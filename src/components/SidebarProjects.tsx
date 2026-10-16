@@ -7,7 +7,7 @@ import {
 } from "@/lib/origin-workspaces";
 import { createPortal } from "react-dom";
 import { STANDALONE_SECTION } from "../../shared/origin-workspaces";
-import { NewBotDialog } from "./NewBotDialog";
+import { NewBotDialog } from "./lazy-screens";
 
 const SORTS: { id: ProjectSort; label: string }[] = [
   { id: "custom", label: "Custom order" },

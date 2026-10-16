@@ -66,7 +66,7 @@ import type { LocaleKey } from "@/locales";
 import { isProviderSafetyBlock, PROVIDER_SAFETY_GUIDANCE, PROVIDER_SAFETY_HELP_URL } from "../../shared/provider-safety";
 import { isCancelledTranscriptRow } from "../../shared/client-cancel";
 import { BotAvatar } from "./Avatar";
-import { ChiefSectionBar, ChiefSectionPanel, useChiefSection } from "./ChiefSections";
+import { AgentProjectBar, ChiefSectionBar, ChiefSectionPanel, useChiefSection } from "./ChiefSections";
 import { isWorkspaceSection } from "../../shared/origin-workspaces";
 import { HEADER_RENAME, SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
 import { ProjectMark } from "./ProjectMark";
@@ -1223,6 +1223,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
     <main className="relative flex h-full min-w-0 flex-1 flex-col bg-app">
       <CallOverlay bot={bot} />
       {projectPage && <ChiefSectionBar bot={bot} section={chiefSection} onSection={setChiefSection} />}
+      {!projectPage && !bot.chiefOfStaff && <AgentProjectBar agent={bot} />}
       {projectPage && chiefSection !== "chat" && <ChiefSectionPanel bot={bot} section={chiefSection} />}
       <GlassScrollFrame className={cn("flex-1 [--glass-tint:var(--color-app)]", projectPage && chiefSection !== "chat" && "hidden")}>
       {/* z-[25]: above the room set-up card (z-20), below the CallOverlay (z-30). */}
