@@ -594,6 +594,7 @@ import { createHostedSlackRoutes } from "./routes/hosted-slack.ts";
 import { createBotPresetRoutes } from "./routes/bot-presets.ts";
 import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
+import { createDefaultTeamRoutes, ensureTeamChiefs } from "./origin-teams.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
 import { createBotPatchRoutes } from "./routes/bot-patch.ts";
 import { createBotLifecycleRoutes } from "./routes/bot-lifecycle.ts";
@@ -13718,6 +13719,7 @@ ROUTES.push(createBotCreateRoutes({
   routines: () => routines,
   storedAvatarExists, defaultSelection, checkedModelSelection, cloudOwnerSession, wireBot,
 }));
+ROUTES.push(createDefaultTeamRoutes({ store, maxWorkspaceBots: MAX_WORKSPACE_BOTS, wireBot }));
 ROUTES.push(createBotSettingsRoutes({
   store, cfg, registry, commandAllowlist, commandAllowlistDrivers: COMMAND_ALLOWLIST_DRIVERS,
   cloudHome: Boolean(CLOUD_HOME), cloudOwnerProfileFields: CLOUD_OWNER_PROFILE_FIELDS,
@@ -17593,6 +17595,12 @@ server.listen(PORT, "127.0.0.1", async () => {
   // Only once every registry is initialized and the endpoint listens: earlier dispatch can hit uninitialized bindings.
   routines!.start();
   memoryUpkeep.start();
+  try {
+    const chiefs = ensureTeamChiefs(store, await defaultSelection());
+    if (chiefs.length) console.log(`[teams] gave ${chiefs.length} team(s) a Chief of Staff bot`);
+  } catch (error) {
+    console.warn(`[teams] could not give every team a Chief: ${(error as Error).message}`);
+  }
 });
 
 // Tunnel requests have no peer address, which request-auth treats as proxied: a session is required, never loopback trust.

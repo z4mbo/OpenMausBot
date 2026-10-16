@@ -22,6 +22,7 @@ vi.mock("react", async importOriginal => {
 vi.mock("@/lib/create-configured-bot", async importOriginal => ({
   ...await importOriginal<typeof import("@/lib/create-configured-bot")>(), createConfiguredBot: fixture.create,
 }));
+vi.mock("@/lib/origin-teams", () => ({ createDefaultTeam: async () => ({}) }));
 vi.mock("@/state/store", async importOriginal => {
   const store = await importOriginal<typeof import("@/state/store")>();
   return { ...store, api: fixture.api, BotEditorStore: () => null, useStore: () => ({ state: store.initialState, dispatch: fixture.dispatch }) };

@@ -16,7 +16,10 @@ function storage(): Storage | undefined {
   }
 }
 
+export const ADVANCED_MODE_ONLY = true;
+
 export function readAdvancedMode(): boolean {
+  if (ADVANCED_MODE_ONLY) return true;
   if (sessionChoice !== undefined) return sessionChoice;
   try {
     const store = storage();
@@ -70,5 +73,5 @@ export function setAdvancedMode(enabled: boolean): void {
 }
 
 export function useAdvancedMode(): boolean {
-  return useSyncExternalStore(subscribe, readAdvancedMode, () => false);
+  return useSyncExternalStore(subscribe, readAdvancedMode, () => ADVANCED_MODE_ONLY);
 }

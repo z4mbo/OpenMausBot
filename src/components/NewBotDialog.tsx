@@ -3,6 +3,7 @@ import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { api, BotEditorStore, useStore, type Bot, type ModelSelection } from "@/state/store";
 import { BotCreationDraft, EMPTY_BOT_DEFAULTS } from "@/lib/bot-creation-draft";
 import { createConfiguredBot, preparedBotTemplate } from "@/lib/create-configured-bot";
+import { createDefaultTeam } from "@/lib/origin-teams";
 import { BOT_ROLES, roleProfilePatch } from "@/lib/bot-roles";
 import { chosenPreset, presetDraftPatch, presetGroups, presetPictureFile, presetSummaryLines, type BotPreset } from "@/lib/bot-presets";
 import { cn } from "@/lib/cn";
@@ -144,6 +145,10 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
       else {
         const { bot, warnings } = await createConfiguredBot(draft, undefined, undefined, undefined, visibility?.ok ? visibility.visibility : undefined);
         parent.dispatch({ type: "botAdded", bot, preserveSelection });
+        if (!bot.section?.trim()) {
+          try { await createDefaultTeam(bot.id); }
+          catch (cause) { warnings.push(`Bot created without its default team: ${cause instanceof Error ? cause.message : String(cause)}`); }
+        }
         if (warnings.length) parent.dispatch({ type: "error", message: warnings.join("\n") });
         try { await onCreated?.(bot); }
         catch (cause) { parent.dispatch({ type: "error", message: cause instanceof Error ? cause.message : String(cause) }); }

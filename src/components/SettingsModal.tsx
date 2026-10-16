@@ -53,7 +53,7 @@ import { cn } from "@/lib/cn";
 import { glassPopupFrameStyle } from "@/lib/glass-popup";
 import { NotificationRows } from "./NotificationSettingsRows";
 import { setShowThreads, useShowThreadsChoice } from "@/lib/thread-preferences";
-import { setAdvancedMode, useAdvancedMode } from "@/lib/interface-mode";
+import { useAdvancedMode } from "@/lib/interface-mode";
 import { parseSidebarDensity, setPinnedCircles, setSidebarDensity, setUniversalPins, SIDEBAR_DENSITIES, usePinnedCircles, useSidebarDensity, useUniversalPins, type SidebarDensity } from "@/lib/sidebar-preferences";
 import { setShowRunCard, useShowRunCard } from "@/lib/run-card-preferences";
 import { parseSendKey, SEND_KEYS, sendKeyLabel, setSendKey, useSendKey } from "@/lib/send-key";
@@ -418,19 +418,6 @@ function ColorUserBubblesRow() {
         checked={enabled}
         aria-label={t("settings.userBubbles.aria")}
         onClick={() => setColorUserBubbles(!enabled)}
-      />
-    </SettingRow>
-  );
-}
-
-function AdvancedModeRow() {
-  const enabled = useAdvancedMode();
-  return (
-    <SettingRow className="rounded-2xl border border-accent-border/40 bg-raised-hover/40 py-4" title={t("settings.advancedMode.title")} subtitle={t("settings.advancedMode.subtitle")}>
-      <Switch
-        checked={enabled}
-        aria-label={t("settings.advancedMode.title")}
-        onClick={() => setAdvancedMode(!enabled)}
       />
     </SettingRow>
   );
@@ -849,8 +836,6 @@ export function SettingsModal() {
       case "general":
         return (
           <>
-            <AdvancedModeRow />
-
             <ProSettingsCard />
             <Card title={t("settings.profile.title")} subtitle={t("settings.profile.sharedSubtitle")}>
               <ProfileFields />
@@ -886,7 +871,6 @@ export function SettingsModal() {
             <Card title={t("settings.skin.title")} subtitle={t("settings.skin.subtitle")}>
               <SkinPicker />
             </Card>
-            {remoteActive && <AdvancedModeRow />}
             <FontRow />
             <ChatWidthRow />
             <ColorUserBubblesRow />

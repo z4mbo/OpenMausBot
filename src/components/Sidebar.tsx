@@ -1,6 +1,6 @@
 import { track } from "@/lib/analytics";
 import { OrganizationIdentity } from "./OrganizationIdentity";
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent } from "react";
 import { createPortal } from "react-dom";
 import {
   Activity,
@@ -33,6 +33,7 @@ import {
   Trash2,
   Users,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { api, useStore, formatTime, visibleMessages, currentTaskBot, botOpensTo, openBot, openThread, type Action, type AppState, type Bot, type BotProject, type Group, type InstanceInfo, type Message } from "@/state/store";
 import { approvalModeFor } from "../../shared/approval-mode";
@@ -2295,6 +2296,12 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                   sectionGroupItems,
                 )
               : undefined;
+            const chiefLed = Boolean(sectionName) && sectionChiefItems.length > 0;
+            const openTeamMenu = !remoteClient && layoutInteractive && sectionName ? (event: ReactMouseEvent<HTMLElement>) => {
+              event.preventDefault();
+              teamMenuReturn.current = event.currentTarget.querySelector<HTMLElement>("button") ?? event.currentTarget;
+              setTeamMenu({ name: sectionName, x: Math.max(8, Math.min(event.clientX, window.innerWidth - 266)), y: Math.max(8, Math.min(event.clientY, window.innerHeight - 190)) });
+            } : undefined;
             return (
               <div
                 key={id}
@@ -2309,14 +2316,23 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                 {dropTarget?.id === id && dropTarget.place === "before" && draggingSectionId !== id && (
                   <div className="mx-2 h-0.5 rounded-full bg-accent" />
                 )}
-                {density !== "icons" && (
+                {chiefLed && (
+                  <div className="relative" data-team-chief={sectionName} onContextMenu={openTeamMenu}>
+                    {sectionChiefItems.map((bot) => <BotListItem key={bot.id} {...botRow(bot)} />)}
+                    {layoutInteractive && density !== "icons" && (
+                      <button type="button" onClick={() => toggleSection(id)}
+                        aria-label={t(collapsed ? "sidebar.section.expand" : "sidebar.section.collapse", { name: sectionLabel(id) })}
+                        aria-expanded={!collapsed}
+                        className="absolute -left-1 top-1/2 flex h-5 w-4 -translate-y-1/2 items-center justify-center rounded text-ink-secondary hover:text-ink">
+                        {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+                      </button>
+                    )}
+                  </div>
+                )}
+                {density !== "icons" && !chiefLed && (
                   <SidebarSectionHeader
                     name={sectionLabel(id)}
-                    onContextMenu={!remoteClient && layoutInteractive && sectionName ? (event) => {
-                      event.preventDefault();
-                      teamMenuReturn.current = event.currentTarget.querySelector<HTMLElement>("button") ?? event.currentTarget;
-                      setTeamMenu({ name: sectionName, x: Math.max(8, Math.min(event.clientX, window.innerWidth - 266)), y: Math.max(8, Math.min(event.clientY, window.innerHeight - 190)) });
-                    } : undefined}
+                    onContextMenu={openTeamMenu}
                     collapsed={collapsed}
                     attention={attention}
                     onToggle={layoutInteractive ? () => toggleSection(id) : undefined}
@@ -2338,8 +2354,8 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                   title={`${t("task.queued")} · ${queued.join(", ")}`} aria-label={`${t("sidebar.section.expand", { name: sectionLabel(id) })} · ${t("task.queued")} · ${queued.join(", ")}`}
                   className="mx-3 mb-1 inline-flex h-7 items-center self-start rounded-full bg-raised/50 px-3 text-[13px] font-medium leading-4 text-ink-secondary hover:text-ink">{t("task.queued")} · {queued.length}</button>}
                 {!collapsed && (
-                  <>
-                    {sectionChiefItems.map((bot) => <BotListItem key={bot.id} {...botRow(bot)} />)}
+                  <div className={chiefLed ? "ml-4 flex flex-col gap-0.5 border-l border-hairline pl-1" : "contents"}>
+                    {!chiefLed && sectionChiefItems.map((bot) => <BotListItem key={bot.id} {...botRow(bot)} />)}
                     {sectionGroupItems.map((group) => (
                       <GroupListItem
                         key={group.id}
@@ -2365,7 +2381,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                         <Plus size={13} /> {t(state.bots.some(bot => !bot.hidden && bot.section?.trim() === sectionName) ? "team.manageBots" : "team.addBots")}
                       </button>
                     )}
-                  </>
+                  </div>
                 )}
                 {dropTarget?.id === id && dropTarget.place === "after" && draggingSectionId !== id && (
                   <div className="mx-2 h-0.5 rounded-full bg-accent" />
