@@ -335,7 +335,7 @@ export function profileMenuItems({
   ];
 }
 
-export function SidebarProfileMenu({ iconOnly = false }: { iconOnly?: boolean } = {}) {
+export function SidebarProfileMenu({ iconOnly = false, compact = false, placement = "above" }: { iconOnly?: boolean; compact?: boolean; placement?: "above" | "below" } = {}) {
   const { state, dispatch } = useStore();
   const phone = useSidebarPhoneStatus();
   const connectPhone = useConnectPhoneEntry(state.config?.cloudHome === true);
@@ -382,17 +382,19 @@ export function SidebarProfileMenu({ iconOnly = false }: { iconOnly?: boolean } 
       <SidebarPopoverMenu
         items={items}
         ariaLabel={name}
-        triggerClassName={iconOnly ? "shrink-0 rounded-xl" : "w-full"}
+        placement={placement}
+        triggerClassName={iconOnly ? cn("shrink-0", compact ? "rounded-md" : "rounded-xl") : "w-full"}
         triggerTitle={iconOnly ? name : undefined}
         renderTrigger={({ open }) => iconOnly ? (
           <span
             ref={triggerRef}
             className={cn(
-              "relative flex size-[46px] items-center justify-center rounded-xl transition-colors",
+              "relative flex items-center justify-center transition-colors",
+              compact ? "size-8 rounded-md" : "size-[46px] rounded-xl",
               open ? "bg-raised" : "hover:bg-raised/50",
             )}
           >
-            <InitialsAvatar initials={profileInitials(profile)} size={28} />
+            <InitialsAvatar initials={profileInitials(profile)} size={compact ? 22 : 28} />
             {noteworthy && (
               <span
                 aria-hidden

@@ -6,7 +6,7 @@ import type { ApprovalModeSelector } from "./ApprovalModeSelector";
 import type { ModelPicker } from "./ModelPicker";
 import { CODEX_USAGE_LIMIT_REACHED, CODEX_USAGE_URL } from "../../shared/codex-usage-limit";
 import { failedTurnTool } from "../../shared/failed-turn";
-vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), CREATES_FOLDERS_AND_GROUPS: true, SIDEBAR_SHOWS_LOOSE_BOTS: true, SIDEBAR_HAS_SEARCH: true, SIDEBAR_ROW_EXTRAS: true, SIDEBAR_THREAD_TREE: false, SIDEBAR_ACTIONS_IN_FOOTER: false, SHOWS_CHIEF_LABEL: true, WORKSPACE_NAV: false }));
+vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), CREATES_FOLDERS_AND_GROUPS: true, SIDEBAR_SHOWS_LOOSE_BOTS: true, SIDEBAR_HAS_SEARCH: true, SIDEBAR_ROW_EXTRAS: true, SIDEBAR_THREAD_TREE: false, SIDEBAR_ACTIONS_IN_FOOTER: false, SHOWS_CHIEF_LABEL: true, WORKSPACE_NAV: false, PROFILE_AT_TOP: false }));
 
 const fixture = vi.hoisted(() => {
   vi.stubGlobal("window", {});

@@ -6,7 +6,7 @@ import { UnreadBadge } from "./UnreadBadge";
 import { OriginNav } from "./OriginPages";
 import { teamUnread } from "./ChiefSections";
 import { unreadReplies } from "@/lib/origin-unread";
-import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL, WORKSPACE_NAV, NEW_PROJECT_DIALOG } from "@/lib/origin-teams";
+import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL, WORKSPACE_NAV, NEW_PROJECT_DIALOG, PROFILE_AT_TOP } from "@/lib/origin-teams";
 import { ProjectMark } from "./ProjectMark";
 import { OrganizationIdentity } from "./OrganizationIdentity";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
@@ -2172,6 +2172,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           className={cn("relative flex shrink-0 items-center", density === "icons" ? "flex-col gap-1" : "ml-0.5 gap-0.5")}
           style={windowNoDragStyle}
         >
+          {PROFILE_AT_TOP && density !== "icons" && <SidebarProfileMenu iconOnly compact />}
           {WORKSPACE_NAV && <>
             <button type="button" onClick={openCommandPalette} aria-label={t("sidebar.searchAria")} title={t("sidebar.searchAria")}
               className={cn("flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink", density === "icons" ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md")}>
@@ -2484,11 +2485,11 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
       />
 
       <div className={cn("pb-3 pt-2", density === "icons" ? "flex flex-col items-center gap-1 px-2" : "px-3")}>
-        <SidebarFooterNav
+        {!(PROFILE_AT_TOP && density !== "icons") && <SidebarFooterNav
           density={density}
           collapsed={sectionCollapsed(TOOLS_SECTION_ID)}
           onToggleCollapsed={layoutInteractive ? () => toggleSection(TOOLS_SECTION_ID) : undefined}
-        />
+        />}
         {density === "icons" && (
           <SidebarPhoneButton
             density={density}
@@ -2502,9 +2503,9 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           </div>
         ) : (
           <div className={cn("flex items-center gap-1 not-first:mt-3", SIDEBAR_ACTIONS_IN_FOOTER && "relative")}>
-            <div className="min-w-0 flex-1">
+            {PROFILE_AT_TOP ? <><SidebarFooterNav density={density} inline /><div className="flex-1" /></> : <div className="min-w-0 flex-1">
               <SidebarProfileMenu />
-            </div>
+            </div>}
             <UpdateIndicator />
             {SIDEBAR_ACTIONS_IN_FOOTER && <div className="flex items-center" style={windowNoDragStyle}>{renderHeaderActions(true)}</div>}
             <SidebarAppsButton />

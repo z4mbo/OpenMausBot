@@ -85,14 +85,17 @@ export function SidebarFooterNav({
   density,
   collapsed = false,
   onToggleCollapsed,
+  inline = false,
 }: {
   density: SidebarDensity;
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
+  /** Tools as a row of icons beside the footer's other icons, with no header. */
+  inline?: boolean;
 }) {
   const { state, dispatch } = useStore();
   const advanced = useAdvancedMode();
-  const iconsOnly = density === "icons";
+  const iconsOnly = density === "icons" || inline;
   const toolsLayout = useSidebarToolsLayout();
   const toolbar = !iconsOnly && toolsLayout === "toolbar";
   const iconSize = iconsOnly ? 20 : 18;
@@ -129,7 +132,7 @@ export function SidebarFooterNav({
         icon={(active) => <Zap size={iconSize} className={tone(active)} />}
         onClick={() => dispatch({ type: "toggleTriggers", open: true })}
       />}
-      {iconsOnly && <NavRow
+      {iconsOnly && !inline && <NavRow
         id="apps"
         label={t("sidebar.nav.apps")}
         tourId="nav-apps"
@@ -153,6 +156,7 @@ export function SidebarFooterNav({
     </>
   );
 
+  if (inline) return <nav data-tour="tools" aria-label={t("sidebar.tools")} className="flex items-center">{rows}</nav>;
   if (iconsOnly) {
     return <nav data-tour="tools" aria-label={t("sidebar.tools")} className="flex flex-col items-center gap-1">{rows}</nav>;
   }

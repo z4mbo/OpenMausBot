@@ -5,7 +5,7 @@ import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { AppState, Bot, InstanceInfo, Message, Task } from "@/state/store";
-vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), CREATES_FOLDERS_AND_GROUPS: true, SIDEBAR_SHOWS_LOOSE_BOTS: true, SIDEBAR_HAS_SEARCH: true, SIDEBAR_ROW_EXTRAS: true, SIDEBAR_THREAD_TREE: false, SIDEBAR_ACTIONS_IN_FOOTER: false, SHOWS_CHIEF_LABEL: true, WORKSPACE_NAV: false }));
+vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), CREATES_FOLDERS_AND_GROUPS: true, SIDEBAR_SHOWS_LOOSE_BOTS: true, SIDEBAR_HAS_SEARCH: true, SIDEBAR_ROW_EXTRAS: true, SIDEBAR_THREAD_TREE: false, SIDEBAR_ACTIONS_IN_FOOTER: false, SHOWS_CHIEF_LABEL: true, WORKSPACE_NAV: false, PROFILE_AT_TOP: false }));
 
 const renders = vi.hoisted(() => ({ bots: [] as string[], threads: [] as string[] }));
 vi.mock("./RenameTitle", () => ({
