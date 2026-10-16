@@ -3,9 +3,10 @@ import { activeWorkspace, inWorkspace, switchWorkspace, useWorkspaces, workspace
 import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
 import { SidebarAgents, SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
+import { OriginNav } from "./OriginPages";
 import { teamUnread } from "./ChiefSections";
 import { unreadReplies } from "@/lib/origin-unread";
-import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
+import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL, WORKSPACE_NAV, NEW_PROJECT_DIALOG } from "@/lib/origin-teams";
 import { ProjectMark } from "./ProjectMark";
 import { OrganizationIdentity } from "./OrganizationIdentity";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
@@ -41,6 +42,7 @@ import {
   Trash2,
   Users,
   X,
+  SquarePen,
 } from "lucide-react";
 import { api, useStore, formatTime, visibleMessages, currentTaskBot, botOpensTo, openBot, openThread, type Action, type AppState, type Bot, type BotProject, type Group, type InstanceInfo, type Message } from "@/state/store";
 import { approvalModeFor } from "../../shared/approval-mode";
@@ -2066,7 +2068,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                   className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
                 >
                   <BotIcon size={16} className="text-ink-secondary" />
-                  <span className="flex-1">{t("sidebar.newBot")}</span>
+                  <span className="flex-1">{NEW_PROJECT_DIALOG ? "New project" : t("sidebar.newBot")}</span>
                   <ShortcutHint id="new-bot" />
                 </button>
                 {CREATES_FOLDERS_AND_GROUPS && <button
@@ -2170,6 +2172,17 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           className={cn("relative flex shrink-0 items-center", density === "icons" ? "flex-col gap-1" : "ml-0.5 gap-0.5")}
           style={windowNoDragStyle}
         >
+          {WORKSPACE_NAV && <>
+            <button type="button" onClick={openCommandPalette} aria-label={t("sidebar.searchAria")} title={t("sidebar.searchAria")}
+              className={cn("flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink", density === "icons" ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md")}>
+              <Search size={density === "icons" ? 20 : 17} />
+            </button>
+            <button type="button" aria-label="New thread" title="New thread"
+              onClick={() => { const current = state.bots.find((b) => b.id === state.selectedId); if (current) dispatch({ type: "newTask", botId: current.id }); else dispatch({ type: "toggleNewBot", open: true }); }}
+              className={cn("flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink", density === "icons" ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md")}>
+              <SquarePen size={density === "icons" ? 20 : 17} />
+            </button>
+          </>}
           {!collapseToIcons && (advanced || density === "icons") && <button
             type="button"
             onClick={toggleCollapsed}
@@ -2305,6 +2318,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
               {!SIDEBAR_SHOWS_LOOSE_BOTS && density === "icons" && <WorkspaceSwitcher compact heads={workspaceHeads} activeId={activeHeadId} onNewWorkspace={newWorkspace} />}
             </div>
           )}
+          {WORKSPACE_NAV && <OriginNav iconsOnly={density === "icons"} />}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
             <SidebarProjects projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} extraUnread={teamUnread(state.bots, bot)} />}
               onNewProject={() => dispatch({ type: "toggleNewBot", open: true })} />
@@ -2598,7 +2612,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
       {newChatOpen && createPortal(
         <SidebarNewChatPanel
           anchor={sidebarRef.current}
-          style={windowNoDragStyle}
+          style={SIDEBAR_ACTIONS_IN_FOOTER ? { ...windowNoDragStyle, top: "auto", bottom: 64, background: "var(--color-menu)", borderRadius: 16, border: "1px solid color-mix(in srgb, var(--color-hairline) 60%, transparent)", boxShadow: "0 24px 48px rgb(0 0 0 / 0.5)", overflow: "hidden" } : windowNoDragStyle}
           onClose={() => setNewChatOpen(false)}
           onNewBot={() => { setNewChatOpen(false); dispatch({ type: "toggleNewBot", open: true }); }}
           onNewGroup={CREATES_FOLDERS_AND_GROUPS ? () => { setNewChatOpen(false); setNewRoom(true); } : undefined}

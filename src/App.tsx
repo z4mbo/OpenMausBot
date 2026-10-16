@@ -44,6 +44,8 @@ import { phonePairingSettingsAction, takePhonePairingRequest } from "@/lib/phone
 import { useExternalChatLinks } from "@/hooks/use-external-chat-links";
 import { ChatNotice } from "@/components/ChatErrorBanner";
 import { INSET_PAGE } from "@/lib/origin-teams";
+import { openOriginPage, useOriginPage } from "@/lib/origin-pages";
+import { OriginPageView } from "./components/OriginPages";
 
 function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
   const { state, dispatch } = useStore();
@@ -254,6 +256,17 @@ function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
     });
   }, [dispatch]);
 
+  const originPage = useOriginPage();
+  useEffect(() => { openOriginPage(null); }, [state.selectedId, state.activeView]);
+  useEffect(() => {
+    if (!originPage) return;
+    const leave = (event: MouseEvent) => {
+      if ((event.target as Element | null)?.closest?.("[data-sidebar-bot-row], [data-sidebar-thread-row]")) openOriginPage(null);
+    };
+    document.addEventListener("click", leave, true);
+    return () => document.removeEventListener("click", leave, true);
+  }, [originPage]);
+
   return (
     <div className="flex h-full flex-col">
       <UpdateBanner sidebarIndicator={!calendarFocus && (sidebarInline || drawerOpen)} />
@@ -284,7 +297,9 @@ function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
           menuButtonRef.current?.focus();
         }}
       />}
-      {state.activeView === "team-map" ? (
+      {originPage && state.activeView === "chat" ? (
+        <OriginPageView page={originPage} />
+      ) : state.activeView === "team-map" ? (
         <TeamMapPage />
       ) : state.activeView === "files" ? (
         <FilesView />
