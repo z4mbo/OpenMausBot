@@ -112,11 +112,10 @@ describe("Settings in Simple mode", () => {
     for (const id of hidden) expect(SIMPLE_HIDDEN_SECTIONS).toContain(id);
   });
 
-  it.skip("keeps General as it is, Advanced mode switch first", () => {
+  it("keeps General as it is, with no Advanced mode switch", () => {
     const html = render();
     expect(currentPage(html)).toBe("general");
-    expect(html.indexOf('aria-label="Advanced mode"')).toBeGreaterThan(0);
-    expect(html.indexOf('aria-label="Advanced mode"')).toBeLessThan(html.indexOf("Language"));
+    expect(html).not.toContain('aria-label="Advanced mode"');
     expect(blocks(html)).toEqual(["general"]);
   });
 

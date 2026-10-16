@@ -31,13 +31,11 @@ afterEach(() => {
 });
 
 describe("interface mode", () => {
-  it.skip("defaults a fresh install to Simple and stores that once", async () => {
-    const { readAdvancedMode, settleAdvancedModeDefault, ADVANCED_MODE_KEY } = await fresh();
-    expect(readAdvancedMode()).toBe(false);
+  it("is Advanced on a fresh install", async () => {
+    const { readAdvancedMode, settleAdvancedModeDefault } = await fresh();
+    expect(readAdvancedMode()).toBe(true);
     settleAdvancedModeDefault();
-    local.setItem("omb-skin", "midnight");
-    expect(local.getItem(ADVANCED_MODE_KEY)).toBe("0");
-    expect((await fresh()).readAdvancedMode()).toBe(false);
+    expect((await fresh()).readAdvancedMode()).toBe(true);
   });
 
   it("defaults an existing install to Advanced so an update hides nothing", async () => {
@@ -48,10 +46,10 @@ describe("interface mode", () => {
     expect(local.getItem(ADVANCED_MODE_KEY)).toBe("1");
   });
 
-  it.skip("keeps an explicit choice over the existing-install default", async () => {
+  it("ignores a stored Simple choice", async () => {
     local.setItem("omb-skin", "midnight");
     (await fresh()).setAdvancedMode(false);
-    expect((await fresh()).readAdvancedMode()).toBe(false);
+    expect((await fresh()).readAdvancedMode()).toBe(true);
   });
 
   it("still switches for the session when storage throws", async () => {
@@ -63,12 +61,12 @@ describe("interface mode", () => {
     expect(readAdvancedMode()).toBe(true);
   });
 
-  it.skip("falls back to Simple when storage cannot be read at all", async () => {
+  it("stays Advanced when storage cannot be read at all", async () => {
     local.getItem.mockImplementation(() => {
       throw new Error("blocked");
     });
     const { readAdvancedMode, settleAdvancedModeDefault } = await fresh();
     expect(() => settleAdvancedModeDefault()).not.toThrow();
-    expect(readAdvancedMode()).toBe(false);
+    expect(readAdvancedMode()).toBe(true);
   });
 });

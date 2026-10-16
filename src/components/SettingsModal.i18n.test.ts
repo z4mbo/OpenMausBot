@@ -34,7 +34,7 @@ afterEach(() => {
 });
 
 describe("Settings → General", () => {
-  it.skip("renders in the language the picker selected, and re-renders in the next one", async () => {
+  it("renders in the language the picker selected, and re-renders in the next one", async () => {
     setLocale("pt-br");
     const pt = await renderSettings();
     expect(pt).toContain("Configurações");
@@ -50,7 +50,6 @@ describe("Settings → General", () => {
     for (const key of [
       "settings.group.you", "settings.group.computers", "settings.group.account",
       "settings.section.appearance", "settings.section.backups", "settings.section.people",
-      "settings.advancedMode.title",
     ] as const) {
       expect(locales.ja[key], key).toBeTruthy();
       expect(locales.ja[key], key).not.toBe(en[key]);
