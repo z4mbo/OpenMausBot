@@ -15,7 +15,7 @@ import { ProposalStatus } from "./ProposalStatus";
 import { randomBotName } from "@/lib/random-bot-name";
 import { t } from "@/lib/i18n";
 import { SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
-import { ProjectIconField } from "../ProjectMark";
+import { AvatarLookField, ProjectIconField } from "../ProjectMark";
 
 export function IdentitySection({
   bot,
@@ -40,6 +40,7 @@ export function IdentitySection({
     <div className="flex flex-col gap-4">
       <BotProfileAvatarCard bot={bot} activeState={activeState} mascotMotion={mascotMotion} onPatch={patch} />
       {!SHOWS_CHIEF_LABEL && !draft && bot.chiefOfStaff && <ProjectIconField botId={bot.id} />}
+      {!SHOWS_CHIEF_LABEL && !draft && <AvatarLookField botId={bot.id} />}
       <PackageProvenance bot={bot} />
 
       {!hideName && <div>

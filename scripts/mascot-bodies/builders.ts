@@ -257,6 +257,11 @@ export const BODY_DEFS: BodyDef[] = [
   // A face-fit constraint, not taste: at the classic 0.42 the notches pinch the
   // star to a 50-unit inscribed circle, and the smallest face clamps every body.
   { id: "star", name: "Star", d: buildStar(196, 196, 5, 0.55), viewBox: [0, 0, 200, 200] },
+  { id: "pebble", name: "Pebble", d: buildEllipse(200, 168), viewBox: [0, 0, 200, 200] },
+  { id: "pentagon", name: "Pentagon", d: buildPolygon(196, 196, 5, 0.14), viewBox: [0, 0, 200, 200] },
+  { id: "octagon", name: "Octagon", d: buildPolygon(196, 196, 8, 0.1), viewBox: [0, 0, 200, 200] },
+  { id: "flower", name: "Flower", d: buildStar(196, 196, 8, 0.8), viewBox: [0, 0, 200, 200] },
+  { id: "triangle", name: "Triangle", d: buildPolygon(196, 196, 3, 0.18), viewBox: [0, 0, 200, 200] },
 ]
 
 export const BODY_IDS: string[] = BODY_DEFS.map(s => s.id)

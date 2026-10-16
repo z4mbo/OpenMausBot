@@ -11,6 +11,7 @@ import { MAUS_COLORS, type MausColor, type MausMotion, type MausState } from "@/
 import { CursorAvatar, type CursorAvatarHandle } from "./CursorAvatar";
 import { avatarCropRadius, botAvatarProfile, clampAvatarFocus, clampAvatarZoom, type BotAvatarCrop } from "../../shared/bot-avatar";
 import { MASCOT_BODIES, botMascotBody, type MascotBodyId } from "../../shared/mascot-bodies";
+import { useAvatarLook } from "@/lib/origin-avatar-looks";
 
 export const EYE_SCALE = 1.12;
 export const MOUTH_WEIGHT = 11;
@@ -88,6 +89,8 @@ export type MausAvatarProps = {
   animated?: boolean;
   bodyId?: MascotBodyId;
   gradient?: [string, string, string];
+  sphere?: boolean;
+  eyeColor?: string;
 };
 
 function MausAvatarComponent(
@@ -111,6 +114,8 @@ function MausAvatarComponent(
     animated = true,
     bodyId,
     gradient,
+    sphere,
+    eyeColor,
   }: MausAvatarProps,
   ref: React.Ref<MausAvatarHandle>,
 ) {
@@ -160,6 +165,8 @@ function MausAvatarComponent(
         size={size}
         silhouette={silhouette}
         gradient={gradient ?? gradientFor(color)}
+        sphere={sphere}
+        eyeColor={eyeColor}
         title={label ?? null}
         lookAround={lookAround ?? (forward ? 0 : 1)}
         gaze={{ x: (gaze?.x ?? 0) + pointer.x, y: (gaze?.y ?? 0) + pointer.y }}
@@ -179,6 +186,7 @@ export const MausAvatar = memo(forwardRef(MausAvatarComponent));
 export type BotAvatarProps = Omit<MausAvatarProps, "color" | "gradient"> & {
   readable?: boolean;
   bot: {
+    id?: string;
     name?: string;
     color: MausColor;
     avatarUrl?: string | null;
@@ -205,8 +213,16 @@ export function resolveBotAvatarOutcome(params: {
   return "flatImage";
 }
 
+/** Zap's dot palette: the rim is the body mixed 55% with white; eyes go light on a near-black body. */
+export function dotLook(hex: string): { gradient: [string, string, string]; eyeColor: string } {
+  const value = Number.parseInt(hex.slice(1), 16);
+  const luminance = (0.2126 * ((value >> 16) & 0xff) + 0.7152 * ((value >> 8) & 0xff) + 0.0722 * (value & 0xff)) / 255;
+  return { gradient: [mix(hex, "#ffffff", 0.55), hex, mix(hex, "#000000", 0.35)], eyeColor: luminance < 0.18 ? "#f2f2ef" : "#0b0b0c" };
+}
+
 export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotProps }: BotAvatarProps) {
   const profile = botAvatarProfile(bot);
+  const look = useAvatarLook(bot.id);
   const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => setImageFailed(false), [profile.avatarUrl]);
@@ -223,7 +239,11 @@ export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotPr
         bodyId={bot.mascotBody ?? undefined}
         {...mascotProps}
         color={bot.color}
-        gradient={readable ? roomAvatarGradient(bot.color) : undefined}
+        gradient={look.look === "dot" ? dotLook(look.color ?? MAUS_COLORS[bot.color] ?? MAUS_COLORS.green).gradient
+          : look.color ? [mix(look.color, "#ffffff", 0.55), look.color, mix(look.color, "#000000", 0.42)]
+          : readable ? roomAvatarGradient(bot.color) : undefined}
+        sphere={look.look === "dot"}
+        eyeColor={look.look === "dot" ? dotLook(look.color ?? MAUS_COLORS[bot.color] ?? MAUS_COLORS.green).eyeColor : undefined}
         size={size}
         label={label ?? bot.name}
       />
