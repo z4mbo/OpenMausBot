@@ -2199,3 +2199,12 @@ button:disabled.bg-danger {
   background-color: var(--bubble-selection, color-mix(in srgb, #000000 35%, var(--color-bubble-user)));
   color: var(--bubble-selection-ink, #ffffff);
 }
+
+[data-origin-inset] { background: var(--color-panel); }
+[data-origin-inset] > [data-sidebar] { border-right-color: transparent; }
+[data-origin-inset] > main {
+  margin: 8px 8px 8px 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-hairline) 35%, transparent);
+}

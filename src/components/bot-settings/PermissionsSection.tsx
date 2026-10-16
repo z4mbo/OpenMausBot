@@ -16,6 +16,7 @@ import { ManagedTeamsSettings } from "./ManagedTeamsSettings";
 import { ProposalStatus } from "./ProposalStatus";
 import type { useBotSettingsDerived } from "./useBotSettingsDerived";
 import { useBotEditor } from "./BotEditorContext";
+import { SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
 
 export function PermissionsSection({
   bot,
@@ -47,6 +48,7 @@ export function PermissionsSection({
 
   return (
     <div className="flex flex-col gap-4">
+      {SHOWS_CHIEF_LABEL && (
       <div
         className={cn(
           "rounded-xl border p-4",
@@ -96,6 +98,7 @@ export function PermissionsSection({
         />}
         {bot.chiefOfStaff && <ProposalStatus bot={bot} kind="owner" />}
       </div>
+      )}
 
       <div className="flex items-center justify-between gap-4 rounded-xl bg-card p-4">
         <div>

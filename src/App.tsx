@@ -43,6 +43,7 @@ import { botShowsUnread } from "@/lib/bot-unread";
 import { phonePairingSettingsAction, takePhonePairingRequest } from "@/lib/phone-pairing";
 import { useExternalChatLinks } from "@/hooks/use-external-chat-links";
 import { ChatNotice } from "@/components/ChatErrorBanner";
+import { INSET_PAGE } from "@/lib/origin-teams";
 
 function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
   const { state, dispatch } = useStore();
@@ -257,7 +258,7 @@ function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
     <div className="flex h-full flex-col">
       <UpdateBanner sidebarIndicator={!calendarFocus && (sidebarInline || drawerOpen)} />
       <AppNotices quiet={paletteOpen || drawerOpen || Boolean(localVmWorkspaceBotId)} viewer={viewer} />
-      <div className="relative flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1" data-origin-inset={INSET_PAGE ? "" : undefined}>
       {!calendarFocus && <button
         type="button"
         ref={menuButtonRef}

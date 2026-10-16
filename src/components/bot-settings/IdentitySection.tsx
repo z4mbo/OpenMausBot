@@ -23,12 +23,14 @@ export function IdentitySection({
   activeState,
   mascotMotion,
   namePlaceholder,
+  hideName = false,
 }: {
   bot: Bot;
   patch: (patch: BotPatch) => void;
   activeState: MausState;
   mascotMotion: { kind: Exclude<MausMotion, "none">; nonce: number } | null;
   namePlaceholder?: string;
+  hideName?: boolean;
 }) {
   const [instructionsOpen, setInstructionsOpen] = useState(false);
   const { draft } = useBotEditor();
@@ -40,7 +42,7 @@ export function IdentitySection({
       {!SHOWS_CHIEF_LABEL && !draft && bot.chiefOfStaff && <ProjectIconField botId={bot.id} />}
       <PackageProvenance bot={bot} />
 
-      <div>
+      {!hideName && <div>
         <div className="mb-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <label htmlFor={`bot-name-${bot.id}`} className="text-[13px] text-ink-secondary">Name</label>
           {draft && <div className="flex flex-wrap gap-1">
@@ -61,7 +63,7 @@ export function IdentitySection({
           placeholder={namePlaceholder}
           onChange={(e) => patch({ name: e.target.value })}
         />
-      </div>
+      </div>}
       <Field label="Title">
         <ProposalStatus bot={bot} kind="chief" />
         <input

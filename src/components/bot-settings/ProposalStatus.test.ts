@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StoreProvider, api, type Bot } from "@/state/store";
 import { BotEditorContext } from "./BotEditorContext";
+vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), SHOWS_CHIEF_LABEL: true }));
 
 const fixture = vi.hoisted(() => ({ bots: [] as Bot[] }));
 vi.mock("@/state/store", async (importOriginal) => {

@@ -68,7 +68,7 @@ import { isCancelledTranscriptRow } from "../../shared/client-cancel";
 import { BotAvatar } from "./Avatar";
 import { ChiefSectionBar, ChiefSectionPanel, useChiefSection } from "./ChiefSections";
 import { isWorkspaceSection } from "../../shared/origin-workspaces";
-import { SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
+import { HEADER_RENAME, SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
 import { ProjectMark } from "./ProjectMark";
 import { TurnPresence } from "./TurnPresence";
 import { showToolCallsEnabled, skillAuthoringEnabled } from "@/lib/feature-flags";
@@ -1267,7 +1267,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
                   }
                 }}
                 onActivate={() => dispatch({ type: "toggleSettings", open: true })}
-                showEditButton
+                showEditButton={HEADER_RENAME}
                 className="truncate text-[14px] font-semibold text-ink"
                 editButtonClassName="size-6 rounded-full"
                 inputClassName="max-w-[220px] rounded-full bg-inset px-2 py-0.5 text-[14px] font-semibold"

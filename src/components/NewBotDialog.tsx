@@ -3,7 +3,7 @@ import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { api, BotEditorStore, useStore, type Bot, type ModelSelection } from "@/state/store";
 import { BotCreationDraft, EMPTY_BOT_DEFAULTS } from "@/lib/bot-creation-draft";
 import { createConfiguredBot, preparedBotTemplate } from "@/lib/create-configured-bot";
-import { createDefaultTeam } from "@/lib/origin-teams";
+import { NEW_PROJECT_DIALOG, PROJECT_LEAD_ROLE, createDefaultTeam } from "@/lib/origin-teams";
 import { activeWorkspaceId } from "@/lib/origin-workspaces";
 import { BOT_ROLES, roleProfilePatch } from "@/lib/bot-roles";
 import { chosenPreset, presetDraftPatch, presetGroups, presetPictureFile, presetSummaryLines, type BotPreset } from "@/lib/bot-presets";
@@ -105,6 +105,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
         }
         if (!defaultsMode) defaults.profile.name = defaults.profile.name?.trim() || result.suggestedName;
         if (section !== undefined) defaults.profile.section = section;
+        else if (NEW_PROJECT_DIALOG && !defaultsMode) Object.assign(defaults.profile, PROJECT_LEAD_ROLE);
         setDraft(new BotCreationDraft(defaults, () => render(value => value + 1)));
         setReady(true);
       }).catch(cause => { if (!cancelled) setError(String(cause)); });
@@ -177,7 +178,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
       else parent.dispatch(action);
     },
   };
-  const title = defaultsMode ? t("newBot.defaults") : t("sidebar.newBot");
+  const title = defaultsMode ? t("newBot.defaults") : NEW_PROJECT_DIALOG ? "New project" : t("sidebar.newBot");
   return <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-3 sm:p-5">
     <div ref={dialog} role="dialog" aria-modal="true" aria-label={title} aria-busy={saving} tabIndex={-1}
       className="flex h-[min(760px,94dvh)] w-full max-w-[900px] flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-panel shadow-2xl outline-none">
@@ -231,7 +232,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
         <button type="button" onClick={() => closeRef.current()} className="rounded-lg px-4 py-2 text-[13px] text-ink-secondary hover:bg-control">{t("common.cancel")}</button>
         <button type="button" disabled={!ready || saving || (!defaultsMode && !bot.name.trim())} onClick={() => void save()}
           className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2 text-[13px] font-medium text-white hover:brightness-110 disabled:opacity-40">
-          {saving && <Loader2 size={15} className="animate-spin" />}{t(defaultsMode ? "newBot.saveDefaults" : "newBot.create")}
+          {saving && <Loader2 size={15} className="animate-spin" />}{defaultsMode ? t("newBot.saveDefaults") : NEW_PROJECT_DIALOG ? "Create project" : t("newBot.create")}
         </button>
       </div>
       <LocalComputerAutoWarning open={warning === "local"} onCancel={() => setWarning(null)} onConfirm={() => { draft.consent.acknowledgeLocalAuto = true; setWarning(null); void save(); }} />
@@ -243,15 +244,20 @@ function DraftSection({ active, draft, defaultsMode }: { active: Section; draft:
   const bot = draft.bot;
   const { state } = useStore();
   const derived = useBotSettingsDerived(bot);
+  const projectDialog = NEW_PROJECT_DIALOG && !defaultsMode;
   if (active === "Identity") return <div className="space-y-4">
+    {projectDialog && <label className="block text-[13px] text-ink-secondary">Project name
+      <input autoFocus className={cn(inputCls, "mt-1.5")} maxLength={100} value={bot.name} placeholder="Name your project"
+        onChange={(event) => draft.patch({ name: event.target.value })} onFocus={(event) => event.currentTarget.select()} />
+    </label>}
     <StartingRole draft={draft} defaultsMode={defaultsMode} />
     <IdentitySection bot={bot} patch={derived.patch} activeState={derived.activeState} mascotMotion={null}
-      namePlaceholder={defaultsMode ? t("newBot.randomName") : undefined} />
-    <label className="block text-[13px] text-ink-secondary">Team
+      namePlaceholder={defaultsMode ? t("newBot.randomName") : undefined} hideName={projectDialog} />
+    {!projectDialog && <label className="block text-[13px] text-ink-secondary">Team
       <Select size="lg" className="mt-1.5 w-full" value={bot.section ?? ""} onChange={event => draft.patch({ section: event.target.value })}>
         <option value="">General</option>{[...new Set([...(state.sections ?? []), ...state.bots.map(bot => bot.section ?? "")])].filter(Boolean).map(name => <option key={name}>{name}</option>)}
       </Select>
-    </label>
+    </label>}
   </div>;
   if (active === "Soul") return <SoulSection bot={bot} patch={derived.patch} />;
   if (active === "Skills") return <SkillsSection bot={bot} />;
@@ -283,7 +289,11 @@ function StartingRole({ draft, defaultsMode }: { draft: BotCreationDraft; defaul
     if (!preset) {
       draft.choosePreset(undefined);
       const role = BOT_ROLES.find(role => role.id === value);
-      if (role) draft.patch(roleProfilePatch(role));
+      const projectDialog = NEW_PROJECT_DIALOG && !defaultsMode;
+      if (role) {
+        const { name, ...fields } = roleProfilePatch(role);
+        draft.patch(projectDialog ? fields : { name, ...fields });
+      } else if (projectDialog) draft.patch(PROJECT_LEAD_ROLE);
       return;
     }
     draft.patch(presetDraftPatch(preset));
@@ -315,7 +325,7 @@ function StartingRole({ draft, defaultsMode }: { draft: BotCreationDraft; defaul
   return <div>
     <label className="block text-[13px] text-ink-secondary">{t("newBot.startingRole")}
       <Select size="lg" className="mt-1.5 w-full" value={draft.preset ? `preset:${draft.preset.id}` : ""} onChange={event => void choose(event.target.value)}>
-        <option value="">{t("newBot.customSettings")}</option>
+        <option value="">{NEW_PROJECT_DIALOG && !defaultsMode ? PROJECT_LEAD_ROLE.title : t("newBot.customSettings")}</option>
         {presetGroups(presets).map(group => <optgroup key={group.label} label={group.label}>
           {group.presets.map(preset => <option key={preset.id} value={`preset:${preset.id}`}>{preset.name}</option>)}
         </optgroup>)}
