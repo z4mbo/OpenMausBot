@@ -1,7 +1,9 @@
 import { track } from "@/lib/analytics";
-import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_SHOWS_LOOSE_BOTS, headBot } from "@/lib/origin-teams";
+import { activeWorkspace, switchWorkspace, useWorkspaces, workspaceOf } from "@/lib/origin-workspaces";
+import { SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
+import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE } from "@/lib/origin-teams";
 import { OrganizationIdentity } from "./OrganizationIdentity";
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   Activity,
@@ -1021,7 +1023,7 @@ export function BotThreadList({ bot, selected, density, query, pendingQueued, re
     } finally { setMarkingRead(false); }
   };
   return (
-    <div hidden={hidden} className="mb-2 space-y-0.5" role="group" aria-label={t("task.namedList", { name: bot.name })}
+    <div hidden={hidden} className={cn("mb-2 space-y-0.5", SIDEBAR_THREAD_TREE && "ml-[26px]")} role="group" aria-label={t("task.namedList", { name: bot.name })}
       onDragOver={(event) => { if (event.dataTransfer.types.includes(FOLDER_DRAG_TYPE)) event.stopPropagation(); }}
       onDrop={(event) => { if (event.dataTransfer.types.includes(FOLDER_DRAG_TYPE)) { event.preventDefault(); event.stopPropagation(); resetFolderDrag(); } }}>
       {!hidden && <>
@@ -1098,9 +1100,11 @@ export function BotThreadList({ bot, selected, density, query, pendingQueued, re
       {readError && <p role="alert" className="px-2.5 py-1 text-[12px] text-danger">{readError}</p>}
       <span role="status" className="sr-only">{readStatus}</span>
       {projects.length > 0 && ungrouped.length > 0 && <div className="pl-6 pr-3 pb-1 pt-2 text-[10.5px] text-ink-tertiary">{t("task.list")}</div>}
-      {ungrouped.map(renderThread)}
+      {SIDEBAR_THREAD_TREE
+        ? <div data-thread-tree className="[&>div:last-of-type]:after:h-1/2">{ungrouped.map(renderThread)}</div>
+        : ungrouped.map(renderThread)}
       <HelperThreadGroup tasks={orderedThreadList(helpers)} busy={helpers.some((task) => currentTaskBot(bot, task.threadId).busy)} renderThread={renderThread} />
-      <ThreadListFooter bulk={bulk} rows={shownRows} selected={selection} total={ownTasks.length} canShowAll={!query && !showAll && ownTasks.length > visibleTasks.length} canSelect={tasks.length > 1}
+      <ThreadListFooter bulk={bulk} rows={shownRows} selected={selection} total={ownTasks.length} canShowAll={!query && !showAll && ownTasks.length > visibleTasks.length} canSelect={SIDEBAR_ROW_EXTRAS && tasks.length > 1}
         onShowAll={() => setShowAll(true)} freshConversation onDelete={(threadIds) => deleteThreadsInBulk({ botId: bot.id }, threadIds, dispatch)} />
       <LocalComputerAutoWarning
         open={permissionRefresh?.kind === "local-auto"}
@@ -1133,6 +1137,8 @@ export interface BotRowProps {
   query: string;
   dispatch: Dispatch<Action>;
   onMenu: (menu: MenuState) => void;
+  /** Replaces the row's "…" button; the right-click menu stays. */
+  trailing?: ReactNode;
 }
 
 export function botRowProps(
@@ -1275,7 +1281,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
               </Phone>
             )}
           </span>
-          {selected && last && !renaming && !expanded && (
+          {SIDEBAR_ROW_EXTRAS && selected && last && !renaming && !expanded && (
             <span className="shrink-0 text-[12px] tabular-nums text-ink-secondary transition-opacity group-hover:opacity-0 group-focus-within:opacity-0 touch:opacity-0">
               {formatTime(last.at)}
             </span>
@@ -1359,12 +1365,12 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
         <span className="pointer-events-none absolute bottom-1.5 right-1.5 size-2 rounded-full border border-panel bg-accent" />
       )}
       {!renaming && !deleting && !iconOnly && <>
-        {showThreads && <button type="button" aria-label={t("task.newShort")} title={t("task.newShort")} onClick={() => { setThreadsOpen(true); dispatch({ type: "newTask", botId: bot.id }); }}
+        {SIDEBAR_ROW_EXTRAS && showThreads && <button type="button" aria-label={t("task.newShort")} title={t("task.newShort")} onClick={() => { setThreadsOpen(true); dispatch({ type: "newTask", botId: bot.id }); }}
           className="pointer-events-none absolute right-[3.75rem] top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><Plus size={14} /></button>}
         {CREATES_FOLDERS_AND_GROUPS && showThreads && <button type="button" aria-label={t("folder.newNamed", { name: bot.name })} title={t("folder.new")} onClick={() => { setThreadsOpen(true); setCreatingProject(true); }}
           className="pointer-events-none absolute right-8 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><FolderPlus size={14} /></button>}
-        <button type="button" aria-label={t("sidebar.bot.actions", { name: bot.name })} title={t("sidebar.bot.actions", { name: bot.name })} aria-haspopup="menu" onClick={(event) => { const rect = event.currentTarget.getBoundingClientRect(); onMenu({ botId: bot.id, x: rect.left, y: rect.bottom }); }}
-          className="pointer-events-none absolute right-1 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><MoreHorizontal size={15} /></button>
+        {props.trailing ?? <button type="button" aria-label={t("sidebar.bot.actions", { name: bot.name })} title={t("sidebar.bot.actions", { name: bot.name })} aria-haspopup="menu" onClick={(event) => { const rect = event.currentTarget.getBoundingClientRect(); onMenu({ botId: bot.id, x: rect.left, y: rect.bottom }); }}
+          className="pointer-events-none absolute right-1 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><MoreHorizontal size={15} /></button>}
       </>}
       {deleting && iconOnly && (
         <span className="pointer-events-none absolute bottom-1 right-1 rounded-full bg-card p-1 text-ink-secondary">
@@ -1847,7 +1853,16 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     sectionedBots,
     unsectionedBots,
   } = partitionSidebarBots(matchingBots, { universalPins });
-  const bossBot = unsectionedChief ?? (SIDEBAR_SHOWS_LOOSE_BOTS ? undefined : headBot(unsectionedBots));
+  const workspaces = useWorkspaces();
+  const workspaceHeads = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : [...(unsectionedChief ? [unsectionedChief] : []), ...[...unsectionedBots].reverse()];
+  const activeHeadId = activeWorkspace(workspaces, workspaceHeads);
+  const bossBot = SIDEBAR_SHOWS_LOOSE_BOTS ? unsectionedChief : workspaceHeads.find((head) => head.id === activeHeadId);
+  const workspaceProjects = sectionChiefs.filter((chief) => workspaceOf(workspaces, chief.id, workspaceHeads[0]?.id) === activeHeadId);
+  const newWorkspace = () => {
+    void api<{ bot: Bot }>("/api/bots", { method: "POST", body: JSON.stringify({ name: "New workspace" }) })
+      .then(({ bot }) => { dispatch({ type: "botAdded", bot }); switchWorkspace(bot.id); })
+      .catch((cause) => dispatch({ type: "error", message: cause instanceof Error ? cause.message : String(cause) }));
+  };
   const { botChats, sectionedRooms, unsectionedRooms } = partitionSidebarGroups(visibleGroups);
 
   const sectionNames: string[] = (state.sections ?? []).filter((name) => !q || name.toLowerCase().includes(q.toLowerCase()));
@@ -2264,8 +2279,13 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           )}
           {bossBot && (
             <div className="mb-1.5">
-              <BotListItem {...botRow(bossBot)} />
+              <BotListItem {...botRow(bossBot)} trailing={SIDEBAR_SHOWS_LOOSE_BOTS ? undefined
+                : <WorkspaceSwitcher heads={workspaceHeads} activeId={activeHeadId} onNewWorkspace={newWorkspace} />} />
             </div>
+          )}
+          {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
+            <SidebarProjects projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} />}
+              onNewProject={() => dispatch({ type: "toggleNewBot", open: true })} />
           )}
           {sectionIds.map((id, index) => {
             const sectionName = userSectionName(id);
@@ -2298,6 +2318,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                 )
               : undefined;
             const chiefLed = Boolean(sectionName) && sectionChiefItems.length > 0;
+            if (chiefLed && !SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons") return null;
             const openTeamMenu = !remoteClient && layoutInteractive && sectionName ? (event: ReactMouseEvent<HTMLElement>) => {
               event.preventDefault();
               teamMenuReturn.current = event.currentTarget.querySelector<HTMLElement>("button") ?? event.currentTarget;
