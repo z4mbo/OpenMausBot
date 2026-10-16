@@ -2,6 +2,8 @@ import { track } from "@/lib/analytics";
 import { activeWorkspace, inWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
 import { isWorkspaceSection } from "../../shared/origin-workspaces";
 import { SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
+import { UnreadBadge } from "./UnreadBadge";
+import { unreadReplies } from "@/lib/origin-unread";
 import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE } from "@/lib/origin-teams";
 import { OrganizationIdentity } from "./OrganizationIdentity";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
@@ -1307,9 +1309,9 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
               )}
             </span>
           )}
-          {unread && (
-            <span className="size-2 shrink-0 rounded-full bg-accent" aria-label={t("task.unreadMany")} />
-          )}
+          {unread && (SIDEBAR_ROW_EXTRAS
+            ? <span className="size-2 shrink-0 rounded-full bg-accent" aria-label={t("task.unreadMany")} />
+            : <UnreadBadge count={unreadReplies(bot)} />)}
         </div>}
       </div>
     </>

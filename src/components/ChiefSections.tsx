@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Bug, FolderGit2, Image, KeyRound, MessageCircle, MessageSquareHeart, Settings, Users } from "lucide-react";
+import { Bug, FolderGit2, Image, KeyRound, MessageSquareHeart, Settings, Users } from "lucide-react";
+import { unreadReplies } from "@/lib/origin-unread";
+import { UnreadBadge } from "./UnreadBadge";
 import { useStore, type Bot } from "@/state/store";
 import { openBot } from "@/state/thread-navigation";
 import { useShowThreads } from "@/lib/thread-preferences";
@@ -37,8 +39,9 @@ export function ChiefSectionBar({ bot, section, onSection }: { bot: Bot; section
         className={cn("mr-2 flex shrink-0 items-center gap-2 rounded-lg px-2 py-1 text-[14px] font-semibold text-ink hover:bg-raised", section === "chat" && "bg-raised")}>
         <BotAvatar bot={bot} size={22} />
         <span className="max-w-[160px] truncate">{bot.name}</span>
-        <span aria-label={bot.busy ? "Working" : "Idle"} className={cn("size-2 rounded-full", bot.busy ? "animate-pulse bg-success" : "bg-ink-tertiary/60")} />
-        {section !== "chat" && <MessageCircle size={13} className="text-ink-secondary" aria-hidden="true" />}
+        {unreadReplies(bot) > 0
+          ? <UnreadBadge count={unreadReplies(bot)} />
+          : <span aria-label={bot.busy ? "Working" : "Idle"} className={cn("size-2 rounded-full", bot.busy ? "animate-pulse bg-success" : "bg-ink-tertiary/60")} />}
       </button>
       {CHIEF_SECTIONS.map(({ id, label, icon: Icon }) => (
         <button key={id} type="button" aria-current={section === id ? "page" : undefined}
