@@ -5,20 +5,20 @@ import {
   useImperativeHandle,
   useRef,
   useState,
-  type PointerEvent as ReactPointerEvent,
 } from "react";
 import { MAUS_COLORS, type MausColor, type MausMotion, type MausState } from "@/lib/mascot";
 import { CursorAvatar, type CursorAvatarHandle } from "./CursorAvatar";
 import { avatarCropRadius, botAvatarProfile, clampAvatarFocus, clampAvatarZoom, type BotAvatarCrop } from "../../shared/bot-avatar";
 import { MASCOT_BODIES, botMascotBody, type MascotBodyId } from "../../shared/mascot-bodies";
 import { useAvatarLook } from "@/lib/origin-avatar-looks";
-import { CssSphere, type SphereMood } from "./zap-dots/react";
+import { CssSphere } from "./zap-dots/react";
 import type { SphereShape } from "./zap-dots/scene";
 import "./zap-dots/zap-dots.css";
+import { FACE_BOX } from "./cursor-face-data";
 
 /** The Zap dot shape for a mascot body; Zap calls the capsule a pill. */
 function sphereShapeFor(body: MascotBodyId | null | undefined): SphereShape {
-  return !body || body === "capsule" ? (body ? "pill" : "circle") : body;
+  return botMascotBody(body);
 }
 
 export const EYE_SCALE = 1.12;
@@ -97,6 +97,9 @@ export type MausAvatarProps = {
   animated?: boolean;
   bodyId?: MascotBodyId;
   gradient?: [string, string, string];
+  eyeColor?: string;
+  /** The Liquid style: Zap's sphere shader paints the body, the original face sits on top. */
+  liquid?: { color: string };
 };
 
 function MausAvatarComponent(
@@ -120,6 +123,8 @@ function MausAvatarComponent(
     animated = true,
     bodyId,
     gradient,
+    eyeColor,
+    liquid,
   }: MausAvatarProps,
   ref: React.Ref<MausAvatarHandle>,
 ) {
@@ -146,23 +151,39 @@ function MausAvatarComponent(
 
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
   const range = forward ? POINTER_GAZE.forward : POINTER_GAZE.authored;
-  const onPointerMove = (event: ReactPointerEvent<HTMLSpanElement>) => {
-    if (!trackPointer || !animated) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    setPointer({
-      x: Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width) * 2 - 1)) * range,
-      y: Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height) * 2 - 1)) * range,
-    });
-  };
-  const onPointerLeave = () => setPointer({ x: 0, y: 0 });
+  const self = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const avatar = self.current;
+    if (!trackPointer || !animated || !avatar) return;
+    // A gaze zone is the area the face watches: a sidebar row, the chat, the settings panel. Without one, the avatar itself.
+    const zone = avatar.closest<HTMLElement>("[data-gaze-zone]") ?? avatar;
+    const follow = (event: PointerEvent) => {
+      const rect = avatar.getBoundingClientRect();
+      const reach = zone === avatar ? rect.width / 2 : Math.max(rect.width * 2, zone.getBoundingClientRect().width / 2);
+      const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+      setPointer({
+        x: Math.max(-1, Math.min(1, (event.clientX - cx) / reach)) * range,
+        y: Math.max(-1, Math.min(1, (event.clientY - cy) / reach)) * range,
+      });
+    };
+    const rest = () => setPointer({ x: 0, y: 0 });
+    zone.addEventListener("pointermove", follow);
+    zone.addEventListener("pointerleave", rest);
+    return () => { zone.removeEventListener("pointermove", follow); zone.removeEventListener("pointerleave", rest); };
+  }, [trackPointer, animated, range]);
 
   return (
-    <span
-      className="inline-flex shrink-0"
-      onPointerMove={trackPointer && animated ? onPointerMove : undefined}
-      onPointerLeave={trackPointer && animated ? onPointerLeave : undefined}
-    >
+    <span ref={self} className="relative inline-flex shrink-0">
+      {liquid && (
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <CssSphere size={Math.round(size * (FACE_BOX / (FACE_BOX + 30)))} color={liquid.color} shape={sphereShapeFor(bodyId)} eyes={false} glow={0}
+            seed={liquid.color + (bodyId ?? "")} />
+        </span>
+      )}
       <CursorAvatar
+        className={liquid ? "relative" : undefined}
+        bodyless={Boolean(liquid)}
+        eyeColor={eyeColor}
         ref={inner}
         state={motionState ?? state}
         expression={expression}
@@ -215,8 +236,6 @@ export function resolveBotAvatarOutcome(params: {
   return "flatImage";
 }
 
-const DOT_MOOD: Partial<Record<MausState, SphereMood>> = { working: "working", thinking: "thinking", searching: "thinking", loading: "working", happy: "done", celebrate: "done", angry: "error", sad: "error" };
-
 export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotProps }: BotAvatarProps) {
   const profile = botAvatarProfile(bot);
   const look = useAvatarLook(bot.id);
@@ -230,15 +249,6 @@ export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotPr
     imageFailed,
   });
 
-  if (outcome !== "flatImage" && look.look === "dot") {
-    return (
-      <span className="inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }} role="img" aria-label={label ?? bot.name}>
-        <CssSphere size={size} color={look.color ?? MAUS_COLORS[bot.color] ?? MAUS_COLORS.green} shape={sphereShapeFor(bot.mascotBody)}
-          mood={mascotProps.animated === false ? undefined : DOT_MOOD[mascotProps.state ?? "idle"]} seed={bot.id ?? bot.name} glow={0} />
-      </span>
-    );
-  }
-
   if (outcome !== "flatImage") {
     return (
       <MausAvatar
@@ -247,6 +257,8 @@ export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotPr
         color={bot.color}
         gradient={look.color ? [mix(look.color, "#ffffff", 0.55), look.color, mix(look.color, "#000000", 0.42)]
           : readable ? roomAvatarGradient(bot.color) : undefined}
+        liquid={look.look === "dot" ? { color: look.color ?? MAUS_COLORS[bot.color] ?? MAUS_COLORS.green } : undefined}
+        eyeColor={look.face ?? (look.look === "dot" ? "#050505" : undefined)}
         size={size}
         label={label ?? bot.name}
       />

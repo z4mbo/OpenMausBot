@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from "react";
 import { api } from "@/state/store";
 
-export interface AvatarLook { look?: "mascot" | "dot"; color?: string }
+/** `mascot` is the Minimal style, `dot` the Liquid one. */
+export interface AvatarLook { look?: "mascot" | "dot"; color?: string; face?: string }
 
 /** Zap's dot colours, offered beside a free colour picker. */
 export const ZAP_SWATCHES = ["#C8FF00", "#FF5FCB", "#4DA3FF", "#FFB020", "#A78BFA", "#2EE6C9", "#FF6A3D", "#FFE14D", "#7C9CFF", "#FF8FAB", "#9BE7FF", "#F2F2EF"] as const;
@@ -29,7 +30,7 @@ export function useAvatarLook(botId: string | undefined): AvatarLook {
   return useSyncExternalStore(subscribe, () => (botId && looks[botId]) || NONE, () => NONE);
 }
 
-export async function setAvatarLook(botId: string, patch: { look?: "mascot" | "dot"; color?: string | null }) {
+export async function setAvatarLook(botId: string, patch: { look?: "mascot" | "dot"; color?: string | null; face?: string | null }) {
   const result = await api<{ look: AvatarLook }>(`/api/bots/${encodeURIComponent(botId)}/avatar-look`, {
     method: "PUT", body: JSON.stringify(patch),
   });

@@ -166,7 +166,7 @@ float sdStar5(vec2 p, float r, float rf) {
 }
 
 // 0 circle · 1 squircle · 2 pill · 3 hexagon · 4 cursor · 5 blob · 6 drop · 7 shield · 8 diamond
-// 9 star · 10 pebble · 11 pentagon · 12 octagon · 13 flower · 14 triangle
+// 9 star · 10 pebble · 11 pentagon · 12 octagon · 13 flower · 14 triangle · 15 capsule (upright)
 float sdShape(vec2 p) {
   if (uShape < 0.5) return length(p) - 1.0;
   if (uShape < 1.5) {
@@ -196,7 +196,10 @@ float sdShape(vec2 p) {
   if (uShape < 11.5) return sdPoly(p - vec2(0.0, -0.04), 0.88, 5.0) - 0.1;
   if (uShape < 12.5) return sdPoly(rot(0.392699) * p, 0.92, 8.0) - 0.07;
   if (uShape < 13.5) { float a = atan(p.y, p.x); return (length(p) - (0.86 + 0.12 * cos(8.0 * a))) * 0.85; }
-  return sdPoly(p - vec2(0.0, -0.16), 0.9, 3.0) - 0.16;
+  if (uShape < 14.5) return sdPoly(p - vec2(0.0, -0.16), 0.9, 3.0) - 0.16;
+  vec2 c = p;
+  c.y -= clamp(c.y, -0.24, 0.24);
+  return length(c) - 0.74;
 }
 
 vec2 shapeGrad(vec2 p) {

@@ -1021,7 +1021,7 @@ function PinnedBanner({
 const CHATHEAD_PILL = "flex min-w-0 items-center gap-2 rounded-full border border-hairline/40 bg-control/60 py-0.5 pl-1.5 text-ink";
 
 function chiefOfStaffBadge(bot: Bot) {
-  if (!bot.chiefOfStaff) return null;
+  if (!bot.chiefOfStaff || isWorkspaceSection(bot.section)) return null;
   if (!SHOWS_CHIEF_LABEL) return <ProjectMark botId={bot.id} size={13} />;
   return (
     <span title={t("chat.chiefOfStaff")} className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-accent/12 px-2 py-0.5 text-[11px] font-medium text-accent @max-4xl/chathead:px-1.5">
@@ -1220,7 +1220,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
 
   return (
     <ThreadLinkContext value={threadLink}>
-    <main className="relative flex h-full min-w-0 flex-1 flex-col bg-app">
+    <main data-gaze-zone="" className="relative flex h-full min-w-0 flex-1 flex-col bg-app">
       <CallOverlay bot={bot} />
       {projectPage && <ChiefSectionBar bot={bot} section={chiefSection} onSection={setChiefSection} />}
       {!projectPage && !bot.chiefOfStaff && <AgentProjectBar agent={bot} />}

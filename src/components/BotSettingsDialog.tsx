@@ -293,6 +293,7 @@ export function BotSettingsDialog({ bot, overlay = false }: {
         ref={dialogRef}
         role="dialog"
         aria-labelledby="bot-settings-title"
+        data-gaze-zone=""
         tabIndex={-1}
         className={cn(
           "animate-panel-in absolute inset-0 z-40 flex h-full min-w-0 flex-col border-l border-hairline/40 bg-panel outline-none focus-visible:outline-none",

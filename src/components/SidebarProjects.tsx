@@ -120,7 +120,7 @@ export function SidebarProjects({ projects, row, onNewProject }: { projects: rea
   );
 }
 
-export interface SidebarGroup { id: string; name: string; rows: ReactNode; empty?: ReactNode; onAdd?: () => void; addLabel?: string }
+export interface SidebarGroup { id: string; name: string; rows: ReactNode; empty?: ReactNode; onAdd?: () => void; addLabel?: string; onContextMenu?: (event: React.MouseEvent<HTMLElement>) => void }
 
 /** Agents and each template team: groups that fold open and closed and can be dragged into any order. */
 export function SidebarGroups({ groups }: { groups: readonly SidebarGroup[] }) {
@@ -138,7 +138,7 @@ export function SidebarGroups({ groups }: { groups: readonly SidebarGroup[] }) {
       const open = !folded.has(group.id);
       return (
         <div key={group.id} data-sidebar-group={group.id} className="flex flex-col gap-0.5 pt-3">
-          <div draggable
+          <div draggable onContextMenu={group.onContextMenu}
             onDragStart={(event) => { dragging.current = group.id; event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("application/x-origin-group", group.id); }}
             onDragOver={(event) => { if (!dragging.current || dragging.current === group.id) return; event.preventDefault(); setDrop({ id: group.id, place: place(event) }); }}
             onDragLeave={() => setDrop(null)}

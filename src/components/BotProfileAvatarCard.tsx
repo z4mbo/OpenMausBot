@@ -142,10 +142,10 @@ export function BotProfileAvatarCard({
   const { request: api, uploadAvatar, draft: isDraft } = useBotEditor();
   const zapLooks = ZAP_LOOKS && !isDraft;
   const look = useAvatarLook(zapLooks ? bot.id : undefined);
-  const dot = zapLooks && look.look === "dot";
+  const customFace = Boolean(look.face && look.face !== "#FFFFFF" && look.face !== "#050505");
   const customColour = Boolean((look.color && !(ZAP_SWATCHES as readonly string[]).includes(look.color)));
   const [lookError, setLookError] = useState("");
-  const saveLook = (patch: { look?: "mascot" | "dot"; color?: string | null }) => {
+  const saveLook = (patch: { look?: "mascot" | "dot"; color?: string | null; face?: string | null }) => {
     setLookError("");
     void setAvatarLook(bot.id, patch).catch((cause) => setLookError(cause instanceof Error ? cause.message : String(cause)));
   };
@@ -290,6 +290,21 @@ export function BotProfileAvatarCard({
         </div>
         <div className="mt-1.5 text-[11.5px] text-ink-secondary">PNG, JPEG, GIF, or WebP · up to 10 MB</div>
 
+        {zapLooks && !bot.avatarUrl ? (
+          <>
+            <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">Style</div>
+            <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-hairline/40">
+              {(["mascot", "dot"] as const).map((option, index) => (
+                <button key={option} type="button" disabled={busy} aria-pressed={(look.look ?? "mascot") === option} onClick={() => saveLook({ look: option })}
+                  className={cn("py-1.5 text-[12.5px] disabled:opacity-50", index > 0 && "border-l border-hairline/40",
+                    (look.look ?? "mascot") === option ? "bg-control text-ink" : "text-ink-secondary hover:bg-control/60 hover:text-ink")}>
+                  {option === "mascot" ? "Minimal" : "Liquid"}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
         <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">
           Shape
         </div>
@@ -312,24 +327,12 @@ export function BotProfileAvatarCard({
           ))}
         </div>
 
-        {crop === "mascot" && zapLooks && (
-          <>
-            <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">Style</div>
-            <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-hairline/40">
-              {(["mascot", "dot"] as const).map((option, index) => (
-                <button key={option} type="button" disabled={busy} aria-pressed={(look.look ?? "mascot") === option} onClick={() => saveLook({ look: option })}
-                  className={cn("py-1.5 text-[12.5px] disabled:opacity-50", index > 0 && "border-l border-hairline/40",
-                    (look.look ?? "mascot") === option ? "bg-control text-ink" : "text-ink-secondary hover:bg-control/60 hover:text-ink")}>
-                  {option === "mascot" ? "Mascot" : "Dot"}
-                </button>
-              ))}
-            </div>
           </>
         )}
 
         {crop === "mascot" && (
           <>
-            {!dot && <><div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">
+            <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">
               Expression
             </div>
             <div className="grid grid-cols-5 gap-2">
@@ -350,7 +353,7 @@ export function BotProfileAvatarCard({
                   <BotAvatar bot={bot} state={expression} size={42} animated={false} />
                 </button>
               ))}
-            </div></>}
+            </div>
 
             <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">
               Color
@@ -390,6 +393,31 @@ export function BotProfileAvatarCard({
               )}
             </div>
             {lookError && <p role="alert" className="mt-1 text-[12px] text-danger">{lookError}</p>}
+            {zapLooks && (
+              <>
+                <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">Face</div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {([["#FFFFFF", "White"], ["#050505", "Black"]] as const).map(([value, name]) => {
+                    const chosen = (look.face ?? (look.look === "dot" ? "#050505" : "#FFFFFF")) === value;
+                    return (
+                      <button key={value} type="button" disabled={busy} aria-pressed={chosen} onClick={() => saveLook({ face: value })}
+                        className={cn("flex h-9 items-center gap-2 rounded-full border border-hairline/50 px-3 text-[12.5px] text-ink disabled:opacity-50",
+                          chosen && "ring-2 ring-accent-border ring-offset-2 ring-offset-card")}>
+                        <span className="size-4 rounded-full border border-hairline/60" style={{ backgroundColor: value }} />{name}
+                      </button>
+                    );
+                  })}
+                  <label title="Custom face colour"
+                    className={cn("relative flex h-9 cursor-pointer items-center gap-2 overflow-hidden rounded-full border border-dashed border-hairline px-3 text-[12.5px] text-ink-secondary",
+                      customFace && "border-solid text-ink ring-2 ring-accent-border ring-offset-2 ring-offset-card")}>
+                    <span className="size-4 rounded-full border border-hairline/60" style={{ backgroundColor: customFace ? look.face : "transparent" }} />Custom
+                    <input type="color" aria-label="Custom face colour" value={look.face ?? "#FFFFFF"} onChange={(event) => saveLook({ face: event.target.value })}
+                      className="absolute inset-0 cursor-pointer opacity-0" />
+                  </label>
+                </div>
+              </>
+            )}
+
 
             <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">
               Body

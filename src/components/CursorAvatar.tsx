@@ -1032,6 +1032,8 @@ export interface CursorAvatarProps {
   silhouette?: CursorSilhouette
   gradient?: [string, string, string]
   eyeColor?: string
+  /** Draw only the face; something else (the Liquid style's sphere) paints the body. */
+  bodyless?: boolean
   title?: string | null
   className?: string
   style?: React.CSSProperties
@@ -1066,6 +1068,7 @@ export const CursorAvatar = React.forwardRef<CursorAvatarHandle, CursorAvatarPro
       silhouette = DEFAULT_SILHOUETTE,
       gradient = DEFAULT_GRADIENT,
       eyeColor = "#ffffff",
+      bodyless = false,
       title,
       className,
       style,
@@ -1381,7 +1384,7 @@ export const CursorAvatar = React.forwardRef<CursorAvatarHandle, CursorAvatarPro
           <g ref={trailLayer} />
           <g ref={bodyGroup}>
           <g ref={bodyContent}>
-          <g transform={silhouette.fit || undefined} dangerouslySetInnerHTML={{ __html: body }} />
+          {!bodyless && <g transform={silhouette.fit || undefined} dangerouslySetInnerHTML={{ __html: body }} />}
           <g clipPath={`url(#${uid}-clip)`}>
             <g transform={anchorTransform(silhouette.anchor)}>
               <path ref={eye0} fill={eyeColor} />

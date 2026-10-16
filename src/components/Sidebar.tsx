@@ -1278,7 +1278,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
               className="truncate"
               inputClassName="w-full rounded bg-inset px-1 py-0.5 text-[15px] font-semibold"
             />
-            {bot.chiefOfStaff && !renaming && !SHOWS_CHIEF_LABEL && <ProjectMark botId={bot.id} />}
+            {bot.chiefOfStaff && !renaming && !SHOWS_CHIEF_LABEL && !isWorkspaceSection(bot.section) && <ProjectMark botId={bot.id} />}
             {bot.chiefOfStaff && !renaming && SHOWS_CHIEF_LABEL && (
               <Crown size={13} strokeWidth={2.25} className="shrink-0 text-accent" role="img" aria-label={t("sidebar.bot.chiefOfStaff")} data-testid="chief-crown">
                 <title>{t("sidebar.bot.chiefOfStaff")}</title>
@@ -1351,6 +1351,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
         aria-busy={deleting || undefined}
         aria-current={selected && !expanded && !renaming ? "page" : undefined}
         data-sidebar-bot-row={bot.id}
+        data-gaze-zone=""
         onClick={onSelect}
         onKeyDown={(event) => {
           if (renaming) return;
@@ -1877,6 +1878,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     && !standaloneTeams.has(chief.section?.trim() ?? ""));
   useEffect(() => { if (activeHeadId) reportActiveWorkspace(activeHeadId); }, [activeHeadId]);
   const [newAgentOpen, setNewAgentOpen] = useState(false);
+  const deletingTemplate = Boolean(deletingTeam && deletingTeam !== STANDALONE_SECTION && standaloneTeams.has(deletingTeam));
   const newWorkspace = () => {
     void api<{ bot: Bot }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name: "New workspace" }) })
       .then(({ bot }) => { dispatch({ type: "botAdded", bot }); switchWorkspace(bot.id); })
@@ -2331,6 +2333,11 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
               empty: standaloneAgents.length === 0 ? <p className="px-3 py-1 text-[12px] text-ink-tertiary">No agents yet. Add one from scratch or from a template.</p> : null },
             ...workspaceTeams.map((team) => ({
               id: `team:${team}`, name: team,
+              onContextMenu: remoteClient ? undefined : (event: ReactMouseEvent<HTMLElement>) => {
+                event.preventDefault();
+                teamMenuReturn.current = event.currentTarget.querySelector<HTMLElement>("button") ?? event.currentTarget;
+                setTeamMenu({ name: team, x: Math.max(8, Math.min(event.clientX, window.innerWidth - 266)), y: Math.max(8, Math.min(event.clientY, window.innerHeight - 190)) });
+              },
               rows: <>
                 {sectionedRooms.filter((group) => group.section === team).map((group) => (
                   <GroupListItem key={group.id} group={group} density={density} quiet={quietRows} query={q} onMenu={setRoomMenu} />
@@ -2556,14 +2563,19 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         </div>
       </div>, document.body)}
       <ConfirmDialog open={deletingTeam !== null} title={t("team.deleteTitle", { name: deletingTeam ?? "" })}
-        body={t("team.deleteKeepBotsDescription")} confirmLabel={t("team.delete")} returnFocusRef={sidebarRef}
+        body={deletingTemplate ? "This deletes the team, its bots and their group chats, with their conversations. This cannot be undone." : t("team.deleteKeepBotsDescription")}
+        confirmLabel={t("team.delete")} returnFocusRef={sidebarRef}
         pending={teamDeletePending}
         onCancel={() => { if (!teamDeleteRunning.current) setDeletingTeam(null); }} onConfirm={() => {
           const name = deletingTeam;
           if (!name || teamDeleteRunning.current) return;
           teamDeleteRunning.current = true;
           setTeamDeletePending(true);
-          void api(`/api/sidebar-sections?section=${encodeURIComponent(name)}`, { method: "DELETE" })
+          const removeMembers = deletingTemplate ? Promise.all([
+            ...state.groups.filter((group) => group.section?.trim() === name).map((group) => api(`/api/groups/${group.id}`, { method: "DELETE" })),
+            ...state.bots.filter((bot) => bot.section?.trim() === name).map((bot) => api(`/api/bots/${bot.id}`, { method: "DELETE" })),
+          ]) : Promise.resolve();
+          void removeMembers.then(() => api(`/api/sidebar-sections?section=${encodeURIComponent(name)}`, { method: "DELETE" }))
             .then(({ sections }) => { dispatch({ type: "sectionDeleted", section: name, sections }); setDeletingTeam(null); })
             .catch(cause => setTeamFeedback({ error: true, text: cause instanceof Error ? cause.message : String(cause) }))
             .finally(() => { teamDeleteRunning.current = false; setTeamDeletePending(false); });

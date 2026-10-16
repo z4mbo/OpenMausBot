@@ -7,8 +7,8 @@ import { BRIDGE_FRAG, BRIDGE_VERT, SPHERE_FRAG, SPHERE_VERT, TRAIL_FRAG, TRAIL_V
 
 export type SphereShape =
   | 'circle' | 'squircle' | 'pill' | 'hexagon'
-  | 'cursor' | 'blob' | 'drop' | 'shield' | 'diamond' | 'star' | 'pebble' | 'pentagon' | 'octagon' | 'flower' | 'triangle'
-export const SPHERE_SHAPES: SphereShape[] = ['circle', 'squircle', 'pill', 'hexagon', 'cursor', 'blob', 'drop', 'shield', 'diamond', 'star', 'pebble', 'pentagon', 'octagon', 'flower', 'triangle']
+  | 'cursor' | 'blob' | 'drop' | 'shield' | 'diamond' | 'star' | 'pebble' | 'pentagon' | 'octagon' | 'flower' | 'triangle' | 'capsule'
+export const SPHERE_SHAPES: SphereShape[] = ['circle', 'squircle', 'pill', 'hexagon', 'cursor', 'blob', 'drop', 'shield', 'diamond', 'star', 'pebble', 'pentagon', 'octagon', 'flower', 'triangle', 'capsule']
 const SHAPE_CODE: Record<SphereShape, number> = Object.fromEntries(SPHERE_SHAPES.map((shape, index) => [shape, index])) as Record<SphereShape, number>
 
 /** Origin draws still dots: no slime trails, spray or orbiting minis. */
