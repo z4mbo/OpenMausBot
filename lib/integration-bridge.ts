@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { readBoundedText } from "./http-body";
 
 export function originUrl() {
   const configured = process.env.ORIGIN_PUBLIC_URL || process.env.ORIGIN_SITE_URL;
@@ -14,8 +15,7 @@ export function signIntegration(body: string) {
   return createHmac("sha256", secret).update(body).digest("hex");
 }
 export async function readIntegrationRequest(request: Request) {
-  const body = await request.text();
-  if (body.length > 100000) throw new Error("Request too large");
+  const body = await readBoundedText(request, 100000);
   const signature = request.headers.get("x-origin-signature") || "";
   if (!/^[a-f0-9]{64}$/.test(signature) || !timingSafeEqual(Buffer.from(signature, "hex"), Buffer.from(signIntegration(body), "hex"))) throw new Error("Unauthorized");
   const payload = JSON.parse(body);

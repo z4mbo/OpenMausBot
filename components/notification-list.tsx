@@ -2,7 +2,7 @@
 import { ContentSkeleton } from "./content-skeleton";
 import { useState } from "react";
 import { useMutation, usePaginatedQuery } from "convex/react";
-import { AtSign, Bell, Check, CheckCheck, Circle, Clock3, Loader2, MessageSquare } from "lucide-react";
+import { AtSign, Bell, Check, CheckCheck, Circle, Clock3, MessageSquare } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useWorkspace } from "./workspace-context";

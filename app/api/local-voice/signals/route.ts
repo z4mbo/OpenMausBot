@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { BodyTooLarge, readBoundedJson } from "@/lib/http-body";
+import { callJson, callOptions } from "@/lib/call-http";
 import {
   ackLocalVoiceSignals,
   listLocalVoiceSignals,
@@ -13,13 +14,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function errorResponse(error: unknown, status = 400) {
-  return NextResponse.json({ error: error instanceof Error ? error.message : "Request failed" }, { status });
+  return callJson({ error: error instanceof Error ? error.message : "Request failed" }, { status: error instanceof BodyTooLarge ? 413 : status });
 }
 
 export async function GET(request: Request) {
   try {
     const user = await requireLocalWorkspace(request);
-    return NextResponse.json({ signals: await listLocalVoiceSignals(user), hosted: "origin-local" });
+    return callJson({ signals: await listLocalVoiceSignals(user), hosted: "origin-local" });
   } catch (error) {
     return errorResponse(error, 401);
   }
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as {
+    const body = await readBoundedJson(request) as {
       sessionToken?: string;
       teamId?: string;
       toUserId?: Id<"users">;
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
     const user = await requireLocalWorkspace(request, body);
     if (!body.toUserId || !body.kind) throw new Error("Signal target and kind required");
     const signal = await sendLocalVoiceSignal(user, body.toUserId, body.kind, body.payload || "", body.fromJoinedAt, body.toJoinedAt);
-    return NextResponse.json({ signal, hosted: "origin-local" });
+    return callJson({ signal, hosted: "origin-local" });
   } catch (error) {
     return errorResponse(error);
   }
@@ -47,11 +48,13 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const body = await request.json() as { sessionToken?: string; teamId?: string; signalIds?: string[] };
+    const body = await readBoundedJson(request) as { sessionToken?: string; teamId?: string; signalIds?: string[] };
     const user = await requireLocalWorkspace(request, body);
     await ackLocalVoiceSignals(user, body.signalIds || []);
-    return NextResponse.json({ ok: true, hosted: "origin-local" });
+    return callJson({ ok: true, hosted: "origin-local" });
   } catch (error) {
     return errorResponse(error);
   }
 }
+
+export function OPTIONS() { return callOptions(); }

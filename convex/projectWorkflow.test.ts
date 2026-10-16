@@ -36,9 +36,22 @@ async function fixture() {
 }
 
 describe("Project access", () => {
+  test("legacy workspace discovery cannot enumerate private projects", async () => {
+    const f = await fixture();
+    for (const person of [f.member, f.viewer]) {
+      const teams = await f.t.query(api.teams.listWithProjects, { sessionToken: person.token });
+      expect(teams).toHaveLength(1);
+      expect(teams[0].projects.map(project => project._id)).toEqual([f.shared]);
+      expect(JSON.stringify(teams)).not.toContain("https://github.com/example/private");
+    }
+    const owner = await f.t.query(api.teams.listWithProjects, { sessionToken: f.owner.token });
+    expect(owner[0].projects.map(project => project._id).sort()).toEqual([f.shared, f.privateProject].sort());
+    await f.t.mutation(api.teams.leave, { sessionToken: f.member.token, teamId: f.teamId });
+    expect(await f.t.query(api.teams.listWithProjects, { sessionToken: f.member.token })).toEqual([]);
+  });
   test("members can leave without deleting work; invitations do not restore old grants", async () => {
     const f = await fixture();
-    const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.member.token, teamId: f.teamId, name: "MCP", write: true });
+    const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.member.token, teamId: f.teamId, name: "Agent", write: true });
     await f.t.mutation(api.teams.leave, { sessionToken: f.member.token, teamId: f.teamId });
     expect(await f.t.query(api.workspaces.list, { sessionToken: f.member.token })).toHaveLength(0);
     await expect(f.t.query(api.connectors.verify, { token: grant.token })).rejects.toThrow();

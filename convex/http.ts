@@ -1,12 +1,16 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { BodyTooLarge, readBoundedText } from "../lib/http-body";
 
 const http = httpRouter();
 http.route({ path: "/integrations", method: "POST", handler: httpAction(async (ctx, request) => {
   const secret = process.env.ORIGIN_INTEGRATION_SECRET;
   if (!secret || secret.length < 32) return new Response("Unavailable", { status: 503 });
-  const body = await request.text(); const signature = request.headers.get("x-origin-signature") || "";
+  let body: string;
+  try { body = await readBoundedText(request, 100000); }
+  catch (error) { return new Response("Request rejected", { status: error instanceof BodyTooLarge ? 413 : 400 }); }
+  const signature = request.headers.get("x-origin-signature") || "";
   if (body.length > 100000 || !/^[a-f0-9]{64}$/.test(signature)) return new Response("Unauthorized", { status: 401 });
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
   const bytes = Uint8Array.from(signature.match(/../g)!, x => parseInt(x, 16));
@@ -16,6 +20,13 @@ http.route({ path: "/integrations", method: "POST", handler: httpAction(async (c
     if (typeof p.at !== "number" || Math.abs(Date.now() - p.at) > 60000) return new Response("Expired", { status: 401 });
     let result: unknown;
     switch (p.operation) {
+      case "prHumanContext": result = JSON.parse(await ctx.runMutation(internal.taskPRs.humanContext, p.args)); break;
+      case "prFinalize": result = JSON.parse(await ctx.runMutation(internal.taskPRs.finalize, p.args)); break;
+      case "prTargets": result = JSON.parse(await ctx.runQuery(internal.taskPRs.targets, p.args)); break;
+      case "prEventTargets": result = await ctx.runQuery(internal.taskPRs.eventTargets, p.args); break;
+      case "prBeginSync": result = await ctx.runMutation(internal.taskPRs.beginSync, p.args); break;
+      case "prSync": result = await ctx.runMutation(internal.taskPRs.sync, p.args); break;
+      case "githubDelivery": result = await ctx.runMutation(internal.taskPRs.delivery, p.args); break;
       case "context": result = JSON.parse(await ctx.runQuery(internal.integrations.context, p.args)); break;
       case "targets": result = JSON.parse(await ctx.runQuery(internal.integrations.targets, p.args)); break;
       case "webhookTargets": result = JSON.parse(await ctx.runQuery(internal.integrations.webhookTargets, p.args)); break;

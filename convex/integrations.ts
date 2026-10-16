@@ -92,7 +92,8 @@ export const linkIssue = internalMutation({
     const done = a.state === "closed";
     // Closed GitHub issues are authoritative; an unchanged open issue must not
     // undo work completed locally before GitHub is closed.
-    const changed = done ? !task.done : task.githubIssueState === "closed";
+    const prDriven = task.githubTaskMode === "pull_request" || Boolean(await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", task._id)).first());
+    const changed = !prDriven && (done ? !task.done : task.githubIssueState === "closed");
     if (!changed && task.githubIssueNumber === a.number && task.githubIssueState === a.state && task.githubIssueUpdatedAt === a.updatedAt && task.githubIssueUrl === a.issueUrl && task.teamId === project.teamId) return null;
     if (changed) { await recordCompletion(ctx, task, done, a.updatedAt); if (task.done !== done) await changeOpenIssueCount(ctx, project._id, done ? -1 : 1); }
     await ctx.db.patch(task._id, { teamId: project.teamId, githubIssueNumber: a.number, githubIssueUrl: a.issueUrl, githubIssueState: a.state, githubIssueUpdatedAt: a.updatedAt, githubIssueSyncedAt: Date.now(), ...(changed ? { done, updatedAt: Date.now() } : {}) });

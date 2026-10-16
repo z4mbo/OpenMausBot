@@ -57,8 +57,10 @@ export async function GET(request: NextRequest, context: { params: Promise<{ ste
         return response;
       }
     }
-    saveWorkspaceGitHub(pending.teamId, account.login, account.id, pending.userId, token);
+    const currentAccess = await getConvexClient().query(api.workspaces.access, { sessionToken: pending.sessionToken, teamId: pending.teamId as Id<"teams"> });
+    if (!["owner", "admin"].includes(currentAccess.role)) throw new Error("Workspace admin access required");
     await getConvexClient().mutation(api.integrations.configure, { sessionToken: pending.sessionToken, teamId: pending.teamId as Id<"teams">, login: account.login, autoCreate: true });
+    saveWorkspaceGitHub(pending.teamId, account.login, account.id, pending.userId, token);
     after(async () => {
       try {
         const projects = await getConvexClient().query(api.projects.listForUser, { sessionToken: pending.sessionToken, teamId: pending.teamId as Id<"teams"> });

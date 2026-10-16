@@ -5,7 +5,7 @@ import { useQuery } from "convex/react";
 import { GitBranch, Loader2, Plus } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { localApi } from "@/lib/client-api";
+import { localApi, navigateLocalApp } from "@/lib/client-api";
 import { useWorkspace } from "./workspace-context";
 
 export function RepositoryProvisioning({ project, sessionToken }: { project: Doc<"projects"> & { memberRole: string }; sessionToken: string }) {
@@ -22,7 +22,7 @@ export function RepositoryProvisioning({ project, sessionToken }: { project: Doc
     setBusy(true); setError("");
     try {
       const result = await localApi<{ url: string }>(`/api/github/oauth/start?teamId=${workspace._id}&projectId=${project._id}`, sessionToken, { method: "POST" });
-      window.location.assign(result.url);
+      navigateLocalApp(result.url); setBusy(false);
     } catch (error) { setError(error instanceof Error ? error.message : "Could not connect GitHub"); setBusy(false); }
   };
   const create = async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useQuery } from "convex/react";
 import {
   Loader2,
@@ -18,6 +18,8 @@ import type { DirectConversation } from "@/lib/localRealtime";
 import { localApi } from "@/lib/client-api";
 import { useMemberProfile, useWorkspace } from "./workspace-context";
 import { Dialog } from "./dialog";
+import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
+
 import { ContentSkeleton } from "./content-skeleton";
 import { UserAvatar, memberName, type AvatarIdentity } from "./user-avatar";
 import { ChatThread } from "./chat-view";
@@ -35,6 +37,8 @@ type Props = {
 };
 
 export function ChatView(props: Props) {
+  const id = useId();
+  const online = useWorkspaceOnline();
   const workspace = useWorkspace(),
     openMember = useMemberProfile();
   const members = useQuery(api.workspaces.members, {
@@ -152,9 +156,21 @@ export function ChatView(props: Props) {
   return (
     <section className="team-chat" aria-label="Chat">
       <header className="chat-toolbar">
-        <div className="chat-tabs" role="tablist" aria-label="Conversations">
+        <div className="chat-tabs" role="tablist" aria-label="Conversations" onKeyDown={event => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+          const tabs = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+          const index = tabs.indexOf(event.target as HTMLButtonElement);
+          if (index < 0) return;
+          event.preventDefault();
+          const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+          const target = tabs[next];
+          target?.click(); requestAnimationFrame(() => target?.focus());
+        }}>
           <button
             role="tab"
+            id={`${id}-chat`}
+            aria-controls={`${id}-panel`}
+            tabIndex={section === "chat" ? 0 : -1}
             aria-selected={section === "chat"}
             onClick={() => selectSection("chat")}
           >
@@ -162,6 +178,9 @@ export function ChatView(props: Props) {
           </button>
           <button
             role="tab"
+            id={`${id}-dm`}
+            aria-controls={`${id}-panel`}
+            tabIndex={section === "dm" ? 0 : -1}
             aria-selected={section === "dm"}
             onClick={() => selectSection("dm")}
           >
@@ -179,9 +198,9 @@ export function ChatView(props: Props) {
               <button
                 key={member.userId}
                 className="chat-member"
-                title={`Message ${memberName(member)}`}
+                title={!online ? RECONNECT_TO_CREATE : `Message ${memberName(member)}`}
                 aria-label={`Message ${memberName(member)}`}
-                disabled={Boolean(opening) || workspace.role === "viewer"}
+                disabled={!online || Boolean(opening) || workspace.role === "viewer"}
                 onClick={() => void startDirect(member)}
               >
                 <UserAvatar user={member} size="small" />
@@ -265,6 +284,10 @@ export function ChatView(props: Props) {
         </div>
       )}
       <div
+        role="tabpanel"
+        id={`${id}-panel`}
+        aria-labelledby={`${id}-${section}`}
+        tabIndex={0}
         className={`chat-body ${section === "dm" ? "direct-chat" : ""} ${selected ? "has-conversation" : ""}`}
       >
         {section === "dm" && (
@@ -273,7 +296,8 @@ export function ChatView(props: Props) {
               <span>Messages</span>
               <button
                 className="icon-button"
-                title="New message"
+                title={!online ? RECONNECT_TO_CREATE : "New message"}
+                disabled={!online}
                 aria-label="New direct message"
                 onClick={() => setPeopleOpen(true)}
               >
@@ -292,6 +316,7 @@ export function ChatView(props: Props) {
                 <span>No direct messages yet</span>
                 <button
                   className="ghost-button compact"
+                  disabled={!online} title={!online ? RECONNECT_TO_CREATE : undefined}
                   onClick={() => setPeopleOpen(true)}
                 >
                   New message
@@ -392,7 +417,7 @@ export function ChatView(props: Props) {
                   <div key={member.userId}>
                     <button
                       className="chat-person-main"
-                      disabled={workspace.role === "viewer" || Boolean(opening)}
+                      title={!online ? RECONNECT_TO_CREATE : undefined} disabled={!online || workspace.role === "viewer" || Boolean(opening)}
                       onClick={() => void startDirect(member)}
                     >
                       <UserAvatar user={member} />

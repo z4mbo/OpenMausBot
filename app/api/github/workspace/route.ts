@@ -3,6 +3,7 @@ import { api } from "@/convex/_generated/api";
 import { DEFAULT_OWNER_EMAIL } from "@/convex/lib/auth";
 import { getConvexClient, requireLocalWorkspace, sessionTokenFromRequest } from "@/lib/localRealtime";
 import { disconnectWorkspaceGitHub, githubAppConfig, workspaceGitHubInfo } from "@/lib/github-workspace";
+import { permissionNotice } from "@/lib/github-app";
 
 export const runtime = "nodejs";
 export async function GET(request: Request) {
@@ -10,6 +11,7 @@ export async function GET(request: Request) {
     const user = await requireLocalWorkspace(request);
     const config = githubAppConfig(); const connection = workspaceGitHubInfo(user.teamId);
     return NextResponse.json({ configured: Boolean(config), canSetup: user.email === DEFAULT_OWNER_EMAIL, login: connection?.login || null,
+      prPermissionNotice: config ? permissionNotice : null, permissionApprovalUrl: "https://github.com/settings/installations",
       installationUrl: config?.slug ? `https://github.com/apps/${config.slug}/installations/new` : null });
   } catch { return NextResponse.json({ error: "Workspace access required" }, { status: 403 }); }
 }

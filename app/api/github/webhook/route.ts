@@ -1,23 +1,37 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { after } from "next/server";
-import { githubAppConfig, hashSecret, readGitHubJob, saveGitHubJob } from "@/lib/github-workspace";
+import { githubAppConfig } from "@/lib/github-workspace";
 import { syncGitHubEvent } from "@/lib/github-sync";
+import { syncPREvent } from "@/lib/github-prs";
+import { integrationBridge } from "@/lib/integration-bridge";
+import { parseGitHubEvent, verifyGitHubSignature } from "@/lib/github-webhook";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 export async function POST(request: Request) {
   const secret = githubAppConfig()?.webhookSecret;
   if (!secret) return new Response("Unavailable", { status: 503 });
-  const body = await request.text(); const signature = request.headers.get("x-hub-signature-256") || "";
-  if (body.length > 1000000 || !/^sha256=[a-f0-9]{64}$/.test(signature) || !timingSafeEqual(Buffer.from(signature.slice(7), "hex"), createHmac("sha256", secret).update(body).digest())) return new Response("Unauthorized", { status: 401 });
-  if (request.headers.get("x-github-event") !== "issues") return Response.json({ accepted: true });
-  const key = `delivery:${hashSecret(request.headers.get("x-github-delivery") || body)}`;
-  if (readGitHubJob(key)?.state === "done") return Response.json({ accepted: true });
+  const reader = request.body?.getReader();
+  let size = 0; const chunks: Uint8Array[] = [];
+  if (reader) while (true) {
+    const chunk = await reader.read(); if (chunk.done) break;
+    size += chunk.value.byteLength;
+    if (size > 1000000) { await reader.cancel(); return new Response("Too large", { status: 413 }); }
+    chunks.push(chunk.value);
+  }
+  const body = Buffer.concat(chunks).toString("utf8");
+  if (!verifyGitHubSignature(body, request.headers.get("x-hub-signature-256") ?? "", secret)) return new Response("Unauthorized", { status: 401 });
+  const kind = request.headers.get("x-github-event") ?? "";
+  if (!["issues", "pull_request", "pull_request_review", "check_suite", "check_run"].includes(kind)) return Response.json({ accepted: true });
+  let event;
+  try { event = parseGitHubEvent(body, kind, request.headers.get("x-github-delivery") ?? ""); }
+  catch { return new Response("Invalid event", { status: 400 }); }
+  const { deliveryId, fingerprint } = event;
   try {
-    const event = JSON.parse(body);
-    const repo = event.repository?.full_name;
-    if (typeof repo !== "string" || !/^[\w.-]+\/[\w.-]+$/.test(repo)) return new Response("Invalid repository", { status: 400 });
-    if (!Number.isInteger(event.issue?.number)) return new Response("Invalid issue", { status: 400 });
-    after(async () => { await syncGitHubEvent(`https://github.com/${repo}`, event.issue.number); saveGitHubJob(key, "done"); });
-    return Response.json({ accepted: true }, { status: 202 });
-  } catch { return new Response("Invalid event", { status: 400 }); }
+    const lease = await integrationBridge<number | null>("githubDelivery", { deliveryId, fingerprint });
+    if (lease === null) return Response.json({ accepted: true, duplicate: true });
+    // Acknowledge only after syncing; a crash leaves a recoverable lease.
+    if (kind === "issues") await syncGitHubEvent(event.repoUrl, event.numbers[0]);
+    else await syncPREvent(event.repoUrl, event.numbers, event.headSha);
+    await integrationBridge("githubDelivery", { deliveryId, fingerprint, finishLease: lease });
+    return Response.json({ accepted: true });
+  } catch { return Response.json({ error: "GitHub sync pending; retry delivery or reconcile" }, { status: 503 }); }
 }

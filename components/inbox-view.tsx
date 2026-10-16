@@ -17,7 +17,7 @@ import { IssueSelect } from "./issue-select";
 
 function localDay(date: Date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`; }
 
-export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpenProject }: { sessionToken: string; onOpenTask: (projectId: Id<"projects">, taskId: Id<"tasks">) => void; onOpenChat: (messageId: string) => void; unread: number; onOpenProject: (projectId: Id<"projects">) => void }) {
+export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpenProject, mode }: { sessionToken: string; onOpenTask: (projectId: Id<"projects">, taskId: Id<"tasks">) => void; onOpenChat: (messageId: string) => void; unread: number; onOpenProject: (projectId: Id<"projects">) => void; mode?: "assigned" | "completed" }) {
   const workspace = useWorkspace();
   const openMember = useMemberProfile();
   const members = useQuery(api.workspaces.members, { sessionToken, teamId: workspace._id });
@@ -26,7 +26,7 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
   const hasUnread = unread > 0;
   useEffect(() => { setNotificationsOpen(hasUnread); }, [hasUnread]);
   const [mine, setMine] = useState(true);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(mode === "completed");
   const [project, setProject] = useState("");
   const [priority, setPriority] = useState<"" | "low" | "medium" | "high">("");
   const [search, setSearch] = useState("");
@@ -65,10 +65,10 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
   const filtered = results.filter(task => `${task.title} ${task.projectName} ${task.assignedToName || ""}`.toLowerCase().includes(search.trim().toLowerCase()));
   const hasFilters = Boolean(project || priority || search);
   return <section className={`work-inbox ${section === "calendar" ? "calendar-inbox" : ""}`} aria-label="Inbox">
-    <details className="inbox-notifications" open={notificationsOpen}><summary onClick={event => { event.preventDefault(); setNotificationsOpen(open => !open); }}><ChevronRight size={14} /><Bell size={14} />Notifications{unread > 0 && <span className="notification-count">{unread}</span>}</summary><NotificationList sessionToken={sessionToken} onOpenTask={onOpenTask} onOpenChat={onOpenChat} /></details>
+    {!mode && <details className="inbox-notifications" open={notificationsOpen}><summary onClick={event => { event.preventDefault(); setNotificationsOpen(open => !open); }}><ChevronRight size={14} /><Bell size={14} />Notifications{unread > 0 && <span className="notification-count">{unread}</span>}</summary><NotificationList sessionToken={sessionToken} onOpenTask={onOpenTask} onOpenChat={onOpenChat} /></details>}
     <div className="work-toolbar">
       <div className="segmented-control" aria-label="Issue ownership"><button className={mine ? "active" : ""} aria-pressed={mine} onClick={() => setMine(true)}>Assigned to me</button><button className={!mine ? "active" : ""} aria-pressed={!mine} onClick={() => setMine(false)}>All issues</button></div>
-      <div className="segmented-control" aria-label="Issue completion"><button className={!done ? "active" : ""} aria-pressed={!done} onClick={() => setDone(false)}>Active</button><button className={done ? "active" : ""} aria-pressed={done} onClick={() => setDone(true)}>Completed</button></div>
+      {!mode && <div className="segmented-control" aria-label="Issue completion"><button className={!done ? "active" : ""} aria-pressed={!done} onClick={() => setDone(false)}>Active</button><button className={done ? "active" : ""} aria-pressed={done} onClick={() => setDone(true)}>Completed</button></div>}
       <div className="segmented-control inbox-view-switch" aria-label="Issue view"><button className={section === "issues" ? "active" : ""} aria-pressed={section === "issues"} onClick={() => setSection("issues")}><List size={14} />List</button><button className={section === "calendar" ? "active" : ""} aria-pressed={section === "calendar"} onClick={() => setSection("calendar")}><CalendarDays size={14} />Calendar</button></div>
       <div className="work-filters">
         <IssueSelect label="Filter by project" value={project} onChange={setProject} icon={<Circle size={14} />} options={[{ value: "", label: "All projects" }, ...(projects || []).map(p => ({ value: p._id, label: p.name, icon: <ProjectIcon project={p} size={14} /> }))]} />
@@ -80,7 +80,7 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
     {section === "calendar" ? <InboxCalendar sessionToken={sessionToken} onOpenTask={onOpenTask} mine={mine} done={done} project={project} priority={priority} search={search} /> : <>
     <div className="activity-band">
       <div className="activity-summary"><CheckCircle2 size={16} /><strong>{days.reduce((n, day) => n + day.count, 0)}{activity?.truncated ? "+" : ""}</strong><span>completed in the last 6 months</span></div>
-      <div className="activity-scroll" tabIndex={0} aria-label="Completion activity, last six months"><div className="activity-map" role="img" aria-label={`${days.reduce((n, day) => n + day.count, 0)} completed issues in the last six months`}>{days.map(day => <span key={day.date} data-level={Math.min(day.count, 4)} title={`${day.date}: ${day.count} completed`} aria-label={`${day.date}: ${day.count} completed`}>{day.month && <small>{day.month}</small>}</span>)}</div></div>
+      <div className="activity-scroll" tabIndex={0} role="group" aria-label="Completion activity, last six months"><div className="activity-map" role="img" aria-label={`${days.reduce((n, day) => n + day.count, 0)} completed issues in the last six months`}>{days.map(day => <span key={day.date} data-level={Math.min(day.count, 4)} title={`${day.date}: ${day.count} completed`}>{day.month && <small>{day.month}</small>}</span>)}</div></div>
       <div className="activity-legend"><span>Less</span>{[0, 1, 2, 3, 4].map(n => <i key={n} data-level={n} />)}<span>More</span></div>
     </div>
     {notice && <div className="notice danger" role="alert">{notice}</div>}

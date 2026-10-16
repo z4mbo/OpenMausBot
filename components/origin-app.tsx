@@ -1,30 +1,25 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
-import { TaskActionsMenu } from "./task-actions-menu";
+import { BoardTab, TaskModal } from "./project-issues";
+import { taskKey } from "../lib/project-issues";
 import clsx from "clsx";
 import {
-  ArrowLeft,
-  ArrowRight,
   ArrowUp,
   ArrowUpDown,
-  CalendarDays,
   ChevronDown,
   ChevronRight,
   CheckCircle2,
   Circle,
   Columns3,
-  Columns2,
   CircleDot,
   Power,
   RotateCcw,
   Copy,
   ExternalLink,
   FileText,
-  Flag,
   GitBranch,
   GitCommit,
-  GripVertical,
   Image,
   Inbox,
   KeyRound,
@@ -39,7 +34,6 @@ import {
   MicOff,
   MonitorUp,
   MonitorOff,
-  MoreHorizontal,
   Pencil,
   PenTool,
   PhoneOff,
@@ -69,8 +63,6 @@ import { decryptSecret, encryptSecret, type EncryptedSecret } from "@/lib/vaultC
 import { MemberProfileContext, useMemberProfile, useWorkspace, type Workspace } from "./workspace-context";
 import { MemberProfile } from "./member-profile";
 import { useModalKeyboard } from "./use-modal-keyboard";
-import { GitHubIssueIndicator } from "./github-issue-indicator";
-import { LocalAttachment } from "./local-attachment";
 import { RepositoryProvisioning } from "./repository-provisioning";
 import { RepositorySettings, WorkspaceGitHubSetup } from "./repository-settings";
 import { useNotifications } from "./use-notifications";
@@ -87,10 +79,7 @@ import { IssueComposer } from "./issue-composer";
 import { InboxView } from "./inbox-view";
 import { CallDevices } from "./call-devices";
 import { CallAudio } from "./call-audio";
-import { IssueFields } from "./issue-fields";
-import { IssueCommentBody, IssueCommentComposer } from "./issue-comments";
 import { ProjectMembers } from "./project-members";
-import { useBoardScroll } from "./use-board-scroll";
 import { WorkspaceSettings, WorkspaceMembers } from "./workspace-settings";
 import { AssetsPanel, VaultPanel } from "./project-library";
 import { ChatView } from "./chat-shell";
@@ -125,7 +114,6 @@ type AuthSession = { sessionToken: string; user: AuthUser };
 type TabKey = "board" | "repo" | "assets" | "vault" | "feedback" | "settings";
 type MainView = "project" | "inbox" | "chat" | "voice" | "draw";
 type Role = "admin" | "member" | "viewer";
-type Priority = "low" | "medium" | "high";
 type CredentialKind = "password" | "api_key" | "secret" | "note";
 type StoredCredentialKind = CredentialKind | "apk" | "file";
 type AssetType = "figma" | "image" | "icon" | "font" | "document" | "apk" | "other";
@@ -183,7 +171,6 @@ const tabs: Array<{ key: TabKey; label: string; icon: typeof Columns3 }> = [
   { key: "settings", label: "Settings", icon: Settings },
 ];
 const roles: Role[] = ["admin", "member", "viewer"];
-const priorities: Priority[] = ["low", "medium", "high"];
 const credentialKinds: Array<{ value: CredentialKind; label: string }> = [
   { value: "password", label: "Website login" },
   { value: "api_key", label: "API key" },
@@ -191,43 +178,6 @@ const credentialKinds: Array<{ value: CredentialKind; label: string }> = [
   { value: "note", label: "Secure note" },
 ];
 const assetTypes: AssetType[] = ["figma", "image", "icon", "font", "document", "apk", "other"];
-function normalizeLaneTitle(title: string) {
-  return title.trim().toLowerCase().replace(/[\s_-]+/g, "");
-}
-
-function laneTone(title: string) {
-  const normalized = normalizeLaneTitle(title);
-  if (normalized === "idea") return "idea";
-  if (normalized === "todo") return "todo";
-  if (normalized === "done") return "done";
-  return "custom";
-}
-
-function dueInfo(value?: string) {
-  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
-  const [year, month, day] = value.split("-").map(Number);
-  const due = new Date(year, month - 1, day);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const days = Math.round((due.getTime() - today.getTime()) / 86400000);
-  const label = days === 0 ? "Today" : days === 1 ? "Tomorrow" : days === -1 ? "Yesterday" : due.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  return { label, tone: days < 0 ? "overdue" : days <= 1 ? "soon" : "later" };
-}
-
-function BoardProgress({ done, total }: { done: number; total: number }) {
-  const percent = total ? Math.round((done / total) * 100) : 0;
-  return (
-    <div className="board-progress" title={`${done} of ${total} issues completed`} aria-label={`${percent}% of issues completed`}>
-      <svg viewBox="0 0 36 36" aria-hidden="true"><circle className="board-progress-track" cx="18" cy="18" r="15" /><circle className="board-progress-value" cx="18" cy="18" r="15" pathLength={100} style={{ strokeDasharray: `${percent} 100` }} /></svg>
-      <strong>{percent}%</strong>
-    </div>
-  );
-}
-
-function taskKey(id: string) {
-  return `ORI-${id.slice(-4).toUpperCase()}`;
-}
-
 function projectInitial(name: string) {
   return (name.trim()[0] || "P").toUpperCase();
 }
@@ -267,16 +217,6 @@ function githubRepoHref(repoUrl?: string) {
   const parsed = parseGitHubRepo(repoUrl);
   return parsed ? `https://github.com/${parsed.owner}/${parsed.repo}` : null;
 }
-function githubNewIssueHref(repoUrl: string | undefined, title = "", body = "") {
-  const repoHref = githubRepoHref(repoUrl);
-  if (!repoHref) return null;
-  const params = new URLSearchParams();
-  if (title.trim()) params.set("title", title.trim());
-  if (body.trim()) params.set("body", body.trim());
-  const query = params.toString();
-  return `${repoHref}/issues/new${query ? `?${query}` : ""}`;
-}
-
 function LoadingState({ label = "Loading" }: { label?: string }) {
   return <ContentSkeleton label={label} kind={label.includes("board") || label.includes("project") ? "board" : "list"} rows={4} />;
 }
@@ -500,7 +440,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
           <span className="nav-glider" aria-hidden="true"><span className="nav-glider-avatar"><UserAvatar user={user} size="small" /></span></span>
           <nav className="sidebar-nav">
           <button
-            className={clsx("nav-item", mainView === "inbox" && "active")}
+            aria-current={mainView === "inbox" ? "page" : undefined} className={clsx("nav-item", mainView === "inbox" && "active")}
             type="button"
             onClick={() => openView("inbox")}
           >
@@ -509,16 +449,16 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
             {(notifications.summary?.unread || 0) > 0 && <span className="inbox-unread-dot" aria-label={`${notifications.summary!.unread}${notifications.summary!.more ? "+" : ""} unread notifications`} />}
             <small>{inbox?.length ?? 0}</small>
           </button>
-          <button className={clsx("nav-item", mainView === "chat" && "active")} type="button" onClick={() => openView("chat")}>
+          <button aria-current={mainView === "chat" ? "page" : undefined} className={clsx("nav-item", mainView === "chat" && "active")} type="button" onClick={() => openView("chat")}>
             <MessageCircle size={16} />
             <span>Chat</span>
           </button>
-          <button className={clsx("nav-item", mainView === "voice" && "active")} type="button" onClick={() => openView("voice")}>
+          <button aria-current={mainView === "voice" ? "page" : undefined} className={clsx("nav-item", mainView === "voice" && "active")} type="button" onClick={() => openView("voice")}>
             <Video size={16} />
             <span>Call</span>
             <small>{voiceParticipants?.length ?? 0}</small>
           </button>
-          <button className={clsx("nav-item", mainView === "draw" && "active")} type="button" onClick={() => openView("draw")}><PenTool size={16} /><span>Draw</span></button>
+          <button aria-current={mainView === "draw" ? "page" : undefined} className={clsx("nav-item", mainView === "draw" && "active")} type="button" onClick={() => openView("draw")}><PenTool size={16} /><span>Draw</span></button>
           </nav>
           <div className="sidebar-section">
             <div className="sidebar-section-head">
@@ -539,7 +479,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
                   <button
                     key={project._id}
                     data-project-id={project._id}
-                    className={clsx("project-button", dragProject === project._id && "dragging", mainView === "project" && activeProjectId === project._id && "active")}
+                    aria-current={mainView === "project" && activeProjectId === project._id ? "page" : undefined} className={clsx("project-button", dragProject === project._id && "dragging", mainView === "project" && activeProjectId === project._id && "active")}
                     type="button"
                     draggable={workspace.role !== "viewer"}
                     onDragStart={event => { setDragProject(project._id); event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", project._id); }}
@@ -573,7 +513,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
         : mainView === "inbox" ? (
           <InboxView sessionToken={sessionToken} unread={notifications.summary?.unread || 0} onOpenProject={openProject} onOpenChat={messageId => { setChatFocus(messageId); openView("chat"); }} onOpenTask={(projectId, taskId) => setLinkedTask({ projectId, taskId })} />
         ) : activeProjectId ? (
-          <ProjectWorkspace key={activeProjectId} projectId={activeProjectId} sessionToken={sessionToken} user={user} />
+          <ProjectWorkspace key={activeProjectId} projectId={activeProjectId} sessionToken={sessionToken} user={user} viewers={projectViewers.filter(v => v.projectId === activeProjectId)} />
         ) : (
           <EmptyProjects sessionToken={sessionToken} onCreated={openProject} />
         )}
@@ -1286,7 +1226,7 @@ function CallVideoTile({
   );
 }
 
-function ProjectWorkspace({ projectId, sessionToken, user }: { projectId: Id<"projects">; sessionToken: string; user: AuthUser }) {
+function ProjectWorkspace({ projectId, sessionToken, user, viewers }: { projectId: Id<"projects">; sessionToken: string; user: AuthUser; viewers: Array<AvatarUser & { userId: string }> }) {
   const [tab, setTab] = useState<TabKey>("board");
   useEffect(() => { const value = new URLSearchParams(window.location.search).get("tab"); setTab(value === "team" ? "settings" : tabs.some(tab => tab.key === value) ? value as TabKey : "board"); }, [projectId]);
   const tabLoading = useContentTransition(`${projectId}:${tab}`);
@@ -1299,7 +1239,7 @@ function ProjectWorkspace({ projectId, sessionToken, user }: { projectId: Id<"pr
       {tabLoading && <div className="view-loading-overlay"><ContentSkeleton kind={tab === "board" ? "board" : "list"} label="Loading project view" /></div>}
       <div className="project-navigation"><div className="project-identity"><ProjectIcon project={project} /><strong>{project.name}</strong></div><nav className="tabs" aria-label="Project views"><span className="tab-glider" aria-hidden="true" />{tabs.map((item) => { const Icon = item.icon; return <button key={item.key} aria-label={item.label} title={item.label} className={clsx(tab === item.key && "active", item.key === "feedback" && "project-feedback-tab", item.key === "settings" && "project-settings-tab")} onClick={() => { setTab(item.key); const params = new URLSearchParams(window.location.search); params.set("tab", item.key); window.history.replaceState(null, "", `${location.pathname}?${params}`); }}><Icon size={16} />{item.key !== "settings" && <span>{item.label}</span>}</button>; })}</nav></div>
       {project.status !== "active" && <ProjectStateBanner project={project} sessionToken={sessionToken} />}
-      {tab === "board" ? <BoardTab project={project} projectId={projectId} sessionToken={sessionToken} userEmail={user.email} canEdit={project.memberRole !== "viewer"} onCreateIssue={() => setIssueOpen(true)} /> : null}
+      {tab === "board" ? <BoardTab key={projectId} project={project} projectId={projectId} sessionToken={sessionToken} userEmail={user.email} canEdit={project.memberRole !== "viewer"} onCreateIssue={() => setIssueOpen(true)} /> : null}
       {tab === "repo" ? <RepoTab project={project} sessionToken={sessionToken} /> : null}
       {tab === "assets" ? <AssetsPanel projectId={projectId} sessionToken={sessionToken} /> : null}
       {tab === "vault" ? <VaultPanel projectId={projectId} sessionToken={sessionToken} /> : null}
@@ -1386,315 +1326,6 @@ function SettingsTab({ project, sessionToken }: { project: ProjectWithUi; sessio
     <button className="primary-button" disabled={busy}>{busy ? "Saving..." : saved ? "Saved" : "Save project"}</button>
     <div className="project-lifecycle-actions"><span>Project status</span><button className="project-active-toggle" type="button" role="switch" aria-checked={project.status === "active"} aria-label="Active project" disabled={busy} onClick={async () => { setBusy(true); setError(""); try { await updateProject({ projectId: project._id, sessionToken, status: project.status === "active" ? "inactive" : "active" }); } catch (error) { setError(error instanceof Error ? error.message : "Could not update project"); } finally { setBusy(false); } }}><span aria-hidden="true" />{project.status === "active" ? "Active" : "Inactive"}</button></div>
   </form><ProjectMembers projectId={project._id} sessionToken={sessionToken} /></div>;
-}
-
-function BoardTab({ project, projectId, sessionToken, canEdit, userEmail, onCreateIssue }: { project: ProjectWithUi; projectId: Id<"projects">; sessionToken: string; canEdit: boolean; userEmail: string; onCreateIssue: () => void }) {
-  const openMember = useMemberProfile();
-  const board = useQuery(api.tasks.board, { projectId, sessionToken });
-  const projectMembers = useQuery(api.members.people, { projectId, sessionToken });
-  const updateTask = useMutation(api.tasks.updateTask);
-  const moveTask = useMutation(api.tasks.moveTask);
-  const deleteTask = useMutation(api.tasks.deleteTask);
-  const [dragTaskId, setDragTaskId] = useState<Id<"tasks"> | null>(null);
-  const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(null);
-  const [boardNotice, setBoardNotice] = useState("");
-  const [archive, setArchive] = useState(false);
-  const [assigneeFilter, setAssigneeFilter] = useState("");
-  const [completedColumnId, setCompletedColumnId] = useState<Id<"columns"> | null>(null);
-  const [filter, setFilter] = useState("");
-  const [filterOpen, setFilterOpen] = useState(false);
-  const filterButton = useRef<HTMLButtonElement>(null);
-  const [columnEditor, setColumnEditor] = useState<Doc<"columns"> | "new" | null>(null);
-  const boardScroll = useBoardScroll(Boolean(board) && !archive);
-
-  useEffect(() => {
-    setBoardNotice("");
-    setAssigneeFilter("");
-  }, [projectId]);
-
-  if (!board) return <LoadingState label="Loading board" />;
-  const assignees = new Map(board.assignees?.map(member => [member.email, member]));
-  const visualColumns = board.columns.filter(column => !(column.isDone ?? column.title.toLowerCase() === "done")).map(column => ({ ...column, displayTitle: column.title }));
-  const matches = (task: Doc<"tasks">) => (!assigneeFilter || task.assignedToEmail === assigneeFilter) && `${task.title} ${task.assignedToName || ""} ${task.priority} ${taskKey(task._id)}`.toLowerCase().includes(filter.toLowerCase());
-  const visibleColumnIds = new Set(visualColumns.map((column) => column._id));
-  const fallbackColumn = visualColumns.find(column => column.title.toLowerCase() === "todo") || visualColumns[0];
-  const columnForTask = (task: Doc<"tasks">) => visibleColumnIds.has(task.columnId) ? task.columnId : fallbackColumn?._id;
-  const archivedTasks = board.tasks.filter(task => task.done && matches(task) && (!completedColumnId || columnForTask(task) === completedColumnId)).sort((a, b) => b.updatedAt - a.updatedAt);
-  const showCompleted = (columnId: Id<"columns"> | null) => { setCompletedColumnId(columnId); setArchive(true); };
-  const move = (columnId: Id<"columns">, beforeTaskId?: Id<"tasks">) => {
-    if (canEdit && dragTaskId) moveTask({ projectId, sessionToken, taskId: dragTaskId, columnId, beforeTaskId });
-    setDragTaskId(null);
-  };
-  return (
-    <section className="board-section" ref={boardScroll}>
-      <div className="board-header">
-        <div className="segmented-control"><span className="segment-glider" aria-hidden="true" /><button className={!archive ? "active" : ""} onClick={() => setArchive(false)}><Circle size={14} />Active<span>{board.tasks.filter(t => !t.done && matches(t)).length}</span></button><button className={archive ? "active" : ""} onClick={() => showCompleted(null)}><CheckCircle2 size={14} />Completed<span>{board.tasks.filter(t => t.done && matches(t)).length}</span></button></div>
-        <BoardProgress done={board.tasks.filter(task => task.done).length} total={board.tasks.length} />
-        <div className="board-header-actions">
-          <MemberPicker label="Issue assignee filter" members={[...new Map([...(board.assignees || []), ...(projectMembers || [])].map(member => [member.email, member])).values()]} value={assigneeFilter} onChange={setAssigneeFilter} allLabel="All issues" currentEmail={userEmail} />
-          {canEdit && <button className="board-column-button" aria-label="Add column" title="Add column" onClick={() => setColumnEditor("new")}><Columns2 size={15} /><span>Column</span></button>}
-          <div className="board-filter-control">
-            <button ref={filterButton} className={`icon-button ${filter ? "selected" : ""}`} aria-label="Search issues" title="Search issues" aria-expanded={filterOpen} onClick={() => setFilterOpen(!filterOpen)}><Search size={16} /></button>
-            {filterOpen && <div className="board-filter-popover"><input autoFocus value={filter} onChange={event => setFilter(event.target.value)} placeholder="Search issues" aria-label="Search project issues" onKeyDown={event => { if (event.key === "Escape") { setFilterOpen(false); filterButton.current?.focus(); } }} /><button className="icon-button" aria-label="Close issue filter" onClick={() => { setFilterOpen(false); filterButton.current?.focus(); }}><X size={14} /></button></div>}
-          </div>
-          {canEdit && <button className="primary-button compact project-create-issue" onClick={onCreateIssue}><CircleDot size={15} />Create issue</button>}
-        </div>
-      </div>
-      {!canEdit ? <div className="notice">You have view-only access to this project, so issue creation is disabled.</div> : null}
-      {boardNotice ? <div className="notice danger">{boardNotice}</div> : null}
-      {archive ? <div className="archive-list">{completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}{!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title="No completed issues" body={filter ? "No issues match your search." : "Completed work will appear here."} />}{archivedTasks.map(task => <div key={task._id} className="archive-row"><CheckCircle2 size={16} /><button className="archive-issue" onClick={() => setSelectedTaskId(task._id)}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button><time>{fmtDate(task.updatedAt)}</time>{canEdit && <button className="ghost-button compact" onClick={async () => { const target = columnForTask(task); if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; } try { if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target }); await updateTask({ projectId, sessionToken, taskId: task._id, done: false }); } catch (error) { setBoardNotice(error instanceof Error ? error.message : "Could not restore issue"); } }}><ArrowLeft size={13} />Restore</button>}</div>)}</div> : <div className="kanban-scroll">
-        {visualColumns.map((column, index) => {
-          const tasks = board.tasks.filter(task => !task.done && matches(task) && columnForTask(task) === column._id);
-          const completedCount = board.tasks.filter(task => task.done && matches(task) && columnForTask(task) === column._id).length;
-          const prev = visualColumns[index - 1];
-          const next = visualColumns[index + 1];
-          return (
-            <div
-              className={clsx("kanban-column", laneTone(column.displayTitle), dragTaskId && "drag-target")}
-              key={column._id}
-              onDragOver={(event) => { if (canEdit) event.preventDefault(); }}
-              onDrop={() => move(column._id)}
-            >
-              <div className="kanban-title">
-                <div>
-                  <span className="column-dot" />
-                  <strong>{column.displayTitle}</strong>
-                </div>
-                <div className="kanban-tools">
-                  <span>{tasks.length}</span>
-                  {canEdit && <button className="icon-button" title={`Edit ${column.title} column`} aria-label={`Edit ${column.title} column`} onClick={() => setColumnEditor(column)}><MoreHorizontal size={15} /></button>}
-                </div>
-              </div>
-              <div className="task-list">
-                {tasks.length === 0 ? <div className="empty-lane">{completedCount ? <button className="archive-lane-link" aria-label={`View ${completedCount} completed issues in ${column.title}`} onClick={() => showCompleted(column._id)}><CheckCircle2 size={16} />{completedCount} completed</button> : filter ? "No matching issues" : "No issues"}</div> : null}
-                {tasks.map((task) => (
-                  <article
-                    className={clsx("task-card", task.done && "done", dragTaskId === task._id && "dragging")}
-                    key={task._id}
-                    data-task-id={task._id}
-                    data-priority={task.priority}
-                    draggable={canEdit}
-                    onDragStart={() => setDragTaskId(task._id)}
-                    onDragEnd={() => setDragTaskId(null)}
-                    onDragOver={(event) => { if (canEdit) event.preventDefault(); }}
-                    onDrop={(event) => {
-                      event.stopPropagation();
-                      move(column._id, task._id);
-                    }}
-                    onClick={() => setSelectedTaskId(task._id)}
-                    tabIndex={0}
-                    onKeyDown={event => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); setSelectedTaskId(task._id); } }}
-                  >
-                    <div className="task-card-head">
-                      <span className="task-code">{taskKey(task._id)}<GitHubIssueIndicator number={task.githubIssueNumber} /></span>
-                      <button className="drag-handle" type="button" disabled={!canEdit} aria-label="Drag task">
-                        <GripVertical size={14} />
-                      </button>
-                    </div>
-                    <div className="task-top">
-                      <button
-                        className="check-button"
-                        aria-label={`Complete ${task.title}`}
-                        type="button"
-                        disabled={!canEdit}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          void updateTask({ projectId, sessionToken, taskId: task._id, done: !task.done }).catch(error => setBoardNotice(error.message));
-                        }}
-                      >
-                        {task.done ? <CheckCircle2 size={17} /> : <Circle size={17} />}
-                      </button>
-                      <strong>{task.title}</strong>
-                    </div>
-                    <div className="task-meta">
-                      <span className={clsx("priority", task.priority)}><Flag size={11} /> {task.priority}</span>
-                      {(() => { const due = dueInfo(task.dueDate); return due ? <span className={clsx("due-chip", due.tone)} title={`Due ${task.dueDate}`}><CalendarDays size={11} />{due.label}</span> : null; })()}
-                      {task.assignedToEmail && (() => { const member = assignees.get(task.assignedToEmail) || { name: task.assignedToName || task.assignedToEmail, email: task.assignedToEmail }; const nickname = sidebarUsername(member); return <button className="task-assignee-profile" title={nickname} aria-label={`View ${nickname} profile`} onClick={event => { event.stopPropagation(); openMember(member.email); }}><UserAvatar user={member} size="small" /></button>; })()}
-                    </div>
-                    <TaskActionsMenu title={task.title} canEdit={canEdit} canMoveLeft={!!prev} canMoveRight={!!next} onMoveLeft={() => moveTask({ projectId, sessionToken, taskId: task._id, columnId: prev!._id })} onMoveRight={() => moveTask({ projectId, sessionToken, taskId: task._id, columnId: next!._id })} onDelete={() => deleteTask({ projectId, sessionToken, taskId: task._id })} onError={setBoardNotice} />
-                  </article>
-                ))}
-              </div>
-              {tasks.length > 0 && completedCount > 0 && <button className="archive-lane-link completed-lane-footer" aria-label={`View ${completedCount} completed issues in ${column.title}`} onClick={() => showCompleted(column._id)}><CheckCircle2 size={14} />{completedCount} completed</button>}
-            </div>
-          );
-        })}
-      </div>}
-      {columnEditor && <ColumnEditor column={columnEditor === "new" ? null : columnEditor} columns={visualColumns} projectId={projectId} sessionToken={sessionToken} onClose={() => setColumnEditor(null)} />}
-      {selectedTaskId ? <TaskModal project={project} projectId={projectId} sessionToken={sessionToken} taskId={selectedTaskId} canEdit={canEdit} onClose={() => setSelectedTaskId(null)} /> : null}
-    </section>
-  );
-}
-
-function ColumnEditor({ column, columns, projectId, sessionToken, onClose }: { column: Doc<"columns"> | null; columns: Doc<"columns">[]; projectId: Id<"projects">; sessionToken: string; onClose: () => void }) {
-  const [title, setTitle] = useState(column?.title || "");
-  const [destination, setDestination] = useState(columns.find(c => c._id !== column?._id)?._id || "");
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const create = useMutation(api.tasks.createColumn);
-  const update = useMutation(api.tasks.updateColumn);
-  const remove = useMutation(api.tasks.deleteColumn);
-  return <Dialog title={column ? "Edit column" : "New column"} onClose={onClose}><form className="dialog-body stack-form" onSubmit={async e => { e.preventDefault(); setBusy(true); try { if (column) await update({ projectId, sessionToken, columnId: column._id, title, isDone: false }); else await create({ projectId, sessionToken, title, isDone: false }); onClose(); } catch (error) { setError(error instanceof Error ? error.message : "Could not save column"); } finally { setBusy(false); } }}><label>Name<input autoFocus value={title} onChange={e => setTitle(e.target.value)} required maxLength={60} /></label>{error && <p className="notice danger">{error}</p>}<div className="dialog-actions"><button className="primary-button compact" disabled={busy}>Save column</button>{column && columns.length > 1 && <button className="ghost-button danger compact" type="button" onClick={() => setDeleting(!deleting)}><Trash2 size={14} />Delete column</button>}</div>{deleting && column && <div className="column-delete-form"><label>Move its issues to<select value={destination} onChange={e => setDestination(e.target.value as Id<"columns">)}>{columns.filter(c => c._id !== column._id).map(c => <option key={c._id} value={c._id}>{c.title}</option>)}</select></label><button type="button" className="ghost-button danger" disabled={busy} onClick={async () => { setBusy(true); try { await remove({ projectId, sessionToken, columnId: column._id, moveToColumnId: destination as Id<"columns"> }); onClose(); } catch (error) { setError(error instanceof Error ? error.message : "Could not delete column"); } finally { setBusy(false); } }}>Delete and move issues</button></div>}</form></Dialog>;
-}
-
-function TaskModal({
-  project,
-  projectId,
-  sessionToken,
-  taskId,
-  canEdit,
-  onClose,
-}: {
-  project: ProjectWithUi;
-  projectId: Id<"projects">;
-  sessionToken: string;
-  taskId: Id<"tasks">;
-  canEdit: boolean;
-  onClose: () => void;
-}) {
-  const details = useQuery(api.tasks.details, { projectId, sessionToken, taskId });
-  const workspace = useWorkspace();
-  const updateTask = useMutation(api.tasks.updateTask);
-  const moveTask = useMutation(api.tasks.moveTask);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<Priority>("medium");
-  const [assignedToEmail, setAssignedToEmail] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [columnId, setColumnId] = useState<Id<"columns"> | "">("");
-  const [activityError, setActivityError] = useState("");
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const [githubState, setGithubState] = useState<"idle" | "creating" | "created" | "fallback" | "error">("idle");
-  const [githubNotice, setGithubNotice] = useState("");
-  const hydratedRef = useRef(false);
-  const lastSaved = useRef({ title: "", description: "", priority: "medium" as Priority, assignedToEmail: "", dueDate: "" });
-  const saving = useRef<Promise<void>>(Promise.resolve());
-
-  useEffect(() => {
-    if (!details?.task) return;
-    hydratedRef.current = false;
-    setTitle(details.task.title);
-    setDescription(details.task.description || "");
-    setPriority(details.task.priority);
-    setAssignedToEmail(details.task.assignedToEmail || "");
-    setDueDate(details.task.dueDate || "");
-    lastSaved.current = { title: details.task.title, description: details.task.description || "", priority: details.task.priority, assignedToEmail: details.task.assignedToEmail || "", dueDate: details.task.dueDate || "" };
-    setColumnId(details.task.columnId);
-    setSaveState("idle");
-    setGithubState("idle");
-    setGithubNotice("");
-    const handle = window.setTimeout(() => { hydratedRef.current = true; }, 0);
-    return () => window.clearTimeout(handle);
-  }, [details?.task?._id]);
-
-  const saveDraft = useCallback(() => {
-    if (!canEdit || !hydratedRef.current) return Promise.resolve();
-    const draft = { title: title.trim(), description, priority, assignedToEmail, dueDate };
-    const save = saving.current.catch(() => {}).then(async () => {
-      const patch: Partial<typeof draft> = {};
-      for (const key of Object.keys(draft) as (keyof typeof draft)[]) {
-        if (draft[key] !== lastSaved.current[key]) Object.assign(patch, { [key]: draft[key] });
-      }
-      if (!Object.keys(patch).length) return;
-      if (!draft.title || patch.assignedToEmail === "" || patch.dueDate === "") {
-        setSaveState("error"); throw new Error("Title, assignee and due date cannot be empty");
-      }
-      setSaveState("saving");
-      try {
-        await updateTask({ projectId, sessionToken, taskId, ...patch });
-        lastSaved.current = draft; setSaveState("saved");
-      } catch (error) { setSaveState("error"); throw error; }
-    });
-    saving.current = save;
-    return save;
-  }, [assignedToEmail, canEdit, description, dueDate, priority, projectId, sessionToken, taskId, title, updateTask]);
-  useEffect(() => {
-    if (!details?.task || !hydratedRef.current) return;
-    const handle = window.setTimeout(() => { void saveDraft().catch(() => {}); }, 500);
-    return () => window.clearTimeout(handle);
-  }, [details?.task?._id, saveDraft]);
-  const closeIssue = () => { void saveDraft().then(onClose).catch(error => setActivityError(error instanceof Error ? error.message : "Could not save issue")); };
-
-  const changeColumn = async (value: string) => {
-    if (!canEdit || !value) return;
-    const nextColumnId = value as Id<"columns">;
-    setColumnId(nextColumnId);
-    setSaveState("saving");
-    try {
-      await moveTask({ projectId, sessionToken, taskId, columnId: nextColumnId });
-      setSaveState("saved");
-    } catch {
-      setColumnId(details?.task.columnId || "");
-      setSaveState("error");
-    }
-  };
-  const openReference = (targetProject: Id<"projects">, targetTask?: Id<"tasks">) => { void saveDraft().then(() => { const url = new URL(window.location.href); url.search = new URLSearchParams({ project: targetProject, ...(targetTask ? { issue: targetTask } : {}) }).toString(); window.location.href = url.toString(); }).catch(() => setSaveState("error")); };
-  const activity = details ? [...details.comments.map((item) => ({ kind: "comment" as const, at: item.createdAt, item })), ...details.assets.filter(item => !item.commentId).map((item) => ({ kind: "asset" as const, at: item.createdAt, item }))].sort((a, b) => a.at - b.at) : [];
-  const linkedGitHubAsset = details?.assets.find((asset) => asset.url.includes("github.com") && /\/issues\/\d+/.test(asset.url));
-  const linkedGitHubUrl = details?.task.githubIssueUrl || linkedGitHubAsset?.url;
-  const githubIssueHref = details?.task
-    ? githubNewIssueHref(
-        project.repoUrl,
-        details.task.title,
-        [details.task.description, `Origin issue: ${taskKey(details.task._id)}`].filter(Boolean).join("\n\n"),
-      )
-    : null;
-  const createGitHubIssue = async () => {
-    if (!details?.task || !canEdit || !project.repoUrl) return;
-    setGithubState("creating");
-    setGithubNotice("");
-    try {
-      await saveDraft();
-      const result = await localApi<{ ok: boolean; issueUrl: string; issueNumber: number; message: string }>("/api/github/issues", sessionToken, {
-        method: "POST", json: { projectId, taskId },
-      });
-      setGithubState("created");
-      setGithubNotice(result.message);
-    } catch (error) {
-      setGithubState("error");
-      setGithubNotice(error instanceof Error ? error.message : "GitHub issue creation failed");
-    }
-  };
-  return <Dialog title={details ? `${taskKey(details.task._id)} / ${project.name}` : "Issue details"} className="issue-detail-dialog" onClose={closeIssue}>
-    {details ? <div className="issue-detail-layout">
-      <section className="issue-description-section">
-        <div className="issue-detail-status" aria-live="polite">
-          {details.task.done && <span className="issue-completed-badge"><CheckCircle2 size={14} />Completed</span>}
-          <span className={saveState === "error" ? "danger" : ""}>{saveState === "saving" ? "Saving..." : saveState === "saved" ? "Saved" : saveState === "error" ? "Not saved. Check required fields." : "All changes saved"}</span>
-        </div>
-        <textarea className="issue-title-input" aria-label="Issue title" autoFocus={canEdit} value={title} onChange={event => setTitle(event.target.value)} disabled={!canEdit} rows={2} maxLength={250} required />
-        <textarea className="issue-detail-description" aria-label="Issue description" value={description} onChange={event => setDescription(event.target.value)} rows={5} placeholder="Add a description..." disabled={!canEdit} />
-      </section>
-      <aside className="issue-detail-sidebar" aria-label="Issue properties">
-        <h3>Properties</h3>
-        <IssueFields columns={details.columns.filter(column => !(column.isDone ?? column.title.toLowerCase() === "done"))} members={details.members} columnId={columnId} onColumnChange={value => void changeColumn(value)} priority={priority} onPriorityChange={setPriority} assignee={assignedToEmail} onAssigneeChange={setAssignedToEmail} dueDate={dueDate} onDueDateChange={setDueDate} disabled={!canEdit} />
-        <section className="issue-github-section">
-          <h3><GitBranch size={14} />GitHub</h3>
-          <span className="issue-repository-name">{githubRepoLabel(project.repoUrl)}</span>
-          {linkedGitHubUrl ? <a className="ghost-button compact" href={linkedGitHubUrl} target="_blank" rel="noreferrer"><ExternalLink size={14} />Open GitHub issue</a>
-            : githubIssueHref ? <button className="ghost-button compact" type="button" onClick={createGitHubIssue} disabled={!canEdit || githubState === "creating"}>{githubState === "creating" ? <Loader2 className="spin" size={14} /> : <Plus size={14} />}{githubState === "creating" ? "Creating..." : "Create GitHub issue"}</button>
-            : null}
-          {githubNotice && <small className={clsx("github-notice", githubState === "error" && "danger")}>{githubNotice}</small>}
-        </section>
-        <dl className="issue-date-summary"><div><dt>Created</dt><dd>{fmtDate(details.task.createdAt)}</dd></div><div><dt>Updated</dt><dd>{fmtDate(details.task.updatedAt)}</dd></div></dl>
-      </aside>
-      <section className="issue-detail-activity">
-        <header><h3><MessageCircle size={15} />Activity <span>{activity.length}</span></h3></header>
-        <div className="issue-timeline">
-          {!activity.length && <p className="activity-empty">No activity yet.</p>}
-          {activity.map(entry => <article className="issue-timeline-entry" key={entry.item._id}>
-            {entry.kind === "comment" ? <UserAvatar user={details.members.find(member => member.userId === entry.item.authorUserId) || { name: entry.item.authorName, email: entry.item.authorEmail }} size="small" /> : <span className="activity-avatar" aria-hidden="true"><Paperclip size={14} /></span>}
-            <div className="activity-entry-content"><header><strong>{entry.kind === "comment" ? entry.item.authorName : "Attachment"}</strong><time dateTime={new Date(entry.at).toISOString()} title={new Date(entry.at).toLocaleString()}>{new Intl.DateTimeFormat("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(entry.at)}</time></header>
-              {entry.kind === "comment" ? <><IssueCommentBody comment={entry.item} sessionToken={sessionToken} canEdit={canEdit} onOpenReference={openReference} /><div className="comment-media">{details.assets.filter(asset => asset.commentId === entry.item._id && asset.localFileId).map(asset => <LocalAttachment key={asset._id} file={{ id: asset.localFileId!, name: asset.name, size: asset.size || 0, contentType: asset.contentType || "application/octet-stream" }} sessionToken={sessionToken} scope={`teamId=${workspace._id}`} />)}</div></> : entry.item.localFileId ? <LocalAttachment file={{ id: entry.item.localFileId, name: entry.item.name, size: entry.item.size || 0, contentType: entry.item.contentType || "application/octet-stream" }} sessionToken={sessionToken} scope={`teamId=${workspace._id}`} /> : <a className="activity-attachment" href={entry.item.url} target="_blank" rel="noreferrer"><span>{entry.item.name}</span><ExternalLink size={13} /></a>}
-            </div>
-          </article>)}
-        </div>
-        {canEdit && <IssueCommentComposer key={taskId} projectId={projectId} taskId={taskId} sessionToken={sessionToken} members={details.members} />}
-        {activityError && <div className="notice danger" role="alert">{activityError}</div>}
-      </section>
-    </div> : <div className="dialog-body"><LoadingState label="Opening issue" /></div>}
-  </Dialog>;
 }
 
 function RepoTab({ project, sessionToken }: { project: Doc<"projects"> & { memberRole: string }; sessionToken: string }) {

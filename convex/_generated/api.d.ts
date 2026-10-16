@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as agentsTables from "../agentsTables.js";
 import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
 import type * as commits from "../commits.js";
@@ -30,14 +31,17 @@ import type * as lib_completions from "../lib/completions.js";
 import type * as lib_features from "../lib/features.js";
 import type * as lib_permissions from "../lib/permissions.js";
 import type * as lib_repository from "../lib/repository.js";
+import type * as lib_taskBranches from "../lib/taskBranches.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as memberProfiles from "../memberProfiles.js";
 import type * as members from "../members.js";
+import type * as meta from "../meta.js";
 import type * as notifications from "../notifications.js";
 import type * as planning from "../planning.js";
 import type * as preferences from "../preferences.js";
 import type * as projectPresence from "../projectPresence.js";
 import type * as projects from "../projects.js";
+import type * as taskPRs from "../taskPRs.js";
 import type * as tasks from "../tasks.js";
 import type * as teams from "../teams.js";
 import type * as wiki from "../wiki.js";
@@ -51,6 +55,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agentsTables: typeof agentsTables;
   auth: typeof auth;
   chat: typeof chat;
   commits: typeof commits;
@@ -73,14 +78,17 @@ declare const fullApi: ApiFromModules<{
   "lib/features": typeof lib_features;
   "lib/permissions": typeof lib_permissions;
   "lib/repository": typeof lib_repository;
+  "lib/taskBranches": typeof lib_taskBranches;
   "lib/validators": typeof lib_validators;
   memberProfiles: typeof memberProfiles;
   members: typeof members;
+  meta: typeof meta;
   notifications: typeof notifications;
   planning: typeof planning;
   preferences: typeof preferences;
   projectPresence: typeof projectPresence;
   projects: typeof projects;
+  taskPRs: typeof taskPRs;
   tasks: typeof tasks;
   teams: typeof teams;
   wiki: typeof wiki;

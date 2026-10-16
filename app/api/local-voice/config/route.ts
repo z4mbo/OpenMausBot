@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { NextResponse } from "next/server";
+import { callJson, callOptions } from "@/lib/call-http";
 import { requireLocalWorkspace } from "@/lib/localRealtime";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,6 +13,8 @@ export async function GET(request: Request) {
       const credential = createHmac("sha1", process.env.ORIGIN_TURN_SECRET).update(username).digest("base64");
       iceServers.push({ urls: [`turn:${host}:3478?transport=udp`, `turn:${host}:3478?transport=tcp`], username, credential });
     }
-    return NextResponse.json({ iceServers }, { headers: { "Cache-Control": "no-store" } });
-  } catch { return NextResponse.json({ error: "Workspace access required" }, { status: 401 }); }
+    return callJson({ iceServers }, { headers: { "Cache-Control": "no-store" } });
+  } catch { return callJson({ error: "Workspace access required" }, { status: 401 }); }
 }
+
+export function OPTIONS() { return callOptions(); }

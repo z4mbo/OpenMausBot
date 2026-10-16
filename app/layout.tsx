@@ -10,6 +10,8 @@ import { Providers } from "./providers";
 import { bodyFont, displayFont, monoFont } from "@/lib/fonts";
 import { siteUrl } from "@/lib/site";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Origin | A workspace for your team",

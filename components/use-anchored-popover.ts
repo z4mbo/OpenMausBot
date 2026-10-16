@@ -2,7 +2,9 @@
 
 import { useLayoutEffect, type RefObject } from "react";
 
-export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLButtonElement | null>, menu: RefObject<HTMLDivElement | null>, input: RefObject<HTMLInputElement | null>) {
+export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLButtonElement | null>, menu: RefObject<HTMLDivElement | null>, input: RefObject<HTMLInputElement | null>, options?: { width?: number; maxHeight?: number }) {
+  const preferredWidth = options?.width ?? 280;
+  const preferredHeight = options?.maxHeight ?? 330;
   useLayoutEffect(() => {
     const button = trigger.current, popover = menu.current;
     if (!open || !button || !popover) return;
@@ -12,11 +14,11 @@ export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLButtonE
       const viewport = window.visualViewport;
       const top = viewport?.offsetTop || 0;
       const bottom = top + (viewport?.height || window.innerHeight);
-      const width = Math.min(280, window.innerWidth - 24);
+      const width = Math.min(preferredWidth, window.innerWidth - 24);
       const below = bottom - box.bottom - 12;
       const above = box.top - top - 12;
       const upward = below < 220 && above > below;
-      const height = Math.min(330, Math.max(80, upward ? above : below));
+      const height = Math.min(preferredHeight, Math.max(80, upward ? above : below));
       Object.assign(popover.style, {
         width: `${width}px`, maxHeight: `${height}px`,
         left: `${Math.max(12, Math.min(box.left, window.innerWidth - width - 12))}px`,
@@ -39,5 +41,5 @@ export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLButtonE
       window.visualViewport?.removeEventListener("scroll", position);
       if (popover.matches(":popover-open")) popover.hidePopover();
     };
-  }, [open, trigger, menu, input]);
+  }, [open, trigger, menu, input, preferredWidth, preferredHeight]);
 }

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getConvexClient, getLocalFile, limitLocalAction, localDataDir, registerLocalFile, requireLocalChat, sessionTokenFromRequest } from "@/lib/localRealtime";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { BodyTooLarge, readBoundedBytes } from "@/lib/http-body";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
@@ -17,13 +18,14 @@ export async function POST(request: Request) {
     }
     limitLocalAction(`upload:${user._id}`, 30, 60000);
     if (Number(request.headers.get("content-length")) > 16 * 1024 * 1024) throw new Error("Files must be smaller than 15 MB");
-    const form = await request.formData(); const file = form.get("file");
+    const bytes = await readBoundedBytes(request, 16 * 1024 * 1024);
+    const form = await new Response(bytes as BodyInit, { headers: { "content-type": request.headers.get("content-type") || "" } }).formData(); const file = form.get("file");
     if (!(file instanceof File) || file.size > 15 * 1024 * 1024 || file.size === 0) throw new Error("Choose a file between 1 byte and 15 MB");
     const metadata = { id: crypto.randomUUID(), name: file.name.slice(0, 200), contentType: file.type || "application/octet-stream", size: file.size, ...(projectId ? { projectId } : {}) };
     const dir = path.join(localDataDir(), "files"); await mkdir(dir, { recursive: true });
     await writeFile(path.join(dir, metadata.id), Buffer.from(await file.arrayBuffer()), { flag: "wx" });
     registerLocalFile(user, metadata); return NextResponse.json({ file: metadata });
-  } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Upload failed" }, { status: 400 }); }
+  } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Upload failed" }, { status: error instanceof BodyTooLarge ? 413 : 400 }); }
 }
 export async function GET(request: Request) {
   try {

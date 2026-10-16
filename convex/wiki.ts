@@ -85,8 +85,9 @@ export const update = mutation({
           Y.applyUpdate(doc, new Uint8Array(page.collaborationState));
           const text = doc.getText("content");
           doc.transact(() => { text.delete(0, text.length); text.insert(0, args.content!); });
-          patch.collaborationState = new Uint8Array(Y.encodeStateAsUpdate(doc)).buffer;
-          if (patch.collaborationState.byteLength > 700000) throw new Error("Document size limit reached");
+          const state = new Uint8Array(Y.encodeStateAsUpdate(doc)).buffer;
+          patch.collaborationState = state;
+          if (state.byteLength > 700000) throw new Error("Document size limit reached");
         } finally { doc.destroy(); }
       }
     }

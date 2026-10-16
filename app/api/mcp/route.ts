@@ -22,9 +22,10 @@ export async function POST(request: Request) {
   const requestOrigin = request.headers.get("origin");
   if (requestOrigin && ![originUrl(), "https://chatgpt.com", "https://claude.ai"].includes(requestOrigin)) return new Response("Origin not allowed", { status: 403 });
   let auth;
+  const bearer = request.headers.get("authorization")?.replace(/^Bearer /i, "") || "";
   const convex = getConvexClient();
   try {
-    auth = resolveMcpToken(request.headers.get("authorization")?.replace(/^Bearer /i, "") || "");
+    auth = resolveMcpToken(bearer);
     const access = await convex.query(api.connectors.verify, { token: auth.connectorToken });
     auth.write = auth.write && access.write;
     limitLocalAction(`mcp:${auth.grantId}`, 120, 60000);
@@ -58,7 +59,8 @@ export async function POST(request: Request) {
 }
 export async function GET(request: Request) {
   try {
-    const auth = resolveMcpToken(request.headers.get("authorization")?.replace(/^Bearer /i, "") || "");
+    const bearer = request.headers.get("authorization")?.replace(/^Bearer /i, "") || "";
+    const auth = resolveMcpToken(bearer);
     await getConvexClient().query(api.connectors.verify, { token: auth.connectorToken });
     return new Response(null, { status: 405, headers: { Allow: "POST", "Cache-Control": "no-store" } });
   } catch { return unauthorized(); }

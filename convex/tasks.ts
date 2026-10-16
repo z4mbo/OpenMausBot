@@ -159,8 +159,9 @@ export const createColumn = mutation({
     const columns = await ctx.db.query("columns").withIndex("by_project", (q) => q.eq("projectId", args.projectId)).collect();
     const order = columns.length ? Math.max(...columns.map((column) => column.order)) + 1 : 0;
     if (columns.length >= 20) throw new Error("A workflow can have up to 20 columns");
-    await ctx.db.insert("columns", { projectId: args.projectId, title: args.title.trim(), isDone: false, order, createdAt: now, updatedAt: now });
+    const id = await ctx.db.insert("columns", { projectId: args.projectId, title: args.title.trim(), isDone: false, order, createdAt: now, updatedAt: now });
     await touchProject(ctx, args.projectId);
+    return id;
   },
 });
 
@@ -265,15 +266,15 @@ export const createTask = mutation({
   },
 });
 
-export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; columnId: Id<"columns">; title: string; description?: string; priority: "low" | "medium" | "high"; assignedToEmail?: string; dueDate?: string; }, actorId: Id<"users">) {
+export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; columnId: Id<"columns">; title: string; description?: string; priority: "low" | "medium" | "high"; assignedToEmail?: string; dueDate?: string; }, actorId: Id<"users">, actorAgentId?: Id<"workspaceAgents">) {
   const [column, assignee] = await Promise.all([
       ctx.db.get(args.columnId),
       findAssignee(ctx, args.projectId, args.assignedToEmail),
     ]);
     if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
     if (!args.title.trim() || args.title.length > 250) throw new Error("Enter an issue title under 250 characters");
-    if (!assignee) throw new Error("Choose an active workspace member as assignee");
-    const dueDate = requireDueDate(args.dueDate);
+    if (!assignee && (!actorAgentId || args.assignedToEmail)) throw new Error("Choose an active workspace member as assignee");
+    const dueDate = actorAgentId && !args.dueDate ? undefined : requireDueDate(args.dueDate);
     const now = Date.now();
     if ((args.description?.length || 0) > 60000) throw new Error("Description must be under 60,000 characters");
     const last = await ctx.db.query("tasks").withIndex("by_column_order", q => q.eq("columnId", args.columnId)).order("desc").first();
@@ -296,7 +297,7 @@ export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
     });
     await changeOpenIssueCount(ctx, args.projectId, (column.isDone ?? column.title.toLowerCase() === "done") ? 0 : 1);
     await touchProject(ctx, args.projectId);
-    if (project?.teamId) await notify(ctx, { teamId: project.teamId, email: assignee.email, actorId, kind: "assignment", eventId: `created:${taskId}`, projectId: project._id, taskId });
+    if (project?.teamId && assignee) await notify(ctx, { teamId: project.teamId, email: assignee.email, actorId, kind: "assignment", eventId: `created:${taskId}`, projectId: project._id, taskId });
     return taskId;
 }
 

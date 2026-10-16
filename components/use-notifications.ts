@@ -5,18 +5,20 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { isQuietTime } from "@/lib/notification-quiet";
 
-export function useNotifications(sessionToken: string, teamId: Id<"teams">, userId: Id<"users">) {
-  const summary = useQuery(api.notifications.summary, { sessionToken, teamId });
-  const preferences = useQuery(api.preferences.notifications, { sessionToken, teamId });
+export function useNotifications(sessionToken: string | undefined, teamId: Id<"teams"> | undefined, userId: Id<"users"> | undefined) {
+  const scope = sessionToken && teamId && userId ? { sessionToken, teamId } : "skip";
+  const summary = useQuery(api.notifications.summary, scope);
+  const preferences = useQuery(api.preferences.notifications, scope);
   const [sound, setSound] = useState(true);
   const context = useRef<AudioContext | null>(null), last = useRef<string | null | undefined>(undefined);
   const preference = `origin.notification-sound:${userId}`;
   useEffect(() => {
+    if (!userId || !teamId) return;
     setSound(localStorage.getItem(preference) !== "off"); last.current = undefined;
     const unlock = () => { try { context.current ||= new AudioContext(); void context.current.resume().catch(() => {}); } catch { /* Audio is optional. */ } };
     window.addEventListener("pointerdown", unlock); window.addEventListener("keydown", unlock);
     return () => { window.removeEventListener("pointerdown", unlock); window.removeEventListener("keydown", unlock); void context.current?.close(); context.current = null; };
-  }, [preference, teamId]);
+  }, [preference, teamId, userId]);
   useEffect(() => {
     if (!summary) return;
     const previous = last.current; last.current = summary.latest;

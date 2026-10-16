@@ -5,7 +5,7 @@ Before=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash /root/origin/deploy/turn-firewall.sh
+ExecStart=/bin/bash /srv/origin/deploy/turn-firewall.sh
 RemainAfterExit=yes
 
 [Install]

@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { isReleaseHistory, releases, releaseStorageKey } from "./releases";
 
 describe("release notifications", () => {
-  it("preserves the original 1.0 changelog", () => {
+  it("keeps the 1.0 changelog as the release history", () => {
+    expect(releases[0].version).toBe("1.0");
     expect(releases.at(-1)?.version).toBe("1.0");
     expect(isReleaseHistory(releases)).toBe(true);
     expect(isReleaseHistory([{ ...releases[0], version: "1.1" }, ...releases])).toBe(true);

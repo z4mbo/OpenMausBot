@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { featureTables } from "./featureTables";
+import { agentAttribution, agentsTables } from "./agentsTables";
 import {
   assetTypeValidator,
   callSignalKindValidator,
@@ -18,6 +19,7 @@ import {
 
 export default defineSchema({
   ...featureTables,
+  ...agentsTables,
   notifications: defineTable({ teamId: v.id("teams"), userId: v.id("users"), actorId: v.id("users"), kind: v.union(v.literal("assignment"), v.literal("comment"), v.literal("mention")), eventId: v.string(), projectId: v.optional(v.id("projects")), taskId: v.optional(v.id("tasks")), messageId: v.optional(v.string()), preview: v.optional(v.string()), read: v.boolean(), snoozedUntil: v.optional(v.number()), createdAt: v.number() })
     .index("by_user_team", ["userId", "teamId"])
     .index("by_user_team_read", ["userId", "teamId", "read"])
@@ -101,6 +103,9 @@ export default defineSchema({
     .index("by_token", ["inviteToken"]),
 
   projects: defineTable({
+    githubTaskMode: v.optional(v.union(v.literal("issue"), v.literal("pull_request"))),
+    githubReviewColumnId: v.optional(v.union(v.id("columns"), v.null())),
+    githubDoneColumnId: v.optional(v.id("columns")),
     githubRepoState: v.optional(v.union(v.literal("pending"), v.literal("ready"), v.literal("error"), v.literal("awaiting_connection"))),
     githubRepoError: v.optional(v.string()),
     githubRepoId: v.optional(v.number()),
@@ -146,6 +151,7 @@ export default defineSchema({
     .index("by_token", ["inviteToken"]),
 
   columns: defineTable({
+    ...agentAttribution,
     projectId: v.id("projects"),
     title: v.string(),
     order: v.number(),
@@ -157,6 +163,9 @@ export default defineSchema({
     .index("by_project_order", ["projectId", "order"]),
 
   tasks: defineTable({
+    githubTaskBranch: v.optional(v.string()),
+    githubTaskMode: v.optional(v.union(v.literal("issue"), v.literal("pull_request"))),
+    ...agentAttribution,
     labels: v.optional(v.array(v.string())),
     milestoneId: v.optional(v.id("milestones")),
     teamId: v.optional(v.id("teams")),
@@ -195,6 +204,7 @@ export default defineSchema({
     .index("by_column", ["columnId"])
     .index("by_column_order", ["columnId", "order"])
     .index("by_project_githubIssueNumber", ["projectId", "githubIssueNumber"])
+    .index("by_githubTaskBranch", ["githubTaskBranch"])
     .index("by_githubIssueNumber", ["githubIssueNumber"])
     .index("by_milestoneId", ["milestoneId"])
     .index("by_teamId_and_dueDate", ["teamId", "dueDate"])
@@ -202,11 +212,14 @@ export default defineSchema({
 
   connectorGrants: defineTable({
     teamId: v.id("teams"), userId: v.id("users"), tokenHash: v.string(), name: v.string(),
-    // Legacy flag from the removed Agent feature; kept optional so existing grants still validate.
     agentAccess: v.optional(v.boolean()),
+    hostId: v.optional(v.id("agentHosts")),
+    runId: v.optional(v.id("workspaceAgentRuns")),
     write: v.boolean(), expiresAt: v.number(), createdAt: v.number(), revoked: v.boolean(),
   }).index("by_tokenHash", ["tokenHash"]).index("by_userId_and_teamId", ["userId", "teamId"])
-    .index("by_userId_and_teamId_and_revoked", ["userId", "teamId", "revoked"]),
+    .index("by_userId_and_teamId_and_revoked", ["userId", "teamId", "revoked"])
+    .index("by_userId_and_teamId_and_runId_and_hostId", ["userId", "teamId", "runId", "hostId"])
+    .index("by_userId_and_teamId_and_runId_and_hostId_and_revoked", ["userId", "teamId", "runId", "hostId", "revoked"]),
   connectorOperations: defineTable({
     grantId: v.id("connectorGrants"), requestId: v.string(), result: v.string(),
   }).index("by_grantId_and_requestId", ["grantId", "requestId"]),
@@ -219,6 +232,7 @@ export default defineSchema({
     .index("by_taskId", ["taskId"]),
 
   taskComments: defineTable({
+    ...agentAttribution,
     projectId: v.id("projects"),
     taskId: v.id("tasks"),
     authorUserId: v.id("users"),
@@ -279,6 +293,7 @@ export default defineSchema({
     .index("by_project_and_updatedAt", ["projectId", "updatedAt"]),
 
   wikiPages: defineTable({
+    ...agentAttribution,
     teamId: v.optional(v.id("teams")),
     collaborationState: v.optional(v.bytes()),
     projectId: v.id("projects"),
@@ -326,6 +341,7 @@ export default defineSchema({
   }).index("by_project", ["projectId"]),
 
   designAssets: defineTable({
+    ...agentAttribution,
     projectId: v.id("projects"),
     type: assetTypeValidator,
     name: v.string(),

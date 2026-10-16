@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { canAnimateTaskExit, selectionBox } from "@/lib/workspace-motion";
 
 /*
  * Motion layer for the workspace. It observes the DOM that React renders and adds
@@ -59,10 +60,11 @@ export function MotionLayer() {
       const active = container.querySelector<HTMLElement>(activeSelector);
       const hide = () => { glider.style.opacity = "0"; glider.dataset.visible = "false"; };
       if (!active || !active.offsetParent) return hide();
-      const base = container.getBoundingClientRect();
       const rect = active.getBoundingClientRect();
+      const box = selectionBox(active, container as HTMLElement);
       const clip = active.parentElement?.closest(".sidebar-project-list")?.getBoundingClientRect();
-      if (clip && (rect.top < clip.top - 1 || rect.bottom > clip.bottom + 1)) return hide();
+      const top = container.getBoundingClientRect().top + box.y - container.scrollTop;
+      if (clip && (top < clip.top - 1 || top + box.height > clip.bottom + 1)) return hide();
       const first = !glider.dataset.ready;
       const avatar = glider.querySelector<HTMLElement>(".nav-glider-avatar");
       if (avatar) {
@@ -75,9 +77,9 @@ export function MotionLayer() {
       }
       glider.style.transition = first || reduced.matches ? "none" : "";
       glider.style.opacity = "1";
-      glider.style.width = `${rect.width}px`;
-      glider.style.height = `${rect.height}px`;
-      glider.style.transform = `translate3d(${rect.left - base.left + container.scrollLeft}px, ${rect.top - base.top + container.scrollTop}px, 0)`;
+      glider.style.width = `${box.width}px`;
+      glider.style.height = `${box.height}px`;
+      glider.style.transform = `translate3d(${box.x}px, ${box.y}px, 0)`;
       glider.dataset.ready = "true";
       glider.dataset.visible = "true";
     };
@@ -165,6 +167,7 @@ export function MotionLayer() {
       }
       const animation = ghost.animate(keyframes, { duration: toward ? 760 : 360, easing: toward ? "cubic-bezier(.55, 0, .25, 1)" : "ease-in" });
       animation.onfinish = () => { ghost.remove(); if (toward) bump(toward.querySelector("span") || toward); };
+      animation.oncancel = () => ghost.remove();
     };
 
     /* -------------------------------------------------------------- mutation */
@@ -224,7 +227,7 @@ export function MotionLayer() {
       lists.forEach(([list, selector]) => enterList(list, selector));
 
       // Cards removed while their list stays on screen: completed issues fly to the Completed control.
-      const exits = removed.filter(({ element, parent }) => !addedTracked.has(`t:${element.dataset.taskId}`) && (parent as Element).isConnected);
+      const exits = removed.filter(({ element, parent }) => !addedTracked.has(`t:${element.dataset.taskId}`) && canAnimateTaskExit(parent as HTMLElement));
       if (exits.length && exits.length <= 3) {
         exits.forEach(({ element }) => {
           const id = element.dataset.taskId!;

@@ -322,6 +322,7 @@ export const upsertRepoSnapshot = internalMutation({
         };
         if (existing) {
           if ((existing.githubIssueUpdatedAt || 0) > issue.updatedAt) continue;
+          if (existing.githubTaskMode === "pull_request" || await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", existing._id)).first()) patch.done = existing.done;
           if (issue.state === "open" && existing.githubIssueState !== "closed") patch.done = existing.done;
           patch.columnId = existing.columnId;
           await recordCompletion(ctx, existing, patch.done, issue.updatedAt);

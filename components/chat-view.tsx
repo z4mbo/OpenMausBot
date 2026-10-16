@@ -1,5 +1,7 @@
 "use client";
 
+import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
+
 import {
   Fragment,
   useCallback,
@@ -18,7 +20,6 @@ import {
   Check,
   Circle,
   CirclePlus,
-  Download,
   File,
   Hash,
   Heart,
@@ -57,6 +58,7 @@ import {
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { IssueComposer } from "./issue-composer";
+import { LocalAttachment } from "./local-attachment";
 import { activeChatTags, chatMessageParts, chatTextParts } from "@/lib/chat-text";
 import { useChatTypingFocus } from "./use-chat-typing-focus";
 import { hasOpenKeyboardOverlay } from "@/lib/keyboard-navigation";
@@ -174,8 +176,9 @@ export function ChatThread({
     } catch (error) { if (generation === searchGeneration.current) setNotice(error instanceof Error ? error.message : "Search failed"); }
     finally { if (generation === searchGeneration.current) setSearching(false); }
   };
+  const online = useWorkspaceOnline();
   const canWrite =
-    workspace.role !== "viewer" && (!conversation || Boolean(recipient));
+    online && workspace.role !== "viewer" && (!conversation || Boolean(recipient));
   useChatTypingFocus(inputRef, canWrite);
   const wasSending = useRef(false);
   useEffect(() => {
@@ -650,7 +653,7 @@ export function ChatThread({
                   {message.attachments?.length ? (
                     <div className="message-files">
                       {message.attachments.map((file) => (
-                        <MessageFile
+                        <LocalAttachment
                           key={file.id}
                           file={file}
                           sessionToken={sessionToken}
@@ -958,7 +961,7 @@ export function ChatThread({
             }
           }}
           placeholder={
-            canWrite
+            !online ? "Reconnect to send a message" : canWrite
               ? conversation
                 ? `Message ${recipient ? memberName(recipient) : "teammate"}`
                 : "Message the team"
@@ -984,7 +987,7 @@ export function ChatThread({
               type="button"
               className="icon-button"
               aria-label="Attach files"
-              title="Attach files"
+              title={!online ? RECONNECT_TO_CREATE : "Attach files"}
               disabled={
                 !canWrite ||
                 uploading ||
@@ -1025,7 +1028,7 @@ export function ChatThread({
           </div>
           <button
             className="send-message"
-            title={editing ? "Save message" : "Send message"}
+            title={!online ? RECONNECT_TO_CREATE : editing ? "Save message" : "Send message"}
             aria-label={editing ? "Save message" : "Send message"}
             disabled={
               !canWrite ||
@@ -1046,69 +1049,5 @@ export function ChatThread({
       </form>
       {issueMessage && projects && <IssueComposer sessionToken={sessionToken} projects={projects} activeProjectId={null} initialDraft={{ title: issueMessage.body.split("\n")[0].slice(0, 250) || "Follow up on chat", description: `${issueMessage.body}\n\nFrom ${issueMessage.authorName}, ${new Date(issueMessage.createdAt).toLocaleString()}` }} onClose={() => setIssueMessage(null)} onCreated={onOpenReference} />}
     </section>
-  );
-}
-
-function MessageFile({
-  file,
-  sessionToken,
-  scope,
-}: {
-  file: ChatAttachment;
-  sessionToken: string;
-  scope: string;
-}) {
-  const [url, setUrl] = useState("");
-  const [error, setError] = useState(false);
-  const image = /^image\/(png|jpeg|gif|webp)$/.test(file.contentType);
-  useEffect(() => {
-    let objectUrl = "";
-    let alive = true;
-    fetch(`/api/local-chat/files?${scope}&id=${file.id}`, {
-      headers: { Authorization: `Bearer ${sessionToken}` },
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error("Download failed");
-        return response.blob();
-      })
-      .then((blob) => {
-        if (alive) {
-          objectUrl = URL.createObjectURL(blob);
-          setUrl(objectUrl);
-        }
-      })
-      .catch(() => {
-        if (alive) setError(true);
-      });
-    return () => {
-      alive = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [file.id, scope, sessionToken]);
-  return (
-    <a
-      className={`message-file ${image ? "image-attachment" : ""}`}
-      href={url || undefined}
-      download={file.name}
-    >
-      {image && url ? (
-        <img src={url} alt={file.name} loading="lazy" />
-      ) : (
-        <File size={24} />
-      )}
-      <span>
-        <strong>{file.name}</strong>
-        <small>
-          {error
-            ? "Download unavailable"
-            : `${Math.max(1, Math.round(file.size / 1024))} KB`}
-        </small>
-      </span>
-      {url ? (
-        <Download size={15} />
-      ) : (
-        !error && <Loader2 className="spin" size={15} />
-      )}
-    </a>
   );
 }

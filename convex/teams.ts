@@ -2,7 +2,8 @@ import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { api } from "./_generated/api";
 import { requireUser } from "./lib/auth";
-import { normalizeEmail, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
+import { normalizeEmail, projectMember, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
+import schema from "./schema";
 import { roleValidator } from "./lib/validators";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
@@ -16,6 +17,9 @@ async function removeMembership(ctx: MutationCtx, member: Doc<"teamMembers">) {
     if (project?.teamId === member.teamId) await ctx.db.delete(item._id);
   }
   if (member.userId) {
+    // Fleet grants must not crowd personal connector revocation out of the bounded page.
+    const personal = await ctx.db.query("connectorGrants").withIndex("by_userId_and_teamId_and_runId_and_hostId_and_revoked", q => q.eq("userId", member.userId!).eq("teamId", member.teamId).eq("runId", undefined).eq("hostId", undefined).eq("revoked", false)).take(21);
+    for (const grant of personal) await ctx.db.patch(grant._id, { revoked: true });
     const grants = await ctx.db.query("connectorGrants").withIndex("by_userId_and_teamId_and_revoked", q => q.eq("userId", member.userId!).eq("teamId", member.teamId).eq("revoked", false)).take(100);
     for (const grant of grants) await ctx.db.patch(grant._id, { revoked: true });
   }
@@ -39,33 +43,28 @@ function makeInviteToken() {
 
 export const listWithProjects = query({
   args: { sessionToken: v.string() },
+  returns: v.array(v.object({ ...schema.tables.teams.validator.fields, _id: v.id("teams"), _creationTime: v.number(), memberRole: roleValidator, projects: v.array(v.object({ ...schema.tables.projects.validator.fields, _id: v.id("projects"), _creationTime: v.number() })) })),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
     const memberships = await ctx.db
       .query("teamMembers")
       .withIndex("by_email", (q) => q.eq("email", user.email))
-      .collect();
+      .take(101);
 
-    const active = memberships.filter((membership) => membership.status === "active");
-    const rows = await Promise.all(
-      active.map(async (membership) => {
-        const team = await ctx.db.get(membership.teamId);
-        if (!team) return null;
-        const projects = await ctx.db
-          .query("projects")
-          .withIndex("by_team", (q) => q.eq("teamId", team._id))
-          .collect();
-        return {
-          ...team,
-          memberRole: membership.role,
-          projects: projects.sort((a, b) => b.updatedAt - a.updatedAt),
-        };
-      }),
-    );
-
-    return rows
-      .filter((row): row is NonNullable<typeof row> => row !== null)
-      .sort((a, b) => b.updatedAt - a.updatedAt);
+    if (memberships.length > 100) throw new Error("Workspace discovery limit exceeded");
+    const active = memberships.filter(m => m.status === "active" && (!m.userId || m.userId === user._id));
+    const rows = []; let projectCount = 0;
+    for (const membership of active) {
+      const team = await ctx.db.get(membership.teamId);
+      if (!team) continue;
+      const projects = await ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", team._id)).take(Math.min(201, 1001 - projectCount));
+      projectCount += projects.length;
+      if (projects.length > 200 || projectCount > 1000) throw new Error("Project discovery limit exceeded");
+      const visible = [];
+      for (const project of projects) if (await projectMember(ctx, project, user)) visible.push(project);
+      rows.push({ ...team, memberRole: membership.role, projects: visible.sort((a, b) => b.updatedAt - a.updatedAt) });
+    }
+    return rows.sort((a, b) => b.updatedAt - a.updatedAt);
   },
 });
 
@@ -212,7 +211,7 @@ export const updateRole = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams"), memberId: v.id("teamMembers"), role: roleValidator },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { member: requester } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
+    await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     const member = await ctx.db.get(args.memberId);
     if (!member || member.teamId !== args.teamId) throw new Error("Member not found");
     if (member.role === "owner" || args.role === "owner") throw new Error("Workspace ownership cannot be changed here");
@@ -225,7 +224,7 @@ export const removeMember = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams"), memberId: v.id("teamMembers") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { member: requester, user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
+    const { user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     const member = await ctx.db.get(args.memberId);
     if (!member || member.teamId !== args.teamId) throw new Error("Member not found");
     if (member.role === "owner") throw new Error("The workspace owner cannot be removed");

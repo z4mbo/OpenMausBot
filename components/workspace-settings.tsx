@@ -1,10 +1,11 @@
 "use client";
+import { localAppOrigin } from "@/lib/client-api";
 
 import { useState, type ReactNode } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Bell, Check, Copy, Link, Loader2, LogOut, Plug, Settings2, Shield, Trash2, User, UserPlus, Users } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import type { Doc, Id } from "@/convex/_generated/dataModel";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { Dialog } from "./dialog";
 import { useMemberProfile, useWorkspace } from "./workspace-context";
 import { IntegrationSettings } from "./integration-settings";
@@ -35,7 +36,7 @@ function WorkspaceGeneral({ sessionToken }: { sessionToken: string }) {
   const update = useMutation(api.workspaces.update);
   const create = useMutation(api.workspaces.create);
   const admin = ["owner", "admin"].includes(workspace.role);
-  return <><h3>Workspace</h3><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { await update({ sessionToken, teamId: workspace._id, name }); setNotice("Workspace updated"); } catch (error) { setNotice(error instanceof Error ? error.message : "Could not save"); } }}><label>Name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} disabled={!admin} /></label><label>Workspace URL<input value={`${typeof window !== "undefined" ? window.location.origin : ""}/${workspace.slug}`} readOnly /></label>{admin && <button className="primary-button compact">Save changes</button>}</form>{notice && <p className="notice">{notice}</p>}<div className="settings-section"><h4>Create another workspace</h4><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { const result = await create({ sessionToken, name: newName }); window.location.href = `/${result.slug}`; } catch (error) { setNotice(error instanceof Error ? error.message : "Could not create workspace"); } }}><label>Name<input value={newName} onChange={e => setNewName(e.target.value)} required placeholder="New workspace" maxLength={60} /></label><button className="ghost-button compact">Create workspace</button></form></div></>;
+  return <><h3>Workspace</h3><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { await update({ sessionToken, teamId: workspace._id, name }); setNotice("Workspace updated"); } catch (error) { setNotice(error instanceof Error ? error.message : "Could not save"); } }}><label>Name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} disabled={!admin} /></label><label>Workspace URL<input value={`${typeof window !== "undefined" ? localAppOrigin() : ""}/${workspace.slug}`} readOnly /></label>{admin && <button className="primary-button compact">Save changes</button>}</form>{notice && <p className="notice">{notice}</p>}<div className="settings-section"><h4>Create another workspace</h4><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { const result = await create({ sessionToken, name: newName }); window.location.href = `/${result.slug}`; } catch (error) { setNotice(error instanceof Error ? error.message : "Could not create workspace"); } }}><label>Name<input value={newName} onChange={e => setNewName(e.target.value)} required placeholder="New workspace" maxLength={60} /></label><button className="ghost-button compact">Create workspace</button></form></div></>;
 }
 
 function LeaveWorkspace({ sessionToken }: { sessionToken: string }) {
@@ -70,7 +71,7 @@ export function WorkspaceMembers({ sessionToken, beforeOpenProfile }: { sessionT
   const copy = async (value: string) => { try { await navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { setNotice("Clipboard unavailable. Select and copy the invitation link."); } };
   const workspaceInvites = invitations?.filter(invite => !invite.projectId);
   return <><h3>Members & invitations</h3>{admin && <>
-    <form className="invite-link-form" onSubmit={event => { event.preventDefault(); void attempt(async () => { const result = await createInvite({ sessionToken, teamId: workspace._id, role }); setLink(`${window.location.origin}/join/${result.token}`); }); }}>
+    <form className="invite-link-form" onSubmit={event => { event.preventDefault(); void attempt(async () => { const result = await createInvite({ sessionToken, teamId: workspace._id, role }); setLink(`${localAppOrigin()}/join/${result.token}`); }); }}>
       <label>Role<select value={role} onChange={event => setRole(event.target.value as typeof role)}><option value="member">Member</option><option value="admin">Admin</option><option value="viewer">Viewer</option></select></label>
       <button className="primary-button compact" disabled={busy}>{busy ? <Loader2 className="spin" size={15} /> : <Link size={15} />}Create invite link</button>
     </form>
@@ -80,6 +81,6 @@ export function WorkspaceMembers({ sessionToken, beforeOpenProfile }: { sessionT
       <button className="member-profile-trigger" onClick={() => { beforeOpenProfile?.(); openMember(member.email); }} aria-label={`View ${member.name} profile`}><UserAvatar user={member} /><span><strong>{member.name}</strong><small>{member.email}</small></span></button>
       {admin && member.role !== "owner" ? <><select aria-label={`Role for ${member.name}`} value={member.role} disabled={busy} onChange={event => attempt(() => updateRole({ sessionToken, teamId: workspace._id, memberId: member._id, role: event.target.value as typeof role }))}><option value="admin">Admin</option><option value="member">Member</option><option value="viewer">Viewer</option></select><button className="icon-button" disabled={busy} aria-label={`Remove ${member.name}`} title="Remove member" onClick={() => { if (window.confirm(`Remove ${member.name} from ${workspace.name}?`)) void attempt(() => removeMember({ sessionToken, teamId: workspace._id, memberId: member._id })); }}><Trash2 size={14} /></button></> : <span className="role-label">{member.role}</span>}
     </div>)}</div>
-    {!!workspaceInvites?.length && <div className="settings-section"><h4>Active invitations</h4>{workspaceInvites.map(invite => <div className="pending-invitation" key={invite._id}><UserPlus size={14} /><div><strong>Shareable link</strong><small>{invite.role} · Expires {new Date(invite.expiresAt).toLocaleDateString()}</small></div><button className="icon-button" title="Copy invitation" aria-label="Copy invitation" onClick={() => copy(`${window.location.origin}/join/${invite.token}`)}><Copy size={14} /></button><button className="icon-button" title="Revoke invitation" aria-label="Revoke invitation" onClick={() => attempt(() => revokeInvite({ sessionToken, inviteId: invite._id }))}><Trash2 size={14} /></button></div>)}</div>}
+    {!!workspaceInvites?.length && <div className="settings-section"><h4>Active invitations</h4>{workspaceInvites.map(invite => <div className="pending-invitation" key={invite._id}><UserPlus size={14} /><div><strong>Shareable link</strong><small>{invite.role} · Expires {new Date(invite.expiresAt).toLocaleDateString()}</small></div><button className="icon-button" title="Copy invitation" aria-label="Copy invitation" onClick={() => copy(`${localAppOrigin()}/join/${invite.token}`)}><Copy size={14} /></button><button className="icon-button" title="Revoke invitation" aria-label="Revoke invitation" onClick={() => attempt(() => revokeInvite({ sessionToken, inviteId: invite._id }))}><Trash2 size={14} /></button></div>)}</div>}
   </>;
 }

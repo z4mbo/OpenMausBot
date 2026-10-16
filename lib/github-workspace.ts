@@ -1,9 +1,9 @@
 import { createHash, randomBytes } from "node:crypto";
 import { integrationDb, openIntegration, sealIntegration } from "./githubConnection";
-import { githubHeaders } from "./githubLocal";
+import { githubHeaders } from "./github-repo";
 import { originUrl } from "./integration-bridge";
 
-export type GitHubAppConfig = { clientId: string; clientSecret: string; slug?: string; webhookSecret?: string };
+export type GitHubAppConfig = { clientId: string; clientSecret: string; slug?: string; webhookSecret?: string; appId?: number; privateKey?: string };
 type TokenRecord = { access_token: string; refresh_token?: string; expires_at?: number };
 type Connection = { team: string; login: string; account_id: number; connected_by: string; encrypted: string };
 export type GithubState = { teamId: string; sessionToken: string; userId: string; slug: string; mode: "connect" | "setup"; verifier: string; installationAttempted?: boolean; projectId?: string };
@@ -19,8 +19,9 @@ function db() {
 export const hashSecret = (value: string) => createHash("sha256").update(value).digest("hex");
 export function githubAppConfig(): GitHubAppConfig | null {
   const row = db().prepare("SELECT encrypted FROM github_app WHERE id=1").get() as { encrypted: string } | undefined;
-  if (row) return JSON.parse(openIntegration(row.encrypted, "github-app"));
-  return process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET ? { clientId: process.env.GITHUB_CLIENT_ID, clientSecret: process.env.GITHUB_CLIENT_SECRET, webhookSecret: process.env.GITHUB_WEBHOOK_SECRET } : null;
+  const credentials = { appId: process.env.GITHUB_APP_ID ? Number(process.env.GITHUB_APP_ID) : undefined, privateKey: process.env.GITHUB_APP_PRIVATE_KEY?.replace(/\\n/g, "\n") };
+  if (row) { const saved = JSON.parse(openIntegration(row.encrypted, "github-app")); return { ...saved, appId: credentials.appId ?? saved.appId, privateKey: credentials.privateKey ?? saved.privateKey }; }
+  return process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET ? { ...credentials, clientId: process.env.GITHUB_CLIENT_ID, clientSecret: process.env.GITHUB_CLIENT_SECRET, webhookSecret: process.env.GITHUB_WEBHOOK_SECRET } : null;
 }
 export function saveGitHubApp(config: GitHubAppConfig) {
   db().prepare("INSERT INTO github_app VALUES(1,?) ON CONFLICT(id) DO UPDATE SET encrypted=excluded.encrypted").run(sealIntegration(JSON.stringify(config), "github-app"));

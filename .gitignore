@@ -1,5 +1,6 @@
 node_modules
 .next
+.convex/
 out
 .env
 .env.*
@@ -24,3 +25,6 @@ playwright-report/
 test-results/
 secret-scan*.json
 /public/excalidraw/
+
+# WP5b local verification output
+.omb-*

@@ -11,9 +11,20 @@ import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { useWorkspace } from "./workspace-context";
 import { ContentSkeleton } from "./content-skeleton";
+import { useWorkspaceOnline } from "./workspace-connection";
+
+function imageBlob(file: BinaryFileData) {
+  const separator = file.dataURL.indexOf(",");
+  if (!file.dataURL.startsWith("data:") || separator < 0) throw new Error("Invalid drawing image");
+  const payload = file.dataURL.slice(separator + 1);
+  return new Blob(file.dataURL.slice(0, separator).endsWith(";base64")
+    ? [Uint8Array.from(atob(payload), character => character.charCodeAt(0))]
+    : [decodeURIComponent(payload)], { type: file.mimeType });
+}
 
 export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly = false, name }: { sessionToken: string; user: { _id: string; name: string }; canvasId?: Id<"canvases">; readOnly?: boolean; name?: string }) {
   const workspace = useWorkspace();
+  const online = useWorkspaceOnline();
   const args = { sessionToken, teamId: workspace._id, canvasId };
   const scene = useQuery(api.draw.scene, args);
   const presence = useQuery(api.draw.presence, args) as Doc<"drawingPresence">[] | undefined;
@@ -25,6 +36,7 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
   const [canvas, setCanvas] = useState<ExcalidrawImperativeAPI | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [notice, setNotice] = useState("");
+  const [unavailableFiles, setUnavailableFiles] = useState<string[]>([]);
   const [clock, setClock] = useState(Date.now());
   const remote = useRef(false);
   const ready = useRef(false);
@@ -80,15 +92,18 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
   useEffect(() => {
     if (!canvas || !presence) return;
     const collaborators: AppState["collaborators"] = new Map();
-    for (const member of presence) if (member.userId !== user._id && member.updatedAt > clock - 30000) collaborators.set(String(member.userId) as Parameters<typeof collaborators.set>[0], { username: member.name, pointer: { x: member.x, y: member.y, tool: "pointer" }, button: member.button as "up" | "down", color: { background: "#2ebd85", stroke: "#16845b" } });
+    for (const member of online ? presence : []) if (member.userId !== user._id && member.updatedAt > clock - 30000) collaborators.set(String(member.userId) as Parameters<typeof collaborators.set>[0], { username: member.name, pointer: { x: member.x, y: member.y, tool: "pointer" }, button: member.button as "up" | "down", color: { background: "#2ebd85", stroke: "#16845b" } });
     canvas.updateScene({ collaborators });
-  }, [canvas, presence, clock, user._id]);
+  }, [canvas, presence, clock, user._id, online]);
   useEffect(() => {
     if (!canvas || !storedFiles) return;
     for (const file of storedFiles) {
       if (!file.url || canvas.getFiles()[file.fileId]) continue;
       knownFiles.current.add(file.fileId);
-      void fetch(file.url).then(r => { if (!r.ok) throw new Error("Image unavailable"); return r.blob(); }).then(blob => new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result as string); reader.onerror = reject; reader.readAsDataURL(blob); })).then(dataURL => canvas.addFiles([{ id: file.fileId, dataURL, mimeType: file.mimeType, created: Date.now() } as BinaryFileData])).catch(() => setNotice("A drawing image could not be loaded"));
+      void fetch(file.url).then(r => { if (!r.ok) throw new Error("Image unavailable"); return r.blob(); }).then(blob => new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result as string); reader.onerror = reject; reader.readAsDataURL(blob); })).then(dataURL => {
+        canvas.addFiles([{ id: file.fileId, dataURL, mimeType: file.mimeType, created: Date.now() } as BinaryFileData]);
+        setUnavailableFiles(current => current.filter(id => id !== file.fileId));
+      }).catch(() => setUnavailableFiles(current => current.includes(file.fileId) ? current : [...current, file.fileId]));
     }
   }, [canvas, storedFiles]);
   const onChange = (elements: readonly OrderedExcalidrawElement[], _state: AppState, files: BinaryFiles) => {
@@ -102,12 +117,12 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
     for (const file of Object.values(files)) {
       if (knownFiles.current.has(file.id)) continue;
       knownFiles.current.add(file.id);
-      void (async () => { try { const url = await uploadUrl(args); const blob = await (await fetch(file.dataURL)).blob(); const response = await fetch(url, { method: "POST", headers: { "Content-Type": file.mimeType }, body: blob }); if (!response.ok) throw new Error("Image upload failed"); const { storageId } = await response.json() as { storageId: Id<"_storage"> }; await saveFile({ ...args, fileId: file.id, storageId, mimeType: file.mimeType }); } catch (error) { knownFiles.current.delete(file.id); setNotice(error instanceof Error ? error.message : "Image upload failed"); } })();
+      void (async () => { try { const blob = imageBlob(file); const url = await uploadUrl(args); const response = await fetch(url, { method: "POST", headers: { "Content-Type": file.mimeType }, body: blob }); if (!response.ok) throw new Error("Image upload failed"); const { storageId } = await response.json() as { storageId: Id<"_storage"> }; await saveFile({ ...args, fileId: file.id, storageId, mimeType: file.mimeType }); } catch (error) { knownFiles.current.delete(file.id); setNotice(error instanceof Error ? error.message : "Image upload failed"); } })();
     }
   };
   if (scene === undefined) return <ContentSkeleton kind="canvas" label="Loading drawing" />;
   return <div className="drawing-canvas">
-    {notice && <div className="drawing-status error" role="alert">{notice}</div>}
+    {(notice || unavailableFiles.length > 0) && <div className="drawing-status error" role="alert">{notice || "A drawing image could not be loaded"}</div>}
     <Excalidraw excalidrawAPI={setCanvas} name={name || `${workspace.name} - Draw`} theme="dark" isCollaborating viewModeEnabled={readOnly || workspace.role === "viewer"} validateEmbeddable={false}
       initialData={{ elements: scene.map(data => JSON.parse(data)), appState: { viewBackgroundColor: "#ffffff", currentItemStrokeColor: "#1e1e1e" }, scrollToContent: true }}
       onChange={onChange}

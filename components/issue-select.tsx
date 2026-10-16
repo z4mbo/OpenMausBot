@@ -31,7 +31,7 @@ export function IssueSelect({ label, value, options, onChange, disabled, icon }:
     } else if (event.key === "Enter") { event.preventDefault(); if (matches[active]) choose(matches[active]); }
     else if (event.key === "Tab") close();
   }}>
-    <button ref={trigger} type="button" className="issue-select-trigger" aria-label={label} title={label} aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled || !options.length} onClick={() => { setOpen(!open); setQuery(""); setActive(Math.max(0, options.findIndex(option => option.value === value))); }} onKeyDown={event => {
+    <button ref={trigger} type="button" className="issue-select-trigger" aria-label={selected ? `${label}: ${selected.label}` : label} title={label} aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled || !options.length} onClick={() => { setOpen(!open); setQuery(""); setActive(Math.max(0, options.findIndex(option => option.value === value))); }} onKeyDown={event => {
       if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) { event.preventDefault(); setQuery(""); setActive(Math.max(0, options.findIndex(option => option.value === value))); setOpen(true); }
     }}>{selected?.icon || icon}<span>{selected?.label || label}</span><ChevronDown size={12} /></button>
     {open && <div ref={menu} popover="manual" className="issue-select-popover">

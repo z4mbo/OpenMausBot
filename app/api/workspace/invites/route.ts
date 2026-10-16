@@ -1,3 +1,4 @@
+import { BodyTooLarge, readBoundedJson } from "@/lib/http-body";
 import { NextResponse } from "next/server";
 import { api } from "@/convex/_generated/api";
 import { getConvexClient, limitLocalAction, requireLocalWorkspace, sessionTokenFromRequest } from "@/lib/localRealtime";
@@ -5,7 +6,7 @@ import { sendInviteMail } from "@/lib/invite-mail";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as { email?: string; role?: "admin" | "member" | "viewer" };
+    const body = await readBoundedJson(request) as { email?: string; role?: "admin" | "member" | "viewer" };
     const user = await requireLocalWorkspace(request);
     if (!["owner", "admin"].includes(user.workspaceRole)) throw new Error("Admin role required");
     limitLocalAction(`invite:${user.teamId}:${user._id}`, 20, 60000);
@@ -13,5 +14,5 @@ export async function POST(request: Request) {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Enter a valid email address");
     const invite = await getConvexClient().mutation(api.workspaces.createInvite, { sessionToken: sessionTokenFromRequest(request), teamId: user.teamId, email, role: body.role || "member" });
     return NextResponse.json(await sendInviteMail(invite, email, user.name));
-  } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Invitation failed" }, { status: 400 }); }
+  } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Invitation failed" }, { status: error instanceof BodyTooLarge ? 413 : 400 }); }
 }

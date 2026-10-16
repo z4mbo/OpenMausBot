@@ -12,6 +12,9 @@ export async function authorize(ctx: QueryCtx | MutationCtx, token: string, writ
   const tokenHash = await hashToken(token);
   const grant = await ctx.db.query("connectorGrants").withIndex("by_tokenHash", q => q.eq("tokenHash", tokenHash)).unique();
   if (!grant || grant.revoked || grant.expiresAt <= Date.now()) throw new Error("Connector authorization expired or revoked");
+  if (grant.hostId) throw new Error("Host token cannot access Origin actions");
+  // Agent run tokens belong to the removed Agent feature and no longer authorize anything.
+  if (grant.runId) throw new Error("Run token cannot access Origin actions");
   const user = await ctx.db.get(grant.userId);
   const member = user?.status === "active" ? await getActiveTeamMember(ctx, grant.teamId, user.email) : null;
   if (!user || !member || (member.userId && member.userId !== user._id) || (write && (!grant.write || !canEdit(member)))) throw new Error("Connector access denied");
@@ -29,7 +32,7 @@ export const createGrant = mutation({
   handler: async (ctx, args) => {
     const { user, member } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     if (args.write && !canEdit(member)) throw new Error("Read-only workspace access");
-    const active = await ctx.db.query("connectorGrants").withIndex("by_userId_and_teamId_and_revoked", q => q.eq("userId", user._id).eq("teamId", args.teamId).eq("revoked", false)).take(21);
+    const active = await ctx.db.query("connectorGrants").withIndex("by_userId_and_teamId_and_runId_and_hostId_and_revoked", q => q.eq("userId", user._id).eq("teamId", args.teamId).eq("runId", undefined).eq("hostId", undefined).eq("revoked", false)).take(21);
     if (active.filter(g => !g.revoked && g.expiresAt > Date.now()).length >= 20) throw new Error("Disconnect an existing connector first");
     const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, "0")).join("");
     const expiresAt = Date.now() + 90 * 86400000;
@@ -49,7 +52,7 @@ export const listGrants = query({
   returns: v.array(v.object({ _id: v.id("connectorGrants"), name: v.string(), write: v.boolean(), createdAt: v.number(), expiresAt: v.number(), revoked: v.boolean() })),
   handler: async (ctx, a) => {
     const { user } = await requireTeamMember(ctx, a.teamId, a.sessionToken);
-    return (await ctx.db.query("connectorGrants").withIndex("by_userId_and_teamId", q => q.eq("userId", user._id).eq("teamId", a.teamId)).order("desc").take(100))
+    return (await ctx.db.query("connectorGrants").withIndex("by_userId_and_teamId_and_runId_and_hostId", q => q.eq("userId", user._id).eq("teamId", a.teamId).eq("runId", undefined).eq("hostId", undefined)).order("desc").take(100))
       .map(({ _id, name, write, createdAt, expiresAt, revoked }) => ({ _id, name, write, createdAt, expiresAt, revoked }));
   },
 });
@@ -70,14 +73,19 @@ export const read = query({
   returns: v.string(),
   handler: async (ctx, a) => {
     const { grant, user } = await authorize(ctx, a.token, false, a.projectId);
+    const run = grant.runId ? (await ctx.db.get(grant.runId))! : null;
     if (a.kind === "projects") {
+      if (run) {
+        const p = (await ctx.db.get(run.projectId))!;
+        return JSON.stringify({ projects: [{ id: p._id, name: p.name, description: p.description, repoUrl: p.repoUrl, githubRepoState: p.githubRepoState, status: p.status === "active" ? "active" : "inactive" }], nextCursor: null });
+      }
       const p = await ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", grant.teamId)).paginate({ numItems: 50, cursor: a.cursor || null });
       const visible = await visibleProjectRows(ctx, p.page.map(project => ({ ...project, projectId: project._id })), user);
       return JSON.stringify({ projects: visible.map(({ _id, name, description, repoUrl, githubRepoState, status }) => ({ id: _id, name, description, repoUrl, githubRepoState, status: status === "active" ? "active" : "inactive" })), nextCursor: p.isDone ? null : p.continueCursor });
     }
     if (a.kind === "inbox") {
       const p = await ctx.db.query("tasks").withIndex("by_teamId_and_done_and_assignedToEmail", q => q.eq("teamId", grant.teamId).eq("done", a.done ?? false).eq("assignedToEmail", user.email)).order("desc").paginate({ numItems: 50, cursor: a.cursor || null });
-      const visible = await visibleProjectRows(ctx, p.page, user, !a.done);
+      const visible = await visibleProjectRows(ctx, run ? p.page.filter(t => t.projectId === run.projectId) : p.page, user, !a.done);
       const issues = await Promise.all(visible.map(async t => ({ id: t._id, projectId: t.projectId, projectName: (await ctx.db.get(t.projectId))!.name, title: t.title, done: t.done, priority: t.priority, dueDate: t.dueDate, githubIssueUrl: t.githubIssueUrl })));
       return JSON.stringify({ issues, nextCursor: p.isDone ? null : p.continueCursor });
     }
@@ -85,6 +93,7 @@ export const read = query({
       const p = await ctx.db.query("notifications").withIndex("by_user_team", q => q.eq("userId", user._id).eq("teamId", grant.teamId)).order("desc").paginate({ numItems: 50, cursor: a.cursor || null });
       const notifications = [];
       for (const row of p.page) {
+        if (run && row.projectId !== run.projectId) continue;
         const project = row.projectId ? await ctx.db.get(row.projectId) : null;
         if (row.projectId && (!project || !await projectMember(ctx, project, user))) continue;
         // Chat content is outside the connector grant; expose only the mention event.
@@ -103,7 +112,7 @@ export const read = query({
       const columns = await ctx.db.query("columns").withIndex("by_project_order", q => q.eq("projectId", p._id)).take(20);
       return JSON.stringify({ id: p._id, name: p.name, description: p.description, repoUrl: p.repoUrl, status: p.status === "active" ? "active" : "inactive", columns: columns.map(c => ({ id: c._id, title: c.title })) });
     }
-    const serialize = (t: { _id: string; title: string; description?: string; columnId: string; done: boolean; priority: string; assignedToEmail?: string; dueDate?: string; githubIssueUrl?: string }) => ({ id: t._id, title: t.title, description: t.description, columnId: t.columnId, done: t.done, priority: t.priority, assignedToEmail: t.assignedToEmail, dueDate: t.dueDate, githubIssueUrl: t.githubIssueUrl });
+    const serialize = (t: { _id: string; title: string; description?: string; columnId: string; done: boolean; priority: string; assignedToEmail?: string; dueDate?: string; githubIssueUrl?: string; githubTaskBranch?: string }) => ({ id: t._id, title: t.title, description: t.description, columnId: t.columnId, done: t.done, priority: t.priority, assignedToEmail: t.assignedToEmail, dueDate: t.dueDate, githubIssueUrl: t.githubIssueUrl, githubTaskBranch: t.githubTaskBranch });
     if (a.kind === "issue") {
       const task = a.taskId ? await ctx.db.get(a.taskId) : null;
       if (!task || task.projectId !== a.projectId) throw new Error("Issue not found");

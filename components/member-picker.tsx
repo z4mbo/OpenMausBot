@@ -15,6 +15,7 @@ export function MemberPicker({ members, value, onChange, label, disabled, allLab
   const menu = useRef<HTMLDivElement>(null), search = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false), [query, setQuery] = useState(""), [active, setActive] = useState(0);
   const selected = members.find(member => member.email === value);
+  const selectedLabel = selected ? memberName(selected) : value ? value.split("@")[0] : allLabel || "Select member";
   const people = members.filter(member => `${memberName(member)} ${member.name || ""} ${member.email}`.toLowerCase().includes(query.toLowerCase()));
   const options = [...(allLabel && !query ? [{ value: "", label: allLabel, person: undefined as Person | undefined }] : []), ...people.map(person => ({ value: person.email, label: memberName(person), person }))];
   const close = () => { setOpen(false); trigger.current?.focus({ preventScroll: true }); };
@@ -33,9 +34,10 @@ export function MemberPicker({ members, value, onChange, label, disabled, allLab
     else if (event.key === "Enter") { event.preventDefault(); const option = options[active]; if (option) { onChange(option.value); close(); } }
     else if (event.key === "Tab") close();
   }}>
-    <button ref={trigger} type="button" className="member-picker-trigger" aria-label={label} aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled} onClick={() => { setOpen(!open); setQuery(""); setActive(0); }}>
+    <button ref={trigger} type="button" className="member-picker-trigger" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled} onClick={() => { setOpen(!open); setQuery(""); setActive(0); }}>
+      <span className="sr-only">{label}: </span>
       {selected ? <UserAvatar user={selected} size="small" /> : allLabel && !value ? <Users size={15} /> : <UserRound size={15} />}
-      <span>{selected ? memberName(selected) : value ? value.split("@")[0] : allLabel || "Select member"}</span><ChevronDown size={13} />
+      <span>{selectedLabel}</span><ChevronDown size={13} />
     </button>
     {required && <input className="member-picker-validation" aria-hidden="true" tabIndex={-1} required disabled={disabled} value={value} onChange={() => {}} onInvalid={event => { event.preventDefault(); trigger.current?.focus(); setOpen(true); }} />}
     {open && <div ref={menu} popover="manual" className="member-picker-popover">

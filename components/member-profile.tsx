@@ -3,7 +3,7 @@ import { ContentSkeleton } from "./content-skeleton";
 
 import { useState } from "react";
 import { usePaginatedQuery, useQuery } from "convex/react";
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Dialog } from "./dialog";

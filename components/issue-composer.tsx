@@ -10,6 +10,8 @@ import { IssueFields } from "./issue-fields";
 import { IssueSelect } from "./issue-select";
 import { ProjectIcon } from "./project-icon";
 import { rankSearchResults } from "@/lib/search-ranking";
+import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
+
 
 export function IssueComposer({
   sessionToken,
@@ -26,6 +28,7 @@ export function IssueComposer({
   onCreated: (id: Id<"projects">, taskId: Id<"tasks">) => void;
   initialDraft?: { title: string; description: string };
 }) {
+  const online = useWorkspaceOnline();
   const editable = projects.filter((p) => p.memberRole !== "viewer");
   const [projectId, setProjectId] = useState<Id<"projects"> | null>(
     editable.find((p) => p._id === activeProjectId)?._id ||
@@ -62,16 +65,16 @@ export function IssueComposer({
       (c) => !(c.isDone ?? c.title.toLowerCase() === "done"),
     ) || [];
   useEffect(() => {
-    if (board?.columns.length === 0 && projectId)
+    if (online && board?.columns.length === 0 && projectId)
       void ensureColumns({ sessionToken, projectId }).catch((error) =>
         setError(error.message),
       );
-  }, [board?.columns.length, projectId, ensureColumns, sessionToken]);
+  }, [online, board?.columns.length, projectId, ensureColumns, sessionToken]);
   const selectedColumn = columns.find((c) => c._id === columnId) || columns[0];
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (
-      busy ||
+      !online || busy ||
       !projectId ||
       !selectedColumn ||
       !title.trim() ||
@@ -165,7 +168,7 @@ export function IssueComposer({
               onDueDateChange={setDueDate}
               disabled={busy}
             >
-              <button type="submit" className="primary-button compact issue-create-submit" disabled={busy || !title.trim() || !priority || !selectedColumn || !members?.length}>
+              <button type="submit" className="primary-button compact issue-create-submit" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={!online || busy || !title.trim() || !priority || !selectedColumn || !members?.length}>
                 {busy ? <Loader2 size={15} className="spin" /> : <Plus size={15} />}
                 Create issue
               </button>

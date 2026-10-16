@@ -61,8 +61,8 @@ export function WhatsNew({ userId }: { userId: string }) {
     setOpen(false);
   };
   return <>
-    <button className="sidebar-whats-new" onClick={() => setOpen(true)} aria-label={`What's new${unread ? ", unread update" : ""}`}>
-      <Sparkles size={14} /><span>What&apos;s new</span>{unread && <i aria-hidden="true" />}<small>v{latestRelease.version}</small><ArrowUpRight size={13} />
+    <button className="sidebar-whats-new" onClick={() => setOpen(true)} aria-label={`What's new v${latestRelease.version}${unread ? ", unread update" : ""}`}>
+      <Sparkles size={14} /><span>{"What's new"}</span>{unread && <i aria-hidden="true" />}<small> v{latestRelease.version}</small><ArrowUpRight size={13} />
     </button>
     {open && <Dialog title="What's new" className="release-dialog" onClose={close}>
       <div className="release-history">{history.map(release => <article className="release-entry" key={release.version}>

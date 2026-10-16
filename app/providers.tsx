@@ -1,5 +1,6 @@
 "use client";
 
+import "../lib/csp-runtime";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ReactNode, useMemo } from "react";
 
