@@ -12,6 +12,7 @@ export const NEW_PROJECT_DIALOG = true;
 export const INSET_PAGE = true;
 export const WORKSPACE_NAV = true;
 export const PROFILE_AT_TOP = true;
+export const ZAP_LOOKS = true;
 
 /** The starting role of every new project: it leads the project and its default agents. */
 export const PROJECT_LEAD_ROLE = {

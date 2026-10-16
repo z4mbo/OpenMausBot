@@ -23,9 +23,11 @@ import {
   type BotAvatarCrop,
 } from "../../shared/bot-avatar";
 import { MASCOT_BODIES, MASCOT_BODY_IDS } from "../../shared/mascot-bodies";
-import { BotAvatar, MausAvatar } from "./Avatar";
+import { BotAvatar } from "./Avatar";
 import { AvatarImageGenerator } from "./AvatarImageGenerator";
 import { useOrganizationBranding } from "@/lib/use-organization-branding";
+import { ZAP_LOOKS } from "@/lib/origin-teams";
+import { ZAP_SWATCHES, setAvatarLook, useAvatarLook } from "@/lib/origin-avatar-looks";
 
 type AvatarPatch = Partial<
   Pick<Bot, "avatarCrop" | "avatarUrl" | "avatarZoom" | "avatarFocusX" | "avatarFocusY" | "color" | "mascotExpression" | "mascotBody">
@@ -137,7 +139,16 @@ export function BotProfileAvatarCard({
   onPatch: (patch: AvatarPatch) => void;
 }) {
   const { flushBotPatches } = useStore();
-  const { request: api, uploadAvatar } = useBotEditor();
+  const { request: api, uploadAvatar, draft: isDraft } = useBotEditor();
+  const zapLooks = ZAP_LOOKS && !isDraft;
+  const look = useAvatarLook(zapLooks ? bot.id : undefined);
+  const dot = zapLooks && look.look === "dot";
+  const customColour = Boolean((look.color && !(ZAP_SWATCHES as readonly string[]).includes(look.color)));
+  const [lookError, setLookError] = useState("");
+  const saveLook = (patch: { look?: "mascot" | "dot"; color?: string | null }) => {
+    setLookError("");
+    void setAvatarLook(bot.id, patch).catch((cause) => setLookError(cause instanceof Error ? cause.message : String(cause)));
+  };
   const organization = useOrganizationBranding();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -301,9 +312,24 @@ export function BotProfileAvatarCard({
           ))}
         </div>
 
+        {crop === "mascot" && zapLooks && (
+          <>
+            <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">Style</div>
+            <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-hairline/40">
+              {(["mascot", "dot"] as const).map((option, index) => (
+                <button key={option} type="button" disabled={busy} aria-pressed={(look.look ?? "mascot") === option} onClick={() => saveLook({ look: option })}
+                  className={cn("py-1.5 text-[12.5px] disabled:opacity-50", index > 0 && "border-l border-hairline/40",
+                    (look.look ?? "mascot") === option ? "bg-control text-ink" : "text-ink-secondary hover:bg-control/60 hover:text-ink")}>
+                  {option === "mascot" ? "Mascot" : "Dot"}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
         {crop === "mascot" && (
           <>
-            <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">
+            {!dot && <><div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">
               Expression
             </div>
             <div className="grid grid-cols-5 gap-2">
@@ -321,10 +347,10 @@ export function BotProfileAvatarCard({
                   title={expression}
                   aria-label={`Use ${expression} expression`}
                 >
-                  <MausAvatar color={bot.color} bodyId={bot.mascotBody ?? undefined} state={expression} size={42} animated={false} />
+                  <BotAvatar bot={bot} state={expression} size={42} animated={false} />
                 </button>
               ))}
-            </div>
+            </div></>}
 
             <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">
               Color
@@ -335,18 +361,35 @@ export function BotProfileAvatarCard({
                   key={color}
                   type="button"
                   disabled={busy}
-                  aria-pressed={bot.color === color}
-                  onClick={() => onPatch({ color })}
+                  aria-pressed={bot.color === color && !look.color}
+                  onClick={() => { onPatch({ color }); if (look.color) saveLook({ color: null }); }}
                   className={cn(
                     "size-10 rounded-full border-2 border-transparent transition-transform hover:scale-110 disabled:opacity-50",
-                    bot.color === color && "ring-2 ring-accent-border ring-offset-2 ring-offset-card",
+                    bot.color === color && !look.color && "ring-2 ring-accent-border ring-offset-2 ring-offset-card",
                   )}
                   style={{ backgroundColor: MAUS_COLORS[color] }}
                   title={color}
                   aria-label={`Use ${color} mascot color`}
                 />
               ))}
+              {zapLooks && ZAP_SWATCHES.map((swatch) => (
+                <button key={swatch} type="button" disabled={busy} aria-pressed={look.color === swatch} onClick={() => saveLook({ color: swatch })}
+                  className={cn("size-10 rounded-full border-2 border-transparent transition-transform hover:scale-110 disabled:opacity-50",
+                    look.color === swatch && "ring-2 ring-accent-border ring-offset-2 ring-offset-card")}
+                  style={{ backgroundColor: swatch }} title={swatch} aria-label={`Use ${swatch} colour`} />
+              ))}
+              {zapLooks && (
+                <label title="Custom colour"
+                  className={cn("relative flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-hairline text-[16px] text-ink-secondary transition-transform hover:scale-110",
+                    customColour && "border-solid ring-2 ring-accent-border ring-offset-2 ring-offset-card")}
+                  style={customColour ? { backgroundColor: look.color } : undefined}>
+                  {!customColour && "+"}
+                  <input type="color" aria-label="Custom colour" value={look.color ?? "#C8FF00"} onChange={(event) => saveLook({ color: event.target.value })}
+                    className="absolute inset-0 cursor-pointer opacity-0" />
+                </label>
+              )}
             </div>
+            {lookError && <p role="alert" className="mt-1 text-[12px] text-danger">{lookError}</p>}
 
             <div className="mb-2 mt-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink-secondary">
               Body
@@ -367,7 +410,7 @@ export function BotProfileAvatarCard({
                       : "text-ink-secondary hover:bg-control/60",
                   )}
                 >
-                  <MausAvatar color={bot.color} bodyId={id} size={34} animated={false} trackPointer={false} />
+                  <BotAvatar bot={{ ...bot, mascotBody: id }} size={34} animated={false} trackPointer={false} />
                 </button>
               ))}
             </div>

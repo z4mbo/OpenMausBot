@@ -1032,8 +1032,6 @@ export interface CursorAvatarProps {
   silhouette?: CursorSilhouette
   gradient?: [string, string, string]
   eyeColor?: string
-  /** Zap's dot shading: a lit sphere with a soft highlight instead of the flat diagonal gradient. */
-  sphere?: boolean
   title?: string | null
   className?: string
   style?: React.CSSProperties
@@ -1068,7 +1066,6 @@ export const CursorAvatar = React.forwardRef<CursorAvatarHandle, CursorAvatarPro
       silhouette = DEFAULT_SILHOUETTE,
       gradient = DEFAULT_GRADIENT,
       eyeColor = "#ffffff",
-      sphere = false,
       title,
       className,
       style,
@@ -1368,25 +1365,11 @@ export const CursorAvatar = React.forwardRef<CursorAvatarHandle, CursorAvatarPro
         aria-hidden={label ? undefined : true}
       >
         <defs>
-          {sphere ? (
-            <radialGradient id={`${uid}-grad`} cx="0.36" cy="0.3" r="0.8" fx="0.32" fy="0.24" gradientUnits="objectBoundingBox">
-              <stop offset="0%" stopColor={gradient[0]} />
-              <stop offset="45%" stopColor={gradient[1]} />
-              <stop offset="100%" stopColor={gradient[2]} />
-            </radialGradient>
-          ) : (
-            <linearGradient id={`${uid}-grad`} x1="1" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={gradient[0]} />
-              <stop offset="55%" stopColor={gradient[1]} />
-              <stop offset="100%" stopColor={gradient[2]} />
-            </linearGradient>
-          )}
-          {sphere && (
-            <radialGradient id={`${uid}-gloss`} cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-            </radialGradient>
-          )}
+          <linearGradient id={`${uid}-grad`} x1="1" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={gradient[0]} />
+            <stop offset="55%" stopColor={gradient[1]} />
+            <stop offset="100%" stopColor={gradient[2]} />
+          </linearGradient>
           {/* The fit goes on the clipPath itself: browsers ignore a <g> inside one, which is also why silhouette.clip is pre-flattened. */}
           <clipPath
             id={`${uid}-clip`}
@@ -1399,7 +1382,6 @@ export const CursorAvatar = React.forwardRef<CursorAvatarHandle, CursorAvatarPro
           <g ref={bodyGroup}>
           <g ref={bodyContent}>
           <g transform={silhouette.fit || undefined} dangerouslySetInnerHTML={{ __html: body }} />
-          {sphere && <g clipPath={`url(#${uid}-clip)`}><ellipse cx={FACE_BOX * 0.36} cy={FACE_BOX * 0.26} rx={FACE_BOX * 0.2} ry={FACE_BOX * 0.12} fill={`url(#${uid}-gloss)`} /></g>}
           <g clipPath={`url(#${uid}-clip)`}>
             <g transform={anchorTransform(silhouette.anchor)}>
               <path ref={eye0} fill={eyeColor} />

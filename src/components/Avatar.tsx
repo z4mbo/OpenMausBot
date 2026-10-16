@@ -12,6 +12,14 @@ import { CursorAvatar, type CursorAvatarHandle } from "./CursorAvatar";
 import { avatarCropRadius, botAvatarProfile, clampAvatarFocus, clampAvatarZoom, type BotAvatarCrop } from "../../shared/bot-avatar";
 import { MASCOT_BODIES, botMascotBody, type MascotBodyId } from "../../shared/mascot-bodies";
 import { useAvatarLook } from "@/lib/origin-avatar-looks";
+import { CssSphere, type SphereMood } from "./zap-dots/react";
+import type { SphereShape } from "./zap-dots/scene";
+import "./zap-dots/zap-dots.css";
+
+/** The Zap dot shape for a mascot body; Zap calls the capsule a pill. */
+function sphereShapeFor(body: MascotBodyId | null | undefined): SphereShape {
+  return !body || body === "capsule" ? (body ? "pill" : "circle") : body;
+}
 
 export const EYE_SCALE = 1.12;
 export const MOUTH_WEIGHT = 11;
@@ -89,8 +97,6 @@ export type MausAvatarProps = {
   animated?: boolean;
   bodyId?: MascotBodyId;
   gradient?: [string, string, string];
-  sphere?: boolean;
-  eyeColor?: string;
 };
 
 function MausAvatarComponent(
@@ -114,8 +120,6 @@ function MausAvatarComponent(
     animated = true,
     bodyId,
     gradient,
-    sphere,
-    eyeColor,
   }: MausAvatarProps,
   ref: React.Ref<MausAvatarHandle>,
 ) {
@@ -165,8 +169,6 @@ function MausAvatarComponent(
         size={size}
         silhouette={silhouette}
         gradient={gradient ?? gradientFor(color)}
-        sphere={sphere}
-        eyeColor={eyeColor}
         title={label ?? null}
         lookAround={lookAround ?? (forward ? 0 : 1)}
         gaze={{ x: (gaze?.x ?? 0) + pointer.x, y: (gaze?.y ?? 0) + pointer.y }}
@@ -213,12 +215,7 @@ export function resolveBotAvatarOutcome(params: {
   return "flatImage";
 }
 
-/** Zap's dot palette: the rim is the body mixed 55% with white; eyes go light on a near-black body. */
-export function dotLook(hex: string): { gradient: [string, string, string]; eyeColor: string } {
-  const value = Number.parseInt(hex.slice(1), 16);
-  const luminance = (0.2126 * ((value >> 16) & 0xff) + 0.7152 * ((value >> 8) & 0xff) + 0.0722 * (value & 0xff)) / 255;
-  return { gradient: [mix(hex, "#ffffff", 0.55), hex, mix(hex, "#000000", 0.35)], eyeColor: luminance < 0.18 ? "#f2f2ef" : "#0b0b0c" };
-}
+const DOT_MOOD: Partial<Record<MausState, SphereMood>> = { working: "working", thinking: "thinking", searching: "thinking", loading: "working", happy: "done", celebrate: "done", angry: "error", sad: "error" };
 
 export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotProps }: BotAvatarProps) {
   const profile = botAvatarProfile(bot);
@@ -233,17 +230,23 @@ export function BotAvatar({ bot, size = 44, label, readable = false, ...mascotPr
     imageFailed,
   });
 
+  if (outcome !== "flatImage" && look.look === "dot") {
+    return (
+      <span className="inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }} role="img" aria-label={label ?? bot.name}>
+        <CssSphere size={size} color={look.color ?? MAUS_COLORS[bot.color] ?? MAUS_COLORS.green} shape={sphereShapeFor(bot.mascotBody)}
+          mood={mascotProps.animated === false ? undefined : DOT_MOOD[mascotProps.state ?? "idle"]} seed={bot.id ?? bot.name} glow={0} />
+      </span>
+    );
+  }
+
   if (outcome !== "flatImage") {
     return (
       <MausAvatar
         bodyId={bot.mascotBody ?? undefined}
         {...mascotProps}
         color={bot.color}
-        gradient={look.look === "dot" ? dotLook(look.color ?? MAUS_COLORS[bot.color] ?? MAUS_COLORS.green).gradient
-          : look.color ? [mix(look.color, "#ffffff", 0.55), look.color, mix(look.color, "#000000", 0.42)]
+        gradient={look.color ? [mix(look.color, "#ffffff", 0.55), look.color, mix(look.color, "#000000", 0.42)]
           : readable ? roomAvatarGradient(bot.color) : undefined}
-        sphere={look.look === "dot"}
-        eyeColor={look.look === "dot" ? dotLook(look.color ?? MAUS_COLORS[bot.color] ?? MAUS_COLORS.green).eyeColor : undefined}
         size={size}
         label={label ?? bot.name}
       />
