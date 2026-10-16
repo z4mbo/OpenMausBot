@@ -594,7 +594,7 @@ import { createHostedSlackRoutes } from "./routes/hosted-slack.ts";
 import { createBotPresetRoutes } from "./routes/bot-presets.ts";
 import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
-import { createDefaultTeamRoutes, ensureTeamChiefs } from "./origin-teams.ts";
+import { createDefaultTeamRoutes, ensureTeamChiefs, ensureWorkspaces } from "./origin-teams.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
 import { createBotPatchRoutes } from "./routes/bot-patch.ts";
 import { createBotLifecycleRoutes } from "./routes/bot-lifecycle.ts";
@@ -17598,6 +17598,8 @@ server.listen(PORT, "127.0.0.1", async () => {
   try {
     const chiefs = ensureTeamChiefs(store, await defaultSelection());
     if (chiefs.length) console.log(`[teams] gave ${chiefs.length} team(s) a Chief of Staff bot`);
+    const heads = ensureWorkspaces(store);
+    if (heads.length) console.log(`[teams] made ${heads.length} bot(s) workspace heads`);
   } catch (error) {
     console.warn(`[teams] could not give every team a Chief: ${(error as Error).message}`);
   }

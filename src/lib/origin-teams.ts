@@ -6,6 +6,6 @@ export const SIDEBAR_HAS_SEARCH = false;
 export const SIDEBAR_ROW_EXTRAS = false;
 export const SIDEBAR_THREAD_TREE = true;
 
-export function createDefaultTeam(botId: string) {
-  return api(`/api/bots/${encodeURIComponent(botId)}/default-team`, { method: "POST" });
+export function createDefaultTeam(botId: string, workspaceId?: string) {
+  return api(`/api/bots/${encodeURIComponent(botId)}/default-team`, { method: "POST", body: JSON.stringify(workspaceId ? { workspaceId } : {}) });
 }

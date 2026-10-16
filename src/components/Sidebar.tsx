@@ -1,5 +1,6 @@
 import { track } from "@/lib/analytics";
-import { activeWorkspace, switchWorkspace, useWorkspaces, workspaceOf } from "@/lib/origin-workspaces";
+import { activeWorkspace, inWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
+import { isWorkspaceSection } from "../../shared/origin-workspaces";
 import { SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
 import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE } from "@/lib/origin-teams";
 import { OrganizationIdentity } from "./OrganizationIdentity";
@@ -1854,12 +1855,12 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     unsectionedBots,
   } = partitionSidebarBots(matchingBots, { universalPins });
   const workspaces = useWorkspaces();
-  const workspaceHeads = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : [...(unsectionedChief ? [unsectionedChief] : []), ...[...unsectionedBots].reverse()];
+  const workspaceHeads = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : workspaceHeadsOf(sectionChiefs);
   const activeHeadId = activeWorkspace(workspaces, workspaceHeads);
-  const bossBot = SIDEBAR_SHOWS_LOOSE_BOTS ? unsectionedChief : workspaceHeads.find((head) => head.id === activeHeadId);
-  const workspaceProjects = sectionChiefs.filter((chief) => workspaceOf(workspaces, chief.id, workspaceHeads[0]?.id) === activeHeadId);
+  const bossBot = SIDEBAR_SHOWS_LOOSE_BOTS ? unsectionedChief : workspaceHeads.find((head) => head.id === activeHeadId) ?? unsectionedChief;
+  const workspaceProjects = sectionChiefs.filter((chief) => !isWorkspaceSection(chief.section) && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, chief));
   const newWorkspace = () => {
-    void api<{ bot: Bot }>("/api/bots", { method: "POST", body: JSON.stringify({ name: "New workspace" }) })
+    void api<{ bot: Bot }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name: "New workspace" }) })
       .then(({ bot }) => { dispatch({ type: "botAdded", bot }); switchWorkspace(bot.id); })
       .catch((cause) => dispatch({ type: "error", message: cause instanceof Error ? cause.message : String(cause) }));
   };

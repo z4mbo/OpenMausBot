@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { activeWorkspace, movedOrder, sortProjects, workspaceOf } from "./origin-workspaces";
+import { activeWorkspace, inWorkspace, movedOrder, sortProjects, workspaceHeadsOf } from "./origin-workspaces";
 
-const state = { projectWorkspace: { kai: "second" }, order: ["yuki", "kai"], sort: "custom" as const, collapsed: false };
+const view = { order: ["yuki", "kai"], sort: "custom" as const, collapsed: false };
 const projects = [
   { id: "kai", name: "Kai", updatedAt: 10 },
   { id: "ada", name: "Ada", updatedAt: 30 },
@@ -9,20 +9,31 @@ const projects = [
 ];
 
 describe("Origin workspaces", () => {
-  it("falls back to the first head when the saved one is gone", () => {
-    expect(activeWorkspace({ ...state, active: "deleted" }, [{ id: "first" }, { id: "second" }])).toBe("first");
-    expect(activeWorkspace({ ...state, active: "second" }, [{ id: "first" }, { id: "second" }])).toBe("second");
+  it("lists workspace heads oldest first and ignores project Chiefs", () => {
+    const bots = [
+      { id: "ggs", section: "Workspace: GGs", chiefOfStaff: true },
+      { id: "kai", section: "Kai", chiefOfStaff: true },
+      { id: "rio", section: "Workspace: Rio", chiefOfStaff: true },
+    ];
+    expect(workspaceHeadsOf(bots).map((bot) => bot.id)).toEqual(["rio", "ggs"]);
   });
 
-  it("files an unassigned project under the default workspace", () => {
-    expect(workspaceOf(state, "kai", "first")).toBe("second");
-    expect(workspaceOf(state, "yuki", "first")).toBe("first");
+  it("falls back to the first head when the saved one is gone", () => {
+    expect(activeWorkspace({ ...view, active: "deleted" }, [{ id: "first" }, { id: "second" }])).toBe("first");
+    expect(activeWorkspace({ ...view, active: "second" }, [{ id: "first" }, { id: "second" }])).toBe("second");
+  });
+
+  it("shows a project only in the workspace whose head manages its team", () => {
+    const rio = { id: "rio", managedSections: ["Kai", "Yuki"] };
+    expect(inWorkspace(rio, { section: "Kai" })).toBe(true);
+    expect(inWorkspace(rio, { section: "Other" })).toBe(false);
+    expect(inWorkspace(undefined, { section: "Other" })).toBe(true);
   });
 
   it("sorts by custom order, recency or name", () => {
-    expect(sortProjects(projects, state).map((p) => p.id)).toEqual(["yuki", "kai", "ada"]);
-    expect(sortProjects(projects, { ...state, sort: "recent" }).map((p) => p.id)).toEqual(["ada", "yuki", "kai"]);
-    expect(sortProjects(projects, { ...state, sort: "name" }).map((p) => p.id)).toEqual(["ada", "kai", "yuki"]);
+    expect(sortProjects(projects, view).map((p) => p.id)).toEqual(["yuki", "kai", "ada"]);
+    expect(sortProjects(projects, { ...view, sort: "recent" }).map((p) => p.id)).toEqual(["ada", "yuki", "kai"]);
+    expect(sortProjects(projects, { ...view, sort: "name" }).map((p) => p.id)).toEqual(["ada", "kai", "yuki"]);
   });
 
   it("moves a dragged project before or after its target", () => {

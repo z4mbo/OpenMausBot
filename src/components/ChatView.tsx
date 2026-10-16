@@ -67,6 +67,7 @@ import { isProviderSafetyBlock, PROVIDER_SAFETY_GUIDANCE, PROVIDER_SAFETY_HELP_U
 import { isCancelledTranscriptRow } from "../../shared/client-cancel";
 import { BotAvatar } from "./Avatar";
 import { ChiefSectionBar, ChiefSectionPanel, useChiefSection } from "./ChiefSections";
+import { isWorkspaceSection } from "../../shared/origin-workspaces";
 import { TurnPresence } from "./TurnPresence";
 import { showToolCallsEnabled, skillAuthoringEnabled } from "@/lib/feature-flags";
 import { normalizeState, stateForBot } from "@/lib/mascot";
@@ -1037,6 +1038,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   const advanced = useAdvancedMode();
   const canWrite = useCanWriteIn(bot.threadId);
   const [chiefSection, setChiefSection] = useChiefSection(bot.id);
+  const projectPage = Boolean(bot.chiefOfStaff) && !isWorkspaceSection(bot.section);
 
   const computerStarting = computerStartLine(state.computerStarts[bot.id], bot.name);
   const mascotMotion = state.mascotMotion?.botId === bot.id ? state.mascotMotion : null;
@@ -1211,9 +1213,9 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
     <ThreadLinkContext value={threadLink}>
     <main className="relative flex h-full min-w-0 flex-1 flex-col bg-app">
       <CallOverlay bot={bot} />
-      {bot.chiefOfStaff && <ChiefSectionBar bot={bot} section={chiefSection} onSection={setChiefSection} />}
-      {bot.chiefOfStaff && chiefSection !== "chat" && <ChiefSectionPanel bot={bot} section={chiefSection} />}
-      <GlassScrollFrame className={cn("flex-1 [--glass-tint:var(--color-app)]", bot.chiefOfStaff && chiefSection !== "chat" && "hidden")}>
+      {projectPage && <ChiefSectionBar bot={bot} section={chiefSection} onSection={setChiefSection} />}
+      {projectPage && chiefSection !== "chat" && <ChiefSectionPanel bot={bot} section={chiefSection} />}
+      <GlassScrollFrame className={cn("flex-1 [--glass-tint:var(--color-app)]", projectPage && chiefSection !== "chat" && "hidden")}>
       {/* z-[25]: above the room set-up card (z-20), below the CallOverlay (z-30). */}
       <GlassBar edge="top" className="z-[25]">
       <div
