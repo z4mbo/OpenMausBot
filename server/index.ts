@@ -595,6 +595,7 @@ import { createBotPresetRoutes } from "./routes/bot-presets.ts";
 import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, ensureTeamChiefs, ensureWorkspaces } from "./origin-teams.ts";
+import { createProjectIconRoutes } from "./origin-project-icons.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
 import { createBotPatchRoutes } from "./routes/bot-patch.ts";
 import { createBotLifecycleRoutes } from "./routes/bot-lifecycle.ts";
@@ -13720,6 +13721,7 @@ ROUTES.push(createBotCreateRoutes({
   storedAvatarExists, defaultSelection, checkedModelSelection, cloudOwnerSession, wireBot,
 }));
 ROUTES.push(createDefaultTeamRoutes({ store, maxWorkspaceBots: MAX_WORKSPACE_BOTS, wireBot }));
+ROUTES.push(createProjectIconRoutes({ store, storedAvatarExists }));
 ROUTES.push(createBotSettingsRoutes({
   store, cfg, registry, commandAllowlist, commandAllowlistDrivers: COMMAND_ALLOWLIST_DRIVERS,
   cloudHome: Boolean(CLOUD_HOME), cloudOwnerProfileFields: CLOUD_OWNER_PROFILE_FIELDS,

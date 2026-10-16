@@ -4,7 +4,8 @@ import { isWorkspaceSection } from "../../shared/origin-workspaces";
 import { SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
 import { unreadReplies } from "@/lib/origin-unread";
-import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE } from "@/lib/origin-teams";
+import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
+import { ProjectMark } from "./ProjectMark";
 import { OrganizationIdentity } from "./OrganizationIdentity";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -1272,7 +1273,8 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
               className="truncate"
               inputClassName="w-full rounded bg-inset px-1 py-0.5 text-[15px] font-semibold"
             />
-            {bot.chiefOfStaff && !renaming && (
+            {bot.chiefOfStaff && !renaming && !SHOWS_CHIEF_LABEL && <ProjectMark botId={bot.id} />}
+            {bot.chiefOfStaff && !renaming && SHOWS_CHIEF_LABEL && (
               <Crown size={13} strokeWidth={2.25} className="shrink-0 text-accent" role="img" aria-label={t("sidebar.bot.chiefOfStaff")} data-testid="chief-crown">
                 <title>{t("sidebar.bot.chiefOfStaff")}</title>
               </Crown>
