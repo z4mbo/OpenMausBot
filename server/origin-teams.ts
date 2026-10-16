@@ -69,6 +69,11 @@ export function createDefaultTeamRoutes(deps: { store: Store; maxWorkspaceBots: 
   return async ({ req, res, path, method, auth, json, readBody }) => {
     const match = method === "POST" ? /^\/api\/bots\/([^/]+)\/default-team$/.exec(path) : null;
     const newWorkspace = method === "POST" && path === "/api/workspaces";
+    if (method === "PUT" && path === "/api/workspaces/active") {
+      const body = await readBody(req).catch(() => null) as { id?: unknown } | null;
+      activeHeadId = typeof body?.id === "string" && workspaceHeads(store).some(head => head.id === body.id) ? body.id : null;
+      return json(res, 200, { active: activeHeadId });
+    }
     if (!match && !newWorkspace) return PASS;
     if (auth.kind === "session" && !auth.scopes.includes("admin")) return json(res, 403, { error: "Creating a project or workspace needs the admin scope" });
     const body = await readBody(req).catch(() => null) as { workspaceId?: unknown; name?: unknown } | null;
@@ -90,14 +95,30 @@ export function createDefaultTeamRoutes(deps: { store: Store; maxWorkspaceBots: 
   };
 }
 
+let activeHeadId: string | null = null;
+
+/** Template teams join the workspace the person has open, so its head can reach and manage them. */
+export function watchTemplateTeams(store: Store): () => void {
+  return store.onChange(change => {
+    if (change.type !== "bot") return;
+    const bot = store.bot(change.botId);
+    const team = bot ? sectionOf(bot) : "";
+    if (!bot?.installedPackage || !team || isWorkspaceSection(team) || team === STANDALONE_SECTION) return;
+    const heads = workspaceHeads(store);
+    if (heads.some(head => head.managedSections?.includes(team))) return;
+    const owner = heads.find(head => head.id === activeHeadId) ?? heads[0];
+    if (owner) fileUnderWorkspace(store, owner, team);
+  });
+}
+
 /** Bots outside every team become workspace heads, and every project belongs to exactly one head (the oldest by default). */
 export function ensureWorkspaces(store: Store): BotRecord[] {
   for (const bot of store.bots) if (bot.chiefOfStaff && bot.title === OLD_CHIEF_TITLE) store.patchBot(bot.id, { title: "" });
   const converted = store.bots.filter(bot => !sectionOf(bot) && !bot.hidden).reverse().map(bot => makeWorkspaceHead(store, bot));
   const [first] = workspaceHeads(store);
   if (!first) return converted;
-  const templateTeams = new Set(store.bots.filter(bot => bot.installedPackage).map(sectionOf));
-  const projects = new Set(store.bots.filter(bot => bot.chiefOfStaff && sectionOf(bot) && !isWorkspaceSection(bot.section) && !templateTeams.has(sectionOf(bot))).map(sectionOf));
+  const projects = new Set(store.bots.filter(bot => bot.chiefOfStaff && sectionOf(bot) && !isWorkspaceSection(bot.section)).map(sectionOf));
+  for (const bot of store.bots) if (bot.installedPackage && sectionOf(bot)) projects.add(sectionOf(bot));
   for (const team of projects) {
     if (!workspaceHeads(store).some(head => head.managedSections?.includes(team))) fileUnderWorkspace(store, first, team);
   }

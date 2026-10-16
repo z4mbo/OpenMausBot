@@ -1,5 +1,5 @@
 import { track } from "@/lib/analytics";
-import { activeWorkspace, inWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
+import { activeWorkspace, inWorkspace, reportActiveWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
 import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
 import { SidebarAgents, SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
@@ -1865,17 +1865,17 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   } = partitionSidebarBots(matchingBots, { universalPins });
   const workspaces = useWorkspaces();
   const workspaceHeads = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : workspaceHeadsOf(sectionChiefs);
-  const managedTeams = new Set(workspaceHeads.flatMap((head) => head.managedSections ?? []).map((name) => name.trim()));
   const standaloneTeams = new Set(state.bots.filter((bot) => bot.installedPackage).map((bot) => bot.section?.trim() ?? "").filter(Boolean));
   standaloneTeams.add(STANDALONE_SECTION);
   const standaloneAgents = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : state.bots
-    .filter((bot) => !bot.hidden && !isWorkspaceSection(bot.section) && bot.section?.trim()
-      && (standaloneTeams.has(bot.section.trim()) || !managedTeams.has(bot.section.trim())))
-    .sort((a, b) => (a.section ?? "").localeCompare(b.section ?? "") || Number(Boolean(b.chiefOfStaff)) - Number(Boolean(a.chiefOfStaff)));
+    .filter((bot) => !bot.hidden && bot.section?.trim() === STANDALONE_SECTION);
   const activeHeadId = activeWorkspace(workspaces, workspaceHeads);
   const bossBot = SIDEBAR_SHOWS_LOOSE_BOTS ? unsectionedChief : workspaceHeads.find((head) => head.id === activeHeadId) ?? unsectionedChief ?? unsectionedBots.at(-1);
+  const workspaceTeams = [...standaloneTeams].filter((team) => team !== STANDALONE_SECTION
+    && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, { section: team })).sort((a, b) => a.localeCompare(b));
   const workspaceProjects = sectionChiefs.filter((chief) => !isWorkspaceSection(chief.section) && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, chief)
     && !standaloneTeams.has(chief.section?.trim() ?? ""));
+  useEffect(() => { if (activeHeadId) reportActiveWorkspace(activeHeadId); }, [activeHeadId]);
   const newWorkspace = () => {
     void api<{ bot: Bot }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name: "New workspace" }) })
       .then(({ bot }) => { dispatch({ type: "botAdded", bot }); switchWorkspace(bot.id); })
@@ -2322,6 +2322,29 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
             <SidebarProjects projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} extraUnread={teamUnread(state.bots, bot)} />}
               onNewProject={() => dispatch({ type: "toggleNewBot", open: true })} />
+          )}
+          {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && workspaceTeams.length > 0 && (
+            <div data-sidebar-teams className="flex flex-col gap-0.5 pt-3">
+              <div className="px-2 pb-1 text-[12px] font-medium text-ink-secondary">Teams</div>
+              {workspaceTeams.map((team) => {
+                const id = userSectionId(team);
+                const collapsed = sectionCollapsed(id);
+                const members = state.bots.filter((bot) => !bot.hidden && bot.section?.trim() === team)
+                  .sort((a, b) => Number(Boolean(b.chiefOfStaff)) - Number(Boolean(a.chiefOfStaff)));
+                return (
+                  <div key={team} data-sidebar-team={team} className="flex flex-col gap-0.5">
+                    <SidebarSectionHeader name={team} collapsed={collapsed} onToggle={() => toggleSection(id)} reorderable={false} dragging={false}
+                      attention={collapsed ? sidebarSectionAttention(members, sectionedRooms.filter((group) => group.section === team)) : undefined} />
+                    {!collapsed && <>
+                      {sectionedRooms.filter((group) => group.section === team).map((group) => (
+                        <GroupListItem key={group.id} group={group} density={density} quiet={quietRows} query={q} onMenu={setRoomMenu} />
+                      ))}
+                      {members.map((bot) => <BotListItem key={bot.id} {...botRow(bot)} />)}
+                    </>}
+                  </div>
+                );
+              })}
+            </div>
           )}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
             <SidebarAgents agents={standaloneAgents} row={(bot) => <BotListItem {...botRow(bot)} />} />

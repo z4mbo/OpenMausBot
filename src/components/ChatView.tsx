@@ -1041,7 +1041,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   const advanced = useAdvancedMode();
   const canWrite = useCanWriteIn(bot.threadId);
   const [chiefSection, setChiefSection] = useChiefSection(bot.id);
-  const projectPage = Boolean(bot.chiefOfStaff) && !isWorkspaceSection(bot.section);
+  const projectPage = Boolean(bot.chiefOfStaff) && !isWorkspaceSection(bot.section) && !profile.installedPackage;
   const unreadHere = Boolean(profile.tasks?.find((task) => task.threadId === bot.threadId)?.unread ?? profile.unread);
   useEffect(() => {
     if (projectPage && chiefSection === "chat" && unreadHere) {

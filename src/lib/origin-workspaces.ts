@@ -60,7 +60,14 @@ export function inWorkspace(head: Head | undefined, project: { section?: string 
 }
 
 export const activeWorkspaceId = () => read().active;
-export const switchWorkspace = (headId: string) => write({ active: headId });
+/** Tells the server which workspace is open, so a template team added now joins it. */
+export function reportActiveWorkspace(headId: string) {
+  void fetch("/api/workspaces/active", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: headId }) }).catch(() => {});
+}
+export const switchWorkspace = (headId: string) => {
+  write({ active: headId });
+  reportActiveWorkspace(headId);
+};
 export const setProjectSort = (sort: ProjectSort) => write({ sort });
 export const setProjectsCollapsed = (collapsed: boolean) => write({ collapsed });
 export const setAgentsCollapsed = (agentsCollapsed: boolean) => write({ agentsCollapsed });
