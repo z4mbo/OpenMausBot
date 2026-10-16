@@ -2447,12 +2447,12 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
             <SidebarProfileMenu iconOnly />
           </div>
         ) : (
-          <div className="flex items-center gap-1 not-first:mt-3">
+          <div className={cn("flex items-center gap-1 not-first:mt-3", SIDEBAR_ACTIONS_IN_FOOTER && "relative")}>
             <div className="min-w-0 flex-1">
               <SidebarProfileMenu />
             </div>
             <UpdateIndicator />
-            {SIDEBAR_ACTIONS_IN_FOOTER && <div className="relative flex items-center" style={windowNoDragStyle}>{renderHeaderActions(true)}</div>}
+            {SIDEBAR_ACTIONS_IN_FOOTER && <div className="flex items-center" style={windowNoDragStyle}>{renderHeaderActions(true)}</div>}
             <SidebarAppsButton />
           </div>
         )}
