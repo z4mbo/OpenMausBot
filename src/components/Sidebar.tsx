@@ -4,7 +4,7 @@ import { isWorkspaceSection } from "../../shared/origin-workspaces";
 import { SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
 import { unreadReplies } from "@/lib/origin-unread";
-import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE } from "@/lib/origin-teams";
+import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE } from "@/lib/origin-teams";
 import { OrganizationIdentity } from "./OrganizationIdentity";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -1309,9 +1309,9 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
               )}
             </span>
           )}
-          {unread && (SIDEBAR_ROW_EXTRAS
-            ? <span className="size-2 shrink-0 rounded-full bg-accent" aria-label={t("task.unreadMany")} />
-            : <UnreadBadge count={unreadReplies(bot)} />)}
+          {unread && SIDEBAR_ROW_EXTRAS && (
+            <span className="size-2 shrink-0 rounded-full bg-accent" aria-label={t("task.unreadMany")} />
+          )}
         </div>}
       </div>
     </>
@@ -1372,8 +1372,8 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
           className="pointer-events-none absolute right-[3.75rem] top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><Plus size={14} /></button>}
         {CREATES_FOLDERS_AND_GROUPS && showThreads && <button type="button" aria-label={t("folder.newNamed", { name: bot.name })} title={t("folder.new")} onClick={() => { setThreadsOpen(true); setCreatingProject(true); }}
           className="pointer-events-none absolute right-8 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><FolderPlus size={14} /></button>}
-        {props.trailing ?? <button type="button" aria-label={t("sidebar.bot.actions", { name: bot.name })} title={t("sidebar.bot.actions", { name: bot.name })} aria-haspopup="menu" onClick={(event) => { const rect = event.currentTarget.getBoundingClientRect(); onMenu({ botId: bot.id, x: rect.left, y: rect.bottom }); }}
-          className="pointer-events-none absolute right-1 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><MoreHorizontal size={15} /></button>}
+        {props.trailing ?? (!SIDEBAR_ROW_EXTRAS ? (unread ? <UnreadBadge count={unreadReplies(bot)} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2" /> : null) : <button type="button" aria-label={t("sidebar.bot.actions", { name: bot.name })} title={t("sidebar.bot.actions", { name: bot.name })} aria-haspopup="menu" onClick={(event) => { const rect = event.currentTarget.getBoundingClientRect(); onMenu({ botId: bot.id, x: rect.left, y: rect.bottom }); }}
+          className="pointer-events-none absolute right-1 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><MoreHorizontal size={15} /></button>)}
       </>}
       {deleting && iconOnly && (
         <span className="pointer-events-none absolute bottom-1 right-1 rounded-full bg-card p-1 text-ink-secondary">
@@ -1965,6 +1965,144 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const pendingBotUndo = teamFeedback?.restoreBot;
   const botRow = (bot: Bot) => botRowProps(state, dispatch, bot, { density, quiet: quietRows, query: q, onMenu: setMenu });
 
+  const renderHeaderActions = (bottom: boolean) => (
+    <>
+          {advanced && <div ref={attentionMenuRef} className={density === "icons" ? "relative" : "contents"}>
+            <button
+              type="button"
+              onClick={() => setAttentionOpen((o) => !o)}
+              aria-label={attentionTriggerLabel(attention.length)}
+              title={attentionTriggerLabel(attention.length)}
+              className={cn(
+                "relative flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+                density === "icons" || bottom ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md",
+              )}
+            >
+              <Activity size={density === "icons" ? 20 : bottom ? 18 : 17} strokeWidth={2} />
+              {attention.length > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-accent px-0.5 text-[9.5px] font-semibold leading-4 text-ink">{attention.length > 9 ? "9+" : attention.length}</span>
+              )}
+              {attentionHasRunningWork(attention) && (
+                <span data-header-activity="" className="absolute bottom-0.5 right-0.5 size-1.5 rounded-full bg-success" aria-hidden="true" />
+              )}
+            </button>
+            {attentionMotion.shown && (
+              <>
+                <div className={cn(
+                  bottom ? "bottom-full mb-1" : "top-full mt-1", "absolute z-40 overflow-hidden rounded-xl border border-hairline/50 bg-menu py-1.5 shadow-2xl shadow-black/60",
+                  density === "icons" ? "left-0" : "right-0",
+                  density === "icons" ? "w-72" : density === "compact" ? "w-60 md:w-[min(240px,calc(var(--sidebar-width)_-_32px))]" : "w-72 md:w-[min(288px,calc(var(--sidebar-width)_-_32px))]",
+                  attentionMotion.className,
+                )} {...attentionMotion.exitProps}>
+                  <div className="flex items-center gap-1 pb-1 pl-3.5 pr-2 pt-1.5">
+                    <span className="flex-1 text-[13px] font-medium text-ink">{t("attention.title")}</span>
+                    <button
+                      type="button"
+                      onClick={() => setAttentionPinned(!attentionPinned)}
+                      aria-label={t(attentionPinned ? "attention.unpin" : "attention.pin")}
+                      title={t(attentionPinned ? "attention.unpin" : "attention.pin")}
+                      className="flex size-6 items-center justify-center rounded text-ink-secondary hover:bg-raised hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                    >
+                      {attentionPinned ? <PinOff size={14} /> : <Pin size={14} />}
+                    </button>
+                  </div>
+                  {attention.length === 0 ? (
+                    <div className="px-3.5 py-2.5 text-[13px] text-ink-secondary">{t("attention.empty")}</div>
+                  ) : (
+                    <AttentionThreadRows entries={attention} onJump={(entry) => { setAttentionOpen(false); dispatch(attentionJumpAction(entry)); }} />
+                  )}
+                </div>
+              </>
+            )}
+          </div>}
+          <div ref={plusMenuRef} className="contents">
+          <button
+            ref={importReturnRef}
+            onClick={() => setPlusOpen((o) => !o)}
+            aria-label={remoteClient ? t("sidebar.new") : t("sidebar.newOrShare")}
+            className={cn(
+              "flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+              density === "icons" || bottom ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md",
+            )}
+            title={remoteClient ? t("sidebar.new") : t("sidebar.newOrShare")}
+          >
+            <Plus size={density === "icons" ? 20 : bottom ? 18 : 17} strokeWidth={2} />
+          </button>
+          {plusMotion.shown && (
+            <>
+              <div className={cn(
+                bottom ? "bottom-full mb-1" : "top-full mt-1", "absolute z-40 w-52 overflow-hidden rounded-xl border border-hairline/50 bg-menu py-1.5 shadow-2xl shadow-black/60",
+                density === "icons" ? "left-0" : "right-0",
+                plusMotion.className,
+              )} {...plusMotion.exitProps}>
+                <button
+                  onClick={() => {
+                    setPlusOpen(false);
+                    setNewChatOpen(true);
+                  }}
+                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
+                >
+                  <MessageSquarePlus size={16} className="text-ink-secondary" />
+                  {t("sidebar.newChat.title")}
+                </button>
+                <button
+                  onClick={() => {
+                    setPlusOpen(false);
+                    dispatch({ type: "toggleNewBot", open: true });
+                  }}
+                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
+                >
+                  <BotIcon size={16} className="text-ink-secondary" />
+                  <span className="flex-1">{t("sidebar.newBot")}</span>
+                  <ShortcutHint id="new-bot" />
+                </button>
+                {CREATES_FOLDERS_AND_GROUPS && <button
+                  onClick={() => {
+                    setPlusOpen(false);
+                    setNewRoom(true);
+                  }}
+                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
+                >
+                  <Users size={16} className="text-ink-secondary" />
+                  {t("sidebar.newChannel.title")}
+                </button>}
+                {CREATES_FOLDERS_AND_GROUPS && !remoteClient && <button
+                  onClick={() => { setPlusOpen(false); setNewTeam(true); }}
+                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
+                >
+                  <FolderPlus size={16} className="text-ink-secondary" /> {t("team.create")}
+                </button>}
+                {!remoteClient && <>
+                <button
+                  onClick={() => {
+                    setPlusOpen(false);
+                    setTeamLibraryOpen(true);
+                  }}
+                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
+                >
+                  <Library size={16} className="text-ink-secondary" />
+                  {t("sidebar.teamLibrary")}
+                </button>
+                {archivedBots.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setPlusOpen(false);
+                      setArchivedBotsOpen(true);
+                    }}
+                    className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
+                  >
+                    <Archive size={16} className="text-ink-secondary" />
+                    <span className="flex-1">{t("sidebar.archived.title")}</span>
+                    <span className="text-[11.5px] text-ink-secondary">{archivedBots.length}</span>
+                  </button>
+                )}
+                </>}
+              </div>
+            </>
+          )}
+          </div>
+    </>
+  );
   return (
     <aside
       ref={sidebarRef}
@@ -2040,140 +2178,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           >
             <Search size={20} strokeWidth={2} />
           </button>}
-          {advanced && <div ref={attentionMenuRef} className={density === "icons" ? "relative" : "contents"}>
-            <button
-              type="button"
-              onClick={() => setAttentionOpen((o) => !o)}
-              aria-label={attentionTriggerLabel(attention.length)}
-              title={attentionTriggerLabel(attention.length)}
-              className={cn(
-                "relative flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
-                density === "icons" ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md",
-              )}
-            >
-              <Activity size={density === "icons" ? 20 : 17} strokeWidth={2} />
-              {attention.length > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-accent px-0.5 text-[9.5px] font-semibold leading-4 text-ink">{attention.length > 9 ? "9+" : attention.length}</span>
-              )}
-              {attentionHasRunningWork(attention) && (
-                <span data-header-activity="" className="absolute bottom-0.5 right-0.5 size-1.5 rounded-full bg-success" aria-hidden="true" />
-              )}
-            </button>
-            {attentionMotion.shown && (
-              <>
-                <div className={cn(
-                  "absolute top-full z-40 mt-1 overflow-hidden rounded-xl border border-hairline/50 bg-menu py-1.5 shadow-2xl shadow-black/60",
-                  density === "icons" ? "left-0" : "right-0",
-                  density === "icons" ? "w-72" : density === "compact" ? "w-60 md:w-[min(240px,calc(var(--sidebar-width)_-_32px))]" : "w-72 md:w-[min(288px,calc(var(--sidebar-width)_-_32px))]",
-                  attentionMotion.className,
-                )} {...attentionMotion.exitProps}>
-                  <div className="flex items-center gap-1 pb-1 pl-3.5 pr-2 pt-1.5">
-                    <span className="flex-1 text-[13px] font-medium text-ink">{t("attention.title")}</span>
-                    <button
-                      type="button"
-                      onClick={() => setAttentionPinned(!attentionPinned)}
-                      aria-label={t(attentionPinned ? "attention.unpin" : "attention.pin")}
-                      title={t(attentionPinned ? "attention.unpin" : "attention.pin")}
-                      className="flex size-6 items-center justify-center rounded text-ink-secondary hover:bg-raised hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-                    >
-                      {attentionPinned ? <PinOff size={14} /> : <Pin size={14} />}
-                    </button>
-                  </div>
-                  {attention.length === 0 ? (
-                    <div className="px-3.5 py-2.5 text-[13px] text-ink-secondary">{t("attention.empty")}</div>
-                  ) : (
-                    <AttentionThreadRows entries={attention} onJump={(entry) => { setAttentionOpen(false); dispatch(attentionJumpAction(entry)); }} />
-                  )}
-                </div>
-              </>
-            )}
-          </div>}
-          <div ref={plusMenuRef} className="contents">
-          <button
-            ref={importReturnRef}
-            onClick={() => setPlusOpen((o) => !o)}
-            aria-label={remoteClient ? t("sidebar.new") : t("sidebar.newOrShare")}
-            className={cn(
-              "flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
-              density === "icons" ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md",
-            )}
-            title={remoteClient ? t("sidebar.new") : t("sidebar.newOrShare")}
-          >
-            <Plus size={density === "icons" ? 20 : 17} strokeWidth={2} />
-          </button>
-          {plusMotion.shown && (
-            <>
-              <div className={cn(
-                "absolute top-full z-40 mt-1 w-52 overflow-hidden rounded-xl border border-hairline/50 bg-menu py-1.5 shadow-2xl shadow-black/60",
-                density === "icons" ? "left-0" : "right-0",
-                plusMotion.className,
-              )} {...plusMotion.exitProps}>
-                <button
-                  onClick={() => {
-                    setPlusOpen(false);
-                    setNewChatOpen(true);
-                  }}
-                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
-                >
-                  <MessageSquarePlus size={16} className="text-ink-secondary" />
-                  {t("sidebar.newChat.title")}
-                </button>
-                <button
-                  onClick={() => {
-                    setPlusOpen(false);
-                    dispatch({ type: "toggleNewBot", open: true });
-                  }}
-                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
-                >
-                  <BotIcon size={16} className="text-ink-secondary" />
-                  <span className="flex-1">{t("sidebar.newBot")}</span>
-                  <ShortcutHint id="new-bot" />
-                </button>
-                {CREATES_FOLDERS_AND_GROUPS && <button
-                  onClick={() => {
-                    setPlusOpen(false);
-                    setNewRoom(true);
-                  }}
-                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
-                >
-                  <Users size={16} className="text-ink-secondary" />
-                  {t("sidebar.newChannel.title")}
-                </button>}
-                {CREATES_FOLDERS_AND_GROUPS && !remoteClient && <button
-                  onClick={() => { setPlusOpen(false); setNewTeam(true); }}
-                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
-                >
-                  <FolderPlus size={16} className="text-ink-secondary" /> {t("team.create")}
-                </button>}
-                {!remoteClient && <>
-                <button
-                  onClick={() => {
-                    setPlusOpen(false);
-                    setTeamLibraryOpen(true);
-                  }}
-                  className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
-                >
-                  <Library size={16} className="text-ink-secondary" />
-                  {t("sidebar.teamLibrary")}
-                </button>
-                {archivedBots.length > 0 && (
-                  <button
-                    onClick={() => {
-                      setPlusOpen(false);
-                      setArchivedBotsOpen(true);
-                    }}
-                    className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
-                  >
-                    <Archive size={16} className="text-ink-secondary" />
-                    <span className="flex-1">{t("sidebar.archived.title")}</span>
-                    <span className="text-[11.5px] text-ink-secondary">{archivedBots.length}</span>
-                  </button>
-                )}
-                </>}
-              </div>
-            </>
-          )}
-          </div>
+          {!SIDEBAR_ACTIONS_IN_FOOTER && renderHeaderActions(false)}
         </div>
       </div>
 
@@ -2447,6 +2452,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
               <SidebarProfileMenu />
             </div>
             <UpdateIndicator />
+            {SIDEBAR_ACTIONS_IN_FOOTER && <div className="relative flex items-center" style={windowNoDragStyle}>{renderHeaderActions(true)}</div>}
             <SidebarAppsButton />
           </div>
         )}

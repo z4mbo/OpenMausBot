@@ -27,6 +27,7 @@ import { PinnedBotRoster } from "./PinnedCircleThreads";
 import { setPinnedCircleOrder } from "@/lib/sidebar-preferences";
 import { PINNED_CIRCLE_DRAG_TYPE } from "@/lib/pinned-circle-order";
 import { forgetSearchDisclosuresForTests } from "@/lib/search-disclosure";
+vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), CREATES_FOLDERS_AND_GROUPS: true, SIDEBAR_SHOWS_LOOSE_BOTS: true, SIDEBAR_HAS_SEARCH: true, SIDEBAR_ROW_EXTRAS: true, SIDEBAR_THREAD_TREE: false, SIDEBAR_ACTIONS_IN_FOOTER: false, SHOWS_CHIEF_LABEL: true }));
 
 const bot = (overrides: Partial<Bot> = {}): Bot => ({
   id: "atlas",

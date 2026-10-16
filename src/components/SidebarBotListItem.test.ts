@@ -17,7 +17,7 @@ import { ConfirmDialogCard } from "./ConfirmDialog";
 import { BotDeleteMenuItem, BotListItem, botConfirmCopy, botRowProps, currentArchivableBot } from "./Sidebar";
 import { endCall } from "@/lib/call";
 import { configureLiveMedia, resetLiveMedia, startLiveCall } from "@/lib/live-call-media";
-vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), CREATES_FOLDERS_AND_GROUPS: true, SIDEBAR_SHOWS_LOOSE_BOTS: true, SIDEBAR_HAS_SEARCH: true, SIDEBAR_ROW_EXTRAS: true, SIDEBAR_THREAD_TREE: false }));
+vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), CREATES_FOLDERS_AND_GROUPS: true, SIDEBAR_SHOWS_LOOSE_BOTS: true, SIDEBAR_HAS_SEARCH: true, SIDEBAR_ROW_EXTRAS: true, SIDEBAR_THREAD_TREE: false, SIDEBAR_ACTIONS_IN_FOOTER: false, SHOWS_CHIEF_LABEL: true }));
 
 const bot = (overrides: Partial<Bot> = {}): Bot => ({
   id: "atlas",

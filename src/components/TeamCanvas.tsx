@@ -8,6 +8,7 @@ import { teamMapStatus, type TeamMapSection } from "@/lib/team-map";
 import { COMPUTER_DRAG_TYPE, fitTeams, layoutTeams, orderBots, parseBotOrders, parsePositions, reorderBot, zoomAt, type Point, type View } from "@/lib/team-canvas";
 import { BotAvatar } from "./Avatar";
 import { InstanceProviderMark, ProviderMark } from "./ProviderIcons";
+import { SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
 
 type Gesture = {
   id: number;
@@ -48,7 +49,7 @@ function BotCard({ bot, selected, moving, connected, onComputer, onArrange }: {
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5"><span className="truncate text-[14px] font-semibold">{bot.name}</span>
           {bot.chiefOfStaff && <Crown size={12} className="shrink-0 text-warning" aria-label={t("chat.chiefOfStaff")} />}</span>
-        <span className="mt-1 block truncate text-[11px] text-ink-secondary">{bot.title || (bot.chiefOfStaff ? t("chat.chiefOfStaff") : t("canvas.bot"))}</span>
+        <span className="mt-1 block truncate text-[11px] text-ink-secondary">{bot.title || (bot.chiefOfStaff && SHOWS_CHIEF_LABEL ? t("chat.chiefOfStaff") : t("canvas.bot"))}</span>
       </span>
     </button>
     <div className="flex h-[43px] items-center gap-1 border-t border-hairline/30 px-2">

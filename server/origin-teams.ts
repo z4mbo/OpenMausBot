@@ -13,7 +13,8 @@ export const DEFAULT_TEAM_ROLES = [
   { name: "Copywriter", soul: "You write the product's words: landing pages, emails, posts and in-product copy, in its voice." },
 ] as const;
 
-const CHIEF_TITLE = "Chief of Staff";
+const CHIEF_TITLE = "";
+const OLD_CHIEF_TITLE = "Chief of Staff";
 const WORKSPACE_TITLE = "Workspace";
 
 const sectionOf = (bot: BotRecord) => bot.section?.trim() || "";
@@ -91,6 +92,7 @@ export function createDefaultTeamRoutes(deps: { store: Store; maxWorkspaceBots: 
 
 /** Bots outside every team become workspace heads, and every project belongs to exactly one head (the oldest by default). */
 export function ensureWorkspaces(store: Store): BotRecord[] {
+  for (const bot of store.bots) if (bot.chiefOfStaff && bot.title === OLD_CHIEF_TITLE) store.patchBot(bot.id, { title: "" });
   const converted = store.bots.filter(bot => !sectionOf(bot) && !bot.hidden).reverse().map(bot => makeWorkspaceHead(store, bot));
   const [first] = workspaceHeads(store);
   if (!first) return converted;

@@ -29,6 +29,7 @@ vi.mock("./DesktopCapabilities", async (importOriginal) => ({
 }));
 
 import { MAC_TRAFFIC_LIGHT_CENTER_Y, Sidebar } from "./Sidebar";
+vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), CREATES_FOLDERS_AND_GROUPS: true, SIDEBAR_SHOWS_LOOSE_BOTS: true, SIDEBAR_HAS_SEARCH: true, SIDEBAR_ROW_EXTRAS: true, SIDEBAR_THREAD_TREE: false, SIDEBAR_ACTIONS_IN_FOOTER: false, SHOWS_CHIEF_LABEL: true }));
 
 const render = () => renderToStaticMarkup(
   createElement(StoreProvider, null, createElement(Sidebar, { open: true, onClose: () => {} })),

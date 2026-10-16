@@ -1,4 +1,5 @@
-import { CalendarDays, FolderOpen, Network, Puzzle, Zap } from "lucide-react";
+import { CalendarDays, FolderOpen, Network, Puzzle, Store, Zap } from "lucide-react";
+import { SIDEBAR_ACTIONS_IN_FOOTER } from "@/lib/origin-teams";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
@@ -75,7 +76,7 @@ export function SidebarAppsButton() {
         state.pluginsOpen ? "bg-raised text-accent" : "text-ink-secondary hover:bg-raised/50 hover:text-ink",
       )}
     >
-      <Puzzle size={18} />
+      {SIDEBAR_ACTIONS_IN_FOOTER ? <Store size={18} /> : <Puzzle size={18} />}
     </button>
   );
 }
@@ -134,7 +135,7 @@ export function SidebarFooterNav({
         tourId="nav-apps"
         iconsOnly={iconsOnly}
         active={state.pluginsOpen}
-        icon={(active) => <Puzzle size={iconSize} className={tone(active)} />}
+        icon={(active) => SIDEBAR_ACTIONS_IN_FOOTER ? <Store size={iconSize} className={tone(active)} /> : <Puzzle size={iconSize} className={tone(active)} />}
         onClick={() => dispatch({ type: "togglePlugins", open: true })}
       />}
       {advanced && (
