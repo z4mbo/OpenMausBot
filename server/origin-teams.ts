@@ -102,6 +102,10 @@ export function watchTemplateTeams(store: Store): () => void {
   return store.onChange(change => {
     if (change.type !== "bot") return;
     const bot = store.bot(change.botId);
+    if (bot?.installedPackage && !sectionOf(bot) && !bot.hidden) {
+      store.patchBot(bot.id, { section: STANDALONE_SECTION });
+      return;
+    }
     const team = bot ? sectionOf(bot) : "";
     if (!bot?.installedPackage || !team || isWorkspaceSection(team) || team === STANDALONE_SECTION) return;
     const heads = workspaceHeads(store);
@@ -114,7 +118,9 @@ export function watchTemplateTeams(store: Store): () => void {
 /** Bots outside every team become workspace heads, and every project belongs to exactly one head (the oldest by default). */
 export function ensureWorkspaces(store: Store): BotRecord[] {
   for (const bot of store.bots) if (bot.chiefOfStaff && bot.title === OLD_CHIEF_TITLE) store.patchBot(bot.id, { title: "" });
-  const converted = store.bots.filter(bot => !sectionOf(bot) && !bot.hidden).reverse().map(bot => makeWorkspaceHead(store, bot));
+  const loose = store.bots.filter(bot => !sectionOf(bot) && !bot.hidden).reverse();
+  const converted = workspaceHeads(store).length ? [] : loose.map(bot => makeWorkspaceHead(store, bot));
+  if (!converted.length) for (const bot of loose) store.patchBot(bot.id, { section: STANDALONE_SECTION });
   const [first] = workspaceHeads(store);
   if (!first) return converted;
   const projects = new Set(store.bots.filter(bot => bot.chiefOfStaff && sectionOf(bot) && !isWorkspaceSection(bot.section)).map(sectionOf));

@@ -17,9 +17,9 @@ export function OriginNav({ iconsOnly = false }: { iconsOnly?: boolean }) {
         <button key={id} type="button" aria-current={open === id ? "page" : undefined} title={label} aria-label={label}
           onClick={() => openOriginPage(id)}
           className={cn("flex items-center rounded-lg text-ink-secondary hover:bg-raised/60 hover:text-ink",
-            iconsOnly ? "size-[46px] justify-center rounded-xl" : "gap-2.5 px-2.5 py-1.5 text-[13.5px]",
+            iconsOnly ? "size-[46px] justify-center rounded-xl" : "gap-[6px] px-1 py-1.5 text-[13.5px]",
             open === id && "bg-raised text-ink")}>
-          <Icon size={iconsOnly ? 18 : 16} aria-hidden="true" />{!iconsOnly && label}
+          <Icon size={iconsOnly ? 18 : 14} className="shrink-0" aria-hidden="true" />{!iconsOnly && label}
         </button>
       ))}
     </nav>

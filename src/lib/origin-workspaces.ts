@@ -9,7 +9,9 @@ interface WorkspaceView {
   order: string[];
   sort: ProjectSort;
   collapsed: boolean;
-  agentsCollapsed?: boolean;
+  /** Order and folded state of the sidebar groups below Projects (Agents and template teams). */
+  groupOrder?: string[];
+  collapsedGroups?: string[];
 }
 
 interface Head { id: string; section?: string; chiefOfStaff?: boolean; managedSections?: string[] }
@@ -70,7 +72,17 @@ export const switchWorkspace = (headId: string) => {
 };
 export const setProjectSort = (sort: ProjectSort) => write({ sort });
 export const setProjectsCollapsed = (collapsed: boolean) => write({ collapsed });
-export const setAgentsCollapsed = (agentsCollapsed: boolean) => write({ agentsCollapsed });
+export const setGroupOrder = (groupOrder: string[]) => write({ groupOrder });
+export function toggleGroup(id: string) {
+  const folded = new Set(read().collapsedGroups ?? []);
+  if (folded.has(id)) folded.delete(id); else folded.add(id);
+  write({ collapsedGroups: [...folded] });
+}
+export function orderedGroups<T extends { id: string }>(groups: readonly T[], view: WorkspaceView): T[] {
+  const order = view.groupOrder ?? [];
+  const rank = (id: string) => { const index = order.indexOf(id); return index < 0 ? Number.MAX_SAFE_INTEGER : index; };
+  return [...groups].sort((a, b) => rank(a.id) - rank(b.id));
+}
 export const setProjectOrder = (order: string[]) => write({ order, sort: "custom" });
 
 /** Projects of one workspace, in the chosen order. `updatedAt` is the project's latest thread activity. */

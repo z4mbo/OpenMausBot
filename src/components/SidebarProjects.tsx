@@ -3,7 +3,7 @@ import { ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Plus, UserPlus } from
 import type { Bot } from "@/state/store";
 import { cn } from "@/lib/cn";
 import {
-  movedOrder, setAgentsCollapsed, setProjectOrder, setProjectSort, setProjectsCollapsed, sortProjects, switchWorkspace, useWorkspaces, type ProjectSort,
+  movedOrder, orderedGroups, setGroupOrder, setProjectOrder, setProjectSort, setProjectsCollapsed, sortProjects, switchWorkspace, toggleGroup, useWorkspaces, type ProjectSort,
 } from "@/lib/origin-workspaces";
 import { createPortal } from "react-dom";
 import { STANDALONE_SECTION } from "../../shared/origin-workspaces";
@@ -120,24 +120,54 @@ export function SidebarProjects({ projects, row, onNewProject }: { projects: rea
   );
 }
 
-/** Standalone agents: made from scratch or from a template, outside every project, each with its own chat. */
-export function SidebarAgents({ agents, row }: { agents: readonly Bot[]; row(bot: Bot): ReactNode }) {
-  const workspaces = useWorkspaces();
-  const [creating, setCreating] = useState(false);
-  const open = !workspaces.agentsCollapsed;
-  return (
-    <div data-sidebar-agents className="flex flex-col gap-0.5 pt-3">
-      <div className="flex items-center gap-1 px-2 pb-1">
-        <button type="button" aria-expanded={open} onClick={() => setAgentsCollapsed(open)}
-          className="flex min-w-0 flex-1 items-center gap-1 rounded text-[12px] font-medium text-ink-secondary hover:text-ink">
-          <ChevronRight size={12} className={cn("shrink-0 transition-transform", open && "rotate-90")} aria-hidden="true" />Agents
-        </button>
-        <button type="button" aria-label="New agent" title="New agent" onClick={() => setCreating(true)}
-          className="flex size-6 items-center justify-center rounded text-ink-secondary hover:bg-raised hover:text-ink"><Plus size={14} /></button>
-      </div>
-      {open && agents.map((bot) => <div key={bot.id} data-sidebar-agent-row={bot.id}>{row(bot)}</div>)}
-      {open && agents.length === 0 && <p className="px-3 py-1 text-[12px] text-ink-tertiary">No agents yet. Add one from scratch or from a template.</p>}
-      {creating && createPortal(<NewBotDialog section={STANDALONE_SECTION} onClose={() => setCreating(false)} />, document.body)}
-    </div>
-  );
+export interface SidebarGroup { id: string; name: string; rows: ReactNode; empty?: ReactNode; onAdd?: () => void; addLabel?: string }
+
+/** Agents and each template team: groups that fold open and closed and can be dragged into any order. */
+export function SidebarGroups({ groups }: { groups: readonly SidebarGroup[] }) {
+  const view = useWorkspaces();
+  const ordered = orderedGroups(groups, view);
+  const folded = new Set(view.collapsedGroups ?? []);
+  const dragging = useRef<string | null>(null);
+  const [drop, setDrop] = useState<{ id: string; place: "before" | "after" } | null>(null);
+  const place = (event: React.DragEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return event.clientY < rect.top + rect.height / 2 ? "before" as const : "after" as const;
+  };
+  return <>
+    {ordered.map((group) => {
+      const open = !folded.has(group.id);
+      return (
+        <div key={group.id} data-sidebar-group={group.id} className="flex flex-col gap-0.5 pt-3">
+          <div draggable
+            onDragStart={(event) => { dragging.current = group.id; event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("application/x-origin-group", group.id); }}
+            onDragOver={(event) => { if (!dragging.current || dragging.current === group.id) return; event.preventDefault(); setDrop({ id: group.id, place: place(event) }); }}
+            onDragLeave={() => setDrop(null)}
+            onDrop={(event) => {
+              event.preventDefault();
+              const from = dragging.current;
+              if (from && from !== group.id) setGroupOrder(movedOrder(ordered.map((item) => item.id), from, group.id, place(event)));
+              dragging.current = null; setDrop(null);
+            }}
+            onDragEnd={() => { dragging.current = null; setDrop(null); }}
+            className={cn("flex cursor-grab items-center gap-1 rounded px-2 pb-1 active:cursor-grabbing",
+              drop?.id === group.id && (drop.place === "before" ? "shadow-[0_-2px_var(--color-accent)]" : "shadow-[0_2px_var(--color-accent)]"))}>
+            <button type="button" aria-expanded={open} onClick={() => toggleGroup(group.id)}
+              className="flex min-w-0 flex-1 items-center gap-1 rounded text-[12px] font-medium text-ink-secondary hover:text-ink">
+              <ChevronRight size={12} className={cn("shrink-0 transition-transform", open && "rotate-90")} aria-hidden="true" />
+              <span className="truncate">{group.name}</span>
+            </button>
+            {group.onAdd && <button type="button" aria-label={group.addLabel} title={group.addLabel} onClick={group.onAdd}
+              className="flex size-6 items-center justify-center rounded text-ink-secondary hover:bg-raised hover:text-ink"><Plus size={14} /></button>}
+          </div>
+          {open && group.rows}
+          {open && group.empty}
+        </div>
+      );
+    })}
+  </>;
+}
+
+/** Creates a standalone agent, from scratch or from a template, outside every project. */
+export function NewAgentDialog({ onClose }: { onClose(): void }) {
+  return createPortal(<NewBotDialog section={STANDALONE_SECTION} onClose={onClose} />, document.body);
 }
