@@ -57,6 +57,7 @@ import { t } from "@/lib/i18n";
 import { createBotPatchQueue, type BotUpdatePatch } from "./bot-patch-queue";
 import { useChatErrorClear } from "./chat-error";
 import { openLiveEvents, publishLiveFrame, publishMissedFrames } from "@/lib/live-events";
+import { chatHiddenFor } from "@/lib/origin-chief-section";
 
 const MAX_ROUTINE_RUNS = 2_000;
 const ACTIVE_ROUTINE_RUN_STATUSES = new Set<RoutineRun["status"]>(["queued", "running", "waiting"]);
@@ -2923,7 +2924,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           const id = action.type === "select" ? action.id : action.botId;
           const bot = stateRef.current.bots.find((b) => b.id === id);
           const group = stateRef.current.groups.find((g) => g.id === id);
-          if (bot?.unread) {
+          if (bot?.unread && !chatHiddenFor(bot.id)) {
             api(`/api/bots/${id}/read`, { method: "POST", body: JSON.stringify({ threadId: bot.threadId }) }).catch(() => {});
           } else if (group?.unread) {
             api(`/api/groups/${id}/read`, { method: "POST" }).catch(() => {});
@@ -3418,7 +3419,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           const selected = stateRef.current.bots.find((candidate) => candidate.id === bot.id);
           const shown = selected?.switchingTo ?? selected?.threadId;
           const selectedTask = bot.tasks?.find((task) => task.threadId === shown);
-          if (bot.id === stateRef.current.selectedId && stateRef.current.activeView === "chat" &&
+          if (bot.id === stateRef.current.selectedId && stateRef.current.activeView === "chat" && !chatHiddenFor(bot.id) &&
               (selectedTask?.unread || (!bot.tasks && bot.unread))) {
             if (selectedTask) selectedTask.unread = false;
             bot.unread = botShowsUnread(bot);

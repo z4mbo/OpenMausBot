@@ -3,6 +3,8 @@ import { Bug, FolderGit2, Image, KeyRound, MessageSquareHeart, Settings, Users }
 import { unreadReplies } from "@/lib/origin-unread";
 import { UnreadBadge } from "./UnreadBadge";
 import { useStore, type Bot } from "@/state/store";
+import { chiefSectionOf, setChiefSectionOf, type ChiefSection } from "@/lib/origin-chief-section";
+export type { ChiefSection };
 import { openBot } from "@/state/thread-navigation";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { cn } from "@/lib/cn";
@@ -18,13 +20,10 @@ export const CHIEF_SECTIONS = [
   { id: "settings", label: "Settings", icon: Settings, blurb: "Settings for the whole project: its name, members, integrations and defaults for its agents." },
 ] as const;
 
-export type ChiefSection = "chat" | (typeof CHIEF_SECTIONS)[number]["id"];
-
-const chosen = new Map<string, ChiefSection>();
 
 export function useChiefSection(botId: string): [ChiefSection, (section: ChiefSection) => void] {
   const [, render] = useState(0);
-  return [chosen.get(botId) ?? "chat", (next) => { chosen.set(botId, next); render((n) => n + 1); }];
+  return [chiefSectionOf(botId), (next) => { setChiefSectionOf(botId, next); render((n) => n + 1); }];
 }
 
 export function teamAgents(bots: readonly Bot[], chief: Bot): Bot[] {

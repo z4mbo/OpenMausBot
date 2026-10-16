@@ -1042,6 +1042,12 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   const canWrite = useCanWriteIn(bot.threadId);
   const [chiefSection, setChiefSection] = useChiefSection(bot.id);
   const projectPage = Boolean(bot.chiefOfStaff) && !isWorkspaceSection(bot.section);
+  const unreadHere = Boolean(profile.tasks?.find((task) => task.threadId === bot.threadId)?.unread ?? profile.unread);
+  useEffect(() => {
+    if (projectPage && chiefSection === "chat" && unreadHere) {
+      void api(`/api/bots/${profile.id}/read`, { method: "POST", body: JSON.stringify({ threadId: bot.threadId }) }).catch(() => {});
+    }
+  }, [projectPage, chiefSection, unreadHere, profile.id, bot.threadId]);
 
   const computerStarting = computerStartLine(state.computerStarts[bot.id], bot.name);
   const mascotMotion = state.mascotMotion?.botId === bot.id ? state.mascotMotion : null;
