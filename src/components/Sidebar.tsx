@@ -1,4 +1,5 @@
 import { track } from "@/lib/analytics";
+import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_SHOWS_LOOSE_BOTS, headBot } from "@/lib/origin-teams";
 import { OrganizationIdentity } from "./OrganizationIdentity";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type MouseEvent as ReactMouseEvent } from "react";
 import { createPortal } from "react-dom";
@@ -33,7 +34,6 @@ import {
   Trash2,
   Users,
   X,
-  ChevronDown,
 } from "lucide-react";
 import { api, useStore, formatTime, visibleMessages, currentTaskBot, botOpensTo, openBot, openThread, type Action, type AppState, type Bot, type BotProject, type Group, type InstanceInfo, type Message } from "@/state/store";
 import { approvalModeFor } from "../../shared/approval-mode";
@@ -783,15 +783,15 @@ export function BotContextMenu({
     >
       {showThreads && <>
         {item(<Plus size={16} className="text-ink-secondary" />, t("task.newShort"), () => dispatch({ type: "newTask", botId: bot.id }))}
-        {canChooseFolder && item(<FolderOpen size={16} className="shrink-0 text-ink-secondary" />, t("task.folder.new"), () => onNewTaskFolder(bot.id))}
-        {item(<FolderPlus size={16} className="text-ink-secondary" />, t("folder.new"), () => onNewFolder(bot.id))}
+        {CREATES_FOLDERS_AND_GROUPS && canChooseFolder && item(<FolderOpen size={16} className="shrink-0 text-ink-secondary" />, t("task.folder.new"), () => onNewTaskFolder(bot.id))}
+        {CREATES_FOLDERS_AND_GROUPS && item(<FolderPlus size={16} className="text-ink-secondary" />, t("folder.new"), () => onNewFolder(bot.id))}
         {divider("threads")}
       </>}
       {remoteClient ? [
-        item(<FolderPlus size={16} className="text-ink-secondary" />, t("sidebar.bot.moveToSection"), () => {
+        ...(CREATES_FOLDERS_AND_GROUPS ? [item(<FolderPlus size={16} className="text-ink-secondary" />, t("sidebar.bot.moveToSection"), () => {
           onClose();
           onMoveToSection(bot.id);
-        }),
+        })] : []),
         item(<Pencil size={16} className="text-ink-secondary" />, t("sidebar.bot.editProfile"), () => {
           openForSettings();
           if (!state.settingsOpen) dispatch({ type: "toggleSettings", open: true });
@@ -805,7 +805,7 @@ export function BotContextMenu({
           bot.pinned ? t("sidebar.bot.unpin") : t("sidebar.bot.pin"),
           () => dispatch({ type: "updateBot", botId: bot.id, patch: { pinned: !bot.pinned } }),
         ),
-        item(
+        ...(CREATES_FOLDERS_AND_GROUPS ? [item(
           <Crown size={16} className={bot.chiefOfStaff ? "text-accent" : "text-ink-secondary"} />,
           bot.chiefOfStaff ? t("sidebar.bot.removeChief") : t("sidebar.bot.makeChief"),
           () => dispatch({ type: "updateBot", botId: bot.id, patch: { chiefOfStaff: !bot.chiefOfStaff } }),
@@ -817,7 +817,7 @@ export function BotContextMenu({
         item(<FolderPlus size={16} className="text-ink-secondary" />, t("sidebar.bot.moveToSection"), () => {
           onClose();
           onMoveToSection(bot.id);
-        }),
+        })] : []),
         item(<BellDot size={16} className="text-ink-secondary" />, t("sidebar.bot.markUnread"), () =>
           dispatch({ type: "markUnread", botId: bot.id }),
         ),
@@ -1361,7 +1361,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
       {!renaming && !deleting && !iconOnly && <>
         {showThreads && <button type="button" aria-label={t("task.newShort")} title={t("task.newShort")} onClick={() => { setThreadsOpen(true); dispatch({ type: "newTask", botId: bot.id }); }}
           className="pointer-events-none absolute right-[3.75rem] top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><Plus size={14} /></button>}
-        {showThreads && <button type="button" aria-label={t("folder.newNamed", { name: bot.name })} title={t("folder.new")} onClick={() => { setThreadsOpen(true); setCreatingProject(true); }}
+        {CREATES_FOLDERS_AND_GROUPS && showThreads && <button type="button" aria-label={t("folder.newNamed", { name: bot.name })} title={t("folder.new")} onClick={() => { setThreadsOpen(true); setCreatingProject(true); }}
           className="pointer-events-none absolute right-8 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><FolderPlus size={14} /></button>}
         <button type="button" aria-label={t("sidebar.bot.actions", { name: bot.name })} title={t("sidebar.bot.actions", { name: bot.name })} aria-haspopup="menu" onClick={(event) => { const rect = event.currentTarget.getBoundingClientRect(); onMenu({ botId: bot.id, x: rect.left, y: rect.bottom }); }}
           className="pointer-events-none absolute right-1 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded text-ink-secondary opacity-0 hover:bg-raised hover:text-ink group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 max-md:pointer-events-auto max-md:opacity-70 touch:pointer-events-auto touch:opacity-70"><MoreHorizontal size={15} /></button>
@@ -1847,6 +1847,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     sectionedBots,
     unsectionedBots,
   } = partitionSidebarBots(matchingBots, { universalPins });
+  const bossBot = unsectionedChief ?? (SIDEBAR_SHOWS_LOOSE_BOTS ? undefined : headBot(unsectionedBots));
   const { botChats, sectionedRooms, unsectionedRooms } = partitionSidebarGroups(visibleGroups);
 
   const sectionNames: string[] = (state.sections ?? []).filter((name) => !q || name.toLowerCase().includes(q.toLowerCase()));
@@ -1863,7 +1864,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     ...(pinnedBots.length > 0 && !universalPins ? [PINNED_SECTION_ID] : []),
     ...(unsectionedRooms.length > 0 ? [CHANNELS_SECTION_ID] : []),
     ...(botChats.length > 0 ? [BOT_CHATS_SECTION_ID] : []),
-    ...(unsectionedBots.length > 0 ? [BOTS_SECTION_ID] : []),
+    ...(SIDEBAR_SHOWS_LOOSE_BOTS && unsectionedBots.length > 0 ? [BOTS_SECTION_ID] : []),
     ...sectionNames.map(userSectionId),
   ];
   const sectionIds = orderedSidebarSections(naturalSectionIds, sectionOrder);
@@ -2012,7 +2013,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           >
             {density === "icons" ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={17} />}
           </button>}
-          {density === "icons" && <button
+          {SIDEBAR_HAS_SEARCH && density === "icons" && <button
             type="button"
             onClick={openCommandPalette}
             aria-label={t("sidebar.searchAria")}
@@ -2110,7 +2111,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                   <span className="flex-1">{t("sidebar.newBot")}</span>
                   <ShortcutHint id="new-bot" />
                 </button>
-                <button
+                {CREATES_FOLDERS_AND_GROUPS && <button
                   onClick={() => {
                     setPlusOpen(false);
                     setNewRoom(true);
@@ -2119,8 +2120,8 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                 >
                   <Users size={16} className="text-ink-secondary" />
                   {t("sidebar.newChannel.title")}
-                </button>
-                {!remoteClient && <button
+                </button>}
+                {CREATES_FOLDERS_AND_GROUPS && !remoteClient && <button
                   onClick={() => { setPlusOpen(false); setNewTeam(true); }}
                   className="flex w-full items-center gap-3 px-3.5 py-2 text-left text-[14px] text-ink hover:bg-raised/70"
                 >
@@ -2160,7 +2161,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
 
       {density === "icons" && <DesktopWorkspaceSwitcher compact cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />}
       <OrganizationIdentity compact={density === "icons"} />
-      <div className={cn("pt-1 pb-3", density === "icons" ? "hidden" : "px-3")}>
+      <div className={cn("pt-1 pb-3", density === "icons" || !SIDEBAR_HAS_SEARCH ? "hidden" : "px-3")}>
         <div className="flex items-center gap-2 rounded-md border border-hairline/40 bg-inset/40 px-2.5 py-1.5 focus-within:border-focus">
           <Search size={14} className="text-ink-secondary" />
           <input
@@ -2261,9 +2262,9 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           {matchingBots.length === 0 && visibleGroups.length === 0 && q && q.length < MIN_QUERY && (
             <div className="px-3 py-6 text-center text-[13px] text-ink-secondary">{t("sidebar.noMatch", { query })}</div>
           )}
-          {unsectionedChief && (
+          {bossBot && (
             <div className="mb-1.5">
-              <BotListItem {...botRow(unsectionedChief)} />
+              <BotListItem {...botRow(bossBot)} />
             </div>
           )}
           {sectionIds.map((id, index) => {
@@ -2310,25 +2311,13 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                 onDrop={dropSection}
                 className={cn(
                   "flex flex-col gap-0.5",
-                  density !== "icons" && index > 0 && "pt-3",
+                  density !== "icons" && index > 0 && !chiefLed && "pt-3",
                 )}
               >
                 {dropTarget?.id === id && dropTarget.place === "before" && draggingSectionId !== id && (
                   <div className="mx-2 h-0.5 rounded-full bg-accent" />
                 )}
-                {chiefLed && (
-                  <div className="relative" data-team-chief={sectionName} onContextMenu={openTeamMenu}>
-                    {sectionChiefItems.map((bot) => <BotListItem key={bot.id} {...botRow(bot)} />)}
-                    {layoutInteractive && density !== "icons" && (
-                      <button type="button" onClick={() => toggleSection(id)}
-                        aria-label={t(collapsed ? "sidebar.section.expand" : "sidebar.section.collapse", { name: sectionLabel(id) })}
-                        aria-expanded={!collapsed}
-                        className="absolute -left-1 top-1/2 flex h-5 w-4 -translate-y-1/2 items-center justify-center rounded text-ink-secondary hover:text-ink">
-                        {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-                      </button>
-                    )}
-                  </div>
-                )}
+                {chiefLed && sectionChiefItems.map((bot) => <BotListItem key={bot.id} {...botRow(bot)} />)}
                 {density !== "icons" && !chiefLed && (
                   <SidebarSectionHeader
                     name={sectionLabel(id)}
@@ -2350,12 +2339,12 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                     onDelete={!remoteClient && sectionName ? () => setDeletingTeam(sectionName) : undefined}
                   />
                 )}
-                {collapsed && queued.length > 0 && <button type="button" onClick={() => toggleSection(id)}
+                {!chiefLed && collapsed && queued.length > 0 && <button type="button" onClick={() => toggleSection(id)}
                   title={`${t("task.queued")} · ${queued.join(", ")}`} aria-label={`${t("sidebar.section.expand", { name: sectionLabel(id) })} · ${t("task.queued")} · ${queued.join(", ")}`}
                   className="mx-3 mb-1 inline-flex h-7 items-center self-start rounded-full bg-raised/50 px-3 text-[13px] font-medium leading-4 text-ink-secondary hover:text-ink">{t("task.queued")} · {queued.length}</button>}
-                {!collapsed && (
-                  <div className={chiefLed ? "ml-4 flex flex-col gap-0.5 border-l border-hairline pl-1" : "contents"}>
-                    {!chiefLed && sectionChiefItems.map((bot) => <BotListItem key={bot.id} {...botRow(bot)} />)}
+                {!chiefLed && !collapsed && (
+                  <>
+                    {sectionChiefItems.map((bot) => <BotListItem key={bot.id} {...botRow(bot)} />)}
                     {sectionGroupItems.map((group) => (
                       <GroupListItem
                         key={group.id}
@@ -2381,7 +2370,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                         <Plus size={13} /> {t(state.bots.some(bot => !bot.hidden && bot.section?.trim() === sectionName) ? "team.manageBots" : "team.addBots")}
                       </button>
                     )}
-                  </div>
+                  </>
                 )}
                 {dropTarget?.id === id && dropTarget.place === "after" && draggingSectionId !== id && (
                   <div className="mx-2 h-0.5 rounded-full bg-accent" />
@@ -2565,7 +2554,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           style={windowNoDragStyle}
           onClose={() => setNewChatOpen(false)}
           onNewBot={() => { setNewChatOpen(false); dispatch({ type: "toggleNewBot", open: true }); }}
-          onNewGroup={() => { setNewChatOpen(false); setNewRoom(true); }}
+          onNewGroup={CREATES_FOLDERS_AND_GROUPS ? () => { setNewChatOpen(false); setNewRoom(true); } : undefined}
         />,
         document.body,
       )}

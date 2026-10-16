@@ -40,6 +40,7 @@ vi.mock("@/state/store", async (importOriginal) => {
 
 import { Sidebar } from "./Sidebar";
 import { SidebarNewChatPanel } from "./SidebarNewChatPanel";
+vi.mock("@/lib/origin-teams", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/origin-teams")>(), CREATES_FOLDERS_AND_GROUPS: true, SIDEBAR_SHOWS_LOOSE_BOTS: true, SIDEBAR_HAS_SEARCH: true }));
 
 type Props = { children?: ReactNode; className?: string; onClick?: () => void; [key: string]: unknown };
 function nodes(value: ReactNode): ReactElement<Props>[] {

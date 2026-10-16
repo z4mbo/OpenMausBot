@@ -47,13 +47,13 @@ export function SidebarNewChatPanel({
   anchor: HTMLElement | null;
   onClose: () => void;
   onNewBot: () => void;
-  onNewGroup: () => void;
+  onNewGroup?: () => void;
   style?: CSSProperties;
 }) {
   const { state, dispatch } = useStore();
   const showThreads = useShowThreads();
   const [query, setQuery] = useState("");
-  const [cursor, setCursor] = useState(ACTION_COUNT);
+  const [cursor, setCursor] = useState(onNewGroup ? ACTION_COUNT : ACTION_COUNT - 1);
   const [place, setPlace] = useState(() => newChatPanelPlacement(null, typeof window === "undefined" ? 0 : window.innerWidth));
   const [maxHeight, setMaxHeight] = useState(() => newChatPanelMaxHeight(typeof window === "undefined" ? 0 : window.innerHeight));
   const rootRef = useRef<HTMLDivElement>(null);
@@ -85,7 +85,7 @@ export function SidebarNewChatPanel({
   const bots = rankByName(state.bots.filter((bot) => !bot.hidden), query);
   const actions = [
     { key: "bot", icon: <Plus size={16} />, label: t("sidebar.newChat.createBot"), run: onNewBot },
-    { key: "group", icon: <Users size={16} />, label: t("sidebar.newChat.createGroup"), run: onNewGroup },
+    ...(onNewGroup ? [{ key: "group", icon: <Users size={16} />, label: t("sidebar.newChat.createGroup"), run: onNewGroup }] : []),
   ];
   const count = actions.length + bots.length;
   const selected = cursor < actions.length ? cursor : bots.length ? Math.min(cursor, count - 1) : -1;
