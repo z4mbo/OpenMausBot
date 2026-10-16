@@ -8,7 +8,6 @@
  * @module
  */
 
-import type * as agentWorkspace from "../agentWorkspace.js";
 import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
 import type * as commits from "../commits.js";
@@ -52,7 +51,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  agentWorkspace: typeof agentWorkspace;
   auth: typeof auth;
   chat: typeof chat;
   commits: typeof commits;

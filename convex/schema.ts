@@ -202,6 +202,7 @@ export default defineSchema({
 
   connectorGrants: defineTable({
     teamId: v.id("teams"), userId: v.id("users"), tokenHash: v.string(), name: v.string(),
+    // Legacy flag from the removed Agent feature; kept optional so existing grants still validate.
     agentAccess: v.optional(v.boolean()),
     write: v.boolean(), expiresAt: v.number(), createdAt: v.number(), revoked: v.boolean(),
   }).index("by_tokenHash", ["tokenHash"]).index("by_userId_and_teamId", ["userId", "teamId"])

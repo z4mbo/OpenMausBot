@@ -10,39 +10,6 @@ import { repositoryUrl } from "./lib/repository";
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
 const page = { numItems: 50, cursor: null };
 
-describe("Extended Agent grants", () => {
-  test("keeps MCP narrow and rechecks requester, roles and project membership", async () => {
-    const f = await fixture();
-    const narrow = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.owner.token, teamId: f.teamId, name: "MCP", write: true });
-    await expect(f.t.query(api.agentWorkspace.read, { token: narrow.token, request: JSON.stringify({ kind: "documents", projectId: f.shared }) })).rejects.toThrow(/Enable workspace access/);
-    const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.member.token, teamId: f.teamId, name: "Agent", write: true, agentAccess: true });
-    await expect(f.t.query(api.agentWorkspace.read, { token: grant.token, request: JSON.stringify({ kind: "assets", projectId: f.privateProject }) })).rejects.toThrow();
-    const args = { token: grant.token, sessionToken: f.member.token, requestId: "unique-comment", change: JSON.stringify({ kind: "add_comment", projectId: f.shared, taskId: f.issue, body: "Approved once" }) };
-    await expect(f.t.mutation(api.agentWorkspace.apply, { ...args, sessionToken: f.owner.token })).rejects.toThrow(/requesting user/);
-    await f.t.mutation(api.agentWorkspace.apply, args);
-    await f.t.mutation(api.agentWorkspace.apply, args);
-    expect((await f.t.query(api.tasks.details, { sessionToken: f.member.token, projectId: f.shared, taskId: f.issue })).comments).toHaveLength(1);
-    await expect(f.t.mutation(api.agentWorkspace.apply, { ...args, change: JSON.stringify({ kind: "add_comment", projectId: f.shared, taskId: f.issue, body: "Changed" }) })).rejects.toThrow(/already used/);
-    await expect(f.t.mutation(api.agentWorkspace.apply, { ...args, requestId: "invite-test", change: JSON.stringify({ kind: "invite_member", email: "new@example.test", role: "member" }) })).rejects.toThrow();
-    const viewer = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.viewer.token, teamId: f.teamId, name: "Viewer", write: false, agentAccess: true });
-    await expect(f.t.mutation(api.agentWorkspace.apply, { ...args, token: viewer.token, sessionToken: f.viewer.token })).rejects.toThrow();
-    await f.t.mutation(api.teams.leave, { sessionToken: f.member.token, teamId: f.teamId });
-    await expect(f.t.query(api.agentWorkspace.identity, { token: grant.token })).rejects.toThrow();
-  });
-  test("exposes vault names but never encrypted values, notes or usernames", async () => {
-    const f = await fixture();
-    const itemId = await f.t.run(ctx => ctx.db.insert("credentials", { projectId: f.shared, title: "Hosting", kind: "password", username: "sensitive-user", notes: "sensitive-notes", ciphertext: "encrypted-secret", iv: "iv", salt: "salt", kdf: "PBKDF2", iterations: 1, createdAt: Date.now(), updatedAt: Date.now() }));
-    const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.member.token, teamId: f.teamId, name: "Agent", write: false, agentAccess: true });
-    const result = await f.t.query(api.agentWorkspace.read, { token: grant.token, request: JSON.stringify({ kind: "vault", projectId: f.shared }) });
-    expect(JSON.parse(result).items).toEqual([{ id: itemId, title: "Hosting", kind: "password" }]);
-    expect(result).not.toContain("sensitive-");
-    expect(result).not.toContain("encrypted-secret");
-    const approved = await f.t.mutation(api.agentWorkspace.apply, { token: grant.token, sessionToken: f.member.token, requestId: "request-vault-item", change: JSON.stringify({ kind: "request_vault", projectId: f.shared, credentialId: itemId, reason: "Check hosting" }) });
-    expect(JSON.parse(approved).credentialId).toBe(itemId);
-    expect(approved).not.toContain("encrypted-secret");
-  });
-});
-
 async function fixture() {
   const t = convexTest(schema, modules);
   const data = await t.run(async ctx => {
@@ -71,7 +38,7 @@ async function fixture() {
 describe("Project access", () => {
   test("members can leave without deleting work; invitations do not restore old grants", async () => {
     const f = await fixture();
-    const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.member.token, teamId: f.teamId, name: "Agent", write: true });
+    const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.member.token, teamId: f.teamId, name: "MCP", write: true });
     await f.t.mutation(api.teams.leave, { sessionToken: f.member.token, teamId: f.teamId });
     expect(await f.t.query(api.workspaces.list, { sessionToken: f.member.token })).toHaveLength(0);
     await expect(f.t.query(api.connectors.verify, { token: grant.token })).rejects.toThrow();

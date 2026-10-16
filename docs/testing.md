@@ -5,7 +5,6 @@ Fast checks do not need a production connection:
 ```sh
 npx tsc --noEmit
 npx vitest run
-node --test scripts/test-agent-companion.mjs
 node scripts/test-plugin-package.mjs
 npx tsx scripts/test-document-sync.ts
 npx tsx scripts/test-chat-composer.ts
@@ -20,22 +19,6 @@ npm run build
 The Convex unit suite uses in-memory synthetic data. It covers project membership, viewer restrictions, invitation links, removal/revocation, inactive projects and legacy states, inline comment references, mentions, attachments, collaborative checklists, preserved drawing data, MCP idempotency and GitHub closure ordering. It never connects to a live deployment.
 
 Integration tests use a separate local Convex backend at `http://127.0.0.1:3210`, its HTTP endpoint at port 3211, and a local Origin server. They intentionally refuse non-localhost service URLs. Never copy production data into the fixtures.
-
-`node scripts/test-agent-workflow.mjs` checks the actual Agent HTTP endpoint with
-synthetic accounts: pairing/replay, private conversations, approved writes,
-argument tampering, idempotency, completion, cancellation, read-only grants and
-revocation. It does not call a model. The companion transport suite uses mocked
-Codex messages; a separate signed-in local companion smoke test is needed to
-verify real model responses and dynamic tool calls.
-
-`node scripts/test-agent-shared.mjs` checks shared-runner isolation, private DMs
-and projects, read-only/viewer permissions, disabling a workspace and formatting
-without tools. `scripts/local-agent-qa.mjs` can start and deploy an isolated local
-backend when its `CONVEX_TEST_BINARY` is available. The optional
-`scripts/local-agent-smoke.mjs` requires explicit `ORIGIN_SMOKE_AUTH_FILE` pointing
-to an authorized companion login; it uses real subscription quota on synthetic
-data, never paid API keys. `--serve` keeps that temporary runner available for
-browser QA; stopping it revokes its grant and removes its temporary profile.
 
 `scripts/test-workspace.mjs` creates synthetic users, a workspace, projects, and `/tmp/origin-qa-session.json`. This temporary file contains test credentials; do not publish it. Set `TEST_CONVEX_URL` and `TEST_ORIGIN_URL` for your isolated environment before running the fixture.
 

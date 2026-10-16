@@ -24,7 +24,7 @@ export async function authorize(ctx: QueryCtx | MutationCtx, token: string, writ
 }
 
 export const createGrant = mutation({
-  args: { sessionToken: v.string(), teamId: v.id("teams"), name: v.string(), write: v.boolean(), agentAccess: v.optional(v.boolean()) },
+  args: { sessionToken: v.string(), teamId: v.id("teams"), name: v.string(), write: v.boolean() },
   returns: v.object({ token: v.string(), grantId: v.id("connectorGrants"), expiresAt: v.number() }),
   handler: async (ctx, args) => {
     const { user, member } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
@@ -34,7 +34,7 @@ export const createGrant = mutation({
     const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, "0")).join("");
     const expiresAt = Date.now() + 90 * 86400000;
     const grantId = await ctx.db.insert("connectorGrants", { teamId: args.teamId, userId: user._id, name: args.name.slice(0, 120),
-      tokenHash: await hashToken(token), write: args.write, agentAccess: args.agentAccess, expiresAt, createdAt: Date.now(), revoked: false });
+      tokenHash: await hashToken(token), write: args.write, expiresAt, createdAt: Date.now(), revoked: false });
     return { token, grantId, expiresAt };
   },
 });

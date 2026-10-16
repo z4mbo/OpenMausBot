@@ -1,17 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowUpRight, ArrowUp, Check, Command, CornerDownLeft, Inbox, Keyboard, MousePointer2, PanelLeft, Plus, Search, SlidersHorizontal, Sparkles } from "lucide-react";
+import { ArrowUpRight, Command, CornerDownLeft, Inbox, Keyboard, PanelLeft, Plus, Search, SlidersHorizontal, Sparkles } from "lucide-react";
 import { isReleaseHistory, releases, releaseStorageKey } from "@/lib/releases";
 import { hasOpenKeyboardOverlay, isEditingTarget } from "@/lib/keyboard-navigation";
 import { Dialog } from "./dialog";
 
 const seenThisSession = new Set<string>();
-const changeIcons = [MousePointer2, Keyboard, Plus, PanelLeft, Inbox, SlidersHorizontal];
+const changeIcons = [Keyboard, Plus, PanelLeft, Inbox, SlidersHorizontal];
 
 function ReleasePreview() {
   return <div className="release-preview" aria-hidden="true">
-    <div className="release-agent-demo"><div className="release-demo-label"><MousePointer2 size={15} />Agent<span>Origin</span></div><div className="release-demo-prompt">Plan the next release<ArrowUp size={13} /></div><div className="release-demo-task"><Check size={13} /><span>Polish the workspace</span><small>Ready</small></div><div className="release-demo-task"><Check size={13} /><span>Bring the team together</span><small>Ready</small></div><div className="release-demo-approval"><span>2 proposed issues</span><span><Check size={12} />Approve</span></div></div>
     <div className="release-keyboard-demo"><div><kbd>C</kbd><Plus size={13} /><span>New issue</span></div><div><kbd>F</kbd><Search size={13} /><span>Find anything</span></div><div><kbd><CornerDownLeft size={16} /></kbd><span>Open best match</span></div><div className="release-shortcut-caption"><Command size={12} />Less clicking. More doing.</div></div>
   </div>;
 }
@@ -69,7 +68,7 @@ export function WhatsNew({ userId }: { userId: string }) {
       <div className="release-history">{history.map(release => <article className="release-entry" key={release.version}>
         <div className="release-meta"><span>Version {release.version}</span><time dateTime={release.date}>{new Date(`${release.date}T12:00:00`).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}</time></div>
         <h3>{release.title}</h3>
-        {(release.version === "1.0" || release.version === "1.1") && <ReleasePreview />}
+        {release.version === "1.0" && <ReleasePreview />}
         <ul>{release.changes.map((change, index) => { const Icon = changeIcons[index % changeIcons.length]; return <li key={change.title}><span className="release-change-icon"><Icon size={17} /></span><div><h4>{change.title}</h4><p>{change.body}</p></div></li>; })}</ul>
       </article>)}</div>
     </Dialog>}

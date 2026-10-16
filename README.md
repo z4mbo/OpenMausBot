@@ -8,7 +8,7 @@
 
 <p><strong>Your team's work, in one place.</strong><br />
 Issues, chat, calls, and a shared canvas in one quiet workspace.<br />
-Open source and self-hosted: run it on your own server, connected to GitHub and your AI agents.</p>
+Open source and self-hosted: run it on your own server, connected to GitHub.</p>
 
 <p>
   <a href="#run-locally"><strong>Run locally</strong></a> ·
@@ -42,7 +42,6 @@ Open source and self-hosted: run it on your own server, connected to GitHub and 
 | Chat | Workspace chat and DMs, full-history text search, attachments, mentions, reactions, pins, and message-to-issue creation. |
 | Call | Audio, video, screen sharing, participant focus, and a self-hosted TURN relay. |
 | Draw | A shared Excalidraw canvas with real-time editing and cursors. |
-| Agent | One workspace assistant, with approved changes and issue rewriting. Connect Codex locally or on your private server, or use your own OpenAI, Anthropic or OpenRouter API key. |
 | Project feedback | A dedicated tab in each project, with an opt-in public submission form. Triage privately and convert feedback into assigned issues. |
 
 Completed issues stay accessible in each project's completed view. They do not occupy a kanban column or inflate the sidebar's open-issue count.
@@ -103,14 +102,9 @@ Create an Origin issue, select **Create GitHub issue**, and implement it in the 
 
 Origin also exposes an OAuth-protected MCP endpoint at `/api/mcp`. AI clients can read projects, issues and inbox events, and optionally create, modify, complete or delete issues in a workspace you authorize. Access is revocable and expires. The connector does not expose chat contents, the vault, GitHub credentials, or arbitrary code execution. See the [MCP guide](docs/claude-origin.md) and [Codex plugin](plugins/origin).
 
-Prefer staying inside Origin? Open **Agent** and choose a [local or server companion](docs/agent.md),
-or an admin-supplied API key. Admins can share a runner with their workspace while
-each member keeps their own data permissions. Every change needs approval.
-Repository coding is not enabled yet.
-
 ## Run Locally
 
-Requirements: Node.js 24+, npm, and a Convex deployment. No OpenAI or Anthropic API key is required.
+Requirements: Node.js 24+, npm, and a Convex deployment.
 
 ```sh
 git clone https://github.com/z4mbo/origin-workspace.git

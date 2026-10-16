@@ -6,7 +6,6 @@ import "./features.css";
 import "./project-workflow.css";
 import "./experience.css";
 import "./workspace-refinement.css";
-import "./agent.css";
 import { Providers } from "./providers";
 import { bodyFont, displayFont, monoFont } from "@/lib/fonts";
 import { siteUrl } from "@/lib/site";

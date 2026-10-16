@@ -10,7 +10,6 @@ import { IssueFields } from "./issue-fields";
 import { IssueSelect } from "./issue-select";
 import { ProjectIcon } from "./project-icon";
 import { rankSearchResults } from "@/lib/search-ranking";
-import { IssueAiFormat } from "./issue-ai-format";
 
 export function IssueComposer({
   sessionToken,
@@ -153,7 +152,6 @@ export function IssueComposer({
               rows={5}
               disabled={busy}
             />
-            <IssueAiFormat sessionToken={sessionToken} projectId={projectId} text={description} disabled={busy} onApply={setDescription} />
             <IssueFields
               columns={columns}
               members={members || []}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
-import { AgentView } from "./agent-view";
 import { TaskActionsMenu } from "./task-actions-menu";
 import clsx from "clsx";
 import {
@@ -53,7 +52,6 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
-  MousePointer2,
   PanelLeftClose,
   PanelLeftOpen,
   SquarePen,
@@ -68,7 +66,6 @@ import { FormEvent, useCallback, useEffect, useRef, useState, type CSSProperties
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { decryptSecret, encryptSecret, type EncryptedSecret } from "@/lib/vaultCrypto";
-import { IssueAiFormat } from "./issue-ai-format";
 import { MemberProfileContext, useMemberProfile, useWorkspace, type Workspace } from "./workspace-context";
 import { MemberProfile } from "./member-profile";
 import { useModalKeyboard } from "./use-modal-keyboard";
@@ -126,7 +123,7 @@ type AuthUser = {
 };
 type AuthSession = { sessionToken: string; user: AuthUser };
 type TabKey = "board" | "repo" | "assets" | "vault" | "feedback" | "settings";
-type MainView = "project" | "inbox" | "chat" | "voice" | "draw" | "agent";
+type MainView = "project" | "inbox" | "chat" | "voice" | "draw";
 type Role = "admin" | "member" | "viewer";
 type Priority = "low" | "medium" | "high";
 type CredentialKind = "password" | "api_key" | "secret" | "note";
@@ -429,7 +426,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
     const githubStatus = params.get("github");
     if (githubStatus) setShellNotice(githubStatus === "connected" ? "GitHub connected to this workspace." : githubStatus === "app-ready" ? "GitHub App ready. Open Settings > Integrations to connect your workspace." : "GitHub connection was not completed. Try again from Settings > Integrations.");
     const view = params.get("view");
-    if (view && ["chat", "voice", "draw", "inbox", "agent"].includes(view)) setMainView(view as MainView);
+    if (view && ["chat", "voice", "draw", "inbox"].includes(view)) setMainView(view as MainView);
     const project = params.get("project");
     if (project) setActiveProjectId(project as Id<"projects">);
     const issue = params.get("issue");
@@ -522,7 +519,6 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
             <small>{voiceParticipants?.length ?? 0}</small>
           </button>
           <button className={clsx("nav-item", mainView === "draw" && "active")} type="button" onClick={() => openView("draw")}><PenTool size={16} /><span>Draw</span></button>
-          <button className={clsx("nav-item", mainView === "agent" && "active")} type="button" onClick={() => openView("agent")}><MousePointer2 size={16} /><span>Agent</span></button>
           </nav>
           <div className="sidebar-section">
             <div className="sidebar-section-head">
@@ -571,7 +567,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
         {sidebarCollapsed && <button className="icon-button sidebar-restore" aria-label="Keep sidebar open" title="Keep sidebar open" aria-controls="workspace-sidebar" aria-expanded="false" onClick={() => { setSidebarCollapsed(false); setSidebarHover(false); }}><PanelLeftOpen size={18} /></button>}
         {viewLoading && <div className="view-loading-overlay"><ContentSkeleton kind={mainView === "chat" ? "chat" : mainView === "draw" ? "canvas" : mainView === "project" || mainView === "voice" ? "board" : "list"} label="Loading view" rows={6} /></div>}
         {shellNotice && <div className="notice danger">{shellNotice}<button className="icon-button" aria-label="Dismiss" onClick={() => setShellNotice("")}><X size={14} /></button></div>}
-        {mainView === "agent" ? <AgentView sessionToken={sessionToken} /> : mainView === "chat" ? (
+        {mainView === "chat" ? (
           <ChatView sessionToken={sessionToken} user={user} focusMessageId={chatFocus} onOpenReference={(projectId, taskId) => { if (taskId) setLinkedTask({ projectId, taskId }); else openProject(projectId); }} />
         ) : mainView === "draw" || mainView === "voice" ? null
         : mainView === "inbox" ? (
@@ -1669,7 +1665,6 @@ function TaskModal({
         </div>
         <textarea className="issue-title-input" aria-label="Issue title" autoFocus={canEdit} value={title} onChange={event => setTitle(event.target.value)} disabled={!canEdit} rows={2} maxLength={250} required />
         <textarea className="issue-detail-description" aria-label="Issue description" value={description} onChange={event => setDescription(event.target.value)} rows={5} placeholder="Add a description..." disabled={!canEdit} />
-        {canEdit && <IssueAiFormat sessionToken={sessionToken} projectId={projectId} text={description} onApply={setDescription} />}
       </section>
       <aside className="issue-detail-sidebar" aria-label="Issue properties">
         <h3>Properties</h3>
