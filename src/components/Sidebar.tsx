@@ -1857,7 +1857,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const workspaces = useWorkspaces();
   const workspaceHeads = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : workspaceHeadsOf(sectionChiefs);
   const activeHeadId = activeWorkspace(workspaces, workspaceHeads);
-  const bossBot = SIDEBAR_SHOWS_LOOSE_BOTS ? unsectionedChief : workspaceHeads.find((head) => head.id === activeHeadId) ?? unsectionedChief;
+  const bossBot = SIDEBAR_SHOWS_LOOSE_BOTS ? unsectionedChief : workspaceHeads.find((head) => head.id === activeHeadId) ?? unsectionedChief ?? unsectionedBots.at(-1);
   const workspaceProjects = sectionChiefs.filter((chief) => !isWorkspaceSection(chief.section) && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, chief));
   const newWorkspace = () => {
     void api<{ bot: Bot }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name: "New workspace" }) })
