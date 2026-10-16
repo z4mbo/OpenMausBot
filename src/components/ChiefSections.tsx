@@ -13,7 +13,7 @@ export const CHIEF_SECTIONS = [
   { id: "vault", label: "Vault", icon: KeyRound, blurb: "Keys, logins and secrets this project's agents may use." },
   { id: "repo", label: "Repo", icon: FolderGit2, blurb: "The project's code repository and its pull requests." },
   { id: "feedback", label: "Feedback", icon: MessageSquareHeart, blurb: "What users say about the project, collected in one place." },
-  { id: "settings", label: "Settings", icon: Settings, blurb: "" },
+  { id: "settings", label: "Settings", icon: Settings, blurb: "Settings for the whole project: its name, members, integrations and defaults for its agents." },
 ] as const;
 
 export type ChiefSection = "chat" | (typeof CHIEF_SECTIONS)[number]["id"];
@@ -31,7 +31,6 @@ export function teamAgents(bots: readonly Bot[], chief: Bot): Bot[] {
 }
 
 export function ChiefSectionBar({ bot, section, onSection }: { bot: Bot; section: ChiefSection; onSection(section: ChiefSection): void }) {
-  const { dispatch } = useStore();
   return (
     <nav aria-label={`${bot.name} sections`} data-chief-sections className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-hairline/40 px-4 py-2 pl-11 md:pl-4">
       <button type="button" onClick={() => onSection("chat")} aria-current={section === "chat" ? "page" : undefined}
@@ -43,7 +42,7 @@ export function ChiefSectionBar({ bot, section, onSection }: { bot: Bot; section
       </button>
       {CHIEF_SECTIONS.map(({ id, label, icon: Icon }) => (
         <button key={id} type="button" aria-current={section === id ? "page" : undefined}
-          onClick={() => id === "settings" ? dispatch({ type: "toggleSettings", botId: bot.id, open: true }) : onSection(id)}
+          onClick={() => onSection(id)}
           className={cn("flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] text-ink-secondary hover:bg-raised hover:text-ink",
             section === id && "bg-raised text-ink")}>
           <Icon size={14} aria-hidden="true" />{label}
