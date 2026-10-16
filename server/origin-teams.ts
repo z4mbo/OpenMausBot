@@ -1,4 +1,4 @@
-import { WORKSPACE_PREFIX, isWorkspaceSection } from "../shared/origin-workspaces.ts";
+import { STANDALONE_SECTION, WORKSPACE_PREFIX, isWorkspaceSection } from "../shared/origin-workspaces.ts";
 import type { WireBot } from "../shared/wire.ts";
 import type { ModelSelection } from "./contracts.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
@@ -96,7 +96,8 @@ export function ensureWorkspaces(store: Store): BotRecord[] {
   const converted = store.bots.filter(bot => !sectionOf(bot) && !bot.hidden).reverse().map(bot => makeWorkspaceHead(store, bot));
   const [first] = workspaceHeads(store);
   if (!first) return converted;
-  const projects = new Set(store.bots.filter(bot => bot.chiefOfStaff && sectionOf(bot) && !isWorkspaceSection(bot.section)).map(sectionOf));
+  const templateTeams = new Set(store.bots.filter(bot => bot.installedPackage).map(sectionOf));
+  const projects = new Set(store.bots.filter(bot => bot.chiefOfStaff && sectionOf(bot) && !isWorkspaceSection(bot.section) && !templateTeams.has(sectionOf(bot))).map(sectionOf));
   for (const team of projects) {
     if (!workspaceHeads(store).some(head => head.managedSections?.includes(team))) fileUnderWorkspace(store, first, team);
   }
@@ -105,7 +106,7 @@ export function ensureWorkspaces(store: Store): BotRecord[] {
 
 /** Every named team is led by a Chief bot; a team without one gets a Chief named after it. */
 export function ensureTeamChiefs(store: Store, selection: ModelSelection): BotRecord[] {
-  const teams = new Set([...store.sections, ...store.bots.map(sectionOf)].filter(Boolean));
+  const teams = new Set([...store.sections, ...store.bots.map(sectionOf)].filter(team => team && team !== STANDALONE_SECTION));
   const created: BotRecord[] = [];
   for (const team of teams) {
     if (store.bots.some(bot => sectionOf(bot) === team && bot.chiefOfStaff)) continue;

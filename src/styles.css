@@ -2202,9 +2202,15 @@ button:disabled.bg-danger {
 
 [data-origin-inset] { background: var(--color-panel); }
 [data-origin-inset] > [data-sidebar] { border-right-color: transparent; }
-[data-origin-inset] > main {
-  margin: 8px 8px 8px 0;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--color-hairline) 35%, transparent);
+@media (min-width: 768px) {
+  [data-origin-inset] > main,
+  [data-origin-inset] > aside:not([data-sidebar]):not([aria-label="Notifications"]) {
+    margin: 8px 8px 8px 0;
+    height: auto;
+    align-self: stretch;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-hairline) 35%, transparent);
+  }
+  [data-origin-inset] > aside:not([data-sidebar]):not([aria-label="Notifications"]) { background: var(--color-app); }
 }

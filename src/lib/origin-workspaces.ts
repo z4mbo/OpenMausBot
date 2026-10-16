@@ -9,6 +9,7 @@ interface WorkspaceView {
   order: string[];
   sort: ProjectSort;
   collapsed: boolean;
+  agentsCollapsed?: boolean;
 }
 
 interface Head { id: string; section?: string; chiefOfStaff?: boolean; managedSections?: string[] }
@@ -62,6 +63,7 @@ export const activeWorkspaceId = () => read().active;
 export const switchWorkspace = (headId: string) => write({ active: headId });
 export const setProjectSort = (sort: ProjectSort) => write({ sort });
 export const setProjectsCollapsed = (collapsed: boolean) => write({ collapsed });
+export const setAgentsCollapsed = (agentsCollapsed: boolean) => write({ agentsCollapsed });
 export const setProjectOrder = (order: string[]) => write({ order, sort: "custom" });
 
 /** Projects of one workspace, in the chosen order. `updatedAt` is the project's latest thread activity. */

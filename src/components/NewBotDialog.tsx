@@ -5,6 +5,7 @@ import { BotCreationDraft, EMPTY_BOT_DEFAULTS } from "@/lib/bot-creation-draft";
 import { createConfiguredBot, preparedBotTemplate } from "@/lib/create-configured-bot";
 import { NEW_PROJECT_DIALOG, PROJECT_LEAD_ROLE, createDefaultTeam } from "@/lib/origin-teams";
 import { activeWorkspaceId } from "@/lib/origin-workspaces";
+import { STANDALONE_SECTION } from "../../shared/origin-workspaces";
 import { BOT_ROLES, roleProfilePatch } from "@/lib/bot-roles";
 import { chosenPreset, presetDraftPatch, presetGroups, presetPictureFile, presetSummaryLines, type BotPreset } from "@/lib/bot-presets";
 import { cn } from "@/lib/cn";
@@ -178,7 +179,8 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
       else parent.dispatch(action);
     },
   };
-  const title = defaultsMode ? t("newBot.defaults") : NEW_PROJECT_DIALOG ? "New project" : t("sidebar.newBot");
+  const projectDialog = NEW_PROJECT_DIALOG && section === undefined;
+  const title = defaultsMode ? t("newBot.defaults") : projectDialog ? "New project" : section === STANDALONE_SECTION ? "New agent" : t("sidebar.newBot");
   return <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-3 sm:p-5">
     <div ref={dialog} role="dialog" aria-modal="true" aria-label={title} aria-busy={saving} tabIndex={-1}
       className="flex h-[min(760px,94dvh)] w-full max-w-[900px] flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-panel shadow-2xl outline-none">
@@ -232,7 +234,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
         <button type="button" onClick={() => closeRef.current()} className="rounded-lg px-4 py-2 text-[13px] text-ink-secondary hover:bg-control">{t("common.cancel")}</button>
         <button type="button" disabled={!ready || saving || (!defaultsMode && !bot.name.trim())} onClick={() => void save()}
           className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2 text-[13px] font-medium text-white hover:brightness-110 disabled:opacity-40">
-          {saving && <Loader2 size={15} className="animate-spin" />}{defaultsMode ? t("newBot.saveDefaults") : NEW_PROJECT_DIALOG ? "Create project" : t("newBot.create")}
+          {saving && <Loader2 size={15} className="animate-spin" />}{defaultsMode ? t("newBot.saveDefaults") : projectDialog ? "Create project" : t("newBot.create")}
         </button>
       </div>
       <LocalComputerAutoWarning open={warning === "local"} onCancel={() => setWarning(null)} onConfirm={() => { draft.consent.acknowledgeLocalAuto = true; setWarning(null); void save(); }} />
@@ -244,7 +246,7 @@ function DraftSection({ active, draft, defaultsMode }: { active: Section; draft:
   const bot = draft.bot;
   const { state } = useStore();
   const derived = useBotSettingsDerived(bot);
-  const projectDialog = NEW_PROJECT_DIALOG && !defaultsMode;
+  const projectDialog = NEW_PROJECT_DIALOG && !defaultsMode && !bot.section;
   if (active === "Identity") return <div className="space-y-4">
     {projectDialog && <label className="block text-[13px] text-ink-secondary">Project name
       <input autoFocus className={cn(inputCls, "mt-1.5")} maxLength={100} value={bot.name} placeholder="Name your project"
@@ -289,7 +291,7 @@ function StartingRole({ draft, defaultsMode }: { draft: BotCreationDraft; defaul
     if (!preset) {
       draft.choosePreset(undefined);
       const role = BOT_ROLES.find(role => role.id === value);
-      const projectDialog = NEW_PROJECT_DIALOG && !defaultsMode;
+      const projectDialog = NEW_PROJECT_DIALOG && !defaultsMode && !draft.bot.section;
       if (role) {
         const { name, ...fields } = roleProfilePatch(role);
         draft.patch(projectDialog ? fields : { name, ...fields });
@@ -325,7 +327,7 @@ function StartingRole({ draft, defaultsMode }: { draft: BotCreationDraft; defaul
   return <div>
     <label className="block text-[13px] text-ink-secondary">{t("newBot.startingRole")}
       <Select size="lg" className="mt-1.5 w-full" value={draft.preset ? `preset:${draft.preset.id}` : ""} onChange={event => void choose(event.target.value)}>
-        <option value="">{NEW_PROJECT_DIALOG && !defaultsMode ? PROJECT_LEAD_ROLE.title : t("newBot.customSettings")}</option>
+        <option value="">{NEW_PROJECT_DIALOG && !defaultsMode && !draft.bot.section ? PROJECT_LEAD_ROLE.title : t("newBot.customSettings")}</option>
         {presetGroups(presets).map(group => <optgroup key={group.label} label={group.label}>
           {group.presets.map(preset => <option key={preset.id} value={`preset:${preset.id}`}>{preset.name}</option>)}
         </optgroup>)}

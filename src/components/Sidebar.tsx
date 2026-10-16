@@ -1,7 +1,7 @@
 import { track } from "@/lib/analytics";
 import { activeWorkspace, inWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
-import { isWorkspaceSection } from "../../shared/origin-workspaces";
-import { SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
+import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
+import { SidebarAgents, SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
 import { unreadReplies } from "@/lib/origin-unread";
 import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
@@ -1860,9 +1860,17 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   } = partitionSidebarBots(matchingBots, { universalPins });
   const workspaces = useWorkspaces();
   const workspaceHeads = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : workspaceHeadsOf(sectionChiefs);
+  const managedTeams = new Set(workspaceHeads.flatMap((head) => head.managedSections ?? []).map((name) => name.trim()));
+  const standaloneTeams = new Set(state.bots.filter((bot) => bot.installedPackage).map((bot) => bot.section?.trim() ?? "").filter(Boolean));
+  standaloneTeams.add(STANDALONE_SECTION);
+  const standaloneAgents = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : state.bots
+    .filter((bot) => !bot.hidden && !isWorkspaceSection(bot.section) && bot.section?.trim()
+      && (standaloneTeams.has(bot.section.trim()) || !managedTeams.has(bot.section.trim())))
+    .sort((a, b) => (a.section ?? "").localeCompare(b.section ?? "") || Number(Boolean(b.chiefOfStaff)) - Number(Boolean(a.chiefOfStaff)));
   const activeHeadId = activeWorkspace(workspaces, workspaceHeads);
   const bossBot = SIDEBAR_SHOWS_LOOSE_BOTS ? unsectionedChief : workspaceHeads.find((head) => head.id === activeHeadId) ?? unsectionedChief ?? unsectionedBots.at(-1);
-  const workspaceProjects = sectionChiefs.filter((chief) => !isWorkspaceSection(chief.section) && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, chief));
+  const workspaceProjects = sectionChiefs.filter((chief) => !isWorkspaceSection(chief.section) && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, chief)
+    && !standaloneTeams.has(chief.section?.trim() ?? ""));
   const newWorkspace = () => {
     void api<{ bot: Bot }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name: "New workspace" }) })
       .then(({ bot }) => { dispatch({ type: "botAdded", bot }); switchWorkspace(bot.id); })
@@ -2288,14 +2296,18 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
             <div className="px-3 py-6 text-center text-[13px] text-ink-secondary">{t("sidebar.noMatch", { query })}</div>
           )}
           {bossBot && (
-            <div className="mb-1.5">
+            <div className="relative mb-1.5">
               <BotListItem {...botRow(bossBot)} trailing={SIDEBAR_SHOWS_LOOSE_BOTS ? undefined
                 : <WorkspaceSwitcher heads={workspaceHeads} activeId={activeHeadId} onNewWorkspace={newWorkspace} />} />
+              {!SIDEBAR_SHOWS_LOOSE_BOTS && density === "icons" && <WorkspaceSwitcher compact heads={workspaceHeads} activeId={activeHeadId} onNewWorkspace={newWorkspace} />}
             </div>
           )}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
             <SidebarProjects projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} />}
               onNewProject={() => dispatch({ type: "toggleNewBot", open: true })} />
+          )}
+          {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
+            <SidebarAgents agents={standaloneAgents} row={(bot) => <BotListItem {...botRow(bot)} />} />
           )}
           {sectionIds.map((id, index) => {
             const sectionName = userSectionName(id);
