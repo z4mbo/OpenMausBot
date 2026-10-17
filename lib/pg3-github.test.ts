@@ -104,7 +104,7 @@ test("PG3 O-118: ambiguous create reconciles the marker; retries and durable iss
 test("PG3 O-119/O-120: signed webhook, dedupe, invalid delivery/HMAC, polling and close/reopen preserve columns", async () => {
   const f = await fixture();
   await createGitHubTask(f.projectId, f.taskId);
-  await f.t.mutation(api.tasks.updateTask, { sessionToken: f.owner.sessionToken, projectId: f.projectId, taskId: f.taskId, done: true });
+  await f.t.run(async ctx => { await ctx.db.patch(f.taskId, { done: true }); await ctx.db.patch(f.projectId, { openIssueCount: ((await ctx.db.get(f.projectId))!.openIssueCount ?? 1) - 1 }); });
   const id = randomUUID();
   const accepted = await f.webhook(f.payload, id);
   const results = await Promise.allSettled(vi.mocked(integrationBridge).mock.results.map(result => result.value));
