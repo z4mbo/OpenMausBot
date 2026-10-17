@@ -8,6 +8,9 @@ import type { SearchHit } from "@/lib/search-hit";
 import { landOnSearchHit } from "@/lib/focus-message";
 import { WORKSPACE_NAV } from "@/lib/origin-teams";
 import { OriginSearch } from "./OriginSearch";
+import { openNewIssue } from "@/lib/origin-new-issue";
+import { cloudProjectOf, useCloudLinks } from "@/lib/origin-cloud-links";
+import { currentOriginPage } from "@/lib/origin-pages";
 
 type PaletteEntry =
   | { kind: "bot"; bot: Bot }
@@ -28,12 +31,31 @@ export function CommandPalette({ onOpenChange }: { onOpenChange?: (open: boolean
   const [messageHits, setMessageHits] = useState<SearchHit[]>([]);
   const [cursor, setCursor] = useState(0);
   const selectedRef = useRef<HTMLButtonElement>(null);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const links = useCloudLinks();
+  const linksRef = useRef(links);
+  linksRef.current = links;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !e.shiftKey && !e.altKey) {
         e.preventDefault();
         setOpen((o) => !o);
+        return;
+      }
+      if (!WORKSPACE_NAV || e.defaultPrevented || e.repeat || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable=true], [role=dialog]")) return;
+      const key = e.key.toLowerCase();
+      if (key === "f") {
+        e.preventDefault();
+        setOpen(true);
+      } else if (key === "c") {
+        e.preventDefault();
+        const current = stateRef.current;
+        const selected = current.activeView === "chat" && !currentOriginPage() ? current.selectedId : null;
+        openNewIssue(selected ? cloudProjectOf(current.bots, linksRef.current.projects, selected) ?? null : null);
       }
     };
     const onOpen = () => setOpen(true);
