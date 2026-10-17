@@ -13,6 +13,11 @@ import { shareSession } from "./OriginConnect";
 
 const DEV_ORIGIN_URL = "http://127.0.0.1:3210";
 const SYNC_EVERY_MS = 60_000;
+const SIGN_IN_TIMEOUT_MS = 15_000;
+
+function withTimeout<T>(work: Promise<T>, server: string): Promise<T> {
+  return Promise.race([work, new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error(`Can't reach the Origin server at ${server}`)), SIGN_IN_TIMEOUT_MS))]);
+}
 
 const errorText = (cause: unknown) => {
   const text = cause instanceof Error ? cause.message : String(cause);
@@ -69,9 +74,9 @@ function SignIn() {
     try {
       if (invite.trim() && !token) throw new Error("That invite link doesn't look right");
       setCloudUrl(server.trim() || null);
-      const result = mode === "signin"
-        ? await cloudAction<{ sessionToken: string }>("auth:login", { email: email.trim(), password, sessionToken: undefined })
-        : await cloudAction<{ sessionToken: string }>("auth:signup", { email: email.trim(), password, name: name.trim(), ...(token ? { inviteToken: token } : {}), sessionToken: undefined });
+      const result = await withTimeout(mode === "signin"
+        ? cloudAction<{ sessionToken: string }>("auth:login", { email: email.trim(), password, sessionToken: undefined })
+        : cloudAction<{ sessionToken: string }>("auth:signup", { email: email.trim(), password, name: name.trim(), ...(token ? { inviteToken: token } : {}), sessionToken: undefined }), server.trim());
       setSessionToken(result.sessionToken);
       if (token) await cloudMutation("workspaces:acceptInvite", { token });
       await shareSession(server.trim(), result.sessionToken);

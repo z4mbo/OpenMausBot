@@ -88,6 +88,8 @@ export function useCloudPages<T>(name: string, args: Record<string, unknown> | "
   return { results, status, loadMore };
 }
 
+const SESSION_CHECK_MS = 8_000;
+
 export function useCloudSession(): {
   user: CloudUser | null;
   token: string | null;
@@ -98,10 +100,22 @@ export function useCloudSession(): {
   const url = useCloudUrl();
   const token = useCloudToken();
   const me = useCloudQuery<CloudUser | null>("auth:me", url && token ? {} : "skip");
+  const [unreachable, setUnreachable] = useState<string | null>(null);
 
   useEffect(() => {
     if (token && me === null) setSessionToken(null);
   }, [token, me]);
+
+  useEffect(() => {
+    if (!url || !token) return;
+    let alive = true;
+    const slow = window.setTimeout(() => { if (alive) setUnreachable(url); }, SESSION_CHECK_MS);
+    cloudClient()?.query(functionRef<"query">("auth:me"), { sessionToken: token }).then(
+      (user) => { if (!alive) return; window.clearTimeout(slow); setUnreachable(null); if (!user) setSessionToken(null); },
+      () => { if (alive) { window.clearTimeout(slow); setSessionToken(null); } },
+    );
+    return () => { alive = false; window.clearTimeout(slow); };
+  }, [url, token]);
 
   const login = useCallback(async (email: string, password: string) => {
     const client = cloudClient();
@@ -123,8 +137,8 @@ export function useCloudSession(): {
   return useMemo(() => ({
     user: token && me ? me : null,
     token: url ? token : null,
-    ready: Boolean(url) && (!token || me !== undefined),
+    ready: Boolean(url) && (!token || me !== undefined || unreachable === url),
     login,
     logout,
-  }), [url, token, me, login, logout]);
+  }), [url, token, me, unreachable, login, logout]);
 }
