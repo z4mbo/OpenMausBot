@@ -1,6 +1,5 @@
 // Import first: it reads a Cloud home's secrets off the launcher's pipe before any module can start a process.
 import { BOOT_CLOUD_SECRETS } from "./cloud-secrets-boot.ts";
-import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { existsSync, readFileSync, realpathSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
@@ -67,7 +66,7 @@ import {
 import * as checkpoints from "./checkpoints.ts";
 import { commandReceipt } from "./commands.ts";
 import { buildTurnDigest, coverageForDriver, digestPromptLine, renderDigest, toolEvidence } from "./digest.ts";
-import { appendDecision, bindDecisionRetention, decisionRetentionDays, flushDecisionLog, pruneDecisions, withDecisionActor, type DecisionActor } from "./decision-log.ts";
+import { appendDecision, bindDecisionRetention, decisionRetentionDays, flushDecisionLog, pruneDecisions, withDecisionActor } from "./decision-log.ts";
 import { validateBotCwd } from "./bot-cwd.ts";
 import {
   ATTACHMENTS_DIR,
@@ -483,7 +482,6 @@ import { bindThreadLogCapProvider } from "./thread-log-rotation.ts";
 import { listenWebhookIngress, webhookCredential, type WebhookIngress } from "./webhook-ingress.ts";
 import { assertModelVariantSupported, memberTurnSelection } from "./member-turn.ts";
 import { WebhookManager } from "./webhooks.ts";
-import type { WebhookTrigger } from "../shared/webhooks.ts";
 import { AGENTS_NODE_FLAG, SPAWNED_PROXIES } from "./proxy-paths.ts";
 import { AGENTS_PROXY_ENV, agentsProxyLaunch, agentsToolBridgeEnv, applyAgentsBridge, bridgedToolTitle, turnEngine } from "./agents-bridge-switch.ts";
 import { harnessMcpTokenEnv } from "./harness-mcp-token.ts";
@@ -537,7 +535,6 @@ import {
   labelFromUserAgent,
   requestOrigin,
   requestSource,
-  requiredScope,
   resolveLoopbackTrust,
   resolveRequestAuth,
   parseCookies,
@@ -547,17 +544,12 @@ import {
 import { cookieMaxAgeSeconds, formatPairingCode, SessionRegistry, type Scope, type SessionRecord } from "./sessions.ts";
 import { ThreadStarters } from "./thread-starters.ts";
 import {
-  appendAdminAction,
-  botAuditSnapshot,
-  botChangeRows,
-  configChangeRows,
   flushAdminActivity,
   pruneAdminActivity,
   sharedSignIn,
-  signInListsOf,
-  type AdminActionRow,
-  type AdminActor,
 } from "./admin-activity.ts";
+import { createAdminActivityHost } from "./host/admin-activity.ts";
+import { cloudOwnerSession, cloudCardRefusal, canManageCommandAllowlist, decisionActorFor, viewerFor, usageTriggerFor, queuedTurnTrigger } from "./request-identity.ts";
 import {
   frameForMember,
   memberBody,
@@ -569,7 +561,6 @@ import {
   roomFeeds,
   routineVisible,
   sameAudience,
-  SEES_EVERYTHING,
   VisibleSet,
   type FrameContext,
   type PathSubject,
@@ -589,7 +580,7 @@ import {
   type PhoneSecretContext,
 } from "./phone-secret.ts";
 // Keep these two last, so loading the route table leaves module start-up order as is.
-import { json, onJsonBody, parsedBodyOf, readBody } from "./harness/http.ts";
+import { json, onJsonBody, readBody } from "./harness/http.ts";
 import { PUBLIC_ROUTES, ROUTES, dispatchRoutes } from "./routes/table.ts";
 import { createHostedSlackRoutes } from "./routes/hosted-slack.ts";
 import { createBotPresetRoutes } from "./routes/bot-presets.ts";
@@ -602,7 +593,7 @@ import {
   awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, transcribeWith,
 } from "./origin-call-agent.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
-import { createOriginImportRoutes, originImportKind } from "./routes/origin-import.ts";
+import { createOriginImportRoutes } from "./routes/origin-import.ts";
 import { createOriginAgentSupport } from "./origin-agent-support.ts";
 import { createOriginInviteRoutes, createOriginPublicRoutes } from "./origin-public-pages.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
@@ -1100,11 +1091,6 @@ function cloudGuestDriven(threadId: string): boolean {
   return person !== undefined && !cloudOwnerPerson(person);
 }
 
-/** Loopback is not the owner on a Cloud home: only processes on the machine (a bot's shell) arrive that way. */
-function cloudOwnerSession(auth: RequestAuth): boolean {
-  return auth.kind === "session" && auth.scopes.includes("admin");
-}
-
 function cloudOwnerPerson(person: string | undefined): boolean {
   if (!person) return false;
   if (person === CLOUD_OWNER_KEY || cloudEarlierOwners.adopted.has(person)) return true;
@@ -1120,10 +1106,6 @@ function cloudProvenOwnerPerson(person: string | undefined): boolean {
 
 function cloudOwnerDevice(person: string): boolean {
   return sessions.list().some((session) => session.scopes.includes("admin") && personKey(session) === person);
-}
-
-function cloudCardRefusal(auth: RequestAuth & { kind: "session" }): string | null {
-  return auth.scopes.includes("admin") ? null : "Only the owner of this Cloud can answer this card.";
 }
 
 /** Decides only whose answer to an existing card counts; it adds no card, gate or prompt. */
@@ -1145,10 +1127,6 @@ function cardAnswerRefusal(auth: RequestAuth, threadId: string, requestId: strin
   return "Only the person who started this conversation or sent this request, or a workspace admin, can answer this card.";
 }
 
-function canManageCommandAllowlist(auth: RequestAuth): boolean {
-  return auth.kind === "loopback" ? auth.trust !== "service" : auth.scopes.includes("admin");
-}
-
 const COMMAND_ALLOWLIST_DRIVERS = new Set([
   "claudeAgent", "codex", "antigravityAgent", "grokAgent", "opencodeGo", "kimiAgent",
   "droidAgent", "cursorAgent", "qwenAgent", "geminiAgent", "hermesAgent", "customAcp",
@@ -1166,17 +1144,6 @@ function commandAllowlistResponse(bot: BotRecord): CommandAllowlistResponse {
       providerInstanceId: bot.modelSelection.instanceId,
       cwd,
     },
-  };
-}
-
-function decisionActorFor(auth: RequestAuth): DecisionActor {
-  if (auth.kind === "loopback") return auth.trust === "service" ? { kind: "worker" } : { kind: "loopback" };
-  const session = auth.session;
-  return {
-    kind: "session", sessionId: session.id, label: session.label,
-    ...(session.email ? { email: session.email } : {}),
-    // A portal session's id is its membership grant: never written down.
-    ...(session.userId && !session.userId.startsWith("portal:") ? { userId: session.userId } : {}),
   };
 }
 
@@ -1210,11 +1177,6 @@ async function answeringCardAs(auth: RequestAuth, threadId: string, requestId: s
     }
     if (CLOUD_HOME && open) cloudCardAnswersInFlight.delete(requestId);
   }
-}
-
-function viewerFor(auth: RequestAuth): Viewer {
-  if (auth.kind === "loopback" || auth.scopes.includes("admin")) return SEES_EVERYTHING;
-  return { kind: "member", ...(auth.session.email ? { email: auth.session.email } : {}) };
 }
 
 /** Cached until the next bot, room or thread change (store.onChange). */
@@ -1387,180 +1349,12 @@ function memberFrameContext(visible: VisibleSet): FrameContext {
   };
 }
 
-function adminActivityRecording(): boolean {
-  if (DESKTOP_MANAGED) return false;
-  if (HOSTED_WORKSPACE) return true;
-  const chatOnly = (scopes: readonly string[]) => !scopes.includes("admin");
-  return sharedSignIn(signInAllowList()) || sessions.list().some((session) => chatOnly(session.scopes)) ||
-    sessions.openPairings().some((pairing) => chatOnly(pairing.scopes));
-}
-
-function adminActorFor(auth: RequestAuth, req: IncomingMessage): AdminActor {
-  if (auth.kind === "loopback" && auth.trust !== "service" &&
-    (req.headers["x-openmausbot-cli"] === "1" || req.headers["x-openmausbot-cli-owner"] !== undefined)) return { kind: "cli" };
-  return decisionActorFor(auth);
-}
-
-const adminActorScope = new AsyncLocalStorage<{ actor: AdminActor; sharedAtStart: boolean } | null>();
-onConfigSaved((before, after) => {
-  const scope = adminActorScope.getStore();
-  if (!scope || DESKTOP_MANAGED) return;
-  if (!scope.sharedAtStart && !adminActivityRecording() && !sharedSignIn(signInListsOf(before)) && !sharedSignIn(signInListsOf(after))) return;
-  for (const row of configChangeRows(before, after)) appendAdminAction(DATA_DIR, { ...row, actor: scope.actor });
+const adminActivityHost = createAdminActivityHost({
+  dataDir: DATA_DIR, desktopManaged: DESKTOP_MANAGED, hostedWorkspace: HOSTED_WORKSPACE,
+  sessions, signInAllowList, lendingEnabled, store: () => store, webhooks: () => webhooks,
 });
-
-interface AuditPlan {
-  config: boolean;
-  botId?: string;
-  createsBots: boolean;
-  deletesBot?: string;
-  createsWebhook: boolean;
-  webhookId?: string;
-  sessionId?: string;
-  pairing: boolean;
-  engineAction?: { id: string; action: string };
-  roomId?: string;
-}
-
-const ACCOUNT_ADD_ENGINES = new Map([["/api/instances/claude-accounts", "claude"], ["/api/instances/chatgpt-accounts", "chatgpt"],
-  ["/api/instances/antigravity-accounts", "antigravity"]]);
-
-function adminAuditPlan(method: string, path: string): AuditPlan | null {
-  if (method === "GET" || method === "HEAD" || method === "OPTIONS") return null;
-  if (path.startsWith("/api/internal/") || path.startsWith("/api/testing/")) return null;
-  const plan: AuditPlan = {
-    config: requiredScope(method, path, { sharedComputers: lendingEnabled() }) === "admin",
-    createsBots: method === "POST" && (path === "/api/bots" || path === "/api/teams/import" || path === "/api/org-library/add" || originImportKind(path) !== null),
-    createsWebhook: method === "POST" && path === "/api/webhooks",
-    pairing: method === "POST" && path === "/api/auth/pairing",
-  };
-  let m = /^\/api\/bots\/([\w-]+)(?:\/(always-allow|model))?$/.exec(path);
-  if (m && ((!m[2] && method === "PATCH") || (m[2] === "model" && method === "PATCH") || (m[2] === "always-allow" && method === "POST"))) plan.botId = m[1];
-  if (m && !m[2] && method === "DELETE") plan.deletesBot = m[1];
-  m = /^\/api\/webhooks\/([\w-]+)(\/rotate)?$/.exec(path);
-  if (m && ((m[2] && method === "POST") || (!m[2] && (method === "PATCH" || method === "DELETE")))) plan.webhookId = m[1];
-  m = /^\/api\/auth\/sessions\/([\w-]+)$/.exec(path);
-  if (m && method === "DELETE") plan.sessionId = m[1];
-  m = /^\/api\/groups\/([\w-]+)$/.exec(path);
-  if (m && method === "PATCH") plan.roomId = m[1];
-  m = /^\/api\/instances\/([\w.-]+)\/(install|auth\/complete|auth\/sign-out|claude-update|leftover-files\/remove)$/.exec(path);
-  if (m && method === "POST") plan.engineAction = { id: m[1]!, action: m[2]!.replace("/", "-") };
-  const accountAdd = method === "POST" ? ACCOUNT_ADD_ENGINES.get(path) : undefined;
-  if (accountAdd) plan.engineAction = { id: accountAdd, action: "account-add" };
-  return plan.config || plan.botId || plan.createsBots || plan.deletesBot || plan.createsWebhook || plan.webhookId || plan.sessionId || plan.pairing || plan.engineAction || plan.roomId ? plan : null;
-}
-
-const WEBHOOK_AUDIT_FIELDS = ["name", "prompt", "botId", "runOn", "enabled", "eventTypes"] as const;
-const auditBot = (id: string | undefined) => (id ? botAuditSnapshot(store.bot(id) as unknown as Record<string, unknown> | null) : null);
-const auditHook = (id: string | undefined) => (id ? webhooks.list().find((hook) => hook.id === id) : undefined);
-const hookFields = (hook: WebhookTrigger, fields: readonly string[] = WEBHOOK_AUDIT_FIELDS) =>
-  Object.fromEntries(fields.map((field) => [field, (hook as unknown as Record<string, unknown>)[field] ?? null]));
-
-function requestedBotFields(req: IncomingMessage, path: string): string[] {
-  if (path.endsWith("/always-allow")) return ["alwaysAllow"];
-  if (path.endsWith("/model")) return ["modelSelection"];
-  const body = parsedBodyOf(req);
-  if (!body || typeof body !== "object" || Array.isArray(body)) return [];
-  const fields = new Set(Object.keys(body));
-  if (fields.has("autoApprove") || fields.has("approvalMode")) fields.add("autoApprove").add("approvalMode");
-  if (fields.has("chiefOfStaff")) fields.add("managedSections");
-  return [...fields];
-}
-
-/** Each row compares only what this request named or created, so another admin's concurrent change is not attributed here. */
-function beginAdminAudit(req: IncomingMessage, res: ServerResponse, method: string, path: string, auth: RequestAuth): void {
-  const plan = DESKTOP_MANAGED ? null : adminAuditPlan(method, path);
-  const actor = plan ? adminActorFor(auth, req) : null;
-  const sharedAtStart = plan ? adminActivityRecording() : false;
-  // Set for every request, so a kept-alive connection never inherits one.
-  adminActorScope.enterWith(plan?.config && actor ? { actor, sharedAtStart } : null);
-  if (!plan || !actor) return;
-  const before = {
-    bot: auditBot(plan.botId ?? plan.deletesBot),
-    botName: store.bot(plan.botId ?? plan.deletesBot ?? "")?.name,
-    hook: auditHook(plan.webhookId),
-    session: plan.sessionId ? sessions.list().find((session) => session.id === plan.sessionId) : undefined,
-    roomFloor: plan.roomId ? store.group(plan.roomId)?.audienceFloor ?? "everyone" : undefined,
-  };
-  let answered: unknown;
-  if (plan.createsBots || plan.createsWebhook || plan.pairing) onJsonBody(res, (body) => (answered = body));
-  res.once("finish", () => {
-    if (res.statusCode >= 400 || (!sharedAtStart && !adminActivityRecording())) return;
-    try {
-      for (const row of adminAuditRows(plan, req, path, before, answered)) appendAdminAction(DATA_DIR, { ...row, actor });
-    } catch (error) {
-      console.warn(`admin activity: could not record ${method} ${path}: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  });
-}
-
-function adminAuditRows(
-  plan: AuditPlan,
-  req: IncomingMessage,
-  path: string,
-  before: { bot: Record<string, unknown> | null; botName?: string; hook?: WebhookTrigger; session?: ReturnType<typeof sessions.list>[number]; roomFloor?: unknown },
-  answered: unknown,
-): Array<Omit<AdminActionRow, "at" | "actor">> {
-  const rows: Array<Omit<AdminActionRow, "at" | "actor">> = [];
-  const reply = answered && typeof answered === "object" ? answered as Record<string, unknown> : {};
-  const idOf = (value: unknown) => (value && typeof value === "object" && typeof (value as { id?: unknown }).id === "string" ? (value as { id: string }).id : undefined);
-  if (plan.botId) {
-    rows.push(...botChangeRows({ id: plan.botId, name: store.bot(plan.botId)?.name }, before.bot, auditBot(plan.botId), requestedBotFields(req, path)));
-  }
-  if (plan.createsBots && reply.replayed !== true) {
-    const created = [idOf(reply.bot), ...(Array.isArray(reply.bots) ? reply.bots.map(idOf) : []), ...(Array.isArray(reply.members) ? reply.members.map(idOf) : [])].filter((id): id is string => Boolean(id));
-    for (const id of new Set(created)) {
-      const fields = auditBot(id);
-      if (fields) rows.push({ category: "bot", action: "bot.create", target: { kind: "bot", id, name: store.bot(id)!.name }, after: fields });
-    }
-  }
-  if (plan.deletesBot && before.bot && !store.bot(plan.deletesBot)) {
-    rows.push({ category: "bot", action: "bot.delete", target: { kind: "bot", id: plan.deletesBot, ...(before.botName ? { name: before.botName } : {}) }, before: before.bot });
-  }
-  const hookTarget = (hook: WebhookTrigger) => ({ kind: "webhook", id: hook.id, name: hook.name });
-  if (plan.createsWebhook) {
-    const hook = auditHook(idOf(reply.webhook));
-    if (hook) rows.push({ category: "webhook", action: "webhook.create", target: hookTarget(hook), after: hookFields(hook) });
-  }
-  if (plan.webhookId && before.hook) {
-    const after = auditHook(plan.webhookId);
-    if (!after) rows.push({ category: "webhook", action: "webhook.delete", target: hookTarget(before.hook), before: hookFields(before.hook) });
-    else if (path.endsWith("/rotate")) rows.push({ category: "webhook", action: "webhook.rotate-secret", target: hookTarget(after) });
-    else {
-      const body = parsedBodyOf(req);
-      const named = body && typeof body === "object" ? Object.keys(body) : [];
-      const changed = WEBHOOK_AUDIT_FIELDS.filter((field) => named.includes(field) &&
-        JSON.stringify(hookFields(before.hook!, [field])) !== JSON.stringify(hookFields(after, [field])));
-      if (changed.length) {
-        rows.push({ category: "webhook", action: "webhook.update", target: hookTarget(after), changed: [...changed], before: hookFields(before.hook, changed), after: hookFields(after, changed) });
-      }
-    }
-  }
-  if (before.session && !sessions.list().some((session) => session.id === before.session!.id)) {
-    const session = before.session;
-    rows.push({ category: "session", action: "session.revoke", target: { kind: "session", id: session.id, name: session.email ?? session.label },
-      before: { label: session.label, ...(session.email ? { email: session.email } : {}), scopes: session.scopes } });
-  }
-  if (plan.pairing) {
-    const pairing = sessions.openPairings().find((candidate) => candidate.id === reply.id);
-    if (pairing) rows.push({ category: "session", action: "pairing.create", target: { kind: "pairing", name: pairing.label }, after: { label: pairing.label, scopes: pairing.scopes } });
-  }
-  if (plan.engineAction) rows.push({ category: "engine", action: `engine.${plan.engineAction.action}`, target: { kind: "engine", id: plan.engineAction.id } });
-  const roomBody = plan.roomId ? parsedBodyOf(req) : undefined;
-  const room = plan.roomId ? store.group(plan.roomId) : undefined;
-  if (room && roomBody && typeof roomBody === "object" && (roomBody as { resetAudience?: unknown }).resetAudience === true) {
-    rows.push({ category: "visibility", action: "room.audience-reset", target: { kind: "room", id: room.id, name: room.name },
-      changed: ["audienceFloor"], before: { audienceFloor: before.roomFloor ?? "everyone" }, after: { audienceFloor: room.audienceFloor ?? "everyone" } });
-  }
-  return rows;
-}
-
-
-function usageTriggerFor(auth: RequestAuth): UsageTrigger {
-  return auth.kind === "session"
-    ? { kind: "user", ...(auth.session.email ? { email: auth.session.email } : {}), label: auth.session.label }
-    : { kind: "owner" };
-}
+const { adminActivityRecording, beginAdminAudit, withoutAdminActor } = adminActivityHost;
+onConfigSaved(adminActivityHost.configSaved);
 
 function operatorPrices(): PriceList | null {
   return entitled("billing") && cfg.billing?.prices && Object.keys(cfg.billing.prices).length ? cfg.billing.prices : null;
@@ -1578,11 +1372,6 @@ function bookTurnUsage(row: Omit<UsageRow, "at" | "costSource">, tokensReported 
   }
 }
 
-function queuedTurnTrigger(item: { trigger?: UsageTrigger; sender?: ResolvedSender; peerAsk?: unknown }): UsageTrigger | undefined {
-  if (item.trigger) return item.trigger;
-  if (item.peerAsk) return undefined;
-  return item.sender ? { kind: "user", label: item.sender.name } : { kind: "owner" };
-}
 const providerAuthSessions = new ProviderAuthSessions();
 const mcpOAuth = new McpOAuthManager({
   file: join(DATA_DIR, "mcp-oauth.json"),
@@ -5846,7 +5635,7 @@ bus.subscribe((event: RuntimeEvent) => {
   });
   if (!patch) return;
   try {
-    adminActorScope.exit(() => saveConfig(patch));
+    withoutAdminActor(() => saveConfig(patch));
     Object.assign(cfg, loadConfig());
     broadcast({ kind: "config", ...configStatus() });
   } catch (error) {
