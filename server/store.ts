@@ -15,7 +15,6 @@ import { runCommand, type Command } from "./commands.ts";
 import { workspaceDir } from "./workspace.ts";
 import type { Destination } from "./surface.ts";
 import { newId, type ModelSelection } from "./contracts.ts";
-import { pickBotName } from "./names.ts";
 import { redactSecretsInText } from "./redact.ts";
 import { scrubbedSkillRequest } from "./skill-request-card.ts";
 import { AVATAR_FOCUS_CENTER, AVATAR_ZOOM_MIN, botAvatarProfile, clampAvatarFocus, clampAvatarZoom } from "../shared/bot-avatar.ts";
@@ -36,6 +35,8 @@ import type {
 import { movesThreadToTop } from "../shared/wire.ts";
 import { parseConnectorTools } from "./connector-tools.ts";
 import { sameModelSelection } from "../shared/thread-model.ts";
+import { createBotCreation, type NewBotProfile, type OriginImportRecord } from "./store-bot-creation.ts";
+export type { OriginImportRecord } from "./store-bot-creation.ts";
 export type {
   BotActivity, ConnectorCardData, GroupDefaultResponder, OptionCardData,
   SecretRequestCardData, Surface, TaskClosedBy, TaskOpenedBy, TaskUsage,
@@ -312,16 +313,6 @@ export interface BotRecord extends Omit<WireBot, "avatarUrl" | "tasks"> {
   assignedSkills?: string[];
 }
 
-export interface OriginImportRecord {
-  deployment: string;
-  kind: "workspace" | "project";
-  cloudId: string;
-  workspaceId?: string;
-  memberIds: string[];
-}
-
-type NewBotProfile = Partial<Pick<BotRecord, "name" | "title" | "description" | "soul" | "color" | "mascotExpression" | "mascotBody" | "modelSelection" | "section" | "cwd" | "visibility" | "toolScope">>;
-
 export type BotWirePrivateKeys = "resumeCursors" | "tasks" | "avatarUrl" | "approvalGrant" | "lastProfileRequestId" | "lastTeamSetupReceipt" | "originImport" | "packageBase" | "assignedSkills";
 export type BotWireProjection = Pick<BotRecord, Exclude<keyof BotRecord, BotWirePrivateKeys>>;
 export type BotWireProjectionIsExact = AssertExact<Omit<WireBot, "avatarUrl" | "tasks">, BotWireProjection> & AssertSameKeys<Omit<WireBot, "avatarUrl" | "tasks">, BotWireProjection>;
@@ -465,6 +456,18 @@ export class Store {
   private registeringInitialSections = true;
   /** Clearing this slot must not clear a concurrently running task's activity. */
   private legacyActivities = new Map<string, BotActivity>();
+
+  private readonly botCreation = createBotCreation({
+    bots: () => this.bots,
+    bot: (id) => this.bot(id),
+    newBotSelection: (selection) => this.newBotSelection(selection),
+    saveBots: (bots) => this.saveBots(bots),
+    emit: (change) => this.emit(change),
+    appendMessage: (threadId, message) => this.appendMessage(threadId, message),
+    colors: COLORS,
+    untitledThread: UNTITLED_THREAD,
+    sectionKey,
+  });
 
   constructor(
     defaultSelection: () => ModelSelection,
@@ -1497,91 +1500,18 @@ export class Store {
     return this.completeNewBotSelection(requested ?? this.defaultSelection());
   }
 
-  private prepareBot(profile: NewBotProfile, pending: readonly BotRecord[] = []): BotRecord {
-    const toolScope = parseToolScope(profile.toolScope);
-    if (!toolScope.ok) throw new Error(toolScope.error);
-    const name = profile.name?.trim() || pickBotName([...this.bots, ...pending].map((b) => b.name));
-    const section = sectionKey(profile.section);
-    const bot: BotRecord = {
-      id: newId(),
-      threadId: newId(),
-      name,
-      title: profile.title ?? "",
-      description: profile.description ?? "",
-      soul: profile.soul ?? "",
-      soulHash: soulHash(profile.soul ?? ""),
-      notifications: true,
-      color: profile.color ?? COLORS[(this.bots.length + pending.length) % COLORS.length],
-      ...(profile.mascotExpression ? { mascotExpression: profile.mascotExpression } : {}),
-      ...(profile.mascotBody ? { mascotBody: profile.mascotBody } : {}),
-      // Restricted from its first frame: no one else is ever told it exists.
-      ...(profile.visibility && profile.visibility !== "everyone" ? { visibility: structuredClone(profile.visibility) } : {}),
-      ...(toolScope.scope ? { toolScope: toolScope.scope } : {}),
-      unread: false,
-      modelSelection: this.newBotSelection(profile.modelSelection),
-      resumeCursors: {},
-      createdAt: Date.now(),
-    };
-    if (section) bot.section = section;
-    if (profile.cwd) bot.cwd = profile.cwd;
-    bot.tasks = [{
-      threadId: bot.threadId,
-      title: UNTITLED_THREAD,
-      createdAt: bot.createdAt,
-      updatedAt: bot.createdAt,
-      resumeCursors: {},
-      unread: false,
-      activity: "idle",
-      busy: false,
-    }];
-    return bot;
-  }
-
-  private publishNewBot(bot: BotRecord, seedMessages: boolean): void {
-    try {
-      writeSoulMirror(bot.id, bot.soul ?? "");
-    } catch (e) {
-      console.warn(`[bot-folder] could not write SOUL.md mirror for ${bot.id}: ${(e as Error).message}`);
-    }
-    // Before its transcript: clients need the bot/thread mapping to place either message.
-    this.emit({ type: "bot", botId: bot.id });
-    if (seedMessages) {
-      this.appendMessage(bot.threadId, {
-        role: "bot",
-        kind: "text",
-        text: `Hi, I'm ${bot.name}. What would you like me to do?`,
-      });
-    }
-  }
-
   createBot(profile: NewBotProfile = {}, opts: { seedMessages?: boolean } = {}): BotRecord {
-    const bot = this.prepareBot(profile);
+    const bot = this.botCreation.prepareBot(profile);
     this.rememberSections([profile.section]);
     // Persist before publishing or greeting, so an interrupted creation cannot inherit tools.
     this.saveBots([bot, ...this.bots]);
     this.bots.unshift(bot);
-    this.publishNewBot(bot, opts.seedMessages !== false);
+    this.botCreation.publishNewBot(bot, opts.seedMessages !== false);
     return bot;
   }
 
   createOriginImport(identity: Omit<OriginImportRecord, "memberIds">, profile: NewBotProfile, members: readonly NewBotProfile[] = []): { bot: BotRecord; members: BotRecord[] } {
-    const head = identity.workspaceId ? this.bot(identity.workspaceId) : null;
-    if (identity.workspaceId && !head?.chiefOfStaff) throw new Error("The imported project's workspace head no longer exists");
-    const created: BotRecord[] = [];
-    for (const fields of [profile, ...[...members].reverse()]) created.push(this.prepareBot(fields, created));
-    const bot = created[0];
-    bot.chiefOfStaff = true;
-    bot.originImport = { ...identity, memberIds: created.slice(1).map((member) => member.id) };
-    const managedSections = head ? [...new Set([...(head.managedSections ?? []), sectionKey(bot.section)])] : [];
-    if (managedSections.length > 100) throw new Error("A workspace can manage at most 100 project teams");
-    const nextBots = [...[...created].reverse(), ...this.bots.map((current) => current === head ? { ...current, managedSections } : current)];
-    // Security: the complete team and its workspace grant become visible only after the same durable write.
-    this.saveBots(nextBots);
-    if (head) head.managedSections = managedSections;
-    this.bots.unshift(...[...created].reverse());
-    for (const member of created) this.publishNewBot(member, true);
-    if (head) this.emit({ type: "bot", botId: head.id });
-    return { bot, members: created.slice(1).reverse() };
+    return this.botCreation.createOriginImport(identity, profile, members);
   }
 
   applyTeamSetup(request: TeamSetupRequest): TeamSetupResult {
