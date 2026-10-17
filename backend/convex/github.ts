@@ -156,6 +156,7 @@ export const syncRepo = action({
     await ctx.runMutation(internal.github.upsertRepoSnapshot, {
       projectId: args.projectId,
       sessionToken: args.sessionToken,
+      repoUrl: project.repoUrl!,
       issues,
       pullRequests,
     });
@@ -230,6 +231,8 @@ export const createIssueForTask = action({
     const payload = (await response.json()) as { number: number; html_url: string; state: "open" | "closed" };
     await ctx.runMutation(internal.github.linkTaskIssue, {
       projectId: args.projectId,
+      sessionToken: args.sessionToken,
+      repoUrl: project.repoUrl!,
       taskId: args.taskId,
       githubIssueNumber: payload.number,
       githubIssueUrl: payload.html_url,
@@ -242,14 +245,20 @@ export const createIssueForTask = action({
 export const linkTaskIssue = internalMutation({
   args: {
     projectId: v.id("projects"),
+    sessionToken: v.string(),
+    repoUrl: v.string(),
     taskId: v.id("tasks"),
     githubIssueNumber: v.number(),
     githubIssueUrl: v.string(),
     githubIssueState: v.union(v.literal("open"), v.literal("closed")),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
+    const { project } = await requireEditor(ctx, args.projectId, args.sessionToken);
+    if (project.repoUrl !== args.repoUrl) throw new Error("Repository changed; sync cancelled");
     const task = await ctx.db.get(args.taskId);
     if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
+    if (task.githubIssueNumber && task.githubIssueNumber !== args.githubIssueNumber) throw new Error("Issue already linked");
     await ctx.db.patch(args.taskId, {
       githubIssueNumber: args.githubIssueNumber,
       githubIssueUrl: args.githubIssueUrl,
@@ -258,6 +267,7 @@ export const linkTaskIssue = internalMutation({
       updatedAt: Date.now(),
     });
     await touchProject(ctx, args.projectId);
+    return null;
   },
 });
 
@@ -265,6 +275,7 @@ export const upsertRepoSnapshot = internalMutation({
   args: {
     projectId: v.id("projects"),
     sessionToken: v.string(),
+    repoUrl: v.string(),
     issues: v.array(
       v.object({
         number: v.number(),
@@ -289,8 +300,10 @@ export const upsertRepoSnapshot = internalMutation({
       }),
     ),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    await requireEditor(ctx, args.projectId, args.sessionToken);
+    const { project } = await requireEditor(ctx, args.projectId, args.sessionToken);
+    if (project.repoUrl !== args.repoUrl) throw new Error("Repository changed; sync cancelled");
     const now = Date.now();
     const columns = await ctx.db
       .query("columns")
@@ -385,5 +398,6 @@ export const upsertRepoSnapshot = internalMutation({
     }
 
     await touchProject(ctx, args.projectId);
+    return null;
   },
 });

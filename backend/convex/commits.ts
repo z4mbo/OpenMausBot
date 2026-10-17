@@ -86,6 +86,8 @@ export const remove = mutation({
 export const upsertMany = internalMutation({
   args: {
     projectId: v.id("projects"),
+    sessionToken: v.string(),
+    repoUrl: v.string(),
     commits: v.array(
       v.object({
         sha: v.string(),
@@ -96,7 +98,10 @@ export const upsertMany = internalMutation({
       }),
     ),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
+    const { project } = await requireEditor(ctx, args.projectId, args.sessionToken);
+    if (project.repoUrl !== args.repoUrl) throw new Error("Repository changed; sync cancelled");
     const now = Date.now();
     for (const commit of args.commits) {
       const existing = await ctx.db
@@ -123,6 +128,7 @@ export const upsertMany = internalMutation({
       }
     }
     await touchProject(ctx, args.projectId);
+    return null;
   },
 });
 
@@ -170,7 +176,7 @@ export const syncGitHub = action({
       committedAt: item.commit?.author?.date ? new Date(item.commit.author.date).getTime() : Date.now(),
     }));
 
-    await ctx.runMutation(internal.commits.upsertMany, { projectId: args.projectId, commits });
+    await ctx.runMutation(internal.commits.upsertMany, { ...args, repoUrl: project.repoUrl!, commits });
     return { ok: true, count: commits.length, repo: `${parsed.owner}/${parsed.repo}`, error: "" };
   },
 });

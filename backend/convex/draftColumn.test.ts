@@ -72,7 +72,7 @@ describe("Draft column", () => {
     const taskId = await f.create(f.columns[0]._id, "Parked");
     await f.t.mutation(internal.integrations.linkIssue, { projectId: f.projectId, taskId, repoUrl, number: 7, issueUrl: `${repoUrl}/issues/7`, state: "open", updatedAt: 1000 });
     const snapshot = () => f.t.mutation(internal.github.upsertRepoSnapshot, {
-      sessionToken: f.sessionToken, projectId: f.projectId,
+      sessionToken: f.sessionToken, projectId: f.projectId, repoUrl,
       issues: [{ number: 7, title: "Parked", state: "closed", url: `${repoUrl}/issues/7`, updatedAt: 2000 }], pullRequests: [],
     });
     await snapshot();
