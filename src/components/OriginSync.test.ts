@@ -48,7 +48,7 @@ beforeEach(() => {
   fixture.workspaces.mockResolvedValue([]);
   fixture.api.mockImplementation(async (path: string) => {
     if (path === "/api/origin/cloud-links") return { workspaces: {}, projects: {} };
-    if (path === "/api/workspaces") return { bot: { id: "old-head", name: "Old" } };
+    if (path === "/api/origin/import/workspaces") return { bot: { id: "old-head", name: "Old" } };
     return {};
   });
   host = document.createElement("div");
@@ -107,9 +107,9 @@ describe("Origin sync account isolation", () => {
   it("does not link or dispatch a bot response that arrives after signing into another account", async () => {
     const oldBot = deferred<{ bot: { id: string; name: string } }>();
     fixture.workspaces.mockResolvedValueOnce([{ _id: "old-team", name: "Old" }]).mockResolvedValue([]);
-    fixture.api.mockImplementation(async (path: string) => path === "/api/workspaces" ? oldBot.promise : { workspaces: {}, projects: {} });
+    fixture.api.mockImplementation(async (path: string) => path === "/api/origin/import/workspaces" ? oldBot.promise : { workspaces: {}, projects: {} });
     render();
-    await vi.waitFor(() => expect(fixture.api.mock.calls.some(([path]) => path === "/api/workspaces")).toBe(true));
+    await vi.waitFor(() => expect(fixture.api.mock.calls.some(([path]) => path === "/api/origin/import/workspaces")).toBe(true));
     fixture.token = "second-session";
     render();
     oldBot.resolve({ bot: { id: "old-head", name: "Old" } });

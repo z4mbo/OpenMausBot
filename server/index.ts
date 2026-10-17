@@ -602,6 +602,7 @@ import {
   awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, transcribeWith,
 } from "./origin-call-agent.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
+import { createOriginImportRoutes } from "./origin-import.ts";
 import { createOriginAgentSupport } from "./origin-agent-support.ts";
 import { createOriginInviteRoutes, createOriginPublicRoutes } from "./origin-public-pages.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
@@ -1429,7 +1430,7 @@ function adminAuditPlan(method: string, path: string): AuditPlan | null {
   if (path.startsWith("/api/internal/") || path.startsWith("/api/testing/")) return null;
   const plan: AuditPlan = {
     config: requiredScope(method, path, { sharedComputers: lendingEnabled() }) === "admin",
-    createsBots: method === "POST" && (path === "/api/bots" || path === "/api/teams/import" || path === "/api/org-library/add"),
+    createsBots: method === "POST" && (path === "/api/bots" || path === "/api/teams/import" || path === "/api/org-library/add" || /^\/api\/origin\/import\/(workspaces|projects)$/.test(path)),
     createsWebhook: method === "POST" && path === "/api/webhooks",
     pairing: method === "POST" && path === "/api/auth/pairing",
   };
@@ -1506,8 +1507,8 @@ function adminAuditRows(
   if (plan.botId) {
     rows.push(...botChangeRows({ id: plan.botId, name: store.bot(plan.botId)?.name }, before.bot, auditBot(plan.botId), requestedBotFields(req, path)));
   }
-  if (plan.createsBots) {
-    const created = [idOf(reply.bot), ...(Array.isArray(reply.bots) ? reply.bots.map(idOf) : [])].filter((id): id is string => Boolean(id));
+  if (plan.createsBots && reply.replayed !== true) {
+    const created = [idOf(reply.bot), ...(Array.isArray(reply.bots) ? reply.bots.map(idOf) : []), ...(Array.isArray(reply.members) ? reply.members.map(idOf) : [])].filter((id): id is string => Boolean(id));
     for (const id of new Set(created)) {
       const fields = auditBot(id);
       if (fields) rows.push({ category: "bot", action: "bot.create", target: { kind: "bot", id, name: store.bot(id)!.name }, after: fields });
@@ -3366,7 +3367,7 @@ const wireTask = (task: TaskRecord, botModel: ModelSelection): WireTask => {
 
 /** Strips provider session ids (resumeCursors) here, not at call sites, so no broadcast or paired phone ever gets them. */
 const wireBot = (bot: BotRecord): WireBot => {
-  const { resumeCursors: _resumeCursors, tasks, approvalGrant, lastProfileRequestId: _lastProfileRequestId, lastTeamSetupReceipt: _lastTeamSetupReceipt, packageBase: _packageBase, assignedSkills: _assignedSkills, ...rest } = bot;
+  const { resumeCursors: _resumeCursors, tasks, approvalGrant, lastProfileRequestId: _lastProfileRequestId, lastTeamSetupReceipt: _lastTeamSetupReceipt, originImport: _originImport, packageBase: _packageBase, assignedSkills: _assignedSkills, ...rest } = bot;
   // Clients see Ask while an elevated grant awaits the desktop's confirmation, never a grant that may still roll back.
   const visible = approvalGrant && !approvalGrant.threadOnly
     ? { ...rest, approvalMode: "ask" as const, autoApprove: false }
@@ -3385,7 +3386,7 @@ function toolScopeForTurn(botId: string) {
 }
 
 const wireTrustedApprovalBot = (bot: NonNullable<ReturnType<typeof store.bot>>) => {
-  const { resumeCursors: _resumeCursors, tasks, approvalGrant: _approvalGrant, lastProfileRequestId: _lastProfileRequestId, lastTeamSetupReceipt: _lastTeamSetupReceipt, packageBase: _packageBase, assignedSkills: _assignedSkills, ...rest } = bot;
+  const { resumeCursors: _resumeCursors, tasks, approvalGrant: _approvalGrant, lastProfileRequestId: _lastProfileRequestId, lastTeamSetupReceipt: _lastTeamSetupReceipt, originImport: _originImport, packageBase: _packageBase, assignedSkills: _assignedSkills, ...rest } = bot;
   return { ...rest, approvalMode: approvalModeFor(rest), mainThreadId: botMainThread(bot.id), avatarUrl: rest.avatarUrl ?? null, ...(tasks ? { tasks: tasks.map((task) => wireTask(task, bot.modelSelection)) } : {}) };
 };
 
@@ -13803,6 +13804,10 @@ ROUTES.push(createOriginCloudRoutes({
   },
 }));
 ROUTES.push(createCloudLinkRoutes({ store, changed: originAgents.changed }));
+ROUTES.push(createOriginImportRoutes({
+  store, maxWorkspaceBots: MAX_WORKSPACE_BOTS, defaultSelection, wireBot, changed: originAgents.changed, authorized: workspaceBackupAccess.authorized,
+  selectionError: (selection) => hostedModels && !hostedModels.allows(selection) ? hostedModels.error() : null,
+}));
 ROUTES.push(createOriginInviteRoutes({ publicUrl }));
 const originPublicPages = createOriginPublicRoutes({ publicUrl });
 ROUTES.push(createAvatarLookRoutes({ store }));

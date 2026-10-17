@@ -1,0 +1,172 @@
+{
+  "fixture": {
+    "url": "http://127.0.0.1:20439",
+    "pid": 5444,
+    "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-70zRNc",
+    "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792272812057-23936.log"
+  },
+  "syntheticCloud": "http://127.0.0.1:52045",
+  "verification": "real isolated HTTP server and real runImport client; synthetic cloud access checks; no live account or provider",
+  "workspaceLinkFailure": {
+    "createdWorkspaces": [],
+    "createdProjects": [],
+    "failures": [
+      {
+        "name": "Import verification",
+        "error": "The local team was saved, but its Origin link could not be saved. Retry to reconnect it."
+      },
+      {
+        "name": "Resumable project",
+        "error": "its workspace could not be created"
+      }
+    ]
+  },
+  "projectLinkFailure": {
+    "createdWorkspaces": [
+      {
+        "name": "Import verification",
+        "botId": "71affc6d-907c-467f-a5f1-b6e5c5592295"
+      }
+    ],
+    "createdProjects": [],
+    "failures": [
+      {
+        "name": "Resumable project",
+        "error": "The local team was saved, but its Origin link could not be saved. Retry to reconnect it."
+      }
+    ]
+  },
+  "restored": {
+    "createdWorkspaces": [],
+    "createdProjects": [
+      {
+        "name": "Resumable project",
+        "botId": "330f754d-b6f8-4e20-97f7-f4bb9946636f",
+        "agents": 6,
+        "workspace": "Import verification"
+      }
+    ],
+    "failures": []
+  },
+  "lostResponse": {
+    "createdWorkspaces": [],
+    "createdProjects": [],
+    "failures": [
+      {
+        "name": "Resumable project",
+        "error": "Fixture simulated a lost response after the server committed"
+      }
+    ]
+  },
+  "replay": {
+    "createdWorkspaces": [],
+    "createdProjects": [
+      {
+        "name": "Resumable project",
+        "botId": "330f754d-b6f8-4e20-97f7-f4bb9946636f",
+        "agents": 6,
+        "workspace": "Import verification"
+      }
+    ],
+    "failures": []
+  },
+  "final": {
+    "botCount": 9,
+    "headId": "71affc6d-907c-467f-a5f1-b6e5c5592295",
+    "chiefId": "330f754d-b6f8-4e20-97f7-f4bb9946636f",
+    "links": {
+      "workspaces": {
+        "71affc6d-907c-467f-a5f1-b6e5c5592295": "team1"
+      },
+      "projects": {
+        "330f754d-b6f8-4e20-97f7-f4bb9946636f": "project1"
+      }
+    }
+  },
+  "events": [
+    {
+      "path": "/api/origin/cloud-session",
+      "status": 200
+    },
+    {
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/import/workspaces",
+      "status": 503
+    },
+    {
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/import/workspaces",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/import/projects",
+      "status": 503
+    },
+    {
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/import/projects",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/import/projects",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/import/projects",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/import/projects",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/import/projects",
+      "status": 200
+    },
+    {
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "status": 200
+    }
+  ]
+}

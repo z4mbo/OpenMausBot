@@ -19,7 +19,7 @@ const WORKSPACE_TITLE = "Workspace";
 
 const sectionOf = (bot: BotRecord) => bot.section?.trim() || "";
 
-function uniqueTeamName(store: Store, wanted: string): string {
+export function uniqueTeamName(store: Store, wanted: string): string {
   const base = wanted.trim().slice(0, 60) || "Team";
   const taken = new Set([...store.sections, ...store.bots.map(sectionOf)]);
   if (!taken.has(base)) return base;
