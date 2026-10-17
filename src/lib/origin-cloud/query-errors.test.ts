@@ -120,4 +120,18 @@ describe("scoped Origin query failures", () => {
     notify("fixture:query");
     expect(host.textContent).toBe("loading");
   });
+  it("bounds a retry while allowing the SDK's reconnect backoff to finish", async () => {
+    vi.useFakeTimers();
+    fixture.pending = true;
+    render(); render(); render(); render();
+    flushSync(() => { vi.advanceTimersByTime(12_001); });
+    expect(host.textContent).toContain("Could not load assets");
+    flushSync(() => [...host.querySelectorAll<HTMLButtonElement>("button")].find((node) => node.textContent === "Try again")!.click());
+    render(); render(); render();
+    flushSync(() => { vi.advanceTimersByTime(12_001); });
+    expect(host.textContent).toBe("loading");
+    flushSync(() => { vi.advanceTimersByTime(18_001); });
+    expect(host.textContent).toContain("Could not load assets");
+    await Promise.resolve();
+  });
 });

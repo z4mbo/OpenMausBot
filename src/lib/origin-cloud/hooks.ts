@@ -6,12 +6,13 @@ import { isAuthorityQuery, OriginQueryFailures, OriginQueryRecovery, OriginQuery
 function useQueryFailure(key: string | null, pending: boolean, failed: boolean, hasData: boolean): void {
   const enabled = useContext(OriginQueryFailures);
   const recovery = useContext(OriginQueryRecovery);
+  const timeout = recovery && recovery.attempt > 0 ? 30_000 : 12_000;
   const [timedOut, setTimedOut] = useState<string | null>(null);
   useEffect(() => {
     if (!enabled || key === null || !pending || failed) return;
-    const timer = window.setTimeout(() => setTimedOut(key), 12_000);
+    const timer = window.setTimeout(() => setTimedOut(key), timeout);
     return () => window.clearTimeout(timer);
-  }, [enabled, key, pending, failed]);
+  }, [enabled, key, pending, failed, timeout]);
   const unavailable = failed || (pending && timedOut === key);
   const report = recovery?.reportFailure;
   useEffect(() => {

@@ -90,7 +90,7 @@ export function CloudQueryBoundary({ label, children }: { label: string; childre
     else next.delete(key);
     return next;
   }), []);
-  const recovery = useMemo(() => ({ attempt: refresh, label, failureCount: failures.size, retry: refreshQueries, reportFailure }), [refresh, label, failures.size, refreshQueries, reportFailure]);
+  const recovery = useMemo(() => ({ attempt: attempt + refresh, label, failureCount: failures.size, retry: refreshQueries, reportFailure }), [attempt, refresh, label, failures.size, refreshQueries, reportFailure]);
   return <OriginQueryRecovery value={recovery}>
     {failures.size > 0 && <GlassHeader><div className={glassHeaderRow}><CloudQueryRefreshNotice /></div></GlassHeader>}
     <QueryFailureBoundary key={`${current.revision}:${attempt}`} label={label} onRetry={retry}><OriginQueryFailures value={true}>{children}</OriginQueryFailures></QueryFailureBoundary>
