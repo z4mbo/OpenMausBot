@@ -1,0 +1,176 @@
+{
+  "previewUrl": "http://127.0.0.1:5173/__origin-ui.html",
+  "phase": "after",
+  "checkedAt": "2026-10-17T21:32:18.509Z",
+  "cases": [
+    {
+      "screen": "assign",
+      "theme": "dark",
+      "size": "desktop",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 430,
+        "right": 850
+      },
+      "choosesAgent": true
+    },
+    {
+      "screen": "connect",
+      "theme": "dark",
+      "size": "desktop",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 430,
+        "right": 850
+      },
+      "signInFieldsEnableSubmit": true
+    },
+    {
+      "screen": "members",
+      "theme": "dark",
+      "size": "desktop",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 260,
+        "right": 1020
+      },
+      "nestedAccountDismissesAlone": true
+    },
+    {
+      "screen": "assign",
+      "theme": "dark",
+      "size": "mobile",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 0,
+        "right": 375
+      },
+      "choosesAgent": true
+    },
+    {
+      "screen": "connect",
+      "theme": "dark",
+      "size": "mobile",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 0,
+        "right": 375
+      },
+      "signInFieldsEnableSubmit": true
+    },
+    {
+      "screen": "members",
+      "theme": "dark",
+      "size": "mobile",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 0,
+        "right": 375
+      },
+      "nestedAccountDismissesAlone": true
+    },
+    {
+      "screen": "assign",
+      "theme": "light",
+      "size": "desktop",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 430,
+        "right": 850
+      },
+      "choosesAgent": true
+    },
+    {
+      "screen": "connect",
+      "theme": "light",
+      "size": "desktop",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 430,
+        "right": 850
+      },
+      "signInFieldsEnableSubmit": true
+    },
+    {
+      "screen": "members",
+      "theme": "light",
+      "size": "desktop",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 260,
+        "right": 1020
+      },
+      "nestedAccountDismissesAlone": true
+    },
+    {
+      "screen": "assign",
+      "theme": "light",
+      "size": "mobile",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 0,
+        "right": 375
+      },
+      "choosesAgent": true
+    },
+    {
+      "screen": "connect",
+      "theme": "light",
+      "size": "mobile",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 0,
+        "right": 375
+      },
+      "signInFieldsEnableSubmit": true
+    },
+    {
+      "screen": "members",
+      "theme": "light",
+      "size": "mobile",
+      "initialFocusInside": true,
+      "reverseTabInside": true,
+      "escaped": true,
+      "focusReturned": true,
+      "bounds": {
+        "left": 0,
+        "right": 375
+      },
+      "nestedAccountDismissesAlone": true
+    }
+  ],
+  "pageErrors": []
+}

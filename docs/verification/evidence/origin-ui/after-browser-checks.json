@@ -1,0 +1,105 @@
+{
+  "previewUrl": "http://127.0.0.1:5174/__origin-ui.html",
+  "checkedAt": "2026-10-17T21:47:38.711Z",
+  "cases": [
+    {
+      "screen": "issue",
+      "size": "desktop",
+      "theme": "dark",
+      "dateScheme": "dark",
+      "menusInViewport": true,
+      "escapeReturnsFocus": true
+    },
+    {
+      "screen": "modal",
+      "size": "desktop",
+      "theme": "dark",
+      "guardedCloseOpacity": "1",
+      "nestedEscape": true
+    },
+    {
+      "screen": "whatsnew",
+      "size": "desktop",
+      "theme": "dark",
+      "currentRelease": true,
+      "escapeCloses": true
+    },
+    {
+      "screen": "issue",
+      "size": "mobile",
+      "theme": "dark",
+      "dateScheme": "dark",
+      "menusInViewport": true,
+      "escapeReturnsFocus": true
+    },
+    {
+      "screen": "modal",
+      "size": "mobile",
+      "theme": "dark",
+      "guardedCloseOpacity": "1",
+      "nestedEscape": true
+    },
+    {
+      "screen": "whatsnew",
+      "size": "mobile",
+      "theme": "dark",
+      "currentRelease": true,
+      "escapeCloses": true
+    },
+    {
+      "screen": "issue",
+      "size": "desktop",
+      "theme": "light",
+      "dateScheme": "light",
+      "menusInViewport": true,
+      "escapeReturnsFocus": true
+    },
+    {
+      "screen": "modal",
+      "size": "desktop",
+      "theme": "light",
+      "guardedCloseOpacity": "1",
+      "nestedEscape": true
+    },
+    {
+      "screen": "whatsnew",
+      "size": "desktop",
+      "theme": "light",
+      "currentRelease": true,
+      "escapeCloses": true
+    },
+    {
+      "screen": "issue",
+      "size": "mobile",
+      "theme": "light",
+      "dateScheme": "light",
+      "menusInViewport": true,
+      "escapeReturnsFocus": true
+    },
+    {
+      "screen": "modal",
+      "size": "mobile",
+      "theme": "light",
+      "guardedCloseOpacity": "1",
+      "nestedEscape": true
+    },
+    {
+      "screen": "whatsnew",
+      "size": "mobile",
+      "theme": "light",
+      "currentRelease": true,
+      "escapeCloses": true
+    },
+    {
+      "screen": "chat",
+      "newerDraft": "Second draft",
+      "sendReenabled": true
+    },
+    {
+      "screen": "issue",
+      "reducedMotion": "none",
+      "dismissedImmediately": true
+    }
+  ],
+  "pageErrors": []
+}
