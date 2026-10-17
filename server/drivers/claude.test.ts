@@ -88,6 +88,10 @@ function answerQueue(conn: ReturnType<typeof connect>) {
 const CONTROL_PLANE_FIXTURE = {
   OMB_CLOUD_READY_TOKEN: "ready-should-not-leak", OMB_CLOUD_BOOTSTRAP: "bootstrap-should-not-leak",
   OMB_LICENSE_KEY: "license-should-not-leak", OMB_INSTALLATION_CREDENTIAL: "fleet-should-not-leak",
+  ORIGIN_INTEGRATION_SECRET: "origin-integration-should-not-leak", ORIGIN_GITHUB_TOKEN: "origin-github-should-not-leak",
+  ORIGIN_RESEND_API_KEY: "origin-mail-should-not-leak", ORIGIN_TURN_SECRET: "origin-turn-should-not-leak",
+  GITHUB_APP_PRIVATE_KEY: "github-app-should-not-leak", GITHUB_CLIENT_SECRET: "github-client-should-not-leak",
+  GITHUB_WEBHOOK_SECRET: "github-webhook-should-not-leak",
 };
 
 describe("ClaudeDriver.decodeConfig", () => {

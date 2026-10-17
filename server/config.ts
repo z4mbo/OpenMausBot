@@ -967,7 +967,11 @@ export const WORKSPACE_CREDENTIAL_ENV = [
 ] as const;
 
 /** Operator secrets only this process reads, plus every `OMB_CLOUD_` var (the underscore leaves out OMB_CLOUDFLARED_PATH). */
-export const CONTROL_PLANE_ENV = ["OMB_LICENSE_KEY", "OMB_INSTALLATION_CREDENTIAL"] as const;
+export const CONTROL_PLANE_ENV = [
+  "OMB_LICENSE_KEY", "OMB_INSTALLATION_CREDENTIAL",
+  "ORIGIN_INTEGRATION_SECRET", "ORIGIN_GITHUB_TOKEN", "ORIGIN_RESEND_API_KEY", "ORIGIN_TURN_SECRET",
+  "GITHUB_APP_PRIVATE_KEY", "GITHUB_CLIENT_SECRET", "GITHUB_WEBHOOK_SECRET",
+] as const;
 export const CONTROL_PLANE_ENV_PREFIX = "OMB_CLOUD_";
 
 /** Names compare case-insensitively because Windows environments do. */
@@ -1028,6 +1032,7 @@ function openCodeProviderKeyNameRefusal(name: string): string | undefined {
   if (name === "OPENCODE_API_KEY") return "Save the OpenCode key in the OpenCode API key box instead.";
   const reserved = name.startsWith("OPENCODE_") || name.startsWith("OMB_")
     || (WORKSPACE_CREDENTIAL_ENV as readonly string[]).includes(name)
+    || (CONTROL_PLANE_ENV as readonly string[]).includes(name)
     || ((PROVIDER_CREDENTIAL_ENV as readonly string[]).includes(name) && !(OPENCODE_PROVIDER_ENV as readonly string[]).includes(name));
   return reserved ? `OpenMaus keeps ${name} for itself, so OpenCode can't be given it here. Put this key in opencode.json instead.` : undefined;
 }

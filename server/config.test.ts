@@ -1794,6 +1794,19 @@ describe("credential env preference", () => {
 });
 
 describe("workspace credential env strip", () => {
+  it("keeps Origin integration authority out of child environments for every Windows spelling", () => {
+    const credentials = [
+      "ORIGIN_INTEGRATION_SECRET", "ORIGIN_GITHUB_TOKEN", "ORIGIN_RESEND_API_KEY", "ORIGIN_TURN_SECRET",
+      "GITHUB_APP_PRIVATE_KEY", "GITHUB_CLIENT_SECRET", "GITHUB_WEBHOOK_SECRET",
+    ];
+    const env: Record<string, string | undefined> = {
+      PATH: "/usr/bin", GITHUB_TOKEN: "project-owned-token", ORIGIN_PUBLIC_URL: "https://origin.example",
+      ...Object.fromEntries(credentials.flatMap((name) => [[name, "server-secret"], [name.toLowerCase(), "server-secret"]])),
+    };
+    stripWorkspaceCredentialEnv(env);
+    expect(env).toEqual({ PATH: "/usr/bin", GITHUB_TOKEN: "project-owned-token", ORIGIN_PUBLIC_URL: "https://origin.example" });
+  });
+
   it("removes every workspace credential from a child env in place", () => {
     const env = {
       PATH: "/usr/bin",
