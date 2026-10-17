@@ -2,7 +2,7 @@
 
 The website now consumes `shared/origin-theme.css`, the same semantic palette, control radii and motion duration used by the core app. Inter replaces the separate display typography. Light and dark colors, form focus, flat panel borders, menu dismissal and wrapping footer navigation were inspected. The auth password input has an explicit accessible name independent of its visibility toggle.
 
-The website's `/whats-new` page reads `shared/origin-releases.ts`. Footer/download links expose it, and download guidance describes the unsigned Mac update limitation accurately. The Docker build context includes both shared files; `scripts/deploy-origin.mjs` stages those dependencies from the committed tree.
+The website's `/whats-new` page reads `shared/origin-releases.ts`. Footer/download links expose it, and download guidance describes the unsigned Mac update limitation accurately. Its Mac opening link follows [Apple's current instructions](https://support.apple.com/en-us/102445); macOS 15 and later removed the old Control-click override. The Docker build context includes both shared files; `scripts/deploy-origin.mjs` stages those dependencies from the committed tree.
 
 ## Browser evidence
 
@@ -10,7 +10,7 @@ The isolated Next development server ran on `http://127.0.0.1:3017`, with `NEXT_
 
 Before screenshots cover landing, sign-in and sign-up at 375/1440 px in light/dark. Final after checks use the 2026-10-18 version 0.2.3 changelog and cover those routes plus release history: 16 cases, zero page errors, no horizontal overflow, mobile menu Escape, password visibility, named fields and Windows download target. Full-page after screenshots include the lower landing sections and footer. Evidence is in `evidence/origin-site/`: `*-before.png`, `*-after-full.png`, `before-results.json` and `after-full-results.json`. The new release-history page has no pre-existing screen to compare.
 
-The final production Docker image was built with the intended public Convex endpoints and tested before rollout through a private loopback container and SSH tunnel at `http://127.0.0.1:3033/`. All WebSockets are intercepted without forwarding, and non-loopback HTTP requests are blocked. Both final 16-case runs (`after` and `production-image`) pass with zero page errors. The tests never submit an account form. `production-image-full-results.json` and matching screenshots record this compiled-artifact check; they do not prove live account authentication.
+The final production Docker image was built with the intended public Convex endpoints and tested before rollout through a private loopback container and SSH tunnel at `http://127.0.0.1:3034/`. The image is `origin-audit-site:0.2.3-final`, ID `sha256:4510c3ccf3598946de922215ffb7f7f9951ddb2ce23760346026fdc33c55d48e`, from website commit `c397371e1`. Its desktop runtime source is unchanged from tag `origin-v0.2.3`. All WebSockets are intercepted without forwarding, and non-loopback HTTP requests are blocked. Both final 16-case runs (`after` and `production-image`) pass with zero page errors. The tests never submit an account form. `production-image-full-results.json` and matching screenshots record this compiled-artifact check; they do not prove live account authentication. The private container and SSH tunnel were stopped after inspection.
 
 ```powershell
 $env:NEXT_PUBLIC_CONVEX_URL = 'http://127.0.0.1:20689'
