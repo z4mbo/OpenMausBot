@@ -19,6 +19,10 @@ on:
 permissions:
   contents: read
 
+# vite's client build needs more than node's default ~2 GB heap
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
+
 jobs:
   version:
     name: Tag matches package.json
