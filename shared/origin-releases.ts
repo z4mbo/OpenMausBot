@@ -3,11 +3,11 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.2.4",
+  version: "0.2.5",
   date: "2026-10-18",
   title: "A safer, more consistent workspace",
   changes: [
-    { title: "Workspace and project permissions", body: "Viewer access is respected in chat and calls. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages." },
+    { title: "Workspace and project permissions", body: "Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages." },
     { title: "Safer issue mirroring", body: "Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin." },
     { title: "Files respect their source access", body: "Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour." },
     { title: "Shared work and sync", body: "Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots." },
