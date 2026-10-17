@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { Loader2, X } from "lucide-react";
 import { cloudUrl, setCloudUrl, useCloudSession } from "@/lib/origin-cloud";
 import { sessionStore } from "@/lib/origin-cloud/client";
-import { cn } from "@/lib/cn";
+import { CenteredDialog } from "./CenteredDialog";
+import { ghostButton, iconButton, inputClass, primaryButton } from "./origin-pages/ui";
 
 const DEV_URL = "http://127.0.0.1:3210";
 
@@ -15,13 +16,14 @@ export async function shareSession(url: string | null, sessionToken: string | nu
 }
 
 export function OriginConnectDialog({ onClose }: { onClose(): void }) {
+  const titleId = useId();
   const session = useCloudSession();
   const [url, setUrl] = useState(cloudUrl() ?? DEV_URL);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const field = "mt-1.5 w-full rounded-lg border border-hairline/40 bg-inset px-3 py-2 text-[13px] text-ink outline-none focus:border-focus";
+  const field = `${inputClass} mt-1.5`;
 
   const signIn = async () => {
     setBusy(true); setError("");
@@ -42,17 +44,16 @@ export function OriginConnectDialog({ onClose }: { onClose(): void }) {
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div role="dialog" aria-modal="true" aria-label="Origin account" className="w-full max-w-[420px] rounded-2xl border border-hairline/50 bg-panel p-5">
+    <CenteredDialog label="Origin account" labelledBy={titleId} onClose={onClose} className="p-5 sm:max-w-[420px]">{(dismiss) => <>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[16px] font-semibold text-ink">Origin account</h2>
-          <button type="button" aria-label="Close" onClick={onClose} className="flex size-8 items-center justify-center rounded-lg text-ink-secondary hover:bg-raised hover:text-ink"><X size={16} /></button>
+          <h2 id={titleId} className="text-[16px] font-semibold text-ink">Origin account</h2>
+          <button type="button" aria-label="Close" onClick={dismiss} className={iconButton}><X size={16} /></button>
         </div>
         {session.user ? (
           <div className="space-y-4">
-            <p className="text-[13px] text-ink-secondary">Signed in as <span className="font-medium text-ink">{session.user.name || session.user.email}</span> on {cloudUrl()}.</p>
+            <p className="break-words text-[13px] text-ink-secondary">Signed in as <span className="font-medium text-ink">{session.user.name || session.user.email}</span> on {cloudUrl()}.</p>
             <button type="button" disabled={busy} onClick={() => void signOut()}
-              className="rounded-lg bg-raised px-4 py-2 text-[13px] text-ink hover:bg-raised-hover disabled:opacity-50">Sign out</button>
+              className={ghostButton}>Sign out</button>
           </div>
         ) : (
           <form className="space-y-3" onSubmit={(event) => { event.preventDefault(); void signIn(); }}>
@@ -67,13 +68,12 @@ export function OriginConnectDialog({ onClose }: { onClose(): void }) {
             </label>
             {error && <p role="alert" className="text-[12.5px] text-danger">{error}</p>}
             <button type="submit" disabled={busy || !email || !password}
-              className={cn("flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-[13px] font-medium text-white disabled:opacity-40")}>
+              className={`${primaryButton} w-full`}>
               {busy && <Loader2 size={14} className="animate-spin" />}Sign in
             </button>
           </form>
         )}
-      </div>
-    </div>,
+      </>}</CenteredDialog>,
     document.body,
   );
 }
