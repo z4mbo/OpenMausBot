@@ -1,12 +1,26 @@
 import { Inbox, MessagesSquare, PenTool, Phone } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { openOriginPage, useOriginPage, type OriginPage } from "@/lib/origin-pages";
+import { useCloudLinks } from "@/lib/origin-cloud-links";
+import { activeWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
+import { useStore } from "@/state/store";
+import { MemberCall } from "./origin-pages/CallPage";
+import { WorkspaceChat } from "./origin-pages/WorkspaceChatPage";
+import { WorkspaceInbox } from "./origin-pages/WorkspaceInboxPage";
+import { WorkspaceGate } from "./origin-pages/ui";
+import { lazyScreen } from "./lazy-screens";
+import { EXCALIDRAW_ASSET_PATH } from "@/lib/excalidraw-assets";
 
-export const ORIGIN_PAGES: { id: OriginPage; label: string; icon: typeof Inbox; blurb: string }[] = [
-  { id: "inbox", label: "Inbox", icon: Inbox, blurb: "Everything that needs you across the workspace: mentions, approvals and updates." },
-  { id: "chat", label: "Chat", icon: MessagesSquare, blurb: "Talk with the people in this workspace, in channels and direct messages." },
-  { id: "call", label: "Call", icon: Phone, blurb: "Voice and video calls with your team, with agents joining when you need them." },
-  { id: "draw", label: "Draw", icon: PenTool, blurb: "A shared canvas for sketches, flows and plans." },
+const DrawingCanvas = lazyScreen("DrawingCanvas", async () => {
+  (window as Window & { EXCALIDRAW_ASSET_PATH?: string }).EXCALIDRAW_ASSET_PATH = EXCALIDRAW_ASSET_PATH;
+  return (await import("./origin-pages/DrawingCanvas")).DrawingCanvas;
+});
+
+export const ORIGIN_PAGES: { id: OriginPage; label: string; contents: string; icon: typeof Inbox }[] = [
+  { id: "inbox", label: "Inbox", contents: "Issues and notifications", icon: Inbox },
+  { id: "chat", label: "Chat", contents: "Messages", icon: MessagesSquare },
+  { id: "call", label: "Call", contents: "Calls", icon: Phone },
+  { id: "draw", label: "Draw", contents: "Drawings", icon: PenTool },
 ];
 
 export function OriginNav({ iconsOnly = false }: { iconsOnly?: boolean }) {
@@ -29,12 +43,27 @@ export function OriginNav({ iconsOnly = false }: { iconsOnly?: boolean }) {
 export function OriginPageView({ page }: { page: OriginPage }) {
   const entry = ORIGIN_PAGES.find((item) => item.id === page)!;
   const Icon = entry.icon;
+  const teamId = useActiveCloudWorkspace();
   return (
-    <main className="relative flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-3 bg-app p-6 text-center">
-      <Icon size={30} className="text-ink-secondary" aria-hidden="true" />
-      <h1 className="text-[18px] font-semibold text-ink">{entry.label}</h1>
-      <p className="max-w-sm text-[13px] text-ink-secondary">{entry.blurb}</p>
-      <span className="rounded-full bg-raised px-3 py-1 text-[12px] text-ink-secondary">Coming soon</span>
+    <main className="relative flex h-full min-w-0 flex-1 flex-col bg-app" data-origin-page={page}>
+      <header className="flex shrink-0 items-center gap-2 border-b border-hairline/40 px-4 py-2.5 pl-11 md:pl-4">
+        <Icon size={15} className="text-ink-secondary" aria-hidden="true" />
+        <h1 className="text-[14px] font-semibold text-ink">{entry.label}</h1>
+      </header>
+      <WorkspaceGate key={teamId ?? ""} teamId={teamId} label={entry.contents}>
+        {(ctx) => page === "inbox" ? <WorkspaceInbox {...ctx} />
+          : page === "chat" ? <WorkspaceChat {...ctx} />
+          : page === "call" ? <MemberCall key={ctx.teamId} target={{ teamId: ctx.teamId }} me={ctx.me} canJoin={ctx.canEdit} name="Workspace" emptyNote="Nobody is in the workspace call yet" />
+          : <DrawingCanvas key={ctx.teamId} teamId={ctx.teamId} userId={ctx.me._id} name="Workspace drawing" readOnly={!ctx.canEdit} />}
+      </WorkspaceGate>
     </main>
   );
+}
+
+function useActiveCloudWorkspace(): string | null {
+  const { state } = useStore();
+  const view = useWorkspaces();
+  const { workspaces } = useCloudLinks();
+  const headId = activeWorkspace(view, workspaceHeadsOf(state.bots));
+  return (headId && workspaces[headId]) || null;
 }

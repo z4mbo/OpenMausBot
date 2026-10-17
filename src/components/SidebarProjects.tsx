@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Cloud, Download, Plus, UserPlus, X } from "lucide-react";
+import { ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Cloud, Plus, UserPlus, X } from "lucide-react";
 import { OriginConnectDialog } from "./OriginConnect";
-import { OriginImportDialog } from "./OriginImport";
 import { RuntimeHelp, WorkspaceMembersPanel } from "./origin-members";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
 import type { Bot } from "@/state/store";
@@ -61,7 +60,7 @@ function Menu({ label, icon, children, className, floating = false }: { label: s
 const menuItem = "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-ink hover:bg-raised";
 
 export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = false }: { heads: readonly Bot[]; activeId?: string; onNewWorkspace(): void; compact?: boolean }) {
-  const [panel, setPanel] = useState<"account" | "import" | "members" | null>(null);
+  const [panel, setPanel] = useState<"account" | "members" | null>(null);
   const cloudLinks = useCloudLinks();
   return (
     <>
@@ -77,11 +76,9 @@ export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = f
       <button type="button" role="menuitem" onClick={onNewWorkspace} className={menuItem}><Plus size={13} />New workspace</button>
       <button type="button" role="menuitem" onClick={() => setPanel("members")} className={menuItem}><UserPlus size={13} />Members & invites…</button>
       <div className="my-1 h-px bg-hairline/50" />
-      <button type="button" role="menuitem" onClick={() => setPanel("import")} className={menuItem}><Download size={13} />Import from Origin…</button>
       <button type="button" role="menuitem" onClick={() => setPanel("account")} className={menuItem}><Cloud size={13} />Origin account…</button>
     </Menu>
     {panel === "account" && <OriginConnectDialog onClose={() => setPanel(null)} />}
-    {panel === "import" && <OriginImportDialog onClose={() => setPanel(null)} />}
     {panel === "members" && <MembersDialog cloudTeamId={(activeId && cloudLinks.workspaces[activeId]) || null} onClose={() => setPanel(null)} />}
     </>
   );

@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 const DEV_URL = "http://127.0.0.1:3210";
 
 /** Shares the signed-in Origin session with the harness, so bots can reach their project's issues, assets and repo. */
-async function shareSession(url: string | null, sessionToken: string | null) {
+export async function shareSession(url: string | null, sessionToken: string | null) {
   await fetch("/api/origin/cloud-session", sessionToken && url
     ? { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ url, sessionToken }) }
     : { method: "DELETE" }).catch(() => {});

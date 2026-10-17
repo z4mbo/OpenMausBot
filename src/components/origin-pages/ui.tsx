@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Cloud, Loader2, LogIn, X } from "lucide-react";
-import { useCloudQuery, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
+import { useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
+import { useWorkspaceAccess, type WorkspaceRole } from "@/lib/origin-members";
 import { cn } from "@/lib/cn";
 import type { CloudProject } from "./cloud-types";
 import { errorText } from "./repo-url";
@@ -32,6 +33,23 @@ export function CloudGate({ cloudProjectId, projectName, label, children }: Orig
   if (!signedIn) return <SignIn onLogin={session.login} label={label} />;
   if (project === undefined) return <Loading label={`Loading ${label.toLowerCase()}`} />;
   return <>{children({ project, projectId: cloudProjectId, canEdit: project.memberRole !== "viewer", isAdmin: project.memberRole === "owner" || project.memberRole === "admin" })}</>;
+}
+
+export type WorkspaceContext = { teamId: string; me: CloudUser; role: WorkspaceRole; canEdit: boolean };
+
+export function WorkspaceGate({ teamId, label, children }: { teamId: string | null; label: string; children: (ctx: WorkspaceContext) => ReactNode }) {
+  const url = useCloudUrl();
+  const session = useCloudSession();
+  const signedIn = Boolean(session.user && session.token);
+  const access = useWorkspaceAccess(teamId && signedIn ? teamId : null);
+  if (!url) return <EmptyState icon={<Cloud size={28} />} title="Origin is not set up" body="Add your Origin cloud address in settings to use the workspace pages." />;
+  if (!session.ready) return <Loading label="Connecting to Origin" />;
+  if (!signedIn || !session.user) return <SignIn onLogin={session.login} label={label} />;
+  if (!teamId) {
+    return <EmptyState icon={<Cloud size={28} />} title="Connect this workspace to Origin" body={`This workspace is not linked to an Origin workspace yet. Use Import from Origin in the workspace menu, and its ${label.toLowerCase()} appear here.`} />;
+  }
+  if (access === undefined) return <Loading label={`Loading ${label.toLowerCase()}`} />;
+  return <>{children({ teamId, me: session.user, role: access.role, canEdit: access.role !== "viewer" })}</>;
 }
 
 function SignIn({ onLogin, label }: { onLogin(email: string, password: string): Promise<void>; label: string }) {

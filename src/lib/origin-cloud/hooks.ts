@@ -37,6 +37,57 @@ export function useCloudQuery<T = unknown>(name: string, args: Record<string, un
   return result && result.key === watchKey ? result.value : undefined;
 }
 
+type Page<T> = { page: T[]; isDone: boolean; continueCursor: string };
+export type CloudPages<T> = { results: T[]; status: "loading" | "more" | "done"; loadMore(): void };
+
+/** A Convex paginated query, every loaded page kept live. */
+export function useCloudPages<T>(name: string, args: Record<string, unknown> | "skip", pageSize: number): CloudPages<T> {
+  const url = useCloudUrl();
+  const token = useCloudToken();
+  const key = args === "skip" ? null : JSON.stringify(args);
+  const watchKey = url && key !== null ? `${url}\n${token ?? ""}\n${name}\n${key}` : null;
+  const [cursors, setCursors] = useState<{ key: string | null; list: (string | null)[] }>({ key: watchKey, list: [null] });
+  const list = cursors.key === watchKey ? cursors.list : [null];
+  const [pages, setPages] = useState<{ key: string | null; byCursor: Map<string | null, Page<T>> }>({ key: null, byCursor: new Map() });
+  const listKey = JSON.stringify(list);
+
+  useEffect(() => {
+    const client = cloudClient();
+    if (!client || watchKey === null || key === null) return;
+    const base = JSON.parse(key) as Record<string, unknown>;
+    const stops = (JSON.parse(listKey) as (string | null)[]).map((cursor) => {
+      const watch = client.watchQuery(functionRef<"query">(name), withSession({ ...base, paginationOpts: { numItems: pageSize, cursor } }));
+      const read = () => {
+        let value: Page<T> | undefined;
+        try {
+          value = watch.localQueryResult() as Page<T> | undefined;
+        } catch {
+          value = undefined;
+        }
+        if (!value) return;
+        setPages((current) => {
+          const byCursor = new Map(current.key === watchKey ? current.byCursor : []);
+          byCursor.set(cursor, value);
+          return { key: watchKey, byCursor };
+        });
+      };
+      read();
+      return watch.onUpdate(read);
+    });
+    return () => { for (const stop of stops) stop(); };
+  }, [watchKey, name, key, listKey, pageSize]);
+
+  const loaded = pages.key === watchKey ? list.map((cursor) => pages.byCursor.get(cursor)) : [];
+  const last = loaded.at(-1);
+  const results = loaded.flatMap((page) => page?.page ?? []);
+  const status = !loaded.length || loaded.some((page) => !page) ? "loading" : last!.isDone ? "done" : "more";
+  const loadMore = useCallback(() => {
+    if (!last || last.isDone) return;
+    setCursors({ key: watchKey, list: [...list, last.continueCursor] });
+  }, [last, list, watchKey]);
+  return { results, status, loadMore };
+}
+
 export function useCloudSession(): {
   user: CloudUser | null;
   token: string | null;

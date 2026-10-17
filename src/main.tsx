@@ -13,6 +13,7 @@ import { BrowserSignInPage } from "./pair/BrowserSignInPage";
 import { PairPage } from "./pair/PairPage";
 import "./styles.css";
 import { CloudProvider } from "@/lib/origin-cloud";
+import { OriginGate } from "./components/OriginGate";
 
 // Before first paint; settleAdvancedModeDefault must run before applySkin writes omb-skin.
 settleAdvancedModeDefault();
@@ -40,7 +41,7 @@ async function chooseRoot(): Promise<React.ReactNode> {
     const { DesktopViewer } = await import("./components/DesktopViewer");
     return <DesktopViewer />;
   }
-  return <CloudProvider><App /></CloudProvider>;
+  return <CloudProvider><OriginGate><App /></OriginGate></CloudProvider>;
 }
 
 void Promise.all([bootstrapBrand(), chooseRoot()]).then(([, root]) => {

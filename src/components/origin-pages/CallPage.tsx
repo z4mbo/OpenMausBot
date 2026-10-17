@@ -28,7 +28,7 @@ export function CallPage(props: OriginPageProps) {
   return (
     <CloudGate {...props} label="Calls">
       {({ project, projectId, canEdit }) => session.user && project.teamId
-        ? <MemberCall key={projectId} target={{ teamId: project.teamId, room: projectId }} me={session.user} canJoin={canEdit} projectName={project.name} />
+        ? <MemberCall key={projectId} target={{ teamId: project.teamId, room: projectId }} me={session.user} canJoin={canEdit} name={project.name} emptyNote="Nobody is in this project's call yet" />
         : <EmptyState icon={<PhoneOff size={28} />} title="Calls are unavailable" body="Origin did not say which workspace this project belongs to." />}
     </CloudGate>
   );
@@ -41,7 +41,7 @@ function videoSender(connection: RTCPeerConnection, index: number) {
   return connection.getTransceivers().filter((transceiver) => transceiver.receiver.track.kind === "video")[index]?.sender;
 }
 
-function MemberCall({ target, me, canJoin, projectName }: { target: RealtimeTarget; me: CloudUser; canJoin: boolean; projectName: string }) {
+export function MemberCall({ target, me, canJoin, name, emptyNote }: { target: RealtimeTarget; me: CloudUser; canJoin: boolean; name: string; emptyNote: string }) {
   const self = useMemo(() => personOf(me), [me]);
   const targetKey = `${target.teamId}:${target.room ?? ""}`;
   const { value: polledParticipants } = usePolled(
@@ -486,13 +486,13 @@ function MemberCall({ target, me, canJoin, projectName }: { target: RealtimeTarg
   const present = participants ?? [];
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col gap-3 p-4" aria-label={`${projectName} call`}>
+    <section className="flex min-h-0 flex-1 flex-col gap-3 p-4" aria-label={`${name} call`}>
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5" aria-label="People in the call">
           {participants === undefined
             ? <span className="text-[12.5px] text-ink-tertiary">Checking who is here…</span>
             : present.length === 0
-              ? <span className="text-[12.5px] text-ink-secondary">Nobody is in this project's call yet</span>
+              ? <span className="text-[12.5px] text-ink-secondary">{emptyNote}</span>
               : present.map((participant) => (
                 <button key={participant.userId} type="button" title={participant.name}
                   onClick={() => setFocused(participant.userId === self.userId ? SELF_CAMERA : `${participant.userId}:camera`)}

@@ -9,6 +9,7 @@ import { PersonAvatar } from "./PersonAvatar";
 
 const MESSAGES = "/api/local-chat/messages";
 const FILES = "/api/local-chat/files";
+const CONVERSATIONS = "/api/local-chat/conversations";
 const POLL_MS = 2_500;
 const MAX_FILE_BYTES = 15 * 1024 * 1024;
 const REACTIONS = [
@@ -23,7 +24,8 @@ export function TeamChatPage(props: OriginPageProps) {
   return (
     <CloudGate {...props} label="Messages">
       {({ project, projectId, canEdit }) => session.user && project.teamId
-        ? <TeamChat key={projectId} target={{ teamId: project.teamId, conversation: `project:${projectId}` }} projectId={projectId} projectName={project.name} me={session.user} canWrite={canEdit} />
+        ? <TeamChat key={projectId} target={{ teamId: project.teamId, conversation: `project:${projectId}` }} projectId={projectId} name={project.name} me={session.user} canWrite={canEdit}
+            emptyTitle={`Start the ${project.name} conversation`} emptyBody="Messages here are shared with everyone in this project." readOnlyNote="You have view-only access to this project." />
         : <EmptyState icon={<MessagesSquare size={28} />} title="Chat is unavailable" body="Origin did not say which workspace this project belongs to." />}
     </CloudGate>
   );
@@ -41,7 +43,12 @@ function mergeMessages(older: readonly MemberChatMessage[], latest: readonly Mem
   return [...byId.values()].sort((a, b) => a.createdAt - b.createdAt);
 }
 
-function TeamChat({ target, projectId, projectName, me, canWrite }: { target: RealtimeTarget; projectId: string; projectName: string; me: CloudUser; canWrite: boolean }) {
+export type TeamChatProps = {
+  target: RealtimeTarget; name: string; me: CloudUser; canWrite: boolean; projectId?: string;
+  emptyTitle: string; emptyBody: string; readOnlyNote: string; markRead?: boolean;
+};
+
+export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, emptyBody, readOnlyNote, markRead = false }: TeamChatProps) {
   const key = `${target.teamId}:${target.conversation}`;
   const { value: latest, error, refresh } = usePolled(
     () => originRealtime<{ messages: MemberChatMessage[]; hasMore: boolean }>(MESSAGES, target),
@@ -61,6 +68,7 @@ function TeamChat({ target, projectId, projectName, me, canWrite }: { target: Re
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: "end" });
+    if (markRead && lastId) void originRealtime(CONVERSATIONS, target, { method: "PATCH", json: { messageId: lastId } }).catch(() => {});
   }, [lastId]);
 
   const loadOlder = async () => {
@@ -84,7 +92,7 @@ function TeamChat({ target, projectId, projectName, me, canWrite }: { target: Re
         if (file.size === 0 || file.size > MAX_FILE_BYTES) throw new Error(`${file.name} must be between 1 byte and 15 MB`);
         const form = new FormData();
         form.append("file", file, file.name);
-        const uploaded = await originRealtime<{ file: MemberChatAttachment }>(FILES, target, { body: form, query: { projectId } });
+        const uploaded = await originRealtime<{ file: MemberChatAttachment }>(FILES, target, { body: form, ...(projectId ? { query: { projectId } } : {}) });
         setPending((current) => [...current, uploaded.file]);
       }
     } catch (reason) {
@@ -130,14 +138,14 @@ function TeamChat({ target, projectId, projectName, me, canWrite }: { target: Re
   };
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col" aria-label={`${projectName} chat`}>
+    <section className="flex min-h-0 flex-1 flex-col" aria-label={`${name} chat`}>
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {latest === undefined && !error && <p role="status" className="flex items-center gap-2 text-[13px] text-ink-secondary"><Loader2 size={14} className="animate-spin" />Loading messages</p>}
         {latest?.hasMore && !olderExhausted && messages.length > 0 && (
           <button type="button" className="mx-auto mb-3 block rounded-lg px-3 py-1 text-[12.5px] text-ink-secondary hover:bg-raised hover:text-ink" onClick={() => void loadOlder()}>Load earlier messages</button>
         )}
         {latest && messages.length === 0 && (
-          <EmptyState icon={<MessagesSquare size={28} />} title={`Start the ${projectName} conversation`} body="Messages here are shared with everyone in this project." />
+          <EmptyState icon={<MessagesSquare size={28} />} title={emptyTitle} body={emptyBody} />
         )}
         <ol className="flex flex-col gap-3">
           {messages.map((message) => {
@@ -211,14 +219,14 @@ function TeamChat({ target, projectId, projectName, me, canWrite }: { target: Re
             <div className="flex items-end gap-2">
               <input ref={fileInput} type="file" multiple hidden onChange={(event) => void attach(event.target.files)} />
               <button type="button" className={iconButton} aria-label="Attach a file" title="Attach a file" disabled={busy || pending.length >= 8} onClick={() => fileInput.current?.click()}><Paperclip size={15} /></button>
-              <textarea className={cn(inputClass, "max-h-40 min-h-[38px] flex-1 resize-none")} rows={1} placeholder={`Message ${projectName}`} aria-label="Message"
+              <textarea className={cn(inputClass, "max-h-40 min-h-[38px] flex-1 resize-none")} rows={1} placeholder={`Message ${name}`} aria-label="Message"
                 value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={onKeyDown} />
               <button type="submit" className={primaryButton} disabled={busy || (!draft.trim() && !pending.length)} aria-label="Send">
                 {busy ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
               </button>
             </div>
           </form>
-        ) : <p className="text-[12.5px] text-ink-secondary">You have view-only access to this project.</p>}
+        ) : <p className="text-[12.5px] text-ink-secondary">{readOnlyNote}</p>}
       </div>
     </section>
   );
