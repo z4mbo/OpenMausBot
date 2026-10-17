@@ -75,6 +75,8 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
   const [dismissedAt, setDismissedAt] = useState<number | null>(null);
   const [highlight, setHighlight] = useState(0);
   const [focused, setFocused] = useState<string | null>(null);
+  const draftVersion = useRef(0);
+  const inFlight = useRef(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
@@ -126,7 +128,8 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
   };
 
   const attach = async (files: FileList | null) => {
-    if (!files?.length) return;
+    if (!files?.length || inFlight.current || !canWrite) return;
+    inFlight.current = true;
     setBusy(true);
     setNotice("");
     try {
@@ -140,6 +143,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
     } catch (reason) {
       setNotice(reason instanceof Error ? reason.message : "Could not upload the file");
     } finally {
+      inFlight.current = false;
       setBusy(false);
       if (fileInput.current) fileInput.current.value = "";
     }
@@ -147,18 +151,22 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
 
   const send = async (event?: FormEvent) => {
     event?.preventDefault();
-    if (busy || (!draft.trim() && !pending.length)) return;
+    if (inFlight.current || !canWrite || (!draft.trim() && !pending.length)) return;
+    inFlight.current = true;
+    const sentVersion = draftVersion.current;
+    const attachmentIds = pending.map((file) => file.id);
     setBusy(true);
     setNotice("");
     try {
       const mentionUserIds = mentionedPeople(draft, people).map((person) => person.userId);
-      await originRealtime(MESSAGES, target, { json: { body: draft, attachmentIds: pending.map((file) => file.id), ...(mentionUserIds.length ? { mentionUserIds } : {}) } });
-      setDraft("");
-      setPending([]);
+      await originRealtime(MESSAGES, target, { json: { body: draft, attachmentIds, ...(mentionUserIds.length ? { mentionUserIds } : {}) } });
+      if (draftVersion.current === sentVersion) setDraft("");
+      setPending((current) => current.filter((file) => !attachmentIds.includes(file.id)));
       refresh();
     } catch (reason) {
       setNotice(reason instanceof Error ? reason.message : "Could not send the message");
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   };
@@ -179,6 +187,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
     if (!mention) return;
     const next = `${draft.slice(0, mention.start)}@${person.name} ${draft.slice(caret)}`;
     const at = mention.start + person.name.length + 2;
+    draftVersion.current += 1;
     setDraft(next);
     setCaret(at);
     setDismissedAt(mention.start);
@@ -293,7 +302,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
               </div>
             )}
             {choices.length > 0 && (
-              <div role="listbox" id="team-chat-mentions" aria-label="Mention a teammate" className="flex max-h-60 flex-col overflow-y-auto rounded-xl border border-hairline/40 bg-raised p-1 shadow-lg">
+              <div role="listbox" id="team-chat-mentions" aria-label="Mention a teammate" className="flex max-h-60 flex-col overflow-y-auto rounded-xl border border-hairline/40 bg-raised p-1">
                 {choices.map((person, index) => (
                   <button key={person.id} id={`team-chat-mention-${person.id}`} type="button" role="option" aria-selected={index === highlight}
                     onMouseDown={(event) => event.preventDefault()} onMouseEnter={() => setHighlight(index)} onClick={() => pickMention(person)}
@@ -312,7 +321,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
                 role="combobox" aria-autocomplete="list" aria-expanded={choices.length > 0} aria-controls={choices.length ? "team-chat-mentions" : undefined}
                 aria-activedescendant={choices[highlight] ? `team-chat-mention-${choices[highlight]!.id}` : undefined}
                 value={draft} onKeyDown={onKeyDown}
-                onChange={(event) => { setDraft(event.target.value); setCaret(event.target.selectionStart ?? event.target.value.length); setDismissedAt(null); }}
+                onChange={(event) => { draftVersion.current += 1; setDraft(event.target.value); setCaret(event.target.selectionStart ?? event.target.value.length); setDismissedAt(null); }}
                 onSelect={(event) => setCaret(event.currentTarget.selectionStart ?? 0)} />
               <button type="submit" className={cn(primaryButton, "size-8 rounded-xl p-0")} disabled={busy || (!draft.trim() && !pending.length)} aria-label="Send">
                 {busy ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
