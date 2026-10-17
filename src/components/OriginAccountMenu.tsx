@@ -61,7 +61,7 @@ export function OriginAccountMenu({ iconOnly = false }: { iconOnly?: boolean }) 
           onSelect: () => void signOut(),
         }],
       }} />
-      {settings && <OriginAccountDialog me={me} onClose={() => setSettings(false)} onSignOut={() => { setSettings(false); void signOut(); }} />}
+      {settings && <OriginAccountDialog key={JSON.stringify([cloudUrl(), me._id])} me={me} onClose={() => setSettings(false)} onSignOut={() => { setSettings(false); void signOut(); }} />}
     </>
   );
 }
