@@ -208,6 +208,14 @@ keyless local generation, saved-key handling, and safe errors with a local fake 
 The [independent threads fixture](threads.md) checks nested sidebar navigation,
 per-thread models, simultaneous direct conversations and thread-scoped Stop.
 
+The [Origin import integrity fixture](origin-import.md) checks complete local
+team creation, link-write recovery, lost responses and concurrent retries against
+synthetic cloud access responses in a disposable fake-engine server.
+
+The [Origin drawing fixture](origin-draw.md) checks actual Excalidraw edits,
+failed-save navigation and reload recovery, account scope, project canvas creation,
+read-only controls and mobile layout against a synthetic cloud adapter.
+
 The [mobile generated-image checks](mobile-generated-images.md) cover native image
 attachments and message-scoped download authorization using isolated fixtures.
 
@@ -267,6 +275,21 @@ The [Group and Goal Local VM recipe](group-local-vm.md) checks per-speaker
 desktop routing, cancellation, and computer authority cleanup.
 
 ## Evidence
+
+Origin's inspection and delivery records:
+
+- [Audit register, evidence and delivery status](origin-audit.md)
+- [Delivery goal and authority](origin-delivery-goal.md)
+- [Backend access matrix and lifecycle audit](origin-backend-access.md)
+- [Shared controls and dialog checks](origin-ui.md)
+- [Project navigation and delegation checks](origin-project-ui.md)
+- [Populated project pages, accounts and members](origin-pages.md)
+- [Core Settings and onboarding](origin-core.md)
+- [Member call lifecycle and audio recovery](origin-calls.md)
+- [Drawing recovery and canvas controls](origin-draw.md)
+- [Storage admission security investigation](origin-storage-admission.md)
+- [Upstream fit review and paired appearance](origin-upstream-review.md)
+- [Website themes and release history](origin-site.md)
 
 The [persistence responsiveness benchmark](persistence-performance.md) measures
 synthetic message/log bursts and history scans, with isolated chat, visibility

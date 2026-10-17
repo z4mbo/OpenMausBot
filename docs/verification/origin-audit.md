@@ -1,0 +1,85 @@
+# Origin inspection and delivery record
+
+This audit implements the user's expanded [delivery goal](origin-delivery-goal.md). Work is isolated in `C:\Users\aless\Documents\Origin-bugfix`, branch `bugfix/scan`, from `origin-integration` commit `04da48583`. The concurrent main checkout was inspected read-only. Its live servers and local Convex process were not used for mutation tests.
+
+The audit is still in progress. Source fixes, synthetic backend tests, browser fixtures, packaged acceptance and production delivery are separate evidence boundaries. Version 0.2.2 is being prepared; this document does not yet claim it has been published.
+
+## Bug register
+
+Locations identify the affected implementation at the fix checkpoint. Each row links the logical fix commit by its abbreviated SHA; full scenarios and regression evidence are in the linked feature reports and adjacent test files.
+
+| Severity | Source | Concrete scenario / wrong result | Fix commit |
+| --- | --- | --- | --- |
+| P1 | `server/config.ts:972` | A model child inherits Origin integration, GitHub App, mail and TURN secrets from its server environment. | `3ed2399e4`: strip server authority at the shared child-environment boundary, including Windows key casing. |
+| P1 | `server/origin-cloud.ts:250` | A Convex/transport error embeds the active session token; tool or HTTP output repeats it. | `567efcb6a`: redact the exact active token before extracting or clipping errors. |
+| P1 | `server/origin-members.ts:203` | A workspace member who is a project viewer can write project chat, pin messages or join project calls because the project role is discarded. | `972df62b0`: carry the restrictive role through store and call-agent authorization. |
+| P1 | `backend/convex/lib/agentAccess.ts:78` | A sender loses project edit access, or its thread/agent is disabled, but can resume, heartbeat or append to an existing run. | `c4e38c73b`: recheck current writable-thread authority on run operations. |
+| P1 | `backend/convex/lib/agentThreadRows.ts:77` | Queue promotion starts a request whose sender was removed or made a viewer while waiting. | `a63e207a4`: reauthorize each queued request and continue bounded batches past invalid rows. |
+| P1 | `backend/convex/lib/auth.ts:132` | With 502 sessions, password change/revoke-other-devices deletes only the first 500, leaving later sessions valid. | `fe66847e6`: invalidate every previous session by generation while preserving the current session. |
+| P1 | `backend/convex/agents.ts:235` | Replacing one avatar deletes a blob still used by another agent or project icon. | `6adbde17b`: remove the reference without eagerly deleting a shared blob. |
+| P1 | `backend/convex/github.ts:306`, `commits.ts:104` | A GitHub fetch finishes after repository replacement or sign-out and writes old repository data into the current project. | `385b65d58`: atomically reauthorize and compare the original repository before writing. |
+| P1 | `backend/convex/tasks.ts:325` | An unmirrored issue in a repository project completes directly; legacy Done-column creation/moves also bypass the workflow. | `ac2f33152`: require a matching merge proof and keep open issues out of system Done. |
+| P1 | `backend/convex/integrations.ts:87`, `server/github/review.ts:158` | Manually closing a GitHub issue completes Origin without a verified merge; delayed closure after a merge can also lose completion. | `ed09492b2`: signed, repository/issue/head-pinned merge receipts survive delayed closure; ordinary closure only mirrors state. Explicit reopen intent prevents reopening manual closures on the next tick. |
+| P1 | `src/components/OriginGate.tsx:160` | Delayed sync from a previous account/server dispatches bots or links after the active connection changes. | `f86e4149c`: scope and cancel sync work across connection changes and unmount. |
+| P1 | `server/origin-import.ts:115` | A partial project import or lost linking response leaves orphaned/duplicate Chiefs and role bots on retry. | `cbfed57e2`: atomically persist the complete team and a private import receipt, then repair cloud links on replay. |
+| P1 | `src/components/origin-pages/ui.tsx:93` | Unlock a Vault, then change project/account/server; reused children retain the previous unlock and private drafts. | `6f6f4db34`: key private page state by server, account and project/workspace. |
+| P1 | `src/components/origin-pages/IssuesPage.tsx:623` | Edit a title while a teammate changes description; saving the old two-field draft overwrites their description. | `07aa1c6ff`: track edited fields separately and follow untouched remote values. |
+| P1 | `src/components/origin-pages/DrawingCanvas.tsx:64`, `src/lib/origin-drawing-outbox.ts:9` | A save batch is removed before awaiting; navigation followed by failure requeues it into an unmounted ref. | `e716fd20a`: persist scoped elements/image bytes until acknowledgement and recover after navigation/reload. |
+| P2 | `backend/convex/tasks.ts:160` | Rename Draft and its inferred privacy disappears, allowing later mirroring. | `41b15afec`: persist Draft identity on create/rename, including legacy columns. |
+| P2 | `backend/convex/github.ts:185` | Legacy issue creation exposes a Draft through its manual URL, or a legacy snapshot completes a parked Draft. | `5ad6039bb`: reject Draft publication and preserve parked state. |
+| P2 | `server/github/review.ts:158` | A PR contains an example or another repository's issue number; regex parsing and extra PATCH-close can close the wrong issue. | `2ef867bfa`: use GitHub's authoritative closing references and observe closure rather than issuing an extra close. |
+| P2 | `server/github/sync.ts:191` | A delayed stale target writes to an old issue, or a closed webhook causes an unintended reopen. | `056ee6664`: recheck current repository/task/issue identity and make webhook sync pull-only. |
+| P2 | `src/components/origin-pages/TeamChatPage.tsx:154` | Type a new draft while a send is pending; its successful response clears the newer text. Two same-render submits can also double-send. | `cdf6a40ab`: preserve draft generations and synchronously guard send/upload admission. |
+| P2 | `src/components/CenteredDialog.tsx:25`, `origin-pages/ui.tsx:342` | Tab escapes the dialog, nested Escape closes multiple layers, or a rejected busy close animates the dialog invisible. | `44978ff7c`: shared focus containment, topmost dismissal and close validation before exit. |
+| P2 | `src/components/CenteredDialog.tsx:42` | Child autofocus replaces the remembered opener; StrictMode cleanup restores focus while the dialog is still mounted. | `c31caa97b`: capture the opener before child autofocus and restore on actual unmount. |
+| P2 | `src/components/origin-pages/issue-fields.tsx:59` | Right-edge issue property menus overflow a 375 px screen and native date UI keeps a dark scheme in light mode. | `a65295083`: clamp the shared menu and inherit the active scheme. |
+| P2 | `src/components/origin-pages/RepoPage.tsx:16` | A repository URL changes while project ID stays constant; the old snapshot remains, including an eligible late response. | `232f9574e`: remount by repository and invalidate abandoned load generations. |
+| P2 | `src/components/origin-pages/RepoPage.tsx:71` | Private Drafts are counted in “Create N on GitHub” although the backend skips them. | `6342868b6`: count only publishable open issues. |
+| P2 | `src/components/origin-pages/WorkspaceInboxPage.tsx:191` | Complete calls a rejecting direct mutation instead of opening the repository issue's PR workflow. | `ed1788038`: route completion through the issue workflow. |
+| P2 | `backend/convex/auth.ts:200` | An outsider accepts a project invite but gets no workspace membership; a deleted project can still consume its invitation. | `0540f3997`: grant minimum workspace access, preserve existing role ceilings and reject stale/inactive targets. |
+| P2 | `src/lib/member-call-session.ts:58`, `server/origin-realtime-store.ts:110` | A delayed leave or stale machine heartbeat/signaling overwrites or removes a replacement call. | `7131605a9`: client nonce ownership and server UUID session fencing. |
+| P2 | `src/components/origin-pages/CallPage.tsx:700` | Autoplay rejects; the Play audio retry exists under a hidden parent and cannot be used. | `f1ec5d126`: hide only media elements and expose stacked recovery controls. |
+| P2 | `src/components/origin-pages/DrawingCanvas.tsx:141` | An old canvas image fetch resolves after navigation and writes into abandoned API/state. | `04c2f5b31`: cancel downloads and ignore aborted results. |
+| P2 | `src/components/origin-pages/DrawingCanvas.tsx:275` | Same-render submits export two snapshots; closing a pending Ask still sends/navigates when the export finishes. | `d13fd4500`: serialize exports and invalidate abandoned generations. |
+| P2 | `src/components/OriginAccountMenu.tsx:61` | Switch account with the profile editor mounted; the previous name draft remains. | `d64c7cbfd`: reset editor identity by server/account. |
+| P2 | `src/components/OriginAccountMenu.tsx:168` | Cancel password change and reopen it; both cancelled password values remain. | `57139f224`: clear values and error on cancellation. |
+| P2 | `src/lib/origin-releases.ts:9` | Read a release, then publish another on the same day; date-based tracking hides the unread indicator. | `0720bed2d`: track the exact release version. |
+| P2 | `src/lib/app-links.ts:5` | Origin Help/feedback opens the upstream repository rather than this product's support source. | `b6b80b5d8`: use Origin links while retaining explicit upstream service/download links. |
+| P2 | `server/mcp-remote-proxy.ts:127` | A rejected remote MCP request hides the HTTP status and gives no useful recovery action. | `e25f6633c`: safe status/recovery text adapted from upstream PR 3026, without sensitive response bodies/addresses. |
+
+| P1 | `backend/convex/lib/storage.ts:93`, `backend/convex/storage.ts:38` | A removed member rebinds a remembered private blob in their own project and obtains a fresh URL. | `f3a8fbb44`: scoped one-use uploads and persistent admission across all five reference writers; session/role rechecks and paginated legacy migration. [Evidence and limits](origin-storage-admission.md). |
+| P1 | `server/config.ts:978` | Origin operator integration authority and Convex administration keys are inherited together by engine and installer children. | `165506951`: remove administration keys when the positive Origin operator marker is present; real synthetic CLI/shell children prove exclusion and preservation of ordinary project credentials. |
+| P2 | `src/lib/origin-cloud/hooks.ts:6`, `src/components/origin-pages/ui.tsx:77` | Failed/stalled reads leave a spinner indefinitely; a refresh error can discard the loaded editor and draft. | `91e477f8e`, `a751a37bc`: scoped retry boundaries, retained non-authority data, fail-closed access queries and bounded retries accommodating SDK reconnect backoff. |
+| P2 | `src/components/origin-pages/ui.tsx:337`, `AssetsPage.tsx`, `VaultPage.tsx`, `FeedbackPage.tsx` | Downgrade a role with an editor open; Save stays enabled and emits the former privileged mutation. | `eec6d240b`: current-role fields/submit guards, shared access explanation and preserved draft; 20 before/after browser cases. |
+| P2 | `companion/src/proxy.ts`, `server/routes/bot-patch.ts:91` | A paired device's appearance PATCH is refused, despite its valid companion capability. | `1b9bfbf5f`: constrained display-only PATCH capability, validated shared palette and atomic rejection of protected mixed fields. [Upstream evidence](origin-upstream-review.md). |
+
+## UI/UX evidence
+
+| Screens / shared source | Change | Before/after and coverage |
+| --- | --- | --- |
+| Shared dialogs; assignment, Origin connection, members | Unified controls, focus containment, nested Escape, opener restoration and busy dismissal. | [Shared controls](origin-ui.md), [project controls](origin-project-ui.md); desktop/mobile and Midnight/Atelier images. `791d33c1b` adopts shared controls in the remaining dialogs. |
+| Chief header, agent list/chat, delegation and search | Fit long names and project tools at 375 px; preserve status and navigation. | [Project controls](origin-project-ui.md); `1ab69ff5f`. Gate-only captures are explicitly distinguished from populated pages. |
+| Issues/detail/composer, Assets/tokens, Vault, Repo, Feedback, project Settings, Inbox/calendar, workspace Chat, account/members | Populated, empty/loading/denied/viewer states; real WebCrypto, collaborative draft handling, mutation failures and responsive layouts. | [Populated page inspection](origin-pages.md); long feedback/settings overflow fix `4f4195480`; merge-approval copy `38479a6cd`. |
+| Calls | Lobby, active call, people/devices/reactions/hand, replacement lifecycle and blocked audio recovery. | [Call inspection](origin-calls.md); actual before/after autoplay screenshots in four theme/size combinations. Hardware/peer acceptance remains separate. |
+| Draw | Real drawing tools, saved/pending/recovered scenes, project canvas creation, Ask, viewer controls and mobile layout. | [Draw inspection](origin-draw.md); `78d03e554` maps Excalidraw control tokens to Origin and fits the canvas picker. |
+| Core App, Sidebar and Settings | All 13 available Settings sections at 375/1440 px in Midnight/Daylight. | [Core inspection](origin-core.md): 56 browser cases; seven mapped onboarding phases and ten persisted tour steps. |
+| Landing, login, signup and release history | Shared core palette, Inter, radii, flat borders, focus, mobile menus and wrapping footer; shared release history. | [Website inspection](origin-site.md); `8244073b9`; 12 before cases and 16 full-page after cases. |
+| Inspection infrastructure | Concurrent previews had a shared Vite dependency cache, causing 504 optimized dependency failures. | `6ce780407`: isolate caches per disposable fixture. Checkers verify the expected fixture entry before interaction, protecting against stale port reuse. |
+
+The component inventory is in `evidence/origin-ui/component-inventory.json`. An inventory entry is source coverage, not proof of every interactive branch. The individual reports state the exercised states and remaining acceptance boundaries.
+
+## Verification and delivery status
+
+- Completed checkpoint: 11 touched server suites, 585 passing tests and 8 skips; four guard suites, 43 passing tests. Later changes receive focused checks and a final aggregate pass.
+- Full backend including storage admission: 17 files, 132 passing tests; independent storage security review completed.
+- Final project-page browser matrix: 113 cases, 40 account/member cases, 20 live-editor permission cases and 39 real Convex-client protocol cases. These use isolated synthetic data and do not claim production account acceptance.
+- Website unit tests and production build pass, including `/whats-new`. Release packaging tests exercise the installed electron-builder's feed generator using synthetic artifacts.
+- The required final client/shared suite, both application/server TypeScript checks, full backend including storage, lint, locale/catalog checks, documentation guards and final touched-server checks remain release gates.
+- GitHub branch/PR, Windows/macOS workflow artifacts, public downloads/update feeds, backend deployment and website deployment remain pending. The configured website SSH destination was checked read-only; no production data was used for testing.
+- Some isolated synthetic fixture directories remain after automatic approval review rejected their exact guarded cleanup with “blocked by policy.” Their processes are stopped and exact paths are recorded in the feature reports; no alternate deletion bypass was attempted.
+
+## Findings outside completed acceptance
+
+Existing download bearer URLs and previously downloaded data cannot be treated as revoked by a storage-admission fix. Native real-provider, microphone/camera, cross-machine WebRTC/TURN, signed updater and macOS interactive acceptance require their own environments. Unbounded legacy reads/deletes and missing response validators are recorded in [the backend inventory](origin-backend-access.md); they were inspected but not qualified at production scale. The contrast checker reports two pre-existing Midnight filled-button contrast gaps, while the remaining nine skins pass its thresholds; this pass preserved the core palette.
+
+The [daily review goal](origin-delivery-goal.md) continues at 06:00 Europe/Rome. Useful upstream changes are assessed against Origin's own account, workspace/project Chief, sender-runs and human-approval contracts before adoption.

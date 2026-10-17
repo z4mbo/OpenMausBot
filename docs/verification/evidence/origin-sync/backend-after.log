@@ -1,0 +1,12 @@
+
+ RUN  v5.0.2 C:/Users/aless/Documents/Origin-bugfix/backend
+
+
+ Test Files  9 passed (9)
+      Tests  81 passed (81)
+   Start at  23:23:39
+   Duration  4.33s (tests 73%, import 13%, environment 8%, transform 5%, worker 1%)
+
+    Isolate  9 workers spawned · ~112ms startup each (spawn + environment, per file)
+             at least ~900ms faster with isolate: false — reuses workers across files instead of one per file
+
