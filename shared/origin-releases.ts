@@ -3,7 +3,7 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.2.2",
+  version: "0.2.3",
   date: "2026-10-18",
   title: "A safer, more consistent workspace",
   changes: [
@@ -15,6 +15,7 @@ export const releases: Release[] = [{
     { title: "Call continuity", body: "An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover." },
     { title: "Recoverable drawings", body: "Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot." },
     { title: "Consistent workspace controls", body: "Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii." },
+    { title: "Chat attachments that fit", body: "Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name." },
     { title: "Recoverable workspace loading", body: "Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page." },
     { title: "Appearance from paired devices", body: "Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings." },
     { title: "Clearer connection errors", body: "Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot." },
