@@ -260,10 +260,13 @@ describe("control-omb ui drives the real renderer", () => {
     const originalLabel = options.find((option: any) => option.id === originalModel).label;
     const nextModel = options.find((option: any) => option.id !== originalModel);
     const clickModel = async (label: string) => {
-      const state = await ui("snapshot", info.ui, "--interactive");
-      const matches = Object.entries(state.refs as Record<string, { name: string; role: string }>)
-        .filter(([, value]) => value.role === "button" && value.name.includes(label));
-      expect(matches).toHaveLength(1);
+      let matches: Array<[string, { name: string; role: string }]> = [];
+      await expect.poll(async () => {
+        const state = await ui("snapshot", info.ui, "--interactive");
+        matches = Object.entries(state.refs as Record<string, { name: string; role: string }>)
+          .filter(([, value]) => value.role === "button" && value.name.includes(label));
+        return matches;
+      }, { timeout: 10_000 }).toHaveLength(1);
       await ui("click", info.ui, "--ref", `@${matches[0]![0]}`);
     };
     await clickModel(originalLabel);
