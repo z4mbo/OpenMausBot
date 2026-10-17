@@ -287,6 +287,8 @@ export async function launchVerificationServer(
   if (browser) Object.assign(childEnv, {
     OMB_AGENT_BROWSER_PATH: browser.binaryPath,
     AGENT_BROWSER_EXECUTABLE_PATH: browser.executablePath,
+    // agent-browser 0.36.0-omb.1 on Windows resolves its native home independently of USERPROFILE.
+    XDG_RUNTIME_DIR: join(dataDir, "runtime"),
   });
   if (boatFixtureApi) childEnv.OMB_BOAT_API = boatFixtureApi;
   if (staticDir) childEnv.OMB_STATIC_DIR = staticDir;
