@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
 import { cloud, cloudAction, cloudMutation, setCloudUrl, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
-import { cloudUrl as cloudUrlNow, sessionStore, setSessionToken } from "@/lib/origin-cloud/client";
+import { cloudQueryOnce, cloudUrl as cloudUrlNow, sessionStore, setSessionToken } from "@/lib/origin-cloud/client";
 import { refreshCloudLinks } from "@/lib/origin-cloud-links";
 import { exclusiveWithSync, onSyncRequest, syncFromOrigin } from "@/lib/origin-sync";
 import { sharedAgentsRound } from "@/lib/origin-shared-agents";
@@ -167,68 +167,86 @@ export function OriginSync() {
   instances.current = state.instances;
   const [empty, setEmpty] = useState(false);
   const [syncProblems, setSyncProblems] = useState<{ name: string; error: string }[]>([]);
-  const running = useRef(false);
-  const requestedWhileRunning = useRef(false);
+  const syncRequest = useRef<() => Promise<void>>(async () => {});
   const hydrated = Boolean(state.hydrated);
+  const sync = useCallback(() => syncRequest.current(), []);
 
-  const sync = useCallback(async (): Promise<void> => {
-    if (running.current) {
-      requestedWhileRunning.current = true;
-      return;
-    }
-    running.current = true;
-    await exclusiveWithSync(async () => {
-      try {
-        await shareSession(cloudUrlNow(), sessionStore.get());
-        const workspaces = await cloud.workspaces.list();
-        setEmpty(workspaces.length === 0);
-        if (!workspaces.length) return;
-        const projects = (await Promise.all(workspaces.map((workspace) => cloud.projects.listForUser(workspace._id)))).flat();
-        const links = await api<CloudLinks>("/api/origin/cloud-links");
-        const call = async <T,>(path: string, init?: { method?: string; body?: string }): Promise<T> => {
-          const answer = await api<T & { bot?: Bot; chief?: Bot; members?: Bot[] }>(path, init);
-          for (const bot of [answer.bot, answer.chief, ...(answer.members ?? [])]) if (bot) dispatch({ type: "botAdded", bot, preserveSelection: true });
-          return answer;
-        };
-        const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: bots.current, links, call, lead: PROJECT_LEAD_ROLE });
-        await sharedAgentsRound({ call, bots: bots.current, instances: instances.current, projects }).catch(() => undefined);
-        await refreshCloudLinks();
-        const accountTeams = new Set(workspaces.map((workspace) => workspace._id));
-        setAccountWorkspaces(Object.entries(synced.links.workspaces).filter(([, teamId]) => accountTeams.has(teamId)).map(([headId]) => headId)
-          .concat(synced.result.createdWorkspaces.map((workspace) => workspace.botId)));
-        setSyncProblems(synced.result.failures);
-        const linkedHeads = Object.keys(synced.links.workspaces);
-        const created = synced.result.createdWorkspaces.map((workspace) => workspace.botId);
-        const known = new Set([...linkedHeads, ...created]);
-        if (!known.has(activeWorkspaceId() ?? "")) {
-          const first = workspaceHeadsOf(bots.current).find((head) => known.has(head.id))?.id ?? created[0] ?? linkedHeads[0];
-          if (first) switchWorkspace(first);
-        }
-      } catch {
-        // A failed round leaves the app as it was; the next round retries.
-      } finally {
-        running.current = false;
+  useEffect(() => {
+    let active = true;
+    let running = false;
+    let requestedWhileRunning = false;
+    const current = () => active && url === cloudUrlNow() && session.token === sessionStore.get();
+    const assertCurrent = () => {
+      if (!current()) throw new Error("Origin account changed during sync");
+    };
+    const guarded = async <T,>(work: () => Promise<T>): Promise<T> => {
+      assertCurrent();
+      const answer = await work();
+      assertCurrent();
+      return answer;
+    };
+    const request = async (): Promise<void> => {
+      if (!current() || !hydrated || !url || !session.token) return;
+      if (running) {
+        requestedWhileRunning = true;
+        return;
       }
-    });
-    if (requestedWhileRunning.current) {
-      requestedWhileRunning.current = false;
-      await sync();
-    }
-  }, [dispatch]);
-
-  useEffect(() => {
-    void shareSession(url, session.token);
-  }, [url, session.token]);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    void sync();
-    const timer = window.setInterval(() => void sync(), SYNC_EVERY_MS);
-    const onFocus = () => void sync();
+      running = true;
+      await exclusiveWithSync(async () => {
+        try {
+          await guarded(() => shareSession(url, session.token));
+          const workspaces = await guarded(() => cloud.workspaces.list());
+          setEmpty(workspaces.length === 0);
+          if (!workspaces.length) return;
+          const projects = (await guarded(() => Promise.all(workspaces.map((workspace) => cloud.projects.listForUser(workspace._id))))).flat();
+          const links = await guarded(() => api<CloudLinks>("/api/origin/cloud-links"));
+          const call = async <T,>(path: string, init?: { method?: string; body?: string }): Promise<T> => {
+            const answer = await guarded(() => api<T & { bot?: Bot; chief?: Bot; members?: Bot[] }>(path, init));
+            for (const bot of [answer.bot, answer.chief, ...(answer.members ?? [])]) if (bot) dispatch({ type: "botAdded", bot, preserveSelection: true });
+            return answer;
+          };
+          const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: bots.current, links, call, lead: PROJECT_LEAD_ROLE });
+          assertCurrent();
+          await sharedAgentsRound({
+            call, bots: bots.current, instances: instances.current, projects,
+            cloud: {
+              query: (name, args) => guarded(() => cloudQueryOnce(name, args)),
+              mutation: (name, args) => guarded(() => cloudMutation(name, args)),
+            },
+          }).catch(() => undefined);
+          await guarded(() => refreshCloudLinks());
+          const accountTeams = new Set(workspaces.map((workspace) => workspace._id));
+          const linkedHeads = Object.entries(synced.links.workspaces).filter(([, teamId]) => accountTeams.has(teamId)).map(([headId]) => headId);
+          const created = synced.result.createdWorkspaces.map((workspace) => workspace.botId);
+          setAccountWorkspaces([...linkedHeads, ...created]);
+          setSyncProblems(synced.result.failures);
+          const known = new Set([...linkedHeads, ...created]);
+          if (!known.has(activeWorkspaceId() ?? "")) {
+            const first = workspaceHeadsOf(bots.current).find((head) => known.has(head.id))?.id ?? created[0] ?? linkedHeads[0];
+            if (first) switchWorkspace(first);
+          }
+        } catch {
+          return;
+        } finally {
+          running = false;
+        }
+      });
+      if (requestedWhileRunning && current()) {
+        requestedWhileRunning = false;
+        await request();
+      }
+    };
+    syncRequest.current = request;
+    setEmpty(false);
+    setSyncProblems([]);
+    setAccountWorkspaces([]);
+    void request();
+    const timer = window.setInterval(() => void request(), SYNC_EVERY_MS);
+    const onFocus = () => void request();
     window.addEventListener("focus", onFocus);
-    const stopRequests = onSyncRequest(() => void sync());
-    return () => { window.clearInterval(timer); window.removeEventListener("focus", onFocus); stopRequests(); };
-  }, [sync, hydrated]);
+    const stopRequests = onSyncRequest(() => void request());
+    return () => { active = false; window.clearInterval(timer); window.removeEventListener("focus", onFocus); stopRequests(); };
+  }, [dispatch, hydrated, url, session.token]);
 
   if (empty) return <NoWorkspace onReady={() => void sync()} />;
   if (!syncProblems.length) return null;
