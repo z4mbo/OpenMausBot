@@ -11,7 +11,7 @@ import {
   CALL_REACTIONS, createCallSignaling, formatElapsed, galleryColumns, isScreenTrack, parseCallMessage, SELF_CAMERA, SELF_SCREEN,
   type CallChannelMessage, type CallReaction, type CallSignaling,
 } from "@/lib/member-call";
-import { originRealtime, usePolled, type MemberCallParticipant, type MemberCallSignal, type MemberCallSignalKind, type RealtimeTarget } from "@/lib/origin-realtime";
+import { OriginRealtimeError, originRealtime, usePolled, type MemberCallParticipant, type MemberCallSignal, type MemberCallSignalKind, type RealtimeTarget } from "@/lib/origin-realtime";
 import { useCallAgent, type CallAgentParticipant } from "@/lib/call-agent";
 import {
   endMemberCall, memberCallKey, publishMemberCallState, showingCallPage, startMemberCall, useMemberCallConfig, useMemberCallFailure, useMemberCallState,
@@ -145,7 +145,9 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
   const channels = useRef(new Map<string, RTCDataChannel>());
   const signalings = useRef(new Map<string, CallSignaling>());
   const peerSessions = useRef(new Map<string, number>());
+  const peerSessionIds = useRef(new Map<string, string>());
   const ownSession = useRef(0);
+  const ownSessionId = useRef("");
   const restartTimers = useRef(new Map<string, number>());
   const processed = useRef(new Set<string>());
   const joined = useRef(false);
@@ -161,7 +163,12 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
   const callAgent = useCallAgent(target, agent?.id, localStream, agent?.voice);
 
   const api = <T,>(path: string, init?: Parameters<typeof originRealtime>[2]) => originRealtime<T>(path, targetRef.current, init);
-  const leaveServer = () => api(PARTICIPANTS, { json: { action: "leave" } }).catch(() => {});
+  const leaveServer = (sessionId = ownSessionId.current) => api(PARTICIPANTS, { json: { action: "leave", sessionId } }).catch(() => {});
+  const sessionError = (error: unknown) => {
+    if (error instanceof OriginRealtimeError && error.status === 409) {
+      endMemberCall(config.nonce, { key: config.key, message: "This call ended or was joined on another device. Join again to continue." });
+    }
+  };
 
   const resetPeers = () => {
     peers.current.forEach((connection) => connection.close());
@@ -170,6 +177,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     signalings.current.forEach((signaling) => signaling.dispose());
     signalings.current.clear();
     peerSessions.current.clear();
+    peerSessionIds.current.clear();
     restartTimers.current.forEach((timer) => window.clearTimeout(timer));
     restartTimers.current.clear();
     processed.current.clear();
@@ -227,6 +235,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     signalings.current.get(userId)?.dispose();
     signalings.current.delete(userId);
     peerSessions.current.delete(userId);
+    peerSessionIds.current.delete(userId);
     window.clearTimeout(restartTimers.current.get(userId));
     restartTimers.current.delete(userId);
     connection?.close();
@@ -239,13 +248,15 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     });
   };
 
-  const sendSignal = async (toUserId: string, kind: MemberCallSignalKind, payload: string, fromJoinedAt: number, toJoinedAt?: number) => {
+  const sendSignal = async (toUserId: string, kind: MemberCallSignalKind, payload: string, fromJoinedAt: number, sessionId: string, toJoinedAt?: number, toSessionId?: string) => {
     for (let attempt = 0; attempt < 3; attempt++) {
-      if (!joined.current || ownSession.current !== fromJoinedAt || peerSessions.current.get(toUserId) !== toJoinedAt) return;
+      if (!joined.current || ownSessionId.current !== sessionId || peerSessionIds.current.get(toUserId) !== toSessionId) return;
       try {
-        await api(SIGNALS, { json: { toUserId, kind, payload, fromJoinedAt, toJoinedAt } });
+        await api(SIGNALS, { json: { toUserId, kind, payload, fromJoinedAt, toJoinedAt, sessionId, toSessionId } });
         return;
       } catch (error) {
+        sessionError(error);
+        if (error instanceof OriginRealtimeError && error.status === 409) return;
         if (attempt === 2) throw error;
         await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
       }
@@ -258,7 +269,9 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     const connection = new RTCPeerConnection({ iceServers: iceServers.current });
     const fromSession = ownSession.current;
     const toSession = peerSessions.current.get(userId);
-    const send = (kind: MemberCallSignalKind, payload: string) => sendSignal(userId, kind, payload, fromSession, toSession);
+    const fromSessionId = ownSessionId.current;
+    const toSessionId = peerSessionIds.current.get(userId);
+    const send = (kind: MemberCallSignalKind, payload: string) => sendSignal(userId, kind, payload, fromSession, fromSessionId, toSession, toSessionId);
     const signaling = createCallSignaling(connection, self.userId < userId, send);
     signalings.current.set(userId, signaling);
     const signalError = (error: unknown) => {
@@ -341,7 +354,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
   const startCall = async () => {
     if (joining || localRef.current) return;
     if (!navigator.mediaDevices?.getUserMedia) {
-      endMemberCall({ key: config.key, message: "Camera and microphone are not available here." });
+      endMemberCall(config.nonce, { key: config.key, message: "Camera and microphone are not available here." });
       return;
     }
     let stream: MediaStream | null = null;
@@ -356,14 +369,15 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
         stream.getTracks().forEach((track) => track.stop());
         return;
       }
-      const presence = await api<{ joinedAt: number }>(PARTICIPANTS, { json: { action: "join", audioEnabled: hasAudio, videoEnabled: hasVideo } });
+      const presence = await api<{ joinedAt: number; sessionId: string }>(PARTICIPANTS, { json: { action: "join", audioEnabled: hasAudio, videoEnabled: hasVideo } });
       if (!mounted.current) {
         stream.getTracks().forEach((track) => track.stop());
-        await leaveServer();
+        await leaveServer(presence.sessionId);
         return;
       }
       joined.current = true;
       ownSession.current = presence.joinedAt;
+      ownSessionId.current = presence.sessionId;
       localRef.current = stream;
       setLocalStream(stream);
       setJoinedAt(Date.now());
@@ -372,7 +386,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
       setNotice("");
     } catch (error) {
       stream?.getTracks().forEach((track) => track.stop());
-      if (mounted.current) endMemberCall({ key: config.key, message: error instanceof Error ? error.message : "Could not start the call" });
+      if (mounted.current) endMemberCall(config.nonce, { key: config.key, message: error instanceof Error ? error.message : "Could not start the call" });
     } finally {
       if (mounted.current) setJoining(false);
     }
@@ -396,7 +410,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     setPanelOpen(false);
     resetPeers();
     await leaveServer();
-    endMemberCall();
+    endMemberCall(config.nonce);
   };
 
   const stopSharing = async () => {
@@ -481,7 +495,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     if (kind === "audio") setAudioEnabled(next);
     else setVideoEnabled(next);
     if (stream) {
-      void api(PARTICIPANTS, { json: { action: "update", audioEnabled: kind === "audio" ? next : audioEnabled, videoEnabled: kind === "video" ? next : videoEnabled, screenSharing: Boolean(screenRef.current) } }).catch(() => {});
+      void api(PARTICIPANTS, { json: { action: "update", sessionId: ownSessionId.current, audioEnabled: kind === "audio" ? next : audioEnabled, videoEnabled: kind === "video" ? next : videoEnabled, screenSharing: Boolean(screenRef.current) } }).catch(sessionError);
     }
   };
 
@@ -500,7 +514,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
 
   useEffect(() => {
     if (!localStream) return;
-    const heartbeat = () => { void api(PARTICIPANTS, { json: { action: "update", audioEnabled, videoEnabled, screenSharing: Boolean(screenStream) } }).catch(() => {}); };
+    const heartbeat = () => { void api(PARTICIPANTS, { json: { action: "update", sessionId: ownSessionId.current, audioEnabled, videoEnabled, screenSharing: Boolean(screenStream) } }).catch(sessionError); };
     heartbeat();
     const timer = window.setInterval(heartbeat, HEARTBEAT_MS);
     return () => window.clearInterval(timer);
@@ -514,10 +528,13 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     let alive = true;
     const load = async () => {
       try {
-        const result = await api<{ signals: MemberCallSignal[] }>(SIGNALS);
+        const result = await api<{ signals: MemberCallSignal[] }>(SIGNALS, { query: { sessionId: ownSessionId.current } });
         if (alive) setSignals(result.signals);
       } catch (error) {
-        if (alive) setNotice(error instanceof Error ? error.message : "Could not load call signals");
+        if (alive) {
+          sessionError(error);
+          setNotice(error instanceof Error ? error.message : "Could not load call signals");
+        }
       }
     };
     void load();
@@ -533,8 +550,9 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     for (const participant of others) {
       const previous = peerSessions.current.get(participant.userId);
       if (previous !== undefined && previous > participant.joinedAt) continue;
-      if (previous !== undefined && previous !== participant.joinedAt) cleanupPeer(participant.userId);
+      if (previous !== undefined && peerSessionIds.current.get(participant.userId) !== participant.sessionId) cleanupPeer(participant.userId);
       peerSessions.current.set(participant.userId, participant.joinedAt);
+      peerSessionIds.current.set(participant.userId, participant.sessionId);
       ensurePeer(participant.userId);
     }
   }, [localStream, participants, self.userId]);
@@ -548,13 +566,14 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
         if (processed.current.has(signal.id)) continue;
         processed.current.add(signal.id);
         acknowledged.push(signal.id);
-        if (signal.toJoinedAt !== undefined && signal.toJoinedAt !== ownSession.current) continue;
+        if (signal.toSessionId !== ownSessionId.current || (signal.toJoinedAt !== undefined && signal.toJoinedAt !== ownSession.current)) continue;
         const previous = peerSessions.current.get(signal.fromUserId);
         if (signal.fromJoinedAt !== undefined) {
           if (previous !== undefined && previous > signal.fromJoinedAt) continue;
-          if (previous !== undefined && previous !== signal.fromJoinedAt) cleanupPeer(signal.fromUserId);
+          if (previous !== undefined && peerSessionIds.current.get(signal.fromUserId) !== signal.fromSessionId) cleanupPeer(signal.fromUserId);
           peerSessions.current.set(signal.fromUserId, signal.fromJoinedAt);
         }
+        peerSessionIds.current.set(signal.fromUserId, signal.fromSessionId);
         ensurePeer(signal.fromUserId);
         try {
           await signalings.current.get(signal.fromUserId)?.receive(signal.kind, signal.payload);
@@ -562,7 +581,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
           setNotice(error instanceof Error ? error.message : "Call connection failed");
         }
       }
-      if (acknowledged.length) await api(SIGNALS, { method: "DELETE", json: { signalIds: acknowledged } }).catch(() => {});
+      if (acknowledged.length) await api(SIGNALS, { method: "DELETE", json: { signalIds: acknowledged, sessionId: ownSessionId.current } }).catch(sessionError);
     };
     void handle();
   }, [localStream, signals]);
@@ -674,8 +693,8 @@ function MemberCallEngine({ config }: { config: MemberCallConfig }) {
   const { state } = useStore();
   const agent = config.agentId ? state.bots.find((bot) => bot.id === config.agentId) : undefined;
   const call = useMemberCallEngine(config, agent);
-  useLayoutEffect(() => { publishMemberCallState(call); });
-  useEffect(() => () => publishMemberCallState(null), []);
+  useLayoutEffect(() => { publishMemberCallState(call, config.nonce); });
+  useEffect(() => () => publishMemberCallState(null, config.nonce), [config.nonce]);
   const { localStream, others, remote, callAgent } = call;
   return (
     <div className="hidden">

@@ -127,17 +127,53 @@ describe("origin member calls", () => {
     expect(listed.body.participants.map((p: { name: string }) => p.name)).toEqual(["Ana", "Bo"]);
     expect((await call("tok-bo", "GET", `/api/local-voice/participants?teamId=${TEAM}`)).body.participants).toEqual([]);
 
-    const sent = await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", fromJoinedAt: ana.body.joinedAt, toJoinedAt: bo.body.joinedAt });
+    const sent = await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", fromJoinedAt: ana.body.joinedAt, toJoinedAt: bo.body.joinedAt, sessionId: ana.body.sessionId, toSessionId: bo.body.sessionId });
     expect(sent.body.signal.kind).toBe("offer");
-    const stale = await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", toJoinedAt: 1 });
+    const stale = await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", toJoinedAt: 1, sessionId: ana.body.sessionId, toSessionId: bo.body.sessionId });
     expect(stale.body.signal).toBeNull();
-    const inbox = await call("tok-bo", "GET", `/api/local-voice/signals?${room}`);
+    const inbox = await call("tok-bo", "GET", `/api/local-voice/signals?${room}&sessionId=${bo.body.sessionId}`);
     expect(inbox.body.signals).toHaveLength(1);
-    await call("tok-bo", "DELETE", `/api/local-voice/signals?${room}`, { signalIds: [inbox.body.signals[0].id] });
-    expect((await call("tok-bo", "GET", `/api/local-voice/signals?${room}`)).body.signals).toEqual([]);
+    await call("tok-bo", "DELETE", `/api/local-voice/signals?${room}`, { signalIds: [inbox.body.signals[0].id], sessionId: bo.body.sessionId });
+    expect((await call("tok-bo", "GET", `/api/local-voice/signals?${room}&sessionId=${bo.body.sessionId}`)).body.signals).toEqual([]);
 
-    await call("tok-bo", "POST", `/api/local-voice/participants?${room}`, { action: "leave" });
-    expect((await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}" })).status).toBe(400);
+    await call("tok-bo", "POST", `/api/local-voice/participants?${room}`, { action: "leave", sessionId: bo.body.sessionId });
+    expect((await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", sessionId: ana.body.sessionId, toSessionId: bo.body.sessionId })).status).toBe(400);
+  });
+
+  it("fences delayed call updates and leaves after the same person joins from another machine", async () => {
+    const { call } = await start();
+    const path = `/api/local-voice/participants?teamId=${TEAM}&room=${PROJECT}`;
+    const first = await call("tok-ana", "POST", path, { action: "join", audioEnabled: true });
+    const current = await call("tok-ana", "POST", path, { action: "join", audioEnabled: false });
+    for (const action of ["update", "leave"]) {
+      expect(await call("tok-ana", "POST", path, { action, audioEnabled: true, sessionId: first.body.sessionId })).toEqual({ status: 409, body: { error: "Rejoin the call to continue" } });
+      expect((await call("tok-ana", "POST", path, { action })).status).toBe(409);
+    }
+    expect(first.body.sessionId).toBeTypeOf("string");
+    expect(current.body.sessionId).not.toBe(first.body.sessionId);
+    expect((await call("tok-ana", "GET", path)).body.participants).toEqual([expect.objectContaining({ sessionId: current.body.sessionId, audioEnabled: false })]);
+    expect((await call("tok-ana", "POST", path, { action: "update", audioEnabled: true, sessionId: current.body.sessionId })).status).toBe(200);
+    expect((await call("tok-ana", "POST", path, { action: "leave", sessionId: current.body.sessionId })).status).toBe(200);
+    expect((await call("tok-ana", "GET", path)).body.participants).toEqual([]);
+    expect((await call("tok-ana", "POST", path, { action: "unknown" })).status).toBe(400);
+    expect((await call("tok-ana", "GET", path)).body.participants).toEqual([]);
+  });
+
+  it("keeps a replaced machine from consuming or sending the current call's signaling", async () => {
+    const { call } = await start();
+    const room = `teamId=${TEAM}&room=${PROJECT}`;
+    const first = await call("tok-ana", "POST", `/api/local-voice/participants?${room}`, { action: "join" });
+    const current = await call("tok-ana", "POST", `/api/local-voice/participants?${room}`, { action: "join" });
+    const bo = await call("tok-bo", "POST", `/api/local-voice/participants?${room}`, { action: "join" });
+    const body = { toUserId: USERS["tok-ana"]!._id, kind: "offer", payload: "{}", sessionId: bo.body.sessionId, toSessionId: current.body.sessionId };
+    const sent = await call("tok-bo", "POST", `/api/local-voice/signals?${room}`, body);
+    expect(sent.status).toBe(200);
+    const signalId = sent.body.signal.id;
+    expect((await call("tok-ana", "GET", `/api/local-voice/signals?${room}&sessionId=${first.body.sessionId}`)).status).toBe(409);
+    expect((await call("tok-ana", "DELETE", `/api/local-voice/signals?${room}`, { signalIds: [signalId], sessionId: first.body.sessionId })).status).toBe(409);
+    expect((await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { ...body, toUserId: USERS["tok-bo"]!._id, sessionId: first.body.sessionId, toSessionId: bo.body.sessionId })).status).toBe(409);
+    expect((await call("tok-ana", "GET", `/api/local-voice/signals?${room}&sessionId=${current.body.sessionId}`)).body.signals.map((signal: { id: string }) => signal.id)).toEqual([signalId]);
+    expect((await call("tok-bo", "POST", `/api/local-voice/signals?${room}`, { ...body, toSessionId: first.body.sessionId })).body.signal).toBeNull();
   });
 
   it("refuses a project from another workspace and a view-only member", async () => {
