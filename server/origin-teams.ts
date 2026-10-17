@@ -81,6 +81,7 @@ export function createDefaultTeamRoutes(deps: { store: Store; maxWorkspaceBots: 
       if (store.bots.length >= maxWorkspaceBots) return json(res, 409, { error: `this workspace is limited to ${maxWorkspaceBots} bots` });
       const name = typeof body?.name === "string" && body.name.trim() ? body.name.trim().slice(0, 40) : "New workspace";
       const head = makeWorkspaceHead(store, store.createBot({ name }));
+      ensureWorkspaces(store);
       return json(res, 201, { bot: wireBot(head) });
     }
     const chief = store.bot(decodeURIComponent(match![1]));
@@ -102,37 +103,36 @@ export function watchTemplateTeams(store: Store): () => void {
   return store.onChange(change => {
     if (change.type !== "bot") return;
     const bot = store.bot(change.botId);
-    if (bot?.installedPackage && !sectionOf(bot) && !bot.hidden) {
+    const heads = workspaceHeads(store);
+    if (!bot?.installedPackage || !heads.length) return;
+    if (!sectionOf(bot) && !bot.hidden) {
       store.patchBot(bot.id, { section: STANDALONE_SECTION });
       return;
     }
-    const team = bot ? sectionOf(bot) : "";
-    if (!bot?.installedPackage || !team || isWorkspaceSection(team) || team === STANDALONE_SECTION) return;
-    const heads = workspaceHeads(store);
+    const team = sectionOf(bot);
+    if (!team || isWorkspaceSection(team) || team === STANDALONE_SECTION) return;
     if (heads.some(head => head.managedSections?.includes(team))) return;
     const owner = heads.find(head => head.id === activeHeadId) ?? heads[0];
     if (owner) fileUnderWorkspace(store, owner, team);
   });
 }
 
-/** Bots outside every team become workspace heads, and every project belongs to exactly one head (the oldest by default). */
-export function ensureWorkspaces(store: Store): BotRecord[] {
-  for (const bot of store.bots) if (bot.chiefOfStaff && bot.title === OLD_CHIEF_TITLE) store.patchBot(bot.id, { title: "" });
-  const loose = store.bots.filter(bot => !sectionOf(bot) && !bot.hidden).reverse();
-  const converted = workspaceHeads(store).length ? [] : loose.map(bot => makeWorkspaceHead(store, bot));
-  if (!converted.length) for (const bot of loose) store.patchBot(bot.id, { section: STANDALONE_SECTION });
+/** Once a workspace exists, bots outside every team join the standalone agents, and every project belongs to exactly one head (the oldest by default). A setup without workspaces keeps its sections as they are. */
+export function ensureWorkspaces(store: Store): void {
   const [first] = workspaceHeads(store);
-  if (!first) return converted;
+  if (!first) return;
+  for (const bot of store.bots) if (bot.chiefOfStaff && bot.title === OLD_CHIEF_TITLE) store.patchBot(bot.id, { title: "" });
+  for (const bot of store.bots) if (!sectionOf(bot) && !bot.hidden) store.patchBot(bot.id, { section: STANDALONE_SECTION });
   const projects = new Set(store.bots.filter(bot => bot.chiefOfStaff && sectionOf(bot) && !isWorkspaceSection(bot.section)).map(sectionOf));
   for (const bot of store.bots) if (bot.installedPackage && sectionOf(bot)) projects.add(sectionOf(bot));
   for (const team of projects) {
     if (!workspaceHeads(store).some(head => head.managedSections?.includes(team))) fileUnderWorkspace(store, first, team);
   }
-  return converted;
 }
 
-/** Every named team is led by a Chief bot; a team without one gets a Chief named after it. */
+/** Once a workspace exists, every named team is led by a Chief bot; a team without one gets a Chief named after it. */
 export function ensureTeamChiefs(store: Store, selection: ModelSelection): BotRecord[] {
+  if (!workspaceHeads(store).length) return [];
   const teams = new Set([...store.sections, ...store.bots.map(sectionOf)].filter(team => team && team !== STANDALONE_SECTION));
   const created: BotRecord[] = [];
   for (const team of teams) {

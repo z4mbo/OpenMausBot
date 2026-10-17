@@ -17619,9 +17619,8 @@ server.listen(PORT, "127.0.0.1", async () => {
   try {
     const chiefs = ensureTeamChiefs(store, await defaultSelection());
     if (chiefs.length) console.log(`[teams] gave ${chiefs.length} team(s) a Chief of Staff bot`);
-    const heads = ensureWorkspaces(store);
+    ensureWorkspaces(store);
     watchTemplateTeams(store);
-    if (heads.length) console.log(`[teams] made ${heads.length} bot(s) workspace heads`);
   } catch (error) {
     console.warn(`[teams] could not give every team a Chief: ${(error as Error).message}`);
   }
