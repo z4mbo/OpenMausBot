@@ -8,6 +8,7 @@ import {
   createUser,
   getSessionUser,
   getUserByEmail,
+  invalidateOtherSessions,
   makePasswordRecord,
   normalizeEmail,
   publicUser,
@@ -154,8 +155,7 @@ export const revokeOtherSessions = mutation({
   handler: async (ctx, args) => {
     const result = await getSessionUser(ctx, args.sessionToken);
     if (!result) throw new Error("Login required");
-    const sessions = await ctx.db.query("sessions").withIndex("by_user", q => q.eq("userId", result.user._id)).take(500);
-    for (const session of sessions) if (session._id !== result.session._id) await ctx.db.delete(session._id);
+    await invalidateOtherSessions(ctx, result.user, result.session);
     return null;
   },
 });
@@ -179,8 +179,7 @@ export const changePassword = mutation({
     if (!(await verifyPassword(user, args.currentPassword))) throw new Error("Current password is wrong");
     const passwordRecord = await makePasswordRecord(args.newPassword);
     await ctx.db.patch(user._id, { ...passwordRecord, updatedAt: Date.now() });
-    const sessions = await ctx.db.query("sessions").withIndex("by_user", q => q.eq("userId", user._id)).take(500);
-    for (const session of sessions) if (session._id !== current.session._id) await ctx.db.delete(session._id);
+    await invalidateOtherSessions(ctx, user, current.session);
     return null;
   },
 });

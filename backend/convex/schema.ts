@@ -46,6 +46,7 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
     lastLoginAt: v.optional(v.number()),
+    sessionVersion: v.optional(v.number()),
   }).index("by_email", ["email"]),
 
   sessions: defineTable({
@@ -54,6 +55,7 @@ export default defineSchema({
     expiresAt: v.number(),
     createdAt: v.number(),
     lastSeenAt: v.number(),
+    sessionVersion: v.optional(v.number()),
   })
     .index("by_tokenHash", ["tokenHash"])
     .index("by_user", ["userId"]),
