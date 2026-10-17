@@ -1,6 +1,7 @@
+import { ComposerSendButton } from "./ComposerSendButton";
 import { track } from "@/lib/analytics";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type SetStateAction } from "react";
-import { ArrowUp, BookOpen, Clock, Mic, Paperclip, Sparkles, Square, Target, Users, X } from "lucide-react";
+import { BookOpen, Mic, Paperclip, Sparkles, Square, Target, Users, X } from "lucide-react";
 import { useStore, visibleMessages, currentTaskBot, type Bot, type Group, type Message } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { useMenuMotion } from "./MenuMotion";
@@ -1114,32 +1115,7 @@ export function Composer({
         )}
         {bot && !group && <CallButton bot={bot} placement="composer" />}
         {hasContent && !locked && (
-          <button
-            onClick={send}
-            disabled={attachmentPending}
-            aria-label={
-              busy && canSteer
-                  ? t("composer.send.steer")
-                  : busy
-                    ? t("composer.send.queue")
-                    : t("composer.send.message")
-            }
-            title={
-              busy && canSteer
-                  ? t("composer.send.steer")
-                  : busy
-                    ? t("composer.send.queueHint")
-                    : `${t("chat.send")} (${sendLabel})`
-            }
-            className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-full text-white",
-              busy && !canSteer
-                  ? "bg-raised text-ink-secondary hover:bg-raised-hover"
-                  : "bg-accent hover:brightness-110",
-            )}
-          >
-            {busy && !canSteer ? <Clock size={15} /> : <ArrowUp size={17} />}
-          </button>
+          <ComposerSendButton busy={busy} canSteer={canSteer} attachmentPending={attachmentPending} sendLabel={sendLabel} onSend={send} />
           )}
           </div>
         </div>
