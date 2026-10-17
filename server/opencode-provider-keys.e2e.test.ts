@@ -100,7 +100,7 @@ if (process.argv.includes("--version") && !process.env.VENICE_API_KEY) {
 }
 if (process.env.VENICE_API_KEY) await waitFor(root + "/keyed-probe-release");
 await import(${JSON.stringify(pathToFileURL(join(SERVER_DIR, "testing", "fake-acp-cli.ts")).href)});
-`);
+`, { mode: 0o755 });
   // Only OpenCode: nothing probes a CLI installed on this machine.
   writeFileSync(join(dataDir, "config.json"), JSON.stringify({
     instances: {
