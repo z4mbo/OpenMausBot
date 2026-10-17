@@ -4,8 +4,11 @@
 // so the page renders exactly what the app renders; only the host, the port
 // and the /api target are pinned here.
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { mkdtemp, rm } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
-import { createServer } from "vite";
+import { createServer, type AliasOptions } from "vite";
 
 export const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 
@@ -30,6 +33,7 @@ export interface PreviewOptions {
   /** Vite's log level. Its default prints port and dependency notes on stdout,
    * ahead of anything the fixture prints there. */
   logLevel?: "info" | "warn" | "error" | "silent";
+  aliases?: AliasOptions;
 }
 
 export interface MountedPreview {
@@ -49,13 +53,24 @@ const matchRoute = (route: PreviewRoute, pathname: string, method: string | unde
 
 /** Serve `entry` in an isolated page whose /api requests are proxied to `fixture`. */
 export async function mountPreview(
-  fixture: { info: { url: string } },
+  fixture: { info: { url: string; dataDir?: string } },
   options: PreviewOptions,
 ): Promise<MountedPreview> {
   const { entry, route, title, extraRoutes = [], viewport = "width=device-width, initial-scale=1", logLevel } = options;
+  const temporaryRoot = resolve(tmpdir());
+  const cacheRoot = fixture.info.dataDir ?? await mkdtemp(join(temporaryRoot, "openmausbot-preview-cache-"));
+  const clearCache = async () => {
+    if (fixture.info.dataDir) return;
+    const target = resolve(cacheRoot);
+    if (dirname(target) !== temporaryRoot || !basename(target).startsWith("openmausbot-preview-cache-")) throw new Error("Invalid preview cache directory");
+    await rm(target, { recursive: true, force: true });
+  };
   const page = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="${escapeHtml(viewport)}"><title>${escapeHtml(title)}</title></head><body><div id="root"></div><script type="module" src="${escapeHtml(entry)}"></script></body></html>`;
   const ui = await createServer({
     root: REPO_ROOT,
+    cacheDir: join(cacheRoot, "node_modules", ".vite"),
+    optimizeDeps: { entries: [entry.replace(/^\/+/, "")] },
+    ...(options.aliases ? { resolve: { alias: options.aliases } } : {}),
     ...(logLevel ? { logLevel } : {}),
     server: { host: "127.0.0.1", port: 0, proxy: {
       "/api": { target: fixture.info.url },
@@ -87,11 +102,12 @@ export async function mountPreview(
   const base = ui.resolvedUrls?.local[0];
   if (!base) {
     await ui.close();
+    await clearCache();
     throw new Error("the preview server did not report a local URL");
   }
   return {
     previewUrl: new URL(route, base).href,
-    close: () => ui.close(),
+    close: async () => { await ui.close(); await clearCache(); },
   };
 }
 
