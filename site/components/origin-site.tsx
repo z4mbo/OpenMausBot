@@ -7,7 +7,7 @@ import {
   ArrowRight, Bot, Check, ChevronDown, Cloud, FileImage, FolderGit2, GitPullRequest, Inbox, KeyRound, Laptop, ListTodo, Menu, MessageSquareHeart,
   MessagesSquare, PenTool, Phone, ShieldAlert, UsersRound, Vault, X,
 } from "lucide-react";
-import { bodyFont, displayFont, monoFont } from "@/lib/fonts";
+import { bodyFont } from "@/lib/fonts";
 import { AgentAvatar, AppleLogo, MAC_ARM_DOWNLOAD_URL, MAC_INTEL_DOWNLOAD_URL, TEAM, WINDOWS_DOWNLOAD_URL, WindowsLogo, usePlatform, useOriginSession, type Platform } from "./brand";
 import { OriginLogo } from "./origin-logo";
 import { useInView, usePageVisible, useReducedMotion, useReveal } from "./motion";
@@ -20,7 +20,7 @@ export function SiteFrame({ children, signedIn, minimal = false }: { children: R
   const root = useRef<HTMLDivElement>(null);
   useReveal(root);
   return (
-    <div ref={root} className={clsx(st.site, displayFont.variable, bodyFont.variable, monoFont.variable)}>
+    <div ref={root} className={clsx(st.site, bodyFont.variable)}>
       <a className={st.skip} href="#main">Skip to content</a>
       <SiteHeader signedIn={signedIn} minimal={minimal} />
       {children}

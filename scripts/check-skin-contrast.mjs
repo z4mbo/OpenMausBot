@@ -3,12 +3,9 @@
 // the CSS itself. Run it after touching a palette:
 //
 //   pnpm check:contrast
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { readSkinCss } from "./testing/skin-css.ts";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const css = readFileSync(join(root, "src/styles.css"), "utf8");
+const css = readSkinCss();
 
 function declarations(body) {
   const tokens = {};
@@ -34,7 +31,14 @@ function parseSkins(source) {
   const base = parseBase(source);
   const skins = new Map();
   for (const [, id, body] of source.matchAll(/\[data-skin="([a-z-]+)"\]\s*\{([^}]*)\}/g)) {
-    skins.set(id, { ...base, ...declarations(body) });
+    const tokens = { ...base, ...declarations(body) };
+    const resolve = (value, seen = new Set()) => {
+      const variable = /^var\((--[\w-]+)\)$/.exec(value)?.[1];
+      if (!variable) return value;
+      if (seen.has(variable) || tokens[variable] === undefined) throw new Error(`Unresolved skin token: ${variable}`);
+      return resolve(tokens[variable], new Set([...seen, variable]));
+    };
+    skins.set(id, Object.fromEntries(Object.entries(tokens).map(([name, value]) => [name, resolve(value)])));
   }
   return skins;
 }

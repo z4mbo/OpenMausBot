@@ -97,7 +97,7 @@ function AuthForm({ initialMode, inviteToken, invitation, onSession }: { initial
           <Field label="Email"><input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@company.com" /></Field>
           <Field label="Password">
             <span className={st.password}>
-              <input type={visible ? "text" : "password"} autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={e => setPassword(e.target.value)}
+              <input aria-label="Password" type={visible ? "text" : "password"} autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={e => setPassword(e.target.value)}
                 required minLength={signup ? 10 : undefined} maxLength={128} placeholder={signup ? "At least 10 characters" : "Your password"} />
               <button type="button" aria-label={visible ? "Hide password" : "Show password"} onClick={() => setVisible(!visible)}>{visible ? <EyeOff size={16} /> : <Eye size={16} />}</button>
             </span>

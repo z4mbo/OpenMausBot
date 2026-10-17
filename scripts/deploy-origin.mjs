@@ -12,7 +12,7 @@ const PRODUCTION_DEPLOYMENT = "wry-fly-446";
 const REMOTE_SITE = "/root/origin";
 const REMOTE_COMPOSE = "/root/multi-ghost";
 const REMOTE_DOWNLOADS = "/root/multi-ghost/origin-downloads";
-const SITE_PATHS = ["site", "backend/package.json", "backend/convex", "backend/lib"];
+const SITE_PATHS = ["site", "backend/package.json", "backend/convex", "backend/lib", "shared/origin-theme.css", "shared/origin-releases.ts"];
 
 const HELP = `Usage: node scripts/deploy-origin.mjs [steps] [options]
 

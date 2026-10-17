@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import { bodyFont, displayFont, monoFont } from "@/lib/fonts";
+import { bodyFont } from "@/lib/fonts";
 import { siteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable}`} suppressHydrationWarning>
+    <html lang="en" className={bodyFont.variable} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>

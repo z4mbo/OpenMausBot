@@ -1,0 +1,23 @@
+:root {
+  --origin-dark-app: #070707;
+  --origin-dark-panel: #111111;
+  --origin-dark-inset: #191919;
+  --origin-dark-line: #333333;
+  --origin-dark-ink: #fcfcfc;
+  --origin-dark-secondary: #fcfcfc99;
+  --origin-dark-tertiary: #fcfcfc90;
+  --origin-dark-accent: #1084fe;
+  --origin-dark-accent-text: #7fc0ff;
+  --origin-light-app: #fcfcfc;
+  --origin-light-panel: #f7f7f7;
+  --origin-light-inset: #e6e6e6;
+  --origin-light-line: #d0d0d0;
+  --origin-light-ink: #0d0d0d;
+  --origin-light-secondary: #575757;
+  --origin-light-tertiary: #5c5c5c;
+  --origin-light-accent: #0b62c4;
+  --origin-light-accent-text: #0b5cb8;
+  --origin-radius-control: 8px;
+  --origin-radius-panel: 12px;
+  --origin-motion-duration: 160ms;
+}

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../shared/origin-theme.css";
 
 /* Phones and tablets have no hover, and Tailwind only applies `hover:` and
    `group-hover:` under `@media (hover: hover)`. A control revealed on hover
@@ -222,23 +223,23 @@
    ───────────────────────────────────────────────────────────────────────── */
 [data-skin="midnight"] {
   --code-color-scheme: dark;
-  --color-app: #070707;
-  --color-panel: #111111;
+  --color-app: var(--origin-dark-app);
+  --color-panel: var(--origin-dark-panel);
   --color-raised: #2f2f2f;
   --color-raised-hover: #3d3d3d;
   --color-composer: #2f2f2f;    /* = raised: unchanged */
   --color-composer-ring: transparent;
   --color-card: #262626;
   --color-menu: #262626;    /* = card: unchanged */
-  --color-inset: #191919;
+  --color-inset: var(--origin-dark-inset);
   --color-control: #2f2f2f;       /* = raised: Midnight is unchanged */
-  --color-hairline: #333333;
-  --color-ink: #fcfcfc;
-  --color-ink-secondary: #fcfcfc99;
-  --color-ink-tertiary: #fcfcfc90;
-  --color-accent: #1084fe;
+  --color-hairline: var(--origin-dark-line);
+  --color-ink: var(--origin-dark-ink);
+  --color-ink-secondary: var(--origin-dark-secondary);
+  --color-ink-tertiary: var(--origin-dark-tertiary);
+  --color-accent: var(--origin-dark-accent);
   --color-accent-border: #459ffe;
-  --color-accent-text: #7fc0ff;
+  --color-accent-text: var(--origin-dark-accent-text);
   --color-accent-ink: #ffffff;
   --color-bubble-user: #5a5a5a;
   --color-bubble-user-ink: #fcfcfc;   /* = ink: unchanged */
@@ -649,29 +650,29 @@
    ───────────────────────────────────────────────────────────────────────── */
 [data-skin="daylight"] {
   --code-color-scheme: light;
-  --color-app: #fcfcfc;           /* the thread */
-  --color-panel: #f7f7f7;         /* sidebar, one step down from the thread */
+  --color-app: var(--origin-light-app);           /* the thread */
+  --color-panel: var(--origin-light-panel);         /* sidebar, one step down from the thread */
   --color-raised: #e1e1e1;
   --color-raised-hover: #d7d7d7;  /* the selected row */
   --color-card: #eeeeee;          /* what a bot says */
-  --color-inset: #e6e6e6;         /* the search field */
+  --color-inset: var(--origin-light-inset);         /* the search field */
   --color-control: #dedede;       /* a chip on a card */
   /* Sampled at #efefef, which is what the eye reads on the divider — but a
      hairline that faint fails this repo's own gate (1.5:1 against the page)
      and every border is drawn at /40 on top of that. #d0d0d0 is the lightest
      grey that still passes; see scripts/check-skin-contrast.mjs. */
-  --color-hairline: #d0d0d0;
+  --color-hairline: var(--origin-light-line);
 
-  --color-ink: #0d0d0d;
-  --color-ink-secondary: #575757;
-  --color-ink-tertiary: #5c5c5c;
+  --color-ink: var(--origin-light-ink);
+  --color-ink-secondary: var(--origin-light-secondary);
+  --color-ink-tertiary: var(--origin-light-tertiary);
 
   /* The upstream blue is #1084fe, which carries white at 3.1:1 — fine for the
      unread dot it is mostly used for, not for a filled button's label. The
      fill is darkened until white clears AA; the dot keeps reading as blue. */
-  --color-accent: #0b62c4;
+  --color-accent: var(--origin-light-accent);
   --color-accent-border: #1084fe;
-  --color-accent-text: #0b5cb8;
+  --color-accent-text: var(--origin-light-accent-text);
   --color-focus: #0b62c4;
   --color-accent-ink: #ffffff;
   /* The composer is the page with a ring around it, not a grey slab —

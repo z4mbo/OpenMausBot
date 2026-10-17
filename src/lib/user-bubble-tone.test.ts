@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { contrastRatio, relativeLuminance, toOklch } from "./color-contrast";
 import { MAUS_COLORS, MAUS_COLOR_NAMES } from "./mascot";
@@ -15,8 +12,9 @@ import {
   userBubbleTone,
 } from "./user-bubble-tone";
 import { ZAP_SWATCHES } from "./origin-avatar-looks";
+import { readSkinCss } from "../../scripts/testing/skin-css";
 
-const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../styles.css"), "utf8");
+const css = readSkinCss();
 
 function declarations(body: string): Record<string, string> {
   return Object.fromEntries([...body.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)].map(([, name, value]) => [name, value.trim()]));
