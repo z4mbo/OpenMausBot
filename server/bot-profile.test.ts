@@ -109,7 +109,7 @@ describe("mascotBody", () => {
     expect(parseBotProfilePatch({ mascotBody: "hexagram" } as never, true)).toEqual({
       ok: false,
       error:
-        "mascotBody must be cursor, blob, circle, squircle, capsule, drop, shield, hexagon, diamond, or star",
+        "mascotBody must be cursor, blob, circle, squircle, capsule, drop, shield, hexagon, diamond, star, pebble, pentagon, octagon, flower, or triangle",
     });
   });
 });
