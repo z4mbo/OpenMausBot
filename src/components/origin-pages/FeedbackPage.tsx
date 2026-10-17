@@ -4,32 +4,32 @@ import { copyText } from "@/lib/copy-text";
 import { ArrowUpRight, Bug, Check, CirclePlus, Copy, Lightbulb, Loader2, MessageSquareHeart, RotateCcw, Settings2, X } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
+import { feedbackLink, useAppAddress } from "@/lib/origin-members";
 import type { CloudBoard, CloudFeedbackEntry, CloudFeedbackPortal, CloudPerson, CloudProject } from "./cloud-types";
 import { fmtDate, taskKey } from "./repo-url";
 import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, Segmented, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 export type FeedbackPageProps = OriginPageProps & {
-  /** The Origin web app's origin, e.g. "https://origin.example.com"; the public form lives at `<publicOrigin>/feedback/<slug>`. */
-  publicOrigin?: string;
   onOpenIssue?(taskId: string): void;
 };
 
 type Filter = "open" | "completed" | "dismissed" | "all";
 const statusTone: Record<CloudFeedbackEntry["status"], string> = { new: "bg-accent/15 text-accent-text", planned: "bg-warning/15 text-warning", completed: "bg-success/15 text-success", dismissed: "bg-raised text-ink-tertiary" };
 
-export function FeedbackPage({ publicOrigin, onOpenIssue, ...props }: FeedbackPageProps) {
+export function FeedbackPage({ onOpenIssue, ...props }: FeedbackPageProps) {
   return (
     <CloudGate {...props} label="Feedback">
       {({ project, projectId, canEdit, isAdmin }) => project.teamId
-        ? <Feedback project={project} teamId={project.teamId} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} publicOrigin={publicOrigin} onOpenIssue={onOpenIssue} />
+        ? <Feedback project={project} teamId={project.teamId} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenIssue={onOpenIssue} />
         : <EmptyState icon={<MessageSquareHeart size={28} />} title="Feedback needs a workspace project" body="Move this project into an Origin workspace to collect feedback." />}
     </CloudGate>
   );
 }
 
-function Feedback({ project, teamId, projectId, canEdit, isAdmin, publicOrigin, onOpenIssue }: {
-  project: CloudProject; teamId: string; projectId: string; canEdit: boolean; isAdmin: boolean; publicOrigin?: string; onOpenIssue?(taskId: string): void;
+function Feedback({ project, teamId, projectId, canEdit, isAdmin, onOpenIssue }: {
+  project: CloudProject; teamId: string; projectId: string; canEdit: boolean; isAdmin: boolean; onOpenIssue?(taskId: string): void;
 }) {
+  const appAddress = useAppAddress();
   const portals = useCloudQuery<CloudFeedbackPortal[]>("feedback:portals", { teamId });
   const portal = portals?.find((item) => item.projectId === projectId);
   const entries = useCloudQuery<CloudFeedbackEntry[]>("feedback:list", portal ? { teamId, portalId: portal._id } : "skip");
@@ -40,7 +40,7 @@ function Feedback({ project, teamId, projectId, canEdit, isAdmin, publicOrigin, 
 
   if (!portals) return <Loading label="Loading feedback" />;
 
-  const link = portal ? `${publicOrigin?.replace(/\/$/, "") ?? ""}/feedback/${portal.slug}` : "";
+  const link = portal ? feedbackLink(portal.slug, appAddress) : "";
   const visible = entries?.filter((entry) => filter === "all" || (filter === "open" ? entry.status === "new" || entry.status === "planned" : entry.status === filter));
   const setDismissed = (entry: CloudFeedbackEntry, dismissed: boolean) => {
     void cloudMutation("feedback:dismiss", { teamId, entryId: entry._id, dismissed }).catch(() => setNotice("Could not update feedback"));
@@ -57,7 +57,7 @@ function Feedback({ project, teamId, projectId, canEdit, isAdmin, publicOrigin, 
               onClick={() => void copyText(link).then((result) => setNotice(result === "copied" ? "Feedback link copied" : "Could not copy link"))}>
               <Copy size={14} />
             </button>
-            {publicOrigin && <a className={iconButton} href={link} target="_blank" rel="noreferrer" title="Open public feedback form" aria-label="Open public feedback form"><ArrowUpRight size={15} /></a>}
+            <a className={iconButton} href={link} target="_blank" rel="noreferrer" title="Open public feedback form" aria-label="Open public feedback form"><ArrowUpRight size={15} /></a>
           </>
         )}
         {isAdmin && <button type="button" className={ghostButton} onClick={() => setSettings(true)}><Settings2 size={14} />Portal settings</button>}

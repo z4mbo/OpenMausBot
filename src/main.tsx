@@ -29,6 +29,10 @@ async function chooseRoot(): Promise<React.ReactNode> {
     }
     return <PairPage initialCode={takePairingCodeFromLocation()} initialEmail={takeInvitedEmailFromLocation()} />;
   }
+  if (location.pathname === "/oauth/authorize") {
+    const { OAuthConsentPage } = await import("./pair/OAuthConsentPage");
+    return <CloudProvider><OAuthConsentPage /></CloudProvider>;
+  }
   const session = await readSessionState();
   if (session.kind === "unauthenticated") return <PairPage initialCode={null} reason={session.error} />;
   if (session.kind === "loopback" && session.trust === "service") return <PairPage initialCode={null} reason={SERVICE_TRUST_REASON} />;

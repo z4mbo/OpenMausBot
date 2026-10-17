@@ -68,6 +68,12 @@ export default defineConfig({
       "/.well-known/openmausbot/environment": {
         target: `http://127.0.0.1:${process.env.OMB_PORT || process.env.OGB_PORT || 8799}`,
       },
+      "^/(oauth/(register|token|revoke)|\\.well-known/oauth-[a-z-]+(/api/mcp)?)$": {
+        target: `http://127.0.0.1:${process.env.OMB_PORT || process.env.OGB_PORT || 8799}`,
+      },
+      "^/(join|feedback)/[^/]+$": {
+        target: `http://127.0.0.1:${process.env.OMB_PORT || process.env.OGB_PORT || 8799}`,
+      },
     },
   },
 });

@@ -589,7 +589,7 @@ import {
 } from "./phone-secret.ts";
 // Keep these two last, so loading the route table leaves module start-up order as is.
 import { json, onJsonBody, parsedBodyOf, readBody } from "./harness/http.ts";
-import { ROUTES, dispatchRoutes } from "./routes/table.ts";
+import { PUBLIC_ROUTES, ROUTES, dispatchRoutes } from "./routes/table.ts";
 import { createHostedSlackRoutes } from "./routes/hosted-slack.ts";
 import { createBotPresetRoutes } from "./routes/bot-presets.ts";
 import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
@@ -598,7 +598,11 @@ import { createDefaultTeamRoutes, ensureTeamChiefs, ensureWorkspaces, watchTempl
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
 import { createOriginCloudRoutes } from "./origin-cloud.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
+import { createOriginInviteRoutes, createOriginPublicRoutes } from "./origin-public-pages.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
+import { createOriginMemberRoutes } from "./origin-members.ts";
+import { createOriginMcpRoutes } from "./origin-mcp.ts";
+import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService } from "./routes/github.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
 import { createBotPatchRoutes } from "./routes/bot-patch.ts";
 import { createBotLifecycleRoutes } from "./routes/bot-lifecycle.ts";
@@ -13727,7 +13731,14 @@ ROUTES.push(createDefaultTeamRoutes({ store, maxWorkspaceBots: MAX_WORKSPACE_BOT
 ROUTES.push(createProjectIconRoutes({ store, storedAvatarExists }));
 ROUTES.push(createOriginCloudRoutes({ store, agentBotId: (header) => { const capability = authorizedInternalCapability(header); return capability?.kind === "agents" && capability.generation !== EXTERNAL_RUNTIME_GENERATION ? capability.botId : null; } }));
 ROUTES.push(createCloudLinkRoutes({ store }));
+ROUTES.push(createOriginInviteRoutes({ publicUrl }));
+const originPublicPages = createOriginPublicRoutes({ publicUrl });
 ROUTES.push(createAvatarLookRoutes({ store }));
+ROUTES.push(createOriginMemberRoutes());
+PUBLIC_ROUTES.push(createOriginMcpRoutes({ publicUrl }));
+const githubService = createGitHubService({ serverPublicUrl: publicUrl });
+ROUTES.push(createGitHubRoutes({ service: githubService }));
+PUBLIC_ROUTES.push(createGitHubPublicRoutes({ service: githubService }));
 ROUTES.push(createBotSettingsRoutes({
   store, cfg, registry, commandAllowlist, commandAllowlistDrivers: COMMAND_ALLOWLIST_DRIVERS,
   cloudHome: Boolean(CLOUD_HOME), cloudOwnerProfileFields: CLOUD_OWNER_PROFILE_FIELDS,
@@ -14167,6 +14178,8 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
       res.end(answer.text);
       return;
     }
+    if (await originPublicPages({ req, res, path, method })) return;
+    if (await dispatchRoutes(PUBLIC_ROUTES, { req, res, url, path, method, json, readBody })) return;
     // Two public routes come first; everything else needs the loopback owner or a paired session with the right scope.
     if (method === "GET" && !path.startsWith("/api/") && !path.startsWith("/.well-known/") && serveStatic(res, path)) return;
     if (method === "GET" && path === "/.well-known/openmausbot/environment") {

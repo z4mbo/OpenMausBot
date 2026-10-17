@@ -81,6 +81,57 @@ The Origin desktop app reads the URL from localStorage `origin-cloud-url`, else
 `VITE_ORIGIN_CONVEX_URL`. For dev, set `VITE_ORIGIN_CONVEX_URL=http://127.0.0.1:3210`
 or call `setCloudUrl("http://127.0.0.1:3210")` from `src/lib/origin-cloud`.
 
+## GitHub integration (served by this app)
+
+The GitHub routes the Next.js site used to serve now live in this server
+(`server/routes/github.ts`, logic in `server/github/`), on the same paths, so a
+GitHub App manifest, OAuth callback and webhook point at this app:
+
+| Path | Caller | Credential |
+| --- | --- | --- |
+| `GET/POST/DELETE /api/github/connection?projectId=` | Origin client | `x-origin-session` header (the person's Origin session) |
+| `POST /api/github/issues`, `POST /api/github/pull-requests` | Origin client | same |
+| `GET/POST /api/github/repo?projectId=[&teamId=]` | Origin client | same |
+| `POST /api/github/setup?teamId=`, `POST /api/github/oauth/start?teamId=[&projectId=]` | Origin client | same; answers `{ url }`, a single-use link the client opens in the browser |
+| `GET/DELETE /api/github/workspace?teamId=` | Origin client | same |
+| `GET /api/github/oauth/begin`, `GET /api/github/setup/begin` | browser | single-use ticket; sets the `origin.github` state cookie |
+| `GET /api/github/oauth/install`, `GET /api/github/oauth/callback`, `GET /api/github/setup/callback` | GitHub redirect | state bound to the `origin.github` cookie, PKCE |
+| `POST /api/github/webhook` | GitHub | `X-Hub-Signature-256` HMAC, 1 MB body limit |
+| `POST /api/integrations/tick` | Convex cron `integrations:kick` | `x-origin-signature` HMAC of `ORIGIN_INTEGRATION_SECRET`, 60 s freshness |
+
+The client routes sit behind the app's own sign-in (admin scope for paired
+sessions); the browser, GitHub and Convex legs run before it and check their
+own credential. Tokens, the App's credentials and OAuth states are sealed in
+`<data dir>/origin-github/integrations.sqlite` with the key file next to it.
+
+### Server environment
+
+| Name | Meaning |
+| --- | --- |
+| `ORIGIN_INTEGRATION_SECRET` | Same value as the Convex deployment's. Without it ticks are refused and the bridge cannot call Convex. |
+| `ORIGIN_PUBLIC_URL` | Origin GitHub and Convex reach this server at (OAuth redirect, webhook, tick). Defaults to the server's own public URL. |
+| `ORIGIN_CONVEX_URL` | Convex client URL when no Origin sign-in has been shared with the server. |
+| `ORIGIN_CONVEX_SITE_URL` | Convex HTTP actions URL; derived otherwise (`:3210` -> `:3211`, `.convex.cloud` -> `.convex.site`). |
+| `ORIGIN_LEGACY_OWNER_EMAIL` | The one Origin account allowed to create the GitHub App. |
+| `ORIGIN_GITHUB_TOKEN` | Optional fallback token for that owner's own projects (deliberately not `GITHUB_TOKEN`). |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITHUB_WEBHOOK_SECRET`, `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY` | Optional: an existing App instead of the manifest setup. |
+
+### Convex side
+
+`integrations:kick` posts to `${ORIGIN_PUBLIC_URL}/api/integrations/tick`, so
+the Convex deployment's `ORIGIN_PUBLIC_URL` must be this app's public origin
+(for the local dev server, `http://127.0.0.1:8799` or whatever port it runs
+on). `ORIGIN_INTEGRATION_SECRET` must match on both sides. Set it on the local
+deployment only:
+
+```powershell
+cd C:\Users\aless\Documents\origin-workspace
+npx convex env set ORIGIN_PUBLIC_URL http://127.0.0.1:8799
+```
+
+Convex's invite links also read `ORIGIN_PUBLIC_URL`, which is consistent now
+that this app serves `/join/<token>`.
+
 ## Running the origin-workspace web app against it
 
 `cd C:\Users\aless\Documents\origin-workspace; npm run dev` uses `.env.local`

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Bug, FolderGit2, Image, KeyRound, MessageSquareHeart, Settings, Users } from "lucide-react";
+import { ArrowLeft, Bug, FolderGit2, Image, KeyRound, MessageSquareHeart, MessagesSquare, Phone, Settings, Users } from "lucide-react";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { unreadReplies } from "@/lib/origin-unread";
 import { UnreadBadge } from "./UnreadBadge";
@@ -10,12 +10,14 @@ import { openBot } from "@/state/thread-navigation";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { cn } from "@/lib/cn";
 import { BotAvatar } from "./Avatar";
-import { AssignIssueDialog, AssetsPage, FeedbackPage, IssuesPage, ProjectSettingsPage, RepoPage, VaultPage, issueBrief, type AssignableIssue } from "./origin-pages";
+import { AssignIssueDialog, AssetsPage, CallPage, FeedbackPage, IssuesPage, ProjectSettingsPage, RepoPage, TeamChatPage, VaultPage, issueBrief, type AssignableIssue } from "./origin-pages";
 import { useCloudProjectFor } from "@/lib/origin-cloud-links";
 
 export const CHIEF_SECTIONS = [
   { id: "issues", label: "Issues", icon: Bug, blurb: "Track the project's bugs and tasks, and hand them to its agents." },
   { id: "agents", label: "Agents", icon: Users, blurb: "" },
+  { id: "team-chat", label: "Team chat", icon: MessagesSquare, blurb: "Talk with the people in this project." },
+  { id: "call", label: "Call", icon: Phone, blurb: "Voice and video calls with the people in this project." },
   { id: "assets", label: "Assets", icon: Image, blurb: "Images, documents and files the team makes for this project." },
   { id: "vault", label: "Vault", icon: KeyRound, blurb: "Keys, logins and secrets this project's agents may use." },
   { id: "repo", label: "Repo", icon: FolderGit2, blurb: "The project's code repository and its pull requests." },
@@ -136,6 +138,8 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   if (section === "vault") return <VaultPage {...page} />;
   if (section === "repo") return <RepoPage {...page} />;
   if (section === "feedback") return <FeedbackPage {...page} />;
+  if (section === "team-chat") return <TeamChatPage {...page} />;
+  if (section === "call") return <CallPage {...page} />;
   if (section === "settings") return <ProjectSettingsPage {...page} />;
   const Icon = entry.icon;
   return (

@@ -1,11 +1,12 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Select } from "../Select";
-import { Check, GitBranch, Loader2, Settings, Trash2, UserPlus, Users } from "lucide-react";
+import { Check, GitBranch, Link2, Loader2, Settings, Trash2, UserPlus, Users } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
+import { originGitHub, type GitHubProjectConnection, type GitHubWorkspaceStatus } from "@/lib/origin-github";
 import { cn } from "@/lib/cn";
 import type { CloudPerson, CloudProject, CloudProjectMember, GitHubTaskMode, MemberRole } from "./cloud-types";
 import { githubRepoHref } from "./repo-url";
-import { CloudGate, Field, Loading, Notice, PageHeader, cardClass, iconButton, inputClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, Field, Loading, Notice, PageHeader, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 type IconType = NonNullable<CloudProject["iconType"]>;
 type TaskPRColumn = { id: string; title: string; isDone: boolean };
@@ -20,6 +21,7 @@ export function ProjectSettingsPage(props: OriginPageProps) {
             <div className="flex flex-col gap-4">
               <GeneralSettings key={`${projectId}:${project.name}:${project.repoUrl ?? ""}:${project.iconValue ?? ""}`} project={project} projectId={projectId} isAdmin={isAdmin} />
               <GitHubSettings key={`${projectId}:${project.githubTaskMode ?? ""}`} project={project} projectId={projectId} isAdmin={isAdmin} />
+              <GitHubConnectionCard project={project} projectId={projectId} isAdmin={isAdmin} />
             </div>
             <Members project={project} projectId={projectId} isAdmin={isAdmin} />
           </div>
@@ -170,6 +172,96 @@ function GitHubSettings({ project, projectId, isAdmin }: { project: CloudProject
         {notice && <Notice>{notice}</Notice>}
         {isAdmin && <button className={cn(primaryButton, "self-start")} disabled={action.busy || !columns || !project.repoUrl} title={!project.repoUrl ? "Link a repository first" : undefined}>Save GitHub settings</button>}
       </form>
+    </Card>
+  );
+}
+
+function useGitHubStatus(teamId: string | undefined, projectId: string) {
+  const [workspace, setWorkspace] = useState<GitHubWorkspaceStatus | null>(null);
+  const [connection, setConnection] = useState<GitHubProjectConnection | null>(null);
+  const [error, setError] = useState("");
+  const refresh = useCallback(async () => {
+    try {
+      const [status, project] = await Promise.all([
+        teamId ? originGitHub.workspace(teamId) : Promise.resolve(null),
+        originGitHub.connection(projectId).catch(() => ({ connection: null })),
+      ]);
+      setWorkspace(status);
+      setConnection(project.connection);
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not read the GitHub connection");
+    }
+  }, [teamId, projectId]);
+  useEffect(() => {
+    void refresh();
+    const onFocus = () => void refresh();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [refresh]);
+  return { workspace, connection, error, refresh, setConnection };
+}
+
+function GitHubConnectionCard({ project, projectId, isAdmin }: { project: CloudProject; projectId: string; isAdmin: boolean }) {
+  const { workspace, connection, error, refresh, setConnection } = useGitHubStatus(project.teamId, projectId);
+  const [token, setToken] = useState("");
+  const [notice, setNotice] = useState("");
+  const action = useAction();
+  const teamId = project.teamId;
+  const run = async (fn: () => Promise<unknown>, fallback: string, done = "") => {
+    setNotice("");
+    if (await action.run(fn, fallback)) {
+      if (done) setNotice(done);
+      await refresh();
+    }
+  };
+  const saveToken = async (event: FormEvent) => {
+    event.preventDefault();
+    await run(async () => { setConnection((await originGitHub.saveToken(projectId, token.trim())).connection); setToken(""); }, "Could not save the token", "GitHub token saved for this project");
+  };
+  return (
+    <Card icon={<Link2 size={15} />} title="GitHub connection">
+      <div className="flex flex-col gap-3 text-[13px]">
+        {error && <Notice tone="danger">{error}</Notice>}
+        {!teamId ? <Notice>This project is not in an Origin workspace.</Notice> : workspace === null ? <Loading label="Reading GitHub connection" /> : (
+          <>
+            <p className="text-ink-secondary">
+              {workspace.login ? <>Workspace connected as <strong className="text-ink">@{workspace.login}</strong>.</> : "This workspace has not connected GitHub."}
+            </p>
+            {!workspace.configured && (workspace.canSetup
+              ? <Notice>Create the Origin GitHub App once for this server; GitHub opens in your browser.</Notice>
+              : <Notice>The Origin administrator has not set up the GitHub App on this server yet.</Notice>)}
+            {project.githubTaskMode === "pull_request" && workspace.prPermissionNotice && <Notice>{workspace.prPermissionNotice}</Notice>}
+            {isAdmin && (
+              <div className="flex flex-wrap gap-2">
+                {!workspace.configured && workspace.canSetup && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.setupApp(teamId), "Could not start the App setup", "Finish creating the App in your browser, then come back here.")}>Create GitHub App</button>}
+                {workspace.configured && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.connectWorkspace(teamId, projectId), "Could not connect GitHub", "Finish connecting in your browser, then come back here.")}>{workspace.login ? "Reconnect GitHub" : "Connect GitHub"}</button>}
+                {workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(() => originGitHub.disconnectWorkspace(teamId), "Could not disconnect GitHub", "GitHub disconnected from this workspace")}>Disconnect</button>}
+                {!project.repoUrl && workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(async () => {
+                  const result = await originGitHub.createRepository(teamId, projectId);
+                  if (result.state === "error") throw new Error(result.error ?? "Repository creation failed");
+                }, "Could not create the repository", "Creating a private repository for this project")}>Create repository</button>}
+              </div>
+            )}
+          </>
+        )}
+        {project.repoUrl && (
+          <form onSubmit={saveToken} className="flex flex-col gap-2 border-t border-hairline/30 pt-3">
+            <p className="text-ink-secondary">
+              {connection ? <>This project uses {connection.source === "project" ? "a personal access token of" : "the workspace connection of"} <strong className="text-ink">@{connection.login}</strong>.</> : "This project has no GitHub access of its own."}
+            </p>
+            {isAdmin && (
+              <div className="flex flex-wrap gap-2">
+                <input className={cn(inputClass, "min-w-[200px] flex-1")} type="password" autoComplete="off" placeholder="Fine-grained access token for this repository" aria-label="GitHub access token" value={token} onChange={(e) => setToken(e.target.value)} />
+                <button className={ghostButton} disabled={action.busy || !token.trim()}>Save token</button>
+                {connection?.source === "project" && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(() => originGitHub.removeToken(projectId), "Could not remove the token", "Token removed")}>Remove token</button>}
+              </div>
+            )}
+          </form>
+        )}
+        {action.error && <Notice tone="danger">{action.error}</Notice>}
+        {notice && <Notice>{notice}</Notice>}
+      </div>
     </Card>
   );
 }

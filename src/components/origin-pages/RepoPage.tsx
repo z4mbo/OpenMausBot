@@ -1,13 +1,14 @@
 import { CircleCheck, CircleDot, ExternalLink, FolderGit2, GitCommitHorizontal, GitMerge, GitPullRequest, GitPullRequestClosed, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { cloudAction, useCloudQuery } from "@/lib/origin-cloud";
+import { originGitHub } from "@/lib/origin-github";
 import { cn } from "@/lib/cn";
 import type { CloudBoard, CloudCommit, CloudProject, CloudPullRequest, CloudTaskPullRequest } from "./cloud-types";
 import { fmtDate, githubRepoHref, githubRepoLabel, shortSha, taskKey } from "./repo-url";
 import { CloudGate, EmptyState, Loading, Notice, PageHeader, cardClass, ghostButton, useAction, type OriginPageProps } from "./ui";
 
 export function RepoPage(props: OriginPageProps) {
-  return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit }) => <Repo project={project} projectId={projectId} canEdit={canEdit} />}</CloudGate>;
+  return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} />}</CloudGate>;
 }
 
 const prStateStyle: Record<CloudPullRequest["state"], { icon: typeof GitPullRequest; tone: string }> = {
@@ -16,7 +17,7 @@ const prStateStyle: Record<CloudPullRequest["state"], { icon: typeof GitPullRequ
   closed: { icon: GitPullRequestClosed, tone: "text-danger" },
 };
 
-function Repo({ project, projectId, canEdit }: { project: CloudProject; projectId: string; canEdit: boolean }) {
+function Repo({ project, projectId, canEdit, isAdmin }: { project: CloudProject; projectId: string; canEdit: boolean; isAdmin: boolean }) {
   const href = githubRepoHref(project.repoUrl);
   const pulls = useCloudQuery<CloudPullRequest[]>("github:listPullRequests", href ? { projectId } : "skip");
   const commits = useCloudQuery<CloudCommit[]>("commits:list", href ? { projectId } : "skip");
@@ -49,7 +50,12 @@ function Repo({ project, projectId, canEdit }: { project: CloudProject; projectI
       </PageHeader>
       {!href && <div className="mb-3"><Notice tone="danger">{project.repoUrl} is not a GitHub repository address.</Notice></div>}
       {project.githubRepoState === "error" && project.githubRepoError && <div className="mb-3"><Notice tone="danger">{project.githubRepoError}</Notice></div>}
-      {project.githubRepoState === "awaiting_connection" && <div className="mb-3"><Notice>A workspace admin needs to connect GitHub in Origin before this repository can sync.</Notice></div>}
+      {project.githubRepoState === "awaiting_connection" && <div className="mb-3 flex flex-wrap items-center gap-2"><Notice>A workspace admin needs to connect GitHub in Origin before this repository can sync.</Notice>
+        {isAdmin && project.teamId && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void action.run(async () => {
+          await originGitHub.connectWorkspace(project.teamId!, projectId);
+          setMessage("Finish connecting GitHub in your browser, then come back here.");
+        }, "Could not connect GitHub")}>Connect GitHub</button>}
+      </div>}
       {message && <div className="mb-3"><Notice>{message}</Notice></div>}
       {action.error && <div className="mb-3"><Notice tone="danger">{action.error}</Notice></div>}
 

@@ -6,3 +6,5 @@ export { RepoPage } from "./RepoPage";
 export { FeedbackPage, type FeedbackPageProps } from "./FeedbackPage";
 export { ProjectSettingsPage } from "./ProjectSettingsPage";
 export type { OriginPageProps } from "./ui";
+export { CallPage } from "./CallPage";
+export { TeamChatPage } from "./TeamChatPage";

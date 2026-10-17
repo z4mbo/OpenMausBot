@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { copyText } from "@/lib/copy-text";
 import { Select } from "../Select";
-import { Check, Cloud, Copy, Link, Loader2, LogIn, LogOut, Mail, Trash2, UserPlus, Users } from "lucide-react";
+import { Check, Cloud, Copy, Link, Loader2, LogIn, LogOut, Mail, Trash2, UserPlus } from "lucide-react";
 import { useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
 import {
-  INVITE_ROLES, joinLink, originMembers, originWebUrl, rememberWebUrlFrom, setOriginWebUrl,
+  INVITE_ROLES, joinLink, originMembers, useAppAddress,
   useWorkspaceAccess, useWorkspaceInvites, useWorkspaceMembers,
   type InviteRole, type WorkspaceInvite, type WorkspaceMember,
 } from "@/lib/origin-members";
@@ -48,7 +48,7 @@ function Members({ teamId, myEmail }: { teamId: string; myEmail: string }) {
   const action = useAction();
   const [left, setLeft] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
-  const [webBase, setWebBase] = useState(originWebUrl);
+  const appAddress = useAppAddress();
 
   if (left) return <EmptyState icon={<LogOut size={28} />} title="You left this workspace" body="You need a new invitation to come back." />;
   if (!access || !members) return <Loading label="Loading members" />;
@@ -67,7 +67,7 @@ function Members({ teamId, myEmail }: { teamId: string; myEmail: string }) {
       </div>
       {action.error && <div className="mb-3"><Notice tone="danger">{action.error}</Notice></div>}
 
-      {isAdmin && <InviteForm teamId={teamId} webBase={webBase} onWebBase={setWebBase} />}
+      {isAdmin && <InviteForm teamId={teamId} />}
 
       <ul className={cn(cardClass, "mb-5 divide-y divide-hairline/30")} aria-label="Members">
         {members.map((member) => (
@@ -90,7 +90,7 @@ function Members({ teamId, myEmail }: { teamId: string; myEmail: string }) {
               ? <p className="rounded-xl bg-inset px-3 py-2.5 text-[13px] text-ink-secondary">No open invitations.</p>
               : <ul className={cn(cardClass, "divide-y divide-hairline/30")} aria-label="Pending invitations">
                 {workspaceInvites.map((invite) => (
-                  <InviteRow key={invite._id} invite={invite} webBase={webBase} busy={action.busy}
+                  <InviteRow key={invite._id} invite={invite} appAddress={appAddress} busy={action.busy}
                     onRevoke={() => void action.run(() => originMembers.revokeInvite(invite._id), "Could not revoke the invitation")} />
                 ))}
               </ul>}
@@ -167,9 +167,9 @@ function useCopy(): [string | null, (key: string, text: string) => void] {
   return [copied, copy];
 }
 
-function InviteRow({ invite, webBase, busy, onRevoke }: { invite: WorkspaceInvite; webBase: string | null; busy: boolean; onRevoke(): void }) {
+function InviteRow({ invite, appAddress, busy, onRevoke }: { invite: WorkspaceInvite; appAddress: string; busy: boolean; onRevoke(): void }) {
   const [copied, copy] = useCopy();
-  const link = joinLink(invite.token, webBase);
+  const link = joinLink(invite.token, appAddress);
   return (
     <li className="flex items-center gap-3 px-4 py-2.5">
       <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-inset text-ink-secondary" aria-hidden="true">
@@ -179,8 +179,8 @@ function InviteRow({ invite, webBase, busy, onRevoke }: { invite: WorkspaceInvit
         <p className="truncate text-[13px] font-medium text-ink">{invite.email ?? "Shareable link"}</p>
         <p className="text-[12px] text-ink-secondary">{ROLE_LABEL[invite.role] ?? invite.role} · Expires {new Date(invite.expiresAt).toLocaleDateString()}</p>
       </div>
-      <button type="button" className={iconButton} disabled={!link} title={link ? "Copy invite link" : "Set the Origin web address first"}
-        aria-label="Copy invite link" onClick={() => link && copy(invite._id, link)}>
+      <button type="button" className={iconButton} title="Copy invite link"
+        aria-label="Copy invite link" onClick={() => copy(invite._id, link)}>
         {copied === invite._id ? <Check size={14} /> : <Copy size={14} />}
       </button>
       <button type="button" className={iconButton} disabled={busy} title="Revoke invitation" aria-label="Revoke invitation" onClick={onRevoke}>
@@ -190,11 +190,10 @@ function InviteRow({ invite, webBase, busy, onRevoke }: { invite: WorkspaceInvit
   );
 }
 
-function InviteForm({ teamId, webBase, onWebBase }: { teamId: string; webBase: string | null; onWebBase(base: string | null): void }) {
+function InviteForm({ teamId }: { teamId: string }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<InviteRole>("member");
-  const [result, setResult] = useState<{ link: string | null; token: string; note?: string } | null>(null);
-  const [webUrl, setWebUrl] = useState("");
+  const [result, setResult] = useState<{ link: string; note?: string } | null>(null);
   const [copied, copy] = useCopy();
   const action = useAction();
 
@@ -202,25 +201,11 @@ function InviteForm({ teamId, webBase, onWebBase }: { teamId: string; webBase: s
     event.preventDefault();
     const address = email.trim();
     await action.run(async () => {
-      if (address) {
-        const sent = await originMembers.sendEmailInvite({ teamId, email: address, role });
-        rememberWebUrlFrom(sent.inviteLink);
-        onWebBase(originWebUrl());
-        const token = sent.inviteLink.split("/join/").pop() ?? "";
-        setResult({ link: sent.inviteLink, token, note: sent.sent ? `Invitation emailed to ${address}.` : "Origin could not send email from this backend, so share the link yourself." });
-      } else {
-        const created = await originMembers.createInvite({ teamId, role });
-        setResult({ link: joinLink(created.token, webBase), token: created.token });
-      }
+      const created = await originMembers.createInvite({ teamId, role, ...(address ? { email: address } : {}) });
+      const note = !address ? undefined : created.sent ? `Invitation emailed to ${address}.` : "Email is not set up on this server, so share the link yourself.";
+      setResult({ link: created.inviteLink, note });
       setEmail("");
     }, "Could not create the invitation");
-  };
-
-  const saveWebUrl = () => {
-    setOriginWebUrl(webUrl);
-    const base = originWebUrl();
-    onWebBase(base);
-    if (result) setResult({ ...result, link: joinLink(result.token, base) });
   };
 
   return (
@@ -245,22 +230,12 @@ function InviteForm({ teamId, webBase, onWebBase }: { teamId: string; webBase: s
       {result && (
         <div className="mt-3 space-y-2">
           {result.note && <Notice>{result.note}</Notice>}
-          {result.link
-            ? <div className="flex items-center gap-2">
-              <input className={inputClass} aria-label="Invitation link" value={result.link} readOnly onFocus={(event) => event.currentTarget.select()} />
-              <button type="button" className={iconButton} title="Copy invite link" aria-label="Copy invite link" onClick={() => copy("new", result.link!)}>
-                {copied === "new" ? <Check size={14} /> : <Copy size={14} />}
-              </button>
-            </div>
-            : <Notice>Invitation created. Add your Origin web address below to get a link you can share.</Notice>}
-        </div>
-      )}
-      {!webBase && (
-        <div className="mt-3 flex flex-wrap items-end gap-2">
-          <Field label="Origin web address" className="min-w-[200px] flex-1">
-            <input className={inputClass} placeholder="https://origin.example.com" value={webUrl} onChange={(event) => setWebUrl(event.target.value)} />
-          </Field>
-          <button type="button" className={ghostButton} disabled={!webUrl.trim()} onClick={saveWebUrl}><Users size={14} />Use for links</button>
+          <div className="flex items-center gap-2">
+            <input className={inputClass} aria-label="Invitation link" value={result.link} readOnly onFocus={(event) => event.currentTarget.select()} />
+            <button type="button" className={iconButton} title="Copy invite link" aria-label="Copy invite link" onClick={() => copy("new", result.link)}>
+              {copied === "new" ? <Check size={14} /> : <Copy size={14} />}
+            </button>
+          </div>
         </div>
       )}
     </div>
