@@ -3,6 +3,24 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.2.2",
+  date: "2026-10-18",
+  title: "A safer, more consistent workspace",
+  changes: [
+    { title: "Workspace and project permissions", body: "Viewer access is respected in chat and calls. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages." },
+    { title: "Safer issue mirroring", body: "Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin." },
+    { title: "Files respect their source access", body: "Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour." },
+    { title: "Shared work and sync", body: "Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots." },
+    { title: "Safer collaborative editing", body: "Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere." },
+    { title: "Call continuity", body: "An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover." },
+    { title: "Recoverable drawings", body: "Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot." },
+    { title: "Consistent workspace controls", body: "Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii." },
+    { title: "Recoverable workspace loading", body: "Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page." },
+    { title: "Appearance from paired devices", body: "Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings." },
+    { title: "Clearer connection errors", body: "Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot." },
+    { title: "Release history everywhere", body: "What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes." },
+  ],
+}, {
   version: "desktop-1.0",
   date: "2026-10-16",
   title: "Origin on the desktop",
