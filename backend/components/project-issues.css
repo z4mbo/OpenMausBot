@@ -1,9 +1,0 @@
-.issue-layout-switch { flex-shrink: 0; }
-.issue-table-scroll { overflow: auto; padding: 8px 24px 24px; }
-.issue-table { width: 100%; border-collapse: collapse; text-align: left; }
-.issue-table th { color: var(--muted, #9498a3); font-weight: 500; font-size: 12px; }
-.issue-table th, .issue-table td { padding: 14px 12px; border-bottom: 1px solid var(--line-soft, #1d2026); }
-.issue-table td:first-child { display: flex; align-items: center; gap: 12px; min-width: 240px; }
-.issue-table-title { display: inline-flex; align-items: center; gap: 14px; text-align: left; }
-.issue-table-title small { color: var(--muted, #9498a3); font-family: monospace; white-space: nowrap; }
-.issue-table tr:hover { background: var(--panel-2, #17191d); }
