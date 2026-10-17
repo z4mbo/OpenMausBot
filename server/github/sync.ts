@@ -186,13 +186,15 @@ export function issueStateMove(task: { done: boolean; draft?: boolean; githubIss
   return parked ? "park" : "close";
 }
 
-async function syncTarget(service: GitHubService, target: Pick<Target, "projectId" | "taskId" | "number">) {
+async function syncTarget(service: GitHubService, target: Target, pushChanges = true) {
   const { token, repo, task } = await contextWithToken(service, target.projectId, target.taskId);
   if (!repo || !token) throw new Error("Repository sync needs an authorized GitHub connection");
+  const expectedRepo = parseGitHubRepo(target.repoUrl);
+  if (!expectedRepo || repoName(repo) !== repoName(expectedRepo) || !task || task._id !== target.taskId || task.githubIssueNumber !== target.number) throw new Error("GitHub issue link changed; refresh before synchronizing");
   const path = `/repos/${repo.owner}/${repo.repo}/issues/${target.number}`;
   let issue = await githubRequest<GitHubIssue>(service, path, token);
   if (issue.pull_request) return;
-  const move = task ? issueStateMove(task, issue.state) : "pull";
+  const move = pushChanges ? issueStateMove(task, issue.state) : "pull";
   if (move !== "pull") issue = await githubRequest<GitHubIssue>(service, path, token, { method: "PATCH", body: JSON.stringify(STATE_PATCH[move]) });
   if (move === "park") {
     await githubRequest(service, `${path}/comments`, token, {
@@ -203,8 +205,8 @@ async function syncTarget(service: GitHubService, target: Pick<Target, "projectI
 }
 
 /** Pushes one linked issue's Origin state (done, or parked in Draft) to GitHub now instead of on the next sync. */
-export async function syncLinkedTask(service: GitHubService, projectId: string, taskId: string, number: number) {
-  await syncTarget(service, { projectId, taskId, number });
+export async function syncLinkedTask(service: GitHubService, projectId: string, taskId: string, number: number, repoUrl: string) {
+  await syncTarget(service, { projectId, taskId, number, repoUrl });
 }
 
 export type GitHubIssueRemoval = {
@@ -300,7 +302,7 @@ export async function mirrorUnlinkedPage(service: GitHubService) {
 
 export async function syncGitHubEvent(service: GitHubService, repoUrl: string, number: number) {
   const targets = await service.bridge<Target[]>("webhookTargets", { repoUrl, number });
-  for (const target of targets) await syncTarget(service, target);
+  for (const target of targets) await syncTarget(service, { ...target, repoUrl, number }, false);
 }
 
 export async function syncGitHubPage(service: GitHubService) {

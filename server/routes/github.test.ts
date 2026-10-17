@@ -170,14 +170,14 @@ describe("POST /api/github/webhook", () => {
     expect(network.bridgeCalls).toEqual([]);
   });
 
-  it("syncs a signed issue event once, links it and finishes the lease; a duplicate does nothing", async () => {
+  it.each([undefined, "closed"])("pulls a signed closed issue event without reopening it (last state %s); a duplicate does nothing", async (githubIssueState) => {
     let lease: number | null = 3;
     const { call, network } = await start({
       env: { clientId: "cid", clientSecret: "csecret", webhookSecret: WEBHOOK_SECRET, legacyToken: "legacy-token" },
       bridge: {
         githubDelivery: () => lease,
         webhookTargets: () => [{ projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", number: 5 }],
-        context: () => context({ legacyOwner: true, project: { ...context().project, githubWorkspaceAccess: false } }),
+        context: () => context({ legacyOwner: true, project: { ...context().project, githubWorkspaceAccess: false }, task: { _id: "t1", title: "Login", done: false, githubIssueNumber: 5, githubIssueUrl: "https://github.com/acme/widgets/issues/5", githubIssueState } }),
         linkIssue: () => null,
       },
       github: { "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, html_url: "https://github.com/acme/widgets/issues/5", state: "closed", updated_at: "2026-10-17T11:00:00Z" } }) },
@@ -188,6 +188,7 @@ describe("POST /api/github/webhook", () => {
     expect(network.bridgeCalls.map((c) => c.name)).toEqual(["githubDelivery", "webhookTargets", "context", "linkIssue", "githubDelivery"]);
     expect(network.bridgeCalls[3].args).toMatchObject({ taskId: "t1", number: 5, state: "closed", issueUrl: "https://github.com/acme/widgets/issues/5" });
     expect(network.bridgeCalls[4].args).toMatchObject({ deliveryId: "delivery-1", finishLease: 3 });
+    expect(network.requests.some((request) => request.key.startsWith("PATCH"))).toBe(false);
     lease = null;
     network.bridgeCalls.length = 0;
     expect(await (await call("/api/github/webhook", deliver(issueBody))).json()).toEqual({ accepted: true, duplicate: true });
@@ -484,6 +485,33 @@ describe("issue mirroring and two-way state", () => {
   it("leaves GitHub alone when the Origin backend does not report drafts", async () => {
     const { network } = await tickWith({ done: false, githubIssueState: "open" }, "open");
     expect(network.requests.some((r) => r.key.startsWith("PATCH"))).toBe(false);
+  });
+
+  it.each([
+    { name: "repository changed", repoUrl: "https://github.com/acme/replacement", issueNumber: 5 },
+    { name: "task relinked", repoUrl: "https://github.com/acme/widgets", issueNumber: 6 },
+  ])("does not apply a scheduled target after its $name", async ({ repoUrl, issueNumber }) => {
+    const remote = `${repoUrl}/issues/5`;
+    const harness = await start({
+      bridge: {
+        pending: () => [], prTargets: () => ({ rows: [], nextCursor: null }), unlinkedTasks: () => ({ rows: [], nextCursor: null }),
+        targets: () => ({ rows: [{ projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", number: 5 }], nextCursor: null }),
+        context: () => context({
+          project: { ...context().project, repoUrl },
+          task: { _id: "t1", title: "Login", done: true, githubIssueNumber: issueNumber, githubIssueUrl: `${repoUrl}/issues/${issueNumber}`, githubIssueState: "open" },
+        }),
+        linkIssue: () => null,
+      },
+      github: {
+        [`GET ${remote.replace("https://github.com/", "https://api.github.com/repos/")}`]: () => ({ body: { number: 5, html_url: remote, state: "open", updated_at: "2026-10-16T00:00:00Z" } }),
+        [`PATCH ${remote.replace("https://github.com/", "https://api.github.com/repos/")}`]: () => ({ body: { number: 5, html_url: remote, state: "closed", updated_at: "2026-10-17T00:00:00Z" } }),
+      },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    await harness.call("/api/integrations/tick", signedTick({ at: NOW }));
+    await Promise.all(harness.work);
+    expect(harness.network.requests.some((request) => request.key.includes("/issues/"))).toBe(false);
+    expect(harness.network.bridgeCalls.some((call) => call.name === "linkIssue")).toBe(false);
   });
 
   it("never creates a GitHub issue for a draft, even when an older backend lists it as unlinked", async () => {
