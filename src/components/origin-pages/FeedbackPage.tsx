@@ -87,7 +87,7 @@ function Feedback({ project, teamId, projectId, canEdit, isAdmin, onOpenIssue }:
                 <strong className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-ink">{entry.title}</strong>
                 <span className={cn("rounded-full px-2 py-0.5 text-[11.5px] capitalize", statusTone[entry.status])}>{entry.status}</span>
               </header>
-              <p className="whitespace-pre-wrap text-[13px] text-ink-secondary">{entry.body}</p>
+              <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-[13px] text-ink-secondary">{entry.body}</p>
               <footer className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-ink-tertiary">
                 <time>{fmtDate(entry.createdAt)}</time>
                 <div className="ml-auto flex items-center gap-2">

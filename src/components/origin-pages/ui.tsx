@@ -27,13 +27,13 @@ export const ghostButton =
   `inline-flex min-h-8 items-center justify-center gap-1.5 rounded-lg border border-hairline/60 px-3 py-1.5 text-[13px] text-ink-secondary transition-colors hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 export const iconButton =
   `inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
-export const cardClass = "rounded-xl border border-hairline/40 bg-panel";
+export const cardClass = "min-w-0 rounded-xl border border-hairline/40 bg-panel";
 export const chipButton =
   `inline-flex h-8 max-w-[220px] items-center gap-1.5 rounded-full border border-hairline/60 bg-raised/60 px-3 text-[12.5px] text-ink-secondary transition-colors hover:border-hairline hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 /** Clears the glass header a page scrolls beneath; `--glass-top` is the header's height, published by its frame. */
 export const underGlass = "pt-[calc(var(--glass-top,0px)+1.25rem)] [scroll-padding-top:var(--glass-top,0px)]";
 /** The scrolling body every project and workspace page shares. */
-export const pageClass = `flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-5 md:px-6 ${underGlass} motion-safe:animate-[rise_0.24s_cubic-bezier(0.22,1,0.36,1)_backwards]`;
+export const pageClass = `flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-4 pb-5 md:px-6 ${underGlass} motion-safe:animate-[rise_0.18s_cubic-bezier(0.22,1,0.36,1)_backwards]`;
 
 function GateShell({ children }: { children: ReactNode }) {
   return <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]">{children}</div>;
@@ -308,7 +308,7 @@ export function PageHeader({ title, count, children }: { title: string; count?: 
 
 export function Field({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <label className={cn("flex flex-col gap-1 text-[12px] font-medium text-ink-secondary", className)}>
+    <label className={cn("flex min-w-0 flex-col gap-1 text-[12px] font-medium text-ink-secondary", className)}>
       {label}
       {children}
     </label>
