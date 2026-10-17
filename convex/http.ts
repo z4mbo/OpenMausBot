@@ -31,6 +31,7 @@ http.route({ path: "/integrations", method: "POST", handler: httpAction(async (c
       case "targets": result = JSON.parse(await ctx.runQuery(internal.integrations.targets, p.args)); break;
       case "webhookTargets": result = JSON.parse(await ctx.runQuery(internal.integrations.webhookTargets, p.args)); break;
       case "pending": result = await ctx.runQuery(internal.integrations.pending, {}); break;
+      case "unlinkedTasks": result = JSON.parse(await ctx.runQuery(internal.integrations.unlinkedTasks, p.args)); break;
       case "repoResult": result = await ctx.runMutation(internal.integrations.repoResult, p.args); break;
       case "linkIssue": result = await ctx.runMutation(internal.integrations.linkIssue, p.args); break;
       case "chatMentions": result = await ctx.runMutation(internal.notifications.chatMentions, p.args); break;

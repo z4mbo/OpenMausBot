@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as agentRuns from "../agentRuns.js";
+import type * as agentThreads from "../agentThreads.js";
+import type * as agents from "../agents.js";
 import type * as agentsTables from "../agentsTables.js";
 import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
@@ -26,6 +29,8 @@ import type * as inbox from "../inbox.js";
 import type * as integrations from "../integrations.js";
 import type * as issueRelations from "../issueRelations.js";
 import type * as legacyImport from "../legacyImport.js";
+import type * as lib_agentAccess from "../lib/agentAccess.js";
+import type * as lib_agentThreadRows from "../lib/agentThreadRows.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_completions from "../lib/completions.js";
 import type * as lib_features from "../lib/features.js";
@@ -55,6 +60,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agentRuns: typeof agentRuns;
+  agentThreads: typeof agentThreads;
+  agents: typeof agents;
   agentsTables: typeof agentsTables;
   auth: typeof auth;
   chat: typeof chat;
@@ -73,6 +81,8 @@ declare const fullApi: ApiFromModules<{
   integrations: typeof integrations;
   issueRelations: typeof issueRelations;
   legacyImport: typeof legacyImport;
+  "lib/agentAccess": typeof lib_agentAccess;
+  "lib/agentThreadRows": typeof lib_agentThreadRows;
   "lib/auth": typeof lib_auth;
   "lib/completions": typeof lib_completions;
   "lib/features": typeof lib_features;

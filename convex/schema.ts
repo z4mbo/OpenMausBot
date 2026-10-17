@@ -66,6 +66,8 @@ export default defineSchema({
     drawingElementCount: v.optional(v.number()),
     drawingBytes: v.optional(v.number()),
     slug: v.optional(v.string()),
+    /** Opt-in: members share bot definitions and threads, and each sender's message runs on that sender's own models. */
+    sharedAgents: v.optional(v.boolean()),
     ownerUserId: v.id("users"),
     createdAt: v.number(),
     updatedAt: v.number(),

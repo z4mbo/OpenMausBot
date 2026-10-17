@@ -298,6 +298,8 @@ export const create = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     repoUrl: v.optional(v.string()),
+    /** "later": no repository is created automatically; the person links or creates one from the project afterwards. */
+    githubRepo: v.optional(v.literal("later")),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
@@ -308,7 +310,7 @@ export const create = mutation({
   },
 });
 
-export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"teams">; name: string; description?: string; repoUrl?: string }, user: Doc<"users">) {
+export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"teams">; name: string; description?: string; repoUrl?: string; githubRepo?: "later" }, user: Doc<"users">) {
   if (!args.name.trim() || args.name.length > 100) throw new Error("Enter a project name under 100 characters");
     const repoUrl = repositoryUrl(args.repoUrl);
     const teamMember = await getActiveTeamMember(ctx, args.teamId, user.email);
@@ -316,7 +318,7 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
     const now = Date.now();
     const ownerEmail = normalizeEmail(user.email);
     const projectId = await ctx.db.insert("projects", {
-      githubRepoState: repoUrl ? "ready" : "pending",
+      githubRepoState: repoUrl ? "ready" : args.githubRepo === "later" ? undefined : "pending",
       githubWorkspaceAccess: Boolean(repoUrl && teamMember && ["owner", "admin"].includes(teamMember.role)),
       teamId: args.teamId,
       openIssueCount: 0,
@@ -355,7 +357,7 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
       });
     }
 
-    if (!repoUrl) await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId });
+    if (!repoUrl && args.githubRepo !== "later") await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId });
     return projectId;
 }
 

@@ -319,6 +319,11 @@ export const updateTask = mutation({
   },
 });
 
+async function hasMergedPullRequest(ctx: QueryCtx | MutationCtx, taskId: Id<"tasks">) {
+  const rows = await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", taskId)).take(20);
+  return rows.some(row => row.state === "merged");
+}
+
 export async function updateTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; taskId: Id<"tasks">; title?: string; description?: string; priority?: "low" | "medium" | "high"; assignedToEmail?: string; dueDate?: string; done?: boolean; }, actorId: Id<"users">) {
   const task = await ctx.db.get(args.taskId);
     if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
@@ -349,6 +354,9 @@ export async function updateTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
     }
     if (args.dueDate !== undefined) patch.dueDate = requireDueDate(args.dueDate);
     if (args.done !== undefined) patch.done = args.done;
+    if (patch.done === true && !task.done && task.githubIssueNumber && !await hasMergedPullRequest(ctx, task._id)) {
+      throw new Error(`GitHub issue #${task.githubIssueNumber} completes when its pull request merges. Open a pull request that says "Closes #${task.githubIssueNumber}".`);
+    }
     if (patch.done !== undefined) await recordCompletion(ctx, task, patch.done);
     await ctx.db.patch(args.taskId, patch);
     if (patch.assignedToEmail && patch.assignedToEmail !== task.assignedToEmail) {

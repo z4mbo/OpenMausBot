@@ -75,7 +75,7 @@ export const read = query({
     const { grant, user } = await authorize(ctx, a.token, false, a.projectId);
     const run = grant.runId ? (await ctx.db.get(grant.runId))! : null;
     if (a.kind === "projects") {
-      if (run) {
+      if (run?.projectId) {
         const p = (await ctx.db.get(run.projectId))!;
         return JSON.stringify({ projects: [{ id: p._id, name: p.name, description: p.description, repoUrl: p.repoUrl, githubRepoState: p.githubRepoState, status: p.status === "active" ? "active" : "inactive" }], nextCursor: null });
       }

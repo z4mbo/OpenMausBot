@@ -62,7 +62,7 @@ export const context = internalQuery({
     const teamOwner = team ? await ctx.db.get(team.ownerUserId) : null;
     const legacyOwner = p.ownerEmail === DEFAULT_OWNER_EMAIL && teamOwner?.email === DEFAULT_OWNER_EMAIL && teamOwner.status === "active";
     return JSON.stringify({ credentialAllowed, legacyOwner, project: { _id: p._id, teamId: p.teamId, name: p.name, status: p.status, description: p.description, repoUrl: p.repoUrl, githubRepoId: p.githubRepoId, githubWorkspaceAccess: p.githubWorkspaceAccess }, connection: await connection(ctx, p),
-      task: task ? { _id: task._id, title: task.title, description: task.description, done: task.done, githubIssueNumber: task.githubIssueNumber, githubIssueUrl: task.githubIssueUrl } : null });
+      task: task ? { _id: task._id, title: task.title, description: task.description, done: task.done, githubIssueNumber: task.githubIssueNumber, githubIssueUrl: task.githubIssueUrl, githubIssueState: task.githubIssueState } : null });
   },
 });
 
@@ -122,6 +122,21 @@ export const webhookTargets = internalQuery({
       if (p?.repoUrl?.toLowerCase().replace(/^https?:\/\/github.com\//, "").replace(/\.git$/, "").replace(/\/$/, "") === repo) rows.push({ taskId: t._id, projectId: p._id, repoUrl: p.repoUrl, number: t.githubIssueNumber });
     }
     return JSON.stringify(rows);
+  },
+});
+
+/** Open issues of active, repository-authorized projects that have no GitHub issue yet, for the tick to mirror. */
+export const unlinkedTasks = internalQuery({
+  args: { cursor: v.union(v.string(), v.null()) }, returns: v.string(),
+  handler: async (ctx, a) => {
+    const page = await ctx.db.query("projects").paginate({ cursor: a.cursor, numItems: 25 });
+    const rows: { projectId: string; taskId: string }[] = [];
+    for (const project of page.page) {
+      if (project.status !== "active" || !project.repoUrl || !project.githubWorkspaceAccess) continue;
+      const open = await ctx.db.query("tasks").withIndex("by_project_and_done", q => q.eq("projectId", project._id).eq("done", false)).take(200);
+      for (const task of open) if (!task.githubIssueNumber && rows.length < 20) rows.push({ projectId: project._id, taskId: task._id });
+    }
+    return JSON.stringify({ rows, nextCursor: page.isDone ? null : page.continueCursor });
   },
 });
 

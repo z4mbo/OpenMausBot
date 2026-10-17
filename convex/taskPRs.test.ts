@@ -169,3 +169,32 @@ describe("Delivery dedupe and finalize authority", () => {
     await expect(f.t.mutation(internal.taskPRs.humanContext, a)).rejects.toThrow("Authorize");
   });
 });
+
+describe("GitHub-first issue lifecycle", () => {
+  test("a GitHub-linked issue completes only through a merged pull request", async () => {
+    const f = await fixture();
+    await f.t.run(ctx => ctx.db.patch(f.taskId, { githubIssueNumber: 7, githubIssueUrl: `${repoUrl}/issues/7`, githubIssueState: "open" }));
+    await expect(f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: true })).rejects.toThrow("Closes #7");
+    await f.link({ ...f.s, state: "merged", githubUpdatedAt: 3000 });
+    expect((await f.t.run(ctx => ctx.db.get(f.taskId)))!.done).toBe(true);
+    await f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: false });
+    await f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: true });
+    expect((await f.t.run(ctx => ctx.db.get(f.taskId)))!.done).toBe(true);
+  });
+  test("unlinked open issues of authorized projects are listed for mirroring, and the context carries the last GitHub state", async () => {
+    const f = await fixture();
+    const page = JSON.parse(await f.t.query(internal.integrations.unlinkedTasks, { cursor: null }));
+    expect(page.rows).toEqual([{ projectId: f.projectId, taskId: f.taskId }]);
+    await f.t.run(ctx => ctx.db.patch(f.taskId, { githubIssueNumber: 3, githubIssueState: "closed" }));
+    expect(JSON.parse(await f.t.query(internal.integrations.unlinkedTasks, { cursor: null })).rows).toEqual([]);
+    const context = JSON.parse(await f.t.query(internal.integrations.context, { projectId: f.projectId, taskId: f.taskId }));
+    expect(context.task.githubIssueState).toBe("closed");
+  });
+  test("a project created with githubRepo later waits for the person instead of creating a repository", async () => {
+    const f = await fixture();
+    const later = await f.t.mutation(api.projects.create, { sessionToken: f.sessionToken, teamId: f.teamId, name: "Later", githubRepo: "later" });
+    const project = await f.t.run(ctx => ctx.db.get(later));
+    expect(project!.githubRepoState).toBeUndefined();
+    expect(await f.t.query(internal.integrations.pending, {})).not.toContain(later);
+  });
+});
