@@ -4,6 +4,16 @@ Delivery is in progress. This record distinguishes published artifacts, deployed
 
 The current candidate is 0.2.4. The 0.2.3 binaries and private website image below were verified but never published; a subsequent malformed-URL credential privacy fix and final source extractions require matching new desktop builds. No 0.2.3 promotion script is eligible for execution.
 
+## Current candidate verification
+
+The 0.2.4 website image is `sha256:28eab45dea7a9250e12921017df6a529eefa7682c5f5103a249ffffba2e374e1`, built from website source `5818efadf`. Two private compiled-image runs pass 16 browser cases each, including all 14 current changelog entries in the release-history screen. All WebSockets are intercepted and external HTTP is blocked; no account form is submitted. The private container and tunnel are stopped. The separate synthetic app previews remain available to the user.
+
+The integrated touched-server, release, architecture and documentation checks pass 42 files and 1,352 tests, with 19 existing platform skips. Client/server TypeScript and full lint pass. Independent review confirms the preserved durable-import, request-attribution, authority-filtering and renderer-export invariants. Native packaging and new CI conclusions remain pending.
+
+The Windows renderer run passes 13 tests, with one native one-shot CLI bootstrap failure and one existing POSIX-only skip. The failed team-share case then passes unchanged. All five supported browser-evidence cases pass, and a separate focused persistent-MCP comparison passes two tests. Passive observation reproduces a native CLI daemon exit/restart during cold start, independently of the corrected fixture socket location. This remains an unresolved verification-tool limitation; it does not establish a failure of the production persistent-MCP path. No retries, skipped assertions, native pin changes or production workarounds hide that result.
+
+Exact guarded cleanup of some synthetic temporary directories was rejected by automatic approval review as “blocked by policy.” Their owned processes are stopped; the rejected deletion was not retried through another mechanism. In addition to the earlier feature-report paths, the stopped `openmausbot-verify-data-J3amUQ` fixture and seven renderer partial fixtures remain; the latter's exact paths are in the local cleanup evidence. The intentionally live user previews are separate from those retained directories.
+
 ## Unshipped 0.2.3 build evidence
 
 - Desktop source: `67e7a7934f2b762a6c20886ea675f7c57d4f2184`, annotated tag `origin-v0.2.3`.
