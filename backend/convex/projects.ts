@@ -7,6 +7,7 @@ import { callSignalKindValidator, projectIconTypeValidator, projectStatusValidat
 import type { Id, Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { admitStorageReference, issueUpload, storageMetadata, validateUpload } from "./lib/storage";
 
 const defaultColumns = ["Draft", "Todo", "In progress"];
 const accents = ["#111111", "#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626"];
@@ -285,9 +286,10 @@ export const ackCallSignals = mutation({
 
 export const generateIconUploadUrl = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string() },
+  returns: v.string(),
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.projectId, args.sessionToken);
-    return await ctx.storage.generateUploadUrl();
+    return issueUpload(ctx, args.sessionToken, { kind: "icon", projectId: args.projectId });
   },
 });
 
@@ -468,6 +470,7 @@ export const update = mutation({
     iconValue: v.optional(v.string()),
     iconStorageId: v.optional(v.id("_storage")),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const { user, project: existingProject } = await requireAdmin(ctx, args.projectId, args.sessionToken);
     const patch: Partial<{
@@ -502,9 +505,16 @@ export const update = mutation({
       if (args.iconType === "default") patch.iconValue = undefined;
     }
     if (args.iconValue !== undefined) patch.iconValue = args.iconValue.trim() || undefined;
-    if (args.iconStorageId !== undefined) patch.iconStorageId = args.iconStorageId;
+    if (args.iconStorageId !== undefined) {
+      const metadata = await storageMetadata(ctx, args.iconStorageId);
+      if (!metadata) throw new Error("File not found");
+      validateUpload({ kind: "icon", projectId: args.projectId }, metadata.size, metadata.contentType);
+      await admitStorageReference(ctx, args.iconStorageId, user, { kind: "project", projectId: args.projectId });
+      patch.iconStorageId = args.iconStorageId;
+    }
     await ctx.db.patch(args.projectId, patch);
     if (args.status === "active" && existingProject.githubRepoState === "pending") await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId: args.projectId });
+    return null;
   },
 });
 

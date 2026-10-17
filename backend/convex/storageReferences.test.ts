@@ -18,7 +18,7 @@ test("replacing an agent avatar preserves files referenced by a project and anot
   await t.mutation(api.agents.setSharedAgents, { sessionToken, teamId, enabled: true });
   const agents = await t.mutation(api.agents.publishProjectTeam, { sessionToken, teamId, projectId, agents: [{ kind: "chief", roleKey: "chief", name: "Chief" }, { kind: "agent", roleKey: "designer", name: "Designer" }] });
   const storageId = await t.run(ctx => ctx.storage.store(new Blob(["image bytes"], { type: "image/png" })));
-  await t.mutation(api.projects.update, { sessionToken, projectId, iconType: "image", iconStorageId: storageId });
+  await t.run(ctx => ctx.db.patch(projectId, { iconType: "image", iconStorageId: storageId }));
   await t.run(async ctx => { for (const agent of agents) await ctx.db.patch(agent.agentId, { avatarStorageId: storageId }); });
   await t.mutation(api.agents.setAvatar, { sessionToken, agentId: agents[0]!.agentId, storageId: null });
   expect((await t.query(api.projects.get, { sessionToken, projectId })).iconUrl).not.toBeNull();

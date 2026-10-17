@@ -3,6 +3,7 @@ import { action, internalMutation, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { createWorkspace } from "./workspaces";
+import { admitStorageReference, issueUpload, storageMetadata } from "./lib/storage";
 import {
   createSession,
   createUser,
@@ -30,9 +31,10 @@ export const me = query({
 
 export const generateAvatarUploadUrl = mutation({
   args: { sessionToken: v.string() },
+  returns: v.string(),
   handler: async (ctx, args) => {
-    await requireUser(ctx, args.sessionToken);
-    return await ctx.storage.generateUploadUrl();
+    const user = await requireUser(ctx, args.sessionToken);
+    return issueUpload(ctx, args.sessionToken, { kind: "profile", userId: user._id });
   },
 });
 
@@ -43,6 +45,7 @@ export const updateProfile = mutation({
     name: v.optional(v.string()),
     avatarStorageId: v.optional(v.id("_storage")),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
     const patch: Partial<{
@@ -61,11 +64,13 @@ export const updateProfile = mutation({
       patch.name = args.name.trim() || user.name;
     }
     if (args.avatarStorageId !== undefined) {
-      const file = await ctx.db.system.get("_storage", args.avatarStorageId);
+      const file = await storageMetadata(ctx, args.avatarStorageId);
       if (!file || file.size > 5 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.contentType || "")) throw new Error("Choose a PNG, JPEG, WebP or GIF under 5 MB");
+      await admitStorageReference(ctx, args.avatarStorageId, user, { kind: "user", userId: user._id });
       patch.avatarStorageId = args.avatarStorageId;
     }
     await ctx.db.patch(user._id, patch);
+    return null;
   },
 });
 

@@ -47,6 +47,7 @@ import type * as planning from "../planning.js";
 import type * as preferences from "../preferences.js";
 import type * as projectPresence from "../projectPresence.js";
 import type * as projects from "../projects.js";
+import type * as storage from "../storage.js";
 import type * as taskPRs from "../taskPRs.js";
 import type * as tasks from "../tasks.js";
 import type * as teams from "../teams.js";
@@ -100,6 +101,7 @@ declare const fullApi: ApiFromModules<{
   preferences: typeof preferences;
   projectPresence: typeof projectPresence;
   projects: typeof projects;
+  storage: typeof storage;
   taskPRs: typeof taskPRs;
   tasks: typeof tasks;
   teams: typeof teams;

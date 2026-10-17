@@ -121,15 +121,24 @@ export function writeOriginCloud(file: string, state: OriginCloudState): void {
   renameSync(partial, file);
 }
 
-export function convexOriginClient(url: string): OriginCloudClient {
+export function convexOriginClient(url: string, siteUrl = process.env.ORIGIN_CONVEX_SITE_URL?.trim()): OriginCloudClient {
   const client = new ConvexHttpClient(url, { logger: false });
   const deployment = new URL(url).origin;
+  const actionOrigin = new URL(deployment);
+  if (actionOrigin.hostname.endsWith(".convex.cloud")) actionOrigin.hostname = actionOrigin.hostname.replace(/\.convex\.cloud$/, ".convex.site");
+  else if (["localhost", "127.0.0.1", "[::1]"].includes(actionOrigin.hostname) && actionOrigin.port) actionOrigin.port = String(Number(actionOrigin.port) + 1);
+  const uploadOrigins = new Set([deployment, actionOrigin.origin]);
+  if (siteUrl) {
+    const configured = new URL(siteUrl);
+    if (!["http:", "https:"].includes(configured.protocol) || configured.username || configured.password || configured.pathname !== "/" || configured.search || configured.hash) throw new Error("Origin's HTTP action address must be an application origin");
+    uploadOrigins.add(configured.origin);
+  }
   return {
     query: (name, args) => client.query(makeFunctionReference<"query">(name), args),
     mutation: (name, args) => client.mutation(makeFunctionReference<"mutation">(name), args),
     async upload(uploadUrl, data, contentType) {
       // Security: a project file only ever goes to the deployment the person signed in to.
-      if (new URL(uploadUrl).origin !== deployment) throw new Error("Origin returned an upload address outside its deployment");
+      if (!uploadOrigins.has(new URL(uploadUrl).origin)) throw new Error("Origin returned an upload address outside its deployment");
       const response = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": contentType }, body: data });
       if (!response.ok) throw new Error(`the upload failed with HTTP ${response.status}`);
       const body = record(await response.json());

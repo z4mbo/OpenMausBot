@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { featureTables } from "./featureTables";
 import { agentAttribution, agentsTables } from "./agentsTables";
+import { storageScope, uploadTarget } from "./lib/storageValidators";
 import {
   assetTypeValidator,
   callSignalKindValidator,
@@ -20,6 +21,8 @@ import {
 export default defineSchema({
   ...featureTables,
   ...agentsTables,
+  storageAdmissions: defineTable({ storageId: v.id("_storage"), scopeKey: v.string(), scope: storageScope, contentType: v.optional(v.string()), createdAt: v.number() }).index("by_storageId_and_scopeKey", ["storageId", "scopeKey"]),
+  storageUploadIntents: defineTable({ tokenHash: v.string(), sessionId: v.id("sessions"), userId: v.id("users"), target: uploadTarget, state: v.union(v.literal("issued"), v.literal("uploading"), v.literal("complete")), expiresAt: v.number(), storageId: v.optional(v.id("_storage")) }).index("by_tokenHash", ["tokenHash"]).index("by_expiresAt", ["expiresAt"]).index("by_userId_and_expiresAt", ["userId", "expiresAt"]),
   notifications: defineTable({ teamId: v.id("teams"), userId: v.id("users"), actorId: v.id("users"), kind: v.union(v.literal("assignment"), v.literal("comment"), v.literal("mention")), eventId: v.string(), projectId: v.optional(v.id("projects")), taskId: v.optional(v.id("tasks")), messageId: v.optional(v.string()), conversation: v.optional(v.string()), agentThreadId: v.optional(v.id("agentThreads")), preview: v.optional(v.string()), read: v.boolean(), snoozedUntil: v.optional(v.number()), createdAt: v.number() })
     .index("by_user_team", ["userId", "teamId"])
     .index("by_user_team_read", ["userId", "teamId", "read"])
@@ -31,7 +34,7 @@ export default defineSchema({
   authAttempts: defineTable({ key: v.string(), count: v.number(), expiresAt: v.number() }).index("by_key", ["key"]),
   canvases: defineTable({ teamId: v.id("teams"), projectId: v.id("projects"), name: v.string(), archived: v.boolean(), drawingElementCount: v.optional(v.number()), drawingBytes: v.optional(v.number()), createdAt: v.number(), updatedAt: v.number() }).index("by_project", ["projectId", "archived"]),
   drawingElements: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), elementId: v.string(), version: v.number(), nonce: v.number(), data: v.string(), updatedAt: v.number() }).index("by_teamId", ["teamId"]).index("by_teamId_and_elementId", ["teamId", "elementId"]).index("by_scene", ["teamId", "canvasId", "elementId"]),
-  drawingFiles: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), fileId: v.string(), storageId: v.id("_storage"), mimeType: v.string() }).index("by_teamId", ["teamId"]).index("by_teamId_and_fileId", ["teamId", "fileId"]).index("by_scene", ["teamId", "canvasId", "fileId"]),
+  drawingFiles: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), fileId: v.string(), storageId: v.id("_storage"), mimeType: v.string() }).index("by_teamId", ["teamId"]).index("by_teamId_and_fileId", ["teamId", "fileId"]).index("by_scene", ["teamId", "canvasId", "fileId"]).index("by_storageId", ["storageId"]),
   drawingPresence: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), userId: v.id("users"), name: v.string(), x: v.number(), y: v.number(), button: v.string(), updatedAt: v.number() }).index("by_teamId", ["teamId"]).index("by_teamId_and_userId", ["teamId", "userId"]).index("by_scene", ["teamId", "canvasId", "userId"]),
   users: defineTable({
     email: v.string(),
@@ -47,7 +50,7 @@ export default defineSchema({
     updatedAt: v.number(),
     lastLoginAt: v.optional(v.number()),
     sessionVersion: v.optional(v.number()),
-  }).index("by_email", ["email"]),
+  }).index("by_email", ["email"]).index("by_avatarStorageId", ["avatarStorageId"]),
 
   sessions: defineTable({
     userId: v.id("users"),
@@ -134,6 +137,7 @@ export default defineSchema({
     .index("by_repoUrl", ["repoUrl"])
     .index("by_owner", ["ownerEmail"])
     .index("by_legacySourceKey", ["legacySourceKey"])
+    .index("by_iconStorageId", ["iconStorageId"])
     .index("by_team", ["teamId"]),
 
   members: defineTable({
@@ -359,7 +363,7 @@ export default defineSchema({
     notes: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_project", ["projectId"]),
+  }).index("by_project", ["projectId"]).index("by_storageId", ["storageId"]),
 
   chatMessages: defineTable({
     projectId: v.id("projects"),

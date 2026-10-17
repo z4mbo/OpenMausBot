@@ -2,8 +2,11 @@ import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { BodyTooLarge, readBoundedText } from "../lib/http-body";
+import { upload, uploadOptions } from "./storage";
 
 const http = httpRouter();
+http.route({ path: "/uploads", method: "POST", handler: upload });
+http.route({ path: "/uploads", method: "OPTIONS", handler: uploadOptions });
 http.route({ path: "/integrations", method: "POST", handler: httpAction(async (ctx, request) => {
   const secret = process.env.ORIGIN_INTEGRATION_SECRET;
   if (!secret || secret.length < 32) return new Response("Unavailable", { status: 503 });
