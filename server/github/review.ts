@@ -3,6 +3,7 @@ import { repositoryPath, withInstallation } from "./app.ts";
 import { checksSummary, syncPREvent } from "./prs.ts";
 import type { OriginGitHub } from "../origin-cloud.ts";
 import { mirrorTasks, projectConnection, syncGitHubEvent } from "./sync.ts";
+import { readClosingIssueNumbers, readClosingIssuesForPulls } from "./closing-issues.ts";
 
 export type PullState = "draft" | "open" | "closed" | "merged";
 export type ReviewDecision = "approved" | "changes_requested" | "review_required" | "commented";
@@ -41,14 +42,6 @@ type CheckRuns = { total_count: number; check_runs: { name: string; status: stri
 
 const OPEN_DETAIL_MAX = 15;
 const FILES_MAX = 100;
-const CLOSING = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+#(\d{1,9})\b/gi;
-
-/** The issues GitHub closes when this pull request merges into the default branch, from its closing keywords. */
-export function closingIssueNumbers(body: string | null | undefined): number[] {
-  const found = new Set<number>();
-  for (const match of (body ?? "").matchAll(CLOSING)) found.add(Number(match[1]));
-  return [...found];
-}
 
 export function pullState(pr: Pick<PullRow, "state" | "draft" | "merged_at" | "merged">): PullState {
   return pr.merged || pr.merged_at ? "merged" : pr.state === "closed" ? "closed" : pr.draft ? "draft" : "open";
@@ -68,10 +61,10 @@ export function reviewDecision(reviews: { user?: { login?: string } | null; stat
   return commented ? "commented" : "review_required";
 }
 
-function summary(pr: PullRow, now: number): PullSummary {
+function summary(pr: PullRow, now: number, closes: number[] = []): PullSummary {
   const updatedAt = pr.updated_at ? Date.parse(pr.updated_at) : NaN;
   return {
-    number: pr.number, title: pr.title || `Pull request #${pr.number}`, url: pr.html_url, state: pullState(pr), closes: closingIssueNumbers(pr.body),
+    number: pr.number, title: pr.title || `Pull request #${pr.number}`, url: pr.html_url, state: pullState(pr), closes,
     updatedAt: Number.isFinite(updatedAt) ? updatedAt : now, branch: pr.head.ref, ...(pr.user?.login ? { author: pr.user.login } : {}),
   };
 }
@@ -88,10 +81,11 @@ async function checkRuns(service: GitHubService, path: string, sha: string, toke
 export async function listPullRequests(service: GitHubService, repoUrl: string, token: string | undefined): Promise<PullSummary[]> {
   const path = repositoryPath(repoUrl);
   const rows = await githubRequest<PullRow[]>(service, `${path}/pulls?state=all&sort=updated&direction=desc&per_page=30`, token ?? "");
+  const references = token ? await readClosingIssuesForPulls(service, repoUrl, rows.map((pr) => pr.number), token).catch(() => new Map<number, number[]>()) : new Map<number, number[]>();
   const now = service.now();
   let detailed = 0;
   return Promise.all(rows.map(async (pr) => {
-    const base = summary(pr, now);
+    const base = summary(pr, now, references.get(pr.number));
     if (!token || pr.state !== "open" || detailed++ >= OPEN_DETAIL_MAX) return base;
     const [runs, review] = await Promise.all([
       checkRuns(service, path, pr.head.sha, token).catch(() => null),
@@ -108,9 +102,9 @@ export async function readPullRequest(service: GitHubService, repoUrl: string, n
     githubRequest<{ default_branch: string }>(service, path, token),
     githubRequest<{ filename: string; status: string; additions: number; deletions: number }[]>(service, `${path}/pulls/${number}/files?per_page=${FILES_MAX}`, token),
   ]);
-  const [runs, review] = await Promise.all([checkRuns(service, path, pr.head.sha, token), reviewOf(service, path, number, token)]);
+  const [runs, review, closes] = await Promise.all([checkRuns(service, path, pr.head.sha, token), reviewOf(service, path, number, token), readClosingIssueNumbers(service, repoUrl, number, token)]);
   return {
-    ...summary(pr, service.now()), checks: checksSummary(runs.check_runs, runs.total_count > runs.check_runs.length), review,
+    ...summary(pr, service.now(), closes), checks: checksSummary(runs.check_runs, runs.total_count > runs.check_runs.length), review,
     baseBranch: pr.base.ref, defaultBranch: repository.default_branch, headSha: pr.head.sha, mergeable: pr.mergeable ?? null,
     additions: pr.additions ?? 0, deletions: pr.deletions ?? 0,
     files: files.map((file) => ({ name: file.filename, status: file.status, additions: file.additions, deletions: file.deletions })),
@@ -161,21 +155,18 @@ export async function mergePullRequest(service: GitHubService, repoUrl: string, 
   return { sha: merged.sha, detail };
 }
 
-/**
- * Merges, then closes the issues the pull request closes and syncs them and the pull request into Origin at once, so
- * they show as done without waiting for GitHub's webhook or the next periodic sync.
- */
 export async function mergeAndComplete(service: GitHubService, projectId: string, repoUrl: string, number: number, token: string, expectedHeadSha?: string): Promise<{ sha: string; completed: number[] }> {
   const { sha, detail } = await mergePullRequest(service, repoUrl, number, token, expectedHeadSha);
   const completed: number[] = [];
   await syncPREvent(service, repoUrl, [number]).catch((error: unknown) => console.warn("Merged pull request sync deferred", number, error instanceof Error ? error.message : error));
   for (const issue of detail.closes) {
     try {
-      await githubRequest(service, `${repositoryPath(repoUrl)}/issues/${issue}`, token, { method: "PATCH", body: JSON.stringify({ state: "closed", state_reason: "completed" }) });
+      const observed = await githubRequest<{ number: number; state: string; pull_request?: unknown }>(service, `${repositoryPath(repoUrl)}/issues/${issue}`, token);
+      if (observed.number !== issue || observed.state !== "closed" || observed.pull_request) continue;
       await syncGitHubEvent(service, repoUrl, issue);
       completed.push(issue);
     } catch (error) {
-      console.warn("Closed issue sync deferred", projectId, issue, error instanceof Error ? error.message : error);
+      console.warn("Merged issue sync deferred", projectId, issue, error instanceof Error ? error.message : error);
     }
   }
   return { sha, completed };
@@ -185,11 +176,12 @@ export async function mergeAndComplete(service: GitHubService, projectId: string
 export async function linkClosingReference(service: GitHubService, repoUrl: string, number: number, issueNumber: number, token: string): Promise<{ added: boolean; pull: PullSummary }> {
   const path = `${repositoryPath(repoUrl)}/pulls/${number}`;
   const pr = await githubRequest<PullRow>(service, path, token);
-  if (closingIssueNumbers(pr.body).includes(issueNumber)) return { added: false, pull: summary(pr, service.now()) };
+  const closes = await readClosingIssueNumbers(service, repoUrl, number, token);
+  if (closes.includes(issueNumber)) return { added: false, pull: summary(pr, service.now(), closes) };
   if (pr.state !== "open") throw new Error(`#${number} is ${pullState(pr)}; link an open pull request`);
   const body = `${(pr.body ?? "").trimEnd()}\n\nCloses #${issueNumber}`.trim();
   const updated = await githubRequest<PullRow>(service, path, token, { method: "PATCH", body: JSON.stringify({ body }) });
-  return { added: true, pull: summary(updated, service.now()) };
+  return { added: true, pull: summary(updated, service.now(), await readClosingIssueNumbers(service, repoUrl, number, token)) };
 }
 
 /**

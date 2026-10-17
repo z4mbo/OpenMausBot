@@ -422,12 +422,16 @@ const pull = (overrides: Record<string, unknown> = {}) => ({
   updated_at: "2026-10-16T00:00:00Z", body: "Closes #5", user: { login: "dev-bot" }, head: { ref: "feature", sha: sha40("a") }, base: { ref: "main" },
   mergeable: true, additions: 12, deletions: 3, node_id: "PR_8", ...overrides,
 });
-const prRoutes = (overrides: { pr?: Record<string, unknown>; conclusion?: string; reviews?: unknown[] } = {}): Record<string, Route> => ({
+const closingReferences = (numbers: number[], repo = "acme/widgets", hasNextPage = false, endCursor: string | null = null) => ({
+  data: { repository: { pullRequest: { closingIssuesReferences: { nodes: numbers.map((number) => ({ number, repository: { nameWithOwner: repo } })), pageInfo: { hasNextPage, endCursor } } } } },
+});
+const prRoutes = (overrides: { pr?: Record<string, unknown>; conclusion?: string; reviews?: unknown[]; closes?: number[] } = {}): Record<string, Route> => ({
   "GET https://api.github.com/repos/acme/widgets/pulls/8": () => ({ body: pull(overrides.pr) }),
   "GET https://api.github.com/repos/acme/widgets": () => ({ body: { default_branch: "main" } }),
   "GET https://api.github.com/repos/acme/widgets/pulls/8/files": () => ({ body: [{ filename: "src/login.ts", status: "modified", additions: 12, deletions: 3 }] }),
   [`GET https://api.github.com/repos/acme/widgets/commits/${sha40("a")}/check-runs`]: () => ({ body: { total_count: 1, check_runs: [{ name: "ci", status: "completed", conclusion: overrides.conclusion ?? "success" }] } }),
   "GET https://api.github.com/repos/acme/widgets/pulls/8/reviews": () => ({ body: overrides.reviews ?? [] }),
+  "POST https://api.github.com/graphql": () => ({ body: closingReferences(overrides.closes ?? [5]) }),
 });
 
 describe("issue mirroring and two-way state", () => {
@@ -590,7 +594,7 @@ describe("POST /api/github/pull-requests/review", () => {
     expect(JSON.parse(merges[0].body)).toMatchObject({ sha: sha40("a"), merge_method: "squash" });
   });
 
-  it("closes the issues a merged pull request closes and syncs them into Origin at once", async () => {
+  it("syncs GitHub's actual closed issues after merging without issuing an extra close", async () => {
     const issue = (state: string) => ({ number: 5, html_url: "https://github.com/acme/widgets/issues/5", state, updated_at: "2026-10-17T11:00:00Z" });
     const closed: unknown[] = [];
     const harness = await start({
@@ -610,8 +614,50 @@ describe("POST /api/github/pull-requests/review", () => {
     harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
     const merged = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
     expect(await merged.json()).toEqual({ merged: true, sha: sha40("c"), completed: [5] });
-    expect(closed).toEqual([{ state: "closed", state_reason: "completed" }]);
+    expect(closed).toEqual([]);
     expect(harness.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ taskId: "t1", number: 5, state: "closed" });
+  });
+
+  it("does not close an unrelated issue mentioned in a PR example when GitHub links another issue", async () => {
+    const harness = await start({
+      bridge: { context: () => context(), prEventTargets: () => [], webhookTargets: () => [] },
+      github: {
+        ...prRoutes({ pr: { body: "Example: `Closes #5`\n\nFixes acme/other#5" }, closes: [] }),
+        "PUT https://api.github.com/repos/acme/widgets/pulls/8/merge": () => ({ body: { sha: sha40("c"), merged: true } }),
+        "PATCH https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: {} }),
+      },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    const merged = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
+    expect(await merged.json()).toEqual({ merged: true, sha: sha40("c"), completed: [] });
+    expect(harness.network.requests.some((request) => request.key.includes("/issues/"))).toBe(false);
+  });
+
+  it("waits for GitHub to close a linked issue instead of reporting it completed while still open", async () => {
+    const harness = await start({
+      bridge: { context: () => context(), prEventTargets: () => [], webhookTargets: () => [] },
+      github: {
+        ...prRoutes(),
+        "PUT https://api.github.com/repos/acme/widgets/pulls/8/merge": () => ({ body: { sha: sha40("c"), merged: true } }),
+        "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, state: "open" } }),
+        "PATCH https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: {} }),
+      },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    const merged = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
+    expect(await merged.json()).toEqual({ merged: true, sha: sha40("c"), completed: [] });
+    expect(harness.network.requests.some((request) => request.key.startsWith("PATCH"))).toBe(false);
+  });
+
+  it("refuses a merge when GitHub cannot resolve the PR's closing references", async () => {
+    const harness = await start({
+      bridge: { context: () => context() },
+      github: { ...prRoutes(), "POST https://api.github.com/graphql": () => ({ body: { errors: [{ message: "Forbidden" }] } }) },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    const refused = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
+    expect(await refused.json()).toEqual({ error: "GitHub closing issue references are unavailable; retry before merging" });
+    expect(harness.network.requests.some((request) => request.key.startsWith("PUT"))).toBe(false);
   });
 
   it("refuses to merge while checks fail and never uses the legacy owner token", async () => {

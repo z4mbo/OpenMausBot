@@ -1,18 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { closingIssueNumbers, mergeBlocker, reviewDecision, type PullDetail } from "./review.ts";
+import { mergeBlocker, reviewDecision, type PullDetail } from "./review.ts";
 import { isRepositoryName, repositoryNameFor } from "../../shared/github-repo-name.ts";
 import { issueStateMove } from "./sync.ts";
 import { draftBody } from "./prs.ts";
 import { implementBrief, issueBrief } from "../../shared/origin-issues.ts";
-
-describe("closing keywords", () => {
-  it("finds every issue GitHub closes on merge, and nothing else", () => {
-    expect(closingIssueNumbers("Closes #5, fixes #6 and resolved: #7\nRefs #8 · see #9")).toEqual([5, 6, 7]);
-    expect(closingIssueNumbers("closes#5 Closes #5")).toEqual([5]);
-    expect(closingIssueNumbers(null)).toEqual([]);
-  });
-});
 
 describe("review decision", () => {
   it("counts each reviewer's latest decisive review", () => {
