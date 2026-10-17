@@ -1,0 +1,151 @@
+{
+  "previewUrl": "http://127.0.0.1:3017/",
+  "version": "0.2.2",
+  "cases": [
+    {
+      "path": "/",
+      "width": 375,
+      "colorScheme": "light",
+      "geometry": {
+        "width": 375,
+        "scrollWidth": 375
+      }
+    },
+    {
+      "path": "/login",
+      "width": 375,
+      "colorScheme": "light",
+      "geometry": {
+        "width": 375,
+        "scrollWidth": 375
+      }
+    },
+    {
+      "path": "/signup",
+      "width": 375,
+      "colorScheme": "light",
+      "geometry": {
+        "width": 375,
+        "scrollWidth": 375
+      }
+    },
+    {
+      "path": "/whats-new",
+      "width": 375,
+      "colorScheme": "light",
+      "geometry": {
+        "width": 375,
+        "scrollWidth": 375
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "colorScheme": "light",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "path": "/login",
+      "width": 1440,
+      "colorScheme": "light",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "path": "/signup",
+      "width": 1440,
+      "colorScheme": "light",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "path": "/whats-new",
+      "width": 1440,
+      "colorScheme": "light",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "path": "/",
+      "width": 375,
+      "colorScheme": "dark",
+      "geometry": {
+        "width": 375,
+        "scrollWidth": 375
+      }
+    },
+    {
+      "path": "/login",
+      "width": 375,
+      "colorScheme": "dark",
+      "geometry": {
+        "width": 375,
+        "scrollWidth": 375
+      }
+    },
+    {
+      "path": "/signup",
+      "width": 375,
+      "colorScheme": "dark",
+      "geometry": {
+        "width": 375,
+        "scrollWidth": 375
+      }
+    },
+    {
+      "path": "/whats-new",
+      "width": 375,
+      "colorScheme": "dark",
+      "geometry": {
+        "width": 375,
+        "scrollWidth": 375
+      }
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "colorScheme": "dark",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "path": "/login",
+      "width": 1440,
+      "colorScheme": "dark",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "path": "/signup",
+      "width": 1440,
+      "colorScheme": "dark",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "path": "/whats-new",
+      "width": 1440,
+      "colorScheme": "dark",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    }
+  ],
+  "pageErrors": []
+}
