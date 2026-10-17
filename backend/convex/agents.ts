@@ -232,7 +232,6 @@ export const setAvatar = mutation({
       const meta = await ctx.db.system.get(args.storageId);
       if (!meta || meta.size > 5 * 1024 * 1024 || !meta.contentType?.startsWith("image/")) throw new Error("Upload an image under 5 MB");
     }
-    if (agent.avatarStorageId && agent.avatarStorageId !== args.storageId) await ctx.storage.delete(agent.avatarStorageId);
     await ctx.db.patch(agent._id, {
       avatarStorageId: args.storageId ?? undefined, soulVersion: (agent.soulVersion ?? 1) + 1, updatedBy: access.user._id, updatedAt: Date.now(),
     });
