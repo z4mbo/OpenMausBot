@@ -57,7 +57,7 @@ export function CenteredDialog({ label, onClose: requestClose, canClose, classNa
     <div className={cn("fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/55", overlayMotion(closing))}>
       <div className="flex min-h-full items-end justify-center sm:items-center sm:p-6" onMouseDown={(event) => { if (event.target === event.currentTarget) dismiss(); }}>
         <div ref={panel} role="dialog" aria-modal="true" aria-label={label} tabIndex={-1} style={{ outline: "none" }}
-          className={cn("w-full rounded-t-2xl border border-hairline/60 bg-appmax-sm:border-x-0 max-sm:border-b-0 max-sm:pb-[env(safe-area-inset-bottom)] sm:rounded-[18px]", sheetMotion(closing), className)}>
+          className={cn("w-full rounded-t-2xl border border-hairline/60 bg-app max-sm:border-x-0 max-sm:border-b-0 max-sm:pb-[env(safe-area-inset-bottom)] sm:rounded-[18px]", sheetMotion(closing), className)}>
           {children(dismiss)}
         </div>
       </div>

@@ -12,13 +12,7 @@ import {
 
 export interface ComposerProject { id: string; name: string; memberRole?: string; icon?: ReactNode }
 
-function isoDay(offset: number): string {
-  const day = new Date();
-  day.setDate(day.getDate() + offset);
-  return `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
-}
 
-const DUE_SHORTCUTS = [{ label: "Today", offset: 0 }, { label: "Tomorrow", offset: 1 }, { label: "Next week", offset: 7 }] as const;
 
 /**
  * The new-issue composer: a project breadcrumb, a large title, a description and a row of property chips.
@@ -167,15 +161,6 @@ function IssueForm({ project, initialColumnId, initialDraft, myEmail, agents, ac
         <DateChip value={dueDate} onChange={setDueDate} disabled={action.busy} required />
         {agents.length > 0 && <AgentChip agents={agents} value={agentId} onPick={(id) => setAgentId(id ?? "")} onClear={() => setAgentId("")} disabled={action.busy} />}
       </IssueChips>
-      <div className="mt-2 flex flex-wrap items-center gap-1">
-        <span className="mr-1 text-[11.5px] text-ink-tertiary">Due</span>
-        {DUE_SHORTCUTS.map((shortcut) => (
-          <button key={shortcut.label} type="button" disabled={action.busy} onClick={() => setDueDate(isoDay(shortcut.offset))}
-            className={cn("rounded-full px-2 py-0.5 text-[11.5px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/60", dueDate === isoDay(shortcut.offset) ? "bg-accent/15 text-accent-text" : "text-ink-tertiary hover:bg-raised hover:text-ink")}>
-            {shortcut.label}
-          </button>
-        ))}
-      </div>
       {people && !people.length && <div className="mt-3"><Notice>Add a member to this project first: every issue needs an assignee.</Notice></div>}
       {action.error && <div className="mt-3"><Notice tone="danger">{action.error}</Notice></div>}
       <div className="mt-4 flex items-center gap-3 border-t border-hairline/40 pt-4">
