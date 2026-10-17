@@ -198,18 +198,20 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
 
   const callScope = async (ctx: RouteContext, body?: Args): Promise<CallScope> => {
     const { token, teamId } = scopeInput(ctx, body);
-    const user = await workspaceUser(token, teamId);
+    let user = await workspaceUser(token, teamId);
     const room = ctx.url.searchParams.get("room") ?? text(body?.room);
-    if (room) await project(token, teamId, room);
+    if (room && (await project(token, teamId, room)).memberRole === "viewer") user = { ...user, role: "viewer" };
     return { user, room };
   };
 
   const chatScope = async (ctx: RouteContext, body?: Args): Promise<ChatScope & { token: string }> => {
     const { token, teamId } = scopeInput(ctx, body);
-    const user = await workspaceUser(token, teamId);
+    let user = await workspaceUser(token, teamId);
     const conversation = parseConversation(ctx.url.searchParams.get("conversation") ?? "");
     if (conversation === null) throw new RealtimeError("Conversation not found");
-    if (conversation.startsWith("project:")) await project(token, teamId, conversation.slice("project:".length));
+    if (conversation.startsWith("project:")) {
+      if ((await project(token, teamId, conversation.slice("project:".length))).memberRole === "viewer") user = { ...user, role: "viewer" };
+    }
     else if (conversation && !store().directConversationMember(user, conversation)) throw new RealtimeError("Conversation not found");
     return { user, conversation, token };
   };
@@ -250,6 +252,7 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
     const { req, res, method, json, url, auth } = ctx;
     const body = route === "agent" && method === "POST" ? record(await ctx.readBody(req, MAX_JSON_BYTES)) : undefined;
     const scope = await callScope(ctx, body);
+    if (method === "POST" && scope.user.role === "viewer") throw new RealtimeError("View-only workspace access");
     const name = scope.room ? (await project(originSessionToken(req, body), scope.user.teamId, scope.room)).name : "Workspace";
     const agentScope: CallAgentScope = { teamId: scope.user.teamId, room: scope.room, name, user: scope.user };
     const present = () => store().participants(scope).map((participant) => participant.userId);

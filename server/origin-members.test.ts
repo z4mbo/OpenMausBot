@@ -35,7 +35,7 @@ afterEach(async () => {
   for (const folder of folders.splice(0)) rmSync(folder, { recursive: true, force: true });
 });
 
-function fakeConvex(): OriginCloudClient {
+function fakeConvex(projectRoles: Record<string, string> = {}): OriginCloudClient {
   const answer = async (name: string, args: Record<string, unknown>): Promise<unknown> => {
     const token = String(args.sessionToken ?? "");
     const user = USERS[token];
@@ -47,7 +47,7 @@ function fakeConvex(): OriginCloudClient {
     }
     if (name === "workspaces:members") return Object.entries(USERS).map(([key, member]) => ({ userId: member._id, name: member.name, email: member.email, role: ROLES[key] }));
     if (name === "projects:get") {
-      if (args.projectId === PROJECT) return { _id: PROJECT, teamId: TEAM, name: "Kai", memberRole: ROLES[token] };
+      if (args.projectId === PROJECT) return { _id: PROJECT, teamId: TEAM, name: "Kai", memberRole: projectRoles[token] ?? ROLES[token] };
       if (args.projectId === FOREIGN_PROJECT) return { _id: FOREIGN_PROJECT, teamId: OTHER_TEAM, name: "Elsewhere", memberRole: "owner" };
       throw new Error("Uncaught Error: Project not found");
     }
@@ -58,12 +58,12 @@ function fakeConvex(): OriginCloudClient {
   return { query: answer, mutation: answer };
 }
 
-async function start(options: { notices?: MentionNotice[]; delayMs?: number; callAgents?: CallAgents } = {}) {
+async function start(options: { notices?: MentionNotice[]; delayMs?: number; callAgents?: CallAgents; projectRoles?: Record<string, string> } = {}) {
   const folder = mkdtempSync(join(tmpdir(), "omb-origin-members-"));
   folders.push(folder);
   const store = openRealtimeStore(join(folder, "realtime.sqlite"));
   stores.push(store);
-  const convex = fakeConvex();
+  const convex = fakeConvex(options.projectRoles);
   const route = createOriginMemberRoutes({
     store: () => store,
     convex: () => convex,
@@ -147,6 +147,15 @@ describe("origin member calls", () => {
     expect(viewer).toEqual({ status: 400, body: { error: "View-only workspace access" } });
   });
 
+  it("keeps project viewers from joining calls even when they can write in the workspace", async () => {
+    const { call } = await start({ projectRoles: { "tok-bo": "viewer" } });
+    const room = `teamId=${TEAM}&room=${PROJECT}`;
+    expect((await call("tok-bo", "GET", `/api/local-voice/participants?${room}`)).status).toBe(200);
+    expect((await call("tok-bo", "POST", `/api/local-voice/participants?${room}`, { action: "join" })).status).toBe(400);
+    expect((await call("tok-ana", "GET", `/api/local-voice/participants?${room}`)).body.participants).toEqual([]);
+    expect((await call("tok-bo", "POST", `/api/local-voice/participants?teamId=${TEAM}`, { action: "join" })).status).toBe(200);
+  });
+
   it("brings the project's chief into the call for people in it, with captions and audio that is never kept", async () => {
     const heard: number[] = [];
     const callAgents = createCallAgents({
@@ -221,6 +230,19 @@ describe("origin member chat", () => {
     expect(listed.body.conversations).toMatchObject([{ otherUserId: USERS["tok-ana"]!._id, unread: 1 }]);
     await call("tok-bo", "PATCH", `/api/local-chat/conversations?${dm}`, { messageId: message.body.message.id });
     expect((await call("tok-bo", "GET", `/api/local-chat/conversations?teamId=${TEAM}`)).body.conversations[0].unread).toBe(0);
+  });
+
+  it("keeps project viewers from writing or changing project chat while retaining workspace chat access", async () => {
+    const { call } = await start({ projectRoles: { "tok-bo": "viewer" } });
+    const channel = `teamId=${TEAM}&conversation=project:${PROJECT}`;
+    const sent = await call("tok-ana", "POST", `/api/local-chat/messages?${channel}`, { body: "Project update" });
+    expect((await call("tok-bo", "GET", `/api/local-chat/messages?${channel}`)).body.messages).toHaveLength(1);
+    expect((await call("tok-bo", "POST", `/api/local-chat/messages?${channel}`, { body: "Viewer write" })).status).toBe(400);
+    expect((await call("tok-bo", "PATCH", `/api/local-chat/messages?${channel}`, { id: sent.body.message.id, pinned: true })).status).toBe(400);
+    const messages = (await call("tok-ana", "GET", `/api/local-chat/messages?${channel}`)).body.messages;
+    expect(messages).toHaveLength(1);
+    expect(messages[0].pinned).toBeUndefined();
+    expect((await call("tok-bo", "POST", `/api/local-chat/messages?teamId=${TEAM}`, { body: "Workspace update" })).status).toBe(200);
   });
 
   it("notifies a direct message's other participant and refuses mentions of anyone else there", async () => {
