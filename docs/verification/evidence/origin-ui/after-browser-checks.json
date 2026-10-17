@@ -1,6 +1,6 @@
 {
   "previewUrl": "http://127.0.0.1:5173/__origin-ui.html",
-  "checkedAt": "2026-10-17T22:08:18.919Z",
+  "checkedAt": "2026-10-17T22:20:14.358Z",
   "cases": [
     {
       "screen": "issue",
@@ -21,7 +21,7 @@
       "screen": "whatsnew",
       "size": "desktop",
       "theme": "dark",
-      "currentRelease": true,
+      "currentRelease": "0.2.3",
       "escapeCloses": true
     },
     {
@@ -43,7 +43,7 @@
       "screen": "whatsnew",
       "size": "mobile",
       "theme": "dark",
-      "currentRelease": true,
+      "currentRelease": "0.2.3",
       "escapeCloses": true
     },
     {
@@ -65,7 +65,7 @@
       "screen": "whatsnew",
       "size": "desktop",
       "theme": "light",
-      "currentRelease": true,
+      "currentRelease": "0.2.3",
       "escapeCloses": true
     },
     {
@@ -87,7 +87,7 @@
       "screen": "whatsnew",
       "size": "mobile",
       "theme": "light",
-      "currentRelease": true,
+      "currentRelease": "0.2.3",
       "escapeCloses": true
     },
     {

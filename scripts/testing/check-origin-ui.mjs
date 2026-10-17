@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const url = new URL(process.argv[2] ?? "");
 assert.equal(url.hostname, "127.0.0.1");
 assert.equal(url.pathname, "/__origin-ui.html");
 assert.match(await (await fetch(url)).text(), /scripts\/testing\/origin-ui-preview\.tsx/);
+const releaseVersion = JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8")).version;
 const output = resolve("docs/verification/evidence/origin-ui");
 await mkdir(output, { recursive: true });
 const { chromium } = await import(process.env.OMB_VERIFY_PLAYWRIGHT || "playwright");
@@ -19,7 +20,7 @@ const show = async (screen, theme = "dark") => {
   next.search = new URLSearchParams({ screen, theme }).toString();
   await page.goto(next.href);
 };
-const capture = (name) => page.screenshot({ path: resolve(output, `${name}.png`) });
+const capture = (name) => page.screenshot({ path: resolve(output, `${name}.png`), animations: "disabled" });
 
 try {
   for (const theme of ["dark", "light"]) {
@@ -67,12 +68,13 @@ try {
       await show("whatsnew", theme);
       await page.getByRole("button", { name: /^What's new/ }).click();
       await page.getByRole("dialog", { name: "What's new", exact: true }).waitFor();
+      await page.getByRole("dialog", { name: "What's new", exact: true }).getByText(`v${releaseVersion}`, { exact: true }).waitFor();
       await page.getByRole("heading", { name: "A safer, more consistent workspace", exact: true }).waitFor();
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await capture(`whatsnew-after-${size}-${theme}`);
       await page.keyboard.press("Escape");
       await page.getByRole("dialog").waitFor({ state: "detached" });
-      evidence.cases.push({ screen: "whatsnew", size, theme, currentRelease: true, escapeCloses: true });
+      evidence.cases.push({ screen: "whatsnew", size, theme, currentRelease: releaseVersion, escapeCloses: true });
     }
   }
   await page.setViewportSize({ width: 375, height: 812 });
