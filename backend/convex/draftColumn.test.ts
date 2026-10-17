@@ -60,6 +60,28 @@ describe("Draft column", () => {
     expect((await context(f, taskId)).task.done).toBe(true);
   });
 
+  test("the legacy GitHub issue action keeps Draft issues private", async () => {
+    const f = await fixture();
+    const taskId = await f.create(f.columns[0]._id, "Confidential draft");
+    await expect(f.t.action(api.github.createIssueForTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId }))
+      .rejects.toThrow("Draft");
+  });
+
+  test("legacy repository snapshots do not complete parked Draft issues", async () => {
+    const f = await fixture();
+    const taskId = await f.create(f.columns[0]._id, "Parked");
+    await f.t.mutation(internal.integrations.linkIssue, { projectId: f.projectId, taskId, repoUrl, number: 7, issueUrl: `${repoUrl}/issues/7`, state: "open", updatedAt: 1000 });
+    const snapshot = () => f.t.mutation(internal.github.upsertRepoSnapshot, {
+      sessionToken: f.sessionToken, projectId: f.projectId,
+      issues: [{ number: 7, title: "Parked", state: "closed", url: `${repoUrl}/issues/7`, updatedAt: 2000 }], pullRequests: [],
+    });
+    await snapshot();
+    expect((await context(f, taskId)).task.done).toBe(false);
+    await f.t.mutation(api.tasks.moveTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId, columnId: f.columns[1]._id });
+    await snapshot();
+    expect((await context(f, taskId)).task.done).toBe(true);
+  });
+
   test("renaming a column to Draft flags it, and the flag survives a later rename", async () => {
     const f = await fixture();
     const todo = f.columns[1]._id;

@@ -185,7 +185,9 @@ export const createIssueForTask = action({
       projectId: args.projectId,
       sessionToken: args.sessionToken,
       taskId: args.taskId,
-    })) as { task: Doc<"tasks"> };
+    })) as { task: Doc<"tasks">; columns: Doc<"columns">[] };
+    const column = details.columns.find(item => item._id === details.task.columnId);
+    if (column && isDraftColumn(column)) throw new Error("Draft issues stay in Origin. Move this issue to an active column before publishing it.");
     const parsed = parseGitHubRepo(project.repoUrl);
     if (!parsed) return { ok: false, issueUrl: "", manualUrl: "", message: "Add a valid GitHub repo URL in Settings." };
 
@@ -324,6 +326,8 @@ export const upsertRepoSnapshot = internalMutation({
         };
         if (existing) {
           if ((existing.githubIssueUpdatedAt || 0) > issue.updatedAt) continue;
+          const column = await ctx.db.get(existing.columnId);
+          if (column && isDraftColumn(column)) patch.done = existing.done;
           if (existing.githubTaskMode === "pull_request" || await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", existing._id)).first()) patch.done = existing.done;
           if (issue.state === "open" && existing.githubIssueState !== "closed") patch.done = existing.done;
           patch.columnId = existing.columnId;
