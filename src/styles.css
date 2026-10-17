@@ -2214,3 +2214,7 @@ button:disabled.bg-danger {
   }
   [data-origin-inset] > aside:not([data-sidebar]):not([aria-label="Notifications"]) { background: var(--color-app); }
 }
+
+@keyframes team-link-flow {
+  to { stroke-dashoffset: -28; }
+}

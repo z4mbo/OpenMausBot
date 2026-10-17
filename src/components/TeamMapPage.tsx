@@ -12,7 +12,9 @@ import {
   type TeamMapSnapshot,
 } from "@/lib/team-map";
 import { cn } from "@/lib/cn";
-import { CREATES_FOLDERS_AND_GROUPS } from "@/lib/origin-teams";
+import { CREATES_FOLDERS_AND_GROUPS, WORKSPACE_NAV } from "@/lib/origin-teams";
+import { isWorkspaceSection, WORKSPACE_PREFIX } from "../../shared/origin-workspaces";
+import { activeWorkspace, useWorkspaces, workspaceHeadsOf, workspaceSectionKeys } from "@/lib/origin-workspaces";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { useCaptionChrome } from "@/components/DesktopCapabilities";
 import { placeOffered } from "@/lib/place";
@@ -279,12 +281,22 @@ export function TeamMapPage() {
   const pendingMoveRef = useRef(pendingMove);
   pendingMoveRef.current = pendingMove;
   useEffect(() => () => pendingMoveRef.current?.resolve(false), []);
-  const bots = useMemo(() => state.bots.filter((bot) => !bot.hidden), [state.bots]);
+  const workspaces = useWorkspaces();
+  const head = WORKSPACE_NAV ? state.bots.find((bot) => bot.id === activeWorkspace(workspaces, workspaceHeadsOf(state.bots))) : undefined;
+  const workspaceKeys = useMemo(() => head ? workspaceSectionKeys(head) : null, [head]);
+  const bots = useMemo(() => state.bots.filter((bot) => !bot.hidden && (!workspaceKeys || workspaceKeys.includes(bot.section?.trim() ?? ""))), [state.bots, workspaceKeys]);
   const sections = useMemo(() => {
+    if (workspaceKeys) {
+      return buildTeamMapSections(bots, []).sort((a, b) => workspaceKeys.indexOf(a.key) - workspaceKeys.indexOf(b.key))
+        .map((section) => isWorkspaceSection(section.key) ? { ...section, name: section.key.slice(WORKSPACE_PREFIX.length) } : section);
+    }
     const names = [...new Set([...(state.sections ?? []), ...state.groups.flatMap((group) => group.section ? [group.section] : [])])];
     const order = (key: string) => key === "" ? -1 : names.includes(key) ? names.indexOf(key) : names.length;
     return buildTeamMapSections(bots, names).sort((a, b) => order(a.key) - order(b.key));
-  }, [bots, state.sections, state.groups]);
+  }, [bots, state.sections, state.groups, workspaceKeys]);
+  const hierarchy = useMemo(() => workspaceKeys && sections.some((section) => section.key === workspaceKeys[0])
+    ? { parent: workspaceKeys[0], children: sections.map((section) => section.key).filter((key) => key !== workspaceKeys[0]) }
+    : undefined, [sections, workspaceKeys]);
   const edges = useMemo(() => buildTeamMapEdges(bots, snapshot), [bots, snapshot]);
 
   const refresh = useCallback(async () => {
@@ -359,7 +371,7 @@ export function TeamMapPage() {
         <button aria-label={t("common.close")} className="rounded p-1 hover:bg-danger/10" onClick={() => { setError(null); setRefreshError(null); }}><X size={14} /></button>
       </div>}
       <div className="relative flex min-h-0 flex-1">
-      <TeamCanvas sections={sections} canManage={!remoteClient} onMove={requestMove}
+      <TeamCanvas sections={sections} hierarchy={hierarchy} canManage={!remoteClient} onMove={requestMove}
         connectedBotIds={state.settingsOpen ? edges.flatMap((edge) => edge.sourceBotId === state.selectedId ? [edge.targetBotId] : edge.targetBotId === state.selectedId ? [edge.sourceBotId] : []) : []}
         onComputer={(bot) => dispatch({ type: "toggleSettings", botId: bot.id, section: "access", open: true })}
         teamComputers={Object.fromEntries(computers.filter((computer) => computer.section !== null).map((computer) => [computer.section!, { name: computer.name, state: computer.state }]))}

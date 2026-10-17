@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeWorkspace, inWorkspace, movedOrder, sortProjects, workspaceHeadsOf } from "./origin-workspaces";
+import { activeWorkspace, inWorkspace, movedOrder, sortProjects, workspaceHeadsOf, workspaceSectionKeys } from "./origin-workspaces";
 
 const view = { order: ["yuki", "kai"], sort: "custom" as const, collapsed: false };
 const projects = [
@@ -39,5 +39,12 @@ describe("Origin workspaces", () => {
   it("moves a dragged project before or after its target", () => {
     expect(movedOrder(["a", "b", "c"], "c", "a", "before")).toEqual(["c", "a", "b"]);
     expect(movedOrder(["a", "b", "c"], "a", "b", "after")).toEqual(["b", "a", "c"]);
+  });
+});
+
+describe("workspaceSectionKeys", () => {
+  it("lists the head's own section, its projects and templates once, then standalone agents", () => {
+    expect(workspaceSectionKeys({ id: "h", section: "Workspace: GGs", chiefOfStaff: true, managedSections: ["Kai", " Kai ", "Agents", "SEO Team"] }))
+      .toEqual(["Workspace: GGs", "Kai", "SEO Team", "Agents"]);
   });
 });

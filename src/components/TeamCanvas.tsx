@@ -73,8 +73,10 @@ function BotCard({ bot, selected, moving, connected, onComputer, onArrange }: {
   </article>;
 }
 
-export function TeamCanvas({ sections, canManage, onMove, onInstructions, onMemory, onEditTeam, onDeleteTeam, onComputer, onComputerDrop, onTeamComputer, teamComputers = {}, connectedBotIds = [] }: {
+export function TeamCanvas({ sections, hierarchy, canManage, onMove, onInstructions, onMemory, onEditTeam, onDeleteTeam, onComputer, onComputerDrop, onTeamComputer, teamComputers = {}, connectedBotIds = [] }: {
   sections: TeamMapSection<Bot>[];
+  /** Draws a link from one team to the teams it leads, such as a workspace to its projects. */
+  hierarchy?: { parent: string; children: string[] };
   canManage: boolean;
   onMove: (bot: Bot, destination: string) => Promise<boolean | void>;
   onInstructions: (key: string, label: string) => void;
@@ -354,6 +356,7 @@ export function TeamCanvas({ sections, canManage, onMove, onInstructions, onMemo
       if (event.key === "0") { event.preventDefault(); fit(); }
     }}>
     <div data-canvas-world className="absolute left-0 top-0 origin-top-left" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}>
+      {hierarchy && <HierarchyLinks hierarchy={hierarchy} sections={sections} tiles={tiles} />}
       {sections.map((section, index) => {
         const tile = tiles[index];
         const hierarchy = section.chiefs.length > 0 && section.members.length > 0;
@@ -432,4 +435,40 @@ export function TeamCanvas({ sections, canManage, onMove, onInstructions, onMemo
       </div>
     </div>
   </div>;
+}
+
+function HierarchyLinks({ hierarchy, sections, tiles }: {
+  hierarchy: { parent: string; children: string[] };
+  sections: TeamMapSection<Bot>[];
+  tiles: { x: number; y: number; width: number; height: number }[];
+}) {
+  const tileOf = (key: string) => tiles[sections.findIndex((section) => section.key === key)];
+  const parent = tileOf(hierarchy.parent);
+  if (!parent) return null;
+  const paths = hierarchy.children.flatMap((key) => {
+    const child = tileOf(key);
+    if (!child) return [];
+    const below = child.y >= parent.y + parent.height;
+    const from = below ? { x: parent.x + parent.width / 2, y: parent.y + parent.height }
+      : { x: parent.x + (child.x > parent.x ? parent.width : 0), y: parent.y + Math.min(parent.height, 64) / 2 };
+    const to = below ? { x: child.x + child.width / 2, y: child.y }
+      : { x: child.x + (child.x > parent.x ? 0 : child.width), y: child.y + 32 };
+    const bend = below ? Math.max(40, (to.y - from.y) / 2) : 0;
+    const d = below
+      ? `M ${from.x} ${from.y} C ${from.x} ${from.y + bend}, ${to.x} ${to.y - bend}, ${to.x} ${to.y}`
+      : `M ${from.x} ${from.y} C ${(from.x + to.x) / 2} ${from.y}, ${(from.x + to.x) / 2} ${to.y}, ${to.x} ${to.y}`;
+    return [{ key, d, to }];
+  });
+  return (
+    <svg aria-hidden="true" className="pointer-events-none absolute left-0 top-0 overflow-visible" width={1} height={1}>
+      {paths.map((path) => (
+        <g key={path.key} className="text-hairline">
+          <path d={path.d} fill="none" stroke="currentColor" strokeWidth={1.5} strokeOpacity={0.9} />
+          <path d={path.d} fill="none" stroke="var(--color-accent, #6366f1)" strokeWidth={1.5} strokeDasharray="4 10" strokeOpacity={0.55}
+            className="motion-safe:animate-[team-link-flow_1.6s_linear_infinite]" />
+          <circle cx={path.to.x} cy={path.to.y} r={3} fill="currentColor" />
+        </g>
+      ))}
+    </svg>
+  );
 }

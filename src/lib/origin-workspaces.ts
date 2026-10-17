@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { isWorkspaceSection } from "../../shared/origin-workspaces";
+import { isWorkspaceSection, STANDALONE_SECTION } from "../../shared/origin-workspaces";
 
 /** Which workspace is open and how its projects are listed: per-browser view choices. Membership lives on the server. */
 export type ProjectSort = "custom" | "recent" | "name";
@@ -68,6 +68,13 @@ export function activeWorkspace(view: WorkspaceView, heads: readonly { id: strin
 export function inWorkspace(head: Head | undefined, project: { section?: string }): boolean {
   const team = project.section?.trim();
   return !head || Boolean(team && head.managedSections?.some((name) => name.trim() === team));
+}
+
+/** The sections one workspace spans, in map order: the head's own, its projects and template teams, then standalone agents. */
+export function workspaceSectionKeys(head: Head): string[] {
+  const own = head.section?.trim() ?? "";
+  const managed = (head.managedSections ?? []).map((name) => name.trim()).filter((name) => name && name !== own && name !== STANDALONE_SECTION);
+  return [own, ...new Set(managed), STANDALONE_SECTION];
 }
 
 export const activeWorkspaceId = () => read().active;
