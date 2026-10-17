@@ -48,12 +48,18 @@ export function ChipSelect({ label, value, options, onChange, icon, disabled, pl
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const [upward, setUpward] = useState(false);
+  const [menuLeft, setMenuLeft] = useState(0);
   const selected = options.find((option) => option.value === value);
   const matches = options.filter((option) => `${option.label} ${option.hint ?? ""}`.toLowerCase().includes(query.trim().toLowerCase()));
   const close = (restore = true) => { setOpen(false); if (restore) trigger.current?.focus({ preventScroll: true }); };
   const choose = (option: ChipOption) => { onChange(option.value); close(); };
   const show = () => {
     const box = trigger.current?.getBoundingClientRect();
+    if (box) {
+      const width = Math.min(240, window.innerWidth - 16);
+      const edge = align === "right" ? box.right - width : box.left;
+      setMenuLeft(Math.max(8, Math.min(edge, window.innerWidth - width - 8)) - box.left);
+    }
     const below = box ? window.innerHeight - box.bottom : Infinity;
     setUpward(box !== undefined && below < MENU_ROOM && box.top > below);
     setQuery("");
@@ -86,7 +92,7 @@ export function ChipSelect({ label, value, options, onChange, icon, disabled, pl
         <ChevronDown size={12} className="shrink-0 opacity-60" aria-hidden="true" />
       </button>
       {open && (
-        <div className={cn("absolute z-40 w-60 overflow-hidden rounded-xl border border-hairline/60 bg-menu motion-safe:animate-pop-in", upward ? "bottom-full mb-1.5" : "top-full mt-1.5", align === "right" ? "right-0" : "left-0")}>
+        <div style={{ left: menuLeft }} className={cn("absolute z-40 w-60 max-w-[calc(100vw-16px)] overflow-hidden rounded-xl border border-hairline/60 bg-menu motion-safe:animate-pop-in", upward ? "bottom-full mb-1.5" : "top-full mt-1.5")}>
           <div className="flex items-center gap-2 border-b border-hairline/40 px-3 py-2 text-ink-tertiary">
             <Search size={14} aria-hidden="true" />
             <input autoFocus className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-tertiary max-md:text-[16px]"
@@ -118,7 +124,7 @@ export function DateChip({ value, onChange, disabled, required }: { value: strin
     <label className={cn(chipButton, "relative cursor-pointer pr-2", value && "text-ink")}>
       <CalendarDays size={14} aria-hidden="true" className="shrink-0" />
       <input type="date" aria-label="Due date" title="Due date" value={value} required={required} disabled={disabled} onChange={(event) => onChange(event.target.value)}
-        className="w-[7.5rem] cursor-pointer bg-transparent text-[12.5px] outline-none [color-scheme:dark] max-md:text-[16px]" />
+        style={{ colorScheme: "var(--code-color-scheme)" }} className="w-[7.5rem] cursor-pointer bg-transparent text-[12.5px] outline-none max-md:text-[16px]" />
     </label>
   );
 }
