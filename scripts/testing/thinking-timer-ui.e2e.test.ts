@@ -3,7 +3,7 @@
 // Needs the pinned agent-browser binary: runs when one resolves (tools
 // directory, OMB_AGENT_BROWSER_PATH or PATH) or OMB_UI_E2E=1 asks for the
 // verified download; otherwise skipped.
-import { spawn } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -11,13 +11,14 @@ import { fileURLToPath } from "node:url";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { removeTempDir, waitForExit } from "../../server/testing/cleanup.ts";
+import { removeTempDir } from "../../server/testing/cleanup.ts";
+import { STANDALONE_SECTION } from "../../shared/origin-workspaces.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
 import { fixtureApi } from "./preview-fixture.ts";
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
-const CLI = join(ROOT, "scripts", "control-omb.ts");
 const forced = process.env.OMB_UI_E2E === "1";
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
 const enabled = forced || Boolean(binary);
@@ -33,7 +34,7 @@ const evidenceDir = process.env.OMB_UI_EVIDENCE_DIR ? resolve(ROOT, process.env.
 const ownsEvidenceDir = !process.env.OMB_UI_EVIDENCE_DIR;
 
 interface Launched {
-  child: ReturnType<typeof spawn>;
+  child: ChildProcess;
   info: { ui: string; url: string; previewUrl: string; botId: string; dataDir: string; logPath: string };
   stderr: () => string;
 }
@@ -41,9 +42,7 @@ interface Launched {
 function launch(args: string[]): Promise<Launched> {
   return new Promise((done, fail) => {
     // Own process group: a timeout must also take down whatever it is running.
-    const child = spawn(process.execPath, ["--experimental-strip-types", CLI, "ui", "launch", ...args], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"], detached: process.platform !== "win32",
-    });
+    const child = spawnUiLauncher(args);
     const killGroup = (signal: NodeJS.Signals) => {
       if (child.pid && process.platform !== "win32") {
         try { process.kill(-child.pid, signal); return; } catch { /* group already gone */ }
@@ -135,7 +134,7 @@ describe("the thinking timer stays anchored across a thread switch", () => {
         console.log("Thinking timer fixture evidence saved.");
       }
     } finally {
-      await waitForExit(current.child, { signal: "SIGINT", graceMs: 30_000 });
+      await stopUiLauncher(current.child);
       expect(existsSync(current.info.dataDir)).toBe(false);
     }
   });
@@ -148,6 +147,7 @@ describe("the thinking timer stays anchored across a thread switch", () => {
     launched = await launch(["--mode", "hang"]); // the turn never settles; the bot stays busy
     const { info } = launched;
     const api = fixtureApi(info.url);
+    await api("PATCH", `/api/bots/${info.botId}`, { section: STANDALONE_SECTION });
     const evaluate = async (js: string) => (await ui("eval", info.ui, "--js", js)).result;
     const timerText = () => evaluate(`document.querySelector('.turn-presence .tabular-nums')?.textContent ?? null`);
     const selectThread = (threadId: string) => evaluate(`document.querySelector('[data-sidebar-thread-row="${threadId}"]')?.click(); true`);
@@ -202,7 +202,7 @@ describe("the thinking timer stays anchored across a thread switch", () => {
     const logs = await ui("console", info.ui);
     expect((logs.messages as Array<{ type: string; text: string }>).filter((message) => message.type === "error")).toEqual([]);
 
-    await waitForExit(launched.child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(launched.child);
     expect(launched.child.exitCode).toBe(0);
     expect(existsSync(info.dataDir)).toBe(false);
   }, LAUNCH_TIMEOUT_MS + 120_000);
@@ -211,6 +211,7 @@ describe("the thinking timer stays anchored across a thread switch", () => {
     launched = await launch(["--mode", "hang"]); // the group's turn never settles either
     const { info } = launched;
     const api = fixtureApi(info.url);
+    await api("PATCH", `/api/bots/${info.botId}`, { section: STANDALONE_SECTION });
     const evaluate = async (js: string) => (await ui("eval", info.ui, "--js", js)).result;
     const timerText = () => evaluate(`document.querySelector('.turn-presence .tabular-nums')?.textContent ?? null`);
     const botsState = () => api("GET", "/api/bots");
@@ -272,7 +273,7 @@ describe("the thinking timer stays anchored across a thread switch", () => {
     const logs = await ui("console", info.ui);
     expect((logs.messages as Array<{ type: string; text: string }>).filter((message) => message.type === "error")).toEqual([]);
 
-    await waitForExit(launched.child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(launched.child);
     expect(launched.child.exitCode).toBe(0);
     expect(existsSync(info.dataDir)).toBe(false);
   }, LAUNCH_TIMEOUT_MS + 120_000);

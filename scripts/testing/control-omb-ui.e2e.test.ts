@@ -2,21 +2,21 @@
 // accessibility tree. Needs the pinned agent-browser binary: runs when one
 // resolves (tools directory, OMB_AGENT_BROWSER_PATH or PATH) or OMB_UI_E2E=1
 // asks for the verified download; otherwise skipped.
-import { spawn } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it } from "vitest";
 
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { removeTempDir, waitForExit } from "../../server/testing/cleanup.ts";
+import { removeTempDir } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
 import { fixtureApi } from "./preview-fixture.ts";
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
-const CLI = join(ROOT, "scripts", "control-omb.ts");
 const forced = process.env.OMB_UI_E2E === "1";
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
 const enabled = forced || Boolean(binary);
@@ -41,7 +41,7 @@ const evidenceDir = process.env.OMB_UI_EVIDENCE_DIR ? resolve(ROOT, process.env.
 const ownsEvidenceDir = !process.env.OMB_UI_EVIDENCE_DIR;
 
 interface Launched {
-  child: ReturnType<typeof spawn>;
+  child: ChildProcess;
   info: { ui: string; url: string; previewUrl: string; botId: string; dataDir: string; logPath: string };
   stderr: () => string;
 }
@@ -49,9 +49,7 @@ interface Launched {
 function launch(args: string[]): Promise<Launched> {
   return new Promise((done, fail) => {
     // Own process group: a timeout must also take down whatever it is running.
-    const child = spawn(process.execPath, ["--experimental-strip-types", CLI, "ui", "launch", ...args], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"], detached: process.platform !== "win32",
-    });
+    const child = spawnUiLauncher(args);
     const killGroup = (signal: NodeJS.Signals) => {
       if (child.pid && process.platform !== "win32") {
         try { process.kill(-child.pid, signal); return; } catch { /* group already gone */ }
@@ -105,10 +103,13 @@ const refsNamed = (snapshot: Record<string, any>, name: string, role?: string) =
 describe("control-omb ui drives the real renderer", () => {
   let launched: Launched | undefined;
 
+  afterEach(async () => {
+    const current = launched;
+    launched = undefined;
+    await stopUiLauncher(current?.child);
+  });
+
   afterAll(async () => {
-    if (launched && launched.child.exitCode === null && launched.child.signalCode === null) {
-      await waitForExit(launched.child, { signal: "SIGINT", graceMs: 30_000 });
-    }
     if (ownsEvidenceDir) await removeTempDir(evidenceDir);
   });
 
@@ -144,11 +145,12 @@ describe("control-omb ui drives the real renderer", () => {
     await ui("type", info.ui, "--name", "Find in this conversation", "--text", "fake claude");
     await expect.poll(highlighted, { timeout: 10_000 }).toBe("fake claude");
     await ui("press", info.ui, "--keys", "Escape");
-    await ui("type", info.ui, "--name", "Search bots and messages", "--text", "zebra");
-    await expect.poll(async () => (await ui("eval", info.ui, "--js", "[...document.querySelectorAll('mark')].some(mark => mark.textContent === 'zebra')")).result, { timeout: 10_000 }).toBe(true);
-    await ui("eval", info.ui, "--js", "[...document.querySelectorAll('mark')].find(mark => mark.textContent === 'zebra').closest('button').click(); true");
+    await ui("click", info.ui, "--name", "Search bots and messages");
+    await ui("type", info.ui, "--name", "Search projects, agents, issues and messages", "--text", "zebra");
+    await expect.poll(async () => (await ui("eval", info.ui, "--js", "[...document.querySelectorAll('#origin-search-results mark')].some(mark => mark.textContent === 'zebra')")).result, { timeout: 10_000 }).toBe(true);
+    await ui("eval", info.ui, "--js", "[...document.querySelectorAll('#origin-search-results mark')].find(mark => mark.textContent === 'zebra').closest('[role=option]').click(); true");
     await expect.poll(highlighted, { timeout: 10_000 }).toBe("zebra");
-    await waitForExit(launched.child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(launched.child);
     expect(launched.child.exitCode).toBe(0);
   }, LAUNCH_TIMEOUT_MS + 90_000);
 
@@ -230,7 +232,7 @@ describe("control-omb ui drives the real renderer", () => {
     await expect.poll(() => evaluate(`${input}?.value ?? null`), { timeout: 10_000 }).toBe("");
     await expect.poll(() => evaluate("window.keyTests.length")).toBe(3);
     await expect.poll(verdict).toBe("Saved key: Model catalog reachable: fixture-model. Authentication and chat not verified.");
-    await waitForExit(launched.child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(launched.child);
     expect(launched.child.exitCode).toBe(0);
     expect(existsSync(info.dataDir)).toBe(false);
   }, LAUNCH_TIMEOUT_MS + 180_000);
@@ -257,17 +259,24 @@ describe("control-omb ui drives the real renderer", () => {
     const options = models.instances.find((instance: any) => instance.instanceId === originalBot.modelSelection.instanceId).models.options;
     const originalLabel = options.find((option: any) => option.id === originalModel).label;
     const nextModel = options.find((option: any) => option.id !== originalModel);
-    await ui("click", info.ui, "--name", originalLabel);
+    const clickModel = async (label: string) => {
+      const state = await ui("snapshot", info.ui, "--interactive");
+      const matches = Object.entries(state.refs as Record<string, { name: string; role: string }>)
+        .filter(([, value]) => value.role === "button" && value.name.includes(label));
+      expect(matches).toHaveLength(1);
+      await ui("click", info.ui, "--ref", `@${matches[0]![0]}`);
+    };
+    await clickModel(originalLabel);
     expect(await ui("eval", info.ui, "--js", "[...document.querySelectorAll('[aria-label=\"Apply model changes to\"] button')].find(b => b.textContent === 'Only this thread').getAttribute('aria-pressed')"))
       .toMatchObject({ result: "true" });
     await ui("click", info.ui, "--name", "Thread + bot default");
     const scopeShot = join(evidenceDir, "model-scope.png");
     mkdirSync(evidenceDir, { recursive: true });
     await ui("screenshot", info.ui, "--out", scopeShot);
-    await ui("click", info.ui, "--name", nextModel.label);
+    await clickModel(nextModel.label);
     await expect.poll(async () => (await savedBot()).modelSelection.model, { timeout: 10_000 }).toBe(nextModel.id);
     expect((await savedBot()).tasks.find((task: any) => task.threadId === originalBot.threadId).modelSelection.model).toBe(nextModel.id);
-    await ui("click", info.ui, "--name", nextModel.label);
+    await clickModel(nextModel.label);
     await ui("click", info.ui, "--name", "Only this thread");
     const modelSnapshot = await ui("snapshot", info.ui, "--interactive");
     const originalRow = Object.entries(modelSnapshot.refs as Record<string, { name: string; role: string }>)
@@ -409,7 +418,7 @@ describe("control-omb ui drives the real renderer", () => {
     const title = await ui("eval", info.ui, "--js", "document.title");
     expect(title).toMatchObject({ ok: true, result: "Isolated OpenMaus Chat" });
 
-    await waitForExit(launched.child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(launched.child);
     expect(launched.child.exitCode).toBe(0);
     expect(existsSync(info.dataDir)).toBe(false);
     expect(existsSync(info.logPath)).toBe(true);
