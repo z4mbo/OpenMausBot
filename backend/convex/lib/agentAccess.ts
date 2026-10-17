@@ -71,6 +71,24 @@ export async function requireThread(ctx: Ctx, threadId: Id<"agentThreads">, sess
   return { thread, agent, access, user };
 }
 
+export async function requireWritableThread(ctx: Ctx, threadId: Id<"agentThreads">, sessionToken: string) {
+  const context = await requireThread(ctx, threadId, sessionToken);
+  await requireSharedAgents(ctx, context.thread.teamId);
+  if (!context.access.canSend) throw new Error("View-only access");
+  if (context.thread.archivedAt !== undefined || context.agent.archivedAt !== undefined) throw new Error("This thread is archived");
+  if (context.agent.disabled) throw new Error("This agent is disabled");
+  return context;
+}
+
+export async function canResumeThreadRun(ctx: Ctx, run: Doc<"workspaceAgentRuns">, user: Doc<"users">): Promise<boolean> {
+  if (!run.threadId || run.requesterUserId !== user._id) return false;
+  const thread = await ctx.db.get(run.threadId);
+  if (!thread || thread.archivedAt !== undefined || !canSeeThread(thread, user)) return false;
+  const agent = await ctx.db.get(thread.agentId);
+  if (!agent || agent.disabled || agent.archivedAt !== undefined || !await sharedAgentsOn(ctx, thread.teamId)) return false;
+  return (await agentAccess(ctx, agent, user))?.canSend === true;
+}
+
 /** Security: a bot-role row is written only by the person whose run produced it, while that run is live or just ended. */
 export const BOT_WRITE_GRACE_MS = 120_000;
 
