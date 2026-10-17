@@ -70,11 +70,11 @@ The component inventory is in `evidence/origin-ui/component-inventory.json`. An 
 
 ## Verification and delivery status
 
-- Completed checkpoint: 11 touched server suites, 585 passing tests and 8 skips; four guard suites, 43 passing tests. Later changes receive focused checks and a final aggregate pass.
+- Final touched-server and guard aggregate: 18 files, 722 passing tests and 8 existing skips. Documentation guards separately pass all 7 tests.
 - Full backend including storage admission: 17 files, 132 passing tests; independent storage security review completed.
 - Final project-page browser matrix: 113 cases, 40 account/member cases, 20 live-editor permission cases and 39 real Convex-client protocol cases. These use isolated synthetic data and do not claim production account acceptance.
 - Website unit tests and production build pass, including `/whats-new`. Release packaging tests exercise the installed electron-builder's feed generator using synthetic artifacts.
-- The required final client/shared suite, both application/server TypeScript checks, full backend including storage, lint, locale/catalog checks, documentation guards and final touched-server checks remain release gates.
+- Both application/server TypeScript checks, backend TypeScript, lint, locale/catalog checks, documentation guards and final touched-server checks pass. The required full client/shared suite remains the last running source gate.
 - GitHub branch/PR, Windows/macOS workflow artifacts, public downloads/update feeds, backend deployment and website deployment remain pending. The configured website SSH destination was checked read-only; no production data was used for testing.
 - Some isolated synthetic fixture directories remain after automatic approval review rejected their exact guarded cleanup with “blocked by policy.” Their processes are stopped and exact paths are recorded in the feature reports; no alternate deletion bypass was attempted.
 
