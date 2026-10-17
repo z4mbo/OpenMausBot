@@ -1,4 +1,4 @@
-/** Must stay byte-compatible with origin-workspace lib/vaultCrypto.ts: both clients read the same Convex `credentials` rows. */
+/** Must stay byte-compatible with the existing Convex `credentials` rows, which the retired web dashboard also wrote. */
 export type EncryptedSecret = {
   ciphertext: string;
   iv: string;

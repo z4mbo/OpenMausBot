@@ -5,11 +5,11 @@ backend; nothing touches a cloud deployment.
 
 ## Backend
 
-- Repo: `C:\Users\aless\Documents\origin-workspace` (Convex functions in `convex/`).
-- Deployment: `local:local-ggs-origin_workspace` (written to `origin-workspace/.env.local`).
+- Code: `backend/` in this repository (Convex functions in `backend/convex/`).
+- Deployment: `local:local-ggs-origin_workspace` (`CONVEX_DEPLOYMENT` in `backend/.env.local`, gitignored).
 - Client URL: `http://127.0.0.1:3210`
 - HTTP actions (site) URL: `http://127.0.0.1:3211` (signed `/integrations` bridge).
-- Data and config live in `origin-workspace/.convex/local/default/` (gitignored).
+- Data and config live in `backend/.convex/local/default/` (gitignored).
   The backend binary is `convex-local-backend.exe`, cached under
   `%LOCALAPPDATA%\convex\binaries\`.
 
@@ -21,7 +21,7 @@ local-only; its data never leaves the machine.
 
 | Name | Value |
 | --- | --- |
-| `ORIGIN_INTEGRATION_SECRET` | random 64-hex string; read it with `npx convex env get ORIGIN_INTEGRATION_SECRET`. Also copied into `origin-workspace/.env.local` for the Next.js app. |
+| `ORIGIN_INTEGRATION_SECRET` | random 64-hex string; read it with `npx convex env get ORIGIN_INTEGRATION_SECRET`. Also in `backend/.env.local`; `site/.env.local` only needs the two `NEXT_PUBLIC_CONVEX_*` URLs. |
 | `ORIGIN_PUBLIC_URL` | `http://localhost:3000` |
 | `ORIGIN_SIGNUP_MODE` | unset, so sign-up is open (`invite` would make it invite-only). |
 
@@ -30,13 +30,15 @@ local-only; its data never leaves the machine.
 PowerShell, from anywhere:
 
 ```powershell
-Start-Process cmd.exe -WorkingDirectory C:\Users\aless\Documents\origin-workspace -WindowStyle Hidden `
+Start-Process cmd.exe -WorkingDirectory C:\Users\aless\Documents\Origin\backend -WindowStyle Hidden `
   -ArgumentList '/c','npx convex dev --codegen disable --typecheck disable --tail-logs always > .convex\dev.log 2>&1'
 ```
 
 `npx convex dev` keeps the backend running and re-pushes `convex/` on every
 change. `--codegen disable` keeps `convex/_generated/` untouched (the CLI would
-otherwise rewrite it with different line endings). Logs: `origin-workspace\.convex\dev.log`.
+otherwise rewrite it with different line endings). Logs: `backend\.convex\dev.log`.
+
+In a terminal you watch, `pnpm dev:backend` from the repository root runs `npx convex dev` in the foreground.
 
 Check it is up: `curl http://127.0.0.1:3210/version`.
 
@@ -49,7 +51,7 @@ Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object CommandLi
 
 ### Reset all data
 
-Stop the backend, delete `origin-workspace\.convex\local\default\convex_local_storage`
+Stop the backend, delete `backend\.convex\local\default\convex_local_storage`
 and `convex_local_backend.sqlite3`, start it again and re-run the seed.
 
 ## Test login
@@ -72,7 +74,7 @@ and `convex_local_backend.sqlite3`, start it again and re-run the seed.
 - Design asset on Kai: "Kai mockups", type `figma`, link-only (`design:createAsset`, no file upload).
 - Feedback portal on Kai, "Kai feedback" (`feedback:configure`), with one idea entry
   "Dark mode please" submitted through the signed `/integrations` HTTP bridge
-  (operation `feedback`, the same path the Next.js `/api/feedback` route uses).
+  (operation `feedback`, the same path the app server's public feedback form uses).
 - Vault (credentials), GitHub pull requests and commits are empty.
 
 ## Pointing the OpenMausBot client at it
@@ -83,7 +85,7 @@ or call `setCloudUrl("http://127.0.0.1:3210")` from `src/lib/origin-cloud`.
 
 ## GitHub integration (served by this app)
 
-The GitHub routes the Next.js site used to serve now live in this server
+The GitHub routes live in this server
 (`server/routes/github.ts`, logic in `server/github/`), on the same paths, so a
 GitHub App manifest, OAuth callback and webhook point at this app:
 
@@ -125,14 +127,35 @@ on). `ORIGIN_INTEGRATION_SECRET` must match on both sides. Set it on the local
 deployment only:
 
 ```powershell
-cd C:\Users\aless\Documents\origin-workspace
+cd C:\Users\aless\Documents\Origin\backend
 npx convex env set ORIGIN_PUBLIC_URL http://127.0.0.1:8799
 ```
 
 Convex's invite links also read `ORIGIN_PUBLIC_URL`, which is consistent now
 that this app serves `/join/<token>`.
 
-## Running the origin-workspace web app against it
+## Moving the dev deployment from origin-workspace to backend/
 
-`cd C:\Users\aless\Documents\origin-workspace; npm run dev` uses `.env.local`
-and serves `http://localhost:3000`.
+The local deployment's state lives next to the code that runs it, so the
+`npx convex dev` still running in the old `origin-workspace` checkout keeps its
+data in `origin-workspace\.convex\local\default\`. To move it:
+
+```powershell
+# 1. stop the old dev process and its backend (see Stop above)
+# 2. copy its state and environment into backend/
+robocopy C:\Users\aless\Documents\origin-workspace\.convex C:\Users\aless\Documents\Origin\backend\.convex /E
+Copy-Item C:\Users\aless\Documents\origin-workspace\.env.local C:\Users\aless\Documents\Origin\backend\.env.local
+# 3. start it from backend/ (see Start above) and check it
+curl http://127.0.0.1:3210/version
+```
+
+The deployment name, ports, admin key and data stay the same, so the desktop
+app, the app server and `site/` keep working unchanged. `origin-workspace`
+stays on disk as an archive.
+
+## Running the site against it
+
+`pnpm dev:site` serves `site/` on `http://127.0.0.1:3001` with
+`site/.env.local` (`NEXT_PUBLIC_CONVEX_URL=http://127.0.0.1:3210`,
+`NEXT_PUBLIC_CONVEX_SITE_URL=http://127.0.0.1:3211`). `site/README.md` has the
+checks.
