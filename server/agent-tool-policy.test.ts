@@ -15,6 +15,11 @@ describe("built-in agent tool read policy", () => {
       "tool_result_read",
       "list_routines",
       "skills_list",
+      "origin_list_issues",
+      "origin_get_issue",
+      "origin_list_assets",
+      "origin_vault_list",
+      "origin_repo_status",
     ]);
     for (const name of READ_ONLY_AGENT_TOOL_NAMES) {
       expect(isReadOnlyAgentTool(name)).toBe(true);
@@ -34,6 +39,7 @@ describe("built-in agent tool read policy", () => {
     "create_bot", "request_credential", "request_sign_in", "memory_update", "propose_routine",
     "propose_routine_action", "propose_profile", "skill_manage",
     "propose_team_setup", "propose_bot_deletion",
+    "origin_create_issue", "origin_update_issue", "origin_comment_issue",
     "list_secrets", "read_credentials", "list_bots_and_delete", "unknown", "",
     "mcp__agents__list_bots", "agents.list_bots", "LIST_BOTS", " list_bots",
   ])("does not infer read access for %s", (name) => {

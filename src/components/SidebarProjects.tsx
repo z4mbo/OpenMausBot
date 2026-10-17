@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Plus, UserPlus } from "lucide-react";
+import { ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Cloud, Download, Plus, UserPlus, X } from "lucide-react";
+import { OriginConnectDialog } from "./OriginConnect";
+import { OriginImportDialog } from "./OriginImport";
+import { RuntimeHelp, WorkspaceMembersPanel } from "./origin-members";
+import { useCloudLinks } from "@/lib/origin-cloud-links";
 import type { Bot } from "@/state/store";
 import { cn } from "@/lib/cn";
 import {
@@ -57,7 +61,10 @@ function Menu({ label, icon, children, className, floating = false }: { label: s
 const menuItem = "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-ink hover:bg-raised";
 
 export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = false }: { heads: readonly Bot[]; activeId?: string; onNewWorkspace(): void; compact?: boolean }) {
+  const [panel, setPanel] = useState<"account" | "import" | "members" | null>(null);
+  const cloudLinks = useCloudLinks();
   return (
+    <>
     <Menu label="Switch workspace" icon={<ChevronsUpDown size={compact ? 12 : 14} />} floating={compact}
       className={compact ? "absolute -bottom-1 right-1 z-10 rounded-full bg-panel" : "absolute right-1.5 top-1/2 z-10 -translate-y-1/2"}>
       <div className="px-2.5 pb-1 pt-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-ink-tertiary">Workspaces</div>
@@ -68,8 +75,15 @@ export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = f
       ))}
       <div className="my-1 h-px bg-hairline/50" />
       <button type="button" role="menuitem" onClick={onNewWorkspace} className={menuItem}><Plus size={13} />New workspace</button>
-      <button type="button" role="menuitem" disabled title="Coming soon" className={cn(menuItem, "cursor-not-allowed opacity-50")}><UserPlus size={13} />Invite members</button>
+      <button type="button" role="menuitem" onClick={() => setPanel("members")} className={menuItem}><UserPlus size={13} />Members & invites…</button>
+      <div className="my-1 h-px bg-hairline/50" />
+      <button type="button" role="menuitem" onClick={() => setPanel("import")} className={menuItem}><Download size={13} />Import from Origin…</button>
+      <button type="button" role="menuitem" onClick={() => setPanel("account")} className={menuItem}><Cloud size={13} />Origin account…</button>
     </Menu>
+    {panel === "account" && <OriginConnectDialog onClose={() => setPanel(null)} />}
+    {panel === "import" && <OriginImportDialog onClose={() => setPanel(null)} />}
+    {panel === "members" && <MembersDialog cloudTeamId={(activeId && cloudLinks.workspaces[activeId]) || null} onClose={() => setPanel(null)} />}
+    </>
   );
 }
 
@@ -170,4 +184,22 @@ export function SidebarGroups({ groups }: { groups: readonly SidebarGroup[] }) {
 /** Creates a standalone agent, from scratch or from a template, outside every project. */
 export function NewAgentDialog({ onClose }: { onClose(): void }) {
   return createPortal(<NewBotDialog section={STANDALONE_SECTION} onClose={onClose} />, document.body);
+}
+
+function MembersDialog({ cloudTeamId, onClose }: { cloudTeamId: string | null; onClose(): void }) {
+  return createPortal(
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <div role="dialog" aria-modal="true" aria-label="Members & invites" className="flex h-[min(720px,92dvh)] w-full max-w-[760px] flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-panel shadow-2xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-hairline/40 px-5 py-3.5">
+          <h2 className="text-[16px] font-semibold text-ink">Members & invites</h2>
+          <button type="button" aria-label="Close" onClick={onClose} className="flex size-8 items-center justify-center rounded-lg text-ink-secondary hover:bg-raised hover:text-ink"><X size={16} /></button>
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <WorkspaceMembersPanel cloudTeamId={cloudTeamId} />
+          <div className="px-5 pb-5"><RuntimeHelp className="mt-4" /></div>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
 }

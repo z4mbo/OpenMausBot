@@ -596,6 +596,8 @@ import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, ensureTeamChiefs, ensureWorkspaces, watchTemplateTeams } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
+import { createOriginCloudRoutes } from "./origin-cloud.ts";
+import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
 import { createBotPatchRoutes } from "./routes/bot-patch.ts";
@@ -13723,6 +13725,8 @@ ROUTES.push(createBotCreateRoutes({
 }));
 ROUTES.push(createDefaultTeamRoutes({ store, maxWorkspaceBots: MAX_WORKSPACE_BOTS, wireBot }));
 ROUTES.push(createProjectIconRoutes({ store, storedAvatarExists }));
+ROUTES.push(createOriginCloudRoutes({ store, agentBotId: (header) => { const capability = authorizedInternalCapability(header); return capability?.kind === "agents" && capability.generation !== EXTERNAL_RUNTIME_GENERATION ? capability.botId : null; } }));
+ROUTES.push(createCloudLinkRoutes({ store }));
 ROUTES.push(createAvatarLookRoutes({ store }));
 ROUTES.push(createBotSettingsRoutes({
   store, cfg, registry, commandAllowlist, commandAllowlistDrivers: COMMAND_ALLOWLIST_DRIVERS,

@@ -10,6 +10,8 @@ import { openBot } from "@/state/thread-navigation";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { cn } from "@/lib/cn";
 import { BotAvatar } from "./Avatar";
+import { AssignIssueDialog, AssetsPage, FeedbackPage, IssuesPage, ProjectSettingsPage, RepoPage, VaultPage, issueBrief, type AssignableIssue } from "./origin-pages";
+import { useCloudProjectFor } from "@/lib/origin-cloud-links";
 
 export const CHIEF_SECTIONS = [
   { id: "issues", label: "Issues", icon: Bug, blurb: "Track the project's bugs and tasks, and hand them to its agents." },
@@ -71,7 +73,9 @@ export function ChiefSectionBar({ bot, section, onSection }: { bot: Bot; section
 
 export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude<ChiefSection, "chat"> }) {
   const { state, dispatch } = useStore();
+  const cloudProjectId = useCloudProjectFor(bot);
   const showThreads = useShowThreads();
+  const [assigning, setAssigning] = useState<AssignableIssue | null>(null);
   const entry = CHIEF_SECTIONS.find((item) => item.id === section)!;
   if (section === "agents") {
     const agents = teamAgents(state.bots, bot);
@@ -113,6 +117,26 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
       </section>
     );
   }
+  const page = { cloudProjectId: cloudProjectId ?? null, projectName: bot.name };
+  if (section === "issues") {
+    const assignTo = (agent: Bot) => {
+      if (!assigning) return;
+      dispatch({ type: "send", botId: agent.id, text: issueBrief(assigning) });
+      setAssigning(null);
+      openBot(dispatch, agent, showThreads);
+    };
+    return (
+      <>
+        <IssuesPage {...page} onAssignToAgent={setAssigning} />
+        {assigning && <AssignIssueDialog issue={assigning} agents={[bot, ...teamAgents(state.bots, bot)]} onPick={assignTo} onClose={() => setAssigning(null)} />}
+      </>
+    );
+  }
+  if (section === "assets") return <AssetsPage {...page} />;
+  if (section === "vault") return <VaultPage {...page} />;
+  if (section === "repo") return <RepoPage {...page} />;
+  if (section === "feedback") return <FeedbackPage {...page} />;
+  if (section === "settings") return <ProjectSettingsPage {...page} />;
   const Icon = entry.icon;
   return (
     <section className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center" aria-label={entry.label}>

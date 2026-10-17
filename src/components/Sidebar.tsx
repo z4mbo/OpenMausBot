@@ -4,6 +4,7 @@ import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-work
 import { NewAgentDialog, SidebarGroups, SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
 import { OriginNav } from "./OriginPages";
+import { WhatsNew } from "./WhatsNew";
 import { teamUnread } from "./ChiefSections";
 import { unreadReplies } from "@/lib/origin-unread";
 import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL, WORKSPACE_NAV, NEW_PROJECT_DIALOG, PROFILE_AT_TOP } from "@/lib/origin-teams";
@@ -2510,6 +2511,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
             <SidebarAppsButton />
           </div>
         )}
+        {PROFILE_AT_TOP && density !== "icons" && <div className="mt-2 border-t border-hairline/40 pt-1.5"><WhatsNew variant="line" /></div>}
       </div>
       </GlassBar>
       </GlassScrollFrame>

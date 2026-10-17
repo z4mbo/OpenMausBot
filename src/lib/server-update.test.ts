@@ -36,7 +36,7 @@ describe("self-hosted update row", () => {
 
   it("explains servers that are updated elsewhere", () => {
     expect(serverUpdateRow("up-to-date", check({ install: "desktop" })).label).toBe(
-      "Updated from the OpenMausBot app on the computer running this server",
+      "Updated from the Origin app on the computer running this server",
     );
     expect(serverUpdateRow("up-to-date", check({ install: "managed" })).label).toBe("This server is kept up to date for you");
   });

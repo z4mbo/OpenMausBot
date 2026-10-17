@@ -216,7 +216,7 @@ it("on the person's own Cloud, Settings shows the plan read only, with Manage an
   all(view().html, ["Max plan", "This computer needs to sign in to MausBot Cloud again", "Switch to this computer"]); none(view().html, [...BUY, "Could not complete"]);
   plan.state.mockRejectedValueOnce(new Error("cloud-plan:state is only available in this app's window")); f.values = []; view(); f.effects[0](); await flush();
   const refused = view();
-  expect(refused.html).toContain("Your plan is managed in the OpenMausBot app on your computer.");
+  expect(refused.html).toContain("Your plan is managed in the Origin app on your computer.");
   expect(refused.nodes.some(node => node.type === "button")).toBe(false);
   none(refused.html, ["Could not complete", 'role="alert"', "Loading"]);
 });

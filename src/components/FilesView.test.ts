@@ -152,7 +152,7 @@ describe("Add a folder", () => {
 
   it.each([
     ["too-broad", "That folder is too big to share. Choose a folder inside it, like one in Documents."],
-    ["app-data", "That's MausBot's own folder. Choose another one."],
+    ["app-data", "That's Origin's own folder. Choose another one."],
     ["already-shared", "This folder is already shared."],
     ["not-a-folder", "Choose a folder."],
     ["private", "That folder holds private keys or settings, so it isn't shared. Choose another one."],
