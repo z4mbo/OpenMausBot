@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
+import { Fragment, useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { CloudOff, FolderPlus, Link2, Loader2, LogIn, Plus, RotateCw, SearchX, ServerOff, Users, X } from "lucide-react";
 import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
 import { linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
@@ -90,7 +90,7 @@ function ProjectGate({ cloudProjectId, projectName, link, label, children, onRet
   if (project === null) {
     return <GateShell><EmptyState icon={<SearchX size={22} />} title={`No access to ${projectName}`} /></GateShell>;
   }
-  return <>{children({ project, projectId: cloudProjectId, canEdit: project.memberRole !== "viewer", isAdmin: project.memberRole === "owner" || project.memberRole === "admin" })}</>;
+  return <Fragment key={JSON.stringify([url, session.user?._id, cloudProjectId])}>{children({ project, projectId: cloudProjectId, canEdit: project.memberRole !== "viewer", isAdmin: project.memberRole === "owner" || project.memberRole === "admin" })}</Fragment>;
 }
 
 function SetUpProject({ projectName, label, link }: { projectName: string; label: string; link?: ProjectLink }) {
@@ -160,7 +160,7 @@ function TeamGate({ teamId, label, head, children, onRetry }: WorkspaceGateProps
   if (access === null) {
     return <GateShell><EmptyState icon={<SearchX size={22} />} title="No access to this workspace" /></GateShell>;
   }
-  return <>{children({ teamId, me: session.user, role: access.role, canEdit: access.role !== "viewer" })}</>;
+  return <Fragment key={JSON.stringify([url, session.user._id, teamId])}>{children({ teamId, me: session.user, role: access.role, canEdit: access.role !== "viewer" })}</Fragment>;
 }
 
 function SetUpWorkspace({ label, head }: { label: string; head?: { id: string; name: string } }) {
