@@ -328,10 +328,10 @@ export function DownloadCard({ name, compact = false }: { name?: string; compact
       <h2 id="download-title">{title}</h2>
       <p>{name ? "Your workspaces live in the desktop app. Install it and sign in with the same email." : "Install the app, sign in with your Origin account and your workspaces are there."}</p>
       <DownloadButtons platform={platform} />
-      <p className={st.fine}>Windows 10 and 11, 64-bit · macOS on Apple silicon (<a href={MAC_INTEL_DOWNLOAD_URL}>Intel build</a>). The app updates itself.</p>
+      <p className={st.fine}>Windows 10 and 11, 64-bit · macOS on Apple silicon (<a href={MAC_INTEL_DOWNLOAD_URL}>Intel build</a>). Read <Link href="/whats-new">what&apos;s new</Link>.</p>
       <p className={st.smartscreen}>
         <ShieldAlert size={15} aria-hidden="true" />
-        <span>The apps aren&apos;t code-signed yet. On Windows, if SmartScreen stops the installer, choose <b>More info</b>, then <b>Run anyway</b>. On a Mac, right-click Origin, choose <b>Open</b>, then <b>Open</b> again.</span>
+        <span>The apps aren&apos;t code-signed yet. On Windows, if SmartScreen stops the installer, choose <b>More info</b>, then <b>Run anyway</b>. On a Mac, right-click Origin, choose <b>Open</b>, then <b>Open</b> again. Unsigned Mac builds need a fresh download for updates.</span>
       </p>
     </div>
   );
@@ -370,6 +370,8 @@ function SiteFooter() {
           <a href="/#download">Download</a>
           <Link href="/login">Sign in</Link>
           <Link href="/signup">Create account</Link>
+          <Link href="/whats-new">What's new</Link>
+          <a href="https://github.com/z4mbo/Origin">GitHub</a>
         </nav>
         <p>No trackers, no ads.</p>
       </div>
