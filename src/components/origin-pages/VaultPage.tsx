@@ -6,7 +6,7 @@ import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import type { CloudCredential, CredentialKind } from "./cloud-types";
 import { errorText } from "./repo-url";
-import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 import { decryptSecret, encryptSecret, generatePassword } from "./vaultCrypto";
 
 const KINDS: Record<CredentialKind, string> = { password: "Website login", api_key: "API key", secret: "Secret", note: "Secure note", apk: "APK", file: "File" };
@@ -146,12 +146,12 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
           ))}
         </div>
       )}
-      {editing && unlocked && <VaultItemEditor projectId={projectId} passphrase={passphrase} item={editing === "new" ? null : editing} onClose={() => setEditing(null)} />}
+      {editing && unlocked && <VaultItemEditor projectId={projectId} canEdit={canEdit} passphrase={passphrase} item={editing === "new" ? null : editing} onClose={() => setEditing(null)} />}
     </section>
   );
 }
 
-function VaultItemEditor({ projectId, passphrase, item, onClose }: { projectId: string; passphrase: string; item: CloudCredential | null; onClose(): void }) {
+function VaultItemEditor({ projectId, canEdit, passphrase, item, onClose }: { projectId: string; canEdit: boolean; passphrase: string; item: CloudCredential | null; onClose(): void }) {
   const [kind, setKind] = useState<CredentialKind>(item?.kind ?? "password");
   const [title, setTitle] = useState(item?.title ?? "");
   const [username, setUsername] = useState(item?.username ?? "");
@@ -160,6 +160,7 @@ function VaultItemEditor({ projectId, passphrase, item, onClose }: { projectId: 
   const action = useAction();
   const save = async (event: FormEvent) => {
     event.preventDefault();
+    if (!canEdit || action.busy) return;
     const ok = await action.run(async () => {
       const encrypted = secret ? await encryptSecret(secret, passphrase) : null;
       if (item) {
@@ -175,6 +176,8 @@ function VaultItemEditor({ projectId, passphrase, item, onClose }: { projectId: 
   return (
     <Modal title={item ? "Edit vault item" : "New vault item"} onClose={() => { setSecret(""); onClose(); }}>
       <form onSubmit={save} className="flex flex-col gap-3">
+        <ReadOnlyEditorNotice canEdit={canEdit} />
+        <fieldset disabled={!canEdit} className="contents">
         <Field label="Type">
           <Select className="w-full" value={kind} onChange={(e) => setKind(e.target.value as CredentialKind)}>
             {kinds.map((value) => <option key={value} value={value}>{KINDS[value]}</option>)}
@@ -191,8 +194,9 @@ function VaultItemEditor({ projectId, passphrase, item, onClose }: { projectId: 
             {kind !== "note" && <button type="button" className={cn(iconButton, "size-8")} title="Generate password" aria-label="Generate password" onClick={() => setSecret(generatePassword())}><Shuffle size={14} /></button>}
           </span>
         </Field>
+        </fieldset>
         {action.error && <Notice tone="danger">{action.error}</Notice>}
-        <button className={primaryButton} disabled={action.busy}>
+        <button className={primaryButton} disabled={action.busy || !canEdit}>
           {action.busy ? <Loader2 size={14} className="animate-spin" /> : <LockKeyhole size={14} />}Save encrypted item
         </button>
       </form>

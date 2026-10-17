@@ -4,7 +4,7 @@ import { ExternalLink, File, Image as ImageIcon, Loader2, Palette, Pencil, Plus,
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import type { AssetType, CloudDesign, CloudDesignAsset, CloudDesignToken, TokenType } from "./cloud-types";
-import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 const ASSET_TYPES: readonly AssetType[] = ["image", "document", "figma", "icon", "font", "apk", "other"];
 const TOKEN_TYPES: readonly TokenType[] = ["color", "typography", "spacing", "component", "motion", "other"];
@@ -103,8 +103,8 @@ function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean })
           ))}
         </div>
       )}
-      {editing && <AssetEditor projectId={projectId} asset={editing === "new" ? null : editing} onClose={() => setEditing(null)} />}
-      {tokenEditing && <TokenEditor projectId={projectId} token={tokenEditing === "new" ? null : tokenEditing} onClose={() => setTokenEditing(null)} />}
+      {editing && <AssetEditor projectId={projectId} canEdit={canEdit} asset={editing === "new" ? null : editing} onClose={() => setEditing(null)} />}
+      {tokenEditing && <TokenEditor projectId={projectId} canEdit={canEdit} token={tokenEditing === "new" ? null : tokenEditing} onClose={() => setTokenEditing(null)} />}
     </section>
   );
 }
@@ -116,7 +116,7 @@ async function uploadFile(projectId: string, file: File): Promise<string> {
   return ((await response.json()) as { storageId: string }).storageId;
 }
 
-function AssetEditor({ projectId, asset, onClose }: { projectId: string; asset: CloudDesignAsset | null; onClose(): void }) {
+function AssetEditor({ projectId, canEdit, asset, onClose }: { projectId: string; canEdit: boolean; asset: CloudDesignAsset | null; onClose(): void }) {
   const [files, setFiles] = useState<File[]>([]);
   const [name, setName] = useState(asset?.name ?? "");
   const [type, setType] = useState<AssetType>(asset?.type ?? "image");
@@ -135,6 +135,7 @@ function AssetEditor({ projectId, asset, onClose }: { projectId: string; asset: 
   };
   const save = async (event: FormEvent) => {
     event.preventDefault();
+    if (!canEdit || action.busy) return;
     const ok = await action.run(async () => {
       if (asset) {
         await cloudMutation("design:updateAsset", { projectId, assetId: asset._id, name, type, notes, ...(url !== (asset.url ?? "") ? { url } : {}) });
@@ -160,6 +161,8 @@ function AssetEditor({ projectId, asset, onClose }: { projectId: string; asset: 
   return (
     <Modal title={asset ? "Edit asset" : batch ? "Add assets" : "Add asset"} onClose={onClose} canClose={() => !action.busy}>
       <form onSubmit={save} className="flex flex-col gap-3">
+        <ReadOnlyEditorNotice canEdit={canEdit} />
+        <fieldset disabled={!canEdit} className="contents">
         {!asset && (
           <>
             <button type="button" onClick={() => input.current?.click()}
@@ -182,9 +185,10 @@ function AssetEditor({ projectId, asset, onClose }: { projectId: string; asset: 
           </>
         )}
         <Field label="Notes"><textarea className={inputClass} rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
+        </fieldset>
         {action.error && <Notice tone="danger">{action.error}</Notice>}
         {progress && <Notice>{progress}</Notice>}
-        <button className={primaryButton} disabled={action.busy}>
+        <button className={primaryButton} disabled={action.busy || !canEdit}>
           {action.busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}{asset ? "Save asset" : batch ? `Save ${files.length} assets` : "Save asset"}
         </button>
       </form>
@@ -192,7 +196,7 @@ function AssetEditor({ projectId, asset, onClose }: { projectId: string; asset: 
   );
 }
 
-function TokenEditor({ projectId, token, onClose }: { projectId: string; token: CloudDesignToken | null; onClose(): void }) {
+function TokenEditor({ projectId, canEdit, token, onClose }: { projectId: string; canEdit: boolean; token: CloudDesignToken | null; onClose(): void }) {
   const [type, setType] = useState<TokenType>(token?.type ?? "color");
   const [name, setName] = useState(token?.name ?? "");
   const [value, setValue] = useState(token?.value ?? "");
@@ -200,6 +204,7 @@ function TokenEditor({ projectId, token, onClose }: { projectId: string; token: 
   const action = useAction();
   const save = async (event: FormEvent) => {
     event.preventDefault();
+    if (!canEdit || action.busy) return;
     const ok = await action.run(() => token
       ? cloudMutation("design:updateToken", { projectId, tokenId: token._id, type, name, value, description })
       : cloudMutation("design:createToken", { projectId, type, name, value, ...(description ? { description } : {}) }), "Could not save token");
@@ -208,6 +213,8 @@ function TokenEditor({ projectId, token, onClose }: { projectId: string; token: 
   return (
     <Modal title={token ? "Edit token" : "New token"} onClose={onClose}>
       <form onSubmit={save} className="flex flex-col gap-3">
+        <ReadOnlyEditorNotice canEdit={canEdit} />
+        <fieldset disabled={!canEdit} className="contents">
         <Field label="Type">
           <Select className="w-full" value={type} onChange={(e) => setType(e.target.value as TokenType)}>
             {TOKEN_TYPES.map((item) => <option key={item} value={item}>{item}</option>)}
@@ -216,10 +223,11 @@ function TokenEditor({ projectId, token, onClose }: { projectId: string; token: 
         <Field label="Name"><input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required placeholder="brand.primary" /></Field>
         <Field label="Value"><input className={inputClass} value={value} onChange={(e) => setValue(e.target.value)} required placeholder={type === "color" ? "#1084fe" : ""} /></Field>
         <Field label="Description"><input className={inputClass} value={description} onChange={(e) => setDescription(e.target.value)} /></Field>
+        </fieldset>
         {action.error && <Notice tone="danger">{action.error}</Notice>}
         <div className="flex justify-end gap-2">
           <button type="button" className={ghostButton} onClick={onClose}>Cancel</button>
-          <button className={primaryButton} disabled={action.busy}>{action.busy ? <Loader2 size={14} className="animate-spin" /> : null}Save token</button>
+          <button className={primaryButton} disabled={action.busy || !canEdit}>{action.busy ? <Loader2 size={14} className="animate-spin" /> : null}Save token</button>
         </div>
       </form>
     </Modal>

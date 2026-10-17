@@ -334,6 +334,10 @@ export function Notice({ tone = "info", children }: { tone?: "info" | "danger"; 
   );
 }
 
+export function ReadOnlyEditorNotice({ canEdit }: { canEdit: boolean }) {
+  return canEdit ? null : <Notice>Editing access changed. Your draft is kept, but your current role cannot save it.</Notice>;
+}
+
 /** A page's header row once it sits in the glass above the page, lined up with the page's own gutters. */
 export const glassHeaderRow = "px-4 pb-3 md:px-6";
 
