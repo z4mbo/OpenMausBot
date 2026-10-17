@@ -28,3 +28,5 @@ third_party/opencode/LICENSE text eol=lf
 # joins and every layering, healthcheck and trust check fails for a reason
 # that has nothing to do with the image. Docker itself reads LF everywhere.
 Dockerfile text eol=lf
+# Shipped to the server and built there by Docker.
+site/Dockerfile text eol=lf

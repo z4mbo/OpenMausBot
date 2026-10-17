@@ -84,7 +84,12 @@
     "control-plane:types": "pnpm --filter @openmausbot/control-plane types",
     "control-plane:check": "pnpm --filter @openmausbot/control-plane check",
     "control-plane:test": "pnpm --filter @openmausbot/control-plane test",
-    "control-plane:dry-run": "pnpm --filter @openmausbot/control-plane dry-run"
+    "control-plane:dry-run": "pnpm --filter @openmausbot/control-plane dry-run",
+    "dev:backend": "pnpm --filter @origin/backend dev",
+    "test:backend": "pnpm --filter @origin/backend test",
+    "dev:site": "pnpm --filter @origin/site dev",
+    "test:site": "pnpm --filter @origin/site test",
+    "deploy:origin": "node scripts/deploy-origin.mjs"
   },
   "dependencies": {
     "@1password/sdk": "0.5.0",

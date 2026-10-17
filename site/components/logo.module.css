@@ -1,0 +1,23 @@
+.logo { display: block; flex: none; overflow: visible; }
+.face { transform: translate(calc(var(--look-x, 0) * 1px), calc(var(--look-y, 0) * 0.8px)); transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.eyes { transform: translate(calc(var(--look-x, 0) * 2.8px), calc(var(--look-y, 0) * 2.3px)); transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.lids {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 6.4s var(--blink-delay, 1.4s) infinite;
+}
+a:hover > .logo .lids, .logo:hover .lids { animation: blinkOnce 0.24s ease-in-out; }
+
+@keyframes blink {
+  0%, 44%, 47.5%, 92%, 94.5%, 96%, 98.5%, 100% { transform: scaleY(1); }
+  45.6% { transform: scaleY(0.08); }
+  93.2%, 97.2% { transform: scaleY(0.08); }
+}
+@keyframes blinkOnce {
+  50% { transform: scaleY(0.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lids, a:hover > .logo .lids, .logo:hover .lids { animation: none; }
+  .face, .eyes { transition: none; }
+}

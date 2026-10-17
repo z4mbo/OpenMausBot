@@ -1,0 +1,33 @@
+{
+  "name": "@origin/site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "origin.imbored.fun: the Origin website, sign-in and invite pages.",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --webpack -p 3001 -H 127.0.0.1",
+    "build": "next build --webpack",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:landing": "node scripts/test-landing.mjs"
+  },
+  "dependencies": {
+    "@origin/backend": "workspace:*",
+    "clsx": "2.1.1",
+    "convex": "1.45.0",
+    "lucide-react": "1.14.0",
+    "next": "16.4.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "playwright": "1.64.1",
+    "sharp": "0.35.5",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

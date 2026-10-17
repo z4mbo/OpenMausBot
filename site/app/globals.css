@@ -1,0 +1,128 @@
+:root {
+  color-scheme: dark;
+  --bg: #070708;
+  --bg-elevated: #0d0e10;
+  --panel: #111215;
+  --panel-2: #17191d;
+  --panel-3: #1d2025;
+  --ink: #f5f6f8;
+  --muted: #9498a3;
+  --muted-2: #696e79;
+  --line: #272a30;
+  --line-soft: #1d2026;
+  --soft: #20232a;
+  --danger: #ff6b5f;
+  --green: #3ddc97;
+  --blue: #58c7d9;
+  --amber: #f2b84b;
+  --violet: #b99cff;
+  --shadow: 0 20px 70px rgba(0, 0, 0, 0.38);
+  --radius: 8px;
+  --o-bg: #000000;
+  --o-body: var(--font-body), "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  background: var(--o-bg);
+  font-family: var(--o-body);
+  font-feature-settings: "cv11", "ss03";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+a {
+  color: inherit;
+}
+
+code,
+pre {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #0b0c0e;
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 10px 11px;
+  outline: none;
+  min-height: 38px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-2);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  color: #c9ccd3;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2b2e36;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+::selection { background: rgba(255, 255, 255, 0.22); color: #fff; }
+
+@media (max-width: 680px) {
+  body {
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation-duration: .01ms !important; }
+}
