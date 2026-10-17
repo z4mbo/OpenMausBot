@@ -290,6 +290,7 @@ Origin's inspection and delivery records:
 - [Storage admission security investigation](origin-storage-admission.md)
 - [Upstream fit review and paired appearance](origin-upstream-review.md)
 - [Website themes and release history](origin-site.md)
+- [Before/after screenshot index](origin-screenshots.md)
 
 The [persistence responsiveness benchmark](persistence-performance.md) measures
 synthetic message/log bursts and history scans, with isolated chat, visibility

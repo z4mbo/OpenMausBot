@@ -46,7 +46,6 @@ Locations identify the affected implementation at the fix checkpoint. Each row l
 | P2 | `src/lib/origin-releases.ts:9` | Read a release, then publish another on the same day; date-based tracking hides the unread indicator. | `0720bed2d`: track the exact release version. |
 | P2 | `src/lib/app-links.ts:5` | Origin Help/feedback opens the upstream repository rather than this product's support source. | `b6b80b5d8`: use Origin links while retaining explicit upstream service/download links. |
 | P2 | `server/mcp-remote-proxy.ts:127` | A rejected remote MCP request hides the HTTP status and gives no useful recovery action. | `e25f6633c`: safe status/recovery text adapted from upstream PR 3026, without sensitive response bodies/addresses. |
-
 | P1 | `backend/convex/lib/storage.ts:93`, `backend/convex/storage.ts:38` | A removed member rebinds a remembered private blob in their own project and obtains a fresh URL. | `f3a8fbb44`: scoped one-use uploads and persistent admission across all five reference writers; session/role rechecks and paginated legacy migration. [Evidence and limits](origin-storage-admission.md). |
 | P1 | `server/config.ts:978` | Origin operator integration authority and Convex administration keys are inherited together by engine and installer children. | `165506951`: remove administration keys when the positive Origin operator marker is present; real synthetic CLI/shell children prove exclusion and preservation of ordinary project credentials. |
 | P2 | `src/lib/origin-cloud/hooks.ts:6`, `src/components/origin-pages/ui.tsx:77` | Failed/stalled reads leave a spinner indefinitely; a refresh error can discard the loaded editor and draft. | `91e477f8e`, `a751a37bc`: scoped retry boundaries, retained non-authority data, fail-closed access queries and bounded retries accommodating SDK reconnect backoff. |
@@ -66,7 +65,7 @@ Locations identify the affected implementation at the fix checkpoint. Each row l
 | Landing, login, signup and release history | Shared core palette, Inter, radii, flat borders, focus, mobile menus and wrapping footer; shared release history. | [Website inspection](origin-site.md); `8244073b9`; 12 before cases and 16 full-page after cases. |
 | Inspection infrastructure | Concurrent previews had a shared Vite dependency cache, causing 504 optimized dependency failures. | `6ce780407`: isolate caches per disposable fixture. Checkers verify the expected fixture entry before interaction, protecting against stale port reuse. |
 
-The component inventory is in `evidence/origin-ui/component-inventory.json`. An inventory entry is source coverage, not proof of every interactive branch. The individual reports state the exercised states and remaining acceptance boundaries.
+The [screenshot index](origin-screenshots.md) links 200 matched before/after pairs. The component inventory is in `evidence/origin-ui/component-inventory.json`. An inventory entry is source coverage, not proof of every interactive branch. The individual reports state the exercised states and remaining acceptance boundaries.
 
 ## Verification and delivery status
 
@@ -74,7 +73,7 @@ The component inventory is in `evidence/origin-ui/component-inventory.json`. An 
 - Full backend including storage admission: 17 files, 132 passing tests; independent storage security review completed.
 - Final project-page browser matrix: 113 cases, 40 account/member cases, 20 live-editor permission cases and 39 real Convex-client protocol cases. These use isolated synthetic data and do not claim production account acceptance.
 - Website unit tests and production build pass, including `/whats-new`. Release packaging tests exercise the installed electron-builder's feed generator using synthetic artifacts.
-- Both application/server TypeScript checks, backend TypeScript, lint, locale/catalog checks, documentation guards and final touched-server checks pass. The required full client/shared suite remains the last running source gate.
+- Full client/shared suite: 554 files, 5,855 passing tests. Both application/server TypeScript checks, backend TypeScript, lint, locale/catalog checks, documentation guards and final touched-server checks pass.
 - GitHub branch/PR, Windows/macOS workflow artifacts, public downloads/update feeds, backend deployment and website deployment remain pending. The configured website SSH destination was checked read-only; no production data was used for testing.
 - Some isolated synthetic fixture directories remain after automatic approval review rejected their exact guarded cleanup with “blocked by policy.” Their processes are stopped and exact paths are recorded in the feature reports; no alternate deletion bypass was attempted.
 
