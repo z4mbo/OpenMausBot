@@ -46,7 +46,7 @@ export function WorkspaceMembersPanel({ cloudTeamId }: { cloudTeamId: string | n
     return <EmptyState icon={<Cloud size={28} />} title="No Origin workspace selected"
       body="Pick or connect an Origin workspace to manage its members." />;
   }
-  return <Members teamId={cloudTeamId} myEmail={session.user?.email ?? ""} />;
+  return <Members key={JSON.stringify([url, session.user?._id, cloudTeamId])} teamId={cloudTeamId} myEmail={session.user?.email ?? ""} />;
 }
 
 const sameEmail = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
