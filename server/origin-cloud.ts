@@ -5,6 +5,7 @@ import { makeFunctionReference } from "convex/server";
 import {
   issueBrief, originIssueKey, ORIGIN_ISSUE_CARDS_MAX, type OriginIssueCard, type OriginIssueCards, type OriginIssuePriority,
 } from "../shared/origin-issues.ts";
+import { isDraftColumn } from "../shared/origin-columns.ts";
 import { isReadOnlyAgentTool } from "./agent-tool-policy.ts";
 import { DATA_DIR } from "./config.ts";
 import type { MirrorResult } from "./github/sync.ts";
@@ -60,7 +61,8 @@ export interface OriginGitHub {
   pullRequests(projectId: string): Promise<PullSummary[]>;
   pullRequest(projectId: string, number: number): Promise<PullDetail>;
   approve(projectId: string, number: number, body: string): Promise<{ approved: boolean }>;
-  merge(projectId: string, number: number, headSha?: string): Promise<{ sha: string }>;
+  /** `completed`: the closed issues already synced into Origin. */
+  merge(projectId: string, number: number, headSha?: string): Promise<{ sha: string; completed?: number[] }>;
   repository?(projectId: string): Promise<{ defaultBranch: string }>;
 }
 
@@ -586,7 +588,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     const open = columns.filter((column) => !isDoneColumn(column));
     const column = trimmed(args.column)
       ? findColumn(columns, text(args.column))
-      : open.find((candidate) => normalizedTitle(text(candidate.title)) === "todo") ?? open[0];
+      : open.find(isDraftColumn) ?? open.find((candidate) => normalizedTitle(text(candidate.title)) === "todo") ?? open[0];
     if (!column) return { text: `No such column. Columns: ${columnNames(columns)}.`, isError: true };
     let assignee = trimmed(args.assignee);
     if (!assignee) assignee = text(record(await scope.client.query("auth:me", { sessionToken: scope.sessionToken })).email);
@@ -608,7 +610,8 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
       labels: Array.isArray(args.labels) ? args.labels.map(String) : [],
     }, columns, project.projectId, name);
     let mirrored = "";
-    if (text((await projectDoc(ctx, project.projectId)).repoUrl) && ctx.github) {
+    if (isDraftColumn(column)) mirrored = " It stays in Origin as a draft; moving it to another column creates its GitHub issue.";
+    else if (text((await projectDoc(ctx, project.projectId)).repoUrl) && ctx.github) {
       const result = await ctx.github.mirrorIssue(project.projectId, taskId).catch((error: unknown): MirrorResult => ({ taskId, error: error instanceof Error ? error.message : String(error) }));
       mirrored = result.issueNumber ? ` Mirrored as GitHub issue #${result.issueNumber}.` : ` Its GitHub issue is not created yet (${clip(result.error ?? "unknown", 200)}); the next sync retries.`;
     }
@@ -635,6 +638,11 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
       await scope.client.mutation("tasks:moveTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId, columnId: column._id });
       done ??= isDoneColumn(column);
       changed.push(`column "${text(column.title)}"`);
+      const task = tasks.find((item) => item._id === taskId);
+      if (viaPullRequest && ctx.github && !isDraftColumn(column) && !isDoneColumn(column) && !task?.githubIssueNumber) {
+        const result = await ctx.github.mirrorIssue(scope.projectId, taskId).catch((error: unknown): MirrorResult => ({ taskId, error: error instanceof Error ? error.message : String(error) }));
+        if (result.issueNumber) changed.push(`mirrored as GitHub issue #${result.issueNumber}`);
+      }
     }
     const fields: Args = {
       ...(typeof args.title === "string" ? { title: args.title } : {}),
@@ -680,6 +688,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
       const brief = issueBrief({
         id: target.taskId, key, projectName: name, title: text(found.task.title), description: clip(text(found.task.description), 2_400),
         priority: text(found.task.priority) || "medium", dueDate: text(found.task.dueDate) || undefined, labels,
+        githubIssueNumber: Number(found.task.githubIssueNumber) || undefined,
       });
       return {
         text: `Ready to hand ${key} to ${agent.name}.`,
@@ -807,8 +816,14 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     const { tasks } = await board(scopeOf(ctx, project));
     const issueKeys = new Map(tasks.filter((task) => Number(task.githubIssueNumber)).map((task) => [Number(task.githubIssueNumber), originIssueKey(text(task._id))]));
     const result = await github.merge(project.projectId, number, headSha);
-    const closes = (await github.pullRequest(project.projectId, number).then((pr) => pr.closes, () => [] as number[])).map((n) => issueKeys.get(n) ?? `#${n}`);
-    return { text: `Merged #${number} into the default branch (${result.sha.slice(0, 7)}).${closes.length ? ` GitHub closes ${closes.join(", ")}, and Origin marks ${closes.length === 1 ? "it" : "them"} done on the next sync.` : " It closes no issue; complete the matching issue's pull request link first."}` };
+    const closes = await github.pullRequest(project.projectId, number).then((pr) => pr.closes, () => [] as number[]);
+    const synced = new Set(result.completed ?? []);
+    const keyOf = (n: number) => issueKeys.get(n) ?? `#${n}`;
+    const done = closes.filter((n) => synced.has(n)).map(keyOf);
+    const late = closes.filter((n) => !synced.has(n)).map(keyOf);
+    const outcome = !closes.length ? " It closes no issue; complete the matching issue's pull request link first."
+      : `${done.length ? ` ${done.join(", ")} ${done.length === 1 ? "is" : "are"} now done in Origin and closed on GitHub.` : ""}${late.length ? ` GitHub closes ${late.join(", ")}, and Origin marks ${late.length === 1 ? "it" : "them"} done on the next sync.` : ""}`;
+    return { text: `Merged #${number} into the default branch (${result.sha.slice(0, 7)}).${outcome}` };
   },
 
   async origin_list_assets(args, ctx) {

@@ -250,6 +250,7 @@ function runForget(state) {
     path,
     AbortSignal,
     remoteMicrophoneRefused: new Set(),
+    DATA_FOLDER: ".openmausbot",
     desktopDataDir: () => "/Users/me/.openmausbot",
     slog: () => {},
     session: { defaultSession: { fetch: async () => ({ ok: true }), clearStorageData: async () => {} } },
@@ -343,7 +344,6 @@ function switchFixture(t, { startResults = [], releaseLeaseThrows = false, stopU
     stopUtilityServer,
     desktopDataDirLease: { release: () => { if (releaseLeaseThrows) throw new Error("lease release exploded"); } },
     acquireDataDirLease: () => ({ release: () => {} }),
-    acquireDataDirLeaseFor: () => ({ release: () => {} }),
     fs: { promises: { mkdir: async () => {} } },
     startServerOn: async (...args) => {
       forks.push(args);

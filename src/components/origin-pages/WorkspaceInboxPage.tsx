@@ -49,7 +49,7 @@ export function WorkspaceInbox({ teamId, canEdit }: WorkspaceContext) {
   const hasFilters = Boolean(filters.project || filters.priority || filters.search);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-[var(--glass-top,0px)] [scroll-padding-top:var(--glass-top,0px)]">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 md:p-6">
         <Notifications teamId={teamId} onOpenTask={open} onError={setNotice} />
         <div className="flex flex-wrap items-center gap-2">

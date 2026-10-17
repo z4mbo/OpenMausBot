@@ -48,15 +48,21 @@ export const originGitHub = {
     call<{ state: RepositoryState; repoUrl?: string; error?: string }>(`/api/github/repo?${query({ teamId, projectId })}`, { method: "POST", body: JSON.stringify(name ? { name } : {}) }),
   repositories: (teamId: string) => call<{ login: string | null; repositories: GitHubRepository[] }>(`/api/github/repos?${query({ teamId })}`),
   repository: (projectId: string) => call<RepoSnapshot>(`/api/github/repo?${query({ projectId })}`),
+  /** Creates the missing GitHub issues of open issues outside Draft; linked issues among `taskIds` get their done or Draft state pushed to GitHub. */
   mirrorIssues: (projectId: string, taskIds?: readonly string[]) =>
     call<{ results: { taskId: string; issueNumber?: number; error?: string }[] }>("/api/github/mirror", { method: "POST", body: JSON.stringify({ projectId, ...(taskIds ? { taskIds } : {}) }) }),
   openTaskPullRequest: (projectId: string, taskId: string) =>
     call<{ number: number; url: string; message: string }>("/api/github/pull-requests", { method: "POST", body: JSON.stringify({ projectId, taskId }) }),
+  /** Deletes the Origin issue after removing its GitHub issue; a failure on GitHub keeps both. */
+  deleteIssue: (projectId: string, taskId: string) =>
+    call<{ message: string; github: GitHubIssueRemoval | null }>("/api/github/issues/delete", { method: "POST", body: JSON.stringify({ projectId, taskId }) }),
   review: (projectId: string, number: number, action: "approve" | "merge", body?: string) =>
-    call<{ approved?: boolean; merged?: boolean; sha?: string }>("/api/github/pull-requests/review", { method: "POST", body: JSON.stringify({ projectId, number, action, ...(body ? { body } : {}) }) }),
+    call<{ approved?: boolean; merged?: boolean; sha?: string; completed?: number[] }>("/api/github/pull-requests/review", { method: "POST", body: JSON.stringify({ projectId, number, action, ...(body ? { body } : {}) }) }),
 };
 
 export interface GitHubRepository { fullName: string; url: string; private: boolean }
+
+export interface GitHubIssueRemoval { outcome: "deleted" | "closed" | "missing"; number: number; reason?: string }
 
 export type PullState = "draft" | "open" | "closed" | "merged";
 export type ReviewDecision = "approved" | "changes_requested" | "review_required" | "commented";

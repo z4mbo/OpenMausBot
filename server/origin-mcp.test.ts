@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { json, readBody } from "./harness/http.ts";
 import type { OriginCloudClient } from "./origin-cloud.ts";
-import { createOriginMcpRoutes, openMcpOAuth, type McpOAuth } from "./origin-mcp.ts";
+import { answerMcpMessage, createOriginMcpRoutes, openMcpOAuth, type McpOAuth } from "./origin-mcp.ts";
 import { dispatchRoutes } from "./routes/table.ts";
 
 const TEAM = "team0000000001";
@@ -165,5 +165,42 @@ describe("origin MCP OAuth", () => {
     expect(forged.status).toBe(400);
     await fetch(`${base}/oauth/revoke`, { method: "POST", body: new URLSearchParams({ token: tokens.access_token, client_id: registered.client_id }) });
     expect((await rpc(base, tokens.access_token, { jsonrpc: "2.0", id: 1, method: "ping" })).status).toBe(401);
+  });
+});
+
+describe("delete_issue", () => {
+  const ISSUE_URL = "https://github.com/acme/widgets/issues/5";
+  const auth = { connectorToken: CONNECTOR, write: true, grantId: "grant1" };
+  const call = { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "delete_issue", arguments: { requestId: "request-0001", projectId: "project000001", taskId: "task0000000001" } } };
+  const convex = (linked: boolean) => {
+    const order: string[] = [];
+    const client: OriginCloudClient = {
+      query: async (name) => { order.push(name); return JSON.stringify({ id: "task0000000001", ...(linked ? { githubIssueUrl: ISSUE_URL } : {}) }); },
+      mutation: async (name) => { order.push(name); return JSON.stringify({ id: "task0000000001" }); },
+    };
+    return { client, order };
+  };
+  const text = (reply: Record<string, any> | null) => reply?.result.content[0].text as string;
+
+  it("removes the linked GitHub issue after Origin deleted the issue, and reports what happened", async () => {
+    const { client, order } = convex(true);
+    const removed: string[][] = [];
+    const reply = await answerMcpMessage(call, auth, client, async (projectId, taskId, issueUrl) => {
+      order.push("github");
+      removed.push([projectId, taskId, issueUrl]);
+      return "GitHub issue #5 was deleted too";
+    });
+    expect(order).toEqual(["connectors:read", "connectors:write", "github"]);
+    expect(removed).toEqual([["project000001", "task0000000001", ISSUE_URL]]);
+    expect(text(reply)).toBe('{"id":"task0000000001"}\nGitHub issue #5 was deleted too.');
+  });
+
+  it("says the GitHub issue is still there when removing it fails, and leaves unlinked issues alone", async () => {
+    const failing = await answerMcpMessage(call, auth, convex(true).client, async () => { throw new Error("Reconnect GitHub in workspace settings"); });
+    expect(text(failing)).toContain(`Its GitHub issue ${ISSUE_URL} is still there: Reconnect GitHub in workspace settings.`);
+    let asked = false;
+    const unlinked = await answerMcpMessage(call, auth, convex(false).client, async () => { asked = true; return ""; });
+    expect(text(unlinked)).toBe('{"id":"task0000000001"}');
+    expect(asked).toBe(false);
   });
 });

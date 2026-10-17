@@ -160,9 +160,9 @@ test("Add a Cloud… sits just under the saved servers only where main offers it
 
 test("native window identity distinguishes hosted HTML, companion data, and the local workspace", () => {
   const state = { environments: [{ id: "old", name: "Old team", origin: "https://old.example" }], activeId: "old" };
-  assert.equal(env.workspaceWindowTitle(state), "OpenMausBot — Hosted: Old team (old.example)");
-  assert.equal(env.workspaceWindowTitle(state, { serverName: "Office", endpoint: "https://c-office.openmausbot.com" }), "OpenMausBot — Connected to: Office (c-office.openmausbot.com)");
-  assert.equal(env.workspaceWindowTitle(env.withActive(state, "local")), "OpenMausBot");
+  assert.equal(env.workspaceWindowTitle(state), "Origin — Hosted: Old team (old.example)");
+  assert.equal(env.workspaceWindowTitle(state, { serverName: "Office", endpoint: "https://c-office.openmausbot.com" }), "Origin — Connected to: Office (c-office.openmausbot.com)");
+  assert.equal(env.workspaceWindowTitle(env.withActive(state, "local")), "Origin");
 });
 
 test("a version 1 file parses as all-remote with kind stamped and activeId preserved, and serializes back as version 2", () => {

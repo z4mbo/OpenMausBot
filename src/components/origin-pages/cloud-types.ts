@@ -27,6 +27,7 @@ export interface CloudColumn {
   title: string;
   order: number;
   isDone?: boolean;
+  isDraft?: boolean;
 }
 
 export interface CloudTask {

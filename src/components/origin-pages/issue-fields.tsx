@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Bot as BotIcon, CalendarDays, Check, ChevronDown, Circle, Search, SignalHigh, SignalLow, SignalMedium, X } from "lucide-react";
+import { Bot as BotIcon, CalendarDays, Check, ChevronDown, Circle, CircleDashed, Search, SignalHigh, SignalLow, SignalMedium, X } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { isDraftColumn } from "../../../shared/origin-columns";
 import type { CloudColumn, CloudPerson, Priority } from "./cloud-types";
 import { CenteredDialog } from "../CenteredDialog";
 import { chipButton } from "./ui";
@@ -23,7 +24,7 @@ export function isDoneColumn(column: CloudColumn): boolean {
 
 export function laneTone(title: string): string {
   const name = title.trim().toLowerCase().replace(/[\s_-]+/g, "");
-  if (name === "idea" || name === "backlog") return "text-ink-tertiary";
+  if (name === "draft" || name === "idea" || name === "backlog") return "text-ink-tertiary";
   if (name === "todo") return "text-ink-secondary";
   if (name === "inprogress" || name === "doing") return "text-warning";
   if (name === "review" || name === "inreview") return "text-accent-text";
@@ -122,8 +123,13 @@ export function DateChip({ value, onChange, disabled, required }: { value: strin
   );
 }
 
+export function ColumnIcon({ column, size = 14, strokeWidth }: { column: CloudColumn; size?: number; strokeWidth?: number }) {
+  const Icon = isDraftColumn(column) ? CircleDashed : Circle;
+  return <Icon size={size} strokeWidth={strokeWidth} className={cn("shrink-0", isDraftColumn(column) ? "text-ink-tertiary" : laneTone(column.title))} aria-hidden="true" />;
+}
+
 export function statusOptions(columns: readonly CloudColumn[]): ChipOption[] {
-  return columns.map((column) => ({ value: column._id, label: column.title, icon: <Circle size={14} className={cn("shrink-0", laneTone(column.title))} aria-hidden="true" /> }));
+  return columns.map((column) => ({ value: column._id, label: column.title, icon: <ColumnIcon column={column} />, hint: isDraftColumn(column) ? "Not on GitHub" : undefined }));
 }
 
 export function priorityOptions(): ChipOption[] {

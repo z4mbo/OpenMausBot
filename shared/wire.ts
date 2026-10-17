@@ -419,7 +419,8 @@ export type CardAnswerer = (
 
 /** One transcript line, serialized as stored. */
 export interface WireMessage {
-  roomRequest?: { id: string; phase: "request" | "result" };
+  /** `sent` marks the requester's own chip for a handoff to another bot's thread; `request` and `result` are the lines in the recipient's and requester's conversations. */
+  roomRequest?: { id: string; phase: "sent" | "request" | "result" };
   id: string;
   role: "bot" | "user";
   kind: "text" | "options" | "activity" | "screen" | "connector" | "secret" | "signin" | "routine.run" | "goal.run" | "digest" | "compaction" | "call" | "widget";

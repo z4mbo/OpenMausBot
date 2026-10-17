@@ -27,7 +27,8 @@ import { createServerSupervisor } from "./server-supervisor.mjs";
 import { serverChildLaunch } from "./server-child-launch.mjs";
 import { packageUrlFromCommandLine, packageUrlFromDeepLink } from "./package-link.mjs";
 import { chatLinkFrom, chatLinkFromCommandLine } from "./chat-link.mjs";
-import { createOrganizationEntry, isOrganizationDeepLink, takeOrganizationDeepLink, organizationRestartIntent, withOrganizationRestartIntent, withoutOrganizationRestartIntent } from "./organization-entry.mjs";
+import { APP_SCHEME } from "./app-scheme.mjs";
+import { createOrganizationEntry, isOrganizationDeepLink, ORGANIZATION_DEEP_LINK, takeOrganizationDeepLink, organizationRestartIntent, withOrganizationRestartIntent, withoutOrganizationRestartIntent } from "./organization-entry.mjs";
 import { windowChromeOptions } from "./window-chrome.mjs";
 import { createAllWindowsClosedQuit } from "./window-all-closed.mjs";
 import { createStartupScreen } from "./startup-screen.mjs";
@@ -115,6 +116,10 @@ const DEV_URL = process.env.ELECTRON_START_URL ?? "http://127.0.0.1:5199";
 const DEFAULT_COMPOSIO_BROKER_URL = "https://openmausbot-composio.milindsoni201.workers.dev";
 let SERVER_PORT = 8799;
 const APP_ICON = path.join(__dirname, "resources/app-icon.png");
+const APP_USER_MODEL_ID = "com.imbored.origin";
+const PACKAGED_DATA_FOLDER = ".origin";
+const DEV_SERVER_DATA_FOLDER = ".openmausbot";
+const DATA_FOLDER = app.isPackaged ? PACKAGED_DATA_FOLDER : DEV_SERVER_DATA_FOLDER;
 let desktopViewerWindow = null;
 let desktopViewerOwner = null;
 let desktopViewerContextId = null;
@@ -217,8 +222,11 @@ if (process.platform === "linux") {
   app.setDesktopName("com.openmausbot.app.desktop");
 }
 
+// electron-builder's NSIS shortcut carries appId as its AppUserModelId; the taskbar and notifications group by it.
+if (process.platform === "win32") app.setAppUserModelId(APP_USER_MODEL_ID);
+
 if (!app.requestSingleInstanceLock()) {
-  console.log("[desktop] OpenMausBot is already running — focusing that window");
+  console.log("[desktop] Origin is already running — focusing that window");
   process.exit(0);
 }
 
@@ -283,7 +291,7 @@ app.on("open-url", (event, url) => {
 
 app.on("second-instance", (_event, commandLine) => {
   if (takeOrganizationDeepLink(commandLine)) {
-    queueOrganizationEntry("openmausbot://organization");
+    queueOrganizationEntry(ORGANIZATION_DEEP_LINK);
     return;
   }
   if (cloudEntry.fromArgs(commandLine)) return;
@@ -361,7 +369,7 @@ const serverSupervisor = createServerSupervisor({
     slog("server recovery paused after repeated failures; quit and reopen to retry");
     dialog.showErrorBox(
       "The bot server stopped",
-      "Automatic recovery could not restart the background server. Quit and reopen OpenMausBot to try again. Interrupted chat turns were not resent.\n\n" +
+      "Automatic recovery could not restart the background server. Quit and reopen Origin to try again. Interrupted chat turns were not resent.\n\n" +
         `Server log: ${path.join(LOG_DIR, "server.log")}`,
     );
   },
@@ -370,7 +378,7 @@ const serverSupervisor = createServerSupervisor({
 
 function desktopDataDir() {
   // An empty OMB_DATA_DIR falls back here too; server/config.ts would not, so the child gets this path.
-  return process.env.OMB_DATA_DIR || path.join(app.getPath("home"), ".openmausbot");
+  return process.env.OMB_DATA_DIR || path.join(app.getPath("home"), DATA_FOLDER);
 }
 
 async function stopUtilityServer(proc, timeoutMs = UTILITY_SERVER_STOP_TIMEOUT_MS) {
@@ -1136,7 +1144,7 @@ async function runCompanyBackup(kind, input, scheduled = null) {
     const status = await localBackupStatus(proc);
     if (status.pendingRestore) {
       publishCompanyBackupState({ busy: false, pendingRestore: true });
-      throw new Error("Restart OpenMausBot to finish the pending restore before starting another backup operation.");
+      throw new Error("Restart Origin to finish the pending restore before starting another backup operation.");
     }
     if (status.busy) throw companyBackupDeferred();
     const transfers = createCompanyBackups({
@@ -1355,8 +1363,8 @@ function buildErrorPage({ allPortsOccupied }) {
   const serverLogPath = path.join(LOG_DIR, "server.log");
   const serverLogHref = pathToFileURL(serverLogPath).href;
   const reason = allPortsOccupied
-    ? "Every OpenMausBot port answered health checks from another process — likely a second copy of the app, or another program on ports 8799–28799. Quit that program, then quit and reopen OpenMausBot."
-    : "The background server didn't come up in time — this is usually slow startup, not a port conflict. Quit and reopen OpenMausBot.";
+    ? "Every Origin port answered health checks from another process — likely a second copy of the app, or another program on ports 8799–28799. Quit that program, then quit and reopen Origin."
+    : "The background server didn't come up in time — this is usually slow startup, not a port conflict. Quit and reopen Origin.";
   return (
     "data:text/html;charset=utf-8," +
     encodeURIComponent(
@@ -1409,7 +1417,7 @@ function desktopViewerErrorPage(message, retryUrl) {
 }
 
 function openDesktopViewer(owner, rawUrl, rawTitle, contextId) {
-  if (!owner || owner.isDestroyed()) throw new Error("The OpenMausBot window is unavailable");
+  if (!owner || owner.isDestroyed()) throw new Error("The Origin window is unavailable");
   const url = desktopViewerUrl(rawUrl);
   const titleCandidate = Object.prototype.toString.call(rawTitle) === "[object String]" ? rawTitle.trim() : "";
   const title = titleCandidate ? titleCandidate.slice(0, 80) : "Live desktop";
@@ -1509,7 +1517,7 @@ function openDesktopViewer(owner, rawUrl, rawTitle, contextId) {
 }
 
 function ensureDesktopWorkspace(owner) {
-  if (!owner || owner.isDestroyed()) throw new Error("The OpenMausBot window is unavailable");
+  if (!owner || owner.isDestroyed()) throw new Error("The Origin window is unavailable");
   if (desktopWorkspaceManager) {
     if (desktopWorkspaceOwner !== owner) {
       throw new Error("The two-desktop view belongs to another app window");
@@ -1722,7 +1730,7 @@ function refreshApplicationMenu() {
       onSwitch: (id) => void workspaceMenuAction(() => switchEnvironment(id)),
       onAddFromClipboard: () => void addServerFromClipboard(),
       onConnect: () => void workspaceMenuAction(openWorkspaceSettings),
-      onOrganizationSignIn: () => queueOrganizationEntry("openmausbot://organization"),
+      onOrganizationSignIn: () => queueOrganizationEntry(ORGANIZATION_DEEP_LINK),
       onForget: (id) => void workspaceMenuAction(() => forgetEnvironment(id)),
       onOpenSettings: () => {
         if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("app:open-settings");
@@ -1752,12 +1760,6 @@ function navigateMainWindow(url) {
 
 let rememberedHome = null;
 
-function acquireDataDirLeaseFor(dir) {
-  return dir === desktopDataDir()
-    ? acquireDataDirLease(dir, { legacyDataDir: path.join(app.getPath("home"), ".opengrokbot") })
-    : acquireDataDirLease(dir);
-}
-
 /** Pause the supervisor first, or its recovery forks on the wrong data dir; resume() stays in the finally. */
 async function switchLocalEnvironmentTo(targetDir, targetId) {
   if (!app.isPackaged) return { ok: false, error: "dev" };
@@ -1769,7 +1771,7 @@ async function switchLocalEnvironmentTo(targetDir, targetId) {
   const failedSwitch = () => {
     dialog.showErrorBox(
       "Could not switch environments",
-      "OpenMausBot could not switch to that environment. The app log has the details.",
+      "Origin could not switch to that environment. The app log has the details.",
     );
     return { ok: false, error: "switch-failed" };
   };
@@ -1791,7 +1793,7 @@ async function switchLocalEnvironmentTo(targetDir, targetId) {
           desktopDataDirLease = null;
         },
         acquireLease: async (dir) => {
-          desktopDataDirLease = acquireDataDirLeaseFor(dir);
+          desktopDataDirLease = acquireDataDirLease(dir);
           runningDataDir = dir;
         },
         createDir: async (dir) => {
@@ -1813,7 +1815,7 @@ async function switchLocalEnvironmentTo(targetDir, targetId) {
             slog(`switch rollback lease release failed: ${error?.message ?? error}`);
           }
           desktopDataDirLease = null;
-          desktopDataDirLease = acquireDataDirLeaseFor(previousDir);
+          desktopDataDirLease = acquireDataDirLease(previousDir);
           runningDataDir = previousDir;
           const restored = await startServerOn(SERVER_PORT, previousDir);
           // startServerOn only watches; without ready() the rolled-back child has no owner.
@@ -1880,7 +1882,7 @@ function createLocalEnvironment(name, dataDir) {
       ? name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
       : "";
     if (typeof name !== "string" || !name.trim()) return { ok: false, error: "name", state };
-    candidateDir = path.join(os.homedir(), `.openmausbot-${slug || randomUUID().slice(0, 8)}`);
+    candidateDir = path.join(os.homedir(), `${DATA_FOLDER}-${slug || randomUUID().slice(0, 8)}`);
   } else {
     candidateDir = typeof dataDir === "string" ? dataDir.trim() : "";
     if (
@@ -2105,7 +2107,7 @@ async function forgetEnvironment(id, purge = false) {
     const resolvedCanon = canonical(resolved);
     const rootCanon = canonical(root);
     if (runningDataDir && canonical(runningDataDir) === resolvedCanon) return { ok: false, error: "active" };
-    if (path.basename(resolved).startsWith(".openmausbot") && resolvedCanon !== rootCanon && !resolvedCanon.startsWith(rootCanon + path.sep)) {
+    if (path.basename(resolved).startsWith(DATA_FOLDER) && resolvedCanon !== rootCanon && !resolvedCanon.startsWith(rootCanon + path.sep)) {
       try {
         await fs.promises.rm(resolved, { recursive: true, force: true });
       } catch (error) {
@@ -2461,9 +2463,9 @@ ipcMain.handle("desktop:export-diagnostics", localOnly("desktop:export-diagnosti
   return result.filePath;
 }));
 
-// The path is renderer-controlled: it must resolve inside ~/.openmausbot to a regular file, never a symlink escape.
+// The path is renderer-controlled: it must resolve inside the data folder to a regular file, never a symlink escape.
 ipcMain.handle("desktop:save-file", localOnly("desktop:save-file", async (event, rawPath) => {
-  return withSavableFile(rawPath, { home: os.homedir() }, async ({ defaultName, copyTo }) => {
+  return withSavableFile(rawPath, { dataDir: desktopDataDir() }, async ({ defaultName, copyTo }) => {
     const parent = BrowserWindow.fromWebContents(event.sender);
     const defaultPath = await defaultSaveName(app.getPath("downloads"), defaultName);
     const choice = await dialog.showSaveDialog(parent ?? undefined, {
@@ -3213,7 +3215,7 @@ app.whenReady().then(async () => {
       persistEnvironments({ ...environmentsState, activeId: LOCAL_ID });
       dialog.showErrorBox(
         "The environment's folder is missing",
-        `${boot.missingDir} is not there anymore, so OpenMausBot came up on this computer's default data folder instead. Restore or remount that folder, then choose the environment again from the Server menu.`,
+        `${boot.missingDir} is not there anymore, so Origin came up on this computer's default data folder instead. Restore or remount that folder, then choose the environment again from the Server menu.`,
       );
     }
     bootDataDir = boot.dataDir;
@@ -3221,21 +3223,19 @@ app.whenReady().then(async () => {
   if (app.isPackaged) {
     try {
       // Acquire before either plaintext credential migration touches config.json.
-      desktopDataDirLease = acquireDataDirLease(bootDataDir, {
-        legacyDataDir: path.join(app.getPath("home"), ".opengrokbot"),
-      });
+      desktopDataDirLease = acquireDataDirLease(bootDataDir);
       runningDataDir = bootDataDir;
     } catch (error) {
       dialog.showErrorBox(
-        "OpenMausBot could not start safely",
-        error?.message ?? "Another process is using this OpenMausBot data folder.",
+        "Origin could not start safely",
+        error?.message ?? "Another process is using this Origin data folder.",
       );
       app.quit();
       return;
     }
   }
   if (app.isPackaged) {
-    app.setAsDefaultProtocolClient("openmausbot");
+    app.setAsDefaultProtocolClient(APP_SCHEME);
     // Chromium adds this header below JavaScript, so a shell using curl cannot impersonate the person at the desktop.
     installDesktopMutationHeader();
   }
@@ -3348,14 +3348,12 @@ app.whenReady().then(async () => {
       }
       desktopDataDirLease = null;
       try {
-        desktopDataDirLease = acquireDataDirLease(desktopDataDir(), {
-          legacyDataDir: path.join(app.getPath("home"), ".opengrokbot"),
-        });
+        desktopDataDirLease = acquireDataDirLease(desktopDataDir());
         runningDataDir = desktopDataDir();
       } catch (error) {
         dialog.showErrorBox(
-          "OpenMausBot could not start safely",
-          error?.message ?? "Another process is using this OpenMausBot data folder.",
+          "Origin could not start safely",
+          error?.message ?? "Another process is using this Origin data folder.",
         );
         app.quit();
         return;
@@ -3364,12 +3362,12 @@ app.whenReady().then(async () => {
       if (retried) {
         dialog.showErrorBox(
           "The environment was unhealthy",
-          `OpenMausBot could not start on ${bootDataDir} and came up on this computer's default data folder instead. Choose that environment again from the Server menu once it is available.`,
+          `Origin could not start on ${bootDataDir} and came up on this computer's default data folder instead. Choose that environment again from the Server menu once it is available.`,
         );
       } else {
         dialog.showErrorBox(
-          "OpenMausBot could not start",
-          `OpenMausBot could not start on ${bootDataDir} or on this computer's default data folder. Check that both folders are readable, then start the app again.`,
+          "Origin could not start",
+          `Origin could not start on ${bootDataDir} or on this computer's default data folder. Check that both folders are readable, then start the app again.`,
         );
         app.quit();
       }

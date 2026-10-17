@@ -396,7 +396,7 @@ export function createCloudMove({ localRequest, fetchImpl = fetch, tempRoot, ava
       } else restartBegins();
       if (now() > deadline) {
         fail("restart_timeout", target?.kind === "cloud" ? "My Cloud is taking longer than usual to restart. Check it again in a few minutes."
-          : `${There()} hasn't come back yet. If it doesn't start again on its own, start OpenMausBot there; it finishes installing the copy when it starts.`);
+          : `${There()} hasn't come back yet. If it doesn't start again on its own, start Origin there; it finishes installing the copy when it starts.`);
       }
     }
   }

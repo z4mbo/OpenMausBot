@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import { fromMarkdown, type Options as MarkdownParseOptions } from "mdast-util-from-markdown";
 import { Check, Copy, Download, LoaderCircle, RotateCcw, WrapText, X } from "lucide-react";
+import { APP_SCHEME } from "@/lib/app-links";
 import { useCopyFeedback } from "@/lib/copy-text";
 import { t } from "@/lib/i18n";
 import { remarkMentions, sameMentionPerson, type MentionPeer, type MentionPerson } from "@/lib/mentions";
@@ -968,7 +969,7 @@ const MARKDOWN_COMPONENTS: Components = {
   },
 };
 
-const MAY_LINK_THREAD = /#|openmausbot/i;
+const MAY_LINK_THREAD = new RegExp(`#|${APP_SCHEME}`, "i");
 const NO_THREAD_REFS: ThreadRefsValue = { threads: [] };
 
 function ChatMarkdownComponent({ text, message, mentionPeers = NO_MENTION_PEERS, everyone = false, mentionPerson, delivered }: {

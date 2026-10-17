@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, type HTMLAttributes, type ReactNode } from "react";
+import { createContext, useContext, useLayoutEffect, useRef, useState, type HTMLAttributes, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/cn";
 
@@ -68,4 +69,30 @@ export function GlassScroller({ className, children, ...rest }: HTMLAttributes<H
       <div className="glass-scroller-content">{children}</div>
     </div>
   );
+}
+
+const GlassHeaderSlot = createContext<HTMLElement | null>(null);
+
+/** A frame whose top glass bar holds `bar` and any rows the page beneath adds with `GlassHeader`, all under one glass. */
+export function GlassHeaderFrame({ bar, barClassName, className, children }: { bar: ReactNode; barClassName?: string; className?: string; children: ReactNode }) {
+  const [slot, setSlot] = useState<HTMLDivElement | null>(null);
+  return (
+    <GlassScrollFrame className={className}>
+      <GlassBar edge="top" className={barClassName}>
+        {bar}
+        <div ref={setSlot} data-glass-header-slot="" />
+      </GlassBar>
+      <GlassHeaderSlot value={slot}>{children}</GlassHeaderSlot>
+    </GlassScrollFrame>
+  );
+}
+
+/** Pins a page's own header rows into the glass bar above it; with no such bar they render in place. */
+export function GlassHeader({ children }: { children: ReactNode }) {
+  const slot = useContext(GlassHeaderSlot);
+  return slot ? createPortal(children, slot) : <>{children}</>;
+}
+
+export function useInGlassHeader(): boolean {
+  return useContext(GlassHeaderSlot) !== null;
 }

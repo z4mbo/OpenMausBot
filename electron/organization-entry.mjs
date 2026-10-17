@@ -1,7 +1,8 @@
+import { APP_SCHEME } from "./app-scheme.mjs";
 import environments from "./environments.cjs";
 import { withoutDesktopCompanionAccess } from "./desktop-companion-client.mjs";
 
-export const ORGANIZATION_DEEP_LINK = "openmausbot://organization";
+export const ORGANIZATION_DEEP_LINK = `${APP_SCHEME}://organization`;
 const RESTART_FIELD = "desktopOrganizationSettingsPending";
 
 // This is an action, not a router: never accept a destination or credential.

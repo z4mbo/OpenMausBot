@@ -275,15 +275,15 @@ const __APP_VERSION__: string;
         state(): Promise<{ maximized: boolean }>;
         onMaximizedChanged(cb: (maximized: boolean) => void): () => void;
       };
-      /** Receives a GitHub package URL opened through openmausbot://install. */
+      /** Receives a GitHub package URL opened through origin-app://install. */
       onPackageInstall?(cb: (url: string) => void): () => void;
-      /** Receives a chat link (openmausbot://thread/… or openmausbot://bot/…)
+      /** Receives a chat link (origin-app://thread/… or origin-app://bot/…)
        * opened from outside the app. */
       onChatLink?(cb: (link: string) => void): () => void;
       /** The desktop shell's app-menu Preferences… item was activated; open
        * app Settings. Local-shell only: remote server pages never receive
        * the channel, and the bridge is absent in the browser. "cloud" is the
-       * openmausbot://cloud link (Settings → OMB Cloud, opened by the link). */
+       * origin-app://cloud link (Settings → OMB Cloud, opened by the link). */
       onOpenAppSettings?(cb: (section?: "organization" | "cloud" | "cloud-settings" | "cloud-add" | "cloud-add-howto") => void): () => void;
       /** Updates the native Dock/taskbar unread indicator. */
       setUnreadCount?(count: number): void;

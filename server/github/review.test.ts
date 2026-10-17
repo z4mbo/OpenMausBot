@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { closingIssueNumbers, mergeBlocker, reviewDecision, type PullDetail } from "./review.ts";
 import { isRepositoryName, repositoryNameFor } from "../../shared/github-repo-name.ts";
 import { issueStateMove } from "./sync.ts";
+import { draftBody } from "./prs.ts";
+import { implementBrief, issueBrief } from "../../shared/origin-issues.ts";
 
 describe("closing keywords", () => {
   it("finds every issue GitHub closes on merge, and nothing else", () => {
@@ -45,6 +47,14 @@ describe("issue state sync", () => {
     expect(issueStateMove({ done: true, githubIssueState: "closed" }, "open")).toBe("pull");
     expect(issueStateMove({ done: true }, "open")).toBe("pull");
   });
+
+  it("parks the GitHub issue of a draft as not planned and reopens it when the issue leaves Draft", () => {
+    expect(issueStateMove({ done: false, draft: true, githubIssueState: "open" }, "open")).toBe("park");
+    expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "closed")).toBe("pull");
+    expect(issueStateMove({ done: false, draft: false, githubIssueState: "closed" }, "closed")).toBe("reopen");
+    expect(issueStateMove({ done: true, draft: true, githubIssueState: "open" }, "open")).toBe("close");
+    expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "open")).toBe("pull");
+  });
 });
 
 describe("repository names", () => {
@@ -57,5 +67,24 @@ describe("repository names", () => {
     expect(isRepositoryName("My-App_2.0")).toBe(true);
     expect(isRepositoryName("bad name")).toBe(false);
     expect(isRepositoryName("..")).toBe(false);
+  });
+});
+
+describe("pull request pipeline text", () => {
+  const issue = { id: "k17abcd", key: "ORI-ABCD", projectName: "Widgets", title: "Fix login", priority: "high", labels: [], githubIssueNumber: 5 };
+
+  it("a draft pull request closes the task's GitHub issue", () => {
+    expect(draftBody({ description: "Build it", githubIssueNumber: 5 })).toBe("Build it\n\nCloses #5");
+    expect(draftBody({ githubIssueNumber: 5 })).toBe("Closes #5");
+    expect(draftBody({ description: "Build it" })).toBe("Build it");
+  });
+
+  it("tells the agent to close the GitHub issue, and the Chief to delegate, review and merge", () => {
+    expect(issueBrief(issue)).toContain('open a pull request whose description says "Closes #5"');
+    const chief = implementBrief(issue);
+    expect(chief).toContain("origin_assign_issue");
+    expect(chief).toContain("origin_merge_pr");
+    expect(chief).toContain("merging closes GitHub issue #5 and completes ORI-ABCD");
+    expect(implementBrief({ ...issue, githubIssueNumber: undefined })).toContain("that references the issue key");
   });
 });

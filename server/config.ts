@@ -784,13 +784,14 @@ export function changedInstanceIds(before: Record<string, unknown>, after: Recor
     .filter((id) => !isDeepStrictEqual(before[id], after[id]));
 }
 
-export const DATA_DIR = process.env.OMB_DATA_DIR ?? join(homedir(), ".openmausbot");
+const DEFAULT_DATA_DIR = join(homedir(), ".openmausbot");
+export const DATA_DIR = process.env.OMB_DATA_DIR ?? DEFAULT_DATA_DIR;
 const LEGACY_DATA_DIR = join(homedir(), ".opengrokbot");
 export const EVENTS_DIR = join(DATA_DIR, "events");
 export const NATIVE_DIR = join(DATA_DIR, "native");
 
 export function ensureDirs() {
-  if (!existsSync(DATA_DIR) && existsSync(LEGACY_DATA_DIR)) {
+  if (DATA_DIR === DEFAULT_DATA_DIR && !existsSync(DATA_DIR) && existsSync(LEGACY_DATA_DIR)) {
     try {
       renameSync(LEGACY_DATA_DIR, DATA_DIR);
     } catch {

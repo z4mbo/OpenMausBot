@@ -12,6 +12,7 @@ import { WorkspaceChat } from "./origin-pages/WorkspaceChatPage";
 import { WorkspaceInbox } from "./origin-pages/WorkspaceInboxPage";
 import { WorkspaceGate } from "./origin-pages/ui";
 import { DrawingCanvas } from "./OriginDraw";
+import { GlassHeaderFrame } from "./GlassScrollFrame";
 import { useBotColor } from "@/lib/origin-avatar-looks";
 import { accentVars } from "@/lib/user-bubble-tone";
 
@@ -59,17 +60,20 @@ export function OriginPageView({ page }: { page: OriginPage }) {
   const accent = accentVars(useBotColor(headBot));
   return (
     <main className="relative flex h-full min-w-0 flex-1 flex-col bg-app" data-origin-page={page} style={accent}>
-      <header className="flex h-14 shrink-0 items-center gap-2.5 border-b border-hairline/40 px-4 pl-11 md:pl-5">
-        <span key={page} className="flex size-8 items-center justify-center rounded-xl bg-raised text-ink-secondary"><Icon size={18} aria-hidden="true" /></span>
-        <h1 key={`${page}-title`} className="text-[15px] font-semibold text-ink origin-rise">{entry.label}</h1>
-        <span className="hidden truncate text-[12.5px] text-ink-tertiary sm:inline">· {head?.name ?? "Workspace"}</span>
-      </header>
-      <WorkspaceGate key={teamId ?? ""} teamId={teamId} head={head} label={entry.contents}>
-        {(ctx) => page === "inbox" ? <WorkspaceInbox {...ctx} />
-          : page === "chat" ? <WorkspaceChat {...ctx} />
-          : page === "call" ? <MemberCall key={ctx.teamId} target={{ teamId: ctx.teamId }} me={ctx.me} canJoin={ctx.canEdit} name={head?.name ?? "Workspace"} agent={headBot} open={() => openOriginPage("call")} />
-          : <DrawingCanvas key={ctx.teamId} teamId={ctx.teamId} userId={ctx.me._id} name="Workspace drawing" readOnly={!ctx.canEdit} agent={headBot} />}
-      </WorkspaceGate>
+      <GlassHeaderFrame className="flex min-h-0 flex-1 flex-col [--glass-tint:var(--color-app)]" barClassName="z-[25]" bar={
+        <header className="flex h-14 shrink-0 items-center gap-2.5 px-4 pl-11 md:pl-5">
+          <span key={page} className="flex size-8 items-center justify-center rounded-xl bg-raised text-ink-secondary"><Icon size={18} aria-hidden="true" /></span>
+          <h1 key={`${page}-title`} className="text-[15px] font-semibold text-ink origin-rise">{entry.label}</h1>
+          <span className="hidden truncate text-[12.5px] text-ink-tertiary sm:inline">· {head?.name ?? "Workspace"}</span>
+        </header>
+      }>
+        <WorkspaceGate key={teamId ?? ""} teamId={teamId} head={head} label={entry.contents}>
+          {(ctx) => page === "inbox" ? <WorkspaceInbox {...ctx} />
+            : page === "chat" ? <WorkspaceChat {...ctx} />
+            : page === "call" ? <MemberCall key={ctx.teamId} target={{ teamId: ctx.teamId }} me={ctx.me} canJoin={ctx.canEdit} name={head?.name ?? "Workspace"} agent={headBot} open={() => openOriginPage("call")} />
+            : <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]"><DrawingCanvas key={ctx.teamId} teamId={ctx.teamId} userId={ctx.me._id} name="Workspace drawing" readOnly={!ctx.canEdit} agent={headBot} /></div>}
+        </WorkspaceGate>
+      </GlassHeaderFrame>
     </main>
   );
 }

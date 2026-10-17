@@ -442,6 +442,7 @@ describe("issue mirroring and two-way state", () => {
       github: {
         "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, html_url: "https://github.com/acme/widgets/issues/5", state: remote, updated_at: "2026-10-16T00:00:00Z" } }),
         "PATCH https://api.github.com/repos/acme/widgets/issues/5": ({ body }) => ({ body: { number: 5, html_url: "https://github.com/acme/widgets/issues/5", state: JSON.parse(body).state, updated_at: "2026-10-17T00:00:00Z" } }),
+        "POST https://api.github.com/repos/acme/widgets/issues/5/comments": () => ({ status: 201, body: {} }),
       },
     });
     harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
@@ -465,6 +466,74 @@ describe("issue mirroring and two-way state", () => {
     expect(closedOnGitHub.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ state: "closed" });
   });
 
+  it("closes the GitHub issue as not planned with a note while its Origin issue is in Draft, and reopens it when it leaves", async () => {
+    const parked = await tickWith({ done: false, draft: true, githubIssueState: "open" }, "open");
+    expect(JSON.parse(parked.network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "closed", state_reason: "not_planned" });
+    expect(JSON.parse(parked.network.requests.find((r) => r.key.endsWith("/issues/5/comments"))!.body).body).toContain("Moved back to Draft in Origin");
+    expect(parked.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ state: "closed" });
+    const stillParked = await tickWith({ done: false, draft: true, githubIssueState: "closed" }, "closed");
+    expect(stillParked.network.requests.some((r) => r.key.startsWith("PATCH") || r.key.endsWith("/comments"))).toBe(false);
+    const left = await tickWith({ done: false, draft: false, githubIssueState: "closed" }, "closed");
+    expect(JSON.parse(left.network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "open" });
+  });
+
+  it("leaves GitHub alone when the Origin backend does not report drafts", async () => {
+    const { network } = await tickWith({ done: false, githubIssueState: "open" }, "open");
+    expect(network.requests.some((r) => r.key.startsWith("PATCH"))).toBe(false);
+  });
+
+  it("never creates a GitHub issue for a draft, even when an older backend lists it as unlinked", async () => {
+    const created: unknown[] = [];
+    const harness = await start({
+      bridge: {
+        pending: () => [], prTargets: () => ({ rows: [], nextCursor: null }), targets: () => ({ rows: [], nextCursor: null }),
+        unlinkedTasks: () => ({ rows: [{ projectId: "p1", taskId: "t1" }], nextCursor: null }),
+        context: () => context({ task: { _id: "t1", title: "Idea", done: false, draft: true } }), linkIssue: () => null,
+      },
+      github: { "POST https://api.github.com/repos/acme/widgets/issues": ({ body }) => { created.push(JSON.parse(body)); return { status: 201, body: {} }; } },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    await harness.call("/api/integrations/tick", signedTick({ at: NOW }));
+    await Promise.all(harness.work);
+    expect(created).toEqual([]);
+  });
+
+  it("mirrors only issues outside Draft on request, says why a draft has none, and syncs linked issues it is asked about", async () => {
+    const created: { title: string }[] = [];
+    const parkedTask = { githubIssueNumber: 5, githubIssueUrl: "https://github.com/acme/widgets/issues/5", githubIssueState: "open", draft: true };
+    const harness = await start({
+      bridge: {
+        context: (args) => context({ task: { _id: args.taskId, title: String(args.taskId), done: false, ...(args.taskId === "t3" ? parkedTask : {}) } }),
+        linkIssue: () => null,
+      },
+      github: {
+        "POST https://api.github.com/repos/acme/widgets/issues": ({ body }) => {
+          created.push(JSON.parse(body));
+          return { status: 201, body: { number: 11, html_url: "https://github.com/acme/widgets/issues/11", state: "open", updated_at: "2026-10-17T00:00:00Z" } };
+        },
+        "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, html_url: "https://github.com/acme/widgets/issues/5", state: "open", updated_at: "2026-10-16T00:00:00Z" } }),
+        "PATCH https://api.github.com/repos/acme/widgets/issues/5": ({ body }) => ({ body: { number: 5, html_url: "https://github.com/acme/widgets/issues/5", state: JSON.parse(body).state, updated_at: "2026-10-17T00:00:00Z" } }),
+        "POST https://api.github.com/repos/acme/widgets/issues/5/comments": () => ({ status: 201, body: {} }),
+      },
+      convex: {
+        "tasks:board": () => ({
+          columns: [{ _id: "draft", title: "Draft", isDraft: true }, { _id: "todo", title: "Todo" }],
+          tasks: [{ _id: "t1", columnId: "todo", done: false }, { _id: "t2", columnId: "draft", done: false }, { _id: "t3", columnId: "draft", done: false, githubIssueNumber: 5 }],
+        }),
+      },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    const all = await harness.call("/api/github/mirror", { method: "POST", session: "member-session", body: JSON.stringify({ projectId: "p1" }) });
+    expect(await all.json()).toEqual({ results: [{ taskId: "t1", issueNumber: 11 }] });
+    expect(created.map((issue) => issue.title)).toEqual(["t1"]);
+    const asked = await harness.call("/api/github/mirror", { method: "POST", session: "member-session", body: JSON.stringify({ projectId: "p1", taskIds: ["t2", "t3"] }) });
+    expect(await asked.json()).toEqual({ results: [
+      { taskId: "t2", error: expect.stringContaining("Draft") },
+      { taskId: "t3", issueNumber: 5 },
+    ] });
+    expect(JSON.parse(harness.network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "closed", state_reason: "not_planned" });
+  });
+
   it("mirrors open issues without a GitHub issue on the tick, and on request for a project", async () => {
     const created: unknown[] = [];
     const harness = await start({
@@ -479,7 +548,7 @@ describe("issue mirroring and two-way state", () => {
           return { status: 201, body: { number: 11, html_url: "https://github.com/acme/widgets/issues/11", state: "open", updated_at: "2026-10-17T00:00:00Z" } };
         },
       },
-      convex: { "tasks:board": () => ({ tasks: [{ _id: "t1", done: false }, { _id: "t2", done: true }, { _id: "t3", done: false, githubIssueNumber: 4 }] }) },
+      convex: { "tasks:board": () => ({ columns: [], tasks: [{ _id: "t1", done: false }, { _id: "t2", done: true }, { _id: "t3", done: false, githubIssueNumber: 4 }] }) },
     });
     harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
     await harness.call("/api/integrations/tick", signedTick({ at: NOW }));
@@ -515,10 +584,34 @@ describe("POST /api/github/pull-requests/review", () => {
     });
     harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
     const merged = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
-    expect(await merged.json()).toEqual({ merged: true, sha: sha40("c") });
+    expect(await merged.json()).toEqual({ merged: true, sha: sha40("c"), completed: [] });
     expect(merges).toHaveLength(1);
     expect(merges[0].authorization).toBe("Bearer workspace-token");
     expect(JSON.parse(merges[0].body)).toMatchObject({ sha: sha40("a"), merge_method: "squash" });
+  });
+
+  it("closes the issues a merged pull request closes and syncs them into Origin at once", async () => {
+    const issue = (state: string) => ({ number: 5, html_url: "https://github.com/acme/widgets/issues/5", state, updated_at: "2026-10-17T11:00:00Z" });
+    const closed: unknown[] = [];
+    const harness = await start({
+      bridge: {
+        context: () => context({ task: { _id: "t1", title: "Login", done: false, githubIssueNumber: 5, githubIssueUrl: "https://github.com/acme/widgets/issues/5", githubIssueState: "open" } }),
+        prEventTargets: () => [],
+        webhookTargets: () => [{ projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", number: 5 }],
+        linkIssue: () => null,
+      },
+      github: {
+        ...prRoutes(),
+        "PUT https://api.github.com/repos/acme/widgets/pulls/8/merge": () => ({ body: { sha: sha40("c"), merged: true } }),
+        "PATCH https://api.github.com/repos/acme/widgets/issues/5": ({ body }) => { closed.push(JSON.parse(body)); return { body: issue("closed") }; },
+        "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: issue("closed") }),
+      },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    const merged = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
+    expect(await merged.json()).toEqual({ merged: true, sha: sha40("c"), completed: [5] });
+    expect(closed).toEqual([{ state: "closed", state_reason: "completed" }]);
+    expect(harness.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ taskId: "t1", number: 5, state: "closed" });
   });
 
   it("refuses to merge while checks fail and never uses the legacy owner token", async () => {
@@ -539,6 +632,96 @@ describe("POST /api/github/pull-requests/review", () => {
     const approved = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "approve", body: "Looks right." }));
     expect(await approved.json()).toEqual({ approved: false });
     expect(events).toEqual(["APPROVE", "COMMENT"]);
+  });
+});
+
+describe("POST /api/github/issues/delete", () => {
+  const ISSUE = "https://api.github.com/repos/acme/widgets/issues/5";
+  const remote = (body = "Build it\n\n<!-- origin-task:t1 -->") => ({ number: 5, node_id: "I_5", html_url: "https://github.com/acme/widgets/issues/5", state: "open", updated_at: "2026-10-16T00:00:00Z", body });
+  const remove = (session = "member-session") => ({ method: "POST", session, body: JSON.stringify({ projectId: "p1", taskId: "t1" }) });
+  const setup = async (github: Record<string, Route>, convex: Record<string, Handler> = {}) => {
+    const harness = await start({
+      bridge: { context: () => context() },
+      convex: {
+        "tasks:details": () => ({ task: { _id: "t1", githubIssueNumber: 5, githubIssueUrl: "https://github.com/acme/widgets/issues/5" } }),
+        "tasks:deleteTask": () => null,
+        ...convex,
+      },
+      github: { "GET https://api.github.com/repos/acme/widgets": () => ({ body: { default_branch: "main" } }), ...github },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    return harness;
+  };
+  const deletedInOrigin = (harness: Awaited<ReturnType<typeof setup>>) => harness.convex.calls.some((call) => call.name === "tasks:deleteTask");
+
+  it("deletes the GitHub issue Origin created, then the Origin issue", async () => {
+    const mutations: unknown[] = [];
+    const harness = await setup({
+      [`GET ${ISSUE}`]: () => ({ body: remote() }),
+      "POST https://api.github.com/graphql": ({ body }) => { mutations.push(JSON.parse(body)); return { body: { data: { deleteIssue: { clientMutationId: null } } } }; },
+    });
+    const response = await harness.call("/api/github/issues/delete", remove());
+    expect(await response.json()).toEqual({ github: { outcome: "deleted", number: 5 }, message: "Deleted the issue; GitHub issue #5 was deleted too." });
+    expect(mutations).toEqual([{ query: expect.stringContaining("deleteIssue"), variables: { id: "I_5" } }]);
+    expect(harness.network.requests.every((request) => request.headers.authorization === "Bearer workspace-token")).toBe(true);
+    expect(deletedInOrigin(harness)).toBe(true);
+  });
+
+  it("closes it as not planned with a note when the connection may not delete issues", async () => {
+    const writes: { key: string; body: unknown }[] = [];
+    const record: Route = ({ method, body }) => { writes.push({ key: method, body: JSON.parse(body) }); return { body: remote() }; };
+    const harness = await setup({
+      [`GET ${ISSUE}`]: () => ({ body: remote() }),
+      "POST https://api.github.com/graphql": () => ({ body: { data: { deleteIssue: null }, errors: [{ type: "FORBIDDEN", message: "octo does not have the correct permissions to execute `DeleteIssue`" }] } }),
+      [`PATCH ${ISSUE}`]: record,
+      [`POST ${ISSUE}/comments`]: record,
+    });
+    const result = await (await harness.call("/api/github/issues/delete", remove())).json() as { github: unknown; message: string };
+    expect(result.github).toEqual({ outcome: "closed", number: 5, reason: "Origin's GitHub connection is not an admin of this repository" });
+    expect(result.message).toContain("closed as not planned");
+    expect(writes).toEqual([
+      { key: "PATCH", body: { state: "closed", state_reason: "not_planned" } },
+      { key: "POST", body: { body: expect.stringContaining("Deleted in Origin (ORI-T1)") } },
+    ]);
+    expect(deletedInOrigin(harness)).toBe(true);
+  });
+
+  it("only closes an issue Origin did not create", async () => {
+    const harness = await setup({
+      [`GET ${ISSUE}`]: () => ({ body: remote("Reported by a customer") }),
+      [`PATCH ${ISSUE}`]: () => ({ body: remote() }),
+      [`POST ${ISSUE}/comments`]: () => ({ body: {} }),
+    });
+    const result = await (await harness.call("/api/github/issues/delete", remove())).json() as { github: unknown; message: string };
+    expect(result.github).toMatchObject({ outcome: "closed", reason: "it was not created by Origin" });
+    expect(harness.network.requests.some((request) => request.key.endsWith("/graphql"))).toBe(false);
+  });
+
+  it("treats an issue already gone from GitHub as removed", async () => {
+    const harness = await setup({ [`GET ${ISSUE}`]: () => ({ status: 410 }) });
+    expect(await (await harness.call("/api/github/issues/delete", remove())).json()).toMatchObject({ github: { outcome: "missing", number: 5 } });
+    expect(deletedInOrigin(harness)).toBe(true);
+  });
+
+  it("keeps the Origin issue when GitHub fails, and says so when Origin fails after GitHub", async () => {
+    const down = await setup({ [`GET ${ISSUE}`]: () => ({ status: 502 }) });
+    const failed = await down.call("/api/github/issues/delete", remove());
+    expect(failed.status).toBe(400);
+    expect(deletedInOrigin(down)).toBe(false);
+    const rejected = await setup({
+      [`GET ${ISSUE}`]: () => ({ body: remote() }),
+      "POST https://api.github.com/graphql": () => ({ body: { data: { deleteIssue: { clientMutationId: null } } } }),
+    }, { "tasks:deleteTask": () => { throw new Error("Task not found"); } });
+    const partial = await rejected.call("/api/github/issues/delete", remove());
+    expect(partial.status).toBe(502);
+    expect(await partial.json()).toEqual({ error: "GitHub issue #5 was deleted too, but Origin could not delete the issue: Task not found", github: { outcome: "deleted", number: 5 } });
+  });
+
+  it("refuses a viewer before touching GitHub", async () => {
+    const harness = await setup({}, { "projects:get": () => ({ _id: "p1", teamId: "team1", repoUrl: "https://github.com/acme/widgets", memberRole: "viewer", githubWorkspaceAccess: true }) });
+    expect((await harness.call("/api/github/issues/delete", remove())).status).toBe(400);
+    expect(harness.network.requests).toEqual([]);
+    expect(deletedInOrigin(harness)).toBe(false);
   });
 });
 

@@ -9,6 +9,7 @@ import {
   AgentChip, ChipSelect, DateChip, IssueChips, IssueDialog, ProjectDot, isDoneColumn, issueDescriptionClass, issueTitleClass, memberOptions, priorityOptions, statusOptions,
   type CreatedIssue, type IssueAgent,
 } from "./issue-fields";
+import { isDraftColumn } from "../../../shared/origin-columns";
 
 export interface ComposerProject { id: string; name: string; memberRole?: string; icon?: ReactNode }
 
@@ -123,7 +124,7 @@ function IssueForm({ project, initialColumnId, initialDraft, myEmail, agents, ac
   const asked = useRef(false);
   const titleInput = useRef<HTMLTextAreaElement>(null);
   const columns = (board?.columns ?? []).filter((column) => !isDoneColumn(column)).sort((a, b) => a.order - b.order);
-  const column = columns.find((item) => item._id === columnId) ?? columns.find((item) => item.title.trim().toLowerCase() === "todo") ?? columns[0];
+  const column = columns.find((item) => item._id === columnId) ?? columns.find(isDraftColumn) ?? columns.find((item) => item.title.trim().toLowerCase() === "todo") ?? columns[0];
   const chosenAssignee = assignee || (people?.some((person) => person.email === myEmail) ? myEmail ?? "" : "");
 
   useEffect(() => {

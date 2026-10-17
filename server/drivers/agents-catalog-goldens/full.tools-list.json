@@ -1789,7 +1789,7 @@
           },
           "column": {
             "type": "string",
-            "description": "Column title or id; default Todo, else the first open column."
+            "description": "Column title or id; default Draft, which gets no GitHub issue until moved out of it."
           },
           "assignee": {
             "type": "string",

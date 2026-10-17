@@ -13,13 +13,18 @@ import {
   GitHubHttpError, verifyIntegration, workspaceGitHubToken, type GitHubEnv, type GitHubService,
 } from "../github/service.ts";
 import { createGitHubStore, RateLimited, type GithubState } from "../github/store.ts";
-import { approvePullRequest, listPullRequests, mergePullRequest, withProjectGitHub } from "../github/review.ts";
-import { createGitHubTask, createProjectRepository, mirrorTasks, mirrorUnlinkedPage, syncGitHubEvent, syncGitHubPage } from "../github/sync.ts";
+import { approvePullRequest, listPullRequests, mergeAndComplete, withProjectGitHub } from "../github/review.ts";
+import {
+  createGitHubTask, createProjectRepository, DRAFT_STAYS_LOCAL, mirrorTasks, mirrorUnlinkedPage, removalSentence, removeGitHubIssue, syncGitHubEvent, syncGitHubPage,
+  syncLinkedTask, type MirrorResult,
+} from "../github/sync.ts";
 import { parseGitHubEvent, verifyGitHubSignature, WEBHOOK_EVENTS, WEBHOOK_MAX_BYTES } from "../github/webhook.ts";
 import { isRepositoryName } from "../../shared/github-repo-name.ts";
+import { isDraftColumn } from "../../shared/origin-columns.ts";
 import { PASS, type PublicRouteHandler, type RouteHandler } from "./table.ts";
 
 type Args = Record<string, unknown>;
+type BoardColumn = { _id: string; title: string; isDraft?: boolean };
 type Project = { _id: string; teamId?: string; repoUrl?: string; memberRole?: string; ownerEmail?: string; githubWorkspaceAccess?: boolean; githubTaskMode?: string };
 type OriginUser = { _id: string; email: string };
 type WorkspaceUser = OriginUser & { teamId: string; workspaceRole: string; slug: string };
@@ -215,10 +220,35 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
           // Creating an issue as a workspace admin also approves the repository; the mutation checks workspace admin, not the project role.
           if (workspace.connectedBy) await convex.mutation("integrations:approveRepository", { sessionToken, projectId: project._id, repoUrl: project.repoUrl });
         }
-        const details = await convex.query("tasks:details", { sessionToken, projectId: project._id, taskId: body.taskId }) as { task: { githubTaskMode?: string } };
+        const details = await convex.query("tasks:details", { sessionToken, projectId: project._id, taskId: body.taskId }) as { task: { columnId: string; githubTaskMode?: string }; columns: BoardColumn[] };
+        if (details.columns.some((column) => column._id === details.task.columnId && isDraftColumn(column))) throw new Error(DRAFT_STAYS_LOCAL);
         const asPullRequest = details.task.githubTaskMode === "pull_request" || (!details.task.githubTaskMode && project.githubTaskMode === "pull_request");
         return json(res, 200, asPullRequest ? await createTaskPR(service, sessionToken, body.projectId, body.taskId) : await createGitHubTask(service, body.projectId, body.taskId));
       } catch (error) { return failure(res, json, error, "GitHub issue creation failed"); }
+    }
+
+    if (path === "/api/github/issues/delete" && method === "POST") {
+      try {
+        const body = JSON.parse(await readBoundedText(req, 2_000)) as Args;
+        if (typeof body.projectId !== "string" || typeof body.taskId !== "string") throw new Error("Project and issue required");
+        const sessionToken = originSession(req, body);
+        const { user, project } = await githubProject(service, sessionToken, body.projectId, true);
+        store.limit(`github-delete:${user._id}`, 20, MINUTE);
+        const key = `delete-issue:${body.taskId}`;
+        if (!store.lockJob(key)) throw new Error("This issue is already being deleted");
+        try {
+          const convex = service.convex();
+          const details = await convex.query("tasks:details", { sessionToken, projectId: project._id, taskId: body.taskId }) as { task: { githubIssueUrl?: string } };
+          const github = details.task.githubIssueUrl ? await removeGitHubIssue(service, project._id, body.taskId, details.task.githubIssueUrl) : null;
+          try {
+            await convex.mutation("tasks:deleteTask", { sessionToken, projectId: project._id, taskId: body.taskId });
+          } catch (error) {
+            const reason = error instanceof Error ? error.message : "unknown error";
+            return json(res, 502, { error: `${github ? `${removalSentence(github)}, but ` : ""}Origin could not delete the issue: ${reason}`, github });
+          }
+          return json(res, 200, { github, message: github ? `Deleted the issue; ${removalSentence(github)}.` : "Deleted the issue." });
+        } finally { store.saveJob(key, "done"); }
+      } catch (error) { return failure(res, json, error, "Issue deletion failed"); }
     }
 
     if (path === "/api/github/pull-requests" && method === "POST") {
@@ -283,10 +313,23 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const { user, project } = await githubProject(service, sessionToken, body.projectId, true);
         if (!project.repoUrl) return json(res, 200, { results: [] });
         store.limit(`github-mirror:${user._id}`, 12, MINUTE);
-        const board = await service.convex().query("tasks:board", { sessionToken, projectId: project._id }) as { tasks: { _id: string; done: boolean; githubIssueNumber?: number }[] };
+        const board = await service.convex().query("tasks:board", { sessionToken, projectId: project._id }) as {
+          columns: BoardColumn[]; tasks: { _id: string; columnId: string; done: boolean; githubIssueNumber?: number }[];
+        };
         const wanted = Array.isArray(body.taskIds) ? new Set(body.taskIds.filter((id): id is string => typeof id === "string")) : null;
-        const taskIds = board.tasks.filter((task) => !task.done && !task.githubIssueNumber && (!wanted || wanted.has(task._id))).slice(0, MIRROR_BATCH).map((task) => task._id);
-        return json(res, 200, { results: await mirrorTasks(service, project._id, taskIds) });
+        const drafts = new Set(board.columns.filter(isDraftColumn).map((column) => column._id));
+        const open = board.tasks.filter((task) => !task.done && (!wanted || wanted.has(task._id)));
+        const taskIds = open.filter((task) => !task.githubIssueNumber && !drafts.has(task.columnId)).slice(0, MIRROR_BATCH).map((task) => task._id);
+        const results = await mirrorTasks(service, project._id, taskIds);
+        if (wanted) results.push(...open.filter((task) => !task.githubIssueNumber && drafts.has(task.columnId)).map((task) => ({ taskId: task._id, error: DRAFT_STAYS_LOCAL })));
+        const linked = wanted ? open.flatMap((task) => (task.githubIssueNumber ? [{ taskId: task._id, issueNumber: task.githubIssueNumber }] : [])) : [];
+        for (const { taskId, issueNumber } of linked.slice(0, MIRROR_BATCH)) {
+          results.push(await syncLinkedTask(service, project._id, taskId, issueNumber).then(
+            (): MirrorResult => ({ taskId, issueNumber }),
+            (error: unknown): MirrorResult => ({ taskId, issueNumber, error: error instanceof Error ? error.message : "GitHub issue sync failed" }),
+          ));
+        }
+        return json(res, 200, { results });
       } catch (error) { return failure(res, json, error, "GitHub issue mirroring failed"); }
     }
 
@@ -304,7 +347,7 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const headSha = typeof body.headSha === "string" ? body.headSha : undefined;
         const result = await withProjectGitHub<object>(service, project._id, (token, repoUrl) => body.action === "approve"
           ? approvePullRequest(service, repoUrl, number, token, comment || "Approved in Origin.")
-          : mergePullRequest(service, repoUrl, number, token, headSha).then(({ sha }) => ({ merged: true, sha })));
+          : mergeAndComplete(service, project._id, repoUrl, number, token, headSha).then(({ sha, completed }) => ({ merged: true, sha, completed })));
         return json(res, 200, result);
       } catch (error) { return failure(res, json, error, "Pull request review failed"); }
     }

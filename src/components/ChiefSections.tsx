@@ -11,9 +11,9 @@ import { useShowThreads } from "@/lib/thread-preferences";
 import { cn } from "@/lib/cn";
 import { BotAvatar } from "./Avatar";
 import { ProjectAgentsPage } from "./ProjectAgentsPage";
-import { AssignIssueDialog, AssetsPage, CallPage, FeedbackPage, IssuesPage, ProjectSettingsPage, RepoPage, TeamChatPage, VaultPage, issueBrief, type AssignableIssue } from "./origin-pages";
+import { AssignIssueDialog, AssetsPage, CallPage, FeedbackPage, IssuesPage, ProjectSettingsPage, RepoPage, TeamChatPage, VaultPage, implementBrief, issueBrief, type AssignableIssue } from "./origin-pages";
 import { useCloudProjectFor, useCloudWorkspaceFor } from "@/lib/origin-cloud-links";
-import { GlassBar, GlassScrollFrame } from "./GlassScrollFrame";
+import { GlassHeaderFrame } from "./GlassScrollFrame";
 import { openOriginPage } from "@/lib/origin-pages";
 import { ProjectDrawPage } from "./OriginDraw";
 import { requestIssueFocus } from "@/lib/origin-issue-focus";
@@ -47,13 +47,13 @@ export function teamUnread(bots: readonly Bot[], chief: Bot): number {
   return teamAgents(bots, chief).filter((agent) => botShowsUnread(agent)).reduce((sum, agent) => sum + unreadReplies(agent), 0);
 }
 
-/** A section page under the project bar: the bar is glass and the page scrolls beneath it, as the chat does. */
+/** A section page under the project bar: the bar and the page's own header share one glass and the page scrolls beneath both, as the chat does. */
 export function ChiefSectionFrame({ bot, section, onSection }: { bot: Bot; section: Exclude<ChiefSection, "chat">; onSection(section: ChiefSection): void }) {
   return (
-    <GlassScrollFrame className="flex min-h-0 flex-1 flex-col [--glass-tint:var(--color-app)]">
-      <GlassBar edge="top" className="z-[25] pb-1.5"><ChiefSectionBar bot={bot} section={section} onSection={onSection} joined /></GlassBar>
+    <GlassHeaderFrame className="flex min-h-0 flex-1 flex-col [--glass-tint:var(--color-app)]" barClassName="z-[25] pb-1.5"
+      bar={<ChiefSectionBar bot={bot} section={section} onSection={onSection} joined />}>
       <ChiefSectionPanel key={section} bot={bot} section={section} />
-    </GlassScrollFrame>
+    </GlassHeaderFrame>
   );
 }
 
@@ -131,7 +131,7 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   if (section === "issues") {
     const team = [bot, ...teamAgents(state.bots, bot)];
     const handOff = (issue: AssignableIssue, agent: Bot) => {
-      dispatch({ type: "send", botId: agent.id, text: issueBrief(issue) });
+      dispatch({ type: "send", botId: agent.id, text: agent.id === bot.id ? implementBrief(issue) : issueBrief(issue) });
       setAssigning(null);
       openBot(dispatch, agent, showThreads);
     };
@@ -142,7 +142,7 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
           const agent = agentId ? team.find((candidate) => candidate.id === agentId) : undefined;
           if (agent) handOff(issue, agent);
           else setAssigning(issue);
-        }} />
+        }} chief={{ name: bot.name, implement: (issue) => dispatch({ type: "send", botId: bot.id, text: implementBrief(issue) }) }} />
         {assigning && <AssignIssueDialog issue={assigning} agents={team} onPick={(agent) => handOff(assigning, agent)} onClose={() => setAssigning(null)} />}
       </>
     );

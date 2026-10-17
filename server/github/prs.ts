@@ -14,7 +14,7 @@ const githubPR = z.object({
 type GitHubPR = z.infer<typeof githubPR>;
 export type PRSnapshot = { number: number; url: string; branch: string; headSha: string; baseSha: string; state: "draft" | "open" | "closed" | "merged"; checks: string; review: string; mergeable: boolean | null; githubUpdatedAt: number };
 
-type TaskDoc = { _id: string; title: string; description?: string; githubTaskBranch?: string };
+type TaskDoc = { _id: string; title: string; description?: string; githubTaskBranch?: string; githubIssueNumber?: number };
 type Context = { project: { repoUrl?: string }; task: TaskDoc; existingPR?: { number: number } | null };
 type Target = { _id: string; projectId: string; url: string; number: number };
 type OpenedPR = { status: "opened"; number: number; url: string; state: string; id: string };
@@ -118,6 +118,11 @@ async function prepareDraftBranch(service: GitHubService, context: Context, appT
   return branch;
 }
 
+/** Merging the draft closes the task's GitHub issue, which completes it in Origin. */
+export function draftBody(task: Pick<TaskDoc, "description" | "githubIssueNumber">): string {
+  return [task.description?.trim(), task.githubIssueNumber ? `Closes #${task.githubIssueNumber}` : ""].filter(Boolean).join("\n\n");
+}
+
 export async function createTaskPR(service: GitHubService, sessionToken: string, projectId: string, taskId: string) {
   const context = await service.bridge<Context>("prHumanContext", { sessionToken, projectId, taskId, choosePR: true });
   const repoUrl = context.project.repoUrl ?? "";
@@ -129,7 +134,7 @@ export async function createTaskPR(service: GitHubService, sessionToken: string,
       if (repositoryPath(current.project.repoUrl ?? "") !== repositoryPath(repoUrl)) throw new Error("PR repository changed during authorization");
       if (context.existingPR) return readPRSnapshot(service, repoUrl, context.existingPR.number, appToken);
       const branch = await prepareDraftBranch(service, context, appToken);
-      return openPR(service, repoUrl, taskId, branch, context.task.title, context.task.description ?? "", appToken);
+      return openPR(service, repoUrl, taskId, branch, context.task.title, draftBody(context.task), appToken);
     });
     const result = await service.bridge<OpenedPR>("prFinalize", { sessionToken, projectId, taskId, snapshot });
     return { ...result, ok: true, message: `Linked draft PR #${result.number}` };

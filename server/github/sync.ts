@@ -1,4 +1,5 @@
 import { repositoryNameFor } from "../../shared/github-repo-name.ts";
+import { originIssueKey } from "../../shared/origin-issues.ts";
 import { jobPayload } from "./store.ts";
 import { parseGitHubRepo, repoName } from "./repo.ts";
 import { GitHubHttpError, githubRequest, workspaceGitHubToken, type GitHubService } from "./service.ts";
@@ -9,7 +10,11 @@ export type IntegrationContext = {
   legacyOwner: boolean;
   project: { _id: string; teamId?: string; name: string; status?: string; description?: string; repoUrl?: string; githubRepoId?: number; githubWorkspaceAccess?: boolean };
   connection: Connection | null;
-  task: { _id: string; title: string; description?: string; done: boolean; githubIssueNumber?: number; githubIssueUrl?: string; githubIssueState?: "open" | "closed" } | null;
+  task: {
+    _id: string; title: string; description?: string; done: boolean; githubIssueNumber?: number; githubIssueUrl?: string; githubIssueState?: "open" | "closed";
+    /** In the board's draft column. Absent from Origin Cloud deployments without draft columns. */
+    draft?: boolean;
+  } | null;
 };
 type GitHubIssue = { number: number; html_url: string; state: "open" | "closed"; updated_at: string; body?: string; pull_request?: unknown };
 type Target = { projectId: string; taskId: string; repoUrl: string; number: number };
@@ -128,6 +133,7 @@ export async function createGitHubTask(service: GitHubService, projectId: string
   if (!task || !repo) throw new Error("Connect a GitHub repository first");
   const repoUrl = `https://github.com/${repo.owner}/${repo.repo}`;
   if (task.githubIssueNumber) return { ok: true, issueNumber: task.githubIssueNumber, issueUrl: task.githubIssueUrl, message: `Already linked to GitHub #${task.githubIssueNumber}` };
+  if (task.draft) throw new Error(DRAFT_STAYS_LOCAL);
   if (!token) throw new Error(connection && !project.githubWorkspaceAccess
     ? "GitHub is connected. A workspace admin must enable this repository in the project's Repo tab."
     : "A workspace admin needs to reconnect GitHub in Settings > Integrations");
@@ -156,31 +162,109 @@ export async function createGitHubTask(service: GitHubService, projectId: string
   }
 }
 
-export type IssueStateMove = "pull" | "close" | "reopen";
+export const DRAFT_STAYS_LOCAL = "This issue is in Draft, which stays in Origin. Move it to another column to create its GitHub issue.";
+
+/** `park` closes the GitHub issue of an Origin issue moved back to Draft as not planned, until it leaves Draft. */
+export type IssueStateMove = "pull" | "close" | "park" | "reopen";
+
+const STATE_PATCH: Record<Exclude<IssueStateMove, "pull">, object> = {
+  close: { state: "closed", state_reason: "completed" },
+  park: { state: "closed", state_reason: "not_planned" },
+  reopen: { state: "open" },
+};
 
 /**
  * Three-way merge of an issue's open/closed state: `githubIssueState` is what Origin last saw on GitHub, so a change on
- * GitHub since then wins, and otherwise a different Origin state is pushed to GitHub.
+ * GitHub since then wins, and otherwise a different Origin state is pushed to GitHub. An open issue in Draft counts
+ * as closed.
  */
-export function issueStateMove(task: { done: boolean; githubIssueState?: "open" | "closed" }, remote: "open" | "closed"): IssueStateMove {
-  const local = task.done ? "closed" : "open";
+export function issueStateMove(task: { done: boolean; draft?: boolean; githubIssueState?: "open" | "closed" }, remote: "open" | "closed"): IssueStateMove {
+  const parked = !task.done && task.draft === true;
+  const local = task.done || parked ? "closed" : "open";
   if (!task.githubIssueState || remote !== task.githubIssueState || local === remote) return "pull";
-  return task.done ? "close" : "reopen";
+  if (local === "open") return "reopen";
+  return parked ? "park" : "close";
 }
 
-async function syncTarget(service: GitHubService, target: Target) {
+async function syncTarget(service: GitHubService, target: Pick<Target, "projectId" | "taskId" | "number">) {
   const { token, repo, task } = await contextWithToken(service, target.projectId, target.taskId);
   if (!repo || !token) throw new Error("Repository sync needs an authorized GitHub connection");
   const path = `/repos/${repo.owner}/${repo.repo}/issues/${target.number}`;
   let issue = await githubRequest<GitHubIssue>(service, path, token);
   if (issue.pull_request) return;
   const move = task ? issueStateMove(task, issue.state) : "pull";
-  if (move !== "pull") {
-    issue = await githubRequest<GitHubIssue>(service, path, token, {
-      method: "PATCH", body: JSON.stringify(move === "close" ? { state: "closed", state_reason: "completed" } : { state: "open" }),
-    });
+  if (move !== "pull") issue = await githubRequest<GitHubIssue>(service, path, token, { method: "PATCH", body: JSON.stringify(STATE_PATCH[move]) });
+  if (move === "park") {
+    await githubRequest(service, `${path}/comments`, token, {
+      method: "POST", body: JSON.stringify({ body: `Moved back to Draft in Origin (${originIssueKey(target.taskId)}), so this issue is closed as not planned. It reopens when the issue leaves Draft.` }),
+    }).catch(() => undefined);
   }
   await link(service, target.projectId, target.taskId, `https://github.com/${repo.owner}/${repo.repo}`, issue);
+}
+
+/** Pushes one linked issue's Origin state (done, or parked in Draft) to GitHub now instead of on the next sync. */
+export async function syncLinkedTask(service: GitHubService, projectId: string, taskId: string, number: number) {
+  await syncTarget(service, { projectId, taskId, number });
+}
+
+export type GitHubIssueRemoval = {
+  outcome: "deleted" | "closed" | "missing";
+  number: number;
+  /** Why a closed issue could not be deleted. */
+  reason?: string;
+};
+
+type GraphQLReply = { data?: unknown; errors?: { type?: string; message?: string }[] };
+
+async function issueOrGone(service: GitHubService, repoPath: string, number: number, token: string): Promise<(GitHubIssue & { node_id: string }) | null> {
+  try { return await githubRequest(service, `${repoPath}/issues/${number}`, token); }
+  catch (error) {
+    if (!(error instanceof GitHubHttpError) || ![404, 410].includes(error.status)) throw error;
+    await githubRequest(service, repoPath, token);
+    return null;
+  }
+}
+
+/**
+ * Deletes the GitHub issue Origin created for this task. GitHub lets only repository admins delete issues, so without
+ * that right, or for an issue Origin did not create, it is closed as not planned with a note instead.
+ */
+export async function removeGitHubIssue(service: GitHubService, projectId: string, taskId: string, issueUrl: string): Promise<GitHubIssueRemoval> {
+  const { repo, token } = await contextWithToken(service, projectId);
+  if (!repo) throw new Error("This project has no GitHub repository");
+  const repoUrl = `https://github.com/${repo.owner}/${repo.repo}`;
+  const linked = /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/issues\/(\d{1,9})$/.exec(issueUrl);
+  if (!linked || linked[1].toLowerCase() !== repoUrl.toLowerCase()) throw new Error("This issue is linked to another repository; remove its GitHub issue there");
+  const number = Number(linked[2]);
+  if (!token) throw new Error("A workspace admin needs to reconnect GitHub in Settings > Integrations");
+  const repoPath = `/repos/${repo.owner}/${repo.repo}`;
+  const issue = await issueOrGone(service, repoPath, number, token);
+  if (!issue) return { outcome: "missing", number };
+  if (issue.pull_request) throw new Error(`GitHub #${number} is a pull request, not an issue`);
+  let reason = "it was not created by Origin";
+  if (issue.body?.includes(`<!-- origin-task:${taskId} -->`)) {
+    const reply = await githubRequest<GraphQLReply>(service, "/graphql", token, {
+      method: "POST", body: JSON.stringify({ query: "mutation($id:ID!){deleteIssue(input:{issueId:$id}){clientMutationId}}", variables: { id: issue.node_id } }),
+    }).catch((error: unknown): GraphQLReply => {
+      if (error instanceof GitHubHttpError && error.status === 403) return { errors: [{ type: "FORBIDDEN" }] };
+      throw error;
+    });
+    if (!reply.errors?.length) return { outcome: "deleted", number };
+    reason = reply.errors.some((error) => error.type === "FORBIDDEN")
+      ? "Origin's GitHub connection is not an admin of this repository"
+      : `GitHub refused to delete it (${(reply.errors[0].message ?? "unknown error").slice(0, 200)})`;
+  }
+  await githubRequest(service, `${repoPath}/issues/${number}`, token, { method: "PATCH", body: JSON.stringify({ state: "closed", state_reason: "not_planned" }) });
+  await githubRequest(service, `${repoPath}/issues/${number}/comments`, token, {
+    method: "POST", body: JSON.stringify({ body: `Deleted in Origin (${originIssueKey(taskId)}), so this issue is closed as not planned.` }),
+  }).catch(() => undefined);
+  return { outcome: "closed", number, reason };
+}
+
+export function removalSentence(removal: GitHubIssueRemoval): string {
+  if (removal.outcome === "deleted") return `GitHub issue #${removal.number} was deleted too`;
+  if (removal.outcome === "missing") return `GitHub issue #${removal.number} was already gone`;
+  return `GitHub issue #${removal.number} was closed as not planned with a note instead of deleted, because ${removal.reason ?? "it could not be deleted"}`;
 }
 
 export type MirrorResult = { taskId: string; issueNumber?: number; error?: string };

@@ -610,6 +610,7 @@ import { createOriginMemberRoutes } from "./origin-members.ts";
 import { createOriginMcpRoutes } from "./origin-mcp.ts";
 import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService } from "./routes/github.ts";
 import { originGitHub } from "./github/review.ts";
+import { removalSentence, removeGitHubIssue } from "./github/sync.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
 import { createBotPatchRoutes } from "./routes/bot-patch.ts";
 import { createBotLifecycleRoutes } from "./routes/bot-lifecycle.ts";
@@ -13876,8 +13877,11 @@ const callAgents = createCallAgents({
   log: (line) => console.log(line),
 });
 ROUTES.push(createOriginMemberRoutes({ callAgents }));
-PUBLIC_ROUTES.push(createOriginMcpRoutes({ publicUrl }));
 const githubService = createGitHubService({ serverPublicUrl: publicUrl });
+PUBLIC_ROUTES.push(createOriginMcpRoutes({
+  publicUrl,
+  removeGitHubIssue: async (projectId, taskId, issueUrl) => removalSentence(await removeGitHubIssue(githubService(), projectId, taskId, issueUrl)),
+}));
 ROUTES.push(createGitHubRoutes({ service: githubService }));
 PUBLIC_ROUTES.push(createGitHubPublicRoutes({ service: githubService }));
 ROUTES.push(createBotSettingsRoutes({
@@ -15669,7 +15673,8 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
                 tool: { name: "Sent to " + recipient.name + (destination && destination.id !== source?.id ? " · " + destination.name : ""), ok: true,
                   ...(call.reason ? { output: call.reason } : {}) },
                 ...(destination && !lane ? { comm: { groupId: destination.id, threadId: node.threadId, withBotId: recipient.id, withName: recipient.name, withColor: recipient.color } }
-                  : { threadRef: { botId: recipient.id, threadId: node.threadId, title: store.taskByThread(recipient.id, node.threadId)?.title ?? "Teammate work" } }),
+                  : { threadRef: { botId: recipient.id, threadId: node.threadId, title: store.taskByThread(recipient.id, node.threadId)?.title ?? "Teammate work" },
+                    roomRequest: { id: node.id, phase: "sent" } }),
               });
             }
           } catch (error) {

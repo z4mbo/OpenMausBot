@@ -1,6 +1,8 @@
-// openmausbot://thread/<thread-id>?bot=<bot-id> and openmausbot://bot/<bot-id>. The page checks them strictly against
+import { APP_SCHEME } from "./app-scheme.mjs";
+
+// <scheme>://thread/<thread-id>?bot=<bot-id> and <scheme>://bot/<bot-id>. The page checks them strictly against
 // its chats; opening one never sends, interrupts or creates anything.
-const CHAT_LINK_PREFIXES = ["openmausbot://thread/", "openmausbot://bot/"];
+const CHAT_LINK_PREFIXES = [`${APP_SCHEME}://thread/`, `${APP_SCHEME}://bot/`];
 const MAX_LINK_LENGTH = 1024;
 
 export function chatLinkFrom(value) {

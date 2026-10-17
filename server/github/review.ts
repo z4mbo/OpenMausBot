@@ -1,8 +1,8 @@
 import { appConfig, GitHubHttpError, githubRequest, type GitHubService } from "./service.ts";
 import { repositoryPath, withInstallation } from "./app.ts";
-import { checksSummary } from "./prs.ts";
+import { checksSummary, syncPREvent } from "./prs.ts";
 import type { OriginGitHub } from "../origin-cloud.ts";
-import { mirrorTasks, projectConnection } from "./sync.ts";
+import { mirrorTasks, projectConnection, syncGitHubEvent } from "./sync.ts";
 
 export type PullState = "draft" | "open" | "closed" | "merged";
 export type ReviewDecision = "approved" | "changes_requested" | "review_required" | "commented";
@@ -161,6 +161,26 @@ export async function mergePullRequest(service: GitHubService, repoUrl: string, 
   return { sha: merged.sha, detail };
 }
 
+/**
+ * Merges, then closes the issues the pull request closes and syncs them and the pull request into Origin at once, so
+ * they show as done without waiting for GitHub's webhook or the next periodic sync.
+ */
+export async function mergeAndComplete(service: GitHubService, projectId: string, repoUrl: string, number: number, token: string, expectedHeadSha?: string): Promise<{ sha: string; completed: number[] }> {
+  const { sha, detail } = await mergePullRequest(service, repoUrl, number, token, expectedHeadSha);
+  const completed: number[] = [];
+  await syncPREvent(service, repoUrl, [number]).catch((error: unknown) => console.warn("Merged pull request sync deferred", number, error instanceof Error ? error.message : error));
+  for (const issue of detail.closes) {
+    try {
+      await githubRequest(service, `${repositoryPath(repoUrl)}/issues/${issue}`, token, { method: "PATCH", body: JSON.stringify({ state: "closed", state_reason: "completed" }) });
+      await syncGitHubEvent(service, repoUrl, issue);
+      completed.push(issue);
+    } catch (error) {
+      console.warn("Closed issue sync deferred", projectId, issue, error instanceof Error ? error.message : error);
+    }
+  }
+  return { sha, completed };
+}
+
 /** Adds `Closes #issue` to the pull request's description when it does not close that issue yet. */
 export async function linkClosingReference(service: GitHubService, repoUrl: string, number: number, issueNumber: number, token: string): Promise<{ added: boolean; pull: PullSummary }> {
   const path = `${repositoryPath(repoUrl)}/pulls/${number}`;
@@ -195,7 +215,7 @@ export function originGitHub(service: GitHubService): OriginGitHub {
     pullRequests: (projectId) => withProjectGitHub(service, projectId, (token, repoUrl) => listPullRequests(service, repoUrl, token)),
     pullRequest: (projectId, number) => withProjectGitHub(service, projectId, (token, repoUrl) => readPullRequest(service, repoUrl, number, token)),
     approve: (projectId, number, body) => withProjectGitHub(service, projectId, (token, repoUrl) => approvePullRequest(service, repoUrl, number, token, body)),
-    merge: (projectId, number, headSha) => withProjectGitHub(service, projectId, async (token, repoUrl) => ({ sha: (await mergePullRequest(service, repoUrl, number, token, headSha)).sha })),
+    merge: (projectId, number, headSha) => withProjectGitHub(service, projectId, (token, repoUrl) => mergeAndComplete(service, projectId, repoUrl, number, token, headSha)),
     repository: (projectId) => withProjectGitHub(service, projectId, async (token, repoUrl) =>
       ({ defaultBranch: (await githubRequest<{ default_branch: string }>(service, repositoryPath(repoUrl), token)).default_branch })),
   };

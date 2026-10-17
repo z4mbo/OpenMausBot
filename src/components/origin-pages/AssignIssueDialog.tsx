@@ -6,7 +6,7 @@ import type { AssignableIssue } from "./IssuesPage";
 import { cn } from "@/lib/cn";
 import { overlayMotion, sheetMotion, useDismiss } from "./ui";
 
-export { issueBrief } from "../../../shared/origin-issues";
+export { implementBrief, issueBrief } from "../../../shared/origin-issues";
 
 export function AssignIssueDialog({ issue, agents, onPick, onClose: requestClose }: { issue: AssignableIssue; agents: Bot[]; onPick(agent: Bot): void; onClose(): void }) {
   const { closing, dismiss: onClose } = useDismiss(requestClose);

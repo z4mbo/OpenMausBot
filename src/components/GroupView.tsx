@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { activeLocale, t } from "@/lib/i18n";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { Check, ChevronDown, ChevronRight, Folder, FolderOpen, Loader2, Pause, Pin, Plus, Search, Square, X } from "lucide-react";
@@ -40,7 +40,7 @@ import { isCancelledTranscriptRow } from "../../shared/client-cancel";
 import { roomRetryRequest } from "@/lib/room-retry";
 import { botEngine, failedTurnCause } from "@/lib/failed-turn";
 import { CitationSelectionToolbar, SentCitations } from "./CitationUI";
-import { Composer, type MentionTeammate } from "./Composer";
+import { Composer } from "./Composer";
 import { ChatErrorBanner, ChatNotice } from "./ChatErrorBanner";
 import { RoomContextBadge, RoomContextWarnings } from "./ContextWarning";
 import { roomContextWarnings } from "@/lib/context-warning";
@@ -1122,7 +1122,7 @@ function RoomSetup({ group, members }: { group: Group; members: Bot[] }) {
 }
 const MAUSES_SHOWN = 8;
 
-export function GroupView({ group, managed = false, headerEnd, people }: { group: Group; managed?: boolean; headerEnd?: ReactNode; people?: readonly MentionTeammate[] }) {
+export function GroupView({ group }: { group: Group }) {
   const { state, dispatch } = useStore();
   const remoteClient = window.ogb?.remoteClient?.active === true;
   const { dragProps: headerDragProps, noDragStyle: headerNoDragStyle, controlsShiftStyle } = useCaptionChrome();
@@ -1341,7 +1341,6 @@ export function GroupView({ group, managed = false, headerEnd, people }: { group
           className="flex items-center gap-1.5 @max-3xl/roomhead:ml-auto @max-3xl/roomhead:flex-wrap @max-3xl/roomhead:justify-end"
           style={controlsShiftStyle}
         >
-          {!managed && <>
           <button
             type="button"
             onClick={() => setFindOpen((open) => !open)}
@@ -1386,8 +1385,6 @@ export function GroupView({ group, managed = false, headerEnd, people }: { group
               </span>
             </button>
           )}
-          </>}
-          {headerEnd}
         </div>
         </div>
       </div>
@@ -1414,7 +1411,7 @@ export function GroupView({ group, managed = false, headerEnd, people }: { group
 
       {!setupPending && !group.dm && <RoomHoldsBanner group={group} members={members} />}
 
-      {!setupPending && !managed && <div className="w-full px-5">
+      {!setupPending && <div className="w-full px-5">
         {bulletinOpen ? (
           <div className="mb-1 rounded-lg border border-hairline/40 bg-panel p-2">
             <textarea
@@ -1607,7 +1604,6 @@ export function GroupView({ group, managed = false, headerEnd, people }: { group
         key={group.threadId}
         group={group}
         members={members}
-        people={people}
         locked={setupPending}
         replyTo={replyTo}
         onClearReply={clearReply}

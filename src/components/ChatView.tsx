@@ -1,4 +1,5 @@
-import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch } from "react";
+import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useAdvancedMode } from "@/lib/interface-mode";
 import { ThreadLinkContext } from "@/components/ThreadLinkMenu";
 import { useShowThreads } from "@/lib/thread-preferences";
@@ -81,6 +82,8 @@ import { ChatMarkdown } from "./ChatMarkdown";
 import { VoiceNoteBubble, type VoiceNoteAttachment } from "./VoiceNoteBubble";
 import { RawMarkdownView, RawToggleAction } from "./RawMarkdownToggle";
 import { ThreadChip } from "./ThreadChip";
+import { DelegationBlock } from "./DelegationBlock";
+import { delegatedRequestIds, failedRequestIds, isDelegationChip, resultShownInBlock } from "@/lib/delegation";
 import { VerifyCard } from "./VerifyCard";
 import { askText, runSkill, runSteps, runSummary, showRun, skillPrompt } from "@/lib/verify-steps";
 import { useShowRunCard } from "@/lib/run-card-preferences";
@@ -806,6 +809,7 @@ const MessagesList = memo(function MessagesList({
   onSubmitEdit,
   onRegenerate,
   onReply,
+  separators = true,
 }: {
   messages: Message[];
   transcript: Message[];
@@ -825,9 +829,12 @@ const MessagesList = memo(function MessagesList({
   onSubmitEdit: (id: string, text: string) => void;
   onRegenerate: () => void;
   onReply: (message: Message) => void;
+  separators?: boolean;
 }) {
   const { botId, threadId, botName, busy, hasMore, focus, showToolCalls, locale } = useChatRows();
   const items = useMemo(() => groupTranscript(messages), [messages, locale]);
+  const delegated = useMemo(() => delegatedRequestIds(transcript, botId), [transcript, botId]);
+  const failedDelegations = useMemo(() => failedRequestIds(transcript), [transcript]);
   const newestMessageId = messages.at(-1)?.id;
   let newestUserMessageId: string | undefined;
   for (let i = messages.length - 1; i >= 0 && !newestUserMessageId; i--) {
@@ -847,7 +854,7 @@ const MessagesList = memo(function MessagesList({
         const previous = items[i - 1];
         const prev = previous && (previous.kind === "message" ? previous.message : previous.messages.at(-1));
         const first = item.kind === "message" ? item.message : item.messages[0];
-        const newDay = !prev || localDay(prev.at) !== localDay(first.at);
+        const newDay = separators && (!prev || localDay(prev.at) !== localDay(first.at));
         const divider = dividerAbove(item.kind === "message" ? [item.message] : item.messages);
         if (item.kind === "turn") {
           return (
@@ -917,6 +924,8 @@ const MessagesList = memo(function MessagesList({
             case "call":
               return m.call ? <CallRecordRow message={m} transcript={transcript} botName={botName} threadId={threadId} busy={busy} hasMore={hasMore} /> : null;
             case "activity": {
+              if (isDelegationChip(m, botId)) return <DelegatedWork message={m} failed={failedDelegations.has(m.roomRequest!.id)} />;
+              if (resultShownInBlock(m, delegated)) return null;
               if (m.dataResult) return <DataResultChip message={m} />;
               if (m.originIssues) return <OriginIssuesCard message={m} />;
               if (isStatusActivity(m)) return <StatusActivityRow message={m} />;
@@ -1035,7 +1044,38 @@ function chiefOfStaffBadge(bot: Bot) {
   );
 }
 
-export function ChatView({ bot: profile }: { bot: Bot }) {
+function DelegatedTranscript({ agent, threadId, messages }: { agent: Bot; threadId: string; messages: Message[] }) {
+  const parent = useChatRows();
+  const rows = useMemo((): ChatRows => ({
+    ...parent, botId: agent.id, threadId, botName: agent.name, voiceId: agent.voice, busy: false, hasMore: false, focus: null,
+    showToolCalls: true, onBranch: () => false, conversational: false,
+  }), [parent, agent.id, agent.name, agent.voice, threadId]);
+  const lookups = useMemo(() => transcriptLookups(messages, messages), [messages]);
+  return (
+    <ChatRowsContext.Provider value={rows}>
+      <MessagesList messages={messages} transcript={messages} lookups={lookups} place="auto" today={localDay(Date.now())}
+        editingId={null} lastBotTextId={undefined} canRetryLast={false} engine={undefined} unreadDividerId={null} unreadDividerFading={false}
+        onStartEdit={ignoreRow} onCancelEdit={ignoreRow} onSubmitEdit={ignoreRow} onRegenerate={ignoreRow} onReply={ignoreRow} separators={false} />
+    </ChatRowsContext.Provider>
+  );
+}
+
+const ignoreRow = () => {};
+
+function DelegatedWork({ message, failed }: { message: Message; failed: boolean }) {
+  const { state } = useStore();
+  const agent = state.bots.find((bot) => bot.id === message.threadRef!.botId);
+  if (!agent || agent.hidden) return <ThreadChip message={message} />;
+  return <DelegationBlock sent={message} agent={agent} failed={failed}
+    renderTranscript={(messages, threadId) => <DelegatedTranscript agent={agent} threadId={threadId} messages={messages} />} />;
+}
+
+function placedHeader(embedded: boolean, slot: HTMLElement | null | undefined, header: ReactNode): ReactNode {
+  if (!embedded) return header;
+  return slot ? createPortal(header, slot) : null;
+}
+
+export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: Bot; embedded?: boolean; headerSlot?: HTMLElement | null }) {
   const bot = useMemo(() => currentTaskBot(profile), [profile]);
   const { state, dispatch } = useStore();
   const showThreads = useShowThreads();
@@ -1229,12 +1269,13 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
     <ThreadLinkContext value={threadLink}>
     <main data-gaze-zone="" className="relative flex h-full min-w-0 flex-1 flex-col bg-app" style={accentStyle}>
       <CallOverlay bot={bot} />
-      {!projectPage && !bot.chiefOfStaff && <AgentProjectBar agent={bot} />}
+      {!projectPage && !bot.chiefOfStaff && !embedded && <AgentProjectBar agent={bot} />}
       {projectPage && chiefSection !== "chat" && <ChiefSectionFrame bot={bot} section={chiefSection} onSection={setChiefSection} />}
       <GlassScrollFrame className={cn("flex-1 [--glass-tint:var(--color-app)]", projectPage && chiefSection !== "chat" && "hidden")}>
       {/* z-[25]: above the room set-up card (z-20), below the CallOverlay (z-30). */}
       <GlassBar edge="top" className="z-[25]">
       {projectPage && chiefSection === "chat" && <ChiefSectionBar bot={bot} section={chiefSection} onSection={setChiefSection} joined />}
+      {placedHeader(embedded, headerSlot, (
       <div
         {...headerDragProps}
         className={cn(
@@ -1249,7 +1290,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
             <div data-chathead-pill className={cn(CHATHEAD_PILL, "pr-1")}>
               <button
                 type="button"
-                onClick={() => dispatch({ type: "toggleSettings", open: true })}
+                onClick={() => dispatch({ type: "toggleSettings", open: true, ...(embedded ? { botId: bot.id } : {}) })}
                 className="flex shrink-0 items-center justify-center rounded-full"
                 title={t("chat.openProfile")}
                 aria-label={t("chat.openProfileAria", { name: bot.name })}
@@ -1274,7 +1315,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
                     dispatch({ type: "updateBot", botId: bot.id, patch: { name } });
                   }
                 }}
-                onActivate={() => dispatch({ type: "toggleSettings", open: true })}
+                onActivate={() => dispatch({ type: "toggleSettings", open: true, ...(embedded ? { botId: bot.id } : {}) })}
                 showEditButton={HEADER_RENAME}
                 className="truncate text-[14px] font-semibold text-ink"
                 editButtonClassName="size-6 rounded-full"
@@ -1286,7 +1327,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
             <button
               type="button"
               data-chathead-pill
-              onClick={() => dispatch({ type: "toggleSettings", open: true })}
+              onClick={() => dispatch({ type: "toggleSettings", open: true, ...(embedded ? { botId: bot.id } : {}) })}
               title={t("chat.openProfile")}
               aria-label={t("chat.openProfileAria", { name: bot.name })}
               className={cn(CHATHEAD_PILL, "pr-3.5 hover:bg-raised-hover")}
@@ -1352,6 +1393,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
         </div>
         </div>
       </div>
+      ))}
 
       <BotActivityPicker bot={bot} />
       {routineExecution && <div className="mx-5 mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-hairline/40 bg-inset px-3 py-2 text-[11.5px] text-ink-secondary">

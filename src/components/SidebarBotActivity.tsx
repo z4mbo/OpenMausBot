@@ -4,6 +4,7 @@ import type { Action, AppState, Bot, Group, Task } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { roomThreadSpeakerId, roomThreadWorking } from "@/lib/room-threads";
 import { t } from "@/lib/i18n";
+import { isDelegatedThread } from "@/lib/delegation";
 import { isArchived, orderedSidebarThreads, orderedThreadList, threadRecency, threadUpdatedLabel } from "./SidebarThreadRow";
 import type { SidebarDensity } from "@/lib/sidebar-preferences";
 
@@ -15,6 +16,7 @@ export function sidebarBotActivityTasks(bot: Bot, queued: Record<string, unknown
   }];
   return tasks.map((task) => ({ ...task, queued: Boolean(queued[task.threadId]?.length) }))
     .filter((task) => !task.routineRunId)
+    .filter((task) => task.activity === "waiting-on-you" || !isDelegatedThread(task, bot.id))
     .filter((task) => !isArchived(task) || (archivedApprovals && task.activity === "waiting-on-you"))
     .filter((task) => task.activity === "waiting-on-you" || task.activity === "working" || task.busy || task.waitingForTeammates === true || task.queued || task.unread);
 }

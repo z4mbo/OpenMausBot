@@ -1,10 +1,12 @@
 export const APP_NAME = "Origin";
+/** The URL scheme the desktop app registers; chat links it opens start with it. */
+export const APP_SCHEME = "origin-app";
 export const APP_REPOSITORY = "https://github.com/milind-soni/OpenMausBot";
 export const DOCS_URL = `${APP_REPOSITORY}/tree/main/docs`;
 export const HELP_CENTER_URL = DOCS_URL;
 export const APPROVAL_LEVELS_URL = `${APP_REPOSITORY}/blob/main/docs/approval-levels.md`;
 export const FEEDBACK_URL = "https://discord.gg/9Wb8MEpXRs";
-export const RELEASES_URL = `${APP_REPOSITORY}/releases`;
+export const RELEASES_URL = "https://origin.imbored.fun/downloads/";
 export const PRICING_URL = "https://www.openmausbot.com/pricing";
 export function withSource(url: string, source: string): string {
   const target = new URL(url);

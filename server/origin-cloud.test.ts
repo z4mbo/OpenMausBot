@@ -72,7 +72,7 @@ const mutations = (calls: Call[]) => calls.filter((call) => call.kind === "mutat
 
 const BOARD = {
   columns: [
-    { _id: "col1", title: "Idea" },
+    { _id: "col1", title: "Draft", isDraft: true },
     { _id: "col2", title: "Todo" },
     { _id: "col3", title: "Done", isDone: true },
   ],
@@ -229,17 +229,17 @@ describe("runOriginTool", () => {
     expect(result.text).toBe("Commented on issue yukitaskef56.");
   });
 
-  it("creates an issue in Todo assigned to the signed-in user, then sets labels", async () => {
+  it("creates an issue in Draft assigned to the signed-in user, then sets labels", async () => {
     const { client, calls } = fakeConvex({ "tasks:board": BOARD, "auth:me": { email: "me@x.dev" }, "tasks:createTask": "t9" });
     const result = await runOriginTool("origin_create_issue", { title: "New", labels: ["ui"], due_date: "2026-11-01" }, "coder", { bots: BOTS, state, connect: () => client });
-    expect(result.text).toBe('Created issue t9 (ORI-T9) "New" in column "Todo" of proj.');
+    expect(result.text).toBe('Created issue t9 (ORI-T9) "New" in column "Draft" of proj. It stays in Origin as a draft; moving it to another column creates its GitHub issue.');
     expect(mutations(calls)).toEqual([
-      ["tasks:createTask", { projectId: "proj", sessionToken: "tok", columnId: "col2", title: "New", priority: "medium", assignedToEmail: "me@x.dev", dueDate: "2026-11-01" }],
+      ["tasks:createTask", { projectId: "proj", sessionToken: "tok", columnId: "col1", title: "New", priority: "medium", assignedToEmail: "me@x.dev", dueDate: "2026-11-01" }],
       ["issueRelations:labels", { sessionToken: "tok", taskId: "t9", labels: ["ui"] }],
     ]);
     expect(result.cards).toEqual({
       heading: "Issue created",
-      issues: [{ id: "t9", key: "ORI-T9", projectId: "proj", projectName: "proj", title: "New", status: "Todo", done: false, priority: "medium", assignee: "me@x.dev", due: "2026-11-01", labels: ["ui"] }],
+      issues: [{ id: "t9", key: "ORI-T9", projectId: "proj", projectName: "proj", title: "New", status: "Draft", done: false, priority: "medium", assignee: "me@x.dev", due: "2026-11-01", labels: ["ui"] }],
     });
   });
 
@@ -395,6 +395,19 @@ describe("GitHub-first issues", () => {
     expect(mutations(calls).map(([name]) => name)).toEqual(["tasks:createTask"]);
   });
 
+  it("keeps a new issue in Draft off GitHub, and mirrors it once it moves to another column", async () => {
+    const board = { ...KAI_BOARD, columns: [{ _id: "k0", title: "Draft", isDraft: true }, ...KAI_BOARD.columns], tasks: [{ ...KAI_BOARD.tasks[0], columnId: "k0" }] };
+    const { client, calls } = workspaceConvex({ ...repoProject(), "auth:me": { email: "me@x.dev" }, "tasks:createTask": "kainew", "tasks:board": board });
+    const github = fakeGitHub();
+    const created = await runOriginTool("origin_create_issue", { title: "New" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(created.text).toContain('in column "Draft"');
+    expect(mutations(calls)[0]).toMatchObject(["tasks:createTask", { columnId: "k0" }]);
+    expect(github.calls).toEqual([]);
+    const moved = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", column: "Todo" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(moved.text).toContain("mirrored as GitHub issue #12");
+    expect(github.calls).toEqual([["mirrorIssue", "kai", "kaitaskab12"]]);
+  });
+
   it("origin_review_pr is the Chief's: lists open pull requests with the issues they close, reads one, approves and merges it", async () => {
     const { client } = workspaceConvex({ ...repoProject(), "tasks:board": () => ({ ...KAI_BOARD, tasks: KAI_BOARD.tasks.map((task, index) => (index === 0 ? { ...task, githubIssueNumber: 12 } : task)) }) });
     const github = fakeGitHub();
@@ -409,6 +422,10 @@ describe("GitHub-first issues", () => {
     const merged = await runOriginTool("origin_merge_pr", { number: 7, head_sha: "a".repeat(40) }, "kai-chief", workspaceDeps(client, { github: github.api }));
     expect(merged.text).toContain("Merged #7 into the default branch (ccccccc). GitHub closes ORI-AB12");
     expect(github.calls).toContainEqual(["merge", "kai", 7, "a".repeat(40)]);
+    const synced = fakeGitHub({ merge: async () => ({ sha: "c".repeat(40), completed: [12] }) });
+    const completed = await runOriginTool("origin_merge_pr", { number: 7, head_sha: "a".repeat(40) }, "kai-chief", workspaceDeps(client, { github: synced.api }));
+    expect(completed.text).toContain("ORI-AB12 is now done in Origin and closed on GitHub.");
+    expect(completed.text).not.toContain("next sync");
   });
 
   it("merging needs a project admin's sign-in", async () => {

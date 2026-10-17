@@ -212,7 +212,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
         description: { type: "string", maxLength: 60_000, description: "Markdown." },
         priority: { ...ORIGIN_PRIORITY, description: "Default medium." },
         labels: { type: "array", maxItems: 20, items: { type: "string", maxLength: 32 } },
-        column: { type: "string", description: "Column title or id; default Todo, else the first open column." },
+        column: { type: "string", description: "Column title or id; default Draft, which gets no GitHub issue until moved out of it." },
         assignee: { type: "string", description: "Member email; default you, the signed-in user." },
         due_date: { type: "string", description: "YYYY-MM-DD; default one week from today." },
         project: ORIGIN_PROJECT,

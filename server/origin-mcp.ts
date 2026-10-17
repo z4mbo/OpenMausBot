@@ -283,7 +283,7 @@ export const ORIGIN_MCP_TOOLS: readonly Tool[] = [
   },
   { name: "list_issues", description: "List active or completed issues in a project. Follow nextCursor until null.", schema: z.object({ projectId: id, done: z.boolean().optional(), cursor: z.string().optional() }), annotations: READ, write: false, run: read("issues") },
   { name: "get_issue", description: "Read issue details, priority, due date, assignee, and GitHub link.", schema: z.object({ projectId: id, taskId: id }), annotations: READ, write: false, run: read("issue") },
-  { name: "delete_issue", description: "Permanently delete an Origin issue, its comments, attachment references and relationships. Does not delete its linked GitHub issue. Confirm the exact issue with the user first; prefer completing it when preserving history matters.", schema: z.object({ requestId, projectId: id, taskId: id }), annotations: DESTRUCTIVE, write: true, run: write("delete_issue") },
+  { name: "delete_issue", description: "Permanently delete an Origin issue, its comments, attachment references and relationships. Its linked GitHub issue is deleted too, or closed as not planned when the GitHub connection cannot delete it; the result says which. Confirm the exact issue with the user first; prefer completing it when preserving history matters.", schema: z.object({ requestId, projectId: id, taskId: id }), annotations: DESTRUCTIVE, write: true, run: write("delete_issue") },
   { name: "create_project", description: "Create an Origin project. If the workspace admin enabled GitHub, this also creates a private GitHub repository.", schema: z.object({ requestId, name: z.string().min(1).max(100), description: z.string().max(10000).optional() }), annotations: WRITE, write: true, run: write("create_project") },
   { name: "update_project", description: "Update a project name or description.", schema: z.object({ requestId, projectId: id, name: z.string().min(1).max(100).optional(), description: z.string().max(10000).optional() }), annotations: DESTRUCTIVE, write: true, run: write("update_project") },
   {
@@ -303,7 +303,29 @@ const REJECTED = "Operation rejected. Check workspace permissions, project/issue
 
 type JsonRpcMessage = { jsonrpc?: unknown; id?: unknown; method?: unknown; params?: unknown };
 
-export async function answerMcpMessage(message: JsonRpcMessage, auth: McpAuth, client: OriginCloudClient): Promise<Args | null> {
+/** Removes the GitHub issue linked to an Origin issue, answering with the sentence the connector reads. */
+export type GitHubIssueRemover = (projectId: string, taskId: string, issueUrl: string) => Promise<string>;
+
+async function linkedGitHubIssue(client: OriginCloudClient, token: string, args: Args): Promise<string | null> {
+  try {
+    const issue = JSON.parse(String(await client.query("connectors:read", { token, kind: "issue", projectId: args.projectId, taskId: args.taskId }))) as Args;
+    return typeof issue.githubIssueUrl === "string" ? issue.githubIssueUrl : null;
+  } catch {
+    return null;
+  }
+}
+
+async function runTool(tool: Tool, client: OriginCloudClient, token: string, args: Args, removeGitHubIssue?: GitHubIssueRemover): Promise<string> {
+  const issueUrl = tool.name === "delete_issue" && removeGitHubIssue ? await linkedGitHubIssue(client, token, args) : null;
+  const result = await tool.run(client, token, args);
+  const text = typeof result === "string" ? result : JSON.stringify(result);
+  if (!issueUrl || !removeGitHubIssue) return text;
+  const github = await removeGitHubIssue(String(args.projectId), String(args.taskId), issueUrl)
+    .catch((error: unknown) => `Its GitHub issue ${issueUrl} is still there: ${error instanceof Error ? error.message : "GitHub request failed"}`);
+  return `${text}\n${github}.`;
+}
+
+export async function answerMcpMessage(message: JsonRpcMessage, auth: McpAuth, client: OriginCloudClient, removeGitHubIssue?: GitHubIssueRemover): Promise<Args | null> {
   const hasId = message.id !== undefined && message.id !== null;
   if (!hasId) return null;
   const reply = (result: unknown) => ({ jsonrpc: "2.0", id: message.id, result });
@@ -332,8 +354,7 @@ export async function answerMcpMessage(message: JsonRpcMessage, auth: McpAuth, c
       const parsed = tool.schema.safeParse(params.arguments ?? {});
       if (!parsed.success) return reply({ content: [{ type: "text", text: `Invalid arguments for ${tool.name}: ${parsed.error.issues.map((issue) => `${issue.path.join(".") || "input"} ${issue.message}`).join("; ")}` }], isError: true });
       try {
-        const result = await tool.run(client, auth.connectorToken, parsed.data as Args);
-        return reply({ content: [{ type: "text", text: typeof result === "string" ? result : JSON.stringify(result) }] });
+        return reply({ content: [{ type: "text", text: await runTool(tool, client, auth.connectorToken, parsed.data as Args, removeGitHubIssue) }] });
       } catch {
         return reply({ content: [{ type: "text", text: REJECTED }], isError: true });
       }
@@ -359,6 +380,7 @@ export interface OriginMcpRouteDeps {
   convexUrl?: () => string | null;
   oauth?: McpOAuth;
   now?: () => number;
+  removeGitHubIssue?: GitHubIssueRemover;
 }
 
 export function createOriginMcpRoutes(deps: OriginMcpRouteDeps = {}): PublicRouteHandler {
@@ -432,7 +454,7 @@ export function createOriginMcpRoutes(deps: OriginMcpRouteDeps = {}): PublicRout
     const batch = Array.isArray(parsed);
     if (batch && (parsed as unknown[]).length > MCP_BATCH_MAX) return send(res, 400, { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Batch too large" } });
     const messages = (batch ? parsed : [parsed]) as JsonRpcMessage[];
-    const replies = (await Promise.all(messages.map((message) => answerMcpMessage(message && typeof message === "object" ? message : {}, auth, client!)))).filter((reply) => reply !== null);
+    const replies = (await Promise.all(messages.map((message) => answerMcpMessage(message && typeof message === "object" ? message : {}, auth, client!, deps.removeGitHubIssue)))).filter((reply) => reply !== null);
     if (!replies.length) {
       res.writeHead(202, { "cache-control": "no-store" });
       res.end();

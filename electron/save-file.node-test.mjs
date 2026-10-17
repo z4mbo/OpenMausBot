@@ -41,8 +41,8 @@ describe("save-file path validation", () => {
     const file = path.join(botHome, "workspaces", "bot", "report.docx");
     // fs.promises.realpath, as the module uses: on Windows the callback API leaves 8.3 short names that the promises API expands.
     const expected = await fs.promises.realpath(file);
-    assert.equal(await resolveSavablePath(file, { home }), expected);
-    assert.equal(await resolveSavablePath(pathToFileURL(file).href, { home }), expected);
+    assert.equal(await resolveSavablePath(file, { dataDir: botHome }), expected);
+    assert.equal(await resolveSavablePath(pathToFileURL(file).href, { dataDir: botHome }), expected);
   });
 
   it("accepts a file under a symlinked bot home", { skip: !canSymlink }, async () => {
@@ -54,7 +54,7 @@ describe("save-file path validation", () => {
     fs.symlinkSync(realBotHome, path.join(linkedHome, ".openmausbot"));
 
     const viaLink = path.join(linkedHome, ".openmausbot", "report.docx");
-    assert.equal(await resolveSavablePath(viaLink, { home: linkedHome }), await fs.promises.realpath(viaLink));
+    assert.equal(await resolveSavablePath(viaLink, { dataDir: path.join(linkedHome, ".openmausbot") }), await fs.promises.realpath(viaLink));
 
     fs.rmSync(realHome, { recursive: true, force: true });
     fs.rmSync(linkedHome, { recursive: true, force: true });
@@ -62,24 +62,24 @@ describe("save-file path validation", () => {
 
   it("rejects paths outside the bot home, including via traversal", async () => {
     const rejected = "Only files created by your bots can be saved";
-    await assert.rejects(resolveSavablePath(path.join(home, "secret.txt"), { home }), { message: rejected });
-    await assert.rejects(resolveSavablePath(path.join(botHome, "..", "secret.txt"), { home }), { message: rejected });
+    await assert.rejects(resolveSavablePath(path.join(home, "secret.txt"), { dataDir: botHome }), { message: rejected });
+    await assert.rejects(resolveSavablePath(path.join(botHome, "..", "secret.txt"), { dataDir: botHome }), { message: rejected });
   });
 
   it("rejects a symlink inside the bot home pointing outside it", { skip: !canSymlink }, async () => {
     const escape = path.join(botHome, "escape.txt");
     fs.symlinkSync(path.join(home, "secret.txt"), escape);
-    await assert.rejects(resolveSavablePath(escape, { home }), {
+    await assert.rejects(resolveSavablePath(escape, { dataDir: botHome }), {
       message: "Only files created by your bots can be saved",
     });
     fs.rmSync(escape);
   });
 
   it("rejects empty, relative, and non-file targets", async () => {
-    await assert.rejects(resolveSavablePath("", { home }), { message: "A file path is required" });
-    await assert.rejects(resolveSavablePath("workspaces/bot/report.docx", { home }), { message: "That file path is invalid" });
-    await assert.rejects(resolveSavablePath(path.join(botHome, "nope.docx"), { home }), { message: "That file no longer exists" });
-    await assert.rejects(resolveSavablePath(path.join(botHome, "workspaces"), { home }), { message: "That path is not a file" });
+    await assert.rejects(resolveSavablePath("", { dataDir: botHome }), { message: "A file path is required" });
+    await assert.rejects(resolveSavablePath("workspaces/bot/report.docx", { dataDir: botHome }), { message: "That file path is invalid" });
+    await assert.rejects(resolveSavablePath(path.join(botHome, "nope.docx"), { dataDir: botHome }), { message: "That file no longer exists" });
+    await assert.rejects(resolveSavablePath(path.join(botHome, "workspaces"), { dataDir: botHome }), { message: "That path is not a file" });
   });
 });
 
@@ -168,7 +168,7 @@ describe("save-file source handles", () => {
   it("copies from the validated open handle", async () => {
     const source = path.join(botHome, "workspaces", "bot", "report.docx");
     const destination = path.join(home, "copied-report.docx");
-    await withSavableFile(source, { home }, ({ copyTo }) => copyTo(destination));
+    await withSavableFile(source, { dataDir: botHome }, ({ copyTo }) => copyTo(destination));
     assert.equal(fs.readFileSync(destination, "utf8"), "docx");
     fs.rmSync(destination);
   });
@@ -177,7 +177,7 @@ describe("save-file source handles", () => {
     const source = path.join(botHome, "workspaces", "bot", "report.docx");
     const moved = `${source}.moved`;
     const destination = path.join(home, "swapped-report.docx");
-    await withSavableFile(source, { home }, async ({ copyTo }) => {
+    await withSavableFile(source, { dataDir: botHome }, async ({ copyTo }) => {
       fs.renameSync(source, moved);
       fs.symlinkSync(path.join(home, "secret.txt"), source);
       await copyTo(destination);
@@ -215,7 +215,7 @@ describe("save-file source handles", () => {
     };
 
     await assert.rejects(
-      withSavableFile(source, { home, fsp, platform: "win32" }, async () => {}),
+      withSavableFile(source, { dataDir: botHome, fsp, platform: "win32" }, async () => {}),
       { message: "That file changed while it was being opened" },
     );
     assert.equal(closed, true);

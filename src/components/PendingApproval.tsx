@@ -204,7 +204,7 @@ export const PendingApprovalPanel = memo(function PendingApprovalPanel({
             </span>
           )}
         </div>
-        <div className="ml-auto flex shrink-0 items-baseline gap-2">
+        <div className="ml-auto flex min-w-0 flex-wrap items-baseline justify-end gap-2">
           <button
             type="button"
             aria-expanded={open}

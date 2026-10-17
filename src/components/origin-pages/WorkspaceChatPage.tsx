@@ -47,7 +47,7 @@ export function WorkspaceChat({ teamId, me, canEdit }: WorkspaceContext) {
   const row = "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[13px] text-ink-secondary hover:bg-raised/60 hover:text-ink";
 
   return (
-    <div className="flex min-h-0 flex-1">
+    <div className="flex min-h-0 flex-1 pt-[var(--glass-top,0px)] [&>*]:[--glass-top:0px]">
       <aside aria-label="Conversations" className={cn("w-full shrink-0 flex-col gap-1 overflow-y-auto border-r border-hairline/40 p-2 md:flex md:w-64", selected === null ? "flex" : "hidden")}>
         <button type="button" className={cn(row, active === WORKSPACE_CHANNEL && "bg-raised text-ink")} aria-current={active === WORKSPACE_CHANNEL ? "page" : undefined}
           onClick={() => setSelected(WORKSPACE_CHANNEL)}>

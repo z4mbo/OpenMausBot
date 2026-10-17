@@ -167,6 +167,7 @@ export interface Message extends Pick<import("../../shared/wire").WireMessage, "
   requestMessageId?: string;
   turnId?: string;
   turnTerminal?: boolean;
+  turnSucceeded?: boolean;
   turnCompletedAt?: number;
   optimisticThreadOrderAt?: number;
   hasImage?: boolean;
@@ -178,7 +179,7 @@ export interface Message extends Pick<import("../../shared/wire").WireMessage, "
   sendId?: string;
   from?: { botId: string; name: string; color: MausColor };
   peerAsk?: { botId: string; name: string; unattended?: boolean };
-  roomRequest?: { id: string; phase: "request" | "result" };
+  roomRequest?: { id: string; phase: "sent" | "request" | "result" };
   reactions?: Array<{ emoji: string; by: string }>;
   comm?: { groupId: string; threadId?: string; withBotId: string; withName: string; withColor: MausColor };
   threadRef?: { botId: string; threadId: string; title: string };

@@ -666,7 +666,21 @@ const playTurn = (prompt: JsonValue, late = false) => {
 
   if (process.env.FAKE_CLAUDE_ROOM_PLAN) {
     const progress = (text: string) => out({ type: "assistant", message: { content: [{ type: "text", text }] } });
-    void runRoomHandoffAgent(argv, process.env.FAKE_CLAUDE_ROOM_PLAN, prompt, undefined, progress).then(text => {
+    // FAKE_CLAUDE_TOOL_CALLS (without `server`) play first, paced by FAKE_CLAUDE_STEP_MS and FAKE_CLAUDE_THINKING.
+    const playSteps = async () => {
+      const stepMs = Number(process.env.FAKE_CLAUDE_STEP_MS);
+      const pause = () => new Promise(resolve => setTimeout(resolve, stepMs > 0 ? stepMs : 0));
+      for (const call of scriptedToolCalls?.filter(candidate => !candidate.server) ?? []) {
+        const id = `tu-${process.pid}-${++toolUseCount}`;
+        const thinking = process.env.FAKE_CLAUDE_THINKING;
+        if (thinking) out({ type: "stream_event", event: { type: "content_block_delta", delta: { type: "thinking_delta", thinking } } });
+        await pause();
+        out({ type: "assistant", message: { content: [{ type: "tool_use", id, name: call.name, input: call.input }] } });
+        await pause();
+        out({ type: "user", message: { content: [{ type: "tool_result", tool_use_id: id, is_error: !call.ok, content: call.output ?? "" }] } });
+      }
+    };
+    void playSteps().then(() => runRoomHandoffAgent(argv, process.env.FAKE_CLAUDE_ROOM_PLAN!, prompt, undefined, progress)).then(text => {
       const contextTokens = Number(process.env.FAKE_CLAUDE_CONTEXT_TOKENS);
       const usage = Number.isSafeInteger(contextTokens) && contextTokens > 0 ? { input_tokens: contextTokens, output_tokens: 5 } : undefined;
       out({ type: "assistant", message: { content: [{ type: "text", text }], ...(usage ? { usage } : {}) } });
