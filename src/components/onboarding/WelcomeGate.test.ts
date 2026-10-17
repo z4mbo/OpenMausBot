@@ -21,6 +21,12 @@ vi.mock("react", async (original) => ({
 const store = vi.hoisted(() => ({ state: {} as Record<string, unknown>, dispatch: vi.fn(), api: vi.fn() }));
 vi.mock("@/state/store", () => ({ api: store.api, useStore: () => ({ state: store.state, dispatch: store.dispatch }) }));
 vi.mock("@/lib/analytics", () => ({ emailGateDone: () => false }));
+const cloud = vi.hoisted(() => ({ url: null as string | null, token: null as string | null }));
+vi.mock("@/lib/origin-cloud/hooks", () => ({ useCloudUrl: () => cloud.url, useCloudToken: () => cloud.token }));
+const signOut = vi.hoisted(() => ({ logout: vi.fn(async () => {}), share: vi.fn(async () => {}) }));
+vi.mock("@/lib/origin-cloud/client", () => ({ logoutCloud: signOut.logout }));
+vi.mock("@/components/OriginConnect", () => ({ shareSession: signOut.share }));
+vi.mock("@/components/EngineLibrary", () => ({ engineReady: (instance: { ready?: boolean }) => instance.ready === true }));
 // The gate's job is choosing; the flow itself has its own recipe.
 vi.mock("./WelcomeFlow", () => ({ WelcomeFlow: () => null }));
 vi.mock("@/components/Avatar", () => ({ MausAvatar: () => null }));
@@ -64,6 +70,10 @@ beforeEach(() => {
   fixture.effects = [];
   store.dispatch.mockReset();
   store.api.mockReset();
+  cloud.url = null;
+  cloud.token = null;
+  signOut.logout.mockClear();
+  signOut.share.mockClear();
   store.state = { config: fresh, welcomeOpen: false, appSettingsOpen: false, appSettingsSection: "general", bots: [] };
   vi.stubGlobal("window", {});
   vi.stubGlobal("localStorage", storage());
@@ -188,6 +198,62 @@ describe("who gets the welcome flow", () => {
     (resumed.props.onDone as () => void)();
     store.state = { ...store.state, welcomeOpen: true };
     expect(gate(LOCAL_VIEWER).tree?.props.initialBeat).toBeUndefined();
+  });
+});
+
+describe("Origin member setup", () => {
+  const finished = { ...EMPTY_ONBOARDING, completedAt: "2026-09-23T00:00:00.000Z", version: WELCOME_VERSION };
+  const signIn = () => {
+    cloud.url = "https://origin.example";
+    cloud.token = "session";
+  };
+
+  it("opens the member flow for a signed-in member even after the welcome was finished", () => {
+    vi.stubGlobal("window", LOCAL_PAGE);
+    store.state = { ...store.state, config: { onboarding: finished }, instances: [{ ready: true }] };
+    expect(gate(LOCAL_VIEWER).tree).toBeNull();
+    signIn();
+    const { tree } = gate(LOCAL_VIEWER);
+    expect(tree?.type).toBe(WelcomeFlow);
+    expect(tree?.props).toMatchObject({ member: true, locked: true, replay: false });
+  });
+
+  it("cannot be dismissed, only finished or left by signing out of Origin", async () => {
+    vi.stubGlobal("window", LOCAL_PAGE);
+    signIn();
+    store.state = { ...store.state, config: { onboarding: finished }, instances: [] };
+    const { tree } = gate(LOCAL_VIEWER);
+    (tree!.props.onSignOut as () => void)();
+    await flush();
+    expect(signOut.logout).toHaveBeenCalled();
+    expect(signOut.share).toHaveBeenCalledWith(null, null);
+  });
+
+  it("stays closed once finished while a model is ready, and reopens when none is", () => {
+    vi.stubGlobal("window", LOCAL_PAGE);
+    signIn();
+    const config = { onboarding: { ...finished, memberSetupAt: "2026-10-17T00:00:00.000Z" } };
+    store.state = { ...store.state, config, instances: [{ ready: true }] };
+    expect(gate(LOCAL_VIEWER).tree).toBeNull();
+    store.state = { ...store.state, instances: [{ ready: false }] };
+    expect(gate(LOCAL_VIEWER).tree?.props.member).toBe(true);
+  });
+
+  it("replays the member flow from Settings, and that replay can be closed", () => {
+    vi.stubGlobal("window", LOCAL_PAGE);
+    signIn();
+    const config = { onboarding: { ...finished, memberSetupAt: "2026-10-17T00:00:00.000Z" } };
+    store.state = { ...store.state, config, instances: [{ ready: true }], welcomeOpen: true };
+    expect(gate(LOCAL_VIEWER).tree?.props).toMatchObject({ member: true, locked: false, replay: true });
+  });
+
+  it("never runs on a remote client or a hosted page", () => {
+    signIn();
+    store.state = { ...store.state, config: { onboarding: finished }, instances: [] };
+    vi.stubGlobal("window", { ogb: { remoteClient: { active: true } } });
+    expect(gate(LOCAL_VIEWER).tree).toBeNull();
+    vi.stubGlobal("window", REMOTE_PAGE);
+    expect(gate({ hosted: true, canSave: true }).tree).toBeNull();
   });
 });
 

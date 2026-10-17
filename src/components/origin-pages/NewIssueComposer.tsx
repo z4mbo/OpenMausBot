@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { Bot as BotIcon, ChevronRight, CircleDashed, Loader2, Plus, Search, SignalMedium, Tag, UserRound, X } from "lucide-react";
+import { ChevronRight, CircleDashed, Loader2, Plus, Search, SignalMedium, UserRound } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { rankByName } from "@/lib/palette-rank";
 import { cn } from "@/lib/cn";
 import type { CloudBoard, CloudPerson, Priority } from "./cloud-types";
-import { Loading, Notice, chipButton, primaryButton, useAction } from "./ui";
+import { Loading, Notice, primaryButton, useAction } from "./ui";
 import {
-  ChipSelect, DateChip, IssueDialog, isDoneColumn, memberOptions, parseLabels, priorityOptions, statusOptions, type CreatedIssue, type IssueAgent,
+  AgentChip, ChipSelect, DateChip, IssueChips, IssueDialog, ProjectDot, isDoneColumn, issueDescriptionClass, issueTitleClass, memberOptions, priorityOptions, statusOptions,
+  type CreatedIssue, type IssueAgent,
 } from "./issue-fields";
 
 export interface ComposerProject { id: string; name: string; memberRole?: string; icon?: ReactNode }
-
-const NO_AGENT = "none";
 
 function isoDay(offset: number): string {
   const day = new Date();
@@ -25,9 +24,11 @@ const DUE_SHORTCUTS = [{ label: "Today", offset: 0 }, { label: "Tomorrow", offse
  * The new-issue composer: a project breadcrumb, a large title, a description and a row of property chips.
  * It asks for the project first when none is given; `agentsFor` lets the person hand the issue to an agent as it is created.
  */
-export function NewIssueComposer({ projects, loading = false, initialProjectId, initialColumnId, initialDraft, myEmail, agentsFor, onClose, onCreated }: {
+export function NewIssueComposer({ projects, loading = false, emptyNote, initialProjectId, initialColumnId, initialDraft, myEmail, agentsFor, onClose, onCreated }: {
   projects: readonly ComposerProject[];
   loading?: boolean;
+  /** Shown instead of the project list when there is nowhere to create an issue yet. */
+  emptyNote?: string;
   initialProjectId: string | null;
   initialColumnId?: string;
   initialDraft?: { title?: string; description?: string };
@@ -54,9 +55,9 @@ export function NewIssueComposer({ projects, loading = false, initialProjectId, 
     </div>
   );
   return (
-    <IssueDialog label="New issue" heading={heading} onClose={() => { if (!action.busy) onClose(); }}>
-      {loading ? <div className="px-5 pb-5"><Loading label="Loading projects" variant="inline" /></div> : !editable.length ? (
-        <p className="px-5 pb-8 pt-4 text-center text-[13px] text-ink-secondary">Create a project, or ask to join one, to add your first issue.</p>
+    <IssueDialog label="New issue" heading={heading} onClose={onClose} canClose={() => !action.busy}>
+      {loading ? <div className="px-6 pb-6"><Loading label="Loading projects" variant="inline" /></div> : !editable.length ? (
+        <p className="px-6 pb-8 pt-4 text-center text-[13px] text-ink-secondary origin-rise">{emptyNote ?? "Create a project, or ask to join one, to add your first issue."}</p>
       ) : !project ? (
         <ProjectChoice projects={editable} onChoose={setChosen} />
       ) : (
@@ -67,10 +68,6 @@ export function NewIssueComposer({ projects, loading = false, initialProjectId, 
   );
 }
 
-function ProjectDot({ name }: { name: string }) {
-  return <span aria-hidden="true" className="flex size-4 shrink-0 items-center justify-center rounded bg-accent/20 text-[9.5px] font-bold text-accent-text">{name.trim().charAt(0).toUpperCase() || "?"}</span>;
-}
-
 function ProjectChoice({ projects, onChoose }: { projects: readonly ComposerProject[]; onChoose(id: string): void }) {
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState(0);
@@ -79,7 +76,7 @@ function ProjectChoice({ projects, onChoose }: { projects: readonly ComposerProj
   const list = useRef<HTMLDivElement>(null);
   useEffect(() => { list.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest" }); }, [index]);
   return (
-    <div className="flex flex-col gap-2 px-5 pb-5 pt-2">
+    <div className="flex flex-col gap-2 px-6 pb-6 pt-2 max-sm:px-5">
       <div className="flex items-center gap-2 rounded-xl border border-hairline/50 bg-inset px-3 transition-colors focus-within:border-accent/60">
         <Search size={15} className="shrink-0 text-ink-tertiary" aria-hidden="true" />
         <input autoFocus type="search" role="combobox" aria-expanded="true" aria-controls="new-issue-projects" aria-activedescendant={active ? `new-issue-project-${active.id}` : undefined}
@@ -95,7 +92,7 @@ function ProjectChoice({ projects, onChoose }: { projects: readonly ComposerProj
           }}
           className="w-full bg-transparent py-2.5 text-[14px] text-ink outline-none placeholder:text-ink-tertiary max-md:text-[16px]" />
       </div>
-      <div ref={list} id="new-issue-projects" role="listbox" aria-label="Projects" className="flex max-h-[320px] flex-col gap-0.5 overflow-y-auto">
+      <div ref={list} id="new-issue-projects" role="listbox" aria-label="Projects" className="flex max-h-[min(400px,55dvh)] flex-col gap-0.5 overflow-y-auto">
         {matches.map((project) => (
           <button key={project.id} id={`new-issue-project-${project.id}`} type="button" role="option" tabIndex={-1} aria-selected={project === active}
             onMouseMove={() => setIndex(matches.indexOf(project))} onClick={() => onChoose(project.id)}
@@ -128,7 +125,6 @@ function IssueForm({ project, initialColumnId, initialDraft, myEmail, agents, ac
   const [priority, setPriority] = useState<Priority>("medium");
   const [assignee, setAssignee] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [labels, setLabels] = useState("");
   const [agentId, setAgentId] = useState("");
   const asked = useRef(false);
   const titleInput = useRef<HTMLTextAreaElement>(null);
@@ -148,40 +144,29 @@ function IssueForm({ project, initialColumnId, initialDraft, myEmail, agents, ac
     event?.preventDefault();
     if (missing || action.busy || !column) return;
     let taskId = "";
-    const chosen = parseLabels(labels);
     const ok = await action.run(async () => {
       taskId = await cloudMutation<string>("tasks:createTask", { projectId, columnId: column._id, title: title.trim(), description, priority, assignedToEmail: chosenAssignee, dueDate });
-      if (chosen.length) await cloudMutation("issueRelations:labels", { taskId, labels: chosen });
     }, "Could not create the issue");
-    if (ok) onCreated({ projectId, taskId, title: title.trim(), description, priority, dueDate, labels: chosen, status: column.title, agentId: agentId || undefined });
+    if (ok) onCreated({ projectId, taskId, title: title.trim(), description, priority, dueDate, labels: [], status: column.title, agentId: agentId || undefined });
   };
 
   return (
-    <form onSubmit={(event) => void submit(event)} className="flex min-h-[340px] flex-col px-5 pb-5 pt-2"
+    <form onSubmit={(event) => void submit(event)} className="flex min-h-[400px] flex-col px-6 pb-5 pt-2 max-sm:px-5"
       onKeyDown={(event) => { if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) { event.preventDefault(); void submit(); } }}>
       <textarea ref={titleInput} rows={1} aria-label="Issue title" placeholder="Issue title" value={title} maxLength={250} required disabled={action.busy}
         onChange={(event) => setTitle(event.target.value.replace(/\n/g, " "))}
         onKeyDown={(event) => { if (event.key === "Enter" && !event.metaKey && !event.ctrlKey) event.preventDefault(); }}
-        className="w-full resize-none bg-transparent text-[22px] font-semibold leading-snug tracking-[-0.01em] text-ink outline-none [field-sizing:content] placeholder:text-ink-tertiary max-md:text-[19px]" />
+        className={issueTitleClass} />
       <textarea aria-label="Issue description" placeholder="Add a description…" rows={5} value={description} disabled={action.busy}
         onChange={(event) => setDescription(event.target.value)}
-        className="mt-3 min-h-[120px] w-full flex-1 resize-none bg-transparent text-[14px] leading-relaxed text-ink-secondary outline-none placeholder:text-ink-tertiary max-md:text-[16px]" />
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+        className={cn(issueDescriptionClass, "flex-1")} />
+      <IssueChips>
         <ChipSelect label="Status" value={column?._id ?? ""} options={statusOptions(columns)} onChange={setColumnId} icon={<CircleDashed size={14} aria-hidden="true" />} disabled={action.busy || !columns.length} />
         <ChipSelect label="Priority" value={priority} options={priorityOptions()} onChange={(value) => setPriority(value as Priority)} icon={<SignalMedium size={14} aria-hidden="true" />} disabled={action.busy} />
         <ChipSelect label="Assignee" value={chosenAssignee} options={memberOptions(people ?? [])} onChange={setAssignee} icon={<UserRound size={14} aria-hidden="true" />} disabled={action.busy || !people?.length} />
         <DateChip value={dueDate} onChange={setDueDate} disabled={action.busy} required />
-        <label className={cn(chipButton, "cursor-text")}>
-          <Tag size={14} aria-hidden="true" className="shrink-0" />
-          <input aria-label="Labels" placeholder="Labels" value={labels} onChange={(event) => setLabels(event.target.value)} disabled={action.busy}
-            className="w-24 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-ink-secondary max-md:text-[16px]" />
-        </label>
-        {agents.length > 0 && (
-          <ChipSelect label="Hand to agent" value={agentId} placeholder="Hand to agent" align="right" icon={<BotIcon size={14} aria-hidden="true" />}
-            options={[...agents.map((agent) => ({ value: agent.id, label: agent.name, icon: agent.avatar })), ...(agentId ? [{ value: NO_AGENT, label: "Don't hand off", icon: <X size={14} aria-hidden="true" /> }] : [])]}
-            onChange={(value) => setAgentId(value === NO_AGENT ? "" : value)} disabled={action.busy} />
-        )}
-      </div>
+        {agents.length > 0 && <AgentChip agents={agents} value={agentId} onPick={(id) => setAgentId(id ?? "")} onClear={() => setAgentId("")} disabled={action.busy} />}
+      </IssueChips>
       <div className="mt-2 flex flex-wrap items-center gap-1">
         <span className="mr-1 text-[11.5px] text-ink-tertiary">Due</span>
         {DUE_SHORTCUTS.map((shortcut) => (

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCallSignaling, formatElapsed, isScreenTrack, selectCallFocus } from "./member-call";
+import { createCallSignaling, formatElapsed, galleryColumns, isScreenTrack, parseCallMessage, selectCallFocus } from "./member-call";
 
 type Description = { type: string; sdp?: string };
 
@@ -86,5 +86,30 @@ describe("formatElapsed", () => {
   it("shows minutes and seconds", () => {
     expect(formatElapsed(0)).toBe("00:00");
     expect(formatElapsed(754)).toBe("12:34");
+  });
+});
+
+describe("call channel messages", () => {
+  it("keeps known reactions and hand flags", () => {
+    expect(parseCallMessage(JSON.stringify({ kind: "reaction", emoji: "🎉" }))).toEqual({ kind: "reaction", emoji: "🎉" });
+    expect(parseCallMessage(JSON.stringify({ kind: "hand", up: true }))).toEqual({ kind: "hand", up: true });
+  });
+
+  it("drops anything else", () => {
+    expect(parseCallMessage(JSON.stringify({ kind: "reaction", emoji: "<img src=x>" }))).toBeNull();
+    expect(parseCallMessage(JSON.stringify({ kind: "hand", up: "yes" }))).toBeNull();
+    expect(parseCallMessage("not json")).toBeNull();
+    expect(parseCallMessage(new ArrayBuffer(4))).toBeNull();
+    expect(parseCallMessage("x".repeat(500))).toBeNull();
+  });
+});
+
+describe("gallery columns", () => {
+  it("grows towards a square and caps by width", () => {
+    expect(galleryColumns(1, 1200)).toBe(1);
+    expect(galleryColumns(2, 1200)).toBe(2);
+    expect(galleryColumns(4, 1200)).toBe(2);
+    expect(galleryColumns(5, 1200)).toBe(3);
+    expect(galleryColumns(8, 400)).toBe(2);
   });
 });

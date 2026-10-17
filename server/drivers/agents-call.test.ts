@@ -297,4 +297,15 @@ describe("origin_assign_issue", () => {
       .toEqual({ isError: true, text: "Only a Chief assigns Origin issues to agents." });
     expect(origin.calls).toHaveLength(1);
   });
+
+  it("origin_complete_issue asks the project's Chief to review in a new thread, without resuming the agent", async () => {
+    const reviewer = { botId: "kai-chief", botName: "Kai", message: "Review #7", reason: "Review the pull request for ORI-AB12" };
+    const { calls, client } = originHarness({
+      "origin:prepare": { ok: true, status: 200, body: { text: "Commented on ORI-AB12.", reviewer } },
+      "/api/internal/coordinate-bots": { ok: true, status: 200, body: { receipts: [] } },
+    });
+    const result = await callTool("origin_complete_issue", { issue_id: "ORI-AB12", summary: "Done" }, context({ client }));
+    expect(result).toEqual({ text: "Commented on ORI-AB12." });
+    expect(calls[1]).toEqual({ path: "/api/internal/coordinate-bots", body: { botIds: ["kai-chief"], message: "Review #7", reason: reviewer.reason, thread: "new", reply: "none" } });
+  });
 });

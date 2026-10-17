@@ -1,7 +1,7 @@
 {
   "default": {
-    "bytes": 64255,
-    "sha256": "bb8bf76ecf7a3b39c8fa551636a27c9402b6d1b844c24fd6b7536d0d0d5812ba",
+    "bytes": 68501,
+    "sha256": "0f7a62f801ad7256e8959741cdc70d07baab055fbe0d0d4ab3953c2c1b7d68f7",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -47,15 +47,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "voice": {
-    "bytes": 64996,
-    "sha256": "d5a663df01d85bb26641f41de17f8c094834c4ab6a764c55ed4fba65a0916b3a",
+    "bytes": 69242,
+    "sha256": "7aa159c0c9c89d06f870a6ea869db42553454e1b6f6bffb6c311594e64b36e27",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -102,15 +108,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "shared": {
-    "bytes": 66000,
-    "sha256": "13b95d210349598de513a3dc193053cd6f750164f88c1bab73d046b88496e37b",
+    "bytes": 70246,
+    "sha256": "f3bb32842a055937b55a408f92dafc6164369f813ba75db780b116e0503a4940",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -158,15 +170,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "shared+voice": {
-    "bytes": 66741,
-    "sha256": "6d0b9e40b117f5a94887eb488b3a949d0e06a2c54129fddb3b7c5fe104c610ac",
+    "bytes": 70987,
+    "sha256": "93472fe83fef75f5daf6abb52edc1d449dd13d028dcd9af95efd636104883078",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -215,15 +233,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills": {
-    "bytes": 67154,
-    "sha256": "f71eadcdb70a0df2e342fa851b8e6543918b10f92032ddb2900975e82dd815b9",
+    "bytes": 71400,
+    "sha256": "7129f689c917d1b069513709953a84765b7ed97959870d82648790bf0d496366",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -271,15 +295,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+voice": {
-    "bytes": 67895,
-    "sha256": "87669f40c13a7757bcdf90170bbed2b42fa8aa939d1558f97fbd9f9caa17b77d",
+    "bytes": 72141,
+    "sha256": "6313e7c4fbc4c21091428f504211ca7e0397971937e26e67df422dd9eb53d66d",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -328,15 +358,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+shared": {
-    "bytes": 68899,
-    "sha256": "752a7793d54c9efbd58729649f96cea10e4321afdab4437876b2077b44255bf2",
+    "bytes": 73145,
+    "sha256": "538214419e3b1ab94feb1569a7d64fb21b3c1ab00371111c7fd3cdd531f62f43",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -386,15 +422,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+shared+voice": {
-    "bytes": 69640,
-    "sha256": "192d739c493c70e6b69286a1cacb5340eb6d5720ea14e163ec710574f56b89a0",
+    "bytes": 73886,
+    "sha256": "aa92dfa80aef26d4274166c46e8895c40e413cbb14d177d1d3f708e668784d23",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -445,15 +487,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "non-chief": {
-    "bytes": 53580,
-    "sha256": "7f465368515a5a8ade0bf1387ca01aa5e439dc9cebca747b18630aa5b6b183e2",
+    "bytes": 56262,
+    "sha256": "a528786f713fd40ef9b7957b5c702956055751c7b0a1c0adb8b999b051e48fdf",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -494,12 +542,16 @@
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "voice+non-chief": {
-    "bytes": 54321,
-    "sha256": "63e4fb8e751ba182a9db9138a893ef384347fe187fefc745aeb72431dc1f5cb1",
+    "bytes": 57003,
+    "sha256": "8bdb027c1c726aee7d3a93e4f610f5de9116b9aaafc5b0f2a5a189644ec0b577",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -541,12 +593,16 @@
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "shared+non-chief": {
-    "bytes": 55325,
-    "sha256": "daa81ead1ea07d888f85b2018ebf6ae89ef72403d80753e3db33c4b20fe095de",
+    "bytes": 58007,
+    "sha256": "81e43afd36243fce452ee3dab4d0c115a15844bc75a42fcc834a7d22d92b2acc",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -589,12 +645,16 @@
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 56066,
-    "sha256": "6bd2d75184ed5d1af76669e26a141e8ab49ba9815eafdd97901a842aad5f7b57",
+    "bytes": 58748,
+    "sha256": "c9a7fb0ac9d20ee6aa0a410ffa24c47bf12b208b2e6e6a80052320e2003eda60",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -638,12 +698,16 @@
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+non-chief": {
-    "bytes": 56479,
-    "sha256": "29d5899ef983b69930c0dd5792ed538143a3b285fad1b1be850162cd7308e9ee",
+    "bytes": 59161,
+    "sha256": "dc026172fc3d32fd62a0268673632be7b6387a550be5a79d4bc4cd3d55821eea",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -686,12 +750,16 @@
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 57220,
-    "sha256": "830f2e96e3e74c9fe6aea6b21b7fd2c9fe1c39a506b96c6a8cf0c6aac4a7cec9",
+    "bytes": 59902,
+    "sha256": "fcba6123b0a9cf52d9ed4b377a9fd7abbec952fdf7a75cb6d1c1f26a52283a2d",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -735,12 +803,16 @@
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 58224,
-    "sha256": "5440e8c7b86c958717c4264e10e2d21e819f4e19ff24449722723b556a348e99",
+    "bytes": 60906,
+    "sha256": "7771ac4b55378cbf5d5c3bb3372cc138d910d0244180b4b0522374c8e8860ff3",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -785,12 +857,16 @@
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 58965,
-    "sha256": "4eae06eb14c33ef4e18afbf17e0ff705af2da7fdbc03643a1ebef3327dab149d",
+    "bytes": 61647,
+    "sha256": "015acc0141b23e7f5fd36faa36a2f259df4a47d74aed81d0b72f424649b094bb",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -836,12 +912,16 @@
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 68695,
-    "sha256": "5238b532f12c87c8563e1416cd7a84a521cdf21e006e148de40bdb5414513fcd",
+    "bytes": 72941,
+    "sha256": "a581d4df89c3bc6333a6b608cc5d13030748df1c09083b90dcaf7e06c9e29418",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -891,15 +971,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 58020,
-    "sha256": "1aae0a3bc611e9fc5ccdf0a78245839a41deba79c2d82bc5f16d318fa6b91bfa",
+    "bytes": 60702,
+    "sha256": "547f6c6076c953e0a01a81e011214538d24f5cf325ccd0e35c9151307fab1909",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -944,12 +1030,16 @@
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 70500,
-    "sha256": "f9f6a12184bc9a4939316e290f70baa592e27590500c322eb28e12ea9d8d5c21",
+    "bytes": 74746,
+    "sha256": "6ab1f6915a16b5c8174ceff22eb5d9a58170d5f6728d386a8de99dd77beb13c8",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1001,15 +1091,21 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   },
   "default+legacy-switches": {
-    "bytes": 64255,
-    "sha256": "bb8bf76ecf7a3b39c8fa551636a27c9402b6d1b844c24fd6b7536d0d0d5812ba",
+    "bytes": 68501,
+    "sha256": "0f7a62f801ad7256e8959741cdc70d07baab055fbe0d0d4ab3953c2c1b7d68f7",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1055,10 +1151,16 @@
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
       "origin_vault_list",
-      "origin_repo_status"
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_draw"
     ]
   }
 }

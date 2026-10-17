@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, RefreshCw } from "lucide-react";
-import { EngineSetup } from "@/components/EngineSetup";
+import { Check, ChevronDown, Download, Loader2, LogIn, RefreshCw } from "lucide-react";
+import { EngineSetup, needsCli, offersSignIn } from "@/components/EngineSetup";
 import { engineReady } from "@/components/EngineLibrary";
 import { InstanceProviderMark } from "@/components/ProviderIcons";
 import { cn } from "@/lib/cn";
@@ -25,6 +25,49 @@ function StatusPill({ ready }: { ready: boolean }) {
       <span className={cn("size-1.5 rounded-full", ready ? "bg-success" : "bg-warning")} aria-hidden="true" />
       {ready ? t("onboarding.engines.ready") : t("onboarding.engines.needsSetup")}
     </span>
+  );
+}
+
+export function oneClickInstall(instance: InstanceInfo): boolean {
+  return needsCli(instance) && Boolean(instance.install?.server || instance.install?.managed);
+}
+
+function InstallButton({ instance, onInstalled }: { instance: InstanceInfo; onInstalled: (instances: InstanceInfo[]) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const install = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const { instances } = await api(`/api/instances/${encodeURIComponent(instance.instanceId)}/install`, { method: "POST", body: "{}" });
+      const list = (instances ?? []) as InstanceInfo[];
+      const installed = list.find((candidate) => candidate.instanceId === instance.instanceId);
+      if (list.length) onInstalled(list);
+      if (installed?.snapshot.state !== "available") {
+        throw new Error(t("engineSetup.installNotVerified", { reason: installed?.snapshot.reason ?? t("engineSetup.noReason") }));
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => void install()}
+        disabled={busy}
+        className="flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1 text-[12px] font-medium text-white transition-opacity duration-150 disabled:cursor-wait disabled:opacity-70"
+      >
+        {busy ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+        {busy ? t("onboarding.engines.installing") : t("onboarding.engines.install")}
+      </button>
+      {error && (
+        <p role="alert" className="basis-full whitespace-pre-wrap pl-[30px] text-[11.5px] leading-relaxed text-danger">{error}</p>
+      )}
+    </>
   );
 }
 
@@ -166,25 +209,45 @@ export function EnginesBeat({
                       <StatusPill ready />
                     </div>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => setOpen(expanded === instance.instanceId ? null : instance.instanceId)}
-                      aria-expanded={expanded === instance.instanceId}
-                      className="flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-raised/40"
-                    >
-                      <span className="flex size-[18px] shrink-0 items-center justify-center">
-                        <InstanceProviderMark instance={instance} size={18} />
-                      </span>
-                      <div className="flex min-w-0 flex-1 items-baseline gap-2">
-                        <span className="truncate text-[13.5px] font-medium text-ink">{instance.displayName}</span>
-                        {v && <span className="shrink-0 text-[11.5px] tabular-nums text-ink-secondary">{v}</span>}
-                      </div>
-                      <StatusPill ready={false} />
-                      <ChevronDown
-                        size={14}
-                        className={cn("shrink-0 text-ink-secondary transition-transform duration-200", expanded === instance.instanceId && "rotate-180")}
-                      />
-                    </button>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-3 transition-colors hover:bg-raised/40">
+                      <button
+                        type="button"
+                        onClick={() => setOpen(expanded === instance.instanceId ? null : instance.instanceId)}
+                        aria-expanded={expanded === instance.instanceId}
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                      >
+                        <span className="flex size-[18px] shrink-0 items-center justify-center">
+                          <InstanceProviderMark instance={instance} size={18} />
+                        </span>
+                        <span className="flex min-w-0 flex-1 items-baseline gap-2">
+                          <span className="truncate text-[13.5px] font-medium text-ink">{instance.displayName}</span>
+                          {v && <span className="shrink-0 text-[11.5px] tabular-nums text-ink-secondary">{v}</span>}
+                        </span>
+                        <StatusPill ready={false} />
+                        <ChevronDown
+                          size={14}
+                          className={cn("shrink-0 text-ink-secondary transition-transform duration-150", expanded === instance.instanceId && "rotate-180")}
+                        />
+                      </button>
+                      {oneClickInstall(instance) ? (
+                        <InstallButton
+                          instance={instance}
+                          onInstalled={(next) => {
+                            dispatch({ type: "instances", instances: next });
+                            if (offersSignIn(next.find((candidate) => candidate.instanceId === instance.instanceId))) setOpen(instance.instanceId);
+                          }}
+                        />
+                      ) : offersSignIn(instance) && expanded !== instance.instanceId ? (
+                        <button
+                          type="button"
+                          onClick={() => setOpen(instance.instanceId)}
+                          className="flex shrink-0 items-center gap-1.5 rounded-lg bg-raised px-2.5 py-1 text-[12px] font-medium text-ink transition-colors hover:bg-raised-hover"
+                        >
+                          <LogIn size={12} />
+                          {t("onboarding.engines.signIn")}
+                        </button>
+                      ) : null}
+                    </div>
                   )}
                   {!ok && expanded === instance.instanceId && (
                     <EngineSetup

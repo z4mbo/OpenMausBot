@@ -80,6 +80,7 @@ describe("what a bridged turn is listed", () => {
       "request_sign_in",
       "fill_login",
       "memory_update",
+      "origin_team_chat_post",
       FIND_TOOL,
       USE_TOOL,
     ]);
@@ -99,6 +100,7 @@ describe("what a bridged turn is listed", () => {
       "fill_login",
       "send_voice_note",
       "memory_update",
+      "origin_team_chat_post",
       FIND_TOOL,
       USE_TOOL,
     ]);
@@ -158,8 +160,8 @@ describe("what a bridged turn is listed", () => {
         for (const spelling of reportedAs(hidden.name)) expect(isOutboundTool(spelling), `${name}: ${spelling}`).toBe(false);
       }
     }
-    // today that is the two the hot list names anyway
-    expect(names(availableTools(profile({ ...FULL_CHIEF }))).filter((tool) => reportedAs(tool).some(isOutboundTool))).toEqual(["post_to_room", "send_voice_note"]);
+    // today that is the two the hot list names, and the team chat post
+    expect(names(availableTools(profile({ ...FULL_CHIEF }))).filter((tool) => reportedAs(tool).some(isOutboundTool))).toEqual(["post_to_room", "send_voice_note", "origin_team_chat_post"]);
     // and the bridge's own two names are not outward either
     for (const spelling of [...reportedAs(USE_TOOL), ...reportedAs(FIND_TOOL)]) expect(isOutboundTool(spelling), spelling).toBe(false);
     // derived, not listed by hand: a future tool named like a send is kept,

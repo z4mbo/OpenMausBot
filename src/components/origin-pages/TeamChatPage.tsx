@@ -120,13 +120,15 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
     }
   };
 
-  const change = async (id: string, patch: Record<string, unknown>) => {
+  const change = async (id: string, patch: Record<string, unknown>): Promise<boolean> => {
     try {
       const result = await originRealtime<{ message: MemberChatMessage | null }>(MESSAGES, target, { method: "PATCH", json: { id, ...patch } });
       setOlder((current) => result.message ? current.map((message) => (message.id === id ? result.message! : message)) : current.filter((message) => message.id !== id));
       refresh();
+      return true;
     } catch (reason) {
       setNotice(reason instanceof Error ? reason.message : "Could not change the message");
+      return false;
     }
   };
 
@@ -139,7 +141,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
 
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-label={`${name} chat`}>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 pt-[calc(var(--glass-top,0px)+0.75rem)] [scroll-padding-top:var(--glass-top,0px)]">
         {latest === undefined && !error && <Loading label="Loading messages" variant="chat" />}
         {latest?.hasMore && !olderExhausted && messages.length > 0 && (
           <button type="button" className="mx-auto mb-3 block rounded-lg px-3 py-1 text-[12.5px] text-ink-secondary hover:bg-raised hover:text-ink" onClick={() => void loadOlder()}>Load earlier messages</button>
@@ -170,7 +172,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
                     )}
                   </div>
                   {editing?.id === message.id ? (
-                    <form className="mt-1 flex flex-col gap-1.5" onSubmit={(event) => { event.preventDefault(); void change(message.id, { body: editing.body }).then(() => setEditing(null)); }}>
+                    <form className="mt-1 flex flex-col gap-1.5" onSubmit={(event) => { event.preventDefault(); void change(message.id, { body: editing.body }).then((saved) => { if (saved) setEditing(null); }); }}>
                       <textarea className={cn(inputClass, "min-h-[60px]")} aria-label="Edit message" value={editing.body} onChange={(event) => setEditing({ id: message.id, body: event.target.value })} />
                       <div className="flex gap-2">
                         <button type="submit" className={primaryButton}>Save</button>

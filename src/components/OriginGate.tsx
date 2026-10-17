@@ -4,6 +4,7 @@ import { cloud, cloudAction, cloudMutation, setCloudUrl, useCloudSession, useClo
 import { cloudUrl as cloudUrlNow, sessionStore, setSessionToken } from "@/lib/origin-cloud/client";
 import { refreshCloudLinks } from "@/lib/origin-cloud-links";
 import { exclusiveWithSync, onSyncRequest, syncFromOrigin } from "@/lib/origin-sync";
+import { sharedAgentsRound } from "@/lib/origin-shared-agents";
 import { PROJECT_LEAD_ROLE } from "@/lib/origin-teams";
 import { activeWorkspaceId, setAccountWorkspaces, switchWorkspace, workspaceHeadsOf } from "@/lib/origin-workspaces";
 import { api, useStore, type Bot } from "@/state/store";
@@ -33,7 +34,7 @@ export function inviteTokenFrom(input: string): string | null {
   return match?.[1] ?? null;
 }
 
-const field = "h-11 w-full rounded-[11px] border border-hairline/60 bg-inset px-3.5 text-[14.5px] text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-tertiary/80 focus:border-focus focus:ring-[3px] focus:ring-focus/20";
+const field = "h-11 w-full rounded-[11px] border border-hairline/60 bg-inset px-3.5 text-[14.5px] text-ink outline-none transition-[border-color] placeholder:text-ink-tertiary/80 focus:border-focus";
 const primary = "mt-1 flex h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 text-[14.5px] font-semibold text-app transition-opacity hover:opacity-90 disabled:opacity-40";
 const title = "text-center text-[26px] font-bold leading-tight tracking-[-0.03em] text-ink";
 const subtitle = "mt-2 text-center text-[14px] text-ink-secondary";
@@ -52,7 +53,6 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 function Shell({ children }: { children: ReactNode }) {
   return (
     <main className="relative flex min-h-dvh items-start justify-center overflow-y-auto bg-app px-4 pb-8 pt-[clamp(40px,14vh,140px)]">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(40%_60%_at_50%_0%,color-mix(in_srgb,var(--color-accent)_22%,transparent),transparent_70%)]" />
       <div className="relative w-full max-w-[400px]">
         <div className="mb-5 flex justify-center"><OriginLogo size={48} /></div>
         {children}
@@ -163,12 +163,19 @@ export function OriginSync() {
   const url = useCloudUrl();
   const bots = useRef(state.bots);
   bots.current = state.bots;
+  const instances = useRef(state.instances);
+  instances.current = state.instances;
   const [empty, setEmpty] = useState(false);
   const [syncProblems, setSyncProblems] = useState<{ name: string; error: string }[]>([]);
   const running = useRef(false);
+  const requestedWhileRunning = useRef(false);
+  const hydrated = Boolean(state.hydrated);
 
-  const sync = useCallback(async () => {
-    if (running.current) return;
+  const sync = useCallback(async (): Promise<void> => {
+    if (running.current) {
+      requestedWhileRunning.current = true;
+      return;
+    }
     running.current = true;
     await exclusiveWithSync(async () => {
       try {
@@ -184,6 +191,7 @@ export function OriginSync() {
           return answer;
         };
         const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: bots.current, links, call, lead: PROJECT_LEAD_ROLE });
+        await sharedAgentsRound({ call, bots: bots.current, instances: instances.current, projects }).catch(() => undefined);
         await refreshCloudLinks();
         const accountTeams = new Set(workspaces.map((workspace) => workspace._id));
         setAccountWorkspaces(Object.entries(synced.links.workspaces).filter(([, teamId]) => accountTeams.has(teamId)).map(([headId]) => headId)
@@ -202,6 +210,10 @@ export function OriginSync() {
         running.current = false;
       }
     });
+    if (requestedWhileRunning.current) {
+      requestedWhileRunning.current = false;
+      await sync();
+    }
   }, [dispatch]);
 
   useEffect(() => {
@@ -209,18 +221,19 @@ export function OriginSync() {
   }, [url, session.token]);
 
   useEffect(() => {
+    if (!hydrated) return;
     void sync();
     const timer = window.setInterval(() => void sync(), SYNC_EVERY_MS);
     const onFocus = () => void sync();
     window.addEventListener("focus", onFocus);
     const stopRequests = onSyncRequest(() => void sync());
     return () => { window.clearInterval(timer); window.removeEventListener("focus", onFocus); stopRequests(); };
-  }, [sync]);
+  }, [sync, hydrated]);
 
   if (empty) return <NoWorkspace onReady={() => void sync()} />;
   if (!syncProblems.length) return null;
   return (
-    <div role="status" className="fixed right-4 bottom-4 z-[60] max-w-[340px] rounded-xl border border-hairline/50 bg-panel px-4 py-3 text-[12.5px] text-ink-secondary shadow-xl">
+    <div role="status" className="fixed right-4 bottom-4 z-[60] max-w-[340px] rounded-xl border border-hairline/50 bg-panel px-4 py-3 text-[12.5px] text-ink-secondary">
       <p className="font-medium text-ink">{syncProblems.length === 1 ? "One project couldn't be loaded" : `${syncProblems.length} projects couldn't be loaded`}</p>
       <ul className="mt-1 space-y-0.5">{syncProblems.slice(0, 4).map((problem) => <li key={problem.name} className="truncate">{problem.name}: {problem.error}</li>)}</ul>
       <p className="mt-1 text-ink-tertiary">Retrying in a minute.</p>

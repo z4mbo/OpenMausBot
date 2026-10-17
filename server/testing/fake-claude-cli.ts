@@ -24,6 +24,8 @@
 //   FAKE_CLAUDE_REPLIES  JSON array of replies (string, or string[] for several items) used in order
 //   FAKE_CLAUDE_REPLY_STATE  counter file keeping FAKE_CLAUDE_REPLIES in order across processes
 //   FAKE_CLAUDE_TOOL_CALLS  JSON [{name, input?, ok?}] each turn calls before its reply (unset: one Bash call)
+//   FAKE_CLAUDE_THINKING  text streamed as a thinking delta before each scripted tool call and the reply
+//   FAKE_CLAUDE_STEP_MS  pause before and after each scripted tool call, so a watcher sees each step live
 //   FAKE_CLAUDE_USES_CLOUD_COMPUTER  1: first take one screenshot through the `computer` MCP server
 //   FAKE_CLAUDE_CONNECT_APPS  toolkits (gmail,slack): first call COMPOSIO_MANAGE_CONNECTIONS via `composio`
 //   FAKE_CLAUDE_HOOKS  1: run the --settings hooks like the CLI (PostToolUse per tool_result, PostToolUseFailure for
@@ -752,9 +754,18 @@ const playTurn = (prompt: JsonValue, late = false) => {
   const usage = { input_tokens: 10, cache_read_input_tokens: Number.isSafeInteger(cacheRead) && cacheRead > 0 ? cacheRead : 2, output_tokens: 5 };
   if (scriptedToolCalls) {
     const failureContext: string[] = [];
+    const stepMs = Number(process.env.FAKE_CLAUDE_STEP_MS);
+    const pause = () => { if (stepMs > 0) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, stepMs); };
+    const think = () => {
+      const thinking = process.env.FAKE_CLAUDE_THINKING;
+      if (thinking) out({ type: "stream_event", event: { type: "content_block_delta", delta: { type: "thinking_delta", thinking } } });
+    };
     for (const call of scriptedToolCalls) {
       const id = call.id ?? `tu-${process.pid}-${++toolUseCount}`;
+      think();
+      pause();
       out({ type: "assistant", message: { content: [{ type: "tool_use", id, name: call.name, input: call.input }], usage } });
+      pause();
       const reply = call.server ? mcpToolCall(call.server, call.name, call.input)
         : { ok: call.ok, content: call.output };
       out({ type: "user", message: { content: [{ type: "tool_result", tool_use_id: id, is_error: !reply.ok, content: reply.content }] } });
@@ -770,6 +781,8 @@ const playTurn = (prompt: JsonValue, late = false) => {
       }
     }
     if (failureContext.length) replyParts = [`${failureContext.join("\n")}\n\n${replyParts[0] ?? ""}`, ...replyParts.slice(1)];
+    think();
+    pause();
     for (const text of replyParts) out({ type: "assistant", message: { content: [{ type: "text", text }], usage } });
   } else {
     replyParts.forEach((text, index) => {

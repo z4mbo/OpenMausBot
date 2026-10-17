@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { json, readBody } from "./harness/http.ts";
 import {
   cloudProjectFor, createOriginCloudRoutes, reachableCloudProjects, readOriginCloud, runOriginTool, writeOriginCloud, type OriginAgentTurn, type OriginCloudClient,
-  type OriginToolDeps,
+  type OriginGitHub, type OriginToolDeps,
 } from "./origin-cloud.ts";
 import type { RequestAuth } from "./request-auth.ts";
 import { dispatchRoutes } from "./routes/table.ts";
@@ -216,6 +216,13 @@ describe("runOriginTool", () => {
     expect(missing).toMatchObject({ isError: true, text: expect.stringContaining("No issue ORI-ZZZZ") });
   });
 
+  it("refuses to touch the labels of an issue outside the bot's project", async () => {
+    const { client, calls } = workspaceConvex();
+    const result = await runOriginTool("origin_update_issue", { issue_id: "yukitaskef56", labels: ["mine"] }, "kai-dev", workspaceDeps(client));
+    expect(result).toMatchObject({ isError: true, text: expect.stringContaining("Task not found") });
+    expect(mutations(calls)).toEqual([]);
+  });
+
   it("finds a raw issue id in whichever reachable project holds it", async () => {
     const { client } = workspaceConvex();
     const result = await runOriginTool("origin_comment_issue", { issue_id: "yukitaskef56", text: "On it" }, "head", workspaceDeps(client));
@@ -314,29 +321,102 @@ describe("origin_assign_issue", () => {
 });
 
 describe("origin_complete_issue", () => {
-  it("comments the summary and pull request, then moves the issue to review", async () => {
+  it("comments the summary and pull request, moves the issue to review and asks the project's Chief to review it", async () => {
     const { client, calls } = workspaceConvex();
     const result = await runOriginTool("origin_complete_issue", {
-      issue_id: "kaitaskab12", summary: "CI runs on every push.", pull_request_url: "https://github.com/ggs/kai/pull/7", stage: "review",
+      issue_id: "kaitaskab12", summary: "CI runs on every push.", pull_request_url: "https://github.com/ggs/kai/pull/7",
     }, "kai-dev", workspaceDeps(client));
-    expect(result.text).toBe('Commented on ORI-AB12 and moved to "Review".');
+    expect(result.text).toBe('Commented on ORI-AB12 and moved to "Review". Kai is asked to review and merge it. Do not mark it done yourself.');
     expect(mutations(calls)).toEqual([
       ["tasks:addComment", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", body: "CI runs on every push.\n\nPull request: https://github.com/ggs/kai/pull/7" }],
       ["tasks:moveTask", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", columnId: "k3" }],
     ]);
     expect(result.cards?.heading).toBe("Issue in review");
+    expect(result.reviewer).toMatchObject({ botId: "kai-chief", botName: "Kai" });
+    expect(result.reviewer?.message).toContain("origin_review_pr");
   });
 
-  it("marks the issue done in its done column, and refuses a bad link", async () => {
+  it("never marks an issue done, and refuses a bad link", async () => {
     const { client, calls } = workspaceConvex();
-    const result = await runOriginTool("origin_complete_issue", { issue_id: "yukitaskef56", summary: "Shipped." }, "yuki-dev", workspaceDeps(client));
-    expect(result.text).toBe('Commented on ORI-EF56 and marked done in "Done".');
-    expect(mutations(calls).slice(1)).toEqual([
-      ["tasks:moveTask", { projectId: "yuki", sessionToken: "tok", taskId: "yukitaskef56", columnId: "y4" }],
-      ["tasks:updateTask", { projectId: "yuki", sessionToken: "tok", taskId: "yukitaskef56", done: true }],
-    ]);
+    const result = await runOriginTool("origin_complete_issue", { issue_id: "yukitaskef56", summary: "Shipped.", stage: "done" }, "yuki-dev", workspaceDeps(client));
+    expect(result.isError).toBeUndefined();
+    expect(mutations(calls).some(([name, args]) => name === "tasks:updateTask" || (name === "tasks:moveTask" && (args as { columnId: string }).columnId === "y4"))).toBe(false);
     expect(await runOriginTool("origin_complete_issue", { issue_id: "yukitaskef56", summary: "x", pull_request_url: "javascript:alert(1)" }, "yuki-dev", workspaceDeps(client)))
       .toMatchObject({ isError: true });
+  });
+
+  it("in a project with a repository, needs a pull request there and links it to the issue's GitHub issue", async () => {
+    const { client, calls } = workspaceConvex({ "projects:get": (args: Record<string, unknown>) => ({ _id: args.projectId, name: "Kai", repoUrl: "https://github.com/ggs/kai" }) });
+    const github = fakeGitHub();
+    const missing = await runOriginTool("origin_complete_issue", { issue_id: "kaitaskab12", summary: "Done." }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(missing).toMatchObject({ isError: true });
+    expect(missing.text).toContain("pull_request_url");
+    const foreign = await runOriginTool("origin_complete_issue", { issue_id: "kaitaskab12", summary: "Done.", pull_request_url: "https://github.com/evil/kai/pull/7" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(foreign).toMatchObject({ isError: true });
+    expect(mutations(calls)).toEqual([]);
+    const result = await runOriginTool("origin_complete_issue", { issue_id: "kaitaskab12", summary: "Done.", pull_request_url: "https://github.com/ggs/kai/pull/7" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(github.calls).toEqual([["mirrorIssue", "kai", "kaitaskab12"], ["linkPullRequest", "kai", 7, 12]]);
+    expect(result.text).toContain('added "Closes #12" to #7');
+    expect(result.reviewer?.message).toContain("checks success");
+  });
+});
+
+function fakeGitHub(overrides: Partial<OriginGitHub> = {}) {
+  const calls: unknown[][] = [];
+  const pull = { number: 7, title: "CI", url: "https://github.com/ggs/kai/pull/7", author: "dev", branch: "ci", state: "open" as const, closes: [12], updatedAt: 1, checks: "success", review: "review_required" as const };
+  const api: OriginGitHub = {
+    mirrorIssue: async (projectId, taskId) => { calls.push(["mirrorIssue", projectId, taskId]); return { taskId, issueNumber: 12 }; },
+    linkPullRequest: async (projectId, number, issueNumber) => { calls.push(["linkPullRequest", projectId, number, issueNumber]); return { added: true, pull }; },
+    pullRequests: async (projectId) => { calls.push(["pullRequests", projectId]); return [pull, { ...pull, number: 3, state: "merged" }]; },
+    pullRequest: async (projectId, number) => {
+      calls.push(["pullRequest", projectId, number]);
+      return { ...pull, baseBranch: "main", defaultBranch: "main", headSha: "a".repeat(40), mergeable: true, additions: 4, deletions: 1, files: [{ name: "ci.yml", status: "added", additions: 4, deletions: 1 }], checkRuns: [{ name: "test", status: "completed", conclusion: "success" }] };
+    },
+    approve: async (projectId, number, body) => { calls.push(["approve", projectId, number, body]); return { approved: true }; },
+    merge: async (projectId, number, headSha) => { calls.push(["merge", projectId, number, headSha]); return { sha: "c".repeat(40) }; },
+    ...overrides,
+  };
+  return { api, calls };
+}
+
+describe("GitHub-first issues", () => {
+  const repoProject = (memberRole = "admin") => ({ "projects:get": (args: Record<string, unknown>) => ({ _id: args.projectId, name: "Kai", repoUrl: "https://github.com/ggs/kai", memberRole }) });
+
+  it("mirrors a new issue to GitHub, and refuses to mark one done or drop it in the done column", async () => {
+    const { client, calls } = workspaceConvex({ ...repoProject(), "auth:me": { email: "me@x.dev" }, "tasks:createTask": "kainew" });
+    const github = fakeGitHub();
+    const created = await runOriginTool("origin_create_issue", { title: "New" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(created.text).toContain("Mirrored as GitHub issue #12.");
+    for (const change of [{ done: true }, { column: "Done" }]) {
+      const refused = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", ...change }, "kai-dev", workspaceDeps(client, { github: github.api }));
+      expect(refused).toMatchObject({ isError: true });
+      expect(refused.text).toContain("origin_complete_issue");
+    }
+    expect(mutations(calls).map(([name]) => name)).toEqual(["tasks:createTask"]);
+  });
+
+  it("origin_review_pr is the Chief's: lists open pull requests with the issues they close, reads one, approves and merges it", async () => {
+    const { client } = workspaceConvex({ ...repoProject(), "tasks:board": () => ({ ...KAI_BOARD, tasks: KAI_BOARD.tasks.map((task, index) => (index === 0 ? { ...task, githubIssueNumber: 12 } : task)) }) });
+    const github = fakeGitHub();
+    expect(await runOriginTool("origin_review_pr", {}, "kai-dev", workspaceDeps(client, { github: github.api }))).toMatchObject({ isError: true });
+    const listed = await runOriginTool("origin_review_pr", {}, "kai-chief", workspaceDeps(client, { github: github.api }));
+    expect(listed.text).toContain("#7 open \"CI\"");
+    expect(listed.text).toContain("closes #12 (ORI-AB12)");
+    expect(listed.text).not.toContain("#3 merged");
+    const read = await runOriginTool("origin_review_pr", { action: "read", number: 7 }, "kai-chief", workspaceDeps(client, { github: github.api }));
+    expect(read.text).toContain(`Ready to merge: pass head_sha ${"a".repeat(40)}`);
+    expect((await runOriginTool("origin_review_pr", { action: "approve", number: 7, comment: "Good." }, "kai-chief", workspaceDeps(client, { github: github.api }))).text).toBe("Approved #7 with your comment.");
+    const merged = await runOriginTool("origin_merge_pr", { number: 7, head_sha: "a".repeat(40) }, "kai-chief", workspaceDeps(client, { github: github.api }));
+    expect(merged.text).toContain("Merged #7 into the default branch (ccccccc). GitHub closes ORI-AB12");
+    expect(github.calls).toContainEqual(["merge", "kai", 7, "a".repeat(40)]);
+  });
+
+  it("merging needs a project admin's sign-in", async () => {
+    const { client } = workspaceConvex(repoProject("member"));
+    const github = fakeGitHub();
+    const refused = await runOriginTool("origin_merge_pr", { number: 7, head_sha: "a".repeat(40) }, "kai-chief", workspaceDeps(client, { github: github.api }));
+    expect(refused).toMatchObject({ isError: true });
+    expect(github.calls.some(([name]) => name === "merge")).toBe(false);
   });
 });
 
@@ -409,15 +489,41 @@ async function serve(options: { auth?: RequestAuth; agentTurn?: (header: string 
 
 describe("origin-cloud routes", () => {
   it("sets, reports and clears the session without ever returning the token", async () => {
-    const { call, file } = await serve();
+    let signedOut = false;
+    const { call, file } = await serve({ answers: { "auth:me": () => (signedOut ? null : { email: "me@x.dev" }) } });
     expect(await call("GET", "/api/origin/cloud-session")).toEqual([200, { url: null, connected: false }]);
     expect(await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210/", sessionToken: "tok" })).toEqual([200, { url: "http://127.0.0.1:3210", connected: true }]);
     const [, status] = await call("GET", "/api/origin/cloud-session");
     expect(status).toEqual({ url: "http://127.0.0.1:3210", connected: true });
     expect(JSON.stringify(status)).not.toContain("tok");
     expect(readOriginCloud(file).sessionToken).toBe("tok");
+    expect((await call("DELETE", "/api/origin/cloud-session"))[0]).toBe(409);
+    signedOut = true;
     expect(await call("DELETE", "/api/origin/cloud-session")).toEqual([200, { url: null, connected: false }]);
     expect(readOriginCloud(file)).toEqual({ projects: {} });
+  });
+
+  it("keeps a project link saved while Origin was checking the session", async () => {
+    let saved = "";
+    const { call, file } = await serve({
+      answers: {
+        "auth:me": () => {
+          writeOriginCloud(saved, { ...readOriginCloud(saved), projects: { chief: "late" } });
+          return { email: "me@x.dev" };
+        },
+      },
+    });
+    saved = file;
+    expect((await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "tok" }))[0]).toBe(200);
+    expect(readOriginCloud(file)).toEqual({ url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "late" } });
+  });
+
+  it("never hands the bots to another person's signed-in Origin account", async () => {
+    const { call, file } = await serve({ answers: { "auth:me": (args: Record<string, unknown>) => ({ email: args.sessionToken === "ana" ? "Ana@x.dev" : "bo@x.dev" }) } });
+    expect((await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "ana" }))[0]).toBe(200);
+    expect(await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "bo" })).toEqual([409, { error: "This app is connected to another Origin account" }]);
+    expect((await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "ana" }))[0]).toBe(200);
+    expect(readOriginCloud(file).sessionToken).toBe("ana");
   });
 
   it("refuses a bad address or a token Origin does not accept", async () => {

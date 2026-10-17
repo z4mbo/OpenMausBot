@@ -300,7 +300,7 @@ export const CLIENT_ALLOW: ReadonlyArray<{ methods: readonly string[]; path: Reg
   // configured-or-not booleans; the handler strips the few identifying fields for clients
   { methods: ["GET"], path: /^\/api\/config$/ },
   // Origin member calls and chat: the handler authorizes each request with the person's Origin session
-  { methods: ["GET", "POST", "DELETE"], path: /^\/api\/local-voice\/(?:config|participants|signals)$/ },
+  { methods: ["GET", "POST", "DELETE"], path: /^\/api\/local-voice\/(?:config|participants|signals|agent|agent-audio)$/ },
   { methods: ["GET", "POST", "PATCH"], path: /^\/api\/local-chat\/(?:conversations|messages|files)$/ },
   { methods: ["GET"], path: /^\/api\/releases$/ },
 ];

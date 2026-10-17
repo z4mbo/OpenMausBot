@@ -1,3 +1,4 @@
+import { repositoryNameFor } from "../../shared/github-repo-name.ts";
 import { jobPayload } from "./store.ts";
 import { parseGitHubRepo, repoName } from "./repo.ts";
 import { GitHubHttpError, githubRequest, workspaceGitHubToken, type GitHubService } from "./service.ts";
@@ -8,7 +9,7 @@ export type IntegrationContext = {
   legacyOwner: boolean;
   project: { _id: string; teamId?: string; name: string; status?: string; description?: string; repoUrl?: string; githubRepoId?: number; githubWorkspaceAccess?: boolean };
   connection: Connection | null;
-  task: { _id: string; title: string; description?: string; done: boolean; githubIssueNumber?: number; githubIssueUrl?: string } | null;
+  task: { _id: string; title: string; description?: string; done: boolean; githubIssueNumber?: number; githubIssueUrl?: string; githubIssueState?: "open" | "closed" } | null;
 };
 type GitHubIssue = { number: number; html_url: string; state: "open" | "closed"; updated_at: string; body?: string; pull_request?: unknown };
 type Target = { projectId: string; taskId: string; repoUrl: string; number: number };
@@ -63,7 +64,15 @@ async function contextWithToken(service: GitHubService, projectId: string, taskI
   return { ...context, token, repo };
 }
 
-export async function createProjectRepository(service: GitHubService, projectId: string, manual = false): Promise<RepositoryResult> {
+/** The token of this project's own GitHub connection (its saved connection, else the workspace's), never the legacy fallback. */
+export async function projectConnection(service: GitHubService, projectId: string): Promise<{ repoUrl: string; token: string | undefined }> {
+  const context = await contextWithToken(service, projectId);
+  if (!context.repo) throw new Error("Link a GitHub repository to this project first");
+  const repoUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
+  return { repoUrl, token: context.token && context.token !== service.env.legacyToken ? context.token : undefined };
+}
+
+export async function createProjectRepository(service: GitHubService, projectId: string, manual = false, requestedName?: string): Promise<RepositoryResult> {
   const { store } = service;
   const key = `repo:${projectId}`;
   if (!store.lockJob(key)) return { state: "working" };
@@ -81,7 +90,7 @@ export async function createProjectRepository(service: GitHubService, projectId:
     if (!token) throw new Error("Reconnect GitHub in workspace settings");
     const saved = jobPayload(store.readJob(key));
     let repo = saved.repo as Repository | undefined;
-    const name = `${context.project.name.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "").slice(0, 70) || "project"}-${projectId.slice(-6)}`;
+    const name = requestedName ?? repositoryNameFor(context.project.name);
     const marker = `Origin project: ${projectId}`;
     if (!repo && saved.started) {
       try { repo = await githubRequest<Repository>(service, `/repos/${connection.login}/${typeof saved.name === "string" ? saved.name : name}`, token); }
@@ -101,7 +110,7 @@ export async function createProjectRepository(service: GitHubService, projectId:
   } catch (error) {
     const message = error instanceof Error ? error.message : "Repository creation failed";
     keepPayloadAsError(service, key);
-    await service.bridge("repoResult", { projectId, state: "error", error: message });
+    await service.bridge("repoResult", { projectId, state: "error", error: message }).catch(() => undefined);
     return { state: "error", error: message };
   }
 }
@@ -147,11 +156,62 @@ export async function createGitHubTask(service: GitHubService, projectId: string
   }
 }
 
+export type IssueStateMove = "pull" | "close" | "reopen";
+
+/**
+ * Three-way merge of an issue's open/closed state: `githubIssueState` is what Origin last saw on GitHub, so a change on
+ * GitHub since then wins, and otherwise a different Origin state is pushed to GitHub.
+ */
+export function issueStateMove(task: { done: boolean; githubIssueState?: "open" | "closed" }, remote: "open" | "closed"): IssueStateMove {
+  const local = task.done ? "closed" : "open";
+  if (!task.githubIssueState || remote !== task.githubIssueState || local === remote) return "pull";
+  return task.done ? "close" : "reopen";
+}
+
 async function syncTarget(service: GitHubService, target: Target) {
-  const { token, repo } = await contextWithToken(service, target.projectId, target.taskId);
+  const { token, repo, task } = await contextWithToken(service, target.projectId, target.taskId);
   if (!repo || !token) throw new Error("Repository sync needs an authorized GitHub connection");
-  const issue = await githubRequest<GitHubIssue>(service, `/repos/${repo.owner}/${repo.repo}/issues/${target.number}`, token);
-  if (!issue.pull_request) await link(service, target.projectId, target.taskId, `https://github.com/${repo.owner}/${repo.repo}`, issue);
+  const path = `/repos/${repo.owner}/${repo.repo}/issues/${target.number}`;
+  let issue = await githubRequest<GitHubIssue>(service, path, token);
+  if (issue.pull_request) return;
+  const move = task ? issueStateMove(task, issue.state) : "pull";
+  if (move !== "pull") {
+    issue = await githubRequest<GitHubIssue>(service, path, token, {
+      method: "PATCH", body: JSON.stringify(move === "close" ? { state: "closed", state_reason: "completed" } : { state: "open" }),
+    });
+  }
+  await link(service, target.projectId, target.taskId, `https://github.com/${repo.owner}/${repo.repo}`, issue);
+}
+
+export type MirrorResult = { taskId: string; issueNumber?: number; error?: string };
+
+/** Gives each Origin issue its GitHub issue, one at a time so a lost response is reconciled before the next. */
+export async function mirrorTasks(service: GitHubService, projectId: string, taskIds: readonly string[]): Promise<MirrorResult[]> {
+  const results: MirrorResult[] = [];
+  for (const taskId of taskIds) {
+    try {
+      const created = await createGitHubTask(service, projectId, taskId);
+      results.push({ taskId, ...(created.issueNumber ? { issueNumber: created.issueNumber } : {}) });
+    } catch (error) {
+      results.push({ taskId, error: error instanceof Error ? error.message : "GitHub issue creation failed" });
+    }
+  }
+  return results;
+}
+
+/** One page of open issues without a GitHub issue, across projects whose repository a workspace admin authorized. */
+export async function mirrorUnlinkedPage(service: GitHubService) {
+  const cursorKey = "mirror-cursor";
+  const saved = jobPayload(service.store.readJob(cursorKey));
+  const page = await service.bridge<{ rows: { projectId: string; taskId: string }[]; nextCursor: string | null }>("unlinkedTasks", { cursor: typeof saved.cursor === "string" ? saved.cursor : null });
+  const byProject = new Map<string, string[]>();
+  for (const row of page.rows) byProject.set(row.projectId, [...byProject.get(row.projectId) ?? [], row.taskId]);
+  for (const [projectId, taskIds] of byProject) {
+    for (const result of await mirrorTasks(service, projectId, taskIds)) {
+      if (result.error) console.warn("GitHub issue mirroring failed", result.taskId, result.error);
+    }
+  }
+  service.store.saveJob(cursorKey, "done", { cursor: page.nextCursor });
 }
 
 export async function syncGitHubEvent(service: GitHubService, repoUrl: string, number: number) {

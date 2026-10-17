@@ -15,7 +15,7 @@ export function userProfileSystemPrompt(profile?: { aboutMe?: string }): string 
 
 /** Sections that change between turns of one conversation. A driver keys its per-thread CLI process on the rest;
  * otherwise every change relaunches it and the provider re-uploads the conversation at the cache-write rate. */
-const VOLATILE_SECTIONS = new Set(["memory", "mentions", "outstanding", "recent", "availability"]);
+const VOLATILE_SECTIONS = new Set(["memory", "mentions", "outstanding", "recent", "availability", "origin-status"]);
 
 /** Its id is what puts it in the volatile half. */
 export function teamAvailabilityPart(team: readonly RosterMember[]): PromptPart {

@@ -2,8 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 import type { WorkspaceMember } from "./origin-members";
 
 vi.mock("@/lib/origin-cloud", () => ({ cloudMutation: vi.fn(), cloudQueryOnce: vi.fn() }));
+vi.mock("@/lib/origin-github", () => ({ originGitHub: { createRepository: vi.fn() } }));
 
-const { accessChanges, currentAccess, grantsFor } = await import("./origin-project-access");
+const { accessChanges, createOriginProject, currentAccess, grantsFor } = await import("./origin-project-access");
+const { cloudMutation } = await import("@/lib/origin-cloud");
+const { originGitHub } = await import("@/lib/origin-github");
 const { exclusiveWithSync } = await import("./origin-sync");
 
 const person = (email: string, role: WorkspaceMember["role"]): WorkspaceMember => ({ _id: email, name: email.split("@")[0]!, email, role, avatarUrl: null });
@@ -49,5 +52,39 @@ describe("exclusiveWithSync", () => {
     await expect(failing).rejects.toThrow("boom");
     await last;
     expect(order).toEqual(["first", "failing", "last"]);
+  });
+});
+
+describe("a new project's repository", () => {
+  const create = (repository?: Parameters<typeof createOriginProject>[0]["repository"]) =>
+    createOriginProject({ teamId: "team1", name: "My App", access: { mode: "private", emails: [] }, members, myEmail: "me@x.io", ...(repository ? { repository } : {}) });
+
+  it("creates it under the project's name by default, and reports a GitHub failure without failing the project", async () => {
+    vi.mocked(cloudMutation).mockReset().mockResolvedValue("p1");
+    vi.mocked(originGitHub.createRepository).mockReset().mockResolvedValue({ state: "ready", repoUrl: "https://github.com/octo/My-App" });
+    expect(await create()).toEqual({ projectId: "p1", missed: [], repository: { state: "ready", repoUrl: "https://github.com/octo/My-App" } });
+    expect(vi.mocked(cloudMutation).mock.calls[0]).toEqual(["projects:create", { teamId: "team1", name: "My App", githubRepo: "later" }]);
+    expect(vi.mocked(originGitHub.createRepository).mock.calls[0]).toEqual(["team1", "p1", "My-App"]);
+    vi.mocked(originGitHub.createRepository).mockResolvedValue({ state: "error", error: "name already exists" });
+    expect((await create({ mode: "new", name: "taken" })).repository).toEqual({ state: "error", error: "name already exists" });
+  });
+
+  it("links an existing repository, or leaves it for later without creating one", async () => {
+    vi.mocked(cloudMutation).mockReset().mockResolvedValue("p2");
+    vi.mocked(originGitHub.createRepository).mockReset();
+    expect((await create({ mode: "existing", url: "https://github.com/octo/site" })).repository).toEqual({ state: "ready", repoUrl: "https://github.com/octo/site" });
+    expect(vi.mocked(cloudMutation).mock.calls[0]).toEqual(["projects:create", { teamId: "team1", name: "My App", repoUrl: "https://github.com/octo/site" }]);
+    expect((await create({ mode: "later" })).repository).toEqual({ state: "later" });
+    expect(originGitHub.createRepository).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the automatic repository on an Origin backend that does not know githubRepo yet", async () => {
+    vi.mocked(cloudMutation).mockReset()
+      .mockRejectedValueOnce(new Error("ArgumentValidationError: Object contains extra field `githubRepo` that is not in the validator."))
+      .mockResolvedValue("p3");
+    vi.mocked(originGitHub.createRepository).mockReset();
+    expect(await create()).toEqual({ projectId: "p3", missed: [], repository: { state: "waiting" } });
+    expect(vi.mocked(cloudMutation).mock.calls[1]).toEqual(["projects:create", { teamId: "team1", name: "My App" }]);
+    expect(originGitHub.createRepository).not.toHaveBeenCalled();
   });
 });

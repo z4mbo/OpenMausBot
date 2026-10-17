@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { activeLocale, t } from "@/lib/i18n";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { Check, ChevronDown, ChevronRight, Folder, FolderOpen, Loader2, Pause, Pin, Plus, Search, Square, X } from "lucide-react";
@@ -40,7 +40,7 @@ import { isCancelledTranscriptRow } from "../../shared/client-cancel";
 import { roomRetryRequest } from "@/lib/room-retry";
 import { botEngine, failedTurnCause } from "@/lib/failed-turn";
 import { CitationSelectionToolbar, SentCitations } from "./CitationUI";
-import { Composer } from "./Composer";
+import { Composer, type MentionTeammate } from "./Composer";
 import { ChatErrorBanner, ChatNotice } from "./ChatErrorBanner";
 import { RoomContextBadge, RoomContextWarnings } from "./ContextWarning";
 import { roomContextWarnings } from "@/lib/context-warning";
@@ -1120,7 +1120,9 @@ function RoomSetup({ group, members }: { group: Group; members: Bot[] }) {
     </section>
   );
 }
-export function GroupView({ group }: { group: Group }) {
+const MAUSES_SHOWN = 8;
+
+export function GroupView({ group, managed = false, headerEnd, people }: { group: Group; managed?: boolean; headerEnd?: ReactNode; people?: readonly MentionTeammate[] }) {
   const { state, dispatch } = useStore();
   const remoteClient = window.ogb?.remoteClient?.active === true;
   const { dragProps: headerDragProps, noDragStyle: headerNoDragStyle, controlsShiftStyle } = useCaptionChrome();
@@ -1308,6 +1310,9 @@ export function GroupView({ group }: { group: Group }) {
       </span>
     );
   });
+  const crowdMauses = memberMauses.length > MAUSES_SHOWN
+    ? [...memberMauses.slice(0, MAUSES_SHOWN), <span key="more" className="text-[12px] tabular-nums text-ink-secondary">+{memberMauses.length - MAUSES_SHOWN}</span>]
+    : memberMauses;
 
   return (
     <main className="relative flex h-full min-w-0 flex-1 flex-col bg-app">
@@ -1336,6 +1341,7 @@ export function GroupView({ group }: { group: Group }) {
           className="flex items-center gap-1.5 @max-3xl/roomhead:ml-auto @max-3xl/roomhead:flex-wrap @max-3xl/roomhead:justify-end"
           style={controlsShiftStyle}
         >
+          {!managed && <>
           <button
             type="button"
             onClick={() => setFindOpen((open) => !open)}
@@ -1360,7 +1366,7 @@ export function GroupView({ group }: { group: Group }) {
           {!remoteClient && !setupPending && !group.dm && <RoomWorkingFolderChip group={group} onToggle={() => setFolderOpen((open) => !open)} />}
           {!remoteClient && !setupPending && !group.dm && <DefaultResponderSelect group={group} members={members} />}
           {group.dm || remoteClient ? (
-            memberMauses
+            crowdMauses
           ) : (
             <button
               ref={membersTriggerRef}
@@ -1374,12 +1380,14 @@ export function GroupView({ group }: { group: Group }) {
               }
               className="flex items-center gap-1.5 rounded-full py-0.5 pl-1 pr-1.5 hover:bg-raised/60"
             >
-              {memberMauses}
+              {crowdMauses}
               <span className="flex size-[18px] items-center justify-center rounded-full border border-dashed border-hairline/70 text-ink-secondary">
                 <Plus size={11} />
               </span>
             </button>
           )}
+          </>}
+          {headerEnd}
         </div>
         </div>
       </div>
@@ -1406,7 +1414,7 @@ export function GroupView({ group }: { group: Group }) {
 
       {!setupPending && !group.dm && <RoomHoldsBanner group={group} members={members} />}
 
-      {!setupPending && <div className="w-full px-5">
+      {!setupPending && !managed && <div className="w-full px-5">
         {bulletinOpen ? (
           <div className="mb-1 rounded-lg border border-hairline/40 bg-panel p-2">
             <textarea
@@ -1599,6 +1607,7 @@ export function GroupView({ group }: { group: Group }) {
         key={group.threadId}
         group={group}
         members={members}
+        people={people}
         locked={setupPending}
         replyTo={replyTo}
         onClearReply={clearReply}

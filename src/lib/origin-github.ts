@@ -44,6 +44,44 @@ export const originGitHub = {
   saveToken: (projectId: string, token: string) =>
     call<{ connection: GitHubProjectConnection | null }>(`/api/github/connection?${query({ projectId })}`, { method: "POST", body: JSON.stringify({ token }) }),
   removeToken: (projectId: string) => call<{ connection: null }>(`/api/github/connection?${query({ projectId })}`, { method: "DELETE" }),
-  createRepository: (teamId: string, projectId: string) =>
-    call<{ state: RepositoryState; repoUrl?: string; error?: string }>(`/api/github/repo?${query({ teamId, projectId })}`, { method: "POST" }),
+  createRepository: (teamId: string, projectId: string, name?: string) =>
+    call<{ state: RepositoryState; repoUrl?: string; error?: string }>(`/api/github/repo?${query({ teamId, projectId })}`, { method: "POST", body: JSON.stringify(name ? { name } : {}) }),
+  repositories: (teamId: string) => call<{ login: string | null; repositories: GitHubRepository[] }>(`/api/github/repos?${query({ teamId })}`),
+  repository: (projectId: string) => call<RepoSnapshot>(`/api/github/repo?${query({ projectId })}`),
+  mirrorIssues: (projectId: string, taskIds?: readonly string[]) =>
+    call<{ results: { taskId: string; issueNumber?: number; error?: string }[] }>("/api/github/mirror", { method: "POST", body: JSON.stringify({ projectId, ...(taskIds ? { taskIds } : {}) }) }),
+  openTaskPullRequest: (projectId: string, taskId: string) =>
+    call<{ number: number; url: string; message: string }>("/api/github/pull-requests", { method: "POST", body: JSON.stringify({ projectId, taskId }) }),
+  review: (projectId: string, number: number, action: "approve" | "merge", body?: string) =>
+    call<{ approved?: boolean; merged?: boolean; sha?: string }>("/api/github/pull-requests/review", { method: "POST", body: JSON.stringify({ projectId, number, action, ...(body ? { body } : {}) }) }),
 };
+
+export interface GitHubRepository { fullName: string; url: string; private: boolean }
+
+export type PullState = "draft" | "open" | "closed" | "merged";
+export type ReviewDecision = "approved" | "changes_requested" | "review_required" | "commented";
+
+export interface RepoPull {
+  number: number;
+  title: string;
+  url: string;
+  author?: string;
+  branch?: string;
+  state: PullState;
+  closes: number[];
+  updatedAt: number;
+  checks?: string;
+  review?: ReviewDecision;
+}
+
+export interface RepoIssue { number: number; title: string; state: "open" | "closed"; url: string; author?: string; updatedAt: number }
+export interface RepoCommit { sha: string; url: string; message: string; author: string; committedAt: number }
+
+export interface RepoSnapshot {
+  repo: string;
+  tokenConfigured: boolean;
+  issues: RepoIssue[];
+  pullRequests: RepoPull[];
+  commits: RepoCommit[];
+  commitsError: string;
+}

@@ -4,10 +4,13 @@ import { NewIssueComposer, type ComposerProject } from "./origin-pages/NewIssueC
 import { PresenceStack } from "./OriginPeople";
 import { ProjectRowTrailing } from "./SidebarProjects";
 import { useOriginMe } from "./OriginAccountMenu";
-import { teamUnread } from "./ChiefSections";
+import { teamAgents, teamUnread } from "./ChiefSections";
+import { issueBrief } from "./origin-pages";
+import { createdToAssignable } from "./origin-pages/IssuesPage";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { unreadReplies } from "@/lib/origin-unread";
 import { cloudProjectOf, useCloudLinks } from "@/lib/origin-cloud-links";
+import { useCloudSession } from "@/lib/origin-cloud";
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
 import { closeNewIssue, useNewIssueRequest } from "@/lib/origin-new-issue";
 import { openOriginPage, useOriginPage } from "@/lib/origin-pages";
@@ -112,15 +115,31 @@ function NewIssueDialog({ teamId, projectId }: { teamId: string | null; projectI
   const { projects: links } = useCloudLinks();
   const me = useOriginMe();
   const { rows } = useOriginProjects(teamId);
+  const session = useCloudSession();
+  const signedIn = Boolean(session.user && session.token);
+  const emptyNote = !session.ready ? undefined : !signedIn ? "Sign in to Origin to create issues." : !teamId ? "Share this workspace to create issues with your team." : undefined;
   const chiefFor = (cloudId: string) => state.bots.find((bot) => bot.chiefOfStaff && links[bot.id] === cloudId);
+  const teamFor = (cloudId: string): Bot[] => {
+    const chief = chiefFor(cloudId);
+    return chief ? [chief, ...teamAgents(state.bots, chief)] : [];
+  };
   const projects: ComposerProject[] = (rows ?? []).filter((row) => row.status === "active" || row._id === projectId).map((row) => {
     const chief = chiefFor(row._id);
     return { id: row._id, name: row.name, memberRole: row.memberRole, icon: chief ? <BotAvatar bot={chief} size={18} animated={false} /> : undefined };
   });
   return (
-    <NewIssueComposer loading={rows === undefined} projects={projects} initialProjectId={projectId} myEmail={me?.email} onClose={closeNewIssue}
-      onCreated={(cloudId) => {
+    <NewIssueComposer loading={!session.ready || (signedIn && Boolean(teamId) && rows === undefined)} emptyNote={emptyNote} projects={projects} initialProjectId={projectId} myEmail={me?.email} onClose={closeNewIssue}
+      agentsFor={(cloudId) => teamFor(cloudId).map((agent) => ({ id: agent.id, name: agent.name, avatar: <BotAvatar bot={agent} size={20} animated={false} /> }))}
+      onCreated={(cloudId, _taskId, issue) => {
         closeNewIssue();
+        const agent = issue.agentId ? teamFor(cloudId).find((candidate) => candidate.id === issue.agentId) : undefined;
+        if (agent) {
+          dispatch({ type: "send", botId: agent.id, text: issueBrief(createdToAssignable(issue, rows?.find((row) => row._id === cloudId)?.name ?? "")) });
+          if (agent.chiefOfStaff) setChiefSectionOf(agent.id, "chat");
+          openOriginPage(null);
+          openBot(dispatch, agent, showThreads);
+          return;
+        }
         const chief = chiefFor(cloudId);
         if (!chief) return;
         setChiefSectionOf(chief.id, "issues");

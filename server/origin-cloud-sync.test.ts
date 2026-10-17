@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { json, readBody } from "./harness/http.ts";
 import { readOriginCloud, writeOriginCloud } from "./origin-cloud.ts";
-import { applyLinkPatch, createCloudLinkRoutes, liveLinks, readWorkspaceLinks, writeWorkspaceLinks } from "./origin-cloud-sync.ts";
+import { applyLinkPatch, createCloudLinkRoutes, liveLinks, readSharedLinks, readWorkspaceLinks, writeSharedLinks, writeWorkspaceLinks } from "./origin-cloud-sync.ts";
 import type { RequestAuth } from "./request-auth.ts";
 import { dispatchRoutes } from "./routes/table.ts";
 import type { BotRecord } from "./store.ts";
@@ -33,6 +33,19 @@ const bots = () => [
 ] as unknown as BotRecord[];
 
 describe("cloud link store", () => {
+  it("keeps agent and thread links beside workspace links and drops them with their bot or thread", () => {
+    const file = join(tempFolder(), "links.json");
+    writeWorkspaceLinks(file, { head: "team1" });
+    writeSharedLinks(file, { agents: { dev: "agent1" }, threads: { t1: "thread1" } });
+    writeWorkspaceLinks(file, { head: "team2" });
+    expect(readSharedLinks(file)).toEqual({ agents: { dev: "agent1" }, threads: { t1: "thread1" } });
+    const withTasks = bots().map((bot) => (bot.id === "dev" ? { ...bot, tasks: [{ threadId: "t1" }] } : bot)) as unknown as BotRecord[];
+    expect(liveLinks(withTasks, { workspaces: {}, projects: {}, agents: { dev: "a1", gone: "a2" }, threads: { t1: "c1", t9: "c9" } }))
+      .toEqual({ workspaces: {}, projects: {}, agents: { dev: "a1" }, threads: { t1: "c1" } });
+    expect(applyLinkPatch(bots(), { workspaces: {}, projects: {}, agents: { kai: "a1" } }, { agents: { dev: "a1" } }))
+      .toEqual({ workspaces: {}, projects: {}, agents: { dev: "a1" } });
+  });
+
   it("round-trips workspace links and reads a missing or corrupt file as empty", () => {
     const file = join(tempFolder(), "links.json");
     expect(readWorkspaceLinks(file)).toEqual({});

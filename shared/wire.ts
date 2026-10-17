@@ -172,6 +172,19 @@ export interface WireTask {
   cacheKeepWarm?: CacheKeepWarmStatus;
   /** the folder this task's turns run in, pinned on its first turn. */
   cwd?: string | null;
+  shared?: SharedThreadLink;
+  /** A person chose to keep this new thread on a shared bot to themselves. */
+  sharedPrivate?: true;
+}
+
+/** A thread mirrored to a shared Origin agent: every member sees it, and each message runs on its sender's machine. */
+export interface SharedThreadLink {
+  cloudThreadId: string;
+  /** The run holding the thread, when one is live. */
+  run?: { by: string; mine: boolean; model?: string };
+  /** Runs waiting behind it; mineQueued counts this person's own. */
+  queued?: number;
+  mineQueued?: number;
 }
 
 /** One thread's keep-warm window as a client shows it. Times are epoch ms. */
@@ -364,6 +377,16 @@ export interface WireBot {
   /** Who may see this bot on a workspace several people share. Absent means
    * everyone. Sent to admins only; a member's copy of a bot never carries it. */
   visibility?: BotVisibility;
+  /** Bound to a shared Origin agent: its definition is the workspace's, its runs are each sender's own. */
+  shared?: SharedBotLink;
+}
+
+export interface SharedBotLink {
+  agentId: string;
+  teamId: string;
+  canEdit: boolean;
+  /** Another member changed the instructions: no turn runs here until this person accepts or keeps their own. */
+  review?: { version: number; by: string; soul: string };
 }
 
 /** Who may see a bot: every signed-in person, admins only, or the listed
@@ -526,6 +549,19 @@ export interface WireMessage {
   queued?: boolean;
   /** steer-queue entry this drained user line came from. */
   queueId?: string;
+  /** A row another member's machine wrote into a shared thread. Never starts a turn here. */
+  remote?: RemoteRow;
+}
+
+export interface RemoteRow {
+  cloudId: string;
+  /** Whose message it is, or whose run wrote it. */
+  userId?: string;
+  name: string;
+  runId?: string;
+  /** The run's model, as its runner labelled it. */
+  model?: string;
+  status?: "streaming" | "final" | "interrupted";
 }
 
 export const movesThreadToTop = (message: Pick<WireMessage, "role" | "kind" | "peerAsk" | "turnId" | "turnTerminal">): boolean =>

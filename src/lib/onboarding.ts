@@ -4,6 +4,7 @@ export interface OnboardingStatus {
   reelSeen: boolean;
   hintsSeen: string[];
   firstTurnAt?: string;
+  memberSetupAt?: string;
 }
 
 export const WELCOME_VERSION = 1;
@@ -54,8 +55,31 @@ export function welcomeDue(
   return true;
 }
 
-export function completionPatch(now: Date = new Date()): { onboarding: { completedAt: string; version: number } } {
-  return { onboarding: { completedAt: now.toISOString(), version: WELCOME_VERSION } };
+export function completionPatch(
+  now: Date = new Date(),
+  options: { member?: boolean } = {},
+): { onboarding: { completedAt: string; version: number; memberSetupAt?: string } } {
+  return {
+    onboarding: {
+      completedAt: now.toISOString(),
+      version: WELCOME_VERSION,
+      ...(options.member ? memberSetupPatch(now).onboarding : {}),
+    },
+  };
+}
+
+export function memberSetupPatch(now: Date = new Date()): { onboarding: { memberSetupAt: string } } {
+  return { onboarding: { memberSetupAt: now.toISOString() } };
+}
+
+export function memberSetupDue<Instance>(
+  config: { onboarding?: OnboardingStatus } | null | undefined,
+  state: { signedIn: boolean; instances: readonly Instance[] },
+  ready: (instance: Instance) => boolean,
+): boolean {
+  if (!state.signedIn || !config) return false;
+  if (!config.onboarding?.memberSetupAt) return true;
+  return state.instances.length > 0 && !state.instances.some(ready);
 }
 
 export function hintSeen(record: OnboardingStatus | undefined, id: string): boolean {
@@ -71,16 +95,18 @@ export function hintSeenPatch(
 }
 
 
-export type BeatId = "hello" | "reel" | "engines" | "permissions" | "phone" | "bot";
+export type BeatId = "hello" | "reel" | "engines" | "projects" | "defaults" | "computers" | "permissions" | "phone" | "bot";
 
 export interface BeatOptions {
   dictation: boolean;
   reel: boolean;
   hosted?: boolean;
+  member?: boolean;
 }
 
 export function beatsFor(options: BeatOptions): BeatId[] {
   if (options.hosted) return ["hello", "bot"];
+  if (options.member) return ["hello", "engines", "projects", "defaults", "computers", ...(options.dictation ? ["permissions" as const] : [])];
   const beats: BeatId[] = ["hello"];
   if (options.reel) beats.push("reel");
   beats.push("engines");
@@ -104,7 +130,11 @@ export function previousBeat(beats: readonly BeatId[], current: BeatId): BeatId 
 export function beatWidth(beat: BeatId): number {
   switch (beat) {
     case "engines":
+    case "defaults":
       return 680;
+    case "projects":
+    case "computers":
+      return 560;
     case "phone":
       return 620;
     case "reel":

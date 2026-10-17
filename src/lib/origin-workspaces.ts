@@ -61,6 +61,13 @@ export function setAccountWorkspaces(headIds: string[]) {
   write({ account: headIds });
 }
 
+/** Shows a head made in this session before the next sync confirms it belongs to the account. */
+export function addAccountWorkspace(headId: string) {
+  const account = read().account;
+  if (!account || account.includes(headId)) return;
+  write({ account: [...account, headId] });
+}
+
 export function activeWorkspace(view: WorkspaceView, heads: readonly { id: string }[]): string | undefined {
   return heads.some((head) => head.id === view.active) ? view.active : heads[0]?.id;
 }

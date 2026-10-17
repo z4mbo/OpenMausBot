@@ -85,6 +85,16 @@ export function functionRef<T extends FunctionType>(name: string) {
   return makeFunctionReference<T>(name);
 }
 
+export async function logoutCloud(): Promise<void> {
+  const client = cloudClient();
+  const current = sessionStore.get();
+  try {
+    if (client && current) await client.mutation(functionRef<"mutation">("auth:logout"), { sessionToken: current });
+  } finally {
+    setSessionToken(null);
+  }
+}
+
 export function withSession(args: Record<string, unknown> = {}): Record<string, unknown> {
   if ("sessionToken" in args) {
     if (args.sessionToken !== undefined) return args;

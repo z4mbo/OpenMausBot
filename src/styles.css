@@ -2218,3 +2218,50 @@ button:disabled.bg-danger {
 @keyframes team-link-flow {
   to { stroke-dashoffset: -28; }
 }
+
+/* Origin motion. Every entrance runs only when motion is welcome; exits are
+   the same curves reversed so a dialog leaves the way it came. */
+@keyframes origin-fade-in { from { opacity: 0; } }
+@keyframes origin-fade-out { to { opacity: 0; } }
+@keyframes origin-sheet-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.99); }
+}
+@keyframes origin-sheet-out {
+  to { opacity: 0; transform: translateY(4px) scale(0.99); }
+}
+@keyframes origin-tile-in {
+  from { opacity: 0; transform: scale(0.97); }
+}
+@keyframes origin-float-up {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.6); }
+  12% { opacity: 1; transform: translate(-50%, -18px) scale(1.15); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--drift, 0px)), -220px) scale(1); }
+}
+@keyframes origin-pop-badge {
+  from { opacity: 0; transform: scale(0.85); }
+}
+@keyframes origin-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  50% { transform: scale(1.08); opacity: 0.9; }
+}
+.origin-overlay-in { animation: origin-fade-in 0.12s ease-out both; }
+.origin-overlay-out { animation: origin-fade-out 0.12s ease-out both; }
+.origin-sheet-in { animation: origin-sheet-in 0.16s cubic-bezier(0.2, 0, 0, 1) both; }
+.origin-sheet-out { animation: origin-sheet-out 0.12s ease-out both; }
+.origin-tile-in { animation: origin-tile-in 0.16s cubic-bezier(0.2, 0, 0, 1) both; }
+.origin-rise { animation: origin-sheet-in 0.16s cubic-bezier(0.2, 0, 0, 1) both; }
+.origin-float-up { animation: origin-float-up 1.6s cubic-bezier(0.2, 0, 0, 1) forwards; }
+.origin-pop-badge { animation: origin-pop-badge 0.14s ease-out both; }
+.origin-breathe { animation: origin-breathe 2.4s ease-in-out infinite; }
+/* A speaking tile's ring follows the voice: --level runs 0 to 1. */
+.origin-speaking-ring {
+  box-shadow: 0 0 0 calc(2px + var(--level, 0) * 3px) color-mix(in srgb, var(--color-accent) calc(55% + var(--level, 0) * 45%), transparent);
+  transition: box-shadow 0.12s linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .origin-overlay-in, .origin-overlay-out, .origin-sheet-in, .origin-sheet-out, .origin-tile-in,
+  .origin-rise, .origin-pop-badge, .origin-breathe { animation: none; }
+  .origin-float-up { animation-duration: 0.01s; }
+  .origin-speaking-ring { transition: none; }
+}
+:root[data-reduced-motion="true"] :is(.origin-overlay-in, .origin-overlay-out, .origin-sheet-in, .origin-sheet-out, .origin-tile-in, .origin-rise, .origin-pop-badge, .origin-breathe) { animation: none; }

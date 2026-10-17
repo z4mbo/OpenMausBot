@@ -327,8 +327,32 @@
       }
     },
     {
+      "name": "origin_team_chat_post",
+      "description": "Post a message in an Origin project's team chat under your own name, for the project's members to read. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "description": "Markdown."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "text"
+        ]
+      }
+    },
+    {
       "name": "find_tool",
-      "description": "Find an OpenMausBot tool that is not in your tool list. Say what you want to do in a few words, or give the tool's name. Each match comes back with its description and exact input schema; run one with use_tool. A tool in your tool list is called directly, not found here. Tools reached this way: list_shared_computers, shared_computer, assignment_status, raise_escalation, list_threads, close_thread, start_thread, vm_exec, show_widget, update_widget, create_bot, list_team_setup, propose_team_setup, propose_bot_deletion, create_room, manage_room, retry_thread, memory_log, session_search, session_read, list_routines, propose_routine, propose_routine_action, propose_profile, propose_model, propose_team_memory, skills_list, skill_manage, add_mcp_server, origin_list_projects, origin_list_issues, origin_get_issue, origin_create_issue, origin_update_issue, origin_comment_issue, origin_assign_issue, origin_complete_issue, origin_list_assets, origin_add_asset, origin_vault_list, origin_repo_status.",
+      "description": "Find an OpenMausBot tool that is not in your tool list. Say what you want to do in a few words, or give the tool's name. Each match comes back with its description and exact input schema; run one with use_tool. A tool in your tool list is called directly, not found here. Tools reached this way: list_shared_computers, shared_computer, assignment_status, raise_escalation, list_threads, close_thread, start_thread, vm_exec, show_widget, update_widget, create_bot, list_team_setup, propose_team_setup, propose_bot_deletion, create_room, manage_room, retry_thread, memory_log, session_search, session_read, list_routines, propose_routine, propose_routine_action, propose_profile, propose_model, propose_team_memory, skills_list, skill_manage, add_mcp_server, origin_list_projects, origin_list_issues, origin_get_issue, origin_create_issue, origin_update_issue, origin_comment_issue, origin_assign_issue, origin_complete_issue, origin_review_pr, origin_merge_pr, origin_list_assets, origin_add_asset, origin_vault_list, origin_repo_status, origin_team_chat, origin_feedback, origin_draw.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,

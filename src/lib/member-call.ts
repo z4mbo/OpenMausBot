@@ -17,6 +17,31 @@ export function selectCallFocus(tiles: readonly CallTileRef[], current: string |
   return screens[0]?.id ?? tiles.find((tile) => tile.id !== SELF_CAMERA)?.id ?? tiles[0]?.id ?? null;
 }
 
+export const CALL_REACTIONS = ["👍", "❤️", "🎉", "😂", "👏", "🤔"] as const;
+export type CallReaction = (typeof CALL_REACTIONS)[number];
+
+/** What call members send each other over the call's data channel. */
+export type CallChannelMessage = { kind: "reaction"; emoji: CallReaction } | { kind: "hand"; up: boolean };
+
+/** Another member's data is untrusted: anything but a known reaction or a hand flag is dropped. */
+export function parseCallMessage(data: unknown): CallChannelMessage | null {
+  if (typeof data !== "string" || data.length > 200) return null;
+  let value: unknown;
+  try { value = JSON.parse(data); } catch { return null; }
+  if (!value || typeof value !== "object") return null;
+  const message = value as Record<string, unknown>;
+  if (message.kind === "reaction" && (CALL_REACTIONS as readonly unknown[]).includes(message.emoji)) return { kind: "reaction", emoji: message.emoji as CallReaction };
+  if (message.kind === "hand" && typeof message.up === "boolean") return { kind: "hand", up: message.up };
+  return null;
+}
+
+/** How many columns a gallery of `count` tiles uses in a stage `width` pixels wide. */
+export function galleryColumns(count: number, width: number): number {
+  if (count <= 1) return 1;
+  const most = width < 560 ? 2 : width < 1000 ? 3 : 4;
+  return Math.min(most, Math.ceil(Math.sqrt(count)), count);
+}
+
 export function formatElapsed(seconds: number): string {
   return `${Math.floor(seconds / 60).toString().padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`;
 }

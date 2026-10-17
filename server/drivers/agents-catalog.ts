@@ -265,17 +265,42 @@ const ORIGIN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_complete_issue",
-    description: "Finish your work on an Origin issue: comments the summary and pull request link, then moves it to review (stage review, while the pull request waits) or marks it done (default)." + ORIGIN_CARDS + ORIGIN_SCOPE,
+    description: "Finish your work on an Origin issue: links your pull request to its GitHub issue (adds \"Closes #n\"), comments the summary, moves it to review and asks the project's Chief to review and merge. The issue is done only when the pull request merges; never mark it done yourself. In a project with a GitHub repository, pull_request_url is required." + ORIGIN_CARDS + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
         issue_id: ORIGIN_ISSUE_ID,
         summary: { type: "string", minLength: 1, maxLength: 6_000, description: "What was done, in Markdown." },
-        pull_request_url: { type: "string", maxLength: 500 },
-        stage: { type: "string", enum: ["review", "done"], description: "Default done." },
+        pull_request_url: { type: "string", maxLength: 500, description: "https://github.com/<owner>/<repo>/pull/<number> in the project's repository." },
         project: ORIGIN_PROJECT,
       },
       required: ["issue_id", "summary"],
+    },
+  },
+  {
+    name: "origin_review_pr",
+    description: "As a project's Chief, review its pull requests: list the open ones (checks, review, the issues each closes), read one (changed files, checks, whether it can merge), or approve it with a review comment. Merge with origin_merge_pr." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        action: { type: "string", enum: ["list", "read", "approve"], description: "Default list." },
+        number: { type: "integer", minimum: 1, description: "Pull request number, for read and approve." },
+        comment: { type: "string", maxLength: 4_000, description: "Review comment for approve." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_merge_pr",
+    description: "As a project's Chief, merge a reviewed pull request into the default branch once its checks pass. Irreversible, always asks the person first, and completes the issues it closes. Read it with origin_review_pr first and pass the head_sha it reports." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        number: { type: "integer", minimum: 1, description: "Pull request number." },
+        head_sha: { type: "string", maxLength: 64, description: "The head SHA origin_review_pr read reported, so a newer push is not merged unseen." },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["number", "head_sha"],
     },
   },
   {
@@ -306,8 +331,45 @@ const ORIGIN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_repo_status",
-    description: "Show an Origin project's repository: URL, open pull requests with checks and review, and recent commits." + ORIGIN_SCOPE,
+    description: "Show an Origin project's repository: URL, clone command and default branch, the project's folder on this computer (empty, or the branch checked out), open pull requests with checks and review, and recent commits." + ORIGIN_SCOPE,
     inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
+  },
+  {
+    name: "origin_team_chat",
+    description: "Read the latest messages of an Origin project's team chat, where its members and agents talk." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: { limit: { type: "integer", minimum: 1, maximum: 50, description: "Default 20." }, project: ORIGIN_PROJECT },
+    },
+  },
+  {
+    name: "origin_team_chat_post",
+    description: "Post a message in an Origin project's team chat under your own name, for the project's members to read." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: { text: { type: "string", minLength: 1, maxLength: 4_000, description: "Markdown." }, project: ORIGIN_PROJECT },
+      required: ["text"],
+    },
+  },
+  {
+    name: "origin_feedback",
+    description: "List the feedback an Origin project's users sent through its public portal (bugs and ideas), or read one item in full with entry_id." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        status: { type: "string", enum: ["open", "new", "planned", "completed", "dismissed", "all"], description: "Default open (new and planned)." },
+        entry_id: { type: "string", maxLength: 64, description: "Feedback id from the list, to read it in full." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_draw",
+    description: "List an Origin project's Draw canvases, or read one: its element counts, the text on it top to bottom, and its links." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: { canvas: { type: "string", maxLength: 120, description: "Canvas name or id; omit to list them." }, project: ORIGIN_PROJECT },
+    },
   },
 ];
 
@@ -1029,6 +1091,7 @@ export const SHARED_COMPUTER_TOOL_NAMES = new Set(["list_shared_computers", "sha
 const VOICE_TOOL_NAMES = new Set(["send_voice_note"]);
 const CHIEF_ONLY_TOOL_NAMES = new Set([
   "create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue",
+  "origin_review_pr", "origin_merge_pr",
 ]);
 const CHIEF_TARGET_TOOL_NAMES = new Set(["propose_profile", "propose_model"]);
 const WATCHER_TOOL_NAMES = new Set(["create_options_card"]);

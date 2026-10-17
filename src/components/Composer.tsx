@@ -1,5 +1,5 @@
 import { track } from "@/lib/analytics";
-import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type SetStateAction } from "react";
 import { ArrowUp, BookOpen, Clock, Mic, Paperclip, Sparkles, Square, Target, Users, X } from "lucide-react";
 import { useStore, visibleMessages, currentTaskBot, type Bot, type Group, type Message } from "@/state/store";
 import { cn } from "@/lib/cn";
@@ -83,7 +83,9 @@ import {
 } from "@/lib/composer-commands";
 import { useSlashSkills } from "@/lib/use-slash-skills";
 
-type MentionChoice = { id: string; name: string; bot?: Bot };
+export type MentionTeammate = { id: string; name: string; avatar: ReactNode; kind: string; description?: string };
+
+type MentionChoice = { id: string; name: string; bot?: Bot; teammate?: MentionTeammate };
 
 interface ComposerDraftSnapshot extends ComposerSendSnapshot {
   reply: Message | null;
@@ -93,6 +95,7 @@ export function Composer({
   bot: profile,
   group,
   members,
+  people,
   onEditLast,
   replyTo,
   onClearReply,
@@ -103,6 +106,7 @@ export function Composer({
   bot?: Bot;
   group?: Group;
   members?: Bot[];
+  people?: readonly MentionTeammate[];
   onEditLast?: () => void;
   replyTo?: Message | null;
   onClearReply?: () => void;
@@ -318,12 +322,13 @@ export function Composer({
       ? [
           ...(!group.dm ? [{ id: "__everyone__", name: "everyone" }] : []),
           ...(members ?? []).map((member) => ({ id: member.id, name: member.name, bot: member })),
+          ...(people ?? []).map((teammate) => ({ id: `person:${teammate.id}`, name: teammate.name, teammate })),
         ]
       : state.bots
           .filter((member) => member.id !== bot?.id && !member.hidden)
           .map((member) => ({ id: member.id, name: member.name, bot: member }));
     return mentionChoicesForQuery(pool, mention.query);
-  }, [mention, dismissedAt, state.bots, bot?.id, group, members]);
+  }, [mention, dismissedAt, state.bots, bot?.id, group, members, people]);
   const mentionEveryoneCount = (members ?? []).filter((member) => !member.hidden).length;
   const mentionPickerOpen = candidates.length > 0;
   const commandMotion = useMenuMotion(commandPickerOpen);
@@ -800,7 +805,7 @@ export function Composer({
             className={cn("absolute bottom-full start-2 z-20 mb-2 max-h-72 w-72 overflow-x-hidden overflow-y-auto overscroll-contain rounded-xl border border-hairline/40 bg-raised shadow-lg", mentionMotion.className)} {...mentionMotion.exitProps}
           >
             {candidates.map((peer, i) => {
-              const description = mentionRowDescription(peer.bot
+              const description = peer.teammate ? peer.teammate.description : mentionRowDescription(peer.bot
                 ? { kind: "bot", title: peer.bot.title }
                 : { kind: "everyone", count: mentionEveryoneCount });
               return (
@@ -813,7 +818,7 @@ export function Composer({
                   onClick={() => pickMention(peer)}
                   onMouseEnter={() => setHighlight(i)}
                   selected={i === highlight}
-                  icon={peer.bot ? (
+                  icon={peer.teammate ? peer.teammate.avatar : peer.bot ? (
                     <BotAvatar
                       bot={peer.bot}
                       state={normalizeState(peer.bot.mascotExpression) ?? "happy"}
@@ -826,7 +831,7 @@ export function Composer({
                   )}
                   name={peer.name}
                   description={description || undefined}
-                  kind={peer.bot ? t("composer.mention.agent") : t("composer.mention.channel")}
+                  kind={peer.teammate ? peer.teammate.kind : peer.bot ? t("composer.mention.agent") : t("composer.mention.channel")}
                 />
               );
             })}

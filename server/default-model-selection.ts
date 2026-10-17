@@ -78,3 +78,31 @@ export function withNewBotEffort(
   }
   return { ...selection, effort };
 }
+
+export interface ModelIntent { provider: string; model: string; effort?: string }
+export type SharedModelVia = "intent" | "default" | "fallback" | "none";
+
+/** What a shared bot runs on for this member: its own model when this machine can run it, else the member's default for that
+ * provider, else any ready engine. Never another member's account: every candidate is one of this machine's instances. */
+export function resolveSharedModel(
+  instances: readonly SelectableInstance[],
+  intent: ModelIntent | null | undefined,
+  defaults: Readonly<Record<string, ModelSelection>> = {},
+  context: DefaultSelectionContext = {},
+): { selection: ModelSelection; via: SharedModelVia } {
+  if (intent?.provider && intent.model) {
+    const exact = instances.find((instance) => instance.driverKind === intent.provider && readyToRun(instance, context)
+      && (instance.models.default === intent.model || instance.models.options.some((model) => model.id === intent.model)));
+    if (exact) {
+      const effort = intent.effort as EffortLevel | undefined;
+      const selection: ModelSelection = { instanceId: exact.instanceId, model: intent.model };
+      return { selection: effort && exact.capabilities?.effortLevels?.includes(effort) ? { ...selection, effort } : selection, via: "intent" };
+    }
+    const preferred = defaults[intent.provider];
+    const chosen = preferred ? selectDefaultModelSelection(instances, preferred, context) : null;
+    if (chosen?.instanceId) return { selection: chosen, via: "default" };
+  }
+  const fallback = selectDefaultModelSelection(instances, undefined, context);
+  const ready = instances.find((instance) => instance.instanceId === fallback.instanceId);
+  return ready && readyToRun(ready, context) ? { selection: fallback, via: "fallback" } : { selection: { instanceId: "", model: "" }, via: "none" };
+}

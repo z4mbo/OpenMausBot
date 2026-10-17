@@ -408,6 +408,23 @@ async function assignOriginIssue(args: Json, context: ToolCallContext): Promise<
   return { text: `Assigned to ${String(handoff.botName)}: ${JSON.stringify(sent.body)} ${noted} End your turn now; the result resumes you.` };
 }
 
+/** After the issue moves to review, the project's Chief gets a new thread asking it to review and merge the pull request. */
+async function completeOriginIssue(args: Json, context: ToolCallContext): Promise<ToolCallResult> {
+  const { apiResponse } = context.client;
+  const { ok, body } = await apiResponse("/api/internal/origin/tool", { method: "POST", body: JSON.stringify({ name: "origin_complete_issue", arguments: args }) });
+  const text = String(body.text ?? body.error ?? "origin_complete_issue did not answer.");
+  if (!ok || body.isError === true) return { text, isError: true };
+  const reviewer = body.reviewer && typeof body.reviewer === "object" ? body.reviewer as Json : null;
+  if (!reviewer) return { text };
+  const sent = await apiResponse("/api/internal/coordinate-bots", {
+    method: "POST",
+    body: JSON.stringify({ botIds: [reviewer.botId], message: reviewer.message, reason: reviewer.reason, thread: "new", reply: "none" }),
+  });
+  return sent.ok && !sent.body.error
+    ? { text }
+    : { text: `${text} Asking ${String(reviewer.botName)} to review did not go through (${String(sent.body.error ?? `HTTP ${sent.status}`)}); tell your Chief the pull request is ready.` };
+}
+
 export async function callTool(name: string, args: Json, context: ToolCallContext): Promise<ToolCallResult> {
   const { botId: BOT_ID, threadId: THREAD_ID, depth: DEPTH } = context;
   const { api, apiResponse } = context.client;
@@ -436,6 +453,7 @@ export async function callTool(name: string, args: Json, context: ToolCallContex
   }
   if (CARD_TOOL_NAMES.has(name)) return callCardTool(name, args, context);
   if (name === "origin_assign_issue") return assignOriginIssue(args, context);
+  if (name === "origin_complete_issue") return completeOriginIssue(args, context);
   if (ORIGIN_TOOL_NAMES.has(name)) {
     const { ok, body } = await apiResponse("/api/internal/origin/tool", { method: "POST", body: JSON.stringify({ name, arguments: args }) });
     return { text: String(body.text ?? body.error ?? `${name} did not answer.`), ...(!ok || body.isError === true ? { isError: true } : {}) };

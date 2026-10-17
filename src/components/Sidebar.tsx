@@ -1,5 +1,5 @@
 import { track } from "@/lib/analytics";
-import { activeWorkspace, inWorkspace, reportActiveWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
+import { activeWorkspace, addAccountWorkspace, inWorkspace, reportActiveWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
 import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
 import { NewAgentDialog, SidebarGroups, SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
@@ -7,10 +7,15 @@ import { OriginNav } from "./OriginPages";
 import { sidebarRowLead } from "@/lib/sidebar-row-geometry";
 import { WhatsNew } from "./WhatsNew";
 import { NewIssueHost, useOriginProjectRows } from "./OriginSidebarExtras";
+import { MemberCallBanner } from "./MemberCallBanner";
 import { OriginAccountMenu } from "./OriginAccountMenu";
-import { cloudProjectOf, useCloudLinks } from "@/lib/origin-cloud-links";
+import { cloudProjectOf, linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
+import { cloudMutation, cloudUrl } from "@/lib/origin-cloud";
+import { sessionStore } from "@/lib/origin-cloud/client";
+import { exclusiveWithSync, requestOriginSync } from "@/lib/origin-sync";
 import { useCanCreateProject } from "@/lib/use-origin-workspace";
 import { openNewIssue } from "@/lib/origin-new-issue";
+import { currentOriginPage } from "@/lib/origin-pages";
 import { unreadReplies } from "@/lib/origin-unread";
 import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL, WORKSPACE_NAV, NEW_PROJECT_DIALOG, PROFILE_AT_TOP } from "@/lib/origin-teams";
 import { ProjectMark } from "./ProjectMark";
@@ -1924,7 +1929,22 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const [newAgentOpen, setNewAgentOpen] = useState(false);
   const deletingTemplate = Boolean(deletingTeam && deletingTeam !== STANDALONE_SECTION && standaloneTeams.has(deletingTeam));
   const newWorkspace = () => {
-    void api<{ bot: Bot }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name: "New workspace" }) })
+    const name = "New workspace";
+    const createLocal = () => api<{ bot: Bot }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name }) });
+    const created = cloudUrl() && sessionStore.get()
+      ? exclusiveWithSync(async () => {
+        const { teamId } = await cloudMutation<{ teamId: string }>("workspaces:create", { name });
+        let local: { bot: Bot };
+        try { local = await createLocal(); }
+        catch (cause) {
+          throw new Error(`${cause instanceof Error ? cause.message : String(cause)}. The workspace exists in Origin and will appear shortly.`);
+        }
+        await linkCloudRecord({ workspaces: { [local.bot.id]: teamId } });
+        addAccountWorkspace(local.bot.id);
+        return local;
+      }).finally(requestOriginSync)
+      : createLocal();
+    void created
       .then(({ bot }) => { dispatch({ type: "botAdded", bot }); switchWorkspace(bot.id); })
       .catch((cause) => dispatch({ type: "error", message: cause instanceof Error ? cause.message : String(cause) }));
   };
@@ -2227,7 +2247,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
               <Search size={density === "icons" ? 20 : 17} />
             </button>
             <button type="button" aria-label="Create issue" title="Create issue" data-sidebar-new-issue
-              onClick={() => openNewIssue(state.activeView === "chat" && state.selectedId ? cloudProjectOf(state.bots, cloudLinks.projects, state.selectedId) ?? null : null)}
+              onClick={() => openNewIssue(state.activeView === "chat" && !currentOriginPage() && state.selectedId ? cloudProjectOf(state.bots, cloudLinks.projects, state.selectedId) ?? null : null)}
               className={cn("flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink", density === "icons" ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md")}>
               <SquarePen size={density === "icons" ? 20 : 17} />
             </button>
@@ -2528,6 +2548,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)}
         iconOnly={density === "icons"}
       />
+      {WORKSPACE_NAV && <MemberCallBanner iconOnly={density === "icons"} />}
 
       <div className={cn("pb-3 pt-2", density === "icons" ? "flex flex-col items-center gap-1 px-2" : "px-3")}>
         {!(PROFILE_AT_TOP && density !== "icons") && <SidebarFooterNav

@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Select } from "../Select";
-import { Check, GitBranch, Link2, Loader2, Settings, Trash2, UserPlus, Users } from "lucide-react";
+import { Check, GitBranch, Link2, Loader2, Palette, RotateCcw, Settings, Trash2, UserPlus, Users } from "lucide-react";
+import { ZAP_SWATCHES, setAvatarLook, useAvatarLook, useBotColor } from "@/lib/origin-avatar-looks";
+import { botPalette } from "@/lib/user-bubble-tone";
+import { useStore } from "@/state/store";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { originGitHub, type GitHubProjectConnection, type GitHubWorkspaceStatus } from "@/lib/origin-github";
 import { cn } from "@/lib/cn";
@@ -13,6 +16,7 @@ type IconType = NonNullable<CloudProject["iconType"]>;
 type TaskPRColumn = { id: string; title: string; isDone: boolean };
 
 export function ProjectSettingsPage(props: OriginPageProps) {
+  const botId = props.link?.botId;
   return (
     <CloudGate {...props} label="Settings">
       {({ project, projectId, isAdmin }) => (
@@ -20,7 +24,8 @@ export function ProjectSettingsPage(props: OriginPageProps) {
           <PageHeader title="Settings" />
           <div className="grid max-w-5xl gap-4 lg:grid-cols-2">
             <div className="flex flex-col gap-4">
-              <GeneralSettings key={`${projectId}:${project.name}:${project.repoUrl ?? ""}:${project.iconValue ?? ""}`} project={project} projectId={projectId} isAdmin={isAdmin} />
+              <GeneralSettings key={projectId} project={project} projectId={projectId} isAdmin={isAdmin}
+                accent={botId ? <ProjectAccent botId={botId} /> : null} />
               <GitHubSettings key={`${projectId}:${project.githubTaskMode ?? ""}`} project={project} projectId={projectId} isAdmin={isAdmin} />
               <GitHubConnectionCard project={project} projectId={projectId} isAdmin={isAdmin} />
             </div>
@@ -44,14 +49,65 @@ function Card({ icon, title, children }: { icon: ReactNode; title: string; child
   );
 }
 
+/** The project's accent is its lead bot's colour: this shows it and changes it for the whole app, not only these pages. */
+function ProjectAccent({ botId }: { botId: string }) {
+  const { state } = useStore();
+  const bot = state.bots.find((candidate) => candidate.id === botId);
+  const look = useAvatarLook(botId);
+  const color = botPalette(useBotColor(bot));
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const save = (next: string | null) => {
+    setError("");
+    setSaving(true);
+    void setAvatarLook(botId, { color: next })
+      .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)))
+      .finally(() => setSaving(false));
+  };
+  const custom = Boolean(look.color && !(ZAP_SWATCHES as readonly string[]).some((swatch) => swatch.toLowerCase() === look.color?.toLowerCase()));
+  const swatch = "relative size-7 shrink-0 rounded-full outline-none transition-transform duration-150 hover:scale-110 focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-panel disabled:opacity-50 motion-reduce:hover:scale-100";
+  const chosen = "ring-2 ring-ink ring-offset-2 ring-offset-panel";
+  return (
+    <div role="group" aria-label="Accent colour" className="flex flex-col gap-2 rounded-xl border border-hairline/40 bg-inset/60 p-3">
+      <div className="flex items-center gap-2.5">
+        <span className="size-5 shrink-0 rounded-full transition-colors duration-150" style={{ background: color }} aria-hidden="true" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-[12.5px] font-medium text-ink">Accent <span className="font-mono text-[11.5px] uppercase text-ink-tertiary">{color}</span></span>
+        </span>
+        {look.color && (
+          <button type="button" onClick={() => save(null)} disabled={saving} title="Use the mascot colour"
+            className="flex h-7 items-center gap-1 rounded-full px-2 text-[11.5px] text-ink-secondary outline-none transition-colors hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
+            <RotateCcw size={12} />Mascot colour
+          </button>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {ZAP_SWATCHES.map((value) => {
+          const active = look.color?.toLowerCase() === value.toLowerCase();
+          return <button key={value} type="button" disabled={saving} aria-pressed={active} aria-label={`Use ${value}`} title={value} onClick={() => save(value)}
+            className={cn(swatch, active && chosen)} style={{ background: value }} />;
+        })}
+        <label title="Custom colour" className={cn(swatch, "flex cursor-pointer items-center justify-center overflow-hidden border border-dashed border-hairline text-ink-secondary", custom && cn("border-solid", chosen))}
+          style={custom ? { background: look.color } : undefined}>
+          {!custom && <Palette size={13} aria-hidden="true" />}
+          <input type="color" aria-label="Custom accent colour" value={botPalette(look.color ?? color)} disabled={saving}
+            onChange={(event) => save(event.target.value)} className="absolute inset-0 cursor-pointer opacity-0" />
+        </label>
+        {saving && <Loader2 size={14} className="animate-spin text-ink-tertiary" aria-label="Saving" />}
+      </div>
+      {error && <Notice tone="danger">{error}</Notice>}
+    </div>
+  );
+}
+
 function ProjectGlyph({ project, iconType, iconValue }: { project: CloudProject; iconType: IconType; iconValue: string }) {
   const base = "flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl text-[18px] font-semibold";
   if (iconType === "image" && project.iconUrl) return <img src={project.iconUrl} alt="" className={cn(base, "object-cover")} />;
   if (iconType === "emoji" && iconValue) return <span className={cn(base, "bg-raised")}>{iconValue}</span>;
-  return <span className={cn(base, "text-white")} style={{ background: project.accent }}>{project.name.slice(0, 1).toUpperCase()}</span>;
+  return <span className={cn(base, "bg-accent text-accent-ink transition-colors duration-150")}>{project.name.slice(0, 1).toUpperCase()}</span>;
 }
 
-function GeneralSettings({ project, projectId, isAdmin }: { project: CloudProject; projectId: string; isAdmin: boolean }) {
+function GeneralSettings({ project, projectId, isAdmin, accent }: { project: CloudProject; projectId: string; isAdmin: boolean; accent: ReactNode }) {
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description ?? "");
   const [repoUrl, setRepoUrl] = useState(project.repoUrl ?? "");
@@ -59,6 +115,16 @@ function GeneralSettings({ project, projectId, isAdmin }: { project: CloudProjec
   const [iconValue, setIconValue] = useState(project.iconType === "emoji" || project.iconType === "icon" ? project.iconValue ?? "" : "");
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [saved, setSaved] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const remote = JSON.stringify([project.name, project.description ?? "", project.repoUrl ?? "", project.iconType ?? "default", project.iconValue ?? ""]);
+  useEffect(() => {
+    if (dirty) return;
+    setName(project.name);
+    setDescription(project.description ?? "");
+    setRepoUrl(project.repoUrl ?? "");
+    setIconType(project.iconType ?? "default");
+    setIconValue(project.iconType === "emoji" || project.iconType === "icon" ? project.iconValue ?? "" : "");
+  }, [remote, dirty]);
   const action = useAction();
   const save = async (event: FormEvent) => {
     event.preventDefault();
@@ -77,13 +143,14 @@ function GeneralSettings({ project, projectId, isAdmin }: { project: CloudProjec
         ...(iconStorageId ? { iconStorageId } : {}),
       });
     }, "Could not save project");
-    if (ok) { setIconFile(null); setSaved(true); }
+    if (ok) { setIconFile(null); setSaved(true); setDirty(false); }
   };
   const toggleStatus = () => void action.run(() => cloudMutation("projects:update", { projectId, status: project.status === "active" ? "inactive" : "active" }), "Could not update project");
   const repoHref = githubRepoHref(repoUrl);
   return (
     <Card icon={<Settings size={15} />} title="Project">
-      <form onSubmit={save} onChange={() => setSaved(false)} className="flex flex-col gap-3">
+      {accent && <div className="mb-3">{accent}</div>}
+      <form onSubmit={save} onChange={() => { setSaved(false); setDirty(true); }} className="flex flex-col gap-3">
         <fieldset disabled={!isAdmin || action.busy} className="flex flex-col gap-3">
           <div className="flex items-end gap-3">
             <ProjectGlyph project={project} iconType={iconType} iconValue={iconValue} />
@@ -102,9 +169,6 @@ function GeneralSettings({ project, projectId, isAdmin }: { project: CloudProjec
             )}
           </div>
           {iconType === "image" && <Field label="Picture"><input className={inputClass} type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0] ?? null)} /></Field>}
-          <div className="flex items-center gap-2 text-[12px] text-ink-secondary">
-            <span className="size-4 rounded-full border border-hairline/60" style={{ background: project.accent }} aria-hidden="true" />Accent {project.accent}
-          </div>
           <Field label="Name"><input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} /></Field>
           <Field label="Description"><textarea className={inputClass} rows={5} value={description} onChange={(e) => setDescription(e.target.value)} /></Field>
           <Field label="GitHub repository">

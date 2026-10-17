@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import { MausAvatar } from "@/components/Avatar";
+import { OriginLogo } from "@/components/OriginLogo";
 import { useDesktopCapabilities } from "@/components/DesktopCapabilities";
 import { setEmailGateDone, track } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
@@ -16,11 +16,14 @@ import {
   type BeatId,
 } from "@/lib/onboarding";
 import { api, useStore, type Bot } from "@/state/store";
+import { ComputersBeat } from "./beats/ComputersBeat";
+import { DefaultsBeat } from "./beats/DefaultsBeat";
 import { EnginesBeat } from "./beats/EnginesBeat";
 import { HelloBeat } from "./beats/HelloBeat";
 import { MeetYourBotBeat } from "./beats/MeetYourBotBeat";
 import { PermissionsBeat } from "./beats/PermissionsBeat";
 import { PhoneBeat } from "./beats/PhoneBeat";
+import { ProjectsBeat } from "./beats/ProjectsBeat";
 import { QuietButton } from "./beats/shared";
 import { withViewTransition } from "./view-transition";
 import { ProgressDots } from "./ProgressDots";
@@ -30,6 +33,9 @@ const MASCOT_FOR_BEAT: Record<BeatId, MausState> = {
   hello: "happy",
   reel: "curious",
   engines: "searching",
+  projects: "curious",
+  defaults: "thinking",
+  computers: "working",
   permissions: "listening",
   phone: "sending",
   bot: "celebrate",
@@ -41,6 +47,12 @@ function beatTitle(beat: BeatId): string | null {
       return t("onboarding.welcome", { app: brand().name });
     case "engines":
       return t("onboarding.engines.title");
+    case "projects":
+      return t("onboarding.projects.title");
+    case "defaults":
+      return t("onboarding.defaults.title");
+    case "computers":
+      return t("onboarding.computers.title");
     case "permissions":
       return t("onboarding.perms.title");
     case "bot":
@@ -64,6 +76,9 @@ export function WelcomeFlow({
   dictation,
   entrance = "arrive",
   hosted = false,
+  member = false,
+  locked = false,
+  onSignOut,
   onOpenOrganisation,
 }: {
   bot: Bot | null;
@@ -75,11 +90,14 @@ export function WelcomeFlow({
   dictation?: boolean;
   entrance?: Motion;
   hosted?: boolean;
+  member?: boolean;
+  locked?: boolean;
+  onSignOut?: () => void;
   onOpenOrganisation?: () => void;
 }) {
   const { dispatch } = useStore();
   const { capabilities } = useDesktopCapabilities();
-  const beats = beatsFor({ dictation: dictation ?? capabilities.dictation.available, reel, hosted });
+  const beats = beatsFor({ dictation: dictation ?? capabilities.dictation.available, reel, hosted, member });
   const [beat, setBeat] = useState<BeatId>(() => (initialBeat && beats.includes(initialBeat) ? initialBeat : "hello"));
   const [mascot, setMascot] = useState<MausState>(MASCOT_FOR_BEAT[beat]);
   const [motion, setMotion] = useState<{ kind: Motion; key: number }>({ kind: "blink", key: 0 });
@@ -118,12 +136,12 @@ export function WelcomeFlow({
       setEmailGateDone("submitted");
       onDone();
       try {
-        const config = await api("/api/config", { method: "PUT", body: JSON.stringify(completionPatch()), signal: AbortSignal.timeout(10_000) });
+        const config = await api("/api/config", { method: "PUT", body: JSON.stringify(completionPatch(new Date(), { member })), signal: AbortSignal.timeout(10_000) });
         dispatch({ type: "configStatus", config });
       } catch {
       }
     },
-    [beat, dispatch, onDone, replay],
+    [beat, dispatch, member, onDone, replay],
   );
 
   const next = nextBeat(beats, beat);
@@ -136,7 +154,7 @@ export function WelcomeFlow({
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape") {
       event.preventDefault();
-      void finish("skipped");
+      if (!locked) void finish("skipped");
       return;
     }
     if (event.key !== "Tab" || !cardRef.current) return;
@@ -169,7 +187,7 @@ export function WelcomeFlow({
 
   const hello = beat === "hello";
   const title = beatTitle(beat);
-  const logo = hello ? brand().logo : undefined;
+  const logo = hello && !member ? brand().logo : undefined;
   const beatProps = { onNext: advance, onSkip: advance, setMascot, bump };
   const current = beats.indexOf(beat) + 1;
 
@@ -190,17 +208,24 @@ export function WelcomeFlow({
         className="welcome-card relative flex max-h-full w-full flex-col overflow-y-auto rounded-2xl border border-hairline/40 bg-panel p-5 sm:p-8 shadow-[0_30px_80px_-28px_rgba(0,0,0,0.45),0_8px_24px_-12px_rgba(0,0,0,0.25)] outline-none"
         style={{ maxWidth: beatWidth(beat) }}
       >
-        <QuietButton onClick={() => void finish("skipped")} className="absolute right-4 top-4">
-          {t("onboarding.skipTour")}
-        </QuietButton>
+        {locked ? (
+          onSignOut && (
+            <QuietButton onClick={onSignOut} className="absolute right-4 top-4">
+              {t("onboarding.signOut")}
+            </QuietButton>
+          )
+        ) : (
+          <QuietButton onClick={() => void finish("skipped")} className="absolute right-4 top-4">
+            {t("onboarding.skipTour")}
+          </QuietButton>
+        )}
 
         <div className={cn("flex shrink-0", hello ? "flex-col items-center" : "items-center gap-3")}>
           <div className="welcome-maus flex shrink-0">
             {logo ? (
               <img src={logo} alt="" width={72} height={72} className="h-[72px] w-[72px] object-contain" />
             ) : (
-              <MausAvatar
-                color="green"
+              <OriginLogo
                 state={mascot}
                 motion={motion.kind}
                 motionKey={motion.key}
@@ -216,10 +241,13 @@ export function WelcomeFlow({
           )}
         </div>
 
-        <div key={beat} className={cn("flex flex-col", beat === "engines" ? "min-h-0" : "shrink-0")}>
-          {beat === "hello" && <HelloBeat {...beatProps} hosted={hosted} />}
+        <div key={beat} className={cn("flex flex-col", beat === "engines" || beat === "defaults" ? "min-h-0" : "shrink-0")}>
+          {beat === "hello" && <HelloBeat {...beatProps} hosted={hosted} member={member} />}
           {beat === "reel" && <FeatureReel {...beatProps} />}
           {beat === "engines" && <EnginesBeat {...beatProps} hosted={hosted} onOpenOrganisation={onOpenOrganisation} />}
+          {beat === "projects" && <ProjectsBeat {...beatProps} />}
+          {beat === "defaults" && <DefaultsBeat {...beatProps} onSetUpModels={() => go("engines")} />}
+          {beat === "computers" && <ComputersBeat {...beatProps} />}
           {beat === "permissions" && <PermissionsBeat {...beatProps} />}
           {beat === "phone" && <PhoneBeat {...beatProps} />}
           {beat === "bot" && (

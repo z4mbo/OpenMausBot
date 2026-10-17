@@ -11,6 +11,8 @@ export function openOriginPage(page: OriginPage | null) {
   for (const listener of listeners) listener();
 }
 
+export const currentOriginPage = (): OriginPage | null => current;
+
 export function useOriginPage(): OriginPage | null {
   return useSyncExternalStore((listener) => { listeners.add(listener); return () => listeners.delete(listener); }, () => current, () => null);
 }

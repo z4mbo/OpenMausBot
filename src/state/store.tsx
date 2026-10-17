@@ -144,7 +144,7 @@ export interface SecretRequestCardData {
 
 export type ComputerControlState = { held: boolean; helpReason: string | null; help?: import("../../shared/wire").ComputerHelpRef | null };
 
-export interface Message extends Pick<import("../../shared/wire").WireMessage, "widget" | "routedBy" | "quickModel"> {
+export interface Message extends Pick<import("../../shared/wire").WireMessage, "widget" | "routedBy" | "quickModel" | "remote"> {
   id: string;
   role: "bot" | "user";
   kind: "text" | "options" | "activity" | "screen" | "connector" | "secret" | "signin" | "routine.run" | "goal.run" | "digest" | "compaction" | "call" | "widget";
@@ -240,7 +240,7 @@ export interface ModelSelection {
   variant?: string;
 }
 
-export interface Task {
+export interface Task extends Pick<import("../../shared/wire").WireTask, "shared" | "sharedPrivate"> {
   waitingForTeammates?: boolean;
   threadId: string;
   routineRunId?: string;
@@ -356,6 +356,7 @@ export interface Bot {
   mcpServers?: string[] | null;
   browserProfile?: string | null;
   visibility?: BotVisibility;
+  shared?: import("../../shared/wire").SharedBotLink;
   installedPackage?: InstalledPackageMetadata;
   messages: Message[];
   hasMore?: boolean;

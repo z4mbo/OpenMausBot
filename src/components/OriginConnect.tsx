@@ -43,7 +43,7 @@ export function OriginConnectDialog({ onClose }: { onClose(): void }) {
 
   return createPortal(
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div role="dialog" aria-modal="true" aria-label="Origin account" className="w-full max-w-[420px] rounded-2xl border border-hairline/50 bg-panel p-5 shadow-2xl">
+      <div role="dialog" aria-modal="true" aria-label="Origin account" className="w-full max-w-[420px] rounded-2xl border border-hairline/50 bg-panel p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[16px] font-semibold text-ink">Origin account</h2>
           <button type="button" aria-label="Close" onClick={onClose} className="flex size-8 items-center justify-center rounded-lg text-ink-secondary hover:bg-raised hover:text-ink"><X size={16} /></button>

@@ -61,6 +61,8 @@ export function delegatedApprovalMode(input: {
 // Tools that ask a person: a malformed AskUserQuestion falls back to the permission path, and approving it runs the tool with
 // no answer ("The user did not answer the questions."), so no mode may answer one.
 const ASKS_A_PERSON = new Set(["askuserquestion", "ask_user"]);
+// Irreversible changes outside the app that Full access still never answers.
+const ALWAYS_CONFIRMED = new Set(["origin_merge_pr"]);
 
 // Approve for me allows these names and nothing wider: a page fetch and every other tool stay a prompt.
 const WEB_SEARCH = new Set(["websearch", "web_search", "web-search", "search_web"]);
@@ -103,6 +105,7 @@ export function autoVerdict(
   if (ASKS_A_PERSON.has(bareToolName(tool))) {
     return { approve: null, source: "no-grant" };
   }
+  if (ALWAYS_CONFIRMED.has(bareToolName(tool))) return { approve: null, source: "outbound-guard" };
   // Full's promise is literal, sandbox widening included; entering Full is consent-gated by the bot PATCH endpoint.
   if (mode === "full") return { approve: `approved ${tool} (full access)`, source: "full-access" };
   if (context?.requiresExplicitApproval) return { approve: null, source: "explicit-approval-block" };

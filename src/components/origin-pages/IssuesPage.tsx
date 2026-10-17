@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type PointerEvent, type ReactNode, type RefObject } from "react";
 import {
   Bot as BotIcon, CalendarDays, CheckCircle2, ChevronRight, Circle, CircleDashed, Columns3, ExternalLink, GitBranch, GitPullRequest, GripVertical,
-  List, Loader2, MessageCircle, MoreHorizontal, Plus, Search, SignalMedium, Tag, Trash2, UserRound, X,
+  List, Loader2, MessageCircle, MoreHorizontal, Plus, Search, SignalMedium, Trash2, UserRound,
 } from "lucide-react";
-import { cloudAction, cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
+import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { consumeIssueFocus, useIssueFocus } from "@/lib/origin-issue-focus";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import type {
-  CloudBoard, CloudColumn, CloudIssueRelations, CloudPerson, CloudProject, CloudTask, CloudTaskDetails, CloudTaskPullRequest, Priority,
+  CloudBoard, CloudColumn, CloudPerson, CloudProject, CloudTask, CloudTaskDetails, CloudTaskPullRequest, Priority,
 } from "./cloud-types";
 import { errorText, fmtDate, githubRepoLabel, taskKey } from "./repo-url";
 import {
@@ -16,11 +16,14 @@ import {
   type OriginPageProps,
 } from "./ui";
 import {
-  ChipSelect, DateChip, IssueDialog, PriorityIcon, capitalize, isDoneColumn, laneTone, memberOptions, parseLabels, priorityOptions, statusOptions,
+  AgentChip, ChipSelect, DateChip, IssueChips, IssueDialog, PriorityIcon, ProjectDot, capitalize, isDoneColumn, issueDescriptionClass, issueTitleClass, laneTone, memberOptions,
+  priorityOptions, statusOptions,
   type CreatedIssue, type IssueAgent,
 } from "./issue-fields";
 import { orderForMove, stepTarget, useFlip, withPendingMoves, type PendingMove } from "./issue-order";
 import { NewIssueComposer } from "./NewIssueComposer";
+import { CompleteIssueDialog, completesThroughPullRequest } from "./CompleteIssueDialog";
+import { originGitHub } from "@/lib/origin-github";
 import { PersonAvatar } from "./PersonAvatar";
 import { useCardDrag, type CardDrag, type DropTarget } from "./use-card-drag";
 
@@ -94,7 +97,9 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
   const [pending, setPending] = useState<ReadonlyMap<string, PendingMove>>(new Map());
   const [moves, setMoves] = useState(0);
   const [notice, setNotice] = useState("");
+  const [completing, setCompleting] = useState<string | null>(null);
   const ensured = useRef(false);
+  const mirrored = useRef(new Set<string>());
   const lanesRef = useRef<HTMLDivElement>(null);
   const search = useRef<HTMLInputElement>(null);
   const focus = useIssueFocus(projectId);
@@ -109,6 +114,14 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
     setSelected(focus.issueId);
     consumeIssueFocus(focus);
   }, [focus]);
+
+  useEffect(() => {
+    if (!canEdit || !board || !project.repoUrl) return;
+    const unlinked = board.tasks.filter((task) => !task.done && !task.githubIssueNumber && !mirrored.current.has(task._id)).map((task) => task._id);
+    if (!unlinked.length) return;
+    for (const id of unlinked) mirrored.current.add(id);
+    void originGitHub.mirrorIssues(projectId, unlinked).catch(() => undefined);
+  }, [board, canEdit, project.repoUrl, projectId]);
 
   useEffect(() => {
     if (!canEdit || !board || board.columns.length || ensured.current) return;
@@ -135,7 +148,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
   const fallback = columns.find((column) => column.title.toLowerCase() === "todo") ?? columns[0];
   const laneOf = (task: CloudTask) => (visibleIds.has(task.columnId) ? task.columnId : fallback?._id);
   const needle = query.trim().toLowerCase();
-  const matches = (task: CloudTask) => !needle || `${taskKey(task._id)} ${task.title} ${task.description ?? ""} ${task.assignedToName ?? ""} ${(task.labels ?? []).join(" ")}`.toLowerCase().includes(needle);
+  const matches = (task: CloudTask) => !needle || `${taskKey(task._id)} ${task.title} ${task.description ?? ""} ${task.assignedToName ?? ""}`.toLowerCase().includes(needle);
   const active = tasks.filter((task) => !task.done && matches(task));
   const completed = tasks.filter((task) => task.done && matches(task)).sort((a, b) => b.updatedAt - a.updatedAt);
   const assignees = new Map([...(board.assignees ?? []), ...(people ?? [])].map((person) => [person.email, person]));
@@ -151,6 +164,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
       .finally(() => setPending((current) => { const next = new Map(current); next.delete(taskId); return next; }));
   };
   const setDone = (task: CloudTask, done: boolean) => {
+    if (done && completesThroughPullRequest(project, task)) { setCompleting(task._id); return; }
     setMoves((count) => count + 1);
     void cloudMutation("tasks:updateTask", { projectId, taskId: task._id, done }).catch(report);
   };
@@ -187,7 +201,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
   const done = board.tasks.filter((task) => task.done).length;
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-5 md:px-6 motion-safe:animate-[rise_0.24s_cubic-bezier(0.22,1,0.36,1)_backwards]" aria-label="Issues">
+    <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-[calc(var(--glass-top,0px)+1.25rem)] md:px-6 motion-safe:animate-[rise_0.24s_cubic-bezier(0.22,1,0.36,1)_backwards]" aria-label="Issues">
       <PageHeader title="Issues" count={board.tasks.length ? <ProgressRing done={done} total={board.tasks.length} /> : undefined}>
         <Segmented label="Issue state" value={view} onChange={setView}
           options={[{ value: "active", label: <><Circle size={13} />Active <span className="tabular-nums text-ink-tertiary">{active.length}</span></> }, { value: "completed", label: <><CheckCircle2 size={13} />Done <span className="tabular-nums text-ink-tertiary">{completed.length}</span></> }]} />
@@ -246,7 +260,6 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
                               <span className="hidden font-mono text-[11.5px] text-ink-tertiary sm:inline">{taskKey(task._id)}</span>
                               <span className="truncate text-ink">{task.title}</span>
                             </button>
-                            {(task.labels ?? []).slice(0, 2).map((label) => <span key={label} className="hidden rounded-full bg-raised px-2 py-px text-[11.5px] text-ink-secondary md:inline">{label}</span>)}
                             {due && <span className={cn("hidden text-[12px] sm:inline", due.tone)}>{due.label}</span>}
                             {person ? <span title={person.name}><PersonAvatar person={person} size={20} /></span> : <UserRound size={16} className="text-ink-tertiary" aria-label="Unassigned" />}
                             <TaskMenu task={task} columns={columns} canEdit={canEdit} agents={agents} onMove={(columnId) => move(task._id, columnId)} onDone={() => setDone(task, true)} onDelete={() => remove(task)} onAssign={assign} />
@@ -268,7 +281,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
             const lifted = cardDrag.drag;
             return (
               <div key={column._id} data-column-id={column._id}
-                className={cn("flex w-[min(19rem,85vw)] shrink-0 snap-start flex-col rounded-2xl bg-inset/50 p-2 transition-[background-color,box-shadow] duration-200", lifted && "bg-inset/70", here && "bg-inset/90 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-accent)_35%,transparent)]")}>
+                className={cn("flex w-[min(19rem,85vw)] shrink-0 snap-start flex-col rounded-2xl bg-inset/50 p-2 transition-[background-color,box-shadow] duration-200", lifted && "bg-inset/70", here && "bg-inset/90")}>
                 <div className="flex items-center gap-2 px-2 pb-2 pt-1">
                   <Circle size={12} strokeWidth={2.5} className={laneTone(column.title)} aria-hidden="true" />
                   <strong className="truncate text-[13px] font-semibold text-ink">{column.title}</strong>
@@ -315,7 +328,9 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
               <Plus size={14} />Add column
             </button>
           )}
-          {!columns.length && <Loading label="Preparing columns" variant="board" />}
+          {!columns.length && (canEdit && !board.columns.length && !notice
+            ? <Loading label="Preparing columns" variant="board" />
+            : <EmptyState compact icon={<CircleDashed size={22} />} title="No open columns" body={canEdit ? "Add a column to start tracking issues." : "An editor has not set up this board yet."} />)}
           {cardDrag.drag && <DragGhost drag={cardDrag.drag} ghost={cardDrag.ghost} task={tasks.find((item) => item._id === cardDrag.drag!.taskId)} columns={columns}
             assignee={(task) => task.assignedToEmail ? assignees.get(task.assignedToEmail) ?? { email: task.assignedToEmail, name: task.assignedToName ?? task.assignedToEmail } : undefined} />}
         </div>
@@ -331,6 +346,10 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
           }} />
       )}
       {columnEditor && <ColumnEditor projectId={projectId} column={columnEditor === "new" ? null : columnEditor} columns={columns} onClose={() => setColumnEditor(null)} />}
+      {completing && (() => {
+        const task = board.tasks.find((item) => item._id === completing);
+        return task ? <CompleteIssueDialog project={project} projectId={projectId} task={task} onClose={() => setCompleting(null)} /> : null;
+      })()}
       {selected && <IssueDetail key={selected} project={project} projectId={projectId} taskId={selected} canEdit={canEdit} agents={agents} onClose={() => setSelected(null)}
         onDelete={(task) => remove(task)} onAssign={assign} />}
     </section>
@@ -350,7 +369,7 @@ function DragGhost({ drag, ghost, task, columns, assignee }: {
   return (
     <div ref={ghost} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[60]"
       style={{ width: drag.width, transform: `translate3d(${drag.x}px, ${drag.y}px, 0)` }}>
-      <div className="rotate-[1.5deg] scale-[1.03] rounded-xl shadow-[0_18px_40px_-12px_rgb(0_0_0/0.65)] motion-safe:animate-[pop-in_0.16s_ease-out]">
+      <div className="rotate-[1.5deg] scale-[1.03] rounded-xl motion-safe:animate-[pop-in_0.16s_ease-out]">
         <TaskCard task={task} columns={columns} canEdit={false} agents={[]} lifted assignee={assignee(task)} />
       </div>
     </div>
@@ -389,7 +408,7 @@ export function TaskCard({ task, columns, canEdit, assignee, agents, lifted = fa
         if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onOpen?.(); return; }
         onKeyDown?.(event);
       }}
-      className={cn("group relative cursor-pointer rounded-xl border border-hairline/40 bg-panel p-3 outline-none transition-[border-color,background-color,box-shadow,opacity,transform] duration-150 hover:border-hairline hover:bg-raised/40 hover:shadow-[0_8px_24px_-12px_rgb(0_0_0/0.6)] focus-visible:ring-2 focus-visible:ring-accent/60",
+      className={cn("group relative cursor-pointer rounded-xl border border-hairline/40 bg-panel p-3 outline-none transition-[border-color,background-color,box-shadow,opacity,transform] duration-150 hover:border-hairline hover:bg-raised/40 focus-visible:ring-2 focus-visible:ring-accent/60",
         canEdit && "cursor-grab select-none active:cursor-grabbing", lifted && "cursor-grabbing border-hairline")}>
       <div className="mb-1.5 flex items-center gap-1.5 text-[11.5px] text-ink-tertiary">
         {canEdit && <GripVertical size={12} className="-ml-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100" aria-hidden="true" />}
@@ -413,7 +432,6 @@ export function TaskCard({ task, columns, canEdit, assignee, agents, lifted = fa
       <div className="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[11.5px]">
         <span className="flex items-center gap-1 text-ink-secondary" title={`${capitalize(task.priority)} priority`}><PriorityIcon priority={task.priority} size={13} />{capitalize(task.priority)}</span>
         {due && <span className={cn("flex items-center gap-1", due.tone)} title={`Due ${task.dueDate}`}><CalendarDays size={12} aria-hidden="true" />{due.label}</span>}
-        {(task.labels ?? []).map((label) => <span key={label} className="rounded-full bg-raised px-1.5 py-px text-ink-secondary">{label}</span>)}
         {assignee && <span className="ml-auto" title={assignee.name}><PersonAvatar person={assignee} size={20} /></span>}
       </div>
     </article>
@@ -449,7 +467,7 @@ function TaskMenu({ task, columns, canEdit, agents, onMove, onDone, onDelete, on
     <div ref={root} className="relative">
       <button type="button" className={cn(iconButton, "size-7")} aria-label={`Actions for ${task.title}`} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}><MoreHorizontal size={14} /></button>
       {open && (
-        <div ref={menu} role="menu" className="absolute right-0 top-8 z-30 w-56 rounded-xl border border-hairline/60 bg-menu p-1 shadow-xl motion-safe:animate-pop-in"
+        <div ref={menu} role="menu" className="absolute right-0 top-8 z-30 w-56 rounded-xl border border-hairline/60 bg-menu p-1 motion-safe:animate-pop-in"
           onKeyDown={(event) => {
             if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setOpen(false); return; }
             if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
@@ -522,10 +540,9 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, onClose, onD
   project: CloudProject; projectId: string; taskId: string; canEdit: boolean; agents: readonly IssueAgent[]; onClose(): void; onDelete(task: CloudTask): void; onAssign?(task: CloudTask, agentId?: string): void;
 }) {
   const details = useCloudQuery<CloudTaskDetails>("tasks:details", { projectId, taskId });
-  const relations = useCloudQuery<CloudIssueRelations>("issueRelations:list", { taskId });
   const [draft, setDraft] = useState<{ title: string; description: string } | null>(null);
-  const [labelInput, setLabelInput] = useState("");
   const action = useAction();
+  const [completing, setCompleting] = useState(false);
   const task = details?.task;
 
   useEffect(() => {
@@ -534,167 +551,114 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, onClose, onD
   }, [task, draft]);
 
   const heading = (
-    <div className="flex min-w-0 items-center gap-2 text-[13px] text-ink-secondary">
-      <span className="truncate">{project.name}</span>
+    <div className="flex min-w-0 items-center gap-1.5 text-[13px]">
+      <span className="flex min-w-0 items-center gap-1.5 rounded-full border border-hairline/50 bg-raised/50 px-2.5 py-1 text-ink-secondary">
+        <ProjectDot name={project.name} /><span className="max-w-[220px] truncate">{project.name}</span>
+      </span>
       <ChevronRight size={14} className="shrink-0 text-ink-tertiary" aria-hidden="true" />
-      <span className="font-mono text-ink">{taskKey(taskId)}</span>
+      <h2 className="whitespace-nowrap font-mono font-medium text-ink">{taskKey(taskId)}</h2>
       {task?.done && <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11.5px] text-success"><CheckCircle2 size={12} />Done</span>}
     </div>
   );
-  if (!details || !task || !draft) return <IssueDialog label="Issue" heading={heading} onClose={onClose} wide><Loading label="Opening issue" variant="inline" /></IssueDialog>;
+  if (!details || !task || !draft) return <IssueDialog label="Issue" heading={heading} onClose={onClose}><div className="px-6 pb-6"><Loading label="Opening issue" variant="inline" /></div></IssueDialog>;
 
   const columns = details.columns.filter((column) => !isDoneColumn(column));
   const dirty = draft.title !== task.title || draft.description !== (task.description ?? "");
-  const labels = relations?.labels ?? task.labels ?? [];
   const update = (patch: Record<string, unknown>, fallback: string) => void action.run(() => cloudMutation("tasks:updateTask", { projectId, taskId, ...patch }), fallback);
-  const save = () => action.run(() => cloudMutation("tasks:updateTask", {
-    projectId, taskId,
-    ...(draft.title !== task.title ? { title: draft.title } : {}),
-    ...(draft.description !== (task.description ?? "") ? { description: draft.description } : {}),
-  }), "Could not save issue");
-  const setLabels = (next: string[]) => void action.run(() => cloudMutation("issueRelations:labels", { taskId, labels: next }), "Could not update labels");
-  const close = () => { if (dirty && canEdit && !window.confirm("Discard unsaved changes?")) return; onClose(); };
+  const save = () => {
+    if (!dirty || !draft.title.trim() || action.busy) return;
+    void action.run(() => cloudMutation("tasks:updateTask", {
+      projectId, taskId,
+      ...(draft.title !== task.title ? { title: draft.title } : {}),
+      ...(draft.description !== (task.description ?? "") ? { description: draft.description } : {}),
+    }), "Could not save issue");
+  };
+  const toggleDone = () => (!task.done && completesThroughPullRequest(project, task) ? setCompleting(true) : update({ done: !task.done }, "Could not update issue"));
 
   return (
-    <IssueDialog label={`${taskKey(task._id)} ${task.title}`} heading={heading} onClose={close} wide>
-      <div className="grid gap-6 px-5 pb-5 pt-2 md:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="flex min-w-0 flex-col">
-          <textarea rows={1} aria-label="Issue title" value={draft.title} maxLength={250} disabled={!canEdit}
-            onChange={(e) => setDraft({ ...draft, title: e.target.value.replace(/\n/g, " ") })}
-            onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }}
-            className="w-full resize-none bg-transparent text-[22px] font-semibold leading-snug tracking-[-0.01em] text-ink outline-none [field-sizing:content] disabled:opacity-100 max-md:text-[19px]" />
-          <textarea aria-label="Issue description" placeholder="Add a description…" value={draft.description} disabled={!canEdit}
-            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-            className="mt-3 min-h-[120px] w-full resize-y bg-transparent text-[14px] leading-relaxed text-ink-secondary outline-none [field-sizing:content] placeholder:text-ink-tertiary disabled:opacity-100 max-md:text-[16px]" />
-          {canEdit && dirty && (
-            <div className="mt-2 flex flex-wrap items-center gap-2 motion-safe:animate-pop-in">
-              <button type="button" className={primaryButton} disabled={action.busy || !draft.title.trim()} onClick={() => void save()}>
-                {action.busy ? <Loader2 size={14} className="animate-spin" /> : null}Save changes
-              </button>
-              <button type="button" className={ghostButton} onClick={() => setDraft(null)}>Discard</button>
-            </div>
-          )}
-          {action.error && <div className="mt-2"><Notice tone="danger">{action.error}</Notice></div>}
-          <Comments projectId={projectId} taskId={taskId} details={details} canEdit={canEdit} />
-        </div>
-        <aside className="flex flex-col gap-5 md:border-l md:border-hairline/40 md:pl-5" aria-label="Issue properties">
-          {onAssign && <AgentHandOff agents={agents} onPick={(agentId) => onAssign(task, agentId)} />}
-          <Section title="Properties">
-            <div className="flex flex-wrap gap-2">
-              <ChipSelect label="Status" value={columns.some((c) => c._id === task.columnId) ? task.columnId : ""} options={statusOptions(columns)} icon={<CircleDashed size={14} aria-hidden="true" />} disabled={!canEdit}
-                onChange={(columnId) => void action.run(() => cloudMutation("tasks:moveTask", { projectId, taskId, columnId }), "Could not move issue")} />
-              <ChipSelect label="Priority" value={task.priority} options={priorityOptions()} icon={<SignalMedium size={14} aria-hidden="true" />} disabled={!canEdit}
-                onChange={(priority) => update({ priority }, "Could not change the priority")} />
-              <ChipSelect label="Assignee" value={task.assignedToEmail ?? ""} options={memberOptions(details.members)} icon={<UserRound size={14} aria-hidden="true" />} disabled={!canEdit} align="right"
-                onChange={(assignedToEmail) => update({ assignedToEmail }, "Could not change the assignee")} />
-              <DateChip value={task.dueDate ?? ""} disabled={!canEdit} onChange={(dueDate) => { if (dueDate) update({ dueDate }, "Could not change the due date"); }} />
-            </div>
-          </Section>
-          <Section title="Labels">
-            <div className="flex flex-wrap gap-1.5">
-              {labels.map((label) => (
-                <span key={label} className="flex items-center gap-1 rounded-full bg-raised px-2 py-0.5 text-[12px] text-ink-secondary motion-safe:animate-pop-in">
-                  {label}
-                  {canEdit && <button type="button" aria-label={`Remove label ${label}`} className="rounded-full hover:text-ink" onClick={() => setLabels(labels.filter((item) => item !== label))}><X size={11} /></button>}
-                </span>
-              ))}
-              {canEdit && (
-                <form className={cn(chipButton, "h-6 px-2")} onSubmit={(event) => { event.preventDefault(); if (!labelInput.trim()) return; const next = parseLabels([...labels, labelInput].join(",")); setLabelInput(""); setLabels(next); }}>
-                  <Tag size={11} aria-hidden="true" />
-                  <input className="w-20 bg-transparent text-[12px] text-ink outline-none placeholder:text-ink-tertiary max-md:text-[16px]" placeholder="Add label" aria-label="Add label" value={labelInput} maxLength={32} onChange={(e) => setLabelInput(e.target.value)} />
-                </form>
-              )}
-              {!labels.length && !canEdit && <span className="text-[12px] text-ink-tertiary">No labels</span>}
-            </div>
-          </Section>
-          <GitHubSection project={project} projectId={projectId} task={task} canEdit={canEdit} />
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[12px]">
-            <dt className="text-ink-tertiary">Created</dt><dd className="text-ink-secondary">{fmtDate(task.createdAt)}</dd>
-            <dt className="text-ink-tertiary">Updated</dt><dd className="text-ink-secondary">{fmtDate(task.updatedAt)}</dd>
-          </dl>
+    <IssueDialog label={`${taskKey(task._id)} ${task.title}`} heading={heading} onClose={onClose}
+      canClose={() => !(dirty && canEdit) || window.confirm("Discard unsaved changes?")}>
+      <div className="flex flex-col px-6 pb-5 pt-2 max-sm:px-5"
+        onKeyDown={(event) => { if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) { event.preventDefault(); save(); } }}>
+        <textarea rows={1} aria-label="Issue title" placeholder="Issue title" value={draft.title} maxLength={250} disabled={!canEdit}
+          onChange={(e) => setDraft({ ...draft, title: e.target.value.replace(/\n/g, " ") })}
+          onKeyDown={(event) => { if (event.key === "Enter" && !event.metaKey && !event.ctrlKey) event.preventDefault(); }}
+          className={issueTitleClass} />
+        <textarea aria-label="Issue description" placeholder={canEdit ? "Add a description…" : "No description"} value={draft.description} disabled={!canEdit}
+          onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+          className={issueDescriptionClass} />
+        <IssueChips>
+          <ChipSelect label="Status" value={columns.some((c) => c._id === task.columnId) ? task.columnId : ""} options={statusOptions(columns)} icon={<CircleDashed size={14} aria-hidden="true" />}
+            disabled={!canEdit || task.done} placeholder={task.done ? "Done" : undefined}
+            onChange={(columnId) => void action.run(() => cloudMutation("tasks:moveTask", { projectId, taskId, columnId }), "Could not move issue")} />
+          <ChipSelect label="Priority" value={task.priority} options={priorityOptions()} icon={<SignalMedium size={14} aria-hidden="true" />} disabled={!canEdit}
+            onChange={(priority) => update({ priority }, "Could not change the priority")} />
+          <ChipSelect label="Assignee" value={task.assignedToEmail ?? ""} options={memberOptions(details.members)} icon={<UserRound size={14} aria-hidden="true" />} disabled={!canEdit}
+            onChange={(assignedToEmail) => update({ assignedToEmail }, "Could not change the assignee")} />
+          <DateChip value={task.dueDate ?? ""} disabled={!canEdit} onChange={(dueDate) => { if (dueDate) update({ dueDate }, "Could not change the due date"); }} />
+          {onAssign && !task.done && <AgentChip agents={agents} onPick={(agentId) => onAssign(task, agentId)} />}
+          <GitHubChips project={project} projectId={projectId} task={task} canEdit={canEdit} />
+        </IssueChips>
+        {action.error && <div className="mt-3"><Notice tone="danger">{action.error}</Notice></div>}
+        {completing && <CompleteIssueDialog project={project} projectId={projectId} task={task} onClose={() => setCompleting(false)} />}
+        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-hairline/40 pt-4">
+          <span className="text-[12px] text-ink-tertiary">
+            {canEdit && dirty ? "Ctrl+Enter to save" : `Created ${fmtDate(task.createdAt)} · Updated ${fmtDate(task.updatedAt)}`}
+          </span>
           {canEdit && (
-            <div className="flex flex-col gap-2 border-t border-hairline/40 pt-4">
-              <button type="button" className={ghostButton} onClick={() => update({ done: !task.done }, "Could not update issue")}>
-                {task.done ? <Circle size={14} /> : <CheckCircle2 size={14} />}{task.done ? "Reopen issue" : "Mark complete"}
-              </button>
-              <button type="button" className={cn(ghostButton, "text-danger hover:text-danger")} onClick={() => onDelete(task)}><Trash2 size={14} />Delete issue</button>
+            <div className="ml-auto flex items-center gap-2">
+              {dirty ? <>
+                <button type="button" className={cn(ghostButton, "rounded-full")} onClick={() => setDraft(null)}>Discard</button>
+                <button type="button" className={cn(primaryButton, "rounded-full px-4")} disabled={action.busy || !draft.title.trim()} onClick={save}>
+                  {action.busy ? <Loader2 size={14} className="animate-spin" /> : null}Save changes
+                </button>
+              </> : <>
+                <button type="button" className={cn(iconButton, "hover:text-danger")} aria-label="Delete issue" title="Delete issue" onClick={() => onDelete(task)}><Trash2 size={15} /></button>
+                <button type="button" className={cn(ghostButton, "rounded-full px-4")} onClick={toggleDone}>
+                  {task.done ? <Circle size={14} /> : <CheckCircle2 size={14} />}{task.done ? "Reopen issue" : "Mark complete"}
+                </button>
+              </>}
             </div>
           )}
-        </aside>
+        </div>
       </div>
+      <Comments projectId={projectId} taskId={taskId} details={details} canEdit={canEdit} />
     </IssueDialog>
   );
 }
 
-function AgentHandOff({ agents, onPick }: { agents: readonly IssueAgent[]; onPick(agentId?: string): void }) {
-  return (
-    <section className="rounded-xl border border-accent/25 bg-accent/[0.06] p-3" aria-label="Hand to an agent">
-      <h4 className="mb-2 flex items-center gap-1.5 text-[12.5px] font-semibold text-ink"><BotIcon size={14} className="text-accent-text" />Hand to an agent</h4>
-      {agents.length ? (
-        <div className="flex flex-col gap-1">
-          {agents.slice(0, 5).map((agent) => (
-            <button key={agent.id} type="button" onClick={() => onPick(agent.id)}
-              className="flex items-center gap-2 rounded-lg px-1.5 py-1 text-left text-[13px] text-ink outline-none transition-colors hover:bg-raised focus-visible:ring-2 focus-visible:ring-accent/60">
-              {agent.avatar}<span className="min-w-0 flex-1 truncate">{agent.name}</span><ChevronRight size={13} className="text-ink-tertiary" aria-hidden="true" />
-            </button>
-          ))}
-          {agents.length > 5 && <button type="button" className="px-1.5 py-1 text-left text-[12px] text-ink-secondary hover:text-ink" onClick={() => onPick()}>All {agents.length} agents…</button>}
-        </div>
-      ) : (
-        <button type="button" className={cn(primaryButton, "w-full")} onClick={() => onPick()}><BotIcon size={14} />Choose an agent</button>
-      )}
-    </section>
-  );
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section>
-      <h4 className="mb-2 text-[11.5px] font-medium uppercase tracking-[0.06em] text-ink-tertiary">{title}</h4>
-      {children}
-    </section>
-  );
-}
-
-function GitHubSection({ project, projectId, task, canEdit }: { project: CloudProject; projectId: string; task: CloudTask; canEdit: boolean }) {
+function GitHubChips({ project, projectId, task, canEdit }: { project: CloudProject; projectId: string; task: CloudTask; canEdit: boolean }) {
   const prs = useCloudQuery<CloudTaskPullRequest[]>("taskPRs:list", { taskId: task._id });
-  const [manualUrl, setManualUrl] = useState("");
   const [message, setMessage] = useState("");
   const action = useAction();
   const mode = task.githubTaskMode ?? project.githubTaskMode ?? "issue";
   if (!project.repoUrl && !task.githubIssueUrl && !prs?.length) return null;
   const create = () => action.run(async () => {
-    const result = await cloudAction<{ ok: boolean; issueUrl: string; manualUrl: string; message: string }>("github:createIssueForTask", { projectId, taskId: task._id });
-    setMessage(result.message);
-    setManualUrl(result.ok ? "" : result.manualUrl);
+    const [result] = (await originGitHub.mirrorIssues(projectId, [task._id])).results;
+    if (result?.error) throw new Error(result.error);
+    setMessage(result?.issueNumber ? `Created GitHub issue #${result.issueNumber}` : "");
   }, "GitHub issue creation failed");
-  return (
-    <Section title="GitHub">
-      <p className="mb-1.5 flex items-center gap-1.5 truncate text-[12px] text-ink-secondary"><GitBranch size={12} aria-hidden="true" />{githubRepoLabel(project.repoUrl)}</p>
-      {task.githubIssueUrl ? (
-        <a className={cn(ghostButton, "w-full justify-start")} href={task.githubIssueUrl} target="_blank" rel="noreferrer">
-          Issue #{task.githubIssueNumber}
-          <span className={cn("ml-auto text-[11.5px]", task.githubIssueState === "closed" ? "text-ink-tertiary" : "text-success")}>{task.githubIssueState ?? "open"}</span>
-          <ExternalLink size={12} />
-        </a>
-      ) : project.repoUrl && mode === "issue" && canEdit ? (
-        <button type="button" className={cn(ghostButton, "w-full")} disabled={action.busy} onClick={() => void create()}>
-          {action.busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}Create GitHub issue
-        </button>
-      ) : null}
-      {prs?.map((pr) => (
-        <div key={pr._id} className="mt-2 rounded-lg bg-inset px-2.5 py-2 text-[12px]">
-          <a href={pr.url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-ink hover:underline">
-            <GitPullRequest size={13} />PR #{pr.number}<span className="ml-auto capitalize text-ink-secondary">{pr.state}</span>
-          </a>
-          <p className="mt-1 text-ink-tertiary">Checks: {pr.checks} · Review: {pr.review} · Mergeable: {pr.mergeable == null ? "unknown" : pr.mergeable ? "yes" : "no"}</p>
-        </div>
-      ))}
-      {message && <p className="mt-1.5 text-[12px] text-ink-secondary" role="status">{message}</p>}
-      {manualUrl && <a className="mt-1 inline-flex items-center gap-1 text-[12px] text-accent-text hover:underline" href={manualUrl} target="_blank" rel="noreferrer">Open a prefilled GitHub issue<ExternalLink size={11} /></a>}
-      {action.error && <Notice tone="danger">{action.error}</Notice>}
-    </Section>
-  );
+  return <>
+    {task.githubIssueUrl ? (
+      <a className={chipButton} href={task.githubIssueUrl} target="_blank" rel="noreferrer" title={`${githubRepoLabel(project.repoUrl)} issue #${task.githubIssueNumber}`}>
+        <GitBranch size={14} aria-hidden="true" className="shrink-0" />#{task.githubIssueNumber}
+        <span className={task.githubIssueState === "closed" ? "text-ink-tertiary" : "text-success"}>{task.githubIssueState ?? "open"}</span>
+        <ExternalLink size={12} aria-hidden="true" className="shrink-0 opacity-60" />
+      </a>
+    ) : project.repoUrl && mode === "issue" && canEdit ? (
+      <button type="button" className={chipButton} disabled={action.busy} onClick={() => void create()} title={githubRepoLabel(project.repoUrl)}>
+        {action.busy ? <Loader2 size={14} className="animate-spin" /> : <GitBranch size={14} aria-hidden="true" />}Create GitHub issue
+      </button>
+    ) : null}
+    {prs?.map((pr) => (
+      <a key={pr._id} className={chipButton} href={pr.url} target="_blank" rel="noreferrer"
+        title={`Checks: ${pr.checks} · Review: ${pr.review} · Mergeable: ${pr.mergeable == null ? "unknown" : pr.mergeable ? "yes" : "no"}`}>
+        <GitPullRequest size={14} aria-hidden="true" className="shrink-0" />PR #{pr.number}<span className="capitalize text-ink-tertiary">{pr.state}</span>
+      </a>
+    ))}
+    {message && <span className="text-[12px] text-ink-secondary" role="status">{message}</span>}
+    {action.error && <span className="text-[12px] text-danger" role="alert">{action.error}</span>}
+  </>;
 }
 
 function Comments({ projectId, taskId, details, canEdit }: { projectId: string; taskId: string; details: CloudTaskDetails; canEdit: boolean }) {
@@ -713,14 +677,14 @@ function Comments({ projectId, taskId, details, canEdit }: { projectId: string; 
     if (await action.run(() => cloudMutation("tasks:addComment", { projectId, taskId, body }), "Could not send comment")) setBody("");
   };
   return (
-    <section className="mt-6 border-t border-hairline/40 pt-4" aria-label="Activity">
+    <section className="border-t border-hairline/40 px-6 pb-6 pt-4 max-sm:px-5" aria-label="Activity">
       <h4 className="mb-3 flex items-center gap-1.5 text-[13px] font-semibold text-ink"><MessageCircle size={14} />Activity <span className="font-normal tabular-nums text-ink-tertiary">{entries.length}</span></h4>
       <ol className="flex flex-col gap-3">
         {!entries.length && <li className="text-[12.5px] text-ink-tertiary">No comments yet. Agents post their progress here too.</li>}
         {entries.map((entry) => (
           <li key={entry.id} className="flex gap-2.5 motion-safe:animate-msg-in">
             <PersonAvatar person={{ name: entry.author, email: entry.email || entry.author }} size={24} />
-            <div className="min-w-0 flex-1 rounded-xl bg-inset/70 px-3 py-2">
+            <div className="min-w-0 flex-1 rounded-xl border border-hairline/40 px-3 py-2">
               <header className="mb-0.5 flex items-center gap-2 text-[12px]">
                 <strong className="font-medium text-ink">{entry.author}</strong>
                 <time className="text-ink-tertiary" dateTime={new Date(entry.at).toISOString()}>{new Date(entry.at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</time>
@@ -731,7 +695,7 @@ function Comments({ projectId, taskId, details, canEdit }: { projectId: string; 
         ))}
       </ol>
       {canEdit && (
-        <form onSubmit={submit} className="mt-3 rounded-xl border border-hairline/60 bg-inset transition-colors focus-within:border-accent/60">
+        <form onSubmit={submit} className="mt-3 rounded-xl border border-hairline/60 transition-colors focus-within:border-accent/60">
           <textarea className="block min-h-[72px] w-full resize-none bg-transparent px-3 py-2 text-[13px] text-ink outline-none placeholder:text-ink-tertiary max-md:text-[16px]" placeholder="Leave a comment…" aria-label="Comment" value={body} maxLength={8000} disabled={action.busy}
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={(event) => { if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) void submit(event); }} />

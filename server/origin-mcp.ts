@@ -14,6 +14,7 @@ export const MCP_SCOPES = ["origin:read", "origin:write"] as const;
 export const MCP_PROTOCOL_VERSIONS = ["2025-06-18", "2025-03-26", "2024-11-05"] as const;
 const MAX_BODY_BYTES = 100_000;
 const MAX_FORM_BYTES = 20_000;
+const MCP_BATCH_MAX = 20;
 const CODE_TTL_MS = 5 * 60_000;
 const ACCESS_TTL_MS = 3_600_000;
 const STALE_CLIENT_MS = 7 * 86_400_000;
@@ -429,6 +430,7 @@ export function createOriginMcpRoutes(deps: OriginMcpRouteDeps = {}): PublicRout
       return send(res, 400, { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } });
     }
     const batch = Array.isArray(parsed);
+    if (batch && (parsed as unknown[]).length > MCP_BATCH_MAX) return send(res, 400, { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Batch too large" } });
     const messages = (batch ? parsed : [parsed]) as JsonRpcMessage[];
     const replies = (await Promise.all(messages.map((message) => answerMcpMessage(message && typeof message === "object" ? message : {}, auth, client!)))).filter((reply) => reply !== null);
     if (!replies.length) {

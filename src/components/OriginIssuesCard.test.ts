@@ -40,12 +40,13 @@ function render(element: ReturnType<typeof createElement>) {
 }
 
 describe("Origin issue cards", () => {
-  it("shows each issue's key, title, status, priority, assignee and project, and what was left out", () => {
+  it("shows each issue's key, title, status, priority, assignee and project but not its labels, and what was left out", () => {
     const { container, unmount } = render(createElement(OriginIssuesCard, { message }));
     try {
       expect(container.textContent).toContain("2 open high-priority issues · 2 projects");
       const first = container.querySelector('[data-origin-issue="kaitaskab12"]')!;
-      for (const part of ["ORI-AB12", "Set up CI", "High", "ci"]) expect(first.textContent).toContain(part);
+      for (const part of ["ORI-AB12", "Set up CI", "High"]) expect(first.textContent).toContain(part);
+      expect([...first.querySelectorAll("span")].some((span) => span.textContent === "ci")).toBe(false);
       expect(first.querySelector("article")).not.toBeNull();
       expect(container.querySelector('[aria-label="Kai · Todo issues"]')).not.toBeNull();
       expect(container.querySelector('[aria-label="Yuki · In progress issues"]')).not.toBeNull();

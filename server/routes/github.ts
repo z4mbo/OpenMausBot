@@ -10,11 +10,13 @@ import { createTaskPR, syncPREvent, syncPRPage } from "../github/prs.ts";
 import { githubHeaders, parseGitHubRepo, repoName } from "../github/repo.ts";
 import {
   appConfig, convexSiteUrl, createIntegrationBridge, exchangeGitHubToken, githubAuthorizeUrl, githubEnvFrom, githubRequest, originUrl,
-  verifyIntegration, workspaceGitHubToken, type GitHubEnv, type GitHubService,
+  GitHubHttpError, verifyIntegration, workspaceGitHubToken, type GitHubEnv, type GitHubService,
 } from "../github/service.ts";
 import { createGitHubStore, RateLimited, type GithubState } from "../github/store.ts";
-import { createGitHubTask, createProjectRepository, syncGitHubEvent, syncGitHubPage } from "../github/sync.ts";
+import { approvePullRequest, listPullRequests, mergePullRequest, withProjectGitHub } from "../github/review.ts";
+import { createGitHubTask, createProjectRepository, mirrorTasks, mirrorUnlinkedPage, syncGitHubEvent, syncGitHubPage } from "../github/sync.ts";
 import { parseGitHubEvent, verifyGitHubSignature, WEBHOOK_EVENTS, WEBHOOK_MAX_BYTES } from "../github/webhook.ts";
+import { isRepositoryName } from "../../shared/github-repo-name.ts";
 import { PASS, type PublicRouteHandler, type RouteHandler } from "./table.ts";
 
 type Args = Record<string, unknown>;
@@ -25,6 +27,7 @@ type WorkspaceUser = OriginUser & { teamId: string; workspaceRole: string; slug:
 const STATE_COOKIE = "origin.github";
 const ADMIN_ROLES = new Set(["owner", "admin"]);
 const MINUTE = 60_000;
+const MIRROR_BATCH = 20;
 
 export interface GitHubServiceOptions {
   dataDir?: string;
@@ -107,7 +110,7 @@ async function githubProject(service: GitHubService, sessionToken: string, proje
   const credential = saved ? await service.bridge<{ credentialAllowed: boolean }>("context", { projectId, credentialOwner: saved.connectedBy }) : null;
   const token = name && credential?.credentialAllowed ? service.store.connectionToken(project._id, name) : undefined;
   const owner = service.env.legacyOwnerEmail;
-  const legacyToken = owner && user.email === owner && project.ownerEmail === owner ? service.env.legacyToken : undefined;
+  const legacyToken = owner && user.email.toLowerCase() === owner && project.ownerEmail?.toLowerCase() === owner ? service.env.legacyToken : undefined;
   const workspace = project.teamId ? await convex.query("integrations:status", { sessionToken, teamId: project.teamId }) as { connectedBy: string | null } : null;
   const workspaceToken = !token && project.githubWorkspaceAccess && workspace?.connectedBy && project.teamId ? await workspaceGitHubToken(service, project.teamId, workspace.connectedBy) : undefined;
   return { project, user, token: token || workspaceToken || legacyToken, repo: name };
@@ -236,12 +239,15 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         if (!ADMIN_ROLES.has(user.workspaceRole)) return json(res, 403, { error: "A workspace admin must create the repository" });
         const projectId = query("projectId");
         if (!projectId) throw new Error("Project required");
+        const requested = JSON.parse(await readBoundedText(req, 2_000) || "{}") as Args;
+        const name = typeof requested.name === "string" ? requested.name.trim() : undefined;
+        if (name !== undefined && !isRepositoryName(name)) throw new Error("Use a repository name of up to 100 letters, digits, dots, dashes or underscores");
         const project = await service.convex().query("projects:get", { sessionToken, projectId }) as Project;
         if (project.teamId !== user.teamId) return json(res, 404, { error: "Project not found" });
         if (project.repoUrl) return json(res, 200, { state: "ready", repoUrl: project.repoUrl });
         if (!store.workspaceInfo(user.teamId)) return json(res, 409, { error: "Connect GitHub to this workspace first" });
         store.limit(`github-create-repo:${user._id}`, 10, MINUTE);
-        const result = await createProjectRepository(service, projectId, true);
+        const result = await createProjectRepository(service, projectId, true, name);
         const status = { error: 400, awaiting_connection: 409, working: 202, ready: 200 }[result.state];
         return json(res, status, result);
       } catch (error) { return failure(res, json, error, "Request failed"); }
@@ -253,6 +259,54 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         store.limit(`github-read:${user._id}`, 60, MINUTE);
         return json(res, 200, await readRepository(service, project.repoUrl, token));
       } catch (error) { return failure(res, json, error, "Request failed"); }
+    }
+
+    if (path === "/api/github/repos" && method === "GET") {
+      try {
+        const sessionToken = originSession(req);
+        const user = await requireWorkspace(service, sessionToken, query("teamId") ?? "");
+        if (!ADMIN_ROLES.has(user.workspaceRole)) return json(res, 403, { error: "A workspace admin chooses the repository" });
+        const status = await service.convex().query("integrations:status", { sessionToken, teamId: user.teamId }) as { connectedBy: string | null; login: string | null };
+        const token = status.connectedBy ? await workspaceGitHubToken(service, user.teamId, status.connectedBy) : undefined;
+        if (!token) return json(res, 409, { error: "Connect GitHub to this workspace first" });
+        store.limit(`github-read:${user._id}`, 60, MINUTE);
+        const rows = await githubRequest<{ full_name: string; html_url: string; private: boolean }[]>(service, "/user/repos?per_page=100&sort=updated&affiliation=owner,collaborator,organization_member", token);
+        return json(res, 200, { login: status.login, repositories: rows.map((row) => ({ fullName: row.full_name, url: row.html_url, private: row.private })) });
+      } catch (error) { return failure(res, json, error, "Could not list repositories"); }
+    }
+
+    if (path === "/api/github/mirror" && method === "POST") {
+      try {
+        const body = JSON.parse(await readBoundedText(req, 20_000) || "{}") as Args;
+        if (typeof body.projectId !== "string") throw new Error("Project required");
+        const sessionToken = originSession(req, body);
+        const { user, project } = await githubProject(service, sessionToken, body.projectId, true);
+        if (!project.repoUrl) return json(res, 200, { results: [] });
+        store.limit(`github-mirror:${user._id}`, 12, MINUTE);
+        const board = await service.convex().query("tasks:board", { sessionToken, projectId: project._id }) as { tasks: { _id: string; done: boolean; githubIssueNumber?: number }[] };
+        const wanted = Array.isArray(body.taskIds) ? new Set(body.taskIds.filter((id): id is string => typeof id === "string")) : null;
+        const taskIds = board.tasks.filter((task) => !task.done && !task.githubIssueNumber && (!wanted || wanted.has(task._id))).slice(0, MIRROR_BATCH).map((task) => task._id);
+        return json(res, 200, { results: await mirrorTasks(service, project._id, taskIds) });
+      } catch (error) { return failure(res, json, error, "GitHub issue mirroring failed"); }
+    }
+
+    if (path === "/api/github/pull-requests/review" && method === "POST") {
+      try {
+        const body = JSON.parse(await readBoundedText(req, 20_000)) as Args;
+        if (typeof body.projectId !== "string" || !Number.isSafeInteger(body.number) || Number(body.number) < 1) throw new Error("Project and pull request required");
+        if (body.action !== "approve" && body.action !== "merge") throw new Error("action must be approve or merge");
+        const sessionToken = originSession(req, body);
+        const { user, project } = await githubProject(service, sessionToken, body.projectId, true);
+        if (!ADMIN_ROLES.has(project.memberRole ?? "")) return json(res, 403, { error: "A project admin approves and merges pull requests" });
+        store.limit(`github-review:${user._id}`, 20, MINUTE);
+        const number = Number(body.number);
+        const comment = typeof body.body === "string" ? body.body.slice(0, 4_000) : "";
+        const headSha = typeof body.headSha === "string" ? body.headSha : undefined;
+        const result = await withProjectGitHub<object>(service, project._id, (token, repoUrl) => body.action === "approve"
+          ? approvePullRequest(service, repoUrl, number, token, comment || "Approved in Origin.")
+          : mergePullRequest(service, repoUrl, number, token, headSha).then(({ sha }) => ({ merged: true, sha })));
+        return json(res, 200, result);
+      } catch (error) { return failure(res, json, error, "Pull request review failed"); }
     }
 
     if (path === "/api/github/setup" && method === "POST") {
@@ -314,7 +368,6 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
 }
 
 type IssueRow = { number: number; title?: string; state?: "open" | "closed"; html_url?: string; updated_at?: string; user?: { login?: string }; pull_request?: unknown };
-type PullRow = { number: number; title?: string; state?: "open" | "closed"; merged_at?: string | null; html_url?: string; updated_at?: string; user?: { login?: string }; head?: { ref?: string } };
 type CommitRow = { sha: string; html_url: string; commit: { message: string; author?: { name?: string; date?: string } } };
 
 async function readRepository(service: GitHubService, repoUrl: string | undefined, token: string | undefined) {
@@ -322,13 +375,13 @@ async function readRepository(service: GitHubService, repoUrl: string | undefine
   if (!repo) throw new Error("Add a valid GitHub repo URL in Settings.");
   const base = `https://api.github.com/repos/${repo.owner}/${repo.repo}`;
   const options = { headers: githubHeaders(token), signal: AbortSignal.timeout(15_000) };
-  const [issuesResponse, pullsResponse, commitsResponse] = await Promise.all([
-    service.fetch(`${base}/issues?state=all&per_page=30`, options),
-    service.fetch(`${base}/pulls?state=all&per_page=20`, options),
+  const [issuesResponse, pulls, commitsResponse] = await Promise.all([
+    service.fetch(`${base}/issues?state=all&per_page=50`, options),
+    listPullRequests(service, `https://github.com/${repo.owner}/${repo.repo}`, token).catch((error: unknown) => error instanceof GitHubHttpError ? error.status : 0),
     service.fetch(`${base}/commits?per_page=30`, options),
   ]);
-  if (!issuesResponse.ok || !pullsResponse.ok) {
-    const status = !issuesResponse.ok ? issuesResponse.status : pullsResponse.status;
+  if (!issuesResponse.ok || typeof pulls === "number") {
+    const status = !issuesResponse.ok ? issuesResponse.status : Number(pulls);
     throw new Error(status === 404 ? "Repository not found or access unavailable. Check the repository URL and workspace connection in repository settings."
       : status === 401 ? "Your GitHub connection has expired. Reconnect in repository settings."
       : status === 403 ? "GitHub denied access. Check the workspace connection, organization approval or rate limits."
@@ -340,10 +393,7 @@ async function readRepository(service: GitHubService, repoUrl: string | undefine
     number: issue.number, title: issue.title || `Issue #${issue.number}`, state: issue.state === "closed" ? "closed" : "open",
     url: issue.html_url || `${web}/issues/${issue.number}`, author: issue.user?.login, updatedAt: at(issue.updated_at),
   }));
-  const pullRequests = (await pullsResponse.json() as PullRow[]).map((pr) => ({
-    number: pr.number, title: pr.title || `PR #${pr.number}`, state: pr.merged_at ? "merged" : pr.state === "closed" ? "closed" : "open",
-    url: pr.html_url || `${web}/pull/${pr.number}`, author: pr.user?.login, branch: pr.head?.ref, updatedAt: at(pr.updated_at),
-  }));
+  const pullRequests = pulls;
   const commits = commitsResponse.ok ? (await commitsResponse.json() as CommitRow[]).map((item) => ({
     sha: item.sha, url: item.html_url, message: item.commit.message.split("\n")[0], author: item.commit.author?.name || "GitHub", committedAt: at(item.commit.author?.date),
   })) : [];
@@ -491,6 +541,7 @@ async function tick(service: GitHubService, req: IncomingMessage, res: ServerRes
       await Promise.all([
         ...(pending.length ? [createProjectRepository(service, pending[0])] : []),
         syncGitHubPage(service), syncPRPage(service), ...tickJobs.map((job) => Promise.resolve().then(job)),
+        mirrorUnlinkedPage(service).catch((error: unknown) => console.warn("GitHub issue mirroring skipped", error instanceof Error ? error.message : error)),
       ]);
     } finally { service.store.saveJob("sync-lock", "done"); }
   })());

@@ -8,6 +8,7 @@ export interface AvatarLook { look?: "mascot" | "dot"; color?: string; face?: st
 export const ZAP_SWATCHES = ["#C8FF00", "#FF5FCB", "#4DA3FF", "#FFB020", "#A78BFA", "#2EE6C9", "#FF6A3D", "#FFE14D", "#7C9CFF", "#FF8FAB", "#9BE7FF", "#F2F2EF"] as const;
 
 const NONE: AvatarLook = {};
+const NONE_MAP: Record<string, AvatarLook> = {};
 let looks: Record<string, AvatarLook> = {};
 let loading: Promise<void> | null = null;
 const listeners = new Set<() => void>();
@@ -28,6 +29,10 @@ function subscribe(listener: () => void) {
 
 export function useAvatarLook(botId: string | undefined): AvatarLook {
   return useSyncExternalStore(subscribe, () => (botId && looks[botId]) || NONE, () => NONE);
+}
+
+export function useAvatarLooks(): Readonly<Record<string, AvatarLook>> {
+  return useSyncExternalStore(subscribe, () => looks, () => NONE_MAP);
 }
 
 export async function setAvatarLook(botId: string, patch: { look?: "mascot" | "dot"; color?: string | null; face?: string | null }) {

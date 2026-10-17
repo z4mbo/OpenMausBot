@@ -6,10 +6,11 @@ import { createConfiguredBot, preparedBotTemplate } from "@/lib/create-configure
 import { NEW_PROJECT_DIALOG, PROJECT_LEAD_ROLE, createDefaultTeam } from "@/lib/origin-teams";
 import { activeWorkspaceId } from "@/lib/origin-workspaces";
 import { linkCloudRecord } from "@/lib/origin-cloud-links";
-import { createOriginProject, type ProjectAccess } from "@/lib/origin-project-access";
+import { createOriginProject, type ProjectAccess, type RepositoryChoice } from "@/lib/origin-project-access";
 import { exclusiveWithSync, requestOriginSync } from "@/lib/origin-sync";
 import { useActiveOriginWorkspace, useCanCreateProject, useWorkspacePeople } from "@/lib/use-origin-workspace";
 import { ProjectAccessPicker } from "./origin-members/ProjectAccessPicker";
+import { RepositoryPicker, repositoryChoiceReady } from "./origin-members/RepositoryPicker";
 import { STANDALONE_SECTION } from "../../shared/origin-workspaces";
 import { BOT_ROLES, roleProfilePatch } from "@/lib/bot-roles";
 import { chosenPreset, presetDraftPatch, presetGroups, presetPictureFile, presetSummaryLines, type BotPreset } from "@/lib/bot-presets";
@@ -95,6 +96,8 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
   const originWorkspace = useActiveOriginWorkspace();
   const cloudTeamId = NEW_PROJECT_DIALOG && !defaultsMode && section === undefined ? originWorkspace.teamId : null;
   const [projectAccess, setProjectAccess] = useState<ProjectAccess>({ mode: "everyone", emails: [] });
+  const [repository, setRepository] = useState<RepositoryChoice>({ mode: "new", name: null });
+  const [progress, setProgress] = useState("");
   const choosesVisibility = !defaultsMode && !cloudTeamId && typeof window !== "undefined" && !window.ogb && ownerOrAdmin === true;
   const dialog = useRef<HTMLDivElement>(null);
   const closeRef = useRef(() => {});
@@ -166,7 +169,9 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
           return created;
         };
         const { bot, warnings } = cloudTeamId ? await exclusiveWithSync(async () => {
-          const cloudProject = await createOriginProject({ teamId: cloudTeamId, name: draft.bot.name, access: projectAccess, members: workspacePeople.members ?? [], myEmail: workspacePeople.myEmail });
+          setProgress(repository.mode === "new" ? "Creating the project and its GitHub repository…" : "Creating the project…");
+          const cloudProject = await createOriginProject({ teamId: cloudTeamId, name: draft.bot.name, access: projectAccess, members: workspacePeople.members ?? [], myEmail: workspacePeople.myEmail, repository });
+          setProgress("");
           let created: Awaited<ReturnType<typeof createLocal>>;
           try { created = await createLocal(); }
           catch (cause) {
@@ -175,6 +180,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
           }
           await linkCloudRecord({ projects: { [created.bot.id]: cloudProject.projectId } });
           if (cloudProject.missed.length) created.warnings.push(`Project created, but access could not be granted to ${cloudProject.missed.join(", ")}. Change it in the project's settings.`);
+          if (cloudProject.repository.state === "error") created.warnings.push(`Project created, but its GitHub repository was not: ${cloudProject.repository.error} Retry from the project's Settings.`);
           return created;
         }) : await createLocal();
         if (warnings.length) parent.dispatch({ type: "error", message: warnings.join("\n") });
@@ -185,6 +191,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
     } catch (cause) { if (alive.current) setError(cause instanceof Error ? cause.message : String(cause)); }
     finally {
       savingRef.current = false;
+      setProgress("");
       parent.dispatch({ type: "botCreationPending", on: false });
       if (alive.current) setSaving(false);
     }
@@ -206,8 +213,12 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
   };
   const projectDialog = NEW_PROJECT_DIALOG && section === undefined;
   if (cloudTeamId && canCreateProject === false) return <ProjectsNeedAdmin onClose={() => closeRef.current()} />;
-  const accessIncomplete = Boolean(cloudTeamId) && (canCreateProject === undefined || workspacePeople.members === undefined || (projectAccess.mode === "people" && projectAccess.emails.length === 0));
-  const accessPicker = cloudTeamId ? <ProjectAccessPicker members={workspacePeople.members} myEmail={workspacePeople.myEmail} value={projectAccess} onChange={setProjectAccess} disabled={saving} /> : null;
+  const accessIncomplete = Boolean(cloudTeamId) && (canCreateProject === undefined || workspacePeople.members === undefined || (projectAccess.mode === "people" && projectAccess.emails.length === 0)
+    || !repositoryChoiceReady(repository, bot.name));
+  const accessPicker = cloudTeamId ? <>
+    <ProjectAccessPicker members={workspacePeople.members} myEmail={workspacePeople.myEmail} value={projectAccess} onChange={setProjectAccess} disabled={saving} />
+    <RepositoryPicker teamId={cloudTeamId} projectName={bot.name} value={repository} onChange={setRepository} disabled={saving} />
+  </> : null;
   const title = defaultsMode ? t("newBot.defaults") : projectDialog ? "New project" : section === STANDALONE_SECTION ? "New agent" : t("sidebar.newBot");
   return <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-3 sm:p-5">
     <div ref={dialog} role="dialog" aria-modal="true" aria-label={title} aria-busy={saving} tabIndex={-1}
@@ -258,6 +269,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
         </div>
       </div>
       {error && <p role="alert" className="max-h-24 overflow-y-auto border-t border-hairline/40 px-5 py-3 text-[13px] text-danger">{error}</p>}
+      {progress && !error && <p role="status" className="flex items-center gap-2 border-t border-hairline/40 px-5 py-3 text-[13px] text-ink-secondary motion-safe:animate-pop-in"><Loader2 size={14} className="animate-spin" />{progress}</p>}
       <div className="flex shrink-0 justify-end gap-2 border-t border-hairline/40 px-5 py-3">
         <button type="button" onClick={() => closeRef.current()} className="rounded-lg px-4 py-2 text-[13px] text-ink-secondary hover:bg-control">{t("common.cancel")}</button>
         <button type="button" disabled={!ready || saving || accessIncomplete || (!defaultsMode && !bot.name.trim())} onClick={() => void save()}

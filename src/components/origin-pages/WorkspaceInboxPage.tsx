@@ -4,11 +4,8 @@ import {
 } from "lucide-react";
 import { cloudMutation, useCloudPages, useCloudQuery, type CloudProject } from "@/lib/origin-cloud";
 import { useWorkspaceMembers } from "@/lib/origin-members";
-import { useCloudLinks } from "@/lib/origin-cloud-links";
-import { setChiefSectionOf, type ChiefSection } from "@/lib/origin-chief-section";
+import { useOpenOriginIssue } from "@/lib/origin-issue-focus";
 import { openOriginPage } from "@/lib/origin-pages";
-import { useShowThreads } from "@/lib/thread-preferences";
-import { openBot, useStore } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import type { Priority } from "./cloud-types";
@@ -35,22 +32,6 @@ function localDay(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-/** Opens a cloud project in this app when one of its projects is linked to it. */
-function useOpenCloudProject(): (projectId: string, section?: ChiefSection) => boolean {
-  const { state, dispatch } = useStore();
-  const { projects } = useCloudLinks();
-  const showThreads = useShowThreads();
-  return (projectId, section = "issues") => {
-    const botId = Object.entries(projects).find(([, cloudId]) => cloudId === projectId)?.[0];
-    const bot = botId ? state.bots.find((candidate) => candidate.id === botId) : undefined;
-    if (!bot) return false;
-    setChiefSectionOf(bot.id, section);
-    openBot(dispatch, bot, showThreads);
-    openOriginPage(null);
-    return true;
-  };
-}
-
 function matches(task: { title: string; projectName: string; assignedToName?: string }, search: string): boolean {
   return `${task.title} ${task.projectName} ${task.assignedToName ?? ""}`.toLowerCase().includes(search.trim().toLowerCase());
 }
@@ -60,10 +41,10 @@ export function WorkspaceInbox({ teamId, canEdit }: WorkspaceContext) {
   const [filters, setFilters] = useState<Filters>({ mine: true, done: false, project: "", priority: "", search: "" });
   const [notice, setNotice] = useState("");
   const projects = useCloudQuery<CloudProject[]>("projects:listForUser", { teamId });
-  const openProject = useOpenCloudProject();
+  const openIssue = useOpenOriginIssue();
   const patch = (next: Partial<Filters>) => setFilters((current) => ({ ...current, ...next }));
-  const open = (projectId: string) => {
-    if (!openProject(projectId)) setNotice("That project has not reached this computer yet. It opens here after the next sync.");
+  const open = (projectId: string, issueId: string) => {
+    if (!openIssue({ projectId, issueId })) setNotice("That project has not reached this computer yet. It opens here after the next sync.");
   };
   const hasFilters = Boolean(filters.project || filters.priority || filters.search);
 
@@ -103,7 +84,7 @@ export function WorkspaceInbox({ teamId, canEdit }: WorkspaceContext) {
   );
 }
 
-function Notifications({ teamId, onOpenTask, onError }: { teamId: string; onOpenTask(projectId: string): void; onError(message: string): void }) {
+function Notifications({ teamId, onOpenTask, onError }: { teamId: string; onOpenTask(projectId: string, issueId: string): void; onError(message: string): void }) {
   const summary = useCloudQuery<{ unread: number; more: boolean }>("notifications:summary", { teamId });
   const [openState, setOpenState] = useState<boolean | null>(null);
   const [unreadOnly, setUnreadOnly] = useState(true);
@@ -141,7 +122,7 @@ function Notifications({ teamId, onOpenTask, onError }: { teamId: string; onOpen
                 <button type="button" className="min-w-0 flex-1 text-left" onClick={() => {
                   act(mark(row._id, true), "Could not open the notification");
                   if (row.messageId) openOriginPage("chat");
-                  else if (row.available && row.projectId) onOpenTask(row.projectId);
+                  else if (row.available && row.projectId && row.taskId) onOpenTask(row.projectId, row.taskId);
                 }}>
                   <span className="flex items-center gap-1.5 text-[13px] text-ink">
                     <PersonAvatar person={{ name: row.actorName, email: row.actorName, avatarUrl: row.actorAvatar }} size={18} />
@@ -184,7 +165,7 @@ function Snooze({ onSnooze }: { onSnooze(delay: number): void }) {
     <div className="relative">
       <button type="button" className={iconButton} aria-label="Snooze notification" title="Snooze" aria-expanded={open} onClick={() => setOpen(!open)}><Clock3 size={14} /></button>
       {open && (
-        <div role="menu" className="absolute right-0 top-8 z-20 flex w-36 flex-col rounded-lg border border-hairline/60 bg-menu p-1 shadow-xl">
+        <div role="menu" className="absolute right-0 top-8 z-20 flex w-36 flex-col rounded-lg border border-hairline/60 bg-menu p-1">
           {SNOOZE_OPTIONS.map((option) => (
             <button key={option.delay} type="button" role="menuitem" className="rounded-md px-2 py-1.5 text-left text-[12.5px] text-ink hover:bg-raised"
               onClick={() => { setOpen(false); onSnooze(option.delay); }}>{option.label}</button>
@@ -195,7 +176,7 @@ function Snooze({ onSnooze }: { onSnooze(delay: number): void }) {
   );
 }
 
-type ViewProps = { teamId: string; filters: Filters; canEdit: boolean; onOpen(projectId: string): void; onError(message: string): void };
+type ViewProps = { teamId: string; filters: Filters; canEdit: boolean; onOpen(projectId: string, issueId: string): void; onError(message: string): void };
 
 function IssueList({ teamId, filters, canEdit, onOpen, onError, hasFilters }: ViewProps & { hasFilters: boolean }) {
   const members = useWorkspaceMembers(teamId);
@@ -233,7 +214,7 @@ function IssueList({ teamId, filters, canEdit, onOpen, onError, hasFilters }: Vi
                   aria-label={`${task.done ? "Reopen" : "Complete"} ${task.title}`} title={task.done ? "Reopen issue" : "Complete issue"} onClick={() => void toggle(task)}>
                   {pending === task._id ? <Loader2 size={15} className="animate-spin" /> : task.done ? <CheckCircle2 size={15} className="text-success" /> : <Circle size={15} />}
                 </button>
-                <button type="button" className="min-w-0 flex-1 truncate text-left text-[13.5px] text-ink hover:underline" onClick={() => onOpen(task.projectId)}>
+                <button type="button" className="min-w-0 flex-1 truncate text-left text-[13.5px] text-ink hover:underline" onClick={() => onOpen(task.projectId, task._id)}>
                   {task.title}{task.githubIssueNumber ? <span className="ml-1.5 text-[12px] text-ink-tertiary">#{task.githubIssueNumber}</span> : null}
                 </button>
                 <span className="hidden max-w-[160px] truncate text-[12px] text-ink-secondary sm:inline">{task.projectName}</span>
@@ -357,7 +338,7 @@ function IssueCalendar({ teamId, filters, canEdit, onOpen, onError }: ViewProps)
                 </time>
                 {tasks.map((task) => (
                   <button key={task._id} type="button" title={task.title} draggable={canEdit && !pending}
-                    onDragStart={(event) => event.dataTransfer.setData(ISSUE_DRAG_TYPE, task._id)} onClick={() => onOpen(task.projectId)}
+                    onDragStart={(event) => event.dataTransfer.setData(ISSUE_DRAG_TYPE, task._id)} onClick={() => onOpen(task.projectId, task._id)}
                     className={cn("flex items-start gap-1 rounded-md bg-raised/60 px-1.5 py-1 text-left hover:bg-raised", task.done && "opacity-60")}>
                     {task.done ? <CheckCircle2 size={12} className="mt-0.5 shrink-0 text-success" /> : <Circle size={12} className={cn("mt-0.5 shrink-0", priorityTone[task.priority])} />}
                     <span className="min-w-0">

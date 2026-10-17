@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { CalendarDays, Check, ChevronDown, Circle, Search, SignalHigh, SignalLow, SignalMedium, X } from "lucide-react";
+import { Bot as BotIcon, CalendarDays, Check, ChevronDown, Circle, Search, SignalHigh, SignalLow, SignalMedium, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { CloudColumn, CloudPerson, Priority } from "./cloud-types";
+import { CenteredDialog } from "../CenteredDialog";
 import { chipButton } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
 
@@ -30,11 +31,10 @@ export function laneTone(title: string): string {
   return "text-ink-secondary";
 }
 
-export function parseLabels(value: string): string[] {
-  return [...new Set(value.split(",").map((label) => label.trim()).filter(Boolean))].slice(0, 20);
-}
+/** The height a chip's open list needs below it before it opens upward instead. */
+const MENU_ROOM = 340;
 
-export type ChipOption = { value: string; label: string; icon?: ReactNode; hint?: string };
+export type ChipOption ={ value: string; label: string; icon?: ReactNode; hint?: string };
 
 /** A pill that opens a searchable, keyboard-driven list, like the Origin issue composer's property chips. */
 export function ChipSelect({ label, value, options, onChange, icon, disabled, placeholder, className, align = "left" }: {
@@ -46,11 +46,19 @@ export function ChipSelect({ label, value, options, onChange, icon, disabled, pl
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  const [upward, setUpward] = useState(false);
   const selected = options.find((option) => option.value === value);
   const matches = options.filter((option) => `${option.label} ${option.hint ?? ""}`.toLowerCase().includes(query.trim().toLowerCase()));
   const close = (restore = true) => { setOpen(false); if (restore) trigger.current?.focus({ preventScroll: true }); };
   const choose = (option: ChipOption) => { onChange(option.value); close(); };
-  const show = () => { setQuery(""); setActive(Math.max(0, options.findIndex((option) => option.value === value))); setOpen(true); };
+  const show = () => {
+    const box = trigger.current?.getBoundingClientRect();
+    const below = box ? window.innerHeight - box.bottom : Infinity;
+    setUpward(box !== undefined && below < MENU_ROOM && box.top > below);
+    setQuery("");
+    setActive(Math.max(0, options.findIndex((option) => option.value === value)));
+    setOpen(true);
+  };
   useEffect(() => {
     if (!open) return;
     const dismiss = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) close(false); };
@@ -77,7 +85,7 @@ export function ChipSelect({ label, value, options, onChange, icon, disabled, pl
         <ChevronDown size={12} className="shrink-0 opacity-60" aria-hidden="true" />
       </button>
       {open && (
-        <div className={cn("absolute top-full z-40 mt-1.5 w-60 overflow-hidden rounded-xl border border-hairline/60 bg-menu shadow-2xl motion-safe:animate-pop-in", align === "right" ? "right-0" : "left-0")}>
+        <div className={cn("absolute z-40 w-60 overflow-hidden rounded-xl border border-hairline/60 bg-menu motion-safe:animate-pop-in", upward ? "bottom-full mb-1.5" : "top-full mt-1.5", align === "right" ? "right-0" : "left-0")}>
           <div className="flex items-center gap-2 border-b border-hairline/40 px-3 py-2 text-ink-tertiary">
             <Search size={14} aria-hidden="true" />
             <input autoFocus className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-tertiary max-md:text-[16px]"
@@ -133,31 +141,51 @@ export type CreatedIssue = {
   projectId: string; taskId: string; title: string; description: string; priority: Priority; dueDate: string; labels: string[]; status: string; agentId?: string;
 };
 
-/** The roomy dialog the composer and the issue page share. */
-export function IssueDialog({ label, heading, onClose, children, wide }: { label: string; heading: ReactNode; onClose(): void; children: ReactNode; wide?: boolean }) {
-  const panel = useRef<HTMLDivElement>(null);
-  const close = useRef(onClose);
-  close.current = onClose;
-  useEffect(() => {
-    const returnTo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); close.current(); } };
-    window.addEventListener("keydown", onKey);
-    return () => { window.removeEventListener("keydown", onKey); returnTo?.focus({ preventScroll: true }); };
-  }, []);
+/** The box the composer and the issue page share: a heading, then the title, description and property chips. */
+export function IssueDialog({ label, heading, onClose, canClose, children }: { label: string; heading: ReactNode; onClose(): void; canClose?(): boolean; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/55 backdrop-blur-[2px] motion-safe:animate-[workspace-in_0.16s_ease-out] sm:items-start sm:p-6 md:pt-[8vh]"
-      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div ref={panel} role="dialog" aria-modal="true" aria-label={label}
-        className={cn("w-full rounded-t-2xl border border-hairline/60 bg-menu shadow-[0_24px_80px_rgb(0_0_0/0.55)] motion-safe:animate-pop-in sm:rounded-[18px]", wide ? "sm:max-w-5xl" : "sm:max-w-[860px]")}>
-        <div className="flex items-center gap-2 px-5 pb-1 pt-3.5">
+    <CenteredDialog label={label} onClose={onClose} canClose={canClose} className="sm:max-w-[780px]">
+      {(dismiss) => <>
+        <div className="flex items-center gap-2 px-6 pb-1 pt-4 max-sm:px-5">
           <div className="min-w-0 flex-1">{heading}</div>
-          <button type="button" aria-label="Close" onClick={onClose}
+          <button type="button" aria-label="Close" onClick={dismiss}
             className="flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-secondary outline-none transition-colors hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
             <X size={16} aria-hidden="true" />
           </button>
         </div>
         {children}
-      </div>
-    </div>
+      </>}
+    </CenteredDialog>
   );
 }
+
+export function ProjectDot({ name }: { name: string }) {
+  return <span aria-hidden="true" className="flex size-4 shrink-0 items-center justify-center rounded bg-accent/20 text-[9.5px] font-bold text-accent-text">{name.trim().charAt(0).toUpperCase() || "?"}</span>;
+}
+
+/** The row of property chips under an issue's title and description. */
+export function IssueChips({ children }: { children: ReactNode }) {
+  return <div className="mt-5 flex flex-wrap items-center gap-2">{children}</div>;
+}
+
+export const issueTitleClass = "w-full resize-none bg-transparent text-[24px] font-semibold leading-snug tracking-[-0.01em] text-ink outline-none [field-sizing:content] placeholder:text-ink-tertiary disabled:opacity-100 max-md:text-[20px]";
+export const issueDescriptionClass = "mt-3 min-h-[140px] w-full resize-none bg-transparent text-[14.5px] leading-relaxed text-ink-secondary outline-none [field-sizing:content] placeholder:text-ink-tertiary disabled:opacity-100 max-md:text-[16px]";
+
+/** Chips that hand an issue to one of the project's agents; with no agents listed, the host asks which one. */
+export function AgentChip({ agents, onPick, disabled, value = "", onClear }: {
+  agents: readonly IssueAgent[]; onPick(agentId?: string): void; disabled?: boolean; value?: string; onClear?(): void;
+}) {
+  if (!agents.length) {
+    return <button type="button" className={chipButton} disabled={disabled} onClick={() => onPick()}><BotIcon size={14} aria-hidden="true" />Hand to agent</button>;
+  }
+  const options: ChipOption[] = [
+    ...agents.map((agent) => ({ value: agent.id, label: agent.name, icon: agent.avatar })),
+    ...(value && onClear ? [{ value: NO_AGENT, label: "Don't hand off", icon: <X size={14} aria-hidden="true" /> }] : []),
+  ];
+  return (
+    <ChipSelect label="Hand to agent" value={value} placeholder="Hand to agent" align="right" icon={<BotIcon size={14} aria-hidden="true" />} options={options} disabled={disabled}
+      onChange={(next) => (next === NO_AGENT ? onClear?.() : onPick(next))} />
+  );
+}
+
+const NO_AGENT = "none";

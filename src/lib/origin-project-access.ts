@@ -1,5 +1,12 @@
 import { cloudMutation, cloudQueryOnce } from "@/lib/origin-cloud";
+import { originGitHub } from "@/lib/origin-github";
 import type { WorkspaceMember, WorkspaceRole } from "@/lib/origin-members";
+import { repositoryNameFor } from "../../shared/github-repo-name";
+
+/** A new project's repository: created under the workspace's GitHub connection (`name` null follows the project name), an existing one, or none yet. */
+export type RepositoryChoice = { mode: "new"; name: string | null } | { mode: "existing"; url: string } | { mode: "later" };
+
+export type RepositoryOutcome = { state: "ready"; repoUrl: string } | { state: "working" | "waiting" | "later" } | { state: "error"; error: string };
 
 /** Who sees a project besides workspace owners and admins, who always see every project. */
 export type AccessMode = "private" | "everyone" | "people";
@@ -68,11 +75,42 @@ async function applyGrants(projectId: string, add: readonly Grant[], remove: rea
   return failures;
 }
 
-/** Creates the Origin project and grants the chosen people access; returns the people the grant missed instead of failing the creation. */
-export async function createOriginProject(args: { teamId: string; name: string; access: ProjectAccess; members: readonly WorkspaceMember[]; myEmail: string }): Promise<{ projectId: string; missed: string[] }> {
-  const projectId = await cloudMutation<string>("projects:create", { teamId: args.teamId, name: args.name.trim() });
+/** An Origin backend without the `githubRepo` argument rejects it; the project is then created the older way. */
+async function createProjectRecord(teamId: string, name: string, repository: RepositoryChoice): Promise<{ projectId: string; deferred: boolean }> {
+  if (repository.mode === "existing") return { projectId: await cloudMutation<string>("projects:create", { teamId, name, repoUrl: repository.url }), deferred: false };
+  try {
+    return { projectId: await cloudMutation<string>("projects:create", { teamId, name, githubRepo: "later" }), deferred: true };
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes("githubRepo")) throw error;
+    return { projectId: await cloudMutation<string>("projects:create", { teamId, name }), deferred: false };
+  }
+}
+
+async function createRepository(teamId: string, projectId: string, name: string): Promise<RepositoryOutcome> {
+  try {
+    const result = await originGitHub.createRepository(teamId, projectId, name);
+    if (result.state === "ready" && result.repoUrl) return { state: "ready", repoUrl: result.repoUrl };
+    if (result.state === "error") return { state: "error", error: result.error ?? "Repository creation failed" };
+    return { state: result.state === "working" ? "working" : "waiting" };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!/connect github/i.test(message)) return { state: "error", error: message };
+    await cloudMutation("integrations:retryRepo", { projectId }).catch(() => undefined);
+    return { state: "waiting" };
+  }
+}
+
+/** Creates the Origin project, its repository and grants the chosen people access; a missed grant or repository is reported, not thrown. */
+export async function createOriginProject(args: { teamId: string; name: string; access: ProjectAccess; members: readonly WorkspaceMember[]; myEmail: string; repository?: RepositoryChoice }): Promise<{ projectId: string; missed: string[]; repository: RepositoryOutcome }> {
+  const name = args.name.trim();
+  const choice = args.repository ?? { mode: "new", name: null };
+  const { projectId, deferred } = await createProjectRecord(args.teamId, name, choice);
   const missed = await applyGrants(projectId, grantsFor(args.access, args.members, args.myEmail), []);
-  return { projectId, missed };
+  const repository: RepositoryOutcome = choice.mode === "existing" ? { state: "ready", repoUrl: choice.url }
+    : choice.mode === "later" ? { state: "later" }
+    : deferred ? await createRepository(args.teamId, projectId, choice.name ?? repositoryNameFor(name))
+    : { state: "waiting" };
+  return { projectId, missed, repository };
 }
 
 export async function updateProjectAccess(args: { projectId: string; access: ProjectAccess; members: readonly WorkspaceMember[]; myEmail: string }): Promise<void> {

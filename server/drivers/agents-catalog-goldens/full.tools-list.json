@@ -1944,7 +1944,7 @@
     },
     {
       "name": "origin_complete_issue",
-      "description": "Finish your work on an Origin issue: comments the summary and pull request link, then moves it to review (stage review, while the pull request waits) or marks it done (default). The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Finish your work on an Origin issue: links your pull request to its GitHub issue (adds \"Closes #n\"), comments the summary, moves it to review and asks the project's Chief to review and merge. The issue is done only when the pull request merges; never mark it done yourself. In a project with a GitHub repository, pull_request_url is required. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1963,15 +1963,8 @@
           },
           "pull_request_url": {
             "type": "string",
-            "maxLength": 500
-          },
-          "stage": {
-            "type": "string",
-            "enum": [
-              "review",
-              "done"
-            ],
-            "description": "Default done."
+            "maxLength": 500,
+            "description": "https://github.com/<owner>/<repo>/pull/<number> in the project's repository."
           },
           "project": {
             "type": "string",
@@ -1982,6 +1975,69 @@
         "required": [
           "issue_id",
           "summary"
+        ]
+      }
+    },
+    {
+      "name": "origin_review_pr",
+      "description": "As a project's Chief, review its pull requests: list the open ones (checks, review, the issues each closes), read one (changed files, checks, whether it can merge), or approve it with a review comment. Merge with origin_merge_pr. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "list",
+              "read",
+              "approve"
+            ],
+            "description": "Default list."
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Pull request number, for read and approve."
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 4000,
+            "description": "Review comment for approve."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      }
+    },
+    {
+      "name": "origin_merge_pr",
+      "description": "As a project's Chief, merge a reviewed pull request into the default branch once its checks pass. Irreversible, always asks the person first, and completes the issues it closes. Read it with origin_review_pr first and pass the head_sha it reports. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Pull request number."
+          },
+          "head_sha": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "The head SHA origin_review_pr read reported, so a newer push is not merged unseen."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "number",
+          "head_sha"
         ]
       }
     },
@@ -2079,11 +2135,126 @@
     },
     {
       "name": "origin_repo_status",
-      "description": "Show an Origin project's repository: URL, open pull requests with checks and review, and recent commits. Acts on your team's Origin project unless you pass project.",
+      "description": "Show an Origin project's repository: URL, clone command and default branch, the project's folder on this computer (empty, or the branch checked out), open pull requests with checks and review, and recent commits. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_team_chat",
+      "description": "Read the latest messages of an Origin project's team chat, where its members and agents talk. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Default 20."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_team_chat_post",
+      "description": "Post a message in an Origin project's team chat under your own name, for the project's members to read. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "description": "Markdown."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "text"
+        ]
+      }
+    },
+    {
+      "name": "origin_feedback",
+      "description": "List the feedback an Origin project's users sent through its public portal (bugs and ideas), or read one item in full with entry_id. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "new",
+              "planned",
+              "completed",
+              "dismissed",
+              "all"
+            ],
+            "description": "Default open (new and planned)."
+          },
+          "entry_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Feedback id from the list, to read it in full."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_draw",
+      "description": "List an Origin project's Draw canvases, or read one: its element counts, the text on it top to bottom, and its links. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "canvas": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Canvas name or id; omit to list them."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,

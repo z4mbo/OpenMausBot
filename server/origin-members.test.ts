@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { releases } from "../shared/origin-releases.ts";
 import { json, readBody } from "./harness/http.ts";
+import { createCallAgents, DEFAULT_CALL_AGENT_SETTINGS, type CallAgents } from "./origin-call-agent.ts";
 import type { OriginCloudClient } from "./origin-cloud.ts";
 import { createOriginMemberRoutes, turnIceServers } from "./origin-members.ts";
 import { openRealtimeStore, type MentionNotice } from "./origin-realtime-store.ts";
@@ -57,7 +58,7 @@ function fakeConvex(): OriginCloudClient {
   return { query: answer, mutation: answer };
 }
 
-async function start(options: { notices?: MentionNotice[] } = {}) {
+async function start(options: { notices?: MentionNotice[]; delayMs?: number; callAgents?: CallAgents } = {}) {
   const folder = mkdtempSync(join(tmpdir(), "omb-origin-members-"));
   folders.push(folder);
   const store = openRealtimeStore(join(folder, "realtime.sqlite"));
@@ -68,7 +69,11 @@ async function start(options: { notices?: MentionNotice[] } = {}) {
     convex: () => convex,
     filesDir: join(folder, "files"),
     turn: () => ({ host: "turn.example", secret: "turn-secret" }),
-    notifyMentions: options.notices ? async (notice) => { options.notices!.push(notice); } : null,
+    notifyMentions: options.notices ? async (notice) => {
+      if (options.delayMs) await new Promise((done) => setTimeout(done, options.delayMs));
+      options.notices!.push(notice);
+    } : null,
+    ...(options.callAgents ? { callAgents: options.callAgents } : {}),
   });
   const server = createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
@@ -141,6 +146,34 @@ describe("origin member calls", () => {
     const viewer = await call("tok-cy", "POST", `/api/local-voice/participants?teamId=${TEAM}&room=${PROJECT}`, { action: "join" });
     expect(viewer).toEqual({ status: 400, body: { error: "View-only workspace access" } });
   });
+
+  it("brings the project's chief into the call for people in it, with captions and audio that is never kept", async () => {
+    const heard: number[] = [];
+    const callAgents = createCallAgents({
+      bot: (botId) => (botId === "chief" ? { id: "chief", name: "GGs" } : null),
+      allowed: ({ botId, room }) => botId === "chief" && room === PROJECT,
+      ask: async () => "On it.",
+      summarize: async () => "{}",
+      post: () => {},
+      transcribe: async ({ audio }) => { heard.push(audio.length); return "hello team"; },
+      settings: () => DEFAULT_CALL_AGENT_SETTINGS,
+    });
+    const { base, call } = await start({ callAgents });
+    const room = `teamId=${TEAM}&room=${PROJECT}`;
+    expect((await call("tok-ana", "POST", `/api/local-voice/agent?${room}`, { action: "join", botId: "chief" })).body).toEqual({ error: "Join the call first" });
+    await call("tok-ana", "POST", `/api/local-voice/participants?${room}`, { action: "join", audioEnabled: true });
+    expect((await call("tok-ana", "POST", `/api/local-voice/agent?teamId=${TEAM}`, { action: "join", botId: "chief" })).status).toBe(400);
+    const joined = await call("tok-ana", "POST", `/api/local-voice/agent?${room}`, { action: "join", botId: "chief" });
+    expect(joined.body.agent).toMatchObject({ name: "GGs", state: "listening" });
+    const audio = await fetch(`${base}/api/local-voice/agent-audio?${room}&mime=audio%2Fwebm`, { method: "POST", headers: { "x-origin-session": "tok-ana" }, body: new Uint8Array(64) });
+    expect(((await audio.json()) as { line: unknown }).line).toMatchObject({ speaker: "Ana", text: "hello team" });
+    expect(heard).toEqual([64]);
+    const seen = await call("tok-bo", "GET", `/api/local-voice/agent?${room}`);
+    expect(seen.body.agent.name).toBe("GGs");
+    expect(seen.body.lines.map((line: { text: string }) => line.text)).toEqual(["hello team"]);
+    expect((await call("tok-bo", "POST", `/api/local-voice/agent?${room}`, { action: "line", text: "hi" })).body).toEqual({ error: "Join the call first" });
+    expect((await call(null, "GET", `/api/local-voice/agent?${room}`)).status).toBe(401);
+  });
 });
 
 describe("origin member chat", () => {
@@ -165,6 +198,16 @@ describe("origin member chat", () => {
     expect((await call("tok-bo", "GET", `/api/local-chat/messages?${channel}&search=edit`)).body.messages).toHaveLength(1);
     expect((await call("tok-ana", "PATCH", `/api/local-chat/messages?${channel}`, { id, delete: true })).body.message).toBeNull();
     expect((await call("tok-ana", "POST", `/api/local-chat/messages?${channel}`, { body: "hi", mentionUserIds: ["user00000stranger"] })).status).toBe(400);
+  });
+
+  it("delivers each queued mention once while several messages flush at the same time", async () => {
+    const notices: MentionNotice[] = [];
+    const { call } = await start({ notices, delayMs: 30 });
+    const channel = `teamId=${TEAM}&conversation=project:${PROJECT}`;
+    const mention = { mentionUserIds: [USERS["tok-bo"]!._id] };
+    const sent = await Promise.all(["one", "two", "three"].map((body) => call("tok-ana", "POST", `/api/local-chat/messages?${channel}`, { body, ...mention })));
+    await new Promise((done) => setTimeout(done, 200));
+    expect(notices.map((notice) => notice.messageId).sort()).toEqual(sent.map((answer) => answer.body.message.id).sort());
   });
 
   it("opens direct conversations only between members and counts unread", async () => {

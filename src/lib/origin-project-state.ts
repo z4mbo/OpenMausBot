@@ -95,13 +95,17 @@ export function useProjectPresence(teamId: string | null | undefined, projectId:
     };
   }, [teamId, projectId]);
 
-  return (rows ?? []).filter((row) => row.updatedAt > now - PRESENCE_WINDOW_MS);
+  const last = useRef<{ teamId: string | null | undefined; rows: ProjectViewer[] }>({ teamId, rows: [] });
+  if (last.current.teamId !== teamId) last.current = { teamId, rows: [] };
+  if (rows) last.current.rows = rows;
+  return last.current.rows.filter((row) => row.updatedAt > now - PRESENCE_WINDOW_MS);
 }
 
 export function viewersByProject(others: readonly ProjectViewer[], self: ProjectViewer | null): Map<string, ProjectViewer[]> {
   const map = new Map<string, ProjectViewer[]>();
   for (const viewer of self ? [self, ...others] : others) {
     const list = map.get(viewer.projectId) ?? [];
+    if (list.some((shown) => shown.userId === viewer.userId)) continue;
     list.push(viewer);
     map.set(viewer.projectId, list);
   }

@@ -223,7 +223,7 @@ describe("POST /api/integrations/tick", () => {
     const response = await call("/api/integrations/tick", signedTick({ at: NOW, projectId: "p1" }));
     expect(await response.json()).toEqual({ ok: true });
     expect(network.requests[0].headers.authorization).toBe("Bearer workspace-token");
-    expect(JSON.parse(network.requests[0].body)).toMatchObject({ name: "widgets-p1", private: true, description: "Origin project: p1" });
+    expect(JSON.parse(network.requests[0].body)).toMatchObject({ name: "Widgets", private: true, description: "Origin project: p1" });
     expect(network.bridgeCalls.at(-1)).toEqual({ name: "repoResult", args: { projectId: "p1", state: "ready", repoUrl: "https://github.com/octo/widgets-p1", repoId: 9 } });
   });
 
@@ -231,14 +231,14 @@ describe("POST /api/integrations/tick", () => {
     let release = () => {};
     const gate = new Promise<string[]>((resolve) => { release = () => resolve([]); });
     const { call, network, work } = await start({
-      bridge: { pending: () => gate, targets: () => ({ rows: [], nextCursor: null }), prTargets: () => ({ rows: [], nextCursor: "next" }) },
+      bridge: { pending: () => gate, targets: () => ({ rows: [], nextCursor: null }), prTargets: () => ({ rows: [], nextCursor: "next" }), unlinkedTasks: () => ({ rows: [], nextCursor: null }) },
     });
     const first = await call("/api/integrations/tick", signedTick({ at: NOW }));
     expect(first.status).toBe(202);
     expect(await (await call("/api/integrations/tick", signedTick({ at: NOW }))).json()).toEqual({ busy: true });
     release();
     await Promise.all(work);
-    expect(network.bridgeCalls.map((c) => c.name).sort()).toEqual(["pending", "prTargets", "targets"]);
+    expect(network.bridgeCalls.map((c) => c.name).sort()).toEqual(["pending", "prTargets", "targets", "unlinkedTasks"]);
     expect(network.bridgeCalls.find((c) => c.name === "prTargets")?.args).toEqual({ cursor: null, state: "draft" });
     expect((await call("/api/integrations/tick", signedTick({ at: NOW }))).status).toBe(202);
   });
@@ -413,5 +413,155 @@ describe("GET /api/github/repo", () => {
   it("needs the caller's Origin session", async () => {
     const harness = await start();
     expect(await (await harness.call("/api/github/repo?projectId=p1")).json()).toEqual({ error: "Login required" });
+  });
+});
+
+const sha40 = (char: string) => char.repeat(40);
+const pull = (overrides: Record<string, unknown> = {}) => ({
+  number: 8, title: "Add login", html_url: "https://github.com/acme/widgets/pull/8", state: "open", draft: false, merged_at: null,
+  updated_at: "2026-10-16T00:00:00Z", body: "Closes #5", user: { login: "dev-bot" }, head: { ref: "feature", sha: sha40("a") }, base: { ref: "main" },
+  mergeable: true, additions: 12, deletions: 3, node_id: "PR_8", ...overrides,
+});
+const prRoutes = (overrides: { pr?: Record<string, unknown>; conclusion?: string; reviews?: unknown[] } = {}): Record<string, Route> => ({
+  "GET https://api.github.com/repos/acme/widgets/pulls/8": () => ({ body: pull(overrides.pr) }),
+  "GET https://api.github.com/repos/acme/widgets": () => ({ body: { default_branch: "main" } }),
+  "GET https://api.github.com/repos/acme/widgets/pulls/8/files": () => ({ body: [{ filename: "src/login.ts", status: "modified", additions: 12, deletions: 3 }] }),
+  [`GET https://api.github.com/repos/acme/widgets/commits/${sha40("a")}/check-runs`]: () => ({ body: { total_count: 1, check_runs: [{ name: "ci", status: "completed", conclusion: overrides.conclusion ?? "success" }] } }),
+  "GET https://api.github.com/repos/acme/widgets/pulls/8/reviews": () => ({ body: overrides.reviews ?? [] }),
+});
+
+describe("issue mirroring and two-way state", () => {
+  const linked = (task: Record<string, unknown>) => context({ task: { _id: "t1", title: "Login", done: false, githubIssueNumber: 5, githubIssueUrl: "https://github.com/acme/widgets/issues/5", ...task } });
+  const tickWith = async (task: Record<string, unknown>, remote: "open" | "closed") => {
+    const harness = await start({
+      bridge: {
+        pending: () => [], prTargets: () => ({ rows: [], nextCursor: null }), unlinkedTasks: () => ({ rows: [], nextCursor: null }),
+        targets: () => ({ rows: [{ projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", number: 5 }], nextCursor: null }),
+        context: () => linked(task), linkIssue: () => null,
+      },
+      github: {
+        "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, html_url: "https://github.com/acme/widgets/issues/5", state: remote, updated_at: "2026-10-16T00:00:00Z" } }),
+        "PATCH https://api.github.com/repos/acme/widgets/issues/5": ({ body }) => ({ body: { number: 5, html_url: "https://github.com/acme/widgets/issues/5", state: JSON.parse(body).state, updated_at: "2026-10-17T00:00:00Z" } }),
+      },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    await harness.call("/api/integrations/tick", signedTick({ at: NOW }));
+    await Promise.all(harness.work);
+    return harness;
+  };
+
+  it("closes the GitHub issue when Origin completed it since the last sync", async () => {
+    const { network } = await tickWith({ done: true, githubIssueState: "open" }, "open");
+    const patch = network.requests.find((r) => r.key.startsWith("PATCH"));
+    expect(JSON.parse(patch!.body)).toEqual({ state: "closed", state_reason: "completed" });
+    expect(network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ number: 5, state: "closed" });
+  });
+
+  it("reopens on GitHub after Origin reopened, and lets a change on GitHub win", async () => {
+    const reopened = await tickWith({ done: false, githubIssueState: "closed" }, "closed");
+    expect(JSON.parse(reopened.network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "open" });
+    const closedOnGitHub = await tickWith({ done: false, githubIssueState: "open" }, "closed");
+    expect(closedOnGitHub.network.requests.some((r) => r.key.startsWith("PATCH"))).toBe(false);
+    expect(closedOnGitHub.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ state: "closed" });
+  });
+
+  it("mirrors open issues without a GitHub issue on the tick, and on request for a project", async () => {
+    const created: unknown[] = [];
+    const harness = await start({
+      bridge: {
+        pending: () => [], prTargets: () => ({ rows: [], nextCursor: null }), targets: () => ({ rows: [], nextCursor: null }),
+        unlinkedTasks: () => ({ rows: [{ projectId: "p1", taskId: "t1" }], nextCursor: null }),
+        context: () => context({ task: { _id: "t1", title: "Login", description: "Build it", done: false } }), linkIssue: () => null,
+      },
+      github: {
+        "POST https://api.github.com/repos/acme/widgets/issues": ({ body }) => {
+          created.push(JSON.parse(body));
+          return { status: 201, body: { number: 11, html_url: "https://github.com/acme/widgets/issues/11", state: "open", updated_at: "2026-10-17T00:00:00Z" } };
+        },
+      },
+      convex: { "tasks:board": () => ({ tasks: [{ _id: "t1", done: false }, { _id: "t2", done: true }, { _id: "t3", done: false, githubIssueNumber: 4 }] }) },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    await harness.call("/api/integrations/tick", signedTick({ at: NOW }));
+    await Promise.all(harness.work);
+    expect(created).toEqual([{ title: "Login", body: "Build it\n\n<!-- origin-task:t1 -->" }]);
+    expect(harness.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ taskId: "t1", number: 11 });
+    const mirrored = await harness.call("/api/github/mirror", { method: "POST", session: "member-session", body: JSON.stringify({ projectId: "p1" }) });
+    expect(await mirrored.json()).toEqual({ results: [{ taskId: "t1", issueNumber: 11 }] });
+  });
+
+  it("tolerates an Origin backend that does not list unlinked issues yet", async () => {
+    const harness = await start({ bridge: { pending: () => [], prTargets: () => ({ rows: [], nextCursor: null }), targets: () => ({ rows: [], nextCursor: null }) } });
+    await harness.call("/api/integrations/tick", signedTick({ at: NOW }));
+    await expect(Promise.all(harness.work)).resolves.toBeDefined();
+  });
+});
+
+describe("POST /api/github/pull-requests/review", () => {
+  const review = (session: string, payload: Record<string, unknown>) => ({ method: "POST", session, body: JSON.stringify({ projectId: "p1", number: 8, ...payload }) });
+
+  it("only a project admin approves or merges", async () => {
+    const harness = await start({ bridge: { context: () => context() }, github: prRoutes() });
+    const refused = await harness.call("/api/github/pull-requests/review", review("member-session", { action: "merge" }));
+    expect(refused.status).toBe(403);
+    expect(harness.network.requests.some((r) => r.key.startsWith("PUT"))).toBe(false);
+  });
+
+  it("merges into the default branch with the project's connection once checks pass, pinned to the checked head", async () => {
+    const merges: { authorization: string; body: string }[] = [];
+    const harness = await start({
+      bridge: { context: () => context() },
+      github: { ...prRoutes(), "PUT https://api.github.com/repos/acme/widgets/pulls/8/merge": ({ body, headers }) => { merges.push({ authorization: headers.authorization, body }); return { body: { sha: sha40("c"), merged: true } }; } },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    const merged = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
+    expect(await merged.json()).toEqual({ merged: true, sha: sha40("c") });
+    expect(merges).toHaveLength(1);
+    expect(merges[0].authorization).toBe("Bearer workspace-token");
+    expect(JSON.parse(merges[0].body)).toMatchObject({ sha: sha40("a"), merge_method: "squash" });
+  });
+
+  it("refuses to merge while checks fail and never uses the legacy owner token", async () => {
+    const harness = await start({ env: { legacyToken: "legacy-token" }, bridge: { context: () => context({ legacyOwner: true }) }, github: prRoutes({ conclusion: "failure" }) });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    const refused = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
+    expect(await refused.json()).toEqual({ error: "checks on #8 are failure; merge once they pass" });
+    expect(harness.network.requests.every((r) => r.headers.authorization !== "Bearer legacy-token")).toBe(true);
+  });
+
+  it("falls back to a comment when GitHub refuses an approval from the pull request's own author", async () => {
+    const events: string[] = [];
+    const harness = await start({
+      bridge: { context: () => context() },
+      github: { "POST https://api.github.com/repos/acme/widgets/pulls/8/reviews": ({ body }) => { const event = JSON.parse(body).event as string; events.push(event); return event === "APPROVE" ? { status: 422 } : { body: {} }; } },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    const approved = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "approve", body: "Looks right." }));
+    expect(await approved.json()).toEqual({ approved: false });
+    expect(events).toEqual(["APPROVE", "COMMENT"]);
+  });
+});
+
+describe("project repositories", () => {
+  it("creates the repository under the requested name and lists the workspace connection's repositories", async () => {
+    const names: string[] = [];
+    const harness = await start({
+      convex: { "projects:get": () => ({ _id: "p1", teamId: "team1", memberRole: "admin" }) },
+      bridge: { context: () => context({ project: { ...context().project, repoUrl: undefined } }), repoResult: () => null },
+      github: {
+        "POST https://api.github.com/user/repos": ({ body }) => {
+          names.push(JSON.parse(body).name as string);
+          return { status: 201, body: { id: 9, html_url: "https://github.com/octo/My-App", description: JSON.parse(body).description, owner: { login: "octo" }, private: true } };
+        },
+        "GET https://api.github.com/user/repos": () => ({ body: [{ full_name: "octo/site", html_url: "https://github.com/octo/site", private: false }] }),
+      },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    expect((await harness.call("/api/github/repo?teamId=team1&projectId=p1", { method: "POST", session: "admin-session", body: JSON.stringify({ name: "bad name" }) })).status).toBe(400);
+    const created = await harness.call("/api/github/repo?teamId=team1&projectId=p1", { method: "POST", session: "admin-session", body: JSON.stringify({ name: "My-App" }) });
+    expect(await created.json()).toEqual({ state: "ready", repoUrl: "https://github.com/octo/My-App" });
+    expect(names).toEqual(["My-App"]);
+    expect(await (await harness.call("/api/github/repos?teamId=team1", { session: "admin-session" })).json()).toEqual({ login: "octo", repositories: [{ fullName: "octo/site", url: "https://github.com/octo/site", private: false }] });
+    expect((await harness.call("/api/github/repos?teamId=team1", { session: "member-session" })).status).toBe(403);
   });
 });

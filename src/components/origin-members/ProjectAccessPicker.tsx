@@ -47,7 +47,7 @@ export function ProjectAccessPicker({ members, myEmail, value, onChange, disable
           return (
             <label key={mode.id}
               className={cn("group relative flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-[border-color,background-color,box-shadow] duration-200",
-                selected ? "border-accent/70 bg-accent/[0.07] shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-accent)_14%,transparent)]" : "border-hairline/60 hover:border-hairline hover:bg-raised/40",
+                selected ? "border-accent/70 bg-accent/[0.07]" : "border-hairline/60 hover:border-hairline hover:bg-raised/40",
                 "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent/60")}>
               <input type="radio" name={name} value={mode.id} aria-label={mode.title} checked={selected} className="sr-only"
                 onChange={() => onChange({ mode: mode.id, emails: mode.id === "people" ? value.emails : [] })} />

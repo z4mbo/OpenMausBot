@@ -9,6 +9,7 @@ import { landOnSearchHit } from "@/lib/focus-message";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
 import { useCloudQuery } from "@/lib/origin-cloud";
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
+import { requestIssueFocus } from "@/lib/origin-issue-focus";
 import { openOriginPage, type OriginPage } from "@/lib/origin-pages";
 import { useArchivedSections } from "@/lib/origin-archived";
 import { activeWorkspace, inWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
@@ -16,6 +17,7 @@ import { isWorkspaceSection, STANDALONE_SECTION } from "../../shared/origin-work
 import { BotAvatar } from "./Avatar";
 import { ORIGIN_PAGES } from "./OriginPages";
 import { taskKey } from "./origin-pages/repo-url";
+import { CenteredDialog } from "./CenteredDialog";
 
 interface Entry {
   key: string;
@@ -155,7 +157,7 @@ export function OriginSearch({ onClose }: { onClose(): void }) {
       return [{
         key: `issue:${issue._id}`, depth: 0 as const, label: issue.title, hint: `${taskKey(issue._id)} · ${chief.name}`,
         icon: <span className={cn("flex size-[26px] items-center justify-center rounded-lg bg-raised", issue.done ? "text-success" : "text-accent")}>{issue.done ? <CheckCircle2 size={14} /> : <CircleDot size={14} />}</span>,
-        open: () => go(chief, "issues"),
+        open: () => { requestIssueFocus({ projectId: issue.projectId, issueId: issue._id }); go(chief, "issues"); },
       }];
     }) : [];
 
@@ -193,8 +195,7 @@ export function OriginSearch({ onClose }: { onClose(): void }) {
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.nativeEvent.isComposing) return;
     const step = (to: number) => { event.preventDefault(); setCursor(flat.length ? (to + flat.length) % flat.length : 0); };
-    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(); }
-    else if (event.key === "ArrowDown" || (event.key === "Tab" && !event.shiftKey) || (event.ctrlKey && event.key === "n")) step(selected + 1);
+    if (event.key === "ArrowDown" || (event.key === "Tab" && !event.shiftKey) || (event.ctrlKey && event.key === "n")) step(selected + 1);
     else if (event.key === "ArrowUp" || (event.key === "Tab" && event.shiftKey) || (event.ctrlKey && event.key === "p")) step(selected - 1);
     else if (event.key === "Home" && event.ctrlKey) step(0);
     else if (event.key === "End" && event.ctrlKey) step(flat.length - 1);
@@ -210,22 +211,26 @@ export function OriginSearch({ onClose }: { onClose(): void }) {
   const loading = Boolean(q) && (q !== slow || (teamId !== null && issueHits === undefined));
   let index = -1;
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-3 pt-[8vh] backdrop-blur-[2px] motion-safe:animate-[workspace-in_0.16s_ease-out] sm:p-6 sm:pt-[12vh]"
-      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }} onKeyDown={onKeyDown}>
-      <div role="dialog" aria-modal="true" aria-label="Search"
-        className="flex max-h-[min(560px,80vh)] w-full max-w-[640px] flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-menu shadow-2xl shadow-black/60 motion-safe:animate-pop-in">
-        <div className="flex items-center gap-3 border-b border-hairline/40 px-4 py-3">
-          <Search size={17} className={cn("shrink-0 transition-colors", q ? "text-accent" : "text-ink-secondary")} aria-hidden="true" />
+    <CenteredDialog label="Search" onClose={onClose} className="flex h-[min(620px,85dvh)] flex-col overflow-hidden sm:max-w-[720px]">
+      {(dismiss) => <div className="flex min-h-0 flex-1 flex-col"
+        onKeyDown={(event) => {
+          if (event.key !== "Escape") { onKeyDown(event); return; }
+          event.preventDefault();
+          event.stopPropagation();
+          dismiss();
+        }}>
+        <div className="flex items-center gap-3 border-b border-hairline/40 px-5 py-3.5">
+          <Search size={18} className={cn("shrink-0 transition-colors", q ? "text-accent" : "text-ink-secondary")} aria-hidden="true" />
           <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} maxLength={160}
             role="combobox" aria-expanded="true" aria-controls="origin-search-results" aria-activedescendant={active ? `origin-search-${selected}` : undefined}
             aria-label="Search projects, agents, issues and messages" placeholder="Search projects, agents, issues, messages…"
-            className="w-full bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-tertiary" />
+            className="w-full bg-transparent text-[16px] text-ink outline-none placeholder:text-ink-tertiary" />
           {loading && <span className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-ink-tertiary/40 border-t-ink-secondary" aria-hidden="true" />}
           {query ? (
             <button type="button" aria-label="Clear search" onClick={() => setQuery("")} className="flex size-6 shrink-0 items-center justify-center rounded-md text-ink-tertiary hover:bg-raised hover:text-ink"><X size={14} /></button>
           ) : <kbd className="shrink-0 rounded-md border border-hairline/40 px-1.5 py-0.5 text-[11px] text-ink-tertiary">esc</kbd>}
         </div>
-        <div ref={listRef} id="origin-search-results" role="listbox" aria-label="Search results" className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1.5">
+        <div ref={listRef} id="origin-search-results" role="listbox" aria-label="Search results" className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
           {!flat.length && (
             <div className="flex flex-col items-center gap-2 px-3 py-10 text-center">
               <FolderKanban size={22} className="text-ink-tertiary" aria-hidden="true" />
@@ -269,13 +274,13 @@ export function OriginSearch({ onClose }: { onClose(): void }) {
             </Fragment>
           ))}
         </div>
-        <div className="hidden items-center gap-4 border-t border-hairline/40 px-4 py-2 text-[11.5px] text-ink-tertiary sm:flex">
+        <div className="hidden items-center gap-4 border-t border-hairline/40 px-5 py-2.5 text-[11.5px] text-ink-tertiary sm:flex">
           <span><kbd className="font-sans">↑↓</kbd> to move</span>
           <span><kbd className="font-sans">↵</kbd> to open</span>
           <span><kbd className="font-sans">⇧↵</kbd> project issues</span>
           <span className="ml-auto"><kbd className="font-sans">esc</kbd> to close</span>
         </div>
-      </div>
-    </div>
+      </div>}
+    </CenteredDialog>
   );
 }

@@ -4,7 +4,7 @@ import { t } from "@/lib/i18n";
 import { api, useStore } from "@/state/store";
 import { inputClass, PrimaryButton, QuietButton, staggerIndex, type BeatProps } from "./shared";
 
-export function HelloBeat({ onNext, onSkip, hosted = false }: BeatProps & { hosted?: boolean }) {
+export function HelloBeat({ onNext, onSkip, hosted = false, member = false }: BeatProps & { hosted?: boolean; member?: boolean }) {
   const { dispatch } = useStore();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,11 +36,11 @@ export function HelloBeat({ onNext, onSkip, hosted = false }: BeatProps & { host
     }
   };
 
-  if (hosted) {
+  if (hosted || member) {
     return (
       <div className="stagger flex flex-col items-center">
         <p className="animate-rise mt-1.5 text-center text-[14px] leading-relaxed text-ink-secondary" style={staggerIndex(0)}>
-          {t("onboarding.hosted.intro")}
+          {t(member ? "onboarding.member.intro" : "onboarding.hosted.intro")}
         </p>
         <PrimaryButton onClick={onNext} className="animate-rise mt-5" style={staggerIndex(1)}>
           {t("onboarding.continue")}

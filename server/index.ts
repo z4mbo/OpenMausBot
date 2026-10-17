@@ -597,13 +597,19 @@ import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, ensureTeamChiefs, ensureWorkspaces, watchTemplateTeams } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
-import { createOriginCloudRoutes, ORIGIN_ASSET_MAX_BYTES } from "./origin-cloud.ts";
+import { createOriginCloudRoutes, cloudProjectFor, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
+import {
+  awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, transcribeWith,
+} from "./origin-call-agent.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
+import { createOriginAgentSupport } from "./origin-agent-support.ts";
 import { createOriginInviteRoutes, createOriginPublicRoutes } from "./origin-public-pages.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
+import { createSharedAgents, type SendDecision } from "./origin-shared-agents.ts";
 import { createOriginMemberRoutes } from "./origin-members.ts";
 import { createOriginMcpRoutes } from "./origin-mcp.ts";
 import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService } from "./routes/github.ts";
+import { originGitHub } from "./github/review.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
 import { createBotPatchRoutes } from "./routes/bot-patch.ts";
 import { createBotLifecycleRoutes } from "./routes/bot-lifecycle.ts";
@@ -3380,7 +3386,7 @@ const wireTrustedApprovalBot = (bot: NonNullable<ReturnType<typeof store.bot>>) 
   return { ...rest, approvalMode: approvalModeFor(rest), mainThreadId: botMainThread(bot.id), avatarUrl: rest.avatarUrl ?? null, ...(tasks ? { tasks: tasks.map((task) => wireTask(task, bot.modelSelection)) } : {}) };
 };
 
-function previewSystemPrompt(bot: BotRecord) {
+async function previewSystemPrompt(bot: BotRecord) {
   const persona = botPersona(bot);
   const instance = registry.get(bot.modelSelection.instanceId);
   const caps = instance?.adapter.capabilities;
@@ -3403,6 +3409,7 @@ function previewSystemPrompt(bot: BotRecord) {
     browserOn: caps?.browserMcp === true && builtInBrowserEnabled(cfg) && bot.browser !== false,
   });
   const privateWorkspace = instance && supportsWorkspaceFiles(instance.driverKind);
+  const originParts = agentsMounted ? await originAgents.context.peek(bot.id) : [];
   const built = buildSystemPrompt(persona, bot.soul ?? "", [
     { id: "user-profile", label: "About the user", text: userProfileSystemPrompt(cfg.profile) },
     {
@@ -3432,6 +3439,7 @@ function previewSystemPrompt(bot: BotRecord) {
     { id: "routine", label: "Routines", text: agentsMounted ? ROUTINE_PROMPT : "" },
     { id: "profile", label: "Profile changes", text: agentsMounted ? PROFILE_PROMPT : "" },
     { id: "section-context", label: "Section context", text: sectionContextSystemPrompt(bot.section) },
+    ...originParts,
     { id: "team-memory", label: "Team memory", text: teamMemory.systemPrompt(bot.section) + (agentsMounted ? TEAM_MEMORY_PROMPT : "") },
     teamAvailabilityPart(agentsMounted && coordination ? peers : []),
     { id: "memory", label: "Memory", text: memorySystemPrompt(bot.id, { managedWrites: agentsMounted, fileTools: Boolean(privateWorkspace), enabled: bot.memoryEnabled !== false }) },
@@ -7999,7 +8007,8 @@ async function acceptDirectSend(
   },
   guardedStart?: (currentAtStart: BotRecord) => Promise<DirectSendReceipt>,
 ): Promise<DirectSendReceipt> {
-  const { botId, threadId, text, sendId, replyTo, sender, trigger, via, callId, dataContext, personPresent } = input;
+  const { botId, threadId, text, replyTo, sender, trigger, via, callId, dataContext, personPresent } = input;
+  let { sendId } = input;
   const refused = directSendRefusal(botId, threadId);
   if (refused) throw refused;
   return sendSequencer.run(
@@ -8046,6 +8055,14 @@ async function acceptDirectSend(
       }
 
       if (guardedStart) return guardedStart(currentAtStart);
+
+      const shared = await sharedAgents.beforeSend({ botId: currentAtStart.id, threadId, text, sendId });
+      if (shared) sendId = shared.sendId;
+      if (shared?.status === "queued") return queueSharedSend(currentAtStart.id, threadId, text, shared, replyTo, sender);
+      if (shared) {
+        return startOrQueueDirectMessage(botId, threadId, text, replyTo, sendId, sender, trigger, via, callId, dataContext)
+          .catch((error: unknown) => { sharedAgents.failed(threadId); throw error; });
+      }
 
       if (currentAtStart.busy) {
         const instance = runningTurnInstance(currentAtStart, threadId);
@@ -8115,6 +8132,17 @@ async function acceptDirectSend(
       return startOrQueueDirectMessage(botId, threadId, text, replyTo, sendId, sender, trigger, via, callId, dataContext);
     },
   );
+}
+
+function queueSharedSend(botId: string, threadId: string, text: string, decision: Extract<SendDecision, { status: "queued" }>, replyTo?: Message, sender?: ResolvedSender): DirectSendReceipt {
+  const message = store.appendMessage(threadId, {
+    role: "user", kind: "text", text, sendId: decision.sendId, replyToId: replyTo?.id, sender, queued: true, queueId: decision.runId,
+  });
+  sharedAgents.queued({
+    runId: decision.runId, botId, threadId, cloudThreadId: decision.cloudThreadId, teamId: decision.teamId, messageId: message.id, text,
+    ...(sender ? { sender } : {}),
+  });
+  return { ok: true, queued: true, queueId: decision.runId, threadId };
 }
 
 async function deliverLateQuestionAnswer(
@@ -9126,6 +9154,7 @@ async function startTurn(
       const profilePrompt = integrations.agents ? PROFILE_PROMPT : "";
       const recallPrompt = integrations.agents && bot.memoryEnabled !== false ? SESSION_SEARCH_SYSTEM_PROMPT : "";
       const learnPrompt = skillAuthoring ? LEARN_PROMPT : "";
+      const originParts = integrations.agents ? await originAgents.context.parts(bot.id) : [];
 
       // Wait for the snapshot right before dispatch: the engine must not edit the project until it settles.
       if (checkpointCwd) {
@@ -9230,6 +9259,7 @@ async function startTurn(
         { id: "profile", label: "Profile changes", text: profilePrompt },
         { id: "learn", label: "Skill authoring", text: learnPrompt },
         { id: "section-context", label: "Section context", text: sectionContextSystemPrompt(bot.section) },
+        ...originParts,
         { id: "team-memory", label: "Team memory", text: teamMemory.systemPrompt(bot.section) + (integrations.agents ? TEAM_MEMORY_PROMPT : "") },
         // Volatile, so a teammate starting or finishing never changes the stable half.
         teamAvailabilityPart(coordinationPrompt ? sectionPeers : []),
@@ -11233,6 +11263,7 @@ async function runClaimedGroupMemberTurn(
       });
     }
   }
+  const roomOrigin = integrations.agents ? await originAgents.context.parts(bot.id) : [];
   applyAgentsBridge(threadId, integrations, cfg, bot, turnEngine(instance, providerConfigs(), registry.lastSnapshot(instance.instanceId), cwd));
   const roomSystem = buildSystemPrompt(system, store.bot(bot.id)?.soul ?? bot.soul ?? "", [
     { id: "user-profile", label: "About the user", text: userProfileSystemPrompt(cfg.profile) },
@@ -11250,6 +11281,7 @@ async function runClaimedGroupMemberTurn(
     teamAvailabilityPart(outsideRoom),
     { id: "recent", label: "Recent work", text: recentWorkPrompt(recentLines) },
     { id: "section-context", label: "Section context", text: sectionContextSystemPrompt(bot.section) },
+    ...roomOrigin,
     { id: "team-memory", label: "Team memory", text: teamMemory.systemPrompt(bot.section) + (integrations.agents ? TEAM_MEMORY_PROMPT : "") },
     { id: "memory", label: "Memory", text: roomMemory ? `\n${roomMemory.trim()}` : "" },
     { id: "skills", label: "Skills index", text: workspace ? skillsSystemPrompt(bot.id, skillsHost.conversationSkills(bot, threadId), skillsHost.conversationStartedAt(threadId)) : "" },
@@ -13349,6 +13381,7 @@ function configStatus() {
       reelSeen: cfg.onboarding?.reelSeen === true,
       hintsSeen: cfg.onboarding?.hintsSeen ?? [],
       ...(cfg.onboarding?.firstTurnAt ? { firstTurnAt: cfg.onboarding.firstTurnAt } : {}),
+      ...(cfg.onboarding?.memberSetupAt ? { memberSetupAt: cfg.onboarding.memberSetupAt } : {}),
     },
     browserEngine: browserEngineSummary(),
     // partitionId is read-only routing metadata: config PATCH rejects callers that try to choose it.
@@ -13730,8 +13763,28 @@ ROUTES.push(createBotCreateRoutes({
 }));
 ROUTES.push(createDefaultTeamRoutes({ store, maxWorkspaceBots: MAX_WORKSPACE_BOTS, wireBot }));
 ROUTES.push(createProjectIconRoutes({ store, storedAvatarExists }));
+const originAgents = createOriginAgentSupport({
+  bots: () => store.bots,
+  github: () => originGitHub(githubService()),
+  chosenRoot: () => cfg.origin?.projectsRoot ?? undefined,
+  saveRoot: (projectsRoot) => {
+    saveConfig({ origin: { projectsRoot } });
+    cfg.origin = projectsRoot ? { projectsRoot } : {};
+  },
+  cwdOf: (botId) => store.bot(botId)?.cwd,
+  setCwd: (botId, cwd) => {
+    const bot = store.patchBot(botId, { cwd });
+    if (bot) broadcast({ kind: "bot", bot: wireBot(bot) });
+  },
+  localFolders: !CLOUD_HOME,
+});
+ROUTES.push(originAgents.routes);
 ROUTES.push(createOriginCloudRoutes({
   store,
+  github: () => originGitHub(githubService()),
+  teamChat: originAgents.teamChat,
+  folder: originAgents.folder,
+  changed: originAgents.changed,
   agentTurn: (header) => {
     const capability = authorizedInternalCapability(header);
     return capability?.kind === "agents" && capability.generation !== EXTERNAL_RUNTIME_GENERATION ? { botId: capability.botId, threadId: capability.threadId } : null;
@@ -13746,11 +13799,83 @@ ROUTES.push(createOriginCloudRoutes({
     }
   },
 }));
-ROUTES.push(createCloudLinkRoutes({ store }));
+ROUTES.push(createCloudLinkRoutes({ store, changed: originAgents.changed }));
 ROUTES.push(createOriginInviteRoutes({ publicUrl }));
 const originPublicPages = createOriginPublicRoutes({ publicUrl });
 ROUTES.push(createAvatarLookRoutes({ store }));
-ROUTES.push(createOriginMemberRoutes());
+const sharedAgents = createSharedAgents({
+  store,
+  instances: async () => selectableInstances(await registry.describe()),
+  selectionContext,
+  isBusy: threadBusy,
+  startQueued: async (run, message) => {
+    await startTurn(run.botId, run.text, { threadId: run.threadId, ...(message ? { userMessage: message } : {}), ...(run.sender ? { sender: run.sender } : {}) });
+  },
+  interrupt: (botId, threadId) => void interruptDirectThread(botId, threadId).catch(() => undefined),
+  redact: redactSecretsInText,
+});
+ROUTES.push(sharedAgents.routes);
+sharedAgents.start();
+const callAgentSettingsFile = join(DATA_DIR, "origin-call-agent.json");
+let callAgentSettings = readCallAgentSettings(callAgentSettingsFile);
+ROUTES.push(createCallAgentSettingsRoutes({
+  file: callAgentSettingsFile,
+  keys: () => ({ groq: Boolean(cfg.groq?.key), openai: Boolean(cfg.openai?.key) }),
+  changed: (settings) => { callAgentSettings = settings; },
+}));
+/** No model named: the engine's own quick-call choice, its cheapest, rather than the chief's chat model. */
+function callSummaryWriter(bot: BotRecord): { instance: ProviderInstance; model?: string } {
+  const chosen = callAgentSettings.summarizer.instanceId
+    ? { instanceId: callAgentSettings.summarizer.instanceId, ...(callAgentSettings.summarizer.model ? { model: callAgentSettings.summarizer.model } : {}) }
+    : helperSelection(cfg) ?? { instanceId: bot.modelSelection.instanceId };
+  const instance = registry.get(chosen.instanceId);
+  if (!instance?.enabled || !instance.generateText) throw new CallAgentError("The call summary model can't write text; pick another in Settings");
+  const refusal = policyModelRefusal(instance);
+  if (refusal) throw new CallAgentError(refusal);
+  if (hostedModels && chosen.instanceId !== bot.modelSelection.instanceId && !(chosen.model && hostedModels.allows({ instanceId: chosen.instanceId, model: chosen.model }))) {
+    throw new CallAgentError(hostedModels.error());
+  }
+  return { instance, ...(chosen.model ? { model: chosen.model } : {}) };
+}
+const callAgents = createCallAgents({
+  bot: (botId) => {
+    const bot = store.bot(botId);
+    return bot && !bot.hidden ? { id: bot.id, name: bot.name } : null;
+  },
+  allowed: ({ auth, botId, room }) => {
+    const bot = store.bot(botId);
+    if (!bot?.chiefOfStaff || !visibleTo(viewerFor(auth)).bot(botId)) return false;
+    return !room || cloudProjectFor(store.bots, readOriginCloud(defaultOriginCloudFile()).projects, botId) === room;
+  },
+  ask: ({ auth, botId, prompt }) => {
+    const bot = store.bot(botId);
+    if (!bot || !visibleTo(viewerFor(auth)).bot(botId)) return Promise.reject(new CallAgentError("That agent is not available to you"));
+    return awaitBotReply(store, bot.threadId, async () => {
+      await acceptDirectSend({
+        botId, threadId: bot.threadId, text: prompt, sendId: randomUUID().replaceAll("-", ""),
+        sender: messageSender(auth), trigger: usageTriggerFor(auth), via: "call", personPresent: true,
+      });
+    }, 120_000);
+  },
+  summarize: async ({ botId, prompt }) => {
+    const bot = store.bot(botId);
+    if (!bot) throw new CallAgentError("The chief no longer exists");
+    const writer = callSummaryWriter(bot);
+    assertWithinBudget(cfg, DATA_DIR);
+    return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), timeoutMs: 180_000 });
+  },
+  post: ({ botId, widget, fallback, transcript }) => {
+    const bot = store.bot(botId);
+    if (!bot) return;
+    const card = createAgentCard({ store, bot, threadId: bot.threadId, input: { tool: "show_widget", widget, fallback_text: fallback } });
+    if (!card.ok) store.appendMessage(bot.threadId, { role: "bot", kind: "text", text: fallback });
+    if (transcript) store.appendMessage(bot.threadId, { role: "bot", kind: "text", text: `Call transcript\n\n${transcript}` });
+  },
+  transcribe: ({ audio, mime, settings }) => transcribeWith({ audio, mime, settings, keys: { groq: cfg.groq?.key, openai: cfg.openai?.key } }),
+  settings: () => callAgentSettings,
+  log: (line) => console.log(line),
+});
+ROUTES.push(createOriginMemberRoutes({ callAgents }));
 PUBLIC_ROUTES.push(createOriginMcpRoutes({ publicUrl }));
 const githubService = createGitHubService({ serverPublicUrl: publicUrl });
 ROUTES.push(createGitHubRoutes({ service: githubService }));
@@ -16968,7 +17093,7 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
     if (m && method === "GET") {
       const bot = store.bot(m[1]);
       if (!bot) return json(res, 404, { error: "no such bot" });
-      return json(res, 200, previewSystemPrompt(bot));
+      return json(res, 200, await previewSystemPrompt(bot));
     }
     m = path.match(/^\/api\/bots\/([\w-]+)\/overview$/);
     if (m && method === "GET") {

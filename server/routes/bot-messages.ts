@@ -1,4 +1,5 @@
 import type { ServerResponse } from "node:http";
+import { REMOTE_CARD, REMOTE_CARD_REFUSAL } from "../origin-thread-mirror.ts";
 import { z } from "zod";
 
 import { approvalModeFor } from "../../shared/approval-mode.ts";
@@ -442,6 +443,8 @@ export function createBotMessageRoutes(deps: BotMessageRouteDeps): RouteHandler 
           reviewedSha256,
         }))) return;
         const requestId = String(body.requestId);
+
+        if (requestId.startsWith(REMOTE_CARD)) return json(res, 403, { error: REMOTE_CARD_REFUSAL });
         const own = await harnessCardOutcome(bot.threadId, requestId, behavior, body.message);
         if (own) return json(res, 200, { ok: true, outcome: own });
         const pending = store.messagesFor(bot.threadId).find((message) => message.card?.requestId === requestId);
@@ -470,6 +473,8 @@ export function createBotMessageRoutes(deps: BotMessageRouteDeps): RouteHandler 
       const reviewedSha256 = typeof body.reviewedSha256 === "string" ? body.reviewedSha256 : undefined;
       if (!behavior) return json(res, 400, { error: "behavior must be allow, deny, or answer" });
       const requestId = String(body.requestId);
+
+      if (requestId.startsWith(REMOTE_CARD)) return json(res, 403, { error: REMOTE_CARD_REFUSAL });
       const refusal = cardAnswerRefusal(auth, threadId, requestId, behavior);
       if (refusal) return json(res, 403, { error: refusal });
       if (body.rememberCommand === true) {

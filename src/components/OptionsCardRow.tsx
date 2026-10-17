@@ -4,6 +4,7 @@ import { ApprovalCard } from "./ApprovalCard";
 import { MessageBoundary } from "./MessageBoundary";
 import { OptionCard, shouldHideOnboardingCard } from "./OptionCard";
 import { QuestionCard } from "./QuestionCard";
+import { RemoteCard } from "./SharedThreadBar";
 
 /**
  * Called, not mounted: a quiz that dropped out must come back as null so the transcript draws no row and no day
@@ -16,7 +17,9 @@ export function optionsCardRow({ message: m, transcript, botId, botName, threadI
   botName: string;
   threadId: string;
 }): ReactNode {
-  const card = m.card?.requestId && m.card.questionRequest ? (
+  const card = m.remote ? (
+    <RemoteCard message={m} />
+  ) : m.card?.requestId && m.card.questionRequest ? (
     <QuestionCard threadId={threadId} bot={{ name: botName }} message={m} />
   ) : m.card?.requestId && m.card.tool ? (
     <ApprovalCard bot={{ name: botName }} message={m} threadId={threadId} />

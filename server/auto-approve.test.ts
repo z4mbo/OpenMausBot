@@ -208,3 +208,10 @@ describe("delegatedApprovalMode", () => {
     expect(delegatedApprovalMode({ ...base, senderMode: "auto", recipientDriverKind: "codex" })).toBe("auto");
   });
 });
+
+describe("merging a pull request", () => {
+  it("always asks the person, even with Full access", () => {
+    expect(autoVerdict("full", "mcp__agents__origin_merge_pr")).toEqual({ approve: null, source: "outbound-guard" });
+    expect(autoVerdict("auto", "origin_merge_pr")).toEqual({ approve: null, source: "outbound-guard" });
+  });
+});

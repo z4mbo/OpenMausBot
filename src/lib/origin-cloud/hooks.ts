@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { cloudClient, functionRef, sessionStore, setSessionToken, urlStore, withSession } from "./client";
+import { cloudClient, functionRef, logoutCloud, sessionStore, setSessionToken, urlStore, withSession } from "./client";
 import type { CloudUser } from "./types";
 
 export function useCloudUrl(): string | null {
@@ -112,7 +112,7 @@ export function useCloudSession(): {
     const slow = window.setTimeout(() => { if (alive) setUnreachable(url); }, SESSION_CHECK_MS);
     cloudClient()?.query(functionRef<"query">("auth:me"), { sessionToken: token }).then(
       (user) => { if (!alive) return; window.clearTimeout(slow); setUnreachable(null); if (!user) setSessionToken(null); },
-      () => { if (alive) { window.clearTimeout(slow); setSessionToken(null); } },
+      () => { if (alive) { window.clearTimeout(slow); setUnreachable(url); } },
     );
     return () => { alive = false; window.clearTimeout(slow); };
   }, [url, token]);
@@ -124,15 +124,7 @@ export function useCloudSession(): {
     setSessionToken(result.sessionToken);
   }, []);
 
-  const logout = useCallback(async () => {
-    const client = cloudClient();
-    const current = sessionStore.get();
-    try {
-      if (client && current) await client.mutation(functionRef<"mutation">("auth:logout"), { sessionToken: current });
-    } finally {
-      setSessionToken(null);
-    }
-  }, []);
+  const logout = useCallback(() => logoutCloud(), []);
 
   return useMemo(() => ({
     user: token && me ? me : null,

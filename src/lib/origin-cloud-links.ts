@@ -5,14 +5,22 @@ import type { CloudLinks } from "./origin-import";
 const EMPTY: CloudLinks = { workspaces: {}, projects: {} };
 let links: CloudLinks = EMPTY;
 let loading: Promise<void> | null = null;
+let latestRequest = 0;
 const listeners = new Set<() => void>();
 const notify = () => { for (const listener of listeners) listener(); };
 
 function load() {
-  loading ??= api<CloudLinks>("/api/origin/cloud-links")
-    .then((result) => { links = { workspaces: result.workspaces ?? {}, projects: result.projects ?? {} }; notify(); })
-    .catch(() => { loading = null; });
-  return loading;
+  if (loading) return loading;
+  const request = ++latestRequest;
+  const pending: Promise<void> = api<CloudLinks>("/api/origin/cloud-links")
+    .then((result) => {
+      if (request !== latestRequest) return;
+      links = { workspaces: result.workspaces ?? {}, projects: result.projects ?? {} };
+      notify();
+    })
+    .catch(() => { if (loading === pending) loading = null; });
+  loading = pending;
+  return pending;
 }
 
 function subscribe(listener: () => void) {

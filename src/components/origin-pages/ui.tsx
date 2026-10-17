@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { FolderPlus, Link2, Loader2, LogIn, Plus, ServerOff, Users, X } from "lucide-react";
+import { CloudOff, FolderPlus, Link2, Loader2, LogIn, Plus, RotateCw, SearchX, ServerOff, Users, X } from "lucide-react";
 import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
 import { linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
 import { useWorkspaceAccess, type WorkspaceRole } from "@/lib/origin-members";
 import { cn } from "@/lib/cn";
+import { overlayMotion, sheetMotion, useDismiss } from "../CenteredDialog";
 import { Select } from "../Select";
 import type { CloudProject } from "./cloud-types";
 import { errorText } from "./repo-url";
+
+export { CenteredDialog, overlayMotion, sheetMotion, useDismiss } from "../CenteredDialog";
 
 /** Where an unlinked project page can create or link its shared project: the local project lead and its workspace's cloud id. */
 export type ProjectLink = { botId: string; teamId: string | null };
@@ -26,21 +29,66 @@ export const iconButton =
 export const cardClass = "rounded-xl border border-hairline/40 bg-panel";
 export const chipButton =
   `inline-flex h-8 max-w-[220px] items-center gap-1.5 rounded-full border border-hairline/60 bg-raised/60 px-3 text-[12.5px] text-ink-secondary transition-colors hover:border-hairline hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
+/** Clears the glass header a page scrolls beneath; `--glass-top` is the header's height, published by its frame. */
+export const underGlass = "pt-[calc(var(--glass-top,0px)+1.25rem)] [scroll-padding-top:var(--glass-top,0px)]";
 /** The scrolling body every project and workspace page shares. */
-export const pageClass = "flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-5 md:px-6 motion-safe:animate-[rise_0.24s_cubic-bezier(0.22,1,0.36,1)_backwards]";
+export const pageClass = `flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-5 md:px-6 ${underGlass} motion-safe:animate-[rise_0.24s_cubic-bezier(0.22,1,0.36,1)_backwards]`;
+
+function GateShell({ children }: { children: ReactNode }) {
+  return <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]">{children}</div>;
+}
+
+/** How long a gate waits on a query before offering a retry: a failed query reads as still loading. */
+const GATE_STALL_MS = 12_000;
+
+function useStalled(waiting: boolean): boolean {
+  const [stalled, setStalled] = useState(false);
+  useEffect(() => {
+    setStalled(false);
+    if (!waiting) return;
+    const timer = window.setTimeout(() => setStalled(true), GATE_STALL_MS);
+    return () => window.clearTimeout(timer);
+  }, [waiting]);
+  return waiting && stalled;
+}
+
+function Stalled({ label, onRetry }: { label: string; onRetry(): void }) {
+  return (
+    <EmptyState icon={<CloudOff size={22} />} title={`Could not load ${label.toLowerCase()}`}
+      action={<button type="button" className={ghostButton} onClick={onRetry}><RotateCw size={14} />Try again</button>} />
+  );
+}
+
+/** Remounts a gate on retry, so its queries subscribe afresh. */
+function useRetry(): [number, () => void] {
+  const [attempt, setAttempt] = useState(0);
+  return [attempt, () => setAttempt((value) => value + 1)];
+}
 
 export type ProjectContext = { project: CloudProject; projectId: string; canEdit: boolean; isAdmin: boolean };
 
-export function CloudGate({ cloudProjectId, projectName, link, label, children }: OriginPageProps & { label: string; children: (ctx: ProjectContext) => ReactNode }) {
+type CloudGateProps = OriginPageProps & { label: string; children: (ctx: ProjectContext) => ReactNode };
+
+export function CloudGate(props: CloudGateProps) {
+  const [attempt, retry] = useRetry();
+  return <ProjectGate key={attempt} {...props} onRetry={retry} />;
+}
+
+function ProjectGate({ cloudProjectId, projectName, link, label, children, onRetry }: CloudGateProps & { onRetry(): void }) {
   const url = useCloudUrl();
   const session = useCloudSession();
   const signedIn = Boolean(session.user && session.token);
-  const project = useCloudQuery<CloudProject>("projects:get", cloudProjectId && signedIn ? { projectId: cloudProjectId } : "skip");
-  if (!url) return <NoServer />;
-  if (!session.ready) return <Loading label="Signing in" variant="page" />;
-  if (!signedIn) return <SignIn onLogin={session.login} label={label} />;
-  if (!cloudProjectId) return <SetUpProject projectName={projectName} label={label} link={link} />;
-  if (project === undefined) return <Loading label={`Loading ${label.toLowerCase()}`} variant="page" />;
+  const project = useCloudQuery<CloudProject | null>("projects:get", cloudProjectId && signedIn ? { projectId: cloudProjectId } : "skip");
+  const stalled = useStalled(Boolean(url && signedIn && cloudProjectId) && project === undefined);
+  if (!url) return <GateShell><NoServer /></GateShell>;
+  if (!session.ready) return <GateShell><Loading label="Signing in" variant="page" /></GateShell>;
+  if (!signedIn) return <GateShell><SignIn onLogin={session.login} label={label} /></GateShell>;
+  if (!cloudProjectId) return <GateShell><SetUpProject projectName={projectName} label={label} link={link} /></GateShell>;
+  if (stalled) return <GateShell><Stalled label={label} onRetry={onRetry} /></GateShell>;
+  if (project === undefined) return <GateShell><Loading label={`Loading ${label.toLowerCase()}`} variant="page" /></GateShell>;
+  if (project === null) {
+    return <GateShell><EmptyState icon={<SearchX size={22} />} title={`No access to ${projectName}`} /></GateShell>;
+  }
   return <>{children({ project, projectId: cloudProjectId, canEdit: project.memberRole !== "viewer", isAdmin: project.memberRole === "owner" || project.memberRole === "admin" })}</>;
 }
 
@@ -89,16 +137,28 @@ function SetUpProject({ projectName, label, link }: { projectName: string; label
 export type WorkspaceContext = { teamId: string; me: CloudUser; role: WorkspaceRole; canEdit: boolean };
 
 /** A workspace page's gate; `head` lets an unshared workspace create its shared workspace in place. */
-export function WorkspaceGate({ teamId, label, head, children }: { teamId: string | null; label: string; head?: { id: string; name: string }; children: (ctx: WorkspaceContext) => ReactNode }) {
+type WorkspaceGateProps = { teamId: string | null; label: string; head?: { id: string; name: string }; children: (ctx: WorkspaceContext) => ReactNode };
+
+export function WorkspaceGate(props: WorkspaceGateProps) {
+  const [attempt, retry] = useRetry();
+  return <TeamGate key={attempt} {...props} onRetry={retry} />;
+}
+
+function TeamGate({ teamId, label, head, children, onRetry }: WorkspaceGateProps & { onRetry(): void }) {
   const url = useCloudUrl();
   const session = useCloudSession();
   const signedIn = Boolean(session.user && session.token);
   const access = useWorkspaceAccess(teamId && signedIn ? teamId : null);
-  if (!url) return <NoServer />;
-  if (!session.ready) return <Loading label="Signing in" variant="page" />;
-  if (!signedIn || !session.user) return <SignIn onLogin={session.login} label={label} />;
-  if (!teamId) return <SetUpWorkspace label={label} head={head} />;
-  if (access === undefined) return <Loading label={`Loading ${label.toLowerCase()}`} variant="page" />;
+  const stalled = useStalled(Boolean(url && signedIn && teamId) && access === undefined);
+  if (!url) return <GateShell><NoServer /></GateShell>;
+  if (!session.ready) return <GateShell><Loading label="Signing in" variant="page" /></GateShell>;
+  if (!signedIn || !session.user) return <GateShell><SignIn onLogin={session.login} label={label} /></GateShell>;
+  if (!teamId) return <GateShell><SetUpWorkspace label={label} head={head} /></GateShell>;
+  if (stalled) return <GateShell><Stalled label={label} onRetry={onRetry} /></GateShell>;
+  if (access === undefined) return <GateShell><Loading label={`Loading ${label.toLowerCase()}`} variant="page" /></GateShell>;
+  if (access === null) {
+    return <GateShell><EmptyState icon={<SearchX size={22} />} title="No access to this workspace" /></GateShell>;
+  }
   return <>{children({ teamId, me: session.user, role: access.role, canEdit: access.role !== "viewer" })}</>;
 }
 
@@ -248,8 +308,9 @@ export function Field({ label, children, className }: { label: string; children:
   );
 }
 
-export function Modal({ title, onClose, children, wide, className }: { title: ReactNode; onClose(): void; children: ReactNode; wide?: boolean; className?: string }) {
+export function Modal({ title, onClose: requestClose, children, wide, className }: { title: ReactNode; onClose(): void; children: ReactNode; wide?: boolean; className?: string }) {
   const panel = useRef<HTMLDivElement>(null);
+  const { closing, dismiss: onClose } = useDismiss(requestClose);
   const close = useRef(onClose);
   close.current = onClose;
   useEffect(() => {
@@ -270,10 +331,10 @@ export function Modal({ title, onClose, children, wide, className }: { title: Re
     return () => { window.removeEventListener("keydown", onKey); returnTo?.focus({ preventScroll: true }); };
   }, []);
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/55 backdrop-blur-[2px] motion-safe:animate-[workspace-in_0.16s_ease-out] sm:items-start sm:p-4 md:p-10"
+    <div className={cn("fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/55 backdrop-blur-[2px] sm:items-start sm:p-4 md:p-10", overlayMotion(closing))}
       onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <div ref={panel} role="dialog" aria-modal="true"
-        className={cn("w-full rounded-t-2xl border border-hairline/60 bg-menu shadow-2xl motion-safe:animate-pop-in sm:rounded-2xl", wide ? "sm:max-w-4xl" : "sm:max-w-md", className)}>
+        className={cn("w-full rounded-t-2xl border border-hairline/60 bg-menu sm:rounded-2xl", sheetMotion(closing), wide ? "sm:max-w-4xl" : "sm:max-w-md", className)}>
         <div className="flex items-center gap-2 px-4 pb-2 pt-3">
           <h3 className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink-secondary">{title}</h3>
           <button type="button" className={iconButton} aria-label="Close" onClick={onClose}><X size={16} /></button>
@@ -289,7 +350,7 @@ export function Segmented<T extends string>({ value, options, onChange, label }:
     <div role="group" aria-label={label} className="flex rounded-lg bg-inset p-0.5">
       {options.map((option) => (
         <button key={option.value} type="button" aria-pressed={option.value === value} title={option.title} onClick={() => onChange(option.value)}
-          className={cn("flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] text-ink-secondary transition-colors hover:text-ink", focusRing, option.value === value && "bg-raised text-ink shadow-[0_1px_2px_rgb(0_0_0/0.15)]")}>
+          className={cn("flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] text-ink-secondary transition-colors hover:text-ink", focusRing, option.value === value && "bg-raised text-ink")}>
           {option.label}
         </button>
       ))}

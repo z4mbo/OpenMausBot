@@ -13,6 +13,8 @@ import {
   spotlightsQuiet,
   hintSeenPatch,
   LOCAL_VIEWER,
+  memberSetupDue,
+  memberSetupPatch,
   nextBeat,
   organisationSignIn,
   previousBeat,
@@ -181,6 +183,15 @@ describe("persistence patches", () => {
     });
   });
 
+  it("records the member setup alongside completion only for the member flow", () => {
+    const now = new Date("2026-10-17T08:00:00.000Z");
+    expect(memberSetupPatch(now)).toEqual({ onboarding: { memberSetupAt: "2026-10-17T08:00:00.000Z" } });
+    expect(completionPatch(now, { member: true })).toEqual({
+      onboarding: { completedAt: "2026-10-17T08:00:00.000Z", version: WELCOME_VERSION, memberSetupAt: "2026-10-17T08:00:00.000Z" },
+    });
+    expect(completionPatch(now, { member: false }).onboarding).not.toHaveProperty("memberSetupAt");
+  });
+
   it("adds a hint once and never writes a no-op", () => {
     expect(hintSeen(undefined, "computer")).toBe(false);
     expect(hintSeenPatch(undefined, "computer")).toEqual({ onboarding: { hintsSeen: ["computer"] } });
@@ -218,6 +229,19 @@ describe("beat machine", () => {
     expect(beatsFor({ dictation: true, reel: true, hosted: false })).toEqual(["hello", "reel", "engines", "permissions", "phone", "bot"]);
   });
 
+  it("gives an Origin member their own models, defaults, computers and permissions, nothing else", () => {
+    expect(beatsFor({ dictation: true, reel: true, member: true })).toEqual(["hello", "engines", "projects", "defaults", "computers", "permissions"]);
+    expect(beatsFor({ dictation: false, reel: true, member: true })).toEqual(["hello", "engines", "projects", "defaults", "computers"]);
+    for (const dictation of [true, false]) {
+      for (const reel of [true, false]) {
+        const beats = beatsFor({ dictation, reel });
+        expect(beats).not.toContain("defaults");
+        expect(beats).not.toContain("computers");
+        expect(beats).not.toContain("projects");
+      }
+    }
+  });
+
   it("walks forward and back and stops at the ends", () => {
     const beats = beatsFor({ dictation: true, reel: false });
     expect(nextBeat(beats, "hello")).toBe("engines");
@@ -237,5 +261,30 @@ describe("beat machine", () => {
     for (const beat of beatsFor({ dictation: true, reel: true }).filter((id) => id !== "reel")) {
       expect(flowDotsShown(beat)).toBe(true);
     }
+  });
+});
+
+describe("memberSetupDue", () => {
+  const ok = (instance: { ready: boolean }) => instance.ready;
+  const recorded = { onboarding: { ...done, memberSetupAt: "2026-10-17T08:00:00.000Z" } };
+  const engines = (...ready: boolean[]) => ready.map((value) => ({ ready: value }));
+
+  it("never runs for someone not signed in to Origin, or before the config arrives", () => {
+    expect(memberSetupDue({ onboarding: done }, { signedIn: false, instances: [] }, ok)).toBe(false);
+    expect(memberSetupDue(null, { signedIn: true, instances: engines(false) }, ok)).toBe(false);
+  });
+
+  it("runs for a signed-in member who has not finished it, even with a ready engine and the welcome done", () => {
+    expect(memberSetupDue({ onboarding: done }, { signedIn: true, instances: engines(true) }, ok)).toBe(true);
+    expect(memberSetupDue({}, { signedIn: true, instances: [] }, ok)).toBe(true);
+  });
+
+  it("runs again when no engine is ready after it was finished", () => {
+    expect(memberSetupDue(recorded, { signedIn: true, instances: engines(false, false) }, ok)).toBe(true);
+    expect(memberSetupDue(recorded, { signedIn: true, instances: engines(false, true) }, ok)).toBe(false);
+  });
+
+  it("waits for the engine list before deciding nothing is ready", () => {
+    expect(memberSetupDue(recorded, { signedIn: true, instances: [] }, ok)).toBe(false);
   });
 });

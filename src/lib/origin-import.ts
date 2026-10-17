@@ -1,9 +1,10 @@
-import { isWorkspaceSection } from "../../shared/origin-workspaces";
 import type { CloudProject, CloudWorkspace } from "./origin-cloud/types";
 
 export interface CloudLinks {
   workspaces: Record<string, string>;
   projects: Record<string, string>;
+  agents?: Record<string, string>;
+  threads?: Record<string, string>;
 }
 
 interface LocalBot { id: string; name: string; section?: string; chiefOfStaff?: boolean }
@@ -43,16 +44,15 @@ export function planImport(
   const chosenProjects = cloud.projects.filter((project) => selection.projects.includes(project._id));
   const teamIds = new Set([...selection.workspaces, ...chosenProjects.map((project) => project.teamId)]);
   const workspaces = cloud.workspaces.filter((workspace) => teamIds.has(workspace._id)).map((workspace): WorkspaceStep => {
-    const head = botById.get(headFor.get(workspace._id) ?? "");
-    const linked = head?.chiefOfStaff && isWorkspaceSection(head.section);
-    return { cloudTeamId: workspace._id, name: workspace.name, ...(linked ? { headId: head.id, headName: head.name } : {}) };
+    const headId = headFor.get(workspace._id);
+    return { cloudTeamId: workspace._id, name: workspace.name, ...(headId ? { headId, headName: botById.get(headId)?.name ?? workspace.name } : {}) };
   });
   const known = new Set(workspaces.map((step) => step.cloudTeamId));
   const plan: ImportPlan = { workspaces, projects: [], alreadyLinked: [] };
   for (const project of chosenProjects) {
     if (!known.has(project.teamId)) continue;
-    const chief = botById.get(chiefFor.get(project._id) ?? "");
-    if (chief) plan.alreadyLinked.push({ cloudProjectId: project._id, name: project.name, localName: chief.name });
+    const chiefId = chiefFor.get(project._id);
+    if (chiefId) plan.alreadyLinked.push({ cloudProjectId: project._id, name: project.name, localName: botById.get(chiefId)?.name ?? project.name });
     else plan.projects.push({ cloudProjectId: project._id, cloudTeamId: project.teamId, name: project.name });
   }
   return plan;
