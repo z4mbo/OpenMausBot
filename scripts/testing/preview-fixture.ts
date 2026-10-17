@@ -33,6 +33,8 @@ export interface PreviewOptions {
   /** Vite's log level. Its default prints port and dependency notes on stdout,
    * ahead of anything the fixture prints there. */
   logLevel?: "info" | "warn" | "error" | "silent";
+  hmr?: boolean;
+  cacheDir?: string;
   aliases?: AliasOptions;
 }
 
@@ -68,11 +70,11 @@ export async function mountPreview(
   const page = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="${escapeHtml(viewport)}"><title>${escapeHtml(title)}</title></head><body><div id="root"></div><script type="module" src="${escapeHtml(entry)}"></script></body></html>`;
   const ui = await createServer({
     root: REPO_ROOT,
-    cacheDir: join(cacheRoot, "node_modules", ".vite"),
+    cacheDir: options.cacheDir ?? join(cacheRoot, "node_modules", ".vite"),
     optimizeDeps: { entries: [entry.replace(/^\/+/, "")] },
     ...(options.aliases ? { resolve: { alias: options.aliases } } : {}),
     ...(logLevel ? { logLevel } : {}),
-    server: { host: "127.0.0.1", port: 0, proxy: {
+    server: { host: "127.0.0.1", port: 0, hmr: options.hmr, proxy: {
       "/api": { target: fixture.info.url },
       "/.well-known/openmausbot/environment": { target: fixture.info.url },
     } },

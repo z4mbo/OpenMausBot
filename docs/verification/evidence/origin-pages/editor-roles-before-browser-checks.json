@@ -1,0 +1,209 @@
+{
+  "previewUrl": "http://127.0.0.1:5175/__origin-pages.html",
+  "phase": "before",
+  "checkedAt": "2026-10-17T22:05:04.633Z",
+  "boundary": "Production editors, synthetic reactive role changes and mutation receipts; backend enforcement is tested separately.",
+  "cases": [
+    {
+      "editor": "asset",
+      "size": "desktop",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "design:updateAsset"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "token",
+      "size": "desktop",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "design:updateToken"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "vault",
+      "size": "desktop",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "credentials:create"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "portal",
+      "size": "desktop",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "feedback:configure"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "convert",
+      "size": "desktop",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "feedback:convert"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "asset",
+      "size": "mobile",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "design:updateAsset"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "token",
+      "size": "mobile",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "design:updateToken"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "vault",
+      "size": "mobile",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "credentials:create"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "portal",
+      "size": "mobile",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "feedback:configure"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "convert",
+      "size": "mobile",
+      "theme": "dark",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "feedback:convert"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "asset",
+      "size": "desktop",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "design:updateAsset"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "token",
+      "size": "desktop",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "design:updateToken"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "vault",
+      "size": "desktop",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "credentials:create"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "portal",
+      "size": "desktop",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "feedback:configure"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "convert",
+      "size": "desktop",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "feedback:convert"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "asset",
+      "size": "mobile",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "design:updateAsset"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "token",
+      "size": "mobile",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "design:updateToken"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "vault",
+      "size": "mobile",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "credentials:create"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "portal",
+      "size": "mobile",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "feedback:configure"
+      ],
+      "draftPreserved": true
+    },
+    {
+      "editor": "convert",
+      "size": "mobile",
+      "theme": "light",
+      "saveDisabled": false,
+      "mutationsAfterDowngrade": [
+        "feedback:convert"
+      ],
+      "draftPreserved": true
+    }
+  ],
+  "pageErrors": []
+}

@@ -1,0 +1,2055 @@
+{
+  "previewUrl": "http://127.0.0.1:5176/__origin-pages.html",
+  "phase": "before",
+  "checkedAt": "2026-10-17T21:38:38.419Z",
+  "boundary": "Production renderer, synthetic cloud hook/HTTP data, disposable fake-engine server; no live account or Convex integration.",
+  "cases": [
+    {
+      "screen": "issues",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "new-issue",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "issue-detail",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "assets",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "tokens",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "token-editor",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault-unlocked",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault-project-switch",
+      "size": "desktop",
+      "theme": "dark",
+      "leakedUnlock": true
+    },
+    {
+      "screen": "feedback",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "repo",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "settings",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "inbox",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "inbox-calendar",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "chat",
+      "size": "desktop",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "issues",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "BUTTON",
+            "label": "Add column",
+            "right": 1172
+          },
+          {
+            "tag": "svg",
+            "label": "",
+            "right": 1029.015625
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1026.0989990234375
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1022.015625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "new-issue",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "BUTTON",
+            "label": "Add column",
+            "right": 1172
+          },
+          {
+            "tag": "svg",
+            "label": "",
+            "right": 1029.015625
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1026.0989990234375
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1022.015625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "issue-detail",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "assets",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "tokens",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "token-editor",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault-unlocked",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault-project-switch",
+      "size": "mobile",
+      "theme": "dark",
+      "leakedUnlock": true
+    },
+    {
+      "screen": "feedback",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [
+          {
+            "label": "Feedback",
+            "width": 375,
+            "scrollWidth": 682
+          }
+        ],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "repo",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "settings",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [
+          {
+            "label": "Project settings",
+            "width": 375,
+            "scrollWidth": 449
+          }
+        ],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "ProjectFIconAccent initialEmojiIcon nameUpload imageNameDescriptionA s",
+            "right": 448.53125
+          },
+          {
+            "tag": "SECTION",
+            "label": "ProjectFIconAccent initialEmojiIcon nameUpload imageNameDescriptionA s",
+            "right": 448.53125
+          },
+          {
+            "tag": "H3",
+            "label": "Project",
+            "right": 431.53125
+          },
+          {
+            "tag": "FORM",
+            "label": "FIconAccent initialEmojiIcon nameUpload imageNameDescriptionA syntheti",
+            "right": 431.53125
+          },
+          {
+            "tag": "FIELDSET",
+            "label": "FIconAccent initialEmojiIcon nameUpload imageNameDescriptionA syntheti",
+            "right": 431.53125
+          },
+          {
+            "tag": "DIV",
+            "label": "FIconAccent initialEmojiIcon nameUpload image",
+            "right": 431.53125
+          },
+          {
+            "tag": "LABEL",
+            "label": "IconAccent initialEmojiIcon nameUpload image",
+            "right": 431.53125
+          },
+          {
+            "tag": "DIV",
+            "label": "Accent initialEmojiIcon nameUpload image",
+            "right": 431.53125
+          }
+        ]
+      }
+    },
+    {
+      "screen": "inbox",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "0 completed issues in the last six months",
+            "right": 574.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "inbox-calendar",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "chat",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "workspace-conversation",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "issues",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "new-issue",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "issue-detail",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "assets",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "tokens",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "token-editor",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault-unlocked",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault-project-switch",
+      "size": "desktop",
+      "theme": "light",
+      "leakedUnlock": true
+    },
+    {
+      "screen": "feedback",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "repo",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "settings",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "inbox",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "inbox-calendar",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "chat",
+      "size": "desktop",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "issues",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "BUTTON",
+            "label": "Add column",
+            "right": 1172
+          },
+          {
+            "tag": "svg",
+            "label": "",
+            "right": 1029.015625
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1026.0989990234375
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1022.015625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "new-issue",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "BUTTON",
+            "label": "Add column",
+            "right": 1172
+          },
+          {
+            "tag": "svg",
+            "label": "",
+            "right": 1029.015625
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1026.0989990234375
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1022.015625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "issue-detail",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "assets",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "tokens",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "token-editor",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault-unlocked",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault-project-switch",
+      "size": "mobile",
+      "theme": "light",
+      "leakedUnlock": true
+    },
+    {
+      "screen": "feedback",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [
+          {
+            "label": "Feedback",
+            "width": 375,
+            "scrollWidth": 682
+          }
+        ],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "repo",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "settings",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [
+          {
+            "label": "Project settings",
+            "width": 375,
+            "scrollWidth": 449
+          }
+        ],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "ProjectFIconAccent initialEmojiIcon nameUpload imageNameDescriptionA s",
+            "right": 448.53125
+          },
+          {
+            "tag": "SECTION",
+            "label": "ProjectFIconAccent initialEmojiIcon nameUpload imageNameDescriptionA s",
+            "right": 448.53125
+          },
+          {
+            "tag": "H3",
+            "label": "Project",
+            "right": 431.53125
+          },
+          {
+            "tag": "FORM",
+            "label": "FIconAccent initialEmojiIcon nameUpload imageNameDescriptionA syntheti",
+            "right": 431.53125
+          },
+          {
+            "tag": "FIELDSET",
+            "label": "FIconAccent initialEmojiIcon nameUpload imageNameDescriptionA syntheti",
+            "right": 431.53125
+          },
+          {
+            "tag": "DIV",
+            "label": "FIconAccent initialEmojiIcon nameUpload image",
+            "right": 431.53125
+          },
+          {
+            "tag": "LABEL",
+            "label": "IconAccent initialEmojiIcon nameUpload image",
+            "right": 431.53125
+          },
+          {
+            "tag": "DIV",
+            "label": "Accent initialEmojiIcon nameUpload image",
+            "right": 431.53125
+          }
+        ]
+      }
+    },
+    {
+      "screen": "inbox",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "0 completed issues in the last six months",
+            "right": 574.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "inbox-calendar",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "chat",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "workspace-conversation",
+      "size": "mobile",
+      "theme": "light",
+      "state": "populated",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "issues",
+      "size": "mobile",
+      "theme": "light",
+      "state": "empty",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "BUTTON",
+            "label": "Add column",
+            "right": 1172
+          },
+          {
+            "tag": "svg",
+            "label": "",
+            "right": 1029.015625
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1026.0989990234375
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 1022.015625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "assets",
+      "size": "mobile",
+      "theme": "light",
+      "state": "empty",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault",
+      "size": "mobile",
+      "theme": "light",
+      "state": "empty",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "feedback",
+      "size": "mobile",
+      "theme": "light",
+      "state": "empty",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "repo",
+      "size": "mobile",
+      "theme": "light",
+      "state": "empty",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "settings",
+      "size": "mobile",
+      "theme": "light",
+      "state": "empty",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [
+          {
+            "label": "Project settings",
+            "width": 375,
+            "scrollWidth": 449
+          }
+        ],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "ProjectFIconAccent initialEmojiIcon nameUpload imageNameDescriptionA s",
+            "right": 448.53125
+          },
+          {
+            "tag": "SECTION",
+            "label": "ProjectFIconAccent initialEmojiIcon nameUpload imageNameDescriptionA s",
+            "right": 448.53125
+          },
+          {
+            "tag": "H3",
+            "label": "Project",
+            "right": 431.53125
+          },
+          {
+            "tag": "FORM",
+            "label": "FIconAccent initialEmojiIcon nameUpload imageNameDescriptionA syntheti",
+            "right": 431.53125
+          },
+          {
+            "tag": "FIELDSET",
+            "label": "FIconAccent initialEmojiIcon nameUpload imageNameDescriptionA syntheti",
+            "right": 431.53125
+          },
+          {
+            "tag": "DIV",
+            "label": "FIconAccent initialEmojiIcon nameUpload image",
+            "right": 431.53125
+          },
+          {
+            "tag": "LABEL",
+            "label": "IconAccent initialEmojiIcon nameUpload image",
+            "right": 431.53125
+          },
+          {
+            "tag": "DIV",
+            "label": "Accent initialEmojiIcon nameUpload image",
+            "right": 431.53125
+          }
+        ]
+      }
+    },
+    {
+      "screen": "inbox",
+      "size": "mobile",
+      "theme": "light",
+      "state": "empty",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "0 completed issues in the last six months",
+            "right": 574.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "chat",
+      "size": "mobile",
+      "theme": "light",
+      "state": "empty",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "issues",
+      "size": "mobile",
+      "theme": "light",
+      "state": "loading",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "",
+            "right": 604
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 424
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 596
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 596
+          },
+          {
+            "tag": "DIV",
+            "label": "",
+            "right": 904
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 724
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 896
+          }
+        ]
+      }
+    },
+    {
+      "screen": "assets",
+      "size": "mobile",
+      "theme": "light",
+      "state": "loading",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault",
+      "size": "mobile",
+      "theme": "light",
+      "state": "loading",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "feedback",
+      "size": "mobile",
+      "theme": "light",
+      "state": "loading",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "repo",
+      "size": "mobile",
+      "theme": "light",
+      "state": "loading",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "settings",
+      "size": "mobile",
+      "theme": "light",
+      "state": "loading",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "inbox",
+      "size": "mobile",
+      "theme": "light",
+      "state": "loading",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "0 completed issues in the last six months",
+            "right": 574.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "chat",
+      "size": "mobile",
+      "theme": "light",
+      "state": "loading",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "issues",
+      "size": "mobile",
+      "theme": "light",
+      "state": "denied",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "assets",
+      "size": "mobile",
+      "theme": "light",
+      "state": "denied",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault",
+      "size": "mobile",
+      "theme": "light",
+      "state": "denied",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "feedback",
+      "size": "mobile",
+      "theme": "light",
+      "state": "denied",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "repo",
+      "size": "mobile",
+      "theme": "light",
+      "state": "denied",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "settings",
+      "size": "mobile",
+      "theme": "light",
+      "state": "denied",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "inbox",
+      "size": "mobile",
+      "theme": "light",
+      "state": "denied",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "0 completed issues in the last six months",
+            "right": 574.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "chat",
+      "size": "mobile",
+      "theme": "light",
+      "state": "denied",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "issues",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "viewer",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "assets",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "viewer",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "vault",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "viewer",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "feedback",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "viewer",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [
+          {
+            "label": "Feedback",
+            "width": 375,
+            "scrollWidth": 682
+          }
+        ],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "repo",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "viewer",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "settings",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "viewer",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [
+          {
+            "label": "Project settings",
+            "width": 375,
+            "scrollWidth": 405
+          }
+        ],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "ProjectFIconAccent initialEmojiIcon nameUpload imageNameDescriptionA s",
+            "right": 405.421875
+          },
+          {
+            "tag": "SECTION",
+            "label": "ProjectFIconAccent initialEmojiIcon nameUpload imageNameDescriptionA s",
+            "right": 405.421875
+          },
+          {
+            "tag": "H3",
+            "label": "Project",
+            "right": 388.421875
+          },
+          {
+            "tag": "FORM",
+            "label": "FIconAccent initialEmojiIcon nameUpload imageNameDescriptionA syntheti",
+            "right": 388.421875
+          },
+          {
+            "tag": "FIELDSET",
+            "label": "FIconAccent initialEmojiIcon nameUpload imageNameDescriptionA syntheti",
+            "right": 388.421875
+          },
+          {
+            "tag": "DIV",
+            "label": "FIconAccent initialEmojiIcon nameUpload image",
+            "right": 388.421875
+          },
+          {
+            "tag": "LABEL",
+            "label": "IconAccent initialEmojiIcon nameUpload image",
+            "right": 388.421875
+          },
+          {
+            "tag": "DIV",
+            "label": "Accent initialEmojiIcon nameUpload image",
+            "right": 388.421875
+          }
+        ]
+      }
+    },
+    {
+      "screen": "inbox",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "viewer",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": [
+          {
+            "tag": "DIV",
+            "label": "0 completed issues in the last six months",
+            "right": 574.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          },
+          {
+            "tag": "SPAN",
+            "label": "",
+            "right": 382.765625
+          }
+        ]
+      }
+    },
+    {
+      "screen": "chat",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "populated",
+      "role": "viewer",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    },
+    {
+      "screen": "repo",
+      "size": "mobile",
+      "theme": "dark",
+      "state": "error",
+      "role": "owner",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "pageScrollers": [],
+        "overflow": []
+      }
+    }
+  ],
+  "pageErrors": [],
+  "requests": [
+    {
+      "path": "/api/origin/app-address",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/repo",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/workspace",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/connection",
+      "method": "GET"
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "PATCH"
+    },
+    {
+      "path": "/api/origin/app-address",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/repo",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/workspace",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/connection",
+      "method": "GET"
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "PATCH"
+    },
+    {
+      "path": "/api/origin/app-address",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/repo",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/workspace",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/connection",
+      "method": "GET"
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "PATCH"
+    },
+    {
+      "path": "/api/origin/app-address",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/repo",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/workspace",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/connection",
+      "method": "GET"
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "PATCH"
+    },
+    {
+      "path": "/api/local-chat/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "PATCH"
+    },
+    {
+      "path": "/api/origin/app-address",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/workspace",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/connection",
+      "method": "GET"
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/origin/app-address",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/repo",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/workspace",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/connection",
+      "method": "GET"
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "PATCH"
+    },
+    {
+      "path": "/api/origin/app-address",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/repo",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/workspace",
+      "method": "GET"
+    },
+    {
+      "path": "/api/github/connection",
+      "method": "GET"
+    },
+    {
+      "path": "/api/origin/cloud-links",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/messages",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/local-chat/conversations",
+      "method": "PATCH"
+    },
+    {
+      "path": "/api/github/repo",
+      "method": "GET"
+    }
+  ]
+}
