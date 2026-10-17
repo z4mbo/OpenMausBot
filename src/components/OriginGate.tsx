@@ -10,8 +10,8 @@ import { api, useStore, type Bot } from "@/state/store";
 import type { CloudLinks } from "@/lib/origin-import";
 import { cn } from "@/lib/cn";
 import { shareSession } from "./OriginConnect";
+import { defaultOriginServer, originServerFor } from "@/lib/origin-cloud/servers";
 
-const DEV_ORIGIN_URL = "http://127.0.0.1:3210";
 const SYNC_EVERY_MS = 60_000;
 const SIGN_IN_TIMEOUT_MS = 15_000;
 
@@ -63,7 +63,7 @@ function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [invite, setInvite] = useState("");
-  const [server, setServer] = useState(url ?? DEV_ORIGIN_URL);
+  const [server, setServer] = useState(url ?? defaultOriginServer());
   const [advanced, setAdvanced] = useState(!url && !import.meta.env.DEV);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -73,13 +73,14 @@ function SignIn() {
     setBusy(true); setError("");
     try {
       if (invite.trim() && !token) throw new Error("That invite link doesn't look right");
-      setCloudUrl(server.trim() || null);
+      const backend = originServerFor(server);
+      setCloudUrl(backend);
       const result = await withTimeout(mode === "signin"
         ? cloudAction<{ sessionToken: string }>("auth:login", { email: email.trim(), password, sessionToken: undefined })
-        : cloudAction<{ sessionToken: string }>("auth:signup", { email: email.trim(), password, name: name.trim(), ...(token ? { inviteToken: token } : {}), sessionToken: undefined }), server.trim());
+        : cloudAction<{ sessionToken: string }>("auth:signup", { email: email.trim(), password, name: name.trim(), ...(token ? { inviteToken: token } : {}), sessionToken: undefined }), backend);
       setSessionToken(result.sessionToken);
       if (token) await cloudMutation("workspaces:acceptInvite", { token });
-      await shareSession(server.trim(), result.sessionToken);
+      await shareSession(backend, result.sessionToken);
       setPassword("");
     } catch (cause) {
       setError(errorText(cause));
@@ -210,7 +211,7 @@ export function OriginGate({ children }: { children: ReactNode }) {
   const url = useCloudUrl();
   const session = useCloudSession();
   useEffect(() => {
-    if (!url && import.meta.env.DEV) setCloudUrl(DEV_ORIGIN_URL);
+    if (!url) setCloudUrl(defaultOriginServer());
   }, [url]);
   if (session.token && !session.ready) {
     return <main className="flex min-h-dvh items-center justify-center bg-app"><Loader2 size={18} className="animate-spin text-ink-tertiary" /></main>;

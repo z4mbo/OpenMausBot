@@ -1,5 +1,6 @@
 import { ConvexReactClient } from "convex/react";
 import { makeFunctionReference, type FunctionType } from "convex/server";
+import { originServerFor } from "./servers";
 
 const URL_KEY = "origin-cloud-url";
 const SESSION_KEY = "origin-cloud-session";
@@ -44,7 +45,7 @@ function createStore(read: () => string | null) {
 
 export function cloudUrl(): string | null {
   const stored = readStorage(URL_KEY)?.trim();
-  if (stored) return stored;
+  if (stored) return originServerFor(stored);
   const fromEnv = (import.meta.env?.VITE_ORIGIN_CONVEX_URL as string | undefined)?.trim();
   return fromEnv || null;
 }
