@@ -95,7 +95,12 @@ export const wake = internalMutation({
 });
 export const markAll = mutation({
   args: scope, returns: v.null(),
-  handler: async (ctx, a) => { const { user } = await requireTeamMember(ctx, a.teamId, a.sessionToken); await readBatch(ctx, a.teamId, user._id, Date.now()); return null; },
+  handler: async (ctx, a) => {
+    const { user } = await requireTeamMember(ctx, a.teamId, a.sessionToken);
+    const newest = await ctx.db.query("notifications").withIndex("by_user_team_read", q => q.eq("userId", user._id).eq("teamId", a.teamId).eq("read", false)).order("desc").first();
+    if (newest) await readBatch(ctx, a.teamId, user._id, newest._creationTime);
+    return null;
+  },
 });
 async function readBatch(ctx: MutationCtx, teamId: Id<"teams">, userId: Id<"users">, before: number) {
   const rows = await ctx.db.query("notifications").withIndex("by_user_team_read", q => q.eq("userId", userId).eq("teamId", teamId).eq("read", false).lte("_creationTime", before)).take(100);
