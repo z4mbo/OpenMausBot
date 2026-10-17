@@ -699,6 +699,18 @@ describe("connection security and discovery", () => {
     expect(() => validateBaseUrl("http://0.0.0.0:8799")).toThrow("Insecure cleartext HTTP");
   });
 
+  it("does not echo credentials from a malformed configured URL", () => {
+    const secret = "fixture-password-not-a-real-secret";
+    let message = "";
+    try {
+      validateBaseUrl(`https://member:${secret}@[`);
+    } catch (error) {
+      message = error instanceof Error ? error.message : String(error);
+    }
+    expect(message).toContain("Invalid OpenMausBot URL");
+    expect(message).not.toContain(secret);
+  });
+
   it("skips a foreign process and discovers the real fallback port", async () => {
     globalThis.fetch = vi.fn(async (url: any) => {
       if (String(url).includes(":8799")) return jsonResponse({ app: "not-openmausbot" });
