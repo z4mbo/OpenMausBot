@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { Download, File as FileIcon, Loader2, MessagesSquare, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useCloudSession, type CloudUser } from "@/lib/origin-cloud";
 import { originRealtime, originRealtimeFile, usePolled, type MemberChatAttachment, type MemberChatMessage, type RealtimeTarget } from "@/lib/origin-realtime";
+import { consumeChatFocus, useChatFocus } from "@/lib/origin-chat-focus";
+import { mentionChoicesForQuery, mentionedPeople, mentionQueryAt } from "@/lib/mentions";
 import { ChatMarkdown } from "../ChatMarkdown";
+import { useTeammates, type Teammate } from "../origin-members/teammates";
 import { CloudGate, EmptyState, Loading, Notice, iconButton, inputClass, primaryButton, type OriginPageProps } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
 
@@ -24,11 +27,16 @@ export function TeamChatPage(props: OriginPageProps) {
   return (
     <CloudGate {...props} label="Messages">
       {({ project, projectId, canEdit }) => session.user && project.teamId
-        ? <TeamChat key={projectId} target={{ teamId: project.teamId, conversation: `project:${projectId}` }} projectId={projectId} name={project.name} me={session.user} canWrite={canEdit}
-            emptyTitle={`Start the ${project.name} conversation`} emptyBody="Messages here are shared with everyone in this project." readOnlyNote="You have view-only access to this project." />
+        ? <ProjectTeamChat key={projectId} teamId={project.teamId} projectId={projectId} name={project.name} me={session.user} canWrite={canEdit} />
         : <EmptyState icon={<MessagesSquare size={22} />} title="Chat is unavailable" body="This project is not in a shared workspace yet, so there is nobody to chat with." />}
     </CloudGate>
   );
+}
+
+function ProjectTeamChat({ teamId, projectId, name, me, canWrite }: { teamId: string; projectId: string; name: string; me: CloudUser; canWrite: boolean }) {
+  const people = useTeammates({ projectId });
+  return <TeamChat target={{ teamId, conversation: `project:${projectId}` }} projectId={projectId} name={name} me={me} canWrite={canWrite} people={people}
+    emptyTitle={`Start the ${name} conversation`} emptyBody="Messages here are shared with everyone in this project." readOnlyNote="You have view-only access to this project." />;
 }
 
 function timeLabel(at: number): string {
@@ -44,11 +52,13 @@ function mergeMessages(older: readonly MemberChatMessage[], latest: readonly Mem
 }
 
 export type TeamChatProps = {
-  target: RealtimeTarget; name: string; me: CloudUser; canWrite: boolean; projectId?: string;
+  target: RealtimeTarget; name: string; me: CloudUser; canWrite: boolean; projectId?: string; people: readonly Teammate[];
   emptyTitle: string; emptyBody: string; readOnlyNote: string; markRead?: boolean;
 };
 
-export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, emptyBody, readOnlyNote, markRead = false }: TeamChatProps) {
+const MENTION_CHOICES = 8;
+
+export function TeamChat({ target, projectId, name, me, canWrite, people, emptyTitle, emptyBody, readOnlyNote, markRead = false }: TeamChatProps) {
   const key = `${target.teamId}:${target.conversation}`;
   const { value: latest, error, refresh } = usePolled(
     () => originRealtime<{ messages: MemberChatMessage[]; hasMore: boolean }>(MESSAGES, target),
@@ -61,15 +71,47 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
+  const [caret, setCaret] = useState(0);
+  const [dismissedAt, setDismissedAt] = useState<number | null>(null);
+  const [highlight, setHighlight] = useState(0);
+  const [focused, setFocused] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const messages = mergeMessages(older, latest?.messages ?? []);
   const lastId = messages.at(-1)?.id;
+  const mention = mentionQueryAt(draft, caret);
+  const choices = useMemo(
+    () => (mention && mention.start !== dismissedAt ? mentionChoicesForQuery(people, mention.query).slice(0, MENTION_CHOICES) : []),
+    [mention?.start, mention?.query, dismissedAt, people],
+  );
+  const focus = useChatFocus();
+  const wanted = focus && focus.conversation === (target.conversation ?? "") ? focus : null;
 
   useEffect(() => {
-    bottom.current?.scrollIntoView({ block: "end" });
+    if (!focused) bottom.current?.scrollIntoView({ block: "end" });
     if (markRead && lastId) void originRealtime(CONVERSATIONS, target, { method: "PATCH", json: { messageId: lastId } }).catch(() => {});
   }, [lastId]);
+
+  useEffect(() => {
+    if (!wanted) return;
+    let alive = true;
+    void originRealtime<{ messages: MemberChatMessage[] }>(MESSAGES, target, { query: { focus: wanted.messageId } }).then((result) => {
+      if (!alive) return;
+      setOlder((current) => mergeMessages(result.messages, current));
+      setFocused(wanted.messageId);
+    }).catch(() => setNotice("That message is no longer here")).finally(() => consumeChatFocus(wanted));
+    return () => { alive = false; };
+  }, [wanted]);
+
+  useEffect(() => {
+    if (!focused) return;
+    document.querySelector(`[data-member-message="${CSS.escape(focused)}"]`)?.scrollIntoView({ block: "center" });
+    const timer = window.setTimeout(() => setFocused(null), 2_400);
+    return () => window.clearTimeout(timer);
+  }, [focused]);
+
+  useEffect(() => setHighlight(0), [choices.length, mention?.start]);
 
   const loadOlder = async () => {
     const first = messages[0];
@@ -109,7 +151,8 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
     setBusy(true);
     setNotice("");
     try {
-      await originRealtime(MESSAGES, target, { json: { body: draft, attachmentIds: pending.map((file) => file.id) } });
+      const mentionUserIds = mentionedPeople(draft, people).map((person) => person.userId);
+      await originRealtime(MESSAGES, target, { json: { body: draft, attachmentIds: pending.map((file) => file.id), ...(mentionUserIds.length ? { mentionUserIds } : {}) } });
       setDraft("");
       setPending([]);
       refresh();
@@ -132,8 +175,39 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
     }
   };
 
+  const pickMention = (person: Teammate) => {
+    if (!mention) return;
+    const next = `${draft.slice(0, mention.start)}@${person.name} ${draft.slice(caret)}`;
+    const at = mention.start + person.name.length + 2;
+    setDraft(next);
+    setCaret(at);
+    setDismissedAt(mention.start);
+    requestAnimationFrame(() => {
+      input.current?.focus();
+      input.current?.setSelectionRange(at, at);
+    });
+  };
+
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+    if (event.nativeEvent.isComposing) return;
+    if (choices.length) {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        setHighlight((current) => (current + (event.key === "ArrowDown" ? 1 : -1) + choices.length) % choices.length);
+        return;
+      }
+      if (event.key === "Enter" || event.key === "Tab") {
+        event.preventDefault();
+        pickMention(choices[highlight] ?? choices[0]!);
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setDismissedAt(mention?.start ?? null);
+        return;
+      }
+    }
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       void send();
     }
@@ -153,7 +227,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
           {messages.map((message) => {
             const mine = message.authorUserId === me._id;
             return (
-              <li key={message.id} className="group -mx-2 flex gap-2.5 rounded-xl px-2 py-1 transition-colors hover:bg-raised/30 motion-safe:animate-msg-in" data-member-message={message.id}>
+              <li key={message.id} className={cn("group -mx-2 flex gap-2.5 rounded-xl px-2 py-1 transition-colors hover:bg-raised/30 motion-safe:animate-msg-in", focused === message.id && "ring-2 ring-accent/70")} data-member-message={message.id}>
                 <PersonAvatar person={{ name: message.authorName, email: message.authorEmail, avatarUrl: message.avatarUrl ?? null }} size={30} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-2">
@@ -179,7 +253,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
                         <button type="button" className={iconButton} aria-label="Cancel editing" onClick={() => setEditing(null)}><X size={14} /></button>
                       </div>
                     </form>
-                  ) : message.body && <div className="text-[13.5px] text-ink"><ChatMarkdown text={message.body} /></div>}
+                  ) : message.body && <div className="text-[13.5px] text-ink"><MessageBody message={message} me={me} /></div>}
                   {message.attachments?.length ? (
                     <div className="mt-1.5 flex flex-wrap gap-2">
                       {message.attachments.map((file) => <Attachment key={file.id} file={file} target={target} />)}
@@ -218,11 +292,28 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
                 ))}
               </div>
             )}
+            {choices.length > 0 && (
+              <div role="listbox" id="team-chat-mentions" aria-label="Mention a teammate" className="flex max-h-60 flex-col overflow-y-auto rounded-xl border border-hairline/40 bg-raised p-1 shadow-lg">
+                {choices.map((person, index) => (
+                  <button key={person.id} id={`team-chat-mention-${person.id}`} type="button" role="option" aria-selected={index === highlight}
+                    onMouseDown={(event) => event.preventDefault()} onMouseEnter={() => setHighlight(index)} onClick={() => pickMention(person)}
+                    className={cn("flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[13px] text-ink", index === highlight && "bg-panel")}>
+                    {person.avatar}
+                    <span className="min-w-0 flex-1 truncate font-medium">{person.name}</span>
+                    {person.description && <span className="truncate text-[12px] text-ink-tertiary">{person.description}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex items-end gap-1.5 rounded-2xl border border-hairline/60 bg-inset p-1.5 transition-colors focus-within:border-accent/60">
               <input ref={fileInput} type="file" multiple hidden onChange={(event) => void attach(event.target.files)} />
               <button type="button" className={iconButton} aria-label="Attach a file" title="Attach a file" disabled={busy || pending.length >= 8} onClick={() => fileInput.current?.click()}><Paperclip size={15} /></button>
-              <textarea className="max-h-40 min-h-8 flex-1 resize-none bg-transparent px-1 py-1.5 text-[13.5px] text-ink outline-none [field-sizing:content] placeholder:text-ink-tertiary max-md:text-[16px]" rows={1} placeholder={`Message ${name}`} aria-label="Message"
-                value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={onKeyDown} />
+              <textarea ref={input} className="max-h-40 min-h-8 flex-1 resize-none bg-transparent px-1 py-1.5 text-[13.5px] text-ink outline-none [field-sizing:content] placeholder:text-ink-tertiary max-md:text-[16px]" rows={1} placeholder={`Message ${name}`} aria-label="Message"
+                role="combobox" aria-autocomplete="list" aria-expanded={choices.length > 0} aria-controls={choices.length ? "team-chat-mentions" : undefined}
+                aria-activedescendant={choices[highlight] ? `team-chat-mention-${choices[highlight]!.id}` : undefined}
+                value={draft} onKeyDown={onKeyDown}
+                onChange={(event) => { setDraft(event.target.value); setCaret(event.target.selectionStart ?? event.target.value.length); setDismissedAt(null); }}
+                onSelect={(event) => setCaret(event.currentTarget.selectionStart ?? 0)} />
               <button type="submit" className={cn(primaryButton, "size-8 rounded-xl p-0")} disabled={busy || (!draft.trim() && !pending.length)} aria-label="Send">
                 {busy ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
               </button>
@@ -232,6 +323,13 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
       </div>
     </section>
   );
+}
+
+function MessageBody({ message, me }: { message: MemberChatMessage; me: CloudUser }) {
+  const mentions = message.mentions;
+  const peers = useMemo(() => (mentions ?? []).filter((mention) => mention.userId !== me._id).map((mention) => ({ name: mention.name })), [mentions, me._id]);
+  const mine = mentions?.find((mention) => mention.userId === me._id);
+  return <ChatMarkdown text={message.body} mentionPeers={peers} {...(mine ? { mentionPerson: { profileName: mine.name } } : {})} />;
 }
 
 function Attachment({ file, target }: { file: MemberChatAttachment; target: RealtimeTarget }) {

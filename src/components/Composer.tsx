@@ -71,7 +71,7 @@ import {
   doubleEnterSteersQueue,
 } from "./ComposerQueuedMessages";
 import { skillAuthoringEnabled } from "@/lib/feature-flags";
-import { mentionChoicesForQuery, mentionQueryAt, mentionRowDescription } from "@/lib/mentions";
+import { mentionChoicesForQuery, mentionedPeople, mentionQueryAt, mentionRowDescription, type MentionPeer } from "@/lib/mentions";
 import { serializeThreadRefs, threadTokenFromPaste, threadTokenSpacing } from "@/lib/thread-refs";
 import {
   composerSlashTrigger,
@@ -324,11 +324,18 @@ export function Composer({
           ...(members ?? []).map((member) => ({ id: member.id, name: member.name, bot: member })),
           ...(people ?? []).map((teammate) => ({ id: `person:${teammate.id}`, name: teammate.name, teammate })),
         ]
-      : state.bots
-          .filter((member) => member.id !== bot?.id && !member.hidden)
-          .map((member) => ({ id: member.id, name: member.name, bot: member }));
+      : [
+          ...(people ?? []).map((teammate) => ({ id: `person:${teammate.id}`, name: teammate.name, teammate })),
+          ...state.bots
+            .filter((member) => member.id !== bot?.id && !member.hidden)
+            .map((member) => ({ id: member.id, name: member.name, bot: member })),
+        ];
     return mentionChoicesForQuery(pool, mention.query);
   }, [mention, dismissedAt, state.bots, bot?.id, group, members, people]);
+  const mentionPeers = useMemo<MentionPeer[]>(
+    () => [...(group ? members ?? [] : state.bots.filter((member) => member.id !== bot?.id)), ...(people ?? [])],
+    [group, members, state.bots, bot?.id, people],
+  );
   const mentionEveryoneCount = (members ?? []).filter((member) => !member.hidden).length;
   const mentionPickerOpen = candidates.length > 0;
   const commandMotion = useMenuMotion(commandPickerOpen);
@@ -594,6 +601,7 @@ export function Composer({
         replyToId: replyTo?.id,
         threadId,
         dataContext,
+        ...(people?.length ? { mentionUserIds: mentionedPeople(body, people).map((teammate) => teammate.id) } : {}),
         onError: () => restoreDraft(sentDraft),
       });
       track("message_sent", { driver: bot.modelSelection?.instanceId, queued: busy && !canSteer });
@@ -964,7 +972,7 @@ export function Composer({
           <MentionTextarea
           wrapperClassName="@max-[30rem]/composer:order-first @max-[30rem]/composer:basis-full"
           inputRef={inputRef}
-          peers={group ? members ?? [] : state.bots.filter((member) => member.id !== bot?.id)}
+          peers={mentionPeers}
           everyone={Boolean(group && !group.dm)}
           dir="auto"
           rows={1}

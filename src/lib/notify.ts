@@ -50,3 +50,16 @@ export function showNotification(
     new Notification(frame.title, options).onclick = open;
   }
 }
+
+/** A desktop alert for an Origin notification; `tag` keeps one alert per notification however often it is raised. */
+export function showOriginNotification(alert: { tag: string; title: string; body: string }, onOpen: () => void) {
+  if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+  new Notification(alert.title, {
+    body: alert.body,
+    tag: `origin:${alert.tag}`,
+    ...(notificationSoundsEnabled() ? {} : { silent: true }),
+  }).onclick = () => {
+    window.focus();
+    onOpen();
+  };
+}

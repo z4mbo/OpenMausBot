@@ -4,12 +4,12 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { releases } from "../shared/origin-releases.ts";
 import { json, readBody } from "./harness/http.ts";
 import { createCallAgents, DEFAULT_CALL_AGENT_SETTINGS, type CallAgents } from "./origin-call-agent.ts";
 import type { OriginCloudClient } from "./origin-cloud.ts";
-import { createOriginMemberRoutes, turnIceServers } from "./origin-members.ts";
+import { convexMentionNotifier, createOriginMemberRoutes, turnIceServers } from "./origin-members.ts";
 import { openRealtimeStore, type MentionNotice } from "./origin-realtime-store.ts";
 import type { RequestAuth } from "./request-auth.ts";
 import { dispatchRoutes } from "./routes/table.ts";
@@ -187,7 +187,7 @@ describe("origin member chat", () => {
     expect(posted.status).toBe(200);
     expect(posted.body.message.references).toEqual([{ type: "issue", projectId: PROJECT, id: "task0000000001", label: "Fix login" }]);
     await new Promise((done) => setTimeout(done, 20));
-    expect(notices).toEqual([{ teamId: TEAM, actorId: USERS["tok-ana"]!._id, messageId: posted.body.message.id, userIds: [USERS["tok-bo"]!._id] }]);
+    expect(notices).toEqual([{ teamId: TEAM, actorId: USERS["tok-ana"]!._id, messageId: posted.body.message.id, userIds: [USERS["tok-bo"]!._id], conversation: `project:${PROJECT}`, preview: "Look at this" }]);
 
     const id = posted.body.message.id;
     expect((await call("tok-bo", "PATCH", `/api/local-chat/messages?${channel}`, { id, body: "hijack" })).status).toBe(400);
@@ -223,6 +223,26 @@ describe("origin member chat", () => {
     expect((await call("tok-bo", "GET", `/api/local-chat/conversations?teamId=${TEAM}`)).body.conversations[0].unread).toBe(0);
   });
 
+  it("notifies a direct message's other participant and refuses mentions of anyone else there", async () => {
+    const notices: MentionNotice[] = [];
+    const { call } = await start({ notices });
+    const opened = await call("tok-ana", "POST", `/api/local-chat/conversations?teamId=${TEAM}`, { recipientId: USERS["tok-bo"]!._id });
+    const dm = `teamId=${TEAM}&conversation=${encodeURIComponent(opened.body.conversationId)}`;
+    expect((await call("tok-ana", "POST", `/api/local-chat/messages?${dm}`, { body: "@Cy look", mentionUserIds: [USERS["tok-cy"]!._id] })).status).toBe(400);
+    const sent = await call("tok-ana", "POST", `/api/local-chat/messages?${dm}`, { body: "@Bo look", mentionUserIds: [USERS["tok-bo"]!._id] });
+    await new Promise((done) => setTimeout(done, 20));
+    expect(notices).toEqual([{ teamId: TEAM, actorId: USERS["tok-ana"]!._id, messageId: sent.body.message.id, userIds: [USERS["tok-bo"]!._id], conversation: opened.body.conversationId, preview: "@Bo look" }]);
+  });
+
+  it("limits how often one person can mention others", async () => {
+    const { call } = await start({ notices: [] });
+    const channel = `teamId=${TEAM}`;
+    const statuses: number[] = [];
+    for (let i = 0; i < 22; i += 1) statuses.push((await call("tok-ana", "POST", `/api/local-chat/messages?${channel}`, { body: `@Bo ${i}`, mentionUserIds: [USERS["tok-bo"]!._id] })).status);
+    expect(statuses.slice(0, 20).every((status) => status === 200)).toBe(true);
+    expect(statuses.at(-1)).toBe(400);
+  });
+
   it("uploads a file, attaches it, and serves it only inside its conversation", async () => {
     const { base, call } = await start();
     const channel = `teamId=${TEAM}&conversation=project:${PROJECT}`;
@@ -237,6 +257,33 @@ describe("origin member chat", () => {
     expect(download.headers.get("content-type")).toBe("image/png");
     expect(new Uint8Array(await download.arrayBuffer())).toEqual(new Uint8Array([137, 80, 78, 71]));
     expect((await fetch(`${base}/api/local-chat/files?teamId=${TEAM}&id=${uploaded.file.id}`, { headers: { "x-origin-session": "tok-bo" } })).status).toBe(404);
+  });
+});
+
+describe("convexMentionNotifier", () => {
+  const notice: MentionNotice = { teamId: TEAM, actorId: "user000000000a", messageId: "m1", userIds: ["user000000000b"], conversation: "", preview: "hi" };
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("signs the notice for the deployment's site, derived from the connected Convex address", async () => {
+    const fetchMock = vi.fn(async () => new Response("null", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const secret = "s".repeat(32);
+    await convexMentionNotifier({ ORIGIN_INTEGRATION_SECRET: secret }, () => "http://127.0.0.1:3210")!(notice);
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("http://127.0.0.1:3211/integrations");
+    const body = String(init.body);
+    expect(JSON.parse(body)).toMatchObject({ operation: "chatMentions", args: notice });
+    expect((init.headers as Record<string, string>)["x-origin-signature"]).toBe(createHmac("sha256", secret).update(body).digest("hex"));
+  });
+
+  it("drops a notice the deployment refuses and retries one it could not reach", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const notify = convexMentionNotifier({ ORIGIN_INTEGRATION_SECRET: "s".repeat(32), ORIGIN_CONVEX_SITE_URL: "https://site.example" }, () => null)!;
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("no", { status: 400 })));
+    await expect(notify(notice)).resolves.toBeUndefined();
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("down", { status: 503 })));
+    await expect(notify(notice)).rejects.toThrow(/503/);
+    expect(convexMentionNotifier({ ORIGIN_INTEGRATION_SECRET: "short" }, () => null)).toBeNull();
   });
 });
 

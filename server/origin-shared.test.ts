@@ -7,7 +7,7 @@ import type { ProviderSnapshot } from "./contracts.ts";
 import { resolveSharedModel } from "./default-model-selection.ts";
 import { openOutbox } from "./origin-outbox.ts";
 import { createRunLease } from "./origin-run-lease.ts";
-import { remoteBacklogExceedsCaps } from "./origin-shared-agents.ts";
+import { remoteBacklogExceedsCaps, sharedThreadMention } from "./origin-shared-agents.ts";
 import { clientIdFor, createThreadMirror, fromCloudRow, ownRow, threadLinkFrom, toCloudRow, type CloudRow, type ThreadSnapshot } from "./origin-thread-mirror.ts";
 import type { Message, StoreChange } from "./store.ts";
 
@@ -217,5 +217,28 @@ describe("cross-machine context", () => {
     expect(remoteBacklogExceedsCaps([{ role: "bot", kind: "text", text: "mine" }, remote("a"), remote("b")])).toBe(false);
     expect(remoteBacklogExceedsCaps([{ role: "bot", kind: "text", text: "mine" }, remote("x".repeat(5_000))])).toBe(true);
     expect(remoteBacklogExceedsCaps(Array.from({ length: 13 }, (_, index) => remote(`m${index}`)))).toBe(true);
+  });
+});
+
+describe("tagging teammates in a shared thread", () => {
+  const lines = [
+    message({ id: "mine", role: "user", sendId: "s1", text: "@ada look" }),
+    message({ id: "theirs", role: "user", sendId: "s2", text: "@ada look", remote: { cloudId: "c2", name: "Bo", status: "final" } }),
+  ];
+  const store = { taskByThread: (_bot: string, thread: string) => (thread === "t" || thread === "local" ? { threadId: thread } : undefined), messagesFor: () => lines } as never;
+  const ask = (body: Record<string, unknown>) => sharedThreadMention(store, { t: "cloudthread1" }, "b", { threadId: "t", sendId: "s1", userIds: ["user1"], ...body });
+
+  it("names the cloud row of this person's own line", () => {
+    expect(ask({})).toEqual({ threadId: "cloudthread1", clientId: "send:s1", userIds: ["user1"] });
+    expect(ask({ userIds: ["user1", "user1", "user2"] })).toMatchObject({ userIds: ["user1", "user2"] });
+  });
+
+  it("refuses another member's line, an unshared thread and malformed people", () => {
+    expect(ask({ sendId: "s2" })).toMatchObject({ status: 404 });
+    expect(ask({ threadId: "local" })).toMatchObject({ status: 409 });
+    expect(ask({ threadId: "gone" })).toMatchObject({ status: 404 });
+    expect(ask({ userIds: [] })).toMatchObject({ status: 400 });
+    expect(ask({ userIds: ["Robert'); DROP"] })).toMatchObject({ status: 400 });
+    expect(ask({ userIds: Array.from({ length: 11 }, (_, i) => `user${i}`) })).toMatchObject({ status: 400 });
   });
 });

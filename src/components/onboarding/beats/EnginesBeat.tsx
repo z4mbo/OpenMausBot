@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Download, Loader2, LogIn, RefreshCw } from "lucide-react";
-import { EngineSetup, needsCli, offersSignIn } from "@/components/EngineSetup";
+import { EngineSetup, needsCli, offersSignIn, scriptInstallOffered } from "@/components/EngineSetup";
 import { engineReady } from "@/components/EngineLibrary";
 import { InstanceProviderMark } from "@/components/ProviderIcons";
+import { ScriptEngineInstall } from "@/components/ScriptEngineInstall";
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n";
 import { engineSummary, organisationSignIn } from "@/lib/onboarding";
@@ -99,6 +100,7 @@ export function EnginesBeat({
   const instances = loaded || state.instances.length ? state.instances : null;
   const [checking, setChecking] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
+  const cloudHome = state.config?.cloudHome === true;
 
   const refresh = useCallback(async () => {
     const request = ++latestRequest.current;
@@ -234,6 +236,15 @@ export function EnginesBeat({
                           instance={instance}
                           onInstalled={(next) => {
                             dispatch({ type: "instances", instances: next });
+                            if (offersSignIn(next.find((candidate) => candidate.instanceId === instance.instanceId))) setOpen(instance.instanceId);
+                          }}
+                        />
+                      ) : scriptInstallOffered(instance, cloudHome) && expanded !== instance.instanceId ? (
+                        <ScriptEngineInstall
+                          instance={instance}
+                          script={instance.install!.script!}
+                          compact
+                          onFinished={(next) => {
                             if (offersSignIn(next.find((candidate) => candidate.instanceId === instance.instanceId))) setOpen(instance.instanceId);
                           }}
                         />

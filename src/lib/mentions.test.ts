@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mentionChoicesForQuery, mentionRanges, mentionRowDescription } from "./mentions";
+import { mentionChoicesForQuery, mentionedPeople, mentionRanges, mentionRowDescription } from "./mentions";
 
 const peers = [{ name: "Atlas" }, { name: "New Bot" }, { name: "New Bot 2" }, { name: "調査担当" }, { name: "Hidden", hidden: true }];
 const matches = (text: string, everyone = false) => mentionRanges(text, peers, everyone).map(({ start, end }) => text.slice(start, end));
@@ -87,5 +87,18 @@ describe("mention row description", () => {
   it("counts the bots @everyone reaches", () => {
     expect(mentionRowDescription({ kind: "everyone", count: 1 })).toBe("1 bot in this chat");
     expect(mentionRowDescription({ kind: "everyone", count: 6 })).toBe("6 bots in this chat");
+  });
+});
+
+describe("people a message tags", () => {
+  const people = [{ id: "1", name: "ada" }, { id: "2", name: "Ada Lovelace" }, { id: "3", name: "bo" }];
+
+  it("prefers the longest name, keeps message order and lists each person once", () => {
+    expect(mentionedPeople("@bo and @Ada Lovelace, then @bo again", people).map((person) => person.id)).toEqual(["3", "2"]);
+    expect(mentionedPeople("@ada look", people).map((person) => person.id)).toEqual(["1"]);
+  });
+
+  it("ignores addresses and longer words", () => {
+    expect(mentionedPeople("mail ada@x.dev or @adam", people)).toEqual([]);
   });
 });

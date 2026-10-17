@@ -118,6 +118,15 @@ describe("organisation sign-in in the engines beat", () => {
     expect(props.setMascot).toHaveBeenLastCalledWith("proud");
   });
 
+  it("offers the official installer on its row only in the local desktop app", () => {
+    const script = { command: "curl -fsSL https://x.ai/cli/install.sh | bash", source: "x.ai", docsUrl: "https://docs.x.ai/build/overview" };
+    store.instances = [{ ...personal("grok", false), driverKind: "grokAgent", install: { command: { linux: script.command }, script } }];
+    vi.stubGlobal("window", { ogb: { openInstallTerminal: vi.fn() } });
+    expect(render().html).toContain(">Install</button>");
+    vi.stubGlobal("window", { ogb: { openInstallTerminal: vi.fn(), remoteClient: { active: true } } });
+    expect(render().html).not.toContain(">Install</button>");
+  });
+
   it("does not count a Company engine that cannot run yet", () => {
     vi.stubGlobal("window", { ogb: { organization: bridge } });
     store.instances = [personal("claude", false), company(false)];

@@ -14,7 +14,7 @@ import { defaultCloudLinksFile, readSharedLinks, writeSharedLinks } from "./orig
 import { defaultOriginCloudFile, readOriginCloud } from "./origin-cloud.ts";
 import { openOutbox, type Outbox, type QueuedRun } from "./origin-outbox.ts";
 import { createRunLease, type RunLease } from "./origin-run-lease.ts";
-import { createThreadMirror, type CloudPort } from "./origin-thread-mirror.ts";
+import { clientIdFor, createThreadMirror, type CloudPort } from "./origin-thread-mirror.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
 import type { Message, Store } from "./store.ts";
 
@@ -90,6 +90,8 @@ export interface SharedAgentsDeps {
 export type SendDecision = { status: "running"; sendId: string } | { status: "queued"; sendId: string; runId: string; teamId: string; cloudThreadId: string };
 
 const TICK_MS = 15_000;
+const MENTIONS_PER_MESSAGE = 10;
+const MENTION_REQUESTS_PER_MINUTE = 20;
 const HOST_EVERY_MS = 10 * 60_000;
 const ID = /^[a-z0-9]{1,64}$/;
 
@@ -115,6 +117,26 @@ export function remoteBacklogExceedsCaps(messages: readonly Pick<Message, "role"
 /** Origin no longer shares this agent or thread (sharing turned off, archived, access removed): the thread goes on locally. */
 export function sharingWithdrawn(error: unknown): boolean {
   return /Shared agents are off|Agent not found|Thread not found|is archived|View-only access/.test(error instanceof Error ? error.message : String(error));
+}
+
+type MentionRefusal = { status: number; error: string };
+
+/** The Origin call that tags teammates in this person's own line of a shared thread; Origin checks the tags and access. */
+export function sharedThreadMention(
+  store: Pick<Store, "taskByThread" | "messagesFor">, threads: Record<string, string>, botId: string, body: Record<string, unknown> | null,
+): MentionRefusal | { threadId: string; clientId: string; userIds: string[] } {
+  const threadId = typeof body?.threadId === "string" ? body.threadId : "";
+  const sendId = typeof body?.sendId === "string" ? body.sendId : "";
+  const userIds = Array.isArray(body?.userIds) ? [...new Set(body.userIds)] : [];
+  if (!sendId || !userIds.length || userIds.length > MENTIONS_PER_MESSAGE || !userIds.every((id): id is string => typeof id === "string" && ID.test(id))) {
+    return { status: 400, error: `sendId and 1 to ${MENTIONS_PER_MESSAGE} Origin user ids are required` };
+  }
+  if (!store.taskByThread(botId, threadId)) return { status: 404, error: "No such thread" };
+  const cloudThreadId = threads[threadId];
+  if (!cloudThreadId) return { status: 409, error: "Only people in a shared thread can be tagged" };
+  const message = store.messagesFor(threadId).find((candidate) => candidate.sendId === sendId && candidate.role === "user" && !candidate.remote);
+  if (!message) return { status: 404, error: "No such message" };
+  return { threadId: cloudThreadId, clientId: clientIdFor(message), userIds };
 }
 
 export function createSharedAgents(deps: SharedAgentsDeps) {
@@ -338,8 +360,21 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     return { defaults: state.defaults, bots };
   };
 
+  const mentionTimes: number[] = [];
+  const mentionRefusal = (botId: string, body: Record<string, unknown> | null): MentionRefusal | null => {
+    const op = sharedThreadMention(store, threads(), botId, body);
+    if ("error" in op) return op;
+    const now = Date.now();
+    while (mentionTimes.length && now - mentionTimes[0]! > 60_000) mentionTimes.shift();
+    if (mentionTimes.length >= MENTION_REQUESTS_PER_MINUTE) return { status: 429, error: "Too many mentions. Try again in a minute." };
+    mentionTimes.push(now);
+    box().enqueue("notifications:agentThreadMentions", op);
+    schedule();
+    return null;
+  };
+
   const routes: RouteHandler = async ({ req, res, path, method, auth, json, readBody }) => {
-    if (!path.startsWith("/api/origin/shared-agents") && !/^\/api\/bots\/[\w-]+\/(shared-review|shared-private)$/.test(path)) return PASS;
+    if (!path.startsWith("/api/origin/shared-agents") && !/^\/api\/bots\/[\w-]+\/(shared-review|shared-private|mentions)$/.test(path)) return PASS;
     if (method === "GET" && path === "/api/origin/shared-agents") {
       const state = readState(files.state);
       return json(res, 200, { bots: Object.fromEntries(Object.entries(state.bots).filter(([id]) => store.bot(id))) });
@@ -429,6 +464,12 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       const { review: _done, ...link } = updated.shared!;
       store.patchBot(bot.id, { shared: link });
       return json(res, 200, { ok: true });
+    }
+    const mention = /^\/api\/bots\/([\w-]+)\/mentions$/.exec(path);
+    if (mention && method === "POST") {
+      const refused = mentionRefusal(mention[1]!, body);
+      if (refused) return json(res, refused.status, { error: refused.error });
+      return json(res, 202, { ok: true });
     }
     const privacy = /^\/api\/bots\/([\w-]+)\/shared-private$/.exec(path);
     if (privacy && method === "PUT") {

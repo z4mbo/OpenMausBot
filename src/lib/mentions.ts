@@ -76,6 +76,13 @@ export function mentionRanges(text: string, peers: readonly MentionPeer[], every
   return ranges;
 }
 
+/** The people a message tags, in order, each once. */
+export function mentionedPeople<T extends { name: string }>(text: string, people: readonly T[]): T[] {
+  const tagged = mentionRanges(text, people).map((range) => text.slice(range.start + 1, range.end).toLowerCase());
+  return people.filter((person) => tagged.includes(person.name.toLowerCase()))
+    .sort((a, b) => tagged.indexOf(a.name.toLowerCase()) - tagged.indexOf(b.name.toLowerCase()));
+}
+
 export function mentionClassName(range: Pick<MentionRange, "you">): string {
   return range.you ? "mention-highlight mention-you" : "mention-highlight";
 }

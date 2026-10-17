@@ -10,6 +10,7 @@ import {
   openRealtimeStore, RealtimeError,
   type CallScope, type CallSignalKind, type ChatMention, type Conversation, type ChatReference, type ChatScope, type MentionNotice, type RealtimeStore, type WorkspaceUser,
 } from "./origin-realtime-store.ts";
+import { convexSiteUrl } from "./origin-public-pages.ts";
 import { PASS, type RouteContext, type RouteHandler } from "./routes/table.ts";
 
 type Args = Record<string, unknown>;
@@ -73,14 +74,20 @@ export function connectedConvex(): OriginCloudClient | null {
   return cachedConvex.client;
 }
 
-export function convexMentionNotifier(env: NodeJS.ProcessEnv = process.env): ((notice: MentionNotice) => Promise<void>) | null {
-  const site = env.ORIGIN_CONVEX_SITE_URL?.trim().replace(/\/$/, "");
+export function convexMentionNotifier(env: NodeJS.ProcessEnv = process.env, convexUrl: () => string | null = connectedConvexUrl): ((notice: MentionNotice) => Promise<void>) | null {
   const secret = env.ORIGIN_INTEGRATION_SECRET;
-  if (!site || !secret || secret.length < 32) return null;
+  if (!secret || secret.length < 32) return null;
   return async (notice) => {
+    const url = convexUrl();
+    const site = env.ORIGIN_CONVEX_SITE_URL?.trim().replace(/\/+$/, "") || (url ? convexSiteUrl(url) : null);
+    if (!site) throw new Error("Origin is not connected");
     const body = JSON.stringify({ at: Date.now(), operation: "chatMentions", args: notice });
     const signature = createHmac("sha256", secret).update(body).digest("hex");
     const response = await fetch(`${site}/integrations`, { method: "POST", body, headers: { "content-type": "application/json", "x-origin-signature": signature }, signal: AbortSignal.timeout(15_000) });
+    if (response.status === 400) {
+      console.warn("Origin refused a chat mention notice; dropping it");
+      return;
+    }
     if (!response.ok) throw new Error(`Origin notification failed (${response.status})`);
   };
 }
@@ -353,11 +360,14 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
       if (scope.conversation.startsWith("dm:") && !scope.conversation.slice(3).split(":").every((id) => team.some((member) => member.userId === id))) {
         throw new RealtimeError("This member is no longer in the workspace");
       }
+      const participants = scope.conversation.startsWith("dm:") ? scope.conversation.slice(3).split(":") : null;
       const mentions: ChatMention[] = [...new Set((mentionIds ?? []) as unknown[])].map((id) => {
         const member = team.find((candidate) => candidate.userId === id);
         if (!member || !text(member.userId)) throw new RealtimeError("Mention must belong to this workspace");
+        if (participants && !participants.includes(text(member.userId))) throw new RealtimeError("Only people in this conversation can be mentioned");
         return { userId: text(member.userId), name: text(member.username) || text(member.name) };
       });
+      if (mentions.length) store().limit(`chat-mention:${scope.user.teamId}:${scope.user.userId}`, 20, 60_000);
       const notifyUserIds: string[] = [];
       const references = await resolveReferences(scope, body.references, team, notifyUserIds);
       const message = store().send(scope, text(body.body), {

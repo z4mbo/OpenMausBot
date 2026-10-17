@@ -14,6 +14,7 @@ import { WorkspaceGate } from "./origin-pages/ui";
 import { DrawingCanvas } from "./OriginDraw";
 import { GlassHeaderFrame } from "./GlassScrollFrame";
 import { useBotColor } from "@/lib/origin-avatar-looks";
+import { useOriginInboxAlerts } from "@/lib/origin-inbox-alerts";
 import { accentVars } from "@/lib/user-bubble-tone";
 
 export const ORIGIN_PAGES: { id: OriginPage; label: string; contents: string; icon: typeof Inbox }[] = [
@@ -28,22 +29,28 @@ export function OriginNav({ density }: { density: SidebarDensity }) {
   const lead = sidebarRowLead(density, useShowThreads());
   const iconsOnly = density === "icons";
   const { state } = useStore();
-  const { head } = useActiveCloudWorkspace();
+  const { teamId, head } = useActiveCloudWorkspace();
   const accent = accentVars(useBotColor(state.bots.find((bot) => bot.id === head?.id)));
+  const inbox = useOriginInboxAlerts(teamId);
+  const inboxCount = inbox.unread > 0 ? `${inbox.unread}${inbox.more ? "+" : ""}` : "";
   return (
     <nav aria-label="Workspace" data-origin-nav style={accent} className={cn("flex flex-col gap-0.5", iconsOnly ? "items-center py-1" : "pb-1 pt-1.5")}>
       {ORIGIN_PAGES.map(({ id, label, icon: Icon }) => {
         const active = open === id;
+        const count = id === "inbox" ? inboxCount : "";
+        const name = count ? `${label}, ${count} unread` : label;
         return (
-          <button key={id} type="button" aria-current={active ? "page" : undefined} title={iconsOnly ? label : undefined} aria-label={iconsOnly ? label : undefined}
+          <button key={id} type="button" aria-current={active ? "page" : undefined} title={iconsOnly ? name : undefined} aria-label={iconsOnly || count ? name : undefined}
             data-origin-nav-item={id} onClick={() => openOriginPage(id)}
             className={cn("group flex items-center rounded-xl outline-none transition-[background-color,transform] duration-150 active:scale-[0.98] focus-visible:ring-1 focus-visible:ring-accent/60 motion-reduce:active:scale-100",
               iconsOnly ? "size-[46px] justify-center" : cn("w-full py-1 pr-3 text-left", lead.padding, lead.gap),
               active ? "bg-raised text-ink" : "text-ink hover:bg-raised/50")}>
-            <span className="flex shrink-0 items-center justify-center" style={iconsOnly ? undefined : { width: lead.size, height: Math.min(lead.size, 32) }}>
+            <span className="relative flex shrink-0 items-center justify-center" style={iconsOnly ? undefined : { width: lead.size, height: Math.min(lead.size, 32) }}>
               <Icon size={20} aria-hidden="true" className={cn("transition-colors duration-150 motion-reduce:transition-none", active ? "text-ink" : "text-ink-secondary group-hover:text-ink")} />
+              {count && iconsOnly && <span aria-hidden="true" className="absolute -right-1 -top-1 size-2.5 rounded-full bg-accent ring-2 ring-app" />}
             </span>
             {!iconsOnly && <span className="flex-1 truncate text-[14px] font-medium leading-5">{label}</span>}
+            {count && !iconsOnly && <span aria-hidden="true" data-origin-inbox-unread className="rounded-full bg-accent px-1.5 text-[11px] font-semibold leading-[18px] text-accent-ink">{count}</span>}
           </button>
         );
       })}

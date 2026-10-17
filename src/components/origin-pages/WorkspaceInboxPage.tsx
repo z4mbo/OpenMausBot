@@ -5,7 +5,7 @@ import {
 import { cloudMutation, useCloudPages, useCloudQuery, type CloudProject } from "@/lib/origin-cloud";
 import { useWorkspaceMembers } from "@/lib/origin-members";
 import { useOpenOriginIssue } from "@/lib/origin-issue-focus";
-import { openOriginPage } from "@/lib/origin-pages";
+import { useOpenOriginNotification } from "@/lib/origin-notification-open";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import type { Priority } from "./cloud-types";
@@ -21,7 +21,7 @@ type InboxTask = {
 type CalendarTask = { _id: string; projectId: string; title: string; dueDate: string; done: boolean; priority: Priority; projectName: string };
 type Notification = {
   _id: string; kind: "assignment" | "comment" | "mention"; read: boolean; createdAt: number; projectId?: string; taskId?: string; messageId?: string;
-  preview?: string; actorName: string; actorAvatar: string | null; projectName?: string; taskTitle?: string; available: boolean;
+  conversation?: string; agentThreadId?: string; preview?: string; actorName: string; actorAvatar: string | null; projectName?: string; taskTitle?: string; available: boolean;
 };
 type Filters = { mine: boolean; done: boolean; project: string; priority: "" | Priority; search: string };
 
@@ -51,7 +51,7 @@ export function WorkspaceInbox({ teamId, canEdit }: WorkspaceContext) {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-[var(--glass-top,0px)] [scroll-padding-top:var(--glass-top,0px)]">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 md:p-6">
-        <Notifications teamId={teamId} onOpenTask={open} onError={setNotice} />
+        <Notifications teamId={teamId} onError={setNotice} />
         <div className="flex flex-wrap items-center gap-2">
           <Segmented label="Issue ownership" value={filters.mine ? "mine" : "all"} onChange={(value) => patch({ mine: value === "mine" })}
             options={[{ value: "mine", label: "Assigned to me" }, { value: "all", label: "All issues" }]} />
@@ -84,7 +84,8 @@ export function WorkspaceInbox({ teamId, canEdit }: WorkspaceContext) {
   );
 }
 
-function Notifications({ teamId, onOpenTask, onError }: { teamId: string; onOpenTask(projectId: string, issueId: string): void; onError(message: string): void }) {
+function Notifications({ teamId, onError }: { teamId: string; onError(message: string): void }) {
+  const openTarget = useOpenOriginNotification();
   const summary = useCloudQuery<{ unread: number; more: boolean }>("notifications:summary", { teamId });
   const [openState, setOpenState] = useState<boolean | null>(null);
   const [unreadOnly, setUnreadOnly] = useState(true);
@@ -121,13 +122,12 @@ function Notifications({ teamId, onOpenTask, onError }: { teamId: string; onOpen
                 </span>
                 <button type="button" className="min-w-0 flex-1 text-left" onClick={() => {
                   act(mark(row._id, true), "Could not open the notification");
-                  if (row.messageId) openOriginPage("chat");
-                  else if (row.available && row.projectId && row.taskId) onOpenTask(row.projectId, row.taskId);
+                  if (openTarget(row) === "elsewhere") onError("That conversation has not reached this computer yet. It opens here after the next sync.");
                 }}>
                   <span className="flex items-center gap-1.5 text-[13px] text-ink">
                     <PersonAvatar person={{ name: row.actorName, email: row.actorName, avatarUrl: row.actorAvatar }} size={18} />
                     <strong className="font-semibold">{row.actorName}</strong>
-                    {row.kind === "mention" ? row.messageId ? "tagged you in chat" : "mentioned you on" : row.kind === "comment" ? "commented on" : "assigned you"}
+                    {row.kind === "mention" ? row.agentThreadId ? "tagged you in an agent thread" : row.messageId ? "tagged you in chat" : "mentioned you on" : row.kind === "comment" ? "commented on" : "assigned you"}
                     {!row.read && <span className="size-1.5 rounded-full bg-accent" aria-label="Unread" />}
                   </span>
                   {row.taskTitle && <span className="mt-0.5 block truncate text-[13px] font-medium text-ink">{row.taskTitle}</span>}

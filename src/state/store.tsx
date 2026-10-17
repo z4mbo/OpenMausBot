@@ -501,6 +501,7 @@ export interface EngineInstall {
   needsNode?: boolean;
   managed?: { label: string; downloadBytes: number };
   server?: { package: string };
+  script?: import("../../shared/engine-script-install").EngineInstallScript;
   settings?: "connections";
 }
 
@@ -823,6 +824,8 @@ export type Action =
       replyToId?: string;
       threadId?: string;
       dataContext?: import("../../shared/data-context").DataContext;
+      /** Origin user ids of teammates the text tags; they are notified once the line reaches a shared thread. */
+      mentionUserIds?: readonly string[];
       onError?: () => void;
     }
   | { type: "pendingQueued"; threadId: string; queueId: string; text: string; reason?: SteerQueueReason }
@@ -2703,6 +2706,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             .then((body) => {
               if (body?.message && typeof body.threadId === "string") {
                 rawDispatch({ type: "messageAdded", threadId: body.threadId, message: body.message });
+              }
+              if ((body?.message || body?.queued) && typeof body.threadId === "string" && action.mentionUserIds?.length) {
+                void api(`/api/bots/${action.botId}/mentions`, {
+                  method: "POST",
+                  body: JSON.stringify({ threadId: body.threadId, sendId, userIds: action.mentionUserIds }),
+                }).catch((error: unknown) => console.warn("Teammates tagged in this message were not notified", error));
               }
               if (
                 body?.queued &&

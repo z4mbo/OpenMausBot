@@ -1,6 +1,7 @@
 // Ported from upstream's provider contracts with Promises for Effect and listeners for Stream; shapes and names are kept.
 
 import type { ApprovalMode } from "../shared/approval-mode.ts";
+import type { EngineInstallScript } from "../shared/engine-script-install.ts";
 import type { ToolScope } from "../shared/tool-scope.ts";
 import type { EffortLevel } from "../shared/wire.ts";
 import type {
@@ -310,6 +311,8 @@ export interface EngineInstall {
   settings?: "connections";
   /** Settings can npm-install this package as the server's own user into an app-owned dir; set by the registry, never by a client. */
   server?: { package: string };
+  /** The vendor's official installer for this server's OS, from a fixed allow-list; set by the registry, never by a client. */
+  script?: EngineInstallScript;
 }
 
 export interface ProviderAuthenticationStart {

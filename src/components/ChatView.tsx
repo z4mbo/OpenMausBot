@@ -100,6 +100,10 @@ import { MessageBoundary } from "./MessageBoundary";
 import { WidgetMessage } from "./widget/WidgetMessage";
 import { OriginIssuesCard } from "./OriginIssuesCard";
 import { Composer } from "./Composer";
+import { useTeammates } from "./origin-members/teammates";
+import { useCloudProjectFor } from "@/lib/origin-cloud-links";
+import type { MentionPeer } from "@/lib/mentions";
+import { useAgentThreadFocus } from "@/lib/origin-chat-focus";
 import { ChatErrorBanner, ChatNotice } from "./ChatErrorBanner";
 import { ThreadContextWarning } from "./ContextWarning";
 import { ChatFindBar } from "./ChatFindBar";
@@ -169,7 +173,7 @@ interface ChatRows {
   busy: boolean;
   hasMore: boolean;
   bots: readonly Bot[];
-  mentionPeers: readonly Bot[]; mentionPerson: { profileName?: string };
+  mentionPeers: readonly MentionPeer[]; mentionPerson: { profileName?: string };
   focus: AppState["focusMessage"];
   showToolCalls: boolean;
   locale: string;
@@ -1156,7 +1160,10 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
   const unreadDivider = useUnreadDivider({ threadId: bot.threadId, messages, following });
 
   const bots = useDrawnBots(state.bots);
-  const mentionPeers = useMemo(() => bots.filter((peer) => peer.id !== bot.id), [bots, bot.id]);
+  const cloudProjectId = useCloudProjectFor(bot);
+  const people = useTeammates(bot.shared ? { teamId: bot.shared.teamId, projectId: cloudProjectId } : {});
+  const mentionPeers = useMemo<MentionPeer[]>(() => [...bots.filter((peer) => peer.id !== bot.id), ...people], [bots, bot.id, people]);
+  useAgentThreadFocus({ threadId: bot.threadId, cloudThreadId: bot.tasks?.find((task) => task.threadId === bot.threadId)?.shared?.cloudThreadId, messages }, dispatch);
   const focus = state.focusMessage?.threadId === bot.threadId ? state.focusMessage : null;
   const showToolCalls = showToolCallsEnabled(state.config);
   const tts = state.config?.tts;
@@ -1537,6 +1544,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
       <Composer
         key={bot.threadId}
         bot={profile}
+        people={people}
         replyTo={replyTo}
         onClearReply={clearReply}
         onConsumeReply={consumeReply}

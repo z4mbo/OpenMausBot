@@ -637,6 +637,7 @@ import { localDesktopTarget, localVmViewerStatus, viewerTargetId } from "./deskt
 import { createAntigravityLeftoverRoutes } from "./routes/antigravity-leftovers.ts";
 import { createAntigravityAccountRoutes } from "./routes/antigravity-accounts.ts";
 import { createConfigRoutes } from "./routes/config.ts";
+import { createEngineScriptInstallRoutes } from "./routes/engine-script-installs.ts";
 import { createInstanceRoutes } from "./routes/instances.ts";
 import { createMcpServerRoutes } from "./routes/mcp-servers.ts";
 import { createComputerRoutes } from "./routes/computers.ts";
@@ -817,7 +818,8 @@ function customDomainStatus() {
     serverIpv4: DESKTOP_MANAGED ? null : customDomainIpv4(),
   };
 }
-const registry = new ProviderRegistry(BUILT_IN_DRIVERS);
+const SCRIPT_ENGINE_INSTALLS = LOOPBACK.trust === "owner" && !HOSTED_WORKSPACE && !CLOUD_HOME && !hostedModels;
+const registry = new ProviderRegistry(BUILT_IN_DRIVERS, { scriptInstalls: SCRIPT_ENGINE_INSTALLS });
 const supportsApprovalMode = createApprovalModeSupport(registry);
 registerEnginesBinDir();
 
@@ -14135,6 +14137,7 @@ ROUTES.push(createConfigRoutes({
   checkedModelSelection, policyModelRefusal, browserSessionSpec, configStatus, configForAccess,
   resyncOpenCodeProviderKeys, revokeEngineCapabilities, reloadProviders, broadcast, drainQueuedSends,
 }));
+ROUTES.push(createEngineScriptInstallRoutes({ registry, enabled: SCRIPT_ENGINE_INSTALLS }));
 ROUTES.push(createInstanceRoutes({
   store, cfg, registry, sessions, providerAuthSessions,
   hostedModels: Boolean(hostedModels),

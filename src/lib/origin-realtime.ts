@@ -11,7 +11,7 @@ export type MemberChatAttachment = { id: string; name: string; size: number; con
 export type MemberChatMessage = {
   id: string; authorUserId: string; authorName: string; authorEmail: string; avatarUrl?: string | null;
   body: string; createdAt: number; editedAt?: number; replyTo?: string; pinned?: boolean;
-  attachments?: MemberChatAttachment[]; reactions?: Record<string, string[]>;
+  attachments?: MemberChatAttachment[]; reactions?: Record<string, string[]>; mentions?: { userId: string; name: string }[];
 };
 
 export class OriginRealtimeError extends Error {

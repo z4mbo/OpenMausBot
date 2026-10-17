@@ -226,8 +226,8 @@ export const MuseCodeDriver: ProviderDriver<MuseConfig> = {
   models: DEFAULT_MODELS,
   install: {
     command: {
-      darwin: "curl -fsSL https://dev.meta.ai/install.sh | bash",
-      linux: "curl -fsSL https://dev.meta.ai/install.sh | bash",
+      darwin: "curl -fsSL https://dev.meta.ai/install.sh | sh",
+      linux: "curl -fsSL https://dev.meta.ai/install.sh | sh",
       win32: "irm https://dev.meta.ai/install.ps1 | iex",
     },
     docsUrl: "https://dev.meta.ai/docs/muse-code",

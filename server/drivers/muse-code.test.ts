@@ -12,7 +12,7 @@ const choices = [
 
 describe("Muse Code driver", () => {
   it("installs with Meta's installer, signs in with `muse login`, and starts on Muse Wonder", () => {
-    expect(MuseCodeDriver.install?.command?.darwin).toBe("curl -fsSL https://dev.meta.ai/install.sh | bash");
+    expect(MuseCodeDriver.install?.command?.darwin).toBe("curl -fsSL https://dev.meta.ai/install.sh | sh");
     expect(MuseCodeDriver.install?.signInCommand).toBe("muse login");
     expect(MuseCodeDriver.defaultConfig()).toEqual({ cli: "muse" });
     expect(MuseCodeDriver.models.default).toBe("muse-wonder-1.0");

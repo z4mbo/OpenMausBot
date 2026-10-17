@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Hash, MessageSquarePlus, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useWorkspaceMembers, type WorkspaceMember } from "@/lib/origin-members";
 import { originRealtime, usePolled, type MemberChatMessage } from "@/lib/origin-realtime";
 import { errorText } from "./repo-url";
+import { useChatFocus } from "@/lib/origin-chat-focus";
+import { useTeammates } from "../origin-members/teammates";
 import { TeamChat } from "./TeamChatPage";
 import { Loading, Notice, iconButton, inputClass, type WorkspaceContext } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
@@ -31,6 +33,11 @@ export function WorkspaceChat({ teamId, me, canEdit }: WorkspaceContext) {
   const activeDm = conversations?.find((conversation) => conversation.id === active);
   const activeMember = activeDm ? memberOf(activeDm.otherUserId) : undefined;
   const activeName = active === WORKSPACE_CHANNEL ? "the workspace" : activeMember ? memberLabel(activeMember) : "this conversation";
+  const people = useTeammates({ teamId, only: active === WORKSPACE_CHANNEL ? undefined : otherParticipant(active, me._id) });
+  const focus = useChatFocus();
+  useEffect(() => {
+    if (focus && (focus.conversation === WORKSPACE_CHANNEL || focus.conversation.startsWith("dm:"))) setSelected(focus.conversation);
+  }, [focus]);
 
   const startConversation = async (member: WorkspaceMember) => {
     setNotice("");
@@ -92,13 +99,17 @@ export function WorkspaceChat({ teamId, me, canEdit }: WorkspaceContext) {
           {active === WORKSPACE_CHANNEL ? <Hash size={15} className="text-ink-secondary" aria-hidden="true" /> : activeMember && <PersonAvatar person={activeMember} size={22} />}
           <h2 className="truncate text-[14px] font-semibold text-ink">{active === WORKSPACE_CHANNEL ? "Workspace" : activeName}</h2>
         </div>
-        <TeamChat key={active} target={{ teamId, conversation: active }} name={activeName} me={me} canWrite={canEdit} markRead
+        <TeamChat key={active} target={{ teamId, conversation: active }} name={activeName} me={me} canWrite={canEdit} people={people} markRead
           emptyTitle={active === WORKSPACE_CHANNEL ? "Start the workspace conversation" : `Say hello to ${activeName}`}
           emptyBody={active === WORKSPACE_CHANNEL ? "Messages here are shared with everyone in this workspace." : "Only the two of you can see this conversation."}
           readOnlyNote="You have view-only access to this workspace." />
       </div>
     </div>
   );
+}
+
+function otherParticipant(conversation: string, self: string): string {
+  return conversation.slice(3).split(":").find((id) => id !== self) ?? self;
 }
 
 function MemberPicker({ members, onPick }: { members: WorkspaceMember[]; onPick(member: WorkspaceMember): void }) {

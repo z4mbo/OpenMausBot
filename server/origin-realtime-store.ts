@@ -28,7 +28,7 @@ export type CallParticipant = {
 };
 export type CallSignalKind = "offer" | "answer" | "candidate";
 export type CallSignal = { id: string; fromUserId: string; toUserId: string; fromJoinedAt?: number; toJoinedAt?: number; kind: CallSignalKind; payload: string; createdAt: number };
-export type MentionNotice = { teamId: string; actorId: string; messageId: string; userIds: string[] };
+export type MentionNotice = { teamId: string; actorId: string; messageId: string; userIds: string[]; conversation: Conversation; preview: string };
 
 export const CHAT_REACTIONS = ["like", "heart", "celebrate", "eyes"] as const;
 export const CALL_ROOM_LIMIT = 8;
@@ -194,8 +194,8 @@ export function openRealtimeStore(file: string, now: () => number = Date.now) {
       transaction(() => {
         db.prepare("INSERT INTO messages(id,team,conversation,created,payload) VALUES(?,?,?,?,?)").run(message.id, user.teamId, conversation, message.createdAt, JSON.stringify(message));
         const userIds = [...new Set([...mentions.map((mention) => mention.userId), ...(extras.notifyUserIds ?? [])])].filter((id) => id !== user.userId).slice(0, 20);
-        if (userIds.length && !conversation.startsWith("dm:")) {
-          const notice: MentionNotice = { teamId: user.teamId, actorId: user.userId, messageId: message.id, userIds };
+        if (userIds.length) {
+          const notice: MentionNotice = { teamId: user.teamId, actorId: user.userId, messageId: message.id, userIds, conversation, preview: message.body.slice(0, 280) };
           db.prepare("INSERT INTO mention_outbox VALUES(?,?)").run(message.id, JSON.stringify(notice));
         }
       });

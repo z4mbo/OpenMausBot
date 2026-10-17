@@ -1,6 +1,7 @@
 // Provider instance registry — port of upstream's ProviderInstanceRegistryLive behavior, minus Effect.
 import { findCliCandidates } from "../env-path.ts";
 import { installNpmEngine, npmAvailable, serverInstallFor } from "../engine-install.ts";
+import { hostInstallPlatform, officialInstallScript } from "../engine-script-install.ts";
 import type {
   AnyProviderDriver,
   EngineAccess,
@@ -25,11 +26,13 @@ export type RegistryEntry =
   | { instanceId: InstanceId; live: ProviderInstance; shadow?: undefined }
   | { instanceId: InstanceId; live?: undefined; shadow: ShadowInstance };
 
-function withServerInstall(install: AnyProviderDriver["install"], npmPresent: boolean): AnyProviderDriver["install"] {
+function withServerInstall(driver: AnyProviderDriver | undefined, npmPresent: boolean, scriptInstalls: boolean): AnyProviderDriver["install"] {
+  const install = driver?.install;
   if (!install) return undefined;
   const server = serverInstallFor(install, npmPresent);
-  const platform = process.platform === "darwin" || process.platform === "linux" || process.platform === "win32" ? process.platform : undefined;
-  return { ...install, platform, ...(server ? { server } : {}) };
+  const platform = hostInstallPlatform() ?? undefined;
+  const script = scriptInstalls && !server && !install.managed ? officialInstallScript(driver.driverKind, platform ?? null) : null;
+  return { ...install, platform, ...(server ? { server } : {}), ...(script ? { script } : {}) };
 }
 
 function cliDefaultOf(driver: AnyProviderDriver | undefined): string | undefined {
@@ -54,10 +57,12 @@ export class ProviderRegistry {
   private driversByKind: Map<string, AnyProviderDriver>;
   private readonly enginesBaseDir: string | undefined;
   private readonly npmPresent: () => boolean;
+  private readonly scriptInstalls: boolean;
 
-  constructor(drivers: readonly AnyProviderDriver[], options: { enginesBaseDir?: string; npmAvailable?: () => boolean } = {}) {
+  constructor(drivers: readonly AnyProviderDriver[], options: { enginesBaseDir?: string; npmAvailable?: () => boolean; scriptInstalls?: boolean } = {}) {
     this.enginesBaseDir = options.enginesBaseDir;
     this.npmPresent = options.npmAvailable ?? npmAvailable;
+    this.scriptInstalls = options.scriptInstalls ?? false;
     this.driversByKind = new Map(drivers.map((d) => [d.driverKind, d]));
   }
 
@@ -230,7 +235,7 @@ export class ProviderRegistry {
             models: { default: "", options: [] },
             capabilities: { computerMcp: false, agentsMcp: false, localComputerMcp: false },
             access: driver?.metadata.access ?? "subscription",
-            install: withServerInstall(driver?.install, npmPresent),
+            install: withServerInstall(driver, npmPresent, this.scriptInstalls),
             cli: entry.shadow.cli,
             cliDefault: cliDefaultOf(driver),
             cliCandidates: candidatesFor(driver),
@@ -266,7 +271,7 @@ export class ProviderRegistry {
             backgroundText: inst.generateText !== undefined || inst.generateMemoryText !== undefined,
           },
           access: driver?.metadata.access ?? "subscription",
-          install: withServerInstall(driver?.install, npmPresent),
+          install: withServerInstall(driver, npmPresent, this.scriptInstalls),
           authentication: inst.startAuthentication
             ? {
                 method: inst.authenticationMethod ?? (inst.getAuthentication && inst.completeAuthentication

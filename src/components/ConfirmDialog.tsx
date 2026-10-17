@@ -10,6 +10,7 @@ export interface ConfirmDialogProps {
   open: boolean;
   title: string;
   body: string;
+  details?: ReactNode;
   confirmLabel: string;
   tone?: ConfirmTone;
   icon?: ReactNode;
@@ -86,6 +87,7 @@ export function ConfirmDialogCard({
   cancelRef,
   title,
   body,
+  details,
   confirmLabel,
   tone = "danger",
   icon,
@@ -124,6 +126,7 @@ export function ConfirmDialogCard({
           </p>
         </div>
       </div>
+      {details}
       <div className="mt-5 flex justify-end gap-2">
         <button
           ref={cancelRef}

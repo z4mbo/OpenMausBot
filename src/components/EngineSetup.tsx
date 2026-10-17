@@ -7,6 +7,7 @@ import { copyText } from "@/lib/copy-text";
 import { DEVICE_SIGN_IN_COPY, DeviceSignIn, deviceSignInProvider } from "./DeviceSignIn";
 import { ClaudeSignIn } from "./ClaudeSignIn";
 import { RefreshEngines } from "./EngineLibrary";
+import { ScriptEngineInstall } from "./ScriptEngineInstall";
 
 type Platform = "darwin" | "win32" | "linux";
 
@@ -38,6 +39,11 @@ export function needsCli(instance: InstanceInfo | undefined): boolean {
 
 export function serverTerminal(cloudHome: boolean): boolean {
   return Boolean(window.ogb?.openInstallTerminal) && window.ogb?.remoteClient?.active !== true && !cloudHome;
+}
+
+export function scriptInstallOffered(instance: InstanceInfo | undefined, cloudHome: boolean): boolean {
+  const install = instance?.install;
+  return Boolean(install?.script && !install.server && !install.managed) && needsCli(instance) && serverTerminal(cloudHome);
 }
 
 export function grokKeyInstead(instance: InstanceInfo, cloudHome: boolean): boolean {
@@ -487,6 +493,7 @@ export function EngineSetup({
   const installCommand = installCommandFor(install);
   const signInCommand = install?.signInCommand;
   const signInOnly = intent === "cloud" && needsSignIn(instance);
+  const script = scriptInstallOffered(instance, cloudHome) ? install?.script : undefined;
   const deviceSignIn = signInOnly && instance.authentication?.method === "device-code";
   const browserSignIn = signInOnly && instance.authentication?.method === "browser-pkce";
   const pasteSignIn = signInOnly && instance.authentication?.method === "paste-code";
@@ -509,6 +516,8 @@ export function EngineSetup({
       ? t("engineSetup.injectDesc")
       : install?.server
         ? t("engineSetup.serverInstallDesc")
+      : script
+        ? t("engineSetup.script.desc", { source: script.source })
       : install?.managed
         ? t("engineSetup.managedDesc")
       : signInCommand
@@ -566,6 +575,14 @@ export function EngineSetup({
         <ClaudeSignIn key={instance.instanceId} instanceId={instance.instanceId} />
       ) : install.server && !signInOnly ? (
         <ServerEngineInstall instance={instance} mode="install" command={installCommand} />
+      ) : script && !signInOnly ? (
+        <>
+          <ScriptEngineInstall key={instance.instanceId} instance={instance} script={script} />
+          <details className="mt-2 rounded-lg border border-hairline/50 bg-app px-2.5 py-2 text-[11.5px] text-ink-secondary">
+            <summary className="cursor-pointer select-none">{t("engineSetup.preferTerminal")}</summary>
+            <CommandRow command={script.command} actionLabel={t("engineSetup.openInstall")} compact />
+          </details>
+        </>
       ) : install.managed ? (
         <ManagedEngineSetup instance={instance} signInOnly={signInOnly} />
       ) : command ? (

@@ -381,13 +381,13 @@ const support: AcpSupport = {
   nativeSource: "grok.acp",
   loginNote: "Grok is not signed in to your grok.com account — choose Sign in to Grok in engine setup",
 
-  // No Windows one-liner: the installer is a POSIX shell script.
   install: {
     command: {
       darwin: "curl -fsSL https://x.ai/cli/install.sh | bash",
       linux: "curl -fsSL https://x.ai/cli/install.sh | bash",
+      win32: "irm https://x.ai/cli/install.ps1 | iex",
     },
-    docsUrl: "https://x.ai/cli",
+    docsUrl: "https://docs.x.ai/build/overview",
     signInCommand: "grok login",
   },
   deviceSignIn: GROK_DEVICE_SIGN_IN,
