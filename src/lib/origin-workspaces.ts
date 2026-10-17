@@ -12,6 +12,8 @@ interface WorkspaceView {
   /** Order and folded state of the sidebar groups below Projects (Agents and template teams). */
   groupOrder?: string[];
   collapsedGroups?: string[];
+  /** Workspace heads that belong to the signed-in Origin account; other local heads stay hidden. */
+  account?: string[];
 }
 
 interface Head { id: string; section?: string; chiefOfStaff?: boolean; managedSections?: string[] }
@@ -49,7 +51,14 @@ export function useWorkspaces(): WorkspaceView {
 
 /** Heads arrive newest first; the oldest is the default workspace. */
 export function workspaceHeadsOf<T extends Head>(bots: readonly T[]): T[] {
-  return bots.filter((bot) => bot.chiefOfStaff && isWorkspaceSection(bot.section)).reverse();
+  const account = read().account;
+  return bots.filter((bot) => bot.chiefOfStaff && isWorkspaceSection(bot.section) && (!account || account.includes(bot.id))).reverse();
+}
+
+export function setAccountWorkspaces(headIds: string[]) {
+  const current = read().account;
+  if (current && current.length === headIds.length && current.every((id, index) => id === headIds[index])) return;
+  write({ account: headIds });
 }
 
 export function activeWorkspace(view: WorkspaceView, heads: readonly { id: string }[]): string | undefined {

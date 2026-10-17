@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
 import { cloud, cloudAction, cloudMutation, setCloudUrl, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
-import { setSessionToken } from "@/lib/origin-cloud/client";
+import { cloudUrl as cloudUrlNow, sessionStore, setSessionToken } from "@/lib/origin-cloud/client";
 import { refreshCloudLinks } from "@/lib/origin-cloud-links";
 import { syncFromOrigin } from "@/lib/origin-sync";
 import { PROJECT_LEAD_ROLE } from "@/lib/origin-teams";
-import { activeWorkspaceId, switchWorkspace, workspaceHeadsOf } from "@/lib/origin-workspaces";
+import { activeWorkspaceId, setAccountWorkspaces, switchWorkspace, workspaceHeadsOf } from "@/lib/origin-workspaces";
 import { api, useStore, type Bot } from "@/state/store";
 import type { CloudLinks } from "@/lib/origin-import";
 import { cn } from "@/lib/cn";
@@ -172,12 +172,14 @@ export function OriginSync() {
   const bots = useRef(state.bots);
   bots.current = state.bots;
   const [empty, setEmpty] = useState(false);
+  const [syncProblems, setSyncProblems] = useState<{ name: string; error: string }[]>([]);
   const running = useRef(false);
 
   const sync = useCallback(async () => {
     if (running.current) return;
     running.current = true;
     try {
+      await shareSession(cloudUrlNow(), sessionStore.get());
       const workspaces = await cloud.workspaces.list();
       setEmpty(workspaces.length === 0);
       if (!workspaces.length) return;
@@ -190,6 +192,10 @@ export function OriginSync() {
       };
       const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: bots.current, links, call, lead: PROJECT_LEAD_ROLE });
       await refreshCloudLinks();
+      const accountTeams = new Set(workspaces.map((workspace) => workspace._id));
+      setAccountWorkspaces(Object.entries(synced.links.workspaces).filter(([, teamId]) => accountTeams.has(teamId)).map(([headId]) => headId)
+        .concat(synced.result.createdWorkspaces.map((workspace) => workspace.botId)));
+      setSyncProblems(synced.result.failures);
       const linkedHeads = Object.keys(synced.links.workspaces);
       const created = synced.result.createdWorkspaces.map((workspace) => workspace.botId);
       const known = new Set([...linkedHeads, ...created]);
@@ -216,7 +222,15 @@ export function OriginSync() {
     return () => { window.clearInterval(timer); window.removeEventListener("focus", onFocus); };
   }, [sync]);
 
-  return empty ? <NoWorkspace onReady={() => void sync()} /> : null;
+  if (empty) return <NoWorkspace onReady={() => void sync()} />;
+  if (!syncProblems.length) return null;
+  return (
+    <div role="status" className="fixed right-4 bottom-4 z-[60] max-w-[340px] rounded-xl border border-hairline/50 bg-panel px-4 py-3 text-[12.5px] text-ink-secondary shadow-xl">
+      <p className="font-medium text-ink">{syncProblems.length === 1 ? "One project couldn't be loaded" : `${syncProblems.length} projects couldn't be loaded`}</p>
+      <ul className="mt-1 space-y-0.5">{syncProblems.slice(0, 4).map((problem) => <li key={problem.name} className="truncate">{problem.name}: {problem.error}</li>)}</ul>
+      <p className="mt-1 text-ink-tertiary">Retrying in a minute.</p>
+    </div>
+  );
 }
 
 /** Origin comes first: the app opens on sign-in, then shows the account's workspaces. */
