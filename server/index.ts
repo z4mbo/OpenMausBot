@@ -602,7 +602,7 @@ import {
   awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, transcribeWith,
 } from "./origin-call-agent.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
-import { createOriginImportRoutes } from "./origin-import.ts";
+import { createOriginImportRoutes, originImportKind } from "./routes/origin-import.ts";
 import { createOriginAgentSupport } from "./origin-agent-support.ts";
 import { createOriginInviteRoutes, createOriginPublicRoutes } from "./origin-public-pages.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
@@ -1430,7 +1430,7 @@ function adminAuditPlan(method: string, path: string): AuditPlan | null {
   if (path.startsWith("/api/internal/") || path.startsWith("/api/testing/")) return null;
   const plan: AuditPlan = {
     config: requiredScope(method, path, { sharedComputers: lendingEnabled() }) === "admin",
-    createsBots: method === "POST" && (path === "/api/bots" || path === "/api/teams/import" || path === "/api/org-library/add" || /^\/api\/origin\/import\/(workspaces|projects)$/.test(path)),
+    createsBots: method === "POST" && (path === "/api/bots" || path === "/api/teams/import" || path === "/api/org-library/add" || originImportKind(path) !== null),
     createsWebhook: method === "POST" && path === "/api/webhooks",
     pairing: method === "POST" && path === "/api/auth/pairing",
   };

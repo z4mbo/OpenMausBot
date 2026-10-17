@@ -8,7 +8,7 @@ import { json, readBody } from "./harness/http.ts";
 import { closeMessageDb } from "./message-db.ts";
 import { readOriginCloud, writeOriginCloud } from "./origin-cloud.ts";
 import { readWorkspaceLinks } from "./origin-cloud-sync.ts";
-import { createOriginImportRoutes } from "./origin-import.ts";
+import { createOriginImportRoutes } from "./routes/origin-import.ts";
 import { DEFAULT_TEAM_ROLES } from "./origin-teams.ts";
 import type { RequestAuth } from "./request-auth.ts";
 import { dispatchRoutes } from "./routes/table.ts";

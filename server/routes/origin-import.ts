@@ -1,15 +1,15 @@
 import { z } from "zod";
 import type { IncomingMessage } from "node:http";
-import { isWorkspaceSection, STANDALONE_SECTION, WORKSPACE_PREFIX } from "../shared/origin-workspaces.ts";
-import type { WireBot } from "../shared/wire.ts";
-import { parseBotProfilePatch } from "./bot-profile.ts";
-import type { ModelSelection } from "./contracts.ts";
-import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, writeOriginCloud, type OriginCloudClient } from "./origin-cloud.ts";
-import { CLOUD_ID, defaultCloudLinksFile, readWorkspaceLinks, writeWorkspaceLinks } from "./origin-cloud-sync.ts";
-import { DEFAULT_TEAM_ROLES, uniqueTeamName } from "./origin-teams.ts";
-import type { RequestAuth } from "./request-auth.ts";
-import { PASS, type RouteHandler } from "./routes/table.ts";
-import type { BotRecord, Store } from "./store.ts";
+import { isWorkspaceSection, STANDALONE_SECTION, WORKSPACE_PREFIX } from "../../shared/origin-workspaces.ts";
+import type { WireBot } from "../../shared/wire.ts";
+import { parseBotProfilePatch } from "../bot-profile.ts";
+import type { ModelSelection } from "../contracts.ts";
+import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, writeOriginCloud, type OriginCloudClient } from "../origin-cloud.ts";
+import { CLOUD_ID, defaultCloudLinksFile, readWorkspaceLinks, writeWorkspaceLinks } from "../origin-cloud-sync.ts";
+import { DEFAULT_TEAM_ROLES, uniqueTeamName } from "../origin-teams.ts";
+import type { RequestAuth } from "../request-auth.ts";
+import { PASS, type RouteHandler } from "./table.ts";
+import type { BotRecord, Store } from "../store.ts";
 
 const cloudId = z.string().regex(CLOUD_ID);
 const workspaceRequest = z.object({ cloudTeamId: cloudId }).strict().transform((input) => ({ ...input, kind: "workspace" as const }));
@@ -33,12 +33,16 @@ export interface OriginImportRouteDeps {
   changed?(): void;
 }
 
+export function originImportKind(path: string): "workspace" | "project" | null {
+  return path === "/api/origin/import/workspaces" ? "workspace" : path === "/api/origin/import/projects" ? "project" : null;
+}
+
 export function createOriginImportRoutes(deps: OriginImportRouteDeps): RouteHandler {
   const { store, maxWorkspaceBots, wireBot } = deps;
   const cloudFile = () => deps.cloudFile ?? defaultOriginCloudFile();
   const linksFile = () => deps.linksFile ?? defaultCloudLinksFile();
   return async ({ req, res, path, method, auth, json, readBody }) => {
-    const kind = path === "/api/origin/import/workspaces" ? "workspace" : path === "/api/origin/import/projects" ? "project" : null;
+    const kind = originImportKind(path);
     if (method !== "POST" || !kind) return PASS;
     if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Importing Origin projects needs the admin scope" });
     const body = await readBody(req).catch(() => null);
