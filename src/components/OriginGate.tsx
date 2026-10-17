@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
 import { cloud, cloudAction, cloudMutation, setCloudUrl, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
 import { setSessionToken } from "@/lib/origin-cloud/client";
 import { refreshCloudLinks } from "@/lib/origin-cloud-links";
@@ -32,24 +32,37 @@ export function inviteTokenFrom(input: string): string | null {
   return match?.[1] ?? null;
 }
 
-const field = "w-full rounded-lg border border-hairline/40 bg-inset px-3 py-2.5 text-[13.5px] text-ink outline-none placeholder:text-ink-tertiary focus:border-focus";
-const primary = "flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-[13.5px] font-medium text-app transition-opacity hover:opacity-90 disabled:opacity-40";
+const field = "h-11 w-full rounded-[11px] border border-hairline/60 bg-inset px-3.5 text-[14.5px] text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-tertiary/80 focus:border-focus focus:ring-[3px] focus:ring-focus/20";
+const primary = "mt-1 flex h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 text-[14.5px] font-semibold text-app transition-opacity hover:opacity-90 disabled:opacity-40";
+const title = "text-center text-[26px] font-bold leading-tight tracking-[-0.03em] text-ink";
+const subtitle = "mt-2 text-center text-[14px] text-ink-secondary";
+const textLink = "font-semibold text-ink underline decoration-hairline underline-offset-[3px] hover:decoration-current";
 
 function OriginMark() {
   return (
-    <svg width="44" height="44" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-      <rect width="64" height="64" rx="16" fill="#111111" />
-      <circle cx="32" cy="32" r="17" stroke="white" strokeWidth="4" />
-      <circle cx="32" cy="32" r="8" fill="white" />
+    <svg width="44" height="44" viewBox="0 0 64 64" fill="none" aria-hidden="true" className="text-ink">
+      <rect width="64" height="64" rx="16" fill="currentColor" />
+      <circle cx="32" cy="32" r="17" strokeWidth="4" className="stroke-app" />
+      <circle cx="32" cy="32" r="8" className="fill-app" />
     </svg>
+  );
+}
+
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+  return (
+    <label className="grid gap-1.5">
+      <span className="flex justify-between gap-2 text-[12.5px] font-semibold text-ink">{label}{hint && <span className="font-normal text-ink-tertiary">{hint}</span>}</span>
+      {children}
+    </label>
   );
 }
 
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-app p-4">
-      <div className="w-full max-w-[380px]">
-        <div className="mb-6 flex flex-col items-center gap-3 text-center"><OriginMark /></div>
+    <main className="relative flex min-h-dvh items-start justify-center overflow-y-auto bg-app px-4 pb-8 pt-[clamp(40px,14vh,140px)]">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(40%_60%_at_50%_0%,color-mix(in_srgb,var(--color-accent)_22%,transparent),transparent_70%)]" />
+      <div className="relative w-full max-w-[400px]">
+        <div className="mb-5 flex justify-center"><OriginMark /></div>
         {children}
       </div>
     </main>
@@ -92,30 +105,30 @@ function SignIn() {
   const signup = mode === "signup";
   return (
     <Shell>
-      <h1 className="mb-1 text-center text-[20px] font-semibold text-ink">{signup ? "Create your Origin account" : "Sign in to Origin"}</h1>
-      <p className="mb-6 text-center text-[13px] text-ink-secondary">{signup ? "Your workspaces, projects and agents in one place." : "Pick up your workspaces where you left them."}</p>
-      <form className="space-y-2.5" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
-        {signup && <input className={field} placeholder="Your name" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} />}
-        <input className={field} type="email" placeholder="Email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} />
-        <input className={field} type="password" placeholder="Password" autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={(event) => setPassword(event.target.value)} />
-        <input className={field} placeholder="Invite link (optional)" value={invite} onChange={(event) => setInvite(event.target.value)} />
-        {error && <p role="alert" className="px-1 text-[12.5px] text-danger">{error}</p>}
+      <h1 className={title}>{signup ? "Create your Origin account" : "Sign in to Origin"}</h1>
+      <p className={cn(subtitle, "mb-7")}>{signup ? "Your workspaces, projects and agents in one place." : "Pick up your workspaces where you left them."}</p>
+      <form className="grid gap-3.5" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
+        {signup && <Field label="Your name"><input className={field} placeholder="Alex Smith" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} /></Field>}
+        <Field label="Email"><input className={field} type="email" placeholder="you@company.com" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} /></Field>
+        <Field label="Password"><input className={field} type="password" placeholder={signup ? "At least 10 characters" : "Your password"} autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={(event) => setPassword(event.target.value)} /></Field>
+        <Field label="Invite link" hint="Optional"><input className={field} placeholder="Paste an invite link" value={invite} onChange={(event) => setInvite(event.target.value)} /></Field>
+        {error && <p role="alert" className="rounded-[10px] bg-danger/10 px-3 py-2.5 text-[13px] text-danger">{error}</p>}
         <button type="submit" className={primary} disabled={busy || !email || !password || (signup && !name.trim())}>
-          {busy && <Loader2 size={14} className="animate-spin" />}{signup ? "Create account" : "Sign in"}
+          {busy ? <Loader2 size={16} className="animate-spin" /> : <>{signup ? "Create account" : "Sign in"}<ArrowRight size={16} /></>}
         </button>
       </form>
-      <p className="mt-4 text-center text-[12.5px] text-ink-secondary">
+      <p className="mt-6 text-center text-[13.5px] text-ink-secondary">
         {signup ? "Already have an account? " : "New to Origin? "}
-        <button type="button" className="font-medium text-ink hover:underline" onClick={() => { setMode(signup ? "signin" : "signup"); setError(""); }}>
+        <button type="button" className={textLink} onClick={() => { setMode(signup ? "signin" : "signup"); setError(""); }}>
           {signup ? "Sign in" : "Create an account"}
         </button>
       </p>
-      <div className="mt-6 border-t border-hairline/40 pt-3">
+      <div className="mt-8 border-t border-hairline/50 pt-3">
         <button type="button" aria-expanded={advanced} onClick={() => setAdvanced((open) => !open)}
-          className="mx-auto flex items-center gap-1 text-[12px] text-ink-tertiary hover:text-ink-secondary">
-          Server<ChevronDown size={12} className={cn("transition-transform", advanced && "rotate-180")} />
+          className="mx-auto flex h-8 items-center gap-1 rounded-lg px-2 text-[12.5px] text-ink-tertiary hover:text-ink-secondary">
+          Server<ChevronDown size={13} className={cn("transition-transform", advanced && "rotate-180")} />
         </button>
-        {advanced && <input className={cn(field, "mt-2 text-[12.5px]")} aria-label="Origin server address" value={server} onChange={(event) => setServer(event.target.value)} placeholder="https://your-deployment.convex.cloud" />}
+        {advanced && <input className={cn(field, "mt-2 h-10 text-[13px]")} aria-label="Origin server address" value={server} onChange={(event) => setServer(event.target.value)} placeholder="https://your-deployment.convex.cloud" />}
       </div>
     </Shell>
   );
@@ -134,19 +147,19 @@ function NoWorkspace({ onReady }: { onReady(): void }) {
   const token = inviteTokenFrom(invite);
   return (
     <div className="fixed inset-0 z-[80]"><Shell>
-      <h1 className="mb-1 text-center text-[20px] font-semibold text-ink">Welcome{session.user?.name ? `, ${session.user.name}` : ""}</h1>
-      <p className="mb-6 text-center text-[13px] text-ink-secondary">You're not in a workspace yet. Create one, or join with an invite link.</p>
-      <form className="space-y-2.5" onSubmit={(event) => { event.preventDefault(); void run(() => cloudMutation("workspaces:create", { name: name.trim() })); }}>
-        <input className={field} placeholder="Workspace name" value={name} onChange={(event) => setName(event.target.value)} />
-        <button type="submit" className={primary} disabled={busy || !name.trim()}>Create workspace</button>
+      <h1 className={title}>Welcome{session.user?.name ? `, ${session.user.name}` : ""}</h1>
+      <p className={cn(subtitle, "mb-7")}>You're not in a workspace yet. Create one, or join with an invite link.</p>
+      <form className="grid gap-3.5" onSubmit={(event) => { event.preventDefault(); void run(() => cloudMutation("workspaces:create", { name: name.trim() })); }}>
+        <Field label="Workspace name"><input className={field} placeholder="Your team" value={name} onChange={(event) => setName(event.target.value)} /></Field>
+        <button type="submit" className={primary} disabled={busy || !name.trim()}>Create workspace<ArrowRight size={16} /></button>
       </form>
-      <div className="my-5 flex items-center gap-3 text-[11.5px] text-ink-tertiary"><span className="h-px flex-1 bg-hairline/40" />or<span className="h-px flex-1 bg-hairline/40" /></div>
-      <form className="space-y-2.5" onSubmit={(event) => { event.preventDefault(); if (token) void run(() => cloudMutation("workspaces:acceptInvite", { token })); }}>
-        <input className={field} placeholder="Paste an invite link" value={invite} onChange={(event) => setInvite(event.target.value)} />
-        <button type="submit" className={cn(primary, "bg-raised text-ink")} disabled={busy || !token}>Join workspace</button>
+      <div className="my-6 flex items-center gap-3 text-[12px] text-ink-tertiary"><span className="h-px flex-1 bg-hairline/50" />or<span className="h-px flex-1 bg-hairline/50" /></div>
+      <form className="grid gap-3.5" onSubmit={(event) => { event.preventDefault(); if (token) void run(() => cloudMutation("workspaces:acceptInvite", { token })); }}>
+        <Field label="Invite link"><input className={field} placeholder="Paste an invite link" value={invite} onChange={(event) => setInvite(event.target.value)} /></Field>
+        <button type="submit" className={cn(primary, "border border-hairline/60 bg-raised text-ink")} disabled={busy || !token}>Join workspace</button>
       </form>
-      {error && <p role="alert" className="mt-3 text-center text-[12.5px] text-danger">{error}</p>}
-      <button type="button" onClick={() => void session.logout()} className="mx-auto mt-6 block text-[12px] text-ink-tertiary hover:text-ink-secondary">Sign out</button>
+      {error && <p role="alert" className="mt-4 rounded-[10px] bg-danger/10 px-3 py-2.5 text-center text-[13px] text-danger">{error}</p>}
+      <button type="button" onClick={() => void session.logout()} className="mx-auto mt-8 block rounded-lg px-2 py-1 text-[12.5px] text-ink-tertiary hover:text-ink-secondary">Sign out</button>
     </Shell></div>
   );
 }
