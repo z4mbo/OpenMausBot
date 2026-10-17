@@ -2,7 +2,7 @@
 
 This audit implements the user's expanded [delivery goal](origin-delivery-goal.md). Work is isolated in `C:\Users\aless\Documents\Origin-bugfix`, branch `bugfix/scan`, from `origin-integration` commit `04da48583`. The concurrent main checkout was inspected read-only. Its live servers and local Convex process were not used for mutation tests.
 
-The audit is still in progress. Source fixes, synthetic backend tests, browser fixtures, packaged acceptance and production delivery are separate evidence boundaries. Version 0.2.2 is being prepared; this document does not yet claim it has been published.
+The audit is still in progress. Source fixes, synthetic backend tests, browser fixtures, packaged acceptance and production delivery are separate evidence boundaries. Version 0.2.3 is being prepared; this document does not yet claim it has been published. The unshipped 0.2.2 build was cancelled after the final attachment check found another layout defect; its public source tag remains as a historical checkpoint.
 
 ## Bug register
 
@@ -51,6 +51,8 @@ Locations identify the affected implementation at the fix checkpoint. Each row l
 | P2 | `src/lib/origin-cloud/hooks.ts:6`, `src/components/origin-pages/ui.tsx:77` | Failed/stalled reads leave a spinner indefinitely; a refresh error can discard the loaded editor and draft. | `91e477f8e`, `a751a37bc`: scoped retry boundaries, retained non-authority data, fail-closed access queries and bounded retries accommodating SDK reconnect backoff. |
 | P2 | `src/components/origin-pages/ui.tsx:337`, `AssetsPage.tsx`, `VaultPage.tsx`, `FeedbackPage.tsx` | Downgrade a role with an editor open; Save stays enabled and emits the former privileged mutation. | `eec6d240b`: current-role fields/submit guards, shared access explanation and preserved draft; 20 before/after browser cases. |
 | P2 | `companion/src/proxy.ts`, `server/routes/bot-patch.ts:91` | A paired device's appearance PATCH is refused, despite its valid companion capability. | `1b9bfbf5f`: constrained display-only PATCH capability, validated shared palette and atomic rejection of protected mixed fields. [Upstream evidence](origin-upstream-review.md). |
+| P2 | `src/components/origin-pages/TeamChatPage.tsx:369` | A wide image exceeds a 303 px mobile message column; a 204-character filename creates a 1,326 px chat scroller at 375 px. Document-only overflow checks miss this inner scroller. | `405505637`: bound images and file buttons to the message width, truncate only the displayed name, preserve full download names/bytes. Eight before/after browser cases inspect every horizontal scroller. |
+| P3 | `cloudflare/control-plane/src/highlevel.ts:29`, `cloudflare/control-plane/test/highlevel.test.ts:299` | A wrong-state test sometimes changes only unused Base64URL pad bits, leaving the same decoded bytes and failing CI. Alternate wire spellings are also admitted. | `49320a321`: require canonical 32-byte state encodings and mutate significant bytes in the test. Two deterministic alias regressions fail before; all 132 workerd tests, typecheck and local dry-run pass. This is an encoding-contract issue, not token forgery. |
 
 ## UI/UX evidence
 
@@ -65,7 +67,7 @@ Locations identify the affected implementation at the fix checkpoint. Each row l
 | Landing, login, signup and release history | Shared core palette, Inter, radii, flat borders, focus, mobile menus and wrapping footer; shared release history. | [Website inspection](origin-site.md); `8244073b9`; 12 before cases and 16 full-page after cases. |
 | Inspection infrastructure | Concurrent previews had a shared Vite dependency cache, causing 504 optimized dependency failures. | `6ce780407`: isolate caches per disposable fixture. Checkers verify the expected fixture entry before interaction, protecting against stale port reuse. |
 
-The [screenshot index](origin-screenshots.md) links 200 matched before/after pairs. The component inventory is in `evidence/origin-ui/component-inventory.json`. An inventory entry is source coverage, not proof of every interactive branch. The individual reports state the exercised states and remaining acceptance boundaries.
+The [screenshot index](origin-screenshots.md) links 208 matched before/after pairs. The component inventory is in `evidence/origin-ui/component-inventory.json`. An inventory entry is source coverage, not proof of every interactive branch. The individual reports state the exercised states and remaining acceptance boundaries.
 
 ## Verification and delivery status
 

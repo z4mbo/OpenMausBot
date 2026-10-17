@@ -241,3 +241,16 @@ Before/after pairs recorded during this audit. Names identify the screen, state,
 | search-mobile-dark | [Before](evidence/origin-ui/search-before-mobile-dark.png) | [After](evidence/origin-ui/search-after-mobile-dark.png) |
 | search-mobile-light | [Before](evidence/origin-ui/search-before-mobile-light.png) | [After](evidence/origin-ui/search-after-mobile-light.png) |
 
+
+## Chat attachments
+
+| Screen / viewport / theme | Before | After |
+| --- | --- | --- |
+| file-desktop-dark | [Before](evidence/origin-ui/chat-attachments/file-before-desktop-dark.png) | [After](evidence/origin-ui/chat-attachments/file-after-desktop-dark.png) |
+| file-desktop-light | [Before](evidence/origin-ui/chat-attachments/file-before-desktop-light.png) | [After](evidence/origin-ui/chat-attachments/file-after-desktop-light.png) |
+| file-mobile-dark | [Before](evidence/origin-ui/chat-attachments/file-before-mobile-dark.png) | [After](evidence/origin-ui/chat-attachments/file-after-mobile-dark.png) |
+| file-mobile-light | [Before](evidence/origin-ui/chat-attachments/file-before-mobile-light.png) | [After](evidence/origin-ui/chat-attachments/file-after-mobile-light.png) |
+| image-desktop-dark | [Before](evidence/origin-ui/chat-attachments/image-before-desktop-dark.png) | [After](evidence/origin-ui/chat-attachments/image-after-desktop-dark.png) |
+| image-desktop-light | [Before](evidence/origin-ui/chat-attachments/image-before-desktop-light.png) | [After](evidence/origin-ui/chat-attachments/image-after-desktop-light.png) |
+| image-mobile-dark | [Before](evidence/origin-ui/chat-attachments/image-before-mobile-dark.png) | [After](evidence/origin-ui/chat-attachments/image-after-mobile-dark.png) |
+| image-mobile-light | [Before](evidence/origin-ui/chat-attachments/image-before-mobile-light.png) | [After](evidence/origin-ui/chat-attachments/image-after-mobile-light.png) |
