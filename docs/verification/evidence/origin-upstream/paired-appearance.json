@@ -1,0 +1,466 @@
+{
+  "passed": true,
+  "fixture": {
+    "url": "http://127.0.0.1:20887",
+    "pid": 24380,
+    "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-iLA39T",
+    "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792274168965-11780.log"
+  },
+  "proxyUrl": "http://127.0.0.1:61398",
+  "verification": "Real isolated fake-engine server and companion proxy; synthetic paired credential; no native phone or personal account",
+  "events": [
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 403
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 403
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 400
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 400
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 400
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 400
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 400
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 400
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "host",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 400
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 400
+    },
+    {
+      "target": "host",
+      "method": "GET",
+      "path": "/api/bots?messages=0",
+      "status": 200
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 401
+    },
+    {
+      "target": "paired",
+      "method": "PATCH",
+      "path": "/api/bots/c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "status": 401
+    }
+  ],
+  "send": {
+    "success": true,
+    "botId": "c81eeceb-709e-480d-b905-4d60f5f61f9e",
+    "taskId": "b46acbb6-376e-4a53-8c69-c708cb0e5fe9",
+    "messageId": "c5cc5848-9746-4c20-b196-abf16c2f67c2",
+    "at": 1792274171297
+  },
+  "wait": {
+    "status": "settled",
+    "state": "completed",
+    "targetType": "bot",
+    "targetId": "c81eeceb-709e-480d-b905-4d60f5f61f9e",
+    "taskId": "b46acbb6-376e-4a53-8c69-c708cb0e5fe9",
+    "target": {
+      "id": "c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "name": "Fixture Starter",
+      "title": "",
+      "description": "",
+      "section": null,
+      "chiefOfStaff": false,
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "busy": false,
+      "waitingForTeammates": false,
+      "activity": "idle",
+      "unread": true,
+      "activeTaskId": "b46acbb6-376e-4a53-8c69-c708cb0e5fe9",
+      "tasks": [
+        {
+          "taskId": "b46acbb6-376e-4a53-8c69-c708cb0e5fe9",
+          "title": "Check the appearance fixture",
+          "createdAt": 1792274170651,
+          "busy": false,
+          "waitingForTeammates": false,
+          "activity": "idle",
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "active": true,
+          "usage": {
+            "input": 12,
+            "output": 5,
+            "cachedInput": 2,
+            "costUsd": 0.01,
+            "turns": 1,
+            "lastTurn": {
+              "input": 12,
+              "output": 5,
+              "cachedInput": 2,
+              "costUsd": 0.01
+            },
+            "context": {
+              "tokens": 12,
+              "window": 200000
+            }
+          }
+        }
+      ]
+    },
+    "messages": [
+      {
+        "id": "47b873f9-6cd3-4a1c-b983-64b81b8b9cb7",
+        "at": 1792274170662,
+        "role": "bot",
+        "kind": "text",
+        "text": "Hi, I'm Atlas. What would you like me to do?"
+      },
+      {
+        "id": "c5cc5848-9746-4c20-b196-abf16c2f67c2",
+        "at": 1792274171297,
+        "role": "user",
+        "kind": "text",
+        "text": "Check the appearance fixture"
+      },
+      {
+        "id": "ceed86e1-2bea-4b24-8731-22b9ad620d7a",
+        "at": 1792274171487,
+        "role": "bot",
+        "kind": "text",
+        "text": "Appearance fixture reply"
+      },
+      {
+        "id": "7f3d8dd7-439f-4b22-9564-99bb98f1fa2f",
+        "at": 1792274171488,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "Bash",
+          "ok": true,
+          "spoken": "running a command"
+        }
+      },
+      {
+        "id": "ae3607cd-016e-4a32-a754-acb7ba1eb210",
+        "at": 1792274171513,
+        "role": "bot",
+        "kind": "digest",
+        "text": "[digest] · tools: Bash ×1 (from tool previews) · reply: Appearance fixture reply"
+      }
+    ],
+    "hasMore": false,
+    "job": {
+      "threadId": "b46acbb6-376e-4a53-8c69-c708cb0e5fe9",
+      "scope": "job",
+      "since": 1792274171432,
+      "now": 1792274171683,
+      "state": "completed",
+      "reason": "Fixture Starter finished",
+      "version": "hWzBUjB7YKCAEonS",
+      "conversation": {
+        "kind": "bot",
+        "busy": false,
+        "activity": "idle",
+        "queued": 0
+      },
+      "roots": [
+        "41182230-da57-4450-a6a2-0d78d7f76e9a"
+      ],
+      "nodes": [
+        {
+          "id": "41182230-da57-4450-a6a2-0d78d7f76e9a",
+          "rootId": "41182230-da57-4450-a6a2-0d78d7f76e9a",
+          "depth": 0,
+          "botId": "c81eeceb-709e-480d-b905-4d60f5f61f9e",
+          "botName": "Fixture Starter",
+          "threadId": "b46acbb6-376e-4a53-8c69-c708cb0e5fe9",
+          "threadTitle": "Check the appearance fixture",
+          "status": "completed",
+          "outcome": "done",
+          "mode": "work",
+          "reply": "resume",
+          "awaited": true,
+          "createdAt": 1792274171302,
+          "startedAt": 1792274171302,
+          "finishedAt": 1792274171493,
+          "executions": 1,
+          "result": "Appearance fixture reply"
+        }
+      ],
+      "hidden": 0,
+      "counts": {
+        "queued": 0,
+        "running": 0,
+        "waiting": 0,
+        "needsInput": 0,
+        "completed": 1,
+        "failed": 0,
+        "cancelled": 0
+      },
+      "needsInput": []
+    }
+  },
+  "messages": {
+    "bot": {
+      "id": "c81eeceb-709e-480d-b905-4d60f5f61f9e",
+      "name": "Fixture Starter",
+      "title": "",
+      "description": "",
+      "section": null,
+      "chiefOfStaff": false,
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "busy": false,
+      "waitingForTeammates": false,
+      "activity": "idle",
+      "unread": true,
+      "activeTaskId": "b46acbb6-376e-4a53-8c69-c708cb0e5fe9",
+      "tasks": [
+        {
+          "taskId": "b46acbb6-376e-4a53-8c69-c708cb0e5fe9",
+          "title": "Check the appearance fixture",
+          "createdAt": 1792274170651,
+          "busy": false,
+          "waitingForTeammates": false,
+          "activity": "idle",
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "active": true,
+          "usage": {
+            "input": 12,
+            "output": 5,
+            "cachedInput": 2,
+            "costUsd": 0.01,
+            "turns": 1,
+            "lastTurn": {
+              "input": 12,
+              "output": 5,
+              "cachedInput": 2,
+              "costUsd": 0.01
+            },
+            "context": {
+              "tokens": 12,
+              "window": 200000
+            }
+          }
+        }
+      ]
+    },
+    "taskId": "b46acbb6-376e-4a53-8c69-c708cb0e5fe9",
+    "messages": [
+      {
+        "id": "47b873f9-6cd3-4a1c-b983-64b81b8b9cb7",
+        "at": 1792274170662,
+        "role": "bot",
+        "kind": "text",
+        "text": "Hi, I'm Atlas. What would you like me to do?"
+      },
+      {
+        "id": "c5cc5848-9746-4c20-b196-abf16c2f67c2",
+        "at": 1792274171297,
+        "role": "user",
+        "kind": "text",
+        "text": "Check the appearance fixture"
+      },
+      {
+        "id": "ceed86e1-2bea-4b24-8731-22b9ad620d7a",
+        "at": 1792274171487,
+        "role": "bot",
+        "kind": "text",
+        "text": "Appearance fixture reply"
+      },
+      {
+        "id": "7f3d8dd7-439f-4b22-9564-99bb98f1fa2f",
+        "at": 1792274171488,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "Bash",
+          "ok": true,
+          "spoken": "running a command"
+        }
+      },
+      {
+        "id": "ae3607cd-016e-4a32-a754-acb7ba1eb210",
+        "at": 1792274171513,
+        "role": "bot",
+        "kind": "digest",
+        "text": "[digest] · tools: Bash ×1 (from tool previews) · reply: Appearance fixture reply"
+      }
+    ],
+    "hasMore": false
+  }
+}
