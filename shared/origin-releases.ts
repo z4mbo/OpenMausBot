@@ -3,7 +3,7 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.2.3",
+  version: "0.2.4",
   date: "2026-10-18",
   title: "A safer, more consistent workspace",
   changes: [
@@ -18,7 +18,7 @@ export const releases: Release[] = [{
     { title: "Chat attachments that fit", body: "Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name." },
     { title: "Recoverable workspace loading", body: "Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page." },
     { title: "Appearance from paired devices", body: "Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings." },
-    { title: "Clearer connection errors", body: "Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot." },
+    { title: "Clearer connection errors", body: "Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials." },
     { title: "Release history everywhere", body: "What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes." },
   ],
 }, {
