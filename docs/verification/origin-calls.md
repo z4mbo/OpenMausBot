@@ -47,13 +47,27 @@ The six targeted Vitest files passed 53 tests. Both TypeScript commands exited 0
 
 The recorded launcher was stopped with Ctrl+C. Its child PID no longer existed and neither fixture port was listening. The synthetic temporary directory remained; automatic approval review rejected its verified exact-path removal with `blocked by policy`, so no alternate deletion was attempted. The persistent evidence log remains available.
 
+## Native two-peer follow-up
+
+The native follow-up uses production `MemberCall`/`MemberCallHost`, production HTTP signaling routes and the real isolated SQLite store. Two independent headless Chromium contexts use synthetic identities and fake camera/microphone devices. Their actual `RTCPeerConnection` instances exchange offer/answer/candidates, nonzero audio/video RTP and decoded video; remote audio elements are playing. Raised-hand data, mute/unmute, same-user session replacement, reconnection, presence cleanup and the exact prior call tracks ending all pass. A fresh lobby preview is distinct from a call's stopped tracks.
+
+The promoted recipe passed five scenarios with zero page errors or external requests. The evidence records source `9e1b40440`; no call implementation changed from the earlier frozen `eb981de95` follow-up. See [results](evidence/origin-calls/real-peer-calls-result.json), [peer A](evidence/origin-calls/real-peer-a-connected.png) and [peer B](evidence/origin-calls/real-peer-b-connected.png).
+
+```powershell
+node --experimental-strip-types scripts/verify-origin-real-peers.ts
+$env:OMB_VERIFY_PLAYWRIGHT = 'file:///ABSOLUTE/PATH/TO/playwright/index.mjs'
+node scripts/testing/check-origin-real-peers.mjs PRINTED_PREVIEW_URL
+```
+
+The checker requires the exact loopback preview path and fixture marker before interacting. ICE servers are empty and external requests/WebSockets are blocked; this verifies local host connectivity, not TURN, internet traversal, real devices, physical audio output, agent speech or transcription, screen capture, Electron prompts or real account navigation. The fixture processes and ports were closed after verification, and its temporary directory was removed. Two earlier exploratory fixture directories remain after automatic approval review rejected their exact cleanup; their processes are stopped.
+
 ## Verification limits and drawing inspection
 
-The fixture proves local session lifecycle and production route/store behavior with synthetic authorization. It does not prove real peer audio/video, ICE/TURN across machines, screen capture, real agent transcription/speech, Electron device permissions or authenticated production project navigation. Peer SDP negotiation remains covered by the focused fake-connection tests.
+The earlier mocked fixture proves local session lifecycle and production route/store behavior with synthetic authorization. The native follow-up above extends this to real local peer media and negotiation. Cross-machine ICE/TURN, screen capture, real agent transcription/speech, Electron device permissions and authenticated production project navigation remain separate acceptance boundaries.
 
 Drawing sources inspected: `src/components/OriginDraw.tsx`, `src/components/origin-pages/DrawingCanvas.tsx`, `backend/convex/draw.ts`. The backend checks canvas/project/workspace membership and edit permissions for scene and image mutations. No Convex process was used or changed.
 
-Two drawing follow-ups remain unimplemented in this call batch:
+The two drawing findings from the original call batch are fixed and verified in the separate [drawing inspection](origin-draw.md):
 
 - `DrawingCanvas` removes an in-flight save batch from `pending` before awaiting the mutation. On navigation, cleanup sends only the remaining pending elements. If the in-flight request then fails, its catch puts the batch back into an unmounted component's ref, where no interval retries it. Browser `beforeunload` protection does not cover in-app navigation. This needs a durable scene save queue or an application navigation guard, plus failure-after-navigation coverage.
 - Image downloads have no abort/liveness check. Switching canvases during a delayed image fetch can call `addFiles` on the old canvas object and update the old component's state. A production Excalidraw fixture with delayed synthetic storage responses should cover cancellation and failed-image recovery before accepting that workflow.
