@@ -19,6 +19,7 @@ export const releases: Release[] = [{
     { title: "Recoverable workspace loading", body: "Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page." },
     { title: "Appearance from paired devices", body: "Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings." },
     { title: "Clearer connection errors", body: "Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials." },
+    { title: "Accurate browser setup", body: "Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine." },
     { title: "Release history everywhere", body: "What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes." },
   ],
 }, {

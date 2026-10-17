@@ -12,7 +12,6 @@ import { browserProcessesRunning, browserProcessTree, stopBrowserProcesses } fro
 import { BROWSER_VIEWPORT_ARGS, browserRuntimeEnv, ownsBrowserViewport } from "./browser-runtime.ts";
 import { SIGN_IN_PROMPT } from "./system-prompt.ts";
 import {
-  AGENT_BROWSER_VERSION,
   agentBrowserReleaseUrl,
   agentBrowserReleaseVersion,
   resolveAgentBrowserReleaseAsset,
@@ -247,14 +246,14 @@ const runVersion: AgentBrowserVersionRunner = (binaryPath) => new Promise((resol
 const probedVersions = new Map<string, { mtimeMs: number; version?: string | null; pending?: Promise<string | null> }>();
 const warnedBrowserVersions = new Set<string>();
 
-function versionWarning(version: string): string | undefined {
-  return version === AGENT_BROWSER_VERSION ? undefined : `installed agent-browser ${version} is not the pinned ${AGENT_BROWSER_VERSION}`;
+function versionWarning(version: string, pinnedVersion = agentBrowserReleaseVersion(resolveAgentBrowserReleaseAsset())): string | undefined {
+  return version === pinnedVersion ? undefined : `installed agent-browser ${version} is not the pinned ${pinnedVersion}`;
 }
 
-function warnVersionOnce(binaryPath: string, version: string, warning: string | undefined): void {
-  if (!warning || warnedBrowserVersions.has(`${binaryPath}\0${version}`)) return;
-  warnedBrowserVersions.add(`${binaryPath}\0${version}`);
-  console.warn(`browser engine: ${warning} at ${binaryPath}. A different build can stall browser tools; install ${AGENT_BROWSER_VERSION}.`);
+function warnVersionOnce(binaryPath: string, version: string, warning: string | undefined, pinnedVersion = agentBrowserReleaseVersion(resolveAgentBrowserReleaseAsset())): void {
+  if (!warning || warnedBrowserVersions.has(`${binaryPath}\0${version}\0${pinnedVersion}`)) return;
+  warnedBrowserVersions.add(`${binaryPath}\0${version}\0${pinnedVersion}`);
+  console.warn(`browser engine: ${warning} at ${binaryPath}. A different build can stall browser tools; install ${pinnedVersion}.`);
 }
 
 /** A string once read, null if unreadable, undefined while the first probe for this mtime runs; never blocks. */
@@ -482,8 +481,9 @@ export function browserEngineStatus(options: BrowserLookupOptions = {}): Browser
     const actual = options.versionOf ? options.versionOf(binaryPath) : cachedAgentBrowserVersion(binaryPath);
     if (actual === undefined) return { kind: "ready", binaryPath, version: "unknown" };
     const version = actual ?? "unknown";
-    const warning = versionWarning(version);
-    warnVersionOnce(binaryPath, version, warning);
+    const pinnedVersion = agentBrowserReleaseVersion(resolveAgentBrowserReleaseAsset(platform, options.arch));
+    const warning = versionWarning(version, pinnedVersion);
+    warnVersionOnce(binaryPath, version, warning, pinnedVersion);
     return { kind: "ready", binaryPath, version, ...(warning ? { warning } : {}) };
   }
   if (bundle && (options.exists ?? existsSync)(bundle.directory)) {
