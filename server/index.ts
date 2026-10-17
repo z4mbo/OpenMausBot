@@ -448,6 +448,7 @@ import { browserEvidence, browserSteps, stepContext } from "./browser-steps.ts";
 import { parseLoginFields, parseTotpField, createLoginRoutes } from "./routes/logins.ts";
 import { savedLoginResumePrompt } from "../shared/logins.ts";
 import { BrowserLive, browserRestartRefusal } from "./browser-live.ts";
+import { createBrowserViewAccess } from "./host/browser-view-access.ts";
 import {
   agentBrowserIntegration,
   browserEngineEncryptionKey,
@@ -5115,6 +5116,7 @@ const sseClients = new Set<SseClient>();
 let audienceChangedAt = 0;
 function audienceChanged(): void {
   audienceChangedAt = lastSeq;
+  browserLive.recheckViewers();
   for (const client of sseClients) {
     if (client.viewer.kind !== "member") continue;
     sseClients.delete(client);
@@ -16626,13 +16628,11 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
           : { status: 503, error: "Workspace sign-in is unavailable." };
         if (failure) return json(res, failure.status, { error: failure.error });
       }
-      const owner = auth.kind === "session" ? auth.session.id : "local-owner";
-      const isCurrent = () => {
-        const current = store.bot(bot.id);
-        return !!current && current.browser !== false && builtInBrowserEnabled(cfg)
-          && currentBrowserSession(current.id, current.browserProfile) === browser.session
-          && (auth.kind !== "session" || sessions.isLive(auth.session.id));
-      };
+      const { owner, isCurrent } = createBrowserViewAccess({
+        auth, botId: bot.id, session: browser.session, bot: (id) => store.bot(id),
+        enabled: () => builtInBrowserEnabled(cfg), sessionFor: currentBrowserSession, isLive: (id) => sessions.isLive(id),
+        visible: (viewer, id) => visibleTo(viewerFor(viewer)).bot(id),
+      });
       if (method === "GET" && liveBrowserMatch[2] === "live") {
         req.socket.setTimeout(0);
         return await browserLive.open({ botId: bot.id, session: browser.session, spec: browser.spec, owner, isCurrent, res });
