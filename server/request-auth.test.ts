@@ -132,6 +132,8 @@ describe("scopes", () => {
   it("limits a client's bot and room edits to display fields, naming the field it refused", () => {
     expect(clientBotPatchViolation({ unread: true })).toBeNull();
     expect(clientBotPatchViolation({ pinned: true, color: "green" })).toBeNull();
+    expect(clientBotPatchViolation({ avatarCrop: "mascot", avatarZoom: 1, avatarFocusX: 0.5, avatarFocusY: 0.5, avatarUrl: null })).toBeNull();
+    expect(clientBotPatchViolation({ avatarCrop: "square", name: "Renamed" })).toBe("name");
     expect(clientBotPatchViolation({ unread: true, autoApprove: true })).toBe("autoApprove");
     expect(clientBotPatchViolation({ cwd: "/" })).toBe("cwd");
     expect(clientBotPatchViolation({ recordBrowserSteps: true })).toBe("recordBrowserSteps");
@@ -139,6 +141,23 @@ describe("scopes", () => {
     expect(clientGroupPatchViolation({ name: "Ops", unread: false, turnTimeoutMinutes: 30 })).toBeNull();
     expect(clientGroupPatchViolation({ cwd: "/tmp" })).toBe("cwd");
     expect(clientGroupPatchViolation({ memberIds: [] })).toBe("memberIds");
+  });
+
+  it.each([
+    ["unread", false], ["pinned", true], ["pinnedMessageId", "message-1"],
+    ["color", "teal"], ["mascotExpression", "happy"], ["mascotBody", "star"],
+    ["avatarUrl", null], ["avatarCrop", "square"], ["avatarZoom", 1.5],
+    ["avatarFocusX", 0.25], ["avatarFocusY", 0.75],
+  ])("allows the client display field %s", (field, value) => {
+    expect(clientBotPatchViolation({ [field as string]: value })).toBeNull();
+  });
+
+  it.each([
+    "autoApprove", "approvalMode", "modelSelection", "computer", "soul",
+    "chiefOfStaff", "section", "name", "hidden", "__proto__", "unexpected",
+  ])("refuses %s atomically when mixed with a display edit", (field) => {
+    const body = JSON.parse(`{"color":"teal","${field}":true}`);
+    expect(clientBotPatchViolation(body)).toBe(field);
   });
 });
 
