@@ -6,7 +6,8 @@ import { openBot, openBotThread } from "@/state/thread-navigation";
 import { useStore, type Bot } from "@/state/store";
 import { NewBotDialog } from "./lazy-screens";
 import { AgentsFlow } from "./agents-flow/AgentsFlow";
-import { ProjectRoom } from "./agents-flow/ProjectRoom";
+import { ProjectRoom, useProjectRoom } from "./agents-flow/ProjectRoom";
+import { GroupTaskPicker } from "./TaskPicker";
 import { EmptyState, Segmented, pageClass } from "./origin-pages/ui";
 
 type AgentsView = "room" | "flow";
@@ -56,12 +57,26 @@ export function ProjectAgentsPage({ lead, agents }: { lead: Bot; agents: readonl
         </section>
       ) : (
         <section aria-label="Agents" className={pageClass}>
-          <div className="mb-3 flex justify-end">{controls}</div>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <FlowTitle lead={lead} agents={agents} />
+            {controls}
+          </div>
           <AgentsFlow lead={lead} agents={agents} onOpen={open} onSettings={(bot) => dispatch({ type: "toggleSettings", botId: bot.id, open: true })} />
           {!agents.length && <EmptyState compact icon={<Network size={22} />} title={`${lead.name} works alone for now`} />}
         </section>
       )}
       {adding && team && createPortal(<NewBotDialog section={team} preserveSelection onClose={() => setAdding(false)} />, document.body)}
     </>
+  );
+}
+
+function FlowTitle({ lead, agents }: { lead: Bot; agents: readonly Bot[] }) {
+  const { room } = useProjectRoom(lead, agents);
+  if (!room) return <span />;
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      <span className="truncate text-[15px] font-semibold text-ink">{room.name}</span>
+      <GroupTaskPicker group={room} />
+    </div>
   );
 }

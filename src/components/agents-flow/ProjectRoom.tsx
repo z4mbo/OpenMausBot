@@ -12,7 +12,7 @@ import { ghostButton } from "../origin-pages/ui";
 
 const opening = new Set<string>();
 
-function useProjectRoom(lead: Bot, agents: readonly Bot[]) {
+export function useProjectRoom(lead: Bot, agents: readonly Bot[]) {
   const { state, dispatch } = useStore();
   const head = workspaceHeadOf(state.bots, lead);
   const room = projectRoomOf(state.groups, lead);
