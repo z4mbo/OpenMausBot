@@ -697,7 +697,7 @@ function MemberCallEngine({ config }: { config: MemberCallConfig }) {
   useEffect(() => () => publishMemberCallState(null, config.nonce), [config.nonce]);
   const { localStream, others, remote, callAgent } = call;
   return (
-    <div className="hidden">
+    <div className="fixed bottom-24 right-4 z-40 flex max-w-[calc(100vw-32px)] flex-col items-end gap-2">
       {localStream && others.map((participant) => remote[participant.userId] && <CallAudio key={participant.userId} stream={remote[participant.userId]!.stream} name={participant.name} />)}
       {agent && callAgent.participant?.stream && <CallAudio key={`agent:${agent.id}`} stream={callAgent.participant.stream} name={agent.name} />}
     </div>
@@ -1182,9 +1182,9 @@ function CallAudio({ stream, name }: { stream: MediaStream; name: string }) {
   }, [stream]);
   return (
     <>
-      <audio ref={audio} autoPlay onPlaying={() => setBlocked(false)} />
+      <audio ref={audio} className="hidden" autoPlay onPlaying={() => setBlocked(false)} />
       {blocked && (
-        <button type="button" className={cn(ghostButton, "fixed bottom-4 right-4 z-40")} aria-label={`Play audio from ${name}`}
+        <button type="button" className={cn(ghostButton, "bg-menu")} aria-label={`Play audio from ${name}`}
           onClick={() => { void audio.current?.play().then(() => setBlocked(false)).catch(() => setBlocked(true)); }}>
           <Volume2 size={14} />Play audio
         </button>

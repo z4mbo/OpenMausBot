@@ -121,4 +121,31 @@ describe("member call session ownership", () => {
     expect(currentMemberCall()?.key).toBe("fixture-team:second");
   });
 
+  it("makes the blocked-audio retry reachable outside the nonvisual media host", async () => {
+    fixture.participants = [{ userId: "remote-user", name: "Remote person", email: "remote@example.test", joinedAt: 1, lastSeenAt: 1, sessionId: "remote-session", audioEnabled: true, videoEnabled: false }];
+    const peers: { ontrack: ((event: { track: MediaStreamTrack }) => void) | null }[] = [];
+    vi.stubGlobal("RTCPeerConnection", class {
+      ontrack = null;
+      connectionState = "new";
+      signalingState = "stable";
+      private transceivers: { receiver: { track: { kind: string } }; sender: { replaceTrack(): Promise<void> } }[] = [];
+      constructor() { peers.push(this); }
+      addTransceiver(kind: string) { this.transceivers.push({ receiver: { track: { kind } }, sender: { replaceTrack: async () => {} } }); }
+      getTransceivers() { return this.transceivers; }
+      createDataChannel() { return { readyState: "connecting" }; }
+      close() {}
+    });
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockRejectedValue(new DOMException("Blocked", "NotAllowedError"));
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {});
+    vi.spyOn(HTMLMediaElement.prototype, "srcObject", "set").mockImplementation(() => {});
+    join("first");
+    await vi.waitFor(() => expect(peers[0]?.ontrack).toBeTypeOf("function"));
+    peers[0]!.ontrack!({ track: { kind: "audio", id: "synthetic-audio", readyState: "live" } as MediaStreamTrack });
+    await vi.waitFor(() => expect(container.querySelector('[aria-label="Play audio from Remote person"]')).not.toBeNull());
+    const retry = container.querySelector<HTMLButtonElement>('[aria-label="Play audio from Remote person"]')!;
+    expect(retry.closest(".hidden")).toBeNull();
+    play.mockResolvedValue(undefined);
+    flushSync(() => retry.click());
+    await vi.waitFor(() => expect(container.querySelector('[aria-label="Play audio from Remote person"]')).toBeNull());
+  });
 });
