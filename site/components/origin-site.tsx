@@ -331,7 +331,7 @@ export function DownloadCard({ name, compact = false }: { name?: string; compact
       <p className={st.fine}>Windows 10 and 11, 64-bit · macOS on Apple silicon (<a href={MAC_INTEL_DOWNLOAD_URL}>Intel build</a>). Read <Link href="/whats-new">what&apos;s new</Link>.</p>
       <p className={st.smartscreen}>
         <ShieldAlert size={15} aria-hidden="true" />
-        <span>The apps aren&apos;t code-signed yet. On Windows, if SmartScreen stops the installer, choose <b>More info</b>, then <b>Run anyway</b>. On a Mac, right-click Origin, choose <b>Open</b>, then <b>Open</b> again. Unsigned Mac builds need a fresh download for updates.</span>
+        <span>The apps aren&apos;t code-signed yet. On Windows, if SmartScreen stops the installer, choose <b>More info</b>, then <b>Run anyway</b>. For an unidentified-developer warning on a Mac, follow <a href="https://support.apple.com/en-us/102445">Apple&apos;s opening instructions</a>. Unsigned Mac builds need a fresh download for updates.</span>
       </p>
     </div>
   );

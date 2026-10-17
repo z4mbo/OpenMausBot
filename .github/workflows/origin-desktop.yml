@@ -4,8 +4,8 @@
 # latest.yml / latest-mac.yml, which the installed apps read for updates.
 #
 # Signing is optional. Without the secrets below the mac build is ad-hoc
-# signed (Gatekeeper asks users to right-click → Open, and macOS in-app
-# updates do not install) and the Windows installer is unsigned (SmartScreen
+# signed (macOS 15+ requires review in System Settings > Privacy & Security,
+# and macOS in-app updates do not install) and Windows is unsigned (SmartScreen
 # shows "unknown publisher").
 #   MAC_CERT_P12_BASE64, MAC_CERT_PASSWORD    Developer ID Application cert
 #   APPLE_API_KEY_P8_BASE64, APPLE_API_KEY_ID, APPLE_API_ISSUER_ID   notarytool
