@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 import { isDraftColumn } from "../../../shared/origin-columns";
 import type { CloudColumn, CloudPerson, Priority } from "./cloud-types";
 import { CenteredDialog } from "../CenteredDialog";
-import { chipButton } from "./ui";
+import { CloudQueryRefreshNotice, chipButton } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
 
 export const PRIORITIES: readonly Priority[] = ["low", "medium", "high"];
@@ -165,6 +165,7 @@ export function IssueDialog({ label, heading, onClose, canClose, children }: { l
             <X size={16} aria-hidden="true" />
           </button>
         </div>
+        <CloudQueryRefreshNotice className="px-6 pb-2 max-sm:px-5" />
         {children}
       </>}
     </CenteredDialog>

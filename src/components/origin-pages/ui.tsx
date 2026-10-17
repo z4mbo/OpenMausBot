@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
+import { Component, Fragment, useCallback, useContext, useEffect, useId, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { CloudOff, FolderPlus, Link2, Loader2, LogIn, Plus, RotateCw, SearchX, ServerOff, Users, X } from "lucide-react";
 import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
 import { linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
@@ -9,6 +9,8 @@ import { GlassHeader, useInGlassHeader } from "../GlassScrollFrame";
 import { Select } from "../Select";
 import type { CloudProject } from "./cloud-types";
 import { errorText } from "./repo-url";
+import { OriginQueryFailures, OriginQueryRecovery, OriginQueryUnavailable } from "@/lib/origin-cloud/query-failure";
+import { useCloudToken } from "@/lib/origin-cloud/hooks";
 
 export { CenteredDialog, overlayMotion, sheetMotion, useDismiss } from "../CenteredDialog";
 
@@ -60,10 +62,52 @@ function Stalled({ label, onRetry }: { label: string; onRetry(): void }) {
   );
 }
 
+class QueryFailureBoundary extends Component<{ label: string; onRetry(): void; children: ReactNode }, { error: Error | null }> {
+  state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      if (!(this.state.error instanceof OriginQueryUnavailable)) throw this.state.error;
+      return <GateShell><Stalled label={this.props.label} onRetry={this.props.onRetry} /></GateShell>;
+    }
+    return this.props.children;
+  }
+}
+
+export function CloudQueryBoundary({ label, children }: { label: string; children: ReactNode }) {
+  const url = useCloudUrl();
+  const token = useCloudToken();
+  const [scope, setScope] = useState({ url, token, revision: 0 });
+  const [failures, setFailures] = useState<ReadonlySet<string>>(new Set());
+  const current = scope.url === url && scope.token === token ? scope : { url, token, revision: scope.revision + 1 };
+  if (current !== scope) { setScope(current); setFailures(new Set()); }
+  const [attempt, retry] = useRetry();
+  const [refresh, refreshQueries] = useRetry();
+  const reportFailure = useCallback((key: string, failed: boolean) => setFailures((current) => {
+    if (current.has(key) === failed) return current;
+    const next = new Set(current);
+    if (failed) next.add(key);
+    else next.delete(key);
+    return next;
+  }), []);
+  const recovery = useMemo(() => ({ attempt: refresh, label, failureCount: failures.size, retry: refreshQueries, reportFailure }), [refresh, label, failures.size, refreshQueries, reportFailure]);
+  return <OriginQueryRecovery value={recovery}>
+    {failures.size > 0 && <GlassHeader><div className={glassHeaderRow}><CloudQueryRefreshNotice /></div></GlassHeader>}
+    <QueryFailureBoundary key={`${current.revision}:${attempt}`} label={label} onRetry={retry}><OriginQueryFailures value={true}>{children}</OriginQueryFailures></QueryFailureBoundary>
+  </OriginQueryRecovery>;
+}
+
+export function CloudQueryRefreshNotice({ className }: { className?: string }) {
+  const recovery = useContext(OriginQueryRecovery);
+  if (!recovery?.failureCount) return null;
+  return <div className={className}><Notice tone="danger">Could not refresh {recovery.label.toLowerCase()}. Showing the last loaded data.<button type="button" className={cn(ghostButton, "ml-2 min-h-7 px-2 py-1 text-[12px]")} onClick={recovery.retry}>Try again</button></Notice></div>;
+}
+
 /** Remounts a gate on retry, so its queries subscribe afresh. */
 function useRetry(): [number, () => void] {
   const [attempt, setAttempt] = useState(0);
-  return [attempt, () => setAttempt((value) => value + 1)];
+  const retry = useCallback(() => setAttempt((value) => value + 1), []);
+  return [attempt, retry];
 }
 
 export type ProjectContext = { project: CloudProject; projectId: string; canEdit: boolean; isAdmin: boolean };
@@ -72,7 +116,7 @@ type CloudGateProps = OriginPageProps & { label: string; children: (ctx: Project
 
 export function CloudGate(props: CloudGateProps) {
   const [attempt, retry] = useRetry();
-  return <ProjectGate key={attempt} {...props} onRetry={retry} />;
+  return <CloudQueryBoundary key={props.cloudProjectId} label={props.label}><ProjectGate key={attempt} {...props} onRetry={retry} /></CloudQueryBoundary>;
 }
 
 function ProjectGate({ cloudProjectId, projectName, link, label, children, onRetry }: CloudGateProps & { onRetry(): void }) {
@@ -142,7 +186,7 @@ type WorkspaceGateProps = { teamId: string | null; label: string; head?: { id: s
 
 export function WorkspaceGate(props: WorkspaceGateProps) {
   const [attempt, retry] = useRetry();
-  return <TeamGate key={attempt} {...props} onRetry={retry} />;
+  return <CloudQueryBoundary key={props.teamId} label={props.label}><TeamGate key={attempt} {...props} onRetry={retry} /></CloudQueryBoundary>;
 }
 
 function TeamGate({ teamId, label, head, children, onRetry }: WorkspaceGateProps & { onRetry(): void }) {
@@ -325,7 +369,7 @@ export function Modal({ title, onClose, canClose, children, wide, className }: {
           <h3 id={heading} className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink-secondary">{title}</h3>
           <button type="button" className={iconButton} aria-label="Close" onClick={dismiss}><X size={16} /></button>
         </div>
-        <div className="px-4 pb-4">{children}</div>
+        <div className="px-4 pb-4"><CloudQueryRefreshNotice className="mb-3" />{children}</div>
       </>}
     </CenteredDialog>
   );

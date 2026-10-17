@@ -11,7 +11,7 @@ import {
 import { requestOriginSync } from "@/lib/origin-sync";
 import { cn } from "@/lib/cn";
 import { OriginConnectDialog } from "../OriginConnect";
-import { EmptyState, Field, Loading, Notice, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
+import { CloudQueryBoundary, EmptyState, Field, Loading, Notice, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
 import { MemberAvatar } from "./MemberAvatar";
 
 const ROLE_LABEL: Record<string, string> = { owner: "Owner", admin: "Admin", member: "Member", viewer: "Viewer" };
@@ -46,7 +46,7 @@ export function WorkspaceMembersPanel({ cloudTeamId }: { cloudTeamId: string | n
     return <EmptyState icon={<Cloud size={28} />} title="No Origin workspace selected"
       body="Pick or connect an Origin workspace to manage its members." />;
   }
-  return <Members key={JSON.stringify([url, session.user?._id, cloudTeamId])} teamId={cloudTeamId} myEmail={session.user?.email ?? ""} />;
+  return <CloudQueryBoundary key={JSON.stringify([url, session.user?._id, cloudTeamId])} label="Members"><Members teamId={cloudTeamId} myEmail={session.user?.email ?? ""} /></CloudQueryBoundary>;
 }
 
 const sameEmail = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
