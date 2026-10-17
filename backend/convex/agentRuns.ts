@@ -3,7 +3,7 @@ import { internalMutation, mutation, query } from "./_generated/server";
 import { runUsage, threadAttachment, threadMessageKind, threadMessageTool } from "./agentsTables";
 import { requireUser } from "./lib/auth";
 import { canResumeThreadRun, requireThread, requireWritableThread, runAcceptsBotWrites } from "./lib/agentAccess";
-import { cleanPayload, cleanText, cleanTool, LEASE_MS, messageByClientId, nextSeq, settleRun } from "./lib/agentThreadRows";
+import { cleanPayload, cleanText, cleanTool, LEASE_MS, messageByClientId, nextSeq, promoteQueuedRun, settleRun } from "./lib/agentThreadRows";
 import { requireTeamMember } from "./lib/permissions";
 
 const CLIENT_ID_MAX = 160;
@@ -204,6 +204,15 @@ export const expireStale = internalMutation({
       expired += 1;
     }
     return expired;
+  },
+});
+
+export const promoteQueued = internalMutation({
+  args: { threadId: v.id("agentThreads"), previousRunId: v.id("workspaceAgentRuns") },
+  returns: v.null(),
+  handler: async (ctx, args): Promise<null> => {
+    await promoteQueuedRun(ctx, args.threadId, args.previousRunId, Date.now());
+    return null;
   },
 });
 
