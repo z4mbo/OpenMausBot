@@ -191,17 +191,23 @@ test("MCP inbox and deletion are scoped and idempotent, and completion requires 
   await expect(f.t.query(api.connectors.read, { token: grant.token, kind: "issue", projectId: f.privateProject, taskId: f.privateIssue })).rejects.toThrow();
 });
 
-test("GitHub closure completes Origin once and stale events cannot reopen it", async () => {
+test("only a trusted merge completes a mirrored issue, with one completion and no stale reopen", async () => {
   const f = await fixture();
   const args = { projectId: f.shared, taskId: f.issue, repoUrl: "https://github.com/example/shared", number: 1, issueUrl: "https://github.com/example/shared/issues/1", state: "closed" as const, updatedAt: Date.now() };
   await f.t.mutation(internal.integrations.linkIssue, args);
   await f.t.mutation(internal.integrations.linkIssue, args);
+  expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(false);
+  const receipt = { projectId: f.shared, taskId: f.issue, repoUrl: args.repoUrl, issueNumber: args.number, pullRequest: { number: 9, headSha: "a".repeat(40), mergeSha: "b".repeat(40), mergedAt: args.updatedAt } };
+  await f.t.mutation(internal.integrations.completeMergedIssue, receipt);
+  await f.t.mutation(internal.integrations.completeMergedIssue, receipt);
   await f.t.mutation(internal.integrations.linkIssue, { ...args, state: "open", updatedAt: args.updatedAt - 1 });
   expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(true);
   expect((await f.t.query(api.projects.get, { sessionToken: f.owner.token, projectId: f.shared })).openIssueCount).toBe(0);
   await f.t.mutation(api.tasks.updateTask, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue, done: false });
   expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(false);
   await f.t.mutation(internal.integrations.linkIssue, args);
+  expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(false);
+  await f.t.mutation(internal.integrations.completeMergedIssue, receipt);
   expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(true);
 });
 

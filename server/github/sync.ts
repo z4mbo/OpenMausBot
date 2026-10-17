@@ -11,7 +11,7 @@ export type IntegrationContext = {
   project: { _id: string; teamId?: string; name: string; status?: string; description?: string; repoUrl?: string; githubRepoId?: number; githubWorkspaceAccess?: boolean };
   connection: Connection | null;
   task: {
-    _id: string; title: string; description?: string; done: boolean; githubIssueNumber?: number; githubIssueUrl?: string; githubIssueState?: "open" | "closed";
+    _id: string; title: string; description?: string; done: boolean; githubIssueNumber?: number; githubIssueUrl?: string; githubIssueState?: "open" | "closed"; githubIssueReopenRequested?: boolean;
     /** In the board's draft column. Absent from Origin Cloud deployments without draft columns. */
     draft?: boolean;
   } | null;
@@ -173,16 +173,11 @@ const STATE_PATCH: Record<Exclude<IssueStateMove, "pull">, object> = {
   reopen: { state: "open" },
 };
 
-/**
- * Three-way merge of an issue's open/closed state: `githubIssueState` is what Origin last saw on GitHub, so a change on
- * GitHub since then wins, and otherwise a different Origin state is pushed to GitHub. An open issue in Draft counts
- * as closed.
- */
-export function issueStateMove(task: { done: boolean; draft?: boolean; githubIssueState?: "open" | "closed" }, remote: "open" | "closed"): IssueStateMove {
+export function issueStateMove(task: { done: boolean; draft?: boolean; githubIssueState?: "open" | "closed"; githubIssueReopenRequested?: boolean }, remote: "open" | "closed"): IssueStateMove {
   const parked = !task.done && task.draft === true;
   const local = task.done || parked ? "closed" : "open";
   if (!task.githubIssueState || remote !== task.githubIssueState || local === remote) return "pull";
-  if (local === "open") return "reopen";
+  if (local === "open") return task.githubIssueReopenRequested ? "reopen" : "pull";
   return parked ? "park" : "close";
 }
 
@@ -303,6 +298,7 @@ export async function mirrorUnlinkedPage(service: GitHubService) {
 export async function syncGitHubEvent(service: GitHubService, repoUrl: string, number: number) {
   const targets = await service.bridge<Target[]>("webhookTargets", { repoUrl, number });
   for (const target of targets) await syncTarget(service, { ...target, repoUrl, number }, false);
+  return targets;
 }
 
 export async function syncGitHubPage(service: GitHubService) {

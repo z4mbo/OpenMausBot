@@ -333,19 +333,22 @@ export const upsertRepoSnapshot = internalMutation({
           githubIssueState: issue.state,
           githubIssueSyncedAt: now,
           githubIssueUpdatedAt: issue.updatedAt,
-          done: issue.state === "closed",
+          done: false,
           columnId: todoColumn._id,
           updatedAt: issue.updatedAt || now,
         };
         if (existing) {
           if ((existing.githubIssueUpdatedAt || 0) > issue.updatedAt) continue;
           const column = await ctx.db.get(existing.columnId);
+          patch.done = existing.done;
+          if (issue.state === "open" && existing.githubIssueState === "closed") patch.done = false;
           if (column && isDraftColumn(column)) patch.done = existing.done;
           if (existing.githubTaskMode === "pull_request" || await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", existing._id)).first()) patch.done = existing.done;
           if (issue.state === "open" && existing.githubIssueState !== "closed") patch.done = existing.done;
           patch.columnId = existing.columnId;
           await recordCompletion(ctx, existing, patch.done, issue.updatedAt);
-          await ctx.db.patch(existing._id, patch);
+          await ctx.db.patch(existing._id, { ...patch, ...(issue.state === "open" ? { githubIssueReopenRequested: undefined,
+            ...(existing.githubIssueState === "closed" ? { completionPullRequest: undefined } : {}) } : {}) });
           if (existing.done !== patch.done) await changeOpenIssueCount(ctx, args.projectId, patch.done ? -1 : 1);
         } else {
           await ctx.db.insert("tasks", {
@@ -355,7 +358,7 @@ export const upsertRepoSnapshot = internalMutation({
             title: issue.title,
             description: issue.body,
             priority: "medium",
-            done: issue.state === "closed",
+            done: false,
             githubIssueNumber: issue.number,
             githubIssueUrl: issue.url,
             githubIssueState: issue.state,

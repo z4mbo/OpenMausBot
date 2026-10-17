@@ -464,7 +464,7 @@ describe("issue mirroring and two-way state", () => {
   });
 
   it("reopens on GitHub after Origin reopened, and lets a change on GitHub win", async () => {
-    const reopened = await tickWith({ done: false, githubIssueState: "closed" }, "closed");
+    const reopened = await tickWith({ done: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed");
     expect(JSON.parse(reopened.network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "open" });
     const closedOnGitHub = await tickWith({ done: false, githubIssueState: "open" }, "closed");
     expect(closedOnGitHub.network.requests.some((r) => r.key.startsWith("PATCH"))).toBe(false);
@@ -478,13 +478,19 @@ describe("issue mirroring and two-way state", () => {
     expect(parked.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ state: "closed" });
     const stillParked = await tickWith({ done: false, draft: true, githubIssueState: "closed" }, "closed");
     expect(stillParked.network.requests.some((r) => r.key.startsWith("PATCH") || r.key.endsWith("/comments"))).toBe(false);
-    const left = await tickWith({ done: false, draft: false, githubIssueState: "closed" }, "closed");
+    const left = await tickWith({ done: false, draft: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed");
     expect(JSON.parse(left.network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "open" });
   });
 
   it("leaves GitHub alone when the Origin backend does not report drafts", async () => {
     const { network } = await tickWith({ done: false, githubIssueState: "open" }, "open");
     expect(network.requests.some((r) => r.key.startsWith("PATCH"))).toBe(false);
+  });
+
+  it("preserves a manual GitHub closure unless Origin explicitly requested a reopen", async () => {
+    const { network } = await tickWith({ done: false, githubIssueState: "closed" }, "closed");
+    expect(network.requests.some((request) => request.key.startsWith("PATCH"))).toBe(false);
+    expect(network.bridgeCalls.find((call) => call.name === "linkIssue")?.args).toMatchObject({ state: "closed" });
   });
 
   it.each([
@@ -627,10 +633,14 @@ describe("POST /api/github/pull-requests/review", () => {
     const closed: unknown[] = [];
     const harness = await start({
       bridge: {
-        context: () => context({ task: { _id: "t1", title: "Login", done: false, githubIssueNumber: 5, githubIssueUrl: "https://github.com/acme/widgets/issues/5", githubIssueState: "open" } }),
+        context: ({ projectId, taskId }) => context({ project: { ...context().project, _id: projectId }, task: { _id: taskId, title: "Login", done: false, githubIssueNumber: 5, githubIssueUrl: "https://github.com/acme/widgets/issues/5", githubIssueState: "open" } }),
         prEventTargets: () => [],
-        webhookTargets: () => [{ projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", number: 5 }],
+        webhookTargets: () => [
+          { projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", number: 5 },
+          { projectId: "another-project", taskId: "another-task", repoUrl: "https://github.com/acme/widgets", number: 5 },
+        ],
         linkIssue: () => null,
+        completeMergedIssue: () => true,
       },
       github: {
         ...prRoutes(),
@@ -644,6 +654,31 @@ describe("POST /api/github/pull-requests/review", () => {
     expect(await merged.json()).toEqual({ merged: true, sha: sha40("c"), completed: [5] });
     expect(closed).toEqual([]);
     expect(harness.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ taskId: "t1", number: 5, state: "closed" });
+    expect(harness.network.bridgeCalls.filter((c) => c.name === "completeMergedIssue").map((c) => c.args)).toEqual([{
+      projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", issueNumber: 5,
+      pullRequest: { number: 8, headSha: sha40("a"), mergeSha: sha40("c"), mergedAt: NOW },
+    }]);
+  });
+
+  it("does not report a parked issue completed when its merge receipt is rejected", async () => {
+    const harness = await start({
+      bridge: {
+        context: () => context({ task: { _id: "t1", title: "Parked", done: false, draft: true, githubIssueNumber: 5, githubIssueState: "closed" } }),
+        prEventTargets: () => [],
+        webhookTargets: () => [{ projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", number: 5 }],
+        linkIssue: () => null,
+        completeMergedIssue: () => false,
+      },
+      github: {
+        ...prRoutes(),
+        "PUT https://api.github.com/repos/acme/widgets/pulls/8/merge": () => ({ body: { sha: sha40("c"), merged: true } }),
+        "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, state: "closed", updated_at: "2026-10-17T11:00:00Z" } }),
+      },
+    });
+    harness.service.store.saveWorkspace("team1", "octo", 42, "u-admin", { access_token: "workspace-token" });
+    const merged = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
+    expect(await merged.json()).toEqual({ merged: true, sha: sha40("c"), completed: [] });
+    expect(harness.network.bridgeCalls.filter((c) => c.name === "completeMergedIssue")).toHaveLength(1);
   });
 
   it("does not close an unrelated issue mentioned in a PR example when GitHub links another issue", async () => {
@@ -663,11 +698,17 @@ describe("POST /api/github/pull-requests/review", () => {
 
   it("waits for GitHub to close a linked issue instead of reporting it completed while still open", async () => {
     const harness = await start({
-      bridge: { context: () => context(), prEventTargets: () => [], webhookTargets: () => [] },
+      bridge: {
+        context: () => context({ task: { _id: "t1", title: "Login", done: false, githubIssueNumber: 5, githubIssueState: "open" } }),
+        prEventTargets: () => [],
+        webhookTargets: () => [{ projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", number: 5 }],
+        linkIssue: () => null,
+        completeMergedIssue: () => false,
+      },
       github: {
         ...prRoutes(),
         "PUT https://api.github.com/repos/acme/widgets/pulls/8/merge": () => ({ body: { sha: sha40("c"), merged: true } }),
-        "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, state: "open" } }),
+        "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, state: "open", updated_at: "2026-10-17T11:00:00Z" } }),
         "PATCH https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: {} }),
       },
     });
@@ -675,6 +716,9 @@ describe("POST /api/github/pull-requests/review", () => {
     const merged = await harness.call("/api/github/pull-requests/review", review("admin-session", { action: "merge" }));
     expect(await merged.json()).toEqual({ merged: true, sha: sha40("c"), completed: [] });
     expect(harness.network.requests.some((request) => request.key.startsWith("PATCH"))).toBe(false);
+    expect(harness.network.bridgeCalls.find((call) => call.name === "completeMergedIssue")?.args).toMatchObject({
+      taskId: "t1", issueNumber: 5, pullRequest: { number: 8, headSha: sha40("a"), mergeSha: sha40("c") },
+    });
   });
 
   it("refuses a merge when GitHub cannot resolve the PR's closing references", async () => {

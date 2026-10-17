@@ -190,6 +190,8 @@ export default defineSchema({
     githubIssueState: v.optional(v.union(v.literal("open"), v.literal("closed"))),
     githubIssueSyncedAt: v.optional(v.number()),
     githubIssueUpdatedAt: v.optional(v.number()),
+    githubIssueReopenRequested: v.optional(v.boolean()),
+    completionPullRequest: v.optional(v.object({ repoUrl: v.string(), issueNumber: v.number(), number: v.number(), headSha: v.string(), mergeSha: v.string(), mergedAt: v.number() })),
     order: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),

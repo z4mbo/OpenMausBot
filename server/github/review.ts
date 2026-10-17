@@ -162,9 +162,18 @@ export async function mergeAndComplete(service: GitHubService, projectId: string
   for (const issue of detail.closes) {
     try {
       const observed = await githubRequest<{ number: number; state: string; pull_request?: unknown }>(service, `${repositoryPath(repoUrl)}/issues/${issue}`, token);
-      if (observed.number !== issue || observed.state !== "closed" || observed.pull_request) continue;
-      await syncGitHubEvent(service, repoUrl, issue);
-      completed.push(issue);
+      if (observed.number !== issue || !["open", "closed"].includes(observed.state) || observed.pull_request) continue;
+      const targets = await syncGitHubEvent(service, repoUrl, issue);
+      let applied = false;
+      for (const target of targets) {
+        if (target.projectId !== projectId) continue;
+        const accepted = await service.bridge<boolean>("completeMergedIssue", {
+          projectId, taskId: target.taskId, repoUrl, issueNumber: issue,
+          pullRequest: { number, headSha: detail.headSha, mergeSha: sha, mergedAt: service.now() },
+        });
+        applied ||= accepted;
+      }
+      if (applied) completed.push(issue);
     } catch (error) {
       console.warn("Merged issue sync deferred", projectId, issue, error instanceof Error ? error.message : error);
     }

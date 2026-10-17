@@ -34,7 +34,8 @@ describe("merge blockers", () => {
 describe("issue state sync", () => {
   it("pushes an Origin change, pulls a GitHub change, and lets GitHub win when both moved", () => {
     expect(issueStateMove({ done: true, githubIssueState: "open" }, "open")).toBe("close");
-    expect(issueStateMove({ done: false, githubIssueState: "closed" }, "closed")).toBe("reopen");
+    expect(issueStateMove({ done: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed")).toBe("reopen");
+    expect(issueStateMove({ done: false, githubIssueState: "closed" }, "closed")).toBe("pull");
     expect(issueStateMove({ done: false, githubIssueState: "open" }, "closed")).toBe("pull");
     expect(issueStateMove({ done: true, githubIssueState: "closed" }, "open")).toBe("pull");
     expect(issueStateMove({ done: true }, "open")).toBe("pull");
@@ -43,7 +44,7 @@ describe("issue state sync", () => {
   it("parks the GitHub issue of a draft as not planned and reopens it when the issue leaves Draft", () => {
     expect(issueStateMove({ done: false, draft: true, githubIssueState: "open" }, "open")).toBe("park");
     expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "closed")).toBe("pull");
-    expect(issueStateMove({ done: false, draft: false, githubIssueState: "closed" }, "closed")).toBe("reopen");
+    expect(issueStateMove({ done: false, draft: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed")).toBe("reopen");
     expect(issueStateMove({ done: true, draft: true, githubIssueState: "open" }, "open")).toBe("close");
     expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "open")).toBe("pull");
   });

@@ -5,7 +5,7 @@ import { canEdit, changeOpenIssueCount, getActiveTeamMember, projectMember, proj
 import { priorityValidator, taskAssetTypeValidator } from "./lib/validators";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { recordCompletion } from "./lib/completions";
+import { hasCurrentMergeReceipt, recordCompletion } from "./lib/completions";
 import { notify } from "./notifications";
 import { containsMention, mentionToken } from "../lib/issue-mentions";
 import { updateChecklist } from "../lib/comment-checklist";
@@ -241,7 +241,8 @@ export const deleteColumn = mutation({
       const target = args.moveToColumnId ? await ctx.db.get(args.moveToColumnId) : null;
       if (!target || target._id === column._id || target.projectId !== args.projectId) throw new Error("Choose a destination for the issues in this column");
       if (isDoneColumn(target) && tasks.some(task => !task.done)) throw new Error("Complete the open issues before moving them to Done");
-      for (const [index, task] of tasks.entries()) await ctx.db.patch(task._id, { columnId: target._id, order: Date.now() + index, updatedAt: Date.now() });
+      for (const [index, task] of tasks.entries()) await ctx.db.patch(task._id, { columnId: target._id, order: Date.now() + index, updatedAt: Date.now(),
+        ...(!task.done && task.githubIssueNumber && isDraftColumn(column) && !isDraftColumn(target) ? { githubIssueReopenRequested: true } : {}) });
     }
     await ctx.db.delete(args.columnId);
     await touchProject(ctx, args.projectId);
@@ -327,6 +328,7 @@ async function requireMergedCompletion(ctx: QueryCtx | MutationCtx, projectId: I
   if (!project.repoUrl && !task?.githubIssueNumber) return;
   const repo = repositoryUrl(project.repoUrl)?.toLowerCase();
   if (task) {
+    if (task.githubIssueState === "closed" && hasCurrentMergeReceipt(task, project)) return;
     const rows = await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", task._id)).take(20);
     if (rows.some(row => row.state === "merged" && row.projectId === projectId && repo && row.url.toLowerCase().startsWith(`${repo}/pull/`))) return;
   }
@@ -345,6 +347,8 @@ export async function updateTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
       assignedToName: string | undefined;
       dueDate: string | undefined;
       done: boolean;
+      completionPullRequest: Doc<"tasks">["completionPullRequest"];
+      githubIssueReopenRequested: boolean;
       updatedAt: number;
     }> = { updatedAt: Date.now() };
     if (args.title !== undefined) {
@@ -364,6 +368,10 @@ export async function updateTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
     }
     if (args.dueDate !== undefined) patch.dueDate = requireDueDate(args.dueDate);
     if (args.done !== undefined) patch.done = args.done;
+    if (patch.done === false && task.done) {
+      patch.completionPullRequest = undefined;
+      if (task.githubIssueNumber) patch.githubIssueReopenRequested = true;
+    }
     if (patch.done === true && !task.done) await requireMergedCompletion(ctx, args.projectId, task);
     if (patch.done !== undefined) await recordCompletion(ctx, task, patch.done);
     await ctx.db.patch(args.taskId, patch);
@@ -389,6 +397,8 @@ export const moveTask = mutation({
     if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
     if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
     if (!task.done && isDoneColumn(column)) throw new Error("Complete this issue before moving it to Done");
+    const previousColumn = task.githubIssueNumber && !task.done && !isDraftColumn(column) ? await ctx.db.get(task.columnId) : null;
+    const reopen = Boolean(previousColumn && isDraftColumn(previousColumn));
     const tasks = (await ctx.db.query("tasks").withIndex("by_column", (q) => q.eq("columnId", args.columnId)).collect())
       .filter((item) => item._id !== args.taskId)
       .sort((a, b) => a.order - b.order);
@@ -402,7 +412,7 @@ export const moveTask = mutation({
       : tasks.length
         ? Math.max(...tasks.map((item) => item.order)) + 1
         : 0;
-    await ctx.db.patch(args.taskId, { columnId: args.columnId, order, updatedAt: Date.now() });
+    await ctx.db.patch(args.taskId, { columnId: args.columnId, order, updatedAt: Date.now(), ...(reopen ? { githubIssueReopenRequested: true } : {}) });
     await touchProject(ctx, args.projectId);
   },
 });

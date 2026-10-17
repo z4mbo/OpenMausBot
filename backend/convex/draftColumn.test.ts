@@ -57,6 +57,8 @@ describe("Draft column", () => {
     await link("open", 3000);
     expect((await context(f, taskId)).task.done).toBe(false);
     await link("closed", 4000);
+    expect((await context(f, taskId)).task.done).toBe(false);
+    await f.t.mutation(internal.integrations.completeMergedIssue, { projectId: f.projectId, taskId, repoUrl, issueNumber: 7, pullRequest: { number: 9, headSha: "a".repeat(40), mergeSha: "b".repeat(40), mergedAt: 5000 } });
     expect((await context(f, taskId)).task.done).toBe(true);
   });
 
@@ -79,6 +81,8 @@ describe("Draft column", () => {
     expect((await context(f, taskId)).task.done).toBe(false);
     await f.t.mutation(api.tasks.moveTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId, columnId: f.columns[1]._id });
     await snapshot();
+    expect((await context(f, taskId)).task.done).toBe(false);
+    await f.t.mutation(internal.integrations.completeMergedIssue, { projectId: f.projectId, taskId, repoUrl, issueNumber: 7, pullRequest: { number: 9, headSha: "a".repeat(40), mergeSha: "b".repeat(40), mergedAt: 3000 } });
     expect((await context(f, taskId)).task.done).toBe(true);
   });
 
