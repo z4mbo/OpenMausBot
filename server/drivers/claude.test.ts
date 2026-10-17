@@ -92,6 +92,8 @@ const CONTROL_PLANE_FIXTURE = {
   ORIGIN_RESEND_API_KEY: "origin-mail-should-not-leak", ORIGIN_TURN_SECRET: "origin-turn-should-not-leak",
   GITHUB_APP_PRIVATE_KEY: "github-app-should-not-leak", GITHUB_CLIENT_SECRET: "github-client-should-not-leak",
   GITHUB_WEBHOOK_SECRET: "github-webhook-should-not-leak",
+  CONVEX_DEPLOY_KEY: "prod:origin-fixture|deploy-should-not-leak",
+  CONVEX_SELF_HOSTED_ADMIN_KEY: "convex-admin-should-not-leak",
 };
 
 describe("ClaudeDriver.decodeConfig", () => {

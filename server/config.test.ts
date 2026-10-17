@@ -1794,6 +1794,37 @@ describe("credential env preference", () => {
 });
 
 describe("workspace credential env strip", () => {
+  it.each(["ORIGIN_INTEGRATION_SECRET", "origin_integration_secret", "Origin_Integration_Secret"])(
+    "keeps backend administration private when %s supplies Origin operator authority",
+    (marker) => {
+      for (const strip of [stripControlPlaneEnv, stripWorkspaceCredentialEnv]) {
+        const env: Record<string, string | undefined> = {
+          [marker]: "origin-operator-fixture", PATH: "/usr/bin", GITHUB_TOKEN: "project-owned-token",
+          CONVEX_DEPLOY_KEY: "prod:origin-fixture|operator-deploy", convex_deploy_key: "operator-deploy",
+          CONVEX_SELF_HOSTED_ADMIN_KEY: "operator-admin", Convex_Self_Hosted_Admin_Key: "operator-admin",
+          CONVEX_URL: "https://project-fixture.convex.cloud", MY_CONVEX_DEPLOY_KEY: "project-owned-token",
+        };
+        strip(env);
+        expect(env).toEqual({
+          PATH: "/usr/bin", GITHUB_TOKEN: "project-owned-token",
+          CONVEX_URL: "https://project-fixture.convex.cloud", MY_CONVEX_DEPLOY_KEY: "project-owned-token",
+        });
+      }
+    },
+  );
+
+  it.each([undefined, "", "   "])("preserves project Convex credentials without Origin operator authority (%s)", (marker) => {
+    for (const strip of [stripControlPlaneEnv, stripWorkspaceCredentialEnv]) {
+      const credentials = {
+        CONVEX_DEPLOY_KEY: "prod:project-fixture|project-deploy",
+        CONVEX_SELF_HOSTED_ADMIN_KEY: "project-admin", GITHUB_TOKEN: "project-owned-token",
+      };
+      const env = { ORIGIN_INTEGRATION_SECRET: marker, ...credentials };
+      strip(env);
+      expect(env).toEqual(credentials);
+    }
+  });
+
   it("keeps Origin integration authority out of child environments for every Windows spelling", () => {
     const credentials = [
       "ORIGIN_INTEGRATION_SECRET", "ORIGIN_GITHUB_TOKEN", "ORIGIN_RESEND_API_KEY", "ORIGIN_TURN_SECRET",
