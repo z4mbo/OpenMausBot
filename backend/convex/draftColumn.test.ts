@@ -68,4 +68,24 @@ describe("Draft column", () => {
     const { columns } = await f.t.query(api.tasks.board, { sessionToken: f.sessionToken, projectId: f.projectId });
     expect(columns.find(column => column._id === todo)).toMatchObject({ title: "Ideas", isDraft: true });
   });
+
+  test("newly created Draft columns stay private after a rename", async () => {
+    const f = await fixture();
+    const columnId = await f.t.mutation(api.tasks.createColumn, { sessionToken: f.sessionToken, projectId: f.projectId, title: "Draft" });
+    const taskId = await f.create(columnId, "Unannounced idea");
+    await f.t.mutation(api.tasks.updateColumn, { sessionToken: f.sessionToken, projectId: f.projectId, columnId, title: "Ideas" });
+
+    expect((await context(f, taskId)).task.draft).toBe(true);
+    const { rows } = JSON.parse(await f.t.query(internal.integrations.unlinkedTasks, { cursor: null })) as { rows: { taskId: string }[] };
+    expect(rows.map(row => row.taskId)).not.toContain(taskId);
+  });
+
+  test("renaming a legacy unflagged Draft column keeps its issues private", async () => {
+    const f = await fixture();
+    const columnId = f.columns[0]._id;
+    await f.t.run(ctx => ctx.db.patch(columnId, { isDraft: undefined }));
+    const taskId = await f.create(columnId, "Existing private idea");
+    await f.t.mutation(api.tasks.updateColumn, { sessionToken: f.sessionToken, projectId: f.projectId, columnId, title: "Ideas" });
+    expect((await context(f, taskId)).task.draft).toBe(true);
+  });
 });

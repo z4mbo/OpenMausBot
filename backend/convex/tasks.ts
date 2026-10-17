@@ -9,7 +9,7 @@ import { recordCompletion } from "./lib/completions";
 import { notify } from "./notifications";
 import { containsMention, mentionToken } from "../lib/issue-mentions";
 import { updateChecklist } from "../lib/comment-checklist";
-import { normalizeColumnTitle } from "./lib/columns";
+import { isDraftColumn, normalizeColumnTitle } from "./lib/columns";
 
 const defaultColumns = ["Draft", "Todo", "In progress"] as const;
 
@@ -156,7 +156,7 @@ export const createColumn = mutation({
     const columns = await ctx.db.query("columns").withIndex("by_project", (q) => q.eq("projectId", args.projectId)).collect();
     const order = columns.length ? Math.max(...columns.map((column) => column.order)) + 1 : 0;
     if (columns.length >= 20) throw new Error("A workflow can have up to 20 columns");
-    const id = await ctx.db.insert("columns", { projectId: args.projectId, title: args.title.trim(), isDone: false, order, createdAt: now, updatedAt: now });
+    const id = await ctx.db.insert("columns", { projectId: args.projectId, title: args.title.trim(), isDone: false, ...(normalizeColumnTitle(args.title) === "draft" ? { isDraft: true } : {}), order, createdAt: now, updatedAt: now });
     await touchProject(ctx, args.projectId);
     return id;
   },
@@ -222,7 +222,7 @@ export const updateColumn = mutation({
     const column = await ctx.db.get(args.columnId);
     if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
     if (!args.title.trim() || args.title.length > 60) throw new Error("Enter a column name under 60 characters");
-    await ctx.db.patch(args.columnId, { title: args.title.trim(), isDone: false, ...(normalizeColumnTitle(args.title) === "draft" ? { isDraft: true } : {}), updatedAt: Date.now() });
+    await ctx.db.patch(args.columnId, { title: args.title.trim(), isDone: false, ...(isDraftColumn(column) || normalizeColumnTitle(args.title) === "draft" ? { isDraft: true } : {}), updatedAt: Date.now() });
     await touchProject(ctx, args.projectId);
   },
 });
