@@ -35,6 +35,10 @@ vi.mock("./DesktopCapabilities", async () => {
   return { useDesktopCapabilities: () => ({ capabilities: initialDesktopCapabilities() }) };
 });
 vi.mock("@/lib/thread-preferences", () => ({ useShowThreads: () => fixture.showThreads }));
+vi.mock("@/lib/origin-cloud", async (original) => ({
+  ...await original<typeof import("@/lib/origin-cloud")>(),
+  useCloudQuery: () => undefined,
+}));
 vi.mock("@/lib/interface-mode", () => ({ useAdvancedMode: () => true, setAdvancedMode: () => {} }));
 vi.mock("@/state/store", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/state/store")>();
