@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import type { ChildProcess } from "node:child_process";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { spawnWithSecrets } from "./cloud-home-start.ts";
@@ -18,6 +18,7 @@ const OWNER_ANTHROPIC = `anthropic-owner-${randomBytes(8).toString("hex")}`;
 let home = "";
 let dataDir = "";
 let dump = "";
+let processDumps = "";
 let base = "";
 let child: ChildProcess;
 let log = "";
@@ -48,7 +49,19 @@ async function adminPairing(): Promise<string> {
   return (await api("POST", "/api/auth/pair", { code: granted.code })).body.token;
 }
 
-const started = () => JSON.parse(readFileSync(dump, "utf8")) as { pid: number; env: Record<string, string> };
+type AcpCapture = { pid: number; argv: string[]; env: Record<string, string> };
+const captures = (): AcpCapture[] => readdirSync(processDumps).filter((name) => /^\d+\.json$/.test(name)).flatMap((name) => {
+  try { return [JSON.parse(readFileSync(join(processDumps, name), "utf8")) as AcpCapture]; } catch { return []; }
+});
+const processIds = () => new Set(captures().map((capture) => capture.pid));
+async function nextCatalogProcess(previous: ReadonlySet<number>): Promise<AcpCapture> {
+  let captured: AcpCapture | undefined;
+  await expect.poll(() => {
+    captured = captures().find((entry) => !previous.has(entry.pid) && entry.argv.length === 1 && entry.argv[0] === "acp");
+    return Boolean(captured);
+  }, { timeout: 15_000 }).toBe(true);
+  return captured!;
+}
 /** Existence alone can catch a half-written file on a busy runner (SyntaxError: Unexpected end). */
 const written = (file: string, shape: "document" | "lines" = "document") => {
   try {
@@ -63,13 +76,38 @@ beforeAll(async () => {
   dataDir = join(home, ".openmausbot");
   mkdirSync(dataDir, { recursive: true });
   dump = join(home, "opencode.json");
+  processDumps = join(home, "opencode-processes");
+  mkdirSync(processDumps);
+  const cli = join(home, "gated-acp.ts");
+  writeFileSync(cli, `#!/usr/bin/env node
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+const root = ${JSON.stringify(home)};
+const parent = process.ppid;
+async function waitFor(file) {
+  while (!existsSync(file)) {
+    try { process.kill(parent, 0); } catch { process.exit(0); }
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+}
+if (process.argv.includes("--version") && !process.env.VENICE_API_KEY) {
+  const counter = root + "/version-count";
+  const count = existsSync(counter) ? Number(readFileSync(counter, "utf8")) + 1 : 1;
+  writeFileSync(counter, String(count));
+  if (count === 2) {
+    writeFileSync(root + "/old-probe-ready", JSON.stringify({ pid: process.pid }));
+    await waitFor(root + "/old-probe-release");
+  }
+}
+if (process.env.VENICE_API_KEY) await waitFor(root + "/keyed-probe-release");
+await import(${JSON.stringify(pathToFileURL(join(SERVER_DIR, "testing", "fake-acp-cli.ts")).href)});
+`);
   // Only OpenCode: nothing probes a CLI installed on this machine.
   writeFileSync(join(dataDir, "config.json"), JSON.stringify({
     instances: {
       opencodeGo: {
         driver: "opencodeGo", displayName: "OpenCode",
-        config: { cli: join(SERVER_DIR, "testing", "fake-acp-cli.ts") },
-        environment: { FAKE_ACP_MODELS: "fixture/warm", FAKE_ACP_DUMP: dump },
+        config: { cli },
+        environment: { FAKE_ACP_MODELS: "fixture/warm", FAKE_ACP_DUMP: dump, FAKE_ACP_DUMP_BY_PID: processDumps },
       },
     },
   }));
@@ -103,11 +141,13 @@ afterAll(async () => {
 it("saves keys for any OpenCode provider on a Cloud, shows only their names, and hands them to OpenCode alone", async () => {
   expect(owner).toMatch(/^omb_sess_/);
   expect((await api("GET", "/api/config")).body.opencodeGo).toEqual({ configured: false, providerKeys: [] });
-  await expect.poll(() => written(dump), { timeout: 15_000 }).toBe(true);
-  expect(started().env.ANTHROPIC_API_KEY).toBeUndefined();
-  expect(started().env.OPENAI_API_KEY).toBeUndefined();
+  const initial = await nextCatalogProcess(new Set());
+  expect(initial.env.ANTHROPIC_API_KEY).toBeUndefined();
+  expect(initial.env.OPENAI_API_KEY).toBeUndefined();
 
-  rmSync(dump, { force: true });
+  await expect.poll(() => written(join(home, "old-probe-ready")), { timeout: 15_000 }).toBe(true);
+  const stalePid = JSON.parse(readFileSync(join(home, "old-probe-ready"), "utf8")).pid as number;
+  const beforeSave = processIds();
   const saved = await api("PUT", "/api/config", { opencodeGo: { providerKeys: { VENICE_API_KEY: VENICE, ANTHROPIC_API_KEY: OWNER_ANTHROPIC } } });
   expect(saved.status, saved.text).toBe(200);
   expect(saved.body.opencodeGo).toEqual({ configured: false, providerKeys: ["ANTHROPIC_API_KEY", "VENICE_API_KEY"] });
@@ -117,10 +157,17 @@ it("saves keys for any OpenCode provider on a Cloud, shows only their names, and
     expect(response).not.toContain(OWNER_ANTHROPIC);
   }
   expect(reread.body.opencodeGo.providerKeys).toEqual(["ANTHROPIC_API_KEY", "VENICE_API_KEY"]);
-  await expect.poll(() => written(dump), { timeout: 15_000 }).toBe(true);
-  expect(started().env.VENICE_API_KEY).toBe(VENICE);
-  expect(started().env.ANTHROPIC_API_KEY).toBe(OWNER_ANTHROPIC);
-  expect(started().env.OPENAI_API_KEY).toBeUndefined();
+  writeFileSync(join(home, "old-probe-release"), "true");
+  await expect.poll(() => captures().some((capture) => capture.pid === stalePid), { timeout: 15_000 }).toBe(true);
+  const stale = captures().find((capture) => capture.pid === stalePid)!;
+  expect(stale.argv).toEqual(["--version"]);
+  expect(stale.env.VENICE_API_KEY).toBeUndefined();
+  expect(stale.env.ANTHROPIC_API_KEY).toBeUndefined();
+  writeFileSync(join(home, "keyed-probe-release"), "true");
+  const savedCatalog = await nextCatalogProcess(beforeSave);
+  expect(savedCatalog.env.VENICE_API_KEY).toBe(VENICE);
+  expect(savedCatalog.env.ANTHROPIC_API_KEY).toBe(OWNER_ANTHROPIC);
+  expect(savedCatalog.env.OPENAI_API_KEY).toBeUndefined();
 
   const { bot } = (await api("POST", "/api/bots", { name: "Venice bot", modelSelection: { instanceId: "opencodeGo", model: "fixture/warm" } })).body;
   const thread = (await api("POST", `/api/bots/${bot.id}/tasks`, { title: "Mine" })).body.task.threadId as string;
@@ -129,20 +176,21 @@ it("saves keys for any OpenCode provider on a Cloud, shows only their names, and
   expect((await api("POST", `/api/bots/${bot.id}/messages`, { text: "Hello.", threadId: thread })).status).toBe(202);
   await expect.poll(() => written(prompts, "lines"), { timeout: 15_000 }).toBe(true);
   const turnPid = JSON.parse(readFileSync(prompts, "utf8").trim().split("\n").at(-1)!).pid as number;
-  expect(started().pid).toBe(turnPid);
-  expect(started().env.VENICE_API_KEY).toBe(VENICE);
-  expect(started().env.ANTHROPIC_API_KEY).toBe(OWNER_ANTHROPIC);
-  expect(started().env.OPENAI_API_KEY).toBeUndefined();
+  const turn = captures().find((capture) => capture.pid === turnPid)!;
+  expect(turn.pid).toBe(turnPid);
+  expect(turn.env.VENICE_API_KEY).toBe(VENICE);
+  expect(turn.env.ANTHROPIC_API_KEY).toBe(OWNER_ANTHROPIC);
+  expect(turn.env.OPENAI_API_KEY).toBeUndefined();
   await expect.poll(async () => (await api("GET", "/api/bots")).body.bots.find((entry: any) => entry.id === bot.id)
     ?.tasks.find((task: any) => task.threadId === thread)?.busy, { timeout: 15_000 }).toBe(false);
 
-  rmSync(dump, { force: true });
+  const beforeRemoval = processIds();
   const removed = await api("PUT", "/api/config", { opencodeGo: { providerKeys: { VENICE_API_KEY: "" } } });
   expect(removed.status, removed.text).toBe(200);
   expect(removed.body.opencodeGo.providerKeys).toEqual(["ANTHROPIC_API_KEY"]);
-  await expect.poll(() => written(dump), { timeout: 15_000 }).toBe(true);
-  expect(started().env.VENICE_API_KEY).toBeUndefined();
-  expect(started().env.ANTHROPIC_API_KEY).toBe(OWNER_ANTHROPIC);
+  const removedCatalog = await nextCatalogProcess(beforeRemoval);
+  expect(removedCatalog.env.VENICE_API_KEY).toBeUndefined();
+  expect(removedCatalog.env.ANTHROPIC_API_KEY).toBe(OWNER_ANTHROPIC);
 }, 90_000);
 
 it("refuses a name OpenMaus keeps, in one plain line, and saves nothing", async () => {
