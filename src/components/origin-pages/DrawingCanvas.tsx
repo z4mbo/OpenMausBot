@@ -5,6 +5,7 @@ import type { AppState, BinaryFileData, BinaryFiles, ExcalidrawImperativeAPI } f
 import type { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { RemoteExcalidrawElement } from "@excalidraw/excalidraw/data/reconcile";
 import "@excalidraw/excalidraw/index.css";
+import "./drawing-canvas.css";
 import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
 import { cloudUrl, sessionStore } from "@/lib/origin-cloud/client";
 import { drawingOutbox } from "@/lib/origin-drawing-outbox";

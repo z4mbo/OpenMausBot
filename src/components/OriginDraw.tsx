@@ -41,8 +41,8 @@ function ProjectCanvases({ projectId, teamId, userId, canEdit, agent }: { projec
   };
   if (canvases === undefined) return <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]"><Loading label="Loading canvases" variant="grid" /></div>;
   const newCanvas = naming ? (
-    <form onSubmit={(event) => void create(event)} className="flex items-center gap-1.5 origin-rise">
-      <input autoFocus className={cn(inputClass, "h-8 w-44")} aria-label="Canvas name" placeholder="Canvas name" value={name} maxLength={80} required
+    <form onSubmit={(event) => void create(event)} className="flex w-full items-center gap-1.5 origin-rise sm:w-auto">
+      <input autoFocus className={cn(inputClass, "h-8 min-w-0 flex-1 sm:w-44 sm:flex-none")} aria-label="Canvas name" placeholder="Canvas name" value={name} maxLength={80} required
         onChange={(event) => setName(event.target.value)} onKeyDown={(event) => { if (event.key === "Escape") { setNaming(false); setName(""); } }} />
       <button className={cn(primaryButton, "h-8")} disabled={action.busy || !name.trim()}>{action.busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}Create</button>
     </form>
@@ -61,8 +61,8 @@ function ProjectCanvases({ projectId, teamId, userId, canEdit, agent }: { projec
     );
   }
   const tabs = (
-    <div className="flex min-w-0 items-center gap-1.5">
-      <div role="tablist" aria-label="Canvases" className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
+    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+      <div role="tablist" aria-label="Canvases" className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
         {canvases.map((canvas) => (
           <button key={canvas._id} type="button" role="tab" aria-selected={canvas._id === current._id} onClick={() => setChosen(canvas._id)}
             className={cn("h-8 shrink-0 rounded-full px-3 text-[12.5px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/60",
