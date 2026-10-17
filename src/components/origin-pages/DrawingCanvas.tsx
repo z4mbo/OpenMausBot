@@ -144,18 +144,21 @@ export function DrawingCanvas({ teamId, canvasId, userId, name, readOnly, agent,
 
   useEffect(() => {
     if (!canvas || !storedFiles) return;
+    const controller = new AbortController();
     for (const file of storedFiles) {
       if (!file.url || canvas.getFiles()[file.fileId]) continue;
       knownFiles.current.add(file.fileId);
-      void fetch(file.url)
+      void fetch(file.url, { signal: controller.signal })
         .then((response) => { if (!response.ok) throw new Error("Image unavailable"); return response.blob(); })
         .then(readDataUrl)
         .then((dataURL) => {
+          if (controller.signal.aborted) return;
           canvas.addFiles([{ id: file.fileId, dataURL, mimeType: file.mimeType, created: Date.now() } as BinaryFileData]);
           setUnavailableFiles((current) => current.filter((id) => id !== file.fileId));
         })
-        .catch(() => setUnavailableFiles((current) => current.includes(file.fileId) ? current : [...current, file.fileId]));
+        .catch(() => { if (!controller.signal.aborted) setUnavailableFiles((current) => current.includes(file.fileId) ? current : [...current, file.fileId]); });
     }
+    return () => controller.abort();
   }, [canvas, storedFiles]);
 
   const upload = async (file: BinaryFileData) => {
