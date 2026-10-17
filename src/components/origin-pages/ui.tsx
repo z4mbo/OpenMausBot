@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { CloudOff, FolderPlus, Link2, Loader2, LogIn, Plus, RotateCw, SearchX, ServerOff, Users, X } from "lucide-react";
 import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
 import { linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
 import { useWorkspaceAccess, type WorkspaceRole } from "@/lib/origin-members";
 import { cn } from "@/lib/cn";
-import { overlayMotion, sheetMotion, useDismiss } from "../CenteredDialog";
+import { CenteredDialog } from "../CenteredDialog";
 import { GlassHeader, useInGlassHeader } from "../GlassScrollFrame";
 import { Select } from "../Select";
 import type { CloudProject } from "./cloud-types";
@@ -315,40 +315,19 @@ export function Field({ label, children, className }: { label: string; children:
   );
 }
 
-export function Modal({ title, onClose: requestClose, children, wide, className }: { title: ReactNode; onClose(): void; children: ReactNode; wide?: boolean; className?: string }) {
-  const panel = useRef<HTMLDivElement>(null);
-  const { closing, dismiss: onClose } = useDismiss(requestClose);
-  const close = useRef(onClose);
-  close.current = onClose;
-  useEffect(() => {
-    const returnTo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); close.current(); }
-      if (event.key !== "Tab" || !panel.current) return;
-      const focusable = [...panel.current.querySelectorAll<HTMLElement>("button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])")];
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (!first || !last) return;
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-    };
-    window.addEventListener("keydown", onKey);
-    const root = panel.current;
-    if (root && !root.contains(document.activeElement)) (root.querySelector<HTMLElement>("input:not([type=hidden]), textarea, select") ?? root.querySelector<HTMLElement>("button"))?.focus({ preventScroll: true });
-    return () => { window.removeEventListener("keydown", onKey); returnTo?.focus({ preventScroll: true }); };
-  }, []);
+export function Modal({ title, onClose, canClose, children, wide, className }: { title: ReactNode; onClose(): void; canClose?(): boolean; children: ReactNode; wide?: boolean; className?: string }) {
+  const heading = useId();
   return (
-    <div className={cn("fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/55 backdrop-blur-[2px] sm:items-start sm:p-4 md:p-10", overlayMotion(closing))}
-      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div ref={panel} role="dialog" aria-modal="true"
-        className={cn("w-full rounded-t-2xl border border-hairline/60 bg-menu sm:rounded-2xl", sheetMotion(closing), wide ? "sm:max-w-4xl" : "sm:max-w-md", className)}>
+    <CenteredDialog label={typeof title === "string" ? title : "Dialog"} labelledBy={heading} onClose={onClose} canClose={canClose}
+      className={cn(wide ? "sm:max-w-4xl" : "sm:max-w-md", className)}>
+      {(dismiss) => <>
         <div className="flex items-center gap-2 px-4 pb-2 pt-3">
-          <h3 className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink-secondary">{title}</h3>
-          <button type="button" className={iconButton} aria-label="Close" onClick={onClose}><X size={16} /></button>
+          <h3 id={heading} className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink-secondary">{title}</h3>
+          <button type="button" className={iconButton} aria-label="Close" onClick={dismiss}><X size={16} /></button>
         </div>
         <div className="px-4 pb-4">{children}</div>
-      </div>
-    </div>
+      </>}
+    </CenteredDialog>
   );
 }
 

@@ -158,7 +158,7 @@ function AssetEditor({ projectId, asset, onClose }: { projectId: string; asset: 
     if (ok) onClose();
   };
   return (
-    <Modal title={asset ? "Edit asset" : batch ? "Add assets" : "Add asset"} onClose={() => { if (!action.busy) onClose(); }}>
+    <Modal title={asset ? "Edit asset" : batch ? "Add assets" : "Add asset"} onClose={onClose} canClose={() => !action.busy}>
       <form onSubmit={save} className="flex flex-col gap-3">
         {!asset && (
           <>
