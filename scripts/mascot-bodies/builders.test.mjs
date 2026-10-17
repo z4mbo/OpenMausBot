@@ -5,6 +5,7 @@ import { BODY_DEFS, BODY_IDS } from "./builders.ts";
 const EXPECTED_IDS = [
   "cursor", "blob", "circle", "squircle", "capsule",
   "drop", "shield", "hexagon", "diamond", "star",
+  "pebble", "pentagon", "octagon", "flower", "triangle",
 ];
 
 describe("body builders", () => {

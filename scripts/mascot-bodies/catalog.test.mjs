@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { BODY_DEFS } from "./builders.ts";
 
 import {
   DEFAULT_MASCOT_BODY,
@@ -9,8 +10,10 @@ import {
 } from "../../shared/mascot-bodies.ts";
 
 describe("the generated catalog", () => {
-  it("carries all ten bodies", () => {
-    expect(MASCOT_BODY_IDS).toHaveLength(10);
+  it("carries every source body in picker order", () => {
+    expect(MASCOT_BODY_IDS).toEqual(BODY_DEFS.map(({ id }) => id));
+    expect(Object.keys(MASCOT_BODIES)).toEqual(MASCOT_BODY_IDS);
+    expect(new Set(MASCOT_BODY_IDS).size).toBe(MASCOT_BODY_IDS.length);
     for (const id of MASCOT_BODY_IDS) expect(MASCOT_BODIES[id].id).toBe(id);
   });
 
