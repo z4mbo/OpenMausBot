@@ -1,0 +1,28 @@
+import assert from "node:assert/strict";
+import { activeChatTags, chatMessageParts, chatTextParts } from "../lib/chat-text";
+import type { ChatMention, ChatReference } from "../lib/localRealtime";
+
+const mentions = [{ userId: "sam", name: "sam" }, { userId: "sam-long", name: "sam-long" }, { userId: "zoe", name: "Zoë Lee" }] as ChatMention[];
+const references = [{ type: "project", id: "origin", projectId: "origin", label: "Origin.com" }, { type: "issue", id: "issue", projectId: "origin", label: "Fix (chat)" }] as ChatReference[];
+const parse = (text: string) => chatTextParts(text, mentions, references);
+const text = "Hey @sam, ask @sam-long about #Origin.com and #Fix (chat).\n@Zoë Lee can review https://example.com/@sam?q=1&b=2.";
+const parts = parse(text);
+assert.equal(parts.map(part => part.text).join(""), text);
+assert.equal(parts.filter(part => part.kind === "mention").length, 3);
+assert.equal(parts.filter(part => part.kind === "reference").length, 2);
+assert.deepEqual(parts.filter(part => part.kind === "link"), [{ kind: "link", text: "https://example.com/@sam?q=1&b=2", href: "https://example.com/@sam?q=1&b=2" }]);
+assert.equal(parse("@sammy @sam-dev @sam.test a@sam.com https://example.com/@sam").filter(part => part.kind === "mention").length, 0);
+assert.equal(parse("(@sam) @sam!").filter(part => part.kind === "mention").length, 2);
+assert.equal(activeChatTags(parse("(@sam) @sam!")).mentionIds.size, 1);
+assert.equal(activeChatTags(parse("Deleted the tag")).mentionIds.size, 0);
+assert.equal(activeChatTags(parse("#Origin.com")).referenceIds.size, 1);
+assert.equal(chatTextParts("@unknown", mentions).length, 1);
+assert.equal(chatTextParts("", mentions, references).length, 0);
+assert.deepEqual(parse("See www.example.com, example.com/path and https://example.com/a_(b)." ).filter(part => part.kind === "link").map(part => part.href), ["https://www.example.com", "https://example.com/path", "https://example.com/a_(b)"]);
+assert.equal(parse('javascript:alert(1) data:text/html,<script>alert(1)</script> file:///etc/passwd').some(part => part.kind === "link"), false);
+assert.equal(parse('<script>alert("x")</script>').map(part => part.text).join(""), '<script>alert("x")</script>');
+assert.equal(parse("https://example.com/" + "a".repeat(4000)).filter(part => part.kind === "link").length, 1);
+assert.equal(chatMessageParts("Review this", [mentions[0]], [references[0]]).map(part => part.text).join(""), "Review this @sam #Origin.com");
+assert.equal(chatMessageParts("@sam #Origin.com", [mentions[0]], [references[0]]).map(part => part.text).join(""), "@sam #Origin.com");
+assert.equal(chatMessageParts("", [], [references[0]]).map(part => part.text).join(""), "#Origin.com");
+console.log("Chat text tests passed: inline tags, URL boundaries, safe links, literal text, removed tags.");

@@ -1,0 +1,32 @@
+services:
+  origin:
+    build:
+      context: ..
+      args:
+        NEXT_PUBLIC_CONVEX_URL: ${NEXT_PUBLIC_CONVEX_URL:?Set your Convex URL}
+        NEXT_PUBLIC_CONVEX_SITE_URL: ${NEXT_PUBLIC_CONVEX_SITE_URL:?Set your Convex site URL}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      ORIGIN_PUBLIC_URL: ${ORIGIN_PUBLIC_URL:?Set your public origin}
+      ORIGIN_LOCAL_DATA_DIR: /data/origin
+      ORIGIN_INTEGRATION_SECRET: ${ORIGIN_INTEGRATION_SECRET:?Set your integration secret}
+      ORIGIN_SMTP_HOST: ${ORIGIN_SMTP_HOST:-}
+      ORIGIN_SMTP_PORT: ${ORIGIN_SMTP_PORT:-465}
+      ORIGIN_SMTP_SECURE: ${ORIGIN_SMTP_SECURE:-true}
+      ORIGIN_SMTP_USER: ${ORIGIN_SMTP_USER:-}
+      ORIGIN_SMTP_PASSWORD: ${ORIGIN_SMTP_PASSWORD:-}
+      ORIGIN_SMTP_FROM: ${ORIGIN_SMTP_FROM:-}
+      ORIGIN_TURN_HOST: ${ORIGIN_TURN_HOST:-}
+      ORIGIN_TURN_SECRET: ${ORIGIN_TURN_SECRET:-}
+    volumes:
+      - origin-data:/data/origin
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  origin-data:

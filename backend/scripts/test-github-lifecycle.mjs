@@ -1,0 +1,55 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { createHmac } from "node:crypto";
+import { ConvexHttpClient } from "convex/browser";
+import { makeFunctionReference } from "convex/server";
+
+process.loadEnvFile("/tmp/origin-integration-qa.env");
+for (const url of [process.env.NEXT_PUBLIC_CONVEX_URL, process.env.NEXT_PUBLIC_CONVEX_SITE_URL]) {
+  assert.equal(new URL(url).hostname, "127.0.0.1", "Only the isolated local backend is allowed");
+}
+const { alex, sam, viewer, workspace } = JSON.parse(await readFile("/tmp/origin-qa-session.json", "utf8"));
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL, { logger: false });
+const q = (name, args) => client.query(makeFunctionReference(name), args);
+const m = (name, args) => client.mutation(makeFunctionReference(name), args);
+const repoUrl = "https://github.com/origin-local-tests/lifecycle";
+const projectId = await m("projects:create", { sessionToken: alex.sessionToken, teamId: workspace._id, name: "GitHub lifecycle QA", repoUrl });
+const scope = { sessionToken: alex.sessionToken, projectId };
+await assert.rejects(m("integrations:approveRepository", { ...scope, sessionToken: viewer.sessionToken, repoUrl }));
+await assert.rejects(m("integrations:approveRepository", { ...scope, sessionToken: sam.sessionToken, repoUrl }));
+await assert.rejects(m("integrations:approveRepository", { ...scope, repoUrl: "https://github.com/other/repo" }), /changed/);
+await m("integrations:approveRepository", { ...scope, repoUrl });
+assert.equal((await q("projects:get", scope)).githubWorkspaceAccess, true);
+const board = await q("tasks:board", scope);
+const taskId = await m("tasks:createTask", { ...scope, columnId: board.columns[0]._id, title: "Close remotely", priority: "high", assignedToEmail: alex.user.email, dueDate: "2026-10-01" });
+const task = async () => (await q("tasks:details", { ...scope, taskId })).task;
+const sync = async (state, updatedAt) => {
+  const body = JSON.stringify({ at: Date.now(), operation: "linkIssue", args: { projectId, taskId, repoUrl, number: 12, issueUrl: `${repoUrl}/issues/12`, state, updatedAt } });
+  const response = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_SITE_URL}/integrations`, { method: "POST", body, headers: { "x-origin-signature": createHmac("sha256", process.env.ORIGIN_INTEGRATION_SECRET).update(body).digest("hex") } });
+  assert.equal(response.status, 200, await response.text());
+};
+const at = Date.now() - 60000;
+await sync("open", at);
+await m("tasks:updateTask", { ...scope, taskId, done: true });
+await sync("open", at + 1000);
+assert.equal((await task()).done, true, "Polling an unchanged open issue preserves local completion");
+await sync("closed", at + 2000);
+await m("tasks:updateTask", { ...scope, taskId, done: false });
+await sync("closed", at + 2000);
+assert.equal((await task()).done, true, "Repeated closed state repairs a locally reopened task");
+await sync("open", at + 1000);
+assert.equal((await task()).done, true, "Stale open events cannot reopen a closed issue");
+await sync("open", at + 3000);
+assert.equal((await task()).done, false, "A real remote reopening is mirrored");
+await sync("closed", at + 4000);
+await sync("closed", at + 4000);
+const completed = await task();
+assert.equal(completed.done, true);
+assert.equal(completed.githubIssueUpdatedAt, at + 4000);
+assert.ok(completed.githubIssueSyncedAt > completed.githubIssueUpdatedAt);
+assert.equal((await q("projects:get", scope)).openIssueCount, 0);
+const inbox = await q("inbox:list", { sessionToken: alex.sessionToken, teamId: workspace._id, projectId, mine: true, done: true, paginationOpts: { cursor: null, numItems: 10 } });
+assert.equal(inbox.page[0].githubIssueNumber, 12);
+await m("projects:update", { ...scope, repoUrl: "https://github.com/origin-local-tests/changed" });
+assert.equal((await q("projects:get", scope)).githubWorkspaceAccess, true, "An explicit workspace-admin repository change approves that repository");
+console.log("PASS workspace-admin approval, repository races, closed-state repair, remote timestamps, stale-event rejection, reopen, counts and inbox badge");

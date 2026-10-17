@@ -1,0 +1,318 @@
+/*
+ * Origin experience layer.
+ * Loaded after every other stylesheet. It gives the workspace depth, a type system,
+ * and motion. Behavior lives in components/motion-layer.tsx; everything here degrades
+ * to the base styles when that layer is absent or motion is reduced.
+ */
+
+:root {
+  --o-bg: #000000;
+  --o-panel: #09090a;
+  --o-panel-hi: #0e0e10;
+  --o-card: #111113;
+  --o-card-hi: #161618;
+  --o-line: rgba(255, 255, 255, 0.07);
+  --o-line-strong: rgba(255, 255, 255, 0.13);
+  --o-text: #f2f2f3;
+  --o-text-2: #a1a1a8;
+  --o-text-3: #6b6b73;
+  --o-accent: #f2f2f3;
+  --o-accent-soft: rgba(255, 255, 255, 0.1);
+  --o-idea: #c4acff;
+  --o-todo: #7fdbe8;
+  --o-progress: #8e8e96;
+  --o-done: #3ddc97;
+  --o-high: #ff7b70;
+  --o-medium: #f5c160;
+  --o-low: #6fe3ae;
+  --o-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --o-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --o-display: var(--font-display), "Inter", system-ui, sans-serif;
+  --o-body: var(--font-body), "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --o-mono: var(--font-mono), "SFMono-Regular", ui-monospace, Menlo, monospace;
+}
+
+body { background: var(--o-bg); font-family: var(--o-body); font-feature-settings: "cv11", "ss03"; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+::selection { background: rgba(255, 255, 255, 0.22); color: #fff; }
+.workspace-app *, .origin-dialog * { scrollbar-width: thin; scrollbar-color: #2c2e34 transparent; }
+
+/* ---------------------------------------------------------------- shell */
+.workspace-app { background: var(--o-bg); }
+.workspace-app .sidebar { background: transparent; }
+.workspace-app > .workspace {
+  position: relative;
+  isolation: isolate;
+  background: var(--o-panel);
+  border: 1px solid var(--o-line);
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55), 0 40px 90px -50px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+
+.workspace-app .mobile-topbar { background: var(--o-bg); border-bottom-color: var(--o-line); }
+
+/* -------------------------------------------------------------- sidebar */
+.workspace-app .sidebar-topbar .profile-chip { border-radius: 9px; transition: background 0.2s; }
+.workspace-app .sidebar-topbar .profile-chip:hover { background: rgba(255, 255, 255, 0.05); }
+.workspace-app .sidebar .icon-button { border-radius: 8px; color: #7b808b; transition: background 0.18s, color 0.18s, transform 0.25s var(--o-spring); }
+.workspace-app .sidebar .icon-button:hover { background: rgba(255, 255, 255, 0.07); color: var(--o-text); }
+.workspace-app .sidebar .icon-button:active { transform: scale(0.9); }
+.workspace-app .sidebar-new-issue { background: #1c1c1f; color: var(--o-text); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.6); }
+.workspace-switcher select { border-radius: 9px; background: rgba(255, 255, 255, 0.045); box-shadow: inset 0 0 0 1px var(--o-line); transition: background 0.2s; }
+.workspace-switcher select:hover { background: rgba(255, 255, 255, 0.07); }
+
+.workspace-app .sidebar-content { position: relative; }
+.workspace-app .nav-glider {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 9px;
+  background: #161618;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.075);
+  transition: transform 0.5s var(--o-spring), width 0.35s var(--o-out), height 0.35s var(--o-out), opacity 0.2s;
+}
+.workspace-app .nav-glider::before { content: ""; position: absolute; left: -10px; top: 50%; width: 3px; height: 14px; margin-top: -7px; border-radius: 0 3px 3px 0; background: var(--o-accent); }
+.workspace-app .sidebar-nav, .workspace-app .sidebar-section { position: relative; z-index: 1; }
+.workspace-app .sidebar-content:has(> .nav-glider[data-visible="true"]) :is(.nav-item, .project-button).active { background: transparent; box-shadow: none; }
+.workspace-app .nav-item, .workspace-app .project-button { position: relative; height: 32px; min-height: 32px; flex-basis: 32px; border-radius: 9px; transition: color 0.2s, background 0.2s; }
+.workspace-app .nav-item svg, .workspace-app .project-button .project-icon { transition: color 0.2s, transform 0.35s var(--o-spring); }
+.workspace-app .nav-item:hover svg { transform: translateX(1px) scale(1.06); }
+.workspace-app .nav-item:hover, .workspace-app .project-button:hover { background: rgba(255, 255, 255, 0.035); color: #e6e7ea; }
+.workspace-app .nav-item.active, .workspace-app .project-button.active { color: #fff; }
+.workspace-app .nav-item.active svg { color: var(--o-accent); }
+.workspace-app .nav-item:active, .workspace-app .project-button:active { transform: scale(0.985); }
+.workspace-app .nav-item small, .workspace-app .project-issue-count { font-family: var(--o-mono); font-size: 10px; letter-spacing: -0.01em; color: #6f7581; display: inline-block; }
+.workspace-app .sidebar-nav .inbox-unread-dot { background: var(--o-accent); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6); animation: o-pulse 2.4s ease-out infinite; }
+.workspace-app .section-toggle > span, .workspace-app .project-group-toggle span { font-family: var(--o-mono); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.09em; color: #6f7581; }
+.workspace-app .project-button.dragging { opacity: 0.35; }
+.workspace-app .project-viewer { box-shadow: 0 0 0 1.5px #0b0c0e; }
+.workspace-app .project-viewer .origin-user-avatar { animation: o-breathe 3.2s ease-in-out infinite; }
+
+/* ------------------------------------------------------------- avatars */
+.origin-user-avatar { background: var(--avatar-tone, #9bd32c); color: #0b0c0e; font-weight: 700; }
+
+/* Flat replacements for older gradient and blur surfaces. */
+.sidebar, .modal-backdrop, .call-tile-meta, .mobile-nav-scrim, .origin-dialog::backdrop { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.mobile-nav-scrim { background: rgba(0, 0, 0, 0.72); }
+.brand-mark { background: #f2f2f3; }
+.progress-track span { background: #f2f2f3; }
+.call-thumbnail .call-tile-meta { background: rgba(0, 0, 0, 0.72); }
+
+/* ----------------------------------------------------------- navigation */
+.workspace-app .project-navigation { gap: 16px; padding-bottom: 10px; border-bottom-color: var(--o-line); }
+.project-identity { display: flex; align-items: center; gap: 10px; min-width: 0; flex: none; max-width: 280px; padding-right: 16px; border-right: 1px solid var(--o-line); }
+.project-identity .project-icon { width: 18px; height: 18px; flex: none; }
+.project-identity strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--o-display); font-size: 17px; font-weight: 620; font-variation-settings: "wdth" 106; letter-spacing: -0.02em; color: #fff; }
+.workspace-app .project-navigation .tabs { position: relative; gap: 2px; padding: 2px; }
+.workspace-app .project-navigation .tabs button { position: relative; z-index: 1; gap: 7px; padding: 6px 11px; border: 0; border-radius: 8px; background: transparent; color: #8b909b; font-size: 12.5px; font-weight: 550; transition: color 0.2s; }
+.workspace-app .project-navigation .tabs button:hover { background: transparent; color: #e6e7ea; }
+.workspace-app .project-navigation .tabs button.active { color: #fff; background: transparent; }
+.workspace-app .project-navigation .tabs button.active svg { color: var(--o-accent); }
+.tab-glider, .segment-glider { position: absolute; z-index: 0; left: 0; top: 0; width: 0; height: 0; opacity: 0; pointer-events: none; border-radius: 8px; background: #1a1a1c; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); transition: transform 0.5s var(--o-spring), width 0.35s var(--o-out), height 0.35s var(--o-out), opacity 0.2s; }
+.tab-glider::after { content: ""; position: absolute; left: 22%; right: 22%; bottom: -12px; height: 2px; border-radius: 2px; background: var(--o-accent); }
+.workspace-app .tabs:not(:has(> .tab-glider[data-visible="true"])) button.active { background: rgba(255, 255, 255, 0.07); }
+
+/* ---------------------------------------------------------- board header */
+.workspace-app .segmented-control { position: relative; padding: 3px; border: 0; border-radius: 10px; background: rgba(255, 255, 255, 0.035); box-shadow: inset 0 0 0 1px var(--o-line); }
+.workspace-app .segmented-control button { position: relative; z-index: 1; border-radius: 7px; font-size: 12.5px; font-weight: 550; transition: color 0.2s; }
+.workspace-app .segmented-control:has(> .segment-glider[data-visible="true"]) button.active { background: transparent; }
+.workspace-app .segmented-control button > span { font-family: var(--o-mono); font-size: 10px; color: #7d828d; display: inline-block; }
+.segment-glider { border-radius: 7px; }
+
+.board-progress { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px 0 6px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); box-shadow: inset 0 0 0 1px var(--o-line); }
+.board-progress svg { width: 22px; height: 22px; transform: rotate(-90deg); overflow: visible; }
+.board-progress circle { fill: none; stroke-width: 4; }
+.board-progress-track { stroke: rgba(255, 255, 255, 0.09); }
+.board-progress-value { stroke: #f2f2f3; stroke-linecap: round; transition: stroke-dasharray 0.9s var(--o-out); }
+.board-progress strong { display: inline-block; min-width: 30px; font-family: var(--o-mono); font-size: 11px; font-weight: 500; color: #d7dae0; }
+
+.workspace-app .board-header { margin-bottom: 16px; }
+.workspace-app .board-header-actions { gap: 10px; }
+.workspace-app .board-column-button { height: 32px; border-radius: 9px; background: rgba(255, 255, 255, 0.04); border-color: var(--o-line); transition: background 0.2s, transform 0.25s var(--o-spring); }
+.workspace-app .board-column-button:hover { background: rgba(255, 255, 255, 0.075); }
+.workspace-app .board-filter-popover { border-radius: 12px; border-color: var(--o-line-strong); background: #0c0c0d; box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.8); animation: o-pop 0.28s var(--o-spring); }
+
+/* -------------------------------------------------------------- buttons */
+.primary-button { border: 0; border-radius: 10px; background: #f2f2f3; color: #000; font-weight: 650; box-shadow: none; transition: transform 0.25s var(--o-spring), box-shadow 0.25s, filter 0.2s; }
+.primary-button:hover:not(:disabled) { background: #ffffff; transform: translateY(-1px); }
+.primary-button:active:not(:disabled) { transform: translateY(0) scale(0.97); }
+.ghost-button { border-radius: 10px; background: rgba(255, 255, 255, 0.04); border-color: var(--o-line-strong); font-weight: 600; transition: background 0.2s, border-color 0.2s, transform 0.25s var(--o-spring); }
+.ghost-button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.075); border-color: rgba(255, 255, 255, 0.2); }
+.ghost-button:active:not(:disabled) { transform: scale(0.97); }
+.workspace-app .icon-button:active:not(:disabled) { transform: scale(0.9); }
+.workspace-app .project-create-issue { height: 32px; min-height: 32px; padding: 0 12px; gap: 7px; }
+.workspace-app :focus, .origin-dialog :focus, .origin-dialog:focus, .issue-select-popover :focus, .member-picker-popover :focus { outline: none; }
+.workspace-app :is(button, a):focus-visible, .origin-dialog button:focus-visible { filter: brightness(1.15); }
+
+/* --------------------------------------------------------------- kanban */
+.workspace-app .kanban-scroll { gap: 14px; padding: 2px 2px 8px; }
+.workspace-app .kanban-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+  padding: 10px 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.012);
+  transition: border-color 0.25s, background 0.25s;
+  --lane: var(--o-progress);
+}
+.workspace-app .kanban-column.idea { --lane: var(--o-idea); }
+.workspace-app .kanban-column.todo { --lane: var(--o-todo); }
+.workspace-app .kanban-column.done { --lane: var(--o-done); }
+.workspace-app .kanban-column:hover { border-color: rgba(255, 255, 255, 0.06); }
+.workspace-app .kanban-column.drag-target { border-style: dashed; border-color: rgba(255, 255, 255, 0.08); }
+.workspace-app .kanban-column[data-drop] { border-style: solid; border-color: color-mix(in srgb, var(--lane) 50%, transparent); background: color-mix(in srgb, var(--lane) 7%, transparent); }
+.workspace-app .kanban-title { height: 30px; margin-bottom: 10px; padding: 0 2px 0 4px; }
+.workspace-app .kanban-title > div:first-child { gap: 10px; }
+.workspace-app .kanban-title strong { font-size: 13px; font-weight: 620; letter-spacing: -0.005em; color: #eceef1; }
+.workspace-app .column-dot { width: 8px; height: 8px; border: 0; background: var(--lane); color: var(--lane); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lane) 18%, transparent); }
+.workspace-app .kanban-column.custom .column-dot { animation: o-working 2.2s ease-in-out infinite; }
+.workspace-app .kanban-tools span { min-width: 22px; height: 20px; padding: 0 6px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.055); color: #b3b7c0; font-family: var(--o-mono); font-size: 10px; font-weight: 500; }
+.workspace-app .task-list { gap: 8px; }
+
+.workspace-app .task-card {
+  position: relative;
+  isolation: isolate;
+  padding: 12px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  background: var(--o-card);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 0.4s var(--o-spring), box-shadow 0.3s, border-color 0.2s, opacity 0.2s;
+}
+.workspace-app .task-card:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.14); background: var(--o-card-hi); box-shadow: 0 14px 28px -14px rgba(0, 0, 0, 0.85); }
+.workspace-app .task-card:active { transform: translateY(0) scale(0.99); }
+.workspace-app .task-card[data-priority="high"]::after, .workspace-app .task-card[data-priority="medium"]::after { content: ""; position: absolute; left: -1px; top: 14px; bottom: 14px; width: 2px; border-radius: 0 2px 2px 0; background: var(--o-high); }
+.workspace-app .task-card[data-priority="medium"]::after { background: var(--o-medium); opacity: 0.7; }
+.workspace-app .task-card.dragging { opacity: 0.35; transform: scale(0.97); border-style: dashed; box-shadow: none; }
+.workspace-app .task-code { font-family: var(--o-mono); font-size: 9.5px; font-weight: 500; letter-spacing: 0.01em; color: #6b717d; }
+.workspace-app .drag-handle { opacity: 0; transition: opacity 0.2s; color: #6b717d; }
+.workspace-app .task-card:hover .drag-handle { opacity: 1; }
+.workspace-app .task-top { gap: 9px; margin-top: 9px; }
+.workspace-app .task-top strong { font-size: 13.5px; line-height: 1.45; font-weight: 520; color: #eef0f3; letter-spacing: -0.005em; }
+.workspace-app .check-button { width: 22px; min-width: 22px; height: 22px; min-height: 22px; margin: -1px 0 0 -3px; color: #6f7581; border-radius: 50%; transition: color 0.2s, background 0.2s, transform 0.3s var(--o-spring); }
+.workspace-app .check-button:hover:not(:disabled) { color: var(--o-done); background: rgba(61, 220, 151, 0.12); transform: scale(1.08); }
+.workspace-app .task-meta { gap: 6px; margin-top: 11px; align-items: center; }
+.workspace-app .priority { border-color: transparent; height: 20px; min-height: 20px; padding: 0 7px; gap: 4px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em; text-transform: capitalize; }
+.due-chip { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.045); color: #a3a8b3; font-size: 10.5px; font-weight: 550; white-space: nowrap; }
+.due-chip.soon { background: rgba(245, 193, 96, 0.1); color: #f7d38a; }
+.due-chip.overdue { background: rgba(255, 123, 112, 0.12); color: #ffa39b; }
+.workspace-app .task-assignee-profile { border-radius: 50%; padding: 1px; transition: transform 0.3s var(--o-spring), box-shadow 0.2s; }
+.workspace-app .task-assignee-profile:hover { background: transparent; transform: scale(1.12); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18); }
+.workspace-app .task-actions { top: 8px; right: 8px; padding: 2px; border-radius: 9px; background: #111113; box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.8), inset 0 0 0 1px var(--o-line); transform: translateY(-2px); transition: opacity 0.18s, transform 0.25s var(--o-out); }
+.workspace-app .task-card:hover .task-actions { transform: none; }
+.workspace-app .task-actions button { border-radius: 7px; }
+.workspace-app .task-list > .empty-lane { position: relative; gap: 10px; border: 1px dashed rgba(255, 255, 255, 0.075); border-radius: 12px; background: transparent; color: #6f7581; font-size: 12px; }
+.workspace-app .kanban-column[data-drop] .empty-lane { border-color: color-mix(in srgb, var(--lane) 50%, transparent); color: var(--lane); }
+.workspace-app .archive-lane-link { border-radius: 999px; padding: 6px 12px; color: #8b909b; transition: background 0.2s, color 0.2s; }
+.workspace-app .archive-lane-link:hover { background: rgba(61, 220, 151, 0.08); color: #9ff0c9; }
+.workspace-app .archive-lane-link svg { color: var(--o-done); }
+.workspace-app .archive-row { border-radius: 10px; border-bottom-color: var(--o-line); padding-inline: 10px; transition: background 0.2s; }
+.workspace-app .archive-row:hover { background: rgba(255, 255, 255, 0.03); }
+.workspace-app .archive-row > svg { color: var(--o-done); }
+.workspace-app .archive-issue > span { font-family: var(--o-mono); font-size: 9.5px; }
+
+/* -------------------------------------------------------------- motion */
+.workspace-app .motion-overlay { position: fixed; inset: 0; z-index: 70; pointer-events: none; overflow: hidden; }
+.workspace-app .motion-ghost { position: fixed; margin: 0; z-index: 71; pointer-events: none; box-shadow: 0 24px 48px -14px rgba(0, 0, 0, 0.8); will-change: transform, opacity; }
+.check-burst { position: fixed; width: 0; height: 0; }
+.check-burst::before { content: ""; position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--o-done); animation: o-burst-ring 0.6s var(--o-out) forwards; }
+.check-burst i { position: absolute; left: -3px; top: -3px; width: 6px; height: 6px; border-radius: 50%; background: var(--tone, #3ddc97); animation: o-burst-dot 0.75s var(--o-out) forwards; }
+
+/* ------------------------------------------------------ views and panels */
+.workspace-app .view-loading-overlay { background: transparent; }
+.skeleton-block { background: #18181a; animation: o-shimmer 1.2s ease-in-out infinite alternate; }
+.workspace-app .skeleton-board .skeleton-row { border-color: rgba(255, 255, 255, 0.05); border-radius: 16px; background: rgba(255, 255, 255, 0.015); }
+.workspace-app .notice { border-radius: 12px; animation: o-drop 0.4s var(--o-spring); }
+.workspace-app .view-header h1, .workspace-app .chat-tabs > button[aria-selected=true] { letter-spacing: -0.01em; }
+.workspace-app .view-header h1 { font-family: var(--o-display); font-weight: 620; font-variation-settings: "wdth" 106; letter-spacing: -0.02em; }
+
+/* Inbox */
+.workspace-app .work-issue-row { position: relative; isolation: isolate; border-radius: 6px; border: 1px solid transparent; transition: background 0.2s, border-color 0.2s; }
+.workspace-app .work-issue-row:hover { background: rgba(255, 255, 255, 0.025); border-color: var(--o-line); }
+.workspace-app .work-complete { border-radius: 50%; transition: color 0.2s, background 0.2s, transform 0.3s var(--o-spring); }
+.workspace-app .work-complete:hover { color: var(--o-done); background: rgba(61, 220, 151, 0.12); }
+
+/* Chat */
+.workspace-app .chat-tabs > button { transition: color 0.2s, border-color 0.25s; }
+.workspace-app .chat-tabs > button[aria-selected=true] { border-bottom-color: var(--o-accent); }
+.workspace-app .chat-thread .conversation-message { border-radius: 12px; transition: background 0.2s; animation: o-message 0.45s var(--o-out) both; }
+.workspace-app .chat-thread .conversation-message:hover { background: rgba(255, 255, 255, 0.025); }
+.workspace-app .chat-thread .chat-profile-name { font-weight: 650; }
+.workspace-app .chat-member:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+.workspace-app .chat-member { transition: transform 0.3s var(--o-spring), box-shadow 0.2s; }
+
+/* ---------------------------------------------------------------- dialogs */
+.origin-dialog {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: #0c0c0d;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 40px 100px -30px rgba(0, 0, 0, 0.95);
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.26s ease, transform 0.5s var(--o-spring);
+}
+@starting-style { .origin-dialog[open] { opacity: 0; transform: translateY(14px) scale(0.965); } }
+.origin-dialog::backdrop { background: rgba(0, 0, 0, 0.78); transition: background 0.3s ease; }
+@starting-style { .origin-dialog[open]::backdrop { background: rgba(0, 0, 0, 0); } }
+.origin-dialog .dialog-heading { background: #0c0c0d; border-bottom-color: rgba(255, 255, 255, 0.07); }
+.origin-dialog .dialog-heading h2 { font-weight: 620; letter-spacing: -0.005em; }
+.origin-dialog .dialog-footer { background: #09090a; border-top-color: rgba(255, 255, 255, 0.07); }
+.issue-detail-sidebar { background: #09090a; }
+.issue-description-section .issue-title-input { font-family: var(--o-display); font-weight: 600; font-variation-settings: "wdth" 104; letter-spacing: -0.02em; }
+.issue-composer-fields .issue-title-input { font-family: var(--o-display); font-weight: 600; font-variation-settings: "wdth" 104; letter-spacing: -0.02em; }
+
+/* Command palette */
+.modal-backdrop { background: rgba(0, 0, 0, 0.78); animation: o-fade 0.25s ease both; }
+.search-modal { border-radius: 18px; border-color: rgba(255, 255, 255, 0.1); background: #0c0c0d; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 40px 100px -30px rgba(0, 0, 0, 0.95); animation: o-palette 0.45s var(--o-spring) both; }
+.search-input-row { border-bottom-color: rgba(255, 255, 255, 0.07); }
+.search-input-row input { font-size: 15px; }
+.search-results .section-label { font-family: var(--o-mono); font-size: 9.5px; font-weight: 500; letter-spacing: 0.09em; padding: 4px 8px 2px; }
+.search-results button { position: relative; isolation: isolate; border-radius: 10px; transition: background 0.15s, transform 0.2s var(--o-out); }
+.search-results button:hover { background: rgba(255, 255, 255, 0.05); border-color: transparent; transform: translateX(2px); }
+.search-results button::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--o-accent); opacity: 0; transition: opacity 0.2s; }
+.search-results button:hover::before, .search-results button:focus-visible::before { opacity: 1; }
+.search-results > div { animation: o-rise 0.4s var(--o-out) both; }
+.search-results > div:nth-child(2) { animation-delay: 0.04s; }
+.search-results > div:nth-child(3) { animation-delay: 0.08s; }
+.search-results > div:nth-child(4) { animation-delay: 0.12s; }
+
+/* Popovers and menus */
+.workspace-app .profile-menu, .workspace-app [role="menu"] { border-radius: 14px; background: #0c0c0d; border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.85); animation: o-pop 0.3s var(--o-spring); transform-origin: top left; }
+
+/* ------------------------------------------------------------- keyframes */
+@keyframes o-pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55); } 70%, 100% { box-shadow: 0 0 0 7px rgba(255, 255, 255, 0); } }
+@keyframes o-breathe { 50% { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18); } }
+@keyframes o-working { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--lane) 12%, transparent); } }
+@keyframes o-shimmer { from { opacity: 0.45; } to { opacity: 1; } }
+@keyframes o-drop { from { opacity: 0; transform: translateY(-8px) scale(0.98); } }
+@keyframes o-pop { from { opacity: 0; transform: translateY(-4px) scale(0.96); } }
+@keyframes o-fade { from { opacity: 0; } }
+@keyframes o-rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes o-palette { from { opacity: 0; transform: translateY(-12px) scale(0.97); } }
+@keyframes o-message { from { opacity: 0; transform: translateY(6px); } }
+@keyframes o-burst-ring { from { transform: scale(0.4); opacity: 1; } to { transform: scale(1.9); opacity: 0; border-width: 0.5px; } }
+@keyframes o-burst-dot { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; } }
+
+/* ------------------------------------------------------------ responsive */
+@media (max-width: 760px) {
+  .project-identity { display: none; }
+  .workspace-app .kanban-column { padding: 8px; border-radius: 14px; }
+  .board-progress { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-app *, .workspace-app *::before, .workspace-app *::after, .origin-dialog, .origin-dialog *, .modal-backdrop, .search-modal, .search-modal * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .workspace-app .task-card:hover { transform: none; }
+}

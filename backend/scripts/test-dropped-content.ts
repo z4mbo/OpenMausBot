@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { droppedLink, validateAttachmentFiles } from "../lib/dropped-content";
+assert.equal(droppedLink("# Browser link\r\nhttps://example.com/a\r\nhttps://example.com/b", ""), "https://example.com/a");
+assert.equal(droppedLink("", " https://example.com/design "), "https://example.com/design");
+for (const input of ["javascript:alert(1)", "data:text/html,bad", "file:///private/data", "https://user:secret@example.com", "not a URL"]) assert.equal(droppedLink("", input), null);
+assert.throws(() => validateAttachmentFiles([{ name: "large", size: 16 * 1024 * 1024 }]));
+assert.throws(() => validateAttachmentFiles([{ name: "empty", size: 0 }]));
+assert.throws(() => validateAttachmentFiles(Array.from({ length: 9 }, () => ({ name: "file", size: 1 }))));
+validateAttachmentFiles([{ name: "image.png", size: 5000 }]);
+console.log("PASS dropped files, URI lists, URL validation, file counts and size limits");

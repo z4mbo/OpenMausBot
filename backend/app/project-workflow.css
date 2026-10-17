@@ -1,0 +1,145 @@
+/* Keep navigation fixed while project groups and workflow lanes scroll. */
+.sidebar-project-group { flex: none; display: flex; flex-direction: column; gap: 3px; }
+.project-group-toggle { width: 100%; margin-top: 12px; padding: 0 7px; }
+.project-group-toggle span { flex: 1; text-align: left; }
+.project-group-toggle small { font-size: 11px; color: #737781; }
+.workspace-app .sidebar-project-name { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project-state { margin-left: 5px; font-size: 10px; }
+.project-state-banner.inactive { color: #b0b4bd; }
+.project-state-banner { display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 12px; flex: none; }
+.project-state-banner > span { overflow-wrap: anywhere; }
+.project-navigation { flex: none; min-width: 0; }
+.workspace-app .project-navigation .tabs { gap: 16px; align-items: center; }
+.workspace-app .project-navigation .tabs .project-feedback-tab { margin-left: auto; }
+.workspace-app .project-navigation .tabs .project-settings-tab { padding-inline: 8px; }
+.workspace-app .project-shell:has(.board-section), .workspace-app .project-shell:has(.project-canvases) { height: 100%; min-height: 0; }
+.workspace-app .board-section { min-height: 0; }
+.workspace-app .board-header { flex: none; }
+.workspace-app .kanban-scroll { min-height: 240px; scrollbar-width: thin; scrollbar-color: #454850 transparent; overscroll-behavior-x: contain; }
+.workspace-app .kanban-scroll::-webkit-scrollbar { height: 5px; }
+.workspace-app .kanban-scroll::-webkit-scrollbar-thumb { background: #454850; border-radius: 3px; }
+.workspace-app .kanban-column { flex: 0 0 304px; width: 304px; min-width: 304px; max-width: 304px; min-height: 0; display: flex; flex-direction: column; }
+.workspace-app .kanban-title { flex: none; }
+.workspace-app .task-card:hover { transform: none; }
+.workspace-app .kanban-column .task-list { overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: #36383e transparent; }
+.workspace-app .task-list > .empty-lane { min-height: 160px; }
+.board-column-button { background: transparent; border: 0; }
+.board-column-button:hover { background: #24262b; }
+.project-settings-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 1fr); gap: 40px; align-items: start; }
+.project-lifecycle-actions { display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid #2c2e34; margin-top: 14px; padding-top: 20px; }
+.project-lifecycle-actions { align-items: center; justify-content: space-between; font-size: 13px; color: #a9adb6; }
+.project-active-toggle { display: flex; align-items: center; gap: 9px; padding: 6px 0; border: 0; background: transparent; color: #d7dae0; font: inherit; }
+.project-active-toggle > span { width: 28px; height: 16px; border-radius: 8px; background: #4b4f59; padding: 3px; }
+.project-active-toggle > span::after { content: ""; display: block; width: 10px; height: 10px; background: #eee; border-radius: 50%; transition: transform .15s; }
+.project-active-toggle[aria-checked=true] > span { background: #41725d; }
+.project-active-toggle[aria-checked=true] > span::after { transform: translateX(12px); }
+.project-members { min-width: 0; }
+.project-members h3 { margin: 8px 0 20px; font-size: 14px; font-weight: 600; }
+.project-members-form { display: grid; grid-template-columns: minmax(0, 1fr) 110px; gap: 12px; margin-bottom: 16px; }
+.project-members-form label, .invite-link-form label { display: grid; gap: 7px; font-size: 12px; color: #9ca0ab; min-width: 0; }
+.project-members-form button { justify-self: start; grid-column: 1 / -1; }
+.project-members .workspace-member { gap: 10px; }
+.project-member-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.project-members .workspace-member > small { flex: none; font-size: 11px; color: #8e939e; }
+.project-members .pending-invitation > span { flex: 1; font-size: 12px; }
+.invite-link-form { display: flex; align-items: end; gap: 12px; margin-bottom: 14px; }
+.invite-link-form label { flex: 1; }
+.repo-address-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #303238; padding-bottom: 16px; min-width: 0; }
+.repo-address-row > a { display: flex; align-items: center; gap: 10px; min-width: 0; color: #c6cbd4; font-size: 13px; text-decoration: none; }
+.repo-address-row > a span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.repo-address-row svg { flex: none; }
+.repository-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; }
+.repository-column { min-width: 0; }
+.repository-column > header { display: flex; align-items: center; gap: 8px; height: 40px; border-bottom: 1px solid #303238; font-size: 13px; color: #b7bdc8; }
+.repository-column > header strong { font-weight: 500; }
+.repository-column > header > span { margin-left: auto; font-size: 11px; color: #838996; }
+.repository-item { display: flex; flex-direction: column; gap: 9px; padding: 16px 3px; border-bottom: 1px solid #25272c; text-decoration: none; color: #d4d7de; }
+.repository-item:hover { background: #191b20; }
+.repository-item > strong { font-size: 13px; font-weight: 500; line-height: 1.6; overflow-wrap: anywhere; }
+.repository-item > span { display: flex; gap: 10px; font-size: 11px; color: #9096a2; min-width: 0; }
+.repository-item > span > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.repository-item time { font-size: 10px; color: #737a86; }
+.repository-state.open { color: #8fcaa3; }.repository-state.closed { color: #b3a1ce; }.repository-state.merged { color: #ada9eb; }
+.repository-empty { padding: 28px 4px; font-size: 12px; color: #747b87; }
+.repo-workspace-setup { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 0; font-size: 12px; border-top: 1px solid #2a2d32; }
+.repo-workspace-setup > div:first-child { display: flex; align-items: center; gap: 8px; flex: 1; }
+.repo-workspace-setup > p { width: 100%; margin: 0; }
+.repo-choice { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }
+.repo-choice legend { font-size: 12px; color: #9297a1; margin-bottom: 12px; }
+.stack-form .repo-choice label { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+.repo-choice input[type=radio] { width: 15px; height: 15px; min-height: 15px; margin: 0; accent-color: #e3e5e8; }
+.project-canvases { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.canvas-toolbar { display: flex; align-items: center; gap: 8px; flex: none; margin-bottom: 12px; }
+.canvas-toolbar select { width: auto; max-width: min(60%, 320px); border: 0; background: transparent; font-size: 13px; }
+.canvas-toolbar > .ghost-button { margin-left: auto; }
+.project-canvases .draw-view { flex: 1; min-height: 300px; height: auto; }
+.project-canvases .drawing-canvas { height: 100%; }
+.issue-mention-input { position: relative; }
+.issue-comment-composer { overflow: visible; }
+.issue-mention-menu { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 5; width: min(280px, 100%); padding: 5px; border: 1px solid #3b3e45; border-radius: 6px; background: #1e2025; box-shadow: 0 8px 24px #0006; }
+.issue-mention-menu button { display: flex; align-items: center; gap: 9px; height: 38px; width: 100%; border: 0; background: none; color: #d7dbe2; border-radius: 4px; padding: 0 9px; text-align: left; }
+.issue-mention-menu button[aria-selected=true], .issue-mention-menu button:hover { background: #30343c; }
+.issue-mention-menu button span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.issue-comment-composer footer > div { display: flex; gap: 4px; }
+.issue-comment-text { overflow-wrap: anywhere; white-space: pre-wrap; }
+.issue-comment-text .inline-mention { display: inline; background: #26332f; border: 0; border-radius: 3px; color: #aad8c2; font: inherit; padding: 1px 3px; }
+.issue-comment-text a { color: #a6c4ef; text-decoration: underline; text-underline-offset: 3px; }
+.issue-assignee-field { display: grid; gap: 7px; min-width: 0; }
+.issue-assignee-field > span { display: flex; gap: 7px; align-items: center; color: #9297a2; font-size: 11px; }
+.member-picker { position: relative; min-width: 0; }
+.member-picker-trigger { display: flex; align-items: center; gap: 8px; min-height: 34px; max-width: 100%; width: 100%; border: 1px solid #363941; border-radius: 5px; background: transparent; color: #d7dbe2; padding: 5px 8px; font: inherit; font-size: 12px; }
+.member-picker-trigger > span:not(.avatar) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.member-picker-trigger > svg { flex: none; }
+.member-picker .origin-user-avatar { flex: 0 0 22px; width: 22px; min-width: 22px; max-width: 22px; height: 22px; min-height: 22px; max-height: 22px; font-size: 9px; }
+.member-picker-popover { position: absolute; top: calc(100% + 6px); right: 0; width: 260px; max-width: calc(100vw - 48px); z-index: 30; padding: 5px; background: #202126; border: 1px solid #41444e; border-radius: 6px; box-shadow: 0 12px 32px #0006; }
+.member-picker-popover [role=listbox] { max-height: 220px; overflow-y: auto; overscroll-behavior: contain; }
+.member-picker-popover [role=option] { display: flex; gap: 9px; align-items: center; height: 38px; width: 100%; color: #d7dbe2; background: none; border: 0; border-radius: 4px; padding: 5px 8px; font-size: 12px; text-align: left; }
+.member-picker-popover [role=option][data-highlighted=true] { background: #34363f; }
+.member-picker-popover [role=option] > span:not(.avatar) { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.member-picker-popover small { color: #999fae; font-size: 10px; }
+.member-picker-search { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid #363941; color: #979daa; }
+.member-picker-search input { background: none; border: 0; width: 100%; min-width: 0; min-height: 30px; padding: 0; color: #d7dbe2; box-shadow: none; outline: none; }
+.member-picker-popover p, .issue-mention-menu p { font-size: 12px; padding: 6px 8px; color: #a3a8b3; }
+.member-picker-validation { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; opacity: 0; pointer-events: none; }
+.board-header-actions > .member-picker { max-width: 180px; }
+.board-header-actions .member-picker-trigger { border-color: transparent; }
+.issue-comment-text .inline-reference { background: #2c3441; color: #c1d2eb; }
+.comment-checklist-item { display: flex; align-items: start; gap: 9px; margin: 7px 0; white-space: normal; }
+.comment-checklist-item input { flex: 0 0 15px; width: 15px; height: 15px; min-height: 15px; margin: 3px 0 0; padding: 0; accent-color: #9dccb6; }
+.comment-checklist-item .checked { text-decoration: line-through; color: #858b96; }
+.comment-media { display: grid; gap: 8px; margin-top: 8px; min-width: 0; }
+.comment-media:empty { display: none; }
+.issue-comment-composer .composer-attachments { padding: 0 12px; margin-bottom: 4px; }
+.issue-comment-composer.drop-active { border-color: #a7cbb9; background: #202b26; }
+.issue-mention-menu { max-height: 240px; overflow-y: auto; }
+.issue-mention-menu button { height: auto; min-height: 40px; }
+.issue-mention-menu button > svg { flex: none; }
+.issue-mention-menu button > span:last-child { display: grid; gap: 2px; }
+.issue-mention-menu button small { font-size: 10px; color: #9299a6; overflow: hidden; text-overflow: ellipsis; }
+.work-inbox { width: 100%; max-width: none; margin: 0; }
+.calendar-inbox { display: flex; flex-direction: column; min-height: 100%; }
+.calendar-inbox .inbox-section-tabs { flex: none; }
+.inbox-calendar { display: flex; flex: 1; flex-direction: column; }
+.inbox-calendar .calendar-grid { padding: 0; flex: 1; }
+.calendar-grid.week { min-height: 440px; }
+.calendar-grid.month { grid-template-rows: repeat(6, minmax(110px, 1fr)); }
+.calendar-grid.month .calendar-day { min-height: 110px; }
+@media (max-width: 1000px) { .project-settings-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }.repository-columns { gap: 16px; } }
+@media (max-width: 700px) {
+  .issue-assignee-field .member-picker-popover { left: 0; right: auto; max-width: calc(100vw - 72px); }
+  .workspace-app .project-navigation .tabs { gap: 12px; }
+  .workspace-app .project-navigation .tabs button { font-size: 11px; gap: 5px; padding-inline: 0; }
+  .workspace-app .project-navigation .tabs button:not(.active) > span { display: none; }
+  .workspace-app .project-navigation .tabs button { min-width: 28px; }
+  .workspace-app .project-navigation .tabs .project-settings-tab { padding-inline: 4px; }
+  .project-shell .project-create-issue { display: inline-flex; }
+  .workspace-app .kanban-scroll { scroll-snap-type: x mandatory; gap: 16px; scrollbar-width: thin; }
+  .workspace-app .kanban-column { flex: 0 0 100%; width: 100%; min-width: 0; max-width: none; scroll-snap-align: start; scroll-snap-stop: always; }
+  .board-column-button > svg { display: block; }
+  .repository-columns { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .work-inbox { padding: 16px; }
+  .calendar-grid.week { min-height: 0; }
+  .calendar-inbox .calendar-grid { display: flex; flex-direction: column; }
+  .project-members-form { grid-template-columns: minmax(0, 1fr) 100px; }
+  .project-canvases .draw-view { min-height: 360px; }
+}

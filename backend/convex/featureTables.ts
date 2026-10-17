@@ -1,0 +1,14 @@
+import { defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export const featureTables = {
+  milestones: defineTable({ teamId: v.id("teams"), title: v.string(), description: v.string(), targetDate: v.string(), status: v.union(v.literal("planned"), v.literal("active"), v.literal("completed")), createdAt: v.number(), updatedAt: v.number() }).index("by_teamId_and_targetDate", ["teamId", "targetDate"]),
+  releases: defineTable({ teamId: v.id("teams"), projectId: v.id("projects"), version: v.string(), body: v.string(), publishedAt: v.optional(v.number()), createdAt: v.number(), updatedAt: v.number() }).index("by_teamId_and_createdAt", ["teamId", "createdAt"]).index("by_projectId", ["projectId"]),
+  releaseIssues: defineTable({ releaseId: v.id("releases"), taskId: v.id("tasks") }).index("by_releaseId", ["releaseId"]).index("by_releaseId_and_taskId", ["releaseId", "taskId"]),
+  taskRelations: defineTable({ teamId: v.id("teams"), fromTaskId: v.id("tasks"), toTaskId: v.id("tasks"), kind: v.union(v.literal("blocks"), v.literal("parent")) }).index("by_fromTaskId", ["fromTaskId"]).index("by_toTaskId", ["toTaskId"]),
+  feedbackPortals: defineTable({ teamId: v.id("teams"), projectId: v.id("projects"), slug: v.string(), title: v.string(), description: v.string(), enabled: v.boolean() }).index("by_slug", ["slug"]).index("by_projectId", ["projectId"]).index("by_teamId", ["teamId"]),
+  feedbackEntries: defineTable({ portalId: v.id("feedbackPortals"), title: v.string(), body: v.string(), kind: v.union(v.literal("bug"), v.literal("idea")), status: v.union(v.literal("new"), v.literal("planned"), v.literal("completed"), v.literal("dismissed")), taskId: v.optional(v.id("tasks")), createdAt: v.number() }).index("by_portalId_and_createdAt", ["portalId", "createdAt"]),
+  notificationPreferences: defineTable({ teamId: v.id("teams"), userId: v.id("users"), assignments: v.boolean(), comments: v.boolean(), mentions: v.boolean(), mutedProjects: v.array(v.id("projects")), quietStart: v.string(), quietEnd: v.string(), timeZone: v.string() }).index("by_teamId_and_userId", ["teamId", "userId"]),
+  savedViews: defineTable({ teamId: v.id("teams"), userId: v.id("users"), name: v.string(), mine: v.boolean(), done: v.boolean(), projectId: v.optional(v.id("projects")), priority: v.optional(v.union(v.literal("low"), v.literal("medium"), v.literal("high"))) }).index("by_teamId_and_userId", ["teamId", "userId"]),
+  drawingBoards: defineTable({ teamId: v.id("teams"), projectId: v.optional(v.id("projects")), name: v.string(), thumbnail: v.optional(v.string()), createdAt: v.number(), updatedAt: v.number(), elementCount: v.optional(v.number()), bytes: v.optional(v.number()) }).index("by_teamId", ["teamId"]),
+};

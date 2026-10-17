@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import { isScreenTrack, selectCallFocus } from "../lib/call-layout";
+
+const self = { id: "self:camera" }, peer = { id: "sam:camera" };
+const screen = { id: "sam:screen", screenSharing: true }, second = { id: "alex:screen", screenSharing: true };
+const none = new Set<string>();
+assert.equal(selectCallFocus([], null, none), null);
+assert.equal(selectCallFocus([self], null, none), self.id);
+assert.equal(selectCallFocus([self, peer], null, none), peer.id);
+assert.equal(selectCallFocus([self, peer, screen], self.id, none), screen.id);
+assert.equal(selectCallFocus([self, peer, screen], peer.id, new Set([screen.id])), peer.id);
+assert.equal(selectCallFocus([self, peer, screen, second], peer.id, new Set([screen.id])), second.id);
+assert.equal(selectCallFocus([self, peer, screen], second.id, new Set([screen.id, second.id])), screen.id);
+assert.equal(selectCallFocus([self, peer], screen.id, new Set([screen.id])), peer.id);
+assert.equal(selectCallFocus([self], peer.id, none), self.id);
+const audio = { kind: "audio" }, camera = { kind: "video" }, reserved = { kind: "video" }, incomingScreen = { kind: "video" };
+const transceivers = [audio, camera, reserved, incomingScreen].map(track => ({ receiver: { track } }));
+assert.equal(isScreenTrack(transceivers, audio), false);
+assert.equal(isScreenTrack(transceivers, camera), false);
+assert.equal(isScreenTrack(transceivers, incomingScreen), true);
+assert.equal(isScreenTrack(transceivers.slice(0, 3), reserved), true);
+console.log("Call layout tests passed: automatic screen focus, manual selection, concurrent shares, departure and stop-sharing fallback.");

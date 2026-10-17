@@ -1,0 +1,50 @@
+import assert from "node:assert/strict";
+import { mkdtemp, readFile, stat } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { build } from "esbuild";
+import { ConvexHttpClient } from "convex/browser";
+import { makeFunctionReference } from "convex/server";
+const directory = await mkdtemp(path.join(tmpdir(), "origin-connection-test-"));
+process.env.ORIGIN_LOCAL_DATA_DIR = directory;
+await build({ entryPoints: ["lib/githubConnection.ts"], outfile: path.join(directory, "connection.mjs"), bundle: true, platform: "node", format: "esm" });
+const { saveGitHubConnection, githubConnectionToken, githubConnectionInfo, deleteGitHubConnection } = await import(path.join(directory, "connection.mjs"));
+const token = "synthetic-test-secret-not-a-real-token";
+saveGitHubConnection("project-a", "test/private", "test-user", token, "user-a");
+assert.equal(githubConnectionToken("project-a", "test/private"), token);
+assert.equal(githubConnectionToken("project-b", "test/private"), undefined);
+assert.equal(githubConnectionToken("project-a", "test/other"), undefined);
+assert.deepEqual(Object.keys(githubConnectionInfo("project-a", "test/private")).sort(), ["login", "updatedAt"]);
+assert.equal((await stat(path.join(directory, "integrations.key"))).mode & 0o777, 0o600);
+assert.ok(!(await readFile(path.join(directory, "integrations.sqlite-wal"))).includes(Buffer.from(token)));
+deleteGitHubConnection("project-a");
+assert.equal(githubConnectionToken("project-a", "test/private"), undefined);
+console.log("PASS encrypted token storage, private key permissions, project/repository scope and disconnect");
+
+const fixture = JSON.parse(await readFile("/tmp/origin-qa-session.json", "utf8"));
+const endpoint = `http://127.0.0.1:3001/api/github/connection?projectId=${fixture.projectId}`;
+assert.equal((await fetch(endpoint)).status, 400);
+const viewer = { Authorization: `Bearer ${fixture.viewer.sessionToken}`, "Content-Type": "application/json" };
+assert.equal((await fetch(endpoint, { method: "POST", headers: viewer, body: JSON.stringify({ token }) })).status, 400);
+assert.equal((await fetch(endpoint, { method: "DELETE", headers: viewer })).status, 400);
+const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${fixture.alex.sessionToken}` } });
+assert.deepEqual(await response.json(), { connection: null });
+console.log("PASS connection API authentication, viewer restrictions and credential-free status response");
+
+const client = new ConvexHttpClient("http://127.0.0.1:3210");
+const scope = { sessionToken: fixture.alex.sessionToken, projectId: fixture.projectId };
+const project = await client.query(makeFunctionReference("projects:get"), scope);
+await client.mutation(makeFunctionReference("projects:update"), { ...scope, repoUrl: "https://github.com/octocat/Hello-World" });
+try {
+  const headers = { Authorization: `Bearer ${scope.sessionToken}`, "Content-Type": "application/json" };
+  const snapshot = await fetch(`http://127.0.0.1:3001/api/github/repo?projectId=${scope.projectId}`, { headers });
+  const payload = await snapshot.json();
+  assert.equal(snapshot.status, 200, payload.error);
+  assert.ok(payload.commits.length > 0);
+  assert.ok(Array.isArray(payload.issues) && Array.isArray(payload.pullRequests));
+  const issue = await fetch("http://127.0.0.1:3001/api/github/issues", { method: "POST", headers, body: JSON.stringify({ projectId: scope.projectId, title: "Local QA, never submitted" }) });
+  const fallback = await issue.json();
+  assert.equal(fallback.ok, false);
+  assert.ok(fallback.manualUrl.startsWith("https://github.com/octocat/Hello-World/issues/new?"));
+  console.log("PASS live public GitHub commits/issues/PR read and unconnected manual-create fallback (no external issue submitted)");
+} finally { await client.mutation(makeFunctionReference("projects:update"), { ...scope, repoUrl: project.repoUrl || "" }); }

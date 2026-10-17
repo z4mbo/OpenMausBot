@@ -1,0 +1,39 @@
+services:
+  origin-turn:
+    image: coturn/coturn:4.18.0-r0
+    restart: unless-stopped
+    network_mode: host
+    user: "3478:3478"
+    command:
+      - -n
+      - --log-file=stdout
+      - --listening-port=3478
+      - --min-port=49160
+      - --max-port=49260
+      - --realm=${ORIGIN_TURN_REALM:?Set your TURN realm}
+      - --fingerprint
+      - --use-auth-secret
+      - --static-auth-secret=${ORIGIN_TURN_SECRET:?Set a strong ORIGIN_TURN_SECRET}
+      - --external-ip=${ORIGIN_TURN_PUBLIC_IP:?Set the relay public IPv4 address}
+      - --listening-ip=${ORIGIN_TURN_PUBLIC_IP:?Set the relay public IPv4 address}
+      - --relay-ip=${ORIGIN_TURN_PUBLIC_IP:?Set the relay public IPv4 address}
+      - --no-tls
+      - --no-tcp-relay
+      - --no-multicast-peers
+      - --denied-peer-ip=0.0.0.0-0.255.255.255
+      - --denied-peer-ip=10.0.0.0-10.255.255.255
+      - --denied-peer-ip=127.0.0.0-127.255.255.255
+      - --denied-peer-ip=169.254.0.0-169.254.255.255
+      - --denied-peer-ip=172.16.0.0-172.31.255.255
+      - --denied-peer-ip=192.168.0.0-192.168.255.255
+      - --user-quota=12
+      - --total-quota=150
+      - --max-bps=1250000
+      - --bps-capacity=12500000
+    tmpfs:
+      - /var/lib/coturn:uid=3478,gid=3478
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

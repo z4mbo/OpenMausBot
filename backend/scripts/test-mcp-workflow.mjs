@@ -1,0 +1,54 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { createHash, randomBytes } from "node:crypto";
+
+process.loadEnvFile("/tmp/origin-integration-qa.env");
+const site = process.env.ORIGIN_PUBLIC_URL;
+assert.equal(new URL(site).hostname, "127.0.0.1", "Only isolated localhost is allowed");
+const { alex, workspace, projectId } = JSON.parse(await readFile("/tmp/origin-qa-session.json", "utf8"));
+const json = async (path, body, headers = {}) => {
+  const response = await fetch(`${site}${path}`, { method: "POST", headers: { "Content-Type": "application/json", ...headers }, body: JSON.stringify(body) });
+  assert.equal(response.status, 200, await response.clone().text());
+  return response.json();
+};
+const registration = await fetch(`${site}/oauth/register`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ client_name: "Origin local workflow test", redirect_uris: ["http://127.0.0.1:8765/callback"], token_endpoint_auth_method: "none" }) });
+assert.equal(registration.status, 201);
+const client = await registration.json();
+const verifier = randomBytes(32).toString("base64url");
+const resource = `${site}/api/mcp`;
+const query = new URLSearchParams({ client_id: client.client_id, redirect_uri: client.redirect_uris[0], response_type: "code", code_challenge_method: "S256", code_challenge: createHash("sha256").update(verifier).digest("base64url"), resource, scope: "origin:read origin:write", state: "local-test" });
+const consent = await json("/api/mcp/authorize", { query: query.toString(), teamId: workspace._id, allow: true }, { Authorization: `Bearer ${alex.sessionToken}` });
+const code = new URL(consent.url).searchParams.get("code");
+const exchange = await fetch(`${site}/oauth/token`, { method: "POST", body: new URLSearchParams({ grant_type: "authorization_code", code, client_id: client.client_id, redirect_uri: client.redirect_uris[0], code_verifier: verifier, resource }) });
+assert.equal(exchange.status, 200);
+const token = await exchange.json();
+let id = 0;
+const rpc = async (method, params) => {
+  const response = await json("/api/mcp", { jsonrpc: "2.0", id: ++id, method, params }, { Authorization: `Bearer ${token.access_token}`, Accept: "application/json, text/event-stream" });
+  assert.ok(!response.error, JSON.stringify(response.error));
+  return response.result;
+};
+await rpc("initialize", { protocolVersion: "2025-03-26", capabilities: {}, clientInfo: { name: "local-test", version: "1" } });
+const names = (await rpc("tools/list", {})).tools.map(tool => tool.name);
+for (const name of ["get_inbox", "delete_issue", "list_members", "create_issue", "update_issue"]) assert.ok(names.includes(name));
+const call = async (name, args) => {
+  const result = await rpc("tools/call", { name, arguments: args });
+  assert.ok(!result.isError, JSON.stringify(result));
+  return JSON.parse(result.content[0].text);
+};
+const project = await call("get_project", { projectId });
+const people = await call("list_members", { projectId });
+assert.ok(people.members.some(member => member.email === alex.user.email));
+const requestId = `mcp-test-${Date.now()}`;
+const issue = await call("create_issue", { projectId, columnId: project.columns[0].id, requestId, title: "MCP disposable QA issue", priority: "low", assignedToEmail: alex.user.email, dueDate: "2026-10-01" });
+assert.ok((await call("get_inbox", {})).issues.some(item => item.id === issue.id));
+await call("update_issue", { projectId, taskId: issue.id, done: true, requestId: `${requestId}-complete` });
+assert.equal((await call("get_issue", { projectId, taskId: issue.id })).done, true);
+const deletion = { projectId, taskId: issue.id, requestId: `${requestId}-delete` };
+await call("delete_issue", deletion);
+await call("delete_issue", deletion);
+const removed = await rpc("tools/call", { name: "get_issue", arguments: { projectId, taskId: issue.id } });
+assert.equal(removed.isError, true);
+await fetch(`${site}/oauth/revoke`, { method: "POST", body: new URLSearchParams({ token: token.access_token, client_id: client.client_id }) });
+assert.equal((await fetch(`${site}/api/mcp`, { headers: { Authorization: `Bearer ${token.access_token}` } })).status, 401);
+console.log("PASS real MCP HTTP, OAuth PKCE, scoped members, inbox, issue create/complete/delete, retry and revocation");

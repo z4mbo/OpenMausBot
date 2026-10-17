@@ -1,0 +1,25 @@
+{
+  "name": "origin",
+  "version": "1.1.1",
+  "description": "Projects, issues and your inbox, connected to Origin through workspace-scoped OAuth.",
+  "author": {
+    "name": "Origin contributors"
+  },
+  "keywords": [],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Origin",
+    "shortDescription": "Manage projects and issues",
+    "longDescription": "Read your projects and inbox, create and update issues, complete work, and delete issues with confirmation. Access is scoped to the workspace and permissions you authorize, with no access to chat contents, vault secrets or GitHub credentials.",
+    "developerName": "Origin contributors",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/z4mbo/origin-workspace",
+    "brandColor": "#171717",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png",
+    "logoDark": "./assets/icon.png",
+    "defaultPrompt": ["Show my assigned issues in Origin.", "Turn this plan into Origin issues.", "Review the open issues in my project."]
+  },
+  "mcpServers": "./.mcp.json"
+}

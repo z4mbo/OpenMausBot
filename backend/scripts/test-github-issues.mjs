@@ -1,0 +1,81 @@
+import assert from "node:assert/strict";
+import { ConvexHttpClient } from "convex/browser";
+import { makeFunctionReference } from "convex/server";
+import { sortProjects } from "../lib/project-sort.ts";
+import { normalizeProjectEmoji } from "../lib/project-emoji.ts";
+
+const backend = process.env.TEST_CONVEX_URL || "http://127.0.0.1:3210";
+assert.equal(new URL(backend).hostname, "127.0.0.1", "Synthetic tests must never run against production");
+const client = new ConvexHttpClient(backend, { logger: false });
+const query = (name, args) => client.query(makeFunctionReference(name), name === "projectPresence:list" ? { activeSince: Date.now() - 60_000, ...args } : args);
+const mutation = (name, args) => client.mutation(makeFunctionReference(name), args);
+const run = Date.now();
+const register = name => client.action(makeFunctionReference("auth:signup"), { name, email: `${name}-${run}@example.test`, password: `Issue-QA-${run}`, workspaceName: `${name} studio`, slug: `${name}-${run}` });
+const alex = await register("Owner");
+const sam = await register("Member");
+const viewer = await register("Viewer");
+const [workspace] = await query("workspaces:list", { sessionToken: alex.sessionToken });
+for (const [who, role] of [[sam, "member"], [viewer, "viewer"]]) {
+  const invitation = await mutation("workspaces:createInvite", { sessionToken: alex.sessionToken, teamId: workspace._id, role });
+  await mutation("workspaces:acceptInvite", { sessionToken: who.sessionToken, token: invitation.token });
+}
+const projectId = await mutation("projects:create", { sessionToken: alex.sessionToken, teamId: workspace._id, name: "Presence tests" });
+const scope = { sessionToken: alex.sessionToken, teamId: workspace._id };
+const projectScope = { sessionToken: alex.sessionToken, projectId };
+const samScope = { ...scope, sessionToken: sam.sessionToken };
+const id = crypto.randomUUID();
+const publish = (sequence, project = projectId, clientId = id) => mutation("projectPresence:update", { ...scope, clientId, sequence, projectId: project });
+const before = await query("projects:get", projectScope);
+await publish(1);
+let members = await query("projectPresence:list", samScope);
+assert.equal(members.filter(p => p.userId === alex.user._id).length, 1);
+assert.equal(members.find(p => p.userId === alex.user._id).projectId, projectId);
+assert.equal((await query("projectPresence:list", { ...samScope, activeSince: Date.now() + 60_000 })).length, 0, "expired heartbeats are excluded from the active window");
+assert.equal((await query("projectPresence:list", scope)).some(p => p.userId === alex.user._id), false);
+assert.equal((await query("projects:get", projectScope)).updatedAt, before.updatedAt, "viewing a project must not bump its activity sort order");
+await publish(3, null);
+await publish(2);
+assert.equal((await query("projectPresence:list", samScope)).some(p => p.userId === alex.user._id), false, "late heartbeat must not undo a leave");
+await publish(4);
+await publish(1, projectId, `${id}-tab2`);
+assert.equal((await query("projectPresence:list", samScope)).filter(p => p.userId === alex.user._id).length, 1, "multi-tab presence is deduplicated");
+await publish(5, null);
+assert.equal((await query("projectPresence:list", samScope)).filter(p => p.userId === alex.user._id).length, 1, "closing one tab keeps the other tab visible");
+await publish(2, null, `${id}-tab2`);
+const privateWorkspace = (await query("workspaces:list", { sessionToken: sam.sessionToken })).find(w => w._id !== workspace._id);
+const privateProject = { _id: await mutation("projects:create", { sessionToken: sam.sessionToken, teamId: privateWorkspace._id, name: "Private" }) };
+await assert.rejects(query("projectPresence:list", { ...scope, teamId: privateWorkspace._id }), /access/i);
+await assert.rejects(mutation("projectPresence:update", { ...samScope, clientId: id, sequence: 1, projectId: privateProject._id }), /workspace/i);
+await mutation("projectPresence:update", { ...scope, sessionToken: viewer.sessionToken, clientId: id, sequence: 1, projectId });
+assert.ok((await query("projectPresence:list", scope)).some(p => p.userId === viewer.user._id));
+await mutation("projectPresence:update", { ...scope, sessionToken: viewer.sessionToken, clientId: id, sequence: 2, projectId: null });
+console.log("PASS #2 presence identity, workspace isolation, late updates, multi-tab leave, viewer presence and activity order");
+
+let board = await query("tasks:board", projectScope);
+await mutation("tasks:createTask", { ...projectScope, columnId: board.columns[0]._id, title: "Existing issue", priority: "medium", assignedToEmail: alex.user.email, dueDate: "2026-10-01" });
+board = await query("tasks:board", projectScope);
+const task = { ...projectScope, columnId: board.columns[0]._id, title: "Required properties test", priority: "medium" };
+await assert.rejects(mutation("tasks:createTask", task), /assignee/i);
+await assert.rejects(mutation("tasks:createTask", { ...task, assignedToEmail: alex.user.email }), /due date/i);
+await assert.rejects(mutation("tasks:createTask", { ...task, assignedToEmail: "missing@example.test", dueDate: "2026-10-01" }), /assignee/i);
+await assert.rejects(mutation("tasks:createTask", { ...task, assignedToEmail: alex.user.email, dueDate: "2026-02-31" }), /due date/i);
+const update = { ...projectScope, taskId: board.tasks[0]._id };
+await assert.rejects(mutation("tasks:updateTask", { ...update, assignedToEmail: "" }), /assignee/i);
+await assert.rejects(mutation("tasks:updateTask", { ...update, dueDate: "" }), /due date/i);
+await assert.rejects(mutation("tasks:updateTask", { ...update, title: " " }), /title/i);
+console.log("PASS #4 required and valid properties enforced on the backend");
+
+const projects = [{ _id: "a", name: "Zulu", updatedAt: 100 }, { _id: "b", name: "Alpha", updatedAt: 300 }, { _id: "c", name: "bravo", updatedAt: 200 }];
+assert.deepEqual(sortProjects(projects, "name").map(p => p._id), ["b", "c", "a"]);
+assert.deepEqual(sortProjects(projects, "recent").map(p => p._id), ["b", "c", "a"]);
+assert.deepEqual(sortProjects(projects, "oldest").map(p => p._id), ["a", "c", "b"]);
+assert.equal(sortProjects(projects, "manual"), projects);
+for (const emoji of ["\u{1F680}", "\u{1F469}\u{1F3FD}\u200D\u{1F4BB}", "\u{1F1EE}\u{1F1F9}", "1\uFE0F\u20E3"]) {
+  assert.equal(normalizeProjectEmoji(emoji), emoji);
+  await mutation("projects:update", { ...projectScope, iconType: "emoji", iconValue: emoji });
+  assert.equal((await query("projects:listForUser", scope)).find(p => p._id === projectId).iconValue, emoji);
+}
+assert.throws(() => normalizeProjectEmoji("abc"));
+assert.throws(() => normalizeProjectEmoji("\u{1F680}\u{1F680}"));
+await mutation("projects:update", { ...projectScope, iconType: "default" });
+console.log("PASS #3 sort modes, unchanged manual ordering and complete Unicode emoji persistence");
