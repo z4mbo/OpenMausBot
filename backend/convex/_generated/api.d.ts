@@ -32,6 +32,7 @@ import type * as legacyImport from "../legacyImport.js";
 import type * as lib_agentAccess from "../lib/agentAccess.js";
 import type * as lib_agentThreadRows from "../lib/agentThreadRows.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_columns from "../lib/columns.js";
 import type * as lib_completions from "../lib/completions.js";
 import type * as lib_features from "../lib/features.js";
 import type * as lib_permissions from "../lib/permissions.js";
@@ -84,6 +85,7 @@ declare const fullApi: ApiFromModules<{
   "lib/agentAccess": typeof lib_agentAccess;
   "lib/agentThreadRows": typeof lib_agentThreadRows;
   "lib/auth": typeof lib_auth;
+  "lib/columns": typeof lib_columns;
   "lib/completions": typeof lib_completions;
   "lib/features": typeof lib_features;
   "lib/permissions": typeof lib_permissions;
