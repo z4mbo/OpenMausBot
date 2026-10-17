@@ -1,6 +1,6 @@
-# Origin upstream review — 2026-10-17
+# Origin upstream review — 2026-10-18
 
-This is a bounded review of eleven recent merged OpenMausBot PRs, fetched from the source repository on 2026-10-17. It compares their changed files and relevant patches with this Origin worktree. A merge upstream is an input to review, not permission to replace Origin's account, project, approval or release contracts. Further merges belong to the daily review at 06:00 Europe/Rome.
+This bounded review compares the changed files and relevant patches of twelve merged OpenMausBot PRs with Origin, using the 2026-10-17 source fetch and the subsequent #2947 review. Three have adopted functionality, counting #2947's narrow permission adaptation; nine remain deferred or have no applicable product patch. The newest twenty-merge metadata listing also contains eight older merges whose code was not reviewed here. Metadata discovery does not count as completed review. A merge upstream is an input to review, not permission to replace Origin's account, project, approval or release contracts. The active Origin candidate is 0.2.5, still unfrozen and unshipped; the public version remains 0.2.1. Further merges belong to the daily review at 06:00 Europe/Rome.
 
 ## Adopted changes
 
@@ -24,6 +24,16 @@ The adaptation adds the five avatar fields already accepted by the profile route
 The shared palette is exported by `shared/wire.ts` and re-exported by `src/lib/mascot.ts`, so API validation and renderer choices use the same names. Companion documentation records the exact expanded route.
 
 Origin already handles custom hexadecimal colours defensively in `botPalette`; the upstream description's bubble crash does not reproduce here and is not claimed as an Origin bug. Origin's custom Liquid/Zap colour picker persists through the separate `avatar-look` route, which remains unchanged and keeps custom hex support.
+
+### Live browser view permission revocation — partial adoption
+
+[OpenMausBot #2947](https://github.com/milind-soni/OpenMausBot/pull/2947), “Browser panel v2: the page fills the panel, sharp, over T3 Code's stream,” merge [`62a7b7ac72e4f0adae1b373032592df7327d7b26`](https://github.com/milind-soni/OpenMausBot/commit/62a7b7ac72e4f0adae1b373032592df7327d7b26), prompted a narrow permission adaptation in Origin commit `9c1510a03`.
+
+The concrete P1 scenario is an authorized member opening a bot's live browser, followed by that bot becoming invisible to the member while the member and browser sessions remain live. Origin's old view predicate still returns true, so the production `BrowserLive` class can forward another private frame. A visibility change before initialization completes is also incorrectly accepted. `server/host/browser-view-access.ts` now includes current bot visibility in its predicate; `BrowserLive.recheckViewers` and the `audienceChanged` hook close revoked viewers immediately, including streams waiting for their next frame, while retaining another viewer's valid access.
+
+The original real predicate fails two permission tests. The production streaming class with synthetic transport/frame input also retains the second frame before correction. Afterward, focused access/browser tests pass 114 cases with 12 existing Windows/OS skips; server TypeScript and size/legacy guards pass. The standard isolated route fixture covers startup, doctor, seed, auth/CSRF checks and missing-engine 503 handling. It does not prove a successful real browser stream being revoked through HTTP. Synthetic class/transport proof and route-fixture coverage are distinct acceptance boundaries.
+
+The complete BrowserPanel v2 is deferred. Its upstream ChromeEngine/BrowserService tree is absent from this Origin base, so copying the panel or streaming surface alone would call missing lifecycle and permission services. The page-filling stream, viewport/zoom, popups and other full-panel behavior are not claimed as imported or verified. This PR is counted once as partially adopted, not as an additional deferred review.
 
 ## Remaining reviewed merges
 
