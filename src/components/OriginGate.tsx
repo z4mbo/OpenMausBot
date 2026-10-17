@@ -10,6 +10,7 @@ import { api, useStore, type Bot } from "@/state/store";
 import type { CloudLinks } from "@/lib/origin-import";
 import { cn } from "@/lib/cn";
 import { shareSession } from "./OriginConnect";
+import { OriginLogo } from "./OriginLogo";
 import { defaultOriginServer, originServerFor } from "@/lib/origin-cloud/servers";
 
 const SYNC_EVERY_MS = 60_000;
@@ -38,15 +39,6 @@ const title = "text-center text-[26px] font-bold leading-tight tracking-[-0.03em
 const subtitle = "mt-2 text-center text-[14px] text-ink-secondary";
 const textLink = "font-semibold text-ink underline decoration-hairline underline-offset-[3px] hover:decoration-current";
 
-function OriginMark() {
-  return (
-    <svg width="44" height="44" viewBox="0 0 64 64" fill="none" aria-hidden="true" className="text-ink">
-      <rect width="64" height="64" rx="16" fill="currentColor" />
-      <circle cx="32" cy="32" r="17" strokeWidth="4" className="stroke-app" />
-      <circle cx="32" cy="32" r="8" className="fill-app" />
-    </svg>
-  );
-}
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
@@ -62,7 +54,7 @@ function Shell({ children }: { children: ReactNode }) {
     <main className="relative flex min-h-dvh items-start justify-center overflow-y-auto bg-app px-4 pb-8 pt-[clamp(40px,14vh,140px)]">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(40%_60%_at_50%_0%,color-mix(in_srgb,var(--color-accent)_22%,transparent),transparent_70%)]" />
       <div className="relative w-full max-w-[400px]">
-        <div className="mb-5 flex justify-center"><OriginMark /></div>
+        <div className="mb-5 flex justify-center"><OriginLogo size={48} /></div>
         {children}
       </div>
     </main>
