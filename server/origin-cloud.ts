@@ -245,8 +245,9 @@ function dueDateAfter(days: number, now = new Date()): string {
   return new Date(now.getTime() + days * 86_400_000).toISOString().slice(0, 10);
 }
 
-function convexMessage(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error);
+function convexMessage(error: unknown, sessionToken: string): string {
+  const raw = error instanceof Error ? error.message : String(error);
+  const message = raw.replaceAll(sessionToken, "[redacted]");
   const invalid = /ArgumentValidationError[^\n]*\nPath: \.(\w+)\nValue: ([^\n]+)/.exec(message);
   if (invalid) return `${invalid[1]} ${clip(invalid[2], 80)} is not a valid id or value; copy ids exactly from the list tools`;
   const uncaught = /Uncaught Error: ([^\n]+)/.exec(message);
@@ -1006,7 +1007,7 @@ export async function runOriginTool(name: string, args: Args, botId: string, dep
     });
   } catch (error) {
     if (error instanceof OriginRefusal) return { text: error.message, isError: true };
-    const message = convexMessage(error);
+    const message = convexMessage(error, sessionToken);
     const hint = message === "Login required" ? " The Origin sign-in has expired; ask the person to sign in to Origin again." : "";
     return { text: `Origin refused ${name}: ${message}.${hint}`, isError: true };
   }
@@ -1123,7 +1124,7 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
     try {
       user = record(await connect(url).query("auth:me", { sessionToken }));
     } catch (error) {
-      return json(res, 502, { error: `Origin did not answer: ${convexMessage(error)}` });
+      return json(res, 502, { error: `Origin did not answer: ${convexMessage(error, sessionToken)}` });
     }
     if (!text(user.email)) return json(res, 400, { error: "Origin did not accept this session token" });
     const owner = await storedSessionEmail(sessionToken);

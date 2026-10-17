@@ -271,6 +271,19 @@ describe("runOriginTool", () => {
     });
   });
 
+  it.each([
+    'Server Error\nArgumentValidationError: Value does not match validator.\nPath: .sessionToken\nValue: "private-origin-session"\nValidator: v.string().',
+    'Uncaught Error: Invalid Origin session private-origin-session',
+    'Request failed with arguments {"sessionToken":"private-origin-session"}',
+  ])("keeps the Origin session out of tool errors: %s", async (message) => {
+    const { client } = fakeConvex({ "tasks:board": new Error(message) });
+    const result = await runOriginTool("origin_list_issues", {}, "coder", {
+      bots: BOTS, state: { ...state, sessionToken: "private-origin-session" }, connect: () => client,
+    });
+    expect(result.isError).toBe(true);
+    expect(result.text).not.toContain("private-origin-session");
+  });
+
   it("lists the reachable projects with their Chief and agents", async () => {
     const { client } = workspaceConvex();
     const result = await runOriginTool("origin_list_projects", {}, "head", workspaceDeps(client));
@@ -547,6 +560,13 @@ describe("origin-cloud routes", () => {
     const { call } = await serve({ answers: { "auth:me": null } });
     expect((await call("PUT", "/api/origin/cloud-session", { url: "ftp://x", sessionToken: "tok" }))[0]).toBe(400);
     expect(await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "bad" })).toEqual([400, { error: "Origin did not accept this session token" }]);
+  });
+
+  it("keeps the Origin session out of connection errors", async () => {
+    const { call } = await serve({ answers: { "auth:me": new Error('Request failed with arguments {"sessionToken":"private-origin-session"}') } });
+    const [status, body] = await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "private-origin-session" });
+    expect(status).toBe(502);
+    expect(JSON.stringify(body)).not.toContain("private-origin-session");
   });
 
   it("links and unlinks a bot's project and lists only existing bots", async () => {
