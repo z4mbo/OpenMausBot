@@ -29,7 +29,7 @@ export function CallPage(props: OriginPageProps) {
     <CloudGate {...props} label="Calls">
       {({ project, projectId, canEdit }) => session.user && project.teamId
         ? <MemberCall key={projectId} target={{ teamId: project.teamId, room: projectId }} me={session.user} canJoin={canEdit} name={project.name} emptyNote="Nobody is in this project's call yet" />
-        : <EmptyState icon={<PhoneOff size={28} />} title="Calls are unavailable" body="Origin did not say which workspace this project belongs to." />}
+        : <EmptyState icon={<PhoneOff size={22} />} title="Calls are unavailable" body="This project is not in a shared workspace yet, so there is nobody to call." />}
     </CloudGate>
   );
 }

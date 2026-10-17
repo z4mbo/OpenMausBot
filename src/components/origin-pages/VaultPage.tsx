@@ -6,7 +6,7 @@ import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import type { CloudCredential, CredentialKind } from "./cloud-types";
 import { errorText } from "./repo-url";
-import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 import { decryptSecret, encryptSecret, generatePassword } from "./vaultCrypto";
 
 const KINDS: Record<CredentialKind, string> = { password: "Website login", api_key: "API key", secret: "Secret", note: "Secure note", apk: "APK", file: "File" };
@@ -94,7 +94,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
   const filtered = items.filter((item) => `${item.title} ${item.username ?? ""} ${item.url ?? ""}`.toLowerCase().includes(needle));
 
   return (
-    <section className="flex-1 overflow-y-auto p-6" aria-label="Vault">
+    <section className={pageClass} aria-label="Vault">
       <PageHeader title="Vault" count={`${items.length} encrypted ${items.length === 1 ? "item" : "items"}`}>
         <label className="relative flex items-center">
           <Search size={14} className="pointer-events-none absolute left-2 text-ink-tertiary" aria-hidden="true" />
@@ -113,7 +113,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
           <button className={primaryButton} disabled={busy || (!items.length && !canEdit)}>
             {busy ? <Loader2 size={14} className="animate-spin" /> : <Unlock size={14} />}{items.length ? "Unlock vault" : "Create vault"}
           </button>
-          <p className="basis-full text-[12px] text-ink-tertiary">Secrets are encrypted in this app with your passphrase and never leave it in plain text. Origin cannot recover a lost passphrase.</p>
+          <p className="basis-full text-[12px] text-ink-tertiary">Secrets are encrypted in this app with your passphrase and never leave it in plain text. Nobody can recover a lost passphrase, not even a workspace admin.</p>
         </form>
       )}
       {notice && <div className="mb-3"><Notice>{notice}</Notice></div>}
@@ -176,7 +176,7 @@ function VaultItemEditor({ projectId, passphrase, item, onClose }: { projectId: 
     <Modal title={item ? "Edit vault item" : "New vault item"} onClose={() => { setSecret(""); onClose(); }}>
       <form onSubmit={save} className="flex flex-col gap-3">
         <Field label="Type">
-          <Select className={inputClass} value={kind} onChange={(e) => setKind(e.target.value as CredentialKind)}>
+          <Select className="w-full" value={kind} onChange={(e) => setKind(e.target.value as CredentialKind)}>
             {kinds.map((value) => <option key={value} value={value}>{KINDS[value]}</option>)}
           </Select>
         </Field>

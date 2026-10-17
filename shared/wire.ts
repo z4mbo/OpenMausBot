@@ -18,6 +18,7 @@ import type { ModelRequestCardData } from "./model-request.ts";
 import type { SkillRequestCardData } from "./skill-request.ts";
 import type { QuestionRequestCardData } from "./ask-question.ts";
 import type { RoutineRunCardData } from "./routine-run.ts";
+import type { OriginIssueCards } from "./origin-issues.ts";
 import type { WidgetPayload } from "./widget.ts";
 import type { GroupGoalRunCardData } from "./group-goal-run.ts";
 import type { RuntimeEvent } from "./runtime-events.ts";
@@ -516,6 +517,8 @@ export interface WireMessage {
   threadRef?: { botId: string; threadId: string; title: string };
   /** A published Data result, linked to its bot's main viewer. */
   dataResult?: { botId: string; cardId: string; title: string; kind: "table" | "chart" | "text"; sql?: string };
+  /** Issues an Origin tool returned, drawn as cards that open each issue in its project. */
+  originIssues?: OriginIssueCards;
   /** user messages: the Data result the person was viewing when they sent
    * this. `text` stays exactly what they typed. */
   dataContext?: { cardId: string; draftSql?: string };

@@ -2,7 +2,7 @@ import { createElement, type Dispatch } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { botRole, roleProfilePatch } from "@/lib/bot-roles";
-import { createBotWithRole, initialState, reducer, StoreProvider, useStore, type Action, type Bot } from "./store";
+import { createBotWithRole, initialState, reducer, StoreProvider, useStore, type Action, type Bot, type Message } from "./store";
 
 const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
 const deferred = () => {
@@ -131,6 +131,14 @@ describe("setup navigation", () => {
     expect(next.activeView).toBe(preserveSelection ? "team-map" : "chat");
     expect(next.selectedId).toBe(preserveSelection ? "existing" : "created");
     expect(reducer(state, { type: "botAdded", bot })).toMatchObject({ activeView: "chat", selectedId: "created" });
+  });
+
+  it("gives a bot added without its transcript an empty one, so a reply arriving next does not crash the reducer", () => {
+    const bot = { id: "imported", name: "Lead", threadId: "t-imported" } as unknown as Bot;
+    const added = reducer(initialState, { type: "botAdded", bot, preserveSelection: true });
+    expect(added.bots[0]!.messages).toEqual([]);
+    const message = { id: "m1", role: "bot", kind: "text", text: "Hi", at: 1 } as unknown as Message;
+    expect(reducer(added, { type: "messageAdded", threadId: "t-imported", message }).bots[0]!.messages).toEqual([message]);
   });
 
   it("keeps creation pending through close/reopen until the request settles", () => {

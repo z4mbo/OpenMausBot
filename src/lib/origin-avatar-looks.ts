@@ -37,3 +37,9 @@ export async function setAvatarLook(botId: string, patch: { look?: "mascot" | "d
   looks = { ...looks, [botId]: result.look };
   notify();
 }
+
+/** The colour a bot shows: its avatar card's custom colour, else its mascot colour. */
+export function useBotColor(bot: { id: string; color?: string } | undefined): string {
+  const look = useAvatarLook(bot?.id);
+  return look.color ?? bot?.color ?? "green";
+}

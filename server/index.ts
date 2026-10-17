@@ -80,6 +80,7 @@ import {
 import {
   messageAttachmentName,
   messageFileRoots,
+  openMessageFile,
 } from "./message-file.ts";
 import {
   avatarGenerationRequestSchema,
@@ -596,7 +597,7 @@ import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, ensureTeamChiefs, ensureWorkspaces, watchTemplateTeams } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
-import { createOriginCloudRoutes } from "./origin-cloud.ts";
+import { createOriginCloudRoutes, ORIGIN_ASSET_MAX_BYTES } from "./origin-cloud.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
 import { createOriginInviteRoutes, createOriginPublicRoutes } from "./origin-public-pages.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
@@ -13729,7 +13730,22 @@ ROUTES.push(createBotCreateRoutes({
 }));
 ROUTES.push(createDefaultTeamRoutes({ store, maxWorkspaceBots: MAX_WORKSPACE_BOTS, wireBot }));
 ROUTES.push(createProjectIconRoutes({ store, storedAvatarExists }));
-ROUTES.push(createOriginCloudRoutes({ store, agentBotId: (header) => { const capability = authorizedInternalCapability(header); return capability?.kind === "agents" && capability.generation !== EXTERNAL_RUNTIME_GENERATION ? capability.botId : null; } }));
+ROUTES.push(createOriginCloudRoutes({
+  store,
+  agentTurn: (header) => {
+    const capability = authorizedInternalCapability(header);
+    return capability?.kind === "agents" && capability.generation !== EXTERNAL_RUNTIME_GENERATION ? { botId: capability.botId, threadId: capability.threadId } : null;
+  },
+  turnFile: async (turn, path) => {
+    const opened = await openMessageFile(path, messageFileRootsForThread(turn.botId, turn.threadId).filter((root) => root !== ATTACHMENTS_DIR));
+    try {
+      if (opened.bytes > ORIGIN_ASSET_MAX_BYTES) throw new Error(`${opened.name} is over 15 MB, the limit for an Origin asset`);
+      return { data: await opened.handle.readFile(), name: opened.name, contentType: opened.mime };
+    } finally {
+      await opened.handle.close().catch(() => undefined);
+    }
+  },
+}));
 ROUTES.push(createCloudLinkRoutes({ store }));
 ROUTES.push(createOriginInviteRoutes({ publicUrl }));
 const originPublicPages = createOriginPublicRoutes({ publicUrl });

@@ -1,7 +1,7 @@
 {
   "default": {
-    "bytes": 60690,
-    "sha256": "fbab695de81319102afa8284aef7870d74becfecca3bb96e5146d0c266c65ebe",
+    "bytes": 64255,
+    "sha256": "bb8bf76ecf7a3b39c8fa551636a27c9402b6d1b844c24fd6b7536d0d0d5812ba",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -39,19 +39,23 @@
       "propose_model",
       "propose_team_memory",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "voice": {
-    "bytes": 61431,
-    "sha256": "e42d5831048b21517db3be7ba64ed11b52c4d39a2b6afb8794c2f1c03c066566",
+    "bytes": 64996,
+    "sha256": "d5a663df01d85bb26641f41de17f8c094834c4ab6a764c55ed4fba65a0916b3a",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -90,19 +94,23 @@
       "propose_model",
       "propose_team_memory",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "shared": {
-    "bytes": 62435,
-    "sha256": "bb9d44a9938c7a588ebd1076e89c7af4aefdbd490bde56f4c3afcdcf92bc88d4",
+    "bytes": 66000,
+    "sha256": "13b95d210349598de513a3dc193053cd6f750164f88c1bab73d046b88496e37b",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -142,19 +150,23 @@
       "propose_model",
       "propose_team_memory",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "shared+voice": {
-    "bytes": 63176,
-    "sha256": "60c2aa0993def9193ab2f186262b49bb5c75cae29eb54c048ded88ac8d52d9a6",
+    "bytes": 66741,
+    "sha256": "6d0b9e40b117f5a94887eb488b3a949d0e06a2c54129fddb3b7c5fe104c610ac",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -195,19 +207,23 @@
       "propose_model",
       "propose_team_memory",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills": {
-    "bytes": 63589,
-    "sha256": "a0dfc3372e4452f4f4752fbb4ee153cfcb17c1569da34d073359362acdc0178e",
+    "bytes": 67154,
+    "sha256": "f71eadcdb70a0df2e342fa851b8e6543918b10f92032ddb2900975e82dd815b9",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -247,19 +263,23 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+voice": {
-    "bytes": 64330,
-    "sha256": "8a1219b32633b39eb6b76f03c7cc6ade8b37b6e1c7b11b6a3e504d12b61482c6",
+    "bytes": 67895,
+    "sha256": "87669f40c13a7757bcdf90170bbed2b42fa8aa939d1558f97fbd9f9caa17b77d",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -300,19 +320,23 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+shared": {
-    "bytes": 65334,
-    "sha256": "4803e53f8eed961c29f104455e168e58cbe6eb4e165b02fbdde078dfb6dc6edd",
+    "bytes": 68899,
+    "sha256": "752a7793d54c9efbd58729649f96cea10e4321afdab4437876b2077b44255bf2",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -354,19 +378,23 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+shared+voice": {
-    "bytes": 66075,
-    "sha256": "fd9b57e11c5ba72ee78aeb399bccdfb87f5c6042fa17129f0f421dd9ef82a552",
+    "bytes": 69640,
+    "sha256": "192d739c493c70e6b69286a1cacb5340eb6d5720ea14e163ec710574f56b89a0",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -409,19 +437,23 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "non-chief": {
-    "bytes": 51040,
-    "sha256": "63333ae08dc9b18e15bcb2a0bbd0af546d6a7a650c7b71b94bcb5a1bf50ce39d",
+    "bytes": 53580,
+    "sha256": "7f465368515a5a8ade0bf1387ca01aa5e439dc9cebca747b18630aa5b6b183e2",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -452,19 +484,22 @@
       "propose_model",
       "propose_team_memory",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "voice+non-chief": {
-    "bytes": 51781,
-    "sha256": "a89f0fc92b3b51ee225d0474044e49d060aec3fe6f6474473b488f00687aac35",
+    "bytes": 54321,
+    "sha256": "63e4fb8e751ba182a9db9138a893ef384347fe187fefc745aeb72431dc1f5cb1",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -496,19 +531,22 @@
       "propose_model",
       "propose_team_memory",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "shared+non-chief": {
-    "bytes": 52785,
-    "sha256": "39b75dacf95183d3991b918a7216b44d11d2236a82e8ba8e0d9a06f62c149008",
+    "bytes": 55325,
+    "sha256": "daa81ead1ea07d888f85b2018ebf6ae89ef72403d80753e3db33c4b20fe095de",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -541,19 +579,22 @@
       "propose_model",
       "propose_team_memory",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 53526,
-    "sha256": "12fe8ad95ddb55f88dca8521c884fc29cbb01a2a2ca627f7b45ca3a7044bac72",
+    "bytes": 56066,
+    "sha256": "6bd2d75184ed5d1af76669e26a141e8ab49ba9815eafdd97901a842aad5f7b57",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -587,19 +628,22 @@
       "propose_model",
       "propose_team_memory",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+non-chief": {
-    "bytes": 53939,
-    "sha256": "587a1a19a1106c3633a120551118831eac6ba28800b6b791fba2efda68a77b70",
+    "bytes": 56479,
+    "sha256": "29d5899ef983b69930c0dd5792ed538143a3b285fad1b1be850162cd7308e9ee",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -632,19 +676,22 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 54680,
-    "sha256": "d2bc05d9b4fd828957ae5b9ed6b40679e23893400a8540d96fa220201cf0e4a6",
+    "bytes": 57220,
+    "sha256": "830f2e96e3e74c9fe6aea6b21b7fd2c9fe1c39a506b96c6a8cf0c6aac4a7cec9",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -678,19 +725,22 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 55684,
-    "sha256": "d8a30aab04389fdd9624ef006dd70df67fb6cc14281be7f4ccb57af2fcb1608e",
+    "bytes": 58224,
+    "sha256": "5440e8c7b86c958717c4264e10e2d21e819f4e19ff24449722723b556a348e99",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -725,19 +775,22 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 56425,
-    "sha256": "7614e328e0dc1eb39767f39fd034d7b715217f3ec843ce190aa1614d0399bc0c",
+    "bytes": 58965,
+    "sha256": "4eae06eb14c33ef4e18afbf17e0ff705af2da7fdbc03643a1ebef3327dab149d",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -773,19 +826,22 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 65130,
-    "sha256": "6d51303ff6324eb645b9bb22ea28f66219b6e97698a0bab0c45d13ab68e1cb87",
+    "bytes": 68695,
+    "sha256": "5238b532f12c87c8563e1416cd7a84a521cdf21e006e148de40bdb5414513fcd",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -827,19 +883,23 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 55480,
-    "sha256": "a310243b1bc383c1e48a5690cec7f6105f5faec48a511d7b2c61d1ca6a77560e",
+    "bytes": 58020,
+    "sha256": "1aae0a3bc611e9fc5ccdf0a78245839a41deba79c2d82bc5f16d318fa6b91bfa",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -874,19 +934,22 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 66935,
-    "sha256": "d925922900db311932f0be1b62a314e98cecbfca277ef2027e20aab44938ef20",
+    "bytes": 70500,
+    "sha256": "f9f6a12184bc9a4939316e290f70baa592e27590500c322eb28e12ea9d8d5c21",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -930,19 +993,23 @@
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]
   },
   "default+legacy-switches": {
-    "bytes": 60690,
-    "sha256": "fbab695de81319102afa8284aef7870d74becfecca3bb96e5146d0c266c65ebe",
+    "bytes": 64255,
+    "sha256": "bb8bf76ecf7a3b39c8fa551636a27c9402b6d1b844c24fd6b7536d0d0d5812ba",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -980,12 +1047,16 @@
       "propose_model",
       "propose_team_memory",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status"
     ]

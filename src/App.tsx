@@ -41,6 +41,7 @@ import { setLocale } from "@/lib/i18n";
 import { shouldOpenKeyboardShortcuts } from "@/lib/keyboard-shortcuts";
 import { effectiveLanguage, useLanguageChoice } from "@/lib/language-preference";
 import { botShowsUnread } from "@/lib/bot-unread";
+import { inArchivedProject } from "@/lib/origin-archived";
 import { phonePairingSettingsAction, takePhonePairingRequest } from "@/lib/phone-pairing";
 import { useExternalChatLinks } from "@/hooks/use-external-chat-links";
 import { ChatNotice } from "@/components/ChatErrorBanner";
@@ -54,7 +55,7 @@ function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
   const { capabilities } = useDesktopCapabilities();
   const captionChrome = useCaptionChrome();
   const unreadCount =
-    state.bots.filter((bot) => !bot.hidden && botShowsUnread(bot)).length +
+    state.bots.filter((bot) => !bot.hidden && !inArchivedProject(bot) && botShowsUnread(bot)).length +
     state.groups.filter((group) => group.unread).length;
   const remoteClient = window.ogb?.remoteClient?.active === true;
   const twoSidePanelsFit = useMediaQuery(TWO_SIDE_PANELS_FIT, true);

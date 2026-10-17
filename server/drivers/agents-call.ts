@@ -385,6 +385,29 @@ function recallWhen(at: unknown, dateOnly: boolean): string {
   return dateOnly ? day : `${day} ${pad(said.getHours())}:${pad(said.getMinutes())}`;
 }
 
+/** The issue goes out through coordinate_bots, with every check that route makes, before Origin records who has it. */
+async function assignOriginIssue(args: Json, context: ToolCallContext): Promise<ToolCallResult> {
+  const { apiResponse } = context.client;
+  const origin = (phase?: "record") => apiResponse("/api/internal/origin/tool", {
+    method: "POST", body: JSON.stringify({ name: "origin_assign_issue", arguments: args, ...(phase ? { phase } : {}) }),
+  });
+  const prepared = await origin();
+  const handoff = prepared.body.handoff && typeof prepared.body.handoff === "object" ? prepared.body.handoff as Json : null;
+  if (!prepared.ok || prepared.body.isError === true || !handoff) {
+    return { text: String(prepared.body.text ?? prepared.body.error ?? "origin_assign_issue did not answer."), isError: true };
+  }
+  const sent = await apiResponse("/api/internal/coordinate-bots", {
+    method: "POST",
+    body: JSON.stringify({ botIds: [handoff.botId], message: handoff.message, reason: handoff.reason, done_when: handoff.doneWhen, thread: "new" }),
+  });
+  if (!sent.ok || sent.body.error) return { text: `Not assigned, nothing was sent: ${String(sent.body.error ?? `HTTP ${sent.status}`)}`, isError: true };
+  const recorded = await origin("record");
+  const noted = recorded.ok && recorded.body.isError !== true
+    ? String(recorded.body.text ?? "")
+    : `The assignment went out, but Origin did not record it: ${String(recorded.body.text ?? recorded.body.error ?? `HTTP ${recorded.status}`)}`;
+  return { text: `Assigned to ${String(handoff.botName)}: ${JSON.stringify(sent.body)} ${noted} End your turn now; the result resumes you.` };
+}
+
 export async function callTool(name: string, args: Json, context: ToolCallContext): Promise<ToolCallResult> {
   const { botId: BOT_ID, threadId: THREAD_ID, depth: DEPTH } = context;
   const { api, apiResponse } = context.client;
@@ -412,6 +435,7 @@ export async function callTool(name: string, args: Json, context: ToolCallContex
     return { text: `Attached ${String(body.name ?? "the file")} (${Number(body.bytes ?? 0)} bytes). It now appears in the chat with a preview.` };
   }
   if (CARD_TOOL_NAMES.has(name)) return callCardTool(name, args, context);
+  if (name === "origin_assign_issue") return assignOriginIssue(args, context);
   if (ORIGIN_TOOL_NAMES.has(name)) {
     const { ok, body } = await apiResponse("/api/internal/origin/tool", { method: "POST", body: JSON.stringify({ name, arguments: args }) });
     return { text: String(body.text ?? body.error ?? `${name} did not answer.`), ...(!ok || body.isError === true ? { isError: true } : {}) };

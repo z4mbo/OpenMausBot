@@ -6,6 +6,8 @@ import { useShowThreads } from "@/lib/thread-preferences";
 import { cn } from "@/lib/cn";
 import type { SearchHit } from "@/lib/search-hit";
 import { landOnSearchHit } from "@/lib/focus-message";
+import { WORKSPACE_NAV } from "@/lib/origin-teams";
+import { OriginSearch } from "./OriginSearch";
 
 type PaletteEntry =
   | { kind: "bot"; bot: Bot }
@@ -81,6 +83,7 @@ export function CommandPalette({ onOpenChange }: { onOpenChange?: (open: boolean
   }, [cursor, messageHits]);
 
   if (!open) return null;
+  if (WORKSPACE_NAV) return <OriginSearch onClose={() => setOpen(false)} />;
 
   const bots = rankByName(state.bots.filter((b) => !b.hidden), q);
   const rooms = rankByName(state.groups, q);

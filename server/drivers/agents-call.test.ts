@@ -250,3 +250,51 @@ describe("propose_team_memory", () => {
     } }]);
   });
 });
+
+describe("origin_assign_issue", () => {
+  const handoff = { botId: "kai-dev", botName: "Developer", message: "You're assigned issue ORI-AB12", doneWhen: "PR linked", reason: "Origin issue ORI-AB12: Set up CI" };
+
+  function originHarness(answers: Record<string, { ok: boolean; status: number; body: Record<string, unknown> }>) {
+    const calls: Array<{ path: string; body: Record<string, unknown> }> = [];
+    const apiResponse = async (path: string, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      calls.push({ path, body });
+      const key = path === "/api/internal/origin/tool" ? `origin:${String(body.phase ?? "prepare")}` : path;
+      return answers[key] ?? { ok: false, status: 404, body: { error: "unexpected" } };
+    };
+    return { calls, client: { api: async () => ({}), apiResponse } };
+  }
+
+  it("prepares, hands the issue over through coordinate_bots, then records it", async () => {
+    const { calls, client } = originHarness({
+      "origin:prepare": { ok: true, status: 200, body: { text: "Ready", handoff } },
+      "/api/internal/coordinate-bots": { ok: true, status: 200, body: { receipts: [{ botId: "kai-dev", outcome: "queued" }] } },
+      "origin:record": { ok: true, status: 200, body: { text: "Labelled ORI-AB12 agent:developer and commented the assignment." } },
+    });
+    const result = await callTool("origin_assign_issue", { issue_id: "ORI-AB12", bot_id: "kai-dev" }, context({ client }));
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("Assigned to Developer");
+    expect(result.text).toContain("Labelled ORI-AB12 agent:developer");
+    expect(calls.map((call) => [call.path, call.body.phase ?? null])).toEqual([
+      ["/api/internal/origin/tool", null],
+      ["/api/internal/coordinate-bots", null],
+      ["/api/internal/origin/tool", "record"],
+    ]);
+    expect(calls[1]!.body).toEqual({ botIds: ["kai-dev"], message: handoff.message, reason: handoff.reason, done_when: handoff.doneWhen, thread: "new" });
+    expect(calls[0]!.body.arguments).toEqual({ issue_id: "ORI-AB12", bot_id: "kai-dev" });
+  });
+
+  it("records nothing when coordinate_bots refuses, and sends nothing when Origin refuses", async () => {
+    const refused = originHarness({
+      "origin:prepare": { ok: true, status: 200, body: { text: "Ready", handoff } },
+      "/api/internal/coordinate-bots": { ok: false, status: 403, body: { error: "The recipient is not an allowed peer of the sender" } },
+    });
+    const result = await callTool("origin_assign_issue", { issue_id: "x", bot_id: "kai-dev" }, context({ client: refused.client }));
+    expect(result).toEqual({ isError: true, text: "Not assigned, nothing was sent: The recipient is not an allowed peer of the sender" });
+    expect(refused.calls).toHaveLength(2);
+    const origin = originHarness({ "origin:prepare": { ok: true, status: 200, body: { text: "Only a Chief assigns Origin issues to agents.", isError: true } } });
+    expect(await callTool("origin_assign_issue", { issue_id: "x", bot_id: "y" }, context({ client: origin.client })))
+      .toEqual({ isError: true, text: "Only a Chief assigns Origin issues to agents." });
+    expect(origin.calls).toHaveLength(1);
+  });
+});

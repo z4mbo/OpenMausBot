@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 import { useCloudSession, type CloudUser } from "@/lib/origin-cloud";
 import { originRealtime, originRealtimeFile, usePolled, type MemberChatAttachment, type MemberChatMessage, type RealtimeTarget } from "@/lib/origin-realtime";
 import { ChatMarkdown } from "../ChatMarkdown";
-import { CloudGate, EmptyState, Notice, iconButton, inputClass, primaryButton, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Loading, Notice, iconButton, inputClass, primaryButton, type OriginPageProps } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
 
 const MESSAGES = "/api/local-chat/messages";
@@ -26,7 +26,7 @@ export function TeamChatPage(props: OriginPageProps) {
       {({ project, projectId, canEdit }) => session.user && project.teamId
         ? <TeamChat key={projectId} target={{ teamId: project.teamId, conversation: `project:${projectId}` }} projectId={projectId} name={project.name} me={session.user} canWrite={canEdit}
             emptyTitle={`Start the ${project.name} conversation`} emptyBody="Messages here are shared with everyone in this project." readOnlyNote="You have view-only access to this project." />
-        : <EmptyState icon={<MessagesSquare size={28} />} title="Chat is unavailable" body="Origin did not say which workspace this project belongs to." />}
+        : <EmptyState icon={<MessagesSquare size={22} />} title="Chat is unavailable" body="This project is not in a shared workspace yet, so there is nobody to chat with." />}
     </CloudGate>
   );
 }
@@ -140,18 +140,18 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-label={`${name} chat`}>
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
-        {latest === undefined && !error && <p role="status" className="flex items-center gap-2 text-[13px] text-ink-secondary"><Loader2 size={14} className="animate-spin" />Loading messages</p>}
+        {latest === undefined && !error && <Loading label="Loading messages" variant="chat" />}
         {latest?.hasMore && !olderExhausted && messages.length > 0 && (
           <button type="button" className="mx-auto mb-3 block rounded-lg px-3 py-1 text-[12.5px] text-ink-secondary hover:bg-raised hover:text-ink" onClick={() => void loadOlder()}>Load earlier messages</button>
         )}
         {latest && messages.length === 0 && (
-          <EmptyState icon={<MessagesSquare size={28} />} title={emptyTitle} body={emptyBody} />
+          <EmptyState icon={<MessagesSquare size={22} />} title={emptyTitle} body={emptyBody} />
         )}
         <ol className="flex flex-col gap-3">
           {messages.map((message) => {
             const mine = message.authorUserId === me._id;
             return (
-              <li key={message.id} className="flex gap-2.5" data-member-message={message.id}>
+              <li key={message.id} className="group -mx-2 flex gap-2.5 rounded-xl px-2 py-1 transition-colors hover:bg-raised/30 motion-safe:animate-msg-in" data-member-message={message.id}>
                 <PersonAvatar person={{ name: message.authorName, email: message.authorEmail, avatarUrl: message.avatarUrl ?? null }} size={30} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-2">
@@ -159,7 +159,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
                     <time dateTime={new Date(message.createdAt).toISOString()} className="text-[11px] tabular-nums text-ink-tertiary">{timeLabel(message.createdAt)}</time>
                     {message.editedAt && <span className="text-[11px] text-ink-tertiary">edited</span>}
                     {canWrite && (
-                      <span className="ml-auto flex items-center gap-0.5">
+                      <span className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100 max-md:opacity-100">
                         {REACTIONS.map((reaction) => (
                           <button key={reaction.id} type="button" title={reaction.label} aria-label={`React ${reaction.label}`}
                             className="rounded px-1 text-[12px] opacity-60 hover:bg-raised hover:opacity-100" onClick={() => void change(message.id, { reaction: reaction.id })}>{reaction.emoji}</button>
@@ -216,12 +216,12 @@ export function TeamChat({ target, projectId, name, me, canWrite, emptyTitle, em
                 ))}
               </div>
             )}
-            <div className="flex items-end gap-2">
+            <div className="flex items-end gap-1.5 rounded-2xl border border-hairline/60 bg-inset p-1.5 transition-colors focus-within:border-accent/60">
               <input ref={fileInput} type="file" multiple hidden onChange={(event) => void attach(event.target.files)} />
               <button type="button" className={iconButton} aria-label="Attach a file" title="Attach a file" disabled={busy || pending.length >= 8} onClick={() => fileInput.current?.click()}><Paperclip size={15} /></button>
-              <textarea className={cn(inputClass, "max-h-40 min-h-[38px] flex-1 resize-none")} rows={1} placeholder={`Message ${name}`} aria-label="Message"
+              <textarea className="max-h-40 min-h-8 flex-1 resize-none bg-transparent px-1 py-1.5 text-[13.5px] text-ink outline-none [field-sizing:content] placeholder:text-ink-tertiary max-md:text-[16px]" rows={1} placeholder={`Message ${name}`} aria-label="Message"
                 value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={onKeyDown} />
-              <button type="submit" className={primaryButton} disabled={busy || (!draft.trim() && !pending.length)} aria-label="Send">
+              <button type="submit" className={cn(primaryButton, "size-8 rounded-xl p-0")} disabled={busy || (!draft.trim() && !pending.length)} aria-label="Send">
                 {busy ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
               </button>
             </div>

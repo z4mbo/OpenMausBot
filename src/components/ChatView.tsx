@@ -86,13 +86,15 @@ import { askText, runSkill, runSteps, runSummary, showRun, skillPrompt } from "@
 import { useShowRunCard } from "@/lib/run-card-preferences";
 import { sendsMessage, useSendKey } from "@/lib/send-key";
 import { useColorUserBubbles } from "@/lib/user-bubble-preference";
-import { userBubbleStyle } from "@/lib/user-bubble-tone";
+import { accentVars, userBubbleStyle } from "@/lib/user-bubble-tone";
+import { useBotColor } from "@/lib/origin-avatar-looks";
 import { ToolActivity } from "./ToolActivity";
 import { DataResultChip } from "./DataResultChip";
 import { ThreadRefText } from "./ThreadRefs";
 import { optionsCardRow } from "./OptionsCardRow";
 import { MessageBoundary } from "./MessageBoundary";
 import { WidgetMessage } from "./widget/WidgetMessage";
+import { OriginIssuesCard } from "./OriginIssuesCard";
 import { Composer } from "./Composer";
 import { ChatErrorBanner, ChatNotice } from "./ChatErrorBanner";
 import { ThreadContextWarning } from "./ContextWarning";
@@ -914,6 +916,7 @@ const MessagesList = memo(function MessagesList({
               return m.call ? <CallRecordRow message={m} transcript={transcript} botName={botName} threadId={threadId} busy={busy} hasMore={hasMore} /> : null;
             case "activity": {
               if (m.dataResult) return <DataResultChip message={m} />;
+              if (m.originIssues) return <OriginIssuesCard message={m} />;
               if (isStatusActivity(m)) return <StatusActivityRow message={m} />;
               if (m.tool && failedTurnCause(m.tool.name) !== null) {
                 return (
@@ -1124,7 +1127,9 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   branch.current = messages;
   const onBranch = useCallback((messageId: string) => branch.current.some((m) => m.id === messageId), []);
   const colorMine = useColorUserBubbles();
-  const bubbleStyle = useMemo(() => (colorMine ? userBubbleStyle(bot.color) : undefined), [colorMine, bot.color]);
+  const botColor = useBotColor(bot);
+  const bubbleStyle = useMemo(() => (colorMine ? userBubbleStyle(botColor) : undefined), [colorMine, botColor]);
+  const accentStyle = useMemo(() => accentVars(botColor), [botColor]);
   const hasMore = Boolean(bot.hasMore);
   const rows = useMemo<ChatRows>(
     () => ({ botId: bot.id, threadId: bot.threadId, botName: bot.name, voiceId: bot.voice, tts, localVoice, busy, hasMore, bots, mentionPeers, mentionPerson: { profileName: state.config?.profile?.name }, focus, showToolCalls, locale, dispatch, onBranch, bubbleStyle, conversational: isConversational(bot.replyStyle), openedAt }),
@@ -1220,14 +1225,15 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
 
   return (
     <ThreadLinkContext value={threadLink}>
-    <main data-gaze-zone="" className="relative flex h-full min-w-0 flex-1 flex-col bg-app">
+    <main data-gaze-zone="" className="relative flex h-full min-w-0 flex-1 flex-col bg-app" style={accentStyle}>
       <CallOverlay bot={bot} />
-      {projectPage && <ChiefSectionBar bot={bot} section={chiefSection} onSection={setChiefSection} />}
+      {projectPage && chiefSection !== "chat" && <ChiefSectionBar bot={bot} section={chiefSection} onSection={setChiefSection} />}
       {!projectPage && !bot.chiefOfStaff && <AgentProjectBar agent={bot} />}
       {projectPage && chiefSection !== "chat" && <ChiefSectionPanel bot={bot} section={chiefSection} />}
       <GlassScrollFrame className={cn("flex-1 [--glass-tint:var(--color-app)]", projectPage && chiefSection !== "chat" && "hidden")}>
       {/* z-[25]: above the room set-up card (z-20), below the CallOverlay (z-30). */}
       <GlassBar edge="top" className="z-[25]">
+      {projectPage && chiefSection === "chat" && <ChiefSectionBar bot={bot} section={chiefSection} onSection={setChiefSection} joined />}
       <div
         {...headerDragProps}
         className={cn(

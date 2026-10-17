@@ -335,7 +335,15 @@ export function profileMenuItems({
   ];
 }
 
-export function SidebarProfileMenu({ iconOnly = false, compact = false, placement = "above" }: { iconOnly?: boolean; compact?: boolean; placement?: "above" | "below" } = {}) {
+/** A signed-in account that takes over the menu's trigger and adds its own rows around the app's. */
+export interface ProfileMenuAccount {
+  label: string;
+  renderTrigger(state: { open: boolean }): React.ReactNode;
+  before: SidebarMenuItem[];
+  after: SidebarMenuItem[];
+}
+
+export function SidebarProfileMenu({ iconOnly = false, compact = false, placement = "above", account: signedIn }: { iconOnly?: boolean; compact?: boolean; placement?: "above" | "below"; account?: ProfileMenuAccount } = {}) {
   const { state, dispatch } = useStore();
   const phone = useSidebarPhoneStatus();
   const connectPhone = useConnectPhoneEntry(state.config?.cloudHome === true);
@@ -354,7 +362,7 @@ export function SidebarProfileMenu({ iconOnly = false, compact = false, placemen
   const remote = window.ogb?.remoteClient?.active === true;
   const cloudAccount = !remote && Boolean(window.ogb?.cloudAccount || (window.ogb?.cloudPlan && state.config?.cloudHome === true));
 
-  const items = profileMenuItems({
+  const appItems = profileMenuItems({
     phone: phoneMenuItems({
       destinations,
       connected: phone.kind === "connected",
@@ -375,17 +383,18 @@ export function SidebarProfileMenu({ iconOnly = false, compact = false, placemen
     onFeedback: () => void openExternalLink(FEEDBACK_URL),
     onAccount: () => dispatch({ type: "toggleAppSettings", open: true, section: "cloudAccount" }),
   });
+  const items = signedIn ? [...signedIn.before, ...appItems, ...signedIn.after] : appItems;
   const noteworthy = update && updateNoteworthy(update.phase, update.pending) && !updateHasButton(update.phase);
 
   return (
     <>
       <SidebarPopoverMenu
         items={items}
-        ariaLabel={name}
+        ariaLabel={signedIn?.label ?? name}
         placement={placement}
-        triggerClassName={iconOnly ? cn("shrink-0", compact ? "rounded-md" : "rounded-xl") : "w-full"}
-        triggerTitle={iconOnly ? name : undefined}
-        renderTrigger={({ open }) => iconOnly ? (
+        triggerClassName={signedIn ? "flex max-w-full min-w-0 rounded-lg" : iconOnly ? cn("shrink-0", compact ? "rounded-md" : "rounded-xl") : "w-full"}
+        triggerTitle={iconOnly && !signedIn ? name : undefined}
+        renderTrigger={({ open }) => signedIn ? signedIn.renderTrigger({ open }) : iconOnly ? (
           <span
             ref={triggerRef}
             className={cn(

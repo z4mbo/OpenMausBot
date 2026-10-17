@@ -1661,8 +1661,23 @@
       }
     },
     {
+      "name": "origin_list_projects",
+      "description": "List the Origin projects you reach (a Chief also reaches the teams it manages) with each one's Chief and agents and their bot ids. If Origin is not connected or nothing is linked, tell the person.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
       "name": "origin_list_issues",
-      "description": "List the issues on your Origin project's board with their column, priority, assignee, due date and labels. Use it before planning work, picking the next task, or reporting status, and to find an issue id. Uses the Origin project linked to you or your Chief; if Origin is not connected or no project is linked, tell the person.",
+      "description": "List Origin issues (column, priority, assignee, due, labels), filtered by status, priority, assignee or text: which are open, urgent (high priority) or whose, and their ids. A Chief without a project of its own gets every project it reaches. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1675,6 +1690,29 @@
               "all"
             ],
             "description": "Default open."
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "assignee": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Part of an assignee's name or email."
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Text in the key, title, description or labels."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
           }
         }
       },
@@ -1687,7 +1725,7 @@
     },
     {
       "name": "origin_get_issue",
-      "description": "Read one Origin issue in full: description, comments, attachments, linked pull requests with checks and review, labels and related issues. Use it before working on or commenting on an issue. Uses the Origin project linked to you or your Chief; if Origin is not connected or no project is linked, tell the person.",
+      "description": "Read one Origin issue in full: description, comments, attachments, pull requests with checks and review, labels and related issues. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1696,7 +1734,12 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 64,
-            "description": "The issue id exactly as origin_list_issues shows it."
+            "description": "Issue id or ORI- key from origin_list_issues."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
           }
         },
         "required": [
@@ -1712,7 +1755,7 @@
     },
     {
       "name": "origin_create_issue",
-      "description": "Create an issue on your Origin project's board when the person asks you to track work, or when you find a bug or follow-up worth tracking. Check origin_list_issues first so you do not file a duplicate. Uses the Origin project linked to you or your Chief; if Origin is not connected or no project is linked, tell the person.",
+      "description": "Create an Origin issue for work to track or a bug or follow-up you found. Check origin_list_issues first for a duplicate. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1750,11 +1793,16 @@
           },
           "assignee": {
             "type": "string",
-            "description": "Email of an active project member; default the signed-in Origin user."
+            "description": "Member email; default you, the signed-in user."
           },
           "due_date": {
             "type": "string",
             "description": "YYYY-MM-DD; default one week from today."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
           }
         },
         "required": [
@@ -1764,7 +1812,7 @@
     },
     {
       "name": "origin_update_issue",
-      "description": "Change an Origin issue: retitle, rewrite the description, set priority, labels or assignee, move it to another column, or mark it done when the work is finished. Moving to a done column marks it done unless you pass done. Uses the Origin project linked to you or your Chief; if Origin is not connected or no project is linked, tell the person.",
+      "description": "Change an Origin issue: title, description, priority, labels, assignee, due date, column or done. A done column marks it done unless you pass done. Finish your own work with origin_complete_issue. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1773,7 +1821,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 64,
-            "description": "The issue id exactly as origin_list_issues shows it."
+            "description": "Issue id or ORI- key from origin_list_issues."
           },
           "title": {
             "type": "string",
@@ -1803,6 +1851,10 @@
             "type": "string",
             "description": "Email of an active project member."
           },
+          "due_date": {
+            "type": "string",
+            "description": "YYYY-MM-DD."
+          },
           "labels": {
             "type": "array",
             "maxItems": 20,
@@ -1811,6 +1863,11 @@
               "maxLength": 32
             },
             "description": "Replaces all labels."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
           }
         },
         "required": [
@@ -1820,7 +1877,7 @@
     },
     {
       "name": "origin_comment_issue",
-      "description": "Comment on an Origin issue to report progress, a finding, a question or a result. Project members are notified; keep it short and specific. Uses the Origin project linked to you or your Chief; if Origin is not connected or no project is linked, tell the person.",
+      "description": "Comment on an Origin issue: progress, a finding, a question or a result. Members are notified; keep it short. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1829,13 +1886,18 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 64,
-            "description": "The issue id exactly as origin_list_issues shows it."
+            "description": "Issue id or ORI- key from origin_list_issues."
           },
           "text": {
             "type": "string",
             "minLength": 1,
             "maxLength": 8000,
             "description": "Markdown."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
           }
         },
         "required": [
@@ -1845,12 +1907,97 @@
       }
     },
     {
-      "name": "origin_list_assets",
-      "description": "List your Origin project's design assets (with links) and design tokens. Use it before design or front-end work so you reuse the project's logos, images and colours. Uses the Origin project linked to you or your Chief; if Origin is not connected or no project is linked, tell the person.",
+      "name": "origin_assign_issue",
+      "description": "Hand an Origin issue to an agent of its project's team, or to the Chief of a project you manage, through coordinate_bots in a new thread: it branches, opens a pull request and finishes with origin_complete_issue. The issue gets the agent's label and moves to In progress. The result resumes you; end your turn. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
-        "properties": {}
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Issue id or ORI- key from origin_list_issues."
+          },
+          "bot_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Bot id from origin_list_projects, or a unique name."
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Optional extra direction for the agent."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "issue_id",
+          "bot_id"
+        ]
+      }
+    },
+    {
+      "name": "origin_complete_issue",
+      "description": "Finish your work on an Origin issue: comments the summary and pull request link, then moves it to review (stage review, while the pull request waits) or marks it done (default). The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Issue id or ORI- key from origin_list_issues."
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000,
+            "description": "What was done, in Markdown."
+          },
+          "pull_request_url": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "review",
+              "done"
+            ],
+            "description": "Default done."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "issue_id",
+          "summary"
+        ]
+      }
+    },
+    {
+      "name": "origin_list_assets",
+      "description": "List an Origin project's design assets (with links) and tokens, to reuse its logos, images and colours. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
       },
       "annotations": {
         "readOnlyHint": true,
@@ -1860,12 +2007,68 @@
       }
     },
     {
-      "name": "origin_vault_list",
-      "description": "List what your Origin project's vault holds: titles, kinds, URLs and usernames only. Values are encrypted and never returned; use it to learn which account or key exists, then ask the person for the value with request_credential. Uses the Origin project linked to you or your Chief; if Origin is not connected or no project is linked, tell the person.",
+      "name": "origin_add_asset",
+      "description": "Add a design asset to an Origin project: a link (url) or a file from your working folder (path, at most 15 MB). Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
-        "properties": {}
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "figma",
+              "image",
+              "icon",
+              "font",
+              "document",
+              "apk",
+              "other"
+            ],
+            "description": "Default other."
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "http(s) link; url or path, not both."
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "A file in your working folder."
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    {
+      "name": "origin_vault_list",
+      "description": "List an Origin project's vault: titles, kinds, URLs and usernames. Values are encrypted with the person's passphrase and never readable here; ask for one with request_credential. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
       },
       "annotations": {
         "readOnlyHint": true,
@@ -1876,11 +2079,17 @@
     },
     {
       "name": "origin_repo_status",
-      "description": "Show your Origin project's repository: its URL, open pull requests with checks and review state where known, and recent commits. Use it before code work or when asked how the code is going. Uses the Origin project linked to you or your Chief; if Origin is not connected or no project is linked, tell the person.",
+      "description": "Show an Origin project's repository: URL, open pull requests with checks and review, and recent commits. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
-        "properties": {}
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
       },
       "annotations": {
         "readOnlyHint": true,

@@ -1,6 +1,6 @@
 import { useMemo, useState, type DragEvent } from "react";
 import {
-  AtSign, Bell, CalendarDays, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock3, Flag, Inbox, List, Loader2, MessageSquare, Search, X,
+  AtSign, Bell, CalendarDays, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock3, Inbox, List, Loader2, MessageSquare, Search, X,
 } from "lucide-react";
 import { cloudMutation, useCloudPages, useCloudQuery, type CloudProject } from "@/lib/origin-cloud";
 import { useWorkspaceMembers } from "@/lib/origin-members";
@@ -15,6 +15,7 @@ import type { Priority } from "./cloud-types";
 import { errorText } from "./repo-url";
 import { EmptyState, Loading, Notice, Segmented, ghostButton, iconButton, inputClass, type WorkspaceContext } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
+import { PriorityIcon } from "./issue-fields";
 
 type InboxTask = {
   _id: string; projectId: string; title: string; priority: Priority; done: boolean; dueDate?: string;
@@ -62,7 +63,7 @@ export function WorkspaceInbox({ teamId, canEdit }: WorkspaceContext) {
   const openProject = useOpenCloudProject();
   const patch = (next: Partial<Filters>) => setFilters((current) => ({ ...current, ...next }));
   const open = (projectId: string) => {
-    if (!openProject(projectId)) setNotice("That project is not in this app yet. Import it from Origin to open it here.");
+    if (!openProject(projectId)) setNotice("That project has not reached this computer yet. It opens here after the next sync.");
   };
   const hasFilters = Boolean(filters.project || filters.priority || filters.search);
 
@@ -129,7 +130,7 @@ function Notifications({ teamId, onOpenTask, onError }: { teamId: string; onOpen
               <CheckCheck size={14} />Mark all read
             </button>
           </div>
-          {status === "loading" && !results.length && <Loading label="Loading notifications" />}
+          {status === "loading" && !results.length && <Loading label="Loading notifications" variant="inline" />}
           {status !== "loading" && !results.length && <p className="py-4 text-center text-[13px] text-ink-secondary">{unreadOnly ? "No unread notifications" : "No notifications yet"}</p>}
           <ul className="flex flex-col">
             {results.map((row) => (
@@ -219,7 +220,7 @@ function IssueList({ teamId, filters, canEdit, onOpen, onError, hasFilters }: Vi
   return (
     <>
       <Activity teamId={teamId} mine={filters.mine} project={filters.project} />
-      {status === "loading" && !results.length ? <Loading label="Loading issues" /> : !rows.length ? (
+      {status === "loading" && !results.length ? <Loading label="Loading issues" variant="list" /> : !rows.length ? (
         <EmptyState icon={<Inbox size={26} />} title={hasFilters ? "No matching issues" : filters.done ? "No completed issues yet" : "You're all caught up"} />
       ) : (
         <ul className="flex flex-col divide-y divide-hairline/30 rounded-xl border border-hairline/40 bg-panel" aria-label="Issues">
@@ -242,8 +243,8 @@ function IssueList({ teamId, filters, canEdit, onOpen, onError, hasFilters }: Vi
                 <time dateTime={task.dueDate} className={cn("w-16 text-right text-[12px] tabular-nums", overdue ? "text-danger" : "text-ink-secondary")}>
                   {task.dueDate ? new Date(`${task.dueDate}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "No date"}
                 </time>
-                <span className={cn("flex w-16 items-center gap-1 text-[12px] capitalize", priorityTone[task.priority])} title={`${task.priority} priority`}>
-                  <Flag size={12} aria-hidden="true" />{task.priority}
+                <span className="flex w-16 items-center gap-1 text-[12px] capitalize text-ink-secondary" title={`${task.priority} priority`}>
+                  <PriorityIcon priority={task.priority} size={13} />{task.priority}
                 </span>
               </li>
             );

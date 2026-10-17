@@ -6,10 +6,13 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { json, readBody } from "./harness/http.ts";
-import { cloudProjectFor, createOriginCloudRoutes, readOriginCloud, runOriginTool, writeOriginCloud, type OriginCloudClient } from "./origin-cloud.ts";
+import {
+  cloudProjectFor, createOriginCloudRoutes, reachableCloudProjects, readOriginCloud, runOriginTool, writeOriginCloud, type OriginAgentTurn, type OriginCloudClient,
+  type OriginToolDeps,
+} from "./origin-cloud.ts";
 import type { RequestAuth } from "./request-auth.ts";
 import { dispatchRoutes } from "./routes/table.ts";
-import type { BotRecord } from "./store.ts";
+import type { BotRecord, Message } from "./store.ts";
 
 const servers: Server[] = [];
 const folders: string[] = [];
@@ -26,26 +29,46 @@ function tempFile() {
 
 const BOTS = [
   { id: "chief", name: "Chief", section: "Apollo", chiefOfStaff: true },
-  { id: "coder", name: "Coder", section: "Apollo" },
+  { id: "coder", name: "Coder", title: "Developer", section: "Apollo" },
   { id: "designer", name: "Designer", section: " Apollo " },
   { id: "loner", name: "Loner", section: "Other" },
   { id: "managed", name: "Managed", section: "Side" },
   { id: "lead2", name: "Lead 2", section: "Hermes", chiefOfStaff: true, managedSections: ["Side"] },
 ] as unknown as BotRecord[];
 
-type Call = { kind: "query" | "mutation"; name: string; args: Record<string, unknown> };
+const WORKSPACE = [
+  { id: "head", name: "Head", section: "Workspace: GGs", chiefOfStaff: true, managedSections: ["Kai", "Yuki", "Gone"] },
+  { id: "kai-chief", name: "Kai", section: "Kai", chiefOfStaff: true },
+  { id: "kai-dev", name: "Developer", title: "Developer", section: "Kai" },
+  { id: "yuki-chief", name: "Yuki", section: "Yuki", chiefOfStaff: true },
+  { id: "yuki-dev", name: "Developer", section: "Yuki" },
+  { id: "gone-chief", name: "Gone", section: "Gone", chiefOfStaff: true, hidden: true },
+  { id: "outsider", name: "Outsider", section: "Mars", chiefOfStaff: true },
+] as unknown as BotRecord[];
+const WORKSPACE_LINKS = { "kai-chief": "kai", "yuki-chief": "yuki", "gone-chief": "gone", outsider: "mars" };
+
+type Call = { kind: "query" | "mutation" | "upload"; name: string; args: Record<string, unknown> };
 
 function fakeConvex(answers: Record<string, unknown | ((args: Record<string, unknown>) => unknown)>) {
   const calls: Call[] = [];
-  const answer = (kind: Call["kind"]) => async (name: string, args: Record<string, unknown>) => {
+  const answer = (kind: "query" | "mutation") => async (name: string, args: Record<string, unknown>) => {
     calls.push({ kind, name, args });
     const value = answers[name];
     if (value instanceof Error) throw value;
     return typeof value === "function" ? value(args) : value ?? null;
   };
-  const client: OriginCloudClient = { query: answer("query"), mutation: answer("mutation") };
+  const client: OriginCloudClient = {
+    query: answer("query"),
+    mutation: answer("mutation"),
+    upload: async (uploadUrl, data, contentType) => {
+      calls.push({ kind: "upload", name: uploadUrl, args: { bytes: data.byteLength, contentType } });
+      return "storage1";
+    },
+  };
   return { client, calls };
 }
+
+const mutations = (calls: Call[]) => calls.filter((call) => call.kind === "mutation").map((call) => [call.name, call.args]);
 
 const BOARD = {
   columns: [
@@ -58,6 +81,38 @@ const BOARD = {
     { _id: "t2", columnId: "col3", title: "Ship v1", priority: "low", done: true },
   ],
 };
+
+const KAI_BOARD = {
+  columns: [{ _id: "k1", title: "Todo" }, { _id: "k2", title: "In progress" }, { _id: "k3", title: "Review" }, { _id: "k4", title: "Done", isDone: true }],
+  tasks: [
+    { _id: "kaitaskab12", columnId: "k1", title: "Set up CI", priority: "high", done: false, dueDate: "2026-11-02" },
+    { _id: "kaitaskcd34", columnId: "k1", title: "Write notes", priority: "low", done: false },
+  ],
+};
+const YUKI_BOARD = {
+  columns: [{ _id: "y1", title: "Todo", isDone: false }, { _id: "y4", title: "Done", isDone: false }],
+  tasks: [{ _id: "yukitaskef56", columnId: "y1", title: "Ship mobile", priority: "high", done: false }],
+};
+
+/** A fake deployment with two projects; queries answer from the project they name. */
+function workspaceConvex(extra: Record<string, unknown | ((args: Record<string, unknown>) => unknown)> = {}) {
+  const boards: Record<string, typeof KAI_BOARD> = { kai: KAI_BOARD, yuki: YUKI_BOARD };
+  return fakeConvex({
+    "projects:get": (args: Record<string, unknown>) => ({ _id: args.projectId, name: args.projectId === "kai" ? "Kai" : args.projectId === "yuki" ? "Yuki" : "Mars" }),
+    "tasks:board": (args: Record<string, unknown>) => boards[String(args.projectId)] ?? { columns: [], tasks: [] },
+    "tasks:details": (args: Record<string, unknown>) => {
+      const found = boards[String(args.projectId)]?.tasks.find((task) => task._id === args.taskId);
+      if (!found) throw new Error("Uncaught Error: Task not found");
+      return { task: found, columns: boards[String(args.projectId)]!.columns, comments: [], assets: [] };
+    },
+    "issueRelations:list": { labels: ["ci"], relations: [] },
+    ...extra,
+  });
+}
+
+const workspaceDeps = (client: OriginCloudClient, more: Partial<OriginToolDeps> = {}): OriginToolDeps => ({
+  bots: WORKSPACE, state: { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: WORKSPACE_LINKS }, connect: () => client, ...more,
+});
 
 describe("origin-cloud store", () => {
   it("round-trips the session and links, and reads a missing or corrupt file as empty", () => {
@@ -85,6 +140,19 @@ describe("cloudProjectFor", () => {
   });
 });
 
+describe("reachableCloudProjects", () => {
+  it("gives a workspace head its managed projects, a project only its own, and nobody a hidden or unmanaged one", () => {
+    expect(reachableCloudProjects(WORKSPACE, WORKSPACE_LINKS, "head")).toEqual([
+      { projectId: "kai", section: "Kai", own: false },
+      { projectId: "yuki", section: "Yuki", own: false },
+    ]);
+    expect(reachableCloudProjects(WORKSPACE, WORKSPACE_LINKS, "kai-chief")).toEqual([{ projectId: "kai", section: "Kai", own: true }]);
+    expect(reachableCloudProjects(WORKSPACE, WORKSPACE_LINKS, "kai-dev")).toEqual([{ projectId: "kai", section: "Kai", own: true }]);
+    expect(reachableCloudProjects(WORKSPACE, WORKSPACE_LINKS, "gone-chief")).toEqual([]);
+    expect(reachableCloudProjects(WORKSPACE, WORKSPACE_LINKS, "ghost")).toEqual([]);
+  });
+});
+
 describe("runOriginTool", () => {
   const state = { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "proj" } };
 
@@ -96,33 +164,87 @@ describe("runOriginTool", () => {
     expect(unlinked).toMatchObject({ isError: true, text: expect.stringContaining("no linked Origin project") });
   });
 
-  it("lists open issues of the inherited project with the stored session", async () => {
-    const { client, calls } = fakeConvex({ "tasks:board": BOARD });
+  it("lists open issues of the inherited project with the stored session, as text and cards", async () => {
+    const { client, calls } = fakeConvex({ "tasks:board": BOARD, "projects:get": { name: "Apollo app" } });
     const result = await runOriginTool("origin_list_issues", {}, "coder", { bots: BOTS, state, connect: () => client });
-    expect(calls).toEqual([{ kind: "query", name: "tasks:board", args: { projectId: "proj", sessionToken: "tok" } }]);
+    expect(calls.map((call) => call.name).sort()).toEqual(["projects:get", "tasks:board"]);
+    expect(calls.every((call) => call.args.projectId === "proj" && call.args.sessionToken === "tok")).toBe(true);
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("t1 [Todo] Fix login · priority high · assignee Ana <a@x.dev> · labels bug");
+    expect(result.text).toContain("Origin project Apollo app (proj): 1 open issue(s).");
+    expect(result.text).toContain("t1 (ORI-T1) [Todo] Fix login · priority high · assignee Ana <a@x.dev> · labels bug");
     expect(result.text).not.toContain("Ship v1");
+    expect(result.cards).toEqual({
+      heading: "1 open issue · Apollo app",
+      issues: [{ id: "t1", key: "ORI-T1", projectId: "proj", projectName: "Apollo app", title: "Fix login", status: "Todo", done: false, priority: "high", assignee: "Ana", labels: ["bug"] }],
+    });
+  });
+
+  it("filters by priority and text, and refuses an unknown priority", async () => {
+    const { client } = workspaceConvex();
+    const urgent = await runOriginTool("origin_list_issues", { priority: "high", project: "Kai" }, "head", workspaceDeps(client));
+    expect(urgent.cards?.issues.map((issue) => issue.title)).toEqual(["Set up CI"]);
+    expect(urgent.cards?.heading).toBe("1 open high-priority issue · Kai");
+    const matched = await runOriginTool("origin_list_issues", { query: "notes" }, "kai-dev", workspaceDeps(client));
+    expect(matched.cards?.issues.map((issue) => issue.key)).toEqual(["ORI-CD34"]);
+    expect(await runOriginTool("origin_list_issues", { priority: "urgent" }, "kai-dev", workspaceDeps(client))).toMatchObject({ isError: true });
+  });
+
+  it("lets a workspace head list every project it manages, or one by name, id or team, and nothing else", async () => {
+    const { client } = workspaceConvex();
+    const all = await runOriginTool("origin_list_issues", {}, "head", workspaceDeps(client));
+    expect(all.text).toContain("Origin project Kai (kai): 2 open issue(s).");
+    expect(all.text).toContain("Origin project Yuki (yuki): 1 open issue(s).");
+    expect(all.cards?.heading).toBe("3 open issues · 2 projects");
+    expect(all.cards?.issues.map((issue) => [issue.projectName, issue.title])).toEqual([["Kai", "Set up CI"], ["Kai", "Write notes"], ["Yuki", "Ship mobile"]]);
+    for (const project of ["Yuki", "yuki", "YUKI"]) {
+      const one = await runOriginTool("origin_list_issues", { project }, "head", workspaceDeps(client));
+      expect(one.cards?.issues.map((issue) => issue.title), project).toEqual(["Ship mobile"]);
+    }
+    const outside = await runOriginTool("origin_list_issues", { project: "mars" }, "head", workspaceDeps(client));
+    expect(outside).toMatchObject({ isError: true, text: expect.stringContaining('No Origin project "mars" among the ones you reach: "Kai" (kai), "Yuki" (yuki).') });
+    const sideways = await runOriginTool("origin_list_issues", { project: "yuki" }, "kai-dev", workspaceDeps(client));
+    expect(sideways).toMatchObject({ isError: true });
+  });
+
+  it("finds an issue by its ORI- key across the reachable projects", async () => {
+    const { client } = workspaceConvex();
+    const result = await runOriginTool("origin_get_issue", { issue_id: "ori-ef56" }, "head", workspaceDeps(client));
+    expect(result.text).toContain("yukitaskef56 (ORI-EF56) [Todo] Ship mobile");
+    expect(result.text).toContain("Origin project Yuki (yuki).");
+    expect(result.cards).toMatchObject({ heading: "Issue ORI-EF56", issues: [{ id: "yukitaskef56", projectId: "yuki", labels: ["ci"] }] });
+    const missing = await runOriginTool("origin_get_issue", { issue_id: "ORI-ZZZZ" }, "head", workspaceDeps(client));
+    expect(missing).toMatchObject({ isError: true, text: expect.stringContaining("No issue ORI-ZZZZ") });
+  });
+
+  it("finds a raw issue id in whichever reachable project holds it", async () => {
+    const { client } = workspaceConvex();
+    const result = await runOriginTool("origin_comment_issue", { issue_id: "yukitaskef56", text: "On it" }, "head", workspaceDeps(client));
+    expect(result.text).toBe("Commented on issue yukitaskef56.");
   });
 
   it("creates an issue in Todo assigned to the signed-in user, then sets labels", async () => {
     const { client, calls } = fakeConvex({ "tasks:board": BOARD, "auth:me": { email: "me@x.dev" }, "tasks:createTask": "t9" });
     const result = await runOriginTool("origin_create_issue", { title: "New", labels: ["ui"], due_date: "2026-11-01" }, "coder", { bots: BOTS, state, connect: () => client });
-    expect(result.text).toBe('Created issue t9 "New" in column "Todo".');
-    expect(calls.find((call) => call.name === "tasks:createTask")?.args).toEqual({
-      projectId: "proj", sessionToken: "tok", columnId: "col2", title: "New", priority: "medium", assignedToEmail: "me@x.dev", dueDate: "2026-11-01",
+    expect(result.text).toBe('Created issue t9 (ORI-T9) "New" in column "Todo" of proj.');
+    expect(mutations(calls)).toEqual([
+      ["tasks:createTask", { projectId: "proj", sessionToken: "tok", columnId: "col2", title: "New", priority: "medium", assignedToEmail: "me@x.dev", dueDate: "2026-11-01" }],
+      ["issueRelations:labels", { sessionToken: "tok", taskId: "t9", labels: ["ui"] }],
+    ]);
+    expect(result.cards).toEqual({
+      heading: "Issue created",
+      issues: [{ id: "t9", key: "ORI-T9", projectId: "proj", projectName: "proj", title: "New", status: "Todo", done: false, priority: "medium", assignee: "me@x.dev", due: "2026-11-01", labels: ["ui"] }],
     });
-    expect(calls.at(-1)).toEqual({ kind: "mutation", name: "issueRelations:labels", args: { sessionToken: "tok", taskId: "t9", labels: ["ui"] } });
   });
 
   it("moving to a done column marks the issue done", async () => {
     const { client, calls } = fakeConvex({ "tasks:board": BOARD });
     const result = await runOriginTool("origin_update_issue", { issue_id: "t1", column: "done" }, "coder", { bots: BOTS, state, connect: () => client });
     expect(result.text).toBe('Updated issue t1: column "Done", done true.');
-    expect(calls.filter((call) => call.kind === "mutation").map((call) => [call.name, call.args])).toEqual([
+    expect(mutations(calls)).toEqual([
       ["tasks:moveTask", { projectId: "proj", sessionToken: "tok", taskId: "t1", columnId: "col3" }],
       ["tasks:updateTask", { projectId: "proj", sessionToken: "tok", taskId: "t1", done: true }],
     ]);
+    expect(result.cards?.heading).toBe("Issue updated");
   });
 
   it("never shows vault ciphertext", async () => {
@@ -141,15 +263,129 @@ describe("runOriginTool", () => {
       isError: true, text: 'Origin refused origin_get_issue: taskId "nope" is not a valid id or value; copy ids exactly from the list tools.',
     });
   });
+
+  it("lists the reachable projects with their Chief and agents", async () => {
+    const { client } = workspaceConvex();
+    const result = await runOriginTool("origin_list_projects", {}, "head", workspaceDeps(client));
+    expect(result.text).toContain("- Kai (project kai)");
+    expect(result.text).toContain("Chief: Kai [id: kai-chief]");
+    expect(result.text).toContain("Agents: Developer (Developer) [id: kai-dev]");
+    expect(result.text).not.toContain("Mars");
+  });
 });
 
-async function serve(options: { auth?: RequestAuth; agentBotId?: (header: string | string[] | undefined) => string | null; answers?: Record<string, unknown> } = {}) {
+describe("origin_assign_issue", () => {
+  it("prepares a handoff for an agent of the issue's project without writing anything", async () => {
+    const { client, calls } = workspaceConvex();
+    const result = await runOriginTool("origin_assign_issue", { issue_id: "kaitaskab12", bot_id: "kai-dev", instructions: "Use GitHub Actions." }, "kai-chief", workspaceDeps(client));
+    expect(result.isError).toBeUndefined();
+    expect(result.handoff).toMatchObject({ botId: "kai-dev", botName: "Developer", reason: "Origin issue ORI-AB12: Set up CI" });
+    expect(result.handoff?.message).toContain('You\'re assigned issue ORI-AB12: "Set up CI" (Origin project Kai, issue id kaitaskab12).');
+    expect(result.handoff?.message).toContain("origin_complete_issue");
+    expect(result.handoff?.message).toContain("From Kai: Use GitHub Actions.");
+    expect(mutations(calls)).toEqual([]);
+  });
+
+  it("records the assignment: agent label, a comment, and In progress", async () => {
+    const { client, calls } = workspaceConvex();
+    const result = await runOriginTool("origin_assign_issue", { issue_id: "ORI-AB12", bot_id: "Developer" }, "kai-chief", workspaceDeps(client), "record");
+    expect(result.text).toBe("Labelled ORI-AB12 agent:developer and commented the assignment.");
+    expect(mutations(calls)).toEqual([
+      ["issueRelations:labels", { sessionToken: "tok", taskId: "kaitaskab12", labels: ["ci", "agent:developer"] }],
+      ["tasks:addComment", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", body: "Assigned to the agent Developer (Developer) by Kai in OpenMausBot." }],
+      ["tasks:moveTask", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", columnId: "k2" }],
+    ]);
+    expect(result.cards?.heading).toBe("Assigned to Developer");
+  });
+
+  it("lets a workspace head hand an issue to a project's Chief, and refuses crossing projects or non-Chiefs", async () => {
+    const { client } = workspaceConvex();
+    const down = await runOriginTool("origin_assign_issue", { issue_id: "yukitaskef56", bot_id: "yuki-chief" }, "head", workspaceDeps(client));
+    expect(down.handoff?.botId).toBe("yuki-chief");
+    const crossed = await runOriginTool("origin_assign_issue", { issue_id: "yukitaskef56", bot_id: "kai-dev" }, "head", workspaceDeps(client));
+    expect(crossed).toMatchObject({ isError: true, text: expect.stringContaining("does not work on this Origin project") });
+    const ambiguous = await runOriginTool("origin_assign_issue", { issue_id: "yukitaskef56", bot_id: "Developer" }, "head", workspaceDeps(client));
+    expect(ambiguous).toMatchObject({ isError: true, text: expect.stringContaining("Several agents are called Developer") });
+    const agent = await runOriginTool("origin_assign_issue", { issue_id: "kaitaskab12", bot_id: "kai-chief" }, "kai-dev", workspaceDeps(client));
+    expect(agent).toMatchObject({ isError: true, text: expect.stringContaining("Only a Chief") });
+    const outsider = await runOriginTool("origin_assign_issue", { issue_id: "kaitaskab12", bot_id: "outsider" }, "kai-chief", workspaceDeps(client));
+    expect(outsider).toMatchObject({ isError: true });
+  });
+});
+
+describe("origin_complete_issue", () => {
+  it("comments the summary and pull request, then moves the issue to review", async () => {
+    const { client, calls } = workspaceConvex();
+    const result = await runOriginTool("origin_complete_issue", {
+      issue_id: "kaitaskab12", summary: "CI runs on every push.", pull_request_url: "https://github.com/ggs/kai/pull/7", stage: "review",
+    }, "kai-dev", workspaceDeps(client));
+    expect(result.text).toBe('Commented on ORI-AB12 and moved to "Review".');
+    expect(mutations(calls)).toEqual([
+      ["tasks:addComment", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", body: "CI runs on every push.\n\nPull request: https://github.com/ggs/kai/pull/7" }],
+      ["tasks:moveTask", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", columnId: "k3" }],
+    ]);
+    expect(result.cards?.heading).toBe("Issue in review");
+  });
+
+  it("marks the issue done in its done column, and refuses a bad link", async () => {
+    const { client, calls } = workspaceConvex();
+    const result = await runOriginTool("origin_complete_issue", { issue_id: "yukitaskef56", summary: "Shipped." }, "yuki-dev", workspaceDeps(client));
+    expect(result.text).toBe('Commented on ORI-EF56 and marked done in "Done".');
+    expect(mutations(calls).slice(1)).toEqual([
+      ["tasks:moveTask", { projectId: "yuki", sessionToken: "tok", taskId: "yukitaskef56", columnId: "y4" }],
+      ["tasks:updateTask", { projectId: "yuki", sessionToken: "tok", taskId: "yukitaskef56", done: true }],
+    ]);
+    expect(await runOriginTool("origin_complete_issue", { issue_id: "yukitaskef56", summary: "x", pull_request_url: "javascript:alert(1)" }, "yuki-dev", workspaceDeps(client)))
+      .toMatchObject({ isError: true });
+  });
+});
+
+describe("origin_add_asset", () => {
+  it("adds a link, or uploads a file the turn may share", async () => {
+    const { client, calls } = workspaceConvex({ "design:generateUploadUrl": "http://127.0.0.1:3210/api/storage/upload?token=x" });
+    const link = await runOriginTool("origin_add_asset", { name: "Mockups", type: "figma", url: "https://figma.com/file/1" }, "kai-dev", workspaceDeps(client));
+    expect(link.text).toBe('Added the link "Mockups" to Kai\'s assets.');
+    const read: string[] = [];
+    const file = async (path: string) => {
+      read.push(path);
+      return { data: new Uint8Array([1, 2, 3]), name: "logo.png", contentType: "image/png" };
+    };
+    const uploaded = await runOriginTool("origin_add_asset", { name: "Logo", type: "image", path: "out/logo.png" }, "kai-dev", workspaceDeps(client, { file }));
+    expect(uploaded.text).toBe('Uploaded logo.png (3 bytes) as "Logo" to Kai\'s assets.');
+    expect(read).toEqual(["out/logo.png"]);
+    expect(calls.filter((call) => call.kind !== "query").map((call) => [call.name, call.args])).toEqual([
+      ["design:createAsset", { projectId: "kai", sessionToken: "tok", type: "figma", name: "Mockups", url: "https://figma.com/file/1" }],
+      ["design:generateUploadUrl", { projectId: "kai", sessionToken: "tok" }],
+      ["http://127.0.0.1:3210/api/storage/upload?token=x", { bytes: 3, contentType: "image/png" }],
+      ["design:createAsset", { projectId: "kai", sessionToken: "tok", type: "image", name: "Logo", storageId: "storage1", contentType: "image/png", size: 3 }],
+    ]);
+  });
+
+  it("refuses both or neither source, and explains an unreadable file", async () => {
+    const { client } = workspaceConvex();
+    expect(await runOriginTool("origin_add_asset", { name: "x" }, "kai-dev", workspaceDeps(client))).toMatchObject({ isError: true });
+    expect(await runOriginTool("origin_add_asset", { name: "x", url: "https://a.b", path: "a" }, "kai-dev", workspaceDeps(client))).toMatchObject({ isError: true });
+    expect(await runOriginTool("origin_add_asset", { name: "x", path: "a" }, "kai-dev", workspaceDeps(client))).toMatchObject({ isError: true, text: expect.stringContaining("pass url instead") });
+    const file = async () => { throw new Error("the linked file is outside the workspace"); };
+    expect(await runOriginTool("origin_add_asset", { name: "x", path: "/etc/passwd" }, "kai-dev", workspaceDeps(client, { file }))).toEqual({
+      isError: true, text: "Could not read /etc/passwd: the linked file is outside the workspace.",
+    });
+  });
+});
+
+async function serve(options: { auth?: RequestAuth; agentTurn?: (header: string | string[] | undefined) => OriginAgentTurn | null; answers?: Record<string, unknown>; rooms?: string[] } = {}) {
   const file = tempFile();
   const fake = fakeConvex(options.answers ?? { "auth:me": { email: "me@x.dev" }, "tasks:board": BOARD });
-  const store = { bots: BOTS, bot: (id: string) => BOTS.find((bot) => bot.id === id) ?? null };
+  const appended: Array<{ threadId: string; message: Omit<Message, "id" | "at"> }> = [];
+  const store = {
+    bots: BOTS,
+    bot: (id: string) => BOTS.find((bot) => bot.id === id) ?? null,
+    appendMessage: (threadId: string, message: Omit<Message, "id" | "at">) => { appended.push({ threadId, message }); },
+    groupByThread: (threadId: string) => (options.rooms?.includes(threadId) ? { id: "room" } : undefined),
+  };
   const routes = [createOriginCloudRoutes({
     store: store as never,
-    agentBotId: options.agentBotId ?? ((header) => (header === "Bearer cap-coder" ? "coder" : null)),
+    agentTurn: options.agentTurn ?? ((header) => (header === "Bearer cap-coder" ? { botId: "coder", threadId: "coder-thread" } : header === "Bearer cap-room" ? { botId: "coder", threadId: "room-thread" } : null)),
     file,
     connect: () => fake.client,
   })];
@@ -168,7 +404,7 @@ async function serve(options: { auth?: RequestAuth; agentBotId?: (header: string
     const response = await fetch(`${base}${path}`, { method, headers: { "content-type": "application/json", ...headers }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
     return [response.status, await response.json()] as const;
   };
-  return { call, file, fake };
+  return { call, file, fake, appended };
 }
 
 describe("origin-cloud routes", () => {
@@ -208,18 +444,43 @@ describe("origin-cloud routes", () => {
     expect((await call("GET", "/api/origin/cloud-session"))[0]).toBe(200);
   });
 
-  it("runs a tool only for an agents capability, as the bot it belongs to", async () => {
-    const { call, file, fake } = await serve();
+  it("runs a tool only for an agents capability, as the bot it belongs to, and shows its issues in that turn's thread", async () => {
+    const { call, file, fake, appended } = await serve();
     writeOriginCloud(file, { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "proj" } });
     const tool = { name: "origin_list_issues", arguments: { status: "all" } };
     expect(await call("POST", "/api/internal/origin/tool", tool)).toEqual([401, { error: "unauthorized" }]);
     expect(await call("POST", "/api/internal/origin/tool", tool, { authorization: "Bearer forged" })).toEqual([401, { error: "unauthorized" }]);
     expect((await call("POST", "/api/internal/origin/tool", { name: "list_bots" }, { authorization: "Bearer cap-coder" }))[0]).toBe(400);
+    expect(appended).toEqual([]);
     const [status, body] = await call("POST", "/api/internal/origin/tool", tool, { authorization: "Bearer cap-coder" });
     expect(status).toBe(200);
     expect((body as { text: string }).text).toContain("2 all issue(s)");
-    expect(fake.calls.at(-1)?.args).toEqual({ projectId: "proj", sessionToken: "tok" });
+    expect(body).not.toHaveProperty("cards");
+    expect(fake.calls.every((entry) => entry.args.projectId === "proj")).toBe(true);
     expect(readFileSync(file, "utf8")).toContain("proj");
+    expect(appended).toHaveLength(1);
+    expect(appended[0]!.threadId).toBe("coder-thread");
+    expect(appended[0]!.message).toMatchObject({ role: "bot", kind: "activity", tool: { name: "origin_list_issues", ok: true } });
+    expect(appended[0]!.message.originIssues?.issues.map((issue) => issue.id)).toEqual(["t1", "t2"]);
+    expect(appended[0]!.message.from).toBeUndefined();
+  });
+
+  it("attributes the cards to the bot in a room, and posts none for an error", async () => {
+    const { call, file, appended } = await serve({ rooms: ["room-thread"] });
+    writeOriginCloud(file, { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "proj" } });
+    await call("POST", "/api/internal/origin/tool", { name: "origin_list_issues", arguments: {} }, { authorization: "Bearer cap-room" });
+    expect(appended[0]!.message.from).toMatchObject({ botId: "coder", name: "Coder" });
+    await call("POST", "/api/internal/origin/tool", { name: "origin_list_issues", arguments: { priority: "urgent" } }, { authorization: "Bearer cap-room" });
+    expect(appended).toHaveLength(1);
+  });
+
+  it("takes the record phase only for origin_assign_issue", async () => {
+    const { call, file, fake } = await serve();
+    writeOriginCloud(file, { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "proj" } });
+    await call("POST", "/api/internal/origin/tool", { name: "origin_list_issues", arguments: {}, phase: "record" }, { authorization: "Bearer cap-coder" });
+    expect(fake.calls.filter((entry) => entry.kind === "mutation")).toEqual([]);
+    const [, refused] = await call("POST", "/api/internal/origin/tool", { name: "origin_assign_issue", arguments: { issue_id: "t1", bot_id: "designer" }, phase: "record" }, { authorization: "Bearer cap-coder" });
+    expect(refused).toMatchObject({ isError: true, text: expect.stringContaining("Only a Chief") });
   });
 
   it("leaves other paths to the next handler", async () => {

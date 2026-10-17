@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Cloud, Plus, UserPlus, X } from "lucide-react";
-import { OriginConnectDialog } from "./OriginConnect";
+import { Archive, ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Plus, UserPlus, X } from "lucide-react";
 import { RuntimeHelp, WorkspaceMembersPanel } from "./origin-members";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
 import type { Bot } from "@/state/store";
+import { UnreadBadge } from "./UnreadBadge";
 import { cn } from "@/lib/cn";
 import {
   movedOrder, orderedGroups, setGroupOrder, setProjectOrder, setProjectSort, setProjectsCollapsed, sortProjects, switchWorkspace, toggleGroup, useWorkspaces, type ProjectSort,
@@ -60,7 +60,7 @@ function Menu({ label, icon, children, className, floating = false }: { label: s
 const menuItem = "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-ink hover:bg-raised";
 
 export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = false }: { heads: readonly Bot[]; activeId?: string; onNewWorkspace(): void; compact?: boolean }) {
-  const [panel, setPanel] = useState<"account" | "members" | null>(null);
+  const [panel, setPanel] = useState<"members" | null>(null);
   const cloudLinks = useCloudLinks();
   return (
     <>
@@ -75,21 +75,31 @@ export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = f
       <div className="my-1 h-px bg-hairline/50" />
       <button type="button" role="menuitem" onClick={onNewWorkspace} className={menuItem}><Plus size={13} />New workspace</button>
       <button type="button" role="menuitem" onClick={() => setPanel("members")} className={menuItem}><UserPlus size={13} />Members & invites…</button>
-      <div className="my-1 h-px bg-hairline/50" />
-      <button type="button" role="menuitem" onClick={() => setPanel("account")} className={menuItem}><Cloud size={13} />Origin account…</button>
     </Menu>
-    {panel === "account" && <OriginConnectDialog onClose={() => setPanel(null)} />}
     {panel === "members" && <MembersDialog cloudTeamId={(activeId && cloudLinks.workspaces[activeId]) || null} onClose={() => setPanel(null)} />}
     </>
   );
 }
 
-export function SidebarProjects({ projects, row, onNewProject }: { projects: readonly Bot[]; row(bot: Bot): ReactNode; onNewProject(): void }) {
+export function SidebarProjects({ projects, row, onNewProject, archived, selectedId }: {
+  projects: readonly Bot[];
+  row(bot: Bot): ReactNode;
+  /** Absent when the signed-in person may not create projects here. */
+  onNewProject?: () => void;
+  /** Projects that are inactive in Origin: listed under a folded "Archived" group. */
+  archived?: (bot: Bot) => boolean;
+  selectedId?: string | null;
+}) {
   const workspaces = useWorkspaces();
   const ordered = sortProjects(projects.map((bot) => ({ id: bot.id, name: bot.name, updatedAt: lastUpdate(bot), bot })), workspaces);
   const dragging = useRef<string | null>(null);
   const [drop, setDrop] = useState<{ id: string; place: "before" | "after" } | null>(null);
   const open = !workspaces.collapsed;
+  const shelved = archived ? ordered.filter(({ bot }) => archived(bot)) : [];
+  const live = shelved.length ? ordered.filter((item) => !shelved.includes(item)) : ordered;
+  const holdsSelection = shelved.some(({ id }) => id === selectedId);
+  const [shelfOpen, setShelfOpen] = useState(holdsSelection);
+  useEffect(() => { if (holdsSelection) setShelfOpen(true); }, [holdsSelection]);
   const place = (event: React.DragEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     return event.clientY < rect.top + rect.height / 2 ? "before" as const : "after" as const;
@@ -108,10 +118,29 @@ export function SidebarProjects({ projects, row, onNewProject }: { projects: rea
             </button>
           ))}
         </Menu>
-        <button type="button" aria-label="New project" title="New project" onClick={onNewProject}
-          className="flex size-6 items-center justify-center rounded text-ink-secondary hover:bg-raised hover:text-ink"><Plus size={14} /></button>
+        {onNewProject && <button type="button" aria-label="New project" title="New project" onClick={onNewProject}
+          className="flex size-6 items-center justify-center rounded text-ink-secondary hover:bg-raised hover:text-ink"><Plus size={14} /></button>}
       </div>
-      {open && ordered.map(({ id, bot }) => (
+      {open && live.map(({ id, bot }) => projectRow(id, bot))}
+      {open && shelved.length > 0 && (
+        <div data-sidebar-archived-projects className="mt-1 flex flex-col gap-0.5">
+          <button type="button" aria-expanded={shelfOpen} onClick={() => setShelfOpen((value) => !value)}
+            className="group/shelf flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] text-ink-tertiary transition-colors hover:bg-raised/50 hover:text-ink-secondary">
+            <ChevronRight size={12} className={cn("shrink-0 transition-transform duration-200", shelfOpen && "rotate-90")} aria-hidden="true" />
+            <Archive size={12} className="shrink-0" aria-hidden="true" />
+            <span className="flex-1 text-left">Archived</span>
+            <span className="rounded-full bg-raised/70 px-1.5 text-[10.5px] tabular-nums leading-4 text-ink-tertiary">{shelved.length}</span>
+          </button>
+          {shelfOpen && <div className="flex origin-top animate-pop-in flex-col gap-0.5 opacity-75 transition-opacity hover:opacity-100 focus-within:opacity-100">
+            {shelved.map(({ id, bot }) => projectRow(id, bot))}
+          </div>}
+        </div>
+      )}
+    </div>
+  );
+
+  function projectRow(id: string, bot: Bot) {
+    return (
         <div key={id} data-sidebar-project-row={id} draggable={workspaces.sort === "custom"}
           onDragStart={(event) => { dragging.current = id; event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("application/x-origin-project", id); }}
           onDragOver={(event) => { if (!dragging.current || dragging.current === id) return; event.preventDefault(); setDrop({ id, place: place(event) }); }}
@@ -126,7 +155,16 @@ export function SidebarProjects({ projects, row, onNewProject }: { projects: rea
           className={cn(drop?.id === id && (drop.place === "before" ? "shadow-[0_-2px_var(--color-accent)]" : "shadow-[0_2px_var(--color-accent)]"))}>
           {row(bot)}
         </div>
-      ))}
+    );
+  }
+}
+
+/** The right side of a project row: who is in the project, then unread replies. */
+export function ProjectRowTrailing({ viewers, unread }: { viewers: ReactNode; unread: number }) {
+  return (
+    <div data-project-row-trailing className="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1.5">
+      {viewers}
+      {unread > 0 && <UnreadBadge count={unread} />}
     </div>
   );
 }

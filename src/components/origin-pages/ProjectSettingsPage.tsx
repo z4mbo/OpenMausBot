@@ -6,7 +6,8 @@ import { originGitHub, type GitHubProjectConnection, type GitHubWorkspaceStatus 
 import { cn } from "@/lib/cn";
 import type { CloudPerson, CloudProject, CloudProjectMember, GitHubTaskMode, MemberRole } from "./cloud-types";
 import { githubRepoHref } from "./repo-url";
-import { CloudGate, Field, Loading, Notice, PageHeader, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { ProjectAccessCard } from "../origin-members/ProjectAccessCard";
+import { CloudGate, Field, Loading, Notice, PageHeader, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 type IconType = NonNullable<CloudProject["iconType"]>;
 type TaskPRColumn = { id: string; title: string; isDone: boolean };
@@ -15,7 +16,7 @@ export function ProjectSettingsPage(props: OriginPageProps) {
   return (
     <CloudGate {...props} label="Settings">
       {({ project, projectId, isAdmin }) => (
-        <section className="flex-1 overflow-y-auto p-6" aria-label="Project settings">
+        <section className={pageClass} aria-label="Project settings">
           <PageHeader title="Settings" />
           <div className="grid max-w-5xl gap-4 lg:grid-cols-2">
             <div className="flex flex-col gap-4">
@@ -23,7 +24,10 @@ export function ProjectSettingsPage(props: OriginPageProps) {
               <GitHubSettings key={`${projectId}:${project.githubTaskMode ?? ""}`} project={project} projectId={projectId} isAdmin={isAdmin} />
               <GitHubConnectionCard project={project} projectId={projectId} isAdmin={isAdmin} />
             </div>
-            <Members project={project} projectId={projectId} isAdmin={isAdmin} />
+            <div className="flex flex-col gap-4">
+              <ProjectAccessCard projectId={projectId} teamId={project.teamId} />
+              <Members project={project} projectId={projectId} isAdmin={isAdmin} />
+            </div>
           </div>
         </section>
       )}
@@ -79,12 +83,12 @@ function GeneralSettings({ project, projectId, isAdmin }: { project: CloudProjec
   const repoHref = githubRepoHref(repoUrl);
   return (
     <Card icon={<Settings size={15} />} title="Project">
-      <form onSubmit={save} className="flex flex-col gap-3">
+      <form onSubmit={save} onChange={() => setSaved(false)} className="flex flex-col gap-3">
         <fieldset disabled={!isAdmin || action.busy} className="flex flex-col gap-3">
           <div className="flex items-end gap-3">
             <ProjectGlyph project={project} iconType={iconType} iconValue={iconValue} />
             <Field label="Icon" className="flex-1">
-              <Select className={inputClass} value={iconType} onChange={(e) => setIconType(e.target.value as IconType)}>
+              <Select className="w-full" value={iconType} onChange={(e) => setIconType(e.target.value as IconType)}>
                 <option value="default">Accent initial</option>
                 <option value="emoji">Emoji</option>
                 <option value="icon">Icon name</option>
@@ -148,20 +152,20 @@ function GitHubSettings({ project, projectId, isAdmin }: { project: CloudProject
       <form onSubmit={save} className="flex flex-col gap-3">
         <fieldset disabled={!isAdmin || action.busy} className="flex flex-col gap-3">
           <Field label="Create tasks as">
-            <Select className={inputClass} value={mode} onChange={(e) => setMode(e.target.value as GitHubTaskMode)}>
+            <Select className="w-full" value={mode} onChange={(e) => setMode(e.target.value as GitHubTaskMode)}>
               <option value="issue">GitHub issues</option>
               <option value="pull_request">Draft pull requests with task branches</option>
             </Select>
           </Field>
           <Field label="In review column">
-            <Select className={inputClass} value={review} required={mode === "pull_request"} onChange={(e) => setReview(e.target.value)}>
+            <Select className="w-full" value={review} required={mode === "pull_request"} onChange={(e) => setReview(e.target.value)}>
               <option value="" disabled>Choose a column or keep the current column</option>
               <option value="none">Keep current column</option>
               {columns?.filter((column) => !column.isDone).map((column) => <option key={column.id} value={column.id}>{column.title}</option>)}
             </Select>
           </Field>
           <Field label="Done column on merge">
-            <Select className={inputClass} value={done} onChange={(e) => setDone(e.target.value)}>
+            <Select className="w-full" value={done} onChange={(e) => setDone(e.target.value)}>
               <option value="auto">Use Done (create if missing)</option>
               {columns?.map((column) => <option key={column.id} value={column.id}>{column.title}</option>)}
             </Select>
@@ -223,14 +227,14 @@ function GitHubConnectionCard({ project, projectId, isAdmin }: { project: CloudP
     <Card icon={<Link2 size={15} />} title="GitHub connection">
       <div className="flex flex-col gap-3 text-[13px]">
         {error && <Notice tone="danger">{error}</Notice>}
-        {!teamId ? <Notice>This project is not in an Origin workspace.</Notice> : workspace === null ? <Loading label="Reading GitHub connection" /> : (
+        {!teamId ? <Notice>This project is not in a shared workspace yet.</Notice> : workspace === null ? <Loading label="Reading GitHub connection" variant="inline" /> : (
           <>
             <p className="text-ink-secondary">
               {workspace.login ? <>Workspace connected as <strong className="text-ink">@{workspace.login}</strong>.</> : "This workspace has not connected GitHub."}
             </p>
             {!workspace.configured && (workspace.canSetup
-              ? <Notice>Create the Origin GitHub App once for this server; GitHub opens in your browser.</Notice>
-              : <Notice>The Origin administrator has not set up the GitHub App on this server yet.</Notice>)}
+              ? <Notice>Create the GitHub App once for this server; GitHub opens in your browser.</Notice>
+              : <Notice>A server administrator has not set up the GitHub App yet.</Notice>)}
             {project.githubTaskMode === "pull_request" && workspace.prPermissionNotice && <Notice>{workspace.prPermissionNotice}</Notice>}
             {isAdmin && (
               <div className="flex flex-wrap gap-2">
@@ -281,7 +285,7 @@ function Members({ project, projectId, isAdmin }: { project: CloudProject; proje
   };
   return (
     <Card icon={<Users size={15} />} title={`Members${people ? ` · ${people.length}` : ""}`}>
-      {people === undefined ? <Loading label="Loading members" /> : (
+      {people === undefined ? <Loading label="Loading members" variant="inline" /> : (
         <ul className="flex flex-col divide-y divide-hairline/30">
           {people.map((person) => {
             const row = projectRows.get(person.email);
@@ -297,7 +301,7 @@ function Members({ project, projectId, isAdmin }: { project: CloudProject; proje
                 </div>
                 {editable ? (
                   <>
-                    <Select className={cn(inputClass, "w-auto")} aria-label={`Role for ${person.name}`} value={row.role} disabled={action.busy}
+                    <Select size="sm" aria-label={`Role for ${person.name}`} value={row.role} disabled={action.busy}
                       onChange={(e) => void action.run(() => cloudMutation("members:updateRole", { projectId, memberId: row._id, role: e.target.value }), "Could not change role")}>
                       {ROLES.map((value) => <option key={value} value={value}>{value}</option>)}
                     </Select>
@@ -317,7 +321,7 @@ function Members({ project, projectId, isAdmin }: { project: CloudProject; proje
           <Field label="Add a workspace member" className="min-w-[180px] flex-1">
             <input className={inputClass} type="email" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
-          <Select className={cn(inputClass, "w-auto")} aria-label="Role" value={role} onChange={(e) => setRole(e.target.value as "member" | "viewer")}>
+          <Select size="sm" aria-label="Role" value={role} onChange={(e) => setRole(e.target.value as "member" | "viewer")}>
             <option value="member">Member</option>
             <option value="viewer">Viewer</option>
           </Select>

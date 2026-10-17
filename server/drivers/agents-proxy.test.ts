@@ -658,12 +658,16 @@ describe("agents-proxy MCP surface", () => {
       "skills_list",
       "skill_manage",
       "add_mcp_server",
+      "origin_list_projects",
       "origin_list_issues",
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
       "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
       "origin_list_assets",
+      "origin_add_asset",
       "origin_vault_list",
       "origin_repo_status",
     ]);
@@ -745,7 +749,7 @@ describe("agents-proxy MCP surface", () => {
       "assignment_status", "list_bots", "list_rooms", "list_threads",
       "list_team_setup",
       "session_search", "session_read", "list_routines", "skills_list",
-      "origin_list_issues", "origin_get_issue", "origin_list_assets", "origin_vault_list", "origin_repo_status",
+      "origin_list_projects", "origin_list_issues", "origin_get_issue", "origin_list_assets", "origin_vault_list", "origin_repo_status",
     ];
     expect(list.result.tools.filter((tool: any) => tool.annotations?.readOnlyHint)
       .map((tool: any) => tool.name)).toEqual(readNames);
@@ -2040,7 +2044,7 @@ describe("standing external runtime", () => {
   it("sees the same one tool surface as every turn: the switches it sets change nothing", async () => {
     const list = await externalRpc("tools/list");
     // the main child is a Chief's turn; this one is not, so only the role differs
-    const chiefOnly = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread"];
+    const chiefOnly = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue"];
     const everyTurn = (await rpc("tools/list")).result.tools.filter((tool: any) => !chiefOnly.includes(tool.name));
     const names = list.result.tools.map((tool: any) => tool.name);
     expect(names).toEqual(everyTurn.map((tool: any) => tool.name));

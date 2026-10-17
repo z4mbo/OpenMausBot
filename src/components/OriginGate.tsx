@@ -3,7 +3,7 @@ import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
 import { cloud, cloudAction, cloudMutation, setCloudUrl, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
 import { cloudUrl as cloudUrlNow, sessionStore, setSessionToken } from "@/lib/origin-cloud/client";
 import { refreshCloudLinks } from "@/lib/origin-cloud-links";
-import { syncFromOrigin } from "@/lib/origin-sync";
+import { exclusiveWithSync, onSyncRequest, syncFromOrigin } from "@/lib/origin-sync";
 import { PROJECT_LEAD_ROLE } from "@/lib/origin-teams";
 import { activeWorkspaceId, setAccountWorkspaces, switchWorkspace, workspaceHeadsOf } from "@/lib/origin-workspaces";
 import { api, useStore, type Bot } from "@/state/store";
@@ -170,36 +170,38 @@ export function OriginSync() {
   const sync = useCallback(async () => {
     if (running.current) return;
     running.current = true;
-    try {
-      await shareSession(cloudUrlNow(), sessionStore.get());
-      const workspaces = await cloud.workspaces.list();
-      setEmpty(workspaces.length === 0);
-      if (!workspaces.length) return;
-      const projects = (await Promise.all(workspaces.map((workspace) => cloud.projects.listForUser(workspace._id)))).flat();
-      const links = await api<CloudLinks>("/api/origin/cloud-links");
-      const call = async <T,>(path: string, init?: { method?: string; body?: string }): Promise<T> => {
-        const answer = await api<T & { bot?: Bot; chief?: Bot; members?: Bot[] }>(path, init);
-        for (const bot of [answer.bot, answer.chief, ...(answer.members ?? [])]) if (bot) dispatch({ type: "botAdded", bot, preserveSelection: true });
-        return answer;
-      };
-      const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: bots.current, links, call, lead: PROJECT_LEAD_ROLE });
-      await refreshCloudLinks();
-      const accountTeams = new Set(workspaces.map((workspace) => workspace._id));
-      setAccountWorkspaces(Object.entries(synced.links.workspaces).filter(([, teamId]) => accountTeams.has(teamId)).map(([headId]) => headId)
-        .concat(synced.result.createdWorkspaces.map((workspace) => workspace.botId)));
-      setSyncProblems(synced.result.failures);
-      const linkedHeads = Object.keys(synced.links.workspaces);
-      const created = synced.result.createdWorkspaces.map((workspace) => workspace.botId);
-      const known = new Set([...linkedHeads, ...created]);
-      if (!known.has(activeWorkspaceId() ?? "")) {
-        const first = workspaceHeadsOf(bots.current).find((head) => known.has(head.id))?.id ?? created[0] ?? linkedHeads[0];
-        if (first) switchWorkspace(first);
+    await exclusiveWithSync(async () => {
+      try {
+        await shareSession(cloudUrlNow(), sessionStore.get());
+        const workspaces = await cloud.workspaces.list();
+        setEmpty(workspaces.length === 0);
+        if (!workspaces.length) return;
+        const projects = (await Promise.all(workspaces.map((workspace) => cloud.projects.listForUser(workspace._id)))).flat();
+        const links = await api<CloudLinks>("/api/origin/cloud-links");
+        const call = async <T,>(path: string, init?: { method?: string; body?: string }): Promise<T> => {
+          const answer = await api<T & { bot?: Bot; chief?: Bot; members?: Bot[] }>(path, init);
+          for (const bot of [answer.bot, answer.chief, ...(answer.members ?? [])]) if (bot) dispatch({ type: "botAdded", bot, preserveSelection: true });
+          return answer;
+        };
+        const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: bots.current, links, call, lead: PROJECT_LEAD_ROLE });
+        await refreshCloudLinks();
+        const accountTeams = new Set(workspaces.map((workspace) => workspace._id));
+        setAccountWorkspaces(Object.entries(synced.links.workspaces).filter(([, teamId]) => accountTeams.has(teamId)).map(([headId]) => headId)
+          .concat(synced.result.createdWorkspaces.map((workspace) => workspace.botId)));
+        setSyncProblems(synced.result.failures);
+        const linkedHeads = Object.keys(synced.links.workspaces);
+        const created = synced.result.createdWorkspaces.map((workspace) => workspace.botId);
+        const known = new Set([...linkedHeads, ...created]);
+        if (!known.has(activeWorkspaceId() ?? "")) {
+          const first = workspaceHeadsOf(bots.current).find((head) => known.has(head.id))?.id ?? created[0] ?? linkedHeads[0];
+          if (first) switchWorkspace(first);
+        }
+      } catch {
+        // A failed round leaves the app as it was; the next round retries.
+      } finally {
+        running.current = false;
       }
-    } catch {
-      // A failed round leaves the app as it was; the next round retries.
-    } finally {
-      running.current = false;
-    }
+    });
   }, [dispatch]);
 
   useEffect(() => {
@@ -211,7 +213,8 @@ export function OriginSync() {
     const timer = window.setInterval(() => void sync(), SYNC_EVERY_MS);
     const onFocus = () => void sync();
     window.addEventListener("focus", onFocus);
-    return () => { window.clearInterval(timer); window.removeEventListener("focus", onFocus); };
+    const stopRequests = onSyncRequest(() => void sync());
+    return () => { window.clearInterval(timer); window.removeEventListener("focus", onFocus); stopRequests(); };
   }, [sync]);
 
   if (empty) return <NoWorkspace onReady={() => void sync()} />;

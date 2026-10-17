@@ -51,3 +51,24 @@ export function useCloudProjectFor(bot: { id: string } | undefined): string | un
   const { projects } = useCloudLinks();
   return bot ? cloudProjectOf(state.bots, projects, bot.id) : undefined;
 }
+
+interface WorkspaceBot extends TeamBot { managedSections?: string[] }
+
+/** The cloud workspace whose head manages this bot's team. */
+export function cloudWorkspaceOf(bots: readonly WorkspaceBot[], workspaces: Record<string, string>, botId: string): string | undefined {
+  const team = bots.find((bot) => bot.id === botId)?.section?.trim();
+  if (!team) return undefined;
+  const head = bots.find((bot) => workspaces[bot.id] && bot.managedSections?.some((section) => section.trim() === team));
+  return head ? workspaces[head.id] : undefined;
+}
+
+export function useCloudWorkspaceFor(bot: { id: string } | undefined): string | undefined {
+  const { state } = useStore();
+  const { workspaces } = useCloudLinks();
+  return bot ? cloudWorkspaceOf(state.bots, workspaces, bot.id) : undefined;
+}
+
+export async function linkCloudRecord(patch: Partial<CloudLinks>): Promise<void> {
+  await api("/api/origin/cloud-links", { method: "PUT", body: JSON.stringify(patch) });
+  await refreshCloudLinks();
+}

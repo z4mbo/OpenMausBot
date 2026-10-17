@@ -186,10 +186,23 @@ function darkInkTone(palette: string): UserBubbleTone {
   };
 }
 
-export function userBubbleTone(color: MausColor): UserBubbleTone {
-  const palette = MAUS_COLORS[color];
-  const { h } = toOklch(palette);
-  return h >= YELLOW_HUES.from && h <= YELLOW_HUES.to ? darkInkTone(palette) : whiteInkTone(palette);
+/** A bot's colour as `#rrggbb`: a mascot colour name, a custom `#rgb` or `#rrggbb` hex, or green for anything else. */
+export function botPalette(color: MausColor | string | undefined): string {
+  if (color && color in MAUS_COLORS) return MAUS_COLORS[color as MausColor];
+  const hex = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color?.trim() ?? "")?.[1];
+  if (!hex) return MAUS_COLORS.green;
+  return `#${hex.length === 3 ? [...hex].map((digit) => digit + digit).join("") : hex}`.toLowerCase();
+}
+
+/** Yellows and very light colours keep their brightness and take dark text. */
+function takesDarkInk(palette: string): boolean {
+  const { l, h } = toOklch(palette);
+  return (h >= YELLOW_HUES.from && h <= YELLOW_HUES.to) || l > 0.86;
+}
+
+export function userBubbleTone(color: MausColor | string): UserBubbleTone {
+  const palette = botPalette(color);
+  return takesDarkInk(palette) ? darkInkTone(palette) : whiteInkTone(palette);
 }
 
 export function mentionChipBackground(mention: string, inset: string): string {
@@ -204,7 +217,7 @@ export function quoteSurface(inset: string, background: string): string {
   return mixSrgb(inset, background, 0.7);
 }
 
-export function userBubbleStyle(color: MausColor): CSSProperties {
+export function userBubbleStyle(color: MausColor | string): CSSProperties {
   const tone = userBubbleTone(color);
   return {
     backgroundColor: tone.background,
@@ -230,5 +243,21 @@ export function userBubbleStyle(color: MausColor): CSSProperties {
     "--color-success-ink": tone.successInk,
     "--bubble-selection": tone.selection,
     "--bubble-selection-ink": tone.selectionInk,
+  } as CSSProperties;
+}
+
+/**
+ * The accent a project's pages wear: its lead bot's colour on buttons, active tabs, focus rings and badges.
+ * Link text leans towards the skin's ink so it stays readable on light and dark skins alike.
+ */
+export function accentVars(color: MausColor | string): CSSProperties {
+  const palette = botPalette(color);
+  const ink = contrastRatio("#ffffff", palette) >= contrastRatio(INK, palette) ? "#ffffff" : INK;
+  return {
+    "--color-accent": palette,
+    "--color-accent-border": palette,
+    "--color-accent-ink": ink,
+    "--color-focus": palette,
+    "--color-accent-text": `color-mix(in oklab, ${palette} 72%, var(--color-ink))`,
   } as CSSProperties;
 }

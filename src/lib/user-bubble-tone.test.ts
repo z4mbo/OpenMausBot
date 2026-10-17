@@ -10,8 +10,11 @@ import {
   mentionChipBackground,
   quoteSurface,
   selectionBackground,
+  accentVars,
+  botPalette,
   userBubbleTone,
 } from "./user-bubble-tone";
+import { ZAP_SWATCHES } from "./origin-avatar-looks";
 
 const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../styles.css"), "utf8");
 
@@ -86,4 +89,28 @@ describe("user bubble tone", () => {
       }
     },
   );
+});
+
+describe("custom bot colours", () => {
+  it("reads mascot names, #rrggbb and #rgb, and falls back to green for anything else", () => {
+    expect(botPalette("blue")).toBe(MAUS_COLORS.blue);
+    expect(botPalette("#C8FF00")).toBe("#c8ff00");
+    expect(botPalette("#abc")).toBe("#aabbcc");
+    expect(botPalette("magenta")).toBe(MAUS_COLORS.green);
+    expect(botPalette(undefined)).toBe(MAUS_COLORS.green);
+  });
+
+  it.each([...ZAP_SWATCHES, "#123456", "#0a0a0a", "#ffffff"])("fills the bubble for %s with readable text", (hex) => {
+    const tone = userBubbleTone(hex);
+    for (const fill of [tone.background, tone.deep]) {
+      expect(contrastRatio(tone.ink, fill)).toBeGreaterThanOrEqual(BUBBLE_TEXT_MIN);
+      expect(contrastRatio(tone.secondary, fill)).toBeGreaterThanOrEqual(BUBBLE_TEXT_MIN);
+    }
+  });
+
+  it.each([...ZAP_SWATCHES, "#123456", ...MAUS_COLOR_NAMES])("gives a project accent for %s whose button text is readable", (color) => {
+    const vars = accentVars(color) as Record<string, string>;
+    expect(vars["--color-accent"]).toBe(botPalette(color));
+    expect(contrastRatio(vars["--color-accent-ink"]!, vars["--color-accent"]!)).toBeGreaterThanOrEqual(3);
+  });
 });

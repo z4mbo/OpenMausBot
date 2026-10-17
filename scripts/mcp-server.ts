@@ -712,6 +712,7 @@ function projectMessage(message: Record<string, any>) {
     ...(connector ? { connector } : {}),
     ...(secret ? { secret } : {}),
     ...(signIn ? { signIn } : {}), ...(message.widget ? { widget: message.widget } : {}),
+    ...(message.originIssues ? { originIssues: message.originIssues } : {}),
     ...(message.kind === "screen" ? { hasImage: Boolean(message.hasImage || message.png) } : {}),
   };
 }

@@ -4,19 +4,7 @@ import type { Bot } from "@/state/store";
 import { BotAvatar } from "../Avatar";
 import type { AssignableIssue } from "./IssuesPage";
 
-export function issueBrief(issue: AssignableIssue): string {
-  return [
-    `You're assigned issue ${issue.key}: "${issue.title}" (Origin project ${issue.projectName}, issue id ${issue.id}).`,
-    issue.description ? `\n${issue.description}\n` : "",
-    `Priority ${issue.priority}${issue.dueDate ? `, due ${issue.dueDate}` : ""}${issue.labels.length ? `, labels: ${issue.labels.join(", ")}` : ""}.`,
-    "",
-    "1. Move the issue to In progress with origin_update_issue and read it with origin_get_issue.",
-    "2. Work in the project's local repo on a new branch named after the issue key.",
-    "3. Commit, push the branch and open a pull request that references the issue key.",
-    "4. Comment the pull request link on the issue with origin_comment_issue, then move it to review.",
-    "Ask me before anything you can't undo.",
-  ].filter((line) => line !== "").join("\n");
-}
+export { issueBrief } from "../../../shared/origin-issues";
 
 export function AssignIssueDialog({ issue, agents, onPick, onClose }: { issue: AssignableIssue; agents: Bot[]; onPick(agent: Bot): void; onClose(): void }) {
   return createPortal(

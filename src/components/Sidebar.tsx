@@ -4,8 +4,13 @@ import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-work
 import { NewAgentDialog, SidebarGroups, SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
 import { OriginNav } from "./OriginPages";
+import { sidebarRowLead } from "@/lib/sidebar-row-geometry";
 import { WhatsNew } from "./WhatsNew";
-import { teamUnread } from "./ChiefSections";
+import { NewIssueHost, useOriginProjectRows } from "./OriginSidebarExtras";
+import { OriginAccountMenu } from "./OriginAccountMenu";
+import { cloudProjectOf, useCloudLinks } from "@/lib/origin-cloud-links";
+import { useCanCreateProject } from "@/lib/use-origin-workspace";
+import { openNewIssue } from "@/lib/origin-new-issue";
 import { unreadReplies } from "@/lib/origin-unread";
 import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL, WORKSPACE_NAV, NEW_PROJECT_DIALOG, PROFILE_AT_TOP } from "@/lib/origin-teams";
 import { ProjectMark } from "./ProjectMark";
@@ -15,6 +20,7 @@ import { createPortal } from "react-dom";
 import {
   Activity,
   Archive,
+  ArchiveRestore,
   BellDot,
   Bot as BotIcon,
   Check,
@@ -661,9 +667,12 @@ export function BotContextMenu({
   onMoveToSection,
   onNewFolder,
   onNewTaskFolder,
+  projectArchive,
 }: {
   menu: MenuState | null;
   onClose: () => void;
+  /** An Origin project's Chief archives the whole project instead of hiding itself. */
+  projectArchive?: (botId: string) => ProjectArchiveControl | undefined;
   onArchive: (bot: Bot) => void;
   onDelete: (bot: Bot) => void;
   onMoveToSection: (botId: string) => void;
@@ -748,6 +757,7 @@ export function BotContextMenu({
     : visibleBotCount <= 1
       ? t("sidebar.bot.archiveBlockedLast")
       : undefined;
+  const project = projectArchive?.(bot.id);
   const openForSettings = () => {
     if (state.selectedId === bot.id) dispatch({ type: "select", id: bot.id });
     else openBot(dispatch, bot, showThreads);
@@ -850,7 +860,12 @@ export function BotContextMenu({
           void copyText(bot.threadId);
         }),
         divider("d3"),
-        item(
+        project ? item(
+          project.archived ? <ArchiveRestore size={16} className="text-ink-secondary" /> : <Archive size={16} className="text-ink-secondary" />,
+          project.archived ? "Unarchive" : "Archive",
+          project.toggle,
+          { disabled: !project.allowed, hint: project.allowed ? undefined : "Only project admins can archive a project" },
+        ) : item(
           <Archive size={16} className="text-ink-secondary" />,
           t("sidebar.bot.archive"),
           () => onArchive(bot),
@@ -875,6 +890,8 @@ export function BotContextMenu({
 }
 
 export type BotConfirmKind = "archive" | "delete";
+
+export interface ProjectArchiveControl { archived: boolean; allowed: boolean; toggle(): void }
 
 /** A confirmation may span live fleet updates; never authorize from its snapshot. */
 export function currentArchivableBot(bots: readonly Bot[], id: string): Bot | undefined {
@@ -1149,6 +1166,12 @@ export interface BotRowProps {
   trailing?: ReactNode;
   /** Unread replies from bots the sidebar does not list, such as a project's agents. */
   extraUnread?: number;
+  /** Room in px that a custom `trailing` needs at the row's right edge. */
+  trailingWidth?: number;
+  /** Archived projects keep working without unread marks. */
+  muteUnread?: boolean;
+  /** Gives the avatar and the name their own targets instead of one row-wide button. */
+  split?: { avatarLabel: string; onAvatar(): void; titleLabel: string; onTitle(): void };
 }
 
 export function botRowProps(
@@ -1196,7 +1219,8 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
   useEffect(() => {
     if (iconOnly) setRenaming(false);
   }, [iconOnly]);
-  const avatarSize = iconOnly ? 44 : density === "compact" ? (showThreads ? 26 : 36) : (showThreads ? 32 : 44);
+  const lead = sidebarRowLead(density, showThreads);
+  const avatarSize = lead.size;
   const visible = useVisibleMessages(bot);
   const last = lastNonReceipt(visible);
   const title = bot.title.trim();
@@ -1205,9 +1229,9 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
     "flex w-full items-center rounded-xl text-left outline-none transition-colors duration-150 focus-visible:ring-1 focus-visible:ring-accent/60",
     iconOnly
       ? "justify-center px-1 py-1.5"
-      : density === "compact"
-        ? cn(showThreads ? "gap-1.5 py-1" : "gap-2.5 py-1.5", showThreads ? "pl-6 pr-9 group-hover:pr-[5.75rem] group-focus-within:pr-[5.75rem] max-md:pr-[5.75rem] touch:pr-[5.75rem]" : "pl-2 pr-9")
-        : cn(showThreads ? "gap-2 py-2" : "gap-3 py-2", showThreads ? "pl-6 pr-9 group-hover:pr-[5.75rem] group-focus-within:pr-[5.75rem] max-md:pr-[5.75rem] touch:pr-[5.75rem]" : "pl-2.5 pr-9"),
+      : cn(lead.gap, lead.padding, density === "compact" ? (showThreads ? "py-1" : "py-1.5") : "py-2",
+        props.trailingWidth !== undefined ? "pr-[var(--row-trail)]"
+          : showThreads ? "pr-9 group-hover:pr-[5.75rem] group-focus-within:pr-[5.75rem] max-md:pr-[5.75rem] touch:pr-[5.75rem]" : "pr-9"),
     selected ? "bg-raised shadow-[0_1px_2px_rgb(0_0_0/0.10)]" : "hover:bg-raised/50",
   );
   const activityTasks = sidebarBotActivityTasks(bot, pendingQueued);
@@ -1215,12 +1239,12 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
   const working = !waiting && (Boolean(bot.busy) || activityTasks.some((task) => task.busy || task.activity === "working"));
   const teammateWait = !waiting && !working && (Boolean(bot.waitingForTeammates) || activityTasks.some((task) => Boolean(task.waitingForTeammates)));
   const queued = activityTasks.some((task) => task.queued);
-  const unread = botShowsUnread(bot);
+  const unread = !props.muteUnread && botShowsUnread(bot);
   const onLiveCall = liveBadgeFor(bot.id, liveMedia, liveCall);
   const statusLine = deleting || working || waiting || teammateWait || queued;
-  const body = (
-    <>
-      <span className="relative flex shrink-0" title={iconOnly ? undefined : [bot.name, ...details].join(" · ")}>
+  const split = iconOnly ? undefined : props.split;
+  const avatar = (
+      <span className="relative flex shrink-0" title={iconOnly || split ? undefined : [bot.name, ...details].join(" · ")}>
         <BotAvatar
           bot={bot}
           state={stateForBot({ ...bot, messages: visible })}
@@ -1259,7 +1283,20 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
           </span>
         )}
       </span>
-      <div className={cn("min-w-0 flex-1", iconOnly && "hidden")}>
+  );
+  const body = (
+    <>
+      {split ? (
+        <button type="button" aria-label={split.avatarLabel} data-sidebar-row-avatar
+          onClick={(event) => { event.stopPropagation(); split.onAvatar(); }}
+          className="relative flex shrink-0 rounded-full outline-none focus-visible:shadow-[0_0_0_2px_var(--color-accent)]">
+          {avatar}
+        </button>
+      ) : avatar}
+      <div className={cn("min-w-0 flex-1", iconOnly && "hidden", split && "relative")}>
+        {split && !renaming && <button type="button" aria-label={split.titleLabel} data-sidebar-row-title
+          onClick={(event) => { event.stopPropagation(); split.onTitle(); }}
+          className="absolute -inset-y-1 inset-x-0 z-10 rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-accent/60" />}
         <div className="flex items-baseline justify-between gap-2">
           <span className="flex min-w-0 grow items-center gap-1.5 truncate text-[15px] font-semibold leading-5 text-ink">
             {bot.pinned && <Pin size={12} className="shrink-0 text-ink-secondary" />}
@@ -1340,8 +1377,8 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
     <div className="group relative" title={iconOnly ? [bot.name, bot.title?.trim()].filter(Boolean).join(" · ") : undefined}>
       {/* Keep this wrapper mounted: replacing it remounts RenameTitle and leaves the row stuck in rename mode. */}
       <div
-        role={renaming ? undefined : "button"}
-        tabIndex={renaming ? undefined : 0}
+        role={renaming || split ? undefined : "button"}
+        tabIndex={renaming || split ? undefined : 0}
         aria-label={
           !renaming && iconOnly
             ? deleting
@@ -1353,9 +1390,9 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
         aria-current={selected && !expanded && !renaming ? "page" : undefined}
         data-sidebar-bot-row={bot.id}
         data-gaze-zone=""
-        onClick={onSelect}
+        onClick={split ? undefined : onSelect}
         onKeyDown={(event) => {
-          if (renaming) return;
+          if (renaming || split) return;
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
             openBot(dispatch, bot, showThreads);
@@ -1363,6 +1400,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
         }}
         onContextMenu={onContextMenu}
         className={rowClass}
+        style={props.trailingWidth !== undefined ? { "--row-trail": `${props.trailingWidth}px` } as CSSProperties : undefined}
       >
         {body}
       </div>
@@ -1878,6 +1916,11 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const workspaceProjects = sectionChiefs.filter((chief) => !isWorkspaceSection(chief.section) && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, chief)
     && !standaloneTeams.has(chief.section?.trim() ?? ""));
   useEffect(() => { if (activeHeadId) reportActiveWorkspace(activeHeadId); }, [activeHeadId]);
+  const cloudLinks = useCloudLinks();
+  const cloudTeamId = (activeHeadId && cloudLinks.workspaces[activeHeadId]) || null;
+  const originRows = useOriginProjectRows(cloudTeamId);
+  const canCreateProject = useCanCreateProject(cloudTeamId);
+  const createsProjects = !NEW_PROJECT_DIALOG || canCreateProject === true;
   const [newAgentOpen, setNewAgentOpen] = useState(false);
   const deletingTemplate = Boolean(deletingTeam && deletingTeam !== STANDALONE_SECTION && standaloneTeams.has(deletingTeam));
   const newWorkspace = () => {
@@ -2064,7 +2107,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                   <MessageSquarePlus size={16} className="text-ink-secondary" />
                   {t("sidebar.newChat.title")}
                 </button>
-                <button
+                {createsProjects && <button
                   onClick={() => {
                     setPlusOpen(false);
                     dispatch({ type: "toggleNewBot", open: true });
@@ -2074,7 +2117,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                   <BotIcon size={16} className="text-ink-secondary" />
                   <span className="flex-1">{NEW_PROJECT_DIALOG ? "New project" : t("sidebar.newBot")}</span>
                   <ShortcutHint id="new-bot" />
-                </button>
+                </button>}
                 {CREATES_FOLDERS_AND_GROUPS && <button
                   onClick={() => {
                     setPlusOpen(false);
@@ -2165,7 +2208,9 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         ) : null}
         {density !== "icons" && (
           <div data-sidebar-top-slot className="@container/sidebar-top flex min-w-0 flex-1 items-center">
-            <div data-sidebar-top-spacer className="min-w-0 flex-1 @min-[96px]/sidebar-top:min-w-6" />
+            {PROFILE_AT_TOP
+              ? <div data-sidebar-top-account className="flex min-w-0 flex-1 items-center pr-1" style={windowNoDragStyle}><OriginAccountMenu /></div>
+              : <div data-sidebar-top-spacer className="min-w-0 flex-1 @min-[96px]/sidebar-top:min-w-6" />}
             <div data-sidebar-top-switcher className="flex min-w-0 max-w-[140px] items-center">
               <DesktopWorkspaceSwitcher inline cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />
             </div>
@@ -2176,14 +2221,13 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           className={cn("relative flex shrink-0 items-center", density === "icons" ? "flex-col gap-1" : "ml-0.5 gap-0.5")}
           style={windowNoDragStyle}
         >
-          {PROFILE_AT_TOP && density !== "icons" && <SidebarProfileMenu iconOnly compact />}
           {WORKSPACE_NAV && <>
             <button type="button" onClick={openCommandPalette} aria-label={t("sidebar.searchAria")} title={t("sidebar.searchAria")}
               className={cn("flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink", density === "icons" ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md")}>
               <Search size={density === "icons" ? 20 : 17} />
             </button>
-            <button type="button" aria-label="New thread" title="New thread"
-              onClick={() => { const current = state.bots.find((b) => b.id === state.selectedId); if (current) dispatch({ type: "newTask", botId: current.id }); else dispatch({ type: "toggleNewBot", open: true }); }}
+            <button type="button" aria-label="Create issue" title="Create issue" data-sidebar-new-issue
+              onClick={() => openNewIssue(state.activeView === "chat" && state.selectedId ? cloudProjectOf(state.bots, cloudLinks.projects, state.selectedId) ?? null : null)}
               className={cn("flex items-center justify-center text-ink-secondary hover:bg-raised hover:text-ink", density === "icons" ? "size-[46px] shrink-0 rounded-xl" : "size-8 rounded-md")}>
               <SquarePen size={density === "icons" ? 20 : 17} />
             </button>
@@ -2323,10 +2367,11 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
               {!SIDEBAR_SHOWS_LOOSE_BOTS && density === "icons" && <WorkspaceSwitcher compact heads={workspaceHeads} activeId={activeHeadId} onNewWorkspace={newWorkspace} />}
             </div>
           )}
-          {WORKSPACE_NAV && <OriginNav iconsOnly={density === "icons"} />}
+          {WORKSPACE_NAV && <OriginNav density={density} />}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
-            <SidebarProjects projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} extraUnread={teamUnread(state.bots, bot)} />}
-              onNewProject={() => dispatch({ type: "toggleNewBot", open: true })} />
+            <SidebarProjects projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} {...originRows.rowProps(bot)} />}
+              archived={originRows.isArchived} selectedId={state.activeView === "chat" ? state.selectedId : null}
+              onNewProject={createsProjects ? () => dispatch({ type: "toggleNewBot", open: true }) : undefined} />
           )}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && <SidebarGroups groups={[
             { id: "agents", name: "Agents", addLabel: "New agent", onAdd: () => setNewAgentOpen(true),
@@ -2499,7 +2544,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         {density === "icons" ? (
           <div className="flex flex-col items-center justify-center gap-1">
             <UpdateIndicator />
-            <SidebarProfileMenu iconOnly />
+            {PROFILE_AT_TOP ? <OriginAccountMenu iconOnly /> : <SidebarProfileMenu iconOnly />}
           </div>
         ) : (
           <div className={cn("flex items-center gap-1 not-first:mt-3", SIDEBAR_ACTIONS_IN_FOOTER && "relative")}>
@@ -2527,6 +2572,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           }}
           onNewFolder={setNewFolderBotId}
           onNewTaskFolder={setNewTaskFolderBotId}
+          projectArchive={WORKSPACE_NAV ? originRows.projectArchive : undefined}
         />
       {showThreads && newFolderBotId && state.bots.find((bot) => bot.id === newFolderBotId) && <BotProjectDialog bot={state.bots.find((bot) => bot.id === newFolderBotId)!} onClose={() => setNewFolderBotId(null)} />}
       {showThreads && newTaskFolderBot && <NewTaskFolderDialog bot={newTaskFolderBot} onClose={() => setNewTaskFolderBotId(null)} onReturnFocus={() => {
@@ -2638,6 +2684,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           }}
         />
       {newRoom && <NewRoomPanel onClose={() => setNewRoom(false)} />}
+      {WORKSPACE_NAV && <NewIssueHost teamId={cloudTeamId} />}
       {/* Portaled: below md the sidebar's translate makes it the containing block for fixed children. */}
       {newChatOpen && createPortal(
         <SidebarNewChatPanel

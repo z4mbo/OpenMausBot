@@ -64,3 +64,24 @@ export async function syncFromOrigin(deps: {
   const result = await runImport(plan, { call, lead });
   return { links, result };
 }
+
+let tail: Promise<unknown> = Promise.resolve();
+
+/** Runs work while no sync round runs, so a round never sees a cloud record before its local copy is linked. */
+export function exclusiveWithSync<T>(work: () => Promise<T>): Promise<T> {
+  const run = tail.then(work, work);
+  tail = run.catch(() => undefined);
+  return run;
+}
+
+const syncRequests = new Set<() => void>();
+
+export function onSyncRequest(listener: () => void): () => void {
+  syncRequests.add(listener);
+  return () => { syncRequests.delete(listener); };
+}
+
+/** Asks the running sync for a round now instead of at its next tick. */
+export function requestOriginSync(): void {
+  for (const listener of syncRequests) listener();
+}

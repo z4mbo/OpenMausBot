@@ -32,9 +32,10 @@ describe("WorkspaceGate", () => {
     expect(render(null)).toContain("Sign in to Origin");
   });
 
-  it("asks to link a workspace that has no Origin workspace", () => {
+  it("offers to share a workspace that has no shared workspace yet", () => {
     cloud.signedIn = true;
-    expect(render(null)).toContain("Connect this workspace to Origin");
+    expect(render(null)).toContain("Share this workspace");
+    expect(render(null)).not.toContain("Connect this workspace");
   });
 
   it("waits for the member's access, then hands over the workspace", () => {
@@ -47,9 +48,9 @@ describe("WorkspaceGate", () => {
     expect(render("t1")).toContain("view only");
   });
 
-  it("says when Origin has no address", () => {
+  it("says when there is no workspace server", () => {
     cloud.url = null;
-    expect(render("t1")).toContain("Origin is not set up");
+    expect(render("t1")).toContain("No workspace server");
     cloud.url = "https://example.convex.cloud";
   });
 });

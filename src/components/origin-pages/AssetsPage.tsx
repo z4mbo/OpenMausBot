@@ -4,7 +4,7 @@ import { ExternalLink, File, Image as ImageIcon, Loader2, Palette, Pencil, Plus,
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import type { AssetType, CloudDesign, CloudDesignAsset, CloudDesignToken, TokenType } from "./cloud-types";
-import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, Segmented, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 const ASSET_TYPES: readonly AssetType[] = ["image", "document", "figma", "icon", "font", "apk", "other"];
 const TOKEN_TYPES: readonly TokenType[] = ["color", "typography", "spacing", "component", "motion", "other"];
@@ -32,7 +32,7 @@ function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean })
   const [editing, setEditing] = useState<CloudDesignAsset | "new" | null>(null);
   const [tokenEditing, setTokenEditing] = useState<CloudDesignToken | "new" | null>(null);
   const [notice, setNotice] = useState("");
-  if (!design) return <Loading label="Loading assets" />;
+  if (!design) return <Loading label="Loading assets" variant="grid" />;
   const needle = query.trim().toLowerCase();
   const assets = design.assets.filter((asset) => (filter === "all" || asset.type === filter) && `${asset.name} ${asset.notes ?? ""}`.toLowerCase().includes(needle));
   const tokens = design.tokens.filter((token) => `${token.name} ${token.value} ${token.description ?? ""}`.toLowerCase().includes(needle));
@@ -45,7 +45,7 @@ function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean })
     void cloudMutation("design:removeToken", { projectId, tokenId: token._id }).catch(() => setNotice("Could not delete token"));
   };
   return (
-    <section className="flex-1 overflow-y-auto p-6" aria-label="Assets">
+    <section className={pageClass} aria-label="Assets">
       <PageHeader title="Assets" count={tab === "assets" ? design.assets.length : design.tokens.length}>
         <Segmented label="Asset view" value={tab} onChange={setTab}
           options={[{ value: "assets", label: <><ImageIcon size={13} />Files</> }, { value: "tokens", label: <><Palette size={13} />Tokens</> }]} />
@@ -54,7 +54,7 @@ function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean })
           <input className={cn(inputClass, "w-44 pl-7")} placeholder={tab === "assets" ? "Search assets" : "Search tokens"} aria-label="Search" value={query} onChange={(e) => setQuery(e.target.value)} />
         </label>
         {tab === "assets" && (
-          <Select className={cn(inputClass, "w-auto")} aria-label="Asset type" value={filter} onChange={(e) => setFilter(e.target.value as AssetType | "all")}>
+          <Select size="sm" aria-label="Asset type" value={filter} onChange={(e) => setFilter(e.target.value as AssetType | "all")}>
             <option value="all">All types</option>
             {ASSET_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
           </Select>
@@ -174,7 +174,7 @@ function AssetEditor({ projectId, asset, onClose }: { projectId: string; asset: 
           <>
             <Field label="Name"><input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required maxLength={150} /></Field>
             <Field label="Type">
-              <Select className={inputClass} value={type} onChange={(e) => setType(e.target.value as AssetType)}>
+              <Select className="w-full" value={type} onChange={(e) => setType(e.target.value as AssetType)}>
                 {ASSET_TYPES.map((value) => <option key={value} value={value}>{value}</option>)}
               </Select>
             </Field>
@@ -209,7 +209,7 @@ function TokenEditor({ projectId, token, onClose }: { projectId: string; token: 
     <Modal title={token ? "Edit token" : "New token"} onClose={onClose}>
       <form onSubmit={save} className="flex flex-col gap-3">
         <Field label="Type">
-          <Select className={inputClass} value={type} onChange={(e) => setType(e.target.value as TokenType)}>
+          <Select className="w-full" value={type} onChange={(e) => setType(e.target.value as TokenType)}>
             {TOKEN_TYPES.map((item) => <option key={item} value={item}>{item}</option>)}
           </Select>
         </Field>

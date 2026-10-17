@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { ArrowLeft, Hash, Loader2, MessageSquarePlus, X } from "lucide-react";
+import { ArrowLeft, Hash, MessageSquarePlus, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useWorkspaceMembers, type WorkspaceMember } from "@/lib/origin-members";
 import { originRealtime, usePolled, type MemberChatMessage } from "@/lib/origin-realtime";
 import { errorText } from "./repo-url";
 import { TeamChat } from "./TeamChatPage";
-import { Notice, iconButton, inputClass, type WorkspaceContext } from "./ui";
+import { Loading, Notice, iconButton, inputClass, type WorkspaceContext } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
 
 type DirectConversation = { id: string; otherUserId: string; lastMessage?: MemberChatMessage; unread: number };
@@ -64,7 +64,7 @@ export function WorkspaceChat({ teamId, me, canEdit }: WorkspaceContext) {
         )}
         {notice && <Notice tone="danger">{notice}</Notice>}
         {error && <Notice tone="danger">{error}</Notice>}
-        {conversations === undefined && !error && <p role="status" className="flex items-center gap-2 px-2 py-1 text-[12.5px] text-ink-secondary"><Loader2 size={13} className="animate-spin" />Loading</p>}
+        {conversations === undefined && !error && <div className="px-2"><Loading label="Loading conversations" variant="inline" /></div>}
         {conversations?.length === 0 && !picking && <p className="px-2 py-1 text-[12.5px] text-ink-tertiary">No direct messages yet.</p>}
         {conversations?.map((conversation) => {
           const member = memberOf(conversation.otherUserId);

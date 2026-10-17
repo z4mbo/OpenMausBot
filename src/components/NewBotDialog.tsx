@@ -1,10 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { Loader2, Plus, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Loader2, Lock, Plus, Trash2, X } from "lucide-react";
 import { api, BotEditorStore, useStore, type Bot, type ModelSelection } from "@/state/store";
 import { BotCreationDraft, EMPTY_BOT_DEFAULTS } from "@/lib/bot-creation-draft";
 import { createConfiguredBot, preparedBotTemplate } from "@/lib/create-configured-bot";
 import { NEW_PROJECT_DIALOG, PROJECT_LEAD_ROLE, createDefaultTeam } from "@/lib/origin-teams";
 import { activeWorkspaceId } from "@/lib/origin-workspaces";
+import { linkCloudRecord } from "@/lib/origin-cloud-links";
+import { createOriginProject, type ProjectAccess } from "@/lib/origin-project-access";
+import { exclusiveWithSync, requestOriginSync } from "@/lib/origin-sync";
+import { useActiveOriginWorkspace, useCanCreateProject, useWorkspacePeople } from "@/lib/use-origin-workspace";
+import { ProjectAccessPicker } from "./origin-members/ProjectAccessPicker";
 import { STANDALONE_SECTION } from "../../shared/origin-workspaces";
 import { BOT_ROLES, roleProfilePatch } from "@/lib/bot-roles";
 import { chosenPreset, presetDraftPatch, presetGroups, presetPictureFile, presetSummaryLines, type BotPreset } from "@/lib/bot-presets";
@@ -87,7 +92,10 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
   const [audience, setAudience] = useState<VisibilityMode>("everyone");
   const [people, setPeople] = useState("");
   const ownerOrAdmin = useOwnerOrAdmin();
-  const choosesVisibility = !defaultsMode && typeof window !== "undefined" && !window.ogb && ownerOrAdmin === true;
+  const originWorkspace = useActiveOriginWorkspace();
+  const cloudTeamId = NEW_PROJECT_DIALOG && !defaultsMode && section === undefined ? originWorkspace.teamId : null;
+  const [projectAccess, setProjectAccess] = useState<ProjectAccess>({ mode: "everyone", emails: [] });
+  const choosesVisibility = !defaultsMode && !cloudTeamId && typeof window !== "undefined" && !window.ogb && ownerOrAdmin === true;
   const dialog = useRef<HTMLDivElement>(null);
   const closeRef = useRef(() => {});
   closeRef.current = () => {
@@ -136,6 +144,8 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
     window.addEventListener("keydown", onKey);
     return () => { window.removeEventListener("keydown", onKey); if (previous?.isConnected) previous.focus(); };
   }, []);
+  const canCreateProject = useCanCreateProject(cloudTeamId);
+  const workspacePeople = useWorkspacePeople(cloudTeamId);
   const save = async () => {
     if (!ready || savingRef.current || parent.state.botCreationPending) return;
     if (!defaultsMode && draft.bot.approvalMode === "auto" && draft.bot.computer === "local" && !draft.consent.acknowledgeLocalAuto) { setWarning("local"); return; }
@@ -146,12 +156,27 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
     try {
       if (defaultsMode) await api("/api/config", { method: "PATCH", body: JSON.stringify({ newBotDefaults: await preparedBotTemplate(draft) }) });
       else {
-        const { bot, warnings } = await createConfiguredBot(draft, undefined, undefined, undefined, visibility?.ok ? visibility.visibility : undefined);
-        parent.dispatch({ type: "botAdded", bot, preserveSelection });
-        if (!bot.section?.trim()) {
-          try { await createDefaultTeam(bot.id, activeWorkspaceId()); }
-          catch (cause) { warnings.push(`Bot created without its default team: ${cause instanceof Error ? cause.message : String(cause)}`); }
-        }
+        const createLocal = async () => {
+          const created = await createConfiguredBot(draft, undefined, undefined, undefined, visibility?.ok ? visibility.visibility : undefined);
+          parent.dispatch({ type: "botAdded", bot: created.bot, preserveSelection });
+          if (!created.bot.section?.trim()) {
+            try { await createDefaultTeam(created.bot.id, (cloudTeamId && originWorkspace.headId) || activeWorkspaceId()); }
+            catch (cause) { created.warnings.push(`Bot created without its default team: ${cause instanceof Error ? cause.message : String(cause)}`); }
+          }
+          return created;
+        };
+        const { bot, warnings } = cloudTeamId ? await exclusiveWithSync(async () => {
+          const cloudProject = await createOriginProject({ teamId: cloudTeamId, name: draft.bot.name, access: projectAccess, members: workspacePeople.members ?? [], myEmail: workspacePeople.myEmail });
+          let created: Awaited<ReturnType<typeof createLocal>>;
+          try { created = await createLocal(); }
+          catch (cause) {
+            requestOriginSync();
+            throw new Error(`${cause instanceof Error ? cause.message : String(cause)}. The project exists in Origin and will appear in the sidebar shortly.`);
+          }
+          await linkCloudRecord({ projects: { [created.bot.id]: cloudProject.projectId } });
+          if (cloudProject.missed.length) created.warnings.push(`Project created, but access could not be granted to ${cloudProject.missed.join(", ")}. Change it in the project's settings.`);
+          return created;
+        }) : await createLocal();
         if (warnings.length) parent.dispatch({ type: "error", message: warnings.join("\n") });
         try { await onCreated?.(bot); }
         catch (cause) { parent.dispatch({ type: "error", message: cause instanceof Error ? cause.message : String(cause) }); }
@@ -180,6 +205,9 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
     },
   };
   const projectDialog = NEW_PROJECT_DIALOG && section === undefined;
+  if (cloudTeamId && canCreateProject === false) return <ProjectsNeedAdmin onClose={() => closeRef.current()} />;
+  const accessIncomplete = Boolean(cloudTeamId) && (canCreateProject === undefined || workspacePeople.members === undefined || (projectAccess.mode === "people" && projectAccess.emails.length === 0));
+  const accessPicker = cloudTeamId ? <ProjectAccessPicker members={workspacePeople.members} myEmail={workspacePeople.myEmail} value={projectAccess} onChange={setProjectAccess} disabled={saving} /> : null;
   const title = defaultsMode ? t("newBot.defaults") : projectDialog ? "New project" : section === STANDALONE_SECTION ? "New agent" : t("sidebar.newBot");
   return <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-3 sm:p-5">
     <div ref={dialog} role="dialog" aria-modal="true" aria-label={title} aria-busy={saving} tabIndex={-1}
@@ -224,7 +252,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
           {!ready && !error && <div role="status" className="flex items-center gap-2 text-[13px] text-ink-secondary"><Loader2 size={16} className="animate-spin" />{t("newBot.loading")}</div>}
           {ready && <fieldset disabled={saving} className="min-w-0">
             <BotEditorStore value={scopedStore}><BotEditorContext.Provider value={{ request: draft.request, draft: true, uploadAvatar: draft.uploadAvatar }}>
-              <DraftSection active={active} draft={draft} defaultsMode={defaultsMode} />
+              <DraftSection active={active} draft={draft} defaultsMode={defaultsMode} access={accessPicker} />
             </BotEditorContext.Provider></BotEditorStore>
           </fieldset>}
         </div>
@@ -232,7 +260,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
       {error && <p role="alert" className="max-h-24 overflow-y-auto border-t border-hairline/40 px-5 py-3 text-[13px] text-danger">{error}</p>}
       <div className="flex shrink-0 justify-end gap-2 border-t border-hairline/40 px-5 py-3">
         <button type="button" onClick={() => closeRef.current()} className="rounded-lg px-4 py-2 text-[13px] text-ink-secondary hover:bg-control">{t("common.cancel")}</button>
-        <button type="button" disabled={!ready || saving || (!defaultsMode && !bot.name.trim())} onClick={() => void save()}
+        <button type="button" disabled={!ready || saving || accessIncomplete || (!defaultsMode && !bot.name.trim())} onClick={() => void save()}
           className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2 text-[13px] font-medium text-white hover:brightness-110 disabled:opacity-40">
           {saving && <Loader2 size={15} className="animate-spin" />}{defaultsMode ? t("newBot.saveDefaults") : projectDialog ? "Create project" : t("newBot.create")}
         </button>
@@ -242,7 +270,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
   </div>;
 }
 
-function DraftSection({ active, draft, defaultsMode }: { active: Section; draft: BotCreationDraft; defaultsMode: boolean }) {
+function DraftSection({ active, draft, defaultsMode, access }: { active: Section; draft: BotCreationDraft; defaultsMode: boolean; access?: ReactNode }) {
   const bot = draft.bot;
   const { state } = useStore();
   const derived = useBotSettingsDerived(bot);
@@ -252,6 +280,7 @@ function DraftSection({ active, draft, defaultsMode }: { active: Section; draft:
       <input autoFocus className={cn(inputCls, "mt-1.5")} maxLength={100} value={bot.name} placeholder="Name your project"
         onChange={(event) => draft.patch({ name: event.target.value })} onFocus={(event) => event.currentTarget.select()} />
     </label>}
+    {projectDialog && access}
     <StartingRole draft={draft} defaultsMode={defaultsMode} />
     <IdentitySection bot={bot} patch={derived.patch} activeState={derived.activeState} mascotMotion={null}
       namePlaceholder={defaultsMode ? t("newBot.randomName") : undefined} hideName={projectDialog} />
@@ -269,6 +298,18 @@ function DraftSection({ active, draft, defaultsMode }: { active: Section; draft:
   if (active === "Model") return <ModelSection bot={bot} />;
   if (active === "Permissions") return <PermissionsSection bot={bot} derived={derived} />;
   return <VoiceSection bot={bot} derived={derived} />;
+}
+
+function ProjectsNeedAdmin({ onClose }: { onClose(): void }) {
+  return <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); onClose(); } }}>
+    <div role="alertdialog" aria-modal="true" aria-label="New project" className="w-full max-w-sm rounded-2xl border border-hairline/50 bg-panel p-5 text-center shadow-2xl motion-safe:animate-pop-in">
+      <span className="mx-auto mb-3 flex size-11 items-center justify-center rounded-2xl bg-raised text-ink-secondary" aria-hidden="true"><Lock size={20} /></span>
+      <h2 className="text-[16px] font-semibold text-ink">Only admins create projects</h2>
+      <p className="mt-1.5 text-[13px] leading-relaxed text-ink-secondary">Ask a workspace owner or admin to create the project and give you access.</p>
+      <button type="button" autoFocus onClick={onClose} className="mt-4 rounded-lg bg-control px-4 py-2 text-[13px] text-ink hover:bg-raised-hover">{t("common.close")}</button>
+    </div>
+  </div>;
 }
 
 function StartingRole({ draft, defaultsMode }: { draft: BotCreationDraft; defaultsMode: boolean }) {

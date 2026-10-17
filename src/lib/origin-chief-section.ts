@@ -4,5 +4,15 @@ export type ChiefSection = "chat" | "issues" | "agents" | "team-chat" | "call" |
 const chosen = new Map<string, ChiefSection>();
 
 export const chiefSectionOf = (botId: string): ChiefSection => chosen.get(botId) ?? "chat";
-export const setChiefSectionOf = (botId: string, section: ChiefSection) => { chosen.set(botId, section); };
+const listeners = new Set<() => void>();
+let version = 0;
+
+export const setChiefSectionOf = (botId: string, section: ChiefSection) => {
+  if (chosen.get(botId) === section) return;
+  chosen.set(botId, section);
+  version += 1;
+  for (const listener of listeners) listener();
+};
+export const subscribeChiefSections = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
+export const chiefSectionsVersion = () => version;
 export const chatHiddenFor = (botId: string): boolean => chiefSectionOf(botId) !== "chat";

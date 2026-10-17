@@ -12,6 +12,7 @@ export const READ_ONLY_AGENT_TOOL_NAMES: ReadonlySet<string> = new Set([
   "tool_result_read",
   "list_routines",
   "skills_list",
+  "origin_list_projects",
   "origin_list_issues",
   "origin_get_issue",
   "origin_list_assets",

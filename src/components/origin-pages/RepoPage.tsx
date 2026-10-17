@@ -1,14 +1,14 @@
-import { CircleCheck, CircleDot, ExternalLink, FolderGit2, GitCommitHorizontal, GitMerge, GitPullRequest, GitPullRequestClosed, Loader2, RefreshCw } from "lucide-react";
+import { CircleCheck, CircleDot, ExternalLink, FolderGit2, GitCommitHorizontal, GitMerge, GitPullRequest, GitPullRequestClosed, Loader2, RefreshCw, Settings } from "lucide-react";
 import { useState } from "react";
 import { cloudAction, useCloudQuery } from "@/lib/origin-cloud";
 import { originGitHub } from "@/lib/origin-github";
 import { cn } from "@/lib/cn";
 import type { CloudBoard, CloudCommit, CloudProject, CloudPullRequest, CloudTaskPullRequest } from "./cloud-types";
 import { fmtDate, githubRepoHref, githubRepoLabel, shortSha, taskKey } from "./repo-url";
-import { CloudGate, EmptyState, Loading, Notice, PageHeader, cardClass, ghostButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Loading, Notice, PageHeader, cardClass, ghostButton, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
-export function RepoPage(props: OriginPageProps) {
-  return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} />}</CloudGate>;
+export function RepoPage({ onOpenSettings, ...props }: OriginPageProps & { onOpenSettings?(): void }) {
+  return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />}</CloudGate>;
 }
 
 const prStateStyle: Record<CloudPullRequest["state"], { icon: typeof GitPullRequest; tone: string }> = {
@@ -17,7 +17,7 @@ const prStateStyle: Record<CloudPullRequest["state"], { icon: typeof GitPullRequ
   closed: { icon: GitPullRequestClosed, tone: "text-danger" },
 };
 
-function Repo({ project, projectId, canEdit, isAdmin }: { project: CloudProject; projectId: string; canEdit: boolean; isAdmin: boolean }) {
+function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { project: CloudProject; projectId: string; canEdit: boolean; isAdmin: boolean; onOpenSettings?(): void }) {
   const href = githubRepoHref(project.repoUrl);
   const pulls = useCloudQuery<CloudPullRequest[]>("github:listPullRequests", href ? { projectId } : "skip");
   const commits = useCloudQuery<CloudCommit[]>("commits:list", href ? { projectId } : "skip");
@@ -26,7 +26,8 @@ function Repo({ project, projectId, canEdit, isAdmin }: { project: CloudProject;
   const action = useAction();
 
   if (!project.repoUrl) {
-    return <EmptyState icon={<FolderGit2 size={28} />} title="No repository linked" body="Add the project's GitHub repository in Settings to see its pull requests and commits here." />;
+    return <EmptyState icon={<FolderGit2 size={22} />} title="No repository linked" body="Add the project's GitHub repository in Settings to see its pull requests and commits here, and let its agents open pull requests."
+      action={onOpenSettings && <button type="button" className={primaryButton} onClick={onOpenSettings}><Settings size={14} />Open settings</button>} />;
   }
 
   const sync = () => action.run(async () => {
@@ -41,7 +42,7 @@ function Repo({ project, projectId, canEdit, isAdmin }: { project: CloudProject;
   const taskByBranch = new Map((board?.tasks ?? []).filter((task) => task.githubTaskBranch).map((task) => [task.githubTaskBranch!, task]));
 
   return (
-    <section className="flex-1 overflow-y-auto p-6" aria-label="Repo">
+    <section className={pageClass} aria-label="Repo">
       <PageHeader title="Repo">
         {href && <a className={ghostButton} href={href} target="_blank" rel="noreferrer"><FolderGit2 size={14} />{githubRepoLabel(project.repoUrl)}<ExternalLink size={12} /></a>}
         {canEdit && href && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void sync()}>
@@ -50,7 +51,7 @@ function Repo({ project, projectId, canEdit, isAdmin }: { project: CloudProject;
       </PageHeader>
       {!href && <div className="mb-3"><Notice tone="danger">{project.repoUrl} is not a GitHub repository address.</Notice></div>}
       {project.githubRepoState === "error" && project.githubRepoError && <div className="mb-3"><Notice tone="danger">{project.githubRepoError}</Notice></div>}
-      {project.githubRepoState === "awaiting_connection" && <div className="mb-3 flex flex-wrap items-center gap-2"><Notice>A workspace admin needs to connect GitHub in Origin before this repository can sync.</Notice>
+      {project.githubRepoState === "awaiting_connection" && <div className="mb-3 flex flex-wrap items-center gap-2"><Notice>A workspace admin needs to connect GitHub in Settings before this repository can sync.</Notice>
         {isAdmin && project.teamId && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void action.run(async () => {
           await originGitHub.connectWorkspace(project.teamId!, projectId);
           setMessage("Finish connecting GitHub in your browser, then come back here.");
@@ -65,7 +66,7 @@ function Repo({ project, projectId, canEdit, isAdmin }: { project: CloudProject;
             <GitPullRequest size={15} className="text-ink-secondary" /><strong className="text-[13px] font-semibold text-ink">Pull requests</strong>
             <span className="text-[12px] text-ink-tertiary">{pulls?.length ?? ""}</span>
           </header>
-          {pulls === undefined ? <Loading label="Loading pull requests" /> : !pulls.length ? <p className="px-4 py-8 text-center text-[12.5px] text-ink-tertiary">No pull requests yet{canEdit ? ". Sync to fetch them from GitHub." : "."}</p> : (
+          {pulls === undefined ? <div className="px-4"><Loading label="Loading pull requests" variant="inline" /></div> : !pulls.length ? <p className="px-4 py-8 text-center text-[12.5px] text-ink-tertiary">No pull requests yet{canEdit ? ". Sync to fetch them from GitHub." : "."}</p> : (
             <ul className="divide-y divide-hairline/30">
               {pulls.map((pr) => {
                 const style = prStateStyle[pr.state];
@@ -98,7 +99,7 @@ function Repo({ project, projectId, canEdit, isAdmin }: { project: CloudProject;
             <GitCommitHorizontal size={15} className="text-ink-secondary" /><strong className="text-[13px] font-semibold text-ink">Recent commits</strong>
             <span className="text-[12px] text-ink-tertiary">{commits?.length ?? ""}</span>
           </header>
-          {commits === undefined ? <Loading label="Loading commits" /> : !commits.length ? <p className="px-4 py-8 text-center text-[12.5px] text-ink-tertiary">No commits yet{canEdit ? ". Sync to fetch them from GitHub." : "."}</p> : (
+          {commits === undefined ? <div className="px-4"><Loading label="Loading commits" variant="inline" /></div> : !commits.length ? <p className="px-4 py-8 text-center text-[12.5px] text-ink-tertiary">No commits yet{canEdit ? ". Sync to fetch them from GitHub." : "."}</p> : (
             <ul className="divide-y divide-hairline/30">
               {commits.slice(0, 50).map((commit) => (
                 <li key={commit._id}>

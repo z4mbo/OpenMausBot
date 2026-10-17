@@ -171,27 +171,40 @@ const SELF_CHANGE_OUTCOME = " Read the result: a change to your own routines, sk
 
 const START_THREAD_SELF_ID = "Leave out, or use your own bot ID. For teammates use coordinate_bots.";
 
-const ORIGIN_SCOPE = " Uses the Origin project linked to you or your Chief; if Origin is not connected or no project is linked, tell the person.";
-const ORIGIN_ISSUE_ID = { type: "string", minLength: 1, maxLength: 64, description: "The issue id exactly as origin_list_issues shows it." };
+const ORIGIN_SCOPE = " Acts on your team's Origin project unless you pass project.";
+const ORIGIN_PROJECT = { type: "string", maxLength: 120, description: "Name or id from origin_list_projects." };
+const ORIGIN_ISSUE_ID = { type: "string", minLength: 1, maxLength: 64, description: "Issue id or ORI- key from origin_list_issues." };
 const ORIGIN_PRIORITY = { type: "string", enum: ["low", "medium", "high"] };
+const ORIGIN_CARDS = " The person sees issue cards; do not repeat them.";
 
 const ORIGIN_TOOL_DEFINITIONS = [
   {
+    name: "origin_list_projects",
+    description: "List the Origin projects you reach (a Chief also reaches the teams it manages) with each one's Chief and agents and their bot ids. If Origin is not connected or nothing is linked, tell the person.",
+    inputSchema: { type: "object", additionalProperties: false, properties: {} },
+  },
+  {
     name: "origin_list_issues",
-    description: "List the issues on your Origin project's board with their column, priority, assignee, due date and labels. Use it before planning work, picking the next task, or reporting status, and to find an issue id." + ORIGIN_SCOPE,
+    description: "List Origin issues (column, priority, assignee, due, labels), filtered by status, priority, assignee or text: which are open, urgent (high priority) or whose, and their ids. A Chief without a project of its own gets every project it reaches." + ORIGIN_CARDS + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
-      properties: { status: { type: "string", enum: ["open", "done", "all"], description: "Default open." } },
+      properties: {
+        status: { type: "string", enum: ["open", "done", "all"], description: "Default open." },
+        priority: ORIGIN_PRIORITY,
+        assignee: { type: "string", maxLength: 120, description: "Part of an assignee's name or email." },
+        query: { type: "string", maxLength: 120, description: "Text in the key, title, description or labels." },
+        project: ORIGIN_PROJECT,
+      },
     },
   },
   {
     name: "origin_get_issue",
-    description: "Read one Origin issue in full: description, comments, attachments, linked pull requests with checks and review, labels and related issues. Use it before working on or commenting on an issue." + ORIGIN_SCOPE,
-    inputSchema: { type: "object", additionalProperties: false, properties: { issue_id: ORIGIN_ISSUE_ID }, required: ["issue_id"] },
+    description: "Read one Origin issue in full: description, comments, attachments, pull requests with checks and review, labels and related issues." + ORIGIN_CARDS + ORIGIN_SCOPE,
+    inputSchema: { type: "object", additionalProperties: false, properties: { issue_id: ORIGIN_ISSUE_ID, project: ORIGIN_PROJECT }, required: ["issue_id"] },
   },
   {
     name: "origin_create_issue",
-    description: "Create an issue on your Origin project's board when the person asks you to track work, or when you find a bug or follow-up worth tracking. Check origin_list_issues first so you do not file a duplicate." + ORIGIN_SCOPE,
+    description: "Create an Origin issue for work to track or a bug or follow-up you found. Check origin_list_issues first for a duplicate." + ORIGIN_CARDS + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -200,15 +213,16 @@ const ORIGIN_TOOL_DEFINITIONS = [
         priority: { ...ORIGIN_PRIORITY, description: "Default medium." },
         labels: { type: "array", maxItems: 20, items: { type: "string", maxLength: 32 } },
         column: { type: "string", description: "Column title or id; default Todo, else the first open column." },
-        assignee: { type: "string", description: "Email of an active project member; default the signed-in Origin user." },
+        assignee: { type: "string", description: "Member email; default you, the signed-in user." },
         due_date: { type: "string", description: "YYYY-MM-DD; default one week from today." },
+        project: ORIGIN_PROJECT,
       },
       required: ["title"],
     },
   },
   {
     name: "origin_update_issue",
-    description: "Change an Origin issue: retitle, rewrite the description, set priority, labels or assignee, move it to another column, or mark it done when the work is finished. Moving to a done column marks it done unless you pass done." + ORIGIN_SCOPE,
+    description: "Change an Origin issue: title, description, priority, labels, assignee, due date, column or done. A done column marks it done unless you pass done. Finish your own work with origin_complete_issue." + ORIGIN_CARDS + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -219,34 +233,81 @@ const ORIGIN_TOOL_DEFINITIONS = [
         done: { type: "boolean" },
         column: { type: "string", description: "Column title or id to move the issue to." },
         assignee: { type: "string", description: "Email of an active project member." },
+        due_date: { type: "string", description: "YYYY-MM-DD." },
         labels: { type: "array", maxItems: 20, items: { type: "string", maxLength: 32 }, description: "Replaces all labels." },
+        project: ORIGIN_PROJECT,
       },
       required: ["issue_id"],
     },
   },
   {
     name: "origin_comment_issue",
-    description: "Comment on an Origin issue to report progress, a finding, a question or a result. Project members are notified; keep it short and specific." + ORIGIN_SCOPE,
+    description: "Comment on an Origin issue: progress, a finding, a question or a result. Members are notified; keep it short." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
-      properties: { issue_id: ORIGIN_ISSUE_ID, text: { type: "string", minLength: 1, maxLength: 8_000, description: "Markdown." } },
+      properties: { issue_id: ORIGIN_ISSUE_ID, text: { type: "string", minLength: 1, maxLength: 8_000, description: "Markdown." }, project: ORIGIN_PROJECT },
       required: ["issue_id", "text"],
     },
   },
   {
+    name: "origin_assign_issue",
+    description: "Hand an Origin issue to an agent of its project's team, or to the Chief of a project you manage, through coordinate_bots in a new thread: it branches, opens a pull request and finishes with origin_complete_issue. The issue gets the agent's label and moves to In progress. The result resumes you; end your turn." + ORIGIN_CARDS + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        issue_id: ORIGIN_ISSUE_ID,
+        bot_id: { type: "string", minLength: 1, maxLength: 128, description: "Bot id from origin_list_projects, or a unique name." },
+        instructions: { type: "string", maxLength: 1_000, description: "Optional extra direction for the agent." },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["issue_id", "bot_id"],
+    },
+  },
+  {
+    name: "origin_complete_issue",
+    description: "Finish your work on an Origin issue: comments the summary and pull request link, then moves it to review (stage review, while the pull request waits) or marks it done (default)." + ORIGIN_CARDS + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        issue_id: ORIGIN_ISSUE_ID,
+        summary: { type: "string", minLength: 1, maxLength: 6_000, description: "What was done, in Markdown." },
+        pull_request_url: { type: "string", maxLength: 500 },
+        stage: { type: "string", enum: ["review", "done"], description: "Default done." },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["issue_id", "summary"],
+    },
+  },
+  {
     name: "origin_list_assets",
-    description: "List your Origin project's design assets (with links) and design tokens. Use it before design or front-end work so you reuse the project's logos, images and colours." + ORIGIN_SCOPE,
-    inputSchema: { type: "object", additionalProperties: false, properties: {} },
+    description: "List an Origin project's design assets (with links) and tokens, to reuse its logos, images and colours." + ORIGIN_SCOPE,
+    inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
+  },
+  {
+    name: "origin_add_asset",
+    description: "Add a design asset to an Origin project: a link (url) or a file from your working folder (path, at most 15 MB)." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        name: { type: "string", minLength: 1, maxLength: 150 },
+        type: { type: "string", enum: ["figma", "image", "icon", "font", "document", "apk", "other"], description: "Default other." },
+        url: { type: "string", maxLength: 2_000, description: "http(s) link; url or path, not both." },
+        path: { type: "string", maxLength: 1_000, description: "A file in your working folder." },
+        notes: { type: "string", maxLength: 1_000 },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["name"],
+    },
   },
   {
     name: "origin_vault_list",
-    description: "List what your Origin project's vault holds: titles, kinds, URLs and usernames only. Values are encrypted and never returned; use it to learn which account or key exists, then ask the person for the value with request_credential." + ORIGIN_SCOPE,
-    inputSchema: { type: "object", additionalProperties: false, properties: {} },
+    description: "List an Origin project's vault: titles, kinds, URLs and usernames. Values are encrypted with the person's passphrase and never readable here; ask for one with request_credential." + ORIGIN_SCOPE,
+    inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
   },
   {
     name: "origin_repo_status",
-    description: "Show your Origin project's repository: its URL, open pull requests with checks and review state where known, and recent commits. Use it before code work or when asked how the code is going." + ORIGIN_SCOPE,
-    inputSchema: { type: "object", additionalProperties: false, properties: {} },
+    description: "Show an Origin project's repository: URL, open pull requests with checks and review, and recent commits." + ORIGIN_SCOPE,
+    inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
   },
 ];
 
@@ -967,7 +1028,7 @@ const SKILL_TOOL_NAMES = new Set(["skills_list", "skill_manage"]);
 export const SHARED_COMPUTER_TOOL_NAMES = new Set(["list_shared_computers", "shared_computer"]);
 const VOICE_TOOL_NAMES = new Set(["send_voice_note"]);
 const CHIEF_ONLY_TOOL_NAMES = new Set([
-  "create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread",
+  "create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue",
 ]);
 const CHIEF_TARGET_TOOL_NAMES = new Set(["propose_profile", "propose_model"]);
 const WATCHER_TOOL_NAMES = new Set(["create_options_card"]);

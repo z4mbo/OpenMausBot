@@ -2,9 +2,12 @@ import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ConvexHttpClient } from "convex/browser";
 import { makeFunctionReference } from "convex/server";
+import {
+  issueBrief, originIssueKey, ORIGIN_ISSUE_CARDS_MAX, type OriginIssueCard, type OriginIssueCards, type OriginIssuePriority,
+} from "../shared/origin-issues.ts";
 import { DATA_DIR } from "./config.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
-import { sectionKey, type BotRecord, type Store } from "./store.ts";
+import { sectionKey, type BotRecord, type Message, type Store } from "./store.ts";
 
 export interface OriginCloudState {
   url?: string;
@@ -18,14 +21,33 @@ type Args = Record<string, unknown>;
 export interface OriginCloudClient {
   query(name: string, args: Args): Promise<unknown>;
   mutation(name: string, args: Args): Promise<unknown>;
+  /** POSTs a file to an upload URL the deployment issued and returns its storage id. */
+  upload?(uploadUrl: string, data: Uint8Array, contentType: string): Promise<string>;
+}
+
+/** What origin_assign_issue hands to coordinate_bots before it records the assignment in Origin. */
+export interface OriginHandoff {
+  botId: string;
+  botName: string;
+  message: string;
+  doneWhen: string;
+  reason: string;
 }
 
 export interface OriginToolResult {
   text: string;
   isError?: boolean;
+  cards?: OriginIssueCards;
+  handoff?: OriginHandoff;
 }
 
-type ProjectBot = Pick<BotRecord, "id" | "section" | "chiefOfStaff" | "managedSections">;
+export interface OriginAssetFile {
+  data: Uint8Array;
+  name: string;
+  contentType: string;
+}
+
+type ProjectBot = Pick<BotRecord, "id" | "name" | "section" | "chiefOfStaff" | "managedSections"> & Partial<Pick<BotRecord, "title" | "hidden">>;
 
 export const defaultOriginCloudFile = () => join(DATA_DIR, "origin-cloud.json");
 
@@ -54,9 +76,19 @@ export function writeOriginCloud(file: string, state: OriginCloudState): void {
 
 export function convexOriginClient(url: string): OriginCloudClient {
   const client = new ConvexHttpClient(url, { logger: false });
+  const deployment = new URL(url).origin;
   return {
     query: (name, args) => client.query(makeFunctionReference<"query">(name), args),
     mutation: (name, args) => client.mutation(makeFunctionReference<"mutation">(name), args),
+    async upload(uploadUrl, data, contentType) {
+      // Security: a project file only ever goes to the deployment the person signed in to.
+      if (new URL(uploadUrl).origin !== deployment) throw new Error("Origin returned an upload address outside its deployment");
+      const response = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": contentType }, body: data });
+      if (!response.ok) throw new Error(`the upload failed with HTTP ${response.status}`);
+      const body = record(await response.json());
+      if (typeof body.storageId !== "string") throw new Error("the upload returned no storage id");
+      return body.storageId;
+    },
   };
 }
 
@@ -71,27 +103,86 @@ export function cloudProjectFor(bots: readonly ProjectBot[], links: Record<strin
   return leader ? links[leader.id] : null;
 }
 
+export interface ReachableProject {
+  projectId: string;
+  /** The team (sidebar section) that works on it. */
+  section: string;
+  /** Linked to the bot itself or its own team, rather than reached through a section it manages. */
+  own: boolean;
+}
+
+/** A bot reaches its own team's project; a Chief also reaches the projects of the sections it manages, and nothing further down. */
+export function reachableCloudProjects(bots: readonly ProjectBot[], links: Record<string, string>, botId: string): ReachableProject[] {
+  const bot = bots.find((candidate) => candidate.id === botId);
+  if (!bot || bot.hidden) return [];
+  const found = new Map<string, ReachableProject>();
+  const own = cloudProjectFor(bots, links, botId);
+  if (own) found.set(own, { projectId: own, section: sectionKey(bot.section), own: true });
+  if (bot.chiefOfStaff) {
+    const managed = new Set((bot.managedSections ?? []).map((section) => sectionKey(section)).filter(Boolean));
+    for (const candidate of bots) {
+      const projectId = links[candidate.id];
+      if (!projectId || candidate.hidden || found.has(projectId) || !managed.has(sectionKey(candidate.section))) continue;
+      found.set(projectId, { projectId, section: sectionKey(candidate.section), own: false });
+    }
+  }
+  return [...found.values()];
+}
+
 const record = (value: unknown): Args => (value && typeof value === "object" && !Array.isArray(value) ? value as Args : {});
 const list = (value: unknown): Args[] => (Array.isArray(value) ? value.map(record) : []);
 const text = (value: unknown): string => (typeof value === "string" ? value : "");
+const trimmed = (value: unknown): string => text(value).trim();
 const clip = (value: string, max: number) => (value.length > max ? `${value.slice(0, max)}…` : value);
 const normalizedTitle = (title: string) => title.trim().toLowerCase().replace(/[\s_-]+/g, "");
-const isDoneColumn = (column: Args) => typeof column.isDone === "boolean" ? column.isDone : text(column.title).trim().toLowerCase() === "done";
+const isDoneColumn = (column: Args) => column.isDone === true || text(column.title).trim().toLowerCase() === "done";
 const PRIORITIES = new Set(["low", "medium", "high"]);
+const PRIORITY_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
+const REVIEW_COLUMNS = new Set(["review", "inreview", "codereview", "toreview", "readyforreview"]);
+const ASSET_TYPES = new Set(["figma", "image", "icon", "font", "document", "apk", "other"]);
+export const ORIGIN_ASSET_MAX_BYTES = 15 * 1024 * 1024;
+const ISSUE_KEY = /^ORI-([A-Z0-9]{1,8})$/i;
 const ISSUE_LIST_MAX = 100;
 const PR_STATUS_TASKS_MAX = 25;
 const DEFAULT_DUE_DAYS = 7;
+const LABEL_MAX = 32;
+
+/** A refusal whose message is already the sentence the bot should read. */
+class OriginRefusal extends Error {}
+
+function refuse(message: string): never {
+  throw new OriginRefusal(message);
+}
 
 function issueLine(task: Args, columns: Args[]): string {
   const column = columns.find((candidate) => candidate._id === task.columnId);
   const parts = [
-    `${text(task._id)} [${column ? text(column.title) : "?"}${task.done ? ", done" : ""}] ${text(task.title)}`,
+    `${text(task._id)} (${originIssueKey(text(task._id))}) [${column ? text(column.title) : "?"}${task.done ? ", done" : ""}] ${text(task.title)}`,
     text(task.priority) && `priority ${text(task.priority)}`,
     text(task.assignedToEmail) && `assignee ${text(task.assignedToName) || text(task.assignedToEmail)} <${text(task.assignedToEmail)}>`,
     text(task.dueDate) && `due ${text(task.dueDate)}`,
     Array.isArray(task.labels) && task.labels.length ? `labels ${task.labels.join(", ")}` : "",
   ];
   return `- ${parts.filter(Boolean).join(" · ")}`;
+}
+
+function issueCard(task: Args, columns: Args[], projectId: string, projectName: string): OriginIssueCard {
+  const id = text(task._id);
+  const column = columns.find((candidate) => candidate._id === task.columnId);
+  const priority = (PRIORITIES.has(text(task.priority)) ? text(task.priority) : "medium") as OriginIssuePriority;
+  const labels = Array.isArray(task.labels) ? task.labels.filter((label): label is string => typeof label === "string") : [];
+  return {
+    id, key: originIssueKey(id), projectId, ...(projectName ? { projectName } : {}),
+    title: text(task.title), status: task.done ? "Done" : column ? text(column.title) : "", done: Boolean(task.done), priority,
+    ...(text(task.assignedToName) || text(task.assignedToEmail) ? { assignee: text(task.assignedToName) || text(task.assignedToEmail) } : {}),
+    ...(text(task.dueDate) ? { due: text(task.dueDate) } : {}),
+    ...(labels.length ? { labels } : {}),
+  };
+}
+
+function cardsOf(heading: string, issues: OriginIssueCard[]): OriginIssueCards {
+  const shown = issues.slice(0, ORIGIN_ISSUE_CARDS_MAX);
+  return { heading, issues: shown, ...(issues.length > shown.length ? { more: issues.length - shown.length } : {}) };
 }
 
 function findColumn(columns: Args[], wanted: string): Args | undefined {
@@ -115,10 +206,68 @@ function convexMessage(error: unknown): string {
   return clip((uncaught?.[1] ?? message).trim(), 500);
 }
 
+function agentLabel(name: string): string {
+  return `agent:${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "bot"}`.slice(0, LABEL_MAX);
+}
+
 interface ToolScope {
   client: OriginCloudClient;
   sessionToken: string;
   projectId: string;
+}
+
+interface ToolContext {
+  client: OriginCloudClient;
+  sessionToken: string;
+  bots: readonly ProjectBot[];
+  links: Record<string, string>;
+  caller: ProjectBot;
+  reachable: ReachableProject[];
+  phase?: "record";
+  file?(path: string): Promise<OriginAssetFile>;
+  projectDocs: Map<string, Promise<Args>>;
+}
+
+const scopeOf = (ctx: ToolContext, project: ReachableProject): ToolScope => ({ client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId });
+
+function projectDoc(ctx: ToolContext, projectId: string): Promise<Args> {
+  let doc = ctx.projectDocs.get(projectId);
+  if (!doc) {
+    doc = ctx.client.query("projects:get", { projectId, sessionToken: ctx.sessionToken }).then(record, () => ({}));
+    ctx.projectDocs.set(projectId, doc);
+  }
+  return doc;
+}
+
+async function projectName(ctx: ToolContext, projectId: string): Promise<string> {
+  return text((await projectDoc(ctx, projectId)).name) || projectId;
+}
+
+async function projectChoices(ctx: ToolContext): Promise<string> {
+  const names = await Promise.all(ctx.reachable.map(async (project) => `"${await projectName(ctx, project.projectId)}" (${project.projectId})`));
+  return names.join(", ");
+}
+
+/** Picks one project among those the bot reaches: by id, Origin name, team section or the name of a bot linked to it. */
+async function pickProject(ctx: ToolContext, wanted: unknown): Promise<ReachableProject> {
+  const name = trimmed(wanted);
+  if (!name) {
+    const own = ctx.reachable.find((project) => project.own);
+    if (own) return own;
+    if (ctx.reachable.length === 1) return ctx.reachable[0];
+    return refuse(`You reach several Origin projects; pass project, one of: ${await projectChoices(ctx)}.`);
+  }
+  const key = name.toLowerCase();
+  const byId = ctx.reachable.find((project) => project.projectId === name);
+  if (byId) return byId;
+  const bySection = ctx.reachable.find((project) => project.section.toLowerCase() === key);
+  if (bySection) return bySection;
+  const byBot = ctx.reachable.find((project) => ctx.bots.some((bot) => !bot.hidden && ctx.links[bot.id] === project.projectId && bot.name.trim().toLowerCase() === key));
+  if (byBot) return byBot;
+  for (const project of ctx.reachable) {
+    if ((await projectName(ctx, project.projectId)).trim().toLowerCase() === key) return project;
+  }
+  return refuse(`No Origin project "${clip(name, 80)}" among the ones you reach: ${await projectChoices(ctx)}.`);
 }
 
 async function board(scope: ToolScope) {
@@ -126,9 +275,45 @@ async function board(scope: ToolScope) {
   return { columns: list(result.columns), tasks: list(result.tasks) };
 }
 
-function issueId(args: Args): string | null {
-  const id = typeof args.issue_id === "string" ? args.issue_id.trim() : "";
-  return id || null;
+async function details(scope: ToolScope, taskId: string) {
+  const result = record(await scope.client.query("tasks:details", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId }));
+  return { task: record(result.task), columns: list(result.columns), comments: list(result.comments), assets: list(result.assets) };
+}
+
+interface IssueTarget {
+  project: ReachableProject;
+  taskId: string;
+}
+
+/** Finds an issue by id or ORI- key in the named project, else in the reachable projects, the bot's own first. */
+async function resolveIssue(ctx: ToolContext, args: Args, tool: string): Promise<IssueTarget> {
+  const raw = trimmed(args.issue_id);
+  if (!raw) return refuse(`${tool} needs issue_id, copied from origin_list_issues.`);
+  const candidates = trimmed(args.project)
+    ? [await pickProject(ctx, args.project)]
+    : [...ctx.reachable].sort((a, b) => Number(b.own) - Number(a.own));
+  const key = ISSUE_KEY.exec(raw);
+  if (key) {
+    const suffix = key[1].toLowerCase();
+    const matches = (await Promise.all(candidates.map(async (project) =>
+      (await board(scopeOf(ctx, project))).tasks.filter((task) => text(task._id).endsWith(suffix)).map((task) => ({ project, taskId: text(task._id) }))))).flat();
+    if (matches.length === 1) return matches[0];
+    return refuse(matches.length
+      ? `${raw.toUpperCase()} matches ${matches.length} issues; pass the issue id instead: ${matches.map((match) => match.taskId).join(", ")}.`
+      : `No issue ${raw.toUpperCase()} in the Origin projects you reach; list them with origin_list_issues.`);
+  }
+  if (candidates.length === 1) return { project: candidates[0], taskId: raw };
+  for (const project of candidates) {
+    const found = await details(scopeOf(ctx, project), raw).then(() => true, () => false);
+    if (found) return { project, taskId: raw };
+  }
+  return refuse(`No issue ${clip(raw, 64)} in the Origin projects you reach; copy the id from origin_list_issues.`);
+}
+
+async function currentLabels(scope: ToolScope, taskId: string, task: Args): Promise<string[]> {
+  const relations = record(await scope.client.query("issueRelations:list", { sessionToken: scope.sessionToken, taskId }).catch(() => ({})));
+  const labels = relations.labels ?? task.labels;
+  return Array.isArray(labels) ? labels.map(String) : [];
 }
 
 async function setLabels(scope: ToolScope, taskId: string, labels: unknown): Promise<void> {
@@ -136,27 +321,95 @@ async function setLabels(scope: ToolScope, taskId: string, labels: unknown): Pro
   await scope.client.mutation("issueRelations:labels", { sessionToken: scope.sessionToken, taskId, labels: labels.map(String) });
 }
 
-const TOOLS: Record<string, (args: Args, scope: ToolScope) => Promise<OriginToolResult>> = {
-  async origin_list_issues(args, scope) {
-    const status = args.status === "done" || args.status === "all" ? args.status : "open";
-    const { columns, tasks } = await board(scope);
-    const shown = tasks.filter((task) => status === "all" || (status === "done") === Boolean(task.done));
-    if (!shown.length) return { text: `No ${status === "all" ? "" : `${status} `}issues in this Origin project. Columns: ${columnNames(columns)}.` };
-    const lines = shown.slice(0, ISSUE_LIST_MAX).map((task) => issueLine(task, columns));
-    const more = shown.length > ISSUE_LIST_MAX ? `\n(${shown.length - ISSUE_LIST_MAX} more not shown.)` : "";
-    return { text: `${shown.length} ${status} issue(s). Columns: ${columnNames(columns)}.\n${lines.join("\n")}${more}` };
+async function issueCardsFor(ctx: ToolContext, target: IssueTarget, heading: string): Promise<OriginIssueCards> {
+  const scope = scopeOf(ctx, target.project);
+  const [found, name] = await Promise.all([details(scope, target.taskId), projectName(ctx, target.project.projectId)]);
+  const labels = await currentLabels(scope, target.taskId, found.task);
+  return cardsOf(heading, [issueCard({ ...found.task, labels }, found.columns, target.project.projectId, name)]);
+}
+
+function sortIssues(tasks: Args[]): Args[] {
+  return [...tasks].sort((a, b) =>
+    Number(Boolean(a.done)) - Number(Boolean(b.done))
+    || (PRIORITY_RANK[text(a.priority)] ?? 1) - (PRIORITY_RANK[text(b.priority)] ?? 1)
+    || (text(a.dueDate) || "9999").localeCompare(text(b.dueDate) || "9999"));
+}
+
+function resolveAgent(ctx: ToolContext, wanted: unknown): ProjectBot {
+  const name = trimmed(wanted);
+  if (!name) return refuse("origin_assign_issue needs bot_id: the agent's id from origin_list_projects or list_bots.");
+  const live = ctx.bots.filter((bot) => !bot.hidden && bot.id !== ctx.caller.id);
+  const byId = live.find((bot) => bot.id === name);
+  if (byId) return byId;
+  const reached = new Set(ctx.reachable.map((project) => project.projectId));
+  const named = live.filter((bot) => bot.name.trim().toLowerCase() === name.toLowerCase() && reached.has(cloudProjectFor(ctx.bots, ctx.links, bot.id) ?? ""));
+  if (named.length === 1) return named[0];
+  return refuse(named.length
+    ? `Several agents are called ${clip(name, 60)}; pass the bot id from origin_list_projects.`
+    : `No agent ${clip(name, 60)} on the Origin projects you reach; origin_list_projects lists each project's agents.`);
+}
+
+const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginToolResult>> = {
+  async origin_list_projects(_args, ctx) {
+    const lines = await Promise.all(ctx.reachable.map(async (project) => {
+      const doc = await projectDoc(ctx, project.projectId);
+      const team = ctx.bots.filter((bot) => !bot.hidden && project.section && sectionKey(bot.section) === project.section);
+      const chief = team.find((bot) => bot.chiefOfStaff);
+      const agents = team.filter((bot) => bot !== chief);
+      return [
+        `- ${text(doc.name) || project.projectId} (project ${project.projectId})${project.own ? " · your project" : ""}${text(doc.repoUrl) ? ` · repo ${text(doc.repoUrl)}` : ""}`,
+        `  Chief: ${chief ? `${chief.name} [id: ${chief.id}]` : "none"} · team "${project.section || "?"}"`,
+        `  Agents: ${agents.length ? agents.map((bot) => `${bot.name}${bot.title ? ` (${bot.title})` : ""} [id: ${bot.id}]`).join(", ") : "none"}`,
+      ].join("\n");
+    }));
+    const lead = ctx.caller.chiefOfStaff
+      ? "Hand an issue to one of these agents with origin_assign_issue; give other work to a project's Chief with coordinate_bots."
+      : "Only your Chief assigns issues; work on the ones you are given.";
+    return { text: `Origin projects you reach (${ctx.reachable.length}):\n${lines.join("\n")}\n${lead}` };
   },
 
-  async origin_get_issue(args, scope) {
-    const taskId = issueId(args);
-    if (!taskId) return { text: "origin_get_issue needs issue_id, copied from origin_list_issues.", isError: true };
-    const details = record(await scope.client.query("tasks:details", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId }));
-    const [relations, pulls] = await Promise.all([
-      scope.client.query("issueRelations:list", { sessionToken: scope.sessionToken, taskId }).catch(() => ({})),
-      scope.client.query("taskPRs:list", { sessionToken: scope.sessionToken, taskId }).catch(() => []),
+  async origin_list_issues(args, ctx) {
+    const status = args.status === "done" || args.status === "all" ? args.status : "open";
+    if (args.priority !== undefined && !PRIORITIES.has(String(args.priority))) return { text: 'priority must be "low", "medium" or "high".', isError: true };
+    const priority = args.priority === undefined ? "" : String(args.priority);
+    const needle = trimmed(args.query).toLowerCase();
+    const assignee = trimmed(args.assignee).toLowerCase();
+    const single = trimmed(args.project) || ctx.reachable.some((project) => project.own) || ctx.reachable.length === 1;
+    const projects = single ? [await pickProject(ctx, args.project)] : ctx.reachable;
+    const boards = await Promise.all(projects.map(async (project) => ({ project, name: await projectName(ctx, project.projectId), ...await board(scopeOf(ctx, project)) })));
+    const blocks: string[] = [];
+    const cards: OriginIssueCard[] = [];
+    let total = 0;
+    for (const { project, name, columns, tasks } of boards) {
+      const shown = sortIssues(tasks.filter((task) =>
+        (status === "all" || (status === "done") === Boolean(task.done))
+        && (!priority || task.priority === priority)
+        && (!assignee || `${text(task.assignedToEmail)} ${text(task.assignedToName)}`.toLowerCase().includes(assignee))
+        && (!needle || `${originIssueKey(text(task._id))} ${text(task.title)} ${text(task.description)} ${Array.isArray(task.labels) ? task.labels.join(" ") : ""}`.toLowerCase().includes(needle))));
+      total += shown.length;
+      const header = `Origin project ${name} (${project.projectId}): ${shown.length} ${status}${priority ? ` ${priority}-priority` : ""} issue(s). Columns: ${columnNames(columns)}.`;
+      const lines = shown.slice(0, ISSUE_LIST_MAX).map((task) => issueLine(task, columns));
+      const more = shown.length > ISSUE_LIST_MAX ? `\n(${shown.length - ISSUE_LIST_MAX} more not shown.)` : "";
+      blocks.push(`${header}${lines.length ? `\n${lines.join("\n")}` : ""}${more}`);
+      cards.push(...shown.map((task) => issueCard(task, columns, project.projectId, name)));
+    }
+    if (!total) return { text: blocks.join("\n\n") };
+    const where = boards.length === 1 ? boards[0].name : `${boards.length} projects`;
+    const heading = `${total} ${status === "all" ? "" : `${status} `}${priority ? `${priority}-priority ` : ""}issue${total === 1 ? "" : "s"} · ${where}`;
+    return { text: `${blocks.join("\n\n")}\nThe person sees these as issue cards they can open; do not repeat the whole list.`, cards: cardsOf(heading, cards) };
+  },
+
+  async origin_get_issue(args, ctx) {
+    const target = await resolveIssue(ctx, args, "origin_get_issue");
+    const scope = scopeOf(ctx, target.project);
+    const [found, name] = await Promise.all([details(scope, target.taskId), projectName(ctx, target.project.projectId)]);
+    const [labels, pulls, relations] = await Promise.all([
+      currentLabels(scope, target.taskId, found.task),
+      scope.client.query("taskPRs:list", { sessionToken: scope.sessionToken, taskId: target.taskId }).catch(() => []),
+      scope.client.query("issueRelations:list", { sessionToken: scope.sessionToken, taskId: target.taskId }).catch(() => ({})),
     ]);
-    const task: Args = { ...record(details.task), labels: record(relations).labels ?? record(details.task).labels };
-    const lines = [issueLine(task, list(details.columns)).slice(2)];
+    const task: Args = { ...found.task, labels };
+    const lines = [issueLine(task, found.columns).slice(2), `Origin project ${name} (${target.project.projectId}).`];
     const description = text(task.description);
     lines.push("", description ? `Description:\n${clip(description, 4_000)}` : "No description.");
     const linkedPulls = list(pulls);
@@ -167,27 +420,30 @@ const TOOLS: Record<string, (args: Args, scope: ToolScope) => Promise<OriginTool
     if (related.length) {
       lines.push("", "Related issues:", ...related.map((relation) => `- ${relation.outgoing ? "" : "is "}${text(relation.kind)}${relation.outgoing ? "" : " of"} ${text(relation.taskId)} ${text(relation.title)}${relation.done ? " (done)" : ""}`));
     }
-    const comments = list(details.comments).slice(-20);
+    const comments = found.comments.slice(-20);
     lines.push("", comments.length ? "Comments (oldest first):" : "No comments.");
     for (const comment of comments) lines.push(`- ${text(comment.authorName) || text(comment.authorEmail)}: ${clip(text(comment.body), 1_000)}`);
-    const assets = list(details.assets);
-    if (assets.length) lines.push("", "Attachments:", ...assets.map((asset) => `- ${text(asset.name)} (${text(asset.type)})${text(asset.url) ? ` ${text(asset.url)}` : ""}`));
-    return { text: lines.join("\n") };
+    if (found.assets.length) lines.push("", "Attachments:", ...found.assets.map((asset) => `- ${text(asset.name)} (${text(asset.type)})${text(asset.url) ? ` ${text(asset.url)}` : ""}`));
+    const card = issueCard(task, found.columns, target.project.projectId, name);
+    return { text: lines.join("\n"), cards: cardsOf(`Issue ${card.key}`, [card]) };
   },
 
-  async origin_create_issue(args, scope) {
-    const title = typeof args.title === "string" ? args.title.trim() : "";
+  async origin_create_issue(args, ctx) {
+    const title = trimmed(args.title);
     if (!title) return { text: "origin_create_issue needs a title.", isError: true };
     const priority = typeof args.priority === "string" ? args.priority : "medium";
     if (!PRIORITIES.has(priority)) return { text: 'priority must be "low", "medium" or "high".', isError: true };
+    const project = await pickProject(ctx, args.project);
+    const scope = scopeOf(ctx, project);
     const { columns } = await board(scope);
     const open = columns.filter((column) => !isDoneColumn(column));
-    const column = typeof args.column === "string" && args.column.trim()
-      ? findColumn(columns, args.column)
+    const column = trimmed(args.column)
+      ? findColumn(columns, text(args.column))
       : open.find((candidate) => normalizedTitle(text(candidate.title)) === "todo") ?? open[0];
     if (!column) return { text: `No such column. Columns: ${columnNames(columns)}.`, isError: true };
-    let assignee = typeof args.assignee === "string" ? args.assignee.trim() : "";
+    let assignee = trimmed(args.assignee);
     if (!assignee) assignee = text(record(await scope.client.query("auth:me", { sessionToken: scope.sessionToken })).email);
+    const dueDate = typeof args.due_date === "string" && args.due_date ? args.due_date : dueDateAfter(DEFAULT_DUE_DAYS);
     const taskId = text(await scope.client.mutation("tasks:createTask", {
       projectId: scope.projectId,
       sessionToken: scope.sessionToken,
@@ -196,21 +452,28 @@ const TOOLS: Record<string, (args: Args, scope: ToolScope) => Promise<OriginTool
       ...(typeof args.description === "string" && args.description.trim() ? { description: args.description } : {}),
       priority,
       ...(assignee ? { assignedToEmail: assignee } : {}),
-      dueDate: typeof args.due_date === "string" && args.due_date ? args.due_date : dueDateAfter(DEFAULT_DUE_DAYS),
+      dueDate,
     }));
     await setLabels(scope, taskId, args.labels);
-    return { text: `Created issue ${taskId} "${title}" in column "${text(column.title)}".` };
+    const name = await projectName(ctx, project.projectId);
+    const card = issueCard({
+      _id: taskId, columnId: column._id, title, priority, done: isDoneColumn(column), assignedToEmail: assignee, dueDate,
+      labels: Array.isArray(args.labels) ? args.labels.map(String) : [],
+    }, columns, project.projectId, name);
+    return { text: `Created issue ${taskId} (${card.key}) "${title}" in column "${text(column.title)}" of ${name}.`, cards: cardsOf("Issue created", [card]) };
   },
 
-  async origin_update_issue(args, scope) {
-    const taskId = issueId(args);
-    if (!taskId) return { text: "origin_update_issue needs issue_id, copied from origin_list_issues.", isError: true };
+  async origin_update_issue(args, ctx) {
+    if (!trimmed(args.issue_id)) return { text: "origin_update_issue needs issue_id, copied from origin_list_issues.", isError: true };
     if (args.priority !== undefined && !PRIORITIES.has(String(args.priority))) return { text: 'priority must be "low", "medium" or "high".', isError: true };
+    const target = await resolveIssue(ctx, args, "origin_update_issue");
+    const scope = scopeOf(ctx, target.project);
+    const { taskId } = target;
     const changed: string[] = [];
     let done = typeof args.done === "boolean" ? args.done : undefined;
-    if (typeof args.column === "string" && args.column.trim()) {
+    if (trimmed(args.column)) {
       const { columns, tasks } = await board(scope);
-      const column = findColumn(columns, args.column);
+      const column = findColumn(columns, text(args.column));
       if (!column) return { text: `No such column. Columns: ${columnNames(columns)}.`, isError: true };
       if (!tasks.some((task) => task._id === taskId)) return { text: `No issue ${taskId} in this Origin project.`, isError: true };
       await scope.client.mutation("tasks:moveTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId, columnId: column._id });
@@ -221,31 +484,104 @@ const TOOLS: Record<string, (args: Args, scope: ToolScope) => Promise<OriginTool
       ...(typeof args.title === "string" ? { title: args.title } : {}),
       ...(typeof args.description === "string" ? { description: args.description } : {}),
       ...(typeof args.priority === "string" ? { priority: args.priority } : {}),
-      ...(typeof args.assignee === "string" && args.assignee.trim() ? { assignedToEmail: args.assignee.trim() } : {}),
+      ...(trimmed(args.assignee) ? { assignedToEmail: trimmed(args.assignee) } : {}),
+      ...(trimmed(args.due_date) ? { dueDate: trimmed(args.due_date) } : {}),
       ...(done !== undefined ? { done } : {}),
     };
     if (Object.keys(fields).length) {
       await scope.client.mutation("tasks:updateTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId, ...fields });
-      changed.push(...Object.keys(fields).map((key) => key === "assignedToEmail" ? "assignee" : key === "done" ? `done ${String(done)}` : key));
+      changed.push(...Object.keys(fields).map((key) => key === "assignedToEmail" ? "assignee" : key === "dueDate" ? "due date" : key === "done" ? `done ${String(done)}` : key));
     }
     if (Array.isArray(args.labels)) {
       await setLabels(scope, taskId, args.labels);
       changed.push("labels");
     }
-    if (!changed.length) return { text: "origin_update_issue changed nothing: pass at least one of title, description, priority, done, column, assignee or labels.", isError: true };
-    return { text: `Updated issue ${taskId}: ${changed.join(", ")}.` };
+    if (!changed.length) return { text: "origin_update_issue changed nothing: pass at least one of title, description, priority, done, column, assignee, due_date or labels.", isError: true };
+    return { text: `Updated issue ${taskId}: ${changed.join(", ")}.`, cards: await issueCardsFor(ctx, target, "Issue updated") };
   },
 
-  async origin_comment_issue(args, scope) {
-    const taskId = issueId(args);
-    const body = typeof args.text === "string" ? args.text.trim() : "";
-    if (!taskId || !body) return { text: "origin_comment_issue needs issue_id and text.", isError: true };
-    await scope.client.mutation("tasks:addComment", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId, body });
-    return { text: `Commented on issue ${taskId}.` };
+  async origin_comment_issue(args, ctx) {
+    const body = trimmed(args.text);
+    if (!trimmed(args.issue_id) || !body) return { text: "origin_comment_issue needs issue_id and text.", isError: true };
+    const target = await resolveIssue(ctx, args, "origin_comment_issue");
+    await ctx.client.mutation("tasks:addComment", { projectId: target.project.projectId, sessionToken: ctx.sessionToken, taskId: target.taskId, body });
+    return { text: `Commented on issue ${target.taskId}.` };
   },
 
-  async origin_list_assets(_args, scope) {
-    const result = record(await scope.client.query("design:list", { projectId: scope.projectId, sessionToken: scope.sessionToken }));
+  async origin_assign_issue(args, ctx) {
+    if (!ctx.caller.chiefOfStaff) return { text: "Only a Chief assigns Origin issues to agents. Work on the issues you were given, or ask your Chief.", isError: true };
+    const agent = resolveAgent(ctx, args.bot_id);
+    const target = await resolveIssue(ctx, args, "origin_assign_issue");
+    if (cloudProjectFor(ctx.bots, ctx.links, agent.id) !== target.project.projectId) {
+      return { text: `${agent.name} does not work on this Origin project; assign the issue to a bot of the project's team (origin_list_projects lists them).`, isError: true };
+    }
+    const scope = scopeOf(ctx, target.project);
+    const [found, name] = await Promise.all([details(scope, target.taskId), projectName(ctx, target.project.projectId)]);
+    const labels = await currentLabels(scope, target.taskId, found.task);
+    const key = originIssueKey(target.taskId);
+    if (ctx.phase !== "record") {
+      const note = trimmed(args.instructions);
+      const brief = issueBrief({
+        id: target.taskId, key, projectName: name, title: text(found.task.title), description: clip(text(found.task.description), 2_400),
+        priority: text(found.task.priority) || "medium", dueDate: text(found.task.dueDate) || undefined, labels,
+      });
+      return {
+        text: `Ready to hand ${key} to ${agent.name}.`,
+        handoff: {
+          botId: agent.id,
+          botName: agent.name,
+          message: clip(note ? `${brief}\n\nFrom ${ctx.caller.name}: ${note}` : brief, 4_000),
+          doneWhen: `${key} has a pull request linked in an issue comment and is in review or done through origin_complete_issue, or the reason it cannot be done is commented on the issue.`,
+          reason: clip(`Origin issue ${key}: ${text(found.task.title)}`, 200),
+        },
+      };
+    }
+    const label = agentLabel(agent.name);
+    await setLabels(scope, target.taskId, [...labels.filter((existing) => !existing.startsWith("agent:")), label]);
+    await ctx.client.mutation("tasks:addComment", {
+      projectId: scope.projectId, sessionToken: scope.sessionToken, taskId: target.taskId,
+      body: `Assigned to the agent ${agent.name}${agent.title ? ` (${agent.title})` : ""} by ${ctx.caller.name} in OpenMausBot.`,
+    });
+    const inProgress = found.columns.find((column) => !isDoneColumn(column) && normalizedTitle(text(column.title)) === "inprogress");
+    if (inProgress && !found.task.done && found.task.columnId !== inProgress._id) {
+      await ctx.client.mutation("tasks:moveTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId: target.taskId, columnId: inProgress._id });
+    }
+    return { text: `Labelled ${key} ${label} and commented the assignment.`, cards: await issueCardsFor(ctx, target, `Assigned to ${agent.name}`) };
+  },
+
+  async origin_complete_issue(args, ctx) {
+    const summary = trimmed(args.summary);
+    if (!trimmed(args.issue_id) || !summary) return { text: "origin_complete_issue needs issue_id and summary.", isError: true };
+    const pullRequest = trimmed(args.pull_request_url);
+    if (pullRequest && !/^https?:\/\/\S+$/i.test(pullRequest)) return { text: "pull_request_url must be an http(s) link.", isError: true };
+    const stage = args.stage === "review" ? "review" : "done";
+    const target = await resolveIssue(ctx, args, "origin_complete_issue");
+    const scope = scopeOf(ctx, target.project);
+    const { columns } = await details(scope, target.taskId);
+    await ctx.client.mutation("tasks:addComment", {
+      projectId: scope.projectId, sessionToken: scope.sessionToken, taskId: target.taskId,
+      body: `${clip(summary, 6_000)}${pullRequest ? `\n\nPull request: ${pullRequest}` : ""}`,
+    });
+    let where: string;
+    if (stage === "done") {
+      const doneColumn = columns.find(isDoneColumn);
+      if (doneColumn) await ctx.client.mutation("tasks:moveTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId: target.taskId, columnId: doneColumn._id });
+      await ctx.client.mutation("tasks:updateTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId: target.taskId, done: true });
+      where = `marked done${doneColumn ? ` in "${text(doneColumn.title)}"` : ""}`;
+    } else {
+      const configured = text((await projectDoc(ctx, scope.projectId)).githubReviewColumnId);
+      const review = columns.find((column) => column._id === configured)
+        ?? columns.find((column) => !isDoneColumn(column) && REVIEW_COLUMNS.has(normalizedTitle(text(column.title))));
+      if (review) await ctx.client.mutation("tasks:moveTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId: target.taskId, columnId: review._id });
+      where = review ? `moved to "${text(review.title)}"` : `left where it is: the project has no review column (columns: ${columnNames(columns)})`;
+    }
+    const key = originIssueKey(target.taskId);
+    return { text: `Commented on ${key} and ${where}.`, cards: await issueCardsFor(ctx, target, stage === "done" ? "Issue completed" : "Issue in review") };
+  },
+
+  async origin_list_assets(args, ctx) {
+    const project = await pickProject(ctx, args.project);
+    const result = record(await ctx.client.query("design:list", { projectId: project.projectId, sessionToken: ctx.sessionToken }));
     const assets = list(result.assets);
     const tokens = list(result.tokens);
     if (!assets.length && !tokens.length) return { text: "This Origin project has no design assets or tokens." };
@@ -258,20 +594,47 @@ const TOOLS: Record<string, (args: Args, scope: ToolScope) => Promise<OriginTool
     return { text: lines.join("\n") };
   },
 
-  async origin_vault_list(_args, scope) {
-    const rows = list(await scope.client.query("credentials:list", { projectId: scope.projectId, sessionToken: scope.sessionToken }));
+  async origin_add_asset(args, ctx) {
+    const name = trimmed(args.name);
+    const type = trimmed(args.type) || "other";
+    const url = trimmed(args.url);
+    const path = trimmed(args.path);
+    if (!name || name.length > 150) return { text: "origin_add_asset needs a name under 150 characters.", isError: true };
+    if (!ASSET_TYPES.has(type)) return { text: `type must be one of ${[...ASSET_TYPES].join(", ")}.`, isError: true };
+    if (Boolean(url) === Boolean(path)) return { text: "origin_add_asset takes either url (a link) or path (a file in your working folder), not both.", isError: true };
+    if (url && !/^https?:\/\/\S+$/i.test(url)) return { text: "url must be an http(s) link.", isError: true };
+    const project = await pickProject(ctx, args.project);
+    const base = { projectId: project.projectId, sessionToken: ctx.sessionToken, type, name, ...(trimmed(args.notes) ? { notes: trimmed(args.notes) } : {}) };
+    if (url) {
+      await ctx.client.mutation("design:createAsset", { ...base, url });
+      return { text: `Added the link "${name}" to ${await projectName(ctx, project.projectId)}'s assets.` };
+    }
+    if (!ctx.file || !ctx.client.upload) return { text: "Uploading files is not available in this conversation; pass url instead.", isError: true };
+    const file = await ctx.file(path).catch((error: unknown) => refuse(`Could not read ${clip(path, 200)}: ${error instanceof Error ? error.message : String(error)}.`));
+    if (file.data.byteLength > ORIGIN_ASSET_MAX_BYTES) return { text: `${file.name} is over 15 MB, the limit for an Origin asset.`, isError: true };
+    const uploadUrl = text(await ctx.client.mutation("design:generateUploadUrl", { projectId: project.projectId, sessionToken: ctx.sessionToken }));
+    const storageId = await ctx.client.upload(uploadUrl, file.data, file.contentType);
+    await ctx.client.mutation("design:createAsset", { ...base, storageId, contentType: file.contentType, size: file.data.byteLength });
+    return { text: `Uploaded ${file.name} (${file.data.byteLength} bytes) as "${name}" to ${await projectName(ctx, project.projectId)}'s assets.` };
+  },
+
+  async origin_vault_list(args, ctx) {
+    const project = await pickProject(ctx, args.project);
+    const rows = list(await ctx.client.query("credentials:list", { projectId: project.projectId, sessionToken: ctx.sessionToken }));
     if (!rows.length) return { text: "This Origin project's vault is empty." };
     const lines = rows.map((row) => {
       const parts = [text(row.title), text(row.kind) || "secret", text(row.username) && `username ${text(row.username)}`, text(row.url)];
       return `- ${parts.filter(Boolean).join(" · ")}`;
     });
-    return { text: `Vault entries (metadata only; values are encrypted and not readable here; ask the person to hand you one with request_credential if needed):\n${lines.join("\n")}` };
+    return { text: `Vault entries (metadata only; values are encrypted with a passphrase only the person holds and cannot be read here; ask the person to hand you one with request_credential if needed):\n${lines.join("\n")}` };
   },
 
-  async origin_repo_status(_args, scope) {
+  async origin_repo_status(args, ctx) {
+    const project = await pickProject(ctx, args.project);
+    const scope = scopeOf(ctx, project);
     const base = { projectId: scope.projectId, sessionToken: scope.sessionToken };
-    const [project, pulls, commits, { tasks }] = await Promise.all([
-      scope.client.query("projects:get", base).then(record),
+    const [doc, pulls, commits, { tasks }] = await Promise.all([
+      projectDoc(ctx, scope.projectId),
       scope.client.query("github:listPullRequests", base).then(list),
       scope.client.query("commits:list", base).then(list),
       board(scope),
@@ -283,7 +646,7 @@ const TOOLS: Record<string, (args: Args, scope: ToolScope) => Promise<OriginTool
       scope.client.query("taskPRs:list", { sessionToken: scope.sessionToken, taskId: task._id }).then((rows) => list(rows).map((row): Args => ({ ...row, issueId: task._id }))).catch(() => [])))).flat();
     const byUrl = new Map(linked.map((row) => [text(row.url), row]));
     const open = pulls.filter((pr) => pr.state === "open");
-    const lines = [`Repository: ${text(project.repoUrl) || "none linked to this Origin project"}`];
+    const lines = [`Repository: ${text(doc.repoUrl) || "none linked to this Origin project"}`];
     lines.push(open.length ? `Open pull requests (${open.length}):` : "No open pull requests.");
     for (const pr of open) {
       const task = byUrl.get(text(pr.url));
@@ -308,22 +671,29 @@ export interface OriginToolDeps {
   bots: readonly ProjectBot[];
   state: OriginCloudState;
   connect(url: string): OriginCloudClient;
+  /** Reads a file the calling turn may share, for origin_add_asset. */
+  file?(path: string): Promise<OriginAssetFile>;
 }
 
-export async function runOriginTool(name: string, args: Args, botId: string, deps: OriginToolDeps): Promise<OriginToolResult> {
+export async function runOriginTool(name: string, args: Args, botId: string, deps: OriginToolDeps, phase?: "record"): Promise<OriginToolResult> {
   const tool = TOOLS[name];
   if (!tool) return { text: `Unknown Origin tool: ${name}`, isError: true };
   const { url, sessionToken } = deps.state;
   if (!url || !sessionToken) {
     return { text: "Origin is not connected. Ask the person to sign in to Origin in OpenMausBot first; do not retry until they have.", isError: true };
   }
-  const projectId = cloudProjectFor(deps.bots, deps.state.projects, botId);
-  if (!projectId) {
+  const caller = deps.bots.find((bot) => bot.id === botId);
+  const reachable = reachableCloudProjects(deps.bots, deps.state.projects, botId);
+  if (!caller || !reachable.length) {
     return { text: "This bot has no linked Origin project, and neither does its team's Chief. Ask the person to link this bot or its Chief to an Origin project.", isError: true };
   }
   try {
-    return await tool(args, { client: deps.connect(url), sessionToken, projectId });
+    return await tool(args, {
+      client: deps.connect(url), sessionToken, bots: deps.bots, links: deps.state.projects, caller, reachable,
+      ...(phase ? { phase } : {}), ...(deps.file ? { file: deps.file } : {}), projectDocs: new Map(),
+    });
   } catch (error) {
+    if (error instanceof OriginRefusal) return { text: error.message, isError: true };
     const message = convexMessage(error);
     const hint = message === "Login required" ? " The Origin sign-in has expired; ask the person to sign in to Origin again." : "";
     return { text: `Origin refused ${name}: ${message}.${hint}`, isError: true };
@@ -344,26 +714,46 @@ function deploymentUrl(value: unknown): string | null {
   }
 }
 
+/** The agents turn an internal capability belongs to. */
+export interface OriginAgentTurn {
+  botId: string;
+  threadId: string;
+}
+
 export interface OriginCloudRouteDeps {
-  store: Pick<Store, "bot" | "bots">;
-  /** The bot an agents-kind internal turn capability in this Authorization header belongs to, or null. */
-  agentBotId(authorization: string | string[] | undefined): string | null;
+  store: Pick<Store, "bot" | "bots" | "appendMessage" | "groupByThread">;
+  /** The turn of the agents-kind internal capability in this Authorization header, or null. */
+  agentTurn(authorization: string | string[] | undefined): OriginAgentTurn | null;
+  /** Reads a file the turn may share (its bot's working folders), for origin_add_asset. */
+  turnFile?(turn: OriginAgentTurn, path: string): Promise<OriginAssetFile>;
   file?: string;
   connect?: (url: string) => OriginCloudClient;
 }
 
 export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandler {
-  const { store, agentBotId } = deps;
+  const { store, agentTurn } = deps;
   const file = () => deps.file ?? defaultOriginCloudFile();
   const connect = deps.connect ?? convexOriginClient;
   return async ({ req, res, path, method, auth, json, readBody }) => {
     if (method === "POST" && path === "/api/internal/origin/tool") {
-      const botId = agentBotId(req.headers.authorization);
-      if (!botId || !store.bot(botId)) return json(res, 401, { error: "unauthorized" });
+      const turn = agentTurn(req.headers.authorization);
+      const bot = turn ? store.bot(turn.botId) : null;
+      if (!turn || !bot) return json(res, 401, { error: "unauthorized" });
       const body = record(await readBody(req));
       const name = text(body.name);
       if (!ORIGIN_SERVER_TOOL_NAMES.has(name)) return json(res, 400, { error: `Unknown Origin tool: ${name}` });
-      return json(res, 200, await runOriginTool(name, record(body.arguments), botId, { bots: store.bots, state: readOriginCloud(file()), connect }));
+      const phase = body.phase === "record" && name === "origin_assign_issue" ? "record" : undefined;
+      const readFile = deps.turnFile ? (requested: string) => deps.turnFile!(turn, requested) : undefined;
+      const result = await runOriginTool(name, record(body.arguments), turn.botId, {
+        bots: store.bots, state: readOriginCloud(file()), connect, ...(readFile ? { file: readFile } : {}),
+      }, phase);
+      if (result.cards && !result.isError) {
+        const card: Omit<Message, "id" | "at"> = { role: "bot", kind: "activity", tool: { name, ok: true }, originIssues: result.cards };
+        if (store.groupByThread(turn.threadId)) card.from = { botId: bot.id, name: bot.name, color: bot.color };
+        store.appendMessage(turn.threadId, card);
+      }
+      const { cards: _cards, ...answer } = result;
+      return json(res, 200, answer);
     }
     if (path === "/api/origin/cloud-session" && method === "GET") {
       const { url, sessionToken } = readOriginCloud(file());

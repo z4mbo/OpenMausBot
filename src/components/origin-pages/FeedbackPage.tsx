@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 import { feedbackLink, useAppAddress } from "@/lib/origin-members";
 import type { CloudBoard, CloudFeedbackEntry, CloudFeedbackPortal, CloudPerson, CloudProject } from "./cloud-types";
 import { fmtDate, taskKey } from "./repo-url";
-import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, Segmented, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 export type FeedbackPageProps = OriginPageProps & {
   onOpenIssue?(taskId: string): void;
@@ -21,7 +21,7 @@ export function FeedbackPage({ onOpenIssue, ...props }: FeedbackPageProps) {
     <CloudGate {...props} label="Feedback">
       {({ project, projectId, canEdit, isAdmin }) => project.teamId
         ? <Feedback project={project} teamId={project.teamId} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenIssue={onOpenIssue} />
-        : <EmptyState icon={<MessageSquareHeart size={28} />} title="Feedback needs a workspace project" body="Move this project into an Origin workspace to collect feedback." />}
+        : <EmptyState icon={<MessageSquareHeart size={22} />} title="Feedback needs a workspace project" body="Move this project into a shared workspace to collect feedback." />}
     </CloudGate>
   );
 }
@@ -47,7 +47,7 @@ function Feedback({ project, teamId, projectId, canEdit, isAdmin, onOpenIssue }:
   };
 
   return (
-    <section className="flex-1 overflow-y-auto p-6" aria-label="Feedback">
+    <section className={pageClass} aria-label="Feedback">
       <PageHeader title="Feedback" count={entries ? entries.length : undefined}>
         {portal && <Segmented label="Feedback status" value={filter} onChange={setFilter}
           options={[{ value: "open", label: "Open" }, { value: "completed", label: "Completed" }, { value: "dismissed", label: "Dismissed" }, { value: "all", label: "All" }]} />}
@@ -73,10 +73,10 @@ function Feedback({ project, teamId, projectId, canEdit, isAdmin, onOpenIssue }:
       {notice && <div className="mb-3"><Notice>{notice}</Notice></div>}
 
       {!portal ? (
-        <EmptyState icon={<MessageSquareHeart size={28} />} title="Feedback is private until you enable a form"
+        <EmptyState icon={<MessageSquareHeart size={22} />} title="Feedback is private until you enable a form"
           body="Turn on a public form and people can send bugs and ideas for this project without an account."
           action={isAdmin ? <button type="button" className={primaryButton} onClick={() => setSettings(true)}>Set up feedback</button> : undefined} />
-      ) : !visible ? <Loading label="Loading entries" /> : !visible.length ? (
+      ) : !visible ? <Loading label="Loading entries" variant="inline" /> : !visible.length ? (
         <EmptyState icon={<MessageSquareHeart size={24} />} title="No feedback here yet" />
       ) : (
         <div className="flex flex-col gap-3">
@@ -160,12 +160,12 @@ function ConvertFeedback({ teamId, projectId, entry, onClose, onCreated }: { tea
       <form onSubmit={submit} className="flex flex-col gap-3">
         <strong className="text-[13px] text-ink">{entry.title}</strong>
         <Field label="Column">
-          <Select className={inputClass} required value={columnId} onChange={(e) => setColumn(e.target.value)}>
+          <Select className="w-full" required value={columnId} onChange={(e) => setColumn(e.target.value)}>
             {columns.map((item) => <option key={item._id} value={item._id}>{item.title}</option>)}
           </Select>
         </Field>
         <Field label="Assigned to">
-          <Select className={inputClass} required value={assignee} onChange={(e) => setAssignee(e.target.value)}>
+          <Select className="w-full" required value={assignee} onChange={(e) => setAssignee(e.target.value)}>
             <option value="">Choose a member</option>
             {people?.map((person) => <option key={person.email} value={person.email}>{person.name || person.email}</option>)}
           </Select>

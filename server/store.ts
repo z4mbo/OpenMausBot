@@ -119,6 +119,11 @@ function redactBotAuthored<T extends Omit<Message, "id" | "at"> & { at?: number 
     title: redactSecretsInText(out.dataResult.title),
     ...(out.dataResult.sql === undefined ? {} : { sql: redactSecretsInText(out.dataResult.sql) }),
   };
+  if (out.originIssues) out.originIssues = {
+    ...out.originIssues,
+    heading: redactSecretsInText(out.originIssues.heading),
+    issues: out.originIssues.issues.map((issue) => ({ ...issue, title: redactSecretsInText(issue.title) })),
+  };
   if (typeof out.text === "string") out.text = redactSecretsInText(out.text);
   if (out.compaction) out.compaction = { ...out.compaction, summary: redactSecretsInText(out.compaction.summary) };
   if (out.tool?.name) {

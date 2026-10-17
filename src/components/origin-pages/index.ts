@@ -1,5 +1,5 @@
 export { AssignIssueDialog, issueBrief } from "./AssignIssueDialog";
-export { IssuesPage, type AssignableIssue, type IssuesPageProps } from "./IssuesPage";
+export { IssuesPage, TaskCard, type AssignableIssue, type IssuesPageProps } from "./IssuesPage";
 export { AssetsPage } from "./AssetsPage";
 export { VaultPage } from "./VaultPage";
 export { RepoPage } from "./RepoPage";

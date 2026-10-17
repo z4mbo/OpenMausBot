@@ -27,9 +27,11 @@ const render = (Page: ComponentType<{ cloudProjectId: string | null; projectName
   renderToStaticMarkup(createElement(Page, { cloudProjectId, projectName: "Demo" }));
 
 describe("origin pages", () => {
-  it.each(all)("%s asks to connect a project that has no cloud id", (_name, Page) => {
+  it.each(all)("%s offers to set up a project that has no cloud id, never to connect to a separate site", (_name, Page) => {
     cloud.signedIn = true;
-    expect(render(Page, null)).toContain("Connect this project to Origin");
+    const html = render(Page, null);
+    expect(html).toContain("Set up Demo");
+    expect(html).not.toMatch(/Connect this project|lives? only on Origin/);
   });
 
   it.each(all)("%s asks to sign in without a session", (_name, Page) => {
@@ -37,8 +39,10 @@ describe("origin pages", () => {
     expect(render(Page, "p1")).toContain("Sign in to Origin");
   });
 
-  it.each(all)("%s shows a loading state while the project loads", (_name, Page) => {
+  it.each(all)("%s shows a skeleton while the project loads", (_name, Page) => {
     cloud.signedIn = true;
-    expect(render(Page, "p1")).toContain('role="status"');
+    const html = render(Page, "p1");
+    expect(html).toContain('role="status"');
+    expect(html).not.toContain("animate-spin");
   });
 });

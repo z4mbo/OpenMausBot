@@ -50,6 +50,7 @@ import { currentCall } from "@/lib/call";
 import { readLastConversation, rememberConversation } from "@/lib/last-conversation";
 import { readLastBotSection, rememberBotSection } from "@/lib/last-bot-section";
 import { showNotification } from "@/lib/notify";
+import { inArchivedProject } from "@/lib/origin-archived";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { speaker } from "@/lib/tts";
 import { roleProfilePatch, type BotRole } from "@/lib/bot-roles";
@@ -182,6 +183,7 @@ export interface Message extends Pick<import("../../shared/wire").WireMessage, "
   comm?: { groupId: string; threadId?: string; withBotId: string; withName: string; withColor: MausColor };
   threadRef?: { botId: string; threadId: string; title: string };
   dataResult?: import("../../shared/wire").WireMessage["dataResult"];
+  originIssues?: import("../../shared/wire").WireMessage["originIssues"];
   queued?: boolean;
   queueId?: string;
 }
@@ -1249,7 +1251,7 @@ export function reducer(state: AppState, action: Action): AppState {
       return withMascotMotion({
         ...state,
         // The HTTP response and its SSE broadcast race; fold both without showing the bot twice.
-        bots: [action.bot, ...state.bots.filter((bot) => bot.id !== action.bot.id)],
+        bots: [action.bot.messages ? action.bot : { ...action.bot, messages: [] }, ...state.bots.filter((bot) => bot.id !== action.bot.id)],
         ...(action.preserveSelection ? {} : { activeView: "chat" as const, selectedId: action.bot.id }),
       }, action.bot.id, "arrive");
     case "deleteBot": {
@@ -3442,7 +3444,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
         case "notify":
           // The wrapped dispatch: only it PATCHes unread:false back to the server.
-          showNotification(
+          if (!inArchivedProject(stateRef.current.bots.find((bot) => bot.id === frame.notification.botId))) showNotification(
             frame.notification,
             (target) => openNotificationTarget(dispatch, target, stateRef.current, showThreadsRef.current),
             stateRef.current.bots.find((bot) => bot.id === frame.notification.botId)?.avatarUrl,
