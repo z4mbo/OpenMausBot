@@ -2,6 +2,8 @@
 
 The user expanded the active goal on 2026-10-17: after the deep inspection, update everything and push online. This supersedes the earlier restriction against deployment. The active goal remains unfinished until inspection, verification and delivery are complete.
 
+On 2026-10-18 the user requested continued productive iterations until the weekly usage allowance is exhausted, and a visible app preview with explanations of changes while work proceeds. Finish each verified release before beginning the next improvement cycle. Do not manufacture activity to consume usage, purchase credits, or use an account reset. Keep the goal active across completed release cycles while allowance remains.
+
 ## Required outcome
 
 - Inspect the complete monorepo, including concurrent main-checkout changes read-only, with specialist agents working in waves.
@@ -13,6 +15,7 @@ The user expanded the active goal on 2026-10-17: after the deep inspection, upda
 - Build and publish matching Windows and macOS downloads and updater feeds, deploy the landing page and required backend changes through the documented release process, and verify public versions, links and artifact hashes.
 - Record every adopted or deferred upstream OpenMausBot PR. Continue the daily review at 06:00 Europe/Rome, staying quiet when unchanged.
 - Finish with bug scenarios, severity, source locations, fix commits, UI evidence, delivery results and explicit remaining limitations.
+- Keep isolated, synthetic app previews visible while working. Show before/after images for visible changes and explain their effect; keep those fixtures separate from automated-test fixtures and personal data.
 
 ## Isolation and authority
 

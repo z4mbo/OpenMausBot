@@ -1,8 +1,10 @@
-# Origin 0.2.3 delivery
+# Origin 0.2.4 delivery
 
 Delivery is in progress. This record distinguishes published artifacts, deployed services and isolated verification. The review PR stays open; no product task PR was merged.
 
-## Build and artifact identity
+The current candidate is 0.2.4. The 0.2.3 binaries and private website image below were verified but never published; a subsequent malformed-URL credential privacy fix and final source extractions require matching new desktop builds. No 0.2.3 promotion script is eligible for execution.
+
+## Unshipped 0.2.3 build evidence
 
 - Desktop source: `67e7a7934f2b762a6c20886ea675f7c57d4f2184`, annotated tag `origin-v0.2.3`.
 - [Native build run](https://github.com/z4mbo/Origin/actions/runs/39074949599): Windows x64, macOS arm64 and macOS x64 succeeded, including packaged smoke checks and feed validation.
