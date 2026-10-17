@@ -165,7 +165,7 @@ function PasswordChanger() {
       <input className={inputClass} type="password" autoComplete="new-password" placeholder="New password, 10 characters or more" aria-label="New password" value={next} onChange={(event) => setNext(event.target.value)} />
       {action.error && <Notice tone="danger">{action.error}</Notice>}
       <div className="flex justify-end gap-2">
-        <button type="button" className={ghostButton} onClick={() => setOpen(false)}>Cancel</button>
+        <button type="button" className={ghostButton} onClick={() => { setCurrent(""); setNext(""); action.setError(""); setOpen(false); }}>Cancel</button>
         <button type="submit" className={primaryButton} disabled={action.busy || !current || next.length < 10}>Save password</button>
       </div>
     </form>
