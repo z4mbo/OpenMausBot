@@ -366,10 +366,10 @@ function Attachment({ file, target }: { file: MemberChatAttachment; target: Real
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(link.href), 10_000);
   };
-  if (image && url) return <img src={url} alt={file.name} className="max-h-60 max-w-[320px] rounded-lg border border-hairline/40 object-contain" />;
+  if (image && url) return <img src={url} alt={file.name} className="min-w-0 max-h-60 max-w-[min(100%,320px)] rounded-lg border border-hairline/40 object-contain" />;
   return (
-    <button type="button" onClick={() => void download().catch(() => {})} className="flex items-center gap-1.5 rounded-lg border border-hairline/50 bg-panel px-2.5 py-1.5 text-[12.5px] text-ink hover:bg-raised">
-      <Download size={13} />{file.name}<span className="text-ink-tertiary">{Math.max(1, Math.round(file.size / 1024))} KB</span>
+    <button type="button" onClick={() => void download().catch(() => {})} className="flex min-w-0 max-w-full items-center gap-1.5 rounded-lg border border-hairline/50 bg-panel px-2.5 py-1.5 text-[12.5px] text-ink hover:bg-raised">
+      <Download size={13} className="shrink-0" /><span className="min-w-0 truncate" title={file.name}>{file.name}</span><span className="shrink-0 whitespace-nowrap text-ink-tertiary">{Math.max(1, Math.round(file.size / 1024))} KB</span>
     </button>
   );
 }
