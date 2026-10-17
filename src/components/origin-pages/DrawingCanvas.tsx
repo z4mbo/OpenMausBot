@@ -8,6 +8,7 @@ import "@excalidraw/excalidraw/index.css";
 import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
 import { cloudUrl, sessionStore } from "@/lib/origin-cloud/client";
 import { drawingOutbox } from "@/lib/origin-drawing-outbox";
+import { usePopoverDismiss } from "@/hooks/use-popover-dismiss";
 import { useColorScheme } from "@/lib/color-scheme";
 import { composeMessage, imageAttachmentFromFile } from "@/lib/composer-attachments";
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
@@ -270,15 +271,28 @@ function AskAgent({ agent, canvas, name }: { agent: Bot; canvas: ExcalidrawImper
   const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const exporting = useRef(false);
+  const generation = useRef(0);
+  const root = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const close = () => { generation.current++; exporting.current = false; setBusy(false); setOpen(false); };
+  const dismiss = () => { close(); trigger.current?.focus(); };
+  usePopoverDismiss(open, root, close);
+  useEffect(() => () => { generation.current++; }, []);
   const send = async (event: FormEvent) => {
     event.preventDefault();
+    if (exporting.current) return;
     const elements = canvas.getSceneElements();
     if (!elements.length) { setError("Draw something first"); return; }
+    exporting.current = true;
+    const request = ++generation.current;
     setBusy(true);
     setError("");
     try {
       const blob = await exportToBlob({ elements, appState: { ...canvas.getAppState(), exportBackground: true, viewBackgroundColor: "#ffffff", exportWithDarkMode: false }, files: canvas.getFiles(), mimeType: "image/png", maxWidthOrHeight: 1600, exportPadding: 32 });
+      if (request !== generation.current) return;
       const image = await imageAttachmentFromFile(new File([blob], `${name.replace(/[^\w -]+/g, "").trim() || "canvas"}.png`, { type: "image/png" }));
+      if (request !== generation.current) return;
       if (!image) throw new Error("Could not attach the snapshot");
       const words = canvasWords(canvas);
       const asked = question.trim() || "What do you make of this sketch? Point out gaps, risks and next steps.";
@@ -289,32 +303,32 @@ function AskAgent({ agent, canvas, name }: { agent: Bot; canvas: ExcalidrawImper
       openOriginPage(null);
       openBot(dispatch, agent, showThreads);
     } catch (cause) {
-      setError(errorText(cause, "Could not share the canvas"));
+      if (request === generation.current) setError(errorText(cause, "Could not share the canvas"));
     } finally {
-      setBusy(false);
+      if (request === generation.current) { exporting.current = false; setBusy(false); }
     }
   };
   return (
-    <div className="relative">
-      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
+    <div ref={root} className="relative">
+      <button ref={trigger} type="button" aria-label={`Ask ${agent.name}`} aria-expanded={open} onClick={() => open ? close() : setOpen(true)}
         className={cn("group flex h-8 items-center gap-1.5 rounded-full border border-accent/35 bg-accent/10 py-1 pl-1 pr-3 text-[12.5px] font-medium text-accent-text outline-none transition-[background-color,transform] hover:bg-accent/20 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent/60", open && "bg-accent/20")}>
         <BotAvatar bot={agent} size={22} animated={false} />
         <Sparkles size={13} aria-hidden="true" className="transition-transform duration-150 group-hover:rotate-12" />Ask {agent.name}
       </button>
       {open && (
         <form onSubmit={(event) => void send(event)} aria-label={`Ask ${agent.name} about this canvas`}
-          className="absolute right-0 top-full z-40 mt-2 flex w-[min(340px,calc(100vw-24px))] origin-top-right flex-col gap-2.5 rounded-2xl border border-hairline/60 bg-menu p-3 animate-pop-in">
+          onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); dismiss(); } }}
+          className="absolute right-0 top-full z-40 mt-2 flex w-[min(340px,calc(100vw-24px))] origin-top-right flex-col gap-2.5 rounded-xl border border-hairline/60 bg-menu p-3 animate-pop-in">
           <div className="flex items-center gap-2">
             <BotAvatar bot={agent} size={26} />
             <div className="min-w-0 flex-1">
               <strong className="block truncate text-[13px] text-ink">Ask {agent.name}</strong>
             </div>
-            <button type="button" className={iconButton} aria-label="Close" onClick={() => setOpen(false)}><X size={14} /></button>
+            <button type="button" className={iconButton} aria-label="Close" onClick={dismiss}><X size={14} /></button>
           </div>
           <textarea autoFocus rows={3} className={cn(inputClass, "resize-none")} aria-label="Question" placeholder="What do you make of this sketch?" value={question} disabled={busy}
             onChange={(event) => setQuestion(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === "Escape") setOpen(false);
               if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); }
             }} />
           {error && <Notice tone="danger">{error}</Notice>}

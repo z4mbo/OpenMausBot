@@ -96,3 +96,21 @@ it("abandons an upload URL when its account changes before the URL arrives", asy
   expect(fixture.mutation.mock.calls.some(([name]) => name === "draw:saveFile")).toBe(false);
 });
 
+it("exports only one agent snapshot when submit events arrive before the busy render", () => {
+  fixture.export.mockReturnValue(new Promise(() => {}));
+  mount("ask-duplicate", true);
+  flushSync(() => host.querySelector<HTMLButtonElement>('[aria-expanded="false"]')!.click());
+  const form = host.querySelector("form")!;
+  flushSync(() => { form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); });
+  expect(fixture.export).toHaveBeenCalledOnce();
+});
+
+it("cancels a pending snapshot when its popover closes", async () => {
+  const image = Promise.withResolvers<Blob>(); fixture.export.mockReturnValue(image.promise);
+  mount("ask-cancel", true);
+  flushSync(() => host.querySelector<HTMLButtonElement>('[aria-expanded="false"]')!.click());
+  flushSync(() => host.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
+  flushSync(() => host.querySelector<HTMLButtonElement>('[aria-label="Close"]')!.click());
+  image.resolve(new Blob(["snapshot"], { type: "image/png" })); await vi.advanceTimersByTimeAsync(0);
+  expect(fixture.attach).not.toHaveBeenCalled(); expect(fixture.dispatch).not.toHaveBeenCalled();
+});
