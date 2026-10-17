@@ -200,11 +200,16 @@ export const acceptInviteAccount = internalMutation({
           .unique();
     const invite = projectInvite ?? teamInvite;
     if (!invite || invite.status !== "invited") throw new Error("Invite not found");
+    const project = projectInvite ? await ctx.db.get(projectInvite.projectId) : null;
+    if (projectInvite && !project) throw new Error("Project no longer exists");
+    const teamId = project?.teamId ?? teamInvite?.teamId;
+    if (teamId && !await ctx.db.get(teamId)) throw new Error("Workspace no longer exists");
 
     const now = Date.now();
     const email = normalizeEmail(invite.email);
     let user = await getUserByEmail(ctx, email);
     if (user) {
+      if (user.status !== "active") throw new Error("Account is unavailable");
       if (!(await verifyPassword(user, args.password))) throw new Error("Existing account password is wrong");
       await ctx.db.patch(user._id, { name: args.name.trim() || user.name, updatedAt: now });
     } else {
@@ -230,9 +235,16 @@ export const acceptInviteAccount = internalMutation({
     };
 
     if (projectInvite) {
+      if (project?.teamId) {
+        const membership = await ctx.db.query("teamMembers").withIndex("by_team_email", q => q.eq("teamId", project.teamId!).eq("email", email)).unique();
+        if (membership?.userId && membership.userId !== user._id) throw new Error("Workspace membership belongs to another account");
+        const fields = { ...patch, role: projectInvite.role === "viewer" ? "viewer" as const : "member" as const };
+        if (!membership) await ctx.db.insert("teamMembers", { teamId: project.teamId, ...fields, createdAt: now });
+        else if (membership.status !== "active") await ctx.db.patch(membership._id, fields);
+      }
       await ctx.db.patch(projectInvite._id, patch);
       const sessionToken = await createSession(ctx, user._id);
-      return { sessionToken, user: publicUser(user), projectId: projectInvite.projectId, teamId: null };
+      return { sessionToken, user: publicUser(user), projectId: projectInvite.projectId, teamId: project?.teamId ?? null };
     }
 
     if (!teamInvite) throw new Error("Invite not found");
