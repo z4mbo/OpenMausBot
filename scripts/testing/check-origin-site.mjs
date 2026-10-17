@@ -17,7 +17,7 @@ try {
   for (const colorScheme of ["light", "dark"]) {
     for (const width of [375, 1440]) {
       const context = await browser.newContext({ viewport: { width, height: 900 }, colorScheme, reducedMotion: "reduce" });
-      await context.routeWebSocket("ws://127.0.0.1:20689/**", socket => socket.onMessage(() => {}));
+      await context.routeWebSocket("**", socket => socket.onMessage(() => {}));
       const page = await context.newPage();
       page.on("pageerror", error => evidence.pageErrors.push(error.message));
       await page.route("**/*", route => {

@@ -6,9 +6,11 @@ The website's `/whats-new` page reads `shared/origin-releases.ts`. Footer/downlo
 
 ## Browser evidence
 
-The isolated Next server ran on `http://127.0.0.1:3017`, with `NEXT_PUBLIC_CONVEX_URL=http://127.0.0.1:20689` pointing to an unused synthetic endpoint. The browser intercepted that WebSocket; no account was created and no production/local Convex deployment was contacted. External requests were blocked in the reproducible after check.
+The isolated Next development server ran on `http://127.0.0.1:3017`, with `NEXT_PUBLIC_CONVEX_URL=http://127.0.0.1:20689` pointing to an unused synthetic endpoint. Its browser intercepted that WebSocket; no account was created and no production/local Convex deployment was contacted. External HTTP requests were blocked.
 
-Before screenshots cover landing, sign-in and sign-up at 375/1440 px in light/dark. Final after checks use the 2026-10-18 version 0.2.2 changelog and cover those routes plus release history: 16 cases, zero page errors, no horizontal overflow, mobile menu Escape, password visibility, named fields and Windows download target. Full-page after screenshots include the lower landing sections and footer. Evidence is in `evidence/origin-site/`: `*-before.png`, `*-after-full.png`, `before-results.json` and `after-full-results.json`. The new release-history page has no pre-existing screen to compare.
+Before screenshots cover landing, sign-in and sign-up at 375/1440 px in light/dark. Final after checks use the 2026-10-18 version 0.2.3 changelog and cover those routes plus release history: 16 cases, zero page errors, no horizontal overflow, mobile menu Escape, password visibility, named fields and Windows download target. Full-page after screenshots include the lower landing sections and footer. Evidence is in `evidence/origin-site/`: `*-before.png`, `*-after-full.png`, `before-results.json` and `after-full-results.json`. The new release-history page has no pre-existing screen to compare.
+
+The final production Docker image was built with the intended public Convex endpoints and tested before rollout through a private loopback container and SSH tunnel at `http://127.0.0.1:3033/`. All WebSockets are intercepted without forwarding, and non-loopback HTTP requests are blocked. Both final 16-case runs (`after` and `production-image`) pass with zero page errors. The tests never submit an account form. `production-image-full-results.json` and matching screenshots record this compiled-artifact check; they do not prove live account authentication.
 
 ```powershell
 $env:NEXT_PUBLIC_CONVEX_URL = 'http://127.0.0.1:20689'

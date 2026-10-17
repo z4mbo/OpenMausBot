@@ -1,6 +1,6 @@
 {
-  "previewUrl": "http://127.0.0.1:3017/",
-  "version": "0.2.2",
+  "previewUrl": "http://127.0.0.1:3033/",
+  "version": "0.2.3",
   "cases": [
     {
       "path": "/",
