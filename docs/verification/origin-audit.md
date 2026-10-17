@@ -2,7 +2,7 @@
 
 This audit implements the user's expanded [delivery goal](origin-delivery-goal.md). Work is isolated in `C:\Users\aless\Documents\Origin-bugfix`, branch `bugfix/scan`, from `origin-integration` commit `04da48583`. The concurrent main checkout was inspected read-only. Its live servers and local Convex process were not used for mutation tests.
 
-The audit is still in progress. Source fixes, synthetic backend tests, browser fixtures, packaged acceptance and production delivery are separate evidence boundaries. Version 0.2.3 is being prepared; this document does not yet claim it has been published. The unshipped 0.2.2 build was cancelled after the final attachment check found another layout defect; its public source tag remains as a historical checkpoint.
+The audit is still in progress. Source fixes, synthetic backend tests, browser fixtures, packaged acceptance and production delivery are separate evidence boundaries. Version 0.2.4 is being prepared; this document does not yet claim it has been published. Versions 0.2.2 and 0.2.3 were never shipped. Their source tags remain historical checkpoints; the 0.2.4 candidate includes a subsequent malformed-URL credential privacy fix and the final CI corrections.
 
 ## Bug register
 
@@ -54,6 +54,7 @@ Locations identify the affected implementation at the fix checkpoint. Each row l
 | P2 | `src/components/origin-pages/TeamChatPage.tsx:369` | A wide image exceeds a 303 px mobile message column; a 204-character filename creates a 1,326 px chat scroller at 375 px. Document-only overflow checks miss this inner scroller. | `405505637`: bound images and file buttons to the message width, truncate only the displayed name, preserve full download names/bytes. Eight before/after browser cases inspect every horizontal scroller. |
 | P3 | `cloudflare/control-plane/src/highlevel.ts:29`, `cloudflare/control-plane/test/highlevel.test.ts:299` | A wrong-state test sometimes changes only unused Base64URL pad bits, leaving the same decoded bytes and failing CI. Alternate wire spellings are also admitted. | `49320a321`: require canonical 32-byte state encodings and mutate significant bytes in the test. Two deterministic alias regressions fail before; all 132 workerd tests, typecheck and local dry-run pass. This is an encoding-contract issue, not token forgery. |
 | P1 | `scripts/deploy-origin.mjs:128` | Replacing the staged website drops untracked `deploy/` relay configuration; the fixed `.new` path can delete another operator's staging, and a global image prune affects unrelated services. | `d620d1af6`: preserve operator configuration, use unique guarded paths, target Origin alone and retain rollback state. Five actual-shell regressions fail before and pass after. |
+| P2 | `scripts/mcp-url.ts:5` | A malformed URL such as `https://member:<password>@[` makes URL validation echo the complete address, disclosing the embedded password in an error. | `d4df57e33`: return a generic malformed-address error and retain the existing public validation export. The synthetic-credential regression fails before; all 40 MCP tests pass after. |
 
 ## UI/UX evidence
 
@@ -68,7 +69,13 @@ Locations identify the affected implementation at the fix checkpoint. Each row l
 | Landing, login, signup and release history | Shared core palette, Inter, radii, flat borders, focus, mobile menus and wrapping footer; shared release history. | [Website inspection](origin-site.md); `8244073b9`; 12 before cases and 16 full-page after cases. |
 | Inspection infrastructure | Concurrent previews had a shared Vite dependency cache, causing 504 optimized dependency failures. | `6ce780407`: isolate caches per disposable fixture. Checkers verify the expected fixture entry before interaction, protecting against stale port reuse. |
 
-The [screenshot index](origin-screenshots.md) links 208 matched before/after pairs. The component inventory is in `evidence/origin-ui/component-inventory.json`. An inventory entry is source coverage, not proof of every interactive branch. The individual reports state the exercised states and remaining acceptance boundaries.
+The [screenshot index](origin-screenshots.md) links 208 matched before/after pairs. The component inventory is in `evidence/origin-ui/component-inventory.json`. An inventory entry is source coverage, not proof of every interactive branch. The individual reports state the exercised states and remaining acceptance boundaries. Dedicated synthetic core and populated project-page previews remain visible while work proceeds; automated tests use different fixture processes and ports.
+
+## Source-size guard corrections
+
+The final extraction commits move bot creation, request identity, administrative audit recording, schedule normalization, archived-agent controls, chat menus, send controls, motion, text direction and routine retention into cohesive modules. Existing size budgets only decrease; the 2,000-line cap is unchanged. The tracked-source guard passes after the new modules are committed.
+
+Four existing fork modules between 1,000 and 2,000 lines are registered under the guard's explicit new-entry rule: `server/drivers/agents-catalog.ts` keeps its external-tool schema contract together; `server/origin-cloud.ts` keeps the typed cloud/authentication bridge together; `src/components/origin-pages/CallPage.tsx` keeps its media/session lifecycle together; and `src/components/zap-dots/scene.ts` preserves the vendor-derived graphics unit and constants. These registrations expose their size to future checks. They do not raise an existing budget or exempt a file from the cap.
 
 ## Verification and delivery status
 
