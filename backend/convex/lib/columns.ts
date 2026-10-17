@@ -6,3 +6,7 @@ export function normalizeColumnTitle(title: string) {
 export function isDraftColumn(column: { title: string; isDraft?: boolean }) {
   return column.isDraft ?? normalizeColumnTitle(column.title) === "draft";
 }
+
+export function isDoneColumn(column: { title: string; isDone?: boolean }) {
+  return column.isDone ?? normalizeColumnTitle(column.title) === "done";
+}
