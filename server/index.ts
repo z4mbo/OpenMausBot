@@ -2013,7 +2013,7 @@ function internalCapabilityIsActive(capability: InternalCapability): boolean {
   );
 }
 const MAX_COMMS_DEPTH = 1;
-const MAX_WORKSPACE_BOTS = 100;
+const MAX_WORKSPACE_BOTS = 1000;
 const createSidebarSectionSchema = z.object({
   name: z.string(),
   botIds: z.array(z.string().regex(/^[\w-]+$/)).max(MAX_WORKSPACE_BOTS).default([]),
