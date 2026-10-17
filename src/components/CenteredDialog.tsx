@@ -39,12 +39,13 @@ export function CenteredDialog({ label, labelledBy, onClose: requestClose, canCl
   label: string; labelledBy?: string; onClose(): void; canClose?(): boolean; className?: string; children(dismiss: () => void): ReactNode;
 }) {
   const panel = useRef<HTMLDivElement>(null);
+  const [returnTo] = useState(() => typeof document !== "undefined" && document.activeElement instanceof HTMLElement ? document.activeElement : null);
   const { closing, dismiss: animateOut } = useDismiss(requestClose);
   const dismiss = () => { if (canClose?.() !== false) animateOut(); };
   const close = useRef(dismiss);
   close.current = dismiss;
   useEffect(() => {
-    const returnTo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const element = panel.current;
     const onKey = (event: KeyboardEvent) => {
       const dialogs = document.querySelectorAll("[data-centered-dialog]");
       if (dialogs[dialogs.length - 1] !== panel.current) return;
@@ -62,8 +63,8 @@ export function CenteredDialog({ label, labelledBy, onClose: requestClose, canCl
     };
     window.addEventListener("keydown", onKey);
     if (panel.current && !panel.current.contains(document.activeElement)) panel.current.focus({ preventScroll: true });
-    return () => { window.removeEventListener("keydown", onKey); if (returnTo?.isConnected) returnTo.focus({ preventScroll: true }); };
-  }, []);
+    return () => { window.removeEventListener("keydown", onKey); if (returnTo?.isConnected && !element?.isConnected) returnTo.focus({ preventScroll: true }); };
+  }, [returnTo]);
   return (
     <div className={cn("fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/55", overlayMotion(closing))}>
       <div className="flex min-h-full items-end justify-center sm:items-center sm:p-6" onMouseDown={(event) => { if (event.target === event.currentTarget) dismiss(); }}>
