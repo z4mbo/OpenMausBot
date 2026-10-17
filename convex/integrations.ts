@@ -4,8 +4,14 @@ import { internal } from "./_generated/api";
 import { getActiveTeamMember, requireTeamAdmin, requireTeamMember, changeOpenIssueCount, touchProject } from "./lib/permissions";
 import { recordCompletion } from "./lib/completions";
 import { DEFAULT_OWNER_EMAIL } from "./lib/auth";
+import { isDraftColumn } from "./lib/columns";
 import type { QueryCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
+
+async function inDraft(ctx: QueryCtx, task: Doc<"tasks">) {
+  const column = await ctx.db.get(task.columnId);
+  return Boolean(column && isDraftColumn(column));
+}
 
 async function connection(ctx: QueryCtx, project: Doc<"projects">) {
   const team = project.teamId ? await ctx.db.get(project.teamId) : null;
@@ -62,7 +68,7 @@ export const context = internalQuery({
     const teamOwner = team ? await ctx.db.get(team.ownerUserId) : null;
     const legacyOwner = p.ownerEmail === DEFAULT_OWNER_EMAIL && teamOwner?.email === DEFAULT_OWNER_EMAIL && teamOwner.status === "active";
     return JSON.stringify({ credentialAllowed, legacyOwner, project: { _id: p._id, teamId: p.teamId, name: p.name, status: p.status, description: p.description, repoUrl: p.repoUrl, githubRepoId: p.githubRepoId, githubWorkspaceAccess: p.githubWorkspaceAccess }, connection: await connection(ctx, p),
-      task: task ? { _id: task._id, title: task.title, description: task.description, done: task.done, githubIssueNumber: task.githubIssueNumber, githubIssueUrl: task.githubIssueUrl, githubIssueState: task.githubIssueState } : null });
+      task: task ? { _id: task._id, title: task.title, description: task.description, done: task.done, draft: await inDraft(ctx, task), githubIssueNumber: task.githubIssueNumber, githubIssueUrl: task.githubIssueUrl, githubIssueState: task.githubIssueState } : null });
   },
 });
 
@@ -93,7 +99,8 @@ export const linkIssue = internalMutation({
     // Closed GitHub issues are authoritative; an unchanged open issue must not
     // undo work completed locally before GitHub is closed.
     const prDriven = task.githubTaskMode === "pull_request" || Boolean(await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", task._id)).first());
-    const changed = !prDriven && (done ? !task.done : task.githubIssueState === "closed");
+    const parked = done && await inDraft(ctx, task);
+    const changed = !prDriven && !parked && (done ? !task.done : task.githubIssueState === "closed");
     if (!changed && task.githubIssueNumber === a.number && task.githubIssueState === a.state && task.githubIssueUpdatedAt === a.updatedAt && task.githubIssueUrl === a.issueUrl && task.teamId === project.teamId) return null;
     if (changed) { await recordCompletion(ctx, task, done, a.updatedAt); if (task.done !== done) await changeOpenIssueCount(ctx, project._id, done ? -1 : 1); }
     await ctx.db.patch(task._id, { teamId: project.teamId, githubIssueNumber: a.number, githubIssueUrl: a.issueUrl, githubIssueState: a.state, githubIssueUpdatedAt: a.updatedAt, githubIssueSyncedAt: Date.now(), ...(changed ? { done, updatedAt: Date.now() } : {}) });
@@ -125,7 +132,7 @@ export const webhookTargets = internalQuery({
   },
 });
 
-/** Open issues of active, repository-authorized projects that have no GitHub issue yet, for the tick to mirror. */
+/** Open issues outside the draft column of active, repository-authorized projects that have no GitHub issue yet, for the tick to mirror. */
 export const unlinkedTasks = internalQuery({
   args: { cursor: v.union(v.string(), v.null()) }, returns: v.string(),
   handler: async (ctx, a) => {
@@ -134,7 +141,9 @@ export const unlinkedTasks = internalQuery({
     for (const project of page.page) {
       if (project.status !== "active" || !project.repoUrl || !project.githubWorkspaceAccess) continue;
       const open = await ctx.db.query("tasks").withIndex("by_project_and_done", q => q.eq("projectId", project._id).eq("done", false)).take(200);
-      for (const task of open) if (!task.githubIssueNumber && rows.length < 20) rows.push({ projectId: project._id, taskId: task._id });
+      const columns = await ctx.db.query("columns").withIndex("by_project", q => q.eq("projectId", project._id)).take(50);
+      const drafts = new Set(columns.filter(isDraftColumn).map(column => column._id));
+      for (const task of open) if (!task.githubIssueNumber && !drafts.has(task.columnId) && rows.length < 20) rows.push({ projectId: project._id, taskId: task._id });
     }
     return JSON.stringify({ rows, nextCursor: page.isDone ? null : page.continueCursor });
   },

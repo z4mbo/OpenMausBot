@@ -9,12 +9,9 @@ import { recordCompletion } from "./lib/completions";
 import { notify } from "./notifications";
 import { containsMention, mentionToken } from "../lib/issue-mentions";
 import { updateChecklist } from "../lib/comment-checklist";
+import { normalizeColumnTitle } from "./lib/columns";
 
-const defaultColumns = ["Idea", "Todo", "In progress"] as const;
-
-function normalizeColumnTitle(title: string) {
-  return title.trim().toLowerCase().replace(/[\s_-]+/g, "");
-}
+const defaultColumns = ["Draft", "Todo", "In progress"] as const;
 
 async function requireEditor(ctx: QueryCtx | MutationCtx, projectId: Id<"projects">, sessionToken: string) {
   const result = await requireMember(ctx, projectId, sessionToken);
@@ -199,6 +196,7 @@ export const ensureDefaultColumns = mutation({
         projectId: args.projectId,
         title,
         order: index,
+        ...(title === "Draft" ? { isDraft: true } : {}),
         createdAt: now,
         updatedAt: now,
       });
@@ -224,7 +222,7 @@ export const updateColumn = mutation({
     const column = await ctx.db.get(args.columnId);
     if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
     if (!args.title.trim() || args.title.length > 60) throw new Error("Enter a column name under 60 characters");
-    await ctx.db.patch(args.columnId, { title: args.title.trim(), isDone: false, updatedAt: Date.now() });
+    await ctx.db.patch(args.columnId, { title: args.title.trim(), isDone: false, ...(normalizeColumnTitle(args.title) === "draft" ? { isDraft: true } : {}), updatedAt: Date.now() });
     await touchProject(ctx, args.projectId);
   },
 });

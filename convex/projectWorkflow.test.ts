@@ -28,8 +28,8 @@ async function fixture() {
   const shared = await t.mutation(api.projects.create, { sessionToken: data.owner.token, teamId, name: "Shared", repoUrl: "https://github.com/example/shared" });
   const privateProject = await t.mutation(api.projects.create, { sessionToken: data.owner.token, teamId, name: "Private", repoUrl: "https://github.com/example/private" });
   for (const person of [data.member, data.viewer]) await t.mutation(api.members.addWorkspaceMember, { sessionToken: data.owner.token, projectId: shared, email: person.email, role: "member" });
-  const column = (await t.query(api.tasks.board, { sessionToken: data.owner.token, projectId: shared })).columns[0]._id;
-  const privateColumn = (await t.query(api.tasks.board, { sessionToken: data.owner.token, projectId: privateProject })).columns[0]._id;
+  const column = (await t.query(api.tasks.board, { sessionToken: data.owner.token, projectId: shared })).columns.find(c => c.title === "Todo")!._id;
+  const privateColumn = (await t.query(api.tasks.board, { sessionToken: data.owner.token, projectId: privateProject })).columns.find(c => c.title === "Todo")!._id;
   const issue = await t.mutation(api.tasks.createTask, { sessionToken: data.owner.token, projectId: shared, columnId: column, title: "Shared issue", priority: "high", assignedToEmail: data.member.email, dueDate: "2026-10-01" });
   const privateIssue = await t.mutation(api.tasks.createTask, { sessionToken: data.owner.token, projectId: privateProject, columnId: privateColumn, title: "Private issue", priority: "high", assignedToEmail: data.owner.email, dueDate: "2026-10-01" });
   return { t, ...data, teamId, shared, privateProject, column, issue, privateIssue };

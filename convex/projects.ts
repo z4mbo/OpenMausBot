@@ -8,7 +8,7 @@ import type { Id, Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 
-const defaultColumns = ["Idea", "Todo", "In progress"];
+const defaultColumns = ["Draft", "Todo", "In progress"];
 const accents = ["#111111", "#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626"];
 const callStaleMs = 30_000;
 
@@ -352,6 +352,7 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
         title,
         order: index,
         isDone: title === "Done",
+        ...(title === "Draft" ? { isDraft: true } : {}),
         createdAt: now,
         updatedAt: now,
       });

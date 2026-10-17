@@ -158,6 +158,7 @@ export default defineSchema({
     title: v.string(),
     order: v.number(),
     isDone: v.optional(v.boolean()),
+    isDraft: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

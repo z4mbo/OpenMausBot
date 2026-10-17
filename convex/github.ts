@@ -4,6 +4,7 @@ import { api, internal } from "./_generated/api";
 import { canEdit, changeOpenIssueCount, requireMember, touchProject } from "./lib/permissions";
 import { DEFAULT_OWNER_EMAIL } from "./lib/auth";
 import { recordCompletion } from "./lib/completions";
+import { isDraftColumn } from "./lib/columns";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 
@@ -293,7 +294,8 @@ export const upsertRepoSnapshot = internalMutation({
       .query("columns")
       .withIndex("by_project_order", (q) => q.eq("projectId", args.projectId))
       .take(20);
-    const todoColumn = columns.find(column => !(column.isDone ?? column.title.toLowerCase() === "done")) ?? columns[0];
+    const open = columns.filter(column => !(column.isDone ?? column.title.toLowerCase() === "done"));
+    const todoColumn = open.find(column => !isDraftColumn(column)) ?? open[0] ?? columns[0];
     const existingTasks = await ctx.db
       .query("tasks")
       .withIndex("by_project", (q) => q.eq("projectId", args.projectId))

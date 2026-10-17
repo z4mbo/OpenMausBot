@@ -20,7 +20,7 @@ async function fixture() {
   const projectId = await t.mutation(api.projects.create, { sessionToken, teamId, name: "PRs", repoUrl });
   const { taskId, columnId, reviewId } = await t.run(async ctx => {
     await ctx.db.patch(projectId, { githubWorkspaceAccess: true });
-    const columnId = (await ctx.db.query("columns").withIndex("by_project", q => q.eq("projectId", projectId)).first())!._id;
+    const columnId = (await ctx.db.query("columns").withIndex("by_project", q => q.eq("projectId", projectId)).collect()).find(column => column.title === "Todo")!._id;
     const reviewId = await ctx.db.insert("columns", { projectId, title: "In review", order: 5, isDone: false, createdAt: 1, updatedAt: 1 });
     const taskId = await ctx.db.insert("tasks", { projectId, teamId, title: "Implement", columnId, done: false, priority: "medium", order: 1, createdAt: 1, updatedAt: 1 });
     await ctx.db.patch(projectId, { openIssueCount: 1, githubReviewColumnId: reviewId });
