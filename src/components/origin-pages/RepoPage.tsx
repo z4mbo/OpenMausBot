@@ -12,7 +12,7 @@ import { errorText, fmtDate, githubRepoHref, githubRepoLabel, shortSha, taskKey 
 import { CloudGate, EmptyState, Notice, PageHeader, Skeleton, cardClass, ghostButton, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 export function RepoPage({ onOpenSettings, ...props }: OriginPageProps & { onOpenSettings?(): void }) {
-  return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />}</CloudGate>;
+  return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo key={project.repoUrl ?? ""} project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />}</CloudGate>;
 }
 
 const PULL_STATE: Record<PullState, { icon: typeof GitPullRequest; tone: string; label: string }> = {
@@ -48,7 +48,7 @@ function useRepository(projectId: string, enabled: boolean) {
       if (mine === generation.current) setLoading(false);
     }
   }, [projectId, enabled]);
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { void load(); return () => { generation.current++; }; }, [load]);
   return { snapshot, error, loading, reload: load };
 }
 
