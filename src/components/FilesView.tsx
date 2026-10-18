@@ -12,6 +12,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { useCaptionChrome } from "./DesktopCapabilities";
 import { Switch } from "./SettingsPrimitives";
 import { ModalFocusScope, useModalDialog } from "@/hooks/use-modal-dialog";
+import { Loading } from "./origin-pages/ui";
 
 const REFUSAL: Record<string, LocaleKey> = {
   "too-broad": "files.refusal.tooBroad", "app-data": "files.refusal.appData", "already-shared": "files.refusal.alreadyShared",
@@ -74,7 +75,7 @@ function Unavailable() {
 
 function FilesPage({ bridge }: { bridge: CloudFilesBridge }) {
   const { state: app, dispatch } = useStore();
-  const [state, setState] = useCloudFiles(bridge);
+  const [state, setState, load] = useCloudFiles(bridge);
   const [ask, setAsk] = useState<(Ask & { id: number }) | null>(null);
   const sequence = useRef(0);
   const askReturnRef = useRef<HTMLElement | null>(null);
@@ -102,7 +103,10 @@ function FilesPage({ bridge }: { bridge: CloudFilesBridge }) {
   const close = () => setAsk((current) => current?.id === ask?.id ? null : current);
   const share = (tokens: string[]) => { close(); void run(async () => { let next: CloudFilesState | undefined; for (const token of tokens) next = await bridge.share(token); return next; }); };
   const moreSpace = () => void run(() => bridge.moreSpace());
-  if (!state) return null;
+  if (!state) return load.error ? <div className="flex flex-col items-start gap-3">
+    <p role="alert" className="text-[13px] text-danger">{t("files.failed")}</p>
+    <button type="button" className="ui-button" onClick={load.retry}>{t("chat.retry")}</button>
+  </div> : <Loading label={t("skills.library.loading")} variant="list" />;
   if (state.phase === "unavailable") return <Unavailable />;
   return <>
     {state.phase === "offline" && <p role="status" className="rounded-xl bg-card px-4 py-3 text-[13px] text-ink-secondary">{t("files.offline")}</p>}

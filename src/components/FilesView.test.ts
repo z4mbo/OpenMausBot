@@ -227,6 +227,15 @@ describe("Your bots' work", () => {
 });
 
 describe("My Cloud's state", () => {
+  it("offers recovery when the initial Files IPC state rejects", async () => {
+    bridge.state.mockRejectedValueOnce(new Error("Synthetic IPC state failure"));
+    await mount();
+    expect(document.querySelector('[role="alert"]'), "Rejected initial state must not leave an empty Files page").not.toBeNull();
+    expect(button("Retry")).toBeTruthy();
+    await click("Retry");
+    expect(button("Add a folder")).toBeTruthy();
+    expect(bridge.state).toHaveBeenCalledTimes(2);
+  });
   it("follows main's pushes, and stops listening when closed", async () => {
     await mount();
     expect(bridge.onState).toHaveBeenCalledOnce();
