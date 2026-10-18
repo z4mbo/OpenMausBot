@@ -38,15 +38,26 @@ HTTP connection-reset failure; neither failed run is described as green.
 | P2: phone/companion Live calls require an unrelated plan before checking the configured key | `c6371c2b4` | [Fake-provider HTTP calls and authority controls](origin-live-policy.md) |
 | P2: self-hosted updates query upstream, miss Origin tags and offer upstream installation commands | `67d5d8a26` | [Checker, HTTP and isolated-server evidence](origin-update-channel.md) |
 | P2: a nonsettling engine status probe keeps registry discovery pending | `67dbb03a8` | [Real registry with virtual-clock deadlines and a normal isolated server](origin-provider-snapshot-deadline.md); CLI termination escalation is deferred |
-| P3: startup/tray and PWA install name show the upstream product | `eeb992491`, `7a5716f74` | Native startup proof retained by the branding review; current integration still needs final checks |
+| P2: startup/tray, PWA installation, agent messages and setup copy identify the upstream product | `eeb992491`, `7a5716f74`, `795ca0077` | [Native startup, real pairing/onboarding and compatibility evidence](origin-branding.md) |
 | P2: launch promotion points to the upstream Product Hunt page | `43d25faab` | Related notice/queue regressions passed at its worker checkpoint |
+| P1: optional fleet upgrade executes the upstream npm install as root before restarting Origin services | `5821d0c0a` | Four red-before regressions; planning now refuses before an executor mutation; final operator report follows |
 
 The user's one-row footer preference is implemented by `27ab9b426`. Its existing
 39 focused checks pass. The [finite browser matrix](sidebar-footer-single-row.md)
 retains 16 before/after captures: all eight updated cases stay on one line, with
 contained, disjoint controls at least 25.125 px wide, correct keyboard order and
-working Apps selection. Broader product-copy integration and the new CI fixture
-investigation remain pending. These statuses must be updated before freeze.
+working Apps selection. [Product-copy integration](origin-branding.md) preserves
+stored legacy restart warnings and the external relay's exact wire contract;
+neither candidate-only regression reached production. The
+[provider-error CI fixture](origin-ci-provider-error.md) now isolates its fake
+HTTP 429 from unrelated MCP initialization. This reproduces the timeout mechanism,
+not the unobserved timing of the original GitHub runner. The integrated Live-call
+and full Comms files passed all 53 cases. Fresh CI is still required.
+
+The [landing image](origin-landing-capture.md) now comes from one real 0.2.13
+renderer frame with the requested footer. Its seven product-module blobs match
+the integration; the tooling-title correction changes no product pixels. Three
+whole-frame derivatives preserve that capture, with the previous image retained.
 
 ## Release and inspection boundary
 
@@ -54,14 +65,17 @@ The current shared changelog rolls the four unpublished 0.2.12 notes into eleven
 0.2.13 notes. It does not present 0.2.12 as a published history entry. In-app,
 website, GitHub and updater copies must be generated from the same final source.
 
-Final integrated client/shared, TypeScript, lint, locale, guards, touched server
-and website checks are pending. Fresh source-bound CI, Windows/Mac builds,
+Final integrated client/shared, TypeScript, lint, locale, guards and remaining
+touched-server checks are pending. Website tests passed 25 cases. Fresh
+source-bound CI, Windows/Mac builds,
 artifact/feed validation, private website acceptance and public delivery remain
 pending. No new backend deployment is required merely by changing the desktop
 version: the complete final backend closure must first be compared with deployed
 0.2.11 before deciding whether backend changes are necessary.
 
 This batch does not establish every feature or component as accepted. The
+[feature acceptance register](origin-feature-acceptance-034.md) records 34 areas
+and distinguishes historical inventory from actual runtime acceptance. The
 [upstream review](origin-upstream-fit-034.md) distinguishes source-fit ideas from
 tested adaptations. Cross-machine sender-runs/offline recovery, complete Chief
 delegation and GitHub App review-to-human-merge journeys, real recipient email,
