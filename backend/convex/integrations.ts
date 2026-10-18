@@ -4,14 +4,20 @@ import { internal } from "./_generated/api";
 import { getActiveTeamMember, requireTeamAdmin, requireTeamMember, changeOpenIssueCount, touchProject } from "./lib/permissions";
 import { hasCurrentMergeReceipt, recordCompletion } from "./lib/completions";
 import { DEFAULT_OWNER_EMAIL } from "./lib/auth";
-import { isDraftColumn } from "./lib/columns";
+import { isDraftColumn, projectDraftStatus } from "./lib/columns";
+import { isLegacyIdeaColumn } from "../../shared/origin-columns";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { repositoryUrl } from "./lib/repository";
 
 async function inDraft(ctx: QueryCtx, task: Doc<"tasks">) {
   const column = await ctx.db.get(task.columnId);
-  return Boolean(column && isDraftColumn(column));
+  if (!column || column.projectId !== task.projectId) throw new Error("Issue workflow column not found");
+  if (isDraftColumn(column)) return true;
+  if (!isLegacyIdeaColumn(column)) return false;
+  const status = await projectDraftStatus(ctx, task.projectId);
+  if (status === "unresolved") throw new Error("Workflow repair required before publishing legacy Idea issues");
+  return status === "absent";
 }
 
 async function completeWithMergeReceipt(ctx: MutationCtx, project: Doc<"projects">, task: Doc<"tasks">) {
@@ -184,9 +190,18 @@ export const unlinkedTasks = internalQuery({
     for (const project of page.page) {
       if (project.status !== "active" || !project.repoUrl || !project.githubWorkspaceAccess) continue;
       const open = await ctx.db.query("tasks").withIndex("by_project_and_done", q => q.eq("projectId", project._id).eq("done", false)).take(200);
-      const columns = await ctx.db.query("columns").withIndex("by_project", q => q.eq("projectId", project._id)).take(50);
-      const drafts = new Set(columns.filter(isDraftColumn).map(column => column._id));
-      for (const task of open) if (!task.githubIssueNumber && !drafts.has(task.columnId) && rows.length < 20) rows.push({ projectId: project._id, taskId: task._id });
+      const columns = new Map((await ctx.db.query("columns").withIndex("by_project_order", q => q.eq("projectId", project._id)).take(100)).map(column => [column._id, column]));
+      let draftStatus: Promise<"present" | "absent" | "unresolved"> | undefined;
+      for (const task of open) {
+        if (task.githubIssueNumber || rows.length >= 20) continue;
+        const column = columns.get(task.columnId) ?? await ctx.db.get(task.columnId);
+        if (!column || column.projectId !== project._id || isDraftColumn(column)) continue;
+        if (isLegacyIdeaColumn(column)) {
+          draftStatus ??= projectDraftStatus(ctx, project._id);
+          if (await draftStatus !== "present") continue;
+        }
+        rows.push({ projectId: project._id, taskId: task._id });
+      }
     }
     return JSON.stringify({ rows, nextCursor: page.isDone ? null : page.continueCursor });
   },

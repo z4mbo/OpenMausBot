@@ -4,6 +4,7 @@ import type { Id } from "./_generated/dataModel";
 import { DEFAULT_OWNER_EMAIL } from "./lib/auth";
 import { priorityValidator, projectIconTypeValidator, projectStatusValidator } from "./lib/validators";
 import { createWorkspace } from "./workspaces";
+import { ensureDraftColumn } from "./lib/columns";
 
 // Admin-only, additive recovery. Source keys make retries safe without matching issue titles.
 export const prepareWorkspace = internalMutation({
@@ -103,6 +104,7 @@ export const importProject = internalMutation({
     const allTasks = await ctx.db.query("tasks").withIndex("by_project", q => q.eq("projectId", projectId)).take(2001);
     if (allTasks.length > 2000) throw new Error("Review large board before importing");
     await ctx.db.patch(projectId, { openIssueCount: allTasks.filter(t => !t.done).length });
+    await ensureDraftColumn(ctx, projectId);
     return { projectId, created: !existing, imported, skipped, total: allTasks.length };
   },
 });

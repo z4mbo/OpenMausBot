@@ -110,6 +110,7 @@ export default defineSchema({
     .index("by_token", ["inviteToken"]),
 
   projects: defineTable({
+    draftIdeaCandidateId: v.optional(v.id("columns")),
     githubTaskMode: v.optional(v.union(v.literal("issue"), v.literal("pull_request"))),
     githubReviewColumnId: v.optional(v.union(v.id("columns"), v.null())),
     githubDoneColumnId: v.optional(v.id("columns")),
@@ -169,7 +170,8 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_project", ["projectId"])
-    .index("by_project_order", ["projectId", "order"]),
+    .index("by_project_order", ["projectId", "order"])
+    .index("by_projectId_and_isDraft_and_order", ["projectId", "isDraft", "order"]),
 
   tasks: defineTable({
     githubTaskBranch: v.optional(v.string()),

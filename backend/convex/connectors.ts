@@ -127,7 +127,7 @@ export const write = mutation({
   args: { token: v.string(), requestId: v.string(), change: v.union(
     v.object({ kind: v.literal("create_project"), name: v.string(), description: v.optional(v.string()) }),
     v.object({ kind: v.literal("update_project"), projectId: v.id("projects"), name: v.optional(v.string()), description: v.optional(v.string()) }),
-    v.object({ kind: v.literal("create_issue"), projectId: v.id("projects"), columnId: v.id("columns"), title: v.string(), description: v.optional(v.string()), priority: priorityValidator, assignedToEmail: v.string(), dueDate: v.string() }),
+    v.object({ kind: v.literal("create_issue"), projectId: v.id("projects"), columnId: v.optional(v.id("columns")), title: v.string(), description: v.optional(v.string()), priority: priorityValidator, assignedToEmail: v.string(), dueDate: v.string() }),
     v.object({ kind: v.literal("update_issue"), projectId: v.id("projects"), taskId: v.id("tasks"), title: v.optional(v.string()), description: v.optional(v.string()), priority: v.optional(priorityValidator), assignedToEmail: v.optional(v.string()), dueDate: v.optional(v.string()), done: v.optional(v.boolean()) }),
     v.object({ kind: v.literal("delete_issue"), projectId: v.id("projects"), taskId: v.id("tasks") }),
   ) }, returns: v.string(),

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 import { canEdit, changeOpenIssueCount, getActiveTeamMember, projectMember, projectPeople, requireMember, requireTeamMember, touchProject } from "./lib/permissions";
 import { priorityValidator, taskAssetTypeValidator } from "./lib/validators";
@@ -9,10 +9,18 @@ import { hasCurrentMergeReceipt, recordCompletion } from "./lib/completions";
 import { notify } from "./notifications";
 import { containsMention, mentionToken } from "../lib/issue-mentions";
 import { updateChecklist } from "../lib/comment-checklist";
-import { isDoneColumn, isDraftColumn, normalizeColumnTitle } from "./lib/columns";
+import { compareStoredColumns, compareWorkflowColumns, DEFAULT_WORKFLOW_COLUMNS, ensureDraftColumn, isDoneColumn, isDraftColumn, normalizeColumnTitle } from "./lib/columns";
+import { DRAFT_COLUMN_TITLE, isLegacyIdeaColumn } from "../../shared/origin-columns";
 import { repositoryUrl } from "./lib/repository";
+import schema from "./schema";
 
-const defaultColumns = ["Draft", "Todo", "In progress"] as const;
+const columnDoc = v.object({ ...schema.tables.columns.validator.fields, _id: v.id("columns"), _creationTime: v.number() });
+const taskDoc = v.object({ ...schema.tables.tasks.validator.fields, _id: v.id("tasks"), _creationTime: v.number() });
+const commentDoc = v.object({ ...schema.tables.taskComments.validator.fields, _id: v.id("taskComments"), _creationTime: v.number() });
+const assetDoc = v.object({ ...schema.tables.taskAssets.validator.fields, _id: v.id("taskAssets"), _creationTime: v.number() });
+const person = {
+  email: v.string(), name: v.string(), username: v.optional(v.string()), avatarUrl: v.union(v.string(), v.null()),
+};
 
 async function requireEditor(ctx: QueryCtx | MutationCtx, projectId: Id<"projects">, sessionToken: string) {
   const result = await requireMember(ctx, projectId, sessionToken);
@@ -45,6 +53,7 @@ function requireDueDate(value?: string) {
 
 export const board = query({
   args: { projectId: v.id("projects"), sessionToken: v.string() },
+  returns: v.object({ columns: v.array(columnDoc), tasks: v.array(taskDoc), assignees: v.array(v.object(person)) }),
   handler: async (ctx, args) => {
     const { project } = await requireMember(ctx, args.projectId, args.sessionToken);
     const [columns, tasks] = await Promise.all([
@@ -58,7 +67,7 @@ export const board = query({
         username: active ? user.username : undefined, avatarUrl: active && user.avatarStorageId ? await ctx.storage.getUrl(user.avatarStorageId) : null };
     }));
     return {
-      columns: columns.sort((a, b) => a.order - b.order),
+      columns: columns.sort(compareWorkflowColumns),
       tasks: tasks.sort((a, b) => a.order - b.order),
       assignees,
     };
@@ -128,6 +137,10 @@ export const assignedToMe = query({
 
 export const details = query({
   args: { projectId: v.id("projects"), sessionToken: v.string(), taskId: v.id("tasks") },
+  returns: v.object({
+    task: taskDoc, columns: v.array(columnDoc), comments: v.array(commentDoc), assets: v.array(assetDoc),
+    members: v.array(v.object({ ...person, _id: v.union(v.id("members"), v.id("teamMembers")), userId: v.id("users"), role: v.union(v.literal("owner"), v.literal("admin"), v.literal("member"), v.literal("viewer")), status: v.literal("active") })),
+  }),
   handler: async (ctx, args) => {
     const { project } = await requireMember(ctx, args.projectId, args.sessionToken);
     const task = await ctx.db.get(args.taskId);
@@ -140,7 +153,7 @@ export const details = query({
     ]);
     return {
       task,
-      columns: columns.sort((a, b) => a.order - b.order),
+      columns: columns.sort(compareWorkflowColumns),
       comments: comments.sort((a, b) => a.createdAt - b.createdAt),
       assets: assets.sort((a, b) => a.createdAt - b.createdAt),
       members: members.filter((member) => member.status === "active"),
@@ -150,14 +163,17 @@ export const details = query({
 
 export const createColumn = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string(), title: v.string(), isDone: v.optional(v.boolean()) },
+  returns: v.id("columns"),
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     if (!args.title.trim() || args.title.length > 60) throw new Error("Enter a column name under 60 characters");
+    if (normalizeColumnTitle(args.title) !== "draft") await ensureDraftColumn(ctx, args.projectId);
     const now = Date.now();
-    const columns = await ctx.db.query("columns").withIndex("by_project", (q) => q.eq("projectId", args.projectId)).collect();
+    const columns = await ctx.db.query("columns").withIndex("by_project", (q) => q.eq("projectId", args.projectId)).take(20);
     const order = columns.length ? Math.max(...columns.map((column) => column.order)) + 1 : 0;
     if (columns.length >= 20) throw new Error("A workflow can have up to 20 columns");
     const id = await ctx.db.insert("columns", { projectId: args.projectId, title: args.title.trim(), isDone: false, ...(normalizeColumnTitle(args.title) === "draft" ? { isDraft: true } : {}), order, createdAt: now, updatedAt: now });
+    await ensureDraftColumn(ctx, args.projectId);
     await touchProject(ctx, args.projectId);
     return id;
   },
@@ -165,71 +181,50 @@ export const createColumn = mutation({
 
 export const ensureDefaultColumns = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string() },
+  returns: v.null(),
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const now = Date.now();
-    const existingColumns = await ctx.db
+    const first = await ctx.db
       .query("columns")
       .withIndex("by_project_order", (q) => q.eq("projectId", args.projectId))
-      .collect();
-    if (existingColumns.length) return;
-    const usedColumnIds = new Set<Id<"columns">>();
-
-    for (const [index, title] of defaultColumns.entries()) {
-      const normalizedTitle = normalizeColumnTitle(title);
-      const column = existingColumns.find((item) => {
-        return !usedColumnIds.has(item._id) && normalizeColumnTitle(item.title) === normalizedTitle;
-      });
-
-      if (column) {
-        usedColumnIds.add(column._id);
-        const patch: Partial<{ title: string; order: number; updatedAt: number }> = {};
-        if (column.title !== title) patch.title = title;
-        if (column.order !== index) patch.order = index;
-        if (Object.keys(patch).length) {
-          patch.updatedAt = now;
-          await ctx.db.patch(column._id, patch);
-        }
-        continue;
-      }
-
+      .first();
+    if (!first) for (const [index, title] of DEFAULT_WORKFLOW_COLUMNS.entries()) {
       await ctx.db.insert("columns", {
         projectId: args.projectId,
         title,
         order: index,
-        ...(title === "Draft" ? { isDraft: true } : {}),
+        ...(title === DRAFT_COLUMN_TITLE ? { isDraft: true } : {}),
+        isDone: false,
         createdAt: now,
         updatedAt: now,
       });
     }
 
-    let extraIndex = defaultColumns.length;
-    for (const column of existingColumns) {
-      if (usedColumnIds.has(column._id)) continue;
-      if (column.order < defaultColumns.length) {
-        await ctx.db.patch(column._id, { order: extraIndex, updatedAt: now });
-      }
-      extraIndex += 1;
-    }
-
-    await touchProject(ctx, args.projectId);
+    const result = await ensureDraftColumn(ctx, args.projectId);
+    if (!first || result.changed) await touchProject(ctx, args.projectId);
+    return null;
   },
 });
 
 export const updateColumn = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string(), columnId: v.id("columns"), title: v.string(), isDone: v.optional(v.boolean()) },
+  returns: v.null(),
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const column = await ctx.db.get(args.columnId);
     if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
     if (!args.title.trim() || args.title.length > 60) throw new Error("Enter a column name under 60 characters");
     await ctx.db.patch(args.columnId, { title: args.title.trim(), isDone: false, ...(isDraftColumn(column) || normalizeColumnTitle(args.title) === "draft" ? { isDraft: true } : {}), updatedAt: Date.now() });
+    await ensureDraftColumn(ctx, args.projectId);
     await touchProject(ctx, args.projectId);
+    return null;
   },
 });
 
 export const deleteColumn = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string(), columnId: v.id("columns"), moveToColumnId: v.optional(v.id("columns")) },
+  returns: v.null(),
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const column = await ctx.db.get(args.columnId);
@@ -245,7 +240,9 @@ export const deleteColumn = mutation({
         ...(!task.done && task.githubIssueNumber && isDraftColumn(column) && !isDraftColumn(target) ? { githubIssueReopenRequested: true } : {}) });
     }
     await ctx.db.delete(args.columnId);
+    await ensureDraftColumn(ctx, args.projectId);
     await touchProject(ctx, args.projectId);
+    return null;
   },
 });
 
@@ -253,7 +250,7 @@ export const createTask = mutation({
   args: {
     projectId: v.id("projects"),
     sessionToken: v.string(),
-    columnId: v.id("columns"),
+    columnId: v.optional(v.id("columns")),
     title: v.string(),
     description: v.optional(v.string()),
     priority: priorityValidator,
@@ -267,9 +264,9 @@ export const createTask = mutation({
   },
 });
 
-export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; columnId: Id<"columns">; title: string; description?: string; priority: "low" | "medium" | "high"; assignedToEmail?: string; dueDate?: string; }, actorId: Id<"users">, actorAgentId?: Id<"workspaceAgents">) {
+export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; columnId?: Id<"columns">; title: string; description?: string; priority: "low" | "medium" | "high"; assignedToEmail?: string; dueDate?: string; }, actorId: Id<"users">, actorAgentId?: Id<"workspaceAgents">) {
   const [column, assignee] = await Promise.all([
-      ctx.db.get(args.columnId),
+      args.columnId ? ctx.db.get(args.columnId) : ensureDraftColumn(ctx, args.projectId).then(result => result.column),
       findAssignee(ctx, args.projectId, args.assignedToEmail),
     ]);
     if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
@@ -278,7 +275,8 @@ export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
     const dueDate = actorAgentId && !args.dueDate ? undefined : requireDueDate(args.dueDate);
     const now = Date.now();
     if ((args.description?.length || 0) > 60000) throw new Error("Description must be under 60,000 characters");
-    const last = await ctx.db.query("tasks").withIndex("by_column_order", q => q.eq("columnId", args.columnId)).order("desc").first();
+    if (args.columnId) await ensureDraftColumn(ctx, args.projectId);
+    const last = await ctx.db.query("tasks").withIndex("by_column_order", q => q.eq("columnId", column._id)).order("desc").first();
     const order = last ? last.order + 1 : 0;
     const project = await ctx.db.get(args.projectId);
     const done = isDoneColumn(column);
@@ -286,7 +284,7 @@ export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
     const taskId = await ctx.db.insert("tasks", {
       teamId: project?.teamId,
       projectId: args.projectId,
-      columnId: args.columnId,
+      columnId: column._id,
       title: args.title.trim(),
       description: args.description?.trim() || undefined,
       priority: args.priority,
@@ -303,6 +301,68 @@ export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
     if (project?.teamId && assignee) await notify(ctx, { teamId: project.teamId, email: assignee.email, actorId, kind: "assignment", eventId: `created:${taskId}`, projectId: project._id, taskId });
     return taskId;
 }
+
+const draftRepairPage = { cursor: v.union(v.string(), v.null()) };
+const draftRepairReceipt = v.object({
+  phase: v.union(v.literal("columns"), v.literal("legacyIdeas"), v.literal("projects")),
+  scanned: v.number(), changed: v.number(), created: v.number(), candidateUpdated: v.number(), adopted: v.number(), cursor: v.string(), isDone: v.boolean(),
+});
+
+export const flagDraftColumns = internalMutation({
+  args: draftRepairPage,
+  returns: draftRepairReceipt,
+  handler: async (ctx, args) => {
+    const page = await ctx.db.query("columns").paginate({ cursor: args.cursor, numItems: 100 });
+    let changed = 0;
+    for (const column of page.page) if (isDraftColumn(column) && (column.isDraft !== true || column.isDone !== false)) {
+      await ctx.db.patch(column._id, { isDraft: true, isDone: false, updatedAt: Date.now() });
+      changed++;
+    }
+    return { phase: "columns" as const, scanned: page.page.length, changed, created: 0, candidateUpdated: 0, adopted: 0, cursor: page.continueCursor, isDone: page.isDone };
+  },
+});
+
+export const selectLegacyDraftCandidates = internalMutation({
+  args: draftRepairPage,
+  returns: draftRepairReceipt,
+  handler: async (ctx, args) => {
+    const page = await ctx.db.query("columns").paginate({ cursor: args.cursor, numItems: 100 });
+    let changed = 0;
+    for (const column of page.page) {
+      if (!isLegacyIdeaColumn(column)) continue;
+      const project = await ctx.db.get(column.projectId);
+      if (!project) continue;
+      const draft = await ctx.db.query("columns").withIndex("by_projectId_and_isDraft_and_order", q => q.eq("projectId", column.projectId).eq("isDraft", true)).first();
+      if (draft) continue;
+      const previous = project.draftIdeaCandidateId ? await ctx.db.get(project.draftIdeaCandidateId) : null;
+      if (previous?.projectId === project._id && isLegacyIdeaColumn(previous) && compareStoredColumns(previous, column) <= 0) continue;
+      await ctx.db.patch(project._id, { draftIdeaCandidateId: column._id });
+      changed++;
+    }
+    return { phase: "legacyIdeas" as const, scanned: page.page.length, changed, created: 0, candidateUpdated: changed, adopted: 0, cursor: page.continueCursor, isDone: page.isDone };
+  },
+});
+
+export const repairProjectDrafts = internalMutation({
+  args: draftRepairPage,
+  returns: draftRepairReceipt,
+  handler: async (ctx, args) => {
+    const page = await ctx.db.query("projects").paginate({ cursor: args.cursor, numItems: 25 });
+    let changed = 0;
+    let created = 0;
+    let adopted = 0;
+    for (const project of page.page) {
+      const result = await ensureDraftColumn(ctx, project._id);
+      if (result.created) created++;
+      if (result.adopted) adopted++;
+      if (result.changed) {
+        changed++;
+        await touchProject(ctx, project._id);
+      }
+    }
+    return { phase: "projects" as const, scanned: page.page.length, changed, created, candidateUpdated: 0, adopted, cursor: page.continueCursor, isDone: page.isDone };
+  },
+});
 
 export const updateTask = mutation({
   args: {

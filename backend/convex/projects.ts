@@ -8,8 +8,7 @@ import type { Id, Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { admitStorageReference, issueUpload, storageMetadata, validateUpload } from "./lib/storage";
-
-const defaultColumns = ["Draft", "Todo", "In progress"];
+import { DEFAULT_WORKFLOW_COLUMNS, ensureDraftColumn } from "./lib/columns";
 const accents = ["#111111", "#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626"];
 const callStaleMs = 30_000;
 
@@ -348,12 +347,12 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
       joinedAt: now,
     });
 
-    for (const [index, title] of defaultColumns.entries()) {
+    for (const [index, title] of DEFAULT_WORKFLOW_COLUMNS.entries()) {
       await ctx.db.insert("columns", {
         projectId,
         title,
         order: index,
-        isDone: title === "Done",
+        isDone: false,
         ...(title === "Draft" ? { isDraft: true } : {}),
         createdAt: now,
         updatedAt: now,
@@ -413,7 +412,11 @@ export const importRepos = mutation({
         return project.repoUrl?.trim().toLowerCase() === normalizedRepoUrl || project.name.trim().toLowerCase() === normalizedName;
       });
       if (existing || existingRepoUrls.has(normalizedRepoUrl) || existingNames.has(normalizedName)) {
-        if (existing) imported.push({ projectId: existing._id, name: existing.name, repoUrl: existing.repoUrl || repoUrl, created: false });
+        if (existing) {
+          const access = await projectMember(ctx, existing, user);
+          if (access && canEdit(access)) await ensureDraftColumn(ctx, existing._id);
+          imported.push({ projectId: existing._id, name: existing.name, repoUrl: existing.repoUrl || repoUrl, created: false });
+        }
         continue;
       }
 
@@ -440,11 +443,13 @@ export const importRepos = mutation({
         updatedAt: now,
         joinedAt: now,
       });
-      for (const [index, title] of defaultColumns.entries()) {
+      for (const [index, title] of DEFAULT_WORKFLOW_COLUMNS.entries()) {
         await ctx.db.insert("columns", {
           projectId,
           title,
           order: index,
+          isDone: false,
+          ...(title === "Draft" ? { isDraft: true } : {}),
           createdAt: now,
           updatedAt: now,
         });
