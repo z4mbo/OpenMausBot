@@ -87,6 +87,7 @@ function AuthForm({ initialMode, inviteToken, invitation, onSession }: { initial
   const signupMode = useQuery(api.auth.signupMode, {});
   const inviteOnly = Boolean(signupMode?.inviteOnly) && !inviteToken;
   const signup = mode === "signup";
+  const signupPolicyLoading = signup && !inviteToken && signupMode === undefined;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -115,7 +116,9 @@ function AuthForm({ initialMode, inviteToken, invitation, onSession }: { initial
 
   return (
     <Card title={title} subtitle={subtitle} icon={invitation ? <span className={st.badge}><UsersRound size={22} /></span> : undefined}>
-      {signup && inviteOnly ? (
+      {signupPolicyLoading ? (
+        <div className={st.loading} role="status"><Loader2 className={st.spin} size={20} /><span className={st.visuallyHidden}>Loading</span></div>
+      ) : signup && inviteOnly ? (
         <p className={st.notice}>Origin is invite-only for now. Ask a workspace admin for an invite link, then open it here or paste it into the app.</p>
       ) : (
         <form className={st.form} onSubmit={submit}>

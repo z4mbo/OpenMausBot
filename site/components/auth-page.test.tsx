@@ -9,9 +9,10 @@ const fixture = vi.hoisted(() => ({
   session: { loading: false, token: "fixture-session-one" as string | null, user: { _id: "fixture-user-one", name: "Fixture member", email: "member@example.test" } as { _id: string; name: string; email: string } | null, save: vi.fn(), signOut: vi.fn() },
   accept: vi.fn(),
   action: vi.fn(),
+  signupMode: { inviteOnly: true } as { inviteOnly: boolean } | undefined,
 }));
 vi.mock("@/lib/convex-api", () => ({ api: { workspaces: { invitePreview: "preview", acceptInvite: "accept", list: "workspaces" }, auth: { login: "login", signup: "signup", signupMode: "signupMode" } } }));
-vi.mock("convex/react", () => ({ useQuery: (name: string) => name === "preview" ? fixture.invitation : name === "signupMode" ? { inviteOnly: true } : [], useMutation: () => fixture.accept, useAction: () => fixture.action }));
+vi.mock("convex/react", () => ({ useQuery: (name: string, args: unknown) => name === "preview" ? args === "skip" ? undefined : fixture.invitation : name === "signupMode" ? fixture.signupMode : [], useMutation: () => fixture.accept, useAction: () => fixture.action }));
 vi.mock("./brand", () => ({ useOriginSession: () => fixture.session }));
 vi.mock("./origin-site", () => ({ SiteFrame: ({ children }: { children: ReactNode }) => <div>{children}</div>, DownloadCard: () => <aside>Download Origin</aside> }));
 vi.mock("next/link", () => ({ default: ({ href, children, ...props }: { href: string; children: ReactNode }) => <a href={href} {...props}>{children}</a> }));
@@ -40,11 +41,64 @@ beforeEach(() => {
   fixture.session = { loading: false, token: "fixture-session-one", user: { _id: "fixture-user-one", name: "Fixture member", email: "member@example.test" }, save: vi.fn(), signOut: vi.fn() };
   fixture.accept.mockReset();
   fixture.action.mockReset();
+  fixture.signupMode = { inviteOnly: true };
   host = document.createElement("div");
   document.body.append(host);
   root = createRoot(host);
 });
 afterEach(() => { act(() => root.unmount()); host.remove(); expect(fetch).not.toHaveBeenCalled(); vi.unstubAllGlobals(); });
+
+it("waits for signup policy before showing fields on an invite-only instance", async () => {
+  fixture.session = { ...fixture.session, token: null, user: null };
+  fixture.signupMode = undefined;
+  const signup = async () => { await act(async () => root.render(<AuthPage mode="signup" />)); };
+  await signup();
+  expect(heading()).toBe("Create your Origin account");
+  expect(host.querySelector('[role="status"]')?.textContent).toContain("Loading");
+  expect(host.querySelector("form")).toBeNull();
+  expect(host.querySelectorAll("input")).toHaveLength(0);
+  fixture.signupMode = { inviteOnly: true };
+  await signup();
+  expect(host.textContent).toContain("Origin is invite-only for now.");
+  expect(host.querySelector('[role="status"]')).toBeNull();
+  expect(host.querySelectorAll("input")).toHaveLength(0);
+  expect(fixture.action).not.toHaveBeenCalled();
+});
+
+it("shows signup fields only after the policy permits public registration", async () => {
+  fixture.session = { ...fixture.session, token: null, user: null };
+  fixture.signupMode = undefined;
+  const signup = async () => { await act(async () => root.render(<AuthPage mode="signup" />)); };
+  await signup();
+  expect(host.querySelector("form")).toBeNull();
+  fixture.signupMode = { inviteOnly: false };
+  await signup();
+  expect(host.querySelectorAll("input")).toHaveLength(4);
+  expect(button("Create account").disabled).toBe(false);
+  expect(host.querySelector('[role="status"]')).toBeNull();
+  expect(fixture.action).not.toHaveBeenCalled();
+});
+
+it("keeps sign-in available while the public signup policy loads", async () => {
+  fixture.session = { ...fixture.session, token: null, user: null };
+  fixture.signupMode = undefined;
+  await act(async () => root.render(<AuthPage mode="signin" />));
+  expect(heading()).toBe("Sign in to Origin");
+  expect(host.querySelectorAll("input")).toHaveLength(2);
+  expect(button("Sign in").disabled).toBe(false);
+  expect(fixture.action).not.toHaveBeenCalled();
+});
+
+it("keeps a verified invitation signup available while public signup policy loads", async () => {
+  fixture.session = { ...fixture.session, token: null, user: null };
+  fixture.signupMode = undefined;
+  await render();
+  expect(heading()).toBe("Join Fixture workspace");
+  expect(host.querySelectorAll("input")).toHaveLength(3);
+  expect(button("Create account").disabled).toBe(false);
+  expect(host.querySelector('[role="status"]')).toBeNull();
+  expect(fixture.action).not.toHaveBeenCalled();
+});
 
 it("keeps pending acceptance and its success when preview invalidates before the mutation resolves", async () => {
   const pending = deferred();
