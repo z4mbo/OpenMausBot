@@ -80,3 +80,4 @@ docs/verification/evidence/origin-backend-compatibility-031/**/*.log text eol=lf
 docs/verification/evidence/origin-backend-compatibility-031/fixture/*.mjs text eol=lf
 docs/verification/evidence/origin-backend-compatibility-031/fixture/*.mts text eol=lf
 docs/verification/evidence/origin-backend-compatibility-031/fixture/*.ts text eol=lf
+docs/verification/evidence/origin-backend-compatibility-031/fixture/*.txt text eol=lf

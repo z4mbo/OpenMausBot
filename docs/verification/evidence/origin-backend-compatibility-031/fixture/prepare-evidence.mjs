@@ -52,7 +52,7 @@ const write = (file, value) => writeFileSync(resolve(directory, file), normalize
 for (const name of ["vitest.config.mts", "setup.ts", "compatibility.test.ts", "prepare-evidence.mjs"]) write(`fixture/${name}`, read(name));
 write("observations.json", JSON.stringify(observations, null, 2) + "\n");
 write("module-loads.json", JSON.stringify(bindings, null, 2) + "\n");
-const log = normalize(rawLog).replace(/\u001b\[[0-9;]*m/g, "").trimEnd() + "\n";
+const log = normalize(rawLog).replace(new RegExp(String.fromCharCode(27) + "\\[[0-9;]*m", "g"), "").trimEnd() + "\n";
 write("checks.log", log);
 const report = {
   schemaVersion: 1, status: "isolated-request-contract-verified-unpublished", passed: true,
