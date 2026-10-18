@@ -88,6 +88,7 @@ Use only mapped, tested commands:
 - [Chief access to additional teams](team-access.md)
 - [Revoked additional-team grants in the client cache and workspace sidebar](origin-team-access-cache.md)
 - [Personal-key Live calls without upstream subscriptions](origin-live-policy.md)
+- [Origin self-hosted release lookup and update instructions](origin-update-channel.md)
 - [Engines and Doctor](engines.md)
 - [Installer credential boundary follow-up](origin-installer-security-next.md)
 - [Current App landing image capture](origin-landing-capture.md)
