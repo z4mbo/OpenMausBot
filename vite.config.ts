@@ -54,6 +54,8 @@ export default defineConfig({
     // clients that resolve IPv4 first
     host: "127.0.0.1",
     port: Number(process.env.OMB_UI_PORT) || 5199,
+    // Vite 7.3.6 replaces fs.deny rather than extending its defaults.
+    fs: { deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/.omb-scratch/**"] },
     // packager output lands inside the repo — its HTML files must never
     // trigger dev full-page reloads
     watch: {
