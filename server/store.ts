@@ -35,6 +35,7 @@ import { parseConnectorTools } from "./connector-tools.ts";
 import { sameModelSelection } from "../shared/thread-model.ts";
 import { createBotCreation, type NewBotProfile, type OriginImportRecord } from "./store-bot-creation.ts";
 import { deleteBotData, persistBotDeletion, retireEmptyWorkspaceSections } from "./store-bot-deletion.ts";
+import { commitBotChange, taskRevocations } from "./bots-save.ts";
 export type { OriginImportRecord } from "./store-bot-creation.ts";
 export type {
   BotActivity, ConnectorCardData, GroupDefaultResponder, OptionCardData,
@@ -2031,8 +2032,7 @@ export class Store {
     const bot = this.botByThread(threadId);
     const task = bot ? this.taskByThread(bot.id, threadId) : undefined;
     if (!bot || !task || task.cwd === undefined) return false;
-    delete task.cwd;
-    this.saveBots();
+    commitBotChange(bot, "the conversation folder", () => this.saveBots(), () => { delete task.cwd; });
     this.emit({ type: "bot", botId: bot.id });
     return true;
   }
@@ -2042,25 +2042,24 @@ export class Store {
     const task = bot ? this.taskByThread(botId, threadId) : undefined;
     if (!bot || !task) return null;
     if (opts.privateOnly && task.cwd === undefined) {
-      task.cwd = fallbackCwd ?? null;
-      this.saveBots();
+      commitBotChange(bot, "the conversation folder", () => this.saveBots(), () => { task.cwd = fallbackCwd ?? null; });
       this.emit({ type: "bot", botId });
-      return task.cwd;
+      return task.cwd ?? null;
     }
     if (opts.none) {
       if (task.cwd !== null) {
-        task.cwd = null;
-        this.saveBots();
+        commitBotChange(bot, "the conversation folder", () => this.saveBots(), () => { task.cwd = null; });
         this.emit({ type: "bot", botId });
       }
       return null;
     }
     if (task.cwd === undefined) {
-      task.cwd = Object.keys(task.resumeCursors).length === 0 ? (bot.cwd ?? fallbackCwd ?? null) : null;
-      this.saveBots();
+      commitBotChange(bot, "the conversation folder", () => this.saveBots(), () => {
+        task.cwd = Object.keys(task.resumeCursors).length === 0 ? (bot.cwd ?? fallbackCwd ?? null) : null;
+      });
       this.emit({ type: "bot", botId });
     }
-    return task.cwd;
+    return task.cwd ?? null;
   }
 
   /** Pinned, not read live: engines key their sessions and files to the folder a thread starts in. */
@@ -2187,18 +2186,18 @@ export class Store {
     const task = this.taskByThread(botId, threadId);
     if (!bot || !task) return null;
     if (patch.projectId !== undefined && !this.project(botId, patch.projectId)) return null;
-    for (const key of TASK_PATCH_FIELDS) {
-      if (Object.prototype.hasOwnProperty.call(patch, key)) {
-        Object.assign(task, { [key]: structuredClone(patch[key]) });
+    const revocations = taskRevocations(bot, task, patch);
+    commitBotChange(bot, "the conversation change", () => this.saveBots(), () => {
+      for (const key of TASK_PATCH_FIELDS) {
+        if (Object.prototype.hasOwnProperty.call(patch, key)) Object.assign(task, { [key]: structuredClone(patch[key]) });
       }
-    }
-    if (task.snoozedUntil === 0 && patch.unread === true) task.snoozedUntil = undefined;
-    if (typeof patch.title === "string") task.title = patch.title.trim().slice(0, 80) || UNTITLED_THREAD;
-    if (Object.prototype.hasOwnProperty.call(patch, "pinned") && task.pinned !== true) delete task.pinned;
-    if (task.routineRunId) task.unread = false;
-    if (bot.threadId === threadId) this.mirrorActiveTask(bot, task);
-    bot.unread = bot.tasks!.some(taskCountsAsBotUnread);
-    this.saveBots();
+      if (task.snoozedUntil === 0 && patch.unread === true) task.snoozedUntil = undefined;
+      if (typeof patch.title === "string") task.title = patch.title.trim().slice(0, 80) || UNTITLED_THREAD;
+      if (Object.prototype.hasOwnProperty.call(patch, "pinned") && task.pinned !== true) delete task.pinned;
+      if (task.routineRunId) task.unread = false;
+      if (bot.threadId === threadId) this.mirrorActiveTask(bot, task);
+      bot.unread = bot.tasks!.some(taskCountsAsBotUnread);
+    }, () => Object.assign(task, revocations));
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2213,17 +2212,13 @@ export class Store {
   clearAutoSurfacePins(botId: string, destination: Destination): number {
     const bot = this.bot(botId);
     if (!bot?.tasks) return 0;
-    let cleared = 0;
-    for (const task of bot.tasks) {
-      if (task.surface === undefined || task.surfaceSource !== "auto" || task.surface === destination) continue;
-      task.surface = undefined;
-      task.surfaceSource = undefined;
-      cleared++;
-    }
-    if (!cleared) return 0;
-    this.saveBots();
+    const tasks = bot.tasks.filter(task => task.surface !== undefined && task.surfaceSource === "auto" && task.surface !== destination);
+    if (!tasks.length) return 0;
+    commitBotChange(bot, "conversation surfaces", () => this.saveBots(), () => {
+      for (const task of tasks) Object.assign(task, { surface: undefined, surfaceSource: undefined });
+    });
     this.emit({ type: "bot", botId });
-    return cleared;
+    return tasks.length;
   }
 
   /** One write: never publish a new provider before its approval downgrade. */
@@ -2306,11 +2301,10 @@ export class Store {
     if (!bot) return null;
     if (projectId !== undefined && !this.project(botId, projectId)) return null;
     const task = this.buildTask(bot, title, projectId, openedBy, approvalMode, modelSelection, cwd);
-    bot.tasks = [task, ...(bot.tasks ?? [])];
-    if (activate) {
-      this.mirrorActiveTask(bot, task);
-    }
-    this.saveBots();
+    commitBotChange(bot, "the new conversation", () => this.saveBots(), () => {
+      bot.tasks = [task, ...(bot.tasks ?? [])];
+      if (activate) this.mirrorActiveTask(bot, task);
+    });
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2341,8 +2335,7 @@ export class Store {
     const bot = this.bot(botId);
     const task = this.taskByThread(botId, threadId);
     if (!bot || !task) return null;
-    task.openedBy = structuredClone(openedBy);
-    this.saveBots();
+    commitBotChange(bot, "the conversation opener", () => this.saveBots(), () => { task.openedBy = structuredClone(openedBy); });
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2360,10 +2353,11 @@ export class Store {
     const bot = this.bot(botId);
     const task = this.taskByThread(botId, threadId);
     if (!bot || !task) return null;
-    if (closedBy) task.closedBy = structuredClone(closedBy);
-    else if (!task.closedBy) return task;
-    else delete task.closedBy;
-    this.saveBots();
+    if (!closedBy && !task.closedBy) return task;
+    commitBotChange(bot, "the conversation closer", () => this.saveBots(), () => {
+      if (closedBy) task.closedBy = structuredClone(closedBy);
+      else delete task.closedBy;
+    });
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2372,8 +2366,7 @@ export class Store {
     const bot = this.bot(botId);
     const task = bot?.tasks?.find((t) => t.threadId === threadId);
     if (!bot || !task) return null;
-    this.mirrorActiveTask(bot, task);
-    this.saveBots();
+    commitBotChange(bot, "the selected conversation", () => this.saveBots(), () => this.mirrorActiveTask(bot, task));
     this.emit({ type: "bot", botId });
     return bot;
   }
@@ -2383,11 +2376,13 @@ export class Store {
   }
 
   titleTaskFromFirstMessage(botId: string, text: string, threadId?: string): TaskRecord | null {
+    const bot = this.bot(botId);
     const task = threadId ? this.taskByThread(botId, threadId) : this.activeTask(botId);
-    if (!task || task.titleFromFirstMessage || (task.title !== UNTITLED_TASK && task.title !== UNTITLED_THREAD)) return null;
-    task.title = titleFromMessage(text);
-    task.titleFromFirstMessage = true;
-    this.saveBots();
+    if (!bot || !task || task.titleFromFirstMessage || (task.title !== UNTITLED_TASK && task.title !== UNTITLED_THREAD)) return null;
+    commitBotChange(bot, "the conversation title", () => this.saveBots(), () => {
+      task.title = titleFromMessage(text);
+      task.titleFromFirstMessage = true;
+    });
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2403,7 +2398,6 @@ export class Store {
     return result?.deleted.length ? result.bot : null;
   }
 
-  /** Transcript rows go first, so a database failure leaves every task, log file and subscriber untouched. */
   deleteTasks(botId: string, threadIds: string[]): { bot: BotRecord; deleted: string[]; missing: string[] } | null {
     const bot = this.bot(botId);
     if (!bot?.tasks) return null;
@@ -2412,21 +2406,16 @@ export class Store {
     const deleted = unique.filter((id) => present.has(id));
     const missing = unique.filter((id) => !present.has(id));
     if (!deleted.length) return { bot, deleted, missing };
-    mdb.deleteThreads(deleted);
     const doomed = new Set(deleted);
-    bot.tasks = bot.tasks.filter((t) => !doomed.has(t.threadId));
-    let visible = bot.tasks.find((task) => !task.routineRunId);
-    if (!visible) {
-      visible = this.buildTask(bot);
-      bot.tasks = [visible, ...bot.tasks];
-    }
-    if (doomed.has(bot.threadId) || this.taskByThread(botId, bot.threadId)?.routineRunId) {
-      this.mirrorActiveTask(bot, visible);
-    }
+    commitBotChange(bot, "the conversation deletion", () => mdb.deleteThreads(deleted, () => this.saveBots()), () => {
+      bot.tasks = bot.tasks!.filter((t) => !doomed.has(t.threadId));
+      let visible = bot.tasks.find((task) => !task.routineRunId);
+      if (!visible) { visible = this.buildTask(bot); bot.tasks = [visible, ...bot.tasks]; }
+      if (doomed.has(bot.threadId) || this.taskByThread(botId, bot.threadId)?.routineRunId) this.mirrorActiveTask(bot, visible);
+      bot.unread = bot.tasks.some(taskCountsAsBotUnread);
+      this.refreshBotActivity(bot);
+    });
     for (const id of deleted) this.deleteThreadRecord(id, true);
-    bot.unread = bot.tasks.some(taskCountsAsBotUnread);
-    this.refreshBotActivity(bot);
-    this.saveBots();
     this.emit({ type: "bot", botId });
     return { bot, deleted, missing };
   }
