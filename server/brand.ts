@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { DATA_DIR } from "./config.ts";
 import { entitled } from "./enterprise.ts";
+import { APP_NAME } from "../shared/product-brand.mjs";
 
 const HEX_COLOUR = /^#[0-9a-fA-F]{6}$/;
 const MAX_LOGO_CHARS = 300_000;
@@ -38,7 +39,7 @@ export const brandSchema = z
 
 export type Brand = z.infer<typeof brandSchema>;
 
-export const DEFAULT_BRAND: Brand = { name: "Origin" };
+export const DEFAULT_BRAND: Brand = { name: APP_NAME };
 
 export interface BrandStatus {
   brand: Brand;

@@ -1,4 +1,5 @@
 import { filledTextInk } from "./color-contrast";
+import { APP_NAME } from "../../shared/product-brand.mjs";
 
 export interface Brand {
   name: string;
@@ -16,7 +17,7 @@ export interface BrandStatus {
   notice?: string;
 }
 
-export const DEFAULT_BRAND: Brand = { name: "Origin" };
+export const DEFAULT_BRAND: Brand = { name: APP_NAME };
 
 let current: BrandStatus = { brand: DEFAULT_BRAND, source: "default", file: "" };
 

@@ -1,4 +1,6 @@
 // Retain the Windows notification-area identity across app restarts.
+import { APP_NAME } from "../shared/product-brand.mjs";
+
 export function createSystemTray({ Tray, Menu, nativeImage, iconPath, getWindow, onQuit }) {
   const tray = new Tray(nativeImage.createFromPath(iconPath).resize({ width: 20, height: 20 }),
     "889af657-21b5-4ec9-b5d0-cb798cbdfd30");
@@ -13,11 +15,11 @@ export function createSystemTray({ Tray, Menu, nativeImage, iconPath, getWindow,
     win.focus();
     return true;
   };
-  tray.setToolTip("OpenMaus Bot");
+  tray.setToolTip(APP_NAME);
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: "Open OpenMaus Bot", click: show },
+    { label: `Open ${APP_NAME}`, click: show },
     { type: "separator" },
-    { label: "Quit OpenMaus Bot", click: onQuit },
+    { label: `Quit ${APP_NAME}`, click: onQuit },
   ]));
   tray.on("click", show);
   tray.on("double-click", show);

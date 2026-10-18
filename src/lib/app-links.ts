@@ -1,4 +1,4 @@
-export const APP_NAME = "Origin";
+export { APP_NAME } from "../../shared/product-brand.mjs";
 /** The URL scheme the desktop app registers; chat links it opens start with it. */
 export const APP_SCHEME = "origin-app";
 const UPSTREAM_REPOSITORY = "https://github.com/milind-soni/OpenMausBot";
