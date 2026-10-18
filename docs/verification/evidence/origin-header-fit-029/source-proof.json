@@ -1,0 +1,54 @@
+{
+  "baseline": "63c38a2cf5e22166efafb7e727b562988e5b084c",
+  "implementation": "659de8cf53e7bdb4efe45c344fc1f1a2b89ce086",
+  "integratedImplementation": "c1210a4f3a3466587a24973aefc3661bc72a15ba",
+  "normalization": "CRLF to LF for current source comparisons; frozen source hashes use unchanged Git blob bytes",
+  "sourceFiles": [
+    {
+      "path": "src/components/Sidebar.tsx",
+      "beforeSha256": "638735ad2ab2396f0456a5ac906ef3aee7361c6598ac377073d333d1f1a847ce",
+      "recordedAfterRawSha256": "582baebbb248c40d4360026ad89efd77634613d3b47faa50f83d13729e6f0df4",
+      "capturedLfNormalizedSha256": "71b810f938cbd26377956d79c0f36837121f5e967faabf677e2e6eba06502ee2",
+      "currentLfNormalizedSha256": "71b810f938cbd26377956d79c0f36837121f5e967faabf677e2e6eba06502ee2",
+      "validatedAgainstCurrentLfNormalizedSource": true
+    },
+    {
+      "path": "src/components/SidebarPopoverMenu.tsx",
+      "beforeSha256": "de1ce6a4745c27e4b9042c7a47ea39b48aedf71adcdd5d4b089fa186990d7edb",
+      "recordedAfterRawSha256": "2d2dfb12a1341bec5a7cd1ca7a258c6470a352a041b333a7915ed99b54e546ce",
+      "capturedLfNormalizedSha256": "371eae985d9501b2a033f12ba7cbed7186996daa66f179f424ea475a244ceece",
+      "currentLfNormalizedSha256": "371eae985d9501b2a033f12ba7cbed7186996daa66f179f424ea475a244ceece",
+      "validatedAgainstCurrentLfNormalizedSource": true
+    },
+    {
+      "path": "src/components/SidebarIdentity.tsx",
+      "beforeSha256": null,
+      "recordedAfterRawSha256": "0a1220947d1348954b1128e1447fa52f15a3cc02f48c814e062206930d6e95f9",
+      "capturedLfNormalizedSha256": "0a1220947d1348954b1128e1447fa52f15a3cc02f48c814e062206930d6e95f9",
+      "currentLfNormalizedSha256": "0a1220947d1348954b1128e1447fa52f15a3cc02f48c814e062206930d6e95f9",
+      "validatedAgainstCurrentLfNormalizedSource": true
+    },
+    {
+      "path": "scripts/testing/origin-header-preview.tsx",
+      "beforeSha256": "7ca55b3c7afa030dae413ed2915d7006d47e8b389480f52b02cd3658e80152b9",
+      "recordedAfterRawSha256": "7ca55b3c7afa030dae413ed2915d7006d47e8b389480f52b02cd3658e80152b9",
+      "capturedLfNormalizedSha256": "7ca55b3c7afa030dae413ed2915d7006d47e8b389480f52b02cd3658e80152b9",
+      "currentLfNormalizedSha256": "7ca55b3c7afa030dae413ed2915d7006d47e8b389480f52b02cd3658e80152b9",
+      "validatedAgainstCurrentLfNormalizedSource": true
+    },
+    {
+      "path": "scripts/testing/origin-header-cloud.ts",
+      "beforeSha256": "6cfe8969eda975de5bd6eafa745f903f2afed29a8ca0c9472397711d245c49b5",
+      "recordedAfterRawSha256": "6cfe8969eda975de5bd6eafa745f903f2afed29a8ca0c9472397711d245c49b5",
+      "capturedLfNormalizedSha256": "6cfe8969eda975de5bd6eafa745f903f2afed29a8ca0c9472397711d245c49b5",
+      "currentLfNormalizedSha256": "6cfe8969eda975de5bd6eafa745f903f2afed29a8ca0c9472397711d245c49b5",
+      "validatedAgainstCurrentLfNormalizedSource": true
+    }
+  ],
+  "finalTest": {
+    "path": "src/components/Sidebar.origin-header.test.ts",
+    "sha256": "af23f9c7c7394d1f2eb2faab9d0208742203ffffdd3ed2557b53da66fd8350f8",
+    "validatedAgainstCurrentLfNormalizedSource": true
+  },
+  "scope": "Header modules and synthetic fixture modules only; no claim of packaged release acceptance"
+}

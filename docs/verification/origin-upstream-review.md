@@ -90,3 +90,5 @@ The checks establish HTTP behavior and a fake-engine turn. They do not establish
 ## Metadata refresh before delivery
 
 At `2026-10-18T09:45:02.064Z`, an authenticated merged-PR query found no merges after already-reviewed #2947 (merged `2026-10-17T21:51:37Z`). This is a metadata refresh, not another source comparison: the twenty recorded comparisons, three adaptations and seventeen deferred dispositions remain unchanged. The next scheduled review remains 06:00 Europe/Rome.
+
+The authenticated refresh at `2026-10-18T11:25:41Z` again found zero merged PRs after that cutoff, with `incomplete_results: false`. No additional source comparison or adoption is claimed. The twenty comparisons, three adaptations, seventeen deferred dispositions and daily 06:00 Europe/Rome schedule remain unchanged.

@@ -1,0 +1,54 @@
+{
+  "candidate": "0.2.9",
+  "baseline": "63c38a2cf5e22166efafb7e727b562988e5b084c",
+  "implementation": "659de8cf53e7bdb4efe45c344fc1f1a2b89ce086",
+  "integratedImplementation": "c1210a4f3a3466587a24973aefc3661bc72a15ba",
+  "synthetic": true,
+  "fixturePackageVersion": "0.2.8",
+  "screenshots": 54,
+  "matchedDesktopPairs": 24,
+  "desktopScreenshots": 48,
+  "afterOnlyMobileScreenshots": 4,
+  "menuScreenshots": 2,
+  "matrixBaselineOverlaps": 24,
+  "matrixAfterCasesFit": 24,
+  "mobileViewport": {
+    "width": 375,
+    "height": 812,
+    "actualSidebarWidth": 320,
+    "directLiveDomMeasurements": true,
+    "noDocumentHorizontalOverflow": true
+  },
+  "exactFinalTest": {
+    "red": 12,
+    "green": 12,
+    "unchangedTestSha256": "af23f9c7c7394d1f2eb2faab9d0208742203ffffdd3ed2557b53da66fd8350f8",
+    "proof": "test-proof.json"
+  },
+  "accountEscape": {
+    "menuClosedAfterExitAnimation": true,
+    "focusReturnedTo": "Open account menu"
+  },
+  "syntheticComputerMenuFailure": {
+    "visible": true,
+    "within240pxSidebar": true,
+    "left": 8,
+    "right": 231
+  },
+  "omittedObsoleteMobileCaptures": [
+    "after-mac-240-advanced-dark-viewport375.jpg",
+    "after-mac-240-advanced-light-viewport375.jpg",
+    "after-win-240-advanced-dark-viewport375.jpg",
+    "after-win-240-advanced-light-viewport375.jpg"
+  ],
+  "sourceProof": "source-proof.json",
+  "manifest": "manifest.json",
+  "manifestEntries": 63,
+  "totalFiles": 64,
+  "limitations": [
+    "Source-component regression evidence prepared for 0.2.9; fixture footer reports baseline package 0.2.8.",
+    "Computer chooser bridge and account/data are synthetic; no Electron native popup, OS titlebar, packaged installation or real account writes were exercised.",
+    "Four mobile captures are AFTER-only and use the app's actual 320px mobile drawer at a 375px viewport; they are not 240px sidebar comparisons.",
+    "DOM unit tests do not perform layout. Independent browser rectangles and JPEG captures establish the measured layout results."
+  ]
+}

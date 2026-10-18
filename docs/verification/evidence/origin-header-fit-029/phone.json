@@ -1,0 +1,200 @@
+{
+  "synthetic": true,
+  "afterOnly": true,
+  "packagedWindowAcceptance": false,
+  "qualification": "At375px the app uses its320px mobile sidebar. Live DOM rectangles are measured directly because the mobile drawer covers the synthetic debug button; stale initial debug-panel measurements/captures are excluded.",
+  "cases": [
+    {
+      "platform": "mac",
+      "theme": "dark",
+      "file": "screenshots/after-mac-mobile-advanced-dark-viewport375.jpg",
+      "afterOnly": true,
+      "directLiveDomMeasurement": true,
+      "proof": {
+        "sidebar": {
+          "bottom": 812,
+          "height": 812,
+          "left": 0,
+          "right": 320,
+          "top": 0,
+          "width": 320
+        },
+        "titlebar": {
+          "bottom": 46,
+          "height": 46,
+          "left": 0,
+          "right": 319,
+          "top": 0,
+          "width": 319
+        },
+        "account": {
+          "bottom": 78,
+          "height": 32,
+          "left": 12,
+          "right": 168.78125,
+          "top": 46,
+          "width": 156.78125
+        },
+        "computer": {
+          "bottom": 76,
+          "height": 28,
+          "left": 176.78125,
+          "right": 307,
+          "top": 48,
+          "width": 130.21875
+        },
+        "computerName": "This computer",
+        "controlsDisjoint": true,
+        "controlsWithinSidebar": true,
+        "controlsBelowTitlebar": true,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "viewportHeight": 812
+      }
+    },
+    {
+      "platform": "mac",
+      "theme": "light",
+      "file": "screenshots/after-mac-mobile-advanced-light-viewport375.jpg",
+      "afterOnly": true,
+      "directLiveDomMeasurement": true,
+      "proof": {
+        "sidebar": {
+          "bottom": 812,
+          "height": 812,
+          "left": 0,
+          "right": 320,
+          "top": 0,
+          "width": 320
+        },
+        "titlebar": {
+          "bottom": 46,
+          "height": 46,
+          "left": 0,
+          "right": 319,
+          "top": 0,
+          "width": 319
+        },
+        "account": {
+          "bottom": 78,
+          "height": 32,
+          "left": 12,
+          "right": 168.78125,
+          "top": 46,
+          "width": 156.78125
+        },
+        "computer": {
+          "bottom": 76,
+          "height": 28,
+          "left": 176.78125,
+          "right": 307,
+          "top": 48,
+          "width": 130.21875
+        },
+        "computerName": "This computer",
+        "controlsDisjoint": true,
+        "controlsWithinSidebar": true,
+        "controlsBelowTitlebar": true,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "viewportHeight": 812
+      }
+    },
+    {
+      "platform": "win",
+      "theme": "dark",
+      "file": "screenshots/after-win-mobile-advanced-dark-viewport375.jpg",
+      "afterOnly": true,
+      "directLiveDomMeasurement": true,
+      "proof": {
+        "sidebar": {
+          "bottom": 812,
+          "height": 812,
+          "left": 0,
+          "right": 320,
+          "top": 0,
+          "width": 320
+        },
+        "titlebar": {
+          "bottom": 48,
+          "height": 48,
+          "left": 0,
+          "right": 319,
+          "top": 0,
+          "width": 319
+        },
+        "account": {
+          "bottom": 80,
+          "height": 32,
+          "left": 12,
+          "right": 168.78125,
+          "top": 48,
+          "width": 156.78125
+        },
+        "computer": {
+          "bottom": 78,
+          "height": 28,
+          "left": 176.78125,
+          "right": 307,
+          "top": 50,
+          "width": 130.21875
+        },
+        "computerName": "This computer",
+        "controlsDisjoint": true,
+        "controlsWithinSidebar": true,
+        "controlsBelowTitlebar": true,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "viewportHeight": 812
+      }
+    },
+    {
+      "platform": "win",
+      "theme": "light",
+      "file": "screenshots/after-win-mobile-advanced-light-viewport375.jpg",
+      "afterOnly": true,
+      "directLiveDomMeasurement": true,
+      "proof": {
+        "sidebar": {
+          "bottom": 812,
+          "height": 812,
+          "left": 0,
+          "right": 320,
+          "top": 0,
+          "width": 320
+        },
+        "titlebar": {
+          "bottom": 48,
+          "height": 48,
+          "left": 0,
+          "right": 319,
+          "top": 0,
+          "width": 319
+        },
+        "account": {
+          "bottom": 80,
+          "height": 32,
+          "left": 12,
+          "right": 168.78125,
+          "top": 48,
+          "width": 156.78125
+        },
+        "computer": {
+          "bottom": 78,
+          "height": 28,
+          "left": 176.78125,
+          "right": 307,
+          "top": 50,
+          "width": 130.21875
+        },
+        "computerName": "This computer",
+        "controlsDisjoint": true,
+        "controlsWithinSidebar": true,
+        "controlsBelowTitlebar": true,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "viewportHeight": 812
+      }
+    }
+  ]
+}
