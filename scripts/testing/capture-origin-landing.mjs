@@ -43,7 +43,7 @@ try {
   });
   await context.routeWebSocket("**/*", route => { const target = new URL(route.url()); webSockets.push({ origin: target.origin, blocked: true, previewOnly: target.hostname === "127.0.0.1" && [base.port, "0"].includes(target.port) }); route.close(); });
   await page.goto(base.href, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  assert.equal(await page.title(), "Origin isolated landing capture");
+  assert.equal(await page.title(), "Origin preview — sample data");
   await page.locator('[data-chief-section="issues"][aria-current="page"]').waitFor();
   await page.locator("[data-task-id]").first().waitFor();
   await page.getByText(`v${version}`, { exact: true }).waitFor();
