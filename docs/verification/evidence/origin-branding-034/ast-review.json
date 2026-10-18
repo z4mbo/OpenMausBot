@@ -1,0 +1,197 @@
+{
+  "baseline": "87ff77be5ea79272175219d479b9a8017b4e8fcc",
+  "method": "Compare complete TypeScript syntax trees including identifiers and punctuation while masking only string/template/JSX text. Comments are not syntax-tree content.",
+  "onlyCopy": [
+    "electron/computer-sharing.mjs",
+    "electron/desktop-companion-client.mjs",
+    "scripts/mcp-server.ts",
+    "scripts/mcp-url.ts",
+    "server/boat-create-idempotency.ts",
+    "server/boat-delete-journal.ts",
+    "server/boat-deletion.ts",
+    "server/boat.ts",
+    "server/bot-package.ts",
+    "server/browser-engine.ts",
+    "server/browser-lifecycle-cleanup.ts",
+    "server/browser-runtime.ts",
+    "server/checkpoints.ts",
+    "server/chief-of-staff.ts",
+    "server/claude-update.ts",
+    "server/cli-phone-setup.ts",
+    "server/cli-setup.ts",
+    "server/cli.ts",
+    "server/cloud-home.ts",
+    "server/config.ts",
+    "server/connector-proxy.ts",
+    "server/connector-scope-hint.ts",
+    "server/connector-signed-out-hint.ts",
+    "server/connector-verdict.ts",
+    "server/container-computer.ts",
+    "server/control-client.ts",
+    "server/custom-domain.ts",
+    "server/data/engine.ts",
+    "server/decider/openrouter.ts",
+    "server/decider/relay.ts",
+    "server/drivers/acp/background-text.ts",
+    "server/drivers/acp/core.ts",
+    "server/drivers/agents-bridge.ts",
+    "server/drivers/agents-call.ts",
+    "server/drivers/agents-catalog.ts",
+    "server/drivers/antigravity-acp.ts",
+    "server/drivers/chatgpt-plan-auth.ts",
+    "server/drivers/claude-keepwarm.ts",
+    "server/drivers/claude.ts",
+    "server/drivers/codex-errors.ts",
+    "server/drivers/codex-instructions.ts",
+    "server/drivers/codex.ts",
+    "server/drivers/dweb-proxy.ts",
+    "server/drivers/muse-code.ts",
+    "server/drivers/openai-chat.ts",
+    "server/drivers/phone-proxy.ts",
+    "server/drivers/pi-mcp-extension.ts",
+    "server/drivers/pi.ts",
+    "server/drivers/prompt-split.ts",
+    "server/engine-install.ts",
+    "server/escalations.ts",
+    "server/fleet.ts",
+    "server/harness-mcp-proxy.ts",
+    "server/harness/bus.ts",
+    "server/headless/commands.ts",
+    "server/headless/connect.ts",
+    "server/headless/engine.ts",
+    "server/headless/main.ts",
+    "server/highlevel/client.ts",
+    "server/highlevel/instructions.ts",
+    "server/highlevel/relay.ts",
+    "server/highlevel/service.ts",
+    "server/highlevel/sign-in.ts",
+    "server/host/loop-guard.ts",
+    "server/incidents.ts",
+    "server/index.ts",
+    "server/local-computer.ts",
+    "server/mcp-oauth.ts",
+    "server/mcp-probe.ts",
+    "server/mcp-registry.ts",
+    "server/mcp-remote-proxy.ts",
+    "server/mcp-trim.ts",
+    "server/message-db.ts",
+    "server/model-catalog/catalog.ts",
+    "server/onepassword.ts",
+    "server/org-library.ts",
+    "server/origin-cloud.ts",
+    "server/package-export.ts",
+    "server/package-import.ts",
+    "server/peer-roster.ts",
+    "server/permission-proxy.ts",
+    "server/phone-secret.ts",
+    "server/recall.ts",
+    "server/routes/bot-memory.ts",
+    "server/routes/desktop-viewer.ts",
+    "server/routes/instances.ts",
+    "server/routes/pinned-client-thread.ts",
+    "server/routes/teams.ts",
+    "server/routine-execution.ts",
+    "server/routine-requests.ts",
+    "server/routines.ts",
+    "server/runtime/envelope.ts",
+    "server/runtime/tree.ts",
+    "server/sentinel/cli.ts",
+    "server/server-launcher.ts",
+    "server/service-unit.ts",
+    "server/setup-mode.ts",
+    "server/store.ts",
+    "server/surface.ts",
+    "server/team-manifest.ts",
+    "server/vps-computer.ts",
+    "server/vps-ssh.ts",
+    "server/waiting-on-person.ts",
+    "server/webhooks.ts",
+    "server/workspace-backup-http.ts",
+    "server/workspace-backup-maintenance.ts",
+    "server/workspace-backup.ts",
+    "shared/logins.ts",
+    "shared/package-format.ts",
+    "shared/provider-safety.ts",
+    "shared/sign-in-request.ts",
+    "shared/widget-samples.ts",
+    "src/components/ConnectedWorkspacesSettings.tsx",
+    "src/components/RemoteComputerSection.tsx",
+    "src/lib/computer-control.ts",
+    "src/lib/local-computer.ts",
+    "src/lib/skins.ts",
+    "src/lib/team-import.ts"
+  ],
+  "reviewedStructure": [
+    {
+      "file": "electron/startup-screen.mjs"
+    },
+    {
+      "file": "electron/system-tray.mjs"
+    },
+    {
+      "file": "scripts/verify-startup-tray.mjs"
+    },
+    {
+      "file": "server/brand.ts"
+    },
+    {
+      "file": "server/cloud-health.ts"
+    },
+    {
+      "file": "server/headless/client.ts"
+    },
+    {
+      "file": "server/peer-provenance.ts"
+    },
+    {
+      "file": "server/system-prompt.ts"
+    },
+    {
+      "file": "shared/product-brand.d.mts",
+      "reason": "new file"
+    },
+    {
+      "file": "shared/product-brand.mjs",
+      "reason": "new file"
+    },
+    {
+      "file": "src/components/ApiKeys.tsx"
+    },
+    {
+      "file": "src/components/AppNotices.tsx"
+    },
+    {
+      "file": "src/components/CustomDomainSettings.tsx"
+    },
+    {
+      "file": "src/components/LinuxLocalControl.tsx"
+    },
+    {
+      "file": "src/components/bot-settings/ToolSelectionCard.tsx"
+    },
+    {
+      "file": "src/components/onboarding/PhonePreview.tsx"
+    },
+    {
+      "file": "src/components/onboarding/reel/scenes/Terminal.tsx"
+    },
+    {
+      "file": "src/lib/app-links.ts"
+    },
+    {
+      "file": "src/lib/brand.ts"
+    },
+    {
+      "file": "src/lib/notices.ts"
+    },
+    {
+      "file": "src/lib/peer-message.ts"
+    },
+    {
+      "file": "src/lib/phone-setup.ts"
+    },
+    {
+      "file": "src/pair/PairPage.tsx"
+    }
+  ]
+}

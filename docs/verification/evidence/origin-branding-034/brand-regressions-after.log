@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-branding-034/Origin
+
+
+ Test Files  5 passed (5)
+      Tests  14 passed | 147 skipped (161)
+   Start at  23:35:16
+   Duration  2.39s (transform 532ms, setup 840ms, import 780ms, tests 94ms, environment 0ms)
+

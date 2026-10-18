@@ -1,0 +1,557 @@
+{
+  "baseline": "87ff77be5ea79272175219d479b9a8017b4e8fcc",
+  "messages": [
+    {
+      "file": "src/locales/de.json",
+      "key": "vm.vps.subtitle",
+      "before": "Dauerhafte, von OpenMaus verwaltete Docker-Desktops auf deinem VPS. Wer einen entfernt, löscht dessen Dateien und Browser-Logins endgültig.",
+      "after": "Dauerhafte, von Origin verwaltete Docker-Desktops auf deinem VPS. Wer einen entfernt, löscht dessen Dateien und Browser-Logins endgültig."
+    },
+    {
+      "file": "src/locales/de.json",
+      "key": "vm.vps.refreshHint",
+      "before": "Aktualisiere, um die von OpenMaus verwalteten Computer auf deinem VPS zu prüfen.",
+      "after": "Aktualisiere, um die von Origin verwalteten Computer auf deinem VPS zu prüfen."
+    },
+    {
+      "file": "src/locales/de.json",
+      "key": "vm.vps.noneFound",
+      "before": "Keine von OpenMaus verwalteten VPS-Computer gefunden.",
+      "after": "Keine von Origin verwalteten VPS-Computer gefunden."
+    },
+    {
+      "file": "src/locales/de.json",
+      "key": "vm.cloud.noneFound",
+      "before": "Keine von OpenMaus verwalteten Cloud-Computer gefunden.",
+      "after": "Keine von Origin verwalteten Cloud-Computer gefunden."
+    },
+    {
+      "file": "src/locales/de.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Nutze deinen ChatGPT-Tarif für geeignete KI-Anfragen in Origin. Das ist getrennt von MausBot Cloud und der API-Abrechnung.",
+      "after": "Nutze deinen ChatGPT-Tarif für geeignete KI-Anfragen in Origin. API-Nutzung wird separat abgerechnet."
+    },
+    {
+      "file": "src/locales/de.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Geeignete KI-Anfragen in Origin nutzen deinen ChatGPT-Tarif. Nutzung und Zugriff verwaltest du in den ChatGPT-Einstellungen. Dein ChatGPT-Tarif ist getrennt von MausBot Cloud.",
+      "after": "Geeignete KI-Anfragen in Origin nutzen deinen ChatGPT-Tarif. Nutzung und Zugriff verwaltest du in den ChatGPT-Einstellungen."
+    },
+    {
+      "file": "src/locales/en.json",
+      "key": "onboarding.reel.terminal.body",
+      "before": "Type npx openmausbot, pick a brain, and the same app opens in your browser. Pair a phone, or put it on a server.",
+      "after": "From an Origin source checkout, run pnpm omb, pick a brain, and open the app in your browser. Pair a phone, or run it on a server."
+    },
+    {
+      "file": "src/locales/en.json",
+      "key": "remote.client.server.hint",
+      "before": "On your server, run this command to create a fresh, single-use pairing link. Paste the full link below, including its 12-character code.",
+      "after": "From your Origin source checkout on the server, run this command to create a fresh, single-use pairing link. Paste the full link below, including its 12-character code."
+    },
+    {
+      "file": "src/locales/en.json",
+      "key": "vm.vps.subtitle",
+      "before": "Persistent OpenMaus-managed Docker desktops on your VPS. Removing one permanently erases its files and browser sign-ins.",
+      "after": "Persistent Origin-managed Docker desktops on your VPS. Removing one permanently erases its files and browser sign-ins."
+    },
+    {
+      "file": "src/locales/en.json",
+      "key": "vm.vps.refreshHint",
+      "before": "Refresh to check OpenMaus-managed computers on your VPS.",
+      "after": "Refresh to check Origin-managed computers on your VPS."
+    },
+    {
+      "file": "src/locales/en.json",
+      "key": "vm.vps.noneFound",
+      "before": "No OpenMaus-managed VPS computers found.",
+      "after": "No Origin-managed VPS computers found."
+    },
+    {
+      "file": "src/locales/en.json",
+      "key": "vm.cloud.noneFound",
+      "before": "No OpenMaus-managed cloud computers found.",
+      "after": "No Origin-managed cloud computers found."
+    },
+    {
+      "file": "src/locales/en.json",
+      "key": "vm.perBot.deleteHint",
+      "before": "Delete OpenMaus-managed desktops you no longer need to free a slot. Files in their durable folders remain.",
+      "after": "Delete Origin-managed desktops you no longer need to free a slot. Files in their durable folders remain."
+    },
+    {
+      "file": "src/locales/en.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Use your ChatGPT plan for eligible AI requests in Origin. This is separate from MausBot Cloud and API billing.",
+      "after": "Use your ChatGPT plan for eligible AI requests in Origin. API usage is billed separately."
+    },
+    {
+      "file": "src/locales/en.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Eligible AI requests in Origin use your ChatGPT plan. Manage usage and access in ChatGPT settings. Your ChatGPT plan is separate from MausBot Cloud.",
+      "after": "Eligible AI requests in Origin use your ChatGPT plan. Manage usage and access in ChatGPT settings."
+    },
+    {
+      "file": "src/locales/es.json",
+      "key": "vm.vps.subtitle",
+      "before": "Escritorios Docker persistentes gestionados por OpenMaus en tu VPS. Quitar uno borra para siempre sus archivos e inicios de sesión.",
+      "after": "Escritorios Docker persistentes gestionados por Origin en tu VPS. Quitar uno borra para siempre sus archivos e inicios de sesión."
+    },
+    {
+      "file": "src/locales/es.json",
+      "key": "vm.vps.refreshHint",
+      "before": "Actualiza para comprobar los equipos gestionados por OpenMaus en tu VPS.",
+      "after": "Actualiza para comprobar los equipos gestionados por Origin en tu VPS."
+    },
+    {
+      "file": "src/locales/es.json",
+      "key": "vm.vps.noneFound",
+      "before": "No se encontraron equipos VPS gestionados por OpenMaus.",
+      "after": "No se encontraron equipos VPS gestionados por Origin."
+    },
+    {
+      "file": "src/locales/es.json",
+      "key": "vm.cloud.noneFound",
+      "before": "No se encontraron equipos en la nube gestionados por OpenMaus.",
+      "after": "No se encontraron equipos en la nube gestionados por Origin."
+    },
+    {
+      "file": "src/locales/es.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Usa tu plan de ChatGPT para las solicitudes de IA aptas en Origin. Es independiente de MausBot Cloud y de la facturación de la API.",
+      "after": "Usa tu plan de ChatGPT para las solicitudes de IA aptas en Origin. El uso de la API se factura por separado."
+    },
+    {
+      "file": "src/locales/es.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Las solicitudes de IA aptas en Origin usan tu plan de ChatGPT. Gestiona el uso y el acceso en los ajustes de ChatGPT. Tu plan de ChatGPT es independiente de MausBot Cloud.",
+      "after": "Las solicitudes de IA aptas en Origin usan tu plan de ChatGPT. Gestiona el uso y el acceso en los ajustes de ChatGPT."
+    },
+    {
+      "file": "src/locales/fr.json",
+      "key": "vm.vps.subtitle",
+      "before": "Bureaux Docker persistants gérés par OpenMaus sur votre VPS. En supprimer un efface définitivement ses fichiers et connexions.",
+      "after": "Bureaux Docker persistants gérés par Origin sur votre VPS. En supprimer un efface définitivement ses fichiers et connexions."
+    },
+    {
+      "file": "src/locales/fr.json",
+      "key": "vm.vps.refreshHint",
+      "before": "Actualisez pour vérifier les ordinateurs gérés par OpenMaus sur votre VPS.",
+      "after": "Actualisez pour vérifier les ordinateurs gérés par Origin sur votre VPS."
+    },
+    {
+      "file": "src/locales/fr.json",
+      "key": "vm.vps.noneFound",
+      "before": "Aucun ordinateur VPS géré par OpenMaus n’a été trouvé.",
+      "after": "Aucun ordinateur VPS géré par Origin n’a été trouvé."
+    },
+    {
+      "file": "src/locales/fr.json",
+      "key": "vm.cloud.noneFound",
+      "before": "Aucun ordinateur cloud géré par OpenMaus n’a été trouvé.",
+      "after": "Aucun ordinateur cloud géré par Origin n’a été trouvé."
+    },
+    {
+      "file": "src/locales/fr.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Utilisez votre forfait ChatGPT pour les requêtes IA éligibles dans Origin. Il est distinct de MausBot Cloud et de la facturation de l'API.",
+      "after": "Utilisez votre forfait ChatGPT pour les requêtes IA éligibles dans Origin. L’utilisation de l’API est facturée séparément."
+    },
+    {
+      "file": "src/locales/fr.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Les requêtes IA éligibles dans Origin utilisent votre forfait ChatGPT. Gérez l'utilisation et l'accès dans les paramètres de ChatGPT. Votre forfait ChatGPT est distinct de MausBot Cloud.",
+      "after": "Les requêtes IA éligibles dans Origin utilisent votre forfait ChatGPT. Gérez l’utilisation et l’accès dans les paramètres de ChatGPT."
+    },
+    {
+      "file": "src/locales/hi.json",
+      "key": "vm.vps.subtitle",
+      "before": "आपके VPS पर OpenMaus द्वारा प्रबंधित स्थायी Docker डेस्कटॉप। किसी को हटाने पर उसकी फ़ाइलें और ब्राउज़र लॉगिन हमेशा के लिए मिट जाते हैं।",
+      "after": "आपके VPS पर Origin द्वारा प्रबंधित स्थायी Docker डेस्कटॉप। किसी को हटाने पर उसकी फ़ाइलें और ब्राउज़र लॉगिन हमेशा के लिए मिट जाते हैं।"
+    },
+    {
+      "file": "src/locales/hi.json",
+      "key": "vm.vps.refreshHint",
+      "before": "अपने VPS पर OpenMaus द्वारा प्रबंधित कंप्यूटर देखने के लिए ताज़ा करें।",
+      "after": "अपने VPS पर Origin द्वारा प्रबंधित कंप्यूटर देखने के लिए ताज़ा करें।"
+    },
+    {
+      "file": "src/locales/hi.json",
+      "key": "vm.vps.noneFound",
+      "before": "OpenMaus द्वारा प्रबंधित कोई VPS कंप्यूटर नहीं मिला।",
+      "after": "Origin द्वारा प्रबंधित कोई VPS कंप्यूटर नहीं मिला।"
+    },
+    {
+      "file": "src/locales/hi.json",
+      "key": "vm.cloud.noneFound",
+      "before": "OpenMaus द्वारा प्रबंधित कोई क्लाउड कंप्यूटर नहीं मिला।",
+      "after": "Origin द्वारा प्रबंधित कोई क्लाउड कंप्यूटर नहीं मिला।"
+    },
+    {
+      "file": "src/locales/hi.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Origin में योग्य AI अनुरोधों के लिए अपने ChatGPT प्लान का इस्तेमाल करें। यह MausBot Cloud और API बिलिंग से अलग है।",
+      "after": "Origin में योग्य AI अनुरोधों के लिए अपने ChatGPT प्लान का इस्तेमाल करें। API के इस्तेमाल का शुल्क अलग से लिया जाता है।"
+    },
+    {
+      "file": "src/locales/hi.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Origin में योग्य AI अनुरोध आपके ChatGPT प्लान का इस्तेमाल करते हैं। इस्तेमाल और पहुँच को ChatGPT सेटिंग्स में प्रबंधित करें। आपका ChatGPT प्लान MausBot Cloud से अलग है।",
+      "after": "Origin में योग्य AI अनुरोध आपके ChatGPT प्लान का इस्तेमाल करते हैं। इस्तेमाल और पहुँच को ChatGPT सेटिंग्स में प्रबंधित करें।"
+    },
+    {
+      "file": "src/locales/ja.json",
+      "key": "onboarding.reel.terminal.body",
+      "before": "npx openmausbot と入力してモデルを選ぶと、同じアプリがブラウザーで開きます。スマートフォンをペアリングしたり、サーバーで動かしたりできます。",
+      "after": "Origin のソースコードから pnpm omb を実行し、モデルを選んでブラウザーでアプリを開きます。スマートフォンをペアリングしたり、サーバーで動かしたりできます。"
+    },
+    {
+      "file": "src/locales/ja.json",
+      "key": "remote.client.server.hint",
+      "before": "サーバーでこのコマンドを実行し、新しい一度限りのペアリングリンクを作成してください。12 文字のコードを含め、リンク全体を下に貼り付けてください。",
+      "after": "サーバー上の Origin のソースコードからこのコマンドを実行して、新しい使い捨てペアリングリンクを作成します。12 文字のコードを含む完全なリンクを下に貼り付けてください。"
+    },
+    {
+      "file": "src/locales/ja.json",
+      "key": "vm.vps.subtitle",
+      "before": "あなたの VPS 上にある、OpenMaus 管理の永続的な Docker デスクトップです。削除すると、そのファイルとブラウザーのログインは完全に消えます。",
+      "after": "あなたの VPS 上にある、Origin 管理の永続的な Docker デスクトップです。削除すると、そのファイルとブラウザーのログインは完全に消えます。"
+    },
+    {
+      "file": "src/locales/ja.json",
+      "key": "vm.vps.refreshHint",
+      "before": "VPS 上の OpenMaus 管理コンピューターを確認するには更新してください。",
+      "after": "VPS 上の Origin 管理コンピューターを確認するには更新してください。"
+    },
+    {
+      "file": "src/locales/ja.json",
+      "key": "vm.vps.noneFound",
+      "before": "OpenMaus 管理の VPS コンピューターは見つかりませんでした。",
+      "after": "Origin 管理の VPS コンピューターは見つかりませんでした。"
+    },
+    {
+      "file": "src/locales/ja.json",
+      "key": "vm.cloud.noneFound",
+      "before": "OpenMaus 管理のクラウドコンピューターは見つかりませんでした。",
+      "after": "Origin 管理のクラウドコンピューターは見つかりませんでした。"
+    },
+    {
+      "file": "src/locales/ja.json",
+      "key": "vm.perBot.deleteHint",
+      "before": "不要になった OpenMaus 管理のデスクトップを削除すると、枠が空きます。永続フォルダー内のファイルは残ります。",
+      "after": "不要になった Origin 管理のデスクトップを削除すると、枠が空きます。永続フォルダー内のファイルは残ります。"
+    },
+    {
+      "file": "src/locales/ja.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Origin の対象となる AI リクエストに ChatGPT のプランを使います。これは MausBot Cloud や API の課金とは別です。",
+      "after": "Origin の対象となる AI リクエストに ChatGPT のプランを使います。API の利用料金は別途請求されます。"
+    },
+    {
+      "file": "src/locales/ja.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Origin の対象となる AI リクエストには ChatGPT のプランが使われます。利用状況とアクセスは ChatGPT の設定で管理してください。ChatGPT のプランは MausBot Cloud とは別です。",
+      "after": "Origin の対象となる AI リクエストには ChatGPT のプランが使われます。利用状況とアクセスは ChatGPT の設定で管理してください。"
+    },
+    {
+      "file": "src/locales/pt-br.json",
+      "key": "vm.vps.subtitle",
+      "before": "Desktops Docker persistentes gerenciados pelo OpenMaus no seu VPS. Remover um apaga para sempre seus arquivos e logins de navegador.",
+      "after": "Desktops Docker persistentes gerenciados pelo Origin no seu VPS. Remover um apaga para sempre seus arquivos e logins de navegador."
+    },
+    {
+      "file": "src/locales/pt-br.json",
+      "key": "vm.vps.refreshHint",
+      "before": "Atualize para verificar os computadores gerenciados pelo OpenMaus no seu VPS.",
+      "after": "Atualize para verificar os computadores gerenciados pelo Origin no seu VPS."
+    },
+    {
+      "file": "src/locales/pt-br.json",
+      "key": "vm.vps.noneFound",
+      "before": "Nenhum computador VPS gerenciado pelo OpenMaus foi encontrado.",
+      "after": "Nenhum computador VPS gerenciado pelo Origin foi encontrado."
+    },
+    {
+      "file": "src/locales/pt-br.json",
+      "key": "vm.cloud.noneFound",
+      "before": "Nenhum computador na nuvem gerenciado pelo OpenMaus foi encontrado.",
+      "after": "Nenhum computador na nuvem gerenciado pelo Origin foi encontrado."
+    },
+    {
+      "file": "src/locales/pt-br.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Use seu plano do ChatGPT para solicitações de IA elegíveis no Origin. Ele é separado do MausBot Cloud e da cobrança da API.",
+      "after": "Use seu plano do ChatGPT para solicitações de IA elegíveis no Origin. O uso da API é cobrado separadamente."
+    },
+    {
+      "file": "src/locales/pt-br.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "As solicitações de IA elegíveis no Origin usam seu plano do ChatGPT. Gerencie o uso e o acesso nas configurações do ChatGPT. Seu plano do ChatGPT é separado do MausBot Cloud.",
+      "after": "As solicitações de IA elegíveis no Origin usam seu plano do ChatGPT. Gerencie o uso e o acesso nas configurações do ChatGPT."
+    },
+    {
+      "file": "src/locales/tr.json",
+      "key": "onboarding.reel.terminal.body",
+      "before": "npx openmausbot yazın, bir beyin seçin ve aynı uygulama tarayıcınızda açılsın. Bir telefon eşleştirin veya bir sunucuya kurun.",
+      "after": "Origin kaynak kodu klasöründe pnpm omb çalıştırın, bir model seçin ve uygulamayı tarayıcınızda açın. Telefon eşleştirin veya sunucuda çalıştırın."
+    },
+    {
+      "file": "src/locales/tr.json",
+      "key": "remote.client.server.hint",
+      "before": "Sunucunuzda yeni, tek kullanımlık bir eşleştirme bağlantısı oluşturmak için bu komutu çalıştırın. 12 karakterlik kodu da dahil olmak üzere tam bağlantıyı aşağıya yapıştırın.",
+      "after": "Sunucunuzdaki Origin kaynak kodu klasöründe bu komutu çalıştırarak yeni, tek kullanımlık bir eşleştirme bağlantısı oluşturun. 12 karakterli kodu da içeren tam bağlantıyı aşağıya yapıştırın."
+    },
+    {
+      "file": "src/locales/tr.json",
+      "key": "vm.vps.subtitle",
+      "before": "VPS'inizde kalıcı, OpenMaus yönetimli Docker masaüstleri. Birini kaldırmak dosyalarını ve tarayıcı oturumlarını kalıcı olarak siler.",
+      "after": "VPS'inizde kalıcı, Origin yönetimli Docker masaüstleri. Birini kaldırmak dosyalarını ve tarayıcı oturumlarını kalıcı olarak siler."
+    },
+    {
+      "file": "src/locales/tr.json",
+      "key": "vm.vps.refreshHint",
+      "before": "VPS'inizdeki OpenMaus yönetimli bilgisayarları kontrol etmek için yenileyin.",
+      "after": "VPS'inizdeki Origin yönetimli bilgisayarları kontrol etmek için yenileyin."
+    },
+    {
+      "file": "src/locales/tr.json",
+      "key": "vm.vps.noneFound",
+      "before": "OpenMaus yönetimli VPS bilgisayarı bulunamadı.",
+      "after": "Origin yönetimli VPS bilgisayarı bulunamadı."
+    },
+    {
+      "file": "src/locales/tr.json",
+      "key": "vm.cloud.noneFound",
+      "before": "OpenMaus yönetimli bulut bilgisayarı bulunamadı.",
+      "after": "Origin yönetimli bulut bilgisayarı bulunamadı."
+    },
+    {
+      "file": "src/locales/tr.json",
+      "key": "vm.perBot.deleteHint",
+      "before": "Yer açmak için artık ihtiyacınız olmayan OpenMaus yönetimli masaüstlerini silin. Kalıcı klasörlerindeki dosyalar korunur.",
+      "after": "Yer açmak için artık ihtiyacınız olmayan Origin yönetimli masaüstlerini silin. Kalıcı klasörlerindeki dosyalar korunur."
+    },
+    {
+      "file": "src/locales/tr.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Origin'taki uygun AI istekleri için ChatGPT planınızı kullanın. Bu, MausBot Cloud ve API faturalandırmasından ayrıdır.",
+      "after": "Origin'deki uygun AI istekleri için ChatGPT planınızı kullanın. API kullanımı ayrıca ücretlendirilir."
+    },
+    {
+      "file": "src/locales/tr.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Origin'taki uygun AI istekleri ChatGPT planınızı kullanır. Kullanımı ve erişimi ChatGPT ayarlarından yönetin. ChatGPT planınız MausBot Cloud'dan ayrıdır.",
+      "after": "Origin'deki uygun AI istekleri ChatGPT planınızı kullanır. Kullanımı ve erişimi ChatGPT ayarlarından yönetin."
+    },
+    {
+      "file": "src/locales/uk.json",
+      "key": "onboarding.reel.terminal.body",
+      "before": "Введіть npx openmausbot, оберіть мозок — і той самий застосунок відкриється у вашому браузері. Прив'яжіть телефон або поставте на сервер.",
+      "after": "У каталозі вихідного коду Origin запустіть pnpm omb, виберіть модель і відкрийте застосунок у браузері. Прив’яжіть телефон або запустіть його на сервері."
+    },
+    {
+      "file": "src/locales/uk.json",
+      "key": "remote.client.server.hint",
+      "before": "На своєму сервері виконайте цю команду, щоб створити свіже одноразове посилання прив'язки. Вставте повне посилання нижче, разом із 12-символьним кодом.",
+      "after": "У каталозі вихідного коду Origin на сервері виконайте цю команду, щоб створити нове одноразове посилання для прив’язки. Вставте нижче повне посилання разом із 12-символьним кодом."
+    },
+    {
+      "file": "src/locales/uk.json",
+      "key": "vm.vps.subtitle",
+      "before": "Постійні керовані OpenMaus Docker-робочі столи на вашому VPS. Видалення одного остаточно стирає його файли та логіни браузера.",
+      "after": "Постійні керовані Origin Docker-робочі столи на вашому VPS. Видалення одного остаточно стирає його файли та логіни браузера."
+    },
+    {
+      "file": "src/locales/uk.json",
+      "key": "vm.vps.refreshHint",
+      "before": "Оновіть, щоб перевірити керовані OpenMaus комп'ютери на вашому VPS.",
+      "after": "Оновіть, щоб перевірити керовані Origin комп'ютери на вашому VPS."
+    },
+    {
+      "file": "src/locales/uk.json",
+      "key": "vm.vps.noneFound",
+      "before": "Керованих OpenMaus VPS-комп'ютерів не знайдено.",
+      "after": "Керованих Origin VPS-комп'ютерів не знайдено."
+    },
+    {
+      "file": "src/locales/uk.json",
+      "key": "vm.cloud.noneFound",
+      "before": "Керованих OpenMaus хмарних комп'ютерів не знайдено.",
+      "after": "Керованих Origin хмарних комп'ютерів не знайдено."
+    },
+    {
+      "file": "src/locales/uk.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Використовуйте свій план ChatGPT для відповідних запитів до ШІ в Origin. Це окремо від MausBot Cloud і оплати API.",
+      "after": "Використовуйте свій план ChatGPT для відповідних запитів до ШІ в Origin. Використання API оплачується окремо."
+    },
+    {
+      "file": "src/locales/uk.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Відповідні запити до ШІ в Origin використовують ваш план ChatGPT. Керуйте використанням і доступом у налаштуваннях ChatGPT. Ваш план ChatGPT — окремо від MausBot Cloud.",
+      "after": "Відповідні запити до ШІ в Origin використовують ваш план ChatGPT. Керуйте використанням і доступом у налаштуваннях ChatGPT."
+    },
+    {
+      "file": "src/locales/vi.json",
+      "key": "onboarding.reel.terminal.body",
+      "before": "Nhập npx openmausbot, chọn một bộ não, và chính ứng dụng đó sẽ mở trong trình duyệt của bạn. Ghép nối điện thoại hoặc đưa ứng dụng lên máy chủ.",
+      "after": "Từ mã nguồn Origin, chạy pnpm omb, chọn mô hình và mở ứng dụng trong trình duyệt. Ghép nối điện thoại hoặc chạy trên máy chủ."
+    },
+    {
+      "file": "src/locales/vi.json",
+      "key": "remote.client.server.hint",
+      "before": "Trên máy chủ của bạn, hãy chạy lệnh này để tạo một liên kết ghép nối mới dùng một lần. Dán toàn bộ liên kết bên dưới, bao gồm cả mã 12 ký tự.",
+      "after": "Từ mã nguồn Origin trên máy chủ, chạy lệnh này để tạo liên kết ghép nối mới chỉ dùng một lần. Dán liên kết đầy đủ bên dưới, bao gồm mã gồm 12 ký tự."
+    },
+    {
+      "file": "src/locales/vi.json",
+      "key": "vm.vps.subtitle",
+      "before": "Môi trường desktop Docker cố định do OpenMaus quản lý trên VPS của bạn. Xóa máy tính sẽ xóa vĩnh viễn các tệp và thông tin đăng nhập trình duyệt.",
+      "after": "Môi trường desktop Docker cố định do Origin quản lý trên VPS của bạn. Xóa máy tính sẽ xóa vĩnh viễn các tệp và thông tin đăng nhập trình duyệt."
+    },
+    {
+      "file": "src/locales/vi.json",
+      "key": "vm.vps.refreshHint",
+      "before": "Làm mới để kiểm tra các máy tính do OpenMaus quản lý trên VPS của bạn.",
+      "after": "Làm mới để kiểm tra các máy tính do Origin quản lý trên VPS của bạn."
+    },
+    {
+      "file": "src/locales/vi.json",
+      "key": "vm.vps.noneFound",
+      "before": "Không tìm thấy máy tính VPS nào do OpenMaus quản lý.",
+      "after": "Không tìm thấy máy tính VPS nào do Origin quản lý."
+    },
+    {
+      "file": "src/locales/vi.json",
+      "key": "vm.cloud.noneFound",
+      "before": "Không tìm thấy máy tính đám mây nào do OpenMaus quản lý.",
+      "after": "Không tìm thấy máy tính đám mây nào do Origin quản lý."
+    },
+    {
+      "file": "src/locales/vi.json",
+      "key": "vm.perBot.deleteHint",
+      "before": "Xóa các desktop do OpenMaus quản lý mà bạn không còn dùng đến để giải phóng chỗ. Các tệp trong thư mục lưu trữ cố định vẫn sẽ được giữ lại.",
+      "after": "Xóa các desktop do Origin quản lý mà bạn không còn dùng đến để giải phóng chỗ. Các tệp trong thư mục lưu trữ cố định vẫn sẽ được giữ lại."
+    },
+    {
+      "file": "src/locales/vi.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "Sử dụng gói ChatGPT của bạn cho các yêu cầu AI đủ điều kiện trong Origin. Gói này tách biệt với MausBot Cloud và thanh toán API.",
+      "after": "Sử dụng gói ChatGPT của bạn cho các yêu cầu AI đủ điều kiện trong Origin. Mức sử dụng API được tính phí riêng."
+    },
+    {
+      "file": "src/locales/vi.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Các yêu cầu AI đủ điều kiện trong Origin sử dụng gói ChatGPT của bạn. Quản lý mức sử dụng và quyền truy cập trong cài đặt ChatGPT. Gói ChatGPT của bạn tách biệt với MausBot Cloud.",
+      "after": "Các yêu cầu AI đủ điều kiện trong Origin sử dụng gói ChatGPT của bạn. Quản lý mức sử dụng và quyền truy cập trong cài đặt ChatGPT."
+    },
+    {
+      "file": "src/locales/zh-tw.json",
+      "key": "onboarding.reel.terminal.body",
+      "before": "輸入 npx openmausbot，選一個大腦，同一個應用程式就會在你的瀏覽器中開啟。也可以配對手機，或把它放到伺服器上。",
+      "after": "在 Origin 原始碼目錄中執行 pnpm omb，選擇模型，再於瀏覽器開啟應用程式。你也可以配對手機，或在伺服器上執行。"
+    },
+    {
+      "file": "src/locales/zh-tw.json",
+      "key": "remote.client.server.hint",
+      "before": "請在你的伺服器上執行這個指令，以建立全新的一次性配對連結。將完整連結（包含其 12 個字元的配對碼）貼在下方。",
+      "after": "在伺服器上的 Origin 原始碼目錄中執行此指令，建立新的單次使用配對連結。請在下方貼上完整連結，包括其中的 12 字元驗證碼。"
+    },
+    {
+      "file": "src/locales/zh-tw.json",
+      "key": "vm.vps.subtitle",
+      "before": "在你的 VPS 上由 OpenMaus 管理的持續性 Docker 桌面。移除其中一台會永久清除其檔案與瀏覽器登入資訊。",
+      "after": "在你的 VPS 上由 Origin 管理的持續性 Docker 桌面。移除其中一台會永久清除其檔案與瀏覽器登入資訊。"
+    },
+    {
+      "file": "src/locales/zh-tw.json",
+      "key": "vm.vps.refreshHint",
+      "before": "重新整理以檢查你 VPS 上由 OpenMaus 管理的電腦。",
+      "after": "重新整理以檢查你 VPS 上由 Origin 管理的電腦。"
+    },
+    {
+      "file": "src/locales/zh-tw.json",
+      "key": "vm.vps.noneFound",
+      "before": "找不到由 OpenMaus 管理的 VPS 電腦。",
+      "after": "找不到由 Origin 管理的 VPS 電腦。"
+    },
+    {
+      "file": "src/locales/zh-tw.json",
+      "key": "vm.cloud.noneFound",
+      "before": "找不到由 OpenMaus 管理的雲端電腦。",
+      "after": "找不到由 Origin 管理的雲端電腦。"
+    },
+    {
+      "file": "src/locales/zh-tw.json",
+      "key": "vm.perBot.deleteHint",
+      "before": "移除不再需要、由 OpenMaus 管理的桌面即可釋出名額。其持久資料夾中的檔案會保留。",
+      "after": "移除不再需要、由 Origin 管理的桌面即可釋出名額。其持久資料夾中的檔案會保留。"
+    },
+    {
+      "file": "src/locales/zh-tw.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "將你的 ChatGPT 方案用於 Origin 中符合資格的 AI 請求。這與 MausBot Cloud 和 API 計費各自獨立。",
+      "after": "將你的 ChatGPT 方案用於 Origin 中符合資格的 AI 請求。API 用量另行計費。"
+    },
+    {
+      "file": "src/locales/zh-tw.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Origin 中符合資格的 AI 請求會使用你的 ChatGPT 方案。請在 ChatGPT 設定中管理用量和存取權限。你的 ChatGPT 方案與 MausBot Cloud 各自獨立。",
+      "after": "Origin 中符合資格的 AI 請求會使用你的 ChatGPT 方案。請在 ChatGPT 設定中管理用量和存取權限。"
+    },
+    {
+      "file": "src/locales/zh.json",
+      "key": "onboarding.reel.terminal.body",
+      "before": "输入 npx openmausbot，选一个大脑，同一个应用程序就会在你的浏览器中打开。也可以配对手机，或把它放到服务器上。",
+      "after": "在 Origin 源代码目录中运行 pnpm omb，选择模型，然后在浏览器中打开应用。你也可以配对手机，或在服务器上运行它。"
+    },
+    {
+      "file": "src/locales/zh.json",
+      "key": "remote.client.server.hint",
+      "before": "请在你的服务器上运行这个指令，以创建全新的一次性配对链接。将完整链接（包含其 12 个字符的配对码）贴在下方。",
+      "after": "在服务器上的 Origin 源代码目录中运行此命令，创建一个新的一次性配对链接。在下方粘贴完整链接，包括其中的 12 位代码。"
+    },
+    {
+      "file": "src/locales/zh.json",
+      "key": "vm.vps.subtitle",
+      "before": "你的 VPS 上由 OpenMaus 管理的持久 Docker 桌面。移除其中一台会永久清除它的文件和浏览器登录。",
+      "after": "你的 VPS 上由 Origin 管理的持久 Docker 桌面。移除其中一台会永久清除它的文件和浏览器登录。"
+    },
+    {
+      "file": "src/locales/zh.json",
+      "key": "vm.vps.refreshHint",
+      "before": "刷新以检查你 VPS 上由 OpenMaus 管理的电脑。",
+      "after": "刷新以检查你 VPS 上由 Origin 管理的电脑。"
+    },
+    {
+      "file": "src/locales/zh.json",
+      "key": "vm.vps.noneFound",
+      "before": "未找到由 OpenMaus 管理的 VPS 电脑。",
+      "after": "未找到由 Origin 管理的 VPS 电脑。"
+    },
+    {
+      "file": "src/locales/zh.json",
+      "key": "vm.cloud.noneFound",
+      "before": "未找到由 OpenMaus 管理的云端电脑。",
+      "after": "未找到由 Origin 管理的云端电脑。"
+    },
+    {
+      "file": "src/locales/zh.json",
+      "key": "vm.perBot.deleteHint",
+      "before": "删除不再需要的 OpenMaus 托管桌面以腾出名额。其持久文件夹中的文件会保留。",
+      "after": "删除不再需要的 Origin 托管桌面以腾出名额。其持久文件夹中的文件会保留。"
+    },
+    {
+      "file": "src/locales/zh.json",
+      "key": "engineSetup.chatgpt.description",
+      "before": "将你的 ChatGPT 方案用于 Origin 中符合条件的 AI 请求。这与 MausBot Cloud 和 API 计费相互独立。",
+      "after": "将你的 ChatGPT 方案用于 Origin 中符合条件的 AI 请求。API 用量单独计费。"
+    },
+    {
+      "file": "src/locales/zh.json",
+      "key": "engineSetup.chatgpt.welcomeBody",
+      "before": "Origin 中符合条件的 AI 请求会使用你的 ChatGPT 方案。请在 ChatGPT 设置中管理用量和访问权限。你的 ChatGPT 方案与 MausBot Cloud 相互独立。",
+      "after": "Origin 中符合条件的 AI 请求会使用你的 ChatGPT 方案。请在 ChatGPT 设置中管理用量和访问权限。"
+    }
+  ]
+}

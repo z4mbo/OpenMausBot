@@ -1,0 +1,30 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-branding-034/Origin
+
+ ❯ src/components/AppNotices.test.ts (13 tests | 1 failed) 143ms
+     × does not promote the upstream Product Hunt launch on any account 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/AppNotices.test.ts > Origin product notices > does not promote the upstream Product Hunt launch on any account
+AssertionError: expected '<aside aria-labelledby="product-hunt-…' not to contain 'Product Hunt'
+
+Expected: "Product Hunt"
+Received: "<aside aria-labelledby="product-hunt-title" data-notice="product-hunt" class="fixed bottom-4 left-4 z-40 max-h-[calc(100dvh-32px)] w-[300px] max-w-[calc(100vw-32px)] overflow-y-auto rounded-xl border border-hairline/40 bg-panel p-3.5 text-ink shadow-2xl shadow-black/20"><div class="flex items-start justify-between gap-3"><div class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rocket mt-0.5 shrink-0 text-ink-secondary" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg><h2 id="product-hunt-title" class="text-[13.5px] font-semibold">We&#x27;re live on Product Hunt</h2></div><button type="button" aria-label="Dismiss for good" class="ui-icon-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><p class="mb-3 mt-1 text-[12.5px] text-ink-secondary">Origin just launched. An upvote would mean a lot to us.</p><div class="flex flex-wrap items-center gap-3"><div><button type="button" class="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-control px-3 py-1.5 text-[13px] font-medium text-ink hover:bg-raised-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">Upvote on Product Hunt<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right" aria-hidden="true"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></button></div><button type="button" class="py-2 text-[12px] text-ink-secondary hover:text-ink">Not now</button></div><p role="status" class="sr-only">We&#x27;re live on Product Hunt</p></aside>"
+
+ ❯ src/components/AppNotices.test.ts:280:24
+    278|       account = next;
+    279|       const html = await launch();
+    280|       expect(html).not.toContain("Product Hunt");
+       |                        ^
+    281|       expect(html).not.toContain("products/mausbot");
+    282|       expect(window.ogb?.openExternal).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  23:20:24
+   Duration  2.80s (transform 931ms, setup 503ms, import 1.99s, tests 143ms, environment 0ms)
+
