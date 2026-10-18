@@ -27,6 +27,7 @@ export function ActivityPanel({ bot }: { bot: Bot }) {
   const [rows, setRows] = useState<ActivityRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const loadAbort = useRef<AbortController | null>(null);
+  const settle = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     loadAbort.current?.abort();
@@ -51,7 +52,11 @@ export function ActivityPanel({ bot }: { bot: Bot }) {
   useEffect(() => {
     setRows(null);
     void load();
-    return () => loadAbort.current?.abort();
+    return () => {
+      loadAbort.current?.abort();
+      if (settle.current) clearTimeout(settle.current);
+      settle.current = null;
+    };
   }, [load]);
 
   const threadIds = useMemo(
@@ -59,7 +64,6 @@ export function ActivityPanel({ bot }: { bot: Bot }) {
     [bot.threadId, bot.tasks],
   );
   useEffect(() => {
-    let settle: ReturnType<typeof setTimeout> | null = null;
     const stopLive = listenLiveFrames({
       onMissedFrames: () => void load(),
       onFrame: (frame) => {
@@ -73,15 +77,15 @@ export function ActivityPanel({ bot }: { bot: Bot }) {
           runtime.type === "request.resolved" ||
           runtime.type === "item.completed"
         ) {
-          if (settle) clearTimeout(settle);
-          settle = setTimeout(() => void load(), 400);
+          if (settle.current) clearTimeout(settle.current);
+          settle.current = setTimeout(() => {
+            settle.current = null;
+            void load();
+          }, 400);
         }
       },
     });
-    return () => {
-      stopLive();
-      if (settle) clearTimeout(settle);
-    };
+    return stopLive;
   }, [threadIds, load]);
 
   const days = useMemo(() => (rows ? groupActivityByDay(rows, new Date()) : []), [rows]);
