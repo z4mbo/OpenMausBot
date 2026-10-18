@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "reviewedAfterExclusive": "2026-10-18T15:22:47.8180101Z",
+  "reviewedThroughInclusive": "2026-10-18T17:24:07.000Z",
+  "scope": "initial targeted review of26 new merges; zero new adoptions at this checkpoint",
+  "evaluated": 26,
+  "adopted": 0,
+  "priorLedger": {
+    "reviewed": 20,
+    "adapted": 3,
+    "deferredOrNoPatch": 17,
+    "existingEvidenceUnchanged": true
+  },
+  "files": [
+    {
+      "path": "review-ledger.json",
+      "bytes": 81798,
+      "sha256": "51c2a404ec6131da5eff6fc2b709b983dfd77f0385f7dce9744b59e4ca02a69b"
+    },
+    {
+      "path": "review-report.md",
+      "bytes": 12951,
+      "sha256": "6a2cde00bf6da08298c5ae523e885edc268574ed218f9c402e42649250900de1"
+    },
+    {
+      "path": "patch-inventory.json",
+      "bytes": 207217,
+      "sha256": "4490eba1b8c05530171ebb5ee2d3f3ba7a98d88b4b128e5247ceb07682dd0e97"
+    },
+    {
+      "path": "overlapping-file-versions.json",
+      "bytes": 41955,
+      "sha256": "04e7d6eaf26fed5a7c54e38279ee672f71f52ed4a6933bee311ec3b92529423e"
+    },
+    {
+      "path": "source-queries.json",
+      "bytes": 3512,
+      "sha256": "576bc9c9fdfa85f4de85e462cac40409d68171abbaa79fd03519413199c6152f"
+    }
+  ]
+}

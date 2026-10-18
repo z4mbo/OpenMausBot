@@ -1,0 +1,1797 @@
+{
+  "schemaVersion": 1,
+  "reviewFinishedAt": "2026-10-18T17:29:56.716Z",
+  "repository": "milind-soni/OpenMausBot",
+  "reviewedAfterExclusive": "2026-10-18T15:22:47.8180101Z",
+  "reviewedThroughInclusive": "2026-10-18T17:24:07.000Z",
+  "searchTotal": 26,
+  "incompleteResults": false,
+  "directListingCount": 100,
+  "directListingHasMore": true,
+  "directListingBoundary": "2026-10-15T14:16:20Z",
+  "directListingReachedOlderThanCutoff": true,
+  "searchAndDirectIdsMatch": true,
+  "upstreamHead": "180141663c6190813a31f45c86ddcfdbb7f8a0a6",
+  "originPublishedSource": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+  "originCurrentSource": "98632d7c2ed8215f5a2fc60ff063ba7f918b1380",
+  "identicalRuntimeTrees": [
+    {
+      "path": "server",
+      "published": "c46d78694eef9bd3b5d9ef8bb0edc39126799fa0",
+      "current": "c46d78694eef9bd3b5d9ef8bb0edc39126799fa0",
+      "identical": true
+    },
+    {
+      "path": "backend",
+      "published": "785ac8c20beb028922f4d95068be2bd4f8bbcc96",
+      "current": "785ac8c20beb028922f4d95068be2bd4f8bbcc96",
+      "identical": true
+    },
+    {
+      "path": "src",
+      "published": "791f9dc99015bf401aeda8bf2dab340c19531093",
+      "current": "791f9dc99015bf401aeda8bf2dab340c19531093",
+      "identical": true
+    },
+    {
+      "path": "shared",
+      "published": "28e9c0371bb550069e6a3c8b074ee45f5c6f9448",
+      "current": "28e9c0371bb550069e6a3c8b074ee45f5c6f9448",
+      "identical": true
+    },
+    {
+      "path": "electron",
+      "published": "aa1257f35a56b721a9d77dc8d8dd9db4afa318e8",
+      "current": "aa1257f35a56b721a9d77dc8d8dd9db4afa318e8",
+      "identical": true
+    },
+    {
+      "path": "site",
+      "published": "b618b104235fc822fd2bf887d3fb432a0d302df3",
+      "current": "b618b104235fc822fd2bf887d3fb432a0d302df3",
+      "identical": true
+    },
+    {
+      "path": "scripts",
+      "published": "acb0a4443ad9584b90e9f4fdd279a9f64f2803d3",
+      "current": "acb0a4443ad9584b90e9f4fdd279a9f64f2803d3",
+      "identical": true
+    }
+  ],
+  "priorLedgerSha256": "3557528104b6b10817c6c8c4976c2c0c4e64ba1f4440be58564072f36b2b004b",
+  "priorLedgerCounts": {
+    "sourceReviewed": 20,
+    "adapted": 3,
+    "deferredOrNoPatch": 17
+  },
+  "metadataDiscovered": 26,
+  "sourceReviewPending": false,
+  "mutations": {
+    "source": false,
+    "root": false,
+    "production": false,
+    "externalMessages": false
+  },
+  "evaluatedNew": 26,
+  "newAdoptions": 0,
+  "newPatchesApplied": 0,
+  "newProvenRuntimeBugs": 0,
+  "scopeQualification": "All 26 received an explicit primary-patch/surface disposition. Targeted code comparisons are static and scope-limited; translation/aggregate inventories are labeled separately. This is not a claim of reading/testing all 817 changed-file entries or 26 runtime-verified bugs. No previous ledger row is changed.",
+  "deduplication": {
+    "changedFileEntries": 817,
+    "uniquePaths": 382,
+    "uniquePathAndBlobVersions": 567,
+    "repeatedPathAndBlobGroups": 250,
+    "aggregateRollup": 3059,
+    "aggregateFileEntries": 305,
+    "followup3062Overlaps": [
+      3029,
+      3052
+    ],
+    "featureAdoptionsCounted": 0
+  },
+  "priorLedger": {
+    "unchanged": true,
+    "sourceReviewed": 20,
+    "adapted": 3,
+    "deferredOrNoPatch": 17,
+    "sha256": "3557528104b6b10817c6c8c4976c2c0c4e64ba1f4440be58564072f36b2b004b"
+  },
+  "recommendedNext": [
+    3037,
+    3036,
+    3045,
+    3042,
+    3058,
+    3038
+  ],
+  "entries": [
+    {
+      "number": 3059,
+      "title": "0.1.116: Automations fixes, app events, Cloud reliability (1Password, lending, browser, passkeys, time zone), treg research",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3059",
+      "createdAt": "2026-10-18T14:59:40Z",
+      "mergedAt": "2026-10-18T15:41:51Z",
+      "mergeCommit": "63e3fab20d08c0c243ff5c43ea3ef18daded2697",
+      "changedFiles": 305,
+      "disposition": "defer-aggregate-rollup",
+      "reviewScope": "Aggregate envelope and repeated file-version inventory",
+      "rationale": "The 305-file release rollup repeats the child changes in this window and includes upstream release/cloud/branding surfaces. Review child patches independently; do not import this aggregate or count it as another implementation adoption.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "1505d54854b886552f639f33716588fcf8361e1c37d868a0d6cc95afc74bb925",
+      "officialFilesSha256": "70919fb1053b61df2b3b8416d32b933befae9fb16a88e485b6e43c8f1221bf73",
+      "evidence": [
+        {
+          "path": "package.json",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "package.json",
+            "present": true,
+            "blob": "dea9f422355f6d37bb71f7882952e8cc1e0f0bb3",
+            "bytes": 7906,
+            "sha256": "a81ab8d9f56e8b88cc7f2ba29cf888931569a2aab2e8caf21f4a79194e53f3a9"
+          }
+        },
+        {
+          "path": "server/app-triggers.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "df0ff4e32fbb66dac8bf2e8a28d35810610e7a0e",
+          "upstreamPatchSha256": "682136afce0c2eb5a2797ead65459aba7d82b7a2fbc9c3fc22644ae4ed401ade",
+          "origin": {
+            "path": "server/app-triggers.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/research.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "eb5b0d45fe4b7274d7fc86e88e862b9bbb297d6f",
+          "upstreamPatchSha256": "d455b9428ead707d1bdc21ebe2916733573739e33a1e0b4d3783b8f1e9648f88",
+          "origin": {
+            "path": "server/research.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "shared/redact.ts",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "shared/redact.ts",
+            "present": true,
+            "blob": "fad237b82f536eccec04280053bba29c42b9936e",
+            "bytes": 4909,
+            "sha256": "16e0367525e52f3367747a62b2304bcdeecf3780a117b985afddc9e1d87dbc18"
+          }
+        }
+      ],
+      "overlappingFileVersions": 249
+    },
+    {
+      "number": 3057,
+      "title": "fix(automations): the sentence keeps acronyms and names, and says \"Every 2 minutes\"",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3057",
+      "createdAt": "2026-10-18T13:53:27Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "36581ba9d0f5ae09d64f5bed1b83616be61c979a",
+      "changedFiles": 2,
+      "disposition": "defer-automations-ui-foundation",
+      "reviewScope": "Targeted cron-step and acronym/name sentence comparison",
+      "rationale": "Upstream labels */2 cron schedules as Every 2 minutes and preserves acronyms/names when generating sentences. The Origin baseline has no src/lib/automations.ts; preserve this requirement if the new automation UI is adopted.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "ddc2e90d4d7503012cac69e8034c543284698d465b65f2990c3e895877bc7806",
+      "officialFilesSha256": "1f2bba066ae7b57adf2eff13c53bc64c7696d9dddd2f4b8a417086f9d59eb4d4",
+      "evidence": [
+        {
+          "path": "src/lib/automations.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "07460e7a1b95db3792973d223ea9df8dc1ca9d81",
+          "upstreamPatchSha256": "697713b1c7de0691191629b0e25c1051fa8b713cf910fe1760af89838b96c628",
+          "origin": {
+            "path": "src/lib/automations.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "src/components/RoutineCalendarPage.tsx",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "src/components/RoutineCalendarPage.tsx",
+            "present": true,
+            "blob": "7de946e890de2d9b4689609fcadeb622d53854c7",
+            "bytes": 128800,
+            "sha256": "fc607bde4cc1bda9e01e14448aa79bf8d7217df2494e6a853100b1eae0918323"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    },
+    {
+      "number": 3054,
+      "title": "fix(cloud): My Cloud tells time in its owner's time zone",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3054",
+      "createdAt": "2026-10-18T13:53:19Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "f0f757d43655042b4f3b07db837e230741a07f8c",
+      "changedFiles": 11,
+      "disposition": "defer-cloud-authority-design",
+      "reviewScope": "Targeted timezone route and saved-process-zone comparison",
+      "rationale": "Upstream persists the owner time zone and assigns process.env.TZ, affecting schedules and all later child processes. Origin has shared workspace/project members; a process-wide zone change needs an explicit server-owner/member policy and per-schedule correctness tests.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "efc45e27d819a3805b5659711c4bed1b77bbdf834a9c24694cb3125bc81e8ca6",
+      "officialFilesSha256": "5452780a20234c5b8a3bd3617ea74147246ddec7d5595a145c7cd654cc3af280",
+      "evidence": [
+        {
+          "path": "server/time-zone.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "869f211d5c2f3c818df6a9acf0615f7530de1f0f",
+          "upstreamPatchSha256": "ca2c3a0152871920602dd71fe08f64ef1658a8890e6e12d107f0fff64d89d4c8",
+          "origin": {
+            "path": "server/time-zone.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/routes/time-zone.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "4453cab3a34085077364700659c27908e15dd2b1",
+          "upstreamPatchSha256": "80ae5d18fbe50a9f63816b13babf1056f74f4cb3b299be3c76a36f92bf1591ac",
+          "origin": {
+            "path": "server/routes/time-zone.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "src/components/CloudTimeZone.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "30912ccdab18e91e78c73e194d61da60d31b22a9",
+          "upstreamPatchSha256": "59ae61baf2c42a518827f99989fcf7b63efce42deb97d95b8c137fd95b84c80e",
+          "origin": {
+            "path": "src/components/CloudTimeZone.tsx",
+            "present": false
+          }
+        },
+        {
+          "path": "server/routines.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "f11331bc7896997209c5705d175d648bd476e2a6",
+          "upstreamPatchSha256": "d3692158981b2e09da04f5ae8477cea98adfff2e07828fded0a39db5b6264972",
+          "origin": {
+            "path": "server/routines.ts",
+            "present": true,
+            "blob": "3ca3c0c89d87e115455971c81b29800cba8931a7",
+            "bytes": 75902,
+            "sha256": "2adab65b0272a96c4778d9fddadf33f2e7eab78898331881038f2e922ab9b752"
+          }
+        }
+      ],
+      "overlappingFileVersions": 7
+    },
+    {
+      "number": 3058,
+      "title": "feat(logs): open the logs folder from Settings, and a plain \"Where are my logs?\" page",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3058",
+      "createdAt": "2026-10-18T13:54:32Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "60619915c66da378f3636048248c4f1996362604",
+      "changedFiles": 18,
+      "disposition": "recommend-future-narrow-feature",
+      "reviewScope": "Targeted main-only logs opener and Settings bridge comparison",
+      "rationale": "Origin already exports redacted diagnostics but lacks the main-selected logs-folder bridge. A bounded Open logs action is useful: the renderer must never supply an arbitrary path; remote clients must not reveal another machine’s path. Requires desktop bridge tests and actual packaged UI acceptance.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "c8316b83da57006122aac9c4c526006d000ca2134a542b91884aecc5fc1b5d95",
+      "officialFilesSha256": "24933e0e827e7cc1e5540a5471f371eb17a542708a9e8c4ef84dcccbf3f79ec6",
+      "evidence": [
+        {
+          "path": "electron/save-file.mjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "bb9220662c7a8274edb69bb5c755531a498ca673",
+          "upstreamPatchSha256": "84dfb1913e9a155c75ae2aaa676c7da683e375465078e2cb65a064447ed9df75",
+          "origin": {
+            "path": "electron/save-file.mjs",
+            "present": true,
+            "blob": "7885d6781455362dcc6761778179e18b3399371e",
+            "bytes": 5023,
+            "sha256": "7924924e603417404c67b2a9690becb88498e52de3fa6d299dabff4f5068ef7c"
+          }
+        },
+        {
+          "path": "electron/main.mjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "35801d142db5c02b235f682cfb4d79c7f18295fc",
+          "upstreamPatchSha256": "8e9b60691c14049e0cef279546689b61eeb86936852cdf4208716646c13aef48",
+          "origin": {
+            "path": "electron/main.mjs",
+            "present": true,
+            "blob": "6a52084240bb890079b3d536cb992d18d25827e2",
+            "bytes": 162577,
+            "sha256": "a8424288121dd783622105499ddcf8b1b6b8497b98b96e90a3930db6ef3c1cb1"
+          }
+        },
+        {
+          "path": "electron/preload.cjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "853e9b8f19daf05b2bc5c35de3b3060245946a7f",
+          "upstreamPatchSha256": "ccdfad8ce49a505f933e85b582e41834420a1b9c2391dece78194a96c1f924f5",
+          "origin": {
+            "path": "electron/preload.cjs",
+            "present": true,
+            "blob": "c56641035fbb64daf971753b499d81fdc7034502",
+            "bytes": 19943,
+            "sha256": "5aa9f2222dbd81147b4d33a8971eb697018bec9073fef6a88ce32a59862f0f46"
+          }
+        },
+        {
+          "path": "src/components/SettingsModal.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "5331c4b43037943e77366c568f6f9306641f77b9",
+          "upstreamPatchSha256": "0d07716e09c3b353e1b3f8b759223dec52ea11ace4d294b1d89f52f078c9a10b",
+          "origin": {
+            "path": "src/components/SettingsModal.tsx",
+            "present": true,
+            "blob": "b98eff9d6227176262b59112ad6aab7be4d55842",
+            "bytes": 50881,
+            "sha256": "4486b4e1c1b1e53a8db8cccabc9822ef8ea071950f948d0822921464b0dfe924"
+          }
+        },
+        {
+          "path": "src/components/DiagnosticsRow.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "a0a4ad9243d870c128fcaf8e3912f56350455a8e",
+          "upstreamPatchSha256": "d6e70e0e2baed46bcd9d4230b31eb5cf01ae3a63f98a7613e62de61afd0cd073",
+          "origin": {
+            "path": "src/components/DiagnosticsRow.tsx",
+            "present": false
+          }
+        }
+      ],
+      "overlappingFileVersions": 7
+    },
+    {
+      "number": 3055,
+      "title": "fix(browser): a launcher check that only timed out still counts as running",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3055",
+      "createdAt": "2026-10-18T13:53:21Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "cdd0f01b5154e0b90552942c96e230cdcc0e3d4f",
+      "changedFiles": 2,
+      "disposition": "defer-missing-launcher-stack",
+      "reviewScope": "Targeted launcher timeout predicate comparison",
+      "rationale": "Upstream resolves a --version timeout when execFile reports killed, treating it as proof that the launcher could start while still rejecting noexec. Origin lacks this Chrome launcher module; no corresponding baseline path is patched by copying the isolated helper.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "f2c177e4025e0992720ca0f232b59b777b6536cd0b16c3420b146ec1bf1603b7",
+      "officialFilesSha256": "eedd727453c2e797e43be0e4775eb9a72a91bd42e7b87709e3192a822864e7bc",
+      "evidence": [
+        {
+          "path": "server/browser/chrome/launcher.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "de8a3033e98dcd08588a0f850abfff8043ed01e9",
+          "upstreamPatchSha256": "c1bbf7e6a627180cf7d9f16209dd7f38cfa22556dd55331bf55fcbaf904724de",
+          "origin": {
+            "path": "server/browser/chrome/launcher.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/browser-engine-release.ts",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "server/browser-engine-release.ts",
+            "present": true,
+            "blob": "13bcbcc9a822b0d9e21bc7a4505d3a122d9dfd22",
+            "bytes": 3192,
+            "sha256": "30cad1c6718046352883fdb2f606c4f2689fcb3826a59f2bb007b5bbf90919a4"
+          }
+        }
+      ],
+      "overlappingFileVersions": 2
+    },
+    {
+      "number": 3056,
+      "title": "fix(automations): Set it up yourself starts with a bot chosen",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3056",
+      "createdAt": "2026-10-18T13:53:24Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "2397cc8e5c91104cae01333e8785fd981c302ac4",
+      "changedFiles": 6,
+      "disposition": "defer-automations-ui-foundation",
+      "reviewScope": "Targeted bot-selection propagation comparison",
+      "rationale": "The new automation composer passes its chosen bot into schedule/webhook editors, with a single-bot fallback. Origin lacks the new TriggersPage/NewAutomation foundation, so this is a useful requirement for a future port rather than an immediately applicable isolated fix.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "2cdb8822d7ff5864c030fcc17e30d67773dc8f5057de0aa11d88908bdc5e0801",
+      "officialFilesSha256": "5e9c057bb76a6868c0786b89afdaebde59aa35467d9e574137255504b833bb84",
+      "evidence": [
+        {
+          "path": "src/components/automations/NewAutomation.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "2ae135ac4939d650b4fce975d6757b2f7ad22fb5",
+          "upstreamPatchSha256": "99b397fa9f47397d8d49278307e748dd15cbb86ae0f8e7a974057ef5d6e309b9",
+          "origin": {
+            "path": "src/components/automations/NewAutomation.tsx",
+            "present": false
+          }
+        },
+        {
+          "path": "src/components/TriggersPage.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "a706a6ebc202e27d3414704e4bab8da3992be305",
+          "upstreamPatchSha256": "aec58e5c193ed5bbad3bb6ab0d8a1501c4124b034a3e3a4ddac26271cfe9d1f3",
+          "origin": {
+            "path": "src/components/TriggersPage.tsx",
+            "present": false
+          }
+        },
+        {
+          "path": "src/components/RoutineCalendarPage.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "1c08eea6a8aef963e6923828c7ffb61e9c8b599c",
+          "upstreamPatchSha256": "8d02e2020649c6f420c1a7774b2fa5c35025e149e48bcde57c45ee7606cdbeaa",
+          "origin": {
+            "path": "src/components/RoutineCalendarPage.tsx",
+            "present": true,
+            "blob": "7de946e890de2d9b4689609fcadeb622d53854c7",
+            "bytes": 128800,
+            "sha256": "fc607bde4cc1bda9e01e14448aa79bf8d7217df2494e6a853100b1eae0918323"
+          }
+        },
+        {
+          "path": "src/components/WebhookTrigger.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "fd1748f83f7812608dc4e973be5dae7c171cd741",
+          "upstreamPatchSha256": "c60155aab2eb74b54be7beb56707b3a5cd64386fb5ddcee2ef908f0f9bde4f96",
+          "origin": {
+            "path": "src/components/WebhookTrigger.tsx",
+            "present": false
+          }
+        }
+      ],
+      "overlappingFileVersions": 1
+    },
+    {
+      "number": 3053,
+      "title": "fix(lending): the switch tells the truth, My Cloud remembers lent computers, and bots name them by platform",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3053",
+      "createdAt": "2026-10-18T13:45:46Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "9eae74f341beb37f5129cf3020f92a1ca031f3ed",
+      "changedFiles": 34,
+      "disposition": "defer-cloud-lending-authority",
+      "reviewScope": "Targeted remembered lending state, platform naming and session re-pair comparison",
+      "rationale": "Truthful persisted switch/status and platform names are useful, but restoring the owner Cloud session and remembering lent machines changes authorization/lifecycle across machines. Origin needs its sender/member ownership contract and offline/revoked-machine tests before adoption.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "fbbbab48ffe7bb6388d9e4e703964008f51e2fd373d4e4de934ac0f03fc250c3",
+      "officialFilesSha256": "01226ac3a85324c71b1408671ac8d79b2401ace62913f7a6702dfc7f6c05295f",
+      "evidence": [
+        {
+          "path": "electron/cloud-home.mjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "fa6fbeb74821b3e4d684f8fd2175e05b6e4557d4",
+          "upstreamPatchSha256": "8506a580fe604abddfc87d5bef898d8f7ba37b2584b6fee72e9b50229aa03e30",
+          "origin": {
+            "path": "electron/cloud-home.mjs",
+            "present": true,
+            "blob": "d4a35bfdcd022481afe1fc9fcf52b906ec227f69",
+            "bytes": 11313,
+            "sha256": "6337c62db75344b1121bae038c977b2eeecf2003f0c0d52f5d5e812ed2c3a484"
+          }
+        },
+        {
+          "path": "electron/computer-sharing.mjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "b7c15649587af303cceec8aa2debfbb8e3953755",
+          "upstreamPatchSha256": "bb1a149294e00fefa6296d2655955a1b8333b6cc8fde8370a9c11a2e0b71c6ed",
+          "origin": {
+            "path": "electron/computer-sharing.mjs",
+            "present": true,
+            "blob": "be57fba9e63bbccfd993d359a8bc9a9d795bebde",
+            "bytes": 22469,
+            "sha256": "3bb74aeaadef97174d484bf20fd518c9e60dcf02f539d120d21d3db7d7c9d544"
+          }
+        },
+        {
+          "path": "src/components/CloudLending.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "fc575b6dc83166742597e878c0715211345d0cc3",
+          "upstreamPatchSha256": "9144043fd546c16b1fc4b644aafb816b11dc1667f17198ac83da687935cc10f9",
+          "origin": {
+            "path": "src/components/CloudLending.tsx",
+            "present": true,
+            "blob": "0bf4b8287a5fe5d91347884af43da0a4a3ca8077",
+            "bytes": 6810,
+            "sha256": "566dd9840460bd513cb66b174f5caa10863b578eb4201bfe08355890ad78d9ee"
+          }
+        },
+        {
+          "path": "server/lent-computers.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "21c329643a557764d2a4667ac3234d3670c6a0e5",
+          "upstreamPatchSha256": "1903de9989a0fed0a9990fe8e67f499520f2966df9bcb1e250f83b29cc325dab",
+          "origin": {
+            "path": "server/lent-computers.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/environment.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "5a35c91171c6b9b9cceaddc8e4a611f74dc50c8d",
+          "upstreamPatchSha256": "17df1e7a721fc8aafe4c7b98b8e9ec6ebe13c16f3915bc429bcb83e1625e95ba",
+          "origin": {
+            "path": "server/environment.ts",
+            "present": true,
+            "blob": "556eb3065ea91534901deb040ffad984864036d7",
+            "bytes": 4525,
+            "sha256": "d34d6146ad1258412b8d9112398d5a178164cd914ab838f7fc2e08674b51e698"
+          }
+        }
+      ],
+      "overlappingFileVersions": 16
+    },
+    {
+      "number": 3050,
+      "title": "fix(browser): a passkey sign-in no longer freezes the bot's browser, and says what works",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3050",
+      "createdAt": "2026-10-18T13:06:57Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "6c167b362cf88fac5e85b3be2b9f57b605718814",
+      "changedFiles": 25,
+      "disposition": "defer-browser-lifecycle-dependency",
+      "reviewScope": "Targeted CDP WebAuthn sidecar and passkey-wall recognition comparison",
+      "rationale": "Upstream suppresses headless WebAuthn UI and reports Google/Microsoft passkey walls. Its ChromeEngine/CDP sidecar stack is absent from this Origin baseline. A future bounded notice may be portable; it must request the person’s real authenticator rather than bypass authentication.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "d17a0db383271fc55eead5f530aa94adf1598ac80e4e8cfe92a274b5dc73e358",
+      "officialFilesSha256": "f0348ee0ba71e8cb6828d84602260880d0b80fbb1e130f43f503aaead240a523",
+      "evidence": [
+        {
+          "path": "server/browser/chrome/sidecar.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "b260e74ce202c3026b5d1dffbff9333d4e0dbe8c",
+          "upstreamPatchSha256": "efc0cdfe2f304f2240798061848ef0ecfd9ab301a66242c7566da92b3c6f6106",
+          "origin": {
+            "path": "server/browser/chrome/sidecar.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "shared/passkey-wall.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "213312b9e5d73357f1fd0a2479d911782a479a3c",
+          "upstreamPatchSha256": "05d19529805c0b4c2246ad9e35d118eb0d5d260ff57b151571ef43dcf70c92a8",
+          "origin": {
+            "path": "shared/passkey-wall.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "src/components/browser/PasskeyNotice.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "a8660480b44f912931f3dc20fcfd9304613e9c9e",
+          "upstreamPatchSha256": "0ee73c8dd46a6ffa7027d1beeecf735c178693240dc1d6bbcd43914c2b89daf3",
+          "origin": {
+            "path": "src/components/browser/PasskeyNotice.tsx",
+            "present": false
+          }
+        },
+        {
+          "path": "server/host/browser.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "a20d9afb48e06777af2236240d31f77db66a1913",
+          "upstreamPatchSha256": "1d918ccf9e0fb3a372cb2f4b73b1a54bef107d020df5e092117b8c8df2da69a3",
+          "origin": {
+            "path": "server/host/browser.ts",
+            "present": false
+          }
+        }
+      ],
+      "overlappingFileVersions": 18
+    },
+    {
+      "number": 3051,
+      "title": "feat(cloud): logins on both sides (Also use on My Cloud), and one line on what lives where",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3051",
+      "createdAt": "2026-10-18T13:09:12Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "62611af83651b33c10b32090451aa9f911e88003",
+      "changedFiles": 25,
+      "disposition": "defer-secret-transfer-authority",
+      "reviewScope": "Targeted private utility-port login handoff and one-time Cloud pairing comparison",
+      "rationale": "This copies a selected sealed login/1Password token through Electron main to a verified personal Cloud using one-time pairing and no renderer secret. Origin must map account/project ownership and destination validation explicitly; do not add automatic secret replication to shared servers.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "b2c81c710195798e2da1025c1b08e9acb9a18f20a4236fe1ff910f25596c9904",
+      "officialFilesSha256": "d357e5a8a317943682fe1517531b17f93a4078bbe20748e159b23560e8c41c04",
+      "evidence": [
+        {
+          "path": "electron/cloud-logins.mjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "e6808bc5bc9673f2bb3e1d9910a4e0aabb150d20",
+          "upstreamPatchSha256": "84a98c57e071261d7d387da90ecd63cada3ddcebfc87c874b0eef5e0bfc44c1e",
+          "origin": {
+            "path": "electron/cloud-logins.mjs",
+            "present": false
+          }
+        },
+        {
+          "path": "server/login-handoff.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "0402d93791cf881b821d56dcf976983f256008a6",
+          "upstreamPatchSha256": "f5ba5716396694a6064e0bd7817d8da12627881e7969a4eb8af2e0d60dd09f74",
+          "origin": {
+            "path": "server/login-handoff.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/login-store.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "5970fbdde16c6f095d86122d2459fdf0d6bcbd72",
+          "upstreamPatchSha256": "66b550d39ae5bdbf905b217a103627a659eabb448fd90a6ad1e60a328233fafe",
+          "origin": {
+            "path": "server/login-store.ts",
+            "present": true,
+            "blob": "5287f96a9eedbe842a3d49a502229034c6c6f229",
+            "bytes": 10978,
+            "sha256": "f56af98de78e1f7c387b865d86fd1f94a88aa167118f003ed5a5323b56fa1a65"
+          }
+        },
+        {
+          "path": "src/components/LoginsSettings.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "82e508568c6bb457af05b32a09a702d22c6ea8e1",
+          "upstreamPatchSha256": "8495a7d17288aef06ca0cd51f801281a6291c9eeef91197d4824c20528275341",
+          "origin": {
+            "path": "src/components/LoginsSettings.tsx",
+            "present": true,
+            "blob": "f20913242a483d0a9566827f1f4032c34c643668",
+            "bytes": 12293,
+            "sha256": "aa7d59c73fccfabb05491887d0fefc912ea7ce0cd9a0cb976899d3e604c7f425"
+          }
+        }
+      ],
+      "overlappingFileVersions": 15
+    },
+    {
+      "number": 3049,
+      "title": "fix(lending): browsing through a lent PC recovers or says the fix",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3049",
+      "createdAt": "2026-10-18T12:46:44Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "1b25e67b690bd8d42979c21e13e87e7e6cec7d7c",
+      "changedFiles": 16,
+      "disposition": "defer-partial-guidance-adaptation",
+      "reviewScope": "Targeted lent-screen failure mapping and browser guidance comparison",
+      "rationale": "Plain missing/blocked-helper and no-DevTools-endpoint recovery guidance is useful. The patch also changes lending transport, native relaunch and app-tool catalog behavior; preserve Origin hierarchy, tool grants and exact platform source, and first reproduce its failure path in an isolated fixture.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "021c3b8ee81413a3d33c50007e9b7e30d269ea542b31a6fc4ef3deea44ca4092",
+      "officialFilesSha256": "a4cc188349873199a2692f7354cb0381335eb5d071bc7f0ba7c2a50c9ce90650",
+      "evidence": [
+        {
+          "path": "electron/lent-screen-failures.mjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "6efd16a95a48b664137d831254a49fbb78146981",
+          "upstreamPatchSha256": "00dabc160423fba31c8b902bf8064ee4e3be17ea9421833a3ac6ef70e168cd81",
+          "origin": {
+            "path": "electron/lent-screen-failures.mjs",
+            "present": false
+          }
+        },
+        {
+          "path": "server/lent-screen-guidance.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "9a42cc36b964f701750f36f51e9909dc93bdaa68",
+          "upstreamPatchSha256": "1d7e1cb60eb64c6afa5d51a3ae6c862b17137945bb162b1c9751ca2924783bbc",
+          "origin": {
+            "path": "server/lent-screen-guidance.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/shared-computers.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "c3d9a457855f753189f26a2a8f973d1526b04393",
+          "upstreamPatchSha256": "f0011cbd8e8c44a28e04f5dc457b60446de75c5d1c757a82bafeca17098b2b6d",
+          "origin": {
+            "path": "server/shared-computers.ts",
+            "present": true,
+            "blob": "8cb9e5043076115e3260d7c591c8252ed24167ea",
+            "bytes": 10497,
+            "sha256": "027eff8915cb53bceaec2de6f14f0c02fb3cd82c28c0655dffdbc9818638ca8a"
+          }
+        },
+        {
+          "path": "server/drivers/agents-catalog.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "6184d42cf20354d5305ab645d72f9229116247d9",
+          "upstreamPatchSha256": "5bfb316c4aa7b4e8801b9973896c09bdd73819d5a5b7531e8d4140627a9a0887",
+          "origin": {
+            "path": "server/drivers/agents-catalog.ts",
+            "present": true,
+            "blob": "e77af67ce68449ed70294cf7334132fc08b59bf8",
+            "bytes": 73661,
+            "sha256": "120da1a3c454d6a962a05182b01514c9ffe4ade0667b63f270a0944b6dfa1978"
+          }
+        }
+      ],
+      "overlappingFileVersions": 8
+    },
+    {
+      "number": 3048,
+      "title": "fix(cloud): 1Password works on My Cloud, and bots can ask for its token securely",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3048",
+      "createdAt": "2026-10-18T12:45:11Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "ebc45b5b8938a678e1dcc0b4cf0b37faf8b84a30",
+      "changedFiles": 26,
+      "disposition": "defer-credential-flow-design",
+      "reviewScope": "Targeted 1Password SDK failure, sealed credential target and phone restriction comparison",
+      "rationale": "Distinguishing an unavailable SDK from a refused token is useful. The larger patch adds a sealed-login credential target, Cloud SDK packaging and phone restrictions; Origin must keep its own central account/permission and secret-store boundaries. Start with a separately reproduced SDK error, not bulk credential-flow import.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "c1681d3cdf7033dc18e3d25cf28f38441fae60cd674575052095d80561a77530",
+      "officialFilesSha256": "c94839df5880e2cede483e6190711d21faee2ad60eab339230d1815f254ad40d",
+      "evidence": [
+        {
+          "path": "server/onepassword.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "5ccc5f14f1bce8b7f0fd7dcebab68ba83dae61e0",
+          "upstreamPatchSha256": "8f47924c8c309e8462eb77440031700c01cb6903ab5a5695d2da16b1eaf50116",
+          "origin": {
+            "path": "server/onepassword.ts",
+            "present": true,
+            "blob": "99d0bd9a069f130d35783a9ccd4923395b456b7e",
+            "bytes": 9842,
+            "sha256": "12148485d816321e33dc9977869f5152a069fc93bb5ea37cb0a47e33ec03e4bf"
+          }
+        },
+        {
+          "path": "server/phone-secret.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "eceee2cd402d7bc1821bd8aa030f42eedc68f877",
+          "upstreamPatchSha256": "8579c151a26a8f79b8b11629dbc89d47634382d597da08807a50afb6389685f3",
+          "origin": {
+            "path": "server/phone-secret.ts",
+            "present": true,
+            "blob": "d7c9a55dbaba93cc735f64e06604d94f8251edff",
+            "bytes": 13789,
+            "sha256": "fd9d8e19bf2534e584a825b237ba1372ee96b28456ca45e5f332040c772be77f"
+          }
+        },
+        {
+          "path": "shared/credential-request.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "70edc42300c769618c9711712cd58f8ff5eae813",
+          "upstreamPatchSha256": "dfc9d313447a234c49b62416ee9095dd2b0b8fc1707a5f4aa54a1a7bb9747b3f",
+          "origin": {
+            "path": "shared/credential-request.ts",
+            "present": true,
+            "blob": "6af95b1ec9e502e71699a81b239dacc2ee15d274",
+            "bytes": 4062,
+            "sha256": "54d2780e46cc75b762ccea0ebc26bc2692e66f291d5a8469cb8e2a3fd02a4e14"
+          }
+        },
+        {
+          "path": "server/bot-logins.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "457f7300b3933db96aac1bd2a3b0f61f4f0ce11e",
+          "upstreamPatchSha256": "f03766e71d2233050adca5c49a57cb92758d8adee9757d43c2dece6d4753086e",
+          "origin": {
+            "path": "server/bot-logins.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/routes/logins.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "7f2714bcf8d11439cc17df910215fce5dc816013",
+          "upstreamPatchSha256": "bbb7aa87936282774885da491ab014f7f3c4e70420db29416a25829b64600d78",
+          "origin": {
+            "path": "server/routes/logins.ts",
+            "present": true,
+            "blob": "9ad55052fc37f26f1ec67cea749b1774b75c0c3d",
+            "bytes": 7651,
+            "sha256": "f11f700c121d47225b453b60f03e81af34788b6450e2de10e4cec87c1c63e7d0"
+          }
+        }
+      ],
+      "overlappingFileVersions": 13
+    },
+    {
+      "number": 3040,
+      "title": "fix: main after the pt-BR and browser panel merges",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3040",
+      "createdAt": "2026-10-17T23:11:54Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "271d5064aaed9c81dad8cdfa239fe13a36d73e23",
+      "changedFiles": 12,
+      "disposition": "defer-upstream-integration-cleanup",
+      "reviewScope": "Targeted merge-repair source comparison",
+      "rationale": "This repairs interactions between upstream pt-BR and BrowserPanel changes, including catalog/greeting/locale references and ratchets. Origin has not imported those parent implementations; applying the merge cleanup by itself would introduce absent dependencies or unrelated locale behavior.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "d6e03b9befb887bea467fb2b7b23b23ba6c15c979e22ff00ecd25efe59719e81",
+      "officialFilesSha256": "c8bb48937e027da4f0f00cf97138395252bff88cbdbd592d452f39ac76a7c0ae",
+      "evidence": [
+        {
+          "path": "server/initial-greeting.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "c4a5e934292ddfb53300b465639975b30511aa0d",
+          "upstreamPatchSha256": "7c100f3b0245a5382f4e45f3ee289f42a083c43ad001670bd057a59db3313974",
+          "origin": {
+            "path": "server/initial-greeting.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/store.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "13af6c1439df89550b42d405d2e8bef9c820eeeb",
+          "upstreamPatchSha256": "347fc24b11c72e7c79a21fa41acb4a38865ee9742ccf2ae9ea4315b85f67d5d2",
+          "origin": {
+            "path": "server/store.ts",
+            "present": true,
+            "blob": "c81bc59902fc8718143ffe5eb240ce03d37aaeac",
+            "bytes": 111183,
+            "sha256": "3cc863ea2fd0caedb73dc7683fd7bf250fa1c00325525a23309caf488ad0db47"
+          }
+        },
+        {
+          "path": "src/lib/team-catalog.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "7b63d8e6e3c917719ce689e52f39e68dc511978b",
+          "upstreamPatchSha256": "3ab348229ce88e38ee3e314d32d824398411dcdaac054d4f80a58fcfe2499e34",
+          "origin": {
+            "path": "src/lib/team-catalog.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "src/components/ComputerPanel.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "e6bbb5ef775a16cbad8298d6cb9698545adf48d7",
+          "upstreamPatchSha256": "27c69d2435767ead5e56c4f6fdcfc9afbda558c6de73253c3aaea7c8cd435e05",
+          "origin": {
+            "path": "src/components/ComputerPanel.tsx",
+            "present": true,
+            "blob": "ee173ae5c95abd30c75870fe9fc13fa3d0422a96",
+            "bytes": 88268,
+            "sha256": "afce454c8fab671d9ac040f3ee11e5bd4e2713e16e373f4e521de46177658678"
+          }
+        }
+      ],
+      "overlappingFileVersions": 11
+    },
+    {
+      "number": 3039,
+      "title": "Automations: when something happens in a connected app, a bot does something (Triggers v2, PR3)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3039",
+      "createdAt": "2026-10-17T23:11:52Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "a728025b70178e7f2736358db7302830e461ad73",
+      "changedFiles": 68,
+      "disposition": "defer-large-feature-integration",
+      "reviewScope": "Targeted app-event host, broker, request and persistence comparison",
+      "rationale": "App-event subscriptions, reconciliation and bounded routine queues are useful, but the new managed Composio broker/owner and immediate-apply request contracts must be adapted to Origin identity, project visibility, sender-runs and consent. No upstream service entitlement or credentials may be assumed.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "b9f4ac0f9ccb03dcd26b36ff3b25b67da6ec819fcb0ad6879a569c4cea770ab9",
+      "officialFilesSha256": "dabc9068c34d2a3d8da3d479a90bc38d4422554fc3aff71108d5b4f97709bfd3",
+      "evidence": [
+        {
+          "path": "server/app-triggers.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "df0ff4e32fbb66dac8bf2e8a28d35810610e7a0e",
+          "upstreamPatchSha256": "682136afce0c2eb5a2797ead65459aba7d82b7a2fbc9c3fc22644ae4ed401ade",
+          "origin": {
+            "path": "server/app-triggers.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/app-trigger-host.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "5057e71d2523e7ecbcd0b5aa3a3a22819f33908b",
+          "upstreamPatchSha256": "0ca058d28e2b6eea976313ca307946e283e4222896cf50d39d6457f96cf7d0de",
+          "origin": {
+            "path": "server/app-trigger-host.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/app-trigger-requests.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "daed5bd1a31354f72606f4ef0852180f587ec853",
+          "upstreamPatchSha256": "1c0dcca154da828abf8109971f6e5b8e817f61c6a29bf18202f7fb0f5edea176",
+          "origin": {
+            "path": "server/app-trigger-requests.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/app-trigger-broker.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "ab58afbb7c9e7883d4aa3e822edbceccc7776557",
+          "upstreamPatchSha256": "b503b1fc2b33f4525fa276bf54b164361aeaef085194e909fc7ee5013750c6cf",
+          "origin": {
+            "path": "server/app-trigger-broker.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/composio.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "d842be2410e68a71e278af96080bb8692f5a0ffc",
+          "upstreamPatchSha256": "a01ab4b959552398963de2a700d290c4e0fccc1274f56fc12f6681ca60b79bd0",
+          "origin": {
+            "path": "server/composio.ts",
+            "present": true,
+            "blob": "075659b2d6a715282775e42e3d9546126fe905bf",
+            "bytes": 60278,
+            "sha256": "af4d69c1b7c368dc0ec82fd2cf5afc4b6f96c2be3f84f335783de50d29a5e7aa"
+          }
+        }
+      ],
+      "overlappingFileVersions": 40
+    },
+    {
+      "number": 3038,
+      "title": "fix(automations): turning one back on works, and a deleted bot's automations go with it",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3038",
+      "createdAt": "2026-10-17T23:03:44Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "52e38481bb9c66304776821f053f4d5140bb386b",
+      "changedFiles": 81,
+      "disposition": "recommend-future-lifecycle-adaptation",
+      "reviewScope": "Targeted enable/resume and deleted-bot automation cleanup comparison",
+      "rationale": "Upstream binds persisted routine/webhook cleanup to durable bot.deleted events, startup orphan repair and run/owner state. Origin has its own durable workspace deletion and old routine/webhook contracts; test deletion write failures, grouped/hidden bots and cloud reconciliation before adapting the lifecycle cleanup.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "ac9b7b0a0335707b07551cd86ec8cff5950caade5d845c56d5b62112f595f22e",
+      "officialFilesSha256": "f0c57be0b54c12636279480862e46be3b2eb65b48c093172be09341979df848c",
+      "evidence": [
+        {
+          "path": "server/bot-automations.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "9d6522a715371877eed4c1da746d7bf98871474b",
+          "upstreamPatchSha256": "2ce3c1fd1a4bf5e1dc4ac164b8fa0b9b2ec1c0747f0d37b19b3ee3b6c183643c",
+          "origin": {
+            "path": "server/bot-automations.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/routines.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "a7bd84e2e40461be490fd75e3047c5d7bd176fc6",
+          "upstreamPatchSha256": "5e09a67636164a6ca5b7ab3bad5f97b679bc8fd50c76271683446114520d2bab",
+          "origin": {
+            "path": "server/routines.ts",
+            "present": true,
+            "blob": "3ca3c0c89d87e115455971c81b29800cba8931a7",
+            "bytes": 75902,
+            "sha256": "2adab65b0272a96c4778d9fddadf33f2e7eab78898331881038f2e922ab9b752"
+          }
+        },
+        {
+          "path": "server/webhooks.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "c057a46c228407e9fc7fd56ff77d4aec439094e1",
+          "upstreamPatchSha256": "8939c457700eafac4628fa9937e77fb4069cb877323ebc55560c6700736c85e6",
+          "origin": {
+            "path": "server/webhooks.ts",
+            "present": true,
+            "blob": "9e832ff197187940364491b59abae900a652fc92",
+            "bytes": 26799,
+            "sha256": "4b8a2cfd50ccdb50b863c843a4fa1ed6c2d23a9d6907604840f4ebac00b421a6"
+          }
+        },
+        {
+          "path": "server/store-bot-deletion.ts",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "server/store-bot-deletion.ts",
+            "present": true,
+            "blob": "9e44fa9c70630efb8273c55527711dbaee8c45a5",
+            "bytes": 4258,
+            "sha256": "143c90fd3a7f8c0bde88e7a9c4a30ad02e6901096f9aeaac93c45e6c9c6ce8d3"
+          }
+        },
+        {
+          "path": "server/index.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "745db7ea0b2e55773b8685355634ffd593b7d02c",
+          "upstreamPatchSha256": "e7e62d19063f996079b64245cc921f73e1a710233e07a6e6721a5473b9809728",
+          "origin": {
+            "path": "server/index.ts",
+            "present": true,
+            "blob": "dfb08a9d95c095cc03a49d617a1f4065f6b7a2a5",
+            "bytes": 930813,
+            "sha256": "7c8c020d1cedb9c2e257f555327b4f61ba31136fd13855e0c2bcf71417ddd312"
+          }
+        }
+      ],
+      "overlappingFileVersions": 62
+    },
+    {
+      "number": 2566,
+      "title": "X and research for bots: bring your own treg key; included with paid Cloud plans",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/2566",
+      "createdAt": "2026-10-09T14:26:15Z",
+      "mergedAt": "2026-10-18T15:41:53Z",
+      "mergeCommit": "4e14e799d72544321a2636e0003a661adf46d455",
+      "changedFiles": 76,
+      "disposition": "defer-new-provider-and-billing",
+      "reviewScope": "Targeted BYO treg research, bounded result and paid-Cloud relay comparison",
+      "rationale": "Adds X/research tool catalogs, request/result bounds, BYO treg credentials and upstream paid-plan relay budgets. The provider entitlement, charge/idempotency and tool authorization boundaries are new to Origin; no upstream credential, paid-plan service or provider spending is authorized by this review.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "421d07924dd26f3f8495e11ea0b4faedd867805009a917334c654d539a09581e",
+      "officialFilesSha256": "497b660f5ca25be22cad31e3647a6837c200b9cfd4d97ff247bd9cc44af52e29",
+      "evidence": [
+        {
+          "path": "server/research.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "eb5b0d45fe4b7274d7fc86e88e862b9bbb297d6f",
+          "upstreamPatchSha256": "d455b9428ead707d1bdc21ebe2916733573739e33a1e0b4d3783b8f1e9648f88",
+          "origin": {
+            "path": "server/research.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/x-research.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "8ea63b0a6e510b1679105486104f01b9d91de9c8",
+          "upstreamPatchSha256": "80201c4859cfbdda7d66fefc5465d9b0cd4d691bbcf40ae272ce7735f94ed5ff",
+          "origin": {
+            "path": "server/x-research.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/cloud-secrets.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "b8071e8abbdfd5a2cf0c23db2f8bbf61cf7123ff",
+          "upstreamPatchSha256": "5cc03a427a2a3b3b7c9bfbd059651d67118b2621b5e08888c97a5389d418939e",
+          "origin": {
+            "path": "server/cloud-secrets.ts",
+            "present": true,
+            "blob": "e4bf3b12151fc3d60f0c24f989101b1b214cab8b",
+            "bytes": 2189,
+            "sha256": "65004cadb53c99ace262d830bb25f05a017d9a0d626bf14d4b7938865065f593"
+          }
+        },
+        {
+          "path": "server/included-services.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "e197073527efab7ac4cc5747459088f1a1e1dee5",
+          "upstreamPatchSha256": "6421b966abfbf457bf6d15e0ab94d3855b6c961f9552e10aa08a732b0294f724",
+          "origin": {
+            "path": "server/included-services.ts",
+            "present": true,
+            "blob": "ea2ebe407f6447eff14e37c287c5012af8c100ef",
+            "bytes": 4444,
+            "sha256": "d3bc960ebe49d6044abae1e7d58793b51fd1970211b5425319d42be9a3046db7"
+          }
+        },
+        {
+          "path": "electron/included-x.mjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "b4da61f1410dc2ed0893aa22191b6525d8fc63d6",
+          "upstreamPatchSha256": "f42ee0cf293b3a20a776cbbc2b1eecabb1a571934735802c7d5f5e690ba2e3f5",
+          "origin": {
+            "path": "electron/included-x.mjs",
+            "present": false
+          }
+        }
+      ],
+      "overlappingFileVersions": 49
+    },
+    {
+      "number": 3052,
+      "title": "fix(routines): report a routine that keeps failing the same way once per streak",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3052",
+      "createdAt": "2026-10-18T13:33:09Z",
+      "mergedAt": "2026-10-18T16:03:22Z",
+      "mergeCommit": "2d46a6e6d3f0b18287625bcb666da5ee3a2f763d",
+      "changedFiles": 3,
+      "disposition": "defer-routine-alert-contract-adaptation",
+      "reviewScope": "Targeted failure-streak comparison",
+      "rationale": "Upstream suppresses the same error on successive failed outcomes until a success/error change, with a new null-alert callback contract. Origin still uses onRunFailed(run) and a different recovery surface; blindly copying the single expression could hide distinct incidents or fail to compile. Preserve durable outcome ordering and add streak-reset tests first.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "f5360cd251ef86caa6dea628c6b52587acf5897539d314c4ce419aeecf23cd72",
+      "officialFilesSha256": "7462246917d8ee7a55f325f64a0b1bc9bae28f3b8699761a5ef8fabf58790de3",
+      "evidence": [
+        {
+          "path": "server/routines.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "3a2fd6c1ec268ea0ee8c119153bc6004a5dc6e99",
+          "upstreamPatchSha256": "2eb0e4c2a2c871c8381492e8e8bd8adec54545990decf99b0cf315bdc357f535",
+          "origin": {
+            "path": "server/routines.ts",
+            "present": true,
+            "blob": "3ca3c0c89d87e115455971c81b29800cba8931a7",
+            "bytes": 75902,
+            "sha256": "2adab65b0272a96c4778d9fddadf33f2e7eab78898331881038f2e922ab9b752"
+          }
+        },
+        {
+          "path": "server/routine-outcomes.ts",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "server/routine-outcomes.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/incidents.e2e.test.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "46e872e12a0e877f4e33d38ab5ea40385bbd9eb7",
+          "upstreamPatchSha256": "d454c2435818a37f4e3dbf0d234f89fa95f16bd2a062c8ba9ebc6e90ebcc0444",
+          "origin": {
+            "path": "server/incidents.e2e.test.ts",
+            "present": true,
+            "blob": "6143c7d95c139fa55ce5e8c660121cb4d5ce9b4e",
+            "bytes": 35983,
+            "sha256": "b17ca516709e7fadae1b76fef891efa209ea15fa6e6b7966b45eceacee13b8d7"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    },
+    {
+      "number": 3047,
+      "title": "i18n(ja): translate the 1,765 missing strings",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3047",
+      "createdAt": "2026-10-18T08:19:37Z",
+      "mergedAt": "2026-10-18T16:03:34Z",
+      "mergeCommit": "994d88ed5aa984fc2502d05ece84e5057880f38b",
+      "changedFiles": 2,
+      "disposition": "defer-translation-catalog-integration",
+      "reviewScope": "Translation catalog and source-hash inventory",
+      "rationale": "The patch fills 1,765 Japanese strings and updates source-hash bookkeeping. Origin has additional account/project/invitation copy and its own catalog history. Merge by validated keys with source-hash/catalog checks and native wording review; do not claim complete Japanese coverage from these two upstream files.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "2b1c703ce257554eeecd60dd8e3261f0ff73eeab5e22568ccd5c932e397d2281",
+      "officialFilesSha256": "21373ded33e776ca4e9fb577434efbff314db9aa3ece41db548b45ec199ff279",
+      "evidence": [
+        {
+          "path": "src/locales/ja.json",
+          "upstreamChanged": true,
+          "upstreamBlob": "6ea2a59880ccb46a1569eed6b6b4f22898828683",
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "src/locales/ja.json",
+            "present": true,
+            "blob": "e9566f1144c2a5311afeb7c1a9cd7f2d99c2c9d3",
+            "bytes": 373631,
+            "sha256": "a21dc61ce587705a5850e26ccc16dad99fff28292d8d43b4e423bffa33edf940"
+          }
+        },
+        {
+          "path": "src/locales/source-hashes.json",
+          "upstreamChanged": true,
+          "upstreamBlob": "4e60b5f66f64df61adde71bbed8206230748f6d3",
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "src/locales/source-hashes.json",
+            "present": true,
+            "blob": "d00cbbf8f3ea3b735f9f7f50deb42a576c7876bb",
+            "bytes": 2935977,
+            "sha256": "78c8cc7bf646fb19e4f0346b8761fdb8dcea4082309dac4bd25f096cb669734a"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    },
+    {
+      "number": 3045,
+      "title": "fix(codex): pass -c overrides from the CLI setting after app-server",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3045",
+      "createdAt": "2026-10-18T03:52:55Z",
+      "mergedAt": "2026-10-18T16:04:46Z",
+      "mergeCommit": "43fbf6c7006ed7d5bef4fd132d2f4920127dd943",
+      "changedFiles": 3,
+      "disposition": "recommend-future-narrow-fix",
+      "reviewScope": "Targeted Codex launcher/config override ordering comparison",
+      "rationale": "Origin still passes config.cli directly to spawnCli before app-server arguments. Upstream relocates user -c/--config overrides after app-server while retaining the driver’s security/confinement overrides last. Strong fit for a separate synthetic argv regression; preserve full executable paths and quoting.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "e56426df2b0e011a96c2a537a50612b56194b86fcac65491dc471facf50a0532",
+      "officialFilesSha256": "5ce0e26b582387f8c2a985ca21d45e1d8251c5e23faa1be064402300088a0f37",
+      "evidence": [
+        {
+          "path": "server/drivers/codex-process.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "3958d0f3e0590a3b113f083eae830c1710ada6f7",
+          "upstreamPatchSha256": "220b2dd0bd6c1a678356a30fd0fd9ccd2a641e4dc7b9ab8fd845c470c5f2eac9",
+          "origin": {
+            "path": "server/drivers/codex-process.ts",
+            "present": true,
+            "blob": "3f5ff77ef387dfc0e16de01ff22078d717317a67",
+            "bytes": 3150,
+            "sha256": "37ac2b4ed8ff295d910ee5068fcfcdfa838dfeb27bb097021c7bf5e46d96a5f6"
+          }
+        },
+        {
+          "path": "server/drivers/codex.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "676fc51be69f29cd851a58304575ee80db66cdcf",
+          "upstreamPatchSha256": "466064f12aca702f11a9f473db2c34b7753fcbfca0ef242f3993dcae28582a62",
+          "origin": {
+            "path": "server/drivers/codex.ts",
+            "present": true,
+            "blob": "05c5eb515b000ea535f1d97ef8401e6c45381abb",
+            "bytes": 95171,
+            "sha256": "47473eed15aadbf36aafee99d75635e7a708520367b18cfcba3a4e2c779ac891"
+          }
+        },
+        {
+          "path": "server/env-path.ts",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "server/env-path.ts",
+            "present": true,
+            "blob": "fa05dbbf24553b69235c9563fe741c63e5927a5b",
+            "bytes": 11774,
+            "sha256": "4767520f6616bab0cdef0ab97981ea16a189367f034806d011bb650abe7f581a"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    },
+    {
+      "number": 3044,
+      "title": "Fix macOS dictation loss across pauses and stop recording on send",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3044",
+      "createdAt": "2026-10-18T02:52:53Z",
+      "mergedAt": "2026-10-18T16:05:08Z",
+      "mergeCommit": "941fa15ec3875045689ca3b709e31dd7d6efad14",
+      "changedFiles": 16,
+      "disposition": "defer-macos-acceptance-required",
+      "reviewScope": "Targeted speech segment accumulation and composer session lifecycle comparison",
+      "rationale": "Origin still replaces transcripts from one recording session and does not use the new draft-scoped dictation hook. Upstream accumulates finalized utterances with speech timing and stops on send/edit/draft switch. Useful, but Swift recognizer behavior and actual macOS pause/send acceptance need a Mac; synthetic tests alone cannot close that platform gate.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "ee01d098707da17e1c278eca9fec352cfd00c7e9e30aa25a80377873e6ed4dfb",
+      "officialFilesSha256": "867dada618f9ba39eabf5a905b19cbc96631fc37517e1c0347ece663bdc1ad77",
+      "evidence": [
+        {
+          "path": "electron/resources/speech-helper.swift",
+          "upstreamChanged": true,
+          "upstreamBlob": "a5ce3349150deacd1e211e1c4b1ee0881e37d078",
+          "upstreamPatchSha256": "df7e8a562d342c61758365ccacc422f67358b7ff47f771b0130d42ee013c384b",
+          "origin": {
+            "path": "electron/resources/speech-helper.swift",
+            "present": true,
+            "blob": "20992cd31c0d6e758d9688f7b784eb466efe340e",
+            "bytes": 6936,
+            "sha256": "e5ea00fce4b95c0f6e2e0a04d6dca0680153a65bba927579c7b7891a890d29e8"
+          }
+        },
+        {
+          "path": "electron/speech-transcript.mjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "92f545ddccf3ea7057ee4cc441f034d2ee78b2cc",
+          "upstreamPatchSha256": "c8b24a8a9d7ec5bb067f5f424ab47e28194d3cce936335c2206a8a7f7f1e436b",
+          "origin": {
+            "path": "electron/speech-transcript.mjs",
+            "present": false
+          }
+        },
+        {
+          "path": "electron/speech.mjs",
+          "upstreamChanged": true,
+          "upstreamBlob": "60bf1fdbfac26a4b4768a9299815d1746bdb67cf",
+          "upstreamPatchSha256": "5658c52b64cae675bd21046a296c5bf9175a053f361e9881e3af75b9730de9f5",
+          "origin": {
+            "path": "electron/speech.mjs",
+            "present": true,
+            "blob": "1d33dd32d85693686f9696cb01a282fac676eb83",
+            "bytes": 5344,
+            "sha256": "56d456ac56d22eede1f399912b897e5bdf5665218563b38332a7a38a026a9d93"
+          }
+        },
+        {
+          "path": "src/lib/use-composer-dictation.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "0ed24ba5fb31a1a0f98ea87f1068a21bfd49dbc5",
+          "upstreamPatchSha256": "8ddd079c2e6381a637627face688a5251202a8399eeebc1d9af72737a59c1e62",
+          "origin": {
+            "path": "src/lib/use-composer-dictation.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "src/components/Composer.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "0ebd9531b36e8c2c8eefd1dc9b6100cf8440eaa8",
+          "upstreamPatchSha256": "bd275cc7bada3a1472de81e93448724acd7dcf94acd1c3b2f1f57b588fdeeb99",
+          "origin": {
+            "path": "src/components/Composer.tsx",
+            "present": true,
+            "blob": "dc7eac33dcef9bde4508b1df0353acc3cbd28648",
+            "bytes": 48270,
+            "sha256": "5f6f7a536f1ca463607121554ff83991b3d7e2c61995a37c1a94881098b169fc"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    },
+    {
+      "number": 3042,
+      "title": "fix(updates): ask a page older than its server to reload instead of saying up to date",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3042",
+      "createdAt": "2026-10-18T02:15:08Z",
+      "mergedAt": "2026-10-18T16:05:30Z",
+      "mergeCommit": "78995ebe9109a30ac5efd03e510891dc24cda0ec",
+      "changedFiles": 4,
+      "disposition": "recommend-future-narrow-fix",
+      "reviewScope": "Targeted server-update state comparison",
+      "rationale": "Origin maps every available:false result to up-to-date. Upstream introduces reload when a non-managed server version differs from the stale renderer bundle, with a native page reload action. Add a web-client/server-version regression and do not confuse the Electron updater with this browser state.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "b687e78111b0208337b12ed84f25f24b6a5469465ce60814d4dd31eabfbdf0fc",
+      "officialFilesSha256": "9a6e56e51e37f9bca67b533f11a4feb2ea4bc3dd0189d31a0b95875d8a23623e",
+      "evidence": [
+        {
+          "path": "src/lib/server-update.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "2ff5d0929a9f957b206098239a3e1b705034f075",
+          "upstreamPatchSha256": "c98ef084bbaca07c82a459802469eb6ca82a07c6990f77ef7c974b89e319f72f",
+          "origin": {
+            "path": "src/lib/server-update.ts",
+            "present": true,
+            "blob": "9c6964ebf60bddfe4c47e35a4617c6543e3d3633",
+            "bytes": 1364,
+            "sha256": "4b9b3abc39eed2be5303f0fd6fb0e7a9c1bbe6227896d5dd8735f00b3ab15ee0"
+          }
+        },
+        {
+          "path": "src/components/SidebarProfileMenu.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "40d314bc72c14fac7cd263c39f22e04634cf59d8",
+          "upstreamPatchSha256": "6226a213b3fa09e6884d98b5e6aa44c21f2b86f8d71157fdc613862d8c4b0b65",
+          "origin": {
+            "path": "src/components/SidebarProfileMenu.tsx",
+            "present": true,
+            "blob": "2be0758185b9ced99e42277f87f8d6c638225e59",
+            "bytes": 16964,
+            "sha256": "44c26d9cad617e1b9703a8ce061942b25986ced664403eff11fd929d0650fe61"
+          }
+        },
+        {
+          "path": "src/lib/app-links.ts",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "src/lib/app-links.ts",
+            "present": true,
+            "blob": "6a637357e6be312da3514872f87884866a2dee7b",
+            "bytes": 1719,
+            "sha256": "813b31eebfe50735fb86de1e7a79d12588062e9e97264d1bc1ff50a2a26d7404"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    },
+    {
+      "number": 3061,
+      "title": "fix(recovery): fail over when Claude Code refuses a turn because it is signed out",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3061",
+      "createdAt": "2026-10-18T16:05:32Z",
+      "mergedAt": "2026-10-18T16:07:08Z",
+      "mergeCommit": "5ea510d807df76a2f0b97cb3f572cc43209d966a",
+      "changedFiles": 11,
+      "disposition": "defer-recovery-security-contract",
+      "reviewScope": "Targeted Claude synthetic refusal and retired-process recovery comparison",
+      "rationale": "Upstream buffers startup events until a structured synthetic authentication_failed frame plus error result with no new cost, confirms the exact process tree stopped, and excludes other models sharing the same failed instance. This is useful but changes the no-replay contract; require fake-driver proof for activity/cost/cleanup/Stop/new-message cases before adapting.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "7f880085526f8a40b51b41b4058766c49572ecb714cbb721ef672f715feb2203",
+      "officialFilesSha256": "d744383b9b8cb0d2ebdb35c03602a6a30e99f5d784d5cdc1c5ed47379310405e",
+      "evidence": [
+        {
+          "path": "server/drivers/claude-auth-recovery.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "77a7207a5ad9e5c609f674f13ceb846dc22f2c20",
+          "upstreamPatchSha256": "c2a46fc96f2bcd3ddfd5754fad0ae6a015b82839d8364322f53e0d9947081204",
+          "origin": {
+            "path": "server/drivers/claude-auth-recovery.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/drivers/claude.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "5f05819b83116f4d655e58a4bdee54a156bd5a61",
+          "upstreamPatchSha256": "275c70323964f903cefb9f39250929e06c6220a2afad7c2666f7828e0ac9537e",
+          "origin": {
+            "path": "server/drivers/claude.ts",
+            "present": true,
+            "blob": "6b87e3de4d911f0db841d96128faa6ec0d4c1adb",
+            "bytes": 103919,
+            "sha256": "659378afea9f6e1eda6a8e0fa7c782df3276c6216ae983f3883e65669b7b8a61"
+          }
+        },
+        {
+          "path": "server/contracts.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "71568f1bf77d26bcd28e8a131c7b379bdc5eb946",
+          "upstreamPatchSha256": "2da70eb2818cebc8e5e70469766c50e7ae4c542d68d2e266d6b550347ace5849",
+          "origin": {
+            "path": "server/contracts.ts",
+            "present": true,
+            "blob": "940163608667361c184e6ca78d526a71cee64dc5",
+            "bytes": 21033,
+            "sha256": "085bbf98ecf62a23cfed272a8bf6c06015a5076063cdddc9aefc2e91c4ee3445"
+          }
+        },
+        {
+          "path": "server/index.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "fbf94ee9bd16608a2cf7350d51dce7ea8d3cf1e9",
+          "upstreamPatchSha256": "00ab078b902c15b06f52b5666223b4b4fe46c43e4c3e0475f60b002ef04efeba",
+          "origin": {
+            "path": "server/index.ts",
+            "present": true,
+            "blob": "dfb08a9d95c095cc03a49d617a1f4065f6b7a2a5",
+            "bytes": 930813,
+            "sha256": "7c8c020d1cedb9c2e257f555327b4f61ba31136fd13855e0c2bcf71417ddd312"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    },
+    {
+      "number": 3037,
+      "title": "fix(redact): mask Stripe secret and restricted keys",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3037",
+      "createdAt": "2026-10-17T22:49:24Z",
+      "mergedAt": "2026-10-18T16:07:18Z",
+      "mergeCommit": "170a58bc55c90dc8548a99b533dce6e9b1216496",
+      "changedFiles": 2,
+      "disposition": "recommend-priority-adapt-after-proof",
+      "reviewScope": "Targeted shared redaction prefix comparison",
+      "rationale": "Origin’s sk- hyphen pattern does not match Stripe’s sk_live_, sk_test_, rk_live_ or rk_test_ underscore prefixes in free text. Upstream adds one bounded content pattern while retaining length-only markers. Root authorized a separate reachable-path proof using synthetic keys, then a narrow regression/fix if reproduced; no real key is used.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "95c55d864fb2c9a986e3500ca6bb08a1382147d44d3ca09cfd492a509c4bc77c",
+      "officialFilesSha256": "9fff96ad522447b5432f3e0f04269520993b312e5b8f7691335840e564aa22eb",
+      "evidence": [
+        {
+          "path": "shared/redact.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "5b8c8a653ac4780e8e7b48496a12f809bdfdab81",
+          "upstreamPatchSha256": "7ff95fad69811753b17b1a79c6ba89af34446e65f1c1e1c7ed5407ce0c58b8d0",
+          "origin": {
+            "path": "shared/redact.ts",
+            "present": true,
+            "blob": "fad237b82f536eccec04280053bba29c42b9936e",
+            "bytes": 4909,
+            "sha256": "16e0367525e52f3367747a62b2304bcdeecf3780a117b985afddc9e1d87dbc18"
+          }
+        },
+        {
+          "path": "server/redact.ts",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "server/redact.ts",
+            "present": true,
+            "blob": "3e3fc1e56a1695eda3558ccbe539ebd0af292717",
+            "bytes": 1955,
+            "sha256": "ee36affb813479f920423329588547af45d288cc8b074d2dbe231ea866dfe9f8"
+          }
+        },
+        {
+          "path": "server/redact.test.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "76bea7edeaf4587a4f2262373e5b30c47fa7fa39",
+          "upstreamPatchSha256": "d74c633768b782ed83d9f46dc648985c48374a84d9c860b6c8659bba9dc0ecc4",
+          "origin": {
+            "path": "server/redact.test.ts",
+            "present": true,
+            "blob": "182b5b9ec2aaec7ccab62142c74267625bdee515",
+            "bytes": 11576,
+            "sha256": "4d58bea980d01b50e1a063857e4407cee09373a62258b2eb99a3b27d59e13ead"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    },
+    {
+      "number": 3036,
+      "title": "fix(store): clear a demoted Chief's additional teams from the cached bot",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3036",
+      "createdAt": "2026-10-17T22:22:24Z",
+      "mergedAt": "2026-10-18T16:07:32Z",
+      "mergeCommit": "53d759e8841abe6a1bd869637c221b99d1f7b7ea",
+      "changedFiles": 2,
+      "disposition": "recommend-future-cache-regression",
+      "reviewScope": "Targeted three reducer snapshot/patch paths comparison",
+      "rationale": "Origin’s botUpdated and taskSwitched paths still omit explicit managedSections replacement. Because object spreading retains an omitted optional field, demotion can leave the old cached list. This is not recorded as already fixed or as a proven server authorization bypass; verify the reducer scenario separately and retain the server’s fresh hierarchy enforcement.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "e5830c5e19dee551cdc31f856936728ae8275a4990d2fc62fb450aadf14aeb82",
+      "officialFilesSha256": "ee7376b66857484f9f11e4baee3be9e1d51b8d9c307ac3c2daf9fe9ce1f774b0",
+      "evidence": [
+        {
+          "path": "src/state/store.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "1f02540368da4e84742d36bd4cdc0cdf5ad15680",
+          "upstreamPatchSha256": "16bbc92f7fd97bc33f27529b7fbb171dcbe02b4b3109fbc9927251cb7191463a",
+          "origin": {
+            "path": "src/state/store.tsx",
+            "present": true,
+            "blob": "a8dfd0e882d843a06498e26ef8abeb1661a15486",
+            "bytes": 159320,
+            "sha256": "f47528a40487a1c7ffc5fe6bf936d8eb89def37574d86838a651ed19bdbe0660"
+          }
+        },
+        {
+          "path": "src/state/store.test.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "f4ba103e1781b0ee4dd0b6a32137053979109eb4",
+          "upstreamPatchSha256": "d3061766afe6caf153df09fbb303d758f411c9ddedacbd1c18aa8b1eafcb3970",
+          "origin": {
+            "path": "src/state/store.test.ts",
+            "present": true,
+            "blob": "15a469edbd1f0a79845d5222412a4e120364865c",
+            "bytes": 140271,
+            "sha256": "76e53d2eb891f98c7e9c980c819c745817cf7dbb158fc46e7d91e7cdde3481f7"
+          }
+        },
+        {
+          "path": "server/store-bot-deletion.ts",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "server/store-bot-deletion.ts",
+            "present": true,
+            "blob": "9e44fa9c70630efb8273c55527711dbaee8c45a5",
+            "bytes": 4258,
+            "sha256": "143c90fd3a7f8c0bde88e7a9c4a30ad02e6901096f9aeaac93c45e6c9c6ce8d3"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    },
+    {
+      "number": 3062,
+      "title": "Bring in #3029's follow-up (localized team catalog search and outcomes), and fix main's i18n and file-size checks",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3062",
+      "createdAt": "2026-10-18T16:12:28Z",
+      "mergedAt": "2026-10-18T16:36:59Z",
+      "mergeCommit": "1e529eff0c821d757faa5d81b7c2b11d3d107ce0",
+      "changedFiles": 9,
+      "disposition": "defer-overlapping-followup",
+      "reviewScope": "Targeted routine-outcome extraction and localized catalog search comparison",
+      "rationale": "This follows #3029 and #3052: localized team-name/summary search and a routine-outcome helper extraction. Its relevant behavior is accounted for in those parent recommendations; do not count the extraction as a second failure-streak adaptation or import ratchet relaxations.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "eac9f3ea17bb5b9831f9fe5265aab4041b308b95e33b35ae164512cb909a47fb",
+      "officialFilesSha256": "b95a28fe001690c155c0ae4ef65c5d699f0f6a74ca1586fe74ddc2172a5856ba",
+      "evidence": [
+        {
+          "path": "server/routine-outcomes.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "1c59dab8e4d1b7d866ed738977d0cc6bf06c3309",
+          "upstreamPatchSha256": "e5539f1a87703dab310ac5ffe93d4b3196ca5a14ccc89f5c9acb384f82fef2e1",
+          "origin": {
+            "path": "server/routine-outcomes.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/routines.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "78be8daa01b0be9a1884ad9f0788da6b9c50ddf1",
+          "upstreamPatchSha256": "ae20f3d230e51b9704069bc777bf60ae38e7ea340ba26916d5d744bbf9635c1c",
+          "origin": {
+            "path": "server/routines.ts",
+            "present": true,
+            "blob": "3ca3c0c89d87e115455971c81b29800cba8931a7",
+            "bytes": 75902,
+            "sha256": "2adab65b0272a96c4778d9fddadf33f2e7eab78898331881038f2e922ab9b752"
+          }
+        },
+        {
+          "path": "src/lib/team-catalog.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "1897b634a879c74d9273a16998c8d2c30da9d4e4",
+          "upstreamPatchSha256": "fdc685f33203b91b5ca4ac2beaa4da3cdbc31f33ebbbfd5b277a17fe15b0916c",
+          "origin": {
+            "path": "src/lib/team-catalog.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "src/components/TeamLibraryPanel.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "4f82edaafeab7c8ba62a03dbf2247347c174bb89",
+          "upstreamPatchSha256": "ba5c863aefcdb6c33ba5a43966f798ad9ecb3fcf7cd2ebde4066606831a832da",
+          "origin": {
+            "path": "src/components/TeamLibraryPanel.tsx",
+            "present": true,
+            "blob": "da7d676c586bcfd5b7b3e81b1964bf1b85b54934",
+            "bytes": 54363,
+            "sha256": "64920ea0868667a2eb6da40761ad3fb7982e7e234f8eb385163b7787d8bcc1a4"
+          }
+        }
+      ],
+      "overlappingFileVersions": 1
+    },
+    {
+      "number": 3029,
+      "title": "Localize the desktop UI in Brazilian Portuguese",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3029",
+      "createdAt": "2026-10-17T19:22:38Z",
+      "mergedAt": "2026-10-18T16:37:00Z",
+      "mergeCommit": "db55ad3077703212b981c0f312c773997180419a",
+      "changedFiles": 57,
+      "disposition": "defer-broad-localization-integration",
+      "reviewScope": "Targeted locale, greeting/catalog and UI-string comparison",
+      "rationale": "This is broader than a translation file: it localizes pt-BR UI, greeting/workspace templates, catalog copy and many components. Origin branding/account/project strings and release history must remain its own. Stage catalog/semantic changes with key/hash checks and review localized search in #3062 instead of bulk cherry-picking the 57-file patch.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "648c8d55625e3df0cdd659d61f115751b863e0b23018fcd9ccf636349b56334e",
+      "officialFilesSha256": "81626b7b6018a1fdefa7315317243a0f40b2dc6a039ee9aea4ebb3c4298f8b8a",
+      "evidence": [
+        {
+          "path": "src/locales/pt-BR.json",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "src/locales/pt-BR.json",
+            "present": false
+          }
+        },
+        {
+          "path": "server/initial-greeting.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "6db91c8d2e1ff52f7d6c775b0a6def7f685cd43b",
+          "upstreamPatchSha256": "d7be1f1103f688b303856c3210080adc6720c429d1102ac0c9b86ec7c35e21fd",
+          "origin": {
+            "path": "server/initial-greeting.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "server/store.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "75e6ba6c9a6e9cc82772e3ecc82780b5c8828a70",
+          "upstreamPatchSha256": "224cd7657c258f323a21f88c34060dd515ef89b8f27c4188188955fe074a86e3",
+          "origin": {
+            "path": "server/store.ts",
+            "present": true,
+            "blob": "c81bc59902fc8718143ffe5eb240ce03d37aaeac",
+            "bytes": 111183,
+            "sha256": "3cc863ea2fd0caedb73dc7683fd7bf250fa1c00325525a23309caf488ad0db47"
+          }
+        },
+        {
+          "path": "server/workspace.ts",
+          "upstreamChanged": true,
+          "upstreamBlob": "90d7479af4f32b408589e5c64302afe2162212d1",
+          "upstreamPatchSha256": "ac3da72949191663d35ebb2704fc1d7fa4e20db7ece3261ec28f68f734c28911",
+          "origin": {
+            "path": "server/workspace.ts",
+            "present": true,
+            "blob": "2652801028bf6072506599921695a8f8a0c07578",
+            "bytes": 27799,
+            "sha256": "9a4b3f90e2adfaad32d011c95d8392bc362e874c02c545cfc33b0f8bb49b929c"
+          }
+        },
+        {
+          "path": "src/lib/team-catalog.ts",
+          "upstreamChanged": false,
+          "upstreamBlob": null,
+          "upstreamPatchSha256": null,
+          "origin": {
+            "path": "src/lib/team-catalog.ts",
+            "present": false
+          }
+        },
+        {
+          "path": "src/components/TeamLibraryPanel.tsx",
+          "upstreamChanged": true,
+          "upstreamBlob": "b41d1ab18e1b317f15111e9effa060ea1ccc2e50",
+          "upstreamPatchSha256": "4157516986afc58b8fabaf066cc167418834c7a32166ea6d112cad5fd0e77b21",
+          "origin": {
+            "path": "src/components/TeamLibraryPanel.tsx",
+            "present": true,
+            "blob": "da7d676c586bcfd5b7b3e81b1964bf1b85b54934",
+            "bytes": 54363,
+            "sha256": "64920ea0868667a2eb6da40761ad3fb7982e7e234f8eb385163b7787d8bcc1a4"
+          }
+        }
+      ],
+      "overlappingFileVersions": 1
+    },
+    {
+      "number": 3060,
+      "title": "chore(release): bump version to 0.1.116",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3060",
+      "createdAt": "2026-10-18T15:52:56Z",
+      "mergedAt": "2026-10-18T16:37:20Z",
+      "mergeCommit": "180141663c6190813a31f45c86ddcfdbb7f8a0a6",
+      "changedFiles": 1,
+      "disposition": "defer-no-origin-product-patch",
+      "reviewScope": "Official release metadata patch comparison",
+      "rationale": "This changes upstream package.json from 0.1.115 to 0.1.116. Origin owns its 0.2.11 package, notes, feeds, source tags and delivery evidence, so this upstream version bump is not applicable.",
+      "adopted": false,
+      "patchApplied": false,
+      "runtimeVerification": false,
+      "officialDetailSha256": "ba4a2747464a48172d0c16610dd17e11eeb4b655be477f53fb4e0ad7136ac2b9",
+      "officialFilesSha256": "557093a24a1ef97b0461b81effc321db216d935c5bdd9d29e3f365199f970e1f",
+      "evidence": [
+        {
+          "path": "package.json",
+          "upstreamChanged": true,
+          "upstreamBlob": "bfc93f7ebb6d8563f4db3f44bf05b2a1e090fee2",
+          "upstreamPatchSha256": "a1563c702ea9549312214562f6b567efca9251aef2ee155e81c3736f23efce0b",
+          "origin": {
+            "path": "package.json",
+            "present": true,
+            "blob": "dea9f422355f6d37bb71f7882952e8cc1e0f0bb3",
+            "bytes": 7906,
+            "sha256": "a81ab8d9f56e8b88cc7f2ba29cf888931569a2aab2e8caf21f4a79194e53f3a9"
+          }
+        }
+      ],
+      "overlappingFileVersions": 0
+    }
+  ]
+}
