@@ -3,6 +3,15 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.2.12",
+  date: "2026-10-18",
+  title: "Safer agent logs and reliable signup",
+  changes: [
+    { title: "Reliable signup loading", body: "Signup checks whether registration is available before showing its fields. A connection that does not respond offers Try again after ten seconds. Sign-in and verified invitations stay available." },
+    { title: "Safer Windows child processes", body: "Workspace credentials stay out of installer and agent child processes even when environment names use different capitalization on Windows." },
+    { title: "Private provider logs", body: "Stripe secret and restricted keys are hidden when agent protocol output is saved to logs, using a protection adapted from OpenMausBot." },
+  ],
+}, {
   version: "0.2.11",
   date: "2026-10-18",
   title: "Draft-first projects and clearer workspace controls",
