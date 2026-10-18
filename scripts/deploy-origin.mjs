@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import { quoteShellWord as quote, siteRolloutScript } from "./origin-site-rollout.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const CONVEX_CLI = join(ROOT, "backend", "node_modules", "convex", "bin", "main.js");
 const PRODUCTION_DEPLOYMENT = "wry-fly-446";
 const PRODUCTION_DEPLOYMENT_TYPE = "dev";
 const REMOTE_SITE = "/root/origin";
@@ -20,8 +21,8 @@ const SITE_PATHS = ["site", "backend/package.json", "backend/convex", "backend/l
 const HELP = `Usage: node scripts/deploy-origin.mjs [steps] [options]
 
 Steps, run in this order (at least one, or --all):
-  --backup       npx convex export of production into --backup-dir
-  --backend      npx convex deploy of backend/ to production
+  --backup       Convex export of production into --backup-dir
+  --backend      Convex deploy of backend/ to production
   --site         build context from HEAD -> tarball -> ${"$"}HOST:${REMOTE_SITE} (old tree kept as ${REMOTE_SITE}.bak-<release>),
                  preserve deploy/ operator config, then docker compose up -d --no-deps --build origin in ${REMOTE_COMPOSE}
   --downloads    desktop installers and update feeds -> ${"$"}HOST:${REMOTE_DOWNLOADS}
@@ -92,13 +93,13 @@ function backup(run, options, ts) {
   console.log(`\n# Back up production Convex (${PRODUCTION_DEPLOYMENT})`);
   requireDeployKey(options.execute);
   if (options.execute) mkdirSync(options.backupDir, { recursive: true });
-  run("npx", ["convex", "export", "--include-file-storage", "--path", join(options.backupDir, `convex-${PRODUCTION_DEPLOYMENT}-${ts}.zip`)], { cwd: join(ROOT, "backend") });
+  run(process.execPath, [CONVEX_CLI, "export", "--include-file-storage", "--path", join(options.backupDir, `convex-${PRODUCTION_DEPLOYMENT}-${ts}.zip`)], { cwd: join(ROOT, "backend") });
 }
 
 function deployBackend(run, options) {
   console.log(`\n# Deploy backend/ to production Convex (${PRODUCTION_DEPLOYMENT})`);
   requireDeployKey(options.execute);
-  run("npx", ["convex", "deploy", "--typecheck", "enable"], { cwd: join(ROOT, "backend") });
+  run(process.execPath, [CONVEX_CLI, "deploy", "--typecheck", "enable"], { cwd: join(ROOT, "backend") });
 }
 
 function git(args) {

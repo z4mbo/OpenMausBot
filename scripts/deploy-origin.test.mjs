@@ -94,7 +94,7 @@ function backendFixture() {
   return { root, backupDir: join(root, "backups") };
 }
 
-function runBackend(root, backupDir, key, execute) {
+function runBackend(root, backupDir, key, execute, { failFirst = false, commandPath = process.env.PATH } = {}) {
   const script = new URL("./deploy-origin.mjs", import.meta.url).href;
   const args = ["--backup", "--backend", "--backup-dir", backupDir];
   if (execute) args.push("--execute");
@@ -104,13 +104,13 @@ function runBackend(root, backupDir, key, execute) {
     childProcess.spawnSync = (command, args, options) => {
       const settings = options ?? args;
       console.log("deployment-test-command=" + JSON.stringify({ command, args: Array.isArray(args) ? args : [], cwd: settings.cwd }));
-      return { status: 0 };
+      return { status: ${failFirst ? 7 : 0} };
     };
     syncBuiltinESMExports();
     process.argv = [process.execPath, "deploy-origin.mjs", ...${JSON.stringify(args)}];
     await import(${JSON.stringify(script)});
   `;
-  const env = { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, WINDIR: process.env.WINDIR, HOME: root, USERPROFILE: root, TEMP: root, TMP: root };
+  const env = { PATH: commandPath, SystemRoot: process.env.SystemRoot, WINDIR: process.env.WINDIR, HOME: root, USERPROFILE: root, TEMP: root, TMP: root };
   if (key !== undefined) env.CONVEX_DEPLOY_KEY = key;
   const result = spawnSync(process.execPath, ["--input-type=module", "--eval", entry], { cwd: root, env, encoding: "utf8" });
   const commands = result.stdout.split(/\r?\n/).filter(line => line.startsWith("deployment-test-command=")).map(line => JSON.parse(line.slice("deployment-test-command=".length)));
@@ -125,13 +125,14 @@ describe("Origin backend deployment authority", () => {
     expect(result.status, result.stderr).toBe(0);
     expect(existsSync(backupDir)).toBe(true);
     expect(result.commands).toHaveLength(2);
-    expect(result.commands[0].cwd).toMatch(/[\\/]backend$/);
-    expect(result.commands[1].cwd).toBe(result.commands[0].cwd);
-    const invocation = command => [command.command, ...(command.args ?? [])].join(" ");
-    expect(invocation(result.commands[0])).toMatch(/npx convex export --include-file-storage --path/);
-    expect(invocation(result.commands[0])).toContain("convex-wry-fly-446-");
-    expect(invocation(result.commands[0])).toContain(backupDir);
-    expect(invocation(result.commands[1])).toBe("npx convex deploy --typecheck enable");
+    const backend = resolve(import.meta.dirname, "../backend");
+    const cli = join(backend, "node_modules", "convex", "bin", "main.js");
+    expect(result.commands[0]).toEqual({ command: process.execPath, args: [cli, "export", "--include-file-storage", "--path", expect.any(String)], cwd: backend });
+    expect(result.commands[0].args[4]).toMatch(/[\\/]convex-wry-fly-446-[^\\/]+\.zip$/);
+    expect(result.commands[0].args[4]).toContain(backupDir);
+    expect(result.commands[1]).toEqual({ command: process.execPath, args: [cli, "deploy", "--typecheck", "enable"], cwd: backend });
+    expect(JSON.stringify(result.commands)).not.toContain(key);
+    expect(JSON.stringify(result.commands)).not.toContain("synthetic-private-token");
     expect(result.stdout).not.toContain("--execute would stop here");
     expect(result.stdout + result.stderr).not.toContain(key);
     expect(result.stdout + result.stderr).not.toContain("synthetic-private-token");
@@ -163,8 +164,31 @@ describe("Origin backend deployment authority", () => {
     expect(result.commands).toEqual([]);
     expect(existsSync(backupDir)).toBe(false);
     expect(result.stdout).toContain("--execute would stop here");
-    expect(result.stdout).toContain("convex export --include-file-storage --path");
-    expect(result.stdout).toContain("convex deploy --typecheck enable");
+    expect(result.stdout).toContain(process.execPath);
+    expect(result.stdout).toContain("export --include-file-storage --path");
+    expect(result.stdout).toContain("deploy --typecheck enable");
+    expect(result.stdout).not.toContain("npx convex");
+    expect(result.stdout + result.stderr).not.toContain("synthetic-private-token");
+  });
+
+  it("uses the selected Node runtime when PATH cannot resolve package-manager shims", () => {
+    const { root, backupDir } = backendFixture();
+    const result = runBackend(root, backupDir, "dev:wry-fly-446|synthetic-private-token", true, { commandPath: join(root, "no-command-shims") });
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.commands).toHaveLength(2);
+    for (const command of result.commands) {
+      expect(command.command).toBe(process.execPath);
+      expect(command.args[0]).toBe(resolve(import.meta.dirname, "../backend/node_modules/convex/bin/main.js"));
+    }
+  });
+
+  it("stops before deployment if the selected Convex export fails", () => {
+    const { root, backupDir } = backendFixture();
+    const result = runBackend(root, backupDir, "dev:wry-fly-446|synthetic-private-token", true, { failFirst: true });
+    expect(result.status).toBe(1);
+    expect(result.commands).toHaveLength(1);
+    expect(result.stderr).toContain("exited with 7");
+    expect(result.stdout).not.toContain("# Deploy backend/");
     expect(result.stdout + result.stderr).not.toContain("synthetic-private-token");
   });
 });
