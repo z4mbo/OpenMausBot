@@ -89,6 +89,8 @@ Version [0.2.10](https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.10) is
 
 The [0.2.10 record](docs/verification/origin-candidate-030.md) retains its source, checks and Activity correction. Candidates [0.2.8](docs/verification/origin-invitations.md) and [0.2.9](docs/verification/origin-candidate-029.md) remain unpublished and immutable; the successful 0.2.9 CI did not waive its reproduced Activity defect. Historical 0.2.7 delivery retains its original receipt.
 
+The unpublished [0.2.11 candidate](docs/verification/origin-candidate-031.md) adds Draft-first boards and task defaults, empty local workspace cleanup, the requested account/computer layout and consistent flat controls. Its local checks pass; fresh release builds, backend repair, email activation and public delivery remain required before it replaces 0.2.10.
+
 The **Origin desktop** GitHub workflow builds macOS Apple silicon, macOS Intel and Windows x64 artifacts without publishing. Local packaging commands are `pnpm package:mac` and `pnpm package:win` on their respective platforms. Download-host publication is a separate operation; building artifacts or opening a PR does not update installed apps. Unsigned/ad-hoc builds have platform-specific installation and updater limits documented in the workflow.
 
 Review new merged OpenMausBot PRs for fixes and functionality that fit Origin. Compare the code first, retain attribution, add Origin-specific regression coverage, and avoid importing upstream branding, service credentials or release settings blindly. Keep each logical change in its own commit and document verification in the PR.

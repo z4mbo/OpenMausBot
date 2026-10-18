@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "version": "0.2.11",
+  "status": "local-checkpoint-unpublished",
+  "observedAt": "2026-10-18T15:59:39.048Z",
+  "checkpoint": "dd5b63ef914c5a546ea99cbef65b29b33078c7e9",
+  "releaseSource": null,
+  "runtimeCheckpoint": "3ebb09b1bcba58606f1eeaeed14843afb629d42e",
+  "publicVersion": "0.2.10",
+  "operatorNode": "v24.21.0",
+  "isolation": {
+    "syntheticData": true,
+    "mainCheckoutMutations": false,
+    "livePortsTouched": false,
+    "productionDataTests": false
+  },
+  "trees": {
+    "src": "791f9dc99015bf401aeda8bf2dab340c19531093",
+    "shared": "28e9c0371bb550069e6a3c8b074ee45f5c6f9448",
+    "server": "c46d78694eef9bd3b5d9ef8bb0edc39126799fa0",
+    "backend": "785ac8c20beb028922f4d95068be2bd4f8bbcc96",
+    "site": "b618b104235fc822fd2bf887d3fb432a0d302df3",
+    "scripts": "1c3e2974278a5bc20083ead602e628e5b48295a8"
+  },
+  "tests": [
+    {
+      "suite": "clientShared",
+      "sourceCheckpoint": "01080e8b762f584bf683d9c59c2b5a554cbab3a2",
+      "files": 564,
+      "passed": 5974,
+      "skipped": 0,
+      "seconds": 387.5,
+      "rawPrivateLog": ".omb-scratch/candidate-031-client-shared-01080e8b7.log",
+      "rawBytes": 203265,
+      "rawSha256": "d5b7842493c44c02b424afe3041a63c5fcfc868db1c67e888d8ed6c98413af00",
+      "complete": true
+    },
+    {
+      "suite": "server",
+      "sourceCheckpoint": "dd5b63ef914c5a546ea99cbef65b29b33078c7e9",
+      "files": 15,
+      "passed": 778,
+      "skipped": 6,
+      "seconds": 139.03,
+      "rawPrivateLog": ".omb-scratch/candidate-031-server-dd5b63ef9.log",
+      "rawBytes": 15866,
+      "rawSha256": "18781ac2aee68c9d54c5f058197fc5143555286cff2188fbfa0446e61ea6e306",
+      "complete": true
+    },
+    {
+      "suite": "backend",
+      "sourceCheckpoint": "01080e8b762f584bf683d9c59c2b5a554cbab3a2",
+      "files": 23,
+      "passed": 215,
+      "skipped": 0,
+      "seconds": 12.08,
+      "rawPrivateLog": ".omb-scratch/candidate-031-backend-01080e8b7.log",
+      "rawBytes": 873,
+      "rawSha256": "b16bb145f65bcf5a234090f5caa1d2b7df4c0a1d061bded951294982f09def50",
+      "complete": true
+    },
+    {
+      "suite": "guards",
+      "sourceCheckpoint": "3ebb09b1bcba58606f1eeaeed14843afb629d42e",
+      "files": 9,
+      "passed": 121,
+      "skipped": 0,
+      "seconds": 16.92,
+      "rawPrivateLog": ".omb-scratch/candidate-031-guards-3ebb09b1b.log",
+      "rawBytes": 7902,
+      "rawSha256": "bcc5cf5ab844fa97bca05c568073a862cbd2b5d0ad11488f9e68003986dddc7c",
+      "complete": true
+    },
+    {
+      "suite": "sidebarBrowser",
+      "sourceCheckpoint": "dd5b63ef914c5a546ea99cbef65b29b33078c7e9",
+      "files": 1,
+      "passed": 2,
+      "skipped": 0,
+      "seconds": 60.11,
+      "rawPrivateLog": ".omb-scratch/candidate-031-sidebar-browser-dd5b63ef9.log",
+      "rawBytes": 361,
+      "rawSha256": "b1632e7bc4765bdf3bb5db639fc34a73d97f6427c37b8b615660f75df282a942",
+      "complete": true
+    }
+  ],
+  "siteBuild": {
+    "complete": true,
+    "sourceCheckpoint": "3ebb09b1bcba58606f1eeaeed14843afb629d42e",
+    "syntheticConvexUrl": "http://127.0.0.1:20689",
+    "noListenerVerifiedBeforeBuild": true,
+    "rawPrivateLog": ".omb-scratch/candidate-031-site-build-3ebb09b1b.log",
+    "rawBytes": 628,
+    "rawSha256": "dc26b8e8e433102403b1e6482c5b642850a345a4a266d2e49376a25770db16ed"
+  },
+  "observedChecksWithoutRetainedCombinedLog": {
+    "siteUnit": {
+      "files": 2,
+      "passed": 14
+    },
+    "appTypes": "pass",
+    "serverTypes": "pass",
+    "backendTypes": "pass",
+    "oxlintDenyWarnings": "pass",
+    "localeCatalog": "pass-partial-translations-retained",
+    "contrast": {
+      "skins": 9,
+      "pairsPerSkin": 52,
+      "daylightMeadowPairedFills": "pass"
+    },
+    "whitespace": "pass"
+  },
+  "excludedInterruptedLogs": [
+    "candidate-031-client-shared-3bea105d6.log",
+    "candidate-031-site-build-01080e8b7.log"
+  ],
+  "remaining": [
+    "actual-baseline-request-contract-compatibility",
+    "final-source-freeze",
+    "new-exact-source-ci-native",
+    "fresh-platform-artifacts-and-site-image",
+    "backend-and-eight-complete-migrations",
+    "mail-activation",
+    "client-feed-site-publication",
+    "public-acceptance"
+  ],
+  "qualification": "Local suite and source-tree evidence only. This file does not authorize production operations or establish packaged, provider, hardware or public acceptance. Old CI/native builds cannot cover new source."
+}
