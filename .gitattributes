@@ -64,3 +64,4 @@ docs/verification/evidence/origin-trigger-row-033/**/*.log text eol=lf
 docs/verification/evidence/origin-trigger-row-033/fixture/*.mjs text eol=lf
 docs/verification/evidence/origin-trigger-row-033/fixture/*.ts text eol=lf
 docs/verification/evidence/origin-trigger-row-033/fixture/*.tsx text eol=lf
+docs/verification/evidence/origin-mail-provider-031.json text eol=lf
