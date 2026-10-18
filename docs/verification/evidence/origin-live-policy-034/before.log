@@ -1,0 +1,47 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-live-gate-034/Origin
+
+ ❯ server/origin-live-access.e2e.test.ts (7 tests | 4 failed) 4891ms
+     × ios asks for its own key and starts without a plan 9ms
+     × android asks for its own key and starts without a plan 7ms
+     × web through the companion asks for its own key and starts without a plan 6ms
+     × android through the companion asks for its own key and starts without a plan 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/origin-live-access.e2e.test.ts > Origin Live calls without an upstream subscription > ios asks for its own key and starts without a plan
+ FAIL  server/origin-live-access.e2e.test.ts > Origin Live calls without an upstream subscription > android asks for its own key and starts without a plan
+ FAIL  server/origin-live-access.e2e.test.ts > Origin Live calls without an upstream subscription > web through the companion asks for its own key and starts without a plan
+ FAIL  server/origin-live-access.e2e.test.ts > Origin Live calls without an upstream subscription > android through the companion asks for its own key and starts without a plan
+AssertionError: expected { status: 402, body: { …(2) } } to match object { status: 409, …(1) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "body": {
+-     "needsKey": true,
++     "error": "Live calls from your phone need a Pro plan.",
++     "needsPro": true,
+    },
+-   "status": 409,
++   "status": 402,
+  }
+
+ ❯ server/origin-live-access.e2e.test.ts:44:23
+     42|       const before = live.sessions.length;
+     43|       const missing = await request("/api/live/session", { botId, clie…
+     44|       expect(missing).toMatchObject({ status: 409, body: { needsKey: t…
+       |                       ^
+     45|       expect(missing.body).not.toHaveProperty("needsPro");
+     46|       expect(live.sessions).toHaveLength(before);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 3 passed (7)
+   Start at  23:13:43
+   Duration  7.36s (transform 1.15s, setup 881ms, import 1.41s, tests 4.89s, environment 0ms)
+

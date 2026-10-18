@@ -96,3 +96,4 @@ docs/verification/evidence/origin-candidate-032.json -text whitespace=cr-at-eol
 docs/verification/evidence/origin-source-review-032.json -text whitespace=cr-at-eol
 docs/verification/evidence/origin-team-access-cache-033/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-issue-drag-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-live-policy-034/** -text whitespace=cr-at-eol,-blank-at-eof

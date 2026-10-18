@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-18T21:28:11.548Z",
+  "baseline": "87ff77be5ea79272175219d479b9a8017b4e8fcc",
+  "workerFix": "7d3fe370be8bbe8a250bb23e1c02dad64085969b",
+  "integrationFix": "c6371c2b4",
+  "severity": "P2",
+  "scenario": "With no upstream subscription, real Origin HTTP phone/companion Live starts return402 needsPro before the personal-key prompt; the desktop/web controls already work.",
+  "before": {
+    "failed": 4,
+    "passed": 3
+  },
+  "after": {
+    "actualHttpCases": 7,
+    "passed": 7,
+    "selectedFiles": 15,
+    "passedFiles": 14,
+    "skippedFiles": 1,
+    "selectedPassed": 283,
+    "existingPosixSkipped": 17
+  },
+  "scope": [
+    "Six desktop/web/iOS/Android/companion combinations",
+    "Missing personal Live key returns409 before provider contact",
+    "Configured synthetic key starts and ends through real server routes and loopback fake OpenAI",
+    "Client config and call response omit the key",
+    "Cross-origin request403 and unknown bot404 before provider contact",
+    "Older-server subscription response becomes an error without purchase UI"
+  ],
+  "upstream": {
+    "pr": 3071,
+    "merge": "411d86e69b18a726874cb0b18404293ca26d03d1",
+    "adoption": "Selective removal of plan gate and purchase prompt; general OpenAI key fallback is not imported."
+  },
+  "checks": {
+    "appTypes": true,
+    "serverTypes": true,
+    "lint": true,
+    "documentationAndSizeGuards": true
+  },
+  "bindings": [
+    {
+      "path": "server/live-call-controller.ts",
+      "sha256": "e494d72142c8f0db3227e7545fae7998dc09f0bc8e30c9a8442594681cd67b64"
+    },
+    {
+      "path": "server/routes/live.ts",
+      "sha256": "02ce816b5f135527e4f7ef6f60ed74d40e54695604658a78fa20d2ba1a61f0ee"
+    },
+    {
+      "path": "server/index.ts",
+      "sha256": "4a57c937056e9a76004ffda90018e67e92acf5e8fb494ebbe0af023bd6a1d59a"
+    },
+    {
+      "path": "server/origin-live-access.e2e.test.ts",
+      "sha256": "1490bd3530e63e7c135437b7bcf50afc4d7123d514d75e12ff13f43ee1de4eac"
+    },
+    {
+      "path": "src/lib/live-call-media.ts",
+      "sha256": "a65c3e03aeb1ed924c01e01756101dfe2e5c4076646757f62c30ee0d7053cb9f"
+    },
+    {
+      "path": "src/components/CallView.tsx",
+      "sha256": "1676eaa2eb75ffa11839f001be00176e5029e3d2105e74eb13e179b5dd3fc279"
+    },
+    {
+      "path": "src/components/ProIntroduction.tsx",
+      "sha256": "758797b821df2d96700993b3caf6124c8730a43c64d0ddc46bb20ad167a70a29"
+    }
+  ],
+  "logs": [
+    {
+      "name": "before.log",
+      "bytes": 2251,
+      "sha256": "803c6fd59a2cc4b40dfed11892ad89387c5aff6cba47473a3e031ecea5ef7c73"
+    },
+    {
+      "name": "after.log",
+      "bytes": 287,
+      "sha256": "1879120958776bfc1b4d9c10ff49f0f9002ebc9efe352db48344752aa178ce12"
+    }
+  ],
+  "limits": [
+    "Selected checks ran in the isolated worker; final integrated suite and publication are separate.",
+    "No real key, audio, WebRTC media, phone hardware, provider billing or production data.",
+    "The17 original POSIX-only e2e cases are skipped on Windows; the new7 HTTP cases run on Windows.",
+    "Old402 handling is compatibility recovery, not a server auth or permission change."
+  ]
+}
