@@ -2,9 +2,11 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import { removeTempDir } from "../server/testing/cleanup.ts";
 import { siteRolloutScript } from "./origin-site-rollout.mjs";
+import ts from "typescript";
 
 const shell = process.platform === "win32"
   ? resolve(spawnSync("git", ["--exec-path"], { encoding: "utf8" }).stdout.trim(), "../../../bin/bash.exe")
@@ -45,6 +47,58 @@ afterEach(async () => {
 });
 
 describe("Origin site deployment", () => {
+  it("stages the shared workflow module required by the backend's site typecheck", () => {
+    const root = mkdtempSync(join(tmpdir(), "origin-deploy-test-"));
+    fixtures.push(root);
+    const repository = join(root, "source");
+    const stage = join(root, "staged");
+    const files = {
+      "package.json": JSON.stringify({ version: "0.2.11", packageManager: "pnpm@10.33.0" }),
+      "pnpm-workspace.yaml": "packages:\n  - backend\n  - site\n",
+      "pnpm-lock.yaml": "lockfileVersion: '9.0'\n",
+      "backend/package.json": "{}\n",
+      "backend/convex/tasks.ts": "import { workflow } from '../../shared/origin-columns';\nexport const taskWorkflow = workflow;\n",
+      "backend/lib/fixture.ts": "export {};\n",
+      "shared/origin-columns.ts": "export const workflow = 'Draft';\n",
+      "shared/origin-theme.css": ":root {}\n",
+      "shared/origin-releases.ts": "export const releases = [];\n",
+      "shared/origin-site-address.ts": "export const site = 'https://example.invalid';\n",
+      "site/Dockerfile": "FROM node:24-alpine\n",
+      "site/.dockerignore": "node_modules\n",
+      "scripts/deploy-origin.mjs": readFileSync(new URL("./deploy-origin.mjs", import.meta.url), "utf8"),
+      "scripts/origin-site-rollout.mjs": readFileSync(new URL("./origin-site-rollout.mjs", import.meta.url), "utf8"),
+    };
+    for (const [name, contents] of Object.entries(files)) {
+      const path = join(repository, name);
+      mkdirSync(resolve(path, ".."), { recursive: true });
+      writeFileSync(path, contents);
+    }
+    for (const args of [["init", "--quiet"], ["add", "."], ["-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "-c", `core.hooksPath=${join(root, "no-hooks")}`, "commit", "--quiet", "-m", "Synthetic site source"]]) {
+      const result = spawnSync("git", args, { cwd: repository, encoding: "utf8" });
+      expect(result.status, result.stderr).toBe(0);
+    }
+    const script = pathToFileURL(join(repository, "scripts/deploy-origin.mjs")).href;
+    const entry = `
+      import childProcess from "node:child_process";
+      import { syncBuiltinESMExports } from "node:module";
+      const original = childProcess.spawnSync;
+      childProcess.spawnSync = (command, ...args) => {
+        if (command === "pnpm" || typeof command === "string" && command.startsWith("pnpm ")) return { status: 0 };
+        return original(command, ...args);
+      };
+      syncBuiltinESMExports();
+      process.argv = [process.execPath, "deploy-origin.mjs", "--stage", ${JSON.stringify(stage)}];
+      await import(${JSON.stringify(script)});
+    `;
+    const env = { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, WINDIR: process.env.WINDIR, HOME: root, USERPROFILE: root, TEMP: root, TMP: root };
+    const result = spawnSync(process.execPath, ["--input-type=module", "--eval", entry], { cwd: repository, env, encoding: "utf8" });
+    expect(result.status, result.stderr).toBe(0);
+    const task = join(stage, "backend/convex/tasks.ts");
+    const program = ts.createProgram([task], { noEmit: true, types: [], target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler });
+    expect(ts.getPreEmitDiagnostics(program).filter(diagnostic => diagnostic.code === 2307).map(diagnostic => ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"))).toEqual([]);
+    expect(readFileSync(join(stage, "shared/origin-columns.ts"), "utf8")).toBe(files["shared/origin-columns.ts"]);
+  });
+
   it("preserves operator configuration while replacing the site and retaining its previous tree", () => {
     const { root, site, run } = fixture();
     const result = run();

@@ -16,7 +16,7 @@ const PRODUCTION_DEPLOYMENT_TYPE = "dev";
 const REMOTE_SITE = "/root/origin";
 const REMOTE_COMPOSE = "/root/multi-ghost";
 const REMOTE_DOWNLOADS = "/root/multi-ghost/origin-downloads";
-const SITE_PATHS = ["site", "backend/package.json", "backend/convex", "backend/lib", "shared/origin-theme.css", "shared/origin-releases.ts", "shared/origin-site-address.ts"];
+const SITE_PATHS = ["site", "backend/package.json", "backend/convex", "backend/lib", "shared/origin-columns.ts", "shared/origin-theme.css", "shared/origin-releases.ts", "shared/origin-site-address.ts"];
 
 const HELP = `Usage: node scripts/deploy-origin.mjs [steps] [options]
 
