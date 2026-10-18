@@ -49,3 +49,7 @@ docs/verification/evidence/origin-flat-dialogs-031/**/*.log text eol=lf
 docs/verification/evidence/origin-flat-dialogs-031/fixture/*.mjs text eol=lf
 docs/verification/evidence/origin-flat-dialogs-031/fixture/*.ts text eol=lf
 docs/verification/evidence/origin-flat-dialogs-031/fixture/*.tsx text eol=lf
+docs/verification/evidence/origin-footer-fit-031/**/*.json text eol=lf
+docs/verification/evidence/origin-footer-fit-031/**/*.log text eol=lf
+docs/verification/evidence/origin-footer-fit-031-intermediate/**/*.json text eol=lf
+docs/verification/evidence/origin-footer-fit-031-intermediate/**/*.log text eol=lf

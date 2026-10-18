@@ -156,7 +156,7 @@ export function SidebarFooterNav({
     </>
   );
 
-  if (inline) return <nav data-tour="tools" aria-label={t("sidebar.tools")} className="flex items-center">{rows}</nav>;
+  if (inline) return advanced || filesRow ? <nav data-tour="tools" aria-label={t("sidebar.tools")} className="flex items-center [&>button]:mx-0 @max-[286px]/sidebar-footer:w-full @max-[286px]/sidebar-footer:justify-between">{rows}</nav> : null;
   if (iconsOnly) {
     return <nav data-tour="tools" aria-label={t("sidebar.tools")} className="flex flex-col items-center gap-1">{rows}</nav>;
   }

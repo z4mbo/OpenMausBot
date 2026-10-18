@@ -2308,7 +2308,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
       />
       {WORKSPACE_NAV && <MemberCallBanner iconOnly={density === "icons"} />}
 
-      <div className={cn("pb-3 pt-2", density === "icons" ? "flex flex-col items-center gap-1 px-2" : "px-3")}>
+      <div className={cn("@container/sidebar-footer pb-3 pt-2", density === "icons" ? "flex flex-col items-center gap-1 px-2" : "px-3")}>
         {!(PROFILE_AT_TOP && density !== "icons") && <SidebarFooterNav
           density={density}
           collapsed={sectionCollapsed(TOOLS_SECTION_ID)}
@@ -2326,12 +2326,12 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
             {PROFILE_AT_TOP ? <OriginAccountMenu iconOnly /> : <SidebarProfileMenu iconOnly />}
           </div>
         ) : (
-          <div className={cn("flex items-center gap-1 not-first:mt-3", SIDEBAR_ACTIONS_IN_FOOTER && "relative")}>
-            {PROFILE_AT_TOP ? <><SidebarFooterNav density={density} inline /><div className="flex-1" /></> : <div className="min-w-0 flex-1">
+          <div data-sidebar-footer-actions className={cn("flex items-center not-first:mt-3", PROFILE_AT_TOP ? "flex-wrap justify-between gap-0.5" : "gap-1", SIDEBAR_ACTIONS_IN_FOOTER && "relative")}>
+            {PROFILE_AT_TOP ? <SidebarFooterNav density={density} inline /> : <div className="min-w-0 flex-1">
               <SidebarProfileMenu />
             </div>}
             <UpdateIndicator />
-            {SIDEBAR_ACTIONS_IN_FOOTER && <div className="flex items-center" style={windowNoDragStyle}>{renderHeaderActions(true)}</div>}
+            {SIDEBAR_ACTIONS_IN_FOOTER && <div className={PROFILE_AT_TOP ? "contents" : "flex items-center"} style={windowNoDragStyle}>{renderHeaderActions(true)}</div>}
             <SidebarAppsButton />
           </div>
         )}

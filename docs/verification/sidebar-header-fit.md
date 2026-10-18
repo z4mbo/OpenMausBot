@@ -64,8 +64,9 @@ below the titlebar, with disjoint controls inside the sidebar. Computer height
 and text size match the navigation peers. `controlsBelowTitlebar` is deliberately
 false because the account belongs in the titlebar. The actual mobile drawer is
 320px wide inside a 375px viewport. These assertions cover the header; an existing
-Advanced footer spill at narrow widths is recorded separately and is not hidden
-by the document-width checks. Representative
+Advanced footer spill at narrow widths is preserved in this collection and is
+not hidden by the document-width checks. The later
+[footer followup](sidebar-footer-fit.md) fixes it with separate evidence. Representative
 [before](evidence/origin-header-layout-031/screenshots/before-win-272-advanced-dark.png)
 and [after](evidence/origin-header-layout-031/screenshots/after-win-272-advanced-dark.png)
 captures show the requested arrangement.

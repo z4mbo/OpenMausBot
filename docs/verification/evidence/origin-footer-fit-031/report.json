@@ -1,0 +1,34 @@
+{
+  "baseline": "0ca15f38b8916e5cb1b7dc9c63222a3228f5fc0e",
+  "severity": "P2",
+  "scenario": "Six fixed46px footer controls require more width than a240/272px expanded sidebar provides; Store paints outside the sidebar. Compact272px drawer also spills inside375px viewport.",
+  "fixed": "Wrap footer controls and place tools across a full row below286px available width; retain46px targets, actions and keyboard order.",
+  "matrixCases": 128,
+  "beforeSpillCases": 20,
+  "afterCasesContained": 64,
+  "optionalCases": 16,
+  "optionalAfterCasesAllEightControlsContained": 8,
+  "screenshots": 144,
+  "focusedChecks": 55,
+  "actualBrowserRegression": {
+    "baselineFailed": 2,
+    "fixedPassed": 2,
+    "layoutCasesPerMode": 16
+  },
+  "runtime": {
+    "errors": [],
+    "submissions": 0,
+    "cases": 128,
+    "browser": "156.0.8078.4"
+  },
+  "synthetic": true,
+  "packagedAcceptance": false,
+  "nativeUpdaterExecution": false,
+  "productionDataUsed": false,
+  "headerGalleryPreserved": true,
+  "equalLengthRowColumnsAligned": true,
+  "intermediateArchive": "origin-footer-fit-031-intermediate",
+  "excludedRootClip": "Root Cua wrong-region clip was not included",
+  "earlierHarnessAttempts": "Reused-target Page.navigate timed out; final regression uses a fresh owned browser target per independent layout case and checks route identity. Initial5s page readiness was insufficient; readiness20s, keyboard settlement5s.",
+  "retainedLogFormatting": "LF and one final newline; original hashes retained when transformed"
+}

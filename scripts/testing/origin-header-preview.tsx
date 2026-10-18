@@ -13,7 +13,7 @@ const params = new URLSearchParams(location.search);
 const platform = params.get("platform") === "mac" ? "darwin" : "win32";
 const width = [240, 272, 320].includes(Number(params.get("width"))) ? Number(params.get("width")) : 240;
 const advanced = params.get("mode") !== "simple";
-const density = params.get("density") === "icons" ? "icons" : "comfortable";
+const density = params.get("density") === "icons" ? "icons" : params.get("density") === "compact" ? "compact" : "comfortable";
 const menuFails = params.get("menu") === "failed";
 const computerName = params.get("computer") === "long" ? "Synthetic computer with a very long saved server name that must remain within the sidebar" : "This computer";
 applySkin(params.get("theme") === "light" ? "atelier" : "midnight");
