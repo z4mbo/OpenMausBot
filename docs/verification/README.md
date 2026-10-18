@@ -70,6 +70,7 @@ Use only mapped, tested commands:
 - [Sidebar footer containment and keyboard access](sidebar-footer-fit.md)
 - [Draft-first boards and default issue creation](origin-draft-defaults.md)
 - [Issue cards remain visible during rapid dragging](origin-issue-drag.md)
+- [Issue dragging after permission or project changes](origin-issue-drag-permission.md)
 - [Legacy Idea privacy during Draft repair](origin-draft-mirror.md)
 - [Local workspace deletion and residual sidebar sections](origin-workspace-deletion.md)
 - [Origin 0.2.11 source and delivery acceptance](origin-candidate-031.md) ([delivery receipt](evidence/origin-delivery-031/delivery-receipt.json))
