@@ -1,0 +1,309 @@
+{
+  "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+  "fixCommit": "7f468ebd1d0112f58f3164963002c35569023d66",
+  "originalCi": {
+    "run": 39152274046,
+    "attempt": 1,
+    "job": "vitest (windows-latest, shard 3/4)",
+    "sourceLogSha256": "55bab84343e10b0d05b2e968cf50de2cec339679e1e57dba415a01e012c28e49",
+    "failure": "continues a delegated teammate's step cap in place and returns the stall to its delegator",
+    "request": "GET /api/bots",
+    "errno": -4077,
+    "code": "ECONNRESET",
+    "syscall": "read",
+    "durationMs": 29433,
+    "serverDeath": false,
+    "serverDeathEvidence": "Six later cases pass against the same child created once in beforeAll; fixture has no restart path",
+    "socketCause": "Unknown; CI retained no per-socket telemetry or child stderr at this failure"
+  },
+  "localOriginal": {
+    "focused": {
+      "passed": 1,
+      "filteredOut": 31,
+      "durationSeconds": 11.49,
+      "targetMs": 2861
+    },
+    "full": {
+      "passed": 32,
+      "durationSeconds": 34.07,
+      "targetMs": 2954
+    },
+    "ciFailureReproduced": false
+  },
+  "regression": {
+    "transport": "real loopback HTTP server, no fetch mock",
+    "injectedFault": "server resets a socket when that same socket handles another request; listener stays owned and alive",
+    "before": {
+      "failed": 1,
+      "passed": 2,
+      "error": "read ECONNRESET",
+      "errno": -4077
+    },
+    "after": {
+      "passed": 3
+    },
+    "identicalTestBytesSha256": "f2efbab67ac864faec507d4aadd42aeec7454fe5715e22e6d8e4d1463e3cd3c6",
+    "beforeHelperSha256": "9838dfdaf75cc13045647406bba10faf9d2415fd1c124ca6cca80c061c33a1ef",
+    "claim": "Proves pooled-connection transport vulnerability and its prevention; does not identify the original CI socket cause"
+  },
+  "fix": {
+    "policy": "Connection: close for fixture API, startup health and timeout diagnostic requests",
+    "fetchCallsPerRequest": 1,
+    "retriesAdded": 0,
+    "timeoutsChanged": false,
+    "retryListChanged": false,
+    "taskAssertionsChanged": false,
+    "productionRuntimeChanged": false,
+    "paths": [
+      {
+        "path": "server/comms.test.ts",
+        "gitBlob": "068204e4f9a4857f56b9c6007d578699c3b29302",
+        "bytes": 64337,
+        "sha256": "409b703f5347cf7f5dd5193583c249298c5dac6da462525df6f7c094d4f4f102"
+      },
+      {
+        "path": "server/testing/fixture-fetch.test.ts",
+        "gitBlob": "e55736c965c4e335cd757f30c658e8bb23f82b96",
+        "bytes": 3336,
+        "sha256": "f2efbab67ac864faec507d4aadd42aeec7454fe5715e22e6d8e4d1463e3cd3c6"
+      },
+      {
+        "path": "server/testing/fixture-fetch.ts",
+        "gitBlob": "036b744f36d410f2cc13d5a3a4a737d5a21c61c5",
+        "bytes": 212,
+        "sha256": "e93a77aae370112af4c06a3b8c9cf0170d8adb6a81cf0d4f93c402ebbac6959d"
+      }
+    ]
+  },
+  "verification": {
+    "fullAfter": {
+      "files": 2,
+      "passed": 35,
+      "durationSeconds": 35.45,
+      "targetMs": 2981
+    },
+    "lint": {
+      "command": "pnpm exec oxlint --deny-warnings server/comms.test.ts server/testing/fixture-fetch.ts server/testing/fixture-fetch.test.ts",
+      "exitCode": 0
+    },
+    "serverTypes": {
+      "command": "pnpm exec tsc -p tsconfig.server.json",
+      "exitCode": 0
+    },
+    "documentation": {
+      "initial": {
+        "passed": 6,
+        "failed": 1,
+        "cause": "New report missing from verification README index"
+      },
+      "afterIndexLink": {
+        "passed": 7,
+        "failed": 0
+      }
+    }
+  },
+  "logs": [
+    {
+      "label": "focused-baseline",
+      "stream": "stdout",
+      "path": "focused-baseline.stdout.log.gz",
+      "originalBytes": 6185,
+      "originalSha256": "0db3be7f91410279cba1c5754ec6cc96d7ddd325542ac3793bf7c2fae661a430",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:47:07.739Z",
+      "completedAt": "2026-10-18T18:47:19.811Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "focused-baseline",
+      "stream": "stderr",
+      "path": "focused-baseline.stderr.log.gz",
+      "originalBytes": 135,
+      "originalSha256": "228f57f77cf94d9ba04c13b1619605368adbe3931bfb8b6eff599ad2dd3fe275",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:47:07.739Z",
+      "completedAt": "2026-10-18T18:47:19.811Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "full-baseline",
+      "stream": "stdout",
+      "path": "full-baseline.stdout.log.gz",
+      "originalBytes": 6646,
+      "originalSha256": "7b63d6f3c229bf8256bb136984d1103ec8b4853d875d277c89e2ba2adfdf700f",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:47:48.794Z",
+      "completedAt": "2026-10-18T18:48:23.381Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "full-baseline",
+      "stream": "stderr",
+      "path": "full-baseline.stderr.log.gz",
+      "originalBytes": 135,
+      "originalSha256": "228f57f77cf94d9ba04c13b1619605368adbe3931bfb8b6eff599ad2dd3fe275",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:47:48.794Z",
+      "completedAt": "2026-10-18T18:48:23.381Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "transport-before",
+      "stream": "stdout",
+      "path": "transport-before.stdout.log.gz",
+      "originalBytes": 998,
+      "originalSha256": "12ad0cbc80f06af78c9da72d01c747b812a417eeabb02b0c22405aaeb88bca2f",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:49:15.023Z",
+      "completedAt": "2026-10-18T18:49:16.355Z",
+      "node": "v24.21.0",
+      "code": 1,
+      "signal": null
+    },
+    {
+      "label": "transport-before",
+      "stream": "stderr",
+      "path": "transport-before.stderr.log.gz",
+      "originalBytes": 807,
+      "originalSha256": "3aa155d10fc1f8333a4dcc850c372afbbe14e53cd3b6a56cfb01ffc5328ffdf2",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:49:15.023Z",
+      "completedAt": "2026-10-18T18:49:16.355Z",
+      "node": "v24.21.0",
+      "code": 1,
+      "signal": null
+    },
+    {
+      "label": "transport-after",
+      "stream": "stdout",
+      "path": "transport-after.stdout.log.gz",
+      "originalBytes": 931,
+      "originalSha256": "a579af16660d74b98311c4c135f22150ecfa03a14ad44659bc3de2a75fc3a2f7",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:49:55.508Z",
+      "completedAt": "2026-10-18T18:49:56.829Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "transport-after",
+      "stream": "stderr",
+      "path": "transport-after.stderr.log.gz",
+      "originalBytes": 135,
+      "originalSha256": "228f57f77cf94d9ba04c13b1619605368adbe3931bfb8b6eff599ad2dd3fe275",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:49:55.508Z",
+      "completedAt": "2026-10-18T18:49:56.829Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "full-after",
+      "stream": "stdout",
+      "path": "full-after.stdout.log.gz",
+      "originalBytes": 7170,
+      "originalSha256": "65efe12ca1e9cd1bf10bf415fabe46fb76b183e0b35e65edd7e29b47ea3c0ef5",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:49:56.868Z",
+      "completedAt": "2026-10-18T18:50:32.828Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "full-after",
+      "stream": "stderr",
+      "path": "full-after.stderr.log.gz",
+      "originalBytes": 270,
+      "originalSha256": "d178f5dc0a49703b21c5797f62e4fd2dc82e1ce833efcb0e926b772f1c03a608",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:49:56.868Z",
+      "completedAt": "2026-10-18T18:50:32.828Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "docs-check",
+      "stream": "stdout",
+      "path": "docs-check.stdout.log.gz",
+      "originalBytes": 1866,
+      "originalSha256": "500a535e877656728441c49d4093f1e2164ed07f2e9161c7e7fa24e2256eb808",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:53:24.696Z",
+      "completedAt": "2026-10-18T18:53:27.749Z",
+      "node": "v24.21.0",
+      "code": 1,
+      "signal": null
+    },
+    {
+      "label": "docs-check",
+      "stream": "stderr",
+      "path": "docs-check.stderr.log.gz",
+      "originalBytes": 1290,
+      "originalSha256": "d8b4bb81447424a0ffb3f22a014288e3d1246f021a55883fa7687fc6e4a78efc",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:53:24.696Z",
+      "completedAt": "2026-10-18T18:53:27.749Z",
+      "node": "v24.21.0",
+      "code": 1,
+      "signal": null
+    },
+    {
+      "label": "docs-check-after",
+      "stream": "stdout",
+      "path": "docs-check-after.stdout.log.gz",
+      "originalBytes": 1746,
+      "originalSha256": "623ad375b9ba5de78108c9d4f74c63542a6acd3cf87ed04a39e172659b7bfb62",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:53:43.863Z",
+      "completedAt": "2026-10-18T18:53:46.291Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "label": "docs-check-after",
+      "stream": "stderr",
+      "path": "docs-check-after.stderr.log.gz",
+      "originalBytes": 135,
+      "originalSha256": "228f57f77cf94d9ba04c13b1619605368adbe3931bfb8b6eff599ad2dd3fe275",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "startedAt": "2026-10-18T18:53:43.863Z",
+      "completedAt": "2026-10-18T18:53:46.291Z",
+      "node": "v24.21.0",
+      "code": 0,
+      "signal": null
+    }
+  ],
+  "cleanup": {
+    "checkedAt": "2026-10-18T18:52:46.227Z",
+    "ownedProcessesRemaining": 0,
+    "ownedProcessQueryScope": "Node/cmd processes with exact new external fixture/worktree prefix; process metadata only",
+    "emptySyntheticMcpDirectoriesRetained": true
+  },
+  "scope": {
+    "mainCheckoutTouched": false,
+    "rootTrackedFilesTouched": false,
+    "livePortsUsed": false,
+    "convexUsed": false,
+    "providerOrInternetRequestsInitiated": false,
+    "pushOrDeployment": false
+  },
+  "limitations": [
+    "The original CI reset did not reproduce locally; its exact socket cause remains unknown.",
+    "This is test transport hardening, not proof of a production task-state bug.",
+    "Original candidate, failed CI, native builds and acceptance proofs remain separate immutable evidence.",
+    "Final source/refreeze, full CI and artifact publication decisions belong to the root."
+  ]
+}

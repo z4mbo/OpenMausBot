@@ -352,4 +352,6 @@ The [flat dialog follow-up](origin-flat-dialogs.md) records pending confirmation
 
 The [Origin CI recovery record](origin-ci-recovery.md) tracks the deterministic Sidebar size-guard failure and the matching-source release verification that follows its correction.
 
+The [comms fixture HTTP isolation record](origin-comms-transport-032.md) preserves the Windows connection-reset investigation, real loopback red/green regression and unchanged delegation assertions.
+
 The [cross-drive Vite fixture record](origin-vite-private-files.md) explains the Windows raw-file regression, strict HTTP denial checks and isolated cleanup proof.
