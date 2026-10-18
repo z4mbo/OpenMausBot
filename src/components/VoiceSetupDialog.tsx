@@ -98,7 +98,6 @@ export function VoiceSetupDialog({
       style={glassPopupFrameStyle()}
       onMouseDown={(event) => event.target === event.currentTarget && close()}
     >
-      {/* A sibling, not the parent: a backdrop-filter on an ancestor would stop the pop-up's own glass from seeing the app behind it. */}
       <div aria-hidden="true" className="glass-scrim pointer-events-none absolute inset-0" />
       <div
         ref={dialogRef}
@@ -108,7 +107,7 @@ export function VoiceSetupDialog({
         aria-describedby={subtitleId}
         tabIndex={-1}
         data-voice-setup-dialog={bot.id}
-        className="glass-surface animate-pop-in relative flex max-h-full w-[min(560px,100%)] flex-col overflow-hidden rounded-[24px] outline-none"
+        className="ui-panel animate-pop-in relative flex max-h-full w-[min(560px,100%)] flex-col overflow-hidden outline-none"
       >
         <header className="flex items-start justify-between gap-4 px-6 pb-4 pt-6 sm:px-7">
           <div className="flex min-w-0 items-center gap-3.5">

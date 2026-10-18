@@ -64,6 +64,7 @@ Use only mapped, tested commands:
 - [Chat widgets: prompts to try with a real bot](widget-prompts.md)
 - [Phone web app installation and safe areas](phone-web-app.md)
 - [Welcome flow and guided tour](onboarding.md)
+- [Shared flat popup and sidebar menu surfaces](origin-flat-popups.md)
 - [Sidebar account and computer controls](sidebar-header-fit.md) ([retained evidence](evidence/origin-header-fit-029/report.json))
 - [Sidebar footer containment and keyboard access](sidebar-footer-fit.md)
 - [Origin 0.2.9 held-candidate verification](origin-candidate-029.md)

@@ -308,8 +308,8 @@ export function SidebarPopoverMenu({
   const openItem = submenu ? items.find((item) => item.key === submenu) : undefined;
   const roomy = anchored;
   const sheetClass = cn(
-    "overflow-hidden border border-hairline/50 bg-menu shadow-2xl shadow-black/50",
-    roomy ? "rounded-2xl p-1.5" : "rounded-xl py-1.5",
+    "ui-panel overflow-hidden bg-menu",
+    roomy ? "p-1.5" : "py-1.5",
   );
 
   const sheet = motion.shown && (
