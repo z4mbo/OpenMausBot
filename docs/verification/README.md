@@ -80,6 +80,7 @@ Use only mapped, tested commands:
 - [Origin 0.2.11 source and delivery acceptance](origin-candidate-031.md) ([delivery receipt](evidence/origin-delivery-031/delivery-receipt.json))
 - [Origin 0.2.13 integration batch and acceptance boundary](origin-candidate-034.md)
 - [Held Origin 0.2.12 replacement candidate, cycle 033](origin-candidate-033.md)
+- [Provider-error handoff CI isolation](origin-ci-provider-error.md)
 - [Origin 0.2.12 held 032 freeze and failed-CI record](origin-candidate-032.md)
 - [Public signup policy loading and bounded recovery](origin-signup-policy.md)
 - [Origin 0.2.9 held-candidate verification](origin-candidate-029.md)
