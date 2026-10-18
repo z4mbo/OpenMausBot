@@ -15,6 +15,8 @@ The user reconfirmed production delivery after verification on 2026-10-18 and ad
 
 After the user cleared the legacy tracker, the goal was recreated as active on 2026-10-18 with this production-delivery scope, including public invitation links, centralized email delivery, acceptance recovery, matching platform releases and the isolation rules above. The obsolete `without deploying` objective is superseded.
 
+The next unpublished cycle also includes the user's 2026-10-18 sidebar and project requirements: account immediately before Search, a full-width computer selector below, Draft first in every project, and Draft as the default for task creation unless a person explicitly chooses another column. Repair existing boards without moving or deleting their tasks. Inspect the residual workspace dropdown reported after workspace deletion, including reserved local section names, name reuse and cloud synchronization; preserve unrelated projects and shared workspace data.
+
 ## Required outcome
 
 - Inspect the complete monorepo, including concurrent main-checkout changes read-only, with specialist agents working in waves.
