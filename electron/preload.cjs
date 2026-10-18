@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
 // Sandboxed preloads get Electron's restricted `require`, which cannot load sibling CommonJS files.
 const desktopRemoteClient = process.argv.includes("--openmausbot-remote-client");
+const vendorCloudEnabled = !desktopRemoteClient && process.argv.includes("--omb-company-desktop=1") && process.argv.includes("--omb-vendor-cloud=1");
 
 let pendingPackageInstallUrl = null;
 const packageInstallListeners = new Set();
@@ -265,7 +266,7 @@ const bridge = {
       return () => ipcRenderer.removeListener("workspaces:open-settings", handler);
     },
   },
-  cloudAccount: process.argv.includes("--omb-company-desktop=1") ? {
+  cloudAccount: vendorCloudEnabled ? {
     state: () => ipcRenderer.invoke("cloud-account:state"),
     begin: () => ipcRenderer.invoke("cloud-account:begin"),
     signInAgain: () => ipcRenderer.invoke("cloud-account:signInAgain"),
@@ -320,10 +321,10 @@ const bridge = {
       return () => ipcRenderer.removeListener("cloud-move:state-changed", handler);
     },
   } : undefined,
-  cloudLending: process.argv.includes("--omb-company-desktop=1") ? {
+  cloudLending: vendorCloudEnabled ? {
     open: () => ipcRenderer.invoke("cloud-lending:open"),
   } : undefined,
-  cloudPlan: process.argv.includes("--omb-company-desktop=1") ? {
+  cloudPlan: vendorCloudEnabled ? {
     state: () => ipcRenderer.invoke("cloud-plan:state"),
     manage: () => isLocalPage || navigator.userActivation?.isActive === true
       ? ipcRenderer.invoke("cloud-plan:manage") : Promise.reject(new Error("Choose Manage to open your Plan page.")),
