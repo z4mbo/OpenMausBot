@@ -35,6 +35,10 @@ vi.mock("./DesktopCapabilities", async () => {
   return { useDesktopCapabilities: () => ({ capabilities: initialDesktopCapabilities() }) };
 });
 vi.mock("@/lib/thread-preferences", () => ({ useShowThreads: () => fixture.showThreads }));
+vi.mock("@/hooks/use-modal-dialog", () => ({
+  useModalDialog: (_ref: unknown, onClose: () => void) => ({ dismiss: onClose }),
+  ModalFocusScope: ({ children }: { children: ReactNode }) => children,
+}));
 vi.mock("@/lib/origin-cloud", async (original) => ({
   ...await original<typeof import("@/lib/origin-cloud")>(),
   useCloudQuery: () => undefined,

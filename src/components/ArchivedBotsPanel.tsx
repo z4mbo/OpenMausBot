@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { Loader2, Trash2, X } from "lucide-react";
 import { api, openBot, useStore, type Bot } from "@/state/store";
@@ -7,6 +7,7 @@ import { useShowThreads } from "@/lib/thread-preferences";
 import { BotAvatar } from "./Avatar";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { archivedDeleteAllCopy, botConfirmCopy } from "./bot-confirm-copy";
+import { ModalFocusScope, useModalDialog } from "@/hooks/use-modal-dialog";
 
 export function ArchivedBotRow({
   bot,
@@ -58,10 +59,12 @@ export function ArchivedBotsPanel({
   bots,
   onClose,
   onRestored,
+  returnFocusRef,
 }: {
   bots: Bot[];
   onClose: () => void;
   onRestored: (message: string) => void;
+  returnFocusRef?: RefObject<HTMLElement | null>;
 }) {
   const { state, dispatch } = useStore();
   const showThreads = useShowThreads();
@@ -72,19 +75,12 @@ export function ArchivedBotsPanel({
   const [error, setError] = useState("");
   const deleting = bots.some((bot) => Boolean(state.deletingBots[bot.id]));
   const locked = restoringAll || Boolean(busyId) || deleting || Boolean(pendingDelete);
+  const handoff = useRef(false);
+  const { dismiss } = useModalDialog(dialogRef, onClose, { returnFocusRef, canClose: () => !locked, restoreFocus: () => !handoff.current });
 
   useEffect(() => {
     if (bots.length === 0) onClose();
   }, [bots.length, onClose]);
-
-  useEffect(() => {
-    dialogRef.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !locked) onClose();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [locked, onClose]);
 
   const restore = async (bot: Bot) => {
     setBusyId(bot.id);
@@ -95,6 +91,7 @@ export function ArchivedBotsPanel({
         body: JSON.stringify({ hidden: false }),
       });
       dispatch({ type: "botPatched", bot: response.bot });
+      if (bots.length === 1) handoff.current = true;
       openBot(dispatch, response.bot, showThreads);
       onRestored(t("sidebar.archived.restored", { name: bot.name }));
       if (bots.length === 1) onClose();
@@ -119,6 +116,7 @@ export function ArchivedBotsPanel({
       );
       for (const response of responses) dispatch({ type: "botPatched", bot: response.bot });
       const first = responses[0]?.bot;
+      handoff.current = true;
       if (first) openBot(dispatch, first, showThreads);
       onRestored(
         bots.length === 1
@@ -136,8 +134,9 @@ export function ArchivedBotsPanel({
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-[2px] sm:p-6"
-      onMouseDown={(event) => event.target === event.currentTarget && !locked && onClose()}
+      onMouseDown={(event) => event.target === event.currentTarget && dismiss()}
     >
+      <ModalFocusScope panelRef={dialogRef}>
       <div
         ref={dialogRef}
         role="dialog"
@@ -174,7 +173,7 @@ export function ArchivedBotsPanel({
               </button>
             )}
             <button
-              onClick={onClose}
+              onClick={dismiss}
               disabled={locked}
               className="flex size-10 items-center justify-center rounded-lg text-ink-secondary hover:bg-raised hover:text-ink disabled:opacity-40"
               aria-label={t("sidebar.archived.close")}
@@ -202,6 +201,7 @@ export function ArchivedBotsPanel({
         </div>
       </div>
       <ConfirmDialog
+        returnFocusRef={dialogRef}
         open={pendingDelete !== null}
         {...(pendingDelete === "all"
           ? archivedDeleteAllCopy()
@@ -219,6 +219,7 @@ export function ArchivedBotsPanel({
           dispatch({ type: "deleteBot", botId: target.id });
         }}
       />
+      </ModalFocusScope>
     </div>,
     document.body,
   );

@@ -2481,6 +2481,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
       )}
       {!remoteClient && archivedBotsOpen && (
         <ArchivedBotsPanel
+          returnFocusRef={importReturnRef}
           bots={archivedBots}
           onClose={() => setArchivedBotsOpen(false)}
           onRestored={(message) => setTeamFeedback({ error: false, text: message })}

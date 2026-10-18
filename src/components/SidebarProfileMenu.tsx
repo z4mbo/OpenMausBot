@@ -354,7 +354,7 @@ export function SidebarProfileMenu({ iconOnly = false, compact = false, placemen
   const update = desktopUpdate ?? serverUpdate;
   const [aboutOpen, setAboutOpen] = useState(false);
   const [phoneAppOpen, setPhoneAppOpen] = useState(false);
-  const triggerRef = useRef<HTMLSpanElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const profile = state.config?.profile;
   const name = profileLabel(profile);
@@ -375,7 +375,7 @@ export function SidebarProfileMenu({ iconOnly = false, compact = false, placemen
     onUsage: () => dispatch({ type: "toggleAppSettings", open: true, section: "usage" }),
     onSettings: () => dispatch({ type: "toggleAppSettings" }),
     onShortcuts: () => {
-      triggerRef.current?.closest("button")?.focus();
+      triggerRef.current?.focus();
       dispatch({ type: "toggleShortcuts", open: true });
     },
     onAbout: () => setAboutOpen(true),
@@ -389,6 +389,7 @@ export function SidebarProfileMenu({ iconOnly = false, compact = false, placemen
   return (
     <>
       <SidebarPopoverMenu
+        triggerRef={triggerRef}
         items={items}
         ariaLabel={signedIn?.label ?? name}
         placement={placement}
@@ -396,7 +397,6 @@ export function SidebarProfileMenu({ iconOnly = false, compact = false, placemen
         triggerTitle={iconOnly && !signedIn ? name : undefined}
         renderTrigger={({ open }) => signedIn ? signedIn.renderTrigger({ open }) : iconOnly ? (
           <span
-            ref={triggerRef}
             className={cn(
               "relative flex items-center justify-center transition-colors",
               compact ? "size-8 rounded-md" : "size-[46px] rounded-xl",
@@ -416,7 +416,6 @@ export function SidebarProfileMenu({ iconOnly = false, compact = false, placemen
           </span>
         ) : (
           <span
-            ref={triggerRef}
             className={cn(
               "flex min-h-[46px] w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors",
               open ? "bg-raised" : "hover:bg-raised/50",
@@ -439,9 +438,10 @@ export function SidebarProfileMenu({ iconOnly = false, compact = false, placemen
           </span>
         )}
       />
-      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} returnFocusRef={triggerRef} />
       <PhoneAppDialog
         open={phoneAppOpen}
+        returnFocusRef={triggerRef}
         onClose={() => setPhoneAppOpen(false)}
         connect={destinations.map((destination) => ({
           key: destination.id,

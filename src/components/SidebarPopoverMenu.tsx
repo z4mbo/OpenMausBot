@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -161,6 +161,7 @@ export function SidebarPopoverMenu({
   triggerClassName = "w-full",
   triggerTitle,
   renderTrigger,
+  triggerRef: suppliedTriggerRef,
 }: {
   placement?: "above" | "below";
   items: SidebarMenuItem[];
@@ -169,6 +170,7 @@ export function SidebarPopoverMenu({
   triggerClassName?: string;
   triggerTitle?: string;
   renderTrigger: (state: { open: boolean }) => React.ReactNode;
+  triggerRef?: RefObject<HTMLButtonElement | null>;
 }) {
   const [open, setOpen] = useState(false);
   const [pinned, setPinned] = useState(false);
@@ -176,7 +178,8 @@ export function SidebarPopoverMenu({
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
   const [subPosition, setSubPosition] = useState<{ left: number; top: number } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const ownTriggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = suppliedTriggerRef ?? ownTriggerRef;
   const menuRef = useRef<HTMLDivElement>(null);
   const subRef = useRef<HTMLDivElement>(null);
   const subRowRef = useRef<HTMLElement | null>(null);
