@@ -60,7 +60,7 @@ describe("createLiveSession", () => {
     await createLiveSession({ key: "k", sdp: OFFER, bot: BOT, history: [], cloudHome: true, fetchImpl });
     await createLiveSession({ key: "k", sdp: OFFER, bot: BOT, history: [], cloudHome: false, fetchImpl });
     const [cloud, computer] = fetchImpl.mock.calls.map(([, init]) => JSON.parse(String(init?.body)).session.instructions as string);
-    expect(cloud).toContain("runs on the user's My Cloud, their always-on OpenMausBot in the cloud, not on their own computer.");
+    expect(cloud).toContain("runs on the user's My Cloud, their always-on Origin in the cloud, not on their own computer.");
     expect(computer).toContain("runs in Origin on the user's own computer.");
     expect(computer).not.toContain("My Cloud");
   });
@@ -149,7 +149,7 @@ describe("live startup context", () => {
   it("on a Cloud, says the voice runs on the user's My Cloud, not their own computer", () => {
     const text = liveInstructions({ name: "Rigel", title: "QA" }, { cloudHome: true });
     expect(text.split("\n")[0]).toBe(`You are Rigel, QA, an AI agent that runs on ${CLOUD_HOME_PLACE}.`);
-    expect(text.split("\n")[0]).toBe("You are Rigel, QA, an AI agent that runs on the user's My Cloud, their always-on OpenMausBot in the cloud, not on their own computer.");
+    expect(text.split("\n")[0]).toBe("You are Rigel, QA, an AI agent that runs on the user's My Cloud, their always-on Origin in the cloud, not on their own computer.");
     expect(text).not.toContain("OMB");
     expect(liveInstructions({ name: "Rigel" }, { cloudHome: false }).split("\n")[0]).toBe("You are Rigel, an AI agent that runs in Origin on the user's own computer.");
   });

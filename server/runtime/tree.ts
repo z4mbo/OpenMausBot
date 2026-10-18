@@ -5,6 +5,7 @@ import { terminal, type Assignment, type Owner, type TurnEvidence } from "./type
 export const CUT_TWICE = "Interrupted by another Origin restart after resuming once; not resumed again. Some of its steps may already have taken effect.";
 
 export const INTERRUPTED_OUTWARD = "Interrupted by an Origin restart after it already";
+const OUTWARD_INTERRUPTION_PREFIXES = [INTERRUPTED_OUTWARD, "Interrupted by an OpenMausBot restart after it already"];
 
 const OUTWARD_SHOWN = 4;
 const OUTWARD_LABEL_MAX = 48;
@@ -33,7 +34,7 @@ export function outwardDetail(labels: readonly string[]): string {
 }
 
 export const outwardInterrupted = (a: Assignment): boolean =>
-  a.outcome === "interrupted" && (a.outcomeDetail?.startsWith(INTERRUPTED_OUTWARD) ?? false);
+  a.outcome === "interrupted" && OUTWARD_INTERRUPTION_PREFIXES.some(prefix => a.outcomeDetail?.startsWith(prefix));
 
 export const NO_PROGRESS_STRIKES = 2;
 export const SAME_ERROR_STRIKES = 3;
