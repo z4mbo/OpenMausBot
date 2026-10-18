@@ -473,13 +473,8 @@ export function deletePlan(input: { registry: FleetRegistry; slug: string; keepD
   };
 }
 
-export function upgradePlan(input: { registry: FleetRegistry }): FleetStep[] {
-  const running = Object.values(input.registry.workspaces).filter((workspace) => workspace.status === "running").sort((a, b) => a.slug.localeCompare(b.slug));
-  return [
-    { kind: "run", argv: ["npm", "install", "-g", "openmausbot@latest"], why: "install the release every workspace runs from" },
-    ...running.map((workspace) => ({ kind: "run" as const, argv: ["systemctl", "restart", `openmausbot@${workspace.slug}.service`], why: `restart ${workspace.slug} on the new release` })),
-    ...running.map((workspace) => ({ kind: "health" as const, url: `http://127.0.0.1:${workspace.port}/api/health`, why: `wait for ${workspace.slug}` })),
-  ];
+export function upgradePlan(_input: { registry: FleetRegistry }): FleetStep[] {
+  throw new Error("Automatic fleet upgrades are unavailable for Origin. Update the Origin checkout used by the service template, then restart and verify each workspace using docs/self-hosting.md#updating. No package install or service restart was performed.");
 }
 
 /** The same shape `openmausbot access` writes; the server reads it live. */

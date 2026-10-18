@@ -41,6 +41,22 @@ const registryFile = "/etc/openmausbot/fleet.json";
 const withRegistry = (workspaces = {}) => ({ [registryFile]: JSON.stringify({ ...emptyRegistry("agentada.cc"), workspaces }) });
 
 describe("openmausbot fleet", () => {
+  it.each([
+    { root: true, dryRun: false },
+    { root: false, dryRun: false },
+    { root: true, dryRun: true },
+  ])("refuses automatic Origin fleet upgrades before mutation (%j)", async ({ root, dryRun }) => {
+    const initialFiles = withRegistry({ acme: { slug: "acme", host: "acme.agentada.cc", port: 8810, webhookPort: 8811, status: "running", createdAt: "" } });
+    const m = machine({ root, files: initialFiles });
+    const output = io();
+    const result = await runFleetCommand({ ...base, action: "upgrade", dryRun }, output.io, m.deps);
+    expect(result, JSON.stringify({ calls: m.calls, out: output.out, err: output.err })).toBe(2);
+    expect(m.calls).toEqual([]);
+    expect(Object.fromEntries(m.files)).toEqual(initialFiles);
+    expect(output.err.join("\n")).toContain("Automatic fleet upgrades are unavailable for Origin");
+    expect(output.out).toEqual([]);
+  });
+
   it("updates only managed OpenRouter models and rejects missing, malformed or redirected config", async () => {
     const workspace: FleetWorkspace = { slug: "acme", host: "acme.agentada.cc", port: 8810, webhookPort: 8811, status: "running", createdAt: "" };
     const path = "/var/lib/openmausbot/acme/.config/opencode/opencode.json";
