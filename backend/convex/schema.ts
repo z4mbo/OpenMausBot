@@ -88,7 +88,7 @@ export default defineSchema({
     expiresAt: v.number(),
     revoked: v.boolean(),
     createdAt: v.number(),
-  }).index("by_token", ["token"]).index("by_teamId", ["teamId"]),
+  }).index("by_token", ["token"]).index("by_teamId", ["teamId"]).index("by_createdBy_and_createdAt", ["createdBy", "createdAt"]),
 
   teamMembers: defineTable({
     teamId: v.id("teams"),
