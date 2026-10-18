@@ -3,13 +3,14 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.2.8",
+  version: "0.2.9",
   date: "2026-10-18",
-  title: "Invitations that reach your team",
+  title: "Invitations and clearer desktop controls",
   changes: [
     { title: "Public workspace invitations", body: "Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website." },
     { title: "Email invitations", body: "Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days." },
     { title: "Clear join confirmations", body: "A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice." },
+    { title: "Account and computer controls", body: "Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach." },
   ],
 }, {
   version: "0.2.7",
