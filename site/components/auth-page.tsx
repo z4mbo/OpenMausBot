@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { useAction, useMutation, useQuery } from "convex/react";
@@ -19,18 +19,44 @@ const cleanError = (error: unknown) => error instanceof Error
 
 export function AuthPage({ mode, inviteToken }: { mode: Mode; inviteToken?: string }) {
   const session = useOriginSession();
-  const invitation = useQuery(api.workspaces.invitePreview, inviteToken ? { token: inviteToken } : "skip");
-  let body: ReactNode;
-  if (session.loading || (inviteToken && invitation === undefined)) body = <div className={st.loading} role="status"><Loader2 className={st.spin} size={20} /><span className={st.visuallyHidden}>Loading</span></div>;
-  else if (inviteToken && invitation === null) body = <Unavailable />;
-  else if (inviteToken && invitation && session.user && session.token) body = <JoinWorkspace token={session.token} inviteToken={inviteToken} name={invitation.name} email={session.user.email} onSignOut={session.signOut} />;
-  else if (session.user && session.token) body = <Account token={session.token} name={session.user.name} email={session.user.email} onSignOut={session.signOut} />;
-  else body = <AuthForm initialMode={mode} inviteToken={inviteToken} invitation={invitation ?? undefined} onSession={session.save} />;
+  const scope = JSON.stringify([inviteToken, session.token, session.user?._id, session.user?.email]);
   return (
     <SiteFrame signedIn={Boolean(session.user)} minimal>
-      <main id="main" className={st.main}>{body}</main>
+      <main id="main" className={st.main}><AuthFlow key={scope} mode={mode} inviteToken={inviteToken} session={session} /></main>
     </SiteFrame>
   );
+}
+
+function AuthFlow({ mode, inviteToken, session }: { mode: Mode; inviteToken?: string; session: ReturnType<typeof useOriginSession> }) {
+  const invitation = useQuery(api.workspaces.invitePreview, inviteToken ? { token: inviteToken } : "skip");
+  const accept = useMutation(api.workspaces.acceptInvite);
+  const accepting = useRef(false);
+  const [acceptance, setAcceptance] = useState<{ name: string; status: "joining" | "joined" } | null>(null);
+  const [error, setError] = useState("");
+  const join = async () => {
+    if (accepting.current || !inviteToken || !invitation || !session.token) return;
+    accepting.current = true;
+    const name = invitation.name;
+    setAcceptance({ name, status: "joining" });
+    setError("");
+    try {
+      await accept({ sessionToken: session.token, token: inviteToken });
+      setAcceptance({ name, status: "joined" });
+    } catch (cause) {
+      setAcceptance(null);
+      setError(cleanError(cause));
+    } finally {
+      accepting.current = false;
+    }
+  };
+  const activeInvitation = acceptance ?? invitation;
+  let body: ReactNode;
+  if (session.loading || (inviteToken && invitation === undefined && !acceptance)) body = <div className={st.loading} role="status"><Loader2 className={st.spin} size={20} /><span className={st.visuallyHidden}>Loading</span></div>;
+  else if (inviteToken && activeInvitation && session.user && session.token) body = <JoinWorkspace name={activeInvitation.name} email={session.user.email} busy={acceptance?.status === "joining"} joined={acceptance?.status === "joined"} error={error} onJoin={() => void join()} onSignOut={session.signOut} />;
+  else if (inviteToken && invitation === null) body = <Unavailable />;
+  else if (session.user && session.token) body = <Account token={session.token} name={session.user.name} email={session.user.email} onSignOut={session.signOut} />;
+  else body = <AuthForm initialMode={mode} inviteToken={inviteToken} invitation={invitation ?? undefined} onSession={session.save} />;
+  return body;
 }
 
 function Card({ title, subtitle, icon, children }: { title: string; subtitle?: ReactNode; icon?: ReactNode; children: ReactNode }) {
@@ -152,11 +178,7 @@ function SignOut({ onSignOut }: { onSignOut(): Promise<void> }) {
   return <button type="button" className={st.quiet} onClick={() => void onSignOut()}><LogOut size={15} />Sign out</button>;
 }
 
-function JoinWorkspace({ token, inviteToken, name, email, onSignOut }: { token: string; inviteToken: string; name: string; email: string; onSignOut(): Promise<void> }) {
-  const accept = useMutation(api.workspaces.acceptInvite);
-  const [busy, setBusy] = useState(false);
-  const [joined, setJoined] = useState(false);
-  const [error, setError] = useState("");
+function JoinWorkspace({ name, email, busy, joined, error, onJoin, onSignOut }: { name: string; email: string; busy: boolean; joined: boolean; error: string; onJoin(): void; onSignOut(): Promise<void> }) {
   if (joined) {
     return (
       <div className={st.stack}>
@@ -167,15 +189,10 @@ function JoinWorkspace({ token, inviteToken, name, email, onSignOut }: { token: 
       </div>
     );
   }
-  const join = async () => {
-    setBusy(true);
-    setError("");
-    try { await accept({ sessionToken: token, token: inviteToken }); setJoined(true); } catch (cause) { setError(cleanError(cause)); } finally { setBusy(false); }
-  };
   return (
     <Card title={`Join ${name}`} subtitle={<>Signed in as <strong>{email}</strong></>} icon={<span className={st.badge}><UsersRound size={22} /></span>}>
       {error && <p role="alert" className={st.error}>{error}</p>}
-      <button type="button" className={st.primary} disabled={busy} onClick={() => void join()}>
+      <button type="button" className={st.primary} disabled={busy} onClick={onJoin}>
         {busy ? <Loader2 className={st.spin} size={16} aria-label="Joining" /> : <>Join workspace<ArrowRight size={16} /></>}
       </button>
       <p className={st.switch}>Not you? <button type="button" onClick={() => void onSignOut()}>Use another account</button></p>
