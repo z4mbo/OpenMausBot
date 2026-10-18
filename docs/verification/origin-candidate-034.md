@@ -6,6 +6,14 @@ held signup/logging/project-list work. Public 0.2.11 remains the last verified
 delivery. Neither the earlier 0.2.12 builds nor a source commit establishes
 publication of this batch.
 
+The initial 0.2.13 freeze at `f44ebe30a9568ed634b9eb8a45476f42e4c059b1`
+also failed CI. Its private draft, original annotated tag, native artifacts,
+website image and staging bytes are retained under
+`origin-candidate-v0.2.13-f44ebe30`. No publication was attempted. The
+[CI follow-up](origin-ci-followup-034.md) records the terminal run and the
+three logical corrections; replacement source-bound checks and artifacts are
+required before this version can ship.
+
 The [033 source](origin-candidate-033.md) was frozen at
 `87ff77be5ea79272175219d479b9a8017b4e8fcc`. Its exact-source CI run
 [39166463163](https://github.com/z4mbo/Origin/actions/runs/39166463163) was still
@@ -43,6 +51,7 @@ HTTP connection-reset failure; neither failed run is described as green.
 | P1: optional fleet upgrade executes the upstream npm install as root before restarting Origin services | `5821d0c0a` | [Four red-before regressions and executor recording](origin-cli-distribution.md); planning refuses before a mutation |
 | P2: CLI setup and service recovery instructions launch the upstream package | `256509b8f` | Same report: six red-before cases, 189 selected passes and five existing platform skips |
 | P2: optional Sentinel scheduling chooses an installed upstream app instead of Origin | `ec60e5a8a` | Same report: four red-before cases, 26 selected passes and one existing skip; native scheduling is separate |
+| P2: the initial branding candidate skips an unavailable uppercase legacy computer descriptor on case-sensitive filesystems and mounts an older connection | `a9134c95b` | [Unmocked Linux filesystem before/after and priority controls](origin-ci-followup-034.md); the current Origin descriptor remains authoritative |
 
 The user's one-row footer preference is implemented by `27ab9b426`. Its existing
 39 focused checks pass. The [finite browser matrix](sidebar-footer-single-row.md)
@@ -55,6 +64,15 @@ neither candidate-only regression reached production. The
 HTTP 429 from unrelated MCP initialization. This reproduces the timeout mechanism,
 not the unobserved timing of the original GitHub runner. The integrated Live-call
 and full Comms files passed all 53 cases. Fresh CI is still required.
+
+The initial 0.2.13 CI run completed all 24 jobs with 19 successes, four failures
+and one intentional broker skip. Eight distinct assertions failed across three
+platform shards: four stale product-copy expectations, three stale catalog
+digest expectations and the Linux descriptor regression above. Test-only
+commits `c2026a75e` and `ec3c964cf` retain the refusal, PWA, wire hash, tool,
+schema and permission checks. The six affected files pass 104 cases locally,
+with five platform skips; the real Linux descriptor probe passes six
+comparisons. These results do not turn the original failed CI green.
 
 The [landing image](origin-landing-capture.md) now comes from one real 0.2.13
 renderer frame with the requested footer. Its seven product-module blobs match
@@ -77,10 +95,14 @@ Both TypeScript checks, full lint, locale validation and 43
 release/documentation guards passed; current website tests passed 25 cases and
 integrated Live/Comms passed 53. The raw successful UI log includes refused
 loopback-port-3000 diagnostics; its terminal footer and process exit are green.
-Fresh
-source-bound CI, Windows/Mac builds,
-artifact/feed validation, private website acceptance and public delivery remain
-pending. No new backend deployment is required merely by changing the desktop
+Replacement source-bound CI, Windows/Mac builds, artifact/feed validation and
+public delivery remain pending. The original private compiled website has
+16 qualified visual cases. All 1,350 client/shared acceptance bindings and all
+151 website inputs remain equivalent at product checkpoint `ec3c964cf`;
+the original reports retain their original sources and timestamps. Reuse is
+input equivalence, not a new full test or browser run. A rebuilt image and its
+eventual public routes still need their own release evidence. No new backend
+deployment is required merely by changing the desktop
 version. The [backend closure comparison](origin-backend-reuse-034.md) records
 100 bindings at `ec60e5a8a`, equal to deployed 0.2.11 apart from the root version.
 All 100 bindings were also carried forward unchanged at the local reporting

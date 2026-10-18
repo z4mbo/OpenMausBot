@@ -1,0 +1,129 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ ✓ server/control-omb.test.ts > control-omb command mapping > treats unhealthy doctor and non-settled waits as command failures 1ms
+ ✓ server/control-omb.test.ts > control-omb command mapping > keeps every ui verb off discovery: the launch handle is required, whatever the environment says 3ms
+ ✓ server/control-omb.test.ts > control-omb command mapping > refuses a handle whose launch has already been stopped 10ms
+ ✓ server/control-omb.test.ts > control-omb command mapping > finds the newest Chrome for Testing that agent-browser install unpacked 4ms
+ ✓ server/control-omb.test.ts > control-omb command mapping > runs directly under Node's strip-only TypeScript loader 988ms
+ ✓ server/control-omb.test.ts > control-omb command mapping > composes doctor from the shared health and model tools 64ms
+ ✓ server/control-omb.test.ts > control-omb command mapping > rejects an available engine when the endpoint is not OpenMausBot 2ms
+ × server/control-omb.test.ts > control-omb command mapping > refuses to mutate a silently discovered live app 5ms
+   → expected Error: mutating commands require an expli… { …(2) } to match object { Object (message) }
+(2 matching properties omitted from actual)
+ ✓ server/control-omb.test.ts > control-omb command mapping > maps bounded reads and dry-run actions without reimplementing them 1ms
+ ✓ server/control-omb.test.ts > control-omb command mapping > maps the rewind that makes the harness rebuild instead of resume 0ms
+ × server/control-omb.test.ts > control-omb command mapping > treats edit as mutating, so it cannot reach a silently discovered app 1ms
+   → expected Error: mutating commands require an expli… { …(2) } to match object { Object (message) }
+(2 matching properties omitted from actual)
+ ✓ server/control-omb.test.ts > control-omb command mapping > requires every part of an edit before calling the shared tool 0ms
+ ✓ server/control-omb.test.ts > control-omb command mapping > rejects invalid bounds before the shared tool is called 0ms
+ × server/control-omb.test.ts > control-omb command mapping > forwards pinned task IDs for sends, reads, waits, interrupts, and model changes 2ms
+   → expected [Function] to throw error including 'explicit OpenMausBot instance' but got 'mutating commands require an explicit…'
+ ✓ server/control-omb.test.ts > control-omb isolated verification loop > rejects an unsafe live VM fixture endpoint: tcp://127.0.0.1:2375 0ms
+ ✓ server/control-omb.test.ts > control-omb isolated verification loop > rejects an unsafe live VM fixture endpoint: ssh://user@production.example/run/podman.sock 0ms
+ ✓ server/control-omb.test.ts > control-omb isolated verification loop > rejects an unsafe live VM fixture endpoint: ssh://user:secret@127.0.0.1/run/podman.sock 0ms
+ ✓ server/control-omb.test.ts > control-omb isolated verification loop > launches, drives a real fake-engine turn, and removes only its test data 17531ms
+ ✓ server/control-omb.test.ts > control-omb isolated verification loop > allows slow starter reads and renames within the fixture launch deadline 4031ms
+ ✓ server/control-omb.test.ts > control-omb isolated verification loop > scripts the fake engine's tool calls from the launcher's environment 2485ms
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ × scripts/testing/web-app-assets.test.ts > phone web app installation assets > links a standalone manifest whose start URL never includes pairing credentials 7ms
+   → expected 'Origin' to be 'OpenMausBot' // Object.is equality
+ ✓ scripts/testing/web-app-assets.test.ts > phone web app installation assets > offers Safari a correctly sized touch icon and a safe-area viewport 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/control-omb.test.ts > control-omb command mapping > refuses to mutate a silently discovered live app
+AssertionError: expected Error: mutating commands require an expli… { …(2) } to match object { Object (message) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "message": "mutating commands require an explicit OpenMausBot instance",
++ HeadlessError {
++   "message": "mutating commands require an explicit Origin instance",
++   "exitCode": 2,
++   "hint": "start `control-omb launch`, then pass its URL with --url",
+  }
+
+ ❯ server/control-omb.test.ts:134:7
+    132|       callTool: vi.fn() as any,
+    133|       env: {},
+    134|     })).rejects.toMatchObject({
+       |       ^
+    135|       message: "mutating commands require an explicit OpenMausBot inst…
+    136|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  server/control-omb.test.ts > control-omb command mapping > treats edit as mutating, so it cannot reach a silently discovered app
+AssertionError: expected Error: mutating commands require an expli… { …(2) } to match object { Object (message) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "message": "mutating commands require an explicit OpenMausBot instance",
++ HeadlessError {
++   "message": "mutating commands require an explicit Origin instance",
++   "exitCode": 2,
++   "hint": "start `control-omb launch`, then pass its URL with --url",
+  }
+
+ ❯ server/control-omb.test.ts:186:7
+    184|       callTool: vi.fn() as any,
+    185|       env: {},
+    186|     })).rejects.toMatchObject({
+       |       ^
+    187|       message: "mutating commands require an explicit OpenMausBot inst…
+    188|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  server/control-omb.test.ts > control-omb command mapping > forwards pinned task IDs for sends, reads, waits, interrupts, and model changes
+AssertionError: expected [Function] to throw error including 'explicit OpenMausBot instance' but got 'mutating commands require an explicit…'
+
+Expected: "explicit OpenMausBot instance"
+Received: "mutating commands require an explicit Origin instance"
+
+ ❯ server/control-omb.test.ts:233:7
+    231|     await expect(runControlOmb(["set-model", "--bot", "bot-1", "--inst…
+    232|       callTool: callTool as any, env: {},
+    233|     })).rejects.toThrow("explicit OpenMausBot instance");
+       |       ^
+    234|   });
+    235| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  scripts/testing/web-app-assets.test.ts > phone web app installation assets > links a standalone manifest whose start URL never includes pairing credentials
+AssertionError: expected 'Origin' to be 'OpenMausBot' // Object.is equality
+
+Expected: "OpenMausBot"
+Received: "Origin"
+
+ ❯ scripts/testing/web-app-assets.test.ts:16:27
+     14|     expect(href).toBeDefined();
+     15|     const manifest = JSON.parse(readFileSync(fileURLToPath(new URL(`pu…
+     16|     expect(manifest.name).toBe("OpenMausBot");
+       |                           ^
+     17|     expect(manifest.display).toBe("standalone");
+     18|     const origin = "https://workspace.example.test";
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 18 passed (22)
+   Start at  00:53:59
+   Duration  34.91s (transform 1.21s, setup 1.85s, import 7.21s, tests 25.14s, environment 0ms)
+
+JSON report written to C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin/.omb-scratch/branding-ci-034-before.json

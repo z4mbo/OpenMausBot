@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix
+
+
+ Test Files  6 passed (6)
+      Tests  104 passed | 5 skipped (109)
+   Start at  00:57:21
+   Duration  23.04s (transform 774ms, setup 977ms, import 1.71s, tests 19.53s, environment 0ms)
+
