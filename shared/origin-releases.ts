@@ -3,9 +3,9 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.2.5",
+  version: "0.2.6",
   date: "2026-10-18",
-  title: "A safer, more consistent workspace",
+  title: "Safer workspaces and clearer controls",
   changes: [
     { title: "Workspace and project permissions", body: "Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages." },
     { title: "Safer issue mirroring", body: "Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin." },
@@ -15,6 +15,10 @@ export const releases: Release[] = [{
     { title: "Call continuity", body: "An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover." },
     { title: "Recoverable drawings", body: "Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot." },
     { title: "Consistent workspace controls", body: "Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii." },
+    { title: "Keyboard control in dialogs", body: "About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement." },
+    { title: "Readable buttons in every theme", body: "Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings." },
+    { title: "Files loading recovery", body: "Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state." },
+    { title: "Responsive Data queries", body: "Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available." },
     { title: "Chat attachments that fit", body: "Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name." },
     { title: "Recoverable workspace loading", body: "Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page." },
     { title: "Appearance from paired devices", body: "Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings." },
