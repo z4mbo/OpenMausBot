@@ -1,3 +1,13 @@
+# Held 032 freeze of Origin 0.2.12
+
+Frozen source `d09a9202130ef58976aea8ee6c221dc433f97e25` is rejected for publication. [CI 39152274046, attempt 1](https://github.com/z4mbo/Origin/actions/runs/39152274046/attempts/1) completed with failure in Windows shard 3/4: a Comms polling `GET /api/bots` rejected with `ECONNRESET`. The server continued serving later cases; the original socket cause remains unproven. [Fixture transport proof](origin-comms-transport-032.md) records the separate one-shot HTTP correction without retries, assertion changes or a production-runtime finding.
+
+Native `39152247675`, actual downloaded Windows resource checks and private compiled-site/browser checks belong to d09 and do not authorize its replacement. The fifteen-asset private draft `416624096`, old source/tag object, local evidence and private image/context are retained. No 032 client/feed/site/backend/mail publication is claimed. Actual archival/refreeze operations require their own receipts; this document does not assert they have happened.
+
+The public release remains the verified [0.2.11 delivery](origin-delivery.md#0211-delivery). The [replacement 033 candidate](origin-candidate-033.md) has four current shared notes and requires a fresh final source, complete CI/native builds, artifacts, compiled website and public acceptance. The original three-note 032 candidate record below is preserved verbatim as a historical checkpoint; its pending and source statements apply only to that checkpoint.
+
+---
+
 # Origin 0.2.12 candidate
 
 This cycle is unpublished. The current public release remains the verified [0.2.11 delivery](origin-delivery.md#0211-delivery). Version 0.2.12 has three shared release notes; CI, native builds, artifact publication and website promotion require fresh evidence from its final frozen source.

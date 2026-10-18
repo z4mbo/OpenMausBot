@@ -339,3 +339,14 @@ These are **after-only** captures of frozen source `dbdac25fcd014d231e694aa8665d
 | Full app: What's new | [Capture](evidence/origin-delivery-027/app/origin-visible-whats-new-027.png) |
 
 The actual App captures use an isolated synthetic engine/account fixture. About and Get-the-phone-app retain focus through native Tab and Shift+Tab; Escape closes the dialog and returns focus to You. No pairing code, physical phone, native picker or packaged interactive acceptance is inferred. The public four-route browser check and actual delivery facts are recorded separately in the [receipt](evidence/origin-delivery-027/delivery-receipt.json).
+
+## Additional-team project cache, cycle 033
+
+[Corrected proof and limits](origin-team-access-cache.md) · four actual browser frames, two matched light/dark comparisons at 1440 × 1000, reduced motion.
+
+| State / theme | Before | After |
+| --- | --- | --- |
+| Detached project after Chief re-election / light | [Stale project remains](evidence/origin-team-access-cache-033/before-1440-light.png) | [Project removed](evidence/origin-team-access-cache-033/after-1440-light.png) |
+| Detached project after Chief re-election / dark | [Stale project remains](evidence/origin-team-access-cache-033/before-1440-dark.png) | [Project removed](evidence/origin-team-access-cache-033/after-1440-dark.png) |
+
+The real Sidebar and StoreProvider receive actual fixture SSE after owner API handover, with supplied post-sync membership and a simulated native bridge. Full App/OriginSync, authenticated cloud, mobile, packaged Electron and live tools were not accepted. The earlier hidden-panel and full-App fixture attempts remain in the [manifest](evidence/origin-team-access-cache-033/manifest.json). The existing 0.2.12 screenshot footer identifies its frozen baseline package, not a new publication. All older screenshot tables and the original landing capture retain their own source boundaries. See the unpublished [033 delivery boundary](origin-candidate-033.md).
