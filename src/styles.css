@@ -200,8 +200,8 @@
   --code-color-scheme: dark;
   /* ink carried by a filled accent / danger surface (see the rule at the
      bottom of this file, which is what makes them take effect) */
-  --color-accent-ink: #ffffff;
-  --color-danger-ink: #ffffff;
+  --color-accent-ink: var(--origin-dark-filled-ink);
+  --color-danger-ink: var(--origin-dark-filled-ink);
   /* ink carried by the user's own bubble. A hex rather than the ink token so
      the contrast check can measure it; every dark skin repeats its ink here. */
   --color-bubble-user-ink: #fcfcfc;
@@ -211,16 +211,6 @@
   --color-maus-line: #fcfcfc;
 }
 
-/* ── Midnight ──────────────────────────────────────────────────────────────
-   The upstream palette, pixel-sampled from the real Grok app. Repeated here
-   (rather than relying on the `@theme` defaults) so that a `[data-skin]`
-   subtree can switch *back* to it — the picker needs that.
-
-   Two upstream contrast gaps are preserved deliberately, because this skin's
-   job is to be the original: white on the accent fill measures 3.65:1 and
-   white on the danger fill 3.32:1, both short of AA for the 13–15px labels
-   they carry. Atelier and Foundry fix this via --color-accent-ink.
-   ───────────────────────────────────────────────────────────────────────── */
 [data-skin="midnight"] {
   --code-color-scheme: dark;
   --color-app: var(--origin-dark-app);
@@ -240,12 +230,12 @@
   --color-accent: var(--origin-dark-accent);
   --color-accent-border: #459ffe;
   --color-accent-text: var(--origin-dark-accent-text);
-  --color-accent-ink: #ffffff;
+  --color-accent-ink: var(--origin-dark-filled-ink);
   --color-bubble-user: #5a5a5a;
   --color-bubble-user-ink: #fcfcfc;   /* = ink: unchanged */
   --color-success: #38d591;
   --color-danger: #ff5667;
-  --color-danger-ink: #ffffff;
+  --color-danger-ink: var(--origin-dark-filled-ink);
   --color-success-ink: #072114;
   --color-warning: #ff9800;
   --color-scrollbar: #3d3d3d;
@@ -922,11 +912,10 @@ body {
     background: var(--color-accent);
     color: var(--color-accent-ink);
   }
-  .ui-button-primary:enabled:hover,
-  a.ui-button-primary:hover {
+  .ui-button-primary:enabled:is(:hover, :active),
+  a.ui-button-primary:is(:hover, :active) {
     background: var(--color-accent);
     color: var(--color-accent-ink);
-    filter: brightness(1.1);
   }
   /* A pill-shaped action in the transcript: run and conversation chips,
      "load earlier", the failed-turn Retry. Same 28px as `.ui-button-md`. */
@@ -997,12 +986,12 @@ body {
   }
   .ui-menu-row:enabled:hover { background: color-mix(in srgb, var(--color-raised) 70%, transparent); }
   .ui-menu-row:disabled { opacity: 0.6; }
-  .ui-button:enabled:hover,
+  .ui-button:enabled:hover:not(.ui-button-primary),
   .ui-icon-button:enabled:hover {
     background: var(--color-raised-hover);
     color: var(--color-ink);
   }
-  .ui-button:enabled:active,
+  .ui-button:enabled:active:not(.ui-button-primary),
   .ui-icon-button:enabled:active {
     background: var(--color-raised);
   }
@@ -1962,16 +1951,6 @@ html[data-cloud-intent-morph] [data-tour="composer"] { view-transition-name: clo
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Filled accent / danger / success surfaces
-
-   Components hardcode `text-white` on these fills (~20 call sites). That works
-   only as long as every skin's accent is dark enough to carry white — which
-   rules out any skin whose accent is meant to glow. Rather than edit twenty
-   components, the ink is taken from a token here; `text-white` and this rule
-   have equal specificity, and this file is loaded after Tailwind's utilities.
-   Midnight sets the token to #ffffff, so its rendering is unchanged.
-   ───────────────────────────────────────────────────────────────────────── */
 .bg-accent {
   color: var(--color-accent-ink);
 }
@@ -1980,6 +1959,29 @@ html[data-cloud-intent-morph] [data-tour="composer"] { view-transition-name: clo
 }
 .bg-success {
   color: var(--color-success-ink);
+}
+
+:is(button:enabled, a[href]):is(.bg-accent, .ui-button-primary):is(:hover, :active) {
+  background-color: var(--color-accent);
+  color: var(--color-accent-ink);
+  filter: none;
+  opacity: 1;
+}
+
+:is(button:enabled, a[href]).bg-danger:is(:hover, :active) {
+  background-color: var(--color-danger);
+  color: var(--color-danger-ink);
+  filter: none;
+  opacity: 1;
+}
+
+:is(button:enabled, a[href]):is(.bg-accent, .bg-danger, .ui-button-primary):hover:not(:focus-visible) {
+  outline: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  outline-offset: -2px;
+}
+
+:is(button:enabled, a[href]):is(.bg-accent, .bg-danger, .ui-button-primary):active:not(:focus-visible) {
+  outline-offset: -3px;
 }
 /* Same mechanism, one skin deeper: Daylight paints the user's own bubble in
    near-black on a near-white page, and the `text-ink` the composer and the

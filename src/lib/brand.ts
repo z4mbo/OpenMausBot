@@ -1,3 +1,5 @@
+import { filledTextInk } from "./color-contrast";
+
 export interface Brand {
   name: string;
   tagline?: string;
@@ -39,9 +41,7 @@ export function luminance(hex: string): number {
 }
 
 export function accentInk(accent: string): string {
-  // contrast vs white = 1.05 / (L + 0.05); vs black = (L + 0.05) / 0.05
-  const l = luminance(accent);
-  return 1.05 / (l + 0.05) >= (l + 0.05) / 0.05 ? "#ffffff" : "#111111";
+  return HEX.test(accent) ? filledTextInk(accent, "#111111") : "#ffffff";
 }
 
 export function brandVars(b: Brand): Record<string, string> {

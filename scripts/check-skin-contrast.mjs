@@ -130,13 +130,6 @@ const PAIRS = [
 ];
 
 const skins = parseSkins(css);
-// Midnight faithfully keeps two upstream contrast gaps. They may improve, but
-// must not get worse; every other below-target pair is a regression.
-const BASELINE_FLOORS = new Map([
-  ["midnight|--color-accent-ink|--color-accent", 3.65],
-  ["midnight|--color-danger-ink|--color-danger", 3.10],
-]);
-const BASELINE_DRIFT = 0.01;
 
 let failed = false;
 for (const [id, tokens] of skins) {
@@ -170,15 +163,10 @@ for (const [id, tokens] of skins) {
     if (skinFailed) failed = true;
     continue;
   }
-  for (const { fg, bg, ratio } of problems) {
-    const floor = BASELINE_FLOORS.get(`${id}|${fg}|${bg}`);
-    if (floor === undefined || ratio < floor - BASELINE_DRIFT) skinFailed = true;
-  }
-  console.log(`${skinFailed ? "✗" : "~"} ${id}${skinFailed ? "" : " (known upstream gaps)"}`);
+  skinFailed = true;
+  console.log(`✗ ${id}`);
   for (const { fg, bg, ratio, min } of problems) {
-    const floor = BASELINE_FLOORS.get(`${id}|${fg}|${bg}`);
-    const baseline = floor === undefined ? "" : `; baseline ${floor.toFixed(2)}:1`;
-    console.log(`    ${fg} on ${bg}: ${ratio.toFixed(2)}:1 (needs ${min}:1${baseline})`);
+    console.log(`    ${fg} on ${bg}: ${ratio.toFixed(2)}:1 (needs ${min}:1)`);
   }
   if (skinFailed) failed = true;
 }

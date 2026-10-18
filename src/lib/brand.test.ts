@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { accentInk, applyBrand, bootstrapBrand, brand, brandVars, DEFAULT_BRAND, iconType, luminance } from "./brand";
+import { contrastRatio } from "./color-contrast";
 
 describe("brand", () => {
   it("derives readable ink for light and dark accents", () => {
@@ -24,6 +25,13 @@ describe("brand", () => {
       "--color-accent-text": "#1D4ED8",
       "--color-accent-ink": "#ffffff",
     });
+  });
+
+  it("keeps normal button text readable through the gray accent crossover", () => {
+    for (let channel = 0; channel <= 255; channel++) {
+      const accent = `#${channel.toString(16).padStart(2, "0").repeat(3)}`;
+      expect(contrastRatio(accentInk(accent), accent), accent).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   it("keeps the default brand when the server is old, slow, or refuses", async () => {

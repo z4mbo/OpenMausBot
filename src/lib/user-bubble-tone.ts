@@ -1,7 +1,7 @@
 // Fills the person's bubble with a gradient of the bot's hue whose text clears WCAG AA at both ends.
 
 import type { CSSProperties } from "react";
-import { contrastRatio, fromOklch, mixSrgb, toOklch } from "./color-contrast";
+import { contrastRatio, filledTextInk, fromOklch, mixSrgb, toOklch } from "./color-contrast";
 import { MAUS_COLORS, type MausColor } from "./mascot";
 
 const WHITE = "#ffffff";
@@ -252,7 +252,7 @@ export function userBubbleStyle(color: MausColor | string): CSSProperties {
  */
 export function accentVars(color: MausColor | string): CSSProperties {
   const palette = botPalette(color);
-  const ink = contrastRatio("#ffffff", palette) >= contrastRatio(INK, palette) ? "#ffffff" : INK;
+  const ink = filledTextInk(palette, INK);
   return {
     "--color-accent": palette,
     "--color-accent-border": palette,
