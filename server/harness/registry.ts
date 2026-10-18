@@ -50,6 +50,23 @@ function cliOfRaw(raw: unknown): string | undefined {
   return typeof cli === "string" && cli ? cli : undefined;
 }
 
+const SNAPSHOT_DEADLINE_MS = 60_000;
+const SNAPSHOT_DEADLINE_REASON = "This engine did not report its status within a minute. Check that its CLI starts in a terminal.";
+
+function boundSnapshotInPlace(instance: ProviderInstance): void {
+  const read = instance.snapshot.bind(instance);
+  instance.snapshot = () => {
+    let deadline: NodeJS.Timeout | undefined;
+    return Promise.race([
+      Promise.resolve().then(read),
+      new Promise<never>((_resolve, reject) => {
+        deadline = setTimeout(() => reject(new Error(SNAPSHOT_DEADLINE_REASON)), SNAPSHOT_DEADLINE_MS);
+        deadline.unref?.();
+      }),
+    ]).finally(() => clearTimeout(deadline));
+  };
+}
+
 export class ProviderRegistry {
   private byId = new Map<InstanceId, RegistryEntry>();
   private cliByInstance = new Map<InstanceId, string>();
@@ -117,6 +134,7 @@ export class ProviderRegistry {
         enabled: entry.enabled ?? true,
         config,
       });
+      boundSnapshotInPlace(live);
       return { instanceId, live: decorate ? decorate(live) : live };
     } catch (e) {
       return {
