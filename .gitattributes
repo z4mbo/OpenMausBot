@@ -81,3 +81,4 @@ docs/verification/evidence/origin-backend-compatibility-031/fixture/*.mjs text e
 docs/verification/evidence/origin-backend-compatibility-031/fixture/*.mts text eol=lf
 docs/verification/evidence/origin-backend-compatibility-031/fixture/*.ts text eol=lf
 docs/verification/evidence/origin-backend-compatibility-031/fixture/*.txt text eol=lf
+docs/verification/evidence/origin-build-context-031/** text eol=lf
