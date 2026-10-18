@@ -83,17 +83,18 @@ if (process.versions.electron && process.argv.includes(flag)) {
           await evaluate('document.querySelector("[data-tour=server-switcher]").click()');
           await waitFor(version === "before" ? 'Boolean(document.querySelector("[data-cloud-add=offer-trial]"))' : 'document.body.innerText.includes("Server address or pairing link")');
           await evaluate("document.fonts.ready.then(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))");
-          const proof = await evaluate(`({cloudAccount:typeof window.ogb.cloudAccount,cloudPlan:typeof window.ogb.cloudPlan,servers:typeof window.ogb.environments,copy:typeof window.ogb.cloudMove,dialog:!!document.querySelector('[data-cloud-add-dialog]'),overflow:document.documentElement.scrollWidth>innerWidth,text:document.body.innerText})`);
+          const proof = await evaluate(`(() => { const row=document.querySelector('[aria-label="Switch to Team server"]')?.closest('li'); return {cloudAccount:typeof window.ogb.cloudAccount,cloudPlan:typeof window.ogb.cloudPlan,servers:typeof window.ogb.environments,copy:typeof window.ogb.cloudMove,dialog:!!document.querySelector('[data-cloud-add-dialog]'),overflow:document.documentElement.scrollWidth>innerWidth,text:document.body.innerText,serverNameWidth:row?.querySelector('.truncate')?.getBoundingClientRect().width ?? null}; })()`);
           assert.equal(proof.overflow, false);
           assert.equal(proof.cloudAccount, version === "before" ? "object" : "undefined");
           assert.equal(proof.dialog, version === "before");
           assert.equal(proof.servers, "object");
           assert.equal(proof.copy, "object");
           if (version === "after") assert(!proof.text.includes("$49") && !proof.text.includes("MausBot Cloud"));
+          if (version === "after") assert(proof.serverNameWidth >= 120, `Saved server name was squeezed to ${proof.serverNameWidth}px`);
           const name = `${version}-${width}-${theme}.png`;
           const image = (await win.webContents.capturePage()).toPNG();
           writeFileSync(join(output, name), image, { flag: "wx" });
-          results.push({ version, theme, width, menuItems, ...proof, screenshot: { name, bytes: image.length, sha256: sha(image) }, mainSha256: sha(main), preloadSha256: sha(readFileSync(preload)) });
+          results.push({ version, theme, width, menuItems, ...proof, screenshot: { name, bytes: image.length, sha256: sha(image) }, mainSha256: sha(main), preloadSha256: sha(readFileSync(preload)), serversComponentSha256:sha(readFileSync(join(root,"src/components/ConnectedWorkspacesSettings.tsx"))) });
         }
         win.destroy(); win = null;
       }

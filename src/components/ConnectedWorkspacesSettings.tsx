@@ -77,11 +77,12 @@ export function ConnectedWorkspacesSettings() {
       {locals.length > 0 && <ul className="divide-y divide-hairline/40">
         {locals.map((entry) => {
           const active = entry.id === saved.activeId;
-          return <li key={entry.id} className="flex items-center gap-3 py-3">
+          return <li key={entry.id} className="flex flex-wrap items-center gap-3 py-3">
             <Laptop size={18} className="shrink-0 text-ink-secondary" />
-            <div className="min-w-0 flex-1"><div className="truncate text-[13px] font-medium text-ink">{entry.name}</div>
+            <div className="min-w-0 grow basis-40"><div className="truncate text-[13px] font-medium text-ink">{entry.name}</div>
               <div className="break-all text-[12px] text-ink-secondary">{entry.dataDir}
                 {entry.missing && <span className="ml-2 rounded-md bg-inset px-1.5 py-0.5 text-[11px]">missing</span>}</div></div>
+            <div className="flex max-w-full flex-wrap items-center gap-2">
             {active ? <span className="flex shrink-0 items-center gap-1 text-[12px] text-ink-secondary"><Check size={13} />Current</span> :
               <button type="button" disabled={busy} aria-label={`Switch to ${entry.name}`}
                 onClick={() => void perform(async () => {
@@ -94,6 +95,7 @@ export function ConnectedWorkspacesSettings() {
             {!active && <button type="button" disabled={busy} aria-label={`Forget ${entry.name}`} title={`Forget ${entry.name}`}
               onClick={() => { setEnvForget(entry.id); setEnvPurge(false); }}
               className="rounded-md p-1.5 text-ink-secondary hover:bg-control hover:text-danger disabled:opacity-50"><Trash2 size={14} /></button>}
+            </div>
           </li>;
         })}
       </ul>}
@@ -146,10 +148,11 @@ export function ConnectedWorkspacesSettings() {
           {[{ id: "local", name: "This computer", origin: "" }, ...saved.environments.filter((entry) => entry.kind !== "local")].map((entry) => {
             const active = entry.id === saved.activeId;
             const Icon = entry.id === "local" ? Laptop : Cloud;
-            return <li key={entry.id} className="flex items-center gap-3 py-3">
+            return <li key={entry.id} className="flex flex-wrap items-center gap-3 py-3">
               <Icon size={18} className="shrink-0 text-ink-secondary" />
-              <div className="min-w-0 flex-1"><div className="truncate text-[13px] font-medium text-ink">{entry.name}</div>
+              <div className="min-w-0 grow basis-40"><div className="truncate text-[13px] font-medium text-ink">{entry.name}</div>
                 <div className="break-all text-[12px] text-ink-secondary">{entry.origin || "Local bots and conversations"}</div></div>
+              <div className="flex max-w-full flex-wrap items-center gap-2">
               {active ? <span className="flex shrink-0 items-center gap-1 text-[12px] text-ink-secondary"><Check size={13} />Current</span> :
                 <button type="button" disabled={busy} aria-label={`Switch to ${entry.name}`} onClick={() => void perform(async () => { await bridge.switch(entry.id); return true; })}
                   className="rounded-md px-2 py-1.5 text-[12px] text-ink hover:bg-control disabled:opacity-50">Switch</button>}
@@ -157,6 +160,7 @@ export function ConnectedWorkspacesSettings() {
               {entry.id !== "local" && sharingOffered && <button type="button" disabled={busy} aria-label={`Computer access for ${entry.name}`} onClick={() => setComputerId(entry.id)} className="rounded-md px-2 py-1.5 text-[12px] text-ink hover:bg-control">Computer access</button>}
               {entry.id !== "local" && <button type="button" disabled={busy} aria-label={`Forget ${entry.name}`} title={`Forget ${entry.name}`}
                 onClick={() => void perform(() => bridge.forget(entry.id))} className="rounded-md p-1.5 text-ink-secondary hover:bg-control hover:text-danger disabled:opacity-50"><Trash2 size={14} /></button>}
+              </div>
             </li>;
           })}
         </ul>}
