@@ -47,7 +47,15 @@ beforeAll(async () => {
     writeFileSync(target, marker);
   }
   port = await unusedPort();
-  server = await createServer({ configFile, root, envDir: root, publicDir: false, cacheDir: join(root, "cache"), appType: "custom", logLevel: "silent", optimizeDeps: { noDiscovery: true, include: [] }, server: { host: "127.0.0.1", port, strictPort: true, hmr: false, watch: null, fs: { allow: [root] } } });
+  const previousDirectory = process.cwd();
+  try {
+    // Vite 7.3.6 resolves its raw-file root from cwd's drive when constructing middleware.
+    process.chdir(root);
+    server = await createServer({ configFile, root, envDir: root, publicDir: false, cacheDir: join(root, "cache"), appType: "custom", logLevel: "silent", optimizeDeps: { noDiscovery: true, include: [] }, server: { host: "127.0.0.1", port, strictPort: true, hmr: false, watch: null, fs: { allow: [root] } } });
+  } finally {
+    process.chdir(previousDirectory);
+  }
+  assert.equal(process.cwd(), previousDirectory);
   await server.listen();
   assert.equal(listenerPort(server.httpServer), port);
   origin = `http://127.0.0.1:${port}`;
