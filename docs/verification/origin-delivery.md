@@ -2,7 +2,7 @@
 
 Delivery is in progress. This record distinguishes published artifacts, deployed services and isolated verification. The review PR stays open; no product task PR was merged.
 
-The active candidate is **0.2.6, UNFROZEN**, pending fresh source CI and matching native builds. **0.2.5 was withdrawn and never published** after corrected test-head CI `39080943442` failed. Its Windows shard 2 exposed a real native cancellation race; Windows shard 1 exposed nine Electron fixture failures. The new candidate includes those corrections and the [modal, menu, Files and contrast followup](origin-ui-followup.md). Versions 0.2.2, 0.2.3 and 0.2.4 were also never shipped; the public version remains **0.2.1**. No new backend, website or storage migration has been published. Earlier artifacts cannot establish acceptance of the changed 0.2.6 source.
+The active candidate is **0.2.6, source frozen under `origin-v0.2.6`**, pending fresh source CI and matching native builds. **0.2.5 was withdrawn and never published** after corrected test-head CI `39080943442` failed. Its Windows shard 2 exposed a real native cancellation race; Windows shard 1 exposed nine Electron fixture failures. The new candidate includes those corrections and the [modal, menu, Files and contrast followup](origin-ui-followup.md). Versions 0.2.2, 0.2.3 and 0.2.4 were also never shipped; the public version remains **0.2.1**. No new backend, website or storage migration has been published. Earlier artifacts cannot establish acceptance of the changed 0.2.6 source.
 
 ## Current candidate verification
 
