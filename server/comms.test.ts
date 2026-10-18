@@ -13,6 +13,7 @@ import { ENVELOPE_MARK } from "./runtime/envelope.ts";
 import { mentionedBots, normalizeGroupDefaultResponder, roomResponders } from "./store.ts";
 import { removeTempDir, waitForExit } from "./testing/cleanup.ts";
 import { readHandoffs } from "./testing/handoff-rows.ts";
+import { fixtureFetch } from "./testing/fixture-fetch.ts";
 
 const SERVER_DIR = dirname(fileURLToPath(import.meta.url));
 const FAKE_CLI = join(SERVER_DIR, "testing", "fake-acp-cli.ts");
@@ -109,7 +110,7 @@ describe("routine comms e2e on the job runtime (fake ACP fleet)", () => {
     for (;;) {
       if (await predicate()) return;
       if (Date.now() > deadline) {
-        const state = await fetch(`${BASE}/api/bots`).then((res) => res.json()).catch(() => ({ bots: [] })) as any;
+        const state = await fixtureFetch(`${BASE}/api/bots`).then((res) => res.json()).catch(() => ({ bots: [] })) as any;
         const tails = (state.bots ?? []).filter((candidate: any) => !candidate.hidden).map((candidate: any) => ({
           name: candidate.name, busy: candidate.busy,
           tail: (candidate.messages ?? []).slice(-6).map((m: any) => ({ role: m.role, kind: m.kind, text: m.text?.slice(0, 300), tool: m.tool?.name, from: m.from?.name })),
@@ -121,7 +122,7 @@ describe("routine comms e2e on the job runtime (fake ACP fleet)", () => {
     }
   };
   const api = async (method: string, path: string, body?: unknown): Promise<{ status: number; body: any }> => {
-    const res = await fetch(`${BASE}${path}`, {
+    const res = await fixtureFetch(`${BASE}${path}`, {
       method,
       headers: body ? { "content-type": "application/json" } : undefined,
       body: body ? JSON.stringify(body) : undefined,
@@ -366,7 +367,7 @@ describe("routine comms e2e on the job runtime (fake ACP fleet)", () => {
     const deadline = Date.now() + 20_000;
     for (;;) {
       try {
-        const res = await fetch(`${BASE}/api/health`);
+        const res = await fixtureFetch(`${BASE}/api/health`);
         if (res.ok) break;
       } catch {
       }
