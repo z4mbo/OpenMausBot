@@ -58,3 +58,4 @@ docs/verification/evidence/origin-flat-popups-032/**/*.log text eol=lf
 docs/verification/evidence/origin-flat-popups-032/fixture/*.mjs text eol=lf
 docs/verification/evidence/origin-flat-popups-032/fixture/*.ts text eol=lf
 docs/verification/evidence/origin-flat-popups-032/fixture/*.tsx text eol=lf
+docs/verification/evidence/origin-flat-popups-032-image-view-correction.json text eol=lf

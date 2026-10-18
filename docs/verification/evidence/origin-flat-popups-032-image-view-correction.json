@@ -1,0 +1,179 @@
+{
+  "checkedAt": "2026-10-18T15:08:33.776676+00:00",
+  "operation": "Read-only Pillow PNG decode and original-detail image viewing; no image bytes changed",
+  "samples": [
+    {
+      "label": "private-layout-probe",
+      "sha256": "0a6fd8baaa6cbe7b6c543ad92014669ec14fb3938dfa33198ed6294b01c9c4b5",
+      "bytes": 52974,
+      "mode": "RGB",
+      "width": 1280,
+      "height": 900,
+      "distinctColors": 2309,
+      "pixel100x100": [
+        5,
+        5,
+        5
+      ],
+      "mostCommonColors": [
+        {
+          "rgb": [
+            5,
+            5,
+            5
+          ],
+          "pixels": 708748
+        },
+        {
+          "rgb": [
+            38,
+            38,
+            38
+          ],
+          "pixels": 170134
+        },
+        {
+          "rgb": [
+            17,
+            17,
+            17
+          ],
+          "pixels": 125814
+        },
+        {
+          "rgb": [
+            25,
+            25,
+            25
+          ],
+          "pixels": 67461
+        },
+        {
+          "rgb": [
+            21,
+            37,
+            30
+          ],
+          "pixels": 24619
+        }
+      ]
+    },
+    {
+      "label": "private-original-mobile-baseline",
+      "sha256": "ac612c60dce1bc3ccec1cc4e0b578be35fba10b95139ad612a952cc30a4d2418",
+      "bytes": 29735,
+      "mode": "RGB",
+      "width": 375,
+      "height": 812,
+      "distinctColors": 1197,
+      "pixel100x100": [
+        246,
+        246,
+        246
+      ],
+      "mostCommonColors": [
+        {
+          "rgb": [
+            17,
+            17,
+            17
+          ],
+          "pixels": 94412
+        },
+        {
+          "rgb": [
+            38,
+            38,
+            38
+          ],
+          "pixels": 91029
+        },
+        {
+          "rgb": [
+            5,
+            5,
+            5
+          ],
+          "pixels": 57420
+        },
+        {
+          "rgb": [
+            25,
+            25,
+            25
+          ],
+          "pixels": 31207
+        },
+        {
+          "rgb": [
+            33,
+            33,
+            33
+          ],
+          "pixels": 5897
+        }
+      ]
+    },
+    {
+      "label": "permanent-canonical-voice",
+      "sha256": "909ddcd0494971f9825ea62e549008652e81fb225e49a204e20ab1e0d5f27318",
+      "bytes": 52968,
+      "mode": "RGB",
+      "width": 1280,
+      "height": 900,
+      "distinctColors": 2285,
+      "pixel100x100": [
+        5,
+        5,
+        5
+      ],
+      "mostCommonColors": [
+        {
+          "rgb": [
+            5,
+            5,
+            5
+          ],
+          "pixels": 708748
+        },
+        {
+          "rgb": [
+            38,
+            38,
+            38
+          ],
+          "pixels": 170134
+        },
+        {
+          "rgb": [
+            17,
+            17,
+            17
+          ],
+          "pixels": 125806
+        },
+        {
+          "rgb": [
+            25,
+            25,
+            25
+          ],
+          "pixels": 67461
+        },
+        {
+          "rgb": [
+            21,
+            37,
+            30
+          ],
+          "pixels": 24619
+        }
+      ]
+    }
+  ],
+  "originalDetailViewing": "The exact private-original-mobile-baseline PNG that appeared blank in the default image view shows the complete Triggers dialog with detail:original. Its recorded raw pixels include94412 panel-colored and91029 card-colored pixels.",
+  "correction": "The prior claim that headless hardware compositing omitted screenshot pixels is unproven and withdrawn. The observed omission was in a default image preview. The actual PNGs tested contain full UI regions. Its underlying viewer cause is not established.",
+  "historicalGallery": "origin-flat-popups-032 remains byte-for-byte immutable; this correction qualifies its speculative rejectedHarnessDetails wording. Canonical --disable-gpu capture choice is retained without claiming it fixed a proven compositor defect.",
+  "noImageEditing": true,
+  "noProductionChanges": true
+}
