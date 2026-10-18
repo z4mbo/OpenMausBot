@@ -969,7 +969,7 @@ export const WORKSPACE_CREDENTIAL_ENV = [
 ] as const;
 
 export function stripWorkspaceCredentialEnv(env: Record<string, string | undefined>): void {
-  for (const key of WORKSPACE_CREDENTIAL_ENV) delete env[key];
+  for (const key of Object.keys(env)) if ((WORKSPACE_CREDENTIAL_ENV as readonly string[]).includes(key.toUpperCase())) delete env[key];
   stripControlPlaneEnv(env);
 }
 

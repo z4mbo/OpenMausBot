@@ -1849,6 +1849,16 @@ describe("workspace credential env strip", () => {
     expect(env).toEqual({ PATH: "/usr/bin", MY_FLAG: "1" });
   });
 
+  it("removes every Windows spelling of workspace credentials without removing project-owned names", () => {
+    const preserved = { PATH: "/usr/bin", MY_BOX_TOKEN: "project-owned-token", GITHUB_TOKEN: "project-owned-token" };
+    const env = {
+      ...preserved,
+      ...Object.fromEntries(WORKSPACE_CREDENTIAL_ENV.flatMap(name => [name, name.toLowerCase(), name[0]!.toLowerCase() + name.slice(1)]).map(name => [name, "synthetic-workspace-key"])),
+    };
+    stripWorkspaceCredentialEnv(env);
+    expect(env).toEqual(preserved);
+  });
+
   it("keeps a hosted tenant's control-plane secrets out of every child env, and only those", () => {
     // What a hosting control plane and a fleet put in the server's env; OMB_CLOUD_FUTURE_SECRET stands for a name added later.
     const operator = {
