@@ -178,7 +178,7 @@ function failureFrom(error: unknown, sql: string, interrupted: InterruptCause | 
 
 export class Lane {
   private queue: Promise<unknown> = Promise.resolve();
-  private running: { interrupted: InterruptCause | null } | null = null;
+  private interruptRunning: (() => void) | null = null;
 
   readonly connection: DuckDB.DuckDBConnection;
   constructor(connection: DuckDB.DuckDBConnection) { this.connection = connection; }
@@ -193,30 +193,35 @@ export class Lane {
     const timeoutMs = options.timeoutMs ?? DATA_LIMITS.sqlTimeoutMs;
     if (options.signal?.aborted) throw new DataFailure({ code: "cancelled", message: "Cancelled before it ran.", sql });
     const state: { interrupted: InterruptCause | null } = { interrupted: null };
-    this.running = state;
+    let redeliver: NodeJS.Timeout | undefined;
     const interrupt = (cause: InterruptCause) => {
       if (state.interrupted) return;
       state.interrupted = cause;
       this.connection.interrupt();
+      // @duckdb/node-api 1.5.6-r.1 dispatches queries asynchronously; native startup can clear an earlier interrupt.
+      redeliver = setInterval(() => this.connection.interrupt(), 25);
+      redeliver.unref();
     };
+    this.interruptRunning = () => interrupt("cancelled");
     const timer = setTimeout(() => interrupt("timeout"), timeoutMs);
     const onAbort = () => interrupt("cancelled");
     options.signal?.addEventListener("abort", onAbort, { once: true });
     try {
-      return await work(this.connection);
+      const result = await work(this.connection);
+      if (state.interrupted) throw new Error("Interrupted!");
+      return result;
     } catch (error) {
       throw failureFrom(error, sql, state.interrupted, timeoutMs);
     } finally {
       clearTimeout(timer);
+      clearInterval(redeliver);
       options.signal?.removeEventListener("abort", onAbort);
-      this.running = null;
+      this.interruptRunning = null;
     }
   }
 
   interrupt(): void {
-    if (!this.running) return;
-    this.running.interrupted ??= "cancelled";
-    this.connection.interrupt();
+    this.interruptRunning?.();
   }
 }
 
