@@ -108,9 +108,9 @@ async function until<T>(read: () => Promise<T>, accepts: (value: T) => boolean, 
       await send("Page.navigate", { url });
       await until(() => evaluate<boolean>(`location.href === ${JSON.stringify(url)} && document.querySelector('[data-tour="server-switcher"]')?.textContent === 'This computer'`), Boolean, 20_000);
       await evaluate("document.fonts.ready.then(() => true)");
-      const footer = await evaluate<{ contained: boolean; aligned: boolean; labels: Array<string | null> }>(`(() => { const sidebar=document.querySelector('[data-sidebar]').getBoundingClientRect(); const apps=document.querySelector('[data-sidebar-nav="apps"]'); const buttons=[...apps.parentElement.querySelectorAll('button')],boxes=buttons.map(button=>button.getBoundingClientRect()); return {contained:boxes.every(box=>box.width>0&&box.left>=sidebar.left&&box.right<=sidebar.right),aligned:boxes.length!==6||boxes[0].top===boxes[3].top||boxes.slice(0,3).every((box,index)=>Math.abs((box.left+box.width/2)-(boxes[index+3].left+boxes[index+3].width/2))<0.1),labels:buttons.map(button=>button.getAttribute('aria-label'))}; })()`);
+      const footer = await evaluate<{ contained: boolean; singleRow: boolean; labels: Array<string | null> }>(`(() => { const sidebar=document.querySelector('[data-sidebar]').getBoundingClientRect(); const apps=document.querySelector('[data-sidebar-nav="apps"]'); const buttons=[...apps.parentElement.querySelectorAll('button')],boxes=buttons.map(button=>button.getBoundingClientRect()); return {contained:boxes.every(box=>box.width>=24&&box.left>=sidebar.left&&box.right<=sidebar.right),singleRow:boxes.every(box=>Math.abs(box.top-boxes[0].top)<0.1),labels:buttons.map(button=>button.getAttribute('aria-label'))}; })()`);
       expect(footer.contained, `${density}/${width}/${mode}`).toBe(true);
-      expect(footer.aligned, `${density}/${width}/${mode}`).toBe(true);
+      expect(footer.singleRow, `${density}/${width}/${mode}`).toBe(true);
       expect(footer.labels).toEqual(mode === "advanced" ? ["Routines", "Triggers", "Team map", "Active Threads", "New or share", "Apps"] : ["New or share", "Apps"]);
     }
   } finally {

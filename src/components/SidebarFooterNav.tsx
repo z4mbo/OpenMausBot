@@ -37,6 +37,7 @@ function NavRow({
       type="button"
       data-tour={tourId}
       data-sidebar-nav={id}
+      data-sidebar-footer-control={iconsOnly ? "" : undefined}
       onClick={onClick}
       aria-label={iconsOnly ? label : undefined}
       title={iconsOnly ? label : undefined}
@@ -67,6 +68,7 @@ export function SidebarAppsButton() {
       type="button"
       data-tour="nav-apps"
       data-sidebar-nav="apps"
+      data-sidebar-footer-control=""
       onClick={() => dispatch({ type: "togglePlugins", open: true })}
       aria-label={label}
       title={label}
@@ -156,7 +158,7 @@ export function SidebarFooterNav({
     </>
   );
 
-  if (inline) return advanced || filesRow ? <nav data-tour="tools" aria-label={t("sidebar.tools")} className="flex items-center [&>button]:mx-0 @max-[286px]/sidebar-footer:w-full @max-[286px]/sidebar-footer:justify-between">{rows}</nav> : null;
+  if (inline) return advanced || filesRow ? <nav data-tour="tools" aria-label={t("sidebar.tools")} className="contents">{rows}</nav> : null;
   if (iconsOnly) {
     return <nav data-tour="tools" aria-label={t("sidebar.tools")} className="flex flex-col items-center gap-1">{rows}</nav>;
   }

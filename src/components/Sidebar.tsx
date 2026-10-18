@@ -1815,7 +1815,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     <>
           {advanced && <div ref={attentionMenuRef} className={density === "icons" ? "relative" : "contents"}>
             <button
-              type="button"
+              type="button" data-sidebar-footer-control={bottom ? "" : undefined}
               onClick={() => setAttentionOpen((o) => !o)}
               aria-label={attentionTriggerLabel(attention.length)}
               title={attentionTriggerLabel(attention.length)}
@@ -1863,7 +1863,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           </div>}
           <div ref={plusMenuRef} className="contents">
           <button
-            ref={importReturnRef}
+            ref={importReturnRef} data-sidebar-footer-control={bottom ? "" : undefined}
             onClick={() => setPlusOpen((o) => !o)}
             aria-label={remoteClient ? t("sidebar.new") : t("sidebar.newOrShare")}
             className={cn(
@@ -2326,7 +2326,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
             {PROFILE_AT_TOP ? <OriginAccountMenu iconOnly /> : <SidebarProfileMenu iconOnly />}
           </div>
         ) : (
-          <div data-sidebar-footer-actions className={cn("flex items-center not-first:mt-3", PROFILE_AT_TOP ? "flex-wrap justify-between gap-0.5" : "gap-1", SIDEBAR_ACTIONS_IN_FOOTER && "relative")}>
+          <div data-sidebar-footer-actions className={cn("items-center not-first:mt-3", PROFILE_AT_TOP ? "grid auto-cols-fr grid-flow-col gap-0.5 [&_[data-sidebar-footer-control]]:min-w-0 [&_[data-sidebar-footer-control]]:w-full [&_[data-sidebar-footer-control]]:max-w-[46px] [&_[data-sidebar-footer-control]]:justify-self-center" : "flex gap-1", SIDEBAR_ACTIONS_IN_FOOTER && "relative")}>
             {PROFILE_AT_TOP ? <SidebarFooterNav density={density} inline /> : <div className="min-w-0 flex-1">
               <SidebarProfileMenu />
             </div>}
