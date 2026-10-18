@@ -6,6 +6,7 @@ import {
   issueBrief, originIssueKey, ORIGIN_ISSUE_CARDS_MAX, type OriginIssueCard, type OriginIssueCards, type OriginIssuePriority,
 } from "../shared/origin-issues.ts";
 import { isDraftColumn } from "../shared/origin-columns.ts";
+import { columnNames, findColumn, normalizedTitle } from "./origin-cloud-columns.ts";
 import { isReadOnlyAgentTool } from "./agent-tool-policy.ts";
 import { DATA_DIR } from "./config.ts";
 import type { MirrorResult } from "./github/sync.ts";
@@ -190,7 +191,6 @@ const list = (value: unknown): Args[] => (Array.isArray(value) ? value.map(recor
 const text = (value: unknown): string => (typeof value === "string" ? value : "");
 const trimmed = (value: unknown): string => text(value).trim();
 const clip = (value: string, max: number) => (value.length > max ? `${value.slice(0, max)}…` : value);
-const normalizedTitle = (title: string) => title.trim().toLowerCase().replace(/[\s_-]+/g, "");
 const isDoneColumn = (column: Args) => column.isDone === true || text(column.title).trim().toLowerCase() === "done";
 const PRIORITIES = new Set(["low", "medium", "high"]);
 const PRIORITY_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
@@ -239,15 +239,6 @@ function issueCard(task: Args, columns: Args[], projectId: string, projectName: 
 function cardsOf(heading: string, issues: OriginIssueCard[]): OriginIssueCards {
   const shown = issues.slice(0, ORIGIN_ISSUE_CARDS_MAX);
   return { heading, issues: shown, ...(issues.length > shown.length ? { more: issues.length - shown.length } : {}) };
-}
-
-function findColumn(columns: Args[], wanted: string): Args | undefined {
-  const key = normalizedTitle(wanted);
-  return columns.find((column) => column._id === wanted) ?? columns.find((column) => normalizedTitle(text(column.title)) === key);
-}
-
-function columnNames(columns: Args[]): string {
-  return columns.map((column) => `"${text(column.title)}"`).join(", ");
 }
 
 function dueDateAfter(days: number, now = new Date()): string {
@@ -594,11 +585,13 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     if (!PRIORITIES.has(priority)) return { text: 'priority must be "low", "medium" or "high".', isError: true };
     const project = await pickProject(ctx, args.project);
     const scope = scopeOf(ctx, project);
-    const { columns } = await board(scope);
-    const open = columns.filter((column) => !isDoneColumn(column));
-    const column = trimmed(args.column)
-      ? findColumn(columns, text(args.column))
-      : open.find(isDraftColumn) ?? open.find((candidate) => normalizedTitle(text(candidate.title)) === "todo") ?? open[0];
+    const requestedColumn = trimmed(args.column);
+    let { columns } = await board(scope);
+    if (!requestedColumn && !columns.some(isDraftColumn)) {
+      await scope.client.mutation("tasks:ensureDefaultColumns", { projectId: scope.projectId, sessionToken: scope.sessionToken });
+      ({ columns } = await board(scope));
+    }
+    const column = requestedColumn ? findColumn(columns, requestedColumn) : columns.find(isDraftColumn);
     if (!column) return { text: `No such column. Columns: ${columnNames(columns)}.`, isError: true };
     let assignee = trimmed(args.assignee);
     if (!assignee) assignee = text(record(await scope.client.query("auth:me", { sessionToken: scope.sessionToken })).email);
@@ -606,7 +599,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     const taskId = text(await scope.client.mutation("tasks:createTask", {
       projectId: scope.projectId,
       sessionToken: scope.sessionToken,
-      columnId: column._id,
+      ...(requestedColumn ? { columnId: column._id } : {}),
       title,
       ...(typeof args.description === "string" && args.description.trim() ? { description: args.description } : {}),
       priority,

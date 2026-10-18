@@ -8,6 +8,7 @@ import { feedbackLink, useAppAddress } from "@/lib/origin-members";
 import type { CloudBoard, CloudFeedbackEntry, CloudFeedbackPortal, CloudPerson, CloudProject } from "./cloud-types";
 import { fmtDate, taskKey } from "./repo-url";
 import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { newIssueColumn, openIssueColumns } from "./issue-columns";
 
 export type FeedbackPageProps = OriginPageProps & {
   onOpenIssue?(taskId: string): void;
@@ -149,14 +150,14 @@ function ConvertFeedback({ teamId, projectId, canEdit, entry, onClose, onCreated
   const [assignee, setAssignee] = useState("");
   const [dueDate, setDueDate] = useState("");
   const action = useAction();
-  const columns = board?.columns.filter((item) => !(item.isDone ?? /^done$/i.test(item.title))) ?? [];
-  const columnId = column || columns[0]?._id || "";
+  const columns = openIssueColumns(board?.columns ?? []);
+  const columnId = newIssueColumn(columns, column)?._id ?? "";
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!canEdit || action.busy) return;
     let taskId = "";
     const ok = await action.run(async () => {
-      taskId = await cloudMutation<string>("feedback:convert", { teamId, entryId: entry._id, columnId, assignedToEmail: assignee, dueDate });
+      taskId = await cloudMutation<string>("feedback:convert", { teamId, entryId: entry._id, ...(column && column === columnId ? { columnId } : {}), assignedToEmail: assignee, dueDate });
     }, "Could not create issue");
     if (ok) onCreated(taskId);
   };
@@ -167,7 +168,8 @@ function ConvertFeedback({ teamId, projectId, canEdit, entry, onClose, onCreated
         <strong className="text-[13px] text-ink">{entry.title}</strong>
         <fieldset disabled={!canEdit} className="contents">
         <Field label="Column">
-          <Select className="w-full" required value={columnId} onChange={(e) => setColumn(e.target.value)}>
+          <Select className="w-full" value={columnId} onChange={(e) => setColumn(e.target.value)}>
+            {!columnId && <option value="">Draft</option>}
             {columns.map((item) => <option key={item._id} value={item._id}>{item.title}</option>)}
           </Select>
         </Field>
@@ -180,7 +182,7 @@ function ConvertFeedback({ teamId, projectId, canEdit, entry, onClose, onCreated
         <Field label="Due date"><input className={inputClass} type="date" required value={dueDate} onChange={(e) => setDueDate(e.target.value)} /></Field>
         </fieldset>
         {action.error && <Notice tone="danger">{action.error}</Notice>}
-        <button className={primaryButton} disabled={action.busy || !canEdit || !columnId || !assignee || !dueDate}>
+        <button className={primaryButton} disabled={action.busy || !canEdit || !board || !assignee || !dueDate}>
           {action.busy ? <Loader2 size={14} className="animate-spin" /> : <CirclePlus size={14} />}Create issue
         </button>
       </form>

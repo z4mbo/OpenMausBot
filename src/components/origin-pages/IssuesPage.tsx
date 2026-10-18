@@ -26,9 +26,10 @@ import { orderForMove, stepTarget, useFlip, withPendingMoves, type PendingMove }
 import { NewIssueComposer } from "./NewIssueComposer";
 import { CompleteIssueDialog, completesThroughPullRequest, type IssueImplementer } from "./CompleteIssueDialog";
 import { originGitHub } from "@/lib/origin-github";
-import { DRAFT_COLUMN_TITLE, isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-columns";
+import { isDraftColumn } from "../../../shared/origin-columns";
 import { PersonAvatar } from "./PersonAvatar";
 import { useCardDrag, type CardDrag, type DropTarget } from "./use-card-drag";
+import { openIssueColumns } from "./issue-columns";
 
 /** What the Issues page hands to `onAssignToAgent`. */
 export type AssignableIssue = {
@@ -140,7 +141,6 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   const [info, setInfo] = useState("");
   const [completing, setCompleting] = useState<string | null>(null);
   const ensured = useRef(false);
-  const renamed = useRef(false);
   const mirrored = useRef(new Set<string>());
   const lanesRef = useRef<HTMLDivElement>(null);
   const search = useRef<HTMLInputElement>(null);
@@ -167,14 +167,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   }, [board, canEdit, project.repoUrl, projectId]);
 
   useEffect(() => {
-    const idea = !board?.columns.some(isDraftColumn) && board?.columns.find(isLegacyIdeaColumn);
-    if (!canEdit || !idea || renamed.current) return;
-    renamed.current = true;
-    void cloudMutation("tasks:updateColumn", { projectId, columnId: idea._id, title: DRAFT_COLUMN_TITLE, isDone: false }).catch((error) => setNotice(errorText(error, "Could not rename the Idea column to Draft")));
-  }, [board, canEdit, projectId]);
-
-  useEffect(() => {
-    if (!canEdit || !board || board.columns.length || ensured.current) return;
+    if (!canEdit || !board || board.columns.some(isDraftColumn) || ensured.current) return;
     ensured.current = true;
     void cloudMutation("tasks:ensureDefaultColumns", { projectId }).catch((error) => setNotice(errorText(error, "Could not create columns")));
   }, [board, canEdit, projectId]);
@@ -193,10 +186,9 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   if (!board) return <Loading label="Loading issues" variant="board" />;
 
   const tasks = withPendingMoves(board.tasks, pending);
-  const columns = board.columns.filter((column) => !isDoneColumn(column));
+  const columns = openIssueColumns(board.columns);
   const visibleIds = new Set(columns.map((column) => column._id));
   const fallback = columns.find((column) => column.title.toLowerCase() === "todo") ?? columns[0];
-  const newIssueColumn = columns.find(isDraftColumn) ?? fallback;
   const draftIds = new Set(columns.filter(isDraftColumn).map((column) => column._id));
   const laneOf = (task: CloudTask) => (visibleIds.has(task.columnId) ? task.columnId : fallback?._id);
   const needle = query.trim().toLowerCase();
@@ -272,7 +264,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
           <input ref={search} className={cn(inputClass, "h-8 pl-8 sm:w-48")} placeholder="Search issues" aria-label="Search issues" value={query} onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(event) => { if (event.key === "Escape") { setQuery(""); event.currentTarget.blur(); } }} />
         </label>
-        {canEdit && <button type="button" className={primaryButton} disabled={!columns.length} onClick={() => setComposer(newIssueColumn?._id ?? "")} title="New issue (C)"><Plus size={14} />New issue</button>}
+        {canEdit && <button type="button" className={primaryButton} onClick={() => setComposer("")} title="New issue (C)"><Plus size={14} />New issue</button>}
       </PageHeader>
       {(!canEdit || notice || info) && (
         <GlassHeader>

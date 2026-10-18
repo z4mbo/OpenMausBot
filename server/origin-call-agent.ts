@@ -221,7 +221,7 @@ export function summaryWidget(input: { callName: string; summary: CallSummary; p
     `Call summary · ${input.callName} (${caption})`,
     summary.keyPoints.length ? `Key points:\n${list(summary.keyPoints)}` : "",
     summary.decisions.length ? `Decisions:\n${list(summary.decisions)}` : "",
-    summary.actionItems.length ? `Action items (create an issue for each checked one with the Origin issue tools):\n${list(summary.actionItems.map((item) => item.owner ? `${item.title} (${item.owner})` : item.title))}` : "",
+    summary.actionItems.length ? `Action items (create an issue in Draft for each checked one with the Origin issue tools unless the person explicitly chooses another column):\n${list(summary.actionItems.map((item) => item.owner ? `${item.title} (${item.owner})` : item.title))}` : "",
   ].filter(Boolean).join("\n\n");
   return { widget, fallback };
 }

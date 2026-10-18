@@ -234,7 +234,7 @@ describe("runOriginTool", () => {
     const result = await runOriginTool("origin_create_issue", { title: "New", labels: ["ui"], due_date: "2026-11-01" }, "coder", { bots: BOTS, state, connect: () => client });
     expect(result.text).toBe('Created issue t9 (ORI-T9) "New" in column "Draft" of proj. It stays in Origin as a draft; moving it to another column creates its GitHub issue.');
     expect(mutations(calls)).toEqual([
-      ["tasks:createTask", { projectId: "proj", sessionToken: "tok", columnId: "col1", title: "New", priority: "medium", assignedToEmail: "me@x.dev", dueDate: "2026-11-01" }],
+      ["tasks:createTask", { projectId: "proj", sessionToken: "tok", title: "New", priority: "medium", assignedToEmail: "me@x.dev", dueDate: "2026-11-01" }],
       ["issueRelations:labels", { sessionToken: "tok", taskId: "t9", labels: ["ui"] }],
     ]);
     expect(result.cards).toEqual({
@@ -395,10 +395,10 @@ function fakeGitHub(overrides: Partial<OriginGitHub> = {}) {
 describe("GitHub-first issues", () => {
   const repoProject = (memberRole = "admin") => ({ "projects:get": (args: Record<string, unknown>) => ({ _id: args.projectId, name: "Kai", repoUrl: "https://github.com/ggs/kai", memberRole }) });
 
-  it("mirrors a new issue to GitHub, and refuses to mark one done or drop it in the done column", async () => {
+  it("mirrors an explicitly requested Todo issue to GitHub, and refuses to mark one done or drop it in the done column", async () => {
     const { client, calls } = workspaceConvex({ ...repoProject(), "auth:me": { email: "me@x.dev" }, "tasks:createTask": "kainew" });
     const github = fakeGitHub();
-    const created = await runOriginTool("origin_create_issue", { title: "New" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    const created = await runOriginTool("origin_create_issue", { title: "New", column: "Todo" }, "kai-dev", workspaceDeps(client, { github: github.api }));
     expect(created.text).toContain("Mirrored as GitHub issue #12.");
     for (const change of [{ done: true }, { column: "Done" }]) {
       const refused = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", ...change }, "kai-dev", workspaceDeps(client, { github: github.api }));
@@ -414,11 +414,43 @@ describe("GitHub-first issues", () => {
     const github = fakeGitHub();
     const created = await runOriginTool("origin_create_issue", { title: "New" }, "kai-dev", workspaceDeps(client, { github: github.api }));
     expect(created.text).toContain('in column "Draft"');
-    expect(mutations(calls)[0]).toMatchObject(["tasks:createTask", { columnId: "k0" }]);
+    expect(mutations(calls)[0]).toEqual(["tasks:createTask", expect.not.objectContaining({ columnId: expect.anything() })]);
     expect(github.calls).toEqual([]);
     const moved = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", column: "Todo" }, "kai-dev", workspaceDeps(client, { github: github.api }));
     expect(moved.text).toContain("mirrored as GitHub issue #12");
     expect(github.calls).toEqual([["mirrorIssue", "kai", "kaitaskab12"]]);
+  });
+
+  it("repairs a legacy board before default creation and keeps its new issue off GitHub", async () => {
+    let repaired = false;
+    const draft = { _id: "private", title: "Private planning", isDraft: true };
+    const { client, calls } = workspaceConvex({
+      ...repoProject(), "auth:me": { email: "me@x.dev" }, "tasks:createTask": "kainew",
+      "tasks:board": () => ({ ...KAI_BOARD, columns: repaired ? [...KAI_BOARD.columns, draft] : KAI_BOARD.columns }),
+      "tasks:ensureDefaultColumns": () => { repaired = true; return null; },
+    });
+    const github = fakeGitHub();
+    const result = await runOriginTool("origin_create_issue", { title: "Private idea" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(result.isError).not.toBe(true);
+    expect(result.text).toContain('in column "Private planning"');
+    expect(result.cards?.issues[0].status).toBe("Private planning");
+    expect(mutations(calls)).toEqual([
+      ["tasks:ensureDefaultColumns", { projectId: "kai", sessionToken: "tok" }],
+      ["tasks:createTask", expect.not.objectContaining({ columnId: expect.anything() })],
+    ]);
+    expect(github.calls).toEqual([]);
+  });
+
+  it("does not infer another destination if Draft repair fails or an explicit column is unknown", async () => {
+    const { client, calls } = workspaceConvex({ ...repoProject(), "tasks:ensureDefaultColumns": new Error("Draft repair failed") });
+    const github = fakeGitHub();
+    const deps = workspaceDeps(client, { github: github.api });
+    expect(await runOriginTool("origin_create_issue", { title: "Private idea" }, "kai-dev", deps)).toMatchObject({ isError: true });
+    expect(mutations(calls).map(([name]) => name)).toEqual(["tasks:ensureDefaultColumns"]);
+    calls.length = 0;
+    expect(await runOriginTool("origin_create_issue", { title: "Private idea", column: "foreign" }, "kai-dev", deps)).toMatchObject({ isError: true });
+    expect(mutations(calls)).toEqual([]);
+    expect(github.calls).toEqual([]);
   });
 
   it("origin_review_pr is the Chief's: lists open pull requests with the issues they close, reads one, approves and merges it", async () => {
