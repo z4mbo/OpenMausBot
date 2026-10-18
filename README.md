@@ -73,6 +73,8 @@ Run the touched server tests and the appropriate browser fixture as well. Unit t
 
 The app's release history lives in `shared/origin-releases.ts`; every desktop version needs a matching entry for What's new. Keep the website, updater notes and platform artifacts aligned with that history.
 
+Version [0.2.7](https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.7) is published for Windows x64, Mac Apple silicon and Mac Intel. The [website](https://origin.imbored.fun) and [What's new](https://origin.imbored.fun/whats-new) match that release. See the [delivery receipt and acceptance limits](docs/verification/origin-delivery.md) and the [development/release tooling followup](docs/verification/origin-release-tools.md).
+
 The **Origin desktop** GitHub workflow builds macOS Apple silicon, macOS Intel and Windows x64 artifacts without publishing. Local packaging commands are `pnpm package:mac` and `pnpm package:win` on their respective platforms. Download-host publication is a separate operation; building artifacts or opening a PR does not update installed apps. Unsigned/ad-hoc builds have platform-specific installation and updater limits documented in the workflow.
 
 Review new merged OpenMausBot PRs for fixes and functionality that fit Origin. Compare the code first, retain attribution, add Origin-specific regression coverage, and avoid importing upstream branding, service credentials or release settings blindly. Keep each logical change in its own commit and document verification in the PR.

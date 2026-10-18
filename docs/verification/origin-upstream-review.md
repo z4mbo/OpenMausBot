@@ -1,6 +1,6 @@
 # Origin upstream review — 2026-10-18
 
-This bounded review compares actual source changes from twenty merged OpenMausBot PRs with Origin. Three have adopted functionality, counting #2947's narrow permission adaptation; seventeen remain deferred or have no applicable product patch. The final eight comparisons used official merge patches and blob hashes against Origin source `43c7fd9ae4316647a2d7705745b32812635c56cb`; their dispositions are recorded below. Metadata discovery does not count as completed review. A merge upstream is an input to review, not permission to replace Origin's account, project, approval or release contracts. The active Origin candidate is 0.2.7, with its source checkpoint named `origin-v0.2.7` and unshipped; the public version remains 0.2.1. Further merges belong to the daily review at 06:00 Europe/Rome.
+This bounded review compares actual source changes from twenty merged OpenMausBot PRs with Origin. Three have adopted functionality, counting #2947's narrow permission adaptation; seventeen remain deferred or have no applicable product patch. The final eight comparisons used official merge patches and blob hashes against Origin source `43c7fd9ae4316647a2d7705745b32812635c56cb`; their dispositions are recorded below. Metadata discovery does not count as completed review. A merge upstream is an input to review, not permission to replace Origin's account, project, approval or release contracts. Origin 0.2.7 is published from frozen source `dbdac25fcd014d231e694aa8665d326b235af616` (`origin-v0.2.7`); public delivery is verified in the [delivery record](origin-delivery.md) and [verified 0.2.7 delivery evidence](evidence/origin-delivery-027/report.json). Further merges belong to the daily review at 06:00 Europe/Rome.
 
 ## Adopted changes
 
@@ -25,7 +25,7 @@ The shared palette is exported by `shared/wire.ts` and re-exported by `src/lib/m
 
 Origin already handles custom hexadecimal colours defensively in `botPalette`; the upstream description's bubble crash does not reproduce here and is not claimed as an Origin bug. Origin's custom Liquid/Zap colour picker persists through the separate `avatar-look` route, which remains unchanged and keeps custom hex support.
 
-### Live browser view permission revocation — partial adoption
+### Live browser view permission revocation (partial adoption)
 
 [OpenMausBot #2947](https://github.com/milind-soni/OpenMausBot/pull/2947), “Browser panel v2: the page fills the panel, sharp, over T3 Code's stream,” merge [`62a7b7ac72e4f0adae1b373032592df7327d7b26`](https://github.com/milind-soni/OpenMausBot/commit/62a7b7ac72e4f0adae1b373032592df7327d7b26), prompted a narrow permission adaptation in Origin commit `9c1510a03`.
 
@@ -86,3 +86,7 @@ After the adaptation, the focused suite above passed 556 tests across 25 files, 
 The real-server recipe uses `launchVerificationServer` from the shared control surface, creates a real companion proxy against that exact temporary server, and uses only a synthetic paired token. It verifies successful saves read from the host, refusal without partial writes, marker spoofing, bad values, missing/wrong credentials, and a normal fake-engine conversation driven through mapped `send`, `wait`, `messages` commands. Its [JSON evidence](evidence/origin-upstream/paired-appearance.json) includes requests, resulting statuses, settled state, transcript and persistent server-log path. The script closes only its own proxy/server and removes the fixture's temporary data.
 
 The checks establish HTTP behavior and a fake-engine turn. They do not establish a physical phone's native avatar controls, real provider behavior, macOS/Windows packaged acceptance or public deployment. Origin's separate UI and delivery records cover their own tested boundaries.
+
+## Metadata refresh before delivery
+
+At `2026-10-18T09:45:02.064Z`, an authenticated merged-PR query found no merges after already-reviewed #2947 (merged `2026-10-17T21:51:37Z`). This is a metadata refresh, not another source comparison: the twenty recorded comparisons, three adaptations and seventeen deferred dispositions remain unchanged. The next scheduled review remains 06:00 Europe/Rome.

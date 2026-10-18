@@ -30,3 +30,6 @@ third_party/opencode/LICENSE text eol=lf
 Dockerfile text eol=lf
 # Shipped to the server and built there by Docker.
 site/Dockerfile text eol=lf
+# Delivery receipts hash JSON bytes; Windows checkouts must preserve LF.
+docs/verification/evidence/origin-delivery-027/**/*.json text eol=lf
+docs/verification/evidence/origin-release-tools-027.json text eol=lf

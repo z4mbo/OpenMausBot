@@ -322,3 +322,20 @@ After-only sequence: [pending Retry](evidence/origin-ui-followup/files-load-afte
 | atelier actual control crop | [Before](evidence/origin-ui-followup/contrast/before/atelier-actual-control-hover.png) | [After](evidence/origin-ui-followup/contrast/after/atelier-actual-control-hover.png) |
 
 The manifest retains the remaining matched contrast scenarios, keyboard-focus states, all nine skins and bright/dark/gray custom accent cases. [Recorded contrast totals](origin-ui-followup.md#filled-primarydanger-controls) distinguish emulated/computed P3 from physical hardware verification. Native Electron/picker and body-portalled custom project Confirm accent remain unverified.
+
+## Verified 0.2.7 source and delivery
+
+These are **after-only** captures of frozen source `dbdac25fcd014d231e694aa8665d326b235af616`; the matched before/after pairs above keep their original source identities. The current compiled website image was checked in 32 cases: four routes at 375/1440 pixels, light/dark, normal/reduced motion. All 18 canonical changelog titles appear, horizontal overflow is absent, and no runtime exception or account submission was recorded. The website image hash, exact PNG dimensions, file hashes and separately verified public receipt are in the [manifest](evidence/origin-delivery-027/report.json).
+
+| Current surface | Evidence |
+| --- | --- |
+| Landing, 375 light | [Capture](evidence/origin-delivery-027/site/landing-375-light-no-preference-cdp.png) |
+| Landing, 1440 dark | [Capture](evidence/origin-delivery-027/site/landing-1440-dark-no-preference-cdp.png) |
+| Sign in, 375 dark | [Capture](evidence/origin-delivery-027/site/login-375-dark-no-preference-cdp.png) |
+| Invite-only sign up, 375 light | [Capture](evidence/origin-delivery-027/site/signup-375-light-no-preference-cdp.png) |
+| What's new, 375 light | [Capture](evidence/origin-delivery-027/site/whats-new-375-light-no-preference-cdp.png) |
+| Full app: About | [Capture](evidence/origin-delivery-027/app/origin-visible-about-027.png), [keyboard proof](evidence/origin-delivery-027/app/actual-about-027-proof.json) |
+| Full app: Get the phone app | [Capture](evidence/origin-delivery-027/app/origin-visible-phone-app-027.png), [keyboard proof](evidence/origin-delivery-027/app/actual-phone-027-proof.json) |
+| Full app: What's new | [Capture](evidence/origin-delivery-027/app/origin-visible-whats-new-027.png) |
+
+The actual App captures use an isolated synthetic engine/account fixture. About and Get-the-phone-app retain focus through native Tab and Shift+Tab; Escape closes the dialog and returns focus to You. No pairing code, physical phone, native picker or packaged interactive acceptance is inferred. The public four-route browser check and actual delivery facts are recorded separately in the [receipt](evidence/origin-delivery-027/delivery-receipt.json).

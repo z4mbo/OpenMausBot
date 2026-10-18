@@ -280,7 +280,8 @@ Origin's inspection and delivery records:
 
 - [Audit register, evidence and delivery status](origin-audit.md)
 - [Delivery goal and authority](origin-delivery-goal.md)
-- [Version 0.2.3 artifacts, rollout and relay credential rotation](origin-delivery.md)
+- [Version 0.2.7 publication, rollout and acceptance limits](origin-delivery.md)
+- [Development and release tooling followup](origin-release-tools.md)
 - [Backend access matrix and lifecycle audit](origin-backend-access.md)
 - [Shared controls and dialog checks](origin-ui.md)
 - [Project navigation and delegation checks](origin-project-ui.md)
