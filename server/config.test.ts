@@ -1828,6 +1828,7 @@ describe("workspace credential env strip", () => {
   it("keeps Origin integration authority out of child environments for every Windows spelling", () => {
     const credentials = [
       "ORIGIN_INTEGRATION_SECRET", "ORIGIN_GITHUB_TOKEN", "ORIGIN_RESEND_API_KEY", "ORIGIN_TURN_SECRET",
+      "BREVO_API_KEY",
       "GITHUB_APP_PRIVATE_KEY", "GITHUB_CLIENT_SECRET", "GITHUB_WEBHOOK_SECRET",
     ];
     const env: Record<string, string | undefined> = {

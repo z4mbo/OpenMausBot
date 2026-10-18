@@ -10,7 +10,10 @@ describe("official engine installers", () => {
       CONVEX_DEPLOY_KEY: "prod:origin-fixture|operator-deploy",
       CONVEX_SELF_HOSTED_ADMIN_KEY: "operator-admin", GITHUB_TOKEN: "project-owned-token",
     };
-    const fixture = { ORIGIN_INTEGRATION_SECRET: originOperator ? "origin-operator-fixture" : undefined, ...credentials };
+    const fixture = {
+      ORIGIN_INTEGRATION_SECRET: originOperator ? "origin-operator-fixture" : undefined,
+      BREVO_API_KEY: "synthetic-backend-mail-key", brevo_api_key: "synthetic-backend-mail-key", ...credentials,
+    };
     for (const [name, value] of Object.entries(fixture)) vi.stubEnv(name, value);
     try {
       const program = `process.stdout.write(JSON.stringify(Object.fromEntries('${Object.keys(fixture).join(" ")}'.split(' ').map(name => [name, process.env[name]]))))`;

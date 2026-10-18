@@ -59,7 +59,9 @@ Configure local backend URLs using [the backend development notes](docs/origin-c
 
 Workspace owners and admins can create a shareable link or enter an email address in Members. The hosted Origin backend uses `https://origin.imbored.fun/join/<token>`; a self-hosted backend needs its own public HTTPS invitation website through `ORIGIN_SITE_URL` or `ORIGIN_PUBLIC_URL`. Invitation links stay bound to their issuing backend.
 
-Email is sent centrally by the backend using `RESEND_API_KEY` and a verified `INVITE_FROM_EMAIL` sender. Configure secrets through the deployment's protected environment, never on each desktop or in chat. A missing configuration or provider failure leaves the invitation available for manual sharing. Provider acceptance does not establish inbox delivery. Each creator can issue 20 invitations per hour across workspaces.
+Email is sent centrally by the backend using a verified `INVITE_FROM_EMAIL` sender. The default provider is Resend with `RESEND_API_KEY`. To use Brevo, set `ORIGIN_INVITE_MAIL_PROVIDER=brevo` and `BREVO_API_KEY`; the sender can be `invites@your-domain.example` or `Origin <invites@your-domain.example>`. Follow Brevo's [domain authentication](https://help.brevo.com/hc/en-us/articles/12163873383186-Authenticate-your-domain-with-Brevo-Brevo-code-DKIM-DMARC) and [transactional activation](https://help.brevo.com/hc/en-us/articles/115000188150-Troubleshooting-Issues-with-Brevo-SMTP) requirements before enabling email. Configure secrets through the deployment's protected environment, never on each desktop or in chat.
+
+A missing configuration or provider failure leaves the invitation available for manual sharing. Each attempt uses only the selected provider, without an automatic retry or fallback that could send duplicate messages. Provider acceptance does not establish inbox delivery. Each creator can issue 20 invitations per hour across workspaces.
 
 Obsolete `teams:sendInvite` and `members:sendInvite` email actions reject with a migration message. Their bare legacy invitation mutations and existing membership rows remain compatible; new email invitations use `workspaces:sendEmailInvite` and `/join/<token>`.
 

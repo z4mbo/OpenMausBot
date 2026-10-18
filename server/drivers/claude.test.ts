@@ -90,6 +90,7 @@ const CONTROL_PLANE_FIXTURE = {
   OMB_LICENSE_KEY: "license-should-not-leak", OMB_INSTALLATION_CREDENTIAL: "fleet-should-not-leak",
   ORIGIN_INTEGRATION_SECRET: "origin-integration-should-not-leak", ORIGIN_GITHUB_TOKEN: "origin-github-should-not-leak",
   ORIGIN_RESEND_API_KEY: "origin-mail-should-not-leak", ORIGIN_TURN_SECRET: "origin-turn-should-not-leak",
+  BREVO_API_KEY: "brevo-mail-should-not-leak",
   GITHUB_APP_PRIVATE_KEY: "github-app-should-not-leak", GITHUB_CLIENT_SECRET: "github-client-should-not-leak",
   GITHUB_WEBHOOK_SECRET: "github-webhook-should-not-leak",
   CONVEX_DEPLOY_KEY: "prod:origin-fixture|deploy-should-not-leak",
