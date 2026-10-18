@@ -1,0 +1,569 @@
+{
+  "baseline": "87ff77be5ea79272175219d479b9a8017b4e8fcc",
+  "observedAt": "2026-10-18T21:25:02.835Z",
+  "results": [
+    {
+      "version": "before",
+      "theme": "dark",
+      "width": 1440,
+      "menuItems": [
+        {
+          "id": "workspace-local",
+          "label": "This computer",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-synthetic-vps",
+          "label": "Team server",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-add-cloud",
+          "label": "Add a Cloud…",
+          "type": "normal"
+        },
+        {
+          "label": "",
+          "type": "separator"
+        },
+        {
+          "id": "workspace-connect",
+          "label": "Connect to a server…",
+          "type": "normal"
+        }
+      ],
+      "cloudAccount": "object",
+      "cloudPlan": "object",
+      "servers": "object",
+      "copy": "object",
+      "dialog": true,
+      "overflow": false,
+      "text": "Origin\nThis computer\nWorkspace\n\nSynthetic local workspace. Choose This computer to inspect its real desktop menu action.\n\nTry MausBot Cloud free for 7 days\n\nA computer in the cloud that runs your bots 24/7, even when this one is off.\n\nRoutines run on time, day and night\nReach your bots from your phone, even with this computer off\nCloud computers and voice included\nProMost popular\n$49/month + tax\nUp to 4 cloud computers at once · 40 GB storage\n4 vCPU · 4 GB memory · 200 cloud computer hours a month\nToday\nYour trial starts. Nothing is charged today. $5 of Claude credit included.\nOct 23\nWe email you a reminder.\nOct 25\nPro starts at $49/month + tax. Cancel before then and pay nothing.\nStart free trial\n\n14-day money-back on every plan. Checkout opens in your browser.\n\nSign in to your Cloud plan\nNot now",
+      "screenshot": {
+        "name": "before-1440-dark.png",
+        "bytes": 51746,
+        "sha256": "317f3f8d7c48524ac23543fcb4c28c2635158a46b62c88ecec47621594e84e58"
+      },
+      "mainSha256": "a8424288121dd783622105499ddcf8b1b6b8497b98b96e90a3930db6ef3c1cb1",
+      "preloadSha256": "5aa9f2222dbd81147b4d33a8971eb697018bec9073fef6a88ce32a59862f0f46"
+    },
+    {
+      "version": "before",
+      "theme": "dark",
+      "width": 375,
+      "menuItems": [
+        {
+          "id": "workspace-local",
+          "label": "This computer",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-synthetic-vps",
+          "label": "Team server",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-add-cloud",
+          "label": "Add a Cloud…",
+          "type": "normal"
+        },
+        {
+          "label": "",
+          "type": "separator"
+        },
+        {
+          "id": "workspace-connect",
+          "label": "Connect to a server…",
+          "type": "normal"
+        }
+      ],
+      "cloudAccount": "object",
+      "cloudPlan": "object",
+      "servers": "object",
+      "copy": "object",
+      "dialog": true,
+      "overflow": false,
+      "text": "Origin\nThis computer\nWorkspace\n\nSynthetic local workspace. Choose This computer to inspect its real desktop menu action.\n\nTry MausBot Cloud free for 7 days\n\nA computer in the cloud that runs your bots 24/7, even when this one is off.\n\nRoutines run on time, day and night\nReach your bots from your phone, even with this computer off\nCloud computers and voice included\nProMost popular\n$49/month + tax\nUp to 4 cloud computers at once · 40 GB storage\n4 vCPU · 4 GB memory · 200 cloud computer hours a month\nToday\nYour trial starts. Nothing is charged today. $5 of Claude credit included.\nOct 23\nWe email you a reminder.\nOct 25\nPro starts at $49/month + tax. Cancel before then and pay nothing.\nStart free trial\n\n14-day money-back on every plan. Checkout opens in your browser.\n\nSign in to your Cloud plan\nNot now",
+      "screenshot": {
+        "name": "before-375-dark.png",
+        "bytes": 40723,
+        "sha256": "0bec96f486953eda4eaa1d93a50d331174d9e5466a261acd78020afeb4351724"
+      },
+      "mainSha256": "a8424288121dd783622105499ddcf8b1b6b8497b98b96e90a3930db6ef3c1cb1",
+      "preloadSha256": "5aa9f2222dbd81147b4d33a8971eb697018bec9073fef6a88ce32a59862f0f46"
+    },
+    {
+      "version": "before",
+      "theme": "light",
+      "width": 1440,
+      "menuItems": [
+        {
+          "id": "workspace-local",
+          "label": "This computer",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-synthetic-vps",
+          "label": "Team server",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-add-cloud",
+          "label": "Add a Cloud…",
+          "type": "normal"
+        },
+        {
+          "label": "",
+          "type": "separator"
+        },
+        {
+          "id": "workspace-connect",
+          "label": "Connect to a server…",
+          "type": "normal"
+        }
+      ],
+      "cloudAccount": "object",
+      "cloudPlan": "object",
+      "servers": "object",
+      "copy": "object",
+      "dialog": true,
+      "overflow": false,
+      "text": "Origin\nThis computer\nWorkspace\n\nSynthetic local workspace. Choose This computer to inspect its real desktop menu action.\n\nTry MausBot Cloud free for 7 days\n\nA computer in the cloud that runs your bots 24/7, even when this one is off.\n\nRoutines run on time, day and night\nReach your bots from your phone, even with this computer off\nCloud computers and voice included\nProMost popular\n$49/month + tax\nUp to 4 cloud computers at once · 40 GB storage\n4 vCPU · 4 GB memory · 200 cloud computer hours a month\nToday\nYour trial starts. Nothing is charged today. $5 of Claude credit included.\nOct 23\nWe email you a reminder.\nOct 25\nPro starts at $49/month + tax. Cancel before then and pay nothing.\nStart free trial\n\n14-day money-back on every plan. Checkout opens in your browser.\n\nSign in to your Cloud plan\nNot now",
+      "screenshot": {
+        "name": "before-1440-light.png",
+        "bytes": 58012,
+        "sha256": "8a6603e296b522ce42084d49b8c39ab37cc3cd9b47fc18ead0c182fc327c17ce"
+      },
+      "mainSha256": "a8424288121dd783622105499ddcf8b1b6b8497b98b96e90a3930db6ef3c1cb1",
+      "preloadSha256": "5aa9f2222dbd81147b4d33a8971eb697018bec9073fef6a88ce32a59862f0f46"
+    },
+    {
+      "version": "before",
+      "theme": "light",
+      "width": 375,
+      "menuItems": [
+        {
+          "id": "workspace-local",
+          "label": "This computer",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-synthetic-vps",
+          "label": "Team server",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-add-cloud",
+          "label": "Add a Cloud…",
+          "type": "normal"
+        },
+        {
+          "label": "",
+          "type": "separator"
+        },
+        {
+          "id": "workspace-connect",
+          "label": "Connect to a server…",
+          "type": "normal"
+        }
+      ],
+      "cloudAccount": "object",
+      "cloudPlan": "object",
+      "servers": "object",
+      "copy": "object",
+      "dialog": true,
+      "overflow": false,
+      "text": "Origin\nThis computer\nWorkspace\n\nSynthetic local workspace. Choose This computer to inspect its real desktop menu action.\n\nTry MausBot Cloud free for 7 days\n\nA computer in the cloud that runs your bots 24/7, even when this one is off.\n\nRoutines run on time, day and night\nReach your bots from your phone, even with this computer off\nCloud computers and voice included\nProMost popular\n$49/month + tax\nUp to 4 cloud computers at once · 40 GB storage\n4 vCPU · 4 GB memory · 200 cloud computer hours a month\nToday\nYour trial starts. Nothing is charged today. $5 of Claude credit included.\nOct 23\nWe email you a reminder.\nOct 25\nPro starts at $49/month + tax. Cancel before then and pay nothing.\nStart free trial\n\n14-day money-back on every plan. Checkout opens in your browser.\n\nSign in to your Cloud plan\nNot now",
+      "screenshot": {
+        "name": "before-375-light.png",
+        "bytes": 44933,
+        "sha256": "a11314d2651047cd9cf1cc636621a074e9bafe0b379a93a88f2db875f2457ef7"
+      },
+      "mainSha256": "a8424288121dd783622105499ddcf8b1b6b8497b98b96e90a3930db6ef3c1cb1",
+      "preloadSha256": "5aa9f2222dbd81147b4d33a8971eb697018bec9073fef6a88ce32a59862f0f46"
+    },
+    {
+      "version": "after",
+      "theme": "dark",
+      "width": 1440,
+      "menuItems": [
+        {
+          "id": "workspace-local",
+          "label": "This computer",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-synthetic-vps",
+          "label": "Team server",
+          "type": "radio"
+        },
+        {
+          "label": "",
+          "type": "separator"
+        },
+        {
+          "id": "workspace-connect",
+          "label": "Connect to a server…",
+          "type": "normal"
+        }
+      ],
+      "cloudAccount": "undefined",
+      "cloudPlan": "undefined",
+      "servers": "object",
+      "copy": "object",
+      "dialog": false,
+      "overflow": false,
+      "text": "Origin\nThis computer\nServers\n\nOne desktop app, wherever your bots live. Switching servers does not move or replace your bots, conversations, or provider accounts.\n\nEnvironments on this computer\nSeparate setups on this computer, each with its own bots, conversations and data folder.\n\nNew environment\n\nName\nData folder (optional)\nChoose…\nCreate\nYour servers\nSaved on this computer. Your hosted bots keep running when you switch away.\nThis computer\nLocal bots and conversations\nCurrent\nTeam server\nhttps://server.example.test\nSwitch\nCopy this computer here\nConnect to a server\nAlready running Origin on a VPS, server, or another computer? Connect it here.\nServer address or pairing link\nName (optional)\n\nPaste a pairing link from your server’s Settings → Remote access, or enter its address and sign in there. Your desktop stays connected afterward.\n\nNeed a pairing code?\nConnect",
+      "screenshot": {
+        "name": "after-1440-dark.png",
+        "bytes": 43307,
+        "sha256": "05c93d98bff839e1da9d6b358311c270514130dbe42842faafb9473119952cc8"
+      },
+      "mainSha256": "21ad89123334623b53c51607e510b45f59b115f3917359abcf0a2a8cececfa4c",
+      "preloadSha256": "04d9e657f1811f38dd1c77e6c561a77bda64e4b79c2c1f7f2a0b1f8e02c4d868"
+    },
+    {
+      "version": "after",
+      "theme": "dark",
+      "width": 375,
+      "menuItems": [
+        {
+          "id": "workspace-local",
+          "label": "This computer",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-synthetic-vps",
+          "label": "Team server",
+          "type": "radio"
+        },
+        {
+          "label": "",
+          "type": "separator"
+        },
+        {
+          "id": "workspace-connect",
+          "label": "Connect to a server…",
+          "type": "normal"
+        }
+      ],
+      "cloudAccount": "undefined",
+      "cloudPlan": "undefined",
+      "servers": "object",
+      "copy": "object",
+      "dialog": false,
+      "overflow": false,
+      "text": "Origin\nThis computer\nServers\n\nOne desktop app, wherever your bots live. Switching servers does not move or replace your bots, conversations, or provider accounts.\n\nEnvironments on this computer\nSeparate setups on this computer, each with its own bots, conversations and data folder.\n\nNew environment\n\nName\nData folder (optional)\nChoose…\nCreate\nYour servers\nSaved on this computer. Your hosted bots keep running when you switch away.\nThis computer\nLocal bots and conversations\nCurrent\nTeam server\nhttps://server.example.test\nSwitch\nCopy this computer here\nConnect to a server\nAlready running Origin on a VPS, server, or another computer? Connect it here.\nServer address or pairing link\nName (optional)\n\nPaste a pairing link from your server’s Settings → Remote access, or enter its address and sign in there. Your desktop stays connected afterward.\n\nNeed a pairing code?\nConnect",
+      "screenshot": {
+        "name": "after-375-dark.png",
+        "bytes": 27253,
+        "sha256": "cb92e92dda07afe2df151d02d497c1469279528180fb6ebb8bdfa44c536d0bee"
+      },
+      "mainSha256": "21ad89123334623b53c51607e510b45f59b115f3917359abcf0a2a8cececfa4c",
+      "preloadSha256": "04d9e657f1811f38dd1c77e6c561a77bda64e4b79c2c1f7f2a0b1f8e02c4d868"
+    },
+    {
+      "version": "after",
+      "theme": "light",
+      "width": 1440,
+      "menuItems": [
+        {
+          "id": "workspace-local",
+          "label": "This computer",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-synthetic-vps",
+          "label": "Team server",
+          "type": "radio"
+        },
+        {
+          "label": "",
+          "type": "separator"
+        },
+        {
+          "id": "workspace-connect",
+          "label": "Connect to a server…",
+          "type": "normal"
+        }
+      ],
+      "cloudAccount": "undefined",
+      "cloudPlan": "undefined",
+      "servers": "object",
+      "copy": "object",
+      "dialog": false,
+      "overflow": false,
+      "text": "Origin\nThis computer\nServers\n\nOne desktop app, wherever your bots live. Switching servers does not move or replace your bots, conversations, or provider accounts.\n\nEnvironments on this computer\nSeparate setups on this computer, each with its own bots, conversations and data folder.\n\nNew environment\n\nName\nData folder (optional)\nChoose…\nCreate\nYour servers\nSaved on this computer. Your hosted bots keep running when you switch away.\nThis computer\nLocal bots and conversations\nCurrent\nTeam server\nhttps://server.example.test\nSwitch\nCopy this computer here\nConnect to a server\nAlready running Origin on a VPS, server, or another computer? Connect it here.\nServer address or pairing link\nName (optional)\n\nPaste a pairing link from your server’s Settings → Remote access, or enter its address and sign in there. Your desktop stays connected afterward.\n\nNeed a pairing code?\nConnect",
+      "screenshot": {
+        "name": "after-1440-light.png",
+        "bytes": 51075,
+        "sha256": "bf1202f0f30205ff1d5a367fdc22a3899d0362993a7053635cc960233672f2ff"
+      },
+      "mainSha256": "21ad89123334623b53c51607e510b45f59b115f3917359abcf0a2a8cececfa4c",
+      "preloadSha256": "04d9e657f1811f38dd1c77e6c561a77bda64e4b79c2c1f7f2a0b1f8e02c4d868"
+    },
+    {
+      "version": "after",
+      "theme": "light",
+      "width": 375,
+      "menuItems": [
+        {
+          "id": "workspace-local",
+          "label": "This computer",
+          "type": "radio"
+        },
+        {
+          "id": "workspace-synthetic-vps",
+          "label": "Team server",
+          "type": "radio"
+        },
+        {
+          "label": "",
+          "type": "separator"
+        },
+        {
+          "id": "workspace-connect",
+          "label": "Connect to a server…",
+          "type": "normal"
+        }
+      ],
+      "cloudAccount": "undefined",
+      "cloudPlan": "undefined",
+      "servers": "object",
+      "copy": "object",
+      "dialog": false,
+      "overflow": false,
+      "text": "Origin\nThis computer\nServers\n\nOne desktop app, wherever your bots live. Switching servers does not move or replace your bots, conversations, or provider accounts.\n\nEnvironments on this computer\nSeparate setups on this computer, each with its own bots, conversations and data folder.\n\nNew environment\n\nName\nData folder (optional)\nChoose…\nCreate\nYour servers\nSaved on this computer. Your hosted bots keep running when you switch away.\nThis computer\nLocal bots and conversations\nCurrent\nTeam server\nhttps://server.example.test\nSwitch\nCopy this computer here\nConnect to a server\nAlready running Origin on a VPS, server, or another computer? Connect it here.\nServer address or pairing link\nName (optional)\n\nPaste a pairing link from your server’s Settings → Remote access, or enter its address and sign in there. Your desktop stays connected afterward.\n\nNeed a pairing code?\nConnect",
+      "screenshot": {
+        "name": "after-375-light.png",
+        "bytes": 32340,
+        "sha256": "91310dd24fa069198d5c07873e10f9aa273f877b12eaf0e07da5e6843a1d07c5"
+      },
+      "mainSha256": "21ad89123334623b53c51607e510b45f59b115f3917359abcf0a2a8cececfa4c",
+      "preloadSha256": "04d9e657f1811f38dd1c77e6c561a77bda64e4b79c2c1f7f2a0b1f8e02c4d868"
+    }
+  ],
+  "calls": [
+    {
+      "version": "before",
+      "channel": "desktop:skin"
+    },
+    {
+      "version": "before",
+      "channel": "workspaces:state"
+    },
+    {
+      "version": "before",
+      "channel": "workspaces:menu"
+    },
+    {
+      "version": "before",
+      "channel": "cloud-account:state"
+    },
+    {
+      "version": "before",
+      "channel": "cloud-account:offer"
+    },
+    {
+      "version": "before",
+      "channel": "desktop:skin"
+    },
+    {
+      "version": "before",
+      "channel": "workspaces:state"
+    },
+    {
+      "version": "before",
+      "channel": "workspaces:menu"
+    },
+    {
+      "version": "before",
+      "channel": "cloud-account:state"
+    },
+    {
+      "version": "before",
+      "channel": "cloud-account:offer"
+    },
+    {
+      "version": "before",
+      "channel": "desktop:skin"
+    },
+    {
+      "version": "before",
+      "channel": "workspaces:state"
+    },
+    {
+      "version": "before",
+      "channel": "workspaces:menu"
+    },
+    {
+      "version": "before",
+      "channel": "cloud-account:state"
+    },
+    {
+      "version": "before",
+      "channel": "cloud-account:offer"
+    },
+    {
+      "version": "before",
+      "channel": "desktop:skin"
+    },
+    {
+      "version": "before",
+      "channel": "workspaces:state"
+    },
+    {
+      "version": "before",
+      "channel": "workspaces:menu"
+    },
+    {
+      "version": "before",
+      "channel": "cloud-account:state"
+    },
+    {
+      "version": "before",
+      "channel": "cloud-account:offer"
+    },
+    {
+      "version": "after",
+      "channel": "desktop:skin"
+    },
+    {
+      "version": "after",
+      "channel": "workspaces:state"
+    },
+    {
+      "version": "after",
+      "channel": "workspaces:menu"
+    },
+    {
+      "version": "after",
+      "channel": "environments:state"
+    },
+    {
+      "version": "after",
+      "channel": "desktop:skin"
+    },
+    {
+      "version": "after",
+      "channel": "workspaces:state"
+    },
+    {
+      "version": "after",
+      "channel": "workspaces:menu"
+    },
+    {
+      "version": "after",
+      "channel": "environments:state"
+    },
+    {
+      "version": "after",
+      "channel": "desktop:skin"
+    },
+    {
+      "version": "after",
+      "channel": "workspaces:state"
+    },
+    {
+      "version": "after",
+      "channel": "workspaces:menu"
+    },
+    {
+      "version": "after",
+      "channel": "environments:state"
+    },
+    {
+      "version": "after",
+      "channel": "desktop:skin"
+    },
+    {
+      "version": "after",
+      "channel": "workspaces:state"
+    },
+    {
+      "version": "after",
+      "channel": "workspaces:menu"
+    },
+    {
+      "version": "after",
+      "channel": "environments:state"
+    }
+  ],
+  "blocked": [
+    {
+      "origin": "ws://127.0.0.1:5175",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:0",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:5175",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:0",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:5175",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:0",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:5175",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:0",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:5175",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:0",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:5175",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:0",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:5175",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:0",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:5175",
+      "resourceType": "webSocket"
+    },
+    {
+      "origin": "ws://127.0.0.1:0",
+      "resourceType": "webSocket"
+    }
+  ],
+  "nativeMenuConstructed": true,
+  "nativePopupManuallyDriven": false,
+  "packagedProductIdentitySimulated": true,
+  "actualRendererAndPreload": true,
+  "productionDataUsed": false,
+  "providerRequests": 0,
+  "limitations": [
+    "Hidden disposable Electron browser windows, not the installed Origin executable.",
+    "The native menu factory and action run; OS menu popup geometry is not tested.",
+    "Synthetic upstream offer and saved server; no payment, provider, pairing or real account operation."
+  ]
+}

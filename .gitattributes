@@ -98,3 +98,5 @@ docs/verification/evidence/origin-team-access-cache-033/** -text whitespace=cr-a
 docs/verification/evidence/origin-issue-drag-034/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-live-policy-034/** -text whitespace=cr-at-eol,-blank-at-eof
 docs/verification/evidence/origin-issue-drag-permission-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-desktop-cloud-policy/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-desktop-cloud-policy/*.log -whitespace
