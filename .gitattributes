@@ -89,3 +89,4 @@ docs/verification/evidence/origin-mail-activation-031.json text eol=lf
 docs/verification/evidence/origin-signup-policy-032/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-signup-policy-timeout-032/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-upstream-review-20261018-172407/** text eol=lf
+docs/verification/evidence/origin-stripe-redaction-032/**/*.json text eol=lf

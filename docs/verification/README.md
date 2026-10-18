@@ -293,6 +293,7 @@ desktop routing, cancellation, and computer authority cleanup.
 Origin's inspection and delivery records:
 
 - [Audit register, evidence and delivery status](origin-audit.md)
+- [Stripe credential redaction through provider-native logs](origin-stripe-redaction.md)
 - [Delivery goal and authority](origin-delivery-goal.md)
 - [Current publication, historical rollout and acceptance limits](origin-delivery.md)
 - [Development and release tooling followup](origin-release-tools.md)
