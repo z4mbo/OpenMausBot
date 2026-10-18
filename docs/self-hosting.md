@@ -206,14 +206,12 @@ Requirements: Docker with Compose, a DNS name pointing at the machine, and
 ports 80/443 open.
 
 ```sh
-git clone https://github.com/milind-soni/OpenMausBot && cd OpenMausBot/deploy
+git clone https://github.com/z4mbo/Origin && cd Origin/deploy
 cp .env.example .env            # set DOMAIN
-docker compose pull omb && docker compose up -d
+docker compose up -d --build
 ```
 
-That uses the image CI publishes on every `main` push
-(`ghcr.io/milind-soni/openmausbot`, tagged `latest`, `sha-…` and `v…`).
-To build from your checkout instead: `docker compose up -d --build`.
+This builds the Origin checkout into the local `origin-server:local` image.
 
 Then sign the engine CLIs in **inside the container** (their logins live on
 the `data` volume, so they survive restarts and image upgrades) and mint a
@@ -244,12 +242,10 @@ What the stack does, so you can adapt it:
   own pairing is the login. A shared-password `basic_auth` block is there,
   commented out, if you want a second wall in front of pairing.
 
-Upgrade with `docker compose pull omb && docker compose up -d` (or
-`git pull && docker compose up -d --build`). State (chats, routines,
+Upgrade with `git pull && docker compose up -d --build`. State (chats, routines,
 engine logins, paired sessions) is on the `data` volume; back that up.
 
-The published image installs the current Chrome for Testing whenever a new
-Stable ships. A build from source keeps the Chrome (and any `ENGINES`) it
+A build from source keeps the Chrome (and any `ENGINES`) it
 installed first, because those layers sit beneath the app and stay cached
 across code changes. To pick up the current ones, rebuild with a new tag:
 
@@ -1113,13 +1109,14 @@ that succeed. A tool call that was denied is never sent back.
 
 ## Updating
 
-For the npm service, [install the chosen new version](deploy-vps.md#update)
-as the service user while the server is stopped, then start it again.
-For a foreground invocation, `npx --yes openmausbot@X.Y.Z serve --tunnel`
-selects a particular published release; replace `X.Y.Z` with that version.
+Origin's desktop releases are published in
+[Origin releases](https://github.com/z4mbo/Origin/releases). Self-hosted servers
+update from the Origin checkout. Origin does not publish an npm package;
+installing the upstream `openmausbot` package replaces Origin with a different
+application.
 
 ```sh
-docker compose -f deploy/docker-compose.yml pull omb && docker compose -f deploy/docker-compose.yml up -d   # Docker
+git pull && docker compose -f deploy/docker-compose.yml up -d --build   # Docker
 git pull && pnpm install && sudo systemctl restart openmausbot          # from source
 ```
 
