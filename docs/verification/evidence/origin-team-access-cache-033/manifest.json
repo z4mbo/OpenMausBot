@@ -1,0 +1,88 @@
+{
+  "base": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+  "fix": "01ddbb18b123954c5381bb77a372de32e63d2961",
+  "payloadCount": 16,
+  "payloads": [
+    {
+      "path": "before-1440-light.png",
+      "bytes": 31618,
+      "sha256": "8e5548818cfb27162520d76030d06a77aafa1b9edf84a7c6b9e7a15e77587622"
+    },
+    {
+      "path": "after-1440-light.png",
+      "bytes": 26720,
+      "sha256": "5307cbccec117a33821dea2da4dc4e453d75cb5a29256e2cac5da8425c41b2f2"
+    },
+    {
+      "path": "before-1440-dark.png",
+      "bytes": 32386,
+      "sha256": "f3d76fb0c07dba2f4cd6576ec3e3eb8b441c04af974b603d53dc61f6c2e1b5e6"
+    },
+    {
+      "path": "after-1440-dark.png",
+      "bytes": 27392,
+      "sha256": "f965fea2d8fe5a36ac23df5e74322daddcd55bcb3117784e9db4b94100c7b754"
+    },
+    {
+      "path": "browser-report.json",
+      "bytes": 5073,
+      "sha256": "7e35f74976fdab1cb67215ed921b1e60fdbcd1b7d4274dd479e7c410960cad50"
+    },
+    {
+      "path": "browser-capture.mjs",
+      "bytes": 11870,
+      "sha256": "12fdd5cd301e5feacd4b4c300f6fa25f28d42cb9685cd91724d43fe42ca4820f"
+    },
+    {
+      "path": "actual-sse-proof.json",
+      "bytes": 6003,
+      "sha256": "6d394ff3a1e3c91e8fbe8d9568f6c4d7db5fd29fc96799f79f531278c804790f"
+    },
+    {
+      "path": "reducer-component-proof.json",
+      "bytes": 5994,
+      "sha256": "6dac68d35e7c06366fb37f9b8dd67b10a1d849258b7f3d5f9fed9d3bbf31aebb"
+    },
+    {
+      "path": "original-handoff.md",
+      "bytes": 5607,
+      "sha256": "8e289cf7e0e48791e2059601d76bc479821bfea5ebee46260e880184b30149ae"
+    },
+    {
+      "path": "settings-attempt-hidden-panel.json",
+      "bytes": 2086,
+      "sha256": "eb26852daa4a87205e8eb94db2d8ebf87a5fffd24c80a53c9f0680fbdf4fa95e"
+    },
+    {
+      "path": "sidebar-attempt-workspace-status.json",
+      "bytes": 4186,
+      "sha256": "5c42c68a3dc46c0e646dcb9a179c129f5ad1d4f5d7e695180188c01ac0ff3883"
+    },
+    {
+      "path": "sidebar-attempt-default-team-status.json",
+      "bytes": 17016,
+      "sha256": "4782c726958af53b1c68af1a794875fc33f6ce8dee3c190d198e9d3c692427c4"
+    },
+    {
+      "path": "full-app-attempt-no-membership.json",
+      "bytes": 3199,
+      "sha256": "08ed52c36b2c71bf056f9524016ef3b83602b7fbd2d21dc521cd38287e78313f"
+    },
+    {
+      "path": "tests.json",
+      "bytes": 6657,
+      "sha256": "dff80de452ee194d53920f7c6db2f90cabc119f8655fc933b3b1322aae36d38b"
+    },
+    {
+      "path": "source-bindings.json",
+      "bytes": 4524,
+      "sha256": "8451ac1c9f7578a5efe3e6ed011a6eb923ba7ef2340b72cd6a058e18aee791ca"
+    },
+    {
+      "path": "proof-validation.json",
+      "bytes": 987,
+      "sha256": "a2069ced863a2f9486534b6d78b9d711fa43da335a1faa29f22634b051084e5c"
+    }
+  ],
+  "correction": "original-handoff.md is preserved as historical evidence. Its Additional teams visibility claim is superseded by origin-team-access-cache.md. Use browser-report.json for the actual Sidebar proof; full-app-attempt-no-membership.json is an unsuccessful fixture attempt."
+}

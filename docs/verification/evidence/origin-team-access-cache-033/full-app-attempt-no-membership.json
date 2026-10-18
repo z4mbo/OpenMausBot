@@ -1,0 +1,39 @@
+{
+  "base": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+  "fix": "01ddbb18b123954c5381bb77a372de32e63d2961",
+  "startedAt": "2026-10-18T18:47:13.148Z",
+  "baselineStoreSha256": "f47528a40487a1c7ffc5fe6bf936d8eb89def37574d86838a651ed19bdbe0660",
+  "fixedStoreSha256": "91d8c168b735ed9598be60df2f3fb16a99a4a27956eae28c757768e519bb3729",
+  "cases": [],
+  "fixtures": [
+    {
+      "phase": "before",
+      "info": {
+        "url": "http://127.0.0.1:23310",
+        "pid": 30992,
+        "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\sidebar-proof-3\\openmausbot-verify-data-UtmFO2",
+        "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\sidebar-proof-3\\openmausbot-verification-evidence\\server-1792349233290-24820.log"
+      },
+      "workspaceId": "ee5b6025-f7fb-48b9-8cbc-e355d7bd7c3f",
+      "projectId": "bd90226e-811b-4ed7-b0ab-ee0d4185c810",
+      "fixtureEntrySha256": "be08a79dfc128ae29c2b17c610f3c9328ce0d28083186fb8ea656668e0475183",
+      "previewUrl": "http://127.0.0.1:5173/__team-cache-sidebar.html",
+      "stopped": true,
+      "fixtureDataRemoved": true
+    }
+  ],
+  "errors": [
+    {
+      "name": "TimeoutError",
+      "message": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-sidebar-bot-row=\"bd90226e-811b-4ed7-b0ab-ee0d4185c810\"]') to be hidden\u001b[22m\n\u001b[2m    23 × locator resolved to visible <div data-gaze-zone=\"\" data-sidebar-bot-row=\"bd90226e-811b-4ed7-b0ab-ee0d4185c810\" class=\"flex w-full items-center rounded-xl text-left outline-none transition-colors duration-150 focus-visible:ring-1 focus-visible:ring-accent/60 gap-2 pl-6 py-2 pr-[var(--row-trail)] hover:bg-raised/50\">…</div>\u001b[22m\n",
+      "stack": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-sidebar-bot-row=\"bd90226e-811b-4ed7-b0ab-ee0d4185c810\"]') to be hidden\u001b[22m\n\u001b[2m    23 × locator resolved to visible <div data-gaze-zone=\"\" data-sidebar-bot-row=\"bd90226e-811b-4ed7-b0ab-ee0d4185c810\" class=\"flex w-full items-center rounded-xl text-left outline-none transition-colors duration-150 focus-visible:ring-1 focus-visible:ring-accent/60 gap-2 pl-6 py-2 pr-[var(--row-trail)] hover:bg-raised/50\">…</div>\u001b[22m\n\n    at C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\sidebar-capture-3.mjs:97:21"
+    }
+  ],
+  "blockedRequests": [],
+  "corrections": [
+    "The Additional teams panel is hidden by SHOWS_CHIEF_LABEL=false in shipped Origin. Its prior direct component render was conditional, not a visible Origin screen. This capture targets the actual App/Sidebar workspace-project consumer instead."
+  ],
+  "boundary": "Actual App/Sidebar and real StoreProvider against isolated local fake-engine server, local mode with no Origin session or cloud backend; native bridge simulated; role transitions through registered owner PATCH route, not a shipped role-toggle control",
+  "browserClosed": true,
+  "endedAt": "2026-10-18T18:47:34.985Z"
+}

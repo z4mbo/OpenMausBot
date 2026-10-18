@@ -1,0 +1,105 @@
+{
+  "base": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+  "fix": "01ddbb18b123954c5381bb77a372de32e63d2961",
+  "branch": "codex/team-access-cache-033",
+  "changed": [
+    "src/state/store.test.ts",
+    "src/state/store.tsx"
+  ],
+  "bindings": [
+    {
+      "path": "src/state/store.tsx",
+      "baseBlob": "a8dfd0e882d843a06498e26ef8abeb1661a15486",
+      "fixBlob": "aa7e482925168c781e0b2e4a20e6470562d194b1",
+      "workingSha256": "11188c17496cb1044fedbc341dfb8b8c59d1302bd2ea11f5b8d17fd985f0503b"
+    },
+    {
+      "path": "src/state/store.test.ts",
+      "baseBlob": "15a469edbd1f0a79845d5222412a4e120364865c",
+      "fixBlob": "3c3da11f1583569d1464dd9f5458bdd891909d5a",
+      "workingSha256": "812e431fb2d088e086f5be8ab0d6f568a2fe53293553e3bf7241e28f6f8945bb"
+    },
+    {
+      "path": "src/components/Sidebar.tsx",
+      "baseBlob": "5961bb5e6002ffa3d4a8bf82286d5ae48a13e280",
+      "fixBlob": "5961bb5e6002ffa3d4a8bf82286d5ae48a13e280",
+      "workingSha256": "df0ef6cdb4ed1a14247d98718db2cb789e7702dc3a3d8545d0e00f1b22adcc6f"
+    },
+    {
+      "path": "src/lib/sidebar-layout.ts",
+      "baseBlob": "acf3a8d7e81d1dbb4ed45a832a7e5547d9676b0d",
+      "fixBlob": "acf3a8d7e81d1dbb4ed45a832a7e5547d9676b0d",
+      "workingSha256": "a88a0d5c733ae2a26824bf410bff04950be629511c9af8ad7eedb47fe5831a5c"
+    },
+    {
+      "path": "src/lib/origin-workspaces.ts",
+      "baseBlob": "79fd1a38d1b7424644070875a31d5d132f2de4a1",
+      "fixBlob": "79fd1a38d1b7424644070875a31d5d132f2de4a1",
+      "workingSha256": "c3b352b60b014a84c6f74a88ab49ba2a37178019f5a1b142018cf648d45d5c3f"
+    },
+    {
+      "path": "src/lib/origin-sync.ts",
+      "baseBlob": "4ed62f49db3ce227f207ef4ae05f6eb608ed1516",
+      "fixBlob": "4ed62f49db3ce227f207ef4ae05f6eb608ed1516",
+      "workingSha256": "663308980ffbfe592d607887f75fc34d5ba71544f65b9fdeba2b09eb7c193dd7"
+    },
+    {
+      "path": "src/lib/origin-teams.ts",
+      "baseBlob": "69917842d85948ac36523dde03b8249dd9a35cb0",
+      "fixBlob": "69917842d85948ac36523dde03b8249dd9a35cb0",
+      "workingSha256": "c425103cf12cabd2530a2b87dd0bb7f579d464acfd49721c7af0c3c519a6eb61"
+    },
+    {
+      "path": "src/components/bot-settings/PermissionsSection.tsx",
+      "baseBlob": "e7f144d29a082bf5d392edcbd88e11e6d06935e0",
+      "fixBlob": "e7f144d29a082bf5d392edcbd88e11e6d06935e0",
+      "workingSha256": "a14bd628f269adf1b06ef6052575b0ef2e63770fecb7326b6252bfaa454872f9"
+    },
+    {
+      "path": "src/components/bot-settings/ManagedTeamsSettings.tsx",
+      "baseBlob": "cc91aaba25cb6076d029ae9230d2ddc2d8430f78",
+      "fixBlob": "cc91aaba25cb6076d029ae9230d2ddc2d8430f78",
+      "workingSha256": "6c25a2ae9e8120bd7c5c7f25ab944a009758f5a62b7ff6075ce3cbe4a4248e4d"
+    },
+    {
+      "path": "server/store.ts",
+      "baseBlob": "c81bc59902fc8718143ffe5eb240ce03d37aaeac",
+      "fixBlob": "c81bc59902fc8718143ffe5eb240ce03d37aaeac",
+      "workingSha256": "2d05f092651240f4c2562fc365022045a979cac6142363599f2a86c3d7b9ce17"
+    },
+    {
+      "path": "server/routes/bot-patch.ts",
+      "baseBlob": "5f28cd1b8ffb18284256bf0b0a747804b4e62feb",
+      "fixBlob": "5f28cd1b8ffb18284256bf0b0a747804b4e62feb",
+      "workingSha256": "563b1075e395cb40c629ddf25155898f88f355bf4505dbab2cfd0eca2b3e3989"
+    },
+    {
+      "path": "server/peer-roster.ts",
+      "baseBlob": "9fa98eaf03791b5db0d30533cc600e826893c4f0",
+      "fixBlob": "9fa98eaf03791b5db0d30533cc600e826893c4f0",
+      "workingSha256": "de126bbeda7ec46eb1bb5945cbaf36da18e0e22f5c5e1252672e84095fac9a92"
+    },
+    {
+      "path": "server/index.ts",
+      "baseBlob": "dfb08a9d95c095cc03a49d617a1f4065f6b7a2a5",
+      "fixBlob": "dfb08a9d95c095cc03a49d617a1f4065f6b7a2a5",
+      "workingSha256": "45b91f3efc5a18569658147be8654a26fe649865623e6a9ec4a4eac179b34ac4"
+    },
+    {
+      "path": "package.json",
+      "baseBlob": "2062669b02a7c856d2dfecabe8925af512b3fb80",
+      "fixBlob": "2062669b02a7c856d2dfecabe8925af512b3fb80",
+      "workingSha256": "a592870eab61808890cf17a2aaf0306206dddcbf78ab5f806546ce462ec87104"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "baseBlob": "9c816eeb3de44293e95305836711d6354c8a70d6",
+      "fixBlob": "9c816eeb3de44293e95305836711d6354c8a70d6",
+      "workingSha256": "090ad00c65293bc016e2c602e725ce58ffcf3591151e89d7b566e16e25b6c271"
+    }
+  ],
+  "browserBaseline": "Only store.tsx is supplied from base through a pre-transform fixture plugin; all other product modules are identical in base/fix.",
+  "newRegressions": 9,
+  "baselineFailingRegressions": 6,
+  "baselinePassingControls": 3
+}
