@@ -177,6 +177,7 @@ export const createIssueForTask = action({
     taskId: v.id("tasks"),
     origin: v.optional(v.string()),
   },
+  returns: v.object({ ok: v.boolean(), issueUrl: v.string(), manualUrl: v.string(), message: v.string() }),
   handler: async (ctx, args) => {
     const project = (await ctx.runQuery(api.projects.get, {
       projectId: args.projectId,
@@ -192,53 +193,21 @@ export const createIssueForTask = action({
     const parsed = parseGitHubRepo(project.repoUrl);
     if (!parsed) return { ok: false, issueUrl: "", manualUrl: "", message: "Add a valid GitHub repo URL in Settings." };
 
-    const fallbackUrl = manualIssueUrl(parsed, details.task, args.origin);
     if (project.memberRole === "viewer") throw new Error("Edit role required");
-    const user = await ctx.runQuery(api.auth.me, { sessionToken: args.sessionToken });
-    const token = user?.email === DEFAULT_OWNER_EMAIL && project.ownerEmail === DEFAULT_OWNER_EMAIL ? process.env.GITHUB_TOKEN : undefined;
-    if (!token) {
+    if (details.task.githubIssueNumber) {
       return {
-        ok: false,
-        issueUrl: "",
-        manualUrl: fallbackUrl,
-        message: "GITHUB_TOKEN is not set in Convex env. Opening a prefilled GitHub issue instead.",
+        ok: true,
+        issueUrl: details.task.githubIssueUrl || `https://github.com/${parsed.owner}/${parsed.repo}/issues/${details.task.githubIssueNumber}`,
+        manualUrl: "",
+        message: `Already linked to GitHub issue #${details.task.githubIssueNumber}.`,
       };
     }
-
-    const body = [
-      details.task.description || "",
-      "",
-      `Created from Origin task ${taskKey(details.task._id)}.`,
-      args.origin ? `Origin workspace: ${args.origin.replace(/\/$/, "")}` : "",
-    ].filter(Boolean).join("\n");
-
-    const response = await fetch(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}/issues`, {
-      method: "POST",
-      headers: githubHeaders(true),
-      body: JSON.stringify({
-        title: details.task.title,
-        body,
-      }),
-    });
-    if (!response.ok) {
-      return {
-        ok: false,
-        issueUrl: "",
-        manualUrl: fallbackUrl,
-        message: `GitHub issue creation failed (${response.status}). Opening a prefilled issue instead.`,
-      };
-    }
-    const payload = (await response.json()) as { number: number; html_url: string; state: "open" | "closed" };
-    await ctx.runMutation(internal.github.linkTaskIssue, {
-      projectId: args.projectId,
-      sessionToken: args.sessionToken,
-      repoUrl: project.repoUrl!,
-      taskId: args.taskId,
-      githubIssueNumber: payload.number,
-      githubIssueUrl: payload.html_url,
-      githubIssueState: payload.state === "closed" ? "closed" : "open",
-    });
-    return { ok: true, issueUrl: payload.html_url, manualUrl: "", message: `Created GitHub issue #${payload.number}.` };
+    return {
+      ok: false,
+      issueUrl: "",
+      manualUrl: manualIssueUrl(parsed, details.task, args.origin),
+      message: "Use Origin's connected repository integration for automatic issue creation, or open this prefilled GitHub issue.",
+    };
   },
 });
 
