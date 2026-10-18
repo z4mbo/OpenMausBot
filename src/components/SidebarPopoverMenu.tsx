@@ -377,7 +377,7 @@ export function SidebarPopoverMenu({
   return (
     <div
       ref={rootRef}
-      className="relative"
+      className="relative min-w-0 max-w-full"
       onPointerEnter={hoverOpen}
       onPointerLeave={hoverClose}
       onFocus={() => openOnHover && setOpen(true)}

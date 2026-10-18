@@ -14,6 +14,7 @@ import { WhatsNew } from "./WhatsNew";
 import { NewIssueHost, useOriginProjectRows } from "./OriginSidebarExtras";
 import { MemberCallBanner } from "./MemberCallBanner";
 import { OriginAccountMenu } from "./OriginAccountMenu";
+import { SidebarAccountRow, SidebarTitlebarSlot } from "./SidebarIdentity";
 import { cloudProjectOf, linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
 import { cloudMutation, cloudUrl } from "@/lib/origin-cloud";
 import { sessionStore } from "@/lib/origin-cloud/client";
@@ -1990,14 +1991,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           </div>
         ) : null}
         {density !== "icons" && (
-          <div data-sidebar-top-slot className="@container/sidebar-top flex min-w-0 flex-1 items-center">
-            {PROFILE_AT_TOP
-              ? <div data-sidebar-top-account className="flex min-w-0 flex-1 items-center pr-1" style={windowNoDragStyle}><OriginAccountMenu /></div>
-              : <div data-sidebar-top-spacer className="min-w-0 flex-1 @min-[96px]/sidebar-top:min-w-6" />}
-            <div data-sidebar-top-switcher className="flex min-w-0 max-w-[140px] items-center">
-              <DesktopWorkspaceSwitcher inline cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />
-            </div>
-          </div>
+          <SidebarTitlebarSlot cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />
         )}
         <div
           data-sidebar-top-buttons
@@ -2040,6 +2034,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         </div>
       </div>
 
+      {PROFILE_AT_TOP && density !== "icons" && <SidebarAccountRow style={windowNoDragStyle} cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />}
       {density === "icons" && <DesktopWorkspaceSwitcher compact cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />}
       <OrganizationIdentity compact={density === "icons"} />
       <div className={cn("pt-1 pb-3", density === "icons" || !SIDEBAR_HAS_SEARCH ? "hidden" : "px-3")}>
