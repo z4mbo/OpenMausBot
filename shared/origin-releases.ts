@@ -10,6 +10,7 @@ export const releases: Release[] = [{
     { title: "Reliable signup loading", body: "Signup checks whether registration is available before showing its fields. A connection that does not respond offers Try again after ten seconds. Sign-in and verified invitations stay available." },
     { title: "Safer Windows child processes", body: "Workspace credentials stay out of installer and agent child processes even when environment names use different capitalization on Windows." },
     { title: "Private provider logs", body: "Stripe secret and restricted keys are hidden when agent protocol output is saved to logs, using a protection adapted from OpenMausBot." },
+    { title: "Accurate project lists", body: "Workspace project lists refresh when a Chief's project links change, clearing stale entries from the sidebar." },
   ],
 }, {
   version: "0.2.11",
