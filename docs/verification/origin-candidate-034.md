@@ -1,18 +1,20 @@
 # Origin 0.2.13 integration batch
 
-This is an unpublished integration checkpoint. It batches the user's rapid-drag,
+This batch shipped as **0.2.13** from frozen source
+`1483a7d76fb092b5ef6860afc5ffb520fc4e7707`. It combines the user's rapid-drag,
 branding, unrelated Cloud subscription and one-row sidebar requests with the
-held signup/logging/project-list work. Public 0.2.11 remains the last verified
-delivery. Neither the earlier 0.2.12 builds nor a source commit establishes
-publication of this batch.
+held signup/logging/project-list work. The [verified delivery](origin-delivery.md#0213-delivery)
+and [final audit report](evidence/origin-delivery-035/final-audit-report.md)
+record the public GitHub release, matching Windows/Mac downloads, update feeds
+and website separately from remaining feature acceptance.
 
 The initial 0.2.13 freeze at `f44ebe30a9568ed634b9eb8a45476f42e4c059b1`
 also failed CI. Its private draft, original annotated tag, native artifacts,
 website image and staging bytes are retained under
 `origin-candidate-v0.2.13-f44ebe30`. No publication was attempted. The
 [CI follow-up](origin-ci-followup-034.md) records the terminal run and the
-three logical corrections; replacement source-bound checks and artifacts are
-required before this version can ship.
+three logical corrections. Replacement source-bound checks and artifacts
+passed before the final source was published; the failed original remains held.
 
 The [033 source](origin-candidate-033.md) was frozen at
 `87ff77be5ea79272175219d479b9a8017b4e8fcc`. Its exact-source CI run
@@ -96,17 +98,22 @@ release/documentation guards passed; current website tests passed 25 cases and
 integrated Live/Comms passed 53. The raw successful UI log includes refused
 loopback-port-3000 diagnostics; its terminal footer and process exit are green.
 Replacement source-bound CI, Windows/Mac builds, artifact/feed validation and
-public delivery remain pending. The original private compiled website has
+public delivery passed; the [new receipt](evidence/origin-delivery-035/delivery-receipt.json)
+retains actual timestamps and source identity. The original private compiled website has
 16 qualified visual cases. All 1,350 client/shared acceptance bindings and all
 151 website inputs remain equivalent at product checkpoint `ec3c964cf`;
 the original reports retain their original sources and timestamps. Reuse is
-input equivalence, not a new full test or browser run. A rebuilt image and its
-eventual public routes still need their own release evidence. No new backend
+input equivalence, not a new full test or browser run. The rebuilt image has
+its own source identity and exact RootFS/runtime comparison; public HTTP checks
+cover four routes and public browser inspection covers landing and What's New.
+Auth HTTP checks cover the initial loading shells, without using an owner session.
+No new backend
 deployment is required merely by changing the desktop
 version. The [backend closure comparison](origin-backend-reuse-034.md) records
 100 bindings at `ec60e5a8a`, equal to deployed 0.2.11 apart from the root version.
 All 100 bindings were also carried forward unchanged at the local reporting
-checkpoint. The final freeze must retain them before reusing that deployment.
+checkpoint. The final freeze retained them, and the read-only publication guard
+verified source/dependency equality before reusing that deployment.
 
 This batch does not establish every feature or component as accepted. The
 [feature acceptance register](origin-feature-acceptance-034.md) records 34 areas

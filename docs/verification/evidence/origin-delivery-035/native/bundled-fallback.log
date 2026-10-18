@@ -1,0 +1,23 @@
+{
+  "available": 3,
+  "targets": [
+    {
+      "label": "mac-arm64",
+      "available": true,
+      "exactOrder": true,
+      "functionLine": 192124
+    },
+    {
+      "label": "mac-x64",
+      "available": true,
+      "exactOrder": true,
+      "functionLine": 192124
+    },
+    {
+      "label": "windows-x64",
+      "available": true,
+      "exactOrder": true,
+      "functionLine": 192124
+    }
+  ]
+}

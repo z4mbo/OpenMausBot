@@ -1,0 +1,93 @@
+# Origin 0.2.13 — final audit report
+
+**Reviewed source: 1483a7d76fb092b5ef6860afc5ffb520fc4e7707. Published release and matching website verified.** The scope is 14 retained, proved finding scenarios and the evidence below. These rows overlap the historical 73-row register and include grouped paths; the counts must not be added. The [34-area feature register](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/origin-feature-acceptance-034.md) distinguishes inspected source, synthetic tests, actual browser checks, packages and external acceptance. It does not certify every feature.
+
+## Proved scenarios fixed in this batch
+
+Locations refer to source 1483. The 17 files cited by the previous 13 rows are byte-identical to their f44 checkpoint; row 14 is the subsequent product correction.
+
+| Severity | Inputs/state → wrong result; correction | File:line; integration fix |
+| --- | --- | --- |
+| P2 | Rapidly drag one of 36 issues: stacked animations hide other cards. One interruptible animation per card preserves visible layout at 180 ms. | [issue-order.ts:58](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/src/components/origin-pages/issue-order.ts#L58); d57c0bfc6, timing 1d54aab6f |
+| P2 | Drag as editor, become viewer, release: stale closure submits a move. Current permissions gate lift/commit and cancel pending drag. | [use-card-drag.ts:82](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/src/components/origin-pages/use-card-drag.ts#L82); ce336ce77 |
+| P1 | Fail bots.json replacement while deleting a thread: SQLite messages disappear, or an unsaved grant stays live. Rollback preserves data/objects and rejects added grants while retaining revocations. | [store.ts:2410](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/store.ts#L2410), [bots-save.ts:45](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/bots-save.ts#L45); fb43fec3b |
+| P2 | Packaged Origin's computer menu opens an upstream subscription offer. Native vendor-account/offer capabilities now require the actual upstream identity. | [main.mjs:863](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/electron/main.mjs#L863), [preload.cjs:6](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/electron/preload.cjs#L6); 7ce85eddd |
+| P2 | At 375 px, saved-server actions leave about 6 px for the name. A readable text basis and wrapping actions restore 265 px. | [ConnectedWorkspacesSettings.tsx:80](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/src/components/ConnectedWorkspacesSettings.tsx#L80); c6141cbbd |
+| P2 | An own-key phone/companion call receives 402 for an unrelated plan before key validation. Explicit Live-key calls retain authentication and target access without that gate. | [live-call-controller.ts:146](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/live-call-controller.ts#L146); c6371c2b4 |
+| P2 | A self-hosted update checks upstream and suggests upstream installation. Origin release/tag lookup and checkout guidance replace that path; held candidates are excluded. | [update-check.ts:4](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/update-check.ts#L4); 67d5d8a26 |
+| P2 | A provider snapshot never settles, blocking healthy-engine discovery. A one-minute deadline returns truthful unavailable state and cleans timers. | [registry.ts:56](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/harness/registry.ts#L56); 67dbb03a8 |
+| P2 | Startup/tray, installation, setup and agent messages identify the upstream product. Shared branding and reviewed copy say Origin while compatibility/vendor contracts remain explicit. | [startup-screen.mjs:17](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/electron/startup-screen.mjs#L17), [product-brand.mjs:1](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/shared/product-brand.mjs#L1); eeb992491, 7a5716f74, 795ca0077 |
+| P2 | An inherited launch card opens the upstream Product Hunt campaign. The promotion is removed from its queue and renderer. | [notices.ts:11](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/src/lib/notices.ts#L11), [AppNotices.tsx:150](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/src/components/AppNotices.tsx#L150); 43d25faab |
+| P1 | Fleet upgrade gives a privileged executor an upstream npm installation before Origin restarts. Planning refuses before installation, writes or restart. | [fleet.ts:476](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/fleet.ts#L476); 5821d0c0a |
+| P2 | CLI setup/service recovery installs or runs the upstream package. Instructions now use the actual pinned Origin checkout and pnpm commands. | [cli-usage.ts:94](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/cli-usage.ts#L94), [service-unit.ts:110](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/service-unit.ts#L110); 256509b8f |
+| P2 | Optional Sentinel discovery schedules an installed upstream app. Discovery selects Origin or preserves the invoking checkout. | [service-unit.ts:148](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/service-unit.ts#L148); ec60e5a8a |
+| P2 | On a case-sensitive home, unavailable uppercase OpenMausBot is skipped and an older ready OpenGrokBot is selected. Shared connection/reason lookup restores exact-case precedence and explicit-userData authority. | [local-computer.ts:363](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/server/local-computer.ts#L363); a9134c95b |
+
+The [CI follow-up](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/origin-ci-followup-034.md) preserves the failed original f44 run: 19 jobs succeeded, four failed and one broker deployment skipped. Its 22 failed platform occurrences were eight distinct assertions. Four stale branding expectations and three catalog assertions in two profile manifests were corrected without weakening refusal, PWA, tool/schema, digest or permission checks. The six affected files passed 104 cases with five platform skips; an actual Linux filesystem probe confirmed the descriptor regression plus five controls. These results do not relabel the original CI as green.
+
+## Visible changes
+
+These are the five before/after pairs in the current PR, preserved at the frozen source. They are source-qualified fixture images, not new installed-app or production captures.
+
+| Screen | Before | After |
+| --- | --- | --- |
+| Footer, 240 px | [Two rows](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-footer-single-row-034/before-240-dark.png) | [One row](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-footer-single-row-034/after-240-dark.png) |
+| Rapid issue drag | [Cards leave the board](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-issue-drag-034/before-during.png) | [Cards stay visible, 180 ms](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-issue-drag-034/duration-after-during.png) |
+| Startup | [Before](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-branding-034/startup-before.png) | [Origin startup](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-branding-034/startup-after.png) |
+| Pairing | [Before](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-branding-034/pairing-before-light.png) | [Origin pairing](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-branding-034/pairing-after-light.png) |
+| Narrow server settings | [Squeezed name](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-desktop-cloud-policy/before-server-layout-375-light.png) | [Readable name](https://raw.githubusercontent.com/z4mbo/Origin/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/evidence/origin-desktop-cloud-policy/after-server-layout-375-light.png) |
+
+The footer is the requested one-row preference, including optional Files/update controls. The real 0.2.13 Issues renderer also supplies the refreshed landing image. Shared What's New contains eleven current notes, six release articles and 51 titles; unpublished 0.2.12 is not a shipped history entry.
+
+Public-domain invitation links and Account-before-Search/computer-below layout first shipped in **0.2.10**. Draft-first/default creation and its bounded legacy repair shipped in **0.2.11**. This candidate carries them forward. Their earlier captures and receipts retain their own sources and are not new 0.2.13 deliveries.
+
+**Email is conditionally ready, not inbox-accepted.** The free Brevo setup has recorded sender/domain readiness and central backend configuration. Actual sending still depends on valid credentials, sender/DNS and provider availability/quota. The recorded 0.2.11 receipt says no real email was sent; provider acceptance and recipient inbox arrival remain unproved. Failure keeps the public manual-share link. No new recipient email was sent for this report.
+
+## Finite remaining acceptance
+
+| Batch | Exit condition |
+| --- | --- |
+| A — two clients and authority | Disposable authenticated clients prove sync, invites, account/backend switches, deletion, concurrent sender-runs leases, offline takeover and role revocation without duplicate execution or stale private content. |
+| B — Chief and GitHub App | A dedicated repository completes delegation through failures/denial, Chief review and exact-head human merge approval; Draft stays private and duplicate/out-of-order webhooks remain scoped. |
+| C — persisted data | Two clients persist board/chat/mentions/notifications, encrypted Vault, all storage writers, feedback, Draw, search and exact project-folder context; larger fixtures prove bounded behavior. |
+| D — native and hardware | Isolated installed Windows and physical arm64/x64 Mac cover launch/update/restart, picker/IPC/titlebar, devices, phone pairing, screen sharing and TURN; agent audio/summary needs its own provider evidence. |
+| E — email | One explicitly authorized test recipient establishes provider acceptance separately from inbox arrival, then checks public-link expiry/revocation and uncertain-send recovery. |
+| F — remaining UI states | Reconcile uncovered entries in the 364-entry historical inventory: portals/archive branches/native dialogs, both widths/themes, keyboard/focus, reduced motion, error/loading/empty/permission states and project accent. |
+
+Existing Windows packages are **unsigned**; Mac packages are **ad hoc signed and unnotarized**, with manual Mac updates. Build success is separate from physical Mac or installed updater acceptance. Synchronous thread-save recovery is proved; cross-file process/power-loss atomicity needs a journal. Provider deadlines bound waiting; resistant-child termination escalation remains deferred.
+
+The original 5,992 client/shared passes can be reused only for their 1,350 equivalent named inputs. The original sixteen website visual cases retain nine full-page/seven auth-viewport scopes and their 151 input bindings; signup captured deliberately blocked-policy loading, with eight initial failed images explicitly rejected. Original run times, sources and image identities remain intact.
+
+## What to add next and upstream fit
+
+Three useful feature priorities are **project automations with visible skipped/superseded/error runs**, **accessible Other answers to Chief widgets**, and a **crash-recovery intent/receipt journal**. Automations must retain Chief/project, authorized sender/machine and durable side-effect identity. Free text cannot grant tool or merge approval. A journal needs process-cut/restart evidence before promising crash atomicity.
+
+The [bounded upstream review](https://github.com/z4mbo/Origin/blob/1483a7d76fb092b5ef6860afc5ffb520fc4e7707/docs/verification/origin-upstream-fit-034.md) covers 76 search results from October 16–18: 46 existing scoped records plus 30 further dispositions, not 76 adopted features. The later primary-API delta found **zero merges strictly after 2026-10-18T21:25:24Z through 23:17:25Z**, with no truncation. Existing selectively adapted subsets are [#3004 thread durability](https://github.com/milind-soni/OpenMausBot/pull/3004), [#2970 bounded status reads](https://github.com/milind-soni/OpenMausBot/pull/2970) and [#3071 own-key Live calls](https://github.com/milind-soni/OpenMausBot/pull/3071); broader policies remain deferred.
+
+Six further useful candidates are recommendations requiring reproduction, not adopted functionality:
+
+| Official upstream PR | Origin fit and required constraint |
+| --- | --- |
+| [#2966 — partial ACP replies on shutdown](https://github.com/milind-soni/OpenMausBot/pull/2966) | Prove missing partial text across graceful restart; preserve one completion, sender attribution and no post-dispose process spawn. |
+| [#2968 — all-inactive model responses](https://github.com/milind-soni/OpenMausBot/pull/2968) | Fix only the proved catalog-filter case; retain explicit/default model precedence and each sender's credentials. |
+| [#3006 — newly installed Podman discovery](https://github.com/milind-soni/OpenMausBot/pull/3006) | Probe the known Windows installer directory with a fixture executable; discovery does not prove VM/hardware readiness. |
+| [#2998 — completed external-poll reports](https://github.com/milind-soni/OpenMausBot/pull/2998) | Reproduce the false failure row; preserve Chief/request identity, parked-seat cleanup and genuine interrupted/stalled failures. |
+| [#3000 — sticky tables below the composer](https://github.com/milind-soni/OpenMausBot/pull/3000) | Reproduce stacking in real chats/rooms at 375 px; inspect shared scrollers, focus and readable content. |
+| [#3002 — widget Other answer](https://github.com/milind-soni/OpenMausBot/pull/3002) | Port resolver, validation, settled values and accessible input together; retain offered IDs, stale-revision rejection, idempotency and exact sender. |
+
+Use small isolated adapters with a recorded upstream SHA, one coherent commit, failing-before/green-after evidence and wrong-workspace/project/member negatives. Preserve sender-runs ownership, hierarchy containment and human-approved exact-head merges. No wholesale upstream merge, vendor billing, secret replication or authority migration is proposed.
+
+## Verified delivery
+
+Origin **0.2.13** is [published](https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.13) from source **1483a7d76fb092b5ef6860afc5ffb520fc4e7707**. GitHub release **416771368** became public at **2026-10-18T23:49:43Z**. The website promotion completed at **2026-10-18T23:50:28.6035760Z** using image **sha256:02e51fcd5b86b85392ada154c402f86229369c8894bb377d8ab5487ecc2296b0**.
+
+- [Final CI 39175531369](https://github.com/z4mbo/Origin/actions/runs/39175531369) passed all 24 expected jobs: 23 success and the intended broker deployment skip. The main twelve shards report **56,677 passed / zero failed / 611 skipped platform occurrences**, distinct from unique tests and other stages.
+- [Native 39175524797](https://github.com/z4mbo/Origin/actions/runs/39175524797) built Windows x64 and both Mac architectures. The actual downloaded packages passed 477 plain Electron source comparisons, Mac architecture/metadata checks and an isolated Windows packaged-resource smoke. Installed GUI and physical Mac execution remain separate.
+- [Backend/site 39175524845](https://github.com/z4mbo/Origin/actions/runs/39175524845) passed 215 backend and 25 site tests, typecheck and site build. The deployed backend was reused after the final source/dependency comparison; no new deployment, migration, backup or deployment key was needed. Historical 0.2.11 receipt times are unchanged.
+- Full anonymous HTTPS streams verified **13 payloads, two metadata files and three download aliases** against the pinned manifest and checksums. Matching updater feeds contain eleven current notes. GitHub's 15 asset sizes/API digests match; compressed Actions archive digests remain provider-reported metadata.
+- Public HTTP checks passed all four routes. Login/signup checks cover their initial loading shells only; no owner session or account submission was used. The public browser inspected landing and What's New, including 51 canonical titles across six release articles. HTTP also checked all 51 bodies. The initial checker wrongly expected a server-rendered auth heading; that failed checker/log is preserved and its scope corrected using the real AuthFlow path.
+- The rebuilt website's complete 16-layer RootFS and runtime configuration, except its revision label, match the qualified prior image, with all 151 input files byte-identical. The original sixteen visual cases retain their original f44/image provenance and limited scopes; this is qualified reuse, not a new sixteen-case run.
+
+See the [delivery receipt](https://github.com/z4mbo/Origin/blob/bugfix/scan/docs/verification/evidence/origin-delivery-035/delivery-receipt.json), [evidence manifest](https://github.com/z4mbo/Origin/blob/bugfix/scan/docs/verification/evidence/origin-delivery-035/manifest.json), [public website](https://origin.imbored.fun/) and [matching What's New](https://origin.imbored.fun/whats-new). Manifest SHA-256 is **9065916484672e3997c6b4fd956a6588cf3a537af321fa357450c92bb3036b44**; checksums SHA-256 is **d1509e96e813e666dd36cb279213a6249d3fdf64ac0526ac26f9a356db450ae4**.
+
+[PR 1](https://github.com/z4mbo/Origin/pull/1) remains open against origin-integration; no task PR was merged. Earlier held candidates and failed checks remain preserved. The six acceptance batches above remain open; publication does not certify every component or feature. Automatic approval review rejected optional deletion of some stopped test folders; they were retained without bypass.

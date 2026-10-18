@@ -1,0 +1,1345 @@
+{
+  "version": "0.2.13",
+  "source": "f44ebe30a9568ed634b9eb8a45476f42e4c059b1",
+  "image": "sha256:a893f04ee5c627e06c240e179bcf52c1bf2ce0a532c65d5348059a5b36f602d1",
+  "policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; form-action 'none'; worker-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'",
+  "target": "http://127.0.0.1:33034",
+  "methods": [
+    "GET",
+    "HEAD"
+  ],
+  "incomingCredentialsForwarded": false,
+  "outgoingCookiesForwarded": false,
+  "blocked": {
+    "method": 0,
+    "path": 0,
+    "upgrade": 0
+  },
+  "requests": [
+    {
+      "path": "/",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/issues.webp",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/product-manager.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/researcher.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/chief.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/designer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/marketer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/developer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/copywriter.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/origin.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/issues-crop.webp",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/chief.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/researcher.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/product-manager.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/designer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/developer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/marketer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/copywriter.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/login",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/login/page-b2553a99727cfac9.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/440-12393dde337d3232.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/signup",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/signup/page-06f9480c054a7f5c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/440-12393dde337d3232.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/whats-new",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/whats-new/page-c8d1993513765801.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/issues.webp",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/marketer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/developer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/copywriter.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/chief.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/designer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/product-manager.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/researcher.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/login",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/login/page-b2553a99727cfac9.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/440-12393dde337d3232.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/signup",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/signup/page-06f9480c054a7f5c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/440-12393dde337d3232.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/whats-new",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/whats-new/page-c8d1993513765801.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/issues-crop.webp",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/chief.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/marketer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/developer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/designer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/copywriter.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/product-manager.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/researcher.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/login",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/login/page-b2553a99727cfac9.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/440-12393dde337d3232.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/signup",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/signup/page-06f9480c054a7f5c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/440-12393dde337d3232.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/whats-new",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/whats-new/page-c8d1993513765801.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/issues.webp",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/designer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/chief.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/product-manager.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/copywriter.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/developer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/researcher.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/landing/avatars/marketer.svg",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/login",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/login/page-b2553a99727cfac9.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/440-12393dde337d3232.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/signup",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/signup/page-06f9480c054a7f5c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/440-12393dde337d3232.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/page-f960af0cbcdb272c.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/whats-new",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/1ecf5dafdea96d24.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/css/2bf1074f1159d000.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/810-7243b30759aebe05.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/webpack-26f04ee2d5988f5b.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/63a1dcd6-5e550798c4911768.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/main-app-f63ba25ee23225b2.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/624-61e684cb570ddd8d.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-0e1258d8cc87adba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/525-e27dd72829ce1e10.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/app/whats-new/page-c8d1993513765801.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/342-56dde7888df1e842.js",
+      "method": "GET",
+      "status": 200
+    }
+  ]
+}

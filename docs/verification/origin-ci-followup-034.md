@@ -42,3 +42,9 @@ a disposable directory. The pre-push hook rejected the initial unlabelled
 snapshots before any remote ref changed; no lint rule was disabled.
 
 A new freeze must include the fixes and this evidence, followed by **fresh exact-source CI and native packages, a website image with its own source/image receipts, and actual public release/download/feed/site verification**. Reused input evidence does not relabel the old image, qualify a replacement build or complete account, mail, hardware, multi-machine or all-feature acceptance. No new tests, builds, push or production operation was performed for this documentation commit.
+
+The subsequent freeze `1483a7d76fb092b5ef6860afc5ffb520fc4e7707` passed those
+release gates and shipped as 0.2.13. The [separate delivery receipt](evidence/origin-delivery-035/delivery-receipt.json)
+and [audit report](evidence/origin-delivery-035/final-audit-report.md) record its
+actual CI, packages, public downloads and website. This does not change the
+failed f44 result or the original evidence above.
