@@ -26,7 +26,7 @@ import { orderForMove, stepTarget, useFlip, withPendingMoves, type PendingMove }
 import { NewIssueComposer } from "./NewIssueComposer";
 import { CompleteIssueDialog, completesThroughPullRequest, type IssueImplementer } from "./CompleteIssueDialog";
 import { originGitHub } from "@/lib/origin-github";
-import { isDraftColumn } from "../../../shared/origin-columns";
+import { isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-columns";
 import { PersonAvatar } from "./PersonAvatar";
 import { useCardDrag, type CardDrag, type DropTarget } from "./use-card-drag";
 import { openIssueColumns } from "./issue-columns";
@@ -160,6 +160,8 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   useEffect(() => {
     if (!canEdit || !board || !project.repoUrl) return;
     const drafts = new Set(board.columns.filter(isDraftColumn).map((column) => column._id));
+    const legacyDraft = !drafts.size && board.columns.find(isLegacyIdeaColumn);
+    if (legacyDraft) drafts.add(legacyDraft._id);
     const unlinked = board.tasks.filter((task) => !task.done && !task.githubIssueNumber && !drafts.has(task.columnId) && !mirrored.current.has(task._id)).map((task) => task._id);
     if (!unlinked.length) return;
     for (const id of unlinked) mirrored.current.add(id);

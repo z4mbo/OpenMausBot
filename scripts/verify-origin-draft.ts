@@ -7,8 +7,9 @@ import { normalizePath, type Plugin } from "vite";
 import { launchVerificationServer } from "./control-omb.ts";
 import { mountPreview, parkUntilSignal, REPO_ROOT, type MountedPreview } from "./testing/preview-fixture.ts";
 
-if (process.argv.length !== 2) throw new Error("This launcher uses only its own synthetic fixture");
-const baseline = "0757f71888d2c5aaf41bd877724949a63d815aa2";
+const privacy = process.argv.length === 3 && process.argv[2] === "--privacy";
+if (process.argv.length !== 2 && !privacy) throw new Error("This launcher uses only its own synthetic fixture");
+const baseline = privacy ? "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d" : "0757f71888d2c5aaf41bd877724949a63d815aa2";
 const paths = ["src/components/origin-pages/NewIssueComposer.tsx", "src/components/origin-pages/FeedbackPage.tsx", "src/components/origin-pages/IssuesPage.tsx", "shared/origin-columns.ts"];
 const fixture = await launchVerificationServer();
 const previews: MountedPreview[] = [];
@@ -36,6 +37,7 @@ try {
       cacheDir: join(fixture.info.dataDir, `vite-draft-${version}`), plugins: [frozenSource],
       aliases: [
         { find: /^@\/lib\/origin-cloud$/, replacement: fileURLToPath(new URL("./testing/origin-draft-cloud.ts", import.meta.url)) },
+        { find: /^@\/lib\/origin-github$/, replacement: fileURLToPath(new URL("./testing/origin-draft-github.ts", import.meta.url)) },
         { find: /^@\//, replacement: `${join(REPO_ROOT, "src").replaceAll("\\", "/")}/` },
       ],
       extraRoutes: [{ path: "/__origin-draft-fixture.json", handler: (_request, response) => { response.setHeader("content-type", "application/json"); response.end(JSON.stringify({ version, baseline, sourceHashes, synthetic: true })); } }],

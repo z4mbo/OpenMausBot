@@ -1,0 +1,88 @@
+{
+  "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+  "test": {
+    "file": "src/components/origin-pages/issue-draft-mirror.test.ts",
+    "sha256": "f531ba7ee3f3f83a8610d04dd658bc5c1ca9fb154cad6cd3a84dac361ba4786b",
+    "before": {
+      "failed": 1,
+      "passed": 2
+    },
+    "after": {
+      "passed": 3
+    }
+  },
+  "relatedTests": 18,
+  "guards": 9,
+  "screenshots": 8,
+  "typecheck": "tsc -b",
+  "lint": "oxlint touched paths --deny-warnings",
+  "normalization": [
+    {
+      "file": "fixture/verify-origin-draft.ts",
+      "source": "scripts/verify-origin-draft.ts",
+      "rawSha256": "508308336dbb7371f7ae646a5e424ba31124a0fba8eca558f742d4fa02634b73",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "fixture/origin-draft-cloud.ts",
+      "source": "scripts/testing/origin-draft-cloud.ts",
+      "rawSha256": "392118dee09c0c3c4d63d0eb6b784d45cbddb44001da339935d8b68260508a7d",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "fixture/origin-draft-preview.tsx",
+      "source": "scripts/testing/origin-draft-preview.tsx",
+      "rawSha256": "5049785ae4a32729e6a7091445bea02221ac87c18ee2e74db255bda6eafd7481",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "fixture/origin-draft-github.ts",
+      "source": "scripts/testing/origin-draft-github.ts",
+      "rawSha256": "01e84c522cec86e7e4a3726ec34099c89195ed2de0a2579f89627279e544ef3d",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "fixture/draft-mirror-capture.mjs",
+      "source": ".omb-scratch/draft-mirror-capture.mjs",
+      "rawSha256": "f75636448526c67d96e9a76f9c6eb53d63e57ded1d9629195bdfc4c18fb290b1",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "logs/draft-mirror-before.log",
+      "source": ".omb-scratch/draft-mirror-before.log",
+      "rawSha256": "4896739303dc6e6196d65311e77407dae39647b011f639bab25f244db516dd71",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "logs/draft-mirror-after.log",
+      "source": ".omb-scratch/draft-mirror-after.log",
+      "rawSha256": "1e5193ebf15dad513feb009012e31b3c84f737d7d155b0ba49c39ebee7023e8e",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "logs/draft-mirror-browser.log",
+      "source": ".omb-scratch/draft-mirror-browser.log",
+      "rawSha256": "53473c0f8a1ae79712f53898a2c8af03e9cb0660df76dc91e32a50d3d9b01a35",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "logs/draft-mirror-types.log",
+      "source": ".omb-scratch/draft-mirror-types.log",
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "logs/draft-mirror-lint.log",
+      "source": ".omb-scratch/draft-mirror-lint.log",
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "transform": "LF and one terminal newline"
+    },
+    {
+      "file": "logs/draft-mirror-guards-final.log",
+      "source": ".omb-scratch/draft-mirror-guards-final.log",
+      "rawSha256": "f0cfbbe4f061984e7089b281ff7222e9568adc52139cf943368a37de31c9d53d",
+      "transform": "LF and one terminal newline"
+    }
+  ],
+  "qualification": "Recorded synthetic mirror requests, no external API or production data. New pending-Idea guard changes an effect only, not rendered controls. Previous Draft-default evidence remains unchanged."
+}
