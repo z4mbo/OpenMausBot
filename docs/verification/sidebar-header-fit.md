@@ -1,5 +1,10 @@
 # Sidebar account and computer controls
 
+## Published source boundary
+
+Fix `c1210a4f3` is included in published 0.2.10 at `0eb372a94715527931043a1b6d8c02a50194dbb0`; the [0.2.10 delivery](origin-delivery.md#0210-delivery) and [permanent receipt](evidence/origin-delivery-030/delivery-receipt.json) bind its current binaries. The original twelve-case regression and 54-JPEG source/bridge evidence below retain their original 0.2.8/0.2.9 qualifications. Native OS popups, window controls and physical installation are not inferred from those synthetic captures.
+
+
 The [retained report](evidence/origin-header-fit-029/report.json) and
 [SHA-256/dimension manifest](evidence/origin-header-fit-029/manifest.json)
 contain 54 unchanged JPEGs: 24 desktop before/after pairs, four mobile after-only

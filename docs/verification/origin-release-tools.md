@@ -1,5 +1,12 @@
 # Origin development and release tools followup
 
+## 0.2.10 operational checkpoint
+
+The [0.2.10 delivery](origin-delivery.md#0210-delivery) and [permanent receipt](evidence/origin-delivery-030/delivery-receipt.json) record actual exact-source CI/native success, public client hashes, a fresh full backup, authenticated existing dev target, five bounded migrations, matching website and revoked temporary key. These actual results are distinct from the historical mock/subprocess and byte-equivalence checks below. The reviewed release source is `0eb372a94715527931043a1b6d8c02a50194dbb0`; earlier 0.2.7 tooling checkpoints retain their original scope.
+
+## Historical tooling checks
+
+
 [Verification index](README.md) · [Sanitized proof](evidence/origin-release-tools-027.json) · [Release delivery and cleanup limits](origin-delivery.md)
 
 These development/operations corrections follow the immutable `origin-v0.2.7` source `dbdac25fcd014d231e694aa8665d326b235af616`. They are not included in that shipped tag and do not replace, relabel or require rebuilding its Mac/Windows artifacts. All three post-publication fix commits match the proven candidates. Actual scoped tracked runs are recorded separately from the historical private regressions.

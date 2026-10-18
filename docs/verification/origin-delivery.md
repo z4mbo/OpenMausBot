@@ -1,4 +1,28 @@
-# Origin 0.2.7 delivery
+# Origin release delivery
+
+## 0.2.10 delivery
+
+Origin **0.2.10** is published from frozen source `0eb372a94715527931043a1b6d8c02a50194dbb0` (`origin-v0.2.10`). [CI 39131925881, attempt 1](https://github.com/z4mbo/Origin/actions/runs/39131925881/attempts/1) and [native 39131922063](https://github.com/z4mbo/Origin/actions/runs/39131922063) succeeded on that source. The public GitHub release, all 13 payloads, two metadata files and three aliases, backend, five bounded migrations and matching website are verified. The deployment key was revoked at `2026-10-18T14:16:39.3562237Z` and its file is absent. [Delivery receipt](evidence/origin-delivery-030/delivery-receipt.json) (SHA-256 `247e4a0dfc19c473b7eea3093bf759ee9777f327850dd5fe44ca6753d110c297`) and [evidence report](evidence/origin-delivery-030/report.json) (SHA-256 `f2f13eafb07b0f1a1b92458daa16c76d31c64d1277edc562f43788b315af7af6`) retain the actual results.
+
+The pre-freeze local checkpoint passed 5,960 client/shared cases across 561 files, 515 touched server/shared cases with five existing skips, 175 backend cases, 14 site cases and 121 guard/release/deployment cases. The unchanged final Activity regression failed one/passed six before correction and passed all seven afterward. The real-App source fixture shows automatic receipt refresh after a visible-composer turn; its 0.2.9 footer, fake provider and controlled HMR remain explicitly qualified. The actual [in-app What’s New gallery](evidence/origin-app-whats-new-030/manifest.json) contains four new captures with 16 article and 128 note-title/body comparisons against the frozen canonical source; component/keyboard evidence does not establish native updater acceptance.
+
+Manifest SHA-256: `cbf75496f263d9b4608c4ea8b70963c3e5ae175600c805831423aca17e9ce1f9`; checksums: `c3384c776cba5781d9c7ec76076e8435bc2eaa3ce6b1d5b80719441b9ea4293e`. Site image: `sha256:4dfdb35d3736cae71bd5a1498b8901e3328480966a72f5cbb0d465cb5272fe7b`; context identity: `a6618c614b3a802368f7a97b2df9b35768a6ffb27a933979ed40a685186154e4`. The fresh storage-inclusive backup SHA-256 is `e7da76d6ba2eb0261f0b0ff7d7fc5d0ad3e6ed6b203be00b799afcff0e2ae176`. The authenticated target remains `wry-fly-446` (Convex `dev`) at its existing pinned cloud URL; no target switch is implied. Only aggregate migration checkpoints are retained.
+
+| Migration stream | Done | Pages | Admitted |
+| --- | --- | --- | --- |
+| users | true | 1 | 3 |
+| projects | true | 1 | 0 |
+| workspaceAgents | true | 1 | 0 |
+| designAssets | true | 1 | 5 |
+| drawingFiles | true | 1 | 1 |
+
+Public browser verification at `2026-10-18T14:19:51.023Z`, after key revocation, passed all four routes with five current notes, three platform links and zero account submissions. [Public landing](evidence/origin-delivery-030/public/landing.jpg) is separate from the sixteen private compiled-image cases. The canonical history has four release articles and 32 titles. All 32 full notes matched the canonical source in the live DOM. The public signup route displayed its invite-only notice; account authentication was not exercised.
+
+The user-approved free Brevo account was created. The required organization address has been submitted; onboarding remains in progress. Brevo requires the user to complete phone verification before API-key creation and sending. Domain authentication remains pending; no provider key has been created; transactional sending is not activated. Hosted invitation email is not configured; public invitation links remain available for manual sharing. No real recipient email has been sent. Provider acceptance does not establish inbox delivery.
+
+Windows packages are unsigned. Mac packages are ad hoc signed and unnotarized with manual updates; interactive macOS installation, signed-updater, real-provider/hardware and cross-machine/TURN acceptance remain separate. Provider acceptance does not establish inbox delivery. The continuing review remains scheduled for 06:00 Europe/Rome.
+
+## Historical 0.2.7 delivery
 
 Origin 0.2.7 delivery is complete. This record distinguishes published artifacts, deployed services and isolated verification. The review PR stays open; no product task PR was merged.
 

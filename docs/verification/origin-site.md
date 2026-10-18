@@ -1,5 +1,12 @@
 # Origin website inspection
 
+## Published 0.2.10 website
+
+The public site now matches frozen source `0eb372a94715527931043a1b6d8c02a50194dbb0` and image `sha256:4dfdb35d3736cae71bd5a1498b8901e3328480966a72f5cbb0d465cb5272fe7b`, context identity `a6618c614b3a802368f7a97b2df9b35768a6ffb27a933979ed40a685186154e4`. All four public routes passed after key cleanup, with five current notes and three platform aliases; no account form was submitted. The sixteen new private compiled-image cases and ordinary public JPEG retain their separate evidence in the [0.2.10 delivery](origin-delivery.md#0210-delivery) and [permanent receipt](evidence/origin-delivery-030/delivery-receipt.json). Live account authentication and mailbox delivery remain outside this acceptance.
+
+## Historical website inspection
+
+
 The website now consumes `shared/origin-theme.css`, the same semantic palette, control radii and motion duration used by the core app. Inter replaces the separate display typography. Light and dark colors, form focus, flat panel borders, menu dismissal and wrapping footer navigation were inspected. The auth password input has an explicit accessible name independent of its visibility toggle.
 
 The website's `/whats-new` page reads `shared/origin-releases.ts`. Footer/download links expose it, and download guidance describes the unsigned Mac update limitation accurately. Its Mac opening link follows [Apple's current instructions](https://support.apple.com/en-us/102445); macOS 15 and later removed the old Control-click override. The Docker build context includes both shared files; `scripts/deploy-origin.mjs` stages those dependencies from the committed tree.

@@ -66,7 +66,7 @@ Use only mapped, tested commands:
 - [Welcome flow and guided tour](onboarding.md)
 - [Sidebar account and computer controls](sidebar-header-fit.md) ([retained evidence](evidence/origin-header-fit-029/report.json))
 - [Origin 0.2.9 held-candidate verification](origin-candidate-029.md)
-- [Origin 0.2.10 candidate preparation](origin-candidate-030.md)
+- [Origin 0.2.10 source and delivery acceptance](origin-candidate-030.md) ([delivery receipt](evidence/origin-delivery-030/delivery-receipt.json))
 - [Activity receipt refresh across bot updates](origin-activity-refresh.md)
 - [Channels](channels.md)
 - [In-chat team coordination](room-coordination.md)

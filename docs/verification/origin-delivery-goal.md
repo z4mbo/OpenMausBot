@@ -1,5 +1,10 @@
 # Origin inspection and online delivery
 
+## Completed 0.2.10 cycle
+
+The [0.2.10 delivery](origin-delivery.md#0210-delivery) and [permanent receipt](evidence/origin-delivery-030/delivery-receipt.json) record completed website, backend and matching Windows/Mac publication at frozen source `0eb372a94715527931043a1b6d8c02a50194dbb0`. The local checkpoint is 5,960 client/shared, 515 touched server/shared passes with five existing skips, 175 backend, fourteen site and 121 guard/release/deployment cases. The user-approved free Brevo account was created. The required organization address has been submitted; onboarding remains in progress. Brevo requires the user to complete phone verification before API-key creation and sending. Domain authentication remains pending; no provider key has been created; transactional sending is not activated. Hosted invitation email is not configured; public invitation links remain available for manual sharing. No real recipient email has been sent. Provider acceptance does not establish inbox delivery. The broad inspection and daily upstream review remain active at 06:00 Europe/Rome; this cycle does not close the documented physical/provider/native acceptance limits.
+
+
 The user expanded the active goal on 2026-10-17: after the deep inspection, update everything and push online. This supersedes the earlier restriction against deployment. The active goal remains unfinished until inspection, verification and delivery are complete.
 
 On 2026-10-18 the user requested continued productive iterations until the weekly usage allowance is exhausted, and a visible app preview with explanations of changes while work proceeds. Finish each verified release before beginning the next improvement cycle. Do not manufacture activity to consume usage, purchase credits, or use an account reset. Keep the goal active across completed release cycles while allowance remains.

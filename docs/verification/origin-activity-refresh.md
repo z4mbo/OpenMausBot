@@ -21,6 +21,6 @@ The [manifest](evidence/origin-activity-refresh-030/manifest.json) covers four c
 
 ## Release boundary
 
-The defect was found after 0.2.9 CI completed successfully. That candidate remains held: its tag, native artifacts, private GitHub draft and site image retain their own identities, and no 0.2.9 publication, backend deployment, migration, site promotion or deployment-key issuance occurred. The correction proceeds in the fresh [0.2.10 candidate](origin-candidate-030.md), requiring its own verification and delivery receipts.
+The defect was found after 0.2.9 CI completed successfully. That candidate remains held: its tag, native artifacts, private GitHub draft and site image retain their own identities, and no 0.2.9 publication, backend deployment, migration, site promotion or deployment-key issuance occurred. The correction is included in published [0.2.10](origin-candidate-030.md), with its own verified [0.2.10 delivery](origin-delivery.md#0210-delivery) and [permanent receipt](evidence/origin-delivery-030/delivery-receipt.json). The original source-fixture acceptance below does not claim a packaged provider turn.
 
 The earlier capability-enabled Windows trust-controls test failed at the same missing-receipt assertion. Independent server-only fixtures had already proved tool forwarding and ledger persistence. The visible-App reproduction and final regression establish refresh cancellation; they do not explain the separate native browser bootstrap failures or the unrelated first-attempt 0.2.9 CI failures.
