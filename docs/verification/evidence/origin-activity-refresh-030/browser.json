@@ -1,0 +1,22 @@
+{
+  "verifiedAt": "2026-10-18T13:16:19.302Z",
+  "receiptLabels": [
+    "15:15Ran a commandRan",
+    "15:14Ran a commandRan",
+    "15:13Ran a commandRan"
+  ],
+  "dialogOverlays": 0,
+  "scrollWidth": 1280,
+  "viewportWidth": 1280,
+  "manualReloadAfterThirdTurn": false,
+  "accountSubmissions": 0,
+  "providerCalls": 0,
+  "backendReceiptCounts": {
+    "before": 2,
+    "after": 3
+  },
+  "backendObservationTimes": {
+    "before": "2026-10-18T13:14:43.036Z",
+    "after": "2026-10-18T13:16:48.464Z"
+  }
+}

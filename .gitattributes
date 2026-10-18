@@ -38,3 +38,5 @@ docs/verification/evidence/origin-delivery-028/**/*.json text eol=lf
 docs/verification/evidence/origin-header-fit-029/**/*.json text eol=lf
 docs/verification/evidence/origin-invite-mail-029.json text eol=lf
 docs/verification/evidence/origin-candidate-029.json text eol=lf
+docs/verification/evidence/origin-activity-refresh-030/**/*.json text eol=lf
+docs/verification/evidence/origin-candidate-030.json text eol=lf
