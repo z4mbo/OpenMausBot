@@ -11,6 +11,7 @@ import { quoteShellWord as quote, siteRolloutScript } from "./origin-site-rollou
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const PRODUCTION_DEPLOYMENT = "wry-fly-446";
+const PRODUCTION_DEPLOYMENT_TYPE = "dev";
 const REMOTE_SITE = "/root/origin";
 const REMOTE_COMPOSE = "/root/multi-ghost";
 const REMOTE_DOWNLOADS = "/root/multi-ghost/origin-downloads";
@@ -78,8 +79,9 @@ function makeRunner(execute) {
 
 function requireDeployKey(execute) {
   const key = process.env.CONVEX_DEPLOY_KEY;
-  if (key?.startsWith(`prod:${PRODUCTION_DEPLOYMENT}|`)) return;
-  const problem = key ? `CONVEX_DEPLOY_KEY is not a production key for ${PRODUCTION_DEPLOYMENT}` : "CONVEX_DEPLOY_KEY is not set";
+  const prefix = `${PRODUCTION_DEPLOYMENT_TYPE}:${PRODUCTION_DEPLOYMENT}|`;
+  if (key?.startsWith(prefix) && key.length > prefix.length) return;
+  const problem = key ? `CONVEX_DEPLOY_KEY is not a ${PRODUCTION_DEPLOYMENT_TYPE} deployment key for ${PRODUCTION_DEPLOYMENT}` : "CONVEX_DEPLOY_KEY is not set";
   if (execute) throw new Error(problem);
   console.log(`  ! ${problem}; --execute would stop here`);
 }

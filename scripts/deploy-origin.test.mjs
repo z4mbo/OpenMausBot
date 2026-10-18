@@ -87,3 +87,84 @@ describe("Origin site deployment", () => {
     expect(existsSync(join(root, "docker.log"))).toBe(false);
   });
 });
+
+function backendFixture() {
+  const root = mkdtempSync(join(tmpdir(), "origin-deploy-test-"));
+  fixtures.push(root);
+  return { root, backupDir: join(root, "backups") };
+}
+
+function runBackend(root, backupDir, key, execute) {
+  const script = new URL("./deploy-origin.mjs", import.meta.url).href;
+  const args = ["--backup", "--backend", "--backup-dir", backupDir];
+  if (execute) args.push("--execute");
+  const entry = `
+    import childProcess from "node:child_process";
+    import { syncBuiltinESMExports } from "node:module";
+    childProcess.spawnSync = (command, args, options) => {
+      const settings = options ?? args;
+      console.log("deployment-test-command=" + JSON.stringify({ command, args: Array.isArray(args) ? args : [], cwd: settings.cwd }));
+      return { status: 0 };
+    };
+    syncBuiltinESMExports();
+    process.argv = [process.execPath, "deploy-origin.mjs", ...${JSON.stringify(args)}];
+    await import(${JSON.stringify(script)});
+  `;
+  const env = { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, WINDIR: process.env.WINDIR, HOME: root, USERPROFILE: root, TEMP: root, TMP: root };
+  if (key !== undefined) env.CONVEX_DEPLOY_KEY = key;
+  const result = spawnSync(process.execPath, ["--input-type=module", "--eval", entry], { cwd: root, env, encoding: "utf8" });
+  const commands = result.stdout.split(/\r?\n/).filter(line => line.startsWith("deployment-test-command=")).map(line => JSON.parse(line.slice("deployment-test-command=".length)));
+  return { ...result, commands };
+}
+
+describe("Origin backend deployment authority", () => {
+  it("backs up before deploying with the dev key for the exact public deployment", () => {
+    const { root, backupDir } = backendFixture();
+    const key = "dev:wry-fly-446|synthetic-private-token";
+    const result = runBackend(root, backupDir, key, true);
+    expect(result.status, result.stderr).toBe(0);
+    expect(existsSync(backupDir)).toBe(true);
+    expect(result.commands).toHaveLength(2);
+    expect(result.commands[0].cwd).toMatch(/[\\/]backend$/);
+    expect(result.commands[1].cwd).toBe(result.commands[0].cwd);
+    const invocation = command => [command.command, ...(command.args ?? [])].join(" ");
+    expect(invocation(result.commands[0])).toMatch(/npx convex export --include-file-storage --path/);
+    expect(invocation(result.commands[0])).toContain("convex-wry-fly-446-");
+    expect(invocation(result.commands[0])).toContain(backupDir);
+    expect(invocation(result.commands[1])).toBe("npx convex deploy --typecheck enable");
+    expect(result.stdout).not.toContain("--execute would stop here");
+    expect(result.stdout + result.stderr).not.toContain(key);
+    expect(result.stdout + result.stderr).not.toContain("synthetic-private-token");
+  });
+
+  it.each([
+    ["a production key with the same name", "prod:wry-fly-446|synthetic-private-token"],
+    ["another development deployment", "dev:other-deployment|synthetic-private-token"],
+    ["another production deployment", "prod:other-deployment|synthetic-private-token"],
+    ["a similarly named deployment", "dev:wry-fly-446-extra|synthetic-private-token"],
+    ["a preview deployment", "preview:wry-fly-446|synthetic-private-token"],
+    ["a project key", "project:synthetic-project|synthetic-private-token"],
+    ["an empty deployment token", "dev:wry-fly-446|"],
+    ["an absent deployment key", undefined],
+  ])("rejects %s before creating a backup or running a command", (_label, key) => {
+    const { root, backupDir } = backendFixture();
+    const result = runBackend(root, backupDir, key, true);
+    expect(result.status).toBe(1);
+    expect(result.commands).toEqual([]);
+    expect(existsSync(backupDir)).toBe(false);
+    expect(result.stderr).toContain(key === undefined ? "CONVEX_DEPLOY_KEY is not set" : "CONVEX_DEPLOY_KEY is not a");
+    expect(result.stdout + result.stderr).not.toContain("synthetic-private-token");
+  });
+
+  it.each([undefined, "prod:wry-fly-446|synthetic-private-token"])("prints a read-only plan without valid authority (%s)", key => {
+    const { root, backupDir } = backendFixture();
+    const result = runBackend(root, backupDir, key, false);
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.commands).toEqual([]);
+    expect(existsSync(backupDir)).toBe(false);
+    expect(result.stdout).toContain("--execute would stop here");
+    expect(result.stdout).toContain("convex export --include-file-storage --path");
+    expect(result.stdout).toContain("convex deploy --typecheck enable");
+    expect(result.stdout + result.stderr).not.toContain("synthetic-private-token");
+  });
+});
