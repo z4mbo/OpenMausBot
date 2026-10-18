@@ -125,6 +125,8 @@ describe("routine comms e2e on the job runtime (fake ACP fleet)", () => {
       method,
       headers: body ? { "content-type": "application/json" } : undefined,
       body: body ? JSON.stringify(body) : undefined,
+    }).catch((cause: unknown) => {
+      throw new Error(`Comms fixture request failed: ${method} ${path.split("?")[0]}`, { cause });
     });
     return { status: res.status, body: await res.json() };
   };
