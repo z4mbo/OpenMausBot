@@ -352,7 +352,7 @@ export const repairProjectDrafts = internalMutation({
     let created = 0;
     let adopted = 0;
     for (const project of page.page) {
-      const result = await ensureDraftColumn(ctx, project._id);
+      const result = await ensureDraftColumn(ctx, project._id, { completeLegacyScan: true });
       if (result.created) created++;
       if (result.adopted) adopted++;
       if (result.changed) {

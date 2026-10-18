@@ -210,4 +210,28 @@ describe("Draft defaults at the task and workflow boundary", () => {
     expect(JSON.parse(await f.t.query(internal.integrations.context, { projectId: f.projectId, taskId })).task.draft).toBe(false);
     expect(JSON.parse(await f.t.query(internal.integrations.unlinkedTasks, { cursor: null })).rows.map((row: { taskId: string }) => row.taskId)).toContain(taskId);
   });
+
+  test("runtime repair refuses an ambiguous large legacy board instead of duplicating a deep Draft", async () => {
+    const f = await fixture();
+    await f.t.run(async ctx => {
+      await ctx.db.patch(f.columns[0]._id, { order: 999, isDraft: undefined });
+      for (let order = 3; order < 106; order++) await ctx.db.insert("columns", { projectId: f.projectId, title: `Legacy active ${order}`, order, createdAt: 1, updatedAt: 1 });
+    });
+    const before = await f.board();
+    await expect(f.create("Wait for ordered repair")).rejects.toThrow("Workflow repair required");
+    await expect(f.ensure()).rejects.toThrow("Workflow repair required");
+    expect(await f.board()).toEqual(before);
+  });
+
+  test("public task, repair and connector APIs cannot set the trusted complete-scan flag", async () => {
+    const f = await fixture();
+    const taskArgs = { sessionToken: f.sessionToken, projectId: f.projectId, title: "Untrusted scan claim", priority: "medium" as const, assignedToEmail: email, dueDate: "2027-01-01", completeLegacyScan: true };
+    await expect(f.t.mutation(api.tasks.createTask, taskArgs)).rejects.toThrow("completeLegacyScan");
+    const repairArgs = { sessionToken: f.sessionToken, projectId: f.projectId, completeLegacyScan: true };
+    await expect(f.t.mutation(api.tasks.ensureDefaultColumns, repairArgs)).rejects.toThrow("completeLegacyScan");
+    const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.sessionToken, teamId: f.teamId, name: "Untrusted connector", write: true });
+    const change = { kind: "create_issue" as const, projectId: f.projectId, title: "Connector scan claim", priority: "medium" as const, assignedToEmail: email, dueDate: "2027-01-01", completeLegacyScan: true };
+    await expect(f.t.mutation(api.connectors.write, { token: grant.token, requestId: "untrusted-scan-1", change })).rejects.toThrow("completeLegacyScan");
+    expect((await f.board()).tasks).toEqual([]);
+  });
 });

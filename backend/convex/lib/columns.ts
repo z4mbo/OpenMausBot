@@ -20,17 +20,18 @@ export function compareStoredColumns(a: Doc<"columns">, b: Doc<"columns">): numb
   return a.order - b.order || a._creationTime - b._creationTime || (a._id < b._id ? -1 : a._id === b._id ? 0 : 1);
 }
 
-export async function ensureDraftColumn(ctx: MutationCtx, projectId: Id<"projects">): Promise<{ column: Doc<"columns">; created: boolean; changed: boolean; adopted: boolean }> {
+export async function ensureDraftColumn(ctx: MutationCtx, projectId: Id<"projects">, options?: { completeLegacyScan: true }): Promise<{ column: Doc<"columns">; created: boolean; changed: boolean; adopted: boolean }> {
   const [project, flagged, first, legacy] = await Promise.all([
     ctx.db.get(projectId),
     ctx.db.query("columns").withIndex("by_projectId_and_isDraft_and_order", q => q.eq("projectId", projectId).eq("isDraft", true)).first(),
     ctx.db.query("columns").withIndex("by_project_order", q => q.eq("projectId", projectId)).first(),
-    ctx.db.query("columns").withIndex("by_project_order", q => q.eq("projectId", projectId)).take(100),
+    ctx.db.query("columns").withIndex("by_project_order", q => q.eq("projectId", projectId)).take(101),
   ]);
   if (!project) throw new Error("Project not found");
   const saved = project.draftIdeaCandidateId ? await ctx.db.get(project.draftIdeaCandidateId) : null;
   const ideas = [...legacy.filter(isLegacyIdeaColumn), ...(saved?.projectId === projectId && isLegacyIdeaColumn(saved) ? [saved] : [])];
   const draft = [...(flagged ? [flagged] : []), ...legacy.filter(isDraftColumn)].sort(compareStoredColumns)[0];
+  if (!draft && legacy.length > 100 && !options?.completeLegacyScan) throw new Error("Workflow repair required before editing this large legacy workflow");
   const candidate = draft ?? ideas.sort(compareStoredColumns)[0];
   const clearedCandidate = project.draftIdeaCandidateId !== undefined;
   if (clearedCandidate) await ctx.db.patch(projectId, { draftIdeaCandidateId: undefined });
