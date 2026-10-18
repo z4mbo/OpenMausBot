@@ -42,3 +42,5 @@ docs/verification/evidence/origin-activity-refresh-030/**/*.json text eol=lf
 docs/verification/evidence/origin-candidate-030.json text eol=lf
 docs/verification/evidence/origin-delivery-030/**/*.json text eol=lf
 docs/verification/evidence/origin-app-whats-new-030/**/*.json text eol=lf
+docs/verification/evidence/origin-header-layout-031/**/*.json text eol=lf
+docs/verification/evidence/origin-header-layout-031/**/*.log text eol=lf

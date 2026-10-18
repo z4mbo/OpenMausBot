@@ -16,7 +16,7 @@ export function useOriginMe(): OriginMe | null {
 }
 
 /** The signed-in Origin account at the top of the sidebar: avatar, username and a menu with the account and the app's own settings. */
-export function OriginAccountMenu({ iconOnly = false }: { iconOnly?: boolean }) {
+export function OriginAccountMenu({ iconOnly = false, titlebar = false }: { iconOnly?: boolean; titlebar?: boolean }) {
   const session = useCloudSession();
   const me = useOriginMe();
   const [settings, setSettings] = useState(false);
@@ -34,11 +34,11 @@ export function OriginAccountMenu({ iconOnly = false }: { iconOnly?: boolean }) 
             <MemberAvatar person={me} size={30} />
           </span>
         ) : (
-          <span data-origin-account className={cn("flex h-8 w-full min-w-0 items-center gap-2 rounded-lg pl-1 pr-1.5 transition-colors duration-150",
+          <span data-origin-account title={name} className={cn("flex h-8 w-full min-w-0 items-center gap-2 rounded-lg pl-1 pr-1.5 transition-colors duration-150",
             open ? "bg-raised" : "hover:bg-raised/60")}>
             <MemberAvatar person={me} size={24} />
-            <span className="min-w-0 truncate text-[13.5px] font-semibold leading-5 text-ink">{name}</span>
-            <ChevronDown size={13} aria-hidden="true" className={cn("shrink-0 text-ink-tertiary transition-transform duration-200", open && "rotate-180")} />
+            <span className={cn("min-w-0 truncate text-[13.5px] font-semibold leading-5 text-ink", titlebar && "@max-[96px]/sidebar-top:sr-only")}>{name}</span>
+            <ChevronDown size={13} aria-hidden="true" className={cn("shrink-0 text-ink-tertiary transition-transform duration-200", titlebar && "@max-[56px]/sidebar-top:hidden", open && "rotate-180")} />
           </span>
         ),
         before: [{

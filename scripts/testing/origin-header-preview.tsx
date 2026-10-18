@@ -15,6 +15,7 @@ const width = [240, 272, 320].includes(Number(params.get("width"))) ? Number(par
 const advanced = params.get("mode") !== "simple";
 const density = params.get("density") === "icons" ? "icons" : "comfortable";
 const menuFails = params.get("menu") === "failed";
+const computerName = params.get("computer") === "long" ? "Synthetic computer with a very long saved server name that must remain within the sidebar" : "This computer";
 applySkin(params.get("theme") === "light" ? "atelier" : "midnight");
 saveSidebarWidth(width);
 setSidebarDensity(density);
@@ -23,7 +24,7 @@ Object.assign(window, { ogb: {
   platform,
   getCapabilities: async () => initialDesktopCapabilities(),
   workspaces: {
-    state: async () => ({ local: true, name: "This computer" }),
+    state: async () => ({ local: true, name: computerName }),
     menu: async () => {
       window.dispatchEvent(new Event("fixture-computer-menu"));
       if (menuFails) throw new Error("Synthetic computer menu unavailable");
@@ -36,13 +37,22 @@ function measure() {
   const titlebar = document.querySelector<HTMLElement>("[data-sidebar-top-row]");
   const account = document.querySelector<HTMLElement>('[aria-label="Open account menu"]');
   const computer = document.querySelector<HTMLElement>('[data-tour="server-switcher"]');
-  if (!sidebar || !titlebar || !account || !computer) return { ready: false };
+  const search = titlebar?.querySelector<HTMLElement>('[aria-label="Search bots and messages"]');
+  const peer = sidebar?.querySelector<HTMLElement>('[data-origin-nav-item="inbox"]');
+  if (!sidebar || !titlebar || !account || !computer || !search || !peer) return { ready: false };
   const box = (element: HTMLElement) => { const rect = element.getBoundingClientRect(); return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height }; };
-  const bounds = box(sidebar), chrome = box(titlebar), profile = box(account), host = box(computer);
-  const menuError = sidebar.querySelector<HTMLElement>('[data-workspace-switcher] [role="alert"]');
+  const bounds = box(sidebar), chrome = box(titlebar), profile = box(account), host = box(computer), find = box(search), nav = box(peer);
+  const menuError = sidebar.querySelector<HTMLElement>('[data-sidebar-computer-row] [role="alert"], [data-workspace-switcher] [role="alert"]');
   const errorBounds = menuError ? box(menuError) : null;
-  return { ready: true, platform, requestedSidebarWidth: width, advanced, density, sidebar: bounds, titlebar: chrome, account: profile, computer: host,
-    computerName: computer.textContent, accountName: account.textContent,
+  return { ready: true, platform, requestedSidebarWidth: width, requestedAdvanced: advanced, renderedAdvanced: Boolean(titlebar.querySelector('[aria-label="Collapse sidebar to avatars"]')), density, sidebar: bounds, titlebar: chrome, account: profile, computer: host,
+    computerName: computer.textContent, accountName: account.textContent, search: find, peer: nav,
+    accountInTitlebar: titlebar.contains(account),
+    accountBeforeSearch: profile.right <= find.left && profile.top >= chrome.top && profile.bottom <= chrome.bottom,
+    computerBelowTitlebar: host.top >= chrome.bottom,
+    computerMatchesPeerHeight: host.height === nav.height,
+    computerFontSize: getComputedStyle(computer).fontSize,
+    peerFontSize: getComputedStyle(peer.querySelector("span.flex-1") ?? peer).fontSize,
+    computerRowFullWidth: host.width >= sidebar.clientWidth - 24,
     controlsDisjoint: profile.right <= host.left || host.right <= profile.left || profile.bottom <= host.top || host.bottom <= profile.top,
     controlsWithinSidebar: [profile, host].every(rect => rect.left >= bounds.left && rect.right <= bounds.right),
     controlsBelowTitlebar: Math.min(profile.top, host.top) >= chrome.bottom,

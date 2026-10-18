@@ -1,0 +1,27 @@
+{
+  "baseline": "37a3b2c450e8a47e489284d6abaa232078541cad",
+  "synthetic": true,
+  "packagedWindowAcceptance": false,
+  "nativeComputerMenuAcceptance": false,
+  "screenshots": 80,
+  "desktopCases": 48,
+  "mobileCases": 16,
+  "requestedAndRenderedModeMatch": true,
+  "productionAdvancedModeOnly": true,
+  "layoutAfterCases": 32,
+  "allAfterHeaderGeometryPassed": true,
+  "documentHorizontalOverflow": false,
+  "footerContainmentClaim": false,
+  "remainingFooterSpill": true,
+  "actualMenus": 2,
+  "extraCases": 12,
+  "runtime": {
+    "errors": [],
+    "submissions": 0,
+    "browser": "156.0.8078.4",
+    "cases": 64
+  },
+  "reducedMotionFixCommit": "0762b5086247fabdfd40e68f4fffe1c75503e059",
+  "historicalPublishedReceiptsModified": false,
+  "retainedLogFormatting": "LF with one final newline; manifest retains raw captured hashes for transformed logs"
+}
