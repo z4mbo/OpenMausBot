@@ -1,0 +1,124 @@
+{
+  "version": "0.2.10",
+  "recordedAt": "2026-10-18T13:27:42.142Z",
+  "node": "v24.21.0",
+  "implementationHead": "f1fa6fdc8ec5c49d15119fccadad7af678c507b7",
+  "subsequentTestOnlyCommit": "51d6a6ee15dca00febde9b28c0625dcfaab3459a",
+  "workingReleaseInputs": {
+    "packageVersion": "0.2.10",
+    "canonicalChangelogEntries": 5,
+    "totalReleaseTitles": 32
+  },
+  "checks": [
+    {
+      "name": "client-shared",
+      "command": "node node_modules/vitest/vitest.mjs run src shared",
+      "exitCode": 0,
+      "passed": 5960,
+      "files": 561,
+      "durationSeconds": 428.66,
+      "completedAt": "2026-10-18T13:26:29.7366608Z",
+      "rawLogBytes": 6798,
+      "rawLogSha256": "96434ae889fbf6fbb61f28c321a00bc5abcf1ee60221b0fdc995b4820da75033"
+    },
+    {
+      "name": "client-types",
+      "command": "node node_modules/typescript/bin/tsc -b",
+      "exitCode": 0,
+      "passed": true,
+      "completedAt": "2026-10-18T13:20:37.1951862Z",
+      "rawLogBytes": 0,
+      "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "server-types",
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.server.json",
+      "exitCode": 0,
+      "passed": true,
+      "completedAt": "2026-10-18T13:21:01.9914901Z",
+      "rawLogBytes": 0,
+      "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "backend-types",
+      "command": "pnpm.cmd --filter @origin/backend typecheck",
+      "exitCode": 0,
+      "passed": true,
+      "completedAt": "2026-10-18T13:21:06.5918349Z",
+      "rawLogBytes": 117,
+      "rawLogSha256": "70faa39229c8b0f1f290b5345dc885aa5a455f4a6feb5f6f1de7181587c69185"
+    },
+    {
+      "name": "site-types",
+      "command": "pnpm.cmd --filter @origin/site typecheck",
+      "exitCode": 0,
+      "passed": true,
+      "completedAt": "2026-10-18T13:21:09.0288218Z",
+      "rawLogBytes": 96,
+      "rawLogSha256": "291125fecee0828d7f4ef51d098001ac725fd102c4208f5bd446de81fd03ed41"
+    },
+    {
+      "name": "backend",
+      "command": "pnpm.cmd --filter @origin/backend test",
+      "exitCode": 0,
+      "passed": 175,
+      "files": 19,
+      "completedAt": "2026-10-18T13:21:23.3306982Z",
+      "rawLogBytes": 536,
+      "rawLogSha256": "07a3a1079c98dad4216a6786dafc405629daaa693829be4b4670ffb9da61289a"
+    },
+    {
+      "name": "site-tests",
+      "command": "pnpm.cmd --filter @origin/site test",
+      "exitCode": 0,
+      "passed": 14,
+      "files": 2,
+      "completedAt": "2026-10-18T13:21:25.2554934Z",
+      "rawLogBytes": 329,
+      "rawLogSha256": "a7c6f5885a83f381e1dcf6c6f332b937421acacfb3bf751ef78dfee72a06a6d1"
+    },
+    {
+      "name": "server",
+      "command": "node node_modules/vitest/vitest.mjs run server/origin-invites.test.ts server/origin-public-pages.test.ts shared/origin-site-address.test.ts server/config.test.ts server/engine-script-install.test.ts server/drivers/claude.test.ts server/comms.test.ts",
+      "exitCode": 0,
+      "passed": 515,
+      "files": 7,
+      "existingSkips": 5,
+      "durationSeconds": 134.9,
+      "completedAt": "2026-10-18T13:23:40.8968636Z",
+      "rawLogBytes": 254,
+      "rawLogSha256": "4c454c69713f031aa97ea8f56f01f06963f856f53b46529a7897b841716e2506"
+    },
+    {
+      "name": "guards",
+      "command": "node node_modules/vitest/vitest.mjs run scripts/testing/file-size-ratchet.test.ts scripts/testing/index-route-ratchet.test.ts scripts/origin-release-notes.test.mjs scripts/deploy-origin.test.mjs scripts/ci-workflow.test.ts scripts/ci-scope.test.ts shared/system-message-guard.test.ts src/components/Select.guard.test.ts src/lib/copy-text.guard.test.ts",
+      "exitCode": 0,
+      "passed": 121,
+      "files": 9,
+      "completedAt": "2026-10-18T13:23:58.4418342Z",
+      "rawLogBytes": 6263,
+      "rawLogSha256": "4c908505cd71413da3c2a1ee26a98c182acec6060601e85548aadbadf90b5f69"
+    },
+    {
+      "name": "lint",
+      "command": "pnpm.cmd lint",
+      "exitCode": 0,
+      "passed": true,
+      "completedAt": "2026-10-18T13:23:58.8595837Z",
+      "rawLogBytes": 98,
+      "rawLogSha256": "d4b14426acec299eab1b620417b18f79a9170ae6b00d15cedf4ffba44fe11677"
+    },
+    {
+      "name": "locales",
+      "command": "node scripts/generate-locale.mjs --check",
+      "exitCode": 0,
+      "passed": true,
+      "completedAt": "2026-10-18T13:23:58.9915639Z",
+      "rawLogBytes": 352,
+      "rawLogSha256": "08b7037c1119bb179339638b8d6d44deccf2812e0f57edf0e0ab522c4f12b15f"
+    }
+  ],
+  "qualification": "Completed local checkpoint with working0.2.10 package/notes and the corrected Activity component. A subsequently integrated script-only Routines test repair has its own native1/1, types and lint evidence; it changes no validated application/server implementation. Frozen-source hosted CI/native builds and public delivery remain separate mandatory gates. The earlier eighteen additional local shard failures are historical results, not green coverage.",
+  "realEmailSent": false,
+  "productionMutationTests": false
+}

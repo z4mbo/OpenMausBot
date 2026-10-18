@@ -63,6 +63,8 @@ Email is sent centrally by the backend using a verified `INVITE_FROM_EMAIL` send
 
 A missing configuration or provider failure leaves the invitation available for manual sharing. Each attempt uses only the selected provider, without an automatic retry or fallback that could send duplicate messages. Provider acceptance does not establish inbox delivery. Each creator can issue 20 invitations per hour across workspaces.
 
+Hosted email sending is not activated yet. Brevo account setup is awaiting Origin's organization mailing address; invitation links remain the manual-share path.
+
 Obsolete `teams:sendInvite` and `members:sendInvite` email actions reject with a migration message. Their bare legacy invitation mutations and existing membership rows remain compatible; new email invitations use `workspaces:sendEmailInvite` and `/join/<token>`.
 
 ## Checks
@@ -84,6 +86,8 @@ Run the touched server tests and the appropriate browser fixture as well. Unit t
 The app's release history lives in `shared/origin-releases.ts`; every desktop version needs a matching entry for What's new. Keep the website, updater notes and platform artifacts aligned with that history.
 
 Version [0.2.7](https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.7) is published for Windows x64, Mac Apple silicon and Mac Intel. The [website](https://origin.imbored.fun) and [What's new](https://origin.imbored.fun/whats-new) match that release. See the [delivery receipt and acceptance limits](docs/verification/origin-delivery.md) and the [development/release tooling followup](docs/verification/origin-release-tools.md).
+
+The [0.2.10 candidate](docs/verification/origin-candidate-030.md) is in preparation after actual Activity inspection held [0.2.9](docs/verification/origin-candidate-029.md), despite its successful final CI/native builds. Neither candidate is published; fresh exact-source checks and rollout remain required.
 
 The **Origin desktop** GitHub workflow builds macOS Apple silicon, macOS Intel and Windows x64 artifacts without publishing. Local packaging commands are `pnpm package:mac` and `pnpm package:win` on their respective platforms. Download-host publication is a separate operation; building artifacts or opening a PR does not update installed apps. Unsigned/ad-hoc builds have platform-specific installation and updater limits documented in the workflow.
 
