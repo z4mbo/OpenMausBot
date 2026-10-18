@@ -1,0 +1,308 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix
+
+AggregateError: 
+    at internalConnectMultiple (node:net:1430:18)
+    at afterConnectMultiple (node:net:2099:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3000
+    }
+  ]
+}
+ ❯ src/components/SettingsModal.appearance.test.ts (33 tests | 1 failed) 256ms
+     × offers desktop connections as a top-level page without exposing the list remotely 6ms
+AggregateError: 
+    at internalConnectMultiple (node:net:1430:18)
+    at afterConnectMultiple (node:net:2099:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3000
+    }
+  ]
+}
+AggregateError: 
+    at internalConnectMultiple (node:net:1430:18)
+    at afterConnectMultiple (node:net:2099:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3000
+    }
+  ]
+}
+AggregateError: 
+    at internalConnectMultiple (node:net:1430:18)
+    at afterConnectMultiple (node:net:2099:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3000
+    }
+  ]
+}
+AggregateError: 
+    at internalConnectMultiple (node:net:1430:18)
+    at afterConnectMultiple (node:net:2099:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3000
+    }
+  ]
+}
+AggregateError: 
+    at internalConnectMultiple (node:net:1430:18)
+    at afterConnectMultiple (node:net:2099:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3000
+    }
+  ]
+}
+AggregateError: 
+    at internalConnectMultiple (node:net:1430:18)
+    at afterConnectMultiple (node:net:2099:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3000
+    }
+  ]
+}
+AggregateError: 
+    at internalConnectMultiple (node:net:1430:18)
+    at afterConnectMultiple (node:net:2099:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3000
+    }
+  ]
+}
+AggregateError: 
+    at internalConnectMultiple (node:net:1430:18)
+    at afterConnectMultiple (node:net:2099:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3000
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3000
+        at createConnectionError (node:net:2062:14)
+        at afterConnectMultiple (node:net:2092:16) {
+      errno: -4078,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3000
+    }
+  ]
+}
+ ❯ src/components/LocalComputerSection.test.ts (41 tests | 2 failed) 46ms
+     × keeps disconnected, unavailable, and empty states distinct 6ms
+     × keeps disconnected, unavailable, and empty states distinct 3ms
+ ❯ src/components/EngineSetup.test.ts (20 tests | 1 failed) 31ms
+     × offers the distinct ChatGPT plan connection without the legacy Codex command 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/EngineSetup.test.ts > server device-code sign-in > offers the distinct ChatGPT plan connection without the legacy Codex command
+AssertionError: expected '<div class="rounded-xl border border-…' to contain 'separate from MausBot Cloud and API b…'
+
+Expected: "separate from MausBot Cloud and API billing"
+Received: "<div class="rounded-xl border border-hairline/40 bg-control/30 p-3"><div class="flex items-start gap-2.5"><span class="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-inset text-ink-secondary"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-in" aria-hidden="true"><path d="m10 17 5-5-5-5"></path><path d="M15 12H3"></path><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path></svg></span><div class="min-w-0"><div class="text-[13px] font-semibold text-ink">Sign in to ChatGPT plan</div><p class="mt-0.5 text-[12px] leading-relaxed text-ink-secondary">Use your ChatGPT plan for eligible AI requests in Origin. API usage is billed separately.</p></div></div><div class="mt-3 space-y-2" data-device-sign-in="codex" data-chatgpt-plan-sign-in="true"><button type="button" class="flex w-full items-center justify-center gap-2 rounded-lg border border-black/20 bg-white px-3 py-2 text-[12.5px] font-semibold text-black hover:opacity-85 disabled:opacity-50"><svg width="16" height="16" viewBox="0 0 256 260" preserveAspectRatio="xMidYMid" class="fill-current"><path d="M239.184 106.203a64.716 64.716 0 0 0-5.576-53.103C219.452 28.459 191 15.784 163.213 21.74A65.586 65.586 0 0 0 52.096 45.22a64.716 64.716 0 0 0-43.23 31.36c-14.31 24.602-11.061 55.634 8.033 76.74a64.665 64.665 0 0 0 5.525 53.102c14.174 24.65 42.644 37.324 70.446 31.36a64.72 64.72 0 0 0 48.754 21.744c28.481.025 53.714-18.361 62.414-45.481a64.767 64.767 0 0 0 43.229-31.36c14.137-24.558 10.875-55.423-8.083-76.483Zm-97.56 136.338a48.397 48.397 0 0 1-31.105-11.255l1.535-.87 51.67-29.825a8.595 8.595 0 0 0 4.247-7.367v-72.85l21.845 12.636c.218.111.37.32.409.563v60.367c-.056 26.818-21.783 48.545-48.601 48.601Zm-104.466-44.61a48.345 48.345 0 0 1-5.781-32.589l1.534.921 51.722 29.826a8.339 8.339 0 0 0 8.441 0l63.181-36.425v25.221a.87.87 0 0 1-.358.665l-52.335 30.184c-23.257 13.398-52.97 5.431-66.404-17.803ZM23.549 85.38a48.499 48.499 0 0 1 25.58-21.333v61.39a8.288 8.288 0 0 0 4.195 7.316l62.874 36.272-21.845 12.636a.819.819 0 0 1-.767 0L41.353 151.53c-23.211-13.454-31.171-43.144-17.804-66.405v.256Zm179.466 41.695-63.08-36.63L161.73 77.86a.819.819 0 0 1 .768 0l52.233 30.184a48.6 48.6 0 0 1-7.316 87.635v-61.391a8.544 8.544 0 0 0-4.4-7.213Zm21.742-32.69-1.535-.922-51.619-30.081a8.39 8.39 0 0 0-8.492 0L99.98 99.808V74.587a.716.716 0 0 1 .307-.665l52.233-30.133a48.652 48.652 0 0 1 72.236 50.391v.205ZM88.061 139.097l-21.845-12.585a.87.87 0 0 1-.41-.614V65.685a48.652 48.652 0 0 1 79.757-37.346l-1.535.87-51.67 29.825a8.595 8.595 0 0 0-4.246 7.367l-.051 72.697Zm11.868-25.58 28.138-16.217 28.188 16.218v32.434l-28.086 16.218-28.188-16.218-.052-32.434Z"></path></svg>Continue with ChatGPT</button></div></div>"
+
+ ❯ src/components/EngineSetup.test.ts:167:20
+    165|     const markup = renderToStaticMarkup(createElement(StoreProvider, n…
+    166|     expect(markup).toContain("Continue with ChatGPT");
+    167|     expect(markup).toContain("separate from MausBot Cloud and API bill…
+       |                    ^
+    168|     expect(markup).not.toContain("codex login");
+    169|     expect(markup).not.toContain("Device-code login");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/LocalComputerSection.test.ts > cloud computer inventory UI > keeps disconnected, unavailable, and empty states distinct
+AssertionError: expected '<div class="rounded-xl bg-card p-4"><…' to contain 'No OpenMaus-managed cloud computers f…'
+
+Expected: "No OpenMaus-managed cloud computers found"
+Received: "<div class="rounded-xl bg-card p-4"><div class="text-[15px] font-medium text-ink">Cloud computers</div><div class="mt-0.5 text-[13px] leading-relaxed text-ink-secondary">Your bots&#x27; cloud computers. Deleting one erases its desktop and files for good.</div><div class="mt-4"><div class="flex items-center justify-between gap-3"><div class="text-[12px] text-ink-secondary">Includes computers left behind by deleted bots so they can still be cleaned up.</div><button type="button" aria-label="Refresh cloud computers" class="flex shrink-0 items-center gap-1.5 rounded-lg border border-hairline/40 px-2.5 py-1.5 text-[12px] text-ink-secondary hover:bg-control hover:text-ink disabled:opacity-40"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg> Refresh</button></div><p role="status" aria-live="polite" aria-atomic="true" class="sr-only">0 cloud computers found.</p><div aria-busy="false" class="mt-3 overflow-hidden rounded-xl border border-hairline/40"><div class="px-3 py-4 text-[13px] text-ink-secondary">No Origin-managed cloud computers found.</div></div></div></div>"
+
+ ❯ src/components/LocalComputerSection.test.ts:309:19
+    307|
+    308|     const empty = renderCard();
+    309|     expect(empty).toContain("No OpenMaus-managed cloud computers found…
+       |                   ^
+    310|   });
+    311|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/components/LocalComputerSection.test.ts > VPS computer inventory UI > keeps disconnected, unavailable, and empty states distinct
+AssertionError: expected '<div class="rounded-xl bg-card p-4"><…' to contain 'No OpenMaus-managed VPS computers fou…'
+
+Expected: "No OpenMaus-managed VPS computers found"
+Received: "<div class="rounded-xl bg-card p-4"><div class="text-[15px] font-medium text-ink">Self-hosted VPS computers</div><div class="mt-0.5 text-[13px] leading-relaxed text-ink-secondary">Persistent Origin-managed Docker desktops on your VPS. Removing one permanently erases its files and browser sign-ins.</div><div class="mt-4"><div class="flex items-center justify-between gap-3"><div class="text-[12px] text-ink-secondary">SSH host: production-vps. Old and orphaned computers stay visible here.</div><button type="button" aria-label="Refresh VPS computers" class="flex shrink-0 items-center gap-1.5 rounded-lg border border-hairline/40 px-2.5 py-1.5 text-[12px] text-ink-secondary hover:bg-control hover:text-ink disabled:opacity-40"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg> Refresh</button></div><p role="status" aria-live="polite" aria-atomic="true" class="sr-only">0 VPS computers found.</p><div aria-busy="false" class="mt-3 overflow-hidden rounded-xl border border-hairline/40"><div class="px-3 py-4 text-[13px] text-ink-secondary">No Origin-managed VPS computers found.</div></div></div></div>"
+
+ ❯ src/components/LocalComputerSection.test.ts:509:26
+    507|     expect(renderCard({ configured: false, sshAlias: null })).toContai…
+    508|     expect(renderCard({ unavailableReason: "SSH host cannot be reached…
+    509|     expect(renderCard()).toContain("No OpenMaus-managed VPS computers …
+       |                          ^
+    510|   });
+    511|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/components/SettingsModal.appearance.test.ts > Settings → Appearance > offers desktop connections as a top-level page without exposing the list remotely
+AssertionError: expected '<div class="glass-popup-frame" style=…' to contain 'npx openmausbot pair --label'
+
+Expected: "npx openmausbot pair --label"
+Received: "<div class="glass-popup-frame" style="--glass-popup-top:24px"><div aria-hidden="true" class="glass-scrim pointer-events-none absolute inset-0"></div><div role="dialog" aria-modal="true" aria-labelledby="app-settings-title" tabindex="-1" class="ui-panel glass-popup animate-pop-in relative flex overflow-hidden outline-none"><span id="app-settings-title" class="sr-only">Settings</span><nav class="glass-rail hidden min-h-0 w-[200px] shrink-0 flex-col gap-1 overflow-y-auto border-r border-hairline/30 p-3 sm:flex"><div class="shrink-0 px-2 py-3 text-[15px] font-semibold text-ink">Settings</div><div class="mb-2 mt-1 flex min-h-8 shrink-0 items-center gap-2 rounded-lg border border-transparent bg-control/70 px-2.5 py-2 focus-within:border-focus"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search shrink-0 text-ink-secondary" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg><input data-settings-search="true" placeholder="Search" aria-label="Search settings" class="w-full bg-transparent text-[13px] text-ink placeholder:text-ink-secondary focus:outline-none" value=""/></div><div role="group" aria-labelledby="settings-group-you" data-settings-group="you" class="flex flex-col gap-0.5 pb-2"><div id="settings-group-you" class="px-2.5 pb-1 pt-2 text-[11px] font-medium uppercase tracking-[0.08em] text-ink-tertiary">You</div><button data-settings-section="general" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user shrink-0" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>General</button><button data-settings-section="appearance" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette shrink-0" aria-hidden="true"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"></path><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>Appearance</button><button data-settings-section="companion" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tablet-smartphone shrink-0" aria-hidden="true"><rect width="10" height="14" x="3" y="8" rx="2"></rect><path d="M5 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-2.4"></path><path d="M8 18h.01"></path></svg>Remote access</button></div><div role="group" aria-labelledby="settings-group-ai" data-settings-group="ai" class="flex flex-col gap-0.5 pb-2"><div id="settings-group-ai" class="px-2.5 pb-1 pt-2 text-[11px] font-medium uppercase tracking-[0.08em] text-ink-tertiary">AI</div><button data-settings-section="engines" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-terminal shrink-0" aria-hidden="true"><path d="M12 19h8"></path><path d="m4 17 6-6-6-6"></path></svg>Model providers</button><button data-settings-section="connections" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round shrink-0" aria-hidden="true"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>API keys</button><button data-settings-section="decisionModel" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap shrink-0" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg>Decision model</button></div><div role="group" aria-labelledby="settings-group-computers" data-settings-group="computers" class="flex flex-col gap-0.5 pb-2"><div id="settings-group-computers" class="px-2.5 pb-1 pt-2 text-[11px] font-medium uppercase tracking-[0.08em] text-ink-tertiary">Computers</div><button data-settings-section="desktopWorkspaces" aria-current="page" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none bg-control text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building2 lucide-building-2 shrink-0" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg>Servers</button><button data-settings-section="computer" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-monitor shrink-0" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>Local VM</button><button data-settings-section="logins" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole shrink-0" aria-hidden="true"><circle cx="12" cy="16" r="1"></circle><rect x="3" y="10" width="18" height="12" rx="2"></rect><path d="M7 10V7a5 5 0 0 1 10 0v3"></path></svg>Logins</button></div><div role="group" aria-labelledby="settings-group-account" data-settings-group="account" class="flex flex-col gap-0.5 pb-2"><div id="settings-group-account" class="px-2.5 pb-1 pt-2 text-[11px] font-medium uppercase tracking-[0.08em] text-ink-tertiary">Account</div><button data-settings-section="usage" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins shrink-0" aria-hidden="true"><circle cx="8" cy="8" r="6"></circle><path d="M18.09 10.37A6 6 0 1 1 10.34 18"></path><path d="M7 6h1v4"></path><path d="m16.71 13.88.7.71-2.82 2.82"></path></svg>Usage</button><button data-settings-section="backups" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-archive shrink-0" aria-hidden="true"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>Backups</button><button data-settings-section="experimental" class="cursor-pointer flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors motion-reduce:transition-none text-ink-secondary hover:bg-control/50 hover:text-ink"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flask-conical shrink-0" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Experimental</button></div></nav><div class="flex min-h-0 min-w-0 flex-1 flex-col"><div class="flex shrink-0 items-center justify-between gap-3 border-b border-hairline/30 px-3 py-3 sm:pl-9"><div class="relative inline-flex min-w-0 sm:hidden"><select aria-label="Settings" class="peer w-full min-w-0 cursor-pointer appearance-none truncate disabled:cursor-default disabled:opacity-50 rounded-lg border border-hairline/40 bg-inset text-ink py-2 pl-3 pr-9 text-[13px]"><optgroup label="You"><option value="general">General</option><option value="appearance">Appearance</option><option value="companion">Remote access</option></optgroup><optgroup label="AI"><option value="engines">Model providers</option><option value="connections">API keys</option><option value="decisionModel">Decision model</option></optgroup><optgroup label="Computers"><option value="desktopWorkspaces" selected="">Servers</option><option value="computer">Local VM</option><option value="logins">Logins</option></optgroup><optgroup label="Account"><option value="usage">Usage</option><option value="backups">Backups</option><option value="experimental">Experimental</option></optgroup></select><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down pointer-events-none absolute top-1/2 -translate-y-1/2 text-ink-secondary peer-disabled:opacity-50 right-2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div><span class="hidden text-[15px] font-semibold text-ink sm:block">Servers</span><button aria-label="Close settings" title="Close settings (Esc)" class="ui-icon-button cursor-pointer shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><div class="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 sm:px-5 sm:pb-5"><p class="text-[13px] leading-relaxed text-ink-secondary">One desktop app, wherever your bots live. Switching servers does not move or replace your bots, conversations, or provider accounts.</p><div class="rounded-xl bg-card p-4"><div class="text-[15px] font-medium text-ink">Your servers</div><div class="mt-0.5 text-[13px] leading-relaxed text-ink-secondary">Saved on this computer. Your hosted bots keep running when you switch away.</div><div class="mt-4"><p role="status" class="text-[13px] text-ink-secondary">Loading servers…</p></div></div><div class="rounded-xl bg-card p-4"><div class="text-[15px] font-medium text-ink">Connect to a server</div><div class="mt-0.5 text-[13px] leading-relaxed text-ink-secondary">Already running Origin on a VPS, server, or another computer? Connect it here.</div><div class="mt-4"><form class="flex flex-col gap-3"><label class="flex flex-col gap-1.5 text-[12px] text-ink-secondary">Server address or pairing link<input required="" placeholder="https://bots.yourcompany.com" autoCapitalize="none" autoCorrect="off" autoComplete="off" spellCheck="false" class="w-full rounded-lg border border-hairline/40 bg-inset px-3 py-2 text-[14px] text-ink outline-none focus:border-accent/50" value=""/></label><label class="flex flex-col gap-1.5 text-[12px] text-ink-secondary">Name (optional)<input maxLength="60" placeholder="My server" class="w-full rounded-lg border border-hairline/40 bg-inset px-3 py-2 text-[14px] text-ink outline-none focus:border-accent/50" value=""/></label><p class="text-[12px] leading-relaxed text-ink-secondary">Paste a pairing link from your server’s Settings → Remote access, or enter its address and sign in there. Your desktop stays connected afterward.</p><details class="text-[12px] text-ink-secondary"><summary class="cursor-pointer">Need a pairing code?</summary><p class="mt-2">Run this from your Origin source checkout on the server and copy the link it prints:</p><code class="mt-1 block select-all break-words rounded-md bg-inset px-2 py-2 text-ink">pnpm pair --label &quot;My desktop&quot;</code></details><button type="submit" disabled="" class="flex w-fit items-center gap-2 rounded-lg bg-accent px-3 py-2 text-[13px] font-medium text-accent-ink disabled:opacity-50">Connect</button></form></div></div></div></div></div></div>"
+
+ ❯ src/components/SettingsModal.appearance.test.ts:390:19
+    388|     expect(local).toContain("Name (optional)");
+    389|     expect(local).toContain("Your servers");
+    390|     expect(local).toContain("npx openmausbot pair --label");
+       |                   ^
+    391|     fixture.section = "general";
+    392|     vi.stubGlobal("window", { ogb: { workspaces: {} } });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  3 failed | 564 passed (567)
+      Tests  4 failed | 5988 passed (5992)
+   Start at  00:08:46
+   Duration  370.16s (transform 12.77s, setup 57.66s, import 102.13s, tests 103.37s, environment 31.28s)
+

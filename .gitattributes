@@ -108,3 +108,5 @@ docs/verification/evidence/origin-ci-provider-error-034/** -text whitespace=cr-a
 docs/verification/evidence/origin-landing-capture-034/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-cli-distribution-034/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-backend-reuse-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-candidate-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-candidate-034/*.log -whitespace

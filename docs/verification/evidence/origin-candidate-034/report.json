@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "version": "0.2.13",
+  "cycle": "034",
+  "status": "local-integration-only",
+  "referenceSource": "12906eafc4b1833261b9fb9631c1030e619f4cff",
+  "recordedAt": "2026-10-18T22:23:29.989Z",
+  "finalFrozenSource": null,
+  "clientShared": {
+    "files": 567,
+    "passed": 5992,
+    "skipped": 0,
+    "seconds": 366.62,
+    "exitCode": 0,
+    "startedAt": "2026-10-18T22:17:00.949Z",
+    "finishedAt": "2026-10-18T22:23:08.279Z",
+    "sourceAtStart": "aab03644c87d8c90f311c55ec2c49361caacfa21",
+    "sourceAtFinish": "12906eafc4b1833261b9fb9631c1030e619f4cff",
+    "bindingScope": [
+      "src",
+      "shared",
+      "package.json",
+      "pnpm-lock.yaml",
+      "vite.config.ts",
+      "vitest.config.ts",
+      "tsconfig.json"
+    ],
+    "bindingEntries": 1350,
+    "inputBindingsSha256": "a28271734220e965821188468c86c2186aeaaa23e8a6a3bbcdcd5e8025ed43a2",
+    "inputsUnchangedAtBoundaries": true,
+    "continuousMonitoring": false,
+    "diagnostics": "Successful raw log includes refused connections to loopback port3000; no silent-log claim or inferred cause."
+  },
+  "previousDiagnostic": {
+    "passed": 5988,
+    "failed": 4,
+    "filesPassed": 564,
+    "filesFailed": 3,
+    "exitCode": 1,
+    "sourceAtStart": "5f9fd9bdbbc8b30c391a2f046c94f69a5c2fa00d",
+    "sourceAtFinish": "5821d0c0af72b1abe6bf54c852a71feee9b98852",
+    "inputsUnchangedAtBoundaries": true,
+    "continuousMonitoring": false,
+    "fixCommit": "aab03644c",
+    "explanation": "Four stale output expectations in EngineSetup, LocalComputerSection and SettingsModal.appearance were corrected; all behavioral controls remain. Three complete affected files independently passed94 cases before this complete rerun."
+  },
+  "integrated": {
+    "liveAndComms": {
+      "files": 2,
+      "passed": 53,
+      "skipped": 0,
+      "seconds": 50.5,
+      "exitCode": 0
+    },
+    "guards": {
+      "files": 4,
+      "passed": 43,
+      "skipped": 0,
+      "seconds": 6.4,
+      "exitCode": 0
+    },
+    "website": {
+      "files": 2,
+      "passed": 25,
+      "skipped": 0,
+      "seconds": 0.772,
+      "exitCode": 0
+    },
+    "applicationTypes": {
+      "command": "tsc -b",
+      "observedExitCode": 0
+    },
+    "serverTypes": {
+      "command": "tsc -p tsconfig.server.json",
+      "observedExitCode": 0
+    },
+    "lint": {
+      "command": "oxlint --deny-warnings .",
+      "observedExitCode": 0
+    },
+    "locales": {
+      "command": "generate-locale.mjs --check",
+      "observedExitCode": 0,
+      "languages": 12,
+      "englishStrings": 4592
+    },
+    "releaseNotes": {
+      "observedExitCode": 0,
+      "version": "0.2.13",
+      "notes": 11
+    },
+    "staticEvidenceBoundary": "The parent tool calls returned exit0 for both TypeScript invocations, lint, locale and release checks. Empty stdout files are retained; success is not inferred solely from empty output."
+  },
+  "backend": {
+    "source": "ec60e5a8aa578c021132c5053d6bd5f0448bbbab",
+    "report": "docs/verification/evidence/origin-backend-reuse-034/report.json",
+    "reportSha256": "d9f3a8e1c9ffd8f3de42ef23716ccd6f46c7115b532f805daf370f9f3bec446a",
+    "bindingsCarriedForward": 100,
+    "optionalPresenceCarriedForward": true,
+    "backendTree": "785ac8c20beb028922f4d95068be2bd4f8bbcc96",
+    "deploymentPerformed": false,
+    "productionProbePerformed": false
+  },
+  "acceptance": "Local/source and named synthetic boundaries only. Fresh exact-source CI/native packages, private website checks and matching public delivery are still pending. The feature acceptance register retains independent device, account, provider and multi-client limits.",
+  "files": [
+    {
+      "name": "client-shared-stable-034.log",
+      "bytes": 31113,
+      "sha256": "40227e5260595f5704436831b8a393a5de438c5e6e2f9b1ccce6a8c0962e3cef"
+    },
+    {
+      "name": "client-shared-stable-034.json",
+      "bytes": 128980,
+      "sha256": "57caded282e9cb1fea285f26b276e0324b112e8da835be488ccef2c2e4798ffd"
+    },
+    {
+      "name": "client-shared-stable-034-final.log",
+      "bytes": 6564,
+      "sha256": "31d83a060500e9b974a5c68eed4b0712b9c27d637d959f1321caad8e33ac4ccc"
+    },
+    {
+      "name": "client-shared-stable-034-final.json",
+      "bytes": 128980,
+      "sha256": "e7c80ce34f716e77796fb32782cb17225903c6778b596421133873a51cf9895a"
+    },
+    {
+      "name": "integrated-live-comms-034.log",
+      "bytes": 238,
+      "sha256": "e5093eec652a33b35e297f94beccbb5cc59a01cbfe8790be2f1f51dd5a8802fa"
+    },
+    {
+      "name": "integrated-tsc-client-034.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integrated-tsc-server-034.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integrated-lint-034.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "integrated-locales-034.log",
+      "bytes": 352,
+      "sha256": "08b7037c1119bb179339638b8d6d44deccf2812e0f57edf0e0ab522c4f12b15f"
+    },
+    {
+      "name": "integrated-releases-034.log",
+      "bytes": 46,
+      "sha256": "73e3f9acb308a7a33702f5d9e6194acb70577623c347bf17f1ff5b5b47383ad1"
+    },
+    {
+      "name": "integrated-guards-034.log",
+      "bytes": 236,
+      "sha256": "cc5d538b1a830b959b0d87189c0154179ce6ed35b1842030f1507fbd348033f0"
+    },
+    {
+      "name": "integrated-site-034-final.log",
+      "bytes": 240,
+      "sha256": "6c58c896ae27717b8b10ddc26f994391bc44eb948fc5510d9223080f476059c8"
+    }
+  ]
+}

@@ -67,15 +67,24 @@ The current shared changelog rolls the four unpublished 0.2.12 notes into eleven
 0.2.13 notes. It does not present 0.2.12 as a published history entry. In-app,
 website, GitHub and updater copies must be generated from the same final source.
 
-Final integrated client/shared acceptance is pending. Both TypeScript checks,
-full lint, locale validation and 43 release/documentation guards passed at the
-integration checkpoint; website tests passed 25 cases. Fresh
+The final integrated client/shared run passed **5,992 cases across 567 files**
+in 366.62 seconds. Its 1,350 bound inputs match at both run boundaries and at
+the reporting checkpoint, while documentation/server-only commits advanced.
+This is a boundary comparison, not continuous filesystem monitoring. The
+earlier full diagnostic's four stale copy expectations and the corrected full
+rerun are both retained in the [local integration record](evidence/origin-candidate-034/report.json).
+Both TypeScript checks, full lint, locale validation and 43
+release/documentation guards passed; current website tests passed 25 cases and
+integrated Live/Comms passed 53. The raw successful UI log includes refused
+loopback-port-3000 diagnostics; its terminal footer and process exit are green.
+Fresh
 source-bound CI, Windows/Mac builds,
 artifact/feed validation, private website acceptance and public delivery remain
 pending. No new backend deployment is required merely by changing the desktop
 version. The [backend closure comparison](origin-backend-reuse-034.md) records
 100 bindings at `ec60e5a8a`, equal to deployed 0.2.11 apart from the root version.
-The final freeze must retain those bindings before reusing that deployment.
+All 100 bindings were also carried forward unchanged at the local reporting
+checkpoint. The final freeze must retain them before reusing that deployment.
 
 This batch does not establish every feature or component as accepted. The
 [feature acceptance register](origin-feature-acceptance-034.md) records 34 areas
