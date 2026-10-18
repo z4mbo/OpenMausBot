@@ -104,6 +104,7 @@ describe("routine comms e2e on the job runtime (fake ACP fleet)", () => {
   let compat: Server;
   let compatUrl = "";
   let compatAnswer: "hang" | "ping" | "steps" | "limit" = "hang";
+  let compatLimitedRequests = 0;
 
   const waitUntil = async (predicate: () => Promise<boolean>, timeout: number, what: string): Promise<void> => {
     const deadline = Date.now() + timeout;
@@ -221,6 +222,7 @@ describe("routine comms e2e on the job runtime (fake ACP fleet)", () => {
       }
       if (compatAnswer === "hang") return;
       if (compatAnswer === "limit") {
+        compatLimitedRequests++;
         res.writeHead(429, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: { message: "Rate limit reached for fake-model: 30 requests per minute" } }));
         return;
@@ -1049,9 +1051,10 @@ describe("routine comms e2e on the job runtime (fake ACP fleet)", () => {
     "tells an asker why its teammate's turn failed, in the provider's words",
     async () => {
       compatAnswer = "limit";
+      const limitedBefore = compatLimitedRequests;
       try {
         await hideAll();
-        const helper = await named("LimitHelper", { modelSelection: { instanceId: "helperCompat", model: "fake-model" } });
+        const helper = await named("LimitHelper", { modelSelection: { instanceId: "helperCompat", model: "fake-model" }, toolScope: { allow: [] } });
         const asker = await named("LimitAsker", { modelSelection: ASKER });
         expect((await startRoutine(asker.id, "ask @LimitHelper something")).status).toBe(201);
         let failed: any;
@@ -1062,6 +1065,7 @@ describe("routine comms e2e on the job runtime (fake ACP fleet)", () => {
         }, 30_000, "the asker never heard back");
         expect(failed.tool.name).toContain("Rate limit reached for fake-model: 30 requests per minute");
         expect(assignments(helper.id, asker.id)[0].result).toContain("Rate limit reached for fake-model: 30 requests per minute");
+        expect(compatLimitedRequests).toBeGreaterThan(limitedBefore);
       } finally {
         compatAnswer = "hang";
       }
