@@ -8,7 +8,7 @@ import { failedTurnTool } from "../shared/failed-turn.ts";
 import type { PlaceRow } from "../shared/place-view.ts";
 import { TRIAL_CREDIT_REFUSED } from "../shared/trial-credit.ts";
 import { CLOUD_HEALTH_PATH, CLOUD_PAIRING_PATH, CLOUD_PAIRING_SKEW_S, cloudPairingSignature, cloudRequestSignature } from "./cloud-home.ts";
-import { CLOUD_HEALTH_MAX_BYTES, HEALTH_BUCKET_CAP, createCloudHealth, createCloudHealthLedger, type CloudHealthDeps } from "./cloud-health.ts";
+import { CLOUD_HEALTH_MAX_BYTES, HEALTH_BUCKET_CAP, createCloudHealth, createCloudHealthLedger, fixedCode, type CloudHealthDeps } from "./cloud-health.ts";
 import { DATA_DIR, EVENTS_DIR } from "./config.ts";
 import type { RuntimeEvent } from "./contracts.ts";
 import { createCloudSignedRoutes } from "./routes/cloud-signed.ts";
@@ -48,6 +48,14 @@ const incidents = (w: ReturnType<typeof world>, after?: string) => w.health.repo
 const place = (state: PlaceRow["state"]): PlaceRow => ({ state, params: { bot: "Tallyspoon Ops", cause: "Boat said: quota exceeded for ada@example.test." }, source: "works-on" });
 
 describe("the failure code a Cloud home reports", () => {
+  it.each(["Origin", "OpenMausBot"])("classifies current and legacy %s restarts without sending the message", (name) => {
+    const cause = `turn interrupted — ${name} restarted`;
+    expect(fixedCode(cause)).toBe("restart");
+    const w = world();
+    w.fail(cause);
+    expect(incidents(w)).toEqual([{ kind: "turn", code: "restart", engine: null, count: 1 }]);
+    expect(JSON.stringify(w.health.report(undefined))).not.toContain(cause);
+  });
   it("names a place that could not be used by its state", () => {
     const w = world();
     w.fail("Your cloud computer hours are used up.", { place: place("cc-no-hours") });

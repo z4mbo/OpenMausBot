@@ -17,7 +17,7 @@ export function codexNotSignedIn(): string {
  * with "Try again at 5:23 PM." or "…or try again at Oct 17th, 2026 5:23 PM.", in its local time. */
 export function codexLimitMessage(said: string, timeZone = hostTimeZone()): string {
   const resets = /\btry again at ([^.]+)/i.exec(said)?.[1]?.trim();
-  return `${CODEX_USAGE_LIMIT_REACHED} This is OpenAI's limit, not your MausBot plan. ${resets
+  return `${CODEX_USAGE_LIMIT_REACHED} This is OpenAI's limit, independent of your cloud computer. ${resets
     ? `It resets at ${resets} (${timeZone}). Until then, manage your Codex usage in ChatGPT or switch this bot to another engine.`
     : "Manage your Codex usage in ChatGPT, or switch this bot to another engine until it resets."}`;
 }

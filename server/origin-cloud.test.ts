@@ -159,7 +159,7 @@ describe("runOriginTool", () => {
   it("explains a missing connection or project link", async () => {
     const { client } = fakeConvex({});
     const offline = await runOriginTool("origin_list_issues", {}, "coder", { bots: BOTS, state: { projects: { chief: "proj" } }, connect: () => client });
-    expect(offline).toMatchObject({ isError: true, text: expect.stringContaining("Origin is not connected") });
+    expect(offline).toMatchObject({ isError: true, text: expect.stringContaining("Origin account is not connected") });
     const unlinked = await runOriginTool("origin_list_issues", {}, "loner", { bots: BOTS, state, connect: () => client });
     expect(unlinked).toMatchObject({ isError: true, text: expect.stringContaining("no linked Origin project") });
   });
@@ -312,7 +312,7 @@ describe("origin_assign_issue", () => {
     expect(result.text).toBe("Labelled ORI-AB12 agent:developer and commented the assignment.");
     expect(mutations(calls)).toEqual([
       ["issueRelations:labels", { sessionToken: "tok", taskId: "kaitaskab12", labels: ["ci", "agent:developer"] }],
-      ["tasks:addComment", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", body: "Assigned to the agent Developer (Developer) by Kai in OpenMausBot." }],
+      ["tasks:addComment", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", body: "Assigned to the agent Developer (Developer) by Kai in Origin." }],
       ["tasks:moveTask", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", columnId: "k2" }],
     ]);
     expect(result.cards?.heading).toBe("Assigned to Developer");

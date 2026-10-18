@@ -101,6 +101,8 @@ describe("native provider onboarding", () => {
       expect(loadConfig().instances?.[id]).toEqual({ driver, enabled: true });
       expect(loadConfig().instances?.openaiCompat.driver).toBe("openai-compat");
       expect(ui.lines.join("\n")).toContain("Existing sign-in found");
+      expect(ui.lines.join("\n")).toContain("Welcome to Origin");
+      expect(ui.lines.join("\n")).not.toContain("OpenMausBot");
       expect(await isSetupComplete(DATA_DIR)).toBe(true);
       ui.assertConsumed();
       expectLeaseReleased();

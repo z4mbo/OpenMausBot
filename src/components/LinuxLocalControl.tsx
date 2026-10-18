@@ -11,10 +11,11 @@ import {
 
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n";
+import { APP_REPOSITORY } from "@/lib/app-links";
 import { useDesktopCapabilities } from "./DesktopCapabilities";
 
 const LINUX_GUIDE_URL =
-  "https://github.com/milind-soni/OpenMausBot/blob/main/docs/linux-desktop.md#enable-local-control";
+  `${APP_REPOSITORY}/blob/origin-integration/docs/linux-desktop.md#enable-local-control`;
 
 export function LinuxLocalControl() {
   const { capabilities } = useDesktopCapabilities();

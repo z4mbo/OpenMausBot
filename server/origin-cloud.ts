@@ -708,7 +708,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     await setLabels(scope, target.taskId, [...labels.filter((existing) => !existing.startsWith("agent:")), label]);
     await ctx.client.mutation("tasks:addComment", {
       projectId: scope.projectId, sessionToken: scope.sessionToken, taskId: target.taskId,
-      body: `Assigned to the agent ${agent.name}${agent.title ? ` (${agent.title})` : ""} by ${ctx.caller.name} in OpenMausBot.`,
+      body: `Assigned to the agent ${agent.name}${agent.title ? ` (${agent.title})` : ""} by ${ctx.caller.name} in Origin.`,
     });
     const inProgress = found.columns.find((column) => !isDoneColumn(column) && normalizedTitle(text(column.title)) === "inprogress");
     if (inProgress && !found.task.done && found.task.columnId !== inProgress._id) {
@@ -994,7 +994,7 @@ export async function runOriginTool(name: string, args: Args, botId: string, dep
   if (!tool) return { text: `Unknown Origin tool: ${name}`, isError: true };
   const { url, sessionToken } = deps.state;
   if (!url || !sessionToken) {
-    return { text: "Origin is not connected. Ask the person to sign in to Origin in OpenMausBot first; do not retry until they have.", isError: true };
+    return { text: "The Origin account is not connected. Ask the person to sign in first; do not retry until they have.", isError: true };
   }
   const caller = deps.bots.find((bot) => bot.id === botId);
   const reachable = reachableCloudProjects(deps.bots, deps.state.projects, botId);

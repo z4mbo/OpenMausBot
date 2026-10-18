@@ -1099,7 +1099,7 @@ describe("RoutineManager", () => {
         routineName: "Morning brief",
         status: "failed",
         threadId: "thread-1",
-        error: "OpenMausBot restarted while this routine was running",
+        error: "Origin restarted while this routine was running",
       },
     ]);
   });
@@ -3440,7 +3440,7 @@ describe("routine paths that cannot exist where the routine runs", () => {
     h.manager.update(routine.id, { prompt: routine.prompt });
     h.manager.runNow(routine.id);
     await h.manager.tick();
-    expect(h.started[0]!.prompt).toContain("[OpenMausBot: this run is on a Linux computer, where C:\\Users\\Ada\\Reports\\weekly.xlsx cannot exist.");
+    expect(h.started[0]!.prompt).toContain("[Origin: this run is on a Linux computer, where C:\\Users\\Ada\\Reports\\weekly.xlsx cannot exist.");
     expect(JSON.parse(readFileSync(h.options.file!, "utf8")).routines[0]).not.toHaveProperty("warning");
   });
 });
