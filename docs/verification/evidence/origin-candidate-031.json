@@ -115,7 +115,6 @@
     "candidate-031-site-build-01080e8b7.log"
   ],
   "remaining": [
-    "actual-baseline-request-contract-compatibility",
     "final-source-freeze",
     "new-exact-source-ci-native",
     "fresh-platform-artifacts-and-site-image",
@@ -124,5 +123,12 @@
     "client-feed-site-publication",
     "public-acceptance"
   ],
-  "qualification": "Local suite and source-tree evidence only. This file does not authorize production operations or establish packaged, provider, hardware or public acceptance. Old CI/native builds cannot cover new source."
+  "qualification": "Local suite and source-tree evidence only. This file does not authorize production operations or establish packaged, provider, hardware or public acceptance. Old CI/native builds cannot cover new source.",
+  "compatibility": {
+    "report": "origin-backend-compatibility-031/backend-compatibility-report-031.json",
+    "reportSha256": "25eade62ac1eb924ea3405ada1833cd7328ebfee176457928ea471cf9aac39cf",
+    "passed": 7,
+    "protocolRequests": 34,
+    "scope": "Original published request contracts and registered candidate handlers with synthetic rows; final frozen candidate module comparison required"
+  }
 }

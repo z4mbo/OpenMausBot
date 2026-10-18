@@ -13,7 +13,7 @@ This candidate is locally verified and unpublished. The public website, download
 | Flat shared dialogs, menus, Settings, Apps, Triggers and Voice; readable trigger identity on phones | `b94899358`, `0757f7188`, `a8961c3c4` | [Dialogs](origin-flat-dialogs.md), [popups](origin-flat-popups.md), [trigger rows](origin-trigger-row.md). |
 | Reduced-motion account focus, busy-confirmation containment and hidden Advanced tab stops | `dfe5202aa`, `a6788ab7d`, `baf8c0260` | Identical regressions fail before and pass after in the linked UI reports; two integrated actual Chromium keyboard cases pass. |
 | Retire duplicate-prone legacy server-token issue creation while retaining existing links/manual creation | `4da184d55` | [Registered-handler evidence and conditional credential scenario](origin-backend-access.md#unpublished-legacy-issue-creation-follow-up). Modern host integration remains separate. |
-| Verified Origin mail provider/domain/sender prepared | `9d16cb641` | [Sanitized provider setup](evidence/origin-mail-provider-031.json). Backend configuration, provider acceptance and inbox delivery are not established. |
+| Verified Origin mail provider/domain/sender prepared | `9d16cb641` | [Sanitized provider setup](evidence/origin-mail-provider-031.json). An [account-only readiness check](evidence/origin-mail-readiness-031.json) confirms API authorization and an enabled transactional relay; backend configuration, email acceptance and inbox delivery remain unproven. |
 
 ## Integrated local checks
 
@@ -36,7 +36,7 @@ The earlier `candidate-031-client-shared-3bea105d6.log` and `candidate-031-site-
 
 ## Remaining delivery gates
 
-Actual old-0.2.10 request-contract compatibility with the candidate backend is being verified in a disposable HTTP/Convex-test bridge. This is distinct from full old-App or packaged compatibility. Source freeze, fresh exact-source CI/native success, new Windows/macOS artifacts, private draft assets, compiled website/browser acceptance and fresh artifact/image identities are required.
+Actual old-0.2.10 request-contract compatibility passes seven cases through 34 real loopback requests to registered candidate handlers. [The report](origin-backend-compatibility.md) retains 209 source bindings, six unchanged tasks, three embedded issue links and three unchanged pull-request link rows. This is distinct from full old-App or packaged compatibility. The final frozen source must match those candidate module identities. Source freeze, fresh exact-source CI/native success, new Windows/macOS artifacts, private draft assets, compiled website/browser acceptance and fresh artifact/image identities remain required.
 
 The reviewed sequence is backend first: fresh full backup, exact-source backend, all pages of five storage migrations and three Draft phases, then confirmed temporary-key revocation and credential-file absence. Only afterward may the approved mail configuration run, followed by new clients/feeds and finally the website. Original backend/mail timestamps remain immutable; later site acceptance requires fresh current public-client evidence. Unknown side-effect outcomes hold the release until independently reconciled.
 
