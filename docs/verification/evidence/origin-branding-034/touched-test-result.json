@@ -1,5 +1,6 @@
 {
   "codeCommit": "52fe303099ff5c75b0ec8195c8b5cda7fb582938",
+  "compatibilityFollowUpCommit": "8f90fae328b1ba6ab28c21c99663b5f3edd41ecb",
   "baseline": "87ff77be5ea79272175219d479b9a8017b4e8fcc",
   "full": {
     "files": 128,

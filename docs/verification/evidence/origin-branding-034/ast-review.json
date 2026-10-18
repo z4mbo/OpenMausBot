@@ -31,7 +31,6 @@
     "server/custom-domain.ts",
     "server/data/engine.ts",
     "server/decider/openrouter.ts",
-    "server/decider/relay.ts",
     "server/drivers/acp/background-text.ts",
     "server/drivers/acp/core.ts",
     "server/drivers/agents-bridge.ts",
@@ -94,7 +93,6 @@
     "server/routine-requests.ts",
     "server/routines.ts",
     "server/runtime/envelope.ts",
-    "server/runtime/tree.ts",
     "server/sentinel/cli.ts",
     "server/server-launcher.ts",
     "server/service-unit.ts",
@@ -129,6 +127,10 @@
       "file": "electron/system-tray.mjs"
     },
     {
+      "file": "scripts/verify-origin-branding.ts",
+      "reason": "new file"
+    },
+    {
       "file": "scripts/verify-startup-tray.mjs"
     },
     {
@@ -142,6 +144,9 @@
     },
     {
       "file": "server/peer-provenance.ts"
+    },
+    {
+      "file": "server/runtime/tree.ts"
     },
     {
       "file": "server/system-prompt.ts"
