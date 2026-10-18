@@ -40,7 +40,9 @@ HTTP connection-reset failure; neither failed run is described as green.
 | P2: a nonsettling engine status probe keeps registry discovery pending | `67dbb03a8` | [Real registry with virtual-clock deadlines and a normal isolated server](origin-provider-snapshot-deadline.md); CLI termination escalation is deferred |
 | P2: startup/tray, PWA installation, agent messages and setup copy identify the upstream product | `eeb992491`, `7a5716f74`, `795ca0077` | [Native startup, real pairing/onboarding and compatibility evidence](origin-branding.md) |
 | P2: launch promotion points to the upstream Product Hunt page | `43d25faab` | Related notice/queue regressions passed at its worker checkpoint |
-| P1: optional fleet upgrade executes the upstream npm install as root before restarting Origin services | `5821d0c0a` | Four red-before regressions; planning now refuses before an executor mutation; final operator report follows |
+| P1: optional fleet upgrade executes the upstream npm install as root before restarting Origin services | `5821d0c0a` | [Four red-before regressions and executor recording](origin-cli-distribution.md); planning refuses before a mutation |
+| P2: CLI setup and service recovery instructions launch the upstream package | `256509b8f` | Same report: six red-before cases, 189 selected passes and five existing platform skips |
+| P2: optional Sentinel scheduling chooses an installed upstream app instead of Origin | `ec60e5a8a` | Same report: four red-before cases, 26 selected passes and one existing skip; native scheduling is separate |
 
 The user's one-row footer preference is implemented by `27ab9b426`. Its existing
 39 focused checks pass. The [finite browser matrix](sidebar-footer-single-row.md)
@@ -65,13 +67,15 @@ The current shared changelog rolls the four unpublished 0.2.12 notes into eleven
 0.2.13 notes. It does not present 0.2.12 as a published history entry. In-app,
 website, GitHub and updater copies must be generated from the same final source.
 
-Final integrated client/shared, TypeScript, lint, locale, guards and remaining
-touched-server checks are pending. Website tests passed 25 cases. Fresh
+Final integrated client/shared acceptance is pending. Both TypeScript checks,
+full lint, locale validation and 43 release/documentation guards passed at the
+integration checkpoint; website tests passed 25 cases. Fresh
 source-bound CI, Windows/Mac builds,
 artifact/feed validation, private website acceptance and public delivery remain
 pending. No new backend deployment is required merely by changing the desktop
-version: the complete final backend closure must first be compared with deployed
-0.2.11 before deciding whether backend changes are necessary.
+version. The [backend closure comparison](origin-backend-reuse-034.md) records
+100 bindings at `ec60e5a8a`, equal to deployed 0.2.11 apart from the root version.
+The final freeze must retain those bindings before reusing that deployment.
 
 This batch does not establish every feature or component as accepted. The
 [feature acceptance register](origin-feature-acceptance-034.md) records 34 areas
