@@ -286,6 +286,7 @@ Origin's inspection and delivery records:
 - [Shared controls and dialog checks](origin-ui.md)
 - [Project navigation and delegation checks](origin-project-ui.md)
 - [Populated project pages, accounts and members](origin-pages.md)
+- [Public invitations and central email](origin-invitations.md)
 - [Core Settings and onboarding](origin-core.md)
 - [Member call lifecycle and audio recovery](origin-calls.md)
 - [Drawing recovery and canvas controls](origin-draw.md)

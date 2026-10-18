@@ -6,6 +6,10 @@ On 2026-10-18 the user requested continued productive iterations until the weekl
 
 After the weekly allowance ended, the user explicitly authorized existing credits and requested fixing failed CI and completing website, Mac and Windows publication. This supersedes the allowance stop condition. Continue that delivery with visible app previews; do not purchase credits or use an account reset.
 
+The user reconfirmed production delivery after verification on 2026-10-18 and added invitation acceptance: workspace links copied or emailed from the desktop must use the public Origin `/join/<token>` route at `https://origin.imbored.fun`, preserve the issuing backend and access restrictions, and support email invitations without requiring a mail-provider secret on each desktop. Verify failures and successful acceptance with isolated accounts and a fake mail transport. Ship the matching verified source, website, backend, Windows/Mac artifacts and release notes together. Real recipient emails require an explicitly supplied recipient; synthetic tests must not send external mail.
+
+After the user cleared the legacy tracker, the goal was recreated as active on 2026-10-18 with this production-delivery scope, including public invitation links, centralized email delivery, acceptance recovery, matching platform releases and the isolation rules above. The obsolete `without deploying` objective is superseded.
+
 ## Required outcome
 
 - Inspect the complete monorepo, including concurrent main-checkout changes read-only, with specialist agents working in waves.
