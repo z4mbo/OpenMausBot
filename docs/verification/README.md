@@ -317,6 +317,7 @@ Origin's inspection and delivery records:
 - [Drawing recovery and canvas controls](origin-draw.md)
 - [Storage admission security investigation](origin-storage-admission.md)
 - [Upstream fit review and paired appearance](origin-upstream-review.md)
+- [Thirty additional upstream source-fit decisions](origin-upstream-fit-034.md)
 - [Website themes and release history](origin-site.md)
 - [Before/after screenshot index](origin-screenshots.md)
 
