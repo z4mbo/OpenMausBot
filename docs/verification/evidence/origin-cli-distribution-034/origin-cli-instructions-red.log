@@ -1,0 +1,271 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin
+
+ ❯ server/cli.test.ts (32 tests | 3 failed | 29 skipped) 10ms
+     × runs explicit setup once and explains how to start without launching a server 7ms
+     × refuses an unconfigured setup without a terminal 1ms
+     × refuses an unconfigured start without a terminal 1ms
+ ❯ server/origin-cli-instructions.test.ts (3 tests | 3 failed) 10ms
+     × starts from the Origin checkout without installing the upstream application 6ms
+     × runs every headless help example from the checkout 2ms
+     × recovers from a disposable npm cache by using a stable Origin checkout 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/cli.test.ts > terminal onboarding commands > runs explicit setup once and explains how to start without launching a server
+AssertionError: expected "vi.fn()" to be called with arguments: [ StringContaining{…} ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   StringContaining "Start with: pnpm omb",
++   "
++ One optional step: connect your phone. You can skip this and start chatting here.",
+  ]
+
+  2nd vi.fn() call:
+
+  [
+-   StringContaining "Start with: pnpm omb",
++   "
++ All set. Start with: openmausbot (or npx openmausbot without a global install).",
+  ]
+
+  3rd vi.fn() call:
+
+  [
+-   StringContaining "Start with: pnpm omb",
++   "Use the same --data-dir (C:\\Users\\aless\\AppData\\Local\\Temp\\omb-test-home-IUjV5Y\\onboarding) and --port (18451) options when starting.",
+  ]
+
+
+Number of calls: 3
+
+ ❯ server/cli.test.ts:218:24
+    216|     expect(setup.isSetupComplete).not.toHaveBeenCalled();
+    217|     expect(serve).not.toHaveBeenCalled();
+    218|     expect(output.log).toHaveBeenCalledWith(expect.stringContaining("S…
+       |                        ^
+    219|     expect(phoneSetup).toHaveBeenCalledOnce();
+    220|     expect(setup.saveCliStartup).toHaveBeenCalledWith(options.dataDir,…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  server/cli.test.ts > terminal onboarding commands > refuses an unconfigured setup without a terminal
+AssertionError: expected "vi.fn()" to be called with arguments: [ StringContaining "pnpm omb setup" ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   StringContaining "pnpm omb setup",
++   "Setup needs an interactive terminal. Run `npx openmausbot setup` in a terminal, then use `npx openmausbot serve` for unattended starts.",
+  ]
+
+
+Number of calls: 1
+
+ ❯ server/cli.test.ts:255:26
+    253|     expect(serve).not.toHaveBeenCalled();
+    254|     expect(output.error).toHaveBeenCalledWith(expect.stringContaining(…
+    255|     expect(output.error).toHaveBeenCalledWith(expect.stringContaining(…
+       |                          ^
+    256|     expect(output.error.mock.calls.flat().join("\n")).not.toContain("n…
+    257|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  server/cli.test.ts > terminal onboarding commands > refuses an unconfigured start without a terminal
+AssertionError: expected "vi.fn()" to be called with arguments: [ StringContaining "pnpm omb setup" ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   StringContaining "pnpm omb setup",
++   "No completed setup was found. Run `npx openmausbot setup` in an interactive terminal first, or use `npx openmausbot serve` with an existing configuration.",
+  ]
+
+
+Number of calls: 1
+
+ ❯ server/cli.test.ts:255:26
+    253|     expect(serve).not.toHaveBeenCalled();
+    254|     expect(output.error).toHaveBeenCalledWith(expect.stringContaining(…
+    255|     expect(output.error).toHaveBeenCalledWith(expect.stringContaining(…
+       |                          ^
+    256|     expect(output.error.mock.calls.flat().join("\n")).not.toContain("n…
+    257|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  server/origin-cli-instructions.test.ts > Origin checkout instructions > starts from the Origin checkout without installing the upstream application
+AssertionError: expected 'openmausbot — your team of AI bots, r…' to contain 'https://github.com/z4mbo/Origin'
+
+- Expected
++ Received
+
+- https://github.com/z4mbo/Origin
++ openmausbot — your team of AI bots, ready in a few steps
++
++   openmausbot                         set up once, then open your workspace
++   openmausbot setup [--data-dir DIR]
++   openmausbot start [the same options as serve]
++   openmausbot serve [--port 8799] [--data-dir DIR] [--label NAME]
++                     [--public-url https://host] [--tailscale | --tunnel | --domain HOST] [--no-pair]
++   openmausbot pair  [--label NAME] [--client] [--phone ios|android]
++                     [--public-url https://host]
++   openmausbot sessions [revoke ID]
++   openmausbot status
++   openmausbot login [--email you@example.com]
++   openmausbot logout
++   openmausbot access list | add EMAIL [--chat-only] | remove EMAIL
++   openmausbot service install [--domain HOST | --tunnel | --tailscale] [--port N] [--data-dir DIR] | uninstall
++                     [--sentinel]   (the health scan below, every two minutes, instead of the server)
++   openmausbot sentinel [--data-dir DIR] [--out DIR] [--once] [--json]   (read-only health scan; see --help)
++   openmausbot browser install [--with-deps] | status
++   openmausbot fleet init --domain HOST [--operator USER] | create NAME --admin EMAIL [--member EMAIL] [--brand FILE]
++                     [--anthropic-key-file FILE] [--cap USD] [--license-key KEY] [--memory 1G]
++                   | list | users NAME add|remove EMAIL [--chat-only] | suspend NAME | resume NAME
++                   | delete NAME --yes [--keep-data] | upgrade   (all take --dry-run)
++                   | agent [--socket PATH] [--group USER]   (root; installed by init --operator)
++
++ setup   choose AI access and optional phone access; keep existing bots and chats
++ start   same as openmausbot: use your saved settings and open the workspace
++ serve   starts the server without prompts and prints a pairing link + QR code
++ pair    mints a pairing code against a running server (--client: chat only)
++ sessions lists paired devices; "sessions revoke ID" signs one out
++ status  what the server says about itself
++ login   signs this machine in to an OpenMausBot account (an emailed code)
++         and reserves its public address for --tunnel
++ logout  releases that address and signs out
++ access  who may sign in with an emailed code at /pair: an address or
++         @domain; --chat-only gives chat and approvals without settings.
++         Takes effect at once, no restart.
++ service keep the server running across reboots: writes a systemd unit
++         (Linux) or a launchd agent (macOS) for the same serve options and
++         prints the commands that install it. Install the package
++         permanently first (npm install -g openmausbot).
++ browser install: the bots' browser engine (agent-browser, pinned) into the
++         data dir, and Chrome for Testing into the user's browser cache.
++         --with-deps also installs
++         the Linux libraries Chrome needs (run as root once). Then run
++         browser install as the user running serve, from that user's home.
++         status: what the current user and data directory have.
++ fleet   many client workspaces on one Linux server, each its own account,
++         service, data folder, brand, sign-in list and keys at NAME.HOST
++         behind the system Caddy. Plans are printed unless run as root;
++         --dry-run always prints. Install the package permanently first.
++         init --operator USER also installs the fleet agent, a root service
++         on a Unix socket only USER may open, so the workspace running as
++         USER manages the others from Settings → Installations.
++
++ --tailscale  serve over your tailnet: Tailscale terminates HTTPS and the
++              link uses this machine's MagicDNS name (needs Tailscale signed in
++              and HTTPS certificates enabled for the tailnet)
++ --tunnel     serve at a public https://c-… address through a
++              Cloudflare tunnel: no domain, no proxy, no open port. Run
++              `openmausbot login` once on this machine first.
++ --domain     serve at https://HOST on your own domain: a pinned Caddy is
++              downloaded once and run alongside the server, and gets the
++              certificate itself. Point the domain's DNS at this machine and
++              open ports 80 and 443.
++
++ --no-open   do not open a browser window
++ --no-pair   skip phone setup and do not print a pairing code
++ --local     start locally this time, ignoring saved remote-access settings
++
++ Drive a running workspace (scripts, CI, other agents):
++   openmausbot doctor                    check the server answers and an engine is ready
++   openmausbot bots | channels | models  your bots, your rooms, the engines and their models
++   openmausbot run BOT "do this"         give a bot one job and wait until it and every teammate it asked are done
++   openmausbot send BOT "text"           send one message and return at once
++   openmausbot wait BOT                  wait on work already running
++   openmausbot messages BOT              the latest messages of a conversation
++   openmausbot interrupt BOT [--tree]    press Stop (--tree: and every teammate on its job)
++   openmausbot export BOT --out DIR      write a job's transcripts, files and screens to DIR
++   openmausbot events [--job THREAD]     the server's live events as JSON lines
++   openmausbot team apply FILE           make the workspace match a team file (team export writes one)
++   openmausbot engine set claude --key-env ANTHROPIC_API_KEY   give it an engine without a screen
++   openmausbot connect URL --code CODE --out FILE              get a token for a workspace elsewhere
++   openmausbot new-bot | new-channel | set-model | edit | mcp
++
++   Server: --url URL (or OPENMAUSBOT_URL), --port N (or OMB_PORT), else this computer's.
++   Token: OPENMAUSBOT_TOKEN or --token-file FILE. --json prints one JSON document;
++   progress goes to stderr (--quiet drops it). openmausbot help VERB for the details.
++
++ Install once with `npm install -g openmausbot`, then type `openmausbot`.
++ Or run without a global install: `npx openmausbot`. Node 24+ is required.
++
+
+ ❯ server/origin-cli-instructions.test.ts:8:19
+      6| describe("Origin checkout instructions", () => {
+      7|   it("starts from the Origin checkout without installing the upstream …
+      8|     expect(USAGE).toContain("https://github.com/z4mbo/Origin");
+       |                   ^
+      9|     expect(USAGE).toContain("pnpm install --frozen-lockfile");
+     10|     expect(USAGE).toContain("pnpm omb setup");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  server/origin-cli-instructions.test.ts > Origin checkout instructions > runs every headless help example from the checkout
+AssertionError: expected 'Drive a running workspace (scripts, C…' to contain 'pnpm omb doctor'
+
+- Expected
++ Received
+
+- pnpm omb doctor
++ Drive a running workspace (scripts, CI, other agents):
++   openmausbot doctor                    check the server answers and an engine is ready
++   openmausbot bots | channels | models  your bots, your rooms, the engines and their models
++   openmausbot run BOT "do this"         give a bot one job and wait until it and every teammate it asked are done
++   openmausbot send BOT "text"           send one message and return at once
++   openmausbot wait BOT                  wait on work already running
++   openmausbot messages BOT              the latest messages of a conversation
++   openmausbot interrupt BOT [--tree]    press Stop (--tree: and every teammate on its job)
++   openmausbot export BOT --out DIR      write a job's transcripts, files and screens to DIR
++   openmausbot events [--job THREAD]     the server's live events as JSON lines
++   openmausbot team apply FILE           make the workspace match a team file (team export writes one)
++   openmausbot engine set claude --key-env ANTHROPIC_API_KEY   give it an engine without a screen
++   openmausbot connect URL --code CODE --out FILE              get a token for a workspace elsewhere
++   openmausbot new-bot | new-channel | set-model | edit | mcp
++
++   Server: --url URL (or OPENMAUSBOT_URL), --port N (or OMB_PORT), else this computer's.
++   Token: OPENMAUSBOT_TOKEN or --token-file FILE. --json prints one JSON document;
++   progress goes to stderr (--quiet drops it). openmausbot help VERB for the details.
+
+ ❯ server/origin-cli-instructions.test.ts:16:28
+     14|
+     15|   it("runs every headless help example from the checkout", () => {
+     16|     expect(HEADLESS_USAGE).toContain("pnpm omb doctor");
+       |                            ^
+     17|     for (const help of Object.values(VERB_HELP)) expect(help).toMatch(…
+     18|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  server/origin-cli-instructions.test.ts > Origin checkout instructions > recovers from a disposable npm cache by using a stable Origin checkout
+AssertionError: expected 'this command runs from an npx cache (…' to contain 'Origin checkout'
+
+Expected: "Origin checkout"
+Received: "this command runs from an npx cache (/home/user/.npm/_npx/fixture/node_modules/openmausbot), which npm may delete at any time. Install it permanently first (npm install -g openmausbot) and run `openmausbot service install` from that install."
+
+ ❯ server/origin-cli-instructions.test.ts:22:21
+     20|   it("recovers from a disposable npm cache by using a stable Origin ch…
+     21|     const warning = unstableInstallWarning("/home/user/.npm/_npx/fixtu…
+     22|     expect(warning).toContain("Origin checkout");
+       |                     ^
+     23|     expect(warning).toContain("pnpm omb service install");
+     24|     expect(warning).not.toContain("npm install -g openmausbot");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 29 skipped (35)
+   Start at  00:10:12
+   Duration  2.33s (transform 606ms, setup 665ms, import 1.31s, tests 19ms, environment 0ms)

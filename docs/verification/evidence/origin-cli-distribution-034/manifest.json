@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "payloads": [
+    {
+      "path": "origin-cli-distribution-docs.log",
+      "bytes": 253,
+      "sha256": "bd55d70b4c3cc7c41f000bcf5302472414356d48772b6b86242b0df31c0eaafc"
+    },
+    {
+      "path": "origin-cli-instructions-green.log",
+      "bytes": 273,
+      "sha256": "462b516c5df670ddad423757330c395b7adbee46640c15db2050d642680a449c"
+    },
+    {
+      "path": "origin-cli-instructions-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "origin-cli-instructions-red.log",
+      "bytes": 14242,
+      "sha256": "716a7c58fb78d086a2eb686b43d76e4ee85e19a7b2dc025f07857bc127960a29"
+    },
+    {
+      "path": "origin-cli-instructions-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "origin-fleet-upgrade-green.log",
+      "bytes": 266,
+      "sha256": "a3dba7753e89f146ba0d6728da05a950ef82075f615a78bc0ecbe381413c9624"
+    },
+    {
+      "path": "origin-fleet-upgrade-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "origin-fleet-upgrade-red.log",
+      "bytes": 4753,
+      "sha256": "f4eb4827765e0f92846ffaac302f452b2090becf51fb0258e9863726dcf2832b"
+    },
+    {
+      "path": "origin-sentinel-selection-green.log",
+      "bytes": 267,
+      "sha256": "cef30f11f4d45c48971eb00b6a20a15fa7ac8650b187ea804f473aab4cefbb11"
+    },
+    {
+      "path": "origin-sentinel-selection-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "origin-sentinel-selection-red.log",
+      "bytes": 7282,
+      "sha256": "165f3dbdee9868087140aa7eb502d0bf49dd7aa3e2703a50cb9b5fd624b80d08"
+    },
+    {
+      "path": "origin-sentinel-selection-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "report.json",
+      "bytes": 10049,
+      "sha256": "91f9ef305acc17e130c5870e4db5bd81611cff1b305951b4689d54407bb9515d"
+    }
+  ]
+}

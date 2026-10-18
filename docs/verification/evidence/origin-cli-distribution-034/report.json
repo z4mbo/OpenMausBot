@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "baseline": "7bcb3d1c5283d747c0cba8e3d6b91f4ecc2dac63",
+  "commits": {
+    "fleet": "f9d05ee2e5c0f1128a295c8012d9ca4dc6cb8d8a",
+    "instructions": "c407bed12bbd90bb181a9c95eb7df985f74d8832",
+    "sentinel": "51f6f8de4629c811934c62ffc050f978d2247998"
+  },
+  "sourceHashes": {
+    "7bcb3d1c5283d747c0cba8e3d6b91f4ecc2dac63": {
+      "server/fleet.ts": "f39dc9166507e9a4d0e1c18c4f310271a1ff1bdcddd3e687d80817cf4deb3d8e",
+      "server/fleet-cli.ts": "6c2e6872cdce5288bc0205db11a30e6f1896279f7e3e9323e3d09088ea3a65ec",
+      "server/cli.ts": "69495877ca216aefccac54b2f19c85fcbc28de727466784b2b40cb8a7d39056e",
+      "server/cli-usage.ts": "223d0b820c000b6e5580efbbca6af69bbc9991a20cf525e7f03bf02848ed48df",
+      "server/headless/main.ts": "2f45c530d1ab415b4dc9c06c205df3aeaa46930924931f0911adfa91e16214aa",
+      "server/service-unit.ts": "fa1e9d83ba65ad5614cb0c701903b49cd78b6479fa4f98524687bd210c932986",
+      "server/service-cli.ts": "37dbc4aade4b4331b14f6adc9e0946193fef00b453843874599ff17bff170724",
+      "shared/product-brand.mjs": "9e6ee8914888bcac087623b42c5039d68c65d2224575286efc10ca975c0dd051",
+      "electron-builder.yml": "6165cc9d037d2fd7f0b672c88d84c7de8f3dade2ecec2c1ddc9b8c7cb2c61a60"
+    },
+    "f9d05ee2e5c0f1128a295c8012d9ca4dc6cb8d8a": {
+      "server/fleet.ts": "f0ccca271fd41eb61bf604c638cc5a6d544ddb57c90cdeffcc4d8eac04bf79fb",
+      "server/fleet-cli.ts": "6c2e6872cdce5288bc0205db11a30e6f1896279f7e3e9323e3d09088ea3a65ec",
+      "server/cli.ts": "69495877ca216aefccac54b2f19c85fcbc28de727466784b2b40cb8a7d39056e",
+      "server/cli-usage.ts": "223d0b820c000b6e5580efbbca6af69bbc9991a20cf525e7f03bf02848ed48df",
+      "server/headless/main.ts": "2f45c530d1ab415b4dc9c06c205df3aeaa46930924931f0911adfa91e16214aa",
+      "server/service-unit.ts": "fa1e9d83ba65ad5614cb0c701903b49cd78b6479fa4f98524687bd210c932986",
+      "server/service-cli.ts": "37dbc4aade4b4331b14f6adc9e0946193fef00b453843874599ff17bff170724",
+      "shared/product-brand.mjs": "9e6ee8914888bcac087623b42c5039d68c65d2224575286efc10ca975c0dd051",
+      "electron-builder.yml": "6165cc9d037d2fd7f0b672c88d84c7de8f3dade2ecec2c1ddc9b8c7cb2c61a60"
+    },
+    "c407bed12bbd90bb181a9c95eb7df985f74d8832": {
+      "server/fleet.ts": "f0ccca271fd41eb61bf604c638cc5a6d544ddb57c90cdeffcc4d8eac04bf79fb",
+      "server/fleet-cli.ts": "74f43ce32be40cf8b7b60021a14354dd596faab0f2bb0d9a7b62240c1a4128b5",
+      "server/cli.ts": "d03722c7d4b311be662aeafe3b31a3e495cc87852119c962d67e02a12e07c6ea",
+      "server/cli-usage.ts": "1883f4dfe641be543410f2dda4592e6f7905db280c165dc5531cc054d03f18d2",
+      "server/headless/main.ts": "09d083e697721f6257d62e9ce48ade129d4527eaa28271a020e9101b6cc910e9",
+      "server/service-unit.ts": "d66bcfd2bca7c86c92c46297f6cea1dd304e3cc0fa5cdb5072c25b53f1841788",
+      "server/service-cli.ts": "dfd390d8f79c4e0074115a364d3e35ce85da6448564705ae2a5ab0407d5630be",
+      "shared/product-brand.mjs": "9e6ee8914888bcac087623b42c5039d68c65d2224575286efc10ca975c0dd051",
+      "electron-builder.yml": "6165cc9d037d2fd7f0b672c88d84c7de8f3dade2ecec2c1ddc9b8c7cb2c61a60"
+    },
+    "51f6f8de4629c811934c62ffc050f978d2247998": {
+      "server/fleet.ts": "f0ccca271fd41eb61bf604c638cc5a6d544ddb57c90cdeffcc4d8eac04bf79fb",
+      "server/fleet-cli.ts": "74f43ce32be40cf8b7b60021a14354dd596faab0f2bb0d9a7b62240c1a4128b5",
+      "server/cli.ts": "d03722c7d4b311be662aeafe3b31a3e495cc87852119c962d67e02a12e07c6ea",
+      "server/cli-usage.ts": "1883f4dfe641be543410f2dda4592e6f7905db280c165dc5531cc054d03f18d2",
+      "server/headless/main.ts": "09d083e697721f6257d62e9ce48ade129d4527eaa28271a020e9101b6cc910e9",
+      "server/service-unit.ts": "f0709340faf67919ce81726d150b80edc9d200392c32f487ad05cac0ae5af731",
+      "server/service-cli.ts": "dfd390d8f79c4e0074115a364d3e35ce85da6448564705ae2a5ab0407d5630be",
+      "shared/product-brand.mjs": "9e6ee8914888bcac087623b42c5039d68c65d2224575286efc10ca975c0dd051",
+      "electron-builder.yml": "6165cc9d037d2fd7f0b672c88d84c7de8f3dade2ecec2c1ddc9b8c7cb2c61a60"
+    }
+  },
+  "originalLogs": [
+    {
+      "path": "origin-fleet-upgrade-red.log",
+      "rawBytes": 4848,
+      "rawSha256": "f6c874c175b126bfc872efaa6876156a6e66353edae47ba638af9c4e51519e77"
+    },
+    {
+      "path": "origin-fleet-upgrade-green.log",
+      "rawBytes": 276,
+      "rawSha256": "a2cf0c2f3e48627d69ecd9aa646c46a7fa28e68f75db989e3dd39ad018d494b1"
+    },
+    {
+      "path": "origin-fleet-upgrade-lint.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "origin-cli-instructions-red.log",
+      "rawBytes": 14515,
+      "rawSha256": "dad0006f571b84f8ad80681dbdd6ed2af71ecc7828f6aa615b531c04f2a1f583"
+    },
+    {
+      "path": "origin-cli-instructions-green.log",
+      "rawBytes": 283,
+      "rawSha256": "3eae32644bc32a24ef65d3d0c781622ed141520b9c31efa55aa198dd071d7a46"
+    },
+    {
+      "path": "origin-cli-instructions-types.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "origin-cli-instructions-lint.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "origin-sentinel-selection-red.log",
+      "rawBytes": 7455,
+      "rawSha256": "3307283b1682f34a8ade41194be37ab4f0f1e47b5136490e395c8f305015ed1a"
+    },
+    {
+      "path": "origin-sentinel-selection-green.log",
+      "rawBytes": 277,
+      "rawSha256": "d797d7f4fbf9f0535839f791b258a52eca85ad3ae851c15017581a0a95ca5134"
+    },
+    {
+      "path": "origin-sentinel-selection-types.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "origin-sentinel-selection-lint.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "origin-cli-distribution-docs.log",
+      "rawBytes": 263,
+      "rawSha256": "8371f7d103ff9a6232dfe8d1234597e3d673a5ec474712f75bffb88c59b0c0c6"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "P1",
+      "file": "server/fleet.ts",
+      "function": "upgradePlan",
+      "scenario": "A fleet operator upgrades Origin. The production planner supplies npm install -g openmausbot@latest to the executor, followed by workspace restart and health steps; non-root and dry-run modes print that unsupported plan.",
+      "proof": "The root-mode production executor was driven with recording dependencies, capturing the exact npm argv, restart and health call. No real package install or service operation occurred.",
+      "fix": "Refuse at planning before executor mutation. The registry does not identify an Origin source checkout or revision, so automatic checkout replacement is unsupported."
+    },
+    {
+      "severity": "P2",
+      "files": [
+        "server/cli-usage.ts",
+        "server/cli.ts",
+        "server/service-unit.ts"
+      ],
+      "scenario": "Origin help, non-interactive setup recovery and unstable npx-cache service guidance tell the user to fetch the upstream npm application.",
+      "fix": "Use the actual Origin source checkout and pnpm scripts consistently in help, recovery instructions and source-hosting documentation. Preserve actual account/vendor identities and all wire/storage/service IDs."
+    },
+    {
+      "severity": "P2",
+      "file": "server/service-unit.ts",
+      "function": "shippedSentinelCli",
+      "scenario": "An optional Origin Sentinel service install discovers only the upstream desktop app and renders a schedule pointing to its executable and bundled CLI, replacing the invoking Origin checkout.",
+      "proof": "The real service writer produced the upstream executable path in a disposable unit file on the baseline. Both-products and upstream-only cases are covered.",
+      "fix": "Choose only Origin product directories and executable names. Linux retains the configured openmausbot executable and both platforms retain the bundled server/openmausbot.js filename. If no compatible Origin bundle is found, keep the invoking checkout script and Node."
+    }
+  ],
+  "verification": {
+    "fleet": {
+      "failedBefore": 4,
+      "passedAfter": 34,
+      "skippedAfter": 8,
+      "files": 3,
+      "rootPrivilegeTransitionTested": false
+    },
+    "instructions": {
+      "failedBefore": 6,
+      "passedAfter": 189,
+      "skippedAfter": 5,
+      "files": 20,
+      "serverTypesPassed": true,
+      "touchedLintPassed": true
+    },
+    "sentinel": {
+      "failedBefore": 4,
+      "passedAfter": 26,
+      "skippedAfter": 1,
+      "files": 5,
+      "serverTypesPassed": true,
+      "touchedLintPassed": true
+    },
+    "finalDocumentationGuards": 7,
+    "logFormatting": "LF, trailing whitespace and trailing blank lines normalized; raw capture hashes retained above."
+  },
+  "optionalSentinelCallPath": [
+    "server/cli.ts main service case",
+    "server/service-cli.ts runServiceCommand sentinel branch",
+    "server/service-cli.ts runSentinelService",
+    "server/service-unit.ts shippedSentinelCli"
+  ],
+  "normalElectronStartupUsesDiscovery": false,
+  "packagerSource": {
+    "file": "electron-builder.yml",
+    "productName": "Origin",
+    "linuxExecutableName": "openmausbot",
+    "expectedMacExecutable": "Origin",
+    "actualMacZipPathsVerified": false
+  },
+  "boundaries": [
+    "No real root account transition, package installation, systemd/launchd/Task Scheduler activation, or production mutation.",
+    "Windows skips the existing Unix-socket fleet-agent and POSIX-specific service checks; those skips are not successes.",
+    "No physical Mac/Linux scheduling acceptance; Mac ZIP path verification remains a release check.",
+    "Automatic fleet upgrade intentionally remains unavailable. Manual Origin checkout update and per-workspace restart/health verification are documented.",
+    "No timeout or retry-list changes."
+  ],
+  "synthetic": true,
+  "productionDataUsed": false,
+  "published": false
+}
