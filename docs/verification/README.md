@@ -44,6 +44,7 @@ recipe from sending messages to the user's running app by accident.
 
 Use only mapped, tested commands:
 
+- [Feature acceptance and remaining work](origin-feature-acceptance-034.md)
 - [The headless command line](headless-cli.md)
 - [Chat turns](chat-turns.md)
 - [Thread saves and failed deletions](origin-thread-durability.md)
