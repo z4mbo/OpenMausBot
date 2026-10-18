@@ -7,8 +7,8 @@ import { afterAll, beforeAll, expect, it } from "vitest";
 import { createServer, normalizePath } from "vite";
 
 const marker = "synthetic-origin-vite-private-files";
-const temporaryParent = realpathSync(tmpdir());
-const root = mkdtempSync(join(temporaryParent, "origin-vite-private-files-"));
+const temporaryParent = realpathSync.native(tmpdir());
+const root = realpathSync.native(mkdtempSync(join(temporaryParent, "origin-vite-private-files-")));
 const configFile = resolve(process.cwd(), "vite.config.ts");
 const scratchFiles = ["credential.env", "create-token.log", "receipt.json"].flatMap(name => [`.omb-scratch/${name}`, `nested/.omb-scratch/${name}`]);
 const defaultDeniedFiles = [".env", ".env.local", "private.crt", "private.pem", ".git/config"];
