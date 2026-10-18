@@ -123,44 +123,29 @@ describe("call modes", () => {
     expect(render(createElement(CallButton, { bot }))).not.toContain("OpenAI API key");
   });
 
-  it("shows the Pro card under the call button, never the key form, when Live calls need Pro", async () => {
+  it("does not offer an upstream subscription when a connected older server refuses Live", async () => {
     vi.stubGlobal("window", { ogb: { speechStop: vi.fn(async () => {}) } });
     const track = { enabled: true, stop: vi.fn() };
     configureLiveMedia({
       getUserMedia: async () => ({ getTracks: () => [track], getAudioTracks: () => [track] }) as unknown as MediaStream,
       createPeer: () => ({
-        iceGatheringState: "complete",
-        localDescription: { sdp: "v=0" },
-        addTrack() {},
-        createDataChannel: () => ({ close() {} }),
-        createOffer: async () => ({ type: "offer", sdp: "v=0" }),
-        setLocalDescription: async () => {},
-        close() {},
+        iceGatheringState: "complete", localDescription: { sdp: "v=0" }, addTrack() {},
+        createDataChannel: () => ({ close() {} }), createOffer: async () => ({ type: "offer", sdp: "v=0" }),
+        setLocalDescription: async () => {}, close() {},
       }) as unknown as RTCPeerConnection,
-      request: async () => {
-        throw new ApiError("Live calls from your phone need a Pro plan.", 402, { needsPro: true });
-      },
+      request: async () => { throw new ApiError("Live calls from your phone need a Pro plan.", 402, { needsPro: true }); },
       stopRemote: () => {},
     });
     setCallMode("live");
     await startLiveCall({ botId: bot.id, threadId: bot.threadId });
-    const header = render(createElement(CallButton, { bot }));
-    expect(header).toContain("Live calls from your phone need a Pro plan");
-    expect(header).not.toContain('aria-label="OpenAI API key for Live calls"');
-    expect(header).not.toContain('type="password"');
-    expect(header).toMatch(/aria-expanded="true" aria-controls="[^"]+"[^>]*aria-label="Live call with Atlas"/);
-    const popup = /<div id="([^"]+)" tabindex="-1" class="animate-pop-in/.exec(header);
-    expect(popup).not.toBeNull();
-    expect(header).toContain(`aria-controls="${popup![1]}"`);
-    expect(header).not.toContain("Get Pro");
-    const composer = render(createElement(CallButton, { bot, placement: "composer" }));
-    expect(composer).toContain("Live calls from your phone need a Pro plan");
-    expect(composer).toContain("bottom-full");
-    expect(render(createElement(CallButton, { bot: { ...bot, id: "juniper" } }))).not.toContain("Pro plan");
-    dismissStartPrompt("juniper");
-    expect(render(createElement(CallButton, { bot }))).toContain("Live calls from your phone need a Pro plan");
-    dismissStartPrompt(bot.id);
-    expect(render(createElement(CallButton, { bot }))).not.toContain("Pro plan");
+    for (const placement of ["header", "composer"] as const) {
+      const html = render(createElement(CallButton, { bot, placement }));
+      expect(html).not.toContain("Pro plan");
+      expect(html).not.toContain("Cloud settings");
+      expect(html).not.toContain("Start free trial");
+      expect(html).not.toContain('type="password"');
+    }
+    expect(track.stop).toHaveBeenCalledOnce();
   });
 
   it("leaves a Live call to the call bar and covers the chat only for Take turns", async () => {
