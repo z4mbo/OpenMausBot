@@ -92,6 +92,7 @@ Use only mapped, tested commands:
 - [Personal-key Live calls without upstream subscriptions](origin-live-policy.md)
 - [Origin self-hosted release lookup and update instructions](origin-update-channel.md)
 - [Engines and Doctor](engines.md)
+- [Bounded provider status reads](origin-provider-snapshot-deadline.md)
 - [Installer credential boundary follow-up](origin-installer-security-next.md)
 - [Current App landing image capture](origin-landing-capture.md)
 - [Cline engine and native loopback qualification](cline.md)
