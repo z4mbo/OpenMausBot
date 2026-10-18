@@ -101,3 +101,4 @@ docs/verification/evidence/origin-issue-drag-permission-034/** -text whitespace=
 docs/verification/evidence/origin-desktop-cloud-policy/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-desktop-cloud-policy/*.log -whitespace
 docs/verification/evidence/origin-update-channel-034/** -text whitespace=cr-at-eol,-blank-at-eof
+docs/verification/evidence/origin-thread-durability-034/** -text whitespace=cr-at-eol
