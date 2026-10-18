@@ -1,18 +1,16 @@
-import { chmodSync, existsSync, readFileSync, mkdirSync, rmSync, statSync, unlinkSync } from "node:fs";
+import { chmodSync, existsSync, readFileSync, mkdirSync, statSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 
 import { writeFileAtomic, writeFileAtomicIfChanged } from "./atomic.ts";
 import { parseToolScope, toolScopeWidens } from "../shared/tool-scope.ts";
 import { ensureSections, readSections, changeEmptySection } from "./section-context.ts";
 import type { TeamComputers } from "./team-computers.ts";
-import { removeBotFolder, soulFile, soulHash, writeSoulMirror } from "./bot-folder.ts";
+import { soulFile, soulHash, writeSoulMirror } from "./bot-folder.ts";
 import type { BotProfilePatch } from "./bot-profile.ts";
 import { peerAllowKey, type PeerAction } from "./peer-approval-key.ts";
 import { DATA_DIR, EVENTS_DIR, NATIVE_DIR, loadBrowserProfileIdAliases } from "./config.ts";
 import * as mdb from "./message-db.ts";
-import { forgetBotMemoryJournal, journalFile } from "./memory-journal.ts";
 import { runCommand, type Command } from "./commands.ts";
-import { workspaceDir } from "./workspace.ts";
 import type { Destination } from "./surface.ts";
 import { newId, type ModelSelection } from "./contracts.ts";
 import { redactSecretsInText } from "./redact.ts";
@@ -36,6 +34,7 @@ import { movesThreadToTop } from "../shared/wire.ts";
 import { parseConnectorTools } from "./connector-tools.ts";
 import { sameModelSelection } from "../shared/thread-model.ts";
 import { createBotCreation, type NewBotProfile, type OriginImportRecord } from "./store-bot-creation.ts";
+import { deleteBotData, persistBotDeletion, retireEmptyWorkspaceSections } from "./store-bot-deletion.ts";
 export type { OriginImportRecord } from "./store-bot-creation.ts";
 export type {
   BotActivity, ConnectorCardData, GroupDefaultResponder, OptionCardData,
@@ -452,6 +451,7 @@ export class Store {
   private defaultSelection: () => ModelSelection;
   private completeNewBotSelection: (selection: ModelSelection) => ModelSelection;
   private driverKindOf: (instanceId: string) => string | undefined;
+  private sectionHasComputer: (section: string) => boolean;
   private listeners = new Set<(change: StoreChange) => void>();
   private registeringInitialSections = true;
   /** Clearing this slot must not clear a concurrently running task's activity. */
@@ -474,10 +474,12 @@ export class Store {
     completeNewBotSelection: (selection: ModelSelection) => ModelSelection = (selection) => selection,
     /** Unknown counts as another driver, so Full and Custom fall back to Ask. */
     driverKindOf: (instanceId: string) => string | undefined = () => undefined,
+    sectionHasComputer: (section: string) => boolean = () => true,
   ) {
     this.defaultSelection = defaultSelection;
     this.completeNewBotSelection = completeNewBotSelection;
     this.driverKindOf = driverKindOf;
+    this.sectionHasComputer = sectionHasComputer;
     mkdirSync(DATA_DIR, { recursive: true });
     for (const file of [BOTS_FILE, GROUPS_FILE]) tightenRegistryFile(file);
     // An unreadable bots.json must never read as "every member was deleted".
@@ -865,6 +867,11 @@ export class Store {
   }
 
   get sections(): string[] { return readSections(); }
+
+  retireEmptyWorkspaceSections(): string[] {
+    return retireEmptyWorkspaceSections({ bots: this.bots, groups: this.groups, sections: this.sections,
+      sectionHasComputer: this.sectionHasComputer, changeEmptySection: (name, nextName) => this.changeEmptySection(name, nextName) });
+  }
 
   private rememberSections(names: (string | undefined)[]) {
     try {
@@ -1607,18 +1614,11 @@ export class Store {
   deleteBot(id: string, setupRequest?: TeamSetupRequest): boolean {
     const bot = this.bot(id);
     if (!bot) return false;
-    let nextBots = this.bots.filter((b) => b.id !== id);
-    if (setupRequest) {
-      const chief = this.bot(setupRequest.botId);
-      if (!chief || chief.id === id || setupRequest.deletion?.botId !== id) throw new Error("The reviewed deletion no longer has a valid owner");
-      const lastTeamSetupReceipt: NonNullable<BotRecord["lastTeamSetupReceipt"]> = { requestId: setupRequest.requestId, result: { state: "applied", newTeams: [], bots: [
-        { id: bot.id, name: bot.name, action: "deleted" },
-      ] } };
-      nextBots = nextBots.map((candidate) => candidate.id === chief.id ? { ...candidate, lastTeamSetupReceipt } : candidate);
-    }
-    // Persist removal before deleting data: a failed save must leave the bot recoverable.
-    this.saveBots(nextBots);
-    this.bots = nextBots;
+    const deletion = persistBotDeletion(bot, {
+      bots: this.bots, groups: this.groups, sections: this.sections, sectionHasComputer: this.sectionHasComputer,
+      saveBots: (bots, registerSections) => this.saveBots(bots, registerSections),
+    }, setupRequest);
+    this.bots = deletion.bots;
     this.legacyActivities.delete(id);
     const rooms = this.groups.filter((g) => !g.dm && g.memberIds.includes(id));
     for (const g of rooms) {
@@ -1629,21 +1629,9 @@ export class Store {
     if (rooms.length) {
       try { this.saveGroups(); } catch (error) { console.warn("store: room cleanup will retry on restart", error); }
     }
-    for (const threadId of new Set([bot.threadId, ...(bot.tasks ?? []).map((t) => t.threadId)])) {
-      this.deleteThreadRecord(threadId);
-    }
-    try {
-      rmSync(workspaceDir(id), { recursive: true, force: true });
-    } catch {}
-    try {
-      rmSync(journalFile(id), { force: true });
-    } catch {}
-    mdb.deleteBotMemoryFiles(id);
-    forgetBotMemoryJournal(id);
-    try {
-      rmSync(join(DATA_DIR, "skill-state", id), { recursive: true, force: true });
-    } catch {}
-    removeBotFolder(id);
+    deleteBotData(bot, threadId => this.deleteThreadRecord(threadId));
+    for (const changed of deletion.revoked) this.emit({ type: "bot", botId: changed.id });
+    if (deletion.retiredSection) this.emit({ type: "sections" });
     this.emit({ type: "bot.deleted", botId: id });
     for (const g of rooms) this.emit({ type: "group", groupId: g.id });
     return true;

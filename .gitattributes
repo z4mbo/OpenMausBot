@@ -71,3 +71,5 @@ docs/verification/evidence/origin-draft-defaults-031/fixture/* text eol=lf
 docs/verification/evidence/origin-draft-mirror-031/**/*.json text eol=lf
 docs/verification/evidence/origin-draft-mirror-031/**/*.log text eol=lf
 docs/verification/evidence/origin-draft-mirror-031/fixture/* text eol=lf
+docs/verification/evidence/origin-workspace-delete-031/**/*.json text eol=lf
+docs/verification/evidence/origin-workspace-delete-031/**/*.log text eol=lf

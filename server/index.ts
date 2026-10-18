@@ -587,7 +587,7 @@ import { createHostedSlackRoutes } from "./routes/hosted-slack.ts";
 import { createBotPresetRoutes } from "./routes/bot-presets.ts";
 import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
-import { createDefaultTeamRoutes, ensureTeamChiefs, ensureWorkspaces, watchTemplateTeams } from "./origin-teams.ts";
+import { createDefaultTeamRoutes, initializeWorkspaceTeams } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
 import { createOriginCloudRoutes, cloudProjectFor, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
 import {
@@ -3073,10 +3073,12 @@ let bootSelection = { instanceId: "", model: "" };
 /** Turns wait for this startup read: it is where the server learns each engine's version and flags. */
 let enginesRead: Promise<void> | null = null;
 const presetStore = createPresetStore();
+const teamComputers = new TeamComputers(join(DATA_DIR, "team-computers.json"), ENVIRONMENT_ID);
 const store = new Store(
   () => bootSelection,
   (selection) => withNewBotEffort(selection, cfg.newBots?.effort, registry.get(selection.instanceId)?.adapter.capabilities.effortLevels),
   (instanceId) => registry.cliTarget(instanceId)?.driverKind,
+  (section) => Boolean(teamComputers.forSection(section)),
 );
 const skillsHost = createSkillsLibraryHost({ store, cfg, appendSkillRequestCard });
 const { listBotSkills, readBotSkillFile } = skillsHost;
@@ -3087,7 +3089,6 @@ const cloudHealth = CLOUD_HOME ? createCloudHealth({ store, bus, dataDir: DATA_D
   connectors: () => highlevelHost.health(composio.configured(cfg) ? composio.connectedServices(cfg) : null),
   browser: () => ({ available: browserEngineStatus().kind === "ready", installing: Boolean(browserEngineInstall), interrupted: browserRuntime.interruptedCount() }) }) : null;
 const cloudSigned = CLOUD_HOME && cloudHealth ? createCloudSignedRoutes({ secret: CLOUD_HOME.bootstrapSecret, sessions, health: cloudHealth }) : null;
-const teamComputers = new TeamComputers(join(DATA_DIR, "team-computers.json"), ENVIRONMENT_ID);
 let followupsReady = false;
 const sendSequencer = new SendSequencer();
 // Before the new-bot default is read: a saved default may name the engine.
@@ -17559,14 +17560,7 @@ server.listen(PORT, "127.0.0.1", async () => {
   // Only once every registry is initialized and the endpoint listens: earlier dispatch can hit uninitialized bindings.
   routines!.start();
   memoryUpkeep.start();
-  try {
-    const chiefs = ensureTeamChiefs(store, await defaultSelection());
-    if (chiefs.length) console.log(`[teams] gave ${chiefs.length} team(s) a Chief of Staff bot`);
-    ensureWorkspaces(store);
-    watchTemplateTeams(store);
-  } catch (error) {
-    console.warn(`[teams] could not give every team a Chief: ${(error as Error).message}`);
-  }
+  await initializeWorkspaceTeams(store, defaultSelection);
 });
 
 // Tunnel requests have no peer address, which request-auth treats as proxied: a session is required, never loopback trust.

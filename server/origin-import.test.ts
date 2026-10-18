@@ -36,7 +36,7 @@ function deferred<T>() {
 }
 
 async function fixture(options: { limit?: number; auth?: RequestAuth; linksFile?: string; selectionError?: string } = {}) {
-  const store = new Store(() => selection);
+  const store = new Store(() => selection, undefined, undefined, () => false);
   const cloudFile = join(DATA_DIR, "origin-cloud.json");
   const linksFile = options.linksFile ?? join(DATA_DIR, "origin-cloud-links.json");
   writeOriginCloud(cloudFile, { url: "http://127.0.0.1:3210", sessionToken: "fixture-owner", projects: {} });
@@ -73,6 +73,24 @@ async function fixture(options: { limit?: number; auth?: RequestAuth; linksFile?
 }
 
 describe("resumable Origin imports through HTTP", () => {
+  it("reimports a still-visible cloud workspace after local head deletion without a leftover numbered section", async () => {
+    const f = await fixture();
+    const original = (await f.workspace()).body.bot!;
+    const other = (await f.workspace("team2")).body.bot!;
+    const before = readFileSync(f.cloudFile, "utf8");
+    expect(f.store.deleteBot(original.id)).toBe(true);
+
+    const imported = await f.workspace();
+
+    expect(imported).toMatchObject({ status: 201, body: { bot: { name: "Studio", section: "Workspace: Studio" }, replayed: false } });
+    expect(imported.body.bot!.id).not.toBe(original.id);
+    expect(f.store.sections).not.toContain("Workspace: Studio 2");
+    expect(f.store.bot(other.id)?.name).toBe("Second");
+    expect(readWorkspaceLinks(f.linksFile)).toEqual({ [other.id]: "team2", [imported.body.bot!.id]: "team1" });
+    expect(readFileSync(f.cloudFile, "utf8")).toBe(before);
+    expect(f.query.mock.calls.every(([name]) => name === "workspaces:list")).toBe(true);
+  });
+
   it("atomically creates a complete project, links it, and replays concurrent or lost-response retries after reload", async () => {
     const f = await fixture();
     const head = (await f.workspace()).body.bot!;
