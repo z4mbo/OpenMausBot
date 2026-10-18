@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useFlip } from "./issue-order";
 
-type Motion = { element: HTMLElement; frames: Keyframe[]; cancelled: boolean; cancel: ReturnType<typeof vi.fn> };
+type Motion = { element: HTMLElement; frames: Keyframe[]; duration: number; cancelled: boolean; cancel: ReturnType<typeof vi.fn> };
 const motions: Motion[] = [];
 let reversed = false;
 let reduced = false;
@@ -36,8 +36,8 @@ beforeEach(() => {
     return new DOMRect(0, layout + translation, 280, 90);
   });
   vi.stubGlobal("Animation", class {});
-  Object.defineProperty(HTMLElement.prototype, "animate", { configurable: true, writable: true, value: vi.fn(function (this: HTMLElement, frames: Keyframe[]) {
-    const motion: Motion = { element: this, frames, cancelled: false, cancel: vi.fn(() => { motion.cancelled = true; }) };
+  Object.defineProperty(HTMLElement.prototype, "animate", { configurable: true, writable: true, value: vi.fn(function (this: HTMLElement, frames: Keyframe[], options: KeyframeAnimationOptions) {
+    const motion: Motion = { element: this, frames, duration: Number(options.duration), cancelled: false, cancel: vi.fn(() => { motion.cancelled = true; }) };
     motions.push(motion);
     return motion as unknown as Animation;
   }) });
@@ -57,7 +57,13 @@ describe("issue movement during an unfinished animation", () => {
     for (let move = 1; move <= 12; move++) {
       reversed = !reversed;
       render(move);
-      for (const card of host.querySelectorAll<HTMLElement>("[data-flip-id]")) expect(active(card).length).toBeLessThanOrEqual(1);
+      for (const card of host.querySelectorAll<HTMLElement>("[data-flip-id]")) {
+        expect(active(card).length).toBeLessThanOrEqual(1);
+        for (const motion of active(card)) {
+          expect(motion.duration).toBeGreaterThanOrEqual(120);
+          expect(motion.duration).toBeLessThanOrEqual(200);
+        }
+      }
     }
   });
 

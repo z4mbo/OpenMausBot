@@ -80,7 +80,7 @@ export function useFlip(container: RefObject<HTMLElement | null>, moves: unknown
       const dx = before.x - spot.x;
       const dy = before.y - spot.y;
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
-      animations.current.set(element, element.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: seed ? 220 : 240, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }));
+      animations.current.set(element, element.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: 180, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }));
     }
     if (animate) seeds.current.clear();
     last.current = next;

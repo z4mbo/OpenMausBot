@@ -55,6 +55,27 @@
       "path": "green-guards.log",
       "bytes": 255,
       "sha256": "d4f157e85d09aa592e721f8e614e80387655d11491d8b037051c8bf191d54974"
+    },
+    {
+      "path": "duration-after-during.png",
+      "bytes": 108656,
+      "sha256": "66088c81aa404a6c38d6939a66bf2d1ffa5accbfdb6145c33d9819db191943be"
+    },
+    {
+      "path": "duration-red.log",
+      "bytes": 1161,
+      "sha256": "d583d4c7f67408f82e3459a9388a3b1854d9d6cbd77e9a3d863c1ed0eb833827"
+    },
+    {
+      "path": "duration-green.log",
+      "bytes": 248,
+      "sha256": "3cacb06d4168adc92cf77d54226c1617a6a2cdb61adebec2645ca55f9ca62e45"
+    },
+    {
+      "path": "duration-followup.json",
+      "bytes": 3265,
+      "sha256": "8e1e708a0d76a271523456b4e058e09beb229ba2c813530b0dd6628c8563b660"
     }
-  ]
+  ],
+  "previousManifestSha256": "dfd1a6212b02642a88fba4d6a89116e901e7b5b180a8342203630a4d24908b40"
 }
