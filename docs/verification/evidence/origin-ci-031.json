@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "checkedAt": "2026-10-18T16:57:59.338Z",
+  "repository": "z4mbo/Origin",
+  "source": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+  "runId": 39144432592,
+  "attempt": 1,
+  "workflowName": "CI",
+  "branch": "bugfix/scan",
+  "event": "pull_request",
+  "statusFromGitHub": "completed",
+  "conclusionFromGitHub": "success",
+  "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592",
+  "createdAt": "2026-10-18T16:18:55Z",
+  "updatedAt": "2026-10-18T16:57:52Z",
+  "expectedJobCount": 20,
+  "actualJobCount": 20,
+  "identitiesMatch": true,
+  "expectedSkipOnly": true,
+  "successCount": 19,
+  "skippedCount": 1,
+  "failedJobs": [],
+  "jobs": [
+    {
+      "id": 117725283260,
+      "name": "typecheck + lint",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:18:57Z",
+      "completedAt": "2026-10-18T16:21:46Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725283260"
+    },
+    {
+      "id": 117725913424,
+      "name": "cloudflared installer (Linux ARM64)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:51Z",
+      "completedAt": "2026-10-18T16:22:03Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913424"
+    },
+    {
+      "id": 117725913427,
+      "name": "macOS smokes (packaged server + Electron)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:52Z",
+      "completedAt": "2026-10-18T16:24:19Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913427"
+    },
+    {
+      "id": 117725913437,
+      "name": "open-source edition builds without enterprise/",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:23:11Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913437"
+    },
+    {
+      "id": 117725913438,
+      "name": "behavior evals (offline tiers 1-3)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:25:37Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913438"
+    },
+    {
+      "id": 117725913443,
+      "name": "packaged server smoke (windows-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:24:14Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913443"
+    },
+    {
+      "id": 117725913473,
+      "name": "Windows CUA host smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:23:22Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913473"
+    },
+    {
+      "id": 117725913493,
+      "name": "control-plane check + workerd tests + dry run",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:49Z",
+      "completedAt": "2026-10-18T16:22:57Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913493"
+    },
+    {
+      "id": 117725913519,
+      "name": "vitest (ubuntu-latest, shard 2/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:43:54Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913519"
+    },
+    {
+      "id": 117725913530,
+      "name": "vitest (ubuntu-latest, shard 4/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:49Z",
+      "completedAt": "2026-10-18T16:44:11Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913530"
+    },
+    {
+      "id": 117725913537,
+      "name": "renderer smoke (control-omb ui, Ubuntu 24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:27:06Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913537"
+    },
+    {
+      "id": 117725913553,
+      "name": "vitest (windows-latest, shard 3/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:57:45Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913553"
+    },
+    {
+      "id": 117725913557,
+      "name": "packaged server smoke (ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:22:54Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913557"
+    },
+    {
+      "id": 117725913577,
+      "name": "vitest (ubuntu-latest, shard 3/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:49Z",
+      "completedAt": "2026-10-18T16:46:46Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913577"
+    },
+    {
+      "id": 117725913602,
+      "name": "vitest (ubuntu-latest, shard 1/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:43:53Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913602"
+    },
+    {
+      "id": 117725913624,
+      "name": "vitest (windows-latest, shard 1/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:49Z",
+      "completedAt": "2026-10-18T16:54:11Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913624"
+    },
+    {
+      "id": 117725913630,
+      "name": "vitest (windows-latest, shard 2/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:48Z",
+      "completedAt": "2026-10-18T16:53:44Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913630"
+    },
+    {
+      "id": 117725913674,
+      "name": "vitest (windows-latest, shard 4/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:21:49Z",
+      "completedAt": "2026-10-18T16:54:38Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117725913674"
+    },
+    {
+      "id": 117726173902,
+      "name": "deploy composio broker (Cloudflare Worker)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-10-18T16:22:58Z",
+      "completedAt": "2026-10-18T16:22:58Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117726173902"
+    },
+    {
+      "id": 117733861302,
+      "name": "CI",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-18T16:57:47Z",
+      "completedAt": "2026-10-18T16:57:52Z",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39144432592/job/117733861302"
+    }
+  ],
+  "scope": {
+    "readOnlyGitHubQuery": true,
+    "rerunRequested": false,
+    "sourceMutated": false,
+    "productionAction": false
+  }
+}

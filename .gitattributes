@@ -82,3 +82,7 @@ docs/verification/evidence/origin-backend-compatibility-031/fixture/*.mts text e
 docs/verification/evidence/origin-backend-compatibility-031/fixture/*.ts text eol=lf
 docs/verification/evidence/origin-backend-compatibility-031/fixture/*.txt text eol=lf
 docs/verification/evidence/origin-build-context-031/** text eol=lf
+docs/verification/evidence/origin-delivery-031/**/*.json text eol=lf
+docs/verification/evidence/origin-ci-031.json text eol=lf
+docs/verification/evidence/origin-packaged-windows-031.json text eol=lf
+docs/verification/evidence/origin-mail-activation-031.json text eol=lf

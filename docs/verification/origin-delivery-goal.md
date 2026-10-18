@@ -1,6 +1,10 @@
 # Origin inspection and online delivery
 
-## Completed 0.2.10 cycle
+## Completed 0.2.11 cycle
+
+The [0.2.11 delivery](origin-delivery.md#0211-delivery) and [permanent receipt](evidence/origin-delivery-031/delivery-receipt.json) record verified GitHub, website, backend and matching Windows/Mac publication from frozen source `697e9f0adacd7d90af9b3f190ab5c4df978b48f1`. Exact-source CI and native packaging succeeded; five storage migrations and three Draft repair phases completed before temporary-key revocation, mail configuration and client publication. Central Brevo configuration and account relay readiness are confirmed; no recipient email was sent and provider acceptance/inbox delivery remain unverified. The actual downloaded Windows resource smoke and sixteen private website cases remain distinct from public four-route acceptance. Physical Mac, signing/notarization, provider/hardware, TURN and broader inspection limits remain open. The goal and daily upstream review continue at 06:00 Europe/Rome; completing this release does not close the ongoing inspection.
+
+## Historical 0.2.10 cycle
 
 The [0.2.10 delivery](origin-delivery.md#0210-delivery) and [permanent receipt](evidence/origin-delivery-030/delivery-receipt.json) record completed website, backend and matching Windows/Mac publication at frozen source `0eb372a94715527931043a1b6d8c02a50194dbb0`. The local checkpoint is 5,960 client/shared, 515 touched server/shared passes with five existing skips, 175 backend, fourteen site and 121 guard/release/deployment cases. The free Brevo account now has completed phone and email verification. After explicit activation approval, all four DNS records were published while preserving the nine existing website A records. Brevo confirms origin.imbored.fun is authenticated and Origin <invites@origin.imbored.fun> is a verified sender. The standard account API key is active until 2027-10-18 and is stored privately outside the repository. Backend email configuration is still pending the next verified delivery; public invitation links remain available for manual sharing. No real recipient email has been sent, and provider acceptance and inbox delivery are not established. See the [sanitized provider setup record](evidence/origin-mail-provider-031.json). The broad inspection and daily upstream review remain active at 06:00 Europe/Rome; this cycle does not close the documented physical/provider/native acceptance limits.
 
@@ -15,7 +19,7 @@ The user reconfirmed production delivery after verification on 2026-10-18 and ad
 
 After the user cleared the legacy tracker, the goal was recreated as active on 2026-10-18 with this production-delivery scope, including public invitation links, centralized email delivery, acceptance recovery, matching platform releases and the isolation rules above. The obsolete `without deploying` objective is superseded.
 
-The next unpublished cycle also includes the user's 2026-10-18 sidebar and project requirements: account immediately before Search, a full-width computer selector below, Draft first in every project, and Draft as the default for task creation unless a person explicitly chooses another column. Repair existing boards without moving or deleting their tasks. Inspect the residual workspace dropdown reported after workspace deletion, including reserved local section names, name reuse and cloud synchronization; preserve unrelated projects and shared workspace data.
+The completed 0.2.11 cycle includes the user's 2026-10-18 sidebar and project requirements: account immediately before Search, a full-width computer selector below, Draft first in every project, and Draft as the default for task creation unless a person explicitly chooses another column. Its bounded board repair preserves existing tasks. Empty local workspace sections are retired without residual dropdowns or reserved-name suffixes; occupied or unknown sections, unrelated projects and shared cloud workspace data remain protected. The linked feature reports retain the exact source and isolated verification limits.
 
 ## Required outcome
 
