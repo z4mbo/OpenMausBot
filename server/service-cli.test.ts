@@ -99,11 +99,11 @@ describe("pnpm omb service", () => {
 
   it("--sentinel prefers the installed app's own CLI over a checkout, which an update or Node upgrade would strand", () => {
     const sentinelOut = join(dir, "sentinel-state");
-    const app = "/Applications/OpenMausBot.app/Contents";
-    const checkout = { action: "install" as const, dataDir: join(dir, "data"), port: 8799, sentinel: true, sentinelOut, script: "/src/OpenMausBot/server/openmausbot.ts", node: "/home/maus/.nvm/versions/node/v24.0.0/bin/node", platform: "darwin" as const, home: "/Users/maus" };
+    const app = "/Applications/Origin.app/Contents";
+    const checkout = { action: "install" as const, dataDir: join(dir, "data"), port: 8799, sentinel: true, sentinelOut, script: "/src/Origin/server/openmausbot.ts", node: "/home/maus/.nvm/versions/node/v24.0.0/bin/node", platform: "darwin" as const, home: "/Users/maus" };
     expect(runServiceCommand({ ...checkout, exists: (path) => path.startsWith(app), hasSentinel: () => true }, io)).toBe(0);
     const plist = readFileSync(join(sentinelOut, "com.openmausbot.sentinel.plist"), "utf8");
-    expect(plist).toContain(`<string>${app}/MacOS/OpenMausBot</string>`);
+    expect(plist).toContain(`<string>${app}/MacOS/Origin</string>`);
     expect(plist).toContain(`<string>${app}/Resources/server/openmausbot.js</string>`);
     expect(plist).toContain("<key>ELECTRON_RUN_AS_NODE</key>");
     expect(plist).not.toContain("openmausbot.ts");
@@ -118,5 +118,16 @@ describe("pnpm omb service", () => {
     expect(runServiceCommand({ ...checkout, exists: () => false }, io)).toBe(0);
     expect(readFileSync(join(sentinelOut, "com.openmausbot.sentinel.plist"), "utf8")).toContain("<string>--experimental-strip-types</string>");
     expect(out.join("\n")).toContain("if either moves (a new checkout, a Node upgrade), run this again");
+  });
+
+  it("--sentinel keeps the invoking Origin checkout when only the upstream desktop app exists", () => {
+    const sentinelOut = join(dir, "sentinel-state");
+    expect(runServiceCommand({ action: "install", dataDir: join(dir, "data"), port: 8799, sentinel: true, sentinelOut,
+      script: "/src/Origin/server/openmausbot.ts", node: "/usr/bin/node", platform: "darwin", home: "/Users/maus",
+      exists: path => path.startsWith("/Applications/OpenMausBot.app/"), hasSentinel: () => true }, io)).toBe(0);
+    const plist = readFileSync(join(sentinelOut, "com.openmausbot.sentinel.plist"), "utf8");
+    expect(plist).toContain("<string>/src/Origin/server/openmausbot.ts</string>");
+    expect(plist).not.toContain("/Applications/OpenMausBot.app/");
+    expect(plist).not.toContain("ELECTRON_RUN_AS_NODE");
   });
 });

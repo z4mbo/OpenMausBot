@@ -1,5 +1,6 @@
 import { homedir, userInfo } from "node:os";
 import { posix } from "node:path";
+import { APP_NAME } from "../shared/product-brand.mjs";
 
 // Unit files describe a Linux or macOS machine: POSIX paths whatever host renders them (Windows CI included).
 const { basename, dirname, join } = posix;
@@ -148,10 +149,10 @@ export function shippedSentinelCli(
   platform: NodeJS.Platform, home: string, exists: (path: string) => boolean, hasSentinel: (script: string) => boolean = () => true,
 ): { node: string; script: string } | null {
   const candidates = platform === "darwin"
-    ? ["/Applications/OpenMausBot.app", join(home, "Applications", "OpenMausBot.app")].map((app) => ({
-      node: join(app, "Contents", "MacOS", "OpenMausBot"), script: join(app, "Contents", "Resources", "server", "openmausbot.js"),
+    ? [`/Applications/${APP_NAME}.app`, join(home, "Applications", `${APP_NAME}.app`)].map((app) => ({
+      node: join(app, "Contents", "MacOS", APP_NAME), script: join(app, "Contents", "Resources", "server", "openmausbot.js"),
     }))
-    : platform === "linux" ? [{ node: "/opt/OpenMausBot/openmausbot", script: "/opt/OpenMausBot/resources/server/openmausbot.js" }] : [];
+    : platform === "linux" ? [{ node: `/opt/${APP_NAME}/openmausbot`, script: `/opt/${APP_NAME}/resources/server/openmausbot.js` }] : [];
   return candidates.find((cli) => exists(cli.node) && exists(cli.script) && hasSentinel(cli.script)) ?? null;
 }
 
