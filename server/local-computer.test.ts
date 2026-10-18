@@ -179,9 +179,9 @@ describe("local computer descriptor", () => {
     expect(readCuaUnavailableReason({ platform: "darwin", userData, home })).toBeNull();
   });
 
-  it.skipIf(process.platform === "win32")("treats the first present legacy descriptor as authoritative", () => {
+  it.skipIf(process.platform === "win32").each(["Origin", "OpenMausBot"])("treats the first present %s descriptor as authoritative", (directory) => {
     const root = privateUserData("legacy-mac-home");
-    const first = join(root, "Library", "Application Support", "OpenMausBot");
+    const first = join(root, "Library", "Application Support", directory);
     const stale = join(root, "Library", "Application Support", "OpenGrokBot");
     mkdirSync(first, { recursive: true, mode: 0o700 });
     mkdirSync(stale, { recursive: true, mode: 0o700 });
@@ -193,6 +193,26 @@ describe("local computer descriptor", () => {
     }), { mode: 0o600 });
     expect(readCuaConnection({ platform: "darwin", home: root, userData: "" })).toBeNull();
     expect(readCuaUnavailableReason({ platform: "darwin", home: root, userData: "" })).toBe(reason);
+  });
+
+  it("keeps the current Origin descriptor ahead of legacy computer connections", () => {
+    const home = privateUserData("origin-mac-home");
+    const current = join(home, "Library", "Application Support", "Origin");
+    const legacy = join(home, "Library", "Application Support", "OpenMausBot");
+    for (const directory of [current, legacy]) mkdirSync(directory, { recursive: true, mode: 0o700 });
+    const descriptor = (command: string) => ({
+      mode: "embedded", socketPath: "/fixture/cua.sock", mcpCommand: command,
+      mcpArgs: ["mcp"], mcpEnv: {},
+    });
+    writeFileSync(join(legacy, "cua-connection.json"), JSON.stringify(descriptor("/fixture/stale-driver")), { mode: 0o600 });
+    const file = join(current, "cua-connection.json");
+    writeFileSync(file, JSON.stringify(descriptor("/fixture/origin-driver")), { mode: 0o600 });
+    const options = { platform: "darwin" as const, home, userData: "", validateLegacyRuntime: () => true };
+    expect(readCuaConnection(options)?.command).toBe("/fixture/origin-driver");
+    for (const value of [{ mode: "unavailable", reason: "Grant access" }, { mode: "embedded" }]) {
+      writeFileSync(file, JSON.stringify(value), { mode: 0o600 });
+      expect(readCuaConnection(options)).toBeNull();
+    }
   });
 
   it("accepts only the exact certified Linux X11 descriptor", () => {
