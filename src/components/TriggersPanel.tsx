@@ -80,7 +80,7 @@ export function TriggersPanel() {
         dialog?.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
         ) ?? [],
-      ).filter((element) => element.getClientRects().length > 0);
+      ).filter((element) => element.checkVisibility());
     (dialog?.querySelector<HTMLElement>("select") ?? dialog)?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || editingRef.current) return;
