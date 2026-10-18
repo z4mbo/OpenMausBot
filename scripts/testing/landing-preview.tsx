@@ -1,0 +1,25 @@
+import { createRoot } from "react-dom/client";
+import App from "../../src/App";
+import { setAnalyticsEnabled, setEmailGateDone } from "../../src/lib/analytics";
+import { initialDesktopCapabilities } from "../../src/lib/desktop";
+import { rememberConversation } from "../../src/lib/last-conversation";
+import { setChiefSectionOf } from "../../src/lib/origin-chief-section";
+import { setAdvancedMode } from "../../src/lib/interface-mode";
+import { saveSidebarWidth, setSidebarDensity } from "../../src/lib/sidebar-preferences";
+import { applySkin } from "../../src/lib/skins";
+import "../../src/styles.css";
+
+setAnalyticsEnabled(false);
+const metadata = await fetch("/__origin-landing-fixture.json").then(response => response.json()) as { projectId: string; workspaceId: string };
+localStorage.setItem("origin-workspaces", JSON.stringify({ active: metadata.workspaceId, account: [metadata.workspaceId], order: [metadata.projectId], sort: "custom", collapsed: false }));
+rememberConversation(metadata.projectId);
+setChiefSectionOf(metadata.projectId, "issues");
+setEmailGateDone("skipped");
+setAdvancedMode(true);
+setSidebarDensity("comfortable");
+saveSidebarWidth(272);
+applySkin("midnight");
+localStorage.removeItem("origin-cloud-url");
+localStorage.setItem("origin-cloud-session", "landing-synthetic-session");
+Object.assign(window, { ogb: { platform: "win32", getCapabilities: async () => initialDesktopCapabilities(), workspaces: { state: async () => ({ local: true, name: "This computer" }), menu: async () => {} } } });
+createRoot(document.getElementById("root")!).render(<App />);

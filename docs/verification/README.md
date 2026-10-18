@@ -84,6 +84,7 @@ Use only mapped, tested commands:
 - [Chief access to additional teams](team-access.md)
 - [Engines and Doctor](engines.md)
 - [Installer credential boundary follow-up](origin-installer-security-next.md)
+- [Current App landing image capture](origin-landing-capture.md)
 - [Cline engine and native loopback qualification](cline.md)
 - [Claude coordination and turn-scoped tools](claude-tool-lifecycle.md)
 - [Codex bot instructions](codex-instructions.md)

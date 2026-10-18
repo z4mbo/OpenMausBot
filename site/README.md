@@ -9,12 +9,17 @@ app/            routes: /, /login, /signup, /join/[token]; any other path shows 
 components/     the website and the sign-in pages
 lib/            Convex API handle, CSP, fonts, metadata
 public/         favicon, social image, product images and agent avatars captured from the desktop app
-scripts/        test-landing.mjs (browser checks), capture-app.mjs (recaptures public/landing)
+scripts/        test-landing.mjs (browser checks), capture-app.mjs (legacy local-backend capture)
 Dockerfile      image built by the `origin` compose service on the server
 ```
 
 The download buttons point at the stable links in `components/brand.tsx` (`/downloads/Origin-Setup.exe`,
 `Origin-Mac-AppleSilicon.dmg`, `Origin-Mac-Intel.dmg`), which `scripts/deploy-origin.mjs --downloads` updates.
+
+The Issues hero image is captured by the repository's `scripts/verify-origin-landing.ts` and
+`scripts/testing/capture-origin-landing.mjs`: the actual App renderer, synthetic cloud data and a disposable
+fake-engine server, with no Convex deployment or real account. See the [capture recipe](../docs/verification/origin-landing-capture.md)
+for its source bindings and before/after evidence. The run images and avatars retain their separate historical capture.
 
 ## Develop and check
 
