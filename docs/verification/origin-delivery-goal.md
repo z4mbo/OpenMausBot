@@ -4,6 +4,8 @@ The user expanded the active goal on 2026-10-17: after the deep inspection, upda
 
 On 2026-10-18 the user requested continued productive iterations until the weekly usage allowance is exhausted, and a visible app preview with explanations of changes while work proceeds. Finish each verified release before beginning the next improvement cycle. Do not manufacture activity to consume usage, purchase credits, or use an account reset. Keep the goal active across completed release cycles while allowance remains.
 
+After the weekly allowance ended, the user explicitly authorized existing credits and requested fixing failed CI and completing website, Mac and Windows publication. This supersedes the allowance stop condition. Continue that delivery with visible app previews; do not purchase credits or use an account reset.
+
 ## Required outcome
 
 - Inspect the complete monorepo, including concurrent main-checkout changes read-only, with specialist agents working in waves.

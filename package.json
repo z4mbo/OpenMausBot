@@ -1,7 +1,7 @@
 {
   "name": "openmausbot",
   "private": true,
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Origin: projects, people and local AI agents in one desktop workspace.",
   "homepage": "https://origin.imbored.fun",
   "repository": {

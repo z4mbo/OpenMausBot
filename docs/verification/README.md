@@ -327,3 +327,5 @@ printed path. Never kill processes by name and never delete a broad temp root.
 ## UI followup evidence
 
 The [Origin UI followup record](origin-ui-followup.md) preserves matched modal focus, Files recovery, filled-control contrast and Windows fixture results with source identities and acceptance limits.
+
+The [Origin CI recovery record](origin-ci-recovery.md) tracks the deterministic Sidebar size-guard failure and the matching-source release verification that follows its correction.
