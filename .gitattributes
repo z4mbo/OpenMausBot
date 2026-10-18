@@ -87,3 +87,4 @@ docs/verification/evidence/origin-ci-031.json text eol=lf
 docs/verification/evidence/origin-packaged-windows-031.json text eol=lf
 docs/verification/evidence/origin-mail-activation-031.json text eol=lf
 docs/verification/evidence/origin-signup-policy-032/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-signup-policy-timeout-032/** -text whitespace=cr-at-eol

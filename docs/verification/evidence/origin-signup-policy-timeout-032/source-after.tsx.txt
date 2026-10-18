@@ -1,0 +1,226 @@
+"use client";
+
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import Link from "next/link";
+import clsx from "clsx";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { ArrowRight, Eye, EyeOff, Loader2, LogOut, UsersRound } from "lucide-react";
+import { api } from "@/lib/convex-api";
+import { useOriginSession } from "./brand";
+import { OriginLogo } from "./origin-logo";
+import { DownloadCard, SiteFrame } from "./origin-site";
+import st from "./auth.module.css";
+
+type Mode = "signin" | "signup";
+const SIGNUP_POLICY_TIMEOUT_MS = 10_000;
+
+const cleanError = (error: unknown) => error instanceof Error
+  ? error.message.replace(/\[CONVEX[^\]]*\]\s*/g, "").replace(/^.*Uncaught Error:\s*/s, "").split("\n")[0].trim() || "Please try again"
+  : "Please try again";
+
+export function AuthPage({ mode, inviteToken }: { mode: Mode; inviteToken?: string }) {
+  const session = useOriginSession();
+  const scope = JSON.stringify([inviteToken, session.token, session.user?._id, session.user?.email]);
+  return (
+    <SiteFrame signedIn={Boolean(session.user)} minimal>
+      <main id="main" className={st.main}><AuthFlow key={scope} mode={mode} inviteToken={inviteToken} session={session} /></main>
+    </SiteFrame>
+  );
+}
+
+function AuthFlow({ mode, inviteToken, session }: { mode: Mode; inviteToken?: string; session: ReturnType<typeof useOriginSession> }) {
+  const invitation = useQuery(api.workspaces.invitePreview, inviteToken ? { token: inviteToken } : "skip");
+  const accept = useMutation(api.workspaces.acceptInvite);
+  const accepting = useRef(false);
+  const [acceptance, setAcceptance] = useState<{ name: string; status: "joining" | "joined" } | null>(null);
+  const [error, setError] = useState("");
+  const join = async () => {
+    if (accepting.current || !inviteToken || !invitation || !session.token) return;
+    accepting.current = true;
+    const name = invitation.name;
+    setAcceptance({ name, status: "joining" });
+    setError("");
+    try {
+      await accept({ sessionToken: session.token, token: inviteToken });
+      setAcceptance({ name, status: "joined" });
+    } catch (cause) {
+      setAcceptance(null);
+      setError(cleanError(cause));
+    } finally {
+      accepting.current = false;
+    }
+  };
+  const activeInvitation = acceptance ?? invitation;
+  let body: ReactNode;
+  if (session.loading || (inviteToken && invitation === undefined && !acceptance)) body = <div className={st.loading} role="status"><Loader2 className={st.spin} size={20} /><span className={st.visuallyHidden}>Loading</span></div>;
+  else if (inviteToken && activeInvitation && session.user && session.token) body = <JoinWorkspace name={activeInvitation.name} email={session.user.email} busy={acceptance?.status === "joining"} joined={acceptance?.status === "joined"} error={error} onJoin={() => void join()} onSignOut={session.signOut} />;
+  else if (inviteToken && invitation === null) body = <Unavailable />;
+  else if (session.user && session.token) body = <Account token={session.token} name={session.user.name} email={session.user.email} onSignOut={session.signOut} />;
+  else body = <AuthForm initialMode={mode} inviteToken={inviteToken} invitation={invitation ?? undefined} onSession={session.save} />;
+  return body;
+}
+
+function Card({ title, subtitle, icon, children }: { title: string; subtitle?: ReactNode; icon?: ReactNode; children: ReactNode }) {
+  return (
+    <section className={st.card} aria-labelledby="auth-title">
+      <div className={st.head}>
+        {icon ?? <OriginLogo size={52} />}
+        <h1 id="auth-title">{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function AuthForm({ initialMode, inviteToken, invitation, onSession }: { initialMode: Mode; inviteToken?: string; invitation?: { name: string; email?: string }; onSession(token: string): void }) {
+  const [mode, setMode] = useState<Mode>(inviteToken ? "signup" : initialMode);
+  const [name, setName] = useState("");
+  const [typedEmail, setEmail] = useState<string | null>(null);
+  const email = typedEmail ?? invitation?.email ?? "";
+  const [password, setPassword] = useState("");
+  const [workspaceName, setWorkspaceName] = useState("");
+  const [visible, setVisible] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [signupPolicyTimedOut, setSignupPolicyTimedOut] = useState(false);
+  const login = useAction(api.auth.login);
+  const register = useAction(api.auth.signup);
+  const signup = mode === "signup";
+  const needsSignupPolicy = signup && !inviteToken;
+  const signupMode = useQuery(api.auth.signupMode, needsSignupPolicy && !signupPolicyTimedOut ? {} : "skip");
+  const inviteOnly = Boolean(signupMode?.inviteOnly) && !inviteToken;
+  const signupPolicyLoading = needsSignupPolicy && signupMode === undefined;
+  useEffect(() => {
+    if (!signupPolicyLoading || signupPolicyTimedOut) return;
+    let active = true;
+    const timer = window.setTimeout(() => { if (active) setSignupPolicyTimedOut(true); }, SIGNUP_POLICY_TIMEOUT_MS);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [signupPolicyLoading, signupPolicyTimedOut]);
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      const result = signup
+        ? await register({ email, password, name, ...(inviteToken ? { inviteToken } : { workspaceName: workspaceName.trim() || undefined }) })
+        : await login({ email, password });
+      onSession(result.sessionToken);
+    } catch (cause) {
+      setError(cleanError(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const title = invitation ? `Join ${invitation.name}` : signup ? "Create your Origin account" : "Sign in to Origin";
+  const subtitle = invitation
+    ? "Create an account or sign in to accept the invitation."
+    : signup ? "One account for your workspaces, projects and agents." : "Pick up your workspaces where you left them.";
+  const switchTo = (next: Mode) => { setMode(next); setError(""); };
+  const switcher = inviteToken
+    ? <button type="button" onClick={() => switchTo(signup ? "signin" : "signup")}>{signup ? "Sign in" : "Create an account"}</button>
+    : <Link href={signup ? "/login" : "/signup"}>{signup ? "Sign in" : "Create an account"}</Link>;
+
+  return (
+    <Card title={title} subtitle={subtitle} icon={invitation ? <span className={st.badge}><UsersRound size={22} /></span> : undefined}>
+      {signupPolicyLoading && signupPolicyTimedOut ? (
+        <div className={st.form}>
+          <p className={st.notice} role="alert">We couldn't check whether signup is available. Check your connection and try again.</p>
+          <button className={st.secondary} type="button" onClick={() => setSignupPolicyTimedOut(false)}>Try again</button>
+        </div>
+      ) : signupPolicyLoading ? (
+        <div className={st.loading} role="status"><Loader2 className={st.spin} size={20} /><span className={st.visuallyHidden}>Loading</span></div>
+      ) : signup && inviteOnly ? (
+        <p className={st.notice}>Origin is invite-only for now. Ask a workspace admin for an invite link, then open it here or paste it into the app.</p>
+      ) : (
+        <form className={st.form} onSubmit={submit}>
+          {signup && <Field label="Your name"><input autoComplete="name" value={name} onChange={e => setName(e.target.value)} required maxLength={100} placeholder="Alex Smith" /></Field>}
+          <Field label="Email"><input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@company.com" /></Field>
+          <Field label="Password">
+            <span className={st.password}>
+              <input aria-label="Password" type={visible ? "text" : "password"} autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={e => setPassword(e.target.value)}
+                required minLength={signup ? 10 : undefined} maxLength={128} placeholder={signup ? "At least 10 characters" : "Your password"} />
+              <button type="button" aria-label={visible ? "Hide password" : "Show password"} onClick={() => setVisible(!visible)}>{visible ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+            </span>
+          </Field>
+          {signup && !inviteToken && <Field label="Workspace name" hint="Optional. You can add more later."><input value={workspaceName} onChange={e => setWorkspaceName(e.target.value)} maxLength={60} placeholder="Your team" /></Field>}
+          {error && <p role="alert" className={st.error}>{error}</p>}
+          <button type="submit" className={st.primary} disabled={busy}>
+            {busy ? <Loader2 className={st.spin} size={16} aria-label="Working" /> : <>{signup ? "Create account" : "Sign in"}<ArrowRight size={16} /></>}
+          </button>
+        </form>
+      )}
+      <p className={st.switch}>{signup ? "Already have an account?" : "New to Origin?"} {switcher}</p>
+    </Card>
+  );
+}
+
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+  return (
+    <label className={st.field}>
+      <span className={st.label}>{label}{hint && <small>{hint}</small>}</span>
+      {children}
+    </label>
+  );
+}
+
+function Account({ token, name, email, onSignOut }: { token: string; name: string; email: string; onSignOut(): Promise<void> }) {
+  const workspaces = useQuery(api.workspaces.list, { sessionToken: token });
+  return (
+    <div className={st.stack}>
+      <DownloadCard name={name} compact />
+      <section className={st.panel} aria-labelledby="account-title">
+        <div className={st.who}>
+          <span className={st.initial} aria-hidden="true">{(name || email).slice(0, 1).toUpperCase()}</span>
+          <div><h2 id="account-title">{name}</h2><p>{email}</p></div>
+          <SignOut onSignOut={onSignOut} />
+        </div>
+        {workspaces && workspaces.length > 0 && (
+          <>
+            <h3 className={st.listTitle}>Your workspaces</h3>
+            <ul className={st.list}>
+              {workspaces.map(workspace => <li key={workspace._id}><span className={st.listMark} aria-hidden="true">{workspace.name.slice(0, 1).toUpperCase()}</span><span>{workspace.name}</span><small>{workspace.role}</small></li>)}
+            </ul>
+          </>
+        )}
+        <p className={st.hint}>Open Origin on your computer and sign in with {email}. Your workspaces and projects are already there.</p>
+      </section>
+    </div>
+  );
+}
+
+function SignOut({ onSignOut }: { onSignOut(): Promise<void> }) {
+  return <button type="button" className={st.quiet} onClick={() => void onSignOut()}><LogOut size={15} />Sign out</button>;
+}
+
+function JoinWorkspace({ name, email, busy, joined, error, onJoin, onSignOut }: { name: string; email: string; busy: boolean; joined: boolean; error: string; onJoin(): void; onSignOut(): Promise<void> }) {
+  if (joined) {
+    return (
+      <div className={st.stack}>
+        <Card title={`You're in ${name}`} subtitle={`Open Origin and sign in as ${email} to start working with the team.`} icon={<span className={clsx(st.badge, st.success)}><UsersRound size={22} /></span>}>
+          <Link className={st.secondary} href="/login">Your account</Link>
+        </Card>
+        <DownloadCard compact />
+      </div>
+    );
+  }
+  return (
+    <Card title={`Join ${name}`} subtitle={<>Signed in as <strong>{email}</strong></>} icon={<span className={st.badge}><UsersRound size={22} /></span>}>
+      {error && <p role="alert" className={st.error}>{error}</p>}
+      <button type="button" className={st.primary} disabled={busy} onClick={onJoin}>
+        {busy ? <Loader2 className={st.spin} size={16} aria-label="Joining" /> : <>Join workspace<ArrowRight size={16} /></>}
+      </button>
+      <p className={st.switch}>Not you? <button type="button" onClick={() => void onSignOut()}>Use another account</button></p>
+    </Card>
+  );
+}
+
+function Unavailable() {
+  return (
+    <Card title="Invitation unavailable" subtitle="This link may have expired or been revoked. Ask the person who invited you for a new one." icon={<span className={st.badge}><UsersRound size={22} /></span>}>
+      <Link className={st.secondary} href="/">Back to Origin</Link>
+    </Card>
+  );
+}

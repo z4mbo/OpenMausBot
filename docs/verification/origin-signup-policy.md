@@ -2,7 +2,8 @@
 
 Anonymous `/signup` visits wait for the public signup policy before offering
 registration. Sign-in and a verified invitation remain available while that
-separate policy query loads.
+separate policy query loads. An unavailable policy offers recovery after ten
+seconds.
 
 ## Proven failure and correction
 
@@ -71,3 +72,38 @@ loading. Those paths were not separately submitted in a real browser. No live
 signup, login, invitation acceptance, email delivery, packaged desktop, or
 production authentication claim follows from this fixture. The published
 release, version and changelog remain unchanged by these commits.
+
+## Unavailable policy and Retry
+
+The initial loading correction alone could still wait indefinitely when the
+policy transport never resolved. The site provider mounts a Convex client but
+has no signup-policy deadline or connection recovery UI. An isolated indefinitely
+pending policy remained loading, with no alert or Retry action, after **60 seconds
+of virtual browser time**. This was not a live-backend outage test.
+
+Commit `5b4aa15ea0968ba53128d40bef45466e099a96c5` bounds that wait to **10 seconds**.
+The loading indicator becomes a connection alert with **Try again**. Timeout
+pauses the query subscription using Convex's `skip` argument; Retry resumes it
+and starts another bounded wait. An unknown policy never enables registration.
+Resolution and unmount cancel the timer, and callbacks belonging to an older
+flow cannot change the current flow. Sign-in and verified invitation signup do
+not start this query deadline. The existing CSS is unchanged.
+
+The separate [timeout report](evidence/origin-signup-policy-timeout-032/report.json)
+retains **24 actual screenshots** across 375/1440 px and light/dark themes: eight
+baseline states and sixteen corrected pending/timeout/Retry/resolved states.
+The corrected browser flows resolve the retried policy after nine virtual
+seconds, then advance another twenty seconds without a stale timeout. There are
+no authentication action calls, external requests, page errors or horizontal
+overflow. The [manifest](evidence/origin-signup-policy-timeout-032/manifest.json)
+binds 32 evidence files, including unchanged raw browser JSON, source snapshots
+and compressed original test logs. Earlier policy and release evidence remains
+unchanged.
+
+Five final regressions fail against the prior runtime; all **25 site tests**
+pass after correction, and the site typecheck has no diagnostics. Coverage
+includes early invite-only/open responses, timeout and Retry, stale callbacks,
+unmount cleanup, and the sign-in/invitation exemptions. Subscription stop/resume
+is checked at the mocked query-hook boundary; this fixture does not measure a
+live WebSocket unsubscribe. Existing invitation-preview and session loading
+states are outside this correction.
