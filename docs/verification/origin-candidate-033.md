@@ -1,5 +1,11 @@
 # Origin 0.2.12 candidate, cycle 033
 
+This document preserves the pre-freeze checkpoint. The subsequent exact-source
+dispatch and the user's decision to batch additional fixes before publication
+are recorded in the [034 integration record](origin-candidate-034.md). Its four
+notes are retained here historically; the current shared notes roll them into
+the unpublished 0.2.13 release.
+
 This replacement cycle is unpublished. The current public release remains the verified [0.2.11 delivery](origin-delivery.md#0211-delivery). Integration checkpoint `f2ad2a15cb4d61cb49b678a74b53c7b9b063e253` includes the corrections and evidence below; it is not a final frozen release source. Final tag/source identity, exact-source CI/native runs, GitHub draft, manifest/checksum hashes, site image/identity and public delivery are all pending. No new publication receipt exists or is linked here.
 
 ## Changes and proof

@@ -3,14 +3,20 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.2.12",
+  version: "0.2.13",
   date: "2026-10-18",
-  title: "Safer agent logs and reliable signup",
+  title: "Reliable boards and a clearer Origin",
   changes: [
     { title: "Reliable signup loading", body: "Signup checks whether registration is available before showing its fields. A connection that does not respond offers Try again after ten seconds. Sign-in and verified invitations stay available." },
     { title: "Safer Windows child processes", body: "Workspace credentials stay out of installer and agent child processes even when environment names use different capitalization on Windows." },
-    { title: "Private provider logs", body: "Stripe secret and restricted keys are hidden when agent protocol output is saved to logs, using a protection adapted from OpenMausBot." },
+    { title: "Private provider logs", body: "Stripe secret and restricted keys are hidden when agent protocol output is saved to logs." },
     { title: "Accurate project lists", body: "Workspace project lists refresh when a Chief's project links change, clearing stale entries from the sidebar." },
+    { title: "Stable issue dragging", body: "Issue cards stay visible when you drag quickly between columns. Losing edit access or switching projects cancels the drag before it can save a move." },
+    { title: "Protected conversations", body: "If saving a conversation change or deletion fails, Origin preserves its saved messages and metadata. Failed permission changes cannot grant broader access." },
+    { title: "Origin throughout the app", body: "Startup, tray menus, installation and agent messages use Origin's name. Unrelated subscription offers and promotional links are removed." },
+    { title: "Live calls with your own key", body: "Phone and companion Live calls use your configured Live key without requiring an upstream subscription. Missing keys still open setup, and access checks still apply." },
+    { title: "Compact sidebar and server controls", body: "Footer icons stay on one line. Saved server names remain readable in narrow windows, with their actions below when needed. The computer menu opens Origin's server settings." },
+    { title: "Origin server updates", body: "Self-hosted update checks find Origin releases and recognize their version tags. Docker instructions build the Origin checkout, and updates never suggest replacing Origin with the upstream npm package." },
   ],
 }, {
   version: "0.2.11",
@@ -57,7 +63,7 @@ export const releases: Release[] = [{
     { title: "Chat attachments that fit", body: "Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name." },
     { title: "Recoverable workspace loading", body: "Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page." },
     { title: "Appearance from paired devices", body: "Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings." },
-    { title: "Clearer connection errors", body: "Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials." },
+    { title: "Clearer connection errors", body: "Remote MCP connection errors include safe HTTP status codes and practical recovery hints. Malformed connection addresses never echo embedded credentials." },
     { title: "Accurate browser setup", body: "Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine." },
     { title: "Release history everywhere", body: "What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes." },
   ],

@@ -1,6 +1,23 @@
 # Origin inspection and online delivery
 
-## Active 0.2.12 replacement cycle 033
+## Active 0.2.13 inspection and delivery batch
+
+The user requested a finite, productive pass over every component and feature,
+including rapid issue dragging, Origin-only product branding, removal of unrelated
+Cloud subscription flows, and a final report of missing features and useful
+upstream PRs. Do not repeat unchanged checks or begin another speculative
+improvement cycle while a verified delivery is waiting. Finish the reported and
+proved defects, run integrated acceptance, then publish matching GitHub, website,
+Windows and Mac outputs and report their evidence and remaining limits.
+
+The [034 integration batch](origin-candidate-034.md) carries those fixes together
+with the held signup/logging/project-list work. The user's latest sidebar
+preference is **one horizontal footer icon row** in expanded sidebars, with
+readable targets and no overflow at narrow widths. The open local tab is a
+synthetic sample-data preview; blocked edits must explain that restriction.
+Current public 0.2.11 remains unchanged until the final verified publication.
+
+## Held 0.2.12 replacement cycle 033
 
 The [033 candidate](origin-candidate-033.md) integrates the project-list cache adaptation, retains the earlier signup/credential fixes and has four current shared notes. The [032 freeze](origin-candidate-032.md) failed CI and remains unpublished; its original native/private proofs are retained separately. Integration checkpoint `f2ad2a15cb4d61cb49b678a74b53c7b9b063e253` has 317 focused root passes and app/server types, plus an actual stable full root client/shared run of 5,983 passes across 564 files. The [sanitized checkpoint](evidence/origin-candidate-033.json) records its source, log identities, start/end checks and no-continuous-monitoring limit. Final source/tag, fresh complete CI/native, fifteen assets/feeds, website and public acceptance all require new actual evidence. The product register preserves 72 rows and adds one P2 cache row, for 73; test-only Comms HTTP hardening is separate. Current public 0.2.11 and original backend/mail times remain unchanged. Completing the replacement delivery will not close the continuing inspection or daily 06:00 Europe/Rome review.
 

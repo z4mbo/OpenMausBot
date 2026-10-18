@@ -1,7 +1,7 @@
-# Verifying OpenMausBot
+# Verifying Origin
 
-OpenMausBot has one development control surface: `pnpm control:omb`. It runs
-the published `openmausbot` verbs (docs/headless-cli.md), which call the MCP
+Origin has one development control surface: `pnpm control:omb`. It runs
+the checkout's headless verbs (docs/headless-cli.md), which call the MCP
 tools in `scripts/mcp-server.ts`, so verification uses the same URL
 validation, task pinning, bounded transcripts, wait states, and redaction as
 external MCP clients and scripts.
@@ -76,7 +76,8 @@ Use only mapped, tested commands:
 - [Legacy Idea privacy during Draft repair](origin-draft-mirror.md)
 - [Local workspace deletion and residual sidebar sections](origin-workspace-deletion.md)
 - [Origin 0.2.11 source and delivery acceptance](origin-candidate-031.md) ([delivery receipt](evidence/origin-delivery-031/delivery-receipt.json))
-- [Origin 0.2.12 replacement candidate and acceptance boundary, cycle 033](origin-candidate-033.md)
+- [Origin 0.2.13 integration batch and acceptance boundary](origin-candidate-034.md)
+- [Held Origin 0.2.12 replacement candidate, cycle 033](origin-candidate-033.md)
 - [Origin 0.2.12 held 032 freeze and failed-CI record](origin-candidate-032.md)
 - [Public signup policy loading and bounded recovery](origin-signup-policy.md)
 - [Origin 0.2.9 held-candidate verification](origin-candidate-029.md)

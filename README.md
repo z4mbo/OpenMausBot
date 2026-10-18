@@ -87,7 +87,7 @@ The app's release history lives in `shared/origin-releases.ts`; every desktop ve
 
 Version [0.2.11](https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.11) is published for [Windows x64](https://origin.imbored.fun/downloads/Origin-Setup.exe), [Mac Apple silicon](https://origin.imbored.fun/downloads/Origin-Mac-AppleSilicon.dmg) and [Mac Intel](https://origin.imbored.fun/downloads/Origin-Mac-Intel.dmg). The [website](https://origin.imbored.fun) and [What's new](https://origin.imbored.fun/whats-new) match its eight current release notes. See the [verified delivery and acceptance limits](docs/verification/origin-delivery.md#0211-delivery) and [permanent receipt](docs/verification/evidence/origin-delivery-031/delivery-receipt.json).
 
-The unpublished [0.2.12 replacement candidate, cycle 033](docs/verification/origin-candidate-033.md), adds accurate project lists to bounded signup recovery and safer Windows child environments/provider logs. Its four shared release notes require fresh source-bound builds and delivery. The [held 032 freeze](docs/verification/origin-candidate-032.md) failed CI; passing native/private checks did not authorize publication. Public 0.2.11 remains unchanged.
+The unpublished [0.2.13 integration batch](docs/verification/origin-candidate-034.md) combines stable issue dragging, conversation-save protection, Origin branding and server updates, personal-key Live calls, one-row footer icons and readable server controls with the held signup/logging fixes. Its ten shared release notes need final integrated checks, matching builds and publication. The [0.2.12 candidate](docs/verification/origin-candidate-033.md) is held to include these requested fixes; the [older 032 freeze](docs/verification/origin-candidate-032.md) failed CI. Public 0.2.11 remains unchanged.
 
 The [0.2.10 record](docs/verification/origin-candidate-030.md) retains its source, checks and Activity correction. Candidates [0.2.8](docs/verification/origin-invitations.md) and [0.2.9](docs/verification/origin-candidate-029.md) remain unpublished and immutable; the successful 0.2.9 CI did not waive its reproduced Activity defect. Historical 0.2.7 delivery retains its original receipt.
 
@@ -96,6 +96,8 @@ The [0.2.11 record](docs/verification/origin-candidate-031.md) covers Draft-firs
 The **Origin desktop** GitHub workflow builds macOS Apple silicon, macOS Intel and Windows x64 artifacts without publishing. Local packaging commands are `pnpm package:mac` and `pnpm package:win` on their respective platforms. Download-host publication is a separate operation; building artifacts or opening a PR does not update installed apps. Unsigned/ad-hoc builds have platform-specific installation and updater limits documented in the workflow.
 
 Review new merged OpenMausBot PRs for fixes and functionality that fit Origin. Compare the code first, retain attribution, add Origin-specific regression coverage, and avoid importing upstream branding, service credentials or release settings blindly. Keep each logical change in its own commit and document verification in the PR.
+
+The [additional upstream review](docs/verification/origin-upstream-fit-034.md) records thirty more PRs, their fit and adoption requirements, alongside the previous forty-six scoped reviews. It includes useful automation, recovery, model-discovery and widget ideas, with a selective integration workflow that preserves Origin's permissions and human-approved merges.
 
 ## Contributing and licensing
 

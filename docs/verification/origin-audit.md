@@ -18,6 +18,13 @@ The unpublished [033 replacement candidate](origin-candidate-033.md) carries fou
 
 ## Bug register
 
+The [034 integration record](origin-candidate-034.md) adds the rapid-drag,
+permission-change, failed-save, vendor-subscription, server-layout, Live access,
+update-channel and product-branding findings. Its source, local proofs and
+pending final delivery remain separate from the 73-row historical register
+below. The latest one-row footer request supersedes the earlier wrapping
+preference while retaining containment and keyboard requirements.
+
 Locations identify the affected implementation at the fix checkpoint. Each row links the logical fix commit by its abbreviated SHA; full scenarios and regression evidence are in the linked feature reports and adjacent test files.
 
 | Severity | Source | Concrete scenario / wrong result | Fix commit |
