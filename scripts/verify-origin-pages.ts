@@ -13,7 +13,7 @@ const ui = await createServer({
     { find: /^@\/lib\/origin-cloud$/, replacement: fileURLToPath(new URL("./testing/origin-pages-cloud.ts", import.meta.url)) },
     { find: "@", replacement: fileURLToPath(new URL("../src", import.meta.url)) },
   ] },
-  server: { host: "127.0.0.1", port: 0, hmr: false, proxy: { "/api": { target: fixture.info.url } } },
+  server: { host: "127.0.0.1", port: 0, hmr: false, watch: { ignored: ["**/.omb-scratch/**"] }, proxy: { "/api": { target: fixture.info.url } } },
   plugins: [{ name: "isolated-origin-pages", configureServer(server) {
     server.middlewares.use((req, res, next) => {
       if ((req.url ?? "").split("?")[0] !== "/__origin-pages.html") return next();

@@ -74,7 +74,7 @@ export async function mountPreview(
     optimizeDeps: { entries: [entry.replace(/^\/+/, "")] },
     ...(options.aliases ? { resolve: { alias: options.aliases } } : {}),
     ...(logLevel ? { logLevel } : {}),
-    server: { host: "127.0.0.1", port: 0, hmr: options.hmr, proxy: {
+    server: { host: "127.0.0.1", port: 0, hmr: options.hmr, watch: { ignored: ["**/.omb-scratch/**"] }, proxy: {
       "/api": { target: fixture.info.url },
       "/.well-known/openmausbot/environment": { target: fixture.info.url },
     } },
