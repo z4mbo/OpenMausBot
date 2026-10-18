@@ -1,4 +1,5 @@
 import { ArchivedBotsPanel } from "./ArchivedBotsPanel";
+import { SidebarFeedback } from "./SidebarFeedback";
 import { botConfirmCopy, type BotConfirmKind } from "./bot-confirm-copy";
 export { ArchivedBotRow, ArchivedBotsPanel } from "./ArchivedBotsPanel";
 export { archivedDeleteAllCopy, botConfirmCopy, type BotConfirmKind } from "./bot-confirm-copy";
@@ -2511,31 +2512,12 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           }}
         />
       )}
-      {teamFeedback &&
-        createPortal(
-          <div
-            role="status"
-            className={cn(
-              "fixed bottom-4 left-4 z-[60] max-w-[300px] rounded-xl border px-3.5 py-2.5 text-[13px] shadow-xl",
-              teamFeedback.error
-                ? "border-danger/30 bg-card text-danger"
-                : "border-hairline/50 bg-card text-ink",
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <span>{teamFeedback.text}</span>
-              {pendingBotUndo && (
-                <button
-                  onClick={() => void undoBotArchive(pendingBotUndo)}
-                  className="rounded-md px-1.5 py-0.5 font-medium text-accent hover:bg-raised"
-                >
-                  {t("common.undo")}
-                </button>
-              )}
-            </div>
-          </div>,
-          document.body,
-        )}
+      {teamFeedback && (
+        <SidebarFeedback
+          feedback={teamFeedback}
+          onUndo={pendingBotUndo ? () => void undoBotArchive(pendingBotUndo) : undefined}
+        />
+      )}
     </aside>
   );
 }

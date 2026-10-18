@@ -52,6 +52,7 @@ vi.mock("@/state/store", async (importOriginal) => {
 import { initialState } from "@/state/store";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { ArchivedBotsPanel, BotContextMenu, Sidebar } from "./Sidebar";
+import { SidebarFeedback } from "./SidebarFeedback";
 
 const left = (id: string, extra: Partial<Bot> = {}): Bot => ({
   id, threadId: `${id}-left`, mainThreadId: `${id}-main`, name: id, title: "", description: "", notifications: true,
@@ -64,7 +65,8 @@ type Props = { children?: ReactNode; onClick?: () => void; onRestore?: () => voi
 function nodes(value: ReactNode): ReactElement<Props>[] {
   return Children.toArray(value).flatMap((child) => {
     if (!isValidElement<Props>(child)) return [];
-    return [child, ...nodes(child.props.children)];
+    const content = child.type === SidebarFeedback ? SidebarFeedback(child.props as Parameters<typeof SidebarFeedback>[0]) : child.props.children;
+    return [child, ...nodes(content)];
   });
 }
 function render(component: () => ReactNode) {
