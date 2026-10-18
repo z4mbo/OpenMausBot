@@ -3,6 +3,20 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.2.11",
+  date: "2026-10-18",
+  title: "Draft-first projects and clearer workspace controls",
+  changes: [
+    { title: "Draft by default", body: "Every project starts with Draft. New issues from the app, feedback, Chiefs and connected tools go to Draft unless you choose another column. Existing issues and imported history keep their destinations." },
+    { title: "Clean workspace deletion", body: "Removing an empty local workspace also removes its leftover sidebar section. Startup cleans up old empty workspace sections, while preserving sections that contain bots, groups or a shared computer." },
+    { title: "Account and computer layout", body: "Your account sits immediately before Search, with a full-width computer selector below. Footer actions wrap into aligned rows inside narrow sidebars." },
+    { title: "Consistent dialogs and menus", body: "About, Files, confirmations, Settings, Apps, Triggers, Voice and sidebar menus share the app's flat surfaces, borders and controls in light and dark themes." },
+    { title: "Reliable keyboard focus", body: "Account menus focus correctly with reduced motion. Pending confirmations keep focus inside, and Triggers skips hidden Advanced controls when you press Tab." },
+    { title: "Readable triggers on phones", body: "Trigger and agent names stay readable on narrow screens, with Copy link and the switch in their own row." },
+    { title: "Invitations from Origin", body: "Hosted workspace invitations use the verified invites@origin.imbored.fun sender. If sending fails, Origin shows the delivery status and keeps the same invitation link available to share." },
+    { title: "Safer issue links", body: "Legacy private ideas wait for Draft repair before GitHub mirroring. Older issue-creation requests preserve existing links or offer a manual creation page instead of risking duplicate GitHub issues." },
+  ],
+}, {
   version: "0.2.10",
   date: "2026-10-18",
   title: "Invitations and reliable desktop controls",
