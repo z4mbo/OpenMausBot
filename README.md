@@ -63,7 +63,7 @@ Email is sent centrally by the backend using a verified `INVITE_FROM_EMAIL` send
 
 A missing configuration or provider failure leaves the invitation available for manual sharing. Each attempt uses only the selected provider, without an automatic retry or fallback that could send duplicate messages. Provider acceptance does not establish inbox delivery. Each creator can issue 20 invitations per hour across workspaces.
 
-The user-approved free Brevo account was created. The required organization address has been submitted; onboarding remains in progress. Brevo requires the user to complete phone verification before API-key creation and sending. Domain authentication remains pending; no provider key has been created; transactional sending is not activated. Hosted invitation email is not configured; public invitation links remain available for manual sharing. No real recipient email has been sent. Provider acceptance does not establish inbox delivery.
+The user-approved free Brevo account was created. The required organization address has been submitted. Phone verification was completed after the 0.2.10 delivery checkpoint; email-code verification for API-key creation remains pending. Domain authentication remains pending; no provider key has been created; transactional sending is not activated. Hosted invitation email is not configured; public invitation links remain available for manual sharing. No real recipient email has been sent. Provider acceptance does not establish inbox delivery.
 
 Obsolete `teams:sendInvite` and `members:sendInvite` email actions reject with a migration message. Their bare legacy invitation mutations and existing membership rows remain compatible; new email invitations use `workspaces:sendEmailInvite` and `/join/<token>`.
 
