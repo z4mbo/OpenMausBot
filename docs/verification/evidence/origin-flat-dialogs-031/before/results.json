@@ -1,0 +1,797 @@
+{
+  "marker": "origin-flat-dialogs-031",
+  "stage": "before",
+  "checkedAt": "2026-10-18T14:38:24.375Z",
+  "synthetic": true,
+  "actualComponents": [
+    "AboutDialog",
+    "ConfirmDialog",
+    "FilesView"
+  ],
+  "cases": [
+    {
+      "screen": "about",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "about-desktop-dark.png",
+      "geometry": {
+        "left": 460,
+        "right": 820,
+        "top": 293.875,
+        "bottom": 606.125,
+        "width": 360,
+        "height": 312.25,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 358,
+        "clientWidth": 358,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-neutral",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "confirm-neutral-desktop-dark.png",
+      "geometry": {
+        "left": 430,
+        "right": 850,
+        "top": 376.4375,
+        "bottom": 523.5625,
+        "width": 420,
+        "height": 147.125,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 418,
+        "clientWidth": 418,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-danger",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "confirm-danger-desktop-dark.png",
+      "geometry": {
+        "left": 430,
+        "right": 850,
+        "top": 365.875,
+        "bottom": 534.125,
+        "width": 420,
+        "height": 168.25,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 418,
+        "clientWidth": 418,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.686342 0.193265 0.0652703 / 0.3)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-pending",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "confirm-pending-desktop-dark.png",
+      "geometry": {
+        "left": 430,
+        "right": 850,
+        "top": 365.875,
+        "bottom": 534.125,
+        "width": 420,
+        "height": 168.25,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 418,
+        "clientWidth": 418,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.686342 0.193265 0.0652703 / 0.3)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "pendingAfterBackdropInside": false,
+      "pendingDismissalBlocked": true
+    },
+    {
+      "screen": "files-refusal",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "files-refusal-desktop-dark.png",
+      "geometry": {
+        "left": 420,
+        "right": 860,
+        "top": 380.5,
+        "bottom": 519.5,
+        "width": 440,
+        "height": 139,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 438,
+        "clientWidth": 438,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "files-suggest",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "files-suggest-desktop-dark.png",
+      "geometry": {
+        "left": 420,
+        "right": 860,
+        "top": 266.125,
+        "bottom": 633.875,
+        "width": 440,
+        "height": 367.75,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 438,
+        "clientWidth": 438,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "files-menu",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "files-menu-desktop-dark.png",
+      "geometry": {
+        "left": 716,
+        "right": 936,
+        "top": 290.625,
+        "bottom": 376.625,
+        "width": 220,
+        "height": 86,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 218,
+        "clientWidth": 218,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0 0 0 / 0.5) 0px 25px 50px -12px",
+        "radius": "12px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(38, 38, 38)"
+      },
+      "escapeClosed": true
+    },
+    {
+      "screen": "about",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "about-mobile-dark.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "height": 312.25,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-neutral",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "confirm-neutral-mobile-dark.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 321.875,
+        "bottom": 490.125,
+        "width": 327,
+        "height": 168.25,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-danger",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "confirm-danger-mobile-dark.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 321.875,
+        "bottom": 490.125,
+        "width": 327,
+        "height": 168.25,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.686342 0.193265 0.0652703 / 0.3)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-pending",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "confirm-pending-mobile-dark.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 321.875,
+        "bottom": 490.125,
+        "width": 327,
+        "height": 168.25,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.686342 0.193265 0.0652703 / 0.3)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "pendingAfterBackdropInside": false,
+      "pendingDismissalBlocked": true
+    },
+    {
+      "screen": "files-refusal",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "files-refusal-mobile-dark.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 336.5,
+        "bottom": 475.5,
+        "width": 327,
+        "height": 139,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "files-suggest",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "files-suggest-mobile-dark.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 211.5625,
+        "bottom": 600.4375,
+        "width": 327,
+        "height": 388.875,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(17, 17, 17)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "files-menu",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "files-menu-mobile-dark.png",
+      "geometry": {
+        "left": 115,
+        "right": 335,
+        "top": 311.75,
+        "bottom": 397.75,
+        "width": 220,
+        "height": 86,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 218,
+        "clientWidth": 218,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0 0 0 / 0.5) 0px 25px 50px -12px",
+        "radius": "12px",
+        "borderColor": "oklab(0.32109 0.0000146329 0.0000064075 / 0.5)",
+        "background": "rgb(38, 38, 38)"
+      },
+      "escapeClosed": true
+    },
+    {
+      "screen": "about",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "about-desktop-light.png",
+      "geometry": {
+        "left": 460,
+        "right": 820,
+        "top": 293.875,
+        "bottom": 606.125,
+        "width": 360,
+        "height": 312.25,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 358,
+        "clientWidth": 358,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-neutral",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "confirm-neutral-desktop-light.png",
+      "geometry": {
+        "left": 430,
+        "right": 850,
+        "top": 376.4375,
+        "bottom": 523.5625,
+        "width": 420,
+        "height": 147.125,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 418,
+        "clientWidth": 418,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-danger",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "confirm-danger-desktop-light.png",
+      "geometry": {
+        "left": 430,
+        "right": 850,
+        "top": 365.875,
+        "bottom": 534.125,
+        "width": 420,
+        "height": 168.25,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 418,
+        "clientWidth": 418,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.496227 0.124559 0.0653153 / 0.3)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-pending",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "confirm-pending-desktop-light.png",
+      "geometry": {
+        "left": 430,
+        "right": 850,
+        "top": 365.875,
+        "bottom": 534.125,
+        "width": 420,
+        "height": 168.25,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 418,
+        "clientWidth": 418,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.496227 0.124559 0.0653153 / 0.3)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "pendingAfterBackdropInside": false,
+      "pendingDismissalBlocked": true
+    },
+    {
+      "screen": "files-refusal",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "files-refusal-desktop-light.png",
+      "geometry": {
+        "left": 420,
+        "right": 860,
+        "top": 380.5,
+        "bottom": 519.5,
+        "width": 440,
+        "height": 139,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 438,
+        "clientWidth": 438,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "files-suggest",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "files-suggest-desktop-light.png",
+      "geometry": {
+        "left": 420,
+        "right": 860,
+        "top": 266.125,
+        "bottom": 633.875,
+        "width": 440,
+        "height": 367.75,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 438,
+        "clientWidth": 438,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "files-menu",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "screenshot": "files-menu-desktop-light.png",
+      "geometry": {
+        "left": 716,
+        "right": 936,
+        "top": 290.625,
+        "bottom": 376.625,
+        "width": 220,
+        "height": 86,
+        "documentWidth": 1280,
+        "viewportWidth": 1280,
+        "scrollWidth": 218,
+        "clientWidth": 218,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0 0 0 / 0.5) 0px 25px 50px -12px",
+        "radius": "10px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(255, 255, 255)"
+      },
+      "escapeClosed": true
+    },
+    {
+      "screen": "about",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "about-mobile-light.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "height": 312.25,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-neutral",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "confirm-neutral-mobile-light.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 321.875,
+        "bottom": 490.125,
+        "width": 327,
+        "height": 168.25,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-danger",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "confirm-danger-mobile-light.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 321.875,
+        "bottom": 490.125,
+        "width": 327,
+        "height": 168.25,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.496227 0.124559 0.0653153 / 0.3)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "confirm-pending",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "confirm-pending-mobile-light.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 321.875,
+        "bottom": 490.125,
+        "width": 327,
+        "height": 168.25,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.496227 0.124559 0.0653153 / 0.3)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "pendingAfterBackdropInside": false,
+      "pendingDismissalBlocked": true
+    },
+    {
+      "screen": "files-refusal",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "files-refusal-mobile-light.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 336.5,
+        "bottom": 475.5,
+        "width": 327,
+        "height": 139,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "files-suggest",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "files-suggest-mobile-light.png",
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 211.5625,
+        "bottom": 600.4375,
+        "width": 327,
+        "height": 388.875,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 325,
+        "clientWidth": 325,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+        "radius": "16px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(251, 248, 242)"
+      },
+      "keyboardContained": true,
+      "escapeClosed": true
+    },
+    {
+      "screen": "files-menu",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "screenshot": "files-menu-mobile-light.png",
+      "geometry": {
+        "left": 115,
+        "right": 335,
+        "top": 311.75,
+        "bottom": 397.75,
+        "width": 220,
+        "height": 86,
+        "documentWidth": 375,
+        "viewportWidth": 375,
+        "scrollWidth": 218,
+        "clientWidth": 218,
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0 0 0 / 0.5) 0px 25px 50px -12px",
+        "radius": "10px",
+        "borderColor": "oklab(0.80175 0.00352141 0.03118 / 0.5)",
+        "background": "rgb(255, 255, 255)"
+      },
+      "escapeClosed": true
+    }
+  ],
+  "pageErrors": [],
+  "externalRequestsBlocked": [],
+  "nativeOrPackagedAcceptance": false,
+  "completedAt": "2026-10-18T14:38:36.622Z"
+}

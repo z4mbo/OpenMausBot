@@ -334,6 +334,8 @@ printed path. Never kill processes by name and never delete a broad temp root.
 
 The [Origin UI followup record](origin-ui-followup.md) preserves matched modal focus, Files recovery, filled-control contrast and Windows fixture results with source identities and acceptance limits.
 
+The [flat dialog follow-up](origin-flat-dialogs.md) records pending confirmation backdrop focus, shared About/confirmation/Files surfaces, matched browser screenshots and the remaining whole-app acceptance limits.
+
 The [Origin CI recovery record](origin-ci-recovery.md) tracks the deterministic Sidebar size-guard failure and the matching-source release verification that follows its correction.
 
 The [cross-drive Vite fixture record](origin-vite-private-files.md) explains the Windows raw-file regression, strict HTTP denial checks and isolated cleanup proof.

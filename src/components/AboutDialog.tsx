@@ -33,7 +33,7 @@ export function AboutDialog({ open, onClose, returnFocusRef }: { open: boolean; 
         role="dialog"
         aria-modal="true"
         aria-labelledby="about-dialog-title"
-        className="w-full max-w-[360px] rounded-2xl border border-hairline/50 bg-panel p-6 text-center shadow-2xl"
+        className="ui-panel w-full max-w-[360px] p-6 text-center"
       >
         <img src="/app-icon.svg" alt="" width={56} height={56} className="mx-auto size-14" />
         <h2 id="about-dialog-title" className="mt-3 text-[17px] font-semibold text-ink">
@@ -56,7 +56,7 @@ export function AboutDialog({ open, onClose, returnFocusRef }: { open: boolean; 
           ref={closeRef}
           type="button"
           onClick={dismiss}
-          className="mt-5 w-full rounded-xl bg-raised px-4 py-2 text-[13px] font-medium text-ink hover:brightness-110"
+          className="ui-button mt-5 w-full"
         >
           Close
         </button>

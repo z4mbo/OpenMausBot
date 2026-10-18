@@ -862,6 +862,13 @@ body {
    use utilities for placement and the control scale below for size, rather
    than inventing another button size. */
 @layer components {
+  .ui-panel {
+    border: 1px solid color-mix(in srgb, var(--color-hairline) 60%, transparent);
+    border-radius: var(--origin-radius-panel);
+    background: var(--color-panel);
+    color: var(--color-ink);
+    box-shadow: none;
+  }
   .ui-button,
   .ui-icon-button {
     display: inline-flex;

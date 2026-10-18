@@ -212,7 +212,7 @@ function FolderMenu({ name, busy, onOpen, onStop }: { name: string; busy: boolea
   return <div ref={ref} className="relative shrink-0">
     <button type="button" aria-haspopup="menu" aria-expanded={open} aria-label={t("files.more", { name })}
       className="ui-icon-button hover:bg-control hover:text-ink" onClick={() => setOpen((value) => !value)}><MoreHorizontal size={16} /></button>
-    {open && <div role="menu" className="absolute right-0 top-full z-40 mt-1 w-[220px] overflow-hidden rounded-xl border border-hairline/50 bg-card py-1.5 text-[12.5px] shadow-2xl shadow-black/50">
+    {open && <div role="menu" className="ui-panel absolute right-0 top-full z-40 mt-1 w-[220px] overflow-hidden py-1.5 text-[12.5px]">
       {item(t("files.openHere"), onOpen)}
       {item(t("files.stop"), onStop, true)}
     </div>}
@@ -237,7 +237,7 @@ function FilesDialog({ label, children, actions, onClose, returnFocusRef, fallba
   const panelRef = useRef<HTMLDivElement>(null);
   const { dismiss } = useModalDialog(panelRef, onClose, { returnFocusRef, fallbackFocusRef });
   return createPortal(<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-6" onMouseDown={(event) => event.target === event.currentTarget && dismiss()}>
-    <div ref={panelRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="files-dialog-label" className="w-full max-w-[440px] rounded-2xl border border-hairline/50 bg-panel p-5 shadow-2xl">
+    <div ref={panelRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="files-dialog-label" className="ui-panel w-full max-w-[440px] p-5">
       <ModalFocusScope panelRef={panelRef}>
       <h2 id="files-dialog-label" className="text-[15px] font-semibold text-ink">{label}</h2>
       {children}
