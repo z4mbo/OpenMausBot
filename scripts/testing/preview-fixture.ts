@@ -8,7 +8,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
-import { createServer, type AliasOptions } from "vite";
+import { createServer, type AliasOptions, type PluginOption } from "vite";
 
 export const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 
@@ -36,6 +36,7 @@ export interface PreviewOptions {
   hmr?: boolean;
   cacheDir?: string;
   aliases?: AliasOptions;
+  plugins?: PluginOption[];
 }
 
 export interface MountedPreview {
@@ -78,7 +79,7 @@ export async function mountPreview(
       "/api": { target: fixture.info.url },
       "/.well-known/openmausbot/environment": { target: fixture.info.url },
     } },
-    plugins: [{
+    plugins: [...(options.plugins ?? []), {
       name: "isolated-preview",
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
