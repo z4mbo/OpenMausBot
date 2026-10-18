@@ -1,0 +1,19 @@
+{
+  "source": "70eb5fecd0a372b9072a730eac63b980a562d49d",
+  "productionBaseline": "43c7fd9ae4316647a2d7705745b32812635c56cb",
+  "startedAt": "2026-10-18T00:28:14.772Z",
+  "ownerPid": 19188,
+  "url": "http://127.0.0.1:20914",
+  "pid": 8740,
+  "closed": true,
+  "productionSourceDiff": [
+    "src/components/AboutDialog.tsx",
+    "src/components/ArchivedBotsPanel.tsx",
+    "src/components/ConfirmDialog.tsx",
+    "src/components/FilesView.tsx",
+    "src/components/PhoneAppDialog.tsx"
+  ],
+  "previewHelper": "Private copy of scripts/testing/preview-fixture.ts; only explicit port option and strictPort added",
+  "previewUrl": "http://127.0.0.1:56903/__origin-files-load-after.html",
+  "closedAt": "2026-10-18T00:28:20.074Z"
+}

@@ -1,0 +1,23 @@
+✖ shared: a missing folder, a link and a hard-linked file never read as deleted (45.7653ms)
+✖ lists files as wire paths with hashes, keeping links and hard links as present, skipping litter and sync's own downloads (5.3703ms)
+ℹ ZIP transferred -> preparing (0 quits) -> native ready -> downloaded -> one restart; watchdog and late ready cannot repeat it
+ℹ native never fetches ZIP -> deadline/error/retryable=false; late native ready keeps error and causes zero quits
+✖ the shipped installer replaces the AppImage and queues its original path for relaunch (38.8871ms)
+✖ a rejected AppImage relaunch is reported without quitting the desktop (7.5775ms)
+ℹ tests 802
+ℹ suites 6
+ℹ pass 783
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 15
+ℹ todo 0
+ℹ duration_ms 6491.9969
+✖ failing tests:
+✖ shared: a missing folder, a link and a hard-linked file never read as deleted (45.7653ms)
+  Error: EPERM: operation not permitted, symlink '<local-user>\AppData\Local\Temp\omb-files-engine-JcF6vS\moved-sub' -> '<local-user>\AppData\Local\Temp\omb-files-engine-JcF6vS\Clients\sub'
+    code: 'EPERM',
+✖ lists files as wire paths with hashes, keeping links and hard links as present, skipping litter and sync's own downloads (5.3703ms)
+  Error: EPERM: operation not permitted, symlink '<local-user>\AppData\Local\Temp\omb-sync-scan-ur3cTG\sub\a.txt' -> '<local-user>\AppData\Local\Temp\omb-sync-scan-ur3cTG\link.txt'
+    code: 'EPERM',
+✖ the shipped installer replaces the AppImage and queues its original path for relaunch (38.8871ms)
+✖ a rejected AppImage relaunch is reported without quitting the desktop (7.5775ms)

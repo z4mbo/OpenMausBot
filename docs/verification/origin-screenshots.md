@@ -254,3 +254,71 @@ Before/after pairs recorded during this audit. Names identify the screen, state,
 | image-desktop-light | [Before](evidence/origin-ui/chat-attachments/image-before-desktop-light.png) | [After](evidence/origin-ui/chat-attachments/image-after-desktop-light.png) |
 | image-mobile-dark | [Before](evidence/origin-ui/chat-attachments/image-before-mobile-dark.png) | [After](evidence/origin-ui/chat-attachments/image-after-mobile-dark.png) |
 | image-mobile-light | [Before](evidence/origin-ui/chat-attachments/image-before-mobile-light.png) | [After](evidence/origin-ui/chat-attachments/image-after-mobile-light.png) |
+
+
+## UI followup: modal focus, Files recovery and filled controls
+
+[Verification boundaries and source identities](origin-ui-followup.md) · [360 PNGs and hashes](evidence/origin-ui-followup/manifest.json). Existing synthetic fixture captures only. Modal final is exact source 62fe9d9a3; all 20 measured geometries are unchanged. Profile/motion and extra recovery states are explicitly after-only. Contrast full fixtures match scenarios and include extra after probes; they are not full-page pixel geometry comparisons.
+
+| Modal case | Before | Final |
+| --- | --- | --- |
+| about-desktop-dark | [Before](evidence/origin-ui-followup/modal/before/about-before-desktop-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/about-after-desktop-dark-no-preference-initial.png) |
+| phone-desktop-dark | [Before](evidence/origin-ui-followup/modal/before/phone-before-desktop-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/phone-after-desktop-dark-no-preference-initial.png) |
+| archive-desktop-dark | [Before](evidence/origin-ui-followup/modal/before/archive-before-desktop-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/archive-after-desktop-dark-no-preference-initial.png) |
+| files-refusal-desktop-dark | [Before](evidence/origin-ui-followup/modal/before/files-refusal-before-desktop-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/files-refusal-after-desktop-dark-no-preference-initial.png) |
+| files-suggest-desktop-dark | [Before](evidence/origin-ui-followup/modal/before/files-suggest-before-desktop-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/files-suggest-after-desktop-dark-no-preference-initial.png) |
+| about-mobile-dark | [Before](evidence/origin-ui-followup/modal/before/about-before-mobile-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/about-after-mobile-dark-no-preference-initial.png) |
+| phone-mobile-dark | [Before](evidence/origin-ui-followup/modal/before/phone-before-mobile-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/phone-after-mobile-dark-no-preference-initial.png) |
+| archive-mobile-dark | [Before](evidence/origin-ui-followup/modal/before/archive-before-mobile-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/archive-after-mobile-dark-no-preference-initial.png) |
+| files-refusal-mobile-dark | [Before](evidence/origin-ui-followup/modal/before/files-refusal-before-mobile-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/files-refusal-after-mobile-dark-no-preference-initial.png) |
+| files-suggest-mobile-dark | [Before](evidence/origin-ui-followup/modal/before/files-suggest-before-mobile-dark-initial.png) | [Final](evidence/origin-ui-followup/modal/after/files-suggest-after-mobile-dark-no-preference-initial.png) |
+| about-desktop-light | [Before](evidence/origin-ui-followup/modal/before/about-before-desktop-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/about-after-desktop-light-no-preference-initial.png) |
+| phone-desktop-light | [Before](evidence/origin-ui-followup/modal/before/phone-before-desktop-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/phone-after-desktop-light-no-preference-initial.png) |
+| archive-desktop-light | [Before](evidence/origin-ui-followup/modal/before/archive-before-desktop-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/archive-after-desktop-light-no-preference-initial.png) |
+| files-refusal-desktop-light | [Before](evidence/origin-ui-followup/modal/before/files-refusal-before-desktop-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/files-refusal-after-desktop-light-no-preference-initial.png) |
+| files-suggest-desktop-light | [Before](evidence/origin-ui-followup/modal/before/files-suggest-before-desktop-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/files-suggest-after-desktop-light-no-preference-initial.png) |
+| about-mobile-light | [Before](evidence/origin-ui-followup/modal/before/about-before-mobile-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/about-after-mobile-light-no-preference-initial.png) |
+| phone-mobile-light | [Before](evidence/origin-ui-followup/modal/before/phone-before-mobile-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/phone-after-mobile-light-no-preference-initial.png) |
+| archive-mobile-light | [Before](evidence/origin-ui-followup/modal/before/archive-before-mobile-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/archive-after-mobile-light-no-preference-initial.png) |
+| files-refusal-mobile-light | [Before](evidence/origin-ui-followup/modal/before/files-refusal-before-mobile-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/files-refusal-after-mobile-light-no-preference-initial.png) |
+| files-suggest-mobile-light | [Before](evidence/origin-ui-followup/modal/before/files-suggest-before-mobile-light-initial.png) | [Final](evidence/origin-ui-followup/modal/after/files-suggest-after-mobile-light-no-preference-initial.png) |
+
+Each modal case also retains matched forward-tab, reverse-tab and escape PNGs in the manifest. Archive nested Confirm pairs:
+
+| Nested Confirm | Before | Final |
+| --- | --- | --- |
+| desktop-dark | [Before](evidence/origin-ui-followup/modal/before/archive-before-desktop-dark-nested-initial.png) | [Final](evidence/origin-ui-followup/modal/after/archive-after-desktop-dark-no-preference-nested-initial.png) |
+| mobile-dark | [Before](evidence/origin-ui-followup/modal/before/archive-before-mobile-dark-nested-initial.png) | [Final](evidence/origin-ui-followup/modal/after/archive-after-mobile-dark-no-preference-nested-initial.png) |
+| desktop-light | [Before](evidence/origin-ui-followup/modal/before/archive-before-desktop-light-nested-initial.png) | [Final](evidence/origin-ui-followup/modal/after/archive-after-desktop-light-no-preference-nested-initial.png) |
+| mobile-light | [Before](evidence/origin-ui-followup/modal/before/archive-before-mobile-light-nested-initial.png) | [Final](evidence/origin-ui-followup/modal/after/archive-after-mobile-light-no-preference-nested-initial.png) |
+
+| Files rejected initial IPC state | Before | Recovered implementation |
+| --- | --- | --- |
+| 375-dark rejection | [Blank](evidence/origin-ui-followup/files-load-before/files-state-rejected-before-mobile-dark.png) | [Error and Retry](evidence/origin-ui-followup/files-load-after/files-state-rejected-after-375-dark.png) |
+
+After-only sequence: [pending Retry](evidence/origin-ui-followup/files-load-after/files-state-retry-loading-375-dark.png), [loaded recovery](evidence/origin-ui-followup/files-load-after/files-state-recovered-after-375-dark.png). The manifest also retains all four 375/1440 light/dark recovery sequences and all 16 profile combinations plus controlled-clock motion capture.
+
+| Filled control / state | Before | After |
+| --- | --- | --- |
+| midnight / 375 / ui-primary hover | [Before](evidence/origin-ui-followup/contrast/before/midnight-srgb-375-ui-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/midnight-srgb-375-ui-primary-hover.png) |
+| midnight / 375 / confirm-primary hover | [Before](evidence/origin-ui-followup/contrast/before/midnight-srgb-375-confirm-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/midnight-srgb-375-confirm-primary-hover.png) |
+| midnight / 375 / confirm-danger hover | [Before](evidence/origin-ui-followup/contrast/before/midnight-srgb-375-confirm-danger-hover.png) | [After](evidence/origin-ui-followup/contrast/after/midnight-srgb-375-confirm-danger-hover.png) |
+| midnight / 1280 / ui-primary hover | [Before](evidence/origin-ui-followup/contrast/before/midnight-srgb-1280-ui-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/midnight-srgb-1280-ui-primary-hover.png) |
+| midnight / 1280 / confirm-primary hover | [Before](evidence/origin-ui-followup/contrast/before/midnight-srgb-1280-confirm-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/midnight-srgb-1280-confirm-primary-hover.png) |
+| midnight / 1280 / confirm-danger hover | [Before](evidence/origin-ui-followup/contrast/before/midnight-srgb-1280-confirm-danger-hover.png) | [After](evidence/origin-ui-followup/contrast/after/midnight-srgb-1280-confirm-danger-hover.png) |
+| atelier / 375 / ui-primary hover | [Before](evidence/origin-ui-followup/contrast/before/atelier-srgb-375-ui-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/atelier-srgb-375-ui-primary-hover.png) |
+| atelier / 375 / confirm-primary hover | [Before](evidence/origin-ui-followup/contrast/before/atelier-srgb-375-confirm-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/atelier-srgb-375-confirm-primary-hover.png) |
+| atelier / 375 / confirm-danger hover | [Before](evidence/origin-ui-followup/contrast/before/atelier-srgb-375-confirm-danger-hover.png) | [After](evidence/origin-ui-followup/contrast/after/atelier-srgb-375-confirm-danger-hover.png) |
+| atelier / 1280 / ui-primary hover | [Before](evidence/origin-ui-followup/contrast/before/atelier-srgb-1280-ui-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/atelier-srgb-1280-ui-primary-hover.png) |
+| atelier / 1280 / confirm-primary hover | [Before](evidence/origin-ui-followup/contrast/before/atelier-srgb-1280-confirm-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/atelier-srgb-1280-confirm-primary-hover.png) |
+| atelier / 1280 / confirm-danger hover | [Before](evidence/origin-ui-followup/contrast/before/atelier-srgb-1280-confirm-danger-hover.png) | [After](evidence/origin-ui-followup/contrast/after/atelier-srgb-1280-confirm-danger-hover.png) |
+| graphite / 375 / ui-primary hover | [Before](evidence/origin-ui-followup/contrast/before/graphite-srgb-375-ui-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/graphite-srgb-375-ui-primary-hover.png) |
+| graphite / 375 / confirm-primary hover | [Before](evidence/origin-ui-followup/contrast/before/graphite-srgb-375-confirm-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/graphite-srgb-375-confirm-primary-hover.png) |
+| graphite / 375 / confirm-danger hover | [Before](evidence/origin-ui-followup/contrast/before/graphite-srgb-375-confirm-danger-hover.png) | [After](evidence/origin-ui-followup/contrast/after/graphite-srgb-375-confirm-danger-hover.png) |
+| graphite / 1280 / ui-primary hover | [Before](evidence/origin-ui-followup/contrast/before/graphite-srgb-1280-ui-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/graphite-srgb-1280-ui-primary-hover.png) |
+| graphite / 1280 / confirm-primary hover | [Before](evidence/origin-ui-followup/contrast/before/graphite-srgb-1280-confirm-primary-hover.png) | [After](evidence/origin-ui-followup/contrast/after/graphite-srgb-1280-confirm-primary-hover.png) |
+| graphite / 1280 / confirm-danger hover | [Before](evidence/origin-ui-followup/contrast/before/graphite-srgb-1280-confirm-danger-hover.png) | [After](evidence/origin-ui-followup/contrast/after/graphite-srgb-1280-confirm-danger-hover.png) |
+| midnight actual control crop | [Before](evidence/origin-ui-followup/contrast/before/midnight-actual-control-hover.png) | [After](evidence/origin-ui-followup/contrast/after/midnight-actual-control-hover.png) |
+| atelier actual control crop | [Before](evidence/origin-ui-followup/contrast/before/atelier-actual-control-hover.png) | [After](evidence/origin-ui-followup/contrast/after/atelier-actual-control-hover.png) |
+
+The manifest retains the remaining matched contrast scenarios, keyboard-focus states, all nine skins and bright/dark/gray custom accent cases. [Recorded contrast totals](origin-ui-followup.md#filled-primarydanger-controls) distinguish emulated/computed P3 from physical hardware verification. Native Electron/picker and body-portalled custom project Confirm accent remain unverified.

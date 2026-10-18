@@ -1,0 +1,83 @@
+[
+  {
+    "ownerPid": 7768,
+    "backendPid": 30608,
+    "closed": true,
+    "ownerRunning": false,
+    "backendRunning": false,
+    "dataRemains": false,
+    "listening": []
+  },
+  {
+    "ownerPid": 8716,
+    "backendPid": 4516,
+    "closed": true,
+    "ownerRunning": false,
+    "backendRunning": false,
+    "dataRemains": false,
+    "listening": []
+  },
+  {
+    "ownerPid": 19188,
+    "backendPid": 8740,
+    "closed": true,
+    "ownerRunning": false,
+    "backendRunning": false,
+    "dataRemains": false,
+    "listening": []
+  },
+  {
+    "ownerPid": 21460,
+    "backendPid": 14736,
+    "closed": true,
+    "ownerRunning": false,
+    "backendRunning": false,
+    "dataRemains": false,
+    "listening": []
+  },
+  {
+    "ownerPid": 26044,
+    "backendPid": 21952,
+    "closed": true,
+    "ownerRunning": false,
+    "backendRunning": false,
+    "dataRemains": false,
+    "listening": []
+  },
+  {
+    "ownerPid": 30604,
+    "backendPid": 38904,
+    "closed": true,
+    "ownerRunning": false,
+    "backendRunning": false,
+    "dataRemains": false,
+    "listening": []
+  },
+  {
+    "ownerPid": 34576,
+    "backendPid": 38124,
+    "closed": true,
+    "ownerRunning": false,
+    "backendRunning": false,
+    "dataRemains": false,
+    "listening": []
+  },
+  {
+    "ownerPid": 37564,
+    "backendPid": 37904,
+    "closed": true,
+    "ownerRunning": false,
+    "backendRunning": false,
+    "dataRemains": false,
+    "listening": []
+  },
+  {
+    "ownerPid": 39388,
+    "backendPid": 18300,
+    "closed": true,
+    "ownerRunning": false,
+    "backendRunning": false,
+    "dataRemains": false,
+    "listening": []
+  }
+]
