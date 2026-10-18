@@ -8,6 +8,13 @@ Each row links the official PR and names the inspected behavior and Origin count
 
 ## Decisions
 
+Subsequent integration: the bounded-status subset of #2970 is now adapted in
+`67dbb03a8`, with [five failing baseline cases and nine passing regressions](origin-provider-snapshot-deadline.md).
+Its POSIX child-termination escalation remains deferred. #3004 is adapted in
+`fb43fec3b`, with [real filesystem and registered-HTTP regression proof](origin-thread-durability.md).
+These later adaptations do not change the static comparison snapshot or turn
+the remaining source-fit recommendations into tested features.
+
 | Official PR / merge | Disposition | Source fit and remaining proof |
 | --- | --- | --- |
 | [#2959 — shared OpenRouter decision key](https://github.com/milind-soni/OpenMausBot/pull/2959), `568a39a9dc7e` | Defer optional convenience | Origin's `server/decider/index.ts` requires the decision model's own key. Reusing an existing OpenRouter key could simplify setup, but must stay opt-in, send it only to the default OpenRouter endpoint and expose only key-source metadata. Preserve explicit decision enablement and each sender's credentials. |

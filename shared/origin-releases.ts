@@ -17,6 +17,7 @@ export const releases: Release[] = [{
     { title: "Live calls with your own key", body: "Phone and companion Live calls use your configured Live key without requiring an upstream subscription. Missing keys still open setup, and access checks still apply." },
     { title: "Compact sidebar and server controls", body: "Footer icons stay on one line. Saved server names remain readable in narrow windows, with their actions below when needed. The computer menu opens Origin's server settings." },
     { title: "Origin server updates", body: "Self-hosted update checks find Origin releases and recognize their version tags. Docker instructions build the Origin checkout, and updates never suggest replacing Origin with the upstream npm package." },
+    { title: "Recoverable engine discovery", body: "An engine that never reports its status becomes unavailable after a minute instead of keeping engine discovery pending. Other engines remain available." },
   ],
 }, {
   version: "0.2.11",
