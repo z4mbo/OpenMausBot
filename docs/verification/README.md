@@ -74,6 +74,7 @@ Use only mapped, tested commands:
 - [Origin 0.2.9 held-candidate verification](origin-candidate-029.md)
 - [Origin 0.2.10 source and delivery acceptance](origin-candidate-030.md) ([delivery receipt](evidence/origin-delivery-030/delivery-receipt.json))
 - [Activity receipt refresh across bot updates](origin-activity-refresh.md)
+- [Draft domain defaults and bounded legacy workflow repair](origin-draft-domain.md)
 - [Channels](channels.md)
 - [In-chat team coordination](room-coordination.md)
 - [Chief access to additional teams](team-access.md)
