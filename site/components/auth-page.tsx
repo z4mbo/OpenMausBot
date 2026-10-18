@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { useAction, useMutation, useQuery } from "convex/react";
@@ -12,6 +12,7 @@ import { DownloadCard, SiteFrame } from "./origin-site";
 import st from "./auth.module.css";
 
 type Mode = "signin" | "signup";
+const SIGNUP_POLICY_TIMEOUT_MS = 10_000;
 
 const cleanError = (error: unknown) => error instanceof Error
   ? error.message.replace(/\[CONVEX[^\]]*\]\s*/g, "").replace(/^.*Uncaught Error:\s*/s, "").split("\n")[0].trim() || "Please try again"
@@ -82,12 +83,20 @@ function AuthForm({ initialMode, inviteToken, invitation, onSession }: { initial
   const [visible, setVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [signupPolicyTimedOut, setSignupPolicyTimedOut] = useState(false);
   const login = useAction(api.auth.login);
   const register = useAction(api.auth.signup);
-  const signupMode = useQuery(api.auth.signupMode, {});
-  const inviteOnly = Boolean(signupMode?.inviteOnly) && !inviteToken;
   const signup = mode === "signup";
-  const signupPolicyLoading = signup && !inviteToken && signupMode === undefined;
+  const needsSignupPolicy = signup && !inviteToken;
+  const signupMode = useQuery(api.auth.signupMode, needsSignupPolicy && !signupPolicyTimedOut ? {} : "skip");
+  const inviteOnly = Boolean(signupMode?.inviteOnly) && !inviteToken;
+  const signupPolicyLoading = needsSignupPolicy && signupMode === undefined;
+  useEffect(() => {
+    if (!signupPolicyLoading || signupPolicyTimedOut) return;
+    let active = true;
+    const timer = window.setTimeout(() => { if (active) setSignupPolicyTimedOut(true); }, SIGNUP_POLICY_TIMEOUT_MS);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [signupPolicyLoading, signupPolicyTimedOut]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -116,7 +125,12 @@ function AuthForm({ initialMode, inviteToken, invitation, onSession }: { initial
 
   return (
     <Card title={title} subtitle={subtitle} icon={invitation ? <span className={st.badge}><UsersRound size={22} /></span> : undefined}>
-      {signupPolicyLoading ? (
+      {signupPolicyLoading && signupPolicyTimedOut ? (
+        <div className={st.form}>
+          <p className={st.notice} role="alert">We couldn't check whether signup is available. Check your connection and try again.</p>
+          <button className={st.secondary} type="button" onClick={() => setSignupPolicyTimedOut(false)}>Try again</button>
+        </div>
+      ) : signupPolicyLoading ? (
         <div className={st.loading} role="status"><Loader2 className={st.spin} size={20} /><span className={st.visuallyHidden}>Loading</span></div>
       ) : signup && inviteOnly ? (
         <p className={st.notice}>Origin is invite-only for now. Ask a workspace admin for an invite link, then open it here or paste it into the app.</p>

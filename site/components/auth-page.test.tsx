@@ -10,9 +10,14 @@ const fixture = vi.hoisted(() => ({
   accept: vi.fn(),
   action: vi.fn(),
   signupMode: { inviteOnly: true } as { inviteOnly: boolean } | undefined,
+  policyQueries: vi.fn(),
 }));
 vi.mock("@/lib/convex-api", () => ({ api: { workspaces: { invitePreview: "preview", acceptInvite: "accept", list: "workspaces" }, auth: { login: "login", signup: "signup", signupMode: "signupMode" } } }));
-vi.mock("convex/react", () => ({ useQuery: (name: string, args: unknown) => name === "preview" ? args === "skip" ? undefined : fixture.invitation : name === "signupMode" ? fixture.signupMode : [], useMutation: () => fixture.accept, useAction: () => fixture.action }));
+vi.mock("convex/react", () => ({ useQuery: (name: string, args: unknown) => {
+  if (name === "preview") return args === "skip" ? undefined : fixture.invitation;
+  if (name === "signupMode") { fixture.policyQueries(args); return args === "skip" ? undefined : fixture.signupMode; }
+  return [];
+}, useMutation: () => fixture.accept, useAction: () => fixture.action }));
 vi.mock("./brand", () => ({ useOriginSession: () => fixture.session }));
 vi.mock("./origin-site", () => ({ SiteFrame: ({ children }: { children: ReactNode }) => <div>{children}</div>, DownloadCard: () => <aside>Download Origin</aside> }));
 vi.mock("next/link", () => ({ default: ({ href, children, ...props }: { href: string; children: ReactNode }) => <a href={href} {...props}>{children}</a> }));
@@ -42,11 +47,102 @@ beforeEach(() => {
   fixture.accept.mockReset();
   fixture.action.mockReset();
   fixture.signupMode = { inviteOnly: true };
+  fixture.policyQueries.mockReset();
   host = document.createElement("div");
   document.body.append(host);
   root = createRoot(host);
 });
-afterEach(() => { act(() => root.unmount()); host.remove(); expect(fetch).not.toHaveBeenCalled(); vi.unstubAllGlobals(); });
+afterEach(() => { act(() => root.unmount()); host.remove(); expect(fetch).not.toHaveBeenCalled(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+
+const renderPublicSignup = async (key?: string) => { await act(async () => root.render(<AuthPage key={key} mode="signup" />)); };
+const advance = async (milliseconds: number) => { await act(async () => vi.advanceTimersByTime(milliseconds)); };
+
+it("bounds a stalled signup policy and retries its subscription without offering registration", async () => {
+  vi.useFakeTimers();
+  fixture.session = { ...fixture.session, token: null, user: null };
+  fixture.signupMode = undefined;
+  await renderPublicSignup();
+  await advance(9999);
+  expect(host.querySelector('[role="status"]')).not.toBeNull();
+  await advance(1);
+  expect(host.querySelector('[role="status"]')).toBeNull();
+  expect(host.querySelector('[role="alert"]')?.textContent).toContain("Check your connection");
+  expect(host.querySelectorAll("input")).toHaveLength(0);
+  expect(fixture.policyQueries).toHaveBeenLastCalledWith("skip");
+  await act(async () => button("Try again").click());
+  expect(host.querySelector('[role="status"]')).not.toBeNull();
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+  expect(fixture.policyQueries).toHaveBeenLastCalledWith({});
+  fixture.signupMode = { inviteOnly: false };
+  await renderPublicSignup();
+  await advance(20_000);
+  expect(host.querySelectorAll("input")).toHaveLength(4);
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+  expect(fixture.action).not.toHaveBeenCalled();
+});
+
+it.each([true, false])("cancels the deadline when signup policy resolves before it: inviteOnly=%s", async inviteOnly => {
+  vi.useFakeTimers();
+  fixture.session = { ...fixture.session, token: null, user: null };
+  fixture.signupMode = undefined;
+  await renderPublicSignup();
+  await advance(9000);
+  fixture.signupMode = { inviteOnly };
+  await renderPublicSignup();
+  await advance(20_000);
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+  expect(host.querySelector('[role="status"]')).toBeNull();
+  expect(host.querySelectorAll("input")).toHaveLength(inviteOnly ? 0 : 4);
+  expect(fixture.action).not.toHaveBeenCalled();
+});
+
+it("ignores a stale deadline from a replaced signup flow", async () => {
+  vi.useFakeTimers();
+  const schedule = vi.spyOn(window, "setTimeout");
+  fixture.session = { ...fixture.session, token: null, user: null };
+  fixture.signupMode = undefined;
+  await renderPublicSignup("first");
+  const expired = schedule.mock.calls.find(([, delay]) => delay === 10_000)?.[0];
+  expect(expired).toBeTypeOf("function");
+  await advance(5000);
+  await renderPublicSignup("second");
+  await act(async () => (expired as () => void)());
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+  expect(host.querySelector('[role="status"]')).not.toBeNull();
+  await advance(9999);
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+  await advance(1);
+  expect(host.querySelector('[role="alert"]')).not.toBeNull();
+});
+
+it("clears the signup deadline when the flow unmounts", async () => {
+  vi.useFakeTimers();
+  const schedule = vi.spyOn(window, "setTimeout");
+  const cancel = vi.spyOn(window, "clearTimeout");
+  fixture.session = { ...fixture.session, token: null, user: null };
+  fixture.signupMode = undefined;
+  await renderPublicSignup();
+  const index = schedule.mock.calls.findIndex(([, delay]) => delay === 10_000);
+  expect(index).toBeGreaterThanOrEqual(0);
+  const timer = schedule.mock.results[index].value;
+  await act(async () => root.render(null));
+  expect(cancel).toHaveBeenCalledWith(timer);
+  await advance(20_000);
+  expect(host.childElementCount).toBe(0);
+});
+
+it.each(["signin", "invitation"] as const)("does not start a signup deadline for %s", async route => {
+  vi.useFakeTimers();
+  const schedule = vi.spyOn(window, "setTimeout");
+  fixture.session = { ...fixture.session, token: null, user: null };
+  fixture.signupMode = undefined;
+  await act(async () => root.render(<AuthPage mode={route === "signin" ? "signin" : "signup"} inviteToken={route === "invitation" ? "fixture-invite-one" : undefined} />));
+  await advance(20_000);
+  expect(schedule.mock.calls.some(([, delay]) => delay === 10_000)).toBe(false);
+  expect(fixture.policyQueries).toHaveBeenLastCalledWith("skip");
+  expect(host.querySelector('[role="alert"]')).toBeNull();
+  expect(host.querySelectorAll("input")).toHaveLength(route === "signin" ? 2 : 3);
+});
 
 it("waits for signup policy before showing fields on an invite-only instance", async () => {
   fixture.session = { ...fixture.session, token: null, user: null };
