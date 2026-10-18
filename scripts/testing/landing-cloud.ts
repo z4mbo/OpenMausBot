@@ -18,6 +18,6 @@ export function useCloudQuery<T = unknown>(name: string, args: Record<string, un
 export function useCloudPages<T>(name: string, args: Record<string, unknown> | "skip") {
   return { results: useCloudQuery<T[]>(name, args) ?? [], status: "done" as const, loadMore() {} };
 }
-export const cloudMutation = async () => { throw new Error("The landing capture fixture does not permit cloud mutations"); };
+export const cloudMutation = async () => { throw new Error("This preview uses sample data. Changes are not saved."); };
 export const cloudAction = cloudMutation;
 export const cloudQueryOnce = async <T>(name: string): Promise<T> => rows[name] as T;

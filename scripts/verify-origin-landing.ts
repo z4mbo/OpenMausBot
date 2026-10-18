@@ -37,7 +37,7 @@ try {
   const paths = ["src/App.tsx", "src/components/Sidebar.tsx", "src/components/SidebarFooterNav.tsx", "src/components/OriginAccountMenu.tsx", "src/components/ChiefSections.tsx", "src/components/origin-pages/IssuesPage.tsx", "src/styles.css"];
   const metadata = { synthetic: true, source, version, projectId: project.id, workspaceId: workspace.id, sourceFiles: paths.map(path => ({ path, sha256: createHash("sha256").update(readFileSync(join(REPO_ROOT, path))).digest("hex") })), adapters: ["scripts/testing/landing-cloud.ts", "scripts/testing/landing-preview.tsx"], noCloudBackend: true, packagedApp: false };
   preview = await mountPreview(fixture, {
-    entry: "/scripts/testing/landing-preview.tsx", route: "/__origin-landing.html", title: "Origin isolated landing capture", hmr: false, logLevel: "silent",
+    entry: "/scripts/testing/landing-preview.tsx", route: "/__origin-landing.html", title: "Origin preview — sample data", hmr: false, logLevel: "silent",
     cacheDir: process.env.ORIGIN_LANDING_CACHE,
     aliases: [{ find: /^@\/lib\/origin-cloud$/, replacement: fileURLToPath(new URL("./testing/landing-cloud.ts", import.meta.url)) }, { find: "@", replacement: fileURLToPath(new URL("../src", import.meta.url)) }],
     extraRoutes: [{ path: "/__origin-landing-fixture.json", handler: (_req, res) => { res.setHeader("content-type", "application/json"); res.end(JSON.stringify(metadata)); } }],
