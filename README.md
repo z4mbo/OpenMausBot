@@ -55,6 +55,14 @@ pnpm dev:site
 
 Configure local backend URLs using [the backend development notes](docs/origin-cloud-dev.md) and [site instructions](site/README.md). Starting `convex dev` pushes functions to its selected deployment, so check that it is the intended local development deployment first. Backend unit tests use disposable `convex-test` databases and need no running backend.
 
+## Workspace invitations
+
+Workspace owners and admins can create a shareable link or enter an email address in Members. The hosted Origin backend uses `https://origin.imbored.fun/join/<token>`; a self-hosted backend needs its own public HTTPS invitation website through `ORIGIN_SITE_URL` or `ORIGIN_PUBLIC_URL`. Invitation links stay bound to their issuing backend.
+
+Email is sent centrally by the backend using `RESEND_API_KEY` and a verified `INVITE_FROM_EMAIL` sender. Configure secrets through the deployment's protected environment, never on each desktop or in chat. A missing configuration or provider failure leaves the invitation available for manual sharing. Provider acceptance does not establish inbox delivery. Each creator can issue 20 invitations per hour across workspaces.
+
+Obsolete `teams:sendInvite` and `members:sendInvite` email actions reject with a migration message. Their bare legacy invitation mutations and existing membership rows remain compatible; new email invitations use `workspaces:sendEmailInvite` and `/join/<token>`.
+
 ## Checks
 
 ```powershell
