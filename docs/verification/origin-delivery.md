@@ -68,7 +68,7 @@ A second attempt authenticated the correct target but stopped before backup when
 
 A third attempt completed a full backup and successfully deployed that backend. It then stopped before migrations or site promotion when the source preflight detected Convex-generated output changes: two storage-module type imports/maps in `backend/convex/_generated/api.d.ts`. The generated patch was preserved privately and only the five generated outputs were restored to their exact frozen contents, returning the backend source diff to zero. That temporary key was also revoked and its file removed. This stop does not erase the successful backend deployment; the separately verified completion and cleanup receipts above govern the final release status.
 
-The frozen generated API declarations still omit those two storage modules. Regenerating and reviewing those type declarations remains a separate source followup; it is not an additional Convex runtime deployment or a migration/site acceptance claim.
+The 0.2.7 frozen declarations omitted those two storage modules. Commit `560eaa1cdb1e49f330d8c1ad91c2cbd197fa8096` subsequently included the generated `lib/storage` and `lib/storageValidators` imports and maps. The published 0.2.10 source and the current working branch contain the same API declaration blob, `b56745cdd9940e7d411fcbf7107a612f341011e0`. The historical generated patch and delivery receipts retain their original scope.
 
 | Migration stream | Done | Pages | Admitted |
 | --- | --- | --- | --- |
