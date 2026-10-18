@@ -95,3 +95,4 @@ docs/verification/evidence/origin-stripe-redaction-032/**/*.json text eol=lf
 docs/verification/evidence/origin-candidate-032.json -text whitespace=cr-at-eol
 docs/verification/evidence/origin-source-review-032.json -text whitespace=cr-at-eol
 docs/verification/evidence/origin-team-access-cache-033/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-issue-drag-034/** -text whitespace=cr-at-eol

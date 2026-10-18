@@ -47,8 +47,19 @@ function spotOf(root: HTMLElement, element: HTMLElement, rect: { left: number; t
 export function useFlip(container: RefObject<HTMLElement | null>, moves: unknown): (id: string, from: DOMRect) => void {
   const last = useRef(new Map<string, Spot>());
   const seeds = useRef(new Map<string, DOMRect>());
+  const animations = useRef(new Map<HTMLElement, Animation>());
   const seen = useRef(moves);
+  useLayoutEffect(() => () => {
+    for (const animation of animations.current.values()) animation.cancel();
+    animations.current.clear();
+  }, []);
   useLayoutEffect(() => {
+    const displayed = new Map<HTMLElement, DOMRect>();
+    for (const [element, animation] of animations.current) {
+      if (element.isConnected) displayed.set(element, element.getBoundingClientRect());
+      animation.cancel();
+    }
+    animations.current.clear();
     const root = container.current;
     if (!root) return;
     const animate = seen.current !== moves;
@@ -62,12 +73,14 @@ export function useFlip(container: RefObject<HTMLElement | null>, moves: unknown
       const spot = spotOf(root, element, rect);
       next.set(id, spot);
       const seed = seeds.current.get(id);
-      const before = seed ? spotOf(root, element, seed) : last.current.get(id);
+      let before = seed ? spotOf(root, element, seed) : last.current.get(id);
+      const visual = displayed.get(element);
+      if (!seed && before && visual) before = { x: before.x + visual.left - rect.left, y: before.y + visual.top - rect.top };
       if (still || !before || typeof element.animate !== "function") continue;
       const dx = before.x - spot.x;
       const dy = before.y - spot.y;
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
-      element.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: seed ? 220 : 240, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+      animations.current.set(element, element.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: seed ? 220 : 240, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }));
     }
     if (animate) seeds.current.clear();
     last.current = next;
