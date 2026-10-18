@@ -1941,7 +1941,7 @@ html[data-cloud-intent-morph] [data-tour="composer"] { view-transition-name: clo
   *::before,
   *::after {
     animation: none !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0s !important;
     transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
