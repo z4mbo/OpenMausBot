@@ -76,7 +76,7 @@ export async function connectVerb(ctx: VerbContext): Promise<VerbOutcome> {
     human: [
       `Connected to "${environment.label}" (${origin}, id ${environment.environmentId}).`,
       `Session "${session.label ?? label}", ${scope === "admin" ? "full access" : "chat and approvals only"}${typeof session.expiresAt === "number" ? `, until ${new Date(session.expiresAt).toISOString().slice(0, 10)}` : ""}.`,
-      `Token saved to ${out}. Use it with: openmausbot doctor --url ${origin} --token-file ${out}`,
+      `Token saved to ${out}. Use it with: pnpm omb doctor --url ${origin} --token-file ${out}`,
     ],
   };
 }

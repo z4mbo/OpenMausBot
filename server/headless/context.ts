@@ -60,7 +60,7 @@ export async function resolveTarget(ctx: VerbContext, positional: string | undef
   if (thread) {
     const owner = bots.find((candidate) => owns(candidate, thread));
     const room = owner ? undefined : rooms.find((candidate) => owns(candidate, thread));
-    if (!owner && !room) throw usageError(`no conversation with id ${thread}`, "run openmausbot bots or openmausbot channels");
+    if (!owner && !room) throw usageError(`no conversation with id ${thread}`, "run pnpm omb bots or pnpm omb channels");
     return withTask(owner ? { type: "bot", id: owner.id, name: owner.name, taskId: thread } : { type: "channel", id: room!.id, name: room!.name, taskId: thread });
   }
   const wanted = positional!.trim();
@@ -72,7 +72,7 @@ export async function resolveTarget(ctx: VerbContext, positional: string | undef
     ...(allow !== "bot" ? rooms.filter((candidate) => String(candidate.name).trim().toLowerCase() === key).map((record) => ({ record, type: "channel" as const })) : []),
   ];
   if (matches.length === 0) {
-    throw usageError(`no ${allow === "channel" ? "room" : allow === "bot" ? "bot" : "bot or room"} named "${wanted}"`, "run openmausbot bots or openmausbot channels for the names");
+    throw usageError(`no ${allow === "channel" ? "room" : allow === "bot" ? "bot" : "bot or room"} named "${wanted}"`, "run pnpm omb bots or pnpm omb channels for the names");
   }
   if (matches.length > 1) {
     throw usageError(`"${wanted}" names ${matches.length} ${allow === "any" ? "bots or rooms" : `${what.slice(2)}s`}: ${matches

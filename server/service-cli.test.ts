@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { runServiceCommand, serviceServeArgs } from "./service-cli.ts";
 import { removeTempDir } from "./testing/cleanup.ts";
 
-describe("openmausbot service", () => {
+describe("pnpm omb service", () => {
   let dir: string;
   const out: string[] = [];
   const err: string[] = [];
@@ -35,7 +35,7 @@ describe("openmausbot service", () => {
     out.length = 0;
     const refused = runServiceCommand({ action: "install", dataDir: join(dir, "x"), port: 8799, script: "/home/maus/.npm/_npx/deadbeef/node_modules/openmausbot/cli.js", node: "/usr/bin/node", platform: "linux" }, io);
     expect(refused).toBe(1);
-    expect(err.join("\n")).toMatch(/npm install -g openmausbot/);
+    expect(err.join("\n")).toContain("stable Origin checkout");
     expect(existsSync(join(dir, "x", "openmausbot.service"))).toBe(false);
   });
 
@@ -59,7 +59,7 @@ describe("openmausbot service", () => {
     expect(plist).toContain("<string>/usr/bin/node</string>");
     expect(plist).not.toContain("ELECTRON_RUN_AS_NODE");
     expect(plist).toContain(`<string>${sentinelOut}</string>`);
-    expect(out.join("\n")).toContain("openmausbot sentinel --check-install");
+    expect(out.join("\n")).toContain("pnpm omb sentinel --check-install");
     expect(existsSync(dataDir)).toBe(false);
     expect(out.join("\n")).toContain("launchctl bootstrap gui/$(id -u) /Users/maus/Library/LaunchAgents/com.openmausbot.sentinel.plist");
     expect(out.join("\n")).toContain(`issues: ${join(sentinelOut, "issues.jsonl")}`);

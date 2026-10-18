@@ -215,7 +215,7 @@ describe("terminal onboarding commands", () => {
     expect(setup.runSetup).toHaveBeenCalledWith({ dataDir: options.dataDir, port: options.port });
     expect(setup.isSetupComplete).not.toHaveBeenCalled();
     expect(serve).not.toHaveBeenCalled();
-    expect(output.log).toHaveBeenCalledWith(expect.stringContaining("Start with: openmausbot"));
+    expect(output.log).toHaveBeenCalledWith(expect.stringContaining("Start with: pnpm omb"));
     expect(phoneSetup).toHaveBeenCalledOnce();
     expect(setup.saveCliStartup).toHaveBeenCalledWith(options.dataDir, { access: "local" });
   });
@@ -252,6 +252,8 @@ describe("terminal onboarding commands", () => {
     expect(setup.runSetup).not.toHaveBeenCalled();
     expect(serve).not.toHaveBeenCalled();
     expect(output.error).toHaveBeenCalledWith(expect.stringContaining("interactive terminal"));
+    expect(output.error).toHaveBeenCalledWith(expect.stringContaining("pnpm omb setup"));
+    expect(output.error.mock.calls.flat().join("\n")).not.toContain("npx openmausbot");
   });
 
   it.each([false, new SetupCancelled()])("does not start after setup is cancelled (%s)", async (result) => {
@@ -395,7 +397,7 @@ describe.skipIf(process.platform === "win32")("serve --tunnel", () => {
     child.stderr?.on("data", (chunk) => (err += String(chunk)));
     try {
       expect(await exited(child)).toBe(1);
-      expect(err).toContain("run `openmausbot login` first");
+      expect(err).toContain("run `pnpm omb login` first");
       let dead = false;
       try {
         await fetch(`http://127.0.0.1:${port}/api/health`);
@@ -549,7 +551,7 @@ describe.skipIf(process.platform === "win32")("serve --tunnel", () => {
   }, 120_000);
 });
 
-describe("openmausbot access", () => {
+describe("pnpm omb access", () => {
   it("edits the sign-in allow-list in config.json without a running server", async () => {
     const home = mkdtempSync(join(tmpdir(), "omb-cli-access-"));
     const dataDir = join(home, "data");

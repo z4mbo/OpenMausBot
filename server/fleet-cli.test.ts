@@ -40,7 +40,7 @@ const base: FleetInput = {
 const registryFile = "/etc/openmausbot/fleet.json";
 const withRegistry = (workspaces = {}) => ({ [registryFile]: JSON.stringify({ ...emptyRegistry("agentada.cc"), workspaces }) });
 
-describe("openmausbot fleet", () => {
+describe("pnpm omb fleet", () => {
   it.each([
     { root: true, dryRun: false },
     { root: false, dryRun: false },

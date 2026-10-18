@@ -93,8 +93,8 @@ Linux recipe below remains required before a production deployment.
 Dry-run on any machine, to read what a real run would do:
 
 ```sh
-openmausbot fleet init --domain example.test --dry-run
-openmausbot fleet create acme --admin owner@acme.test --dry-run
+pnpm omb fleet init --domain example.test --dry-run
+pnpm omb fleet create acme --admin owner@acme.test --dry-run
 ```
 
 ## A real server
