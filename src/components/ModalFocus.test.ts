@@ -77,6 +77,19 @@ describe("modal family focus ownership", () => {
     expect(cancel).not.toHaveBeenCalled();
   });
 
+  it("a pending confirmation prevents backdrop presses from moving native focus", () => {
+    const cancel = vi.fn();
+    flushSync(() => root.render(createElement(ConfirmDialog, {
+      open: true, pending: true, title: "Remove?", body: "Please wait", confirmLabel: "Removing…", onCancel: cancel, onConfirm: vi.fn(),
+    })));
+    const dialog = document.querySelector<HTMLElement>('[role="alertdialog"]')!;
+    const press = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+    dialog.parentElement!.dispatchEvent(press);
+    expect(press.defaultPrevented).toBe(true);
+    expect(cancel).not.toHaveBeenCalled();
+    expect(dialog.contains(document.activeElement)).toBe(true);
+  });
+
   it("a Phone connect handoff keeps the destination's focus", () => {
     let open = true;
     const destination = document.createElement("button");

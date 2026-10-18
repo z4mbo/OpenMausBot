@@ -44,7 +44,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-6"
-      onMouseDown={(event) => event.target === event.currentTarget && dismiss()}
+      onMouseDown={(event) => { if (event.target === event.currentTarget) { event.preventDefault(); dismiss(); } }}
     >
       <ModalFocusScope panelRef={dialogRef}><ConfirmDialogCard ref={dialogRef} cancelRef={cancelRef} {...props} /></ModalFocusScope>
     </div>,
