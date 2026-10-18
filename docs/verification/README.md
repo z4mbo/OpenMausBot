@@ -90,6 +90,7 @@ Use only mapped, tested commands:
 - [Activity receipt refresh across bot updates](origin-activity-refresh.md)
 - [Draft domain defaults and bounded legacy workflow repair](origin-draft-domain.md)
 - [Baseline client requests against the Draft backend](origin-backend-compatibility.md)
+- [034 Convex backend reuse and committed evidence integrity](origin-backend-reuse-034.md)
 - [Channels](channels.md)
 - [In-chat team coordination](room-coordination.md)
 - [Chief access to additional teams](team-access.md)

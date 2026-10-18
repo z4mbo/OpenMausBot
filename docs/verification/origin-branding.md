@@ -30,7 +30,9 @@ These names intentionally remain:
 - Copyright/license notices, upstream adoption credits and historical attribution. The npm-package generator and legacy Linux package fixtures still describe their real upstream package identities.
 - The decision relay's exact `KEY_CHECK_STATE.purpose` wire value. Its existing contract fixture refused the renamed Origin value; the producer is restored to the required upstream payload rather than changing that contract assertion.
 
-The first literal inventory and reviewed exclusions are retained in [product-copy-edit-inventory.json](evidence/origin-branding-034/product-copy-edit-inventory.json). Later JSX, CLI/MCP, API parsing and translated-message corrections are recorded by the supplemental inventories and the final [source snapshot](evidence/origin-branding-034/source-snapshot.json). The initial 322 literal spans across 113 files are an intermediate inventory, not a claim that the entire final patch has only those edits.
+The first literal inventory and reviewed exclusions are retained in [product-copy-edit-inventory.json](evidence/origin-branding-034/product-copy-edit-inventory.json). Later JSX, CLI/MCP, API parsing and translated-message corrections are recorded by the supplemental inventories and the historical checkpoint [source snapshot](evidence/origin-branding-034/source-snapshot.json). The initial 322 literal spans across 113 files are an intermediate inventory, not a claim that the entire final patch has only those edits.
+
+The snapshot's recorded artifact-manifest hash beginning `06466dd6` and its self-reference are historical checkpoint values. They are not current manifest or self-hash assertions. The [034 committed-blob integrity review](origin-backend-reuse-034.md) verifies the refreshed 63-payload artifact manifest independently; the captured snapshot itself remains unchanged.
 
 ## Actual visual checks
 
