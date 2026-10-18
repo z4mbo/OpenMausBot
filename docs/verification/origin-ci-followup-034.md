@@ -34,4 +34,11 @@ The [final input comparison](evidence/origin-ci-followup-034/input-reuse-compari
 
 The packet preserves **52 copied files / 723,069 bytes**, verified against the sealed source before and after copying. The manifest lists SHA-256, lengths and raw Git blobs; scoped attributes preserve evidence bytes. Historical source labels and receipt times are unchanged.
 
+Eleven archived source/helper snapshots have a `.txt` suffix so repository
+lint treats them as evidence data. Their payload bytes and hashes are unchanged.
+The manifest maps each current path to `archivedOriginalPath`; nested historical
+reports retain their original filenames. Reproduction restores those names in
+a disposable directory. The pre-push hook rejected the initial unlabelled
+snapshots before any remote ref changed; no lint rule was disabled.
+
 A new freeze must include the fixes and this evidence, followed by **fresh exact-source CI and native packages, a website image with its own source/image receipts, and actual public release/download/feed/site verification**. Reused input evidence does not relabel the old image, qualify a replacement build or complete account, mail, hardware, multi-machine or all-feature acceptance. No new tests, builds, push or production operation was performed for this documentation commit.

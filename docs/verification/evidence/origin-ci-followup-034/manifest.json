@@ -51,28 +51,32 @@
       "gitBlob": "063520ad55bf80aace45d91fb47f96960e35906d"
     },
     {
-      "path": "descriptor/after/local-computer.ts",
+      "path": "descriptor/after/local-computer.ts.txt",
       "bytes": 14840,
       "sha256": "ba6606fe63e8877bb863544c5620c4792c0e54b8847ba334dbe8ca3d5874ed30",
-      "gitBlob": "e04787f4518197faee4e4d7530b23f1d5c56fa3f"
+      "gitBlob": "e04787f4518197faee4e4d7530b23f1d5c56fa3f",
+      "archivedOriginalPath": "descriptor/after/local-computer.ts"
     },
     {
-      "path": "descriptor/after/proxy-paths.ts",
+      "path": "descriptor/after/proxy-paths.ts.txt",
       "bytes": 1360,
       "sha256": "2399322bba2d4c109435b7d3577685e49afac6937c41614f755fbae2337fc660",
-      "gitBlob": "2c43543e944f384588ddc96e41a46613aa5838d7"
+      "gitBlob": "2c43543e944f384588ddc96e41a46613aa5838d7",
+      "archivedOriginalPath": "descriptor/after/proxy-paths.ts"
     },
     {
-      "path": "descriptor/before/local-computer.ts",
+      "path": "descriptor/before/local-computer.ts.txt",
       "bytes": 14585,
       "sha256": "2dea9eb6a2825121335253e803f27f5787f7b12bd09f0b497df61aaca3a08291",
-      "gitBlob": "61e2fc4f33236922a699315c9091cbfdb3a42864"
+      "gitBlob": "61e2fc4f33236922a699315c9091cbfdb3a42864",
+      "archivedOriginalPath": "descriptor/before/local-computer.ts"
     },
     {
-      "path": "descriptor/before/proxy-paths.ts",
+      "path": "descriptor/before/proxy-paths.ts.txt",
       "bytes": 1330,
       "sha256": "3d29da6bedf1bdb638ad37cef98a2455999d89cb02d25abb2e71d2b084dc0b24",
-      "gitBlob": "6b2e6a9390fade8de1b42430914bbae7f1ba773f"
+      "gitBlob": "6b2e6a9390fade8de1b42430914bbae7f1ba773f",
+      "archivedOriginalPath": "descriptor/before/proxy-paths.ts"
     },
     {
       "path": "descriptor/cleanup-observation.json",
@@ -81,10 +85,11 @@
       "gitBlob": "ef10ae9cae812c7d60cabb2f4595cd2524aca8a8"
     },
     {
-      "path": "descriptor/cleanup.mjs",
+      "path": "descriptor/cleanup.mjs.txt",
       "bytes": 1222,
       "sha256": "8c68a4ffaff4b6764d545e2d547d1f31d9fe95b31466d5729b8a53080c443ec5",
-      "gitBlob": "d5aa21d9d0029f035fec99b9b1dc9ba36118f0e8"
+      "gitBlob": "d5aa21d9d0029f035fec99b9b1dc9ba36118f0e8",
+      "archivedOriginalPath": "descriptor/cleanup.mjs"
     },
     {
       "path": "descriptor/copy-manifest.json",
@@ -111,10 +116,11 @@
       "gitBlob": "9be13e437310f9d8a6118918fdd2d633d796f5dd"
     },
     {
-      "path": "descriptor/probe.mjs",
+      "path": "descriptor/probe.mjs.txt",
       "bytes": 5547,
       "sha256": "16b5bcd42d219f1817d7bf35505f580e989923836d3c24c9c35220b5a1f28d3d",
-      "gitBlob": "859248fa53cd2146c517f8724a7fd8dc8ba09fe8"
+      "gitBlob": "859248fa53cd2146c517f8724a7fd8dc8ba09fe8",
+      "archivedOriginalPath": "descriptor/probe.mjs"
     },
     {
       "path": "descriptor/report.json",
@@ -123,10 +129,11 @@
       "gitBlob": "7070a3707f77e2b415e2b9012bcc2abca17bd62d"
     },
     {
-      "path": "descriptor/run.sh",
+      "path": "descriptor/run.sh.txt",
       "bytes": 824,
       "sha256": "37a551ff6331159b764461bf03713f1b3561849ee278928cead7a2b2c3be397a",
-      "gitBlob": "b11e1d133c577f318f2306ad52a5f2735f3025a2"
+      "gitBlob": "b11e1d133c577f318f2306ad52a5f2735f3025a2",
+      "archivedOriginalPath": "descriptor/run.sh"
     },
     {
       "path": "descriptor/runtime-download.json",
@@ -219,10 +226,11 @@
       "gitBlob": "1d52c2f3a4b98f248ec2c42e0515412fe5f73c19"
     },
     {
-      "path": "wire/current-catalog.mjs",
+      "path": "wire/current-catalog.mjs.txt",
       "bytes": 93873,
       "sha256": "4419bf48611a708e26e0a1f10eb9db7e2a98f3078c373819f0d26098e42dafa7",
-      "gitBlob": "727bfb2246a8d2d605b0be7f67ef421eaaea4b8c"
+      "gitBlob": "727bfb2246a8d2d605b0be7f67ef421eaaea4b8c",
+      "archivedOriginalPath": "wire/current-catalog.mjs"
     },
     {
       "path": "wire/delta.log",
@@ -231,10 +239,11 @@
       "gitBlob": "f5733fbedfaf242a81079f88d42ebe0a2d82dd8a"
     },
     {
-      "path": "wire/derive-delta.mjs",
+      "path": "wire/derive-delta.mjs.txt",
       "bytes": 5621,
       "sha256": "ceff0397a02970ef1fd96981c0ef808f68b64ef314efa68aa4cfbb29986a8597",
-      "gitBlob": "d252b5b93d38ca57bbb9fcb283c8a00ddcb86772"
+      "gitBlob": "d252b5b93d38ca57bbb9fcb283c8a00ddcb86772",
+      "archivedOriginalPath": "wire/derive-delta.mjs"
     },
     {
       "path": "wire/green-command.json",
@@ -267,10 +276,11 @@
       "gitBlob": "827b982106daee52a79362543eb4f0e9042280e2"
     },
     {
-      "path": "wire/previous-catalog.mjs",
+      "path": "wire/previous-catalog.mjs.txt",
       "bytes": 93933,
       "sha256": "923ff6f3d24c8d197429ed0e28a715fc0bb037f4f9b2caf36b5725ddd4023786",
-      "gitBlob": "444e28baefaeb6e9e8395ea35841f47c0b1c878a"
+      "gitBlob": "444e28baefaeb6e9e8395ea35841f47c0b1c878a",
+      "archivedOriginalPath": "wire/previous-catalog.mjs"
     },
     {
       "path": "wire/red-command.json",
@@ -303,10 +313,11 @@
       "gitBlob": "bc5c61f89a260e3cc904823892813dcfbb89e35c"
     },
     {
-      "path": "wire/run-tests.cjs",
+      "path": "wire/run-tests.cjs.txt",
       "bytes": 1552,
       "sha256": "d28f5b97e0bf0b8b7d35d1ec6c742e16b8c70ec7ce8b5d31fba47106718571c9",
-      "gitBlob": "0c27ffe3d88a2bae2216ee95d2fa8e720132049e"
+      "gitBlob": "0c27ffe3d88a2bae2216ee95d2fa8e720132049e",
+      "archivedOriginalPath": "wire/run-tests.cjs"
     },
     {
       "path": "wire/update-command.json",
@@ -332,5 +343,79 @@
       "sha256": "b8004799e5fabe03a99d7e498a9bd11f5f7489ee340ac0fc5decfe4e3e56ead9",
       "gitBlob": "6748210b6e73fed7f3b36afa339e7837a3a0e3d5"
     }
-  ]
+  ],
+  "evidenceDataLabels": {
+    "changedAt": "2026-10-18T23:11:01.370Z",
+    "beforeLabelingManifestSha256": "40c8d01f67dbcd6890c69f6f7315ae425e5e14f2dc81122e49b4bba24265d572",
+    "payloadBytesUnchanged": true,
+    "qualification": "Archived source/helper snapshots are data, stored with .txt suffix. Nested historical reports and manifests retain their original filenames. Restore archivedOriginalPath names only in a disposable reproduction directory; current locations are in this manifest.",
+    "files": [
+      {
+        "from": "descriptor/after/local-computer.ts",
+        "to": "descriptor/after/local-computer.ts.txt",
+        "bytes": 14840,
+        "sha256": "ba6606fe63e8877bb863544c5620c4792c0e54b8847ba334dbe8ca3d5874ed30"
+      },
+      {
+        "from": "descriptor/after/proxy-paths.ts",
+        "to": "descriptor/after/proxy-paths.ts.txt",
+        "bytes": 1360,
+        "sha256": "2399322bba2d4c109435b7d3577685e49afac6937c41614f755fbae2337fc660"
+      },
+      {
+        "from": "descriptor/before/local-computer.ts",
+        "to": "descriptor/before/local-computer.ts.txt",
+        "bytes": 14585,
+        "sha256": "2dea9eb6a2825121335253e803f27f5787f7b12bd09f0b497df61aaca3a08291"
+      },
+      {
+        "from": "descriptor/before/proxy-paths.ts",
+        "to": "descriptor/before/proxy-paths.ts.txt",
+        "bytes": 1330,
+        "sha256": "3d29da6bedf1bdb638ad37cef98a2455999d89cb02d25abb2e71d2b084dc0b24"
+      },
+      {
+        "from": "descriptor/cleanup.mjs",
+        "to": "descriptor/cleanup.mjs.txt",
+        "bytes": 1222,
+        "sha256": "8c68a4ffaff4b6764d545e2d547d1f31d9fe95b31466d5729b8a53080c443ec5"
+      },
+      {
+        "from": "descriptor/probe.mjs",
+        "to": "descriptor/probe.mjs.txt",
+        "bytes": 5547,
+        "sha256": "16b5bcd42d219f1817d7bf35505f580e989923836d3c24c9c35220b5a1f28d3d"
+      },
+      {
+        "from": "descriptor/run.sh",
+        "to": "descriptor/run.sh.txt",
+        "bytes": 824,
+        "sha256": "37a551ff6331159b764461bf03713f1b3561849ee278928cead7a2b2c3be397a"
+      },
+      {
+        "from": "wire/current-catalog.mjs",
+        "to": "wire/current-catalog.mjs.txt",
+        "bytes": 93873,
+        "sha256": "4419bf48611a708e26e0a1f10eb9db7e2a98f3078c373819f0d26098e42dafa7"
+      },
+      {
+        "from": "wire/derive-delta.mjs",
+        "to": "wire/derive-delta.mjs.txt",
+        "bytes": 5621,
+        "sha256": "ceff0397a02970ef1fd96981c0ef808f68b64ef314efa68aa4cfbb29986a8597"
+      },
+      {
+        "from": "wire/previous-catalog.mjs",
+        "to": "wire/previous-catalog.mjs.txt",
+        "bytes": 93933,
+        "sha256": "923ff6f3d24c8d197429ed0e28a715fc0bb037f4f9b2caf36b5725ddd4023786"
+      },
+      {
+        "from": "wire/run-tests.cjs",
+        "to": "wire/run-tests.cjs.txt",
+        "bytes": 1552,
+        "sha256": "d28f5b97e0bf0b8b7d35d1ec6c742e16b8c70ec7ce8b5d31fba47106718571c9"
+      }
+    ]
+  }
 }
