@@ -1,0 +1,122 @@
+import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { normalizePath } from "vite";
+import { chromium } from "../node_modules/.pnpm/playwright@1.64.1/node_modules/playwright/index.mjs";
+import { launchVerificationServer } from "../scripts/control-omb.ts";
+import { mountPreview, REPO_ROOT } from "../scripts/testing/preview-fixture.ts";
+
+const baseline = "bca64e0a72e5d3fd412695d9aa8d47d1913e6a0d";
+const current = execFileSync("git", ["rev-parse", "HEAD"], { cwd: REPO_ROOT, encoding: "utf8" }).trim();
+const sourcePaths = ["src/components/Sidebar.tsx", "src/components/SidebarFooterNav.tsx", "src/components/UpdateIndicator.tsx", "src/styles.css"];
+const output = join(REPO_ROOT, ".omb-scratch", "footer-single-row-proof");
+await mkdir(output, { recursive: true });
+const fixture = await launchVerificationServer();
+const previews = [];
+const sources = {};
+const cases = [];
+const errors = [];
+const submissions = [];
+let browser;
+try {
+  for (const version of ["before", "after"]) {
+    const frozen = new Map();
+    sources[version] = {};
+    for (const path of sourcePaths) {
+      const source = version === "before" ? execFileSync("git", ["show", `${baseline}:${path}`], { cwd: REPO_ROOT, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 }) : await readFile(join(REPO_ROOT, path), "utf8");
+      sources[version][path] = createHash("sha256").update(source).digest("hex");
+      frozen.set(normalizePath(join(REPO_ROOT, path)), source);
+    }
+    previews.push(await mountPreview(fixture, {
+      entry: "/scripts/testing/origin-header-preview.tsx", route: "/__origin-header.html", title: `Synthetic Origin footer ${version}`, hmr: false,
+      cacheDir: join(fixture.info.dataDir, `vite-footer-${version}`),
+      plugins: [{ name: "frozen-single-row-footer", enforce: "pre", load(id) { return frozen.get(normalizePath(id.split("?")[0])); } }],
+      aliases: [
+        { find: /^@\/lib\/origin-cloud$/, replacement: fileURLToPath(new URL("../scripts/testing/origin-header-cloud.ts", import.meta.url)) },
+        { find: /^@\/lib\/interface-mode$/, replacement: fileURLToPath(new URL("../scripts/testing/origin-header-mode.ts", import.meta.url)) },
+        { find: /^@\//, replacement: `${join(REPO_ROOT, "src").replaceAll("\\", "/")}/` },
+      ],
+      extraRoutes: [{ path: "/__origin-header-fixture.json", handler: (_request, response) => { response.setHeader("content-type", "application/json"); response.end(JSON.stringify({ version, baseline, sourceHashes: sources[version], synthetic: true })); } }],
+    }));
+  }
+  browser = await chromium.launch({ executablePath: "C:/Users/aless/AppData/Local/ms-playwright/chromium-1248/chrome-win64/chrome.exe", headless: true });
+  for (const config of [
+    ...[240, 272, 375].flatMap(width => ["dark", "light"].map(theme => ({ width, theme, optional: false }))),
+    { width: 240, theme: "dark", optional: true },
+    { width: 375, theme: "light", optional: true },
+  ]) for (const version of ["before", "after"]) {
+    const mobile = config.width === 375;
+    const context = await browser.newContext({ viewport: { width: mobile ? 375 : 1280, height: mobile ? 812 : 720 }, reducedMotion: "reduce" });
+    if (config.optional) await context.addInitScript(() => {
+      let bridge;
+      Object.defineProperty(window, "ogb", { configurable: true, get: () => bridge, set: value => {
+        bridge = { ...value,
+          cloudAccount: { state: async () => ({ status: "signed-out" }), onState: () => () => {}, files: { state: async () => ({ phase: "ready" }), onState: () => () => {} } },
+          updater: { onState: callback => { callback({ status: "downloading", percent: 50, version: "synthetic" }); return () => {}; }, check: async () => { throw Error("Synthetic updater disabled"); }, install: async () => { throw Error("Synthetic updater disabled"); } },
+        };
+      } });
+    });
+    const page = await context.newPage();
+    page.on("pageerror", error => errors.push(error.message));
+    page.on("request", request => { if (!["GET", "HEAD"].includes(request.method())) submissions.push({ method: request.method(), url: request.url() }); });
+    const url = `${previews[version === "before" ? 0 : 1].previewUrl}?platform=win&width=${mobile ? 320 : config.width}&mode=advanced&density=comfortable&theme=${config.theme}`;
+    await page.goto(url, { waitUntil: "domcontentloaded" });
+    await page.locator('[data-tour="server-switcher"]').filter({ hasText: "This computer" }).waitFor();
+    if (config.optional) {
+      await page.locator('[data-sidebar-nav="files"]').waitFor();
+      await page.locator('[data-update-indicator="downloading"]').waitFor();
+    }
+    await page.evaluate(async () => { await document.fonts.ready; await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))); });
+    const proof = await page.evaluate(() => {
+      const sidebar = document.querySelector('[data-sidebar]');
+      const row = document.querySelector('[data-sidebar-footer-actions]');
+      const rect = element => { const box = element.getBoundingClientRect(); return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height }; };
+      const bounds = rect(sidebar);
+      const controls = [...row.querySelectorAll('button')].map(button => ({ label: button.getAttribute('aria-label'), ...rect(button) }));
+      return { sidebar: bounds, row: rect(row), controls,
+        contained: controls.every(box => box.left >= bounds.left && box.right <= bounds.right),
+        singleRow: controls.every(box => Math.abs(box.top + box.height / 2 - controls[0].top - controls[0].height / 2) < 0.1),
+        minimumWidth: Math.min(...controls.map(box => box.width)),
+        disjoint: controls.every((a, index) => controls.slice(index + 1).every(b => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top)),
+        documentOverflow: document.documentElement.scrollWidth > innerWidth,
+      };
+    });
+    assert.equal(proof.contained, true);
+    assert.equal(proof.disjoint, true);
+    assert.equal(proof.documentOverflow, false);
+    assert.equal(proof.controls.length, config.optional ? 8 : 6);
+    if (version === "after") {
+      assert.equal(proof.singleRow, true);
+      assert.ok(proof.minimumWidth >= 24, JSON.stringify(proof));
+    } else if (config.width === 240) assert.equal(proof.singleRow, false);
+    const file = `${version}-${config.width}-${config.theme}${config.optional ? "-optional" : ""}.png`;
+    await page.screenshot({ path: join(output, file), clip: { x: 0, y: (mobile ? 812 : 720) - 150, width: Math.min(mobile ? 375 : 1280, proof.sidebar.width + 60), height: 150 } });
+    if (version === "after") {
+      await page.getByRole("button", { name: "Routines", exact: true }).focus();
+      const order = [];
+      for (let index = 0; index < proof.controls.length; index++) {
+        order.push(await page.evaluate(() => document.activeElement?.getAttribute("aria-label")));
+        await page.keyboard.press("Tab");
+      }
+      assert.deepEqual(order, proof.controls.map(control => control.label));
+      proof.keyboardOrder = order;
+      await page.getByRole("button", { name: "Apps", exact: true }).click();
+      assert.equal(await page.getByRole("button", { name: "Apps", exact: true }).getAttribute("aria-pressed"), "true");
+      proof.appsSelected = true;
+    }
+    cases.push({ ...config, version, url, file, proof });
+    await context.close();
+    await writeFile(join(output, "in-progress.json"), JSON.stringify({ cases, errors, submissions }, null, 2) + "\n");
+  }
+  assert.deepEqual(errors, []);
+  assert.deepEqual(submissions, []);
+  await writeFile(join(output, "report.json"), JSON.stringify({ baseline, current, layoutFix: "27ab9b4266a0628790d591c94665147409889779", synthetic: true, productionDataUsed: false, packagedAcceptance: false, nativeUpdaterExecution: false, syntheticOptionalBridges: true, sourceHashes: sources, browser: browser.version(), fixture: fixture.info, cases, errors, submissions }, null, 2) + "\n");
+  console.log(JSON.stringify({ passed: true, cases: cases.length, beforeTwoRow: cases.filter(c => c.version === "before" && !c.proof.singleRow).length, afterSingleRow: cases.filter(c => c.version === "after" && c.proof.singleRow).length }));
+} finally {
+  await browser?.close();
+  for (const preview of previews.reverse()) await preview.close();
+  await fixture.close();
+}

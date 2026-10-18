@@ -70,6 +70,7 @@ Use only mapped, tested commands:
 - [Sidebar account and computer controls](sidebar-header-fit.md) ([retained evidence](evidence/origin-header-fit-029/report.json))
 - [Origin server connections without upstream billing and readable narrow server rows](origin-desktop-cloud-policy.md)
 - [Sidebar footer containment and keyboard access](sidebar-footer-fit.md)
+- [Sidebar footer icons in one row](sidebar-footer-single-row.md)
 - [Draft-first boards and default issue creation](origin-draft-defaults.md)
 - [Issue cards remain visible during rapid dragging](origin-issue-drag.md)
 - [Issue dragging after permission or project changes](origin-issue-drag-permission.md)

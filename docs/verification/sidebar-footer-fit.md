@@ -1,5 +1,9 @@
 # Sidebar footer containment and keyboard access
 
+This page preserves the 0.2.11 containment work and its original two-row design.
+The current requested layout uses [one footer row](sidebar-footer-single-row.md),
+with separate before/after evidence; the historical collection below is unchanged.
+
 The P2 defect is a concrete layout overflow: six 46px footer controls and their
 groups require more space than a 240px or 272px expanded sidebar provides.
 The Store button paints outside the sidebar; in a compact mobile drawer it can
