@@ -166,4 +166,26 @@ describe("the anchored menu in a document", () => {
     await act(async () => document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })));
     expect(sheet()).toBeNull();
   });
+
+  it("positions a portalled submenu when the main menu opens below its trigger", async () => {
+    await act(async () => root.render(createElement(SidebarPopoverMenu, { placement: "below", items, ariaLabel: "You", renderTrigger: () => "You" })));
+    await act(async () => trigger().click());
+    const support = host.querySelector<HTMLButtonElement>('[data-menu-key="Help and support"]')!;
+    await act(async () => support.click());
+    await flush();
+    expect(submenu()!.style.visibility).not.toBe("hidden");
+    expect(submenu()!.style.left).not.toBe("0px");
+    expect(document.activeElement).toBe(submenu()!.querySelector('[role="menuitem"]'));
+  });
+
+  it("keeps a below menu open while pressing its portalled submenu", async () => {
+    await act(async () => root.render(createElement(SidebarPopoverMenu, { placement: "below", items, ariaLabel: "You", renderTrigger: () => "You" })));
+    await act(async () => trigger().click());
+    await act(async () => host.querySelector<HTMLButtonElement>('[data-menu-key="Help and support"]')!.click());
+    await act(async () => submenu()!.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })));
+    expect(submenu()).not.toBeNull();
+    await act(async () => [...submenu()!.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')][1]!.click());
+    expect(picked).toEqual(["About"]);
+    expect(host.querySelector('[role="menu"]')).toBeNull();
+  });
 });
