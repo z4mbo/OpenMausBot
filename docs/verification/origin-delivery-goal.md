@@ -1,6 +1,14 @@
 # Origin inspection and online delivery
 
-## Active 0.2.13 inspection and delivery batch
+## Active inspection after published 0.2.13
+
+Origin **0.2.13** is published from frozen source `1483a7d76fb092b5ef6860afc5ffb520fc4e7707`. The [035 receipt](evidence/origin-delivery-035/delivery-receipt.json) and [delivery report](origin-delivery.md#0213-delivery) record GitHub publication at `2026-10-18T23:49:43Z`, website promotion at `2026-10-18T23:50:28.6035760Z` and verified matching Windows/Mac downloads and feeds. This completed delivery reuses the existing deployed backend; it did not repeat deployment, migrations or mail activation.
+
+Central Brevo configuration and account relay readiness retain the [031 receipt](evidence/origin-delivery-031/delivery-receipt.json)'s original verification time, `2026-10-18T17:05:26.745Z`; 035 did not recheck provider readiness or send a real recipient email. Provider acceptance and inbox delivery remain unverified. Windows remains unsigned; Mac remains ad hoc signed and unnotarized with manual updates. Installed desktop GUI/updater, physical Mac, real-provider/hardware, TURN and the [six finite acceptance batches](origin-feature-acceptance-034.md#finite-unresolved-acceptance) remain open. The full inspection goal and daily upstream review at **06:00 Europe/Rome** continue after publication.
+
+### Historical 034 prepublication instructions
+
+The following instructions and public 0.2.11 status describe the checkpoint before verified delivery 035; they are retained as history, not the current release status.
 
 The user requested a finite, productive pass over every component and feature,
 including rapid issue dragging, Origin-only product branding, removal of unrelated
@@ -19,6 +27,8 @@ Current public 0.2.11 remains unchanged until the final verified publication.
 
 ## Held 0.2.12 replacement cycle 033
 
+This is the historical 033 checkpoint. Its pending delivery requirements and public 0.2.11 status predate the completed 035 publication above.
+
 The [033 candidate](origin-candidate-033.md) integrates the project-list cache adaptation, retains the earlier signup/credential fixes and has four current shared notes. The [032 freeze](origin-candidate-032.md) failed CI and remains unpublished; its original native/private proofs are retained separately. Integration checkpoint `f2ad2a15cb4d61cb49b678a74b53c7b9b063e253` has 317 focused root passes and app/server types, plus an actual stable full root client/shared run of 5,983 passes across 564 files. The [sanitized checkpoint](evidence/origin-candidate-033.json) records its source, log identities, start/end checks and no-continuous-monitoring limit. Final source/tag, fresh complete CI/native, fifteen assets/feeds, website and public acceptance all require new actual evidence. The product register preserves 72 rows and adds one P2 cache row, for 73; test-only Comms HTTP hardening is separate. Current public 0.2.11 and original backend/mail times remain unchanged. Completing the replacement delivery will not close the continuing inspection or daily 06:00 Europe/Rome review.
 
 ## Completed 0.2.11 cycle
@@ -26,6 +36,8 @@ The [033 candidate](origin-candidate-033.md) integrates the project-list cache a
 The [0.2.11 delivery](origin-delivery.md#0211-delivery) and [permanent receipt](evidence/origin-delivery-031/delivery-receipt.json) record verified GitHub, website, backend and matching Windows/Mac publication from frozen source `697e9f0adacd7d90af9b3f190ab5c4df978b48f1`. Exact-source CI and native packaging succeeded; five storage migrations and three Draft repair phases completed before temporary-key revocation, mail configuration and client publication. Central Brevo configuration and account relay readiness are confirmed; no recipient email was sent and provider acceptance/inbox delivery remain unverified. The actual downloaded Windows resource smoke and sixteen private website cases remain distinct from public four-route acceptance. Physical Mac, signing/notarization, provider/hardware, TURN and broader inspection limits remain open. The goal and daily upstream review continue at 06:00 Europe/Rome; completing this release does not close the ongoing inspection.
 
 ## Historical 0.2.10 cycle
+
+The following checkpoint predates the 031 backend mail activation; its pending-backend statement is historical.
 
 The [0.2.10 delivery](origin-delivery.md#0210-delivery) and [permanent receipt](evidence/origin-delivery-030/delivery-receipt.json) record completed website, backend and matching Windows/Mac publication at frozen source `0eb372a94715527931043a1b6d8c02a50194dbb0`. The local checkpoint is 5,960 client/shared, 515 touched server/shared passes with five existing skips, 175 backend, fourteen site and 121 guard/release/deployment cases. The free Brevo account now has completed phone and email verification. After explicit activation approval, all four DNS records were published while preserving the nine existing website A records. Brevo confirms origin.imbored.fun is authenticated and Origin <invites@origin.imbored.fun> is a verified sender. The standard account API key is active until 2027-10-18 and is stored privately outside the repository. Backend email configuration is still pending the next verified delivery; public invitation links remain available for manual sharing. No real recipient email has been sent, and provider acceptance and inbox delivery are not established. See the [sanitized provider setup record](evidence/origin-mail-provider-031.json). The broad inspection and daily upstream review remain active at 06:00 Europe/Rome; this cycle does not close the documented physical/provider/native acceptance limits.
 

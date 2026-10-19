@@ -1,5 +1,13 @@
 # Public invitations and central email
 
+## Current status after delivery 035
+
+Origin **0.2.13** is published from frozen source `1483a7d76fb092b5ef6860afc5ffb520fc4e7707`. The [0.2.13 delivery](origin-delivery.md#0213-delivery) and [035 receipt](evidence/origin-delivery-035/delivery-receipt.json) record verified GitHub, website and Windows/Mac publication. This release reuses the existing deployed backend; it did not perform another backend deployment or mail activation.
+
+Central Brevo configuration and account relay readiness were confirmed at `2026-10-18T17:05:26.745Z` in the [031 receipt](evidence/origin-delivery-031/delivery-receipt.json). The 035 receipt carries that historical readiness forward without rechecking the provider. No real recipient email was sent in either delivery; provider acceptance and inbox arrival remain unverified. Persistent invitation acceptance with two authenticated clients, native clipboard and packaged/native/hardware acceptance retain the limits in the [feature acceptance register](origin-feature-acceptance-034.md#finite-unresolved-acceptance).
+
+## Historical invitation rollout
+
 The invitation fixes address the desktop localhost link and the website’s lost join confirmation. They are included in published 0.2.10, bound to frozen source `0eb372a94715527931043a1b6d8c02a50194dbb0`; the [0.2.10 delivery](origin-delivery.md#0210-delivery) and [permanent receipt](evidence/origin-delivery-030/delivery-receipt.json) record the matching backend/site/client rollout. Held 0.2.8 remains frozen at `63c38a2cf5e22166efafb7e727b562988e5b084c`; its draft and private builds remain unpublished. Held 0.2.9 also remains immutable and unpublished. Original source-qualified invitation captures below retain their tested identities.
 
 ## Reproduced defects
@@ -39,6 +47,8 @@ The synthetic website shell supplies the existing compiled Next Inter Latin font
 
 ## Configuration and remaining limits
 
+The next paragraph preserves the historical check before the 031 mail activation; its absent-configuration status is superseded by the current status above.
+
 The backend defaults to Resend, using `RESEND_API_KEY` and a verified `INVITE_FROM_EMAIL` sender. The names-only public-deployment check at `2026-10-18T10:46:40.988Z` found both absent; it read no credential values. No usable invitation-mail configuration has been activated during this follow-up, and no real recipient email has been sent. Provider acceptance means HTTP acceptance, not inbox delivery.
 
 ### Optional Brevo transport
@@ -48,6 +58,8 @@ Commit `fc00c55f3283576e3b8e0bd58106ddd0ce6b247a` adds explicit backend-only `OR
 The existing `workspaces:sendEmailInvite` action and wire results are unchanged. Authorization, project/role checks and the indexed creator quota still precede the single persisted invitation. Only the selected provider receives one plaintext request with a 15-second abort signal. Rejections, network errors and timeouts return sanitized `failed` status, preserving the same manual-share link. There is no automatic retry or fallback after an uncertain provider outcome. The request matches Brevo's [transactional email API](https://developers.brevo.com/docs/send-a-transactional-email).
 
 The initial expanded invitation suite reproduced 21 failures with 17 passes against the Resend-only implementation. The final suite adds authorization/rate-limit variants and passes all 41 cases, including Brevo HTTP acceptance, sender validation, both-provider authorization/quota behavior and no fallback after failure. This is feature/regression coverage, not a count of 21 separate production bugs. The original environment checks reproduced three failures; the corrected config/actual-installer suite passes 217 cases with two existing skips. The complete fake-Claude suite passes 203 cases with three existing skips. Focused isolated CLI-probe/engine checks pass six cases; their other 202 cases were filtered out. Backend/server types and full lint pass in the isolated implementation worktree. After inclusion in the root candidate, its complete backend run also passes 175 cases across 19 files. [Sanitized mail verification](evidence/origin-invite-mail-029.json) retains the source mapping, test counts and log hashes.
+
+The next paragraph preserves the provider-setup checkpoint before the 031 backend activation; its pending-backend statement is historical.
 
 The free Brevo account now has completed phone and email verification. After explicit activation approval, all four DNS records were published while preserving the nine existing website A records. Brevo confirms origin.imbored.fun is authenticated and Origin <invites@origin.imbored.fun> is a verified sender. The standard account API key is active until 2027-10-18 and is stored privately outside the repository. Backend email configuration is still pending the next verified delivery; public invitation links remain available for manual sharing. No real recipient email has been sent, and provider acceptance and inbox delivery are not established. See the [sanitized provider setup record](evidence/origin-mail-provider-031.json). Source/provider/authorization/quota evidence remains separate from real recipient or mailbox acceptance.
 
