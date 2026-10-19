@@ -1,0 +1,15 @@
+{
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "run": 39182338260,
+  "initialAttempt": 1,
+  "initialFailedJob": 117838173841,
+  "requestedJobs": [
+    "vitest (windows-latest, shard 4/4)",
+    "dependent CI aggregator"
+  ],
+  "fullMatrixRerun": false,
+  "requestedAt": "2026-10-19T01:28:30.943Z",
+  "reason": "One SSE predicate timed out after 10000ms. The unchanged two-test file passes locally; independent source review found the provider path unchanged from public13. Exact runtime cause is unproved and remains recorded. A single targeted retry is diagnostic, not a claimed source fix.",
+  "initialFailureRawLogSha256": "f8267dadff25d090fc1bc131e5dd6990da53799b21430479c7874a65befb6a9f",
+  "sourceChanges": false
+}

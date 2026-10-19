@@ -1,0 +1,32 @@
+{
+  "platform": "windows",
+  "archive": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\raw\\origin-windows.zip",
+  "actualArchiveHashVerified": true,
+  "destination": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\artifacts\\0.2.14\\windows",
+  "entries": [
+    {
+      "name": "latest.yml",
+      "bytes": 1192,
+      "compressedBytes": 607,
+      "externalAttributes": -2118778848
+    },
+    {
+      "name": "Origin-0.2.14-setup.exe",
+      "bytes": 269477444,
+      "compressedBytes": 269116496,
+      "externalAttributes": -2118778848
+    },
+    {
+      "name": "Origin-0.2.14-x64.zip",
+      "bytes": 370055045,
+      "compressedBytes": 369196867,
+      "externalAttributes": -2118778848
+    },
+    {
+      "name": "Origin-0.2.14-setup.exe.blockmap",
+      "bytes": 278442,
+      "compressedBytes": 278527,
+      "externalAttributes": -2118778848
+    }
+  ]
+}

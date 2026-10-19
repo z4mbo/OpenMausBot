@@ -1,0 +1,439 @@
+﻿2026-10-19T00:50:05.3615576Z Current runner version: '2.337.0'
+2026-10-19T00:50:05.3638533Z ##[group]Runner Image Provisioner
+2026-10-19T00:50:05.3639276Z Hosted Compute Agent
+2026-10-19T00:50:05.3639785Z Version: 20261002.596
+2026-10-19T00:50:05.3640278Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-19T00:50:05.3640894Z Build Date: 2026-10-02T22:28:27Z
+2026-10-19T00:50:05.3641513Z Worker ID: {e36cb798-2998-49b7-ab31-445f70975a03}
+2026-10-19T00:50:05.3642121Z Region: westus3
+2026-10-19T00:50:05.3642606Z Cloud: Azure
+2026-10-19T00:50:05.3643145Z ##[endgroup]
+2026-10-19T00:50:05.3644336Z ##[group]Operating System
+2026-10-19T00:50:05.3644859Z Microsoft Windows Server 2025
+2026-10-19T00:50:05.3645375Z 10.0.26100
+2026-10-19T00:50:05.3645820Z Datacenter
+2026-10-19T00:50:05.3646279Z ##[endgroup]
+2026-10-19T00:50:05.3646741Z ##[group]Runner Image
+2026-10-19T00:50:05.3647270Z Image: windows-2025-vs2026
+2026-10-19T00:50:05.3647836Z Version: 20261007.264.1
+2026-10-19T00:50:05.3649242Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261007.264/images/windows/Windows2025-VS2026-Readme.md
+2026-10-19T00:50:05.3650554Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261007.264
+2026-10-19T00:50:05.3651341Z ##[endgroup]
+2026-10-19T00:50:05.3652443Z ##[group]GITHUB_TOKEN Permissions
+2026-10-19T00:50:05.3654019Z Contents: read
+2026-10-19T00:50:05.3654500Z Metadata: read
+2026-10-19T00:50:05.3655031Z ##[endgroup]
+2026-10-19T00:50:05.3656793Z Secret source: Actions
+2026-10-19T00:50:05.3657610Z Cache mode: write
+2026-10-19T00:50:05.3658166Z Prepare workflow directory
+2026-10-19T00:50:05.3940171Z Prepare all required actions
+2026-10-19T00:50:05.3988782Z Getting action download info
+2026-10-19T00:50:05.6718648Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-10-19T00:50:05.8492331Z Download action repository 'pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3' (SHA:ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3)
+2026-10-19T00:50:06.3155587Z Download action repository 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' (SHA:820762786026740c76f36085b0efc47a31fe5020)
+2026-10-19T00:50:06.5896877Z Complete job name: Windows CUA host smoke
+2026-10-19T00:50:06.8080161Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-10-19T00:50:06.8081593Z with:
+2026-10-19T00:50:06.8081914Z   repository: z4mbo/Origin
+2026-10-19T00:50:06.8085164Z   token: ***
+2026-10-19T00:50:06.8085482Z   ssh-strict: true
+2026-10-19T00:50:06.8085807Z   ssh-user: git
+2026-10-19T00:50:06.8086120Z   persist-credentials: true
+2026-10-19T00:50:06.8086482Z   clean: true
+2026-10-19T00:50:06.8086809Z   sparse-checkout-cone-mode: true
+2026-10-19T00:50:06.8087185Z   fetch-depth: 1
+2026-10-19T00:50:06.8087490Z   fetch-tags: false
+2026-10-19T00:50:06.8087803Z   show-progress: true
+2026-10-19T00:50:06.8088112Z   lfs: false
+2026-10-19T00:50:06.8088403Z   submodules: false
+2026-10-19T00:50:06.8088763Z   set-safe-directory: true
+2026-10-19T00:50:06.8089131Z   allow-unsafe-pr-checkout: false
+2026-10-19T00:50:06.8089684Z ##[endgroup]
+2026-10-19T00:50:07.0971515Z Syncing repository: z4mbo/Origin
+2026-10-19T00:50:07.0973330Z ##[group]Getting Git version info
+2026-10-19T00:50:07.0973909Z Working directory is 'D:\a\Origin\Origin'
+2026-10-19T00:50:07.1562754Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-19T00:50:07.7645671Z git version 2.56.0.windows.2
+2026-10-19T00:50:07.7690937Z ##[endgroup]
+2026-10-19T00:50:07.7703949Z Temporarily overriding HOME='D:\a\_temp\2830e75f-172b-4cc9-b178-7a852e119906' before making global git config changes
+2026-10-19T00:50:07.7705315Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-19T00:50:07.7711864Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Origin\Origin
+2026-10-19T00:50:07.9402034Z Deleting the contents of 'D:\a\Origin\Origin'
+2026-10-19T00:50:07.9407057Z ##[group]Determining repository object format
+2026-10-19T00:50:07.9409001Z ##[endgroup]
+2026-10-19T00:50:07.9410470Z ##[group]Initializing the repository
+2026-10-19T00:50:07.9416691Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\Origin\Origin
+2026-10-19T00:50:08.0560807Z Initialized empty Git repository in D:/a/Origin/Origin/.git/
+2026-10-19T00:50:08.0605000Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/z4mbo/Origin
+2026-10-19T00:50:08.1219118Z ##[endgroup]
+2026-10-19T00:50:08.1219981Z ##[group]Disabling automatic garbage collection
+2026-10-19T00:50:08.1226843Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-19T00:50:08.1549912Z ##[endgroup]
+2026-10-19T00:50:08.1551141Z ##[group]Setting up auth
+2026-10-19T00:50:08.1552015Z Removing SSH command configuration
+2026-10-19T00:50:08.1559693Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-19T00:50:08.1884491Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-19T00:50:09.9886722Z Removing HTTP extra header
+2026-10-19T00:50:09.9895711Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-19T00:50:10.0228990Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-19T00:50:10.5083344Z Removing includeIf entries pointing to credentials config files
+2026-10-19T00:50:10.5093844Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-19T00:50:10.5442664Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-19T00:50:11.0470267Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-19T00:50:11.0809018Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/Origin/Origin/.git.path D:\a\_temp\git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config
+2026-10-19T00:50:11.1195516Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/Origin/Origin/.git/worktrees/*.path D:\a\_temp\git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config
+2026-10-19T00:50:11.1576995Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config
+2026-10-19T00:50:11.1909056Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config
+2026-10-19T00:50:11.2258679Z ##[endgroup]
+2026-10-19T00:50:11.2259355Z ##[group]Fetching the repository
+2026-10-19T00:50:11.2270335Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +3607e350e9e8da5c4c21dde37baf76c91ed9c858:refs/remotes/pull/1/merge
+2026-10-19T00:50:14.6289768Z From https://github.com/z4mbo/Origin
+2026-10-19T00:50:14.6290860Z  * [new ref]         3607e350e9e8da5c4c21dde37baf76c91ed9c858 -> pull/1/merge
+2026-10-19T00:50:14.6331740Z ##[endgroup]
+2026-10-19T00:50:14.6332259Z ##[group]Determining the checkout info
+2026-10-19T00:50:14.6333200Z ##[endgroup]
+2026-10-19T00:50:14.6344705Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-19T00:50:14.6807342Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-19T00:50:14.7132133Z ##[group]Checking out the ref
+2026-10-19T00:50:14.7146523Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force refs/remotes/pull/1/merge
+2026-10-19T00:50:15.7659632Z Updating files:  19% (1378/6935)
+2026-10-19T00:50:15.7881496Z Updating files:  20% (1387/6935)
+2026-10-19T00:50:15.8108743Z Updating files:  21% (1457/6935)
+2026-10-19T00:50:15.8244321Z Updating files:  22% (1526/6935)
+2026-10-19T00:50:15.8379961Z Updating files:  23% (1596/6935)
+2026-10-19T00:50:15.8520066Z Updating files:  24% (1665/6935)
+2026-10-19T00:50:15.8654845Z Updating files:  25% (1734/6935)
+2026-10-19T00:50:15.8853606Z Updating files:  26% (1804/6935)
+2026-10-19T00:50:15.9119011Z Updating files:  27% (1873/6935)
+2026-10-19T00:50:15.9426404Z Updating files:  28% (1942/6935)
+2026-10-19T00:50:15.9667050Z Updating files:  29% (2012/6935)
+2026-10-19T00:50:15.9945128Z Updating files:  30% (2081/6935)
+2026-10-19T00:50:16.0075958Z Updating files:  31% (2150/6935)
+2026-10-19T00:50:16.0262940Z Updating files:  32% (2220/6935)
+2026-10-19T00:50:16.0493081Z Updating files:  33% (2289/6935)
+2026-10-19T00:50:16.0728348Z Updating files:  34% (2358/6935)
+2026-10-19T00:50:16.0943194Z Updating files:  35% (2428/6935)
+2026-10-19T00:50:16.1193274Z Updating files:  36% (2497/6935)
+2026-10-19T00:50:16.1355001Z Updating files:  37% (2566/6935)
+2026-10-19T00:50:16.1879530Z Updating files:  38% (2636/6935)
+2026-10-19T00:50:16.2247002Z Updating files:  39% (2705/6935)
+2026-10-19T00:50:16.2554098Z Updating files:  40% (2774/6935)
+2026-10-19T00:50:16.2874760Z Updating files:  41% (2844/6935)
+2026-10-19T00:50:16.3113470Z Updating files:  42% (2913/6935)
+2026-10-19T00:50:16.3360622Z Updating files:  43% (2983/6935)
+2026-10-19T00:50:16.3593726Z Updating files:  44% (3052/6935)
+2026-10-19T00:50:16.3785889Z Updating files:  45% (3121/6935)
+2026-10-19T00:50:16.3974786Z Updating files:  46% (3191/6935)
+2026-10-19T00:50:16.4161896Z Updating files:  47% (3260/6935)
+2026-10-19T00:50:16.4464942Z Updating files:  48% (3329/6935)
+2026-10-19T00:50:16.4690150Z Updating files:  49% (3399/6935)
+2026-10-19T00:50:16.4825056Z Updating files:  50% (3468/6935)
+2026-10-19T00:50:16.4961447Z Updating files:  51% (3537/6935)
+2026-10-19T00:50:16.5104585Z Updating files:  52% (3607/6935)
+2026-10-19T00:50:16.5234558Z Updating files:  53% (3676/6935)
+2026-10-19T00:50:16.5388547Z Updating files:  54% (3745/6935)
+2026-10-19T00:50:16.5537516Z Updating files:  55% (3815/6935)
+2026-10-19T00:50:16.5666800Z Updating files:  56% (3884/6935)
+2026-10-19T00:50:16.5792477Z Updating files:  57% (3953/6935)
+2026-10-19T00:50:16.5921768Z Updating files:  58% (4023/6935)
+2026-10-19T00:50:16.6072511Z Updating files:  59% (4092/6935)
+2026-10-19T00:50:16.8883050Z Updating files:  60% (4161/6935)
+2026-10-19T00:50:17.0584575Z Updating files:  60% (4165/6935)
+2026-10-19T00:50:17.0731588Z Updating files:  61% (4231/6935)
+2026-10-19T00:50:17.0887106Z Updating files:  62% (4300/6935)
+2026-10-19T00:50:17.1030326Z Updating files:  63% (4370/6935)
+2026-10-19T00:50:17.1204595Z Updating files:  64% (4439/6935)
+2026-10-19T00:50:17.1370277Z Updating files:  65% (4508/6935)
+2026-10-19T00:50:17.1519942Z Updating files:  66% (4578/6935)
+2026-10-19T00:50:17.1662326Z Updating files:  67% (4647/6935)
+2026-10-19T00:50:17.1878899Z Updating files:  68% (4716/6935)
+2026-10-19T00:50:17.2017097Z Updating files:  69% (4786/6935)
+2026-10-19T00:50:17.2191491Z Updating files:  70% (4855/6935)
+2026-10-19T00:50:17.2339462Z Updating files:  71% (4924/6935)
+2026-10-19T00:50:17.2468014Z Updating files:  72% (4994/6935)
+2026-10-19T00:50:17.2602153Z Updating files:  73% (5063/6935)
+2026-10-19T00:50:17.2778521Z Updating files:  74% (5132/6935)
+2026-10-19T00:50:17.2907282Z Updating files:  75% (5202/6935)
+2026-10-19T00:50:17.3061297Z Updating files:  76% (5271/6935)
+2026-10-19T00:50:17.3187080Z Updating files:  77% (5340/6935)
+2026-10-19T00:50:17.3322346Z Updating files:  78% (5410/6935)
+2026-10-19T00:50:17.3431689Z Updating files:  79% (5479/6935)
+2026-10-19T00:50:17.3556962Z Updating files:  80% (5548/6935)
+2026-10-19T00:50:17.3694607Z Updating files:  81% (5618/6935)
+2026-10-19T00:50:17.3830531Z Updating files:  82% (5687/6935)
+2026-10-19T00:50:17.3970366Z Updating files:  83% (5757/6935)
+2026-10-19T00:50:17.4106830Z Updating files:  84% (5826/6935)
+2026-10-19T00:50:17.4238901Z Updating files:  85% (5895/6935)
+2026-10-19T00:50:17.4368946Z Updating files:  86% (5965/6935)
+2026-10-19T00:50:17.4503348Z Updating files:  87% (6034/6935)
+2026-10-19T00:50:17.4637471Z Updating files:  88% (6103/6935)
+2026-10-19T00:50:17.4761768Z Updating files:  89% (6173/6935)
+2026-10-19T00:50:17.4887464Z Updating files:  90% (6242/6935)
+2026-10-19T00:50:17.5022497Z Updating files:  91% (6311/6935)
+2026-10-19T00:50:17.5158933Z Updating files:  92% (6381/6935)
+2026-10-19T00:50:17.5276083Z Updating files:  93% (6450/6935)
+2026-10-19T00:50:17.5389754Z Updating files:  94% (6519/6935)
+2026-10-19T00:50:17.5510393Z Updating files:  95% (6589/6935)
+2026-10-19T00:50:17.5620744Z Updating files:  96% (6658/6935)
+2026-10-19T00:50:17.5736073Z Updating files:  97% (6727/6935)
+2026-10-19T00:50:17.6142767Z Updating files:  98% (6797/6935)
+2026-10-19T00:50:17.6327356Z Updating files:  99% (6866/6935)
+2026-10-19T00:50:17.6327761Z Updating files: 100% (6935/6935)
+2026-10-19T00:50:17.6328047Z Updating files: 100% (6935/6935), done.
+2026-10-19T00:50:17.6465377Z Note: switching to 'refs/remotes/pull/1/merge'.
+2026-10-19T00:50:17.6465716Z 
+2026-10-19T00:50:17.6465978Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-19T00:50:17.6466504Z changes and commit them, and you can discard any commits you make in this
+2026-10-19T00:50:17.6467010Z state without impacting any branches by switching back to a branch.
+2026-10-19T00:50:17.6467321Z 
+2026-10-19T00:50:17.6467520Z If you want to create a new branch to retain commits you create, you may
+2026-10-19T00:50:17.6468022Z do so (now or later) by using -c with the switch command. Example:
+2026-10-19T00:50:17.6468347Z 
+2026-10-19T00:50:17.6468423Z   git switch -c <new-branch-name>
+2026-10-19T00:50:17.6468551Z 
+2026-10-19T00:50:17.6468621Z Or undo this operation with:
+2026-10-19T00:50:17.6468742Z 
+2026-10-19T00:50:17.6468802Z   git switch -
+2026-10-19T00:50:17.6469143Z 
+2026-10-19T00:50:17.6469311Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-19T00:50:17.6469535Z 
+2026-10-19T00:50:17.6469806Z HEAD is now at 3607e35 Merge ab0cd72b4c2f004c1015adca034472241569c04b into 04da4858354d5a6c5b783e1fe45c05b2509dc5fb
+2026-10-19T00:50:17.6745650Z ##[endgroup]
+2026-10-19T00:50:17.7201719Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-19T00:50:17.7509662Z 3607e350e9e8da5c4c21dde37baf76c91ed9c858
+2026-10-19T00:50:17.7885584Z ##[group]Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3
+2026-10-19T00:50:17.7885951Z with:
+2026-10-19T00:50:17.7886107Z   dest: ~/setup-pnpm
+2026-10-19T00:50:17.7886269Z   run_install: null
+2026-10-19T00:50:17.7886433Z   cache: false
+2026-10-19T00:50:17.7886602Z   cache_dependency_path: pnpm-lock.yaml
+2026-10-19T00:50:17.7886822Z   package_json_file: package.json
+2026-10-19T00:50:17.7887023Z   standalone: false
+2026-10-19T00:50:17.7887173Z ##[endgroup]
+2026-10-19T00:50:17.9347931Z ##[group]Running self-installer...
+2026-10-19T00:50:17.9400032Z (node:7112) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+2026-10-19T00:50:17.9400777Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-19T00:50:38.2435379Z 
+2026-10-19T00:50:38.2435776Z added 1 package, and audited 2 packages in 15s
+2026-10-19T00:50:38.2436355Z 
+2026-10-19T00:50:38.2436745Z 1 package is looking for funding
+2026-10-19T00:50:38.2437075Z   run `npm fund` for details
+2026-10-19T00:50:38.2443285Z 
+2026-10-19T00:50:38.2443407Z found 0 vulnerabilities
+2026-10-19T00:50:41.6604435Z Checking for updates...
+2026-10-19T00:50:41.8223369Z Switching pnpm from v11.19.0 to v10.33.0...
+2026-10-19T00:50:42.6020073Z .../1f28-1a151a3a89a-f39923cd4f8c3317    | Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-10-19T00:50:42.6035161Z .../1f28-1a151a3a89a-f39923cd4f8c3317    |   +1 +
+2026-10-19T00:50:45.4804310Z .../1f28-1a151a3a89a-f39923cd4f8c3317    | Progress: resolved 1, reused 0, downloaded 1, added 0
+2026-10-19T00:50:46.9522353Z .../1f28-1a151a3a89a-f39923cd4f8c3317    | Progress: resolved 1, reused 0, downloaded 1, added 1
+2026-10-19T00:50:46.9524581Z .../1f28-1a151a3a89a-f39923cd4f8c3317    | Progress: resolved 1, reused 0, downloaded 1, added 1, done
+2026-10-19T00:50:48.4124139Z [WARN] Detected a pnpm v10 installation layout at PNPM_HOME. The pnpm shims at PNPM_HOME have been refreshed so the new version is active, but pnpm v11 expects bins in PNPM_HOME/bin. Run "pnpm setup" to migrate your PATH to the v11 layout.
+2026-10-19T00:50:48.4154186Z Successfully updated pnpm to v10.33.0
+2026-10-19T00:50:48.4886150Z ##[endgroup]
+2026-10-19T00:50:48.4886489Z Installation Completed!
+2026-10-19T00:50:48.5205923Z ##[group]Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+2026-10-19T00:50:48.5206297Z with:
+2026-10-19T00:50:48.5206455Z   node-version: 24
+2026-10-19T00:50:48.5206608Z   cache: pnpm
+2026-10-19T00:50:48.5206752Z   check-latest: false
+2026-10-19T00:50:48.5208841Z   token: ***
+2026-10-19T00:50:48.5209008Z   package-manager-cache: true
+2026-10-19T00:50:48.5209192Z env:
+2026-10-19T00:50:48.5209394Z   PNPM_HOME: C:\Users\runneradmin\setup-pnpm\node_modules\.bin
+2026-10-19T00:50:48.5209637Z ##[endgroup]
+2026-10-19T00:50:48.9125390Z Found in cache @ C:\hostedtoolcache\windows\node\24.21.0\x64
+2026-10-19T00:50:48.9131189Z ##[group]Environment details
+2026-10-19T00:50:58.7362133Z node: v24.21.0
+2026-10-19T00:50:58.7362351Z npm: 11.19.0
+2026-10-19T00:50:58.7362505Z yarn: 1.22.22
+2026-10-19T00:50:58.7362981Z ##[endgroup]
+2026-10-19T00:50:58.7852357Z [command]C:\Windows\system32\cmd.exe /D /S /C "C:\Users\runneradmin\setup-pnpm\node_modules\.bin\bin\pnpm.CMD store path --silent"
+2026-10-19T00:50:59.9739096Z D:\.pnpm-store\v10
+2026-10-19T00:51:00.3130964Z Cache hit for: node-cache-Windows-x64-pnpm-b2eeceae85af398cfd3027633b2ef385b1dba49611b2423543c05750ca7a09ea
+2026-10-19T00:51:01.5589036Z Received 67108864 of 648227778 (10.4%), 63.2 MBs/sec
+2026-10-19T00:51:02.5675742Z Received 180355072 of 648227778 (27.8%), 85.1 MBs/sec
+2026-10-19T00:51:03.5687583Z Received 310378496 of 648227778 (47.9%), 97.9 MBs/sec
+2026-10-19T00:51:04.5804529Z Received 402653184 of 648227778 (62.1%), 95.2 MBs/sec
+2026-10-19T00:51:05.6949503Z Received 536870912 of 648227778 (82.8%), 99.5 MBs/sec
+2026-10-19T00:51:06.6593466Z Received 648227778 of 648227778 (100.0%), 101.1 MBs/sec
+2026-10-19T00:51:06.6596803Z Cache Size: ~618 MB (648227778 B)
+2026-10-19T00:51:06.6682385Z [command]"C:\Program Files\Git\usr\bin\tar.exe" -xf D:/a/_temp/a9cf5249-9b7b-414d-9f01-90a86a07248a/cache.tzst -P -C D:/a/Origin/Origin --force-local --use-compress-program "zstd -d"
+2026-10-19T00:51:27.0427929Z Cache restored successfully
+2026-10-19T00:51:27.0741802Z Cache restored from key: node-cache-Windows-x64-pnpm-b2eeceae85af398cfd3027633b2ef385b1dba49611b2423543c05750ca7a09ea
+2026-10-19T00:51:27.1056389Z ##[group]Run pnpm install --frozen-lockfile
+2026-10-19T00:51:27.1056799Z [36;1mpnpm install --frozen-lockfile[0m
+2026-10-19T00:51:27.1805698Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-19T00:51:27.1806006Z env:
+2026-10-19T00:51:27.1806249Z   PNPM_HOME: C:\Users\runneradmin\setup-pnpm\node_modules\.bin
+2026-10-19T00:51:27.1806513Z ##[endgroup]
+2026-10-19T00:51:27.7478491Z Scope: all 5 workspace projects
+2026-10-19T00:51:27.8379737Z Lockfile is up to date, resolution step is skipped
+2026-10-19T00:51:28.0728097Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-10-19T00:51:28.1640457Z Packages: +1058
+2026-10-19T00:51:28.1642212Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2026-10-19T00:51:29.0730772Z Progress: resolved 1058, reused 789, downloaded 0, added 0
+2026-10-19T00:51:30.0758898Z Progress: resolved 1058, reused 1054, downloaded 0, added 43
+2026-10-19T00:51:31.0759358Z Progress: resolved 1058, reused 1054, downloaded 0, added 272
+2026-10-19T00:51:32.0762421Z Progress: resolved 1058, reused 1054, downloaded 0, added 368
+2026-10-19T00:51:33.0767988Z Progress: resolved 1058, reused 1054, downloaded 0, added 485
+2026-10-19T00:51:34.0818771Z Progress: resolved 1058, reused 1054, downloaded 0, added 723
+2026-10-19T00:51:35.0886891Z Progress: resolved 1058, reused 1054, downloaded 0, added 910
+2026-10-19T00:51:36.0937153Z Progress: resolved 1058, reused 1054, downloaded 0, added 976
+2026-10-19T00:51:37.1054637Z Progress: resolved 1058, reused 1054, downloaded 0, added 1004
+2026-10-19T00:51:38.1060289Z Progress: resolved 1058, reused 1054, downloaded 0, added 1050
+2026-10-19T00:51:39.1175883Z Progress: resolved 1058, reused 1054, downloaded 0, added 1055
+2026-10-19T00:51:41.2201097Z Progress: resolved 1058, reused 1054, downloaded 0, added 1056
+2026-10-19T00:51:41.6175821Z Progress: resolved 1058, reused 1054, downloaded 0, added 1058, done
+2026-10-19T00:51:42.9100081Z 
+2026-10-19T00:51:42.9100728Z dependencies:
+2026-10-19T00:51:42.9101047Z + @1password/sdk 0.5.0
+2026-10-19T00:51:42.9101510Z + @clack/prompts 1.7.0
+2026-10-19T00:51:42.9101820Z + @codemirror/lang-sql 6.10.0
+2026-10-19T00:51:42.9102134Z + @codemirror/language 6.13.1
+2026-10-19T00:51:42.9102446Z + @codemirror/state 6.7.6
+2026-10-19T00:51:42.9102755Z + @duckdb/node-api 1.5.6-r.1
+2026-10-19T00:51:42.9103145Z + @excalidraw/excalidraw 0.18.1
+2026-10-19T00:51:42.9103657Z + @hpke/core 1.9.0
+2026-10-19T00:51:42.9104115Z + @lezer/highlight 1.2.5
+2026-10-19T00:51:42.9104534Z + @muse-code/sdk 1.4.6
+2026-10-19T00:51:42.9104829Z + @novnc/novnc 1.7.0
+2026-10-19T00:51:42.9105111Z + @resvg/resvg-js 2.6.2
+2026-10-19T00:51:42.9105492Z + @tanstack/react-virtual 3.14.13
+2026-10-19T00:51:42.9105827Z + @trycua/cua-driver 0.28.2
+2026-10-19T00:51:42.9106124Z + ag-grid-community 36.2.0
+2026-10-19T00:51:42.9106425Z + ag-grid-react 36.2.0
+2026-10-19T00:51:42.9106664Z + ajv 8.20.0
+2026-10-19T00:51:42.9106919Z + ajv-formats 3.0.1
+2026-10-19T00:51:42.9107180Z + clsx 2.1.1
+2026-10-19T00:51:42.9107429Z + codemirror 6.0.2
+2026-10-19T00:51:42.9107673Z + convex 1.47.0
+2026-10-19T00:51:42.9107917Z + croner 10.0.1
+2026-10-19T00:51:42.9108137Z + jose 6.2.10
+2026-10-19T00:51:42.9108348Z + katex 0.16.47
+2026-10-19T00:51:42.9108582Z + lucide-react 0.539.0
+2026-10-19T00:51:42.9108896Z + mdast-util-from-markdown 2.0.3
+2026-10-19T00:51:42.9109192Z + mermaid 12.1.0
+2026-10-19T00:51:42.9109375Z + papaparse 5.7.0
+2026-10-19T00:51:42.9109560Z + posthog-js 1.415.6
+2026-10-19T00:51:42.9109749Z + qrcode-terminal 0.12.0
+2026-10-19T00:51:42.9109949Z + qrcode.react 4.2.0
+2026-10-19T00:51:42.9110112Z + react 19.2.8
+2026-10-19T00:51:42.9110283Z + react-dom 19.2.8
+2026-10-19T00:51:42.9110508Z + react-markdown 10.1.0
+2026-10-19T00:51:42.9110686Z + rehype-katex 7.0.1
+2026-10-19T00:51:42.9110970Z + remark-gfm 4.0.1
+2026-10-19T00:51:42.9111766Z + remark-math 6.0.0
+2026-10-19T00:51:42.9111983Z + shiki 4.4.3
+2026-10-19T00:51:42.9116527Z + tailwind-merge 3.6.0
+2026-10-19T00:51:42.9116928Z + tar 7.5.22
+2026-10-19T00:51:42.9117157Z + vega 6.4.0
+2026-10-19T00:51:42.9117399Z + vega-embed 7.3.0
+2026-10-19T00:51:42.9117573Z + vega-lite 6.5.0
+2026-10-19T00:51:42.9117729Z + vega-themes 3.0.0
+2026-10-19T00:51:42.9117884Z + yaml 2.9.0
+2026-10-19T00:51:42.9118064Z + zod 4.4.3
+2026-10-19T00:51:42.9118189Z 
+2026-10-19T00:51:42.9118298Z devDependencies:
+2026-10-19T00:51:42.9118579Z + @tailwindcss/vite 4.3.3
+2026-10-19T00:51:42.9118886Z + @types/node 26.2.0
+2026-10-19T00:51:42.9119185Z + @types/novnc__novnc 1.6.0
+2026-10-19T00:51:42.9119493Z + @types/papaparse 5.5.2
+2026-10-19T00:51:42.9119868Z + @types/qrcode-terminal 0.12.2
+2026-10-19T00:51:42.9120162Z + @types/react 19.2.18
+2026-10-19T00:51:42.9121103Z + @types/react-dom 19.2.4
+2026-10-19T00:51:42.9121401Z + @types/ws 8.18.2
+2026-10-19T00:51:42.9121659Z + @vitejs/plugin-react 4.7.0
+2026-10-19T00:51:42.9121852Z + electron 43.7.9
+2026-10-19T00:51:42.9122019Z + electron-builder 26.15.3
+2026-10-19T00:51:42.9122222Z + electron-updater 6.8.9
+2026-10-19T00:51:42.9122393Z + esbuild 0.28.2
+2026-10-19T00:51:42.9122554Z + happy-dom 20.14.5
+2026-10-19T00:51:42.9122716Z + oxlint 1.80.0
+2026-10-19T00:51:42.9122873Z + tailwindcss 4.3.3
+2026-10-19T00:51:42.9123020Z + typebox 1.3.7
+2026-10-19T00:51:42.9123173Z + typescript 5.9.3
+2026-10-19T00:51:42.9123331Z + vite 7.3.6
+2026-10-19T00:51:42.9123474Z + vitest 4.1.11
+2026-10-19T00:51:42.9123627Z + wrangler 4.123.0
+2026-10-19T00:51:42.9123784Z + ws 8.22.0
+2026-10-19T00:51:42.9123869Z 
+2026-10-19T00:51:42.9624645Z . prepare$ node scripts/install-git-hooks.mjs
+2026-10-19T00:51:43.0362501Z . prepare: Done
+2026-10-19T00:51:43.0486163Z ╭ Warning ─────────────────────────────────────────────────────────────────────╮
+2026-10-19T00:51:43.0486684Z │                                                                              │
+2026-10-19T00:51:43.0487143Z │   Ignored build scripts: core-js@3.50.0, workerd@1.20260811.1,               │
+2026-10-19T00:51:43.0487613Z │   workerd@1.20260820.1.                                                      │
+2026-10-19T00:51:43.0488076Z │   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+2026-10-19T00:51:43.0488518Z │   to run scripts.                                                            │
+2026-10-19T00:51:43.0488893Z │                                                                              │
+2026-10-19T00:51:43.0489309Z ╰──────────────────────────────────────────────────────────────────────────────╯
+2026-10-19T00:51:43.0606440Z Done in 15.5s using pnpm v10.33.0
+2026-10-19T00:51:43.2005867Z ##[group]Run pnpm build:cua:win && pnpm smoke:cua-win
+2026-10-19T00:51:43.2006264Z [36;1mpnpm build:cua:win && pnpm smoke:cua-win[0m
+2026-10-19T00:51:43.2064762Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-19T00:51:43.2065069Z env:
+2026-10-19T00:51:43.2065288Z   PNPM_HOME: C:\Users\runneradmin\setup-pnpm\node_modules\.bin
+2026-10-19T00:51:43.2065993Z ##[endgroup]
+2026-10-19T00:51:43.7141923Z 
+2026-10-19T00:51:43.7142526Z > openmausbot@0.2.14 build:cua:win D:\a\Origin\Origin
+2026-10-19T00:51:43.7142897Z > node scripts/prepare-cua-win.mjs
+2026-10-19T00:51:43.7143054Z 
+2026-10-19T00:51:43.7915292Z Downloading CUA Driver 0.28.2 from the official release…
+2026-10-19T00:51:51.2494882Z Staged CUA for win32-x64 from D:\a\Origin\Origin\node_modules\.cache\openmausbot\cua-driver-0.28.2-win\cua-driver.exe
+2026-10-19T00:51:51.5518008Z 
+2026-10-19T00:51:51.5518695Z > openmausbot@0.2.14 smoke:cua-win D:\a\Origin\Origin
+2026-10-19T00:51:51.5519343Z > node scripts/smoke-cua-win-embedded.mjs
+2026-10-19T00:51:51.5519565Z 
+2026-10-19T00:51:51.9731754Z Cua Driver daemon listening on \\.\pipe\cua-6408-fd5496f0
+2026-10-19T00:51:52.0252308Z embedded host started: {
+2026-10-19T00:51:52.0252596Z   pid: 4120,
+2026-10-19T00:51:52.0252785Z   driverVersion: '0.28.2',
+2026-10-19T00:51:52.0252982Z   contractVersion: '0.8.0',
+2026-10-19T00:51:52.0253237Z   socketPath: '\\\\.\\pipe\\cua-6408-fd5496f0'
+2026-10-19T00:51:52.0253473Z }
+2026-10-19T00:51:52.8299344Z 
+2026-10-19T00:51:52.8300231Z ✨ cua-driver v0.36.0 is available (you have v0.28.2).
+2026-10-19T00:51:52.8300583Z    Update with: cua-driver update
+2026-10-19T00:51:52.8300950Z    Release notes: https://github.com/trycua/cua/releases/tag/cua-driver-rs-v0.36.0
+2026-10-19T00:51:52.8301220Z 
+2026-10-19T00:51:52.9507102Z Windows confirms the background daemon has no console
+2026-10-19T00:51:53.1023649Z CLI proxy connected to background daemon: 57 tools
+2026-10-19T00:51:53.1032856Z Cua Driver embedded host closed its lifetime pipe; shutting down.
+2026-10-19T00:51:53.1124641Z smoke:cua-win OK — staged bundle drives a real embedded host
+2026-10-19T00:51:53.2607521Z Post job cleanup.
+2026-10-19T00:51:53.4053173Z Cache hit occurred on the primary key node-cache-Windows-x64-pnpm-b2eeceae85af398cfd3027633b2ef385b1dba49611b2423543c05750ca7a09ea, not saving cache.
+2026-10-19T00:51:53.4288360Z Post job cleanup.
+2026-10-19T00:51:53.5728735Z Pruning is unnecessary.
+2026-10-19T00:51:53.6001805Z Post job cleanup.
+2026-10-19T00:51:53.7675644Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-19T00:51:53.7988332Z git version 2.56.0.windows.2
+2026-10-19T00:51:53.8051783Z Temporarily overriding HOME='D:\a\_temp\72bf8881-d60d-45b5-aa9a-bd0b4403acd4' before making global git config changes
+2026-10-19T00:51:53.8052763Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-19T00:51:53.8062163Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Origin\Origin
+2026-10-19T00:51:53.8408671Z Removing SSH command configuration
+2026-10-19T00:51:53.8419055Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-19T00:51:53.8757422Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-19T00:51:54.3500697Z Removing HTTP extra header
+2026-10-19T00:51:54.3509296Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-19T00:51:54.3838048Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-19T00:51:54.8867951Z Removing includeIf entries pointing to credentials config files
+2026-10-19T00:51:54.8877647Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-19T00:51:54.9161584Z includeif.gitdir:D:/a/Origin/Origin/.git.path
+2026-10-19T00:51:54.9162063Z includeif.gitdir:D:/a/Origin/Origin/.git/worktrees/*.path
+2026-10-19T00:51:54.9162406Z includeif.gitdir:/github/workspace/.git.path
+2026-10-19T00:51:54.9162769Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-19T00:51:54.9201949Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/Origin/Origin/.git.path
+2026-10-19T00:51:54.9487997Z D:\a\_temp\git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config
+2026-10-19T00:51:54.9533996Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/Origin/Origin/.git.path D\:\\a\\_temp\\git\-credentials\-6334ba03\-653b\-4003\-b1bb\-fb841603ff9a\.config
+2026-10-19T00:51:54.9873591Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/Origin/Origin/.git/worktrees/*.path
+2026-10-19T00:51:55.0214534Z D:\a\_temp\git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config
+2026-10-19T00:51:55.0258073Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/Origin/Origin/.git/worktrees/*.path D\:\\a\\_temp\\git\-credentials\-6334ba03\-653b\-4003\-b1bb\-fb841603ff9a\.config
+2026-10-19T00:51:55.0614775Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-19T00:51:55.0955952Z /github/runner_temp/git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config
+2026-10-19T00:51:55.1006323Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-6334ba03\-653b\-4003\-b1bb\-fb841603ff9a\.config
+2026-10-19T00:51:55.1355691Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-19T00:51:55.1642887Z /github/runner_temp/git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config
+2026-10-19T00:51:55.1687522Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-6334ba03\-653b\-4003\-b1bb\-fb841603ff9a\.config
+2026-10-19T00:51:55.2087185Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-19T00:51:55.6736805Z Removing credentials config 'D:\a\_temp\git-credentials-6334ba03-653b-4003-b1bb-fb841603ff9a.config'
+2026-10-19T00:51:55.6916780Z Cleaning up orphan processes

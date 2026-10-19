@@ -1,0 +1,73 @@
+import assert from 'node:assert/strict';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+const root = resolve(import.meta.dirname, '..'), folder = '.omb-scratch/delivery-evidence-038';
+const sha = b => createHash('sha256').update(b).digest('hex');
+const read = name => readFileSync(resolve(root, name));
+const pinsBytes = read('.omb-scratch/release-inputs-037b.json'), pins = JSON.parse(pinsBytes);
+const source = 'ab0cd72b4c2f004c1015adca034472241569c04b';
+assert.equal(process.version, 'v24.21.0'); assert.equal(pins.version, '0.2.14'); assert.equal(pins.source, source); assert.equal(pins.githubReleaseId, 416803740);
+assert.deepEqual(process.argv.slice(2), ['--execute']);
+assert.ok(!existsSync(resolve(root, `${folder}/publication-state.json`)), 'Reconcile any prior publication before retry');
+assert.equal(sha(read('.omb-scratch/prepublication-037b.mjs')), 'ba70dccb6dab5dee6b371e1edbb8035984ddd4e07564056b413d46d5bd38bcd6');
+assert.equal(sha(read(`${folder}/native/receipt.json`)), '4c17e1451fbc8a66545516e94acef675cffbea74dcd7bf71545b2fde0a9d4e27');
+const native = JSON.parse(read(`${folder}/native/receipt.json`));
+assert.equal(native.status, 'bounded-package-audit-passed'); assert.equal(native.sourceCommit, source); assert.equal(native.nativeRun, pins.nativeRun); assert.equal(native.windowsResourceSmoke.exitCode, 0);
+assert.equal(sha(read(`${folder}/site-visual-review-038.json`)), 'b29e414563dc8bfb0a0cb716321d42533d55becf7097eda4e290d9898698a0a1');
+const visuals = JSON.parse(read(`${folder}/site-visual-review-038.json`));
+assert.equal(visuals.source, source); assert.equal(visuals.siteImageId, pins.siteImageId); assert.equal(visuals.acceptedVisualStates, 20); assert.equal(visuals.productLayoutBlockers.length, 0); assert.equal(visuals.pendingEvidence.length, 0);
+for (const file of visuals.files) assert.equal(sha(readFileSync(file.path)), file.sha256);
+const streamChecker = read('.omb-scratch/check-public-downloads.py');
+assert.equal(sha(streamChecker), 'd726fad2035d5f4ff423a39665ca0d1b341d323590b4898d3326ecafc376eba1');
+function command(file, args, name, input) {
+  const startedAt = new Date().toISOString();
+  const result = spawnSync(file, args, { cwd: root, input, maxBuffer: 4 * 1024 * 1024, timeout: 240000, windowsHide: true });
+  if (name) {
+    writeFileSync(resolve(root, `${folder}/${name}.log`), result.stdout ?? Buffer.alloc(0), { flag: 'wx' });
+    writeFileSync(resolve(root, `${folder}/${name}.stderr.txt`), result.stderr ?? Buffer.alloc(0), { flag: 'wx' });
+    writeFileSync(resolve(root, `${folder}/${name}-result.json`), JSON.stringify({ startedAt, finishedAt: new Date().toISOString(), exitCode: result.status, source, version: pins.version }, null, 2), { flag: 'wx' });
+  }
+  assert.equal(result.status, 0, `Operation failed: ${name ?? file}; inspect actual outcome before retry`);
+  return result.stdout;
+}
+const gateBytes = command(process.execPath, ['.omb-scratch/prepublication-037b.mjs', '--check', '.omb-scratch/release-inputs-037b.json'], 'prepublication-038');
+const gate = JSON.parse(gateBytes); assert.equal(gate.prepublication, 'passed'); assert.equal(gate.source, source); assert.equal(gate.backendReused, true);
+writeFileSync(resolve(root, `${folder}/prepublication-038.json`), gateBytes, { flag: 'wx' });
+assert.deepEqual(read('.omb-scratch/release-inputs-037b.json'), pinsBytes);
+assert.equal(command('git', ['rev-parse', 'HEAD']).toString().trim(), source); assert.equal(command('git', ['status', '--porcelain']).toString(), '');
+const draft = JSON.parse(command('gh', ['api', `repos/z4mbo/Origin/releases/${pins.githubReleaseId}`]));
+assert.equal(draft.tag_name, 'origin-v0.2.14'); assert.equal(draft.target_commitish, source); assert.equal(draft.draft, true); assert.equal(draft.assets.length, 15);
+const body = read('.omb-scratch/github-release-0.2.14.md').toString(); assert.equal(draft.body, body);
+const statePath = resolve(root, `${folder}/publication-state.json`);
+const state = { source, version: pins.version, pinsSha256: sha(pinsBytes), startedAt: new Date().toISOString(), prepublicationSha256: sha(gateBytes), github: 'not-attempted', downloads: 'not-attempted', site: 'not-attempted', backendReused: true, newBackendDeployment: false };
+writeFileSync(statePath, JSON.stringify(state, null, 2), { flag: 'wx' });
+const save = () => writeFileSync(statePath, JSON.stringify(state, null, 2));
+try {
+  state.github = 'unknown'; save();
+  const request = resolve(root, `${folder}/github-publication-request.json`);
+  writeFileSync(request, JSON.stringify({ tag_name: 'origin-v0.2.14', target_commitish: source, name: draft.name, body, draft: false, prerelease: false, make_latest: 'true' }), { flag: 'wx' });
+  const published = JSON.parse(command('gh', ['api', '--method', 'PATCH', `repos/z4mbo/Origin/releases/${pins.githubReleaseId}`, '--input', request], 'publish-github'));
+  assert.equal(published.id, pins.githubReleaseId); assert.equal(published.tag_name, 'origin-v0.2.14'); assert.equal(published.draft, false); assert.equal(published.target_commitish, source); assert.ok(published.published_at);
+  writeFileSync(resolve(root, `${folder}/github-public-metadata-038.json`), JSON.stringify(published, null, 2), { flag: 'wx' });
+  state.github = 'confirmed'; state.publishedAt = published.published_at; save(); console.log('GitHub release published.');
+  state.downloads = 'unknown'; save();
+  command('ssh', ['hetzner', `bash /root/origin-release-staging/0.2.14/promote-downloads.sh 0.2.14 --promote ${source} ${pins.nativeRun} ${pins.manifestSha256} ${pins.checksumsSha256} 0.2.13`], 'promote-downloads');
+  state.downloads = 'confirmed'; state.downloadsPromotedAt = new Date().toISOString(); save(); console.log('Download aliases and feeds promoted.');
+  state.site = 'unknown'; save();
+  command('ssh', ['hetzner', `bash /root/origin-release-staging/0.2.14/promote-site.sh 0.2.14 --promote ${source} ${pins.siteImageId} ${pins.previousSiteImageId} ${pins.siteIdentitySha256}`], 'promote-site');
+  state.site = 'confirmed'; state.sitePromotedAt = new Date().toISOString(); save(); console.log('Website image promoted.');
+  const githubBytes = command(process.execPath, ['.omb-scratch/check-github-release.mjs', '0.2.14', source, String(pins.nativeRun), '--public', pins.manifestSha256, pins.checksumsSha256], 'github-public-check');
+  writeFileSync(resolve(root, `${folder}/github-public-038.json`), githubBytes, { flag: 'wx' });
+  const publicBytes = command('ssh', ['hetzner', `python3 - 0.2.14 ${source} ${pins.nativeRun} ${pins.manifestSha256} ${pins.checksumsSha256}`], 'public-downloads-038', streamChecker);
+  const summary = JSON.parse(publicBytes.toString().trim().split(/\r?\n/).at(-1)); assert.equal(summary.status, 'passed'); assert.equal(summary.payloads, 13); assert.equal(summary.aliases, 3); assert.equal(summary.metadata, 2); assert.equal(summary.payloadBytes, 1947899193);
+  writeFileSync(resolve(root, `${folder}/public-downloads-result.json`), read(`${folder}/public-downloads-038-result.json`), { flag: 'wx' });
+  const runtime = command('ssh', ['hetzner', 'docker inspect multi-ghost-origin-1 --format \'{{.Image}} {{.State.Running}} {{.RestartCount}} {{index .Config.Labels "org.opencontainers.image.revision"}} {{index .Config.Labels "org.opencontainers.image.version"}} {{.State.StartedAt}}\''], 'public-runtime-038');
+  const runtimeFields = runtime.toString().trim().split(' ');
+  assert.equal(runtimeFields.length, 6);
+  assert.deepEqual(runtimeFields.slice(0, 5), [pins.siteImageId, 'true', '0', source, '0.2.14']);
+  assert.ok(Number.isFinite(Date.parse(runtimeFields[5])));
+  writeFileSync(resolve(root, `${folder}/public-runtime-038.txt`), runtime, { flag: 'wx' });
+  state.publicArtifactHashesVerified = true; state.runtimeVerified = true; state.completedAt = new Date().toISOString(); save(); console.log(JSON.stringify(state));
+} catch (error) { state.interruptedAt = new Date().toISOString(); state.reconciliationRequired = true; save(); throw error; }

@@ -1,0 +1,281 @@
+Browser tab: 4, Title: "What's new | Origin", URL: "https://origin.imbored.fun/whats-new".
+0 AXWebArea What's new | Origin, URL: origin.imbored.fun/whats-new
+	1 link Description: Skip to content, Value: origin.imbored.fun/whats-new#main
+	2 container Main
+		3 link Description: Origin home, Value: origin.imbored.fun/
+		4 link Description: How it works, Value: origin.imbored.fun/#how
+		5 link Description: Agents, Value: origin.imbored.fun/#team
+		6 link Description: Workspace, Value: origin.imbored.fun/#together
+		7 link Description: FAQ, Value: origin.imbored.fun/#questions
+		8 link Description: Sign in, Value: origin.imbored.fun/login
+		9 link Description: Download, Value: origin.imbored.fun/downloads/Origin-Setup.exe
+	10 container main
+		11 heading What's new, Value: 1
+			12 text What's new
+		13 text Release notes for the Origin desktop app.
+		14 container
+			15 text v 0.2.14 2026-10-19
+			16 heading Safer accounts and shared-agent ownership, Value: 2
+				17 text Safer accounts and shared-agent ownership
+			18 content list
+				19 container
+					20 heading Sign-in stays with your account, Value: 3
+						21 text Sign-in stays with your account
+					22 text A delayed sign-in or sign-out cannot replace a newer account, including when another window signs in and signs out before the old request finishes.
+				23 container
+					24 heading Sessions stay on their server, Value: 3
+						25 text Sessions stay on their server
+					26 text Changing servers clears the previous session before connecting to the new server. Different addresses for the same server keep you signed in.
+				27 container
+					28 heading Checked account connections, Value: 3
+						29 text Checked account connections
+					30 text Concurrent connection changes preserve the verified active account. Sign-in reports a failed connection to the local app so you can retry.
+				31 container
+					32 heading Shared agents confirm ownership, Value: 3
+						33 text Shared agents confirm ownership
+					34 text Shared work stops when Origin cannot renew its ownership. Queued and resumed work confirms ownership before starting, and changing accounts stops the previous local run.
+		35 container
+			36 text v 0.2.13 2026-10-18
+			37 heading Reliable boards and a clearer Origin, Value: 2
+				38 text Reliable boards and a clearer Origin
+			39 content list
+				40 container
+					41 heading Reliable signup loading, Value: 3
+						42 text Reliable signup loading
+					43 text Signup checks whether registration is available before showing its fields. A connection that does not respond offers Try again after ten seconds. Sign-in and verified invitations stay available.
+				44 container
+					45 heading Safer Windows child processes, Value: 3
+						46 text Safer Windows child processes
+					47 text Workspace credentials stay out of installer and agent child processes even when environment names use different capitalization on Windows.
+				48 container
+					49 heading Private provider logs, Value: 3
+						50 text Private provider logs
+					51 text Stripe secret and restricted keys are hidden when agent protocol output is saved to logs.
+				52 container
+					53 heading Accurate project lists, Value: 3
+						54 text Accurate project lists
+					55 text Workspace project lists refresh when a Chief's project links change, clearing stale entries from the sidebar.
+				56 container
+					57 heading Stable issue dragging, Value: 3
+						58 text Stable issue dragging
+					59 text Issue cards stay visible when you drag quickly between columns. Losing edit access or switching projects cancels the drag before it can save a move.
+				60 container
+					61 heading Protected conversations, Value: 3
+						62 text Protected conversations
+					63 text If saving a conversation change or deletion fails, Origin preserves its saved messages and metadata. Failed permission changes cannot grant broader access.
+				64 container
+					65 heading Origin throughout the app, Value: 3
+						66 text Origin throughout the app
+					67 text Startup, tray menus, installation and agent messages use Origin's name. Unrelated subscription offers and promotional links are removed.
+				68 container
+					69 heading Live calls with your own key, Value: 3
+						70 text Live calls with your own key
+					71 text Phone and companion Live calls use your configured Live key without requiring an upstream subscription. Missing keys still open setup, and access checks still apply.
+				72 container
+					73 heading Compact sidebar and server controls, Value: 3
+						74 text Compact sidebar and server controls
+					75 text Footer icons stay on one line. Saved server names remain readable in narrow windows, with their actions below when needed. The computer menu opens Origin's server settings.
+				76 container
+					77 heading Origin server updates, Value: 3
+						78 text Origin server updates
+					79 text Self-hosted update checks find Origin releases and recognize their version tags. Docker instructions build the Origin checkout, and updates never suggest replacing Origin with the upstream npm package.
+				80 container
+					81 heading Recoverable engine discovery, Value: 3
+						82 text Recoverable engine discovery
+					83 text An engine that never reports its status becomes unavailable after a minute instead of keeping engine discovery pending. Other engines remain available.
+		84 container
+			85 text v 0.2.11 2026-10-18
+			86 heading Draft-first projects and clearer workspace controls, Value: 2
+				87 text Draft-first projects and clearer workspace controls
+			88 content list
+				89 container
+					90 heading Draft by default, Value: 3
+						91 text Draft by default
+					92 text Every project starts with Draft. New issues from the app, feedback, Chiefs and connected tools go to Draft unless you choose another column. Existing issues and imported history keep their destinations.
+				93 container
+					94 heading Clean workspace deletion, Value: 3
+						95 text Clean workspace deletion
+					96 text Removing an empty local workspace also removes its leftover sidebar section. Startup cleans up old empty workspace sections, while preserving sections that contain bots, groups or a shared computer.
+				97 container
+					98 heading Account and computer layout, Value: 3
+						99 text Account and computer layout
+					100 text Your account sits immediately before Search, with a full-width computer selector below. Footer actions wrap into aligned rows inside narrow sidebars.
+				101 container
+					102 heading Consistent dialogs and menus, Value: 3
+						103 text Consistent dialogs and menus
+					104 text About, Files, confirmations, Settings, Apps, Triggers, Voice and sidebar menus share the app's flat surfaces, borders and controls in light and dark themes.
+				105 container
+					106 heading Reliable keyboard focus, Value: 3
+						107 text Reliable keyboard focus
+					108 text Account menus focus correctly with reduced motion. Pending confirmations keep focus inside, and Triggers skips hidden Advanced controls when you press Tab.
+				109 container
+					110 heading Readable triggers on phones, Value: 3
+						111 text Readable triggers on phones
+					112 text Trigger and agent names stay readable on narrow screens, with Copy link and the switch in their own row.
+				113 container
+					114 heading Invitations from Origin, Value: 3
+						115 text Invitations from Origin
+					116 text Hosted workspace invitations use the verified invites@origin.imbored.fun sender. If sending fails, Origin shows the delivery status and keeps the same invitation link available to share.
+				117 container
+					118 heading Safer issue links, Value: 3
+						119 text Safer issue links
+					120 text Legacy private ideas wait for Draft repair before GitHub mirroring. Older issue-creation requests preserve existing links or offer a manual creation page instead of risking duplicate GitHub issues.
+		121 container
+			122 text v 0.2.10 2026-10-18
+			123 heading Invitations and reliable desktop controls, Value: 2
+				124 text Invitations and reliable desktop controls
+			125 content list
+				126 container
+					127 heading Public workspace invitations, Value: 3
+						128 text Public workspace invitations
+					129 text Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.
+				130 container
+					131 heading Email invitations, Value: 3
+						132 text Email invitations
+					133 text Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.
+				134 container
+					135 heading Clear join confirmations, Value: 3
+						136 text Clear join confirmations
+					137 text A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.
+				138 container
+					139 heading Account and computer controls, Value: 3
+						140 text Account and computer controls
+					141 text Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.
+				142 container
+					143 heading Live activity receipts, Value: 3
+						144 text Live activity receipts
+					145 text Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work.
+		146 container
+			147 text v 0.2.7 2026-10-18
+			148 heading Safer workspaces and clearer controls, Value: 2
+				149 text Safer workspaces and clearer controls
+			150 content list
+				151 container
+					152 heading Workspace and project permissions, Value: 3
+						153 text Workspace and project permissions
+					154 text Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.
+				155 container
+					156 heading Safer issue mirroring, Value: 3
+						157 text Safer issue mirroring
+					158 text Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.
+				159 container
+					160 heading Files respect their source access, Value: 3
+						161 text Files respect their source access
+					162 text Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.
+				163 container
+					164 heading Shared work and sync, Value: 3
+						165 text Shared work and sync
+					166 text Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.
+				167 container
+					168 heading Safer collaborative editing, Value: 3
+						169 text Safer collaborative editing
+					170 text Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.
+				171 container
+					172 heading Call continuity, Value: 3
+						173 text Call continuity
+					174 text An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.
+				175 container
+					176 heading Recoverable drawings, Value: 3
+						177 text Recoverable drawings
+					178 text Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.
+				179 container
+					180 heading Consistent workspace controls, Value: 3
+						181 text Consistent workspace controls
+					182 text Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.
+				183 container
+					184 heading Keyboard control in dialogs, Value: 3
+						185 text Keyboard control in dialogs
+					186 text About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.
+				187 container
+					188 heading Readable buttons in every theme, Value: 3
+						189 text Readable buttons in every theme
+					190 text Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.
+				191 container
+					192 heading Files loading recovery, Value: 3
+						193 text Files loading recovery
+					194 text Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.
+				195 container
+					196 heading Responsive Data queries, Value: 3
+						197 text Responsive Data queries
+					198 text Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.
+				199 container
+					200 heading Chat attachments that fit, Value: 3
+						201 text Chat attachments that fit
+					202 text Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.
+				203 container
+					204 heading Recoverable workspace loading, Value: 3
+						205 text Recoverable workspace loading
+					206 text Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.
+				207 container
+					208 heading Appearance from paired devices, Value: 3
+						209 text Appearance from paired devices
+					210 text Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.
+				211 container
+					212 heading Clearer connection errors, Value: 3
+						213 text Clearer connection errors
+					214 text Remote MCP connection errors include safe HTTP status codes and practical recovery hints. Malformed connection addresses never echo embedded credentials.
+				215 container
+					216 heading Accurate browser setup, Value: 3
+						217 text Accurate browser setup
+					218 text Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.
+				219 container
+					220 heading Release history everywhere, Value: 3
+						221 text Release history everywhere
+					222 text What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes.
+		223 container
+			224 text v desktop-1.0 2026-10-16
+			225 heading Origin on the desktop, Value: 2
+				226 text Origin on the desktop
+			227 content list
+				228 container
+					229 heading Projects with default agents, Value: 3
+						230 text Projects with default agents
+					231 text Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.
+				232 container
+					233 heading Workspaces, Value: 3
+						234 text Workspaces
+					235 text Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.
+				236 container
+					237 heading Zap Liquid avatars, Value: 3
+						238 text Zap Liquid avatars
+					239 text Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.
+				240 container
+					241 heading Inbox, Chat, Call and Draw, Value: 3
+						242 text Inbox, Chat, Call and Draw
+					243 text One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas.
+		244 container
+			245 text v 1.0 2026-09-27
+			246 heading A sharper workspace, Value: 2
+				247 text A sharper workspace
+			248 content list
+				249 container
+					250 heading Keyboard first, Value: 3
+						251 text Keyboard first
+					252 text C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.
+				253 container
+					254 heading A cleaner issue editor, Value: 3
+						255 text A cleaner issue editor
+					256 text Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.
+				257 container
+					258 heading A calmer sidebar, Value: 3
+						259 text A calmer sidebar
+					260 text Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.
+				261 container
+					262 heading One Inbox, two views, Value: 3
+						263 text One Inbox, two views
+					264 text Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.
+				265 container
+					266 heading Small details, fixed, Value: 3
+						267 text Small details, fixed
+					268 text No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list.
+	269 container
+		270 link Description: Origin home, Value: origin.imbored.fun/
+		271 container Footer
+			272 link Description: Download, Value: origin.imbored.fun/#download
+			273 link Description: Sign in, Value: origin.imbored.fun/login
+			274 link Description: Create account, Value: origin.imbored.fun/signup
+			275 link Description: What's new, Value: origin.imbored.fun/whats-new
+			276 link Description: GitHub, Value: github.com/z4mbo/Origin
+		277 text No trackers, no ads.
+
+The focused UI element is 0 AXWebArea What's new | Origin, URL: origin.imbored.fun/whats-new

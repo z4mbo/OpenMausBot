@@ -117,3 +117,5 @@ docs/verification/evidence/origin-ownership-037/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-ownership-037/**/*.log -whitespace
 docs/verification/evidence/origin-ownership-037/**/*.patch -whitespace
 docs/verification/evidence/origin-ownership-037/**/*.ax.txt -whitespace
+
+docs/verification/evidence/origin-delivery-038/** -text -whitespace

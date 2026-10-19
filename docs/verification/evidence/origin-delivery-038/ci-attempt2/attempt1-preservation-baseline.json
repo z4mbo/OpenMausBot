@@ -1,0 +1,282 @@
+{
+  "recordedAt": "2026-10-19T01:34:54.890Z",
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "scope": "All existing files in own monitor-038 scratch, including terminal attempt1 failure, original raw API/job logs and parser draft; this index records byte preservation and does not make excluded parser draft accepted evidence.",
+  "files": [
+    {
+      "path": "39182331810-attempt1-terminal-jobs-api-raw.json",
+      "bytes": 3348,
+      "sha256": "acc88875024c8e9213ba3b3e0337702a9156f794aeea055e68c47d32fd7aa9c1"
+    },
+    {
+      "path": "39182331810-attempt1-terminal-jobs.json",
+      "bytes": 4748,
+      "sha256": "d828697d1508494e7c094ef56233c1b3126f36437a21239072b7e2528a0769a8"
+    },
+    {
+      "path": "39182331810-attempt1-terminal-run-api-raw.json",
+      "bytes": 11527,
+      "sha256": "8190705131a29ee0014c4b91095c3e577e6a400139cd75fb199dadd5abe38e51"
+    },
+    {
+      "path": "39182331810-attempt1-terminal-run.json",
+      "bytes": 12856,
+      "sha256": "72e98228e9e26b0f380d9c27bcdf8cab2d1b145393fe8a15ce3b87ea09ebe8a3"
+    },
+    {
+      "path": "39182331813-attempt1-initial-jobs.json",
+      "bytes": 14825,
+      "sha256": "e0fb71a5469b13b5fc8513b3b7c34dbc4ab982b8af9155810fa087c99be2b5ab"
+    },
+    {
+      "path": "39182331813-attempt1-initial-run.json",
+      "bytes": 12846,
+      "sha256": "d41a425de618b88f894c6b6c6ceff31ed51f5ee5ae6e2d2a5f043568191ee3ea"
+    },
+    {
+      "path": "39182331813-attempt1-terminal-artifacts.json",
+      "bytes": 1727,
+      "sha256": "a5d686e814bec967920b295a9b6323fd40c6a8ea8704300d9a17178a5ca48c44"
+    },
+    {
+      "path": "39182331813-attempt1-terminal-jobs-api-raw.json",
+      "bytes": 11324,
+      "sha256": "20c90a1fbcce67d940c6eea4e279f887c7847bb8481ee7244c4fcb0674565c00"
+    },
+    {
+      "path": "39182331813-attempt1-terminal-jobs.json",
+      "bytes": 16128,
+      "sha256": "8742b175a12f34b9dc4c69a98f8ef5ddc94b1d7bddc03bfab5fad9cb22be3264"
+    },
+    {
+      "path": "39182331813-attempt1-terminal-run-api-raw.json",
+      "bytes": 11520,
+      "sha256": "4159d00c1c1d15eda4154b8a06d0c0ead3aa1ee74041239dab2a65f9d60892b1"
+    },
+    {
+      "path": "39182331813-attempt1-terminal-run.json",
+      "bytes": 12849,
+      "sha256": "b3eb6120a7c733651a7be3a2f201a350e95de56f3c3e4b0a2abd041752594040"
+    },
+    {
+      "path": "39182331975-attempt1-terminal-jobs.json",
+      "bytes": 4745,
+      "sha256": "91127dc30871fd11b48fba1f15d732bb9ad0337cecaa6c324a55f67eb64dcc77"
+    },
+    {
+      "path": "39182331975-attempt1-terminal-run.json",
+      "bytes": 13501,
+      "sha256": "562ebc8bd851258c6970ae403733adf2f54519348bb79370f07447cbfa8de7bd"
+    },
+    {
+      "path": "39182338251-attempt1-terminal-jobs.json",
+      "bytes": 4745,
+      "sha256": "7509d0e6ce7a53e8d8ef5ad770c2b27dd782f45b38ed8b4f91f1add1a225f302"
+    },
+    {
+      "path": "39182338251-attempt1-terminal-run.json",
+      "bytes": 13508,
+      "sha256": "53be14ff1f01a160c2796ae082b79a1842558f9232b443175b7e15014ec87dc9"
+    },
+    {
+      "path": "39182338259-attempt1-terminal-jobs.json",
+      "bytes": 4455,
+      "sha256": "17d0486ef3bc725978b790cf51e536ac7b68c1e5a7ce86b4bafb51dc563ae79d"
+    },
+    {
+      "path": "39182338259-attempt1-terminal-run.json",
+      "bytes": 13481,
+      "sha256": "40a790a1a6175593eba8d9c1a1d777f73dfb8bebfa00e038705d38a24eb9a65a"
+    },
+    {
+      "path": "39182338260-attempt1-failure-jobs.json",
+      "bytes": 81838,
+      "sha256": "9c2e3ceb3728dd2229398672eef84c1a04d937783f8623362e0e5fb70d822b57"
+    },
+    {
+      "path": "39182338260-attempt1-failure-run.json",
+      "bytes": 13474,
+      "sha256": "54efb949c299e4ed3c3e6904f4b4d516d35aa81108645cd5c6edf4d1b802d7dd"
+    },
+    {
+      "path": "39182338260-attempt1-initial-jobs.json",
+      "bytes": 27989,
+      "sha256": "5a024b41e3f17193c45e8e222e79840fcbe3bc9e294e56aabbd3e08ca9da38ed"
+    },
+    {
+      "path": "39182338260-attempt1-initial-run.json",
+      "bytes": 13469,
+      "sha256": "d948edee29ffe317daba4a5ab257a4feee54acc0ecc089716e08ded2e81b1b41"
+    },
+    {
+      "path": "39182338260-attempt1-terminal-jobs-api-raw.json",
+      "bytes": 59459,
+      "sha256": "d2e194bb1c65ff24284b822f38baf62a1ea8d0251913bdf30b613d427512e002"
+    },
+    {
+      "path": "39182338260-attempt1-terminal-jobs.json",
+      "bytes": 84145,
+      "sha256": "e0b43966d705014068777f32b8c7f4619cfd45f8db011f1c3e52614de84c4188"
+    },
+    {
+      "path": "39182338260-attempt1-terminal-run-api-raw.json",
+      "bytes": 11931,
+      "sha256": "c2bd603154401c076aec15ad0857059b60a8e0599bf41d665515caff23a95f2f"
+    },
+    {
+      "path": "39182338260-attempt1-terminal-run.json",
+      "bytes": 13477,
+      "sha256": "6c5bae7c828f0d3545dd3c8d746389d5754b3b1f7ecb8a035656325a10409c8c"
+    },
+    {
+      "path": "backend-site-pr-terminal.log",
+      "bytes": 61350,
+      "sha256": "d437e45d938d18485b14893785e1454b55e5136ed4afc20e2982a8ce73b4495b"
+    },
+    {
+      "path": "ci-job-logs/0_CI.txt",
+      "bytes": 4137,
+      "sha256": "f68ceb84d2373bce9cba4da02b20eda60bf24d018d899604dbf3c43b6cb3787f"
+    },
+    {
+      "path": "ci-job-logs/10_macOS smokes (packaged server + Electron).txt",
+      "bytes": 42593,
+      "sha256": "6b706809dba0c2cf15d247fe0a8cad94ab4785a176ee16e2ae9177194b8ecf38"
+    },
+    {
+      "path": "ci-job-logs/11_open-source edition builds without enterprise_.txt",
+      "bytes": 29691,
+      "sha256": "b5097032bf2830f7637c2ecd7856dce83c2dbf8dd09d4a0650ae0024acfa354d"
+    },
+    {
+      "path": "ci-job-logs/12_vitest (windows-latest, shard 3_4).txt",
+      "bytes": 336174,
+      "sha256": "c96c8a07ecf85e4107204065732ddccbf6721861baaee3d54aedf4b8a80125ae"
+    },
+    {
+      "path": "ci-job-logs/13_vitest (ubuntu-latest, shard 1_4).txt",
+      "bytes": 355243,
+      "sha256": "dc2ec2d531b08fc682703182ac52d6afd20f1d5d5670283e6dbf6f8e4fd2b35e"
+    },
+    {
+      "path": "ci-job-logs/14_vitest (ubuntu-latest, shard 4_4).txt",
+      "bytes": 277249,
+      "sha256": "5f57715e589b4cfccceb0aee07c00ddfebd81ae8183ca13181cbcd4020ff448b"
+    },
+    {
+      "path": "ci-job-logs/15_vitest (windows-latest, shard 2_4).txt",
+      "bytes": 450479,
+      "sha256": "099d39ac93894ef8da0c53b44339f076f44384e4417910b10e974553776b66ae"
+    },
+    {
+      "path": "ci-job-logs/16_Windows CUA host smoke.txt",
+      "bytes": 33763,
+      "sha256": "356d6cfa7f1f1efe56eeeaa28eb006ba1029a5ce1441c2de71cf6f3388fcdc8b"
+    },
+    {
+      "path": "ci-job-logs/17_behavior evals (offline tiers 1-3).txt",
+      "bytes": 33484,
+      "sha256": "2b13445c68311b2de8f6cc95f825e54e3bf3ac52da1db2286e97b88bcd3e8d1f"
+    },
+    {
+      "path": "ci-job-logs/18_packaged server smoke (windows-latest).txt",
+      "bytes": 34753,
+      "sha256": "ca48b36d2918f2649ddabb9b131e9b4dc0fe175be496616e94bc5cb1232b005c"
+    },
+    {
+      "path": "ci-job-logs/19_typecheck + lint.txt",
+      "bytes": 286884,
+      "sha256": "c284f13196acedbc7c3f833395bbf1820beb076e2c7cae817f12355fb13fc315"
+    },
+    {
+      "path": "ci-job-logs/2_vitest (windows-latest, shard 4_4).txt",
+      "bytes": 304512,
+      "sha256": "f8267dadff25d090fc1bc131e5dd6990da53799b21430479c7874a65befb6a9f"
+    },
+    {
+      "path": "ci-job-logs/3_control-plane check + workerd tests + dry run.txt",
+      "bytes": 60028,
+      "sha256": "2c4a3fa46e7c511a693f9189c35bb132438409365aa2b61845ca15e32b826d20"
+    },
+    {
+      "path": "ci-job-logs/4_packaged server smoke (ubuntu-latest).txt",
+      "bytes": 28915,
+      "sha256": "aa124c252144d11014d111d11ab7992d6ad49328933190060f812d3c3c2a4c63"
+    },
+    {
+      "path": "ci-job-logs/5_vitest (windows-latest, shard 1_4).txt",
+      "bytes": 388454,
+      "sha256": "514d5ed36d1b913233b20d005b730eeba28a9f13966b91823e9c70f66b20cce7"
+    },
+    {
+      "path": "ci-job-logs/6_cloudflared installer (Linux ARM64).txt",
+      "bytes": 17577,
+      "sha256": "386359f4e2131479de0ca237226b49376126317bdf3ade2acdd14742a2c75686"
+    },
+    {
+      "path": "ci-job-logs/7_vitest (ubuntu-latest, shard 3_4).txt",
+      "bytes": 313479,
+      "sha256": "7fa01b9e2e4feb5a5d3dab6eeae0691fbe1e5515e7949b0c95ff9841060834a6"
+    },
+    {
+      "path": "ci-job-logs/8_vitest (ubuntu-latest, shard 2_4).txt",
+      "bytes": 419241,
+      "sha256": "ce5b93aa86a3b7d64e623f2ce42bffec3e54d76089b83912a2efe33f2632bc9f"
+    },
+    {
+      "path": "ci-job-logs/9_renderer smoke (control-omb ui, Ubuntu 24.04).txt",
+      "bytes": 38440,
+      "sha256": "e4dbc30c008b7279281b4aa386a39e8f9271c1d2ab25a24d2939669a7d8a7ccc"
+    },
+    {
+      "path": "ci-windows-shard4-failure-api.log",
+      "bytes": 304512,
+      "sha256": "f8267dadff25d090fc1bc131e5dd6990da53799b21430479c7874a65befb6a9f"
+    },
+    {
+      "path": "ci-windows-shard4-failure.log",
+      "bytes": 82,
+      "sha256": "8d7e331f0b09aa04e7613a8463c709ad12933ca5d94582113df4c90d0f6dec3f"
+    },
+    {
+      "path": "ci39182338260-attempt1-logs.zip",
+      "bytes": 1380203,
+      "sha256": "ad79940f625ce079b83aec2b7669e7d172505d8c93a1722f964469d93338b39c"
+    },
+    {
+      "path": "finish.mjs",
+      "bytes": 6298,
+      "sha256": "e17efabec834ad8f01d21e5f813366e23b5ecc287c7fcad5939f5fb0fbe2e26c"
+    },
+    {
+      "path": "git-commit-3607e350e9e8da5c4c21dde37baf76c91ed9c858.json",
+      "bytes": 2601,
+      "sha256": "2b21df8cd1d7a69dd0786fded4c0dbc303d4fab559403861ab66526c5df95987"
+    },
+    {
+      "path": "git-commit-ab0cd72b4c2f004c1015adca034472241569c04b.json",
+      "bytes": 1188,
+      "sha256": "f9c886cc851059fe86778421b72d2a7fefcce110bc4b770021678356be654de9"
+    },
+    {
+      "path": "poll.mjs",
+      "bytes": 4689,
+      "sha256": "15aa78c30640a90c4074529baf998393c625bf65691b5ee63bf686f37521f6d4"
+    },
+    {
+      "path": "state.json",
+      "bytes": 95091,
+      "sha256": "78a1dca1a9f778ffe100184ca465e67d6e24f3f397a0c8e1b7f4b058259b5101"
+    },
+    {
+      "path": "terminal-receipt-038-parser-initial.json",
+      "bytes": 89887,
+      "sha256": "00ede57ddc38fcaac8653109e3bf19ab2171dcb60bcfd0d21b537e090d39a72e"
+    },
+    {
+      "path": "terminal-receipt-038.json",
+      "bytes": 89888,
+      "sha256": "a384de9121678da1f8f78431428ea80a4aa1fb9d24d3b957bffe82f0199a3fcc"
+    }
+  ]
+}

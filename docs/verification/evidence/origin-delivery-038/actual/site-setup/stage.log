@@ -1,0 +1,11 @@
+Scope: all 3 workspace projects
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Progress: resolved 17, reused 0, downloaded 0, added 0
+Progress: resolved 231, reused 0, downloaded 0, added 0
+Progress: resolved 231, reused 0, downloaded 0, added 0, done
+
+Done in 2.3s using pnpm v10.33.0
+Staged the site build context in C:\Users\aless\.codex\worktrees\origin-footer-single-row-034\Origin\.omb-scratch\site-stage-038-final
+{"source":"ab0cd72b4c2f004c1015adca034472241569c04b","files":152,"bytes":1254764,"archiveSha256":"f5a6b070ae7e462bcb3d89c32417273d4bf50ca1b070cb6dcf2f5dd1f53b3204","productionChanged":false}
+(node:40932) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)

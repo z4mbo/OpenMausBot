@@ -1,0 +1,197 @@
+{
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "changedFiles": [
+    {
+      "path": "docs/team-sharing.md",
+      "originExists": true,
+      "originGitBlob": "269014d3dd18f629a8dffc0bf3552131fc7c3530"
+    },
+    {
+      "path": "electron/package-link.mjs",
+      "originExists": true,
+      "originGitBlob": "51efb27ab630580c447641c6574bb02a6fc61fb2"
+    },
+    {
+      "path": "electron/package-link.node-test.mjs",
+      "originExists": true,
+      "originGitBlob": "57067b5f478079dd656224d27ee561e1e169ce44"
+    },
+    {
+      "path": "scripts/testing/file-size-ratchet.test.ts",
+      "originExists": true,
+      "originGitBlob": "f2212e799756377d3ae44753e93b7446a8e81563"
+    },
+    {
+      "path": "server/cursor-session.test.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "server/cursor-session.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "server/fixtures/grok-share-page-anonymous.html",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "server/fixtures/grok-share-page.html",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "server/request-auth.test.ts",
+      "originExists": true,
+      "originGitBlob": "8a5aaca78b31bcc79a90c9560136e02feaaba15c"
+    },
+    {
+      "path": "server/routes/team-library-grok.test.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "server/routes/teams.ts",
+      "originExists": true,
+      "originGitBlob": "07a27079a71610ca633c3925e93264f11302b149"
+    },
+    {
+      "path": "server/team-library.test.ts",
+      "originExists": true,
+      "originGitBlob": "6a4a0af08a9e8755e0007522e7d3fc2e679a12fb"
+    },
+    {
+      "path": "server/team-library.ts",
+      "originExists": true,
+      "originGitBlob": "ce58a92c812c0791f0364f1ec9778bb19dc679c5"
+    },
+    {
+      "path": "shared/grok-import.test.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "shared/grok-import.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/GrokBotMark.test.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/GrokBotMark.tsx",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/GrokFinishSetup.test.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/GrokFinishSetup.tsx",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/GrokImportBox.test.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/GrokImportBox.tsx",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/GrokImportFlow.tsx",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/ImportSettings.test.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/ImportSettings.tsx",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/ProviderIcons.tsx",
+      "originExists": true,
+      "originGitBlob": "63ed7182894c9b9335ce797ffbe5f8f6a94cbb46"
+    },
+    {
+      "path": "src/components/SettingsModal.groups.test.ts",
+      "originExists": true,
+      "originGitBlob": "d9026e99a28158b8439ecdefaee69422aecd3a43"
+    },
+    {
+      "path": "src/components/SettingsModal.simple.test.ts",
+      "originExists": true,
+      "originGitBlob": "e416a60408b606cf570b5630d46514b2c1703c6e"
+    },
+    {
+      "path": "src/components/SettingsModal.tsx",
+      "originExists": true,
+      "originGitBlob": "b98eff9d6227176262b59112ad6aab7be4d55842"
+    },
+    {
+      "path": "src/components/TeamImportDetails.tsx",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/TeamLibraryPanel.tsx",
+      "originExists": true,
+      "originGitBlob": "da7d676c586bcfd5b7b3e81b1964bf1b85b54934"
+    },
+    {
+      "path": "src/components/onboarding/beats/ImportBeat.test.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/components/onboarding/beats/ImportBeat.tsx",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/lib/team-import.test.ts",
+      "originExists": true,
+      "originGitBlob": "befdf8cf3803c214048cc943aeb1c9bbe8b58849"
+    },
+    {
+      "path": "src/lib/team-import.ts",
+      "originExists": true,
+      "originGitBlob": "5f25501835d23adcbe47986ad31f373b6d460117"
+    },
+    {
+      "path": "src/lib/template-add.ts",
+      "originExists": false,
+      "originGitBlob": null
+    },
+    {
+      "path": "src/locales/en.json",
+      "originExists": true,
+      "originGitBlob": "88046bea5f142c03e0bf3185cf4cc2478630b6c6"
+    },
+    {
+      "path": "src/state/store.tsx",
+      "originExists": true,
+      "originGitBlob": "aa7e482925168c781e0b2e4a20e6470562d194b1"
+    }
+  ],
+  "missingImportPageDependencies": [
+    "src/lib/setup-import.ts",
+    "shared/setup-import.ts",
+    "server/setup-import.ts",
+    "server/routes/setup-import.ts",
+    "src/components/onboarding/beats/ImportBeat.tsx"
+  ]
+}

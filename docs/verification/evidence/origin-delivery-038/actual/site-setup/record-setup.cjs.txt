@@ -1,0 +1,24 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const cp = require('node:child_process');
+const crypto = require('node:crypto');
+const root = path.resolve(__dirname, '../..');
+const scratch = path.join(root, '.omb-scratch');
+const source = 'ab0cd72b4c2f004c1015adca034472241569c04b';
+const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+if (cp.execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root }).toString().trim() !== source || cp.execFileSync('git', ['status', '--porcelain=v1'], { cwd: root }).length) throw new Error('Frozen source/clean checkout changed');
+const ready = JSON.parse(fs.readFileSync(path.join(__dirname, 'persistent-fixture-ready.json'), 'utf8'));
+const helpers = JSON.parse(fs.readFileSync(path.join(__dirname, 'helpers.json'), 'utf8'));
+for (const helper of helpers.adapted) {
+  if (sha(fs.readFileSync(helper.original)) !== helper.originalSha256 || sha(fs.readFileSync(path.join(root, helper.output))) !== helper.adaptedSha256) throw new Error('Helper provenance changed');
+}
+const operations = { source, version: '0.2.14', scope: 'private staging/image/loopback setup only', completedExit0: ['stage', 'remote-stage-create', 'context-upload', 'helper-upload', 'image-build', 'identity', 'preview-start', 'read-private-runtime'], ongoing: { execSession: 87168, tunnelPid: ready.tunnel.pid, proxyPid: ready.proxy.pid, browserUrl: ready.url, visualOwner: 'root via Cua', visualAcceptance: 'pending' }, firstLauncher: { returnedExit0: true, childrenAbsentAfterReturn: true, exactHostTeardownCauseProven: false, replacementUsesAttachedSession: true }, productionChanged: false, trackedCheckoutClean: true };
+fs.writeFileSync(path.join(__dirname, 'operations.json'), JSON.stringify(operations, null, 2) + '\n', { flag: 'wx' });
+const helperNames = helpers.adapted.map(item => item.output.replace(/^\.omb-scratch\//, ''));
+const setupNames = ['REPORT.md', 'helpers.json', 'prepare-tools.cjs', 'prepare-browser-contract.mjs', 'browser-observe.js.txt', 'browser-contract.json', 'persistent-browser-ready-contract.json', 'read-private-runtime.cjs', 'runtime.json', 'start-loopback-fixture.cjs', 'record-setup.cjs', 'operations.json', 'stage.log', 'remote-stage-create.log', 'context-upload.log', 'helper-upload.log', 'image-build.log', 'identity.log', 'preview-start.log', 'fixture-start.log', 'fixture-ready.json', 'persistent-fixture-ready.json'];
+const names = [...helperNames, 'site-context-038-final.tgz', 'site-stage-038-proof.json', 'site-release-identity-0.2.14-038.json', ...setupNames.map(name => 'site-038-preparation/' + name)].sort();
+const files = names.map(file => { const bytes = fs.readFileSync(path.join(scratch, file)); return { file, size: bytes.length, sha256: sha(bytes) }; });
+const manifest = Buffer.from(JSON.stringify({ schemaVersion: 1, source, version: '0.2.14', cycle: '038', status: 'setup-ready-visual-acceptance-pending', base: scratch, files, count: files.length, totalBytes: files.reduce((total, item) => total + item.size, 0), activeProcessLogs: 'retained separately; not immutable until shutdown' }, null, 2) + '\n');
+fs.writeFileSync(path.join(__dirname, 'setup-manifest.json'), manifest, { flag: 'wx' });
+for (const item of files) { const bytes = fs.readFileSync(path.join(scratch, item.file)); if (bytes.length !== item.size || sha(bytes) !== item.sha256) throw new Error('Evidence hash mismatch'); }
+console.log(JSON.stringify({ files: files.length, totalBytes: files.reduce((total, item) => total + item.size, 0), manifestSha256: sha(manifest), reportSha256: sha(fs.readFileSync(path.join(__dirname, 'REPORT.md'))), browserUrl: ready.url, visualAcceptance: 'pending' }));

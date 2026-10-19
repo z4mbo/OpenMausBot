@@ -1,0 +1,9 @@
+{
+  "scope": "Private PE version audit helper expectation",
+  "firstError": "Unexpected Windows version metadata",
+  "incorrectExpectedProductVersion": "0.2.14",
+  "actualProductVersion": "0.2.14.0",
+  "actualFileVersion": "0.2.14",
+  "resolution": "Retain raw metadata and validate Windows PE product version with trailing fourth component; package.json and updater versions remain 0.2.14",
+  "productFailure": false
+}

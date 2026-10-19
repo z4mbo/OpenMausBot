@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { stripTypeScriptTypes } from 'node:module';
+import { resolve } from 'node:path';
+import vm from 'node:vm';
+import { deriveFrozenExpectations } from '../frozen-expectations-038.mjs';
+
+const root = resolve(import.meta.dirname, '../..');
+const source = 'ab0cd72b4c2f004c1015adca034472241569c04b';
+assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), source);
+const bytes = execFileSync('git', ['show', `${source}:shared/origin-releases.ts`], { cwd: root });
+const code = stripTypeScriptTypes(bytes.toString()).replace(/^\s*export\s+/gm, '');
+const releases = JSON.parse(vm.runInNewContext(`${code}\nJSON.stringify(releases)`, {}, { timeout: 1000 }));
+const expectations = deriveFrozenExpectations(source);
+assert.equal(releases[0].version, '0.2.14');
+const cases = [];
+for (const theme of ['light', 'dark']) for (const width of [375, 1440]) for (const route of ['/', '/login', '/signup', '/whats-new']) cases.push({ name: `${route === '/' ? 'landing' : route.slice(1)}-${width}-${theme}`, route, theme, width, reducedMotion: true });
+const observation = readFileSync(resolve(import.meta.dirname, 'browser-observe.js.txt'), 'utf8');
+const output = { version: '0.2.14', cycle: '038', source, image: null, expectations, cases, releases, observation, limits: { browserOwner: 'root via Cua only', accountSubmissions: 0, policyAndBackendConnections: 'deliberately blocked by GET/HEAD proxy and CSP', signupAcceptance: false, nativeAcceptance: false, productionAcceptance: false }, readiness: ['actual visible H1', 'fonts loaded', 'scroll-triggered landing sections and visible images settled before full-page capture', 'inspect raw screenshots for compositor/readiness defects', 'record loading/timeout/Retry state actually observed'] };
+writeFileSync(resolve(import.meta.dirname, 'browser-contract.json'), JSON.stringify(output, null, 2) + '\n', { flag: 'wx' });
+console.log(JSON.stringify({ source, cases: cases.length, ...expectations }));

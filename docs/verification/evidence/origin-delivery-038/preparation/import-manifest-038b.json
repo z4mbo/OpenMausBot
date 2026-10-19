@@ -1,0 +1,94 @@
+{
+  "version": "0.2.14",
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "phase": "037b038b-targeted-retry-preparation",
+  "old037038Immutable": true,
+  "ciRun": 39182338260,
+  "plannedCiAttempt": 2,
+  "nativeAttempt": 1,
+  "backendSiteAttempt": 1,
+  "initialFailureRootCause": "unproved",
+  "sourceFixClaimed": false,
+  "actualPositiveAcceptance": false,
+  "rootOrProductionWrites": false,
+  "files": [
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037b.mjs",
+      "importTo": ".omb-scratch/prepublication-037b.mjs",
+      "bytes": 25941,
+      "sha256": "ba70dccb6dab5dee6b371e1edbb8035984ddd4e07564056b413d46d5bd38bcd6"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\ci-attempt1-terminal-038.json",
+      "importTo": ".omb-scratch/ci-attempt1-terminal-038.json",
+      "bytes": 59459,
+      "sha256": "d2e194bb1c65ff24284b822f38baf62a1ea8d0251913bdf30b613d427512e002"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\ci-attempt1-terminal-receipt-038.json",
+      "importTo": ".omb-scratch/ci-attempt1-terminal-receipt-038.json",
+      "bytes": 89888,
+      "sha256": "a384de9121678da1f8f78431428ea80a4aa1fb9d24d3b957bffe82f0199a3fcc"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037b-ci-latest-jobs-raw.json",
+      "importTo": ".omb-scratch/prepublication-037b-ci-latest-jobs-raw.json",
+      "bytes": 57737,
+      "sha256": "7ef42f974499c7476a5105022cd199ceda730968d94659b12f8ee3cbe2264cc1"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\test-prepublication-037b-provenance.mjs",
+      "importTo": ".omb-scratch/test-prepublication-037b-provenance.mjs",
+      "bytes": 3689,
+      "sha256": "95ad86f6f703daf170bf928b50253166a4da37117f6c1fdad7be4f9abfddfce8"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037b-provenance-test-report.json",
+      "importTo": ".omb-scratch/prepublication-037b-provenance-test-report.json",
+      "bytes": 798,
+      "sha256": "66fb92c1a5385ec98faa204069e335640827ab464d2ab4c3c26e149367d9c3bc"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\delivery-preparation-038b\\finalize-delivery-038b.mjs",
+      "importTo": ".omb-scratch/delivery-preparation-038b/finalize-delivery-038b.mjs",
+      "bytes": 19967,
+      "sha256": "6155a91000ca64e51b9c4085be78accd941c709edcc32e10b5ad7e1608758715"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\delivery-preparation-038b\\delivery-receipt-038b.template.json",
+      "importTo": ".omb-scratch/delivery-preparation-038b/delivery-receipt-038b.template.json",
+      "bytes": 11166,
+      "sha256": "bce39ff3558ce8de75b78989effdaaacd41f0ba90c95766a6f2b3335fa44ad95"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\delivery-preparation-038b\\final-audit-report-038b.template.md",
+      "importTo": ".omb-scratch/delivery-preparation-038b/final-audit-report-038b.template.md",
+      "bytes": 5210,
+      "sha256": "85960f08fcd67fced0050b95bd43ae5c6a0cd044e5b06d58aa597f9aac0fc165"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\delivery-preparation-038b\\evidence-selection-038b.json",
+      "importTo": ".omb-scratch/delivery-preparation-038b/evidence-selection-038b.json",
+      "bytes": 33948,
+      "sha256": "309d04599b9d48ad3da7a46f6b92287c22ba61bdb1b17391d0994595ac5ce54e"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\delivery-preparation-038b\\finalize-inputs-038b.template.json",
+      "importTo": ".omb-scratch/delivery-preparation-038b/finalize-inputs-038b.template.json",
+      "bytes": 2601,
+      "sha256": "d441a50e893ec50bb9a2609671ac8e279759c6f2e6c7fbfb73ef1b9fbb615bf4"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\delivery-preparation-038b\\preparation-check-038b.json",
+      "importTo": ".omb-scratch/delivery-preparation-038b/preparation-check-038b.json",
+      "bytes": 638,
+      "sha256": "9f9a86ba161709385911e7ce3f75c71aba4e809a66c624127a09bb76f39800eb"
+    },
+    {
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\delivery-preparation-038b\\HANDOFF-038b.md",
+      "importTo": ".omb-scratch/delivery-preparation-038b/HANDOFF-038b.md",
+      "bytes": 3249,
+      "sha256": "030ed718de57c3057a68d1f92907026bfd848bf18a88a64a1419439d106c8d3c"
+    }
+  ]
+}

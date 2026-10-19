@@ -1,0 +1,29 @@
+{
+  "name": "login-375-light",
+  "route": "/login",
+  "theme": "light",
+  "width": 375,
+  "reducedMotion": true,
+  "alerts": [],
+  "articles": [],
+  "canonicalNotes": 0,
+  "clientWidth": 365,
+  "cssHeight": 900,
+  "cssWidth": 375,
+  "currentNotes": null,
+  "currentVersion": null,
+  "currentVersionDisplay": null,
+  "downloadLinks": [
+    "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+  ],
+  "fonts": "loaded",
+  "h1": "Sign in to Origin",
+  "headingColor": "rgb(13, 13, 13)",
+  "htmlClass": "__variable_d8ebd1",
+  "images": [],
+  "path": "/login",
+  "preferredDark": false,
+  "scrollHeight": 1056,
+  "scrollWidth": 365,
+  "screenshotScope": "viewport"
+}

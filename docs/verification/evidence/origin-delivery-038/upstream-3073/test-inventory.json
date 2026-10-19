@@ -1,0 +1,660 @@
+{
+  "scope": "Static upstream test descriptions only; no tests executed and not a runtime pass count",
+  "files": [
+    {
+      "path": "electron/package-link.node-test.mjs",
+      "staticCaseTitles": [
+        {
+          "line": 7,
+          "title": "accepts a public GitHub package URL"
+        },
+        {
+          "line": 13,
+          "title": "accepts a Grok Bot share link as its canonical x.ai address"
+        },
+        {
+          "line": 22,
+          "title": "rejects other commands, hosts, protocols, credentials, and unsupported file types"
+        }
+      ]
+    },
+    {
+      "path": "scripts/testing/file-size-ratchet.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 62,
+          "title": "no listed file grows, and no file over 1,000 lines goes unlisted"
+        }
+      ]
+    },
+    {
+      "path": "server/cursor-session.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 69,
+          "title": "builds the CLI"
+        },
+        {
+          "line": 80,
+          "title": "polls api2.cursor.sh until the person approves, then keeps the token in a 0600 file and never shows it"
+        },
+        {
+          "line": 109,
+          "title": "gives up after ten minutes, and says so when Cursor refuses"
+        },
+        {
+          "line": 124,
+          "title": "signing out removes the stored session"
+        },
+        {
+          "line": 136,
+          "title": "forgets an expired token without calling Cursor"
+        },
+        {
+          "line": 145,
+          "title": "asks api2.cursor.sh for the import details with the token, downloads the recipe without it, and maps it"
+        },
+        {
+          "line": 176,
+          "title": "sends the token only to api2.cursor.sh, and refuses a download address that is not public https"
+        },
+        {
+          "line": 190,
+          "title": "falls back with one line on 401, a bad shape, a failed download or no network"
+        },
+        {
+          "line": 221,
+          "title": "says a Grok Bot plan is needed, and keeps the sign-in, when Cursor refuses an account without one"
+        },
+        {
+          "line": 229,
+          "title": "refreshes the token once with the refresh token from sign-in, then asks again"
+        },
+        {
+          "line": 252,
+          "title": "takes an inline recipe or a grokbot-bundle/v1 straight from the details"
+        },
+        {
+          "line": 260,
+          "title": "never writes the token to the console, and masks it wherever the app redacts text"
+        }
+      ]
+    },
+    {
+      "path": "server/request-auth.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 37,
+          "title": "accepts localhost, 127.x and ::1 with or without a port"
+        },
+        {
+          "line": 45,
+          "title": "allows absent origins and loopback origins only"
+        },
+        {
+          "line": 56,
+          "title": "derives the request origin from Host and the proxy"
+        },
+        {
+          "line": 62,
+          "title": "treats absent or matching Origin as same-origin, anything else as foreign"
+        },
+        {
+          "line": 68,
+          "title": "parses cookies and names the session cookie per port and environment"
+        },
+        {
+          "line": 82,
+          "title": "takes the LAST forwarded hop, only from a proxy on this machine, and sanitises it"
+        },
+        {
+          "line": 93,
+          "title": "keeps full backups, credentials and replacement behind admin scope"
+        },
+        {
+          "line": 98,
+          "title": "is default deny: chat, approvals, rooms, attachments, routines and own session are client; everything else admin"
+        },
+        {
+          "line": 140,
+          "title": "limits a client"
+        },
+        {
+          "line": 170,
+          "title": "accepts authenticated relay mutations without exposing the desktop owner capability"
+        },
+        {
+          "line": 221,
+          "title": "keeps the loopback owner path exactly as before"
+        },
+        {
+          "line": 233,
+          "title": "rejects revoked email cookies, bearers and tickets without falling back to loopback ownership"
+        },
+        {
+          "line": 250,
+          "title": "renews a session only for a request that passed the origin and scope checks"
+        },
+        {
+          "line": 277,
+          "title": "requires the packaged desktop capability for public loopback mutations"
+        },
+        {
+          "line": 321,
+          "title": "never grants loopback trust to a request that came through a proxy, whatever Host it carries"
+        },
+        {
+          "line": 335,
+          "title": "admits a bearer session from any host and reports how it authenticated"
+        },
+        {
+          "line": 342,
+          "title": "admits the cookie only same-origin, so a foreign page cannot ride it"
+        },
+        {
+          "line": 352,
+          "title": "lets a browser sign-in"
+        },
+        {
+          "line": 375,
+          "title": "accepts a stream ticket on the event stream only, once"
+        },
+        {
+          "line": 386,
+          "title": "enforces scope: a client-only session cannot manage pairing or write config"
+        },
+        {
+          "line": 435,
+          "title": "explains a dead credential instead of silently falling back, even on loopback"
+        },
+        {
+          "line": 451,
+          "title": "counts as proxied whatever the headers say; a bare mock without a socket does not"
+        },
+        {
+          "line": 458,
+          "title": "attributes pairing attempts to the address the tunnel forwarded"
+        },
+        {
+          "line": 463,
+          "title": "never grants loopback trust over the socket, even with a loopback Host and no forwarded headers; a session works"
+        },
+        {
+          "line": 532,
+          "title": "keeps the owner exactly as before when no trust is given or trust is owner"
+        },
+        {
+          "line": 540,
+          "title": "lets a service reach only its routes, as a client without admin"
+        },
+        {
+          "line": 552,
+          "title": "still admits a real session with its own scopes on a service-trust server"
+        },
+        {
+          "line": 560,
+          "title": "ignores service trust while the desktop capability is in force"
+        },
+        {
+          "line": 565,
+          "title": "defaults to service on a hosted workspace, owner elsewhere, and lets the operator choose"
+        },
+        {
+          "line": 585,
+          "title": "is always service on an OMB Cloud home, where a local request is only ever a process on the machine"
+        },
+        {
+          "line": 594,
+          "title": "lets only the CLI that started the server, holding its secret, mint a pairing code under service trust"
+        },
+        {
+          "line": 635,
+          "title": "tells a browser request from a command-line one"
+        },
+        {
+          "line": 648,
+          "title": "refuses a self-hosted server"
+        },
+        {
+          "line": 660,
+          "title": "refuses it under service trust too, where it would otherwise get the service routes"
+        },
+        {
+          "line": 665,
+          "title": "lets the desktop app"
+        },
+        {
+          "line": 682,
+          "title": "still admits a browser that signed in"
+        },
+        {
+          "line": 690,
+          "title": "trusts local browsers only on a development server that asked for it"
+        }
+      ]
+    },
+    {
+      "path": "server/routes/team-library-grok.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 55,
+          "title": "is an admin route, like the GitHub import"
+        },
+        {
+          "line": 63,
+          "title": "answers the public card for a share link"
+        },
+        {
+          "line": 73,
+          "title": "refuses a missing or foreign link without fetching, and passes on a missing bot"
+        },
+        {
+          "line": 85,
+          "title": "signs in to Cursor, then answers the full setup with the card, never the token"
+        },
+        {
+          "line": 113,
+          "title": "keeps the card and says why when Cursor refuses the full setup"
+        },
+        {
+          "line": 127,
+          "title": "calls Cursor for nothing while signed out"
+        }
+      ]
+    },
+    {
+      "path": "server/team-library.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 60,
+          "title": "validates catalog paths and adds the trusted repository URL"
+        },
+        {
+          "line": 70,
+          "title": "loads only the manifest selected by the trusted catalog"
+        },
+        {
+          "line": 84,
+          "title": "normalizes public GitHub repository, blob, and raw links"
+        },
+        {
+          "line": 103,
+          "title": "falls back from main to master for a repository link"
+        },
+        {
+          "line": 116,
+          "title": "loads a shared team file (package v2) from GitHub as a file, without its claimed publisher"
+        },
+        {
+          "line": 132,
+          "title": "reads the page"
+        },
+        {
+          "line": 150,
+          "title": "accepts the grokbot:// button link and a page without a creator"
+        },
+        {
+          "line": 158,
+          "title": "follows a marketplace page to the share link its Add button points at"
+        },
+        {
+          "line": 171,
+          "title": "falls back to the og tags when the embedded record is missing"
+        },
+        {
+          "line": 185,
+          "title": "never fetches anything but an x.ai share page"
+        },
+        {
+          "line": 199,
+          "title": "follows a redirect only while it stays on x.ai over https"
+        },
+        {
+          "line": 219,
+          "title": "caps the page at 2 MB, names a missing bot, and reports a timeout"
+        }
+      ]
+    },
+    {
+      "path": "shared/grok-import.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 42,
+          "title": "reads x.ai share links and the grokbot:// button link"
+        },
+        {
+          "line": 52,
+          "title": "refuses other hosts, schemes, paths and ids"
+        },
+        {
+          "line": 71,
+          "title": "reads a reply wrapped in a code fence and surrounding chat"
+        },
+        {
+          "line": 84,
+          "title": "reads a bare reply and a skill body that holds its own code fence"
+        },
+        {
+          "line": 90,
+          "title": "reads pi-grokbot-import"
+        },
+        {
+          "line": 120,
+          "title": "refuses garbage with a sentence that says what to paste"
+        },
+        {
+          "line": 135,
+          "title": "makes one valid shared-team package with the standing instructions, credited to the share link"
+        },
+        {
+          "line": 157,
+          "title": "turns skills into SKILL.md entries the bot holds (they arrive off), dropping one with no text"
+        },
+        {
+          "line": 168,
+          "title": "keeps clock routines paused, and lists event and unreadable ones with their original text"
+        },
+        {
+          "line": 185,
+          "title": "reads plain times and falls back to the person"
+        },
+        {
+          "line": 204,
+          "title": "lists apps as connector requirements, Composio slugs when known"
+        },
+        {
+          "line": 215,
+          "title": "seeds memories only when the export has them"
+        },
+        {
+          "line": 223,
+          "title": "shortens instructions over the limit and says so"
+        },
+        {
+          "line": 232,
+          "title": "keeps at most 30 skills and 50 routines, and replaces key-shaped text"
+        },
+        {
+          "line": 248,
+          "title": "writes instructions from the public description and credits the share link"
+        },
+        {
+          "line": 265,
+          "title": "asks for one JSON block with everything verbatim and nothing private"
+        },
+        {
+          "line": 279,
+          "title": "picks the closest bot colour and gives greys blue"
+        },
+        {
+          "line": 290,
+          "title": "reads the slug of an x.ai marketplace page, and nothing else"
+        }
+      ]
+    },
+    {
+      "path": "src/components/GrokBotMark.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 9,
+          "title": "is plain path data: commands and numbers, nothing else"
+        },
+        {
+          "line": 14,
+          "title": "renders a static svg with one path: no script, handlers, links, styles or foreign content"
+        }
+      ]
+    },
+    {
+      "path": "src/components/GrokFinishSetup.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 28,
+          "title": "is offered only when something is left to do"
+        },
+        {
+          "line": 35,
+          "title": "asks the Chief of Staff, or the imported bot when there is none"
+        },
+        {
+          "line": 41,
+          "title": "writes one message with the link, the apps to connect, the tools with no match and the left-out routines verbatim"
+        },
+        {
+          "line": 52,
+          "title": "prepares the message in the helper"
+        },
+        {
+          "line": 64,
+          "title": "shows what is left and the button after Add"
+        }
+      ]
+    },
+    {
+      "path": "src/components/GrokImportBox.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 20,
+          "title": "shows the share card with its creator, the export prompt step, the reply box and the starter"
+        },
+        {
+          "line": 33,
+          "title": "offers the starter only once a card is loaded, and says when the prompt was copied"
+        },
+        {
+          "line": 39,
+          "title": "offers the Cursor sign-in on the card, says while it waits, and shows who is signed in"
+        },
+        {
+          "line": 52,
+          "title": "offers the Cursor sign-in before any link is loaded, once, and keeps it on the card after"
+        },
+        {
+          "line": 61,
+          "title": "titles what an export could not carry as Left out in the preview"
+        },
+        {
+          "line": 71,
+          "title": "shows the Grok Bot mark on the card, the sign-in button and the box heading"
+        },
+        {
+          "line": 79,
+          "title": "starts the shared flow on the link box, framed or bare"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ImportSettings.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 23,
+          "title": "draws From your AI apps and From Grok Bot"
+        },
+        {
+          "line": 39,
+          "title": "offers the welcome step"
+        },
+        {
+          "line": 47,
+          "title": "says what happened: looking, nothing new, not this computer, or the result"
+        },
+        {
+          "line": 54,
+          "title": "uses the one shared Grok Bot import in Templates, Settings and the welcome step"
+        }
+      ]
+    },
+    {
+      "path": "src/components/SettingsModal.groups.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 107,
+          "title": "files every page under You, AI, Computers or Account, in that order"
+        },
+        {
+          "line": 115,
+          "title": "shows every desktop page under its labelled group"
+        },
+        {
+          "line": 129,
+          "title": "keeps the browser-only pages for a hosted workspace"
+        },
+        {
+          "line": 137,
+          "title": "shows a paired remote client only Appearance, Remote access and Servers"
+        },
+        {
+          "line": 142,
+          "title": "keeps the old deep links landing on the same page"
+        }
+      ]
+    },
+    {
+      "path": "src/components/SettingsModal.simple.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 97,
+          "title": "draws at most five pages on the desktop, and none of the Advanced-only ones"
+        },
+        {
+          "line": 108,
+          "title": "files every Advanced page under one Simple page, or hides it"
+        },
+        {
+          "line": 116,
+          "title": "keeps General as it is, Advanced mode switch first"
+        },
+        {
+          "line": 124,
+          "title": "stacks Model providers, API keys and Decision model on AI, each under its heading"
+        },
+        {
+          "line": 135,
+          "title": "stacks Remote access, Servers, Local VM, the built-in browser and Logins on Computers"
+        },
+        {
+          "line": 145,
+          "title": "stacks OMB Cloud, Organization and Import on Account in the desktop app"
+        },
+        {
+          "line": 153,
+          "title": "adds People and Activity to Account for a hosted workspace"
+        },
+        {
+          "line": 162,
+          "title": "drops Account when nothing on it is shown"
+        },
+        {
+          "line": 168,
+          "title": "keeps a paired remote client"
+        },
+        {
+          "line": 211,
+          "title": "scrolls a later section of a stacked page into view, and starts a page at its top"
+        },
+        {
+          "line": 246,
+          "title": "is no longer on Experimental, which keeps skill drafting"
+        },
+        {
+          "line": 255,
+          "title": "is found by searching for the browser under Local VM in Advanced"
+        }
+      ]
+    },
+    {
+      "path": "src/components/onboarding/beats/ImportBeat.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 79,
+          "title": "offers one ticked row per kind found, with its count and sources"
+        },
+        {
+          "line": 94,
+          "title": "brings in what is ticked, counts it for analytics without names, and moves on after a moment"
+        },
+        {
+          "line": 110,
+          "title": "leaves out an unticked kind, and cannot run with nothing ticked"
+        },
+        {
+          "line": 126,
+          "title": "tells the flow it is busy for exactly as long as a run lasts"
+        },
+        {
+          "line": 142,
+          "title": "says when bringing in failed and lets the person try again or skip"
+        },
+        {
+          "line": 153,
+          "title": "skips with counts only"
+        },
+        {
+          "line": 160,
+          "title": "shows the one-line result, with notes for what was left out, and Continue"
+        },
+        {
+          "line": 172,
+          "title": "shows a result where nothing came in, because it failed, without the success mark"
+        },
+        {
+          "line": 180,
+          "title": "does not move on by itself when it comes back to a result"
+        },
+        {
+          "line": 188,
+          "title": "offers an optional Grok Bot row that opens the same Grok import inline, and closes again"
+        },
+        {
+          "line": 203,
+          "title": "can be skipped with the Grok Bot row open, and adds no step of its own"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/team-import.test.ts",
+      "staticCaseTitles": [
+        {
+          "line": 13,
+          "title": "previews numbered copies using the same name allocator as the importer"
+        },
+        {
+          "line": 22,
+          "title": "previews portable backups and validates their references before confirmation"
+        },
+        {
+          "line": 57,
+          "title": "rejects unsupported and empty files"
+        },
+        {
+          "line": 64,
+          "title": "previews the complete package setup before installation"
+        },
+        {
+          "line": 104,
+          "title": "previews a portable Markdown playbook"
+        },
+        {
+          "line": 136,
+          "title": "previews every part of a shared team (package v2) with the importer"
+        },
+        {
+          "line": 160,
+          "title": "previews a preset file (skills and presets, no team) as preset bots for New bot"
+        },
+        {
+          "line": 167,
+          "title": "names the problem in a shared team before anything is added"
+        },
+        {
+          "line": 193,
+          "title": "previews a pasted reply (code fence and all) as a shared team with what was left out"
+        },
+        {
+          "line": 214,
+          "title": "previews a dropped grokbot-bundle/v1 file, and a reply without the format through the Grok box"
+        }
+      ]
+    }
+  ]
+}

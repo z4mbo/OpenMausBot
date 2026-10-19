@@ -1,0 +1,50 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const cp = require('node:child_process');
+const crypto = require('node:crypto');
+const repo = path.resolve(__dirname, '../..');
+const frozen = 'ab0cd72b4c2f004c1015adca034472241569c04b';
+const nativeRun = 39182331813;
+const monitor = 'C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin/.omb-scratch/monitor-038';
+const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+assert.equal(cp.execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repo, encoding: 'utf8' }).trim(), frozen);
+const expected = new Map([
+  ['39182331813-attempt1-terminal-artifacts.json', 'a5d686e814bec967920b295a9b6323fd40c6a8ea8704300d9a17178a5ca48c44'],
+  ['39182331813-attempt1-terminal-run.json', 'b3eb6120a7c733651a7be3a2f201a350e95de56f3c3e4b0a2abd041752594040'],
+  ['39182331813-attempt1-terminal-jobs.json', '8742b175a12f34b9dc4c69a98f8ef5ddc94b1d7bddc03bfab5fad9cb22be3264'],
+]);
+for (const [name, digest] of expected) {
+  const data = fs.readFileSync(path.join(monitor, name)); assert.equal(sha(data), digest);
+  fs.writeFileSync(path.join(__dirname, name), data, { flag: 'wx' });
+}
+const metadata = JSON.parse(fs.readFileSync(path.join(__dirname, '39182331813-attempt1-terminal-artifacts.json'), 'utf8'));
+assert.equal(metadata.total_count, 2);
+const raw = path.join(__dirname, 'raw'); fs.mkdirSync(raw);
+async function download(artifact) {
+  assert.equal(artifact.workflow_run.id, nativeRun); assert.equal(artifact.workflow_run.head_sha, frozen); assert.equal(artifact.expired, false);
+  assert(['origin-mac', 'origin-windows'].includes(artifact.name)); assert.match(artifact.digest, /^sha256:[a-f0-9]{64}$/);
+  const filename = path.join(raw, artifact.name + '.zip');
+  const fd = fs.openSync(filename, 'wx'); const err = fs.openSync(path.join(__dirname, artifact.name + '-download.stderr.log'), 'wx');
+  const args = ['api', '--method', 'GET', `repos/z4mbo/Origin/actions/artifacts/${artifact.id}/zip`];
+  const startedAt = new Date().toISOString();
+  const child = cp.spawn('C:/Program Files/GitHub CLI/gh.exe', args, { cwd: repo, stdio: ['ignore', fd, err], windowsHide: true });
+  fs.closeSync(fd); fs.closeSync(err);
+  console.log(`Downloading ${artifact.name}: artifact${artifact.id}, process${child.pid}`);
+  const outcome = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', (code, signal) => resolve({ code, signal })); });
+  const status = { artifactId: artifact.id, name: artifact.name, args, startedAt, finishedAt: new Date().toISOString(), outcome, filename, apiReportedBytes: artifact.size_in_bytes, apiReportedDigest: artifact.digest };
+  fs.writeFileSync(path.join(__dirname, artifact.name + '-download.json'), JSON.stringify(status, null, 2) + '\n', { flag: 'wx' });
+  assert.equal(outcome.code, 0, `${artifact.name} download failed`);
+  const hash = crypto.createHash('sha256'); let size = 0;
+  for await (const bytes of fs.createReadStream(filename)) { size += bytes.length; hash.update(bytes); }
+  const actual = { ...status, actualBytes: size, actualSha256: hash.digest('hex') };
+  assert.equal(actual.actualBytes, artifact.size_in_bytes); assert.equal('sha256:' + actual.actualSha256, artifact.digest);
+  actual.apiAndActualMatch = true;
+  fs.writeFileSync(path.join(__dirname, artifact.name + '-archive-verification.json'), JSON.stringify(actual, null, 2) + '\n', { flag: 'wx' });
+  console.log(JSON.stringify({ name: artifact.name, bytes: size, sha256: actual.actualSha256, apiAndActualMatch: true }));
+  return actual;
+}
+Promise.all(metadata.artifacts.map(download)).then(results => {
+  fs.writeFileSync(path.join(__dirname, 'download-ready.json'), JSON.stringify({ frozenSource: frozen, nativeRun, attempt: 1, version: '0.2.14', archiveDownloads: results, readyAt: new Date().toISOString(), allActualArchiveDigestsVerified: true }, null, 2) + '\n', { flag: 'wx' });
+  console.log('Both actual API archives verified; safe extraction may begin.');
+}).catch(error => { console.error(error.stack); process.exitCode = 1; });

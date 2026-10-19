@@ -1,0 +1,299 @@
+{
+  "name": "whats-new-1440-light",
+  "route": "/whats-new",
+  "theme": "light",
+  "width": 1440,
+  "reducedMotion": true,
+  "alerts": [],
+  "articles": [
+    {
+      "changes": [
+        {
+          "body": "A delayed sign-in or sign-out cannot replace a newer account, including when another window signs in and signs out before the old request finishes.",
+          "title": "Sign-in stays with your account"
+        },
+        {
+          "body": "Changing servers clears the previous session before connecting to the new server. Different addresses for the same server keep you signed in.",
+          "title": "Sessions stay on their server"
+        },
+        {
+          "body": "Concurrent connection changes preserve the verified active account. Sign-in reports a failed connection to the local app so you can retry.",
+          "title": "Checked account connections"
+        },
+        {
+          "body": "Shared work stops when Origin cannot renew its ownership. Queued and resumed work confirms ownership before starting, and changing accounts stops the previous local run.",
+          "title": "Shared agents confirm ownership"
+        }
+      ],
+      "date": "2026-10-19",
+      "title": "Safer accounts and shared-agent ownership",
+      "version": "v0.2.14"
+    },
+    {
+      "changes": [
+        {
+          "body": "Signup checks whether registration is available before showing its fields. A connection that does not respond offers Try again after ten seconds. Sign-in and verified invitations stay available.",
+          "title": "Reliable signup loading"
+        },
+        {
+          "body": "Workspace credentials stay out of installer and agent child processes even when environment names use different capitalization on Windows.",
+          "title": "Safer Windows child processes"
+        },
+        {
+          "body": "Stripe secret and restricted keys are hidden when agent protocol output is saved to logs.",
+          "title": "Private provider logs"
+        },
+        {
+          "body": "Workspace project lists refresh when a Chief's project links change, clearing stale entries from the sidebar.",
+          "title": "Accurate project lists"
+        },
+        {
+          "body": "Issue cards stay visible when you drag quickly between columns. Losing edit access or switching projects cancels the drag before it can save a move.",
+          "title": "Stable issue dragging"
+        },
+        {
+          "body": "If saving a conversation change or deletion fails, Origin preserves its saved messages and metadata. Failed permission changes cannot grant broader access.",
+          "title": "Protected conversations"
+        },
+        {
+          "body": "Startup, tray menus, installation and agent messages use Origin's name. Unrelated subscription offers and promotional links are removed.",
+          "title": "Origin throughout the app"
+        },
+        {
+          "body": "Phone and companion Live calls use your configured Live key without requiring an upstream subscription. Missing keys still open setup, and access checks still apply.",
+          "title": "Live calls with your own key"
+        },
+        {
+          "body": "Footer icons stay on one line. Saved server names remain readable in narrow windows, with their actions below when needed. The computer menu opens Origin's server settings.",
+          "title": "Compact sidebar and server controls"
+        },
+        {
+          "body": "Self-hosted update checks find Origin releases and recognize their version tags. Docker instructions build the Origin checkout, and updates never suggest replacing Origin with the upstream npm package.",
+          "title": "Origin server updates"
+        },
+        {
+          "body": "An engine that never reports its status becomes unavailable after a minute instead of keeping engine discovery pending. Other engines remain available.",
+          "title": "Recoverable engine discovery"
+        }
+      ],
+      "date": "2026-10-18",
+      "title": "Reliable boards and a clearer Origin",
+      "version": "v0.2.13"
+    },
+    {
+      "changes": [
+        {
+          "body": "Every project starts with Draft. New issues from the app, feedback, Chiefs and connected tools go to Draft unless you choose another column. Existing issues and imported history keep their destinations.",
+          "title": "Draft by default"
+        },
+        {
+          "body": "Removing an empty local workspace also removes its leftover sidebar section. Startup cleans up old empty workspace sections, while preserving sections that contain bots, groups or a shared computer.",
+          "title": "Clean workspace deletion"
+        },
+        {
+          "body": "Your account sits immediately before Search, with a full-width computer selector below. Footer actions wrap into aligned rows inside narrow sidebars.",
+          "title": "Account and computer layout"
+        },
+        {
+          "body": "About, Files, confirmations, Settings, Apps, Triggers, Voice and sidebar menus share the app's flat surfaces, borders and controls in light and dark themes.",
+          "title": "Consistent dialogs and menus"
+        },
+        {
+          "body": "Account menus focus correctly with reduced motion. Pending confirmations keep focus inside, and Triggers skips hidden Advanced controls when you press Tab.",
+          "title": "Reliable keyboard focus"
+        },
+        {
+          "body": "Trigger and agent names stay readable on narrow screens, with Copy link and the switch in their own row.",
+          "title": "Readable triggers on phones"
+        },
+        {
+          "body": "Hosted workspace invitations use the verified invites@origin.imbored.fun sender. If sending fails, Origin shows the delivery status and keeps the same invitation link available to share.",
+          "title": "Invitations from Origin"
+        },
+        {
+          "body": "Legacy private ideas wait for Draft repair before GitHub mirroring. Older issue-creation requests preserve existing links or offer a manual creation page instead of risking duplicate GitHub issues.",
+          "title": "Safer issue links"
+        }
+      ],
+      "date": "2026-10-18",
+      "title": "Draft-first projects and clearer workspace controls",
+      "version": "v0.2.11"
+    },
+    {
+      "changes": [
+        {
+          "body": "Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.",
+          "title": "Public workspace invitations"
+        },
+        {
+          "body": "Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.",
+          "title": "Email invitations"
+        },
+        {
+          "body": "A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.",
+          "title": "Clear join confirmations"
+        },
+        {
+          "body": "Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.",
+          "title": "Account and computer controls"
+        },
+        {
+          "body": "Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work.",
+          "title": "Live activity receipts"
+        }
+      ],
+      "date": "2026-10-18",
+      "title": "Invitations and reliable desktop controls",
+      "version": "v0.2.10"
+    },
+    {
+      "changes": [
+        {
+          "body": "Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.",
+          "title": "Workspace and project permissions"
+        },
+        {
+          "body": "Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.",
+          "title": "Safer issue mirroring"
+        },
+        {
+          "body": "Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.",
+          "title": "Files respect their source access"
+        },
+        {
+          "body": "Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.",
+          "title": "Shared work and sync"
+        },
+        {
+          "body": "Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.",
+          "title": "Safer collaborative editing"
+        },
+        {
+          "body": "An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.",
+          "title": "Call continuity"
+        },
+        {
+          "body": "Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.",
+          "title": "Recoverable drawings"
+        },
+        {
+          "body": "Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.",
+          "title": "Consistent workspace controls"
+        },
+        {
+          "body": "About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.",
+          "title": "Keyboard control in dialogs"
+        },
+        {
+          "body": "Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.",
+          "title": "Readable buttons in every theme"
+        },
+        {
+          "body": "Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.",
+          "title": "Files loading recovery"
+        },
+        {
+          "body": "Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.",
+          "title": "Responsive Data queries"
+        },
+        {
+          "body": "Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.",
+          "title": "Chat attachments that fit"
+        },
+        {
+          "body": "Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.",
+          "title": "Recoverable workspace loading"
+        },
+        {
+          "body": "Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.",
+          "title": "Appearance from paired devices"
+        },
+        {
+          "body": "Remote MCP connection errors include safe HTTP status codes and practical recovery hints. Malformed connection addresses never echo embedded credentials.",
+          "title": "Clearer connection errors"
+        },
+        {
+          "body": "Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.",
+          "title": "Accurate browser setup"
+        },
+        {
+          "body": "What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes.",
+          "title": "Release history everywhere"
+        }
+      ],
+      "date": "2026-10-18",
+      "title": "Safer workspaces and clearer controls",
+      "version": "v0.2.7"
+    },
+    {
+      "changes": [
+        {
+          "body": "Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.",
+          "title": "Projects with default agents"
+        },
+        {
+          "body": "Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.",
+          "title": "Workspaces"
+        },
+        {
+          "body": "Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.",
+          "title": "Zap Liquid avatars"
+        },
+        {
+          "body": "One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas.",
+          "title": "Inbox, Chat, Call and Draw"
+        }
+      ],
+      "date": "2026-10-16",
+      "title": "Origin on the desktop",
+      "version": "vdesktop-1.0"
+    },
+    {
+      "changes": [
+        {
+          "body": "C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.",
+          "title": "Keyboard first"
+        },
+        {
+          "body": "Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.",
+          "title": "A cleaner issue editor"
+        },
+        {
+          "body": "Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.",
+          "title": "A calmer sidebar"
+        },
+        {
+          "body": "Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.",
+          "title": "One Inbox, two views"
+        },
+        {
+          "body": "No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list.",
+          "title": "Small details, fixed"
+        }
+      ],
+      "date": "2026-09-27",
+      "title": "A sharper workspace",
+      "version": "v1.0"
+    }
+  ],
+  "canonicalNotes": 55,
+  "clientWidth": 1430,
+  "cssHeight": 900,
+  "cssWidth": 1440,
+  "currentNotes": 4,
+  "currentVersion": "0.2.14",
+  "currentVersionDisplay": "v0.2.14",
+  "downloadLinks": [
+    "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+  ],
+  "fonts": "loaded",
+  "h1": "What's new",
+  "headingColor": "rgb(13, 13, 13)",
+  "htmlClass": "__variable_d8ebd1",
+  "images": [],
+  "path": "/whats-new",
+  "preferredDark": false,
+  "scrollHeight": 6041,
+  "scrollWidth": 1430,
+  "screenshotScope": "full page"
+}

@@ -1,0 +1,485 @@
+{
+  "copiedAt": "2026-10-19T01:18:33.868Z",
+  "receipts": [
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\39182331813-attempt1-terminal-artifacts.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\39182331813-attempt1-terminal-artifacts.json",
+      "bytes": 1727,
+      "sha256": "a5d686e814bec967920b295a9b6323fd40c6a8ea8704300d9a17178a5ca48c44"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\39182331813-attempt1-terminal-jobs.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\39182331813-attempt1-terminal-jobs.json",
+      "bytes": 16128,
+      "sha256": "8742b175a12f34b9dc4c69a98f8ef5ddc94b1d7bddc03bfab5fad9cb22be3264"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\39182331813-attempt1-terminal-run.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\39182331813-attempt1-terminal-run.json",
+      "bytes": 12849,
+      "sha256": "b3eb6120a7c733651a7be3a2f201a350e95de56f3c3e4b0a2abd041752594040"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\REPORT.md",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\REPORT.md",
+      "bytes": 4270,
+      "sha256": "2013147b230c6de43733ee8563743ee22937eac101eb5ef16a6da0d4648b581a"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\SHA256SUMS-0.2.14.txt",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\SHA256SUMS-0.2.14.txt",
+      "bytes": 1191,
+      "sha256": "840d099bb6231582656a118b9d057af24228f940a5916ba21776b9535387b935"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\audit-input.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\audit-input.json",
+      "bytes": 1162,
+      "sha256": "435758d0fa67fc75a0e61bdc836277412c04258372cead26ee1778c70858dcb0"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\audit-metadata.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\audit-metadata.cjs",
+      "bytes": 5768,
+      "sha256": "e4b702553e6b92fce79777ff6c1a66d02491f6aecec2ca3065a50f1375f6ddce"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-fallback-results.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-fallback-results.json",
+      "bytes": 4170,
+      "sha256": "d50b18f49965950bd172ba5c95686072adc0ccb08bac82a2eacb125ee2e6d5c4"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-fallback.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-fallback.log",
+      "bytes": 426,
+      "sha256": "6fc9d5d80f43cbc790bbcd2c7daf8160ce6fcd552d401ca596b29ad1b64a4f9b"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership-final.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership-final.log",
+      "bytes": 259,
+      "sha256": "4d04d1943804c79a61b93ff43b72ea201de9634f247b051a0470930394d7cea5"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership-first-error.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership-first-error.json",
+      "bytes": 938,
+      "sha256": "1c45353dc44d6edc6031bcc1f5279065ae7fac84972876d7b73486abc388c168"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership-refined-error.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership-refined-error.json",
+      "bytes": 938,
+      "sha256": "f3ffa86583c0a534ac403874a9d34c94c006517e648c39e80c4897fd5561890f"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership-refined.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership-refined.log",
+      "bytes": 1731,
+      "sha256": "f55487ac22705a5bb824f68ffaea910764db02394a55d9c4370906f253db7f8b"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership-refined2-error.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership-refined2-error.json",
+      "bytes": 936,
+      "sha256": "4379c3f175485e9e8e2ce0e70ac40c24f2b04d4947571f590c1eab4b19991e24"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership-refined2.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership-refined2.log",
+      "bytes": 1731,
+      "sha256": "29a22f798f457ad9f08859f41ca7521e25a72ed140ec39dae7990ebe05c48ed1"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership-refined3-error.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership-refined3-error.json",
+      "bytes": 772,
+      "sha256": "c5ca3b9fafdb73a8fc419b792ded76a33b0241b1285c2837efafb6470d716176"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership-refined3.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership-refined3.log",
+      "bytes": 1439,
+      "sha256": "c5037738573f276380b13cd857f201b6f93e4a64130125cad1d05219a9e94376"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership-results.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership-results.json",
+      "bytes": 5001,
+      "sha256": "de06e2f3cb03341faef01681dddf69bd8b4808898d2a1af768160a295e593f6e"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\bundled-ownership.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\bundled-ownership.log",
+      "bytes": 1726,
+      "sha256": "042896d6f94bcba12e8f552e4413f33600558d3783673fa96099115ca1d6e27b"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\canonical-09ffff4e44290d80863ea8fab608a4e012dd42cefbf4f212e53ed81f763aea69.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\canonical-09ffff4e44290d80863ea8fab608a4e012dd42cefbf4f212e53ed81f763aea69.json",
+      "bytes": 40202,
+      "sha256": "71060b1d81f02380a89461bf01ba82015d2cee4d5374b4d3d37350d8f02adc6a"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\canonical-2669edb66b05a41a66dfdcff0b70cff020d31e1db45e9db35683c89e5c3ecb07.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\canonical-2669edb66b05a41a66dfdcff0b70cff020d31e1db45e9db35683c89e5c3ecb07.json",
+      "bytes": 302906,
+      "sha256": "9f170381cff4af11f5a3b5ce361a7b6bdb878bf3127a4142b786af24824bf586"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\canonical-834a6ee6b12feb40300b20c2b467f6195d226209f09f6e45001be377d47b0930.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\canonical-834a6ee6b12feb40300b20c2b467f6195d226209f09f6e45001be377d47b0930.json",
+      "bytes": 40201,
+      "sha256": "e35ff8985e1b8e05a0b56d4d8cd8ec41569ebfe57cc37339df3792ce9f52fc3a"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\canonical-a8123b12497f44975de292429d79b1804d6d27be5609d8a2a13157bf785ac86d.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\canonical-a8123b12497f44975de292429d79b1804d6d27be5609d8a2a13157bf785ac86d.json",
+      "bytes": 1747,
+      "sha256": "31d6b02c42c482b88bc8981dd0fc060947c46891d211090722826b82bb4e73c8"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\canonical-c53d04d82e46fd2463937fcee94d8815fdc73500f4b8ebbbef37f9c365e8e820.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\canonical-c53d04d82e46fd2463937fcee94d8815fdc73500f4b8ebbbef37f9c365e8e820.json",
+      "bytes": 301663,
+      "sha256": "e2c04d134facc77ad7da93216cabb0b0838bd50ed1420e8958a84306e1a26e50"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\canonical-fad756e1b81690359d2eb61392fedc9d7319b27d5f0e45473fd154f1d568384c.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\canonical-fad756e1b81690359d2eb61392fedc9d7319b27d5f0e45473fd154f1d568384c.json",
+      "bytes": 303584,
+      "sha256": "9da9e7dfd0fb2e5062a8669643162f403dc6d1c36a4130f5c29731458bb5c2ed"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\check-bundled-fallback.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\check-bundled-fallback.cjs",
+      "bytes": 2544,
+      "sha256": "74fc6e039f4b9f559d27e00b35cc9cb5ebb59ac191666f78962d0dda4ceae031"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\check-bundled-ownership-first.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\check-bundled-ownership-first.cjs",
+      "bytes": 8946,
+      "sha256": "ec0f30e12ad73200695b562e73f8a6ef7fffbc91ef3699fc0eb2c354cadf1849"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\check-bundled-ownership-refined-first.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\check-bundled-ownership-refined-first.cjs",
+      "bytes": 11187,
+      "sha256": "5931af67bc8ee1419396f0b0f46ccf86e08b54faf52da83c358e62f4a07d8a36"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\check-bundled-ownership-refined2.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\check-bundled-ownership-refined2.cjs",
+      "bytes": 11526,
+      "sha256": "695f046a8f653607100a05cc48e3cb06a348923cf1a5d6b63fac830f309a7f4c"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\check-bundled-ownership-refined3.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\check-bundled-ownership-refined3.cjs",
+      "bytes": 12034,
+      "sha256": "0b016e41dcda36db24f99a7cb3062872ffa86403273d19b5682482efc3ee2e1a"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\check-bundled-ownership.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\check-bundled-ownership.cjs",
+      "bytes": 12089,
+      "sha256": "ca111ba131cf24daa77fc369736309ccb2e7e2855c9c398f3648a7da46c760f8"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\compare-canonical-debug.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\compare-canonical-debug.cjs",
+      "bytes": 614,
+      "sha256": "88b92b6a34d6c29afbce1b445e14af616fe378bf1174318089323acbb04ef6bb"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\distribution.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\distribution.log",
+      "bytes": 573,
+      "sha256": "822254b081c5693df026f6bcec7e95b68369916a1725cf66d7239f5375643b15"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\download-artifacts.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\download-artifacts.cjs",
+      "bytes": 4112,
+      "sha256": "9ade3a790df84231a867a2f480698be1f79a7394e7787b50519ebf0e9bd4c314"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\download-ready.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\download-ready.json",
+      "bytes": 1916,
+      "sha256": "1798c0c3465a008533faa443a76ac342c844f26ebf64b64852946423d927d4b0"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\extract-api-archive.ps1",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\extract-api-archive.ps1",
+      "bytes": 3055,
+      "sha256": "4047495f5a435735562e76df818ff09d967411e94ee53c89b215a0edc244b198"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\extract-api-mac.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\extract-api-mac.log",
+      "bytes": 175,
+      "sha256": "4753ada3eaadbb2cd17d30cb3effcb3bb62c6ddd49f844bbdcfe0fe128cf02b5"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\extract-api-windows.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\extract-api-windows.log",
+      "bytes": 183,
+      "sha256": "782b95f06674dbea235cbb5975944a2adb4c14629053cf30a4e1e29ac9cfb138"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\extract-mac-arm64.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\extract-mac-arm64.log",
+      "bytes": 386,
+      "sha256": "5503b4ecab70b9750dca38eee5cf3f5fe3aa474ab35dc91d6d1c81585e14cbfd"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\extract-mac-x64.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\extract-mac-x64.log",
+      "bytes": 382,
+      "sha256": "5045e8ec9f79f5203e0a828454f559b777c629849b8ff363309c2898dc8e5427"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\extract-selected.ps1",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\extract-selected.ps1",
+      "bytes": 3090,
+      "sha256": "5d7a9da50764bea6c4354b3ebd2ad9ec760691f40fdcc662ae44147fd169fd04"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\extract-windows.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\extract-windows.log",
+      "bytes": 389,
+      "sha256": "795eedfd0955016a3286a321c9a053964138ad568553988a7559fc01d9f4f261"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\github-release-0.2.14.md",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\github-release-0.2.14.md",
+      "bytes": 2050,
+      "sha256": "6834433ea45911633fd0abcd018e0b372932baad11a4c9b9375458f5a2e92cb8"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\helper-provenance.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\helper-provenance.json",
+      "bytes": 1091,
+      "sha256": "fa0da930a3636d233cc5d621ec929f14e8aafacb50d18b23cbe0ff049287ba4e"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\mac-api-extraction.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\mac-api-extraction.json",
+      "bytes": 1818,
+      "sha256": "1ba4cdaa63f02fbac6ec4b2fe65f56f69fcb6f4e61efd7f98bfdd986642602f3"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\mac-arm64\\archive-manifest.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\mac-arm64\\archive-manifest.json",
+      "bytes": 581669,
+      "sha256": "563b74f3b57a3e34731a3a5a160592a3852cd93d9d7f30e881866c36be0df78e"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\mac-x64\\archive-manifest.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\mac-x64\\archive-manifest.json",
+      "bytes": 581596,
+      "sha256": "11cf75e457d50be8032c8d5fd7966630828daa5c635c922e1159038a8c85fbed"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\metadata-results.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\metadata-results.json",
+      "bytes": 191819,
+      "sha256": "511d678b5cbde65ed88495411937f6c6014c78dacf796ea9b4586cba7f924e28"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\metadata.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\metadata.log",
+      "bytes": 1783,
+      "sha256": "520d85968058e3f7e3a7fcc41804a81ceec3b3c9d0b5f033e48334e8e745763b"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\origin-mac-archive-verification.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\origin-mac-archive-verification.json",
+      "bytes": 744,
+      "sha256": "f422c6fa420d6f9eeaa035c82f662fca2c33bad2629cddb6ab05551941e15efa"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\origin-mac-download.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\origin-mac-download.json",
+      "bytes": 600,
+      "sha256": "980a45019b830686fc5781b6b3e3eac187454d7e98769622e167cba06cb90a3d"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\origin-mac-download.stderr.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\origin-mac-download.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\origin-windows-archive-verification.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\origin-windows-archive-verification.json",
+      "bytes": 750,
+      "sha256": "c99d06f02e527590769aee0f1a4b3d858904b930290d873143565904b94f3a4a"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\origin-windows-download.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\origin-windows-download.json",
+      "bytes": 607,
+      "sha256": "45d0fd777dfa934fc9174c23d06e75923b8036e7eef83530b1de5622a8c04647"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\origin-windows-download.stderr.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\origin-windows-download.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\packaged-smoke.log",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\packaged-smoke.log",
+      "bytes": 668,
+      "sha256": "5f4512f402e6e07441d31f84389fff3631824d3a335d69da0f84d1a4bbb9d1cb"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\prepare-audit.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\prepare-audit.cjs",
+      "bytes": 2562,
+      "sha256": "19347f07ffbdda0a55ecdfe6f217743878152405b60947d84130e288f4e7ea80"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\receipt.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\receipt.json",
+      "bytes": 8016,
+      "sha256": "4c17e1451fbc8a66545516e94acef675cffbea74dcd7bf71545b2fde0a9d4e27"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\refine-binding-spelling.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\refine-binding-spelling.cjs",
+      "bytes": 1135,
+      "sha256": "095aba93340381ca4934f4fc2db1384465921e61c3bcb7b46cdaa4e6df3a3761"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\refine-ownership-helper.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\refine-ownership-helper.cjs",
+      "bytes": 3936,
+      "sha256": "1f1cd08971ed5c6f81c99c5ccd79083479cb62583e65b6c7d161624a987afebd"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\refine-reader-name.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\refine-reader-name.cjs",
+      "bytes": 775,
+      "sha256": "44172497a92fe56a3c49b4f01c1b5ca4d893459837915d90b8a9b5ded93b63d4"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\refine-shorthand.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\refine-shorthand.cjs",
+      "bytes": 1234,
+      "sha256": "0f08007d8d1aee10c736efaff9fb61a0e2c386f397adec3ff2d22ff2e270ab3d"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\release-manifest-0.2.14.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\release-manifest-0.2.14.json",
+      "bytes": 2257,
+      "sha256": "09086670c3b6cd0cf0f2ad3c9bc6d569dca8a26727e14289655731c5c7c01c73"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\run-packaged-smoke.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\run-packaged-smoke.cjs",
+      "bytes": 2494,
+      "sha256": "b6c1f9dcb79f3ac904e032a9927c8d86f5c7a12cabc2328f0fd7d32b3d289777"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\seal-audit-first.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\seal-audit-first.cjs",
+      "bytes": 11648,
+      "sha256": "b4ef6261ff4b44c14d007becdc5d075bb896c656c2d4a35e7f647d733820adcd"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\seal-audit.cjs",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\seal-audit.cjs",
+      "bytes": 11839,
+      "sha256": "aaf60e258873947660351b613b25d8dbc57c2a6d1748be34496f9e9acc62b7f5"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\seal-first-helper-error.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\seal-first-helper-error.json",
+      "bytes": 496,
+      "sha256": "f8c53de2a1d3f19f98aec397113f9c791d8f6d15edf4423bcf474cbf5d562184"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\smoke-closure.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\smoke-closure.json",
+      "bytes": 447,
+      "sha256": "3365098f6fb6b7c30a0ac3740cf76d2018f745bbf3d169985d0489cef3a7853e"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\smoke-command.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\smoke-command.json",
+      "bytes": 2608,
+      "sha256": "581b6d4aa1f42c0ea571c8802b819bdf08dd7c14032051420dd18976a37afd27"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\smoke-result.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\smoke-result.json",
+      "bytes": 210,
+      "sha256": "d1cb296f9b731462d7c2ff49d56b961ca5a0b9927c9095ec9b534994565b8c09"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\source-bindings.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\source-bindings.json",
+      "bytes": 1887,
+      "sha256": "f195eda2b6d388739c5170d480281de1d0ffd3af273217eb57b618727f50b90e"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\windows-api-extraction.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\windows-api-extraction.json",
+      "bytes": 1013,
+      "sha256": "d4ff6ea8e42f28a7e401f23c51303bc1045277b985ad814270bfc01510a0cb00"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\windows-executable-metadata-raw.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\windows-executable-metadata-raw.json",
+      "bytes": 273,
+      "sha256": "c21d0139b3eed847e4952d89171ce1b412168e333e0815d9faf1ebcd4ec90338"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\windows-executable-metadata.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\windows-executable-metadata.json",
+      "bytes": 273,
+      "sha256": "c21d0139b3eed847e4952d89171ce1b412168e333e0815d9faf1ebcd4ec90338"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\windows-version-first-helper-error.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\windows-version-first-helper-error.json",
+      "bytes": 429,
+      "sha256": "353108d031589f012384c8700dbc373e4db13b751bae4defdf12361bc553b7fe"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\windows\\archive-manifest.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\windows\\archive-manifest.json",
+      "bytes": 540065,
+      "sha256": "b6806488da5e887d07b7aee581ca8d0870e3bc60117c3fc8310a9603520071d0"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\manifest.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\native\\manifest.json",
+      "bytes": 12948,
+      "sha256": "cceb7f99e51086de7badfb2a51f919e1476b5d9a43ea24e4de5aa13b93991b84"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\site-visual-review-038.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\site-visual-review-038.json",
+      "bytes": 25801,
+      "sha256": "b29e414563dc8bfb0a0cb716321d42533d55becf7097eda4e290d9898698a0a1"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\site-visual-review-038.md",
+      "to": ".omb-scratch\\delivery-evidence-038\\site-visual-review-038.md",
+      "bytes": 1878,
+      "sha256": "569a71cc586ae1f56815ee5fb5cb4f98ab4c813053c0ac3197b696c096618cfc"
+    },
+    {
+      "from": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\site-helper-prerequisites-038.json",
+      "to": ".omb-scratch\\delivery-evidence-038\\site-helper-prerequisites-038.json",
+      "bytes": 5877,
+      "sha256": "59fbcbebce92fdd10d7a435e0b8c92721083faf1e30188c40c7ceb57711e676f"
+    }
+  ]
+}

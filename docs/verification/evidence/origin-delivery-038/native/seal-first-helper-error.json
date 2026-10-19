@@ -1,0 +1,8 @@
+{
+  "scope": "Private receipt source binding preparation",
+  "firstError": "Frozen source binding unavailable: scripts/release-artifacts.mjs",
+  "actualFrozenReleaseHelper": "scripts/origin-release-notes.mjs",
+  "incorrectConfigPath": "electron-builder.origin.yml",
+  "actualFrozenConfigPath": "electron-builder.yml",
+  "resolution": "Corrected only receipt source-binding filenames after exact tracked filename inventory; retained original helper. No audit or product source changed."
+}

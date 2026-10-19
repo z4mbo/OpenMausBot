@@ -1,0 +1,32 @@
+{
+  "name": "signup-375-dark",
+  "route": "/signup",
+  "theme": "dark",
+  "width": 375,
+  "reducedMotion": true,
+  "alerts": [
+    "Loading"
+  ],
+  "articles": [],
+  "canonicalNotes": 0,
+  "clientWidth": 365,
+  "cssHeight": 900,
+  "cssWidth": 375,
+  "currentNotes": null,
+  "currentVersion": null,
+  "currentVersionDisplay": null,
+  "downloadLinks": [
+    "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+  ],
+  "fonts": "loaded",
+  "h1": "Create your Origin account",
+  "headingColor": "rgb(252, 252, 252)",
+  "htmlClass": "__variable_d8ebd1",
+  "images": [],
+  "path": "/signup",
+  "preferredDark": true,
+  "scrollHeight": 1056,
+  "scrollWidth": 365,
+  "screenshotScope": "viewport",
+  "acceptance": "Signup heading and policy loading state; no submission"
+}
