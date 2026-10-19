@@ -1,0 +1,16 @@
+Browser tab: 9, Title: "Origin sign-in ownership — before", URL: "http://127.0.0.1:5174/__origin-session-flow.html".
+0 AXWebArea Origin sign-in ownership — before, URL: 127.0.0.1:5174/__origin-session-flow.html
+	1 container root
+		2 container
+			3 heading Origin sign-in ownership · before, Value: 1
+				4 text Origin sign-in ownership ·  before
+			5 text Actual desktop sign-in form and session hooks. Synthetic accounts and Convex; no real backend, password or workspace.
+			6 button Switch to fixture server B
+			7 button (disabled) Resolve server A sign-in
+			8 text Server:  B  · Request:  settled  · Account:  old server A session  · Wrong-server queries:  2  · Session handoffs:  1
+		9 container
+			10 heading Synthetic workspace content, Value: 2
+				11 text Synthetic workspace content
+			12 text The old server A session reached the current server B context.
+
+The focused UI element is 0 AXWebArea Origin sign-in ownership — before, URL: 127.0.0.1:5174/__origin-session-flow.html

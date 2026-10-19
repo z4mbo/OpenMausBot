@@ -1,0 +1,18 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ ✓ src/components/OriginGate.session.test.ts (6 tests) 64ms
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ ✓ src/components/OriginConnect.session.test.ts (13 tests) 61ms
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  02:34:30
+   Duration  3.01s (transform 634ms, setup 684ms, import 1.19s, tests 125ms, environment 687ms)
+
+JSON report written to C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/session-flow-037/flow-final.json

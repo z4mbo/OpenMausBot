@@ -1,0 +1,248 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90mC:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin[39m
+
+[90mstderr[2m | unknown test
+[22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ [31m❯[39m src/components/OriginConnect.session.test.ts [2m([22m[2m10 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[32m 58[2mms[22m[39m
+[31m   [31m×[31m does not forward a superseded account to the local server[39m[32m 4[2mms[22m[39m
+[31m   [31m×[31m does not pair the new account token with an older connection dialog's backend[39m[32m 0[2mms[22m[39m
+[31m   [31m×[31m an older logout cannot delete the current account's server connection[39m[32m 0[2mms[22m[39m
+   [32m✓[39m shares the current session with the local server[32m 1[2mms[22m[39m
+   [32m✓[39m clears the server connection after the current account signs out[32m 0[2mms[22m[39m
+[31m   [31m×[31m reports a refused connection instead of proceeding as if sharing succeeded[39m[32m 1[2mms[22m[39m
+[31m   [31m×[31m the actual account dialog shares the canonical backend for http://127.0.0.1:43001/[39m[32m 30[2mms[22m[39m
+[31m   [31m×[31m the actual account dialog shares the canonical backend for fixture.convex.cloud[39m[32m 7[2mms[22m[39m
+[31m   [31m×[31m the actual account dialog shares the canonical backend for origin.imbored.fun/[39m[32m 7[2mms[22m[39m
+[31m   [31m×[31m a refused handoff remains visible after the actual dialog signs in[39m[32m 6[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 8 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/components/OriginConnect.session.test.ts[2m > [22mdoes not forward a superseded account to the local server
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received:
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/api/origin/cloud-session",
+      Object {
+        "body": "{"url":"http://127.0.0.1:43001","sessionToken":"fixture-session-one"}",
+        "headers": Object {
+          "content-type": "application/json",
+        },
+        "method": "PUT",
+      },
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/components/OriginConnect.session.test.ts:[2m29:21[22m[39m
+    [90m 27|[39m   [34msetSessionToken[39m([32m"fixture-session-two"[39m)[33m;[39m
+    [90m 28|[39m   [35mawait[39m [34mshareSession[39m([32m"http://127.0.0.1:43001"[39m[33m,[39m [32m"fixture-session-one"[39m)[33m;[39m
+    [90m 29|[39m   [34mexpect[39m(fetch)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   |[39m                     [31m^[39m
+    [90m 30|[39m })[33m;[39m
+    [90m 31|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/OriginConnect.session.test.ts[2m > [22mdoes not pair the new account token with an older connection dialog's backend
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received:
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/api/origin/cloud-session",
+      Object {
+        "body": "{"url":"http://127.0.0.1:43001","sessionToken":"fixture-session-two"}",
+        "headers": Object {
+          "content-type": "application/json",
+        },
+        "method": "PUT",
+      },
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/components/OriginConnect.session.test.ts:[2m35:21[22m[39m
+    [90m 33|[39m   setCloudUrl("http://127.0.0.1:43002"); setSessionToken("fixture-sess…
+    [90m 34|[39m   [35mawait[39m [34mshareSession[39m([32m"http://127.0.0.1:43001"[39m[33m,[39m [32m"fixture-session-two"[39m)[33m;[39m
+    [90m 35|[39m   [34mexpect[39m(fetch)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   |[39m                     [31m^[39m
+    [90m 36|[39m })[33m;[39m
+    [90m 37|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/OriginConnect.session.test.ts[2m > [22man older logout cannot delete the current account's server connection
+[31m[1mAssertionError[22m: expected "vi.fn()" to not be called at all, but actually been called 1 times[90m
+
+Received:
+
+[1m  1st vi.fn() call:
+
+[22m    Array [
+      "/api/origin/cloud-session",
+      Object {
+        "method": "DELETE",
+      },
+    ]
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/components/OriginConnect.session.test.ts:[2m41:21[22m[39m
+    [90m 39|[39m   [34msetSessionToken[39m([32m"fixture-session-two"[39m)[33m;[39m
+    [90m 40|[39m   [35mawait[39m [34mshareSession[39m([35mnull[39m[33m,[39m [35mnull[39m)[33m;[39m
+    [90m 41|[39m   [34mexpect[39m(fetch)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   |[39m                     [31m^[39m
+    [90m 42|[39m })[33m;[39m
+    [90m 43|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/OriginConnect.session.test.ts[2m > [22mreports a refused connection instead of proceeding as if sharing succeeded
+[31m[1mAssertionError[22m: promise resolved "undefined" instead of rejecting[39m
+
+[32m- Expected:[39m
+Error {
+  "message": "rejected promise",
+}
+
+[31m+ Received:[39m
+undefined
+
+[36m [2m❯[22m src/components/OriginConnect.session.test.ts:[2m60:77[22m[39m
+    [90m 58|[39m it("reports a refused connection instead of proceeding as if sharing s…
+    [90m 59|[39m   vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ err…
+    [90m 60|[39m   await expect(shareSession("http://127.0.0.1:43001", "fixture-session…
+    [90m   |[39m                                                                             [31m^[39m
+    [90m 61|[39m })[33m;[39m
+    [90m 62|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/OriginConnect.session.test.ts[2m > [22mthe actual account dialog shares the canonical backend for http://127.0.0.1:43001/
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called once with arguments: [ '/api/origin/cloud-session', …(1) ][90m
+
+Received:
+
+[1m  1st vi.fn() call:
+
+[22m[2m  [[22m
+[2m    "/api/origin/cloud-session",[22m
+[32m-   ObjectContaining {[90m
+[32m-     "body": "{\"url\":\"http://127.0.0.1:43001\",\"sessionToken\":\"fixture-dialog-session\"}",[90m
+[31m+   {[90m
+[31m+     "body": "{\"url\":\"http://127.0.0.1:43001/\",\"sessionToken\":\"fixture-dialog-session\"}",[90m
+[31m+     "headers": {[90m
+[31m+       "content-type": "application/json",[90m
+[31m+     },[90m
+[2m      "method": "PUT",[22m
+[2m    },[22m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/components/OriginConnect.session.test.ts:[2m92:19[22m[39m
+    [90m 90|[39m   [35mtry[39m {
+    [90m 91|[39m     [35mawait[39m dialog[33m.[39m[34msubmit[39m()[33m;[39m
+    [90m 92|[39m     expect(fetch).toHaveBeenCalledExactlyOnceWith("/api/origin/cloud-s…
+    [90m   |[39m                   [31m^[39m
+    [90m 93|[39m       method: "PUT", body: JSON.stringify({ url: backend, sessionToken…
+    [90m 94|[39m     }))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/OriginConnect.session.test.ts[2m > [22mthe actual account dialog shares the canonical backend for fixture.convex.cloud
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called once with arguments: [ '/api/origin/cloud-session', …(1) ][90m
+
+Received:
+
+[1m  1st vi.fn() call:
+
+[22m[2m  [[22m
+[2m    "/api/origin/cloud-session",[22m
+[32m-   ObjectContaining {[90m
+[32m-     "body": "{\"url\":\"https://fixture.convex.cloud\",\"sessionToken\":\"fixture-dialog-session\"}",[90m
+[31m+   {[90m
+[31m+     "body": "{\"url\":\"fixture.convex.cloud\",\"sessionToken\":\"fixture-dialog-session\"}",[90m
+[31m+     "headers": {[90m
+[31m+       "content-type": "application/json",[90m
+[31m+     },[90m
+[2m      "method": "PUT",[22m
+[2m    },[22m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/components/OriginConnect.session.test.ts:[2m92:19[22m[39m
+    [90m 90|[39m   [35mtry[39m {
+    [90m 91|[39m     [35mawait[39m dialog[33m.[39m[34msubmit[39m()[33m;[39m
+    [90m 92|[39m     expect(fetch).toHaveBeenCalledExactlyOnceWith("/api/origin/cloud-s…
+    [90m   |[39m                   [31m^[39m
+    [90m 93|[39m       method: "PUT", body: JSON.stringify({ url: backend, sessionToken…
+    [90m 94|[39m     }))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/OriginConnect.session.test.ts[2m > [22mthe actual account dialog shares the canonical backend for origin.imbored.fun/
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called once with arguments: [ '/api/origin/cloud-session', …(1) ][90m
+
+Received:
+
+[1m  1st vi.fn() call:
+
+[22m[2m  [[22m
+[2m    "/api/origin/cloud-session",[22m
+[32m-   ObjectContaining {[90m
+[32m-     "body": "{\"url\":\"https://wry-fly-446.eu-west-1.convex.cloud\",\"sessionToken\":\"fixture-dialog-session\"}",[90m
+[31m+   {[90m
+[31m+     "body": "{\"url\":\"origin.imbored.fun/\",\"sessionToken\":\"fixture-dialog-session\"}",[90m
+[31m+     "headers": {[90m
+[31m+       "content-type": "application/json",[90m
+[31m+     },[90m
+[2m      "method": "PUT",[22m
+[2m    },[22m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/components/OriginConnect.session.test.ts:[2m92:19[22m[39m
+    [90m 90|[39m   [35mtry[39m {
+    [90m 91|[39m     [35mawait[39m dialog[33m.[39m[34msubmit[39m()[33m;[39m
+    [90m 92|[39m     expect(fetch).toHaveBeenCalledExactlyOnceWith("/api/origin/cloud-s…
+    [90m   |[39m                   [31m^[39m
+    [90m 93|[39m       method: "PUT", body: JSON.stringify({ url: backend, sessionToken…
+    [90m 94|[39m     }))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/OriginConnect.session.test.ts[2m > [22ma refused handoff remains visible after the actual dialog signs in
+[31m[1mAssertionError[22m: the given combination of arguments (undefined and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string[39m
+[36m [2m❯[22m src/components/OriginConnect.session.test.ts:[2m106:67[22m[39m
+    [90m104|[39m     [35mawait[39m dialog[33m.[39m[34msubmit[39m()[33m;[39m
+    [90m105|[39m     expect(document.querySelector('[role="dialog"]')?.textContent).toC…
+    [90m106|[39m     expect(document.querySelector('[role="alert"]')?.textContent).toCo…
+    [90m   |[39m                                                                   [31m^[39m
+    [90m107|[39m   } [35mfinally[39m { dialog[33m.[39m[34mclose[39m()[33m;[39m }
+    [90m108|[39m })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m8 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 02:29:28
+[2m   Duration [22m 2.32s[2m (transform 643ms, setup 558ms, import 1.17s, tests 58ms, environment 340ms)[22m
+
+JSON report written to C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/component-baseline-036/connect-red.json

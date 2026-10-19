@@ -1,0 +1,14 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-branding-034/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+·················································
+
+ Test Files  1 passed (1)
+      Tests  49 passed (49)
+   Start at  02:24:47
+   Duration  1.56s (transform 479ms, setup 513ms, import 731ms, tests 149ms, environment 0ms)
+
+JSON report written to C:/Users/aless/.codex/worktrees/origin-branding-034/Origin/.omb-scratch/origin-session-races-green-036.json

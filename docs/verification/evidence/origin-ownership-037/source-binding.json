@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "source": "2b0e69a082d89db711f32e74101387ea1b7addfb",
+  "recordedAt": "2026-10-19T00:41:10.697Z",
+  "candidateVersion": "0.2.14",
+  "publication": "not performed",
+  "trackedRuntimeDiffExit": 0,
+  "bindings": [
+    {
+      "path": "package.json",
+      "gitBlob": "b7b48b7c319972a929d42e3c1bbc3bfc2cad51f3",
+      "bytes": 8074,
+      "rawSha256": "d859f3038a9768c922f0c17dd8dff42205acb438a558ae80793458c0c63d6e20"
+    },
+    {
+      "path": "server/origin-cloud-session.ts",
+      "gitBlob": "d68e0fd6b64e3ee7faffe05d5197beaaac5b7722",
+      "bytes": 1764,
+      "rawSha256": "9d997166ab974eab2f12539af3ff260173f61cf3b79f1e67f0c2ce4635ad4719"
+    },
+    {
+      "path": "server/origin-cloud.test.ts",
+      "gitBlob": "e183484a842d9b8dc23c575d23561f43ee890764",
+      "bytes": 53710,
+      "rawSha256": "e5d6798c19074a535d4f40ffccfcdb7b59e3c24828649f3311ad154c060ec265"
+    },
+    {
+      "path": "server/origin-cloud.ts",
+      "gitBlob": "ddd1d50d5a7db9c03245041c78e28307237d40ad",
+      "bytes": 72059,
+      "rawSha256": "f8b876c18091846591a2231e78ce991d03c59bce8dfd596a41c24ccf79ff7eec"
+    },
+    {
+      "path": "server/origin-run-lease.ts",
+      "gitBlob": "69c9f068b10179c6e7542fdb47e1e4fc1a622a60",
+      "bytes": 11666,
+      "rawSha256": "938d69537159e8a1013d8cc12340ae0df0b125708e12ded70de9a6a2f7b8dc9f"
+    },
+    {
+      "path": "server/origin-shared-agents.ts",
+      "gitBlob": "0bdcc93ab497c1dd8c6025f7be3a2357e557ab0b",
+      "bytes": 27340,
+      "rawSha256": "1e3b6928f82dff5374abf7a187eccbb6f47748be8e2c787d3c8fb78587b4a1a8"
+    },
+    {
+      "path": "server/origin-shared.test.ts",
+      "gitBlob": "0ddf891849be943e52c1ff8e2ff0b4ea632eb26b",
+      "bytes": 34578,
+      "rawSha256": "384bc2a3087a8d07892b9ddc5407b09951c653b992435a90c8a43373cd3623d6"
+    },
+    {
+      "path": "shared/origin-releases.ts",
+      "gitBlob": "0a233b162d9046e35f73fa829b16133971e1e189",
+      "bytes": 13340,
+      "rawSha256": "e7c8f71c14fdb8fc60054dae6cf97d5d9e24a335080ff5f8d5bce39b8a956ccd"
+    },
+    {
+      "path": "site/components/brand.test.tsx",
+      "gitBlob": "d42fca1ad602a6479beb6173783ad3d3c07244cc",
+      "bytes": 6036,
+      "rawSha256": "6c645f7c42dc85504ed8b64f0ea3892ffdcaaa5418e785526f83869f6a6a6beb"
+    },
+    {
+      "path": "site/components/brand.tsx",
+      "gitBlob": "2b2334358f6c52b0b35f802e97299eb4774cb0d6",
+      "bytes": 5530,
+      "rawSha256": "3c5a37d3fa23192845a7d2316e296bc091af8a8dfc0cd3be222a8bf400d41e3a"
+    },
+    {
+      "path": "src/components/OriginConnect.session.test.ts",
+      "gitBlob": "5341642b3256f7a8cdc6cf3a5bb33d0e7cf64b43",
+      "bytes": 6549,
+      "rawSha256": "2b43fc80d8659a38d6d0c0c08362c61be342872e431b868038249018445ac8e0"
+    },
+    {
+      "path": "src/components/OriginConnect.tsx",
+      "gitBlob": "533f5291fc7184df8fc538cccab8c129ee2259e4",
+      "bytes": 4661,
+      "rawSha256": "5f87f0d63590f30a8a52b3be7fe3e1c4c082c2e6d12380a4989fd9701ff6c7de"
+    },
+    {
+      "path": "src/components/OriginGate.session.test.ts",
+      "gitBlob": "0f19461a10fa05ab090b28d9b0ec8e56bbf85a9a",
+      "bytes": 7086,
+      "rawSha256": "224fbdbcfac9f6815c53d92b4d06315c542f12075e24560cf1d2f06af6727763"
+    },
+    {
+      "path": "src/components/OriginGate.tsx",
+      "gitBlob": "1ec5cfc1e6852e0bd97dfb7a220a64d07ee1e94c",
+      "bytes": 15749,
+      "rawSha256": "020b470a46bc0630e1be88a1e3c8ff9146e93505dbef061471a5f291c1702153"
+    },
+    {
+      "path": "src/lib/origin-cloud/client.ts",
+      "gitBlob": "871a4f26ffa7133efb8d2250851a0d6c8de610f7",
+      "bytes": 5227,
+      "rawSha256": "8e6e068f1212d78bf92d6178ffa1fc0c670dba48282ff704573485859742cc16"
+    },
+    {
+      "path": "src/lib/origin-cloud/hooks.ts",
+      "gitBlob": "2f4f4f376538cbc2f1471999ae5fcd4ecc5ea9c8",
+      "bytes": 8443,
+      "rawSha256": "ddb5b0b76d75703437b4ee7a0c64ee09f6ee748c62b811d786052d64d1eb36a3"
+    },
+    {
+      "path": "src/lib/origin-cloud/session-races.test.ts",
+      "gitBlob": "4cd295a01b4b28ce9103c860464b3eb239f73f04",
+      "bytes": 10773,
+      "rawSha256": "6c5f6ec42e297187a641bdc3a2c2a78754b6a3f3cf5f09fe5c39054e34efb3ff"
+    }
+  ],
+  "sourceReferences": [
+    {
+      "receipt": "server-session/origin-session-036.json",
+      "workerCommit": "e7c289d3d6ed15763f87f4d26967b8ae1d4eb5ec",
+      "file": "server/origin-cloud.ts",
+      "gitBlob": "7d826950d474e07e8f503a9846c5b4bea271cd78",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\server\\origin-cloud.ts",
+      "bytes": 72888,
+      "sha256": "d6359985fa1b5847ca1a93880d3f33d68ba603b612e79d879b833c58804c7463",
+      "archiveQualification": "Mutable source path omitted; original Git blob exists and matches receipt; raw source hash remains historical."
+    },
+    {
+      "receipt": "server-session/origin-session-036.json",
+      "workerCommit": "e7c289d3d6ed15763f87f4d26967b8ae1d4eb5ec",
+      "file": "server/origin-cloud.test.ts",
+      "gitBlob": "f40733a08fe1cb14ec1f6e086c6c6ffcba7772c6",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\server\\origin-cloud.test.ts",
+      "bytes": 51207,
+      "sha256": "c05235c4008037566408ba131721733d3f561f2e0bdd36091d3a45ba4e639712",
+      "archiveQualification": "Mutable source path omitted; original Git blob exists and matches receipt; raw source hash remains historical."
+    },
+    {
+      "receipt": "server-session/origin-session-followup-036.json",
+      "workerCommit": "fe606ac07254d627a0c4ebfc0f678718816581f6",
+      "file": "server/origin-cloud.ts",
+      "gitBlob": "3d02f8176f6182988b709bf96dcca8cd319687d1",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\server\\origin-cloud.ts",
+      "bytes": 73026,
+      "sha256": "3aef9d2b50273ea4feeb196b03134b221f50460a2371fc704800504eb9466907",
+      "archiveQualification": "Mutable source path omitted; original Git blob exists and matches receipt; raw source hash remains historical."
+    },
+    {
+      "receipt": "server-session/origin-session-followup-036.json",
+      "workerCommit": "fe606ac07254d627a0c4ebfc0f678718816581f6",
+      "file": "server/origin-cloud.test.ts",
+      "gitBlob": "e183484a842d9b8dc23c575d23561f43ee890764",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\server\\origin-cloud.test.ts",
+      "bytes": 53710,
+      "sha256": "e5d6798c19074a535d4f40ffccfcdb7b59e3c24828649f3311ad154c060ec265",
+      "archiveQualification": "Mutable source path omitted; original Git blob exists and matches receipt; raw source hash remains historical."
+    },
+    {
+      "receipt": "server-session/origin-session-extraction-036.json",
+      "workerCommit": "5b33f7bdc5b34e8e7080f7ec4b0238d3ab986d7a",
+      "file": "server/origin-cloud.ts",
+      "gitBlob": "ddd1d50d5a7db9c03245041c78e28307237d40ad",
+      "lines": 1136,
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\server\\origin-cloud.ts",
+      "bytes": 72059,
+      "sha256": "f8b876c18091846591a2231e78ce991d03c59bce8dfd596a41c24ccf79ff7eec",
+      "archiveQualification": "Mutable source path omitted; original Git blob exists and matches receipt; raw source hash remains historical."
+    },
+    {
+      "receipt": "server-session/origin-session-extraction-036.json",
+      "workerCommit": "5b33f7bdc5b34e8e7080f7ec4b0238d3ab986d7a",
+      "file": "server/origin-cloud-session.ts",
+      "gitBlob": "d68e0fd6b64e3ee7faffe05d5197beaaac5b7722",
+      "lines": 40,
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\server\\origin-cloud-session.ts",
+      "bytes": 1724,
+      "sha256": "5542178b96d813b0c4dc1b74beadb9f875f0a7acdacf3b8cd055f8d727167320",
+      "archiveQualification": "Mutable source path omitted; original Git blob exists and matches receipt; raw source hash remains historical."
+    },
+    {
+      "receipt": "server-session/origin-session-extraction-036.json",
+      "workerCommit": "5b33f7bdc5b34e8e7080f7ec4b0238d3ab986d7a",
+      "file": "scripts/testing/file-size-ratchet.test.ts",
+      "gitBlob": "424279df51b8b80a43aef073f04faf38a87b2acb",
+      "lines": 88,
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\scripts\\testing\\file-size-ratchet.test.ts",
+      "bytes": 4126,
+      "sha256": "df636138d80f236e7e358eade327c0dfe101aa82c1e68ab21b138d888b57c48a",
+      "archiveQualification": "Mutable source path omitted; original Git blob exists and matches receipt; raw source hash remains historical."
+    }
+  ],
+  "mappings": {
+    "b596bdf176858179122179cfc06625e3acaccc37": "5009cb76d00da9a16a65ffcc2b40dc6c43781586",
+    "99f2c5672fb358f749bb02a9e899bdfe5dbf7b35": "a62450263950b9c17992f4f1d3034723207a83d4",
+    "e7c289d3d6ed15763f87f4d26967b8ae1d4eb5ec": "691874a5061df2794274ae3c459b8b5ada83e9ce",
+    "fe606ac07254d627a0c4ebfc0f678718816581f6": "436b42210519de0bd7eea4785dbe3de89e3c2afb",
+    "5b33f7bdc5b34e8e7080f7ec4b0238d3ab986d7a": "2b0e69a082d89db711f32e74101387ea1b7addfb",
+    "8681e59e97b9484da7d9d690f0472db0d51341ee": "cd854baab270c26720db1a3f1fb76ade96090be4"
+  },
+  "aggregateQualification": {
+    "srcShared": {
+      "files": 570,
+      "passed": 6046,
+      "failed": 0,
+      "durationSeconds": 360.39,
+      "startedLocal": "2026-10-19 02:31:51 Europe/Rome",
+      "startSource": "436b42210 plus final19 component tests and component changes in the root working tree",
+      "sourceBoundary": "No automatic start/end source record. Client auth/runtime inputs remained unchanged through39c/cd854/2b, except release metadata added in cd854. Combine unchanged runtime reuse with separate actual19 release/history tests and final53 server guards; do not claim one all-tree run at2b."
+    },
+    "finalComponents": {
+      "passed": 19,
+      "gate": 6,
+      "connect": 13
+    },
+    "baselineComponents": {
+      "gate": {
+        "failed": 4,
+        "passed": 1
+      },
+      "connect": {
+        "failed": 8,
+        "passed": 2
+      },
+      "qualification": "15-case baseline snapshots are archived separately; four scope controls were added for the final19, which are not byte-identical to baseline15."
+    }
+  },
+  "browserQualification": {
+    "main": "Actual OriginGate and hooks with synthetic Convex and mocked shareSession. Baseline substitutes exact1599 OriginGate only. Varying viewport captures prove behavior, not matched layout.",
+    "dialog": "Actual OriginConnect/hooks and real HTTP helper with synthetic409route. Original before metadata incorrectly says realOriginGate:true; source field/hash identify OriginConnect. Original retained unchanged; this note corrects interpretation.",
+    "helpers": "Archived final helper snapshot was later extended with dialog mode. Main entry/production hash unchanged; helper archive is not claimed byte-identical to original main launcher.",
+    "excludedSetup": "Missing capture/ConvexProvider import was an initial setup failure, excluded from product proof.",
+    "cleanup": {
+      "basis": "Root coordination record; archivist did not rerun probes",
+      "acceptedPids": [
+        22180,
+        35616,
+        40336,
+        33064
+      ],
+      "acceptedPorts": [
+        21311,
+        20627,
+        21301,
+        21477,
+        5174,
+        5175
+      ],
+      "acceptedProcessListenerDataAbsent": true,
+      "initial": {
+        "pid": 32776,
+        "port": 21580,
+        "processAndListenerStopped": true,
+        "retainedDataSuffix": "uUBdcv",
+        "reason": "Automatic deletion rejected; no bypass"
+      }
+    }
+  },
+  "limits": [
+    "Local/unpublished candidate only; no new CI/native/site/publication acceptance",
+    "Happy-dom, synthetic Convex, isolated HTTP and fake engine scopes remain distinct",
+    "No native Convex persistence/full BatchA, real recipient email, physicalMac/hardware or exactly-once external-side-effect guarantee",
+    "Historical ec28 CI is not acceptance for newer source;035/031 receipts unchanged"
+  ],
+  "archivePolicy": "Original receipt bytes preserved. .ts/.tsx/.mjs/.cjs/.mts helpers acquire .txt suffix only; all content bytes remain identical. Original-to-archive paths and hashes are indexed in manifest.json. Mutable source paths are omitted per root instruction; Git bindings remain available."
+}

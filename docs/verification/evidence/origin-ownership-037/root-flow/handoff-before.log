@@ -1,0 +1,127 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix
+
+ ❯ src/components/OriginConnect.session.test.ts (6 tests | 4 failed) 8ms
+   × does not forward a superseded account to the local server 3ms
+   × does not pair the new account token with an older connection dialog's backend 0ms
+   × an older logout cannot delete the current account's server connection 0ms
+   × reports a refused connection instead of proceeding as if sharing succeeded 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/OriginConnect.session.test.ts > does not forward a superseded account to the local server
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "/api/origin/cloud-session",
+      Object {
+        "body": "{"url":"http://127.0.0.1:43001","sessionToken":"fixture-session-one"}",
+        "headers": Object {
+          "content-type": "application/json",
+        },
+        "method": "PUT",
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/components/OriginConnect.session.test.ts:17:21
+     15|   setSessionToken("fixture-session-two");
+     16|   await shareSession("http://127.0.0.1:43001", "fixture-session-one");
+     17|   expect(fetch).not.toHaveBeenCalled();
+       |                     ^
+     18| });
+     19|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/OriginConnect.session.test.ts > does not pair the new account token with an older connection dialog's backend
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "/api/origin/cloud-session",
+      Object {
+        "body": "{"url":"http://127.0.0.1:43001","sessionToken":"fixture-session-two"}",
+        "headers": Object {
+          "content-type": "application/json",
+        },
+        "method": "PUT",
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/components/OriginConnect.session.test.ts:23:21
+     21|   setCloudUrl("http://127.0.0.1:43002"); setSessionToken("fixture-sess…
+     22|   await shareSession("http://127.0.0.1:43001", "fixture-session-two");
+     23|   expect(fetch).not.toHaveBeenCalled();
+       |                     ^
+     24| });
+     25|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/components/OriginConnect.session.test.ts > an older logout cannot delete the current account's server connection
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "/api/origin/cloud-session",
+      Object {
+        "method": "DELETE",
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/components/OriginConnect.session.test.ts:29:21
+     27|   setSessionToken("fixture-session-two");
+     28|   await shareSession(null, null);
+     29|   expect(fetch).not.toHaveBeenCalled();
+       |                     ^
+     30| });
+     31|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/components/OriginConnect.session.test.ts > reports a refused connection instead of proceeding as if sharing succeeded
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/components/OriginConnect.session.test.ts:48:77
+     46| it("reports a refused connection instead of proceeding as if sharing s…
+     47|   vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ err…
+     48|   await expect(shareSession("http://127.0.0.1:43001", "fixture-session…
+       |                                                                             ^
+     49| });
+     50|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 2 passed (6)
+   Start at  02:22:40
+   Duration  1.90s (transform 534ms, setup 445ms, import 958ms, tests 8ms, environment 320ms)
+

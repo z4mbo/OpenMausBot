@@ -1,0 +1,179 @@
+{
+  "base": "ec28ec06e935b10a176f26586348e81831475e80",
+  "ownHead": "99f2c5672fb358f749bb02a9e899bdfe5dbf7b35",
+  "parentHead": "5009cb76d00da9a16a65ffcc2b40dc6c43781586",
+  "sources": [
+    {
+      "file": "src/components/OriginGate.tsx",
+      "checkoutSha256": "251bbf77d64253b04f03fec86f566eab251352b6c5ac7595b783f384b6577823",
+      "baselineGitSha256": "3a47b05520d97029549ff1b4732b1918500cf05ade5d31618e5618e30da7a37c",
+      "identicalLf": true,
+      "gitBlob": "fdd0d0dee80758cf99a979ceffb4b698b287f96f",
+      "checkoutUnchanged": true
+    },
+    {
+      "file": "src/components/OriginConnect.tsx",
+      "checkoutSha256": "19c73496bce9843880ba3c15b775478611fc96fcd9b172cc01384257a5fe556d",
+      "baselineGitSha256": "e0ba8986eacc44b63d470dd58ac361e588e001e138a00e9f7c81fc90a6a0037f",
+      "identicalLf": true,
+      "gitBlob": "99302d89a25b037f985f27798edaa41ac4414bbd",
+      "checkoutUnchanged": true
+    },
+    {
+      "file": "src/lib/origin-cloud/client.ts",
+      "checkoutSha256": "5c193a3025723168a71c0606675912646536c4b5ea5d2afc72710547756b9b1d",
+      "baselineGitSha256": "42135500318ab730bfe735cfcfef81b82d7311f0271a9354459fe36d7584a6da",
+      "identicalLf": true,
+      "gitBlob": "fa31d6c025968b328b4466fa53c92146b9264c26",
+      "checkoutUnchanged": true
+    },
+    {
+      "file": "src/lib/origin-cloud/hooks.ts",
+      "checkoutSha256": "40f2255ecf3bb280144c774daaecbeb8fac2ce5a05f5ff12782cfac9756e91ce",
+      "baselineGitSha256": "30249ace02dcea7725c093bfb6f77dd60c3bd8ba818c55a1f9020e283f26449e",
+      "identicalLf": true,
+      "gitBlob": "527a58df242e03c57970b23253803f7e759c6fc3",
+      "checkoutUnchanged": true
+    }
+  ],
+  "tests": [
+    {
+      "file": "src/components/OriginGate.session.test.ts",
+      "size": 6497,
+      "sha256": "66ee4bb48ba21069396ca986a405afa715bc56f71b8de69a4498ab502704b726",
+      "byteExactFromParent": true,
+      "ownUnchanged": true,
+      "parentStillByteExact": true,
+      "snapshot": "OriginGate.session.test.ts.txt"
+    },
+    {
+      "file": "src/components/OriginConnect.session.test.ts",
+      "size": 5343,
+      "sha256": "d080af802f55dd6ecde630eae2cfa6db7309b755093f128e0d5abd8dd2dc3ec8",
+      "byteExactFromParent": true,
+      "ownUnchanged": true,
+      "parentStillByteExact": true,
+      "snapshot": "OriginConnect.session.test.ts.txt"
+    }
+  ],
+  "leases": [
+    {
+      "file": "server/origin-run-lease.ts",
+      "sha256": "938d69537159e8a1013d8cc12340ae0df0b125708e12ded70de9a6a2f7b8dc9f",
+      "unchanged": true
+    },
+    {
+      "file": "server/origin-shared-agents.ts",
+      "sha256": "1e3b6928f82dff5374abf7a187eccbb6f47748be8e2c787d3c8fb78587b4a1a8",
+      "unchanged": true
+    },
+    {
+      "file": "server/origin-shared.test.ts",
+      "sha256": "384bc2a3087a8d07892b9ddc5407b09951c653b992435a90c8a43373cd3623d6",
+      "unchanged": true
+    }
+  ],
+  "createdAt": "2026-10-19T00:29:27.916Z",
+  "results": [
+    {
+      "label": "gate-red",
+      "total": 5,
+      "passed": 1,
+      "failed": 4,
+      "pending": 0,
+      "runtimeErrors": null,
+      "cases": [
+        {
+          "name": "the actual false signup form discards authentication after a backend switch",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected 'fixture-private-token-from-first-back…' to be null"
+        },
+        {
+          "name": "the actual true signup form discards authentication after a backend switch",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected 'fixture-private-token-from-first-back…' to be null"
+        },
+        {
+          "name": "a pending invitation acceptance cannot re-share the old account after a switch",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 1 times\u001b[90m"
+        },
+        {
+          "name": "the current form signs in, accepts its invite and shares the same session",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "a refused server handoff leaves the actual form's retry error visible",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected 'fixture-session-one' to be null"
+        }
+      ],
+      "exitCode": 1
+    },
+    {
+      "label": "connect-red",
+      "total": 10,
+      "passed": 2,
+      "failed": 8,
+      "pending": 0,
+      "runtimeErrors": null,
+      "cases": [
+        {
+          "name": "does not forward a superseded account to the local server",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 1 times\u001b[90m"
+        },
+        {
+          "name": "does not pair the new account token with an older connection dialog's backend",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 1 times\u001b[90m"
+        },
+        {
+          "name": "an older logout cannot delete the current account's server connection",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 1 times\u001b[90m"
+        },
+        {
+          "name": "shares the current session with the local server",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "clears the server connection after the current account signs out",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "reports a refused connection instead of proceeding as if sharing succeeded",
+          "status": "failed",
+          "firstFailure": "Error: promise resolved \"undefined\" instead of rejecting"
+        },
+        {
+          "name": "the actual account dialog shares the canonical backend for http://127.0.0.1:43001/",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected \"vi.fn()\" to be called once with arguments: [ '/api/origin/cloud-session', …(1) ]\u001b[90m"
+        },
+        {
+          "name": "the actual account dialog shares the canonical backend for fixture.convex.cloud",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected \"vi.fn()\" to be called once with arguments: [ '/api/origin/cloud-session', …(1) ]\u001b[90m"
+        },
+        {
+          "name": "the actual account dialog shares the canonical backend for origin.imbored.fun/",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected \"vi.fn()\" to be called once with arguments: [ '/api/origin/cloud-session', …(1) ]\u001b[90m"
+        },
+        {
+          "name": "a refused handoff remains visible after the actual dialog signs in",
+          "status": "failed",
+          "firstFailure": "AssertionError: the given combination of arguments (undefined and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string"
+        }
+      ],
+      "exitCode": 1
+    }
+  ],
+  "ownHeadAfter": "99f2c5672fb358f749bb02a9e899bdfe5dbf7b35",
+  "trackedDiffAfter": "",
+  "completedAt": "2026-10-19T00:30:21.353Z"
+}

@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "baselineCommit": "e7c289d3d6ed15763f87f4d26967b8ae1d4eb5ec",
+  "sourceFileSha256": "3aef9d2b50273ea4feeb196b03134b221f50460a2371fc704800504eb9466907",
+  "fixture": {
+    "url": "http://127.0.0.1:21764",
+    "pid": 28736,
+    "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-CAnXfz",
+    "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792369830148-12176.log"
+  },
+  "syntheticBackend": "http://127.0.0.1:57279",
+  "queryCount": 10,
+  "checks": [
+    {
+      "name": "standard control-omb doctor",
+      "passed": true
+    },
+    {
+      "name": "held incoming validation cannot restore an account after newer sign-out",
+      "passed": true
+    },
+    {
+      "name": "same-account a-to-b-to-a changes reject the stale c refresh",
+      "passed": true
+    }
+  ],
+  "cleanup": {
+    "fixtureExited": true,
+    "fixtureDataRemoved": true,
+    "syntheticBackendClosed": true
+  }
+}

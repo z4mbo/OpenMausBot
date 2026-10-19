@@ -1,0 +1,14 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90mC:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin[39m
+
+[90mstderr[2m | unknown test
+[22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ [32m✓[39m server/origin-shared.test.ts [2m([22m[2m33 tests[22m[2m)[22m[32m 126[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m33 passed[39m[22m[90m (33)[39m
+[2m   Start at [22m 02:20:47
+[2m   Duration [22m 1.59s[2m (transform 508ms, setup 486ms, import 818ms, tests 126ms, environment 0ms)[22m
+
+JSON report written to C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/shared-run-lease-035/green-accepted-final.json

@@ -1,0 +1,88 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin
+
+ ❯ src/lib/origin-cloud/session-races.test.ts (13 tests | 1 failed | 11 skipped) 18ms
+   × never dispatches the previous backend's token when changing the backend 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/origin-cloud/session-races.test.ts > never dispatches the previous backend's token when changing the backend
+AssertionError: expected [ { …(2) }, { …(2) }, { …(2) }, …(1) ] to not deep equally contain { url: 'http://127.0.0.1:43002', …(1) }
+
+- Expected:
+{
+  "token": "fixture-session-one",
+  "url": "http://127.0.0.1:43002",
+}
+
++ Received:
+[
+  {
+    "token": "fixture-session-one",
+    "url": "http://127.0.0.1:43001",
+  },
+  {
+    "token": "fixture-session-one",
+    "url": "http://127.0.0.1:43001",
+  },
+  {
+    "token": "fixture-session-one",
+    "url": "http://127.0.0.1:43002",
+  },
+  {
+    "token": "fixture-session-one",
+    "url": "http://127.0.0.1:43002",
+  },
+]
+
+ ❯ src/lib/origin-cloud/session-races.test.ts:156:36
+    154|   expect(fixture.queries).toContainEqual({ url: "http://127.0.0.1:4300…
+    155|   await act(async () => setCloudUrl("http://127.0.0.1:43002"));
+    156|   expect.soft(fixture.queries).not.toContainEqual({ url: "http://127.0…
+       |                                    ^
+    157|   expect.soft(sessionStore.get()).toBeNull();
+    158|   expect.soft(host.textContent).toBe("signed out");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/lib/origin-cloud/session-races.test.ts > never dispatches the previous backend's token when changing the backend
+AssertionError: expected 'fixture-session-one' to be null
+
+- Expected:
+null
+
++ Received:
+"fixture-session-one"
+
+ ❯ src/lib/origin-cloud/session-races.test.ts:157:35
+    155|   await act(async () => setCloudUrl("http://127.0.0.1:43002"));
+    156|   expect.soft(fixture.queries).not.toContainEqual({ url: "http://127.0…
+    157|   expect.soft(sessionStore.get()).toBeNull();
+       |                                   ^
+    158|   expect.soft(host.textContent).toBe("signed out");
+    159|   await act(async () => setSessionToken("fixture-session-two"));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/lib/origin-cloud/session-races.test.ts > never dispatches the previous backend's token when changing the backend
+AssertionError: expected 'fixture-session-one' to be 'signed out' // Object.is equality
+
+Expected: "signed out"
+Received: "fixture-session-one"
+
+ ❯ src/lib/origin-cloud/session-races.test.ts:158:33
+    156|   expect.soft(fixture.queries).not.toContainEqual({ url: "http://127.0…
+    157|   expect.soft(sessionStore.get()).toBeNull();
+    158|   expect.soft(host.textContent).toBe("signed out");
+       |                                 ^
+    159|   await act(async () => setSessionToken("fixture-session-two"));
+    160|   expect(fixture.queries).toContainEqual({ url: "http://127.0.0.1:4300…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed | 11 skipped (13)
+   Start at  02:26:13
+   Duration  1.09s (transform 225ms, setup 474ms, import 97ms, tests 18ms, environment 336ms)
+

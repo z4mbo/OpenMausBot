@@ -1,0 +1,15 @@
+{
+  "url": "http://127.0.0.1:20627",
+  "pid": 35616,
+  "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-cWrni4",
+  "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792369773045-18636.log",
+  "version": "after",
+  "baseline": "1599b6c6d",
+  "source": "src/components/OriginGate.tsx",
+  "sha256": "020b470a46bc0630e1be88a1e3c8ff9146e93505dbef061471a5f291c1702153",
+  "realOriginGate": true,
+  "realSessionHooks": true,
+  "syntheticConvex": true,
+  "nativeBackend": false,
+  "previewUrl": "http://127.0.0.1:5175/__origin-session-flow.html"
+}
