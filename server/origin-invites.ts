@@ -4,6 +4,7 @@ import { makeFunctionReference } from "convex/server";
 import { defaultOriginCloudFile, readOriginCloud } from "./origin-cloud.ts";
 import { requestOrigin } from "./request-auth.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
+import { normalizeOriginBackendUrl, resolveOriginSiteAddress } from "../shared/origin-site-address.ts";
 
 type Args = Record<string, unknown>;
 
@@ -39,37 +40,18 @@ export function appAddress(req: IncomingMessage, publicUrl: () => string | null)
   return publicUrl()?.replace(/\/+$/, "") || requestOrigin(req);
 }
 
-export interface InviteMail {
-  to: string;
-  teamName: string;
-  inviterName: string;
-  link: string;
-}
+type InviteAddress = { origin: string | null; convexUrl: string | null; centralMail: boolean };
 
-export type SendInviteMail = (mail: InviteMail) => Promise<boolean>;
-
-/** Sends through Resend when ORIGIN_RESEND_API_KEY is set; returns false when mail is not configured or delivery failed. */
-export function resendInviteMail(fetchImpl: typeof fetch = fetch, env: NodeJS.ProcessEnv = process.env): SendInviteMail {
-  return async ({ to, teamName, inviterName, link }) => {
-    const key = env.ORIGIN_RESEND_API_KEY?.trim();
-    if (!key) return false;
-    try {
-      const response = await fetchImpl("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-        body: JSON.stringify({
-          from: env.ORIGIN_INVITE_FROM?.trim() || "Origin <onboarding@resend.dev>",
-          to,
-          subject: `Join ${teamName} on Origin`,
-          text: `${inviterName} invited you to ${teamName}.\n\nJoin the workspace: ${link}\n\nThis invitation expires in 7 days.`,
-        }),
-        signal: AbortSignal.timeout(15_000),
-      });
-      return response.ok;
-    } catch {
-      return false;
-    }
-  };
+async function invitationAddress(client: OriginConvex, convexUrl: string): Promise<InviteAddress> {
+  try {
+    const result = await client.query("workspaces:inviteAddress", {}) as { origin?: unknown; convexUrl?: unknown } | null;
+    if (typeof result?.convexUrl !== "string" || normalizeOriginBackendUrl(result.convexUrl) !== convexUrl || typeof result.origin !== "string") return { origin: null, convexUrl, centralMail: false };
+    const origin = resolveOriginSiteAddress({ convexUrl, siteUrl: result.origin });
+    if (!origin || origin !== normalizeOriginBackendUrl(result.origin)) return { origin: null, convexUrl, centralMail: false };
+    return { origin, convexUrl, centralMail: true };
+  } catch {
+    return { origin: resolveOriginSiteAddress({ convexUrl }), convexUrl, centralMail: false };
+  }
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -80,16 +62,19 @@ export interface OriginInviteRouteDeps {
   publicUrl(): string | null;
   convexUrl?: () => string | null;
   connect?: (url: string) => OriginConvex;
-  sendMail?: SendInviteMail;
 }
 
 export function createOriginInviteRoutes(deps: OriginInviteRouteDeps): RouteHandler {
   const convexUrl = deps.convexUrl ?? (() => configuredConvexUrl());
   const connect = deps.connect ?? convexClient;
-  const sendMail = deps.sendMail ?? resendInviteMail();
   return async ({ req, res, path, method, json, readBody }) => {
     if (path === "/api/origin/app-address" && method === "GET") {
       return json(res, 200, { origin: deps.publicUrl()?.replace(/\/+$/, "") || null });
+    }
+    if (path === "/api/origin/invite-address" && method === "GET") {
+      const url = normalizeOriginBackendUrl(convexUrl());
+      const address = url ? await invitationAddress(connect(url), url) : { origin: null, convexUrl: null };
+      return json(res, 200, { origin: address.origin, convexUrl: address.convexUrl });
     }
     if (path !== "/api/origin/invites" || method !== "POST") return PASS;
     const body = await readBody(req, 16_000).catch(() => null) as Args | null;
@@ -103,24 +88,24 @@ export function createOriginInviteRoutes(deps: OriginInviteRouteDeps): RouteHand
     if (!ID.test(teamId) || (projectId && !ID.test(projectId))) return json(res, 400, { error: "teamId must be an Origin workspace id" });
     if (!ROLES.has(role)) return json(res, 400, { error: "role must be admin, member or viewer" });
     if (email && (!EMAIL.test(email) || email.length > 254)) return json(res, 400, { error: "Enter a valid email address" });
-    const url = convexUrl();
+    const url = normalizeOriginBackendUrl(convexUrl());
     if (!url) return json(res, 409, { error: "This server is not connected to Origin. Sign in to Origin in the app first." });
-    const base = appAddress(req, deps.publicUrl);
-    if (!base) return json(res, 500, { error: "This server has no address to put in an invitation link" });
+    if (body.convexUrl !== undefined && (typeof body.convexUrl !== "string" || normalizeOriginBackendUrl(body.convexUrl) !== url)) return json(res, 409, { error: "Origin's connection changed. Refresh the invitation and try again." });
     const client = connect(url);
-    let invite: { token: string; expiresAt: number; teamName: string };
-    let inviter = "";
+    const address = await invitationAddress(client, url);
+    if (!address.origin) return json(res, 409, { error: "The invitation website is not configured for this Origin backend" });
+    if (email && !address.centralMail) return json(res, 503, { error: "Update the Origin backend before sending invitation email" });
     try {
-      invite = await client.mutation("workspaces:createInvite", { sessionToken, teamId, role, ...(projectId ? { projectId } : {}), ...(email ? { email } : {}) }) as typeof invite;
+      const args = { sessionToken, teamId, role, ...(projectId ? { projectId } : {}) };
       if (email) {
-        const me = await client.query("auth:me", { sessionToken }) as { name?: string; email?: string } | null;
-        inviter = me?.name || me?.email || "";
+        const result = await client.action("workspaces:sendEmailInvite", { ...args, email }) as { token: string; expiresAt: number; inviteLink: string; sent: boolean; deliveryStatus: string };
+        if (!result || !/^[a-f0-9]{64}$/.test(result.token) || !Number.isFinite(result.expiresAt) || result.inviteLink !== `${address.origin}/join/${result.token}` || !["not_configured", "failed", "accepted"].includes(result.deliveryStatus) || result.sent !== (result.deliveryStatus === "accepted")) return json(res, 502, { error: "Origin returned an invalid invitation response" });
+        return json(res, 200, { token: result.token, expiresAt: result.expiresAt, inviteLink: result.inviteLink, sent: result.sent, deliveryStatus: result.deliveryStatus });
       }
+      const invite = await client.mutation("workspaces:createInvite", args) as { token: string; expiresAt: number };
+      return json(res, 200, { token: invite.token, expiresAt: invite.expiresAt, inviteLink: `${address.origin}/join/${invite.token}`, sent: false, deliveryStatus: "not_requested" });
     } catch (error) {
       return json(res, 400, { error: originErrorMessage(error, "Origin could not create the invitation") });
     }
-    const link = `${base}/join/${invite.token}`;
-    const sent = email ? await sendMail({ to: email, teamName: invite.teamName, inviterName: inviter || "A teammate", link }) : false;
-    return json(res, 200, { token: invite.token, expiresAt: invite.expiresAt, inviteLink: link, sent });
   };
 }

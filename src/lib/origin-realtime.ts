@@ -3,10 +3,10 @@ import { sessionStore } from "./origin-cloud/client";
 
 export type MemberCallParticipant = {
   userId: string; name: string; username?: string; email: string; avatarUrl?: string | null;
-  audioEnabled: boolean; videoEnabled: boolean; screenSharing?: boolean; joinedAt: number; lastSeenAt: number;
+  audioEnabled: boolean; videoEnabled: boolean; screenSharing?: boolean; joinedAt: number; lastSeenAt: number; sessionId: string;
 };
 export type MemberCallSignalKind = "offer" | "answer" | "candidate";
-export type MemberCallSignal = { id: string; fromUserId: string; toUserId: string; fromJoinedAt?: number; toJoinedAt?: number; kind: MemberCallSignalKind; payload: string; createdAt: number };
+export type MemberCallSignal = { id: string; fromUserId: string; toUserId: string; fromJoinedAt?: number; toJoinedAt?: number; fromSessionId: string; toSessionId: string; kind: MemberCallSignalKind; payload: string; createdAt: number };
 export type MemberChatAttachment = { id: string; name: string; size: number; contentType: string; projectId?: string };
 export type MemberChatMessage = {
   id: string; authorUserId: string; authorName: string; authorEmail: string; avatarUrl?: string | null;

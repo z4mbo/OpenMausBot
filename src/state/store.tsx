@@ -59,25 +59,7 @@ import { createBotPatchQueue, type BotUpdatePatch } from "./bot-patch-queue";
 import { useChatErrorClear } from "./chat-error";
 import { openLiveEvents, publishLiveFrame, publishMissedFrames } from "@/lib/live-events";
 import { chatHiddenFor } from "@/lib/origin-chief-section";
-
-const MAX_ROUTINE_RUNS = 2_000;
-const ACTIVE_ROUTINE_RUN_STATUSES = new Set<RoutineRun["status"]>(["queued", "running", "waiting"]);
-
-function trimRoutineRuns(runs: readonly RoutineRun[]): RoutineRun[] {
-  const sorted = [...runs].sort((a, b) => b.scheduledFor - a.scheduledFor);
-  if (sorted.length <= MAX_ROUTINE_RUNS) return sorted;
-  const activeCount = sorted.reduce(
-    (count, run) => count + (ACTIVE_ROUTINE_RUN_STATUSES.has(run.status) ? 1 : 0),
-    0,
-  );
-  let terminalSlots = Math.max(0, MAX_ROUTINE_RUNS - activeCount);
-  return sorted.filter((run) => {
-    if (ACTIVE_ROUTINE_RUN_STATUSES.has(run.status)) return true;
-    if (terminalSlots === 0) return false;
-    terminalSlots -= 1;
-    return true;
-  });
-}
+import { trimRoutineRuns } from "./routine-run-retention";
 
 export type { MausColor } from "@/lib/mascot";
 export type { RoutineRunCardData } from "../../shared/routine-run";
@@ -1318,7 +1300,7 @@ export function reducer(state: AppState, action: Action): AppState {
       if ((switchedThread || (before.awaitingThreadSnapshot && action.bot.threadId === before.threadId)) &&
           Array.isArray(action.bot.messages)) {
         // The slim deletion broadcast can beat the full snapshot; later duplicate snapshots must not overwrite newer messages.
-        return reducer(switching, { type: "taskSwitched", bot: { ...before, ...action.bot, computer: action.bot.computer, section: action.bot.section, toolScope: action.bot.toolScope, messages: action.bot.messages, browserProfile: action.bot.browserProfile } });
+        return reducer(switching, { type: "taskSwitched", bot: { ...before, ...action.bot, computer: action.bot.computer, section: action.bot.section, toolScope: action.bot.toolScope, managedSections: action.bot.managedSections, messages: action.bot.messages, browserProfile: action.bot.browserProfile } });
       }
       const patched = updateBot(switching, action.bot.id, (b) => ({
         ...b,
@@ -1330,7 +1312,7 @@ export function reducer(state: AppState, action: Action): AppState {
         browserProfile: action.bot.browserProfile,
         computer: action.bot.computer,
         toolScope: action.bot.toolScope,
-        section: action.bot.section,
+        section: action.bot.section, managedSections: action.bot.managedSections,
         tasks: action.bot.tasks ? mergeTaskStamps(b.tasks, action.bot.tasks) : b.tasks,
         // Old approvals must never be sent to the replacement thread while its transcript loads.
         messages: switchedThread ? [] : b.messages,
@@ -1947,7 +1929,7 @@ export function reducer(state: AppState, action: Action): AppState {
         ...bot,
         ...action.bot,
         computer: action.bot.computer,
-        toolScope: action.bot.toolScope,
+        toolScope: action.bot.toolScope, managedSections: action.bot.managedSections,
         messages: action.bot.messages ?? [],
         hasMore: action.bot.hasMore,
         awaitingThreadSnapshot: false,

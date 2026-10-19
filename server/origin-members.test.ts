@@ -35,7 +35,7 @@ afterEach(async () => {
   for (const folder of folders.splice(0)) rmSync(folder, { recursive: true, force: true });
 });
 
-function fakeConvex(): OriginCloudClient {
+function fakeConvex(projectRoles: Record<string, string> = {}): OriginCloudClient {
   const answer = async (name: string, args: Record<string, unknown>): Promise<unknown> => {
     const token = String(args.sessionToken ?? "");
     const user = USERS[token];
@@ -47,7 +47,7 @@ function fakeConvex(): OriginCloudClient {
     }
     if (name === "workspaces:members") return Object.entries(USERS).map(([key, member]) => ({ userId: member._id, name: member.name, email: member.email, role: ROLES[key] }));
     if (name === "projects:get") {
-      if (args.projectId === PROJECT) return { _id: PROJECT, teamId: TEAM, name: "Kai", memberRole: ROLES[token] };
+      if (args.projectId === PROJECT) return { _id: PROJECT, teamId: TEAM, name: "Kai", memberRole: projectRoles[token] ?? ROLES[token] };
       if (args.projectId === FOREIGN_PROJECT) return { _id: FOREIGN_PROJECT, teamId: OTHER_TEAM, name: "Elsewhere", memberRole: "owner" };
       throw new Error("Uncaught Error: Project not found");
     }
@@ -58,12 +58,12 @@ function fakeConvex(): OriginCloudClient {
   return { query: answer, mutation: answer };
 }
 
-async function start(options: { notices?: MentionNotice[]; delayMs?: number; callAgents?: CallAgents } = {}) {
+async function start(options: { notices?: MentionNotice[]; delayMs?: number; callAgents?: CallAgents; projectRoles?: Record<string, string> } = {}) {
   const folder = mkdtempSync(join(tmpdir(), "omb-origin-members-"));
   folders.push(folder);
   const store = openRealtimeStore(join(folder, "realtime.sqlite"));
   stores.push(store);
-  const convex = fakeConvex();
+  const convex = fakeConvex(options.projectRoles);
   const route = createOriginMemberRoutes({
     store: () => store,
     convex: () => convex,
@@ -127,17 +127,53 @@ describe("origin member calls", () => {
     expect(listed.body.participants.map((p: { name: string }) => p.name)).toEqual(["Ana", "Bo"]);
     expect((await call("tok-bo", "GET", `/api/local-voice/participants?teamId=${TEAM}`)).body.participants).toEqual([]);
 
-    const sent = await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", fromJoinedAt: ana.body.joinedAt, toJoinedAt: bo.body.joinedAt });
+    const sent = await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", fromJoinedAt: ana.body.joinedAt, toJoinedAt: bo.body.joinedAt, sessionId: ana.body.sessionId, toSessionId: bo.body.sessionId });
     expect(sent.body.signal.kind).toBe("offer");
-    const stale = await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", toJoinedAt: 1 });
+    const stale = await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", toJoinedAt: 1, sessionId: ana.body.sessionId, toSessionId: bo.body.sessionId });
     expect(stale.body.signal).toBeNull();
-    const inbox = await call("tok-bo", "GET", `/api/local-voice/signals?${room}`);
+    const inbox = await call("tok-bo", "GET", `/api/local-voice/signals?${room}&sessionId=${bo.body.sessionId}`);
     expect(inbox.body.signals).toHaveLength(1);
-    await call("tok-bo", "DELETE", `/api/local-voice/signals?${room}`, { signalIds: [inbox.body.signals[0].id] });
-    expect((await call("tok-bo", "GET", `/api/local-voice/signals?${room}`)).body.signals).toEqual([]);
+    await call("tok-bo", "DELETE", `/api/local-voice/signals?${room}`, { signalIds: [inbox.body.signals[0].id], sessionId: bo.body.sessionId });
+    expect((await call("tok-bo", "GET", `/api/local-voice/signals?${room}&sessionId=${bo.body.sessionId}`)).body.signals).toEqual([]);
 
-    await call("tok-bo", "POST", `/api/local-voice/participants?${room}`, { action: "leave" });
-    expect((await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}" })).status).toBe(400);
+    await call("tok-bo", "POST", `/api/local-voice/participants?${room}`, { action: "leave", sessionId: bo.body.sessionId });
+    expect((await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { toUserId: USERS["tok-bo"]!._id, kind: "offer", payload: "{}", sessionId: ana.body.sessionId, toSessionId: bo.body.sessionId })).status).toBe(400);
+  });
+
+  it("fences delayed call updates and leaves after the same person joins from another machine", async () => {
+    const { call } = await start();
+    const path = `/api/local-voice/participants?teamId=${TEAM}&room=${PROJECT}`;
+    const first = await call("tok-ana", "POST", path, { action: "join", audioEnabled: true });
+    const current = await call("tok-ana", "POST", path, { action: "join", audioEnabled: false });
+    for (const action of ["update", "leave"]) {
+      expect(await call("tok-ana", "POST", path, { action, audioEnabled: true, sessionId: first.body.sessionId })).toEqual({ status: 409, body: { error: "Rejoin the call to continue" } });
+      expect((await call("tok-ana", "POST", path, { action })).status).toBe(409);
+    }
+    expect(first.body.sessionId).toBeTypeOf("string");
+    expect(current.body.sessionId).not.toBe(first.body.sessionId);
+    expect((await call("tok-ana", "GET", path)).body.participants).toEqual([expect.objectContaining({ sessionId: current.body.sessionId, audioEnabled: false })]);
+    expect((await call("tok-ana", "POST", path, { action: "update", audioEnabled: true, sessionId: current.body.sessionId })).status).toBe(200);
+    expect((await call("tok-ana", "POST", path, { action: "leave", sessionId: current.body.sessionId })).status).toBe(200);
+    expect((await call("tok-ana", "GET", path)).body.participants).toEqual([]);
+    expect((await call("tok-ana", "POST", path, { action: "unknown" })).status).toBe(400);
+    expect((await call("tok-ana", "GET", path)).body.participants).toEqual([]);
+  });
+
+  it("keeps a replaced machine from consuming or sending the current call's signaling", async () => {
+    const { call } = await start();
+    const room = `teamId=${TEAM}&room=${PROJECT}`;
+    const first = await call("tok-ana", "POST", `/api/local-voice/participants?${room}`, { action: "join" });
+    const current = await call("tok-ana", "POST", `/api/local-voice/participants?${room}`, { action: "join" });
+    const bo = await call("tok-bo", "POST", `/api/local-voice/participants?${room}`, { action: "join" });
+    const body = { toUserId: USERS["tok-ana"]!._id, kind: "offer", payload: "{}", sessionId: bo.body.sessionId, toSessionId: current.body.sessionId };
+    const sent = await call("tok-bo", "POST", `/api/local-voice/signals?${room}`, body);
+    expect(sent.status).toBe(200);
+    const signalId = sent.body.signal.id;
+    expect((await call("tok-ana", "GET", `/api/local-voice/signals?${room}&sessionId=${first.body.sessionId}`)).status).toBe(409);
+    expect((await call("tok-ana", "DELETE", `/api/local-voice/signals?${room}`, { signalIds: [signalId], sessionId: first.body.sessionId })).status).toBe(409);
+    expect((await call("tok-ana", "POST", `/api/local-voice/signals?${room}`, { ...body, toUserId: USERS["tok-bo"]!._id, sessionId: first.body.sessionId, toSessionId: bo.body.sessionId })).status).toBe(409);
+    expect((await call("tok-ana", "GET", `/api/local-voice/signals?${room}&sessionId=${current.body.sessionId}`)).body.signals.map((signal: { id: string }) => signal.id)).toEqual([signalId]);
+    expect((await call("tok-bo", "POST", `/api/local-voice/signals?${room}`, { ...body, toSessionId: first.body.sessionId })).body.signal).toBeNull();
   });
 
   it("refuses a project from another workspace and a view-only member", async () => {
@@ -145,6 +181,15 @@ describe("origin member calls", () => {
     expect((await call("tok-ana", "GET", `/api/local-voice/participants?teamId=${TEAM}&room=${FOREIGN_PROJECT}`)).status).toBe(400);
     const viewer = await call("tok-cy", "POST", `/api/local-voice/participants?teamId=${TEAM}&room=${PROJECT}`, { action: "join" });
     expect(viewer).toEqual({ status: 400, body: { error: "View-only workspace access" } });
+  });
+
+  it("keeps project viewers from joining calls even when they can write in the workspace", async () => {
+    const { call } = await start({ projectRoles: { "tok-bo": "viewer" } });
+    const room = `teamId=${TEAM}&room=${PROJECT}`;
+    expect((await call("tok-bo", "GET", `/api/local-voice/participants?${room}`)).status).toBe(200);
+    expect((await call("tok-bo", "POST", `/api/local-voice/participants?${room}`, { action: "join" })).status).toBe(400);
+    expect((await call("tok-ana", "GET", `/api/local-voice/participants?${room}`)).body.participants).toEqual([]);
+    expect((await call("tok-bo", "POST", `/api/local-voice/participants?teamId=${TEAM}`, { action: "join" })).status).toBe(200);
   });
 
   it("brings the project's chief into the call for people in it, with captions and audio that is never kept", async () => {
@@ -221,6 +266,19 @@ describe("origin member chat", () => {
     expect(listed.body.conversations).toMatchObject([{ otherUserId: USERS["tok-ana"]!._id, unread: 1 }]);
     await call("tok-bo", "PATCH", `/api/local-chat/conversations?${dm}`, { messageId: message.body.message.id });
     expect((await call("tok-bo", "GET", `/api/local-chat/conversations?teamId=${TEAM}`)).body.conversations[0].unread).toBe(0);
+  });
+
+  it("keeps project viewers from writing or changing project chat while retaining workspace chat access", async () => {
+    const { call } = await start({ projectRoles: { "tok-bo": "viewer" } });
+    const channel = `teamId=${TEAM}&conversation=project:${PROJECT}`;
+    const sent = await call("tok-ana", "POST", `/api/local-chat/messages?${channel}`, { body: "Project update" });
+    expect((await call("tok-bo", "GET", `/api/local-chat/messages?${channel}`)).body.messages).toHaveLength(1);
+    expect((await call("tok-bo", "POST", `/api/local-chat/messages?${channel}`, { body: "Viewer write" })).status).toBe(400);
+    expect((await call("tok-bo", "PATCH", `/api/local-chat/messages?${channel}`, { id: sent.body.message.id, pinned: true })).status).toBe(400);
+    const messages = (await call("tok-ana", "GET", `/api/local-chat/messages?${channel}`)).body.messages;
+    expect(messages).toHaveLength(1);
+    expect(messages[0].pinned).toBeUndefined();
+    expect((await call("tok-bo", "POST", `/api/local-chat/messages?teamId=${TEAM}`, { body: "Workspace update" })).status).toBe(200);
   });
 
   it("notifies a direct message's other participant and refuses mentions of anyone else there", async () => {

@@ -3,9 +3,10 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 import { SKIN_IDS } from "./skins";
+import { readSkinCss } from "../../scripts/testing/skin-css";
 
 const src = join(dirname(fileURLToPath(import.meta.url)), "..");
-const css = readFileSync(join(src, "styles.css"), "utf8");
+const css = readSkinCss();
 
 function declarations(body: string): Record<string, string> {
   return Object.fromEntries([...body.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)].map(([, name, value]) => [name, value.trim()]));

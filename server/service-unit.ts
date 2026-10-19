@@ -1,5 +1,6 @@
 import { homedir, userInfo } from "node:os";
 import { posix } from "node:path";
+import { APP_NAME } from "../shared/product-brand.mjs";
 
 // Unit files describe a Linux or macOS machine: POSIX paths whatever host renders them (Windows CI included).
 const { basename, dirname, join } = posix;
@@ -33,9 +34,9 @@ export function serviceCommand(spec: Pick<ServiceSpec, "node" | "script" | "serv
 
 export function systemdUnit(spec: ServiceSpec): string {
   const lines = [
-    "# Written by `openmausbot service install`. Re-run it to change the options.",
+    "# Written by `pnpm omb service install`. Re-run it to change the options.",
     "[Unit]",
-    `Description=OpenMausBot${spec.label ? ` (${spec.label})` : ""}`,
+    `Description=Origin${spec.label ? ` (${spec.label})` : ""}`,
     "After=network-online.target",
     "Wants=network-online.target",
     "",
@@ -106,7 +107,7 @@ export function launchdPlist(spec: ServiceSpec): string {
 export function unstableInstallWarning(script: string): string | null {
   const normalized = script.replace(/\\/g, "/");
   if (/\/_npx\//.test(normalized) || /\/\.npm\/_npx\//.test(normalized)) {
-    return `this command runs from an npx cache (${dirname(script)}), which npm may delete at any time. Install it permanently first (npm install -g openmausbot) and run \`openmausbot service install\` from that install.`;
+    return `this command runs from an npx cache (${dirname(script)}), which npm may delete at any time. Use a stable Origin checkout from https://github.com/z4mbo/Origin, run \`pnpm install --frozen-lockfile\`, then run \`pnpm omb service install\` from that checkout.`;
   }
   return null;
 }
@@ -148,10 +149,10 @@ export function shippedSentinelCli(
   platform: NodeJS.Platform, home: string, exists: (path: string) => boolean, hasSentinel: (script: string) => boolean = () => true,
 ): { node: string; script: string } | null {
   const candidates = platform === "darwin"
-    ? ["/Applications/OpenMausBot.app", join(home, "Applications", "OpenMausBot.app")].map((app) => ({
-      node: join(app, "Contents", "MacOS", "OpenMausBot"), script: join(app, "Contents", "Resources", "server", "openmausbot.js"),
+    ? [`/Applications/${APP_NAME}.app`, join(home, "Applications", `${APP_NAME}.app`)].map((app) => ({
+      node: join(app, "Contents", "MacOS", APP_NAME), script: join(app, "Contents", "Resources", "server", "openmausbot.js"),
     }))
-    : platform === "linux" ? [{ node: "/opt/OpenMausBot/openmausbot", script: "/opt/OpenMausBot/resources/server/openmausbot.js" }] : [];
+    : platform === "linux" ? [{ node: `/opt/${APP_NAME}/openmausbot`, script: `/opt/${APP_NAME}/resources/server/openmausbot.js` }] : [];
   return candidates.find((cli) => exists(cli.node) && exists(cli.script) && hasSentinel(cli.script)) ?? null;
 }
 
@@ -216,9 +217,9 @@ function systemdQuoted(value: string, command = false): string {
 export function sentinelSystemdService(spec: SentinelServiceSpec): string {
   for (const [label, value] of [["home", spec.home], ["node", spec.node], ["script", spec.script], ["data dir", spec.dataDir], ["output", spec.out]] as const) assertUnitValue(label, value);
   return [
-    "# Written by `openmausbot service install --sentinel`. Started by its timer.",
+    "# Written by `pnpm omb service install --sentinel`. Started by its timer.",
     "[Unit]",
-    "Description=OpenMausBot Sentinel health scan",
+    "Description=Origin Sentinel health scan",
     "",
     "[Service]",
     "Type=oneshot",
@@ -233,9 +234,9 @@ export function sentinelSystemdService(spec: SentinelServiceSpec): string {
 
 export function sentinelSystemdTimer(): string {
   return [
-    "# Written by `openmausbot service install --sentinel`.",
+    "# Written by `pnpm omb service install --sentinel`.",
     "[Unit]",
-    "Description=Run the OpenMausBot Sentinel health scan every two minutes",
+    "Description=Run the Origin Sentinel health scan every two minutes",
     "",
     "[Timer]",
     `OnBootSec=${SENTINEL_INTERVAL_SECONDS}s`,

@@ -121,7 +121,7 @@ describe("PR lifecycle and missed event recovery", () => {
     await f.t.run(ctx => ctx.db.patch(f.projectId, { repoUrl: "https://github.com/test/changed" }));
     expect(await f.t.mutation(internal.taskPRs.sync, { id, sequence: latest + 2, snapshot: { ...f.s, state: "merged", githubUpdatedAt: 2000 } })).toBe(false);
   });
-  test("issue keyword closure never completes a PR task; ordinary issue sync still completes/reopens", async () => {
+  test("issue closure needs trusted merge evidence, and issue-mode reopening still applies", async () => {
     const f = await fixture(); await f.t.mutation(internal.taskPRs.humanContext, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, choosePR: true }); // Protect before the first PR link exists.
     const issue = { projectId: f.projectId, taskId: f.taskId, repoUrl, number: 42, issueUrl: `${repoUrl}/issues/42`, state: "closed" as const, updatedAt: 2000 };
     await f.t.mutation(internal.integrations.linkIssue, issue);
@@ -130,6 +130,8 @@ describe("PR lifecycle and missed event recovery", () => {
     await f.t.mutation(internal.integrations.linkIssue, { ...issue, state: "open", updatedAt: 4000 });
     expect((await f.t.run(ctx => ctx.db.get(f.taskId)))!.done).toBe(true);
     const g = await fixture(); await g.t.mutation(internal.integrations.linkIssue, { ...issue, taskId: g.taskId, projectId: g.projectId });
+    expect((await g.t.run(ctx => ctx.db.get(g.taskId)))!.done).toBe(false);
+    await g.t.mutation(internal.integrations.completeMergedIssue, { projectId: g.projectId, taskId: g.taskId, repoUrl, issueNumber: 42, pullRequest: { number: 9, headSha: sha("a"), mergeSha: sha("b"), mergedAt: 2500 } });
     expect((await g.t.run(ctx => ctx.db.get(g.taskId)))!.done).toBe(true);
     await g.t.mutation(internal.integrations.linkIssue, { ...issue, taskId: g.taskId, projectId: g.projectId, state: "open", updatedAt: 3000 });
     expect((await g.t.run(ctx => ctx.db.get(g.taskId)))!.done).toBe(false);

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { MausAvatar } from "@/components/Avatar";
 import { cn } from "@/lib/cn";
 import { reducedMotion } from "@/lib/onboarding";
+import { APP_NAME } from "@/lib/app-links";
 import type { SceneProps } from "./types";
 
 const TERMINAL_MS = 6400;
@@ -13,8 +14,8 @@ type Line =
   | { kind: "done"; label: string; value: string };
 
 const SCRIPT: Array<{ at: number; line: Line }> = [
-  { at: 300, line: { kind: "cmd", text: "npx openmausbot" } },
-  { at: 1150, line: { kind: "out", text: "Welcome to Origin", tone: "ink" } },
+  { at: 300, line: { kind: "cmd", text: "pnpm omb" } },
+  { at: 1150, line: { kind: "out", text: `Welcome to ${APP_NAME}`, tone: "ink" } },
   { at: 1350, line: { kind: "out", text: "Let's connect your AI. Choose a provider, then a model.", tone: "dim" } },
   { at: 1800, line: { kind: "pick", label: "Choose your AI connection", options: ["Claude Code", "ChatGPT / Codex", "API key"], chosen: 0 } },
   { at: 2900, line: { kind: "done", label: "Choose your AI connection", value: "Claude Code" } },

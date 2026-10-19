@@ -71,10 +71,10 @@ export function DesktopWorkspaceSwitcher({ compact = false, inline = false, clou
     <button type="button" aria-label={label} aria-haspopup="menu" aria-expanded={open} data-cloud-home-indicator={cloudHome || undefined}
       data-tour="server-switcher" title={title}
       onClick={openMenu}
-      className={cn("flex w-full items-center gap-2 rounded-lg py-2 text-left text-[13px] font-medium text-ink hover:bg-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus", compact ? "justify-center px-1" : "px-2")}
+      className={cn("flex w-full items-center rounded-lg text-left font-medium text-ink hover:bg-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus", compact ? "justify-center gap-2 px-1 py-2 text-[13px]" : "h-10 gap-3 px-3 text-[14px]")}
       style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}>
-      <Icon size={16} className="shrink-0 text-ink-secondary" />
-      {!compact && <><span className="min-w-0 flex-1 truncate">{name}{cloudHome && <AlwaysOn />}</span><ChevronDown size={13} className="shrink-0 text-ink-secondary" /></>}
+      <Icon size={compact ? 16 : 20} className="shrink-0 text-ink-secondary" />
+      {!compact && <><span className="min-w-0 flex-1 truncate">{name}{cloudHome && <AlwaysOn />}</span><ChevronDown size={14} className="shrink-0 text-ink-secondary" /></>}
     </button>
     {error && <p role="alert" className="mt-1 text-[11px] text-danger">{error}</p>}
   </div>;

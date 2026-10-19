@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { json, readBody } from "../harness/http.ts";
 import { requiredScope } from "../request-auth.ts";
-import type { UpdateCheck } from "../update-check.ts";
+import { createUpdateChecker, type UpdateCheck } from "../update-check.ts";
 import { dispatchRoutes } from "./table.ts";
 import { createUpdateCheckRoutes } from "./update-check.ts";
 
@@ -48,5 +48,21 @@ describe("update check route", () => {
     const response = await fetch(`${base}/api/updates/check`);
     expect(response.status).toBe(502);
     expect(await response.json()).toEqual({ error: "Could not check for updates: GitHub answered 403" });
+  });
+
+  it("returns an available Origin release through the registered HTTP route", async () => {
+    const base = await serve(createUpdateChecker({
+      current: "0.2.10", install: "git",
+      fetch: async () => new Response(JSON.stringify({
+        tag_name: "origin-v0.2.11",
+        html_url: "https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.11",
+      })),
+    }));
+    const response = await fetch(`${base}/api/updates/check`);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      current: "0.2.10", latest: "0.2.11", available: true,
+      releaseUrl: "https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.11",
+    });
   });
 });

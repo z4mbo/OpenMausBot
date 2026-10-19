@@ -16,11 +16,11 @@ export interface SentinelArgs {
   checkInstall?: boolean;
 }
 
-export const SENTINEL_USAGE = `openmausbot sentinel [--data-dir DIR] [--out DIR] [--once] [--json]
+export const SENTINEL_USAGE = `pnpm omb sentinel [--data-dir DIR] [--out DIR] [--once] [--json]
                      [--queue-wait SECONDS] [--cost USD]
-openmausbot sentinel --check-install [--json]
+pnpm omb sentinel --check-install [--json]
 
-Scans an OpenMausBot data dir, read-only, for failed tool calls, stopped or
+Scans an Origin data dir, read-only, for failed tool calls, stopped or
 timed-out turns, long queue waits, expensive turns and retry loops, and keeps
 them as issues in issues.jsonl, outside the data dir: on macOS in
 ~/Library/Application Support/openmausbot-sentinel, on Linux in
@@ -63,7 +63,7 @@ export function parseSentinelArgs(argv: string[], env: NodeJS.ProcessEnv = proce
         if (!Number.isFinite(scaled) || number < 0) return { error: `${arg} takes a number of 0 or more`, json };
         if (arg === "--queue-wait") args.queueWaitMs = scaled;
         else args.costUsd = scaled;
-      } else return { error: `unknown argument "${arg}"; see openmausbot sentinel --help`, json };
+      } else return { error: `unknown argument "${arg}"; see pnpm omb sentinel --help`, json };
     } catch (error) {
       return { error: error instanceof Error ? error.message : String(error), json };
     }
@@ -83,10 +83,10 @@ const HOST: SentinelHost = { platform: process.platform, home: homedir(), exists
 export function describeInstallCheck(check: SentinelInstallCheck): string {
   switch (check.status) {
     case "ok": return `sentinel schedule ok: ${check.unit} runs ${check.script} with ${check.node}`;
-    case "stale": return `stale install: ${check.unit} needs ${check.missing.join(" and ")}, which no longer exists; rerun openmausbot service install --sentinel`;
-    case "not_installed": return `no Sentinel schedule at ${check.unit}; install one with openmausbot service install --sentinel`;
-    case "unreadable": return `could not read the command in ${check.unit}; rerun openmausbot service install --sentinel`;
-    default: return "no Sentinel schedule to check on this platform; openmausbot service install --sentinel prints the Task Scheduler command for Windows";
+    case "stale": return `stale install: ${check.unit} needs ${check.missing.join(" and ")}, which no longer exists; rerun pnpm omb service install --sentinel`;
+    case "not_installed": return `no Sentinel schedule at ${check.unit}; install one with pnpm omb service install --sentinel`;
+    case "unreadable": return `could not read the command in ${check.unit}; rerun pnpm omb service install --sentinel`;
+    default: return "no Sentinel schedule to check on this platform; pnpm omb service install --sentinel prints the Task Scheduler command for Windows";
   }
 }
 
@@ -114,7 +114,7 @@ export function runSentinelCli(argv: string[], io: { log(line: string): void; er
   try {
     isDir = statSync(args.dataDir).isDirectory();
   } catch {}
-  if (!isDir) return fail(`no OpenMausBot data dir at ${args.dataDir}; pass --data-dir with the folder that holds messages.db`, args.json);
+  if (!isDir) return fail(`no Origin data dir at ${args.dataDir}; pass --data-dir with the folder that holds messages.db`, args.json);
   const refusal = outRefusal(args.out, args.dataDir);
   if (refusal) return fail(refusal, args.json);
   let summary: ScanSummary;

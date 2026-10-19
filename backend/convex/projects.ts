@@ -7,8 +7,8 @@ import { callSignalKindValidator, projectIconTypeValidator, projectStatusValidat
 import type { Id, Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
-
-const defaultColumns = ["Draft", "Todo", "In progress"];
+import { admitStorageReference, issueUpload, storageMetadata, validateUpload } from "./lib/storage";
+import { DEFAULT_WORKFLOW_COLUMNS, ensureDraftColumn } from "./lib/columns";
 const accents = ["#111111", "#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626"];
 const callStaleMs = 30_000;
 
@@ -285,9 +285,10 @@ export const ackCallSignals = mutation({
 
 export const generateIconUploadUrl = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string() },
+  returns: v.string(),
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.projectId, args.sessionToken);
-    return await ctx.storage.generateUploadUrl();
+    return issueUpload(ctx, args.sessionToken, { kind: "icon", projectId: args.projectId });
   },
 });
 
@@ -346,12 +347,12 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
       joinedAt: now,
     });
 
-    for (const [index, title] of defaultColumns.entries()) {
+    for (const [index, title] of DEFAULT_WORKFLOW_COLUMNS.entries()) {
       await ctx.db.insert("columns", {
         projectId,
         title,
         order: index,
-        isDone: title === "Done",
+        isDone: false,
         ...(title === "Draft" ? { isDraft: true } : {}),
         createdAt: now,
         updatedAt: now,
@@ -411,7 +412,11 @@ export const importRepos = mutation({
         return project.repoUrl?.trim().toLowerCase() === normalizedRepoUrl || project.name.trim().toLowerCase() === normalizedName;
       });
       if (existing || existingRepoUrls.has(normalizedRepoUrl) || existingNames.has(normalizedName)) {
-        if (existing) imported.push({ projectId: existing._id, name: existing.name, repoUrl: existing.repoUrl || repoUrl, created: false });
+        if (existing) {
+          const access = await projectMember(ctx, existing, user);
+          if (access && canEdit(access)) await ensureDraftColumn(ctx, existing._id);
+          imported.push({ projectId: existing._id, name: existing.name, repoUrl: existing.repoUrl || repoUrl, created: false });
+        }
         continue;
       }
 
@@ -438,11 +443,13 @@ export const importRepos = mutation({
         updatedAt: now,
         joinedAt: now,
       });
-      for (const [index, title] of defaultColumns.entries()) {
+      for (const [index, title] of DEFAULT_WORKFLOW_COLUMNS.entries()) {
         await ctx.db.insert("columns", {
           projectId,
           title,
           order: index,
+          isDone: false,
+          ...(title === "Draft" ? { isDraft: true } : {}),
           createdAt: now,
           updatedAt: now,
         });
@@ -468,6 +475,7 @@ export const update = mutation({
     iconValue: v.optional(v.string()),
     iconStorageId: v.optional(v.id("_storage")),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const { user, project: existingProject } = await requireAdmin(ctx, args.projectId, args.sessionToken);
     const patch: Partial<{
@@ -502,9 +510,16 @@ export const update = mutation({
       if (args.iconType === "default") patch.iconValue = undefined;
     }
     if (args.iconValue !== undefined) patch.iconValue = args.iconValue.trim() || undefined;
-    if (args.iconStorageId !== undefined) patch.iconStorageId = args.iconStorageId;
+    if (args.iconStorageId !== undefined) {
+      const metadata = await storageMetadata(ctx, args.iconStorageId);
+      if (!metadata) throw new Error("File not found");
+      validateUpload({ kind: "icon", projectId: args.projectId }, metadata.size, metadata.contentType);
+      await admitStorageReference(ctx, args.iconStorageId, user, { kind: "project", projectId: args.projectId });
+      patch.iconStorageId = args.iconStorageId;
+    }
     await ctx.db.patch(args.projectId, patch);
     if (args.status === "active" && existingProject.githubRepoState === "pending") await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId: args.projectId });
+    return null;
   },
 });
 

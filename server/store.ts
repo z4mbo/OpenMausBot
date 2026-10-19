@@ -1,21 +1,18 @@
-import { chmodSync, existsSync, readFileSync, mkdirSync, rmSync, statSync, unlinkSync } from "node:fs";
+import { chmodSync, existsSync, readFileSync, mkdirSync, statSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 
 import { writeFileAtomic, writeFileAtomicIfChanged } from "./atomic.ts";
 import { parseToolScope, toolScopeWidens } from "../shared/tool-scope.ts";
 import { ensureSections, readSections, changeEmptySection } from "./section-context.ts";
 import type { TeamComputers } from "./team-computers.ts";
-import { removeBotFolder, soulFile, soulHash, writeSoulMirror } from "./bot-folder.ts";
+import { soulFile, soulHash, writeSoulMirror } from "./bot-folder.ts";
 import type { BotProfilePatch } from "./bot-profile.ts";
 import { peerAllowKey, type PeerAction } from "./peer-approval-key.ts";
 import { DATA_DIR, EVENTS_DIR, NATIVE_DIR, loadBrowserProfileIdAliases } from "./config.ts";
 import * as mdb from "./message-db.ts";
-import { forgetBotMemoryJournal, journalFile } from "./memory-journal.ts";
 import { runCommand, type Command } from "./commands.ts";
-import { workspaceDir } from "./workspace.ts";
 import type { Destination } from "./surface.ts";
 import { newId, type ModelSelection } from "./contracts.ts";
-import { pickBotName } from "./names.ts";
 import { redactSecretsInText } from "./redact.ts";
 import { scrubbedSkillRequest } from "./skill-request-card.ts";
 import { AVATAR_FOCUS_CENTER, AVATAR_ZOOM_MIN, botAvatarProfile, clampAvatarFocus, clampAvatarZoom } from "../shared/bot-avatar.ts";
@@ -36,6 +33,10 @@ import type {
 import { movesThreadToTop } from "../shared/wire.ts";
 import { parseConnectorTools } from "./connector-tools.ts";
 import { sameModelSelection } from "../shared/thread-model.ts";
+import { createBotCreation, type NewBotProfile, type OriginImportRecord } from "./store-bot-creation.ts";
+import { deleteBotData, persistBotDeletion, retireEmptyWorkspaceSections } from "./store-bot-deletion.ts";
+import { commitBotChange, taskRevocations } from "./bots-save.ts";
+export type { OriginImportRecord } from "./store-bot-creation.ts";
 export type {
   BotActivity, ConnectorCardData, GroupDefaultResponder, OptionCardData,
   SecretRequestCardData, Surface, TaskClosedBy, TaskOpenedBy, TaskUsage,
@@ -307,11 +308,12 @@ export interface BotRecord extends Omit<WireBot, "avatarUrl" | "tasks"> {
   };
   lastProfileRequestId?: string;
   lastTeamSetupReceipt?: { requestId: string; result: TeamSetupResult };
+  originImport?: OriginImportRecord;
   packageBase?: Partial<Record<AgentPart, PartPair>>;
   assignedSkills?: string[];
 }
 
-export type BotWirePrivateKeys = "resumeCursors" | "tasks" | "avatarUrl" | "approvalGrant" | "lastProfileRequestId" | "lastTeamSetupReceipt" | "packageBase" | "assignedSkills";
+export type BotWirePrivateKeys = "resumeCursors" | "tasks" | "avatarUrl" | "approvalGrant" | "lastProfileRequestId" | "lastTeamSetupReceipt" | "originImport" | "packageBase" | "assignedSkills";
 export type BotWireProjection = Pick<BotRecord, Exclude<keyof BotRecord, BotWirePrivateKeys>>;
 export type BotWireProjectionIsExact = AssertExact<Omit<WireBot, "avatarUrl" | "tasks">, BotWireProjection> & AssertSameKeys<Omit<WireBot, "avatarUrl" | "tasks">, BotWireProjection>;
 export const botWireProjectionIsExact: BotWireProjectionIsExact = true;
@@ -450,20 +452,35 @@ export class Store {
   private defaultSelection: () => ModelSelection;
   private completeNewBotSelection: (selection: ModelSelection) => ModelSelection;
   private driverKindOf: (instanceId: string) => string | undefined;
+  private sectionHasComputer: (section: string) => boolean;
   private listeners = new Set<(change: StoreChange) => void>();
   private registeringInitialSections = true;
   /** Clearing this slot must not clear a concurrently running task's activity. */
   private legacyActivities = new Map<string, BotActivity>();
+
+  private readonly botCreation = createBotCreation({
+    bots: () => this.bots,
+    bot: (id) => this.bot(id),
+    newBotSelection: (selection) => this.newBotSelection(selection),
+    saveBots: (bots) => this.saveBots(bots),
+    emit: (change) => this.emit(change),
+    appendMessage: (threadId, message) => this.appendMessage(threadId, message),
+    colors: COLORS,
+    untitledThread: UNTITLED_THREAD,
+    sectionKey,
+  });
 
   constructor(
     defaultSelection: () => ModelSelection,
     completeNewBotSelection: (selection: ModelSelection) => ModelSelection = (selection) => selection,
     /** Unknown counts as another driver, so Full and Custom fall back to Ask. */
     driverKindOf: (instanceId: string) => string | undefined = () => undefined,
+    sectionHasComputer: (section: string) => boolean = () => true,
   ) {
     this.defaultSelection = defaultSelection;
     this.completeNewBotSelection = completeNewBotSelection;
     this.driverKindOf = driverKindOf;
+    this.sectionHasComputer = sectionHasComputer;
     mkdirSync(DATA_DIR, { recursive: true });
     for (const file of [BOTS_FILE, GROUPS_FILE]) tightenRegistryFile(file);
     // An unreadable bots.json must never read as "every member was deleted".
@@ -852,6 +869,11 @@ export class Store {
 
   get sections(): string[] { return readSections(); }
 
+  retireEmptyWorkspaceSections(): string[] {
+    return retireEmptyWorkspaceSections({ bots: this.bots, groups: this.groups, sections: this.sections,
+      sectionHasComputer: this.sectionHasComputer, changeEmptySection: (name, nextName) => this.changeEmptySection(name, nextName) });
+  }
+
   private rememberSections(names: (string | undefined)[]) {
     try {
       if (ensureSections(names)) this.emit({ type: "sections" });
@@ -1094,7 +1116,7 @@ export class Store {
       detail: string;
       finishedAt: number;
     } | null,
-    fallbackDetail = "OpenMausBot restarted before this goal finished.",
+    fallbackDetail = "Origin restarted before this goal finished.",
     fallbackFinishedAt = Date.now(),
   ): number {
     const ownedThreadIds = new Set<string>();
@@ -1486,72 +1508,18 @@ export class Store {
     return this.completeNewBotSelection(requested ?? this.defaultSelection());
   }
 
-  createBot(
-    profile: Partial<
-      Pick<
-        BotRecord,
-        "name" | "title" | "description" | "soul" | "color" | "mascotExpression" | "mascotBody" | "modelSelection" | "section" | "cwd" | "visibility" | "toolScope"
-      >
-    > = {},
-    opts: {
-      seedMessages?: boolean;
-    } = {},
-  ): BotRecord {
-    const toolScope = parseToolScope(profile.toolScope);
-    if (!toolScope.ok) throw new Error(toolScope.error);
+  createBot(profile: NewBotProfile = {}, opts: { seedMessages?: boolean } = {}): BotRecord {
+    const bot = this.botCreation.prepareBot(profile);
     this.rememberSections([profile.section]);
-    const name = profile.name?.trim() || pickBotName(this.bots.map((b) => b.name));
-    const section = sectionKey(profile.section);
-    const bot: BotRecord = {
-      id: newId(),
-      threadId: newId(),
-      name,
-      title: profile.title ?? "",
-      description: profile.description ?? "",
-      soul: profile.soul ?? "",
-      soulHash: soulHash(profile.soul ?? ""),
-      notifications: true,
-      color: profile.color ?? COLORS[this.bots.length % COLORS.length],
-      ...(profile.mascotExpression ? { mascotExpression: profile.mascotExpression } : {}),
-      ...(profile.mascotBody ? { mascotBody: profile.mascotBody } : {}),
-      // Restricted from its first frame: no one else is ever told it exists.
-      ...(profile.visibility && profile.visibility !== "everyone" ? { visibility: structuredClone(profile.visibility) } : {}),
-      ...(toolScope.scope ? { toolScope: toolScope.scope } : {}),
-      unread: false,
-      modelSelection: this.newBotSelection(profile.modelSelection),
-      resumeCursors: {},
-      createdAt: Date.now(),
-    };
-    if (section) bot.section = section;
-    if (profile.cwd) bot.cwd = profile.cwd;
-    bot.tasks = [{
-      threadId: bot.threadId,
-      title: UNTITLED_THREAD,
-      createdAt: bot.createdAt,
-      updatedAt: bot.createdAt,
-      resumeCursors: {},
-      unread: false,
-      activity: "idle",
-      busy: false,
-    }];
     // Persist before publishing or greeting, so an interrupted creation cannot inherit tools.
     this.saveBots([bot, ...this.bots]);
     this.bots.unshift(bot);
-    try {
-      writeSoulMirror(bot.id, bot.soul ?? "");
-    } catch (e) {
-      console.warn(`[bot-folder] could not write SOUL.md mirror for ${bot.id}: ${(e as Error).message}`);
-    }
-    // Before its transcript: clients need the bot/thread mapping to place either message.
-    this.emit({ type: "bot", botId: bot.id });
-    if (opts.seedMessages !== false) {
-      this.appendMessage(bot.threadId, {
-        role: "bot",
-        kind: "text",
-        text: `Hi, I'm ${name}. What would you like me to do?`,
-      });
-    }
+    this.botCreation.publishNewBot(bot, opts.seedMessages !== false);
     return bot;
+  }
+
+  createOriginImport(identity: Omit<OriginImportRecord, "memberIds">, profile: NewBotProfile, members: readonly NewBotProfile[] = []): { bot: BotRecord; members: BotRecord[] } {
+    return this.botCreation.createOriginImport(identity, profile, members);
   }
 
   applyTeamSetup(request: TeamSetupRequest): TeamSetupResult {
@@ -1647,18 +1615,11 @@ export class Store {
   deleteBot(id: string, setupRequest?: TeamSetupRequest): boolean {
     const bot = this.bot(id);
     if (!bot) return false;
-    let nextBots = this.bots.filter((b) => b.id !== id);
-    if (setupRequest) {
-      const chief = this.bot(setupRequest.botId);
-      if (!chief || chief.id === id || setupRequest.deletion?.botId !== id) throw new Error("The reviewed deletion no longer has a valid owner");
-      const lastTeamSetupReceipt: NonNullable<BotRecord["lastTeamSetupReceipt"]> = { requestId: setupRequest.requestId, result: { state: "applied", newTeams: [], bots: [
-        { id: bot.id, name: bot.name, action: "deleted" },
-      ] } };
-      nextBots = nextBots.map((candidate) => candidate.id === chief.id ? { ...candidate, lastTeamSetupReceipt } : candidate);
-    }
-    // Persist removal before deleting data: a failed save must leave the bot recoverable.
-    this.saveBots(nextBots);
-    this.bots = nextBots;
+    const deletion = persistBotDeletion(bot, {
+      bots: this.bots, groups: this.groups, sections: this.sections, sectionHasComputer: this.sectionHasComputer,
+      saveBots: (bots, registerSections) => this.saveBots(bots, registerSections),
+    }, setupRequest);
+    this.bots = deletion.bots;
     this.legacyActivities.delete(id);
     const rooms = this.groups.filter((g) => !g.dm && g.memberIds.includes(id));
     for (const g of rooms) {
@@ -1669,21 +1630,9 @@ export class Store {
     if (rooms.length) {
       try { this.saveGroups(); } catch (error) { console.warn("store: room cleanup will retry on restart", error); }
     }
-    for (const threadId of new Set([bot.threadId, ...(bot.tasks ?? []).map((t) => t.threadId)])) {
-      this.deleteThreadRecord(threadId);
-    }
-    try {
-      rmSync(workspaceDir(id), { recursive: true, force: true });
-    } catch {}
-    try {
-      rmSync(journalFile(id), { force: true });
-    } catch {}
-    mdb.deleteBotMemoryFiles(id);
-    forgetBotMemoryJournal(id);
-    try {
-      rmSync(join(DATA_DIR, "skill-state", id), { recursive: true, force: true });
-    } catch {}
-    removeBotFolder(id);
+    deleteBotData(bot, threadId => this.deleteThreadRecord(threadId));
+    for (const changed of deletion.revoked) this.emit({ type: "bot", botId: changed.id });
+    if (deletion.retiredSection) this.emit({ type: "sections" });
     this.emit({ type: "bot.deleted", botId: id });
     for (const g of rooms) this.emit({ type: "group", groupId: g.id });
     return true;
@@ -2083,8 +2032,7 @@ export class Store {
     const bot = this.botByThread(threadId);
     const task = bot ? this.taskByThread(bot.id, threadId) : undefined;
     if (!bot || !task || task.cwd === undefined) return false;
-    delete task.cwd;
-    this.saveBots();
+    commitBotChange(bot, "the conversation folder", () => this.saveBots(), () => { delete task.cwd; });
     this.emit({ type: "bot", botId: bot.id });
     return true;
   }
@@ -2094,25 +2042,24 @@ export class Store {
     const task = bot ? this.taskByThread(botId, threadId) : undefined;
     if (!bot || !task) return null;
     if (opts.privateOnly && task.cwd === undefined) {
-      task.cwd = fallbackCwd ?? null;
-      this.saveBots();
+      commitBotChange(bot, "the conversation folder", () => this.saveBots(), () => { task.cwd = fallbackCwd ?? null; });
       this.emit({ type: "bot", botId });
-      return task.cwd;
+      return task.cwd ?? null;
     }
     if (opts.none) {
       if (task.cwd !== null) {
-        task.cwd = null;
-        this.saveBots();
+        commitBotChange(bot, "the conversation folder", () => this.saveBots(), () => { task.cwd = null; });
         this.emit({ type: "bot", botId });
       }
       return null;
     }
     if (task.cwd === undefined) {
-      task.cwd = Object.keys(task.resumeCursors).length === 0 ? (bot.cwd ?? fallbackCwd ?? null) : null;
-      this.saveBots();
+      commitBotChange(bot, "the conversation folder", () => this.saveBots(), () => {
+        task.cwd = Object.keys(task.resumeCursors).length === 0 ? (bot.cwd ?? fallbackCwd ?? null) : null;
+      });
       this.emit({ type: "bot", botId });
     }
-    return task.cwd;
+    return task.cwd ?? null;
   }
 
   /** Pinned, not read live: engines key their sessions and files to the folder a thread starts in. */
@@ -2239,18 +2186,18 @@ export class Store {
     const task = this.taskByThread(botId, threadId);
     if (!bot || !task) return null;
     if (patch.projectId !== undefined && !this.project(botId, patch.projectId)) return null;
-    for (const key of TASK_PATCH_FIELDS) {
-      if (Object.prototype.hasOwnProperty.call(patch, key)) {
-        Object.assign(task, { [key]: structuredClone(patch[key]) });
+    const revocations = taskRevocations(bot, task, patch);
+    commitBotChange(bot, "the conversation change", () => this.saveBots(), () => {
+      for (const key of TASK_PATCH_FIELDS) {
+        if (Object.prototype.hasOwnProperty.call(patch, key)) Object.assign(task, { [key]: structuredClone(patch[key]) });
       }
-    }
-    if (task.snoozedUntil === 0 && patch.unread === true) task.snoozedUntil = undefined;
-    if (typeof patch.title === "string") task.title = patch.title.trim().slice(0, 80) || UNTITLED_THREAD;
-    if (Object.prototype.hasOwnProperty.call(patch, "pinned") && task.pinned !== true) delete task.pinned;
-    if (task.routineRunId) task.unread = false;
-    if (bot.threadId === threadId) this.mirrorActiveTask(bot, task);
-    bot.unread = bot.tasks!.some(taskCountsAsBotUnread);
-    this.saveBots();
+      if (task.snoozedUntil === 0 && patch.unread === true) task.snoozedUntil = undefined;
+      if (typeof patch.title === "string") task.title = patch.title.trim().slice(0, 80) || UNTITLED_THREAD;
+      if (Object.prototype.hasOwnProperty.call(patch, "pinned") && task.pinned !== true) delete task.pinned;
+      if (task.routineRunId) task.unread = false;
+      if (bot.threadId === threadId) this.mirrorActiveTask(bot, task);
+      bot.unread = bot.tasks!.some(taskCountsAsBotUnread);
+    }, () => Object.assign(task, revocations));
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2265,17 +2212,13 @@ export class Store {
   clearAutoSurfacePins(botId: string, destination: Destination): number {
     const bot = this.bot(botId);
     if (!bot?.tasks) return 0;
-    let cleared = 0;
-    for (const task of bot.tasks) {
-      if (task.surface === undefined || task.surfaceSource !== "auto" || task.surface === destination) continue;
-      task.surface = undefined;
-      task.surfaceSource = undefined;
-      cleared++;
-    }
-    if (!cleared) return 0;
-    this.saveBots();
+    const tasks = bot.tasks.filter(task => task.surface !== undefined && task.surfaceSource === "auto" && task.surface !== destination);
+    if (!tasks.length) return 0;
+    commitBotChange(bot, "conversation surfaces", () => this.saveBots(), () => {
+      for (const task of tasks) Object.assign(task, { surface: undefined, surfaceSource: undefined });
+    });
     this.emit({ type: "bot", botId });
-    return cleared;
+    return tasks.length;
   }
 
   /** One write: never publish a new provider before its approval downgrade. */
@@ -2358,11 +2301,10 @@ export class Store {
     if (!bot) return null;
     if (projectId !== undefined && !this.project(botId, projectId)) return null;
     const task = this.buildTask(bot, title, projectId, openedBy, approvalMode, modelSelection, cwd);
-    bot.tasks = [task, ...(bot.tasks ?? [])];
-    if (activate) {
-      this.mirrorActiveTask(bot, task);
-    }
-    this.saveBots();
+    commitBotChange(bot, "the new conversation", () => this.saveBots(), () => {
+      bot.tasks = [task, ...(bot.tasks ?? [])];
+      if (activate) this.mirrorActiveTask(bot, task);
+    });
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2393,8 +2335,7 @@ export class Store {
     const bot = this.bot(botId);
     const task = this.taskByThread(botId, threadId);
     if (!bot || !task) return null;
-    task.openedBy = structuredClone(openedBy);
-    this.saveBots();
+    commitBotChange(bot, "the conversation opener", () => this.saveBots(), () => { task.openedBy = structuredClone(openedBy); });
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2412,10 +2353,11 @@ export class Store {
     const bot = this.bot(botId);
     const task = this.taskByThread(botId, threadId);
     if (!bot || !task) return null;
-    if (closedBy) task.closedBy = structuredClone(closedBy);
-    else if (!task.closedBy) return task;
-    else delete task.closedBy;
-    this.saveBots();
+    if (!closedBy && !task.closedBy) return task;
+    commitBotChange(bot, "the conversation closer", () => this.saveBots(), () => {
+      if (closedBy) task.closedBy = structuredClone(closedBy);
+      else delete task.closedBy;
+    });
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2424,8 +2366,7 @@ export class Store {
     const bot = this.bot(botId);
     const task = bot?.tasks?.find((t) => t.threadId === threadId);
     if (!bot || !task) return null;
-    this.mirrorActiveTask(bot, task);
-    this.saveBots();
+    commitBotChange(bot, "the selected conversation", () => this.saveBots(), () => this.mirrorActiveTask(bot, task));
     this.emit({ type: "bot", botId });
     return bot;
   }
@@ -2435,11 +2376,13 @@ export class Store {
   }
 
   titleTaskFromFirstMessage(botId: string, text: string, threadId?: string): TaskRecord | null {
+    const bot = this.bot(botId);
     const task = threadId ? this.taskByThread(botId, threadId) : this.activeTask(botId);
-    if (!task || task.titleFromFirstMessage || (task.title !== UNTITLED_TASK && task.title !== UNTITLED_THREAD)) return null;
-    task.title = titleFromMessage(text);
-    task.titleFromFirstMessage = true;
-    this.saveBots();
+    if (!bot || !task || task.titleFromFirstMessage || (task.title !== UNTITLED_TASK && task.title !== UNTITLED_THREAD)) return null;
+    commitBotChange(bot, "the conversation title", () => this.saveBots(), () => {
+      task.title = titleFromMessage(text);
+      task.titleFromFirstMessage = true;
+    });
     this.emit({ type: "bot", botId });
     return task;
   }
@@ -2455,7 +2398,6 @@ export class Store {
     return result?.deleted.length ? result.bot : null;
   }
 
-  /** Transcript rows go first, so a database failure leaves every task, log file and subscriber untouched. */
   deleteTasks(botId: string, threadIds: string[]): { bot: BotRecord; deleted: string[]; missing: string[] } | null {
     const bot = this.bot(botId);
     if (!bot?.tasks) return null;
@@ -2464,21 +2406,16 @@ export class Store {
     const deleted = unique.filter((id) => present.has(id));
     const missing = unique.filter((id) => !present.has(id));
     if (!deleted.length) return { bot, deleted, missing };
-    mdb.deleteThreads(deleted);
     const doomed = new Set(deleted);
-    bot.tasks = bot.tasks.filter((t) => !doomed.has(t.threadId));
-    let visible = bot.tasks.find((task) => !task.routineRunId);
-    if (!visible) {
-      visible = this.buildTask(bot);
-      bot.tasks = [visible, ...bot.tasks];
-    }
-    if (doomed.has(bot.threadId) || this.taskByThread(botId, bot.threadId)?.routineRunId) {
-      this.mirrorActiveTask(bot, visible);
-    }
+    commitBotChange(bot, "the conversation deletion", () => mdb.deleteThreads(deleted, () => this.saveBots()), () => {
+      bot.tasks = bot.tasks!.filter((t) => !doomed.has(t.threadId));
+      let visible = bot.tasks.find((task) => !task.routineRunId);
+      if (!visible) { visible = this.buildTask(bot); bot.tasks = [visible, ...bot.tasks]; }
+      if (doomed.has(bot.threadId) || this.taskByThread(botId, bot.threadId)?.routineRunId) this.mirrorActiveTask(bot, visible);
+      bot.unread = bot.tasks.some(taskCountsAsBotUnread);
+      this.refreshBotActivity(bot);
+    });
     for (const id of deleted) this.deleteThreadRecord(id, true);
-    bot.unread = bot.tasks.some(taskCountsAsBotUnread);
-    this.refreshBotActivity(bot);
-    this.saveBots();
     this.emit({ type: "bot", botId });
     return { bot, deleted, missing };
   }

@@ -150,6 +150,7 @@ export function projectIdentityPrompt(snapshot: Pick<ProjectSnapshot, "projectId
       : snapshot.repoUrl ? `Repository: ${oneLine(snapshot.repoUrl, 200)}` : `${name} has no GitHub repository linked yet.`,
     folder ? `Project folder on this computer: ${folder.path}. It is ${name}'s working folder: work there, and when it is empty clone the repository into it, then install and run the project as its README says.` : "",
     role === "chief" ? CHIEF_RULE(name) : AGENT_RULE(name, chief),
+    "New Origin issues start in Draft and stay off GitHub. Omit column when creating an issue unless the person explicitly asks for a different column; creating or assigning work does not choose another status.",
   ];
   return `\n\n${lines.filter(Boolean).join("\n")}`;
 }

@@ -4,6 +4,7 @@
 # checkout every line differs and the drift guard fails for a reason that has
 # nothing to do with drift. Pin them to LF on every platform.
 shared/mascot-bodies.ts text eol=lf
+docs/verification/evidence/origin-comms-transport-032/**/*.json text eol=lf
 # git runs hooks through sh; a CRLF shebang line is "/bin/sh^M: bad interpreter" on every platform.
 scripts/git-hooks/* text eol=lf
 deploy/podman/*.sh text eol=lf
@@ -30,3 +31,94 @@ third_party/opencode/LICENSE text eol=lf
 Dockerfile text eol=lf
 # Shipped to the server and built there by Docker.
 site/Dockerfile text eol=lf
+# Delivery receipts hash JSON bytes; Windows checkouts must preserve LF.
+docs/verification/evidence/origin-delivery-027/**/*.json text eol=lf
+docs/verification/evidence/origin-release-tools-027.json text eol=lf
+docs/verification/evidence/origin-invites-028/**/*.json text eol=lf
+docs/verification/evidence/origin-delivery-028/**/*.json text eol=lf
+docs/verification/evidence/origin-header-fit-029/**/*.json text eol=lf
+docs/verification/evidence/origin-invite-mail-029.json text eol=lf
+docs/verification/evidence/origin-candidate-029.json text eol=lf
+docs/verification/evidence/origin-landing-capture-032/**/*.json text eol=lf
+docs/verification/evidence/origin-activity-refresh-030/**/*.json text eol=lf
+docs/verification/evidence/origin-candidate-030.json text eol=lf
+docs/verification/evidence/origin-delivery-030/**/*.json text eol=lf
+docs/verification/evidence/origin-app-whats-new-030/**/*.json text eol=lf
+docs/verification/evidence/origin-header-layout-031/**/*.json text eol=lf
+docs/verification/evidence/origin-header-layout-031/**/*.log text eol=lf
+docs/verification/evidence/origin-flat-dialogs-031/**/*.json text eol=lf
+docs/verification/evidence/origin-flat-dialogs-031/**/*.log text eol=lf
+docs/verification/evidence/origin-flat-dialogs-031/fixture/*.mjs text eol=lf
+docs/verification/evidence/origin-flat-dialogs-031/fixture/*.ts text eol=lf
+docs/verification/evidence/origin-flat-dialogs-031/fixture/*.tsx text eol=lf
+docs/verification/evidence/origin-footer-fit-031/**/*.json text eol=lf
+docs/verification/evidence/origin-footer-fit-031/**/*.log text eol=lf
+docs/verification/evidence/origin-footer-fit-031-intermediate/**/*.json text eol=lf
+docs/verification/evidence/origin-footer-fit-031-intermediate/**/*.log text eol=lf
+docs/verification/evidence/origin-flat-popups-032/**/*.json text eol=lf
+docs/verification/evidence/origin-flat-popups-032/**/*.log text eol=lf
+docs/verification/evidence/origin-flat-popups-032/fixture/*.mjs text eol=lf
+docs/verification/evidence/origin-flat-popups-032/fixture/*.ts text eol=lf
+docs/verification/evidence/origin-flat-popups-032/fixture/*.tsx text eol=lf
+docs/verification/evidence/origin-flat-popups-032-image-view-correction.json text eol=lf
+docs/verification/evidence/origin-trigger-row-033/**/*.json text eol=lf
+docs/verification/evidence/origin-trigger-row-033/**/*.log text eol=lf
+docs/verification/evidence/origin-trigger-row-033/fixture/*.mjs text eol=lf
+docs/verification/evidence/origin-trigger-row-033/fixture/*.ts text eol=lf
+docs/verification/evidence/origin-trigger-row-033/fixture/*.tsx text eol=lf
+docs/verification/evidence/origin-mail-provider-031.json text eol=lf
+docs/verification/evidence/origin-draft-defaults-031/**/*.json text eol=lf
+docs/verification/evidence/origin-draft-defaults-031/**/*.log text eol=lf
+docs/verification/evidence/origin-draft-defaults-031/fixture/* text eol=lf
+docs/verification/evidence/origin-draft-mirror-031/**/*.json text eol=lf
+docs/verification/evidence/origin-draft-mirror-031/**/*.log text eol=lf
+docs/verification/evidence/origin-draft-mirror-031/fixture/* text eol=lf
+docs/verification/evidence/origin-workspace-delete-031/**/*.json text eol=lf
+docs/verification/evidence/origin-workspace-delete-031/**/*.log text eol=lf
+docs/verification/evidence/origin-draft-domain-031/**/*.json text eol=lf
+docs/verification/evidence/origin-draft-domain-031/**/*.log text eol=lf
+docs/verification/evidence/origin-backend-compatibility-031/**/*.json text eol=lf
+docs/verification/evidence/origin-backend-compatibility-031/**/*.log text eol=lf
+docs/verification/evidence/origin-backend-compatibility-031/fixture/*.mjs text eol=lf
+docs/verification/evidence/origin-backend-compatibility-031/fixture/*.mts text eol=lf
+docs/verification/evidence/origin-backend-compatibility-031/fixture/*.ts text eol=lf
+docs/verification/evidence/origin-backend-compatibility-031/fixture/*.txt text eol=lf
+docs/verification/evidence/origin-build-context-031/** text eol=lf
+docs/verification/evidence/origin-delivery-031/**/*.json text eol=lf
+docs/verification/evidence/origin-ci-031.json text eol=lf
+docs/verification/evidence/origin-packaged-windows-031.json text eol=lf
+docs/verification/evidence/origin-mail-activation-031.json text eol=lf
+docs/verification/evidence/origin-signup-policy-032/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-signup-policy-timeout-032/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-upstream-review-20261018-172407/** text eol=lf
+docs/verification/evidence/origin-stripe-redaction-032/**/*.json text eol=lf
+docs/verification/evidence/origin-candidate-032.json -text whitespace=cr-at-eol
+docs/verification/evidence/origin-source-review-032.json -text whitespace=cr-at-eol
+docs/verification/evidence/origin-team-access-cache-033/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-issue-drag-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-live-policy-034/** -text whitespace=cr-at-eol,-blank-at-eof
+docs/verification/evidence/origin-provider-snapshot-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-issue-drag-permission-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-desktop-cloud-policy/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-desktop-cloud-policy/*.log -whitespace
+docs/verification/evidence/origin-update-channel-034/** -text whitespace=cr-at-eol,-blank-at-eof
+docs/verification/evidence/origin-thread-durability-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-footer-single-row-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-ci-provider-error-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-landing-capture-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-cli-distribution-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-backend-reuse-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-candidate-034/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-candidate-034/*.log -whitespace
+docs/verification/evidence/origin-delivery-035/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-session-scope-036/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-session-scope-036/*.log -whitespace
+docs/verification/evidence/origin-ownership-037/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-ownership-037/**/*.log -whitespace
+docs/verification/evidence/origin-ownership-037/**/*.patch -whitespace
+docs/verification/evidence/origin-ownership-037/**/*.ax.txt -whitespace
+
+docs/verification/evidence/origin-delivery-038/** -text -whitespace
+docs/verification/evidence/origin-native-039/** -text -whitespace
+docs/verification/evidence/origin-plan-usage-040/**/*.json text eol=lf
+docs/verification/evidence/origin-delivery-040/** -text -whitespace

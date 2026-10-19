@@ -30,10 +30,22 @@ describe("Plan usage presentation", () => {
     expect(html).toContain('aria-valuenow="70"');
   });
 
-  it("shows an account error without inventing zero usage", () => {
-    fixture.report = { providers: [{ id: "fixture", name: "Fixture provider", ok: false, error: "Sign in to this account." }] };
+  it("shows an unavailable usage check without treating model access as broken or inventing zero usage", () => {
+    fixture.report = { providers: [{ id: "fixture", name: "Fixture provider", ok: false, error: "Plan usage is unavailable for this account." }] };
     const html = renderToStaticMarkup(createElement(PlanUsage));
-    expect(html).toContain("Sign in to this account.");
+    expect(html).toContain("Plan usage is unavailable for this account.");
+    expect(html).toContain("Models can keep working when usage is unavailable");
+    expect(html).toContain("API-key activity is shown in History.");
+    expect(html).not.toContain("text-danger");
+    expect(html).not.toContain('role="meter"');
+    expect(html).not.toContain("100% left");
+  });
+
+  it("shows a neutral fallback when an older server returns no usage error detail", () => {
+    fixture.report = { providers: [{ id: "fixture", name: "Fixture provider", ok: false, error: null }] };
+    const html = renderToStaticMarkup(createElement(PlanUsage));
+    expect(html).toContain("Could not load plan usage.");
+    expect(html).not.toContain("text-danger");
     expect(html).not.toContain('role="meter"');
     expect(html).not.toContain("100% left");
   });

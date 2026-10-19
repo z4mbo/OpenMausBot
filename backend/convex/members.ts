@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
-import { api } from "./_generated/api";
 import { getActiveTeamMember, normalizeEmail, projectPeople, requireAdmin, requireMember, requireTeamAdmin } from "./lib/permissions";
 import { roleValidator } from "./lib/validators";
 
@@ -147,47 +146,8 @@ export const sendInvite = action({
     role: roleValidator,
     origin: v.string(),
   },
-  handler: async (ctx, args) => {
-    const result: { inviteToken: string; email: string; projectName: string; invitedBy: string } = await ctx.runMutation(
-      api.members.invite,
-      {
-        projectId: args.projectId,
-        sessionToken: args.sessionToken,
-        email: args.email,
-        name: args.name,
-        role: args.role,
-      },
-    );
-    const inviteLink = `${args.origin.replace(/\/$/, "")}/?invite=${result.inviteToken}`;
-    const apiKey = process.env.RESEND_API_KEY;
-    const from = process.env.INVITE_FROM_EMAIL || "Origin <onboarding@resend.dev>";
-
-    if (!apiKey) {
-      return { inviteLink, sent: false, reason: "RESEND_API_KEY not set" };
-    }
-
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from,
-        to: result.email,
-        subject: `You're invited to ${result.projectName} on Origin`,
-        html: `<p>${result.invitedBy} invited you to <strong>${result.projectName}</strong> on Origin.</p><p><a href="${inviteLink}">Accept invite</a></p><p>If the button does not work, open this link:<br>${inviteLink}</p>`,
-        text: `${result.invitedBy} invited you to ${result.projectName} on Origin. Accept: ${inviteLink}`,
-      }),
-    });
-
-    if (!response.ok) {
-      const body = await response.text();
-      return { inviteLink, sent: false, reason: `Email failed: ${response.status} ${body.slice(0, 160)}` };
-    }
-
-    return { inviteLink, sent: true, reason: "Email sent" };
-  },
+  returns: v.object({ inviteLink: v.string(), sent: v.boolean(), reason: v.string() }),
+  handler: async () => { throw new Error("Use workspace invitations in Origin to send email invitations"); },
 });
 
 export const updateRole = mutation({

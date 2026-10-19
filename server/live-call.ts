@@ -1,4 +1,5 @@
 // The OpenAI key never leaves the harness: the renderer only ever holds the SDP answer and its media connection.
+import { APP_NAME } from "../shared/product-brand.mjs";
 import { CLOUD_HOME_PLACE } from "./system-prompt.ts";
 import type { Message } from "./store.ts";
 
@@ -69,7 +70,7 @@ export function liveInstructions(bot: LiveBot, { cloudHome = false }: { cloudHom
   const name = oneLine(bot.name) || "the agent";
   const title = oneLine(bot.title ?? "");
   const description = oneLine(bot.description ?? "").slice(0, 400);
-  const where = cloudHome ? `runs on ${CLOUD_HOME_PLACE}` : "runs in OpenMausBot on the user's own computer";
+  const where = cloudHome ? `runs on ${CLOUD_HOME_PLACE}` : `runs in ${APP_NAME} on the user's own computer`;
   const changes = cloudHome ? "My Cloud" : "the computer";
   return [
     `You are ${name}${title ? `, ${title}` : ""}, an AI agent that ${where}.${description ? ` ${description}` : ""}`,

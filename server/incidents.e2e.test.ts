@@ -87,7 +87,7 @@ it("reports a crashed run to the Chief, who retries it from the incidents thread
     ), { timeout: 10_000 }).toBe(true);
     const chiefRun = await dump(incidents.threadId);
     const prompt = JSON.stringify(chiefRun.prompt);
-    expect(prompt).toContain("[Incident report from OpenMausBot — not from the person.");
+    expect(prompt).toContain("[Incident report from Origin — not from the person.");
     expect(prompt).toContain("Ada's run in its thread #Reconcile the September invoices. failed");
     expect(prompt).toContain("Reconcile the September invoices.");
     expect(prompt).toContain(`retry_thread with bot_id \\"${ada.id}\\" and thread_id \\"${ada.activeTaskId}\\"`);

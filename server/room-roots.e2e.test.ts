@@ -14,14 +14,14 @@ import { hostTimeout } from "./testing/host-timeout.ts";
 import { ownTurnText } from "./testing/room-handoff-agent.ts";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const RERUN_NOTE = "OpenMausBot restarted while your previous turn here was running";
+const RERUN_NOTE = "Origin restarted while your previous turn here was running";
 const RERUN_CHIP = "Resuming after a restart";
-const SECRET_PROVIDED = "OpenMausBot credential update: the user securely provided";
+const SECRET_PROVIDED = "Origin credential update: the user securely provided";
 const SEAT_FREE = "the computer this conversation waited for is free again";
-const INTERRUPTED_OUTWARD = "Interrupted by an OpenMausBot restart after it already";
+const INTERRUPTED_OUTWARD = "Interrupted by an Origin restart after it already";
 const SETTLED = "Your downstream room requests have settled.";
 const GOAL_RUN_ENDED = "The goal run this step belonged to ended with the restart.";
-const INTERRUPTED_LINE = "turn interrupted — OpenMausBot restarted";
+const INTERRUPTED_LINE = "turn interrupted — Origin restarted";
 
 const jsonl = (path: string): any[] => existsSync(path)
   ? readFileSync(path, "utf8").trim().split("\n").filter(Boolean).map((line) => JSON.parse(line)) : [];

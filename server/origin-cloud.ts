@@ -6,6 +6,8 @@ import {
   issueBrief, originIssueKey, ORIGIN_ISSUE_CARDS_MAX, type OriginIssueCard, type OriginIssueCards, type OriginIssuePriority,
 } from "../shared/origin-issues.ts";
 import { isDraftColumn } from "../shared/origin-columns.ts";
+import { columnNames, findColumn, normalizedTitle } from "./origin-cloud-columns.ts";
+import { createOriginCloudSession } from "./origin-cloud-session.ts";
 import { isReadOnlyAgentTool } from "./agent-tool-policy.ts";
 import { DATA_DIR } from "./config.ts";
 import type { MirrorResult } from "./github/sync.ts";
@@ -121,15 +123,24 @@ export function writeOriginCloud(file: string, state: OriginCloudState): void {
   renameSync(partial, file);
 }
 
-export function convexOriginClient(url: string): OriginCloudClient {
+export function convexOriginClient(url: string, siteUrl = process.env.ORIGIN_CONVEX_SITE_URL?.trim()): OriginCloudClient {
   const client = new ConvexHttpClient(url, { logger: false });
   const deployment = new URL(url).origin;
+  const actionOrigin = new URL(deployment);
+  if (actionOrigin.hostname.endsWith(".convex.cloud")) actionOrigin.hostname = actionOrigin.hostname.replace(/\.convex\.cloud$/, ".convex.site");
+  else if (["localhost", "127.0.0.1", "[::1]"].includes(actionOrigin.hostname) && actionOrigin.port) actionOrigin.port = String(Number(actionOrigin.port) + 1);
+  const uploadOrigins = new Set([deployment, actionOrigin.origin]);
+  if (siteUrl) {
+    const configured = new URL(siteUrl);
+    if (!["http:", "https:"].includes(configured.protocol) || configured.username || configured.password || configured.pathname !== "/" || configured.search || configured.hash) throw new Error("Origin's HTTP action address must be an application origin");
+    uploadOrigins.add(configured.origin);
+  }
   return {
     query: (name, args) => client.query(makeFunctionReference<"query">(name), args),
     mutation: (name, args) => client.mutation(makeFunctionReference<"mutation">(name), args),
     async upload(uploadUrl, data, contentType) {
       // Security: a project file only ever goes to the deployment the person signed in to.
-      if (new URL(uploadUrl).origin !== deployment) throw new Error("Origin returned an upload address outside its deployment");
+      if (!uploadOrigins.has(new URL(uploadUrl).origin)) throw new Error("Origin returned an upload address outside its deployment");
       const response = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": contentType }, body: data });
       if (!response.ok) throw new Error(`the upload failed with HTTP ${response.status}`);
       const body = record(await response.json());
@@ -181,7 +192,6 @@ const list = (value: unknown): Args[] => (Array.isArray(value) ? value.map(recor
 const text = (value: unknown): string => (typeof value === "string" ? value : "");
 const trimmed = (value: unknown): string => text(value).trim();
 const clip = (value: string, max: number) => (value.length > max ? `${value.slice(0, max)}…` : value);
-const normalizedTitle = (title: string) => title.trim().toLowerCase().replace(/[\s_-]+/g, "");
 const isDoneColumn = (column: Args) => column.isDone === true || text(column.title).trim().toLowerCase() === "done";
 const PRIORITIES = new Set(["low", "medium", "high"]);
 const PRIORITY_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
@@ -232,21 +242,13 @@ function cardsOf(heading: string, issues: OriginIssueCard[]): OriginIssueCards {
   return { heading, issues: shown, ...(issues.length > shown.length ? { more: issues.length - shown.length } : {}) };
 }
 
-function findColumn(columns: Args[], wanted: string): Args | undefined {
-  const key = normalizedTitle(wanted);
-  return columns.find((column) => column._id === wanted) ?? columns.find((column) => normalizedTitle(text(column.title)) === key);
-}
-
-function columnNames(columns: Args[]): string {
-  return columns.map((column) => `"${text(column.title)}"`).join(", ");
-}
-
 function dueDateAfter(days: number, now = new Date()): string {
   return new Date(now.getTime() + days * 86_400_000).toISOString().slice(0, 10);
 }
 
-function convexMessage(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error);
+function convexMessage(error: unknown, sessionToken: string): string {
+  const raw = error instanceof Error ? error.message : String(error);
+  const message = raw.replaceAll(sessionToken, "[redacted]");
   const invalid = /ArgumentValidationError[^\n]*\nPath: \.(\w+)\nValue: ([^\n]+)/.exec(message);
   if (invalid) return `${invalid[1]} ${clip(invalid[2], 80)} is not a valid id or value; copy ids exactly from the list tools`;
   const uncaught = /Uncaught Error: ([^\n]+)/.exec(message);
@@ -584,11 +586,13 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     if (!PRIORITIES.has(priority)) return { text: 'priority must be "low", "medium" or "high".', isError: true };
     const project = await pickProject(ctx, args.project);
     const scope = scopeOf(ctx, project);
-    const { columns } = await board(scope);
-    const open = columns.filter((column) => !isDoneColumn(column));
-    const column = trimmed(args.column)
-      ? findColumn(columns, text(args.column))
-      : open.find(isDraftColumn) ?? open.find((candidate) => normalizedTitle(text(candidate.title)) === "todo") ?? open[0];
+    const requestedColumn = trimmed(args.column);
+    let { columns } = await board(scope);
+    if (!requestedColumn && !columns.some(isDraftColumn)) {
+      await scope.client.mutation("tasks:ensureDefaultColumns", { projectId: scope.projectId, sessionToken: scope.sessionToken });
+      ({ columns } = await board(scope));
+    }
+    const column = requestedColumn ? findColumn(columns, requestedColumn) : columns.find(isDraftColumn);
     if (!column) return { text: `No such column. Columns: ${columnNames(columns)}.`, isError: true };
     let assignee = trimmed(args.assignee);
     if (!assignee) assignee = text(record(await scope.client.query("auth:me", { sessionToken: scope.sessionToken })).email);
@@ -596,7 +600,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     const taskId = text(await scope.client.mutation("tasks:createTask", {
       projectId: scope.projectId,
       sessionToken: scope.sessionToken,
-      columnId: column._id,
+      ...(requestedColumn ? { columnId: column._id } : {}),
       title,
       ...(typeof args.description === "string" && args.description.trim() ? { description: args.description } : {}),
       priority,
@@ -705,7 +709,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     await setLabels(scope, target.taskId, [...labels.filter((existing) => !existing.startsWith("agent:")), label]);
     await ctx.client.mutation("tasks:addComment", {
       projectId: scope.projectId, sessionToken: scope.sessionToken, taskId: target.taskId,
-      body: `Assigned to the agent ${agent.name}${agent.title ? ` (${agent.title})` : ""} by ${ctx.caller.name} in OpenMausBot.`,
+      body: `Assigned to the agent ${agent.name}${agent.title ? ` (${agent.title})` : ""} by ${ctx.caller.name} in Origin.`,
     });
     const inProgress = found.columns.find((column) => !isDoneColumn(column) && normalizedTitle(text(column.title)) === "inprogress");
     if (inProgress && !found.task.done && found.task.columnId !== inProgress._id) {
@@ -991,7 +995,7 @@ export async function runOriginTool(name: string, args: Args, botId: string, dep
   if (!tool) return { text: `Unknown Origin tool: ${name}`, isError: true };
   const { url, sessionToken } = deps.state;
   if (!url || !sessionToken) {
-    return { text: "Origin is not connected. Ask the person to sign in to Origin in OpenMausBot first; do not retry until they have.", isError: true };
+    return { text: "The Origin account is not connected. Ask the person to sign in first; do not retry until they have.", isError: true };
   }
   const caller = deps.bots.find((bot) => bot.id === botId);
   const reachable = reachableCloudProjects(deps.bots, deps.state.projects, botId);
@@ -1006,7 +1010,7 @@ export async function runOriginTool(name: string, args: Args, botId: string, dep
     });
   } catch (error) {
     if (error instanceof OriginRefusal) return { text: error.message, isError: true };
-    const message = convexMessage(error);
+    const message = convexMessage(error, sessionToken);
     const hint = message === "Login required" ? " The Origin sign-in has expired; ask the person to sign in to Origin again." : "";
     return { text: `Origin refused ${name}: ${message}.${hint}`, isError: true };
   }
@@ -1051,13 +1055,7 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
   const { store, agentTurn } = deps;
   const file = () => deps.file ?? defaultOriginCloudFile();
   const connect = deps.connect ?? convexOriginClient;
-  /** The email of the account whose session the bots use, while Origin still accepts it; null when there is none. */
-  const storedSessionEmail = async (unless?: string): Promise<string | null> => {
-    const { url, sessionToken } = readOriginCloud(file());
-    if (!url || !sessionToken || sessionToken === unless) return null;
-    const owner = await connect(url).query("auth:me", { sessionToken }).then(record, (): Args => ({}));
-    return text(owner.email).toLowerCase() || null;
-  };
+  const session = createOriginCloudSession({ connect, read: () => readOriginCloud(file()), write: (state) => writeOriginCloud(file(), state) });
   return async ({ req, res, path, method, auth, json, readBody }) => {
     if (method === "POST" && path === "/api/internal/origin/tool") {
       const turn = agentTurn(req.headers.authorization);
@@ -1109,9 +1107,12 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
       deps.changed?.();
       return json(res, 200, { cloudProjectId: state.projects[id] ?? null });
     }
+    const previous = session.snapshot();
     if (method === "DELETE") {
-      if (await storedSessionEmail()) return json(res, 409, { error: "The Origin connection belongs to an account that is still signed in" });
-      writeOriginCloud(file(), { projects: readOriginCloud(file()).projects });
+      const owner = await session.owner(previous);
+      if (!owner.verified) return json(res, 502, { error: "The signed-in Origin account could not be checked. Try again." });
+      if (owner.email) return json(res, 409, { error: "The Origin connection belongs to an account that is still signed in" });
+      if (!session.commit(previous)) return json(res, 409, { error: "The Origin connection changed while it was being checked. Try again." });
       return json(res, 200, { url: null, connected: false });
     }
     const body = record(await readBody(req));
@@ -1123,12 +1124,13 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
     try {
       user = record(await connect(url).query("auth:me", { sessionToken }));
     } catch (error) {
-      return json(res, 502, { error: `Origin did not answer: ${convexMessage(error)}` });
+      return json(res, 502, { error: `Origin did not answer: ${convexMessage(error, sessionToken)}` });
     }
     if (!text(user.email)) return json(res, 400, { error: "Origin did not accept this session token" });
-    const owner = await storedSessionEmail(sessionToken);
-    if (owner && owner !== text(user.email).toLowerCase()) return json(res, 409, { error: "This app is connected to another Origin account" });
-    writeOriginCloud(file(), { url, sessionToken, projects: readOriginCloud(file()).projects });
+    const owner = await session.owner(previous, { url, sessionToken });
+    if (!owner.verified) return json(res, 502, { error: "The signed-in Origin account could not be checked. Try again." });
+    if (owner.email && owner.email !== text(user.email).toLowerCase()) return json(res, 409, { error: "This app is connected to another Origin account" });
+    if (!session.commit(previous, { url, sessionToken })) return json(res, 409, { error: "The Origin connection changed while it was being checked. Try again." });
     return json(res, 200, { url, connected: true });
   };
 }

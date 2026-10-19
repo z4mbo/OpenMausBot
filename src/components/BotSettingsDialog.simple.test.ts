@@ -633,7 +633,11 @@ describe("the bot settings panel in Simple mode", () => {
     expect(rendered.html).toContain("Where to find Scout");
     expect(rendered.nodes.some((node) => node.props["data-simple-find"] === "slack")).toBe(false);
     expect(rendered.nodes.find((node) => node.type === PhoneAppDialog)!.props.open).toBe(false);
-    click(find(rendered, "data-simple-find", "android"));
+    const android = find(rendered, "data-simple-find", "android");
+    const opener = { dataset: { simpleFind: "android" } };
+    (android.props.onClick as (event: { currentTarget: typeof opener }) => void)({ currentTarget: opener });
+    const returnFocusRef = rendered.nodes.find((node) => node.type === PhoneAppDialog)!.props.returnFocusRef as { current: unknown };
+    expect(returnFocusRef.current).toBe(opener);
     expect(panel(bot).nodes.find((node) => node.type === PhoneAppDialog)!.props.open).toBe(true);
 
     const withSlack = capture(() => SimpleBotPanel({ bot, derived: fixture.derived as never, slackUrl: "https://admin.example/slack", ...panelProps }));

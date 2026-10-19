@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useRef, type RefObject } from "react";
+import { createPortal } from "react-dom";
+import { ModalFocusScope, useModalDialog } from "@/hooks/use-modal-dialog";
 
 import {
   APP_NAME,
@@ -11,36 +13,27 @@ import {
   platformLabel,
 } from "@/lib/app-links";
 
-export function AboutDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function AboutDialog({ open, onClose, returnFocusRef }: { open: boolean; onClose: () => void; returnFocusRef?: RefObject<HTMLElement | null> }) {
   const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    closeRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const { dismiss } = useModalDialog(panelRef, onClose, { open, initialFocusRef: closeRef, returnFocusRef });
 
   if (!open) return null;
 
   const platform = platformLabel(window.ogb?.platform);
 
-  return (
+  const dialog = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+      onMouseDown={(event) => event.target === event.currentTarget && dismiss()}
     >
       <div
+        ref={panelRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="about-dialog-title"
-        className="w-full max-w-[360px] rounded-2xl border border-hairline/50 bg-panel p-6 text-center shadow-2xl"
+        className="ui-panel w-full max-w-[360px] p-6 text-center"
       >
         <img src="/app-icon.svg" alt="" width={56} height={56} className="mx-auto size-14" />
         <h2 id="about-dialog-title" className="mt-3 text-[17px] font-semibold text-ink">
@@ -62,14 +55,16 @@ export function AboutDialog({ open, onClose }: { open: boolean; onClose: () => v
         <button
           ref={closeRef}
           type="button"
-          onClick={onClose}
-          className="mt-5 w-full rounded-xl bg-raised px-4 py-2 text-[13px] font-medium text-ink hover:brightness-110"
+          onClick={dismiss}
+          className="ui-button mt-5 w-full"
         >
           Close
         </button>
       </div>
     </div>
   );
+  const content = <ModalFocusScope panelRef={panelRef}>{dialog}</ModalFocusScope>;
+  return typeof document === "undefined" ? content : createPortal(content, document.body);
 }
 
 function AboutLink({ href, label }: { href: string; label: string }) {

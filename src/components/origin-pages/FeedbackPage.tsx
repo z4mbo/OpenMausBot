@@ -7,7 +7,8 @@ import { cn } from "@/lib/cn";
 import { feedbackLink, useAppAddress } from "@/lib/origin-members";
 import type { CloudBoard, CloudFeedbackEntry, CloudFeedbackPortal, CloudPerson, CloudProject } from "./cloud-types";
 import { fmtDate, taskKey } from "./repo-url";
-import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { newIssueColumn, openIssueColumns } from "./issue-columns";
 
 export type FeedbackPageProps = OriginPageProps & {
   onOpenIssue?(taskId: string): void;
@@ -87,7 +88,7 @@ function Feedback({ project, teamId, projectId, canEdit, isAdmin, onOpenIssue }:
                 <strong className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-ink">{entry.title}</strong>
                 <span className={cn("rounded-full px-2 py-0.5 text-[11.5px] capitalize", statusTone[entry.status])}>{entry.status}</span>
               </header>
-              <p className="whitespace-pre-wrap text-[13px] text-ink-secondary">{entry.body}</p>
+              <p className="whitespace-pre-wrap [overflow-wrap:anywhere] text-[13px] text-ink-secondary">{entry.body}</p>
               <footer className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-ink-tertiary">
                 <time>{fmtDate(entry.createdAt)}</time>
                 <div className="ml-auto flex items-center gap-2">
@@ -105,62 +106,70 @@ function Feedback({ project, teamId, projectId, canEdit, isAdmin, onOpenIssue }:
           ))}
         </div>
       )}
-      {settings && <PortalSettings teamId={teamId} projectId={projectId} projectName={project.name} portal={portal} onClose={() => setSettings(false)} />}
-      {converting && <ConvertFeedback teamId={teamId} projectId={projectId} entry={converting} onClose={() => setConverting(null)}
+      {settings && <PortalSettings teamId={teamId} projectId={projectId} canEdit={isAdmin} projectName={project.name} portal={portal} onClose={() => setSettings(false)} />}
+      {converting && <ConvertFeedback teamId={teamId} projectId={projectId} canEdit={canEdit} entry={converting} onClose={() => setConverting(null)}
         onCreated={(taskId) => { setConverting(null); setNotice(`Created issue ${taskKey(taskId)}`); onOpenIssue?.(taskId); }} />}
     </section>
   );
 }
 
-function PortalSettings({ teamId, projectId, projectName, portal, onClose }: { teamId: string; projectId: string; projectName: string; portal?: CloudFeedbackPortal; onClose(): void }) {
+function PortalSettings({ teamId, projectId, canEdit, projectName, portal, onClose }: { teamId: string; projectId: string; canEdit: boolean; projectName: string; portal?: CloudFeedbackPortal; onClose(): void }) {
   const [title, setTitle] = useState(portal?.title || projectName);
   const [description, setDescription] = useState(portal?.description ?? "");
   const [enabled, setEnabled] = useState(portal?.enabled ?? false);
   const action = useAction();
   const save = async (event: FormEvent) => {
     event.preventDefault();
+    if (!canEdit || action.busy) return;
     if (await action.run(() => cloudMutation("feedback:configure", { teamId, projectId, title, description, enabled }), "Could not save")) onClose();
   };
   return (
     <Modal title="Feedback settings" onClose={onClose}>
       <form onSubmit={save} className="flex flex-col gap-3">
+        <ReadOnlyEditorNotice canEdit={canEdit} />
+        <fieldset disabled={!canEdit} className="contents">
         <Field label="Public title"><input className={inputClass} value={title} required maxLength={120} onChange={(e) => setTitle(e.target.value)} /></Field>
         <Field label="Public description"><textarea className={inputClass} value={description} maxLength={3000} rows={4} onChange={(e) => setDescription(e.target.value)} /></Field>
         <label className="flex items-center gap-2 text-[13px] text-ink">
           <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />Enable public feedback form
         </label>
+        </fieldset>
         {portal && <p className="text-[12px] text-ink-tertiary">Form address: <code>/feedback/{portal.slug}</code></p>}
         <p className="text-[12px] text-ink-tertiary">Enabling this publishes the title and description above. Workspace content, issues and submitted feedback stay private.</p>
         {action.error && <Notice tone="danger">{action.error}</Notice>}
-        <button className={primaryButton} disabled={action.busy}>{action.busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}Save settings</button>
+        <button className={primaryButton} disabled={action.busy || !canEdit}>{action.busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}Save settings</button>
       </form>
     </Modal>
   );
 }
 
-function ConvertFeedback({ teamId, projectId, entry, onClose, onCreated }: { teamId: string; projectId: string; entry: CloudFeedbackEntry; onClose(): void; onCreated(taskId: string): void }) {
+function ConvertFeedback({ teamId, projectId, canEdit, entry, onClose, onCreated }: { teamId: string; projectId: string; canEdit: boolean; entry: CloudFeedbackEntry; onClose(): void; onCreated(taskId: string): void }) {
   const board = useCloudQuery<CloudBoard>("tasks:board", { projectId });
   const people = useCloudQuery<CloudPerson[]>("members:people", { projectId });
   const [column, setColumn] = useState("");
   const [assignee, setAssignee] = useState("");
   const [dueDate, setDueDate] = useState("");
   const action = useAction();
-  const columns = board?.columns.filter((item) => !(item.isDone ?? /^done$/i.test(item.title))) ?? [];
-  const columnId = column || columns[0]?._id || "";
+  const columns = openIssueColumns(board?.columns ?? []);
+  const columnId = newIssueColumn(columns, column)?._id ?? "";
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (!canEdit || action.busy) return;
     let taskId = "";
     const ok = await action.run(async () => {
-      taskId = await cloudMutation<string>("feedback:convert", { teamId, entryId: entry._id, columnId, assignedToEmail: assignee, dueDate });
+      taskId = await cloudMutation<string>("feedback:convert", { teamId, entryId: entry._id, ...(column && column === columnId ? { columnId } : {}), assignedToEmail: assignee, dueDate });
     }, "Could not create issue");
     if (ok) onCreated(taskId);
   };
   return (
     <Modal title="Convert feedback to issue" onClose={onClose}>
       <form onSubmit={submit} className="flex flex-col gap-3">
+        <ReadOnlyEditorNotice canEdit={canEdit} />
         <strong className="text-[13px] text-ink">{entry.title}</strong>
+        <fieldset disabled={!canEdit} className="contents">
         <Field label="Column">
-          <Select className="w-full" required value={columnId} onChange={(e) => setColumn(e.target.value)}>
+          <Select className="w-full" value={columnId} onChange={(e) => setColumn(e.target.value)}>
+            {!columnId && <option value="">Draft</option>}
             {columns.map((item) => <option key={item._id} value={item._id}>{item.title}</option>)}
           </Select>
         </Field>
@@ -171,8 +180,9 @@ function ConvertFeedback({ teamId, projectId, entry, onClose, onCreated }: { tea
           </Select>
         </Field>
         <Field label="Due date"><input className={inputClass} type="date" required value={dueDate} onChange={(e) => setDueDate(e.target.value)} /></Field>
+        </fieldset>
         {action.error && <Notice tone="danger">{action.error}</Notice>}
-        <button className={primaryButton} disabled={action.busy || !columnId || !assignee || !dueDate}>
+        <button className={primaryButton} disabled={action.busy || !canEdit || !board || !assignee || !dueDate}>
           {action.busy ? <Loader2 size={14} className="animate-spin" /> : <CirclePlus size={14} />}Create issue
         </button>
       </form>

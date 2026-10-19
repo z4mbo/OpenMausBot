@@ -294,11 +294,34 @@ describe("HighLevel OAuth relay", () => {
 
     expect((await callback(worker, testEnv, { code: CODE, state: flow.state })).status).toBe(200);
     // A state that differs in one character opens nothing, before or after.
-    const wrong = `${flow.state.slice(0, -1)}${flow.state.endsWith("A") ? "B" : "A"}`;
+    const wrong = `${flow.state.startsWith("A") ? "B" : "A"}${flow.state.slice(1)}`;
     const other = await claim(worker, testEnv, wrong);
     expect(other.status).toBe(404);
     expect(await other.json()).toEqual({ error: "highlevel_unknown_state" });
     expect((await claim(worker, testEnv, "not a state")).status).toBe(400);
+    expect((await claim(worker, testEnv, flow.state)).status).toBe(200);
+  });
+
+  it.each(["callback", "claim"])("rejects a noncanonical state at %s without consuming the genuine flow", async (operation) => {
+    const highLevel = fakeHighLevel();
+    const worker = createWorker(fetch, fetch, highLevel.fetch);
+    const testEnv = highLevelEnv();
+    const flow = await started(worker, testEnv);
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    const alias = `${flow.state.slice(0, -1)}${alphabet[alphabet.indexOf(flow.state.at(-1)!) + 1]}`;
+    expect(alias).not.toBe(flow.state);
+    expect(await flowLookup(alias)).toBe(await flowLookup(flow.state));
+
+    if (operation === "callback") {
+      expect((await callback(worker, testEnv, { code: CODE, state: alias })).status).toBe(400);
+      expect(highLevel.calls).toHaveLength(0);
+    }
+    expect((await callback(worker, testEnv, { code: CODE, state: flow.state })).status).toBe(200);
+    if (operation === "claim") {
+      const rejected = await claim(worker, testEnv, alias);
+      expect(rejected.status).toBe(400);
+      expect(await rejected.json()).toEqual({ error: "invalid_request" });
+    }
     expect((await claim(worker, testEnv, flow.state)).status).toBe(200);
   });
 
@@ -450,7 +473,7 @@ describe("HighLevel OAuth relay", () => {
     expect(await limited.json()).toEqual({ error: "rate_limited" });
     // Another address, and the other routes from the same address, still work.
     expect((await start(worker, testEnv, { ip: "198.51.100.2" })).status).toBe(200);
-    expect((await claim(worker, testEnv, "a".repeat(43), { ip: "198.51.100.1" })).status).toBe(404);
+    expect((await claim(worker, testEnv, "A".repeat(43), { ip: "198.51.100.1" })).status).toBe(404);
     expect(HIGHLEVEL_CLAIM_LIMIT).toBeGreaterThan(HIGHLEVEL_START_LIMIT);
 
     const keys = await env.DB.prepare("SELECT ip_key FROM highlevel_ip_rate_limits").all<{ ip_key: string }>();

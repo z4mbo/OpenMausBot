@@ -57,7 +57,7 @@ describe("1Password logins", () => {
   it("lists every Login item with a website and a password, by exact host, read-only and for every bot", async () => {
     const { source, calls } = setup();
     expect(await source.refresh()).toEqual({ connected: true, vaults: ["Shared with OMB"], items: 2 });
-    expect(calls).toEqual(["createClient OpenMausBot", "vaults.list", "items.list v1", "items.getAll v1 i1,i2,i5"]);
+    expect(calls).toEqual(["createClient Origin", "vaults.list", "items.list v1", "items.getAll v1 i1,i2,i5"]);
     const rows = source.list();
     expect(rows.map((row) => [row.host, row.username, row.hasTotp, row.source, row.bots])).toEqual([
       ["accounts.example.com", "alice@example.com", true, "1password", "all"],

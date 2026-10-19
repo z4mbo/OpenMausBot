@@ -101,7 +101,6 @@ describe("Triggers pop-up", () => {
     const { html } = render();
     expect(html).toContain(">Triggers</h2>");
     expect(html).toContain("Start a task the moment something happens, without asking.");
-    expect(html).toContain("glass-surface");
     expect(html).toContain(">When</span>");
     expect(html).toContain(">should</span>");
     for (const label of ["Another app sends a link request", "Typeform", "Zapier", "GitHub", "Stripe"]) expect(html).toContain(`>${label}</option>`);

@@ -179,11 +179,11 @@ test("canvases isolate scenes, files and viewers from global Draw", async () => 
   await expect(f.t.mutation(api.draw.updateElements, { sessionToken: f.viewer.token, teamId: f.teamId, canvasId, elements: [element] })).rejects.toThrow();
 });
 
-test("MCP inbox, completion and deletion are scoped and idempotent", async () => {
+test("MCP inbox and deletion are scoped and idempotent, and completion requires a merged PR", async () => {
   const f = await fixture();
   const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.member.token, teamId: f.teamId, name: "Codex", write: true });
   expect(JSON.parse(await f.t.query(api.connectors.read, { token: grant.token, kind: "inbox" })).issues[0].id).toBe(f.issue);
-  await f.t.mutation(api.connectors.write, { token: grant.token, requestId: "complete-issue-1", change: { kind: "update_issue", projectId: f.shared, taskId: f.issue, done: true } });
+  await expect(f.t.mutation(api.connectors.write, { token: grant.token, requestId: "complete-issue-1", change: { kind: "update_issue", projectId: f.shared, taskId: f.issue, done: true } })).rejects.toThrow("pull request");
   const request = { token: grant.token, requestId: "delete-issue-1", change: { kind: "delete_issue" as const, projectId: f.shared, taskId: f.issue } };
   expect(await f.t.mutation(api.connectors.write, request)).toBe(await f.t.mutation(api.connectors.write, request));
   const read = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.owner.token, teamId: f.teamId, name: "Read-only", write: false });
@@ -191,17 +191,23 @@ test("MCP inbox, completion and deletion are scoped and idempotent", async () =>
   await expect(f.t.query(api.connectors.read, { token: grant.token, kind: "issue", projectId: f.privateProject, taskId: f.privateIssue })).rejects.toThrow();
 });
 
-test("GitHub closure completes Origin once and stale events cannot reopen it", async () => {
+test("only a trusted merge completes a mirrored issue, with one completion and no stale reopen", async () => {
   const f = await fixture();
   const args = { projectId: f.shared, taskId: f.issue, repoUrl: "https://github.com/example/shared", number: 1, issueUrl: "https://github.com/example/shared/issues/1", state: "closed" as const, updatedAt: Date.now() };
   await f.t.mutation(internal.integrations.linkIssue, args);
   await f.t.mutation(internal.integrations.linkIssue, args);
+  expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(false);
+  const receipt = { projectId: f.shared, taskId: f.issue, repoUrl: args.repoUrl, issueNumber: args.number, pullRequest: { number: 9, headSha: "a".repeat(40), mergeSha: "b".repeat(40), mergedAt: args.updatedAt } };
+  await f.t.mutation(internal.integrations.completeMergedIssue, receipt);
+  await f.t.mutation(internal.integrations.completeMergedIssue, receipt);
   await f.t.mutation(internal.integrations.linkIssue, { ...args, state: "open", updatedAt: args.updatedAt - 1 });
   expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(true);
   expect((await f.t.query(api.projects.get, { sessionToken: f.owner.token, projectId: f.shared })).openIssueCount).toBe(0);
   await f.t.mutation(api.tasks.updateTask, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue, done: false });
   expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(false);
   await f.t.mutation(internal.integrations.linkIssue, args);
+  expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(false);
+  await f.t.mutation(internal.integrations.completeMergedIssue, receipt);
   expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(true);
 });
 

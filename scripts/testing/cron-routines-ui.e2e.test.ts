@@ -1,26 +1,33 @@
 // Real renderer and routes in a disposable fake-engine workspace only.
 import { spawn, type ChildProcess } from "node:child_process";
-import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
 import { waitForExit } from "../../server/testing/cleanup.ts";
 import type { Routine } from "../../src/lib/routines.ts";
+import en from "../../src/locales/en.json";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const enabled = process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env }));
 let child: ChildProcess | undefined;
-afterAll(() => waitForExit(child, { signal: "SIGINT", graceMs: 30_000 }));
+afterAll(async () => {
+  if (child?.connected) child.send("stop");
+  await waitForExit(child, { graceMs: 30_000 });
+});
 
 (enabled ? it : it.skip)("creates monthly routines, validates cron, preserves arbitrary expressions and excludes calls", async () => {
   let output = "";
   let stderr = "";
-  child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], { cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"] });
+  const launcher = new URL("./control-omb-ui.ts", import.meta.url).href;
+  const bootstrap = `import { launchUi } from ${JSON.stringify(launcher)};
+    process.on('message', message => { if (message === 'stop') process.emit('SIGINT'); });
+    try { await launchUi([]); } finally { process.disconnect(); }`;
+  child = spawn(process.execPath, ["--experimental-strip-types", "--input-type=module", "-e", bootstrap], { cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe", "ipc"] });
   child.stdout!.on("data", chunk => { output += String(chunk); });
   child.stderr!.on("data", chunk => { stderr += String(chunk); });
-  let fixture: { ui: string; url: string; botId: string; logPath: string };
+  let fixture!: { ui: string; url: string; botId: string; logPath: string };
   await expect.poll(() => {
     if (child!.exitCode !== null) throw new Error(stderr);
     try { fixture = JSON.parse(output); return Boolean(fixture.ui); } catch { return false; }
@@ -42,7 +49,7 @@ afterAll(() => waitForExit(child, { signal: "SIGINT", graceMs: 30_000 }));
     return field.getBoundingClientRect().height > 0;
   })()`);
 
-  const startupBox = `document.querySelector('input[aria-label="Also run when OpenMausBot starts"]')`;
+  const startupBox = `document.querySelector(${JSON.stringify(`input[aria-label=${JSON.stringify(en["routines.runOnStartupLabel"])}]`)})`;
 
   await click("Routines"); await click("New routine");
   await fill('input[placeholder="Add title"]', "Monthly close");

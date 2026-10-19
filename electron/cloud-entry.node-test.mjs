@@ -171,6 +171,6 @@ test("Add a Cloud… is decided in main: someone with a Cloud gets the native bo
   assert.match(native, /message: "You already have My Cloud"/);
   assert.match(native, /buttons: \["Email me when it’s ready", "Open My Cloud", "Cancel"\]/);
   assert.match(native, /await ensureCloudAccount\(\)\.interest\("another_cloud"\);/);
-  assert.match(between("function cloudOffersAllowed()", "\n}\n"), /return app\.isPackaged && !desktopRemoteAccess && brandedBuild === false;/);
+  assert.match(between("function cloudOffersAllowed()", "\n}\n"), /return cloudAccountAvailable\(\) && brandedBuild === false;/);
   assert.match(between("async function readCloudOfferBrand()", "\n}\n"), /fetch\(`http:\/\/127\.0\.0\.1:\$\{SERVER_PORT\}\/api\/brand`/);
 });

@@ -87,5 +87,5 @@ export function loginUsableBy(login: { bots: LoginBots }, botId: string): boolea
 
 /** The resume line after the person saved a login from a sign-in card. */
 export function savedLoginResumePrompt(host: string): string {
-  return `OpenMausBot sign-in update: the person saved a login for ${host}. Open its login page in your browser and call fill_login there, then submit the form and check you are signed in. You never see the password. Never ask for a password or a one-time code in chat.`;
+  return `Origin sign-in update: the person saved a login for ${host}. Open its login page in your browser and call fill_login there, then submit the form and check you are signed in. You never see the password. Never ask for a password or a one-time code in chat.`;
 }

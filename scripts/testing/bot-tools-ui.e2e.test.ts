@@ -1,16 +1,14 @@
 // Full-app regression through the existing disposable browser harness. No
 // real provider, OAuth account, MCP package, or user data is used.
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { BOT_ROLES, roleProfilePatch } from "../../src/lib/bot-roles.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
 const forced = process.env.OMB_UI_E2E === "1";
 const enabled = forced || Boolean(binary);
@@ -24,22 +22,13 @@ describe("bot setup and tools in the real renderer", () => {
   let child: ChildProcess | undefined;
   let info: FixtureInfo;
   afterAll(async () => {
-    if (child?.connected) child.send("stop");
-    await waitForExit(child, { graceMs: 30_000 });
+    await stopUiLauncher(child);
   });
 
   (enabled ? it : it.skip)("creates roles, configures per-bot MCP access, and recovers a rejected preset", async () => {
     let stdout = "";
     let stderr = "";
-    // Windows kill("SIGINT") terminates immediately instead of delivering a
-    // catchable signal. Ask the disposable launcher to run its normal cleanup.
-    const launcher = new URL("./control-omb-ui.ts", import.meta.url).href;
-    const bootstrap = `import { launchUi } from ${JSON.stringify(launcher)};
-      process.on('message', message => { if (message === 'stop') process.emit('SIGINT'); });
-      try { await launchUi([]); } finally { process.disconnect(); }`;
-    child = spawn(process.execPath, ["--experimental-strip-types", "--input-type=module", "-e", bootstrap], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe", "ipc"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
     child.on("error", (error) => { stderr += error.message; });
@@ -95,14 +84,14 @@ describe("bot setup and tools in the real renderer", () => {
       };
       return true;
     })()`);
-    await press("Control+n");
+    await click("New agent");
     await chooseRole(coder.id);
     expect(await evaluate("window.botCreateRequests")).toBe(0);
     await click("Create bot");
     await expect.poll(() => evaluate("window.botCreateRequests"), { timeout: 10_000 }).toBe(1);
     await press("Escape");
     expect(await dialogCount()).toBe(0);
-    await press("Control+n");
+    await click("New agent");
     expect(await evaluate("document.querySelector('[role=dialog]')?.getAttribute('aria-busy')")).toBe("true");
     expect(await evaluate("[...document.querySelectorAll('[role=dialog] fieldset button, [role=dialog] input, [role=dialog] select, [role=dialog] textarea')].every(b => b.matches(':disabled'))")).toBe(true);
     await evaluate("[...document.querySelectorAll('[role=dialog] button')].find(b => b.textContent.includes('Create bot')).click()");
@@ -110,7 +99,7 @@ describe("bot setup and tools in the real renderer", () => {
     // Close remains usable; a slow server must not trap the user in a modal.
     await click("Close");
     expect(await dialogCount()).toBe(0);
-    await press("Control+n");
+    await click("New agent");
     await evaluate("window.releaseBotCreation(); true");
     await expect.poll(async () => (await bots()).find((bot) => bot.name === coder.name)?.soul, { timeout: 10_000 }).toBe(coder.soul);
     const created = (await bots()).filter((bot) => !original.some((old) => old.id === bot.id));
@@ -186,10 +175,9 @@ describe("bot setup and tools in the real renderer", () => {
     await openTools();
     await expect.poll(() => evaluate("document.querySelector('[aria-label=\"Let this bot use fixture\"]')?.getAttribute('aria-checked')"), { timeout: 10_000 }).toBe("false");
 
-    // Opening New Bot above settings must replace the old modal, not leave
-    // two focus traps competing. Escape closes only the one remaining layer.
     await press("Control+n");
     expect(await dialogCount()).toBe(1);
+    expect(await evaluate("document.querySelector('[role=dialog]')?.getAttribute('aria-label')")).toBe("New project");
     await press("Shift+Tab");
     expect(await evaluate("document.querySelector('[role=dialog]')?.contains(document.activeElement)")).toBe(true);
     await press("Tab");
@@ -213,7 +201,7 @@ describe("bot setup and tools in the real renderer", () => {
       return true;
     })()`);
     const ops = BOT_ROLES.find((role) => role.id === "ops")!;
-    await press("Control+n");
+    await click("New agent");
     await chooseRole(ops.id);
     await click("Create bot");
     await expect.poll(snapshot, { timeout: 10_000 }).toContain("Fixture preset rejected");
@@ -225,8 +213,7 @@ describe("bot setup and tools in the real renderer", () => {
     expect((await bots()).filter(bot => !beforeFailure.some(old => old.id === bot.id))).toMatchObject([{ name: ops.name, soul: ops.soul }]);
     const logs = await ui("console");
     expect((logs.messages as Array<{ type: string; text: string }>).filter((entry) => entry.type === "error")).toEqual([]);
-    if (child?.connected) child.send("stop");
-    await waitForExit(child, { graceMs: 30_000 });
+    await stopUiLauncher(child);
     expect(child.exitCode).toBe(0);
     expect(existsSync(info.dataDir)).toBe(false);
     expect(existsSync(info.logPath)).toBe(true);

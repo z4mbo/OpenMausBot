@@ -1,17 +1,17 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { copyText } from "@/lib/copy-text";
 import { Select } from "../Select";
 import { Check, Cloud, Copy, Crown, Link, Loader2, LogIn, LogOut, Mail, Search, ShieldCheck, Trash2, UserMinus, UserPlus } from "lucide-react";
 import { useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
 import {
-  INVITE_ROLES, joinLink, originMembers, useAppAddress,
+  INVITE_ROLES, joinLink, originMembers, useOriginInviteAddress,
   useWorkspaceAccess, useWorkspaceInvites, useWorkspaceMembers,
   type InviteRole, type WorkspaceInvite, type WorkspaceMember, type WorkspaceRole,
 } from "@/lib/origin-members";
 import { requestOriginSync } from "@/lib/origin-sync";
 import { cn } from "@/lib/cn";
 import { OriginConnectDialog } from "../OriginConnect";
-import { EmptyState, Field, Loading, Notice, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
+import { CloudQueryBoundary, EmptyState, Field, Loading, Notice, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
 import { MemberAvatar } from "./MemberAvatar";
 
 const ROLE_LABEL: Record<string, string> = { owner: "Owner", admin: "Admin", member: "Member", viewer: "Viewer" };
@@ -46,7 +46,7 @@ export function WorkspaceMembersPanel({ cloudTeamId }: { cloudTeamId: string | n
     return <EmptyState icon={<Cloud size={28} />} title="No Origin workspace selected"
       body="Pick or connect an Origin workspace to manage its members." />;
   }
-  return <Members teamId={cloudTeamId} myEmail={session.user?.email ?? ""} />;
+  return <CloudQueryBoundary key={JSON.stringify([url, session.user?._id, cloudTeamId])} label="Members"><Members teamId={cloudTeamId} myEmail={session.user?.email ?? ""} /></CloudQueryBoundary>;
 }
 
 const sameEmail = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
@@ -60,7 +60,7 @@ function Members({ teamId, myEmail }: { teamId: string; myEmail: string }) {
   const [left, setLeft] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [query, setQuery] = useState("");
-  const appAddress = useAppAddress();
+  const appAddress = useOriginInviteAddress();
 
   if (left) return <EmptyState icon={<LogOut size={28} />} title="You left this workspace" body="It disappears from your sidebar in a moment. You need a new invitation to come back." />;
   if (!access || !members) return <Loading label="Loading members" />;
@@ -119,12 +119,12 @@ function Members({ teamId, myEmail }: { teamId: string; myEmail: string }) {
           {invites === undefined ? <Loading label="Loading invitations" />
             : workspaceInvites.length === 0
               ? <p className="rounded-xl bg-inset px-3 py-2.5 text-[13px] text-ink-secondary">No open invitations.</p>
-              : <ul className={cn(cardClass, "divide-y divide-hairline/30 overflow-hidden")} aria-label="Pending invitations">
+              : <><ul className={cn(cardClass, "divide-y divide-hairline/30 overflow-hidden")} aria-label="Pending invitations">
                 {workspaceInvites.map((invite) => (
                   <InviteRow key={invite._id} invite={invite} appAddress={appAddress} busy={action.busy}
                     onRevoke={() => void action.run(() => originMembers.revokeInvite(invite._id), "Could not revoke the invitation")} />
                 ))}
-              </ul>}
+              </ul>{!appAddress && <div className="mt-2"><Notice>Invitation links are unavailable until this Origin connection has a public address.</Notice></div>}</>}
         </div>
       )}
 
@@ -219,9 +219,9 @@ function expiresIn(at: number): string {
   return days <= 1 ? "Expires today" : `Expires in ${days} days`;
 }
 
-function InviteRow({ invite, appAddress, busy, onRevoke }: { invite: WorkspaceInvite; appAddress: string; busy: boolean; onRevoke(): void }) {
+function InviteRow({ invite, appAddress, busy, onRevoke }: { invite: WorkspaceInvite; appAddress: string | null; busy: boolean; onRevoke(): void }) {
   const [copied, copy] = useCopy();
-  const link = joinLink(invite.token, appAddress);
+  const link = appAddress ? joinLink(invite.token, appAddress) : null;
   return (
     <li className="flex items-center gap-3 px-4 py-2.5 motion-safe:animate-pop-in">
       <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-inset text-ink-secondary" aria-hidden="true">
@@ -235,7 +235,7 @@ function InviteRow({ invite, appAddress, busy, onRevoke }: { invite: WorkspaceIn
         </p>
       </div>
       <button type="button" className={iconButton} title={copied === invite._id ? "Copied" : "Copy invite link"}
-        aria-label="Copy invite link" onClick={() => copy(invite._id, link)}>
+        aria-label="Copy invite link" disabled={!link} onClick={() => { if (link) copy(invite._id, link); }}>
         {copied === invite._id ? <Check size={14} className="text-success" /> : <Copy size={14} />}
       </button>
       <button type="button" className={cn(iconButton, "hover:bg-danger/10 hover:text-danger")} disabled={busy} title="Revoke invitation" aria-label="Revoke invitation" onClick={onRevoke}>
@@ -248,43 +248,60 @@ function InviteRow({ invite, appAddress, busy, onRevoke }: { invite: WorkspaceIn
 function InviteForm({ teamId }: { teamId: string }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<InviteRole>("member");
-  const [result, setResult] = useState<{ link: string; note?: string } | null>(null);
+  const [result, setResult] = useState<{ link: string; note?: string; failed: boolean } | null>(null);
   const [copied, copy] = useCopy();
   const action = useAction();
+  const pending = useRef(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (pending.current) return;
+    pending.current = true;
+    setResult(null);
     const address = email.trim();
-    await action.run(async () => {
-      const created = await originMembers.createInvite({ teamId, role, ...(address ? { email: address } : {}) });
-      const note = !address ? undefined : created.sent ? `Invitation emailed to ${address}.` : "Email is not set up on this server, so share the link yourself.";
-      setResult({ link: created.inviteLink, note });
-      setEmail("");
-    }, "Could not create the invitation");
+    try {
+      await action.run(async () => {
+        const created = await originMembers.createInvite({ teamId, role, ...(address ? { email: address } : {}) });
+        if (!mounted.current) return;
+        const accepted = created.deliveryStatus === "accepted" || (created.deliveryStatus === undefined && created.sent);
+        const note = !address ? undefined : accepted ? `Invitation sent to ${address}.`
+          : created.deliveryStatus === "not_configured" ? "Email invitations are not available for this Origin connection. Share the link below."
+            : "The invitation was created, but the email could not be sent. Share the link below.";
+        setResult({ link: created.inviteLink, note, failed: Boolean(address && !accepted && created.deliveryStatus !== "not_configured") });
+        setEmail("");
+      }, "Could not create the invitation");
+    } finally {
+      pending.current = false;
+    }
   };
 
   return (
     <div className={cn(cardClass, "mb-5 p-4")}>
       <h3 className="mb-3 flex items-center gap-1.5 text-[13px] font-semibold text-ink"><UserPlus size={14} aria-hidden="true" />Invite people</h3>
       <form onSubmit={(event) => void submit(event)} className="flex flex-wrap items-end gap-2">
-        <Field label="Email (optional)" className="min-w-[200px] flex-1">
-          <input className={inputClass} type="email" placeholder="name@company.com" value={email} onChange={(event) => setEmail(event.target.value)} />
+        <Field label="Email address (optional)" className="min-w-[200px] flex-1">
+          <input className={inputClass} type="email" autoComplete="email" placeholder="name@company.com" value={email} disabled={action.busy} onChange={(event) => setEmail(event.target.value)} />
         </Field>
         <Field label="Role">
-          <Select className={cn(inputClass, "w-auto")} value={role} onChange={(event) => setRole(event.target.value as InviteRole)}>
+          <Select className={cn(inputClass, "w-auto")} value={role} disabled={action.busy} onChange={(event) => setRole(event.target.value as InviteRole)}>
             {INVITE_ROLES.map((option) => <option key={option} value={option}>{ROLE_LABEL[option]}</option>)}
           </Select>
         </Field>
         <button className={primaryButton} disabled={action.busy}>
           {action.busy ? <Loader2 size={14} className="animate-spin" /> : email.trim() ? <Mail size={14} /> : <Link size={14} />}
-          {email.trim() ? "Send invite" : "Create link"}
+          {email.trim() ? "Send email invite" : "Create link"}
         </button>
       </form>
-      <p className="mt-2 text-[12px] text-ink-tertiary">{ROLE_HINT[role]}. Links work for 7 days; an invite with an email only works for that address.</p>
+      <p className="mt-2 text-[12px] text-ink-tertiary">{ROLE_HINT[role]}. Leave email blank to create a shareable link. Invitations expire in 7 days; email invites only work for that address.</p>
       {action.error && <div className="mt-3"><Notice tone="danger">{action.error}</Notice></div>}
       {result && (
         <div className="mt-3 space-y-2 motion-safe:animate-pop-in">
-          {result.note && <Notice>{result.note}</Notice>}
+          {result.note && <Notice tone={result.failed ? "danger" : "info"}>{result.note}</Notice>}
           <div className="flex items-center gap-2">
             <input className={inputClass} aria-label="Invitation link" value={result.link} readOnly onFocus={(event) => event.currentTarget.select()} />
             <button type="button" className={iconButton} title="Copy invite link" aria-label="Copy invite link" onClick={() => copy("new", result.link)}>

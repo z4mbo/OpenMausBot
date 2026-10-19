@@ -5,12 +5,10 @@ export const CLOUD_TRIAL_NOTICE = "cloud-trial-notice";
 export const CLOUD_NOTICE = "cloud-notice";
 export const STAR_NOTICE = "github-star-dismissed";
 export const PRODUCT_HUNT_NOTICE = "product-hunt-launch-2026-10";
-export const PRODUCT_HUNT_URL = "https://www.producthunt.com/products/mausbot";
-export const PRODUCT_HUNT_UNTIL = Date.UTC(2026, 10, 1);
 
-export type NoticeId = typeof PRODUCT_HUNT_NOTICE | typeof CLOUD_INTRO | typeof CLOUD_TRIAL_NOTICE | typeof CLOUD_NOTICE | typeof STAR_NOTICE;
+export type NoticeId = typeof CLOUD_INTRO | typeof CLOUD_TRIAL_NOTICE | typeof CLOUD_NOTICE | typeof STAR_NOTICE;
 
-export const NOTICES: readonly NoticeId[] = [PRODUCT_HUNT_NOTICE, CLOUD_INTRO, CLOUD_TRIAL_NOTICE, CLOUD_NOTICE, STAR_NOTICE];
+export const NOTICES: readonly NoticeId[] = [CLOUD_INTRO, CLOUD_TRIAL_NOTICE, CLOUD_NOTICE, STAR_NOTICE];
 
 export type NoticeFacts = Record<NoticeId, boolean | null>;
 

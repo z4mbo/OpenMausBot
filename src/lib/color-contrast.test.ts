@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { fromOklch, parseHex, toOklch } from "./color-contrast";
+import { contrastRatio, filledTextInk, fromOklch, parseHex, toOklch } from "./color-contrast";
 import { MAUS_COLORS } from "./mascot";
+
+describe("filled text ink", () => {
+  it("keeps normal text readable across an RGB color grid", () => {
+    for (let r = 0; r <= 255; r += 17) {
+      for (let g = 0; g <= 255; g += 17) {
+        for (let b = 0; b <= 255; b += 17) {
+          const fill = `#${[r, g, b].map(channel => channel.toString(16).padStart(2, "0")).join("")}`;
+          for (const dark of ["#101410", "#111111"]) {
+            expect(contrastRatio(filledTextInk(fill, dark), fill), `${fill} / ${dark}`).toBeGreaterThanOrEqual(4.5);
+          }
+        }
+      }
+    }
+  });
+});
 
 describe("oklch", () => {
   it.each(Object.entries(MAUS_COLORS))("round-trips %s through OKLCH", (_name, hex) => {

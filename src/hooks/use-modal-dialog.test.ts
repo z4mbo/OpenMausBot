@@ -1,88 +1,131 @@
-import type { EffectCallback } from "react";
+// @vitest-environment happy-dom
+import { createElement, StrictMode, useRef, type ReactNode } from "react";
+import { flushSync } from "react-dom";
+import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ModalFocusScope, useModalDialog } from "./use-modal-dialog";
 
-const fixture = vi.hoisted(() => ({ effects: [] as EffectCallback[] }));
-vi.mock("react", async (original) => ({
-  ...await original<typeof import("react")>(),
-  useRef: (initial: unknown) => ({ current: initial }),
-  useEffect: (effect: EffectCallback) => { fixture.effects.push(effect); },
-}));
-
-import { useModalDialog } from "./use-modal-dialog";
-
-class FakeElement extends EventTarget {
-  constructor(readonly name: string, readonly parent?: FakeElement) { super(); }
-  focus() { document.activeElement = this; }
-  hasAttribute() { return false; }
+let host: HTMLDivElement, root: Root, opener: HTMLButtonElement;
+function Dialog({ open = true, canClose = true, onClose = () => {}, children, fallback }: {
+  open?: boolean; canClose?: boolean; onClose?: () => void; children?: ReactNode; fallback?: HTMLElement;
+}) {
+  const panel = useRef<HTMLDivElement>(null);
+  useModalDialog(panel, onClose, { open, canClose: () => canClose, fallbackFocusRef: { current: fallback ?? null } });
+  return open ? createElement("div", { ref: panel, role: "dialog", tabIndex: -1 },
+    createElement(ModalFocusScope, { panelRef: panel, children })) : null;
 }
-class FakeDialog extends FakeElement {
-  controls: FakeElement[] = [];
-  contains(node: unknown) { return node === this || this.controls.includes(node as FakeElement); }
-  querySelectorAll() { return this.controls; }
-}
-const document = { activeElement: null as FakeElement | null };
-
-function key(target: EventTarget, name: string, patch: { shiftKey?: boolean; prevented?: boolean } = {}) {
-  const event = Object.assign(new Event("keydown", { cancelable: true, bubbles: true }), { key: name, shiftKey: !!patch.shiftKey });
-  if (patch.prevented) event.preventDefault();
-  target.dispatchEvent(event);
+const key = (name: string, shiftKey = false, prevented = false) => {
+  const event = new KeyboardEvent("keydown", { key: name, shiftKey, bubbles: true, cancelable: true });
+  if (prevented) event.preventDefault();
+  document.activeElement?.dispatchEvent(event);
   return event;
-}
-
-let opener: FakeElement;
-let dialog: FakeDialog;
-let first: FakeElement;
-let last: FakeElement;
-let onClose: ReturnType<typeof vi.fn<() => void>>;
-let cleanup: () => void;
+};
+const render = (props: Parameters<typeof Dialog>[0] = {}) => flushSync(() => root.render(createElement(Dialog, props)));
 beforeEach(() => {
-  vi.stubGlobal("HTMLElement", FakeElement);
-  vi.stubGlobal("document", document);
-  opener = new FakeElement("opener");
-  dialog = new FakeDialog("dialog");
-  first = new FakeElement("close", dialog);
-  last = new FakeElement("edit", dialog);
-  dialog.controls = [first, last];
-  opener.focus();
-  onClose = vi.fn<() => void>();
-  fixture.effects = [];
-  useModalDialog({ current: dialog as unknown as HTMLElement }, onClose);
-  cleanup = fixture.effects[0]!() as () => void;
+  host = document.createElement("div"); opener = document.createElement("button");
+  document.body.append(opener, host); opener.focus(); root = createRoot(host);
 });
-afterEach(() => { vi.unstubAllGlobals(); });
+afterEach(() => { flushSync(() => root.unmount()); document.body.replaceChildren(); });
 
-describe("modal dialog keyboard handling", () => {
-  it("moves focus into the dialog and gives it back on close", () => {
-    expect(document.activeElement).toBe(dialog);
-    cleanup();
+describe("shared modal focus lifetime", () => {
+  it("captures an opener before child autofocus and restores only on real unmount", async () => {
+    const focus = vi.spyOn(opener, "focus");
+    flushSync(() => root.render(createElement(StrictMode, null, createElement(Dialog, {
+      children: createElement("input", { autoFocus: true }),
+    }))));
+    await Promise.resolve();
+    expect(document.activeElement).toBe(host.querySelector("input"));
+    expect(focus).not.toHaveBeenCalled();
+    flushSync(() => root.render(null));
+    expect(focus).toHaveBeenCalledOnce();
+  });
+
+  it("activates each controlled opening after an initially closed render", () => {
+    render({ open: false });
+    render({ open: true });
+    expect(document.activeElement).toBe(host.querySelector('[role="dialog"]'));
+    render({ open: false });
     expect(document.activeElement).toBe(opener);
+    const next = document.createElement("button"); document.body.append(next); next.focus();
+    render({ open: true }); render({ open: false });
+    expect(document.activeElement).toBe(next);
   });
 
-  it("closes on Escape without letting the page see it", () => {
-    const page = vi.fn();
-    const event = Object.assign(new Event("keydown", { cancelable: true }), { key: "Escape" });
-    event.stopPropagation = page;
-    dialog.dispatchEvent(event);
-    expect(onClose).toHaveBeenCalledOnce();
-    expect(event.defaultPrevented).toBe(true);
-    expect(page).toHaveBeenCalled();
+  it("keeps zero enabled controls focused on the panel in either Tab direction", () => {
+    render({ children: createElement("button", { disabled: true }, "Working") });
+    for (const reverse of [false, true]) {
+      expect(key("Tab", reverse).defaultPrevented).toBe(true);
+      expect(document.activeElement).toBe(host.querySelector('[role="dialog"]'));
+    }
   });
 
-  it("leaves an Escape that a field inside already handled", () => {
-    key(dialog, "Escape", { prevented: true });
-    expect(onClose).not.toHaveBeenCalled();
+  it("skips hidden, inert, disabled and negative-tabindex controls", () => {
+    render({ children: createElement("div", null,
+      createElement("div", { hidden: true }, createElement("button", null, "Hidden")),
+      createElement("div", { inert: true }, createElement("button", null, "Inert")),
+      createElement("div", { style: { display: "none" } }, createElement("button", null, "Display none")),
+      createElement("button", { disabled: true }, "Disabled"),
+      createElement("button", { tabIndex: -2 }, "Programmatic"),
+      createElement("a", { href: "#first", id: "first" }, "First"),
+      createElement("button", { id: "last" }, "Last")) });
+    const first = host.querySelector<HTMLElement>("#first")!, last = host.querySelector<HTMLElement>("#last")!;
+    last.focus(); expect(key("Tab").defaultPrevented).toBe(true); expect(document.activeElement).toBe(first);
+    expect(key("Tab", true).defaultPrevented).toBe(true); expect(document.activeElement).toBe(last);
   });
 
-  it("wraps Tab and Shift-Tab inside the dialog", () => {
-    last.focus();
-    expect(key(dialog, "Tab").defaultPrevented).toBe(true);
-    expect(document.activeElement).toBe(first);
-    expect(key(dialog, "Tab", { shiftKey: true }).defaultPrevented).toBe(true);
-    expect(document.activeElement).toBe(last);
-    dialog.focus();
-    key(dialog, "Tab", { shiftKey: true });
-    expect(document.activeElement).toBe(last);
-    first.focus();
-    expect(key(dialog, "Tab").defaultPrevented).toBe(false);
+  it("recovers external focus on the next Tab in either direction", () => {
+    render({ children: createElement("button", null, "Only") });
+    for (const reverse of [false, true]) {
+      opener.focus(); key("Tab", reverse);
+      expect(document.activeElement).toBe(host.querySelector("button"));
+    }
+  });
+
+  it("uses current dismissal and lock values without resetting existing focus", () => {
+    const first = vi.fn(), second = vi.fn();
+    render({ onClose: first, children: createElement("input") });
+    const input = host.querySelector<HTMLInputElement>("input")!; input.focus();
+    render({ onClose: second, canClose: false, children: createElement("input") });
+    expect(document.activeElement).toBe(input); key("Escape"); expect(second).not.toHaveBeenCalled();
+    render({ onClose: second, children: createElement("input") }); key("Escape");
+    expect(first).not.toHaveBeenCalled(); expect(second).toHaveBeenCalledOnce();
+  });
+
+  it("leaves already-handled Escape to the inner control", () => {
+    const close = vi.fn(); render({ onClose: close });
+    key("Escape", false, true); expect(close).not.toHaveBeenCalled();
+  });
+
+  it("uses a viable fallback when the opener is removed or disabled", () => {
+    const fallback = document.createElement("section"); fallback.tabIndex = -1; document.body.append(fallback);
+    render({ fallback }); opener.disabled = true; render({ open: false, fallback });
+    expect(document.activeElement).toBe(fallback);
+  });
+
+  it("does not restore into an inert opener", () => {
+    const fallback = document.createElement("button"); document.body.append(fallback);
+    render({ fallback }); opener.inert = true; render({ open: false, fallback });
+    expect(document.activeElement).toBe(fallback);
+  });
+
+  it("does not steal focus that a navigation destination already owns", () => {
+    const destination = document.createElement("button"); document.body.append(destination);
+    render(); destination.focus(); render({ open: false });
+    expect(document.activeElement).toBe(destination);
+  });
+
+  it("keeps a replacement dialog active when the previous dialog is removed", () => {
+    flushSync(() => root.render(createElement(Dialog, { key: "old", children: createElement("input", { autoFocus: true }) })));
+    flushSync(() => root.render(createElement(Dialog, { key: "new", children: createElement("button", { autoFocus: true }, "New") })));
+    expect(document.activeElement?.textContent).toBe("New");
+    key("Tab"); expect(document.activeElement?.textContent).toBe("New");
+  });
+
+  it("releases the global listener when the last locked layer unmounts", () => {
+    const close = vi.fn(); render({ canClose: false, onClose: close });
+    flushSync(() => root.render(null));
+    expect(document.activeElement).toBe(opener);
+    expect(key("Tab").defaultPrevented).toBe(false);
+    key("Escape"); expect(close).not.toHaveBeenCalled();
   });
 });

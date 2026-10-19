@@ -217,15 +217,15 @@ describe("preparing a harness response for a device", () => {
     expect(text).toBe("this is not JSON at all");
   });
 
-  it("passes a Live call's 402 Pro refusal through unchanged", async () => {
-    const refusal = { error: "Live calls from your phone need a Pro plan.", needsPro: true };
+  it("passes a Live call's missing-key response through unchanged", async () => {
+    const refusal = { error: "Add an OpenAI API key to use Live calls.", needsKey: true };
     respond = (res) => {
-      res.writeHead(402, { "content-type": "application/json" });
+      res.writeHead(409, { "content-type": "application/json" });
       res.end(JSON.stringify(refusal));
     };
 
     const { status, text } = await device("/api/live/session", "POST", JSON.stringify({ botId: "b1", sdp: "v=0", client: "ios" }));
-    expect(status).toBe(402);
+    expect(status).toBe(409);
     expect(JSON.parse(text)).toEqual(refusal);
   });
 

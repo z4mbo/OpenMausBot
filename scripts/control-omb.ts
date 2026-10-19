@@ -177,8 +177,6 @@ export function verificationServerEnvironment(parentEnv: NodeJS.ProcessEnv, data
     childEnv.OMB_OPENAI_LIVE_URL = liveUrl;
     if (parentEnv.OMB_OPENAI_LIVE_KEY) childEnv.OMB_OPENAI_LIVE_KEY = parentEnv.OMB_OPENAI_LIVE_KEY;
   }
-  // Live calls need Pro; without it the fixture refuses a call with 402 needsPro.
-  if (parentEnv.OMB_PRO_PLAN?.trim() === "1") childEnv.OMB_PRO_PLAN = "1";
   // Arms the one-shot audio-append failure inside the fixture server.
   if (parentEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE) {
     childEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE = parentEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE;
@@ -287,6 +285,8 @@ export async function launchVerificationServer(
   if (browser) Object.assign(childEnv, {
     OMB_AGENT_BROWSER_PATH: browser.binaryPath,
     AGENT_BROWSER_EXECUTABLE_PATH: browser.executablePath,
+    // agent-browser 0.36.0-omb.1 on Windows resolves its native home independently of USERPROFILE.
+    XDG_RUNTIME_DIR: join(dataDir, "runtime"),
   });
   if (boatFixtureApi) childEnv.OMB_BOAT_API = boatFixtureApi;
   if (staticDir) childEnv.OMB_STATIC_DIR = staticDir;

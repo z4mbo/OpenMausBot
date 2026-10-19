@@ -158,7 +158,7 @@ describe("mcp-gate", () => {
     const answer = await call("search_products");
     const text = answer.result.content[0].text;
     expect(text.length).toBeLessThan(full.length / 10);
-    expect(text.startsWith("⚠️ TRUNCATED by OpenMausBot:")).toBe(true);
+    expect(text.startsWith("⚠️ TRUNCATED by Origin:")).toBe(true);
 
     const spillDir = join(scratch, "spill");
     const [file] = readdirSync(spillDir);
@@ -343,7 +343,7 @@ createInterface({ input: process.stdin }).on("line", (line) => {
     expect(ran()).toEqual([]);
     expect((await callWith("describe_tool", { name: "read" }, 3)).result.content[0].text).toHaveLength(4_000);
     expect((await callWith("call_tool", { arguments: {} }, 4)).result.content[0].text).toHaveLength(4_000);
-    expect((await callWith("call_tool", { name: "read", arguments: {} }, 5)).result.content[0].text).toContain("TRUNCATED by OpenMausBot");
+    expect((await callWith("call_tool", { name: "read", arguments: {} }, 5)).result.content[0].text).toContain("TRUNCATED by Origin");
     expect(ran()).toEqual(["describe_tool", "call_tool", "call_tool"]);
   });
 

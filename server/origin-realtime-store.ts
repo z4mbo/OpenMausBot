@@ -24,10 +24,10 @@ export type ChatMessage = {
 export type DirectConversation = { id: string; otherUserId: string; lastMessage?: ChatMessage; unread: number };
 export type CallParticipant = {
   userId: string; name: string; username?: string; email: string; avatarUrl?: string | null;
-  audioEnabled: boolean; videoEnabled: boolean; screenSharing?: boolean; joinedAt: number; lastSeenAt: number;
+  audioEnabled: boolean; videoEnabled: boolean; screenSharing?: boolean; joinedAt: number; lastSeenAt: number; sessionId: string;
 };
 export type CallSignalKind = "offer" | "answer" | "candidate";
-export type CallSignal = { id: string; fromUserId: string; toUserId: string; fromJoinedAt?: number; toJoinedAt?: number; kind: CallSignalKind; payload: string; createdAt: number };
+export type CallSignal = { id: string; fromUserId: string; toUserId: string; fromJoinedAt?: number; toJoinedAt?: number; fromSessionId: string; toSessionId: string; kind: CallSignalKind; payload: string; createdAt: number };
 export type MentionNotice = { teamId: string; actorId: string; messageId: string; userIds: string[]; conversation: Conversation; preview: string };
 
 export const CHAT_REACTIONS = ["like", "heart", "celebrate", "eyes"] as const;
@@ -37,6 +37,9 @@ const SIGNAL_TTL_MS = 120_000;
 const PAGE = 100;
 
 export class RealtimeError extends Error {}
+export class CallSessionChangedError extends RealtimeError {
+  constructor() { super("Rejoin the call to continue"); }
+}
 
 export type Conversation = "" | `dm:${string}:${string}` | `project:${string}`;
 export interface ChatScope { user: WorkspaceUser; conversation: Conversation }
@@ -104,17 +107,25 @@ export function openRealtimeStore(file: string, now: () => number = Date.now) {
       .map((row) => JSON.parse(row.payload) as CallParticipant);
   };
 
-  const presence = (scope: CallScope, media: { audioEnabled: boolean; videoEnabled: boolean; screenSharing: boolean }, heartbeat: boolean): CallParticipant => {
+  const requireCallSession = (scope: CallScope, sessionId?: string): CallParticipant => {
+    const participant = participants(scope).find((person) => person.userId === scope.user.userId);
+    if (!sessionId || participant?.sessionId !== sessionId) throw new CallSessionChangedError();
+    return participant;
+  };
+
+  const presence = (scope: CallScope, media: { audioEnabled: boolean; videoEnabled: boolean; screenSharing: boolean }, heartbeat: boolean, sessionId?: string): CallParticipant => {
     const { user, room } = scope;
     requireWriter(user);
     const active = participants(scope);
     const previous = active.find((participant) => participant.userId === user.userId);
+    if (heartbeat) requireCallSession(scope, sessionId);
     if (active.length >= CALL_ROOM_LIMIT && !previous) throw new RealtimeError(`This call is full (${CALL_ROOM_LIMIT} people)`);
     if (!heartbeat) db.prepare("DELETE FROM signals WHERE team=? AND room=? AND (sender=? OR recipient=?)").run(user.teamId, room, user.userId, user.userId);
     const at = now();
     const participant: CallParticipant = {
       userId: user.userId, name: user.name, ...(user.username ? { username: user.username } : {}), email: user.email, avatarUrl: user.avatarUrl ?? null,
       ...media, joinedAt: heartbeat && previous ? previous.joinedAt : Math.max(at, (previous?.joinedAt ?? 0) + 1), lastSeenAt: at,
+      sessionId: heartbeat && previous ? previous.sessionId : randomUUID(),
     };
     db.prepare("INSERT INTO participants VALUES(?,?,?,?,?) ON CONFLICT(team,room,user) DO UPDATE SET seen=excluded.seen, payload=excluded.payload")
       .run(user.teamId, room, user.userId, at, JSON.stringify(participant));
@@ -253,35 +264,41 @@ export function openRealtimeStore(file: string, now: () => number = Date.now) {
     participants,
 
     join: (scope: CallScope, media: { audioEnabled: boolean; videoEnabled: boolean; screenSharing: boolean }) => presence(scope, media, false),
-    heartbeat: (scope: CallScope, media: { audioEnabled: boolean; videoEnabled: boolean; screenSharing: boolean }) => presence(scope, media, true),
+    heartbeat: (scope: CallScope, media: { audioEnabled: boolean; videoEnabled: boolean; screenSharing: boolean }, sessionId?: string) => presence(scope, media, true, sessionId),
 
-    leave({ user, room }: CallScope): void {
+    leave(scope: CallScope, sessionId?: string): void {
+      requireCallSession(scope, sessionId);
+      const { user, room } = scope;
       db.prepare("DELETE FROM participants WHERE team=? AND room=? AND user=?").run(user.teamId, room, user.userId);
       db.prepare("DELETE FROM signals WHERE team=? AND room=? AND (sender=? OR recipient=?)").run(user.teamId, room, user.userId, user.userId);
     },
 
-    sendSignal(scope: CallScope, toUserId: string, kind: CallSignalKind, payload: string, fromJoinedAt?: number, toJoinedAt?: number): CallSignal | null {
+    sendSignal(scope: CallScope, toUserId: string, kind: CallSignalKind, payload: string, session: { fromJoinedAt?: number; toJoinedAt?: number; sessionId?: string; toSessionId?: string } = {}): CallSignal | null {
       const { user, room } = scope;
       requireWriter(user);
+      const sender = requireCallSession(scope, session.sessionId);
       if (toUserId === user.userId || !["offer", "answer", "candidate"].includes(kind) || typeof payload !== "string" || !payload || payload.length > 80_000) {
         throw new RealtimeError("Invalid call signal");
       }
       const active = participants(scope);
-      const sender = active.find((participant) => participant.userId === user.userId);
       const recipient = active.find((participant) => participant.userId === toUserId);
-      if (!sender || !recipient) throw new RealtimeError("Both people must be in this call");
-      if ((fromJoinedAt !== undefined && fromJoinedAt !== sender.joinedAt) || (toJoinedAt !== undefined && toJoinedAt !== recipient.joinedAt)) return null;
-      const signal: CallSignal = { id: randomUUID(), fromUserId: user.userId, toUserId, fromJoinedAt: sender.joinedAt, toJoinedAt: recipient.joinedAt, kind, payload, createdAt: now() };
+      if (!recipient) throw new RealtimeError("Both people must be in this call");
+      if ((session.fromJoinedAt !== undefined && session.fromJoinedAt !== sender.joinedAt) || (session.toJoinedAt !== undefined && session.toJoinedAt !== recipient.joinedAt) || session.toSessionId !== recipient.sessionId) return null;
+      const signal: CallSignal = { id: randomUUID(), fromUserId: user.userId, toUserId, fromJoinedAt: sender.joinedAt, toJoinedAt: recipient.joinedAt, fromSessionId: sender.sessionId, toSessionId: recipient.sessionId, kind, payload, createdAt: now() };
       db.prepare("INSERT INTO signals VALUES(?,?,?,?,?,?,?)").run(signal.id, user.teamId, room, toUserId, user.userId, signal.createdAt, JSON.stringify(signal));
       return signal;
     },
 
-    signals({ user, room }: CallScope): CallSignal[] {
+    signals(scope: CallScope, sessionId?: string): CallSignal[] {
+      requireCallSession(scope, sessionId);
+      const { user, room } = scope;
       return (db.prepare("SELECT payload FROM signals WHERE team=? AND room=? AND recipient=? AND created>? ORDER BY created LIMIT 120").all(user.teamId, room, user.userId, now() - SIGNAL_TTL_MS) as { payload: string }[])
         .map((row) => JSON.parse(row.payload) as CallSignal);
     },
 
-    ackSignals({ user, room }: CallScope, ids: readonly string[]): void {
+    ackSignals(scope: CallScope, ids: readonly string[], sessionId?: string): void {
+      requireCallSession(scope, sessionId);
+      const { user, room } = scope;
       const remove = db.prepare("DELETE FROM signals WHERE team=? AND room=? AND recipient=? AND id=?");
       for (const id of ids.slice(0, 120)) remove.run(user.teamId, room, user.userId, id);
     },

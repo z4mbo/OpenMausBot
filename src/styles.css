@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../shared/origin-theme.css";
 
 /* Phones and tablets have no hover, and Tailwind only applies `hover:` and
    `group-hover:` under `@media (hover: hover)`. A control revealed on hover
@@ -199,8 +200,8 @@
   --code-color-scheme: dark;
   /* ink carried by a filled accent / danger surface (see the rule at the
      bottom of this file, which is what makes them take effect) */
-  --color-accent-ink: #ffffff;
-  --color-danger-ink: #ffffff;
+  --color-accent-ink: var(--origin-dark-filled-ink);
+  --color-danger-ink: var(--origin-dark-filled-ink);
   /* ink carried by the user's own bubble. A hex rather than the ink token so
      the contrast check can measure it; every dark skin repeats its ink here. */
   --color-bubble-user-ink: #fcfcfc;
@@ -210,41 +211,31 @@
   --color-maus-line: #fcfcfc;
 }
 
-/* ── Midnight ──────────────────────────────────────────────────────────────
-   The upstream palette, pixel-sampled from the real Grok app. Repeated here
-   (rather than relying on the `@theme` defaults) so that a `[data-skin]`
-   subtree can switch *back* to it — the picker needs that.
-
-   Two upstream contrast gaps are preserved deliberately, because this skin's
-   job is to be the original: white on the accent fill measures 3.65:1 and
-   white on the danger fill 3.32:1, both short of AA for the 13–15px labels
-   they carry. Atelier and Foundry fix this via --color-accent-ink.
-   ───────────────────────────────────────────────────────────────────────── */
 [data-skin="midnight"] {
   --code-color-scheme: dark;
-  --color-app: #070707;
-  --color-panel: #111111;
+  --color-app: var(--origin-dark-app);
+  --color-panel: var(--origin-dark-panel);
   --color-raised: #2f2f2f;
   --color-raised-hover: #3d3d3d;
   --color-composer: #2f2f2f;    /* = raised: unchanged */
   --color-composer-ring: transparent;
   --color-card: #262626;
   --color-menu: #262626;    /* = card: unchanged */
-  --color-inset: #191919;
+  --color-inset: var(--origin-dark-inset);
   --color-control: #2f2f2f;       /* = raised: Midnight is unchanged */
-  --color-hairline: #333333;
-  --color-ink: #fcfcfc;
-  --color-ink-secondary: #fcfcfc99;
-  --color-ink-tertiary: #fcfcfc90;
-  --color-accent: #1084fe;
+  --color-hairline: var(--origin-dark-line);
+  --color-ink: var(--origin-dark-ink);
+  --color-ink-secondary: var(--origin-dark-secondary);
+  --color-ink-tertiary: var(--origin-dark-tertiary);
+  --color-accent: var(--origin-dark-accent);
   --color-accent-border: #459ffe;
-  --color-accent-text: #7fc0ff;
-  --color-accent-ink: #ffffff;
+  --color-accent-text: var(--origin-dark-accent-text);
+  --color-accent-ink: var(--origin-dark-filled-ink);
   --color-bubble-user: #5a5a5a;
   --color-bubble-user-ink: #fcfcfc;   /* = ink: unchanged */
   --color-success: #38d591;
   --color-danger: #ff5667;
-  --color-danger-ink: #ffffff;
+  --color-danger-ink: var(--origin-dark-filled-ink);
   --color-success-ink: #072114;
   --color-warning: #ff9800;
   --color-scrollbar: #3d3d3d;
@@ -649,29 +640,29 @@
    ───────────────────────────────────────────────────────────────────────── */
 [data-skin="daylight"] {
   --code-color-scheme: light;
-  --color-app: #fcfcfc;           /* the thread */
-  --color-panel: #f7f7f7;         /* sidebar, one step down from the thread */
+  --color-app: var(--origin-light-app);           /* the thread */
+  --color-panel: var(--origin-light-panel);         /* sidebar, one step down from the thread */
   --color-raised: #e1e1e1;
   --color-raised-hover: #d7d7d7;  /* the selected row */
   --color-card: #eeeeee;          /* what a bot says */
-  --color-inset: #e6e6e6;         /* the search field */
+  --color-inset: var(--origin-light-inset);         /* the search field */
   --color-control: #dedede;       /* a chip on a card */
   /* Sampled at #efefef, which is what the eye reads on the divider — but a
      hairline that faint fails this repo's own gate (1.5:1 against the page)
      and every border is drawn at /40 on top of that. #d0d0d0 is the lightest
      grey that still passes; see scripts/check-skin-contrast.mjs. */
-  --color-hairline: #d0d0d0;
+  --color-hairline: var(--origin-light-line);
 
-  --color-ink: #0d0d0d;
-  --color-ink-secondary: #575757;
-  --color-ink-tertiary: #5c5c5c;
+  --color-ink: var(--origin-light-ink);
+  --color-ink-secondary: var(--origin-light-secondary);
+  --color-ink-tertiary: var(--origin-light-tertiary);
 
   /* The upstream blue is #1084fe, which carries white at 3.1:1 — fine for the
      unread dot it is mostly used for, not for a filled button's label. The
      fill is darkened until white clears AA; the dot keeps reading as blue. */
-  --color-accent: #0b62c4;
+  --color-accent: var(--origin-light-accent);
   --color-accent-border: #1084fe;
-  --color-accent-text: #0b5cb8;
+  --color-accent-text: var(--origin-light-accent-text);
   --color-focus: #0b62c4;
   --color-accent-ink: #ffffff;
   /* The composer is the page with a ring around it, not a grey slab —
@@ -871,6 +862,13 @@ body {
    use utilities for placement and the control scale below for size, rather
    than inventing another button size. */
 @layer components {
+  .ui-panel {
+    border: 1px solid color-mix(in srgb, var(--color-hairline) 60%, transparent);
+    border-radius: var(--origin-radius-panel);
+    background: var(--color-panel);
+    color: var(--color-ink);
+    box-shadow: none;
+  }
   .ui-button,
   .ui-icon-button {
     display: inline-flex;
@@ -921,11 +919,10 @@ body {
     background: var(--color-accent);
     color: var(--color-accent-ink);
   }
-  .ui-button-primary:enabled:hover,
-  a.ui-button-primary:hover {
+  .ui-button-primary:enabled:is(:hover, :active),
+  a.ui-button-primary:is(:hover, :active) {
     background: var(--color-accent);
     color: var(--color-accent-ink);
-    filter: brightness(1.1);
   }
   /* A pill-shaped action in the transcript: run and conversation chips,
      "load earlier", the failed-turn Retry. Same 28px as `.ui-button-md`. */
@@ -996,12 +993,12 @@ body {
   }
   .ui-menu-row:enabled:hover { background: color-mix(in srgb, var(--color-raised) 70%, transparent); }
   .ui-menu-row:disabled { opacity: 0.6; }
-  .ui-button:enabled:hover,
+  .ui-button:enabled:hover:not(.ui-button-primary),
   .ui-icon-button:enabled:hover {
     background: var(--color-raised-hover);
     color: var(--color-ink);
   }
-  .ui-button:enabled:active,
+  .ui-button:enabled:active:not(.ui-button-primary),
   .ui-icon-button:enabled:active {
     background: var(--color-raised);
   }
@@ -1017,22 +1014,6 @@ body {
   }
 }
 
-/* Liquid glass: the surface for centred pop-ups (Settings, Apps, Triggers).
-   Every value is derived from the active skin's own tokens, so each of the
-   nine skins gets a glass of its own colour and no skin block changes. The
-   app behind stays visible, blurred, through a light scrim. Unlayered so a
-   leftover `bg-panel` on the same element cannot win. */
-.glass-surface {
-  background: color-mix(in srgb, var(--color-menu) 62%, transparent);
-  -webkit-backdrop-filter: blur(28px) saturate(170%);
-  backdrop-filter: blur(28px) saturate(170%);
-  border: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, white 16%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, white 4%, transparent),
-    0 24px 64px -12px color-mix(in srgb, black 45%, transparent),
-    0 2px 8px color-mix(in srgb, black 12%, transparent);
-}
 /* Where a glass pop-up sits: inside the window less a safe area. The top
    inset clears the macOS traffic lights and the Windows caption buttons
    (--glass-popup-top, set from lib/glass-popup.ts); 24px elsewhere. The pane
@@ -1052,39 +1033,23 @@ body {
   height: min(760px, 100%);
   min-height: 0;
 }
-/* Cards and rails sitting on the glass: a second, thinner pane. */
 .glass-card {
-  background: color-mix(in srgb, var(--color-card) 60%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
-}
-/* Existing pages dropped onto glass (every Settings page) keep their markup;
-   their solid cards turn into the same thinner pane. */
-.glass-surface .bg-card {
-  background-color: color-mix(in srgb, var(--color-card) 60%, transparent);
+  background: var(--color-card);
+  border: 1px solid color-mix(in srgb, var(--color-hairline) 60%, transparent);
 }
 .glass-rail {
-  background: color-mix(in srgb, var(--color-app) 22%, transparent);
+  background: var(--color-app);
 }
-/* Behind a glass pop-up: dim without adding a second, full-window blur pass.
-   The pop-up surface provides the glass blur over the content it covers. */
 .glass-scrim {
   background: color-mix(in srgb, black 28%, transparent);
 }
 @media (prefers-reduced-transparency: reduce) {
-  .glass-surface {
-    background: var(--color-menu);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-  .glass-card,
-  .glass-surface .bg-card { background: var(--color-card); }
-  .glass-rail { background: var(--color-app); }
   .glass-scrim {
     background: color-mix(in srgb, black 50%, transparent);
   }
 }
 @media (forced-colors: active) {
-  .glass-surface,
+  .ui-panel,
   .glass-card {
     background: Canvas;
     border-color: CanvasText;
@@ -1951,7 +1916,7 @@ html[data-cloud-intent-morph] [data-tour="composer"] { view-transition-name: clo
   *::before,
   *::after {
     animation: none !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0s !important;
     transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
@@ -1961,16 +1926,6 @@ html[data-cloud-intent-morph] [data-tour="composer"] { view-transition-name: clo
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Filled accent / danger / success surfaces
-
-   Components hardcode `text-white` on these fills (~20 call sites). That works
-   only as long as every skin's accent is dark enough to carry white — which
-   rules out any skin whose accent is meant to glow. Rather than edit twenty
-   components, the ink is taken from a token here; `text-white` and this rule
-   have equal specificity, and this file is loaded after Tailwind's utilities.
-   Midnight sets the token to #ffffff, so its rendering is unchanged.
-   ───────────────────────────────────────────────────────────────────────── */
 .bg-accent {
   color: var(--color-accent-ink);
 }
@@ -1979,6 +1934,29 @@ html[data-cloud-intent-morph] [data-tour="composer"] { view-transition-name: clo
 }
 .bg-success {
   color: var(--color-success-ink);
+}
+
+:is(button:enabled, a[href]):is(.bg-accent, .ui-button-primary):is(:hover, :active) {
+  background-color: var(--color-accent);
+  color: var(--color-accent-ink);
+  filter: none;
+  opacity: 1;
+}
+
+:is(button:enabled, a[href]).bg-danger:is(:hover, :active) {
+  background-color: var(--color-danger);
+  color: var(--color-danger-ink);
+  filter: none;
+  opacity: 1;
+}
+
+:is(button:enabled, a[href]):is(.bg-accent, .bg-danger, .ui-button-primary):hover:not(:focus-visible) {
+  outline: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  outline-offset: -2px;
+}
+
+:is(button:enabled, a[href]):is(.bg-accent, .bg-danger, .ui-button-primary):active:not(:focus-visible) {
+  outline-offset: -3px;
 }
 /* Same mechanism, one skin deeper: Daylight paints the user's own bubble in
    near-black on a near-white page, and the `text-ink` the composer and the

@@ -6,10 +6,11 @@ import { cn } from "@/lib/cn";
 import type { CloudBoard, CloudPerson, Priority } from "./cloud-types";
 import { Loading, Notice, primaryButton, useAction } from "./ui";
 import {
-  AgentChip, ChipSelect, DateChip, IssueChips, IssueDialog, ProjectDot, isDoneColumn, issueDescriptionClass, issueTitleClass, memberOptions, priorityOptions, statusOptions,
+  AgentChip, ChipSelect, DateChip, IssueChips, IssueDialog, ProjectDot, issueDescriptionClass, issueTitleClass, memberOptions, priorityOptions, statusOptions,
   type CreatedIssue, type IssueAgent,
 } from "./issue-fields";
 import { isDraftColumn } from "../../../shared/origin-columns";
+import { newIssueColumn, openIssueColumns } from "./issue-columns";
 
 export interface ComposerProject { id: string; name: string; memberRole?: string; icon?: ReactNode }
 
@@ -123,12 +124,12 @@ function IssueForm({ project, initialColumnId, initialDraft, myEmail, agents, ac
   const [agentId, setAgentId] = useState("");
   const asked = useRef(false);
   const titleInput = useRef<HTMLTextAreaElement>(null);
-  const columns = (board?.columns ?? []).filter((column) => !isDoneColumn(column)).sort((a, b) => a.order - b.order);
-  const column = columns.find((item) => item._id === columnId) ?? columns.find(isDraftColumn) ?? columns.find((item) => item.title.trim().toLowerCase() === "todo") ?? columns[0];
+  const columns = openIssueColumns(board?.columns ?? []);
+  const column = newIssueColumn(columns, columnId);
   const chosenAssignee = assignee || (people?.some((person) => person.email === myEmail) ? myEmail ?? "" : "");
 
   useEffect(() => {
-    if (!board || board.columns.length || asked.current) return;
+    if (!board || board.columns.some(isDraftColumn) || asked.current) return;
     asked.current = true;
     cloudMutation("tasks:ensureDefaultColumns", { projectId }).catch((cause) => action.setError(cause instanceof Error ? cause.message : String(cause)));
   }, [board, projectId, action]);
@@ -140,7 +141,7 @@ function IssueForm({ project, initialColumnId, initialDraft, myEmail, agents, ac
     if (missing || action.busy || !column) return;
     let taskId = "";
     const ok = await action.run(async () => {
-      taskId = await cloudMutation<string>("tasks:createTask", { projectId, columnId: column._id, title: title.trim(), description, priority, assignedToEmail: chosenAssignee, dueDate });
+      taskId = await cloudMutation<string>("tasks:createTask", { projectId, ...(columnId === column._id ? { columnId } : {}), title: title.trim(), description, priority, assignedToEmail: chosenAssignee, dueDate });
     }, "Could not create the issue");
     if (ok) onCreated({ projectId, taskId, title: title.trim(), description, priority, dueDate, labels: [], status: column.title, agentId: agentId || undefined });
   };

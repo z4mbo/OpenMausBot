@@ -116,7 +116,6 @@ describe("Settings rail groups", () => {
     vi.stubGlobal("window", { ogb: { environments: {}, organization: {}, cloudAccount: {} } });
     const html = render();
     for (const label of ["You", "AI", "Computers", "Account"]) expect(html).toContain(`>${label}</div>`);
-    expect(html).toContain("glass-surface");
     expect(rail(html)).toEqual({
       you: ["general", "appearance", "companion"],
       ai: ["engines", "connections", "decisionModel"],

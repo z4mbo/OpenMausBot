@@ -3,12 +3,9 @@
 // the CSS itself. Run it after touching a palette:
 //
 //   pnpm check:contrast
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { readSkinCss } from "./testing/skin-css.ts";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const css = readFileSync(join(root, "src/styles.css"), "utf8");
+const css = readSkinCss();
 
 function declarations(body) {
   const tokens = {};
@@ -34,7 +31,14 @@ function parseSkins(source) {
   const base = parseBase(source);
   const skins = new Map();
   for (const [, id, body] of source.matchAll(/\[data-skin="([a-z-]+)"\]\s*\{([^}]*)\}/g)) {
-    skins.set(id, { ...base, ...declarations(body) });
+    const tokens = { ...base, ...declarations(body) };
+    const resolve = (value, seen = new Set()) => {
+      const variable = /^var\((--[\w-]+)\)$/.exec(value)?.[1];
+      if (!variable) return value;
+      if (seen.has(variable) || tokens[variable] === undefined) throw new Error(`Unresolved skin token: ${variable}`);
+      return resolve(tokens[variable], new Set([...seen, variable]));
+    };
+    skins.set(id, Object.fromEntries(Object.entries(tokens).map(([name, value]) => [name, resolve(value)])));
   }
   return skins;
 }
@@ -126,13 +130,6 @@ const PAIRS = [
 ];
 
 const skins = parseSkins(css);
-// Midnight faithfully keeps two upstream contrast gaps. They may improve, but
-// must not get worse; every other below-target pair is a regression.
-const BASELINE_FLOORS = new Map([
-  ["midnight|--color-accent-ink|--color-accent", 3.65],
-  ["midnight|--color-danger-ink|--color-danger", 3.10],
-]);
-const BASELINE_DRIFT = 0.01;
 
 let failed = false;
 for (const [id, tokens] of skins) {
@@ -166,15 +163,10 @@ for (const [id, tokens] of skins) {
     if (skinFailed) failed = true;
     continue;
   }
-  for (const { fg, bg, ratio } of problems) {
-    const floor = BASELINE_FLOORS.get(`${id}|${fg}|${bg}`);
-    if (floor === undefined || ratio < floor - BASELINE_DRIFT) skinFailed = true;
-  }
-  console.log(`${skinFailed ? "✗" : "~"} ${id}${skinFailed ? "" : " (known upstream gaps)"}`);
+  skinFailed = true;
+  console.log(`✗ ${id}`);
   for (const { fg, bg, ratio, min } of problems) {
-    const floor = BASELINE_FLOORS.get(`${id}|${fg}|${bg}`);
-    const baseline = floor === undefined ? "" : `; baseline ${floor.toFixed(2)}:1`;
-    console.log(`    ${fg} on ${bg}: ${ratio.toFixed(2)}:1 (needs ${min}:1${baseline})`);
+    console.log(`    ${fg} on ${bg}: ${ratio.toFixed(2)}:1 (needs ${min}:1)`);
   }
   if (skinFailed) failed = true;
 }

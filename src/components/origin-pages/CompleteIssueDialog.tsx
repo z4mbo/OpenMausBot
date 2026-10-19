@@ -53,7 +53,7 @@ export function CompleteIssueDialog({ project, projectId, task, implementer, onC
                 <p className="font-medium text-ink">Handing {key} to {implementer.name} to implement and open a PR</p>
                 <p>
                   {implementer.name} gives it to the right agent, which works on a branch and opens a pull request that closes {number ? `#${number}` : "its GitHub issue"}.
-                  {" "}{implementer.name} reviews and merges it; GitHub then closes the issue and {key} moves to Done. It moves to In progress now.
+                  {" "}{implementer.name} reviews it and asks you before merging; GitHub then closes the issue and {key} moves to Done. It moves to In progress now.
                 </p>
               </div>
             </div>
@@ -113,7 +113,7 @@ function Guidance({ project, projectId, task, opened, action, onOpenPullRequest,
               {copied ? <Check size={12} className="text-success motion-safe:animate-pop-in" /> : <Copy size={12} />}{copied ? "Copied" : "Copy"}
             </button>
           </div>
-          <p>The project's Chief reviews and merges it; GitHub then closes #{number} and this issue moves to Done.</p>
+          <p>The project's Chief reviews it and asks you before merging; GitHub then closes #{number} and this issue moves to Done.</p>
         </>
       ) : (
         <p>This issue has no GitHub issue yet. Create it first, then open a pull request that closes it.</p>

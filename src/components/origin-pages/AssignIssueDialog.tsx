@@ -1,22 +1,21 @@
+import { useId } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import type { Bot } from "@/state/store";
 import { BotAvatar } from "../Avatar";
 import type { AssignableIssue } from "./IssuesPage";
-import { cn } from "@/lib/cn";
-import { overlayMotion, sheetMotion, useDismiss } from "./ui";
+import { CenteredDialog } from "../CenteredDialog";
+import { iconButton } from "./ui";
 
 export { implementBrief, issueBrief } from "../../../shared/origin-issues";
 
-export function AssignIssueDialog({ issue, agents, onPick, onClose: requestClose }: { issue: AssignableIssue; agents: Bot[]; onPick(agent: Bot): void; onClose(): void }) {
-  const { closing, dismiss: onClose } = useDismiss(requestClose);
+export function AssignIssueDialog({ issue, agents, onPick, onClose }: { issue: AssignableIssue; agents: Bot[]; onPick(agent: Bot): void; onClose(): void }) {
+  const titleId = useId();
   return createPortal(
-    <div className={cn("fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4 backdrop-blur-[2px]", overlayMotion(closing))} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
-      onKeyDown={(event) => { if (event.key === "Escape") onClose(); }}>
-      <div role="dialog" aria-modal="true" aria-label="Assign to an agent" className={cn("w-full max-w-[420px] rounded-2xl border border-hairline/50 bg-panel p-5", sheetMotion(closing))}>
+    <CenteredDialog label="Assign to an agent" labelledBy={titleId} onClose={onClose} className="p-5 sm:max-w-[420px]">{(dismiss) => <>
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-[16px] font-semibold text-ink">Assign to an agent</h2>
-          <button type="button" aria-label="Close" onClick={onClose} className="flex size-8 items-center justify-center rounded-lg text-ink-secondary hover:bg-raised hover:text-ink"><X size={16} /></button>
+          <h2 id={titleId} className="text-[16px] font-semibold text-ink">Assign to an agent</h2>
+          <button type="button" aria-label="Close" onClick={dismiss} className={iconButton}><X size={16} /></button>
         </div>
         <p className="mb-4 truncate text-[12.5px] text-ink-secondary">{issue.key} · {issue.title}</p>
         {agents.length === 0
@@ -31,8 +30,7 @@ export function AssignIssueDialog({ issue, agents, onPick, onClose: requestClose
               </li>
             ))}
           </ul>}
-      </div>
-    </div>,
+      </>}</CenteredDialog>,
     document.body,
   );
 }

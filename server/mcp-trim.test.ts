@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DEFAULT_RESULT_BUDGET, trimResultText } from "./mcp-trim.ts";
 
-const BANNER = "⚠️ TRUNCATED by OpenMausBot:";
+const BANNER = "⚠️ TRUNCATED by Origin:";
 /** What was kept, between the banner at the start and the one at the end. */
 const keptBody = (text: string) => text.slice(text.indexOf("\n\n") + 2, text.lastIndexOf(`\n\n${BANNER}`));
 

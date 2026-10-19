@@ -19,7 +19,7 @@ const WORKSPACE_TITLE = "Workspace";
 
 const sectionOf = (bot: BotRecord) => bot.section?.trim() || "";
 
-function uniqueTeamName(store: Store, wanted: string): string {
+export function uniqueTeamName(store: Store, wanted: string): string {
   const base = wanted.trim().slice(0, 60) || "Team";
   const taken = new Set([...store.sections, ...store.bots.map(sectionOf)]);
   if (!taken.has(base)) return base;
@@ -132,6 +132,7 @@ export function ensureWorkspaces(store: Store): void {
 
 /** Once a workspace exists, every named team is led by a Chief bot; a team without one gets a Chief named after it. */
 export function ensureTeamChiefs(store: Store, selection: ModelSelection): BotRecord[] {
+  store.retireEmptyWorkspaceSections();
   if (!workspaceHeads(store).length) return [];
   const teams = new Set([...store.sections, ...store.bots.map(sectionOf)].filter(team => team && team !== STANDALONE_SECTION));
   const created: BotRecord[] = [];
@@ -142,4 +143,15 @@ export function ensureTeamChiefs(store: Store, selection: ModelSelection): BotRe
     created.push(chief);
   }
   return created;
+}
+
+export async function initializeWorkspaceTeams(store: Store, selection: () => Promise<ModelSelection>): Promise<void> {
+  try {
+    const chiefs = ensureTeamChiefs(store, await selection());
+    if (chiefs.length) console.log(`[teams] gave ${chiefs.length} team(s) a Chief of Staff bot`);
+    ensureWorkspaces(store);
+    watchTemplateTeams(store);
+  } catch (error) {
+    console.warn(`[teams] could not give every team a Chief: ${(error as Error).message}`);
+  }
 }

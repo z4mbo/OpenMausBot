@@ -1,10 +1,35 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { BUILT_IN_DRIVERS } from "./drivers/builtIn.ts";
-import { OFFICIAL_INSTALLERS, installerArgv, officialInstallScript, type InstallPlatform } from "./engine-script-install.ts";
+import { OFFICIAL_INSTALLERS, installerArgv, officialInstallScript, runOfficialInstaller, type InstallPlatform } from "./engine-script-install.ts";
 
 const PLATFORMS: InstallPlatform[] = ["darwin", "linux", "win32"];
 
 describe("official engine installers", () => {
+  it.each([true, false])("scopes backend administration in the actual installer shell (Origin operator: %s)", async (originOperator) => {
+    const credentials = {
+      CONVEX_DEPLOY_KEY: "prod:origin-fixture|operator-deploy",
+      CONVEX_SELF_HOSTED_ADMIN_KEY: "operator-admin", GITHUB_TOKEN: "project-owned-token",
+    };
+    const fixture = {
+      ORIGIN_INTEGRATION_SECRET: originOperator ? "origin-operator-fixture" : undefined,
+      BREVO_API_KEY: "synthetic-backend-mail-key", brevo_api_key: "synthetic-backend-mail-key", ...credentials,
+      omb_openai_api_key: "synthetic-workspace-key", box_token: "synthetic-workspace-key",
+    };
+    for (const [name, value] of Object.entries(fixture)) vi.stubEnv(name, value);
+    try {
+      const program = `process.stdout.write(JSON.stringify(Object.fromEntries('${Object.keys(fixture).join(" ")}'.split(' ').map(name => [name, process.env[name]]))))`;
+      const quote = (value: string) => `'${value.replaceAll("'", process.platform === "win32" ? "''" : "'\\''")}'`;
+      const command = `${process.platform === "win32" ? "& " : ""}${quote(process.execPath)} -e ${quote(program)}`;
+      let output = "";
+      const run = runOfficialInstaller({ command, source: "fixture.invalid", docsUrl: "https://fixture.invalid" },
+        process.platform === "win32" ? "win32" : "linux", (chunk) => { output += chunk; });
+      expect(await run.done, output).toBe(0);
+      expect(JSON.parse(output)).toEqual(originOperator ? { GITHUB_TOKEN: "project-owned-token" } : credentials);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("download only from the vendor domain they name, over HTTPS", () => {
     for (const [driverKind, installer] of Object.entries(OFFICIAL_INSTALLERS)) {
       for (const platform of PLATFORMS) {

@@ -187,6 +187,87 @@ describe("plan usage parsers", () => {
 });
 
 describe("plan usage fetcher", () => {
+  it.each([
+    ["missing", { token: null, accountId: null, expired: false }, "Subscription usage credentials are not available for Claude. Model access is checked separately."],
+    ["expired", { token: null, accountId: null, expired: true }, "The saved usage token for Claude has expired. Model access is checked separately."],
+  ] as const)("does not report a %s quota token as a failed model sign-in", async (_kind, credential, error) => {
+    const fetchImpl = vi.fn<PlanFetch>();
+    const report = await fetchPlanUsage([account("claude")], {
+      fetch: fetchImpl,
+      credentials: { read: () => credential },
+      now: () => NOW,
+    });
+    expect(report.providers[0]).toMatchObject({ ok: false, error, fiveHour: { available: false, remainingPercent: null } });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("does not report unreadable quota credentials as a failed model sign-in", async () => {
+    const fetchImpl = vi.fn<PlanFetch>();
+    const report = await fetchPlanUsage([account("grok")], {
+      fetch: fetchImpl,
+      credentials: { read: () => { throw new Error(SECRET); } },
+      now: () => NOW,
+    });
+    expect(report.providers[0]).toMatchObject({
+      ok: false,
+      error: "Could not read subscription usage credentials for Grok. Model access is checked separately.",
+    });
+    expect(fetchImpl).not.toHaveBeenCalled();
+    expect(JSON.stringify(report)).not.toContain(SECRET);
+  });
+
+  it.each([
+    ["claude", 401], ["claude", 403],
+    ["codex", 401], ["codex", 403],
+    ["grok", 401], ["grok", 403],
+  ] as const)("keeps a %s usage HTTP %s refusal separate from model authentication", async (driver, status) => {
+    const entry = account(driver);
+    const report = await fetchPlanUsage([entry], {
+      fetch: async () => jsonResponse({ error: SECRET }, status),
+      credentials: { read: () => ({ token: SECRET, accountId: null, expired: false }) },
+      now: () => NOW,
+    });
+    expect(report.providers[0]).toMatchObject({
+      ok: false,
+      error: `${entry.name} did not grant access to subscription usage. Model access is checked separately.`,
+      weekly: { available: false, remainingPercent: null },
+    });
+    expect(JSON.stringify(report)).not.toContain(SECRET);
+  });
+
+  it.each([401, 403])("keeps Grok billing usage when the credits endpoint returns HTTP %s", async (status) => {
+    const report = await fetchPlanUsage([account("grok")], {
+      fetch: async (url) => url.includes("format=credits") ? jsonResponse({ error: SECRET }, status)
+        : url.endsWith("/v1/settings") ? jsonResponse({ settings: { subscription_tier_display: "SuperGrok" } })
+          : jsonResponse({ config: { creditUsagePercent: 40, currentPeriod: { type: "MONTH", end: "2026-10-26T00:00:00.000Z" } } }),
+      credentials: { read: () => ({ token: SECRET, accountId: null, expired: false }) },
+      now: () => NOW,
+    });
+    expect(report.providers[0]).toMatchObject({ ok: true, error: null, plan: "SuperGrok" });
+    expect(report.providers[0]?.extra).toEqual([expect.objectContaining({ label: "Monthly", usedPercent: 40, remainingPercent: 60 })]);
+    expect(JSON.stringify(report)).not.toContain(SECRET);
+  });
+
+  it("excludes API, disabled, managed and separately authenticated accounts from personal subscription reads", () => {
+    expect(planAccountsFromInstances({
+      claude: { driver: "claudeAgent" },
+      codex: { driver: "codex" },
+      grok: { driver: "grokAgent" },
+      disabled: { driver: "claudeAgent", enabled: false },
+      apiAccess: { driver: "claudeAgent", access: "api" },
+      claudeApi: { driver: "claudeAgent", config: { requireApiKey: true } },
+      claudeApiAllBots: { driver: "claudeAgent", environment: { ANTHROPIC_API_KEY: SECRET } },
+      customClaude: { driver: "claudeAgent", environment: { ANTHROPIC_BASE_URL: "https://models.example.test" } },
+      companyClaude: { driver: "claudeAgent", config: { managed: true } },
+      companyCodex: { driver: "codex", config: { managed: { url: "https://models.example.test", models: ["fixture"] } } },
+      chatgpt: { driver: "codex", config: { authMode: "chatgpt-plan" } },
+    })).toEqual([
+      { id: "claude", name: "Claude", driver: "claude", environment: {} },
+      { id: "codex", name: "Codex", driver: "codex", environment: {} },
+      { id: "grok", name: "Grok", driver: "grok", environment: {} },
+    ]);
+  });
+
   it("does not call fetch when the Claude token is expired", async () => {
     const fetchImpl = vi.fn<PlanFetch>();
     const configDir = join(tmpdir(), "omb-plan-usage-claude");
@@ -208,7 +289,7 @@ describe("plan usage fetcher", () => {
     ]);
     expect(fetchImpl).not.toHaveBeenCalled();
     expect(report.providers).toEqual([
-      expect.objectContaining({ id: "work", name: "Work Claude", driver: "claude", ok: false, error: "Sign in again in Claude" }),
+      expect.objectContaining({ id: "work", name: "Work Claude", driver: "claude", ok: false, error: "The saved usage token for Claude has expired. Model access is checked separately." }),
     ]);
     expect(JSON.stringify(report)).not.toContain(SECRET);
   });
@@ -293,7 +374,7 @@ describe("plan usage fetcher", () => {
     });
     expect(services).toEqual([suffixed]);
     expect(fetchImpl).not.toHaveBeenCalled();
-    expect(report.providers[0]).toMatchObject({ ok: false, error: "Sign in again in Claude" });
+    expect(report.providers[0]).toMatchObject({ ok: false, error: "Subscription usage credentials are not available for Claude. Model access is checked separately." });
     expect(JSON.stringify(report)).not.toContain(defaultToken);
   });
 
@@ -318,7 +399,7 @@ describe("plan usage fetcher", () => {
       },
     );
     expect(report.providers.map((provider) => [provider.driver, provider.ok, provider.error])).toEqual([
-      ["claude", false, "Sign in again in Claude"],
+      ["claude", false, "Claude did not grant access to subscription usage. Model access is checked separately."],
       ["codex", true, null],
     ]);
     expect(report.providers[1]?.fiveHour.remainingPercent).toBe(90);

@@ -26,9 +26,10 @@ import { orderForMove, stepTarget, useFlip, withPendingMoves, type PendingMove }
 import { NewIssueComposer } from "./NewIssueComposer";
 import { CompleteIssueDialog, completesThroughPullRequest, type IssueImplementer } from "./CompleteIssueDialog";
 import { originGitHub } from "@/lib/origin-github";
-import { DRAFT_COLUMN_TITLE, isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-columns";
+import { isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-columns";
 import { PersonAvatar } from "./PersonAvatar";
 import { useCardDrag, type CardDrag, type DropTarget } from "./use-card-drag";
+import { openIssueColumns } from "./issue-columns";
 
 /** What the Issues page hands to `onAssignToAgent`. */
 export type AssignableIssue = {
@@ -140,7 +141,6 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   const [info, setInfo] = useState("");
   const [completing, setCompleting] = useState<string | null>(null);
   const ensured = useRef(false);
-  const renamed = useRef(false);
   const mirrored = useRef(new Set<string>());
   const lanesRef = useRef<HTMLDivElement>(null);
   const search = useRef<HTMLInputElement>(null);
@@ -160,6 +160,8 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   useEffect(() => {
     if (!canEdit || !board || !project.repoUrl) return;
     const drafts = new Set(board.columns.filter(isDraftColumn).map((column) => column._id));
+    const legacyDraft = !drafts.size && board.columns.find(isLegacyIdeaColumn);
+    if (legacyDraft) drafts.add(legacyDraft._id);
     const unlinked = board.tasks.filter((task) => !task.done && !task.githubIssueNumber && !drafts.has(task.columnId) && !mirrored.current.has(task._id)).map((task) => task._id);
     if (!unlinked.length) return;
     for (const id of unlinked) mirrored.current.add(id);
@@ -167,14 +169,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   }, [board, canEdit, project.repoUrl, projectId]);
 
   useEffect(() => {
-    const idea = !board?.columns.some(isDraftColumn) && board?.columns.find(isLegacyIdeaColumn);
-    if (!canEdit || !idea || renamed.current) return;
-    renamed.current = true;
-    void cloudMutation("tasks:updateColumn", { projectId, columnId: idea._id, title: DRAFT_COLUMN_TITLE, isDone: false }).catch((error) => setNotice(errorText(error, "Could not rename the Idea column to Draft")));
-  }, [board, canEdit, projectId]);
-
-  useEffect(() => {
-    if (!canEdit || !board || board.columns.length || ensured.current) return;
+    if (!canEdit || !board || board.columns.some(isDraftColumn) || ensured.current) return;
     ensured.current = true;
     void cloudMutation("tasks:ensureDefaultColumns", { projectId }).catch((error) => setNotice(errorText(error, "Could not create columns")));
   }, [board, canEdit, projectId]);
@@ -193,10 +188,9 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   if (!board) return <Loading label="Loading issues" variant="board" />;
 
   const tasks = withPendingMoves(board.tasks, pending);
-  const columns = board.columns.filter((column) => !isDoneColumn(column));
+  const columns = openIssueColumns(board.columns);
   const visibleIds = new Set(columns.map((column) => column._id));
   const fallback = columns.find((column) => column.title.toLowerCase() === "todo") ?? columns[0];
-  const newIssueColumn = columns.find(isDraftColumn) ?? fallback;
   const draftIds = new Set(columns.filter(isDraftColumn).map((column) => column._id));
   const laneOf = (task: CloudTask) => (visibleIds.has(task.columnId) ? task.columnId : fallback?._id);
   const needle = query.trim().toLowerCase();
@@ -272,7 +266,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
           <input ref={search} className={cn(inputClass, "h-8 pl-8 sm:w-48")} placeholder="Search issues" aria-label="Search issues" value={query} onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(event) => { if (event.key === "Escape") { setQuery(""); event.currentTarget.blur(); } }} />
         </label>
-        {canEdit && <button type="button" className={primaryButton} disabled={!columns.length} onClick={() => setComposer(newIssueColumn?._id ?? "")} title="New issue (C)"><Plus size={14} />New issue</button>}
+        {canEdit && <button type="button" className={primaryButton} onClick={() => setComposer("")} title="New issue (C)"><Plus size={14} />New issue</button>}
       </PageHeader>
       {(!canEdit || notice || info) && (
         <GlassHeader>
@@ -620,15 +614,20 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
   project: CloudProject; projectId: string; taskId: string; canEdit: boolean; agents: readonly IssueAgent[]; chief?: IssueChief; onClose(): void; onDelete(task: CloudTask): void; onAssign?(task: CloudTask, agentId?: string): void;
 }) {
   const details = useCloudQuery<CloudTaskDetails>("tasks:details", { projectId, taskId });
-  const [draft, setDraft] = useState<{ title: string; description: string } | null>(null);
+  const [edits, setEdits] = useState<{ title?: string; description?: string }>({});
   const action = useAction();
   const [completing, setCompleting] = useState(false);
   const task = details?.task;
+  const draft = task ? { title: edits.title ?? task.title, description: edits.description ?? task.description ?? "" } : null;
 
   useEffect(() => {
-    if (!task || draft) return;
-    setDraft({ title: task.title, description: task.description ?? "" });
-  }, [task, draft]);
+    if (!task) return;
+    setEdits((current) => {
+      const title = current.title === task.title ? undefined : current.title;
+      const description = current.description === (task.description ?? "") ? undefined : current.description;
+      return title === current.title && description === current.description ? current : { title, description };
+    });
+  }, [task?.title, task?.description]);
 
   const heading = (
     <div className="flex min-w-0 items-center gap-1.5 text-[13px]">
@@ -662,11 +661,11 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
       <div className="flex flex-col px-6 pb-5 pt-2 max-sm:px-5"
         onKeyDown={(event) => { if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) { event.preventDefault(); save(); } }}>
         <textarea rows={1} aria-label="Issue title" placeholder="Issue title" value={draft.title} maxLength={250} disabled={!canEdit}
-          onChange={(e) => setDraft({ ...draft, title: e.target.value.replace(/\n/g, " ") })}
+          onChange={(e) => { const title = e.target.value.replace(/\n/g, " "); setEdits((current) => ({ ...current, title: title === task.title ? undefined : title })); }}
           onKeyDown={(event) => { if (event.key === "Enter" && !event.metaKey && !event.ctrlKey) event.preventDefault(); }}
           className={issueTitleClass} />
         <textarea aria-label="Issue description" placeholder={canEdit ? "Add a description…" : "No description"} value={draft.description} disabled={!canEdit}
-          onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+          onChange={(e) => { const description = e.target.value; setEdits((current) => ({ ...current, description: description === (task.description ?? "") ? undefined : description })); }}
           className={issueDescriptionClass} />
         <IssueChips>
           <ChipSelect label="Status" value={columns.some((c) => c._id === task.columnId) ? task.columnId : ""} options={statusOptions(columns)} icon={<CircleDashed size={14} aria-hidden="true" />}
@@ -692,7 +691,7 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
           {canEdit && (
             <div className="ml-auto flex items-center gap-2">
               {dirty ? <>
-                <button type="button" className={cn(ghostButton, "rounded-full")} onClick={() => setDraft(null)}>Discard</button>
+                <button type="button" className={cn(ghostButton, "rounded-full")} onClick={() => setEdits({})}>Discard</button>
                 <button type="button" className={cn(primaryButton, "rounded-full px-4")} disabled={action.busy || !draft.title.trim()} onClick={save}>
                   {action.busy ? <Loader2 size={14} className="animate-spin" /> : null}Save changes
                 </button>

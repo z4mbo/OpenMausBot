@@ -45,11 +45,17 @@ describe("the server and the credential", () => {
 
   it("refuses control-omb's changes on a server it merely found", async () => {
     await expect(openClient({}, { env: {}, requireExplicitForMutations: true }, true))
-      .rejects.toMatchObject({ message: "mutating commands require an explicit OpenMausBot instance", exitCode: 2 });
+      .rejects.toMatchObject({ message: "mutating commands require an explicit Origin instance", exitCode: 2 });
   });
 });
 
 describe("explain", () => {
+  it.each(["Origin", "OpenMausBot"])("keeps current and legacy %s API refusals actionable", async (name) => {
+    const busy = Object.assign(new Error(`${name} API error (409): {"error":"stop this bot's turn first","code":"thread_busy"}`), { status: 409 });
+    expect(await explain(busy)).toMatchObject({ exitCode: 1, message: "stop this bot's turn first" });
+    const forbidden = Object.assign(new Error(`${name} API error (403): {"error":"admin scope required"}`), { status: 403 });
+    expect(await explain(forbidden)).toMatchObject({ exitCode: 5, message: "not allowed: admin scope required" });
+  });
   it("turns refusals and unreachable servers into exit codes a script can branch on", async () => {
     const status = (code: number, message = "nope") => Object.assign(new Error(message), { status: code });
     expect(await explain(status(401))).toMatchObject({ exitCode: 5, hint: expect.stringContaining("--token-file") });
@@ -61,7 +67,7 @@ describe("explain", () => {
     expect(await explain(status(502, "OpenMausBot API error (502): <html>Bad gateway</html>"))).toMatchObject({ message: "OpenMausBot API error (502): <html>Bad gateway</html>" });
     expect(await explain(status(404, 'OpenMausBot API error (404): {"error":"no such bot"}'))).toMatchObject({ exitCode: 2, message: "no such bot" });
     expect(await explain(status(404, "OpenMausBot API error (404): not found"))).toMatchObject({ exitCode: 1 });
-    expect(await explain(new TypeError("fetch failed"), "http://127.0.0.1:1")).toMatchObject({ exitCode: 5, message: "cannot reach OpenMausBot at http://127.0.0.1:1" });
+    expect(await explain(new TypeError("fetch failed"), "http://127.0.0.1:1")).toMatchObject({ exitCode: 5, message: "cannot reach Origin at http://127.0.0.1:1" });
     expect(await explain(Object.assign(new Error("The operation was aborted due to timeout"), { name: "TimeoutError" }))).toMatchObject({ exitCode: 5 });
     const kept = new HeadlessError("as it was", 4, "hint");
     expect(await explain(kept)).toBe(kept);

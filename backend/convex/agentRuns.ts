@@ -2,8 +2,8 @@ import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { runUsage, threadAttachment, threadMessageKind, threadMessageTool } from "./agentsTables";
 import { requireUser } from "./lib/auth";
-import { requireSharedAgents, requireThread, runAcceptsBotWrites } from "./lib/agentAccess";
-import { cleanPayload, cleanText, cleanTool, LEASE_MS, messageByClientId, nextSeq, settleRun } from "./lib/agentThreadRows";
+import { canResumeThreadRun, requireThread, requireWritableThread, runAcceptsBotWrites } from "./lib/agentAccess";
+import { cleanPayload, cleanText, cleanTool, LEASE_MS, messageByClientId, nextSeq, promoteQueuedRun, settleRun } from "./lib/agentThreadRows";
 import { requireTeamMember } from "./lib/permissions";
 
 const CLIENT_ID_MAX = 160;
@@ -22,10 +22,7 @@ export const begin = mutation({
   },
   returns: v.object({ runId: v.id("workspaceAgentRuns"), messageId: v.id("agentThreadMessages"), status: v.string(), seq: v.number() }),
   handler: async (ctx, args) => {
-    const { thread, agent, access, user } = await requireThread(ctx, args.threadId, args.sessionToken);
-    await requireSharedAgents(ctx, thread.teamId);
-    if (!access.canSend) throw new Error("View-only access");
-    if (thread.archivedAt !== undefined || agent.archivedAt !== undefined) throw new Error("This thread is archived");
+    const { thread, agent, access, user } = await requireWritableThread(ctx, args.threadId, args.sessionToken);
     const clientId = clientIdOf(args.clientId);
     const existing = await messageByClientId(ctx, thread._id, clientId);
     if (existing) {
@@ -66,6 +63,10 @@ export const heartbeat = mutation({
     if (!run || run.requesterUserId !== user._id) throw new Error("Run not found");
     if (run.status !== "running" || !run.threadId) return { status: run.status };
     const now = Date.now();
+    if (!await canResumeThreadRun(ctx, run, user)) {
+      await settleRun(ctx, run, "interrupted", now);
+      return { status: "interrupted" };
+    }
     const engineLabel = args.engineLabel?.trim().slice(0, ENGINE_LABEL_MAX);
     await ctx.db.patch(run._id, { heartbeatAt: now, updatedAt: now, ...(engineLabel ? { engineLabel } : {}) });
     const thread = await ctx.db.get(run.threadId);
@@ -83,7 +84,7 @@ export const appendMessage = mutation({
   },
   returns: v.object({ messageId: v.id("agentThreadMessages"), seq: v.number() }),
   handler: async (ctx, args) => {
-    const { thread, access, user } = await requireThread(ctx, args.threadId, args.sessionToken);
+    const { thread, user } = await requireWritableThread(ctx, args.threadId, args.sessionToken);
     const clientId = clientIdOf(args.clientId);
     const existing = await messageByClientId(ctx, thread._id, clientId);
     if (existing) {
@@ -91,9 +92,7 @@ export const appendMessage = mutation({
       return { messageId: existing._id, seq: existing.seq };
     }
     const now = Date.now();
-    if (args.role === "user") {
-      if (!access.canSend) throw new Error("View-only access");
-    } else if (!args.runId || !runAcceptsBotWrites(await ctx.db.get(args.runId), user._id, thread._id, now)) {
+    if (args.role === "bot" && (!args.runId || !runAcceptsBotWrites(await ctx.db.get(args.runId), user._id, thread._id, now))) {
       throw new Error("Only the run's requester can write its replies");
     }
     const seq = await nextSeq(ctx, thread, now, true);
@@ -115,7 +114,7 @@ export const patchMessage = mutation({
   },
   returns: v.object({ seq: v.number() }),
   handler: async (ctx, args) => {
-    const { thread, user } = await requireThread(ctx, args.threadId, args.sessionToken);
+    const { thread, user } = await requireWritableThread(ctx, args.threadId, args.sessionToken);
     const row = await messageByClientId(ctx, thread._id, clientIdOf(args.clientId));
     if (!row) throw new Error("Message not found");
     const now = Date.now();
@@ -173,13 +172,13 @@ export const pendingForMe = query({
     requestClientId: v.optional(v.string()), text: v.string(), createdAt: v.number(),
   })),
   handler: async (ctx, args) => {
-    const { member } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
+    const { member, user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     const out = [];
     for (const status of ["running", "queued"] as const) {
       const runs = await ctx.db.query("workspaceAgentRuns")
         .withIndex("by_requesterMembershipId_and_status", (q) => q.eq("requesterMembershipId", member._id).eq("status", status)).take(50);
       for (const run of runs) {
-        if (!run.threadId) continue;
+        if (!run.threadId || !await canResumeThreadRun(ctx, run, user)) continue;
         const request = run.requestClientId ? await messageByClientId(ctx, run.threadId, run.requestClientId) : null;
         out.push({
           runId: run._id, threadId: run.threadId, agentId: run.actorAgentId, status: run.status,
@@ -205,6 +204,15 @@ export const expireStale = internalMutation({
       expired += 1;
     }
     return expired;
+  },
+});
+
+export const promoteQueued = internalMutation({
+  args: { threadId: v.id("agentThreads"), previousRunId: v.id("workspaceAgentRuns") },
+  returns: v.null(),
+  handler: async (ctx, args): Promise<null> => {
+    await promoteQueuedRun(ctx, args.threadId, args.previousRunId, Date.now());
+    return null;
   },
 });
 

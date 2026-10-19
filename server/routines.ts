@@ -275,7 +275,7 @@ const CATCH_UP_MS = 12 * 60 * 60_000;
 const WAKE_HORIZON_MS = 60 * 60_000;
 
 export const ROUTINE_DEFERRAL_NOTICE_MS = 30 * 60_000;
-export const ROUTINE_RESTARTED = "OpenMausBot restarted while this routine was running";
+export const ROUTINE_RESTARTED = "Origin restarted while this routine was running";
 const MAX_DATE_MS = 8_640_000_000_000_000;
 const LOCAL_DAY_MS = 24 * 60 * 60_000;
 const INTERVAL_RESTRICTION_SEARCH_MS = 9 * LOCAL_DAY_MS;

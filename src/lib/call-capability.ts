@@ -1,3 +1,5 @@
+import { APP_NAME } from "../../shared/product-brand.mjs";
+
 export type CallCapabilityHelp = {
   label: string;
   reason: string;
@@ -34,7 +36,7 @@ export function callCapabilityHelp(
   if (!speechServiceAvailable) {
     return {
       label: "The call service is unavailable",
-      reason: "The speech service is unavailable in this app build. Restart or update OpenMausBot.",
+      reason: `The speech service is unavailable in this app build. Restart or update ${APP_NAME}.`,
     };
   }
   return null;

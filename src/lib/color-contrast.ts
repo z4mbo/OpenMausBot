@@ -35,6 +35,12 @@ export function contrastRatio(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+export function filledTextInk(fill: string, darkInk: string): string {
+  const white = "#ffffff";
+  const ink = contrastRatio(white, fill) >= contrastRatio(darkInk, fill) ? white : darkInk;
+  return contrastRatio(ink, fill) >= 4.5 ? ink : "#000000";
+}
+
 export type Oklch = { l: number; c: number; h: number };
 
 export function toOklch(hex: string): Oklch {

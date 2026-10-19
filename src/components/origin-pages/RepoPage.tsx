@@ -10,9 +10,10 @@ import type { CloudBoard, CloudProject, CloudTask } from "./cloud-types";
 import { PersonAvatar } from "./PersonAvatar";
 import { errorText, fmtDate, githubRepoHref, githubRepoLabel, shortSha, taskKey } from "./repo-url";
 import { CloudGate, EmptyState, Notice, PageHeader, Skeleton, cardClass, ghostButton, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { isDraftColumn } from "../../../shared/origin-columns";
 
 export function RepoPage({ onOpenSettings, ...props }: OriginPageProps & { onOpenSettings?(): void }) {
-  return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />}</CloudGate>;
+  return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo key={project.repoUrl ?? ""} project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />}</CloudGate>;
 }
 
 const PULL_STATE: Record<PullState, { icon: typeof GitPullRequest; tone: string; label: string }> = {
@@ -48,7 +49,7 @@ function useRepository(projectId: string, enabled: boolean) {
       if (mine === generation.current) setLoading(false);
     }
   }, [projectId, enabled]);
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { void load(); return () => { generation.current++; }; }, [load]);
   return { snapshot, error, loading, reload: load };
 }
 
@@ -67,7 +68,8 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
   const pulls = snapshot?.pullRequests ?? [];
   const tasks = board?.tasks ?? [];
   const linked = tasks.filter((task) => task.githubIssueNumber);
-  const waiting = tasks.filter((task) => !task.done && !task.githubIssueNumber);
+  const draftColumns = new Set((board?.columns ?? []).filter(isDraftColumn).map((column) => column._id));
+  const waiting = tasks.filter((task) => !task.done && !task.githubIssueNumber && !draftColumns.has(task.columnId));
   const pullFor = (number: number) => pulls.find((pr) => pr.closes.includes(number) && pr.state !== "closed");
   const keyFor = (number: number) => linked.find((task) => task.githubIssueNumber === number);
   const assignees = new Map((board?.assignees ?? []).map((person) => [person.email, person]));

@@ -900,7 +900,7 @@ function cardCopy(
       `Continuity: ${definition.continuity ? "Carries the previous run's report into the next run" : "Each run starts fresh"}`,
       `While busy: ${definition.overlap === "queue" ? "Queue one scheduled run; skip further occurrences until it starts" : "Skip overlapping scheduled occurrences"}`,
       ...(definition.runOnStartup || (operation.action === "update" && operation.changes.runOnStartup !== undefined)
-        ? [`On startup: ${definition.runOnStartup ? "Also runs once each time OpenMausBot starts" : "Runs only on its schedule"}`]
+        ? [`On startup: ${definition.runOnStartup ? "Also runs once each time Origin starts" : "Runs only on its schedule"}`]
         : []),
       ...(operation.action === "create" || operation.action === "update"
         ? [consequenceLine(definition.schedule, Boolean(definition.continuity))]
@@ -1054,7 +1054,7 @@ function revalidateOperation(operation: RoutineRequestOperation, manager: Routin
     ? operation.routine.runOnStartup === true
     : operation.action === "update" && operation.changes.runOnStartup === true;
   if (startsWithApp && (schedule ?? current?.schedule)?.type === "once") {
-    throw new RoutineRequestError("Only a repeating routine can also run when OpenMausBot starts. A one-time routine just runs at its time.");
+    throw new RoutineRequestError("Only a repeating routine can also run when Origin starts. A one-time routine just runs at its time.");
   }
   if (schedule?.type === "once" && schedule.at <= now) {
     throw new RoutineRequestError("That one-time schedule is now in the past. Ask the bot to propose a new time.", 409, { terminal: true });

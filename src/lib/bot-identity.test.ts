@@ -1,13 +1,11 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { Window } from "happy-dom";
 import { describe, expect, it } from "vitest";
 import { contrastRatio, mixSrgb, toneForSurface } from "./color-contrast";
 import { MAUS_COLORS, MAUS_COLOR_NAMES } from "./mascot";
 import { SKIN_IDS } from "./skins";
+import { readSkinCss } from "../../scripts/testing/skin-css";
 
-const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../styles.css"), "utf8");
+const css = readSkinCss();
 
 function declarations(body: string): Record<string, string> {
   return Object.fromEntries([...body.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)].map(([, name, value]) => [name, value.trim()]));

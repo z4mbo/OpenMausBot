@@ -322,6 +322,7 @@ export async function shareBotToWorkspace(deps: Pick<SharedSyncDeps, "cloud" | "
 /** The live round the Origin sync runs after its own: real Origin calls, the local API and the current avatar looks. */
 export async function sharedAgentsRound(input: {
   call: Call;
+  cloud?: SharedSyncDeps["cloud"];
   bots: readonly LocalBot[];
   instances: readonly { instanceId: string; driverKind: string }[];
   projects: readonly { _id: string; teamId: string }[];
@@ -330,7 +331,7 @@ export async function sharedAgentsRound(input: {
   const links = await input.call<CloudLinks>("/api/origin/cloud-links");
   const { looks } = await input.call<{ looks: Record<string, SharedDefinition["look"]> }>("/api/origin/avatar-looks");
   return syncSharedAgents({
-    cloud: { query: (name, args) => cloudQueryOnce(name, args), mutation: (name, args) => cloudMutation(name, args) },
+    cloud: input.cloud ?? { query: (name, args) => cloudQueryOnce(name, args), mutation: (name, args) => cloudMutation(name, args) },
     call: input.call, bots: input.bots, links, looks,
     driverKindOf: (instanceId) => input.instances.find((instance) => instance.instanceId === instanceId)?.driverKind,
   }, input.projects);

@@ -22,7 +22,7 @@ vi.mock("@/components/EngineLibrary", () => ({ engineReady: (instance: { snapsho
   instance.snapshot.state === "available" && instance.snapshot.authenticated !== false }));
 import { AppNotices } from "./AppNotices";
 import { CLOUD_NOTICE_DISMISSED } from "./CloudNotice";
-import { PRODUCT_HUNT_NOTICE, PRODUCT_HUNT_UNTIL, PRODUCT_HUNT_URL, CLOUD_INTRO, localDay, STAR_NOTICE } from "@/lib/notices";
+import { PRODUCT_HUNT_NOTICE, CLOUD_INTRO, localDay, STAR_NOTICE } from "@/lib/notices";
 import { track } from "@/lib/analytics";
 import { api } from "@/state/store";
 
@@ -271,37 +271,15 @@ describe("This computer's My Cloud card and the star", () => {
   });
 });
 
-describe("the Product Hunt launch card", () => {
-  const PH = "live on Product Hunt";
-  const fresh = () => { storage.delete(PRODUCT_HUNT_NOTICE); };
-
-  it("comes first, for everyone (new or not, any plan), and the upvote opens the launch and ends it for good", async () => {
-    fresh(); account = paid({ machine: ready });
-    const html = await launch();
-    expect(html).toContain(PH); expect(html).toContain("Upvote on Product Hunt");
-    expect(html).not.toContain(STAR); expect(html).not.toContain("Your always-on bots are on My Cloud");
-    press("Upvote on Product Hunt"); await flush();
-    expect(window.ogb?.openExternal).toHaveBeenCalledWith(PRODUCT_HUNT_URL);
-    expect(vi.mocked(track)).toHaveBeenCalledWith("product_hunt_card", { action: "upvote" });
-    expect(storage.get(PRODUCT_HUNT_NOTICE)).toBe("1"); expect(hints()).toContain(PRODUCT_HUNT_NOTICE);
-    expect(await launch()).toContain("Your always-on bots are on My Cloud");
-  });
-
-  it("Not now, the X and Escape end it for good too", async () => {
-    fresh();
-    expect(await launch()).toContain(PH);
-    press("Not now");
-    expect(vi.mocked(track)).toHaveBeenCalledWith("product_hunt_card", { action: "not_now" });
-    expect(storage.get(PRODUCT_HUNT_NOTICE)).toBe("1");
-    expect(await launch()).not.toContain(PH);
-  });
-
-  it("never on a branded build or an organization's desktop, never after the launch window, never over setup or an update", async () => {
-    fresh(); f.brand = "file";
-    expect(await launch()).not.toContain(PH);
-    f.brand = "default"; now = PRODUCT_HUNT_UNTIL;
-    expect(await launch()).not.toContain(PH);
-    now = NOW; f.updater = { status: "available", version: "9.9.9" };
-    expect(await launch()).not.toContain(PH);
+describe("Origin product notices", () => {
+  it("does not promote the upstream Product Hunt launch on any account", async () => {
+    storage.delete(PRODUCT_HUNT_NOTICE);
+    for (const next of [signedOut, free, paid({ machine: ready })]) {
+      account = next;
+      const html = await launch();
+      expect(html).not.toContain("Product Hunt");
+      expect(html).not.toContain("products/mausbot");
+      expect(window.ogb?.openExternal).not.toHaveBeenCalled();
+    }
   });
 });

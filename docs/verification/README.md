@@ -1,7 +1,7 @@
-# Verifying OpenMausBot
+# Verifying Origin
 
-OpenMausBot has one development control surface: `pnpm control:omb`. It runs
-the published `openmausbot` verbs (docs/headless-cli.md), which call the MCP
+Origin has one development control surface: `pnpm control:omb`. It runs
+the checkout's headless verbs (docs/headless-cli.md), which call the MCP
 tools in `scripts/mcp-server.ts`, so verification uses the same URL
 validation, task pinning, bounded transcripts, wait states, and redaction as
 external MCP clients and scripts.
@@ -28,8 +28,8 @@ exception: `OMB_OPENAI_LIVE_URL` crosses when it is a loopback
 `http://127.0.0.1:PORT` (the fake GPT-Live that
 `node --experimental-strip-types server/testing/fake-openai-live.ts` prints),
 and `OMB_OPENAI_LIVE_KEY` crosses only with it, so that key can only ever
-reach the fake. `OMB_PRO_PLAN` crosses only as `1`: Live calls from a phone need a Pro plan,
-and that is how a server the desktop app did not start says so.
+reach the fake. Live calls use the explicitly configured personal key on every client; no
+upstream Cloud subscription is required.
 
 Pass the printed URL explicitly from a second terminal:
 
@@ -44,8 +44,11 @@ recipe from sending messages to the user's running app by accident.
 
 Use only mapped, tested commands:
 
+- [Feature acceptance and remaining work](origin-feature-acceptance-034.md)
 - [The headless command line](headless-cli.md)
+- [Origin checkout CLI, fleet upgrades and Sentinel distribution](origin-cli-distribution.md)
 - [Chat turns](chat-turns.md)
+- [Thread saves and failed deletions](origin-thread-durability.md)
 - [Conversation context compaction](context-compaction.md)
 - [Work summaries and engine hooks](digests.md)
 - [OpenAI-compatible structured tools](openai-tools.md)
@@ -64,10 +67,47 @@ Use only mapped, tested commands:
 - [Chat widgets: prompts to try with a real bot](widget-prompts.md)
 - [Phone web app installation and safe areas](phone-web-app.md)
 - [Welcome flow and guided tour](onboarding.md)
+- [Shared flat popup and sidebar menu surfaces](origin-flat-popups.md)
+- [Readable trigger identity and actions on mobile](origin-trigger-row.md)
+- [Sidebar account and computer controls](sidebar-header-fit.md) ([retained evidence](evidence/origin-header-fit-029/report.json))
+- [Origin server connections without upstream billing and readable narrow server rows](origin-desktop-cloud-policy.md)
+- [Sidebar footer containment and keyboard access](sidebar-footer-fit.md)
+- [Sidebar footer icons in one row](sidebar-footer-single-row.md)
+- [Origin product identity, startup and compatibility](origin-branding.md)
+- [Draft-first boards and default issue creation](origin-draft-defaults.md)
+- [Issue cards remain visible during rapid dragging](origin-issue-drag.md)
+- [Issue dragging after permission or project changes](origin-issue-drag-permission.md)
+- [Legacy Idea privacy during Draft repair](origin-draft-mirror.md)
+- [Local workspace deletion and residual sidebar sections](origin-workspace-deletion.md)
+- [Origin 0.2.11 source and delivery acceptance](origin-candidate-031.md) ([delivery receipt](evidence/origin-delivery-031/delivery-receipt.json))
+- [Origin 0.2.13 integration batch and acceptance boundary](origin-candidate-034.md)
+- [Origin 0.2.13 failed CI, descriptor compatibility and verified follow-up](origin-ci-followup-034.md)
+- [Origin 0.2.13 published delivery, audit report and upstream recommendations](evidence/origin-delivery-035/final-audit-report.md)
+- [Origin 0.2.14 published delivery, CI retry, screenshots and upstream recommendations](evidence/origin-delivery-038/final-audit-report.md)
+- [Origin 0.2.15 published provider Usage fix, delivery hashes and retained recovery evidence](evidence/origin-delivery-040/final-audit-report.md)
+- [Real isolated backend, two-client invitations, persistence and revocation](evidence/origin-native-039/report.md)
+- [Authentication response ownership and two-tab session races](origin-session-scope.md)
+- [Account, connection and shared-run ownership follow-up](origin-ownership-037.md)
+- [Held Origin 0.2.12 replacement candidate, cycle 033](origin-candidate-033.md)
+- [Provider-error handoff CI isolation](origin-ci-provider-error.md)
+- [Origin 0.2.12 held 032 freeze and failed-CI record](origin-candidate-032.md)
+- [Public signup policy loading and bounded recovery](origin-signup-policy.md)
+- [Origin 0.2.9 held-candidate verification](origin-candidate-029.md)
+- [Origin 0.2.10 source and delivery acceptance](origin-candidate-030.md) ([delivery receipt](evidence/origin-delivery-030/delivery-receipt.json))
+- [Activity receipt refresh across bot updates](origin-activity-refresh.md)
+- [Draft domain defaults and bounded legacy workflow repair](origin-draft-domain.md)
+- [Baseline client requests against the Draft backend](origin-backend-compatibility.md)
+- [034 Convex backend reuse and committed evidence integrity](origin-backend-reuse-034.md)
 - [Channels](channels.md)
 - [In-chat team coordination](room-coordination.md)
 - [Chief access to additional teams](team-access.md)
+- [Revoked additional-team grants in the client cache and workspace sidebar](origin-team-access-cache.md)
+- [Personal-key Live calls without upstream subscriptions](origin-live-policy.md)
+- [Origin self-hosted release lookup and update instructions](origin-update-channel.md)
 - [Engines and Doctor](engines.md)
+- [Bounded provider status reads](origin-provider-snapshot-deadline.md)
+- [Installer credential boundary follow-up](origin-installer-security-next.md)
+- [Current App landing image capture](origin-landing-capture.md)
 - [Cline engine and native loopback qualification](cline.md)
 - [Claude coordination and turn-scoped tools](claude-tool-lifecycle.md)
 - [Codex bot instructions](codex-instructions.md)
@@ -88,6 +128,7 @@ Use only mapped, tested commands:
 - [Shared-workspace trust: loopback, card answerers, decision log](shared-workspace-trust.md)
 - [Shared-workspace governance: bot visibility and admin activity](shared-workspace-governance.md)
 - [Usage ledger](usage-ledger.md)
+- [Provider quota availability without false model sign-in errors](origin-plan-usage.md)
 - [Bounded built-in tool results](tool-results.md)
 - [Memory: recall, upkeep and the tidy-up](memory-layer.md)
 - [Spend cap and sell prices](spend-cap.md)
@@ -208,6 +249,14 @@ keyless local generation, saved-key handling, and safe errors with a local fake 
 The [independent threads fixture](threads.md) checks nested sidebar navigation,
 per-thread models, simultaneous direct conversations and thread-scoped Stop.
 
+The [Origin import integrity fixture](origin-import.md) checks complete local
+team creation, link-write recovery, lost responses and concurrent retries against
+synthetic cloud access responses in a disposable fake-engine server.
+
+The [Origin drawing fixture](origin-draw.md) checks actual Excalidraw edits,
+failed-save navigation and reload recovery, account scope, project canvas creation,
+read-only controls and mobile layout against a synthetic cloud adapter.
+
 The [mobile generated-image checks](mobile-generated-images.md) cover native image
 attachments and message-scoped download authorization using isolated fixtures.
 
@@ -268,6 +317,27 @@ desktop routing, cancellation, and computer authority cleanup.
 
 ## Evidence
 
+Origin's inspection and delivery records:
+
+- [Audit register, evidence and delivery status](origin-audit.md)
+- [Stripe credential redaction through provider-native logs](origin-stripe-redaction.md)
+- [Delivery goal and authority](origin-delivery-goal.md)
+- [Current publication, historical rollout and acceptance limits](origin-delivery.md)
+- [Development and release tooling followup](origin-release-tools.md)
+- [Backend access matrix and lifecycle audit](origin-backend-access.md)
+- [Shared controls and dialog checks](origin-ui.md)
+- [Project navigation and delegation checks](origin-project-ui.md)
+- [Populated project pages, accounts and members](origin-pages.md)
+- [Public invitations and central email](origin-invitations.md)
+- [Core Settings and onboarding](origin-core.md)
+- [Member call lifecycle and audio recovery](origin-calls.md)
+- [Drawing recovery and canvas controls](origin-draw.md)
+- [Storage admission security investigation](origin-storage-admission.md)
+- [Upstream fit review and paired appearance](origin-upstream-review.md)
+- [Thirty additional upstream source-fit decisions](origin-upstream-fit-034.md)
+- [Website themes and release history](origin-site.md)
+- [Before/after screenshot index](origin-screenshots.md)
+
 The [persistence responsiveness benchmark](persistence-performance.md) measures
 synthetic message/log bursts and history scans, with isolated chat, visibility
 and packaged-worker checks. It is not a production capacity qualification.
@@ -297,3 +367,16 @@ state. A green unit test alone does not prove a user workflow.
 Interrupt the `launch` process with Ctrl-C. It stops the exact child it owns and
 removes only its temporary data directory. The server log remains at the
 printed path. Never kill processes by name and never delete a broad temp root.
+
+
+## UI followup evidence
+
+The [Origin UI followup record](origin-ui-followup.md) preserves matched modal focus, Files recovery, filled-control contrast and Windows fixture results with source identities and acceptance limits.
+
+The [flat dialog follow-up](origin-flat-dialogs.md) records pending confirmation backdrop focus, shared About/confirmation/Files surfaces, matched browser screenshots and the remaining whole-app acceptance limits.
+
+The [Origin CI recovery record](origin-ci-recovery.md) tracks the deterministic Sidebar size-guard failure and the matching-source release verification that follows its correction.
+
+The [comms fixture HTTP isolation record](origin-comms-transport-032.md) preserves the Windows connection-reset investigation, real loopback red/green regression and unchanged delegation assertions.
+
+The [cross-drive Vite fixture record](origin-vite-private-files.md) explains the Windows raw-file regression, strict HTTP denial checks and isolated cleanup proof.

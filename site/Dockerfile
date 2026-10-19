@@ -18,6 +18,7 @@ ENV NODE_ENV=production
 
 COPY backend/convex backend/convex
 COPY backend/lib backend/lib
+COPY shared shared
 COPY site site
 RUN pnpm --filter @origin/site build
 

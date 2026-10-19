@@ -38,11 +38,19 @@ export function useCardDrag({ enabled, root, onDrop }: {
   const live = useRef<{ drag: CardDrag; offsetX: number; offsetY: number; x: number; y: number; target: DropTarget | null } | null>(null);
   const dropped = useRef(false);
   const handler = useRef(onDrop);
+  const permitted = useRef(enabled);
   handler.current = onDrop;
+  permitted.current = enabled;
 
   const active = drag !== null;
   useEffect(() => {
     if (!active) return;
+    if (!enabled) {
+      live.current = null;
+      setDrag(null);
+      setTarget(null);
+      return;
+    }
     let frame = 0;
     const place = () => {
       const state = live.current;
@@ -71,7 +79,7 @@ export function useCardDrag({ enabled, root, onDrop }: {
       const state = live.current;
       live.current = null;
       document.body.style.userSelect = "";
-      if (state && commit && state.target) {
+      if (state && commit && state.target && permitted.current) {
         dropped.current = true;
         setTimeout(() => { dropped.current = false; }, 0);
         handler.current(state.drag.taskId, state.target, ghost.current?.getBoundingClientRect() ?? new DOMRect(state.x - state.offsetX, state.y - state.offsetY, state.drag.width, state.drag.height));
@@ -98,9 +106,10 @@ export function useCardDrag({ enabled, root, onDrop }: {
       window.removeEventListener("touchmove", blockScroll);
       document.body.style.userSelect = "";
     };
-  }, [active, root]);
+  }, [active, enabled, root]);
 
   const begin = (card: HTMLElement, taskId: string, x: number, y: number, startX: number, startY: number) => {
+    if (!permitted.current) return;
     const rect = card.getBoundingClientRect();
     const next = { taskId, width: rect.width, height: rect.height, x: rect.left + (x - startX), y: rect.top + (y - startY) };
     live.current = { drag: next, offsetX: startX - rect.left, offsetY: startY - rect.top, x, y, target: null };

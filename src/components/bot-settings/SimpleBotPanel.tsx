@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChevronRight, FileText, Image as ImageIcon, Slack, Smartphone, X } from "lucide-react";
 
 import { cn } from "@/lib/cn";
@@ -149,6 +149,7 @@ export function SimpleBotPanel({
   }, [linked]);
   const [memoryShown, setMemoryShown] = useState(false);
   const [phoneAppOpen, setPhoneAppOpen] = useState(false);
+  const phoneAppReturnRef = useRef<HTMLButtonElement | null>(null);
   const skills = useManagedSkills(bot);
   const apps = useBotApps(bot);
   const { capabilities } = useDesktopCapabilities();
@@ -567,7 +568,7 @@ export function SimpleBotPanel({
                     key={id}
                     type="button"
                     data-simple-find={id}
-                    onClick={() => setPhoneAppOpen(true)}
+                    onClick={(event) => { phoneAppReturnRef.current = event.currentTarget; setPhoneAppOpen(true); }}
                     className="flex min-w-0 flex-col items-start gap-0.5 rounded-xl border border-hairline/40 bg-inset px-3 py-2.5 text-left hover:bg-raised"
                   >
                     <Smartphone size={16} className="mb-1 shrink-0 text-ink-secondary" aria-hidden="true" />
@@ -711,7 +712,7 @@ export function SimpleBotPanel({
           dispatch({ type: "updateBot", botId: target.botId, patch: target.patch });
         }}
       />
-      <PhoneAppDialog open={phoneAppOpen} onClose={() => setPhoneAppOpen(false)} />
+      <PhoneAppDialog open={phoneAppOpen} onClose={() => setPhoneAppOpen(false)} returnFocusRef={phoneAppReturnRef} />
     </>
   );
 }

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { AlertTriangle } from "lucide-react";
 
 import { cn } from "@/lib/cn";
+import { ModalFocusScope, useModalDialog } from "@/hooks/use-modal-dialog";
 
 export type ConfirmTone = "danger" | "neutral";
 
@@ -18,6 +19,7 @@ export interface ConfirmDialogProps {
   onConfirm: () => void;
   pending?: boolean;
   returnFocusRef?: RefObject<HTMLElement | null>;
+  openerRef?: RefObject<HTMLElement | null>;
 }
 
 /**
@@ -28,45 +30,13 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
   const { open, onCancel, returnFocusRef } = props;
   const dialogRef = useRef<HTMLDivElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
-  const cancelAction = useRef(onCancel);
-  cancelAction.current = onCancel;
+  const { dismiss, focus } = useModalDialog(dialogRef, onCancel, {
+    open, initialFocusRef: cancelRef, returnFocusRef: props.openerRef, fallbackFocusRef: returnFocusRef, canClose: () => !props.pending,
+  });
   useEffect(() => {
     if (!open) return;
-    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    cancelRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        cancelAction.current();
-        return;
-      }
-      if (event.key === "Tab") {
-        const controls = dialogRef.current?.querySelectorAll<HTMLElement>("button:not([disabled])");
-        if (!controls?.length) { event.preventDefault(); dialogRef.current?.focus(); return; }
-        const first = controls[0]!;
-        const last = controls[controls.length - 1]!;
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
-        }
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      const target = opener?.isConnected && opener !== document.body ? opener : returnFocusRef?.current;
-      target?.focus();
-    };
-  }, [open, returnFocusRef]);
-
-  // Capture the opener above before moving focus on open or pending changes.
-  useEffect(() => {
-    if (!open) return;
-    if (props.pending) dialogRef.current?.focus();
-    else cancelRef.current?.focus();
+    if (props.pending) focus();
+    else if (dialogRef.current === document.activeElement) cancelRef.current?.focus();
   }, [open, props.pending]);
 
   if (!open) return null;
@@ -74,9 +44,9 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-6"
-      onMouseDown={(event) => event.target === event.currentTarget && onCancel()}
+      onMouseDown={(event) => { if (event.target === event.currentTarget) { event.preventDefault(); dismiss(); } }}
     >
-      <ConfirmDialogCard ref={dialogRef} cancelRef={cancelRef} {...props} />
+      <ModalFocusScope panelRef={dialogRef}><ConfirmDialogCard ref={dialogRef} cancelRef={cancelRef} {...props} /></ModalFocusScope>
     </div>,
     document.body,
   );
@@ -109,8 +79,8 @@ export function ConfirmDialogCard({
       aria-labelledby="confirm-dialog-title"
       aria-describedby="confirm-dialog-body"
       className={cn(
-        "w-full max-w-[420px] rounded-2xl border bg-panel p-5 shadow-2xl",
-        danger ? "border-danger/30" : "border-hairline/50",
+        "ui-panel w-full max-w-[420px] p-5",
+        danger && "border-danger/30",
       )}
     >
       <div className="flex items-start gap-3">
@@ -133,7 +103,7 @@ export function ConfirmDialogCard({
           type="button"
           onClick={onCancel}
           disabled={pending}
-          className="rounded-xl px-4 py-2 text-[13px] text-ink-secondary hover:bg-raised hover:text-ink"
+          className="ui-button"
         >
           Cancel
         </button>
@@ -142,8 +112,8 @@ export function ConfirmDialogCard({
           onClick={onConfirm}
           disabled={pending}
           className={cn(
-            "rounded-xl px-4 py-2 text-[13px] font-medium",
-            danger ? "bg-danger text-white hover:brightness-110" : "bg-accent text-white hover:brightness-110",
+            "ui-button",
+            danger ? "border-transparent bg-danger" : "ui-button-primary",
           )}
         >
           {confirmLabel}

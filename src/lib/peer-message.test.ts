@@ -6,6 +6,10 @@ const NOTE = (opening: string, name: string, rest: string) =>
   `[${opening} @${name}, another bot in this OpenMausBot workspace${rest}]`;
 
 describe("peerLine", () => {
+  it.each(["Origin", "OpenMausBot"])("reads current and legacy %s provenance without exposing its header", (product) => {
+    const text = `[Delegated by @Chief, another bot in this ${product} workspace — do the work]\n\nWrite the summary.`;
+    expect(peerLine({ role: "user", text })).toMatchObject({ name: "Chief", delivery: "delegate_bot", body: "Write the summary." });
+  });
   it("is null for the person's own line and for bot lines", () => {
     expect(peerLine({ role: "user", text: "hi" })).toBeNull();
     expect(peerLine({ role: "bot", text: NOTE("Message from", "Chief", " — x") })).toBeNull();

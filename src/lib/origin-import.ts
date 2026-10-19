@@ -76,7 +76,6 @@ export async function runImport(
   deps: { call: Call; lead: { title: string; description: string; soul: string } },
 ): Promise<ImportResult> {
   const { call, lead } = deps;
-  const put = (body: Partial<CloudLinks>) => call("/api/origin/cloud-links", { method: "PUT", body: JSON.stringify(body) });
   const result: ImportResult = { createdWorkspaces: [], createdProjects: [], failures: [] };
   const heads = new Map<string, { id: string; name: string }>();
   for (const step of plan.workspaces) {
@@ -85,8 +84,7 @@ export async function runImport(
       continue;
     }
     try {
-      const { bot } = await call<{ bot: { id: string; name: string } }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name: step.name }) });
-      await put({ workspaces: { [bot.id]: step.cloudTeamId } });
+      const { bot } = await call<{ bot: { id: string; name: string } }>("/api/origin/import/workspaces", { method: "POST", body: JSON.stringify({ cloudTeamId: step.cloudTeamId }) });
       heads.set(step.cloudTeamId, { id: bot.id, name: bot.name });
       result.createdWorkspaces.push({ name: bot.name, botId: bot.id });
     } catch (cause) {
@@ -100,12 +98,10 @@ export async function runImport(
       continue;
     }
     try {
-      const { bot } = await call<{ bot: { id: string; name: string } }>("/api/bots", { method: "POST", body: JSON.stringify({ name: step.name, ...lead }) });
-      const team = await call<{ members: unknown[] }>(`/api/bots/${encodeURIComponent(bot.id)}/default-team`, {
-        method: "POST", body: JSON.stringify({ workspaceId: head.id }),
+      const { bot, members } = await call<{ bot: { id: string; name: string }; members: unknown[] }>("/api/origin/import/projects", {
+        method: "POST", body: JSON.stringify({ cloudProjectId: step.cloudProjectId, cloudTeamId: step.cloudTeamId, workspaceId: head.id, ...lead }),
       });
-      await put({ projects: { [bot.id]: step.cloudProjectId } });
-      result.createdProjects.push({ name: bot.name, botId: bot.id, agents: team.members.length, workspace: head.name });
+      result.createdProjects.push({ name: bot.name, botId: bot.id, agents: members.length, workspace: head.name });
     } catch (cause) {
       result.failures.push({ name: step.name, error: message(cause) });
     }

@@ -137,6 +137,61 @@ describe("shared threads and sender runs", () => {
     expect((await f.t.query(api.agentThreads.list, { sessionToken: f.owner.token, agentId })).map((row) => row._id)).toEqual([threadId]);
   });
 
+  test.each(["removed", "viewer"] as const)("a requester with %s project access cannot resume or retain a run", async (access) => {
+    const f = await fixture();
+    const { threadId } = await thread(f);
+    const memberRun = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.member.token, threadId, clientId: "member:run", text: "Private project request" });
+    const ownerRun = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.owner.token, threadId, clientId: "owner:next", text: "Continue" });
+    const membership = await f.t.run(ctx => ctx.db.query("members").withIndex("by_project_email", q => q.eq("projectId", f.projectId).eq("email", f.member.email)).unique());
+    if (access === "removed") await f.t.mutation(api.members.remove, { sessionToken: f.owner.token, projectId: f.projectId, memberId: membership!._id });
+    else await f.t.mutation(api.members.updateRole, { sessionToken: f.owner.token, projectId: f.projectId, memberId: membership!._id, role: "viewer" });
+
+    expect(await f.t.query(api.agentRuns.pendingForMe, { sessionToken: f.member.token, teamId: f.teamId })).toEqual([]);
+    expect(await f.t.mutation(api.agentRuns.heartbeat, { sessionToken: f.member.token, runId: memberRun.runId })).toEqual({ status: "interrupted" });
+    const after = await f.t.query(api.agentThreads.messagesSince, { sessionToken: f.owner.token, threadId, afterSeq: 0 });
+    expect(after.activeRun?.runId).toBe(ownerRun.runId);
+  });
+
+  test.each(["archived thread", "archived agent", "disabled agent", "sharing disabled"] as const)("a run stops when its %s prevents new messages", async (change) => {
+    const f = await fixture();
+    const { threadId, agentId } = await thread(f);
+    const run = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.owner.token, threadId, clientId: "owner:run", text: "Hello" });
+    if (change === "archived thread") await f.t.mutation(api.agentThreads.archive, { sessionToken: f.owner.token, threadId });
+    else if (change === "archived agent") await f.t.mutation(api.agents.archive, { sessionToken: f.owner.token, agentId });
+    else if (change === "disabled agent") await f.t.run(ctx => ctx.db.patch(agentId, { disabled: true }));
+    else await f.t.mutation(api.agents.setSharedAgents, { sessionToken: f.owner.token, teamId: f.teamId, enabled: false });
+
+    expect(await f.t.query(api.agentRuns.pendingForMe, { sessionToken: f.owner.token, teamId: f.teamId })).toEqual([]);
+    expect(await f.t.mutation(api.agentRuns.heartbeat, { sessionToken: f.owner.token, runId: run.runId })).toEqual({ status: "interrupted" });
+    expect((await f.t.run(ctx => ctx.db.get(threadId)))?.activeRunId).toBeUndefined();
+  });
+
+  test.each(["viewer", "archived thread", "archived agent", "disabled agent", "sharing disabled"] as const)("%s access blocks transcript writes before the next heartbeat", async (change) => {
+    const f = await fixture();
+    const { threadId, agentId } = await thread(f);
+    const sessionToken = change === "viewer" ? f.member.token : f.owner.token;
+    const run = await f.t.mutation(api.agentRuns.begin, { sessionToken, threadId, clientId: "send:before", text: "Hello" });
+    await f.t.mutation(api.agentRuns.appendMessage, { sessionToken, threadId, runId: run.runId, clientId: "m:before", role: "bot", kind: "text", text: "Started", status: "streaming" });
+    if (change === "viewer") {
+      const membership = await f.t.run(ctx => ctx.db.query("members").withIndex("by_project_email", q => q.eq("projectId", f.projectId).eq("email", f.member.email)).unique());
+      await f.t.mutation(api.members.updateRole, { sessionToken: f.owner.token, projectId: f.projectId, memberId: membership!._id, role: "viewer" });
+    } else if (change === "archived thread") await f.t.mutation(api.agentThreads.archive, { sessionToken: f.owner.token, threadId });
+    else if (change === "archived agent") await f.t.mutation(api.agents.archive, { sessionToken: f.owner.token, agentId });
+    else if (change === "disabled agent") await f.t.run(ctx => ctx.db.patch(agentId, { disabled: true }));
+    else await f.t.mutation(api.agents.setSharedAgents, { sessionToken: f.owner.token, teamId: f.teamId, enabled: false });
+
+    const writes = {
+      begin: () => f.t.mutation(api.agentRuns.begin, { sessionToken, threadId, clientId: "send:after", text: "Another request" }),
+      append: () => f.t.mutation(api.agentRuns.appendMessage, { sessionToken, threadId, runId: run.runId, clientId: "m:after", role: "bot", kind: "text", text: "Unauthorized reply" }),
+      patch: () => f.t.mutation(api.agentRuns.patchMessage, { sessionToken, threadId, clientId: "m:before", text: "Unauthorized edit" }),
+    };
+    const outcomes: Record<string, string> = {};
+    for (const [name, write] of Object.entries(writes)) outcomes[name] = await write().then(() => "accepted", () => "rejected");
+    expect(outcomes).toEqual({ begin: "rejected", append: "rejected", patch: "rejected" });
+    expect((await f.t.run(ctx => ctx.db.query("agentThreadMessages").withIndex("by_runId", q => q.eq("runId", run.runId)).collect()))
+      .map(row => row.text)).toEqual(["Hello", "Started"]);
+  });
+
   test("cancel lets a queued run never start and clears a live lease", async () => {
     const f = await fixture();
     const { threadId } = await thread(f);

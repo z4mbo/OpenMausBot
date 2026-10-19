@@ -64,12 +64,13 @@ type SessionEnv = Pick<UiHandle, "home" | "session" | "chrome">;
 
 /** The exact environment `open` launched with. Later verbs must repeat it:
  * agent-browser relaunches the browser (losing the page) when launch
- * settings drift, and the daemon socket lives under this HOME. */
+ * settings drift, and the daemon socket lives in this runtime directory. */
 export function sessionEnv(handle: SessionEnv, parentEnv: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
   const temp = join(handle.home, "tmp");
   const env: NodeJS.ProcessEnv = {
     HOME: handle.home,
     USERPROFILE: handle.home,
+    XDG_RUNTIME_DIR: join(handle.home, "runtime"),
     TMPDIR: temp,
     TEMP: temp,
     TMP: temp,

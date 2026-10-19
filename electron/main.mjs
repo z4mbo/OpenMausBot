@@ -88,7 +88,6 @@ import { switchLocalEnvironment } from "./environment-switch.mjs";
 import { createManagedDesktopClient, createManagedDesktopRelay, createManagedDesktopStore } from "./managed-desktop.mjs";
 import { CHECKOUT_SOURCES, cloudMenuSublabel, cloudPlanSnapshot, createCloudAccountClient, createCloudAccountStore } from "./cloud-account.mjs";
 import { createTrialNotices } from "./cloud-trial-notice.mjs";
-import { createProPlanRelay } from "./pro-plan.mjs";
 import { cloudHomeConnectUrl, cloudPlanDisk, isCloudHomeEntry, myCloudOrigin, rememberedCloudHome, savedCloudHomeOrigin, withCloudHome } from "./cloud-home.mjs";
 import { installCloudFiles } from "./cloud-sync-main.mjs";
 import { createCloudEntry } from "./cloud-entry.mjs";
@@ -329,7 +328,6 @@ let companyBackupClientStateRequest = null;
 let companyRestoreCommitting = false;
 let companyBackupConfigurationRevision = 0;
 const managedDesktopRelay = createManagedDesktopRelay();
-const proPlanRelay = createProPlanRelay();
 const utilityServerExits = new WeakMap();
 const UTILITY_SERVER_STOP_TIMEOUT_MS = 6_500;
 const trustedApprovalMode = createTrustedApprovalModeCoordinator({ randomId: randomUUID });
@@ -346,7 +344,6 @@ const serverSupervisor = createServerSupervisor({
     slog(`server ready pid=${proc.pid} port=${SERVER_PORT}`);
     void readCloudOfferBrand();
     syncManagedComposioCredentials();
-    syncProPlan();
     orgLibrary?.runtimeReady();
     if (managedDesktop) void managedDesktop.refresh().catch(() => {});
     routineWake.start();
@@ -862,9 +859,19 @@ function syncPhoneSecretKey(proc) {
   }
 }
 
+function cloudAccountAvailable() {
+  return app.isPackaged && !desktopRemoteAccess && app.getName() === "OpenMausBot";
+}
+
+function restoreCloudAccount() {
+  if (!cloudAccountAvailable()) return;
+  cloudAccountRestoring = true;
+  cloudAccountStarted = ensureCloudAccount().start().catch(() => {}).finally(() => { cloudAccountRestoring = false; });
+}
+
 function ensureCloudAccount() {
   if (cloudAccount) return cloudAccount;
-  if (!app.isPackaged || desktopRemoteAccess) throw new Error("MausBot Cloud sign-in requires the local desktop app.");
+  if (!cloudAccountAvailable()) throw new Error("MausBot Cloud is not available in this app. Connect your Origin server in Settings → Servers.");
   cloudAccount = createCloudAccountClient({
     store: createCloudAccountStore({ file: path.join(app.getPath("userData"), "cloud-account.bin"), encryption: {
       available: async () => (await safeStorage.isAsyncEncryptionAvailable()) &&
@@ -878,7 +885,6 @@ function ensureCloudAccount() {
       rememberedHome = rememberedCloudHome(rememberedHome, state);
       sendUpdaterState();
       computerSharing?.cloudChanged();
-      syncProPlan(state);
       refreshCloudMenus();
       announceCloudReady(state);
       if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.mainFrame.url.startsWith(`${rendererOrigin()}/`) &&
@@ -908,7 +914,7 @@ async function readCloudOfferBrand() {
   refreshApplicationMenu();
 }
 function cloudOffersAllowed() {
-  return app.isPackaged && !desktopRemoteAccess && brandedBuild === false;
+  return cloudAccountAvailable() && brandedBuild === false;
 }
 async function cloudOffersReady() {
   if (brandedBuild === null && serverReady) await readCloudOfferBrand();
@@ -1251,7 +1257,6 @@ async function startServerOn(port, dataDir = runningDataDir ?? startupEnvironmen
       : {}),
     OMB_CREDENTIAL_STORE: credentialStoreUnavailable ? "unavailable" : "ok",
     ...workspaceCredentialEnv(secureCredentials),
-    ...proPlanRelay.environment(),
   });
   delete childEnv.OMB_BROWSER_CONNECTION;
   delete childEnv.OMB_SERVER_COMPILE_CACHE;
@@ -1331,16 +1336,6 @@ async function startServerPackaged() {
   }
   serverStartConflictOnly = everyPortForeignOwned;
   return false;
-}
-
-function syncProPlan(state = cloudAccount?.state()) {
-  proPlanRelay.update(state);
-  if (!serverProc) return;
-  try {
-    serverProc.postMessage(proPlanRelay.message());
-  } catch (error) {
-    slog(`Pro plan sync failed: ${error?.message ?? error}`);
-  }
 }
 
 function syncManagedComposioCredentials() {
@@ -1956,10 +1951,18 @@ async function deliverOrganizationEntry() {
   return delivered;
 }
 
+function openOriginServerSettings() {
+  if (!mainWindow || mainWindow.isDestroyed()) createWindow({ deferNavigation: true });
+  if (!desktopTray?.show()) activateExistingWindow(BrowserWindow.getAllWindows());
+  openWorkspaceSettings();
+  return true;
+}
+
 async function openCloudEntry() {
-  if (!app.isPackaged) throw new Error("MausBot Cloud requires the installed desktop app.");
-  if (desktopRemoteAccess) throw new Error("This app is connected to another computer. Disconnect it to use MausBot Cloud on this computer.");
-  if (!serverReady) throw new Error("This installation is unavailable. Restart the app and open My Cloud again.");
+  if (!app.isPackaged) throw new Error("Server connections require the installed desktop app.");
+  if (desktopRemoteAccess) throw new Error("This app is connected to another computer. Disconnect it to change server connections on this computer.");
+  if (!serverReady) throw new Error("This installation is unavailable. Restart the app and open Servers again.");
+  if (!cloudAccountAvailable()) return openOriginServerSettings();
   await cloudAccountRestored();
   const active = activeRemote(environmentsState);
   const showingCloud = Boolean(active) && active.origin === cloudAccount?.homeTarget()?.origin;
@@ -2188,7 +2191,8 @@ function createWindow({ deferNavigation = false } = {}) {
       contextIsolation: true,
       preload: path.join(__dirname, "preload.cjs"),
       additionalArguments: [...desktopCompanionRendererArguments(rendererOrigin(), desktopRemoteAccess),
-        ...(app.isPackaged && !desktopRemoteAccess ? ["--omb-company-desktop=1"] : [])],
+        ...(app.isPackaged && !desktopRemoteAccess ? ["--omb-company-desktop=1"] : []),
+        ...(cloudAccountAvailable() ? ["--omb-vendor-cloud=1"] : [])],
     },
   });
   mainWindow = win;
@@ -3375,11 +3379,7 @@ app.whenReady().then(async () => {
   }
   if (desktopShutdownStarted) return;
   if (app.isPackaged && !desktopRemoteAccess) void ensureManagedDesktop().start().then(() => companyBackupSchedule.start()).catch(() => {});
-  // Fresh local use never makes a Cloud request; start only restores an existing grant.
-  if (app.isPackaged && !desktopRemoteAccess) {
-    cloudAccountRestoring = true;
-    cloudAccountStarted = ensureCloudAccount().start().catch(() => {}).finally(() => { cloudAccountRestoring = false; });
-  }
+  restoreCloudAccount();
   void cloudAccountStarted.then(() => { cloudSignInRestored = true; });
   if (!desktopRemoteAccess && serverReady && companionEnabledAtRest()) {
     // Wait until a saved organisation policy is known: it may turn remote access off.

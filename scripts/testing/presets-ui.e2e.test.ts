@@ -1,13 +1,13 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { request } from "../mcp-server.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
@@ -19,15 +19,13 @@ const evidence = (name: string) => join(ROOT, ".omb-scratch", "verify-evidence",
 
 describe("Preset bots in the real renderer", () => {
   let child: ChildProcess | undefined;
-  afterAll(async () => { await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 }); });
+  afterAll(async () => { await stopUiLauncher(child); });
 
   (enabled ? it : it.skip)("shares New bot defaults as a preset file, adds it back, and makes bots from file and organization presets", async () => {
     let stdout = "";
     let stderr = "";
     let info: { ui: string; url: string; botId: string; dataDir: string; logPath: string };
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
     child.on("error", (error) => { stderr += error.message; });
@@ -121,8 +119,7 @@ describe("Preset bots in the real renderer", () => {
     const bots = async () => (await api("/api/bots")).bots as Array<{ id: string; name: string; installedPackage?: Record<string, unknown> }>;
     const create = async (value: string, expected: string, shot: string) => {
       const before = await bots();
-      await clickWhenFree("New or share");
-      await click("New Bot");
+      await clickWhenFree("New agent");
       await expect.poll(async () => (await ui("eval", "--js", "[...document.querySelectorAll('[role=dialog] button')].find(button => button.textContent.trim() === 'Create bot')?.disabled")).result, { timeout: 20_000 }).toBe(false);
       await expect.poll(() => evaluate("[...document.querySelectorAll('[role=dialog] select optgroup')].map(group => group.label).join(' | ')"), { timeout: 10_000 })
         .toBe("From Acme Partners | Imported presets | Built-in roles");

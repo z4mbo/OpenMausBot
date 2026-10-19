@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Rocket, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import type { CloudAccountState } from "../../electron/cloud-account.mjs";
 import type { CloudOffer } from "../../electron/cloud-home.mjs";
 import { api, CLOUD_LINK_SETTINGS, useStore } from "@/state/store";
@@ -9,7 +9,7 @@ import { brandStatus } from "@/lib/brand";
 import { buyOfferAllowed, cloudNoticeKind, cloudPlanView, cloudTrialNotice, cloudTrialView, offerTrialDays, personalAmount } from "@/lib/cloud-plan";
 import { cloudSetupStage } from "@/lib/cloud-setup";
 import { cornerPopupWaits } from "@/lib/corner-popup";
-import { CLOUD_INTRO, CLOUD_NOTICE, CLOUD_TRIAL_NOTICE, dismissNotice, introShown, introStage, nextNotice, noticeSeen, PRODUCT_HUNT_NOTICE, PRODUCT_HUNT_UNTIL, PRODUCT_HUNT_URL, STAR_NOTICE, usedBefore } from "@/lib/notices";
+import { CLOUD_INTRO, CLOUD_NOTICE, CLOUD_TRIAL_NOTICE, dismissNotice, introShown, introStage, nextNotice, noticeSeen, STAR_NOTICE, usedBefore } from "@/lib/notices";
 import { cloudSignInDue, type WelcomeViewer } from "@/lib/onboarding";
 import { useUpdaterState } from "@/lib/updater";
 import { t } from "@/lib/i18n";
@@ -26,16 +26,6 @@ function StarCard({ onDismiss }: { onDismiss: () => void }) {
     <div className="flex flex-wrap items-center gap-3">
       <LinkButton url={APP_REPOSITORY} label={t("star.button")} onOpened={onDismiss} />
       <NotNowButton onClick={onDismiss} />
-    </div>
-  </NoticeCard>;
-}
-
-function ProductHuntCard({ onDone }: { onDone: (action: "upvote" | "not_now" | "close") => void }) {
-  return <NoticeCard titleId="product-hunt-title" notice="product-hunt" icon={Rocket} title={t("productHunt.title")} onDismiss={() => onDone("close")}>
-    <p className="mb-3 mt-1 text-[12.5px] text-ink-secondary">{t("productHunt.body")}</p>
-    <div className="flex flex-wrap items-center gap-3">
-      <LinkButton url={PRODUCT_HUNT_URL} label={t("productHunt.button")} onOpened={() => onDone("upvote")} />
-      <NotNowButton onClick={() => onDone("not_now")} />
     </div>
   </NoticeCard>;
 }
@@ -104,15 +94,13 @@ export function AppNotices({ quiet = false, viewer = null, now = Date.now }: { q
     return introOpen || stage === "due" ? true : null;
   };
   const notice = !closed && !waits && (bridge || planBridge) ? nextNotice({
-    [PRODUCT_HUNT_NOTICE]: brandStatus().source === "file" || now() >= PRODUCT_HUNT_UNTIL ? false
-      : organization === null ? null : !organization,
     [CLOUD_INTRO]: introDue(),
     [CLOUD_TRIAL_NOTICE]: planBridge && plan === null ? null : Boolean(key && (trialDue || trialOpen === key)),
     [CLOUD_NOTICE]: !view ? false : view.kind === "unknown" ? null
       : Boolean(kind && !noticeSeen(record, CLOUD_NOTICE_CARD[kind].dismissed)),
     [STAR_NOTICE]: Boolean(bridge) && brandStatus().source !== "file" && usedBefore(state.bots),
   }, id => id === CLOUD_INTRO ? stage === "done" && !introOpen
-    : id === STAR_NOTICE || id === PRODUCT_HUNT_NOTICE ? noticeSeen(record, id) : false) : null;
+    : id === STAR_NOTICE ? noticeSeen(record, id) : false) : null;
 
   const shownKey = notice === CLOUD_TRIAL_NOTICE ? key : notice;
   useEffect(() => {
@@ -158,9 +146,6 @@ export function AppNotices({ quiet = false, viewer = null, now = Date.now }: { q
       void cloudNoticeStep(kind, bridge).then(next => setAccount(next), () => setFailed(true)).finally(() => setBusy(false));
     };
     return <CloudNoticeCard kind={kind} busy={busy} failed={failed} onAction={act} onNotNow={() => { close(); save(CLOUD_NOTICE_CARD[kind].dismissed); }} />;
-  }
-  if (notice === PRODUCT_HUNT_NOTICE) {
-    return <ProductHuntCard onDone={action => { track("product_hunt_card", { action }); close(); save(PRODUCT_HUNT_NOTICE); }} />;
   }
   if (notice === STAR_NOTICE) return <StarCard onDismiss={() => { close(); save(STAR_NOTICE); }} />;
   return null;

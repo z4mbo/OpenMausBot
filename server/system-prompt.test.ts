@@ -4,6 +4,7 @@ import { soulSystemPrompt } from "./bot-folder.ts";
 import { BUILT_IN_BROWSER_SYSTEM_PROMPT } from "./browser-engine.ts";
 import {
   longCommandsPrompt,
+  botPersona,
   buildSystemPrompt,
   CONVERSATIONAL_STYLE_PROMPT,
   CLOUD_HOME_PLACE,
@@ -25,6 +26,10 @@ import {
   savedLoginsPrompt,
   type ComputerPromptKind,
 } from "./system-prompt.ts";
+
+it("identifies a new agent as part of Origin", () => {
+  expect(botPersona({ name: "Scout", title: "Researcher" })).toBe("You are Scout, a personal bot in Origin. Role: Researcher.");
+});
 
 describe("resolveComputerPromptKind", () => {
   // Rows the mounts already refuse are pinned here because no dispatchable engine in the test fleet lacks the capability.
@@ -138,7 +143,7 @@ describe("computerPrompt", () => {
   it("distinguishes background window control from foreground desktop input", () => {
     const prompt = computerPrompt("local");
     expect(prompt).toContain("background delivery");
-    expect(prompt).toContain("do not bring OpenMausBot");
+    expect(prompt).toContain("do not bring Origin");
     expect(prompt).toContain("dedicated browser tools");
     expect(prompt).toContain("keeping the user's intended browser profile/account");
     expect(prompt).toContain("Do not silently retry a background refusal");
@@ -271,7 +276,7 @@ describe("cloudHomePrompt", () => {
   it("says the bot runs in the cloud, offers what works there, and never asks for a place that cannot exist", () => {
     for (const tools of [true, false]) {
       const text = cloudHomePrompt(tools);
-      expect(text).toMatch(/^ You run on the user's My Cloud, their always-on OpenMausBot in the cloud, not on their own computer\./);
+      expect(text).toMatch(/^ You run on the user's My Cloud, their always-on Origin in the cloud, not on their own computer\./);
       expect(text.startsWith(` You run on ${CLOUD_HOME_PLACE}.`)).toBe(true);
       expect(text).toContain("Offer what works here: the built-in browser and their cloud computer, a desktop in the cloud. Call it their cloud computer, as the app does.");
       expect(text).not.toMatch(/\bOMB\b|\bBoat\b|\bbox\b/);
@@ -282,7 +287,8 @@ describe("cloudHomePrompt", () => {
 
   it("points to a lent computer only when the turn has the shared-computer tools", () => {
     expect(cloudHomePrompt(true)).toContain("check list_shared_computers: a computer they lend to My Cloud is reachable through shared_computer");
-    expect(cloudHomePrompt(true)).toContain("turn on Let My Cloud use this computer under Settings → MausBot Cloud in the desktop app on that computer");
+    expect(cloudHomePrompt(true)).toContain("if that app does not offer computer sharing, state that it is unavailable");
+    expect(cloudHomePrompt(true)).not.toContain("Settings → MausBot Cloud");
     expect(cloudHomePrompt(false)).not.toMatch(/shared_computer|list_shared_computers/);
     expect(cloudHomePrompt(false)).toContain("You cannot see or use their Mac or PC, its screen or its files from here.");
   });

@@ -164,7 +164,8 @@ describe("server device-code sign-in", () => {
     };
     const markup = renderToStaticMarkup(createElement(StoreProvider, null, createElement(EngineSetup, { instance: engine })));
     expect(markup).toContain("Continue with ChatGPT");
-    expect(markup).toContain("separate from MausBot Cloud and API billing");
+    expect(markup).toContain("Use your ChatGPT plan for eligible AI requests in Origin.");
+    expect(markup).toContain("API usage is billed separately.");
     expect(markup).not.toContain("codex login");
     expect(markup).not.toContain("Device-code login");
   });
