@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
 import { cloud, cloudAction, cloudMutation, setCloudUrl, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
-import { cloudQueryOnce, cloudUrl as cloudUrlNow, sessionStore, setSessionToken } from "@/lib/origin-cloud/client";
+import { captureCloudSession, cloudQueryOnce, cloudUrl as cloudUrlNow, sessionStore, setSessionToken } from "@/lib/origin-cloud/client";
 import { refreshCloudLinks } from "@/lib/origin-cloud-links";
 import { exclusiveWithSync, onSyncRequest, syncFromOrigin } from "@/lib/origin-sync";
 import { sharedAgentsRound } from "@/lib/origin-shared-agents";
@@ -80,12 +80,16 @@ function SignIn() {
       if (invite.trim() && !token) throw new Error("That invite link doesn't look right");
       const backend = originServerFor(server);
       setCloudUrl(backend);
+      const attempt = captureCloudSession();
       const result = await withTimeout(mode === "signin"
         ? cloudAction<{ sessionToken: string }>("auth:login", { email: email.trim(), password, sessionToken: undefined })
         : cloudAction<{ sessionToken: string }>("auth:signup", { email: email.trim(), password, name: name.trim(), ...(token ? { inviteToken: token } : {}), sessionToken: undefined }), backend);
+      attempt.assertCurrent();
+      if (token) await cloudMutation("workspaces:acceptInvite", { token, sessionToken: result.sessionToken });
+      attempt.assertCurrent();
+      await shareSession(backend, result.sessionToken, attempt);
+      attempt.assertCurrent();
       setSessionToken(result.sessionToken);
-      if (token) await cloudMutation("workspaces:acceptInvite", { token });
-      await shareSession(backend, result.sessionToken);
       setPassword("");
     } catch (cause) {
       setError(errorText(cause));

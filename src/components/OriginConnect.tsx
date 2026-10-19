@@ -2,17 +2,27 @@ import { useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { Loader2, X } from "lucide-react";
 import { cloudUrl, setCloudUrl, useCloudSession } from "@/lib/origin-cloud";
-import { sessionStore } from "@/lib/origin-cloud/client";
+import { captureCloudSession, isCurrentCloudSession, sessionStore } from "@/lib/origin-cloud/client";
+import { originServerFor } from "@/lib/origin-cloud/servers";
 import { CenteredDialog } from "./CenteredDialog";
 import { ghostButton, iconButton, inputClass, primaryButton } from "./origin-pages/ui";
 
 const DEV_URL = "http://127.0.0.1:3210";
 
 /** Shares the signed-in Origin session with the harness, so bots can reach their project's issues, assets and repo. */
-export async function shareSession(url: string | null, sessionToken: string | null) {
-  await fetch("/api/origin/cloud-session", sessionToken && url
-    ? { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ url, sessionToken }) }
-    : { method: "DELETE" }).catch(() => {});
+export async function shareSession(url: string | null, sessionToken: string | null, attempt?: ReturnType<typeof captureCloudSession>) {
+  if (!sessionToken || !url) {
+    if (!sessionStore.get()) await fetch("/api/origin/cloud-session", { method: "DELETE" }).catch(() => {});
+    return;
+  }
+  if (attempt) {
+    attempt.assertCurrent();
+    if (attempt.url !== url) throw new Error("Your Origin connection changed. Try again.");
+  } else if (!isCurrentCloudSession(url, sessionToken)) return;
+  const response = await fetch("/api/origin/cloud-session", {
+    method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ url, sessionToken }),
+  });
+  if (!response.ok) throw new Error(`Origin could not connect this account (HTTP ${response.status})`);
 }
 
 export function OriginConnectDialog({ onClose }: { onClose(): void }) {
@@ -28,9 +38,10 @@ export function OriginConnectDialog({ onClose }: { onClose(): void }) {
   const signIn = async () => {
     setBusy(true); setError("");
     try {
-      setCloudUrl(url.trim() || null);
+      const backend = originServerFor(url);
+      setCloudUrl(backend);
       await session.login(email.trim(), password);
-      await shareSession(url.trim(), sessionStore.get());
+      await shareSession(backend, sessionStore.get());
       setPassword("");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -66,13 +77,13 @@ export function OriginConnectDialog({ onClose }: { onClose(): void }) {
             <label className="block text-[12.5px] text-ink-secondary">Password
               <input className={field} type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
             </label>
-            {error && <p role="alert" className="text-[12.5px] text-danger">{error}</p>}
             <button type="submit" disabled={busy || !email || !password}
               className={`${primaryButton} w-full`}>
               {busy && <Loader2 size={14} className="animate-spin" />}Sign in
             </button>
           </form>
         )}
+        {error && <p role="alert" className="mt-3 text-[12.5px] text-danger">{error}</p>}
       </>}</CenteredDialog>,
     document.body,
   );
