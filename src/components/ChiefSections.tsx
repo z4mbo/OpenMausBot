@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, Bot as BotIcon, Brush, CircleDot, GitBranch, Headset, Images, LockKeyhole, Megaphone, MessageCircle, Settings } from "lucide-react";
+import { ArrowLeft, Bot as BotIcon, Brush, CircleDot, GitBranch, Headset, Images, LockKeyhole, Megaphone, MessageCircle, Send, Settings, Sparkles, Target } from "lucide-react";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { unreadReplies } from "@/lib/origin-unread";
 import { UnreadBadge } from "./UnreadBadge";
@@ -17,13 +17,19 @@ import { GlassHeaderFrame } from "./GlassScrollFrame";
 import { openOriginPage } from "@/lib/origin-pages";
 import { ProjectDrawPage } from "./OriginDraw";
 import { requestIssueFocus } from "@/lib/origin-issue-focus";
+import { StudioPage } from "./origin-studio/StudioPage";
+import { BroadcastPage } from "./origin-broadcast/BroadcastPage";
+import { PipelinePage } from "./origin-pipeline/PipelinePage";
 
 export const CHIEF_SECTIONS = [
   { id: "agents", label: "Agents", icon: BotIcon, blurb: "", place: "tab" },
   { id: "issues", label: "Issues", icon: CircleDot, blurb: "Track the project's bugs and tasks, and hand them to its agents.", place: "tab" },
   { id: "team-chat", label: "Chat", icon: MessageCircle, blurb: "Talk with the people in this project.", place: "tab" },
   { id: "call", label: "Call", icon: Headset, blurb: "Voice and video calls with the people in this project.", place: "tab" },
-  { id: "draw", label: "Draw", icon: Brush, blurb: "Shared canvases the people and agents in this project sketch on.", place: "tab" },
+  { id: "draw", label: "Canvas", icon: Brush, blurb: "Shared design canvases the people and agents in this project build on.", place: "tab" },
+  { id: "studio", label: "Studio", icon: Sparkles, blurb: "Generate images, video and audio for this project.", place: "tab" },
+  { id: "broadcast", label: "Broadcast", icon: Send, blurb: "Plan and publish this project's posts on social channels.", place: "tab" },
+  { id: "pipeline", label: "Pipeline", icon: Target, blurb: "Leads and sales: see them, reach them, and plan how to win them.", place: "tab" },
   { id: "assets", label: "Assets", icon: Images, blurb: "Images, documents and files the team makes for this project.", place: "tab" },
   { id: "vault", label: "Vault", icon: LockKeyhole, blurb: "Keys, logins and secrets this project's agents may use.", place: "tool" },
   { id: "repo", label: "Repo", icon: GitBranch, blurb: "The project's code repository and its pull requests.", place: "tool" },
@@ -159,6 +165,9 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   if (section === "team-chat") return <TeamChatPage {...page} />;
   if (section === "call") return <CallPage {...page} agent={bot} open={() => { setChiefSectionOf(bot.id, "call"); openOriginPage(null); openBot(dispatch, bot, showThreads); }} />;
   if (section === "draw") return <ProjectDrawPage {...page} agent={bot} />;
+  if (section === "studio") return <StudioPage {...page} agent={bot} />;
+  if (section === "broadcast") return <BroadcastPage {...page} agent={bot} />;
+  if (section === "pipeline") return <PipelinePage {...page} agent={bot} />;
   if (section === "settings") return <ProjectSettingsPage {...page} />;
   const Icon = entry.icon;
   return (
