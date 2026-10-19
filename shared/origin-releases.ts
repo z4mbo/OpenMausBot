@@ -3,6 +3,14 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.2.15",
+  date: "2026-10-19",
+  title: "Clearer provider usage",
+  changes: [
+    { title: "Quota checks respect model access", body: "Usage distinguishes unavailable subscription allowances from model sign-in. API-key, managed and separately authenticated connections no longer read another account's personal subscription quota. API-key activity remains available in History." },
+    { title: "Grok billing fallback", body: "Usage keeps a valid Grok billing allowance when its separate credits endpoint refuses access. Unreported windows stay unknown." },
+  ],
+}, {
   version: "0.2.14",
   date: "2026-10-19",
   title: "Safer accounts and shared-agent ownership",

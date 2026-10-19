@@ -10,7 +10,9 @@ The configured fleet also always includes Claude API. Its `claudeAgent` driver w
 | P2 | A model CLI refreshes its own authentication, uses another supported credential store, or has no access to its provider's quota endpoint. The quota reader sees missing/expired/unreadable credentials or a usage-only HTTP refusal and labels model sign-in broken. | Missing, expired, unreadable and refused quota access have distinct usage-only messages. The actual model authentication path is unchanged. `src/components/PlanUsage.tsx` uses neutral text and explains that unavailable quota does not establish failed model access. |
 | P2 | Grok credits returns 403 while billing returns a valid 40%-used monthly allowance. Usage discards both responses and demands sign-in. | A successful billing response remains available; the monthly allowance is 60% left and unreported weekly/5-hour windows stay unknown. |
 
-The server regression baseline produced eight failures with fourteen existing passes. The final server suite passes 26 cases. The presentation regression baseline fails two of three cases; the corrected component passes all three. The focused configuration, quota, presentation, release-CI and release-note run passes 293 cases with two platform skips. Both client/server TypeScript checks and touched-file lint pass. Full client/shared acceptance is recorded separately once completed.
+Fix commit: `2f98369ea8746d661ee1e5a56870000121989dd7`.
+
+The server regression baseline produced eight failures with fourteen existing passes. The final server suite passes 26 cases. The presentation regression baseline fails two of three cases; the corrected component passes all three. The focused configuration, quota, presentation, release-CI and release-note run passes 293 cases with two platform skips. Both client/server TypeScript checks and touched-file lint pass. Full client/shared acceptance passes all 6,047 cases in 570 files. After the version bump, all 54 release-CI/release-note guards pass again.
 
 ## Browser evidence
 
