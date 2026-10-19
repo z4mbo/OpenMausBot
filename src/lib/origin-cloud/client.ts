@@ -64,6 +64,10 @@ export function setSessionToken(token: string | null): void {
   sessionStore.notify();
 }
 
+export function isCurrentCloudSession(url: string | null, token: string | null): boolean {
+  return cloudUrl() === url && sessionStore.get() === token;
+}
+
 let current: { url: string; client: ConvexReactClient | null } | null = null;
 
 export function cloudClient(): ConvexReactClient | null {
@@ -86,12 +90,13 @@ export function functionRef<T extends FunctionType>(name: string) {
 }
 
 export async function logoutCloud(): Promise<void> {
+  const url = cloudUrl();
   const client = cloudClient();
   const current = sessionStore.get();
   try {
     if (client && current) await client.mutation(functionRef<"mutation">("auth:logout"), { sessionToken: current });
   } finally {
-    setSessionToken(null);
+    if (isCurrentCloudSession(url, current)) setSessionToken(null);
   }
 }
 

@@ -69,10 +69,13 @@ export function useOriginSession() {
   const token = stored ?? null;
   const user = useQuery(api.auth.me, token ? { sessionToken: token } : "skip");
   const logout = useMutation(api.auth.logout);
-  const save = useCallback((next: string) => writeToken(next), []);
+  const save = useCallback((next: string) => {
+    if (readToken() !== token) throw new Error("Your Origin account changed. Try again.");
+    writeToken(next);
+  }, [token]);
   const signOut = useCallback(async () => {
     if (token) await logout({ sessionToken: token }).catch(() => {});
-    writeToken(null);
+    if (readToken() === token) writeToken(null);
   }, [token, logout]);
   const loading = !ready || (token !== null && user === undefined);
   return { token, user: token && user ? user : null, loading, save, signOut };
