@@ -658,6 +658,59 @@ describe("origin-cloud routes", () => {
     expect(readOriginCloud(file)).toEqual({ url, sessionToken: "same-token", projects: { chief: "proj" } });
   });
 
+  it("does not restore an older incoming sign-in after a newer account signs out", async () => {
+    const checking = deferred<void>();
+    const incomingOwner = deferred<{ email: string }>();
+    let replacementSignedIn = true;
+    const { call, file } = await serve({ answers: { "auth:me": (args: Record<string, unknown>) => {
+      if (args.sessionToken === "older-a") {
+        checking.resolve();
+        return incomingOwner.promise;
+      }
+      return replacementSignedIn ? { email: "bo@x.dev" } : null;
+    } } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { projects: { chief: "proj" } });
+    const olderConnect = call("PUT", "/api/origin/cloud-session", { url, sessionToken: "older-a" });
+    await checking.promise;
+    try {
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "replacement-b" }))[0]).toBe(200);
+      replacementSignedIn = false;
+      expect((await call("DELETE", "/api/origin/cloud-session"))[0]).toBe(200);
+    } finally {
+      incomingOwner.resolve({ email: "ana@x.dev" });
+    }
+    const result = await olderConnect;
+    expect(readOriginCloud(file)).toEqual({ projects: { chief: "proj" } });
+    expect(result[0]).toBe(409);
+  });
+
+  it("rejects a stale refresh after the stored session changes away and back", async () => {
+    const checking = deferred<void>();
+    const storedOwner = deferred<{ email: string }>();
+    let originalChecks = 0;
+    const { call, file } = await serve({ answers: { "auth:me": (args: Record<string, unknown>) => {
+      if (args.sessionToken === "a" && ++originalChecks === 1) {
+        checking.resolve();
+        return storedOwner.promise;
+      }
+      return { email: "ana@x.dev" };
+    } } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { url, sessionToken: "a", projects: { chief: "proj" } });
+    const olderRefresh = call("PUT", "/api/origin/cloud-session", { url, sessionToken: "c" });
+    await checking.promise;
+    try {
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "b" }))[0]).toBe(200);
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "a" }))[0]).toBe(200);
+    } finally {
+      storedOwner.resolve({ email: "ana@x.dev" });
+    }
+    const result = await olderRefresh;
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "a", projects: { chief: "proj" } });
+    expect(result[0]).toBe(409);
+  });
+
   it.each(["PUT", "DELETE"])("keeps the stored account when %s cannot verify its owner", async (method) => {
     const { call, file } = await serve({ answers: { "auth:me": (args: Record<string, unknown>) => {
       if (args.sessionToken === "stored-secret") throw new Error("lookup failed for stored-secret");

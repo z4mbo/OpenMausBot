@@ -1054,6 +1054,7 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
   const { store, agentTurn } = deps;
   const file = () => deps.file ?? defaultOriginCloudFile();
   const connect = deps.connect ?? convexOriginClient;
+  let sessionRevision = 0;
   type Session = Pick<OriginCloudState, "url" | "sessionToken">;
   const sameSession = (left: Session, right: Session) => left.url === right.url && left.sessionToken === right.sessionToken;
   const storedSessionOwner = async (state: Session, replacement?: Session): Promise<{ verified: true; email: string | null } | { verified: false }> => {
@@ -1117,14 +1118,16 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
       deps.changed?.();
       return json(res, 200, { cloudProjectId: state.projects[id] ?? null });
     }
+    const previous = readOriginCloud(file());
+    const revision = sessionRevision;
     if (method === "DELETE") {
-      const previous = readOriginCloud(file());
       const owner = await storedSessionOwner(previous);
       if (!owner.verified) return json(res, 502, { error: "The signed-in Origin account could not be checked. Try again." });
       if (owner.email) return json(res, 409, { error: "The Origin connection belongs to an account that is still signed in" });
       const current = readOriginCloud(file());
-      if (!sameSession(previous, current)) return json(res, 409, { error: "The Origin connection changed while it was being checked. Try again." });
+      if (revision !== sessionRevision || !sameSession(previous, current)) return json(res, 409, { error: "The Origin connection changed while it was being checked. Try again." });
       writeOriginCloud(file(), { projects: current.projects });
+      sessionRevision += 1;
       return json(res, 200, { url: null, connected: false });
     }
     const body = record(await readBody(req));
@@ -1139,13 +1142,13 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
       return json(res, 502, { error: `Origin did not answer: ${convexMessage(error, sessionToken)}` });
     }
     if (!text(user.email)) return json(res, 400, { error: "Origin did not accept this session token" });
-    const previous = readOriginCloud(file());
     const owner = await storedSessionOwner(previous, { url, sessionToken });
     if (!owner.verified) return json(res, 502, { error: "The signed-in Origin account could not be checked. Try again." });
     if (owner.email && owner.email !== text(user.email).toLowerCase()) return json(res, 409, { error: "This app is connected to another Origin account" });
     const current = readOriginCloud(file());
-    if (!sameSession(previous, current)) return json(res, 409, { error: "The Origin connection changed while it was being checked. Try again." });
+    if (revision !== sessionRevision || !sameSession(previous, current)) return json(res, 409, { error: "The Origin connection changed while it was being checked. Try again." });
     writeOriginCloud(file(), { url, sessionToken, projects: current.projects });
+    sessionRevision += 1;
     return json(res, 200, { url, connected: true });
   };
 }
