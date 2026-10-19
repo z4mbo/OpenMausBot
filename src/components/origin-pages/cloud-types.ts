@@ -96,11 +96,6 @@ export interface CloudTaskDetails {
   members: CloudPerson[];
 }
 
-export interface CloudIssueRelations {
-  labels: string[];
-  relations: { _id: string; kind: string; outgoing: boolean; taskId: string; projectId: string; title: string; done: boolean }[];
-}
-
 export interface CloudTaskPullRequest {
   _id: string;
   number: number;
@@ -112,27 +107,6 @@ export interface CloudTaskPullRequest {
   mergeable?: boolean | null;
   headSha?: string;
   baseSha?: string;
-}
-
-export interface CloudPullRequest {
-  _id: string;
-  number: number;
-  title: string;
-  state: "open" | "closed" | "merged";
-  url: string;
-  author?: string;
-  branch?: string;
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface CloudCommit {
-  _id: string;
-  sha: string;
-  message: string;
-  author: string;
-  url?: string;
-  committedAt: number;
 }
 
 export type AssetType = "figma" | "image" | "icon" | "font" | "document" | "apk" | "other";

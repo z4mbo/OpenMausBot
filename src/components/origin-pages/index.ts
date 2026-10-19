@@ -1,10 +1,9 @@
 export { AssignIssueDialog, implementBrief, issueBrief } from "./AssignIssueDialog";
-export { IssuesPage, TaskCard, type AssignableIssue, type IssuesPageProps } from "./IssuesPage";
+export { IssuesPage, type AssignableIssue } from "./IssuesPage";
 export { AssetsPage } from "./AssetsPage";
 export { VaultPage } from "./VaultPage";
 export { RepoPage } from "./RepoPage";
-export { FeedbackPage, type FeedbackPageProps } from "./FeedbackPage";
+export { FeedbackPage } from "./FeedbackPage";
 export { ProjectSettingsPage } from "./ProjectSettingsPage";
-export type { OriginPageProps } from "./ui";
 export { CallPage } from "./CallPage";
 export { TeamChatPage } from "./TeamChatPage";

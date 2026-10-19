@@ -12,7 +12,7 @@ import { errorText } from "./repo-url";
 import { OriginQueryFailures, OriginQueryRecovery, OriginQueryUnavailable } from "@/lib/origin-cloud/query-failure";
 import { useCloudToken } from "@/lib/origin-cloud/hooks";
 
-export { CenteredDialog, overlayMotion, sheetMotion, useDismiss } from "../CenteredDialog";
+export { overlayMotion, sheetMotion, useDismiss } from "../CenteredDialog";
 
 /** Where an unlinked project page can create or link its shared project: the local project lead and its workspace's cloud id. */
 export type ProjectLink = { botId: string; teamId: string | null };

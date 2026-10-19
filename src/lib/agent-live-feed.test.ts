@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { RuntimeEvent } from "../../shared/runtime-events";
-import type { Message } from "@/state/store";
-import { LIVE_STEPS_KEPT, pickFeed, reduceLiveFeed, stepsFromMessages, type LiveFeed } from "./agent-live-feed";
+import { LIVE_STEPS_KEPT, pickFeed, reduceLiveFeed, type LiveFeed } from "./agent-live-feed";
 
 let serial = 0;
 function event(body: Record<string, unknown>): RuntimeEvent {
@@ -68,16 +67,5 @@ describe("pickFeed", () => {
     const done = { threadId: "b", active: false, phase: "idle", thought: "", steps: [], updatedAt: 9 } as LiveFeed;
     expect(pickFeed([done, undefined, running])?.threadId).toBe("a");
     expect(pickFeed([done, { ...done, threadId: "c", updatedAt: 3 }])?.threadId).toBe("b");
-  });
-});
-
-describe("stepsFromMessages", () => {
-  it("lists tool steps newest first and skips everything else", () => {
-    const messages = [
-      { id: "1", role: "bot", kind: "activity", at: 1, tool: { name: "Bash", ok: true, summary: "npm test", output: "12 passed" } },
-      { id: "2", role: "bot", kind: "text", at: 2, text: "done" },
-      { id: "3", role: "bot", kind: "activity", at: 3, tool: { name: "Read", input: "src/app.ts" } },
-    ] as Message[];
-    expect(stepsFromMessages(messages).map((step) => [step.id, step.detail, step.ok])).toEqual([["3", "src/app.ts", undefined], ["1", "npm test", true]]);
   });
 });

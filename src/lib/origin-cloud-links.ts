@@ -38,11 +38,6 @@ export function useCloudLinks(): CloudLinks {
   return useSyncExternalStore(subscribe, () => links, () => EMPTY);
 }
 
-/** The cloud project a project Chief is linked to, or the cloud workspace a workspace head is linked to. */
-export function useCloudLink(botId: string): string | undefined {
-  return useSyncExternalStore(subscribe, () => links.projects[botId] ?? links.workspaces[botId], () => undefined);
-}
-
 interface TeamBot { id: string; section?: string; chiefOfStaff?: boolean }
 
 export function cloudProjectOf(bots: readonly TeamBot[], projects: Record<string, string>, botId: string): string | undefined {

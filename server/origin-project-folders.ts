@@ -230,6 +230,3 @@ export function createProjectFolders(deps: ProjectFoldersDeps) {
 
   return { reconcile, folderOf, routes, root };
 }
-
-export type ProjectFolders = ReturnType<typeof createProjectFolders>;
-

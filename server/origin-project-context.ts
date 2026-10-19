@@ -268,5 +268,3 @@ export function createOriginTurnContext(deps: OriginContextDeps) {
     },
   };
 }
-
-export type OriginTurnContext = ReturnType<typeof createOriginTurnContext>;

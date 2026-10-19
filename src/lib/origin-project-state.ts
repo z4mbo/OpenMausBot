@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cloudMutation, useCloudQuery } from "./origin-cloud";
-export { inArchivedProject, setArchivedSections, useArchivedSections } from "./origin-archived";
+export { setArchivedSections, useArchivedSections } from "./origin-archived";
 
 export type ProjectStatus = "active" | "inactive";
 

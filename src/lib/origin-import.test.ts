@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { planImport, planIsEmpty, runImport } from "./origin-import";
+import { planImport, runImport } from "./origin-import";
 
 const cloud = {
   workspaces: [{ _id: "ggs", name: "GGs" }, { _id: "weeh", name: "weeh" }],
@@ -18,14 +18,15 @@ describe("planImport", () => {
     expect(linked.workspaces).toEqual([{ cloudTeamId: "ggs", name: "GGs", headId: "h", headName: "GGs" }]);
     expect(linked.projects.map((step) => step.name)).toEqual(["Yuki"]);
     expect(linked.alreadyLinked).toEqual([{ cloudProjectId: "kai", name: "Kai", localName: "Kai" }]);
-    expect(planIsEmpty(planImport(cloud, { bots, links: { workspaces: { h: "ggs" }, projects: {} } }, { workspaces: ["ggs"], projects: [] }))).toBe(true);
+    const settled = planImport(cloud, { bots, links: { workspaces: { h: "ggs" }, projects: {} } }, { workspaces: ["ggs"], projects: [] });
+    expect(settled.projects).toEqual([]);
+    expect(settled.workspaces.every((step) => step.headId)).toBe(true);
   });
 
   it("trusts the server's links while the local bot list has not loaded them yet", () => {
     const plan = planImport(cloud, { bots: [], links: { workspaces: { h: "ggs" }, projects: { c: "kai" } } }, { workspaces: [], projects: ["kai"] });
     expect(plan.workspaces).toEqual([{ cloudTeamId: "ggs", name: "GGs", headId: "h", headName: "GGs" }]);
     expect(plan.projects).toEqual([]);
-    expect(planIsEmpty(plan)).toBe(true);
   });
 });
 

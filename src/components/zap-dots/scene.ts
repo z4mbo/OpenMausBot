@@ -44,7 +44,6 @@ type TrailPoint = { x: number; y: number; t: number; speed: number }
 type Spray = { x: number; y: number; r: number; t0: number; vx?: number; vy?: number }
 
 export type EyeStyle = 'pill' | 'dot' | 'square'
-export const EYE_STYLES: EyeStyle[] = ['pill', 'dot', 'square']
 const EYE_CODE: Record<EyeStyle, number> = { pill: 0, dot: 1, square: 2 }
 
 type Sphere = {

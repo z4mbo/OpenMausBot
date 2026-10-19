@@ -58,7 +58,6 @@ export function planImport(
   return plan;
 }
 
-export const planIsEmpty = (plan: ImportPlan) => !plan.projects.length && plan.workspaces.every((step) => step.headId);
 
 type Call = <T>(path: string, init?: { method?: string; body?: string }) => Promise<T>;
 
