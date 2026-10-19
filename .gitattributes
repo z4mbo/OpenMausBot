@@ -120,3 +120,4 @@ docs/verification/evidence/origin-ownership-037/**/*.ax.txt -whitespace
 
 docs/verification/evidence/origin-delivery-038/** -text -whitespace
 docs/verification/evidence/origin-native-039/** -text -whitespace
+docs/verification/evidence/origin-plan-usage-040/**/*.json text eol=lf

@@ -2529,6 +2529,7 @@
   "usage.subtitle": "Tokens and cost per bot, added up from every settled turn. Only providers that report a price show one.",
   "planUsage.title": "Plan usage",
   "planUsage.subtitle": "Remaining allowance on each signed-in provider. 5-hour and weekly windows, when that plan has them.",
+  "planUsage.availabilitySubtitle": "Provider-reported subscription allowances, when available. Models can keep working when usage is unavailable; API-key activity is shown in History.",
   "planUsage.fiveHour": "5-hour",
   "planUsage.weekly": "Weekly",
   "planUsage.left": "{remaining}% left",

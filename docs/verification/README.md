@@ -127,6 +127,7 @@ Use only mapped, tested commands:
 - [Shared-workspace trust: loopback, card answerers, decision log](shared-workspace-trust.md)
 - [Shared-workspace governance: bot visibility and admin activity](shared-workspace-governance.md)
 - [Usage ledger](usage-ledger.md)
+- [Provider quota availability without false model sign-in errors](origin-plan-usage.md)
 - [Bounded built-in tool results](tool-results.md)
 - [Memory: recall, upkeep and the tidy-up](memory-layer.md)
 - [Spend cap and sell prices](spend-cap.md)
