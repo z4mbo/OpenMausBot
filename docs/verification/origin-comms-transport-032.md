@@ -1,0 +1,13 @@
+# Comms fixture HTTP isolation
+
+CI run `39152274046`, attempt 1, failed on the Windows shard 3/4 step-cap delegation case at frozen source `d09a9202130ef58976aea8ee6c221dc433f97e25`. A polling `GET /api/bots` rejected with `read ECONNRESET` (`-4077`) after 29,433 ms. The predicate's 90-second deadline was not reached. Six later cases passed using the same child created once in `beforeAll`; the fixture has no restart path. This was an individual HTTP connection failure, not a server exit. CI did not retain per-socket telemetry or child stderr at that failure, so its exact socket cause remains unknown.
+
+The unchanged source passed locally on Windows with Node 24.21.0: the focused case passed in 2,861 ms, and the complete comms file passed all 32 tests, including the same case in 2,954 ms. These runs did not reproduce the CI event and do not make its failed result green.
+
+The transport regression uses an actual loopback HTTP server which resets a socket when that socket is reused. The original pass-through fetch policy fails with the same `ECONNRESET`; two other transport cases pass. Setting `Connection: close` prevents reuse and passes all three identical regression cases. HTTP errors remain visible, and a connection reset after a mutation still rejects without sending that mutation again. This proves a pooled-connection vulnerability in the fixture's request policy; it does not identify the original CI socket cause.
+
+Commit `7f468ebd1d0112f58f3164963002c35569023d66` applies that one-shot policy to the comms API helper, startup health probe and timeout diagnostics. It changes three test-only files. Existing task assertions, deadlines, error propagation, retries and the retry list are unchanged. No production runtime code changes.
+
+After the change, the complete comms file and transport regressions pass 35 tests in 35.45 seconds; the delegation step-cap case passes in 2,981 ms. Touched-file Oxlint and `tsc -p tsconfig.server.json` pass. All Node/cmd processes belonging to the new external fixture/worktree prefix have exited; three empty synthetic MCP directories remain. No main-checkout server, Convex deployment, real provider, account or production data was used.
+
+The [report](evidence/origin-comms-transport-032/report.json) and [manifest](evidence/origin-comms-transport-032/manifest.json) bind the frozen source, logical fix, identical regression bytes, original CI excerpt and compressed raw before/after logs. The original failed CI, native build and packaged-resource evidence remain separate. Final source, CI and publication require their own verification.

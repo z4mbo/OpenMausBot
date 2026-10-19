@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -161,6 +161,7 @@ export function SidebarPopoverMenu({
   triggerClassName = "w-full",
   triggerTitle,
   renderTrigger,
+  triggerRef: suppliedTriggerRef,
 }: {
   placement?: "above" | "below";
   items: SidebarMenuItem[];
@@ -169,6 +170,7 @@ export function SidebarPopoverMenu({
   triggerClassName?: string;
   triggerTitle?: string;
   renderTrigger: (state: { open: boolean }) => React.ReactNode;
+  triggerRef?: RefObject<HTMLButtonElement | null>;
 }) {
   const [open, setOpen] = useState(false);
   const [pinned, setPinned] = useState(false);
@@ -176,7 +178,8 @@ export function SidebarPopoverMenu({
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
   const [subPosition, setSubPosition] = useState<{ left: number; top: number } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const ownTriggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = suppliedTriggerRef ?? ownTriggerRef;
   const menuRef = useRef<HTMLDivElement>(null);
   const subRef = useRef<HTMLDivElement>(null);
   const subRowRef = useRef<HTMLElement | null>(null);
@@ -220,15 +223,15 @@ export function SidebarPopoverMenu({
     contains: (target: unknown) =>
       [rootRef.current, menuRef.current, subRef.current].some((node) => node?.contains(target as Node)),
   });
-  usePopoverDismiss(open, anchored ? insideRef : rootRef, () => close(anchored));
+  usePopoverDismiss(open, insideRef, () => close(anchored));
 
   useLayoutEffect(() => {
-    if (!anchored || !motion.shown) return;
+    if (!motion.shown) return;
     const place = () => {
       const trigger = triggerRef.current, menu = menuRef.current;
       if (!trigger || !menu) return;
       const viewport = { width: window.innerWidth, height: window.innerHeight };
-      setPosition(anchoredMenuPosition(trigger.getBoundingClientRect(), { width: menu.offsetWidth, height: menu.offsetHeight }, viewport, isRtl(trigger)));
+      if (anchored) setPosition(anchoredMenuPosition(trigger.getBoundingClientRect(), { width: menu.offsetWidth, height: menu.offsetHeight }, viewport, isRtl(trigger)));
       const sub = subRef.current, row = subRowRef.current;
       if (sub && row) {
         setSubPosition(submenuPosition(menu.getBoundingClientRect(), row.getBoundingClientRect(), { width: sub.offsetWidth, height: sub.offsetHeight }, viewport, isRtl(trigger)));
@@ -305,8 +308,8 @@ export function SidebarPopoverMenu({
   const openItem = submenu ? items.find((item) => item.key === submenu) : undefined;
   const roomy = anchored;
   const sheetClass = cn(
-    "overflow-hidden border border-hairline/50 bg-menu shadow-2xl shadow-black/50",
-    roomy ? "rounded-2xl p-1.5" : "rounded-xl py-1.5",
+    "ui-panel overflow-hidden bg-menu",
+    roomy ? "p-1.5" : "py-1.5",
   );
 
   const sheet = motion.shown && (
@@ -374,7 +377,7 @@ export function SidebarPopoverMenu({
   return (
     <div
       ref={rootRef}
-      className="relative"
+      className="relative min-w-0 max-w-full"
       onPointerEnter={hoverOpen}
       onPointerLeave={hoverClose}
       onFocus={() => openOnHover && setOpen(true)}
@@ -415,7 +418,7 @@ export function SidebarPopoverMenu({
 
       {anchored
         ? typeof document !== "undefined" && sheet ? createPortal(<>{sheet}{subSheet}</>, document.body) : null
-        : sheet}
+        : <>{sheet}{typeof document !== "undefined" && subSheet ? createPortal(subSheet, document.body) : null}</>}
     </div>
   );
 }

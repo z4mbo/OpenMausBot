@@ -32,7 +32,7 @@ const codex = (command: string, cwd = "/repo"): Start =>
   ({ title: command, summary: command, input: JSON.stringify({ command, cwd }, null, 2) });
 const times = (count: number, play: (index: number) => void) => { for (let i = 0; i < count; i++) play(i); };
 const note = (call: string, count: number) =>
-  `[OpenMausBot: this exact call has failed the same way ${count} times in a row: “${call}”. Change approach, or stop and report what is blocking.]`;
+  `[Origin: this exact call has failed the same way ${count} times in a row: “${call}”. Change approach, or stop and report what is blocking.]`;
 const stopped = (call: string, count: number) =>
   `the same call failed the same way ${count} times in a row: “${call}” — the turn was stopped`;
 /** Every promise the guard is waiting on has settled. */

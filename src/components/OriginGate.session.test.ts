@@ -1,0 +1,121 @@
+// @vitest-environment happy-dom
+import { act, createElement } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { getFunctionName } from "convex/server";
+
+const fixture = vi.hoisted(() => ({ action: vi.fn(), mutation: vi.fn(), share: vi.fn(), queries: [] as { url: string; token: unknown }[] }));
+vi.mock("convex/react", () => ({ ConvexReactClient: class {
+  constructor(private readonly url: string) {}
+  action = fixture.action;
+  mutation = fixture.mutation;
+  close = async () => {};
+  query = async (_reference: unknown, args: { sessionToken: string }) => {
+    fixture.queries.push({ url: this.url, token: args.sessionToken });
+    return { _id: "fixture-user", email: "member@example.test" };
+  };
+  watchQuery = (_reference: unknown, args: { sessionToken: string }) => {
+    fixture.queries.push({ url: this.url, token: args.sessionToken });
+    return { localQueryResult: () => ({ _id: "fixture-user", email: "member@example.test" }), onUpdate: () => () => {} };
+  };
+} }));
+vi.mock("@/lib/origin-cloud-links", () => ({ refreshCloudLinks: vi.fn() }));
+vi.mock("@/lib/origin-sync", () => ({ exclusiveWithSync: vi.fn(), onSyncRequest: vi.fn(), syncFromOrigin: vi.fn() }));
+vi.mock("@/lib/origin-shared-agents", () => ({ sharedAgentsRound: vi.fn() }));
+vi.mock("@/lib/origin-teams", () => ({ PROJECT_LEAD_ROLE: {} }));
+vi.mock("@/lib/origin-workspaces", () => ({ activeWorkspaceId: vi.fn(), setAccountWorkspaces: vi.fn(), switchWorkspace: vi.fn(), workspaceHeadsOf: vi.fn() }));
+vi.mock("@/state/store", () => ({ api: vi.fn(), useStore: vi.fn() }));
+vi.mock("./OriginConnect", () => ({ shareSession: fixture.share }));
+vi.mock("./OriginLogo", () => ({ OriginLogo: () => null }));
+
+import { OriginGate } from "./OriginGate";
+import { sessionStore, setCloudUrl, setSessionToken } from "@/lib/origin-cloud/client";
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>(done => { resolve = done; });
+  return { promise, resolve };
+}
+let host: HTMLDivElement;
+let root: Root;
+async function input(selector: string, value: string) {
+  const field = host.querySelector<HTMLInputElement>(selector)!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(field, value);
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+async function submit(signup = false) {
+  if (signup) {
+    await act(async () => [...host.querySelectorAll("button")].find(button => button.textContent === "Create an account")!.click());
+    await input('[autocomplete="name"]', "Fixture Member");
+  }
+  await input('[type="email"]', "member@example.test");
+  await input('[type="password"]', "fixture-password");
+  await input('[placeholder="Paste an invite link"]', "https://origin.imbored.fun/join/fixture-invite");
+  await act(async () => { host.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); });
+}
+beforeEach(async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("No network in the sign-in fixture"))));
+  fixture.action.mockReset(); fixture.mutation.mockReset(); fixture.share.mockReset(); fixture.queries = [];
+  localStorage.clear(); setCloudUrl("http://127.0.0.1:43001"); setSessionToken(null);
+  host = document.createElement("div"); document.body.append(host); root = createRoot(host);
+  await act(async () => root.render(createElement(OriginGate, null, createElement("p", null, "Workspace content"))));
+});
+afterEach(() => { act(() => root.unmount()); host.remove(); localStorage.clear(); expect(fetch).not.toHaveBeenCalled(); vi.unstubAllGlobals(); });
+
+it.each([false, true])("the actual %s signup form discards authentication after a backend switch", async signup => {
+  const request = deferred<{ sessionToken: string }>(); fixture.action.mockReturnValue(request.promise);
+  await submit(signup);
+  expect(getFunctionName(fixture.action.mock.calls[0]![0])).toBe(signup ? "auth:signup" : "auth:login");
+  await act(async () => setCloudUrl("http://127.0.0.1:43002"));
+  await act(async () => request.resolve({ sessionToken: "fixture-private-token-from-first-backend" }));
+  expect.soft(sessionStore.get()).toBeNull();
+  expect.soft(fixture.queries).not.toContainEqual({ url: "http://127.0.0.1:43002", token: "fixture-private-token-from-first-backend" });
+  expect.soft(fixture.mutation).not.toHaveBeenCalled();
+  expect(fixture.share).not.toHaveBeenCalled();
+});
+
+it("a pending invitation acceptance cannot re-share the old account after a switch", async () => {
+  fixture.action.mockResolvedValue({ sessionToken: "fixture-session-one" });
+  const invite = deferred<null>(); fixture.mutation.mockReturnValue(invite.promise);
+  await submit();
+  expect(fixture.mutation).toHaveBeenCalledOnce();
+  await act(async () => setSessionToken("fixture-session-two"));
+  await act(async () => invite.resolve(null));
+  expect(sessionStore.get()).toBe("fixture-session-two");
+  expect(fixture.share).not.toHaveBeenCalled();
+});
+
+it("the current form signs in, accepts its invite and shares the same session", async () => {
+  fixture.action.mockResolvedValue({ sessionToken: "fixture-session-one" });
+  fixture.mutation.mockResolvedValue(null); fixture.share.mockResolvedValue(undefined);
+  await submit();
+  expect(sessionStore.get()).toBe("fixture-session-one");
+  expect(getFunctionName(fixture.mutation.mock.calls[0]![0])).toBe("workspaces:acceptInvite");
+  expect(fixture.mutation.mock.calls[0]![1]).toEqual({ token: "fixture-invite", sessionToken: "fixture-session-one" });
+  expect(fixture.share).toHaveBeenCalledOnce();
+  expect(fixture.share.mock.calls[0]!.slice(0, 2)).toEqual(["http://127.0.0.1:43001", "fixture-session-one"]);
+});
+
+it("a refused server handoff leaves the actual form's retry error visible", async () => {
+  fixture.action.mockResolvedValue({ sessionToken: "fixture-session-one" }); fixture.mutation.mockResolvedValue(null);
+  fixture.share.mockRejectedValue(new Error("Origin could not connect this account (HTTP 409)"));
+  await submit();
+  expect(sessionStore.get()).toBeNull();
+  expect(host.querySelector('[role="alert"]')?.textContent).toContain("Origin could not connect this account (HTTP 409)");
+  expect(host.querySelector('button[type="submit"]')?.hasAttribute("disabled")).toBe(false);
+  expect(host.textContent).not.toContain("Workspace content");
+});
+
+it("a delayed server handoff cannot install the old login after another account takes over", async () => {
+  fixture.action.mockResolvedValue({ sessionToken: "fixture-session-one" }); fixture.mutation.mockResolvedValue(null);
+  const handoff = deferred<void>(); fixture.share.mockReturnValue(handoff.promise);
+  await submit();
+  expect(fixture.share).toHaveBeenCalledOnce();
+  expect(sessionStore.get()).toBeNull();
+  await act(async () => setSessionToken("fixture-session-two"));
+  await act(async () => handoff.resolve());
+  expect(sessionStore.get()).toBe("fixture-session-two");
+});

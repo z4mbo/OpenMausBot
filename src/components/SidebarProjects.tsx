@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Archive, ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Plus, UserPlus, X } from "lucide-react";
 import { RuntimeHelp, WorkspaceMembersPanel } from "./origin-members";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
@@ -11,6 +11,8 @@ import {
 import { createPortal } from "react-dom";
 import { STANDALONE_SECTION } from "../../shared/origin-workspaces";
 import { NewBotDialog } from "./lazy-screens";
+import { CenteredDialog } from "./CenteredDialog";
+import { iconButton } from "./origin-pages/ui";
 
 const SORTS: { id: ProjectSort; label: string }[] = [
   { id: "custom", label: "Custom order" },
@@ -27,17 +29,18 @@ function Menu({ label, icon, children, className, floating = false }: { label: s
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
+  const dismiss = useCallback(() => { setOpen(false); root.current?.querySelector<HTMLButtonElement>("button")?.focus(); }, []);
   useEffect(() => {
     if (!open) return;
     const outside = (event: PointerEvent) => {
       const target = event.target as Node;
       if (!root.current?.contains(target) && !panel.current?.contains(target)) setOpen(false);
     };
-    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") dismiss(); };
     document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", escape);
     return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
-  }, [open]);
+  }, [open, dismiss]);
   const toggle = () => {
     if (floating && !open && root.current) {
       const rect = root.current.getBoundingClientRect();
@@ -45,7 +48,7 @@ function Menu({ label, icon, children, className, floating = false }: { label: s
     }
     setOpen((value) => !value);
   };
-  const items = <div ref={panel} role="menu" onClick={() => setOpen(false)}
+  const items = <div ref={panel} role="menu" onClick={dismiss}
     className={cn("z-50 w-52 rounded-xl border border-hairline/60 bg-menu p-1.5 shadow-2xl shadow-black/60", floating ? "fixed" : "absolute right-0 top-full mt-1")}
     style={floating && at ? { left: at.left, top: at.top } : undefined}>{children}</div>;
   return (
@@ -222,19 +225,18 @@ export function NewAgentDialog({ onClose }: { onClose(): void }) {
 }
 
 function MembersDialog({ cloudTeamId, onClose }: { cloudTeamId: string | null; onClose(): void }) {
+  const titleId = useId();
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div role="dialog" aria-modal="true" aria-label="Members & invites" className="flex h-[min(720px,92dvh)] w-full max-w-[760px] flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-panel shadow-2xl">
+    <CenteredDialog label="Members & invites" labelledBy={titleId} onClose={onClose} className="flex h-[min(720px,92dvh)] flex-col overflow-hidden sm:max-w-[760px]">{(dismiss) => <>
         <div className="flex shrink-0 items-center justify-between border-b border-hairline/40 px-5 py-3.5">
-          <h2 className="text-[16px] font-semibold text-ink">Members & invites</h2>
-          <button type="button" aria-label="Close" onClick={onClose} className="flex size-8 items-center justify-center rounded-lg text-ink-secondary hover:bg-raised hover:text-ink"><X size={16} /></button>
+          <h2 id={titleId} className="text-[16px] font-semibold text-ink">Members & invites</h2>
+          <button type="button" aria-label="Close" onClick={dismiss} className={iconButton}><X size={16} /></button>
         </div>
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           <WorkspaceMembersPanel cloudTeamId={cloudTeamId} />
           <div className="px-5 pb-5"><RuntimeHelp className="mt-4" /></div>
         </div>
-      </div>
-    </div>,
+      </>}</CenteredDialog>,
     document.body,
   );
 }

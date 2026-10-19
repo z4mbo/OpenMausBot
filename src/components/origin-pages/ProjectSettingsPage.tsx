@@ -22,14 +22,14 @@ export function ProjectSettingsPage(props: OriginPageProps) {
       {({ project, projectId, isAdmin }) => (
         <section className={pageClass} aria-label="Project settings">
           <PageHeader title="Settings" />
-          <div className="grid max-w-5xl gap-4 lg:grid-cols-2">
-            <div className="flex flex-col gap-4">
+          <div className="grid min-w-0 max-w-5xl gap-4 lg:grid-cols-2">
+            <div className="flex min-w-0 flex-col gap-4">
               <GeneralSettings key={projectId} project={project} projectId={projectId} isAdmin={isAdmin}
                 accent={botId ? <ProjectAccent botId={botId} /> : null} />
               <GitHubSettings key={`${projectId}:${project.githubTaskMode ?? ""}`} project={project} projectId={projectId} isAdmin={isAdmin} />
               <GitHubConnectionCard project={project} projectId={projectId} isAdmin={isAdmin} />
             </div>
-            <div className="flex flex-col gap-4">
+            <div className="flex min-w-0 flex-col gap-4">
               <ProjectAccessCard projectId={projectId} teamId={project.teamId} />
               <Members project={project} projectId={projectId} isAdmin={isAdmin} />
             </div>
@@ -151,7 +151,7 @@ function GeneralSettings({ project, projectId, isAdmin, accent }: { project: Clo
     <Card icon={<Settings size={15} />} title="Project">
       {accent && <div className="mb-3">{accent}</div>}
       <form onSubmit={save} onChange={() => { setSaved(false); setDirty(true); }} className="flex flex-col gap-3">
-        <fieldset disabled={!isAdmin || action.busy} className="flex flex-col gap-3">
+        <fieldset disabled={!isAdmin || action.busy} className="flex min-w-0 flex-col gap-3">
           <div className="flex items-end gap-3">
             <ProjectGlyph project={project} iconType={iconType} iconValue={iconValue} />
             <Field label="Icon" className="flex-1">

@@ -1,0 +1,29 @@
+{
+  "name": "login-1440-dark",
+  "route": "/login",
+  "theme": "dark",
+  "width": 1440,
+  "reducedMotion": true,
+  "alerts": [],
+  "articles": [],
+  "canonicalNotes": 0,
+  "clientWidth": 1430,
+  "cssHeight": 900,
+  "cssWidth": 1440,
+  "currentNotes": null,
+  "currentVersion": null,
+  "currentVersionDisplay": null,
+  "downloadLinks": [
+    "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+  ],
+  "fonts": "loaded",
+  "h1": "Sign in to Origin",
+  "headingColor": "rgb(252, 252, 252)",
+  "htmlClass": "__variable_d8ebd1",
+  "images": [],
+  "path": "/login",
+  "preferredDark": true,
+  "scrollHeight": 1005,
+  "scrollWidth": 1430,
+  "screenshotScope": "viewport"
+}

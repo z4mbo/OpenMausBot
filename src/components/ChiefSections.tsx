@@ -83,16 +83,16 @@ export function ChiefSectionBar({ bot, section, onSection, joined = false }: { b
   const agentsUnread = teamUnread(state.bots, bot);
   const { strip, box } = useTabHighlight(section);
   return (
-    <nav aria-label={`${bot.name} sections`} data-chief-sections className={cn("flex h-14 shrink-0 items-center gap-1 px-3 pl-11 md:pl-3", !joined && "glass-bar relative z-[25] border-b border-hairline/40 [--glass-tint:var(--color-app)]")}>
+    <nav aria-label={`${bot.name} sections`} data-chief-sections className={cn("flex h-14 shrink-0 items-center gap-1 px-3 pl-11 max-md:h-auto max-md:flex-wrap max-md:py-2 md:pl-3", !joined && "glass-bar relative z-[25] border-b border-hairline/40 [--glass-tint:var(--color-app)]")}>
       <button type="button" onClick={() => onSection("chat")} aria-current={section === "chat" ? "page" : undefined}
-        className={cn("mr-1 flex h-10 shrink-0 items-center gap-2 rounded-xl px-2 text-[14px] font-semibold text-ink outline-none transition-colors hover:bg-raised/50 focus-visible:ring-1 focus-visible:ring-accent/60", section === "chat" && "bg-raised")}>
+        className={cn("mr-1 flex h-10 min-w-0 items-center gap-2 rounded-xl px-2 text-[14px] font-semibold text-ink outline-none transition-colors hover:bg-raised/50 focus-visible:ring-1 focus-visible:ring-accent/60 max-md:flex-1 md:shrink-0", section === "chat" && "bg-raised")}>
         <BotAvatar bot={bot} size={24} />
         <span className="max-w-[160px] truncate">{bot.name}</span>
         {unreadReplies(bot) > 0
           ? <UnreadBadge count={unreadReplies(bot)} />
           : <span aria-label={bot.busy ? "Working" : "Idle"} className={cn("size-2 rounded-full", bot.busy ? "animate-pulse bg-success" : "bg-ink-tertiary/60")} />}
       </button>
-      <div ref={strip} className="relative flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:none] max-md:pr-4 max-md:[mask-image:linear-gradient(to_right,black_calc(100%-24px),transparent)]">
+      <div ref={strip} className="relative flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:none] max-md:order-3 max-md:basis-full max-md:pr-4 max-md:[mask-image:linear-gradient(to_right,black_calc(100%-24px),transparent)]">
         {box && <span aria-hidden="true" className="pointer-events-none absolute inset-y-auto left-0 h-9 rounded-xl bg-raised transition-[transform,width] duration-150 ease-out motion-reduce:transition-none"
           style={{ width: box.width, transform: `translateX(${box.left}px)` }} />}
         {CHIEF_SECTIONS.filter((item) => item.place === "tab").map(({ id, label, icon: Icon }) => (
@@ -105,7 +105,7 @@ export function ChiefSectionBar({ bot, section, onSection, joined = false }: { b
           </button>
         ))}
       </div>
-      <div className="flex shrink-0 items-center" role="group" aria-label="Project tools">
+      <div className="flex shrink-0 items-center max-md:order-2" role="group" aria-label="Project tools">
         {CHIEF_SECTIONS.filter((item) => item.place === "tool").map(({ id, label, icon: Icon }) => (
           <button key={id} type="button" aria-current={section === id ? "page" : undefined} aria-label={label} title={label} data-chief-section={id}
             onClick={() => onSection(id)}

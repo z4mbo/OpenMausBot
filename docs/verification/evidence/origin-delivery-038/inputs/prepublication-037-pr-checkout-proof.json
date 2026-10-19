@@ -1,0 +1,71 @@
+{
+  "scope": "Read-only raw GitHub API and completed typecheck-job log inspection. This records PR merge/tree identity; CI was still in progress when observed and no prepublication operator was executed.",
+  "recordedAt": "2026-10-19T01:05:38Z",
+  "prNumber": 1,
+  "run": 39182338260,
+  "attempt": 1,
+  "event": "pull_request",
+  "statusAtObservation": "in_progress",
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "base": "04da4858354d5a6c5b783e1fe45c05b2509dc5fb",
+  "checkout": "3607e350e9e8da5c4c21dde37baf76c91ed9c858",
+  "parents": [
+    "04da4858354d5a6c5b783e1fe45c05b2509dc5fb",
+    "ab0cd72b4c2f004c1015adca034472241569c04b"
+  ],
+  "headTree": "32171d609fbeedb63f46185e2330a6be84186937",
+  "checkoutTree": "32171d609fbeedb63f46185e2330a6be84186937",
+  "treesEqual": true,
+  "baseIsAncestorOfHead": true,
+  "localFrozenTree": "32171d609fbeedb63f46185e2330a6be84186937",
+  "syntheticMergeObjectReadVia": "GitHub immutable git/commits API; local synthetic merge object is absent",
+  "checkoutJobId": 117837543346,
+  "checkoutLogCommand": "git log -1 --format=%H",
+  "actualPinInputCreated": false,
+  "actualGuardExecuted": false,
+  "productionActions": false,
+  "rawFiles": [
+    {
+      "name": "prepublication-037-pr-raw.json",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-pr-raw.json",
+      "bytes": 68035,
+      "sha256": "b098cb265b606117f6912d5f59a3e2d07284a9421d795cd34eada63b88849760"
+    },
+    {
+      "name": "prepublication-037-ci-raw.json",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-ci-raw.json",
+      "bytes": 11928,
+      "sha256": "466c58d16bf21016316a7a6d7e2bc4673b43ebffdca328081cd4e168c1cec1ce"
+    },
+    {
+      "name": "prepublication-037-ci-merge-run.json",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-ci-merge-run.json",
+      "bytes": 44833,
+      "sha256": "b7e3c2e1b98d4cf5ceb8c1d64962a37339587a7ecf4634f263c1ef88da3135a0"
+    },
+    {
+      "name": "prepublication-037-checkout-job.log",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-checkout-job.log",
+      "bytes": 286884,
+      "sha256": "c284f13196acedbc7c3f833395bbf1820beb076e2c7cae817f12355fb13fc315"
+    },
+    {
+      "name": "prepublication-037-merge-raw.json",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-merge-raw.json",
+      "bytes": 2601,
+      "sha256": "2b21df8cd1d7a69dd0786fded4c0dbc303d4fab559403861ab66526c5df95987"
+    },
+    {
+      "name": "prepublication-037-head-raw.json",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-head-raw.json",
+      "bytes": 1188,
+      "sha256": "f9c886cc851059fe86778421b72d2a7fefcce110bc4b770021678356be654de9"
+    },
+    {
+      "name": "prepublication-037-base-raw.json",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-base-raw.json",
+      "bytes": 1207,
+      "sha256": "769171fcaf8898581cbe40742c06829703389ff82ff5d1fcff159cb131303727"
+    }
+  ]
+}

@@ -1,0 +1,285 @@
+{
+  "version": "0.2.10",
+  "source": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+  "checkedAt": "2026-10-18T13:36:48.885Z",
+  "node": "v24.21.0",
+  "workingTree": {
+    "head": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+    "clean": true
+  },
+  "normalization": "CRLF-to-LF only for source comparison. Canonical DOM text compares title plus body with whitespace collapsed; no case, word or punctuation substitutions.",
+  "sourceFiles": [
+    {
+      "path": "src/components/WhatsNew.tsx",
+      "gitBlob": "8d4b91dc4a678ba549bf2f9c949d775716c37202",
+      "frozenBytes": 4841,
+      "frozenSha256": "9b5840c659ffe958b0dd8a48e85f712a99f6ec2198ad4956f2478aef04948342",
+      "currentBytes": 4928,
+      "currentSha256": "cb8c8e730f2fdaec10f98d16de6a9f33a974274e45994f4acff69cc88ec500bc",
+      "normalizedSha256": "9b5840c659ffe958b0dd8a48e85f712a99f6ec2198ad4956f2478aef04948342",
+      "normalizedEqual": true
+    },
+    {
+      "path": "src/components/CenteredDialog.tsx",
+      "gitBlob": "6ce82d841b807d86ba667936848c715107f95a25",
+      "frozenBytes": 2258,
+      "frozenSha256": "f29a8bae87f7541f1061063f1772c34e245bb4805d79065e62d104b19fae13ad",
+      "currentBytes": 2300,
+      "currentSha256": "be7151e8484b4dd89500ab7a7dce91724964329b3bd742f437108ec521a826a7",
+      "normalizedSha256": "f29a8bae87f7541f1061063f1772c34e245bb4805d79065e62d104b19fae13ad",
+      "normalizedEqual": true
+    },
+    {
+      "path": "src/hooks/use-modal-dialog.ts",
+      "gitBlob": "a23d4e5fb3f2ab48536162babb54ab7f7ec74f5c",
+      "frozenBytes": 6097,
+      "frozenSha256": "722090b46a318b0d76c09337c629e2f8f2e23298fe84b5ca052fbcd5a60e45f7",
+      "currentBytes": 6231,
+      "currentSha256": "7f71c33794a4ee3c9b03e4532515013830e6d5100f9ec1e0175e7448de2d58d5",
+      "normalizedSha256": "722090b46a318b0d76c09337c629e2f8f2e23298fe84b5ca052fbcd5a60e45f7",
+      "normalizedEqual": true
+    },
+    {
+      "path": "src/components/MenuMotion.tsx",
+      "gitBlob": "ec3ab6a2aff480927838eaaab3502e1973da8609",
+      "frozenBytes": 1663,
+      "frozenSha256": "4b140caf1ac6ccedb8686adcc85a67eddf2eff664e87e3bdccd021cf261fc679",
+      "currentBytes": 1715,
+      "currentSha256": "0dc34be8948a8eccdbd4cfdff63dc3f12dce224df48c518d961c2423a686c6ee",
+      "normalizedSha256": "4b140caf1ac6ccedb8686adcc85a67eddf2eff664e87e3bdccd021cf261fc679",
+      "normalizedEqual": true
+    },
+    {
+      "path": "src/lib/app-links.ts",
+      "gitBlob": "6a637357e6be312da3514872f87884866a2dee7b",
+      "frozenBytes": 1719,
+      "frozenSha256": "813b31eebfe50735fb86de1e7a79d12588062e9e97264d1bc1ff50a2a26d7404",
+      "currentBytes": 1760,
+      "currentSha256": "d312daf865486709def981c3064e2be99ace0afca03478b86e5eb8356add0e4f",
+      "normalizedSha256": "813b31eebfe50735fb86de1e7a79d12588062e9e97264d1bc1ff50a2a26d7404",
+      "normalizedEqual": true
+    },
+    {
+      "path": "src/lib/origin-releases.ts",
+      "gitBlob": "d98b5d5e991e7b58f94116d81ecf994054325c15",
+      "frozenBytes": 557,
+      "frozenSha256": "9ee0bff4e8a05318f7496d7c943d923518b125ccbf29c3507a7150e63b168639",
+      "currentBytes": 572,
+      "currentSha256": "8616e72c28ce51dcb9a7beb58298efe6c480e8d962b4bcac118579dede06c6a1",
+      "normalizedSha256": "9ee0bff4e8a05318f7496d7c943d923518b125ccbf29c3507a7150e63b168639",
+      "normalizedEqual": true
+    },
+    {
+      "path": "shared/origin-releases.ts",
+      "gitBlob": "e91e33dd941970747a1204c7933c35d7a0eeaaac",
+      "frozenBytes": 8053,
+      "frozenSha256": "68630d759e87ec2eb90bb1bfb6adefb6668ae561056dfe7ac25eaa1854a60cb1",
+      "currentBytes": 8114,
+      "currentSha256": "250ac57cd2d2ff8b74f2ee8d76316041ee7235d2aade91c60e416eac00c7a4e2",
+      "normalizedSha256": "68630d759e87ec2eb90bb1bfb6adefb6668ae561056dfe7ac25eaa1854a60cb1",
+      "normalizedEqual": true
+    },
+    {
+      "path": "package.json",
+      "gitBlob": "a73b3aa57e1c60e801346cd109fbf7288c9cb578",
+      "frozenBytes": 7906,
+      "frozenSha256": "267843aeb58032193bd1f38f59804ebf71e2369247643cb8075b171d87b0b1f0",
+      "currentBytes": 8074,
+      "currentSha256": "fa9fd4aa8185045b704fdff077c0cf0d7b456a6193d7ad3463761b0e5093485f",
+      "normalizedSha256": "267843aeb58032193bd1f38f59804ebf71e2369247643cb8075b171d87b0b1f0",
+      "normalizedEqual": true
+    },
+    {
+      "path": "vite.config.ts",
+      "gitBlob": "0485bd31592c3a9a8fc0a85cecc5025c6aeecf92",
+      "frozenBytes": 3205,
+      "frozenSha256": "50d1d3dd11a6b1d9cf8e0f4fe04dcc997fbf21e05c5273d066ba78ec8859c9ea",
+      "currentBytes": 3287,
+      "currentSha256": "b8d30f3ab7fa2365226588c56655faa2357f8a7cae1a7ac8899191ec519012e3",
+      "normalizedSha256": "50d1d3dd11a6b1d9cf8e0f4fe04dcc997fbf21e05c5273d066ba78ec8859c9ea",
+      "normalizedEqual": true
+    },
+    {
+      "path": "scripts/verify-origin-ui.ts",
+      "gitBlob": "111c39bc141267b5053391b595879eebab73de59",
+      "frozenBytes": 932,
+      "frozenSha256": "b97313566319df8582f3002b73d5f2d903386b155816db42577dec488e95c131",
+      "currentBytes": 932,
+      "currentSha256": "b97313566319df8582f3002b73d5f2d903386b155816db42577dec488e95c131",
+      "normalizedSha256": "b97313566319df8582f3002b73d5f2d903386b155816db42577dec488e95c131",
+      "normalizedEqual": true
+    },
+    {
+      "path": "scripts/testing/origin-ui-preview.tsx",
+      "gitBlob": "151c03f7272cb164888ede1b04df79029415f4a1",
+      "frozenBytes": 7868,
+      "frozenSha256": "05101b731d03e6102301089b9ab353b203df9f07e03a5f39c746f2975f965360",
+      "currentBytes": 7868,
+      "currentSha256": "05101b731d03e6102301089b9ab353b203df9f07e03a5f39c746f2975f965360",
+      "normalizedSha256": "05101b731d03e6102301089b9ab353b203df9f07e03a5f39c746f2975f965360",
+      "normalizedEqual": true
+    },
+    {
+      "path": "scripts/testing/preview-fixture.ts",
+      "gitBlob": "f60abc556ce708ad71356334d0a8e49e9d492849",
+      "frozenBytes": 6566,
+      "frozenSha256": "ff2f60432def4a456fdcacc539c20a0a8627efbce0a5eded1157cdb4d6e19981",
+      "currentBytes": 6715,
+      "currentSha256": "7360c759e5e32327f507b94476a9757c3a3abb36ab7a36c30feca3f083e58e08",
+      "normalizedSha256": "ff2f60432def4a456fdcacc539c20a0a8627efbce0a5eded1157cdb4d6e19981",
+      "normalizedEqual": true
+    },
+    {
+      "path": "src/App.tsx",
+      "gitBlob": "42bb971bd917bd90d6b1a1bec596d78ee9ef3ad6",
+      "frozenBytes": 19281,
+      "frozenSha256": "c6fca3e61488269c9a3064a17fe22afa36ce817dabee9494630717b0b5f93f52",
+      "currentBytes": 19700,
+      "currentSha256": "e4630341c61a0b27f9ffa27da7701e99d8c7b256f7e81b7d5fe7bb3c2c45a31e",
+      "normalizedSha256": "c6fca3e61488269c9a3064a17fe22afa36ce817dabee9494630717b0b5f93f52",
+      "normalizedEqual": true
+    },
+    {
+      "path": "src/components/Sidebar.tsx",
+      "gitBlob": "ed40e2eb32a099d234f8aa59f1b53718051ed825",
+      "frozenBytes": 132974,
+      "frozenSha256": "71b810f938cbd26377956d79c0f36837121f5e967faabf677e2e6eba06502ee2",
+      "currentBytes": 135492,
+      "currentSha256": "582baebbb248c40d4360026ad89efd77634613d3b47faa50f83d13729e6f0df4",
+      "normalizedSha256": "71b810f938cbd26377956d79c0f36837121f5e967faabf677e2e6eba06502ee2",
+      "normalizedEqual": true
+    },
+    {
+      "path": "src/styles.css",
+      "gitBlob": "a94e8963ea210cb31b6ddeb5d6b8caf2c6f4b543",
+      "frozenBytes": 90173,
+      "frozenSha256": "72ba77755c1ac10a8ef1bfde8a204385e8ff1ae03ad552039cfb782badf32f4a",
+      "currentBytes": 92443,
+      "currentSha256": "7e19fa078c656f11d242bcb7ee152e85834a7054630df2df76b402bb12c3f88b",
+      "normalizedSha256": "72ba77755c1ac10a8ef1bfde8a204385e8ff1ae03ad552039cfb782badf32f4a",
+      "normalizedEqual": true
+    }
+  ],
+  "selectedSourceComparisonOnly": true,
+  "fixture": {
+    "synthetic": true,
+    "launcher": "scripts/verify-origin-ui.ts",
+    "entry": "scripts/testing/origin-ui-preview.tsx",
+    "entryMountsActualWhatsNew": true,
+    "syntheticStoreAndSession": true,
+    "execSession": 34159,
+    "backendPid": 4556,
+    "backendPort": 21562,
+    "healthStatus": 200,
+    "healthPidMatched": true,
+    "vitePort": 5176,
+    "proxyHealthStatus": 200,
+    "proxyHealthPidMatched": true,
+    "page": "/__origin-ui.html?screen=whatsnew&theme=dark",
+    "pageStatus": 200,
+    "servedHtmlSha256": "bc8353b620a1862a8da7561c20398d32dd7641c3fea75fec289d92cff9afc5a7",
+    "entryObservedInServedHtml": true,
+    "ownedFixtureLeftRunning": true,
+    "observedVersionBadge": "0.2.10",
+    "observationScope": "Standalone real WhatsNew dialog and opener; no Sidebar footer claim."
+  },
+  "canonicalHistory": [
+    {
+      "version": "0.2.10",
+      "title": "Invitations and reliable desktop controls",
+      "notes": 5
+    },
+    {
+      "version": "0.2.7",
+      "title": "Safer workspaces and clearer controls",
+      "notes": 18
+    },
+    {
+      "version": "desktop-1.0",
+      "title": "Origin on the desktop",
+      "notes": 4
+    },
+    {
+      "version": "1.0",
+      "title": "A sharper workspace",
+      "notes": 5
+    }
+  ],
+  "canonicalNoteCount": 32,
+  "capturedCases": [
+    {
+      "width": 1280,
+      "height": 900,
+      "theme": "dark",
+      "observedHeader": "What's newv0.2.10",
+      "observedVersion": "0.2.10",
+      "screenshot": "whats-new-1280-dark.jpg",
+      "dimensions": {
+        "width": 1280,
+        "height": 900
+      },
+      "releaseArticlesCompared": 4,
+      "noteTitlesAndBodiesCompared": 32,
+      "exactCanonicalTextAfterWhitespaceNormalization": true
+    },
+    {
+      "width": 1280,
+      "height": 900,
+      "theme": "light",
+      "observedHeader": "What's newv0.2.10",
+      "observedVersion": "0.2.10",
+      "screenshot": "whats-new-1280-light.jpg",
+      "dimensions": {
+        "width": 1280,
+        "height": 900
+      },
+      "releaseArticlesCompared": 4,
+      "noteTitlesAndBodiesCompared": 32,
+      "exactCanonicalTextAfterWhitespaceNormalization": true
+    },
+    {
+      "width": 375,
+      "height": 900,
+      "theme": "dark",
+      "observedHeader": "What's newv0.2.10",
+      "observedVersion": "0.2.10",
+      "screenshot": "whats-new-375-dark.jpg",
+      "dimensions": {
+        "width": 375,
+        "height": 900
+      },
+      "releaseArticlesCompared": 4,
+      "noteTitlesAndBodiesCompared": 32,
+      "exactCanonicalTextAfterWhitespaceNormalization": true
+    },
+    {
+      "width": 375,
+      "height": 900,
+      "theme": "light",
+      "observedHeader": "What's newv0.2.10",
+      "observedVersion": "0.2.10",
+      "screenshot": "whats-new-375-light.jpg",
+      "dimensions": {
+        "width": 375,
+        "height": 900
+      },
+      "releaseArticlesCompared": 4,
+      "noteTitlesAndBodiesCompared": 32,
+      "exactCanonicalTextAfterWhitespaceNormalization": true
+    }
+  ],
+  "articleTitleComparisons": 16,
+  "noteTitleAndBodyComparisons": 128,
+  "observedInteractionProof": {
+    "initialUnreadObserved": true,
+    "unreadClearedAfterOpen": true,
+    "seenStateRetainedAfterReload": true,
+    "tabContained": true,
+    "reverseTabContained": true,
+    "escapeClosedDialog": true,
+    "focusReturnedLabel": "What's new",
+    "runtimeExceptions": 0,
+    "accountSubmissions": 0
+  },
+  "qualification": "Source comparisons and read-only fixture health/entry checks supplement the existing browser observations. They do not establish native Electron, packaged updater, provider or production account acceptance. Only selected rendering/version/fixture sources were compared, not every transitive dependency. JPEG bytes are retained unchanged; no image editing occurred."
+}

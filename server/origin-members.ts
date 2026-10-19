@@ -7,7 +7,7 @@ import { DATA_DIR } from "./config.ts";
 import { CallAgentError, MAX_AUDIO_BYTES, type CallAgents, type CallAgentScope } from "./origin-call-agent.ts";
 import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, type OriginCloudClient, type OriginTeamChat } from "./origin-cloud.ts";
 import {
-  openRealtimeStore, RealtimeError,
+  openRealtimeStore, RealtimeError, CallSessionChangedError,
   type CallScope, type CallSignalKind, type ChatMention, type Conversation, type ChatReference, type ChatScope, type MentionNotice, type RealtimeStore, type WorkspaceUser,
 } from "./origin-realtime-store.ts";
 import { convexSiteUrl } from "./origin-public-pages.ts";
@@ -198,18 +198,20 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
 
   const callScope = async (ctx: RouteContext, body?: Args): Promise<CallScope> => {
     const { token, teamId } = scopeInput(ctx, body);
-    const user = await workspaceUser(token, teamId);
+    let user = await workspaceUser(token, teamId);
     const room = ctx.url.searchParams.get("room") ?? text(body?.room);
-    if (room) await project(token, teamId, room);
+    if (room && (await project(token, teamId, room)).memberRole === "viewer") user = { ...user, role: "viewer" };
     return { user, room };
   };
 
   const chatScope = async (ctx: RouteContext, body?: Args): Promise<ChatScope & { token: string }> => {
     const { token, teamId } = scopeInput(ctx, body);
-    const user = await workspaceUser(token, teamId);
+    let user = await workspaceUser(token, teamId);
     const conversation = parseConversation(ctx.url.searchParams.get("conversation") ?? "");
     if (conversation === null) throw new RealtimeError("Conversation not found");
-    if (conversation.startsWith("project:")) await project(token, teamId, conversation.slice("project:".length));
+    if (conversation.startsWith("project:")) {
+      if ((await project(token, teamId, conversation.slice("project:".length))).memberRole === "viewer") user = { ...user, role: "viewer" };
+    }
     else if (conversation && !store().directConversationMember(user, conversation)) throw new RealtimeError("Conversation not found");
     return { user, conversation, token };
   };
@@ -232,6 +234,7 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
 
   const fail = (ctx: RouteContext, error: unknown) => {
     if (error instanceof AccessError) return ctx.json(ctx.res, 401, { error: error.message });
+    if (error instanceof CallSessionChangedError) return ctx.json(ctx.res, 409, { error: error.message });
     if (error instanceof RealtimeError || error instanceof CallAgentError) return ctx.json(ctx.res, 400, { error: error.message });
     const status = Number((error as { status?: unknown })?.status);
     if (status === 413) return ctx.json(ctx.res, 413, { error: "Request too large" });
@@ -250,6 +253,7 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
     const { req, res, method, json, url, auth } = ctx;
     const body = route === "agent" && method === "POST" ? record(await ctx.readBody(req, MAX_JSON_BYTES)) : undefined;
     const scope = await callScope(ctx, body);
+    if (method === "POST" && scope.user.role === "viewer") throw new RealtimeError("View-only workspace access");
     const name = scope.room ? (await project(originSessionToken(req, body), scope.user.teamId, scope.room)).name : "Workspace";
     const agentScope: CallAgentScope = { teamId: scope.user.teamId, room: scope.room, name, user: scope.user };
     const present = () => store().participants(scope).map((participant) => participant.userId);
@@ -280,26 +284,30 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
       const scope = await callScope(ctx, body);
       if (body.action === "leave") {
-        store().leave(scope);
+        store().leave(scope, text(body.sessionId));
         return json(res, 200, { ok: true });
       }
       const media = { audioEnabled: body.audioEnabled === true, videoEnabled: body.videoEnabled === true, screenSharing: body.screenSharing === true };
-      const participant = body.action === "update" ? store().heartbeat(scope, media) : store().join(scope, media);
-      return json(res, 200, { userId: participant.userId, joinedAt: participant.joinedAt });
+      if (body.action !== "join" && body.action !== "update") throw new RealtimeError("Unknown call action");
+      const participant = body.action === "update" ? store().heartbeat(scope, media, text(body.sessionId)) : store().join(scope, media);
+      return json(res, 200, { userId: participant.userId, joinedAt: participant.joinedAt, sessionId: participant.sessionId });
     }
-    if (route === "signals" && method === "GET") return json(res, 200, { signals: store().signals(await callScope(ctx)) });
+    if (route === "signals" && method === "GET") return json(res, 200, { signals: store().signals(await callScope(ctx), ctx.url.searchParams.get("sessionId") ?? undefined) });
     if (route === "signals" && method === "POST") {
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
       const scope = await callScope(ctx, body);
       if (!text(body.toUserId) || !text(body.kind)) throw new RealtimeError("Signal target and kind required");
-      const signal = store().sendSignal(scope, text(body.toUserId), text(body.kind) as CallSignalKind, text(body.payload),
-        typeof body.fromJoinedAt === "number" ? body.fromJoinedAt : undefined, typeof body.toJoinedAt === "number" ? body.toJoinedAt : undefined);
+      const signal = store().sendSignal(scope, text(body.toUserId), text(body.kind) as CallSignalKind, text(body.payload), {
+        fromJoinedAt: typeof body.fromJoinedAt === "number" ? body.fromJoinedAt : undefined,
+        toJoinedAt: typeof body.toJoinedAt === "number" ? body.toJoinedAt : undefined,
+        sessionId: text(body.sessionId), toSessionId: text(body.toSessionId),
+      });
       return json(res, 200, { signal });
     }
     if (route === "signals" && method === "DELETE") {
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
       const scope = await callScope(ctx, body);
-      store().ackSignals(scope, Array.isArray(body.signalIds) ? body.signalIds.filter((id): id is string => typeof id === "string") : []);
+      store().ackSignals(scope, Array.isArray(body.signalIds) ? body.signalIds.filter((id): id is string => typeof id === "string") : [], text(body.sessionId));
       return json(res, 200, { ok: true });
     }
     return PASS;

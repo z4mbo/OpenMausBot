@@ -1,0 +1,41 @@
+Windows native cancellation investigation
+
+Scope: synthetic local DuckDB and isolated loopback Data routes only. No main
+checkout, user previews, personal data, CI reruns, pushes or deployments.
+
+Runtime defect: @duckdb/node-api 1.5.6-r.1 queues native queries asynchronously.
+When the worker pool is occupied, the signal can abort and interrupt the idle
+connection before the queued query starts. Native startup clears that earlier
+interrupt; the superseded query then occupies its lane and blocks its replacement.
+The same gap applies to a disconnected request and to a close-time interruption.
+
+Valid direct trace: native-phase-trace.jsonl records real worker pressure,
+signal abort/first interrupt at 1792283949609, pool drained at 1792283949798,
+already-aborted query actively running at1792283949799 (progress0%,
+total_rows200000003), then a diagnostic second interrupt immediately rejects it.
+The replacement returns200 with rows[[9]], the disconnected edit cancels,
+committed card/table stays intact, engine closes and fixture cleanup completes.
+Unpressured comparison: native-phase-trace-unpressured.jsonl.
+
+Fix: Lane owns redelivery until its exact work promise settles. Finally clears
+the timer and listener before its successor can start. A latched cancellation
+also cannot return a stale successful value. The 15-second test timeout stays
+unchanged. The HTTP regression adds worker pressure and stronger5-second state
+checks for replacement and health settlement, retaining every original assertion.
+
+Genuine red-before: windows-native-cancel-valid-red.log, exit1,4failures in9.80s.
+The native replacement fails its actual settlement assertion; both delayed
+signal/lane tests and the stale-success test also fail. Earlier pressure-red /
+pressure-green / pressure-phases timeouts had a missing fixture pressure variable
+and are invalid evidence; they were diagnosed and corrected before this red run.
+
+Final green: windows-native-cancel-final-green.log,51tests/3files passed in10.98s.
+This includes all ordinary engine and route tests, the pressured HTTP replacement
+and disconnect path, and exact-owner/timer cleanup checks. Server TypeScript,
+focused oxlint and whitespace checks pass. Corresponding final-types/final-lint
+logs are retained. No timeout increase, test skip, suite retry or weakened gate.
+
+Existing Windows engine-test teardown leaves native handles to process exit;
+no claim that its temporary engine directory was removed. All processes from
+these completed Vitest runs have exited. The one deliberately stopped invalid
+red diagnostic was terminated only by its exact owned Vitest PID and child tree.

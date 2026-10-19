@@ -1,0 +1,177 @@
+{
+  "scope": "Synthetic command IO only; canonical feed parser used tiny synthetic local payloads. Historical bytes were read only. No actual guard/operator, GitHub, SSH, provider, environment credential or production call executed.",
+  "tests": 42,
+  "passed": 42,
+  "actualPublicationInputsCreated": false,
+  "macMainVitestClaimed": false,
+  "cases": [
+    {
+      "name": "synthetic14 PR20/native3/backend1 with immutable public13 and original031 facts",
+      "passed": true
+    },
+    {
+      "name": "stale fresh PR head",
+      "passed": true
+    },
+    {
+      "name": "run base differs from fresh PR base",
+      "passed": true
+    },
+    {
+      "name": "base is not ancestor of frozen head",
+      "passed": true
+    },
+    {
+      "name": "actual CI checkout differs from PR merge",
+      "passed": true
+    },
+    {
+      "name": "canonical checkout log missing",
+      "passed": true
+    },
+    {
+      "name": "merge parent differs from PR base",
+      "passed": true
+    },
+    {
+      "name": "PR merge tree differs from frozen head",
+      "passed": true
+    },
+    {
+      "name": "PR merge proof changes in final round",
+      "passed": true
+    },
+    {
+      "name": "old source",
+      "passed": true
+    },
+    {
+      "name": "old version",
+      "passed": true
+    },
+    {
+      "name": "old031 previous image",
+      "passed": true
+    },
+    {
+      "name": "stale CI source",
+      "passed": true
+    },
+    {
+      "name": "manual CI replaces canonical PR",
+      "passed": true
+    },
+    {
+      "name": "CI failed",
+      "passed": true
+    },
+    {
+      "name": "CI attempt changed",
+      "passed": true
+    },
+    {
+      "name": "missing required macOSsmokes",
+      "passed": true
+    },
+    {
+      "name": "skipped required macOSsmokes",
+      "passed": true
+    },
+    {
+      "name": "unexpected extra Mac main shard",
+      "passed": true
+    },
+    {
+      "name": "backend/site stale source",
+      "passed": true
+    },
+    {
+      "name": "backend/site failure",
+      "passed": true
+    },
+    {
+      "name": "backend/site skipped job",
+      "passed": true
+    },
+    {
+      "name": "native stale source",
+      "passed": true
+    },
+    {
+      "name": "draft already public",
+      "passed": true
+    },
+    {
+      "name": "draft digest not verified",
+      "passed": true
+    },
+    {
+      "name": "manifest hash differs",
+      "passed": true
+    },
+    {
+      "name": "checksums hash differs",
+      "passed": true
+    },
+    {
+      "name": "site identity hash differs",
+      "passed": true
+    },
+    {
+      "name": "stale staged feed version",
+      "passed": true
+    },
+    {
+      "name": "stale staged site image",
+      "passed": true
+    },
+    {
+      "name": "immutable035receipt changed",
+      "passed": true
+    },
+    {
+      "name": "canonical PR policy changed",
+      "passed": true
+    },
+    {
+      "name": "new private14 credential present",
+      "passed": true
+    },
+    {
+      "name": "new audit037 credential present",
+      "passed": true
+    },
+    {
+      "name": "CI changes in final round",
+      "passed": true
+    },
+    {
+      "name": "feed changes after stage checks",
+      "passed": true
+    },
+    {
+      "name": "unresolved source and strict complete stage transcripts refused",
+      "passed": true
+    },
+    {
+      "name": "actual canonical feed verifier accepts synthetic14 feeds and real SHA512/sizes",
+      "passed": true
+    },
+    {
+      "name": "stale feed13",
+      "passed": true
+    },
+    {
+      "name": "foreign updater URL",
+      "passed": true
+    },
+    {
+      "name": "wrong updater hash",
+      "passed": true
+    },
+    {
+      "name": "wrong canonical notes",
+      "passed": true
+    }
+  ]
+}

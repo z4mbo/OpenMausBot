@@ -1,0 +1,2003 @@
+{
+  "generatedAt": "2026-10-19T06:24:10.773Z",
+  "scope": "Independent read-only comparison of copied fixture source and recorded launch snapshot against source Git blobs; no credentials, functions or running processes changed.",
+  "source": "0745d6ef0317d42b498fecbbfdf5e5e3be6d41ce",
+  "fixtureRecordSha256": "f53987a34dd99cd1a24f9b50b8835049fd4960091156a2b747e561e9f66a55f6",
+  "copySnapshotMatches": 219,
+  "exactGitBlobMatches": 21,
+  "crlfLfOnlyMatches": 198,
+  "otherContentDifferences": 0,
+  "additionalFileNamesOnly": [
+    "backend/.env.local"
+  ],
+  "additionalFileContentsRead": false,
+  "dependencyJunctions": [
+    {
+      "path": "source/backend/node_modules",
+      "target": "C:\\Users\\aless\\Documents\\Origin-bugfix\\backend\\node_modules"
+    },
+    {
+      "path": "source/node_modules",
+      "target": "C:\\Users\\aless\\Documents\\Origin-bugfix\\node_modules"
+    }
+  ],
+  "copiedPrivateOrExistingDeploymentState": false,
+  "nativeVersion": "unknown; cache directory label is not a verified runtime version",
+  "productFeatureAcceptanceClaimed": false,
+  "rootWrites": false,
+  "processLaunchOrStop": false,
+  "backendMutations": false,
+  "entries": [
+    {
+      "path": "backend/convex/accessMatrix.test.ts",
+      "bytes": 14587,
+      "actualSha256": "fa78fbcd1467c4809463ffb8863ad567babd79518d81f327e8fcb8fb8219a555",
+      "snapshotSha256": "fa78fbcd1467c4809463ffb8863ad567babd79518d81f327e8fcb8fb8219a555",
+      "gitBlobBytes": 14587,
+      "gitBlobSha256": "fa78fbcd1467c4809463ffb8863ad567babd79518d81f327e8fcb8fb8219a555",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/agentRuns.ts",
+      "bytes": 12256,
+      "actualSha256": "e243a023a9321ec217e13ab231447e84d9c0e70a86e87ac6786c75c40bdd4ae5",
+      "snapshotSha256": "e243a023a9321ec217e13ab231447e84d9c0e70a86e87ac6786c75c40bdd4ae5",
+      "gitBlobBytes": 12038,
+      "gitBlobSha256": "62e089f79547165c96c317864940b85d2eacac3503d042d4147b99095c4805af",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/agents.ts",
+      "bytes": 16325,
+      "actualSha256": "82e79c892e342b241982a715101ebcc34a8d2360a2d6fd611ec5e756b5191e18",
+      "snapshotSha256": "82e79c892e342b241982a715101ebcc34a8d2360a2d6fd611ec5e756b5191e18",
+      "gitBlobBytes": 16045,
+      "gitBlobSha256": "5eba763c29e8f458a5da7b8c55a615503fc7b00c7af60dafb607cbe8acd265f0",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/agentsTables.ts",
+      "bytes": 12713,
+      "actualSha256": "745dbb7e43aedab51ee787aa9575c57681ecd0a6f3659c6deab271ff9d61ee58",
+      "snapshotSha256": "745dbb7e43aedab51ee787aa9575c57681ecd0a6f3659c6deab271ff9d61ee58",
+      "gitBlobBytes": 12664,
+      "gitBlobSha256": "983b5a482fc01e4c8c78499cf33b722bb2eba88ae1f734617525bc394e2462a2",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/agentThreads.ts",
+      "bytes": 8345,
+      "actualSha256": "d4da52263f5b45510f8fedf2dbe23812fce299d6a08c5e26bc9ebf474991382e",
+      "snapshotSha256": "d4da52263f5b45510f8fedf2dbe23812fce299d6a08c5e26bc9ebf474991382e",
+      "gitBlobBytes": 8206,
+      "gitBlobSha256": "df1d61109859dcd9509d3448b278aa6334a4a3bc84b86bb53a7d5b7f121d5a33",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/auth.ts",
+      "bytes": 13434,
+      "actualSha256": "77d5ec69f77e3a3df40ddf25181d4e62655c64822fbe5fc1319d59bd8a7bec90",
+      "snapshotSha256": "77d5ec69f77e3a3df40ddf25181d4e62655c64822fbe5fc1319d59bd8a7bec90",
+      "gitBlobBytes": 13160,
+      "gitBlobSha256": "bd19c396ed409164c018f3540827b9adf867f7a05eeb0e09b65a9a6d13e75b67",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/authSessions.test.ts",
+      "bytes": 2276,
+      "actualSha256": "848ec82a31ef080f90f958eea31bc26d513f9502d37dca7bcd897ce91b857c0f",
+      "snapshotSha256": "848ec82a31ef080f90f958eea31bc26d513f9502d37dca7bcd897ce91b857c0f",
+      "gitBlobBytes": 2276,
+      "gitBlobSha256": "848ec82a31ef080f90f958eea31bc26d513f9502d37dca7bcd897ce91b857c0f",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/chat.ts",
+      "bytes": 6660,
+      "actualSha256": "58ba6b1d35c54841efcd9d128da696e1e6629d7b1a85fd6d8258f838daa868ed",
+      "snapshotSha256": "58ba6b1d35c54841efcd9d128da696e1e6629d7b1a85fd6d8258f838daa868ed",
+      "gitBlobBytes": 6467,
+      "gitBlobSha256": "ae275f4c38254fcbc5cc13cfccc1b512a58796fc3720bfd17ef86db06a805166",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/commits.ts",
+      "bytes": 6857,
+      "actualSha256": "83b8361a1a485bbf75fa6107a40ce7d496082000858ac7e7a2bece4b503d617e",
+      "snapshotSha256": "83b8361a1a485bbf75fa6107a40ce7d496082000858ac7e7a2bece4b503d617e",
+      "gitBlobBytes": 6675,
+      "gitBlobSha256": "be9d1afa2d48d0f4e800e80331fde4c32e961d960d39d3b9649212d59942360e",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/connectors.ts",
+      "bytes": 13353,
+      "actualSha256": "e714e62c754bef648a92c06531b6c4d440e418c061baabb004960cc85c34cde7",
+      "snapshotSha256": "e714e62c754bef648a92c06531b6c4d440e418c061baabb004960cc85c34cde7",
+      "gitBlobBytes": 13197,
+      "gitBlobSha256": "2c740582d73cae692049ad6994143faca3513e627df73075df3cd15ffdcc2e08",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/credentials.ts",
+      "bytes": 4746,
+      "actualSha256": "2f9b8491bdcea4d92226c1dd52a32d8eba664586cf3986f5513041ed34e09080",
+      "snapshotSha256": "2f9b8491bdcea4d92226c1dd52a32d8eba664586cf3986f5513041ed34e09080",
+      "gitBlobBytes": 4618,
+      "gitBlobSha256": "273ffcf59a6d290a98be2dfdb8cf56431b858e90116830db5d9a99530871cbc6",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/crons.ts",
+      "bytes": 843,
+      "actualSha256": "69d522d15ce4e5921f438fbfb87dcc57b5fb708f92c021987268a64b6bd27af0",
+      "snapshotSha256": "69d522d15ce4e5921f438fbfb87dcc57b5fb708f92c021987268a64b6bd27af0",
+      "gitBlobBytes": 831,
+      "gitBlobSha256": "7141e7c054c1e961ac9f68ec2c8fccd012f6454112d1970c6a68250c0fe66407",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/design.ts",
+      "bytes": 7668,
+      "actualSha256": "9c2c774d7cb54b7923007d9525c75ac87c3a60fd23e709bee874566f003b3be5",
+      "snapshotSha256": "9c2c774d7cb54b7923007d9525c75ac87c3a60fd23e709bee874566f003b3be5",
+      "gitBlobBytes": 7477,
+      "gitBlobSha256": "c11320b85d5b3d93070f641c2257f343b0fc99cd781d5ddaad3e125536c343ac",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/documents.ts",
+      "bytes": 6269,
+      "actualSha256": "439693585c083de7fa431eba0a93e81de904094148c767912310d8f1daa12c3a",
+      "snapshotSha256": "439693585c083de7fa431eba0a93e81de904094148c767912310d8f1daa12c3a",
+      "gitBlobBytes": 6159,
+      "gitBlobSha256": "f03b216865900b761aa93990eb2c3b9c897a76a086e4c518cb3254aff8c5abf4",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/draftColumn.test.ts",
+      "bytes": 7724,
+      "actualSha256": "65d99ea52f620c34d3aa870d5c169775e1938ce750598b279e78dd9526830109",
+      "snapshotSha256": "65d99ea52f620c34d3aa870d5c169775e1938ce750598b279e78dd9526830109",
+      "gitBlobBytes": 7607,
+      "gitBlobSha256": "69637b6f6e6c4755f9e4b419f7ae2a7c82f944bdb816273478277e4a85e9f0ab",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/draftDefaults.test.ts",
+      "bytes": 16591,
+      "actualSha256": "dfb25dc45e80b5f08c40021c383a2e6857c12c974092827b04412fcf144d633f",
+      "snapshotSha256": "dfb25dc45e80b5f08c40021c383a2e6857c12c974092827b04412fcf144d633f",
+      "gitBlobBytes": 16354,
+      "gitBlobSha256": "bccd4035ff51195e4a080de84290b916e45f7fc77b645fac30936c48f60542fd",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/draftImport.test.ts",
+      "bytes": 4417,
+      "actualSha256": "912471ff8641c2cc5ab0f7bb1aeecd3bfeb9a67b7ec1bfb68d1cd207f824e69b",
+      "snapshotSha256": "912471ff8641c2cc5ab0f7bb1aeecd3bfeb9a67b7ec1bfb68d1cd207f824e69b",
+      "gitBlobBytes": 4353,
+      "gitBlobSha256": "56419e601b09946c7d23de62d5eeec92e6e189bb999f1cd14d8970d6fd1b83e0",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/draftMigration.test.ts",
+      "bytes": 12693,
+      "actualSha256": "f2856351f3f35b3d872f64767821bf1db3156a233615e4c4148c90208357d1ca",
+      "snapshotSha256": "f2856351f3f35b3d872f64767821bf1db3156a233615e4c4148c90208357d1ca",
+      "gitBlobBytes": 12521,
+      "gitBlobSha256": "c75f0cd6fb021a312f3f81c63f01351202b313deae6a3c108fc4edaf548dd76a",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/draw.ts",
+      "bytes": 9526,
+      "actualSha256": "68ca898c96da6c1aa46be48467d257b8ce41503a7d9e6548052bdaa16be4ac00",
+      "snapshotSha256": "68ca898c96da6c1aa46be48467d257b8ce41503a7d9e6548052bdaa16be4ac00",
+      "gitBlobBytes": 9403,
+      "gitBlobSha256": "7a2642498007d9a220e5e8e95fc57a42c8012394250c73b2ee8be0530ce92747",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/featureTables.ts",
+      "bytes": 2748,
+      "actualSha256": "c93ce9703d620b3ccb3714c33dd749d1f10f7b9dfb713226ee055418a277200b",
+      "snapshotSha256": "c93ce9703d620b3ccb3714c33dd749d1f10f7b9dfb713226ee055418a277200b",
+      "gitBlobBytes": 2734,
+      "gitBlobSha256": "63cad7f3183693ce1e6b2e04d67b0ed7c84b86429b9fef4a39e7676627ac7f58",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/feedback.ts",
+      "bytes": 6582,
+      "actualSha256": "bf40b6b2d33653d8673a56c50b96bd150c6e761b5461a89b6dc0d136a74f348b",
+      "snapshotSha256": "bf40b6b2d33653d8673a56c50b96bd150c6e761b5461a89b6dc0d136a74f348b",
+      "gitBlobBytes": 6483,
+      "gitBlobSha256": "ef31e7670675d405e0d3c84e929a78d4280f896e7406da24a9d00123d58386f1",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/github.ts",
+      "bytes": 15388,
+      "actualSha256": "aea1b5bef1aff9a40afcac7f1b780e74dac06571e78360a91525bb53b96145de",
+      "snapshotSha256": "aea1b5bef1aff9a40afcac7f1b780e74dac06571e78360a91525bb53b96145de",
+      "gitBlobBytes": 15013,
+      "gitBlobSha256": "af2565df2f5cfadf1143227a1fc46788e47e5c6e067912f9f4ab21cba4f70e43",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/githubRaces.test.ts",
+      "bytes": 4559,
+      "actualSha256": "99f88a8ad8a6d95b6317e95986767a0b54d97ef4452951c62875cf2ab6036996",
+      "snapshotSha256": "99f88a8ad8a6d95b6317e95986767a0b54d97ef4452951c62875cf2ab6036996",
+      "gitBlobBytes": 4559,
+      "gitBlobSha256": "99f88a8ad8a6d95b6317e95986767a0b54d97ef4452951c62875cf2ab6036996",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/http.ts",
+      "bytes": 3733,
+      "actualSha256": "f65887ca287963afd6cbec62b138f10a2e84920788e011c92a8cb83b9b9c6f67",
+      "snapshotSha256": "f65887ca287963afd6cbec62b138f10a2e84920788e011c92a8cb83b9b9c6f67",
+      "gitBlobBytes": 3685,
+      "gitBlobSha256": "9fde9c78f6d78f09c43925df56cd95d183bf00be1d79ed555a630c95857ed208",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/httpSecurity.test.ts",
+      "bytes": 920,
+      "actualSha256": "5d8e524b9a7ff24bb31c84d197fbcd86e6a5e793ad325d8e0dbc845a04051a86",
+      "snapshotSha256": "5d8e524b9a7ff24bb31c84d197fbcd86e6a5e793ad325d8e0dbc845a04051a86",
+      "gitBlobBytes": 903,
+      "gitBlobSha256": "2791b5215f266923253e57225a2caa6bc3f2b34d87c19136539b74236b2a3397",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/inbox.ts",
+      "bytes": 7799,
+      "actualSha256": "2b90566a6d062d8aae5f5b2a160638e3d04d2fec0453bdb1a8175d31b1c19038",
+      "snapshotSha256": "2b90566a6d062d8aae5f5b2a160638e3d04d2fec0453bdb1a8175d31b1c19038",
+      "gitBlobBytes": 7694,
+      "gitBlobSha256": "6b4857232c1bb0d7c767bff554261dc1fe45651ab9792ab6daec2e122e41b959",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/integrations.ts",
+      "bytes": 17785,
+      "actualSha256": "44b07e47bc9294690cfddfd04c516e4cd23053ec4df3c625bcb6a0d056b14574",
+      "snapshotSha256": "44b07e47bc9294690cfddfd04c516e4cd23053ec4df3c625bcb6a0d056b14574",
+      "gitBlobBytes": 17531,
+      "gitBlobSha256": "96ea47b84d2c637d6ec64ec50a294da415879b2ddd2746ee5b1f9319944eb412",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/invitationMail.test.ts",
+      "bytes": 16174,
+      "actualSha256": "81b19bbe041ad8ff00d5154579e054756205cf468cf59656411c5195d45c698e",
+      "snapshotSha256": "81b19bbe041ad8ff00d5154579e054756205cf468cf59656411c5195d45c698e",
+      "gitBlobBytes": 15923,
+      "gitBlobSha256": "4349eac0b8335a3004e50625d61fde218182e928faf1d2fb1aaa01cfe4331349",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/issueCompletion.test.ts",
+      "bytes": 4116,
+      "actualSha256": "8e5acc446b697e40e15f11c6670db192392bd7372d5163a49f3f1ec68b8af085",
+      "snapshotSha256": "8e5acc446b697e40e15f11c6670db192392bd7372d5163a49f3f1ec68b8af085",
+      "gitBlobBytes": 4116,
+      "gitBlobSha256": "8e5acc446b697e40e15f11c6670db192392bd7372d5163a49f3f1ec68b8af085",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/issueRelations.ts",
+      "bytes": 5086,
+      "actualSha256": "c8d91e4ef5c4fdbecb5dc6fb2208857c17ada9630e7615b589fdb4177f02a32d",
+      "snapshotSha256": "c8d91e4ef5c4fdbecb5dc6fb2208857c17ada9630e7615b589fdb4177f02a32d",
+      "gitBlobBytes": 5014,
+      "gitBlobSha256": "1c0ae1b7f7dbe271b482bcab2a0bc16861eda0e4239c56ece89a9777261e9d40",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/legacyImport.ts",
+      "bytes": 7937,
+      "actualSha256": "10c54683b2ba1eda402e3b4bc7f39aa29c8d15e36487d2924881830e3eaa5042",
+      "snapshotSha256": "10c54683b2ba1eda402e3b4bc7f39aa29c8d15e36487d2924881830e3eaa5042",
+      "gitBlobBytes": 7827,
+      "gitBlobSha256": "fac602ef80f5db08324fdb8318f33a70789d51d7b154877b61a75d274b327f45",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/legacyInvitationMail.test.ts",
+      "bytes": 3554,
+      "actualSha256": "56b0aa5a31b4f6d459738bb95bd5f4d0f93bc8d8dfeb18e759b92380d058cb8f",
+      "snapshotSha256": "56b0aa5a31b4f6d459738bb95bd5f4d0f93bc8d8dfeb18e759b92380d058cb8f",
+      "gitBlobBytes": 3554,
+      "gitBlobSha256": "56b0aa5a31b4f6d459738bb95bd5f4d0f93bc8d8dfeb18e759b92380d058cb8f",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/legacyIssueCreation.test.ts",
+      "bytes": 6544,
+      "actualSha256": "52167e0381e1bf5591cd51b2055289e3e4c0f2b91f57ed9ee3a90a3a5793eb13",
+      "snapshotSha256": "52167e0381e1bf5591cd51b2055289e3e4c0f2b91f57ed9ee3a90a3a5793eb13",
+      "gitBlobBytes": 6427,
+      "gitBlobSha256": "024edaa23dfc6893baf98db9c8359e32d91a4911be8404901d7b929b82202b89",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/agentAccess.ts",
+      "bytes": 4972,
+      "actualSha256": "3a3f9081e656f4f22b5a9f21ed51dbc0c3cd9edadac32ab50c5ee7bf83fe6425",
+      "snapshotSha256": "3a3f9081e656f4f22b5a9f21ed51dbc0c3cd9edadac32ab50c5ee7bf83fe6425",
+      "gitBlobBytes": 4873,
+      "gitBlobSha256": "0c5e1ca7b70cb6939a34a6f44b7fed0ecae3e2ddd86cc98e9d17fde43ac28454",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/agentThreadRows.ts",
+      "bytes": 6145,
+      "actualSha256": "3c9fbf2f519f05c41464f97ce90d8656cc0363b13296b575f8979490e72e0ed3",
+      "snapshotSha256": "3c9fbf2f519f05c41464f97ce90d8656cc0363b13296b575f8979490e72e0ed3",
+      "gitBlobBytes": 6030,
+      "gitBlobSha256": "d615ca21de02f6885666dd7836f3dec152789c29d731e4131060c0a7d0602957",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/auth.ts",
+      "bytes": 5424,
+      "actualSha256": "da30851142fd775ba7eda6e6148c71a5a543a7c4b8ca1336a01ea36b4cafbe25",
+      "snapshotSha256": "da30851142fd775ba7eda6e6148c71a5a543a7c4b8ca1336a01ea36b4cafbe25",
+      "gitBlobBytes": 5268,
+      "gitBlobSha256": "3fc94b50e6fc5898aa5d7a39a8bdaaab2bc27de171fcb8d0509ab2f49849e2a2",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/columns.ts",
+      "bytes": 3759,
+      "actualSha256": "b770f4e80dd6095f19ebba7145ad77c50c39b7ebd8607e1afed1a775f2f26768",
+      "snapshotSha256": "b770f4e80dd6095f19ebba7145ad77c50c39b7ebd8607e1afed1a775f2f26768",
+      "gitBlobBytes": 3708,
+      "gitBlobSha256": "64cdbe511258f5c299e814ec00d1dc8d9a03905afb6da297d068b88ed591db99",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/completions.ts",
+      "bytes": 1221,
+      "actualSha256": "07733c422ee1b61210c7c6dad1583c73895fd07ce82e062af2b0d26ae55f167a",
+      "snapshotSha256": "07733c422ee1b61210c7c6dad1583c73895fd07ce82e062af2b0d26ae55f167a",
+      "gitBlobBytes": 1199,
+      "gitBlobSha256": "195a3ed46bae219ae8723972fa969cb22a016b4790d204cbe36947fad56a9da6",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/features.ts",
+      "bytes": 1307,
+      "actualSha256": "6657bf517cf9891151656da298fd84f3885b54b380d096da7d5575e5c82df9ae",
+      "snapshotSha256": "6657bf517cf9891151656da298fd84f3885b54b380d096da7d5575e5c82df9ae",
+      "gitBlobBytes": 1279,
+      "gitBlobSha256": "f0fe7073e4bf70be40d1b696bfd906ed738c5236aa7901c2fd99ca9d8833cb9a",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/invitationMail.ts",
+      "bytes": 2894,
+      "actualSha256": "243e2aba735b5933268ad1704744493e0e906f60f5701fa266a9c8cbc0da7db3",
+      "snapshotSha256": "243e2aba735b5933268ad1704744493e0e906f60f5701fa266a9c8cbc0da7db3",
+      "gitBlobBytes": 2847,
+      "gitBlobSha256": "cc828b89b665e7a4d274d7dc993f32e984beb01d3d54b70d5d48c3aef18e80dc",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/permissions.ts",
+      "bytes": 5441,
+      "actualSha256": "5f5d3a3cb7588c1fa5dde31be7b48ed1ac9ce96e11fdfa7ceccd714ffac7c811",
+      "snapshotSha256": "5f5d3a3cb7588c1fa5dde31be7b48ed1ac9ce96e11fdfa7ceccd714ffac7c811",
+      "gitBlobBytes": 5331,
+      "gitBlobSha256": "579f2518d6a82ebd9ced89fb5e323d934c59d2af32df588dd29ed8ba06584546",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/repository.ts",
+      "bytes": 428,
+      "actualSha256": "39905545329ef588840f8303565f921c50d81c2a41649a6cf04f922455891906",
+      "snapshotSha256": "39905545329ef588840f8303565f921c50d81c2a41649a6cf04f922455891906",
+      "gitBlobBytes": 422,
+      "gitBlobSha256": "e09a4a91f36e96184969c63017852ac42f8eeb51d83cd1a9f66bfefca3b17fbb",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/storage.ts",
+      "bytes": 8063,
+      "actualSha256": "dd6a1ca00b1e3dbbc83f3131416f10b703d5d86b2bfb6ed6473a64ae78f0c165",
+      "snapshotSha256": "dd6a1ca00b1e3dbbc83f3131416f10b703d5d86b2bfb6ed6473a64ae78f0c165",
+      "gitBlobBytes": 8063,
+      "gitBlobSha256": "dd6a1ca00b1e3dbbc83f3131416f10b703d5d86b2bfb6ed6473a64ae78f0c165",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/lib/storageValidators.ts",
+      "bytes": 713,
+      "actualSha256": "9e7a718fbe0b99c53754ff3d3fc6ff8060a11b08124e407d897293eb247af065",
+      "snapshotSha256": "9e7a718fbe0b99c53754ff3d3fc6ff8060a11b08124e407d897293eb247af065",
+      "gitBlobBytes": 713,
+      "gitBlobSha256": "9e7a718fbe0b99c53754ff3d3fc6ff8060a11b08124e407d897293eb247af065",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/lib/taskBranches.ts",
+      "bytes": 1430,
+      "actualSha256": "5e5193f71b2255c644a1ac98f3aaaaff37afbe922963923382ca9f8ce5f2fcbf",
+      "snapshotSha256": "5e5193f71b2255c644a1ac98f3aaaaff37afbe922963923382ca9f8ce5f2fcbf",
+      "gitBlobBytes": 1410,
+      "gitBlobSha256": "112936e35a0a9b4dc3e8b3b405c1b51fae2ed493b6e65c66bf6f1516b588593e",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/lib/validators.ts",
+      "bytes": 1902,
+      "actualSha256": "e30d61004eb47f4254e7407ecb57d84890cea9fda33dcb3504e849fea02b6fee",
+      "snapshotSha256": "e30d61004eb47f4254e7407ecb57d84890cea9fda33dcb3504e849fea02b6fee",
+      "gitBlobBytes": 1825,
+      "gitBlobSha256": "51801aec43a1ec4858072a57a755674ba60327458a821099648c957e5e4b21d5",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/memberProfiles.ts",
+      "bytes": 3158,
+      "actualSha256": "7a80bbbdd7d3fc88fc4ebe0e1a877f576fc0611b49c210463463fc0d515ec045",
+      "snapshotSha256": "7a80bbbdd7d3fc88fc4ebe0e1a877f576fc0611b49c210463463fc0d515ec045",
+      "gitBlobBytes": 3118,
+      "gitBlobSha256": "b36074920f31fc808ce53463201384b6fe8c66372c47ac2f790d8519e2642d72",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/members.ts",
+      "bytes": 7270,
+      "actualSha256": "c4623c6ddb7a52e0759b0b39971af4c5358a25b8b06c40fe714d728509a26855",
+      "snapshotSha256": "c4623c6ddb7a52e0759b0b39971af4c5358a25b8b06c40fe714d728509a26855",
+      "gitBlobBytes": 7086,
+      "gitBlobSha256": "e56221c44aaf77be0557c080d3580a453d2091056e43a41938d19b8d333af2dd",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/mentions.test.ts",
+      "bytes": 8788,
+      "actualSha256": "237bf16a22b83db5f813b9385b99d0d7f8276099cd5ea637930a977bf999b2c3",
+      "snapshotSha256": "237bf16a22b83db5f813b9385b99d0d7f8276099cd5ea637930a977bf999b2c3",
+      "gitBlobBytes": 8658,
+      "gitBlobSha256": "5ada29e2e7c06837b3ad0cb102c79dc30502d2c5f25b46dcebd561cd037ca26d",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/mergeCompletion.test.ts",
+      "bytes": 10533,
+      "actualSha256": "8d1ac4fc8d54c236c8550682f6da122fbba0b520e3db5b88eda80caf49fa20d1",
+      "snapshotSha256": "8d1ac4fc8d54c236c8550682f6da122fbba0b520e3db5b88eda80caf49fa20d1",
+      "gitBlobBytes": 10533,
+      "gitBlobSha256": "8d1ac4fc8d54c236c8550682f6da122fbba0b520e3db5b88eda80caf49fa20d1",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/meta.test.ts",
+      "bytes": 643,
+      "actualSha256": "4fd4f1100912e434395f702d644b34726937e9058c85a16748388b3fdbbc5208",
+      "snapshotSha256": "4fd4f1100912e434395f702d644b34726937e9058c85a16748388b3fdbbc5208",
+      "gitBlobBytes": 632,
+      "gitBlobSha256": "891cddd959b26f762506b76615408305cd25c105362d1dceb3ab86a079dfe905",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/meta.ts",
+      "bytes": 347,
+      "actualSha256": "68759e3583919b2391569d9b5f77672fa6fd9ed3d8040130ab58c7744e8f815b",
+      "snapshotSha256": "68759e3583919b2391569d9b5f77672fa6fd9ed3d8040130ab58c7744e8f815b",
+      "gitBlobBytes": 339,
+      "gitBlobSha256": "0ba0da9383af577f513a30b34bdfdf8e397fcc41fbd343691051cbdd296de914",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/notifications.ts",
+      "bytes": 14293,
+      "actualSha256": "427d764ea54616bb43b2d9e587bac90ecd3705ed2212a972a6f91be64367fcda",
+      "snapshotSha256": "427d764ea54616bb43b2d9e587bac90ecd3705ed2212a972a6f91be64367fcda",
+      "gitBlobBytes": 14097,
+      "gitBlobSha256": "f10bc2083f3ce9bee4763dfd0529d4967228bfbd6fe72644cc290c264cf477ff",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/pg1Parity.test.ts",
+      "bytes": 20600,
+      "actualSha256": "65c9c112a650ac5203e7b95bc49d8a17b53538a5e1f0801b38288367ede703c2",
+      "snapshotSha256": "65c9c112a650ac5203e7b95bc49d8a17b53538a5e1f0801b38288367ede703c2",
+      "gitBlobBytes": 20360,
+      "gitBlobSha256": "ed622e74c78291456bd310a4be3bce3344de6071104813edb31aad70c49e9609",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/planning.ts",
+      "bytes": 9247,
+      "actualSha256": "9a69989ef8308a2e0c68ea1025ea4add51975af08c749699b445ce42dcd50b75",
+      "snapshotSha256": "9a69989ef8308a2e0c68ea1025ea4add51975af08c749699b445ce42dcd50b75",
+      "gitBlobBytes": 9118,
+      "gitBlobSha256": "3e91f81eda062c97c3e71fbd6a58a1483ee2c4aa57df275c2d62a16005401ec6",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/preferences.ts",
+      "bytes": 2341,
+      "actualSha256": "883fd5192a7d548bd40264de1131c55bc7a3244749b1bb583aed383ff1691eca",
+      "snapshotSha256": "883fd5192a7d548bd40264de1131c55bc7a3244749b1bb583aed383ff1691eca",
+      "gitBlobBytes": 2310,
+      "gitBlobSha256": "f6c20599fd6893e03f9d7f32417d8204b3eb4f334ea316f71049a0cfd00800b9",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/projectInvites.test.ts",
+      "bytes": 3666,
+      "actualSha256": "4f1d2fb8f6d5ef65e3f1a19cc1a2bf61ddf15ece9f3edc4d831e0fa23f22e28f",
+      "snapshotSha256": "4f1d2fb8f6d5ef65e3f1a19cc1a2bf61ddf15ece9f3edc4d831e0fa23f22e28f",
+      "gitBlobBytes": 3666,
+      "gitBlobSha256": "4f1d2fb8f6d5ef65e3f1a19cc1a2bf61ddf15ece9f3edc4d831e0fa23f22e28f",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/projectPresence.ts",
+      "bytes": 3440,
+      "actualSha256": "dd70e3f29e1717c2129a1dfdcefe533fdfb1e8544e92d4660d61b9d9594e1ad8",
+      "snapshotSha256": "dd70e3f29e1717c2129a1dfdcefe533fdfb1e8544e92d4660d61b9d9594e1ad8",
+      "gitBlobBytes": 3387,
+      "gitBlobSha256": "903de0e979c40cd80de0e5cd077e4202552f2edd158f358fdd67d240e301da07",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/projects.ts",
+      "bytes": 22101,
+      "actualSha256": "caf9d3a9a2678db840a89f4966e7ffd1911c8b917114092f34e56ecf0354d0db",
+      "snapshotSha256": "caf9d3a9a2678db840a89f4966e7ffd1911c8b917114092f34e56ecf0354d0db",
+      "gitBlobBytes": 21567,
+      "gitBlobSha256": "c18ad82a41062188540e28825e45c3fad9b9fb728a6aa40224eaf70346ff5911",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/projectWorkflow.test.ts",
+      "bytes": 22814,
+      "actualSha256": "90d4b859b27e17c6cdead984064db23819fca83128e9586a3b9e3a75c4bdb050",
+      "snapshotSha256": "90d4b859b27e17c6cdead984064db23819fca83128e9586a3b9e3a75c4bdb050",
+      "gitBlobBytes": 22578,
+      "gitBlobSha256": "d04f2c5715909d8daaa954904e1e3683b7766d6c222bb65c5048d1d55bd099d0",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/schema.ts",
+      "bytes": 19546,
+      "actualSha256": "2cbbf22def6bec13928b3737e8f70c9ff971ef4c10ca5317b9f9c1c4d532ce93",
+      "snapshotSha256": "2cbbf22def6bec13928b3737e8f70c9ff971ef4c10ca5317b9f9c1c4d532ce93",
+      "gitBlobBytes": 19102,
+      "gitBlobSha256": "d32b3843d31b0bbc7ae6b2fc2993943a7155135ea775c7d26a38f4e16056ecbf",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/sharedAgentQueue.test.ts",
+      "bytes": 6226,
+      "actualSha256": "3b3ef32cfc957f7ed89fcf047b9b81dca30497cfa4a4f8b3a05d3a9fe53c928c",
+      "snapshotSha256": "3b3ef32cfc957f7ed89fcf047b9b81dca30497cfa4a4f8b3a05d3a9fe53c928c",
+      "gitBlobBytes": 6226,
+      "gitBlobSha256": "3b3ef32cfc957f7ed89fcf047b9b81dca30497cfa4a4f8b3a05d3a9fe53c928c",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/sharedAgents.test.ts",
+      "bytes": 16797,
+      "actualSha256": "d4b38fed2d82079dfb4a35cdf1a50787a857d63dab2c274a05500a0ef7e8368a",
+      "snapshotSha256": "d4b38fed2d82079dfb4a35cdf1a50787a857d63dab2c274a05500a0ef7e8368a",
+      "gitBlobBytes": 16590,
+      "gitBlobSha256": "3fe0d8674ba4c581d794ae317f48b86702cfa436dd272d0edda0ac0b00c42405",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/storage.ts",
+      "bytes": 6631,
+      "actualSha256": "35e78aa3507ebe6ea510beddb56cbf2196535045011b2b560f41c56335e1d50c",
+      "snapshotSha256": "35e78aa3507ebe6ea510beddb56cbf2196535045011b2b560f41c56335e1d50c",
+      "gitBlobBytes": 6631,
+      "gitBlobSha256": "35e78aa3507ebe6ea510beddb56cbf2196535045011b2b560f41c56335e1d50c",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/storageAdmission.test.ts",
+      "bytes": 21132,
+      "actualSha256": "e01719e9c0bb421b3dc0f7ad7bdb7cc1499e337e3b234eec17ffce14fc3efb5f",
+      "snapshotSha256": "e01719e9c0bb421b3dc0f7ad7bdb7cc1499e337e3b234eec17ffce14fc3efb5f",
+      "gitBlobBytes": 21132,
+      "gitBlobSha256": "e01719e9c0bb421b3dc0f7ad7bdb7cc1499e337e3b234eec17ffce14fc3efb5f",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/storageReferences.test.ts",
+      "bytes": 1922,
+      "actualSha256": "de8873874efa2a5e594cee896f97f6e796f49e30e38f72f88d8da9f88c4b72a3",
+      "snapshotSha256": "de8873874efa2a5e594cee896f97f6e796f49e30e38f72f88d8da9f88c4b72a3",
+      "gitBlobBytes": 1922,
+      "gitBlobSha256": "de8873874efa2a5e594cee896f97f6e796f49e30e38f72f88d8da9f88c4b72a3",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/taskPRs.test.ts",
+      "bytes": 16891,
+      "actualSha256": "36cd223aa8b248d362118cbea352bb3604f3c16039983a47440c5284147a26c3",
+      "snapshotSha256": "36cd223aa8b248d362118cbea352bb3604f3c16039983a47440c5284147a26c3",
+      "gitBlobBytes": 16689,
+      "gitBlobSha256": "794e3ad50515925b6dcbddf9b107229a3df51d615c7e93962e5f0046e9258c7d",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/taskPRs.ts",
+      "bytes": 14501,
+      "actualSha256": "393747ef928c0324382f49bfdda1156ce803ffab3f9e67e4bf0488ec664f978f",
+      "snapshotSha256": "393747ef928c0324382f49bfdda1156ce803ffab3f9e67e4bf0488ec664f978f",
+      "gitBlobBytes": 14312,
+      "gitBlobSha256": "420b898d8dd333918fe549835b8a60c6e9de2ab9743ca09d950cdd749f3207bd",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/tasks.ts",
+      "bytes": 35205,
+      "actualSha256": "f386aa9f430786377f5dde2626f1ad2a2412ec7eb78a88758292e3917244913e",
+      "snapshotSha256": "f386aa9f430786377f5dde2626f1ad2a2412ec7eb78a88758292e3917244913e",
+      "gitBlobBytes": 34572,
+      "gitBlobSha256": "58bca92460f52c7c3544705a58f0f89cc9749c2590d1983581fc20dc7955048a",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/teams.ts",
+      "bytes": 9092,
+      "actualSha256": "c57e45a36b3a4766cb5144bcdc172d47c25630f7c0fb295ec0c4d0af92c8fe06",
+      "snapshotSha256": "c57e45a36b3a4766cb5144bcdc172d47c25630f7c0fb295ec0c4d0af92c8fe06",
+      "gitBlobBytes": 8889,
+      "gitBlobSha256": "2e79ba5d3672e7ccf1bc6be76d457582eb36c163eaca55c5a4db29978a22d1bc",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/tsconfig.json",
+      "bytes": 392,
+      "actualSha256": "5174f52f48c66e4e7ba8131bd49508fdc49400c49785ae3fba64dab89ab9af12",
+      "snapshotSha256": "5174f52f48c66e4e7ba8131bd49508fdc49400c49785ae3fba64dab89ab9af12",
+      "gitBlobBytes": 375,
+      "gitBlobSha256": "e7438058520ddab6ebdf29d5d82ff77585ea3aa05ae0351edd3690ab92adde27",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/wiki.ts",
+      "bytes": 4453,
+      "actualSha256": "7df46ab10aa5fea166671cf957e5be051c5be0575e7e235784d4ad9ca66d0c7a",
+      "snapshotSha256": "7df46ab10aa5fea166671cf957e5be051c5be0575e7e235784d4ad9ca66d0c7a",
+      "gitBlobBytes": 4340,
+      "gitBlobSha256": "5adc93a7a3ad39cdfd693f685b28ca63898bd20a59c740d6ee44911c5220ee3b",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/workspaces.ts",
+      "bytes": 12931,
+      "actualSha256": "c42869b16282186ef4c980b1300a10b93a3bd777f3fa0e2df1f0269c5119bb25",
+      "snapshotSha256": "c42869b16282186ef4c980b1300a10b93a3bd777f3fa0e2df1f0269c5119bb25",
+      "gitBlobBytes": 12729,
+      "gitBlobSha256": "6d0271275e4032895d6f50c761964b9d02e4a16f1684593955f9447c87bddb27",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/workspaceSearch.ts",
+      "bytes": 3072,
+      "actualSha256": "0e4099414d2c26d79ace8d679401663b69df7edef2605a16cc38e65ba2806c36",
+      "snapshotSha256": "0e4099414d2c26d79ace8d679401663b69df7edef2605a16cc38e65ba2806c36",
+      "gitBlobBytes": 3035,
+      "gitBlobSha256": "02640e1f7a4b2995552e295cc79662dcd966c7b9e967f89c57d8310239e2a472",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/_generated/ai/ai-files.state.json",
+      "bytes": 340,
+      "actualSha256": "ce2426d1d59e6c6a757e05d3397163c14b8198eced9b5499a795fab310adf320",
+      "snapshotSha256": "ce2426d1d59e6c6a757e05d3397163c14b8198eced9b5499a795fab310adf320",
+      "gitBlobBytes": 334,
+      "gitBlobSha256": "ace53748e8e37b3b0ad0e9f2e0e9666818036f5b7f6b609ad6c3b826a11a01ab",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/_generated/ai/guidelines.md",
+      "bytes": 19921,
+      "actualSha256": "54d897cae0aff49e4b7891b82b52fe45ec8ded1077e6dbbbb58dfaf59aea9be8",
+      "snapshotSha256": "54d897cae0aff49e4b7891b82b52fe45ec8ded1077e6dbbbb58dfaf59aea9be8",
+      "gitBlobBytes": 19556,
+      "gitBlobSha256": "62d72acb9afcc18f658d88dd772f34b5b1da5fa60ef0402e57a784d97c458e57",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/convex/_generated/api.d.ts",
+      "bytes": 5122,
+      "actualSha256": "23239e6e8676e453c724b7b4a0d2383f9f317c465fb87cb47c2139b94a67ff90",
+      "snapshotSha256": "23239e6e8676e453c724b7b4a0d2383f9f317c465fb87cb47c2139b94a67ff90",
+      "gitBlobBytes": 5122,
+      "gitBlobSha256": "23239e6e8676e453c724b7b4a0d2383f9f317c465fb87cb47c2139b94a67ff90",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/_generated/api.js",
+      "bytes": 480,
+      "actualSha256": "f513058549831e85376f8d19cafaf2a4a770b6eb1b859fb371141f2c9dec0d70",
+      "snapshotSha256": "f513058549831e85376f8d19cafaf2a4a770b6eb1b859fb371141f2c9dec0d70",
+      "gitBlobBytes": 480,
+      "gitBlobSha256": "f513058549831e85376f8d19cafaf2a4a770b6eb1b859fb371141f2c9dec0d70",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/_generated/dataModel.d.ts",
+      "bytes": 1736,
+      "actualSha256": "db177073d16a4393c7a96bcdc3a2a904e88c2432d54d138ca7715cc431982c17",
+      "snapshotSha256": "db177073d16a4393c7a96bcdc3a2a904e88c2432d54d138ca7715cc431982c17",
+      "gitBlobBytes": 1736,
+      "gitBlobSha256": "db177073d16a4393c7a96bcdc3a2a904e88c2432d54d138ca7715cc431982c17",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/_generated/server.d.ts",
+      "bytes": 6008,
+      "actualSha256": "2b536ee08d434dd044efe0302aeaf4ccb00cd08af10c9f8c7bc7a6734e4aa49b",
+      "snapshotSha256": "2b536ee08d434dd044efe0302aeaf4ccb00cd08af10c9f8c7bc7a6734e4aa49b",
+      "gitBlobBytes": 6008,
+      "gitBlobSha256": "2b536ee08d434dd044efe0302aeaf4ccb00cd08af10c9f8c7bc7a6734e4aa49b",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/convex/_generated/server.js",
+      "bytes": 3872,
+      "actualSha256": "0cdd1d842b9458d8a6f2444c35eb9929312316a384ca76a4b1d964bedde8a6f2",
+      "snapshotSha256": "0cdd1d842b9458d8a6f2444c35eb9929312316a384ca76a4b1d964bedde8a6f2",
+      "gitBlobBytes": 3872,
+      "gitBlobSha256": "0cdd1d842b9458d8a6f2444c35eb9929312316a384ca76a4b1d964bedde8a6f2",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "backend/lib/comment-checklist.ts",
+      "bytes": 663,
+      "actualSha256": "f8af2c8093f6a7e7747bf0473cf33fab5dc3d4628ce2a3ba935ddab4c793634d",
+      "snapshotSha256": "f8af2c8093f6a7e7747bf0473cf33fab5dc3d4628ce2a3ba935ddab4c793634d",
+      "gitBlobBytes": 651,
+      "gitBlobSha256": "e5e3f26a3d945773569bb18776c2f02819de5fb56557273c5ef188fd3a18d565",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/lib/github-pr-snapshot.ts",
+      "bytes": 2175,
+      "actualSha256": "8b9c4871e67d55a5e2bdda46d889bea1ceca427d392f10f54e235c67277acaab",
+      "snapshotSha256": "8b9c4871e67d55a5e2bdda46d889bea1ceca427d392f10f54e235c67277acaab",
+      "gitBlobBytes": 2159,
+      "gitBlobSha256": "a6603f1672babf663b897c8871bd8eca6ca1bae4847faa3478af2e90053e7ad9",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/lib/http-body.ts",
+      "bytes": 1362,
+      "actualSha256": "dd86b42cce14e50c0bcfa6fdf8df179f0d6c4609a40c79663bfaa94417370734",
+      "snapshotSha256": "dd86b42cce14e50c0bcfa6fdf8df179f0d6c4609a40c79663bfaa94417370734",
+      "gitBlobBytes": 1328,
+      "gitBlobSha256": "b985b8d11182bad36e170c082a67106aa71e2472c8de4e24f11830e52fe2c423",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/lib/issue-mentions.ts",
+      "bytes": 380,
+      "actualSha256": "d89ab0dfed131e58f2d320102d41e05f32814353ba4170982a45a899540d2553",
+      "snapshotSha256": "d89ab0dfed131e58f2d320102d41e05f32814353ba4170982a45a899540d2553",
+      "gitBlobBytes": 372,
+      "gitBlobSha256": "b7812722491fdd60ce122e3ea71a01a9d0bed92840764f966c012735dad3fed7",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/lib/notification-quiet.ts",
+      "bytes": 626,
+      "actualSha256": "5e53380d04edefc438098de23db2978ba081d9eca23963202529b59968f57ca0",
+      "snapshotSha256": "5e53380d04edefc438098de23db2978ba081d9eca23963202529b59968f57ca0",
+      "gitBlobBytes": 619,
+      "gitBlobSha256": "e1d9be5c24ea7757e6d40d9f86138940920e38e9f03eeb64456d8f939363ef45",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/lib/task-branch.ts",
+      "bytes": 286,
+      "actualSha256": "3e836fd6a4bfc05ccf16f8abed3d9fb291e7fe3c61a27cd05a3867001bd9a78e",
+      "snapshotSha256": "3e836fd6a4bfc05ccf16f8abed3d9fb291e7fe3c61a27cd05a3867001bd9a78e",
+      "gitBlobBytes": 283,
+      "gitBlobSha256": "8323713fe6b3cfaa6c1b3d9de531d6cd5ae75be7d2f5ae7bdc1a510adf3d0cd6",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "backend/package.json",
+      "bytes": 688,
+      "actualSha256": "e397b2c2380f0a6e88c995a75b94064408397de7ccdce3aff8fe8a13317609ed",
+      "snapshotSha256": "e397b2c2380f0a6e88c995a75b94064408397de7ccdce3aff8fe8a13317609ed",
+      "gitBlobBytes": 661,
+      "gitBlobSha256": "3a8a039a8f172588c41d91bdfdf8188704e0455c770757106bfb65ae04692d0d",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "package.json",
+      "bytes": 8074,
+      "actualSha256": "d859f3038a9768c922f0c17dd8dff42205acb438a558ae80793458c0c63d6e20",
+      "snapshotSha256": "d859f3038a9768c922f0c17dd8dff42205acb438a558ae80793458c0c63d6e20",
+      "gitBlobBytes": 7906,
+      "gitBlobSha256": "42e88fe8d3e69c5e94f7241dae9418576d896e9f98ec54af3104bf9bcd828560",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/activity.ts",
+      "bytes": 1007,
+      "actualSha256": "ef778fab327e231f98e8ce45befe300ea8c21d8dfb746d9bebf44ebc9cc8feeb",
+      "snapshotSha256": "ef778fab327e231f98e8ce45befe300ea8c21d8dfb746d9bebf44ebc9cc8feeb",
+      "gitBlobBytes": 975,
+      "gitBlobSha256": "9d64f87c4639c155cddf8d61d2ea01d35a32f7a16a8d09d69af29e97a15cf300",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/approval-mode.ts",
+      "bytes": 4493,
+      "actualSha256": "06a4a1cf1d92f88f25b7ed46dadf402e147ce446ecf2f5c3e3ab1c7ec3d18ba8",
+      "snapshotSha256": "06a4a1cf1d92f88f25b7ed46dadf402e147ce446ecf2f5c3e3ab1c7ec3d18ba8",
+      "gitBlobBytes": 4405,
+      "gitBlobSha256": "7f4c2e4a442a2ba972187f3236cd390ed8765e3f37b905cecad6f83583ee2cd1",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/ask-question.test.ts",
+      "bytes": 22332,
+      "actualSha256": "5c135cffdff1643fc7e889c8a830af23048a6fbcc62088dc2fbc8a284e3f9ea2",
+      "snapshotSha256": "5c135cffdff1643fc7e889c8a830af23048a6fbcc62088dc2fbc8a284e3f9ea2",
+      "gitBlobBytes": 21857,
+      "gitBlobSha256": "4a19c05f388e1f7c16f16ebc8e21a61bb3ce72618a21b4caafd83d60a77f3716",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/ask-question.ts",
+      "bytes": 17021,
+      "actualSha256": "a8a58c148db9902f9478098bba86aa578834f1b226e21507a138ef4d3bd345df",
+      "snapshotSha256": "a8a58c148db9902f9478098bba86aa578834f1b226e21507a138ef4d3bd345df",
+      "gitBlobBytes": 16621,
+      "gitBlobSha256": "26b1c581c15ada50091464ea54e032a0765dd660721abe46820e2e3806226259",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/bot-avatar.ts",
+      "bytes": 2930,
+      "actualSha256": "a8e5b3c0f5596006cb8587068ee484f7765ef8e132c00686b809733676340500",
+      "snapshotSha256": "a8e5b3c0f5596006cb8587068ee484f7765ef8e132c00686b809733676340500",
+      "gitBlobBytes": 2853,
+      "gitBlobSha256": "43431c0e5930f529c2f4bcfd8eb09d3d83cde088329cf3cb10b8658f6ac107c4",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/bot-profile.ts",
+      "bytes": 921,
+      "actualSha256": "80415aab3e5efb47b82c34a9f55fb72b141c0cb373b170f1447571d0d6a7d735",
+      "snapshotSha256": "80415aab3e5efb47b82c34a9f55fb72b141c0cb373b170f1447571d0d6a7d735",
+      "gitBlobBytes": 898,
+      "gitBlobSha256": "c90064aca9de89010fe17fe6caefac8073fc1e0eb284a5e8d01d0b6711d5c09d",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/browser-held.ts",
+      "bytes": 257,
+      "actualSha256": "8d4ca41174b5ed4c69ab723e05aa7a05264c3c5b6e8c8b475d5b27890eaa7111",
+      "snapshotSha256": "8d4ca41174b5ed4c69ab723e05aa7a05264c3c5b6e8c8b475d5b27890eaa7111",
+      "gitBlobBytes": 255,
+      "gitBlobSha256": "3af37298b145b2e5a0647d106673b4c0938030d49b694987b5452d25f31fe4d2",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/call-consent.test.ts",
+      "bytes": 2613,
+      "actualSha256": "ba1f216d21c07029b3d9872cb59123b8d484c655b758ccfa9ffb93128d730bfa",
+      "snapshotSha256": "ba1f216d21c07029b3d9872cb59123b8d484c655b758ccfa9ffb93128d730bfa",
+      "gitBlobBytes": 2555,
+      "gitBlobSha256": "1a16e513f9e0615a63144f7fd27f3ffdce30ac6ef4b06453a606b306dc858c0e",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/call-consent.ts",
+      "bytes": 1915,
+      "actualSha256": "4561e0edeccfb0374e670cbbab80a085eaecd6419213e34ddae5cd7d4d8f4a68",
+      "snapshotSha256": "4561e0edeccfb0374e670cbbab80a085eaecd6419213e34ddae5cd7d4d8f4a68",
+      "gitBlobBytes": 1887,
+      "gitBlobSha256": "b0e5fa903bc3407cb5f75e90a4ec1bbe6deddc5452e41a20a9a5e91416fb339e",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/client-cancel.test.ts",
+      "bytes": 4069,
+      "actualSha256": "0fdcd876081f4bfac94918e97ddb394d282fcafcb81806f15b05604234a425cd",
+      "snapshotSha256": "0fdcd876081f4bfac94918e97ddb394d282fcafcb81806f15b05604234a425cd",
+      "gitBlobBytes": 3975,
+      "gitBlobSha256": "ab5c28af24ebad7fc9e6ce419aba818e69fc5a5f17b24a76fdddcef47154f6a3",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/client-cancel.ts",
+      "bytes": 2992,
+      "actualSha256": "0d341570e3d11283a4d445f3ef6298deb4786f3ec47ef088842316ef858db71a",
+      "snapshotSha256": "0d341570e3d11283a4d445f3ef6298deb4786f3ec47ef088842316ef858db71a",
+      "gitBlobBytes": 2920,
+      "gitBlobSha256": "6999cb4bfcf8fa4661d25f4e8f4fd576d83ccaa8254b929f87beedcb27db1d13",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/cloud-computer.ts",
+      "bytes": 644,
+      "actualSha256": "7199b87ecfab1b92670e1ac52a84362f2aa0fb80a5bd7c8fe1892dac83b7b7f8",
+      "snapshotSha256": "7199b87ecfab1b92670e1ac52a84362f2aa0fb80a5bd7c8fe1892dac83b7b7f8",
+      "gitBlobBytes": 629,
+      "gitBlobSha256": "cef77b62bde7db7476772c6ea12f974bcbc863ed0487766d8e5053716a49b4c6",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/cloud-home.ts",
+      "bytes": 543,
+      "actualSha256": "5bc18dbe383546ae5a5b8a14d33c88b6a576e34388b8695529697ec0de6e6ada",
+      "snapshotSha256": "5bc18dbe383546ae5a5b8a14d33c88b6a576e34388b8695529697ec0de6e6ada",
+      "gitBlobBytes": 533,
+      "gitBlobSha256": "cfa9ed5e2ff3b06abb4a9c91b1a9538a4cd0cfbed8414ddf01c46fae660b2566",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/codex-usage-limit.ts",
+      "bytes": 500,
+      "actualSha256": "dd11bbdde0c929a9cb56035f7c6009a2c744916d8d0730ea493d1ecd1e7c4e95",
+      "snapshotSha256": "dd11bbdde0c929a9cb56035f7c6009a2c744916d8d0730ea493d1ecd1e7c4e95",
+      "gitBlobBytes": 490,
+      "gitBlobSha256": "92961e1e27dc334e5bc39203e3cab09d5bf5e25cf2f9ce55c58f66e50c1e1916",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/command-allowlist.ts",
+      "bytes": 509,
+      "actualSha256": "668c2c8a54c8dca2bb198c323f573047121d47c383bdefb21f039fc7f8f0a19f",
+      "snapshotSha256": "668c2c8a54c8dca2bb198c323f573047121d47c383bdefb21f039fc7f8f0a19f",
+      "gitBlobBytes": 491,
+      "gitBlobSha256": "45ba7e2ccad450439d4677c2f8339ca1487ba974501b7fa8efb2c5febf652deb",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/computer-contention.ts",
+      "bytes": 732,
+      "actualSha256": "8ca483c3f65b7a8abb85cad4568f1b3d215861e652db91786a3dc20db6c0f9d4",
+      "snapshotSha256": "8ca483c3f65b7a8abb85cad4568f1b3d215861e652db91786a3dc20db6c0f9d4",
+      "gitBlobBytes": 720,
+      "gitBlobSha256": "8e2bb1818d8c573a17502716a340bb607d97c6a39b47d4bf646eb2c94e34491f",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/connector-account-link.ts",
+      "bytes": 1893,
+      "actualSha256": "81c86db94ea5ffd21ef10fb10c5e8fd321c20d0fb05ab56f3436f621dd05bdb6",
+      "snapshotSha256": "81c86db94ea5ffd21ef10fb10c5e8fd321c20d0fb05ab56f3436f621dd05bdb6",
+      "gitBlobBytes": 1856,
+      "gitBlobSha256": "120775bf8959abd614bd13ba65f52c9b3f0160a34e03b9016afd3fd9dd66dea2",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/connector-availability.ts",
+      "bytes": 811,
+      "actualSha256": "3c1b96330a839f5f787c0b7f9642524a3e61f27ef07d38a8a0f9435385ac3f9d",
+      "snapshotSha256": "3c1b96330a839f5f787c0b7f9642524a3e61f27ef07d38a8a0f9435385ac3f9d",
+      "gitBlobBytes": 794,
+      "gitBlobSha256": "1f88a6ae20910a3e8d6dd512155ea3c57d3f7b37489bfcb72945dadc718acc3e",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/connector-scopes.test.ts",
+      "bytes": 4605,
+      "actualSha256": "dd8360e1fc1fcea4b35bb6fb461ff252757046e8075c19112216cce93d9cb8f3",
+      "snapshotSha256": "dd8360e1fc1fcea4b35bb6fb461ff252757046e8075c19112216cce93d9cb8f3",
+      "gitBlobBytes": 4508,
+      "gitBlobSha256": "72a9e5076498f4fdc8d140cccbc479e4ddf5fd4ca210274849b46e7677afc27f",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/connector-scopes.ts",
+      "bytes": 4031,
+      "actualSha256": "41222b214170520874ffabb9d37a81790862f1b8923e0fb8bc4ac80e926f19a0",
+      "snapshotSha256": "41222b214170520874ffabb9d37a81790862f1b8923e0fb8bc4ac80e926f19a0",
+      "gitBlobBytes": 3949,
+      "gitBlobSha256": "5bcf10959a7fd03906f18e7fa1a5566238e7ea9cede21559b83ca505071b8983",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/credential-request.ts",
+      "bytes": 4185,
+      "actualSha256": "ab5a41b569205254e748cbfcf619dc4805f57466f0428b812d4795fb19bed736",
+      "snapshotSha256": "ab5a41b569205254e748cbfcf619dc4805f57466f0428b812d4795fb19bed736",
+      "gitBlobBytes": 4062,
+      "gitBlobSha256": "54d2780e46cc75b762ccea0ebc26bc2692e66f291d5a8469cb8e2a3fd02a4e14",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/cron-label.ts",
+      "bytes": 2026,
+      "actualSha256": "a2ee0a7b5a20940b04bee9649c9e8f72f9fe458c01a010581612ae9269eddc7e",
+      "snapshotSha256": "a2ee0a7b5a20940b04bee9649c9e8f72f9fe458c01a010581612ae9269eddc7e",
+      "gitBlobBytes": 1992,
+      "gitBlobSha256": "2c30db99e1a6ca40abf3076912fa1bfc3a1999ba8c12c77198d95355d24f4be7",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/data-context.test.ts",
+      "bytes": 3311,
+      "actualSha256": "e2a5db461a2287d81ea35b31fee943486dfd58a18afd207fee918c380e1fae3a",
+      "snapshotSha256": "e2a5db461a2287d81ea35b31fee943486dfd58a18afd207fee918c380e1fae3a",
+      "gitBlobBytes": 3257,
+      "gitBlobSha256": "68d8b6617454b183859401e4a004b738040cb14f1730bc63753eed0e5c8c4f54",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/data-context.ts",
+      "bytes": 2701,
+      "actualSha256": "1895e771e4950e2b438e2d5fd0763e0cdde538d4eb348fae6937e5cc77860643",
+      "snapshotSha256": "1895e771e4950e2b438e2d5fd0763e0cdde538d4eb348fae6937e5cc77860643",
+      "gitBlobBytes": 2657,
+      "gitBlobSha256": "cfd95731f8ba36e8fbadbff263c5bab061b0ab02e9d4972a51fa38e1e866b4e0",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/data-surface.ts",
+      "bytes": 9588,
+      "actualSha256": "bb4cf4ab352fdf4ae46311703ebc98ff3f35e20b38ec69bb645206e3ee2c6234",
+      "snapshotSha256": "bb4cf4ab352fdf4ae46311703ebc98ff3f35e20b38ec69bb645206e3ee2c6234",
+      "gitBlobBytes": 9334,
+      "gitBlobSha256": "905128790b78e66a1ec7e5f6c09ee652d22656c0e00f02198efd53eb6db150a1",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/device-sign-in.ts",
+      "bytes": 3028,
+      "actualSha256": "b18dcf5a8abec3cc08f1af31d7de2b5b61c563bae0d262a5dd19875ca8336b4b",
+      "snapshotSha256": "b18dcf5a8abec3cc08f1af31d7de2b5b61c563bae0d262a5dd19875ca8336b4b",
+      "gitBlobBytes": 2973,
+      "gitBlobSha256": "c0b34be6c11c54bc804eaccda0e02e6428e5a44c1386c0cebc8934af7aba2596",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/digest.ts",
+      "bytes": 1228,
+      "actualSha256": "61fe79677f6e5247c9e72002cd0f01414f4ca863d7ac7389c452e8a43ef81391",
+      "snapshotSha256": "61fe79677f6e5247c9e72002cd0f01414f4ca863d7ac7389c452e8a43ef81391",
+      "gitBlobBytes": 1190,
+      "gitBlobSha256": "df18a65173298c3295ee4ea1ac5c1c39cb2dcea3de92e05b4a634ac941b3c3a0",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/engine-script-install.ts",
+      "bytes": 820,
+      "actualSha256": "a9e700f84e0eff49c7a141bca26cc17a2dcccc80da8e82b24e318400bbfabcaa",
+      "snapshotSha256": "a9e700f84e0eff49c7a141bca26cc17a2dcccc80da8e82b24e318400bbfabcaa",
+      "gitBlobBytes": 800,
+      "gitBlobSha256": "7ce3d1b30811b75dfd64e3e2a613d21c619a5b18307fcfbd955551b5167a8702",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/failed-turn.test.ts",
+      "bytes": 2484,
+      "actualSha256": "f9ed226fecff6e427482fc0fb1454cb75ed9d5cc2bbb0ce5f0a1e5f4ff0a0a05",
+      "snapshotSha256": "f9ed226fecff6e427482fc0fb1454cb75ed9d5cc2bbb0ce5f0a1e5f4ff0a0a05",
+      "gitBlobBytes": 2441,
+      "gitBlobSha256": "bd10761fc8572ad3c11e569692fa64a8043570427be68053a8a68aac36ab8b1b",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/failed-turn.ts",
+      "bytes": 1885,
+      "actualSha256": "373bbfbb31ae552d5a62b4b3acee9f2a1815277c4a32c3ff27b2d90fb02d1303",
+      "snapshotSha256": "373bbfbb31ae552d5a62b4b3acee9f2a1815277c4a32c3ff27b2d90fb02d1303",
+      "gitBlobBytes": 1839,
+      "gitBlobSha256": "537cc9a8799b56081fdb6f2d973854290094f612b3804bf65372a290fc25ce35",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/github-repo-name.ts",
+      "bytes": 663,
+      "actualSha256": "dec172487a41d5b73bbc4010c4dea26e49b9bb4bd78b73a0102863569b9bfee8",
+      "snapshotSha256": "dec172487a41d5b73bbc4010c4dea26e49b9bb4bd78b73a0102863569b9bfee8",
+      "gitBlobBytes": 651,
+      "gitBlobSha256": "5324b5a150840558999fe2c4a49bc8cb004e8c5e9c35b63a1608529f32603667",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/group-goal-run.ts",
+      "bytes": 561,
+      "actualSha256": "9dee714352afe7bc4455bec7b4340823cf01c2c10873f68df3f4fb80a3ae94e7",
+      "snapshotSha256": "9dee714352afe7bc4455bec7b4340823cf01c2c10873f68df3f4fb80a3ae94e7",
+      "gitBlobBytes": 537,
+      "gitBlobSha256": "ef1c7c53d1f3e3fa7b0119d01e700b0bf462a3ee02b384528695d4c0cb1a35de",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/highlevel.ts",
+      "bytes": 4006,
+      "actualSha256": "9ca5b0033c7182f6b961d1de2581e8e87a0340f8f7f2933c9a72e67fe67765bb",
+      "snapshotSha256": "9ca5b0033c7182f6b961d1de2581e8e87a0340f8f7f2933c9a72e67fe67765bb",
+      "gitBlobBytes": 3912,
+      "gitBlobSha256": "77cbc70b0f9fd57a5ae1bbd9804f54da98feaeb1c76e99bef47a022fa0a84417",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/image-generation.test.ts",
+      "bytes": 1133,
+      "actualSha256": "6424cec3aaf4945d54369cb9d101c6a0292d238c0fe06181439f653fb8fa4699",
+      "snapshotSha256": "6424cec3aaf4945d54369cb9d101c6a0292d238c0fe06181439f653fb8fa4699",
+      "gitBlobBytes": 1112,
+      "gitBlobSha256": "495531ac9de419777c5eb4a63faef1b8fc6864009ffe2b471a18e4bda1b13edd",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/image-generation.ts",
+      "bytes": 1784,
+      "actualSha256": "3448371e7821810457e1316e8f120347945ef10e039407d8069e64c904015fb0",
+      "snapshotSha256": "3448371e7821810457e1316e8f120347945ef10e039407d8069e64c904015fb0",
+      "gitBlobBytes": 1753,
+      "gitBlobSha256": "27ef9a31d07c9e3bbc5bad19be11b2e7c16c67a87c602e8e655d8d51eb82e0f3",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/import-name.ts",
+      "bytes": 467,
+      "actualSha256": "9feb70a46a3123a5f16ef3b6b0c6fd17f0bb35317db1a45990bc40b8f48721ed",
+      "snapshotSha256": "9feb70a46a3123a5f16ef3b6b0c6fd17f0bb35317db1a45990bc40b8f48721ed",
+      "gitBlobBytes": 456,
+      "gitBlobSha256": "48f66bcca104c2a4e4b2208bb5d7da55833f1809aa1c204d0734f6441cece6a1",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/inspector.ts",
+      "bytes": 636,
+      "actualSha256": "41469f791592956977d2f3dfc6be25aff0cadc7c523b81cab91ba2a14aa0ff22",
+      "snapshotSha256": "41469f791592956977d2f3dfc6be25aff0cadc7c523b81cab91ba2a14aa0ff22",
+      "gitBlobBytes": 615,
+      "gitBlobSha256": "925cbe698d9f5beffc75575520f18ade84f3889e97e02ebe4028b2e240bf9942",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/json.ts",
+      "bytes": 295,
+      "actualSha256": "14d746214186676cf470a4c681268618f38a10b1127b2a47d32457e52e4cdba7",
+      "snapshotSha256": "14d746214186676cf470a4c681268618f38a10b1127b2a47d32457e52e4cdba7",
+      "gitBlobBytes": 287,
+      "gitBlobSha256": "5bbe0d699d8ba53147e05a717cdd4d3ac3b030a7cfb5e8d856fd83ed04b8a23a",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/learn-request.ts",
+      "bytes": 297,
+      "actualSha256": "6bdd8e9b24c4f3182bc75ffc248de4a53218f356cd6b6367c2abe147c92376f6",
+      "snapshotSha256": "6bdd8e9b24c4f3182bc75ffc248de4a53218f356cd6b6367c2abe147c92376f6",
+      "gitBlobBytes": 293,
+      "gitBlobSha256": "f884db284e5a4251ee8561849abd135db6e57bf874dcd06bc0d23cfc25223719",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/line-diff.test.ts",
+      "bytes": 977,
+      "actualSha256": "9e9523bd1f9dcd5f406ea9020e49935a6df5f2b52fbcb03538d2e7625dde0359",
+      "snapshotSha256": "9e9523bd1f9dcd5f406ea9020e49935a6df5f2b52fbcb03538d2e7625dde0359",
+      "gitBlobBytes": 949,
+      "gitBlobSha256": "308e21c8b551bce2c19ef0c21c5df2c5119e294048479e8e9d3628adf7f628d7",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/line-diff.ts",
+      "bytes": 2490,
+      "actualSha256": "1e87fe5606c3ea43d4c35028c9c5c5f98522711d77b04e51e7c14a7d6446ba21",
+      "snapshotSha256": "1e87fe5606c3ea43d4c35028c9c5c5f98522711d77b04e51e7c14a7d6446ba21",
+      "gitBlobBytes": 2429,
+      "gitBlobSha256": "ed6439b9ffd14d2b8853ed56f1b83f2b4502b7a36474761e097a1c97205e50bc",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/live-approval.test.ts",
+      "bytes": 6893,
+      "actualSha256": "be5a3193016770cc5e70663eb916910914dd6886ab15db9cb6e7ea66ecb31739",
+      "snapshotSha256": "be5a3193016770cc5e70663eb916910914dd6886ab15db9cb6e7ea66ecb31739",
+      "gitBlobBytes": 6791,
+      "gitBlobSha256": "5b4e9d33554af4daca528b5890947a0562f2b2934cca0cb5cff90c19a58eb20a",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/live-approval.ts",
+      "bytes": 7681,
+      "actualSha256": "22e3e9a62c6d9a085b7f62213772d4ba8b6bf6f30a0953acbc9b362dd14f625e",
+      "snapshotSha256": "22e3e9a62c6d9a085b7f62213772d4ba8b6bf6f30a0953acbc9b362dd14f625e",
+      "gitBlobBytes": 7537,
+      "gitBlobSha256": "ec8b09232eb3279a25a2f4e5d93fd7f39249635b4c6a962925110b62c903a5d5",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/live-call.test.ts",
+      "bytes": 6412,
+      "actualSha256": "caed1ba0930640a0cabab82223a9cd87ca74ab421bcf8a8b8b369a9c94181086",
+      "snapshotSha256": "caed1ba0930640a0cabab82223a9cd87ca74ab421bcf8a8b8b369a9c94181086",
+      "gitBlobBytes": 6277,
+      "gitBlobSha256": "249a04a190813e900c823f5b3fdb62331786e8e5552caecd3aa6869b1f4e38d5",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/live-call.ts",
+      "bytes": 9381,
+      "actualSha256": "b77bf9636681c0d493e8969cf1443833e22eb653515cfac28e2c796f2833ced1",
+      "snapshotSha256": "b77bf9636681c0d493e8969cf1443833e22eb653515cfac28e2c796f2833ced1",
+      "gitBlobBytes": 9185,
+      "gitBlobSha256": "5d01fc0a23dd3ed66a286eee6bddfca51384f2424611826020603dfcd6730c43",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/logins.test.ts",
+      "bytes": 2692,
+      "actualSha256": "1418f5c626168e281390e475603d210068724345939198d4c4e7ef66642508dd",
+      "snapshotSha256": "1418f5c626168e281390e475603d210068724345939198d4c4e7ef66642508dd",
+      "gitBlobBytes": 2636,
+      "gitBlobSha256": "c02801ecb77f19bc384772e583cdbd90f8b377fc787f272c7d3579a9d9a93d19",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/logins.ts",
+      "bytes": 4301,
+      "actualSha256": "9e084cf41d392681d4b1caaadd31821e38a3a13c9c901310d119388ed2b60911",
+      "snapshotSha256": "9e084cf41d392681d4b1caaadd31821e38a3a13c9c901310d119388ed2b60911",
+      "gitBlobBytes": 4210,
+      "gitBlobSha256": "c5ef321b7279310ca65fb57263d704163dfaeae3c09c6a5f992e54b91a443cf8",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/markdown-windows-paths.test.ts",
+      "bytes": 2275,
+      "actualSha256": "debb381469d3fa6a0493907176c9e901d83eee0bc9e992a5bc71729f6a375197",
+      "snapshotSha256": "debb381469d3fa6a0493907176c9e901d83eee0bc9e992a5bc71729f6a375197",
+      "gitBlobBytes": 2219,
+      "gitBlobSha256": "58ba2aa178cd82930d338697476cc6026cc7e3a8b73b8eda4ec77856c0d78cdb",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/markdown-windows-paths.ts",
+      "bytes": 1685,
+      "actualSha256": "8fa1a7e7795afa23f313044d7b2dc8e81d4d9dd96bbda82e68525322e2bdc9e0",
+      "snapshotSha256": "8fa1a7e7795afa23f313044d7b2dc8e81d4d9dd96bbda82e68525322e2bdc9e0",
+      "gitBlobBytes": 1647,
+      "gitBlobSha256": "c1e1b76bb12b6e3f42a59e29c1796e89915668a552745480d0ca902c3455bcef",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/mascot-bodies.ts",
+      "bytes": 27292,
+      "actualSha256": "7a553f5a35e6f2bfb0933f177332487992dcde1eb941c3f81ace42029cb4750f",
+      "snapshotSha256": "7a553f5a35e6f2bfb0933f177332487992dcde1eb941c3f81ace42029cb4750f",
+      "gitBlobBytes": 27292,
+      "gitBlobSha256": "7a553f5a35e6f2bfb0933f177332487992dcde1eb941c3f81ace42029cb4750f",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "shared/mention-boundary.ts",
+      "bytes": 846,
+      "actualSha256": "91fb6697b02146b444ecced84b0df1acf917cf09da49da6140725ec07eae114e",
+      "snapshotSha256": "91fb6697b02146b444ecced84b0df1acf917cf09da49da6140725ec07eae114e",
+      "gitBlobBytes": 830,
+      "gitBlobSha256": "8d31d705450c32f6260094644fb423a297b76f09b259c588de9a42dcd5e735b7",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/model-request.ts",
+      "bytes": 709,
+      "actualSha256": "7a5eebe68cebc04f6a948dca5d206d2fe9894b592a0300a18801808f512c5861",
+      "snapshotSha256": "7a5eebe68cebc04f6a948dca5d206d2fe9894b592a0300a18801808f512c5861",
+      "gitBlobBytes": 687,
+      "gitBlobSha256": "26daa79171be9878b5a108746313cfbe21c82e1020c1381aac05e56af0ebeadf",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/new-bot-defaults.ts",
+      "bytes": 1350,
+      "actualSha256": "002383ae3c8fa9a67c1f7d30abee6fe5d4012a27a2084e99f570793cce947d13",
+      "snapshotSha256": "002383ae3c8fa9a67c1f7d30abee6fe5d4012a27a2084e99f570793cce947d13",
+      "gitBlobBytes": 1313,
+      "gitBlobSha256": "ce34fc42b9196baca82726bfaa82d064eea5cbc1cabf60dd7cc1692c78ecf6c8",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/notification.ts",
+      "bytes": 1903,
+      "actualSha256": "0a438b68327075534ea7a0ec1fc5e74d89a7e1fdb06baa0b5a1935d0ba47a533",
+      "snapshotSha256": "0a438b68327075534ea7a0ec1fc5e74d89a7e1fdb06baa0b5a1935d0ba47a533",
+      "gitBlobBytes": 1856,
+      "gitBlobSha256": "2af09c070358f4a71979a29379eb851be3dd2a6d381e6b269de6e9eb3ebbb587",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/options-card.test.ts",
+      "bytes": 2605,
+      "actualSha256": "284f93954b5253184837c1f1085978b75c8becc5e1c937db2553277790dbeda0",
+      "snapshotSha256": "284f93954b5253184837c1f1085978b75c8becc5e1c937db2553277790dbeda0",
+      "gitBlobBytes": 2542,
+      "gitBlobSha256": "5d52d0039b7b1f00d4aedd05890ce12b7e984afbafce4e6eaa886920fc015716",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/options-card.ts",
+      "bytes": 2664,
+      "actualSha256": "fe6b8beb81085164366a52d5343d1f15e66e01946be06ec6e8643fa561ead89e",
+      "snapshotSha256": "fe6b8beb81085164366a52d5343d1f15e66e01946be06ec6e8643fa561ead89e",
+      "gitBlobBytes": 2606,
+      "gitBlobSha256": "bc9c46a4414a2fb49194cb59ac49d1f4e0207970e168ea0140c625df976b66c5",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/origin-columns.test.ts",
+      "bytes": 1492,
+      "actualSha256": "e3baa0667aec500a9e1880712784b4b170551b73e472e14990cc9fce1c9497fb",
+      "snapshotSha256": "e3baa0667aec500a9e1880712784b4b170551b73e472e14990cc9fce1c9497fb",
+      "gitBlobBytes": 1463,
+      "gitBlobSha256": "a8577c56dbf9e4da05881ae011efd67dd8c2a93f296601cc7bec480ed8fe94b9",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/origin-columns.ts",
+      "bytes": 1252,
+      "actualSha256": "ed0bb5a4b1a3368709407f5f713b349c0f88f7046ba8f17a50182c83129cbcbc",
+      "snapshotSha256": "ed0bb5a4b1a3368709407f5f713b349c0f88f7046ba8f17a50182c83129cbcbc",
+      "gitBlobBytes": 1232,
+      "gitBlobSha256": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/origin-issues.ts",
+      "bytes": 3762,
+      "actualSha256": "f81bece46c7d88ccd2b8855ce59ab05bedfc284323944373243a5d59494fc8e0",
+      "snapshotSha256": "f81bece46c7d88ccd2b8855ce59ab05bedfc284323944373243a5d59494fc8e0",
+      "gitBlobBytes": 3684,
+      "gitBlobSha256": "a75056bbcad6798a67cc67d273c9b3d4bf1f0580db9cbe8675748720fd2c5c09",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/origin-releases.ts",
+      "bytes": 13340,
+      "actualSha256": "e7c8f71c14fdb8fc60054dae6cf97d5d9e24a335080ff5f8d5bce39b8a956ccd",
+      "snapshotSha256": "e7c8f71c14fdb8fc60054dae6cf97d5d9e24a335080ff5f8d5bce39b8a956ccd",
+      "gitBlobBytes": 13238,
+      "gitBlobSha256": "7452cbb2aacbd741dcba8ed2f513df2caac3bb361a2332342bf991fcd8587985",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/origin-shared-agents.ts",
+      "bytes": 2427,
+      "actualSha256": "6d6441fc97a337856c4f790ef56f560ae7b59972661f39330c14df6aff735765",
+      "snapshotSha256": "6d6441fc97a337856c4f790ef56f560ae7b59972661f39330c14df6aff735765",
+      "gitBlobBytes": 2375,
+      "gitBlobSha256": "0563505f98d34c2e20653f9b4751538925ab13fd3ad0fbff1bdd568b9894c826",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/origin-site-address.test.ts",
+      "bytes": 2069,
+      "actualSha256": "9989e05ee334751014ea8ef668fc6f5a2c632ded172d42c902fc94a59db54621",
+      "snapshotSha256": "9989e05ee334751014ea8ef668fc6f5a2c632ded172d42c902fc94a59db54621",
+      "gitBlobBytes": 2069,
+      "gitBlobSha256": "9989e05ee334751014ea8ef668fc6f5a2c632ded172d42c902fc94a59db54621",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "shared/origin-site-address.ts",
+      "bytes": 1899,
+      "actualSha256": "1df1a4a5cb49117a4430d6d21db8a61ae03388eeb4221fd20fdb31c24e3a0161",
+      "snapshotSha256": "1df1a4a5cb49117a4430d6d21db8a61ae03388eeb4221fd20fdb31c24e3a0161",
+      "gitBlobBytes": 1899,
+      "gitBlobSha256": "1df1a4a5cb49117a4430d6d21db8a61ae03388eeb4221fd20fdb31c24e3a0161",
+      "comparison": "byte-exact"
+    },
+    {
+      "path": "shared/origin-theme.css",
+      "bytes": 776,
+      "actualSha256": "64c4f302bfff785197fb1fc621acfab44738fa791ef6a4d496f4dc5923809fec",
+      "snapshotSha256": "64c4f302bfff785197fb1fc621acfab44738fa791ef6a4d496f4dc5923809fec",
+      "gitBlobBytes": 752,
+      "gitBlobSha256": "e6e58a92c40e0085d14af1639cb8d4d834391d18664c662954d84945417c653a",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/origin-workspaces.ts",
+      "bytes": 488,
+      "actualSha256": "0fa7a638bcaff4bef176878cdf95f59c2d6297ece434caed3b134a58196c91e4",
+      "snapshotSha256": "0fa7a638bcaff4bef176878cdf95f59c2d6297ece434caed3b134a58196c91e4",
+      "gitBlobBytes": 479,
+      "gitBlobSha256": "06d4d48e4e3d5ec5b36d39c6e8447b4cb1e472e78734f2bfc8900dcae2ebb713",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/outbound.test.ts",
+      "bytes": 6104,
+      "actualSha256": "4064523f15d7666d0e56b16dd3eb12961e934efad9f10ec524a8af1449a1200a",
+      "snapshotSha256": "4064523f15d7666d0e56b16dd3eb12961e934efad9f10ec524a8af1449a1200a",
+      "gitBlobBytes": 5967,
+      "gitBlobSha256": "0a43a810a54545dd0a78172e64600a669da84243fd56cc3e09901681f385cee7",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/outbound.ts",
+      "bytes": 6453,
+      "actualSha256": "c39b22ceac857e68ecf1ad4ea7628cb51727309c7388b9b48e77b302ddd240aa",
+      "snapshotSha256": "c39b22ceac857e68ecf1ad4ea7628cb51727309c7388b9b48e77b302ddd240aa",
+      "gitBlobBytes": 6314,
+      "gitBlobSha256": "12f682f1ed4d2d3f172c526997339b8f64e38f9cdd8de2726ece13198249292e",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/package-fixtures/full-team.v2.json",
+      "bytes": 6678,
+      "actualSha256": "90f9a9931d1c13a189df9aa919a760dd0a8ddd6c89cc50808f64c9305d0ffa96",
+      "snapshotSha256": "90f9a9931d1c13a189df9aa919a760dd0a8ddd6c89cc50808f64c9305d0ffa96",
+      "gitBlobBytes": 6441,
+      "gitBlobSha256": "2ac70a5048a48d8ae0c431d73df7cc6ca7006f3a0b428ae4e7098c006b339c6f",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/package-fixtures/legacy-botmrr.v1.md",
+      "bytes": 4067,
+      "actualSha256": "aebdb40b1f34d704fc6d02afcdba0639206b03bc181865217dcd66fb02936627",
+      "snapshotSha256": "aebdb40b1f34d704fc6d02afcdba0639206b03bc181865217dcd66fb02936627",
+      "gitBlobBytes": 3899,
+      "gitBlobSha256": "334f9ec9a6b49afea7828b81b2625e23f5d3d12da2bdd226271723abb473ec57",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/package-fixtures/legacy-team.v1.json",
+      "bytes": 2797,
+      "actualSha256": "d0dd3d39e5f0edef123b33ebb213b4e70f477616fe87e80c744c749faeb41850",
+      "snapshotSha256": "d0dd3d39e5f0edef123b33ebb213b4e70f477616fe87e80c744c749faeb41850",
+      "gitBlobBytes": 2679,
+      "gitBlobSha256": "7e095cb01909cafd46c59cc91aa0d6012bcdd055ca8593e89859b59386dfefff",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/package-fixtures/library-only.v2.json",
+      "bytes": 1505,
+      "actualSha256": "54386af8e26b1d10ca411f61f263341b599ed603e8d0fde904124d2cc7c3a39b",
+      "snapshotSha256": "54386af8e26b1d10ca411f61f263341b599ed603e8d0fde904124d2cc7c3a39b",
+      "gitBlobBytes": 1450,
+      "gitBlobSha256": "5505dde4b4ad66d966c8daedffa04d8b29fbdb952c4aabd7bff3fd8292b6be36",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/package-fixtures/manifest.json",
+      "bytes": 6178,
+      "actualSha256": "ffe61de627c4a43489b6332ebe2ebb1e3fe3b247758e89db33e9981dbb66e486",
+      "snapshotSha256": "ffe61de627c4a43489b6332ebe2ebb1e3fe3b247758e89db33e9981dbb66e486",
+      "gitBlobBytes": 5947,
+      "gitBlobSha256": "c616894b6df211db8da0d9a15a1721102475c55cbab48a187c551e06de52d36d",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/package-fixtures/newer.v3.json",
+      "bytes": 218,
+      "actualSha256": "6417fbb384eaf950e4805cc0affd89fc918e99adf9b7d77dcfc05802085a19d5",
+      "snapshotSha256": "6417fbb384eaf950e4805cc0affd89fc918e99adf9b7d77dcfc05802085a19d5",
+      "gitBlobBytes": 206,
+      "gitBlobSha256": "990c95c05ecb5e067e6fb0d4461cc6bdd39b32e009da5249dbfbcaa2d1c837e2",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/package-fixtures/secret-in-soul.v2.json",
+      "bytes": 933,
+      "actualSha256": "1ce996998a5bacb8637d4af7491ee41eebfbbfa520aff4e0c1945a73c8e2637a",
+      "snapshotSha256": "1ce996998a5bacb8637d4af7491ee41eebfbbfa520aff4e0c1945a73c8e2637a",
+      "gitBlobBytes": 894,
+      "gitBlobSha256": "c5baea8ec130f901982a932f621d0a3c641c1c614a70266b243d2f7d007a94a1",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/package-format.test.ts",
+      "bytes": 15808,
+      "actualSha256": "33a782221fdd82ad75d0d15c24759c0315c4914acbc777fbec6988b93066a121",
+      "snapshotSha256": "33a782221fdd82ad75d0d15c24759c0315c4914acbc777fbec6988b93066a121",
+      "gitBlobBytes": 15540,
+      "gitBlobSha256": "33f40a97342fba0af7346597932a89cb0b18c676c7fcf1238bb0bc1109b54ccc",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/package-format.ts",
+      "bytes": 47806,
+      "actualSha256": "5617b8a45f640138d5e018794fa5a4d5ad29cd67b0dd33989b94951b60d67300",
+      "snapshotSha256": "5617b8a45f640138d5e018794fa5a4d5ad29cd67b0dd33989b94951b60d67300",
+      "gitBlobBytes": 46825,
+      "gitBlobSha256": "353aa97cd45bb88f96848573b3852d2f1e9e8fa7f614222b9050d2e1503aada2",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/pairing-link.test.ts",
+      "bytes": 8692,
+      "actualSha256": "347b32923374fb88a3158d7980243e1fda453f428b5c2c8d0215d15b32e169bf",
+      "snapshotSha256": "347b32923374fb88a3158d7980243e1fda453f428b5c2c8d0215d15b32e169bf",
+      "gitBlobBytes": 8515,
+      "gitBlobSha256": "e1277dbbd862e05c41a36c2adf974dfbb6285473fd2fa9d9b68af637e11932b8",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/pairing-link.ts",
+      "bytes": 6941,
+      "actualSha256": "386b3cc22ab06592623b4fed41635974c7ec55aebb70c17eb349c23dfae891c1",
+      "snapshotSha256": "386b3cc22ab06592623b4fed41635974c7ec55aebb70c17eb349c23dfae891c1",
+      "gitBlobBytes": 6772,
+      "gitBlobSha256": "f15e524ff633602a4aa33df454d38b1d50ddd08084471d77f5e0f09455b71e98",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/person-mention.test.ts",
+      "bytes": 3425,
+      "actualSha256": "7f0a7731a6b49a7d302df268e3a23b948fb08533867b55991777de8e1e5f0038",
+      "snapshotSha256": "7f0a7731a6b49a7d302df268e3a23b948fb08533867b55991777de8e1e5f0038",
+      "gitBlobBytes": 3364,
+      "gitBlobSha256": "10e6791bddc7fa6f3515a3b585c08e1025f0d5f3b1fe5073b3d364adb03dcade",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/person-mention.ts",
+      "bytes": 3569,
+      "actualSha256": "bd527567452e5b1005dd1d8d743867d9a0a001735610df7dcd43c2209d7ed73d",
+      "snapshotSha256": "bd527567452e5b1005dd1d8d743867d9a0a001735610df7dcd43c2209d7ed73d",
+      "gitBlobBytes": 3496,
+      "gitBlobSha256": "ee75993da7ea318692f2aef8b8ebdbb3de06473e316b2446e5eaf3d1d8bf2964",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/place-view.test.ts",
+      "bytes": 13839,
+      "actualSha256": "d94be4e560bb4eb902268c006e43d34dee5d31e0c0d903cc21b62bb3a3ba8c6e",
+      "snapshotSha256": "d94be4e560bb4eb902268c006e43d34dee5d31e0c0d903cc21b62bb3a3ba8c6e",
+      "gitBlobBytes": 13634,
+      "gitBlobSha256": "1903c9a2bc8b5afd139db5a188f719a60345ba56032231aafc59b37046dd49cb",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/place-view.ts",
+      "bytes": 26139,
+      "actualSha256": "78840d566ec84dd6f99ef16d88f0b128a739fddaf0e9f95d17fec277ec77dff5",
+      "snapshotSha256": "78840d566ec84dd6f99ef16d88f0b128a739fddaf0e9f95d17fec277ec77dff5",
+      "gitBlobBytes": 25641,
+      "gitBlobSha256": "39c3464698db79d4c9eda0facb37f8ebb9c1e04e980ce75da43f51c7843810a6",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/product-brand.d.mts",
+      "bytes": 34,
+      "actualSha256": "e00763674ebb09a603cec13e1bfed41f6294551a31cb04c0d7809dfdf0c3b4d7",
+      "snapshotSha256": "e00763674ebb09a603cec13e1bfed41f6294551a31cb04c0d7809dfdf0c3b4d7",
+      "gitBlobBytes": 33,
+      "gitBlobSha256": "d449afcd3e14134ceb4e820b6dd143036f57b8f6563467db6ecf9ef14f832b40",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/product-brand.mjs",
+      "bytes": 35,
+      "actualSha256": "9066b6c7d356f96b7f4f7327544d4aa100a8b72d04eac39c37e3c81b1f7dde2e",
+      "snapshotSha256": "9066b6c7d356f96b7f4f7327544d4aa100a8b72d04eac39c37e3c81b1f7dde2e",
+      "gitBlobBytes": 34,
+      "gitBlobSha256": "9e6ee8914888bcac087623b42c5039d68c65d2224575286efc10ca975c0dd051",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/product-brand.test.ts",
+      "bytes": 1000,
+      "actualSha256": "6f55b87e07b4a99ca9980df7cc44661079a4677a9543faa0488209318b556685",
+      "snapshotSha256": "6f55b87e07b4a99ca9980df7cc44661079a4677a9543faa0488209318b556685",
+      "gitBlobBytes": 982,
+      "gitBlobSha256": "845af259419b2b20a9f0042200354fd39d2668d40687e93fee51696895b7fcfa",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/profile-request.ts",
+      "bytes": 1665,
+      "actualSha256": "ad86fe3b885a5eb34f89b3f61f7d91db8e849564b70dabcae7cd2a110a9924f1",
+      "snapshotSha256": "ad86fe3b885a5eb34f89b3f61f7d91db8e849564b70dabcae7cd2a110a9924f1",
+      "gitBlobBytes": 1630,
+      "gitBlobSha256": "476195aaa7a4dc50e657284a39ac5c09d4e4793cc7a166f9ba8d66d223b3ffe0",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/provider-icon.test.ts",
+      "bytes": 1981,
+      "actualSha256": "a73eebd534f984e2f14f085c9fe7727ccc45dcd37482c7584986a08e9311e359",
+      "snapshotSha256": "a73eebd534f984e2f14f085c9fe7727ccc45dcd37482c7584986a08e9311e359",
+      "gitBlobBytes": 1961,
+      "gitBlobSha256": "a9d65e559641a4a11e517b1c090eb7de9f8535920112213dfa82dc7c60526ca9",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/provider-icon.ts",
+      "bytes": 5225,
+      "actualSha256": "17e1b8f99c5dda151d88716061f1359328ce39416c94515c3906b0c98a4088db",
+      "snapshotSha256": "17e1b8f99c5dda151d88716061f1359328ce39416c94515c3906b0c98a4088db",
+      "gitBlobBytes": 5123,
+      "gitBlobSha256": "fb3c8720605b31f194c4de740117548f12e4d41c46a352ae948f457393b3d563",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/provider-safety.ts",
+      "bytes": 719,
+      "actualSha256": "32a9d9aff2d4b293826927a8c048f558ce47fd39d26d3b759215cea2115376eb",
+      "snapshotSha256": "32a9d9aff2d4b293826927a8c048f558ce47fd39d26d3b759215cea2115376eb",
+      "gitBlobBytes": 712,
+      "gitBlobSha256": "bd68add9226c2272f427089cc47378242bc1649102d73a2f3af736e1acd8a712",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/redact.ts",
+      "bytes": 5073,
+      "actualSha256": "5b63b26cb2668d38bac1200b84e5ba2748441e44846af6e5e8aad047a406e2ae",
+      "snapshotSha256": "5b63b26cb2668d38bac1200b84e5ba2748441e44846af6e5e8aad047a406e2ae",
+      "gitBlobBytes": 4986,
+      "gitBlobSha256": "7a279267caa610cd02b8d7e886a0294ea234548ce7d4a89db3260b7459cb5cde",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/reply-style.test.ts",
+      "bytes": 1943,
+      "actualSha256": "614b1811639d78d1b365a88923f6b8a9eb58671dd6344e659db51a8edf2e8d1f",
+      "snapshotSha256": "614b1811639d78d1b365a88923f6b8a9eb58671dd6344e659db51a8edf2e8d1f",
+      "gitBlobBytes": 1893,
+      "gitBlobSha256": "352c4198cb6b1665c14fdb5ac7e3714558bd3f18bcb60cc6bd2a056ac8f321a2",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/reply-style.ts",
+      "bytes": 1643,
+      "actualSha256": "d37a71d431cfe1ceacd3180241d01a3dd1bf49bcb6cb9b6ee469a52e04f64345",
+      "snapshotSha256": "d37a71d431cfe1ceacd3180241d01a3dd1bf49bcb6cb9b6ee469a52e04f64345",
+      "gitBlobBytes": 1599,
+      "gitBlobSha256": "958e8ee9eda5d3a928b80c7f52120003dbf4154a32223b102c0b5eafcec92723",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/routine-request.ts",
+      "bytes": 5033,
+      "actualSha256": "065880cef1ad19310a6cceaf2a16197d4715ad67ee6ce366afa6b02153c83365",
+      "snapshotSha256": "065880cef1ad19310a6cceaf2a16197d4715ad67ee6ce366afa6b02153c83365",
+      "gitBlobBytes": 4906,
+      "gitBlobSha256": "3acd06bf3345e0a97e038716430464f7ddc9dff14fc7b5a3a8f296e221fec0d2",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/routine-run.ts",
+      "bytes": 1016,
+      "actualSha256": "96a5946994bbc7f8a6a7cae1c5d6faba3f600dd5eca371cf27cbaa5ca8d136b5",
+      "snapshotSha256": "96a5946994bbc7f8a6a7cae1c5d6faba3f600dd5eca371cf27cbaa5ca8d136b5",
+      "gitBlobBytes": 994,
+      "gitBlobSha256": "7aefcd57e90bcfd5f7a48bfb629a492ca3363ed834ae68b48ef28b15d13547bf",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/routine-schedule.test.ts",
+      "bytes": 6149,
+      "actualSha256": "8f1591894b2077b9ed4830f94f4d8d51449fde6cf7291270122517d3726c559b",
+      "snapshotSha256": "8f1591894b2077b9ed4830f94f4d8d51449fde6cf7291270122517d3726c559b",
+      "gitBlobBytes": 6050,
+      "gitBlobSha256": "ff0f085b806a1eadd62d9ca9fef1be350b57836fd2f0112bc4e9bbff0e260e32",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/routine-schedule.ts",
+      "bytes": 4790,
+      "actualSha256": "4664eca33e441597cdb10cddadedc2e98a1e611bd50f039d27ddbb3d82c2abba",
+      "snapshotSha256": "4664eca33e441597cdb10cddadedc2e98a1e611bd50f039d27ddbb3d82c2abba",
+      "gitBlobBytes": 4702,
+      "gitBlobSha256": "a60253f7876bbefd62d316c6d26f273a80b757e84a37eb5a84e4da48502937fd",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/routines.ts",
+      "bytes": 5030,
+      "actualSha256": "1b714a8077bfb56ce71a2fe4a29d717d06f51a0f1f048ef543c7ca49ee1b3c78",
+      "snapshotSha256": "1b714a8077bfb56ce71a2fe4a29d717d06f51a0f1f048ef543c7ca49ee1b3c78",
+      "gitBlobBytes": 4861,
+      "gitBlobSha256": "8f21f7e77fc03107d045ceab903721dfd872b99570c1706fa2f2d292ac412f2a",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/runtime-events.ts",
+      "bytes": 8467,
+      "actualSha256": "ac06768a14f329a0f386e7d36eb927f0a5cbecbaeb7f53c5d9ca065a777ae91c",
+      "snapshotSha256": "ac06768a14f329a0f386e7d36eb927f0a5cbecbaeb7f53c5d9ca065a777ae91c",
+      "gitBlobBytes": 8288,
+      "gitBlobSha256": "6f314237a534b668ff4ee74acbfabd0e2b654df9cb3e2abda9787f06ad4cbdde",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/sign-in-request.ts",
+      "bytes": 3805,
+      "actualSha256": "30dadbf03915c8bc63ff3476e8fd9a3c07a24ff639915edfe3f8183154fe8fcb",
+      "snapshotSha256": "30dadbf03915c8bc63ff3476e8fd9a3c07a24ff639915edfe3f8183154fe8fcb",
+      "gitBlobBytes": 3728,
+      "gitBlobSha256": "7bc4661ea941f0273ce7d48f0fbe736c34e29da3714b8e8f7e177d98120bdbe1",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/site.ts",
+      "bytes": 3019,
+      "actualSha256": "0bc64f3f012d331a55b22b5d74e9e1aa89f762fa94b62d938ba2c3489c25377b",
+      "snapshotSha256": "0bc64f3f012d331a55b22b5d74e9e1aa89f762fa94b62d938ba2c3489c25377b",
+      "gitBlobBytes": 2972,
+      "gitBlobSha256": "1dfbd276b0d8c3a171aabf80d7714e7bcef9ae85f398896ca95d816a014513c1",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/skill-command.ts",
+      "bytes": 1609,
+      "actualSha256": "cf57fb7531e136e3ba25fe2716e5b3616e6223524a0f99cc4c40ea7c7014d3a4",
+      "snapshotSha256": "cf57fb7531e136e3ba25fe2716e5b3616e6223524a0f99cc4c40ea7c7014d3a4",
+      "gitBlobBytes": 1577,
+      "gitBlobSha256": "23730c19f45896a218ba49313c52a8b4fd5ea2ffabe6bf471f76e951b7f98fee",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/skill-md.ts",
+      "bytes": 5533,
+      "actualSha256": "e6273fb80dd75a1db222d07e91373dc09a32dcc96b8f151e978ee507615f98e9",
+      "snapshotSha256": "e6273fb80dd75a1db222d07e91373dc09a32dcc96b8f151e978ee507615f98e9",
+      "gitBlobBytes": 5399,
+      "gitBlobSha256": "5d43ef2cea8fad9c143d1ba7bb3dfb9611b0c933cc352bc60cef17defd24697c",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/skill-request.ts",
+      "bytes": 2687,
+      "actualSha256": "5eb83e2a49ca02e18a6bad386bc18542469d0764a58b05faa904b96eae42651f",
+      "snapshotSha256": "5eb83e2a49ca02e18a6bad386bc18542469d0764a58b05faa904b96eae42651f",
+      "gitBlobBytes": 2626,
+      "gitBlobSha256": "c6585cdff303f8654432ffa52f40af53a840039ac7ef8474709cff9f99a696ea",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/system-message-guard.test.ts",
+      "bytes": 2852,
+      "actualSha256": "7293498c006c3ca606d6acafa6011712d9d667d709dacaa81a830f997d97cc46",
+      "snapshotSha256": "7293498c006c3ca606d6acafa6011712d9d667d709dacaa81a830f997d97cc46",
+      "gitBlobBytes": 2793,
+      "gitBlobSha256": "3c04ace3dc8dc362fefbf3a910fee27fcbd10ab1c121934170095a1866aee892",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/system-message-guard.ts",
+      "bytes": 1909,
+      "actualSha256": "bfd493c1e1e6f746b4cd65aa3d171f30ffecc80ef8c51495a03cf803d79115b1",
+      "snapshotSha256": "bfd493c1e1e6f746b4cd65aa3d171f30ffecc80ef8c51495a03cf803d79115b1",
+      "gitBlobBytes": 1881,
+      "gitBlobSha256": "b6ae8e6fab3d5a676af924ee252d22bc2116332de540a277824b21524daff437",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/team-backup.ts",
+      "bytes": 10641,
+      "actualSha256": "5b89f77b2ef2cd4515711766cf02096d6c82abee34b58da27fab769bdf432133",
+      "snapshotSha256": "5b89f77b2ef2cd4515711766cf02096d6c82abee34b58da27fab769bdf432133",
+      "gitBlobBytes": 10440,
+      "gitBlobSha256": "72305975f5f19d7d6a1959edb4a4898dcd02db87a7b74b0bc0238a9524822e14",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/team-computer.ts",
+      "bytes": 419,
+      "actualSha256": "ba0f70faf747ccd3ab085735e3e51f7595164089f13a37dc97056de847fdaf07",
+      "snapshotSha256": "ba0f70faf747ccd3ab085735e3e51f7595164089f13a37dc97056de847fdaf07",
+      "gitBlobBytes": 403,
+      "gitBlobSha256": "38d943778ffd6572429f927ffaa07d70d272977fae2c0339c164b240f71413cc",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/team-setup.ts",
+      "bytes": 1468,
+      "actualSha256": "5430ee4b72952ef8b9b890b1673ea39b2f87f6f89cac157ad2b3ef2f87fbf9fd",
+      "snapshotSha256": "5430ee4b72952ef8b9b890b1673ea39b2f87f6f89cac157ad2b3ef2f87fbf9fd",
+      "gitBlobBytes": 1421,
+      "gitBlobSha256": "fa9f1317fac5848c8e1ce8a19aafffd2e9b8307cca96ee8e036c24cfa483d25c",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/thread-link.test.ts",
+      "bytes": 2058,
+      "actualSha256": "6d24ad296e0290acb0dadd5e23b98d44390a5ee913712a28993d2218ab0d09f1",
+      "snapshotSha256": "6d24ad296e0290acb0dadd5e23b98d44390a5ee913712a28993d2218ab0d09f1",
+      "gitBlobBytes": 2027,
+      "gitBlobSha256": "81e4d04ecd1bef9611736dfe276da3a1ede4b145339aabef25600fa61c2b42e8",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/thread-link.ts",
+      "bytes": 1147,
+      "actualSha256": "495378f88441bd3c8cf771b9cf3821e07932dbba391dadbaf0c6bf4f1501db64",
+      "snapshotSha256": "495378f88441bd3c8cf771b9cf3821e07932dbba391dadbaf0c6bf4f1501db64",
+      "gitBlobBytes": 1121,
+      "gitBlobSha256": "cb1751f4ed0c4842f9d35963d93d9e29abe7dd9de6cf0bff704c7b627a4960a6",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/thread-model.ts",
+      "bytes": 1248,
+      "actualSha256": "b18bdd515610219e7410ea05cc27a6952dccf53597c9802ebc99cf39ca28293a",
+      "snapshotSha256": "b18bdd515610219e7410ea05cc27a6952dccf53597c9802ebc99cf39ca28293a",
+      "gitBlobBytes": 1226,
+      "gitBlobSha256": "56ea84988e3fbfabaaade76e0fdae13c3828561a7949593cbcfc64c7b3f06bc4",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/tool-name.ts",
+      "bytes": 1069,
+      "actualSha256": "9b2ee8a61e4c1caf60a602de4f1d0304a9cd7ba2518b5eb91900469e226be3f4",
+      "snapshotSha256": "9b2ee8a61e4c1caf60a602de4f1d0304a9cd7ba2518b5eb91900469e226be3f4",
+      "gitBlobBytes": 1047,
+      "gitBlobSha256": "f88e0ce024dc489c4de093a5d118d7f4549bba34399b88294cf8ec80742bc9be",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/tool-scope-support.ts",
+      "bytes": 1603,
+      "actualSha256": "bb4b0c79fc12b2db26cdd920353d4278a62bab5d43bd42203d64f1105000e0d3",
+      "snapshotSha256": "bb4b0c79fc12b2db26cdd920353d4278a62bab5d43bd42203d64f1105000e0d3",
+      "gitBlobBytes": 1579,
+      "gitBlobSha256": "420982260074e0ae8d96b06a4f0f6f08b5d0d626a3f118029bcfbb90460c5ab4",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/tool-scope.test.ts",
+      "bytes": 7525,
+      "actualSha256": "18780167cfb2edbb5ee70d5142000ea0476c39ac9d17a8d8fc0651b400ee8e1f",
+      "snapshotSha256": "18780167cfb2edbb5ee70d5142000ea0476c39ac9d17a8d8fc0651b400ee8e1f",
+      "gitBlobBytes": 7418,
+      "gitBlobSha256": "cae0bf4e4cd308c49c5bdabcc67b35fc8f7b11f69215d7cb6c2acf85ec8c645d",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/tool-scope.ts",
+      "bytes": 6261,
+      "actualSha256": "eeeb433da4a2d4b310a2e87f14eb4dad15fa4882c1468610e1cf76683e6e4c88",
+      "snapshotSha256": "eeeb433da4a2d4b310a2e87f14eb4dad15fa4882c1468610e1cf76683e6e4c88",
+      "gitBlobBytes": 6127,
+      "gitBlobSha256": "761dc28c73171e765992eed6c5adb51dc52bac51d57bb812df9643c41b6440be",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/tool-surface.ts",
+      "bytes": 3762,
+      "actualSha256": "35d3fb6b7a29d4fc1240e12bd74d542a428bb7f0c22831bfe16cc8624616e2c1",
+      "snapshotSha256": "35d3fb6b7a29d4fc1240e12bd74d542a428bb7f0c22831bfe16cc8624616e2c1",
+      "gitBlobBytes": 3705,
+      "gitBlobSha256": "06368a150d14ca02d9a8785b2a8658ce27acc645eb9787f710a74e597e1c2315",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/trial-credit.ts",
+      "bytes": 1418,
+      "actualSha256": "0526dd66ece1a106cde504d58eb2e54f3ac772902cd0ff807c1b2e4ccbf9850d",
+      "snapshotSha256": "0526dd66ece1a106cde504d58eb2e54f3ac772902cd0ff807c1b2e4ccbf9850d",
+      "gitBlobBytes": 1399,
+      "gitBlobSha256": "f0eb99035aef0167827f4d34874e501feedf16ec133519b05503b275f3747ab7",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/vega-config.test.ts",
+      "bytes": 2216,
+      "actualSha256": "b1bad00245ff64318449105f625bb191e5840ffff2855e604160e9e444998dbd",
+      "snapshotSha256": "b1bad00245ff64318449105f625bb191e5840ffff2855e604160e9e444998dbd",
+      "gitBlobBytes": 2167,
+      "gitBlobSha256": "ecace135aad0142f29be4e974124d2c9638131c653029bd68306a46e2e4cc476",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/vega-config.ts",
+      "bytes": 3694,
+      "actualSha256": "e0eefdbdd1498544bb58ace8a7cbd06941b67d5578f4f0d9cbfa5c1630694e04",
+      "snapshotSha256": "e0eefdbdd1498544bb58ace8a7cbd06941b67d5578f4f0d9cbfa5c1630694e04",
+      "gitBlobBytes": 3599,
+      "gitBlobSha256": "a31ccf6bdde36a8fff52f9431095bb346b7f5ce9502f3624dbc8356bb642d264",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/webhooks.ts",
+      "bytes": 1899,
+      "actualSha256": "d17d988fe3d9223c8b1ae5d385a561c3b88ee3a9462e4cedd83a961bc05e98d7",
+      "snapshotSha256": "d17d988fe3d9223c8b1ae5d385a561c3b88ee3a9462e4cedd83a961bc05e98d7",
+      "gitBlobBytes": 1829,
+      "gitBlobSha256": "ae7238a286cfe10f39615329321ba4134fe96d2a07e42c814f579b54eeb2c1b5",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/widget-chart.test.ts",
+      "bytes": 6883,
+      "actualSha256": "c286e9bf1587f863e7f223bc11fc3906987575554a30927452cb2e6af820185e",
+      "snapshotSha256": "c286e9bf1587f863e7f223bc11fc3906987575554a30927452cb2e6af820185e",
+      "gitBlobBytes": 6759,
+      "gitBlobSha256": "7728c088e9eb5a44c0eacaca97b6e270a63ef5243990eaba843adbbbed5756a6",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/widget-chart.ts",
+      "bytes": 6958,
+      "actualSha256": "15f44807f2754b7b12b64b0b33eccb30bcedf916dc7a1efdd090d2d2f9825502",
+      "snapshotSha256": "15f44807f2754b7b12b64b0b33eccb30bcedf916dc7a1efdd090d2d2f9825502",
+      "gitBlobBytes": 6832,
+      "gitBlobSha256": "bfbbdb70789fb45c2a064d43fa0b419184e26d9233c54f3367f92f1eef90bf2f",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/widget-samples.ts",
+      "bytes": 11825,
+      "actualSha256": "fac41d932f8e4500e9c26533834f8450eddb021cfc65c61fddfddf98772ff4a0",
+      "snapshotSha256": "fac41d932f8e4500e9c26533834f8450eddb021cfc65c61fddfddf98772ff4a0",
+      "gitBlobBytes": 11612,
+      "gitBlobSha256": "0227466550007edf57862d57f65bbd7494f72084ccde42263d6d28465325e6e2",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/widget.test.ts",
+      "bytes": 33126,
+      "actualSha256": "5775e42978eec97ce39e86949a58eb3b78e892b843c24a907f8f7dc43861e3fd",
+      "snapshotSha256": "5775e42978eec97ce39e86949a58eb3b78e892b843c24a907f8f7dc43861e3fd",
+      "gitBlobBytes": 32707,
+      "gitBlobSha256": "164a6443d6fffcaf59e21522c06d55e71dc101108d123beca49b60d5686e32ee",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/widget.ts",
+      "bytes": 52510,
+      "actualSha256": "c49963cf8ec294c5641800457d9ccbcb61be02c6bb7ad4dccbf2f99b6a891e3c",
+      "snapshotSha256": "c49963cf8ec294c5641800457d9ccbcb61be02c6bb7ad4dccbf2f99b6a891e3c",
+      "gitBlobBytes": 51569,
+      "gitBlobSha256": "9f288d951a14f8f6d6088e8e26d5417c264473f2f763192cae3e10b18bfbfcdb",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/wire.ts",
+      "bytes": 41962,
+      "actualSha256": "3a0bb7dc0e31b91bef607cbacad194ddcbd0724d8aadd5a5fa9101b530471c55",
+      "snapshotSha256": "3a0bb7dc0e31b91bef607cbacad194ddcbd0724d8aadd5a5fa9101b530471c55",
+      "gitBlobBytes": 41016,
+      "gitBlobSha256": "c529311aebeb6b31a4a76c4680c5c100643d1e38e949606be03f4122458d5e2c",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/workspace-backup-client.ts",
+      "bytes": 787,
+      "actualSha256": "616436cdc85b153726d2990ea772a7e804843ddf7b30ea2a1b709a988ccf16f4",
+      "snapshotSha256": "616436cdc85b153726d2990ea772a7e804843ddf7b30ea2a1b709a988ccf16f4",
+      "gitBlobBytes": 765,
+      "gitBlobSha256": "2fbe175ec73bd1c32c77b71ab08d5e9b480e3762d9936c31a2044e30deb99695",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/workspace-backup.ts",
+      "bytes": 1051,
+      "actualSha256": "5f34c91966829e7a56e0d958ce9befa8abed3d3c36c99ae7dd4eab7018941d9c",
+      "snapshotSha256": "5f34c91966829e7a56e0d958ce9befa8abed3d3c36c99ae7dd4eab7018941d9c",
+      "gitBlobBytes": 1018,
+      "gitBlobSha256": "61e3aee3717d5b39d8bb90463fb751864d1fb855b01f29b50e2bf11b5c48d142",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/written-skill.test.ts",
+      "bytes": 2435,
+      "actualSha256": "6c654c4f5f3523d3962c1acfaba1485147d287aa2699b99f34827c7dd8c7d880",
+      "snapshotSha256": "6c654c4f5f3523d3962c1acfaba1485147d287aa2699b99f34827c7dd8c7d880",
+      "gitBlobBytes": 2393,
+      "gitBlobSha256": "688ec7a7974f0972c15cdd5f18cc46cc08aaada31a93740255e797258b8b07d5",
+      "comparison": "CRLF-versus-LF-only"
+    },
+    {
+      "path": "shared/written-skill.ts",
+      "bytes": 2761,
+      "actualSha256": "b4abc4e35d27ef310a6c8e3b20e4258a82df856e854d6a1f6c717f0d353a0b43",
+      "snapshotSha256": "b4abc4e35d27ef310a6c8e3b20e4258a82df856e854d6a1f6c717f0d353a0b43",
+      "gitBlobBytes": 2705,
+      "gitBlobSha256": "db73191f5eac2bfe9f9b80235f85b8c3739b3830b63e2283ba64ab299f33ccc9",
+      "comparison": "CRLF-versus-LF-only"
+    }
+  ]
+}

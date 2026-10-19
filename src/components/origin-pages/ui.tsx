@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { Component, Fragment, useCallback, useContext, useEffect, useId, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { CloudOff, FolderPlus, Link2, Loader2, LogIn, Plus, RotateCw, SearchX, ServerOff, Users, X } from "lucide-react";
 import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
 import { linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
 import { useWorkspaceAccess, type WorkspaceRole } from "@/lib/origin-members";
 import { cn } from "@/lib/cn";
-import { overlayMotion, sheetMotion, useDismiss } from "../CenteredDialog";
+import { CenteredDialog } from "../CenteredDialog";
 import { GlassHeader, useInGlassHeader } from "../GlassScrollFrame";
 import { Select } from "../Select";
 import type { CloudProject } from "./cloud-types";
 import { errorText } from "./repo-url";
+import { OriginQueryFailures, OriginQueryRecovery, OriginQueryUnavailable } from "@/lib/origin-cloud/query-failure";
+import { useCloudToken } from "@/lib/origin-cloud/hooks";
 
 export { CenteredDialog, overlayMotion, sheetMotion, useDismiss } from "../CenteredDialog";
 
@@ -27,13 +29,13 @@ export const ghostButton =
   `inline-flex min-h-8 items-center justify-center gap-1.5 rounded-lg border border-hairline/60 px-3 py-1.5 text-[13px] text-ink-secondary transition-colors hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 export const iconButton =
   `inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
-export const cardClass = "rounded-xl border border-hairline/40 bg-panel";
+export const cardClass = "min-w-0 rounded-xl border border-hairline/40 bg-panel";
 export const chipButton =
   `inline-flex h-8 max-w-[220px] items-center gap-1.5 rounded-full border border-hairline/60 bg-raised/60 px-3 text-[12.5px] text-ink-secondary transition-colors hover:border-hairline hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 /** Clears the glass header a page scrolls beneath; `--glass-top` is the header's height, published by its frame. */
 export const underGlass = "pt-[calc(var(--glass-top,0px)+1.25rem)] [scroll-padding-top:var(--glass-top,0px)]";
 /** The scrolling body every project and workspace page shares. */
-export const pageClass = `flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-5 md:px-6 ${underGlass} motion-safe:animate-[rise_0.24s_cubic-bezier(0.22,1,0.36,1)_backwards]`;
+export const pageClass = `flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-4 pb-5 md:px-6 ${underGlass} motion-safe:animate-[rise_0.18s_cubic-bezier(0.22,1,0.36,1)_backwards]`;
 
 function GateShell({ children }: { children: ReactNode }) {
   return <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]">{children}</div>;
@@ -60,10 +62,52 @@ function Stalled({ label, onRetry }: { label: string; onRetry(): void }) {
   );
 }
 
+class QueryFailureBoundary extends Component<{ label: string; onRetry(): void; children: ReactNode }, { error: Error | null }> {
+  state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      if (!(this.state.error instanceof OriginQueryUnavailable)) throw this.state.error;
+      return <GateShell><Stalled label={this.props.label} onRetry={this.props.onRetry} /></GateShell>;
+    }
+    return this.props.children;
+  }
+}
+
+export function CloudQueryBoundary({ label, children }: { label: string; children: ReactNode }) {
+  const url = useCloudUrl();
+  const token = useCloudToken();
+  const [scope, setScope] = useState({ url, token, revision: 0 });
+  const [failures, setFailures] = useState<ReadonlySet<string>>(new Set());
+  const current = scope.url === url && scope.token === token ? scope : { url, token, revision: scope.revision + 1 };
+  if (current !== scope) { setScope(current); setFailures(new Set()); }
+  const [attempt, retry] = useRetry();
+  const [refresh, refreshQueries] = useRetry();
+  const reportFailure = useCallback((key: string, failed: boolean) => setFailures((current) => {
+    if (current.has(key) === failed) return current;
+    const next = new Set(current);
+    if (failed) next.add(key);
+    else next.delete(key);
+    return next;
+  }), []);
+  const recovery = useMemo(() => ({ attempt: attempt + refresh, label, failureCount: failures.size, retry: refreshQueries, reportFailure }), [attempt, refresh, label, failures.size, refreshQueries, reportFailure]);
+  return <OriginQueryRecovery value={recovery}>
+    {failures.size > 0 && <GlassHeader><div className={glassHeaderRow}><CloudQueryRefreshNotice /></div></GlassHeader>}
+    <QueryFailureBoundary key={`${current.revision}:${attempt}`} label={label} onRetry={retry}><OriginQueryFailures value={true}>{children}</OriginQueryFailures></QueryFailureBoundary>
+  </OriginQueryRecovery>;
+}
+
+export function CloudQueryRefreshNotice({ className }: { className?: string }) {
+  const recovery = useContext(OriginQueryRecovery);
+  if (!recovery?.failureCount) return null;
+  return <div className={className}><Notice tone="danger">Could not refresh {recovery.label.toLowerCase()}. Showing the last loaded data.<button type="button" className={cn(ghostButton, "ml-2 min-h-7 px-2 py-1 text-[12px]")} onClick={recovery.retry}>Try again</button></Notice></div>;
+}
+
 /** Remounts a gate on retry, so its queries subscribe afresh. */
 function useRetry(): [number, () => void] {
   const [attempt, setAttempt] = useState(0);
-  return [attempt, () => setAttempt((value) => value + 1)];
+  const retry = useCallback(() => setAttempt((value) => value + 1), []);
+  return [attempt, retry];
 }
 
 export type ProjectContext = { project: CloudProject; projectId: string; canEdit: boolean; isAdmin: boolean };
@@ -72,7 +116,7 @@ type CloudGateProps = OriginPageProps & { label: string; children: (ctx: Project
 
 export function CloudGate(props: CloudGateProps) {
   const [attempt, retry] = useRetry();
-  return <ProjectGate key={attempt} {...props} onRetry={retry} />;
+  return <CloudQueryBoundary key={props.cloudProjectId} label={props.label}><ProjectGate key={attempt} {...props} onRetry={retry} /></CloudQueryBoundary>;
 }
 
 function ProjectGate({ cloudProjectId, projectName, link, label, children, onRetry }: CloudGateProps & { onRetry(): void }) {
@@ -90,7 +134,7 @@ function ProjectGate({ cloudProjectId, projectName, link, label, children, onRet
   if (project === null) {
     return <GateShell><EmptyState icon={<SearchX size={22} />} title={`No access to ${projectName}`} /></GateShell>;
   }
-  return <>{children({ project, projectId: cloudProjectId, canEdit: project.memberRole !== "viewer", isAdmin: project.memberRole === "owner" || project.memberRole === "admin" })}</>;
+  return <Fragment key={JSON.stringify([url, session.user?._id, cloudProjectId])}>{children({ project, projectId: cloudProjectId, canEdit: project.memberRole !== "viewer", isAdmin: project.memberRole === "owner" || project.memberRole === "admin" })}</Fragment>;
 }
 
 function SetUpProject({ projectName, label, link }: { projectName: string; label: string; link?: ProjectLink }) {
@@ -142,7 +186,7 @@ type WorkspaceGateProps = { teamId: string | null; label: string; head?: { id: s
 
 export function WorkspaceGate(props: WorkspaceGateProps) {
   const [attempt, retry] = useRetry();
-  return <TeamGate key={attempt} {...props} onRetry={retry} />;
+  return <CloudQueryBoundary key={props.teamId} label={props.label}><TeamGate key={attempt} {...props} onRetry={retry} /></CloudQueryBoundary>;
 }
 
 function TeamGate({ teamId, label, head, children, onRetry }: WorkspaceGateProps & { onRetry(): void }) {
@@ -160,7 +204,7 @@ function TeamGate({ teamId, label, head, children, onRetry }: WorkspaceGateProps
   if (access === null) {
     return <GateShell><EmptyState icon={<SearchX size={22} />} title="No access to this workspace" /></GateShell>;
   }
-  return <>{children({ teamId, me: session.user, role: access.role, canEdit: access.role !== "viewer" })}</>;
+  return <Fragment key={JSON.stringify([url, session.user._id, teamId])}>{children({ teamId, me: session.user, role: access.role, canEdit: access.role !== "viewer" })}</Fragment>;
 }
 
 function SetUpWorkspace({ label, head }: { label: string; head?: { id: string; name: string } }) {
@@ -290,6 +334,10 @@ export function Notice({ tone = "info", children }: { tone?: "info" | "danger"; 
   );
 }
 
+export function ReadOnlyEditorNotice({ canEdit }: { canEdit: boolean }) {
+  return canEdit ? null : <Notice>Editing access changed. Your draft is kept, but your current role cannot save it.</Notice>;
+}
+
 /** A page's header row once it sits in the glass above the page, lined up with the page's own gutters. */
 export const glassHeaderRow = "px-4 pb-3 md:px-6";
 
@@ -308,47 +356,26 @@ export function PageHeader({ title, count, children }: { title: string; count?: 
 
 export function Field({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <label className={cn("flex flex-col gap-1 text-[12px] font-medium text-ink-secondary", className)}>
+    <label className={cn("flex min-w-0 flex-col gap-1 text-[12px] font-medium text-ink-secondary", className)}>
       {label}
       {children}
     </label>
   );
 }
 
-export function Modal({ title, onClose: requestClose, children, wide, className }: { title: ReactNode; onClose(): void; children: ReactNode; wide?: boolean; className?: string }) {
-  const panel = useRef<HTMLDivElement>(null);
-  const { closing, dismiss: onClose } = useDismiss(requestClose);
-  const close = useRef(onClose);
-  close.current = onClose;
-  useEffect(() => {
-    const returnTo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); close.current(); }
-      if (event.key !== "Tab" || !panel.current) return;
-      const focusable = [...panel.current.querySelectorAll<HTMLElement>("button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])")];
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (!first || !last) return;
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-    };
-    window.addEventListener("keydown", onKey);
-    const root = panel.current;
-    if (root && !root.contains(document.activeElement)) (root.querySelector<HTMLElement>("input:not([type=hidden]), textarea, select") ?? root.querySelector<HTMLElement>("button"))?.focus({ preventScroll: true });
-    return () => { window.removeEventListener("keydown", onKey); returnTo?.focus({ preventScroll: true }); };
-  }, []);
+export function Modal({ title, onClose, canClose, children, wide, className }: { title: ReactNode; onClose(): void; canClose?(): boolean; children: ReactNode; wide?: boolean; className?: string }) {
+  const heading = useId();
   return (
-    <div className={cn("fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/55 backdrop-blur-[2px] sm:items-start sm:p-4 md:p-10", overlayMotion(closing))}
-      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div ref={panel} role="dialog" aria-modal="true"
-        className={cn("w-full rounded-t-2xl border border-hairline/60 bg-menu sm:rounded-2xl", sheetMotion(closing), wide ? "sm:max-w-4xl" : "sm:max-w-md", className)}>
+    <CenteredDialog label={typeof title === "string" ? title : "Dialog"} labelledBy={heading} onClose={onClose} canClose={canClose}
+      className={cn(wide ? "sm:max-w-4xl" : "sm:max-w-md", className)}>
+      {(dismiss) => <>
         <div className="flex items-center gap-2 px-4 pb-2 pt-3">
-          <h3 className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink-secondary">{title}</h3>
-          <button type="button" className={iconButton} aria-label="Close" onClick={onClose}><X size={16} /></button>
+          <h3 id={heading} className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink-secondary">{title}</h3>
+          <button type="button" className={iconButton} aria-label="Close" onClick={dismiss}><X size={16} /></button>
         </div>
-        <div className="px-4 pb-4">{children}</div>
-      </div>
-    </div>
+        <div className="px-4 pb-4"><CloudQueryRefreshNotice className="mb-3" />{children}</div>
+      </>}
+    </CenteredDialog>
   );
 }
 

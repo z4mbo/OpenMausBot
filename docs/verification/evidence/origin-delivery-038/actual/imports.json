@@ -1,0 +1,1223 @@
+{
+  "copiedAt": "2026-10-19T01:06:44.138Z",
+  "receipts": [
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037.mjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037.mjs",
+      "bytes": 22563,
+      "sha256": "9f56d5efcab9f74ff8fd5d3c04bd30ee78b35ca73a22d749dbf87b2612b05d37"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\test-prepublication-037.mjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\test-prepublication-037.mjs",
+      "bytes": 17069,
+      "sha256": "7cc7ed00903022af9bdbc818f1484a7ee51e4fd2f7f283385fc49b6b3362fa54"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-test-report.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-test-report.json",
+      "bytes": 3726,
+      "sha256": "ea0f01b1dbdb33bfb5b5990eba02790f992eadfec27569f629455c7e3f9554d9"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-handoff.md",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-handoff.md",
+      "bytes": 6921,
+      "sha256": "6023455ca422f985b73f07993be6a0f26e4653d7594fec186486f70d30877f56"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-pr-checkout-proof.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-pr-checkout-proof.json",
+      "bytes": 3291,
+      "sha256": "e13f09e9945b6499cb92512052c9cdc557bb1d29aa0d70c546d863de6561dfb4"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-pr-raw.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-pr-raw.json",
+      "bytes": 68035,
+      "sha256": "b098cb265b606117f6912d5f59a3e2d07284a9421d795cd34eada63b88849760"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-ci-raw.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-ci-raw.json",
+      "bytes": 11928,
+      "sha256": "466c58d16bf21016316a7a6d7e2bc4673b43ebffdca328081cd4e168c1cec1ce"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-ci-merge-run.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-ci-merge-run.json",
+      "bytes": 44833,
+      "sha256": "b7e3c2e1b98d4cf5ceb8c1d64962a37339587a7ecf4634f263c1ef88da3135a0"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-checkout-job.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-checkout-job.log",
+      "bytes": 286884,
+      "sha256": "c284f13196acedbc7c3f833395bbf1820beb076e2c7cae817f12355fb13fc315"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-merge-raw.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-merge-raw.json",
+      "bytes": 2601,
+      "sha256": "2b21df8cd1d7a69dd0786fded4c0dbc303d4fab559403861ab66526c5df95987"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-head-raw.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-head-raw.json",
+      "bytes": 1188,
+      "sha256": "f9c886cc851059fe86778421b72d2a7fefcce110bc4b770021678356be654de9"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-base-raw.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-base-raw.json",
+      "bytes": 1207,
+      "sha256": "769171fcaf8898581cbe40742c06829703389ff82ff5d1fcff159cb131303727"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037-import-manifest.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037-import-manifest.json",
+      "bytes": 3809,
+      "sha256": "b0c0a402dea2121ed2c7e06793eeaa299c932e9747b183785e05de031650a786"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-release-identity-0.2.14-038.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-release-identity-0.2.14.json",
+      "bytes": 25179,
+      "sha256": "23cd75880bc9ad2b5a95cc3f7554a2d860425fe8e57f0521105912c413ff22ed"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-proof.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-proof.json",
+      "bytes": 35104,
+      "sha256": "f77aef1984618433d2d7dca80e3a39d39fe6e8abf9bf92e17ec0210a27c5489b"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-context-038-final.tgz",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-context-038-final.tgz",
+      "bytes": 487502,
+      "sha256": "f5a6b070ae7e462bcb3d89c32417273d4bf50ca1b070cb6dcf2f5dd1f53b3204"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\prepare-site-038.mjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepare-site-038.mjs",
+      "bytes": 9601,
+      "sha256": "fe9106b3b56aff3b2dfe6c576e9966e03108419ca67149c93cd9e21f9639aa38"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\frozen-expectations-038.mjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\frozen-expectations-038.mjs",
+      "bytes": 4619,
+      "sha256": "66945553878d463e6b9d529caf217320b5599ab9e668cf475512fd23e1e7bfc3"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\build-site-038.sh",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\build-site-038.sh",
+      "bytes": 1276,
+      "sha256": "6fe0bb15ec518336ff0046a649cd8947df78806cd2d32f5eba0c326af8160c11"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\.dockerignore",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\.dockerignore",
+      "bytes": 56,
+      "sha256": "8cc0cb30377faff8894f9375b183a40d073ac1fdfec4a3d21c19bc10d8ce82a0"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\accessMatrix.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\accessMatrix.test.ts",
+      "bytes": 14587,
+      "sha256": "fa78fbcd1467c4809463ffb8863ad567babd79518d81f327e8fcb8fb8219a555"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\agentRuns.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\agentRuns.ts",
+      "bytes": 12038,
+      "sha256": "62e089f79547165c96c317864940b85d2eacac3503d042d4147b99095c4805af"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\agents.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\agents.ts",
+      "bytes": 16045,
+      "sha256": "5eba763c29e8f458a5da7b8c55a615503fc7b00c7af60dafb607cbe8acd265f0"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\agentsTables.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\agentsTables.ts",
+      "bytes": 12664,
+      "sha256": "983b5a482fc01e4c8c78499cf33b722bb2eba88ae1f734617525bc394e2462a2"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\agentThreads.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\agentThreads.ts",
+      "bytes": 8206,
+      "sha256": "df1d61109859dcd9509d3448b278aa6334a4a3bc84b86bb53a7d5b7f121d5a33"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\auth.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\auth.ts",
+      "bytes": 13160,
+      "sha256": "bd19c396ed409164c018f3540827b9adf867f7a05eeb0e09b65a9a6d13e75b67"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\authSessions.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\authSessions.test.ts",
+      "bytes": 2276,
+      "sha256": "848ec82a31ef080f90f958eea31bc26d513f9502d37dca7bcd897ce91b857c0f"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\chat.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\chat.ts",
+      "bytes": 6467,
+      "sha256": "ae275f4c38254fcbc5cc13cfccc1b512a58796fc3720bfd17ef86db06a805166"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\commits.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\commits.ts",
+      "bytes": 6675,
+      "sha256": "be9d1afa2d48d0f4e800e80331fde4c32e961d960d39d3b9649212d59942360e"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\connectors.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\connectors.ts",
+      "bytes": 13197,
+      "sha256": "2c740582d73cae692049ad6994143faca3513e627df73075df3cd15ffdcc2e08"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\credentials.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\credentials.ts",
+      "bytes": 4618,
+      "sha256": "273ffcf59a6d290a98be2dfdb8cf56431b858e90116830db5d9a99530871cbc6"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\crons.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\crons.ts",
+      "bytes": 831,
+      "sha256": "7141e7c054c1e961ac9f68ec2c8fccd012f6454112d1970c6a68250c0fe66407"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\design.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\design.ts",
+      "bytes": 7477,
+      "sha256": "c11320b85d5b3d93070f641c2257f343b0fc99cd781d5ddaad3e125536c343ac"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\documents.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\documents.ts",
+      "bytes": 6159,
+      "sha256": "f03b216865900b761aa93990eb2c3b9c897a76a086e4c518cb3254aff8c5abf4"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draftColumn.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draftColumn.test.ts",
+      "bytes": 7607,
+      "sha256": "69637b6f6e6c4755f9e4b419f7ae2a7c82f944bdb816273478277e4a85e9f0ab"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draftDefaults.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draftDefaults.test.ts",
+      "bytes": 16354,
+      "sha256": "bccd4035ff51195e4a080de84290b916e45f7fc77b645fac30936c48f60542fd"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draftImport.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draftImport.test.ts",
+      "bytes": 4353,
+      "sha256": "56419e601b09946c7d23de62d5eeec92e6e189bb999f1cd14d8970d6fd1b83e0"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draftMigration.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draftMigration.test.ts",
+      "bytes": 12521,
+      "sha256": "c75f0cd6fb021a312f3f81c63f01351202b313deae6a3c108fc4edaf548dd76a"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draw.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\draw.ts",
+      "bytes": 9403,
+      "sha256": "7a2642498007d9a220e5e8e95fc57a42c8012394250c73b2ee8be0530ce92747"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\featureTables.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\featureTables.ts",
+      "bytes": 2734,
+      "sha256": "63cad7f3183693ce1e6b2e04d67b0ed7c84b86429b9fef4a39e7676627ac7f58"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\feedback.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\feedback.ts",
+      "bytes": 6483,
+      "sha256": "ef31e7670675d405e0d3c84e929a78d4280f896e7406da24a9d00123d58386f1"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\github.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\github.ts",
+      "bytes": 15013,
+      "sha256": "af2565df2f5cfadf1143227a1fc46788e47e5c6e067912f9f4ab21cba4f70e43"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\githubRaces.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\githubRaces.test.ts",
+      "bytes": 4559,
+      "sha256": "99f88a8ad8a6d95b6317e95986767a0b54d97ef4452951c62875cf2ab6036996"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\http.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\http.ts",
+      "bytes": 3685,
+      "sha256": "9fde9c78f6d78f09c43925df56cd95d183bf00be1d79ed555a630c95857ed208"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\httpSecurity.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\httpSecurity.test.ts",
+      "bytes": 903,
+      "sha256": "2791b5215f266923253e57225a2caa6bc3f2b34d87c19136539b74236b2a3397"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\inbox.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\inbox.ts",
+      "bytes": 7694,
+      "sha256": "6b4857232c1bb0d7c767bff554261dc1fe45651ab9792ab6daec2e122e41b959"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\integrations.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\integrations.ts",
+      "bytes": 17531,
+      "sha256": "96ea47b84d2c637d6ec64ec50a294da415879b2ddd2746ee5b1f9319944eb412"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\invitationMail.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\invitationMail.test.ts",
+      "bytes": 15923,
+      "sha256": "4349eac0b8335a3004e50625d61fde218182e928faf1d2fb1aaa01cfe4331349"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\issueCompletion.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\issueCompletion.test.ts",
+      "bytes": 4116,
+      "sha256": "8e5acc446b697e40e15f11c6670db192392bd7372d5163a49f3f1ec68b8af085"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\issueRelations.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\issueRelations.ts",
+      "bytes": 5014,
+      "sha256": "1c0ae1b7f7dbe271b482bcab2a0bc16861eda0e4239c56ece89a9777261e9d40"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\legacyImport.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\legacyImport.ts",
+      "bytes": 7827,
+      "sha256": "fac602ef80f5db08324fdb8318f33a70789d51d7b154877b61a75d274b327f45"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\legacyInvitationMail.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\legacyInvitationMail.test.ts",
+      "bytes": 3554,
+      "sha256": "56b0aa5a31b4f6d459738bb95bd5f4d0f93bc8d8dfeb18e759b92380d058cb8f"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\legacyIssueCreation.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\legacyIssueCreation.test.ts",
+      "bytes": 6427,
+      "sha256": "024edaa23dfc6893baf98db9c8359e32d91a4911be8404901d7b929b82202b89"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\agentAccess.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\agentAccess.ts",
+      "bytes": 4873,
+      "sha256": "0c5e1ca7b70cb6939a34a6f44b7fed0ecae3e2ddd86cc98e9d17fde43ac28454"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\agentThreadRows.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\agentThreadRows.ts",
+      "bytes": 6030,
+      "sha256": "d615ca21de02f6885666dd7836f3dec152789c29d731e4131060c0a7d0602957"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\auth.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\auth.ts",
+      "bytes": 5268,
+      "sha256": "3fc94b50e6fc5898aa5d7a39a8bdaaab2bc27de171fcb8d0509ab2f49849e2a2"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\columns.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\columns.ts",
+      "bytes": 3708,
+      "sha256": "64cdbe511258f5c299e814ec00d1dc8d9a03905afb6da297d068b88ed591db99"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\completions.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\completions.ts",
+      "bytes": 1199,
+      "sha256": "195a3ed46bae219ae8723972fa969cb22a016b4790d204cbe36947fad56a9da6"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\features.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\features.ts",
+      "bytes": 1279,
+      "sha256": "f0fe7073e4bf70be40d1b696bfd906ed738c5236aa7901c2fd99ca9d8833cb9a"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\invitationMail.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\invitationMail.ts",
+      "bytes": 2847,
+      "sha256": "cc828b89b665e7a4d274d7dc993f32e984beb01d3d54b70d5d48c3aef18e80dc"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\permissions.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\permissions.ts",
+      "bytes": 5331,
+      "sha256": "579f2518d6a82ebd9ced89fb5e323d934c59d2af32df588dd29ed8ba06584546"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\repository.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\repository.ts",
+      "bytes": 422,
+      "sha256": "e09a4a91f36e96184969c63017852ac42f8eeb51d83cd1a9f66bfefca3b17fbb"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\storage.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\storage.ts",
+      "bytes": 8063,
+      "sha256": "dd6a1ca00b1e3dbbc83f3131416f10b703d5d86b2bfb6ed6473a64ae78f0c165"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\storageValidators.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\storageValidators.ts",
+      "bytes": 713,
+      "sha256": "9e7a718fbe0b99c53754ff3d3fc6ff8060a11b08124e407d897293eb247af065"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\taskBranches.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\taskBranches.ts",
+      "bytes": 1410,
+      "sha256": "112936e35a0a9b4dc3e8b3b405c1b51fae2ed493b6e65c66bf6f1516b588593e"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\validators.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\lib\\validators.ts",
+      "bytes": 1825,
+      "sha256": "51801aec43a1ec4858072a57a755674ba60327458a821099648c957e5e4b21d5"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\memberProfiles.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\memberProfiles.ts",
+      "bytes": 3118,
+      "sha256": "b36074920f31fc808ce53463201384b6fe8c66372c47ac2f790d8519e2642d72"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\members.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\members.ts",
+      "bytes": 7086,
+      "sha256": "e56221c44aaf77be0557c080d3580a453d2091056e43a41938d19b8d333af2dd"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\mentions.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\mentions.test.ts",
+      "bytes": 8658,
+      "sha256": "5ada29e2e7c06837b3ad0cb102c79dc30502d2c5f25b46dcebd561cd037ca26d"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\mergeCompletion.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\mergeCompletion.test.ts",
+      "bytes": 10533,
+      "sha256": "8d1ac4fc8d54c236c8550682f6da122fbba0b520e3db5b88eda80caf49fa20d1"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\meta.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\meta.test.ts",
+      "bytes": 632,
+      "sha256": "891cddd959b26f762506b76615408305cd25c105362d1dceb3ab86a079dfe905"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\meta.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\meta.ts",
+      "bytes": 339,
+      "sha256": "0ba0da9383af577f513a30b34bdfdf8e397fcc41fbd343691051cbdd296de914"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\notifications.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\notifications.ts",
+      "bytes": 14097,
+      "sha256": "f10bc2083f3ce9bee4763dfd0529d4967228bfbd6fe72644cc290c264cf477ff"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\pg1Parity.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\pg1Parity.test.ts",
+      "bytes": 20360,
+      "sha256": "ed622e74c78291456bd310a4be3bce3344de6071104813edb31aad70c49e9609"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\planning.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\planning.ts",
+      "bytes": 9118,
+      "sha256": "3e91f81eda062c97c3e71fbd6a58a1483ee2c4aa57df275c2d62a16005401ec6"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\preferences.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\preferences.ts",
+      "bytes": 2310,
+      "sha256": "f6c20599fd6893e03f9d7f32417d8204b3eb4f334ea316f71049a0cfd00800b9"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\projectInvites.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\projectInvites.test.ts",
+      "bytes": 3666,
+      "sha256": "4f1d2fb8f6d5ef65e3f1a19cc1a2bf61ddf15ece9f3edc4d831e0fa23f22e28f"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\projectPresence.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\projectPresence.ts",
+      "bytes": 3387,
+      "sha256": "903de0e979c40cd80de0e5cd077e4202552f2edd158f358fdd67d240e301da07"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\projects.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\projects.ts",
+      "bytes": 21567,
+      "sha256": "c18ad82a41062188540e28825e45c3fad9b9fb728a6aa40224eaf70346ff5911"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\projectWorkflow.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\projectWorkflow.test.ts",
+      "bytes": 22578,
+      "sha256": "d04f2c5715909d8daaa954904e1e3683b7766d6c222bb65c5048d1d55bd099d0"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\schema.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\schema.ts",
+      "bytes": 19102,
+      "sha256": "d32b3843d31b0bbc7ae6b2fc2993943a7155135ea775c7d26a38f4e16056ecbf"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\sharedAgentQueue.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\sharedAgentQueue.test.ts",
+      "bytes": 6226,
+      "sha256": "3b3ef32cfc957f7ed89fcf047b9b81dca30497cfa4a4f8b3a05d3a9fe53c928c"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\sharedAgents.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\sharedAgents.test.ts",
+      "bytes": 16590,
+      "sha256": "3fe0d8674ba4c581d794ae317f48b86702cfa436dd272d0edda0ac0b00c42405"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\storage.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\storage.ts",
+      "bytes": 6631,
+      "sha256": "35e78aa3507ebe6ea510beddb56cbf2196535045011b2b560f41c56335e1d50c"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\storageAdmission.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\storageAdmission.test.ts",
+      "bytes": 21132,
+      "sha256": "e01719e9c0bb421b3dc0f7ad7bdb7cc1499e337e3b234eec17ffce14fc3efb5f"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\storageReferences.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\storageReferences.test.ts",
+      "bytes": 1922,
+      "sha256": "de8873874efa2a5e594cee896f97f6e796f49e30e38f72f88d8da9f88c4b72a3"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\taskPRs.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\taskPRs.test.ts",
+      "bytes": 16689,
+      "sha256": "794e3ad50515925b6dcbddf9b107229a3df51d615c7e93962e5f0046e9258c7d"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\taskPRs.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\taskPRs.ts",
+      "bytes": 14312,
+      "sha256": "420b898d8dd333918fe549835b8a60c6e9de2ab9743ca09d950cdd749f3207bd"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\tasks.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\tasks.ts",
+      "bytes": 34572,
+      "sha256": "58bca92460f52c7c3544705a58f0f89cc9749c2590d1983581fc20dc7955048a"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\teams.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\teams.ts",
+      "bytes": 8889,
+      "sha256": "2e79ba5d3672e7ccf1bc6be76d457582eb36c163eaca55c5a4db29978a22d1bc"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\tsconfig.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\tsconfig.json",
+      "bytes": 375,
+      "sha256": "e7438058520ddab6ebdf29d5d82ff77585ea3aa05ae0351edd3690ab92adde27"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\wiki.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\wiki.ts",
+      "bytes": 4340,
+      "sha256": "5adc93a7a3ad39cdfd693f685b28ca63898bd20a59c740d6ee44911c5220ee3b"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\workspaces.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\workspaces.ts",
+      "bytes": 12729,
+      "sha256": "6d0271275e4032895d6f50c761964b9d02e4a16f1684593955f9447c87bddb27"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\workspaceSearch.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\workspaceSearch.ts",
+      "bytes": 3035,
+      "sha256": "02640e1f7a4b2995552e295cc79662dcd966c7b9e967f89c57d8310239e2a472"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\ai\\ai-files.state.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\ai\\ai-files.state.json",
+      "bytes": 334,
+      "sha256": "ace53748e8e37b3b0ad0e9f2e0e9666818036f5b7f6b609ad6c3b826a11a01ab"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\ai\\guidelines.md",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\ai\\guidelines.md",
+      "bytes": 19556,
+      "sha256": "62d72acb9afcc18f658d88dd772f34b5b1da5fa60ef0402e57a784d97c458e57"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\api.d.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\api.d.ts",
+      "bytes": 5122,
+      "sha256": "23239e6e8676e453c724b7b4a0d2383f9f317c465fb87cb47c2139b94a67ff90"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\api.js",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\api.js",
+      "bytes": 480,
+      "sha256": "f513058549831e85376f8d19cafaf2a4a770b6eb1b859fb371141f2c9dec0d70"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\dataModel.d.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\dataModel.d.ts",
+      "bytes": 1736,
+      "sha256": "db177073d16a4393c7a96bcdc3a2a904e88c2432d54d138ca7715cc431982c17"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\server.d.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\server.d.ts",
+      "bytes": 6008,
+      "sha256": "2b536ee08d434dd044efe0302aeaf4ccb00cd08af10c9f8c7bc7a6734e4aa49b"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\server.js",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\convex\\_generated\\server.js",
+      "bytes": 3872,
+      "sha256": "0cdd1d842b9458d8a6f2444c35eb9929312316a384ca76a4b1d964bedde8a6f2"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\lib\\comment-checklist.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\lib\\comment-checklist.ts",
+      "bytes": 651,
+      "sha256": "e5e3f26a3d945773569bb18776c2f02819de5fb56557273c5ef188fd3a18d565"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\lib\\github-pr-snapshot.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\lib\\github-pr-snapshot.ts",
+      "bytes": 2159,
+      "sha256": "a6603f1672babf663b897c8871bd8eca6ca1bae4847faa3478af2e90053e7ad9"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\lib\\http-body.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\lib\\http-body.ts",
+      "bytes": 1328,
+      "sha256": "b985b8d11182bad36e170c082a67106aa71e2472c8de4e24f11830e52fe2c423"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\lib\\issue-mentions.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\lib\\issue-mentions.ts",
+      "bytes": 372,
+      "sha256": "b7812722491fdd60ce122e3ea71a01a9d0bed92840764f966c012735dad3fed7"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\lib\\notification-quiet.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\lib\\notification-quiet.ts",
+      "bytes": 619,
+      "sha256": "e1d9be5c24ea7757e6d40d9f86138940920e38e9f03eeb64456d8f939363ef45"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\lib\\task-branch.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\lib\\task-branch.ts",
+      "bytes": 283,
+      "sha256": "8323713fe6b3cfaa6c1b3d9de531d6cd5ae75be7d2f5ae7bdc1a510adf3d0cd6"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\backend\\package.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\backend\\package.json",
+      "bytes": 661,
+      "sha256": "3a8a039a8f172588c41d91bdfdf8188704e0455c770757106bfb65ae04692d0d"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\Dockerfile",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\Dockerfile",
+      "bytes": 858,
+      "sha256": "9d60526ec0c36760b42192f3801a0b2f20443a99ded83b4e685ea09e5a603350"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\package.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\package.json",
+      "bytes": 89,
+      "sha256": "2bb116296492c68ca8abbf5d1721ed8135516e22a7eed60649ef166065943f38"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\pnpm-lock.yaml",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\pnpm-lock.yaml",
+      "bytes": 75952,
+      "sha256": "1160fcafc265edcd9b958e5ed6fe0eb6a1eba698b948f958259c2341ea8684dd"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\pnpm-workspace.yaml",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\pnpm-workspace.yaml",
+      "bytes": 362,
+      "sha256": "c19ecb36278c7720c37a6d6b81a357b22a525aadd154c95dde8e7b1ab8a86796"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\shared\\origin-columns.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\shared\\origin-columns.ts",
+      "bytes": 1232,
+      "sha256": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\shared\\origin-releases.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\shared\\origin-releases.ts",
+      "bytes": 13238,
+      "sha256": "7452cbb2aacbd741dcba8ed2f513df2caac3bb361a2332342bf991fcd8587985"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\shared\\origin-site-address.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\shared\\origin-site-address.ts",
+      "bytes": 1899,
+      "sha256": "1df1a4a5cb49117a4430d6d21db8a61ae03388eeb4221fd20fdb31c24e3a0161"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\shared\\origin-theme.css",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\shared\\origin-theme.css",
+      "bytes": 752,
+      "sha256": "e6e58a92c40e0085d14af1639cb8d4d834391d18664c662954d84945417c653a"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\.dockerignore",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\.dockerignore",
+      "bytes": 56,
+      "sha256": "8cc0cb30377faff8894f9375b183a40d073ac1fdfec4a3d21c19bc10d8ce82a0"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\.env.example",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\.env.example",
+      "bytes": 178,
+      "sha256": "f043951b4ec896b7f2d18cc2ea70743024af44d34b08a03e09818b6f2ca2c03c"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\.gitignore",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\.gitignore",
+      "bytes": 59,
+      "sha256": "16edb7e9edecac33cebb68aaa48fafbc0593396863cb1a20b46fb03516c8a498"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\app\\globals.css",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\app\\globals.css",
+      "bytes": 2257,
+      "sha256": "9b851800330c492ea10059be10580f8ad9ab5b2ae4cb97cc515b26967a4754a6"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\app\\join\\[token]\\page.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\app\\join\\[token]\\page.tsx",
+      "bytes": 489,
+      "sha256": "289f6956823f2718f43b7fa947a24dfa87364054c59291d3b938bd8c168e97ca"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\app\\layout.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\app\\layout.tsx",
+      "bytes": 1150,
+      "sha256": "7c82668a3513c0fdfcecf5999c13b89a54ac865c39d2dde06dc1128092eb1ca0"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\app\\login\\page.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\app\\login\\page.tsx",
+      "bytes": 343,
+      "sha256": "597bfb98d9e5e1615ae7e20655cfc9cc19f9468d7c4a77da2de628e988acf01c"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\app\\not-found.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\app\\not-found.tsx",
+      "bytes": 350,
+      "sha256": "4041120b54e23c2574975ebb44f3f986ac18b7f1f6bbdf205010848ce7ed6050"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\app\\page.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\app\\page.tsx",
+      "bytes": 840,
+      "sha256": "8c1708a6a64ce90731f3fcd8822e15954d47a5df5b7472c86fc3a39617858741"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\app\\providers.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\app\\providers.tsx",
+      "bytes": 534,
+      "sha256": "995fb92c566288c4e1aebcad81faef13bc3fafb5d4e3873590cf19cbb35b8109"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\app\\signup\\page.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\app\\signup\\page.tsx",
+      "bytes": 356,
+      "sha256": "2f4a3effcf6987bf19c10c455a98e7645911953580382805a1152cbf82269fe7"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\app\\whats-new\\page.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\app\\whats-new\\page.tsx",
+      "bytes": 971,
+      "sha256": "69a0f1f4db2c3030daf51e1b2e8eb0a105e32929a0a82967ea37e9c75443e461"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\auth-page.test.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\auth-page.test.tsx",
+      "bytes": 15443,
+      "sha256": "b11ba311fbb8cd817a1cfa51590fa0f7ce9e92b9b1dc4dc7d9d940ac0d428cb0"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\auth-page.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\auth-page.tsx",
+      "bytes": 12308,
+      "sha256": "169caf2542bfc9d11a981cfc32ed559b74eaef77f36321d9560ce4964452177e"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\auth.module.css",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\auth.module.css",
+      "bytes": 6717,
+      "sha256": "85984f71257f88445ec290d8936ea61fa5ec9443e65b7d65aff1ba2bab607616"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\brand.test.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\brand.test.tsx",
+      "bytes": 5922,
+      "sha256": "5998a28dd4e01bfdfe080ba4a4e58c62d22d1313c87a2ac4b7261a45ecef8f9b"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\brand.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\brand.tsx",
+      "bytes": 5412,
+      "sha256": "a353f8ae24e9e92121bf734b58ee3bb722d151d8f704d59f793bd8f582402adc"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\logo.module.css",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\logo.module.css",
+      "bytes": 965,
+      "sha256": "5df8ece28aa3adf6c0368d4544cc052628a2834045d10635140b9073706bf5b8"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\motion.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\motion.ts",
+      "bytes": 2561,
+      "sha256": "9a8a4e3a3f5ca82234694c195f3ad96449e7f7cffceeece3163f177b2bad3a84"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\origin-logo.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\origin-logo.tsx",
+      "bytes": 3821,
+      "sha256": "b853541634f024941f3cd88b26dd58367adbab96d847cc54277dbfee658414ea"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\origin-site.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\origin-site.tsx",
+      "bytes": 19819,
+      "sha256": "01e752a334ef87069649215b9093a9b069e9702f7f9c371d756e064b7cac9886"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\pr-demo.module.css",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\pr-demo.module.css",
+      "bytes": 6362,
+      "sha256": "09b3cbed39fd64c2c5d1a5036c18237f4091c793e4deb79aa244501d95554439"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\pr-demo.tsx",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\pr-demo.tsx",
+      "bytes": 6704,
+      "sha256": "a23596a389c16935e3e27a3a9d77cf61ffdb33de78eabf357c051e1001d1f473"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\components\\site.module.css",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\components\\site.module.css",
+      "bytes": 18033,
+      "sha256": "6af022c304c2af63217d1904133286d237f014b148b8bfb15d7cfd367f934cd7"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\Dockerfile",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\Dockerfile",
+      "bytes": 858,
+      "sha256": "9d60526ec0c36760b42192f3801a0b2f20443a99ded83b4e685ea09e5a603350"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\lib\\convex-api.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\lib\\convex-api.ts",
+      "bytes": 180,
+      "sha256": "5f0d7e72d2849871b249af43269a1723ec190fd1f536b33e36e4169f420b9afa"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\lib\\csp.test.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\lib\\csp.test.ts",
+      "bytes": 1568,
+      "sha256": "926e0ac7f50b09dfb5c7ff0cbc7fe9300677d3c5871c84263008891eb5644e84"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\lib\\csp.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\lib\\csp.ts",
+      "bytes": 1804,
+      "sha256": "3813f6c8ae0977d5a749451088108a47670ba4508a73c0eb1a3c151daf5e8930"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\lib\\fonts.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\lib\\fonts.ts",
+      "bytes": 140,
+      "sha256": "79d85ba0f90867be1432567daf9660f2d7dba6c519b2eaf10661fac1d5a3d6b4"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\lib\\site.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\lib\\site.ts",
+      "bytes": 455,
+      "sha256": "a0a838576eac635291446da207fb0313bbc13658acc6d1fde71abc997b2b7273"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\next-env.d.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\next-env.d.ts",
+      "bytes": 288,
+      "sha256": "1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\next.config.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\next.config.ts",
+      "bytes": 166,
+      "sha256": "841ad3fa8a3d14a82d37b020713ae1ecb86326b8be932d2a7138568f72b9ecdf"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\package.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\package.json",
+      "bytes": 861,
+      "sha256": "7ec36eb0357fdc521e3c8ad19b4565d8e75d9b5466364a41430581e9d3d9452a"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\proxy.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\proxy.ts",
+      "bytes": 684,
+      "sha256": "2e48a45bf61ae96d7d02637a484bc99d0a6ca0255d728e93d9b09e7172eb1d91"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\apple-touch-icon.png",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\apple-touch-icon.png",
+      "bytes": 3003,
+      "sha256": "94567c7779e40b4472242d6d84927436671cc79e23211d663d0862f5688f2dd8"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\chief.svg",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\chief.svg",
+      "bytes": 10952,
+      "sha256": "ac7ccc7f104127fa6ea51234aa477a024335b28800d6bfdd28f52d53161136c7"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\copywriter.svg",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\copywriter.svg",
+      "bytes": 10945,
+      "sha256": "817d77108ef5dc40aa8619cecbbc849816de9ba89b68d4a38fce48519a6abdea"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\designer.svg",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\designer.svg",
+      "bytes": 10943,
+      "sha256": "e7aca13e301f19add8cfe02605fb06efe4af35807ac72395d4a491e66d1a2547"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\developer.svg",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\developer.svg",
+      "bytes": 10944,
+      "sha256": "e04eeb514234b9e5393655c9a91e13841e8c461d1d673f11a0a6ece0f339a44c"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\marketer.svg",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\marketer.svg",
+      "bytes": 10943,
+      "sha256": "251aa3fd9365c6e86d0aa948e20a2db993cd32d4802e6a9980753035d6b4683a"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\product-manager.svg",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\product-manager.svg",
+      "bytes": 10950,
+      "sha256": "8de37260577fa31657428747bbaae3c98b2853e48e3fbb3d9ebc569ef7398851"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\researcher.svg",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\avatars\\researcher.svg",
+      "bytes": 10945,
+      "sha256": "7f8a8c52223d12e9e50b4644d15731311ceb612d529fbe5503af6e636966db73"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\issues-960.webp",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\issues-960.webp",
+      "bytes": 19094,
+      "sha256": "03923da599cfaa3eb8c41ae189e66fc92b2fd5c2102b007fc7ebf3845e4af910"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\issues-crop.webp",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\issues-crop.webp",
+      "bytes": 13214,
+      "sha256": "35d0b4e1bb7f1bdc4fabffce89d4ab5ad51ce469c544960723299342016fcb3c"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\issues.webp",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\issues.webp",
+      "bytes": 38080,
+      "sha256": "411c35b65fc0fe6e3307a971d2ca7a5fb5cd5d55ca06f1a7a2e793f950819987"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\run-960.webp",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\run-960.webp",
+      "bytes": 40662,
+      "sha256": "20a68f5f75b59b27b58781f09a74475fd148c5674103b484b2b45f9e8a3d3f7d"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\run-crop.webp",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\run-crop.webp",
+      "bytes": 26102,
+      "sha256": "f99c43a89e6c47a00a775ba3048d43453a9063390f2494bd00ed8a9db39192fb"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\run.webp",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\landing\\run.webp",
+      "bytes": 81546,
+      "sha256": "0a19dbeeb9b78a6cbfde0a381fa524e54f9eb8aa1b616d3c3b86da6fd908b1b2"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\og.png",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\og.png",
+      "bytes": 57655,
+      "sha256": "081c412852ec863548db98687e13e979898dc8bdf6713aa450090cffc960619c"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\public\\origin.svg",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\public\\origin.svg",
+      "bytes": 345,
+      "sha256": "dc1f889d1ddf251194a8f7adbc4684a5a2228d1ab1a26537e119d48116f5b2b0"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\README.md",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\README.md",
+      "bytes": 2702,
+      "sha256": "aa51b2e8dc3eedc8ab83a89ffd01ab973fc86ba1f4a6027a911086a1f77ca3c6"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\scripts\\capture-app.mjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\scripts\\capture-app.mjs",
+      "bytes": 8616,
+      "sha256": "9599c5381d17e177fd1367f1bd9730d2c8a81a4bfe65f104aade4113e6df5646"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\scripts\\test-landing.mjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\scripts\\test-landing.mjs",
+      "bytes": 16905,
+      "sha256": "18f6b70c5bb898d10734916e1fb51232748d5e73f23c93519984d88d68c1fdaf"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\tsconfig.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\tsconfig.json",
+      "bytes": 590,
+      "sha256": "755b218fee1c0c9f6e73ac3ee731b6c72d39b7ff2e8980f06ff02f6c3cfa1d64"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-stage-038-final\\site\\vitest.config.ts",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-stage-038-final\\site\\vitest.config.ts",
+      "bytes": 293,
+      "sha256": "540444d12bef6a20429f5cafa670420703ba954ad85e5babbe0ccc6c8732a8a3"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\browser-contract.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\browser-contract.json",
+      "bytes": 20607,
+      "sha256": "a844aeb45bd9e2ecdcc4e4694c1774b5b4dcaf78eaf74af42e385201f1e4f029"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\browser-observe.js.txt",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\browser-observe.js.txt",
+      "bytes": 2017,
+      "sha256": "157d0049d028f3892a9fda4c2dd0cd1dff286616eff2c942728cd6a9258c670a"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\browser-ready-contract.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\browser-ready-contract.json",
+      "bytes": 20799,
+      "sha256": "eb515d31c8704dc5551dab8dc1ec1f5ec270eb42e028eb6be3a7b69ab11ee3d5"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\context-upload.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\context-upload.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\fixture-ready.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\fixture-ready.json",
+      "bytes": 2540,
+      "sha256": "e50ea8800948e5f1fd696085b21023b29e67dc6a9439903d113f81f02b27fcde"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\fixture-start.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\fixture-start.log",
+      "bytes": 596,
+      "sha256": "f50f1a2645c04e6a58ceea6c5f0600b686d3fee7d87afa9ed0bf796421d05cb7"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\helper-upload.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\helper-upload.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\helpers.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\helpers.json",
+      "bytes": 2643,
+      "sha256": "57cabd2f7aa71fe63c3315f9044b7718a63c12248b6b1e4877bd6aa261a239f1"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\identity.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\identity.log",
+      "bytes": 429,
+      "sha256": "7ba7c941253064e79d0923e136d76ac0bbfc6566c241cc23b7c6e193867673f5"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\image-build.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\image-build.log",
+      "bytes": 2935,
+      "sha256": "2124469a9e7f622172a4f4ac57d945084590ebc27a988c4867d42126d74f7b84"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\operations.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\operations.json",
+      "bytes": 777,
+      "sha256": "56db69caa7f5a32cac61aade85f66c002a4619f529f3862216fd0e54f01ffe9e"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\persistent-browser-ready-contract.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\persistent-browser-ready-contract.json",
+      "bytes": 20799,
+      "sha256": "338dfef3b4961c61cc72a731cd01b373dd14bbac2f32404e1599ace51a9d3f69"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\persistent-fixture-ready.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\persistent-fixture-ready.json",
+      "bytes": 2540,
+      "sha256": "ac00995b3e05cc8f602eb5a9dc7d03edd2213aded4ab5c83b3aa7e02cb9b2d28"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\persistent-proxy.stderr.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\persistent-proxy.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\persistent-proxy.stdout.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\persistent-proxy.stdout.log",
+      "bytes": 511,
+      "sha256": "e81ad8f8e747d70696dbd9101187db37c52c002199893a5ac214b0918fcab1ab"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\persistent-tunnel.stderr.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\persistent-tunnel.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\persistent-tunnel.stdout.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\persistent-tunnel.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\prepare-browser-contract.mjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\prepare-browser-contract.mjs",
+      "bytes": 2133,
+      "sha256": "cbc02f7b8fdfaa547c636ecedb599f8df5696d72a6130df852f9ccd86f73bfcc"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\prepare-tools.cjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\prepare-tools.cjs",
+      "bytes": 2292,
+      "sha256": "a2cad11f8b3a4cdff4855598298c7cc63ef29abc52a97d4178bc995fd1f42165"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\preview-start.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\preview-start.log",
+      "bytes": 218,
+      "sha256": "a2d90c80f4bb2d20ab1db2796c9b1392301636362cd2813a61f7d708bea99dba"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\proxy.stderr.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\proxy.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\proxy.stdout.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\proxy.stdout.log",
+      "bytes": 511,
+      "sha256": "d506099238348b89f69190fe4ece5f9231de2002a323e7eb74bba035c6ac3991"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\read-private-runtime.cjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\read-private-runtime.cjs",
+      "bytes": 2816,
+      "sha256": "e7ba2c81147cfc50e68fe0ff4461ee89d1c2d999e0ff7f28a39a08e913a33163"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\record-setup.cjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\record-setup.cjs",
+      "bytes": 3674,
+      "sha256": "26d7353109656333ab00086b0c2090176a7878621f49f38aa1ff259d880ffe72"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\remote-stage-create.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\remote-stage-create.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\REPORT.md",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\REPORT.md",
+      "bytes": 4950,
+      "sha256": "1d3199f505364a8203174ee3c47a868e9b7260ebae3ffa060eb73434b45b6af5"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\runtime.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\runtime.json",
+      "bytes": 3949,
+      "sha256": "e17c8cca2e1fae4041248038bf3df5b2ce1c8947baa863ddba3c1efc7f2380fb"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\setup-manifest.json",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\setup-manifest.json",
+      "bytes": 5806,
+      "sha256": "9bcb5884dbac5a47a0d14a6197eb6d0c64ee8a8aa98718f4b39bb53aa93bcd2b"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\stage.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\stage.log",
+      "bytes": 813,
+      "sha256": "15145cacccbb9cdf38c5ed199b08ab58c1ab64a4d2a9adeae33ee4d2ad94e9ee"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\start-loopback-fixture.cjs",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\start-loopback-fixture.cjs",
+      "bytes": 6363,
+      "sha256": "4d7c97a4010ff0c0f30f30df2b889a831789c90e3bbf49b8466f040660b7b698"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\tunnel.stderr.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\tunnel.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\site-038-preparation\\tunnel.stdout.log",
+      "destination": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-038\\site-setup\\tunnel.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

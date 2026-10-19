@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { chmodSync, linkSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
+import fs, { linkSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -70,6 +71,17 @@ test("a folder it cannot read stops the scan instead of reading as empty", async
   const dir = folder(t);
   mkdirSync(join(dir, "sub"));
   writeFileSync(join(dir, "sub", "a.txt"), "one");
-  chmodSync(join(dir, "sub"), 0o000);
-  try { await assert.rejects(scanPc(dir, new Map(), { now: LATER }), /EACCES|EPERM/); } finally { chmodSync(join(dir, "sub"), 0o700); }
+  const denied = join(dir, "sub");
+  const permission = Object.assign(new Error("Fixture directory permission denied"), { code: "EACCES", path: denied });
+  const readDirectory = fs.readdirSync;
+  let deniedReads = 0;
+  const read = t.mock.method(fs, "readdirSync", (candidate, ...options) => {
+    if (candidate === denied) { deniedReads++; throw permission; }
+    return readDirectory(candidate, ...options);
+  });
+  syncBuiltinESMExports();
+  try {
+    await assert.rejects(scanPc(dir, new Map(), { now: LATER }), (error) => error === permission);
+    assert.equal(deniedReads, 1);
+  } finally { read.mock.restore(); syncBuiltinESMExports(); }
 });

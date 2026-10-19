@@ -118,7 +118,7 @@ export function describeMissingFts5(error: unknown): Error | null {
   const message = error instanceof Error ? error.message : String(error);
   if (!/no such module:\s*fts5/i.test(message)) return null;
   return new Error(
-    `OpenMausBot needs SQLite with FTS5, which is built into Node 24 and newer (and into the app). ` +
+    `Origin needs SQLite with FTS5, which is built into Node 24 and newer (and into the app). ` +
     `This Node (${process.version}) has none: install Node 24 or newer. (${message})`,
   );
 }
@@ -521,8 +521,8 @@ export function deleteThread(threadId: string): void {
 }
 
 /** One transaction: every listed thread goes, or none does. */
-export function deleteThreads(threadIds: readonly string[]): void {
-  if (threadIds.length === 0) return;
+export function deleteThreads(threadIds: readonly string[], beforeCommit?: () => void): void {
+  if (threadIds.length === 0 && !beforeCommit) return;
   writeFollowups((connection) => {
     const statements = [
       connection.prepare("DELETE FROM chat_followups WHERE thread_id = ?"),
@@ -531,6 +531,7 @@ export function deleteThreads(threadIds: readonly string[]): void {
       connection.prepare("DELETE FROM notification_log WHERE thread_id = ?"),
     ];
     for (const id of threadIds) for (const statement of statements) statement.run(id);
+    beforeCommit?.();
   });
 }
 

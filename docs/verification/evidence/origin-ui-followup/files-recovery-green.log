@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 <local-user>/.codex/worktrees/origin-dialog-followup/Origin
+
+
+ Test Files  3 passed (3)
+      Tests  32 passed (32)
+   Start at  02:26:42
+   Duration  4.35s (transform 1.19s, setup 997ms, import 2.07s, tests 176ms, environment 662ms)
+

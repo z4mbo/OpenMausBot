@@ -1,0 +1,13 @@
+{
+  "scenario": "Initial preload files.state IPC rejects and no pushed state follows",
+  "productionComponent": "FilesView",
+  "result": {
+    "text": "Files",
+    "alerts": 0,
+    "status": 0,
+    "buttons": 0
+  },
+  "errors": [],
+  "blocked": [],
+  "synthetic": true
+}

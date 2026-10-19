@@ -1,0 +1,52 @@
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { expect, it, vi } from "vitest";
+import type { RuntimeEvent } from "../contracts.ts";
+import { OpenAICompatDriver } from "../drivers/openai-compat.ts";
+
+it.each([false, true])("records whether an unnecessary silent MCP mount masks the provider429 (scoped: %s)", async scoped => {
+  const directory = mkdtempSync(join(tmpdir(), "origin-comms-mcp-cause-"));
+  const receipt = join(directory, "mcp-started.txt");
+  let completions = 0;
+  const provider = createServer(async (request, response) => {
+    for await (const _ of request) {}
+    if (request.url === "/v1/models") { response.end(JSON.stringify({ data: [{ id: "fake-model" }] })); return; }
+    completions++;
+    response.writeHead(429, { "content-type": "application/json" });
+    response.end(JSON.stringify({ error: { message: "Rate limit reached for fake-model: 30 requests per minute" } }));
+  });
+  await new Promise<void>(resolve => provider.listen(0, "127.0.0.1", resolve));
+  const instance = await OpenAICompatDriver.create({
+    instanceId: "controlled-comms", displayName: "Controlled provider", enabled: true,
+    config: OpenAICompatDriver.decodeConfig({ url: `http://127.0.0.1:${(provider.address() as AddressInfo).port}/v1`, model: "fake-model", apiKeyEnv: "SYNTHETIC_COMPAT_KEY" }),
+    environment: { SYNTHETIC_COMPAT_KEY: "synthetic-only" },
+  });
+  const events: RuntimeEvent[] = [];
+  const off = instance.adapter.onEvent(event => events.push(event));
+  try {
+    await instance.adapter.sendTurn({
+      threadId: "controlled-provider-failure", text: "Return this provider failure.",
+      ...(scoped ? { toolScope: { allow: [] } } : {}),
+      integrations: { agents: {
+        command: process.execPath,
+        args: ["-e", "require('node:fs').writeFileSync(process.env.RECEIPT, String(process.pid)); process.stdin.resume(); setInterval(() => {}, 1000);"],
+        env: { RECEIPT: receipt },
+      } },
+    });
+    await vi.waitFor(() => expect(events.some(event => event.type === "turn.completed")).toBe(true), { timeout: 15_000 });
+    const error = events.find(event => event.type === "runtime.error");
+    expect(error).toMatchObject({ message: expect.stringContaining(scoped ? "Rate limit reached for fake-model: 30 requests per minute" : "MCP request timed out; execution outcome may be uncertain") });
+    expect(completions).toBe(scoped ? 1 : 0);
+    expect(existsSync(receipt)).toBe(!scoped);
+    writeFileSync(join(process.cwd(), ".omb-scratch", `comms-mcp-diagnostic-${scoped ? "scoped" : "unrestricted"}.json`), JSON.stringify({ scoped, completions, mcpStarted: existsSync(receipt), mcpPid: existsSync(receipt) ? Number(readFileSync(receipt, "utf8")) : null, runtimeError: error && "message" in error ? error.message : null }, null, 2) + "\n");
+  } finally {
+    off();
+    await instance.dispose();
+    provider.closeAllConnections();
+    await new Promise<void>(resolve => provider.close(() => resolve()));
+    rmSync(directory, { recursive: true, force: true });
+  }
+}, 25_000);

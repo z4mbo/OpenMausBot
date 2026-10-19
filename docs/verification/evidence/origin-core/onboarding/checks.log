@@ -1,0 +1,8 @@
+PASS profile failure preserves input; retry persists before advancing
+PASS reel, engine failure/retry, phone skip and welcome completion
+PASS connected default selected automatically; first message succeeds without a model pick
+PASS full guided tour, saved progress, reload stays dismissed
+PASS Settings replay and Skip queued behind slow Next
+PASS welcome replay can close while persistence is pending
+PASS legacy-install replay and failed replay retry
+{"ok":true,"evidence":"C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\verify-evidence\\onboarding","config":{"completedAt":"2026-10-17T21:37:25.055Z","hintsSeen":["tour.composer","tour.model","tour.computer","tour.computer-browser","tour.tools","tour.apps","tour.apps-panel","tour.automations","tour.automations-page","tour.done"],"reelSeen":false,"version":1}}

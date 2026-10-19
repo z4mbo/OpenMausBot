@@ -1,0 +1,149 @@
+{
+  "source": "b596bdf176858179122179cfc06625e3acaccc37",
+  "baseline": "bfa4597452a871af28caa614b0594c34fd980119",
+  "recordedAt": "2026-10-19T00:28:51.8149588Z",
+  "bindings": [
+    {
+      "path": "src/lib/origin-cloud/client.ts",
+      "gitBlob": "871a4f26ffa7133efb8d2250851a0d6c8de610f7",
+      "sha256": "8e6e068f1212d78bf92d6178ffa1fc0c670dba48282ff704573485859742cc16"
+    },
+    {
+      "path": "src/lib/origin-cloud/hooks.ts",
+      "gitBlob": "2f4f4f376538cbc2f1471999ae5fcd4ecc5ea9c8",
+      "sha256": "ddb5b0b76d75703437b4ee7a0c64ee09f6ee748c62b811d786052d64d1eb36a3"
+    },
+    {
+      "path": "src/lib/origin-cloud/session-races.test.ts",
+      "gitBlob": "4cd295a01b4b28ce9103c860464b3eb239f73f04",
+      "sha256": "6c5f6ec42e297187a641bdc3a2c2a78754b6a3f3cf5f09fe5c39054e34efb3ff"
+    },
+    {
+      "path": "site/components/brand.tsx",
+      "gitBlob": "2b2334358f6c52b0b35f802e97299eb4774cb0d6",
+      "sha256": "3c5a37d3fa23192845a7d2316e296bc091af8a8dfc0cd3be222a8bf400d41e3a"
+    },
+    {
+      "path": "site/components/brand.test.tsx",
+      "gitBlob": "d42fca1ad602a6479beb6173783ad3d3c07244cc",
+      "sha256": "6c645f7c42dc85504ed8b64f0ea3892ffdcaaa5418e785526f83869f6a6a6beb"
+    }
+  ],
+  "abaBefore": {
+    "desktopFailed": 2,
+    "siteFiltered": 6,
+    "siteFailed": 1,
+    "desktopFiltered": 8,
+    "production": "Exact baseline production modules; new tests only"
+  },
+  "backendDispatchBefore": {
+    "failed": 1,
+    "observedWrongBackendTokenDispatch": true,
+    "filtered": 11,
+    "passedControl": 1,
+    "production": "Baseline plus retained pre-backend-fix.patch (ABA implementation); no setCloudUrl token-clear fix yet"
+  },
+  "after": {
+    "clientTypesQualification": "Completed before final explicit storage-error throws/control; root aggregate must cover final integrated source",
+    "diffCheckExit": 0,
+    "siteTypesExit": 0,
+    "touchedLintExit": 0,
+    "priorRelatedQualification": "Related run precedes only final explicit storage-error throws and added URL-write denial control; final focused15 covers them",
+    "priorRelatedFiles": 3,
+    "siteFocused": 9,
+    "siteFull": 34,
+    "overlappingCounts": true,
+    "priorRelatedDesktop": 29,
+    "clientTypesExit": 0,
+    "finalDesktopFocused": 15
+  },
+  "api": "captureCloudSession(): {url:string|null;token:string|null;isCurrent():boolean;assertCurrent():void}",
+  "behavior": [
+    "Module-wide epoch advances once per local setter or matching/clear storage event, independent of subscriber count",
+    "Site snapshots include token and epoch, preserving current-form readiness after batched away-and-back events",
+    "Canonical backend changes clear old token before URL write and store notifications; same canonical backend retains token",
+    "Storage removal/write failures throw sanitized errors; cleared authentication is notified if a later URL write fails"
+  ],
+  "limits": [
+    "Controlled Convex transport and happy-dom StorageEvents; no browser/native Convex/persistence/production acceptance",
+    "Epoch records context changes in this module lifetime; no shared-storage atomic transaction or durable-revision claim",
+    "Root owns actual SignIn/shareSession integration and final aggregate checks"
+  ],
+  "logs": [
+    {
+      "path": "client-types-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "client-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "desktop-after.log",
+      "bytes": 261,
+      "sha256": "e6074d83bb629633a1293617947ded56f947e051370c8b036d992ae2ead6ce51"
+    },
+    {
+      "path": "desktop-backend-before.log",
+      "bytes": 3402,
+      "sha256": "0636680d0e2347df7d2e4c04d8924bc32dc067556e8afe7ff912b64f3d37721f"
+    },
+    {
+      "path": "desktop-before.log",
+      "bytes": 3025,
+      "sha256": "e322313c1c8e38a081007d8c7e5caeaa683a65604b0c367faacf4a1886c4c7b0"
+    },
+    {
+      "path": "desktop-final-focused.log",
+      "bytes": 260,
+      "sha256": "e7e51ce36bcae4874e1760fb0969d60c1c087bd51a7ca26bde1ec6a06d13a1b3"
+    },
+    {
+      "path": "desktop-final.log",
+      "bytes": 262,
+      "sha256": "745e65e40c5eac4284a784808bb4bb45581ae19eac870c1fb5f35f16cbf7696c"
+    },
+    {
+      "path": "desktop-related.log",
+      "bytes": 262,
+      "sha256": "5fde5bdde7d2d67fb72994699854af29973dd6a42d212eeebad26acbaebc69e7"
+    },
+    {
+      "path": "pre-backend-fix.patch",
+      "bytes": 4535,
+      "sha256": "b218cbc4a65cce13b83e1e5af4243dbf6523b976e330e65b818bce2a7229f4c9"
+    },
+    {
+      "path": "site-after.log",
+      "bytes": 260,
+      "sha256": "ed44ab7e504b82dcbd549b6f5900a019b7ac07dc9229583fe94083529d32a465"
+    },
+    {
+      "path": "site-before.log",
+      "bytes": 2086,
+      "sha256": "f3baf0eac2cf4fab4b1cdc5418b2bf1eb6a17d88939c7176c09b9ec9c941c652"
+    },
+    {
+      "path": "site-integrated.log",
+      "bytes": 265,
+      "sha256": "f25f76292884e3bd4c995b9f645c31974c74308ca49517b11c8cb93e4b1669e7"
+    },
+    {
+      "path": "site-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "touched-lint-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "touched-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

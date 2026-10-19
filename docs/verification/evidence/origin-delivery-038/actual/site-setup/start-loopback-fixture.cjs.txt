@@ -1,0 +1,65 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const cp = require('node:child_process');
+const net = require('node:net');
+const crypto = require('node:crypto');
+const root = path.resolve(__dirname, '../..');
+const source = 'ab0cd72b4c2f004c1015adca034472241569c04b';
+const image = 'sha256:b0a0a3315c8eeec4ea8e337b935142cf04142962e3cb92dcde87369f74684201';
+const node = 'C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/runtimes/node-v24.21.0-win-x64/node.exe';
+const prefix = process.argv[2] ?? '';
+assert.match(prefix, /^(?:[a-z]+-)?$/);
+const evidencePath = name => path.join(__dirname, prefix + name);
+const runtime = JSON.parse(fs.readFileSync(path.join(__dirname, 'runtime.json'), 'utf8'));
+assert.equal(runtime.source, source); assert.equal(runtime.image, image); assert.equal(runtime.network.internal, true);
+const stage = JSON.parse(fs.readFileSync(path.join(root, '.omb-scratch/site-stage-038-proof.json'), 'utf8'));
+const identityPath = path.join(root, '.omb-scratch/site-release-identity-0.2.14-038.json');
+const identity = JSON.parse(fs.readFileSync(identityPath, 'utf8'));
+assert.equal(identity.sourceCommit, source); assert.equal(identity.siteImageId, image);
+const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+const ownedLogs = [];
+const open = filename => { const fd = fs.openSync(evidencePath(filename), 'wx'); ownedLogs.push(fd); return fd; };
+let tunnel, proxy;
+(async () => {
+  const free = net.createServer(); await new Promise((resolve, reject) => { free.once('error', reject); free.listen(33038, '127.0.0.1', resolve); }); await new Promise(resolve => free.close(resolve));
+  const sshArgs = ['-N', '-o', 'BatchMode=yes', '-o', 'ExitOnForwardFailure=yes', '-o', 'ConnectTimeout=10', '-o', 'ServerAliveInterval=15', '-o', 'ServerAliveCountMax=2', '-L', `127.0.0.1:33038:${runtime.privateIP}:3000`, 'hetzner'];
+  tunnel = cp.spawn('C:/Windows/System32/OpenSSH/ssh.exe', sshArgs, { cwd: root, stdio: ['ignore', open('tunnel.stdout.log'), open('tunnel.stderr.log')], windowsHide: true });
+  const tunnelDeadline = Date.now() + 15_000;
+  let upstreamStatus;
+  while (Date.now() < tunnelDeadline) {
+    if (tunnel.exitCode !== null) throw new Error(`Owned tunnel exited ${tunnel.exitCode}`);
+    try { const response = await fetch('http://127.0.0.1:33038/', { signal: AbortSignal.timeout(1500) }); await response.arrayBuffer(); if (response.status === 200) { upstreamStatus = 200; break; } } catch {}
+    await pause(200);
+  }
+  assert.equal(upstreamStatus, 200, 'Owned compiled image did not become ready through its private tunnel');
+  const home = path.join(__dirname, 'proxy-home'), temp = path.join(__dirname, 'proxy-temp');
+  fs.mkdirSync(home, { recursive: true }); fs.mkdirSync(temp, { recursive: true });
+  const env = { PATH: 'C:\\Windows\\System32', SystemRoot: 'C:\\Windows', WINDIR: 'C:\\Windows', HOME: home, USERPROFILE: home, APPDATA: path.join(home, 'AppData/Roaming'), LOCALAPPDATA: path.join(home, 'AppData/Local'), TEMP: temp, TMP: temp };
+  const proxyArgs = [path.join(root, '.omb-scratch/serve-site-038-preview.mjs'), source, image];
+  proxy = cp.spawn(node, proxyArgs, { cwd: root, env, stdio: ['ignore', open('proxy.stdout.log'), open('proxy.stderr.log')], windowsHide: true });
+  const proxyDeadline = Date.now() + 10_000;
+  let info;
+  while (Date.now() < proxyDeadline) {
+    if (proxy.exitCode !== null) throw new Error(`Owned proxy exited ${proxy.exitCode}`);
+    try { const line = fs.readFileSync(evidencePath('proxy.stdout.log'), 'utf8').split(/\r?\n/).find(line => line.startsWith('{')); if (line) { info = JSON.parse(line); break; } } catch {}
+    await pause(100);
+  }
+  assert(info && /^http:\/\/127\.0\.0\.1:\d+$/.test(info.url));
+  assert.equal(info.source, source); assert.equal(info.image, image); assert.equal(info.pid, proxy.pid);
+  const proofResponse = await fetch(info.url + '/__origin-private-proof.json', { signal: AbortSignal.timeout(2000) });
+  const proof = await proofResponse.json();
+  assert.equal(proof.version, '0.2.14'); assert.equal(proof.source, source); assert.equal(proof.image, image);
+  assert.deepEqual(proof.methods, ['GET', 'HEAD']); assert.equal(proof.incomingCredentialsForwarded, false); assert.equal(proof.outgoingCookiesForwarded, false);
+  assert(proof.policy.includes("connect-src 'none'") && proof.policy.includes("form-action 'none'"));
+  const landing = await fetch(info.url + '/', { signal: AbortSignal.timeout(5000) }); assert.equal(landing.status, 200); await landing.arrayBuffer();
+  assert(landing.headers.get('content-security-policy').includes("connect-src 'none'"));
+  const sha256 = data => crypto.createHash('sha256').update(data).digest('hex');
+  const result = { version: '0.2.14', cycle: '038', source, image, url: info.url, identity: { file: identityPath, sha256: sha256(fs.readFileSync(identityPath)) }, archive: stage.archive, expectations: stage.expectations, tunnel: { pid: tunnel.pid, args: sshArgs, local: '127.0.0.1:33038', privateRemote: runtime.privateIP + ':3000' }, proxy: { pid: proxy.pid, args: proxyArgs, envKeys: Object.keys(env), policy: proof.policy }, containerId: runtime.container.id, upstreamStatus, privateProxyLandingStatus: landing.status, limits: { browserOwner: 'root via Cua', freshVisualAcceptance: 'pending', accountSubmissions: 0, backendPolicyAndAuthMutations: 'blocked', productionMutations: 0 }, readyAt: new Date().toISOString() };
+  fs.writeFileSync(evidencePath('fixture-ready.json'), JSON.stringify(result, null, 2) + '\n', { flag: 'wx' });
+  const contract = JSON.parse(fs.readFileSync(path.join(__dirname, 'browser-contract.json'), 'utf8'));
+  fs.writeFileSync(evidencePath('browser-ready-contract.json'), JSON.stringify({ ...contract, image, url: info.url, identitySha256: result.identity.sha256 }, null, 2) + '\n', { flag: 'wx' });
+  console.log(JSON.stringify({ source, image, url: info.url, identitySha256: result.identity.sha256, tunnelPid: tunnel.pid, proxyPid: proxy.pid, expectations: result.expectations, accountSubmissions: 0 }));
+  const stop = () => { tunnel.kill(); proxy.kill(); };
+  process.once('SIGINT', stop); process.once('SIGTERM', stop);
+})().catch(error => { tunnel?.kill(); proxy?.kill(); console.error(error.stack); process.exitCode = 1; }).finally(() => { for (const fd of ownedLogs) fs.closeSync(fd); });

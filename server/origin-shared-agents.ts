@@ -233,6 +233,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     watches.clear();
     mirror?.stop();
     mirror = null;
+    lease?.stop();
     lease = null;
     connection?.cloud.close();
     connection = null;

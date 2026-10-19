@@ -1,0 +1,31 @@
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { normalizePath } from 'vite';
+import { launchVerificationServer } from '../../scripts/control-omb.ts';
+import { mountPreview, parkUntilSignal, REPO_ROOT } from '../../scripts/testing/preview-fixture.ts';
+const before = process.argv.includes('--before');
+const dialog = process.argv.includes('--dialog');
+if (process.argv.slice(2).some(arg => !['--before','--dialog'].includes(arg))) throw new Error('Unsupported argument');
+const baseline = '1599b6c6d';
+const relative = dialog ? 'src/components/OriginConnect.tsx' : 'src/components/OriginGate.tsx';
+const source = before ? execFileSync('git', ['show', `${baseline}:${relative}`], {cwd:REPO_ROOT}) : readFileSync(join(REPO_ROOT,relative));
+const fixture = await launchVerificationServer();
+let preview;
+try {
+  const adapter = normalizePath(join(REPO_ROOT,'.omb-scratch/session-flow-037/transport.tsx'));
+  const target = normalizePath(join(REPO_ROOT,relative));
+  const proof = {version:before?'before':'after',baseline,source:relative,sha256:createHash('sha256').update(source).digest('hex'),realOriginGate:!dialog,realAccountDialog:dialog,realSessionHooks:true,syntheticConvex:true,nativeBackend:false};
+  preview = await mountPreview(fixture, {
+    entry:`/.omb-scratch/session-flow-037/${dialog?'dialog':'preview'}.tsx`,route:'/__origin-session-flow.html',title:`Origin ${dialog?'connection error':'sign-in ownership'} — ${proof.version}`,hmr:false,
+    cacheDir:join(fixture.info.dataDir,'session-flow-vite-cache'),
+    plugins:[{name:'exact-gate-source',enforce:'pre',load(id){if(normalizePath(id.split('?')[0])===target) return source.toString();}}],
+    aliases:[{find:dialog ? /^convex\/react$/ : /^(?:convex\/react|@\/lib\/origin-cloud-links|@\/lib\/origin-sync|@\/lib\/origin-shared-agents|@\/lib\/origin-teams|@\/lib\/origin-workspaces|@\/state\/store|\.\/OriginConnect)$/,replacement:adapter}],
+    extraRoutes:[{path:'/__session-flow-proof.json',handler(_req,res){res.setHeader('content-type','application/json');res.end(JSON.stringify(proof));}}, ...(dialog?[{path:'/api/origin/cloud-session',method:'PUT',handler(_req,res){res.statusCode=409;res.setHeader('content-type','application/json');res.end(JSON.stringify({error:'Synthetic connection ownership conflict'}));}}]:[])],
+  });
+  const ready = {...fixture.info,...proof,previewUrl:preview.previewUrl};
+  writeFileSync(join(REPO_ROOT,'.omb-scratch/session-flow-037',`${dialog?'dialog-':'browser-'}${before?'before':'after'}-fixture.json`),JSON.stringify(ready,null,2)+'\n');
+  console.log(JSON.stringify(ready));
+  await parkUntilSignal();
+} finally {await preview?.close();await fixture.close();}

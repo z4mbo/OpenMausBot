@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { canEdit, requireMember, requireTeamMember } from "./lib/permissions";
+import { admitStorageReference, issueUpload, writableUploadScope } from "./lib/storage";
 
 const scope = { sessionToken: v.string(), teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")) };
 async function sceneAccess(ctx: QueryCtx | MutationCtx, args: { sessionToken: string; teamId: Id<"teams">; canvasId?: Id<"canvases"> }) {
@@ -102,14 +103,15 @@ export const files = query({
 });
 export const uploadUrl = mutation({
   args: scope, returns: v.string(),
-  handler: async (ctx, args) => { const { member } = await sceneAccess(ctx, args); if (!canEdit(member)) throw new Error("Edit role required"); return ctx.storage.generateUploadUrl(); },
+  handler: async (ctx, args) => { const { member } = await sceneAccess(ctx, args); if (!canEdit(member)) throw new Error("Edit role required"); return issueUpload(ctx, args.sessionToken, { kind: "drawing", teamId: args.teamId, canvasId: args.canvasId }); },
 });
 export const saveFile = mutation({
   args: { ...scope, fileId: v.string(), storageId: v.id("_storage"), mimeType: v.string() }, returns: v.null(),
   handler: async (ctx, args) => {
-    const { member } = await sceneAccess(ctx, args); if (!canEdit(member)) throw new Error("Edit role required");
+    const { member, user } = await sceneAccess(ctx, args); if (!canEdit(member)) throw new Error("Edit role required");
     const metadata = await ctx.db.system.get(args.storageId);
     if (!metadata || metadata.size > 15 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"].includes(args.mimeType) || args.fileId.length > 100 || !args.fileId) throw new Error("Choose an image under 15 MB");
+    await admitStorageReference(ctx, args.storageId, user, await writableUploadScope(ctx, user, { kind: "drawing", teamId: args.teamId, canvasId: args.canvasId }));
     const existing = await ctx.db.query("drawingFiles").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId).eq("fileId", args.fileId)).unique();
     if (!existing) {
       const count = (await ctx.db.query("drawingFiles").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId)).take(501)).length;

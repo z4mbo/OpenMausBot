@@ -606,10 +606,10 @@ test("only the verified Cloud, open as this window's active server, counts as th
 });
 
 const LOCAL = "http://127.0.0.1:48993";
-function preload({ remote = false, activation = false } = {}) {
+function preload({ remote = false, activation = false, vendorCloud = false } = {}) {
   let bridge; const invoked = [], listeners = new Map();
   vm.runInNewContext(readFileSync(new URL("./preload.cjs", import.meta.url), "utf8"), {
-    process: { platform: "darwin", argv: [`--omb-local-origin=${LOCAL}`, "--omb-company-desktop=1"] },
+    process: { platform: "darwin", argv: [`--omb-local-origin=${LOCAL}`, "--omb-company-desktop=1", ...(vendorCloud ? ["--omb-vendor-cloud=1"] : [])] },
     location: { origin: remote ? ORIGIN : LOCAL }, navigator: { userActivation: { isActive: activation } },
     TextEncoder, localStorage: { getItem: () => null },
     require: () => ({ webUtils: {}, contextBridge: { exposeInMainWorld: (_name, value) => { bridge = value; } },
@@ -798,10 +798,10 @@ test("a server's Copy opens this computer's Settings → Servers on that server'
 });
 
 test("the Cloud's setup checklist can open the lending switch here, and nothing else can", async () => {
-  const local = preload();
+  const local = preload({ vendorCloud: true });
   await local.bridge.cloudLending.open({ origin: "https://evil.example.test", folders: ["/"] });
   assert.deepEqual(local.invoked, [["cloud-lending:open"]]);
-  const page = preload({ remote: true });
+  const page = preload({ remote: true, vendorCloud: true });
   assert.ok(page.bridge.cloudLending);
   assert.deepEqual(Object.keys(page.bridge.cloudLending), ["open"]);
   const source = readFileSync(new URL("./main.mjs", import.meta.url), "utf8").replace(/\r\n/g, "\n");
@@ -835,7 +835,7 @@ test("the Cloud's setup checklist can open the lending switch here, and nothing 
 });
 
 test("Settings on the person's own Cloud shows the plan read only, and can only open the dashboard or switch back", async () => {
-  const page = preload({ remote: true });
+  const page = preload({ remote: true, vendorCloud: true });
   assert.deepEqual(Object.keys(page.bridge.cloudPlan), ["state", "manage", "useThisComputer", "noticeSeen"]);
   assert.equal(page.bridge.cloudAccount, undefined, "no account, credential or address reaches the Cloud's page");
   await page.bridge.cloudPlan.state({ origin: "https://evil.example.test" });
@@ -843,7 +843,7 @@ test("Settings on the person's own Cloud shows the plan read only, and can only 
   await assert.rejects(page.bridge.cloudPlan.useThisComputer(), /Choose Use this computer/);
   await page.bridge.cloudPlan.noticeSeen("ended", { day: "2099-01-01" });
   assert.deepEqual(page.invoked, [["cloud-plan:state"], ["cloud-plan:notice-seen"]]);
-  const clicked = preload({ remote: true, activation: true });
+  const clicked = preload({ remote: true, activation: true, vendorCloud: true });
   await clicked.bridge.cloudPlan.manage("https://evil.example.test"); await clicked.bridge.cloudPlan.useThisComputer("vps");
   assert.deepEqual(clicked.invoked, [["cloud-plan:manage"], ["cloud-plan:local"]]);
 

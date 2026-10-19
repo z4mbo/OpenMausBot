@@ -1,0 +1,10 @@
+import { createRoot } from "react-dom/client";
+import { OriginConnectDialog } from "../../src/components/OriginConnect";
+import { setCloudUrl, setSessionToken } from "../../src/lib/origin-cloud/client";
+import "../../src/styles.css";
+setCloudUrl("http://127.0.0.1:43001"); setSessionToken(null);
+createRoot(document.getElementById("root")!).render(<main className="min-h-dvh bg-app p-8 text-ink">
+  <h1>Origin connection error · synthetic fixture</h1>
+  <p>Actual account dialog, session hooks and HTTP handoff. Synthetic Convex identities; this fixture server refuses the handoff with HTTP 409.</p>
+  <OriginConnectDialog onClose={() => {}} />
+</main>);

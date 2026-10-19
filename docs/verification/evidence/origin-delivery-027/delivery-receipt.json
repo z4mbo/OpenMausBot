@@ -1,0 +1,142 @@
+{
+  "version": "0.2.7",
+  "source": "dbdac25fcd014d231e694aa8665d326b235af616",
+  "ciRun": 39112787205,
+  "ciRunAttempt": 2,
+  "ciConclusion": "success",
+  "ciUrl": "https://github.com/z4mbo/Origin/actions/runs/39112787205",
+  "nativeRun": 39112820614,
+  "nativeConclusion": "success",
+  "nativeUrl": "https://github.com/z4mbo/Origin/actions/runs/39112820614",
+  "published": true,
+  "publicVersion": "0.2.7",
+  "artifactFeedsVerified": true,
+  "backendDeployed": true,
+  "migrationComplete": true,
+  "siteDeployed": true,
+  "siteSourceCommit": "dbdac25fcd014d231e694aa8665d326b235af616",
+  "siteImageSourceCommit": "dbdac25fcd014d231e694aa8665d326b235af616",
+  "siteImageId": "sha256:5d59beb1676c192b4368d731be1b1be1e53407ff0168ae16385cb4568f79ccca",
+  "manifestSha256": "d8cac6d5589b01a1f2605c8e92cdbf0a421b483a88a8819675071525c8654eab",
+  "checksumsSha256": "55053a4478e7e90931a8e473522c15c375dab3fd700a3fee189023f2ccd0a3bb",
+  "siteIdentitySha256": "3bf37c09f24f1d68e94c8548f3df68096e697a57a305196bb17abf9f0acd0afb",
+  "backupSha256": "39c5e0eb8f453d812a62b806e3111f8a97409d3655259bd8fa3c5704aa3fdc02",
+  "migrations": [
+    {
+      "table": "users",
+      "done": true,
+      "pages": 1,
+      "admitted": 3
+    },
+    {
+      "table": "projects",
+      "done": true,
+      "pages": 1,
+      "admitted": 0
+    },
+    {
+      "table": "workspaceAgents",
+      "done": true,
+      "pages": 1,
+      "admitted": 0
+    },
+    {
+      "table": "designAssets",
+      "done": true,
+      "pages": 1,
+      "admitted": 5
+    },
+    {
+      "table": "drawingFiles",
+      "done": true,
+      "pages": 1,
+      "admitted": 1
+    }
+  ],
+  "deployment": {
+    "name": "wry-fly-446",
+    "type": "dev",
+    "url": "https://wry-fly-446.eu-west-1.convex.cloud",
+    "verifiedAt": "2026-10-18T10:12:43.504Z"
+  },
+  "temporaryDeployKeyRevoked": true,
+  "temporaryDeployKeyRevokedAt": "2026-10-18T10:12:49.4334082Z",
+  "credentialFileAbsent": true,
+  "github": {
+    "receiptProvided": true,
+    "verified": true,
+    "id": 416342023,
+    "url": "https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.7"
+  },
+  "publicDownloads": {
+    "verified": true,
+    "status": "passed",
+    "version": "0.2.7",
+    "source": "dbdac25fcd014d231e694aa8665d326b235af616",
+    "nativeRun": 39112820614,
+    "payloads": 13,
+    "aliases": 3,
+    "metadata": 2
+  },
+  "publicSite": {
+    "verified": true,
+    "origin": "https://origin.imbored.fun",
+    "notes": 18,
+    "accountSubmissions": 0,
+    "routes": [
+      {
+        "path": "/",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/",
+        "h1": "Every project gets a team of agents that ships."
+      },
+      {
+        "path": "/login",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/login",
+        "h1": "Sign in to Origin"
+      },
+      {
+        "path": "/signup",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/signup",
+        "h1": "Create your Origin account"
+      },
+      {
+        "path": "/whats-new",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/whats-new",
+        "h1": "What's new"
+      }
+    ],
+    "downloads": [
+      {
+        "platform": "Windows",
+        "href": "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+      },
+      {
+        "platform": "MacAppleSilicon",
+        "href": "https://origin.imbored.fun/downloads/Origin-Mac-AppleSilicon.dmg"
+      },
+      {
+        "platform": "MacIntel",
+        "href": "https://origin.imbored.fun/downloads/Origin-Mac-Intel.dmg"
+      }
+    ],
+    "verifiedAt": "2026-10-18T10:13:38.388Z",
+    "proof": "public/browser-proof.json"
+  },
+  "publicScreenshot": {
+    "path": "public/landing.png",
+    "bytes": 70061,
+    "sha256": "19ad544d425fe8a03864fece53a7e1a0539efc623abffedc6f1404d953656561"
+  },
+  "signingLimitations": {
+    "windows": "unsigned",
+    "mac": "ad-hoc, unnotarized",
+    "macInteractiveAcceptance": false
+  },
+  "networkResetCauseProven": false,
+  "preparedManifestSha256": "bcffaeb9f2aaeffbd91525db4abf03d8ce6619e3bfb654314e6d1e2183abaeb5",
+  "generatedAt": "2026-10-18T10:13:38.388Z"
+}

@@ -261,7 +261,7 @@ describe("the sidecar in front of an unmodified harness", () => {
 
     const { body } = await device("GET", "/api/bots");
     const botId = body.bots[0].id;
-    expect((await device("PATCH", `/api/bots/${botId}`, { body: { autoApprove: true } })).status).toBe(404);
+    expect((await device("PATCH", `/api/bots/${botId}`, { body: { autoApprove: true } })).status).toBe(403);
     expect((await device("PATCH", `/api/groups/not-a-room`, { body: { unread: false } })).status).toBe(404);
   });
 
@@ -280,6 +280,119 @@ describe("the sidecar in front of an unmodified harness", () => {
       expect(res.status, `${method} ${path} was blocked by the sidecar`).not.toBe(403);
       expect(res.status, `${method} ${path} never reached the harness`).not.toBe(404);
     }
+  });
+
+  it("saves a paired device's bot appearance and returns it to other clients", async () => {
+    const { body } = await device("GET", "/api/bots");
+    const bot = body.bots[0];
+    const appearance = { color: "teal", mascotBody: "star", mascotExpression: "happy" };
+    const saved = await device("PATCH", `/api/bots/${bot.id}`, { body: appearance });
+    expect(saved.status, JSON.stringify(saved.body)).toBe(200);
+    expect(saved.body.bot).toMatchObject(appearance);
+
+    const refreshed = await device("GET", "/api/bots");
+    expect(refreshed.body.bots.find((candidate: { id: string }) => candidate.id === bot.id))
+      .toMatchObject(appearance);
+    const host = await fetch(`${HARNESS}/api/bots`).then((response) => response.json()) as { bots: Array<{ id: string }> };
+    expect(host.bots.find((candidate: { id: string }) => candidate.id === bot.id))
+      .toMatchObject(appearance);
+  });
+
+  it("refuses unauthenticated appearance saves and protected fields without changing the bot", async () => {
+    const { body } = await device("GET", "/api/bots");
+    const bot = body.bots[0];
+    const path = `/api/bots/${bot.id}`;
+    const appearance = { color: "coral", mascotBody: "diamond", mascotExpression: "sleeping" };
+    for (const token of [null, "omb_wrong"]) {
+      expect((await device("PATCH", path, { token, body: appearance })).status).toBe(401);
+    }
+    for (const protectedPatch of [
+      { autoApprove: true },
+      { approvalMode: "full" },
+      { soul: "not permitted" },
+      { computer: "local" },
+      { modelSelection: { instanceId: "ghost", model: "other" } },
+      { unexpected: true },
+    ]) {
+      const refused = await device("PATCH", path, { body: { ...appearance, ...protectedPatch } });
+      expect(refused.status, JSON.stringify(protectedPatch)).toBe(403);
+      expect(refused.body.error).toContain(Object.keys(protectedPatch)[0]);
+      expect(refused.body.error).toContain("host computer");
+      const refreshed = await device("GET", "/api/bots");
+      expect(refreshed.body.bots.find((candidate: { id: string }) => candidate.id === bot.id)).toEqual(bot);
+    }
+  });
+
+  it("saves the avatar panel's reset and shape choices from a paired device", async () => {
+    const { body } = await device("GET", "/api/bots");
+    const bot = body.bots[0];
+    const path = `/api/bots/${bot.id}`;
+    const shape = await device("PATCH", path, { body: { color: "purple", avatarCrop: "square", avatarZoom: 1.5, avatarFocusX: 0.25, avatarFocusY: 0.75 } });
+    expect(shape.status, JSON.stringify(shape.body)).toBe(200);
+    expect(shape.body.bot).toMatchObject({ color: "purple", avatarCrop: "square", avatarZoom: 1.5, avatarFocusX: 0.25, avatarFocusY: 0.75 });
+
+    const reset = await device("PATCH", path, { body: { avatarCrop: "mascot", color: "green", mascotExpression: null, mascotBody: "cursor" } });
+    expect(reset.status, JSON.stringify(reset.body)).toBe(200);
+    const host = await fetch(`${HARNESS}/api/bots`).then((response) => response.json()) as { bots: Array<{ id: string }> };
+    expect(host.bots.find((candidate) => candidate.id === bot.id))
+      .toMatchObject({ avatarCrop: "mascot", color: "green", mascotBody: "cursor" });
+    expect((await device("PATCH", path, { body: { avatarUrl: "/etc/passwd" } })).status).toBe(400);
+  });
+
+  it("refuses appearance values clients cannot draw without changing the bot", async () => {
+    const { body } = await device("GET", "/api/bots");
+    const bot = body.bots[0];
+    for (const invalid of [
+      { color: "#168aad" },
+      { color: "<script>" },
+      { color: { nested: true } },
+      { mascotExpression: 12345 },
+      { mascotExpression: "x".repeat(81) },
+      { mascotBody: "nope" },
+      { pinned: [1, 2] },
+      { avatarCrop: "triangle" },
+      { avatarFocusX: "left" },
+    ]) {
+      const refused = await device("PATCH", `/api/bots/${bot.id}`, { body: invalid });
+      expect(refused.status, JSON.stringify(invalid)).toBe(400);
+      expect(refused.body.error).toContain(Object.keys(invalid)[0]);
+      const refreshed = await device("GET", "/api/bots");
+      expect(refreshed.body.bots.find((candidate: { id: string }) => candidate.id === bot.id)).toEqual(bot);
+    }
+  });
+
+  it("validates host appearance saves before applying any field", async () => {
+    const bots = await fetch(`${HARNESS}/api/bots`).then((response) => response.json()) as { bots: { id: string }[] };
+    const bot = bots.bots[0];
+    for (const invalid of [
+      { color: "#168aad" },
+      { color: { nested: true } },
+      { mascotExpression: 12345 },
+      { mascotExpression: "x".repeat(81) },
+      { pinned: [1, 2] },
+    ]) {
+      const response = await fetch(`${HARNESS}/api/bots/${bot.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json", origin: HARNESS },
+        body: JSON.stringify({ unread: true, ...invalid }),
+      });
+      expect(response.status, JSON.stringify(invalid)).toBe(400);
+      const refreshed = await fetch(`${HARNESS}/api/bots`).then((entry) => entry.json()) as { bots: { id: string }[] };
+      expect(refreshed.bots.find((candidate: { id: string }) => candidate.id === bot.id)).toEqual(bot);
+    }
+  });
+
+  it("does not let a device suppress the companion marker to change protected fields", async () => {
+    const { body } = await device("GET", "/api/bots");
+    const bot = body.bots[0];
+    const refused = await device("PATCH", `/api/bots/${bot.id}`, {
+      headers: { "x-openmausbot-companion": "0" },
+      body: { color: "coral", autoApprove: true },
+    });
+    expect(refused.status).toBe(403);
+    expect(refused.body.error).toContain("autoApprove");
+    const refreshed = await device("GET", "/api/bots");
+    expect(refreshed.body.bots.find((candidate: { id: string }) => candidate.id === bot.id)).toEqual(bot);
   });
 
   it("files bots through only the narrow atomic organizer route", async () => {
@@ -325,7 +438,7 @@ describe("the sidecar in front of an unmodified harness", () => {
     expect(after).toHaveLength(before.length + 1);
     expect(after.some((bot: { id: string }) => bot.id === id)).toBe(true);
     expect((await device("GET", "/api/bot-defaults")).status).toBe(404);
-    expect((await device("PATCH", `/api/bots/${id}`, { body: { soul: "not permitted" } })).status).toBe(404);
+    expect((await device("PATCH", `/api/bots/${id}`, { body: { soul: "not permitted" } })).status).toBe(403);
   });
 
   it("only remembers an always-allow key carried by a pending card", async () => {

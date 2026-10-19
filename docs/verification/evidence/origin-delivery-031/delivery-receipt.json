@@ -1,0 +1,253 @@
+{
+  "version": "0.2.11",
+  "source": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+  "sourceExpectations": {
+    "version": "0.2.11",
+    "source": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+    "currentNoteCount": 8,
+    "canonicalTitleTotal": 40,
+    "releaseArticles": 5,
+    "auditFindings": 69,
+    "retainedPriorBugRows": 52,
+    "retainedPublishedAuditRows": 59,
+    "siteFileCount": 151
+  },
+  "ciRun": 39144432592,
+  "ciRunAttempt": 1,
+  "ciConclusion": "success",
+  "ciUrl": "https://github.com/z4mbo/Origin/actions/runs/39144432592",
+  "nativeRun": 39144426479,
+  "nativeConclusion": "success",
+  "nativeUrl": "https://github.com/z4mbo/Origin/actions/runs/39144426479",
+  "published": true,
+  "publicVersion": "0.2.11",
+  "artifactFeedsVerified": true,
+  "backendDeployed": true,
+  "migrationComplete": true,
+  "siteDeployed": true,
+  "siteSourceCommit": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+  "siteImageSourceCommit": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+  "siteImageId": "sha256:bfb08fcc03fc781ecf6ea70b301d16e3e429117814608535e4d5a20c3616f5cb",
+  "previousSiteImageId": "sha256:4dfdb35d3736cae71bd5a1498b8901e3328480966a72f5cbb0d465cb5272fe7b",
+  "manifestSha256": "046b1d878c80838fcf48937929e11666a8edf8e5b1ad42c8da61d79e0fb3fe24",
+  "checksumsSha256": "cac83f90fad57fddc235a2b7f73a9511838dd269846f1169bc0539d9dc263312",
+  "siteIdentitySha256": "18f1943df1e866be09898d047cdc4fd0ada6b3201972161ed76a9c906acee76c",
+  "backupSha256": "ba56e04acb7b3479a62ee4f0bf18ec51d02aaee63e23b8c150a5c4f7ea50750d",
+  "backup": {
+    "sha256": "ba56e04acb7b3479a62ee4f0bf18ec51d02aaee63e23b8c150a5c4f7ea50750d",
+    "bytes": 10914117,
+    "completedAt": "2026-10-18T16:59:36.883Z"
+  },
+  "migrations": {
+    "phaseCount": 8,
+    "storage": [
+      {
+        "table": "users",
+        "handler": "storage:migrateReferences",
+        "done": true,
+        "pages": 1,
+        "admitted": 3
+      },
+      {
+        "table": "projects",
+        "handler": "storage:migrateReferences",
+        "done": true,
+        "pages": 1,
+        "admitted": 0
+      },
+      {
+        "table": "workspaceAgents",
+        "handler": "storage:migrateReferences",
+        "done": true,
+        "pages": 1,
+        "admitted": 0
+      },
+      {
+        "table": "designAssets",
+        "handler": "storage:migrateReferences",
+        "done": true,
+        "pages": 1,
+        "admitted": 5
+      },
+      {
+        "table": "drawingFiles",
+        "handler": "storage:migrateReferences",
+        "done": true,
+        "pages": 1,
+        "admitted": 1
+      }
+    ],
+    "draft": [
+      {
+        "phase": "columns",
+        "handler": "tasks:flagDraftColumns",
+        "bound": 100,
+        "done": true,
+        "pages": 1,
+        "scanned": 81,
+        "changed": 6,
+        "created": 0,
+        "candidateUpdated": 0,
+        "adopted": 0
+      },
+      {
+        "phase": "legacyIdeas",
+        "handler": "tasks:selectLegacyDraftCandidates",
+        "bound": 100,
+        "done": true,
+        "pages": 1,
+        "scanned": 81,
+        "changed": 24,
+        "created": 0,
+        "candidateUpdated": 24,
+        "adopted": 0
+      },
+      {
+        "phase": "projects",
+        "handler": "tasks:repairProjectDrafts",
+        "bound": 25,
+        "done": true,
+        "pages": 2,
+        "scanned": 32,
+        "changed": 27,
+        "created": 2,
+        "candidateUpdated": 0,
+        "adopted": 24
+      }
+    ]
+  },
+  "backendCompatibility": {
+    "phaseSha256": "f098ab7db40e9e57e662e01162f752124d00c1ef873c28c3abb44832000cc423",
+    "compatibilitySha256": "945f6fb7c550def82d2e4b75a38791cca4b4b74a5a3fe3c7ac04903b8d235301",
+    "reportSha256": "25eade62ac1eb924ea3405ada1833cd7328ebfee176457928ea471cf9aac39cf",
+    "reviewedFiles": 9,
+    "completedAt": "2026-10-18T17:00:34.060Z",
+    "originalPublicClientsSha256": "25d90b350da9febace64c25d1c9b117234321538f01f38ea6844d57c53058953",
+    "originalPublicClients": {
+      "version": "0.2.11",
+      "source": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+      "githubReleaseId": 416573901,
+      "manifestSha256": "046b1d878c80838fcf48937929e11666a8edf8e5b1ad42c8da61d79e0fb3fe24",
+      "checksumsSha256": "cac83f90fad57fddc235a2b7f73a9511838dd269846f1169bc0539d9dc263312",
+      "published": true,
+      "clientsVerified": true,
+      "artifactFeedsVerified": true,
+      "verifiedAt": "2026-10-18T17:07:46.757Z"
+    },
+    "independentObjectsReverified": true
+  },
+  "deployment": {
+    "name": "wry-fly-446",
+    "type": "dev",
+    "url": "https://wry-fly-446.eu-west-1.convex.cloud",
+    "verifiedAt": "2026-10-18T17:00:01.490Z"
+  },
+  "temporaryDeployKeyRevoked": true,
+  "temporaryDeployKeyRevokedAt": "2026-10-18T17:00:12.172Z",
+  "credentialFileAbsent": true,
+  "github": {
+    "receiptProvided": true,
+    "verified": true,
+    "id": 416573901,
+    "assets": 15,
+    "payloads": 13,
+    "assetBytes": 1947905441,
+    "url": "https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.11"
+  },
+  "publicDownloads": {
+    "verified": true,
+    "status": "passed",
+    "version": "0.2.11",
+    "source": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+    "nativeRun": 39144426479,
+    "payloads": 13,
+    "aliases": 3,
+    "metadata": 2,
+    "payloadBytes": 1947901993
+  },
+  "publicSite": {
+    "verified": true,
+    "origin": "https://origin.imbored.fun",
+    "notes": 8,
+    "accountSubmissions": 0,
+    "routes": [
+      {
+        "path": "/",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/",
+        "h1": "Every project gets a team of agents that ships."
+      },
+      {
+        "path": "/login",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/login",
+        "h1": "Sign in to Origin"
+      },
+      {
+        "path": "/signup",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/signup",
+        "h1": "Create your Origin account"
+      },
+      {
+        "path": "/whats-new",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/whats-new",
+        "h1": "What's new"
+      }
+    ],
+    "downloads": [
+      {
+        "platform": "Windows",
+        "href": "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+      },
+      {
+        "platform": "MacAppleSilicon",
+        "href": "https://origin.imbored.fun/downloads/Origin-Mac-AppleSilicon.dmg"
+      },
+      {
+        "platform": "MacIntel",
+        "href": "https://origin.imbored.fun/downloads/Origin-Mac-Intel.dmg"
+      }
+    ],
+    "verifiedAt": "2026-10-18T17:09:52.126Z",
+    "proof": "public/browser-proof.json"
+  },
+  "publicScreenshot": {
+    "path": "public/landing.jpg",
+    "bytes": 57214,
+    "sha256": "c201c0e7ad91dba0d4e4799ba18f93a6d914de38148ece32f23ff773b0c8782c"
+  },
+  "mailConfigured": true,
+  "realEmailSent": false,
+  "mailConfiguration": {
+    "namesOnly": true,
+    "providerKeyPresent": true,
+    "senderPresent": true,
+    "providerSelectorPresent": true,
+    "publicUrlPresent": true,
+    "apiKeyAuthorized": true,
+    "transactionalRelayEnabled": true,
+    "configurationOutcome": "confirmed",
+    "backendPhaseSha256": "84c228241654e4aa1d4baf7e0b57a7dc30376b1dc046e8f60caa2248cfb637ce",
+    "verifiedAt": "2026-10-18T17:05:26.745Z"
+  },
+  "mailLimitations": {
+    "providerAcceptanceDoesNotProveInbox": true,
+    "providerAccepted": false,
+    "mailboxDeliveryVerified": false
+  },
+  "authenticationLimitations": {
+    "liveAccountFormsSubmitted": false,
+    "liveSignupConfigurationExercised": false,
+    "privateGalleryPasswordMaskingObserved": false,
+    "privateGalleryFormAndBackendConnectionsBlocked": true
+  },
+  "signingLimitations": {
+    "windows": "unsigned",
+    "mac": "ad-hoc, unnotarized",
+    "macInteractiveAcceptance": false
+  },
+  "preparedManifestSha256": "c3865f0f889263da3a3228f7247f0b6495062e762d1c43b89f82c295f1298488",
+  "generatedAt": "2026-10-18T17:09:52.126Z"
+}

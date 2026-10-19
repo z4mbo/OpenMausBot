@@ -1,0 +1,156 @@
+{
+  "version": "0.2.12",
+  "referenceSource": "cdeefd5a21c92a258b1ccd13b51ae75b8d819f99",
+  "recordedAt": "2026-10-18T17:59:40.092Z",
+  "status": "local-candidate-only",
+  "clientShared": {
+    "files": 564,
+    "passed": 5974,
+    "skipped": 0,
+    "seconds": 371.04,
+    "startedAt": "2026-10-18T17:43:54.553Z",
+    "finishedAt": "2026-10-18T17:50:06.354Z",
+    "inputSource": "8a6bcaf1123346f08eb9537135f4df83cb81bd8d",
+    "inputBindingsUnchanged": true,
+    "inputBindingsSha256": "4c9f7241cf706fc02d1c8cc7bdb875297c94cac525b59b45831bd5fe508bd001"
+  },
+  "selections": {
+    "installer": {
+      "files": 5,
+      "passed": 301,
+      "skipped": 9
+    },
+    "redaction": {
+      "files": 3,
+      "passed": 70
+    },
+    "additionalChildConsumers": {
+      "files": 3,
+      "passed": 26
+    },
+    "website": {
+      "files": 2,
+      "passed": 25
+    },
+    "guardsReleaseDeployment": {
+      "files": 7,
+      "passed": 48
+    }
+  },
+  "types": {
+    "application": true,
+    "server": true,
+    "website": true
+  },
+  "lint": true,
+  "localeCatalogsValid": true,
+  "localeCompletenessClaimed": false,
+  "isolatedOperatorChecks": {
+    "privateSite": 36,
+    "prepublication": 86,
+    "cloudCalls": 0,
+    "historicalProofsOverwritten": false
+  },
+  "landingCapture": {
+    "source": "3dcdc677972264d49e1f94306a777236cc3c3784",
+    "rawScreenshots": 1,
+    "derivatives": 3,
+    "actualApp": true,
+    "syntheticCloudAndDesktopBridge": true,
+    "packagedAcceptance": false,
+    "manifestSha256": "f9829f6c6f7198a42cf3ae4217c9259231cdcbcc6aa9824a57feba29fddb77de"
+  },
+  "independentEvidenceReview": {
+    "checks": 43,
+    "sha256": "5368ad9366b0a25ea207061f53be5deba12cf24257f5099704543a7e3ba421ed",
+    "source": "8a6bcaf1123346f08eb9537135f4df83cb81bd8d",
+    "liveAcceptanceClaimed": false
+  },
+  "operatorCorrections": [
+    "A missing signup recipe index link failed one documentation check; the corrected complete selection passes48.",
+    "Four site-helper parity tests initially lacked their required immutable031 baseline copies; including the hash-pinned inputs makes all9 pass, without changing the guards.",
+    "The original prepublication helper accepted two late local-state changes during its final remote round; a final local recheck now rejects both in86 cases. Original helper/test/report bytes remain archived.",
+    "An earlier client run crossed source edits and is not used as final-input evidence; the retained stable run above proves unchanged inputs."
+  ],
+  "logs": [
+    {
+      "name": "client-shared-stable-032.log",
+      "bytes": 6564,
+      "sha256": "cac599168b9ffa82bec70d21fd4ec40d170336fa24a09a610f3b5c6c63774206",
+      "retainedPrivately": true
+    },
+    {
+      "name": "client-shared-stable-032.json",
+      "bytes": 128237,
+      "sha256": "69a91e555bafb3f1f554516c61df7c7d4979dcc0c313187a1f0111536744f479",
+      "retainedPrivately": true
+    },
+    {
+      "name": "installer-integrated-032.log",
+      "bytes": 250,
+      "sha256": "50f7bc6ebdd53984816a9685e1ce0fa3c6ee6d6d74d326beb2c0f258d4873e34",
+      "retainedPrivately": true
+    },
+    {
+      "name": "redact-integrated-032.log",
+      "bytes": 236,
+      "sha256": "47278485bbda77e29c4b2c92247d6d7b81ad7da2338370f2bb0cc4e74c506b53",
+      "retainedPrivately": true
+    },
+    {
+      "name": "child-env-consumers-032.log",
+      "bytes": 236,
+      "sha256": "9fe09f21d09c0a3e7709b5c2df2b2dcdb2ddc220cdd0426edc9de50fa53ae229",
+      "retainedPrivately": true
+    },
+    {
+      "name": "site-integrated-032.log",
+      "bytes": 240,
+      "sha256": "5f275a339ed1a39830f722bb17d023b3872f3b89202bcc850bd4c22da41ccd54",
+      "retainedPrivately": true
+    },
+    {
+      "name": "guards-with-capture-032.log",
+      "bytes": 236,
+      "sha256": "57c63f368f765498334517b166c24f3b9bd6ca36d70d352c50a30194f2f5b68d",
+      "retainedPrivately": true
+    },
+    {
+      "name": "client-types-with-capture-032.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retainedPrivately": true
+    },
+    {
+      "name": "server-types-with-capture-032.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retainedPrivately": true
+    },
+    {
+      "name": "site-types-032.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retainedPrivately": true
+    },
+    {
+      "name": "lint-with-capture-032.log",
+      "bytes": 98,
+      "sha256": "fbacf9e47ddec97671b57ebfef2e2c468929d1d33243365a03c084f510e0f7b5",
+      "retainedPrivately": true
+    },
+    {
+      "name": "locales-032.log",
+      "bytes": 472,
+      "sha256": "472594ba01d08b82277adbbeed265ecd194b54204e22c197db60c5122eccb25a",
+      "retainedPrivately": true
+    }
+  ],
+  "limits": [
+    "Final-source CI/native, compiled website and public publication remain pending.",
+    "No production-data mutations, external recipient emails, vendor installers or actual secret values were used.",
+    "Backend reuse requires final source/dependency equivalence; original031 mail/provider timestamps are not renewed.",
+    "The historical agent-run marketing screenshot remains outside the Issues-image refresh.",
+    "Physical Mac, signing/notarization, real providers/hardware, TURN and full UI inventory acceptance remain open."
+  ]
+}

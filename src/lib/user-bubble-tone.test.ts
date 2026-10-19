@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { contrastRatio, relativeLuminance, toOklch } from "./color-contrast";
 import { MAUS_COLORS, MAUS_COLOR_NAMES } from "./mascot";
@@ -15,8 +12,9 @@ import {
   userBubbleTone,
 } from "./user-bubble-tone";
 import { ZAP_SWATCHES } from "./origin-avatar-looks";
+import { readSkinCss } from "../../scripts/testing/skin-css";
 
-const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../styles.css"), "utf8");
+const css = readSkinCss();
 
 function declarations(body: string): Record<string, string> {
   return Object.fromEntries([...body.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)].map(([, name, value]) => [name, value.trim()]));
@@ -111,6 +109,15 @@ describe("custom bot colours", () => {
   it.each([...ZAP_SWATCHES, "#123456", ...MAUS_COLOR_NAMES])("gives a project accent for %s whose button text is readable", (color) => {
     const vars = accentVars(color) as Record<string, string>;
     expect(vars["--color-accent"]).toBe(botPalette(color));
-    expect(contrastRatio(vars["--color-accent-ink"]!, vars["--color-accent"]!)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(vars["--color-accent-ink"]!, vars["--color-accent"]!)).toBeGreaterThanOrEqual(BUBBLE_TEXT_MIN);
+  });
+
+  it("keeps project button text readable through the gray accent crossover without moving the fill", () => {
+    for (let channel = 0; channel <= 255; channel++) {
+      const color = `#${channel.toString(16).padStart(2, "0").repeat(3)}`;
+      const vars = accentVars(color) as Record<string, string>;
+      expect(vars["--color-accent"]).toBe(color);
+      expect(contrastRatio(vars["--color-accent-ink"]!, color), color).toBeGreaterThanOrEqual(BUBBLE_TEXT_MIN);
+    }
   });
 });

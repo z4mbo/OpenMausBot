@@ -1,0 +1,153 @@
+{
+  "base": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+  "fix": "01ddbb18b123954c5381bb77a372de32e63d2961",
+  "runs": [
+    {
+      "name": "baseline-selected",
+      "source": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+      "rawReport": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\before.json",
+      "rawSha256": "92c4355d6fd9e02170a4d7a32dcd78287297423bf430021a89569c2b72e7a762",
+      "success": false,
+      "passed": 3,
+      "failed": 6,
+      "skipped": 212,
+      "testFiles": 1,
+      "startedAt": "2026-10-18T18:39:17.035Z",
+      "selectedFailures": [
+        {
+          "name": "team access announcements keeps revoked additional teams cleared after demotion and re-election via botPatched",
+          "message": "AssertionError: expected [ 'Research', '' ] to be undefined"
+        },
+        {
+          "name": "team access announcements keeps revoked additional teams cleared after demotion and re-election via taskSwitched",
+          "message": "AssertionError: expected [ 'Research', '' ] to be undefined"
+        },
+        {
+          "name": "team access announcements keeps revoked additional teams cleared after demotion and re-election via botPatchedSwitch",
+          "message": "AssertionError: expected [ 'Research', '' ] to be undefined"
+        },
+        {
+          "name": "team access announcements clears omitted additional teams while the bot remains Chief via botPatched",
+          "message": "AssertionError: expected [ 'Research', '' ] to be undefined"
+        },
+        {
+          "name": "team access announcements clears omitted additional teams while the bot remains Chief via taskSwitched",
+          "message": "AssertionError: expected [ 'Research', '' ] to be undefined"
+        },
+        {
+          "name": "team access announcements clears omitted additional teams while the bot remains Chief via botPatchedSwitch",
+          "message": "AssertionError: expected [ 'Research', '' ] to be undefined"
+        }
+      ]
+    },
+    {
+      "name": "fixed-store",
+      "source": "01ddbb18b123954c5381bb77a372de32e63d2961",
+      "rawReport": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\after-store.json",
+      "rawSha256": "205632678903736ef9b4e82be3f3c494e1e83e5b200f8a63d74b2ad4114e969b",
+      "success": true,
+      "passed": 221,
+      "failed": 0,
+      "skipped": 0,
+      "testFiles": 1,
+      "startedAt": "2026-10-18T18:39:36.983Z",
+      "selectedFailures": []
+    },
+    {
+      "name": "authority-guards",
+      "source": "01ddbb18b123954c5381bb77a372de32e63d2961",
+      "rawReport": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\authority-guards.json",
+      "rawSha256": "b1d01663abf86098b4008d38532cd32dcbda4682a637196ccb5d356157103b14",
+      "success": true,
+      "passed": 260,
+      "failed": 0,
+      "skipped": 1,
+      "testFiles": 5,
+      "startedAt": "2026-10-18T18:40:05.848Z",
+      "selectedFailures": [],
+      "skippedCases": [
+        "Store writes the bot and group registries owner-only and tightens loose ones on load"
+      ]
+    },
+    {
+      "name": "workspace-consumers",
+      "source": "01ddbb18b123954c5381bb77a372de32e63d2961",
+      "rawReport": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\workspace-consumers.json",
+      "rawSha256": "1bc5c772fd7e3010e1b4b696ff9c62a90c4807b7c41caf46fb40d060c62ee845",
+      "success": true,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "testFiles": 2,
+      "startedAt": "2026-10-18T18:42:24.009Z",
+      "selectedFailures": []
+    },
+    {
+      "name": "client-shared",
+      "source": "01ddbb18b123954c5381bb77a372de32e63d2961",
+      "rawReport": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\client-shared.json",
+      "rawSha256": "3fa8d11576651cd2db4b32e965a4989d326d0b4380d4a26bca8e9327aef6124b",
+      "success": true,
+      "passed": 5983,
+      "failed": 0,
+      "skipped": 0,
+      "testFiles": 564,
+      "startedAt": "2026-10-18T18:43:20.076Z",
+      "selectedFailures": []
+    }
+  ],
+  "commands": [
+    {
+      "command": "node node_modules/vitest/vitest.mjs run src/state/store.test.ts -t \"team access announcements\"",
+      "exitCode": 1,
+      "baseline": true
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run src/state/store.test.ts",
+      "exitCode": 0
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run server/peer-roster.test.ts server/team-setup-requests.test.ts server/store.test.ts scripts/testing/file-size-ratchet.test.ts scripts/testing/comment-history.test.ts",
+      "exitCode": 0
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run src/lib/origin-workspaces.test.ts src/lib/origin-cloud-links.test.ts",
+      "exitCode": 0
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run src shared",
+      "exitCode": 0
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc -b",
+      "exitCode": 0,
+      "log": {
+        "path": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\typecheck-app.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.server.json",
+      "exitCode": 0,
+      "log": {
+        "path": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\typecheck-server.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "node node_modules/oxlint/bin/oxlint --deny-warnings .",
+      "exitCode": 0,
+      "version": "1.80.0"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "limits": [
+    "Full client/shared suite ran while only the isolated browser fixture was active; no tracked source changes occurred after fix commit and before completion. Boundary HEAD/status checks are recorded, not a continuous filesystem monitor.",
+    "The selected baseline intentionally skips 212 unrelated cases; the 3 grant-preservation controls pass before the fix.",
+    "Authority suite has one pre-existing Windows skip; no server source changed.",
+    "Expected test mock ECONNREFUSED localhost:3000 diagnostics appear in the full-suite log; all 5983 assertions passed."
+  ]
+}

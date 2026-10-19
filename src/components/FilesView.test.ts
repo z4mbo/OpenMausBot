@@ -227,6 +227,15 @@ describe("Your bots' work", () => {
 });
 
 describe("My Cloud's state", () => {
+  it("offers recovery when the initial Files IPC state rejects", async () => {
+    bridge.state.mockRejectedValueOnce(new Error("Synthetic IPC state failure"));
+    await mount();
+    expect(document.querySelector('[role="alert"]'), "Rejected initial state must not leave an empty Files page").not.toBeNull();
+    expect(button("Retry")).toBeTruthy();
+    await click("Retry");
+    expect(button("Add a folder")).toBeTruthy();
+    expect(bridge.state).toHaveBeenCalledTimes(2);
+  });
   it("follows main's pushes, and stops listening when closed", async () => {
     await mount();
     expect(bridge.onState).toHaveBeenCalledOnce();
@@ -253,5 +262,61 @@ describe("My Cloud's state", () => {
     delete window.ogb;
     await mount();
     expect(page()).toContain("Files work with My Cloud.");
+  });
+});
+
+describe("Files dialog keyboard focus", () => {
+  const press = (key: string, shiftKey = false) => {
+    const event = new KeyboardEvent("keydown", { key, shiftKey, bubbles: true, cancelable: true });
+    act(() => document.activeElement?.dispatchEvent(event));
+    return event;
+  };
+
+  it("keeps a refusal's only control contained and restores the picker opener after its delayed reply", async () => {
+    let finish!: (value: FolderCheck) => void;
+    bridge.pickFolder.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
+    await mount();
+    const add = button("Add a folder")!;
+    add.focus(); await click("Add a folder");
+    expect(add.disabled).toBe(true);
+    await act(async () => finish(check("Private", { refusal: "private" })));
+    const ok = button("OK", dialog()!)!;
+    expect(document.activeElement).toBe(ok);
+    for (const reverse of [false, true]) {
+      expect(press("Tab", reverse).defaultPrevented).toBe(true);
+      expect(document.activeElement).toBe(ok);
+    }
+    press("Escape");
+    expect(dialog()).toBeNull();
+    expect(document.activeElement).toBe(add);
+  });
+
+  it("wraps suggestion controls around disabled entries and uses a stable Files return target", async () => {
+    bridge.checkFolders.mockResolvedValue([check("Plans"), check("Private", { refusal: "private" })]);
+    await mount(base, ["/Users/ada/Plans"]);
+    const shown = dialog()!;
+    const cancel = button("Cancel", shown)!;
+    const share = button("Share", shown)!;
+    expect(document.activeElement).toBe(cancel);
+    share.focus(); press("Tab");
+    expect(document.activeElement).toBe(shown.querySelector('input:not([disabled])'));
+    press("Tab", true); expect(document.activeElement).toBe(share);
+    press("Escape");
+    expect(document.activeElement).toBe(document.querySelector('section[aria-labelledby="files-shared"]'));
+  });
+
+  it("restores to Files while sharing disables Add and keeps a failed share recoverable", async () => {
+    let reject!: (error: Error) => void;
+    bridge.pickFolder.mockResolvedValue(check("Plans"));
+    bridge.share.mockReturnValue(new Promise((_resolve, fail) => { reject = fail; }));
+    await mount();
+    const add = button("Add a folder")!;
+    add.focus(); await click("Add a folder");
+    await click("Share", dialog()!);
+    expect(add.disabled).toBe(true);
+    expect(document.activeElement).toBe(document.querySelector('section[aria-labelledby="files-shared"]'));
+    await act(async () => reject(new Error("Synthetic share failure")));
+    expect(add.disabled).toBe(false);
+    expect(document.querySelector('[role="alert"]')?.textContent).toContain("Synthetic share failure");
   });
 });

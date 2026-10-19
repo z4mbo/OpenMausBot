@@ -1,7 +1,9 @@
 import { v } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { internal } from "../_generated/api";
 import { threadAttachment, threadMessageKind, threadMessageTool } from "../agentsTables";
+import { canResumeThreadRun } from "./agentAccess";
 
 /** A thread holds one live run; it lapses this long after the runner's last heartbeat. */
 export const LEASE_MS = 60_000;
@@ -72,6 +74,28 @@ export async function runSummary(ctx: QueryCtx, run: Doc<"workspaceAgentRuns">, 
   };
 }
 
+export async function promoteQueuedRun(ctx: MutationCtx, threadId: Id<"agentThreads">, previousRunId: Id<"workspaceAgentRuns">, now: number): Promise<void> {
+  const thread = await ctx.db.get(threadId);
+  if (!thread || thread.activeRunId !== previousRunId) return;
+  const queued = await ctx.db.query("workspaceAgentRuns")
+    .withIndex("by_threadId_and_status", (q) => q.eq("threadId", thread._id).eq("status", "queued")).take(50);
+  for (const next of queued) {
+    const requester = await ctx.db.get(next.requesterUserId);
+    if (!requester || requester.status !== "active" || !await canResumeThreadRun(ctx, next, requester)) {
+      await ctx.db.patch(next._id, { status: "interrupted", endedAt: now, updatedAt: now });
+      continue;
+    }
+    await ctx.db.patch(next._id, { status: "running", heartbeatAt: now, updatedAt: now });
+    await ctx.db.patch(thread._id, { activeRunId: next._id, leaseUntil: now + LEASE_MS, updatedAt: now });
+    return;
+  }
+  if (queued.length === 50) {
+    await ctx.scheduler.runAfter(0, internal.agentRuns.promoteQueued, { threadId, previousRunId });
+    return;
+  }
+  await ctx.db.patch(thread._id, { activeRunId: undefined, leaseUntil: undefined, updatedAt: now });
+}
+
 /** Ends a run; when it held the thread's lease, hands the lease to the oldest queued run. */
 export async function settleRun(
   ctx: MutationCtx, run: Doc<"workspaceAgentRuns">, status: "succeeded" | "failed" | "cancelled" | "interrupted", now: number,
@@ -87,13 +111,5 @@ export async function settleRun(
     }
   }
   if (!run.threadId) return;
-  const thread = await ctx.db.get(run.threadId);
-  if (!thread || thread.activeRunId !== run._id) return;
-  const next = await ctx.db.query("workspaceAgentRuns").withIndex("by_threadId_and_status", (q) => q.eq("threadId", thread._id).eq("status", "queued")).first();
-  if (next) {
-    await ctx.db.patch(next._id, { status: "running", heartbeatAt: now, updatedAt: now });
-    await ctx.db.patch(thread._id, { activeRunId: next._id, leaseUntil: now + LEASE_MS, updatedAt: now });
-  } else {
-    await ctx.db.patch(thread._id, { activeRunId: undefined, leaseUntil: undefined, updatedAt: now });
-  }
+  await promoteQueuedRun(ctx, run.threadId, run._id, now);
 }

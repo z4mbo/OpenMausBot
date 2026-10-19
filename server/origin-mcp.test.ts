@@ -168,6 +168,17 @@ describe("origin MCP OAuth", () => {
   });
 });
 
+describe("create_issue", () => {
+  it.each([undefined, "column000001"])("forwards the person's optional destination %s without inventing a column", async (columnId) => {
+    const { client, calls } = fakeConvex({ write: true });
+    const args = { requestId: "request-0001", projectId: "project000001", title: "Private idea", priority: "medium", assignedToEmail: "me@example.test", dueDate: "2026-11-01", ...(columnId ? { columnId } : {}) };
+    const reply = await answerMcpMessage({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "create_issue", arguments: args } }, { connectorToken: CONNECTOR, write: true, grantId: "grant1" }, client);
+    expect(reply?.result).toMatchObject({ content: [{ type: "text", text: "wrote create_issue" }] });
+    const { requestId, ...change } = args;
+    expect(calls.at(-1)).toEqual({ name: "connectors:write", args: { token: CONNECTOR, requestId, change: { kind: "create_issue", ...change } } });
+  });
+});
+
 describe("delete_issue", () => {
   const ISSUE_URL = "https://github.com/acme/widgets/issues/5";
   const auth = { connectorToken: CONNECTOR, write: true, grantId: "grant1" };

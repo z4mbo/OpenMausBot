@@ -1,0 +1,20 @@
+{
+  "source": "62fe9d9a3c5dd55c391a60853ce3692bd568d2f0",
+  "productionBaseline": "43c7fd9ae4316647a2d7705745b32812635c56cb",
+  "startedAt": "2026-10-18T00:24:03.677Z",
+  "ownerPid": 7768,
+  "url": "http://127.0.0.1:20312",
+  "pid": 30608,
+  "closed": true,
+  "productionSourceDiff": [
+    "src/components/AboutDialog.tsx",
+    "src/components/ArchivedBotsPanel.tsx",
+    "src/components/ConfirmDialog.tsx",
+    "src/components/FilesView.tsx",
+    "src/components/PhoneAppDialog.tsx",
+    "src/hooks/use-modal-dialog.ts"
+  ],
+  "previewHelper": "Private copy of scripts/testing/preview-fixture.ts; only explicit port option and strictPort added",
+  "previewUrl": "http://127.0.0.1:54307/__origin-modal-after.html",
+  "closedAt": "2026-10-18T00:24:45.569Z"
+}

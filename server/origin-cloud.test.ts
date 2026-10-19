@@ -159,7 +159,7 @@ describe("runOriginTool", () => {
   it("explains a missing connection or project link", async () => {
     const { client } = fakeConvex({});
     const offline = await runOriginTool("origin_list_issues", {}, "coder", { bots: BOTS, state: { projects: { chief: "proj" } }, connect: () => client });
-    expect(offline).toMatchObject({ isError: true, text: expect.stringContaining("Origin is not connected") });
+    expect(offline).toMatchObject({ isError: true, text: expect.stringContaining("Origin account is not connected") });
     const unlinked = await runOriginTool("origin_list_issues", {}, "loner", { bots: BOTS, state, connect: () => client });
     expect(unlinked).toMatchObject({ isError: true, text: expect.stringContaining("no linked Origin project") });
   });
@@ -234,7 +234,7 @@ describe("runOriginTool", () => {
     const result = await runOriginTool("origin_create_issue", { title: "New", labels: ["ui"], due_date: "2026-11-01" }, "coder", { bots: BOTS, state, connect: () => client });
     expect(result.text).toBe('Created issue t9 (ORI-T9) "New" in column "Draft" of proj. It stays in Origin as a draft; moving it to another column creates its GitHub issue.');
     expect(mutations(calls)).toEqual([
-      ["tasks:createTask", { projectId: "proj", sessionToken: "tok", columnId: "col1", title: "New", priority: "medium", assignedToEmail: "me@x.dev", dueDate: "2026-11-01" }],
+      ["tasks:createTask", { projectId: "proj", sessionToken: "tok", title: "New", priority: "medium", assignedToEmail: "me@x.dev", dueDate: "2026-11-01" }],
       ["issueRelations:labels", { sessionToken: "tok", taskId: "t9", labels: ["ui"] }],
     ]);
     expect(result.cards).toEqual({
@@ -271,6 +271,19 @@ describe("runOriginTool", () => {
     });
   });
 
+  it.each([
+    'Server Error\nArgumentValidationError: Value does not match validator.\nPath: .sessionToken\nValue: "private-origin-session"\nValidator: v.string().',
+    'Uncaught Error: Invalid Origin session private-origin-session',
+    'Request failed with arguments {"sessionToken":"private-origin-session"}',
+  ])("keeps the Origin session out of tool errors: %s", async (message) => {
+    const { client } = fakeConvex({ "tasks:board": new Error(message) });
+    const result = await runOriginTool("origin_list_issues", {}, "coder", {
+      bots: BOTS, state: { ...state, sessionToken: "private-origin-session" }, connect: () => client,
+    });
+    expect(result.isError).toBe(true);
+    expect(result.text).not.toContain("private-origin-session");
+  });
+
   it("lists the reachable projects with their Chief and agents", async () => {
     const { client } = workspaceConvex();
     const result = await runOriginTool("origin_list_projects", {}, "head", workspaceDeps(client));
@@ -299,7 +312,7 @@ describe("origin_assign_issue", () => {
     expect(result.text).toBe("Labelled ORI-AB12 agent:developer and commented the assignment.");
     expect(mutations(calls)).toEqual([
       ["issueRelations:labels", { sessionToken: "tok", taskId: "kaitaskab12", labels: ["ci", "agent:developer"] }],
-      ["tasks:addComment", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", body: "Assigned to the agent Developer (Developer) by Kai in OpenMausBot." }],
+      ["tasks:addComment", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", body: "Assigned to the agent Developer (Developer) by Kai in Origin." }],
       ["tasks:moveTask", { projectId: "kai", sessionToken: "tok", taskId: "kaitaskab12", columnId: "k2" }],
     ]);
     expect(result.cards?.heading).toBe("Assigned to Developer");
@@ -382,10 +395,10 @@ function fakeGitHub(overrides: Partial<OriginGitHub> = {}) {
 describe("GitHub-first issues", () => {
   const repoProject = (memberRole = "admin") => ({ "projects:get": (args: Record<string, unknown>) => ({ _id: args.projectId, name: "Kai", repoUrl: "https://github.com/ggs/kai", memberRole }) });
 
-  it("mirrors a new issue to GitHub, and refuses to mark one done or drop it in the done column", async () => {
+  it("mirrors an explicitly requested Todo issue to GitHub, and refuses to mark one done or drop it in the done column", async () => {
     const { client, calls } = workspaceConvex({ ...repoProject(), "auth:me": { email: "me@x.dev" }, "tasks:createTask": "kainew" });
     const github = fakeGitHub();
-    const created = await runOriginTool("origin_create_issue", { title: "New" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    const created = await runOriginTool("origin_create_issue", { title: "New", column: "Todo" }, "kai-dev", workspaceDeps(client, { github: github.api }));
     expect(created.text).toContain("Mirrored as GitHub issue #12.");
     for (const change of [{ done: true }, { column: "Done" }]) {
       const refused = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", ...change }, "kai-dev", workspaceDeps(client, { github: github.api }));
@@ -401,11 +414,43 @@ describe("GitHub-first issues", () => {
     const github = fakeGitHub();
     const created = await runOriginTool("origin_create_issue", { title: "New" }, "kai-dev", workspaceDeps(client, { github: github.api }));
     expect(created.text).toContain('in column "Draft"');
-    expect(mutations(calls)[0]).toMatchObject(["tasks:createTask", { columnId: "k0" }]);
+    expect(mutations(calls)[0]).toEqual(["tasks:createTask", expect.not.objectContaining({ columnId: expect.anything() })]);
     expect(github.calls).toEqual([]);
     const moved = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", column: "Todo" }, "kai-dev", workspaceDeps(client, { github: github.api }));
     expect(moved.text).toContain("mirrored as GitHub issue #12");
     expect(github.calls).toEqual([["mirrorIssue", "kai", "kaitaskab12"]]);
+  });
+
+  it("repairs a legacy board before default creation and keeps its new issue off GitHub", async () => {
+    let repaired = false;
+    const draft = { _id: "private", title: "Private planning", isDraft: true };
+    const { client, calls } = workspaceConvex({
+      ...repoProject(), "auth:me": { email: "me@x.dev" }, "tasks:createTask": "kainew",
+      "tasks:board": () => ({ ...KAI_BOARD, columns: repaired ? [...KAI_BOARD.columns, draft] : KAI_BOARD.columns }),
+      "tasks:ensureDefaultColumns": () => { repaired = true; return null; },
+    });
+    const github = fakeGitHub();
+    const result = await runOriginTool("origin_create_issue", { title: "Private idea" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(result.isError).not.toBe(true);
+    expect(result.text).toContain('in column "Private planning"');
+    expect(result.cards?.issues[0].status).toBe("Private planning");
+    expect(mutations(calls)).toEqual([
+      ["tasks:ensureDefaultColumns", { projectId: "kai", sessionToken: "tok" }],
+      ["tasks:createTask", expect.not.objectContaining({ columnId: expect.anything() })],
+    ]);
+    expect(github.calls).toEqual([]);
+  });
+
+  it("does not infer another destination if Draft repair fails or an explicit column is unknown", async () => {
+    const { client, calls } = workspaceConvex({ ...repoProject(), "tasks:ensureDefaultColumns": new Error("Draft repair failed") });
+    const github = fakeGitHub();
+    const deps = workspaceDeps(client, { github: github.api });
+    expect(await runOriginTool("origin_create_issue", { title: "Private idea" }, "kai-dev", deps)).toMatchObject({ isError: true });
+    expect(mutations(calls).map(([name]) => name)).toEqual(["tasks:ensureDefaultColumns"]);
+    calls.length = 0;
+    expect(await runOriginTool("origin_create_issue", { title: "Private idea", column: "foreign" }, "kai-dev", deps)).toMatchObject({ isError: true });
+    expect(mutations(calls)).toEqual([]);
+    expect(github.calls).toEqual([]);
   });
 
   it("origin_review_pr is the Chief's: lists open pull requests with the issues they close, reads one, approves and merges it", async () => {
@@ -470,7 +515,13 @@ describe("origin_add_asset", () => {
   });
 });
 
-async function serve(options: { auth?: RequestAuth; agentTurn?: (header: string | string[] | undefined) => OriginAgentTurn | null; answers?: Record<string, unknown>; rooms?: string[] } = {}) {
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((ready) => { resolve = ready; });
+  return { promise, resolve };
+}
+
+async function serve(options: { auth?: RequestAuth; agentTurn?: (header: string | string[] | undefined) => OriginAgentTurn | null; answers?: Record<string, unknown>; rooms?: string[]; connect?: (url: string) => OriginCloudClient } = {}) {
   const file = tempFile();
   const fake = fakeConvex(options.answers ?? { "auth:me": { email: "me@x.dev" }, "tasks:board": BOARD });
   const appended: Array<{ threadId: string; message: Omit<Message, "id" | "at"> }> = [];
@@ -484,7 +535,7 @@ async function serve(options: { auth?: RequestAuth; agentTurn?: (header: string 
     store: store as never,
     agentTurn: options.agentTurn ?? ((header) => (header === "Bearer cap-coder" ? { botId: "coder", threadId: "coder-thread" } : header === "Bearer cap-room" ? { botId: "coder", threadId: "room-thread" } : null)),
     file,
-    connect: () => fake.client,
+    connect: options.connect ?? (() => fake.client),
   })];
   const server = createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
@@ -543,10 +594,155 @@ describe("origin-cloud routes", () => {
     expect(readOriginCloud(file).sessionToken).toBe("ana");
   });
 
+  it("keeps a replacement session when an older disconnect finishes checking its expired owner", async () => {
+    const checking = deferred<void>();
+    const expiredOwner = deferred<null>();
+    let expiredChecks = 0;
+    const { call, file } = await serve({ answers: {
+      "auth:me": (args: Record<string, unknown>) => {
+        if (args.sessionToken !== "expired-a") return { email: "bo@x.dev" };
+        if (++expiredChecks !== 1) return null;
+        checking.resolve();
+        return expiredOwner.promise;
+      },
+    } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { url, sessionToken: "expired-a", projects: { chief: "proj" } });
+    const disconnect = call("DELETE", "/api/origin/cloud-session");
+    await checking.promise;
+    try {
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "replacement-b" }))[0]).toBe(200);
+    } finally {
+      expiredOwner.resolve(null);
+    }
+    const result = await disconnect;
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "replacement-b", projects: { chief: "proj" } });
+    expect(result[0]).toBe(409);
+  });
+
+  it("keeps the newer account when an older connection finishes checking a superseded owner", async () => {
+    const checking = deferred<void>();
+    const expiredOwner = deferred<null>();
+    let expiredChecks = 0;
+    const { call, file } = await serve({ answers: {
+      "auth:me": (args: Record<string, unknown>) => {
+        if (args.sessionToken !== "expired-a") return { email: args.sessionToken === "replacement-b" ? "bo@x.dev" : "ana@x.dev" };
+        if (++expiredChecks !== 1) return null;
+        checking.resolve();
+        return expiredOwner.promise;
+      },
+    } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { url, sessionToken: "expired-a", projects: { chief: "proj" } });
+    const olderConnect = call("PUT", "/api/origin/cloud-session", { url, sessionToken: "older-c" });
+    await checking.promise;
+    try {
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "replacement-b" }))[0]).toBe(200);
+    } finally {
+      expiredOwner.resolve(null);
+    }
+    const result = await olderConnect;
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "replacement-b", projects: { chief: "proj" } });
+    expect(result[0]).toBe(409);
+  });
+
+  it("checks the stored owner when different deployments issue the same token text", async () => {
+    const url = "http://127.0.0.1:3210";
+    const otherUrl = "http://127.0.0.1:3212";
+    const { call, file } = await serve({ connect: (deployment) => ({
+      query: async () => ({ email: deployment === url ? "ana@x.dev" : "bo@x.dev" }),
+      mutation: async () => null,
+    }) });
+    writeOriginCloud(file, { url, sessionToken: "same-token", projects: { chief: "proj" } });
+    expect((await call("PUT", "/api/origin/cloud-session", { url: otherUrl, sessionToken: "same-token" }))[0]).toBe(409);
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "same-token", projects: { chief: "proj" } });
+  });
+
+  it("does not restore an older incoming sign-in after a newer account signs out", async () => {
+    const checking = deferred<void>();
+    const incomingOwner = deferred<{ email: string }>();
+    let replacementSignedIn = true;
+    const { call, file } = await serve({ answers: { "auth:me": (args: Record<string, unknown>) => {
+      if (args.sessionToken === "older-a") {
+        checking.resolve();
+        return incomingOwner.promise;
+      }
+      return replacementSignedIn ? { email: "bo@x.dev" } : null;
+    } } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { projects: { chief: "proj" } });
+    const olderConnect = call("PUT", "/api/origin/cloud-session", { url, sessionToken: "older-a" });
+    await checking.promise;
+    try {
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "replacement-b" }))[0]).toBe(200);
+      replacementSignedIn = false;
+      expect((await call("DELETE", "/api/origin/cloud-session"))[0]).toBe(200);
+    } finally {
+      incomingOwner.resolve({ email: "ana@x.dev" });
+    }
+    const result = await olderConnect;
+    expect(readOriginCloud(file)).toEqual({ projects: { chief: "proj" } });
+    expect(result[0]).toBe(409);
+  });
+
+  it("rejects a stale refresh after the stored session changes away and back", async () => {
+    const checking = deferred<void>();
+    const storedOwner = deferred<{ email: string }>();
+    let originalChecks = 0;
+    const { call, file } = await serve({ answers: { "auth:me": (args: Record<string, unknown>) => {
+      if (args.sessionToken === "a" && ++originalChecks === 1) {
+        checking.resolve();
+        return storedOwner.promise;
+      }
+      return { email: "ana@x.dev" };
+    } } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { url, sessionToken: "a", projects: { chief: "proj" } });
+    const olderRefresh = call("PUT", "/api/origin/cloud-session", { url, sessionToken: "c" });
+    await checking.promise;
+    try {
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "b" }))[0]).toBe(200);
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "a" }))[0]).toBe(200);
+    } finally {
+      storedOwner.resolve({ email: "ana@x.dev" });
+    }
+    const result = await olderRefresh;
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "a", projects: { chief: "proj" } });
+    expect(result[0]).toBe(409);
+  });
+
+  it.each(["PUT", "DELETE"])("keeps the stored account when %s cannot verify its owner", async (method) => {
+    const { call, file } = await serve({ answers: { "auth:me": (args: Record<string, unknown>) => {
+      if (args.sessionToken === "stored-secret") throw new Error("lookup failed for stored-secret");
+      return { email: "ana@x.dev" };
+    } } });
+    const state = { url: "http://127.0.0.1:3210", sessionToken: "stored-secret", projects: { chief: "proj" } };
+    writeOriginCloud(file, state);
+    const result = await call(method, "/api/origin/cloud-session", method === "PUT" ? { url: state.url, sessionToken: "replacement" } : undefined);
+    expect(result[0]).toBe(502);
+    expect(JSON.stringify(result)).not.toContain("stored-secret");
+    expect(readOriginCloud(file)).toEqual(state);
+  });
+
+  it("allows the same account to refresh its token while preserving project links", async () => {
+    const { call, file } = await serve({ answers: { "auth:me": { email: "Ana@x.dev" } } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { url, sessionToken: "stored-ana", projects: { chief: "proj" } });
+    expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "refreshed-ana" }))[0]).toBe(200);
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "refreshed-ana", projects: { chief: "proj" } });
+  });
+
   it("refuses a bad address or a token Origin does not accept", async () => {
     const { call } = await serve({ answers: { "auth:me": null } });
     expect((await call("PUT", "/api/origin/cloud-session", { url: "ftp://x", sessionToken: "tok" }))[0]).toBe(400);
     expect(await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "bad" })).toEqual([400, { error: "Origin did not accept this session token" }]);
+  });
+
+  it("keeps the Origin session out of connection errors", async () => {
+    const { call } = await serve({ answers: { "auth:me": new Error('Request failed with arguments {"sessionToken":"private-origin-session"}') } });
+    const [status, body] = await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "private-origin-session" });
+    expect(status).toBe(502);
+    expect(JSON.stringify(body)).not.toContain("private-origin-session");
   });
 
   it("links and unlinks a bot's project and lists only existing bots", async () => {

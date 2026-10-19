@@ -1,0 +1,80 @@
+{
+  "node": "v24.21.0",
+  "baseline": "07666fa2e52b5acef1bfd86d30367c239812e0a6",
+  "baselineComponentSha256": "b9317fdf5959f3e4dc79e67e9c54037ade753de1c0b115c1ffef282ae20e9aa6",
+  "finalTestsSha256": "8cbf42f825bce96e2fb16dcc78a25ed6c32210781b6488dfa6dedbbf3ee8da3e",
+  "restoredComponentSha256": "01fd9e17cf2b671f80f76c28c05869826d37133009707bdaa0e59e3e229b8ecd",
+  "red": {
+    "exitCode": 1,
+    "passed": 6,
+    "failed": 1,
+    "pending": 0,
+    "cases": [
+      {
+        "title": "Inspector on the app's live stream shows this thread's runtime events and opens no stream of its own",
+        "status": "passed"
+      },
+      {
+        "title": "Inspector on the app's live stream reloads from disk when the stream missed frames it could not replay",
+        "status": "passed"
+      },
+      {
+        "title": "Activity on the app's live stream keeps a pending receipt refresh when bot updates replace the task array",
+        "status": "failed"
+      },
+      {
+        "title": "Activity on the app's live stream cancels the previous bot's pending refresh when switching bots",
+        "status": "passed"
+      },
+      {
+        "title": "Activity on the app's live stream cancels a pending receipt refresh and its subscription on unmount",
+        "status": "passed"
+      },
+      {
+        "title": "Activity on the app's live stream reloads when one of the bot's turns settles, with no stream of its own",
+        "status": "passed"
+      },
+      {
+        "title": "Activity on the app's live stream reloads when the stream missed frames it could not replay",
+        "status": "passed"
+      }
+    ]
+  },
+  "green": {
+    "exitCode": 0,
+    "passed": 7,
+    "failed": 0,
+    "pending": 0,
+    "cases": [
+      {
+        "title": "Inspector on the app's live stream shows this thread's runtime events and opens no stream of its own",
+        "status": "passed"
+      },
+      {
+        "title": "Inspector on the app's live stream reloads from disk when the stream missed frames it could not replay",
+        "status": "passed"
+      },
+      {
+        "title": "Activity on the app's live stream keeps a pending receipt refresh when bot updates replace the task array",
+        "status": "passed"
+      },
+      {
+        "title": "Activity on the app's live stream cancels the previous bot's pending refresh when switching bots",
+        "status": "passed"
+      },
+      {
+        "title": "Activity on the app's live stream cancels a pending receipt refresh and its subscription on unmount",
+        "status": "passed"
+      },
+      {
+        "title": "Activity on the app's live stream reloads when one of the bot's turns settles, with no stream of its own",
+        "status": "passed"
+      },
+      {
+        "title": "Activity on the app's live stream reloads when the stream missed frames it could not replay",
+        "status": "passed"
+      }
+    ]
+  },
+  "qualification": "Identical final seven-case test bytes and unchanged assertions/timeouts for red/green. Exact baseline component Git blob swapped only in this child worktree under finally, exact reviewed component bytes restored before green. Root frozen checkout/tests untouched; no provider/account/fixture mutations. Parked preview may HMR during the authorized controlled swap."
+}

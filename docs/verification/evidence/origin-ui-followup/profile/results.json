@@ -1,0 +1,271 @@
+{
+  "boundary": "Actual SidebarProfileMenu/SidebarPopoverMenu and dialog components with synthetic store/account data; transformed narrow parent; native Chromium keyboard. No production account.",
+  "cases": [
+    {
+      "screen": "about",
+      "theme": "dark",
+      "placement": "above",
+      "signedIn": false,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "phone",
+      "theme": "dark",
+      "placement": "above",
+      "signedIn": false,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 24,
+        "bottom": 788,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "about",
+      "theme": "dark",
+      "placement": "above",
+      "signedIn": true,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "phone",
+      "theme": "dark",
+      "placement": "above",
+      "signedIn": true,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 24,
+        "bottom": 788,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "about",
+      "theme": "dark",
+      "placement": "below",
+      "signedIn": false,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "phone",
+      "theme": "dark",
+      "placement": "below",
+      "signedIn": false,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 24,
+        "bottom": 788,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "about",
+      "theme": "dark",
+      "placement": "below",
+      "signedIn": true,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "phone",
+      "theme": "dark",
+      "placement": "below",
+      "signedIn": true,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 24,
+        "bottom": 788,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "about",
+      "theme": "light",
+      "placement": "above",
+      "signedIn": false,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "phone",
+      "theme": "light",
+      "placement": "above",
+      "signedIn": false,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 24,
+        "bottom": 788,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "about",
+      "theme": "light",
+      "placement": "above",
+      "signedIn": true,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "phone",
+      "theme": "light",
+      "placement": "above",
+      "signedIn": true,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 24,
+        "bottom": 788,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "about",
+      "theme": "light",
+      "placement": "below",
+      "signedIn": false,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "phone",
+      "theme": "light",
+      "placement": "below",
+      "signedIn": false,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 24,
+        "bottom": 788,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "about",
+      "theme": "light",
+      "placement": "below",
+      "signedIn": true,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 249.875,
+        "bottom": 562.125,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    },
+    {
+      "screen": "phone",
+      "theme": "light",
+      "placement": "below",
+      "signedIn": true,
+      "geometry": {
+        "left": 24,
+        "right": 351,
+        "top": 24,
+        "bottom": 788,
+        "width": 327,
+        "documentWidth": 375
+      },
+      "contained": true,
+      "returnedDurableTrigger": true
+    }
+  ],
+  "errors": [],
+  "external": [],
+  "motion": {
+    "controlledBrowserClock": true,
+    "retainedAt119ms": true,
+    "closedAt120ms": true,
+    "forwardAndReverseExitContained": true,
+    "innerEscapeOnly": true,
+    "reducedMotionImmediate": true
+  }
+}

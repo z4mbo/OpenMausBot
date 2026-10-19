@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-18T21:45:59.659Z",
+  "baselineSource": "ece107dd7b441115f2d4b334e286befac4ae6ec5",
+  "fixSource": "223f796b61bea9c6852fedd6ebf6ecd3eda8cd6c",
+  "upstream": {
+    "pullRequest": "https://github.com/milind-soni/OpenMausBot/pull/2970",
+    "merge": "33283757891044233aabebc48575483174e50e12",
+    "adopted": "Registry snapshot deadline before provider decorators",
+    "deferred": "POSIX SIGTERM-resistant child kill escalation; Windows cannot prove its upstream process regression",
+    "procsChanged": false
+  },
+  "runtime": "v24.21.0",
+  "baseline": {
+    "failed": 5,
+    "passingControls": 4,
+    "total": 9,
+    "exitCode": 1,
+    "clock": "virtual",
+    "startedLocal": "2026-10-18 23:44:01 Europe/Rome",
+    "durationSeconds": 0.843
+  },
+  "fixed": {
+    "newTests": 9,
+    "failed": 0,
+    "passed": 137,
+    "skipped": 2,
+    "files": 9,
+    "startedLocal": "2026-10-18 23:44:18 Europe/Rome",
+    "durationSeconds": 10.29,
+    "selectedTests": [
+      "server/harness/snapshot-deadline.test.ts",
+      "server/harness/registry.test.ts",
+      "server/managed-desktop.test.ts",
+      "server/cloud-credit-provider.test.ts",
+      "server/hosted-models.test.ts",
+      "server/quota-switch.test.ts",
+      "scripts/testing/comment-history.test.ts",
+      "scripts/testing/file-size-ratchet.test.ts",
+      "scripts/testing/verification-docs.test.ts"
+    ],
+    "serverTypes": "passed",
+    "touchedLint": "passed",
+    "diffCheck": "passed"
+  },
+  "fixture": {
+    "record": "fixture.json",
+    "privateRecordSha256": "a3427e75823f59794d4287429c10c890d011fa496dc503946e60c81c773c6348",
+    "temporaryPathPrefixesRedacted": true,
+    "hangingProbeInjected": false,
+    "doctorOk": true,
+    "engineAvailable": true,
+    "settled": true,
+    "fakeEngineReplyPresent": true,
+    "directoryRemoved": true,
+    "pidExited": true
+  },
+  "boundaries": {
+    "deadlineProvenInActualRegistryWithVirtualClock": true,
+    "liveHungCliTerminationProven": false,
+    "deadlineCancelsUnderlyingProbe": false,
+    "userDataUsed": false,
+    "productionUsed": false,
+    "packagedDesktopVerified": false,
+    "externalProviderVerified": false,
+    "continuousMonitoring": false
+  },
+  "sourceGitBlobs": {
+    "server/harness/registry.ts": "2db81c41530675849794c37a04df472f74806669a425673c4b22981ebfa4aade",
+    "server/harness/snapshot-deadline.test.ts": "b4d2aaad1153568d1e6da38ec67592d85af0ac15255b171099921fe92e01c0e2"
+  },
+  "logs": [
+    {
+      "name": "baseline.log",
+      "privatePath": ".omb-scratch/provider-snapshot-034-before.log",
+      "privateSha256": "a74aee80f2e49ff8b236f0a8da81a1b8318c78829a3b9c549b79edb5fd09f369",
+      "sha256": "455d17133809f84fd88cb2ea4509afa7241c3fdf1ef8d291bae7bf40b9ad1926",
+      "privateModifiedAt": "2026-10-18T21:44:02.538Z",
+      "bytes": 3855
+    },
+    {
+      "name": "fixed-focused.log",
+      "privatePath": ".omb-scratch/provider-snapshot-034-focused.log",
+      "privateSha256": "d18c85eaa5473935b30899778d43a6c18ec0962ea900753953c9f6ea70390dc0",
+      "sha256": "6f670c991b3e7caba09e93dc05179b874d8212a85dd97375a1e821a8c809f032",
+      "privateModifiedAt": "2026-10-18T21:44:28.590Z",
+      "bytes": 272
+    },
+    {
+      "name": "server-types.log",
+      "privatePath": ".omb-scratch/provider-snapshot-034-server-types.log",
+      "privateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "privateModifiedAt": "2026-10-18T21:44:27.971Z",
+      "bytes": 0
+    },
+    {
+      "name": "lint.log",
+      "privatePath": ".omb-scratch/provider-snapshot-034-lint.log",
+      "privateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "privateModifiedAt": "2026-10-18T21:44:48.770Z",
+      "bytes": 0
+    }
+  ]
+}

@@ -30,16 +30,32 @@ describe("planImport", () => {
 });
 
 describe("runImport", () => {
+  it("does not leave another unlinked bot on every retry when the default team exceeds capacity", async () => {
+    const local = [{ id: "head", name: "GGs", chiefOfStaff: true, section: "Workspace: GGs" }];
+    const links = { workspaces: { head: "ggs" }, projects: {} };
+    const call = async <T,>(path: string, init?: { method?: string; body?: string }): Promise<T> => {
+      if (path === "/api/bots") {
+        const bot = { id: `orphan${local.length}`, name: JSON.parse(init!.body!).name, chiefOfStaff: false, section: "" };
+        local.push(bot);
+        return { bot } as T;
+      }
+      if (path.endsWith("/default-team") || path === "/api/origin/import/projects") throw new Error("this workspace is limited to 7 bots");
+      throw new Error(`unexpected ${path}`);
+    };
+    for (let round = 0; round < 3; round++) {
+      const plan = planImport(cloud, { bots: local, links }, { workspaces: [], projects: ["kai"] });
+      expect((await runImport(plan, { call, lead: LEAD })).failures).toEqual([{ name: "Kai", error: "this workspace is limited to 7 bots" }]);
+    }
+    expect(local.map((bot) => bot.id)).toEqual(["head"]);
+  });
+
   it("creates the head, then each project with its team, linking each one", async () => {
     const calls: [string, string | undefined, unknown][] = [];
     let next = 0;
     const call = async <T,>(path: string, init?: { method?: string; body?: string }): Promise<T> => {
       calls.push([path, init?.method, init?.body ? JSON.parse(init.body) : undefined]);
-      if (path === "/api/workspaces" || path === "/api/bots") {
-        const body = JSON.parse(init!.body!) as { name: string };
-        return { bot: { id: `b${++next}`, name: body.name } } as T;
-      }
-      if (path.endsWith("/default-team")) return { members: [1, 2, 3, 4, 5, 6] } as T;
+      if (path === "/api/origin/import/workspaces") return { bot: { id: `b${++next}`, name: "GGs" } } as T;
+      if (path === "/api/origin/import/projects") return { bot: { id: `b${++next}`, name: "Kai" }, members: [1, 2, 3, 4, 5, 6] } as T;
       return {} as T;
     };
     const plan = planImport(cloud, { bots: [], links: { workspaces: {}, projects: {} } }, { workspaces: [], projects: ["kai"] });
@@ -50,11 +66,8 @@ describe("runImport", () => {
       failures: [],
     });
     expect(calls).toEqual([
-      ["/api/workspaces", "POST", { name: "GGs" }],
-      ["/api/origin/cloud-links", "PUT", { workspaces: { b1: "ggs" } }],
-      ["/api/bots", "POST", { name: "Kai", ...LEAD }],
-      ["/api/bots/b2/default-team", "POST", { workspaceId: "b1" }],
-      ["/api/origin/cloud-links", "PUT", { projects: { b2: "kai" } }],
+      ["/api/origin/import/workspaces", "POST", { cloudTeamId: "ggs" }],
+      ["/api/origin/import/projects", "POST", { cloudProjectId: "kai", cloudTeamId: "ggs", workspaceId: "b1", ...LEAD }],
     ]);
   });
 });

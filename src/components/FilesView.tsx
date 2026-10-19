@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { Folder, FolderOpen, MoreHorizontal } from "lucide-react";
 import type { CloudFilesBridge, CloudFilesDisk, CloudFilesState, FolderCheck, SharedFolder } from "../../electron/cloud-sync.mjs";
@@ -11,6 +11,8 @@ import { formatMoveBytes } from "./CloudMove";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useCaptionChrome } from "./DesktopCapabilities";
 import { Switch } from "./SettingsPrimitives";
+import { ModalFocusScope, useModalDialog } from "@/hooks/use-modal-dialog";
+import { Loading } from "./origin-pages/ui";
 
 const REFUSAL: Record<string, LocaleKey> = {
   "too-broad": "files.refusal.tooBroad", "app-data": "files.refusal.appData", "already-shared": "files.refusal.alreadyShared",
@@ -73,8 +75,12 @@ function Unavailable() {
 
 function FilesPage({ bridge }: { bridge: CloudFilesBridge }) {
   const { state: app, dispatch } = useStore();
-  const [state, setState] = useCloudFiles(bridge);
-  const [ask, setAsk] = useState<Ask | null>(null);
+  const [state, setState, load] = useCloudFiles(bridge);
+  const [ask, setAsk] = useState<(Ask & { id: number }) | null>(null);
+  const sequence = useRef(0);
+  const askReturnRef = useRef<HTMLElement | null>(null);
+  const fallbackRef = useRef<HTMLElement | null>(null);
+  const request = useCallback((next: Ask) => setAsk({ ...next, id: ++sequence.current }), []);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
   const suggest = app.filesSuggest;
@@ -83,10 +89,10 @@ function FilesPage({ bridge }: { bridge: CloudFilesBridge }) {
     if (!ready || !suggest) return;
     let live = true;
     void bridge.checkFolders(suggest).then((checks) => {
-      if (live && checks.length) setAsk({ kind: "suggest", checks, chosen: checks.filter((check) => !check.refusal).map((check) => check.token) });
+      if (live && checks.length) { askReturnRef.current = fallbackRef.current; request({ kind: "suggest", checks, chosen: checks.filter((check) => !check.refusal).map((check) => check.token) }); }
     }).catch((error: unknown) => { if (live) setFailed(failureText(error)); });
     return () => { live = false; };
-  }, [bridge, suggest, ready]);
+  }, [bridge, suggest, ready, request]);
   const run: Run = async (action) => {
     setBusy(true);
     setFailed(null);
@@ -94,10 +100,13 @@ function FilesPage({ bridge }: { bridge: CloudFilesBridge }) {
     catch (error) { setFailed(failureText(error)); }
     finally { setBusy(false); }
   };
-  const close = () => setAsk(null);
+  const close = () => setAsk((current) => current?.id === ask?.id ? null : current);
   const share = (tokens: string[]) => { close(); void run(async () => { let next: CloudFilesState | undefined; for (const token of tokens) next = await bridge.share(token); return next; }); };
   const moreSpace = () => void run(() => bridge.moreSpace());
-  if (!state) return null;
+  if (!state) return load.error ? <div className="flex flex-col items-start gap-3">
+    <p role="alert" className="text-[13px] text-danger">{t("files.failed")}</p>
+    <button type="button" className="ui-button" onClick={load.retry}>{t("chat.retry")}</button>
+  </div> : <Loading label={t("skills.library.loading")} variant="list" />;
   if (state.phase === "unavailable") return <Unavailable />;
   return <>
     {state.phase === "offline" && <p role="status" className="rounded-xl bg-card px-4 py-3 text-[13px] text-ink-secondary">{t("files.offline")}</p>}
@@ -106,18 +115,18 @@ function FilesPage({ bridge }: { bridge: CloudFilesBridge }) {
       <button type="button" className="ui-button" onClick={() => dispatch(SETTINGS)}>{t("files.openSettings")}</button>
     </div>}
     {failed && <p role="alert" className="text-[13px] text-danger">{failed}</p>}
-    <section aria-labelledby="files-shared" className="flex flex-col gap-3">
+    <section ref={fallbackRef} tabIndex={-1} aria-labelledby="files-shared" className="flex flex-col gap-3 outline-none">
       <div>
         <h2 id="files-shared" className="text-[15px] font-medium text-ink">{t("files.shared.title")}</h2>
         <p className="mt-1 text-[13px] leading-relaxed text-ink-secondary">{t("files.shared.help")}</p>
       </div>
       {state.shared.length > 0
         ? <ul className="flex flex-col divide-y divide-hairline/40 rounded-xl bg-card">
-          {state.shared.map((folder) => <FolderRow key={folder.id} folder={folder} bridge={bridge} busy={busy} run={run} onStop={() => setAsk({ kind: "stop", folder })} />)}
+          {state.shared.map((folder) => <FolderRow key={folder.id} folder={folder} bridge={bridge} busy={busy} run={run} onStop={() => { askReturnRef.current = null; request({ kind: "stop", folder }); }} />)}
         </ul>
         : <p className="text-[13px] text-ink-secondary">{t("files.empty")}</p>}
       <button type="button" disabled={busy} className="ui-button self-start"
-        onClick={() => void run(async () => { const check = await bridge.pickFolder(); if (check) setAsk({ kind: "share", check }); })}>{t("files.add")}</button>
+        onClick={(event) => { askReturnRef.current = event.currentTarget; void run(async () => { const check = await bridge.pickFolder(); if (check) request({ kind: "share", check }); }); }}>{t("files.add")}</button>
       {state.disk && <Storage disk={state.disk} busy={busy} onMore={moreSpace} />}
     </section>
     <section aria-labelledby="files-outputs" className="flex flex-col gap-3">
@@ -136,14 +145,14 @@ function FilesPage({ bridge }: { bridge: CloudFilesBridge }) {
       </div>
     </section>
     {ask?.kind === "share" && (ask.check.refusal
-      ? <FilesDialog label={refusalText(ask.check.refusal)} onClose={close}
+      ? <FilesDialog key={ask.id} label={refusalText(ask.check.refusal)} onClose={close} returnFocusRef={askReturnRef} fallbackFocusRef={fallbackRef}
         actions={<button type="button" autoFocus className="ui-button ui-button-primary" onClick={close}>{t("files.ok")}</button>} />
-      : <ConfirmDialog open tone="neutral" icon={<FolderOpen size={18} />} title={t("files.share.title", { name: ask.check.name })}
+      : <ConfirmDialog key={ask.id} open tone="neutral" openerRef={askReturnRef} returnFocusRef={fallbackRef} icon={<FolderOpen size={18} />} title={t("files.share.title", { name: ask.check.name })}
         body={t("files.share.body", { size: folderSize(ask.check) })} confirmLabel={t("files.share.confirm")}
         onCancel={close} onConfirm={() => share([ask.check.token])} />)}
-    {ask?.kind === "stop" && <ConfirmDialog open title={t("files.stop.title", { name: ask.folder.name })} body={t("files.stop.body")}
+    {ask?.kind === "stop" && <ConfirmDialog key={ask.id} open returnFocusRef={fallbackRef} title={t("files.stop.title", { name: ask.folder.name })} body={t("files.stop.body")}
       confirmLabel={t("files.stop")} onCancel={close} onConfirm={() => { close(); void run(() => bridge.stopSharing(ask.folder.id)); }} />}
-    {ask?.kind === "suggest" && <FilesDialog label={t("files.suggest.title")} onClose={close} actions={<>
+    {ask?.kind === "suggest" && <FilesDialog key={ask.id} label={t("files.suggest.title")} onClose={close} returnFocusRef={askReturnRef} fallbackFocusRef={fallbackRef} actions={<>
       <button type="button" autoFocus className="ui-button" onClick={close}>{t("files.cancel")}</button>
       <button type="button" disabled={!ask.chosen.length} className="ui-button ui-button-primary" onClick={() => share(ask.chosen)}>{t("files.share.confirm")}</button>
     </>}>
@@ -203,7 +212,7 @@ function FolderMenu({ name, busy, onOpen, onStop }: { name: string; busy: boolea
   return <div ref={ref} className="relative shrink-0">
     <button type="button" aria-haspopup="menu" aria-expanded={open} aria-label={t("files.more", { name })}
       className="ui-icon-button hover:bg-control hover:text-ink" onClick={() => setOpen((value) => !value)}><MoreHorizontal size={16} /></button>
-    {open && <div role="menu" className="absolute right-0 top-full z-40 mt-1 w-[220px] overflow-hidden rounded-xl border border-hairline/50 bg-card py-1.5 text-[12.5px] shadow-2xl shadow-black/50">
+    {open && <div role="menu" className="ui-panel absolute right-0 top-full z-40 mt-1 w-[220px] overflow-hidden py-1.5 text-[12.5px]">
       {item(t("files.openHere"), onOpen)}
       {item(t("files.stop"), onStop, true)}
     </div>}
@@ -224,19 +233,16 @@ function Storage({ disk, busy, onMore }: { disk: CloudFilesDisk; busy: boolean; 
   </div>;
 }
 
-function FilesDialog({ label, children, actions, onClose }: { label: string; children?: ReactNode; actions: ReactNode; onClose: () => void }) {
-  const close = useRef(onClose);
-  close.current = onClose;
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); close.current(); } };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-  return createPortal(<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-6" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-    <div role="dialog" aria-modal="true" aria-labelledby="files-dialog-label" className="w-full max-w-[440px] rounded-2xl border border-hairline/50 bg-panel p-5 shadow-2xl">
+function FilesDialog({ label, children, actions, onClose, returnFocusRef, fallbackFocusRef }: { label: string; children?: ReactNode; actions: ReactNode; onClose: () => void; returnFocusRef?: RefObject<HTMLElement | null>; fallbackFocusRef?: RefObject<HTMLElement | null> }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const { dismiss } = useModalDialog(panelRef, onClose, { returnFocusRef, fallbackFocusRef });
+  return createPortal(<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-6" onMouseDown={(event) => event.target === event.currentTarget && dismiss()}>
+    <div ref={panelRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="files-dialog-label" className="ui-panel w-full max-w-[440px] p-5">
+      <ModalFocusScope panelRef={panelRef}>
       <h2 id="files-dialog-label" className="text-[15px] font-semibold text-ink">{label}</h2>
       {children}
       <div className="mt-5 flex justify-end gap-2">{actions}</div>
+      </ModalFocusScope>
     </div>
   </div>, document.body);
 }

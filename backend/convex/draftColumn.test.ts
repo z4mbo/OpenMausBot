@@ -57,6 +57,32 @@ describe("Draft column", () => {
     await link("open", 3000);
     expect((await context(f, taskId)).task.done).toBe(false);
     await link("closed", 4000);
+    expect((await context(f, taskId)).task.done).toBe(false);
+    await f.t.mutation(internal.integrations.completeMergedIssue, { projectId: f.projectId, taskId, repoUrl, issueNumber: 7, pullRequest: { number: 9, headSha: "a".repeat(40), mergeSha: "b".repeat(40), mergedAt: 5000 } });
+    expect((await context(f, taskId)).task.done).toBe(true);
+  });
+
+  test("the legacy GitHub issue action keeps Draft issues private", async () => {
+    const f = await fixture();
+    const taskId = await f.create(f.columns[0]._id, "Confidential draft");
+    await expect(f.t.action(api.github.createIssueForTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId }))
+      .rejects.toThrow("Draft");
+  });
+
+  test("legacy repository snapshots do not complete parked Draft issues", async () => {
+    const f = await fixture();
+    const taskId = await f.create(f.columns[0]._id, "Parked");
+    await f.t.mutation(internal.integrations.linkIssue, { projectId: f.projectId, taskId, repoUrl, number: 7, issueUrl: `${repoUrl}/issues/7`, state: "open", updatedAt: 1000 });
+    const snapshot = () => f.t.mutation(internal.github.upsertRepoSnapshot, {
+      sessionToken: f.sessionToken, projectId: f.projectId, repoUrl,
+      issues: [{ number: 7, title: "Parked", state: "closed", url: `${repoUrl}/issues/7`, updatedAt: 2000 }], pullRequests: [],
+    });
+    await snapshot();
+    expect((await context(f, taskId)).task.done).toBe(false);
+    await f.t.mutation(api.tasks.moveTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId, columnId: f.columns[1]._id });
+    await snapshot();
+    expect((await context(f, taskId)).task.done).toBe(false);
+    await f.t.mutation(internal.integrations.completeMergedIssue, { projectId: f.projectId, taskId, repoUrl, issueNumber: 7, pullRequest: { number: 9, headSha: "a".repeat(40), mergeSha: "b".repeat(40), mergedAt: 3000 } });
     expect((await context(f, taskId)).task.done).toBe(true);
   });
 
@@ -67,5 +93,25 @@ describe("Draft column", () => {
     await f.t.mutation(api.tasks.updateColumn, { sessionToken: f.sessionToken, projectId: f.projectId, columnId: todo, title: "Ideas" });
     const { columns } = await f.t.query(api.tasks.board, { sessionToken: f.sessionToken, projectId: f.projectId });
     expect(columns.find(column => column._id === todo)).toMatchObject({ title: "Ideas", isDraft: true });
+  });
+
+  test("newly created Draft columns stay private after a rename", async () => {
+    const f = await fixture();
+    const columnId = await f.t.mutation(api.tasks.createColumn, { sessionToken: f.sessionToken, projectId: f.projectId, title: "Draft" });
+    const taskId = await f.create(columnId, "Unannounced idea");
+    await f.t.mutation(api.tasks.updateColumn, { sessionToken: f.sessionToken, projectId: f.projectId, columnId, title: "Ideas" });
+
+    expect((await context(f, taskId)).task.draft).toBe(true);
+    const { rows } = JSON.parse(await f.t.query(internal.integrations.unlinkedTasks, { cursor: null })) as { rows: { taskId: string }[] };
+    expect(rows.map(row => row.taskId)).not.toContain(taskId);
+  });
+
+  test("renaming a legacy unflagged Draft column keeps its issues private", async () => {
+    const f = await fixture();
+    const columnId = f.columns[0]._id;
+    await f.t.run(ctx => ctx.db.patch(columnId, { isDraft: undefined }));
+    const taskId = await f.create(columnId, "Existing private idea");
+    await f.t.mutation(api.tasks.updateColumn, { sessionToken: f.sessionToken, projectId: f.projectId, columnId, title: "Ideas" });
+    expect((await context(f, taskId)).task.draft).toBe(true);
   });
 });

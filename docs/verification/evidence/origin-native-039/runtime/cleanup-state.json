@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-19T06:40:34.8033484Z",
+  "listeners": [],
+  "processes": [],
+  "initialHttpProbe": "Connection refused; never accepted as a connected=false response",
+  "browserTabsClosed": [
+    17,
+    18
+  ],
+  "uiLogoutEvidence": "cleanup-owner-signed-out.ax.txt and cleanup-member-signed-out.ax.txt"
+}

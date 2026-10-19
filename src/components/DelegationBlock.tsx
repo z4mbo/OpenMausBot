@@ -65,7 +65,7 @@ export function DelegationBlock({ sent, agent, failed, renderTranscript }: {
             <span aria-hidden="true" className={cn("absolute -bottom-0.5 -right-0.5 size-2 rounded-full ring-2 ring-panel", style.dot)} />
           </span>
           <span className="flex min-w-0 flex-1 items-baseline gap-1.5 text-[13.5px] leading-5">
-            <span className="shrink-0 font-semibold text-ink">{agent.name}</span>
+            <span className="min-w-0 max-w-[50%] truncate font-semibold text-ink">{agent.name}</span>
             <span className={cn("shrink-0", style.text)}>{status === "working" ? `${style.label}:` : `· ${style.label}`}</span>
             {brief && <span className="min-w-0 truncate text-ink-secondary" title={brief}>{status === "working" ? brief : `· ${brief}`}</span>}
           </span>

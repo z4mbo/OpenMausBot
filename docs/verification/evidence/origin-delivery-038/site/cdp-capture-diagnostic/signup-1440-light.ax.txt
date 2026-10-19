@@ -1,0 +1,3 @@
+Browser tab: 14, Title: "Create your account | Origin", URL: "http://127.0.0.1:64038/signup".
+There has been no change in the accessibility tree.
+The focused UI element is 1 AXWebArea Create your account | Origin, URL: 127.0.0.1:64038/signup

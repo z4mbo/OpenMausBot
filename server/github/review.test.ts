@@ -1,18 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { closingIssueNumbers, mergeBlocker, reviewDecision, type PullDetail } from "./review.ts";
+import { mergeBlocker, reviewDecision, type PullDetail } from "./review.ts";
 import { isRepositoryName, repositoryNameFor } from "../../shared/github-repo-name.ts";
 import { issueStateMove } from "./sync.ts";
 import { draftBody } from "./prs.ts";
 import { implementBrief, issueBrief } from "../../shared/origin-issues.ts";
-
-describe("closing keywords", () => {
-  it("finds every issue GitHub closes on merge, and nothing else", () => {
-    expect(closingIssueNumbers("Closes #5, fixes #6 and resolved: #7\nRefs #8 · see #9")).toEqual([5, 6, 7]);
-    expect(closingIssueNumbers("closes#5 Closes #5")).toEqual([5]);
-    expect(closingIssueNumbers(null)).toEqual([]);
-  });
-});
 
 describe("review decision", () => {
   it("counts each reviewer's latest decisive review", () => {
@@ -42,7 +34,8 @@ describe("merge blockers", () => {
 describe("issue state sync", () => {
   it("pushes an Origin change, pulls a GitHub change, and lets GitHub win when both moved", () => {
     expect(issueStateMove({ done: true, githubIssueState: "open" }, "open")).toBe("close");
-    expect(issueStateMove({ done: false, githubIssueState: "closed" }, "closed")).toBe("reopen");
+    expect(issueStateMove({ done: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed")).toBe("reopen");
+    expect(issueStateMove({ done: false, githubIssueState: "closed" }, "closed")).toBe("pull");
     expect(issueStateMove({ done: false, githubIssueState: "open" }, "closed")).toBe("pull");
     expect(issueStateMove({ done: true, githubIssueState: "closed" }, "open")).toBe("pull");
     expect(issueStateMove({ done: true }, "open")).toBe("pull");
@@ -51,7 +44,7 @@ describe("issue state sync", () => {
   it("parks the GitHub issue of a draft as not planned and reopens it when the issue leaves Draft", () => {
     expect(issueStateMove({ done: false, draft: true, githubIssueState: "open" }, "open")).toBe("park");
     expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "closed")).toBe("pull");
-    expect(issueStateMove({ done: false, draft: false, githubIssueState: "closed" }, "closed")).toBe("reopen");
+    expect(issueStateMove({ done: false, draft: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed")).toBe("reopen");
     expect(issueStateMove({ done: true, draft: true, githubIssueState: "open" }, "open")).toBe("close");
     expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "open")).toBe("pull");
   });

@@ -1,0 +1,41 @@
+{
+  "phase": "after",
+  "previewUrl": "http://127.0.0.1:5174/__origin-pages.html",
+  "checkedAt": "2026-10-18T21:26:09.772Z",
+  "cases": [
+    {
+      "journey": "viewer",
+      "beforeRelease": {
+        "gaps": 0,
+        "cards": 12,
+        "mutations": [],
+        "userSelect": ""
+      },
+      "afterRelease": {
+        "gaps": 0,
+        "cards": 12,
+        "mutations": [],
+        "userSelect": ""
+      },
+      "errors": [],
+      "external": []
+    },
+    {
+      "journey": "project-switch",
+      "beforeRelease": {
+        "gaps": 0,
+        "cards": 12,
+        "mutations": [],
+        "userSelect": ""
+      },
+      "afterRelease": {
+        "gaps": 0,
+        "cards": 12,
+        "mutations": [],
+        "userSelect": ""
+      },
+      "errors": [],
+      "external": []
+    }
+  ]
+}

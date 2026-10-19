@@ -7,7 +7,7 @@ import {
   ArrowRight, Bot, Check, ChevronDown, Cloud, FileImage, FolderGit2, GitPullRequest, Inbox, KeyRound, Laptop, ListTodo, Menu, MessageSquareHeart,
   MessagesSquare, PenTool, Phone, ShieldAlert, UsersRound, Vault, X,
 } from "lucide-react";
-import { bodyFont, displayFont, monoFont } from "@/lib/fonts";
+import { bodyFont } from "@/lib/fonts";
 import { AgentAvatar, AppleLogo, MAC_ARM_DOWNLOAD_URL, MAC_INTEL_DOWNLOAD_URL, TEAM, WINDOWS_DOWNLOAD_URL, WindowsLogo, usePlatform, useOriginSession, type Platform } from "./brand";
 import { OriginLogo } from "./origin-logo";
 import { useInView, usePageVisible, useReducedMotion, useReveal } from "./motion";
@@ -20,7 +20,7 @@ export function SiteFrame({ children, signedIn, minimal = false }: { children: R
   const root = useRef<HTMLDivElement>(null);
   useReveal(root);
   return (
-    <div ref={root} className={clsx(st.site, displayFont.variable, bodyFont.variable, monoFont.variable)}>
+    <div ref={root} className={clsx(st.site, bodyFont.variable)}>
       <a className={st.skip} href="#main">Skip to content</a>
       <SiteHeader signedIn={signedIn} minimal={minimal} />
       {children}
@@ -328,10 +328,10 @@ export function DownloadCard({ name, compact = false }: { name?: string; compact
       <h2 id="download-title">{title}</h2>
       <p>{name ? "Your workspaces live in the desktop app. Install it and sign in with the same email." : "Install the app, sign in with your Origin account and your workspaces are there."}</p>
       <DownloadButtons platform={platform} />
-      <p className={st.fine}>Windows 10 and 11, 64-bit · macOS on Apple silicon (<a href={MAC_INTEL_DOWNLOAD_URL}>Intel build</a>). The app updates itself.</p>
+      <p className={st.fine}>Windows 10 and 11, 64-bit · macOS on Apple silicon (<a href={MAC_INTEL_DOWNLOAD_URL}>Intel build</a>). Read <Link href="/whats-new">what&apos;s new</Link>.</p>
       <p className={st.smartscreen}>
         <ShieldAlert size={15} aria-hidden="true" />
-        <span>The apps aren&apos;t code-signed yet. On Windows, if SmartScreen stops the installer, choose <b>More info</b>, then <b>Run anyway</b>. On a Mac, right-click Origin, choose <b>Open</b>, then <b>Open</b> again.</span>
+        <span>The apps aren&apos;t code-signed yet. On Windows, if SmartScreen stops the installer, choose <b>More info</b>, then <b>Run anyway</b>. For an unidentified-developer warning on a Mac, follow <a href="https://support.apple.com/en-us/102445">Apple&apos;s opening instructions</a>. Unsigned Mac builds need a fresh download for updates.</span>
       </p>
     </div>
   );
@@ -370,6 +370,8 @@ function SiteFooter() {
           <a href="/#download">Download</a>
           <Link href="/login">Sign in</Link>
           <Link href="/signup">Create account</Link>
+          <Link href="/whats-new">What's new</Link>
+          <a href="https://github.com/z4mbo/Origin">GitHub</a>
         </nav>
         <p>No trackers, no ads.</p>
       </div>

@@ -1,0 +1,44 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-branding-034/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+x····················································
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/testing/file-size-ratchet.test.ts > source files stay a readable size > no listed file grows, and no file over 1,000 lines goes unlisted
+AssertionError: See server/host/README.md: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "server/origin-cloud.ts is 1136 lines: lower its number to 1136",
++ ]
+
+ ❯ scripts/testing/file-size-ratchet.test.ts:86:51
+     84|     }
+     85|     for (const file of Object.keys(LINES)) if (!seen.has(file)) proble…
+     86|     expect(problems, "See server/host/README.md").toEqual([]);
+       |                                                   ^
+     87|   });
+     88| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 52 passed (53)
+   Start at  02:34:19
+   Duration  14.25s (transform 526ms, setup 764ms, import 935ms, tests 12.11s, environment 0ms)
+
+JSON report written to C:/Users/aless/.codex/worktrees/origin-branding-034/Origin/.omb-scratch/origin-session-extraction-tests-036.json

@@ -51,7 +51,7 @@ if (process.versions.electron && process.argv.includes(flag)) {
   try {
     await client.start(); assert.equal(begins, 0); assert.deepEqual(browsers, []);
     win = new BrowserWindow({ width: 740, height: 780, show: false, webPreferences: { preload: join(root, "electron/preload.cjs"), contextIsolation: true, nodeIntegration: false, sandbox: true,
-      additionalArguments: [`--omb-local-origin=${previewOrigin}`, "--omb-company-desktop=1"] } });
+      additionalArguments: [`--omb-local-origin=${previewOrigin}`, "--omb-company-desktop=1", "--omb-vendor-cloud=1"] } });
     const evaluate = source => win.webContents.executeJavaScript(source, true);
     const wait = async text => { for (let count = 0; count < 240; count++) { if (await evaluate(`document.body.innerText.includes(${JSON.stringify(text)})`)) return; await new Promise(resolve => setTimeout(resolve, 50)); } throw new Error(`Missing fixture UI: ${text}`); };
     const click = async text => { for (let count = 0; count < 80; count++) {

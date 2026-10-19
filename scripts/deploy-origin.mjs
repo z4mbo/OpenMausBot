@@ -2,25 +2,29 @@
 // Deploys Origin: production Convex backup and push, the origin.imbored.fun site, and the desktop downloads.
 // Prints the plan unless --execute is given. See `node scripts/deploy-origin.mjs --help`.
 import { spawnSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { quoteShellWord as quote, siteRolloutScript } from "./origin-site-rollout.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const CONVEX_CLI = join(ROOT, "backend", "node_modules", "convex", "bin", "main.js");
 const PRODUCTION_DEPLOYMENT = "wry-fly-446";
+const PRODUCTION_DEPLOYMENT_TYPE = "dev";
 const REMOTE_SITE = "/root/origin";
 const REMOTE_COMPOSE = "/root/multi-ghost";
 const REMOTE_DOWNLOADS = "/root/multi-ghost/origin-downloads";
-const SITE_PATHS = ["site", "backend/package.json", "backend/convex", "backend/lib"];
+const SITE_PATHS = ["site", "backend/package.json", "backend/convex", "backend/lib", "shared/origin-columns.ts", "shared/origin-theme.css", "shared/origin-releases.ts", "shared/origin-site-address.ts"];
 
 const HELP = `Usage: node scripts/deploy-origin.mjs [steps] [options]
 
 Steps, run in this order (at least one, or --all):
-  --backup       npx convex export of production into --backup-dir
-  --backend      npx convex deploy of backend/ to production
-  --site         build context from HEAD -> tarball -> ${"$"}HOST:${REMOTE_SITE} (old tree kept as ${REMOTE_SITE}.bak-<ts>),
-                 then docker compose up -d --build origin in ${REMOTE_COMPOSE}
+  --backup       Convex export of production into --backup-dir
+  --backend      Convex deploy of backend/ to production
+  --site         build context from HEAD -> tarball -> ${"$"}HOST:${REMOTE_SITE} (old tree kept as ${REMOTE_SITE}.bak-<release>),
+                 preserve deploy/ operator config, then docker compose up -d --no-deps --build origin in ${REMOTE_COMPOSE}
   --downloads    desktop installers and update feeds -> ${"$"}HOST:${REMOTE_DOWNLOADS}
   --all          all four
 
@@ -64,8 +68,6 @@ function spawnTool(command, args, options) {
   return spawnSync([command, ...args].map(arg => /[\s"&|<>^]/.test(arg) ? `"${arg}"` : arg).join(" "), { ...options, shell: true });
 }
 
-const quote = arg => /^[\w@%+=:,./-]+$/.test(arg) ? arg : `'${arg.replaceAll("'", "'\\''")}'`;
-
 function makeRunner(execute) {
   return function run(command, args, { cwd = ROOT, input } = {}) {
     console.log(`  $ ${cwd === ROOT ? "" : `(cd ${cwd}) `}${[command, ...args].map(quote).join(" ")}`);
@@ -78,8 +80,9 @@ function makeRunner(execute) {
 
 function requireDeployKey(execute) {
   const key = process.env.CONVEX_DEPLOY_KEY;
-  if (key?.startsWith(`prod:${PRODUCTION_DEPLOYMENT}|`)) return;
-  const problem = key ? `CONVEX_DEPLOY_KEY is not a production key for ${PRODUCTION_DEPLOYMENT}` : "CONVEX_DEPLOY_KEY is not set";
+  const prefix = `${PRODUCTION_DEPLOYMENT_TYPE}:${PRODUCTION_DEPLOYMENT}|`;
+  if (key?.startsWith(prefix) && key.length > prefix.length) return;
+  const problem = key ? `CONVEX_DEPLOY_KEY is not a ${PRODUCTION_DEPLOYMENT_TYPE} deployment key for ${PRODUCTION_DEPLOYMENT}` : "CONVEX_DEPLOY_KEY is not set";
   if (execute) throw new Error(problem);
   console.log(`  ! ${problem}; --execute would stop here`);
 }
@@ -90,13 +93,13 @@ function backup(run, options, ts) {
   console.log(`\n# Back up production Convex (${PRODUCTION_DEPLOYMENT})`);
   requireDeployKey(options.execute);
   if (options.execute) mkdirSync(options.backupDir, { recursive: true });
-  run("npx", ["convex", "export", "--include-file-storage", "--path", join(options.backupDir, `convex-${PRODUCTION_DEPLOYMENT}-${ts}.zip`)], { cwd: join(ROOT, "backend") });
+  run(process.execPath, [CONVEX_CLI, "export", "--include-file-storage", "--path", join(options.backupDir, `convex-${PRODUCTION_DEPLOYMENT}-${ts}.zip`)], { cwd: join(ROOT, "backend") });
 }
 
 function deployBackend(run, options) {
   console.log(`\n# Deploy backend/ to production Convex (${PRODUCTION_DEPLOYMENT})`);
   requireDeployKey(options.execute);
-  run("npx", ["convex", "deploy", "--typecheck", "enable"], { cwd: join(ROOT, "backend") });
+  run(process.execPath, [CONVEX_CLI, "deploy", "--typecheck", "enable"], { cwd: join(ROOT, "backend") });
 }
 
 function git(args) {
@@ -128,27 +131,19 @@ function stageSite(stage) {
 function deploySite(run, options, ts) {
   console.log(`\n# Build and ship the site to ${options.host}:${REMOTE_SITE}`);
   const work = mkdtempSync(join(tmpdir(), "origin-site-"));
+  const releaseId = `${ts}-${randomUUID()}`;
   try {
     const stage = join(work, "origin");
     console.log(`  staging HEAD's ${SITE_PATHS.join(", ")} in ${stage} with a lockfile pruned to backend + site`);
     stageSite(stage);
-    const tarball = `origin-site-${ts}.tgz`;
-    const remoteTarball = `/tmp/origin-site-${ts}.tgz`;
+    const tarball = `origin-site-${releaseId}.tgz`;
+    const remoteTarball = `/tmp/origin-site-${releaseId}.tgz`;
     run("tar", ["-czf", tarball, "-C", "origin", "."], { cwd: work });
     run("scp", [tarball, `${options.host}:${remoteTarball}`], { cwd: work });
-    const remote = [
-      "set -eu",
-      `rm -rf ${REMOTE_SITE}.new && mkdir ${REMOTE_SITE}.new`,
-      `tar -xzf ${remoteTarball} -C ${REMOTE_SITE}.new`,
-      `if [ -e ${REMOTE_SITE} ]; then mv ${REMOTE_SITE} ${REMOTE_SITE}.bak-${ts}; fi`,
-      `mv ${REMOTE_SITE}.new ${REMOTE_SITE}`,
-      `rm -f ${remoteTarball}`,
-      `cd ${REMOTE_COMPOSE} && docker compose up -d --build origin`,
-      "docker image prune -f >/dev/null",
-    ].join("\n");
+    const remote = siteRolloutScript({ site: REMOTE_SITE, compose: REMOTE_COMPOSE, tarball: remoteTarball, releaseId });
     run("ssh", [options.host, "sh -s"], { input: remote });
     for (const line of remote.split("\n")) console.log(`      ${line}`);
-    console.log(`  rollback: ssh ${options.host} 'rm -rf ${REMOTE_SITE} && mv ${REMOTE_SITE}.bak-${ts} ${REMOTE_SITE} && cd ${REMOTE_COMPOSE} && docker compose up -d --build origin'`);
+    console.log(`  rollback: ssh ${options.host} 'test ! -e ${REMOTE_SITE}.failed-${releaseId} && test ! -L ${REMOTE_SITE}.failed-${releaseId} && mv -- ${REMOTE_SITE} ${REMOTE_SITE}.failed-${releaseId} && test ! -e ${REMOTE_SITE} && test ! -L ${REMOTE_SITE} && mv -- ${REMOTE_SITE}.bak-${releaseId} ${REMOTE_SITE} && cd ${REMOTE_COMPOSE} && docker compose up -d --no-deps --build origin'`);
   } finally {
     rmSync(work, { recursive: true, force: true });
   }

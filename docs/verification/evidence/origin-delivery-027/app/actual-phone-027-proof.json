@@ -1,0 +1,28 @@
+{
+  "source": "dbdac25fcd014d231e694aa8665d326b235af616",
+  "fixture": "synthetic isolated full App",
+  "path": "Profile > Get the phone app",
+  "pairingCodeOpened": false,
+  "checks": [
+    {
+      "focus": "Close",
+      "inside": true,
+      "step": "opened"
+    },
+    {
+      "focus": "Open in the App Store",
+      "inside": true,
+      "step": "Tab"
+    },
+    {
+      "focus": "Close",
+      "inside": true,
+      "step": "Shift+Tab"
+    },
+    {
+      "dialogs": 0,
+      "focus": "You",
+      "step": "Escape"
+    }
+  ]
+}

@@ -1,0 +1,698 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-19T01:47:45.287Z",
+  "readOnly": true,
+  "originSource": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "upstream": {
+    "repository": "milind-soni/OpenMausBot",
+    "number": 3073,
+    "title": "Import a shared Grok Bot, plus a Settings → Import page",
+    "url": "https://github.com/milind-soni/OpenMausBot/pull/3073",
+    "merged": true,
+    "mergedAt": "2026-10-18T23:22:38Z",
+    "mergeCommit": "1da83432c4b952da42225d97fcc623ba754673eb",
+    "head": "6e00d1e7b24596d55baf317f2fc908bf7fac70a5",
+    "mergeParents": [
+      "53d9803aea32c11104a5301805089a5d6b40cf8c",
+      "6e00d1e7b24596d55baf317f2fc908bf7fac70a5"
+    ],
+    "apiDetail": "https://api.github.com/repos/milind-soni/OpenMausBot/pulls/3073",
+    "apiFiles": "https://api.github.com/repos/milind-soni/OpenMausBot/pulls/3073/files?per_page=100",
+    "changedFiles": 37,
+    "additions": 3194,
+    "deletions": 169,
+    "completePatchInventoryVerified": true
+  },
+  "decision": {
+    "adopted": false,
+    "recommendation": "Selective future offline converter/preview slice; defer full Cursor/AI-app flow",
+    "currentReleaseChanged": false,
+    "noBlanketCherryPick": true,
+    "providerAcceptance": false,
+    "testsExecuted": false
+  },
+  "existingOrigin": [
+    {
+      "capability": "Package-v2/file/GitHub/library/backup preview and additive import already exist",
+      "refs": [
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/src/lib/team-import.ts#L32",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/src/components/TeamLibraryPanel.tsx#L368",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/src/components/TeamLibraryPanel.tsx#L392",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/server/routes/teams.ts#L287"
+      ],
+      "qualification": "This does not mean Grok export or the new Settings importer exists."
+    },
+    {
+      "capability": "Untrusted package authority boundary already exists",
+      "refs": [
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/server/routes/teams.ts#L336",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/server/package-import.ts#L246",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/server/package-import.ts#L287",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/server/package-import.ts#L325"
+      ],
+      "qualification": "File trust creates new records/section, uses local model defaults, disables app connections and does not replace an existing Chief."
+    },
+    {
+      "capability": "Ownership revision/session fencing and sender-runs lease controls exist",
+      "refs": [
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/server/origin-cloud-session.ts#L18",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/server/origin-cloud-session.ts#L35",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/server/origin-run-lease.ts#L63",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/src/lib/origin-cloud/client.ts#L51"
+      ],
+      "qualification": "Use the same invariants for a future importer; the upstream Cursor session has no Origin principal/epoch binding."
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "Paste/export Grok adapter",
+      "usefulMissing": true,
+      "disposition": "Candidate for smallest selective next batch, after omission redaction and target-scoping fixes",
+      "source": [
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/shared/grok-import.ts#L69",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/shared/grok-import.ts#L195",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/shared/grok-import.ts#L358"
+      ],
+      "details": "Reads x.ai share/marketplace and grokbot button URLs; pasted openmaus.grok/1 or grokbot-bundle/v1 text maps to an ordinary package-v2 persona, skills, paused clock routines, app requirements and optional memories. Public description-only starter is explicitly weaker than a full export."
+    },
+    {
+      "name": "Shared import UI and explicit Left out/setup notes",
+      "usefulMissing": true,
+      "disposition": "Adapt preview structure and unsent setup draft to exact Origin project Chief; do not transplant global helper selection",
+      "source": [
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokImportFlow.tsx#L19",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokFinishSetup.tsx#L13",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/TeamImportDetails.tsx#L16"
+      ],
+      "details": "One flow is shared across Templates/Settings/onboarding and reuses the existing add endpoint. A follow-up message is prepared, not sent automatically."
+    },
+    {
+      "name": "Optional Cursor one-click path",
+      "usefulMissing": true,
+      "disposition": "Defer until provider contract and account/epoch isolation are proved",
+      "source": [
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.ts#L46",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.ts#L159",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.ts#L226",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/routes/teams.ts#L224"
+      ],
+      "details": "PKCE browser login, local0600 session file, fixed api2.cursor.sh bearer origin and token-free recipe download. Author explicitly calls the API unlisted and did not live-test it. Code plan-refusal note and docs/free-account wording differ; do not promise eligibility."
+    },
+    {
+      "name": "Settings → Import for other AI apps",
+      "usefulMissing": true,
+      "disposition": "Separate dependency-closure review; not a standalone UI-only cherry-pick",
+      "source": [
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/ImportSettings.tsx#L7",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/ImportSettings.tsx#L13"
+      ],
+      "details": "The new page depends on setupImportApi/shared setup-import/onboarding ImportRow that are absent from frozen Origin. Do not display an unsupported detection/import capability."
+    },
+    {
+      "name": "Public card and install-link recognition",
+      "usefulMissing": true,
+      "disposition": "Optional after offline importer; preserve explicit Add and Origin protocol ownership",
+      "source": [
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/team-library.ts#L242",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/team-library.ts#L365",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/electron/package-link.mjs#L20"
+      ],
+      "details": "x.ai/www.x.ai HTTPS allowlist,21-character share IDs, max3 same-host redirects,20-second timeout and2MiB streamed cap. PR does not register grokbot as an OS protocol."
+    }
+  ],
+  "sourceTracedAdoptionBlockers": [
+    {
+      "id": "S1",
+      "classification": "Source-traced upstream await interleaving; not runtime-reproduced and not present in frozen Origin",
+      "scenario": "Start fetchTemplate with accountA; hold /oauth/token or its response body, call signOut (or complete accountB sign-in), then releaseA. renew savesA unconditionally after awaits. pollOnce also clears pending before awaiting the response body, then saves without checking ownership again. An old completion can restore/overwrite credentials after logout or replacement.",
+      "refs": [
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.ts#L185",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.ts#L221",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.ts#L226",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.ts#L239",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.ts#L258"
+      ],
+      "required": "Capture an account/session revision before the first external await and validate it before every save/delete; key credentials to the intended local owner/machine and preserve same-owner refresh. Add deferred-response/body logout/login/ABA tests with no provider calls."
+    },
+    {
+      "id": "S2",
+      "classification": "Source-traced redaction gap in the proposed adapter; not an adopted Origin defect",
+      "scenario": "An event routine is omitted and its original prompt contains a key-shaped value. grokExportToPackage redacts only the accepted document, while leftOut.original retains the omitted text. team-import puts it into warning/setup notes and GrokFinishSetup includes it in the prepared draft. Nothing is auto-sent, but the package redaction claim does not cover all preview/draft surfaces.",
+      "refs": [
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/shared/grok-import.ts#L395",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/shared/grok-import.ts#L466",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/lib/team-import.ts#L52",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokFinishSetup.tsx#L23",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokFinishSetup.tsx#L38"
+      ],
+      "required": "Redact omission originals, warnings, source metadata and setup drafts through the same secret boundary before rendering/storing/logging. Test dropped routines/oversized skills with synthetic secrets and keep memories opt-in."
+    },
+    {
+      "id": "S3",
+      "classification": "Origin hierarchy mismatch if transplanted unchanged",
+      "scenario": "WorkspaceA Chief is the first visible chiefOfStaff, but the import belongs to projectB. setupHelper choosesA globally. The prepared source/apps/omission text would land in the wrong Chief composer. Generic addTemplate also creates an independent new section rather than an Origin project-agent link.",
+      "refs": [
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokFinishSetup.tsx#L13",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/lib/template-add.ts#L15",
+        "https://github.com/z4mbo/Origin/blob/ab0cd72b4c2f004c1015adca034472241569c04b/server/package-import.ts#L246"
+      ],
+      "required": "Choose an authorized target workspace/project and resolve its exact Chief/role from Origin ownership. Never trust imported workspace/project/Chief IDs, alter approvals or auto-grant tools. Add wrong-workspace/viewer/member negatives and rollback/link-uniqueness checks."
+    },
+    {
+      "id": "S4",
+      "classification": "Source-traced UI stale-response risk; not browser-reproduced",
+      "scenario": "Load linkA slowly, loadB or change the Origin context, then releaseA. load has no abort/revision fence and calls the latest handOver ref, so an old answer can update the current card or open a preview in the replacement context.",
+      "refs": [
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokImportBox.tsx#L158",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokImportBox.tsx#L165",
+        "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokImportBox.tsx#L172"
+      ],
+      "required": "Fence link/server/account/workspace/project ownership before handing over or committing a preview; cancel stale effects. Cover A/B reverse completion, unmount and context-switch cases."
+    }
+  ],
+  "selectivePlan": [
+    {
+      "order": 1,
+      "scope": "Pure offline converter and redacted preview",
+      "changes": "Adapt only the shared Grok export reader/converter into the existing package-v2 boundary; sanitize omissions as well as document fields. Keep openmaus.grok/1, grokbot-bundle/v1 and package wire identifiers for compatibility; change human product copy to Origin and retain attribution.",
+      "tests": "Malformed/fenced/BOM/bundle data, hostile IDs/authority/model/cwd/visibility fields, quotas, skill frontmatter, paused/event schedules, zone changes, explicit memory choice, accepted+omitted synthetic-secret paths. No network/OAuth."
+    },
+    {
+      "order": 2,
+      "scope": "Origin target-bound Add and shared preview",
+      "changes": "One explicit project/workspace/role chooser and preview. Use existing authorized Origin agent/link creation and current sender/machine model ownership; do not blindly call the legacy new-section importer for a project agent. Draft setup to the exact target Chief, never auto-send. Keep human-approved PR merges unchanged.",
+      "tests": "Wrong workspace/project/member/viewer, stale account/server changes, duplicate click/uncertain response, rollback without orphan links, Chief unchanged, no shared credentials. Real375/1440 light/dark screenshots, keyboard/focus, reduced motion, project accent and loading/error states."
+    },
+    {
+      "order": 3,
+      "scope": "Optional bounded public-card fetch",
+      "changes": "Keep fixed x.ai host/scheme/ID/redirect/size/time caps and admin scope; absent/unavailable card must not block manual export. Install links open a preview only, using existing Origin protocol handling.",
+      "tests": "Foreign/authenticated/IP/port/redirect URLs, oversize streaming/chunked bodies, timeout/private/removed pages, marketplace ambiguity and no mutation before Add, isolated fixtures only."
+    },
+    {
+      "order": 4,
+      "scope": "Deferred external sign-in / other AI-app import",
+      "changes": "Review missing setup-import closure separately. Add Cursor only afterS1 account fencing and principal isolation, explicit local owner/device display and provider compatibility evidence. Do not resurrect upstream Cloud billing or promise a provider plan from source copy.",
+      "tests": "Deferred poll/body/refresh/logout/replacement/ABA, token confinement/redaction, no credential synchronization to Convex/chat/tools, offline/eligibility/error fallback. Installed desktop/provider acceptance remain separate future gates."
+    }
+  ],
+  "missingImportPageDependencies": [
+    "src/lib/setup-import.ts",
+    "shared/setup-import.ts",
+    "server/setup-import.ts",
+    "server/routes/setup-import.ts",
+    "src/components/onboarding/beats/ImportBeat.tsx"
+  ],
+  "sourceQualification": "Five apparent PR-head/merge differences were checked with exact base64-decoded GitHub content blobs. Two raw-media source outputs had normalized control bytes and were corrected; their originals are retained as diagnostics. Three actual merged files differ from PR head (ratchet/locales/store); both revisions are retained. Behavior analysis uses verified merged blobs.",
+  "changedFiles": [
+    {
+      "path": "docs/team-sharing.md",
+      "status": "modified",
+      "additions": 59,
+      "deletions": 0,
+      "originPathPresent": true,
+      "originGitBlob": "269014d3dd18f629a8dffc0bf3552131fc7c3530",
+      "mergedGitBlob": "381ccbf981d4a63189791ba1fa5e15408676adca",
+      "mergedSourceSha256": "8516f792d2153dccb938c63fb8e583755780636931771a5c30b23767579ab4c5",
+      "prPatchSha256": "8b4f9214c54546c0749d5433052dadf872738ec374bbc148b5de1a3c55d3633d",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/docs/team-sharing.md",
+      "disposition": "Adapt user docs only after shipped Origin capability; keep provider limits honest"
+    },
+    {
+      "path": "electron/package-link.mjs",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 0,
+      "originPathPresent": true,
+      "originGitBlob": "51efb27ab630580c447641c6574bb02a6fc61fb2",
+      "mergedGitBlob": "9a79fc1c91df516d7322c82884edc78ef097153f",
+      "mergedSourceSha256": "7b07974f5e8ea3a682e14ba66db5ef65d8e74db00c52e76a347797346234affa",
+      "prPatchSha256": "c124da8bc2c35384af179cf9387102bbd345c30104aa80c70427cd8f69385002",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/electron/package-link.mjs",
+      "disposition": "Bounded link-parser candidate; no automatic import or new protocol ownership"
+    },
+    {
+      "path": "electron/package-link.node-test.mjs",
+      "status": "modified",
+      "additions": 9,
+      "deletions": 0,
+      "originPathPresent": true,
+      "originGitBlob": "57067b5f478079dd656224d27ee561e1e169ce44",
+      "mergedGitBlob": "e39aa52c35e028608de17e91d45e3e127d9a376b",
+      "mergedSourceSha256": "3c748c52e3e13161460830fbfb3d7f3c2688b6763f08897e96d19944b5952f43",
+      "prPatchSha256": "cfd8f3398168f4fb7dd9b883a70cc77b13d559ac198d8e8efee71c4de5e3e64a",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/electron/package-link.node-test.mjs",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "scripts/testing/file-size-ratchet.test.ts",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 1,
+      "originPathPresent": true,
+      "originGitBlob": "f2212e799756377d3ae44753e93b7446a8e81563",
+      "mergedGitBlob": "56a029f2b296d0b4e5b88cba34049d383bba281d",
+      "mergedSourceSha256": "00b10b639273d05dec2f84569496d5df85c24a585e7bd80ddd4e3f153097a9b8",
+      "prPatchSha256": "e780b3debc9bf565fcad58381998a4f7d93445a0a64751f00ae9732c208079ad",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/scripts/testing/file-size-ratchet.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "server/cursor-session.test.ts",
+      "status": "added",
+      "additions": 279,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "3c0be67ab2a4281191162408b117975fbaa8aa4a",
+      "mergedSourceSha256": "274ecc4b2c904f41a11597885b1fed2d25317eb1ad650992243b19c847472ae9",
+      "prPatchSha256": "f5d0c98a22c8b9310e9847168fad473c8559d8254858ad1912e7c0311463fdf8",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "server/cursor-session.ts",
+      "status": "added",
+      "additions": 324,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "5d96172da2316ea9bfd590611e1d3ae056c1eb4f",
+      "mergedSourceSha256": "89a39fcf837298abab5a7290c1a9b3942b6f6543e0302303389f34bcdfdf84ad",
+      "prPatchSha256": "01281c89e4b17dd712f8e81053c7ca3fbd71a6e1168e8a782ea48a4adc657c4d",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/cursor-session.ts",
+      "disposition": "Defer external session implementation pendingS1/account isolation/provider evidence"
+    },
+    {
+      "path": "server/fixtures/grok-share-page-anonymous.html",
+      "status": "added",
+      "additions": 1,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "083468a09ac911c4000d39dbe92fdc90e385b16c",
+      "mergedSourceSha256": "3ed9ab771b45e1860a7808f72d2e69945d544ad5d2975f0b58cd3cf6e95a32e1",
+      "prPatchSha256": "3075a04e487c9b1d3caafabd440104f9ea3f242ed5d82ce1a2a9634c33dd20e5",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/fixtures/grok-share-page-anonymous.html",
+      "disposition": "Public HTML parser fixture only; untrusted data, never execute"
+    },
+    {
+      "path": "server/fixtures/grok-share-page.html",
+      "status": "added",
+      "additions": 1,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "f1478d9e28b7fe795ef4467f9fd89dccac2849bd",
+      "mergedSourceSha256": "3366962a535f7956df82f87989c3c0fe9a58ecc91862bd3c2243ea2bb0939d63",
+      "prPatchSha256": "88df2de9205ec3abc9a1af433598ae4efe7786895b874376876a5c3338006822",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/fixtures/grok-share-page.html",
+      "disposition": "Public HTML parser fixture only; untrusted data, never execute"
+    },
+    {
+      "path": "server/request-auth.test.ts",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 0,
+      "originPathPresent": true,
+      "originGitBlob": "8a5aaca78b31bcc79a90c9560136e02feaaba15c",
+      "mergedGitBlob": "761fbc659049c7a31a9ce65d20cd6a87940f1d9e",
+      "mergedSourceSha256": "05be2f6c6e9f56980fd6069f12a2ee6bdbba1f2b11d4e7cad7b9ed6c293909b2",
+      "prPatchSha256": "2df4fa7bcb2eb5ff042a66e1657aa7beb97975ecbcb2d82624b098f0b2fc87db",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/request-auth.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "server/routes/team-library-grok.test.ts",
+      "status": "added",
+      "additions": 137,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "274cb32789ac1fe8e049d0992f566d5ded3c1561",
+      "mergedSourceSha256": "143471edc7d92bc975d52ae393fb1b2d5ca63f554a27c2428a1122e03d42ea95",
+      "prPatchSha256": "2eb1e3e6a5ff3687a38ae804fcc6176085986a97ea3f2c86348618e92a0a4e72",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/routes/team-library-grok.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "server/routes/teams.ts",
+      "status": "modified",
+      "additions": 41,
+      "deletions": 1,
+      "originPathPresent": true,
+      "originGitBlob": "07a27079a71610ca633c3925e93264f11302b149",
+      "mergedGitBlob": "ef760a6ed7172e707de824874a824769cfba240b",
+      "mergedSourceSha256": "e2e9cd64948967b039935d76759d05d2bb948579249f7bd30952f761ff54977f",
+      "prPatchSha256": "e6254f89d013ced67e6a88b924f9dd74de05c1ea7da8965ede8c4fff91841bf6",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/routes/teams.ts",
+      "disposition": "Optional allowlisted card fetch; retain admin scope and Origin target authority"
+    },
+    {
+      "path": "server/team-library.test.ts",
+      "status": "modified",
+      "additions": 108,
+      "deletions": 0,
+      "originPathPresent": true,
+      "originGitBlob": "6a4a0af08a9e8755e0007522e7d3fc2e679a12fb",
+      "mergedGitBlob": "7bdbd1870b14c931afcf84fbc133647570e7b0fc",
+      "mergedSourceSha256": "aedd127e401109d4fa7d05ca3b4cb9ca51c9f129adf0711eb3c551aebf8733af",
+      "prPatchSha256": "51c5c90568e7f61d48b8599c4e34c7a8c20c0fa067a7695912dbc5bb41858857",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/team-library.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "server/team-library.ts",
+      "status": "modified",
+      "additions": 172,
+      "deletions": 0,
+      "originPathPresent": true,
+      "originGitBlob": "ce58a92c812c0791f0364f1ec9778bb19dc679c5",
+      "mergedGitBlob": "31b2a4f8c479f6cc7cc12462f8f583e21688cb34",
+      "mergedSourceSha256": "646a9ddf537078c40500e85f5d8ebd11c5500e8752a4b58ee7d16c90bec97a4d",
+      "prPatchSha256": "ed309a5a69a23f35794a8e50260c3f790c07e5d2895c37fb123672fa705b5110",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/server/team-library.ts",
+      "disposition": "Optional allowlisted card fetch; retain admin scope and Origin target authority"
+    },
+    {
+      "path": "shared/grok-import.test.ts",
+      "status": "added",
+      "additions": 302,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "a2e31033b80bde8705e899410366f6c006743df3",
+      "mergedSourceSha256": "7fc656a02a9ff80490c59e1e770ef578346ed6320719aa5f6d52cbe6d381e4c1",
+      "prPatchSha256": "4b1df8974e91849fe614f6c37c9cd0340760e7f430c546a4eee1f7d5242fcfe6",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/shared/grok-import.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "shared/grok-import.ts",
+      "status": "added",
+      "additions": 542,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "2523f77acab4ad3c9d1b14807839440575390541",
+      "mergedSourceSha256": "664898d86576b65276b26b7da795f4f762bec14575949a2a6b038d027e2fcbf9",
+      "prPatchSha256": "41050fc1ba70182e7739a786ecdfa440ace9685b638fc7e414ea0c4db1bb28e5",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/shared/grok-import.ts",
+      "disposition": "Priority selective pure-adapter candidate afterS2 redaction"
+    },
+    {
+      "path": "src/components/GrokBotMark.test.ts",
+      "status": "added",
+      "additions": 26,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "b44ad8b253709818624ef711121107e0fa886bba",
+      "mergedSourceSha256": "a642477ac76db784b52e504883cec61afab1286dcfda3f49ff91c2cbe29bdb00",
+      "prPatchSha256": "17ab990dde8eb6033aa4e55308885db0c70f4615be1542dd7d3f2ea4295078f1",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokBotMark.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "src/components/GrokBotMark.tsx",
+      "status": "added",
+      "additions": 16,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "df08eefb240a5f0e5cd4e2eb1c68894f8fd84124",
+      "mergedSourceSha256": "a8b4e87665ba40fb6dd3246b4e4b14f070940fa240f24db86dee4ff53c36c23c",
+      "prPatchSha256": "a0c45a4c2d09ac5527b6e08ac9cb1dcdd73d578da81b1b1ce0de3cfa9befaa2d",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokBotMark.tsx",
+      "disposition": "Provider-brand asset/reference; preserve legal attribution, do not globally rename vendors"
+    },
+    {
+      "path": "src/components/GrokFinishSetup.test.ts",
+      "status": "added",
+      "additions": 77,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "7f29c5dd9c858a94ce0dbc50198e7245a7b5cfc8",
+      "mergedSourceSha256": "82e52f9fd1639ea13a80cd7575ea37f8e241e34fdc9b4fa4e67a0c5b36e56c4b",
+      "prPatchSha256": "78e4eaeb750bc1c88d4bcf08f75f10639f7f4821640b7109f32a252378219540",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokFinishSetup.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "src/components/GrokFinishSetup.tsx",
+      "status": "added",
+      "additions": 81,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "776b0e3b7afadf8e56e26ad2bbe78d52577567aa",
+      "mergedSourceSha256": "0963970f5e9fcee0ea8a103d2b9c2a41e94be27b7c8f326217af856e2d08ee2d",
+      "prPatchSha256": "156950bf58d9c03067c3f2b49e6f7db2d7d2cbc4930279a93e78606ffb584d40",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokFinishSetup.tsx",
+      "disposition": "Adapt only with exact Origin Chief resolution and redacted unsent draft"
+    },
+    {
+      "path": "src/components/GrokImportBox.test.ts",
+      "status": "added",
+      "additions": 88,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "79fd18411f09bf024ab878777db9a338037c363b",
+      "mergedSourceSha256": "b0ee4df27eb5d54781bb6948e8d53b19659ca788bb2989c4fc3ab9b07d57f474",
+      "prPatchSha256": "2bf41ee9c76c69cbdea9be69705cc58ee79efc09e4b3fd974b6f1dcb4a9c659c",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokImportBox.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "src/components/GrokImportBox.tsx",
+      "status": "added",
+      "additions": 252,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "0e706346e834ca1fe2d1a6279fd824a867810ae1",
+      "mergedSourceSha256": "bad2a8aab47f2ec69cdcfb53cb43d0084a1534ea2172a7e032bd5ea323b7a1c5",
+      "prPatchSha256": "068ed7802033431e6f59e4c77699d5291fc74fc804f3b2b564f8f8bd09ba4931",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokImportBox.tsx",
+      "disposition": "Adapt shared UI with Origin ownership/async fences and shared style tokens"
+    },
+    {
+      "path": "src/components/GrokImportFlow.tsx",
+      "status": "added",
+      "additions": 95,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "55069f3af40915abe41e965d35f89c74f91b5812",
+      "mergedSourceSha256": "3b34622901fea5f1471d4147409fc2f5d2fb13b5499e08de44d3cd96bc3f3258",
+      "prPatchSha256": "dbc8fb12193ce681935ba2820e5ab96fe38fd43445ae2e2c23c31ed8703ac354",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/GrokImportFlow.tsx",
+      "disposition": "Adapt shared UI with Origin ownership/async fences and shared style tokens"
+    },
+    {
+      "path": "src/components/ImportSettings.test.ts",
+      "status": "added",
+      "additions": 62,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "0ab5eb2980ea127ad0a9bde0ee7743ee73760abb",
+      "mergedSourceSha256": "ce5ad0e57d0bf35f61c278964cf793701771a4440b796587f1b00fa490e94687",
+      "prPatchSha256": "35f80621b4464aa62d217a5a556f8efac21ceefe8c4b78d00c5cd9bdba318919",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/ImportSettings.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "src/components/ImportSettings.tsx",
+      "status": "added",
+      "additions": 132,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "dc0180ab4f0685ad2aef639c16e1a3da43bb5ba3",
+      "mergedSourceSha256": "91237458aef1bf3875946eecab19ebdeee501ae4623487e72f0fbd723a5bf445",
+      "prPatchSha256": "03138ced62eb510507ab4959320209a8d5e7242d3009ab49a9a5436eb59cca02",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/ImportSettings.tsx",
+      "disposition": "Dependency-aware UI candidate; Origin lacks referenced setup-import/onboarding modules"
+    },
+    {
+      "path": "src/components/ProviderIcons.tsx",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1,
+      "originPathPresent": true,
+      "originGitBlob": "63ed7182894c9b9335ce797ffbe5f8f6a94cbb46",
+      "mergedGitBlob": "7036319b814bbb042cfbdbae4bd37af245ab8a91",
+      "mergedSourceSha256": "c0ba2a7c15799237452d2f9a5fb69e64aeae5e9ac153f516c18c992191816df7",
+      "prPatchSha256": "2e90891638c1dc7573f660e69f885c9658c62d129bc898bf4f9d6ffa82e44fa2",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/ProviderIcons.tsx",
+      "disposition": "Provider-brand asset/reference; preserve legal attribution, do not globally rename vendors"
+    },
+    {
+      "path": "src/components/SettingsModal.groups.test.ts",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2,
+      "originPathPresent": true,
+      "originGitBlob": "d9026e99a28158b8439ecdefaee69422aecd3a43",
+      "mergedGitBlob": "05696e36e5b83d121d8838e29909b771057d022f",
+      "mergedSourceSha256": "cf878278a78c0f481b7922b34df4c812b8de315de5f5e72dc01cc86b98e50518",
+      "prPatchSha256": "c79bc42fde8dfa2c39c4076ae10fb41e080ee1169b54d1878944e05f95693e1e",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/SettingsModal.groups.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "src/components/SettingsModal.simple.test.ts",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 2,
+      "originPathPresent": true,
+      "originGitBlob": "e416a60408b606cf570b5630d46514b2c1703c6e",
+      "mergedGitBlob": "5375cce99ad7d9ceaa5717ad667bf10b288d1463",
+      "mergedSourceSha256": "47eb66e52c0e09121c67a5d5998fdabc0c978bc53dc1555dc0f6f20e49a04fed",
+      "prPatchSha256": "584f4bac72419ec1e61326a949936e0fab7d98b818e4496474c1e336f83ee05c",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/SettingsModal.simple.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "src/components/SettingsModal.tsx",
+      "status": "modified",
+      "additions": 9,
+      "deletions": 9,
+      "originPathPresent": true,
+      "originGitBlob": "b98eff9d6227176262b59112ad6aab7be4d55842",
+      "mergedGitBlob": "3e54f303a5504fe606eccfa59050a01714e1860b",
+      "mergedSourceSha256": "7d8f2ded132e5c52ea78f3c089914b59e62ff8cfa0653460c3e8e829d919ea8d",
+      "prPatchSha256": "e9f6d273c38cc6e73409e95ca92ccce54aba70fc1e00c83e0c960202f36a75c3",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/SettingsModal.tsx",
+      "disposition": "Adapt only the exact Import tab/localization wiring after capability exists"
+    },
+    {
+      "path": "src/components/TeamImportDetails.tsx",
+      "status": "added",
+      "additions": 114,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "c613f618952d37c502e1eb41a4f673a98e391aaa",
+      "mergedSourceSha256": "0f921b42123a2cec88703ff5d403a54f95ca29f68dcde912417f73e4ab21523d",
+      "prPatchSha256": "1435366d45f1a23cdd252901548add03ca901c0102985b21bd1341fcab086b3e",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/TeamImportDetails.tsx",
+      "disposition": "Existing-preview extraction/adapter; preserve backups/teams behavior and targeted permissions"
+    },
+    {
+      "path": "src/components/TeamLibraryPanel.tsx",
+      "status": "modified",
+      "additions": 22,
+      "deletions": 148,
+      "originPathPresent": true,
+      "originGitBlob": "da7d676c586bcfd5b7b3e81b1964bf1b85b54934",
+      "mergedGitBlob": "7f55f30c3615fecc743f54887b0fb5cd4ea3fd64",
+      "mergedSourceSha256": "243e8bb741932b1641e93bf2e5d4848822d93f58a1182b20f152d1adaab613de",
+      "prPatchSha256": "d8adfdec74223911e0ce60584bda65cc6e587d2d8690142d9fd307f6fc73687e",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/TeamLibraryPanel.tsx",
+      "disposition": "Existing-preview extraction/adapter; preserve backups/teams behavior and targeted permissions"
+    },
+    {
+      "path": "src/components/onboarding/beats/ImportBeat.test.ts",
+      "status": "modified",
+      "additions": 30,
+      "deletions": 1,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "00fe78898ed300fa7eef717510cb54727d2a6997",
+      "mergedSourceSha256": "6ebf2034d0a2915f1096f589f9d8e81b0350131ccfaee5905122abdebcdef19f",
+      "prPatchSha256": "639d9c857c8a693d5efcbc8e6b19951c282f9978d709e35b716309022f0d97e6",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/onboarding/beats/ImportBeat.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "src/components/onboarding/beats/ImportBeat.tsx",
+      "status": "modified",
+      "additions": 37,
+      "deletions": 2,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "31a2eb7dc6879c92f0774f288d10e3a9dde99204",
+      "mergedSourceSha256": "75e63b6bca4346735bfd559cbc3a5fe1c135b38001fa10c2e362a05744cd0dfe",
+      "prPatchSha256": "a29d20fa91b018873fc4ad64c6acbcabdcca0094c1b426a07562678209039d51",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/components/onboarding/beats/ImportBeat.tsx",
+      "disposition": "Dependency-aware UI candidate; Origin lacks referenced setup-import/onboarding modules"
+    },
+    {
+      "path": "src/lib/team-import.test.ts",
+      "status": "modified",
+      "additions": 48,
+      "deletions": 1,
+      "originPathPresent": true,
+      "originGitBlob": "befdf8cf3803c214048cc943aeb1c9bbe8b58849",
+      "mergedGitBlob": "5c63e0ecf2589c0f32274806862df98fbad540d9",
+      "mergedSourceSha256": "9c68fcfd9c29c0bb384bc831f140e94c4169372b48abe4d3855ab2a442be50b3",
+      "prPatchSha256": "880185c8d7209a8bac3ee45a64551851a089ed5d9d1d2f6891d3dcd503a061f5",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/lib/team-import.test.ts",
+      "disposition": "Static test coverage/reference; adapt relevant regressions, not a claim of Origin execution"
+    },
+    {
+      "path": "src/lib/team-import.ts",
+      "status": "modified",
+      "additions": 41,
+      "deletions": 0,
+      "originPathPresent": true,
+      "originGitBlob": "5f25501835d23adcbe47986ad31f373b6d460117",
+      "mergedGitBlob": "ee0f5ddc2cecb60d9bd68d4a24e6bb3afed82778",
+      "mergedSourceSha256": "be57fc6da4d5b94f29024a272ae48c7d5370c5cb5f8fb39a8a1dfec3dcc02466",
+      "prPatchSha256": "067cb86ece965cdc189f5db7f31e83194a231e0bedc2743f6f68e8549ec4a639",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/lib/team-import.ts",
+      "disposition": "Existing-preview extraction/adapter; preserve backups/teams behavior and targeted permissions"
+    },
+    {
+      "path": "src/lib/template-add.ts",
+      "status": "added",
+      "additions": 25,
+      "deletions": 0,
+      "originPathPresent": false,
+      "originGitBlob": null,
+      "mergedGitBlob": "9ef8cb359104378d91c9ad25e1d623265a03f0ef",
+      "mergedSourceSha256": "1f1fe64682972f560b38d520f7bf95a1631e8898e22fd1bddbbb6ec17ea9f293",
+      "prPatchSha256": "3a9ce4f454c9e0e4a9392d37172234524654f936cfcbcfbd21ad45f3ae67e483",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/lib/template-add.ts",
+      "disposition": "Reuse idea only; project-agent linking must use Origin ownership"
+    },
+    {
+      "path": "src/locales/en.json",
+      "status": "modified",
+      "additions": 47,
+      "deletions": 0,
+      "originPathPresent": true,
+      "originGitBlob": "88046bea5f142c03e0bf3185cf4cc2478630b6c6",
+      "mergedGitBlob": "d63ea60b56f0767e90ba08a65323d4ba709e68d1",
+      "mergedSourceSha256": "0d4fb65afffc310b50e66f5151a2fb9c506bb00c2e1dcb19360c5f0d95d27740",
+      "prPatchSha256": "23a9e7820390c0586b804cfce98b7b1bb3abc40bcf4da5b2a22d77456d12b991",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/locales/en.json",
+      "disposition": "Adapt only the exact Import tab/localization wiring after capability exists"
+    },
+    {
+      "path": "src/state/store.tsx",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "originPathPresent": true,
+      "originGitBlob": "aa7e482925168c781e0b2e4a20e6470562d194b1",
+      "mergedGitBlob": "dc65c43cbdd3df11e5064a4c5d0b86cbb598ff88",
+      "mergedSourceSha256": "a8641b57466508ca0745188d8c8abe3ea6169d54bf3c0e645e4b3d8b98e18cdd",
+      "prPatchSha256": "b8a58217be93a6fda975c3ff0ac1a790afcb55c09b880de77c73400ffaefbb9c",
+      "primaryUrl": "https://github.com/milind-soni/OpenMausBot/blob/1da83432c4b952da42225d97fcc623ba754673eb/src/state/store.tsx",
+      "disposition": "Adapt only the exact Import tab/localization wiring after capability exists"
+    }
+  ],
+  "verificationLimits": [
+    "No imported upstream code was executed or applied.",
+    "No Origin product/source/tracked/root files were changed.",
+    "No tests, OAuth, x.ai/Cursor/provider calls, account access, CI reruns, commits, pushes or production actions performed.",
+    "Upstream test descriptions and author-reported371 tests/41 files are not Origin acceptance; the author explicitly did not run full suite, desktop or live provider calls.",
+    "GitHub HTML page fetch timed out; primary REST/git-content APIs supplied detail/complete patches and source blobs.",
+    "The Origin hierarchy/privacy scenarios are conditional transplant risks, not claims those absent modules are shipped in Origin."
+  ]
+}

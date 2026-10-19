@@ -1,0 +1,14 @@
+{
+  "source": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+  "tag": "origin-v0.2.10",
+  "verifiedAt": "2026-10-18T13:38:39.027Z",
+  "entries": 27,
+  "screenshots": 23,
+  "byteCountAndSha256FromGitBlobs": true,
+  "manifestPath": "docs/verification/evidence/origin-invites-028/manifest.json",
+  "manifestSha256": "657675dc9943dd51e9994a6591650b9f5aa9315276004032167b586f9cb6b1b8",
+  "retainedPriorBugRows": 52,
+  "retainedPriorBugRowsVerifiedAgainst": "07666fa2e52b5acef1bfd86d30367c239812e0a6",
+  "currentAuditFindings": 59,
+  "qualification": "Historical source-component screenshots are byte-verified in the new frozen tree; their original synthetic/native limitations remain."
+}

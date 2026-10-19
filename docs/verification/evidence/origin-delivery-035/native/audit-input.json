@@ -1,0 +1,33 @@
+{
+  "targets": [
+    {
+      "label": "mac-arm64",
+      "platform": "mac",
+      "arch": "arm64",
+      "extractedTo": "C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/native-audit-035-d2ee9a4987a4/mac-arm64"
+    },
+    {
+      "label": "mac-x64",
+      "platform": "mac",
+      "arch": "x64",
+      "extractedTo": "C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/native-audit-035-d2ee9a4987a4/mac-x64"
+    },
+    {
+      "label": "windows-x64",
+      "platform": "windows",
+      "arch": "x64",
+      "resourceRelative": "resources",
+      "extractedTo": "C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/native-audit-035-d2ee9a4987a4/windows"
+    }
+  ],
+  "feeds": [
+    {
+      "label": "mac",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/artifacts/0.2.13/mac/latest-mac.yml"
+    },
+    {
+      "label": "windows",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/artifacts/0.2.13/windows/latest.yml"
+    }
+  ]
+}

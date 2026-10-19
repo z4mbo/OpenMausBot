@@ -156,6 +156,7 @@ export const syncRepo = action({
     await ctx.runMutation(internal.github.upsertRepoSnapshot, {
       projectId: args.projectId,
       sessionToken: args.sessionToken,
+      repoUrl: project.repoUrl!,
       issues,
       pullRequests,
     });
@@ -176,6 +177,7 @@ export const createIssueForTask = action({
     taskId: v.id("tasks"),
     origin: v.optional(v.string()),
   },
+  returns: v.object({ ok: v.boolean(), issueUrl: v.string(), manualUrl: v.string(), message: v.string() }),
   handler: async (ctx, args) => {
     const project = (await ctx.runQuery(api.projects.get, {
       projectId: args.projectId,
@@ -185,69 +187,47 @@ export const createIssueForTask = action({
       projectId: args.projectId,
       sessionToken: args.sessionToken,
       taskId: args.taskId,
-    })) as { task: Doc<"tasks"> };
+    })) as { task: Doc<"tasks">; columns: Doc<"columns">[] };
+    const column = details.columns.find(item => item._id === details.task.columnId);
+    if (column && isDraftColumn(column)) throw new Error("Draft issues stay in Origin. Move this issue to an active column before publishing it.");
     const parsed = parseGitHubRepo(project.repoUrl);
     if (!parsed) return { ok: false, issueUrl: "", manualUrl: "", message: "Add a valid GitHub repo URL in Settings." };
 
-    const fallbackUrl = manualIssueUrl(parsed, details.task, args.origin);
     if (project.memberRole === "viewer") throw new Error("Edit role required");
-    const user = await ctx.runQuery(api.auth.me, { sessionToken: args.sessionToken });
-    const token = user?.email === DEFAULT_OWNER_EMAIL && project.ownerEmail === DEFAULT_OWNER_EMAIL ? process.env.GITHUB_TOKEN : undefined;
-    if (!token) {
+    if (details.task.githubIssueNumber) {
       return {
-        ok: false,
-        issueUrl: "",
-        manualUrl: fallbackUrl,
-        message: "GITHUB_TOKEN is not set in Convex env. Opening a prefilled GitHub issue instead.",
+        ok: true,
+        issueUrl: details.task.githubIssueUrl || `https://github.com/${parsed.owner}/${parsed.repo}/issues/${details.task.githubIssueNumber}`,
+        manualUrl: "",
+        message: `Already linked to GitHub issue #${details.task.githubIssueNumber}.`,
       };
     }
-
-    const body = [
-      details.task.description || "",
-      "",
-      `Created from Origin task ${taskKey(details.task._id)}.`,
-      args.origin ? `Origin workspace: ${args.origin.replace(/\/$/, "")}` : "",
-    ].filter(Boolean).join("\n");
-
-    const response = await fetch(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}/issues`, {
-      method: "POST",
-      headers: githubHeaders(true),
-      body: JSON.stringify({
-        title: details.task.title,
-        body,
-      }),
-    });
-    if (!response.ok) {
-      return {
-        ok: false,
-        issueUrl: "",
-        manualUrl: fallbackUrl,
-        message: `GitHub issue creation failed (${response.status}). Opening a prefilled issue instead.`,
-      };
-    }
-    const payload = (await response.json()) as { number: number; html_url: string; state: "open" | "closed" };
-    await ctx.runMutation(internal.github.linkTaskIssue, {
-      projectId: args.projectId,
-      taskId: args.taskId,
-      githubIssueNumber: payload.number,
-      githubIssueUrl: payload.html_url,
-      githubIssueState: payload.state === "closed" ? "closed" : "open",
-    });
-    return { ok: true, issueUrl: payload.html_url, manualUrl: "", message: `Created GitHub issue #${payload.number}.` };
+    return {
+      ok: false,
+      issueUrl: "",
+      manualUrl: manualIssueUrl(parsed, details.task, args.origin),
+      message: "Use Origin's connected repository integration for automatic issue creation, or open this prefilled GitHub issue.",
+    };
   },
 });
 
 export const linkTaskIssue = internalMutation({
   args: {
     projectId: v.id("projects"),
+    sessionToken: v.string(),
+    repoUrl: v.string(),
     taskId: v.id("tasks"),
     githubIssueNumber: v.number(),
     githubIssueUrl: v.string(),
     githubIssueState: v.union(v.literal("open"), v.literal("closed")),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
+    const { project } = await requireEditor(ctx, args.projectId, args.sessionToken);
+    if (project.repoUrl !== args.repoUrl) throw new Error("Repository changed; sync cancelled");
     const task = await ctx.db.get(args.taskId);
     if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
+    if (task.githubIssueNumber && task.githubIssueNumber !== args.githubIssueNumber) throw new Error("Issue already linked");
     await ctx.db.patch(args.taskId, {
       githubIssueNumber: args.githubIssueNumber,
       githubIssueUrl: args.githubIssueUrl,
@@ -256,6 +236,7 @@ export const linkTaskIssue = internalMutation({
       updatedAt: Date.now(),
     });
     await touchProject(ctx, args.projectId);
+    return null;
   },
 });
 
@@ -263,6 +244,7 @@ export const upsertRepoSnapshot = internalMutation({
   args: {
     projectId: v.id("projects"),
     sessionToken: v.string(),
+    repoUrl: v.string(),
     issues: v.array(
       v.object({
         number: v.number(),
@@ -287,8 +269,10 @@ export const upsertRepoSnapshot = internalMutation({
       }),
     ),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    await requireEditor(ctx, args.projectId, args.sessionToken);
+    const { project } = await requireEditor(ctx, args.projectId, args.sessionToken);
+    if (project.repoUrl !== args.repoUrl) throw new Error("Repository changed; sync cancelled");
     const now = Date.now();
     const columns = await ctx.db
       .query("columns")
@@ -318,17 +302,22 @@ export const upsertRepoSnapshot = internalMutation({
           githubIssueState: issue.state,
           githubIssueSyncedAt: now,
           githubIssueUpdatedAt: issue.updatedAt,
-          done: issue.state === "closed",
+          done: false,
           columnId: todoColumn._id,
           updatedAt: issue.updatedAt || now,
         };
         if (existing) {
           if ((existing.githubIssueUpdatedAt || 0) > issue.updatedAt) continue;
+          const column = await ctx.db.get(existing.columnId);
+          patch.done = existing.done;
+          if (issue.state === "open" && existing.githubIssueState === "closed") patch.done = false;
+          if (column && isDraftColumn(column)) patch.done = existing.done;
           if (existing.githubTaskMode === "pull_request" || await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", existing._id)).first()) patch.done = existing.done;
           if (issue.state === "open" && existing.githubIssueState !== "closed") patch.done = existing.done;
           patch.columnId = existing.columnId;
           await recordCompletion(ctx, existing, patch.done, issue.updatedAt);
-          await ctx.db.patch(existing._id, patch);
+          await ctx.db.patch(existing._id, { ...patch, ...(issue.state === "open" ? { githubIssueReopenRequested: undefined,
+            ...(existing.githubIssueState === "closed" ? { completionPullRequest: undefined } : {}) } : {}) });
           if (existing.done !== patch.done) await changeOpenIssueCount(ctx, args.projectId, patch.done ? -1 : 1);
         } else {
           await ctx.db.insert("tasks", {
@@ -338,7 +327,7 @@ export const upsertRepoSnapshot = internalMutation({
             title: issue.title,
             description: issue.body,
             priority: "medium",
-            done: issue.state === "closed",
+            done: false,
             githubIssueNumber: issue.number,
             githubIssueUrl: issue.url,
             githubIssueState: issue.state,
@@ -381,5 +370,6 @@ export const upsertRepoSnapshot = internalMutation({
     }
 
     await touchProject(ctx, args.projectId);
+    return null;
   },
 });

@@ -1,0 +1,135 @@
+{
+  "version": "0.2.10",
+  "source": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+  "image": "sha256:4dfdb35d3736cae71bd5a1498b8901e3328480966a72f5cbb0d465cb5272fe7b",
+  "preparedAt": "2026-10-18T13:46:49.566Z",
+  "privateCompiledBrowserCases": 16,
+  "privateInvitationBrowserCases": 20,
+  "privateInvitationScreenshots": 23,
+  "referencedHeaderScreenshots": 54,
+  "accountSubmissions": 0,
+  "formAndBackendConnectionsBlocked": true,
+  "signupConfigurationNotExercised": true,
+  "publicVerificationPending": false,
+  "files": [
+    {
+      "path": "header-git-manifest.json",
+      "bytes": 683,
+      "sha256": "3dc9a31af2f1f3ddf87649d9b2c8a4fd75c93a10289f6f2d4a5aec998d25d97e"
+    },
+    {
+      "path": "invitation-git-manifest.json",
+      "bytes": 680,
+      "sha256": "2e9f8d71bf1c6647345ca6ad64805bfcea466182295a36eb610a504eb026cd4a"
+    },
+    {
+      "path": "site/landing-1440-dark.jpg",
+      "bytes": 79696,
+      "sha256": "b774a0faf40c54fc431dfa3edb7798970b9d29bce69bba2cf1170d762c321df8"
+    },
+    {
+      "path": "site/landing-1440-light.jpg",
+      "bytes": 82782,
+      "sha256": "2d4f35842eacc0f8d5558919942ec092340c7f230a52f099b372bd2cd0ff0e11"
+    },
+    {
+      "path": "site/landing-375-dark.jpg",
+      "bytes": 44054,
+      "sha256": "3c3733ad6f29e69edc6cf8d055001e22a8e17af41954ce8c66aaed6a738c6c41"
+    },
+    {
+      "path": "site/landing-375-light.jpg",
+      "bytes": 46715,
+      "sha256": "71ed717ab3c1575d157c89c60aedbbac5cd36a008ea08bdb4cd1c69a06551a79"
+    },
+    {
+      "path": "site/login-1440-dark.jpg",
+      "bytes": 28273,
+      "sha256": "625a0a9e3b8fe2c6b4dd449e22d275d860dd31b7b3f24a86a40a5d9ae6c7b1fb"
+    },
+    {
+      "path": "site/login-1440-light.jpg",
+      "bytes": 29474,
+      "sha256": "ebb302c4713aac2ae5f438fe155fce3f5e89fdf1896a87f542bb20c4a170f09f"
+    },
+    {
+      "path": "site/login-375-dark.jpg",
+      "bytes": 20375,
+      "sha256": "0d887d4d874a4d1320cede8d0e1b7498eacf03a306f9f08cb0b60a16463f6cc1"
+    },
+    {
+      "path": "site/login-375-light.jpg",
+      "bytes": 21624,
+      "sha256": "e86a1a99c1148ce5999a73418c7d476ddb2eb85bf056986f4f14e34d68dde0cc"
+    },
+    {
+      "path": "site/proof.json",
+      "bytes": 47566,
+      "sha256": "d66084bab599710f3f6de11f5d9edc01cce1f557a80a4e8247e4abb16c696657"
+    },
+    {
+      "path": "site/proxy-proof.json",
+      "bytes": 46810,
+      "sha256": "a35346ca856db8be0081c1363b2a04afc4b8ca5ab536808866f8fd87508b54e7"
+    },
+    {
+      "path": "site/signup-1440-dark.jpg",
+      "bytes": 37124,
+      "sha256": "0f8c1bbbcbc10fa6763c0760b2e4ab36a6f89d1da0ef2988e48bd0ccbed67a2b"
+    },
+    {
+      "path": "site/signup-1440-light.jpg",
+      "bytes": 38667,
+      "sha256": "7a4d7f84631c044fabc456959d7d846b0ed7cad07902c4408fcfec04010b464d"
+    },
+    {
+      "path": "site/signup-375-dark.jpg",
+      "bytes": 28137,
+      "sha256": "e69075865646b64b12f10a7a049ba1ad1b0162c08532094fea8a98397cb6bb98"
+    },
+    {
+      "path": "site/signup-375-light.jpg",
+      "bytes": 29708,
+      "sha256": "0ace4ff7b6b2cd520a71ae56ffaba391268348ecf3d4212402bb919694b46771"
+    },
+    {
+      "path": "site/whats-new-1440-dark.jpg",
+      "bytes": 91548,
+      "sha256": "2d44218a28f2f50c30eeff41c141c137db24beae9ef69af4d474aadbd4689198"
+    },
+    {
+      "path": "site/whats-new-1440-light.jpg",
+      "bytes": 93021,
+      "sha256": "130bdb169fedc3c9dd2aece80f4d480757d5e3f5db6b4789b6ffe5eeee8e1d79"
+    },
+    {
+      "path": "site/whats-new-375-dark.jpg",
+      "bytes": 55168,
+      "sha256": "c53e8607d5d44d79063ba7fe0fb59fdf26368b4c467af19af4393662d6185b8b"
+    },
+    {
+      "path": "site/whats-new-375-light.jpg",
+      "bytes": 55742,
+      "sha256": "d3a0e93da8599a4bb7613d3650ad53bbfcff415cd9d951b78ef0275b7fd70295"
+    },
+    {
+      "path": "public/landing.jpg",
+      "bytes": 55320,
+      "sha256": "e5920818bef09f2ad52bba767ae47b6b9278013374077553f76c7c630fba99fb"
+    },
+    {
+      "path": "public/browser-proof.json",
+      "bytes": 1272,
+      "sha256": "8a10e2625f2388742a6e4dd5e57a6350ce0dd5fd3e59d622b0dc835e95ae374c"
+    }
+  ],
+  "qualification": "Fresh compiled-image viewport checks only; zero live account submissions. Historical invitation/header qualifications remain. Four Activity captures are separately retained and are not part of these20inputs. Packaged native/physical/provider acceptance remains separate.",
+  "publicationReceipt": "delivery-receipt.json",
+  "privateCompiledScreenshots": 16,
+  "screenshots": 17,
+  "publicScreenshot": {
+    "path": "public/landing.jpg",
+    "bytes": 55320,
+    "sha256": "e5920818bef09f2ad52bba767ae47b6b9278013374077553f76c7c630fba99fb"
+  }
+}

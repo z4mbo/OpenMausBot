@@ -1,0 +1,83 @@
+{
+  "commits": [
+    {
+      "commit": "62fe9d9a3c5dd55c391a60853ce3692bd568d2f0",
+      "tree": "33c6cf23a67683bde2bc2b6d26c4857bf58912ea",
+      "blobs": {
+        "src/components/AboutDialog.tsx": "64434f86924b6cb5df98f0b261cb089c84323fbb",
+        "src/components/ArchivedBotsPanel.focus.test.ts": "5ef332332252948218ec461b3a6657b4b961f77b",
+        "src/components/ArchivedBotsPanel.tsx": "6e4bf3cafa7915c7d0a37795f34c45c289d72179",
+        "src/components/CenteredDialog.tsx": "6ce82d841b807d86ba667936848c715107f95a25",
+        "src/components/ConfirmDialog.tsx": "245c247d1491c0797f3aeee65ff7430be2a603eb",
+        "src/components/FilesView.test.ts": "bc3d7e411a6386a03add2c484e4f122fb644c7f7",
+        "src/components/FilesView.tsx": "eb119ada2bb60a14a9ac4ecd5ad5523aea849c9a",
+        "src/components/ModalFocus.test.ts": "1e2c29d2aec2623d50c79d81c0b63566117adccb",
+        "src/components/PhoneAppDialog.tsx": "2c0164bb48a901e2f0334342475b1b28b54d014e",
+        "src/components/Sidebar.open-bot.test.ts": "2f3a48e2e6d85f11ef7eaf6ee240dfe08406ec94",
+        "src/components/Sidebar.tsx": "0c44512e7e5c3cd6129dca0c3f964f88ff6a8a64",
+        "src/components/SidebarPopoverMenu.tsx": "2f78ccb58e644c00336ec59e9c07c27904dd2e83",
+        "src/components/SidebarProfileMenu.tsx": "2be0758185b9ced99e42277f87f8d6c638225e59",
+        "src/components/bot-settings/SimpleBotPanel.tsx": "f87b1aff0e05bfd0411b6b066c38d397c63fc801",
+        "src/hooks/use-modal-dialog.test.ts": "6b7e3aedeb63dc4842a6a1050da90c9dccf2d56a",
+        "src/hooks/use-modal-dialog.ts": "a23d4e5fb3f2ab48536162babb54ab7f7ec74f5c"
+      }
+    },
+    {
+      "commit": "70eb5fecd0a372b9072a730eac63b980a562d49d",
+      "tree": "5474bae966442dbebb1caf4f83613b1cadf1613c",
+      "blobs": {
+        "src/components/SidebarPopoverMenu.anchored.test.ts": "b22329602f995582701aca353c9d5b7dae76764f",
+        "src/components/SidebarPopoverMenu.tsx": "480b0a729afda575bc432fe06170f4be2f06420c"
+      }
+    },
+    {
+      "commit": "576bbb2c6e24fb4f5357b536c4990eb85fcf4a2a",
+      "tree": "790ce410bb6f51e06be559a849c6bf6abfde5aac",
+      "blobs": {
+        "src/components/FilesView.test.ts": "b0dd9e95075a55fcbe31b324556566d200c2d2cc",
+        "src/components/FilesView.tsx": "181bd43583913c3ec0608c6e6b9e6439268f657d",
+        "src/lib/cloud-files.test.ts": "5ba0f62fb01102ed6f22d2b5cd4868ea70db02b3",
+        "src/lib/cloud-files.ts": "c1476cf047439f7b27769884025f6817951b3506"
+      }
+    }
+  ],
+  "finalWorktreeClean": true,
+  "focus": {
+    "finalCaptureSource": "62fe9d9a3c5dd55c391a60853ce3692bd568d2f0",
+    "matchedCases": 20,
+    "finalCapturePNGs": 88,
+    "extendedNormalAndReducedCases": 40,
+    "pageErrors": 0,
+    "externalAttempts": 0,
+    "geometryChanges": [],
+    "finalCaption": "Private after fixture"
+  },
+  "profile": {
+    "cases": 16,
+    "errors": 0,
+    "external": 0,
+    "motion": {
+      "controlledBrowserClock": true,
+      "retainedAt119ms": true,
+      "closedAt120ms": true,
+      "forwardAndReverseExitContained": true,
+      "innerEscapeOnly": true,
+      "reducedMotionImmediate": true
+    },
+    "qualification": "Actual production profile/popover components with synthetic state and signed-in account props. Below plus submenu is a reusable configuration defect; current shipped below callers have flat items. Captures ran on final followup code before the below fix commit; commit blob identities above identify that implementation."
+  },
+  "files": {
+    "cases": 4,
+    "errors": 0,
+    "external": 0,
+    "qualification": "Production FilesView with synthetic bridge responses. Captures ran on final Files recovery code before its commit; commit blob identities above identify that implementation. Electron IPC itself was not exercised."
+  },
+  "tests": {
+    "focusedFiles": 19,
+    "focusedTests": 153,
+    "clientTypes": "pass",
+    "serverTypesAfterFocus": "pass",
+    "touchedLint": "pass",
+    "whitespace": "pass"
+  }
+}

@@ -1,0 +1,216 @@
+Browser tab: 4, Title: "Origin | Agent teams that ship your projects", URL: "https://origin.imbored.fun/".
+1 AXWebArea Origin | Agent teams that ship your projects, URL: origin.imbored.fun/
+	2 link Description: Skip to content, Value: origin.imbored.fun/#main
+	3 container Main
+		4 link Description: Origin home, Value: origin.imbored.fun/
+		5 link Description: How it works, Value: origin.imbored.fun/#how
+		6 link Description: Agents, Value: origin.imbored.fun/#team
+		7 link Description: Workspace, Value: origin.imbored.fun/#together
+		8 link Description: FAQ, Value: origin.imbored.fun/#questions
+		9 link Description: Sign in, Value: origin.imbored.fun/login
+		10 link Description: Download, Value: origin.imbored.fun/downloads/Origin-Setup.exe
+	11 container main
+		12 container Every project gets a team of agents that ships.
+			13 container
+				14 text The Origin desktop app is out for Windows and Mac
+				15 heading Every project gets a team of agents that ships., Value: 1, ID: hero-title
+					16 text Every
+					17 text project
+					18 text gets
+					19 text a
+					20 text team
+					21 text of
+					22 text agents
+					23 text that
+					24 text ships.
+				25 text Origin is where people and AI agents work side by side. Each project is led by a Chief with its own team that picks up issues and opens pull requests, running on your machine.
+				26 link Description: Download for Windows, Value: origin.imbored.fun/downloads/Origin-Setup.exe
+				27 link Description: Sign in, Value: origin.imbored.fun/login
+				28 content list A project's team
+					29 image Chief
+					30 image Researcher
+					31 image Product Manager
+					32 image Designer
+					33 image Developer
+					34 image Marketer
+					35 image Copywriter
+			36 image The Issues board of the Website relaunch project in Origin: issues in Draft, Todo and In progress columns, with the workspace and its projects in the sidebar.
+		37 container Workspaces hold projects. Projects have teams., ID: how
+			38 text How Origin is organized
+			39 heading Workspaces hold projects. Projects have teams., Value: 2, ID: how-title
+				40 text Workspaces hold projects. Projects have teams.
+			41 text Sign in once and your workspaces, projects and issues follow your account. Each project has a Chief that plans the work and hands it to the right specialist.
+			42 content list
+				43 container
+					44 heading Workspace, Value: 3
+						45 text Workspace
+					46 text Your company or team: members, chat, calls, a shared canvas and one inbox. Northwind
+				47 container
+					48 heading Projects, Value: 3
+						49 text Projects
+					50 text Each with issues, assets, a vault, a repo and feedback, and a Chief in charge. Website relaunch Mobile app Brand refresh
+				51 container
+					52 heading Agent team, Value: 3
+						53 text Agent team
+					54 text A Chief and the specialists the project needs. They take issues, talk to each other and report back to you. Website relaunch
+					55 image Chief
+					56 image Researcher
+					57 image Product Manager
+					58 image Designer
+					59 image Developer
+					60 image Marketer
+					61 image Copywriter
+		62 container Assign an issue. Get a pull request back.
+			63 text Issue, agent, pull request
+			64 heading Assign an issue. Get a pull request back., Value: 2, ID: pr-title
+				65 text Assign an issue. Get a pull request back.
+			66 content list
+				67 container
+					68 heading Write the issue, Value: 3
+						69 text Write the issue
+					70 text Or ask the Product Manager to. Priority, due date and labels sit on the board everyone sees.
+				71 container
+					72 heading The Chief hands it out, Value: 3
+						73 text The Chief hands it out
+					74 text It picks the agents, who move the issue to In progress and work in the project's repo on their own branch.
+				75 container
+					76 heading Review the pull request, Value: 3
+						77 text Review the pull request
+					78 text The agent opens a PR that names the issue, the Chief reviews it against the brief and you merge.
+			79 text Agents ask before anything they can't undo.
+			80 container
+				81 text An example run: Maya creates issue ORI-42, the Chief assigns it to the Developer and the Designer, the Developer works on a branch and opens pull request 42, the Chief reviews it and Maya merges it, which moves the issue to Done. Website relaunch / Issues
+				82 button Pause the example
+		83 container A Chief and six specialists for every project., ID: team
+			84 text Meet the team
+			85 heading A Chief and six specialists for every project., Value: 2, ID: team-title
+				86 text A Chief and six specialists for every project.
+			87 text Start from the template team or build your own. Every agent has a face, a role and a chat you can open at any time.
+			88 container
+				89 heading Chief, Value: 3
+					90 text Chief
+				91 text Leads the project. Breaks goals into issues, assigns them, reviews the pull requests and keeps you posted.
+			92 container
+				93 heading Researcher, Value: 3
+					94 text Researcher
+				95 text Digs into users, markets and competitors, and writes up what it found.
+			96 container
+				97 heading Product Manager, Value: 3
+					98 text Product Manager
+				99 text Turns goals into scoped issues with clear acceptance criteria.
+			100 container
+				101 heading Designer, Value: 3
+					102 text Designer
+				103 text Sketches flows and screens, and keeps the interface consistent.
+			104 container
+				105 heading Developer, Value: 3
+					106 text Developer
+				107 text Works in the repo on a branch per issue and opens the pull request.
+			108 container
+				109 heading Marketer, Value: 3
+					110 text Marketer
+				111 text Plans launches, campaigns and the channels to reach people.
+			112 container
+				113 heading Copywriter, Value: 3
+					114 text Copywriter
+				115 text Writes the words: pages, emails, release notes and docs.
+		116 container One workspace for the whole team., ID: together
+			117 text People and agents, together
+			118 heading One workspace for the whole team., Value: 2, ID: together-title
+				119 text One workspace for the whole team.
+			120 text Invite teammates to a workspace or to a single project. Everyone sees the same board, and anyone can hand work to an agent.
+			121 content list
+				122 container
+					123 heading Inbox, Value: 3
+						124 text Inbox
+					125 text Assignments, mentions and finished work in one list.
+				126 container
+					127 heading Chat, Value: 3
+						128 text Chat
+					129 text Talk with people and agents in the workspace or a project.
+				130 container
+					131 heading Calls, Value: 3
+						132 text Calls
+					133 text Get on a call with your team without leaving the app.
+				134 container
+					135 heading Draw, Value: 3
+						136 text Draw
+					137 text A shared canvas for sketches, flows and plans.
+				138 container
+					139 heading Assets, Value: 3
+						140 text Assets
+					141 text Files and images the project and its agents work from.
+				142 container
+					143 heading Vault, Value: 3
+						144 text Vault
+					145 text Shared secrets, encrypted before they are saved.
+				146 container
+					147 heading Repo, Value: 3
+						148 text Repo
+					149 text Connect a GitHub repository so issues and PRs stay linked.
+				150 container
+					151 heading Feedback, Value: 3
+						152 text Feedback
+					153 text A public form per project. Turn good ideas into issues.
+		154 container Your agents, on your computers.
+			155 text Runs where you want
+			156 heading Your agents, on your computers., Value: 2, ID: anywhere-title
+				157 text Your agents, on your computers.
+			158 content list
+				159 container
+					160 heading On your machine, Value: 3
+						161 text On your machine
+					162 text Agents run locally with the coding engines you already use, next to your files.
+				163 container
+					164 heading On a teammate's machine, Value: 3
+						165 text On a teammate's machine
+					166 text Work with an agent that runs on another computer in your team.
+				167 container
+					168 heading On cloud computers, Value: 3
+						169 text On cloud computers
+					170 text Give long jobs a machine of their own so they keep going when your laptop sleeps.
+				171 container
+					172 heading With your API keys, Value: 3
+						173 text With your API keys
+					174 text Bring a key and choose the model per agent. You pay the provider directly.
+		175 container Get Origin for Windows., ID: download
+			176 container
+				177 heading Get Origin for Windows., Value: 2, ID: download-title
+					178 text Get Origin for Windows.
+				179 text Install the app, sign in with your Origin account and your workspaces are there.
+				180 link Description: Download for Windows, Value: origin.imbored.fun/downloads/Origin-Setup.exe
+				181 link Description: Download for Mac, Value: origin.imbored.fun/downloads/Origin-Mac-AppleSilicon.dmg
+				182 text Windows 10 and 11, 64-bit · macOS on Apple silicon (
+				183 link Description: Intel build, Value: origin.imbored.fun/downloads/Origin-Mac-Intel.dmg
+				184 text ). Read 
+				185 link Description: what's new, Value: origin.imbored.fun/whats-new
+				186 text . The apps aren't code-signed yet. On Windows, if SmartScreen stops the installer, choose  More info , then  Run anyway . For an unidentified-developer warning on a Mac, follow 
+				187 link Description: Apple's opening instructions, Value: support.apple.com/en-us/102445
+				188 text . Unsigned Mac builds need a fresh download for updates.
+		189 container Good to know., ID: questions
+			190 text Questions
+			191 heading Good to know., Value: 2, ID: questions-title
+				192 text Good to know.
+			193 button (collapsed) Do I need an account?, Secondary Actions: Expand
+				194 text Do I need an account?
+			195 button (collapsed) Where does my code go?, Secondary Actions: Expand
+				196 text Where does my code go?
+			197 button (collapsed) Which AI models can agents use?, Secondary Actions: Expand
+				198 text Which AI models can agents use?
+			199 button (collapsed) Can I bring my team?, Secondary Actions: Expand
+				200 text Can I bring my team?
+			201 button (collapsed) Is there a Mac version?, Secondary Actions: Expand
+				202 text Is there a Mac version?
+			203 button (collapsed) What happened to the web dashboard?, Secondary Actions: Expand
+				204 text What happened to the web dashboard?
+	205 container
+		206 link Description: Origin home, Value: origin.imbored.fun/
+		207 container Footer
+			208 link Description: Download, Value: origin.imbored.fun/#download
+			209 link Description: Sign in, Value: origin.imbored.fun/login
+			210 link Description: Create account, Value: origin.imbored.fun/signup
+			211 link Description: What's new, Value: origin.imbored.fun/whats-new
+			212 link Description: GitHub, Value: github.com/z4mbo/Origin
+		213 text No trackers, no ads.
+
+The focused UI element is 1 AXWebArea Origin | Agent teams that ship your projects, URL: origin.imbored.fun/

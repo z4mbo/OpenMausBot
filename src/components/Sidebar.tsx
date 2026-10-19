@@ -1,3 +1,8 @@
+import { ArchivedBotsPanel } from "./ArchivedBotsPanel";
+import { SidebarFeedback } from "./SidebarFeedback";
+import { botConfirmCopy, type BotConfirmKind } from "./bot-confirm-copy";
+export { ArchivedBotRow, ArchivedBotsPanel } from "./ArchivedBotsPanel";
+export { archivedDeleteAllCopy, botConfirmCopy, type BotConfirmKind } from "./bot-confirm-copy";
 import { track } from "@/lib/analytics";
 import { activeWorkspace, addAccountWorkspace, inWorkspace, reportActiveWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
 import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
@@ -9,6 +14,7 @@ import { WhatsNew } from "./WhatsNew";
 import { NewIssueHost, useOriginProjectRows } from "./OriginSidebarExtras";
 import { MemberCallBanner } from "./MemberCallBanner";
 import { OriginAccountMenu } from "./OriginAccountMenu";
+import { SidebarComputerRow, SidebarTitlebarSlot } from "./SidebarIdentity";
 import { cloudProjectOf, linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
 import { cloudMutation, cloudUrl } from "@/lib/origin-cloud";
 import { sessionStore } from "@/lib/origin-cloud/client";
@@ -894,7 +900,6 @@ export function BotContextMenu({
   );
 }
 
-export type BotConfirmKind = "archive" | "delete";
 
 export interface ProjectArchiveControl { archived: boolean; allowed: boolean; toggle(): void }
 
@@ -903,31 +908,6 @@ export function currentArchivableBot(bots: readonly Bot[], id: string): Bot | un
   const active = bots.filter((candidate) => !candidate.hidden);
   if (active.length <= 1) return undefined;
   return active.find((candidate) => candidate.id === id && !candidate.chiefOfStaff);
-}
-
-export function botConfirmCopy(kind: BotConfirmKind, name: string) {
-  return kind === "archive"
-    ? {
-        title: t("sidebar.confirm.archiveTitle", { name }),
-        body: t("sidebar.confirm.archiveBody", { name }),
-        confirmLabel: t("sidebar.bot.archive"),
-        tone: "neutral" as const,
-      }
-    : {
-        title: t("sidebar.confirm.deleteTitle", { name }),
-        body: t("sidebar.confirm.deleteBody", { name }),
-        confirmLabel: t("common.delete"),
-        tone: "danger" as const,
-      };
-}
-
-export function archivedDeleteAllCopy() {
-  return {
-    title: t("sidebar.archived.deleteAllTitle"),
-    body: t("sidebar.archived.deleteAllBody"),
-    confirmLabel: t("sidebar.archived.deleteAll"),
-    tone: "danger" as const,
-  };
 }
 
 export function BotDeleteMenuItem({ deleting, onClick }: { deleting: boolean; onClick: () => void }) {
@@ -1442,222 +1422,6 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
   );
 });
 
-export function ArchivedBotRow({
-  bot,
-  restoring,
-  deleting,
-  disabled,
-  onRestore,
-  onDelete,
-}: {
-  bot: Bot;
-  restoring: boolean;
-  deleting: boolean;
-  disabled: boolean;
-  onRestore: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <div className="flex min-h-[82px] items-center gap-3 border-b border-hairline/35 px-1 py-3">
-      <BotAvatar bot={bot} state="happy" size={42} animated={false} />
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-[14px] font-medium text-ink">{bot.name}</div>
-        <div className="mt-0.5 truncate text-[12.5px] text-ink-secondary">{bot.title || t("sidebar.archived.botFallback")}</div>
-      </div>
-      <div className="flex shrink-0 items-center gap-1.5">
-        <button
-          onClick={onRestore}
-          disabled={disabled || deleting}
-          className="flex min-w-[78px] items-center justify-center gap-2 rounded-full bg-raised h-7 px-3.5 text-[13px] font-medium leading-4 text-ink hover:bg-raised-hover disabled:opacity-40"
-        >
-          {restoring && <Loader2 size={13} className="animate-spin" />}
-          {t("sidebar.archived.restore")}
-        </button>
-        <button
-          type="button"
-          onClick={onDelete}
-          disabled={disabled || deleting}
-          aria-label={t("sidebar.archived.deleteAria", { name: bot.name })}
-          className="flex items-center justify-center gap-2 rounded-full h-7 px-3.5 text-[13px] font-medium leading-4 text-danger hover:bg-danger/10 disabled:opacity-40"
-        >
-          {deleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
-          {t("common.delete")}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export function ArchivedBotsPanel({
-  bots,
-  onClose,
-  onRestored,
-}: {
-  bots: Bot[];
-  onClose: () => void;
-  onRestored: (message: string) => void;
-}) {
-  const { state, dispatch } = useStore();
-  const showThreads = useShowThreads();
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const [restoringAll, setRestoringAll] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState<Bot | "all" | null>(null);
-  const [error, setError] = useState("");
-  const deleting = bots.some((bot) => Boolean(state.deletingBots[bot.id]));
-  const locked = restoringAll || Boolean(busyId) || deleting || Boolean(pendingDelete);
-
-  useEffect(() => {
-    if (bots.length === 0) onClose();
-  }, [bots.length, onClose]);
-
-  useEffect(() => {
-    dialogRef.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !locked) onClose();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [locked, onClose]);
-
-  const restore = async (bot: Bot) => {
-    setBusyId(bot.id);
-    setError("");
-    try {
-      const response = await api(`/api/bots/${bot.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ hidden: false }),
-      });
-      dispatch({ type: "botPatched", bot: response.bot });
-      openBot(dispatch, response.bot, showThreads);
-      onRestored(t("sidebar.archived.restored", { name: bot.name }));
-      if (bots.length === 1) onClose();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const restoreAll = async () => {
-    setRestoringAll(true);
-    setError("");
-    try {
-      const responses = await Promise.all(
-        bots.map((bot) =>
-          api(`/api/bots/${bot.id}`, {
-            method: "PATCH",
-            body: JSON.stringify({ hidden: false }),
-          }),
-        ),
-      );
-      for (const response of responses) dispatch({ type: "botPatched", bot: response.bot });
-      const first = responses[0]?.bot;
-      if (first) openBot(dispatch, first, showThreads);
-      onRestored(
-        bots.length === 1
-          ? t("sidebar.archived.restoredOne")
-          : t("sidebar.archived.restoredMany", { count: bots.length }),
-      );
-      onClose();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-    } finally {
-      setRestoringAll(false);
-    }
-  };
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-[2px] sm:p-6"
-      onMouseDown={(event) => event.target === event.currentTarget && !locked && onClose()}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="archived-bots-title"
-        tabIndex={-1}
-        className="animate-pop-in flex max-h-[min(680px,calc(100dvh-2rem))] w-full max-w-[760px] flex-col overflow-hidden rounded-[24px] border border-hairline/50 bg-panel shadow-2xl shadow-black/50 outline-none"
-      >
-        <header className="flex items-start justify-between gap-4 px-6 pb-4 pt-6 sm:px-8 sm:pt-7">
-          <div>
-            <h2 id="archived-bots-title" className="text-[22px] font-semibold tracking-[-0.01em] text-ink">{t("sidebar.archived.title")}</h2>
-            <p className="mt-1 text-[13px] text-ink-secondary">{t("sidebar.archived.subtitle")}</p>
-          </div>
-          <div className="flex items-center gap-1">
-            {bots.length > 1 && (
-              <button
-                onClick={() => void restoreAll()}
-                disabled={locked}
-                className="flex items-center gap-2 rounded-full bg-raised h-7 px-3.5 text-[13px] font-medium leading-4 text-ink hover:bg-raised-hover disabled:opacity-40"
-              >
-                {restoringAll && <Loader2 size={13} className="animate-spin" />}
-                {t("sidebar.archived.restoreAll")}
-              </button>
-            )}
-            {bots.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setPendingDelete("all")}
-                disabled={locked}
-                className="flex items-center gap-2 rounded-full h-7 px-3.5 text-[13px] font-medium leading-4 text-danger hover:bg-danger/10 disabled:opacity-40"
-              >
-                <Trash2 size={13} />
-                {t("sidebar.archived.deleteAll")}
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              disabled={locked}
-              className="flex size-10 items-center justify-center rounded-lg text-ink-secondary hover:bg-raised hover:text-ink disabled:opacity-40"
-              aria-label={t("sidebar.archived.close")}
-            >
-              <X size={21} />
-            </button>
-          </div>
-        </header>
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-7 pt-3 sm:px-8">
-          <div className="mb-3 text-[12px] font-medium text-ink-secondary">{t("sidebar.archived.count", { count: bots.length })}</div>
-          <div className="grid grid-cols-1 gap-x-8 md:grid-cols-2">
-            {bots.map((bot) => (
-              <ArchivedBotRow
-                key={bot.id}
-                bot={bot}
-                restoring={busyId === bot.id}
-                deleting={Boolean(state.deletingBots[bot.id])}
-                disabled={locked}
-                onRestore={() => void restore(bot)}
-                onDelete={() => setPendingDelete(bot)}
-              />
-            ))}
-          </div>
-          {error && <div role="alert" className="mt-4 rounded-lg bg-danger/10 px-3 py-2 text-[12.5px] text-danger">{error}</div>}
-        </div>
-      </div>
-      <ConfirmDialog
-        open={pendingDelete !== null}
-        {...(pendingDelete === "all"
-          ? archivedDeleteAllCopy()
-          : botConfirmCopy("delete", pendingDelete?.name ?? ""))}
-        icon={<Trash2 size={18} />}
-        onCancel={() => setPendingDelete(null)}
-        onConfirm={() => {
-          if (!pendingDelete) return;
-          const target = pendingDelete;
-          setPendingDelete(null);
-          if (target === "all") {
-            for (const bot of bots) dispatch({ type: "deleteBot", botId: bot.id });
-            return;
-          }
-          dispatch({ type: "deleteBot", botId: target.id });
-        }}
-      />
-    </div>,
-    document.body,
-  );
-}
-
 export function TeamMenuItems({ onAddBots, onRename, onShare, onDelete, onSetForAll }: {
   onAddBots: () => void;
   onRename: () => void;
@@ -2051,7 +1815,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     <>
           {advanced && <div ref={attentionMenuRef} className={density === "icons" ? "relative" : "contents"}>
             <button
-              type="button"
+              type="button" data-sidebar-footer-control={bottom ? "" : undefined}
               onClick={() => setAttentionOpen((o) => !o)}
               aria-label={attentionTriggerLabel(attention.length)}
               title={attentionTriggerLabel(attention.length)}
@@ -2099,7 +1863,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           </div>}
           <div ref={plusMenuRef} className="contents">
           <button
-            ref={importReturnRef}
+            ref={importReturnRef} data-sidebar-footer-control={bottom ? "" : undefined}
             onClick={() => setPlusOpen((o) => !o)}
             aria-label={remoteClient ? t("sidebar.new") : t("sidebar.newOrShare")}
             className={cn(
@@ -2227,14 +1991,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           </div>
         ) : null}
         {density !== "icons" && (
-          <div data-sidebar-top-slot className="@container/sidebar-top flex min-w-0 flex-1 items-center">
-            {PROFILE_AT_TOP
-              ? <div data-sidebar-top-account className="flex min-w-0 flex-1 items-center pr-1" style={windowNoDragStyle}><OriginAccountMenu /></div>
-              : <div data-sidebar-top-spacer className="min-w-0 flex-1 @min-[96px]/sidebar-top:min-w-6" />}
-            <div data-sidebar-top-switcher className="flex min-w-0 max-w-[140px] items-center">
-              <DesktopWorkspaceSwitcher inline cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />
-            </div>
-          </div>
+          <SidebarTitlebarSlot cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />
         )}
         <div
           data-sidebar-top-buttons
@@ -2277,6 +2034,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         </div>
       </div>
 
+      {PROFILE_AT_TOP && density !== "icons" && <SidebarComputerRow style={windowNoDragStyle} cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />}
       {density === "icons" && <DesktopWorkspaceSwitcher compact cloudHome={state.config?.cloudHome === true} owner={cloudOwner} howTo={state.cloudHowTo} onMenuClosed={endHowTo} />}
       <OrganizationIdentity compact={density === "icons"} />
       <div className={cn("pt-1 pb-3", density === "icons" || !SIDEBAR_HAS_SEARCH ? "hidden" : "px-3")}>
@@ -2550,7 +2308,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
       />
       {WORKSPACE_NAV && <MemberCallBanner iconOnly={density === "icons"} />}
 
-      <div className={cn("pb-3 pt-2", density === "icons" ? "flex flex-col items-center gap-1 px-2" : "px-3")}>
+      <div className={cn("@container/sidebar-footer pb-3 pt-2", density === "icons" ? "flex flex-col items-center gap-1 px-2" : "px-3")}>
         {!(PROFILE_AT_TOP && density !== "icons") && <SidebarFooterNav
           density={density}
           collapsed={sectionCollapsed(TOOLS_SECTION_ID)}
@@ -2568,12 +2326,12 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
             {PROFILE_AT_TOP ? <OriginAccountMenu iconOnly /> : <SidebarProfileMenu iconOnly />}
           </div>
         ) : (
-          <div className={cn("flex items-center gap-1 not-first:mt-3", SIDEBAR_ACTIONS_IN_FOOTER && "relative")}>
-            {PROFILE_AT_TOP ? <><SidebarFooterNav density={density} inline /><div className="flex-1" /></> : <div className="min-w-0 flex-1">
+          <div data-sidebar-footer-actions className={cn("items-center not-first:mt-3", PROFILE_AT_TOP ? "grid auto-cols-fr grid-flow-col gap-0.5 [&_[data-sidebar-footer-control]]:min-w-0 [&_[data-sidebar-footer-control]]:w-full [&_[data-sidebar-footer-control]]:max-w-[46px] [&_[data-sidebar-footer-control]]:justify-self-center" : "flex gap-1", SIDEBAR_ACTIONS_IN_FOOTER && "relative")}>
+            {PROFILE_AT_TOP ? <SidebarFooterNav density={density} inline /> : <div className="min-w-0 flex-1">
               <SidebarProfileMenu />
             </div>}
             <UpdateIndicator />
-            {SIDEBAR_ACTIONS_IN_FOOTER && <div className="flex items-center" style={windowNoDragStyle}>{renderHeaderActions(true)}</div>}
+            {SIDEBAR_ACTIONS_IN_FOOTER && <div className={PROFILE_AT_TOP ? "contents" : "flex items-center"} style={windowNoDragStyle}>{renderHeaderActions(true)}</div>}
             <SidebarAppsButton />
           </div>
         )}
@@ -2719,6 +2477,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
       )}
       {!remoteClient && archivedBotsOpen && (
         <ArchivedBotsPanel
+          returnFocusRef={importReturnRef}
           bots={archivedBots}
           onClose={() => setArchivedBotsOpen(false)}
           onRestored={(message) => setTeamFeedback({ error: false, text: message })}
@@ -2748,31 +2507,12 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           }}
         />
       )}
-      {teamFeedback &&
-        createPortal(
-          <div
-            role="status"
-            className={cn(
-              "fixed bottom-4 left-4 z-[60] max-w-[300px] rounded-xl border px-3.5 py-2.5 text-[13px] shadow-xl",
-              teamFeedback.error
-                ? "border-danger/30 bg-card text-danger"
-                : "border-hairline/50 bg-card text-ink",
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <span>{teamFeedback.text}</span>
-              {pendingBotUndo && (
-                <button
-                  onClick={() => void undoBotArchive(pendingBotUndo)}
-                  className="rounded-md px-1.5 py-0.5 font-medium text-accent hover:bg-raised"
-                >
-                  {t("common.undo")}
-                </button>
-              )}
-            </div>
-          </div>,
-          document.body,
-        )}
+      {teamFeedback && (
+        <SidebarFeedback
+          feedback={teamFeedback}
+          onUndo={pendingBotUndo ? () => void undoBotArchive(pendingBotUndo) : undefined}
+        />
+      )}
     </aside>
   );
 }

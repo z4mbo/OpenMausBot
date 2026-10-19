@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-10-19T01:12:19.437Z",
+  "encoding": "JPEG despite inherited .png filename",
+  "capture": "getScreenshot after viewport reset, resize and reload",
+  "priorCapture": "cdp-capture-diagnostic/signup-375-light-timeout-resize-artifact.jpg",
+  "observation": {
+    "alerts": [
+      "We couldn't check whether signup is available. Check your connection and try again."
+    ],
+    "articles": [],
+    "canonicalNotes": 0,
+    "clientWidth": 365,
+    "cssHeight": 900,
+    "cssWidth": 375,
+    "currentNotes": null,
+    "currentVersion": null,
+    "currentVersionDisplay": null,
+    "downloadLinks": [
+      "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+    ],
+    "fonts": "loaded",
+    "h1": "Create your Origin account",
+    "headingColor": "rgb(13, 13, 13)",
+    "htmlClass": "__variable_d8ebd1",
+    "images": [],
+    "path": "/signup",
+    "preferredDark": false,
+    "reducedMotion": true,
+    "scrollHeight": 1056,
+    "scrollWidth": 365
+  }
+}

@@ -31,6 +31,10 @@ vi.mock("./DesktopCapabilities", async () => {
   return { useDesktopCapabilities: () => ({ capabilities: initialDesktopCapabilities() }) };
 });
 vi.mock("@/lib/thread-preferences", () => ({ useShowThreads: () => true }));
+vi.mock("@/lib/origin-cloud", async (original) => ({
+  ...await original<typeof import("@/lib/origin-cloud")>(),
+  useCloudQuery: () => undefined,
+}));
 // The Active Threads menu is an Advanced-mode control; Simple hides it.
 vi.mock("@/lib/interface-mode", () => ({ useAdvancedMode: () => true, setAdvancedMode: () => {} }));
 vi.mock("@/state/store", async (importOriginal) => {

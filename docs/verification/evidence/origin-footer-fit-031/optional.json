@@ -1,0 +1,1471 @@
+{
+  "syntheticBridges": true,
+  "actualUpdateOrCloudData": false,
+  "cases": [
+    {
+      "file": "before-mac-240-comfortable-optional-dark.png",
+      "platform": "mac",
+      "density": "comfortable",
+      "mobile": false,
+      "version": "before",
+      "proof": {
+        "sidebarWidth": 240,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 213,
+            "right": 241,
+            "top": 628,
+            "bottom": 656,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 254,
+            "right": 300,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 300,
+            "right": 346,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 350,
+            "right": 396,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": false,
+        "columnCentersAligned": true
+      }
+    },
+    {
+      "file": "after-mac-240-comfortable-optional-dark.png",
+      "platform": "mac",
+      "density": "comfortable",
+      "mobile": false,
+      "version": "after",
+      "proof": {
+        "sidebarWidth": 240,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 68.328125,
+            "right": 114.328125,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 124.671875,
+            "right": 170.671875,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 181,
+            "right": 227,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 21,
+            "right": 49,
+            "top": 628,
+            "bottom": 656,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 68.328125,
+            "right": 114.328125,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 124.671875,
+            "right": 170.671875,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 181,
+            "right": 227,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": true,
+        "columnCentersAligned": true,
+        "keyboardOrder": [
+          "Routines",
+          "Triggers",
+          "Team map",
+          "Files",
+          "Downloading an update, 50%",
+          "Active Threads",
+          "New or share",
+          "Apps"
+        ],
+        "appsSelection": true
+      }
+    },
+    {
+      "file": "before-mac-mobile-comfortable-optional-dark.png",
+      "platform": "mac",
+      "density": "comfortable",
+      "mobile": true,
+      "version": "before",
+      "proof": {
+        "sidebarWidth": 320,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 213,
+            "right": 241,
+            "top": 720,
+            "bottom": 748,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 254,
+            "right": 300,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 300,
+            "right": 346,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 350,
+            "right": 396,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": false,
+        "columnCentersAligned": true
+      }
+    },
+    {
+      "file": "after-mac-mobile-comfortable-optional-dark.png",
+      "platform": "mac",
+      "density": "comfortable",
+      "mobile": true,
+      "version": "after",
+      "proof": {
+        "sidebarWidth": 320,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 214.5,
+            "right": 242.5,
+            "top": 672,
+            "bottom": 700,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 261,
+            "right": 307,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 12,
+            "right": 58,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 261,
+            "right": 307,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": true,
+        "columnCentersAligned": true,
+        "keyboardOrder": [
+          "Routines",
+          "Triggers",
+          "Team map",
+          "Files",
+          "Downloading an update, 50%",
+          "Active Threads",
+          "New or share",
+          "Apps"
+        ],
+        "appsSelection": true
+      }
+    },
+    {
+      "file": "before-mac-240-compact-optional-dark.png",
+      "platform": "mac",
+      "density": "compact",
+      "mobile": false,
+      "version": "before",
+      "proof": {
+        "sidebarWidth": 240,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 213,
+            "right": 241,
+            "top": 628,
+            "bottom": 656,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 254,
+            "right": 300,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 300,
+            "right": 346,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 350,
+            "right": 396,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": false,
+        "columnCentersAligned": true
+      }
+    },
+    {
+      "file": "after-mac-240-compact-optional-dark.png",
+      "platform": "mac",
+      "density": "compact",
+      "mobile": false,
+      "version": "after",
+      "proof": {
+        "sidebarWidth": 240,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 68.328125,
+            "right": 114.328125,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 124.671875,
+            "right": 170.671875,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 181,
+            "right": 227,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 21,
+            "right": 49,
+            "top": 628,
+            "bottom": 656,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 68.328125,
+            "right": 114.328125,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 124.671875,
+            "right": 170.671875,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 181,
+            "right": 227,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": true,
+        "columnCentersAligned": true,
+        "keyboardOrder": [
+          "Routines",
+          "Triggers",
+          "Team map",
+          "Files",
+          "Downloading an update, 50%",
+          "Active Threads",
+          "New or share",
+          "Apps"
+        ],
+        "appsSelection": true
+      }
+    },
+    {
+      "file": "before-mac-mobile-compact-optional-dark.png",
+      "platform": "mac",
+      "density": "compact",
+      "mobile": true,
+      "version": "before",
+      "proof": {
+        "sidebarWidth": 272,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 213,
+            "right": 241,
+            "top": 720,
+            "bottom": 748,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 254,
+            "right": 300,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 300,
+            "right": 346,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 350,
+            "right": 396,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": false,
+        "columnCentersAligned": true
+      }
+    },
+    {
+      "file": "after-mac-mobile-compact-optional-dark.png",
+      "platform": "mac",
+      "density": "compact",
+      "mobile": true,
+      "version": "after",
+      "proof": {
+        "sidebarWidth": 272,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 79,
+            "right": 125,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 146,
+            "right": 192,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 213,
+            "right": 259,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 21,
+            "right": 49,
+            "top": 720,
+            "bottom": 748,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 79,
+            "right": 125,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 146,
+            "right": 192,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 213,
+            "right": 259,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": true,
+        "columnCentersAligned": true,
+        "keyboardOrder": [
+          "Routines",
+          "Triggers",
+          "Team map",
+          "Files",
+          "Downloading an update, 50%",
+          "Active Threads",
+          "New or share",
+          "Apps"
+        ],
+        "appsSelection": true
+      }
+    },
+    {
+      "file": "before-win-240-comfortable-optional-dark.png",
+      "platform": "win",
+      "density": "comfortable",
+      "mobile": false,
+      "version": "before",
+      "proof": {
+        "sidebarWidth": 240,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 213,
+            "right": 241,
+            "top": 628,
+            "bottom": 656,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 254,
+            "right": 300,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 300,
+            "right": 346,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 350,
+            "right": 396,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": false,
+        "columnCentersAligned": true
+      }
+    },
+    {
+      "file": "after-win-240-comfortable-optional-dark.png",
+      "platform": "win",
+      "density": "comfortable",
+      "mobile": false,
+      "version": "after",
+      "proof": {
+        "sidebarWidth": 240,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 68.328125,
+            "right": 114.328125,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 124.671875,
+            "right": 170.671875,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 181,
+            "right": 227,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 21,
+            "right": 49,
+            "top": 628,
+            "bottom": 656,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 68.328125,
+            "right": 114.328125,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 124.671875,
+            "right": 170.671875,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 181,
+            "right": 227,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": true,
+        "columnCentersAligned": true,
+        "keyboardOrder": [
+          "Routines",
+          "Triggers",
+          "Team map",
+          "Files",
+          "Downloading an update, 50%",
+          "Active Threads",
+          "New or share",
+          "Apps"
+        ],
+        "appsSelection": true
+      }
+    },
+    {
+      "file": "before-win-mobile-comfortable-optional-dark.png",
+      "platform": "win",
+      "density": "comfortable",
+      "mobile": true,
+      "version": "before",
+      "proof": {
+        "sidebarWidth": 320,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 213,
+            "right": 241,
+            "top": 720,
+            "bottom": 748,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 254,
+            "right": 300,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 300,
+            "right": 346,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 350,
+            "right": 396,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": false,
+        "columnCentersAligned": true
+      }
+    },
+    {
+      "file": "after-win-mobile-comfortable-optional-dark.png",
+      "platform": "win",
+      "density": "comfortable",
+      "mobile": true,
+      "version": "after",
+      "proof": {
+        "sidebarWidth": 320,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 214.5,
+            "right": 242.5,
+            "top": 672,
+            "bottom": 700,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 261,
+            "right": 307,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 12,
+            "right": 58,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 261,
+            "right": 307,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": true,
+        "columnCentersAligned": true,
+        "keyboardOrder": [
+          "Routines",
+          "Triggers",
+          "Team map",
+          "Files",
+          "Downloading an update, 50%",
+          "Active Threads",
+          "New or share",
+          "Apps"
+        ],
+        "appsSelection": true
+      }
+    },
+    {
+      "file": "before-win-240-compact-optional-dark.png",
+      "platform": "win",
+      "density": "compact",
+      "mobile": false,
+      "version": "before",
+      "proof": {
+        "sidebarWidth": 240,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 213,
+            "right": 241,
+            "top": 628,
+            "bottom": 656,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 254,
+            "right": 300,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 300,
+            "right": 346,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 350,
+            "right": 396,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": false,
+        "columnCentersAligned": true
+      }
+    },
+    {
+      "file": "after-win-240-compact-optional-dark.png",
+      "platform": "win",
+      "density": "compact",
+      "mobile": false,
+      "version": "after",
+      "proof": {
+        "sidebarWidth": 240,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 68.328125,
+            "right": 114.328125,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 124.671875,
+            "right": 170.671875,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 181,
+            "right": 227,
+            "top": 571,
+            "bottom": 617,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 21,
+            "right": 49,
+            "top": 628,
+            "bottom": 656,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 68.328125,
+            "right": 114.328125,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 124.671875,
+            "right": 170.671875,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 181,
+            "right": 227,
+            "top": 619,
+            "bottom": 665,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": true,
+        "columnCentersAligned": true,
+        "keyboardOrder": [
+          "Routines",
+          "Triggers",
+          "Team map",
+          "Files",
+          "Downloading an update, 50%",
+          "Active Threads",
+          "New or share",
+          "Apps"
+        ],
+        "appsSelection": true
+      }
+    },
+    {
+      "file": "before-win-mobile-compact-optional-dark.png",
+      "platform": "win",
+      "density": "compact",
+      "mobile": true,
+      "version": "before",
+      "proof": {
+        "sidebarWidth": 272,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 58,
+            "right": 104,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 104,
+            "right": 150,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 150,
+            "right": 196,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 213,
+            "right": 241,
+            "top": 720,
+            "bottom": 748,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 254,
+            "right": 300,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 300,
+            "right": 346,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 350,
+            "right": 396,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": false,
+        "columnCentersAligned": true
+      }
+    },
+    {
+      "file": "after-win-mobile-compact-optional-dark.png",
+      "platform": "win",
+      "density": "compact",
+      "mobile": true,
+      "version": "after",
+      "proof": {
+        "sidebarWidth": 272,
+        "controls": [
+          {
+            "label": "Routines",
+            "left": 12,
+            "right": 58,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Triggers",
+            "left": 79,
+            "right": 125,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Team map",
+            "left": 146,
+            "right": 192,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Files",
+            "left": 213,
+            "right": 259,
+            "top": 663,
+            "bottom": 709,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Downloading an update, 50%",
+            "left": 21,
+            "right": 49,
+            "top": 720,
+            "bottom": 748,
+            "width": 28,
+            "height": 28
+          },
+          {
+            "label": "Active Threads",
+            "left": 79,
+            "right": 125,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "New or share",
+            "left": 146,
+            "right": 192,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          },
+          {
+            "label": "Apps",
+            "left": 213,
+            "right": 259,
+            "top": 711,
+            "bottom": 757,
+            "width": 46,
+            "height": 46
+          }
+        ],
+        "contained": true,
+        "columnCentersAligned": true,
+        "keyboardOrder": [
+          "Routines",
+          "Triggers",
+          "Team map",
+          "Files",
+          "Downloading an update, 50%",
+          "Active Threads",
+          "New or share",
+          "Apps"
+        ],
+        "appsSelection": true
+      }
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,294 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-draft-client/Origin
+
+ ❯ server/origin-mcp.test.ts (10 tests | 1 failed) 175ms
+     × forwards the person's optional destination undefined without inventing a column 5ms
+ ❯ src/components/origin-pages/new-issue-defaults.test.ts (9 tests | 6 failed) 2184ms
+     × places semantic Draft first in a stale board without changing task destinations 32ms
+     × uses the backend transaction to repair legacy Idea instead of racing a client rename 1015ms
+     × shows renamed semantic Draft and leaves an unspecified composer destination to the backend 28ms
+     × repairs missing Draft on a nonempty board without submitting into Todo 1012ms
+     × converts feedback to semantic Draft even when Todo has the lowest order 21ms
+     × leaves feedback with no Draft to backend defaulting rather than the first column 10ms
+ ❯ server/origin-cloud.test.ts (43 tests | 4 failed) 144ms
+     × creates an issue in Draft assigned to the signed-in user, then sets labels 5ms
+     × keeps a new issue in Draft off GitHub, and mirrors it once it moves to another column 1ms
+     × repairs a legacy board before default creation and keeps its new issue off GitHub 2ms
+     × does not infer another destination if Draft repair fails or an explicit column is unknown 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/origin-cloud.test.ts > runOriginTool > creates an issue in Draft assigned to the signed-in user, then sets labels
+AssertionError: expected [ [ 'tasks:createTask', …(1) ], …(1) ] to deeply equal [ [ 'tasks:createTask', …(1) ], …(1) ]
+
+- Expected
++ Received
+
+@@ -1,10 +1,11 @@
+  [
+    [
+      "tasks:createTask",
+      {
+        "assignedToEmail": "me@x.dev",
++       "columnId": "col1",
+        "dueDate": "2026-11-01",
+        "priority": "medium",
+        "projectId": "proj",
+        "sessionToken": "tok",
+        "title": "New",
+
+ ❯ server/origin-cloud.test.ts:236:30
+    234|     const result = await runOriginTool("origin_create_issue", { title:…
+    235|     expect(result.text).toBe('Created issue t9 (ORI-T9) "New" in colum…
+    236|     expect(mutations(calls)).toEqual([
+       |                              ^
+    237|       ["tasks:createTask", { projectId: "proj", sessionToken: "tok", t…
+    238|       ["issueRelations:labels", { sessionToken: "tok", taskId: "t9", l…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  server/origin-cloud.test.ts > GitHub-first issues > keeps a new issue in Draft off GitHub, and mirrors it once it moves to another column
+AssertionError: expected [ 'tasks:createTask', …(1) ] to deeply equal [ 'tasks:createTask', …(1) ]
+
+- Expected
++ Received
+
+  [
+    "tasks:createTask",
+    {
++     "assignedToEmail": "me@x.dev",
+      "columnId": "k0",
++     "dueDate": "2026-10-25",
++     "priority": "medium",
++     "projectId": "kai",
++     "sessionToken": "tok",
++     "title": "New",
+    },
+  ]
+
+ ❯ server/origin-cloud.test.ts:417:33
+    415|     const created = await runOriginTool("origin_create_issue", { title…
+    416|     expect(created.text).toContain('in column "Draft"');
+    417|     expect(mutations(calls)[0]).toEqual(["tasks:createTask", expect.no…
+       |                                 ^
+    418|     expect(github.calls).toEqual([]);
+    419|     const moved = await runOriginTool("origin_update_issue", { issue_i…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  server/origin-cloud.test.ts > GitHub-first issues > repairs a legacy board before default creation and keeps its new issue off GitHub
+AssertionError: expected 'Created issue kainew (ORI-INEW) "Priv…' to contain 'in column "Private planning"'
+
+Expected: "in column "Private planning""
+Received: "Created issue kainew (ORI-INEW) "Private idea" in column "Todo" of Kai. Mirrored as GitHub issue #12."
+
+ ❯ server/origin-cloud.test.ts:435:25
+    433|     const result = await runOriginTool("origin_create_issue", { title:…
+    434|     expect(result.isError).not.toBe(true);
+    435|     expect(result.text).toContain('in column "Private planning"');
+       |                         ^
+    436|     expect(result.cards?.issues[0].status).toBe("Private planning");
+    437|     expect(mutations(calls)).toEqual([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  server/origin-cloud.test.ts > GitHub-first issues > does not infer another destination if Draft repair fails or an explicit column is unknown
+AssertionError: expected { …(2) } to match object { isError: true }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "isError": true,
++   "cards": {
++     "heading": "Issue created",
++     "issues": [
++       {
++         "done": false,
++         "due": "2026-10-25",
++         "id": "",
++         "key": "ORI-",
++         "priority": "medium",
++         "projectId": "kai",
++         "projectName": "Kai",
++         "status": "Todo",
++         "title": "Private idea",
++       },
++     ],
++   },
++   "text": "Created issue  (ORI-) \"Private idea\" in column \"Todo\" of Kai. Mirrored as GitHub issue #12.",
+  }
+
+ ❯ server/origin-cloud.test.ts:448:100
+    446|     const github = fakeGitHub();
+    447|     const deps = workspaceDeps(client, { github: github.api });
+    448|     expect(await runOriginTool("origin_create_issue", { title: "Privat…
+       |                                                                                                    ^
+    449|     expect(mutations(calls).map(([name]) => name)).toEqual(["tasks:ens…
+    450|     calls.length = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  server/origin-mcp.test.ts > create_issue > forwards the person's optional destination undefined without inventing a column
+AssertionError: expected { Object (content, isError) } to match object { content: [ { type: 'text', …(1) } ] }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "content": [
+      {
+-       "text": "wrote create_issue",
++       "text": "Invalid arguments for create_issue: columnId Invalid input: expected string, received undefined",
+        "type": "text",
+      },
+    ],
+  }
+
+ ❯ server/origin-mcp.test.ts:176:27
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  src/components/origin-pages/new-issue-defaults.test.ts > new issue destinations > places semantic Draft first in a stale board without changing task destinations
+AssertionError: expected [ 'todo', 'draft' ] to deeply equal [ 'draft', 'todo' ]
+
+- Expected
++ Received
+
+  [
+-   "draft",
+    "todo",
++   "draft",
+  ]
+
+ ❯ src/components/origin-pages/new-issue-defaults.test.ts:62:110
+     60|     fixture.board = { columns, tasks: [{ _id: "existing", columnId: "t…
+     61|     flushSync(() => root.render(createElement(IssuesPage, { cloudProje…
+     62|     expect([...host.querySelectorAll<HTMLElement>("[data-column-id]")]…
+       |                                                                                                              ^
+     63|     expect(host.querySelector('[data-column-id="todo"] [data-task-id="…
+     64|     expect(fixture.mutations).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  src/components/origin-pages/new-issue-defaults.test.ts > new issue destinations > uses the backend transaction to repair legacy Idea instead of racing a client rename
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'tasks:ensureDefaultColumns', …(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "tasks:ensureDefaultColumns",
++   "tasks:updateColumn",
+    {
++     "columnId": "idea",
++     "isDone": false,
+      "projectId": "project",
++     "title": "Draft",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/components/origin-pages/new-issue-defaults.test.ts:69:54
+     67|     fixture.board = { columns: [{ _id: "idea", title: "Idea", order: 0…
+     68|     flushSync(() => root.render(createElement(IssuesPage, { cloudProje…
+     69|     await vi.waitFor(() => expect(fixture.mutations).toHaveBeenCalledW…
+       |                                                      ^
+     70|     expect(fixture.mutations).not.toHaveBeenCalledWith("tasks:updateCo…
+     71|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+ FAIL  src/components/origin-pages/new-issue-defaults.test.ts > new issue destinations > shows renamed semantic Draft and leaves an unspecified composer destination to the backend
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'tasks:createTask', …(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    "tasks:createTask",
+-   ObjectNotContaining {
+-     "columnId": Anything,
++   {
++     "assignedToEmail": "me@example.test",
++     "columnId": "draft",
++     "description": "",
++     "dueDate": "2026-11-01",
++     "priority": "medium",
++     "projectId": "project",
++     "title": "New issue",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/components/origin-pages/new-issue-defaults.test.ts:76:31
+     74|     expect(document.querySelector('[aria-label="Status: Private planni…
+     75|     await submit();
+     76|     expect(fixture.mutations).toHaveBeenCalledWith("tasks:createTask",…
+       |                               ^
+     77|   });
+     78|   it("preserves an explicit lane destination", async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯
+
+ FAIL  src/components/origin-pages/new-issue-defaults.test.ts > new issue destinations > repairs missing Draft on a nonempty board without submitting into Todo
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'tasks:ensureDefaultColumns', …(1) ]
+
+Number of calls: 0
+
+ ❯ src/components/origin-pages/new-issue-defaults.test.ts:94:54
+     92|     fixture.board = { columns: [columns[0]], tasks: [] };
+     93|     composer();
+     94|     await vi.waitFor(() => expect(fixture.mutations).toHaveBeenCalledW…
+       |                                                      ^
+     95|     expect(document.querySelector('[aria-label="Status: Todo"]')).toBe…
+     96|     expect(document.querySelector<HTMLButtonElement>('button[type="sub…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/11]⎯
+
+ FAIL  src/components/origin-pages/new-issue-defaults.test.ts > new issue destinations > converts feedback to semantic Draft even when Todo has the lowest order
+AssertionError: expected 'todo' to be 'draft' // Object.is equality
+
+Expected: "draft"
+Received: "todo"
+
+ ❯ src/components/origin-pages/new-issue-defaults.test.ts:100:26
+     98|   it("converts feedback to semantic Draft even when Todo has the lowes…
+     99|     const select = feedback();
+    100|     expect(select.value).toBe("draft");
+       |                          ^
+    101|     await submit();
+    102|     expect(fixture.mutations).toHaveBeenCalledWith("feedback:convert",…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/11]⎯
+
+ FAIL  src/components/origin-pages/new-issue-defaults.test.ts > new issue destinations > leaves feedback with no Draft to backend defaulting rather than the first column
+AssertionError: expected 'Todo' to be 'Draft' // Object.is equality
+
+Expected: "Draft"
+Received: "Todo"
+
+ ❯ src/components/origin-pages/new-issue-defaults.test.ts:111:55
+    109|   it("leaves feedback with no Draft to backend defaulting rather than …
+    110|     fixture.board = { columns: [columns[0]], tasks: [] };
+    111|     expect(feedback().selectedOptions[0].textContent).toBe("Draft");
+       |                                                       ^
+    112|     await submit();
+    113|     expect(fixture.mutations).toHaveBeenCalledWith("feedback:convert",…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/11]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  11 failed | 51 passed (62)
+   Start at  17:18:19
+   Duration  7.52s (transform 1.51s, setup 1.40s, import 2.68s, tests 2.50s, environment 390ms)

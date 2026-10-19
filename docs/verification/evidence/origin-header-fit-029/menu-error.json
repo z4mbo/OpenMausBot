@@ -1,0 +1,56 @@
+{
+  "file": "screenshots/menu-error-mac-240.jpg",
+  "syntheticBridgeRejection": true,
+  "proof": {
+    "ready": true,
+    "platform": "darwin",
+    "requestedSidebarWidth": 240,
+    "advanced": true,
+    "density": "comfortable",
+    "sidebar": {
+      "bottom": 720,
+      "height": 720,
+      "left": 0,
+      "right": 240,
+      "top": 0,
+      "width": 240
+    },
+    "titlebar": {
+      "bottom": 46,
+      "height": 46,
+      "left": 0,
+      "right": 239,
+      "top": 0,
+      "width": 239
+    },
+    "account": {
+      "bottom": 78,
+      "height": 32,
+      "left": 12,
+      "right": 111.5,
+      "top": 46,
+      "width": 99.5
+    },
+    "computer": {
+      "bottom": 76,
+      "height": 28,
+      "left": 119.5,
+      "right": 227,
+      "top": 48,
+      "width": 107.5
+    },
+    "computerName": "This computer",
+    "controlsDisjoint": true,
+    "controlsWithinSidebar": true,
+    "controlsBelowTitlebar": true,
+    "menuError": {
+      "bottom": 131,
+      "height": 41,
+      "left": 8,
+      "right": 231,
+      "top": 90,
+      "width": 223
+    },
+    "menuErrorWithinSidebar": true
+  }
+}

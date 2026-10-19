@@ -1,3 +1,5 @@
+@import "../../shared/origin-theme.css";
+
 :root {
   color-scheme: dark;
   --bg: #070708;

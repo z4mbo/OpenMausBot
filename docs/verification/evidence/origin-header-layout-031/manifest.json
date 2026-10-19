@@ -1,0 +1,659 @@
+{
+  "files": [
+    {
+      "path": "matrix.json",
+      "bytes": 134192,
+      "sha256": "f9f0ba6a25e251fd065ab2ea83c3972a588985b0ae6fbc5273be6a91386ef84d"
+    },
+    {
+      "path": "menus.json",
+      "bytes": 1323,
+      "sha256": "1ace5a5edae29287109e4b2c6c70e182a77fca6193e5a11300165683f9fcf9ae"
+    },
+    {
+      "path": "extra.json",
+      "bytes": 18183,
+      "sha256": "0868f85c5e6031fbdb7e5ba55b9f390431309b628f9c7e9933e211989b5a7786"
+    },
+    {
+      "path": "runtime.json",
+      "bytes": 83,
+      "sha256": "59f555ee116f8ead76369adfeb9e5a17c5e7b7b4ad81c443ab9ebb5c20a066f9"
+    },
+    {
+      "path": "focus-probe.json",
+      "bytes": 4443,
+      "sha256": "0fb635b63dbf808c108c4245d56df082dd50d1e06ce1828e495ce45a546d0624"
+    },
+    {
+      "path": "screenshots/before-mac-240-advanced-dark.png",
+      "bytes": 56246,
+      "sha256": "25fa904fbbfc5691c3f56616d8daa6717c9ccf60d59da10d95f11faa9ad47853",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-240-advanced-dark.png",
+      "bytes": 55459,
+      "sha256": "aab92c906500d90cb6ca5ae0114f39fcf46b925fa7e8868323674c26f8436185",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-240-advanced-light.png",
+      "bytes": 60411,
+      "sha256": "03f1ab15f550dd6a07bb25a0b9f5d6536277ba32e28c1c0cde054a9804326589",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-240-advanced-light.png",
+      "bytes": 59143,
+      "sha256": "6ed3128ba38330012d4e3b60f619a2d7752a2d592cf8b85610ccc502569d4766",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-240-simple-dark.png",
+      "bytes": 54642,
+      "sha256": "52ae29882f9bee5506781ed1a64eee1302e63e602c3c15c319144ba1a3ed94ab",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-240-simple-dark.png",
+      "bytes": 53938,
+      "sha256": "3e0e139c0c8083ec101b770f705b57ba1f88d422aadf00ff88041712c422b1a6",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-240-simple-light.png",
+      "bytes": 58666,
+      "sha256": "3a8bf1c04fba22eedc70bd71560cd1519026294e713b6589d6cc91c1ae877966",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-240-simple-light.png",
+      "bytes": 57439,
+      "sha256": "f6c83affd35fb90aebf6a8a9873ddf29dee36b80e2cd8d1673cbe4778f2f6912",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-272-advanced-dark.png",
+      "bytes": 56572,
+      "sha256": "9d7ab2379bef5db577e18143b9371f4010697aa8ed95d5bbdcad40f933f46c91",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-272-advanced-dark.png",
+      "bytes": 55164,
+      "sha256": "3125614c4b339f7b06418d1709ae68ca176c3daa4367661bf0e51d9563276e23",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-272-advanced-light.png",
+      "bytes": 60849,
+      "sha256": "c8974a3625b7fc5f5729288654c5febc8af86927f8013e2da15203b1224bf535",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-272-advanced-light.png",
+      "bytes": 59051,
+      "sha256": "a1950dd6d9d6e10c927a8768b4de1cc8b67248554c6a4a34c5d03dced70e5cc9",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-272-simple-dark.png",
+      "bytes": 55015,
+      "sha256": "8f5cc7f96499c7b36d5b71b13ee4094d8a4b5f8d8c53d185c078939499e99736",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-272-simple-dark.png",
+      "bytes": 54297,
+      "sha256": "10107ca968e476a4403d2512e47e65da14827e1135afdf1f146725d5de222653",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-272-simple-light.png",
+      "bytes": 59079,
+      "sha256": "a2bc2bc72c47d1f707f00040f35e201ea4a435bbc3429e9ec76cd39c999a843a",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-272-simple-light.png",
+      "bytes": 58082,
+      "sha256": "ae3b773801a86dd7ceaac67c1bb42f93d943e4bbe08df7c87af9aba0d3fae5b8",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-320-advanced-dark.png",
+      "bytes": 57842,
+      "sha256": "fc27e0e5af46fc01a6299004324e7deb90ed707f70ab89d6ba3f7acbe7a941f3",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-320-advanced-dark.png",
+      "bytes": 56736,
+      "sha256": "ccd21559a022700d61682dda211c7e4c2d37000a7bff3e1b4ea3d7e52dbc487b",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-320-advanced-light.png",
+      "bytes": 62376,
+      "sha256": "45570ac83d7d805afbc10fa0f0645b14fe1b28f76a60996a4716cd56265838dd",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-320-advanced-light.png",
+      "bytes": 60848,
+      "sha256": "ebc673d8ddcf0885caff8a9bec204c0f1c85d60772acae4aa782dc99756df063",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-320-simple-dark.png",
+      "bytes": 56197,
+      "sha256": "98411824b9282ef7ddee039446cb1e237f0061ec29ec2ad4cd2cf5685aa043d2",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-320-simple-dark.png",
+      "bytes": 55558,
+      "sha256": "34ade18c3cde64a2eb38762b45c8502644757e0f787f60f2116009919d67481b",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-320-simple-light.png",
+      "bytes": 60656,
+      "sha256": "ba7179fc94654cb32c2e7c76875ae226a2f1e96e17f92ea2a9f8149dc27f5337",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-320-simple-light.png",
+      "bytes": 59615,
+      "sha256": "f549574877b44b096b254f4a0490254f9f45ea79ad0af97168b649397c66529b",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-240-advanced-dark.png",
+      "bytes": 56829,
+      "sha256": "fe58ea058e57871f174945e50d6ffbdfe1698af7598d81a0f5f916ffa6fb36a5",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-240-advanced-dark.png",
+      "bytes": 56080,
+      "sha256": "cc00f8f50992efe85053464d962b230d64dc8f52fed5909b09c04aaf6271bdc3",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-240-advanced-light.png",
+      "bytes": 60696,
+      "sha256": "cdc433873add5ba30120d266307f076a580079259ad032f203eab85eb8983341",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-240-advanced-light.png",
+      "bytes": 59969,
+      "sha256": "ff665b64ca27744debec81bc79d66fcf9e4b21c20f02a5bffeacfe07b17cf457",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-240-simple-dark.png",
+      "bytes": 55161,
+      "sha256": "86918b5365fe576f7d93a7b5e6f746d11972a1a5bd3918a75bdbac5492493c36",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-240-simple-dark.png",
+      "bytes": 55053,
+      "sha256": "9101c32bc4463fe4d943948dffb0372ad02d6a078baea8a74df5fb1a65bd70a2",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-240-simple-light.png",
+      "bytes": 59054,
+      "sha256": "cd5b26a2b08fd71c3e0de6ba1107ca1022a71a7d061b68eeb18f9f63ea5ea396",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-240-simple-light.png",
+      "bytes": 58969,
+      "sha256": "4937a05cc4c49fa55d904165833521509aa34cd71b52ae95efe18b8fece7aa76",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-272-advanced-dark.png",
+      "bytes": 57069,
+      "sha256": "b4d16887f3ad29e08739b7ddb1cdd1557f01d26050aecc026ed1988aa7f5e3ad",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-272-advanced-dark.png",
+      "bytes": 56261,
+      "sha256": "fef08765caf41286b8870cb58795ecf7fb4e40c6409796cf24802cd9325d32c8",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-272-advanced-light.png",
+      "bytes": 60932,
+      "sha256": "393c30e524b6cb8de17047e85fbfb2c81988f6daf262b4cd9339bd8464886c2d",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-272-advanced-light.png",
+      "bytes": 60326,
+      "sha256": "5eb1c45fee05cf7decad1a92b9f3faadae9106064a4f7867e9045864d8e83247",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-272-simple-dark.png",
+      "bytes": 55508,
+      "sha256": "8c1df2d5492e0a637aa74f80c18fb87d880ea1f29eb70569e1079f646dccf952",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-272-simple-dark.png",
+      "bytes": 55164,
+      "sha256": "59420678ac9d8a346f1ef1fb2e0ac9f6cb0ea2b7d4239dfd47bb0ac04b0b4660",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-272-simple-light.png",
+      "bytes": 59315,
+      "sha256": "048c9ca22936a5769e4c5d1cce54a9678898dd43a143d4affa0ab46b8df7e4b1",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-272-simple-light.png",
+      "bytes": 59189,
+      "sha256": "b5b304aa496042fcb317b1b5a278251ea04e63f256c0c86a7b83c8002347af13",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-320-advanced-dark.png",
+      "bytes": 58201,
+      "sha256": "c5598451fdd7e338e27ff8834cd4f4a15620a029e718d2dc8d72ccb6d7cc3320",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-320-advanced-dark.png",
+      "bytes": 57524,
+      "sha256": "1c6a40896ab061520594b8b33e9435b4034af644b777fb4bdffb7c14701f2f53",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-320-advanced-light.png",
+      "bytes": 62603,
+      "sha256": "d94c7b5c4ef6b8ec81c1d178879d343f57669c0fc52113835507d9642ce9f562",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-320-advanced-light.png",
+      "bytes": 61847,
+      "sha256": "ed2625dda61edd2c96fdbb81af2bb4a7f0122033ef5867cc43d047ea2583e522",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-320-simple-dark.png",
+      "bytes": 56706,
+      "sha256": "16700fe67ac0a36c13e1c8bc25293dd2850741e913da6ec00c05ec3d6103df1d",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-320-simple-dark.png",
+      "bytes": 56295,
+      "sha256": "8c8b5f77e793629c4345bbe20c3ea40bd391954c421441d5d0cb1b036a65e2dd",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-320-simple-light.png",
+      "bytes": 60865,
+      "sha256": "5350e34eedfaa044a69c0fab35e1d9f4b33222722241f2be7cdc038200520315",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-320-simple-light.png",
+      "bytes": 60555,
+      "sha256": "aff18c8de2b4226ce34f4f45815cad92abe868b9121ee251bdb34ed9f8c2f7f5",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-mobile-advanced-dark.png",
+      "bytes": 21806,
+      "sha256": "d57622c19814adeed0d0d852e461bd5532b518ee3b935db508bb10855619576e",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-mac-mobile-advanced-dark.png",
+      "bytes": 21567,
+      "sha256": "03f3c4aedccd71202518a9070349c85fd9482208f489311c91d42ee58e23a855",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/before-mac-mobile-advanced-light.png",
+      "bytes": 23390,
+      "sha256": "a10fba18ad54b7fd048c16be852130df70e10b74d475a7c9ab3d92ad0ec36c8d",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-mac-mobile-advanced-light.png",
+      "bytes": 22884,
+      "sha256": "3f207a569d57e58de770c7a69f521554364b24cf15bbea81bb9a893c76be98e1",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/before-mac-mobile-simple-dark.png",
+      "bytes": 20621,
+      "sha256": "7b0c5e81e4ac14d58f8cefb6379fd489713bd4c48991ff8be6ea21cf44f2ff03",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-mac-mobile-simple-dark.png",
+      "bytes": 20840,
+      "sha256": "0ddba93732aba50e9c9f38d194f44d6bb3ac8ed4c02f4a9843eb0b64792862fe",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/before-mac-mobile-simple-light.png",
+      "bytes": 22137,
+      "sha256": "1d32e7f7d67a0e9e87d8db08ac738fa84a10176efe0683beb4f4c56db5290c32",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-mac-mobile-simple-light.png",
+      "bytes": 22221,
+      "sha256": "20c20676a90035abc4cc00b91416566ebbc547fb8ed85261a5d42207b29eb48f",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/before-win-mobile-advanced-dark.png",
+      "bytes": 21743,
+      "sha256": "5de7a1a112f6bf65abfd8376a0bd6e5462746ccf966f2c03ba37b88047021c04",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-win-mobile-advanced-dark.png",
+      "bytes": 22337,
+      "sha256": "a972a1645d28034bb62ad22fe5fb22546ccaf302062e4d942626b0f46ac73c54",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/before-win-mobile-advanced-light.png",
+      "bytes": 23321,
+      "sha256": "82f0e6e84a6e577efc3ef5cb9bf9f318ddf256530b218d1d9247bf4d7959b724",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-win-mobile-advanced-light.png",
+      "bytes": 23870,
+      "sha256": "bb836ac7eabf8666fa821263603381f6904fe2dee01f9f92d355022bca7932f6",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/before-win-mobile-simple-dark.png",
+      "bytes": 20687,
+      "sha256": "b4d50da093da82b3c93cab918df00a3ab45caab4dab8f6b7120daa3f4dd7b066",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-win-mobile-simple-dark.png",
+      "bytes": 21542,
+      "sha256": "9235ebb51f3e41cac26b76d411f9329965b5df33f1378b033c06de134dc9edf2",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/before-win-mobile-simple-light.png",
+      "bytes": 22205,
+      "sha256": "efe43e514b5862d0cfd2af4d1a7bdc17cdf81a6be4fe855fad50ac3e28f86d92",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-win-mobile-simple-light.png",
+      "bytes": 23205,
+      "sha256": "9639dd8487f976a6f38f45ca3e850fb228ac42d3f11722d094fa7211dbc93582",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/before-mac-240-long-computer-dark.png",
+      "bytes": 56162,
+      "sha256": "6160d441a96fb4e14197d4b15e0868c1bf5fa1665cd981e323852e8f0183705d",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-240-long-computer-dark.png",
+      "bytes": 56026,
+      "sha256": "1e0f631fb82843f4607ccca142f5974d2a1cf1f07447cb399c82df20fa08776e",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-win-240-long-computer-dark.png",
+      "bytes": 56683,
+      "sha256": "e1f1aa6c71ed1c2a42ad56f7aad76971b1f69f876b2f0b15cf9aa23f99dbd887",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-240-long-computer-dark.png",
+      "bytes": 56708,
+      "sha256": "27c81479fa1706d03b97f8caa233ee26d42d430c74ae86ba98391cef70e16b6d",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/before-mac-mobile-long-computer-dark.png",
+      "bytes": 22263,
+      "sha256": "dbee4431b17df5707a12ff2188ba0005b7e481a951e3feef3575904973c2bcce",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-mac-mobile-long-computer-dark.png",
+      "bytes": 22772,
+      "sha256": "2fa341ef2535009b7dfc5cf6a30da7de25ab5d91f510d6ef5c772441f8e267cc",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/before-win-mobile-long-computer-dark.png",
+      "bytes": 22211,
+      "sha256": "f91628562ac98d3d5484a7e3b369d1409b3273fb10fb9b3c4f0ffd766be7bf6d",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-win-mobile-long-computer-dark.png",
+      "bytes": 23504,
+      "sha256": "ddfc3adf933761dfe129bc4aa629286620d44c063e1a5edf6ba5938cd89a1c8c",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "screenshots/after-mac-rail-dark.png",
+      "bytes": 44504,
+      "sha256": "aee0614f997971ced3499005084ee810b3110478a57a3d8f6a607843a47a3784",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-mac-rail-light.png",
+      "bytes": 47769,
+      "sha256": "6d0da9bccf95354a7c5b682d2a103892966e000d96b8ed692528771cd00c3513",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-rail-dark.png",
+      "bytes": 44865,
+      "sha256": "2d32743fe654021a2fa846f75e91171b1f6c33a30c6445c239e75591105e17ec",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/after-win-rail-light.png",
+      "bytes": 48405,
+      "sha256": "90c2118000bdadcce51ecc8a7ae4cee40c2c5b766fe95c38c5b8324bc4285876",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/account-menu-mac-240-light.png",
+      "bytes": 74466,
+      "sha256": "ee3217f591865316a9f4b51a8f7d620d1a2f70feaddb49bf7d8740e3863fc256",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/account-menu-win-240-light.png",
+      "bytes": 77792,
+      "sha256": "3f4b7d228a20a13cffbd813d377fc4c4f76956c4c8789c1ed730aaf3d463dc1d",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/computer-error-mac-240-light.png",
+      "bytes": 60872,
+      "sha256": "d0c6174bdab9591306edae43d93c1a8654fe597c47627f5970c232a1daa2bab8",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "screenshots/computer-error-win-240-light.png",
+      "bytes": 62100,
+      "sha256": "94f8fca1e6599bed5db7cc9588f16040308035656e70f95a159ad8029cc4064b",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "path": "account-placement-exact-proof.json",
+      "bytes": 719,
+      "sha256": "9b1056c3ce304dc1900be6c7a533684679809759d8f19811345e21f5dd9c3f9a"
+    },
+    {
+      "path": "reduced-motion-exact-proof.json",
+      "bytes": 967,
+      "sha256": "c9de7d347e113ff3f9bd80039e49b86cec13323d6a1abf58a8b5c01754d80b59"
+    },
+    {
+      "path": "logs/account-placement-red.log",
+      "bytes": 4040,
+      "sha256": "7b0a4badbf5c27ee8ca792375217a7fd856362ae3be5d706f610bc1a7f8460c6",
+      "rawCapturedSha256": "bb34d2457d366c4f1f6fe42c54e890de8668fbf53a85c360147f2ba02b8216e9",
+      "retainedTransform": "CRLF normalized to LF and trailing blank lines removed; assertion and event lines unchanged"
+    },
+    {
+      "path": "logs/account-placement-green.log",
+      "bytes": 246,
+      "sha256": "7b7c6dba9ae21c1c1936ee941e696abb80ed240d0cb71e9a59f6a3a241b0fc88",
+      "rawCapturedSha256": "abf9fc316c033a01e737a47941651483a22443b0be2dedddb6fab1f4100b8b12",
+      "retainedTransform": "CRLF normalized to LF and trailing blank lines removed; assertion and event lines unchanged"
+    },
+    {
+      "path": "logs/reduced-motion-red-exact.log",
+      "bytes": 1472,
+      "sha256": "a8a792bb3615d76add2af703e9397c222f6df5ff7d087eda7c291edfabe52171",
+      "rawCapturedSha256": "1f0b464f2c7993a20a030585a372c2a2d4ce1f17336eca45537728cf60ea6832",
+      "retainedTransform": "CRLF normalized to LF and trailing blank lines removed; assertion and event lines unchanged"
+    },
+    {
+      "path": "logs/reduced-motion-green-exact.log",
+      "bytes": 244,
+      "sha256": "8c8b6dfc33896aca1c0b288187074d0c6d14d106986f96aee9e7f0877f79ce0a",
+      "rawCapturedSha256": "0bc97e4322c1676cd5fbb73a6721c3b03c0cc7e9548530b524abc4262cc5a8fb",
+      "retainedTransform": "CRLF normalized to LF and trailing blank lines removed; assertion and event lines unchanged"
+    },
+    {
+      "path": "logs/account-row-focused-final.log",
+      "bytes": 248,
+      "sha256": "084ff2539e4b9778fb6dadf96ddda89c072d0efbbf211ce7243cf2fdb8c5cfe2",
+      "rawCapturedSha256": "148ccc6932c20370ad58f67d21ac2ad56502a30857b2225a58e38c7c545b1e44",
+      "retainedTransform": "CRLF normalized to LF and trailing blank lines removed; assertion and event lines unchanged"
+    },
+    {
+      "path": "logs/account-row-final-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/account-row-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/account-row-server-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source-proof.json",
+      "bytes": 4759,
+      "sha256": "7d843c0deeae2b85c5df9be7c7b39579f4806056f9681929d7116647f757f16d"
+    },
+    {
+      "path": "report.json",
+      "bytes": 857,
+      "sha256": "1b20d32a5e68e55a1a261aa3730ef06ed07608df99b6e42d806ac3d09bf6f09c"
+    }
+  ]
+}

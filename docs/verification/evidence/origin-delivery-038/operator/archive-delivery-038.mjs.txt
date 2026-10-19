@@ -1,0 +1,70 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { dirname, relative, resolve } from 'node:path';
+
+const root = resolve(import.meta.dirname, '..');
+const scratch = resolve(root, '.omb-scratch/delivery-evidence-038');
+const destination = resolve(root, 'docs/verification/evidence/origin-delivery-038');
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+const read = name => readFileSync(resolve(root, name));
+const receipt = JSON.parse(readFileSync(resolve(scratch, 'delivery-receipt-038.json')));
+assert.equal(receipt.status, 'published-and-proof-checked');
+assert.equal(receipt.source, 'ab0cd72b4c2f004c1015adca034472241569c04b');
+assert.equal(receipt.published, true);
+assert.ok(!existsSync(destination));
+mkdirSync(destination);
+const files = [], originals = new Map();
+function archive(from, proposed, expected) {
+  const absolute = resolve(from), originalPath = relative(root, absolute).replaceAll('\\', '/');
+  if (originals.has(absolute)) return;
+  assert.ok(lstatSync(absolute).isFile() && !lstatSync(absolute).isSymbolicLink());
+  const bytes = readFileSync(absolute);
+  assert.ok(bytes.length <= 16 * 1024 * 1024);
+  if (expected) { assert.equal(bytes.length, expected.bytes); assert.equal(sha(bytes), expected.sha256); }
+  let name = proposed.replaceAll('\\', '/');
+  assert.ok(!name.startsWith('/') && !name.split('/').includes('..'));
+  assert.ok(!/\.env(?:\.|$)/i.test(name));
+  if (/\.(?:mjs|cjs|py|sh|ts)$/.test(name)) name += '.txt';
+  const target = resolve(destination, name);
+  assert.ok(!relative(destination, target).startsWith('..') && !existsSync(target));
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, bytes, { flag: 'wx' });
+  assert.equal(sha(readFileSync(target)), sha(bytes));
+  files.push({ path: name, originalPath, bytes: bytes.length, sha256: sha(bytes) });
+  originals.set(absolute, name);
+}
+const selection = JSON.parse(read('.omb-scratch/delivery-preparation-038b/evidence-selection-038b.json'));
+for (const item of selection.files) archive(item.root === 'readOnlyFinalCheckout' ? resolve(root, item.path) : item.path, item.proposedPermanentPath, item);
+const destinationFor = name => name === 'delivery-receipt-038.json' ? 'delivery-receipt.json'
+  : name === 'final-audit-report-038.md' ? 'final-audit-report.md'
+  : name === 'upstream-supplement-038.md' ? 'upstream-recommendations.md'
+  : /^(?:site\/|native\/|ci-attempt[12]\/|site-cleanup\/|upstream-)/.test(name) ? name : `actual/${name}`;
+function walk(folder, prefix = '') {
+  for (const entry of readdirSync(folder, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    assert.ok(!entry.isSymbolicLink());
+    const name = prefix + entry.name, absolute = resolve(folder, entry.name);
+    if (entry.isDirectory()) walk(absolute, `${name}/`);
+    else archive(absolute, destinationFor(name));
+  }
+}
+walk(scratch);
+for (const name of ['prepublication-037b.mjs', 'publish-038b.mjs', 'release-inputs-037b.json', 'finalize-actual-038.mjs', 'archive-delivery-038.mjs', 'check-public-site-038.mjs', 'check-public-downloads.py', 'check-github-release.mjs']) archive(resolve(root, '.omb-scratch', name), `operator/${name}`);
+for (const name of readdirSync(resolve(root, '.omb-scratch/delivery-preparation-038b'))) {
+  const file = resolve(root, '.omb-scratch/delivery-preparation-038b', name);
+  if (lstatSync(file).isFile()) archive(file, `preparation/${name}`);
+}
+const generated = {
+  'README.md': '# Origin 0.2.14 delivery evidence\n\nRead [the checked delivery receipt](delivery-receipt.json), [the audit report](final-audit-report.md) and [selective upstream recommendations](upstream-recommendations.md). The outer manifest maps original operator paths to immutable archived bytes. Executable helpers are text attachments. Historical 035/031 receipts remain in their original directories.\n\nThe 20 accepted site states are listed in [the visual review](review/site-visual-review-038.json); rejected, initial-shell and screenshot-helper diagnostics are retained separately and do not count as accepted. Files inherited with .png names contain JPEG/JFIF bytes. Public captures use .jpg. Native audit includes legitimate zero-byte stderr files with their SHA-256; empty actual delivery proofs are rejected.\n\n[One-row sidebar preview](actual/sidebar-one-row-preview.jpg) and [keyboard/geometry proof](actual/sidebar-one-row-keyboard.json) use the isolated 0.2.13 sample app, whose footer is retained in 0.2.14. [Live landing](actual/public-landing-038.jpg) and [live release notes](actual/public-whats-new-038.jpg) were captured after 0.2.14 promotion. No production account or recipient was tested.\n\nCI attempt1 failed; attempt2 contains two fresh executions and eighteen retained records. Both raw histories remain. The timeout cause remains unproved, and no source correction is inferred from the retry. Static/package-resource acceptance does not establish installed Windows GUI/updater or physical Mac execution.\n',
+  'archive-map.json': JSON.stringify({ source: receipt.source, version: receipt.version, qualifiedOriginalPaths: true, files: files.map(({ path, originalPath }) => ({ originalPath, archivedPath: path })) }, null, 2)
+};
+for (const [name, value] of Object.entries(generated)) {
+  const bytes = Buffer.from(value);
+  writeFileSync(resolve(destination, name), bytes, { flag: 'wx' });
+  files.push({ path: name, originalPath: 'generated-by-archive-delivery-038.mjs', bytes: bytes.length, sha256: sha(bytes) });
+}
+files.sort((a, b) => a.path.localeCompare(b.path));
+const manifest = { source: receipt.source, version: receipt.version, createdAt: new Date().toISOString(), totalFiles: files.length, totalBytes: files.reduce((sum, item) => sum + item.bytes, 0), files };
+writeFileSync(resolve(destination, 'manifest.json'), JSON.stringify(manifest, null, 2), { flag: 'wx' });
+for (const file of files) assert.equal(sha(readFileSync(resolve(destination, file.path))), file.sha256);
+console.log(JSON.stringify({ directory: relative(root, destination), files: manifest.totalFiles, bytes: manifest.totalBytes, manifestSha256: sha(readFileSync(resolve(destination, 'manifest.json'))), receiptSha256: sha(readFileSync(resolve(destination, 'delivery-receipt.json'))) }));

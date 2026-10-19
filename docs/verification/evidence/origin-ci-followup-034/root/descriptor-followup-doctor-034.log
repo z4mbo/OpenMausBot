@@ -1,0 +1,730 @@
+{
+  "ok": true,
+  "health": {
+    "status": "connected",
+    "endpoint": "http://127.0.0.1:20012",
+    "app": "openmausbot",
+    "packaged": false
+  },
+  "availableEngines": [
+    "claude"
+  ],
+  "instances": [
+    {
+      "instanceId": "claude",
+      "driverKind": "claudeAgent",
+      "displayName": "Verification fixture",
+      "snapshot": {
+        "state": "available"
+      },
+      "models": {
+        "default": "claude-sonnet-5",
+        "options": [
+          {
+            "id": "claude-fable-5-1",
+            "label": "Claude Fable 5.1"
+          },
+          {
+            "id": "claude-fable-5",
+            "label": "Claude Fable 5"
+          },
+          {
+            "id": "claude-opus-5-5",
+            "label": "Claude Opus 5.5",
+            "contextWindow": 1000000
+          },
+          {
+            "id": "claude-opus-5",
+            "label": "Claude Opus 5"
+          },
+          {
+            "id": "claude-sonnet-5-5",
+            "label": "Claude Sonnet 5.5",
+            "contextWindow": 1000000
+          },
+          {
+            "id": "claude-sonnet-5",
+            "label": "Claude Sonnet 5"
+          },
+          {
+            "id": "claude-haiku-5-5",
+            "label": "Claude Haiku 5.5",
+            "contextWindow": 1000000
+          },
+          {
+            "id": "claude-haiku-4-5",
+            "label": "Claude Haiku 4.5"
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": true,
+        "browserMcp": true,
+        "images": true,
+        "effortLevels": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": true,
+        "backgroundText": true
+      },
+      "access": "subscription"
+    },
+    {
+      "instanceId": "chatgpt",
+      "driverKind": "codex",
+      "displayName": "ChatGPT plan",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "",
+        "options": []
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": true,
+        "browserMcp": true,
+        "images": true,
+        "effortLevels": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "subscription"
+    },
+    {
+      "instanceId": "cursor",
+      "driverKind": "cursorAgent",
+      "displayName": "Cursor",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "auto",
+        "options": [
+          {
+            "id": "auto",
+            "label": "Auto"
+          },
+          {
+            "id": "composer-2.5",
+            "label": "Composer 2.5"
+          },
+          {
+            "id": "composer-2.5-fast",
+            "label": "Composer 2.5 Fast"
+          },
+          {
+            "id": "gpt-5.3-codex",
+            "label": "Codex 5.3"
+          },
+          {
+            "id": "claude-sonnet-5-thinking-high",
+            "label": "Claude Sonnet 5 1M Thinking"
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": false,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "subscription"
+    },
+    {
+      "instanceId": "openaiCompat",
+      "driverKind": "openai-compat",
+      "displayName": "Other (OpenAI-compatible)",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "meta-llama/llama-3.3-70b-instruct",
+        "options": [
+          {
+            "id": "meta-llama/llama-3.3-70b-instruct",
+            "label": "Llama 3.3 70B (OpenRouter)",
+            "custom": true
+          },
+          {
+            "id": "llama-3.3-70b-versatile",
+            "label": "Llama 3.3 70B (Groq)",
+            "custom": true
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "api"
+    },
+    {
+      "instanceId": "mistral",
+      "driverKind": "mistral",
+      "displayName": "Mistral (API)",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "mistral-large-latest",
+        "options": [
+          {
+            "id": "mistral-large-latest",
+            "label": "Mistral Large (latest)"
+          },
+          {
+            "id": "mistral-small-latest",
+            "label": "Mistral Small (latest)"
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": false,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": false,
+        "images": false,
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": false,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "api"
+    },
+    {
+      "instanceId": "cerebras",
+      "driverKind": "cerebras",
+      "displayName": "Cerebras (API)",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "gpt-oss-120b",
+        "options": [
+          {
+            "id": "gpt-oss-120b",
+            "label": "GPT OSS 120B",
+            "contextWindow": 65536
+          },
+          {
+            "id": "qwen-3.8-27b",
+            "label": "Qwen3.8 27B",
+            "contextWindow": 65536
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "api"
+    },
+    {
+      "instanceId": "groq",
+      "driverKind": "groq",
+      "displayName": "Groq (API)",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "openai/gpt-oss-120b",
+        "options": [
+          {
+            "id": "openai/gpt-oss-120b",
+            "label": "GPT OSS 120B",
+            "contextWindow": 131072
+          },
+          {
+            "id": "openai/gpt-oss-20b",
+            "label": "GPT OSS 20B",
+            "contextWindow": 131072
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "api"
+    },
+    {
+      "instanceId": "meta",
+      "driverKind": "meta",
+      "displayName": "Meta Muse (API)",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "muse-wonder-1.0",
+        "options": [
+          {
+            "id": "muse-wonder-1.0",
+            "label": "Muse Wonder 1.0",
+            "contextWindow": 1048576
+          },
+          {
+            "id": "muse-spark-1.3",
+            "label": "Muse Spark 1.3",
+            "contextWindow": 1048576
+          },
+          {
+            "id": "muse-spark-1.3-contributor",
+            "label": "Muse Spark 1.3 Contributor",
+            "contextWindow": 1048576
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "api"
+    },
+    {
+      "instanceId": "museCode",
+      "driverKind": "museCode",
+      "displayName": "Muse Code",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "muse-wonder-1.0",
+        "options": [
+          {
+            "id": "muse-wonder-1.0",
+            "label": "Muse Wonder 1.0",
+            "contextWindow": 1048576
+          },
+          {
+            "id": "muse-spark-1.3",
+            "label": "Muse Spark 1.3",
+            "contextWindow": 1048576
+          },
+          {
+            "id": "muse-spark-1.2",
+            "label": "Muse Spark 1.2",
+            "contextWindow": 1048576
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "effortLevels": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": false
+      },
+      "access": "subscription"
+    },
+    {
+      "instanceId": "openai",
+      "driverKind": "openai-compat",
+      "displayName": "OpenAI",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "gpt-5",
+        "options": [
+          {
+            "id": "gpt-5",
+            "label": "gpt-5"
+          },
+          {
+            "id": "gpt-5-mini",
+            "label": "gpt-5-mini"
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "api"
+    },
+    {
+      "instanceId": "claudeApi",
+      "driverKind": "claudeAgent",
+      "displayName": "Claude (API key)",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "claude-sonnet-5",
+        "options": [
+          {
+            "id": "claude-fable-5-1",
+            "label": "Claude Fable 5.1"
+          },
+          {
+            "id": "claude-fable-5",
+            "label": "Claude Fable 5"
+          },
+          {
+            "id": "claude-opus-5-5",
+            "label": "Claude Opus 5.5",
+            "contextWindow": 1000000
+          },
+          {
+            "id": "claude-opus-5",
+            "label": "Claude Opus 5"
+          },
+          {
+            "id": "claude-sonnet-5-5",
+            "label": "Claude Sonnet 5.5",
+            "contextWindow": 1000000
+          },
+          {
+            "id": "claude-sonnet-5",
+            "label": "Claude Sonnet 5"
+          },
+          {
+            "id": "claude-haiku-5-5",
+            "label": "Claude Haiku 5.5",
+            "contextWindow": 1000000
+          },
+          {
+            "id": "claude-haiku-4-5",
+            "label": "Claude Haiku 4.5"
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": true,
+        "browserMcp": true,
+        "images": true,
+        "effortLevels": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": true,
+        "backgroundText": true
+      },
+      "access": "api"
+    },
+    {
+      "instanceId": "xaiApi",
+      "driverKind": "grok",
+      "displayName": "xAI",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "grok-4.7",
+        "options": [
+          {
+            "id": "grok-4.7",
+            "label": "Grok 4.7",
+            "contextWindow": 500000
+          },
+          {
+            "id": "grok-4",
+            "label": "Grok 4"
+          },
+          {
+            "id": "grok-4-fast",
+            "label": "Grok 4 Fast"
+          },
+          {
+            "id": "grok-3-mini",
+            "label": "Grok 3 Mini"
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": false,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": false,
+        "images": false,
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": false,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "api"
+    },
+    {
+      "instanceId": "openrouter",
+      "driverKind": "openai-compat",
+      "displayName": "OpenRouter",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "meta-llama/llama-3.3-70b-instruct",
+        "options": [
+          {
+            "id": "meta-llama/llama-3.3-70b-instruct",
+            "label": "Llama 3.3 70B (OpenRouter)",
+            "custom": true
+          },
+          {
+            "id": "llama-3.3-70b-versatile",
+            "label": "Llama 3.3 70B (Groq)",
+            "custom": true
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "api"
+    },
+    {
+      "instanceId": "qwen",
+      "driverKind": "qwenAgent",
+      "displayName": "Qwen",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "",
+        "options": []
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": false,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "custom"
+    },
+    {
+      "instanceId": "hermes",
+      "driverKind": "hermesAgent",
+      "displayName": "Hermes",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "",
+        "options": []
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": false,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "custom"
+    },
+    {
+      "instanceId": "cline",
+      "driverKind": "clineAgent",
+      "displayName": "Cline",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "cline-default",
+        "options": [
+          {
+            "id": "cline-default",
+            "label": "Cline default (configured)"
+          }
+        ]
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": false,
+        "browserMcp": true,
+        "images": true,
+        "modelVariants": false,
+        "queueing": false,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": true
+      },
+      "access": "subscription"
+    },
+    {
+      "instanceId": "pi",
+      "driverKind": "piAgent",
+      "displayName": "pi",
+      "snapshot": {
+        "state": "unavailable"
+      },
+      "models": {
+        "default": "",
+        "options": []
+      },
+      "capabilities": {
+        "computerMcp": true,
+        "agentsMcp": true,
+        "composioMcp": true,
+        "phoneMcp": true,
+        "browserMcp": true,
+        "images": true,
+        "effortLevels": [
+          "none",
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "modelVariants": false,
+        "queueing": true,
+        "localComputerMcp": true,
+        "approvalReview": false,
+        "backgroundText": false
+      },
+      "access": "custom"
+    }
+  ],
+  "server": {
+    "version": "0.2.13",
+    "label": "z4mbo-w11",
+    "environmentId": "8e83526a-1ccd-4f25-a7e7-e9fdbf97bfca",
+    "capabilities": {
+      "remoteSessions": true,
+      "selfUpdate": "operator",
+      "emailSignIn": false,
+      "jobs": true
+    }
+  },
+  "session": {
+    "kind": "loopback",
+    "scopes": [
+      "admin",
+      "client"
+    ]
+  },
+  "browser": {
+    "kind": "unavailable",
+    "reason": "agent-browser is not installed on this machine yet",
+    "installable": true,
+    "myChrome": false
+  },
+  "problems": [],
+  "warnings": [
+    "bots have no built-in browser here: agent-browser is not installed on this machine yet (install it with `pnpm omb browser install`)"
+  ]
+}

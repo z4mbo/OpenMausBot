@@ -1,0 +1,76 @@
+{
+  "baseline": "0ca15f38b8916e5cb1b7dc9c63222a3228f5fc0e",
+  "before": {
+    "version": "before",
+    "baseline": "0ca15f38b8916e5cb1b7dc9c63222a3228f5fc0e",
+    "sourceHashes": {
+      "src/components/Sidebar.tsx": "e0552f78eae8a01d0771cdd87bb950da36448cff199a82f52162bc53db51b305",
+      "src/components/SidebarFooterNav.tsx": "70c5574adad3a66caaa06d08c563b058ebe0c7e7cdcb9ec950897b64b5ba7213"
+    },
+    "synthetic": true
+  },
+  "after": {
+    "version": "after",
+    "baseline": "0ca15f38b8916e5cb1b7dc9c63222a3228f5fc0e",
+    "sourceHashes": {
+      "src/components/Sidebar.tsx": "df0ef6cdb4ed1a14247d98718db2cb789e7702dc3a3d8545d0e00f1b22adcc6f",
+      "src/components/SidebarFooterNav.tsx": "633cf65e0c60476e7be00c509a522ec33d61710cc85153384b690d27f40988ba"
+    },
+    "synthetic": true
+  },
+  "sources": [
+    {
+      "path": "src/components/Sidebar.tsx",
+      "rawSha256": "df0ef6cdb4ed1a14247d98718db2cb789e7702dc3a3d8545d0e00f1b22adcc6f",
+      "normalizedLfSha256": "82675bf5a787c97c722c490ca8cedae48d088cfe355645f978f49107b0cc6f8a"
+    },
+    {
+      "path": "src/components/SidebarFooterNav.tsx",
+      "rawSha256": "633cf65e0c60476e7be00c509a522ec33d61710cc85153384b690d27f40988ba",
+      "normalizedLfSha256": "2a116aabdb8af3dc5b56ceaf8d7fd1f28b82e3e0cc3b9c87e58f3bf39b7acc96"
+    },
+    {
+      "path": "src/styles.css",
+      "rawSha256": "6a32667334d20d405e8ee55c5d4455abdb6eea3c9f387b6e8495037a3a1a2b91",
+      "normalizedLfSha256": "eaedc6ef899d8982474b49591389f09f85317e8c035cd79a0adf519e39dac286"
+    },
+    {
+      "path": "src/components/SidebarIdentity.tsx",
+      "rawSha256": "f8b11f3da77e29b414c8f397a347ddec3d8b809c046d4b9e4ed26230cde1eb2a",
+      "normalizedLfSha256": "f8b11f3da77e29b414c8f397a347ddec3d8b809c046d4b9e4ed26230cde1eb2a"
+    },
+    {
+      "path": "src/components/OriginAccountMenu.tsx",
+      "rawSha256": "1a6f6f31ac592a60780f5b84df22696e0c44afaeae3bbe28180b9018dda53b87",
+      "normalizedLfSha256": "5cb227d491bfebab340064dee6c820fc1735960ee32cb0b073be01aee59a3d80"
+    },
+    {
+      "path": "src/components/DesktopWorkspaceSwitcher.tsx",
+      "rawSha256": "ce0887176139cf417fd187075730fca4f33953a6f49d7d79a14a991a7c2a94ad",
+      "normalizedLfSha256": "6b86b649a1c939c1dfa2fbb157911f37d004ee8ddfea7f822baa91f340c35fb7"
+    },
+    {
+      "path": "scripts/testing/origin-header-preview.tsx",
+      "rawSha256": "3904c785939c408b14c9f439d2e02a3e36b4737d0c9aa7a2719dc5b5d0e33b73",
+      "normalizedLfSha256": "3904c785939c408b14c9f439d2e02a3e36b4737d0c9aa7a2719dc5b5d0e33b73"
+    },
+    {
+      "path": "scripts/testing/origin-header-cloud.ts",
+      "rawSha256": "6cfe8969eda975de5bd6eafa745f903f2afed29a8ca0c9472397711d245c49b5",
+      "normalizedLfSha256": "6cfe8969eda975de5bd6eafa745f903f2afed29a8ca0c9472397711d245c49b5"
+    },
+    {
+      "path": "scripts/testing/origin-header-mode.ts",
+      "rawSha256": "34ef4ca752e53cdff71b90478ce2395c780445fc63c33628200732fda69c196d",
+      "normalizedLfSha256": "34ef4ca752e53cdff71b90478ce2395c780445fc63c33628200732fda69c196d"
+    },
+    {
+      "path": "scripts/testing/sidebar-keyboard.e2e.test.ts",
+      "rawSha256": "3ef19a1c92be08c8118675bb4d22a947b0079cf9cb6cc992b8c52bebe27d5adb",
+      "normalizedLfSha256": "3ef19a1c92be08c8118675bb4d22a947b0079cf9cb6cc992b8c52bebe27d5adb"
+    }
+  ],
+  "productionAdvancedOnly": true,
+  "controlledSimpleMode": true,
+  "optionalBridgesSynthetic": true
+}

@@ -25,8 +25,8 @@ export const HIGHLEVEL_CLAIM_LIMIT = 3_000;
 export const HIGHLEVEL_REFRESH_LIMIT = 600;
 
 const STATE_BYTES = 32;
-/** 32 random bytes, base64url without padding. */
-const STATE = /^[A-Za-z0-9_-]{43}$/;
+/** Canonical base64url for 32 bytes has two zero pad bits in its final character. */
+const STATE = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 /** HighLevel's authorization codes are opaque; accept any single token of
  * printable ASCII. The value is sent to HighLevel once and never kept. */
 const CODE = /^[\x21-\x7e]{1,1024}$/;

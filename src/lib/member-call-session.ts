@@ -50,11 +50,13 @@ let nonce = 0;
 /** Joins the call `config` describes, leaving any other one first. */
 export function startMemberCall(config: Omit<MemberCallConfig, "nonce">): void {
   failureStore.set(null);
+  stateStore.set(null);
   configStore.set({ ...config, nonce: ++nonce });
 }
 
 /** Drops the session; the host's engine leaves the room as it unmounts. */
-export function endMemberCall(failure?: { key: string; message: string }): void {
+export function endMemberCall(expectedNonce: number, failure?: { key: string; message: string }): void {
+  if (configStore.get()?.nonce !== expectedNonce) return;
   configStore.set(null);
   stateStore.set(null);
   if (failure) failureStore.set(failure);
@@ -67,7 +69,8 @@ export function useMemberCallConfig(): MemberCallConfig | null {
 }
 
 /** The engine publishes its live state here every render, for the call page and the sidebar banner. */
-export function publishMemberCallState(state: unknown): void {
+export function publishMemberCallState(state: unknown, expectedNonce: number): void {
+  if (configStore.get()?.nonce !== expectedNonce) return;
   stateStore.set(state);
 }
 

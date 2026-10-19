@@ -6,6 +6,7 @@ import { agentKind, avatarLook, modelIntent } from "./agentsTables";
 import { requireUser } from "./lib/auth";
 import { agentAccess, requireAgent, requireSharedAgents } from "./lib/agentAccess";
 import { projectMember, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
+import { admitStorageReference, issueUpload, storageMetadata } from "./lib/storage";
 
 const NAME_MAX = 80;
 const TITLE_MAX = 120;
@@ -218,7 +219,7 @@ export const avatarUploadUrl = mutation({
   handler: async (ctx, args) => {
     const { access } = await requireAgent(ctx, args.agentId, args.sessionToken);
     if (!access.canEdit) throw new Error("Only the creator or an admin can edit this agent");
-    return ctx.storage.generateUploadUrl();
+    return issueUpload(ctx, args.sessionToken, { kind: "agent", agentId: args.agentId });
   },
 });
 
@@ -229,10 +230,10 @@ export const setAvatar = mutation({
     const { agent, access } = await requireAgent(ctx, args.agentId, args.sessionToken);
     if (!access.canEdit) throw new Error("Only the creator or an admin can edit this agent");
     if (args.storageId) {
-      const meta = await ctx.db.system.get(args.storageId);
+      const meta = await storageMetadata(ctx, args.storageId);
       if (!meta || meta.size > 5 * 1024 * 1024 || !meta.contentType?.startsWith("image/")) throw new Error("Upload an image under 5 MB");
+      await admitStorageReference(ctx, args.storageId, access.user, agent.projectId ? { kind: "project", projectId: agent.projectId } : { kind: "workspace", teamId: agent.teamId });
     }
-    if (agent.avatarStorageId && agent.avatarStorageId !== args.storageId) await ctx.storage.delete(agent.avatarStorageId);
     await ctx.db.patch(agent._id, {
       avatarStorageId: args.storageId ?? undefined, soulVersion: (agent.soulVersion ?? 1) + 1, updatedBy: access.user._id, updatedAt: Date.now(),
     });

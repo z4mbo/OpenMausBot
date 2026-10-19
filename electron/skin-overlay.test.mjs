@@ -3,12 +3,13 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
+import { readSkinCss } from "../scripts/testing/skin-css.ts";
 
 const require = createRequire(import.meta.url);
 const { SKIN_CHROME, DEFAULT_SKIN, skinChrome, isKnownSkin } = require("./skin-overlay.cjs");
 
 const here = dirname(fileURLToPath(import.meta.url));
-const css = readFileSync(join(here, "../src/styles.css"), "utf8");
+const css = readSkinCss();
 const skinIds = readFileSync(join(here, "../src/lib/skins.ts"), "utf8");
 
 function cssToken(skin, name) {

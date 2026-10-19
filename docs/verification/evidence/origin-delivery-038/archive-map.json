@@ -1,0 +1,2103 @@
+{
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "version": "0.2.14",
+  "qualifiedOriginalPaths": true,
+  "files": [
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/results.json",
+      "archivedPath": "site/results.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-timeout-results.json",
+      "archivedPath": "site/signup-timeout-results.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-light-timeout-replacement.json",
+      "archivedPath": "site/signup-375-light-timeout-replacement.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/capture-helper.txt",
+      "archivedPath": "site/capture-helper.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/observation-helper.txt",
+      "archivedPath": "site/observation-helper.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/site-release-identity-0.2.14.json",
+      "archivedPath": "inputs/site-release-identity-0.2.14.json"
+    },
+    {
+      "originalPath": ".omb-scratch/site-stage-038-proof.json",
+      "archivedPath": "inputs/site-stage-038-proof.json"
+    },
+    {
+      "originalPath": ".omb-scratch/prepublication-037.mjs",
+      "archivedPath": "inputs/prepublication-037.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/prepublication-037-test-report.json",
+      "archivedPath": "inputs/prepublication-037-test-report.json"
+    },
+    {
+      "originalPath": ".omb-scratch/prepublication-037-pr-checkout-proof.json",
+      "archivedPath": "inputs/prepublication-037-pr-checkout-proof.json"
+    },
+    {
+      "originalPath": "docs/verification/origin-ownership-037.md",
+      "archivedPath": "inputs/docs__verification__origin-ownership-037.md"
+    },
+    {
+      "originalPath": "docs/verification/evidence/origin-ownership-037/manifest.json",
+      "archivedPath": "inputs/docs__verification__evidence__origin-ownership-037__manifest.json"
+    },
+    {
+      "originalPath": "docs/verification/evidence/origin-ownership-037/source-binding.json",
+      "archivedPath": "inputs/docs__verification__evidence__origin-ownership-037__source-binding.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-375-light.png",
+      "archivedPath": "site/landing-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-375-light.json",
+      "archivedPath": "site/landing-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-375-light.ax.txt",
+      "archivedPath": "site/landing-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-375-dark.png",
+      "archivedPath": "site/landing-375-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-375-dark.json",
+      "archivedPath": "site/landing-375-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-375-dark.ax.txt",
+      "archivedPath": "site/landing-375-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-1440-light.png",
+      "archivedPath": "site/landing-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-1440-light.json",
+      "archivedPath": "site/landing-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-1440-light.ax.txt",
+      "archivedPath": "site/landing-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-1440-dark.png",
+      "archivedPath": "site/landing-1440-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-1440-dark.json",
+      "archivedPath": "site/landing-1440-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/landing-1440-dark.ax.txt",
+      "archivedPath": "site/landing-1440-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-375-light.png",
+      "archivedPath": "site/login-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-375-light.json",
+      "archivedPath": "site/login-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-375-light.ax.txt",
+      "archivedPath": "site/login-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-375-dark.png",
+      "archivedPath": "site/login-375-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-375-dark.json",
+      "archivedPath": "site/login-375-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-375-dark.ax.txt",
+      "archivedPath": "site/login-375-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-1440-light.png",
+      "archivedPath": "site/login-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-1440-light.json",
+      "archivedPath": "site/login-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-1440-light.ax.txt",
+      "archivedPath": "site/login-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-1440-dark.png",
+      "archivedPath": "site/login-1440-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-1440-dark.json",
+      "archivedPath": "site/login-1440-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/login-1440-dark.ax.txt",
+      "archivedPath": "site/login-1440-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-light.png",
+      "archivedPath": "site/signup-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-light.json",
+      "archivedPath": "site/signup-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-light.ax.txt",
+      "archivedPath": "site/signup-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-dark.png",
+      "archivedPath": "site/signup-375-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-dark.json",
+      "archivedPath": "site/signup-375-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-dark.ax.txt",
+      "archivedPath": "site/signup-375-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-light.png",
+      "archivedPath": "site/signup-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-light.json",
+      "archivedPath": "site/signup-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-light.ax.txt",
+      "archivedPath": "site/signup-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark.png",
+      "archivedPath": "site/signup-1440-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark.json",
+      "archivedPath": "site/signup-1440-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark.ax.txt",
+      "archivedPath": "site/signup-1440-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-375-light.png",
+      "archivedPath": "site/whats-new-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-375-light.json",
+      "archivedPath": "site/whats-new-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-375-light.ax.txt",
+      "archivedPath": "site/whats-new-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-375-dark.png",
+      "archivedPath": "site/whats-new-375-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-375-dark.json",
+      "archivedPath": "site/whats-new-375-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-375-dark.ax.txt",
+      "archivedPath": "site/whats-new-375-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-light.png",
+      "archivedPath": "site/whats-new-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-light.json",
+      "archivedPath": "site/whats-new-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-light.ax.txt",
+      "archivedPath": "site/whats-new-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-dark.png",
+      "archivedPath": "site/whats-new-1440-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-dark.json",
+      "archivedPath": "site/whats-new-1440-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-dark.ax.txt",
+      "archivedPath": "site/whats-new-1440-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-light-timeout.png",
+      "archivedPath": "site/signup-375-light-timeout.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-light-timeout.ax.txt",
+      "archivedPath": "site/signup-375-light-timeout.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-dark-timeout.png",
+      "archivedPath": "site/signup-375-dark-timeout.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-375-dark-timeout.ax.txt",
+      "archivedPath": "site/signup-375-dark-timeout.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-light-timeout.png",
+      "archivedPath": "site/signup-1440-light-timeout.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-light-timeout.ax.txt",
+      "archivedPath": "site/signup-1440-light-timeout.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark-timeout.png",
+      "archivedPath": "site/signup-1440-dark-timeout.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark-timeout.ax.txt",
+      "archivedPath": "site/signup-1440-dark-timeout.ax.txt"
+    },
+    {
+      "originalPath": "../../.codex/worktrees/origin-branding-034/Origin/.omb-scratch/site-visual-review-038.json",
+      "archivedPath": "review/site-visual-review-038.json"
+    },
+    {
+      "originalPath": "../../.codex/worktrees/origin-branding-034/Origin/.omb-scratch/site-visual-review-038.md",
+      "archivedPath": "review/site-visual-review-038.md"
+    },
+    {
+      "originalPath": "../../.codex/worktrees/origin-branding-034/Origin/.omb-scratch/site-helper-prerequisites-038.json",
+      "archivedPath": "review/site-helper-prerequisites-038.json"
+    },
+    {
+      "originalPath": "../../.codex/worktrees/origin-branding-034/Origin/.omb-scratch/prepublication-037b.mjs",
+      "archivedPath": "ci-retry/prepublication-037b.mjs.txt"
+    },
+    {
+      "originalPath": "../../.codex/worktrees/origin-branding-034/Origin/.omb-scratch/ci-attempt1-terminal-038.json",
+      "archivedPath": "ci-retry/ci-attempt1-terminal-038.json"
+    },
+    {
+      "originalPath": "../../.codex/worktrees/origin-branding-034/Origin/.omb-scratch/ci-attempt1-terminal-receipt-038.json",
+      "archivedPath": "ci-retry/ci-attempt1-terminal-receipt-038.json"
+    },
+    {
+      "originalPath": "../../.codex/worktrees/origin-branding-034/Origin/.omb-scratch/prepublication-037b-ci-latest-jobs-raw.json",
+      "archivedPath": "ci-retry/prepublication-037b-ci-latest-jobs-raw.json"
+    },
+    {
+      "originalPath": "../../.codex/worktrees/origin-branding-034/Origin/.omb-scratch/prepublication-037b-provenance-test-report.json",
+      "archivedPath": "ci-retry/prepublication-037b-provenance-test-report.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/audit-imports.json",
+      "archivedPath": "actual/audit-imports.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182331810-attempt1-terminal-jobs-api-raw.json",
+      "archivedPath": "ci-attempt1/39182331810-attempt1-terminal-jobs-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182331810-attempt1-terminal-run-api-raw.json",
+      "archivedPath": "ci-attempt1/39182331810-attempt1-terminal-run-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182331813-attempt1-terminal-artifacts.json",
+      "archivedPath": "ci-attempt1/39182331813-attempt1-terminal-artifacts.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182331813-attempt1-terminal-jobs-api-raw.json",
+      "archivedPath": "ci-attempt1/39182331813-attempt1-terminal-jobs-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182331813-attempt1-terminal-run-api-raw.json",
+      "archivedPath": "ci-attempt1/39182331813-attempt1-terminal-run-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182331975-attempt1-terminal-jobs.json",
+      "archivedPath": "ci-attempt1/39182331975-attempt1-terminal-jobs.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182331975-attempt1-terminal-run.json",
+      "archivedPath": "ci-attempt1/39182331975-attempt1-terminal-run.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182338251-attempt1-terminal-jobs.json",
+      "archivedPath": "ci-attempt1/39182338251-attempt1-terminal-jobs.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182338251-attempt1-terminal-run.json",
+      "archivedPath": "ci-attempt1/39182338251-attempt1-terminal-run.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182338259-attempt1-terminal-jobs.json",
+      "archivedPath": "ci-attempt1/39182338259-attempt1-terminal-jobs.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182338259-attempt1-terminal-run.json",
+      "archivedPath": "ci-attempt1/39182338259-attempt1-terminal-run.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182338260-attempt1-terminal-jobs-api-raw.json",
+      "archivedPath": "ci-attempt1/39182338260-attempt1-terminal-jobs-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/39182338260-attempt1-terminal-run-api-raw.json",
+      "archivedPath": "ci-attempt1/39182338260-attempt1-terminal-run-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/backend-site-pr-terminal.log",
+      "archivedPath": "ci-attempt1/backend-site-pr-terminal.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/0_CI.txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/0_CI.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/10_macOS smokes (packaged server + Electron).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/10_macOS smokes (packaged server + Electron).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/11_open-source edition builds without enterprise_.txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/11_open-source edition builds without enterprise_.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/12_vitest (windows-latest, shard 3_4).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/12_vitest (windows-latest, shard 3_4).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/13_vitest (ubuntu-latest, shard 1_4).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/13_vitest (ubuntu-latest, shard 1_4).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/14_vitest (ubuntu-latest, shard 4_4).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/14_vitest (ubuntu-latest, shard 4_4).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/15_vitest (windows-latest, shard 2_4).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/15_vitest (windows-latest, shard 2_4).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/16_Windows CUA host smoke.txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/16_Windows CUA host smoke.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/17_behavior evals (offline tiers 1-3).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/17_behavior evals (offline tiers 1-3).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/18_packaged server smoke (windows-latest).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/18_packaged server smoke (windows-latest).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/19_typecheck + lint.txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/19_typecheck + lint.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/2_vitest (windows-latest, shard 4_4).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/2_vitest (windows-latest, shard 4_4).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/3_control-plane check + workerd tests + dry run.txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/3_control-plane check + workerd tests + dry run.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/4_packaged server smoke (ubuntu-latest).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/4_packaged server smoke (ubuntu-latest).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/5_vitest (windows-latest, shard 1_4).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/5_vitest (windows-latest, shard 1_4).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/6_cloudflared installer (Linux ARM64).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/6_cloudflared installer (Linux ARM64).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/7_vitest (ubuntu-latest, shard 3_4).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/7_vitest (ubuntu-latest, shard 3_4).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/8_vitest (ubuntu-latest, shard 2_4).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/8_vitest (ubuntu-latest, shard 2_4).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-job-logs/9_renderer smoke (control-omb ui, Ubuntu 24.04).txt",
+      "archivedPath": "ci-attempt1/ci-job-logs/9_renderer smoke (control-omb ui, Ubuntu 24.04).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci-windows-shard4-failure-api.log",
+      "archivedPath": "ci-attempt1/ci-windows-shard4-failure-api.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/ci39182338260-attempt1-logs.zip",
+      "archivedPath": "ci-attempt1/ci39182338260-attempt1-logs.zip"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/finish.mjs",
+      "archivedPath": "ci-attempt1/finish.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/git-commit-3607e350e9e8da5c4c21dde37baf76c91ed9c858.json",
+      "archivedPath": "ci-attempt1/git-commit-3607e350e9e8da5c4c21dde37baf76c91ed9c858.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/git-commit-ab0cd72b4c2f004c1015adca034472241569c04b.json",
+      "archivedPath": "ci-attempt1/git-commit-ab0cd72b4c2f004c1015adca034472241569c04b.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1/terminal-receipt-038.json",
+      "archivedPath": "ci-attempt1/terminal-receipt-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt1-failure-snapshot.json",
+      "archivedPath": "actual/ci-attempt1-failure-snapshot.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/2026-10-19T01-30-40.079Z-attempt2-api-raw.json",
+      "archivedPath": "ci-attempt2/2026-10-19T01-30-40.079Z-attempt2-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/2026-10-19T01-30-40.079Z-attempt2-jobs-api-raw.json",
+      "archivedPath": "ci-attempt2/2026-10-19T01-30-40.079Z-attempt2-jobs-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/2026-10-19T01-30-40.079Z-latest-jobs-api-raw.json",
+      "archivedPath": "ci-attempt2/2026-10-19T01-30-40.079Z-latest-jobs-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/2026-10-19T01-30-40.079Z-run-api-raw.json",
+      "archivedPath": "ci-attempt2/2026-10-19T01-30-40.079Z-run-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/39182338260-attempt2-terminal-jobs-api-raw.json",
+      "archivedPath": "ci-attempt2/39182338260-attempt2-terminal-jobs-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/39182338260-attempt2-terminal-run-api-raw.json",
+      "archivedPath": "ci-attempt2/39182338260-attempt2-terminal-run-api-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/attempt1-preservation-baseline.json",
+      "archivedPath": "ci-attempt2/attempt1-preservation-baseline.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/ci-job-logs/0_CI.txt",
+      "archivedPath": "ci-attempt2/ci-job-logs/0_CI.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/ci-job-logs/1_vitest (windows-latest, shard 4_4).txt",
+      "archivedPath": "ci-attempt2/ci-job-logs/1_vitest (windows-latest, shard 4_4).txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/ci-targeted-retry-intent.json",
+      "archivedPath": "ci-attempt2/ci-targeted-retry-intent.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/ci-windows-shard4-attempt2-api.log",
+      "archivedPath": "ci-attempt2/ci-windows-shard4-attempt2-api.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/ci39182338260-attempt2-logs.zip",
+      "archivedPath": "ci-attempt2/ci39182338260-attempt2-logs.zip"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/execution-provenance-initial.json",
+      "archivedPath": "ci-attempt2/execution-provenance-initial.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/execution-provenance-terminal.json",
+      "archivedPath": "ci-attempt2/execution-provenance-terminal.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/fetch-terminal-logs.mjs",
+      "archivedPath": "ci-attempt2/fetch-terminal-logs.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/finalize.mjs",
+      "archivedPath": "ci-attempt2/finalize.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/first-observation.json",
+      "archivedPath": "ci-attempt2/first-observation.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/map-provenance.mjs",
+      "archivedPath": "ci-attempt2/map-provenance.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-attempt2/terminal-receipt-038-attempt2.json",
+      "archivedPath": "ci-attempt2/terminal-receipt-038-attempt2.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-import-manifest-038.json",
+      "archivedPath": "actual/ci-import-manifest-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-provider-local-focused.json",
+      "archivedPath": "actual/ci-provider-local-focused.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-targeted-retry-intent.json",
+      "archivedPath": "actual/ci-targeted-retry-intent.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/ci-targeted-retry-request.log",
+      "archivedPath": "actual/ci-targeted-retry-request.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/delivery-receipt-038.json",
+      "archivedPath": "delivery-receipt.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/downloads-stage-check.log",
+      "archivedPath": "actual/downloads-stage-check.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/downloads-stage-created.json",
+      "archivedPath": "actual/downloads-stage-created.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/downloads-stage-recovery-intent.json",
+      "archivedPath": "actual/downloads-stage-recovery-intent.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/downloads-stage-transfer.log",
+      "archivedPath": "actual/downloads-stage-transfer.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/draft-tag-after.json",
+      "archivedPath": "actual/draft-tag-after.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/draft-tag-before.json",
+      "archivedPath": "actual/draft-tag-before.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/draft-tag-request.json",
+      "archivedPath": "actual/draft-tag-request.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/final-audit-report-038.md",
+      "archivedPath": "final-audit-report.md"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/finalize-inputs-038.json",
+      "archivedPath": "actual/finalize-inputs-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/finalizer-038b-first-rejection.json",
+      "archivedPath": "actual/finalizer-038b-first-rejection.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/finalizer-038c-import.json",
+      "archivedPath": "actual/finalizer-038c-import.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/finalizer-evidence-038.json",
+      "archivedPath": "actual/finalizer-evidence-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-draft-after-assets.json",
+      "archivedPath": "actual/github-draft-after-assets.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-draft-assets-upload.log",
+      "archivedPath": "actual/github-draft-assets-upload.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-draft-before-assets.json",
+      "archivedPath": "actual/github-draft-before-assets.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-draft-notes-request.json",
+      "archivedPath": "actual/github-draft-notes-request.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-draft-notes-response.json",
+      "archivedPath": "actual/github-draft-notes-response.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-draft-verified.json",
+      "archivedPath": "actual/github-draft-verified.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-public-038.json",
+      "archivedPath": "actual/github-public-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-public-check-result.json",
+      "archivedPath": "actual/github-public-check-result.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-public-check.log",
+      "archivedPath": "actual/github-public-check.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-public-check.stderr.txt",
+      "archivedPath": "actual/github-public-check.stderr.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-public-metadata-038.json",
+      "archivedPath": "actual/github-public-metadata-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-publication-request.json",
+      "archivedPath": "actual/github-publication-request.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/github-stage-intent.json",
+      "archivedPath": "actual/github-stage-intent.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/imports.json",
+      "archivedPath": "actual/imports.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/39182331813-attempt1-terminal-artifacts.json",
+      "archivedPath": "native/39182331813-attempt1-terminal-artifacts.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/39182331813-attempt1-terminal-jobs.json",
+      "archivedPath": "native/39182331813-attempt1-terminal-jobs.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/39182331813-attempt1-terminal-run.json",
+      "archivedPath": "native/39182331813-attempt1-terminal-run.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/audit-input.json",
+      "archivedPath": "native/audit-input.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/audit-metadata.cjs",
+      "archivedPath": "native/audit-metadata.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-fallback-results.json",
+      "archivedPath": "native/bundled-fallback-results.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-fallback.log",
+      "archivedPath": "native/bundled-fallback.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership-final.log",
+      "archivedPath": "native/bundled-ownership-final.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership-first-error.json",
+      "archivedPath": "native/bundled-ownership-first-error.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership-refined-error.json",
+      "archivedPath": "native/bundled-ownership-refined-error.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership-refined.log",
+      "archivedPath": "native/bundled-ownership-refined.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership-refined2-error.json",
+      "archivedPath": "native/bundled-ownership-refined2-error.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership-refined2.log",
+      "archivedPath": "native/bundled-ownership-refined2.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership-refined3-error.json",
+      "archivedPath": "native/bundled-ownership-refined3-error.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership-refined3.log",
+      "archivedPath": "native/bundled-ownership-refined3.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership-results.json",
+      "archivedPath": "native/bundled-ownership-results.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/bundled-ownership.log",
+      "archivedPath": "native/bundled-ownership.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/canonical-09ffff4e44290d80863ea8fab608a4e012dd42cefbf4f212e53ed81f763aea69.json",
+      "archivedPath": "native/canonical-09ffff4e44290d80863ea8fab608a4e012dd42cefbf4f212e53ed81f763aea69.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/canonical-2669edb66b05a41a66dfdcff0b70cff020d31e1db45e9db35683c89e5c3ecb07.json",
+      "archivedPath": "native/canonical-2669edb66b05a41a66dfdcff0b70cff020d31e1db45e9db35683c89e5c3ecb07.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/canonical-834a6ee6b12feb40300b20c2b467f6195d226209f09f6e45001be377d47b0930.json",
+      "archivedPath": "native/canonical-834a6ee6b12feb40300b20c2b467f6195d226209f09f6e45001be377d47b0930.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/canonical-a8123b12497f44975de292429d79b1804d6d27be5609d8a2a13157bf785ac86d.json",
+      "archivedPath": "native/canonical-a8123b12497f44975de292429d79b1804d6d27be5609d8a2a13157bf785ac86d.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/canonical-c53d04d82e46fd2463937fcee94d8815fdc73500f4b8ebbbef37f9c365e8e820.json",
+      "archivedPath": "native/canonical-c53d04d82e46fd2463937fcee94d8815fdc73500f4b8ebbbef37f9c365e8e820.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/canonical-fad756e1b81690359d2eb61392fedc9d7319b27d5f0e45473fd154f1d568384c.json",
+      "archivedPath": "native/canonical-fad756e1b81690359d2eb61392fedc9d7319b27d5f0e45473fd154f1d568384c.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/check-bundled-fallback.cjs",
+      "archivedPath": "native/check-bundled-fallback.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/check-bundled-ownership-first.cjs",
+      "archivedPath": "native/check-bundled-ownership-first.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/check-bundled-ownership-refined-first.cjs",
+      "archivedPath": "native/check-bundled-ownership-refined-first.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/check-bundled-ownership-refined2.cjs",
+      "archivedPath": "native/check-bundled-ownership-refined2.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/check-bundled-ownership-refined3.cjs",
+      "archivedPath": "native/check-bundled-ownership-refined3.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/check-bundled-ownership.cjs",
+      "archivedPath": "native/check-bundled-ownership.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/compare-canonical-debug.cjs",
+      "archivedPath": "native/compare-canonical-debug.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/distribution.log",
+      "archivedPath": "native/distribution.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/download-artifacts.cjs",
+      "archivedPath": "native/download-artifacts.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/download-ready.json",
+      "archivedPath": "native/download-ready.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/extract-api-archive.ps1",
+      "archivedPath": "native/extract-api-archive.ps1"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/extract-api-mac.log",
+      "archivedPath": "native/extract-api-mac.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/extract-api-windows.log",
+      "archivedPath": "native/extract-api-windows.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/extract-mac-arm64.log",
+      "archivedPath": "native/extract-mac-arm64.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/extract-mac-x64.log",
+      "archivedPath": "native/extract-mac-x64.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/extract-selected.ps1",
+      "archivedPath": "native/extract-selected.ps1"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/extract-windows.log",
+      "archivedPath": "native/extract-windows.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/github-release-0.2.14.md",
+      "archivedPath": "native/github-release-0.2.14.md"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/helper-provenance.json",
+      "archivedPath": "native/helper-provenance.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/mac-api-extraction.json",
+      "archivedPath": "native/mac-api-extraction.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/mac-arm64/archive-manifest.json",
+      "archivedPath": "native/mac-arm64/archive-manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/mac-x64/archive-manifest.json",
+      "archivedPath": "native/mac-x64/archive-manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/manifest.json",
+      "archivedPath": "native/manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/metadata-results.json",
+      "archivedPath": "native/metadata-results.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/metadata.log",
+      "archivedPath": "native/metadata.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/origin-mac-archive-verification.json",
+      "archivedPath": "native/origin-mac-archive-verification.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/origin-mac-download.json",
+      "archivedPath": "native/origin-mac-download.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/origin-mac-download.stderr.log",
+      "archivedPath": "native/origin-mac-download.stderr.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/origin-windows-archive-verification.json",
+      "archivedPath": "native/origin-windows-archive-verification.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/origin-windows-download.json",
+      "archivedPath": "native/origin-windows-download.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/origin-windows-download.stderr.log",
+      "archivedPath": "native/origin-windows-download.stderr.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/packaged-smoke.log",
+      "archivedPath": "native/packaged-smoke.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/prepare-audit.cjs",
+      "archivedPath": "native/prepare-audit.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/receipt.json",
+      "archivedPath": "native/receipt.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/refine-binding-spelling.cjs",
+      "archivedPath": "native/refine-binding-spelling.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/refine-ownership-helper.cjs",
+      "archivedPath": "native/refine-ownership-helper.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/refine-reader-name.cjs",
+      "archivedPath": "native/refine-reader-name.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/refine-shorthand.cjs",
+      "archivedPath": "native/refine-shorthand.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/release-manifest-0.2.14.json",
+      "archivedPath": "native/release-manifest-0.2.14.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/REPORT.md",
+      "archivedPath": "native/REPORT.md"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/run-packaged-smoke.cjs",
+      "archivedPath": "native/run-packaged-smoke.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/seal-audit-first.cjs",
+      "archivedPath": "native/seal-audit-first.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/seal-audit.cjs",
+      "archivedPath": "native/seal-audit.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/seal-first-helper-error.json",
+      "archivedPath": "native/seal-first-helper-error.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/SHA256SUMS-0.2.14.txt",
+      "archivedPath": "native/SHA256SUMS-0.2.14.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/smoke-closure.json",
+      "archivedPath": "native/smoke-closure.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/smoke-command.json",
+      "archivedPath": "native/smoke-command.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/smoke-result.json",
+      "archivedPath": "native/smoke-result.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/source-bindings.json",
+      "archivedPath": "native/source-bindings.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/windows/archive-manifest.json",
+      "archivedPath": "native/windows/archive-manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/windows-api-extraction.json",
+      "archivedPath": "native/windows-api-extraction.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/windows-executable-metadata-raw.json",
+      "archivedPath": "native/windows-executable-metadata-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/windows-executable-metadata.json",
+      "archivedPath": "native/windows-executable-metadata.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native/windows-version-first-helper-error.json",
+      "archivedPath": "native/windows-version-first-helper-error.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/native-import.json",
+      "archivedPath": "actual/native-import.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/origin-ci-038.json",
+      "archivedPath": "actual/origin-ci-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/prepublication-038-result.json",
+      "archivedPath": "actual/prepublication-038-result.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/prepublication-038.json",
+      "archivedPath": "actual/prepublication-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/prepublication-038.log",
+      "archivedPath": "actual/prepublication-038.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/prepublication-038.stderr.txt",
+      "archivedPath": "actual/prepublication-038.stderr.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/promote-downloads-result.json",
+      "archivedPath": "actual/promote-downloads-result.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/promote-downloads.log",
+      "archivedPath": "actual/promote-downloads.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/promote-downloads.stderr.txt",
+      "archivedPath": "actual/promote-downloads.stderr.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/promote-site-result.json",
+      "archivedPath": "actual/promote-site-result.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/promote-site.log",
+      "archivedPath": "actual/promote-site.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/promote-site.stderr.txt",
+      "archivedPath": "actual/promote-site.stderr.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-downloads-038-result.json",
+      "archivedPath": "actual/public-downloads-038-result.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-downloads-038.log",
+      "archivedPath": "actual/public-downloads-038.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-downloads-038.stderr.txt",
+      "archivedPath": "actual/public-downloads-038.stderr.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-downloads-result.json",
+      "archivedPath": "actual/public-downloads-result.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-http-038.json",
+      "archivedPath": "actual/public-http-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-landing-038.ax.txt",
+      "archivedPath": "actual/public-landing-038.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-landing-038.jpg",
+      "archivedPath": "actual/public-landing-038.jpg"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-runtime-038-result.json",
+      "archivedPath": "actual/public-runtime-038-result.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-runtime-038.log",
+      "archivedPath": "actual/public-runtime-038.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-runtime-038.stderr.txt",
+      "archivedPath": "actual/public-runtime-038.stderr.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-runtime-038.txt",
+      "archivedPath": "actual/public-runtime-038.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-whats-new-038.ax.txt",
+      "archivedPath": "actual/public-whats-new-038.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/public-whats-new-038.jpg",
+      "archivedPath": "actual/public-whats-new-038.jpg"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/publication-state.json",
+      "archivedPath": "actual/publication-state.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/publish-github-result.json",
+      "archivedPath": "actual/publish-github-result.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/publish-github.log",
+      "archivedPath": "actual/publish-github.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/publish-github.stderr.txt",
+      "archivedPath": "actual/publish-github.stderr.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/sidebar-one-row-keyboard.json",
+      "archivedPath": "actual/sidebar-one-row-keyboard.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/sidebar-one-row-preview.jpg",
+      "archivedPath": "actual/sidebar-one-row-preview.jpg"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/landing-1440-dark.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/landing-1440-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/landing-1440-dark.json",
+      "archivedPath": "site/cdp-capture-diagnostic/landing-1440-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/landing-1440-dark.png",
+      "archivedPath": "site/cdp-capture-diagnostic/landing-1440-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/landing-1440-light.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/landing-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/landing-1440-light.json",
+      "archivedPath": "site/cdp-capture-diagnostic/landing-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/landing-1440-light.png",
+      "archivedPath": "site/cdp-capture-diagnostic/landing-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/landing-375-light.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/landing-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/landing-375-light.json",
+      "archivedPath": "site/cdp-capture-diagnostic/landing-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/landing-375-light.png",
+      "archivedPath": "site/cdp-capture-diagnostic/landing-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/login-1440-dark.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/login-1440-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/login-1440-dark.json",
+      "archivedPath": "site/cdp-capture-diagnostic/login-1440-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/login-1440-dark.png",
+      "archivedPath": "site/cdp-capture-diagnostic/login-1440-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/login-1440-light.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/login-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/login-1440-light.json",
+      "archivedPath": "site/cdp-capture-diagnostic/login-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/login-1440-light.png",
+      "archivedPath": "site/cdp-capture-diagnostic/login-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/login-375-light.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/login-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/login-375-light.json",
+      "archivedPath": "site/cdp-capture-diagnostic/login-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/login-375-light.png",
+      "archivedPath": "site/cdp-capture-diagnostic/login-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/results.json",
+      "archivedPath": "site/cdp-capture-diagnostic/results.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-1440-dark.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-1440-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-1440-dark.json",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-1440-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-1440-dark.png",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-1440-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-1440-light.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-1440-light.json",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-1440-light.png",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-375-dark.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-375-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-375-dark.json",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-375-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-375-dark.png",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-375-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-375-light-timeout-resize-artifact.jpg",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-375-light-timeout-resize-artifact.jpg"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-375-light.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-375-light.json",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/signup-375-light.png",
+      "archivedPath": "site/cdp-capture-diagnostic/signup-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-1440-dark.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-1440-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-1440-dark.json",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-1440-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-1440-dark.png",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-1440-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-1440-light.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-1440-light.json",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-1440-light.png",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-375-dark.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-375-dark.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-375-dark.json",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-375-dark.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-375-dark.png",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-375-dark.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-375-light.ax.txt",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-375-light.json",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/cdp-capture-diagnostic/whats-new-375-light.png",
+      "archivedPath": "site/cdp-capture-diagnostic/whats-new-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/login-1440-light.ax.txt",
+      "archivedPath": "site/initial-shell/login-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/login-1440-light.json",
+      "archivedPath": "site/initial-shell/login-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/login-1440-light.png",
+      "archivedPath": "site/initial-shell/login-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/login-375-light.ax.txt",
+      "archivedPath": "site/initial-shell/login-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/login-375-light.json",
+      "archivedPath": "site/initial-shell/login-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/login-375-light.png",
+      "archivedPath": "site/initial-shell/login-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/results.json",
+      "archivedPath": "site/initial-shell/results.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/signup-1440-light.ax.txt",
+      "archivedPath": "site/initial-shell/signup-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/signup-1440-light.json",
+      "archivedPath": "site/initial-shell/signup-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/signup-1440-light.png",
+      "archivedPath": "site/initial-shell/signup-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/signup-375-light.ax.txt",
+      "archivedPath": "site/initial-shell/signup-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/signup-375-light.json",
+      "archivedPath": "site/initial-shell/signup-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/initial-shell/signup-375-light.png",
+      "archivedPath": "site/initial-shell/signup-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/policy-loading/signup-1440-light.ax.txt",
+      "archivedPath": "site/policy-loading/signup-1440-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/policy-loading/signup-1440-light.json",
+      "archivedPath": "site/policy-loading/signup-1440-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/policy-loading/signup-1440-light.png",
+      "archivedPath": "site/policy-loading/signup-1440-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/policy-loading/signup-375-light.ax.txt",
+      "archivedPath": "site/policy-loading/signup-375-light.ax.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/policy-loading/signup-375-light.json",
+      "archivedPath": "site/policy-loading/signup-375-light.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/policy-loading/signup-375-light.png",
+      "archivedPath": "site/policy-loading/signup-375-light.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site/viewport-capture-check.png",
+      "archivedPath": "site/viewport-capture-check.png"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-cleanup/cleanup-container-stop.log",
+      "archivedPath": "site-cleanup/cleanup-container-stop.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-cleanup/cleanup-first-helper-error.json",
+      "archivedPath": "site-cleanup/cleanup-first-helper-error.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-cleanup/cleanup-local-after.json",
+      "archivedPath": "site-cleanup/cleanup-local-after.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-cleanup/cleanup-local-before.json",
+      "archivedPath": "site-cleanup/cleanup-local-before.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-cleanup/cleanup-manifest.json",
+      "archivedPath": "site-cleanup/cleanup-manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-cleanup/cleanup-receipt.json",
+      "archivedPath": "site-cleanup/cleanup-receipt.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-cleanup/import-receipt.json",
+      "archivedPath": "site-cleanup/import-receipt.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-cleanup/record-cleanup-first.cjs",
+      "archivedPath": "site-cleanup/record-cleanup-first.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-cleanup/record-cleanup.cjs",
+      "archivedPath": "site-cleanup/record-cleanup.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-helper-prerequisites-038.json",
+      "archivedPath": "actual/site-helper-prerequisites-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/browser-contract.json",
+      "archivedPath": "actual/site-setup/browser-contract.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/browser-observe.js.txt",
+      "archivedPath": "actual/site-setup/browser-observe.js.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/browser-ready-contract.json",
+      "archivedPath": "actual/site-setup/browser-ready-contract.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/context-upload.log",
+      "archivedPath": "actual/site-setup/context-upload.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/fixture-ready.json",
+      "archivedPath": "actual/site-setup/fixture-ready.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/fixture-start.log",
+      "archivedPath": "actual/site-setup/fixture-start.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/helper-upload.log",
+      "archivedPath": "actual/site-setup/helper-upload.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/helpers.json",
+      "archivedPath": "actual/site-setup/helpers.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/identity.log",
+      "archivedPath": "actual/site-setup/identity.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/image-build.log",
+      "archivedPath": "actual/site-setup/image-build.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/operations.json",
+      "archivedPath": "actual/site-setup/operations.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/persistent-browser-ready-contract.json",
+      "archivedPath": "actual/site-setup/persistent-browser-ready-contract.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/persistent-fixture-ready.json",
+      "archivedPath": "actual/site-setup/persistent-fixture-ready.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/persistent-proxy.stderr.log",
+      "archivedPath": "actual/site-setup/persistent-proxy.stderr.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/persistent-proxy.stdout.log",
+      "archivedPath": "actual/site-setup/persistent-proxy.stdout.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/persistent-tunnel.stderr.log",
+      "archivedPath": "actual/site-setup/persistent-tunnel.stderr.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/persistent-tunnel.stdout.log",
+      "archivedPath": "actual/site-setup/persistent-tunnel.stdout.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/prepare-browser-contract.mjs",
+      "archivedPath": "actual/site-setup/prepare-browser-contract.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/prepare-tools.cjs",
+      "archivedPath": "actual/site-setup/prepare-tools.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/preview-start.log",
+      "archivedPath": "actual/site-setup/preview-start.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/proxy.stderr.log",
+      "archivedPath": "actual/site-setup/proxy.stderr.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/proxy.stdout.log",
+      "archivedPath": "actual/site-setup/proxy.stdout.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/read-private-runtime.cjs",
+      "archivedPath": "actual/site-setup/read-private-runtime.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/record-setup.cjs",
+      "archivedPath": "actual/site-setup/record-setup.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/remote-stage-create.log",
+      "archivedPath": "actual/site-setup/remote-stage-create.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/REPORT.md",
+      "archivedPath": "actual/site-setup/REPORT.md"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/runtime.json",
+      "archivedPath": "actual/site-setup/runtime.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/setup-manifest.json",
+      "archivedPath": "actual/site-setup/setup-manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/stage.log",
+      "archivedPath": "actual/site-setup/stage.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/start-loopback-fixture.cjs",
+      "archivedPath": "actual/site-setup/start-loopback-fixture.cjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/tunnel.stderr.log",
+      "archivedPath": "actual/site-setup/tunnel.stderr.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-setup/tunnel.stdout.log",
+      "archivedPath": "actual/site-setup/tunnel.stdout.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-stage-attempt.json",
+      "archivedPath": "actual/site-stage-attempt.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-stage.log",
+      "archivedPath": "actual/site-stage.log"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-visual-review-038.json",
+      "archivedPath": "actual/site-visual-review-038.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/site-visual-review-038.md",
+      "archivedPath": "actual/site-visual-review-038.md"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/storage-deduplication-intent.json",
+      "archivedPath": "actual/storage-deduplication-intent.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/storage-deduplication.json",
+      "archivedPath": "actual/storage-deduplication.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/evidence-manifest.json",
+      "archivedPath": "upstream-3073/evidence-manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/files-page-1.json",
+      "archivedPath": "upstream-3073/files-page-1.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/fit-ledger-3073.json",
+      "archivedPath": "upstream-3073/fit-ledger-3073.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/fit-ledger-3073.md",
+      "archivedPath": "upstream-3073/fit-ledger-3073.md"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/import-receipt.json",
+      "archivedPath": "upstream-3073/import-receipt.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merge-commit-raw.json",
+      "archivedPath": "upstream-3073/merge-commit-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-source-manifest.json",
+      "archivedPath": "upstream-3073/merged-source-manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/docs/team-sharing.md.txt",
+      "archivedPath": "upstream-3073/merged-sources/docs/team-sharing.md.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/electron/package-link.mjs.txt",
+      "archivedPath": "upstream-3073/merged-sources/electron/package-link.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/electron/package-link.node-test.mjs.txt",
+      "archivedPath": "upstream-3073/merged-sources/electron/package-link.node-test.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/scripts/testing/file-size-ratchet.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/scripts/testing/file-size-ratchet.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/server/cursor-session.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/server/cursor-session.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/server/cursor-session.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/server/cursor-session.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/server/fixtures/grok-share-page-anonymous.html.txt",
+      "archivedPath": "upstream-3073/merged-sources/server/fixtures/grok-share-page-anonymous.html.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/server/fixtures/grok-share-page.html.txt",
+      "archivedPath": "upstream-3073/merged-sources/server/fixtures/grok-share-page.html.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/server/request-auth.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/server/request-auth.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/server/routes/team-library-grok.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/server/routes/team-library-grok.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/server/routes/teams.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/server/routes/teams.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/server/team-library.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/server/team-library.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/server/team-library.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/server/team-library.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/shared/grok-import.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/shared/grok-import.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/shared/grok-import.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/shared/grok-import.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/GrokBotMark.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/GrokBotMark.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/GrokBotMark.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/GrokBotMark.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/GrokFinishSetup.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/GrokFinishSetup.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/GrokFinishSetup.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/GrokFinishSetup.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/GrokImportBox.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/GrokImportBox.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/GrokImportBox.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/GrokImportBox.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/GrokImportFlow.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/GrokImportFlow.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/ImportSettings.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/ImportSettings.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/ImportSettings.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/ImportSettings.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/onboarding/beats/ImportBeat.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/onboarding/beats/ImportBeat.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/onboarding/beats/ImportBeat.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/onboarding/beats/ImportBeat.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/ProviderIcons.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/ProviderIcons.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/SettingsModal.groups.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/SettingsModal.groups.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/SettingsModal.simple.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/SettingsModal.simple.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/SettingsModal.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/SettingsModal.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/TeamImportDetails.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/TeamImportDetails.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/components/TeamLibraryPanel.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/components/TeamLibraryPanel.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/lib/team-import.test.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/lib/team-import.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/lib/team-import.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/lib/team-import.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/lib/template-add.ts.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/lib/template-add.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/locales/en.json.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/locales/en.json.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/merged-sources/src/state/store.tsx.txt",
+      "archivedPath": "upstream-3073/merged-sources/src/state/store.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/server/origin-cloud-session.ts.txt",
+      "archivedPath": "upstream-3073/origin-frozen/server/origin-cloud-session.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/server/origin-run-lease.ts.txt",
+      "archivedPath": "upstream-3073/origin-frozen/server/origin-run-lease.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/server/package-import.ts.txt",
+      "archivedPath": "upstream-3073/origin-frozen/server/package-import.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/server/request-auth.ts.txt",
+      "archivedPath": "upstream-3073/origin-frozen/server/request-auth.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/server/routes/teams.ts.txt",
+      "archivedPath": "upstream-3073/origin-frozen/server/routes/teams.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/server/team-library.ts.txt",
+      "archivedPath": "upstream-3073/origin-frozen/server/team-library.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/shared/package-format.ts.txt",
+      "archivedPath": "upstream-3073/origin-frozen/shared/package-format.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/src/components/SettingsModal.tsx.txt",
+      "archivedPath": "upstream-3073/origin-frozen/src/components/SettingsModal.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/src/components/TeamLibraryPanel.tsx.txt",
+      "archivedPath": "upstream-3073/origin-frozen/src/components/TeamLibraryPanel.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/src/lib/origin-cloud/client.ts.txt",
+      "archivedPath": "upstream-3073/origin-frozen/src/lib/origin-cloud/client.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-frozen/src/lib/team-import.ts.txt",
+      "archivedPath": "upstream-3073/origin-frozen/src/lib/team-import.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-path-presence.json",
+      "archivedPath": "upstream-3073/origin-path-presence.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/origin-source-manifest.json",
+      "archivedPath": "upstream-3073/origin-source-manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patch-completeness.json",
+      "archivedPath": "upstream-3073/patch-completeness.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/docs/team-sharing.md.patch.txt",
+      "archivedPath": "upstream-3073/patches/docs/team-sharing.md.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/electron/package-link.mjs.patch.txt",
+      "archivedPath": "upstream-3073/patches/electron/package-link.mjs.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/electron/package-link.node-test.mjs.patch.txt",
+      "archivedPath": "upstream-3073/patches/electron/package-link.node-test.mjs.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/scripts/testing/file-size-ratchet.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/scripts/testing/file-size-ratchet.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/server/cursor-session.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/server/cursor-session.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/server/cursor-session.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/server/cursor-session.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/server/fixtures/grok-share-page-anonymous.html.patch.txt",
+      "archivedPath": "upstream-3073/patches/server/fixtures/grok-share-page-anonymous.html.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/server/fixtures/grok-share-page.html.patch.txt",
+      "archivedPath": "upstream-3073/patches/server/fixtures/grok-share-page.html.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/server/request-auth.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/server/request-auth.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/server/routes/team-library-grok.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/server/routes/team-library-grok.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/server/routes/teams.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/server/routes/teams.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/server/team-library.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/server/team-library.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/server/team-library.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/server/team-library.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/shared/grok-import.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/shared/grok-import.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/shared/grok-import.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/shared/grok-import.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/GrokBotMark.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/GrokBotMark.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/GrokBotMark.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/GrokBotMark.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/GrokFinishSetup.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/GrokFinishSetup.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/GrokFinishSetup.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/GrokFinishSetup.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/GrokImportBox.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/GrokImportBox.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/GrokImportBox.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/GrokImportBox.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/GrokImportFlow.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/GrokImportFlow.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/ImportSettings.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/ImportSettings.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/ImportSettings.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/ImportSettings.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/onboarding/beats/ImportBeat.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/onboarding/beats/ImportBeat.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/onboarding/beats/ImportBeat.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/onboarding/beats/ImportBeat.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/ProviderIcons.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/ProviderIcons.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/SettingsModal.groups.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/SettingsModal.groups.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/SettingsModal.simple.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/SettingsModal.simple.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/SettingsModal.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/SettingsModal.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/TeamImportDetails.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/TeamImportDetails.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/components/TeamLibraryPanel.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/components/TeamLibraryPanel.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/lib/team-import.test.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/lib/team-import.test.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/lib/team-import.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/lib/team-import.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/lib/template-add.ts.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/lib/template-add.ts.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/locales/en.json.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/locales/en.json.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/patches/src/state/store.tsx.patch.txt",
+      "archivedPath": "upstream-3073/patches/src/state/store.tsx.patch.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/pr-3073-raw.json",
+      "archivedPath": "upstream-3073/pr-3073-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/pr-3073.diff",
+      "archivedPath": "upstream-3073/pr-3073.diff"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/pr-head-sources/scripts/testing/file-size-ratchet.test.ts.txt",
+      "archivedPath": "upstream-3073/pr-head-sources/scripts/testing/file-size-ratchet.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/pr-head-sources/server/request-auth.test.ts.txt",
+      "archivedPath": "upstream-3073/pr-head-sources/server/request-auth.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/pr-head-sources/server/team-library.ts.txt",
+      "archivedPath": "upstream-3073/pr-head-sources/server/team-library.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/pr-head-sources/src/locales/en.json.txt",
+      "archivedPath": "upstream-3073/pr-head-sources/src/locales/en.json.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/pr-head-sources/src/state/store.tsx.txt",
+      "archivedPath": "upstream-3073/pr-head-sources/src/state/store.tsx.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/raw-evidence-manifest.json",
+      "archivedPath": "upstream-3073/raw-evidence-manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/raw-media-transport-diagnostic/merged-sources/server/request-auth.test.ts.txt",
+      "archivedPath": "upstream-3073/raw-media-transport-diagnostic/merged-sources/server/request-auth.test.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/raw-media-transport-diagnostic/merged-sources/server/team-library.ts.txt",
+      "archivedPath": "upstream-3073/raw-media-transport-diagnostic/merged-sources/server/team-library.ts.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/test-inventory.json",
+      "archivedPath": "upstream-3073/test-inventory.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3073/verified-content-repairs.json",
+      "archivedPath": "upstream-3073/verified-content-repairs.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3074/comparison.json",
+      "archivedPath": "upstream-3074/comparison.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3074/detail.json",
+      "archivedPath": "upstream-3074/detail.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3074/files.json",
+      "archivedPath": "upstream-3074/files.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3074/fit-review.md",
+      "archivedPath": "upstream-3074/fit-review.md"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-3074/manifest.json",
+      "archivedPath": "upstream-3074/manifest.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-incremental-040234/search-page-1.json",
+      "archivedPath": "upstream-incremental-040234/search-page-1.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-incremental-040234/search-receipt.json",
+      "archivedPath": "upstream-incremental-040234/search-receipt.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-incremental-raw.json",
+      "archivedPath": "upstream-incremental-raw.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-incremental.json",
+      "archivedPath": "upstream-incremental.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-search-initial-rejected.json",
+      "archivedPath": "upstream-search-initial-rejected.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-evidence-038/upstream-supplement-038.md",
+      "archivedPath": "upstream-recommendations.md"
+    },
+    {
+      "originalPath": ".omb-scratch/prepublication-037b.mjs",
+      "archivedPath": "operator/prepublication-037b.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/publish-038b.mjs",
+      "archivedPath": "operator/publish-038b.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/release-inputs-037b.json",
+      "archivedPath": "operator/release-inputs-037b.json"
+    },
+    {
+      "originalPath": ".omb-scratch/finalize-actual-038.mjs",
+      "archivedPath": "operator/finalize-actual-038.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/archive-delivery-038.mjs",
+      "archivedPath": "operator/archive-delivery-038.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/check-public-site-038.mjs",
+      "archivedPath": "operator/check-public-site-038.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/check-public-downloads.py",
+      "archivedPath": "operator/check-public-downloads.py.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/check-github-release.mjs",
+      "archivedPath": "operator/check-github-release.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/delivery-receipt-038b.template.json",
+      "archivedPath": "preparation/delivery-receipt-038b.template.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/evidence-selection-038b.json",
+      "archivedPath": "preparation/evidence-selection-038b.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/final-audit-report-038b.template.md",
+      "archivedPath": "preparation/final-audit-report-038b.template.md"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/finalize-delivery-038b.mjs",
+      "archivedPath": "preparation/finalize-delivery-038b.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/finalize-delivery-038c.mjs",
+      "archivedPath": "preparation/finalize-delivery-038c.mjs.txt"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/finalize-inputs-038b.template.json",
+      "archivedPath": "preparation/finalize-inputs-038b.template.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/finalizer-038c-native-empty-test-report.json",
+      "archivedPath": "preparation/finalizer-038c-native-empty-test-report.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/HANDOFF-038b.md",
+      "archivedPath": "preparation/HANDOFF-038b.md"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/import-manifest-038b.json",
+      "archivedPath": "preparation/import-manifest-038b.json"
+    },
+    {
+      "originalPath": ".omb-scratch/delivery-preparation-038b/preparation-check-038b.json",
+      "archivedPath": "preparation/preparation-check-038b.json"
+    }
+  ]
+}

@@ -360,6 +360,14 @@ function firstPresentCuaDescriptor(candidates: string[]): string | null {
   return null;
 }
 
+function cuaDescriptorPaths(platform: NodeJS.Platform, userData: string | undefined, home: string): string[] {
+  if (userData) return [join(userData, "cua-connection.json")];
+  if (platform !== "darwin") return [];
+  return ["Origin", "OpenMausBot", "openmausbot", "OpenGrokBot", "opengrokbot"].map((directory) =>
+    join(home, "Library", "Application Support", directory, "cua-connection.json"),
+  );
+}
+
 export function readCuaConnection({
   platform = process.platform,
   userData = process.env.OMB_USER_DATA,
@@ -373,14 +381,7 @@ export function readCuaConnection({
   validateLinuxRuntime?: (file: string, raw: LinuxConnectionDescriptor) => boolean;
   validateLegacyRuntime?: (file: string, platform: NodeJS.Platform) => boolean;
 } = {}): LocalComputerConnection | null {
-  const candidates = userData ? [join(userData, "cua-connection.json")] : [];
-  if (platform === "darwin" && !userData) {
-    for (const directory of ["OpenMausBot", "openmausbot", "OpenGrokBot", "opengrokbot"]) {
-      candidates.push(join(home, "Library", "Application Support", directory, "cua-connection.json"));
-    }
-  }
-
-  const file = firstPresentCuaDescriptor(candidates);
+  const file = firstPresentCuaDescriptor(cuaDescriptorPaths(platform, userData, home));
   if (!file) return null;
   try {
     const raw = JSON.parse(readFileSync(file, "utf8"));
@@ -407,13 +408,7 @@ export function readCuaUnavailableReason({
   home?: string;
 } = {}): string | null {
   if (!legacyPlatform(platform)) return null;
-  const candidates = userData ? [join(userData, "cua-connection.json")] : [];
-  if (platform === "darwin" && !userData) {
-    for (const directory of ["OpenMausBot", "openmausbot", "OpenGrokBot", "opengrokbot"]) {
-      candidates.push(join(home, "Library", "Application Support", directory, "cua-connection.json"));
-    }
-  }
-  const file = firstPresentCuaDescriptor(candidates);
+  const file = firstPresentCuaDescriptor(cuaDescriptorPaths(platform, userData, home));
   if (!file) return null;
   try {
     if (validateLegacyDescriptorRuntime(file, platform)) {

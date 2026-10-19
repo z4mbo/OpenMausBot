@@ -1,0 +1,73 @@
+{
+  "version": "0.2.14",
+  "tag": "origin-v0.2.14",
+  "commit": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "desktopRun": 39182331813,
+  "files": [
+    {
+      "name": "Origin-0.2.14-arm64.dmg",
+      "size": 317886358,
+      "sha256": "faea58ea9284af1cc38e91744bda91f72941f15c198c1b0ee7393b6d78ee6dfe"
+    },
+    {
+      "name": "Origin-0.2.14-arm64.dmg.blockmap",
+      "size": 332622,
+      "sha256": "c65947ef91882b7a234707bbadc784448e9c610ff3855892345e90be4b0537da"
+    },
+    {
+      "name": "Origin-0.2.14-arm64.zip",
+      "size": 318271725,
+      "sha256": "1ea2231abeaf78b8bfdfb7c5ed65f35b64e061ca3f3d68bcdcc003eb89770a63"
+    },
+    {
+      "name": "Origin-0.2.14-arm64.zip.blockmap",
+      "size": 331225,
+      "sha256": "6ac0f06a0f97791fbd1aacb3e73b2438fa83fedda57b8111271eb006d731a9d6"
+    },
+    {
+      "name": "Origin-0.2.14-setup.exe",
+      "size": 269477444,
+      "sha256": "e08799aa8b8d7f589d8af246e151c80d8ef686d0576a6a81b582f5c56d310acc"
+    },
+    {
+      "name": "Origin-0.2.14-setup.exe.blockmap",
+      "size": 278442,
+      "sha256": "9fa828ec47944c76efde1c830a028bfcc4f52ce9f9841d2be289d9079a1f5875"
+    },
+    {
+      "name": "Origin-0.2.14-windows-x64.zip",
+      "size": 370055045,
+      "sha256": "0cd654b41ac8871113b46d4bd8d558403070db4349482c3676261ea30b7f377b"
+    },
+    {
+      "name": "Origin-0.2.14-x64.dmg",
+      "size": 334966861,
+      "sha256": "c0d36aed606cff3998fed6e270238278ffb2a38a2aece35bc049ecc187ab76e6"
+    },
+    {
+      "name": "Origin-0.2.14-x64.dmg.blockmap",
+      "size": 349847,
+      "sha256": "6622292b242dc93fede2cef80ef89d7db082422b3c24862e5b436656af20f9ff"
+    },
+    {
+      "name": "Origin-0.2.14-x64.zip",
+      "size": 335599336,
+      "sha256": "d53d9a694b24d26024da41d359f853822ea6203fbe8f5352c02a8872f91d49d2"
+    },
+    {
+      "name": "Origin-0.2.14-x64.zip.blockmap",
+      "size": 347448,
+      "sha256": "8547de4a912403acfa490a370c0a87220d9f65668f7404888a4977cde7d4750a"
+    },
+    {
+      "name": "latest-mac.yml",
+      "size": 1648,
+      "sha256": "9aabd399be9017bc75bde6e2706008ec18a50e6b0c040a96c4cd469f7a754a7e"
+    },
+    {
+      "name": "latest.yml",
+      "size": 1192,
+      "sha256": "2d92611bc9d2f2685a3c095c77e23f6b29e82bd863aa9a0d6eb5587be153a003"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { InstanceConfigMap } from "./contracts.ts";
+import { claudeInstanceOwnsRouting } from "./config.ts";
 import { resolveClaudeConfigDir } from "./drivers/claude.ts";
 import { codexHome } from "./drivers/codex-identity.ts";
 import { harnessHome } from "./env-path.ts";
@@ -135,8 +136,10 @@ export function planAccountsFromInstances(instances: InstanceConfigMap): PlanAcc
   const accounts: PlanAccount[] = [];
   for (const [id, entry] of Object.entries(instances)) {
     const driver = DRIVER_OF[entry.driver];
-    if (!driver) continue;
+    if (!driver || entry.enabled === false || entry.access === "api") continue;
     const config = asRecord(entry.config);
+    if (config?.managed || config?.requireApiKey === true || config?.authMode === "chatgpt-plan") continue;
+    if (driver === "claude" && claudeInstanceOwnsRouting(entry.environment)) continue;
     const configDir = typeof config?.configDir === "string" ? config.configDir : undefined;
     accounts.push({
       id,
@@ -370,8 +373,16 @@ function expiredCredential(): PlanCredential {
   return { token: null, accountId: null, expired: true };
 }
 
-function signInAgain(driver: PlanDriver): string {
-  return `Sign in again in ${PRODUCT_NAME[driver]}`;
+function unavailableUsageCredential(driver: PlanDriver, reason: "missing" | "expired" | "unreadable"): string {
+  const product = PRODUCT_NAME[driver];
+  const message = reason === "expired" ? `The saved usage token for ${product} has expired.`
+    : reason === "unreadable" ? `Could not read subscription usage credentials for ${product}.`
+      : `Subscription usage credentials are not available for ${product}.`;
+  return `${message} Model access is checked separately.`;
+}
+
+function usageAccessRefused(driver: PlanDriver): string {
+  return `${PRODUCT_NAME[driver]} did not grant access to subscription usage. Model access is checked separately.`;
 }
 
 function couldNotReach(driver: PlanDriver): string {
@@ -790,9 +801,10 @@ async function fetchProvider(account: PlanAccount, deps: PlanUsageDeps): Promise
   try {
     credential = await deps.credentials.read(account);
   } catch {
-    return errorRow(account, signInAgain(account.driver));
+    return errorRow(account, unavailableUsageCredential(account.driver, "unreadable"));
   }
-  if (credential.expired || !credential.token) return errorRow(account, signInAgain(account.driver));
+  if (credential.expired) return errorRow(account, unavailableUsageCredential(account.driver, "expired"));
+  if (!credential.token) return errorRow(account, unavailableUsageCredential(account.driver, "missing"));
   try {
     if (account.driver === "claude") return await fetchClaude(account, credential.token, deps);
     if (account.driver === "codex") return await fetchCodex(account, credential.token, credential.accountId, deps);
@@ -846,7 +858,7 @@ async function fetchClaude(account: PlanAccount, token: string, deps: PlanUsageD
     Accept: "application/json",
     "anthropic-beta": "oauth-2025-04-20",
   }, deps.timeoutMs ?? PROVIDER_TIMEOUT_MS);
-  if (authRejected(result.status)) return errorRow(account, signInAgain("claude"));
+  if (authRejected(result.status)) return errorRow(account, usageAccessRefused("claude"));
   if (!result.ok || result.body === null || typeof result.body !== "object") {
     return errorRow(account, result.status === 0 || result.status >= 500 ? couldNotReach("claude") : unexpectedUsage("claude"));
   }
@@ -865,7 +877,7 @@ async function fetchCodex(
   };
   if (accountId) headers["ChatGPT-Account-Id"] = accountId;
   const result = await fetchJson(deps.fetch, CODEX_USAGE_URL, headers, deps.timeoutMs ?? PROVIDER_TIMEOUT_MS);
-  if (authRejected(result.status)) return errorRow(account, signInAgain("codex"));
+  if (authRejected(result.status)) return errorRow(account, usageAccessRefused("codex"));
   if (!result.ok || result.body === null || typeof result.body !== "object") {
     return errorRow(account, result.status === 0 || result.status >= 500 ? couldNotReach("codex") : unexpectedUsage("codex"));
   }
@@ -884,12 +896,10 @@ async function fetchGrok(account: PlanAccount, token: string, deps: PlanUsageDep
     fetchJson(deps.fetch, GROK_BILLING_URL, headers, timeout),
     fetchJson(deps.fetch, GROK_SETTINGS_URL, headers, timeout),
   ]);
-  if (authRejected(credits.status) || (authRejected(billing.status) && !credits.ok)) {
-    return errorRow(account, signInAgain("grok"));
-  }
   const creditsBody = credits.ok ? credits.body : null;
   const billingBody = billing.ok && !authRejected(billing.status) ? billing.body : null;
   if (creditsBody === null && billingBody === null) {
+    if (authRejected(credits.status) || authRejected(billing.status)) return errorRow(account, usageAccessRefused("grok"));
     return errorRow(account, credits.status === 0 || credits.status >= 500 || billing.status === 0 || billing.status >= 500
       ? couldNotReach("grok")
       : unexpectedUsage("grok"));

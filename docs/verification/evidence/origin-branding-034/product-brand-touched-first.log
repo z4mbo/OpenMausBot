@@ -1,0 +1,64 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-branding-034/Origin
+
+ ❯ server/index.test.ts (297 tests | 10 failed | 1 skipped) 212569ms
+     × reconciles durable working goal cards with scheduler truth after a restart 37ms
+     × parks the turn at the wait ceiling and resumes when the computer frees 12757ms
+     × shows a card continuation that cannot start as the root's failed turn, without buzzing twice 571ms
+     × asks the person to sign in with one card and one notification, supersedes the older card, and resumes the bot on Done or Cancel 561ms
+     × brings a sign-in started in a browser on another computer back to this server's https address 49ms
+     × injects the bot's standing instructions (soul) into a real turn, directly after the persona 689ms
+     × does not coach an ordinary request even when the bot profile is blank 557ms
+     × never removes an unmanaged container that squats on a bot's exact Local VM name 1274ms
+     × keeps a room credential card owned by the member that raised it 1243ms
+     × previews the system prompt the model will see, section by section 521ms
+ ❯ server/drivers/claude.test.ts (206 tests | 8 failed | 3 skipped) 68111ms
+     × refuses steering and retires approvals after interrupt before process exit (retained=false) 190ms
+     × refuses steering and retires approvals after interrupt before process exit (retained=true) 203ms
+     × denies late broker asks between retained turns without opening a zombie card 173ms
+     × denies a colliding ask id on the same connection without orphaning the original 193ms
+     × denies a colliding ask id from a second connection on the same broker 185ms
+     × denies a colliding ask id for question-kind asks too, without disturbing the original 168ms
+     × drops a late ask on an already-closed broker instead of a dead card (#211) 263ms
+     × drops a late question on an already-closed broker with an answer, not a deny (#211) 301ms
+ ❯ server/drivers/codex.test.ts (244 tests | 10 failed | 1 skipped) 108480ms
+     × keeps the developer slot stable and delivers volatile context in-turn 697ms
+       × starts with its tools on its own login 623ms
+       × starts with its tools on a Company model 422ms
+       × keeps a tool selection's gate in front of the connector 617ms
+     × reasserts current instructions across processes and resume recovery 1459ms
+     × reasserts current instructions across processes and config-profile-unsupported recovery 1420ms
+     × preserves configured native rules and keeps them private in ask mode 596ms
+     × preserves configured native rules and keeps them private in auto mode 638ms
+     × preserves configured native rules and keeps them private in full mode 572ms
+     × preserves configured native rules and keeps them private in custom mode 616ms
+ ❯ server/routines.test.ts (159 tests | 2 failed) 5482ms
+     × persists definitions separately from permanent run receipts 22ms
+     × warns on the routine, and tells the bot at run time 12ms
+ ❯ server/routine-requests.test.ts (88 tests | 1 failed) 603ms
+     × carries run on startup from the proposal through the card to the created routine 7ms
+ ❯ server/browser-runtime.test.ts (78 tests | 2 failed) 24648ms
+     × strips harness-owned arguments before dispatch and bounds what a result puts into the conversation 185ms
+     × reads around the engine's call, hands it the raw result, and appends its report after shaping so nothing cuts it off 165ms
+ ❯ server/drivers/pi.test.ts (81 tests | 1 failed) 8376ms
+     × delivers the full prompt once per session and rides volatile changes as notes 303ms
+ ❯ server/org-library.test.ts (29 tests | 1 failed) 12017ms
+     × shows a newer format as needing an update and never reads its file 35ms
+ ❯ server/container-computer.test.ts (82 tests | 2 failed) 42ms
+     × refuses a per-bot container carrying another target's label 4ms
+     × never removes an exact-name container without OpenMausBot ownership labels 2ms
+ ❯ server/workspace-backup.test.ts (32 tests | 2 failed | 1 skipped) 29450ms
+     × refuses external and arbitrary internal symlinks while reporting omitted managed discovery links 4ms
+     × leaves out node_modules and links in conversation work folders, and says so 3ms
+stderr | server/drivers/claude.test.ts > ClaudeDriver turns (fake CLI) > denies a colliding ask id on the same connection without orphaning the original
+permission broker on \\.\pipe\openmausbot-perm-35904-t-du0419: duplicate ask id "dup-1" — denying
+
+stderr | server/drivers/claude.test.ts > ClaudeDriver turns (fake CLI) > denies a colliding ask id from a second connection on the same broker
+permission broker on \\.\pipe\openmausbot-perm-35904-t-dued43: duplicate ask id "dup-2" — denying
+
+stderr | server/drivers/claude.test.ts > ClaudeDriver turns (fake CLI) > denies a colliding ask id for question-kind asks too, without disturbing the original
+permission broker on \\.\pipe\openmausbot-perm-35904-t-du70eb: duplicate ask id "dup-4" — denying
+
+stderr | server/drivers/codex.test.ts
+test cleanup could not remove C:\Users\aless\AppData\Local\Temp\omb-test-home-85nziF: EPERM, Permission denied: \\?\C:\Users\aless\AppData\Local\Temp\omb-test-home-85nziF '\\?\C:\Users\aless\AppData\Local\Temp\omb-test-home-85nziF'
+

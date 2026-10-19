@@ -1,0 +1,857 @@
+{
+  "version": "0.2.10",
+  "source": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+  "image": "sha256:4dfdb35d3736cae71bd5a1498b8901e3328480966a72f5cbb0d465cb5272fe7b",
+  "verifiedAt": "2026-10-18T13:46:27.007Z",
+  "accountSubmissions": 0,
+  "formAndBackendConnectionsBlocked": true,
+  "signupConfigurationNotExercised": true,
+  "runtimeExceptions": 0,
+  "canonicalReleases": 4,
+  "canonicalTitles": 32,
+  "latestNotes": 5,
+  "priorPublishedNotes": 18,
+  "cases": [
+    {
+      "articles": [
+        {
+          "text": "Chief\n\nLeads the project. Breaks goals into issues, assigns them, reviews the pull requests and keeps you posted."
+        },
+        {
+          "text": "Researcher\n\nDigs into users, markets and competitors, and writes up what it found."
+        },
+        {
+          "text": "Product Manager\n\nTurns goals into scoped issues with clear acceptance criteria."
+        },
+        {
+          "text": "Designer\n\nSketches flows and screens, and keeps the interface consistent."
+        },
+        {
+          "text": "Developer\n\nWorks in the repo on a branch per issue and opens the pull request."
+        },
+        {
+          "text": "Marketer\n\nPlans launches, campaigns and the channels to reach people."
+        },
+        {
+          "text": "Copywriter\n\nWrites the words: pages, emails, release notes and docs."
+        }
+      ],
+      "client": {
+        "height": 1000,
+        "width": 1430
+      },
+      "dark": true,
+      "fontStatus": "loaded",
+      "h1": "Every project gets a team of agents that ships.",
+      "passwords": [],
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "route": "/",
+      "width": 1440,
+      "theme": "dark",
+      "name": "landing-1440-dark",
+      "screenshot": "landing-1440-dark.jpg",
+      "screenshotDimensions": {
+        "width": 1430,
+        "height": 993
+      },
+      "capturedAt": "2026-10-18T13:44:31.438Z",
+      "overflow": false
+    },
+    {
+      "articles": [
+        {
+          "text": "Chief\n\nLeads the project. Breaks goals into issues, assigns them, reviews the pull requests and keeps you posted."
+        },
+        {
+          "text": "Researcher\n\nDigs into users, markets and competitors, and writes up what it found."
+        },
+        {
+          "text": "Product Manager\n\nTurns goals into scoped issues with clear acceptance criteria."
+        },
+        {
+          "text": "Designer\n\nSketches flows and screens, and keeps the interface consistent."
+        },
+        {
+          "text": "Developer\n\nWorks in the repo on a branch per issue and opens the pull request."
+        },
+        {
+          "text": "Marketer\n\nPlans launches, campaigns and the channels to reach people."
+        },
+        {
+          "text": "Copywriter\n\nWrites the words: pages, emails, release notes and docs."
+        }
+      ],
+      "client": {
+        "height": 1000,
+        "width": 1430
+      },
+      "dark": false,
+      "fontStatus": "loaded",
+      "h1": "Every project gets a team of agents that ships.",
+      "passwords": [],
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "route": "/",
+      "width": 1440,
+      "theme": "light",
+      "name": "landing-1440-light",
+      "screenshot": "landing-1440-light.jpg",
+      "screenshotDimensions": {
+        "width": 1430,
+        "height": 993
+      },
+      "capturedAt": "2026-10-18T13:44:33.910Z",
+      "overflow": false
+    },
+    {
+      "articles": [
+        {
+          "text": "Chief\n\nLeads the project. Breaks goals into issues, assigns them, reviews the pull requests and keeps you posted."
+        },
+        {
+          "text": "Researcher\n\nDigs into users, markets and competitors, and writes up what it found."
+        },
+        {
+          "text": "Product Manager\n\nTurns goals into scoped issues with clear acceptance criteria."
+        },
+        {
+          "text": "Designer\n\nSketches flows and screens, and keeps the interface consistent."
+        },
+        {
+          "text": "Developer\n\nWorks in the repo on a branch per issue and opens the pull request."
+        },
+        {
+          "text": "Marketer\n\nPlans launches, campaigns and the channels to reach people."
+        },
+        {
+          "text": "Copywriter\n\nWrites the words: pages, emails, release notes and docs."
+        }
+      ],
+      "client": {
+        "height": 1000,
+        "width": 365
+      },
+      "dark": true,
+      "fontStatus": "loaded",
+      "h1": "Every project gets a team of agents that ships.",
+      "passwords": [],
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "viewport": {
+        "height": 1000,
+        "width": 375
+      },
+      "route": "/",
+      "width": 375,
+      "theme": "dark",
+      "name": "landing-375-dark",
+      "screenshot": "landing-375-dark.jpg",
+      "screenshotDimensions": {
+        "width": 365,
+        "height": 973
+      },
+      "capturedAt": "2026-10-18T13:45:00.161Z",
+      "overflow": false
+    },
+    {
+      "articles": [
+        {
+          "text": "Chief\n\nLeads the project. Breaks goals into issues, assigns them, reviews the pull requests and keeps you posted."
+        },
+        {
+          "text": "Researcher\n\nDigs into users, markets and competitors, and writes up what it found."
+        },
+        {
+          "text": "Product Manager\n\nTurns goals into scoped issues with clear acceptance criteria."
+        },
+        {
+          "text": "Designer\n\nSketches flows and screens, and keeps the interface consistent."
+        },
+        {
+          "text": "Developer\n\nWorks in the repo on a branch per issue and opens the pull request."
+        },
+        {
+          "text": "Marketer\n\nPlans launches, campaigns and the channels to reach people."
+        },
+        {
+          "text": "Copywriter\n\nWrites the words: pages, emails, release notes and docs."
+        }
+      ],
+      "client": {
+        "height": 1000,
+        "width": 365
+      },
+      "dark": false,
+      "fontStatus": "loaded",
+      "h1": "Every project gets a team of agents that ships.",
+      "passwords": [],
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "viewport": {
+        "height": 1000,
+        "width": 375
+      },
+      "route": "/",
+      "width": 375,
+      "theme": "light",
+      "name": "landing-375-light",
+      "screenshot": "landing-375-light.jpg",
+      "screenshotDimensions": {
+        "width": 365,
+        "height": 973
+      },
+      "capturedAt": "2026-10-18T13:45:02.477Z",
+      "overflow": false
+    },
+    {
+      "articles": [],
+      "client": {
+        "height": 1000,
+        "width": 1430
+      },
+      "dark": true,
+      "fontStatus": "loaded",
+      "h1": "Sign in to Origin",
+      "passwords": [
+        {
+          "empty": true,
+          "masked": true
+        }
+      ],
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "route": "/login",
+      "width": 1440,
+      "theme": "dark",
+      "name": "login-1440-dark",
+      "screenshot": "login-1440-dark.jpg",
+      "screenshotDimensions": {
+        "width": 1430,
+        "height": 993
+      },
+      "capturedAt": "2026-10-18T13:45:09.806Z",
+      "overflow": false,
+      "passwordHidden": true
+    },
+    {
+      "articles": [],
+      "client": {
+        "height": 1000,
+        "width": 1430
+      },
+      "dark": false,
+      "fontStatus": "loaded",
+      "h1": "Sign in to Origin",
+      "passwords": [
+        {
+          "empty": true,
+          "masked": true
+        }
+      ],
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "route": "/login",
+      "width": 1440,
+      "theme": "light",
+      "name": "login-1440-light",
+      "screenshot": "login-1440-light.jpg",
+      "screenshotDimensions": {
+        "width": 1430,
+        "height": 993
+      },
+      "capturedAt": "2026-10-18T13:45:11.953Z",
+      "overflow": false,
+      "passwordHidden": true
+    },
+    {
+      "articles": [],
+      "client": {
+        "height": 1000,
+        "width": 365
+      },
+      "dark": true,
+      "fontStatus": "loaded",
+      "h1": "Sign in to Origin",
+      "passwords": [
+        {
+          "empty": true,
+          "masked": true
+        }
+      ],
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "viewport": {
+        "height": 1000,
+        "width": 375
+      },
+      "route": "/login",
+      "width": 375,
+      "theme": "dark",
+      "name": "login-375-dark",
+      "screenshot": "login-375-dark.jpg",
+      "screenshotDimensions": {
+        "width": 365,
+        "height": 973
+      },
+      "capturedAt": "2026-10-18T13:45:16.923Z",
+      "overflow": false,
+      "passwordHidden": true
+    },
+    {
+      "articles": [],
+      "client": {
+        "height": 1000,
+        "width": 365
+      },
+      "dark": false,
+      "fontStatus": "loaded",
+      "h1": "Sign in to Origin",
+      "passwords": [
+        {
+          "empty": true,
+          "masked": true
+        }
+      ],
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "viewport": {
+        "height": 1000,
+        "width": 375
+      },
+      "route": "/login",
+      "width": 375,
+      "theme": "light",
+      "name": "login-375-light",
+      "screenshot": "login-375-light.jpg",
+      "screenshotDimensions": {
+        "width": 365,
+        "height": 973
+      },
+      "capturedAt": "2026-10-18T13:45:29.646Z",
+      "overflow": false,
+      "passwordHidden": true
+    },
+    {
+      "articles": [],
+      "client": {
+        "height": 1000,
+        "width": 1430
+      },
+      "dark": true,
+      "fontStatus": "loaded",
+      "h1": "Create your Origin account",
+      "passwords": [
+        {
+          "empty": true,
+          "masked": true
+        }
+      ],
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "route": "/signup",
+      "width": 1440,
+      "theme": "dark",
+      "name": "signup-1440-dark",
+      "screenshot": "signup-1440-dark.jpg",
+      "screenshotDimensions": {
+        "width": 1430,
+        "height": 993
+      },
+      "capturedAt": "2026-10-18T13:45:34.913Z",
+      "overflow": false,
+      "passwordHidden": true
+    },
+    {
+      "articles": [],
+      "client": {
+        "height": 1000,
+        "width": 1430
+      },
+      "dark": false,
+      "fontStatus": "loaded",
+      "h1": "Create your Origin account",
+      "passwords": [
+        {
+          "empty": true,
+          "masked": true
+        }
+      ],
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "route": "/signup",
+      "width": 1440,
+      "theme": "light",
+      "name": "signup-1440-light",
+      "screenshot": "signup-1440-light.jpg",
+      "screenshotDimensions": {
+        "width": 1430,
+        "height": 993
+      },
+      "capturedAt": "2026-10-18T13:45:39.624Z",
+      "overflow": false,
+      "passwordHidden": true
+    },
+    {
+      "articles": [],
+      "client": {
+        "height": 1000,
+        "width": 365
+      },
+      "dark": true,
+      "fontStatus": "loaded",
+      "h1": "Create your Origin account",
+      "passwords": [
+        {
+          "empty": true,
+          "masked": true
+        }
+      ],
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "viewport": {
+        "height": 1000,
+        "width": 375
+      },
+      "route": "/signup",
+      "width": 375,
+      "theme": "dark",
+      "name": "signup-375-dark",
+      "screenshot": "signup-375-dark.jpg",
+      "screenshotDimensions": {
+        "width": 365,
+        "height": 973
+      },
+      "capturedAt": "2026-10-18T13:45:42.993Z",
+      "overflow": false,
+      "passwordHidden": true
+    },
+    {
+      "articles": [],
+      "client": {
+        "height": 1000,
+        "width": 365
+      },
+      "dark": false,
+      "fontStatus": "loaded",
+      "h1": "Create your Origin account",
+      "passwords": [
+        {
+          "empty": true,
+          "masked": true
+        }
+      ],
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "viewport": {
+        "height": 1000,
+        "width": 375
+      },
+      "route": "/signup",
+      "width": 375,
+      "theme": "light",
+      "name": "signup-375-light",
+      "screenshot": "signup-375-light.jpg",
+      "screenshotDimensions": {
+        "width": 365,
+        "height": 973
+      },
+      "capturedAt": "2026-10-18T13:45:52.936Z",
+      "overflow": false,
+      "passwordHidden": true
+    },
+    {
+      "articles": [
+        {
+          "changes": [
+            "Public workspace invitations. Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.",
+            "Email invitations. Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.",
+            "Clear join confirmations. A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.",
+            "Account and computer controls. Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.",
+            "Live activity receipts. Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work."
+          ],
+          "title": "Invitations and reliable desktop controls",
+          "version": "v0.2.10"
+        },
+        {
+          "changes": [
+            "Workspace and project permissions. Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.",
+            "Safer issue mirroring. Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.",
+            "Files respect their source access. Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.",
+            "Shared work and sync. Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.",
+            "Safer collaborative editing. Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.",
+            "Call continuity. An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.",
+            "Recoverable drawings. Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.",
+            "Consistent workspace controls. Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.",
+            "Keyboard control in dialogs. About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.",
+            "Readable buttons in every theme. Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.",
+            "Files loading recovery. Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.",
+            "Responsive Data queries. Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.",
+            "Chat attachments that fit. Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.",
+            "Recoverable workspace loading. Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.",
+            "Appearance from paired devices. Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.",
+            "Clearer connection errors. Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials.",
+            "Accurate browser setup. Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.",
+            "Release history everywhere. What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes."
+          ],
+          "title": "Safer workspaces and clearer controls",
+          "version": "v0.2.7"
+        },
+        {
+          "changes": [
+            "Projects with default agents. Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.",
+            "Workspaces. Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.",
+            "Zap Liquid avatars. Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.",
+            "Inbox, Chat, Call and Draw. One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas."
+          ],
+          "title": "Origin on the desktop",
+          "version": "vdesktop-1.0"
+        },
+        {
+          "changes": [
+            "Keyboard first. C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.",
+            "A cleaner issue editor. Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.",
+            "A calmer sidebar. Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.",
+            "One Inbox, two views. Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.",
+            "Small details, fixed. No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list."
+          ],
+          "title": "A sharper workspace",
+          "version": "v1.0"
+        }
+      ],
+      "client": {
+        "height": 1000,
+        "width": 1430
+      },
+      "dark": true,
+      "fontStatus": "loaded",
+      "h1": "What's new",
+      "passwords": [],
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "route": "/whats-new",
+      "width": 1440,
+      "theme": "dark",
+      "name": "whats-new-1440-dark",
+      "screenshot": "whats-new-1440-dark.jpg",
+      "screenshotDimensions": {
+        "width": 1430,
+        "height": 993
+      },
+      "capturedAt": "2026-10-18T13:45:55.353Z",
+      "overflow": false,
+      "notes": true,
+      "version": true
+    },
+    {
+      "articles": [
+        {
+          "changes": [
+            "Public workspace invitations. Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.",
+            "Email invitations. Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.",
+            "Clear join confirmations. A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.",
+            "Account and computer controls. Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.",
+            "Live activity receipts. Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work."
+          ],
+          "title": "Invitations and reliable desktop controls",
+          "version": "v0.2.10"
+        },
+        {
+          "changes": [
+            "Workspace and project permissions. Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.",
+            "Safer issue mirroring. Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.",
+            "Files respect their source access. Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.",
+            "Shared work and sync. Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.",
+            "Safer collaborative editing. Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.",
+            "Call continuity. An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.",
+            "Recoverable drawings. Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.",
+            "Consistent workspace controls. Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.",
+            "Keyboard control in dialogs. About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.",
+            "Readable buttons in every theme. Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.",
+            "Files loading recovery. Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.",
+            "Responsive Data queries. Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.",
+            "Chat attachments that fit. Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.",
+            "Recoverable workspace loading. Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.",
+            "Appearance from paired devices. Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.",
+            "Clearer connection errors. Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials.",
+            "Accurate browser setup. Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.",
+            "Release history everywhere. What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes."
+          ],
+          "title": "Safer workspaces and clearer controls",
+          "version": "v0.2.7"
+        },
+        {
+          "changes": [
+            "Projects with default agents. Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.",
+            "Workspaces. Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.",
+            "Zap Liquid avatars. Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.",
+            "Inbox, Chat, Call and Draw. One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas."
+          ],
+          "title": "Origin on the desktop",
+          "version": "vdesktop-1.0"
+        },
+        {
+          "changes": [
+            "Keyboard first. C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.",
+            "A cleaner issue editor. Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.",
+            "A calmer sidebar. Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.",
+            "One Inbox, two views. Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.",
+            "Small details, fixed. No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list."
+          ],
+          "title": "A sharper workspace",
+          "version": "v1.0"
+        }
+      ],
+      "client": {
+        "height": 1000,
+        "width": 1430
+      },
+      "dark": false,
+      "fontStatus": "loaded",
+      "h1": "What's new",
+      "passwords": [],
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "route": "/whats-new",
+      "width": 1440,
+      "theme": "light",
+      "name": "whats-new-1440-light",
+      "screenshot": "whats-new-1440-light.jpg",
+      "screenshotDimensions": {
+        "width": 1430,
+        "height": 993
+      },
+      "capturedAt": "2026-10-18T13:46:03.326Z",
+      "overflow": false,
+      "notes": true,
+      "version": true
+    },
+    {
+      "articles": [
+        {
+          "changes": [
+            "Public workspace invitations. Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.",
+            "Email invitations. Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.",
+            "Clear join confirmations. A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.",
+            "Account and computer controls. Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.",
+            "Live activity receipts. Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work."
+          ],
+          "title": "Invitations and reliable desktop controls",
+          "version": "v0.2.10"
+        },
+        {
+          "changes": [
+            "Workspace and project permissions. Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.",
+            "Safer issue mirroring. Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.",
+            "Files respect their source access. Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.",
+            "Shared work and sync. Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.",
+            "Safer collaborative editing. Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.",
+            "Call continuity. An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.",
+            "Recoverable drawings. Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.",
+            "Consistent workspace controls. Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.",
+            "Keyboard control in dialogs. About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.",
+            "Readable buttons in every theme. Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.",
+            "Files loading recovery. Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.",
+            "Responsive Data queries. Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.",
+            "Chat attachments that fit. Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.",
+            "Recoverable workspace loading. Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.",
+            "Appearance from paired devices. Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.",
+            "Clearer connection errors. Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials.",
+            "Accurate browser setup. Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.",
+            "Release history everywhere. What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes."
+          ],
+          "title": "Safer workspaces and clearer controls",
+          "version": "v0.2.7"
+        },
+        {
+          "changes": [
+            "Projects with default agents. Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.",
+            "Workspaces. Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.",
+            "Zap Liquid avatars. Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.",
+            "Inbox, Chat, Call and Draw. One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas."
+          ],
+          "title": "Origin on the desktop",
+          "version": "vdesktop-1.0"
+        },
+        {
+          "changes": [
+            "Keyboard first. C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.",
+            "A cleaner issue editor. Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.",
+            "A calmer sidebar. Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.",
+            "One Inbox, two views. Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.",
+            "Small details, fixed. No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list."
+          ],
+          "title": "A sharper workspace",
+          "version": "v1.0"
+        }
+      ],
+      "client": {
+        "height": 1000,
+        "width": 365
+      },
+      "dark": true,
+      "fontStatus": "loaded",
+      "h1": "What's new",
+      "passwords": [],
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "viewport": {
+        "height": 1000,
+        "width": 375
+      },
+      "route": "/whats-new",
+      "width": 375,
+      "theme": "dark",
+      "name": "whats-new-375-dark",
+      "screenshot": "whats-new-375-dark.jpg",
+      "screenshotDimensions": {
+        "width": 365,
+        "height": 973
+      },
+      "capturedAt": "2026-10-18T13:46:05.609Z",
+      "overflow": false,
+      "notes": true,
+      "version": true
+    },
+    {
+      "articles": [
+        {
+          "changes": [
+            "Public workspace invitations. Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.",
+            "Email invitations. Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.",
+            "Clear join confirmations. A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.",
+            "Account and computer controls. Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.",
+            "Live activity receipts. Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work."
+          ],
+          "title": "Invitations and reliable desktop controls",
+          "version": "v0.2.10"
+        },
+        {
+          "changes": [
+            "Workspace and project permissions. Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.",
+            "Safer issue mirroring. Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.",
+            "Files respect their source access. Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.",
+            "Shared work and sync. Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.",
+            "Safer collaborative editing. Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.",
+            "Call continuity. An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.",
+            "Recoverable drawings. Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.",
+            "Consistent workspace controls. Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.",
+            "Keyboard control in dialogs. About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.",
+            "Readable buttons in every theme. Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.",
+            "Files loading recovery. Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.",
+            "Responsive Data queries. Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.",
+            "Chat attachments that fit. Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.",
+            "Recoverable workspace loading. Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.",
+            "Appearance from paired devices. Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.",
+            "Clearer connection errors. Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials.",
+            "Accurate browser setup. Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.",
+            "Release history everywhere. What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes."
+          ],
+          "title": "Safer workspaces and clearer controls",
+          "version": "v0.2.7"
+        },
+        {
+          "changes": [
+            "Projects with default agents. Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.",
+            "Workspaces. Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.",
+            "Zap Liquid avatars. Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.",
+            "Inbox, Chat, Call and Draw. One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas."
+          ],
+          "title": "Origin on the desktop",
+          "version": "vdesktop-1.0"
+        },
+        {
+          "changes": [
+            "Keyboard first. C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.",
+            "A cleaner issue editor. Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.",
+            "A calmer sidebar. Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.",
+            "One Inbox, two views. Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.",
+            "Small details, fixed. No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list."
+          ],
+          "title": "A sharper workspace",
+          "version": "v1.0"
+        }
+      ],
+      "client": {
+        "height": 1000,
+        "width": 365
+      },
+      "dark": false,
+      "fontStatus": "loaded",
+      "h1": "What's new",
+      "passwords": [],
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "viewport": {
+        "height": 1000,
+        "width": 375
+      },
+      "route": "/whats-new",
+      "width": 375,
+      "theme": "light",
+      "name": "whats-new-375-light",
+      "screenshot": "whats-new-375-light.jpg",
+      "screenshotDimensions": {
+        "width": 365,
+        "height": 973
+      },
+      "capturedAt": "2026-10-18T13:46:13.881Z",
+      "overflow": false,
+      "notes": true,
+      "version": true
+    }
+  ],
+  "screenshotMethod": "Documented browser viewport override plus high-level tab.screenshot({fullPage:false}); each unedited JPEG records its actual backing dimensions independently from the emulated DOM viewport. JPEG backing sizes are1430x993 desktop and365x973 mobile; these are not full1440/375x1000 pixel captures.",
+  "excludedHarnessAttempts": [
+    "Earlier object-key ordering caused a false canonical comparison mismatch, resolved with ordered title/body tuples; all16 images from that attempt are excluded due repeated backing surface.",
+    "All16 earlier forced-CDP screenshots and report250fd628c2eda1d867fe13a6d0e0732ee22d0fe000631753222248d9c5b08941 remain unchanged in delivery-evidence-030-excluded-cdp; none count as visual acceptance.",
+    "Initial high-level probe1280x720 was stale after viewport resize and excluded; settled high-level probe1430x993 was independently accepted.",
+    "An unpublished proof serialization revision expanded prior explanatory text into characters; it is retained outside this collection as site-proof-030-excluded-string-spread.json."
+  ],
+  "passwordToggle": {
+    "shownType": "text",
+    "hiddenType": "password",
+    "syntheticValueCleared": true,
+    "accountSubmissions": 0
+  },
+  "mobileNavigation": {
+    "expanded": "true",
+    "closed": true,
+    "focusRestored": true,
+    "overflow": false
+  },
+  "settlementQualification": "Actual DOM layout1000px high checked separately from each captured JPEG backing surface. Fresh independent pixel review is required for every route/theme. Prior same-image password-toggle and mobile Escape/focus interaction observations remain original observations and were not repeated during this recapture.",
+  "finalMatrix": "Sixteen unique source/image-qualified viewport/theme cases with actual headings, bounded scroll widths, masked auth passwords and all32canonical notes matched by title and body."
+}

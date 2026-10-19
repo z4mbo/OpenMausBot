@@ -1,0 +1,61 @@
+{
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "trackedWorktreeClean": true,
+  "files": [
+    {
+      "path": "server/origin-cloud-session.ts",
+      "bytes": 1724,
+      "sha256": "5542178b96d813b0c4dc1b74beadb9f875f0a7acdacf3b8cd055f8d727167320"
+    },
+    {
+      "path": "server/origin-cloud.ts",
+      "bytes": 70923,
+      "sha256": "38af34cef659f72cb249ffd10476fa7d6aff4e029c4c00a57e84d8d851f93a61"
+    },
+    {
+      "path": "server/origin-run-lease.ts",
+      "bytes": 11389,
+      "sha256": "7174cc188d992063d41ca000ce03c05a7b596ba9f0fd9040b0c37db099df9b52"
+    },
+    {
+      "path": "server/origin-shared-agents.ts",
+      "bytes": 26810,
+      "sha256": "cba5e8b483b70be9524508d1c36651fb01e0b2fb2abeef2911d3a37e0506f6f1"
+    },
+    {
+      "path": "shared/product-brand.mjs",
+      "bytes": 34,
+      "sha256": "9e6ee8914888bcac087623b42c5039d68c65d2224575286efc10ca975c0dd051"
+    },
+    {
+      "path": "scripts/smoke-packaged-server.mjs",
+      "bytes": 21398,
+      "sha256": "642865b7f53994ed66986d9075681ae1e860e92b319a054038dd22929144100d"
+    },
+    {
+      "path": "scripts/origin-release-notes.mjs",
+      "bytes": 5200,
+      "sha256": "e032937ef27f679eec7cca933d87c88e09111dd71e13cb396c4d57ceda129055"
+    },
+    {
+      "path": "shared/origin-releases.ts",
+      "bytes": 13238,
+      "sha256": "7452cbb2aacbd741dcba8ed2f513df2caac3bb361a2332342bf991fcd8587985"
+    },
+    {
+      "path": "electron-builder.yml",
+      "bytes": 9813,
+      "sha256": "6165cc9d037d2fd7f0b672c88d84c7de8f3dade2ecec2c1ddc9b8c7cb2c61a60"
+    },
+    {
+      "path": ".github/workflows/origin-desktop.yml",
+      "bytes": 11788,
+      "sha256": "b8fc77e9d7f55d7b84d4cb5dfcbbef1c281734163f5730446b11a61d396e0478"
+    },
+    {
+      "path": "package.json",
+      "bytes": 7906,
+      "sha256": "42e88fe8d3e69c5e94f7241dae9418576d896e9f98ec54af3104bf9bcd828560"
+    }
+  ]
+}

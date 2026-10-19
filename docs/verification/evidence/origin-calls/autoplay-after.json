@@ -1,0 +1,35 @@
+{
+  "before": false,
+  "checkedAt": "2026-10-17T21:38:36.412Z",
+  "cases": [
+    {
+      "theme": "dark",
+      "size": "desktop",
+      "retryExists": true,
+      "retryVisible": true,
+      "retryDismissedAfterPlay": true
+    },
+    {
+      "theme": "dark",
+      "size": "mobile",
+      "retryExists": true,
+      "retryVisible": true,
+      "retryDismissedAfterPlay": true
+    },
+    {
+      "theme": "light",
+      "size": "desktop",
+      "retryExists": true,
+      "retryVisible": true,
+      "retryDismissedAfterPlay": true
+    },
+    {
+      "theme": "light",
+      "size": "mobile",
+      "retryExists": true,
+      "retryVisible": true,
+      "retryDismissedAfterPlay": true
+    }
+  ],
+  "pageErrors": []
+}

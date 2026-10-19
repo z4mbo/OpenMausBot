@@ -596,5 +596,6 @@ export class BrowserLive {
   closeForSession(session: string): void { for (const viewer of this.viewers.values()) if (viewer.session === session) this.close(viewer); }
   closeForOwner(owner: string): void { for (const viewer of this.viewers.values()) if (viewer.owner === owner) this.close(viewer); }
   closeForBot(botId: string): void { for (const viewer of this.viewers.values()) if (viewer.botId === botId) this.close(viewer); }
+  recheckViewers(): void { for (const viewer of this.viewers.values()) if (!this.current(viewer)) this.close(viewer); }
   closeAll(): void { for (const viewer of this.viewers.values()) this.close(viewer); }
 }

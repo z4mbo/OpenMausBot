@@ -40,7 +40,7 @@ export function UpdateIndicator({ className }: { className?: string }) {
   const ready = state.status === "downloaded";
   return (
     <div
-      className={cn("flex size-[46px] shrink-0 items-center justify-center", className)}
+      data-sidebar-footer-control="" className={cn("flex size-[46px] shrink-0 items-center justify-center", className)}
     >
       <button
         ref={buttonRef}
@@ -51,7 +51,7 @@ export function UpdateIndicator({ className }: { className?: string }) {
         title={label}
         onClick={() => setOpen(true)}
         className={cn(
-          "relative flex size-7 shrink-0 items-center justify-center rounded-full bg-white text-neutral-900 shadow-sm ring-1 ring-black/10 transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+          "relative flex size-7 max-w-full shrink-0 items-center justify-center rounded-full bg-white text-neutral-900 shadow-sm ring-1 ring-black/10 transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
         )}
       >
         <ArrowDown size={16} strokeWidth={2.25} aria-hidden className={cn(!ready && "animate-pulse")} />

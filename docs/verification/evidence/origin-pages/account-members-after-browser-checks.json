@@ -1,0 +1,404 @@
+{
+  "previewUrl": "http://127.0.0.1:5175/__origin-pages.html",
+  "phase": "after",
+  "checkedAt": "2026-10-17T22:00:32.169Z",
+  "cases": [
+    {
+      "screen": "workspace-members",
+      "size": "desktop",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-member-remove-confirmation",
+      "size": "desktop",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-invitation-created",
+      "size": "desktop",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-members-viewer",
+      "size": "desktop",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "members-workspace-switch",
+      "size": "desktop",
+      "theme": "dark",
+      "retainedLeave": false
+    },
+    {
+      "screen": "account-menu",
+      "size": "desktop",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "account-settings",
+      "size": "desktop",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": [
+          {
+            "width": 446,
+            "scrollWidth": 446
+          }
+        ]
+      }
+    },
+    {
+      "screen": "account-password-editor",
+      "size": "desktop",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": [
+          {
+            "width": 446,
+            "scrollWidth": 446
+          }
+        ]
+      }
+    },
+    {
+      "screen": "password-cancel",
+      "size": "desktop",
+      "theme": "dark",
+      "retainedPassword": false,
+      "retainedNewPassword": false
+    },
+    {
+      "screen": "account-identity-switch",
+      "size": "desktop",
+      "theme": "dark",
+      "displayName": "Other fixture account"
+    },
+    {
+      "screen": "workspace-members",
+      "size": "mobile",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-member-remove-confirmation",
+      "size": "mobile",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-invitation-created",
+      "size": "mobile",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-members-viewer",
+      "size": "mobile",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "members-workspace-switch",
+      "size": "mobile",
+      "theme": "dark",
+      "retainedLeave": false
+    },
+    {
+      "screen": "account-menu",
+      "size": "mobile",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "account-settings",
+      "size": "mobile",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": [
+          {
+            "width": 375,
+            "scrollWidth": 375
+          }
+        ]
+      }
+    },
+    {
+      "screen": "account-password-editor",
+      "size": "mobile",
+      "theme": "dark",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": [
+          {
+            "width": 375,
+            "scrollWidth": 375
+          }
+        ]
+      }
+    },
+    {
+      "screen": "password-cancel",
+      "size": "mobile",
+      "theme": "dark",
+      "retainedPassword": false,
+      "retainedNewPassword": false
+    },
+    {
+      "screen": "account-identity-switch",
+      "size": "mobile",
+      "theme": "dark",
+      "displayName": "Other fixture account"
+    },
+    {
+      "screen": "workspace-members",
+      "size": "desktop",
+      "theme": "light",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-member-remove-confirmation",
+      "size": "desktop",
+      "theme": "light",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-invitation-created",
+      "size": "desktop",
+      "theme": "light",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-members-viewer",
+      "size": "desktop",
+      "theme": "light",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "members-workspace-switch",
+      "size": "desktop",
+      "theme": "light",
+      "retainedLeave": false
+    },
+    {
+      "screen": "account-menu",
+      "size": "desktop",
+      "theme": "light",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "account-settings",
+      "size": "desktop",
+      "theme": "light",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": [
+          {
+            "width": 446,
+            "scrollWidth": 446
+          }
+        ]
+      }
+    },
+    {
+      "screen": "account-password-editor",
+      "size": "desktop",
+      "theme": "light",
+      "bounds": {
+        "viewport": 1280,
+        "document": 1280,
+        "dialogs": [
+          {
+            "width": 446,
+            "scrollWidth": 446
+          }
+        ]
+      }
+    },
+    {
+      "screen": "password-cancel",
+      "size": "desktop",
+      "theme": "light",
+      "retainedPassword": false,
+      "retainedNewPassword": false
+    },
+    {
+      "screen": "account-identity-switch",
+      "size": "desktop",
+      "theme": "light",
+      "displayName": "Other fixture account"
+    },
+    {
+      "screen": "workspace-members",
+      "size": "mobile",
+      "theme": "light",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-member-remove-confirmation",
+      "size": "mobile",
+      "theme": "light",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-invitation-created",
+      "size": "mobile",
+      "theme": "light",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "workspace-members-viewer",
+      "size": "mobile",
+      "theme": "light",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "members-workspace-switch",
+      "size": "mobile",
+      "theme": "light",
+      "retainedLeave": false
+    },
+    {
+      "screen": "account-menu",
+      "size": "mobile",
+      "theme": "light",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": []
+      }
+    },
+    {
+      "screen": "account-settings",
+      "size": "mobile",
+      "theme": "light",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": [
+          {
+            "width": 375,
+            "scrollWidth": 375
+          }
+        ]
+      }
+    },
+    {
+      "screen": "account-password-editor",
+      "size": "mobile",
+      "theme": "light",
+      "bounds": {
+        "viewport": 375,
+        "document": 375,
+        "dialogs": [
+          {
+            "width": 375,
+            "scrollWidth": 375
+          }
+        ]
+      }
+    },
+    {
+      "screen": "password-cancel",
+      "size": "mobile",
+      "theme": "light",
+      "retainedPassword": false,
+      "retainedNewPassword": false
+    },
+    {
+      "screen": "account-identity-switch",
+      "size": "mobile",
+      "theme": "light",
+      "displayName": "Other fixture account"
+    }
+  ],
+  "pageErrors": []
+}

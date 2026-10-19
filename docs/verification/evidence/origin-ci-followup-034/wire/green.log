@@ -1,0 +1,137 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90mC:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin[39m
+
+[90mstderr[2m | unknown test
+[22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+[90mstdout[2m | server/drivers/agents-bridge-wire.test.ts[2m > [22m[2magents proxy tools/list wire size with the tool bridge on[2m > [22m[2mprints each bridged profile beside its unbridged twin, and what the two bridge tools cost
+[22m[39magents proxy tools/list with the tool bridge on, UTF-8 bytes of the serialized result
+
+  bridged  tools  unbridged  tools  saved  profile
+    15603     15      68469     54    77%  default
+    16344     16      69210     55    76%  voice
+    15643     15      70214     56    78%  shared
+    16384     16      70955     57    77%  shared+voice
+    15630     15      71368     56    78%  skills
+    16371     16      72109     57    77%  skills+voice
+    15670     15      73113     58    79%  skills+shared
+    16411     16      73854     59    78%  skills+shared+voice
+    15436     15      56230     44    73%  non-chief
+    16177     16      56971     45    72%  voice+non-chief
+    15476     15      57975     46    73%  shared+non-chief
+    16217     16      58716     47    72%  shared+voice+non-chief
+    15463     15      59129     46    74%  skills+non-chief
+    16204     16      59870     47    73%  skills+voice+non-chief
+    15503     15      60874     48    75%  skills+shared+non-chief
+    16244     16      61615     49    74%  skills+shared+voice+non-chief
+    16409     16      72909     58    77%  skills+shared+voice+cloud-home
+    16242     16      60670     48    73%  skills+shared+voice+non-chief+cloud-home
+    16429     16      74714     60    78%  skills+shared+voice+escalations
+    15603     15      68469     54    77%  default+legacy-switches
+
+the two bridge tools (whole definition | input schema alone); find_tool's description grows with the names it lists:
+    1420    185  find_tool  (skills+shared+voice+escalations)
+     712    350  use_tool  (skills+shared+voice+escalations)
+    1168    185  find_tool  (non-chief)
+     712    350  use_tool  (non-chief)
+
+ [32m✓[39m server/drivers/agents-bridge-wire.test.ts [2m([22m[2m32 tests[22m[2m)[22m[33m 1176[2mms[22m[39m
+     [33m[2m✓[22m[39m serves the same bridged bytes and answers the bridge's own calls, with no source tree beside it [33m 486[2mms[22m[39m
+[90mstderr[2m | unknown test
+[22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+[90mstdout[2m | server/drivers/agents-catalog-wire.test.ts[2m > [22m[2magents proxy tools/list wire size[2m > [22m[2mprints per-tool and total UTF-8 bytes
+[22m[39magents proxy tools/list, UTF-8 bytes of the serialized result
+
+total per profile:
+   68469  54 tools  default
+   69210  55 tools  voice
+   70214  56 tools  shared
+   70955  57 tools  shared+voice
+   71368  56 tools  skills
+   72109  57 tools  skills+voice
+   73113  58 tools  skills+shared
+   73854  59 tools  skills+shared+voice
+   56230  44 tools  non-chief
+   56971  45 tools  voice+non-chief
+   57975  46 tools  shared+non-chief
+   58716  47 tools  shared+voice+non-chief
+   59129  46 tools  skills+non-chief
+   59870  47 tools  skills+voice+non-chief
+   60874  48 tools  skills+shared+non-chief
+   61615  49 tools  skills+shared+voice+non-chief
+   72909  58 tools  skills+shared+voice+cloud-home
+   60670  48 tools  skills+shared+voice+non-chief+cloud-home
+   74714  60 tools  skills+shared+voice+escalations
+   68469  54 tools  default+legacy-switches
+
+per tool (skills+shared+voice+escalations | skills+shared+voice+non-chief); every other profile is a by-name subset with identical tool bytes:
+    6760   6760  propose_routine
+    6661   6661  propose_routine_action
+    3374   3374  coordinate_bots
+    3005      -  propose_team_setup
+    2686   2686  add_mcp_server
+    2467   2467  skill_manage
+    2252   2252  show_widget
+    2246   1979  propose_profile
+    1808   1643  propose_model
+    1689   1689  session_search
+    1660   1660  start_thread
+    1524   1524  memory_update
+    1320      -  create_bot
+    1250      -  manage_room
+    1249   1249  shared_computer
+    1201   1201  select_computer
+    1201   1201  origin_update_issue
+    1147      -  propose_bot_deletion
+    1128   1128  attach_file
+    1099   1099  assignment_status
+    1083   1083  origin_create_issue
+    1080   1080  post_to_room
+    1079   1079  origin_complete_issue
+    1061      -  retry_thread
+    1024      -  origin_assign_issue
+    1023   1023  origin_list_issues
+     983      -  create_room
+     951    951  vm_exec
+     935    935  propose_team_memory
+     928    928  request_credential
+     859      -  raise_escalation
+     852    852  request_sign_in
+     836    836  tool_result_read
+     810    810  origin_add_asset
+     785      -  origin_review_pr
+     777      -  origin_merge_pr
+     757    757  origin_feedback
+     741    741  session_read
+     740    740  send_voice_note
+     729    729  list_threads
+     718    718  close_thread
+     706    706  origin_get_issue
+     690    690  memory_log
+     659    659  fill_login
+     624    624  origin_comment_issue
+     596    596  origin_repo_status
+     591    591  origin_draw
+     561    561  origin_vault_list
+     555    555  origin_team_chat
+     541    541  list_rooms
+     501    501  list_routines
+     494    494  list_shared_computers
+     488    488  origin_team_chat_post
+     487    487  origin_list_assets
+     472    472  list_bots
+     453    453  update_widget
+     447    447  list_room_targets
+     445      -  list_team_setup
+     430    430  skills_list
+     425    425  origin_list_projects
+
+ [32m✓[39m server/drivers/agents-catalog-wire.test.ts [2m([22m[2m34 tests[22m[2m)[22m[33m 708[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m66 passed[39m[22m[90m (66)[39m
+[2m   Start at [22m 00:55:54
+[2m   Duration [22m 2.91s[2m (transform 261ms, setup 569ms, import 160ms, tests 1.88s, environment 0ms)[22m
+
+JSON report written to C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/ci034-agent-wire-goldens/green.json

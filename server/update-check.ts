@@ -1,18 +1,15 @@
-// A self-hosted server cannot replace itself, so this only says whether a newer release exists and how this install is updated.
 import { existsSync } from "node:fs";
 import { join, sep } from "node:path";
 
-export const LATEST_RELEASE_URL = "https://api.github.com/repos/milind-soni/OpenMausBot/releases/latest";
+export const LATEST_RELEASE_URL = "https://api.github.com/repos/z4mbo/Origin/releases/latest";
 const CACHE_MS = 60 * 60_000;
 
 /** "managed" is a hosted or Cloud server that is updated for its owner. */
 export type InstallKind = "desktop" | "managed" | "docker" | "podman" | "npm" | "git" | "unknown";
 
-/** As docs/self-hosting.md and deploy/podman/README.md give them. */
 export const UPDATE_COMMANDS: Partial<Record<InstallKind, { command: string; restart: boolean }>> = {
-  docker: { command: "docker compose pull omb && docker compose up -d", restart: false },
+  docker: { command: "git pull && docker compose up -d --build", restart: false },
   podman: { command: "git pull && cd deploy/podman && PODMAN_COMPOSE_PROVIDER=podman-compose podman compose --env-file .env -f compose.yaml up -d --build", restart: false },
-  npm: { command: "npm install -g openmausbot@latest", restart: true },
   git: { command: "git pull && pnpm install", restart: true },
 };
 
@@ -32,10 +29,10 @@ export function installKind(input: {
   return "unknown";
 }
 
-/** Semver order on tags such as "v0.1.92"; a prerelease sorts before its release, and anything unparseable is never an update. */
+/** Semver order on tags such as "origin-v0.2.11"; a prerelease sorts before its release, and anything unparseable is never an update. */
 export function isNewerVersion(latest: string, current: string): boolean {
   const parse = (version: string) => {
-    const match = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/.exec(version.trim());
+    const match = /^(?:origin-v|v)?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/.exec(version.trim());
     return match ? { core: match.slice(1, 4).map(Number), pre: match[4]?.split(".") ?? [] } : null;
   };
   const a = parse(latest);
@@ -93,13 +90,13 @@ export function createUpdateChecker(options: {
     inflight ??= (async () => {
       try {
         const response = await fetchRelease(LATEST_RELEASE_URL, {
-          headers: { accept: "application/vnd.github+json", "user-agent": "openmausbot-update-check" },
+          headers: { accept: "application/vnd.github+json", "user-agent": "origin-update-check" },
           signal: AbortSignal.timeout(8_000),
         });
         if (!response.ok) throw new Error(`GitHub answered ${response.status}`);
         const release = await response.json() as { tag_name?: unknown; html_url?: unknown };
         if (typeof release.tag_name !== "string") throw new Error("GitHub sent no release tag");
-        const latest = release.tag_name.replace(/^v/, "");
+        const latest = release.tag_name.replace(/^(?:origin-)?v/, "");
         const result: UpdateCheck = {
           ...base(),
           latest,

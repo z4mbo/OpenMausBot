@@ -1,0 +1,43 @@
+{
+  "version": "0.2.10",
+  "baseline": "07666fa2e52b5acef1bfd86d30367c239812e0a6",
+  "fixCommit": "f1fa6fdc8ec5c49d15119fccadad7af678c507b7",
+  "screenshots": 4,
+  "files": [
+    {
+      "path": "proof.json",
+      "bytes": 4544,
+      "sha256": "950c741743976f608ce1a7bf5c068811d2edc8604cfd985e705cac6f3b053961"
+    },
+    {
+      "path": "regression.json",
+      "bytes": 3274,
+      "sha256": "e873c7e1925880997bff279baba64915e92bdccf1c543a8b8bc7f2ba056a1b0e"
+    },
+    {
+      "path": "browser.json",
+      "bytes": 501,
+      "sha256": "9233b4418ef70343dc3f08a93e8dc2aac0a091efc0b090295ebf8e8e787907cb"
+    },
+    {
+      "path": "screenshots/baseline-one-receipt.jpg",
+      "bytes": 40808,
+      "sha256": "7402c62fc277c34f99d163ba30a15929df5db73784ff5c5b5bf13c0a71ef7bbb"
+    },
+    {
+      "path": "screenshots/second-tool-stale.jpg",
+      "bytes": 46515,
+      "sha256": "9b0ca9535551a2e5b1f21c666b6d5a990405567c628ca24589b0ea348729e25e"
+    },
+    {
+      "path": "screenshots/second-tool-manual-reload.jpg",
+      "bytes": 47843,
+      "sha256": "a4177bf83dd97f05ed1ef240a79b6d87cb8962e89426188b60144ae3eb0c29df"
+    },
+    {
+      "path": "screenshots/after-fix-automatic-refresh.jpg",
+      "bytes": 54803,
+      "sha256": "dab963f4e6d7230ee30f93fb8f62e69b5e6720ae549fa128539b675ca6e9bd6d"
+    }
+  ]
+}

@@ -12,16 +12,14 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 const record = (hintsSeen: string[] = []): OnboardingStatus => ({ ...EMPTY_ONBOARDING, completedAt: "2026-09-01", version: 1, hintsSeen });
-const facts = (intro: boolean | null, trial: boolean | null, cloud: boolean | null, star: boolean | null, launch: boolean | null = false): NoticeFacts =>
-  ({ [PRODUCT_HUNT_NOTICE]: launch, [CLOUD_INTRO]: intro, [CLOUD_TRIAL_NOTICE]: trial, [CLOUD_NOTICE]: cloud, [STAR_NOTICE]: star });
+const facts = (intro: boolean | null, trial: boolean | null, cloud: boolean | null, star: boolean | null): NoticeFacts =>
+  ({ [CLOUD_INTRO]: intro, [CLOUD_TRIAL_NOTICE]: trial, [CLOUD_NOTICE]: cloud, [STAR_NOTICE]: star });
 const none = () => false;
 const DAY = 86_400_000, NOON = new Date(2026, 9, 9, 12).getTime();
 
 it("is one queue: the card after the update first, then the trial's notice, the My Cloud card, the star", () => {
-  expect(NOTICES).toEqual([PRODUCT_HUNT_NOTICE, CLOUD_INTRO, CLOUD_TRIAL_NOTICE, CLOUD_NOTICE, STAR_NOTICE]);
-  expect(nextNotice(facts(true, true, true, true, true), none)).toBe(PRODUCT_HUNT_NOTICE);
-  expect(nextNotice(facts(true, true, true, true, null), none)).toBeNull();
-  expect(nextNotice(facts(true, true, true, true, true), id => id === PRODUCT_HUNT_NOTICE)).toBe(CLOUD_INTRO);
+  expect(NOTICES).toEqual([CLOUD_INTRO, CLOUD_TRIAL_NOTICE, CLOUD_NOTICE, STAR_NOTICE]);
+  expect(NOTICES).not.toContain(PRODUCT_HUNT_NOTICE);
   expect(CLOUD_INTRO).toBe("cloud-trial-intro-v1");
   expect(nextNotice(facts(true, true, true, true), none)).toBe(CLOUD_INTRO);
   expect(nextNotice(facts(false, true, true, true), none)).toBe(CLOUD_TRIAL_NOTICE);

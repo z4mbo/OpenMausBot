@@ -1,0 +1,4 @@
+{
+  "error": "AssertionError [ERR_ASSERTION]: mac-arm64: lease helper AST differs from final source\n+ actual - expected\n\n+ 'fad756e1b81690359d2eb61392fedc9d7319b27d5f0e45473fd154f1d568384c'\n- '2669edb66b05a41a66dfdcff0b70cff020d31e1db45e9db35683c89e5c3ecb07'\n\n    at Object.<anonymous> (C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\check-bundled-ownership.cjs:78:12)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47",
+  "completedTargets": []
+}

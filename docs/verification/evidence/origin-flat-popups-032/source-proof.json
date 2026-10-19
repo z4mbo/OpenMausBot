@@ -1,0 +1,320 @@
+{
+  "baseline": "bcfd3bfd78718a69fe0804cd9435a08772a17e2e",
+  "afterIsUnreleasedWorkingSource": true,
+  "beforeSources": [
+    {
+      "path": "src/components/PluginsPanel.tsx",
+      "bytes": 50853,
+      "sha256": "03d6f22c8b38411446ccf5de62d1642687b2293f08f9fa32a712294344d8899a"
+    },
+    {
+      "path": "src/components/SettingsModal.tsx",
+      "bytes": 51040,
+      "sha256": "463dab4cf8958a0b1e05df15882b830abd5d04f73b0d791937b9524bbcefd3e7"
+    },
+    {
+      "path": "src/components/TriggersPanel.tsx",
+      "bytes": 20375,
+      "sha256": "3211778d07cf11cccecda452f02a29646f23b1f38a35ad58fdacaa12d407671e"
+    },
+    {
+      "path": "src/components/VoiceSetupDialog.tsx",
+      "bytes": 7179,
+      "sha256": "140b130ed5efcdba46cc6dc41ec53f412dc3b32cd4107f2aa2c826d4f19610e6"
+    },
+    {
+      "path": "src/components/SidebarPopoverMenu.tsx",
+      "bytes": 16543,
+      "sha256": "371eae985d9501b2a033f12ba7cbed7186996daa66f179f424ea475a244ceece"
+    },
+    {
+      "path": "src/styles.css",
+      "bytes": 90407,
+      "sha256": "f65c9c07ac7a3cf7327654e826fc369e42095a8aebb889aca0180050d464cc7b"
+    },
+    {
+      "path": "shared/origin-theme.css",
+      "bytes": 752,
+      "sha256": "e6e58a92c40e0085d14af1639cb8d4d834391d18664c662954d84945417c653a"
+    }
+  ],
+  "afterSources": [
+    {
+      "path": "src/components/PluginsPanel.tsx",
+      "bytes": 51813,
+      "sha256": "f0246db1b7a62e141c0bc88f40697c901d64a1ca446bd11acb2dced859128c93"
+    },
+    {
+      "path": "src/components/SettingsModal.tsx",
+      "bytes": 52032,
+      "sha256": "febc22a8e156f3079a88c76992efecc4c5192146e5284cc6e64f1aff14a8ecc9"
+    },
+    {
+      "path": "src/components/TriggersPanel.tsx",
+      "bytes": 20622,
+      "sha256": "219537675f5fbc1a6baa71045ec39ff649d056e79c4363a96ec0bf084c230831"
+    },
+    {
+      "path": "src/components/VoiceSetupDialog.tsx",
+      "bytes": 7201,
+      "sha256": "169631ef2651444099a1592b1504c76fb62fafd288f997dec17ffc8d12270692"
+    },
+    {
+      "path": "src/components/SidebarPopoverMenu.tsx",
+      "bytes": 16900,
+      "sha256": "ca5eed2feab48d40dcd2384df1c82e84707823348886dd61d71c8bea0a1fd2ca"
+    },
+    {
+      "path": "src/styles.css",
+      "bytes": 90983,
+      "sha256": "095c789aed336fb992b8ba999ed50e5978063f5f030b8672474fd97d5c4fedab"
+    },
+    {
+      "path": "shared/origin-theme.css",
+      "bytes": 776,
+      "sha256": "64c4f302bfff785197fb1fc621acfab44738fa791ef6a4d496f4dc5923809fec"
+    }
+  ],
+  "frozenModulesActuallyLoaded": [
+    "src/components/PluginsPanel.tsx",
+    "src/components/SettingsModal.tsx",
+    "src/components/TriggersPanel.tsx",
+    "src/components/VoiceSetupDialog.tsx",
+    "src/components/SidebarPopoverMenu.tsx",
+    "src/styles.css"
+  ],
+  "scope": "Actual production SettingsModal, PluginsPanel, TriggersPanel, VoiceSetupDialog and SidebarPopoverMenu in isolated component fixtures; synthetic store/catalog/voices and HTTP responses. No native calls, account providers, packaged app or full-App acceptance.",
+  "beforeCases": 24,
+  "afterCases": 24,
+  "screenshots": 57,
+  "reducedMotion": "no-preference in both matrices; no reduced-motion CSS changed. Reduced-motion menu focus has a separate owner and needs integrated acceptance.",
+  "imagesEdited": false,
+  "protectedMainPortsNeverUsed": [
+    5199,
+    8799,
+    3210
+  ],
+  "rootTabsAndViewportUntouched": true,
+  "canonicalOwnedPortsClosed": [
+    20275,
+    57449,
+    21304,
+    52171
+  ],
+  "cleanupVerifiedAt": "2026-10-18T15:03:16.826Z",
+  "ownedFixtureCleanup": [
+    {
+      "attempt": "after-accepted",
+      "closedAt": "2026-10-18T14:56:53.567Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "after-final-valid",
+      "closedAt": "2026-10-18T14:58:07.224Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "after-layout-probe",
+      "closedAt": "2026-10-18T15:01:21.021Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "after-proof",
+      "closedAt": "2026-10-18T14:58:56.052Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "after-software",
+      "closedAt": "2026-10-18T15:03:11.488Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-1",
+      "closedAt": "2026-10-18T14:50:50.439Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-accepted",
+      "closedAt": "2026-10-18T14:56:46.192Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-canonical",
+      "closedAt": "2026-10-18T14:53:21.127Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-configured",
+      "closedAt": "2026-10-18T14:53:27.384Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-debug",
+      "closedAt": "2026-10-18T14:51:51.524Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-debug-2",
+      "closedAt": "2026-10-18T14:52:54.591Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-final",
+      "closedAt": "2026-10-18T14:54:03.919Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-final-valid",
+      "closedAt": "2026-10-18T14:57:57.483Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-focus-red",
+      "closedAt": "2026-10-18T14:55:08.457Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-layout-probe",
+      "closedAt": "2026-10-18T15:01:11.272Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-proof",
+      "closedAt": "2026-10-18T14:58:48.528Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-software",
+      "closedAt": "2026-10-18T15:02:40.560Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "before-stable",
+      "closedAt": "2026-10-18T14:52:22.699Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    },
+    {
+      "attempt": "software-probe",
+      "closedAt": "2026-10-18T15:01:54.383Z",
+      "launcherAbsent": true,
+      "backendAbsent": true,
+      "syntheticDataDirectoryAbsent": true
+    }
+  ],
+  "excludedAttempts": [
+    {
+      "attempt": "after-accepted",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "after-final-valid",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "after-layout-probe",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "after-proof",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-1",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-accepted",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-canonical",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-configured",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-debug",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-debug-2",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-final",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-final-valid",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-focus-red",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-layout-probe",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-proof",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "before-stable",
+      "retainedPrivately": true
+    },
+    {
+      "attempt": "software-probe",
+      "retainedPrivately": true
+    }
+  ],
+  "rejectedHarnessDetails": [
+    "Initial virtual entry discovered dependencies after React loaded, producing mismatched Vite optimizer hashes. Fixed fixture-only explicit prebundle/noDiscovery; production modules remain unchanged.",
+    "Added missing papaparse prebundle and actual disposable fixture config, then corrected a duplicate-label locator and explicitly planned synthetic API responses.",
+    "A real baseline Triggers focus failure was retained separately and fixed before the accepted styling baseline.",
+    "Earlier matching matrices and layout probes are excluded: headless hardware-composited screenshots intermittently omitted pixels despite correct DOM geometry. Canonical captures use isolated Chromium --disable-gpu, with no image editing; final matrices bind the final fix commit and exact recorded working source bytes."
+  ],
+  "limits": [
+    "At375px, the populated trigger row's two names remain cramped on both sources; a separate row-layout follow-up is required.",
+    "The broader shadow inventory remains open beyond these five components."
+  ]
+}

@@ -174,7 +174,7 @@ describe("plans", () => {
     expect(() => createPlan({ registry, slug: "beta", seed: { admins: ["x@y.test"], members: [] }, memoryMax: "lots", layout })).toThrow("--memory");
   });
 
-  it("suspends, resumes, deletes and upgrades with the registry kept in step", () => {
+  it("suspends, resumes and deletes with the registry kept in step", () => {
     const created = createPlan({ registry: emptyRegistry("agentada.cc"), slug: "acme", seed: { admins: ["a@b.test"], members: [] }, now, layout });
     const suspended = suspendPlan({ registry: created.registry, slug: "acme", layout });
     expect(suspended.registry.workspaces.acme?.status).toBe("suspended");
@@ -197,7 +197,11 @@ describe("plans", () => {
       expect(() => deletePlan({ registry: incomplete, slug: "acme", keepData: false, layout })).toThrow("operator recovery");
     }
     const two = createPlan({ registry: created.registry, slug: "globex", seed: { admins: ["g@x.test"], members: [] }, now, layout }).registry;
-    expect(argvOf(upgradePlan({ registry: suspendPlan({ registry: two, slug: "globex", layout }).registry }))).toEqual(["npm install -g openmausbot@latest", "systemctl restart openmausbot@acme.service"]);
+    expect(() => upgradePlan({ registry: suspendPlan({ registry: two, slug: "globex", layout }).registry })).toThrow("Automatic fleet upgrades are unavailable for Origin");
+  });
+
+  it("refuses automatic Origin fleet upgrades before planning a package replacement", () => {
+    expect(() => upgradePlan({ registry: emptyRegistry("example.test") })).toThrow("Automatic fleet upgrades are unavailable for Origin");
   });
 
   it("seeds only the trusted portal gateway and reserves the portal hostname", () => {

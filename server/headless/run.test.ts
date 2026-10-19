@@ -113,7 +113,7 @@ describe("run", () => {
     setTimeout(() => controller.abort(), 50);
     const { code, result } = await h.run(["run", "--bot", "lead", "Go", "--json"], controller.signal);
     expect(code).toBe(130);
-    expect(result).toMatchObject({ exitCode: 130, error: "stopped waiting; the work keeps running", hint: "wait again: openmausbot wait --thread t1 --since 1000" });
+    expect(result).toMatchObject({ exitCode: 130, error: "stopped waiting; the work keeps running", hint: "wait again: pnpm omb wait --thread t1 --since 1000" });
     expect(h.calls.some((call) => call.name === "interrupt_conversation")).toBe(false);
   });
 
@@ -121,7 +121,7 @@ describe("run", () => {
     const h = harness([], { jobRead: () => { throw Object.assign(new Error("OpenMausBot API error (404): not found"), { status: 404 }); } });
     const { code, result } = await h.run(["run", "--bot", "lead", "Go", "--json"]);
     expect(code).toBe(5);
-    expect(result).toMatchObject({ ok: false, exitCode: 5, error: "this OpenMausBot server cannot report a conversation's job" });
+    expect(result).toMatchObject({ ok: false, exitCode: 5, error: "this Origin server cannot report a conversation's job" });
     expect(h.calls.map((call) => call.name)).toEqual(["create_task"]);
   });
 });
@@ -221,7 +221,7 @@ describe("wait", () => {
     setTimeout(() => controller.abort(), 50);
     const { code, result } = await h.run(["wait", "--thread", "t1", "--json"], controller.signal);
     expect(code).toBe(130);
-    expect(result).toMatchObject({ ok: false, exitCode: 130, error: "stopped waiting; the work keeps running", hint: "wait again: openmausbot wait --thread t1" });
+    expect(result).toMatchObject({ ok: false, exitCode: 130, error: "stopped waiting; the work keeps running", hint: "wait again: pnpm omb wait --thread t1" });
     expect(h.calls.some((call) => call.name === "interrupt_conversation")).toBe(false);
   });
 });

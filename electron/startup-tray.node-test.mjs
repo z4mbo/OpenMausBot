@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { createStartupScreen } from "./startup-screen.mjs";
+import { createStartupScreen, startupScreenHtml } from "./startup-screen.mjs";
 import { createSystemTray } from "./system-tray.mjs";
 
 const iconPath = fileURLToPath(new URL("./resources/app-icon.png", import.meta.url));
@@ -50,6 +50,20 @@ function fixture(options = {}) {
   return { tray, trayInstance, splash, win, calls, setActive: value => { active = value; } };
 }
 const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
+
+test("desktop startup and tray identify the installed Origin app", async () => {
+  const { splash, tray, trayInstance } = fixture();
+  try {
+    await splash.ready;
+    const html = startupScreenHtml(iconPath);
+    assert.match(html, /<title>Origin<\/title>/);
+    assert.match(html, /<h1>Origin<\/h1>/);
+    assert.doesNotMatch(html, /OpenMaus|MausBot/);
+    assert.equal(splash.window.options.title, "Origin");
+    assert.equal(trayInstance.tooltip, "Origin");
+    assert.deepEqual(trayInstance.menu.filter(item => item.label).map(item => item.label), ["Open Origin", "Quit Origin"]);
+  } finally { splash.dispose(); tray.destroy(); }
+});
 
 class UnreadyWindow extends Window {
   loadURL() { return Promise.resolve(); }

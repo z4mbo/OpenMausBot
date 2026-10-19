@@ -1,0 +1,20 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-branding-034/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+·····················································
+
+ Test Files  3 passed (3)
+      Tests  53 passed (53)
+   Start at  02:35:31
+   Duration  2.35s (transform 476ms, setup 719ms, import 732ms, tests 476ms, environment 0ms)
+
+JSON report written to C:/Users/aless/.codex/worktrees/origin-branding-034/Origin/.omb-scratch/origin-session-extraction-checks-036.json

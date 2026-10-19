@@ -1,0 +1,253 @@
+{
+  "version": "0.2.7",
+  "source": "dbdac25fcd014d231e694aa8665d326b235af616",
+  "image": "sha256:5d59beb1676c192b4368d731be1b1be1e53407ff0168ae16385cb4568f79ccca",
+  "scope": "After-only verification evidence; existing matched before/after UI evidence retains its original source identities.",
+  "website": {
+    "cases": 32,
+    "widths": [
+      375,
+      1440
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "motion": [
+      "reduce",
+      "no-preference"
+    ],
+    "canonicalNotes": 18,
+    "runtimeExceptions": 0,
+    "accountSubmissions": 0
+  },
+  "app": {
+    "paths": [
+      "Profile > Help and support > About",
+      "Profile > Get the phone app"
+    ],
+    "keys": [
+      "Tab",
+      "Shift+Tab",
+      "Escape"
+    ],
+    "isolatedSyntheticFullApp": true,
+    "physicalPhoneOrPairingAcceptance": false
+  },
+  "networkResetCauseProven": false,
+  "publicationReceipt": "delivery-receipt.json",
+  "screenshots": 36,
+  "files": [
+    {
+      "path": "site/landing-375-light-reduce-cdp.png",
+      "bytes": 67890,
+      "sha256": "c2197276faba1ae41a1244472fec08cacdc89b6c7eb2612137daad16e91c8047"
+    },
+    {
+      "path": "site/login-375-light-reduce-cdp.png",
+      "bytes": 26853,
+      "sha256": "3dd399b0f3883f1162304a997320514430aba55e34af50995ba830d0a0d6b152"
+    },
+    {
+      "path": "site/signup-375-light-reduce-cdp.png",
+      "bytes": 37971,
+      "sha256": "16980da788811bf0f22f4007135d0bd741608718184bab3fb0cb93ccec38f4af"
+    },
+    {
+      "path": "site/whats-new-375-light-reduce-cdp.png",
+      "bytes": 72884,
+      "sha256": "3e2df36f59d51428dc88b41ca8fd2da8bb0673ac14ec16dfb04e09343faf7bac"
+    },
+    {
+      "path": "site/landing-1440-light-reduce-cdp.png",
+      "bytes": 110208,
+      "sha256": "eaa92f93c0e917e3a1ab1cb3eb725826a095a2f594c003a42c3801e0297a91a5"
+    },
+    {
+      "path": "site/login-1440-light-reduce-cdp.png",
+      "bytes": 32713,
+      "sha256": "78809ca3a55fad979d6a9e380daa1025e3dddcd56c2eb2b1dd0773a47be4ecf0"
+    },
+    {
+      "path": "site/signup-1440-light-reduce-cdp.png",
+      "bytes": 46265,
+      "sha256": "4389921830b4a162edb176769755c0fc0dd85dcd5e61530170979ab752789f3f"
+    },
+    {
+      "path": "site/whats-new-1440-light-reduce-cdp.png",
+      "bytes": 128700,
+      "sha256": "afce309f816fe1f7dfa8c6a7b857ffee08008f08504a8cbf50794c95d1a91c4d"
+    },
+    {
+      "path": "site/landing-375-dark-reduce-cdp.png",
+      "bytes": 68281,
+      "sha256": "bb376ef4a63a12310d30d9be226fd5f53a3ac24c2d5bac102699274b1295586a"
+    },
+    {
+      "path": "site/login-375-dark-reduce-cdp.png",
+      "bytes": 26896,
+      "sha256": "8bdde256b58a1e2331ce793d326dbf539eed25e61e771d4f94fb6846572f9741"
+    },
+    {
+      "path": "site/signup-375-dark-reduce-cdp.png",
+      "bytes": 37810,
+      "sha256": "01b9cddc3ed37860aca9b63149eaf7fb3f55fa268b6191a3226607195d3ab6f2"
+    },
+    {
+      "path": "site/whats-new-375-dark-reduce-cdp.png",
+      "bytes": 71231,
+      "sha256": "f3bc3779a0eb76924e1170b7823c5207af6ccb2aec4e5645cd4575a9fefd50ec"
+    },
+    {
+      "path": "site/landing-1440-dark-reduce-cdp.png",
+      "bytes": 110683,
+      "sha256": "7cabdcdcdf1cbf2db8c126986a44b363ddd28a58d580f7867b05e325d836ab35"
+    },
+    {
+      "path": "site/login-1440-dark-reduce-cdp.png",
+      "bytes": 32664,
+      "sha256": "6d0f31a6db2c3ae2c46a7b064b077434538fb8d6a8af1b5994e48068649c6825"
+    },
+    {
+      "path": "site/signup-1440-dark-reduce-cdp.png",
+      "bytes": 44062,
+      "sha256": "16b45bd6f1fe64d05c4381481c28db0a818f3da7127c898bc8b212467b036f41"
+    },
+    {
+      "path": "site/whats-new-1440-dark-reduce-cdp.png",
+      "bytes": 127123,
+      "sha256": "34a9f20470d8d40920dde1bff638c5b51dc29a7d2600cfe29ac46b7b564a0a4d"
+    },
+    {
+      "path": "site/landing-375-light-no-preference-cdp.png",
+      "bytes": 56017,
+      "sha256": "dd2575b20ddf971d293066392cdb8cd182bcba0f0c7b1522c2a5db9ac785b9df"
+    },
+    {
+      "path": "site/login-375-light-no-preference-cdp.png",
+      "bytes": 20099,
+      "sha256": "0f6e1d1105118a5eca138003db75bd01a958b5d2be8155f308d762f3ac75e9bd"
+    },
+    {
+      "path": "site/signup-375-light-no-preference-cdp.png",
+      "bytes": 22205,
+      "sha256": "f90af78fa118a58ee8c90d055e11b40a2a9c97b16c3fd8ff8d526fdbcd1d7633"
+    },
+    {
+      "path": "site/whats-new-375-light-no-preference-cdp.png",
+      "bytes": 72926,
+      "sha256": "d8b23dc6c725709d898fcd99d7a417d3dd2feb175ca4a26d513c2981299acd35"
+    },
+    {
+      "path": "site/landing-1440-light-no-preference-cdp.png",
+      "bytes": 90914,
+      "sha256": "8df872c6f30fb3ad2231d5f609033b2b3aef5716dea6393b2298f9fa7bb887d8"
+    },
+    {
+      "path": "site/login-1440-light-no-preference-cdp.png",
+      "bytes": 24145,
+      "sha256": "ab12a30953daabab0d9fda5b77afcb691b1b93b005940da410dd2fcc499e7823"
+    },
+    {
+      "path": "site/signup-1440-light-no-preference-cdp.png",
+      "bytes": 25774,
+      "sha256": "fd1b3b47be86ace7a814dbdbc3f818597550cf41f8b19736b1939bd854ca1278"
+    },
+    {
+      "path": "site/whats-new-1440-light-no-preference-cdp.png",
+      "bytes": 128761,
+      "sha256": "c41ceaca06834f15235f9c5d52ebbc1ced95c5377a3b4c63149041aa0f009df9"
+    },
+    {
+      "path": "site/landing-375-dark-no-preference-cdp.png",
+      "bytes": 53083,
+      "sha256": "a431ce5a2ca8a899a4300d1f1d3215f4d565c223e7e2818ac8906754454e67e7"
+    },
+    {
+      "path": "site/login-375-dark-no-preference-cdp.png",
+      "bytes": 19722,
+      "sha256": "101b80ed3a1cd604c3335f15e863789eedfc26d97a26857503f8be986fe883fe"
+    },
+    {
+      "path": "site/signup-375-dark-no-preference-cdp.png",
+      "bytes": 22562,
+      "sha256": "dfb23c21b9bb256018301c16c3304926babc29f630cf3684af23296c8e514e86"
+    },
+    {
+      "path": "site/whats-new-375-dark-no-preference-cdp.png",
+      "bytes": 71280,
+      "sha256": "4ac2b421c7e300b0fc85eaddaeeb681f0bd5ad72f5e3f89cc9d37eea87735185"
+    },
+    {
+      "path": "site/landing-1440-dark-no-preference-cdp.png",
+      "bytes": 89217,
+      "sha256": "4fbe52046589c0da1b271d6b4ef841fa4ae50ddf4069e17eca2eb246aa8cdbd9"
+    },
+    {
+      "path": "site/login-1440-dark-no-preference-cdp.png",
+      "bytes": 25025,
+      "sha256": "5a9121ba6a8722c789626182fe19862c875866888a05a92be686f2685b18269b"
+    },
+    {
+      "path": "site/signup-1440-dark-no-preference-cdp.png",
+      "bytes": 25876,
+      "sha256": "a8fb37311019b5e6a2715a0b649216f9aa32baa44a82304a25b87e063c952cf6"
+    },
+    {
+      "path": "site/whats-new-1440-dark-no-preference-cdp.png",
+      "bytes": 127182,
+      "sha256": "93671b3a1251aa9ce0d4df7bfca6494ab97fe6f196ff8ba63fd8d8c07b616230"
+    },
+    {
+      "path": "site/results.json",
+      "bytes": 23728,
+      "sha256": "acd4fe6a98a70fc2cf6523dab439e7cae766aed252f533c457544d118492eb1b"
+    },
+    {
+      "path": "app/actual-about-027-proof.json",
+      "bytes": 493,
+      "sha256": "c329a0012adcb7a3f12fb8cb056e79d62b36f1e1eb5c819c6da9548b04e77d8e"
+    },
+    {
+      "path": "app/origin-visible-about-027.png",
+      "bytes": 36918,
+      "sha256": "ea9f2e688630d9819bb6947b30a16e9abb82ea3f48da249be738af2e082a79dc"
+    },
+    {
+      "path": "app/actual-phone-027-proof.json",
+      "bytes": 531,
+      "sha256": "808308011a2b85dbbe5a6844aefdbcaa0157f04e8f818d3745893016befb7dc3"
+    },
+    {
+      "path": "app/origin-visible-phone-app-027.png",
+      "bytes": 72037,
+      "sha256": "0d95301098f533d6784d162ab88173f461e9b80703e0ad9ad4dae5eccb9be335"
+    },
+    {
+      "path": "app/origin-visible-whats-new-027.png",
+      "bytes": 106555,
+      "sha256": "a3a7f6e6fd6a0f0e1cd5282da44a353781a1efcdc1717e390a1fc57af4882a86"
+    },
+    {
+      "path": "comms-diagnostic.json",
+      "bytes": 940,
+      "sha256": "5a07d95ad1c792d839791a01b40b763bf95af0ccaf46ba2bde29bcb4e8674874"
+    },
+    {
+      "path": "public/landing.png",
+      "bytes": 70061,
+      "sha256": "19ad544d425fe8a03864fece53a7e1a0539efc623abffedc6f1404d953656561"
+    },
+    {
+      "path": "public/browser-proof.json",
+      "bytes": 1272,
+      "sha256": "56eff87882ac72cce41cd12295ada1608729b39bda2d77e00b60d9c0f40eaf1d"
+    }
+  ],
+  "privateScreenshots": 35,
+  "publicScreenshot": {
+    "path": "public/landing.png",
+    "bytes": 70061,
+    "sha256": "19ad544d425fe8a03864fece53a7e1a0539efc623abffedc6f1404d953656561"
+  }
+}

@@ -3,8 +3,9 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { json, readBody } from "./harness/http.ts";
-import { createOriginInviteRoutes, originErrorMessage, resendInviteMail, type InviteMail, type OriginConvex } from "./origin-invites.ts";
+import { createOriginInviteRoutes, originErrorMessage, type OriginConvex } from "./origin-invites.ts";
 import { dispatchRoutes } from "./routes/table.ts";
+import { ORIGIN_HOSTED_CONVEX_URL } from "../shared/origin-site-address.ts";
 
 const servers: Server[] = [];
 afterEach(async () => {
@@ -26,16 +27,16 @@ function fakeConvex(answers: Record<string, unknown>) {
 }
 
 async function start(options: { publicUrl?: string | null; convexUrl?: string | null; answers?: Record<string, unknown>; mailOk?: boolean } = {}) {
-  const fake = fakeConvex(options.answers ?? {
+  const fake = fakeConvex({
+    "workspaces:inviteAddress": { origin: "https://origin.imbored.fun", convexUrl: ORIGIN_HOSTED_CONVEX_URL },
     "workspaces:createInvite": { token: "a".repeat(64), expiresAt: 1, teamName: "GGs" },
-    "auth:me": { name: "Ada", email: "ada@x.dev" },
+    "workspaces:sendEmailInvite": { token: "a".repeat(64), expiresAt: 1, inviteLink: `https://origin.imbored.fun/join/${"a".repeat(64)}`, sent: options.mailOk ?? true, deliveryStatus: options.mailOk === false ? "failed" : "accepted" },
+    ...options.answers,
   });
-  const mails: InviteMail[] = [];
   const routes = [createOriginInviteRoutes({
     publicUrl: () => options.publicUrl ?? null,
-    convexUrl: () => (options.convexUrl === undefined ? "http://convex.test" : options.convexUrl),
+    convexUrl: () => (options.convexUrl === undefined ? ORIGIN_HOSTED_CONVEX_URL : options.convexUrl),
     connect: () => fake.client,
-    sendMail: async (mail) => { mails.push(mail); return options.mailOk ?? true; },
   })];
   const server = createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
@@ -50,25 +51,25 @@ async function start(options: { publicUrl?: string | null; convexUrl?: string | 
     return { status: response.status, body: await response.json() as Record<string, unknown> };
   };
   const invite = (body: unknown) => call("/api/origin/invites", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-  return { base, call, invite, calls: fake.calls, mails };
+  return { base, call, invite, calls: fake.calls };
 }
 
 describe("Origin invitation routes", () => {
-  it("builds the link from the configured public address and emails it", async () => {
+  it("uses the hosted website ahead of the local app address and delegates email once", async () => {
     const app = await start({ publicUrl: "https://team.example.org/" });
     const result = await app.invite({ sessionToken: "s", teamId: "team1", role: "member", email: " Bo@X.dev " });
     expect(result.status).toBe(200);
-    expect(result.body).toMatchObject({ inviteLink: `https://team.example.org/join/${"a".repeat(64)}`, sent: true });
-    expect(app.calls[0]).toEqual({ name: "workspaces:createInvite", args: { sessionToken: "s", teamId: "team1", role: "member", email: "bo@x.dev" } });
-    expect(app.mails).toEqual([{ to: "bo@x.dev", teamName: "GGs", inviterName: "Ada", link: `https://team.example.org/join/${"a".repeat(64)}` }]);
+    expect(result.body).toMatchObject({ inviteLink: `https://origin.imbored.fun/join/${"a".repeat(64)}`, sent: true, deliveryStatus: "accepted" });
+    expect(app.calls.filter(call => call.name !== "workspaces:inviteAddress")).toEqual([{ name: "workspaces:sendEmailInvite", args: { sessionToken: "s", teamId: "team1", role: "member", email: "bo@x.dev" } }]);
   });
 
-  it("falls back to the address the request used and sends nothing for a plain link", async () => {
+  it("never uses the request's localhost address for a plain hosted link", async () => {
     const app = await start();
     const result = await app.invite({ sessionToken: "s", teamId: "team1", role: "viewer" });
-    expect(result.body.inviteLink).toBe(`${app.base}/join/${"a".repeat(64)}`);
+    expect(result.body.inviteLink).toBe(`https://origin.imbored.fun/join/${"a".repeat(64)}`);
     expect(result.body.sent).toBe(false);
-    expect(app.mails).toEqual([]);
+    expect(result.body.deliveryStatus).toBe("not_requested");
+    expect(app.calls.some(call => call.name === "workspaces:sendEmailInvite")).toBe(false);
   });
 
   it("reports an unsent email", async () => {
@@ -107,17 +108,43 @@ describe("originErrorMessage", () => {
   });
 });
 
-describe("resendInviteMail", () => {
-  it("does nothing without a key", async () => {
-    const send = resendInviteMail(async () => { throw new Error("no network"); }, {});
-    expect(await send({ to: "a@b.c", teamName: "T", inviterName: "I", link: "https://x/join/t" })).toBe(false);
+describe("invitation issuing-backend affinity", () => {
+  const args = { sessionToken: "s", teamId: "team1", role: "member" };
+  it("keeps feedback's app address independent", async () => {
+    const app = await start({ publicUrl: "https://app.example" });
+    expect((await app.call("/api/origin/app-address")).body).toEqual({ origin: "https://app.example" });
+    expect((await app.call("/api/origin/invite-address")).body).toEqual({ origin: "https://origin.imbored.fun", convexUrl: ORIGIN_HOSTED_CONVEX_URL });
   });
-
-  it("posts the invitation to Resend", async () => {
-    const requests: { url: string; init: RequestInit }[] = [];
-    const send = resendInviteMail(async (url, init) => { requests.push({ url: String(url), init: init! }); return new Response("{}", { status: 200 }); }, { ORIGIN_RESEND_API_KEY: "key", ORIGIN_INVITE_FROM: "Team <t@x.dev>" });
-    expect(await send({ to: "a@b.c", teamName: "GGs", inviterName: "Ada", link: "https://x/join/t" })).toBe(true);
-    expect(requests[0].url).toBe("https://api.resend.com/emails");
-    expect(JSON.parse(String(requests[0].init.body))).toMatchObject({ from: "Team <t@x.dev>", to: "a@b.c", subject: "Join GGs on Origin" });
+  it("rejects a changed renderer connection before calling the backend", async () => {
+    const app = await start();
+    expect((await app.invite({ ...args, convexUrl: "https://different.convex.cloud" })).status).toBe(409);
+    expect(app.calls).toEqual([]);
+  });
+  it("supports only the authoritative custom site's matching backend", async () => {
+    const convexUrl = "https://custom.convex.cloud";
+    const app = await start({ convexUrl, answers: { "workspaces:inviteAddress": { convexUrl, origin: "https://team.example/" } } });
+    expect((await app.invite(args)).body.inviteLink).toBe(`https://team.example/join/${"a".repeat(64)}`);
+  });
+  it.each([null, { convexUrl: "https://different.convex.cloud", origin: "https://site.example" }, { convexUrl: "https://custom.convex.cloud", origin: "https://localhost" }, { convexUrl: "https://custom.convex.cloud", origin: "https://user:secret@site.example" }])("rejects unsafe custom site metadata before a mutation", async address => {
+    const app = await start({ convexUrl: "https://custom.convex.cloud", answers: { "workspaces:inviteAddress": address } });
+    expect((await app.invite(args)).status).toBe(409);
+    expect(app.calls).toHaveLength(1);
+  });
+  it("supports old official backends for plain links while refusing their legacy mail action", async () => {
+    const app = await start({ answers: { "workspaces:inviteAddress": new Error("Function not found") } });
+    expect((await app.invite(args)).body.inviteLink).toBe(`https://origin.imbored.fun/join/${"a".repeat(64)}`);
+    expect((await app.invite({ ...args, email: "a@b.test" })).status).toBe(503);
+    expect(app.calls.some(call => call.name === "workspaces:sendEmailInvite")).toBe(false);
+  });
+  it.each(["not_configured", "failed", "accepted"])("preserves the backend %s delivery result", async deliveryStatus => {
+    const app = await start({ answers: { "workspaces:sendEmailInvite": { token: "a".repeat(64), expiresAt: 1, inviteLink: `https://origin.imbored.fun/join/${"a".repeat(64)}`, deliveryStatus, sent: deliveryStatus === "accepted" } } });
+    expect((await app.invite({ ...args, email: "a@b.test", projectId: "project1" })).body.deliveryStatus).toBe(deliveryStatus);
+    expect(app.calls.at(-1)?.args.projectId).toBe("project1");
+  });
+  it("rejects an inconsistent email link without retry or duplicate invitation", async () => {
+    const app = await start({ answers: { "workspaces:sendEmailInvite": { token: "a".repeat(64), expiresAt: 1, inviteLink: "https://attacker.example", sent: true, deliveryStatus: "accepted" } } });
+    expect((await app.invite({ ...args, email: "a@b.test" })).status).toBe(502);
+    expect(app.calls.filter(call => call.name === "workspaces:sendEmailInvite")).toHaveLength(1);
+    expect(app.calls.some(call => call.name === "workspaces:createInvite")).toBe(false);
   });
 });

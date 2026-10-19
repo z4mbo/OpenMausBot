@@ -45,7 +45,7 @@ function fail(message: string): never {
 }
 
 const CREDENTIALS_REFUSED = "This MCP server refused its credentials (HTTP 401). If it uses a sign-in, send the message again: "
-  + "OpenMausBot refreshes sign-ins when a message starts. If it still fails, open Plugins → MCP servers and sign in to it again, "
+  + "Origin refreshes sign-ins when a message starts. If it still fails, open Plugins → MCP servers and sign in to it again, "
   + "or check its header values.";
 
 /** A refusal of our own: its words carry nothing remote, so they are relayed. */
@@ -122,6 +122,17 @@ function remoteErrorText(detail: string): string {
   text = redactSecretsInText(text).trim();
   if (text.length > REMOTE_ERROR_CHARS) text = `${text.slice(0, REMOTE_ERROR_CHARS - 1)}…`;
   return text || "Remote MCP request failed";
+}
+// Remote HTTP statuses are safe to disclose; response bodies and addresses can contain credentials.
+function remoteStatusText(status: number | undefined): string {
+  if (status === 403) {
+    return "This MCP server refused the request (HTTP 403). Its sign-in may be missing a permission (scope) it needs, "
+      + "or the service may not be turned on for that account or project.";
+  }
+  if (status === 404) return "This MCP server's address was not found (HTTP 404). Check its URL in Plugins → MCP servers.";
+  if (status === 429) return "This MCP server is limiting requests right now (HTTP 429). Try again in a moment.";
+  if (status !== undefined && status >= 500) return `This MCP server had a problem on its side (HTTP ${status}). Try again later.`;
+  return status === undefined ? "Remote MCP request failed" : `Remote MCP request failed (HTTP ${status})`;
 }
 const allowed = (name: string) => !directory?.scope || allowsTool(directory.scope, { kind: "mcp", server: directory.server, name });
 
@@ -234,7 +245,7 @@ async function callTool(params: unknown, signal: AbortSignal): Promise<unknown> 
 
 async function directed(message: Json, signal: AbortSignal): Promise<unknown> {
   if (message.method === "initialize") {
-    const result = await client.initialize("OpenMausBot tool proxy", signal);
+    const result = await client.initialize("Origin tool proxy", signal);
     if (!isRecord(result)) return result;
     const info = isRecord(result.serverInfo) ? result.serverInfo : {};
     const title = typeof info.title === "string" ? info.title : typeof info.name === "string" ? info.name : undefined;
@@ -279,7 +290,7 @@ async function handle(message: Json): Promise<void> {
     const result = directory
       ? await directed(message, signal)
       : message.method === "initialize"
-        ? await client.initialize("OpenMausBot tool proxy", signal)
+        ? await client.initialize("Origin tool proxy", signal)
         : await client.request(message.method, message.params, signal);
     if (message.method === "initialize") initialized = true;
     send({ jsonrpc: "2.0", id: message.id, result });
@@ -288,6 +299,8 @@ async function handle(message: Json): Promise<void> {
     if (failure instanceof Refusal) error(message.id, failure.code, failure.message);
     else if (failure instanceof McpRpcError) error(message.id, failure.code ?? -32603, remoteErrorText(failure.detail));
     else if (failure instanceof McpHttpError && failure.status === 401) error(message.id, -32603, CREDENTIALS_REFUSED);
+    else if (failure instanceof McpHttpError && failure.kind === "status" && !signal.aborted) error(message.id, -32603, remoteStatusText(failure.status));
+    else if (failure instanceof McpHttpError && failure.kind === "network" && failure.message === "request failed" && !signal.aborted) error(message.id, -32603, "Could not reach this MCP server. Check its URL and that it is online.");
     else error(message.id, signal.aborted ? -32800 : -32603, signal.aborted ? "MCP request cancelled" : "Remote MCP request failed");
   } finally { pending.delete(id); }
 }

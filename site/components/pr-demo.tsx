@@ -69,7 +69,7 @@ export function PrDemo({ demo }: { demo: ReturnType<typeof usePrDemo> }) {
     const moved = column > previousColumn.current;
     previousColumn.current = column;
     if (!moved || reduced) return;
-    card.current?.animate([{ rotate: "0deg", scale: "1" }, { rotate: "-2deg", scale: "1.04", offset: 0.45 }, { rotate: "0deg", scale: "1" }], { duration: 650, easing: "cubic-bezier(0.3, 0, 0.2, 1)" });
+    card.current?.animate([{ rotate: "0deg", scale: "1" }, { rotate: "-2deg", scale: "1.04", offset: 0.45 }, { rotate: "0deg", scale: "1" }], { duration: 160, easing: "cubic-bezier(0.3, 0, 0.2, 1)" });
   }, [column, reduced]);
   const counts = [1 + Number(step === 1), Number(step >= 2 && step < LAST), 1 + Number(step >= LAST)];
   const vars = { "--col": column, "--progress": progressOf(step) } as CSSProperties;

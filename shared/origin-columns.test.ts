@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isDraftColumn, isLegacyIdeaColumn } from "./origin-columns.ts";
+import { compareWorkflowColumns, DEFAULT_WORKFLOW_COLUMNS, isDraftColumn, isLegacyIdeaColumn } from "./origin-columns.ts";
 
 describe("draft column", () => {
   it("follows the flag when the backend sets it, and the title Draft otherwise", () => {
@@ -14,5 +14,16 @@ describe("draft column", () => {
     expect(isLegacyIdeaColumn({ title: "Idea" })).toBe(true);
     expect(isLegacyIdeaColumn({ title: "Idea", isDraft: true })).toBe(false);
     expect(isLegacyIdeaColumn({ title: "Todo" })).toBe(false);
+  });
+
+  it("puts semantic Drafts before active columns while retaining order within each group", () => {
+    const columns = [
+      { title: "Todo", order: -2 },
+      { title: "Private ideas", isDraft: true, order: 99 },
+      { title: "Draft", isDraft: false, order: -1 },
+      { title: "Draft", order: 3 },
+    ];
+    expect(columns.toSorted(compareWorkflowColumns).map(column => column.title)).toEqual(["Draft", "Private ideas", "Todo", "Draft"]);
+    expect(DEFAULT_WORKFLOW_COLUMNS).toEqual(["Draft", "Todo", "In progress"]);
   });
 });

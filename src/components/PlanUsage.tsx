@@ -169,7 +169,7 @@ export function PlanUsage() {
   }, [report, now, load]);
 
   return (
-    <Card title={t("planUsage.title")} subtitle={t("planUsage.subtitle")}>
+    <Card title={t("planUsage.title")} subtitle={t("planUsage.availabilitySubtitle")}>
       <div className="mb-3 flex justify-end">
         <button
           type="button"
@@ -238,7 +238,7 @@ export function PlanUsage() {
                   )}
                 </div>
               ) : (
-                <p className="text-[13px] text-danger">{provider.error}</p>
+                <p className="text-[13px] text-ink-secondary">{provider.error || t("planUsage.fetchError")}</p>
               )}
             </div>
           ))}

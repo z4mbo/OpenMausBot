@@ -2,8 +2,11 @@ import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { BodyTooLarge, readBoundedText } from "../lib/http-body";
+import { upload, uploadOptions } from "./storage";
 
 const http = httpRouter();
+http.route({ path: "/uploads", method: "POST", handler: upload });
+http.route({ path: "/uploads", method: "OPTIONS", handler: uploadOptions });
 http.route({ path: "/integrations", method: "POST", handler: httpAction(async (ctx, request) => {
   const secret = process.env.ORIGIN_INTEGRATION_SECRET;
   if (!secret || secret.length < 32) return new Response("Unavailable", { status: 503 });
@@ -34,6 +37,7 @@ http.route({ path: "/integrations", method: "POST", handler: httpAction(async (c
       case "unlinkedTasks": result = JSON.parse(await ctx.runQuery(internal.integrations.unlinkedTasks, p.args)); break;
       case "repoResult": result = await ctx.runMutation(internal.integrations.repoResult, p.args); break;
       case "linkIssue": result = await ctx.runMutation(internal.integrations.linkIssue, p.args); break;
+      case "completeMergedIssue": result = await ctx.runMutation(internal.integrations.completeMergedIssue, p.args); break;
       case "chatMentions": result = await ctx.runMutation(internal.notifications.chatMentions, p.args); break;
       case "feedback": result = await ctx.runMutation(internal.feedback.submit, p.args); break;
       default: return new Response("Unknown operation", { status: 400 });

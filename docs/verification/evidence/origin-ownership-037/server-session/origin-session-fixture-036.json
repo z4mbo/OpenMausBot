@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "sourceFileSha256": "d6359985fa1b5847ca1a93880d3f33d68ba603b612e79d879b833c58804c7463",
+  "baselineSourceGitBlob": "7e28eb9f8d79374f2d41967ebb8ba3b63269a6f1",
+  "fixture": {
+    "url": "http://127.0.0.1:22253",
+    "pid": 8544,
+    "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-OT8C9D",
+    "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792369582984-34700.log"
+  },
+  "syntheticBackend": "http://127.0.0.1:51438",
+  "queryCount": 15,
+  "checks": [
+    {
+      "name": "standard control-omb doctor",
+      "passed": true
+    },
+    {
+      "name": "older disconnect retains replacement account",
+      "passed": true
+    },
+    {
+      "name": "older connection retains newer account",
+      "passed": true
+    },
+    {
+      "name": "same-email token refresh succeeds",
+      "passed": true
+    },
+    {
+      "name": "PUT preserves ownership when verification is unavailable",
+      "passed": true
+    },
+    {
+      "name": "DELETE preserves ownership when verification is unavailable",
+      "passed": true
+    },
+    {
+      "name": "session status excludes bearer token",
+      "passed": true
+    }
+  ],
+  "cleanup": {
+    "fixtureExited": true,
+    "fixtureDataRemoved": true,
+    "syntheticBackendClosed": true
+  }
+}

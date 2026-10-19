@@ -1,0 +1,80 @@
+{
+  "baseline": "3597772b024d7fe0a08791cdc4280cb6022606d8",
+  "fixCommit": "bcfd3bfd78718a69fe0804cd9435a08772a17e2e",
+  "severity": "P2",
+  "component": "TriggersPanel",
+  "baselineLines": "78–108",
+  "scenario": "With a populated trigger and Advanced options closed, native Tab from its summary leaves the dialog for BODY. Hidden action buttons retain one rectangle but checkVisibility is false, so the former geometry filter mistook hidden Delete for the final tab stop.",
+  "nativeBefore": {
+    "browser": "Chromium",
+    "theme": "dark",
+    "size": "desktop",
+    "priorFocus": "Advanced options summary",
+    "nextFocus": "BODY",
+    "hiddenActionButtons": 4,
+    "eachHasOneRectangle": true,
+    "eachVisibilityFalse": true,
+    "screenshot": "focus-before.png"
+  },
+  "unitBefore": {
+    "failed": 2,
+    "passed": 1
+  },
+  "unitAfter": {
+    "failed": 0,
+    "passed": 3
+  },
+  "actualFixedBeforeStyleCases": [
+    {
+      "theme": "dark",
+      "size": "desktop",
+      "keyboardContained": true,
+      "screenshot": "before/triggers-desktop-dark.png"
+    },
+    {
+      "theme": "dark",
+      "size": "mobile",
+      "keyboardContained": true,
+      "screenshot": "before/triggers-mobile-dark.png"
+    },
+    {
+      "theme": "light",
+      "size": "desktop",
+      "keyboardContained": true,
+      "screenshot": "before/triggers-desktop-light.png"
+    },
+    {
+      "theme": "light",
+      "size": "mobile",
+      "keyboardContained": true,
+      "screenshot": "before/triggers-mobile-light.png"
+    }
+  ],
+  "actualStyledAfterCases": [
+    {
+      "theme": "dark",
+      "size": "desktop",
+      "keyboardContained": true,
+      "screenshot": "after/triggers-desktop-dark.png"
+    },
+    {
+      "theme": "dark",
+      "size": "mobile",
+      "keyboardContained": true,
+      "screenshot": "after/triggers-mobile-dark.png"
+    },
+    {
+      "theme": "light",
+      "size": "desktop",
+      "keyboardContained": true,
+      "screenshot": "after/triggers-desktop-light.png"
+    },
+    {
+      "theme": "light",
+      "size": "mobile",
+      "keyboardContained": true,
+      "screenshot": "after/triggers-mobile-light.png"
+    }
+  ],
+  "modeledUnitVisibility": "Happy DOM does not provide layout. The focused unit fixture models the independently observed closed-details visibility/rectangle split; actual native Tab acceptance is retained separately."
+}

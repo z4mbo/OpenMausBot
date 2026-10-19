@@ -1,0 +1,25 @@
+{
+  "node": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\runtimes\\node-v24.21.0-win-x64\\node.exe",
+  "args": [
+    "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "server/origin-shared.test.ts",
+    "-t",
+    "stops the old account",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\shared-run-lease-035\\red-final-account.json"
+  ],
+  "env": {
+    "PATH": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\runtimes\\node-v24.21.0-win-x64;C:\\Windows\\System32",
+    "SystemRoot": "C:\\Windows",
+    "WINDIR": "C:\\Windows",
+    "TEMP": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\shared-run-lease-035\\red-final-account-temp",
+    "TMP": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\shared-run-lease-035\\red-final-account-temp",
+    "HOME": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\shared-run-lease-035\\red-final-account-home",
+    "USERPROFILE": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\shared-run-lease-035\\red-final-account-home",
+    "APPDATA": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\shared-run-lease-035\\red-final-account-home\\AppData\\Roaming",
+    "LOCALAPPDATA": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\shared-run-lease-035\\red-final-account-home\\AppData\\Local"
+  },
+  "startedAt": "2026-10-19T00:22:13.582Z"
+}

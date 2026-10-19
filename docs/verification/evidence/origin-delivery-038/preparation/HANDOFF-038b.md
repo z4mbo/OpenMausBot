@@ -1,0 +1,16 @@
+# Private 037b/038b targeted-retry handoff
+
+This is preparation only. No actual prepublication/finalizer acceptance, root write, GitHub mutation, rerun or production operation was executed by this worker. Old 037/038 prepared files were checked against their sealed hashes and remain unchanged.
+
+Import prepublication-037b.mjs plus ci-attempt 1-terminal-038.json (SHA d2e194bb1c65ff24284b822f38baf62a1ea8d0251913bdf30b613d427512e002) and ci-attempt 1-terminal-receipt-038.json (SHA a384de9121678da1f8f78431428ea80a4aa1fb9d24d3b957bffe82f0199a3fcc) into root .omb-scratch. Actual publication input remains the exact fifteen-key schema; set its ciAttempt from the real completed run (anticipated 2), with native/backend-site attempt 1. Do not treat pending retry metadata as acceptance.
+
+The guard retains strict source, PR merge/tree, jobs, artifact/feed/draft/staging and historical031/035 checks. It adds raw latest-jobs metadata and immutable first-attempt comparison. GitHub cloned all retained records to new attempt-2 IDs; 17 successes keep their complete execution start/end/steps, while the skipped broker keeps completion/empty steps despite a restamped metadata start. Only Windows shard 4 and the dependent aggregate are accepted as new executions. All 20 latest required names must be complete and successful except the intended broker skip. The retained typecheck checkout is proved from original job 117837543346's log, with original execution attempt 1 and its latest copied record ID reported separately. No all 20-reran claim is made.
+
+Initial Windows shard 4 failure is preserved: provider-key-flow SSE predicate did not match within 10 seconds, observed context events only, cause unproved. Source/native artifacts/tag are unchanged. Passing local targeted checks and unchanged provider-path closure are diagnostics, not a source fix. Six pure bounded provenance cases passed using actual copied-record projections plus synthetic retry/aggregate completion. They do not claim live CI success. Original 42 guard cases were not rerun or relabeled as 037b acceptance.
+
+The 038b check-only finalizer imports ../prepublication-037b.mjs and pins reviewed template/selection/report/guard bytes. Fill finalize-inputs-038b.template.json only with real completed/public evidence and set templateOnly=false when complete. It requires initial-failure raw/diagnostic descriptors, compares CI attempt to pins.ciAttempt (native/backend to their actual 1 pins), records retained-versus-retried job execution provenance, and retains source cause as unproved. It outputs receipt/report/evidence JSON to stdout and writes nothing.
+
+    node .omb-scratch/prepublication-037b.mjs --check .omb-scratch/release-inputs-037.json
+    node .omb-scratch/delivery-preparation-038b/finalize-delivery-038b.mjs --check C:/Users/aless/Documents/Origin-bugfix ACTUAL_INPUT_JSON
+
+Root publisher's runtime proof has already been corrected to six fields including StartedAt; use that canonical actual proof, not an alternate. Keep the actual 038 native audit/76 text files and fresh 20 site captures as previously qualified. Preserve public 0.2.13 and all 035/031 bytes/times. Source ab0 must stay frozen through publication. No positive finalizer proof has run here.

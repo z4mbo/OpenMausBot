@@ -4,6 +4,7 @@ import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { RuntimeEvent } from "../../shared/runtime-events";
+import type { ActivityRow } from "../../shared/activity";
 import type { AppState, Bot } from "@/state/store";
 
 vi.mock("./DesktopCapabilities", async (importOriginal) => ({
@@ -37,30 +38,39 @@ const frame = (event: RuntimeEvent) => publishLiveFrame({ kind: "runtime", event
 const missed = () => publishMissedFrames();
 
 const fetched: string[] = [];
+let activityRows: ActivityRow[] = [];
 let root: Root;
+let mounted = false;
 const settle = async () => { for (let i = 0; i < 5; i++) await new Promise((resolve) => setTimeout(resolve, 0)); };
 async function mount(panel: typeof InspectorPanel | typeof ActivityPanel) {
-  const state: AppState = { ...initialState, bots: [bot], selectedId: bot.id };
-  const value = { state, dispatch: vi.fn(), flushBotPatches: async () => null, refreshInstances: async () => {}, refreshModels: async () => {} };
   const container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  flushSync(() => root.render(createElement(BotEditorStore, { value, children: createElement(panel, { bot }) })));
+  mounted = true;
+  const render = (current: Bot) => {
+    const state: AppState = { ...initialState, bots: [current], selectedId: current.id };
+    const value = { state, dispatch: vi.fn(), flushBotPatches: async () => null, refreshInstances: async () => {}, refreshModels: async () => {} };
+    flushSync(() => root.render(createElement(BotEditorStore, { value, children: createElement(panel, { bot: current }) })));
+  };
+  render(bot);
   await settle();
+  return render;
 }
 
 beforeEach(() => {
   opened.mockClear();
   fetched.length = 0;
+  activityRows = [];
   vi.stubGlobal("EventSource", SpyEventSource);
   vi.stubGlobal("fetch", (path: string) => {
     fetched.push(path);
-    const body = path.startsWith("/api/threads/") ? { entries: [], total: { runtime: 0, native: 0 } } : { rows: [] };
+    const body = path.startsWith("/api/threads/") ? { entries: [], total: { runtime: 0, native: 0 } } : { rows: activityRows };
     return Promise.resolve(new Response(JSON.stringify(body)));
   });
 });
 afterEach(() => {
-  root.unmount();
+  if (mounted) root.unmount();
+  mounted = false;
   document.body.replaceChildren();
   vi.unstubAllGlobals();
 });
@@ -90,6 +100,46 @@ describe("Inspector on the app's live stream", () => {
 });
 
 describe("Activity on the app's live stream", () => {
+  it("keeps a pending receipt refresh when bot updates replace the task array", async () => {
+    const render = await mount(ActivityPanel);
+    expect(document.body.textContent).toContain("Nothing yet.");
+    activityRows = [{ at: "2026-10-04T09:00:00.000Z", threadId: bot.threadId, tool: "Bash", app: null, label: "Ran a command", outcome: "ran" }];
+    frame(runtime("tool-done", { type: "item.completed", itemType: "tool", itemId: "tool", ok: true }));
+    render({ ...bot, tasks: (bot.tasks ?? []).map((task) => ({ ...task })) });
+    frame(runtime("turn-done", { type: "turn.completed", ok: true }));
+    render({ ...bot, busy: false, tasks: (bot.tasks ?? []).map((task) => ({ ...task })) });
+    await new Promise((resolve) => setTimeout(resolve, 450));
+    await settle();
+    expect(fetched).toEqual(["/api/bots/bot/activity?limit=300", "/api/bots/bot/activity?limit=300"]);
+    expect(document.body.textContent).toContain("Ran a command");
+    expect(document.body.textContent).not.toContain("Nothing yet.");
+    expect(opened).not.toHaveBeenCalled();
+  });
+
+  it("cancels the previous bot's pending refresh when switching bots", async () => {
+    const render = await mount(ActivityPanel);
+    frame(runtime("previous-turn", { type: "turn.completed", ok: true }));
+    render({ ...bot, id: "next-bot", threadId: "next-thread", tasks: [] });
+    await new Promise((resolve) => setTimeout(resolve, 450));
+    await settle();
+    expect(fetched).toEqual(["/api/bots/bot/activity?limit=300", "/api/bots/next-bot/activity?limit=300"]);
+    frame(runtime("old-thread", { type: "turn.completed", ok: true }));
+    await new Promise((resolve) => setTimeout(resolve, 450));
+    await settle();
+    expect(fetched).toHaveLength(2);
+  });
+
+  it("cancels a pending receipt refresh and its subscription on unmount", async () => {
+    await mount(ActivityPanel);
+    frame(runtime("before-close", { type: "turn.completed", ok: true }));
+    root.unmount();
+    mounted = false;
+    frame(runtime("after-close", { type: "turn.completed", ok: true }));
+    await new Promise((resolve) => setTimeout(resolve, 450));
+    await settle();
+    expect(fetched).toEqual(["/api/bots/bot/activity?limit=300"]);
+  });
+
   it("reloads when one of the bot's turns settles, with no stream of its own", async () => {
     await mount(ActivityPanel);
     expect(fetched).toEqual(["/api/bots/bot/activity?limit=300"]);

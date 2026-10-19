@@ -666,6 +666,7 @@ describe("finding the browser engine", () => {
     const binary = resolve(join(dataDir, "bin"), name);
     const exists = (file: string) => file === binary;
     const env = { PATH: join(dataDir, "bin") };
+    const expectedVersion = agentBrowserReleaseVersion(resolveAgentBrowserReleaseAsset());
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
       const mismatched = browserEngineStatus({ dataDir, env, exists, versionOf: () => "0.38.1" });
@@ -673,14 +674,14 @@ describe("finding the browser engine", () => {
         kind: "ready",
         binaryPath: binary,
         version: "0.38.1",
-        warning: expect.stringContaining(AGENT_BROWSER_VERSION),
+        warning: expect.stringContaining(expectedVersion),
       });
       expect(describeBrowserEngine(mismatched)).toContain("0.38.1");
-      expect(describeBrowserEngine(mismatched)).toContain(AGENT_BROWSER_VERSION);
+      expect(describeBrowserEngine(mismatched)).toContain(expectedVersion);
       expect(warn).toHaveBeenCalledOnce();
       warn.mockClear();
-      const matched = browserEngineStatus({ dataDir, env, exists, versionOf: () => AGENT_BROWSER_VERSION });
-      expect(matched).toEqual({ kind: "ready", binaryPath: binary, version: AGENT_BROWSER_VERSION });
+      const matched = browserEngineStatus({ dataDir, env, exists, versionOf: () => expectedVersion });
+      expect(matched).toEqual({ kind: "ready", binaryPath: binary, version: expectedVersion });
       expect(warn).not.toHaveBeenCalled();
       const unknown = browserEngineStatus({ dataDir, env, exists, versionOf: () => null });
       expect(unknown).toMatchObject({ kind: "ready", version: "unknown", warning: expect.stringContaining("unknown") });
@@ -691,6 +692,21 @@ describe("finding the browser engine", () => {
     } finally {
       warn.mockRestore();
     }
+  });
+
+  it.each(["win32", "linux", "darwin"] as const)("compares unmanaged versions with the %s release descriptor", (platform) => {
+    const dataDir = join(tmpdir(), `omb-engine-platform-${platform}`);
+    const binary = resolve(dataDir, platform === "win32" ? "agent-browser.exe" : "agent-browser");
+    const pinned = agentBrowserReleaseVersion(resolveAgentBrowserReleaseAsset(platform, "x64"));
+    const options = { dataDir, platform, arch: "x64", env: { OMB_AGENT_BROWSER_PATH: binary }, exists: (path: string) => path === binary };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      expect(browserEngineStatus({ ...options, versionOf: () => pinned })).toEqual({ kind: "ready", binaryPath: binary, version: pinned });
+      expect(warn).not.toHaveBeenCalled();
+      const mismatch = platform === "win32" ? AGENT_BROWSER_VERSION : "0.36.0-omb.1";
+      expect(browserEngineStatus({ ...options, versionOf: () => mismatch })).toMatchObject({ warning: `installed agent-browser ${mismatch} is not the pinned ${pinned}` });
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining(`install ${pinned}.`));
+    } finally { warn.mockRestore(); }
   });
 
   it("probes an unmanaged binary's version in the background, once per mtime, without blocking on a stalled binary", async () => {

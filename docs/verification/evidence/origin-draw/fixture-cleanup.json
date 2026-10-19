@@ -1,0 +1,12 @@
+{
+  "stoppedWithCtrlC": true,
+  "serverProcessesRunning": false,
+  "temporaryDirectoriesRemoved": false,
+  "cleanupRejection": "Automatic approval review rejected the guarded native PowerShell recursive cleanup: blocked by policy. No alternate deletion method was attempted.",
+  "fixtures": [
+    { "sessionId": 7842, "serverPid": 39216, "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-KS0HBJ" },
+    { "sessionId": 30429, "serverPid": 26492, "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-OsWcgd" },
+    { "sessionId": 57338, "serverPid": 36772, "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-mUcSFg" },
+    { "sessionId": 50477, "serverPid": 34632, "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-GITwoP", "serverLog": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792273903178-35720.log" }
+  ]
+}

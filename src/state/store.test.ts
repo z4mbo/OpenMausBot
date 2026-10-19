@@ -1547,6 +1547,45 @@ describe("tool selection announcements", () => {
   });
 });
 
+describe("team access announcements", () => {
+  const kinds = ["botPatched", "taskSwitched", "botPatchedSwitch"] as const;
+  const bot: Bot = { id: "chief", threadId: "old", name: "Chief fixture", title: "", description: "",
+    notifications: false, color: "green", unread: false, modelSelection: { instanceId: "pi", model: "local" },
+    section: "Office", chiefOfStaff: true, managedSections: ["Research", ""], messages: [] };
+
+  it.each(kinds)("keeps revoked additional teams cleared after demotion and re-election via %s", kind => {
+    const { managedSections: _sections, ...announcement } = bot;
+    const threadId = kind === "botPatchedSwitch" ? "replacement-thread" : bot.threadId;
+    const demoted = reducer({ ...initialState, bots: [bot] }, {
+      type: kind === "taskSwitched" ? "taskSwitched" : "botPatched",
+      bot: { ...announcement, chiefOfStaff: false, threadId },
+    });
+    expect(demoted.bots[0]?.chiefOfStaff).toBe(false);
+    expect(demoted.bots[0]?.managedSections).toBeUndefined();
+    const elected = reducer(demoted, { type: "botPatched", bot: { ...announcement, threadId } });
+    expect(elected.bots[0]?.chiefOfStaff).toBe(true);
+    expect(elected.bots[0]?.managedSections).toBeUndefined();
+  });
+
+  it.each(kinds)("clears omitted additional teams while the bot remains Chief via %s", kind => {
+    const { managedSections: _sections, ...announcement } = bot;
+    const next = reducer({ ...initialState, bots: [bot] }, {
+      type: kind === "taskSwitched" ? "taskSwitched" : "botPatched",
+      bot: { ...announcement, threadId: kind === "botPatchedSwitch" ? "replacement-thread" : bot.threadId },
+    });
+    expect(next.bots[0]?.chiefOfStaff).toBe(true);
+    expect(next.bots[0]?.managedSections).toBeUndefined();
+  });
+
+  it.each(kinds)("uses the authoritative non-empty additional-team grant via %s", kind => {
+    const next = reducer({ ...initialState, bots: [bot] }, {
+      type: kind === "taskSwitched" ? "taskSwitched" : "botPatched",
+      bot: { ...bot, managedSections: ["Engineering"], threadId: kind === "botPatchedSwitch" ? "replacement-thread" : bot.threadId },
+    });
+    expect(next.bots[0]?.managedSections).toEqual(["Engineering"]);
+  });
+});
+
 describe("teammate wait announcements", () => {
   const waiting: Bot = {
     id: "wait-bot", threadId: "wait-thread", name: "Scooter", title: "", description: "",

@@ -50,7 +50,7 @@ export function agentUnit(spec: { node: string; script: string; operator: string
   return [
     "# Written by `openmausbot fleet init`. The operator workspace creates and manages workspaces through this.",
     "[Unit]",
-    "Description=OpenMausBot fleet agent",
+    "Description=Origin fleet agent",
     "After=network-online.target",
     "Wants=network-online.target",
     "",
@@ -148,7 +148,7 @@ export function templateUnit(spec: { node: string; script: string; layout?: Flee
   return [
     "# Written by `openmausbot fleet init`. One unit for every workspace: %i is the slug.",
     "[Unit]",
-    "Description=OpenMausBot workspace %i",
+    "Description=Origin workspace %i",
     "After=network-online.target openmausbot-fence.service",
     "Wants=network-online.target",
     "Requires=openmausbot-fence.service",
@@ -183,7 +183,7 @@ export function fenceUnit(layout = fleetLayout()): string {
   return [
     "# Written by `openmausbot fleet init`: keeps each workspace's loopback ports to its own user.",
     "[Unit]",
-    "Description=OpenMausBot per-workspace loopback fence",
+    "Description=Origin per-workspace loopback fence",
     "",
     "[Service]",
     "Type=oneshot",
@@ -473,13 +473,8 @@ export function deletePlan(input: { registry: FleetRegistry; slug: string; keepD
   };
 }
 
-export function upgradePlan(input: { registry: FleetRegistry }): FleetStep[] {
-  const running = Object.values(input.registry.workspaces).filter((workspace) => workspace.status === "running").sort((a, b) => a.slug.localeCompare(b.slug));
-  return [
-    { kind: "run", argv: ["npm", "install", "-g", "openmausbot@latest"], why: "install the release every workspace runs from" },
-    ...running.map((workspace) => ({ kind: "run" as const, argv: ["systemctl", "restart", `openmausbot@${workspace.slug}.service`], why: `restart ${workspace.slug} on the new release` })),
-    ...running.map((workspace) => ({ kind: "health" as const, url: `http://127.0.0.1:${workspace.port}/api/health`, why: `wait for ${workspace.slug}` })),
-  ];
+export function upgradePlan(_input: { registry: FleetRegistry }): FleetStep[] {
+  throw new Error("Automatic fleet upgrades are unavailable for Origin. Update the Origin checkout used by the service template, then restart and verify each workspace using docs/self-hosting.md#updating. No package install or service restart was performed.");
 }
 
 /** The same shape `openmausbot access` writes; the server reads it live. */

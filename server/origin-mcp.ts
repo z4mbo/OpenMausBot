@@ -287,8 +287,8 @@ export const ORIGIN_MCP_TOOLS: readonly Tool[] = [
   { name: "create_project", description: "Create an Origin project. If the workspace admin enabled GitHub, this also creates a private GitHub repository.", schema: z.object({ requestId, name: z.string().min(1).max(100), description: z.string().max(10000).optional() }), annotations: WRITE, write: true, run: write("create_project") },
   { name: "update_project", description: "Update a project name or description.", schema: z.object({ requestId, projectId: id, name: z.string().min(1).max(100).optional(), description: z.string().max(10000).optional() }), annotations: DESTRUCTIVE, write: true, run: write("update_project") },
   {
-    name: "create_issue", description: "Create an issue. Read get_project for column IDs and list_members for an active assignee. Due date is YYYY-MM-DD.",
-    schema: z.object({ requestId, projectId: id, columnId: id, title: z.string().min(1).max(250), description: z.string().max(60000).optional(), priority, assignedToEmail: z.string().email(), dueDate }),
+    name: "create_issue", description: "Create an issue in Draft unless the person explicitly chooses another column. Omit columnId for Draft, which stays off GitHub. Read get_project for explicit column IDs and list_members for an active assignee. Due date is YYYY-MM-DD.",
+    schema: z.object({ requestId, projectId: id, columnId: id.optional(), title: z.string().min(1).max(250), description: z.string().max(60000).optional(), priority, assignedToEmail: z.string().email(), dueDate }),
     annotations: WRITE, write: true, run: write("create_issue"),
   },
   {

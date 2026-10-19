@@ -160,6 +160,10 @@ describe("redactSecretsInText", () => {
     ["xai-", 20],
     ["gsk_", 40],
     ["hf_", 30],
+    ["sk_" + "live_", 16],
+    ["sk_" + "test_", 16],
+    ["rk_" + "live_", 16],
+    ["rk_" + "test_", 16],
   ] as const)("bounds %s masking without changing ordinary text", (prefix, minimum) => {
     const key = prefix + "a".repeat(minimum);
     const longer = key + "AB12";
@@ -172,6 +176,14 @@ describe("redactSecretsInText", () => {
     for (const ordinary of [prefix + "a".repeat(minimum - 1), `example_${key}`, `${prefix}example`]) {
       expect(redactSecretsInText(ordinary)).toBe(ordinary);
     }
+  });
+
+  it("preserves Stripe public keys and short credential examples", () => {
+    for (const prefix of ["pk_" + "live_", "pk_" + "test_"]) {
+      const publicKey = prefix + "a".repeat(32);
+      expect(redactSecretsInText(`Publishable ${publicKey}`)).toBe(`Publishable ${publicKey}`);
+    }
+    expect(redactSecretsInText("Use sk_live_example or rk_test_example in the guide")).toBe("Use sk_live_example or rk_test_example in the guide");
   });
 
   it("masks JWTs, PEM private key blocks, and bearer tokens", () => {

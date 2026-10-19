@@ -1,0 +1,570 @@
+{
+  "previewUrl": "http://127.0.0.1:5173/__origin-ui.html",
+  "phase": "after",
+  "checkedAt": "2026-10-17T21:30:39.541Z",
+  "cases": [
+    {
+      "screen": "project-agents",
+      "size": "desktop",
+      "theme": "dark",
+      "geometry": {
+        "viewport": 1280,
+        "document": 1280,
+        "offenders": []
+      },
+      "toolsBounds": {
+        "left": 1108,
+        "right": 1268
+      }
+    },
+    {
+      "screen": "project-issues",
+      "size": "desktop",
+      "theme": "dark",
+      "selected": "Issues",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-team-chat",
+      "size": "desktop",
+      "theme": "dark",
+      "selected": "Chat",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-call",
+      "size": "desktop",
+      "theme": "dark",
+      "selected": "Call",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-draw",
+      "size": "desktop",
+      "theme": "dark",
+      "selected": "Draw",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-assets",
+      "size": "desktop",
+      "theme": "dark",
+      "selected": "Assets",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-vault",
+      "size": "desktop",
+      "theme": "dark",
+      "selected": "Vault",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-repo",
+      "size": "desktop",
+      "theme": "dark",
+      "selected": "Repo",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-feedback",
+      "size": "desktop",
+      "theme": "dark",
+      "selected": "Feedback",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-settings",
+      "size": "desktop",
+      "theme": "dark",
+      "selected": "Settings",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "delegation",
+      "size": "desktop",
+      "theme": "dark",
+      "geometry": {
+        "viewport": 1280,
+        "document": 1280,
+        "offenders": []
+      },
+      "expands": true
+    },
+    {
+      "screen": "search",
+      "size": "desktop",
+      "theme": "dark",
+      "movesSelection": true,
+      "escapeReturnsFocus": true
+    },
+    {
+      "screen": "project-agents",
+      "size": "mobile",
+      "theme": "dark",
+      "geometry": {
+        "viewport": 375,
+        "document": 375,
+        "offenders": [
+          {
+            "tag": "BUTTON",
+            "label": "Draw",
+            "right": 444.015625,
+            "width": 77.9375
+          },
+          {
+            "tag": "svg",
+            "label": "",
+            "right": 394.078125,
+            "width": 18
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 386.578125,
+            "width": 2.25
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 383.578125,
+            "width": 6.0013427734375
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 392.5771484375,
+            "width": 11.273773193359375
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Assets",
+            "right": 530.59375,
+            "width": 84.578125
+          },
+          {
+            "tag": "svg",
+            "label": "",
+            "right": 474.015625,
+            "width": 18
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 472.515625,
+            "width": 8.25
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 468.015625,
+            "width": 10.5
+          },
+          {
+            "tag": "circle",
+            "label": "",
+            "right": 466.515625,
+            "width": 1.5
+          },
+          {
+            "tag": "rect",
+            "label": "",
+            "right": 472.515625,
+            "width": 10.5
+          }
+        ]
+      },
+      "toolsBounds": {
+        "left": 219,
+        "right": 363
+      }
+    },
+    {
+      "screen": "project-agent-chat",
+      "size": "mobile",
+      "theme": "dark",
+      "backToAgents": true
+    },
+    {
+      "screen": "project-issues",
+      "size": "mobile",
+      "theme": "dark",
+      "selected": "Issues",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-team-chat",
+      "size": "mobile",
+      "theme": "dark",
+      "selected": "Chat",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-call",
+      "size": "mobile",
+      "theme": "dark",
+      "selected": "Call",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-draw",
+      "size": "mobile",
+      "theme": "dark",
+      "selected": "Draw",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-assets",
+      "size": "mobile",
+      "theme": "dark",
+      "selected": "Assets",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-vault",
+      "size": "mobile",
+      "theme": "dark",
+      "selected": "Vault",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-repo",
+      "size": "mobile",
+      "theme": "dark",
+      "selected": "Repo",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-feedback",
+      "size": "mobile",
+      "theme": "dark",
+      "selected": "Feedback",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-settings",
+      "size": "mobile",
+      "theme": "dark",
+      "selected": "Settings",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "delegation",
+      "size": "mobile",
+      "theme": "dark",
+      "geometry": {
+        "viewport": 375,
+        "document": 375,
+        "offenders": []
+      },
+      "expands": true
+    },
+    {
+      "screen": "search",
+      "size": "mobile",
+      "theme": "dark",
+      "movesSelection": true,
+      "escapeReturnsFocus": true
+    },
+    {
+      "screen": "project-agents",
+      "size": "desktop",
+      "theme": "light",
+      "geometry": {
+        "viewport": 1280,
+        "document": 1280,
+        "offenders": []
+      },
+      "toolsBounds": {
+        "left": 1108,
+        "right": 1268
+      }
+    },
+    {
+      "screen": "project-issues",
+      "size": "desktop",
+      "theme": "light",
+      "selected": "Issues",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-team-chat",
+      "size": "desktop",
+      "theme": "light",
+      "selected": "Chat",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-call",
+      "size": "desktop",
+      "theme": "light",
+      "selected": "Call",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-draw",
+      "size": "desktop",
+      "theme": "light",
+      "selected": "Draw",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-assets",
+      "size": "desktop",
+      "theme": "light",
+      "selected": "Assets",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-vault",
+      "size": "desktop",
+      "theme": "light",
+      "selected": "Vault",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-repo",
+      "size": "desktop",
+      "theme": "light",
+      "selected": "Repo",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-feedback",
+      "size": "desktop",
+      "theme": "light",
+      "selected": "Feedback",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "project-settings",
+      "size": "desktop",
+      "theme": "light",
+      "selected": "Settings",
+      "gate": "No workspace server",
+      "documentWidth": 1280
+    },
+    {
+      "screen": "delegation",
+      "size": "desktop",
+      "theme": "light",
+      "geometry": {
+        "viewport": 1280,
+        "document": 1280,
+        "offenders": []
+      },
+      "expands": true
+    },
+    {
+      "screen": "search",
+      "size": "desktop",
+      "theme": "light",
+      "movesSelection": true,
+      "escapeReturnsFocus": true
+    },
+    {
+      "screen": "project-agents",
+      "size": "mobile",
+      "theme": "light",
+      "geometry": {
+        "viewport": 375,
+        "document": 375,
+        "offenders": [
+          {
+            "tag": "BUTTON",
+            "label": "Draw",
+            "right": 444.015625,
+            "width": 77.9375
+          },
+          {
+            "tag": "svg",
+            "label": "",
+            "right": 394.078125,
+            "width": 18
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 386.578125,
+            "width": 2.25
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 383.578125,
+            "width": 6.0013427734375
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 392.5771484375,
+            "width": 11.273773193359375
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Assets",
+            "right": 530.59375,
+            "width": 84.578125
+          },
+          {
+            "tag": "svg",
+            "label": "",
+            "right": 474.015625,
+            "width": 18
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 472.515625,
+            "width": 8.25
+          },
+          {
+            "tag": "path",
+            "label": "",
+            "right": 468.015625,
+            "width": 10.5
+          },
+          {
+            "tag": "circle",
+            "label": "",
+            "right": 466.515625,
+            "width": 1.5
+          },
+          {
+            "tag": "rect",
+            "label": "",
+            "right": 472.515625,
+            "width": 10.5
+          }
+        ]
+      },
+      "toolsBounds": {
+        "left": 219,
+        "right": 363
+      }
+    },
+    {
+      "screen": "project-agent-chat",
+      "size": "mobile",
+      "theme": "light",
+      "backToAgents": true
+    },
+    {
+      "screen": "project-issues",
+      "size": "mobile",
+      "theme": "light",
+      "selected": "Issues",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-team-chat",
+      "size": "mobile",
+      "theme": "light",
+      "selected": "Chat",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-call",
+      "size": "mobile",
+      "theme": "light",
+      "selected": "Call",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-draw",
+      "size": "mobile",
+      "theme": "light",
+      "selected": "Draw",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-assets",
+      "size": "mobile",
+      "theme": "light",
+      "selected": "Assets",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-vault",
+      "size": "mobile",
+      "theme": "light",
+      "selected": "Vault",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-repo",
+      "size": "mobile",
+      "theme": "light",
+      "selected": "Repo",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-feedback",
+      "size": "mobile",
+      "theme": "light",
+      "selected": "Feedback",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "project-settings",
+      "size": "mobile",
+      "theme": "light",
+      "selected": "Settings",
+      "gate": "No workspace server",
+      "documentWidth": 375
+    },
+    {
+      "screen": "delegation",
+      "size": "mobile",
+      "theme": "light",
+      "geometry": {
+        "viewport": 375,
+        "document": 375,
+        "offenders": []
+      },
+      "expands": true
+    },
+    {
+      "screen": "search",
+      "size": "mobile",
+      "theme": "light",
+      "movesSelection": true,
+      "escapeReturnsFocus": true
+    }
+  ],
+  "pageErrors": []
+}

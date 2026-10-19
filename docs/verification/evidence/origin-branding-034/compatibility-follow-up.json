@@ -1,0 +1,60 @@
+{
+  "codeCommit": "8f90fae328b1ba6ab28c21c99663b5f3edd41ecb",
+  "outwardReader": {
+    "scenario": "An interrupted persisted child with restarts0 and an OpenMausBot outward-action detail omitted the restart warning; current Origin detail was recognized.",
+    "before": {
+      "failed": 1,
+      "passed": 1,
+      "unselected": 63
+    },
+    "after": {
+      "files": 3,
+      "total": 87,
+      "passed": 87,
+      "failed": 0,
+      "unselectedOrSkipped": 0
+    }
+  },
+  "relayWire": {
+    "before": {
+      "failed": 1,
+      "passed": 2,
+      "unselected": 3
+    },
+    "after": {
+      "files": 1,
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "unselectedOrSkipped": 0
+    },
+    "vendorLiteralPreserved": true,
+    "contractAssertionsUnchanged": true
+  },
+  "consumers": {
+    "independentInventorySha256": "d46770b370e3257f7154dc6bb183eaf34c191bbab47065abae96027ccdec5c69",
+    "focused": {
+      "files": 21,
+      "total": 491,
+      "passed": 32,
+      "failed": 1,
+      "unselectedOrSkipped": 458
+    },
+    "focusedFailure": "HighLevel dependent case was selected without the connection established in the first test; no product or assertion change was needed.",
+    "completeHighLevelPrerequisites": {
+      "files": 1,
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "unselectedOrSkipped": 0
+    },
+    "legacySuppliedInputsPreserved": true,
+    "liveCallIntegratedValidationRequired": true,
+    "macOSConditionalAssertionExecuted": false
+  },
+  "serverTypecheckExit": 0,
+  "lintExit": 0,
+  "noProductionData": true,
+  "noPush": true,
+  "noDeployment": true
+}

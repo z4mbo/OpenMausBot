@@ -22,6 +22,7 @@
 //   FAKE_ACP_MCP_TRANSPORTS  remote MCP transports advertised in initialize, e.g. "http,sse"
 //   FAKE_ACP_PERMISSION_OPTIONS  JSON options override in permission mode
 //   FAKE_ACP_DUMP  path for {argv, env}; with FAKE_ACP_MODES or FAKE_ACP_MODELS also <dump>.prompts.jsonl
+//   FAKE_ACP_DUMP_BY_PID  directory for separate <pid>.json environment captures
 //   FAKE_ACP_LAUNCH_COUNT_FILE  process counter incremented at startup
 //   FAKE_ACP_RPC_DUMP  this process's method list, rewritten after every request
 //   FAKE_ACP_RPC_APPEND_FILE  one {"pid","method","cwd"} line appended per request
@@ -44,6 +45,7 @@
 //   FAKE_ACP_UPDATES_FILE  JSON array of session/update params ({update, _meta?}) re-read per prompt, sent as-is
 //   FAKE_ACP_MODE_ACK_FILE  while it exists a mode switch answers "empty" (no configOptions) or "error"
 import { spawn } from "node:child_process";
+import { join } from "node:path";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 
 const mode = process.env.FAKE_ACP_MODE ?? "happy";
@@ -226,9 +228,12 @@ const writeDumpAtomic = (path: string, contents: string): void => {
     try { unlinkSync(tmp); } catch {}
   }
 };
-if (process.env.FAKE_ACP_DUMP) {
-  writeDumpAtomic(process.env.FAKE_ACP_DUMP, JSON.stringify(dumpState, null, 2));
-}
+const writeStateDump = () => {
+  const contents = JSON.stringify(dumpState, null, 2);
+  if (process.env.FAKE_ACP_DUMP) writeDumpAtomic(process.env.FAKE_ACP_DUMP, contents);
+  if (process.env.FAKE_ACP_DUMP_BY_PID) writeDumpAtomic(join(process.env.FAKE_ACP_DUMP_BY_PID, `${process.pid}.json`), contents);
+};
+writeStateDump();
 if (process.env.FAKE_ACP_LAUNCH_COUNT_FILE) {
   let launches = 0;
   try {
@@ -610,7 +615,7 @@ function handle(msg: any) {
       if (process.env.FAKE_ACP_DUMP) {
         writeFileSync(`${process.env.FAKE_ACP_DUMP}.session.json`, JSON.stringify(msg.params));
         dumpState.mcpServers = servers;
-        writeDumpAtomic(process.env.FAKE_ACP_DUMP, JSON.stringify(dumpState, null, 2));
+        writeStateDump();
       }
       const offered = servers.find((s: any) => s?.name === "agents") ?? null;
       agentsMcp = mode === "list-peers" ? agentsMcp ?? offered : offered;
@@ -853,7 +858,7 @@ function handle(msg: any) {
       }
       const promptText = String(msg.params?.prompt?.[0]?.text ?? "");
       // A hand-off result wake is synthesized: the mode's usual flow would loop on an unprompted turn.
-      const runtimeReport = /\[OpenMausBot report from @[^\]\n]*: ([a-z_]+)/.exec(promptText);
+      const runtimeReport = /\[(?:Origin|OpenMausBot) report from @[^\]\n]*: ([a-z_]+)/.exec(promptText);
       const wokeFromDelegation = promptText.includes("[A delegated task just completed]")
         || promptText.includes("[A delegated task failed]")
         || runtimeReport !== null;

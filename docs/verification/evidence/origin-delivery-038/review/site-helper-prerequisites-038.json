@@ -1,0 +1,129 @@
+{
+  "scope": "Read-only filename/import prerequisites for prepared037 guard and existing038 staging; no operators executed.",
+  "guardRequiredLocal": [
+    {
+      "name": "prepublication-037.mjs",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepublication-037.mjs",
+      "exists": true,
+      "sha256": "9f56d5efcab9f74ff8fd5d3c04bd30ee78b35ca73a22d749dbf87b2612b05d37"
+    },
+    {
+      "name": "check-github-release.mjs",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\check-github-release.mjs",
+      "exists": true,
+      "sha256": "db02071036b57eb2b75be8bb46120b7e7234cc6a4010d98c685dc900760bf5e7"
+    },
+    {
+      "name": "promote-downloads.sh",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\promote-downloads.sh",
+      "exists": true,
+      "sha256": "b9550237b61204053d1446c0772e02ba45cf151a410d6e60d2d49825c25bc6ab"
+    },
+    {
+      "name": "promote-site.sh",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\promote-site.sh",
+      "exists": true,
+      "sha256": "a6c3151d21752351c5ce63ec1fefa58902a4cb499589e1f4a7c0ecd1137f99c5"
+    },
+    {
+      "name": "validate-release.py",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\validate-release.py",
+      "exists": true,
+      "sha256": "d555e5b03ecb6e8f8650278935b6b194af1d63e2816e7c07d8bf9f21df790567"
+    },
+    {
+      "name": "release-contract.mjs",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\release-contract.mjs",
+      "exists": true,
+      "sha256": "f82dd238b6ef4582989cd210cdf6a4e0c819e1813c0bac95ee688d690f7e783c"
+    },
+    {
+      "name": "prepare-distribution.mjs",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepare-distribution.mjs",
+      "exists": true,
+      "sha256": "327cd8741e9a89ab8b2283debab63c59fa0e6d02385ca504f080ef4320a83889"
+    },
+    {
+      "name": "site-release-identity-0.2.14.json",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\site-release-identity-0.2.14.json",
+      "exists": true,
+      "sha256": "23cd75880bc9ad2b5a95cc3f7554a2d860425fe8e57f0521105912c413ff22ed"
+    }
+  ],
+  "sitePreparationDependencies": [
+    {
+      "name": "prepare-site-038.mjs",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepare-site-038.mjs",
+      "exists": true,
+      "sha256": "fe9106b3b56aff3b2dfe6c576e9966e03108419ca67149c93cd9e21f9639aa38"
+    },
+    {
+      "name": "frozen-expectations-038.mjs",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\frozen-expectations-038.mjs",
+      "exists": true,
+      "sha256": "66945553878d463e6b9d529caf217320b5599ab9e668cf475512fd23e1e7bfc3"
+    },
+    {
+      "name": "build-site-038.sh",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\build-site-038.sh",
+      "exists": true,
+      "sha256": "6fe0bb15ec518336ff0046a649cd8947df78806cd2d32f5eba0c326af8160c11"
+    },
+    {
+      "name": "prepare-site-identity.mjs",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\prepare-site-identity.mjs",
+      "exists": true,
+      "sha256": "1f584efefc2c62b84c79bd5f197eadee53e90813e1c52ae01fe231d415243adc"
+    },
+    {
+      "name": "release-contract.mjs",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\release-contract.mjs",
+      "exists": true,
+      "sha256": "f82dd238b6ef4582989cd210cdf6a4e0c819e1813c0bac95ee688d690f7e783c"
+    }
+  ],
+  "optionalRootPlanPreviewDependencies": [
+    {
+      "name": "preview-site-038.sh",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\preview-site-038.sh",
+      "exists": false
+    },
+    {
+      "name": "serve-site-038-preview.mjs",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\serve-site-038-preview.mjs",
+      "exists": false
+    }
+  ],
+  "identityImport": "Use exact038 identity bytes under canonical .omb-scratch/site-release-identity-0.2.14.json; the root canonical file is already present. Do not rewrite identity contents or hashes.",
+  "remoteGuardPrerequisites": {
+    "stage": "/root/origin-release-staging/0.2.14",
+    "helpers": [
+      "promote-downloads.sh",
+      "promote-site.sh",
+      "validate-release.py"
+    ],
+    "siteContext": "site-context-final",
+    "siteIdentity": "site-release-identity-0.2.14.json",
+    "candidateImageTag": "origin-audit-site:0.2.14-final",
+    "privatePreviewStage": "/root/origin-release-staging/0.2.14-cycle038",
+    "privatePreviewImageTag": "origin-audit-site:0.2.14-038-final",
+    "note": "The canonical promotion paths and image alias must bind to the same actual038 bytes/image. The guard intentionally does not accept private preview names."
+  },
+  "dataPrerequisites": [
+    "Explicit actual fifteen-key .omb-scratch/release-inputs-037.json",
+    "Canonical .omb-scratch/distribution/0.2.14 release-manifest-0.2.14.json/SHA256SUMS-0.2.14.txt/latest.yml/latest-mac.yml and payloads",
+    "Immutable031backend/mail proofs and031/035receipts"
+  ],
+  "newOperatorExecutionRequired": false,
+  "optionalPreviewNote": "Both plan preview helpers are absent in root at observation. They are not guard imports and do not block its current peer-owned running preview; import them only if executing that root preview plan.",
+  "sealedAt": "2026-10-19T01:13:19.387Z",
+  "rootReportedRemoteStaging": {
+    "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+    "siteImageId": "sha256:b0a0a3315c8eeec4ea8e337b935142cf04142962e3cb92dcde87369f74684201",
+    "canonicalStage": "/root/origin-release-staging/0.2.14",
+    "contextFiles": 152,
+    "candidateAlias": "origin-audit-site:0.2.14-final",
+    "previousPublic13Unchanged": true,
+    "verificationBoundary": "Reported by root operator; this worker performed no remote or production checks."
+  }
+}

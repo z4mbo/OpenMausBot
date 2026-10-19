@@ -1,0 +1,64 @@
+{
+  "frozenSource": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "targets": [
+    {
+      "label": "mac-arm64",
+      "version": "0.2.14",
+      "plainElectronFiles": 159,
+      "brandSha256": "9e6ee8914888bcac087623b42c5039d68c65d2224575286efc10ca975c0dd051",
+      "asarSha256": "d793385343589aceae15e5be2283e577f873e93ee5fcb6d01bd940de057501ae"
+    },
+    {
+      "label": "mac-x64",
+      "version": "0.2.14",
+      "plainElectronFiles": 159,
+      "brandSha256": "9e6ee8914888bcac087623b42c5039d68c65d2224575286efc10ca975c0dd051",
+      "asarSha256": "d793385343589aceae15e5be2283e577f873e93ee5fcb6d01bd940de057501ae"
+    },
+    {
+      "label": "windows-x64",
+      "version": "0.2.14",
+      "plainElectronFiles": 159,
+      "brandSha256": "9066b6c7d356f96b7f4f7327544d4aa100a8b72d04eac39c37e3c81b1f7dde2e",
+      "asarSha256": "e8adeb6035b38a07309e152c0e8e00aa3c381e4f711098fd61a75e8499125f55"
+    }
+  ],
+  "feeds": [
+    {
+      "label": "mac",
+      "version": "0.2.14",
+      "path": "Origin-0.2.14-x64.zip",
+      "files": [
+        {
+          "url": "Origin-0.2.14-x64.zip",
+          "size": 335599336
+        },
+        {
+          "url": "Origin-0.2.14-arm64.zip",
+          "size": 318271725
+        },
+        {
+          "url": "Origin-0.2.14-x64.dmg",
+          "size": 334966861
+        },
+        {
+          "url": "Origin-0.2.14-arm64.dmg",
+          "size": 317886358
+        }
+      ],
+      "releaseNotesPresent": true
+    },
+    {
+      "label": "windows",
+      "version": "0.2.14",
+      "path": "Origin-0.2.14-setup.exe",
+      "files": [
+        {
+          "url": "Origin-0.2.14-setup.exe",
+          "size": 269477444
+        }
+      ],
+      "releaseNotesPresent": true
+    }
+  ]
+}

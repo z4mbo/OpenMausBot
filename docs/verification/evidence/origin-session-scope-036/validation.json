@@ -1,0 +1,98 @@
+{
+  "source": "bfa4597452a871af28caa614b0594c34fd980119",
+  "recordedAt": "2026-10-19T00:16:40.983Z",
+  "desktop": {
+    "initialFull": {
+      "passed": 3,
+      "failed": 5,
+      "total": 8
+    },
+    "strengthenedCrossBackendCase": {
+      "failed": 1,
+      "filtered": 7,
+      "observedDispatchToReplacementBackend": true
+    },
+    "after": {
+      "passed": 8,
+      "failed": 0
+    },
+    "relatedFourFiles": {
+      "passed": 26,
+      "failed": 0
+    }
+  },
+  "site": {
+    "initial": {
+      "passed": 2,
+      "failed": 2,
+      "total": 4
+    },
+    "expandedBefore": {
+      "passed": 3,
+      "failed": 3,
+      "total": 6
+    },
+    "after": {
+      "passed": 6,
+      "failed": 0
+    },
+    "full": {
+      "files": 3,
+      "passed": 31,
+      "failed": 0
+    }
+  },
+  "clientTypecheck": {
+    "exitCode": 0,
+    "stdoutBytes": 0,
+    "exactCompletionTimeCaptured": false
+  },
+  "siteTypecheck": {
+    "exitCode": 0
+  },
+  "fullOxlint": {
+    "exitCode": 0
+  },
+  "browser": {
+    "tabsPerVersion": 2,
+    "oldLogoutClearedReplacement": true,
+    "fixedLogoutPreservedReplacement": true,
+    "fixedReloadPreservedReplacement": true,
+    "systemFont": true,
+    "typographyAccepted": false,
+    "fullAuthFormPixelsAccepted": false,
+    "initialFontMissingCaptureRejected": true
+  },
+  "excludedAttempts": [
+    "Initial desktop .tsx filter matched no tests; renamed to repository-required .test.ts with createElement.",
+    "Initial eslint command was unavailable; actual repository oxlint command passed."
+  ],
+  "cleanup": [
+    {
+      "pid": 31372,
+      "port": 20922,
+      "processAbsent": true,
+      "listenerAbsent": true,
+      "dataAbsent": true
+    },
+    {
+      "pid": 38664,
+      "port": 20386,
+      "processAbsent": true,
+      "listenerAbsent": true,
+      "dataAbsent": true
+    },
+    {
+      "pid": 33912,
+      "port": 22358,
+      "processAbsent": true,
+      "listenerAbsent": true,
+      "dataAbsent": true
+    }
+  ],
+  "limits": [
+    "No real account, password provider, recipient email, native Convex protocol/database, packaged GUI or production data was used.",
+    "The before image establishes the toolbar, signed-out heading and visible field scope; it is not full-form layout acceptance.",
+    "Test counts overlap. The desktop cross-backend case gained a soft storage assertion to reach the actual dispatch assertion; it is a strengthened red case, not another bug."
+  ]
+}

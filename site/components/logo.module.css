@@ -1,6 +1,6 @@
 .logo { display: block; flex: none; overflow: visible; }
-.face { transform: translate(calc(var(--look-x, 0) * 1px), calc(var(--look-y, 0) * 0.8px)); transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.eyes { transform: translate(calc(var(--look-x, 0) * 2.8px), calc(var(--look-y, 0) * 2.3px)); transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.face { transform: translate(calc(var(--look-x, 0) * 1px), calc(var(--look-y, 0) * 0.8px)); transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.eyes { transform: translate(calc(var(--look-x, 0) * 2.8px), calc(var(--look-y, 0) * 2.3px)); transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .lids {
   transform-box: fill-box;
   transform-origin: center;

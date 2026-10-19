@@ -77,7 +77,7 @@ export function WorkspaceInbox({ teamId, canEdit }: WorkspaceContext) {
         </div>
         {notice && <Notice tone="danger">{notice}</Notice>}
         {view === "list"
-          ? <IssueList teamId={teamId} filters={filters} canEdit={canEdit} onOpen={open} onError={setNotice} hasFilters={hasFilters} />
+          ? <IssueList teamId={teamId} projects={projects ?? []} filters={filters} canEdit={canEdit} onOpen={open} onError={setNotice} hasFilters={hasFilters} />
           : <IssueCalendar teamId={teamId} filters={filters} canEdit={canEdit} onOpen={open} onError={setNotice} />}
       </div>
     </div>
@@ -178,7 +178,7 @@ function Snooze({ onSnooze }: { onSnooze(delay: number): void }) {
 
 type ViewProps = { teamId: string; filters: Filters; canEdit: boolean; onOpen(projectId: string, issueId: string): void; onError(message: string): void };
 
-function IssueList({ teamId, filters, canEdit, onOpen, onError, hasFilters }: ViewProps & { hasFilters: boolean }) {
+function IssueList({ teamId, projects, filters, canEdit, onOpen, onError, hasFilters }: ViewProps & { projects: readonly CloudProject[]; hasFilters: boolean }) {
   const members = useWorkspaceMembers(teamId);
   const [pending, setPending] = useState<string | null>(null);
   const { results, status, loadMore } = useCloudPages<InboxTask>("inbox:list", {
@@ -188,6 +188,10 @@ function IssueList({ teamId, filters, canEdit, onOpen, onError, hasFilters }: Vi
   const today = localDay(new Date());
   const rows = results.filter((task) => matches(task, filters.search));
   const toggle = async (task: InboxTask) => {
+    if (!task.done && (task.githubIssueNumber || projects.some((project) => project._id === task.projectId && project.repoUrl))) {
+      onOpen(task.projectId, task._id);
+      return;
+    }
     setPending(task._id);
     try {
       await cloudMutation("tasks:updateTask", { projectId: task.projectId, taskId: task._id, done: !task.done });

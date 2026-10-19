@@ -1,0 +1,48 @@
+import { useSyncExternalStore, type ReactNode } from "react";
+export function ConvexProvider({ children }: { children: ReactNode }) { return children; }
+let revision = 0;
+let pending: ((value: { sessionToken: string }) => void) | null = null;
+const listeners = new Set<() => void>();
+const queries: { url: string; token: unknown }[] = [];
+let shares = 0;
+const publish = () => { revision++; for (const listener of listeners) listener(); };
+const subscribe = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
+export class ConvexReactClient {
+  constructor(private readonly url: string) {}
+  close = async () => {};
+  action = async () => {
+    if (location.search.includes("dialog")) return { sessionToken: "fixture-dialog-session" };
+    const result = new Promise<{ sessionToken: string }>(resolve => { pending = resolve; });
+    publish(); return result;
+  };
+  mutation = async () => null;
+  query = async (_reference: unknown, args: { sessionToken: string }) => {
+    queries.push({ url: this.url, token: args.sessionToken }); publish();
+    return { _id: "fixture-member", name: "Fixture member", email: "member@example.test" };
+  };
+  watchQuery = (_reference: unknown, args: { sessionToken: string }) => {
+    queries.push({ url: this.url, token: args.sessionToken }); publish();
+    return { localQueryResult: () => ({ _id: "fixture-member", name: "Fixture member", email: "member@example.test" }), onUpdate: () => () => {} };
+  };
+}
+export const refreshCloudLinks = async () => {};
+export const exclusiveWithSync = async () => {};
+export const onSyncRequest = () => () => {};
+export const syncFromOrigin = async () => {};
+export const sharedAgentsRound = async () => {};
+export const PROJECT_LEAD_ROLE = {};
+export const activeWorkspaceId = () => null;
+export const setAccountWorkspaces = () => {};
+export const switchWorkspace = () => {};
+export const workspaceHeadsOf = () => [];
+export const api = async () => { throw new Error("App mutations are disabled in this synthetic fixture"); };
+export const useStore = () => { throw new Error("Full App sync is outside this fixture"); };
+export async function shareSession() { shares++; publish(); }
+export function useControls() {
+  useSyncExternalStore(subscribe, () => revision);
+  return {
+    pending: pending !== null, shares,
+    wrongBackendQueries: queries.filter(row => row.url === "http://127.0.0.1:43002" && row.token === "fixture-private-token-from-first-backend").length,
+    resolve() { const active = pending; pending = null; active?.({ sessionToken: "fixture-private-token-from-first-backend" }); publish(); },
+  };
+}

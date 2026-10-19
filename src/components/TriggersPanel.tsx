@@ -80,7 +80,7 @@ export function TriggersPanel() {
         dialog?.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
         ) ?? [],
-      ).filter((element) => element.getClientRects().length > 0);
+      ).filter((element) => element.checkVisibility());
     (dialog?.querySelector<HTMLElement>("select") ?? dialog)?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || editingRef.current) return;
@@ -139,7 +139,6 @@ export function TriggersPanel() {
       style={glassPopupFrameStyle()}
       onMouseDown={(event) => event.target === event.currentTarget && close()}
     >
-      {/* A sibling, not the parent: a backdrop-filter on an ancestor would stop the pop-up's own glass from seeing the app behind it. */}
       <div aria-hidden="true" className="glass-scrim pointer-events-none absolute inset-0" />
       <div
         ref={dialogRef}
@@ -147,7 +146,7 @@ export function TriggersPanel() {
         aria-modal="true"
         aria-labelledby="triggers-title"
         tabIndex={-1}
-        className="glass-surface glass-popup animate-pop-in relative flex flex-col overflow-hidden rounded-[24px] outline-none"
+        className="ui-panel glass-popup animate-pop-in relative flex flex-col overflow-hidden outline-none"
       >
         <header className="flex items-start justify-between gap-4 px-6 pb-4 pt-6 sm:px-8 sm:pt-7">
           <div className="min-w-0">
@@ -308,44 +307,48 @@ function TriggerRow({
   return (
     <li data-trigger-row={webhook.id} className="glass-card rounded-2xl">
       <div className="flex flex-wrap items-center gap-3 px-4 py-3.5">
-        {bot ? (
-          <BotAvatar bot={bot} state={webhook.enabled ? "idle" : "sleeping"} size={34} animated={false} label={bot.name} />
-        ) : (
-          <div className="flex size-[34px] shrink-0 items-center justify-center rounded-xl bg-raised text-ink-secondary"><Webhook size={16} /></div>
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-center gap-1.5 text-[13.5px] font-medium text-ink">
-            <span className="truncate">{webhook.name}</span>
-            <ArrowRight size={13} className="shrink-0 text-ink-tertiary" aria-hidden="true" />
-            <span className="truncate">{botName}</span>
-          </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11.5px] text-ink-secondary">
-            <span className={cn("size-1.5 rounded-full", status.dot)} />
-            <span className={status.tone}>{status.label}</span>
-            <span aria-hidden="true">·</span>
-            <span>
-              {webhook.lastReceivedAt
-                ? t("triggers.received", { count: webhook.deliveryCount, when: relativeTime(webhook.lastReceivedAt) })
-                : t("triggers.neverReceived")}
-            </span>
+        <div className="flex w-full min-w-0 items-center gap-3 sm:w-auto sm:flex-1">
+          {bot ? (
+            <BotAvatar bot={bot} state={webhook.enabled ? "idle" : "sleeping"} size={34} animated={false} label={bot.name} />
+          ) : (
+            <div className="flex size-[34px] shrink-0 items-center justify-center rounded-xl bg-raised text-ink-secondary"><Webhook size={16} /></div>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-center gap-1.5 text-[13.5px] font-medium text-ink">
+              <span className="truncate" title={webhook.name}>{webhook.name}</span>
+              <ArrowRight size={13} className="shrink-0 text-ink-tertiary" aria-hidden="true" />
+              <span className="truncate" title={botName}>{botName}</span>
+            </div>
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11.5px] text-ink-secondary">
+              <span className={cn("size-1.5 rounded-full", status.dot)} />
+              <span className={status.tone}>{status.label}</span>
+              <span aria-hidden="true">·</span>
+              <span>
+                {webhook.lastReceivedAt
+                  ? t("triggers.received", { count: webhook.deliveryCount, when: relativeTime(webhook.lastReceivedAt) })
+                  : t("triggers.neverReceived")}
+              </span>
+            </div>
           </div>
         </div>
-        <button
-          type="button"
-          disabled={busy || (!hasCredential && !ingressAvailable)}
-          onClick={() => onCopy("link", false)}
-          className="flex items-center gap-1.5 rounded-lg bg-control/70 px-2.5 py-1.5 text-[12px] font-medium text-ink hover:bg-raised-hover disabled:opacity-40"
-        >
-          {copied === "link" ? <Check size={13} className="text-success" /> : working === `${webhook.id}:command` ? <Loader2 size={13} className="animate-spin" /> : <Link2 size={13} />}
-          {copied === "link" ? t("triggers.copied") : t("triggers.copyLink")}
-        </button>
-        <Switch
-          checked={webhook.enabled}
-          disabled={busy || waitingForTest}
-          title={waitingForTest ? t("triggers.waitingTest") : undefined}
-          aria-label={t("triggers.toggleAria", { name: webhook.name })}
-          onClick={onToggle}
-        />
+        <div className="ml-auto flex shrink-0 items-center gap-3">
+          <button
+            type="button"
+            disabled={busy || (!hasCredential && !ingressAvailable)}
+            onClick={() => onCopy("link", false)}
+            className="flex items-center gap-1.5 rounded-lg bg-control/70 px-2.5 py-1.5 text-[12px] font-medium text-ink hover:bg-raised-hover disabled:opacity-40"
+          >
+            {copied === "link" ? <Check size={13} className="text-success" /> : working === `${webhook.id}:command` ? <Loader2 size={13} className="animate-spin" /> : <Link2 size={13} />}
+            {copied === "link" ? t("triggers.copied") : t("triggers.copyLink")}
+          </button>
+          <Switch
+            checked={webhook.enabled}
+            disabled={busy || waitingForTest}
+            title={waitingForTest ? t("triggers.waitingTest") : undefined}
+            aria-label={t("triggers.toggleAria", { name: webhook.name })}
+            onClick={onToggle}
+          />
+        </div>
       </div>
       <details className="group border-t border-hairline/25 px-4 py-2.5">
         <summary className="cursor-pointer text-[12px] font-medium text-ink-secondary hover:text-ink">{t("triggers.advanced")}</summary>

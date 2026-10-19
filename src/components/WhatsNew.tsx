@@ -10,8 +10,8 @@ function readSeen(): string | null {
   try { return localStorage.getItem(WHATS_NEW_SEEN_KEY); } catch { return null; }
 }
 
-function writeSeen(date: string) {
-  try { localStorage.setItem(WHATS_NEW_SEEN_KEY, date); } catch { /* Storage can be blocked; the dot then returns next launch. */ }
+function writeSeen(version: string) {
+  try { localStorage.setItem(WHATS_NEW_SEEN_KEY, version); } catch { /* Storage can be blocked; the dot then returns next launch. */ }
 }
 
 export function WhatsNew({ variant = "button" }: { variant?: "button" | "icon" | "line" }) {
@@ -20,14 +20,14 @@ export function WhatsNew({ variant = "button" }: { variant?: "button" | "icon" |
   const [unread, setUnread] = useState(() => hasUnseenRelease(readSeen()));
 
   useEffect(() => {
-    const sync = (event: StorageEvent) => { if (event.key === WHATS_NEW_SEEN_KEY) setUnread(hasUnseenRelease(event.newValue)); };
+    const sync = (event: StorageEvent) => { if (event.key === WHATS_NEW_SEEN_KEY || event.key === null) setUnread(hasUnseenRelease(readSeen())); };
     window.addEventListener("storage", sync);
     return () => window.removeEventListener("storage", sync);
   }, []);
 
   const toggle = () => {
     if (!open) {
-      writeSeen(latestRelease.date);
+      writeSeen(latestRelease.version);
       setUnread(false);
     }
     setOpen((value) => !value);

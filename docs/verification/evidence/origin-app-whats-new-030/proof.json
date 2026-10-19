@@ -1,0 +1,314 @@
+{
+  "version": "0.2.10",
+  "source": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+  "synthetic": true,
+  "actualComponent": "src/components/WhatsNew.tsx",
+  "latestNotes": 5,
+  "canonicalReleaseCount": 4,
+  "initialUnreadObserved": true,
+  "unreadClearedAfterOpen": true,
+  "seenStateRetainedAfterReload": true,
+  "keyboard": {
+    "tabContained": true,
+    "reverseTabContained": true,
+    "dialogClosed": true,
+    "focusLabel": "What's new"
+  },
+  "runtimeExceptions": 0,
+  "cases": [
+    {
+      "articles": [
+        {
+          "changes": [
+            "Public workspace invitations. Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.",
+            "Email invitations. Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.",
+            "Clear join confirmations. A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.",
+            "Account and computer controls. Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.",
+            "Live activity receipts. Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work."
+          ],
+          "title": "Invitations and reliable desktop controls"
+        },
+        {
+          "changes": [
+            "Workspace and project permissions. Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.",
+            "Safer issue mirroring. Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.",
+            "Files respect their source access. Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.",
+            "Shared work and sync. Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.",
+            "Safer collaborative editing. Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.",
+            "Call continuity. An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.",
+            "Recoverable drawings. Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.",
+            "Consistent workspace controls. Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.",
+            "Keyboard control in dialogs. About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.",
+            "Readable buttons in every theme. Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.",
+            "Files loading recovery. Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.",
+            "Responsive Data queries. Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.",
+            "Chat attachments that fit. Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.",
+            "Recoverable workspace loading. Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.",
+            "Appearance from paired devices. Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.",
+            "Clearer connection errors. Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials.",
+            "Accurate browser setup. Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.",
+            "Release history everywhere. What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes."
+          ],
+          "title": "Safer workspaces and clearer controls"
+        },
+        {
+          "changes": [
+            "Projects with default agents. Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.",
+            "Workspaces. Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.",
+            "Zap Liquid avatars. Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.",
+            "Inbox, Chat, Call and Draw. One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas."
+          ],
+          "title": "Origin on the desktop"
+        },
+        {
+          "changes": [
+            "Keyboard first. C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.",
+            "A cleaner issue editor. Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.",
+            "A calmer sidebar. Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.",
+            "One Inbox, two views. Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.",
+            "Small details, fixed. No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list."
+          ],
+          "title": "A sharper workspace"
+        }
+      ],
+      "dialog": {
+        "height": 680,
+        "width": 680,
+        "x": 300,
+        "y": 110
+      },
+      "header": "What's newv0.2.10",
+      "height": 900,
+      "overflow": false,
+      "reducedMotion": true,
+      "width": 1280,
+      "theme": "dark",
+      "screenshot": "whats-new-1280-dark.jpg",
+      "screenshotDimensions": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "articles": [
+        {
+          "changes": [
+            "Public workspace invitations. Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.",
+            "Email invitations. Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.",
+            "Clear join confirmations. A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.",
+            "Account and computer controls. Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.",
+            "Live activity receipts. Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work."
+          ],
+          "title": "Invitations and reliable desktop controls"
+        },
+        {
+          "changes": [
+            "Workspace and project permissions. Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.",
+            "Safer issue mirroring. Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.",
+            "Files respect their source access. Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.",
+            "Shared work and sync. Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.",
+            "Safer collaborative editing. Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.",
+            "Call continuity. An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.",
+            "Recoverable drawings. Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.",
+            "Consistent workspace controls. Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.",
+            "Keyboard control in dialogs. About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.",
+            "Readable buttons in every theme. Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.",
+            "Files loading recovery. Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.",
+            "Responsive Data queries. Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.",
+            "Chat attachments that fit. Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.",
+            "Recoverable workspace loading. Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.",
+            "Appearance from paired devices. Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.",
+            "Clearer connection errors. Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials.",
+            "Accurate browser setup. Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.",
+            "Release history everywhere. What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes."
+          ],
+          "title": "Safer workspaces and clearer controls"
+        },
+        {
+          "changes": [
+            "Projects with default agents. Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.",
+            "Workspaces. Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.",
+            "Zap Liquid avatars. Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.",
+            "Inbox, Chat, Call and Draw. One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas."
+          ],
+          "title": "Origin on the desktop"
+        },
+        {
+          "changes": [
+            "Keyboard first. C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.",
+            "A cleaner issue editor. Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.",
+            "A calmer sidebar. Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.",
+            "One Inbox, two views. Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.",
+            "Small details, fixed. No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list."
+          ],
+          "title": "A sharper workspace"
+        }
+      ],
+      "dialog": {
+        "height": 680,
+        "width": 680,
+        "x": 300,
+        "y": 110
+      },
+      "header": "What's newv0.2.10",
+      "height": 900,
+      "overflow": false,
+      "reducedMotion": true,
+      "width": 1280,
+      "theme": "light",
+      "screenshot": "whats-new-1280-light.jpg",
+      "screenshotDimensions": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "articles": [
+        {
+          "changes": [
+            "Public workspace invitations. Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.",
+            "Email invitations. Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.",
+            "Clear join confirmations. A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.",
+            "Account and computer controls. Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.",
+            "Live activity receipts. Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work."
+          ],
+          "title": "Invitations and reliable desktop controls"
+        },
+        {
+          "changes": [
+            "Workspace and project permissions. Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.",
+            "Safer issue mirroring. Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.",
+            "Files respect their source access. Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.",
+            "Shared work and sync. Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.",
+            "Safer collaborative editing. Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.",
+            "Call continuity. An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.",
+            "Recoverable drawings. Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.",
+            "Consistent workspace controls. Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.",
+            "Keyboard control in dialogs. About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.",
+            "Readable buttons in every theme. Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.",
+            "Files loading recovery. Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.",
+            "Responsive Data queries. Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.",
+            "Chat attachments that fit. Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.",
+            "Recoverable workspace loading. Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.",
+            "Appearance from paired devices. Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.",
+            "Clearer connection errors. Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials.",
+            "Accurate browser setup. Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.",
+            "Release history everywhere. What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes."
+          ],
+          "title": "Safer workspaces and clearer controls"
+        },
+        {
+          "changes": [
+            "Projects with default agents. Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.",
+            "Workspaces. Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.",
+            "Zap Liquid avatars. Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.",
+            "Inbox, Chat, Call and Draw. One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas."
+          ],
+          "title": "Origin on the desktop"
+        },
+        {
+          "changes": [
+            "Keyboard first. C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.",
+            "A cleaner issue editor. Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.",
+            "A calmer sidebar. Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.",
+            "One Inbox, two views. Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.",
+            "Small details, fixed. No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list."
+          ],
+          "title": "A sharper workspace"
+        }
+      ],
+      "dialog": {
+        "height": 680,
+        "width": 375,
+        "x": 0,
+        "y": 220
+      },
+      "header": "What's newv0.2.10",
+      "height": 900,
+      "overflow": false,
+      "reducedMotion": true,
+      "width": 375,
+      "theme": "dark",
+      "screenshot": "whats-new-375-dark.jpg",
+      "screenshotDimensions": {
+        "width": 375,
+        "height": 900
+      }
+    },
+    {
+      "articles": [
+        {
+          "changes": [
+            "Public workspace invitations. Links created or copied from the desktop open on origin.imbored.fun instead of localhost. Self-hosted connections use their own configured invitation website.",
+            "Email invitations. Enter an email address to send an invitation through your Origin connection's email service. If email is unavailable or sending fails, the invitation stays available as a link you can share. Invitations expire after seven days.",
+            "Clear join confirmations. A successful workspace join keeps its confirmation on screen. Switching invitations or accounts clears the previous result, and repeated clicks cannot submit the same join twice.",
+            "Account and computer controls. Your account and computer selectors have their own row below the desktop title bar. Long account names stay inside the sidebar on Windows and Mac, and both menus remain easy to reach.",
+            "Live activity receipts. Activity updates automatically after tools finish, including when a bot's task list refreshes. Switching bots or closing the panel cancels its pending work."
+          ],
+          "title": "Invitations and reliable desktop controls"
+        },
+        {
+          "changes": [
+            "Workspace and project permissions. Viewer access is respected in chat and calls. Browser views close when access to their bot is removed. Access changes revoke shared agent runs, security changes revoke all other sessions, and project invitations grant the workspace access they need. Origin credentials stay out of engine child processes and error messages.",
+            "Safer issue mirroring. Draft issues stay private when their column is renamed. Repository issues complete through a verified pull request merge; closing an issue manually on GitHub does not mark it Done in Origin.",
+            "Files respect their source access. Uploads are tied to your account and destination, and sharing an existing file checks your current access to its source. Previously downloaded files and shared download links keep their existing behaviour.",
+            "Shared work and sync. Agent handoffs skip requests from people who no longer have access. Workspace sync ignores stale results after you change accounts or servers. Project imports recover after interrupted linking without creating another team of bots.",
+            "Safer collaborative editing. Switching projects, accounts or servers clears private page state and locks the previous Vault. Saving an issue preserves a teammate's changes to fields you have not edited, and replacing an avatar keeps images still used elsewhere.",
+            "Call continuity. An old machine or delayed leave response cannot interrupt your replacement call. If the browser blocks audio, a visible Play audio control lets you recover.",
+            "Recoverable drawings. Unsaved scenes and images recover after navigation or reload, including interrupted saves. Canvas controls fit mobile screens, and closing an Ask preview cancels its pending snapshot.",
+            "Consistent workspace controls. Dialogs and issue menus have consistent keyboard and mobile behaviour. The website shares the app's light and dark palette, fonts and radii.",
+            "Keyboard control in dialogs. About, phone links, archived agents and Files dialogs keep keyboard focus inside and return it to the right control when closed. Nested confirmations keep their own keyboard focus, and menus support submenus in either placement.",
+            "Readable buttons in every theme. Filled buttons keep readable labels in every theme and with custom project colours. Hover and press feedback preserve their paired colours and keyboard focus rings.",
+            "Files loading recovery. Files shows a loading skeleton while it reads the desktop's state. A failed or stalled read offers Retry, and an old response cannot replace the recovered state.",
+            "Responsive Data queries. Replacing a slow query or leaving its editor cancels the abandoned work even when Windows is busy. The next query can run, and the last committed result stays available.",
+            "Chat attachments that fit. Wide images and long file names stay inside the conversation on small screens. Downloads keep the full original file name.",
+            "Recoverable workspace loading. Failed or stalled reads offer a retry. A failed refresh keeps your loaded editor and unsaved draft, while revoked access closes the private page.",
+            "Appearance from paired devices. Paired devices can save bot colours, mascots and avatar framing. Invalid values are rejected, and appearance changes do not grant access to execution settings.",
+            "Clearer connection errors. Remote MCP connection errors include safe HTTP status codes and practical recovery hints, adapted from OpenMausBot. Malformed connection addresses never echo embedded credentials.",
+            "Accurate browser setup. Browser version checks use the supported build for your operating system, so Windows no longer asks you to replace its correctly pinned browser engine.",
+            "Release history everywhere. What's new tracks the version you have read. The app, website and desktop update feeds use one changelog, and desktop packaging checks that the current version has release notes."
+          ],
+          "title": "Safer workspaces and clearer controls"
+        },
+        {
+          "changes": [
+            "Projects with default agents. Every project starts with its own team of agents, ready to pick up work the moment you create it. Reorder them, add your own or start from a template team.",
+            "Workspaces. Keep separate workspaces for separate parts of your life or business, and switch between them from the top of the sidebar.",
+            "Zap Liquid avatars. Give each agent a Zap face in the Minimal or Liquid glass style, with its own colours, mascot shape and gaze.",
+            "Inbox, Chat, Call and Draw. One Inbox for what needs you, chat with any agent, call it live by voice, or sketch together on a shared canvas."
+          ],
+          "title": "Origin on the desktop"
+        },
+        {
+          "changes": [
+            "Keyboard first. C creates an issue. F, / or Cmd/Ctrl + K opens search. Enter opens the best match; arrow keys choose another result. In chat, typing returns to your message.",
+            "A cleaner issue editor. Create issues from one compact row. Choose a project when starting outside a project, and select a priority explicitly. Searchable menus and mobile-sized date controls keep everything consistent.",
+            "A calmer sidebar. Refined spacing, rounded-square avatars and a resizable sidebar. Your avatar moves with the project selection. Drag the sidebar edge left to collapse it, then use the top-left button to keep it open again.",
+            "One Inbox, two views. Issues and notifications share the Inbox; empty notifications stay collapsed. Switch between List and Calendar beside Active and Completed, keeping your project and priority filters. Issue rows stay borderless until you hover.",
+            "Small details, fixed. No extra borders while typing, no background flash in issue descriptions, and no leftover project highlight when collapsing the project list."
+          ],
+          "title": "A sharper workspace"
+        }
+      ],
+      "dialog": {
+        "height": 680,
+        "width": 375,
+        "x": 0,
+        "y": 220
+      },
+      "header": "What's newv0.2.10",
+      "height": 900,
+      "overflow": false,
+      "reducedMotion": true,
+      "width": 375,
+      "theme": "light",
+      "screenshot": "whats-new-375-light.jpg",
+      "screenshotDimensions": {
+        "width": 375,
+        "height": 900
+      }
+    }
+  ],
+  "accountSubmissions": 0,
+  "qualification": "Fresh isolated fixture and actual component at the frozen source. Initial unread was observed on first opening this030fixture; opening cleared it and reload retained read state. Four complete CDP viewport captures; DOM checks include all32notes even outside the visible scroll area. Two high-level capture dimension/selector attempts were excluded before any file write. No account/provider/production mutation."
+}

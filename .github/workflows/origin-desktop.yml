@@ -4,8 +4,8 @@
 # latest.yml / latest-mac.yml, which the installed apps read for updates.
 #
 # Signing is optional. Without the secrets below the mac build is ad-hoc
-# signed (Gatekeeper asks users to right-click → Open, and macOS in-app
-# updates do not install) and the Windows installer is unsigned (SmartScreen
+# signed (macOS 15+ requires review in System Settings > Privacy & Security,
+# and macOS in-app updates do not install) and Windows is unsigned (SmartScreen
 # shows "unknown publisher").
 #   MAC_CERT_P12_BASE64, MAC_CERT_PASSWORD    Developer ID Application cert
 #   APPLE_API_KEY_P8_BASE64, APPLE_API_KEY_ID, APPLE_API_ISSUER_ID   notarytool
@@ -25,12 +25,20 @@ env:
 
 jobs:
   version:
-    name: Tag matches package.json
+    name: Version and changelog
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check:releases
+      - run: pnpm exec vitest run scripts/origin-release-notes.test.mjs
       - name: The updater compares package.json's version, so the tag must name it
         if: startsWith(github.ref, 'refs/tags/origin-v')
         shell: bash
@@ -159,6 +167,9 @@ jobs:
             "release-origin/Origin-$v-arm64.dmg" "release-origin/Origin-$v-x64.dmg"
           node scripts/regenerate-mac-feed.mjs release-origin/latest-mac.yml
 
+      - name: "Gate: macOS release notes and artifact hashes"
+        run: node scripts/origin-release-notes.mjs --feed release-origin/latest-mac.yml
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: origin-mac
@@ -203,7 +214,7 @@ jobs:
           fail=0
           for f in "$res/server/index.js" "$res/server/desktop-entry.mjs" "$res/ui/index.html" \
             "$res/cloudflared/cloudflared.exe" "$res/app-update.yml" release-origin/win-unpacked/Origin.exe \
-            "release-origin/Origin-$v-setup.exe" "release-origin/Origin-$v-setup.exe.blockmap" release-origin/latest.yml; do
+            "release-origin/Origin-$v-setup.exe" "release-origin/Origin-$v-setup.exe.blockmap" "release-origin/Origin-$v-x64.zip" release-origin/latest.yml; do
             [ -f "$f" ] || { echo "::error::missing $f"; fail=1; }
           done
           grep -Eq '^provider: generic$' "$res/app-update.yml" || { echo "::error::app-update.yml is not the generic provider"; fail=1; }
@@ -216,12 +227,15 @@ jobs:
           grep -Fq "path: Origin-$v-setup.exe" release-origin/latest.yml || { echo "::error::latest.yml does not name the installer"; fail=1; }
           cat "$res/app-update.yml" release-origin/latest.yml
           exit $fail
+      - name: "Gate: Windows release notes and artifact hashes"
+        run: node scripts/origin-release-notes.mjs --feed release-origin/latest.yml
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: origin-windows
           path: |
             release-origin/*.exe
             release-origin/*.exe.blockmap
+            release-origin/*.zip
             release-origin/latest.yml
           if-no-files-found: error
           retention-days: 14

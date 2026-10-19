@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-18T15:32:03.436Z",
+  "status": "local-verified-unpublished",
+  "sourceBinding": {
+    "workerCommit": "3b85cb69c0c907a9aa08ba98b664cb5889cbe83a",
+    "releaseSource": null,
+    "comparison": "Resolve releaseSource from the final frozen candidate and require identical Git blobs for every implementation path before any repair invocation.",
+    "expectedGitBlobs": {
+      "shared/origin-columns.ts": "fe44fa23f9bf6e6cbd6da94e966b3a1a666a4375",
+      "backend/convex/lib/columns.ts": "fb0e9a0dd44f6f30deeda7345477eeca4b4a08a6",
+      "backend/convex/schema.ts": "f763482fc352c75549efef49644ff5baf233de7f",
+      "backend/convex/tasks.ts": "389701fbfdd0a0bb4e2412f5bf911767025dd2d4",
+      "backend/convex/projects.ts": "a5a6eed91d13978cb190700a4be8371429aca928",
+      "backend/convex/legacyImport.ts": "93c482aebd910d376e54a0e1c337d148d8e73f21",
+      "backend/convex/connectors.ts": "2fafbb61c4b637b9b08b895d6e34a6c08f1d5000",
+      "backend/convex/feedback.ts": "47eb3dd9623c8b28bc5c7350fef6ba174342d63d",
+      "backend/convex/integrations.ts": "9de569bbe86ed4a238e7c96c9b8cf269464a711f"
+    }
+  },
+  "commits": {
+    "shared": "5ac262d65d1fd6ded5829a28bf6625c5666ca2a4",
+    "domain": "325e42833d534dd8dc08bce6d36088229ae1f42d",
+    "boundedGuard": "3b85cb69c0c907a9aa08ba98b664cb5889cbe83a"
+  },
+  "runtime": "v24.21.0",
+  "baseline": {
+    "source": "0757f71888d2c5aaf41bd877724949a63d815aa2",
+    "originalCases": 8,
+    "failed": 7,
+    "passed": 1,
+    "explicitActiveChoiceControlPassed": true
+  },
+  "additionalRedProofs": [
+    {
+      "file": "contradictory-draft-red.log",
+      "failed": 1,
+      "controlQualification": "Intermediate uncommitted domain change; isDoneColumn retained its pre-fix behavior. Stale semantic Draft + isDone:true rejected an explicit private task with a merged-PR error."
+    },
+    {
+      "file": "pending-idea-red.log",
+      "failed": 1,
+      "passed": 2,
+      "controlQualification": "integrations.ts retained the baseline0757 implementation. Pending legacy Idea context returned draft:false; actual-Draft and explicit-false controls passed. No external issue was created."
+    },
+    {
+      "file": "ambiguous-default-red.log",
+      "failed": 1,
+      "passed": 1,
+      "source": "325e42833d534dd8dc08bce6d36088229ae1f42d",
+      "controlQualification": "The new regression ran against unchanged committed runtime325. Omitted task creation resolved and inserted another Draft rather than rejecting an unresolved deep legacy Draft; public trusted-flag rejection control passed."
+    }
+  ],
+  "checks": {
+    "backend": {
+      "files": 23,
+      "passed": 215,
+      "failed": 0
+    },
+    "newBackendCases": 31,
+    "sharedAndRatchets": {
+      "files": 3,
+      "passed": 5,
+      "failed": 0
+    },
+    "backendTypesExit": 0,
+    "appTypesExit": 0,
+    "serverTypesExit": 0,
+    "touchedLintExit": 0,
+    "diffCheckExit": 0
+  },
+  "migrationFixtures": {
+    "projects": 28,
+    "columnPaginationExercised": true,
+    "projectPaginationExercised": true,
+    "outOfInsertionOrderColumns": 205,
+    "creationTimeTieBreakExercised": true,
+    "allExistingTaskAndLinkDocumentsUnchanged": true,
+    "secondCompleteSweepNoOp": true,
+    "staleCandidateControls": [
+      "different project",
+      "renamed",
+      "explicit false",
+      "existing Draft",
+      "deleted"
+    ]
+  },
+  "acceptance": {
+    "convexTestOnly": true,
+    "actualConvexDeploymentInvocations": 0,
+    "productionCalls": 0,
+    "githubProviderCalls": 0,
+    "userDataMutations": 0,
+    "screenshots": "None: backend/domain task only; client/server/browser acceptance is coordinated separately.",
+    "mainPortsUntouched": [
+      3210,
+      5199,
+      8799
+    ],
+    "generatedApiFilesEdited": false
+  },
+  "limitations": [
+    "Production repair has not run; releaseSource remains unresolved",
+    "Large ambiguous legacy boards reject runtime repair and legacy Idea publication until the complete ordered bounded sweep resolves them",
+    "Existing task/delete-column transfers occur only through the user's existing explicit destination operation; this migration itself never moves or deletes tasks",
+    "Existing board/details full-board reads were not converted to pagination in this finite change"
+  ],
+  "logs": [
+    {
+      "file": "baseline-red.log",
+      "rawPrivateSha256": "f4821a11ff94a5d6275a6147d880cc7ae5f68530b9a17f8487de0360848b2f1b",
+      "publishedLfSha256": "7b4ab3c62f6b095ca4bc355d70638acbb6c893f2925e1a353c50e8826ab9c172",
+      "sanitization": "Worker absolute path replaced; ANSI SGR removed; CRLF normalized to LF. Original raw log remains ignored. Trailing blank lines removed for repository whitespace checks; raw log is unchanged."
+    },
+    {
+      "file": "contradictory-draft-red.log",
+      "rawPrivateSha256": "73c32fe94b8768f10d133d480f934604f79925563e8cd12ff7d5816ebe05568f",
+      "publishedLfSha256": "4bb2a95762a497204bd2c1675b8af135cae0e5cf0a985320107b1c5e31c6a1fa",
+      "sanitization": "Worker absolute path replaced; ANSI SGR removed; CRLF normalized to LF. Original raw log remains ignored. Trailing blank lines removed for repository whitespace checks; raw log is unchanged."
+    },
+    {
+      "file": "pending-idea-red.log",
+      "rawPrivateSha256": "ada2fd2ea9fc90425a2af37db252e27f4ab2e514fcb0800ae11501111788f32e",
+      "publishedLfSha256": "bebb13b857bcb7a42a230ca6044bbf377c5ad0b65890aa456fef2919ecccee81",
+      "sanitization": "Worker absolute path replaced; ANSI SGR removed; CRLF normalized to LF. Original raw log remains ignored. Trailing blank lines removed for repository whitespace checks; raw log is unchanged."
+    },
+    {
+      "file": "ambiguous-default-red.log",
+      "rawPrivateSha256": "81a7a918b6da97170c4d020c3d68001fbc05db43635ce197521c325ccbd39c2e",
+      "publishedLfSha256": "dd1761fe1eb0fca984dacff270d854d0edb0ef72ca6386baa3569ea2995a5356",
+      "sanitization": "Worker absolute path replaced; ANSI SGR removed; CRLF normalized to LF. Original raw log remains ignored. Trailing blank lines removed for repository whitespace checks; raw log is unchanged."
+    },
+    {
+      "file": "backend-green.log",
+      "rawPrivateSha256": "77573e22589f9fec0c17973df4e242b14556a24e2f9dcc33ed0462d45aad4a96",
+      "publishedLfSha256": "0a7089b45c26c12570eaa9e3b1dea58afc1063e7a2a01037fdead7b433bacf63",
+      "sanitization": "Worker absolute path replaced; ANSI SGR removed; CRLF normalized to LF. Original raw log remains ignored. Trailing blank lines removed for repository whitespace checks; raw log is unchanged."
+    },
+    {
+      "file": "shared-guards-green.log",
+      "rawPrivateSha256": "0613a5bd5271324b0288080d920e3f78e1b448a150009b43deb1fe3c48f0d2c7",
+      "publishedLfSha256": "9dade50cd598b9b085b5edfd1df1bb66e4e712d3f5fb496176ef2d851b79788f",
+      "sanitization": "Worker absolute path replaced; ANSI SGR removed; CRLF normalized to LF. Original raw log remains ignored. Trailing blank lines removed for repository whitespace checks; raw log is unchanged."
+    }
+  ]
+}

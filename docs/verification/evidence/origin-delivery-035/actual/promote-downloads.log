@@ -1,0 +1,33 @@
+release-manifest-0.2.13.json: OK
+SHA256SUMS-0.2.13.txt: OK
+{"validatedMetadata": "downloads", "version": "0.2.13", "files": 13}
+Origin-0.2.13-arm64.dmg: OK
+Origin-0.2.13-arm64.dmg.blockmap: OK
+Origin-0.2.13-arm64.zip: OK
+Origin-0.2.13-arm64.zip.blockmap: OK
+Origin-0.2.13-setup.exe: OK
+Origin-0.2.13-setup.exe.blockmap: OK
+Origin-0.2.13-windows-x64.zip: OK
+Origin-0.2.13-x64.dmg: OK
+Origin-0.2.13-x64.dmg.blockmap: OK
+Origin-0.2.13-x64.zip: OK
+Origin-0.2.13-x64.zip.blockmap: OK
+latest-mac.yml: OK
+latest.yml: OK
+rollbackBackup=/root/origin-release-backups/20261018T234956Z-928059c2-b975-4a30-a783-bc1bbdc229b9-before-0.2.13
+Origin-0.2.13-arm64.dmg: OK
+Origin-0.2.13-arm64.dmg.blockmap: OK
+Origin-0.2.13-arm64.zip: OK
+Origin-0.2.13-arm64.zip.blockmap: OK
+Origin-0.2.13-setup.exe: OK
+Origin-0.2.13-setup.exe.blockmap: OK
+Origin-0.2.13-windows-x64.zip: OK
+Origin-0.2.13-x64.dmg: OK
+Origin-0.2.13-x64.dmg.blockmap: OK
+Origin-0.2.13-x64.zip: OK
+Origin-0.2.13-x64.zip.blockmap: OK
+latest-mac.yml: OK
+latest.yml: OK
+backup=/root/origin-release-backups/20261018T234956Z-928059c2-b975-4a30-a783-bc1bbdc229b9-before-0.2.13
+version=0.2.13
+source=1483a7d76fb092b5ef6860afc5ffb520fc4e7707

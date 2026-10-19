@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
+import { createPortal } from "react-dom";
+import { ModalFocusScope, useModalDialog } from "@/hooks/use-modal-dialog";
 import { QRCodeSVG } from "qrcode.react";
 
 import { ANDROID_APK_URL, IOS_APP_STORE_URL, openExternalLink } from "@/lib/app-links";
@@ -16,30 +18,23 @@ export interface PhoneAppConnect {
   onSelect: () => void;
 }
 
-export function PhoneAppDialog({ open, onClose, connect = [] }: { open: boolean; onClose: () => void; connect?: PhoneAppConnect[] }) {
+export function PhoneAppDialog({ open, onClose, connect = [], returnFocusRef }: { open: boolean; onClose: () => void; connect?: PhoneAppConnect[]; returnFocusRef?: RefObject<HTMLElement | null> }) {
   const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    closeRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const handoff = useRef(false);
+  const { dismiss } = useModalDialog(panelRef, onClose, { open, initialFocusRef: closeRef, returnFocusRef, restoreFocus: () => !handoff.current });
+  useEffect(() => { if (open) handoff.current = false; }, [open]);
 
   if (!open) return null;
 
-  return (
+  const dialog = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+      onMouseDown={(event) => event.target === event.currentTarget && dismiss()}
     >
       <div
+        ref={panelRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="phone-app-dialog-title"
@@ -71,6 +66,7 @@ export function PhoneAppDialog({ open, onClose, connect = [] }: { open: boolean;
                 type="button"
                 data-phone-app-connect={destination.key}
                 onClick={() => {
+                  handoff.current = true;
                   onClose();
                   destination.onSelect();
                 }}
@@ -87,7 +83,7 @@ export function PhoneAppDialog({ open, onClose, connect = [] }: { open: boolean;
         <button
           ref={closeRef}
           type="button"
-          onClick={onClose}
+          onClick={dismiss}
           className="mt-3 w-full rounded-xl bg-raised px-4 py-2 text-[13px] font-medium text-ink hover:brightness-110"
         >
           {t("common.close")}
@@ -95,4 +91,6 @@ export function PhoneAppDialog({ open, onClose, connect = [] }: { open: boolean;
       </div>
     </div>
   );
+  const content = <ModalFocusScope panelRef={panelRef}>{dialog}</ModalFocusScope>;
+  return typeof document === "undefined" ? content : createPortal(content, document.body);
 }

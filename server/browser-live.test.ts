@@ -2,6 +2,7 @@ import { EventEmitter } from "node:events";
 import type { ServerResponse } from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BrowserRuntime } from "./browser-runtime.ts";
+import { createBrowserViewAccess } from "./host/browser-view-access.ts";
 import { BrowserActionFailedError, BrowserLive, browserRestartRefusal, browserStreamPort, normalizeBrowserLiveMessage, parseBrowserLiveAction } from "./browser-live.ts";
 
 const execute = vi.hoisted(() => vi.fn());
@@ -417,6 +418,42 @@ describe("authenticated browser viewer relay", () => {
     await a.action({ type: "release" });
     expect(b.res.events("frame")).toHaveLength(1);
   });
+  it("stops frames when the bot becomes private but the member and browser sessions stay live", async () => {
+    let visible = true;
+    const access = createBrowserViewAccess({
+      auth: {
+        kind: "session", via: "bearer", scopes: ["client"],
+        session: { id: "fixture-member", tokenHash: "0".repeat(64), label: "Fixture member", scopes: ["client"], createdAt: 1, lastSeenAt: 1, expiresAt: Number.MAX_SAFE_INTEGER },
+      },
+      botId: "bot-a", session: "profile-a", bot: (id) => ({ id }),
+      enabled: () => true, sessionFor: () => "profile-a", isLive: () => true, visible: () => visible,
+    });
+    const viewer = await open({ owner: access.owner, current: access.isCurrent });
+    viewer.socket.receive(frame);
+    expect(viewer.res.events("frame")).toHaveLength(1);
+    visible = false;
+    viewer.socket.receive({ ...frame, seq: 2 });
+    expect(viewer.res.events("frame")).toHaveLength(1);
+    expect(viewer.res.writableEnded).toBe(true);
+  });
+
+  it("rechecks quiet viewers immediately without closing another person's valid view", async () => {
+    let current = true;
+    const removed = await open({ botId: "private-bot", owner: "fixture-member", current: () => current });
+    const retained = await open({ botId: "other-bot", owner: "fixture-owner" });
+    await removed.action({ type: "take" });
+    current = false;
+    live.recheckViewers();
+    expect(removed.res.writableEnded).toBe(true);
+    expect(removed.socket.readyState).toBe(3);
+    expect(held.has("profile-a")).toBe(false);
+    expect(retained.res.writableEnded).toBe(false);
+    retained.socket.receive(frame);
+    expect(retained.res.events("frame")).toHaveLength(1);
+    await retained.action({ type: "take" });
+    expect(held.get("profile-a")).toBe(retained.res.id);
+  });
+
   it("closes stale authenticated viewers, slow readers and viewers that never acknowledge frames", async () => {
     vi.useFakeTimers();
     let current = true;

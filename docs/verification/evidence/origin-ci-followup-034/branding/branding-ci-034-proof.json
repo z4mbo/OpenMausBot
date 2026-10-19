@@ -1,0 +1,127 @@
+{
+  "recordedAt": "2026-10-18T22:55:46.774Z",
+  "baseSource": "f44ebe30a9568ed634b9eb8a45476f42e4c059b1",
+  "commit": "e298c4ec32576963724f17451c9f51278457d417",
+  "branch": "codex/branding-ci-consumers-034",
+  "scope": "Four stale emitted/display branding expectations only; no product-source or runtime behavior change.",
+  "changedFiles": [
+    {
+      "path": "scripts/testing/web-app-assets.test.ts",
+      "baseGitBlob": "46321a1708fb584a5edba43397dc3cbc0bd23524",
+      "fixedGitBlob": "8e1059cfb44d731b6ec8fdbd415f992488e8dc0d",
+      "baseSha256": "14f44ee4c7a38d5e71cd8e12ca8482f78b40185fc7e1f5a84d3385db6631c8da",
+      "fixedSha256": "042382aca997f8038a6c57bb9a224224be076c7345ad6b66f93f09c5e3dcfa50"
+    },
+    {
+      "path": "server/control-omb.test.ts",
+      "baseGitBlob": "a2d85fd228863e9ab5c4ce28dc247ca53f3f06dd",
+      "fixedGitBlob": "68241a35773c914fc9cdb3b7dce198f163a32592",
+      "baseSha256": "5da0ca2e4bebadd6bf3cac5456dd1414817ece500c7e2c61f7c1f365614bffd8",
+      "fixedSha256": "f595224d0691a87fcaaf72cf979f8cf74d8658a1fced281bc4c18ad9c9829b22"
+    }
+  ],
+  "unchangedProductProducers": [
+    {
+      "path": "server/headless/client.ts",
+      "gitBlob": "43a1008765fd7be5588f0e5c0c63736c39cb18f9",
+      "sha256": "90dc3650262b1971879237bbfa09fb0ea5edcf99e2f8a6223f2baf59a5278862"
+    },
+    {
+      "path": "scripts/control-omb.ts",
+      "gitBlob": "c338f739b20f2e2241f687c30373a5effbf8f984",
+      "sha256": "31e35735ac4b0787ce0760e0ca342a3c7743c8a4e23e32c5d788d1fca8ad8726"
+    },
+    {
+      "path": "public/manifest.webmanifest",
+      "gitBlob": "4b80cbdac00d6a47fda1f9ed51b84b9b9d3e68c4",
+      "sha256": "5a773b72b5f9e21cdf1fca9466db820685621dbdcddf677725760a70f741e651"
+    }
+  ],
+  "allOtherTrackedFilesUnchanged": true,
+  "runner": {
+    "node": "v24.21.0",
+    "vitest": "4.1.11",
+    "command": "node node_modules/vitest/vitest.mjs run server/control-omb.test.ts scripts/testing/web-app-assets.test.ts --reporter=verbose --reporter=json --outputFile=<phase-report>",
+    "config": "Unchanged vite.config.ts, standard setup and timeouts; no retries/skips/config override."
+  },
+  "baseline": {
+    "source": "f44ebe30a9568ed634b9eb8a45476f42e4c059b1",
+    "exit": 1,
+    "total": 22,
+    "passed": 18,
+    "failed": 4,
+    "skipped": 0,
+    "startTime": 1792364039531,
+    "failedAssertions": [
+      {
+        "file": "server/control-omb.test.ts",
+        "test": "control-omb command mapping refuses to mutate a silently discovered live app",
+        "status": "failed"
+      },
+      {
+        "file": "server/control-omb.test.ts",
+        "test": "control-omb command mapping treats edit as mutating, so it cannot reach a silently discovered app",
+        "status": "failed"
+      },
+      {
+        "file": "server/control-omb.test.ts",
+        "test": "control-omb command mapping forwards pinned task IDs for sends, reads, waits, interrupts, and model changes",
+        "status": "failed"
+      },
+      {
+        "file": "scripts/testing/web-app-assets.test.ts",
+        "test": "phone web app installation assets links a standalone manifest whose start URL never includes pairing credentials",
+        "status": "failed"
+      }
+    ]
+  },
+  "fixed": {
+    "source": "e298c4ec32576963724f17451c9f51278457d417",
+    "exit": 0,
+    "total": 22,
+    "passed": 22,
+    "failed": 0,
+    "skipped": 0,
+    "startTime": 1792364082160
+  },
+  "semanticAssertionsPreserved": [
+    "New-bot/edit/set-model still reject mutating silently discovered instances.",
+    "Exact full refusal messages remain asserted at both new-bot/edit sites; set-model still checks explicit-instance error.",
+    "Legacy app=openmausbot health wire input and OPENMAUSBOT_URL config remain unchanged.",
+    "Standalone PWA display, credential-free scoped start URL/id, related-app flag, PNG dimensions and safe-area/Safari viewport assertions remain intact."
+  ],
+  "fixtureBoundary": "The complete control-omb test file includes standard launchVerificationServer fake-engine fixtures, real turn/wait/transcript and persisted-redaction checks, with owned session.close finally blocks and test-data cleanup assertion. No live user server/Convex or production data used.",
+  "validation": {
+    "targetedOxlint": "pass, zero warnings/errors",
+    "diffCheck": "pass",
+    "trackedStatus": "clean"
+  },
+  "coauthor": "Codex <noreply@openai.com>",
+  "evidence": [
+    {
+      "path": ".omb-scratch/branding-ci-034-before.json",
+      "bytes": 14124,
+      "sha256": "ca066b3441d0a17aa7b657a1b627a799f92b4186aa07b9ac2e440cb4b67df033"
+    },
+    {
+      "path": ".omb-scratch/branding-ci-034-before.log",
+      "bytes": 7814,
+      "sha256": "a1d10983993ce593581fec23007c810dbe4d2c05d9743c069b9225879458040e"
+    },
+    {
+      "path": ".omb-scratch/branding-ci-034-after.json",
+      "bytes": 8304,
+      "sha256": "b20554c6191e276b1c3e35627fe52c43278c52df51a667ac90a1a5e54a151861"
+    },
+    {
+      "path": ".omb-scratch/branding-ci-034-after.log",
+      "bytes": 3778,
+      "sha256": "006adeb125da636d46a9ce76eee8e45209fab9ef7273c2672d51e937488fde95"
+    }
+  ],
+  "notClaimed": [
+    "No broad application/native/provider/production acceptance",
+    "No new typecheck/full-suite run for test-string-only changes",
+    "No push, deploy, tag, PR or release mutation"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "run": 39182331813,
+  "attemptedAt": "2026-10-19T01:17:20.402Z",
+  "priorAttempt": "Private GitHub draft completed; staging free-space assertion stopped before directory creation",
+  "githubUploadedAgain": false,
+  "expectedFiles": [
+    "Origin-0.2.14-arm64.dmg",
+    "Origin-0.2.14-arm64.dmg.blockmap",
+    "Origin-0.2.14-arm64.zip",
+    "Origin-0.2.14-arm64.zip.blockmap",
+    "Origin-0.2.14-setup.exe",
+    "Origin-0.2.14-setup.exe.blockmap",
+    "Origin-0.2.14-windows-x64.zip",
+    "Origin-0.2.14-x64.dmg",
+    "Origin-0.2.14-x64.dmg.blockmap",
+    "Origin-0.2.14-x64.zip",
+    "Origin-0.2.14-x64.zip.blockmap",
+    "SHA256SUMS-0.2.14.txt",
+    "latest-mac.yml",
+    "latest.yml",
+    "release-manifest-0.2.14.json"
+  ],
+  "expectedBytes": 1947902641
+}

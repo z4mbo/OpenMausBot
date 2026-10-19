@@ -1,0 +1,92 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix
+
+ ❯ src/lib/origin-cloud/session-races.test.ts (8 tests | 5 failed) 22ms
+   × a delayed logout success preserves a replacement session 8ms
+   × a delayed logout failure preserves a replacement session 1ms
+   × a delayed logout preserves another backend's session even when token text matches 1ms
+   × rejects a delayed login after a backend switch without sending its token to the new backend 6ms
+   × a delayed login cannot replace a session that was established while it waited 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/origin-cloud/session-races.test.ts > a delayed logout success preserves a replacement session
+ FAIL  src/lib/origin-cloud/session-races.test.ts > a delayed logout failure preserves a replacement session
+AssertionError: expected null to be 'fixture-session-two' // Object.is equality
+
+- Expected:
+"fixture-session-two"
+
++ Received:
+null
+
+ ❯ src/lib/origin-cloud/session-races.test.ts:58:30
+     56|   if (outcome === "success") request.resolve(null); else request.rejec…
+     57|   await pending;
+     58|   expect(sessionStore.get()).toBe("fixture-session-two");
+       |                              ^
+     59| });
+     60|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/lib/origin-cloud/session-races.test.ts > a delayed logout preserves another backend's session even when token text matches
+AssertionError: expected null to be 'fixture-session-one' // Object.is equality
+
+- Expected:
+"fixture-session-one"
+
++ Received:
+null
+
+ ❯ src/lib/origin-cloud/session-races.test.ts:66:30
+     64|   setCloudUrl("http://127.0.0.1:43002");
+     65|   request.resolve(null); await pending;
+     66|   expect(sessionStore.get()).toBe("fixture-session-one");
+       |                              ^
+     67| });
+     68|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/lib/origin-cloud/session-races.test.ts > rejects a delayed login after a backend switch without sending its token to the new backend
+AssertionError: expected 'fixture-private-token-from-first-back…' to be null
+
+- Expected:
+null
+
++ Received:
+"fixture-private-token-from-first-backend"
+
+ ❯ src/lib/origin-cloud/session-races.test.ts:83:30
+     81|   await act(async () => setCloudUrl("http://127.0.0.1:43002"));
+     82|   await act(async () => { request.resolve({ sessionToken: "fixture-pri…
+     83|   expect(sessionStore.get()).toBeNull();
+       |                              ^
+     84|   expect(fixture.queries).not.toContainEqual({ url: "http://127.0.0.1:…
+     85| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/lib/origin-cloud/session-races.test.ts > a delayed login cannot replace a session that was established while it waited
+AssertionError: expected 'fixture-stale-login' to be 'fixture-session-two' // Object.is equality
+
+Expected: "fixture-session-two"
+Received: "fixture-stale-login"
+
+ ❯ src/lib/origin-cloud/session-races.test.ts:94:30
+     92|   await act(async () => setSessionToken("fixture-session-two"));
+     93|   await act(async () => { request.resolve({ sessionToken: "fixture-sta…
+     94|   expect(sessionStore.get()).toBe("fixture-session-two");
+       |                              ^
+     95| });
+     96|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 3 passed (8)
+   Start at  02:04:38
+   Duration  1.28s (transform 236ms, setup 529ms, import 221ms, tests 22ms, environment 327ms)
+

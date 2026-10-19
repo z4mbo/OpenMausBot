@@ -1,0 +1,1078 @@
+{
+  "files": [
+    {
+      "path": "matrix.json",
+      "bytes": 203257,
+      "sha256": "578f95315ee0bf3fd1e8160ac2014dc6bfe0be1a6adffb4d62bf0a8936318e6e"
+    },
+    {
+      "path": "runtime.json",
+      "bytes": 84,
+      "sha256": "82194d1afc32f66843eecdc649589294b0378f159c17d24d157bc44af9755cf3"
+    },
+    {
+      "path": "optional.json",
+      "bytes": 34326,
+      "sha256": "47ffec33a65fc20ad49b680b6dc71eb70a1c1bb1fb7018e3151a0f88c0841eb4"
+    },
+    {
+      "path": "screenshots/before-mac-240-comfortable-advanced-dark.png",
+      "bytes": 6337,
+      "sha256": "7d0bbc75946f4f2f0cc3a47a13931ac795cd2ba55682f8944e0c931c9ee830b1",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-comfortable-advanced-dark.png",
+      "bytes": 6361,
+      "sha256": "2aa94f43e05867c7793b72e1943c2a498bf87e17ab1c2863f2ee4247fda56a23",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-240-comfortable-advanced-light.png",
+      "bytes": 6927,
+      "sha256": "d0dc36a1088ad940bc9d241ee96e35fb6e8f122cf295bdc0146637e4409ea4e8",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-comfortable-advanced-light.png",
+      "bytes": 6938,
+      "sha256": "d7fda5936869d840114027beb27de9dc772c2b50b17229390330200f38d9399e",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-240-comfortable-simple-dark.png",
+      "bytes": 5162,
+      "sha256": "2abf0b5697aa7c28168723ca89e1b186e7b11ee7ecabae98651b52b5bb7ad5ec",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-comfortable-simple-dark.png",
+      "bytes": 5164,
+      "sha256": "4760f0396afde31fb26ee2d7c9dee2b9780258dfe60b8c11052399da5d0ed6dd",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-240-comfortable-simple-light.png",
+      "bytes": 5610,
+      "sha256": "9e42ad3db8b50f06b7340f9730f0aa88090cbcdc7ec03295f46b21ea7f3cf12b",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-comfortable-simple-light.png",
+      "bytes": 5612,
+      "sha256": "e0db401ec1949ce6b5fea3e87d4e02f22bc2ec9d69008b9a1d899ea5399a2e96",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-272-comfortable-advanced-dark.png",
+      "bytes": 6709,
+      "sha256": "570fd04d39c837c38e0651300c1c675a92b821330cf3d4c4112b2d3d3e8321b9",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-272-comfortable-advanced-dark.png",
+      "bytes": 6723,
+      "sha256": "5eda9b3a9b59ca81634d126f605dc58a5bc032ce96cd2429795818525dcd1c2c",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-272-comfortable-advanced-light.png",
+      "bytes": 7307,
+      "sha256": "5fb3e031db63420b4e1dea18512038c5d8c0a816860841d7e47f58158bac5d38",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-272-comfortable-advanced-light.png",
+      "bytes": 7208,
+      "sha256": "027438fd4a6cc77b0470cd256057bc2b84d74ff2b8c7bca2af0d059b1385d177",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-272-comfortable-simple-dark.png",
+      "bytes": 5509,
+      "sha256": "eab3914c0a6513cb2cfa059452267888247cfa96c3e8cdb3def8613a4bf786b4",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-272-comfortable-simple-dark.png",
+      "bytes": 5514,
+      "sha256": "6b5e29c7b9f9d8dd8f3eee9ce961580a868af086054d5c06290d95d8a5be19d5",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-272-comfortable-simple-light.png",
+      "bytes": 5900,
+      "sha256": "f3d2c188c88d0ffa345c27d6caf89f9a9c2e3083858e5896681f3e14fb593c6a",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-272-comfortable-simple-light.png",
+      "bytes": 5905,
+      "sha256": "86a21b736db492eeb025a925fdbbec389e192c1967305a186758e49c5973e408",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-320-comfortable-advanced-dark.png",
+      "bytes": 6766,
+      "sha256": "6769b16d1c0832ba40433c570584d348a027f8a85178357f05bd4e2d8375b220",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-320-comfortable-advanced-dark.png",
+      "bytes": 6767,
+      "sha256": "a2722032542165086aaf35d59e489e4102854b904ee34d69d7a8b84ee494b651",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-320-comfortable-advanced-light.png",
+      "bytes": 7340,
+      "sha256": "881c0e8e4ce278fc9f1c04a4df8591cb3b7d7973b5649aa856e0f979d870e7a8",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-320-comfortable-advanced-light.png",
+      "bytes": 7338,
+      "sha256": "3fe6e028c4c7d1cdeea3f5e30050c7918d51ff9db2c9f43c8576188ed7e2e7d7",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-320-comfortable-simple-dark.png",
+      "bytes": 5607,
+      "sha256": "a51721612705a1ed01764e3fc43822d5351fa458da2f1c08a614028f02434a55",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-320-comfortable-simple-dark.png",
+      "bytes": 5609,
+      "sha256": "a8d19acfb5b913a3ac4fed0c4ae4fab86bc872cacc49908d428f262d86b5746d",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-320-comfortable-simple-light.png",
+      "bytes": 5999,
+      "sha256": "7285ff230ecd1418af85e410c2a74b1b9ea79863835d355767c939cd06c45774",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-320-comfortable-simple-light.png",
+      "bytes": 6004,
+      "sha256": "5a8b3489ca007b2970d8962dac04eb67a1f0e5076132c9e20e0d150036373237",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-375-comfortable-advanced-dark.png",
+      "bytes": 3726,
+      "sha256": "73b4785f515c8dd357668574c3116da84295b179651b9a382ba620dc394cde69",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-375-comfortable-advanced-dark.png",
+      "bytes": 3724,
+      "sha256": "52144cbed002d3d8f2e754c103865af23a1d20ccc8d1b8a60ac72be0275896f4",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-375-comfortable-advanced-light.png",
+      "bytes": 4023,
+      "sha256": "a5ccc487710ee20b50dd515fcf7992d40cb3b26f23b369d6506c52c0013cdf2e",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-375-comfortable-advanced-light.png",
+      "bytes": 4019,
+      "sha256": "4837318625c0349a617c0aab629fcc90867eb6f7f458159ae7f643c3644d62f0",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-375-comfortable-simple-dark.png",
+      "bytes": 2543,
+      "sha256": "cd3c02179c8954614d9da9da7cc81422636980f91e542b76613a4e4c134fcf11",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-375-comfortable-simple-dark.png",
+      "bytes": 2544,
+      "sha256": "07861b106d33181ff4abd74033c9798c1705e5a67a08618dcf0c8e0049a2e3ca",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-375-comfortable-simple-light.png",
+      "bytes": 2731,
+      "sha256": "31f04e1e67f49a3afbee8a363e88d87d01683f89e8069e5018fd2c07ed4b1d14",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-375-comfortable-simple-light.png",
+      "bytes": 2732,
+      "sha256": "b0e4fc674c1e1ca01979d6149fad3042f03dbab3a8fa1f00062974ad2806a01e",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-comfortable-advanced-dark.png",
+      "bytes": 6337,
+      "sha256": "7d0bbc75946f4f2f0cc3a47a13931ac795cd2ba55682f8944e0c931c9ee830b1",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-comfortable-advanced-dark.png",
+      "bytes": 6361,
+      "sha256": "2aa94f43e05867c7793b72e1943c2a498bf87e17ab1c2863f2ee4247fda56a23",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-comfortable-advanced-light.png",
+      "bytes": 6927,
+      "sha256": "d0dc36a1088ad940bc9d241ee96e35fb6e8f122cf295bdc0146637e4409ea4e8",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-comfortable-advanced-light.png",
+      "bytes": 6938,
+      "sha256": "d7fda5936869d840114027beb27de9dc772c2b50b17229390330200f38d9399e",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-comfortable-simple-dark.png",
+      "bytes": 5162,
+      "sha256": "2abf0b5697aa7c28168723ca89e1b186e7b11ee7ecabae98651b52b5bb7ad5ec",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-comfortable-simple-dark.png",
+      "bytes": 5164,
+      "sha256": "4760f0396afde31fb26ee2d7c9dee2b9780258dfe60b8c11052399da5d0ed6dd",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-comfortable-simple-light.png",
+      "bytes": 5610,
+      "sha256": "9e42ad3db8b50f06b7340f9730f0aa88090cbcdc7ec03295f46b21ea7f3cf12b",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-comfortable-simple-light.png",
+      "bytes": 5612,
+      "sha256": "e0db401ec1949ce6b5fea3e87d4e02f22bc2ec9d69008b9a1d899ea5399a2e96",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-272-comfortable-advanced-dark.png",
+      "bytes": 6709,
+      "sha256": "570fd04d39c837c38e0651300c1c675a92b821330cf3d4c4112b2d3d3e8321b9",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-272-comfortable-advanced-dark.png",
+      "bytes": 6723,
+      "sha256": "5eda9b3a9b59ca81634d126f605dc58a5bc032ce96cd2429795818525dcd1c2c",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-272-comfortable-advanced-light.png",
+      "bytes": 7307,
+      "sha256": "5fb3e031db63420b4e1dea18512038c5d8c0a816860841d7e47f58158bac5d38",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-272-comfortable-advanced-light.png",
+      "bytes": 7208,
+      "sha256": "027438fd4a6cc77b0470cd256057bc2b84d74ff2b8c7bca2af0d059b1385d177",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-272-comfortable-simple-dark.png",
+      "bytes": 5509,
+      "sha256": "eab3914c0a6513cb2cfa059452267888247cfa96c3e8cdb3def8613a4bf786b4",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-272-comfortable-simple-dark.png",
+      "bytes": 5514,
+      "sha256": "6b5e29c7b9f9d8dd8f3eee9ce961580a868af086054d5c06290d95d8a5be19d5",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-272-comfortable-simple-light.png",
+      "bytes": 5900,
+      "sha256": "f3d2c188c88d0ffa345c27d6caf89f9a9c2e3083858e5896681f3e14fb593c6a",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-272-comfortable-simple-light.png",
+      "bytes": 5905,
+      "sha256": "86a21b736db492eeb025a925fdbbec389e192c1967305a186758e49c5973e408",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-320-comfortable-advanced-dark.png",
+      "bytes": 6766,
+      "sha256": "6769b16d1c0832ba40433c570584d348a027f8a85178357f05bd4e2d8375b220",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-320-comfortable-advanced-dark.png",
+      "bytes": 6767,
+      "sha256": "a2722032542165086aaf35d59e489e4102854b904ee34d69d7a8b84ee494b651",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-320-comfortable-advanced-light.png",
+      "bytes": 7340,
+      "sha256": "881c0e8e4ce278fc9f1c04a4df8591cb3b7d7973b5649aa856e0f979d870e7a8",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-320-comfortable-advanced-light.png",
+      "bytes": 7338,
+      "sha256": "3fe6e028c4c7d1cdeea3f5e30050c7918d51ff9db2c9f43c8576188ed7e2e7d7",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-320-comfortable-simple-dark.png",
+      "bytes": 5607,
+      "sha256": "a51721612705a1ed01764e3fc43822d5351fa458da2f1c08a614028f02434a55",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-320-comfortable-simple-dark.png",
+      "bytes": 5609,
+      "sha256": "a8d19acfb5b913a3ac4fed0c4ae4fab86bc872cacc49908d428f262d86b5746d",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-320-comfortable-simple-light.png",
+      "bytes": 5999,
+      "sha256": "7285ff230ecd1418af85e410c2a74b1b9ea79863835d355767c939cd06c45774",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-320-comfortable-simple-light.png",
+      "bytes": 6004,
+      "sha256": "5a8b3489ca007b2970d8962dac04eb67a1f0e5076132c9e20e0d150036373237",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-375-comfortable-advanced-dark.png",
+      "bytes": 3726,
+      "sha256": "73b4785f515c8dd357668574c3116da84295b179651b9a382ba620dc394cde69",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-375-comfortable-advanced-dark.png",
+      "bytes": 3724,
+      "sha256": "52144cbed002d3d8f2e754c103865af23a1d20ccc8d1b8a60ac72be0275896f4",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-375-comfortable-advanced-light.png",
+      "bytes": 4023,
+      "sha256": "a5ccc487710ee20b50dd515fcf7992d40cb3b26f23b369d6506c52c0013cdf2e",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-375-comfortable-advanced-light.png",
+      "bytes": 4019,
+      "sha256": "4837318625c0349a617c0aab629fcc90867eb6f7f458159ae7f643c3644d62f0",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-375-comfortable-simple-dark.png",
+      "bytes": 2543,
+      "sha256": "cd3c02179c8954614d9da9da7cc81422636980f91e542b76613a4e4c134fcf11",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-375-comfortable-simple-dark.png",
+      "bytes": 2544,
+      "sha256": "07861b106d33181ff4abd74033c9798c1705e5a67a08618dcf0c8e0049a2e3ca",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-375-comfortable-simple-light.png",
+      "bytes": 2731,
+      "sha256": "31f04e1e67f49a3afbee8a363e88d87d01683f89e8069e5018fd2c07ed4b1d14",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-375-comfortable-simple-light.png",
+      "bytes": 2732,
+      "sha256": "b0e4fc674c1e1ca01979d6149fad3042f03dbab3a8fa1f00062974ad2806a01e",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-240-compact-advanced-dark.png",
+      "bytes": 6337,
+      "sha256": "7d0bbc75946f4f2f0cc3a47a13931ac795cd2ba55682f8944e0c931c9ee830b1",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-compact-advanced-dark.png",
+      "bytes": 6361,
+      "sha256": "2aa94f43e05867c7793b72e1943c2a498bf87e17ab1c2863f2ee4247fda56a23",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-240-compact-advanced-light.png",
+      "bytes": 6927,
+      "sha256": "d0dc36a1088ad940bc9d241ee96e35fb6e8f122cf295bdc0146637e4409ea4e8",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-compact-advanced-light.png",
+      "bytes": 6938,
+      "sha256": "d7fda5936869d840114027beb27de9dc772c2b50b17229390330200f38d9399e",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-240-compact-simple-dark.png",
+      "bytes": 5162,
+      "sha256": "2abf0b5697aa7c28168723ca89e1b186e7b11ee7ecabae98651b52b5bb7ad5ec",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-compact-simple-dark.png",
+      "bytes": 5164,
+      "sha256": "4760f0396afde31fb26ee2d7c9dee2b9780258dfe60b8c11052399da5d0ed6dd",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-240-compact-simple-light.png",
+      "bytes": 5610,
+      "sha256": "9e42ad3db8b50f06b7340f9730f0aa88090cbcdc7ec03295f46b21ea7f3cf12b",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-compact-simple-light.png",
+      "bytes": 5612,
+      "sha256": "e0db401ec1949ce6b5fea3e87d4e02f22bc2ec9d69008b9a1d899ea5399a2e96",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-272-compact-advanced-dark.png",
+      "bytes": 6709,
+      "sha256": "570fd04d39c837c38e0651300c1c675a92b821330cf3d4c4112b2d3d3e8321b9",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-272-compact-advanced-dark.png",
+      "bytes": 6723,
+      "sha256": "5eda9b3a9b59ca81634d126f605dc58a5bc032ce96cd2429795818525dcd1c2c",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-272-compact-advanced-light.png",
+      "bytes": 7307,
+      "sha256": "5fb3e031db63420b4e1dea18512038c5d8c0a816860841d7e47f58158bac5d38",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-272-compact-advanced-light.png",
+      "bytes": 7208,
+      "sha256": "027438fd4a6cc77b0470cd256057bc2b84d74ff2b8c7bca2af0d059b1385d177",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-272-compact-simple-dark.png",
+      "bytes": 5509,
+      "sha256": "eab3914c0a6513cb2cfa059452267888247cfa96c3e8cdb3def8613a4bf786b4",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-272-compact-simple-dark.png",
+      "bytes": 5514,
+      "sha256": "6b5e29c7b9f9d8dd8f3eee9ce961580a868af086054d5c06290d95d8a5be19d5",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-272-compact-simple-light.png",
+      "bytes": 5900,
+      "sha256": "f3d2c188c88d0ffa345c27d6caf89f9a9c2e3083858e5896681f3e14fb593c6a",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-272-compact-simple-light.png",
+      "bytes": 5905,
+      "sha256": "86a21b736db492eeb025a925fdbbec389e192c1967305a186758e49c5973e408",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-320-compact-advanced-dark.png",
+      "bytes": 6766,
+      "sha256": "6769b16d1c0832ba40433c570584d348a027f8a85178357f05bd4e2d8375b220",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-320-compact-advanced-dark.png",
+      "bytes": 6767,
+      "sha256": "a2722032542165086aaf35d59e489e4102854b904ee34d69d7a8b84ee494b651",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-320-compact-advanced-light.png",
+      "bytes": 7340,
+      "sha256": "881c0e8e4ce278fc9f1c04a4df8591cb3b7d7973b5649aa856e0f979d870e7a8",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-320-compact-advanced-light.png",
+      "bytes": 7338,
+      "sha256": "3fe6e028c4c7d1cdeea3f5e30050c7918d51ff9db2c9f43c8576188ed7e2e7d7",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-320-compact-simple-dark.png",
+      "bytes": 5607,
+      "sha256": "a51721612705a1ed01764e3fc43822d5351fa458da2f1c08a614028f02434a55",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-320-compact-simple-dark.png",
+      "bytes": 5609,
+      "sha256": "a8d19acfb5b913a3ac4fed0c4ae4fab86bc872cacc49908d428f262d86b5746d",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-320-compact-simple-light.png",
+      "bytes": 5999,
+      "sha256": "7285ff230ecd1418af85e410c2a74b1b9ea79863835d355767c939cd06c45774",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-320-compact-simple-light.png",
+      "bytes": 6004,
+      "sha256": "5a8b3489ca007b2970d8962dac04eb67a1f0e5076132c9e20e0d150036373237",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-375-compact-advanced-dark.png",
+      "bytes": 3735,
+      "sha256": "1db21757b939011ee86a3c60b3e598a9de8bc768c2590439f38cefaa74d97f7b",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-375-compact-advanced-dark.png",
+      "bytes": 3774,
+      "sha256": "16bc835eafc32c3a4d79a11bd094326db4484bfe97b494eabb521db0849a05cc",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-375-compact-advanced-light.png",
+      "bytes": 4065,
+      "sha256": "ff8a5d6bb01e2a9257e4073047b8881db31acd6ba052ebe266b047a94f611c74",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-375-compact-advanced-light.png",
+      "bytes": 4060,
+      "sha256": "98c71233ece31432c2be4d674fe09a77c8988e3974338c5b12bf8b9adccc7f96",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-375-compact-simple-dark.png",
+      "bytes": 2502,
+      "sha256": "1fb9ef2ceaf871421125c7b2d9b2f455e2917d770171ed91fd037c7107f102d2",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-375-compact-simple-dark.png",
+      "bytes": 2508,
+      "sha256": "91237c1836f63b6e3f3bb1d2deb8d94246acfa5a8f7ca179cb956b44b4622027",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-375-compact-simple-light.png",
+      "bytes": 2685,
+      "sha256": "5f09b08ead3de8d6d45d7d252a5a07e0bed74e319fdd06c41bde71b7ea3d295b",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-375-compact-simple-light.png",
+      "bytes": 2690,
+      "sha256": "c65bceccd0042877b09ac6cf73064cd0d6e4c937d8e416dd6a5b1e08af4efb57",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-compact-advanced-dark.png",
+      "bytes": 6337,
+      "sha256": "7d0bbc75946f4f2f0cc3a47a13931ac795cd2ba55682f8944e0c931c9ee830b1",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-compact-advanced-dark.png",
+      "bytes": 6361,
+      "sha256": "2aa94f43e05867c7793b72e1943c2a498bf87e17ab1c2863f2ee4247fda56a23",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-compact-advanced-light.png",
+      "bytes": 6927,
+      "sha256": "d0dc36a1088ad940bc9d241ee96e35fb6e8f122cf295bdc0146637e4409ea4e8",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-compact-advanced-light.png",
+      "bytes": 6938,
+      "sha256": "d7fda5936869d840114027beb27de9dc772c2b50b17229390330200f38d9399e",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-compact-simple-dark.png",
+      "bytes": 5162,
+      "sha256": "2abf0b5697aa7c28168723ca89e1b186e7b11ee7ecabae98651b52b5bb7ad5ec",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-compact-simple-dark.png",
+      "bytes": 5164,
+      "sha256": "4760f0396afde31fb26ee2d7c9dee2b9780258dfe60b8c11052399da5d0ed6dd",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-compact-simple-light.png",
+      "bytes": 5610,
+      "sha256": "9e42ad3db8b50f06b7340f9730f0aa88090cbcdc7ec03295f46b21ea7f3cf12b",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-compact-simple-light.png",
+      "bytes": 5612,
+      "sha256": "e0db401ec1949ce6b5fea3e87d4e02f22bc2ec9d69008b9a1d899ea5399a2e96",
+      "width": 320,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-272-compact-advanced-dark.png",
+      "bytes": 6709,
+      "sha256": "570fd04d39c837c38e0651300c1c675a92b821330cf3d4c4112b2d3d3e8321b9",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-272-compact-advanced-dark.png",
+      "bytes": 6723,
+      "sha256": "5eda9b3a9b59ca81634d126f605dc58a5bc032ce96cd2429795818525dcd1c2c",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-272-compact-advanced-light.png",
+      "bytes": 7307,
+      "sha256": "5fb3e031db63420b4e1dea18512038c5d8c0a816860841d7e47f58158bac5d38",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-272-compact-advanced-light.png",
+      "bytes": 7208,
+      "sha256": "027438fd4a6cc77b0470cd256057bc2b84d74ff2b8c7bca2af0d059b1385d177",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-272-compact-simple-dark.png",
+      "bytes": 5509,
+      "sha256": "eab3914c0a6513cb2cfa059452267888247cfa96c3e8cdb3def8613a4bf786b4",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-272-compact-simple-dark.png",
+      "bytes": 5514,
+      "sha256": "6b5e29c7b9f9d8dd8f3eee9ce961580a868af086054d5c06290d95d8a5be19d5",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-272-compact-simple-light.png",
+      "bytes": 5900,
+      "sha256": "f3d2c188c88d0ffa345c27d6caf89f9a9c2e3083858e5896681f3e14fb593c6a",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-272-compact-simple-light.png",
+      "bytes": 5905,
+      "sha256": "86a21b736db492eeb025a925fdbbec389e192c1967305a186758e49c5973e408",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-320-compact-advanced-dark.png",
+      "bytes": 6766,
+      "sha256": "6769b16d1c0832ba40433c570584d348a027f8a85178357f05bd4e2d8375b220",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-320-compact-advanced-dark.png",
+      "bytes": 6767,
+      "sha256": "a2722032542165086aaf35d59e489e4102854b904ee34d69d7a8b84ee494b651",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-320-compact-advanced-light.png",
+      "bytes": 7340,
+      "sha256": "881c0e8e4ce278fc9f1c04a4df8591cb3b7d7973b5649aa856e0f979d870e7a8",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-320-compact-advanced-light.png",
+      "bytes": 7338,
+      "sha256": "3fe6e028c4c7d1cdeea3f5e30050c7918d51ff9db2c9f43c8576188ed7e2e7d7",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-320-compact-simple-dark.png",
+      "bytes": 5607,
+      "sha256": "a51721612705a1ed01764e3fc43822d5351fa458da2f1c08a614028f02434a55",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-320-compact-simple-dark.png",
+      "bytes": 5609,
+      "sha256": "a8d19acfb5b913a3ac4fed0c4ae4fab86bc872cacc49908d428f262d86b5746d",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-320-compact-simple-light.png",
+      "bytes": 5999,
+      "sha256": "7285ff230ecd1418af85e410c2a74b1b9ea79863835d355767c939cd06c45774",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-320-compact-simple-light.png",
+      "bytes": 6004,
+      "sha256": "5a8b3489ca007b2970d8962dac04eb67a1f0e5076132c9e20e0d150036373237",
+      "width": 400,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-375-compact-advanced-dark.png",
+      "bytes": 3735,
+      "sha256": "1db21757b939011ee86a3c60b3e598a9de8bc768c2590439f38cefaa74d97f7b",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-375-compact-advanced-dark.png",
+      "bytes": 3774,
+      "sha256": "16bc835eafc32c3a4d79a11bd094326db4484bfe97b494eabb521db0849a05cc",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-375-compact-advanced-light.png",
+      "bytes": 4065,
+      "sha256": "ff8a5d6bb01e2a9257e4073047b8881db31acd6ba052ebe266b047a94f611c74",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-375-compact-advanced-light.png",
+      "bytes": 4060,
+      "sha256": "98c71233ece31432c2be4d674fe09a77c8988e3974338c5b12bf8b9adccc7f96",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-375-compact-simple-dark.png",
+      "bytes": 2502,
+      "sha256": "1fb9ef2ceaf871421125c7b2d9b2f455e2917d770171ed91fd037c7107f102d2",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-375-compact-simple-dark.png",
+      "bytes": 2508,
+      "sha256": "91237c1836f63b6e3f3bb1d2deb8d94246acfa5a8f7ca179cb956b44b4622027",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-375-compact-simple-light.png",
+      "bytes": 2685,
+      "sha256": "5f09b08ead3de8d6d45d7d252a5a07e0bed74e319fdd06c41bde71b7ea3d295b",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-375-compact-simple-light.png",
+      "bytes": 2690,
+      "sha256": "c65bceccd0042877b09ac6cf73064cd0d6e4c937d8e416dd6a5b1e08af4efb57",
+      "width": 352,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-240-comfortable-optional-dark.png",
+      "bytes": 8825,
+      "sha256": "633747a012106aaca1b6fae25c36cfd6f2d89573d5723ad3c91634e422b09b8a",
+      "width": 360,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-comfortable-optional-dark.png",
+      "bytes": 9174,
+      "sha256": "17c6cd58e448aaaac9df56d215d1cd654cfd055dfc7de27e5d537fec9bb6c2cc",
+      "width": 360,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-mobile-comfortable-optional-dark.png",
+      "bytes": 4479,
+      "sha256": "a51b00ae38d36fd3e921ef31b802a40584d174f268e1aa1372aa1f90f5946433",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-mobile-comfortable-optional-dark.png",
+      "bytes": 4666,
+      "sha256": "1ea7ec51cdc5b99735de1a73d9fe84719e275369d9c77a3881e580133898aed9",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-240-compact-optional-dark.png",
+      "bytes": 8825,
+      "sha256": "633747a012106aaca1b6fae25c36cfd6f2d89573d5723ad3c91634e422b09b8a",
+      "width": 360,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-240-compact-optional-dark.png",
+      "bytes": 9174,
+      "sha256": "17c6cd58e448aaaac9df56d215d1cd654cfd055dfc7de27e5d537fec9bb6c2cc",
+      "width": 360,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-mac-mobile-compact-optional-dark.png",
+      "bytes": 4502,
+      "sha256": "9a85cfd43cbf79755870ed900e8add7ddd84228a0472e4fff5410050ea39825b",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-mac-mobile-compact-optional-dark.png",
+      "bytes": 4673,
+      "sha256": "95fa474addf25ff469b9214b0bc8aa3d03511f4cb14a4c799e2a105913d2f69c",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-comfortable-optional-dark.png",
+      "bytes": 8889,
+      "sha256": "b6cddfa7bd861000b81898b7fa440b885e6f1fe4e8d5b2dfa7586bcce1228b3f",
+      "width": 360,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-comfortable-optional-dark.png",
+      "bytes": 9175,
+      "sha256": "344970a2d0ba653525efe185690dffcae74228bd168957bc301a942fe75f62cf",
+      "width": 360,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-mobile-comfortable-optional-dark.png",
+      "bytes": 4479,
+      "sha256": "a51b00ae38d36fd3e921ef31b802a40584d174f268e1aa1372aa1f90f5946433",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-mobile-comfortable-optional-dark.png",
+      "bytes": 4666,
+      "sha256": "1ea7ec51cdc5b99735de1a73d9fe84719e275369d9c77a3881e580133898aed9",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-240-compact-optional-dark.png",
+      "bytes": 8889,
+      "sha256": "b6cddfa7bd861000b81898b7fa440b885e6f1fe4e8d5b2dfa7586bcce1228b3f",
+      "width": 360,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-240-compact-optional-dark.png",
+      "bytes": 9175,
+      "sha256": "344970a2d0ba653525efe185690dffcae74228bd168957bc301a942fe75f62cf",
+      "width": 360,
+      "height": 190
+    },
+    {
+      "path": "screenshots/before-win-mobile-compact-optional-dark.png",
+      "bytes": 4502,
+      "sha256": "9a85cfd43cbf79755870ed900e8add7ddd84228a0472e4fff5410050ea39825b",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "screenshots/after-win-mobile-compact-optional-dark.png",
+      "bytes": 4673,
+      "sha256": "95fa474addf25ff469b9214b0bc8aa3d03511f4cb14a4c799e2a105913d2f69c",
+      "width": 375,
+      "height": 190
+    },
+    {
+      "path": "source-proof.json",
+      "bytes": 3400,
+      "sha256": "7f518c42025ce971e7b0cfa046f4244b09327645073ba9683c72fe08b2d6176f"
+    },
+    {
+      "path": "regression-proof.json",
+      "bytes": 811,
+      "sha256": "bdd0c8509cb40d3d3286cbafc92949204a3fa0858d026390bd2c9630b7c08148"
+    },
+    {
+      "path": "logs/footer-red-exact.log",
+      "bytes": 4054,
+      "sha256": "6fd79eacc0ba1261a345ca451958592907bd8b91616c179e79ccb8c6d175721f",
+      "rawCapturedSha256": "a230530902c252fecd83bbfe273fedef73fe70756665fd09d3345bfdb2b738c7",
+      "retainedTransform": "CRLF normalized to LF and trailing blank lines removed; assertion and event lines unchanged"
+    },
+    {
+      "path": "logs/footer-green-exact.log",
+      "bytes": 244,
+      "sha256": "067f8693967696b0151df3520f88fbf54ea6973d1cb3d6d414a8917769d2a2d3",
+      "rawCapturedSha256": "b014d090c1f37abd15b00f6db7319a5206eb4621bb32d3b69e1e5a47b97917d1",
+      "retainedTransform": "CRLF normalized to LF and trailing blank lines removed; assertion and event lines unchanged"
+    },
+    {
+      "path": "logs/footer-focused.log",
+      "bytes": 248,
+      "sha256": "3c5938f809b72bcf5027b4bd864998b56ea4441925f225d9370183034b987fb7",
+      "rawCapturedSha256": "0e1385108a5e32d767e9b42836a8b47a7b7a8ea495cf315edf40ef4dcd3324fb",
+      "retainedTransform": "CRLF normalized to LF and trailing blank lines removed; assertion and event lines unchanged"
+    },
+    {
+      "path": "logs/footer-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/footer-server-types-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/footer-lint-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "report.json",
+      "bytes": 1415,
+      "sha256": "dd44d04fb865054958a6acc271400e45457ba4992bdbbf6297eb8db20ee78052"
+    }
+  ]
+}

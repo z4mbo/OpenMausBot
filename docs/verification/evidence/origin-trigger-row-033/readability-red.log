@@ -1,0 +1,24 @@
+{"stage":"before","url":"http://127.0.0.1:20050","serverPid":38892,"ownerPid":43236,"previewUrl":"http://127.0.0.1:54429/__origin-trigger-row.html"}
+{"stage":"before","theme":"dark","size":"desktop","identity":{"rowWidth":972,"names":[{"text":"Project update","availableWidth":90,"sixCharactersAndEllipsisWidth":48.87255859375,"readablePrefix":true,"tooltip":null},{"text":"Project Chief","availableWidth":78,"sixCharactersAndEllipsisWidth":48.87255859375,"readablePrefix":true,"tooltip":null}]}}
+{"stage":"before","screen":"triggers","size":"desktop","theme":"dark","shadow":"none"}
+{"stage":"before","theme":"dark","size":"mobile","identity":{"rowWidth":275,"names":[{"text":"Project update","availableWidth":8,"sixCharactersAndEllipsisWidth":48.87255859375,"readablePrefix":false,"tooltip":null},{"text":"Project Chief","availableWidth":7,"sixCharactersAndEllipsisWidth":48.87255859375,"readablePrefix":false,"tooltip":null}]}}
+{"stage":"before","closed":true,"ownerPid":43236,"serverPid":38892,"previewUrl":"http://127.0.0.1:54429/__origin-trigger-row.html"}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Both trigger identity names remain legible on mobile
+
+false !== true
+
+    at check (file:///<worker>/.omb-scratch/trigger-row-033/check.mjs:72:39)
+    at async file:///<worker>/.omb-scratch/trigger-row-033/run.ts:48:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.21.0

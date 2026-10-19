@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+const dir=path.resolve('.omb-scratch/monitor-038-attempt2');
+const state=JSON.parse(fs.readFileSync(path.join(dir,'state.json'),'utf8'));
+if(state.run.status!=='completed')throw Error('Attempt2 not terminal; do not download logs yet');
+if(state.run.run_attempt!==2||state.run.head_sha!=='ab0cd72b4c2f004c1015adca034472241569c04b')throw Error('Wrong frozen attempt');
+const gh='C:/Program Files/GitHub CLI/gh.exe';
+for(const [file,endpoint] of [['ci39182338260-attempt2-logs.zip','actions/runs/39182338260/attempts/2/logs'],['ci-windows-shard4-attempt2-api.log','actions/jobs/117847012180/logs']]){
+ const target=path.join(dir,file);
+ if(fs.existsSync(target))throw Error('Refusing duplicate log fetch/overwrite '+file);
+ const bytes=execFileSync(gh,['api','--allow-escape-sequences','--method','GET','repos/z4mbo/Origin/'+endpoint],{maxBuffer:50*1024*1024,stdio:['ignore','pipe','pipe']});
+ if(file.endsWith('.zip')&&bytes.readUInt16LE(0)!==0x4b50)throw Error('ExpectedZIP');
+ fs.writeFileSync(target,bytes);console.log(JSON.stringify({path:target,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')}));
+}
+for(const r of state.raw){
+ const suffix=r.kind==='run'?'run':'jobs';
+ const target=path.join(dir,`39182338260-attempt2-terminal-${suffix}-api-raw.json`);
+ if(fs.existsSync(target))throw Error('Refusing terminalraw overwrite');
+ const b=fs.readFileSync(path.join(dir,r.path));if(crypto.createHash('sha256').update(b).digest('hex')!==r.sha256)throw Error('Rawhashchanged');
+ fs.writeFileSync(target,b);
+}

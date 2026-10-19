@@ -1,0 +1,595 @@
+{
+  "scope": "Bounded read-only visual review of actual captured site images; no browser actions, code changes, operators, production calls, credentials or account submission. DOM facts are corroborating root capture metadata, separate from screenshot inspection.",
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "siteImageId": "sha256:b0a0a3315c8eeec4ea8e337b935142cf04142962e3cb92dcde87369f74684201",
+  "identitySha256": "23cd75880bc9ad2b5a95cc3f7554a2d860425fe8e57f0521105912c413ff22ed",
+  "candidateVersion": "0.2.14",
+  "captureProvenance": "Root Tab.screenshot + browser viewport for initial16 and three timeout states; replacement light375 timeout used getScreenshot after viewport reset/resize/reload. Files have .png names but contain JPEG/JFIF bytes.",
+  "viewed": 20,
+  "acceptedVisualStates": 20,
+  "rejectedCaptures": 0,
+  "productLayoutBlockers": [],
+  "pendingEvidence": [],
+  "functionalAcceptance": {
+    "signIn": false,
+    "signUp": false,
+    "invite": false,
+    "downloadsExecuted": false,
+    "production": false
+  },
+  "notClaimed": [
+    "Keyboard/focus behavior",
+    "Measured WCAG contrast",
+    "Animations",
+    "Actual account or invite submission",
+    "Production behavior",
+    "Packaged-app functionality"
+  ],
+  "notes": [
+    "All initial16 images were viewed. Long landing/Whats new images were re-opened at original detail after default resizing made phone text too small.",
+    "The phone full-page captures include a blank dark tail after the complete visible footer. It does not hide a content section, but should be treated as capture margin rather than site content.",
+    "Current changelog starts with0.2.14; canonical55 titles/bodies across7 articles were checked by the root capture workflow, not manually re-proved from image text."
+  ],
+  "files": [
+    {
+      "name": "landing-375-light",
+      "screen": "landing",
+      "width": 375,
+      "theme": "light",
+      "phase": "rendered content",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/landing-375-light.png",
+      "bytes": 387102,
+      "sha256": "0e7eb7f4e76b9e31071dcf665a18ab108379a0d5cc232f64b435537e9d0d4495",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 8760
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Header/CTAs, hero image, workspace/project/team cards, issue illustration, agent cards, feature grid, run-location cards, download panel, FAQ and footer are visible. Cards stack on phone and align in desktop columns; headings wrap inside content bounds. Both palettes preserve labels and primary-action hierarchy.",
+      "domMetrics": {
+        "cssWidth": 375,
+        "clientWidth": 365,
+        "scrollWidth": 365,
+        "scrollHeight": 8760,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": false,
+        "screenshotScope": "full page"
+      }
+    },
+    {
+      "name": "landing-375-dark",
+      "screen": "landing",
+      "width": 375,
+      "theme": "dark",
+      "phase": "rendered content",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/landing-375-dark.png",
+      "bytes": 376180,
+      "sha256": "68caf4f56dcf6ad5e24720090f966ccdb8d31ea895f6cb9bbf9c99144863c1b6",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 8760
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Header/CTAs, hero image, workspace/project/team cards, issue illustration, agent cards, feature grid, run-location cards, download panel, FAQ and footer are visible. Cards stack on phone and align in desktop columns; headings wrap inside content bounds. Both palettes preserve labels and primary-action hierarchy.",
+      "domMetrics": {
+        "cssWidth": 375,
+        "clientWidth": 365,
+        "scrollWidth": 365,
+        "scrollHeight": 8760,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": true,
+        "screenshotScope": "full page"
+      }
+    },
+    {
+      "name": "landing-1440-light",
+      "screen": "landing",
+      "width": 1440,
+      "theme": "light",
+      "phase": "rendered content",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/landing-1440-light.png",
+      "bytes": 545639,
+      "sha256": "282c0d17c8c1868e257a129bc28762a7ea98048e7662437de51a1c6927ffbe4a",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 6593
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Header/CTAs, hero image, workspace/project/team cards, issue illustration, agent cards, feature grid, run-location cards, download panel, FAQ and footer are visible. Cards stack on phone and align in desktop columns; headings wrap inside content bounds. Both palettes preserve labels and primary-action hierarchy.",
+      "domMetrics": {
+        "cssWidth": 1440,
+        "clientWidth": 1430,
+        "scrollWidth": 1430,
+        "scrollHeight": 6593,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": false,
+        "screenshotScope": "full page"
+      }
+    },
+    {
+      "name": "landing-1440-dark",
+      "screen": "landing",
+      "width": 1440,
+      "theme": "dark",
+      "phase": "rendered content",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/landing-1440-dark.png",
+      "bytes": 532180,
+      "sha256": "811de5b095cae59520334fd7ff634a9cfecf408a8c46fef28d859f69e786390e",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 6593
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Header/CTAs, hero image, workspace/project/team cards, issue illustration, agent cards, feature grid, run-location cards, download panel, FAQ and footer are visible. Cards stack on phone and align in desktop columns; headings wrap inside content bounds. Both palettes preserve labels and primary-action hierarchy.",
+      "domMetrics": {
+        "cssWidth": 1440,
+        "clientWidth": 1430,
+        "scrollWidth": 1430,
+        "scrollHeight": 6593,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": true,
+        "screenshotScope": "full page"
+      }
+    },
+    {
+      "name": "login-375-light",
+      "screen": "login",
+      "width": 375,
+      "theme": "light",
+      "phase": "empty sign-in form",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/login-375-light.png",
+      "bytes": 21253,
+      "sha256": "6de6227910331dd1015ab23ad0fbd445839c8ea26103baf28145f28a8a024513",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 876
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Brand/header, sign-in heading, field labels, email/password controls, password visibility icon, sign-in button and create-account link are readable and aligned. Phone fields fit within the viewport. Footer is below the viewport in these captures; submission/validation was not exercised.",
+      "domMetrics": {
+        "cssWidth": 375,
+        "clientWidth": 365,
+        "scrollWidth": 365,
+        "scrollHeight": 1056,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": false,
+        "screenshotScope": "viewport"
+      }
+    },
+    {
+      "name": "login-375-dark",
+      "screen": "login",
+      "width": 375,
+      "theme": "dark",
+      "phase": "empty sign-in form",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/login-375-dark.png",
+      "bytes": 20202,
+      "sha256": "9f53afb4db1c9eea084265e10534dc843e0a734b821e7a80e00ed7a44e2fabf2",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 876
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Brand/header, sign-in heading, field labels, email/password controls, password visibility icon, sign-in button and create-account link are readable and aligned. Phone fields fit within the viewport. Footer is below the viewport in these captures; submission/validation was not exercised.",
+      "domMetrics": {
+        "cssWidth": 375,
+        "clientWidth": 365,
+        "scrollWidth": 365,
+        "scrollHeight": 1056,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": true,
+        "screenshotScope": "viewport"
+      }
+    },
+    {
+      "name": "login-1440-light",
+      "screen": "login",
+      "width": 1440,
+      "theme": "light",
+      "phase": "empty sign-in form",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/login-1440-light.png",
+      "bytes": 28627,
+      "sha256": "758f2844768fbe4392862f276438d79a1a1c11a5fbdb9c4f6aac4b3cb33257e3",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 894
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Brand/header, sign-in heading, field labels, email/password controls, password visibility icon, sign-in button and create-account link are readable and aligned. Phone fields fit within the viewport. Footer is below the viewport in these captures; submission/validation was not exercised.",
+      "domMetrics": {
+        "cssWidth": 1440,
+        "clientWidth": 1430,
+        "scrollWidth": 1430,
+        "scrollHeight": 1005,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": false,
+        "screenshotScope": "viewport"
+      }
+    },
+    {
+      "name": "login-1440-dark",
+      "screen": "login",
+      "width": 1440,
+      "theme": "dark",
+      "phase": "empty sign-in form",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/login-1440-dark.png",
+      "bytes": 27602,
+      "sha256": "5f9084714aadcfb835f9c144626f04ca7950852e8dd397d9b2c732784d181e57",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 894
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Brand/header, sign-in heading, field labels, email/password controls, password visibility icon, sign-in button and create-account link are readable and aligned. Phone fields fit within the viewport. Footer is below the viewport in these captures; submission/validation was not exercised.",
+      "domMetrics": {
+        "cssWidth": 1440,
+        "clientWidth": 1430,
+        "scrollWidth": 1430,
+        "scrollHeight": 1005,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": true,
+        "screenshotScope": "viewport"
+      }
+    },
+    {
+      "name": "signup-375-light",
+      "screen": "signup",
+      "width": 375,
+      "theme": "light",
+      "phase": "initial policy loading",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/signup-375-light.png",
+      "bytes": 17475,
+      "sha256": "bc8bf419c943059c94a0f364e0549e06492e479b7e9f70455b56fa4ffbd5bff2",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 876
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Heading, description, account sign-in link and initial loading indicator are visible with consistent spacing and both theme palettes. These initial captures do not contain registration fields or establish account creation.",
+      "domMetrics": {
+        "cssWidth": 375,
+        "clientWidth": 365,
+        "scrollWidth": 365,
+        "scrollHeight": 1056,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": false,
+        "screenshotScope": "viewport"
+      }
+    },
+    {
+      "name": "signup-375-dark",
+      "screen": "signup",
+      "width": 375,
+      "theme": "dark",
+      "phase": "initial policy loading",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/signup-375-dark.png",
+      "bytes": 16242,
+      "sha256": "efc3063477180c2408b5f76ad995a9dfdeee56815d12546ae70002faec5231e9",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 876
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Heading, description, account sign-in link and initial loading indicator are visible with consistent spacing and both theme palettes. These initial captures do not contain registration fields or establish account creation.",
+      "domMetrics": {
+        "cssWidth": 375,
+        "clientWidth": 365,
+        "scrollWidth": 365,
+        "scrollHeight": 1056,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": true,
+        "screenshotScope": "viewport"
+      }
+    },
+    {
+      "name": "signup-1440-light",
+      "screen": "signup",
+      "width": 1440,
+      "theme": "light",
+      "phase": "initial policy loading",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/signup-1440-light.png",
+      "bytes": 23373,
+      "sha256": "cb606fcc326c4d40317da4af60714b9fedb0b248c2ccdb93a9a12f5079c24ff5",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 894
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Heading, description, account sign-in link and initial loading indicator are visible with consistent spacing and both theme palettes. These initial captures do not contain registration fields or establish account creation.",
+      "domMetrics": {
+        "cssWidth": 1440,
+        "clientWidth": 1430,
+        "scrollWidth": 1430,
+        "scrollHeight": 1005,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": false,
+        "screenshotScope": "viewport"
+      }
+    },
+    {
+      "name": "signup-1440-dark",
+      "screen": "signup",
+      "width": 1440,
+      "theme": "dark",
+      "phase": "initial policy loading",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/signup-1440-dark.png",
+      "bytes": 22220,
+      "sha256": "bb1e24217fe9dd0914160c718ac5e9d81944a51feb5658e4223e33f76a63b4f1",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 894
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Heading, description, account sign-in link and initial loading indicator are visible with consistent spacing and both theme palettes. These initial captures do not contain registration fields or establish account creation.",
+      "domMetrics": {
+        "cssWidth": 1440,
+        "clientWidth": 1430,
+        "scrollWidth": 1430,
+        "scrollHeight": 1005,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": true,
+        "screenshotScope": "viewport"
+      }
+    },
+    {
+      "name": "whats-new-375-light",
+      "screen": "whats-new",
+      "width": 375,
+      "theme": "light",
+      "phase": "rendered content",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/whats-new-375-light.png",
+      "bytes": 586687,
+      "sha256": "f98ac722a2ddaa71a7b11e4559f228bef7600b8e72678227df8ef86dc1807d89",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 8546
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Version/date, release headings, change titles/body text, article dividers and footer are readable and aligned. Long headings and paragraphs wrap on phone without visible side clipping; desktop uses a centered reading column. Current visible release is0.2.14.",
+      "domMetrics": {
+        "cssWidth": 375,
+        "clientWidth": 365,
+        "scrollWidth": 365,
+        "scrollHeight": 8546,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": false,
+        "screenshotScope": "full page"
+      }
+    },
+    {
+      "name": "whats-new-375-dark",
+      "screen": "whats-new",
+      "width": 375,
+      "theme": "dark",
+      "phase": "rendered content",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/whats-new-375-dark.png",
+      "bytes": 571914,
+      "sha256": "539d8935e37f092b144cd3cc660981ae69bc128672fe4f0faa95c13c08f3fd3a",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 8546
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Version/date, release headings, change titles/body text, article dividers and footer are readable and aligned. Long headings and paragraphs wrap on phone without visible side clipping; desktop uses a centered reading column. Current visible release is0.2.14.",
+      "domMetrics": {
+        "cssWidth": 375,
+        "clientWidth": 365,
+        "scrollWidth": 365,
+        "scrollHeight": 8546,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": true,
+        "screenshotScope": "full page"
+      }
+    },
+    {
+      "name": "whats-new-1440-light",
+      "screen": "whats-new",
+      "width": 1440,
+      "theme": "light",
+      "phase": "rendered content",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/whats-new-1440-light.png",
+      "bytes": 654366,
+      "sha256": "e5af3b55f0075bb2dda3cf82572cd6074d40db76a076a23d2685f443e9bc1cee",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 6041
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Version/date, release headings, change titles/body text, article dividers and footer are readable and aligned. Long headings and paragraphs wrap on phone without visible side clipping; desktop uses a centered reading column. Current visible release is0.2.14.",
+      "domMetrics": {
+        "cssWidth": 1440,
+        "clientWidth": 1430,
+        "scrollWidth": 1430,
+        "scrollHeight": 6041,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": false,
+        "screenshotScope": "full page"
+      }
+    },
+    {
+      "name": "whats-new-1440-dark",
+      "screen": "whats-new",
+      "width": 1440,
+      "theme": "dark",
+      "phase": "rendered content",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/whats-new-1440-dark.png",
+      "bytes": 639074,
+      "sha256": "8238d5c00860af1b0d73e7755e03817ba3fd143849bad5e8cd5326166a802e52",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 6041
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Version/date, release headings, change titles/body text, article dividers and footer are readable and aligned. Long headings and paragraphs wrap on phone without visible side clipping; desktop uses a centered reading column. Current visible release is0.2.14.",
+      "domMetrics": {
+        "cssWidth": 1440,
+        "clientWidth": 1430,
+        "scrollWidth": 1430,
+        "scrollHeight": 6041,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": true,
+        "screenshotScope": "full page"
+      }
+    },
+    {
+      "name": "signup-375-light-timeout",
+      "screen": "signup",
+      "width": 375,
+      "theme": "light",
+      "phase": "settled policy timeout",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/signup-375-light-timeout.png",
+      "bytes": 22973,
+      "sha256": "fa631b8aaf220e9ce6743da514c6585b9cecf6438fd60f5faf8ffec6602c1b30",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 876
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Replacement inspected at original detail: full mobile header, heading, wrapped connection error, Try again button and Sign in link are readable and aligned. Capture now matches the365x876 phone viewport; no submission tested.",
+      "domMetrics": {
+        "cssWidth": 375,
+        "cssHeight": 900,
+        "clientWidth": 365,
+        "scrollWidth": 365,
+        "scrollHeight": 1056,
+        "fonts": "loaded",
+        "reducedMotion": true,
+        "preferredDark": false,
+        "screenshotScope": "viewport"
+      },
+      "replacementObservation": {
+        "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/signup-375-light-timeout-replacement.json",
+        "sha256": "232563fb7131b3940d79b0e40b97905f32c990d1f6cc4caacd5cd72a67b2fdf3"
+      },
+      "captureQualification": "getScreenshot after viewport reset, resize and reload"
+    },
+    {
+      "name": "signup-375-dark-timeout",
+      "screen": "signup",
+      "width": 375,
+      "theme": "dark",
+      "phase": "settled policy timeout",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/signup-375-dark-timeout.png",
+      "bytes": 21847,
+      "sha256": "774455e9f3bbc932272f05362a21846a7b2918b9b73f74f4036b4ac683d0a103",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 365,
+        "height": 876
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Policy connection error and Try again control are visible and readable, with Sign in still available; no submission tested.",
+      "domMetrics": null
+    },
+    {
+      "name": "signup-1440-light-timeout",
+      "screen": "signup",
+      "width": 1440,
+      "theme": "light",
+      "phase": "settled policy timeout",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/signup-1440-light-timeout.png",
+      "bytes": 30117,
+      "sha256": "88e7555e553bdcd53b3df1bb5371783dddbff4a5fde34db3583b730a176ded2d",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 894
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Policy connection error and Try again control are visible and readable, with Sign in still available; no submission tested.",
+      "domMetrics": null
+    },
+    {
+      "name": "signup-1440-dark-timeout",
+      "screen": "signup",
+      "width": 1440,
+      "theme": "dark",
+      "phase": "settled policy timeout",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-038/site/signup-1440-dark-timeout.png",
+      "bytes": 29140,
+      "sha256": "7db802f374db6453ec2e6139c763afafc8e2b5ede0a21cae4b1e0f357331a86b",
+      "actualMime": "image/jpeg",
+      "dimensions": {
+        "width": 1430,
+        "height": 894
+      },
+      "viewedWith": "view_image; original detail for readable inspection",
+      "visualStatus": "accepted for stated visible state only",
+      "observation": "Policy connection error and Try again control are visible and readable, with Sign in still available; no submission tested.",
+      "domMetrics": null
+    }
+  ],
+  "sealedAt": "2026-10-19T01:13:19.387Z",
+  "finalImageHashComparison": {
+    "files": 20,
+    "unchangedPreviouslyViewedImages": 19,
+    "replacedPreviouslyRejectedImages": [
+      {
+        "name": "signup-375-light-timeout",
+        "beforeSha256": "961ce378aca60d91983f34769aa992b33eb7267d51f691dedbed7b125cdb0422",
+        "afterSha256": "fa631b8aaf220e9ce6743da514c6585b9cecf6438fd60f5faf8ffec6602c1b30",
+        "beforeBytes": 4127,
+        "afterBytes": 22973
+      }
+    ],
+    "allFinalImagesViewed": true
+  },
+  "replacementEvidence": {
+    "originalRejectedSha256": "961ce378aca60d91983f34769aa992b33eb7267d51f691dedbed7b125cdb0422",
+    "originalRetainedByRoot": "cdp-capture-diagnostic/signup-375-light-timeout-resize-artifact.jpg",
+    "replacementSha256": "fa631b8aaf220e9ce6743da514c6585b9cecf6438fd60f5faf8ffec6602c1b30",
+    "originalAccepted": false
+  }
+}

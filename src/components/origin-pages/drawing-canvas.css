@@ -1,0 +1,43 @@
+[data-drawing-canvas] .excalidraw.excalidraw {
+  --ui-font: var(--font-sans);
+  --default-bg-color: var(--color-app);
+  --island-bg-color: var(--color-menu);
+  --popup-bg-color: var(--color-menu);
+  --sidebar-bg-color: var(--color-panel);
+  --color-surface-lowest: var(--color-app);
+  --color-surface-low: var(--color-inset);
+  --color-surface-mid: var(--color-panel);
+  --color-surface-high: var(--color-raised);
+  --color-on-surface: var(--color-ink);
+  --color-on-surface-variant: var(--color-ink-secondary);
+  --color-primary: var(--color-accent-text);
+  --color-primary-darker: var(--color-accent-text);
+  --color-primary-darkest: var(--color-accent-text);
+  --color-primary-hover: var(--color-accent-text);
+  --color-primary-light: color-mix(in srgb, var(--color-accent) 15%, var(--color-menu));
+  --color-primary-light-darker: color-mix(in srgb, var(--color-accent) 22%, var(--color-menu));
+  --color-surface-primary-container: var(--color-primary-light);
+  --color-on-primary-container: var(--color-accent-text);
+  --default-border-color: color-mix(in srgb, var(--color-hairline) 60%, transparent);
+  --button-hover-bg: var(--color-raised);
+  --button-active-border: var(--color-accent);
+  --focus-highlight-color: var(--color-accent);
+  --icon-fill-color: var(--color-ink-secondary);
+  --text-primary-color: var(--color-ink);
+  --shadow-island: none;
+  --border-radius-md: 8px;
+  --border-radius-lg: 8px;
+}
+
+[data-drawing-canvas] .excalidraw :is(.Island, .dropdown-menu, .layer-ui__wrapper__footer-left > .App-toolbar) {
+  border: 1px solid var(--default-border-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-drawing-canvas] .excalidraw *,
+  [data-drawing-canvas] .excalidraw *::before,
+  [data-drawing-canvas] .excalidraw *::after {
+    animation-duration: 0.01ms;
+    transition-duration: 0.01ms;
+  }
+}

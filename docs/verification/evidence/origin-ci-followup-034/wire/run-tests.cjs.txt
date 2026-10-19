@@ -1,0 +1,18 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const cp = require('node:child_process');
+const root = path.resolve(__dirname,'../..');
+const label = process.argv[2];
+const targets = process.argv.slice(3);
+const testHome = path.join(__dirname,`${label}-home`);
+const temp = path.join(__dirname,`${label}-temp`);
+fs.mkdirSync(testHome,{recursive:true});
+fs.mkdirSync(temp,{recursive:true});
+const env = {PATH:`${path.dirname(process.execPath)};C:\\Windows\\System32`,SystemRoot:'C:\\Windows',WINDIR:'C:\\Windows',TEMP:temp,TMP:temp,HOME:testHome,USERPROFILE:testHome,APPDATA:path.join(testHome,'AppData/Roaming'),LOCALAPPDATA:path.join(testHome,'AppData/Local')};
+if (label === 'update') env.UPDATE_AGENTS_CATALOG_GOLDENS='1';
+const args = [path.join(root,'node_modules/vitest/vitest.mjs'),'run',...targets,'--reporter=default','--reporter=json',`--outputFile=${path.join(__dirname,`${label}.json`)}`];
+fs.writeFileSync(path.join(__dirname,`${label}-command.json`),JSON.stringify({node:process.execPath,args,env,startedAt:new Date().toISOString()},null,2)+'\n');
+const log = fs.openSync(path.join(__dirname,`${label}.log`),'wx');
+const child = cp.spawn(process.execPath,args,{cwd:root,env,stdio:['ignore',log,log],windowsHide:true});
+console.log(`${label} started: ${child.pid}`);
+child.on('exit',(code,signal)=>{fs.closeSync(log);fs.writeFileSync(path.join(__dirname,`${label}-exit.json`),JSON.stringify({code,signal,finishedAt:new Date().toISOString()},null,2)+'\n');console.log(`${label} exit ${code}`);process.exitCode=code??1;});

@@ -1,5 +1,13 @@
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { repositoryUrl } from "./repository";
+
+export function hasCurrentMergeReceipt(task: Doc<"tasks">, project: Doc<"projects">) {
+  const receipt = task.completionPullRequest;
+  const repoUrl = repositoryUrl(project.repoUrl)?.toLowerCase();
+  return Boolean(receipt && repoUrl && receipt.repoUrl.toLowerCase() === repoUrl
+    && receipt.issueNumber === task.githubIssueNumber && task.githubIssueUrl?.toLowerCase() === `${repoUrl}/issues/${receipt.issueNumber}`);
+}
 
 export async function recordCompletion(ctx: MutationCtx, task: Doc<"tasks">, done: boolean, completedAt = Date.now()) {
   if (!done || task.done || task.completedAt) return;

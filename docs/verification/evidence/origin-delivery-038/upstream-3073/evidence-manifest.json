@@ -1,0 +1,534 @@
+{
+  "scope": "Read-only primary GitHub PR3073 detail, complete37-file patches/merged sources, selected frozen Origin source and fit analysis. Downloaded code/fixtures are retained as text only and were never executed.",
+  "originSource": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "upstreamMerge": "1da83432c4b952da42225d97fcc623ba754673eb",
+  "sourceOrProductionMutation": false,
+  "files": [
+    {
+      "path": "files-page-1.json",
+      "bytes": 248517,
+      "sha256": "2d23c5f02ddaab1cf942f686d0bcffb2200755897850ade86069e697970060ca"
+    },
+    {
+      "path": "fit-ledger-3073.json",
+      "bytes": 43572,
+      "sha256": "dc6884d41c5ffd7c6f09c3729218791340321b9c63c0c920848a1067341f67cd"
+    },
+    {
+      "path": "fit-ledger-3073.md",
+      "bytes": 15323,
+      "sha256": "e3e2a4a7dec46c40e2d9f86b37f4119e4af145269acfd1bd597a25155d54347c"
+    },
+    {
+      "path": "merge-commit-raw.json",
+      "bytes": 2756,
+      "sha256": "b39798d44537614e6d48a5b4a2ba2d2a9f5c50ab724a6a4d47fd83670221f96e"
+    },
+    {
+      "path": "merged-source-manifest.json",
+      "bytes": 39725,
+      "sha256": "fc908b34c3b4bbdfa4151402d50316d1b3b782092493deb04b188e3558c478f7"
+    },
+    {
+      "path": "merged-sources/docs/team-sharing.md.txt",
+      "bytes": 11167,
+      "sha256": "8516f792d2153dccb938c63fb8e583755780636931771a5c30b23767579ab4c5"
+    },
+    {
+      "path": "merged-sources/electron/package-link.mjs.txt",
+      "bytes": 1409,
+      "sha256": "7b07974f5e8ea3a682e14ba66db5ef65d8e74db00c52e76a347797346234affa"
+    },
+    {
+      "path": "merged-sources/electron/package-link.node-test.mjs.txt",
+      "bytes": 2086,
+      "sha256": "3c748c52e3e13161460830fbfb3d7f3c2688b6763f08897e96d19944b5952f43"
+    },
+    {
+      "path": "merged-sources/scripts/testing/file-size-ratchet.test.ts.txt",
+      "bytes": 3776,
+      "sha256": "00b10b639273d05dec2f84569496d5df85c24a585e7bd80ddd4e3f153097a9b8"
+    },
+    {
+      "path": "merged-sources/server/cursor-session.test.ts.txt",
+      "bytes": 16567,
+      "sha256": "274ecc4b2c904f41a11597885b1fed2d25317eb1ad650992243b19c847472ae9"
+    },
+    {
+      "path": "merged-sources/server/cursor-session.ts.txt",
+      "bytes": 15333,
+      "sha256": "89a39fcf837298abab5a7290c1a9b3942b6f6543e0302303389f34bcdfdf84ad"
+    },
+    {
+      "path": "merged-sources/server/fixtures/grok-share-page-anonymous.html.txt",
+      "bytes": 3186,
+      "sha256": "3ed9ab771b45e1860a7808f72d2e69945d544ad5d2975f0b58cd3cf6e95a32e1"
+    },
+    {
+      "path": "merged-sources/server/fixtures/grok-share-page.html.txt",
+      "bytes": 3218,
+      "sha256": "3366962a535f7956df82f87989c3c0fe9a58ecc91862bd3c2243ea2bb0939d63"
+    },
+    {
+      "path": "merged-sources/server/request-auth.test.ts.txt",
+      "bytes": 43812,
+      "sha256": "05be2f6c6e9f56980fd6069f12a2ee6bdbba1f2b11d4e7cad7b9ed6c293909b2"
+    },
+    {
+      "path": "merged-sources/server/routes/team-library-grok.test.ts.txt",
+      "bytes": 7906,
+      "sha256": "143471edc7d92bc975d52ae393fb1b2d5ca63f554a27c2428a1122e03d42ea95"
+    },
+    {
+      "path": "merged-sources/server/routes/teams.ts.txt",
+      "bytes": 21741,
+      "sha256": "e2e9cd64948967b039935d76759d05d2bb948579249f7bd30952f761ff54977f"
+    },
+    {
+      "path": "merged-sources/server/team-library.test.ts.txt",
+      "bytes": 12114,
+      "sha256": "aedd127e401109d4fa7d05ca3b4cb9ca51c9f129adf0711eb3c551aebf8733af"
+    },
+    {
+      "path": "merged-sources/server/team-library.ts.txt",
+      "bytes": 18886,
+      "sha256": "646a9ddf537078c40500e85f5d8ebd11c5500e8752a4b58ee7d16c90bec97a4d"
+    },
+    {
+      "path": "merged-sources/shared/grok-import.test.ts.txt",
+      "bytes": 17000,
+      "sha256": "7fc656a02a9ff80490c59e1e770ef578346ed6320719aa5f6d52cbe6d381e4c1"
+    },
+    {
+      "path": "merged-sources/shared/grok-import.ts.txt",
+      "bytes": 28956,
+      "sha256": "664898d86576b65276b26b7da795f4f762bec14575949a2a6b038d027e2fcbf9"
+    },
+    {
+      "path": "merged-sources/src/components/GrokBotMark.test.ts.txt",
+      "bytes": 1310,
+      "sha256": "a642477ac76db784b52e504883cec61afab1286dcfda3f49ff91c2cbe29bdb00"
+    },
+    {
+      "path": "merged-sources/src/components/GrokBotMark.tsx.txt",
+      "bytes": 2697,
+      "sha256": "a8b4e87665ba40fb6dd3246b4e4b14f070940fa240f24db86dee4ff53c36c23c"
+    },
+    {
+      "path": "merged-sources/src/components/GrokFinishSetup.test.ts.txt",
+      "bytes": 4865,
+      "sha256": "82e52f9fd1639ea13a80cd7575ea37f8e241e34fdc9b4fa4e67a0c5b36e56c4b"
+    },
+    {
+      "path": "merged-sources/src/components/GrokFinishSetup.tsx.txt",
+      "bytes": 4639,
+      "sha256": "0963970f5e9fcee0ea8a103d2b9c2a41e94be27b7c8f326217af856e2d08ee2d"
+    },
+    {
+      "path": "merged-sources/src/components/GrokImportBox.test.ts.txt",
+      "bytes": 5616,
+      "sha256": "b0ee4df27eb5d54781bb6948e8d53b19659ca788bb2989c4fc3ab9b07d57f474"
+    },
+    {
+      "path": "merged-sources/src/components/GrokImportBox.tsx.txt",
+      "bytes": 11208,
+      "sha256": "bad2a8aab47f2ec69cdcfb53cb43d0084a1534ea2172a7e032bd5ea323b7a1c5"
+    },
+    {
+      "path": "merged-sources/src/components/GrokImportFlow.tsx.txt",
+      "bytes": 4039,
+      "sha256": "3b34622901fea5f1471d4147409fc2f5d2fb13b5499e08de44d3cd96bc3f3258"
+    },
+    {
+      "path": "merged-sources/src/components/ImportSettings.test.ts.txt",
+      "bytes": 3606,
+      "sha256": "ce5ad0e57d0bf35f61c278964cf793701771a4440b796587f1b00fa490e94687"
+    },
+    {
+      "path": "merged-sources/src/components/ImportSettings.tsx.txt",
+      "bytes": 6901,
+      "sha256": "91237458aef1bf3875946eecab19ebdeee501ae4623487e72f0fbd723a5bf445"
+    },
+    {
+      "path": "merged-sources/src/components/onboarding/beats/ImportBeat.test.ts.txt",
+      "bytes": 9613,
+      "sha256": "6ebf2034d0a2915f1096f589f9d8e81b0350131ccfaee5905122abdebcdef19f"
+    },
+    {
+      "path": "merged-sources/src/components/onboarding/beats/ImportBeat.tsx.txt",
+      "bytes": 9535,
+      "sha256": "75e63b6bca4346735bfd559cbc3a5fe1c135b38001fa10c2e362a05744cd0dfe"
+    },
+    {
+      "path": "merged-sources/src/components/ProviderIcons.tsx.txt",
+      "bytes": 28282,
+      "sha256": "c0ba2a7c15799237452d2f9a5fb69e64aeae5e9ac153f516c18c992191816df7"
+    },
+    {
+      "path": "merged-sources/src/components/SettingsModal.groups.test.ts.txt",
+      "bytes": 6240,
+      "sha256": "cf878278a78c0f481b7922b34df4c812b8de315de5f5e72dc01cc86b98e50518"
+    },
+    {
+      "path": "merged-sources/src/components/SettingsModal.simple.test.ts.txt",
+      "bytes": 12829,
+      "sha256": "47eb66e52c0e09121c67a5d5998fdabc0c978bc53dc1555dc0f6f20e49a04fed"
+    },
+    {
+      "path": "merged-sources/src/components/SettingsModal.tsx.txt",
+      "bytes": 48266,
+      "sha256": "7d8f2ded132e5c52ea78f3c089914b59e62ff8cfa0653460c3e8e829d919ea8d"
+    },
+    {
+      "path": "merged-sources/src/components/TeamImportDetails.tsx.txt",
+      "bytes": 7573,
+      "sha256": "0f921b42123a2cec88703ff5d403a54f95ca29f68dcde912417f73e4ab21523d"
+    },
+    {
+      "path": "merged-sources/src/components/TeamLibraryPanel.tsx.txt",
+      "bytes": 47115,
+      "sha256": "243e8bb741932b1641e93bf2e5d4848822d93f58a1182b20f152d1adaab613de"
+    },
+    {
+      "path": "merged-sources/src/lib/team-import.test.ts.txt",
+      "bytes": 9144,
+      "sha256": "9c68fcfd9c29c0bb384bc831f140e94c4169372b48abe4d3855ab2a442be50b3"
+    },
+    {
+      "path": "merged-sources/src/lib/team-import.ts.txt",
+      "bytes": 12177,
+      "sha256": "be57fc6da4d5b94f29024a272ae48c7d5370c5cb5f8fb39a8a1dfec3dcc02466"
+    },
+    {
+      "path": "merged-sources/src/lib/template-add.ts.txt",
+      "bytes": 1254,
+      "sha256": "1f1fe64682972f560b38d520f7bf95a1631e8898e22fd1bddbbb6ec17ea9f293"
+    },
+    {
+      "path": "merged-sources/src/locales/en.json.txt",
+      "bytes": 411162,
+      "sha256": "0d4fb65afffc310b50e66f5151a2fb9c506bb00c2e1dcb19360c5f0d95d27740"
+    },
+    {
+      "path": "merged-sources/src/state/store.tsx.txt",
+      "bytes": 158825,
+      "sha256": "a8641b57466508ca0745188d8c8abe3ea6169d54bf3c0e645e4b3d8b98e18cdd"
+    },
+    {
+      "path": "origin-frozen/server/origin-cloud-session.ts.txt",
+      "bytes": 1724,
+      "sha256": "5542178b96d813b0c4dc1b74beadb9f875f0a7acdacf3b8cd055f8d727167320"
+    },
+    {
+      "path": "origin-frozen/server/origin-run-lease.ts.txt",
+      "bytes": 11389,
+      "sha256": "7174cc188d992063d41ca000ce03c05a7b596ba9f0fd9040b0c37db099df9b52"
+    },
+    {
+      "path": "origin-frozen/server/package-import.ts.txt",
+      "bytes": 23677,
+      "sha256": "fb55305c04e14da3e8f08263e8cc54c1698675163e7a3f01910346641a690e95"
+    },
+    {
+      "path": "origin-frozen/server/request-auth.ts.txt",
+      "bytes": 24934,
+      "sha256": "e93c242fbd3a9f9b556a4769e7905f8813115df18dff866c3705a1f769a563a7"
+    },
+    {
+      "path": "origin-frozen/server/routes/teams.ts.txt",
+      "bytes": 19566,
+      "sha256": "4d7b1d57e1b981d8864df166c6f8dfa68f6dc1d5b809532e3b80bca12b28baab"
+    },
+    {
+      "path": "origin-frozen/server/team-library.ts.txt",
+      "bytes": 10444,
+      "sha256": "e4e93a3f9f92984f3d9c01e727f2a1dbbde7cb45af6d6d9e62feee6ba017d9db"
+    },
+    {
+      "path": "origin-frozen/shared/package-format.ts.txt",
+      "bytes": 46825,
+      "sha256": "353aa97cd45bb88f96848573b3852d2f1e9e8fa7f614222b9050d2e1503aada2"
+    },
+    {
+      "path": "origin-frozen/src/components/SettingsModal.tsx.txt",
+      "bytes": 50881,
+      "sha256": "4486b4e1c1b1e53a8db8cccabc9822ef8ea071950f948d0822921464b0dfe924"
+    },
+    {
+      "path": "origin-frozen/src/components/TeamLibraryPanel.tsx.txt",
+      "bytes": 54363,
+      "sha256": "64920ea0868667a2eb6da40761ad3fb7982e7e234f8eb385163b7787d8bcc1a4"
+    },
+    {
+      "path": "origin-frozen/src/lib/origin-cloud/client.ts.txt",
+      "bytes": 5065,
+      "sha256": "e512c8eaea76de0bdadcdf091fb634b7f354fc7dbbd0b96bd217148f8766e204"
+    },
+    {
+      "path": "origin-frozen/src/lib/team-import.ts.txt",
+      "bytes": 10035,
+      "sha256": "8992feb7a26b98fa491befe871eaa10d9650cfa4ef305aaffd37d8f13e385cf8"
+    },
+    {
+      "path": "origin-path-presence.json",
+      "bytes": 5365,
+      "sha256": "d116d7149614f82c167086b5d4e6a2d2254af0365a64497367988e01e60810ff"
+    },
+    {
+      "path": "origin-source-manifest.json",
+      "bytes": 2439,
+      "sha256": "2249db93a5a8a001b3c76812a963fcd03c153fd02d6d1b86a9bcd3e1182ce09a"
+    },
+    {
+      "path": "patch-completeness.json",
+      "bytes": 5340,
+      "sha256": "eaad621d07fe465c825feca91907d966d0c21b8fa4a51bf9b93fa23b01c91b91"
+    },
+    {
+      "path": "patches/docs/team-sharing.md.patch.txt",
+      "bytes": 3926,
+      "sha256": "8b4f9214c54546c0749d5433052dadf872738ec374bbc148b5de1a3c55d3633d"
+    },
+    {
+      "path": "patches/electron/package-link.mjs.patch.txt",
+      "bytes": 812,
+      "sha256": "c124da8bc2c35384af179cf9387102bbd345c30104aa80c70427cd8f69385002"
+    },
+    {
+      "path": "patches/electron/package-link.node-test.mjs.patch.txt",
+      "bytes": 1333,
+      "sha256": "cfd8f3398168f4fb7dd9b883a70cc77b13d559ac198d8e8efee71c4de5e3e64a"
+    },
+    {
+      "path": "patches/scripts/testing/file-size-ratchet.test.ts.patch.txt",
+      "bytes": 283,
+      "sha256": "e780b3debc9bf565fcad58381998a4f7d93445a0a64751f00ae9732c208079ad"
+    },
+    {
+      "path": "patches/server/cursor-session.test.ts.patch.txt",
+      "bytes": 16864,
+      "sha256": "f5d0c98a22c8b9310e9847168fad473c8559d8254858ad1912e7c0311463fdf8"
+    },
+    {
+      "path": "patches/server/cursor-session.ts.patch.txt",
+      "bytes": 15675,
+      "sha256": "01281c89e4b17dd712f8e81053c7ca3fbd71a6e1168e8a782ea48a4adc657c4d"
+    },
+    {
+      "path": "patches/server/fixtures/grok-share-page-anonymous.html.patch.txt",
+      "bytes": 3201,
+      "sha256": "3075a04e487c9b1d3caafabd440104f9ea3f242ed5d82ce1a2a9634c33dd20e5"
+    },
+    {
+      "path": "patches/server/fixtures/grok-share-page.html.patch.txt",
+      "bytes": 3233,
+      "sha256": "88df2de9205ec3abc9a1af433598ae4efe7786895b874376876a5c3338006822"
+    },
+    {
+      "path": "patches/server/request-auth.test.ts.patch.txt",
+      "bytes": 971,
+      "sha256": "2df4fa7bcb2eb5ff042a66e1657aa7beb97975ecbcb2d82624b098f0b2fc87db"
+    },
+    {
+      "path": "patches/server/routes/team-library-grok.test.ts.patch.txt",
+      "bytes": 8061,
+      "sha256": "2eb1e3e6a5ff3687a38ae804fcc6176085986a97ea3f2c86348618e92a0a4e72"
+    },
+    {
+      "path": "patches/server/routes/teams.ts.patch.txt",
+      "bytes": 4105,
+      "sha256": "e6254f89d013ced67e6a88b924f9dd74de05c1ea7da8965ede8c4fff91841bf6"
+    },
+    {
+      "path": "patches/server/team-library.test.ts.patch.txt",
+      "bytes": 7633,
+      "sha256": "51c5c90568e7f61d48b8599c4e34c7a8c20c0fa067a7695912dbc5bb41858857"
+    },
+    {
+      "path": "patches/server/team-library.ts.patch.txt",
+      "bytes": 9311,
+      "sha256": "ed309a5a69a23f35794a8e50260c3f790c07e5d2895c37fb123672fa705b5110"
+    },
+    {
+      "path": "patches/shared/grok-import.test.ts.patch.txt",
+      "bytes": 17320,
+      "sha256": "4b1df8974e91849fe614f6c37c9cd0340760e7f430c546a4eee1f7d5242fcfe6"
+    },
+    {
+      "path": "patches/shared/grok-import.ts.patch.txt",
+      "bytes": 29516,
+      "sha256": "41050fc1ba70182e7739a786ecdfa440ace9685b638fc7e414ea0c4db1bb28e5"
+    },
+    {
+      "path": "patches/src/components/GrokBotMark.test.ts.patch.txt",
+      "bytes": 1353,
+      "sha256": "17ab990dde8eb6033aa4e55308885db0c70f4615be1542dd7d3f2ea4295078f1"
+    },
+    {
+      "path": "patches/src/components/GrokBotMark.tsx.patch.txt",
+      "bytes": 2730,
+      "sha256": "a0c45a4c2d09ac5527b6e08ac9cb1dcdd73d578da81b1b1ce0de3cfa9befaa2d"
+    },
+    {
+      "path": "patches/src/components/GrokFinishSetup.test.ts.patch.txt",
+      "bytes": 4959,
+      "sha256": "78e4eaeb750bc1c88d4bcf08f75f10639f7f4821640b7109f32a252378219540"
+    },
+    {
+      "path": "patches/src/components/GrokFinishSetup.tsx.patch.txt",
+      "bytes": 4737,
+      "sha256": "156950bf58d9c03067c3f2b49e6f7db2d7d2cbc4930279a93e78606ffb584d40"
+    },
+    {
+      "path": "patches/src/components/GrokImportBox.test.ts.patch.txt",
+      "bytes": 5721,
+      "sha256": "2bf41ee9c76c69cbdea9be69705cc58ee79efc09e4b3fd974b6f1dcb4a9c659c"
+    },
+    {
+      "path": "patches/src/components/GrokImportBox.tsx.patch.txt",
+      "bytes": 11478,
+      "sha256": "068ed7802033431e6f59e4c77699d5291fc74fc804f3b2b564f8f8bd09ba4931"
+    },
+    {
+      "path": "patches/src/components/GrokImportFlow.tsx.patch.txt",
+      "bytes": 4151,
+      "sha256": "dbc8fb12193ce681935ba2820e5ab96fe38fd43445ae2e2c23c31ed8703ac354"
+    },
+    {
+      "path": "patches/src/components/ImportSettings.test.ts.patch.txt",
+      "bytes": 3685,
+      "sha256": "35f80621b4464aa62d217a5a556f8efac21ceefe8c4b78d00c5cd9bdba318919"
+    },
+    {
+      "path": "patches/src/components/ImportSettings.tsx.patch.txt",
+      "bytes": 7051,
+      "sha256": "03138ced62eb510507ab4959320209a8d5e7242d3009ab49a9a5436eb59cca02"
+    },
+    {
+      "path": "patches/src/components/onboarding/beats/ImportBeat.test.ts.patch.txt",
+      "bytes": 2452,
+      "sha256": "639d9c857c8a693d5efcbc8e6b19951c282f9978d709e35b716309022f0d97e6"
+    },
+    {
+      "path": "patches/src/components/onboarding/beats/ImportBeat.tsx.patch.txt",
+      "bytes": 3803,
+      "sha256": "a29d20fa91b018873fc4ad64c6acbcabdcca0094c1b426a07562678209039d51"
+    },
+    {
+      "path": "patches/src/components/ProviderIcons.tsx.patch.txt",
+      "bytes": 478,
+      "sha256": "2e90891638c1dc7573f660e69f885c9658c62d129bc898bf4f9d6ffa82e44fa2"
+    },
+    {
+      "path": "patches/src/components/SettingsModal.groups.test.ts.patch.txt",
+      "bytes": 1086,
+      "sha256": "c79bc42fde8dfa2c39c4076ae10fb41e080ee1169b54d1878944e05f95693e1e"
+    },
+    {
+      "path": "patches/src/components/SettingsModal.simple.test.ts.patch.txt",
+      "bytes": 1567,
+      "sha256": "584f4bac72419ec1e61326a949936e0fab7d98b818e4496474c1e336f83ee05c"
+    },
+    {
+      "path": "patches/src/components/SettingsModal.tsx.patch.txt",
+      "bytes": 5313,
+      "sha256": "e9f6d273c38cc6e73409e95ca92ccce54aba70fc1e00c83e0c960202f36a75c3"
+    },
+    {
+      "path": "patches/src/components/TeamImportDetails.tsx.patch.txt",
+      "bytes": 7705,
+      "sha256": "1435366d45f1a23cdd252901548add03ca901c0102985b21bd1341fcab086b3e"
+    },
+    {
+      "path": "patches/src/components/TeamLibraryPanel.tsx.patch.txt",
+      "bytes": 13813,
+      "sha256": "d8adfdec74223911e0ce60584bda65cc6e587d2d8690142d9fd307f6fc73687e"
+    },
+    {
+      "path": "patches/src/lib/team-import.test.ts.patch.txt",
+      "bytes": 3152,
+      "sha256": "880185c8d7209a8bac3ee45a64551851a089ed5d9d1d2f6891d3dcd503a061f5"
+    },
+    {
+      "path": "patches/src/lib/team-import.ts.patch.txt",
+      "bytes": 3007,
+      "sha256": "067cb86ece965cdc189f5db7f31e83194a231e0bedc2743f6f68e8549ec4a639"
+    },
+    {
+      "path": "patches/src/lib/template-add.ts.patch.txt",
+      "bytes": 1296,
+      "sha256": "3a9ce4f454c9e0e4a9392d37172234524654f936cfcbcfbd21ad45f3ae67e483"
+    },
+    {
+      "path": "patches/src/locales/en.json.patch.txt",
+      "bytes": 4995,
+      "sha256": "23a9e7820390c0586b804cfce98b7b1bb3abc40bcf4da5b2a22d77456d12b991"
+    },
+    {
+      "path": "patches/src/state/store.tsx.patch.txt",
+      "bytes": 195,
+      "sha256": "b8a58217be93a6fda975c3ff0ac1a790afcb55c09b880de77c73400ffaefbb9c"
+    },
+    {
+      "path": "pr-3073-raw.json",
+      "bytes": 31976,
+      "sha256": "5a8546582a17d39e943b50af0c8c482202a60f616d1a2c901645705728b3016d"
+    },
+    {
+      "path": "pr-3073.diff",
+      "bytes": 224060,
+      "sha256": "57542e6cee35ed9c305a8b8982dc848765de9bc1b0be38ea442ddfc79701554c"
+    },
+    {
+      "path": "pr-head-sources/scripts/testing/file-size-ratchet.test.ts.txt",
+      "bytes": 3776,
+      "sha256": "7ad5fd59c10b4b64d0fa60f3c0be448acd5e532e4d00b8132db8759dcf63df2a"
+    },
+    {
+      "path": "pr-head-sources/server/request-auth.test.ts.txt",
+      "bytes": 43812,
+      "sha256": "05be2f6c6e9f56980fd6069f12a2ee6bdbba1f2b11d4e7cad7b9ed6c293909b2"
+    },
+    {
+      "path": "pr-head-sources/server/team-library.ts.txt",
+      "bytes": 18886,
+      "sha256": "646a9ddf537078c40500e85f5d8ebd11c5500e8752a4b58ee7d16c90bec97a4d"
+    },
+    {
+      "path": "pr-head-sources/src/locales/en.json.txt",
+      "bytes": 409733,
+      "sha256": "d802f07ace667be5fe5fb0b9f47d936c7d3872f21c35f13c4036a936319684cc"
+    },
+    {
+      "path": "pr-head-sources/src/state/store.tsx.txt",
+      "bytes": 158801,
+      "sha256": "b67be722e17773dc098c05808a9eb234ef60fccde1fac26ef05ecf8188c338f9"
+    },
+    {
+      "path": "raw-evidence-manifest.json",
+      "bytes": 428,
+      "sha256": "f14e46f44261441ad94852b59fc8e4b079eb8fe3c8dca01c662ceebe82cf338b"
+    },
+    {
+      "path": "raw-media-transport-diagnostic/merged-sources/server/request-auth.test.ts.txt",
+      "bytes": 43808,
+      "sha256": "b416df9c7f9717bb7bf6a1e3c6c257e296ac1448ca260717ee862fa9de0462f2"
+    },
+    {
+      "path": "raw-media-transport-diagnostic/merged-sources/server/team-library.ts.txt",
+      "bytes": 18866,
+      "sha256": "8c4e4ba53c8525729719dc6f880b40ef5c3366b8e65f95e80a1898a7b14ef07d"
+    },
+    {
+      "path": "test-inventory.json",
+      "bytes": 20502,
+      "sha256": "b6671f58c8f9a64a7022b3520bfd73b51ff150aefbce046ede6a58bee25486b0"
+    },
+    {
+      "path": "verified-content-repairs.json",
+      "bytes": 6832,
+      "sha256": "10024b18c3c1ffe5fe0383998aa3b8474c0b467188357853f3058fdc1a32a08d"
+    }
+  ],
+  "bytes": 2834444
+}

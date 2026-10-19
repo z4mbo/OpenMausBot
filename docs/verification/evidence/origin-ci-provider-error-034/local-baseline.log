@@ -1,0 +1,8 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 31 skipped (32)
+   Start at  23:48:09
+   Duration  6.47s (transform 433ms, setup 569ms, import 614ms, tests 5.10s, environment 0ms)

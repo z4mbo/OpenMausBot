@@ -1,0 +1,8 @@
+
+ RUN  v4.1.11 <worker>
+
+
+ Test Files  3 passed (3)
+      Tests  24 passed (24)
+   Start at  16:34:45
+   Duration  2.91s (transform 400ms, setup 716ms, import 602ms, tests 117ms, environment 1.03s)

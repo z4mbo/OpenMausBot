@@ -1,0 +1,65 @@
+
+ RUN  v4.1.11 <isolated-worktree>
+
+ ❯ server/data/routes.test.ts (11 tests | 1 failed | 10 skipped) 8289ms
+     × cancels superseded native queries and disconnected edits while preserving the last committed result 8288ms
+ ❯ server/data/lane.test.ts (3 tests | 3 failed) 7ms
+   × keeps signal cancellation owned through delayed dispatch and leaves its successor alone 4ms
+   × keeps lane cancellation owned through delayed dispatch and leaves its successor alone 1ms
+   × rejects cancelled work that finishes before another interrupt is needed 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/data/lane.test.ts > keeps signal cancellation owned through delayed dispatch and leaves its successor alone
+ FAIL  server/data/lane.test.ts > keeps lane cancellation owned through delayed dispatch and leaves its successor alone
+AssertionError: expected 1 to be greater than 1
+ ❯ server/data/lane.test.ts:32:19
+     30|     await vi.advanceTimersByTimeAsync(100);
+     31|     const calls = interrupt.mock.calls.length;
+     32|     expect(calls).toBeGreaterThan(1);
+       |                   ^
+     33|     const error = await failed;
+     34|     expect(error).toBeInstanceOf(DataFailure);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  server/data/lane.test.ts > rejects cancelled work that finishes before another interrupt is needed
+AssertionError: expected 'stale success' to be an instance of DataFailure
+ ❯ server/data/lane.test.ts:64:17
+     62|   finish.resolve();
+     63|   const error = await failed;
+     64|   expect(error).toBeInstanceOf(DataFailure);
+       |                 ^
+     65|   expect((error as DataFailure).error.code).toBe("cancelled");
+     66| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  server/data/routes.test.ts > the Data routes > cancels superseded native queries and disconnected edits while preserving the last committed result
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/data/routes.test.ts:229:73
+    227|       let latest: Awaited<ReturnType<typeof call>> | undefined;
+    228|       const replacement = call("POST", "/api/bots/bot-1/data/run", { c…
+    229|       await expect.poll(() => latest !== undefined, { timeout: 5_000 }…
+       |                                                                         ^
+    230|       await replacement;
+    231|       expect(latest!.status).toBe(200);
+
+Caused by: Error: Matcher did not succeed in time.
+ ❯ server/data/routes.test.ts:229:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 10 skipped (14)
+   Start at  02:44:09
+   Duration  9.80s (transform 372ms, setup 694ms, import 445ms, tests 8.30s, environment 0ms)
+

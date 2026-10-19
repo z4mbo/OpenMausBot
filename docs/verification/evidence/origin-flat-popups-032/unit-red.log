@@ -1,0 +1,89 @@
+
+ RUN  v4.1.11 <worker>
+
+ ❯ src/components/TriggersPanel.focus.test.ts (3 tests | 2 failed) 56ms
+   × wraps forward from a closed Advanced summary instead of hidden action buttons 35ms
+   × wraps backward to the closed summary and includes action buttons after expansion 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/TriggersPanel.focus.test.ts > wraps forward from a closed Advanced summary instead of hidden action buttons
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/components/TriggersPanel.focus.test.ts:47:34
+     45|   const summary = document.querySelector("summary")!;
+     46|   summary.focus();
+     47|   expect(tab().defaultPrevented).toBe(true);
+       |                                  ^
+     48|   expect(document.activeElement).toBe(document.querySelector('[aria-la…
+     49| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/TriggersPanel.focus.test.ts > wraps backward to the closed summary and includes action buttons after expansion
+AssertionError: expected <button type="button" …(1)>…(1)</button> to be <summary …(1)></summary> // Object.is equality
+
+- Expected
++ Received
+
+- <summary
+-   class="cursor-pointer text-[12px] font-medium text-ink-secondary hover:text-ink"
++ <button
++   class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11.5px] font-medium text-danger hover:bg-danger/10 disabled:opacity-40"
++   type="button"
+  >
+-   Advanced options
+- </summary>
++   <svg
++     aria-hidden="true"
++     class="lucide lucide-trash2 lucide-trash-2"
++     fill="none"
++     height="12"
++     stroke="currentColor"
++     stroke-linecap="round"
++     stroke-linejoin="round"
++     stroke-width="2"
++     viewBox="0 0 24 24"
++     width="12"
++     xmlns="http://www.w3.org/2000/svg"
++   >
++     <path
++       d="M10 11v6"
++     />
++     <path
++       d="M14 11v6"
++     />
++     <path
++       d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
++     />
++     <path
++       d="M3 6h18"
++     />
++     <path
++       d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
++     />
++   </svg>
++   Delete
++ </button>
+
+ ❯ src/components/TriggersPanel.focus.test.ts:55:34
+     53|   close.focus();
+     54|   expect(tab(true).defaultPrevented).toBe(true);
+     55|   expect(document.activeElement).toBe(document.querySelector("summary"…
+       |                                  ^
+     56|   document.querySelector("details")!.open = true;
+     57|   close.focus();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  16:55:30
+   Duration  2.57s (transform 664ms, setup 700ms, import 1.15s, tests 56ms, environment 428ms)

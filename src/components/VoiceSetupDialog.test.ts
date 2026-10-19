@@ -102,11 +102,10 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("voice set-up pop-up", () => {
-  it("is a glass pop-up holding the bot's own voice settings", () => {
+  it("holds the bot's own voice settings in an accessible pop-up", () => {
     const { html } = render();
     expect(html).toContain("glass-popup-frame");
     expect(html).toContain("glass-scrim");
-    expect(html).toContain("glass-surface");
     expect(html).toMatch(/role="dialog" aria-modal="true"/);
     expect(html).toContain("Give Pepper a voice");
     expect(html).toContain("Choose an engine, add its key if it needs one, then pick a voice.");

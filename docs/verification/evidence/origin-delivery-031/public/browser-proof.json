@@ -1,0 +1,50 @@
+{
+  "version": "0.2.11",
+  "source": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+  "origin": "https://origin.imbored.fun",
+  "passed": true,
+  "verifiedAt": "2026-10-18T17:09:52.126Z",
+  "notes": 8,
+  "accountSubmissions": 0,
+  "routes": [
+    {
+      "path": "/",
+      "status": "passed",
+      "url": "https://origin.imbored.fun/",
+      "h1": "Every project gets a team of agents that ships."
+    },
+    {
+      "path": "/login",
+      "status": "passed",
+      "url": "https://origin.imbored.fun/login",
+      "h1": "Sign in to Origin"
+    },
+    {
+      "path": "/signup",
+      "status": "passed",
+      "url": "https://origin.imbored.fun/signup",
+      "h1": "Create your Origin account"
+    },
+    {
+      "path": "/whats-new",
+      "status": "passed",
+      "url": "https://origin.imbored.fun/whats-new",
+      "h1": "What's new"
+    }
+  ],
+  "downloads": [
+    {
+      "platform": "Windows",
+      "href": "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+    },
+    {
+      "platform": "MacAppleSilicon",
+      "href": "https://origin.imbored.fun/downloads/Origin-Mac-AppleSilicon.dmg"
+    },
+    {
+      "platform": "MacIntel",
+      "href": "https://origin.imbored.fun/downloads/Origin-Mac-Intel.dmg"
+    }
+  ],
+  "screenshot": "public/landing.jpg"
+}

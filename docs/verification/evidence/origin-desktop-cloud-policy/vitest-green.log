@@ -1,0 +1,8 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-cloud-entry-033/Origin
+
+
+ Test Files  8 passed (8)
+      Tests  57 passed (57)
+   Start at  23:30:13
+   Duration  10.29s (transform 3.04s, setup 1.41s, import 6.91s, tests 766ms, environment 0ms)

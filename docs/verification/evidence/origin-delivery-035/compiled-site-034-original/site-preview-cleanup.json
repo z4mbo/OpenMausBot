@@ -1,0 +1,13 @@
+{
+  "version": "0.2.13",
+  "source": "f44ebe30a9568ed634b9eb8a45476f42e4c059b1",
+  "checkedAt": "2026-10-18T22:41:26.5261850Z",
+  "containerId": "9cc8f0b0a0550d090c505282411ca76fb4e757187f4594d7e0ee9e3ef88caccf",
+  "containerStopped": true,
+  "proxyStopped": true,
+  "tunnelPortClosed": true,
+  "localPreviewPortClosed": true,
+  "remoteContainerAndNetworkRetained": true,
+  "browserTabClosed": true,
+  "publicServicesChanged": false
+}

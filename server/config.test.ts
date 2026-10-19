@@ -1198,7 +1198,7 @@ describe("saving OpenCode provider keys", () => {
     expect(mergeOpenCodeProviderKeys({}, { ANTHROPIC_API_KEY: "sk-ant" })).toEqual({ ok: true, keys: { ANTHROPIC_API_KEY: "sk-ant" } });
   });
 
-  it("refuses names OpenCode does not read or that OpenMaus keeps, with the fix", () => {
+  it("refuses names OpenCode does not read or that Origin keeps, with the fix", () => {
     const refused = (name: string) => {
       const result = mergeOpenCodeProviderKeys(saved, { [name]: "a-key" });
       expect(result.ok, name).toBe(false);
@@ -1210,7 +1210,7 @@ describe("saving OpenCode provider keys", () => {
     expect(refused("OPENCODE_API_KEY")).toContain("OpenCode API key box");
     for (const name of ["OPENCODE_SERVER_KEY", "OMB_CLOUD_BOAT_TOKEN", "OMB_LICENSE_KEY", "BOX_TOKEN", "COMPOSIO_API_KEY",
       "OPENAI_COMPAT_API_KEY", "XAI_API_KEY", "MISTRAL_API_KEY", "CURSOR_API_KEY", "FACTORY_API_KEY"]) {
-      expect(refused(name)).toBe(`OpenMaus keeps ${name} for itself, so OpenCode can't be given it here. Put this key in opencode.json instead.`);
+      expect(refused(name)).toBe(`Origin keeps ${name} for itself, so OpenCode can't be given it here. Put this key in opencode.json instead.`);
     }
   });
 
@@ -1794,6 +1794,51 @@ describe("credential env preference", () => {
 });
 
 describe("workspace credential env strip", () => {
+  it.each(["ORIGIN_INTEGRATION_SECRET", "origin_integration_secret", "Origin_Integration_Secret"])(
+    "keeps backend administration private when %s supplies Origin operator authority",
+    (marker) => {
+      for (const strip of [stripControlPlaneEnv, stripWorkspaceCredentialEnv]) {
+        const env: Record<string, string | undefined> = {
+          [marker]: "origin-operator-fixture", PATH: "/usr/bin", GITHUB_TOKEN: "project-owned-token",
+          CONVEX_DEPLOY_KEY: "prod:origin-fixture|operator-deploy", convex_deploy_key: "operator-deploy",
+          CONVEX_SELF_HOSTED_ADMIN_KEY: "operator-admin", Convex_Self_Hosted_Admin_Key: "operator-admin",
+          CONVEX_URL: "https://project-fixture.convex.cloud", MY_CONVEX_DEPLOY_KEY: "project-owned-token",
+        };
+        strip(env);
+        expect(env).toEqual({
+          PATH: "/usr/bin", GITHUB_TOKEN: "project-owned-token",
+          CONVEX_URL: "https://project-fixture.convex.cloud", MY_CONVEX_DEPLOY_KEY: "project-owned-token",
+        });
+      }
+    },
+  );
+
+  it.each([undefined, "", "   "])("preserves project Convex credentials without Origin operator authority (%s)", (marker) => {
+    for (const strip of [stripControlPlaneEnv, stripWorkspaceCredentialEnv]) {
+      const credentials = {
+        CONVEX_DEPLOY_KEY: "prod:project-fixture|project-deploy",
+        CONVEX_SELF_HOSTED_ADMIN_KEY: "project-admin", GITHUB_TOKEN: "project-owned-token",
+      };
+      const env = { ORIGIN_INTEGRATION_SECRET: marker, ...credentials };
+      strip(env);
+      expect(env).toEqual(credentials);
+    }
+  });
+
+  it("keeps Origin integration authority out of child environments for every Windows spelling", () => {
+    const credentials = [
+      "ORIGIN_INTEGRATION_SECRET", "ORIGIN_GITHUB_TOKEN", "ORIGIN_RESEND_API_KEY", "ORIGIN_TURN_SECRET",
+      "BREVO_API_KEY",
+      "GITHUB_APP_PRIVATE_KEY", "GITHUB_CLIENT_SECRET", "GITHUB_WEBHOOK_SECRET",
+    ];
+    const env: Record<string, string | undefined> = {
+      PATH: "/usr/bin", GITHUB_TOKEN: "project-owned-token", ORIGIN_PUBLIC_URL: "https://origin.example",
+      ...Object.fromEntries(credentials.flatMap((name) => [[name, "server-secret"], [name.toLowerCase(), "server-secret"]])),
+    };
+    stripWorkspaceCredentialEnv(env);
+    expect(env).toEqual({ PATH: "/usr/bin", GITHUB_TOKEN: "project-owned-token", ORIGIN_PUBLIC_URL: "https://origin.example" });
+  });
+
   it("removes every workspace credential from a child env in place", () => {
     const env = {
       PATH: "/usr/bin",
@@ -1802,6 +1847,16 @@ describe("workspace credential env strip", () => {
     };
     stripWorkspaceCredentialEnv(env);
     expect(env).toEqual({ PATH: "/usr/bin", MY_FLAG: "1" });
+  });
+
+  it("removes every Windows spelling of workspace credentials without removing project-owned names", () => {
+    const preserved = { PATH: "/usr/bin", MY_BOX_TOKEN: "project-owned-token", GITHUB_TOKEN: "project-owned-token" };
+    const env = {
+      ...preserved,
+      ...Object.fromEntries(WORKSPACE_CREDENTIAL_ENV.flatMap(name => [name, name.toLowerCase(), name[0]!.toLowerCase() + name.slice(1)]).map(name => [name, "synthetic-workspace-key"])),
+    };
+    stripWorkspaceCredentialEnv(env);
+    expect(env).toEqual(preserved);
   });
 
   it("keeps a hosted tenant's control-plane secrets out of every child env, and only those", () => {
