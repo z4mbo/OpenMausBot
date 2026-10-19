@@ -21,7 +21,8 @@ import { sessionStore } from "@/lib/origin-cloud/client";
 import { exclusiveWithSync, requestOriginSync } from "@/lib/origin-sync";
 import { useCanCreateProject } from "@/lib/use-origin-workspace";
 import { openNewIssue } from "@/lib/origin-new-issue";
-import { currentOriginPage } from "@/lib/origin-pages";
+import { currentOriginPage, useOriginPage } from "@/lib/origin-pages";
+import { modalOpen } from "@/hooks/use-modal-dialog";
 import { unreadReplies } from "@/lib/origin-unread";
 import { CREATES_FOLDERS_AND_GROUPS, SIDEBAR_HAS_SEARCH, SIDEBAR_ROW_EXTRAS, SIDEBAR_ACTIONS_IN_FOOTER, SIDEBAR_SHOWS_LOOSE_BOTS, SIDEBAR_THREAD_TREE, SHOWS_CHIEF_LABEL, WORKSPACE_NAV, NEW_PROJECT_DIALOG, PROFILE_AT_TOP } from "@/lib/origin-teams";
 import { ProjectMark } from "./ProjectMark";
@@ -1447,6 +1448,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   collapseToIcons?: boolean;
 }) {
   const { state, dispatch } = useStore();
+  const originPage = useOriginPage();
   const now = useRelativeNow();
   const cloudOwner = useCloudOwner(state.config?.cloudHome === true);
   const endHowTo = useCallback(() => {
@@ -1567,7 +1569,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   useEffect(() => {
     if (!open || confirm || deletingRoom) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && !event.defaultPrevented && !modalOpen(document)) onClose();
     };
     document.addEventListener("keydown", closeOnEscape);
     return () => document.removeEventListener("keydown", closeOnEscape);
@@ -1809,7 +1811,10 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const attention = crossBotAttentionThreads(state.bots, state.pendingQueued, undefined, state.groups);
   const pinnedThreads = crossBotPinnedThreads(state.bots, state.groups, state.pendingQueued);
   const pendingBotUndo = teamFeedback?.restoreBot;
-  const botRow = (bot: Bot) => botRowProps(state, dispatch, bot, { density, quiet: quietRows, query: q, onMenu: setMenu });
+  const botRow = (bot: Bot) => {
+    const props = botRowProps(state, dispatch, bot, { density, quiet: quietRows, query: q, onMenu: setMenu });
+    return originPage ? { ...props, selected: false, mascotMotion: null } : props;
+  };
 
   const renderHeaderActions = (bottom: boolean) => (
     <>
@@ -2148,7 +2153,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           {WORKSPACE_NAV && <OriginNav density={density} />}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
             <SidebarProjects projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} {...originRows.rowProps(bot)} />}
-              archived={originRows.isArchived} selectedId={state.activeView === "chat" ? state.selectedId : null}
+              archived={originRows.isArchived} selectedId={state.activeView === "chat" && !originPage ? state.selectedId : null}
               onNewProject={createsProjects ? () => dispatch({ type: "toggleNewBot", open: true }) : undefined} />
           )}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && <SidebarGroups groups={[

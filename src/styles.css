@@ -108,12 +108,19 @@
 .file-chip .table-action { width: 24px; height: 24px; min-width: 24px; min-height: 24px; border-radius: 9999px; }
 
 @theme {
-  --animate-panel-in: panel-in 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-  --animate-workspace-in: workspace-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
-  --animate-pop-in: pop-in 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-  --animate-pop-out: pop-out 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  --shadow-lg: initial;
+  --shadow-xl: initial;
+  --shadow-2xl: initial;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --default-transition-duration: var(--motion-base);
+  --default-transition-timing-function: var(--ease-out);
+  --animate-panel-in: panel-in var(--motion-slow) var(--ease-out);
+  --animate-workspace-in: workspace-in var(--motion-base) var(--ease-out);
+  --animate-pop-in: pop-in var(--motion-slow) var(--ease-out);
+  --animate-pop-out: pop-out var(--motion-exit) var(--ease-in) forwards;
   --animate-caret: caret-blink 1s step-end infinite;
-  --animate-msg-in: msg-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-msg-in: msg-in var(--motion-base) var(--ease-out);
   --animate-shimmer: shimmer 2s linear infinite;
   --animate-status-pulse: status-pulse 1.6s steps(2, jump-none) infinite;
   /* onboarding: a block of copy or a row arriving in a beat; `.stagger`
@@ -181,19 +188,27 @@
 /* Tokens that no utility generates — declared outside `@theme` so Tailwind
    can't tree-shake them away, and so a skin can redefine them freely. */
 :root {
-  --chat-bubble-max: 42rem;
-  --chat-bubble-pct: 78%;
+  --motion-fast: 120ms;
+  --motion-base: 160ms;
+  --motion-slow: 200ms;
+  --motion-exit: 140ms;
+  --chat-bubble-max: 35rem;
+  --chat-bubble-pct: 80%;
   --chat-card-pct: 88%;
+  /* .chat-column: fills a narrow pane, then stops at this width and centers, so wider windows only grow the gutters. */
+  --chat-column-max: 60rem;
 }
 :root[data-chat-width="wide"] {
   --chat-bubble-max: 64rem;
   --chat-bubble-pct: 92%;
   --chat-card-pct: 94%;
+  --chat-column-max: 80rem;
 }
 :root[data-chat-width="full"] {
   --chat-bubble-max: 100%;
   --chat-bubble-pct: 96%;
   --chat-card-pct: 96%;
+  --chat-column-max: 100%;
 }
 
 :root {
@@ -1099,6 +1114,7 @@ body {
    keyboard focus scrolls them clear, and the scrollbar runs only between the
    bars (a bar over it would swallow the drag). */
 .glass-scroller {
+  isolation: isolate;
   scroll-padding-top: var(--glass-top, 0px);
   scroll-padding-bottom: calc(var(--glass-bottom, 0px) + var(--glass-bottom-reach, 0px));
 }
@@ -1109,6 +1125,17 @@ body {
 .glass-scroller-content {
   padding-top: var(--glass-top, 0px);
   padding-bottom: calc(var(--glass-bottom, 0px) + var(--glass-bottom-reach, 0px));
+}
+/* The transcript and its composer share one centered column with a fixed cap. The transcript sits
+   inside the scroller's px-5; the dock spans the pane and holds the composer's own px-5, so it adds
+   that padding to the same cap and the composer's edges meet the transcript's. */
+.chat-column {
+  margin-inline: auto;
+  max-width: var(--chat-column-max);
+}
+.chat-column-dock {
+  margin-inline: auto;
+  max-width: calc(var(--chat-column-max) + 2.5rem);
 }
 @media (prefers-reduced-transparency: reduce) {
   .glass-bar::before {
@@ -1236,7 +1263,7 @@ body {
   to { transform: none; opacity: 1; }
 }
 .reply-bubble-in {
-  animation: bubble-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: bubble-in var(--motion-slow) var(--ease-out) both;
 }
 /* mascot arrives at the tail */
 @keyframes turn-mascot-in {
@@ -2222,12 +2249,12 @@ button:disabled.bg-danger {
   0%, 100% { transform: scale(1); opacity: 0.55; }
   50% { transform: scale(1.08); opacity: 0.9; }
 }
-.origin-overlay-in { animation: origin-fade-in 0.12s ease-out both; }
-.origin-overlay-out { animation: origin-fade-out 0.12s ease-out both; }
-.origin-sheet-in { animation: origin-sheet-in 0.16s cubic-bezier(0.2, 0, 0, 1) both; }
-.origin-sheet-out { animation: origin-sheet-out 0.12s ease-out both; }
-.origin-tile-in { animation: origin-tile-in 0.16s cubic-bezier(0.2, 0, 0, 1) both; }
-.origin-rise { animation: origin-sheet-in 0.16s cubic-bezier(0.2, 0, 0, 1) both; }
+.origin-overlay-in { animation: origin-fade-in var(--motion-fast) var(--ease-out) both; }
+.origin-overlay-out { animation: origin-fade-out var(--motion-exit) var(--ease-in) both; }
+.origin-sheet-in { animation: origin-sheet-in var(--motion-base) var(--ease-out) both; }
+.origin-sheet-out { animation: origin-sheet-out var(--motion-exit) var(--ease-in) both; }
+.origin-tile-in { animation: origin-tile-in var(--motion-base) var(--ease-out) both; }
+.origin-rise { animation: origin-sheet-in var(--motion-base) var(--ease-out) both; }
 .origin-float-up { animation: origin-float-up 1.6s cubic-bezier(0.2, 0, 0, 1) forwards; }
 .origin-pop-badge { animation: origin-pop-badge 0.14s ease-out both; }
 .origin-breathe { animation: origin-breathe 2.4s ease-in-out infinite; }

@@ -2,10 +2,10 @@ import { useEffect, useRef } from "react";
 import { cloudQueryOnce, useCloudQuery } from "./origin-cloud";
 import { showOriginNotification } from "./notify";
 import { useOpenOriginNotification, type OriginNotificationTarget } from "./origin-notification-open";
-import { currentOriginPage } from "./origin-pages";
+import { currentOriginPage, openOriginPage } from "./origin-pages";
 
 export type InboxAlertRow = OriginNotificationTarget & {
-  _id: string; kind: "assignment" | "comment" | "mention"; read: boolean; createdAt: number;
+  _id: string; kind: "assignment" | "comment" | "mention" | "digest"; read: boolean; createdAt: number;
   actorName: string; preview?: string; taskTitle?: string; projectName?: string;
 };
 
@@ -14,6 +14,7 @@ type Summary = { unread: number; more: boolean; latest: string | null };
 const FRESH_MS = 120_000;
 
 export function inboxAlert(row: InboxAlertRow): { tag: string; title: string; body: string } {
+  if (row.kind === "digest") return { tag: row._id, title: `${row.actorName}'s standup${row.projectName ? ` for ${row.projectName}` : ""}`, body: row.preview || "Open your Origin inbox" };
   const title = row.kind === "mention"
     ? `${row.actorName} tagged you${row.agentThreadId ? " in an agent thread" : row.messageId ? " in chat" : ""}`
     : row.kind === "comment" ? `${row.actorName} commented` : `${row.actorName} assigned you`;
@@ -46,7 +47,7 @@ export function useOriginInboxAlerts(teamId: string | null): { unread: number; m
         const row = page[0];
         if (!freshAlert(row, latest, Date.now())) return;
         if (document.hasFocus() && currentOriginPage() === "inbox") return;
-        showOriginNotification(inboxAlert(row), () => { opener.current(row); });
+        showOriginNotification(inboxAlert(row), () => { if (row.kind === "digest") openOriginPage("inbox"); else opener.current(row); });
       })
       .catch(() => undefined);
   }, [teamId, latest, loaded]);

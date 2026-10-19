@@ -5,7 +5,6 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { DurationSequencer } from "./scripts/testing/duration-sequencer.ts";
 import { hostTimeout } from "./server/testing/host-timeout.ts";
-import { excalidrawFonts } from "./scripts/excalidraw-fonts.ts";
 
 // The About dialog's version, inlined at build time: the preload bridge is
 // absent in dev.
@@ -14,7 +13,7 @@ const { version } = JSON.parse(
 ) as { version: string };
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), excalidrawFonts()],
+  plugins: [react(), tailwindcss()],
   define: {
     __APP_VERSION__: JSON.stringify(version),
   },

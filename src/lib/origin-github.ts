@@ -56,8 +56,9 @@ export const originGitHub = {
   /** Deletes the Origin issue after removing its GitHub issue; a failure on GitHub keeps both. */
   deleteIssue: (projectId: string, taskId: string) =>
     call<{ message: string; github: GitHubIssueRemoval | null }>("/api/github/issues/delete", { method: "POST", body: JSON.stringify({ projectId, taskId }) }),
-  review: (projectId: string, number: number, action: "approve" | "merge", body?: string) =>
-    call<{ approved?: boolean; merged?: boolean; sha?: string; completed?: number[] }>("/api/github/pull-requests/review", { method: "POST", body: JSON.stringify({ projectId, number, action, ...(body ? { body } : {}) }) }),
+  /** A merge with `headSha` is refused when the pull request has a newer head than the one shown. */
+  review: (projectId: string, number: number, action: "approve" | "merge", body?: string, headSha?: string) =>
+    call<{ approved?: boolean; merged?: boolean; sha?: string; completed?: number[] }>("/api/github/pull-requests/review", { method: "POST", body: JSON.stringify({ projectId, number, action, ...(body ? { body } : {}), ...(headSha ? { headSha } : {}) }) }),
 };
 
 export interface GitHubRepository { fullName: string; url: string; private: boolean }

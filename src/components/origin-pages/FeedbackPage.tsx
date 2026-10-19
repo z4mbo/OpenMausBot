@@ -20,17 +20,19 @@ const statusTone: Record<CloudFeedbackEntry["status"], string> = { new: "bg-acce
 export function FeedbackPage({ onOpenIssue, ...props }: FeedbackPageProps) {
   return (
     <CloudGate {...props} label="Feedback">
-      {({ project, projectId, canEdit, isAdmin }) => project.teamId
-        ? <Feedback project={project} teamId={project.teamId} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenIssue={onOpenIssue} />
+      {({ project, projectId, canEdit }) => project.teamId
+        ? <Feedback project={project} teamId={project.teamId} projectId={projectId} canEdit={canEdit} onOpenIssue={onOpenIssue} />
         : <EmptyState icon={<MessageSquareHeart size={22} />} title="Feedback needs a workspace project" body="Move this project into a shared workspace to collect feedback." />}
     </CloudGate>
   );
 }
 
-function Feedback({ project, teamId, projectId, canEdit, isAdmin, onOpenIssue }: {
-  project: CloudProject; teamId: string; projectId: string; canEdit: boolean; isAdmin: boolean; onOpenIssue?(taskId: string): void;
+function Feedback({ project, teamId, projectId, canEdit, onOpenIssue }: {
+  project: CloudProject; teamId: string; projectId: string; canEdit: boolean; onOpenIssue?(taskId: string): void;
 }) {
   const appAddress = useAppAddress();
+  const access = useCloudQuery<{ role: string }>("workspaces:access", { teamId });
+  const isAdmin = access?.role === "owner" || access?.role === "admin";
   const portals = useCloudQuery<CloudFeedbackPortal[]>("feedback:portals", { teamId });
   const portal = portals?.find((item) => item.projectId === projectId);
   const entries = useCloudQuery<CloudFeedbackEntry[]>("feedback:list", portal ? { teamId, portalId: portal._id } : "skip");

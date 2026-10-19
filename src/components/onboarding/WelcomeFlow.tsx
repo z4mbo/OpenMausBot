@@ -82,7 +82,7 @@ export function WelcomeFlow({
   onOpenOrganisation,
 }: {
   bot: Bot | null;
-  onDone: () => void;
+  onDone: (reason: "completed" | "skipped") => void;
   replay?: boolean;
   initialBeat?: BeatId;
   embedded?: boolean;
@@ -134,7 +134,7 @@ export function WelcomeFlow({
       finishing.current = true;
       track("onboarding_completed", { reason, at: beat, replay });
       setEmailGateDone("submitted");
-      onDone();
+      onDone(reason);
       try {
         const config = await api("/api/config", { method: "PUT", body: JSON.stringify(completionPatch(new Date(), { member })), signal: AbortSignal.timeout(10_000) });
         dispatch({ type: "configStatus", config });
@@ -205,7 +205,7 @@ export function WelcomeFlow({
         aria-label={t("onboarding.dialog")}
         tabIndex={-1}
         onKeyDown={onKeyDown}
-        className="welcome-card relative flex max-h-full w-full flex-col overflow-y-auto rounded-2xl border border-hairline/40 bg-panel p-5 sm:p-8 shadow-[0_30px_80px_-28px_rgba(0,0,0,0.45),0_8px_24px_-12px_rgba(0,0,0,0.25)] outline-none"
+        className="welcome-card relative flex max-h-full w-full flex-col overflow-y-auto rounded-2xl border border-hairline/40 bg-panel p-5 sm:p-8 outline-none"
         style={{ maxWidth: beatWidth(beat) }}
       >
         {locked ? (

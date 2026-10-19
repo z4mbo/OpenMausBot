@@ -33,6 +33,11 @@ function topLayer(document: Document): Layer | undefined {
   return active.findLast((layer) => !active.some((child) => child.parent?.current === layer.panel));
 }
 
+/** Whether a modal dialog is open in `document`; it owns Escape while it is. */
+export function modalOpen(document: Document): boolean {
+  return topLayer(document) !== undefined;
+}
+
 function focusPanel(panel: HTMLElement) {
   (tabStops(panel)[0] ?? panel).focus();
 }

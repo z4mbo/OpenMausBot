@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import { MOTION_MS } from "@/lib/motion";
 
-/** Same length as `--animate-pop-in` in styles.css. */
-export const MENU_MOTION_MS = 200;
+export const MENU_MOTION_MS = MOTION_MS.exit;
 
 export function reducedMotion(): boolean {
   if (typeof document === "undefined") return false;

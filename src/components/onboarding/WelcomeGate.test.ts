@@ -195,9 +195,19 @@ describe("who gets the welcome flow", () => {
     store.state = { ...store.state, appSettingsOpen: false };
     const resumed = gate(LOCAL_VIEWER).tree!;
     expect(resumed.props.initialBeat).toBe("engines");
-    (resumed.props.onDone as () => void)();
+    (resumed.props.onDone as (reason: string) => void)("completed");
     store.state = { ...store.state, welcomeOpen: true };
     expect(gate(LOCAL_VIEWER).tree?.props.initialBeat).toBeUndefined();
+  });
+
+  it("starts the app tour after finishing the welcome, not after skipping it", () => {
+    vi.stubGlobal("window", LOCAL_PAGE);
+    const tour = { type: "toggleTour", open: true };
+    const done = gate(LOCAL_VIEWER).tree!.props.onDone as (reason: string) => void;
+    done("skipped");
+    expect(store.dispatch).not.toHaveBeenCalledWith(tour);
+    done("completed");
+    expect(store.dispatch).toHaveBeenCalledWith(tour);
   });
 });
 

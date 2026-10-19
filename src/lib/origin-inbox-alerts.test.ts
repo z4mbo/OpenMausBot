@@ -10,6 +10,7 @@ describe("Origin inbox alerts", () => {
     expect(inboxAlert(row({ kind: "assignment", taskTitle: "Fix login", projectName: "Kai" }))).toMatchObject({ title: "Ana assigned you", body: "Fix login · Kai" });
     expect(inboxAlert(row({ kind: "comment", projectName: "Kai" })).body).toBe("Kai");
     expect(inboxAlert(row({})).body).toBe("Open your Origin inbox");
+    expect(inboxAlert(row({ kind: "digest", actorName: "Ada", projectName: "Kai", preview: "1 blocker" }))).toEqual({ tag: "n1", title: "Ada's standup for Kai", body: "1 blocker" });
   });
 
   it("alerts only for the newest notification while it is unread and just arrived", () => {

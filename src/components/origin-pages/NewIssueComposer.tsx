@@ -38,6 +38,7 @@ export function NewIssueComposer({ projects, loading = false, emptyNote, initial
   const projectId = editable.some((project) => project.id === chosen) ? chosen : null;
   const project = editable.find((item) => item.id === projectId);
   const action = useAction();
+  const draft = useState({ title: initialDraft?.title ?? "", description: initialDraft?.description ?? "" });
   const heading = (
     <div className="flex min-w-0 items-center gap-1.5 text-[13px]">
       {project ? (
@@ -57,7 +58,7 @@ export function NewIssueComposer({ projects, loading = false, emptyNote, initial
       ) : !project ? (
         <ProjectChoice projects={editable} onChoose={setChosen} />
       ) : (
-        <IssueForm key={project.id} project={project} initialColumnId={initialColumnId} initialDraft={initialDraft} myEmail={myEmail}
+        <IssueForm key={project.id} project={project} initialColumnId={initialColumnId} draft={draft} myEmail={myEmail}
           agents={agentsFor?.(project.id) ?? []} action={action} onCreated={(issue) => onCreated(project.id, issue.taskId, issue)} />
       )}
     </IssueDialog>
@@ -103,10 +104,12 @@ function ProjectChoice({ projects, onChoose }: { projects: readonly ComposerProj
   );
 }
 
-function IssueForm({ project, initialColumnId, initialDraft, myEmail, agents, action, onCreated }: {
+type Draft = { title: string; description: string };
+
+function IssueForm({ project, initialColumnId, draft: [{ title, description }, setDraft], myEmail, agents, action, onCreated }: {
   project: ComposerProject;
   initialColumnId?: string;
-  initialDraft?: { title?: string; description?: string };
+  draft: [Draft, (update: (draft: Draft) => Draft) => void];
   myEmail?: string;
   agents: readonly IssueAgent[];
   action: ReturnType<typeof useAction>;
@@ -115,8 +118,6 @@ function IssueForm({ project, initialColumnId, initialDraft, myEmail, agents, ac
   const projectId = project.id;
   const board = useCloudQuery<CloudBoard>("tasks:board", { projectId });
   const people = useCloudQuery<CloudPerson[]>("members:people", { projectId });
-  const [title, setTitle] = useState(initialDraft?.title ?? "");
-  const [description, setDescription] = useState(initialDraft?.description ?? "");
   const [columnId, setColumnId] = useState(initialColumnId ?? "");
   const [priority, setPriority] = useState<Priority>("medium");
   const [assignee, setAssignee] = useState("");
@@ -150,11 +151,11 @@ function IssueForm({ project, initialColumnId, initialDraft, myEmail, agents, ac
     <form onSubmit={(event) => void submit(event)} className="flex min-h-[400px] flex-col px-6 pb-5 pt-2 max-sm:px-5"
       onKeyDown={(event) => { if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) { event.preventDefault(); void submit(); } }}>
       <textarea ref={titleInput} rows={1} aria-label="Issue title" placeholder="Issue title" value={title} maxLength={250} required disabled={action.busy}
-        onChange={(event) => setTitle(event.target.value.replace(/\n/g, " "))}
+        onChange={(event) => { const next = event.target.value.replace(/\n/g, " "); setDraft((current) => ({ ...current, title: next })); }}
         onKeyDown={(event) => { if (event.key === "Enter" && !event.metaKey && !event.ctrlKey) event.preventDefault(); }}
         className={issueTitleClass} />
       <textarea aria-label="Issue description" placeholder="Add a description…" rows={5} value={description} disabled={action.busy}
-        onChange={(event) => setDescription(event.target.value)}
+        onChange={(event) => { const next = event.target.value; setDraft((current) => ({ ...current, description: next })); }}
         className={cn(issueDescriptionClass, "flex-1")} />
       <IssueChips>
         <ChipSelect label="Status" value={column?._id ?? ""} options={statusOptions(columns)} onChange={setColumnId} icon={<CircleDashed size={14} aria-hidden="true" />} disabled={action.busy || !columns.length} />

@@ -6,6 +6,8 @@ import type { MausState } from "@/lib/mascot";
 import { hintSeenPatch } from "@/lib/onboarding";
 import { sendKeyLabel, useSendKey } from "@/lib/send-key";
 import type { LocaleKey } from "@/locales";
+import { setChiefSectionOf } from "@/lib/origin-chief-section";
+import { openOriginPage } from "@/lib/origin-pages";
 import { api, useStore } from "@/state/store";
 import { Spotlight } from "./Spotlight";
 
@@ -54,13 +56,18 @@ export function GuidedTour() {
   const entered = useRef<string | null>(null);
   const [fallback, setFallback] = useState<string | null>(null);
   const sendKey = useSendKey();
+  const selected = useRef(state.selectedId);
+  selected.current = state.selectedId;
 
   useEffect(() => {
     if (!state.tourOpen) return;
     closed.current = false;
     setDismissed(false);
     setFailed(false);
-  }, [state.tourOpen]);
+    dispatch({ type: "showChat" });
+    openOriginPage(null);
+    if (selected.current) setChiefSectionOf(selected.current, "chat");
+  }, [state.tourOpen, dispatch]);
 
   const run = useCallback(
     (effect: TourEffect | undefined) => {

@@ -50,6 +50,13 @@ describe("isOutboundTool", () => {
       expect(isOutboundTool(name), name).toBe(false);
     }
   });
+
+  it("reads Origin's Broadcast tools by their act, only under the built-in agents server", () => {
+    for (const name of ["origin_broadcast_list", "mcp__agents__origin_broadcast_draft", "agents__origin_broadcast_schedule", "agents_origin_broadcast_list"]) {
+      expect(isOutboundTool(name), name).toBe(false);
+    }
+    expect(isOutboundTool("mcp__other__origin_broadcast_schedule")).toBe(true);
+  });
 });
 
 describe("isReadOnlyTool", () => {

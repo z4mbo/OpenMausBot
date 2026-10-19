@@ -35,7 +35,7 @@ export const chipButton =
 /** Clears the glass header a page scrolls beneath; `--glass-top` is the header's height, published by its frame. */
 export const underGlass = "pt-[calc(var(--glass-top,0px)+1.25rem)] [scroll-padding-top:var(--glass-top,0px)]";
 /** The scrolling body every project and workspace page shares. */
-export const pageClass = `flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-4 pb-5 md:px-6 ${underGlass} motion-safe:animate-[rise_0.18s_cubic-bezier(0.22,1,0.36,1)_backwards]`;
+export const pageClass = `flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-4 pb-5 md:px-6 ${underGlass} motion-safe:animate-[rise_var(--motion-base)_var(--ease-out)_backwards]`;
 
 function GateShell({ children }: { children: ReactNode }) {
   return <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]">{children}</div>;

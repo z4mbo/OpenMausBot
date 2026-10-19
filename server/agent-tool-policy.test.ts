@@ -23,7 +23,10 @@ describe("built-in agent tool read policy", () => {
       "origin_repo_status",
       "origin_team_chat",
       "origin_feedback",
-      "origin_draw",
+      "origin_canvas",
+      "origin_broadcast_list",
+      "origin_studio_list",
+      "origin_pipeline_list_leads",
     ]);
     for (const name of READ_ONLY_AGENT_TOOL_NAMES) {
       expect(isReadOnlyAgentTool(name)).toBe(true);

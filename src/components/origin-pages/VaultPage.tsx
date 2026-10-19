@@ -22,7 +22,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
   const items = useCloudQuery<CloudCredential[]>("credentials:list", { projectId });
   const [passphrase, setPassphrase] = useState("");
   const [unlocked, setUnlocked] = useState(false);
-  const [revealed, setRevealed] = useState<Record<string, string>>({});
+  const [revealed, setRevealed] = useState<Record<string, { ciphertext: string; value: string }>>({});
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<CloudCredential | "new" | null>(null);
   const [notice, setNotice] = useState("");
@@ -70,8 +70,9 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
       setBusy(false);
     }
   };
+  const shown = (item: CloudCredential) => (revealed[item._id]?.ciphertext === item.ciphertext ? revealed[item._id]!.value : undefined);
   const reveal = async (item: CloudCredential, copy = false) => {
-    if (!copy && revealed[item._id]) {
+    if (!copy && shown(item) !== undefined) {
       setRevealed((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== item._id)));
       return;
     }
@@ -80,7 +81,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
       const value = await decryptSecret(item, passphrase);
       if (started !== epoch.current) return;
       if (copy) setNotice((await copyText(value)) === "copied" ? `Copied ${item.title}` : "Could not copy");
-      else setRevealed((current) => ({ ...current, [item._id]: value }));
+      else setRevealed((current) => ({ ...current, [item._id]: { ciphertext: item.ciphertext, value } }));
     } catch {
       setNotice("Could not decrypt this item with this passphrase");
     }
@@ -130,12 +131,12 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
                   {item.username && <span className="text-ink-secondary">{item.username}</span>}
                   {item.url && <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 truncate text-accent-text hover:underline">{item.url}<ExternalLink size={10} /></a>}
                 </div>
-                {revealed[item._id] !== undefined && <code className="mt-1.5 block whitespace-pre-wrap break-all rounded-md bg-inset px-2 py-1 font-mono text-[12px] text-ink">{revealed[item._id]}</code>}
+                {shown(item) !== undefined && <code className="mt-1.5 block whitespace-pre-wrap break-all rounded-md bg-inset px-2 py-1 font-mono text-[12px] text-ink">{shown(item)}</code>}
               </div>
               {unlocked && (
                 <div className="flex shrink-0 items-center">
-                  <button type="button" className={iconButton} title={revealed[item._id] !== undefined ? "Hide secret" : "Reveal secret"} aria-label={`${revealed[item._id] !== undefined ? "Hide" : "Reveal"} ${item.title}`} onClick={() => void reveal(item)}>
-                    {revealed[item._id] !== undefined ? <EyeOff size={14} /> : <Eye size={14} />}
+                  <button type="button" className={iconButton} title={shown(item) !== undefined ? "Hide secret" : "Reveal secret"} aria-label={`${shown(item) !== undefined ? "Hide" : "Reveal"} ${item.title}`} onClick={() => void reveal(item)}>
+                    {shown(item) !== undefined ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                   <button type="button" className={iconButton} title="Copy secret" aria-label={`Copy ${item.title}`} onClick={() => void reveal(item, true)}><Copy size={14} /></button>
                   {canEdit && <button type="button" className={iconButton} title="Edit" aria-label={`Edit ${item.title}`} onClick={() => setEditing(item)}><Pencil size={14} /></button>}

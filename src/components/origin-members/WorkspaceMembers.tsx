@@ -162,7 +162,7 @@ function MemberRow({ member, isMe, canManage, busy, onRole, onRemove }: {
     if (!await onRemove()) { setRemoving(false); setConfirming(false); }
   };
   return (
-    <li className={cn("flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 transition-[background-color,opacity] duration-200 motion-safe:animate-pop-in",
+    <li className={cn("flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 transition-[background-color,opacity] duration-(--motion-slow) motion-safe:animate-pop-in",
       confirming ? "bg-danger/[0.05]" : "hover:bg-raised/30", removing && "opacity-50")}>
       <MemberAvatar person={member} />
       <div className="min-w-0 flex-1">

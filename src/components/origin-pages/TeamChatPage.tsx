@@ -255,7 +255,11 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
                     )}
                   </div>
                   {editing?.id === message.id ? (
-                    <form className="mt-1 flex flex-col gap-1.5" onSubmit={(event) => { event.preventDefault(); void change(message.id, { body: editing.body }).then((saved) => { if (saved) setEditing(null); }); }}>
+                    <form className="mt-1 flex flex-col gap-1.5" onSubmit={(event) => {
+                      event.preventDefault();
+                      const submitted = editing;
+                      void change(message.id, { body: submitted.body }).then((saved) => { if (saved) setEditing((current) => (current === submitted ? null : current)); });
+                    }}>
                       <textarea className={cn(inputClass, "min-h-[60px]")} aria-label="Edit message" value={editing.body} onChange={(event) => setEditing({ id: message.id, body: event.target.value })} />
                       <div className="flex gap-2">
                         <button type="submit" className={primaryButton}>Save</button>

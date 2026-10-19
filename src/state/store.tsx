@@ -167,6 +167,7 @@ export interface Message extends Pick<import("../../shared/wire").WireMessage, "
   threadRef?: { botId: string; threadId: string; title: string };
   dataResult?: import("../../shared/wire").WireMessage["dataResult"];
   originIssues?: import("../../shared/wire").WireMessage["originIssues"];
+  originPullRequest?: import("../../shared/wire").WireMessage["originPullRequest"];
   queued?: boolean;
   queueId?: string;
 }
@@ -549,6 +550,7 @@ export type AppSettingsSection =
   | "appearance"
   | "experimental"
   | "connections"
+  | "integrations"
   | "decisionModel"
   | "engines"
   | "companion"

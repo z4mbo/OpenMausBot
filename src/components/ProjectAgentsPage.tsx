@@ -16,7 +16,7 @@ import { UnreadBadge } from "./UnreadBadge";
 
 const chosenAgent = new Map<string, string>();
 
-const iconButton = "flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-secondary transition-colors duration-150 hover:bg-raised hover:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60";
+const iconButton = "flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-secondary transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60";
 
 export function ProjectAgentsPage({ lead, agents }: { lead: Bot; agents: readonly Bot[] }) {
   const { dispatch } = useStore();
@@ -55,7 +55,7 @@ export function ProjectAgentsPage({ lead, agents }: { lead: Bot; agents: readonl
           {!agents.length && (
             <li className="flex flex-col items-start gap-2 px-2 pt-4 text-[13px] text-ink-secondary">
               <span>{lead.name} works alone for now.</span>
-              {team && <button type="button" onClick={() => setAdding(true)} className="rounded-lg bg-raised px-2.5 py-1 font-medium text-ink transition-colors duration-150 hover:bg-raised-hover">New agent</button>}
+              {team && <button type="button" onClick={() => setAdding(true)} className="rounded-lg bg-raised px-2.5 py-1 font-medium text-ink transition-colors duration-(--motion-fast) hover:bg-raised-hover">New agent</button>}
             </li>
           )}
         </ul>
@@ -94,7 +94,7 @@ function AgentRow({ bot, lead = false, active = false, onSelect }: { bot: Bot; l
   return (
     <li>
       <button type="button" onClick={onSelect} aria-current={active ? "true" : undefined}
-        className={cn("flex w-full min-w-0 items-center gap-3 rounded-xl px-2 py-2 text-left outline-none transition-colors duration-150 focus-visible:ring-1 focus-visible:ring-accent/60",
+        className={cn("flex w-full min-w-0 items-center gap-3 rounded-xl px-2 py-2 text-left outline-none transition-colors duration-(--motion-fast) focus-visible:ring-1 focus-visible:ring-accent/60",
           active ? "bg-raised" : "hover:bg-raised/50")}>
         <span className="relative shrink-0">
           <BotAvatar bot={bot} size={32} animated={working} state={working ? "working" : undefined} />

@@ -106,3 +106,27 @@ describe("issue movement during an unfinished animation", () => {
     expect(active(card).at(-1)?.frames[0].transform).toBe("translate(0px, 50px)");
   });
 });
+
+function Lane({ ids }: { ids: string[] }) {
+  const container = useRef<HTMLDivElement>(null);
+  useFlip(container, 0);
+  return createElement("div", { ref: container }, ids.map((id) => createElement("article", { key: id, "data-flip-id": id }, id)));
+}
+const renderLane = (ids: string[]) => flushSync(() => root.render(createElement(Lane, { ids })));
+const arrivals = () => motions.filter((motion) => motion.frames[0].opacity === 0).map((motion) => motion.element.dataset.flipId);
+
+describe("issue arrival", () => {
+  it("fades in a card that joins the board, not the cards already shown", () => {
+    renderLane(["a"]);
+    expect(arrivals()).toEqual([]);
+    renderLane(["a", "b"]);
+    expect(arrivals()).toEqual(["b"]);
+  });
+
+  it("shows a joining card at once under reduced motion", () => {
+    reduced = true;
+    renderLane(["a"]);
+    renderLane(["a", "b"]);
+    expect(arrivals()).toEqual([]);
+  });
+});

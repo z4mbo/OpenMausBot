@@ -129,7 +129,7 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
         <div data-sidebar-archived-projects className="mt-1 flex flex-col gap-0.5">
           <button type="button" aria-expanded={shelfOpen} onClick={() => setShelfOpen((value) => !value)}
             className="group/shelf flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] text-ink-tertiary transition-colors hover:bg-raised/50 hover:text-ink-secondary">
-            <ChevronRight size={12} className={cn("shrink-0 transition-transform duration-200", shelfOpen && "rotate-90")} aria-hidden="true" />
+            <ChevronRight size={12} className={cn("shrink-0 transition-transform duration-(--motion-slow)", shelfOpen && "rotate-90")} aria-hidden="true" />
             <Archive size={12} className="shrink-0" aria-hidden="true" />
             <span className="flex-1 text-left">Archived</span>
             <span className="rounded-full bg-raised/70 px-1.5 text-[10.5px] tabular-nums leading-4 text-ink-tertiary">{shelved.length}</span>

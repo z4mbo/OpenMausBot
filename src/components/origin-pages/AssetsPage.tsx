@@ -1,6 +1,6 @@
 import { useRef, useState, type FormEvent } from "react";
 import { Select } from "../Select";
-import { ExternalLink, File, Image as ImageIcon, Loader2, Palette, Pencil, Plus, Search, Trash2, Upload } from "lucide-react";
+import { File, Image as ImageIcon, Loader2, Palette, Pencil, Plus, Search, Trash2, Upload } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import type { AssetType, CloudDesign, CloudDesignAsset, CloudDesignToken, TokenType } from "./cloud-types";
@@ -68,19 +68,20 @@ function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean })
             {assets.map((asset) => {
               const href = asset.fileUrl || asset.url || undefined;
               return (
-                <article key={asset._id} className={cn(cardClass, "group flex flex-col overflow-hidden")}>
+                <article key={asset._id} className={cn(cardClass, "group relative flex flex-col overflow-hidden")}>
                   <a href={href} target="_blank" rel="noreferrer" aria-label={`Open ${asset.name}`} className="flex h-32 items-center justify-center bg-inset">
                     {href && (asset.type === "image" || asset.type === "icon") ? <img src={href} alt={asset.name} loading="lazy" className="size-full object-contain" /> : <File size={30} className="text-ink-tertiary" />}
                   </a>
-                  <div className="flex items-start gap-1 p-3">
-                    <div className="min-w-0 flex-1">
-                      <strong className="block truncate text-[13px] font-medium text-ink" title={asset.name}>{asset.name}</strong>
-                      <small className="text-[11.5px] text-ink-tertiary">{asset.type}{asset.size ? ` · ${Math.ceil(asset.size / 1024)} KB` : ""}</small>
-                      {asset.notes && <p className="mt-1 line-clamp-3 text-[12px] text-ink-secondary">{asset.notes}</p>}
+                  {canEdit && (
+                    <div className="absolute right-2 top-2 flex gap-0.5 rounded-lg border border-hairline/40 bg-panel p-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 touch:opacity-100">
+                      <button type="button" className={iconButton} title="Edit asset" aria-label={`Edit ${asset.name}`} onClick={() => setEditing(asset)}><Pencil size={13} /></button>
+                      <button type="button" className={iconButton} title="Delete asset" aria-label={`Delete ${asset.name}`} onClick={() => removeAsset(asset)}><Trash2 size={13} /></button>
                     </div>
-                    {href && <a className={iconButton} href={href} target="_blank" rel="noreferrer" title="Open asset" aria-label={`Open ${asset.name} in a new tab`}><ExternalLink size={13} /></a>}
-                    {canEdit && <button type="button" className={iconButton} title="Edit asset" aria-label={`Edit ${asset.name}`} onClick={() => setEditing(asset)}><Pencil size={13} /></button>}
-                    {canEdit && <button type="button" className={iconButton} title="Delete asset" aria-label={`Delete ${asset.name}`} onClick={() => removeAsset(asset)}><Trash2 size={13} /></button>}
+                  )}
+                  <div className="min-w-0 p-3">
+                    <strong className="block truncate text-[13px] font-medium text-ink" title={asset.name}>{asset.name}</strong>
+                    <small className="text-[11.5px] text-ink-tertiary">{asset.type}{asset.size ? ` · ${Math.ceil(asset.size / 1024)} KB` : ""}</small>
+                    {asset.notes && <p className="mt-1 line-clamp-3 text-[12px] text-ink-secondary">{asset.notes}</p>}
                   </div>
                 </article>
               );
@@ -118,6 +119,7 @@ async function uploadFile(projectId: string, file: File): Promise<string> {
 
 function AssetEditor({ projectId, canEdit, asset, onClose }: { projectId: string; canEdit: boolean; asset: CloudDesignAsset | null; onClose(): void }) {
   const [files, setFiles] = useState<File[]>([]);
+  const [saved, setSaved] = useState<ReadonlySet<File>>(new Set());
   const [name, setName] = useState(asset?.name ?? "");
   const [type, setType] = useState<AssetType>(asset?.type ?? "image");
   const [url, setUrl] = useState(asset?.url ?? "");
@@ -131,6 +133,7 @@ function AssetEditor({ projectId, canEdit, asset, onClose }: { projectId: string
     if (tooBig) { action.setError(`${tooBig.name} is over 15 MB`); return; }
     action.setError("");
     setFiles(selection);
+    setSaved(new Set());
     if (selection[0]) { setName(selection[0].name.slice(0, 150)); setType(assetFileType(selection[0])); }
   };
   const save = async (event: FormEvent) => {
@@ -146,13 +149,15 @@ function AssetEditor({ projectId, canEdit, asset, onClose }: { projectId: string
         await cloudMutation("design:createAsset", { projectId, type, name, url, ...(notes ? { notes } : {}) });
         return;
       }
-      for (const [index, file] of files.entries()) {
-        setProgress(`Uploading ${index + 1} of ${files.length}`);
+      const unsaved = files.filter((file) => !saved.has(file));
+      for (const [index, file] of unsaved.entries()) {
+        setProgress(`Uploading ${index + 1} of ${unsaved.length}`);
         const storageId = await uploadFile(projectId, file);
         await cloudMutation("design:createAsset", {
           projectId, storageId, type: batch ? assetFileType(file) : type, name: batch ? file.name.slice(0, 150) : name,
           ...(notes ? { notes } : {}), ...(file.type ? { contentType: file.type } : {}), size: file.size,
         });
+        setSaved((current) => new Set(current).add(file));
       }
     }, "Could not save asset");
     setProgress("");
@@ -189,7 +194,7 @@ function AssetEditor({ projectId, canEdit, asset, onClose }: { projectId: string
         {action.error && <Notice tone="danger">{action.error}</Notice>}
         {progress && <Notice>{progress}</Notice>}
         <button className={primaryButton} disabled={action.busy || !canEdit}>
-          {action.busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}{asset ? "Save asset" : batch ? `Save ${files.length} assets` : "Save asset"}
+          {action.busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}{asset ? "Save asset" : batch ? `Save ${files.length - saved.size} assets` : "Save asset"}
         </button>
       </form>
     </Modal>

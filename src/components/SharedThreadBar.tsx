@@ -79,7 +79,7 @@ export function SharedThreadBar({ bot, empty }: { bot: Bot; empty: boolean }) {
     method: "PUT", body: JSON.stringify({ threadId: task.threadId, private: value }),
   });
   return (
-    <div className="pointer-events-auto mx-5 mb-2 grid gap-2 animate-[pop-in_120ms_ease-out]" data-shared-thread>
+    <div className="pointer-events-auto mx-5 mb-2 grid gap-2 motion-safe:animate-[pop-in_var(--motion-fast)_var(--ease-out)]" data-shared-thread>
       <ReviewStrip bot={bot} />
       {noModel && (
         <div className="flex items-center justify-between gap-3 rounded-2xl border border-hairline/60 bg-raised px-4 py-2.5">

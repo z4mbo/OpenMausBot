@@ -93,6 +93,7 @@ import { RemoteRowNote, SharedThreadBar } from "./SharedThreadBar";
 import { MessageBoundary } from "./MessageBoundary";
 import { WidgetMessage } from "./widget/WidgetMessage";
 import { OriginIssuesCard } from "./OriginIssuesCard";
+import { OriginPullRequestCard } from "./OriginPullRequestCard";
 import { Composer } from "./Composer";
 import { useTeammates } from "./origin-members/teammates";
 import { useCloudProjectFor } from "@/lib/origin-cloud-links";
@@ -534,7 +535,7 @@ const Bubble = memo(function Bubble({
             "w-fit max-w-[min(var(--chat-bubble-max),var(--chat-bubble-pct))] rounded-2xl text-[15px] leading-relaxed",
             emerging && "turn-answer",
             user && webhookView
-              ? "overflow-hidden border border-accent/25 bg-card text-ink shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+              ? "overflow-hidden border border-accent/25 bg-card text-ink"
               : attachmentsOnly || split
                 ? "text-ink"
                 : user
@@ -918,6 +919,7 @@ const MessagesList = memo(function MessagesList({
               if (resultShownInBlock(m, delegated)) return null;
               if (m.dataResult) return <DataResultChip message={m} />;
               if (m.originIssues) return <OriginIssuesCard message={m} />;
+              if (m.originPullRequest) return <OriginPullRequestCard message={m} />;
               if (isStatusActivity(m)) return <StatusActivityRow message={m} />;
               if (m.tool && failedTurnCause(m.tool.name) !== null) {
                 return (
@@ -1421,7 +1423,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
       >
         <div
           ref={transcriptRef}
-          className="glass-scroller-content flex w-full flex-col gap-3"
+          className="glass-scroller-content chat-column flex w-full flex-col gap-3"
           style={{ paddingBottom: composerDock.pad }}
           role="log"
           // off: a polite log re-reads every tick and chip while the bot works; TranscriptAnnouncer speaks once when
@@ -1501,7 +1503,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
 
       <TranscriptAnnouncer threadKey={transcriptKey} snapshot={announcement} />
 
-      <div ref={composerDockRef} className="pointer-events-none absolute inset-x-0 bottom-0 z-[2]">
+      <div ref={composerDockRef} className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] chat-column-dock">
       {lastRunStep && showRun(recordedRun) && showRunCard && runDismissed.get(transcriptKey) !== lastRunStep.id && (
         <div className="flex justify-end px-5 pb-2">
           <VerifyCard

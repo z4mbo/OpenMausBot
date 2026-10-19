@@ -1,6 +1,7 @@
 // The agents tool catalog and which tools a turn sees: definitions only, no environment, no calls.
 import { CREDENTIAL_TARGETS } from "../../shared/credential-request.ts";
 import { OPTIONS_CARD_LIMITS, WATCHER_OPTIONS_CARD_BOT_ID } from "../../shared/options-card.ts";
+import { STUDIO_CUSTOM_MODEL, STUDIO_MODELS } from "../../shared/studio.ts";
 import { agentToolAnnotations } from "../agent-tool-policy.ts";
 import { WIDGET_TOOL_DEFINITIONS } from "./agents-widget-tools.ts";
 
@@ -364,11 +365,179 @@ const ORIGIN_TOOL_DEFINITIONS = [
     },
   },
   {
-    name: "origin_draw",
-    description: "List an Origin project's Draw canvases, or read one: its element counts, the text on it top to bottom, and its links." + ORIGIN_SCOPE,
+    name: "origin_canvas",
+    description: "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images and their layout, editable with origin_canvas_edit." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
-      properties: { canvas: { type: "string", maxLength: 120, description: "Canvas name or id; omit to list them." }, project: ORIGIN_PROJECT },
+      properties: {
+        canvas: { type: "string", maxLength: 120, description: "Canvas name or id; omit to list them." },
+        node: { type: "string", maxLength: 100, description: "Read only this node and its children." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_canvas_edit",
+    description: "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both}; children of a layout frame need no x, y, and grow:true shares its free space. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        canvas: { type: "string", maxLength: 120, description: "Canvas name or id; optional when the project has one." },
+        new_canvas: { type: "string", maxLength: 80, description: "Start a new canvas with this name and apply ops to it." },
+        ops: { type: "array", minItems: 1, maxItems: 200, items: { type: "object" } },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["ops"],
+    },
+  },
+  {
+    name: "origin_studio_generate",
+    description: "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live. count makes several variations. Images and audio wait for the result (up to 40 s); video returns at once. Keep the good ones with origin_studio_save_asset." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        mode: { type: "string", enum: ["image", "video", "audio", "edit"], description: "edit changes or upscales an existing image asset. Default image." },
+        prompt: { type: "string", maxLength: 8_000, description: "What to make; for an ElevenLabs voice, the words spoken." },
+        model: { type: "string", enum: [...STUDIO_MODELS.map((model) => model.id), STUDIO_CUSTOM_MODEL], description: "Default: the mode's first model. Models ending in image-to-video, edit or upscale need source_asset_id." },
+        aspect_ratio: { type: "string", maxLength: 10, description: "Such as 1:1, 16:9, 9:16." },
+        duration: { type: "string", maxLength: 10, description: "Video or audio length, such as 5, 8s or 30s." },
+        voice: { type: "string", maxLength: 40, description: "ElevenLabs voice name, such as Rachel or Brian." },
+        count: { type: "integer", minimum: 1, maximum: 4 },
+        source_asset_id: { type: "string", maxLength: 64, description: "An image asset id from origin_list_assets to start from." },
+        endpoint: { type: "string", maxLength: 200, description: "With model custom: any fal.ai endpoint id, such as a deployed ComfyUI workflow." },
+        input: { type: "object", description: "With model custom: the endpoint's whole input." },
+        wait: { type: "boolean", description: "Wait for the result. Default true except for video." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_studio_list",
+    description: "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Broadcast." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        status: { type: "string", enum: ["queued", "running", "done", "failed"] },
+        limit: { type: "integer", minimum: 1, maximum: 30, description: "Default 15." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_studio_save_asset",
+    description: "Save a finished Studio generation to the project's Assets (all its outputs, or one with index), and with broadcast true also pick it for Broadcast posts. Returns the asset ids." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        generation_id: { type: "string", minLength: 1, maxLength: 64, description: "From origin_studio_list or origin_studio_generate." },
+        index: { type: "integer", minimum: 0, maximum: 7, description: "One output; omit for all." },
+        broadcast: { type: "boolean", description: "Also pick it for Broadcast." },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["generation_id"],
+    },
+  },
+  {
+    name: "origin_broadcast_draft",
+    description: "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        post_id: { type: "string", maxLength: 64, description: "Omit to draft a new post." },
+        channels: { type: "array", maxItems: 6, uniqueItems: true, items: { type: "string", enum: ["x", "bluesky", "linkedin", "facebook", "instagram", "tiktok"] }, description: "Required for a new post." },
+        text: { type: "string", maxLength: 64_000, description: "Text for every channel." },
+        texts: { type: "object", additionalProperties: { type: "string", maxLength: 64_000 }, description: "Per-channel text that replaces text, keyed by channel." },
+        media: { type: "array", maxItems: 20, items: { type: "string", maxLength: 200 }, description: "Asset names or ids from origin_list_assets; [] removes all." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_broadcast_list",
+    description: "List an Origin project's Broadcast posts: id, status, approval, schedule, channels with their published links or errors, media and text." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: { status: { type: "string", enum: ["all", "draft", "scheduled", "publishing", "published", "failed"], description: "Default all." }, project: ORIGIN_PROJECT },
+    },
+  },
+  {
+    name: "origin_broadcast_schedule",
+    description: "Schedule an approved Broadcast post to publish at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        post_id: { type: "string", minLength: 1, maxLength: 64 },
+        at: { type: "string", maxLength: 40, description: "ISO 8601 time with offset; omit to publish now." },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["post_id"],
+    },
+  },
+  {
+    name: "origin_pipeline_list_leads",
+    description: "List an Origin project's sales pipeline: totals per stage and its leads (id, stage, contact details, value, owner, next step), filtered by stage or a search; or read one lead with its notes and timeline (emails, texts, calls with summaries) with lead_id." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        stage: { type: "string", maxLength: 40, description: "New, Contacted, Qualified, Proposal, Won or Lost." },
+        query: { type: "string", maxLength: 200, description: "Matches name, company, email, phone, notes and tags." },
+        lead_id: { type: "string", maxLength: 64, description: "Read this lead in full." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_pipeline_upsert_lead",
+    description: "Add a lead you researched to an Origin project's pipeline, or change one with lead_id. A lead with the same email is updated instead of duplicated. Only add real people or companies you found; never invent contact details." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        lead_id: { type: "string", maxLength: 64, description: "Omit to add a lead." },
+        name: { type: "string", maxLength: 200, description: "Required for a new lead." },
+        company: { type: "string", maxLength: 200 },
+        email: { type: "string", maxLength: 254 },
+        phone: { type: "string", maxLength: 40, description: "With its country code, like +39 333 123 4567." },
+        source: { type: "string", maxLength: 60, description: "Where you found them; default agent research." },
+        stage: { type: "string", maxLength: 40 },
+        value: { type: "number", minimum: 0, description: "Expected deal value in the project's currency." },
+        tags: { type: "array", maxItems: 12, items: { type: "string", maxLength: 40 } },
+        notes: { type: "string", maxLength: 8_000, description: "What you know about them and why they fit; cite your sources." },
+        next_step: { type: "string", maxLength: 300 },
+        next_due: { type: "string", maxLength: 10, description: "YYYY-MM-DD." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_pipeline_log_activity",
+    description: "Record something that already happened with a lead on its Pipeline timeline: a note, or an email, text or call that took place outside Origin. Sends nothing." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        lead_id: { type: "string", minLength: 1, maxLength: 64 },
+        kind: { type: "string", enum: ["note", "email", "sms", "whatsapp", "call", "ai_call"], description: "Default note." },
+        subject: { type: "string", maxLength: 300 },
+        body: { type: "string", maxLength: 20_000 },
+        summary: { type: "string", maxLength: 8_000 },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["lead_id"],
+    },
+  },
+  {
+    name: "origin_pipeline_contact",
+    description: "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Unless the project's admin turned on auto-send, nothing goes out until a person approves your draft in the app; say so instead of retrying. AI calls are summarised into the lead's timeline when they end." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        lead_id: { type: "string", minLength: 1, maxLength: 64 },
+        channel: { type: "string", enum: ["email", "sms", "whatsapp", "ai_call"] },
+        subject: { type: "string", maxLength: 300, description: "Email only." },
+        body: { type: "string", maxLength: 20_000, description: "The email or message text." },
+        goal: { type: "string", maxLength: 8_000, description: "AI call only: its goal and script." },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["lead_id", "channel"],
     },
   },
 ];
@@ -437,7 +606,8 @@ const TOOL_DEFINITIONS = [
       message: { type: "string", minLength: 1, maxLength: 4000, description: "Question or task for these teammates; later requests in the same conversation can build on earlier ones. Send separate requests when responsibilities differ." },
       reason: { type: "string", maxLength: 200, description: "Optional one line for the person about why this goes to them (shown as a chip)." },
       rework: { type: "boolean", description: "True only to send concrete work again to someone whose request already finished or failed: a correction, a re-check or a retry." },
-      thread: { type: "string", enum: ["standing", "new"], description: "standing (default): the one work thread this conversation has with each teammate. new: open a new thread on the teammate for this, its own history and run; its result still returns here." },
+      thread: { type: "string", enum: ["standing", "new"], description: "standing (default): this conversation's one work thread with each teammate. new: a new thread on the teammate, its own history and run (in_my_folder: in your folder); its result still returns here." },
+      in_my_folder: { type: "boolean" },
       reply: { type: "string", enum: ["resume", "none"], description: "resume (default): the result resumes you. none: a one-way notice that is never awaited; nothing comes back and nothing resumes you." },
       consult: { type: "boolean", description: "True for a question: the teammate answers from what it knows, acting on nothing, and you are resumed with the answer. Leave out for work." },
       done_when: { type: "string", maxLength: 1000, description: "Optional: what must be true for this to count as done, in one or two sentences; the teammate is held to it." },
