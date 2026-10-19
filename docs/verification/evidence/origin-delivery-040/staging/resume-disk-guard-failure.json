@@ -1,0 +1,5 @@
+{
+  "error": "Command failed: ssh -o BatchMode=yes -o ConnectTimeout=15 hetzner python3 -\nTraceback (most recent call last):\n  File \"<stdin>\", line 10, in <module>\nAssertionError\n",
+  "externalOutcomeRequiresReconciliation": true,
+  "failedAt": "2026-10-19T21:15:48.490Z"
+}

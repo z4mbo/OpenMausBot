@@ -1,0 +1,181 @@
+{
+  "downloadLinks": [
+    {
+      "text": "Download",
+      "url": "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+    },
+    {
+      "text": "Download for Windows",
+      "url": "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+    },
+    {
+      "text": "Download for Windows",
+      "url": "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+    },
+    {
+      "text": "Download for Mac",
+      "url": "https://origin.imbored.fun/downloads/Origin-Mac-AppleSilicon.dmg"
+    },
+    {
+      "text": "Intel build",
+      "url": "https://origin.imbored.fun/downloads/Origin-Mac-Intel.dmg"
+    }
+  ],
+  "h1": "Every project gets a team of agents that ships.",
+  "images": [
+    {
+      "complete": true,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/chief.svg"
+    },
+    {
+      "complete": true,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/researcher.svg"
+    },
+    {
+      "complete": true,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/product-manager.svg"
+    },
+    {
+      "complete": true,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/designer.svg"
+    },
+    {
+      "complete": true,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/developer.svg"
+    },
+    {
+      "complete": true,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/marketer.svg"
+    },
+    {
+      "complete": true,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/copywriter.svg"
+    },
+    {
+      "complete": true,
+      "naturalWidth": 1160,
+      "src": "/landing/issues.webp"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/chief.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/researcher.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/product-manager.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/designer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/developer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/marketer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/copywriter.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/developer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/designer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/chief.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/developer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/designer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/developer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/developer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/chief.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/chief.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/researcher.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/product-manager.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/designer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/developer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/marketer.svg"
+    },
+    {
+      "complete": false,
+      "naturalWidth": 150,
+      "src": "/landing/avatars/copywriter.svg"
+    }
+  ],
+  "scrollWidth": 1270,
+  "title": "Origin | Agent teams that ship your projects",
+  "url": "https://origin.imbored.fun/",
+  "width": 1280
+}

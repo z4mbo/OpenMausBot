@@ -1,0 +1,12 @@
+{
+  "code": 0,
+  "signal": null,
+  "pid": 35324,
+  "finishedAt": "2026-10-19T21:00:16.711Z",
+  "retainedOwnTempEntries": [
+    "omb-cline-mcp-AfCgH5",
+    "omb-cline-mcp-mO4tcU",
+    "omb-cline-mcp-yF35Lv"
+  ],
+  "qualification": "Extracted Windows server/browser resources under Node, fresh whitelisted environment. Child process/listener closure must be independently checked; no installed executable or GUI acceptance."
+}

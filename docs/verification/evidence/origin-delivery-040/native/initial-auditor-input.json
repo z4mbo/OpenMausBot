@@ -1,0 +1,56 @@
+{
+  "repo": "C:\\Users\\aless\\Documents\\Origin-bugfix",
+  "frozenSource": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "version": "0.2.15",
+  "nativeRun": 39318738462,
+  "runJson": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifact-preparation-040\\download-native-run.json",
+  "jobsJson": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifact-preparation-040\\download-native-jobs.json",
+  "artifactsJson": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifact-preparation-040\\native-artifacts.json",
+  "artifactArchives": [
+    {
+      "name": "origin-mac",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifact-preparation-040\\raw\\origin-mac.zip"
+    },
+    {
+      "name": "origin-windows",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifact-preparation-040\\raw\\origin-windows.zip"
+    }
+  ],
+  "distributionDir": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.15",
+  "outputDir": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results",
+  "targets": [
+    {
+      "label": "mac-arm64",
+      "platform": "mac",
+      "arch": "arm64",
+      "archive": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifacts\\0.2.15\\mac\\Origin-0.2.15-arm64.zip",
+      "extractedTo": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\mac-arm64"
+    },
+    {
+      "label": "mac-x64",
+      "platform": "mac",
+      "arch": "x64",
+      "archive": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifacts\\0.2.15\\mac\\Origin-0.2.15-x64.zip",
+      "extractedTo": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\mac-x64"
+    },
+    {
+      "label": "windows-x64",
+      "platform": "windows",
+      "arch": "x64",
+      "archive": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifacts\\0.2.15\\windows\\Origin-0.2.15-x64.zip",
+      "resourceRelative": "resources",
+      "extractedTo": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\windows"
+    }
+  ],
+  "feeds": [
+    {
+      "label": "mac",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifacts\\0.2.15\\mac\\latest-mac.yml"
+    },
+    {
+      "label": "windows",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\artifacts\\0.2.15\\windows\\latest.yml"
+    }
+  ],
+  "nodePath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\runtimes\\node-v24.21.0-win-x64\\node.exe"
+}

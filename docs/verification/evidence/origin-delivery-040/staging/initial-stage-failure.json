@@ -1,0 +1,13 @@
+{
+  "cycle": "040",
+  "version": "0.2.15",
+  "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "nativeRun": 39318738462,
+  "nativeAttempt": 2,
+  "phase": "stage-host",
+  "failedAt": "2026-10-19T21:14:43.131Z",
+  "error": "Command failed: ssh hetzner python3 -",
+  "unknownExternalOutcomeMustBeReconciled": true,
+  "partialFilesRetained": true,
+  "publicMutation": false
+}

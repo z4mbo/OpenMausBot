@@ -1,0 +1,14 @@
+{
+  "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "version": "0.2.15",
+  "releaseId": 417743732,
+  "inputsSha256": "a55211b64255cbf23ee344cca08b29d6f326b46ed8e30a4f06d8be7a340b6e04",
+  "preflight": ".omb-scratch/delivery-evidence-040/publication/preflight-8b663116-7579-4438-a241-27703300351d",
+  "startedAt": "2026-10-19T21:21:33.580Z",
+  "order": [
+    "github",
+    "downloads",
+    "site"
+  ],
+  "unknownOutcomeRequiresReconciliation": true
+}

@@ -1,0 +1,20 @@
+{
+  "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "baselineSource": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "backendReused": true,
+  "newBackendDeployment": false,
+  "paths": [
+    "backend",
+    "shared/origin-columns.ts",
+    "shared/origin-site-address.ts",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "tsconfig.json",
+    ".npmrc",
+    ".pnpmfile.cjs",
+    ".pnpmfile.mjs",
+    "convex.json"
+  ],
+  "rootPackageDifference": "version only",
+  "verifiedAt": "2026-10-19T21:09:49.971Z"
+}

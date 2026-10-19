@@ -1,0 +1,7 @@
+{"validatedMetadata": "site", "version": "0.2.15", "files": 152}
+rollbackImage=origin-rollback:before-20261019T212158Z-65ce3eaf-3045-4088-bd76-ac415f622d23
+rollbackContext=/root/origin.bak-20261019T212158Z-65ce3eaf-3045-4088-bd76-ac415f622d23-0.2.15
+image=sha256:91b6d2d7ade9b89ac21a95e76b4870c5ee246ad204f8f1acf21112278d0e51ef
+rollbackImage=origin-rollback:before-20261019T212158Z-65ce3eaf-3045-4088-bd76-ac415f622d23
+rollbackContext=/root/origin.bak-20261019T212158Z-65ce3eaf-3045-4088-bd76-ac415f622d23-0.2.15
+source=cf9e6fdec944700aa1ee395d05512afbaf95da97
