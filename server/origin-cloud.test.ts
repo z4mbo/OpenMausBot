@@ -515,7 +515,13 @@ describe("origin_add_asset", () => {
   });
 });
 
-async function serve(options: { auth?: RequestAuth; agentTurn?: (header: string | string[] | undefined) => OriginAgentTurn | null; answers?: Record<string, unknown>; rooms?: string[] } = {}) {
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((ready) => { resolve = ready; });
+  return { promise, resolve };
+}
+
+async function serve(options: { auth?: RequestAuth; agentTurn?: (header: string | string[] | undefined) => OriginAgentTurn | null; answers?: Record<string, unknown>; rooms?: string[]; connect?: (url: string) => OriginCloudClient } = {}) {
   const file = tempFile();
   const fake = fakeConvex(options.answers ?? { "auth:me": { email: "me@x.dev" }, "tasks:board": BOARD });
   const appended: Array<{ threadId: string; message: Omit<Message, "id" | "at"> }> = [];
@@ -529,7 +535,7 @@ async function serve(options: { auth?: RequestAuth; agentTurn?: (header: string 
     store: store as never,
     agentTurn: options.agentTurn ?? ((header) => (header === "Bearer cap-coder" ? { botId: "coder", threadId: "coder-thread" } : header === "Bearer cap-room" ? { botId: "coder", threadId: "room-thread" } : null)),
     file,
-    connect: () => fake.client,
+    connect: options.connect ?? (() => fake.client),
   })];
   const server = createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
@@ -586,6 +592,91 @@ describe("origin-cloud routes", () => {
     expect(await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "bo" })).toEqual([409, { error: "This app is connected to another Origin account" }]);
     expect((await call("PUT", "/api/origin/cloud-session", { url: "http://127.0.0.1:3210", sessionToken: "ana" }))[0]).toBe(200);
     expect(readOriginCloud(file).sessionToken).toBe("ana");
+  });
+
+  it("keeps a replacement session when an older disconnect finishes checking its expired owner", async () => {
+    const checking = deferred<void>();
+    const expiredOwner = deferred<null>();
+    let expiredChecks = 0;
+    const { call, file } = await serve({ answers: {
+      "auth:me": (args: Record<string, unknown>) => {
+        if (args.sessionToken !== "expired-a") return { email: "bo@x.dev" };
+        if (++expiredChecks !== 1) return null;
+        checking.resolve();
+        return expiredOwner.promise;
+      },
+    } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { url, sessionToken: "expired-a", projects: { chief: "proj" } });
+    const disconnect = call("DELETE", "/api/origin/cloud-session");
+    await checking.promise;
+    try {
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "replacement-b" }))[0]).toBe(200);
+    } finally {
+      expiredOwner.resolve(null);
+    }
+    const result = await disconnect;
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "replacement-b", projects: { chief: "proj" } });
+    expect(result[0]).toBe(409);
+  });
+
+  it("keeps the newer account when an older connection finishes checking a superseded owner", async () => {
+    const checking = deferred<void>();
+    const expiredOwner = deferred<null>();
+    let expiredChecks = 0;
+    const { call, file } = await serve({ answers: {
+      "auth:me": (args: Record<string, unknown>) => {
+        if (args.sessionToken !== "expired-a") return { email: args.sessionToken === "replacement-b" ? "bo@x.dev" : "ana@x.dev" };
+        if (++expiredChecks !== 1) return null;
+        checking.resolve();
+        return expiredOwner.promise;
+      },
+    } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { url, sessionToken: "expired-a", projects: { chief: "proj" } });
+    const olderConnect = call("PUT", "/api/origin/cloud-session", { url, sessionToken: "older-c" });
+    await checking.promise;
+    try {
+      expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "replacement-b" }))[0]).toBe(200);
+    } finally {
+      expiredOwner.resolve(null);
+    }
+    const result = await olderConnect;
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "replacement-b", projects: { chief: "proj" } });
+    expect(result[0]).toBe(409);
+  });
+
+  it("checks the stored owner when different deployments issue the same token text", async () => {
+    const url = "http://127.0.0.1:3210";
+    const otherUrl = "http://127.0.0.1:3212";
+    const { call, file } = await serve({ connect: (deployment) => ({
+      query: async () => ({ email: deployment === url ? "ana@x.dev" : "bo@x.dev" }),
+      mutation: async () => null,
+    }) });
+    writeOriginCloud(file, { url, sessionToken: "same-token", projects: { chief: "proj" } });
+    expect((await call("PUT", "/api/origin/cloud-session", { url: otherUrl, sessionToken: "same-token" }))[0]).toBe(409);
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "same-token", projects: { chief: "proj" } });
+  });
+
+  it.each(["PUT", "DELETE"])("keeps the stored account when %s cannot verify its owner", async (method) => {
+    const { call, file } = await serve({ answers: { "auth:me": (args: Record<string, unknown>) => {
+      if (args.sessionToken === "stored-secret") throw new Error("lookup failed for stored-secret");
+      return { email: "ana@x.dev" };
+    } } });
+    const state = { url: "http://127.0.0.1:3210", sessionToken: "stored-secret", projects: { chief: "proj" } };
+    writeOriginCloud(file, state);
+    const result = await call(method, "/api/origin/cloud-session", method === "PUT" ? { url: state.url, sessionToken: "replacement" } : undefined);
+    expect(result[0]).toBe(502);
+    expect(JSON.stringify(result)).not.toContain("stored-secret");
+    expect(readOriginCloud(file)).toEqual(state);
+  });
+
+  it("allows the same account to refresh its token while preserving project links", async () => {
+    const { call, file } = await serve({ answers: { "auth:me": { email: "Ana@x.dev" } } });
+    const url = "http://127.0.0.1:3210";
+    writeOriginCloud(file, { url, sessionToken: "stored-ana", projects: { chief: "proj" } });
+    expect((await call("PUT", "/api/origin/cloud-session", { url, sessionToken: "refreshed-ana" }))[0]).toBe(200);
+    expect(readOriginCloud(file)).toEqual({ url, sessionToken: "refreshed-ana", projects: { chief: "proj" } });
   });
 
   it("refuses a bad address or a token Origin does not accept", async () => {

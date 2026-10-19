@@ -1054,12 +1054,17 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
   const { store, agentTurn } = deps;
   const file = () => deps.file ?? defaultOriginCloudFile();
   const connect = deps.connect ?? convexOriginClient;
-  /** The email of the account whose session the bots use, while Origin still accepts it; null when there is none. */
-  const storedSessionEmail = async (unless?: string): Promise<string | null> => {
-    const { url, sessionToken } = readOriginCloud(file());
-    if (!url || !sessionToken || sessionToken === unless) return null;
-    const owner = await connect(url).query("auth:me", { sessionToken }).then(record, (): Args => ({}));
-    return text(owner.email).toLowerCase() || null;
+  type Session = Pick<OriginCloudState, "url" | "sessionToken">;
+  const sameSession = (left: Session, right: Session) => left.url === right.url && left.sessionToken === right.sessionToken;
+  const storedSessionOwner = async (state: Session, replacement?: Session): Promise<{ verified: true; email: string | null } | { verified: false }> => {
+    const { url, sessionToken } = state;
+    if (!url || !sessionToken || (replacement && sameSession(state, replacement))) return { verified: true, email: null };
+    try {
+      const owner = record(await connect(url).query("auth:me", { sessionToken }));
+      return { verified: true, email: text(owner.email).toLowerCase() || null };
+    } catch {
+      return { verified: false };
+    }
   };
   return async ({ req, res, path, method, auth, json, readBody }) => {
     if (method === "POST" && path === "/api/internal/origin/tool") {
@@ -1113,8 +1118,13 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
       return json(res, 200, { cloudProjectId: state.projects[id] ?? null });
     }
     if (method === "DELETE") {
-      if (await storedSessionEmail()) return json(res, 409, { error: "The Origin connection belongs to an account that is still signed in" });
-      writeOriginCloud(file(), { projects: readOriginCloud(file()).projects });
+      const previous = readOriginCloud(file());
+      const owner = await storedSessionOwner(previous);
+      if (!owner.verified) return json(res, 502, { error: "The signed-in Origin account could not be checked. Try again." });
+      if (owner.email) return json(res, 409, { error: "The Origin connection belongs to an account that is still signed in" });
+      const current = readOriginCloud(file());
+      if (!sameSession(previous, current)) return json(res, 409, { error: "The Origin connection changed while it was being checked. Try again." });
+      writeOriginCloud(file(), { projects: current.projects });
       return json(res, 200, { url: null, connected: false });
     }
     const body = record(await readBody(req));
@@ -1129,9 +1139,13 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
       return json(res, 502, { error: `Origin did not answer: ${convexMessage(error, sessionToken)}` });
     }
     if (!text(user.email)) return json(res, 400, { error: "Origin did not accept this session token" });
-    const owner = await storedSessionEmail(sessionToken);
-    if (owner && owner !== text(user.email).toLowerCase()) return json(res, 409, { error: "This app is connected to another Origin account" });
-    writeOriginCloud(file(), { url, sessionToken, projects: readOriginCloud(file()).projects });
+    const previous = readOriginCloud(file());
+    const owner = await storedSessionOwner(previous, { url, sessionToken });
+    if (!owner.verified) return json(res, 502, { error: "The signed-in Origin account could not be checked. Try again." });
+    if (owner.email && owner.email !== text(user.email).toLowerCase()) return json(res, 409, { error: "This app is connected to another Origin account" });
+    const current = readOriginCloud(file());
+    if (!sameSession(previous, current)) return json(res, 409, { error: "The Origin connection changed while it was being checked. Try again." });
+    writeOriginCloud(file(), { url, sessionToken, projects: current.projects });
     return json(res, 200, { url, connected: true });
   };
 }
