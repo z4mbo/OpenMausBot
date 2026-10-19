@@ -1,0 +1,57 @@
+Browser tab: 17, Title: "Origin local client A", URL: "http://127.0.0.1:5174/__origin-local-two-client.html".
+1 AXWebArea Origin local client A, URL: 127.0.0.1:5174/__origin-local-two-client.html
+	2 container
+		3 container root
+			4 container
+				5 heading Client A · actual local Origin account flow, Value: 1
+					6 text Client  A  · actual local Origin account flow
+				7 text Real local Convex, OriginGate, account dialog and member panel. Component harness; no full desktop synchronization claim. Backend:  http://127.0.0.1:51527  · browser origin:  http://127.0.0.1:5174  · independent profile:  e2b905b3  · session fingerprint:  signed out
+				8 button Open actual account dialog
+			70 container
+				71 image Origin
+				72 heading Sign in to Origin, Value: 1
+					73 text Sign in to Origin
+				74 text Pick up your workspaces where you left them.
+				75 container
+					76 text Email
+					77 text field (settable) Email
+				78 container
+					79 text Password
+					80 text field (settable) Password
+				81 container
+					82 text Invite link Optional
+					83 text field (settable) Invite link Optional
+				84 button (disabled) Sign in
+				85 text New to Origin? 
+				86 button Create an account
+				87 button (collapsed) Server, Secondary Actions: Expand
+			54 container
+				55 button (expanded) Persisted real subscription observations, Secondary Actions: Collapse
+					56 text Persisted real subscription observations
+				57 content list Local subscription observations
+					58 container
+						59 text 2026-10-19T06:26:56.741Z  ·  session :  signed out
+					60 container
+						61 text 2026-10-19T06:27:20.527Z  ·  session :  1390f68a95ac
+					62 container
+						63 text 2026-10-19T06:27:20.535Z  ·  workspace-list :  Fixture Owner's workspace:owner
+					64 container
+						65 text 2026-10-19T06:27:20.542Z  ·  access-subscription :  owner
+					88 container
+						89 text 2026-10-19T06:28:54.070Z  ·  access-subscription :  denied
+					90 container
+						91 text 2026-10-19T06:28:54.076Z  ·  session :  signed out
+		66 container Origin account
+			67 heading Origin account, Value: 2
+				68 text Origin account
+			69 button Close
+			92 container
+				93 text Origin backend URL
+				94 text field (settable) Origin backend URL, Value: http://127.0.0.1:51527
+				95 text Email
+				96 text field (settable) Email
+				97 text Password
+				98 text field (settable) Password
+				99 button (disabled) Sign in
+
+The focused UI element is 66 container Origin account

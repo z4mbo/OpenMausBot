@@ -1,0 +1,95 @@
+import assert from 'node:assert/strict';
+import { spawn, spawnSync, execFileSync } from 'node:child_process';
+import { createHash, randomBytes } from 'node:crypto';
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, symlinkSync, writeFileSync } from 'node:fs';
+import { createServer } from 'node:net';
+import { resolve, dirname, relative, parse } from 'node:path';
+import { createInterface } from 'node:readline';
+
+assert.equal(process.version, 'v24.21.0');
+const root = resolve(import.meta.dirname, '..');
+const folder = resolve(root, '.omb-scratch/batch-a-native-039');
+assert.ok(!existsSync(folder), 'A previous fixture must be reconciled before another launch');
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+const binary = resolve(process.env.LOCALAPPDATA, 'convex/binaries/precompiled-2026-10-10-72ce13c/convex-local-backend.exe');
+assert.equal(sha(readFileSync(binary)), '19b2f9a0fbbd11b4bcb583d71fce54511a3eb9f8f19c68d5739167a0ec7c191a');
+for (const path of ['private', 'profile/AppData/Local', 'profile/AppData/Roaming', 'temp', 'data', 'source/backend', 'logs']) mkdirSync(resolve(folder, path), { recursive: true });
+const project = resolve(folder, 'source'), backend = resolve(project, 'backend');
+const sourceFiles = [];
+for (const name of ['convex', 'lib', 'package.json']) cpSync(resolve(root, 'backend', name), resolve(backend, name), { recursive: true, errorOnExist: true, force: false });
+cpSync(resolve(root, 'shared'), resolve(project, 'shared'), { recursive: true, errorOnExist: true, force: false });
+cpSync(resolve(root, 'package.json'), resolve(project, 'package.json'), { errorOnExist: true, force: false });
+symlinkSync(resolve(root, 'backend/node_modules'), resolve(backend, 'node_modules'), 'junction');
+symlinkSync(resolve(root, 'node_modules'), resolve(project, 'node_modules'), 'junction');
+function bind(port) { return new Promise((resolvePort, reject) => { const server = createServer(); server.once('error', reject); server.listen(port, '127.0.0.1', () => resolvePort(server)); }); }
+let holders, cloudPort, sitePort;
+for (let attempt = 0; attempt < 12; attempt++) {
+  const first = await bind(0); cloudPort = first.address().port; sitePort = cloudPort + 1;
+  if ([3210, 3211, 5199, 8799].includes(cloudPort) || [3210, 3211, 5199, 8799].includes(sitePort) || sitePort > 65535) { first.close(); continue; }
+  try { holders = [first, await bind(sitePort)]; break; } catch { first.close(); }
+}
+assert.equal(holders?.length, 2);
+const url = `http://127.0.0.1:${cloudPort}`, siteUrl = `http://127.0.0.1:${sitePort}`;
+const instance = `origin-fixture-039-${randomBytes(4).toString('hex')}`, instanceSecret = randomBytes(32).toString('hex');
+const profile = resolve(folder, 'profile');
+const env = {
+  SystemRoot: process.env.SystemRoot, WINDIR: process.env.WINDIR,
+  ComSpec: process.env.ComSpec, PATH: `${dirname(process.execPath)};${resolve(process.env.SystemRoot, 'System32')}`,
+  HOME: profile, USERPROFILE: profile, HOMEDRIVE: parse(profile).root.slice(0, 2), HOMEPATH: profile.slice(2),
+  LOCALAPPDATA: resolve(profile, 'AppData/Local'), APPDATA: resolve(profile, 'AppData/Roaming'),
+  TEMP: resolve(folder, 'temp'), TMP: resolve(folder, 'temp'),
+  CONVEX_AGENT_MODE: 'anonymous', CI: '1', DO_NOT_TRACK: '1', NO_COLOR: '1', DISABLE_BEACON: 'true'
+};
+const keygen = spawnSync(binary, ['keygen', 'admin-key', '--instance-name', instance, '--instance-secret', instanceSecret], { env, windowsHide: true, encoding: 'utf8' });
+assert.equal(keygen.status, 0, 'Local key generation failed');
+const adminKey = keygen.stdout.trim(); assert.ok(adminKey.length > 40 && !adminKey.includes('\n'));
+writeFileSync(resolve(folder, 'private/credentials.json'), JSON.stringify({ url, siteUrl, instance, instanceSecret, adminKey }), { flag: 'wx' });
+const redact = text => text.replaceAll(instanceSecret, '[local-instance-secret]').replaceAll(adminKey, '[local-admin-key]');
+function snapshot(from, prefix = '') {
+  for (const item of readdirSync(from, { withFileTypes: true })) {
+    if (item.name === 'node_modules') continue;
+    const name = prefix + item.name, absolute = resolve(from, item.name);
+    if (item.isDirectory()) snapshot(absolute, `${name}/`);
+    else { const bytes = readFileSync(absolute); sourceFiles.push({ path: name, bytes: bytes.length, sha256: sha(bytes) }); }
+  }
+}
+snapshot(project);
+const record = { source: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), createdAt: new Date().toISOString(), binary, binarySha256: sha(readFileSync(binary)), url, siteUrl, instance, loopbackOnly: true, profile: relative(root, profile), data: relative(root, resolve(folder, 'data')), beaconDisabled: true, inheritedCredentialVariables: [], sourceFiles, launches: [] };
+const save = () => writeFileSync(resolve(folder, 'fixture.json'), JSON.stringify(record, null, 2));
+save();
+await Promise.all(holders.map(server => new Promise(done => server.close(done))));
+let child, chunks = [], stopped = false, restarting = false;
+async function start() {
+  chunks = [];
+  child = spawn(binary, ['--interface', '127.0.0.1', '--port', String(cloudPort), '--site-proxy-port', String(sitePort), '--convex-origin', url, '--convex-site', siteUrl, '--instance-name', instance, '--instance-secret', instanceSecret, '--disable-beacon', '--local-storage', resolve(folder, 'data/storage'), resolve(folder, 'data/backend.sqlite3')], { cwd: folder, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  const launch = { pid: child.pid, startedAt: new Date().toISOString() }; record.launches.push(launch); save();
+  for (const stream of [child.stdout, child.stderr]) stream.on('data', bytes => { if (chunks.reduce((n, b) => n + b.length, 0) < 10 * 1024 * 1024) chunks.push(Buffer.from(bytes)); });
+  child.once('exit', (code, signal) => { launch.exitCode = code; launch.signal = signal; launch.closedAt = new Date().toISOString(); writeFileSync(resolve(folder, `logs/native-${record.launches.indexOf(launch) + 1}.log`), redact(Buffer.concat(chunks).toString())); save(); });
+  let ready = false;
+  for (let i = 0; i < 100; i++) { try { const response = await fetch(`${url}/instance_name`, { signal: AbortSignal.timeout(500) }); if (response.ok && (await response.text()).replaceAll('"', '').trim() === instance) { ready = true; break; } } catch {} await new Promise(done => setTimeout(done, 200)); }
+  assert.ok(ready, 'Owned local backend did not become ready');
+  launch.readyAt = new Date().toISOString(); save();
+}
+async function stopChild() { if (!child || child.exitCode !== null) return; const exited = new Promise(done => child.once('exit', done)); child.kill(); await exited; }
+async function shutdown() { if (stopped) return; stopped = true; await stopChild(); record.stoppedAt = new Date().toISOString(); save(); console.log('Owned synthetic Convex backend stopped; data retained.'); process.exit(0); }
+process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);
+try {
+  await start();
+  const cli = resolve(root, 'backend/node_modules/convex/bin/main.js');
+  const push = spawn(process.execPath, [cli, 'dev', '--once', '--url', url, '--admin-key', adminKey, '--codegen', 'disable', '--typecheck', 'disable', '--tail-logs', 'disable'], { cwd: backend, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  const output = []; for (const stream of [push.stdout, push.stderr]) stream.on('data', bytes => output.push(Buffer.from(bytes)));
+  const pushExit = await new Promise(done => push.once('exit', done));
+  writeFileSync(resolve(folder, 'logs/push.log'), redact(Buffer.concat(output).toString()));
+  record.pushExit = pushExit; record.pushedAt = new Date().toISOString(); save();
+  assert.equal(pushExit, 0, 'Isolated code push failed; inspect sanitized fixture log');
+  const changes = [{ name: 'ORIGIN_SITE_URL', value: 'https://origin-local-fixture.invalid' }];
+  const config = await fetch(`${url}/api/update_environment_variables`, { method: 'POST', headers: { Authorization: `Convex ${adminKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ changes }), signal: AbortSignal.timeout(10000) });
+  assert.equal(config.status, 200, 'Synthetic-only environment configuration failed');
+  record.configuredNames = changes.map(item => item.name); record.readyAt = new Date().toISOString(); save();
+  console.log(JSON.stringify({ ready: true, url, siteUrl, pid: child.pid, source: record.source, root: relative(root, folder), pushExit }));
+  const input = createInterface({ input: process.stdin });
+  input.on('line', async line => {
+    if (line.trim() === 'stop') await shutdown();
+    if (line.trim() === 'restart' && !restarting && !stopped) { restarting = true; await stopChild(); await start(); record.restartMode = 'Windows exact-child termination and SQLite recovery; not a graceful shutdown claim'; save(); console.log(JSON.stringify({ restarted: true, pid: child.pid, url })); restarting = false; }
+  });
+} catch (error) { record.failure = redact(String(error)); save(); console.error(redact(String(error))); await stopChild(); process.exitCode = 1; }

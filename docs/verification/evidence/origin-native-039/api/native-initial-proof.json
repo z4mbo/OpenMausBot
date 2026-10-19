@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "source": "0745d6ef0317d42b498fecbbfdf5e5e3be6d41ce",
+  "target": "http://127.0.0.1:51527",
+  "realNativeBackend": true,
+  "realWebSocketClients": 2,
+  "runLabel": "df6bc917",
+  "startedAt": "2026-10-19T06:31:28.353Z",
+  "ledgerSha256": "d8381f547507229f13629c1edb1e98940f9661395706ac86042136be2dd72f00",
+  "steps": [
+    {
+      "name": "public-signup-login-and-invalid-password",
+      "phase": "initial",
+      "startedAt": "2026-10-19T06:31:28.404Z",
+      "status": "passed",
+      "details": {
+        "publicActions": true,
+        "invalidPasswordDenied": true
+      },
+      "completedAt": "2026-10-19T06:31:28.539Z"
+    },
+    {
+      "name": "workspace-project-bound-invitation-and-scoped-denials",
+      "phase": "initial",
+      "startedAt": "2026-10-19T06:31:28.540Z",
+      "status": "passed",
+      "details": {
+        "boundJoin": true,
+        "signupAndJoinSeparate": true,
+        "scopeDenials": true,
+        "replayDenied": true,
+        "githubRepoLater": true
+      },
+      "completedAt": "2026-10-19T06:31:28.700Z"
+    },
+    {
+      "name": "two-native-websocket-clients",
+      "phase": "initial",
+      "startedAt": "2026-10-19T06:31:28.700Z",
+      "status": "passed",
+      "details": {
+        "nativeSockets": 2,
+        "memberVisibleProjects": 1
+      },
+      "completedAt": "2026-10-19T06:31:28.729Z"
+    },
+    {
+      "name": "reusable-invitation-revoke-and-existing-role-control",
+      "phase": "initial",
+      "startedAt": "2026-10-19T06:31:28.730Z",
+      "status": "passed",
+      "details": {
+        "reusableIdempotent": true,
+        "rolePreserved": true,
+        "revokedDenied": true,
+        "projectAdminElevationDenied": true
+      },
+      "completedAt": "2026-10-19T06:31:28.773Z"
+    },
+    {
+      "name": "draft-default-concurrent-persisted-fields",
+      "phase": "initial",
+      "startedAt": "2026-10-19T06:31:28.773Z",
+      "status": "passed",
+      "details": {
+        "columnOmitted": true,
+        "activeAssigneeDueDate": true,
+        "distinctConcurrentFields": true,
+        "nativeSubscriptionObserved": true
+      },
+      "completedAt": "2026-10-19T06:31:28.857Z"
+    },
+    {
+      "name": "shared-definition-thread-idempotency-private-read",
+      "phase": "initial",
+      "startedAt": "2026-10-19T06:31:28.858Z",
+      "status": "passed",
+      "details": {
+        "definitionIdempotent": true,
+        "threadIdempotent": true,
+        "privateDenied": true,
+        "noProvider": true
+      },
+      "completedAt": "2026-10-19T06:31:28.921Z"
+    },
+    {
+      "name": "concurrent-senders-requester-idempotency-queue-handoff",
+      "phase": "initial",
+      "startedAt": "2026-10-19T06:31:28.921Z",
+      "status": "passed",
+      "details": {
+        "concurrentOneHolderOneQueued": true,
+        "idempotent": true,
+        "requesterDenials": 4,
+        "promotion": true,
+        "nativeTranscriptRows": 4
+      },
+      "completedAt": "2026-10-19T06:31:29.159Z"
+    },
+    {
+      "name": "real-elapsed-lease-takeover",
+      "phase": "initial",
+      "startedAt": "2026-10-19T06:31:29.159Z",
+      "status": "passed",
+      "details": {
+        "elapsedMilliseconds": 65053,
+        "newHolderRunning": true,
+        "oldHolderInterrupted": true,
+        "partialInterrupted": true,
+        "expiryMechanism": "public begin or real cron; not distinguished"
+      },
+      "completedAt": "2026-10-19T06:32:34.239Z"
+    }
+  ],
+  "limits": [
+    "Named native public API/WS/persistence cases only; not all BatchA, full-App/cache/native/provider acceptance.",
+    "No external URLs, admin/deploy key, mail, GitHub or model execution.",
+    "credentials-private.json contains synthetic credentials and exact IDs; DO NOT ARCHIVE.",
+    "Same-requester terminal bot writes retain120s grace; no exactly-once external-effect claim."
+  ],
+  "status": "AWAITING_ROOT_RESTART",
+  "checkpointAt": "2026-10-19T06:32:34.240Z",
+  "networkByPhase": {
+    "initial": {
+      "opened": 2,
+      "closed": 2,
+      "fetches": 0,
+      "blocked": 0
+    }
+  },
+  "scriptSha256": "7628f6c95ab1506d58c6b4a3a8c53c9d9b3297efca0e5d9afcba4550573c773f"
+}

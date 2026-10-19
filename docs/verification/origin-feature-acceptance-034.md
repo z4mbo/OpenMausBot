@@ -8,6 +8,8 @@ Historical checkpoint links: [current candidate](origin-candidate-033.md), [inte
 
 ## How to read the record
 
+The later [039 native-backend report](evidence/origin-native-039/report.md) adds **14 actual API scenario groups and 10 browser journeys** at the unchanged 0.2.14 runtime. Public auth/invitations, scoped denial, persisted edits, real WebSocket lease/queue/revocation and same-SQLite recovery pass. Actual Gate/account/Members components prove join, downgrade, independent logout, restart and removal denial through retry/reload. Counts overlap; they do not close all of Batch A or C. Full-App Chief/local-bot synchronization, private caches outside these components, continuing partitions, installed devices and external-service outcomes remain open. This is additive evidence; the historical inventory and original receipts below retain their scope.
+
 Source inspection establishes which code was reviewed. Synthetic tests/HTTP establish the named isolated logic paths. An actual browser entry means the real named renderer component or route ran with the stated fixture boundary. Packaged install/GUI and production or external-account acceptance are separate. A blank or remaining case is missing evidence, not proof of a defect. Published packages, successful CI and resource-server smoke do not validate every feature in an installed app.
 
 ## Product inventory

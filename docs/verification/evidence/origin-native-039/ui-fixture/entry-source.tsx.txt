@@ -1,0 +1,120 @@
+import { useCallback, useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { OriginGate } from "@/components/OriginGate";
+import { OriginConnectDialog } from "@/components/OriginConnect";
+import { WorkspaceMembersPanel } from "@/components/origin-members/WorkspaceMembers";
+import { cloudClient, cloudQueryOnce, functionRef, setCloudUrl } from "@/lib/origin-cloud/client";
+import { useCloudQuery, useCloudSession } from "@/lib/origin-cloud/hooks";
+import { applySkin } from "@/lib/skins";
+import "/src/styles.css";
+
+type Workspace = { _id: string; name: string; role: string };
+type Observation = { at: string; kind: string; value: string };
+const metadata = await fetch("/__origin-local-contract.json").then(response => response.json()) as { label: string; backend: string };
+const backend = new URL(metadata.backend);
+if (backend.hostname !== "127.0.0.1" || backend.protocol !== "http:" || backend.port !== "51527") throw new Error("Unexpected local backend");
+setCloudUrl(backend.origin);
+applySkin("midnight");
+const ledgerKey = "origin-local-observations";
+const selectionKey = "origin-local-selected-workspace";
+const nonceKey = "origin-local-client-nonce";
+const nonce = localStorage.getItem(nonceKey) ?? crypto.randomUUID();
+localStorage.setItem(nonceKey, nonce);
+const initialLedger = (): Observation[] => {
+  try { const value = JSON.parse(localStorage.getItem(ledgerKey) ?? "[]"); return Array.isArray(value) ? value.slice(-40) : []; }
+  catch { return []; }
+};
+
+function Workspace({ record }: { record(kind: string, value: string): void }) {
+  const session = useCloudSession();
+  const workspaces = useCloudQuery<Workspace[]>("workspaces:list", session.token ? {} : "skip");
+  const [selected, select] = useState(localStorage.getItem(selectionKey) ?? "");
+  const [check, setCheck] = useState("");
+  useEffect(() => {
+    if (workspaces) record("workspace-list", workspaces.map(workspace => `${workspace.name}:${workspace.role}`).join(", ") || "empty");
+    if (!selected && workspaces?.[0]) select(workspaces[0]._id);
+  }, [workspaces, selected, record]);
+  useEffect(() => { if (selected) localStorage.setItem(selectionKey, selected); }, [selected]);
+  useEffect(() => {
+    if (!selected || !session.token) return;
+    const client = cloudClient();
+    if (!client) return;
+    const watch = client.watchQuery(functionRef<"query">("workspaces:access"), { sessionToken: session.token, teamId: selected });
+    const read = () => {
+      try {
+        const access = watch.localQueryResult() as { role?: string } | undefined;
+        if (access) record("access-subscription", access.role ?? "unknown");
+      } catch { record("access-subscription", "denied"); }
+    };
+    const stop = watch.onUpdate(read);
+    read();
+    return stop;
+  }, [selected, session.token, record]);
+  const checkAccess = async () => {
+    try {
+      await cloudQueryOnce("workspaces:access", { teamId: selected });
+      setCheck("Allowed by the real backend"); record("explicit-access-query", "allowed");
+    } catch { setCheck("Denied by the real backend"); record("explicit-access-query", "denied"); }
+  };
+  return <main className="mx-auto max-w-4xl p-4">
+    <h2 className="text-lg font-semibold">Signed in as {session.user?.name} · {session.user?.email}</h2>
+    <label className="mt-4 block text-sm">Remembered local test workspace
+      <select aria-label="Local test workspace" className="ml-2 rounded border border-hairline bg-inset p-2" value={selected} onChange={event => select(event.target.value)}>
+        {!selected && <option value="">Choose a workspace</option>}
+        {selected && !workspaces?.some(workspace => workspace._id === selected) && <option value={selected}>Previous workspace · access not confirmed</option>}
+        {workspaces?.map(workspace => <option key={workspace._id} value={workspace._id}>{workspace.name} · {workspace.role}</option>)}
+      </select>
+    </label>
+    {selected && <>
+      <p className="mt-2 break-all text-xs text-ink-secondary">Local test target ID: {selected}</p>
+      <button className="ui-button mt-2" onClick={() => void checkAccess()}>Check selected workspace access</button>
+      {check && <p role="status" className="mt-2 text-sm">{check}</p>}
+      <WorkspaceMembersPanel cloudTeamId={selected} />
+    </>}
+  </main>;
+}
+
+function Fixture() {
+  const session = useCloudSession();
+  const [dialog, setDialog] = useState(false);
+  const [ledger, setLedger] = useState(initialLedger);
+  const [fingerprint, setFingerprint] = useState("signed out");
+  const record = useCallback((kind: string, value: string) => setLedger(current => {
+    if (current.at(-1)?.kind === kind && current.at(-1)?.value === value) return current;
+    const next = [...current, { at: new Date().toISOString(), kind, value }].slice(-40);
+    localStorage.setItem(ledgerKey, JSON.stringify(next));
+    return next;
+  }), []);
+  useEffect(() => {
+    let live = true;
+    if (!session.token) { setFingerprint("signed out"); record("session", "signed out"); return; }
+    void crypto.subtle.digest("SHA-256", new TextEncoder().encode(session.token)).then(bytes => {
+      if (!live) return;
+      const value = [...new Uint8Array(bytes)].map(byte => byte.toString(16).padStart(2, "0")).join("").slice(0, 12);
+      setFingerprint(value); record("session", value);
+    });
+    return () => { live = false; };
+  }, [session.token, record]);
+  return <div className="min-h-dvh bg-app text-ink">
+    <header className="border-b border-hairline p-4 text-sm">
+      <h1 className="text-lg font-semibold">Client {metadata.label} · actual local Origin account flow</h1>
+      <p>Real local Convex, OriginGate, account dialog and member panel. Component harness; no full desktop synchronization claim.</p>
+      <p className="mt-2 text-xs">Backend: {backend.origin} · browser origin: {location.origin} · independent profile: {nonce.slice(0, 8)} · session fingerprint: {fingerprint}</p>
+      <button className="ui-button mt-3" onClick={() => setDialog(true)}>Open actual account dialog</button>
+    </header>
+    <OriginGate><Workspace record={record} /></OriginGate>
+    {dialog && <OriginConnectDialog onClose={() => setDialog(false)} />}
+    <details className="m-4 rounded border border-hairline p-3" open>
+      <summary>Persisted real subscription observations</summary>
+      <ol aria-label="Local subscription observations" className="mt-2 space-y-1 text-xs">
+        {ledger.map((event, index) => <li key={index}>{event.at} · {event.kind}: {event.value}</li>)}
+      </ol>
+    </details>
+  </div>;
+}
+
+document.addEventListener("click", event => {
+  const anchor = (event.target as Element | null)?.closest("a");
+  if (anchor?.href && new URL(anchor.href).origin !== location.origin) event.preventDefault();
+}, true);
+createRoot(document.getElementById("root")!).render(<Fixture />);

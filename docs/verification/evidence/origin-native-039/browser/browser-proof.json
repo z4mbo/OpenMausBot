@@ -1,0 +1,288 @@
+{
+  "source": "0745d6ef0317d42b498fecbbfdf5e5e3be6d41ce",
+  "frozenUiSource": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "backend": "http://127.0.0.1:51527",
+  "checkedAt": "2026-10-19T06:35:44.770Z",
+  "status": "named-component-journeys-passed",
+  "cases": [
+    {
+      "name": "Actual Gate creates owner and workspace",
+      "status": "passed",
+      "evidence": [
+        "owner-created"
+      ]
+    },
+    {
+      "name": "Separate app-server handoffs point only at the isolated backend",
+      "status": "passed",
+      "evidence": [
+        "app-server-handoffs.json"
+      ]
+    },
+    {
+      "name": "Email-disabled action creates a bound link and truthful fallback",
+      "status": "passed",
+      "evidence": [
+        "invite-not-configured"
+      ]
+    },
+    {
+      "name": "Invited account joins through the real Gate and both views update",
+      "status": "passed",
+      "evidence": [
+        "member-joined",
+        "owner-sees-joined-member"
+      ]
+    },
+    {
+      "name": "Live downgrade is observed by the other client",
+      "status": "passed",
+      "evidence": [
+        "member-downgraded-live"
+      ]
+    },
+    {
+      "name": "Owner logout preserves the other account",
+      "status": "passed",
+      "evidence": [
+        "owner-signed-out",
+        "member-survives-owner-logout"
+      ]
+    },
+    {
+      "name": "Actual account dialog completes a new owner handoff",
+      "status": "passed",
+      "evidence": [
+        "owner-account-reconnected"
+      ]
+    },
+    {
+      "name": "Same-SQLite backend recovery preserves accounts and viewer role",
+      "status": "passed",
+      "evidence": [
+        "owner-before-backend-restart",
+        "viewer-before-backend-restart",
+        "owner-after-backend-restart",
+        "viewer-after-backend-restart",
+        "viewer-reload-after-backend-restart"
+      ]
+    },
+    {
+      "name": "Workspace removal clears the actual protected panel",
+      "status": "passed",
+      "evidence": [
+        "owner-member-removed",
+        "member-revoked-live"
+      ]
+    },
+    {
+      "name": "Explicit denial survives actual Retry and reload",
+      "status": "passed",
+      "evidence": [
+        "member-revoked-retry",
+        "member-revoked-reload"
+      ]
+    }
+  ],
+  "independentOrigins": [
+    "http://127.0.0.1:5174",
+    "http://localhost:5175"
+  ],
+  "actualBackendAndStorage": true,
+  "authOrMembershipMocks": false,
+  "externalRecipientEmails": 0,
+  "limits": [
+    "Named actual components with controlled surrounding shell, not full App/OriginSync/local Chief import or packaged desktop acceptance.",
+    "Browser observations and 14 native API groups overlap; their counts are not additional unique bugs or whole Batch A acceptance.",
+    "Diagnostic workspace selection/history belongs to the fixture; its retained prior names and target ID do not imply a remaining private product panel.",
+    "Restart uses exact-child Windows termination and same-SQLite recovery, not a graceful shutdown claim.",
+    "No fresh light/dark/responsive matrix; existing unchanged visual evidence remains separate."
+  ],
+  "files": [
+    {
+      "path": "app-server-handoffs.json",
+      "bytes": 303,
+      "sha256": "1bec406baa749926f1e06dce0e17cc30364c72ae869c0bc00029842abf2ad966"
+    },
+    {
+      "path": "invite-not-configured.ax.txt",
+      "bytes": 3459,
+      "sha256": "c50baf4494750e6196ab68721b363db168cdab65e9340591b3b9295cc5862595"
+    },
+    {
+      "path": "invite-not-configured.jpg",
+      "bytes": 126796,
+      "sha256": "7b0354c55a131117d642a509b3782be5891ec43692c1da958cc6fe6512877135"
+    },
+    {
+      "path": "member-downgraded-live.ax.txt",
+      "bytes": 3009,
+      "sha256": "debf03bcd86ae2b32ec426a3436b07d59c6585f57988c39d7a848d51b97ca51a"
+    },
+    {
+      "path": "member-downgraded-live.jpg",
+      "bytes": 81274,
+      "sha256": "263fc22786593abe91c09578fc0bebf44aab97d36fe71f9e8937637f553a6d20"
+    },
+    {
+      "path": "member-joined.ax.txt",
+      "bytes": 2525,
+      "sha256": "2eb95cbf55c92704700cea397cee0edb51ed2bd4e61a557ddb3f51efcabe5f0f"
+    },
+    {
+      "path": "member-joined.jpg",
+      "bytes": 81637,
+      "sha256": "35e23aea0827dc9917ec68f01c2fd17db52ead5b9eab02066b559260ad0296f7"
+    },
+    {
+      "path": "member-revoked-live.ax.txt",
+      "bytes": 3189,
+      "sha256": "c31c2ecdca5151d9bad55f9c9864466ca0f06a23cbaa1a1baffb5c8a0466ebd5"
+    },
+    {
+      "path": "member-revoked-live.jpg",
+      "bytes": 78661,
+      "sha256": "c5054a9908399bde47d4138866fc76d2e58c94b68ecfa1f5044e9e40c15606b9"
+    },
+    {
+      "path": "member-revoked-reload.ax.txt",
+      "bytes": 3539,
+      "sha256": "4fac71d96b6030c51ea6af8c0a4e07589c4a4ec3325e46ecef7d65215277a575"
+    },
+    {
+      "path": "member-revoked-reload.jpg",
+      "bytes": 78309,
+      "sha256": "f6666a92f67b2bfe11957d960e81e093ecc3f6e91d44029ac29211303d581e5d"
+    },
+    {
+      "path": "member-revoked-retry.ax.txt",
+      "bytes": 3319,
+      "sha256": "40a227a3cdcfceb00f9a89784effa34b410836caa808973bdfaa50d2b839bf86"
+    },
+    {
+      "path": "member-revoked-retry.jpg",
+      "bytes": 75376,
+      "sha256": "3e66d8c2b1b1ee853651e1c4a45ef1d8517f8a1004cea24a0fca551ace52d7f9"
+    },
+    {
+      "path": "member-survives-owner-logout.ax.txt",
+      "bytes": 3009,
+      "sha256": "debf03bcd86ae2b32ec426a3436b07d59c6585f57988c39d7a848d51b97ca51a"
+    },
+    {
+      "path": "member-survives-owner-logout.jpg",
+      "bytes": 81274,
+      "sha256": "263fc22786593abe91c09578fc0bebf44aab97d36fe71f9e8937637f553a6d20"
+    },
+    {
+      "path": "owner-account-reconnected.ax.txt",
+      "bytes": 4166,
+      "sha256": "da7a4ce4cf6cfcb28820135f0d30cf516753aae520f9c81f2b85a810cfede8f7"
+    },
+    {
+      "path": "owner-account-reconnected.jpg",
+      "bytes": 96928,
+      "sha256": "f3c3f40d2aa97a68a796ce72a3fc7f7fa18fc57e6cbc0214b354f2005ffb11e5"
+    },
+    {
+      "path": "owner-after-backend-restart.ax.txt",
+      "bytes": 3933,
+      "sha256": "ebb23301fc89eef7c033c15f172f2c18ea581c9e8421b8ca2bd52768988fc273"
+    },
+    {
+      "path": "owner-after-backend-restart.jpg",
+      "bytes": 135018,
+      "sha256": "1dd15cf8f375eebf959ab310dd151a8a5bce62c6a0a7f68604a1482aecd677d5"
+    },
+    {
+      "path": "owner-before-backend-restart.ax.txt",
+      "bytes": 3823,
+      "sha256": "7b66df7249570dbb6e97eb7c92b2167152e4caea2f7de406f08a2a0c14c4082d"
+    },
+    {
+      "path": "owner-before-backend-restart.jpg",
+      "bytes": 131172,
+      "sha256": "11b3925af74d64b63faf28da54f2b08bea33425dbb0bf4e92d30efc60b72a256"
+    },
+    {
+      "path": "owner-confirm-remove.ax.txt",
+      "bytes": 3653,
+      "sha256": "a5cad852ad709402fc4688fed7b4af4178ceda22248841a609ecc3612e6fd95b"
+    },
+    {
+      "path": "owner-confirm-remove.jpg",
+      "bytes": 136882,
+      "sha256": "06dc6c2c0a0da55bcb5445facb213e767754e100ee6a3d4113a9674f3f5c20f5"
+    },
+    {
+      "path": "owner-created.ax.txt",
+      "bytes": 2983,
+      "sha256": "1b3c1f847b734b3e656aac7690e43a46f99756a7de05efa566f094d3baf8f297"
+    },
+    {
+      "path": "owner-created.jpg",
+      "bytes": 108485,
+      "sha256": "96508cc645ad3e24cac738c72a394304e4c9b2c52dfefb23eba8695b5f0162f7"
+    },
+    {
+      "path": "owner-member-removed.ax.txt",
+      "bytes": 3546,
+      "sha256": "6da9c8441ee0767f688779e6bf6dd419ba03f2981328b2a0265ff8f436be28a3"
+    },
+    {
+      "path": "owner-member-removed.jpg",
+      "bytes": 128365,
+      "sha256": "94e04796239063fc7dcfde83589fa03b1425ae2c88443ba9beeb5eea054bde23"
+    },
+    {
+      "path": "owner-sees-joined-member.ax.txt",
+      "bytes": 3714,
+      "sha256": "2defc5c5b57b48706f43124acc894a3373d2d3a258fd5c7814f262dd839d30af"
+    },
+    {
+      "path": "owner-sees-joined-member.jpg",
+      "bytes": 127805,
+      "sha256": "e29bd53126117ba85942fd0a280a4ffeea248f765ee00a3cac97db31f83f8f91"
+    },
+    {
+      "path": "owner-signed-out.ax.txt",
+      "bytes": 2470,
+      "sha256": "fff27f36bd7b2290f8ef342a53f54249451d3b44b563d30ea74a4bf0289f2185"
+    },
+    {
+      "path": "owner-signed-out.jpg",
+      "bytes": 47040,
+      "sha256": "0ac780a820e09115eda30eb30cabd10b83976f7c8b7a63cd930a7601d0657c92"
+    },
+    {
+      "path": "viewer-after-backend-restart.ax.txt",
+      "bytes": 3210,
+      "sha256": "a8f1f4b42246b1f78cc3687dba7d16a7507d3a144a2c8d82f2a6b6245e45da97"
+    },
+    {
+      "path": "viewer-after-backend-restart.jpg",
+      "bytes": 81274,
+      "sha256": "263fc22786593abe91c09578fc0bebf44aab97d36fe71f9e8937637f553a6d20"
+    },
+    {
+      "path": "viewer-before-backend-restart.ax.txt",
+      "bytes": 3009,
+      "sha256": "debf03bcd86ae2b32ec426a3436b07d59c6585f57988c39d7a848d51b97ca51a"
+    },
+    {
+      "path": "viewer-before-backend-restart.jpg",
+      "bytes": 81274,
+      "sha256": "263fc22786593abe91c09578fc0bebf44aab97d36fe71f9e8937637f553a6d20"
+    },
+    {
+      "path": "viewer-reload-after-backend-restart.ax.txt",
+      "bytes": 3495,
+      "sha256": "ac90c09974e77f117779dfb8e3e6c44d19854052fc87bf9d895b921229a10fa8"
+    },
+    {
+      "path": "viewer-reload-after-backend-restart.jpg",
+      "bytes": 79381,
+      "sha256": "2883f67c40f721b93ede2977225fbbb64429e0c8366bf0b79c618fc8187e81da"
+    }
+  ]
+}

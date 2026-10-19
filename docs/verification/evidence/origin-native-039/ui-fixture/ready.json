@@ -1,0 +1,73 @@
+{
+  "backend": "http://127.0.0.1:51527",
+  "frozenUiSource": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "checkout": "c7d974fd87bc53926878297c5bf1e6e62b51e322",
+  "clients": [
+    {
+      "label": "A",
+      "url": "http://127.0.0.1:5174/__origin-local-two-client.html",
+      "api": {
+        "url": "http://127.0.0.1:64186",
+        "pid": 10076,
+        "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-xjoJS9",
+        "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792391118586-40892.log"
+      },
+      "storageOrigin": "http://127.0.0.1:5174"
+    },
+    {
+      "label": "B",
+      "url": "http://localhost:5175/__origin-local-two-client.html",
+      "api": {
+        "url": "http://127.0.0.1:64196",
+        "pid": 36004,
+        "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-TczK26",
+        "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792391120586-40892.log"
+      },
+      "storageOrigin": "http://localhost:5175"
+    }
+  ],
+  "bindings": [
+    {
+      "path": "src/components/OriginGate.tsx",
+      "bytes": 16027,
+      "sha256": "6e7ed3faf04b6b10d0101662a3ebf7ed9b1979f4b8aaa4b432f6b85a498b202b",
+      "frozenBlobSha256": "020b470a46bc0630e1be88a1e3c8ff9146e93505dbef061471a5f291c1702153"
+    },
+    {
+      "path": "src/components/OriginConnect.tsx",
+      "bytes": 4661,
+      "sha256": "5f87f0d63590f30a8a52b3be7fe3e1c4c082c2e6d12380a4989fd9701ff6c7de",
+      "frozenBlobSha256": "04891bef74c092316761fe15b724058f46061285acc1ceba4b5092a0e8cbde74"
+    },
+    {
+      "path": "src/components/origin-members/WorkspaceMembers.tsx",
+      "bytes": 18942,
+      "sha256": "20edabbc637c8cdafabc50178479bb0d369d922f50fc8277da1746d9ef37b435",
+      "frozenBlobSha256": "de7c2bc602a149d74625fa9e8ece5678ebf533f194f0eddb354336cd6b8e748e"
+    },
+    {
+      "path": "src/lib/origin-cloud/client.ts",
+      "bytes": 5227,
+      "sha256": "8e6e068f1212d78bf92d6178ffa1fc0c670dba48282ff704573485859742cc16",
+      "frozenBlobSha256": "e512c8eaea76de0bdadcdf091fb634b7f354fc7dbbd0b96bd217148f8766e204"
+    },
+    {
+      "path": "src/lib/origin-cloud/hooks.ts",
+      "bytes": 8443,
+      "sha256": "ddb5b0b76d75703437b4ee7a0c64ee09f6ee748c62b811d786052d64d1eb36a3",
+      "frozenBlobSha256": "10964000242623065c74a917473ee1f2cb2ba7110f1c67597bf5d3a5ac46b524"
+    },
+    {
+      "path": "src/lib/origin-members.ts",
+      "bytes": 6186,
+      "sha256": "565a99cc97906a9809aa1691221c6eba5270c680601bf2c385b44cd9c1852708",
+      "frozenBlobSha256": "293d02ab04569f20d015653252ef19dca3efc48e3ea516fb95294f659ee274ed"
+    }
+  ],
+  "actualConvexTransport": true,
+  "authOrMembershipMocks": false,
+  "backendMutationsFromLauncher": 0,
+  "mailKeysSupplied": false,
+  "parentPid": 40892,
+  "readyAt": "2026-10-19T06:25:35.976Z"
+}

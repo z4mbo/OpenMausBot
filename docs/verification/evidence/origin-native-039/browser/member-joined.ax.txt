@@ -1,0 +1,44 @@
+Browser tab: 18, Title: "Origin local client B", URL: "http://localhost:5175/__origin-local-two-client.html".
+1 AXWebArea Origin local client B, URL: localhost:5175/__origin-local-two-client.html
+	2 container root
+		3 container
+			4 heading Client B · actual local Origin account flow, Value: 1
+				5 text Client  B  · actual local Origin account flow
+			6 text Real local Convex, OriginGate, account dialog and member panel. Component harness; no full desktop synchronization claim. Backend:  http://127.0.0.1:51527  · browser origin:  http://localhost:5175  · independent profile:  7e476999  · session fingerprint:  6fb2f2f594bb
+			7 button Open actual account dialog
+		32 container
+			33 heading Signed in as Fixture Member · member.local-two-client@example.test, Value: 2
+				34 text Signed in as  Fixture Member  ·  member.local-two-client@example.test
+			35 text Remembered local test workspace
+			36 pop up button (collapsed, settable) Description: Local test workspace, Value: Fixture Owner's workspace · member, Secondary Actions: Expand
+				37 menu
+					38 (selected) Fixture Owner's workspace · member
+			39 text Local test target ID:  rd74b7gdb0pv6y81j9vvb3xa5x8gjcze
+			40 button Check selected workspace access
+			41 container Workspace members
+				42 heading Members, Value: 2
+					43 text Members
+				44 text 2 1 admin  ·  1 member You are  member
+				45 content list Members
+					46 container
+						47 text Fixture Owner @owner.local-two-client ·  owner.local-two-client@example.test Owner
+					48 container
+						49 text Fixture Member (you) @member.local-two-client ·  member.local-two-client@example.test Member
+				50 heading Leave workspace, Value: 3
+					51 text Leave workspace
+				52 text You lose access to its projects and connectors. Coming back needs a new invitation.
+				53 button Leave…
+		26 container
+			27 button (expanded) Persisted real subscription observations, Secondary Actions: Collapse
+				28 text Persisted real subscription observations
+			29 content list Local subscription observations
+				30 container
+					31 text 2026-10-19T06:27:13.537Z  ·  session :  signed out
+				54 container
+					55 text 2026-10-19T06:28:05.984Z  ·  session :  6fb2f2f594bb
+				56 container
+					57 text 2026-10-19T06:28:05.992Z  ·  workspace-list :  Fixture Owner's workspace:member
+				58 container
+					59 text 2026-10-19T06:28:05.998Z  ·  access-subscription :  member
+
+The focused UI element is 1 AXWebArea Origin local client B, URL: localhost:5175/__origin-local-two-client.html
