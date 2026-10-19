@@ -1,0 +1,29 @@
+import { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { AuthPage } from "../../site/components/auth-page";
+import { useOriginSession } from "../../site/components/brand";
+import { useControls } from "./transport";
+import "../../site/app/globals.css";
+function Preview() {
+  const controls = useControls();
+  const session = useOriginSession();
+  const [version, setVersion] = useState("loading");
+  useEffect(() => { let live = true; void fetch("/__session-scope-proof.json").then(response => response.json()).then(value => { if (live) setVersion(value.version); }); return () => { live = false; }; }, []);
+  const button = { padding: "8px 12px", border: "1px solid #777", borderRadius: 6, background: "transparent", color: "inherit", cursor: "pointer" };
+  return <>
+    <style>{`:root { --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; } button, input { font: inherit; }`}</style>
+    <header style={{padding: 16, color: "var(--ink)", background: "var(--origin-dark-app)", borderBottom: "1px solid #555"}}>
+      <h1 style={{fontSize: 18}}>Origin session race · {version}</h1>
+      <p>Real AuthPage and session hook; synthetic accounts and Convex transport. Two tabs share only this fixture origin's browser storage. System UI font; typography is outside this check.</p>
+      <div style={{display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12}}>
+        <button style={button} onClick={() => session.save("fixture-session-one")}>Reset to first fixture member</button>
+        <button style={button} onClick={() => session.save("fixture-session-two")}>Sign in as second fixture member</button>
+        <button style={button} disabled={!controls.pending} onClick={controls.resolve}>Resolve old sign-out</button>
+        <button style={button} disabled={!controls.pending} onClick={controls.reject}>Reject old sign-out</button>
+      </div>
+      <output style={{display: "block", marginTop: 12}}>Logout calls: {controls.calls} · Request: {controls.pending ? "pending" : "settled"} · Session: {session.user?.name ?? "signed out"}</output>
+    </header>
+    <AuthPage mode="signin" />
+  </>;
+}
+createRoot(document.getElementById("root")!).render(<Preview />);

@@ -1,0 +1,31 @@
+import { useSyncExternalStore, type AnchorHTMLAttributes, type ReactNode } from "react";
+import st from "../../site/components/site.module.css";
+export const api = { auth: { me: "me", logout: "logout", login: "login", signup: "signup", signupMode: "signupMode" }, workspaces: { list: "list", invitePreview: "preview", acceptInvite: "accept" } };
+let revision = 0;
+let calls = 0;
+let pending: { resolve(): void; reject(error: Error): void } | null = null;
+const listeners = new Set<() => void>();
+const publish = () => { revision++; for (const listener of listeners) listener(); };
+const subscribe = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
+export function useQuery(name: string, args: { sessionToken?: string } | "skip") {
+  if (args === "skip") return undefined;
+  if (name === "signupMode") return { inviteOnly: true };
+  if (name === "me") return { _id: args.sessionToken, name: args.sessionToken === "fixture-session-two" ? "Second fixture member" : "First fixture member", email: args.sessionToken === "fixture-session-two" ? "second@example.test" : "first@example.test" };
+  if (name === "list") return [{ _id: "fixture-team", name: "Fixture workspace", role: "member" }];
+  return null;
+}
+export const useAction = () => async () => { throw new Error("Real login and signup are disabled in this synthetic transport"); };
+export const useMutation = (name: string) => async () => {
+  if (name !== "logout") throw new Error("This fixture only supports synthetic logout");
+  calls++;
+  const request = new Promise<void>((resolve, reject) => { pending = { resolve, reject }; });
+  publish();
+  return request;
+};
+export function useControls() {
+  useSyncExternalStore(subscribe, () => revision);
+  return { calls, pending: pending !== null, resolve() { const active = pending; pending = null; active?.resolve(); publish(); }, reject() { const active = pending; pending = null; active?.reject(new Error("Synthetic offline logout")); publish(); } };
+}
+export function SiteFrame({ children }: { children: ReactNode; signedIn?: boolean; minimal?: boolean }) { return <div className={st.site}>{children}</div>; }
+export function DownloadCard() { return <aside style={{padding: 16}}>Synthetic download shell · no download action</aside>; }
+export default function Link({ children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement>) { return <a {...props} href="#fixture" onClick={event => event.preventDefault()}>{children}</a>; }

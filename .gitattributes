@@ -111,3 +111,5 @@ docs/verification/evidence/origin-backend-reuse-034/** -text whitespace=cr-at-eo
 docs/verification/evidence/origin-candidate-034/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-candidate-034/*.log -whitespace
 docs/verification/evidence/origin-delivery-035/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-session-scope-036/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-session-scope-036/*.log -whitespace

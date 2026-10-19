@@ -1,0 +1,76 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix/site
+
+ ❯ components/brand.test.tsx (6 tests | 3 failed) 20ms
+   × a delayed sign-out success preserves a newer cross-tab login 12ms
+   × a delayed sign-out failure preserves a newer cross-tab login 2ms
+   × a completed login from an older form cannot replace a newer cross-tab session 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  components/brand.test.tsx > a delayed sign-out success preserves a newer cross-tab login
+ FAIL  components/brand.test.tsx > a delayed sign-out failure preserves a newer cross-tab login
+AssertionError: expected null to be 'fixture-session-two' // Object.is equality
+
+- Expected:
+"fixture-session-two"
+
++ Received:
+null
+
+ ❯ components/brand.test.tsx:42:55
+     40|   expect(host.textContent).toBe("fixture-session-two");
+     41|   await act(async () => { if (outcome === "success") resolve(); else r…
+     42|   expect(localStorage.getItem("origin.sessionToken")).toBe("fixture-se…
+       |                                                       ^
+     43|   expect(host.textContent).toBe("fixture-session-two");
+     44| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  components/brand.test.tsx > a completed login from an older form cannot replace a newer cross-tab session
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ components/brand.test.tsx:60:63
+     58|   });
+     59|   await act(async () => {
+     60|     expect.soft(() => saveFromOldForm("fixture-stale-login")).toThrow(…
+       |                                                               ^
+     61|   });
+     62|   expect(localStorage.getItem("origin.sessionToken")).toBe("fixture-se…
+ ❯ Proxy.process.env.NODE_ENV.exports.act ../node_modules/.pnpm/react@19.2.6/node_modules/react/cjs/react.development.js:814:22
+ ❯ components/brand.test.tsx:59:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  components/brand.test.tsx > a completed login from an older form cannot replace a newer cross-tab session
+AssertionError: expected 'fixture-stale-login' to be 'fixture-session-two' // Object.is equality
+
+Expected: "fixture-session-two"
+Received: "fixture-stale-login"
+
+ ❯ components/brand.test.tsx:62:55
+     60|     expect.soft(() => saveFromOldForm("fixture-stale-login")).toThrow(…
+     61|   });
+     62|   expect(localStorage.getItem("origin.sessionToken")).toBe("fixture-se…
+       |                                                       ^
+     63| });
+     64|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 3 passed (6)
+   Start at  02:05:53
+   Duration  576ms (transform 34ms, setup 0ms, import 86ms, tests 20ms, environment 337ms)
+
+undefined
+C:\Users\aless\Documents\Origin-bugfix\site:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run components/brand.test.tsx

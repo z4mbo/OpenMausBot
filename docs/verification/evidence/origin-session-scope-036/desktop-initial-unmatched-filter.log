@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix
+
+No test files found, exiting with code 1
+
+filter: src/lib/origin-cloud/session-races.test.tsx
+include: evals/**/*.test.ts, server/**/*.test.ts, electron/**/*.test.mjs, src/**/*.test.ts, shared/**/*.test.ts, companion/**/*.test.ts, enterprise/**/*.test.ts, scripts/**/*.test.mjs, scripts/**/*.test.ts
+exclude:  **/node_modules/**, **/.git/**
+

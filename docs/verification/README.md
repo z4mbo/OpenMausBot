@@ -83,6 +83,7 @@ Use only mapped, tested commands:
 - [Origin 0.2.13 integration batch and acceptance boundary](origin-candidate-034.md)
 - [Origin 0.2.13 failed CI, descriptor compatibility and verified follow-up](origin-ci-followup-034.md)
 - [Origin 0.2.13 published delivery, audit report and upstream recommendations](evidence/origin-delivery-035/final-audit-report.md)
+- [Authentication response ownership and two-tab session races](origin-session-scope.md)
 - [Held Origin 0.2.12 replacement candidate, cycle 033](origin-candidate-033.md)
 - [Provider-error handoff CI isolation](origin-ci-provider-error.md)
 - [Origin 0.2.12 held 032 freeze and failed-CI record](origin-candidate-032.md)
