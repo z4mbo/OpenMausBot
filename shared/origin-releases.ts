@@ -3,6 +3,20 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.3.0",
+  date: "2026-10-20",
+  title: "From idea to launch: Studio, Broadcast, Pipeline and Canvas",
+  changes: [
+    { title: "Studio", body: "Generate images, video, voice, music and edits with fal.ai models from a project's Studio tab. Results stay with the project, save to Assets in one click and can go straight to Broadcast. Agents can generate too." },
+    { title: "Broadcast", body: "Plan posts on a week calendar and publish them to X, Bluesky, LinkedIn, Facebook, Instagram and TikTok with your own accounts. Posts written by agents wait for a person's approval before they can be scheduled." },
+    { title: "Pipeline", body: "See every lead on a board or table, capture new ones from your landing page with a copyable form snippet, import CSV, and reach out by email, SMS, phone or an AI voice call whose transcript and summary land on the lead's timeline. Ask the project's Chief for an outreach plan." },
+    { title: "Canvas", body: "Draw is now Canvas, a design editor with frames, auto layout, layers, smart guides and export. Agents read and edit the same layers, so you can ask a Chief to design a section and refine it yourself. Existing drawings open converted." },
+    { title: "Integrations", body: "Settings has an Integrations section for fal.ai, ElevenLabs, Twilio, Brevo, Resend and your social accounts. Keys stay on your computer, are never shown again and are never synced or backed up." },
+    { title: "Chief standups and PR cards", body: "Each project's Chief posts a daily digest to the Inbox with finished and moved issues, PRs waiting for you and blockers. Pull requests appear as cards in agent chat with CI status, and Approve & merge asks you first." },
+    { title: "Org", body: "A workspace Org page shows you, your project Chiefs and their agents, with what each is doing now and its recent runs and cost." },
+    { title: "Smoother app", body: "The project bar keeps every section reachable with a More menu, animations share one fast timing, heavy shadows are gone, and 18 bugs are fixed across issues, chat, calls, assets, the vault and onboarding." },
+  ],
+}, {
   version: "0.2.15",
   date: "2026-10-19",
   title: "Clearer provider usage",
