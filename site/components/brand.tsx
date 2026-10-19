@@ -42,9 +42,22 @@ export function WindowsLogo({ size = 16 }: { size?: number }) {
 }
 
 const tokenListeners = new Set<() => void>();
+let sessionEpoch = 0;
+let sessionSnapshot: { token: string | null; epoch: number } | undefined;
 
 function readToken(): string | null {
   try { return localStorage.getItem(SESSION_KEY); } catch { return null; }
+}
+
+function readSession() {
+  const token = readToken();
+  if (!sessionSnapshot || sessionSnapshot.token !== token || sessionSnapshot.epoch !== sessionEpoch) sessionSnapshot = { token, epoch: sessionEpoch };
+  return sessionSnapshot;
+}
+
+function notifySession() {
+  sessionEpoch++;
+  tokenListeners.forEach(listener => listener());
 }
 
 function writeToken(token: string | null) {
@@ -54,29 +67,32 @@ function writeToken(token: string | null) {
   } catch {
     // Blocked storage: the browser cannot keep a session.
   }
-  tokenListeners.forEach(listener => listener());
+  notifySession();
 }
+
+globalThis.addEventListener?.("storage", (event: StorageEvent) => {
+  if (event.key === null || event.key === SESSION_KEY) notifySession();
+});
 
 function subscribeToken(listener: () => void) {
   tokenListeners.add(listener);
-  window.addEventListener("storage", listener);
-  return () => { tokenListeners.delete(listener); window.removeEventListener("storage", listener); };
+  return () => { tokenListeners.delete(listener); };
 }
 
 export function useOriginSession() {
-  const stored = useSyncExternalStore(subscribeToken, readToken, () => undefined);
+  const stored = useSyncExternalStore(subscribeToken, readSession, () => undefined);
   const ready = stored !== undefined;
-  const token = stored ?? null;
+  const token = stored?.token ?? null;
   const user = useQuery(api.auth.me, token ? { sessionToken: token } : "skip");
   const logout = useMutation(api.auth.logout);
   const save = useCallback((next: string) => {
-    if (readToken() !== token) throw new Error("Your Origin account changed. Try again.");
+    if (!stored || readSession() !== stored) throw new Error("Your Origin account changed. Try again.");
     writeToken(next);
-  }, [token]);
+  }, [stored]);
   const signOut = useCallback(async () => {
     if (token) await logout({ sessionToken: token }).catch(() => {});
-    if (readToken() === token) writeToken(null);
-  }, [token, logout]);
+    if (stored && readSession() === stored) writeToken(null);
+  }, [stored, token, logout]);
   const loading = !ready || (token !== null && user === undefined);
   return { token, user: token && user ? user : null, loading, save, signOut };
 }

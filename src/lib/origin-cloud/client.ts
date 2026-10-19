@@ -15,12 +15,13 @@ function readStorage(key: string): string | null {
   }
 }
 
-function writeStorage(key: string, value: string | null): void {
+function writeStorage(key: string, value: string | null): boolean {
   try {
     if (value === null) globalThis.localStorage?.removeItem(key);
     else globalThis.localStorage?.setItem(key, value);
+    return true;
   } catch {
-    return;
+    return false;
   }
 }
 
@@ -31,41 +32,74 @@ function createStore(read: () => string | null) {
     notify: () => listeners.forEach((listener) => listener()),
     subscribe(listener: Listener) {
       listeners.add(listener);
-      const onStorage = (event: StorageEvent) => {
-        if (event.key === null || event.key === URL_KEY || event.key === SESSION_KEY) listener();
-      };
-      globalThis.addEventListener?.("storage", onStorage);
-      return () => {
-        listeners.delete(listener);
-        globalThis.removeEventListener?.("storage", onStorage);
-      };
+      return () => { listeners.delete(listener); };
     },
   };
 }
 
+function effectiveCloudUrl(stored: string | null): string | null {
+  const input = stored?.trim() || (import.meta.env?.VITE_ORIGIN_CONVEX_URL as string | undefined)?.trim();
+  return input ? originServerFor(input) : null;
+}
+
 export function cloudUrl(): string | null {
-  const stored = readStorage(URL_KEY)?.trim();
-  if (stored) return originServerFor(stored);
-  const fromEnv = (import.meta.env?.VITE_ORIGIN_CONVEX_URL as string | undefined)?.trim();
-  return fromEnv || null;
+  return effectiveCloudUrl(readStorage(URL_KEY));
 }
 
 export const urlStore = createStore(cloudUrl);
 
 export function setCloudUrl(url: string | null): void {
-  writeStorage(URL_KEY, url?.trim() || null);
-  urlStore.notify();
+  const stored = url?.trim() || null;
+  const changed = cloudUrl() !== effectiveCloudUrl(stored);
+  if (changed && !writeStorage(SESSION_KEY, null)) throw new Error("Origin could not clear the previous account. Check browser storage and try again.");
+  if (!writeStorage(URL_KEY, stored)) {
+    if (changed) notifyCloudSession();
+    throw new Error("Origin could not save the connection. Check browser storage and try again.");
+  }
+  notifyCloudSession();
 }
 
 export const sessionStore = createStore(() => readStorage(SESSION_KEY));
 
 export function setSessionToken(token: string | null): void {
   writeStorage(SESSION_KEY, token);
+  notifyCloudSession();
+}
+
+let sessionEpoch = 0;
+
+function notifyCloudSession(): void {
+  sessionEpoch++;
+  urlStore.notify();
   sessionStore.notify();
 }
 
+globalThis.addEventListener?.("storage", (event: StorageEvent) => {
+  if (event.key === null || event.key === URL_KEY || event.key === SESSION_KEY) notifyCloudSession();
+});
+
 export function isCurrentCloudSession(url: string | null, token: string | null): boolean {
   return cloudUrl() === url && sessionStore.get() === token;
+}
+
+export function captureCloudSession(): {
+  url: string | null;
+  token: string | null;
+  isCurrent(): boolean;
+  assertCurrent(): void;
+} {
+  const url = cloudUrl();
+  const token = sessionStore.get();
+  const epoch = sessionEpoch;
+  const isCurrent = () => sessionEpoch === epoch && isCurrentCloudSession(url, token);
+  return {
+    url,
+    token,
+    isCurrent,
+    assertCurrent() {
+      if (!isCurrent()) throw new Error("Your Origin account or connection changed. Try again.");
+    },
+  };
 }
 
 let current: { url: string; client: ConvexReactClient | null } | null = null;
@@ -90,13 +124,12 @@ export function functionRef<T extends FunctionType>(name: string) {
 }
 
 export async function logoutCloud(): Promise<void> {
-  const url = cloudUrl();
+  const session = captureCloudSession();
   const client = cloudClient();
-  const current = sessionStore.get();
   try {
-    if (client && current) await client.mutation(functionRef<"mutation">("auth:logout"), { sessionToken: current });
+    if (client && session.token) await client.mutation(functionRef<"mutation">("auth:logout"), { sessionToken: session.token });
   } finally {
-    if (isCurrentCloudSession(url, current)) setSessionToken(null);
+    if (session.isCurrent()) setSessionToken(null);
   }
 }
 

@@ -67,3 +67,48 @@ it("a completed login from the current form stores its session", async () => {
   expect(localStorage.getItem("origin.sessionToken")).toBe("fixture-signed-in");
   expect(host.textContent).toBe("fixture-signed-in");
 });
+
+it("rejects an older form after an ABA cross-tab sign-in and sign-out", async () => {
+  fixture.logout.mockResolvedValue(null);
+  await act(async () => session.signOut());
+  const saveFromOldForm = session.save;
+  await act(async () => {
+    localStorage.setItem("origin.sessionToken", "fixture-session-two");
+    window.dispatchEvent(new StorageEvent("storage", { key: "origin.sessionToken", oldValue: null, newValue: "fixture-session-two" }));
+  });
+  await act(async () => {
+    localStorage.removeItem("origin.sessionToken");
+    window.dispatchEvent(new StorageEvent("storage", { key: "origin.sessionToken", oldValue: "fixture-session-two", newValue: null }));
+  });
+  expect(host.textContent).toBe("signed out");
+  await act(async () => {
+    expect.soft(() => saveFromOldForm("fixture-stale-login")).toThrow("Your Origin account changed");
+  });
+  expect.soft(localStorage.getItem("origin.sessionToken")).toBeNull();
+  await act(async () => session.save("fixture-current-login"));
+  expect(localStorage.getItem("origin.sessionToken")).toBe("fixture-current-login");
+});
+
+it("refreshes the current form after batched away-and-back storage changes", async () => {
+  const saveFromOldForm = session.save;
+  await act(async () => {
+    localStorage.clear();
+    window.dispatchEvent(new StorageEvent("storage", { key: null }));
+    localStorage.setItem("origin.sessionToken", "fixture-session-one");
+    window.dispatchEvent(new StorageEvent("storage", { key: "origin.sessionToken", oldValue: null, newValue: "fixture-session-one" }));
+  });
+  expect(() => saveFromOldForm("fixture-stale-login")).toThrow("Your Origin account changed");
+  await act(async () => session.save("fixture-current-login"));
+  expect(localStorage.getItem("origin.sessionToken")).toBe("fixture-current-login");
+  expect(host.textContent).toBe("fixture-current-login");
+});
+
+it("keeps the current form usable after unrelated storage changes", async () => {
+  const saveFromCurrentForm = session.save;
+  await act(async () => {
+    localStorage.setItem("fixture-unrelated", "value");
+    window.dispatchEvent(new StorageEvent("storage", { key: "fixture-unrelated", oldValue: null, newValue: "value" }));
+    saveFromCurrentForm("fixture-current-login");
+  });
+  expect(host.textContent).toBe("fixture-current-login");
+});

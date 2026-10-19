@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { cloudClient, cloudUrl, functionRef, isCurrentCloudSession, logoutCloud, sessionStore, setSessionToken, urlStore, withSession } from "./client";
+import { captureCloudSession, cloudClient, functionRef, logoutCloud, sessionStore, setSessionToken, urlStore, withSession } from "./client";
 import type { CloudUser } from "./types";
 import { isAuthorityQuery, OriginQueryFailures, OriginQueryRecovery, OriginQueryUnavailable } from "./query-failure";
 
@@ -157,12 +157,11 @@ export function useCloudSession(): {
   }, [url, token]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const url = cloudUrl();
-    const token = sessionStore.get();
+    const session = captureCloudSession();
     const client = cloudClient();
     if (!client) throw new Error("Origin Cloud is not configured");
     const result = (await client.action(functionRef<"action">("auth:login"), { email, password })) as { sessionToken: string };
-    if (!isCurrentCloudSession(url, token)) throw new Error("Your Origin account or connection changed. Try again.");
+    session.assertCurrent();
     setSessionToken(result.sessionToken);
   }, []);
 
