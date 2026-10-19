@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -7,7 +7,7 @@ import type { ProviderSnapshot } from "./contracts.ts";
 import { resolveSharedModel } from "./default-model-selection.ts";
 import { openOutbox } from "./origin-outbox.ts";
 import { createRunLease } from "./origin-run-lease.ts";
-import { remoteBacklogExceedsCaps, sharedThreadMention } from "./origin-shared-agents.ts";
+import { createSharedAgents, remoteBacklogExceedsCaps, sharedThreadMention } from "./origin-shared-agents.ts";
 import { clientIdFor, createThreadMirror, fromCloudRow, ownRow, threadLinkFrom, toCloudRow, type CloudRow, type ThreadSnapshot } from "./origin-thread-mirror.ts";
 import type { Message, StoreChange } from "./store.ts";
 
@@ -138,6 +138,7 @@ describe("run lease", () => {
     const enqueued: Array<[string, Record<string, unknown>]> = [];
     const started: string[] = [];
     const abandoned: string[] = [];
+    const interrupt = vi.fn();
     let clock = 0;
     const lease = createRunLease({
       mutation,
@@ -146,9 +147,9 @@ describe("run lease", () => {
         queuedRuns: () => [...queued.values()], saveQueuedRun: (run) => { queued.set(run.runId, run); }, dropQueuedRun: (id) => { queued.delete(id); },
       },
       kick: () => undefined, isBusy: () => busy.value, startQueued: async (run) => { started.push(run.runId); },
-      interrupt: vi.fn(), abandoned: (run) => { abandoned.push(run.runId); }, now: () => clock,
+      interrupt, abandoned: (run) => { abandoned.push(run.runId); }, now: () => clock, monotonicNow: () => clock,
     });
-    return { lease, enqueued, started, abandoned, advance: (ms: number) => { clock += ms; } };
+    return { lease, enqueued, started, abandoned, interrupt, advance: (ms: number) => { clock += ms; } };
   };
   const input = { botId: "b", threadId: "t", cloudThreadId: "ct", teamId: "team", text: "hi", clientId: "send:s" };
 
@@ -166,7 +167,8 @@ describe("run lease", () => {
   });
 
   it("starts a queued run of mine once Origin hands it the thread, and drops one that was cancelled", async () => {
-    const { lease, started, abandoned, advance } = leaseWith(async () => ({ runId: "r2", status: "queued", messageId: "m" }), { value: false });
+    const { lease, started, abandoned, advance } = leaseWith(async (name) => name === "agentRuns:begin"
+      ? { runId: "r2", status: "queued", messageId: "m" } : { status: "running" }, { value: false });
     const begun = await lease.begin(input);
     expect(begun.status).toBe("queued");
     lease.remember({ runId: "r2", botId: "b", threadId: "t", cloudThreadId: "ct", teamId: "team", messageId: "m", text: "hi" });
@@ -176,16 +178,16 @@ describe("run lease", () => {
     expect(abandoned).toEqual([]);
     advance(31_000);
     lease.pending("team", [{ runId: "r2", status: "running" }]);
-    await Promise.resolve();
-    expect(started).toEqual(["r2"]);
+    await expect.poll(() => started).toEqual(["r2"]);
     expect(abandoned).toEqual(["r3"]);
   });
 
   it("stops the local turn when the run was cancelled elsewhere", async () => {
     const busy = { value: true };
     const interrupt = vi.fn();
+    let heartbeats = 0;
     const lease = createRunLease({
-      mutation: async (name) => (name === "agentRuns:begin" ? { runId: "r", status: "running", messageId: "m" } : { status: "cancelled" }),
+      mutation: async (name) => (name === "agentRuns:begin" ? { runId: "r", status: "running", messageId: "m" } : { status: ++heartbeats === 1 ? "running" : "cancelled" }),
       outbox: { enqueue: vi.fn(), queuedRuns: () => [], saveQueuedRun: vi.fn(), dropQueuedRun: vi.fn() },
       kick: vi.fn(), isBusy: () => busy.value, startQueued: vi.fn(), interrupt, abandoned: vi.fn(),
     });
@@ -194,6 +196,427 @@ describe("run lease", () => {
     await lease.tick();
     expect(interrupt).toHaveBeenCalledWith("b", "t");
     expect(lease.holds("t")).toBe(false);
+  });
+
+  it("stops after the last acknowledged lease expires when heartbeat requests fail", async () => {
+    let heartbeats = 0;
+    const { lease, advance, interrupt, enqueued } = leaseWith(async (name) => {
+      if (name === "agentRuns:begin") return { runId: "r", status: "running", messageId: "m" };
+      if (++heartbeats === 1) return { status: "running" };
+      throw new TypeError("fetch failed");
+    }, { value: true });
+    await lease.begin(input);
+    lease.observe("b");
+    advance(59_999);
+    await lease.tick();
+    expect(lease.holds("t")).toBe(true);
+    expect(interrupt).not.toHaveBeenCalled();
+    advance(1);
+    await lease.tick();
+    await lease.tick();
+    expect(lease.holds("t")).toBe(false);
+    expect(lease.runFor("t")).toBeUndefined();
+    expect(interrupt).toHaveBeenCalledExactlyOnceWith("b", "t");
+    expect(enqueued).not.toContainEqual(["agentRuns:finish", { runId: "r", status: "succeeded" }]);
+  });
+
+  it("bounds a nonsettling heartbeat without overlap or resurrection by its late response", async () => {
+    let resolveHeartbeat!: (value: unknown) => void;
+    const heartbeat = new Promise((resolve) => { resolveHeartbeat = resolve; });
+    const heartbeatCalls = vi.fn(() => heartbeat);
+    let heartbeats = 0;
+    const { lease, advance, interrupt } = leaseWith(async (name) => name === "agentRuns:begin"
+      ? { runId: "r", status: "running", messageId: "m" } : ++heartbeats === 1 ? { status: "running" } : heartbeatCalls(), { value: true });
+    await lease.begin(input);
+    lease.observe("b");
+    advance(15_000);
+    const first = lease.tick();
+    advance(15_000);
+    const second = lease.tick();
+    advance(30_000);
+    const expired = lease.tick();
+    try {
+      expect(heartbeatCalls).toHaveBeenCalledTimes(1);
+      expect(lease.holds("t")).toBe(false);
+      expect(interrupt).toHaveBeenCalledExactlyOnceWith("b", "t");
+    } finally {
+      resolveHeartbeat({ status: "running" });
+      await Promise.allSettled([first, second, expired]);
+    }
+    expect(lease.holds("t")).toBe(false);
+    expect(lease.runFor("t")).toBeUndefined();
+    expect(interrupt).toHaveBeenCalledTimes(1);
+  });
+
+  it("a fresh heartbeat renews ownership, but a later outage cannot extend it", async () => {
+    let heartbeatCount = 0;
+    const { lease, advance, interrupt } = leaseWith(async (name) => {
+      if (name === "agentRuns:begin") return { runId: "r", status: "running", messageId: "m" };
+      if (++heartbeatCount <= 2) return { status: "running" };
+      throw new TypeError("fetch failed");
+    }, { value: true });
+    await lease.begin(input);
+    lease.observe("b");
+    advance(45_000);
+    await lease.tick();
+    advance(30_000);
+    await lease.tick();
+    expect(lease.holds("t")).toBe(true);
+    expect(interrupt).not.toHaveBeenCalled();
+    advance(30_000);
+    await lease.tick();
+    expect(lease.holds("t")).toBe(false);
+    expect(interrupt).toHaveBeenCalledExactlyOnceWith("b", "t");
+    expect(heartbeatCount).toBe(3);
+  });
+
+  it("a permission revocation stops the local turn before its acknowledged lease expires", async () => {
+    let heartbeats = 0;
+    const { lease, interrupt } = leaseWith(async (name) => name === "agentRuns:begin"
+      ? { runId: "r", status: "running", messageId: "m" } : { status: ++heartbeats === 1 ? "running" : "interrupted" }, { value: true });
+    await lease.begin(input);
+    lease.observe("b");
+    await lease.tick();
+    expect(lease.holds("t")).toBe(false);
+    expect(interrupt).toHaveBeenCalledExactlyOnceWith("b", "t");
+  });
+
+  it("uses elapsed monotonic time even when the wall clock moves backwards", async () => {
+    let elapsed = 0;
+    let wall = 100_000;
+    const interrupt = vi.fn();
+    let heartbeats = 0;
+    const lease = createRunLease({
+      mutation: async (name) => {
+        if (name === "agentRuns:begin") return { runId: "r", status: "running", messageId: "m" };
+        if (++heartbeats === 1) return { status: "running" };
+        throw new TypeError("fetch failed");
+      },
+      outbox: { enqueue: vi.fn(), queuedRuns: () => [], saveQueuedRun: vi.fn(), dropQueuedRun: vi.fn() },
+      kick: vi.fn(), isBusy: () => true, startQueued: vi.fn(), interrupt, abandoned: vi.fn(),
+      now: () => wall, monotonicNow: () => elapsed,
+    });
+    await lease.begin(input);
+    lease.observe("b");
+    wall = -100_000;
+    elapsed = 60_000;
+    await lease.tick();
+    expect(lease.holds("t")).toBe(false);
+    expect(interrupt).toHaveBeenCalledExactlyOnceWith("b", "t");
+  });
+
+  it("does not admit a begin response after its conservative lease deadline", async () => {
+    let resolveBegin!: (value: unknown) => void;
+    const begin = new Promise((resolve) => { resolveBegin = resolve; });
+    const { lease, advance } = leaseWith(() => begin, { value: true });
+    const begun = lease.begin(input);
+    advance(60_000);
+    resolveBegin({ runId: "r", status: "running", messageId: "m" });
+    await expect(begun).rejects.toThrow(/lease/i);
+    expect(lease.holds("t")).toBe(false);
+  });
+
+  it("confirms an idempotent begin result before giving a new local runner authority", async () => {
+    const calls: string[] = [];
+    const { lease } = leaseWith(async (name) => {
+      calls.push(name);
+      return name === "agentRuns:begin" ? { runId: "cached", status: "running", messageId: "m" } : { status: "interrupted" };
+    }, { value: true });
+    await expect(lease.begin(input)).rejects.toThrow(/lease/i);
+    expect(calls).toEqual(["agentRuns:begin", "agentRuns:heartbeat"]);
+    expect(lease.holds("t")).toBe(false);
+    expect(lease.runFor("t")).toBeUndefined();
+  });
+
+  it("bounds a nonsettling begin confirmation and ignores its late reply", async () => {
+    vi.useFakeTimers();
+    try {
+      let resolveHeartbeat!: (value: unknown) => void;
+      const pending = new Promise(resolve => { resolveHeartbeat = resolve; });
+      const { lease, advance } = leaseWith(async name => name === "agentRuns:begin"
+        ? { runId: "cached", status: "running", messageId: "m" } : pending, { value: true });
+      const begun = lease.begin(input);
+      const rejected = expect(begun).rejects.toThrow(/lease/i);
+      await Promise.resolve();
+      advance(60_000);
+      vi.advanceTimersByTime(60_000);
+      try {
+        await rejected;
+        expect(lease.holds("t")).toBe(false);
+      } finally {
+        resolveHeartbeat({ status: "running" });
+        await Promise.resolve();
+      }
+      expect(lease.runFor("t")).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not renew an existing local grant from an idempotent begin response", async () => {
+    const { lease, advance, interrupt } = leaseWith(async name => name === "agentRuns:begin"
+      ? { runId: "r", status: "running", messageId: "m" } : { status: "running" }, { value: true });
+    await lease.begin(input);
+    lease.observe("b");
+    advance(45_000);
+    await lease.begin(input);
+    advance(15_000);
+    lease.failed("t");
+    expect(lease.holds("t")).toBe(false);
+    expect(lease.runFor("t")).toBeUndefined();
+    expect(interrupt).toHaveBeenCalledExactlyOnceWith("b", "t");
+  });
+
+  it("expires the local turn on its timer even while the regular tick is blocked", async () => {
+    vi.useFakeTimers();
+    try {
+      let heartbeats = 0;
+      let resolveHeartbeat!: (value: unknown) => void;
+      const pending = new Promise(resolve => { resolveHeartbeat = resolve; });
+      const { lease, advance, interrupt } = leaseWith(async name => name === "agentRuns:begin"
+        ? { runId: "r", status: "running", messageId: "m" } : ++heartbeats === 1 ? { status: "running" } : pending, { value: true });
+      await lease.begin(input);
+      lease.observe("b");
+      advance(15_000);
+      vi.advanceTimersByTime(15_000);
+      const blocked = lease.tick();
+      advance(45_000);
+      vi.advanceTimersByTime(45_000);
+      try {
+        expect(interrupt).toHaveBeenCalledExactlyOnceWith("b", "t");
+        expect(lease.holds("t")).toBe(false);
+      } finally {
+        resolveHeartbeat({ status: "running" });
+        await blocked;
+      }
+      expect(lease.runFor("t")).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("stops a lease once and ignores its heartbeat and timer after a replacement turn starts", async () => {
+    vi.useFakeTimers();
+    try {
+      let resolveHeartbeat!: (value: unknown) => void;
+      const pending = new Promise(resolve => { resolveHeartbeat = resolve; });
+      let heartbeats = 0;
+      const { lease, advance, interrupt } = leaseWith(async name => name === "agentRuns:begin"
+        ? { runId: "old", status: "running", messageId: "m" } : ++heartbeats === 1 ? { status: "running" } : pending, { value: true });
+      await lease.begin(input);
+      lease.observe("b");
+      advance(15_000);
+      vi.advanceTimersByTime(15_000);
+      const blocked = lease.tick();
+      try {
+        lease.stop();
+        lease.stop();
+        expect(interrupt).toHaveBeenCalledExactlyOnceWith("b", "t");
+      } finally {
+        resolveHeartbeat({ status: "running" });
+        await blocked;
+      }
+      advance(60_000);
+      vi.advanceTimersByTime(60_000);
+      expect(interrupt).toHaveBeenCalledTimes(1);
+      expect(lease.holds("t")).toBe(false);
+      expect(lease.runFor("t")).toBeUndefined();
+      await expect(lease.begin(input)).rejects.toThrow(/lease/i);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it.each(["begin", "heartbeat"])("cannot acquire a lease from a late %s response after stop", async phase => {
+    let resolvePending!: (value: unknown) => void;
+    const pending = new Promise(resolve => { resolvePending = resolve; });
+    const mutation = vi.fn(async name => name === `agentRuns:${phase}`
+      ? pending : { runId: "old", status: "running", messageId: "m" });
+    const { lease, interrupt } = leaseWith(mutation, { value: true });
+    const begun = lease.begin(input);
+    const rejected = expect(begun).rejects.toThrow(/lease/i);
+    if (phase === "heartbeat") await expect.poll(() => mutation.mock.calls.some(([name]) => name === "agentRuns:heartbeat")).toBe(true);
+    try {
+      lease.stop();
+      if (phase === "heartbeat") await rejected;
+    } finally {
+      resolvePending({ runId: "old", status: "running", messageId: "m" });
+      await Promise.allSettled([rejected]);
+    }
+    await rejected;
+    expect(lease.holds("t")).toBe(false);
+    expect(lease.runFor("t")).toBeUndefined();
+    expect(interrupt).not.toHaveBeenCalled();
+  });
+
+  it("never starts a queued promotion whose confirmation completes after stop", async () => {
+    let resolveHeartbeat!: (value: unknown) => void;
+    const pending = new Promise(resolve => { resolveHeartbeat = resolve; });
+    const { lease, started, abandoned, interrupt } = leaseWith(async name => name === "agentRuns:begin"
+      ? { runId: "r", status: "queued", messageId: "m" } : pending, { value: false });
+    await lease.begin(input);
+    lease.remember({ runId: "r", botId: "b", threadId: "t", cloudThreadId: "ct", teamId: "team", messageId: "m", text: "hi" });
+    lease.pending("team", [{ runId: "r", status: "running" }]);
+    lease.stop();
+    resolveHeartbeat({ status: "running" });
+    await Promise.resolve();
+    await Promise.resolve();
+    lease.pending("team", [{ runId: "r", status: "running" }]);
+    expect(started).toEqual([]);
+    expect(abandoned).toEqual(["r"]);
+    expect(interrupt).not.toHaveBeenCalled();
+    expect(lease.holds("t")).toBe(false);
+  });
+
+  it("confirms a queued promotion before starting and rejects authority already revoked", async () => {
+    const { lease, started, abandoned } = leaseWith(async (name) => name === "agentRuns:begin"
+      ? { runId: "r", status: "queued", messageId: "m" } : { status: "interrupted" }, { value: false });
+    await lease.begin(input);
+    lease.remember({ runId: "r", botId: "b", threadId: "t", cloudThreadId: "ct", teamId: "team", messageId: "m", text: "hi" });
+    lease.pending("team", [{ runId: "r", status: "running" }]);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(started).toEqual([]);
+    expect(abandoned).toEqual(["r"]);
+    expect(lease.holds("t")).toBe(false);
+  });
+
+  it("never executes a queued promotion while confirmation fails or never settles", async () => {
+    let resolveHeartbeat!: (value: unknown) => void;
+    const pendingHeartbeat = new Promise(resolve => { resolveHeartbeat = resolve; });
+    const heartbeat = vi.fn(() => pendingHeartbeat);
+    const { lease, advance, started, abandoned } = leaseWith(async (name) => name === "agentRuns:begin"
+      ? { runId: "r", status: "queued", messageId: "m" } : heartbeat(), { value: false });
+    await lease.begin(input);
+    lease.remember({ runId: "r", botId: "b", threadId: "t", cloudThreadId: "ct", teamId: "team", messageId: "m", text: "hi" });
+    lease.pending("team", [{ runId: "r", status: "running" }]);
+    advance(60_000);
+    const expired = lease.tick();
+    try {
+      expect(started).toEqual([]);
+      expect(abandoned).toEqual(["r"]);
+      expect(lease.holds("t")).toBe(false);
+      expect(heartbeat).toHaveBeenCalledTimes(1);
+    } finally {
+      resolveHeartbeat({ status: "running" });
+      await expired;
+      await Promise.resolve();
+      await Promise.resolve();
+    }
+    expect(started).toEqual([]);
+  });
+
+  it("keeps a rejected queued confirmation from executing before the claim expires", async () => {
+    const { lease, advance, started, abandoned } = leaseWith(async (name) => {
+      if (name === "agentRuns:begin") return { runId: "r", status: "queued", messageId: "m" };
+      throw new TypeError("fetch failed");
+    }, { value: false });
+    await lease.begin(input);
+    lease.remember({ runId: "r", botId: "b", threadId: "t", cloudThreadId: "ct", teamId: "team", messageId: "m", text: "hi" });
+    lease.pending("team", [{ runId: "r", status: "running" }]);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(started).toEqual([]);
+    expect(lease.holds("t")).toBe(false);
+    advance(60_000);
+    await lease.tick();
+    expect(abandoned).toEqual(["r"]);
+    expect(started).toEqual([]);
+  });
+
+  it("does not reuse an earlier finished run's write grace after a later run loses ownership", async () => {
+    let runId = "first";
+    let heartbeats = 0;
+    const busy = { value: true };
+    const { lease } = leaseWith(async name => name === "agentRuns:begin"
+      ? { runId, status: "running", messageId: "m" } : { status: ++heartbeats <= 2 ? "running" : "interrupted" }, busy);
+    await lease.begin(input);
+    lease.observe("b");
+    busy.value = false;
+    lease.observe("b");
+    expect(lease.runFor("t")).toBe("first");
+    runId = "second";
+    busy.value = true;
+    await lease.begin({ ...input, clientId: "send:second" });
+    lease.observe("b");
+    await lease.tick();
+    expect(lease.holds("t")).toBe(false);
+    expect(lease.runFor("t")).toBeUndefined();
+  });
+
+  it("keeps heartbeating a confirmed queued turn while its start promise remains pending", async () => {
+    let finishStart!: () => void;
+    const start = new Promise<void>(resolve => { finishStart = resolve; });
+    let clock = 0;
+    let queued: Parameters<ReturnType<typeof openOutbox>["saveQueuedRun"]>[0] | undefined;
+    const heartbeat = vi.fn(async () => ({ status: "running" }));
+    const startQueued = vi.fn(() => start);
+    const interrupt = vi.fn();
+    const lease = createRunLease({
+      mutation: async name => name === "agentRuns:begin"
+        ? { runId: "r", status: "queued", messageId: "m" } : heartbeat(),
+      outbox: { enqueue: vi.fn(), queuedRuns: () => queued ? [queued] : [], saveQueuedRun: run => { queued = run; }, dropQueuedRun: () => { queued = undefined; } },
+      kick: vi.fn(), isBusy: () => true, startQueued, interrupt, abandoned: vi.fn(),
+      now: () => clock, monotonicNow: () => clock,
+    });
+    await lease.begin(input);
+    lease.remember({ runId: "r", botId: "b", threadId: "t", cloudThreadId: "ct", teamId: "team", messageId: "m", text: "hi" });
+    lease.pending("team", [{ runId: "r", status: "running" }]);
+    await expect.poll(() => startQueued.mock.calls.length).toBe(1);
+    try {
+      clock = 45_000;
+      await lease.tick();
+      clock = 75_000;
+      await lease.tick();
+      expect(lease.holds("t")).toBe(true);
+      expect(interrupt).not.toHaveBeenCalled();
+      expect(heartbeat).toHaveBeenCalledTimes(3);
+    } finally {
+      finishStart();
+      lease.failed("t");
+    }
+  });
+});
+
+describe("shared runner lifecycle", () => {
+  it("stops the old account's lease before its replacement can run", async () => {
+    vi.useFakeTimers();
+    let clock = 0;
+    const monotonic = vi.spyOn(performance, "now").mockImplementation(() => clock);
+    const folder = mkdtempSync(join(tmpdir(), "omb-shared-account-"));
+    folders.push(folder);
+    const cloudFile = join(folder, "cloud.json");
+    const setAccount = (sessionToken: string) => writeFileSync(cloudFile, JSON.stringify({ url: "https://fixture.invalid", sessionToken, projects: {} }));
+    const links = join(folder, "links.json");
+    writeFileSync(links, JSON.stringify({ threads: { t: "ct" } }));
+    const task = { threadId: "t", title: "Thread", createdAt: 0, modelSelection: { instanceId: "fixture", model: "fixture" } };
+    const bot = { id: "b", name: "Bot", shared: { agentId: "agent", teamId: "team" }, modelSelection: task.modelSelection };
+    const interrupt = vi.fn();
+    const shared = createSharedAgents({
+      store: { bots: [bot], projectBotForTask: () => undefined, bot: () => bot, taskByThread: () => task,
+        messagesFor: () => [], patchTask: (_bot: string, _thread: string, patch: object) => Object.assign(task, patch), onChange: () => () => undefined } as never,
+      files: { cloud: cloudFile, links, state: join(folder, "state.json"), outbox: join(folder, "outbox.sqlite"), bots: join(folder, "bots.json") },
+      connect: (_url, token) => ({ query: async () => ({ _id: token, name: token }),
+        mutation: async name => name === "agentRuns:begin" ? { runId: token, status: "running", messageId: "m" } : { status: "running" },
+        subscribe: () => () => undefined, close: vi.fn() }),
+      instances: async () => [], isBusy: () => true, startQueued: vi.fn(), interrupt, redact: text => text,
+    });
+    try {
+      setAccount("old");
+      expect(await shared.beforeSend({ botId: "b", threadId: "t", text: "Old", sendId: "first" })).toMatchObject({ status: "running" });
+      clock = 45_000;
+      await vi.advanceTimersByTimeAsync(45_000);
+      setAccount("replacement");
+      expect(await shared.beforeSend({ botId: "b", threadId: "t", text: "New", sendId: "second" })).toMatchObject({ status: "running" });
+      expect(interrupt).toHaveBeenCalledExactlyOnceWith("b", "t");
+      clock = 60_000;
+      await vi.advanceTimersByTimeAsync(15_000);
+      expect(interrupt).toHaveBeenCalledTimes(1);
+    } finally {
+      shared.stop();
+      monotonic.mockRestore();
+      vi.useRealTimers();
+    }
   });
 });
 
