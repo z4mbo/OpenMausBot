@@ -3,6 +3,16 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.2.14",
+  date: "2026-10-19",
+  title: "Safer accounts and shared-agent ownership",
+  changes: [
+    { title: "Sign-in stays with your account", body: "A delayed sign-in or sign-out cannot replace a newer account, including when another window signs in and signs out before the old request finishes." },
+    { title: "Sessions stay on their server", body: "Changing servers clears the previous session before connecting to the new server. Different addresses for the same server keep you signed in." },
+    { title: "Checked account connections", body: "Concurrent connection changes preserve the verified active account. Sign-in reports a failed connection to the local app so you can retry." },
+    { title: "Shared agents confirm ownership", body: "Shared work stops when Origin cannot renew its ownership. Queued and resumed work confirms ownership before starting, and changing accounts stops the previous local run." },
+  ],
+}, {
   version: "0.2.13",
   date: "2026-10-18",
   title: "Reliable boards and a clearer Origin",
