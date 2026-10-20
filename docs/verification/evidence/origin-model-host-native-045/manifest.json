@@ -1,0 +1,295 @@
+{
+  "cycle": "045",
+  "capturedAt": "2026-10-20T04:47:18.818Z",
+  "scope": "Finite isolated shared-model native acceptance; composed source closures, not one repeated full-suite run",
+  "baseCommit": "a89f4bb4add33209ab25f1e0d36c9d33aa290db0",
+  "originalArtifactsPreserved": true,
+  "artifacts": [
+    {
+      "path": "docs/verification/evidence/origin-model-host-native-044/handover-final-receipt.json",
+      "bytes": 2089,
+      "sha256": "b79598eb324ac40845507952477856b6067cf57facdc7a11ba0cbd572d9439c1"
+    },
+    {
+      "path": "docs/verification/evidence/origin-model-host-native-044/handover-final-runtime-source.json",
+      "bytes": 107670,
+      "sha256": "2f583b8d941e96f7592f9ad7d7f9dcd78cb1f8dc5119e5d50435dd668c90e476"
+    },
+    {
+      "path": "docs/verification/evidence/origin-model-host-native-044/handover-receipt.json",
+      "bytes": 6193,
+      "sha256": "4fca22f2e15adc62517ae8a4396f1507dc6f6dc6a1d0a6883b8e29cda59cc983"
+    },
+    {
+      "path": "docs/verification/evidence/origin-model-host-native-044/handover-runtime-source.json",
+      "bytes": 107670,
+      "sha256": "fab0189a2098b3c6c5cf960d9c3057a60b8a860ca8b5e74df597952839ffc248"
+    },
+    {
+      "path": "docs/verification/evidence/origin-model-host-native-044/handover-sender-failure-receipt.json",
+      "bytes": 1464,
+      "sha256": "7e2ee57dc9c1bccf1c74be7c0bc8e3b8302664a7510a67ed94bd4eee1f5bc179"
+    },
+    {
+      "path": "docs/verification/evidence/origin-model-host-native-044/handover-sender-failure-runtime-source.json",
+      "bytes": 107670,
+      "sha256": "b8d843daeca87b86de1364855d7996869a8f7ab8e4dd710c26a14dec31c1f811"
+    },
+    {
+      "path": "docs/verification/evidence/origin-model-host-native-044/native-confinement.json",
+      "bytes": 1168,
+      "sha256": "f6a087310c4e739ed82092a8b27eb508004d3871b5fa54e126853737efb16360"
+    },
+    {
+      "path": "docs/verification/evidence/origin-model-host-native-044/receipt.json",
+      "bytes": 4856,
+      "sha256": "100b1677732c768e83aeed99c357b9af9d5ebcf63e510c740c49e21451d0c87f"
+    },
+    {
+      "path": "docs/verification/evidence/origin-model-host-native-044/runtime-source.json",
+      "bytes": 100872,
+      "sha256": "3bccb231ee043813ca0e2c14879d1fbf4eafd983a4925ccfad8f12a412da1149"
+    }
+  ],
+  "backendSourceArtifact": {
+    "path": "docs/verification/evidence/origin-model-host-native-045/backend-source.json",
+    "bytes": 37554,
+    "sha256": "22214fc854647611b7f3684ee6cf0a1ceef16014b56e5419bbeedd83c0144320"
+  },
+  "closures": [
+    {
+      "artifact": "docs/verification/evidence/origin-model-host-native-044/runtime-source.json",
+      "files": 765,
+      "acceptedCases": [
+        "remotePrimary",
+        "unknownBegin",
+        "stopSetup"
+      ],
+      "differencesFromFinalNative": [
+        {
+          "path": "scripts/control-omb.ts",
+          "closureSha256": "90ba255328cc270e13ba172e11506f87434c5c3f11a2001e93a3ad939e8f46f5",
+          "finalNativeSha256": "092f629b38bd8d6aaac2235c6a0ce74071c3587229a1e5ddd34684e391fca951"
+        },
+        {
+          "path": "scripts/testing/model-host-response-proxy.ts",
+          "closureSha256": "c0bbebf63b60b1e8b2eb7fa91493f8bf8d7735f065586caba785730c5ece546f",
+          "finalNativeSha256": null
+        },
+        {
+          "path": "scripts/verify-origin-model-host-handover-native.ts",
+          "closureSha256": null,
+          "finalNativeSha256": "4b73a0358dce5d833bd8ce11f87698b5214e18774ca6142370ff6a10c06599a9"
+        },
+        {
+          "path": "scripts/verify-origin-model-host-handover.ts",
+          "closureSha256": null,
+          "finalNativeSha256": "c2c34ab7d90442f68c6c4dc6526f3355cf045033990e51e034cb8c62f66f02aa"
+        },
+        {
+          "path": "scripts/verify-origin-model-host-native.ts",
+          "closureSha256": "ab624e308dc3861799e944030015e5bfd3245c4d5beaf5fd442a04b154116f73",
+          "finalNativeSha256": null
+        },
+        {
+          "path": "server/drivers/claude-permission-broker.ts",
+          "closureSha256": "1dc7a3c7f4ba791ff8d2ae4acb4ae03a06924b02c1cb84e5129a83f7c9f3fb69",
+          "finalNativeSha256": "45ebef12873fd1b83aaa1443706e2b3c322ca37edcf194d5ecab4e9ed3bb56a9"
+        },
+        {
+          "path": "server/host/shared-model-backups.ts",
+          "closureSha256": "e6625189cba9cfb459e598db62221114f2c5ba0645045795c5f0193b2ce67ea4",
+          "finalNativeSha256": "f0aee3f12f8fe4b39d8bc30ffe656d4047e7b69e71c094a9f3befe3eaf4f8152"
+        },
+        {
+          "path": "server/index.ts",
+          "closureSha256": "9031e6cf339d0a3b81d2f8cd1e16364da7475d784aba08d5a1e6c49bd44a18bc",
+          "finalNativeSha256": "058207683ac5caf07d4ad75b97e548c00bd44a7b7b26cfb2e1d93710fb252a1e"
+        },
+        {
+          "path": "server/origin-hosted-requests.ts",
+          "closureSha256": "daf35130f2ee61c1a6e5e0c922d2daa2c96549c5daab11d232d85bc0db926b82",
+          "finalNativeSha256": "9d3e33c239b8aad2b0ac5a778a621d7912c424ec565c13ecf1d7834e00b89a77"
+        },
+        {
+          "path": "server/origin-model-host-routes.ts",
+          "closureSha256": "2adc4952b2575716a27f92a110d771f060f6597e7244f957c499a1eb6bcfa30e",
+          "finalNativeSha256": "097a655661142a3751dd84cba0d20180d1a85fb2bdc69dbd41395c7aebeb176d"
+        },
+        {
+          "path": "server/origin-model-host.ts",
+          "closureSha256": "df87f330f16969f9f46ebd22f8e564c7ec0a50a7ff3ef9c14961b38b09f9e1b9",
+          "finalNativeSha256": "eff1b61662592b100d632b5b243ddd33feb86a6e88c96947f64c8b1bd5466f1e"
+        },
+        {
+          "path": "server/origin-shared-agents.ts",
+          "closureSha256": "6b0a11d501e323e187282139cbdfa6b207c0d19b5451cbd8c06d213442a2013d",
+          "finalNativeSha256": "4173d729c9ddeb0a4ed446afef07926521a2889740fc3c6cdfec1c5ebaf29345"
+        },
+        {
+          "path": "server/testing/fake-claude-cli.ts",
+          "closureSha256": "25636581f7472eeba31c89e9e30cec7c1236745b4bed9522fc9307d4b80221f7",
+          "finalNativeSha256": "16d8c9e8a8a31e31aac055f8471c588e9a80b7c8a75d365ae75184aaa00150de"
+        },
+        {
+          "path": "server/testing/native-model-host-profile.ts",
+          "closureSha256": null,
+          "finalNativeSha256": "dc5ad77bc64ad172be5963236ef2e4133cc7de4cf2a716f54a990282e57aefc4"
+        },
+        {
+          "path": "shared/origin-releases.ts",
+          "closureSha256": "a0338f4afe2ed8bdd1bd1639119ef145a16b1cbadadaccbf6a083eed13c32b63",
+          "finalNativeSha256": "a051385b7d919a9982228667ab13c50e09ae2fa3a23f238d69f414ad099663df"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/verification/evidence/origin-model-host-native-044/handover-runtime-source.json",
+      "files": 766,
+      "acceptedCases": [
+        "remote-remote",
+        "local-remote",
+        "partial",
+        "offline-nonquota-control",
+        "offline",
+        "stop",
+        "cap",
+        "revoke"
+      ],
+      "differencesFromFinalNative": [
+        {
+          "path": "scripts/verify-origin-model-host-handover-native.ts",
+          "closureSha256": "19010b6e8865078b14852170450cfe867c631a9df01e23ec103c363bd6faf923",
+          "finalNativeSha256": "4b73a0358dce5d833bd8ce11f87698b5214e18774ca6142370ff6a10c06599a9"
+        },
+        {
+          "path": "scripts/verify-origin-model-host-handover.ts",
+          "closureSha256": "6be88fd5d7b612ccf58125eadc7a6830ce31ad3dbb6fb82b9e9c7ced291458d7",
+          "finalNativeSha256": "c2c34ab7d90442f68c6c4dc6526f3355cf045033990e51e034cb8c62f66f02aa"
+        },
+        {
+          "path": "server/drivers/claude-permission-broker.ts",
+          "closureSha256": "1dc7a3c7f4ba791ff8d2ae4acb4ae03a06924b02c1cb84e5129a83f7c9f3fb69",
+          "finalNativeSha256": "45ebef12873fd1b83aaa1443706e2b3c322ca37edcf194d5ecab4e9ed3bb56a9"
+        },
+        {
+          "path": "server/host/shared-model-backups.ts",
+          "closureSha256": "e6625189cba9cfb459e598db62221114f2c5ba0645045795c5f0193b2ce67ea4",
+          "finalNativeSha256": "f0aee3f12f8fe4b39d8bc30ffe656d4047e7b69e71c094a9f3befe3eaf4f8152"
+        },
+        {
+          "path": "server/index.ts",
+          "closureSha256": "9031e6cf339d0a3b81d2f8cd1e16364da7475d784aba08d5a1e6c49bd44a18bc",
+          "finalNativeSha256": "058207683ac5caf07d4ad75b97e548c00bd44a7b7b26cfb2e1d93710fb252a1e"
+        },
+        {
+          "path": "server/origin-model-host-routes.ts",
+          "closureSha256": "2adc4952b2575716a27f92a110d771f060f6597e7244f957c499a1eb6bcfa30e",
+          "finalNativeSha256": "097a655661142a3751dd84cba0d20180d1a85fb2bdc69dbd41395c7aebeb176d"
+        },
+        {
+          "path": "server/origin-model-host.ts",
+          "closureSha256": "df87f330f16969f9f46ebd22f8e564c7ec0a50a7ff3ef9c14961b38b09f9e1b9",
+          "finalNativeSha256": "eff1b61662592b100d632b5b243ddd33feb86a6e88c96947f64c8b1bd5466f1e"
+        },
+        {
+          "path": "server/origin-shared-agents.ts",
+          "closureSha256": "6b0a11d501e323e187282139cbdfa6b207c0d19b5451cbd8c06d213442a2013d",
+          "finalNativeSha256": "4173d729c9ddeb0a4ed446afef07926521a2889740fc3c6cdfec1c5ebaf29345"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/verification/evidence/origin-model-host-native-044/handover-sender-failure-runtime-source.json",
+      "files": 766,
+      "acceptedCases": [
+        "remote-to-local sender busy regression, before correction"
+      ],
+      "differencesFromFinalNative": [
+        {
+          "path": "scripts/verify-origin-model-host-handover-native.ts",
+          "closureSha256": "44fa9b8fe4710245abdcac3b69e4e2fdb25443e716db1a84c93476ed568c25af",
+          "finalNativeSha256": "4b73a0358dce5d833bd8ce11f87698b5214e18774ca6142370ff6a10c06599a9"
+        },
+        {
+          "path": "scripts/verify-origin-model-host-handover.ts",
+          "closureSha256": "6be88fd5d7b612ccf58125eadc7a6830ce31ad3dbb6fb82b9e9c7ced291458d7",
+          "finalNativeSha256": "c2c34ab7d90442f68c6c4dc6526f3355cf045033990e51e034cb8c62f66f02aa"
+        },
+        {
+          "path": "server/index.ts",
+          "closureSha256": "9031e6cf339d0a3b81d2f8cd1e16364da7475d784aba08d5a1e6c49bd44a18bc",
+          "finalNativeSha256": "058207683ac5caf07d4ad75b97e548c00bd44a7b7b26cfb2e1d93710fb252a1e"
+        },
+        {
+          "path": "server/origin-model-host-routes.ts",
+          "closureSha256": "2adc4952b2575716a27f92a110d771f060f6597e7244f957c499a1eb6bcfa30e",
+          "finalNativeSha256": "097a655661142a3751dd84cba0d20180d1a85fb2bdc69dbd41395c7aebeb176d"
+        },
+        {
+          "path": "server/origin-model-host.ts",
+          "closureSha256": "df87f330f16969f9f46ebd22f8e564c7ec0a50a7ff3ef9c14961b38b09f9e1b9",
+          "finalNativeSha256": "eff1b61662592b100d632b5b243ddd33feb86a6e88c96947f64c8b1bd5466f1e"
+        },
+        {
+          "path": "server/origin-shared-agents.ts",
+          "closureSha256": "6b0a11d501e323e187282139cbdfa6b207c0d19b5451cbd8c06d213442a2013d",
+          "finalNativeSha256": "4173d729c9ddeb0a4ed446afef07926521a2889740fc3c6cdfec1c5ebaf29345"
+        }
+      ]
+    },
+    {
+      "artifact": "docs/verification/evidence/origin-model-host-native-044/handover-final-runtime-source.json",
+      "files": 766,
+      "acceptedCases": [
+        "remote-local"
+      ],
+      "differencesFromFinalNative": []
+    }
+  ],
+  "sourceDriftAfterFinalNative": [
+    {
+      "path": "server/index.ts",
+      "nativeSha256": "058207683ac5caf07d4ad75b97e548c00bd44a7b7b26cfb2e1d93710fb252a1e",
+      "currentSha256": "0b148efc94ce09dd3a4bfcffa54668a6f15d9c1ecc38bbe1ddbb5d79c8cb1f3c"
+    },
+    {
+      "path": "server/testing/model-host-readiness.ts",
+      "nativeSha256": "47ddbabae5ce37b859b84b53c0602274061c469adf690bc296168933326fb633",
+      "currentSha256": "61409aec1d90653083ff23932abc415ef6d72633fe2a3967974ca44a52d403f7"
+    }
+  ],
+  "sourceDriftQualification": "Post-native readiness or route changes require their separate root-owned tests. Retained native cases are not silently relabeled against new source.",
+  "regressions": [
+    {
+      "scenario": "Remote quota refusal on a thread with inherited project folder rejects an available local backup",
+      "beforeArtifact": "docs/verification/evidence/origin-model-host-native-044/handover-receipt.json",
+      "afterArtifact": "docs/verification/evidence/origin-model-host-native-044/handover-final-receipt.json",
+      "priorSendReplayed": false
+    },
+    {
+      "scenario": "Backend transfers to sender, but the remote busy presentation blocks startTurn before local provider dispatch",
+      "beforeArtifact": "docs/verification/evidence/origin-model-host-native-044/handover-sender-failure-receipt.json",
+      "afterArtifact": "docs/verification/evidence/origin-model-host-native-044/handover-final-receipt.json",
+      "priorSendReplayed": false
+    }
+  ],
+  "limits": [
+    "Repository fake Claude CLI only; emitted confinement settings and denied MCP/permission paths do not prove real vendor CLI or OS isolation",
+    "Distinct accounts/sources on one native owner computer; controlled offline presence is not a third native computer",
+    "No positive metered HTTP API, real provider spending or owner cost settlement acceptance",
+    "No owner crash/restart with an accepted unknown execution acceptance",
+    "No packaged desktop, browser or production delivery claim in this manifest"
+  ],
+  "cleanupArtifact": {
+    "path": "docs/verification/evidence/origin-model-host-native-045/cleanup-receipt.json",
+    "bytes": 3872,
+    "sha256": "58e6a778f61bfe7f765d237c9d23e9f3572bdf0ca5b57e3ca48b3f0df74e97dd"
+  },
+  "priorManifestArtifact": {
+    "path": "docs/verification/evidence/origin-model-host-native-045/manifest-before-cleanup.json",
+    "bytes": 13306,
+    "sha256": "d64927cfc0c7efab4b064912f5135c7497d279e147413bd7d2f77693fab341e8"
+  },
+  "cleanupCompletedAt": "2026-10-20T04:53:04.851Z"
+}

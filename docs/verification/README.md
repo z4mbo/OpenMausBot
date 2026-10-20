@@ -85,6 +85,8 @@ Use only mapped, tested commands:
 - [Origin 0.2.13 published delivery, audit report and upstream recommendations](evidence/origin-delivery-035/final-audit-report.md)
 - [Origin 0.2.14 published delivery, CI retry, screenshots and upstream recommendations](evidence/origin-delivery-038/final-audit-report.md)
 - [Origin 0.2.15 published provider Usage fix, delivery hashes and retained recovery evidence](evidence/origin-delivery-040/final-audit-report.md)
+- [Origin 0.2.16 source candidate, release notes and shared-hosting acceptance boundary](origin-candidate-045.md)
+- [Origin 0.2.16 release notes](origin-0.2.16-release-notes.md)
 - [Real isolated backend, two-client invitations, persistence and revocation](evidence/origin-native-039/report.md)
 - [Authentication response ownership and two-tab session races](origin-session-scope.md)
 - [Account, connection and shared-run ownership follow-up](origin-ownership-037.md)

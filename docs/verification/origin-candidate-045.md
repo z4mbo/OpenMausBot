@@ -1,0 +1,69 @@
+# Origin 0.2.16 candidate: model continuity and shared project work
+
+Prepared on 2026-10-20. This is an unpublished source candidate. The package version and canonical release history now match 0.2.16; no tag, artifact build, deployment or publication is established by this document update. The [0.2.15 delivery](evidence/origin-delivery-040/final-audit-report.md) remains the separately recorded published source and artifact set.
+
+The first entry in [shared/origin-releases.ts](../../shared/origin-releases.ts) supplies the [canonical Markdown notes](origin-0.2.16-release-notes.md), in-app What's new, website history and updater generation for 0.2.16. Published 0.2.15 binaries and the website do not acquire these source changes until their matching delivery is verified.
+
+## Candidate behavior
+
+| Area | Behavior and limits | Retained evidence |
+| --- | --- | --- |
+| Ranked model fallback | Each agent can opt into up to five ordered, deduplicated account/model backups. Provider-confirmed quota exhaustion is distinct from authentication, quota-meter failure and transient rate limiting. Automatic replay requires a quiesced initial refusal with no reply, reasoning, approval or tool activity. Partial work stays manual. Each account/model is attempted finitely; sibling conversations and the bot default stay unchanged. | `server/quota-refusal.test.ts`, `server/quota-fallback.test.ts`, `server/model-backup.test.ts`, `server/quota-switch.e2e.test.ts`; [actual component and isolated HTTP proof](evidence/origin-model-fallback-041/browser-proof.json). CLI quota frames in these checks are synthetic. |
+| Daily API limits | Computer-wide and optional per-agent USD limits share a durable local ledger and reset time zone. Supported API requests reserve before dispatch and every later tool round; helper calls use the same gate. Dispatched uncertain costs retain their hold. Known subscription billing stays separate; unpriced, unbounded or unsupported API paths fail closed when a cap applies. Zero is a real zero-spend limit. | `server/daily-api-budget.test.ts`, `server/drivers/openai-chat-budget.test.ts`, `server/api-budget-policy.test.ts`, `server/daily-api-budget-api.test.ts`; [zero-limit UI](evidence/origin-model-fallback-041/global-zero-light-375.png). No vendor invoice or cross-computer account-total claim. |
+| Shared-agent synchronization | Imported workspace/project Chiefs and their agents are reconciled in the same sync round. Existing canonical shared-agent identity is preserved across computers. Account/server changes invalidate the old round. | Commit `f7ee7d2b6`, `src/components/OriginSync.test.ts` and the existing shared-agent/backend suites. Full-App cross-machine sync acceptance remains separate from the hosted execution fixture. |
+| Shared project order | Pointer and keyboard moves update canonical workspace project IDs across members. Hidden projects stay hidden; local private projects retain their own ordering. Viewer revocation disables movement. | Commit `90db2b7a6`; [two-browser, real isolated-backend proof](evidence/origin-project-order-042/browser-proof.json) and [persisted rows](evidence/origin-project-order-042/persisted-after-drag.json). |
+| Specialist conversations | The project Agents list separates specialists from the Chief and lists independent/delegated threads. Follow-up work from parent Chief A reuses child A while independent direct B and its selected view remain intact. Notifications open the exact child; the parent link returns to the project conversation. | [Actual component/native fake-runtime browser proof](evidence/origin-agent-threads-043/browser-proof.json), `server/delegation-thread.test.ts`, `server/direct-coordination.e2e.test.ts`, `server/delegation-notification.test.ts`. |
+| Usage and width | Header usage is compact by default, with context details expandable. Unavailable quotas remain neutral. Appearance controls Compact/Medium/Wide conversation and composer width locally. | [Actual ChatView/PlanUsage/Composer proof](evidence/origin-chat-usage-042/browser-proof.json), `src/components/ChatUsagePopover.test.ts`, `src/lib/chat-width.test.ts`. |
+
+Paid automatic fallback requires `fallbackApiAllowed` in addition to an eligible target and the applicable API budget. A source's picker name or missing billing metadata does not establish free subscription access. API budget coverage currently requires reviewed model prices and enforceable per-request bounds; this is not a universal cap for every provider, opaque CLI, reasoning path or custom endpoint.
+
+## Opt-in teammate model hosting
+
+The normal runtime now supports explicitly granted teammate sources. Sharing stays disabled by default: the source owner chooses the projects/workspace scope, models and capacity. Eligible confined runtimes execute on the source owner's online computer, using its local credentials, project folder, Ask approvals and applicable API budget. Sender-runs remains the default. An explicit remote selection is never silently repaired into the local account. A present test marker, including an empty value, still requires the sealed fake-runtime fixture path rather than bypassing admission.
+
+The [consolidated native map](evidence/origin-model-host-native-045/README.md) and its [manifest](evidence/origin-model-host-native-045/manifest.json), SHA-256 `d64927cfc0c7efab4b064912f5135c7497d279e147413bd7d2f77693fab341e8`, retain all nine original 044 artifacts, the [228-file deployed fixture-backend snapshot](evidence/origin-model-host-native-045/backend-source.json) and the separately checked readiness changes made after native capture. Native acceptance uses two disposable Node app servers, the actual isolated Convex backend on 54851/54852, actual local HTTP/MCP paths and the repository's fake Claude CLI. The receipts retain each source boundary and the failed requests rather than rewriting them as successful:
+
+| Receipt | Actual result | Source binding |
+| --- | --- | --- |
+| [Original direct ownership](evidence/origin-model-host-native-044/receipt.json), `2026-10-20T04:14:51.974Z` | Three passed cases: direct hosted execution and duplicate-send reuse; lost successful begin acknowledgement reconciled once; Stop during thread setup with no accepted hosted mutation. | [Original runtime manifest](evidence/origin-model-host-native-044/runtime-source.json). |
+| [Ranked handover](evidence/origin-model-host-native-044/handover-receipt.json), `2026-10-20T04:37:20.991Z` | Eight passed handover/control cases: remote→remote, local→remote, partial-output refusal, ordinary local control, offline-source skip after typed quota, Stop, opaque metered CLI budget refusal before dispatch, and source revocation. It also retains the first failed remote→local inherited-folder request. | [Handover runtime manifest](evidence/origin-model-host-native-044/handover-runtime-source.json). |
+| [Intermediate sender failure](evidence/origin-model-host-native-044/handover-sender-failure-receipt.json), `2026-10-20T04:41:07.332Z` | The backend transferred ownership to the sender, but the hosted busy presentation blocked local dispatch. This failed request was retained without replay. | [Intermediate runtime manifest](evidence/origin-model-host-native-044/handover-sender-failure-runtime-source.json). |
+| [Final fresh remote→local request](evidence/origin-model-host-native-044/handover-final-receipt.json), `2026-10-20T04:45:00.166Z` | Passed after both corrections: one exhausted owner invocation, one successful local invocation, no other provider invocation, one canonical user/reply pair, both native mirrors updated, inherited project folder retained and task no longer busy. Private transcripts remain unchanged. | [Final runtime manifest](evidence/origin-model-host-native-044/handover-final-runtime-source.json). |
+
+The original direct/lost-ack cases also retain the owner's selected private B and both private transcripts, use the owner's granted project folder, exclude private memory/chat canaries from the captured provider prompt, deny three actual internal MCP privacy probes and leave owner memory/log files unchanged. A positive control first confirms that the memory canary reaches the owner's own private prompt. [Native confinement evidence](evidence/origin-model-host-native-044/native-confinement.json) records the restricted tool arguments, strict MCP configuration and denied outside-folder permission request. Raw captures and capability tokens remain in ignored private evidence.
+
+These results bind their captured working-tree manifests, not an eventual release tag. The final receipt SHA-256 is `b79598eb324ac40845507952477856b6067cf57facdc7a11ba0cbd572d9439c1`; its runtime manifest SHA-256 is `2f583b8d941e96f7592f9ad7d7f9dcd78cb1f8dc5119e5d50435dd668c90e476`. Subsequent readiness/version/documentation changes still require the final source gates. The outside-folder check uses a fake CLI permission request and emitted native arguments; it does not prove a real vendor CLI or operating-system sandbox. Claude/Codex configuration and permission tests are synthetic; unsupported hosted drivers are refused. The hosted scope is canonical shared text plus confined project tools, with Ask approvals on the account owner's computer. Private chats, memory, profile, connected apps, shell and delegated tool access are excluded.
+
+The remote aliases represent distinct synthetic accounts on one source-owner computer, not a third physical host. The budget case proves refusal before an opaque metered CLI dispatch, not positive hosted HTTP spending or invoice attribution. Unknown accepted work after an owner crash/restart, real-provider quota behavior, real CLI/OS isolation, physical Mac and installed Windows/macOS approval/updater journeys remain unverified. The UI consent/grant previews and unit/backend tests retain their separate scopes; no production-data test mutation or physical-provider acceptance is claimed.
+
+## UI comparisons
+
+| Screen | Before | After |
+| --- | --- | --- |
+| Agent model fallback, 375 px light | [Before](evidence/origin-model-fallback-041/before-agent-light-375.png) | [After](evidence/origin-model-fallback-041/after-agent-light-375.png) |
+| Usage, desktop dark | [Before](evidence/origin-model-fallback-041/before-usage-dark.png) | [After](evidence/origin-model-fallback-041/after-usage-dark.png) |
+| Specialist threads, desktop dark | [Before](evidence/origin-agent-threads-043/before-desktop-dark.png) | [After](evidence/origin-agent-threads-043/after-delegated-desktop-dark.png) |
+| Shared project order | [Before](evidence/origin-project-order-042/owner-before.png) | [After](evidence/origin-project-order-042/owner-after.png) |
+| Compact Usage | Earlier quota/budget panel is above | [Desktop dark](evidence/origin-chat-usage-042/minimal-usage-dark.png), [375 px light](evidence/origin-chat-usage-042/minimal-usage-light-375.png) |
+| Prepared shared-source UI | [Overflow baseline](evidence/origin-model-host-ui-044/before-agent-light-375-overflow.png) | [375 px correction](evidence/origin-model-host-ui-044/after-agent-light-375.png), [ranked sources](evidence/origin-model-host-ui-044/ranked-shared-models-dark.png), [paid-source confirmation](evidence/origin-model-host-ui-044/paid-shared-model-confirmation.png) |
+
+The linked browser artifacts state their own fixture boundaries. Project-order proof uses real isolated subscriptions with independent local Chief IDs; specialist proof uses two views of one isolated fake runtime; prepared shared-source choices use a synthetic catalog. None is a published or installed-app screenshot.
+
+## Retained evidence integrity
+
+The 2026-10-20 archival review preserves all 41 original files across the four earlier browser evidence folders. Each review includes a raw-byte SHA-256 manifest and verifies its relative file references. These checks add no browser, runtime or release acceptance.
+
+| Evidence | Integrity report | Source-identity limit |
+| --- | --- | --- |
+| Model fallback 041 | [Report](evidence/origin-model-fallback-041/integrity-report.md) | No source digest bindings retained. |
+| Minimal Usage 042 | [Report](evidence/origin-chat-usage-042/integrity-report.md) | No source digest bindings or capture timestamp retained. |
+| Project order 042 | [Report](evidence/origin-project-order-042/integrity-report.md) | No source digest bindings retained. |
+| Specialist threads 043 | [Report](evidence/origin-agent-threads-043/integrity-report.md) | Seven of eight recorded source digests match current raw bytes; `shared/wire.ts` has drifted. The recorded baseline component blob and all ten entries in the original evidence manifest still match. |
+
+Supplementary source inventories are dated at the archival review, never reconstructed as capture-time or startup bindings. All 34 retained screenshot filenames end in `.png`, while their bytes encode JPEG; the review records the actual encoding and dimensions without renaming or re-encoding originals. The separate 044 evidence retains its own manifests and acceptance boundary.
+
+## Release gates still to close
+
+Run the required client/shared checks, both TypeScript builds, touched server/backend tests, lint, source/route guards, locale and release guards against the final frozen source. Retain initial failures and exact successful reruns; do not combine old counts into a new full-suite total.
+
+After source acceptance, follow [release tools](origin-release-tools.md) and [delivery procedure](origin-delivery.md): one matching changelog, GitHub source/PR, website build, Windows x64 and both Mac architectures, update metadata, downloaded artifact hashes and public URL checks. Package, update-feed and publication claims require their own new receipts. This candidate document performs none of those operations and does not waive person-approved PR merges.

@@ -1,8 +1,21 @@
-/** One entry of the What's new history, served at GET /api/releases and bundled into the client. */
+/** One entry of the What's new history bundled into the app and website. */
 export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.2.16",
+  date: "2026-10-20",
+  title: "Model continuity and shared project work",
+  changes: [
+    { title: "Ordered model backups", body: "Choose up to five backup models for each agent. Opt-in fallback follows that order when a provider confirms its quota is exhausted. Automatic continuation requires a refusal before any reply or action; work already started is never sent again automatically. Paid API backups need separate permission." },
+    { title: "Daily API budgets", body: "Set a daily USD limit for this computer and optional limits for individual agents, with a chosen reset time zone. Supported API requests reserve their maximum cost before sending. Uncertain costs keep their reservation; unsupported or unpriced routes stop when a limit applies. Confirmed subscription models remain available." },
+    { title: "Shared agents keep their identity", body: "Workspace and project synchronization preserves existing shared-agent identities when another computer joins. A sync round reconciles imported Chiefs and agents before continuing, and an account change discards the previous round." },
+    { title: "Project order follows the workspace", body: "Reorder shared projects with a pointer or keyboard and see the order on other members' computers. Private projects stay private, and read-only access cannot change the shared order." },
+    { title: "Specialist conversations stay separate", body: "The project Agents page lists each specialist's independent and delegated conversations. Chief follow-ups return to the same delegated child, leaving your direct conversation in place. Notifications open the exact child, with a link back to its project conversation." },
+    { title: "A quieter Usage panel", body: "Open a compact quota panel from the agent conversation header and expand context details when needed. Unavailable quota checks stay neutral. Appearance offers Compact, Medium and Wide layouts that keep the conversation and composer aligned on this device." },
+    { title: "Opt-in teammate model sources", body: "Share supported model accounts with selected projects. Shared choices identify the owner and computer, run on that owner's device and keep provider credentials there. Ordered backups can cross local and teammate sources after a safe initial quota refusal. Paid sources require consent and the owner's budget checks; partial or uncertain accepted work is not silently replayed." },
+  ],
+}, {
   version: "0.2.15",
   date: "2026-10-19",
   title: "Clearer provider usage",

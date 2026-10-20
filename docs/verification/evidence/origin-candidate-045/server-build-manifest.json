@@ -1,0 +1,51 @@
+{
+  "createdAt": "2026-10-20T04:36:27.490Z",
+  "scope": "Server build/smoke evidence files only",
+  "files": [
+    {
+      "path": "server-build-smoke.json",
+      "bytes": 7359,
+      "sha256": "a73f1e0c08e5dd3b260f1cce54049f8f8089c528c603c7c430a0a03c86436822"
+    },
+    {
+      "path": "server-build-smoke.md",
+      "bytes": 2907,
+      "sha256": "fefbdd63155dc4bc1fbaac7d238dbf1d2f2701961adfcf5a3300131d4afb38af"
+    },
+    {
+      "path": "server-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "server-bundle.log",
+      "bytes": 528,
+      "sha256": "716ffb43fa53b5cc7ff9977b8c01b8fdd8ecf8622563c826da5a61314e6e0754"
+    },
+    {
+      "path": "packaged-server-smoke.log",
+      "bytes": 493,
+      "sha256": "1c83d59a272ee29d794cd90c701932bfd0c0d34fd31a5f0532fd5016b3a84d99"
+    },
+    {
+      "path": "initial-server-build/server-build-smoke.json",
+      "bytes": 6664,
+      "sha256": "39bb2ef138580fdf089876d260f10ee6685d537e4ed856fa72af753ee43ae5ac"
+    },
+    {
+      "path": "initial-server-build/server-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "initial-server-build/server-bundle.log",
+      "bytes": 529,
+      "sha256": "359904840c4fc0517179c0bb951186738c8d9e9aa8f03351c5dc1d6a1929b99b"
+    },
+    {
+      "path": "initial-server-build/packaged-server-smoke.log",
+      "bytes": 493,
+      "sha256": "4e7d71386a5a60696b0c6bf341446e1d97f37065b71c0cfb60eef83fb3436b4e"
+    }
+  ]
+}

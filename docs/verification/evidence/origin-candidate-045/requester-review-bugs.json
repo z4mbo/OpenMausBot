@@ -1,0 +1,156 @@
+{
+  "scope": "Three bounded shared-model requester and catalog regressions",
+  "productionActionPerformed": false,
+  "redEvidence": "Observed in tool output only; no red-log files were retained for these regressions.",
+  "bugs": [
+    {
+      "id": "remote-offer-pre-seed-validation",
+      "severity": "P2",
+      "source": "server/origin-hosted-requests.ts:218",
+      "caller": "server/index.ts:9214",
+      "scenario": "A local model proves an initial quota refusal. The ranked chooser validates a remote source. That source goes offline, is revoked, or fails validation before transferToHost revalidates it and before any durable hosted receipt is seeded.",
+      "wrongResult": "offer rejects through the detached dispatch catch handler instead of returning a safe refusal. Normal handoff release, failure reporting, idle cleanup and queue draining are skipped. No hosted receipt exists to reconcile this pre-seed failure.",
+      "fix": "Catch only the validation rejection before durable seed and return false. A failed acknowledgement after offerExisting remains potentially accepted and retains its durable receipt and true result.",
+      "test": "server/origin-hosted-transfer-review.test.ts:10",
+      "red": {
+        "failed": 1,
+        "passed": 1,
+        "cases": "Pre-seed validation rejected unexpectedly; unknown-offer acknowledgement control already retained ownership."
+      },
+      "greenFocused": {
+        "failed": 0,
+        "passed": 2
+      },
+      "greenCombined": {
+        "files": 4,
+        "passed": 24
+      },
+      "boundary": "Actual createSharedAgents, coordinator, chooser and lease with mocked cloud transport; no production or real provider calls."
+    },
+    {
+      "id": "model-catalog-hidden-bot",
+      "severity": "P2",
+      "source": "server/origin-model-host-routes.ts:29",
+      "wiring": [
+        "server/origin-model-host.ts:219",
+        "server/index.ts:13600"
+      ],
+      "scenario": "A client-scope member who cannot see a restricted bot supplies its known ID to GET /api/origin/model-host/catalog?botId=restricted. The server owner still has Origin access to that bot's project.",
+      "wrongResult": "The query-only bot ID bypasses pathSubject visibility gating. The route calls the owner-scoped catalog and returns host owner, computer and model availability metadata. The member response filter does not remove sources arrays.",
+      "fix": "Check the current caller's VisibleSet before querying catalog and return the ordinary no-such-bot 404 for invisible IDs. Pass visibility through the controller with a fail-closed default. Preserve admin-only source settings and revocation.",
+      "test": "server/origin-model-host-routes-review.test.ts:29",
+      "red": {
+        "failed": 2,
+        "passed": 5,
+        "cases": "Restricted and unknown member IDs were accepted; visible-member and existing admin controls passed."
+      },
+      "greenFocused": {
+        "failed": 0,
+        "passed": 7
+      },
+      "greenCombined": {
+        "files": 3,
+        "passed": 20
+      },
+      "boundary": "Actual route and VisibleSet with synthetic request/session and catalog fixtures. No production catalog or account data was queried."
+    },
+    {
+      "id": "hosted-to-local-presentation-activity",
+      "severity": "P2",
+      "source": "server/origin-shared-agents.ts:188",
+      "reset": "server/origin-shared-agents.ts:190",
+      "scenario": "A shared request is displayed as working while a teammate's model runs. After a safe initial quota refusal, backend advance and the exact sender lease succeed, but the stored task still carries the hosted working/busy presentation flag when the local sender is started.",
+      "wrongResult": "The local sender callback receives a working task; the real startTurn busy check can refuse before native dispatch. Without a separate physical-run check, the callback is also invoked when a local turn is already running.",
+      "fix": "After the current-request and exact lease checks, refuse if locallyRunning is true. Otherwise clear only the hosted presentation activity to idle immediately before calling startHostedSender. Preserve the physical-run activity.",
+      "test": "server/origin-hosted-sender-activity-review.test.ts:10",
+      "red": {
+        "failed": 2,
+        "passed": 0,
+        "cases": "Callback observed working instead of idle; physical-running control incorrectly reached the callback."
+      },
+      "greenFocused": {
+        "failed": 0,
+        "passed": 2
+      },
+      "greenCombined": {
+        "files": 5,
+        "passed": 26
+      },
+      "boundary": "The manager/coordinator/lease regression uses mocked canonical cloud responses. Subsequent retained acceptance uses two isolated native servers and repository fake providers; it proves one remote quota attempt followed by one successful local sender attempt with an inherited working folder, one canonical user/reply pair and visibility on both clients. It does not prove a real provider CLI sandbox or production execution.",
+      "nativeAcceptance": {
+        "receipt": "docs/verification/evidence/origin-model-host-native-044/handover-final-receipt.json",
+        "receiptSha256": "b79598eb324ac40845507952477856b6067cf57facdc7a11ba0cbd572d9439c1",
+        "runtimeManifest": "docs/verification/evidence/origin-model-host-native-044/handover-final-runtime-source.json",
+        "runtimeManifestSha256": "2f583b8d941e96f7592f9ad7d7f9dcd78cb1f8dc5119e5d50435dd668c90e476",
+        "loadedSharedAgentsSha256": "4173d729c9ddeb0a4ed446afef07926521a2889740fc3c6cdfec1c5ebaf29345",
+        "finishedAt": "2026-10-20T04:44:07.609Z",
+        "counts": {
+          "ownerQuota": 1,
+          "ownerGood": 0,
+          "ownerPartial": 0,
+          "ownerMetered": 0,
+          "localQuota": 0,
+          "localGood": 1
+        },
+        "runStatus": "succeeded",
+        "canonicalUserRows": 1,
+        "canonicalReplyRows": 1,
+        "startedWithInheritedProjectFolder": true,
+        "sharedReplyVisibleOnBothNativeClients": true,
+        "privateTranscriptsUnchanged": true,
+        "limitations": [
+          "Two isolated native servers and repository fake providers only",
+          "Aliases model distinct synthetic accounts on one owner computer",
+          "No production, real provider, email or GitHub calls",
+          "No packaged UI, real CLI sandbox or positive metered API acceptance"
+        ]
+      }
+    }
+  ],
+  "verification": {
+    "lint": "Touched requester/controller/route files and new regressions passed oxlint --deny-warnings.",
+    "indexLineCount": 17623,
+    "nativeSuccessClaimedForFinalBusyFix": true,
+    "realProviderAcceptance": false,
+    "macOSAcceptance": false,
+    "nativeAcceptanceScope": "Two isolated native servers and repository fake providers only"
+  },
+  "withdrawnFinding": "A proposed stale-generation cleanup scenario was not reproduced: two isolated fixture attempts could not start the assumed replacement while the old quota probe kept busy set. The unsupported test was removed; no index cleanup fence was applied or claimed as a proved fix.",
+  "capturedAt": "2026-10-20T04:44:17.229Z",
+  "headAtCapture": "198639efcf80e4e0f5ce9c4be7e87b745ea53f61",
+  "sources": [
+    {
+      "path": "server/origin-hosted-requests.ts",
+      "sha256": "9d3e33c239b8aad2b0ac5a778a621d7912c424ec565c13ecf1d7834e00b89a77"
+    },
+    {
+      "path": "server/origin-model-host-routes.ts",
+      "sha256": "097a655661142a3751dd84cba0d20180d1a85fb2bdc69dbd41395c7aebeb176d"
+    },
+    {
+      "path": "server/origin-model-host.ts",
+      "sha256": "eff1b61662592b100d632b5b243ddd33feb86a6e88c96947f64c8b1bd5466f1e"
+    },
+    {
+      "path": "server/origin-shared-agents.ts",
+      "sha256": "4173d729c9ddeb0a4ed446afef07926521a2889740fc3c6cdfec1c5ebaf29345"
+    },
+    {
+      "path": "server/index.ts",
+      "sha256": "058207683ac5caf07d4ad75b97e548c00bd44a7b7b26cfb2e1d93710fb252a1e"
+    },
+    {
+      "path": "server/origin-hosted-transfer-review.test.ts",
+      "sha256": "dedd0b38a66a53570f83b0893bf2d980e3514abc246caa7603b680215b00b312"
+    },
+    {
+      "path": "server/origin-model-host-routes-review.test.ts",
+      "sha256": "341e59f0a0b20dba0507f0720dbba5989dcbdea477c6f8c0c970e57303fda2fd"
+    },
+    {
+      "path": "server/origin-hosted-sender-activity-review.test.ts",
+      "sha256": "85fc0651235184d7a6eb7520bc4f43c3b158244ecd669d9970b19309fff87e33"
+    }
+  ],
+  "acceptanceUpdatedAt": "2026-10-20T04:46:38.586Z"
+}

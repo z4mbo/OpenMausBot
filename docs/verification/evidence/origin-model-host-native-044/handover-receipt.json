@@ -1,0 +1,192 @@
+{
+  "capturedAt": "2026-10-20T04:37:20.991Z",
+  "backend": "http://127.0.0.1:54851",
+  "backendPid": 33952,
+  "baseCommit": "a89f4bb4add33209ab25f1e0d36c9d33aa290db0",
+  "runtimeSourceArtifact": "handover-runtime-source.json",
+  "earlierEvidence": "docs/verification/evidence/origin-model-host-native-044/receipt.json",
+  "privateTranscriptsUnchanged": true,
+  "cases": {
+    "remote-remote": {
+      "stage": "passed",
+      "startedAt": "2026-10-20T04:33:14.496Z",
+      "finishedAt": "2026-10-20T04:33:34.790Z",
+      "sendId": "a08a02ca-c146-4076-b6e9-fccc90093479",
+      "cloudThreadId": "k57bw4pe2q2p90r5qbfncq62818gnwsk",
+      "counts": {
+        "ownerQuota": 1,
+        "ownerGood": 1,
+        "ownerPartial": 0,
+        "ownerMetered": 0,
+        "localQuota": 0,
+        "localGood": 0
+      },
+      "runStatus": "succeeded",
+      "canonicalUserRows": 1,
+      "canonicalReplyRows": 1,
+      "finalModel": "claude-sonnet-5",
+      "finalProvider": "claudeAgent"
+    },
+    "local-remote": {
+      "stage": "passed",
+      "startedAt": "2026-10-20T04:33:39.275Z",
+      "finishedAt": "2026-10-20T04:33:49.732Z",
+      "sendId": "b6726758-0eb9-42a5-81c1-d1ae23e5ebc3",
+      "cloudThreadId": "k57fwdq6z409ww8fzmvefag4m18gnpx8",
+      "counts": {
+        "ownerQuota": 0,
+        "ownerGood": 1,
+        "ownerPartial": 0,
+        "ownerMetered": 0,
+        "localQuota": 1,
+        "localGood": 0
+      },
+      "runStatus": "succeeded",
+      "canonicalUserRows": 1,
+      "canonicalReplyRows": 1,
+      "finalModel": "claude-sonnet-5",
+      "finalProvider": "claudeAgent"
+    },
+    "partial": {
+      "stage": "passed",
+      "startedAt": "2026-10-20T04:34:14.045Z",
+      "finishedAt": "2026-10-20T04:34:19.764Z",
+      "sendId": "c57a5d4e-5290-4dc3-8cc5-61d7e98bfb75",
+      "cloudThreadId": "k57bwj4w20yg0msx4kgwdck9sx8gmxp1",
+      "counts": {
+        "ownerQuota": 0,
+        "ownerGood": 0,
+        "ownerPartial": 1,
+        "ownerMetered": 0,
+        "localQuota": 0,
+        "localGood": 0
+      },
+      "runStatus": "failed"
+    },
+    "offline-nonquota-control": {
+      "stage": "passed",
+      "startedAt": "2026-10-20T04:34:40.661Z",
+      "finishedAt": "2026-10-20T04:34:51.877Z",
+      "sendId": "5422ce76-921a-4f84-b09a-51534f07a80a",
+      "cloudThreadId": "k575yx3g2tdjvqh9ta8t0j7rf18gm9ex",
+      "counts": {
+        "ownerQuota": 0,
+        "ownerGood": 0,
+        "ownerPartial": 0,
+        "ownerMetered": 0,
+        "localQuota": 0,
+        "localGood": 1
+      },
+      "runStatus": "succeeded",
+      "canonicalUserRows": 1,
+      "canonicalReplyRows": 1,
+      "finalModel": "",
+      "finalProvider": ""
+    },
+    "offline": {
+      "stage": "passed",
+      "startedAt": "2026-10-20T04:34:51.894Z",
+      "finishedAt": "2026-10-20T04:34:52.903Z",
+      "sendId": "73417bf1-fbf4-481a-9dfd-8f450daa401a",
+      "cloudThreadId": "k57a1mpn4r7kwq8gzqx352xdcs8gmc4n",
+      "counts": {
+        "ownerQuota": 0,
+        "ownerGood": 0,
+        "ownerPartial": 0,
+        "ownerMetered": 0,
+        "localQuota": 1,
+        "localGood": 1
+      },
+      "runStatus": "succeeded",
+      "canonicalUserRows": 1,
+      "canonicalReplyRows": 1,
+      "finalModel": "",
+      "finalProvider": "",
+      "controlledOfflineSourceId": "p971d9s84n44p7jzs6fkn51xph8gn755",
+      "offlineCandidateSkippedAfterTypedQuota": true
+    },
+    "stop": {
+      "stage": "passed",
+      "startedAt": "2026-10-20T04:35:09.256Z",
+      "finishedAt": "2026-10-20T04:35:30.039Z",
+      "sendId": "f316d720-19a1-45f8-aa21-d92935ee2c18",
+      "cloudThreadId": "k5717w6x5e0t2r5qrsg5yqw3vn8gnjpf",
+      "counts": {
+        "ownerQuota": 0,
+        "ownerGood": 1,
+        "ownerPartial": 0,
+        "ownerMetered": 0,
+        "localQuota": 0,
+        "localGood": 0
+      },
+      "runStatus": "cancelled",
+      "acceptedExecutionId": "p57c21yvjecys3yxt72nft8b6d8gn598",
+      "exactAcceptedProviderExited": true,
+      "noReplyAfterGateRelease": true
+    },
+    "cap": {
+      "stage": "passed",
+      "startedAt": "2026-10-20T04:35:46.697Z",
+      "finishedAt": "2026-10-20T04:35:49.876Z",
+      "sendId": "78eba47f-1b4b-4e43-82c4-4dedc2bc0d2f",
+      "cloudThreadId": "k577dyavn4hvfajqfsj2ha19vd8gmhkf",
+      "counts": {
+        "ownerQuota": 0,
+        "ownerGood": 0,
+        "ownerPartial": 0,
+        "ownerMetered": 0,
+        "localQuota": 0,
+        "localGood": 0
+      },
+      "ownerLedger": {
+        "spentUsd": 0,
+        "reservedUsd": 0
+      },
+      "failClosedBeforeProviderDispatch": true,
+      "scope": "Opaque metered Claude CLI preflight; no positive HTTP API cost acceptance"
+    },
+    "revoke": {
+      "stage": "passed",
+      "startedAt": "2026-10-20T04:35:54.350Z",
+      "finishedAt": "2026-10-20T04:36:05.699Z",
+      "sendId": "273b6736-eea3-414a-9dab-40960d267d52",
+      "cloudThreadId": "k57a1tqw1pg34n1brmwjez7k9x8gm2ft",
+      "counts": {
+        "ownerQuota": 0,
+        "ownerGood": 1,
+        "ownerPartial": 0,
+        "ownerMetered": 0,
+        "localQuota": 0,
+        "localGood": 0
+      },
+      "runStatus": "interrupted",
+      "acceptedExecutionId": "p57f0keqv46x577nhx6qk20jt18gmxnp",
+      "exactAcceptedProviderExited": true,
+      "noReplyAfterGateRelease": true
+    }
+  },
+  "finding": {
+    "scenario": "Remote quota refusal on a thread with inherited project folder rejects an available local backup",
+    "sendId": "ec005702-f9f0-435e-b366-ed44bd77f53c",
+    "cloudThreadId": "k572gm6jannd0y4g92yf1p093s8gm5qv",
+    "runStatus": "failed",
+    "taskHasCwdOverride": false,
+    "botHasSyncedProjectFolder": true,
+    "counts": {
+      "ownerQuota": 1,
+      "ownerGood": 0,
+      "ownerPartial": 0,
+      "ownerMetered": 0,
+      "localQuota": 0,
+      "localGood": 0
+    },
+    "failedRequestReplayed": false,
+    "followUpEvidenceRequired": "Fresh post-fix remote-to-local request; failed send remains untouched"
+  },
+  "limitations": [
+    "Two isolated native servers and repository fake providers only",
+    "Aliases model distinct synthetic accounts on one owner computer",
+    "No production, real provider, email or GitHub calls",
+    "No packaged UI, real CLI sandbox or positive metered API acceptance"
+  ]
+}

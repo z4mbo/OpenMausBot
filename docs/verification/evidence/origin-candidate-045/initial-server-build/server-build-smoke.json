@@ -1,0 +1,192 @@
+{
+  "startedAt": "2026-10-20T04:33:08.917Z",
+  "head": "2a29a82702fef4f9b3b4c2c91e52fb3af72deab4",
+  "version": "0.2.15",
+  "worktree": "origin-model-fallback/Origin",
+  "platform": "win32",
+  "arch": "x64",
+  "node": "v24.21.0",
+  "sourceFingerprint": {
+    "algorithm": "SHA-256 of JSON.stringify of sorted path/byte-length/SHA-256 records",
+    "sha256": "39f6a20e021168e0f0c6e8fcc77c348272b803c81c8af0d2065d6b695ced3ecd",
+    "files": 770,
+    "scope": "server/shared/enterprise TS/JS excluding tests plus package, lock, compiler, bundler, smoke, bootstrap, catalog and enterprise license inputs",
+    "selectedInputs": [
+      {
+        "path": "scripts/bundle-server.mjs",
+        "bytes": 5690,
+        "sha256": "8945b24c5e84fb73c745b0174cf4c4042d79d7650cd2c2ea4720aea2d5c18606"
+      },
+      {
+        "path": "scripts/smoke-packaged-server.mjs",
+        "bytes": 21850,
+        "sha256": "dec83b64bb367233668299210151f429c668f4952e1db0a42f2155acc6b0854b"
+      },
+      {
+        "path": "server/drivers/claude-permission-broker.ts",
+        "bytes": 7434,
+        "sha256": "1dc7a3c7f4ba791ff8d2ae4acb4ae03a06924b02c1cb84e5129a83f7c9f3fb69"
+      },
+      {
+        "path": "server/host/shared-model-backups.ts",
+        "bytes": 3453,
+        "sha256": "e6625189cba9cfb459e598db62221114f2c5ba0645045795c5f0193b2ce67ea4"
+      },
+      {
+        "path": "server/index.ts",
+        "bytes": 953008,
+        "sha256": "9031e6cf339d0a3b81d2f8cd1e16364da7475d784aba08d5a1e6c49bd44a18bc"
+      },
+      {
+        "path": "server/origin-hosted-requests.ts",
+        "bytes": 18847,
+        "sha256": "9d3e33c239b8aad2b0ac5a778a621d7912c424ec565c13ecf1d7834e00b89a77"
+      }
+    ]
+  },
+  "environment": {
+    "inheritedCredentialVariables": [],
+    "explicitVariableNames": [
+      "APPDATA",
+      "ComSpec",
+      "HOME",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOCALAPPDATA",
+      "NODE_OPTIONS",
+      "PATH",
+      "SystemRoot",
+      "TEMP",
+      "TMP",
+      "TMPDIR",
+      "USERPROFILE",
+      "WINDIR",
+      "XDG_CACHE_HOME",
+      "XDG_CONFIG_HOME",
+      "XDG_DATA_HOME"
+    ],
+    "home": "owned temporary directory",
+    "path": "portable Node and Windows System32 only"
+  },
+  "steps": [
+    {
+      "name": "server-tsc",
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.server.build.json",
+      "startedAt": "2026-10-20T04:33:08.952Z",
+      "finishedAt": "2026-10-20T04:33:20.713Z",
+      "code": 0,
+      "signal": null,
+      "log": "server-tsc.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "server-bundle",
+      "command": "node scripts/bundle-server.mjs",
+      "startedAt": "2026-10-20T04:33:20.714Z",
+      "finishedAt": "2026-10-20T04:33:21.511Z",
+      "code": 0,
+      "signal": null,
+      "log": "server-bundle.log",
+      "logSha256": "359904840c4fc0517179c0bb951186738c8d9e9aa8f03351c5dc1d6a1929b99b"
+    },
+    {
+      "name": "packaged-server-smoke",
+      "command": "node scripts/smoke-packaged-server.mjs",
+      "startedAt": "2026-10-20T04:33:22.082Z",
+      "finishedAt": "2026-10-20T04:33:36.823Z",
+      "code": 0,
+      "signal": null,
+      "log": "packaged-server-smoke.log",
+      "logSha256": "4e7d71386a5a60696b0c6bf341446e1d97f37065b71c0cfb60eef83fb3436b4e"
+    }
+  ],
+  "generatedOutput": "dist-server",
+  "productionActionPerformed": false,
+  "protectedPortsTouched": false,
+  "limits": [
+    "Server bundle smoke under system Node on Windows, not an Origin installer or Electron GUI",
+    "No real provider credentials or calls",
+    "No macOS/Linux native execution",
+    "Browser bundle not staged or smoke-tested",
+    "Container launcher branch is skipped on Windows",
+    "No version bump, release, upload or deployment"
+  ],
+  "outputFingerprint": {
+    "algorithm": "SHA-256 of JSON.stringify of sorted path/byte-length/SHA-256 records",
+    "sha256": "09e131f84cd207e17e68bbb04213c24d773b5776f2d0febca7183df5bebd58a7",
+    "files": 746,
+    "bytes": 31053677,
+    "criticalArtifacts": [
+      {
+        "path": "desktop-entry.mjs",
+        "bytes": 1979,
+        "sha256": "aaf0a73d59d2b2e77473612f36df3943487469539539e32b517ee859c56ae655"
+      },
+      {
+        "path": "enterprise/server/index.js",
+        "bytes": 565999,
+        "sha256": "ee6a97a1a0cdf4b1a12780b81c76271ce3cbccfaf8223c94862ff7ac141052d4"
+      },
+      {
+        "path": "index.js",
+        "bytes": 11076423,
+        "sha256": "76a97f1ef14c5c40afa79a3e684271ecfef67861258e73612c3e7b87173d44f1"
+      },
+      {
+        "path": "mcp-server.js",
+        "bytes": 60138,
+        "sha256": "e827cab4a6bb13a9285e27b9a2dc3bd8711662df1a1547c6cab40a28262df1fc"
+      },
+      {
+        "path": "message-search.worker.js",
+        "bytes": 2314,
+        "sha256": "30c99bfecf6ce6725b8ac5c8d45c38e19166b991180a5195274f6852a9f42493"
+      },
+      {
+        "path": "openmausbot.js",
+        "bytes": 3163632,
+        "sha256": "efc73059ff26a627ab35200756678e6e308ccafe04605203f3c3e31b4c9a66aa"
+      },
+      {
+        "path": "package.json",
+        "bytes": 18,
+        "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae"
+      },
+      {
+        "path": "proxy-paths.js",
+        "bytes": 1156,
+        "sha256": "477ee6621d43279d27e064e36fd93029fd84beb8ad537bfd9345f2aaf608f104"
+      },
+      {
+        "path": "workspace-backup.worker.js",
+        "bytes": 781374,
+        "sha256": "b464dd35ba160ec4667500b0c0d5025be8ef9d5946ab8d82c7c764d81fe22bdf"
+      }
+    ]
+  },
+  "smoke": {
+    "passed": true,
+    "summary": [
+      "packaged server started with no node_modules in reach (port 63700) ✓",
+      "all 13 spawned proxy paths resolve inside the packaged server dir ✓",
+      "packaged MCP stdio server reached the API and flushed its final frames ✓",
+      "packaged openmausbot doctor and bots answered from the bundle ✓",
+      "packaged backup worker exported an encrypted archive ✓",
+      "packaged desktop entry started the server twice on its compile cache (2 entries) ✓",
+      "packaged server found its enterprise layer inside the server dir ✓"
+    ],
+    "healthPort": 63700
+  },
+  "sourceUnchanged": true,
+  "status": "passed",
+  "finishedAt": "2026-10-20T04:33:36.976Z",
+  "ownedFixtureHomeRetained": true,
+  "disposition": "Initial successful build predates the subsequent task working-folder inheritance correction; final source requires the separately recorded later build.",
+  "cleanup": {
+    "checkedAt": "2026-10-20T04:34:14.5368113Z",
+    "matchingOwnedNodeProcesses": [],
+    "healthPort": 63700,
+    "listeningPids": [],
+    "ownedOuterHomeRetained": true
+  }
+}
