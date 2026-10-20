@@ -2728,7 +2728,7 @@
     },
     {
       "name": "origin_studio_list",
-      "description": "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Broadcast. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Publish. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2765,7 +2765,7 @@
     },
     {
       "name": "origin_studio_save_asset",
-      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Broadcast posts. Returns the asset ids. Acts on your team's Origin project unless you pass project.",
+      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Publish posts. Returns the asset ids. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2784,7 +2784,7 @@
           },
           "broadcast": {
             "type": "boolean",
-            "description": "Also pick it for Broadcast."
+            "description": "Also pick it for Publish."
           },
           "project": {
             "type": "string",
@@ -2858,7 +2858,7 @@
           "caption": {
             "type": "string",
             "maxLength": 2000,
-            "description": "Text of the Broadcast drafts its Output nodes fill, such as template:campaign-pack's feed post and reel."
+            "description": "Text of the Publish drafts its Output nodes fill, such as template:campaign-pack's feed post and reel."
           },
           "name": {
             "type": "string",
@@ -2968,7 +2968,7 @@
     },
     {
       "name": "origin_broadcast_draft",
-      "description": "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval. Match the brand voice. Acts on your team's Origin project unless you pass project.",
+      "description": "Draft a social post in an Origin project's Publish section, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval. Match the brand voice. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3027,7 +3027,7 @@
     },
     {
       "name": "origin_broadcast_list",
-      "description": "List an Origin project's Broadcast posts: id, status, approval, schedule, channels with their published links or errors, media and text. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Publish posts: id, status, approval, schedule, channels with their published links or errors, media and text. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3060,7 +3060,7 @@
     },
     {
       "name": "origin_broadcast_schedule",
-      "description": "Schedule an approved Broadcast post to publish at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first. Acts on your team's Origin project unless you pass project.",
+      "description": "Schedule an approved Publish post to go out at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3088,7 +3088,7 @@
     },
     {
       "name": "origin_campaign_create",
-      "description": "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Broadcast posts, Studio generations and issues of one push. Acts on your team's Origin project unless you pass project.",
+      "description": "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Publish posts, Studio generations and issues of one push. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3185,7 +3185,7 @@
     },
     {
       "name": "origin_campaign_link",
-      "description": "Attach a Broadcast post, Studio generation or Origin issue to a campaign, or detach it with remove. Acts on your team's Origin project unless you pass project.",
+      "description": "Attach a Publish post, Studio generation or Origin issue to a campaign, or detach it with remove. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3341,7 +3341,7 @@
     },
     {
       "name": "origin_brand_update",
-      "description": "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand. Canvas, Pages, Studio and Broadcast all use it. Acts on your team's Origin project unless you pass project.",
+      "description": "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand. Canvas, Pages, Studio and Publish all use it. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,

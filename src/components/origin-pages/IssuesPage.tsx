@@ -32,6 +32,7 @@ import { PersonAvatar } from "./PersonAvatar";
 import { useCardDrag, type CardDrag, type DropTarget } from "./use-card-drag";
 import { openIssueColumns } from "./issue-columns";
 import { MilestoneChip, MilestoneStrip, useMilestones } from "./milestones";
+import { SidebarPopoverMenu, type SidebarMenuItem } from "../SidebarPopoverMenu";
 import { useMilestoneFilter } from "@/lib/origin-milestone-filter";
 
 /** What the Issues page hands to `onAssignToAgent`. */
@@ -101,10 +102,11 @@ const isInProgressColumn = (column: CloudColumn) => !isDoneColumn(column) && col
 
 function handOver(chief: IssueChief | undefined, project: CloudProject, projectId: string, columns: readonly CloudColumn[], task: CloudTask): IssueImplementer | undefined {
   if (!chief) return undefined;
+  const inProgress = columns.find(isInProgressColumn);
   return {
     name: chief.name,
+    column: inProgress?.title,
     async start() {
-      const inProgress = columns.find(isInProgressColumn);
       if (inProgress && task.columnId !== inProgress._id) await cloudMutation("tasks:moveTask", { projectId, taskId: task._id, columnId: inProgress._id });
       chief.implement(toAssignable(task, project, columns));
     },
@@ -548,51 +550,22 @@ function NotOnGitHub() {
 function TaskMenu({ task, columns, canEdit, agents, onMove, onDone, onDelete, onAssign }: {
   task: CloudTask; columns: CloudColumn[]; canEdit: boolean; agents: readonly IssueAgent[]; onMove(columnId: string): void; onDone(): void; onDelete(): void; onAssign?(task: CloudTask, agentId?: string): void;
 }) {
-  const [open, setOpen] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
-  const menu = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const close = (event: MouseEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); };
-    window.addEventListener("mousedown", close);
-    menu.current?.querySelector<HTMLElement>("[role=menuitem]")?.focus();
-    return () => window.removeEventListener("mousedown", close);
-  }, [open]);
   if (!canEdit && !onAssign) return null;
-  const item = "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[12.5px] text-ink-secondary outline-none hover:bg-raised hover:text-ink focus-visible:bg-raised focus-visible:text-ink";
-  const pick = (fn: () => void) => () => { setOpen(false); fn(); };
+  const items: SidebarMenuItem[] = [];
+  if (onAssign) {
+    items.push(agents.length
+      ? { key: "agent", label: "Hand to agent", icon: <BotIcon size={16} />, onSelect() {}, submenu: agents.map((agent) => ({ key: agent.id, label: agent.name, icon: agent.avatar, onSelect: () => onAssign(task, agent.id) })) }
+      : { key: "agent", label: "Hand to agent", icon: <BotIcon size={16} />, onSelect: () => onAssign(task) });
+  }
+  if (canEdit) {
+    const targets = columns.filter((column) => column._id !== task.columnId);
+    if (targets.length) items.push({ key: "move", label: "Move to", icon: <Columns3 size={16} />, onSelect() {}, submenu: targets.map((column) => ({ key: column._id, label: column.title, icon: <ColumnIcon column={column} size={14} />, onSelect: () => onMove(column._id) })) });
+    items.push({ key: "done", label: "Mark complete", icon: <CheckCircle2 size={16} />, onSelect: onDone });
+    items.push({ key: "delete", label: "Delete", icon: <Trash2 size={16} className="text-danger" />, separatorBefore: true, onSelect: onDelete });
+  }
   return (
-    <div ref={root} className="relative">
-      <button type="button" className={cn(iconButton, "size-7")} aria-label={`Actions for ${task.title}`} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}><MoreHorizontal size={14} /></button>
-      {open && (
-        <div ref={menu} role="menu" className="absolute right-0 top-8 z-30 w-56 rounded-xl border border-hairline/60 bg-menu p-1 motion-safe:animate-pop-in"
-          onKeyDown={(event) => {
-            if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setOpen(false); return; }
-            if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
-            event.preventDefault();
-            const items = [...(menu.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ?? [])];
-            const index = items.indexOf(document.activeElement as HTMLElement);
-            items[(index + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length]?.focus();
-          }}>
-          {onAssign && agents.length > 0 && <>
-            <div className="px-2 pb-0.5 pt-1.5 text-[11px] text-ink-tertiary">Hand to agent</div>
-            {agents.slice(0, 6).map((agent) => (
-              <button key={agent.id} type="button" role="menuitem" className={item} onClick={pick(() => onAssign(task, agent.id))}>{agent.avatar}<span className="truncate">{agent.name}</span></button>
-            ))}
-          </>}
-          {onAssign && !agents.length && <button type="button" role="menuitem" className={item} onClick={pick(() => onAssign(task))}><BotIcon size={14} />Hand to agent</button>}
-          {canEdit && <>
-            <div className="px-2 pb-0.5 pt-1.5 text-[11px] text-ink-tertiary">Move to</div>
-            {columns.filter((column) => column._id !== task.columnId).map((column) => (
-              <button key={column._id} type="button" role="menuitem" className={item} onClick={pick(() => onMove(column._id))}><ColumnIcon column={column} size={13} />{column.title}</button>
-            ))}
-            <div className="my-1 h-px bg-hairline/40" />
-            <button type="button" role="menuitem" className={item} onClick={pick(onDone)}><CheckCircle2 size={14} />Mark complete</button>
-            <button type="button" role="menuitem" className={cn(item, "text-danger hover:text-danger focus-visible:text-danger")} onClick={pick(onDelete)}><Trash2 size={14} />Delete</button>
-          </>}
-        </div>
-      )}
-    </div>
+    <SidebarPopoverMenu ariaLabel={`Actions for ${task.title}`} items={items} triggerClassName={cn(iconButton, "size-7")}
+      renderTrigger={() => <MoreHorizontal size={14} />} />
   );
 }
 

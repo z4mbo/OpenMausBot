@@ -140,7 +140,7 @@ export function CampaignStrip({ run, onOpenRun, onOpenBroadcast, onStop, onDismi
         <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-hairline/30 pt-2.5 text-[12.5px] text-ink-secondary">
           <Send size={13} className="text-accent-text" aria-hidden="true" />
           <span>{run.posts!.map((post) => (post.group === "reel" ? "Reel" : "Feed post")).join(" and ")} drafted{run.agentName ? ", waiting for approval" : ""}</span>
-          <button type="button" className={cn(ghostButton, "ml-auto h-7 min-h-7 px-2.5 text-[12px]")} onClick={onOpenBroadcast}>Open Broadcast</button>
+          <button type="button" className={cn(ghostButton, "ml-auto h-7 min-h-7 px-2.5 text-[12px]")} onClick={onOpenBroadcast}>Open Publish</button>
         </div>
       )}
     </section>

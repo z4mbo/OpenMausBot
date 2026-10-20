@@ -1,7 +1,7 @@
-# Broadcast: previews, reels, accounts and the month calendar
+# Publish: previews, reels, accounts and the month calendar
 
-The Broadcast page runs in an isolated page against a disposable fake-engine
-server. The project's posts and assets come from an in-page stand-in for the
+The Publish page (section id `broadcast`) runs in an isolated page against a
+disposable fake-engine server. The project's posts and assets come from an in-page stand-in for the
 Origin backend (`scripts/testing/origin-broadcast-cloud.ts`); the accounts the
 composer can post as come from the real server's accounts route, reading
 synthetic keys the launcher writes into the disposable data folder. The reel's
@@ -39,8 +39,11 @@ and light, and a viewer:
   its posts;
 - a failed post shows the channel's error, and a viewer sees posts read-only.
 
-The 1280 px dark captures are also copied as `round5-*.png`. Stop the launcher
-with Ctrl-C so it removes its temporary data.
+The Month, Week and List switch sits beside the calendar range and the list
+filters, icon-only at 375 px, so the header keeps one row of actions on a phone.
+The 1280 px dark captures are also copied as `round5-*.png`, and the week,
+composer and reel editor as `../round6/publish-*.png` beside the output folder.
+Stop the launcher with Ctrl-C so it removes its temporary data.
 
 The server side has unit tests with fake vendors only:
 `server/broadcast/accounts.test.ts` (extra accounts never return a key),

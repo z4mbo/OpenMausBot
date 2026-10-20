@@ -25,7 +25,7 @@ deferred read tool (`server/drivers/agents-tool-domains.ts`).
 
 Approval rules are the backend's own: Schedule shows only once a person
 approved an agent's post, and a viewer sees neither. A post longer than the
-card can show is approved from Broadcast, after reading all of it.
+card can show is approved from Publish, after reading all of it.
 
 ## Run
 
@@ -53,7 +53,15 @@ It exits non-zero unless:
 - the page threw no error.
 
 It writes `report.json` and the screenshots to
-`docs/verification/evidence/origin-chat-cards/`.
+`docs/verification/evidence/origin-chat-cards/`, including
+`chat-header-scrolled.png`: the thread header after the transcript scrolled
+under it, an opaque bar with no blur of the cards beneath.
+
+Every Origin card in chat (posts, campaigns, assets, vault, repository,
+feedback, calls, issues, pull requests, Studio and designs) is drawn in
+`CardFrame` (`src/components/origin-cards/CardFrame.tsx`): one frame, a header
+with the icon, title, meta line and open button, and the same small solid and
+quiet action buttons.
 
 Unit coverage: `shared/origin-chat-card-items.test.ts`,
 `server/origin-cloud.test.ts` (cards per tool and the route that draws them)

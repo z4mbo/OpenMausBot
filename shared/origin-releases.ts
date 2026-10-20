@@ -3,6 +3,16 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.7.1",
+  date: "2026-10-21",
+  title: "Polish across Studio, Publish and the core",
+  changes: [
+    { title: "Publish everywhere", body: "Broadcast is called Publish throughout the app and in what agents say. Its header is one compact row, the view switch sits by the calendar, and times read naturally." },
+    { title: "Studio, one layout", body: "Create, Workflows, Design and Presets share one header and tab control. Presets is its own tab, video results show a poster frame and only play when you hover them, and the old Canvas entry in the sidebar now lives in Studio › Design." },
+    { title: "Consistent cards in chat", body: "Issue, pull request, Studio, design and Publish cards share one frame and the same buttons, and the chat header no longer tints when cards scroll beneath it." },
+    { title: "Fixes in the core", body: "The issue menu is never cut off and returns focus on Escape, switching projects closes the previous project's dialogs, the microphone stays muted when you switch devices, locking the Vault always takes secrets back from agents, and Team Chat groups messages and shows a retry when loading fails." },
+  ],
+}, {
   version: "0.7.0",
   date: "2026-10-21",
   title: "A simpler Origin: create, publish, and see it all in chat",

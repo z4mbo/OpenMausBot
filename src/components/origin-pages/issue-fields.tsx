@@ -80,7 +80,7 @@ export function ChipSelect({ label, value, options, onChange, icon, disabled, pl
       else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
         setActive((index) => (index + (event.key === "ArrowDown" ? 1 : -1) + matches.length) % Math.max(1, matches.length));
-      } else if (event.key === "Enter") { event.preventDefault(); if (matches[active]) choose(matches[active]); }
+      } else if (event.key === "Enter") { event.preventDefault(); event.stopPropagation(); if (matches[active]) choose(matches[active]); }
       else if (event.key === "Tab") close(false);
     }}>
       <button ref={trigger} type="button" className={cn(chipButton, "w-full", selected && "text-ink")} aria-label={selected ? `${label}: ${selected.label}` : label} title={label}

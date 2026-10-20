@@ -104,7 +104,7 @@ function AgentRow({ bot, lead = false, active = false, onSelect }: { bot: Bot; l
         <span className="min-w-0 flex-1">
           <span className="flex min-w-0 items-center gap-1.5">
             <span className="truncate text-[13.5px] font-semibold text-ink">{bot.name}</span>
-            {lead ? <span className="shrink-0 text-[12px] text-ink-tertiary">Lead</span>
+            {lead ? <span className="shrink-0 text-[12px] text-ink-tertiary">Chief</span>
               : bot.title ? <span className="truncate text-[12px] text-ink-tertiary">{bot.title}</span> : null}
             <UnreadBadge count={unread} />
           </span>

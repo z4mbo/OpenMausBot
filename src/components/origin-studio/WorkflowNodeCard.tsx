@@ -158,7 +158,7 @@ export const WorkflowNodeCard = memo(function WorkflowNodeCard({ node, selected,
         {node.type === "output" && (
           <>
             <input className={cn(inputClass, "py-1 text-[12px]")} aria-label="Asset name" placeholder="Asset name" maxLength={120} disabled={!canEdit} value={String(node.params.name ?? "")} onChange={(event) => set({ name: event.target.value })} />
-            <Select size="sm" className={select} aria-label="Broadcast" value={group} disabled={!canEdit} onChange={(event) => set({ broadcast: event.target.value })}>
+            <Select size="sm" className={select} aria-label="Publish" value={group} disabled={!canEdit} onChange={(event) => set({ broadcast: event.target.value })}>
               <option value="">Assets only</option>
               {Object.entries(STUDIO_BROADCAST_GROUPS).map(([value, entry]) => <option key={value} value={value}>{`Also draft a ${entry.label.toLowerCase()}`}</option>)}
             </Select>
@@ -172,7 +172,7 @@ export const WorkflowNodeCard = memo(function WorkflowNodeCard({ node, selected,
         {state?.status === "failed" && state.error && <p className="line-clamp-3 text-[11.5px] text-danger">{state.error}</p>}
         {!state && problem && <p className="text-[11.5px] text-danger">{problem}</p>}
         {node.type === "output" && state?.status === "done" && <p className="text-[11.5px] text-success">Saved to Assets</p>}
-        {group && !state && <p className="flex items-center gap-1 text-[11.5px] text-ink-tertiary"><Send size={11} aria-hidden="true" />Drafted in Broadcast after a run</p>}
+        {group && !state && <p className="flex items-center gap-1 text-[11.5px] text-ink-tertiary"><Send size={11} aria-hidden="true" />Drafted in Publish after a run</p>}
       </div>
     </div>
   );

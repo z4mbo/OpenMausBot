@@ -1,30 +1,29 @@
-import { Bot as BotIcon, Brush, CircleDot, GitBranch, Headset, Images, LockKeyhole, Megaphone, MessageCircle, MessagesSquare, Palette, Send, Settings, type LucideIcon } from "lucide-react";
+import { Bot as BotIcon, CircleDot, GitBranch, Headset, Images, LockKeyhole, Megaphone, MessageCircle, MessagesSquare, Palette, Send, Settings, type LucideIcon } from "lucide-react";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { unreadReplies } from "@/lib/origin-unread";
-import type { ChiefSection } from "@/lib/origin-chief-section";
+import type { ShownSection } from "@/lib/origin-chief-section";
 import type { Bot } from "@/state/store";
 
-/** `lead` is the Chief button, `tab` the project bar, `tool` the icons on its right, `nested` a page reached from inside another. */
-export type SectionPlace = "lead" | "tab" | "tool" | "nested";
+/** `lead` is the Chief button, `tab` the project bar, `tool` the icons on its right. */
+export type SectionPlace = "lead" | "tab" | "tool";
 
-export interface ProjectSectionEntry { id: ChiefSection; label: string; icon: LucideIcon; blurb: string; place: SectionPlace }
+export interface ProjectSectionEntry { id: ShownSection; label: string; icon: LucideIcon; place: SectionPlace }
 
 export const CHIEF_SECTIONS = [
-  { id: "chat", label: "Chief", icon: MessageCircle, blurb: "Talk with the project's Chief and plan the work.", place: "lead" },
-  { id: "agents", label: "Agents", icon: BotIcon, blurb: "", place: "tab" },
-  { id: "issues", label: "Issues", icon: CircleDot, blurb: "Track the project's bugs and tasks, and hand them to its agents.", place: "tab" },
-  { id: "team-chat", label: "Chat", icon: MessagesSquare, blurb: "Talk with the people in this project.", place: "tab" },
-  { id: "call", label: "Call", icon: Headset, blurb: "Voice and video calls with the people in this project.", place: "tab" },
-  { id: "studio", label: "Studio", icon: Palette, blurb: "Generate images, video and audio for this project.", place: "tab" },
-  { id: "broadcast", label: "Publish", icon: Send, blurb: "Plan and publish this project's posts on social channels.", place: "tab" },
-  { id: "assets", label: "Assets", icon: Images, blurb: "Images, documents and files the team makes for this project.", place: "tool" },
-  { id: "vault", label: "Vault", icon: LockKeyhole, blurb: "Keys, logins and secrets this project's agents may use.", place: "tool" },
-  { id: "repo", label: "Repo", icon: GitBranch, blurb: "The project's code repository and its pull requests.", place: "tool" },
-  { id: "feedback", label: "Feedback", icon: Megaphone, blurb: "What users say about the project, collected in one place.", place: "tool" },
-  { id: "settings", label: "Settings", icon: Settings, blurb: "Settings for the whole project: its name, members, integrations and defaults for its agents.", place: "tool" },
-  { id: "draw", label: "Canvas", icon: Brush, blurb: "Shared design canvases the people and agents in this project build on.", place: "nested" },] as const satisfies readonly ProjectSectionEntry[];
+  { id: "chat", label: "Chief", icon: MessageCircle, place: "lead" },
+  { id: "agents", label: "Agents", icon: BotIcon, place: "tab" },
+  { id: "issues", label: "Issues", icon: CircleDot, place: "tab" },
+  { id: "team-chat", label: "Chat", icon: MessagesSquare, place: "tab" },
+  { id: "call", label: "Call", icon: Headset, place: "tab" },
+  { id: "studio", label: "Studio", icon: Palette, place: "tab" },
+  { id: "broadcast", label: "Publish", icon: Send, place: "tab" },
+  { id: "assets", label: "Assets", icon: Images, place: "tool" },
+  { id: "vault", label: "Vault", icon: LockKeyhole, place: "tool" },
+  { id: "repo", label: "Repo", icon: GitBranch, place: "tool" },
+  { id: "feedback", label: "Feedback", icon: Megaphone, place: "tool" },
+  { id: "settings", label: "Settings", icon: Settings, place: "tool" },
+] as const satisfies readonly ProjectSectionEntry[];
 
-export const sectionEntry = (id: ChiefSection): ProjectSectionEntry => CHIEF_SECTIONS.find((item) => item.id === id) ?? CHIEF_SECTIONS[0];
 export const tabSections = (): ProjectSectionEntry[] => CHIEF_SECTIONS.filter((item) => item.place === "tab");
 export const toolSections = (): ProjectSectionEntry[] => CHIEF_SECTIONS.filter((item) => item.place === "tool");
 

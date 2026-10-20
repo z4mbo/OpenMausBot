@@ -266,6 +266,6 @@ export function runSummary(run: StudioWorkflowRun): string {
     const label = graphNode?.type === "model" ? workflowNodeModel(graphNode)?.label ?? "model" : graphNode?.type ?? node.nodeId;
     return `  ${node.nodeId} ${label}: ${node.status}${node.output ? ` ${node.output.url}` : ""}${node.assetId && graphNode?.type === "output" ? ` · asset ${node.assetId}` : ""}${node.error ? ` (${clip(node.error, 160)})` : ""}`;
   });
-  const posts = (run.posts ?? []).map((post) => `  Broadcast ${post.group} draft ${post.postId}`);
+  const posts = (run.posts ?? []).map((post) => `  Publish ${post.group} draft ${post.postId}`);
   return [`- run ${run._id} "${run.name}" [${run.status}] by ${run.agentName ?? run.createdByName}`, ...lines, ...posts].join("\n");
 }

@@ -34,7 +34,7 @@ const assets: Asset[] = [
 async function recordClip(): Promise<string> {
   const canvas = Object.assign(document.createElement("canvas"), { width: 360, height: 640 });
   const ctx = canvas.getContext("2d")!;
-  const scenes = [["#0b1020", "#6366f1", "Origin"], ["#111827", "#10b981", "Studio"], ["#1f1135", "#ec4899", "Broadcast"], ["#1c1917", "#f59e0b", "Ship"]] as const;
+  const scenes = [["#0b1020", "#6366f1", "Origin"], ["#111827", "#10b981", "Studio"], ["#1f1135", "#ec4899", "Publish"], ["#1c1917", "#f59e0b", "Launch"]] as const;
   const recorder = new MediaRecorder(canvas.captureStream(30), { mimeType: "video/webm;codecs=vp8" });
   const chunks: Blob[] = [];
   recorder.ondataavailable = (event) => chunks.push(event.data);

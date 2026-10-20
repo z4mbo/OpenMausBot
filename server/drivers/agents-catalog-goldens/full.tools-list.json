@@ -2388,7 +2388,7 @@
     },
     {
       "name": "origin_studio_list",
-      "description": "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Broadcast. Before the first call, get its input schema from find_tool.",
+      "description": "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Publish. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2403,7 +2403,7 @@
     },
     {
       "name": "origin_studio_save_asset",
-      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Broadcast posts. Before the first call, get its input schema from find_tool.",
+      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Publish posts. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2460,7 +2460,7 @@
     },
     {
       "name": "origin_broadcast_draft",
-      "description": "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. Before the first call, get its input schema from find_tool.",
+      "description": "Draft a social post in an Origin project's Publish section, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2469,7 +2469,7 @@
     },
     {
       "name": "origin_broadcast_list",
-      "description": "List an Origin project's Broadcast posts: id, status, approval, schedule, channels with their published links or errors, media and text. Before the first call, get its input schema from find_tool.",
+      "description": "List an Origin project's Publish posts: id, status, approval, schedule, channels with their published links or errors, media and text. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2484,7 +2484,7 @@
     },
     {
       "name": "origin_broadcast_schedule",
-      "description": "Schedule an approved Broadcast post to publish at a time, or now; the person's app publishes it with their channel keys. Before the first call, get its input schema from find_tool.",
+      "description": "Schedule an approved Publish post to go out at a time, or now; the person's app publishes it with their channel keys. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2517,7 +2517,7 @@
     },
     {
       "name": "origin_campaign_link",
-      "description": "Attach a Broadcast post, Studio generation or Origin issue to a campaign, or detach it with remove. Before the first call, get its input schema from find_tool.",
+      "description": "Attach a Publish post, Studio generation or Origin issue to a campaign, or detach it with remove. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},

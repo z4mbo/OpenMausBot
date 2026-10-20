@@ -33,8 +33,8 @@ export function Channels({ post, size = 12 }: { post: BroadcastPost; size?: numb
   );
 }
 
-export const timeOf = (at: number) => new Date(at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-export const dateTimeOf = (at: number) => new Date(at).toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+export const timeOf = (at: number) => new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+export const dateTimeOf = (at: number) => new Date(at).toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 export const excerpt = (post: BroadcastPost) => post.variants[0]?.text.trim() || (post.media.length ? `${post.media.length} media` : "Empty post");
 
 function Thumb({ post, size }: { post: BroadcastPost; size: string }) {
@@ -115,7 +115,7 @@ function Range({ label, onPrev, onNext, onToday, atToday, prevLabel, nextLabel, 
       <button type="button" className={iconButton} aria-label={nextLabel} onClick={onNext}><ChevronRight size={16} /></button>
       <span className="ml-1 text-[14px] font-semibold tracking-[-0.01em] text-ink">{label}</span>
       {!atToday && <button type="button" className="ml-1.5 rounded-md px-2 py-1 text-[12px] text-ink-secondary transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink" onClick={onToday}>Today</button>}
-      <span className="ml-auto flex items-center gap-2">{children}</span>
+      <span className="ml-auto flex flex-wrap items-center justify-end gap-2">{children}</span>
     </div>
   );
 }
@@ -162,7 +162,7 @@ export function WeekView({ start, onStart, ...props }: CalendarProps & { start: 
           const posts = byDay.get(dayKey(day)) ?? [];
           return (
             <div key={day.toISOString()} aria-label={longDay(day)} {...target(day)}
-              className={cn("group/day flex min-w-0 flex-col gap-1.5 rounded-xl border p-1.5 transition-colors duration-(--motion-fast) lg:min-h-[200px]",
+              className={cn("group/day flex min-w-0 flex-col gap-1.5 rounded-xl border p-1.5 transition-colors duration-(--motion-fast) lg:min-h-[280px]",
                 isToday ? "border-accent/35 bg-inset/70" : "border-transparent bg-inset/45", past && "opacity-60", "data-[drop-over]:border-accent/70 data-[drop-over]:bg-accent/8")}>
               <div className="flex items-center gap-1.5 px-1 pt-0.5">
                 <span className={cn("text-[11px] font-medium uppercase tracking-wide", isToday ? "text-accent-text" : "text-ink-tertiary")}>{day.toLocaleDateString([], { weekday: "short" })}</span>
@@ -214,7 +214,7 @@ export function MonthView({ start, onStart, ...props }: CalendarProps & { start:
                 <div key={day.toISOString()} role="gridcell" aria-label={longDay(day)} aria-selected={sameDay(day, selected)} {...target(day)}
                   onClick={() => setSelected(day)}
                   className={cn("group/day relative flex min-h-[64px] min-w-0 flex-col gap-1 border-r border-hairline/30 p-1 transition-colors duration-(--motion-fast) last:border-r-0 sm:min-h-[112px] sm:p-1.5",
-                    !inMonth || past ? "bg-inset/35" : "", past && "text-ink-tertiary", "data-[drop-over]:bg-accent/10 data-[drop-over]:shadow-[inset_0_0_0_1.5px_var(--color-accent)]",
+                    inMonth && !past ? "bg-inset/40" : "", past && "text-ink-tertiary", "data-[drop-over]:bg-accent/10 data-[drop-over]:shadow-[inset_0_0_0_1.5px_var(--color-accent)]",
                     sameDay(day, selected) && "max-sm:bg-raised/40")}>
                   <div className="flex items-center gap-1">
                     <span className={cn("flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11.5px] tabular-nums",

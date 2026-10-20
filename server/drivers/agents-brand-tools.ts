@@ -22,7 +22,7 @@ export const BRAND_TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: "origin_brand_update",
-    description: "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand. Canvas, Pages, Studio and Broadcast all use it." + ORIGIN_SCOPE,
+    description: "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand. Canvas, Pages, Studio and Publish all use it." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {

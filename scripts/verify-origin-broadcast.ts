@@ -19,7 +19,7 @@ writeFileSync(join(fixture.info.dataDir, "broadcast-accounts.json"), JSON.string
 const cloud = fileURLToPath(new URL("./testing/origin-broadcast-cloud.ts", import.meta.url));
 let preview: Awaited<ReturnType<typeof mountPreview>> | undefined;
 try {
-  preview = await mountPreview(fixture, { entry: "/scripts/testing/origin-broadcast-preview.tsx", route: "/__origin-broadcast.html", title: "Isolated Origin Broadcast", aliases: [
+  preview = await mountPreview(fixture, { entry: "/scripts/testing/origin-broadcast-preview.tsx", route: "/__origin-broadcast.html", title: "Isolated Origin Publish", aliases: [
     { find: /^@\/lib\/origin-cloud(?:\/client)?$/, replacement: cloud },
     { find: "@", replacement: fileURLToPath(new URL("../src", import.meta.url)) },
   ] });

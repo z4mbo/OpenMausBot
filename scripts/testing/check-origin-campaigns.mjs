@@ -20,7 +20,7 @@ async function open(width, theme, query = {}) {
   for (const [key, value] of Object.entries(query)) target.searchParams.set(key, value);
   await page.goto(target.href);
   assert.equal(await page.title(), "Isolated Origin Campaigns");
-  await page.getByRole("heading", { name: "Broadcast" }).waitFor();
+  await page.getByRole("heading", { name: "Publish" }).waitFor();
   await page.getByRole("button", { name: "Campaigns" }).click();
   await page.getByRole("button", { name: /Spring launch/ }).waitFor();
   return page;
@@ -73,7 +73,7 @@ try {
     await dialog.waitFor();
     await dialog.getByRole("button", { name: "Close" }).click();
     await dialog.waitFor({ state: "detached" });
-    evidence.cases.push({ tag, step: "a timeline post opens in the Broadcast composer" });
+    evidence.cases.push({ tag, step: "a timeline post opens in the Publish composer" });
 
     if (tag === "1280-dark") {
       await page.getByRole("button", { name: "Link issues" }).click();

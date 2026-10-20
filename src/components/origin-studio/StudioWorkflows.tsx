@@ -5,7 +5,7 @@ import { relativeTime } from "@/lib/memory";
 import { cn } from "@/lib/cn";
 import { Loading, cardClass, iconButton } from "../origin-pages/ui";
 import { WorkflowEditor, type WorkflowDraft } from "./WorkflowEditor";
-import { MediaThumb } from "./studio-ui";
+import { MediaThumb, studioCard, studioGrid, studioSectionTitle } from "./studio-ui";
 import { presetImage } from "./StudioPresets";
 import type { StudioGeneration } from "../../../shared/studio";
 import { CAMPAIGN_PACK_ID, STUDIO_WORKFLOW_TEMPLATES, workflowNodeModel, type StudioWorkflow, type StudioWorkflowGraph, type StudioWorkflowRun } from "../../../shared/studio-workflow";
@@ -21,16 +21,20 @@ function RunMark({ status }: { status: StudioWorkflowRun["status"] }) {
   return <Ban size={13} className="text-ink-tertiary" aria-label="Stopped" />;
 }
 
-function WorkflowCard({ name, description, graph, meta, featured, image, onOpen, onRemove }: { name: string; description?: string; graph: StudioWorkflowGraph; meta?: string; featured?: boolean; image?: string; onOpen(): void; onRemove?(): void }) {
+function WorkflowCard({ name, description, graph, meta, featured, image, art, onOpen, onRemove }: { name: string; description?: string; graph: StudioWorkflowGraph; meta?: string; featured?: boolean; image?: string; art?: boolean; onOpen(): void; onRemove?(): void }) {
   const Icon = featured ? Megaphone : Workflow;
   return (
-    <article className={cn(cardClass, "group relative flex flex-col transition-colors duration-(--motion-fast) hover:border-hairline", featured && "border-accent/40")}>
-      <button type="button" onClick={onOpen} className="flex flex-1 flex-col gap-1.5 overflow-hidden rounded-xl p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-accent/60">
-        {image && <img src={image} alt="" loading="lazy" draggable={false} className="-mx-3 -mt-3 mb-1 h-28 w-[calc(100%+1.5rem)] max-w-none object-cover" />}
-        <span className="flex items-center gap-2 text-[13.5px] font-medium text-ink"><Icon size={14} className={cn("shrink-0", featured ? "text-accent-text" : "text-ink-tertiary")} aria-hidden="true" /><span className="truncate">{name}</span></span>
-        {description && <span className="line-clamp-2 text-[12px] text-ink-secondary">{description}</span>}
-        <span className="line-clamp-2 text-[11.5px] text-ink-tertiary">{steps(graph)}</span>
-        {meta && <span className="text-[11.5px] text-ink-tertiary">{meta}</span>}
+    <article className={cn(studioCard, "flex flex-col", featured && "border-accent/40 hover:border-accent/60")}>
+      <button type="button" onClick={onOpen} className="flex flex-1 flex-col rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/60">
+        {image
+          ? <span className="flex aspect-[2/1] overflow-hidden bg-inset"><img src={image} alt="" loading="lazy" draggable={false} className="size-full object-cover transition-transform duration-(--motion-base) group-hover:scale-[1.03] motion-reduce:transition-none" /></span>
+          : art && <span className={cn("flex aspect-[2/1] items-center justify-center", featured ? "bg-accent/10 text-accent-text" : "bg-inset text-ink-tertiary")}><Icon size={26} aria-hidden="true" /></span>}
+        <span className="flex flex-1 flex-col gap-1.5 p-3">
+          <span className="flex items-center gap-2 text-[13.5px] font-medium text-ink"><Icon size={14} className={cn("shrink-0", featured ? "text-accent-text" : "text-ink-tertiary")} aria-hidden="true" /><span className="truncate">{name}</span></span>
+          {description && <span className="line-clamp-2 text-[12px] text-ink-secondary">{description}</span>}
+          <span className="line-clamp-2 text-[11.5px] text-ink-tertiary">{steps(graph)}</span>
+          {meta && <span className="text-[11.5px] text-ink-tertiary">{meta}</span>}
+        </span>
       </button>
       {onRemove && (
         <button type="button" className={cn(iconButton, "absolute right-1.5 top-1.5 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 touch:opacity-100")} onClick={onRemove} aria-label={`Delete ${name}`}><Trash2 size={13} /></button>
@@ -58,12 +62,12 @@ export function StudioWorkflows({ projectId, canEdit, falReady, rows, draft, onD
     <div className="flex flex-col gap-6 pb-6" data-studio-workflows>
       {error && <p className="text-[12.5px] text-danger" role="alert">{error}</p>}
       <section aria-label="Your workflows">
-        <h3 className="mb-2 text-[12px] font-medium uppercase tracking-[0.06em] text-ink-tertiary">Workflows</h3>
+        <h3 className={studioSectionTitle}>Workflows</h3>
         {!workflows ? <Loading label="Loading workflows" variant="grid" /> : (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] gap-3">
+          <div className={studioGrid}>
             {canEdit && (
               <button type="button" onClick={() => setDraft({ name: "Untitled workflow", graph: { nodes: [], edges: [] } })}
-                className="flex min-h-[104px] items-center justify-center gap-2 rounded-xl border border-dashed border-hairline text-[13px] text-ink-secondary outline-none transition-colors duration-(--motion-fast) hover:border-accent/60 hover:text-ink focus-visible:border-accent">
+                className="flex min-h-[104px] items-center justify-center gap-2 rounded-xl border border-dashed border-hairline/70 text-[13px] text-ink-secondary outline-none transition-colors duration-(--motion-fast) hover:border-hairline hover:bg-raised/40 hover:text-ink focus-visible:border-accent">
                 <Plus size={15} />New workflow
               </button>
             )}
@@ -79,17 +83,17 @@ export function StudioWorkflows({ projectId, canEdit, falReady, rows, draft, onD
         )}
       </section>
       <section aria-label="Templates">
-        <h3 className="mb-2 text-[12px] font-medium uppercase tracking-[0.06em] text-ink-tertiary">Templates</h3>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] gap-3">
+        <h3 className={studioSectionTitle}>Templates</h3>
+        <div className={studioGrid}>
           {[...STUDIO_WORKFLOW_TEMPLATES].sort((a, b) => Number(b.id === CAMPAIGN_PACK_ID) - Number(a.id === CAMPAIGN_PACK_ID)).map((template) => (
-            <WorkflowCard key={template.id} name={template.name} description={template.description} graph={template.graph} featured={template.id === CAMPAIGN_PACK_ID} image={template.preview ? presetImage(template.preview) : undefined}
+            <WorkflowCard key={template.id} name={template.name} description={template.description} graph={template.graph} featured={template.id === CAMPAIGN_PACK_ID} image={template.preview ? presetImage(template.preview) : undefined} art
               onOpen={() => setDraft({ name: template.name, graph: structuredClone(template.graph) })} />
           ))}
         </div>
       </section>
       {runs && runs.length > 0 && (
         <section aria-label="Recent runs">
-          <h3 className="mb-2 text-[12px] font-medium uppercase tracking-[0.06em] text-ink-tertiary">Recent runs</h3>
+          <h3 className={studioSectionTitle}>Recent runs</h3>
           <div className={cn(cardClass, "divide-y divide-hairline/30")}>
             {runs.slice(0, 12).map((run) => {
               const outputs = run.nodes.filter((node) => node.output && run.graph.nodes.find((graphNode) => graphNode.id === node.nodeId)?.type === "output");

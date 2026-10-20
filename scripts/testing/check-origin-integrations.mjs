@@ -65,7 +65,7 @@ try {
     await socials.getByText("Main account").waitFor();
     await socials.getByRole("button", { name: "Add X account" }).click();
     const form = stack.getByRole("form", { name: "Add X account" });
-    await form.getByLabel("Name in Broadcast").fill(`Support ${tag}`);
+    await form.getByLabel("Name in Publish").fill(`Support ${tag}`);
     for (const label of ["API key", "API secret", "Access token", "Access token secret"]) await form.getByLabel(label, { exact: true }).fill("fixture");
     await capture(page, `social-accounts-${tag}`);
     await form.getByRole("button", { name: "Add account" }).click();

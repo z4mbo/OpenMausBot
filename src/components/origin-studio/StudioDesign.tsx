@@ -13,7 +13,7 @@ export function StudioDesign({ projectId, teamId, canEdit, agent, switcher }: { 
         ? <ProjectCanvases key={projectId} projectId={projectId} teamId={teamId} userId={session.user._id} canEdit={canEdit} agent={agent} switcher={switcher} />
         : (
           <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]">
-            <div className="flex h-12 shrink-0 items-center px-3 md:px-4">{switcher}</div>
+            <div className="flex h-11 shrink-0 items-start px-4 pb-3 md:px-6"><div className="flex h-8 items-center gap-3">{switcher}</div></div>
             <EmptyState icon={<Brush size={22} />} title="Share this project to design together" />
           </div>
         )}

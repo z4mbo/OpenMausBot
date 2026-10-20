@@ -15,7 +15,7 @@ export interface StackStep {
 export const STACK: readonly StackStep[] = [
   { id: "github", title: "GitHub", unlocks: "Repositories, issues and pushes for every member", providers: [] },
   { id: "studio", title: "Studio generation", unlocks: "Images, video and voice", providers: ["fal", "openai", "elevenlabs"] },
-  { id: "social", title: "Social accounts", unlocks: "Posts and reels from Broadcast", providers: ["x", "bluesky", "linkedin", "meta", "tiktok"] },
+  { id: "social", title: "Social accounts", unlocks: "Posts and reels from Publish", providers: ["x", "bluesky", "linkedin", "meta", "tiktok"] },
 ];
 
 export type StepState = "done" | "partial" | "todo";

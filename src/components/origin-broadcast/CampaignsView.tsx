@@ -30,7 +30,7 @@ function StatusPill({ status }: { status: CampaignStatus }) {
   return <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_TONE[status])}>{CAMPAIGN_STATUS_LABEL[status]}</span>;
 }
 
-const dateTimeOf = (at: number) => new Date(at).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const dateTimeOf = (at: number) => new Date(at).toLocaleString([], { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 
 export function CampaignsView({ projectId, projectName, canEdit, agent, posts, creating, onCreating, onOpenPost }: {
   projectId: string;
@@ -167,16 +167,16 @@ function CampaignDetailView({ projectId, projectName, summary, canEdit, agent, p
 function Stats({ detail }: { detail: CampaignDetail }) {
   const totals = metricTotals(detail.metrics);
   const tiles: { label: string; value: string; note?: string }[] = [
-    { label: "Posts published", value: `${detail.counts.published}/${detail.counts.posts}` },
+    { label: "Published", value: `${detail.counts.published}/${detail.counts.posts}` },
     { label: "Engagement", value: compactNumber(totals.likes + totals.reposts + totals.replies), note: detail.metrics.length ? `${compactNumber(totals.likes)} likes · ${compactNumber(totals.reposts)} reposts` : "Not read yet" },
     { label: "Open issues", value: String(detail.counts.openIssues), note: detail.issues.length ? `of ${detail.issues.length}` : undefined },
   ];
   return (
-    <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+    <div className="grid grid-cols-3 gap-2">
       {tiles.map((tile) => (
         <div key={tile.label} className="flex min-w-0 flex-col gap-0.5 rounded-xl bg-inset/60 px-3 py-2.5">
-          <span className="text-[11.5px] text-ink-tertiary">{tile.label}</span>
-          <span className="text-[19px] font-semibold tabular-nums text-ink">{tile.value}</span>
+          <span className="truncate text-[11.5px] text-ink-tertiary">{tile.label}</span>
+          <span className="text-[17px] font-semibold sm:text-[19px] tabular-nums text-ink">{tile.value}</span>
           <span className="min-h-[16px] truncate text-[11.5px] tabular-nums text-ink-secondary">{tile.note ?? ""}</span>
         </div>
       ))}

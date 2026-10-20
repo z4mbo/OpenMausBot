@@ -333,7 +333,7 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
           {outputs.length > 0 && <span className="text-ink-tertiary">· {outputs.length} in Assets</span>}
           {(run.posts?.length ?? 0) > 0 && (
             <button type="button" className="inline-flex items-center gap-1 rounded-md px-1 text-accent-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60" onClick={onOpenBroadcast} data-workflow-posts>
-              <Send size={12} aria-hidden="true" />{run.posts!.length} Broadcast {run.posts!.length === 1 ? "draft" : "drafts"}
+              <Send size={12} aria-hidden="true" />{run.posts!.length} {run.posts!.length === 1 ? "draft" : "drafts"} in Publish
             </button>
           )}
         </div>

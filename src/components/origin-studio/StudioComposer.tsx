@@ -13,7 +13,7 @@ import { KIND_ICON, MediaThumb, Popover, studioPost, type SourceRef, type Studio
 import { studioModel, studioModelsFor, type StudioCharacter, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel } from "../../../shared/studio";
 import { brandedPrompt, type BrandKit } from "../../../shared/brand-kit";
 import { presetBlank, presetPromptText, studioPreset, type StudioPreset } from "../../../shared/studio-presets";
-import { StudioPresetGallery, draftForPreset, presetImage } from "./StudioPresets";
+import { draftForPreset, presetImage } from "./StudioPresets";
 
 export const STUDIO_MODES: readonly { value: StudioMode; label: string; icon: typeof ImageIcon }[] = [
   { value: "image", label: "Image", icon: ImageIcon },
@@ -122,7 +122,6 @@ function CharacterChip({ library, value, disabled, onChange, onManage }: {
 export interface StudioComposerHandle {
   focus(): void;
   openModels(): void;
-  openPresets(): void;
   applyPreset(preset: StudioPreset): void;
   generate(): void;
   toggleBrand(): void;
@@ -130,18 +129,17 @@ export interface StudioComposerHandle {
 
 type Props = {
   projectId: string; canEdit: boolean; falReady: boolean | null; rows: readonly StudioGeneration[];
-  draft: StudioDraft; onDraft(draft: StudioDraft): void; onOpenLibrary(): void;
+  draft: StudioDraft; onDraft(draft: StudioDraft): void; onOpenLibrary(): void; onOpenPresets(): void;
 };
 
 /** The prompt bar: mode chips, starting files, the prompt, the model and its settings, then Generate. */
-export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function StudioComposer({ projectId, canEdit, falReady, rows, draft, onDraft, onOpenLibrary }, handle) {
+export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function StudioComposer({ projectId, canEdit, falReady, rows, draft, onDraft, onOpenLibrary, onOpenPresets }, handle) {
   const { dispatch } = useStore();
   const brand = useBrandKit(projectId);
   const library = useCloudQuery<StudioCharacter[]>("studioLibrary:list", { projectId });
   const [useBrand, setUseBrand] = useState(true);
   const [picking, setPicking] = useState<{ slot: "source" | "reference"; index: number; kind: StudioMediaKind } | null>(null);
   const [models, setModels] = useState(false);
-  const [presets, setPresets] = useState(false);
   const selectBlank = useRef(false);
   const action = useAction();
   const enhancing = useAction();
@@ -203,7 +201,6 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
   useImperativeHandle(handle, () => ({
     focus: () => prompt.current?.focus(),
     openModels: () => setModels(true),
-    openPresets: () => setPresets(true),
     applyPreset,
     generate,
     toggleBrand: () => setUseBrand((on) => !on),
@@ -250,14 +247,14 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
         </div>
         {preset ? (
           <span className={cn(chipButton, "gap-2 border-accent/50 pl-1 pr-1 text-ink")} data-studio-preset={preset.id}>
-            <button type="button" className="flex min-w-0 items-center gap-2" onClick={() => setPresets(true)} disabled={!canEdit} title={`${preset.description} (T)`}>
+            <button type="button" className="flex min-w-0 items-center gap-2" onClick={onOpenPresets} disabled={!canEdit} title={`${preset.description} (T)`}>
               <img src={presetImage(preset.id)} alt="" className="size-6 shrink-0 rounded-full object-cover" />
               <span className="truncate">{preset.label}</span>
             </button>
             <button type="button" aria-label={`Stop using ${preset.label}`} onClick={() => onDraft(emptyDraft(draft.mode))} disabled={!canEdit} className="flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
           </span>
         ) : (
-          <button type="button" className={chipButton} disabled={!canEdit} onClick={() => setPresets(true)} title="Presets (T)" data-studio-presets-button>
+          <button type="button" className={chipButton} disabled={!canEdit} onClick={onOpenPresets} title="Presets (T)" aria-label="Choose a preset" data-studio-presets-button>
             <LayoutGrid size={13} /><span className="max-sm:hidden">Presets</span>
           </button>
         )}
@@ -321,7 +318,6 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
       </div>
       {(action.error || enhancing.error) && <Notice tone="danger">{action.error || enhancing.error}</Notice>}
       {models && <StudioModelPicker mode={draft.mode} current={model.id} rows={rows} onClose={() => setModels(false)} onPick={(next) => { onDraft(draftForModel(draft, next)); setModels(false); prompt.current?.focus(); }} />}
-      {presets && <StudioPresetGallery current={draft.preset} onClose={() => setPresets(false)} onPick={(next) => { setPresets(false); applyPreset(next); }} />}
       {picking && <StudioMediaPicker projectId={projectId} kind={picking.kind} rows={rows} title={picking.slot === "reference" ? "Choose a reference image" : undefined} assetsOnly={picking.slot === "reference"} onPick={pickRef} onClose={() => setPicking(null)} />}
     </div>
   );

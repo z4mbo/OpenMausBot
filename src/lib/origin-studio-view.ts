@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 /** Which mode each project's Studio shows. */
-export type StudioView = "create" | "design" | "workflows" | "library";
+export type StudioView = "create" | "workflows" | "design" | "presets" | "library";
 
 const chosen = new Map<string, StudioView>();
 const listeners = new Set<() => void>();

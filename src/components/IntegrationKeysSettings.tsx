@@ -26,7 +26,7 @@ export function IntegrationKeysSettings() {
   const { teamId } = useActiveOriginWorkspace();
   return (<>
     <ConnectStackChecklist teamId={teamId} canEdit />
-    <Card subtitle="Keys for the services Studio and Broadcast use. Yours stay on this computer and are never shown again after saving; an owner or admin can share theirs with the whole workspace or with one project, and a key of your own always wins over a shared one.">
+    <Card subtitle="Keys for the services Studio and Publish use. Yours stay on this computer and are never shown again after saving; an owner or admin can share theirs with the whole workspace or with one project, and a key of your own always wins over a shared one.">
       {teamId && <div className="-mx-1 mb-1 border-b border-hairline/30 pb-1"><WorkspaceGitHubCard teamId={teamId} /></div>}
       <IntegrationKeyList teamId={teamId} />
     </Card>

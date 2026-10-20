@@ -224,7 +224,7 @@ export function ReelPanel({ video, videos, coverMs, music, locked, onVideo, onCo
 }
 
 const weekday = (day: number) => new Date(2024, 0, 7 + day).toLocaleDateString([], { weekday: "short" });
-const hourLabel = (hour: number) => new Date(2024, 0, 1, hour).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+const hourLabel = (hour: number) => new Date(2024, 0, 1, hour).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
 /** Slots to publish in: the project's own best from measured posts, or each channel's typical ones until there are enough. */
 export function BestTimes({ samples, channels, onPick }: {

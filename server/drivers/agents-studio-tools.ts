@@ -36,7 +36,7 @@ export const STUDIO_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_studio_list",
-    description: "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Broadcast." + ORIGIN_SCOPE,
+    description: "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Publish." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -48,13 +48,13 @@ export const STUDIO_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_studio_save_asset",
-    description: "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Broadcast posts. Returns the asset ids." + ORIGIN_SCOPE,
+    description: "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Publish posts. Returns the asset ids." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
         generation_id: { type: "string", minLength: 1, maxLength: 64, description: "From origin_studio_list or origin_studio_generate." },
         index: { type: "integer", minimum: 0, maximum: 7, description: "One output; omit for all." },
-        broadcast: { type: "boolean", description: "Also pick it for Broadcast." },
+        broadcast: { type: "boolean", description: "Also pick it for Publish." },
         project: ORIGIN_PROJECT,
       },
       required: ["generation_id"],
@@ -81,7 +81,7 @@ export const STUDIO_TOOL_DEFINITIONS = [
         workflow_id: { type: "string", minLength: 1, maxLength: 64, description: "From origin_studio_workflow_list, such as template:product-reel." },
         inputs: { type: "object", additionalProperties: { type: "string", maxLength: 8_000 }, description: "Input node id to prompt text, or to an asset id for a file input." },
         character: { type: "string", maxLength: 64, description: "A library entry every image and video step follows." },
-        caption: { type: "string", maxLength: 2_000, description: "Text of the Broadcast drafts its Output nodes fill, such as template:campaign-pack's feed post and reel." },
+        caption: { type: "string", maxLength: 2_000, description: "Text of the Publish drafts its Output nodes fill, such as template:campaign-pack's feed post and reel." },
         name: { type: "string", maxLength: 120 },
         wait: { type: "boolean", description: "Wait up to 40 s for the run. Default false." },
         project: ORIGIN_PROJECT,

@@ -29,7 +29,7 @@ export function RepoCard({ card }: { card: Card }) {
           onClick={() => void openExternalLink(repo.url)}>GitHub<ExternalLink size={11} aria-hidden="true" /></button>
       </div>
       {repo.pulls.length > 0 && (
-        <ul className="mt-1.5 flex flex-col gap-0.5" aria-label="Open pull requests">
+        <ul className="-mx-2 mt-1.5 flex flex-col gap-0.5" aria-label="Open pull requests">
           {repo.pulls.map((pr) => {
             const checks = pr.checks ? CHECKS[pr.checks] : undefined;
             return (
@@ -48,7 +48,7 @@ export function RepoCard({ card }: { card: Card }) {
         </ul>
       )}
       {repo.commits.length > 0 && (
-        <ul className="mt-2 flex flex-col gap-1 border-t border-hairline/30 px-2 pt-2" aria-label="Recent commits">
+        <ul className="mt-2 flex flex-col gap-1 border-t border-hairline/30 pt-2" aria-label="Recent commits">
           {repo.commits.map((commit) => (
             <li key={commit.sha} className="flex min-w-0 items-center gap-2 text-[12px]">
               <GitCommitHorizontal size={12} className="shrink-0 text-ink-tertiary" aria-hidden="true" />

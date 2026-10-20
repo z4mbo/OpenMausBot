@@ -3,7 +3,7 @@ import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 export const CAMPAIGN_TOOL_DEFINITIONS = [
   {
     name: "origin_campaign_create",
-    description: "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Broadcast posts, Studio generations and issues of one push." + ORIGIN_SCOPE,
+    description: "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Publish posts, Studio generations and issues of one push." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -30,7 +30,7 @@ export const CAMPAIGN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_campaign_link",
-    description: "Attach a Broadcast post, Studio generation or Origin issue to a campaign, or detach it with remove." + ORIGIN_SCOPE,
+    description: "Attach a Publish post, Studio generation or Origin issue to a campaign, or detach it with remove." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {

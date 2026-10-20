@@ -7,7 +7,7 @@ import { BROADCAST_RULES, type BroadcastChannel } from "../../../shared/broadcas
 import { postCardItem } from "../../../shared/origin-chat-card-items";
 import type { OriginChatCard, OriginPostCardItem } from "../../../shared/origin-chat-cards";
 import { ChannelMark } from "../origin-broadcast/ChannelMark";
-import { ChannelPreview, CoverVideo, PreviewTabs } from "../origin-broadcast/ChannelPreview";
+import { ChannelPreview, CoverVideo, PreviewTabs, previewFolds } from "../origin-broadcast/ChannelPreview";
 import { errorText } from "../origin-pages/repo-url";
 import { CardFrame, More, dateTime, quietButton, rowButton, solidButton, useItemOpener } from "./CardFrame";
 
@@ -37,7 +37,6 @@ function Thumb({ post }: { post: OriginPostCardItem }) {
   );
 }
 
-const FOLDED_CHARS = 120;
 const handleOf = (projectName: string) => `@${projectName.toLowerCase().replace(/[^a-z0-9]+/g, "") || "origin"}`;
 const nextHour = () => {
   const at = new Date(Date.now() + 3_600_000);
@@ -117,7 +116,7 @@ function SinglePost({ card, post, canEdit }: { card: Card; post: OriginPostCardI
         <div className="mt-2" data-card-preview={channel.channel}>
           <ChannelPreview channel={channel.channel} text={channel.text} format={post.format ?? "post"} name={projectName} handle={handleOf(projectName)} safeZones={false}
             media={post.media.map((item, index) => ({ id: `${index}:${item.name}`, name: item.name, url: item.url ?? null, kind: item.kind === "image" || item.kind === "video" ? item.kind : "other" }))} />
-          {channel.text.length > FOLDED_CHARS && (
+          {(channel.truncated || previewFolds(channel.channel, post.format ?? "post", channel.text)) && (
             <details className="mt-1.5 rounded-lg bg-raised/40 px-2.5 py-1.5 text-[12.5px] text-ink-secondary">
               <summary className="cursor-pointer text-[12px] text-ink-tertiary outline-none hover:text-ink focus-visible:text-ink">Full text for {BROADCAST_RULES[channel.channel].label}</summary>
               <p className="mt-1 whitespace-pre-wrap [overflow-wrap:anywhere]">{channel.text}{channel.truncated ? "…" : ""}</p>
@@ -142,7 +141,7 @@ export function BroadcastCard({ card }: { card: Card }) {
   return (
     <CardFrame kind="broadcast" label={card.heading} icon={Send} title={card.heading} meta={card.projectName}
       openLabel="Open Publish" onOpen={() => opener.open({ kind: "post" })} openable={opener.openable}>
-      <ul className="mt-2 flex flex-col gap-0.5" aria-label="Posts">
+      <ul className="-mx-2 mt-2 flex flex-col gap-0.5" aria-label="Posts">
         {posts.map((post) => (
           <li key={post.id}>
             <button type="button" className={rowButton} disabled={!opener.openable} title={opener.title}

@@ -81,10 +81,10 @@ export function nextJourneyStep(facts: JourneyFacts): JourneyStep {
       brief: `${name} is shipped. Create launch content in Studio (images and a short video) that follows the brand kit.`,
     };
     case "post": return {
-      id: "post", phase: "launch", section: "broadcast", action: "Open Broadcast",
-      title: "Content ready → publish in Broadcast",
+      id: "post", phase: "launch", section: "broadcast", action: "Open Publish",
+      title: "Content ready → publish",
       detail: facts.postsScheduled ? `${plural(facts.postsScheduled, "post", "posts")} scheduled; plan the rest of the launch.` : "Plan the launch posts across your channels.",
-      brief: `Draft a launch campaign for ${name} in Broadcast with the Studio content, for my approval.`,
+      brief: `Draft a launch campaign for ${name} in Publish with the Studio content, for my approval.`,
     };
   }
 }

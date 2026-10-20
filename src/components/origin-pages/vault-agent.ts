@@ -5,7 +5,7 @@ import { decryptSecret } from "./vaultCrypto";
 
 const ROUTE = "/api/origin/vault/agent-secrets";
 
-async function handOver(projectId: string, item: CloudCredential, passphrase: string): Promise<void> {
+export async function handOver(projectId: string, item: CloudCredential, passphrase: string): Promise<void> {
   const value = await decryptSecret(item, passphrase);
   await api(ROUTE, { method: "PUT", body: JSON.stringify({ projectId, credentialId: item._id, value }) });
 }

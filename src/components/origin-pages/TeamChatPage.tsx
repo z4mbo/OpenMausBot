@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { Download, File as FileIcon, Loader2, MessagesSquare, Paperclip, Pencil, Send, Trash2, X } from "lucide-react";
+import { CloudOff, Download, File as FileIcon, Loader2, MessagesSquare, Paperclip, Pencil, RotateCw, Send, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useCloudSession, type CloudUser } from "@/lib/origin-cloud";
 import { originRealtime, originRealtimeFile, usePolled, type MemberChatAttachment, type MemberChatMessage, type RealtimeTarget } from "@/lib/origin-realtime";
@@ -7,7 +7,7 @@ import { consumeChatFocus, useChatFocus } from "@/lib/origin-chat-focus";
 import { mentionChoicesForQuery, mentionedPeople, mentionQueryAt } from "@/lib/mentions";
 import { ChatMarkdown } from "../ChatMarkdown";
 import { useTeammates, type Teammate } from "../origin-members/teammates";
-import { CloudGate, EmptyState, Loading, Notice, iconButton, inputClass, primaryButton, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Loading, Notice, ghostButton, iconButton, inputClass, primaryButton, type OriginPageProps } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
 
 const MESSAGES = "/api/local-chat/messages";
@@ -43,6 +43,12 @@ function timeLabel(at: number): string {
   const date = new Date(at);
   const today = new Date().toDateString() === date.toDateString();
   return today ? date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : date.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+const GROUP_MS = 5 * 60_000;
+
+export function continuesGroup(previous: MemberChatMessage | undefined, message: MemberChatMessage): boolean {
+  return Boolean(previous) && previous!.authorUserId === message.authorUserId && message.createdAt - previous!.createdAt < GROUP_MS;
 }
 
 function mergeMessages(older: readonly MemberChatMessage[], latest: readonly MemberChatMessage[]): MemberChatMessage[] {
@@ -226,25 +232,33 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
     <section className="flex min-h-0 flex-1 flex-col" aria-label={`${name} chat`}>
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 pt-[calc(var(--glass-top,0px)+0.75rem)] [scroll-padding-top:var(--glass-top,0px)]">
         {latest === undefined && !error && <Loading label="Loading messages" variant="chat" />}
+        {latest === undefined && error && (
+          <EmptyState icon={<CloudOff size={22} />} title="Could not load messages" body={error}
+            action={<button type="button" className={ghostButton} onClick={() => void refresh()}><RotateCw size={14} />Try again</button>} />
+        )}
         {latest?.hasMore && !olderExhausted && messages.length > 0 && (
           <button type="button" className="mx-auto mb-3 block rounded-lg px-3 py-1 text-[12.5px] text-ink-secondary hover:bg-raised hover:text-ink" onClick={() => void loadOlder()}>Load earlier messages</button>
         )}
         {latest && messages.length === 0 && (
           <EmptyState icon={<MessagesSquare size={22} />} title={emptyTitle} body={emptyBody} />
         )}
-        <ol className="flex flex-col gap-3">
-          {messages.map((message) => {
+        <ol className="flex flex-col">
+          {messages.map((message, index) => {
             const mine = message.authorUserId === me._id;
+            const continued = continuesGroup(messages[index - 1], message);
             return (
-              <li key={message.id} className={cn("group -mx-2 flex gap-2.5 rounded-xl px-2 py-1 transition-colors hover:bg-raised/30 motion-safe:animate-msg-in", focused === message.id && "ring-2 ring-accent/70")} data-member-message={message.id}>
-                <PersonAvatar person={{ name: message.authorName, email: message.authorEmail, avatarUrl: message.avatarUrl ?? null }} size={30} />
+              <li key={message.id} className={cn("group relative -mx-2 flex gap-2.5 rounded-xl px-2 transition-colors hover:bg-raised/30 motion-safe:animate-msg-in", continued ? "py-0.5" : "py-1", index > 0 && !continued && "mt-2.5", focused === message.id && "ring-2 ring-accent/70")}
+                data-member-message={message.id} data-continued={continued || undefined}>
+                {continued
+                  ? <time dateTime={new Date(message.createdAt).toISOString()} className="w-[30px] shrink-0 pt-0.5 text-center text-[10px] tabular-nums text-ink-tertiary opacity-0 transition-opacity duration-(--motion-fast) group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100">{new Date(message.createdAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}</time>
+                  : <PersonAvatar person={{ name: message.authorName, email: message.authorEmail, avatarUrl: message.avatarUrl ?? null }} size={30} />}
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="text-[13px] font-semibold text-ink">{mine ? "You" : message.authorName}</span>
-                    <time dateTime={new Date(message.createdAt).toISOString()} className="text-[11px] tabular-nums text-ink-tertiary">{timeLabel(message.createdAt)}</time>
+                  <div className={cn("flex flex-wrap items-baseline gap-2", continued && "absolute right-2 top-0.5 z-10 max-md:static")}>
+                    {!continued && <span className="text-[13px] font-semibold text-ink">{mine ? "You" : message.authorName}</span>}
+                    {!continued && <time dateTime={new Date(message.createdAt).toISOString()} className="text-[11px] tabular-nums text-ink-tertiary">{timeLabel(message.createdAt)}</time>}
                     {message.editedAt && <span className="text-[11px] text-ink-tertiary">edited</span>}
                     {canWrite && (
-                      <span className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100 max-md:opacity-100">
+                      <span className="-my-1.5 ml-auto flex items-center gap-0.5 rounded-lg bg-app/90 opacity-0 transition-opacity duration-(--motion-fast) group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100 max-md:opacity-100">
                         {REACTIONS.map((reaction) => (
                           <button key={reaction.id} type="button" title={reaction.label} aria-label={`React ${reaction.label}`}
                             className="rounded px-1 text-[12px] opacity-60 hover:bg-raised hover:opacity-100" onClick={() => void change(message.id, { reaction: reaction.id })}>{reaction.emoji}</button>
@@ -292,7 +306,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
         <div ref={bottom} />
       </div>
       <div className="border-t border-hairline/40 p-3">
-        {(notice || error) && <div className="mb-2"><Notice tone="danger">{notice || error}</Notice></div>}
+        {(notice || (error && latest !== undefined)) && <div className="mb-2"><Notice tone="danger">{notice || error}</Notice></div>}
         {canWrite ? (
           <form onSubmit={(event) => void send(event)} className="flex flex-col gap-2">
             {pending.length > 0 && (

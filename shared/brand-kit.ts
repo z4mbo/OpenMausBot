@@ -1,6 +1,6 @@
 import { BRAND_FONT_IDS, brandFont, isBrandFont, type BrandFontId } from "./brand-fonts.ts";
 
-/** A project's one source of brand truth: what Canvas, Pages, Studio and Broadcast draw on. */
+/** A project's one source of brand truth: what Canvas, Pages, Studio and Publish draw on. */
 export interface BrandKit {
   name: string;
   tagline: string;
@@ -235,7 +235,7 @@ export function brandKitText(kit: StoredBrandKit, projectName: string): string {
     `Fonts: headings ${font(kit.fonts.heading)}, body ${font(kit.fonts.body)}`,
     `Logos: ${kit.logos.length ? kit.logos.map(asset).join(", ") : "none"}${kit.icon ? ` · Icon: ${asset(kit.icon)}` : ""}`,
     `Imagery: ${kit.imagery.join(", ") || "not set"}`,
-    "On Canvas, give headings and body text these families and use these colours; Studio adds the imagery and colours to image and video prompts unless brand is false; write Broadcast posts in this voice.",
+    "On Canvas, give headings and body text these families and use these colours; Studio adds the imagery and colours to image and video prompts unless brand is false; write Publish posts in this voice.",
   ].join("\n");
 }
 

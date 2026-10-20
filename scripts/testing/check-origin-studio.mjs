@@ -94,7 +94,24 @@ try {
     await page.getByRole("heading", { name: "Studio" }).waitFor();
     await tile(page, "Pricing card, three tiers").getByText("Cancelled", { exact: true }).waitFor();
     await page.getByText("fal.ai refused the prompt: NSFW content detected").waitFor();
+    await tile(page, "Five second teaser clip").locator("video[poster^='blob:']").waitFor();
+    assert.equal(await tile(page, "Five second teaser clip").locator("video").getAttribute("preload"), "none", "a video with a poster waits for hover to load");
+    step(tag, "a video tile without a poster from fal shows its first frame, drawn in the browser and cached");
     await capture(page, `gallery-${tag}`);
+    const views = page.getByRole("group", { name: "Studio view" });
+    const viewsLeft = async () => Math.round((await views.boundingBox()).x);
+    const createLeft = await viewsLeft();
+    for (const name of ["Workflows", "Presets", "Design"]) {
+      await views.getByRole("button", { name, exact: true }).click();
+      await views.getByRole("button", { name, exact: true, pressed: true }).waitFor();
+      if (width === 1280) {
+        assert.equal(await viewsLeft(), createLeft, `${name} keeps the Studio header in place`);
+        assert.ok(await page.getByRole("heading", { name: "Studio", exact: true }).isVisible(), `${name} shows the Studio title`);
+      }
+    }
+    await views.getByRole("button", { name: "Create", exact: true }).click();
+    await page.getByRole("textbox", { name: "Prompt" }).waitFor();
+    step(tag, "Create, Workflows, Presets and Design share the Studio header and its four-way control");
 
     const prompt = page.getByRole("textbox", { name: "Prompt" });
     await page.keyboard.press("/");
@@ -174,7 +191,7 @@ try {
       await page.keyboard.press("Escape");
       step(tag, "a library entry is saved from a generated image, followed by the next generation (references and description reach fal), and L on a tile seeds a new one");
     } else {
-      await page.getByRole("button", { name: "Studio", exact: true }).click();
+      await page.getByRole("group", { name: "Studio view" }).getByRole("button", { name: "Create", exact: true }).click();
       step(tag, "the Library tab lists the project's characters, products and styles");
     }
 
@@ -195,19 +212,19 @@ try {
     const voice = (await submitted(page, "fal-ai/elevenlabs/tts/eleven-v3")).at(-1);
     assert.match(voice.body.text, new RegExp(`^Meet the launch: Aurora sparkling water launch ${tag}`), "the voice-over is written from the brief");
     assert.ok((await submitted(page, "fal-ai/ffmpeg-api/merge-audio-video")).length > 0, "the reel gets its voice-over");
-    step(tag, "C opens the Campaign pack; one brief runs hero, square post, 9:16 reel and voice-over, and the feed post and reel are drafted in Broadcast");
+    step(tag, "C opens the Campaign pack; one brief runs hero, square post, 9:16 reel and voice-over, and the feed post and reel are drafted in Publish");
 
     if (full) {
       await strip.getByRole("button", { name: "Open its workflow" }).click();
       await page.locator("[data-workflow-run=done]").waitFor();
-      await page.locator("[data-workflow-posts]").getByText("2 Broadcast drafts").waitFor();
+      await page.locator("[data-workflow-posts]").getByText("2 drafts in Publish").waitFor();
       await capture(page, `campaign-workflow-${tag}`);
-      await page.getByRole("button", { name: "Studio", exact: true }).click();
+      await page.getByRole("group", { name: "Studio view" }).getByRole("button", { name: "Create", exact: true }).click();
       const broadcast = await open(width, theme, { page: "broadcast" });
       await broadcast.getByText(`${brief} #launch`).first().waitFor({ timeout: 20_000 });
       await capture(broadcast, `broadcast-drafts-${tag}`);
       await broadcast.close();
-      step(tag, "the pack's run shows its two Broadcast drafts, and Broadcast lists them with the written caption");
+      step(tag, "the pack's run shows its two drafts in Publish, and Publish lists them with the written caption");
     }
 
     if (full) {
@@ -235,13 +252,14 @@ try {
       await page.waitForFunction(async () => (await (await fetch("/__origin-studio-fal.json")).json()).some((request) => request.path === "/fal-ai/seedvr/upscale/image"));
       step(tag, "A on a tile sets up Animate with the output as its start frame; U upscales at once");
 
-      await tile(page, poster).getByRole("button", { name: "Use in Broadcast" }).click();
-      await tile(page, poster).getByRole("button", { name: "Remove from Broadcast" }).waitFor();
-      step(tag, "an output is picked for Broadcast from its tile");
+      await tile(page, poster).getByRole("button", { name: "Add to Publish" }).click();
+      await tile(page, poster).getByRole("button", { name: "Remove from Publish" }).waitFor();
+      step(tag, "an output is picked for Publish from its tile");
 
       await prompt.blur();
       await page.keyboard.press("t");
-      await page.getByRole("dialog", { name: "Presets" }).locator("[data-preset-card='motion-transfer'] img").waitFor();
+      await page.locator("[data-studio-presets] [data-preset-card='motion-transfer'] img").waitFor();
+      assert.equal(await page.getByRole("group", { name: "Studio view" }).getByRole("button", { name: "Presets", exact: true }).getAttribute("aria-pressed"), "true", "T opens the Presets tab");
       await capture(page, `presets-${tag}`);
       await page.keyboard.type("motion transfer");
       await page.keyboard.press("Enter");
@@ -263,7 +281,7 @@ try {
       assert.match(motion.body.image_url, /^https:\/\/127\.0\.0\.1:\d+\/image\//, "the character is the poster's output");
       assert.ok(motion.body.video_url, "the motion video is sent");
       assert.equal(motion.body.character_orientation, "video");
-      step(tag, "T opens the presets with ComfyUI preview images; Motion transfer labels its inputs Character and Motion video and sends both to Kling's motion control");
+      step(tag, "T opens the Presets tab with ComfyUI preview images; Motion transfer labels its inputs Character and Motion video and sends both to Kling's motion control");
     }
 
     await tile(page, poster).focus();

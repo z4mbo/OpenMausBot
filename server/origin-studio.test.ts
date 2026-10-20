@@ -485,7 +485,7 @@ describe("Studio agent tools", () => {
     expect(listed.text).toContain("3 of 3");
     expect(listed.studio!.generations!.map((generation) => generation.id)).toEqual(["gen3", "gen2", "gen1"]);
     const saved = await runOriginTool("origin_studio_save_asset", { generation_id: "gen2", broadcast: true }, "kai-dev", toolDeps);
-    expect(saved.text).toContain("output 0 → asset asset-gen2-0 (picked for Broadcast)");
+    expect(saved.text).toContain("output 0 → asset asset-gen2-0 (picked for Publish)");
     expect(saved.studio!.generations!.map((generation) => generation.id)).toEqual(["gen2"]);
     const animated = await runOriginTool("origin_studio_generate", { mode: "video", prompt: "make it move", sources: ["gen1"], wait: false }, "kai-dev", toolDeps);
     expect(animated.text).toContain("Started 1 generation(s)");

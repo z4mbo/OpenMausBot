@@ -35,6 +35,6 @@ export function kickoffBrief(projectName: string, input: LaunchIdea): string {
       "2. Break the MVP into 5 to 12 small issues with origin_create_issue (they stay private in Draft) and put each in its milestone with origin_milestone_set issues; add the Launch issues the same way.",
       "3. Name the agent roles this project needs beyond its current agents and why; offer to add them with propose_team_setup, but do not add them unasked.",
     ].join("\n"),
-    "Reply with the plan in short: problem, audience, MVP scope, success metric (one number and a date), non-goals, and what comes after the MVP (a landing page in Canvas published with Pages; launch content in Studio and a Broadcast campaign). Then the decisions that are mine and what you would start first. Do not hand out or start any issue until I agree.",
+    "Reply with the plan in short: problem, audience, MVP scope, success metric (one number and a date), non-goals, and what comes after the MVP (a landing page in Canvas published with Pages; launch content in Studio and a Publish campaign). Then the decisions that are mine and what you would start first. Do not hand out or start any issue until I agree.",
   ].filter(Boolean).join("\n\n");
 }

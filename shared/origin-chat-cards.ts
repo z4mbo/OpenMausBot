@@ -10,7 +10,7 @@ export interface OriginCardMedia {
   url?: string;
 }
 
-/** One Broadcast post as an agent tool read or wrote it. */
+/** One Publish post as an agent tool read or wrote it. */
 export interface OriginPostCardItem {
   id: string;
   status: BroadcastStatus;
@@ -19,7 +19,7 @@ export interface OriginPostCardItem {
   format?: "post" | "reel";
   agentName?: string;
   scheduledAt?: number;
-  /** `truncated`: `text` is the start of a longer text, so the whole post is read in Broadcast. */
+  /** `truncated`: `text` is the start of a longer text, so the whole post is read in Publish. */
   channels: Array<{ channel: BroadcastChannel; text: string; truncated?: true; result?: "published" | "failed"; url?: string; error?: string }>;
   media: OriginCardMedia[];
 }
@@ -91,7 +91,7 @@ interface CardBase {
   projectName?: string;
 }
 
-/** A Broadcast post, campaign, asset, vault entry, repository, feedback or call an Origin agent tool returned, drawn in chat as a card that opens it in its project. Clients that do not know a kind ignore it. */
+/** A Publish post, campaign, asset, vault entry, repository, feedback or call an Origin agent tool returned, drawn in chat as a card that opens it in its project. Clients that do not know a kind ignore it. */
 export type OriginChatCard = CardBase & (
   | { kind: "broadcast"; heading: string; posts: OriginPostCardItem[]; more?: number }
   | { kind: "campaign"; campaign: OriginCampaignCardItem }

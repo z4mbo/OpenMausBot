@@ -23,7 +23,7 @@ describe("origin_broadcast_draft", () => {
       sessionToken: "t", projectId: "proj", assetIds: ["a1"], agent: { botId: "bot-1", name: "Marketer" },
       variants: [{ channel: "tiktok", text: "New release" }, { channel: "x", text: "New release, link in bio" }],
     } });
-    expect(result.text).toContain("Drafted Broadcast post post1");
+    expect(result.text).toContain("Drafted Publish post post1");
     expect(result.text).toContain("x: 24/280");
     expect(result.text).toContain("approves it");
   });

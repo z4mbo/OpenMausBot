@@ -72,7 +72,7 @@ export const PALETTE: readonly PaletteEntry[] = [
   { id: "asset-video", label: "Video from Assets", group: "Inputs", hint: "A project clip", type: "asset", params: { kind: "video", label: "Video", assetId: "" } },
   { id: "asset-audio", label: "Audio from Assets", group: "Inputs", hint: "A project sound", type: "asset", params: { kind: "audio", label: "Audio", assetId: "" } },
   { id: "output", label: "Output to Assets", group: "Outputs", hint: "Saves what reaches it", type: "output", params: { name: "" } },
-  { id: "output-broadcast", label: "Output to Broadcast", group: "Outputs", hint: "Saves it and drafts a post", type: "output", params: { name: "", broadcast: "feed" } },
+  { id: "output-broadcast", label: "Output to Publish", group: "Outputs", hint: "Saves it and drafts a post", type: "output", params: { name: "", broadcast: "feed" } },
   { id: "text-overlay", label: "Text overlay", group: "Edit", hint: "Adds a headline to an image", type: "model", params: { model: "fal-ai/nano-banana-pro/edit", prompt: "Add the headline \"Launch day\" in clean bold type, keeping everything else unchanged" } },
   ...STUDIO_MODELS.map((model): PaletteEntry => ({ id: model.id, label: model.label, group: GROUP_OF[model.mode], hint: model.description, type: "model", params: { model: model.id } })),
 ];

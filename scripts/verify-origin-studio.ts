@@ -30,7 +30,7 @@ function toneWav(): Buffer {
 }
 
 /** One project with finished, failed and cancelled generations of every kind; new ones run through the fixture server. */
-async function seed(convex: FakeConvex) {
+async function seed(convex: FakeConvex, mediaBase: string) {
   const { t, ref } = convex;
   const { createSession } = await convex.load<{ createSession(ctx: unknown, userId: string): Promise<string> }>("convex/lib/auth.ts");
   const { userId, token } = await t.run(async (ctx) => {
@@ -47,7 +47,7 @@ async function seed(convex: FakeConvex) {
   await generation({ kind: "image", prompt: "A neon cat on a skateboard", status: "failed", error: "fal.ai refused the prompt: NSFW content detected" });
   await generation({ kind: "image", prompt: "Pricing card, three tiers", status: "cancelled" });
   await generation({ kind: "audio", mode: "audio", model: "fal-ai/elevenlabs/tts/eleven-v3", modelLabel: "ElevenLabs v3 voice", prompt: "Welcome to the Origin launch", status: "done", outputs: [{ url: "https://cdn.fixture.test/welcome.mp3", kind: "audio", contentType: "audio/mpeg" }] });
-  await generation({ kind: "video", mode: "video", model: "fal-ai/kling-video/v3/pro/text-to-video", modelLabel: "Kling 3 Pro", prompt: "Five second teaser clip", status: "done", aspectRatio: "16:9", outputs: [{ url: "https://cdn.fixture.test/teaser.mp4", kind: "video", contentType: "video/mp4" }] });
+  await generation({ kind: "video", mode: "video", model: "fal-ai/kling-video/v3/pro/text-to-video", modelLabel: "Kling 3 Pro", prompt: "Five second teaser clip", status: "done", aspectRatio: "16:9", outputs: [{ url: `${mediaBase}/video/teaser.webm`, kind: "video", contentType: "video/webm" }] });
   await generation({ kind: "image", model: "fal-ai/nano-banana-pro", modelLabel: "Nano Banana Pro", prompt: "Hero shot of the app on a dark desk", status: "done", aspectRatio: "16:9", agentName: "Atlas", outputs: [{ url: swatch("#3b5bdb", "hero"), kind: "image" }] });
   const product = await t.run((ctx) => ctx.db.insert("designAssets", { projectId, type: "image", name: "Product photo.png", url: swatch("#2b8a3e", "product"), createdAt: Date.now(), updatedAt: Date.now() }));
   await t.run((ctx) => ctx.db.insert("studioCharacters", {
@@ -64,10 +64,12 @@ async function startFakeFal() {
   const certificate = join(certs, "fal-media.crt");
   await promisify(execFile)("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", key, "-out", certificate, "-subj", "/CN=127.0.0.1", "-days", "1"]);
   const wav = toneWav();
+  const webm = readFileSync(fileURLToPath(new URL("./testing/fixtures/studio-teaser.webm", import.meta.url)));
   const media = createHttpsServer({ key: readFileSync(key), cert: readFileSync(certificate) }, (req, res) => {
     const path = req.url ?? "/";
     res.setHeader("Access-Control-Allow-Origin", "*");
     if (path.endsWith(".wav")) { res.writeHead(200, { "Content-Type": "audio/wav" }); res.end(wav); return; }
+    if (path.startsWith("/video/")) { res.writeHead(200, { "Content-Type": "video/webm" }); res.end(webm); return; }
     const match = /\/image\/(\d+)-(\d+)x(\d+)\.svg$/.exec(path);
     if (!match) { res.writeHead(404); res.end(); return; }
     res.writeHead(200, { "Content-Type": "image/svg+xml" });
@@ -85,7 +87,7 @@ async function startFakeFal() {
     }
     if (endpoint === "fal-ai/any-llm") return { output: `A cinematic ${String(body.prompt)}, soft rim light, shallow depth of field, 35mm` };
     if (endpoint.includes("elevenlabs")) return { audio: { url: `${mediaBase}/audio/${index}.wav`, content_type: "audio/wav" } };
-    if (/video|ffmpeg|avatar|lipsync/.test(endpoint)) return { video: { url: `${mediaBase}/video/${index}.mp4`, content_type: "video/mp4" } };
+    if (/video|ffmpeg|avatar|lipsync/.test(endpoint)) return { video: { url: `${mediaBase}/video/${index}.webm`, content_type: "video/webm" } };
     const [width, height] = SIZES[String(body.aspect_ratio ?? "")] ?? [560, 560];
     return { images: [{ url: `${mediaBase}/image/${index}-${width}x${height}.svg`, content_type: "image/svg+xml" }] };
   };
@@ -127,8 +129,8 @@ async function startFakeFal() {
 }
 
 const convex = await startFakeConvex();
-const seeded = await seed(convex);
 const fal = await startFakeFal();
+const seeded = await seed(convex, fal.mediaBase);
 const live = await launchVerificationServer({ ...process.env, OMB_FAL_QUEUE_URL: fal.url });
 writeFileSync(join(live.info.dataDir, "origin-cloud.json"), JSON.stringify({ url: convex.url, sessionToken: seeded.token, projects: {} }), { mode: 0o600 });
 writeFileSync(join(live.info.dataDir, "integration-keys.json"), JSON.stringify({ fal: { key: "fixture-id:fixture-secret" } }), { mode: 0o600 });

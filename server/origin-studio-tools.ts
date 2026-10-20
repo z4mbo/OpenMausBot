@@ -51,7 +51,7 @@ function generationLine(row: StudioGeneration): string {
   const outputs = row.outputs.map((output, index) => {
     const saved = row.saved.find((entry) => entry.index === index);
     const picked = row.broadcast.some((entry) => entry.index === index);
-    return `  ${index}: ${output.url}${saved ? ` · asset ${saved.assetId}` : ""}${picked ? " · in Broadcast" : ""}`;
+    return `  ${index}: ${output.url}${saved ? ` · asset ${saved.assetId}` : ""}${picked ? " · in Publish" : ""}`;
   });
   return [`- ${parts.filter(Boolean).join(" · ")}`, ...outputs].join("\n");
 }
@@ -222,7 +222,7 @@ async function workflowRun(scope: Resolved, args: Record<string, unknown>) {
     name: text(args.name) || name, graph, agent: { id: scope.agentId ?? scope.agentName, name: scope.agentName },
     ...(workflowId ? { workflowId } : {}), ...(text(args.caption).trim() ? { caption: text(args.caption) } : {}),
   });
-  if (args.wait !== true) return { text: `Started run ${runId} of "${name}" in ${projectName}'s Studio; the team watches each step live. Outputs land in Assets (folder Studio)${graph.nodes.some((node) => node.params.broadcast) ? "; its Broadcast drafts wait for a person's approval" : ""}. Check it with origin_studio_workflow_list.` };
+  if (args.wait !== true) return { text: `Started run ${runId} of "${name}" in ${projectName}'s Studio; the team watches each step live. Outputs land in Assets (folder Studio)${graph.nodes.some((node) => node.params.broadcast) ? "; its Publish drafts wait for a person's approval" : ""}. Check it with origin_studio_workflow_list.` };
   await Promise.race([workflows.settled(runId), new Promise((done) => setTimeout(done, TOOL_WAIT_MS))]);
   const run = await cloud.client.query("studioWorkflows:getRun", { projectId, sessionToken: cloud.sessionToken, runId }) as StudioWorkflowRun;
   return { text: `${projectName}'s Studio:\n${runSummary(run)}${run.status === "running" ? "\nStill running; check again with origin_studio_workflow_list." : ""}` };
@@ -257,7 +257,7 @@ export async function runStudioTool(name: string, args: Record<string, unknown>,
         const saved = args.broadcast === true
           ? await runner.pickForBroadcast(cloud, projectId, generationId, index, true)
           : await runner.saveAsset(cloud, projectId, generationId, index);
-        lines.push(`output ${index} → asset ${saved.assetId}${args.broadcast === true ? " (picked for Broadcast)" : ""}`);
+        lines.push(`output ${index} → asset ${saved.assetId}${args.broadcast === true ? " (picked for Publish)" : ""}`);
       }
       return { text: `In ${projectName}'s assets: ${lines.join("; ")}.`, studio: studioCards(scope, `Saved to ${projectName}'s Assets`, [row]) };
     }

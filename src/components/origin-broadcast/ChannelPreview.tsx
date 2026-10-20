@@ -41,6 +41,11 @@ const SAFE: Record<"instagram" | "tiktok", { top: number; bottom: number; left: 
 
 const TOKEN = /(https?:\/\/\S+|[#@][\p{L}\p{N}_.]+)/gu;
 
+export function previewFolds(channel: BroadcastChannel, format: BroadcastFormat, text: string): boolean {
+  const fold = format === "reel" ? PLATFORM[channel].reelFold : PLATFORM[channel].fold;
+  return fold !== undefined && Array.from(text).length > fold;
+}
+
 function RichText({ text, link, fold, className }: { text: string; link: string; fold?: number; className?: string }) {
   const folded = fold !== undefined && Array.from(text).length > fold;
   const shown = folded ? `${Array.from(text).slice(0, fold).join("").replace(/\s+\S*$/, "")}…` : text;

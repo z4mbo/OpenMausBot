@@ -1108,6 +1108,11 @@ body {
 .glass-bar[data-glass-bar="top"]::before {
   mask-image: linear-gradient(to bottom, black calc(100% - var(--glass-edge)), transparent);
 }
+.glass-bar.glass-bar-plain::before {
+  background: var(--glass-tint, var(--color-panel));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 .glass-bar[data-glass-bar="bottom"]::before {
   top: calc(-1 * var(--glass-reach, 0px));
   mask-image: linear-gradient(to top, black calc(100% - var(--glass-reach, 0px)), transparent);

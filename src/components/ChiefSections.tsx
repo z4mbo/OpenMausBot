@@ -1,7 +1,7 @@
 import { useState, useSyncExternalStore } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useStore, type Bot } from "@/state/store";
-import { chiefSectionOf, chiefSectionsVersion, setChiefSectionOf, subscribeChiefSections, type ChiefSection } from "@/lib/origin-chief-section";
+import { chiefSectionOf, chiefSectionsVersion, setChiefSectionOf, subscribeChiefSections, type ChiefSection, type ShownSection } from "@/lib/origin-chief-section";
 export type { ChiefSection };
 import { openBot } from "@/state/thread-navigation";
 import { useShowThreads } from "@/lib/thread-preferences";
@@ -11,43 +11,41 @@ import { AssignIssueDialog, AssetsPage, CallPage, FeedbackPage, IssuesPage, Proj
 import { useCloudProjectFor, useCloudWorkspaceFor } from "@/lib/origin-cloud-links";
 import { GlassHeaderFrame } from "./GlassScrollFrame";
 import { openOriginPage } from "@/lib/origin-pages";
-import { ProjectDrawPage } from "./OriginDraw";
 import { requestIssueFocus } from "@/lib/origin-issue-focus";
 import { handOff as handIssueTo } from "@/lib/origin-handoff";
 import { StudioPage } from "./origin-studio/StudioPage";
 import { BroadcastPage } from "./origin-broadcast/BroadcastPage";
 import { LaunchpadDialog } from "./origin-launchpad/LaunchpadDialog";
 import { ChiefSectionBar } from "./ProjectSectionBar";
-import { sectionEntry, teamAgents } from "./project-sections";
+import { teamAgents } from "./project-sections";
 
 export { ChiefSectionBar };
 export { CHIEF_SECTIONS, teamAgents, teamUnread } from "./project-sections";
 
-export function useChiefSection(botId: string): [ChiefSection, (section: ChiefSection) => void] {
+export function useChiefSection(botId: string): [ShownSection, (section: ChiefSection) => void] {
   useSyncExternalStore(subscribeChiefSections, chiefSectionsVersion, chiefSectionsVersion);
   return [chiefSectionOf(botId), (next) => setChiefSectionOf(botId, next)];
 }
 
 /** A section page under the project bar: the bar and the page's own header share one glass and the page scrolls beneath both, as the chat does. */
-export function ChiefSectionFrame({ bot, section, onSection }: { bot: Bot; section: Exclude<ChiefSection, "chat">; onSection(section: ChiefSection): void }) {
+export function ChiefSectionFrame({ bot, section, onSection }: { bot: Bot; section: Exclude<ShownSection, "chat">; onSection(section: ChiefSection): void }) {
   return (
-    <GlassHeaderFrame className="flex min-h-0 flex-1 flex-col [--glass-tint:var(--color-app)]" barClassName="z-[25] pb-1.5"
+    <GlassHeaderFrame className="flex min-h-0 flex-1 flex-col [--glass-tint:var(--color-app)]" barClassName="glass-bar-plain z-[25] pb-1.5"
       bar={<ChiefSectionBar bot={bot} section={section} onSection={onSection} joined />}>
-      <div key={section} data-section-page={section} className="flex min-h-0 min-w-0 flex-1 flex-col motion-safe:animate-[section-in_var(--motion-base)_var(--ease-out)_backwards]">
+      <div key={`${bot.id}:${section}`} data-section-page={section} className="flex min-h-0 min-w-0 flex-1 flex-col motion-safe:animate-[section-in_var(--motion-base)_var(--ease-out)_backwards]">
         <ChiefSectionPanel bot={bot} section={section} />
       </div>
     </GlassHeaderFrame>
   );
 }
 
-export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude<ChiefSection, "chat"> }) {
+export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude<ShownSection, "chat"> }) {
   const { state, dispatch } = useStore();
   const cloudProjectId = useCloudProjectFor(bot);
   const cloudTeamId = useCloudWorkspaceFor(bot);
   const showThreads = useShowThreads();
   const [assigning, setAssigning] = useState<AssignableIssue | null>(null);
   const [launching, setLaunching] = useState(false);
-  const entry = sectionEntry(section);
   const launchpad = launching && <LaunchpadDialog target={{ kind: "project", chief: bot, projectName: bot.name }} onClose={() => setLaunching(false)} />;
   if (section === "agents") return <ProjectAgentsPage lead={bot} agents={teamAgents(state.bots, bot)} />;
   const page = { cloudProjectId: cloudProjectId ?? null, projectName: bot.name, link: { botId: bot.id, teamId: cloudTeamId ?? null } };
@@ -81,19 +79,9 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   }
   if (section === "team-chat") return <TeamChatPage {...page} />;
   if (section === "call") return <CallPage {...page} agent={bot} open={() => { setChiefSectionOf(bot.id, "call"); openOriginPage(null); openBot(dispatch, bot, showThreads); }} />;
-  if (section === "draw") return <ProjectDrawPage {...page} agent={bot} />;
   if (section === "studio") return <StudioPage {...page} agent={bot} />;
   if (section === "broadcast") return <BroadcastPage {...page} agent={bot} />;
-  if (section === "settings") return <ProjectSettingsPage {...page} />;
-  const Icon = entry.icon;
-  return (
-    <section className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center" aria-label={entry.label}>
-      <Icon size={28} className="text-ink-secondary" aria-hidden="true" />
-      <h2 className="text-[17px] font-semibold text-ink">{entry.label}</h2>
-      <p className="max-w-sm text-[13px] text-ink-secondary">{entry.blurb}</p>
-      <span className="rounded-full bg-raised px-3 py-1 text-[12px] text-ink-secondary">Coming soon</span>
-    </section>
-  );
+  return <ProjectSettingsPage {...page} />;
 }
 
 /** A slim bar over a project agent's chat that leads back to its project. */

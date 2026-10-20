@@ -1,4 +1,4 @@
-/** A social channel a Broadcast post can go to. */
+/** A social channel a Publish post can go to. */
 export const BROADCAST_CHANNELS = ["x", "bluesky", "linkedin", "facebook", "instagram", "tiktok"] as const;
 export type BroadcastChannel = (typeof BROADCAST_CHANNELS)[number];
 

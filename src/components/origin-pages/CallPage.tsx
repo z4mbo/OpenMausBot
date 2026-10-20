@@ -636,6 +636,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
         return;
       }
       const track = capture.getTracks()[0]!;
+      track.enabled = stream.getTracks().find((old) => old.kind === kind)?.enabled ?? true;
       try {
         await Promise.all([...peers.current.values()].map((connection) => connection.getTransceivers().find((transceiver) => transceiver.receiver.track.kind === kind)?.sender.replaceTrack(track)));
         stream.getTracks().filter((old) => old.kind === kind).forEach((old) => { stream.removeTrack(old); old.stop(); });
@@ -650,8 +651,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     } else if (stream) {
       stream.getTracks().filter((old) => old.kind === kind).forEach((old) => { stream.removeTrack(old); old.stop(); });
     }
-    if (kind === "audio") setAudioDevice(deviceId);
-    else setVideoDevice(deviceId);
+    (kind === "audio" ? setAudioDevice : setVideoDevice)(deviceId);
   };
 
   const present = participants ?? [];

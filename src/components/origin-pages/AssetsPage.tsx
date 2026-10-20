@@ -154,6 +154,7 @@ function AssetEditor({ projectId, canEdit, asset, onClose }: { projectId: string
   const action = useAction();
   const batch = files.length > 1;
   const choose = (selection: File[]) => {
+    if (action.busy) return;
     const tooBig = selection.find((file) => file.size > MAX_UPLOAD_BYTES);
     if (tooBig) { action.setError(`${tooBig.name} is over 15 MB`); return; }
     action.setError("");
@@ -192,7 +193,7 @@ function AssetEditor({ projectId, canEdit, asset, onClose }: { projectId: string
     <Modal title={asset ? "Edit asset" : batch ? "Add assets" : "Add asset"} onClose={onClose} canClose={() => !action.busy}>
       <form onSubmit={save} className="flex flex-col gap-3">
         <ReadOnlyEditorNotice canEdit={canEdit} />
-        <fieldset disabled={!canEdit} className="contents">
+        <fieldset disabled={!canEdit || action.busy} className="contents">
         {!asset && (
           <>
             <button type="button" onClick={() => input.current?.click()}

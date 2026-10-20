@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Keyboard, Megaphone, PenTool, Sparkles, UserRound, Workflow } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Keyboard, Megaphone, Sparkles, UserRound } from "lucide-react";
 import { api, useStore, type Bot } from "@/state/store";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
 import { useStudioView, type StudioView } from "@/lib/origin-studio-view";
 import { cn } from "@/lib/cn";
-import { CloudGate, EmptyState, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, chipButton, pageClass, type OriginPageProps } from "../origin-pages/ui";
+import { CloudGate, EmptyState, Loading, Modal, Notice, ReadOnlyEditorNotice, Segmented, chipButton, glassHeaderRow, pageClass, type OriginPageProps } from "../origin-pages/ui";
+import { GlassHeader, useInGlassHeader } from "../GlassScrollFrame";
 import { CampaignDialog, CampaignStrip, isCampaignRun } from "./StudioCampaign";
 import { StudioCanvas, type TileAction } from "./StudioCanvas";
 import { STUDIO_MODES, StudioComposer, draftForModel, emptyDraft, type StudioComposerHandle } from "./StudioComposer";
@@ -13,11 +14,11 @@ import { CharacterEditor, StudioLibrary, type CharacterSeed } from "./StudioLibr
 import { StudioDesign } from "./StudioDesign";
 import { StudioViewer } from "./StudioViewer";
 import { StudioWorkflows } from "./StudioWorkflows";
-import { PresetStrip } from "./StudioPresets";
+import { PresetStrip, StudioPresetsPage } from "./StudioPresets";
 import { consumeStudioFocus, useStudioFocus } from "@/lib/studio-focus";
-import { studioPreset } from "../../../shared/studio-presets";
+import { studioPreset, type StudioPreset } from "../../../shared/studio-presets";
 import type { WorkflowDraft } from "./WorkflowEditor";
-import { outputRef, studioPost, typing, type StudioDraft } from "./studio-ui";
+import { StudioTabs, outputRef, studioPost, studioTitle, typing, type StudioDraft } from "./studio-ui";
 import { STUDIO_ACTIONS, studioModel, type StudioCharacter, type StudioGeneration, type StudioMediaKind } from "../../../shared/studio";
 import type { StudioWorkflowRun } from "../../../shared/studio-workflow";
 
@@ -48,7 +49,7 @@ function useFalReady(projectId: string): boolean | null {
 const SHORTCUTS: readonly [string, string][] = [
   ["/", "Write a prompt"], ["Ctrl Enter", "Generate"], ["Ctrl E", "Enhance the prompt"], ["1 – 4", "Image, video, audio, edit"], ["M", "Choose a model"], ["T", "Presets"],
   ["Arrows", "Move between results"], ["Enter", "Open a result"], ["A U R X", "Animate, upscale, remix, extend"], ["P", "Reuse its settings"], ["L", "Save to the library"],
-  ["B", "Use in Broadcast"], ["C", "Campaign pack"], ["W", "Workflows"], ["?", "These shortcuts"],
+  ["B", "Add to Publish"], ["C", "Campaign pack"], ["W", "Workflows"], ["?", "These shortcuts"],
   ["N", "Workflow: add a node"], ["Ctrl Z / Ctrl Shift Z", "Workflow: undo, redo"], ["Ctrl C / V / D", "Workflow: copy, paste, duplicate"],
 ];
 
@@ -190,9 +191,9 @@ function Studio({ projectId, teamId, canEdit, isAdmin, agent }: { projectId: str
       else if (event.key === "?") { event.preventDefault(); setHelp(true); }
       else if (key === "w" && !(tab === "workflows" && workflow)) { event.preventDefault(); setTab(tab === "workflows" ? "create" : "workflows"); }
       else if (key === "c" && canEdit && !(tab === "workflows" && workflow)) { event.preventDefault(); setCampaign(true); }
+      else if (key === "t" && canEdit && tab !== "presets" && !(tab === "workflows" && workflow)) { event.preventDefault(); setTab("presets"); }
       else if (tab !== "create") return;
       else if (index >= 0 && canEdit) { event.preventDefault(); setDraft((current) => draftForModel(current, studioModel(emptyDraft(STUDIO_MODES[index]!.value).model)!)); }
-      else if (key === "t" && canEdit) { event.preventDefault(); composer.current?.openPresets(); }
       else if (key === "m" && canEdit && !(event.target as HTMLElement | null)?.closest?.("[data-studio-tile]")) { event.preventDefault(); composer.current?.openModels(); }
     };
     window.addEventListener("keydown", onKey);
@@ -211,44 +212,44 @@ function Studio({ projectId, teamId, canEdit, isAdmin, agent }: { projectId: str
     showTab("workflows");
   };
 
-  const views = (
-    <Segmented label="Studio view" value={tab} onChange={setTab}
-      options={[
-        { value: "create", label: <><Sparkles size={13} /><span className={cn(tab === "design" && "hidden lg:inline")}>Studio</span></>, title: "Studio" },
-        { value: "workflows", label: <><Workflow size={13} /><span className={cn(tab === "design" && "hidden lg:inline")}>Workflows</span></>, title: "Workflows (W)" },
-        { value: "design", label: <><PenTool size={13} /><span className={cn(tab === "design" && "hidden lg:inline")}>Design</span></>, title: "Design: canvases and components" },
-      ]} />
-  );
+  const pickPreset = (preset: StudioPreset) => {
+    setTab("create");
+    window.setTimeout(() => composer.current?.applyPreset(preset), 0);
+  };
 
-  if (tab === "design") return <StudioDesign projectId={projectId} teamId={teamId} canEdit={canEdit} agent={agent} switcher={views} />;
+  if (tab === "design") {
+    return <StudioDesign projectId={projectId} teamId={teamId} canEdit={canEdit} agent={agent}
+      switcher={<><h2 className={cn(studioTitle, "max-sm:hidden")}>Studio</h2><StudioTabs value={tab} onChange={setTab} compact /></>} />;
+  }
 
   return (
     <section className={cn(pageClass, "pb-0")} aria-label="Studio">
-      <PageHeader title="Studio" count={tab === "create" ? rows?.length : undefined}>
-        {views}
-        {tab === "create" && (
+      <StudioHeader tabs={<StudioTabs value={tab} onChange={setTab} className="order-3 w-full sm:order-none sm:w-auto" />}
+        filter={tab === "create" && (
           <Segmented label="Show" value={filter} onChange={setFilter}
             options={[{ value: "all", label: "All" }, { value: "image", label: "Images" }, { value: "video", label: "Video" }, { value: "audio", label: "Audio" }]} />
-        )}
-        {running > 0 && tab === "create" && <span className="text-[12px] tabular-nums text-ink-tertiary" role="status">{running} running</span>}
+        )}>
+        {running > 0 && tab === "create" && <span className="text-[12px] tabular-nums text-ink-tertiary max-sm:hidden" role="status">{running} running</span>}
         {canEdit && (
-          <button type="button" className={cn(chipButton, "text-ink")} onClick={() => setCampaign(true)} title="One brief, a whole campaign (C)">
-            <Megaphone size={13} className="text-accent-text" />Campaign pack
+          <button type="button" className={cn(chipButton, "text-ink max-sm:px-2.5")} onClick={() => setCampaign(true)} title="One brief, a whole campaign (C)" aria-label="Campaign pack">
+            <Megaphone size={13} className="text-accent-text" /><span className="max-sm:hidden">Campaign pack</span>
           </button>
         )}
-        <button type="button" aria-pressed={tab === "library"} className={cn(chipButton, tab === "library" && "border-accent/50 text-ink")} onClick={() => setTab(tab === "library" ? "create" : "library")} aria-label="Library" title="Characters, products and styles">
+        <button type="button" aria-pressed={tab === "library"} className={cn(chipButton, "max-sm:px-2.5", tab === "library" && "border-accent/50 text-ink")} onClick={() => setTab(tab === "library" ? "create" : "library")} aria-label="Library" title="Characters, products and styles">
           <UserRound size={13} /><span className="max-sm:hidden">Library</span>
         </button>
-        <button type="button" className="hidden size-8 items-center justify-center rounded-lg text-ink-tertiary hover:bg-raised hover:text-ink md:flex" onClick={() => setHelp(true)} aria-label="Keyboard shortcuts (?)" title="Keyboard shortcuts (?)">
+        <button type="button" className="hidden size-8 items-center justify-center rounded-lg text-ink-tertiary transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink md:flex" onClick={() => setHelp(true)} aria-label="Keyboard shortcuts (?)" title="Keyboard shortcuts (?)">
           <Keyboard size={15} />
         </button>
-      </PageHeader>
+      </StudioHeader>
       {!canEdit && <div className="mb-3"><ReadOnlyEditorNotice canEdit={canEdit} /></div>}
       {error && <div className="mb-3"><Notice tone="danger">{error}</Notice></div>}
+      <div key={tab === "workflows" && workflow ? "workflow" : tab} className="flex min-h-0 flex-1 flex-col motion-safe:animate-[section-in_var(--motion-base)_var(--ease-out)_backwards]" data-studio-body={tab}>
       {tab === "workflows" && (
         <StudioWorkflows projectId={projectId} canEdit={canEdit} falReady={falReady} rows={all} draft={workflow} onDraft={setWorkflow} onOpenBroadcast={openBroadcast} />
       )}
       {tab === "library" && <StudioLibrary projectId={projectId} canEdit={canEdit} rows={all} onUse={followCharacter} />}
+      {tab === "presets" && <StudioPresetsPage current={draft.preset} onPick={pickPreset} />}
       {tab === "create" && (
         <>
           <div className="flex-1 pb-4">
@@ -257,18 +258,19 @@ function Studio({ projectId, teamId, canEdit, isAdmin, agent }: { projectId: str
                 onStop={() => void studioPost("workflow/cancel", { projectId, runId: pack._id }).catch((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)))} />
             )}
             {!rows ? <Loading label="Loading generations" variant="grid" /> : !shown.length ? (<>
-              {filter === "all" && canEdit && <PresetStrip onPick={(preset) => composer.current?.applyPreset(preset)} onMore={() => composer.current?.openPresets()} />}
+              {filter === "all" && canEdit && <PresetStrip onPick={(preset) => composer.current?.applyPreset(preset)} onMore={() => setTab("presets")} />}
               <EmptyState icon={<Sparkles size={22} />} title={filter === "all" ? "Nothing generated yet" : "Nothing here yet"}
                 body={filter === "all" ? "What you and the project's agents make appears here for the whole team, and in Assets." : undefined} />
             </>) : <StudioCanvas rows={shown} all={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy} onAction={act} />}
           </div>
           <div className="sticky bottom-0 z-20 -mx-4 bg-gradient-to-t from-app from-70% to-transparent px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-4 md:-mx-6 md:px-6">
             <div className="mx-auto w-full max-w-3xl">
-              <StudioComposer ref={composer} projectId={projectId} canEdit={canEdit} falReady={falReady} rows={all} draft={draft} onDraft={setDraft} onOpenLibrary={() => setTab("library")} />
+              <StudioComposer ref={composer} projectId={projectId} canEdit={canEdit} falReady={falReady} rows={all} draft={draft} onDraft={setDraft} onOpenLibrary={() => setTab("library")} onOpenPresets={() => setTab("presets")} />
             </div>
           </div>
         </>
       )}
+      </div>
       {viewed && <StudioViewer row={viewed} rows={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy.has(viewed._id)} onAction={act} onMove={moveViewer} onClose={() => setViewing(null)} />}
       {campaign && <CampaignDialog projectId={projectId} falReady={falReady} onStarted={(runId) => { setStarted(runId); setTab("create"); }} onClose={() => setCampaign(false)} />}
       {saving && <CharacterEditor projectId={projectId} rows={all} seed={saving} onClose={() => setSaving(null)} />}
@@ -285,5 +287,19 @@ function Studio({ projectId, teamId, canEdit, isAdmin, agent }: { projectId: str
         </Modal>
       )}
     </section>
+  );
+}
+
+function StudioHeader({ tabs, filter, children }: { tabs: ReactNode; filter: ReactNode; children: ReactNode }) {
+  const pinned = useInGlassHeader();
+  return (
+    <GlassHeader>
+      <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-2", pinned ? glassHeaderRow : "mb-4")} data-studio-header>
+        <h2 className={studioTitle}>Studio</h2>
+        {tabs}
+        {filter && <div className="order-4 w-full sm:order-none sm:ml-auto sm:w-auto">{filter}</div>}
+        <div className={cn("ml-auto flex items-center gap-1.5", filter && "sm:ml-0")}>{children}</div>
+      </div>
+    </GlassHeader>
   );
 }

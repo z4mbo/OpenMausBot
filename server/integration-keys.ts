@@ -20,7 +20,7 @@ type Field = {
 type Integration = { label: string; help: string; fields: Record<string, Field> };
 
 /**
- * Third-party accounts a member connects for server-side work (Studio generations, Broadcast posts, Ship deploys). Each
+ * Third-party accounts a member connects for server-side work (Studio generations, Publish posts). Each
  * member keeps their own keys in this computer's data folder: they are never put in a backup and never returned to a
  * client (non-secret fields such as a sender address are). An admin may share theirs with the workspace or a project
  * through the backend; a member's own key always wins over a shared one.

@@ -20,7 +20,8 @@ export function CampaignCard({ card }: { card: Card }) {
   const dates = [campaign.startDate, campaign.endDate].filter(Boolean).join(" – ");
   const stats = [
     { label: "Posts published", value: `${campaign.counts.published}/${campaign.counts.posts}` },
-    { label: "Studio pieces", value: String(campaign.counts.generations) },    { label: "Open issues", value: String(campaign.counts.openIssues) },
+    { label: "Studio pieces", value: String(campaign.counts.generations) },
+    { label: "Open issues", value: String(campaign.counts.openIssues) },
   ];
   return (
     <CardFrame kind="campaign" label={`Campaign ${campaign.name}`} icon={Megaphone}
@@ -28,9 +29,9 @@ export function CampaignCard({ card }: { card: Card }) {
         <span className={cn("shrink-0 rounded-md px-1.5 py-px text-[11px] font-medium", STATUS_TONE[campaign.status])}>{CAMPAIGN_STATUS_LABEL[campaign.status]}</span></span>}
       meta={[card.projectName, dates, campaign.slug && `utm_campaign=${campaign.slug}`].filter(Boolean).join(" · ")}
       openLabel="Open campaign" onOpen={open} openable={opener.openable}>
-      <button type="button" className={cn(rowButton, "mt-1.5 flex-col items-stretch gap-2 px-1")} onClick={open} disabled={!opener.openable} title={opener.title}>
+      <button type="button" className={cn(rowButton, "-mx-2 mt-1.5 w-[calc(100%+1rem)] flex-col items-stretch gap-2")} onClick={open} disabled={!opener.openable} title={opener.title}>
         {campaign.goal && <span className="line-clamp-2 text-[12.5px] leading-snug text-ink-secondary">{campaign.goal}</span>}
-        <dl className="grid grid-cols-4 gap-2">
+        <dl className="grid grid-cols-3 gap-2">
           {stats.map((stat) => (
             <div key={stat.label} className="min-w-0">
               <dt className="truncate text-[11px] text-ink-tertiary">{stat.label}</dt>

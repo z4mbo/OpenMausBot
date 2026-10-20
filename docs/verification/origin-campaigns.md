@@ -1,4 +1,4 @@
-# Campaigns in Broadcast
+# Campaigns in Publish
 
 Campaigns run against the real Convex functions of `backend/convex`, held in
 memory by convex-test and served over the HTTP wire `ConvexHttpClient` speaks.
@@ -29,7 +29,7 @@ and 375 px dark, and a viewer:
   the backend and reports that X is not connected; LinkedIn is named as
   unread;
 - Plan with the Chief sends the brief into its chat;
-- issue and content links open Issues with the issue, and Studio; a timeline post opens the Broadcast composer;
+- issue and content links open Issues with the issue, and Studio; a timeline post opens the Publish composer;
 - linking an issue, moving to Running and creating a campaign (with the
   utm preview and the date-order check) write through the backend;
 - a viewer sees no create, link or plan controls.

@@ -27,6 +27,11 @@ Set `OMB_VERIFY_PLAYWRIGHT` to Playwright's `index.mjs` when it is not
 resolvable from the repository root. At 1280 and 375 px, dark and light, the
 check covers:
 
+- Create, Workflows, Design and Presets share one header: the Studio title and
+  the same four-way control;
+- the seeded video has no poster from fal, so its tile shows the first frame,
+  drawn in the browser from the fixture's WebM and kept in the Cache API; the
+  video itself loads only on hover;
 - `/` focuses the prompt and Ctrl+Enter generates; the tile shows progress with
   an ETA, then the image;
 - a held generation is cancelled from its tile with the keyboard and fal's
@@ -56,7 +61,7 @@ check covers:
 - at 1280 px dark: a workflow is built from the palette, with Ctrl+Z,
   Ctrl+Shift+Z, Ctrl+C then Ctrl+V and a double-click on empty canvas, links
   are dragged, and it is saved with Ctrl+S, run with Ctrl+Enter and listed;
-- at 1280 px dark: T opens the presets with their ComfyUI preview images;
+- at 1280 px dark: T opens the Presets tab with their ComfyUI preview images;
   search plus Enter picks Motion transfer, whose inputs read Character and
   Motion video, and fal's Kling motion control receives the character image,
   the video and `character_orientation`;

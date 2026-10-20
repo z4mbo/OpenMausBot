@@ -100,7 +100,7 @@ function SectionTabs({ tabs, section, badge, onSection }: { tabs: readonly Proje
       )}
       <div ref={ruler} aria-hidden="true" className="pointer-events-none invisible absolute left-0 top-0 flex h-0 w-max overflow-hidden">
         {tabs.map(({ id, label, icon }) => <span key={id} className={tabClass}><TabFace icon={icon} label={label} current={false} badge={badge(id)} /></span>)}
-        <span className={cn(tabClass, "gap-0 px-0")}><ChevronDown size={14} className="-ml-1" /></span>
+        <span className={cn(tabClass, "px-0")}><span /><ChevronDown size={14} className="-ml-1" /></span>
         <span className={tabClass}>More<ChevronDown size={14} className="-ml-1" /></span>
       </div>
     </div>

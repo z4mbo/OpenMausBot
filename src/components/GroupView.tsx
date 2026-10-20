@@ -1300,7 +1300,7 @@ export function GroupView({ group }: { group: Group }) {
       )}
       <GlassScrollFrame className="flex-1 [--glass-tint:var(--color-app)]">
       {/* z-[25]: above the room set-up card (z-20), below the GroupCallOverlay (z-30). */}
-      <GlassBar edge="top" className="z-[25]">
+      <GlassBar edge="top" className="glass-bar-plain z-[25]">
       <div
         {...headerDragProps}
         className={cn(

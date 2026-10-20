@@ -15,7 +15,9 @@ export const completesThroughPullRequest = (project: Pick<CloudProject, "repoUrl
 /** The project's Chief, who sees an issue marked complete through to a merged pull request. */
 export interface IssueImplementer {
   name: string;
-  /** Moves the issue to In progress and hands it to the Chief. */
+  /** The column the issue moves to when handed over; without one it stays where it is. */
+  column?: string;
+  /** Moves the issue to `column` and hands it to the Chief. */
   start(): Promise<void>;
 }
 
@@ -53,11 +55,11 @@ export function CompleteIssueDialog({ project, projectId, task, implementer, onC
                 <p className="font-medium text-ink">Handing {key} to {implementer.name} to implement and open a PR</p>
                 <p>
                   {implementer.name} gives it to the right agent, which works on a branch and opens a pull request that closes {number ? `#${number}` : "its GitHub issue"}.
-                  {" "}{implementer.name} reviews it and asks you before merging; GitHub then closes the issue and {key} moves to Done. It moves to In progress now.
+                  {" "}{implementer.name} reviews it and asks you before merging; GitHub then closes the issue and {key} moves to Done.{implementer.column && ` It moves to ${implementer.column} now.`}
                 </p>
               </div>
             </div>
-            {handed && <Notice>Handed {key} to {implementer.name}. It is In progress; follow it in {implementer.name}'s chat.</Notice>}
+            {handed && <Notice>Handed {key} to {implementer.name}.{implementer.column && ` It is in ${implementer.column};`} Follow it in {implementer.name}'s chat.</Notice>}
             {opened && <Notice>{opened}</Notice>}
             {action.error && <Notice tone="danger">{action.error}</Notice>}
             <div className="mt-1 flex flex-wrap items-center gap-2">

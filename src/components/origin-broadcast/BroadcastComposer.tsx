@@ -182,7 +182,7 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
           <AccountRow channels={open} accounts={accounts} chosen={draft.accounts} locked={locked} onConnect={onConnect}
             onChoose={(channel, accountId) => set({ accounts: { ...draft.accounts, [channel]: accountId } })} />
 
-          {draft.channels.length > 0 && (
+          {(draft.channels.length > 0 || !locked) && (
             <div className="flex flex-col overflow-hidden rounded-xl border border-hairline/50 bg-inset transition-colors duration-(--motion-fast) focus-within:border-accent/60">
               <div role="tablist" aria-label="Text per channel" className="flex gap-0.5 overflow-x-auto border-b border-hairline/40 px-1.5 pt-1.5 [scrollbar-width:none]">
                 {(["all", ...draft.channels] as const).map((item) => {

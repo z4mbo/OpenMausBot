@@ -10,7 +10,7 @@ export const smallButton = "inline-flex h-7 items-center gap-1.5 rounded-lg px-2
 export const quietButton = cn(smallButton, "border border-hairline/60 text-ink-secondary hover:bg-raised hover:text-ink");
 export const solidButton = cn(smallButton, "bg-accent text-accent-ink hover:opacity-90");
 
-const UNLINKED = "No project in this app is linked to this Origin project";
+export const UNLINKED = "No project in this app is linked to this Origin project";
 
 export function useItemOpener(projectId: string): { openable: boolean; title?: string; open(target: Omit<ItemFocus, "projectId">): void } {
   const openable = useCanOpenOriginProject(projectId);
@@ -18,30 +18,34 @@ export function useItemOpener(projectId: string): { openable: boolean; title?: s
   return { openable, ...(openable ? {} : { title: UNLINKED }), open: (target) => { if (openable) openItem({ projectId, ...target }); } };
 }
 
-export function CardFrame({ kind, label, icon: Icon, title, meta, openLabel, onOpen, openable = true, wide, children }: {
+export function CardFrame({ kind, label, icon: Icon, iconClassName, title, titleHint, meta, openLabel, onOpen, openIcon: OpenIcon = ArrowUpRight, openable = true, wide, data, children }: {
   kind: string;
   label: string;
   icon: LucideIcon;
+  iconClassName?: string;
   title: ReactNode;
+  titleHint?: string;
   meta?: ReactNode;
   openLabel?: string;
   onOpen?(): void;
+  openIcon?: LucideIcon;
   openable?: boolean;
   wide?: boolean;
+  data?: Record<`data-${string}`, string | undefined>;
   children?: ReactNode;
 }) {
   return (
-    <section data-origin-card={kind} aria-label={label} className={cn("w-full rounded-2xl bg-inset/50 p-3 motion-safe:animate-pop-in", wide ? "max-w-[30rem]" : "max-w-[26rem]")}>
+    <section data-origin-card={kind} {...data} aria-label={label} className={cn("w-full rounded-2xl bg-inset/50 p-3 motion-safe:animate-pop-in", wide ? "max-w-[30rem]" : "max-w-[26rem]")}>
       <header className="flex items-start gap-2.5">
-        <Icon size={16} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" />
+        <Icon size={16} className={cn("mt-0.5 shrink-0", iconClassName ?? "text-accent-text")} aria-hidden="true" />
         <div className="min-w-0 flex-1">
-          <div className={cardText.title}>{title}</div>
+          <div className={cardText.title} title={titleHint}>{title}</div>
           {meta ? <div className={cardText.meta}>{meta}</div> : null}
         </div>
         {onOpen && openLabel ? (
           <button type="button" onClick={onOpen} disabled={!openable} aria-label={openLabel} title={openable ? openLabel : UNLINKED}
             className="shrink-0 rounded-md p-1 text-ink-tertiary outline-none transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-40 disabled:hover:bg-transparent">
-            <ArrowUpRight size={14} aria-hidden="true" />
+            <OpenIcon size={14} aria-hidden="true" />
           </button>
         ) : null}
       </header>
@@ -51,7 +55,7 @@ export function CardFrame({ kind, label, icon: Icon, title, meta, openLabel, onO
 }
 
 export function More({ count, where }: { count?: number; where: string }) {
-  return count ? <p className="px-2 pt-1.5 text-[12px] text-ink-tertiary">{count} more in {where}</p> : null;
+  return count ? <p className="pt-1.5 text-[12px] text-ink-tertiary">{count} more in {where}</p> : null;
 }
 
-export const dateTime = (at: number) => new Date(at).toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+export const dateTime = (at: number) => new Date(at).toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });

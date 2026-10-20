@@ -21,7 +21,7 @@ export function VaultCard({ card }: { card: Card }) {
     <CardFrame kind="vault" label="Vault entries" icon={LockKeyhole} title={`${card.items.length + (card.more ?? 0)} vault entr${card.items.length + (card.more ?? 0) === 1 ? "y" : "ies"}`}
       meta={[card.projectName, `${usable} usable by agents`].filter(Boolean).join(" · ")}
       openLabel="Open Vault" onOpen={() => opener.open({ kind: "vault" })} openable={opener.openable}>
-      <ul className="mt-2 flex flex-col gap-0.5" aria-label="Entries">
+      <ul className="-mx-2 mt-2 flex flex-col gap-0.5" aria-label="Entries">
         {card.items.map((item) => {
           const kind = KIND[item.kind] ?? KIND.secret!;
           const Icon = kind.icon;

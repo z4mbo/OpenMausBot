@@ -373,7 +373,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
   ...STUDIO_TOOL_DEFINITIONS,
   {
     name: "origin_broadcast_draft",
-    description: "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval." + BRAND_VOICE + ORIGIN_SCOPE,
+    description: "Draft a social post in an Origin project's Publish section, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval." + BRAND_VOICE + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -388,7 +388,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_broadcast_list",
-    description: "List an Origin project's Broadcast posts: id, status, approval, schedule, channels with their published links or errors, media and text." + ORIGIN_SCOPE,
+    description: "List an Origin project's Publish posts: id, status, approval, schedule, channels with their published links or errors, media and text." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: { status: { type: "string", enum: ["all", "draft", "scheduled", "publishing", "published", "failed"], description: "Default all." }, project: ORIGIN_PROJECT },
@@ -396,7 +396,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_broadcast_schedule",
-    description: "Schedule an approved Broadcast post to publish at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first." + ORIGIN_SCOPE,
+    description: "Schedule an approved Publish post to go out at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {

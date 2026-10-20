@@ -19,8 +19,8 @@ async function open(width, theme, query = {}) {
   target.searchParams.set("theme", theme);
   for (const [key, value] of Object.entries(query)) target.searchParams.set(key, value);
   await page.goto(target.href);
-  assert.equal(await page.title(), "Isolated Origin Broadcast");
-  await page.getByRole("heading", { name: "Broadcast" }).waitFor();
+  assert.equal(await page.title(), "Isolated Origin Publish");
+  await page.getByRole("heading", { name: "Publish" }).waitFor();
   await page.evaluate(() => window.originBroadcastFixture.clipReady);
   return page;
 }
@@ -187,6 +187,11 @@ try {
   for (const [from, to] of [["week-1280-dark", "round5-week"], ["month-1280-dark", "round5-month"], ["composer-preview-1280-dark", "round5-composer-preview"],
     ["reel-editor-1280-dark", "round5-reel-editor"], ["month-after-drag-1280-dark", "round5-month-drag"]]) {
     await copyFile(resolve(output, `${from}.png`), resolve(output, `${to}.png`));
+  }
+  const round6 = resolve(output, "..", "round6");
+  await mkdir(round6, { recursive: true });
+  for (const [from, to] of [["week-1280-dark", "publish-week"], ["composer-preview-1280-dark", "publish-composer"], ["reel-editor-1280-dark", "publish-reel"]]) {
+    await copyFile(resolve(output, `${from}.png`), resolve(round6, `${to}.png`));
   }
 } finally {
   await browser.close();

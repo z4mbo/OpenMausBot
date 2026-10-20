@@ -64,7 +64,7 @@ export function ProjectCanvases({ projectId, teamId, userId, canEdit, agent, swi
   if (!current) {
     return (
       <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]">
-        {switcher && <div className="flex h-12 shrink-0 items-center px-3 md:px-4">{switcher}</div>}
+        {switcher && <div className="flex h-11 shrink-0 items-start gap-3 px-4 pb-3 md:px-6"><div className="flex h-8 items-center gap-3">{switcher}</div></div>}
         <EmptyState icon={<Brush size={22} />} title="No canvases yet" body={canEdit ? "Start one, or ask the project's Chief to design something on it." : undefined}
           action={<div className="flex flex-col items-center gap-2">{newCanvas}{action.error && <Notice tone="danger">{action.error}</Notice>}</div>} />
       </div>
@@ -72,7 +72,7 @@ export function ProjectCanvases({ projectId, teamId, userId, canEdit, agent, swi
   }
   const tabs = (
     <div className="flex min-w-0 flex-1 items-center gap-1.5">
-      {switcher && <div className="flex shrink-0 items-center gap-1.5 pr-1">{switcher}<span aria-hidden="true" className="h-4 w-px bg-hairline/60" /></div>}
+      {switcher && <div className="flex shrink-0 items-center gap-3 pr-1.5">{switcher}<span aria-hidden="true" className="h-4 w-px bg-hairline/60" /></div>}
       <div role="tablist" aria-label="Canvases" className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
         {canvases.map((canvas) => renaming === canvas._id ? (
           <input key={canvas._id} autoFocus defaultValue={canvas.name} aria-label="Canvas name" maxLength={80} className={cn(inputClass, "h-8 w-44 shrink-0")}

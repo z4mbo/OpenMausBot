@@ -8,7 +8,7 @@ import { useCanOpenOriginProject, useOpenOriginSection } from "@/lib/origin-issu
 import { decodeScene } from "../../shared/canvas-scene";
 import { sceneSvg } from "../../shared/canvas-svg";
 import type { OriginDesignCard as Card } from "../../shared/origin-design";
-import { ghostButton } from "./origin-pages/ui";
+import { CardFrame, quietButton } from "./origin-cards/CardFrame";
 
 type Thumb = { name: string; src: string | null };
 
@@ -44,13 +44,10 @@ function DesignCard({ card, id }: { card: Card; id: string }) {
   };
   const hint = openable ? `Open ${card.canvasName} in Design` : "No project in this app is linked to this Origin project";
   return (
-    <section data-origin-design={id} data-openable={openable || undefined} aria-label={card.heading} className="w-full max-w-[26rem] rounded-2xl bg-inset/50 p-2">
-      <div className="flex items-center gap-2 px-2 pb-1.5 pt-1 text-[12px] text-ink-tertiary">
-        <span className="min-w-0 flex-1 truncate">{card.heading}</span>
-        {card.issueKey ? <span className="shrink-0 tabular-nums">{card.issueKey}</span> : null}
-      </div>
+    <CardFrame kind="design" data={{ "data-origin-design": id, "data-openable": openable ? "true" : undefined }} label={card.heading} icon={PenTool} title={card.heading}
+      meta={[card.canvasName, card.issueKey].filter(Boolean).join(" · ")}>
       <button type="button" onClick={open} disabled={!openable} title={hint} aria-label={hint}
-        className={cn("grid w-full gap-2 rounded-xl p-0.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-accent/60", card.frames.length > 1 && "grid-cols-2", openable ? "cursor-pointer" : "cursor-default")}>
+        className={cn("mt-2.5 grid w-full gap-2 rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-accent/60", card.frames.length > 1 && "grid-cols-2", openable ? "cursor-pointer" : "cursor-default")}>
         {card.frames.map((frame) => {
           const thumb = thumbs?.get(frame.id);
           return (
@@ -65,13 +62,11 @@ function DesignCard({ card, id }: { card: Card; id: string }) {
           );
         })}
       </button>
-      <div className="flex items-center gap-2 px-1 pb-0.5 pt-1.5">
-        <PenTool size={12} className="shrink-0 text-ink-tertiary" aria-hidden="true" />
-        <span className="min-w-0 flex-1 truncate text-[12px] text-ink-tertiary">{card.canvasName}</span>
-        <button type="button" onClick={open} disabled={!openable} title={openable ? undefined : hint} className={cn(ghostButton, "min-h-7 px-2 py-1 text-[12px]")}>
-          Open in Design<ArrowUpRight size={12} aria-hidden="true" />
+      <div className="mt-2.5 flex">
+        <button type="button" onClick={open} disabled={!openable} title={openable ? undefined : hint} className={quietButton}>
+          <ArrowUpRight size={12} aria-hidden="true" />Open in Design
         </button>
       </div>
-    </section>
+    </CardFrame>
   );
 }

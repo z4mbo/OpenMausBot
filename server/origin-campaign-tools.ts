@@ -76,7 +76,7 @@ function detailText(detail: Args, projectName: string): string {
     `${projectName} campaign:\n${summaryLine(detail)}`,
     [text(detail.goal) && `Goal: ${clip(text(detail.goal), 1_000)}`, text(detail.audience) && `Audience: ${clip(text(detail.audience), 600)}`,
       Array.isArray(detail.channels) && detail.channels.length ? `Channels: ${detail.channels.join(", ")}` : "", text(detail.budgetNote) && `Budget: ${text(detail.budgetNote)}`].filter(Boolean).join("\n"),
-    section("Broadcast posts", posts, list(detail.posts).length),
+    section("Publish posts", posts, list(detail.posts).length),
     detail.metricsAt ? `Metrics read ${when(detail.metricsAt)}.` : "No post metrics read yet; a person refreshes them from the campaign.",
     section("Studio generations", generations, list(detail.generations).length),
     section("Issues", issues, list(detail.issues).length),
@@ -110,7 +110,7 @@ export function campaignTools<C>(scope: (args: Args, ctx: C) => Promise<Campaign
       const created = (await campaigns(target).catch(() => [])).find((campaign) => campaign._id === campaignId);
       return {
         text: `Created campaign ${campaignId} "${trimmed(args.name)}" in ${target.projectName} (Planning). Tag its links with utm_campaign=${text(created?.slug)}. `
-          + "Break the work into Origin issues and attach them, the Broadcast posts and Studio generations with origin_campaign_link.",
+          + "Break the work into Origin issues and attach them, the Publish posts and Studio generations with origin_campaign_link.",
         ...campaignCard(target, created),
       };
     },

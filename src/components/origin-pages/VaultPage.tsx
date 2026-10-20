@@ -9,7 +9,7 @@ import type { CloudCredential, CredentialKind } from "./cloud-types";
 import { errorText } from "./repo-url";
 import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, cardClass, ghostButton, iconButton, inputClass, itemIn, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 import { decryptSecret, encryptSecret, generatePassword } from "./vaultCrypto";
-import { forgetForAgents, setAgentUse, shareUnlockedWithAgents } from "./vault-agent";
+import { forgetForAgents, handOver, setAgentUse, shareUnlockedWithAgents } from "./vault-agent";
 
 const KINDS: Record<CredentialKind, string> = { password: "Website login", api_key: "API key", secret: "Secret", note: "Secure note", apk: "APK", file: "File" };
 const EDITABLE_KINDS: readonly CredentialKind[] = ["password", "api_key", "secret", "note"];
@@ -30,6 +30,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const epoch = useRef(0);
+  const sharing = useRef<Promise<unknown>>(Promise.resolve());
 
   const lock = useCallback(() => {
     epoch.current++;
@@ -38,6 +39,10 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
     setUnlocked(false);
     setEditing(null);
   }, []);
+  const lockAndRevoke = () => {
+    lock();
+    void sharing.current.finally(() => forgetForAgents(projectId));
+  };
 
   useEffect(() => {
     if (!unlocked) return;
@@ -72,7 +77,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
       if (items.length) await decryptSecret(items[0], passphrase);
       else if (passphrase.length < MIN_NEW_PASSPHRASE) throw new Error(`Use a passphrase of at least ${MIN_NEW_PASSPHRASE} characters`);
       setUnlocked(true);
-      void shareUnlockedWithAgents(projectId, items, passphrase);
+      sharing.current = shareUnlockedWithAgents(projectId, items, passphrase);
     } catch (error) {
       setNotice(items.length ? "Could not unlock. Check your vault passphrase." : errorText(error, "Could not create vault"));
     } finally {
@@ -110,7 +115,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
           <Search size={14} className="pointer-events-none absolute left-2 text-ink-tertiary" aria-hidden="true" />
           <input className={cn(inputClass, "w-44 pl-7")} placeholder="Search vault" aria-label="Search vault" value={query} onChange={(e) => setQuery(e.target.value)} />
         </label>
-        {unlocked && <button type="button" className={ghostButton} onClick={() => { lock(); void forgetForAgents(projectId); }} title="Locks the vault and takes its items back from this computer's agents"><LockKeyhole size={14} />Lock</button>}
+        {unlocked && <button type="button" className={ghostButton} onClick={lockAndRevoke} title="Locks the vault and takes its items back from this computer's agents"><LockKeyhole size={14} />Lock</button>}
         {unlocked && canEdit && <button type="button" className={primaryButton} onClick={() => setEditing("new")}><Plus size={14} />New item</button>}
       </PageHeader>
 
@@ -178,6 +183,7 @@ function VaultItemEditor({ projectId, canEdit, passphrase, item, onClose }: { pr
       const encrypted = secret ? await encryptSecret(secret, passphrase) : null;
       if (item) {
         await cloudMutation("credentials:update", { projectId, credentialId: item._id, kind, title, username, url, ...encrypted });
+        if (encrypted && item.agentUse) await handOver(projectId, { ...item, ...encrypted }, passphrase);
       } else {
         if (!encrypted) throw new Error("Enter the secret to store");
         await cloudMutation("credentials:create", { projectId, kind, title, ...(username ? { username } : {}), ...(url ? { url } : {}), ...encrypted });

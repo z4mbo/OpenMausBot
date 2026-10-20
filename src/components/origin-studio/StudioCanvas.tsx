@@ -2,7 +2,8 @@ import { useEffect, useState, type KeyboardEvent } from "react";
 import { AlertTriangle, ArrowUpFromLine, AudioLines, Ban, BookmarkPlus, Clapperboard, Image as ImageIcon, FastForward, Loader2, Maximize2, RotateCcw, Scissors, Send, Shuffle, Square, Trash2, UserRound } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { relativeTime } from "@/lib/memory";
-import { formatSeconds, ratioOf, typing } from "./studio-ui";
+import { useVideoPoster } from "@/lib/video-poster";
+import { formatSeconds, ratioOf, studioCard, typing } from "./studio-ui";
 import { studioEta, type StudioGeneration } from "../../../shared/studio";
 
 export type TileAction = "open" | "animate" | "upscale" | "remix" | "removeBackground" | "extend" | "reuse" | "library" | "broadcast" | "cancel" | "delete";
@@ -23,7 +24,7 @@ const ACTIONS: Record<TileAction, ActionSpec> = {
   extend: { id: "extend", label: "Extend", key: "X", icon: FastForward },
   reuse: { id: "reuse", label: "Reuse settings", key: "P", icon: RotateCcw },
   library: { id: "library", label: "Save to library", key: "L", icon: BookmarkPlus },
-  broadcast: { id: "broadcast", label: "Use in Broadcast", key: "B", icon: Send },
+  broadcast: { id: "broadcast", label: "Add to Publish", key: "B", icon: Send },
   cancel: { id: "cancel", label: "Cancel", icon: Square },
   delete: { id: "delete", label: "Delete", key: "Del", icon: Trash2 },
 };
@@ -78,19 +79,31 @@ function Progress({ row, rows }: { row: StudioGeneration; rows: readonly StudioG
   );
 }
 
+function Unavailable({ kind, ratio }: { kind: "image" | "video"; ratio: string }) {
+  const Icon = kind === "video" ? Clapperboard : ImageIcon;
+  return (
+    <span className="flex w-full items-center justify-center bg-inset" style={{ aspectRatio: ratio }}>
+      <span className="flex size-9 items-center justify-center rounded-full bg-raised/70 text-ink-tertiary"><Icon size={16} aria-hidden="true" /></span>
+    </span>
+  );
+}
+
+function VideoMedia({ url, ratio, onBroken }: { url: string; ratio: string; onBroken(): void }) {
+  const poster = useVideoPoster(url);
+  return (
+    <video src={url} poster={poster} muted loop playsInline preload={poster ? "none" : "metadata"} className="block h-auto w-full bg-inset object-cover" style={{ aspectRatio: ratio }} onError={onBroken}
+      onMouseEnter={(event) => void event.currentTarget.play().catch(() => undefined)} onMouseLeave={(event) => event.currentTarget.pause()} />
+  );
+}
+
 function Media({ row }: { row: StudioGeneration }) {
   const [broken, setBroken] = useState(false);
   const output = row.outputs[0];
   if (!output) return null;
-  if (broken && output.kind !== "audio") {
-    const Icon = output.kind === "video" ? Clapperboard : ImageIcon;
-    return <span className="flex w-full items-center justify-center text-ink-tertiary" style={{ aspectRatio: ratioOf(row.aspectRatio, output.kind) }}><Icon size={20} aria-hidden="true" /></span>;
-  }
+  const ratio = ratioOf(row.aspectRatio, output.kind);
+  if (broken && output.kind !== "audio") return <Unavailable kind={output.kind} ratio={ratio} />;
   if (output.kind === "image") return <img src={output.url} alt={row.prompt} loading="lazy" className="block h-auto w-full" onError={() => setBroken(true)} />;
-  if (output.kind === "video") {
-    return <video src={output.url} muted loop playsInline preload="metadata" className="block h-auto w-full" onError={() => setBroken(true)}
-      onMouseEnter={(event) => void event.currentTarget.play().catch(() => undefined)} onMouseLeave={(event) => event.currentTarget.pause()} />;
-  }
+  if (output.kind === "video") return <VideoMedia url={output.url} ratio={ratio} onBroken={() => setBroken(true)} />;
   return <audio src={output.url} controls preload="none" className="h-9 w-full [color-scheme:var(--code-color-scheme)]" onClick={(event) => event.stopPropagation()} />;
 }
 
@@ -125,11 +138,11 @@ function Tile({ row, rows, canEdit, isAdmin, busy, onAction }: {
   return (
     <article tabIndex={0} onKeyDown={onKey} onDoubleClick={() => row.status === "done" && onAction(row, "open")} data-studio-generation={row.status} data-studio-tile={row._id}
       aria-label={`${row.modelLabel} ${row.kind}: ${row.prompt || "no prompt"}`}
-      className="group relative mb-2 break-inside-avoid overflow-hidden rounded-lg bg-panel outline-none ring-1 ring-hairline/30 transition-shadow duration-(--motion-fast) focus-visible:ring-2 focus-visible:ring-accent motion-safe:animate-pop-in">
+      className={cn(studioCard, "mb-3 break-inside-avoid outline-none focus-visible:border-accent motion-safe:animate-pop-in")}>
       {live && <div className="relative bg-inset" style={{ aspectRatio: ratioOf(row.aspectRatio, row.kind) }}><Progress row={row} rows={rows} /></div>}
       {visual && <button type="button" tabIndex={-1} className="block w-full cursor-zoom-in bg-inset text-left" onClick={() => onAction(row, "open")} aria-label="Open"><Media row={row} /></button>}
       {(row.status === "failed" || row.status === "cancelled") && (
-        <div className={cn("flex items-start gap-2 pb-1 pl-3 pr-20 pt-3 text-[12.5px]", row.status === "failed" ? "text-danger" : "text-ink-tertiary")} role={row.status === "failed" ? "alert" : undefined}>
+        <div className={cn("flex items-start gap-2 px-3 pb-1 pt-3 text-[12.5px] md:pr-20", row.status === "failed" ? "text-danger" : "text-ink-tertiary")} role={row.status === "failed" ? "alert" : undefined}>
           {row.status === "failed" ? <AlertTriangle size={14} className="mt-px shrink-0" aria-hidden="true" /> : <Ban size={14} className="mt-px shrink-0" aria-hidden="true" />}
           <span className="line-clamp-3">{row.status === "failed" ? row.error ?? "The generation failed" : "Cancelled"}</span>
         </div>
@@ -146,16 +159,17 @@ function Tile({ row, rows, canEdit, isAdmin, busy, onAction }: {
         </div>
       ) : <div className="flex flex-col gap-0.5 px-3 pb-2.5 pt-2">{caption}</div>}
       <div className="absolute left-2 top-2 flex flex-wrap gap-1">
-        {picked && <span className="flex items-center gap-1 rounded-full bg-app/85 px-2 py-0.5 text-[11px] text-accent-text"><Send size={10} aria-hidden="true" />Broadcast</span>}
+        {picked && <span className="flex items-center gap-1 rounded-full bg-app/85 px-2 py-0.5 text-[11px] text-accent-text"><Send size={10} aria-hidden="true" />Publish</span>}
         {character && visual && <span className="flex max-w-[140px] items-center gap-1 rounded-full bg-app/85 px-2 py-0.5 text-[11px] text-ink-secondary"><UserRound size={10} aria-hidden="true" /><span className="truncate">{character}</span></span>}
         {row.outputs.length > 1 && <span className="rounded-full bg-app/85 px-2 py-0.5 text-[11px] tabular-nums text-ink-secondary">+{row.outputs.length - 1}</span>}
       </div>
       {actions.length > 0 && (
         <div className={cn("absolute right-1.5 top-1.5 flex max-w-[calc(100%-12px)] flex-wrap items-center justify-end gap-px rounded-lg border border-hairline/40 bg-panel/95 p-0.5",
-          "opacity-0 transition-opacity duration-(--motion-fast) group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100", visual ? "max-md:hidden" : "max-md:opacity-100")}>
+          "opacity-0 transition-opacity duration-(--motion-fast) group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100",
+          visual ? "max-md:hidden" : "max-md:static max-md:mx-2 max-md:mb-2 max-md:w-fit max-md:justify-start max-md:opacity-100")}>
           {actions.map((spec) => (
             <button key={spec.id} type="button" disabled={busy} onClick={() => onAction(row, spec.id)} aria-pressed={spec.id === "broadcast" ? picked : undefined}
-              title={`${spec.id === "broadcast" && picked ? "Remove from Broadcast" : spec.label}${spec.key ? ` (${spec.key})` : ""}`} aria-label={spec.id === "broadcast" && picked ? "Remove from Broadcast" : spec.id === "delete" ? "Delete generation" : spec.label}
+              title={`${spec.id === "broadcast" && picked ? "Remove from Publish" : spec.label}${spec.key ? ` (${spec.key})` : ""}`} aria-label={spec.id === "broadcast" && picked ? "Remove from Publish" : spec.id === "delete" ? "Delete generation" : spec.label}
               className={cn("flex size-7 items-center justify-center rounded-md text-ink-secondary outline-none transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-40",
                 spec.id === "broadcast" && picked && "text-accent-text", spec.id === "delete" && "hover:text-danger")}>
               {busy && spec.id === "cancel" ? <Loader2 size={13} className="animate-spin" /> : <spec.icon size={13} />}
@@ -193,7 +207,7 @@ export function StudioCanvas({ rows, all, canEdit, isAdmin, busy, onAction }: {
     tiles[next]?.scrollIntoView({ block: "nearest" });
   };
   return (
-    <div className="columns-2 gap-2 md:columns-3 xl:columns-4 2xl:columns-5" onKeyDown={move} data-studio-gallery>
+    <div className="columns-2 gap-3 md:columns-3 xl:columns-4 2xl:columns-5" onKeyDown={move} data-studio-gallery>
       {rows.map((row) => <Tile key={row._id} row={row} rows={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy.has(row._id)} onAction={onAction} />)}
     </div>
   );

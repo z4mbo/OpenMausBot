@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { AudioLines, Clapperboard, Image as ImageIcon } from "lucide-react";
+import { AudioLines, Clapperboard, Image as ImageIcon, LayoutGrid, PenTool, Sparkles, Workflow } from "lucide-react";
 import { api } from "@/state/store";
 import { cn } from "@/lib/cn";
+import { useVideoPoster } from "@/lib/video-poster";
+import type { StudioView } from "@/lib/origin-studio-view";
+import { cardClass } from "../origin-pages/ui";
 import type { CloudDesignAsset } from "../origin-pages/cloud-types";
 import type { StudioGeneration, StudioMediaKind, StudioMode, StudioSource } from "../../../shared/studio";
 
@@ -37,6 +40,32 @@ export interface StudioDraft {
   characterId?: string;
 }
 
+export const studioTitle = "text-[18px] font-semibold tracking-[-0.01em] text-ink";
+export const studioSectionTitle = "mb-2.5 text-[12px] font-medium uppercase tracking-[0.06em] text-ink-tertiary";
+export const studioGrid = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] gap-3";
+export const studioCard = cn(cardClass, "group relative overflow-hidden transition-colors duration-(--motion-fast) hover:border-hairline");
+
+const STUDIO_TABS = [
+  { value: "create", label: "Create", icon: Sparkles, title: "Create" },
+  { value: "workflows", label: "Workflows", icon: Workflow, title: "Workflows (W)" },
+  { value: "design", label: "Design", icon: PenTool, title: "Design: canvases and components" },
+  { value: "presets", label: "Presets", icon: LayoutGrid, title: "Presets (T)" },
+] as const satisfies readonly { value: StudioView; label: string; icon: typeof Sparkles; title: string }[];
+
+export function StudioTabs({ value, onChange, compact, className }: { value: StudioView; onChange(view: StudioView): void; compact?: boolean; className?: string }) {
+  return (
+    <div role="group" aria-label="Studio view" className={cn("flex shrink-0 rounded-lg bg-inset p-0.5", className)}>
+      {STUDIO_TABS.map(({ value: tab, label, icon: Icon, title }) => (
+        <button key={tab} type="button" aria-pressed={tab === value} aria-label={label} title={title} onClick={() => onChange(tab)}
+          className={cn("flex h-7 flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 text-[12.5px] text-ink-secondary outline-none transition-colors duration-(--motion-fast) hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60",
+            tab === value && "bg-raised text-ink")}>
+          <Icon size={13} aria-hidden="true" /><span className={cn(compact && "hidden lg:inline")}>{label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export const KIND_ICON: Record<StudioMediaKind, typeof ImageIcon> = { image: ImageIcon, video: Clapperboard, audio: AudioLines };
 
 export const isKindAsset = (asset: CloudDesignAsset, kind: StudioMediaKind) =>
@@ -70,8 +99,15 @@ export function MediaThumb({ kind, url, className, alt = "", iconSize = 14 }: { 
     return <span className={cn("flex items-center justify-center bg-inset text-ink-tertiary", className)} aria-hidden={alt ? undefined : true}><Icon size={iconSize} /></span>;
   }
   return kind === "video"
-    ? <video src={url} muted playsInline preload="metadata" className={cn("object-cover", className)} onError={() => setBroken(true)} aria-label={alt || undefined} />
+    ? <VideoThumb url={url} className={className} alt={alt} onBroken={() => setBroken(true)} />
     : <img src={url} alt={alt} loading="lazy" className={cn("object-cover", className)} onError={() => setBroken(true)} />;
+}
+
+function VideoThumb({ url, className, alt, onBroken }: { url: string; className?: string; alt: string; onBroken(): void }) {
+  const poster = useVideoPoster(url);
+  return poster
+    ? <img src={poster} alt={alt} className={cn("object-cover", className)} />
+    : <video src={url} muted playsInline preload="metadata" className={cn("object-cover", className)} onError={onBroken} aria-label={alt || undefined} />;
 }
 
 /** A small panel anchored to its trigger, opening upward from the prompt bar; Escape and outside clicks close it. */

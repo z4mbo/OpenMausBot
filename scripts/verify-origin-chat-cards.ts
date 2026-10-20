@@ -195,6 +195,10 @@ try {
   const chat = page.locator("main").first();
   await chat.screenshot({ path: join(EVIDENCE, "chat.png") });
   shots.push("docs/verification/evidence/origin-chat-cards/chat.png");
+  await page.locator("main .glass-scroller").first().evaluate((element) => { element.scrollTop = element.scrollHeight / 2; });
+  await page.waitForTimeout(400);
+  await page.locator('main [data-glass-bar="top"]').first().screenshot({ path: join(EVIDENCE, "chat-header-scrolled.png") });
+  shots.push("docs/verification/evidence/origin-chat-cards/chat-header-scrolled.png");
   await card("assets").getByRole("button", { name: /Launch hero/ }).first().click();
   await page.locator('[data-section-page="assets"] [data-origin-item][data-origin-focused]').waitFor({ timeout: 15_000 });
   checks.assetOpensFocused = await page.evaluate(() => document.activeElement?.getAttribute("data-origin-item") !== null && document.activeElement?.closest("[data-section-page]") !== null);

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { CalendarDays, CalendarRange, Clapperboard, Heart, List, Loader2, Megaphone, MessageCircle, Plus, Repeat2, RotateCw, Send, ShieldCheck } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { useItemFocus } from "@/lib/origin-item-focus";
@@ -14,7 +14,7 @@ import { listOrder, matchesFilter, monthStart, movedTo, postTime, weekStart, typ
 import { useBroadcastAccounts, type ChannelAccounts } from "./use-broadcast-accounts";
 
 export function BroadcastPage({ agent, ...props }: OriginPageProps & { agent: Bot }) {
-  return <CloudGate {...props} label="Broadcast">{({ project, projectId, canEdit }) => <Broadcast projectId={projectId} projectName={project.name} canEdit={canEdit} agent={agent} />}</CloudGate>;
+  return <CloudGate {...props} label="Publish">{({ project, projectId, canEdit }) => <Broadcast projectId={projectId} projectName={project.name} canEdit={canEdit} agent={agent} />}</CloudGate>;
 }
 
 type View = "month" | "week" | "list";
@@ -55,19 +55,21 @@ function Broadcast({ projectId, projectName, canEdit: projectEdit, agent }: { pr
       <ShieldCheck size={13} />{pending} {pending === 1 ? "post waits" : "posts wait"} for your approval
     </button>
   );
-  const calendar = { posts, canEdit, onOpen: (post: BroadcastPost) => setOpen({ post }), onNew: (slot: number) => setOpen({ post: null, slot }), onMove: move, toolbar: approvals };
+  const views = (
+    <Segmented label="Publish view" value={view} onChange={setView}
+      options={[{ value: "month", label: <><CalendarRange size={13} /><span className="max-sm:sr-only">Month</span></> }, { value: "week", label: <><CalendarDays size={13} /><span className="max-sm:sr-only">Week</span></> }, { value: "list", label: <><List size={13} /><span className="max-sm:sr-only">List</span></> }]} />
+  );
+  const calendar = { posts, canEdit, onOpen: (post: BroadcastPost) => setOpen({ post }), onNew: (slot: number) => setOpen({ post: null, slot }), onMove: move, toolbar: <>{approvals}{views}</> };
 
   return (
-    <section className={pageClass} aria-label="Broadcast">
-      <PageHeader title="Broadcast">
-        <Segmented label="Broadcast section" value={mode} onChange={setMode}
+    <section className={pageClass} aria-label="Publish">
+      <PageHeader title="Publish">
+        <Segmented label="Publish section" value={mode} onChange={setMode}
           options={[{ value: "posts", label: <><Send size={13} />Posts</> }, { value: "campaigns", label: <><Megaphone size={13} />Campaigns</> }]} />
-        {mode === "posts" && <Segmented label="Broadcast view" value={view} onChange={setView}
-          options={[{ value: "month", label: <><CalendarRange size={13} />Month</> }, { value: "week", label: <><CalendarDays size={13} />Week</> }, { value: "list", label: <><List size={13} />List</> }]} />}
         {canEdit && (mode === "posts" ? <>
-          <button type="button" className={ghostButton} aria-label="New reel" title="New reel" onClick={() => setOpen({ post: null, format: "reel" })}><Clapperboard size={14} /><span className="max-sm:hidden">New reel</span></button>
+          <button type="button" className={cn(ghostButton, "max-sm:ml-auto")} aria-label="New reel" title="New reel" onClick={() => setOpen({ post: null, format: "reel" })}><Clapperboard size={14} /><span className="max-sm:hidden">New reel</span></button>
           <button type="button" className={primaryButton} onClick={() => setOpen({ post: null })}><Plus size={14} />New post</button>
-        </> : <button type="button" className={primaryButton} onClick={() => setCreatingCampaign(true)}><Plus size={14} />New campaign</button>)}
+        </> : <button type="button" className={cn(primaryButton, "max-sm:ml-auto")} onClick={() => setCreatingCampaign(true)}><Plus size={14} />New campaign</button>)}
       </PageHeader>
 
       {mode === "posts" && <AccountsStrip accounts={accounts} onConnect={connect} />}
@@ -79,7 +81,7 @@ function Broadcast({ projectId, projectName, canEdit: projectEdit, agent }: { pr
           onOpenPost={(postId) => { const post = posts.find((candidate) => candidate._id === postId); if (post) setOpen({ post }); }} />
       </> : view === "month" ? <MonthView start={month} onStart={setMonth} {...calendar} />
         : view === "week" ? <WeekView start={week} onStart={setWeek} {...calendar} />
-          : <PostList projectId={projectId} posts={posts} filter={filter} onFilter={setFilter} onOpen={(post) => setOpen({ post })} />}
+          : <PostList projectId={projectId} posts={posts} filter={filter} onFilter={setFilter} onOpen={(post) => setOpen({ post })} views={views} />}
 
       {open && (
         <BroadcastComposer key={open.post?._id ?? `new-${open.format ?? "post"}`} projectId={projectId} projectName={projectName} post={open.post ? live ?? open.post : null}
@@ -137,7 +139,7 @@ function Engagement({ post }: { post: BroadcastPost }) {
   );
 }
 
-function PostList({ projectId, posts, filter, onFilter, onOpen }: { projectId: string; posts: BroadcastPost[]; filter: ListFilter; onFilter(filter: ListFilter): void; onOpen(post: BroadcastPost): void }) {
+function PostList({ projectId, posts, filter, onFilter, onOpen, views }: { projectId: string; posts: BroadcastPost[]; filter: ListFilter; onFilter(filter: ListFilter): void; onOpen(post: BroadcastPost): void; views: ReactNode }) {
   const shown = listOrder(posts.filter((post) => matchesFilter(post, filter)));
   const refresh = useAction();
   const [note, setNote] = useState("");
@@ -149,12 +151,15 @@ function PostList({ projectId, posts, filter, onFilter, onOpen }: { projectId: s
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <div className="overflow-x-auto [scrollbar-width:none]"><Segmented label="Filter posts" value={filter} onChange={onFilter} options={FILTERS} /></div>
-        {hasPublished && (
-          <button type="button" className={cn(ghostButton, "ml-auto min-h-7 px-2.5 py-1 text-[12px]")} disabled={refresh.busy} onClick={readNumbers} title="Read likes, reposts and replies of published X and Bluesky posts">
-            {refresh.busy ? <Loader2 size={12} className="animate-spin" /> : <RotateCw size={12} />}Refresh numbers
-          </button>
-        )}
+        <div className="min-w-0 max-w-full overflow-x-auto [scrollbar-width:none]"><Segmented label="Filter posts" value={filter} onChange={onFilter} options={FILTERS} /></div>
+        <span className="ml-auto flex items-center gap-2">
+          {hasPublished && (
+            <button type="button" className={cn(ghostButton, "min-h-7 px-2.5 py-1 text-[12px]")} disabled={refresh.busy} onClick={readNumbers} aria-label="Refresh numbers" title="Read likes, reposts and replies of published X and Bluesky posts">
+              {refresh.busy ? <Loader2 size={12} className="animate-spin" /> : <RotateCw size={12} />}<span className="max-sm:hidden">Refresh numbers</span>
+            </button>
+          )}
+          {views}
+        </span>
       </div>
       {(refresh.error || note) && <p className={cn("text-[12px]", refresh.error ? "text-danger" : "text-ink-tertiary")}>{refresh.error || note}</p>}
       {!shown.length ? <EmptyState compact icon={<Send size={22} />} title={filter === "all" ? "No posts yet" : "Nothing here"} /> : (
@@ -164,10 +169,11 @@ function PostList({ projectId, posts, filter, onFilter, onOpen }: { projectId: s
             return (
               <button key={post._id} type="button" onClick={() => onOpen(post)}
                 className="flex w-full min-w-0 items-center gap-3 px-4 py-2.5 text-left outline-none transition-colors duration-(--motion-fast) hover:bg-raised/40 focus-visible:bg-raised/40">
-                <span className="w-[104px] shrink-0"><StatusPill post={post} /></span>
+                <span className="w-[104px] shrink-0 max-sm:hidden"><StatusPill post={post} /></span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] text-ink">{excerpt(post)}</span>
-                  <span className="flex items-center gap-1.5 text-[11.5px] text-ink-tertiary">
+                  <span className="flex min-w-0 items-center gap-1.5 text-[11.5px] text-ink-tertiary">
+                    <span className="sm:hidden"><StatusPill post={post} /></span>
                     <Channels post={post} />
                     {post.format === "reel" && <span className="inline-flex items-center gap-1"><Clapperboard size={11} />Reel</span>}
                     {post.media.length > 0 && post.format !== "reel" && <span>· {post.media.length} media</span>}

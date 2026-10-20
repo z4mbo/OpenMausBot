@@ -166,7 +166,7 @@ const link = (from: string, to: string, toPort: string, fromPort?: string): Stud
   id: `${from}-${to}-${toPort}`, from, fromPort: fromPort ?? (from.startsWith("p") ? "text" : "media"), to, toPort,
 });
 
-/** The one-click set: hero, square post, a 9:16 reel with its voice-over, each saved and the posts drafted in Broadcast. */
+/** The one-click set: hero, square post, a 9:16 reel with its voice-over, each saved and the posts drafted in Publish. */
 export const CAMPAIGN_PACK_ID = "template:campaign-pack";
 export const CAMPAIGN_BRIEF_NODE = "p1";
 export const CAMPAIGN_SCRIPT_NODE = "p2";
@@ -299,7 +299,7 @@ export const STUDIO_WORKFLOW_TEMPLATES: readonly StudioWorkflowTemplate[] = [
   {
     id: CAMPAIGN_PACK_ID,
     name: "Campaign pack",
-    description: "From one brief: a hero image, a square post, a 9:16 reel with its voice-over, drafted as Broadcast posts.",
+    description: "From one brief: a hero image, a square post, a 9:16 reel with its voice-over, drafted as Publish posts.",
     graph: {
       nodes: [
         node("p1", "prompt", 40, 420, { label: "Brief", text: "A sleek productivity app on a phone, bright morning desk, confident and optimistic" }),
@@ -323,7 +323,7 @@ export const STUDIO_WORKFLOW_TEMPLATES: readonly StudioWorkflowTemplate[] = [
   },
 ];
 
-/** Where an Output node's file goes in Broadcast: one draft per group, on that group's channels. */
+/** Where an Output node's file goes in Publish: one draft per group, on that group's channels. */
 export const STUDIO_BROADCAST_GROUPS = {
   feed: { label: "Feed post", channels: ["instagram", "x", "linkedin"] },
   reel: { label: "Reel", channels: ["tiktok", "instagram"] },
@@ -383,9 +383,9 @@ export interface StudioWorkflowRun {
   nodes: StudioRunNode[];
   createdByName: string;
   agentName?: string;
-  /** The text of the Broadcast drafts its Output nodes fill. */
+  /** The text of the Publish drafts its Output nodes fill. */
   caption?: string;
-  /** The Broadcast drafts the run filled, one per group. */
+  /** The Publish drafts the run filled, one per group. */
   posts?: Array<{ group: string; postId: string }>;
   createdAt: number;
   updatedAt: number;

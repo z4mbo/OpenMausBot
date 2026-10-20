@@ -1,11 +1,13 @@
 import { setStudioViewOf } from "./origin-studio-view";
 
 /** Which page each project shows: its chat, or one of its sections. Messages count as read only while the chat is on screen. */
-export type ChiefSection = "chat" | "issues" | "agents" | "team-chat" | "call" | "draw" | "studio" | "broadcast" | "assets" | "vault" | "repo" | "feedback" | "settings";
+export type ShownSection = "chat" | "issues" | "agents" | "team-chat" | "call" | "studio" | "broadcast" | "assets" | "vault" | "repo" | "feedback" | "settings";
+/** A page that can be asked for: a shown section, or "draw", which opens Studio's design view. */
+export type ChiefSection = ShownSection | "draw";
 
-const chosen = new Map<string, ChiefSection>();
+const chosen = new Map<string, ShownSection>();
 
-export const chiefSectionOf = (botId: string): ChiefSection => chosen.get(botId) ?? "chat";
+export const chiefSectionOf = (botId: string): ShownSection => chosen.get(botId) ?? "chat";
 const listeners = new Set<() => void>();
 let version = 0;
 

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Select } from "../Select";
-import { Check, GitBranch, KeyRound, Link2, Loader2, Palette, RotateCcw, Settings, Trash2, UserPlus, Users } from "lucide-react";
+import { Check, GitBranch, KeyRound, Link2, Loader2, Palette, RotateCcw, RotateCw, Settings, Trash2, UserPlus, Users } from "lucide-react";
 import { ZAP_SWATCHES, setAvatarLook, useAvatarLook, useBotColor } from "@/lib/origin-avatar-looks";
 import { botPalette } from "@/lib/user-bubble-tone";
 import { useStore } from "@/state/store";
@@ -9,6 +9,7 @@ import { originGitHub, type GitHubProjectConnection, type GitHubWorkspaceStatus 
 import { cn } from "@/lib/cn";
 import type { CloudPerson, CloudProject, CloudProjectMember, GitHubTaskMode, MemberRole } from "./cloud-types";
 import { githubRepoHref } from "./repo-url";
+import { capitalize } from "./issue-fields";
 import { ProjectAccessCard } from "../origin-members/ProjectAccessCard";
 import { ChiefHeartbeatCard } from "./ChiefHeartbeatCard";
 import { IntegrationKeyList } from "../IntegrationKeysSettings";
@@ -257,17 +258,20 @@ function useGitHubStatus(teamId: string | undefined, projectId: string) {
   const [workspace, setWorkspace] = useState<GitHubWorkspaceStatus | null>(null);
   const [connection, setConnection] = useState<GitHubProjectConnection | null>(null);
   const [error, setError] = useState("");
+  const latest = useRef(0);
   const refresh = useCallback(async () => {
+    const request = ++latest.current;
     try {
       const [status, project] = await Promise.all([
         teamId ? originGitHub.workspace(teamId) : Promise.resolve(null),
         originGitHub.connection(projectId).catch(() => ({ connection: null })),
       ]);
+      if (request !== latest.current) return;
       setWorkspace(status);
       setConnection(project.connection);
       setError("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not read the GitHub connection");
+      if (request === latest.current) setError(err instanceof Error ? err.message : "Could not read the GitHub connection");
     }
   }, [teamId, projectId]);
   useEffect(() => {
@@ -279,7 +283,7 @@ function useGitHubStatus(teamId: string | undefined, projectId: string) {
   return { workspace, connection, error, refresh, setConnection };
 }
 
-function GitHubConnectionCard({ project, projectId, isAdmin }: { project: CloudProject; projectId: string; isAdmin: boolean }) {
+export function GitHubConnectionCard({ project, projectId, isAdmin }: { project: CloudProject; projectId: string; isAdmin: boolean }) {
   const { workspace, connection, error, refresh, setConnection } = useGitHubStatus(project.teamId, projectId);
   const [token, setToken] = useState("");
   const [notice, setNotice] = useState("");
@@ -300,7 +304,9 @@ function GitHubConnectionCard({ project, projectId, isAdmin }: { project: CloudP
     <Card icon={<Link2 size={15} />} title="GitHub connection">
       <div className="flex flex-col gap-3 text-[13px]">
         {error && <Notice tone="danger">{error}</Notice>}
-        {!teamId ? <Notice>This project is not in a shared workspace yet.</Notice> : workspace === null ? <Loading label="Reading GitHub connection" variant="inline" /> : (
+        {!teamId ? <Notice>This project is not in a shared workspace yet.</Notice> : workspace === null ? (error
+          ? <button type="button" className={cn(ghostButton, "self-start")} onClick={() => void refresh()}><RotateCw size={14} />Try again</button>
+          : <Loading label="Reading GitHub connection" variant="inline" />) : (
           <>
             <p className="text-ink-secondary">
               {workspace.shared
@@ -379,7 +385,7 @@ function Members({ project, projectId, isAdmin }: { project: CloudProject; proje
                   <>
                     <Select size="sm" aria-label={`Role for ${person.name}`} value={row.role} disabled={action.busy}
                       onChange={(e) => void action.run(() => cloudMutation("members:updateRole", { projectId, memberId: row._id, role: e.target.value }), "Could not change role")}>
-                      {ROLES.map((value) => <option key={value} value={value}>{value}</option>)}
+                      {ROLES.map((value) => <option key={value} value={value}>{capitalize(value)}</option>)}
                     </Select>
                     <button type="button" className={iconButton} aria-label={`Remove ${person.name}`} title="Remove from project" disabled={action.busy}
                       onClick={() => { if (window.confirm(`Remove ${person.name} from ${project.name}?`)) void action.run(() => cloudMutation("members:remove", { projectId, memberId: row._id }), "Could not remove member"); }}>

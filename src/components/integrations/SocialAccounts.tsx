@@ -8,7 +8,7 @@ import { ChannelMark } from "../origin-broadcast/ChannelMark";
 
 const fieldClass = "w-full rounded-lg border border-hairline/40 bg-inset px-2.5 py-1.5 text-[13px] text-ink placeholder:text-ink-tertiary focus:border-accent/60 focus:outline-none max-md:text-[16px]";
 
-/** The extra accounts Broadcast can post as on each connected social service, besides the key saved for that service. */
+/** The extra accounts Publish can post as on each connected social service, besides the key saved for that service. */
 export function SocialAccounts({ integrations, canEdit }: { integrations: readonly IntegrationStatus[]; canEdit: boolean }) {
   const [accounts, setAccounts] = useState<BroadcastAccount[] | null>(null);
   const [adding, setAdding] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export function SocialAccounts({ integrations, canEdit }: { integrations: readon
   if (!social.length) return null;
   return (
     <div className="flex flex-col gap-1.5 border-t border-hairline/30 pt-2.5" aria-label="Accounts per service" role="group">
-      <p className="text-[11.5px] font-medium text-ink-tertiary">Accounts Broadcast can post as</p>
+      <p className="text-[11.5px] font-medium text-ink-tertiary">Accounts Publish can post as</p>
       {error && <p role="alert" className="text-[12px] text-danger">{error}</p>}
       {!accounts ? <Loader2 size={12} className="animate-spin text-ink-tertiary" /> : social.map((integration) => {
         const mine = accounts.filter((account) => account.integration === integration.id);
@@ -73,7 +73,7 @@ function AddAccount({ integration, onDone, onCancel }: { integration: Integratio
     <form onSubmit={(event) => void submit(event)} aria-label={`Add ${integration.label} account`}
       className="grid gap-2 rounded-lg bg-inset/60 p-2.5 sm:grid-cols-2 motion-safe:animate-[rise_var(--motion-fast)_var(--ease-out)_backwards]">
       <label className="flex flex-col gap-1 sm:col-span-2">
-        <span className="text-[12px] text-ink-secondary">Name in Broadcast</span>
+        <span className="text-[12px] text-ink-secondary">Name in Publish</span>
         <input required maxLength={60} value={label} onChange={(event) => setLabel(event.target.value)} placeholder="Founder, Support, Brand…" className={fieldClass} />
       </label>
       {integration.fields.map((field) => (

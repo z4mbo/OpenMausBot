@@ -229,8 +229,8 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
   const scope = canvasId ? { teamId, canvasId } : null;
   return (
     <div className="flex min-h-0 flex-1 flex-col origin-overlay-in" data-drawing-canvas>
-      <div data-canvas-bar className="flex h-12 shrink-0 items-center gap-2 px-3 md:gap-3 md:px-4">
-        <div className="flex min-w-0 flex-1 items-center">{lead ?? <span className="truncate text-[13px] font-medium text-ink">{name}</span>}</div>
+      <div data-canvas-bar className="box-border flex h-11 shrink-0 items-center gap-2 px-4 pb-3 md:gap-3 md:px-6">
+        <div className="flex h-8 min-w-0 flex-1 items-center">{lead ?? <span className="truncate text-[13px] font-medium text-ink">{name}</span>}</div>
         <CanvasPresence here={here} userId={userId} />
         {readOnly && <span className="shrink-0 rounded-full bg-raised px-2.5 py-1 text-[11.5px] text-ink-secondary">View only</span>}
         {outbox.size > 0 && <span role="status" className="hidden shrink-0 text-[11.5px] sm:inline text-ink-tertiary">{outbox.error ? "Waiting to sync" : "Saving…"}</span>}
