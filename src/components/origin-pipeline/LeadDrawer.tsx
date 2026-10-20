@@ -183,6 +183,7 @@ function Composer({ projectId, projectName, lead, chief, channels, settings, dir
     if (mode === "email" && !lead.email) return "Add an email address to write to this lead.";
     if (mode !== "email" && !lead.phone) return "Add a phone number with its country code to reach this lead.";
     if (dirty) return "Save the lead's changes first.";
+    if (channels === null) return "Connections are not confirmed on this computer. Check Settings > Integrations before sending.";
     if (channels && !channels[mode]) return `Connect ${mode === "email" ? "Brevo" : mode === "ai_call" ? "ElevenLabs" : "Twilio"} under Settings > Integrations first; the keys stay on this computer.`;
     if (mode === "ai_call" && (!settings.aiAgentId || !settings.aiPhoneNumberId)) return "Set the ElevenLabs agent and phone number in Pipeline settings first.";
     return "";

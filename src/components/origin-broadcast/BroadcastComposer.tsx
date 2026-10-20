@@ -46,10 +46,11 @@ export function BroadcastComposer({ projectId, post, slot, canEdit, connected, o
   const textOf = (channel: BroadcastChannel) => published.get(channel)?.text ?? draft.custom[channel] ?? draft.base;
   const problems = draft.channels.filter((channel) => !published.has(channel)).flatMap((channel) => channelProblems(channel, textOf(channel), kinds));
   const unconnected = connected ? draft.channels.filter((channel) => !published.has(channel) && connected[channel] === false) : [];
+  const connectionsUnknown = draft.channels.some((channel) => !published.has(channel) && connected?.[channel] === undefined);
   const at = fromLocalInput(draft.at);
   const now = at === undefined || at <= Date.now() + NOW_SLACK_MS;
   const needsApproval = Boolean(post?.needsApproval);
-  const ready = draft.channels.length > 0 && !problems.length && !needsApproval;
+  const ready = draft.channels.length > 0 && !problems.length && !needsApproval && !connectionsUnknown && !unconnected.length;
   const set = (patch: Partial<Draft>) => setDraft((current) => ({ ...current, ...patch }));
 
   const toggleChannel = (channel: BroadcastChannel) => {
@@ -121,6 +122,7 @@ export function BroadcastComposer({ projectId, post, slot, canEdit, connected, o
             <button type="button" className={cn(ghostButton, "min-h-7 px-2.5 py-1 text-[12px]")} onClick={onConnect}>Connect</button>
           </div>
         )}
+        {connectionsUnknown && <Notice>Connections are not confirmed on this computer. Check Settings &gt; Integrations before publishing.</Notice>}
 
         {draft.channels.length > 0 && (
           <div className="flex flex-col overflow-hidden rounded-xl border border-hairline/50 bg-inset focus-within:border-accent/60">
