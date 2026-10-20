@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {
+      "name": "Minimal panel visible and context collapsed",
+      "pass": true
+    },
+    {
+      "name": "375 px light theme without horizontal overflow",
+      "pass": true,
+      "meters": [],
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "name": "Unavailable usage refresh stays neutral and recovers without model sign-in",
+      "pass": true
+    }
+  ],
+  "scope": "Actual ChatView/PlanUsage/Composer, disposable fake CLI accounting; synthetic provider quotas, not a physical vendor account or packaged acceptance"
+}

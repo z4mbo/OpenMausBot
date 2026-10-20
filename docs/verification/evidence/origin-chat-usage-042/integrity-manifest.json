@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-20T04:33:42.843Z",
+  "scope": "Current raw evidence bytes; includes the integrity reports and excludes this manifest itself.",
+  "files": [
+    {
+      "name": "browser-proof.json",
+      "bytes": 560,
+      "sha256": "f75dc462716d569d18b23edbdab415d830999849b74b4eaeb5baf2e76f28f69d"
+    },
+    {
+      "name": "integrity-report.json",
+      "bytes": 6056,
+      "sha256": "173b3f64db8878e60436f72d7f0786600efd4d074ec7baeefc53d7ab52ac8086"
+    },
+    {
+      "name": "integrity-report.md",
+      "bytes": 2105,
+      "sha256": "51a0ce8aafa57b197a77a6da66ed2c7ea5ec61f3ebe220f8f9d258b968b1185f"
+    },
+    {
+      "name": "minimal-usage-dark.png",
+      "bytes": 66135,
+      "sha256": "54b15fd44a7bfa86860f4e69af5a2e1160dc03822d135d457a9ac906129494fe"
+    },
+    {
+      "name": "minimal-usage-light-375.png",
+      "bytes": 41169,
+      "sha256": "5196459503dcc682ab20d5089576f626cd8027557214698722caa93964b62f84"
+    },
+    {
+      "name": "minimal-usage-light.png",
+      "bytes": 67383,
+      "sha256": "0a7e38c20237d892cc254287e52808a00f16c78fbd1b04d800d5fa9523c2bbd7"
+    },
+    {
+      "name": "usage-context-dark.png",
+      "bytes": 79970,
+      "sha256": "9ae2d5b599c81db7162ddf75944f1db37d599d3ae6fc51a00a19c4b4337cee91"
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setLocale } from "@/lib/i18n";
 import type { SendKey } from "@/lib/send-key";
+import type { ChatWidthId } from "@/lib/chat-width";
 import { en, locales } from "@/locales";
 import type { AppSettingsSection } from "@/state/store";
 import type { Switch } from "./SettingsPrimitives";
@@ -25,6 +26,7 @@ const fixture = vi.hoisted(() => ({
   setSendKey: vi.fn(),
   colorUserBubbles: false,
   setColorUserBubbles: vi.fn(),
+  chatWidth: "standard" as ChatWidthId,
   advancedMode: false,
   setAdvancedMode: vi.fn(),
   api: vi.fn(),
@@ -72,6 +74,10 @@ vi.mock("@/lib/user-bubble-preference", () => ({
   useColorUserBubbles: () => fixture.colorUserBubbles,
   setColorUserBubbles: fixture.setColorUserBubbles,
 }));
+vi.mock("@/lib/chat-width", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/chat-width")>(),
+  useChatWidth: () => fixture.chatWidth,
+}));
 vi.mock("@/lib/interface-mode", () => ({
   useAdvancedMode: () => fixture.advancedMode,
   setAdvancedMode: fixture.setAdvancedMode,
@@ -98,6 +104,7 @@ beforeEach(() => {
   fixture.notificationSounds = true;
   fixture.sendKey = "enter";
   fixture.colorUserBubbles = false;
+  fixture.chatWidth = "standard";
   // these pin the Advanced rail; Simple has its own suite (SettingsModal.simple.test.ts)
   fixture.advancedMode = true;
   fixture.switches = [];
@@ -263,15 +270,15 @@ describe("Settings → Appearance", () => {
   });
 
   it.each([
-    ["standard", "Standard"],
-    ["wide", "Wide"],
-    ["full", "Full width"],
-  ])("shows the saved chat width (%s) alongside message colors", (width, label) => {
-    vi.stubGlobal("localStorage", { getItem: (key: string) => key === "omb-chat-width" ? width : null });
+    ["standard", "Compact"],
+    ["wide", "Medium"],
+    ["full", "Wide"],
+  ] as const)("shows the current chat width (%s) alongside message colors", (width, label) => {
+    fixture.chatWidth = width;
     const html = render();
     expect(html).toContain('aria-label="Chat width"');
     expect(html).toContain(`<option value="${width}" selected="">${label}</option>`);
-    for (const option of ["Standard", "Wide", "Full width"]) expect(html).toContain(`>${option}</option>`);
+    for (const option of ["Compact", "Medium", "Wide"]) expect(html).toContain(`>${option}</option>`);
     expect(html).toContain("Color my messages");
     expect(fixture.api).not.toHaveBeenCalled();
     expect(fixture.dispatch).not.toHaveBeenCalled();

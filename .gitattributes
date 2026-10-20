@@ -124,3 +124,9 @@ docs/verification/evidence/origin-plan-usage-040/**/*.json text eol=lf
 docs/verification/evidence/origin-delivery-040/** -text -whitespace
 
 docs/verification/evidence/origin-upstream-20261020/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-model-fallback-041/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-project-order-042/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-chat-usage-042/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-agent-threads-043/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-model-host-ui-044/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-model-host-native-044/** -text whitespace=cr-at-eol

@@ -48,6 +48,15 @@ describe("chat width", () => {
     for (const id of blocks) expect<readonly string[]>(CHAT_WIDTH_IDS).toContain(id);
   });
 
+  it("centers the conversation and composer with compact, medium and full-width column limits", () => {
+    expect(css).toContain("--chat-column-max: 42.5rem");
+    expect(css).toContain("--chat-column-max: 52.5rem");
+    expect(css).toContain("--chat-column-max: 100%");
+    const chat = readFileSync(join(root, "components/ChatView.tsx"), "utf8");
+    expect(chat).toContain("max-w-[var(--chat-column-max)]");
+    expect(chat).toContain("max-w-[calc(var(--chat-column-max)+2.5rem)]");
+  });
+
   it("stamps a chosen width, remembers it, and clears the attribute for the default", () => {
     applyChatWidth("full");
     expect(document.documentElement.dataset.chatWidth).toBe("full");
