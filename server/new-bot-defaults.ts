@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { profilePatchSchema, fitsOnOneLine } from "./bot-profile.ts";
-import { EFFORT_LEVELS } from "../shared/wire.ts";
-import { isModelVariant } from "./contracts.ts";
+import { globalModelSelectionSchema } from "./model-selection-config.ts";
 import { normalizeCronSchedule } from "../shared/routine-schedule.ts";
 import { parseToolScope, type ToolScope } from "../shared/tool-scope.ts";
 
@@ -10,13 +9,7 @@ const clock = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
 const weekdays = z.array(z.number().int().min(0).max(6)).min(1).max(7);
 const timestamp = z.number().int().nonnegative().max(8_640_000_000_000_000);
 
-export const botDefaultModelSchema = z.object({
-  instanceId: z.string().trim().min(1).max(200),
-  model: z.string().trim().min(1).max(500),
-  effort: z.enum(EFFORT_LEVELS).optional(),
-  variant: z.string().refine(isModelVariant, "invalid model variant").optional(),
-}).strict().refine(value => value.effort === undefined || value.variant === undefined,
-  "choose either a model variant or an effort level");
+export const botDefaultModelSchema = globalModelSelectionSchema;
 
 // Preferences only: consent flags, live grants, bot IDs and execution state can never be replayed as permission grants.
 export const botDefaultsProfileSchema = profilePatchSchema.extend({

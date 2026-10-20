@@ -11,7 +11,8 @@ import { withoutComputerEngine } from "./computer-engine-removal.ts";
 import { newBotDefaultsSchema, type NewBotDefaults } from "./new-bot-defaults.ts";
 import { replaySettings } from "./replay-settings.ts";
 import { EFFORT_LEVELS, type EffortLevel, type LiveSettings } from "../shared/wire.ts";
-import { isModelVariant, type InstanceConfigMap, type McpServerSpec, type ModelSelection } from "./contracts.ts";
+import { type InstanceConfigMap, type McpServerSpec, type ModelSelection } from "./contracts.ts";
+import { automaticRecoverySchema, dailyApiBudgetSchema, globalModelSelectionSchema } from "./model-selection-config.ts";
 import { DEFAULT_WINDOW_MINUTES, MAX_WINDOW_MINUTES } from "./cache-keepwarm.ts";
 import { PROVIDER_ICON_PRESETS, providerIconError } from "../shared/provider-icon.ts";
 import { helperStoredShape, type HelperConfig } from "./side-jobs.ts";
@@ -306,18 +307,6 @@ const instanceConfigSchema = z.object({
   config: z.json().optional(),
 });
 const instanceConfigMapSchema = z.record(z.string(), instanceConfigSchema);
-const defaultModelSelectionSchema = z.object({
-  instanceId: z.string().trim().min(1).max(200),
-  model: z.string().trim().min(1).max(500),
-  effort: z.enum(EFFORT_LEVELS).optional(),
-  variant: z.string().refine(isModelVariant, "invalid model variant").optional(),
-}).refine((selection) => selection.variant === undefined || selection.effort === undefined,
-  "choose either a model variant or an effort level");
-const automaticRecoverySchema = z.object({
-  enabled: z.boolean(),
-  backup: defaultModelSelectionSchema.optional(),
-}).strict().refine((recovery) => !recovery.enabled || recovery.backup !== undefined,
-  { message: "Choose a backup model before enabling automatic recovery", path: ["backup"] });
 /** Prompt-cache keep-warm. Off unless enabled; a bot's own `cacheKeepWarm` overrides it. */
 const cacheKeepWarmSchema = z.object({
   enabled: z.boolean(),
@@ -347,8 +336,9 @@ const appConfigSchema = z.object({
   customDomain: z.string().optional(),
   /** Who may sign in with an emailed code: addresses or `@domain` entries; admins get every scope, members chat only. */
   signIn: z.object({ admins: z.array(z.string().max(320)).max(500).optional(), members: z.array(z.string().max(320)).max(5000).optional() }).optional(),
-  defaultModelSelection: defaultModelSelectionSchema.optional(),
+  defaultModelSelection: globalModelSelectionSchema.optional(),
   automaticRecovery: automaticRecoverySchema.optional(),
+  dailyApiBudget: dailyApiBudgetSchema.optional(),
   cacheKeepWarm: cacheKeepWarmSchema.optional(),
   newBotDefaults: newBotDefaultsSchema.optional(),
   newBots: newBotsConfigSchema.optional(),
@@ -486,7 +476,7 @@ const storedAppConfigSchema = appConfigSchema.extend(helperStoredShape).extend({
   }).optional(),
 });
 const appConfigPatchSchema = appConfigSchema.omit({ instances: true, mcpServers: true, cliStartup: true, customDomain: true })
-  .extend({ threads: threadsPatchSchema.optional(), newBots: newBotsPatchSchema.optional() });
+  .extend({ threads: threadsPatchSchema.optional(), newBots: newBotsPatchSchema.optional(), dailyApiBudget: dailyApiBudgetSchema.nullable().optional() });
 const jsonObjectSchema = z.record(z.string(), z.json());
 
 export interface AppConfig extends HelperConfig {
@@ -496,6 +486,8 @@ export interface AppConfig extends HelperConfig {
   defaultModelSelection?: ModelSelection;
   /** Off by default; one backup attempt only before any work starts. */
   automaticRecovery?: { enabled: boolean; backup?: ModelSelection };
+  /** Daily model API allowance for this data directory; zero blocks paid requests. */
+  dailyApiBudget?: { limitUsd: number; timeZone: string };
   cacheKeepWarm?: { enabled: boolean; windowMinutes?: number };
   /** UI creation template. Saving it never mutates a bot or grants access. */
   newBotDefaults?: NewBotDefaults;
@@ -892,7 +884,7 @@ export function cacheUntilConfigChanges<T>(derive: (config: AppConfig) => T): ()
 }
 
 /** Keeps process.env in step with a saved credential ("" drops the var), because loadConfig() prefers env. */
-export function syncCredentialEnv(patch: Partial<Omit<AppConfig, "threads" | "newBots">>): void {
+export function syncCredentialEnv(patch: Partial<Omit<AppConfig, "threads" | "newBots" | "dailyApiBudget">>): void {
   const secrets: Array<[value: string | undefined, name: string]> = [
     [patch.xai?.key, "XAI_API_KEY"],
     [patch.mistral?.key, "MISTRAL_API_KEY"],
@@ -1064,9 +1056,10 @@ export function onConfigSaved(listener: (before: JsonObject, after: JsonObject) 
 
 /** Secrets are never echoed back; callers report configured-or-not only. */
 export function saveConfig(
-  patch: Partial<Omit<AppConfig, "threads" | "newBots">> & {
+  patch: Partial<Omit<AppConfig, "threads" | "newBots" | "dailyApiBudget">> & {
     threads?: z.output<typeof threadsPatchSchema>;
     newBots?: z.output<typeof newBotsPatchSchema>;
+    dailyApiBudget?: z.output<typeof dailyApiBudgetSchema> | null;
   },
   options: { replaceInstances?: boolean } = {},
 ): void {
@@ -1077,7 +1070,7 @@ export function saveConfig(
     if (parsed.success) disk = parsed.data;
   } catch {
   }
-  const checkedPatch = appConfigSchema.partial().extend({ threads: threadsPatchSchema.optional(), newBots: newBotsPatchSchema.optional() }).parse(patch);
+  const checkedPatch = appConfigSchema.partial().extend({ threads: threadsPatchSchema.optional(), newBots: newBotsPatchSchema.optional(), dailyApiBudget: dailyApiBudgetSchema.nullable().optional() }).parse(patch);
   const before = configSaveListeners.size ? structuredClone(disk) : disk;
   const storedProfiles = storedBrowserProfilesSchema.safeParse(disk.browserProfiles);
   if (storedProfiles.success) disk.browserProfiles = storedProfiles.data;
@@ -1099,6 +1092,8 @@ export function saveConfig(
   if (checkedPatch.signIn !== undefined) disk.signIn = checkedPatch.signIn;
   // Replace the section so clearing a backup cannot revive the old selection.
   if (checkedPatch.automaticRecovery !== undefined) disk.automaticRecovery = checkedPatch.automaticRecovery;
+  if (checkedPatch.dailyApiBudget === null) delete disk.dailyApiBudget;
+  else if (checkedPatch.dailyApiBudget !== undefined) disk.dailyApiBudget = checkedPatch.dailyApiBudget;
   if (checkedPatch.cacheKeepWarm !== undefined) disk.cacheKeepWarm = checkedPatch.cacheKeepWarm;
   if (checkedPatch.defaultModelSelection !== undefined) {
     disk.defaultModelSelection = checkedPatch.defaultModelSelection;
