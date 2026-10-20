@@ -357,6 +357,34 @@ describe("start_thread on yourself", () => {
 });
 
 describe("coordinate_bots on a teammate", () => {
+  it("announces a Chief's user-requested child once while keeping its consultation quiet", async () => {
+    const chief = await createBot("Project Chief", "gated");
+    const specialist = await createBot("Researcher", "gated");
+    expect((await api("PATCH", `/api/bots/${chief.id}`, { chiefOfStaff: true })).status).toBe(200);
+    const stream = await openSse(`${base}/api/events`);
+    try {
+      const token = await heldTurn(chief, "Research this project, then ask for a second opinion.");
+      const work = await coordinated(token, specialist.id, "Research the project.");
+      const started = await stream.until(frame => frame.kind === "notify" && frame.notification?.kind === "delegation-started", 20_000);
+      expect(started.notification).toMatchObject({ botId: specialist.id, threadId: work.threadId, body: "Research the project." });
+      const consult = await api("POST", "/api/internal/coordinate-bots", { botIds: [specialist.id], message: "What is your opinion?", consult: true }, token);
+      expect(consult.status, JSON.stringify(consult.body)).toBe(200);
+      const consulted = consult.body.receipts[0];
+      release(work.threadId);
+      await expect.poll(() => handoffs().find(node => node.id === consulted.requestId)?.status, { timeout: 20_000 }).toBe("completed");
+      release(chief.threadId);
+      await expect.poll(async () => (await botState(chief.id))?.busy, { timeout: 20_000 }).toBe(false);
+      expect((await api("PATCH", `/api/bots/${chief.id}`, { name: "Chief observed" })).status).toBe(200);
+      await stream.until(frame => frame.kind === "bot" && frame.bot?.id === chief.id && frame.bot?.name === "Chief observed");
+      expect(stream.frames.filter(frame => frame.kind === "notify" && frame.notification?.kind === "delegation-started").map(frame => frame.notification))
+        .toEqual([expect.objectContaining({ botId: specialist.id, threadId: work.threadId, body: "Research the project." })]);
+      expect((await botState(specialist.id)).threadId).toBe(specialist.threadId);
+    } finally {
+      stream.close();
+      await cleanup([chief.id, specialist.id]);
+    }
+  }, 60_000);
+
   it.each([1, 2])("runs three requests in the teammate's one thread, one at a time within capacity %i, returns all results, and leaves the person's selected thread untouched", async (capacity) => {
     expect((await api("PUT", "/api/config", { threads: { maxConcurrentPerBot: capacity } })).status).toBe(200);
     const pm = await createBot("Pam", "gated");

@@ -4361,7 +4361,7 @@ const coordinator: Coordinator = createCoordinator({
       const turnText = liveRoster ? `${brief}\n\n${liveRoster}` : brief;
       const systemInstructions = node.parentId ? coordinationSystemInstructions() : "";
       appendDelegationRequest({ store, node, resumed, request: coordinator.sharedRequest(node), sender, bot, notify,
-        routine: activeRoutineRunForThread(coordinator.node(node.rootId)?.threadId ?? node.threadId) !== null });
+        routine: activeRoutineRunForThread(coordinator.node(node.rootId)?.threadId ?? node.threadId) !== null, quiet: turnAnswers(coordinator.node(node.rootId)?.threadId ?? node.threadId, { cardContinuation: true, coordination: { id: node.rootId } }).quiet });
       markInternalTurn(node.threadId);
       if (resumed && !group) {
         const settledFrom = [...new Set(coordinator.children(node.id)

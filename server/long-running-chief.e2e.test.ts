@@ -58,7 +58,7 @@ async function chiefJob(test: (f: any) => Promise<void>) {
   let server: ChildProcess = session.child;
   let restarted = false;
   let events: SseRecorder | undefined;
-  const notifications: Array<{ kind?: string; title?: string; body?: string }> = [];
+  const notifications: Array<{ kind?: string; title?: string; body?: string; botId?: string; threadId?: string }> = [];
   const listen = async () => {
     events = await openSse(`${url}/api/events`, { origin: url });
     const recorder = events;
@@ -67,7 +67,7 @@ async function chiefJob(test: (f: any) => Promise<void>) {
       for (const frame of recorder.frames) {
         if (seen.has(frame)) continue;
         seen.add(frame);
-        if (frame.kind === "notify") notifications.push({ kind: frame.notification?.kind, title: frame.notification?.title, body: frame.notification?.body });
+        if (frame.kind === "notify") notifications.push({ kind: frame.notification?.kind, title: frame.notification?.title, body: frame.notification?.body, botId: frame.notification?.botId, threadId: frame.notification?.threadId });
       }
     }, 50);
     pump.unref();
@@ -231,11 +231,15 @@ it("carries a consult-and-implement job over several teammate turns, through a s
   expect(chiefRows.filter((name: string) => name.startsWith("Resumed with"))).toEqual(["Resumed with Mira, Eli results, reviewing", "Resumed with Mira, Eli results, reviewing"]);
   for (const node of f.tree(job).filter((candidate: any) => candidate.parentId)) expect(await f.cards(node.threadId)).toEqual([]);
   expect(f.notifications.filter((notification: any) => notification.kind === "approval")).toEqual([]);
-  expect(f.notifications.map((notification: any) => [notification.kind, notification.body])).toEqual([
+  expect(f.notifications.filter((notification: any) => notification.kind !== "delegation-started").map((notification: any) => [notification.kind, notification.body])).toEqual([
     ["done", "A0: Mira is consulting and Eli is implementing."],
     ["delegation-settled", "Results in from Mira, Eli"],
     ["delegation-settled", "Results in from Mira, Eli"],
   ]);
+  expect(f.notifications.filter((notification: any) => notification.kind === "delegation-started").map((notification: any) => [notification.botId, notification.threadId, notification.body]))
+    .toEqual([[f.mira.id, f.child(job, f.mira.id, "CONSULT-ONE").threadId, "CONSULT-ONE: Which CSV approach and which edge cases should we handle?"],
+      [f.eli.id, capped.threadId, "IMPLEMENT-CAP: Build the invoice CSV export end to end, run the tests, and report."],
+      [f.mira.id, f.child(job, f.mira.id, "REVIEW").threadId, "REVIEW: review Eli's finished export."]]);
 
   const consult = f.prompt(f.turn("M1"));
   expect(consult).toMatch(ASSIGNED_BY_CLIVE);
@@ -300,12 +304,14 @@ it("tells the Chief what happened to each approval: allowed, denied, or never an
   expect(f.prompt(f.turn("B3"))).toContain("[Origin report from @Mira on assignment ");
   expect((await f.cards(work)).map((message: any) => [message.card.subtitle, message.card.answered, message.card.dismissed, message.card.answeredBy?.kind]))
     .toEqual([["git log --oneline -5 -- src/export", "allow", false, "loopback"], ["git push origin export", "deny", false, "loopback"], ["pnpm test", "deny", true, undefined]]);
-  expect(f.notifications.map((notification: any) => [notification.kind, notification.body])).toEqual([
+  expect(f.notifications.filter((notification: any) => notification.kind !== "delegation-started").map((notification: any) => [notification.kind, notification.body])).toEqual([
     ["done", "B0: Mira is checking."],
     ["approval", "git log --oneline -5 -- src/export"], ["delegation-settled", "Results in from Mira"],
     ["approval", "git push origin export"], ["delegation-settled", "Results in from Mira"],
     ["approval", "pnpm test"], ["delegation-settled", "Results in from Mira"],
   ]);
+  expect(f.notifications.filter((notification: any) => notification.kind === "delegation-started").map((notification: any) => [notification.botId, notification.threadId, notification.body]))
+    .toEqual([[f.mira.id, work, "CHECK-HISTORY: check the export module's recent history."], [f.mira.id, work, "PUSH-BRANCH: push the export branch."], [f.mira.id, work, "RUN-TESTS: run the test suite."]]);
 }), hostTimeout(120_000));
 
 it.each(["SIGTERM", "SIGKILL"] as const)("wakes the Chief after a restart cuts its teammates mid-job, and it reports (%s)", (signal) => chiefJob(async (f) => {
@@ -415,8 +421,9 @@ it("tells the Chief a teammate's turn stalled, in the watchdog's words", () => c
   expect(f.child(job, f.mira.id, "LONG-SUITE").result).toBe(stalled.result);
   expect(f.turns(f.clive.id).map((record: any) => record.planKey)).toEqual(["D0", "D1"]);
   expect((await f.tasks(f.clive.id)).map((task: any) => task.title)).not.toContain("Team incidents");
-  expect(f.notifications.map((notification: any) => [notification.kind, notification.body])).toEqual([
+  expect(f.notifications.filter((notification: any) => notification.kind !== "delegation-started").map((notification: any) => [notification.kind, notification.body])).toEqual([
     ["done", "D0: Mira is running the suite."], ["delegation-settled", "Results in from Mira"]]);
+  expect(f.notifications.filter((notification: any) => notification.kind === "delegation-started")).toMatchObject([{ botId: f.mira.id, threadId: stalled.threadId, body: "LONG-SUITE: run the full integration suite; it prints nothing until it finishes." }]);
 }), hostTimeout(90_000));
 
 it("lets a card hold only its own job: other jobs run beside it, or say once whose card they wait behind", () => chiefJob(async (f) => {

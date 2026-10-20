@@ -10,6 +10,7 @@ export function appendDelegationRequest(input: {
   sender?: BotRecord | null;
   bot: BotRecord;
   routine: boolean;
+  quiet: boolean;
   notify(notification: Notification | null): void;
 }): void {
   const { store, node, request, sender, bot } = input;
@@ -17,5 +18,5 @@ export function appendDelegationRequest(input: {
   store.appendMessage(node.threadId, { role: "bot", kind: "text", roomRequest: { id: request.id, phase: "request" },
     ...(sender ? { from: { botId: sender.id, name: sender.name, color: sender.color } } : {}),
     text: `${request.botIds.map(id => `@${store.bot(id)?.name ?? "Teammate"}`).join(" ")} ${node.text}` });
-  if (node.parentId && !input.routine) input.notify(buildNotification("delegation-started", bot, node.threadId, node.text, { avatarUrl: bot.avatarUrl }));
+  if (node.parentId && !node.groupId && sender?.chiefOfStaff && node.mode === "work" && node.origin?.kind === "user" && !input.routine && !input.quiet) input.notify(buildNotification("delegation-started", bot, node.threadId, node.text, { avatarUrl: bot.avatarUrl }));
 }
