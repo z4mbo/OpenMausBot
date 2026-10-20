@@ -62,6 +62,7 @@ vi.mock("./OrganizationSettings", () => ({ OrganizationSettings: marker("organiz
 vi.mock("./PeopleSection", () => ({ PeopleSection: marker("people") }));
 vi.mock("./ActivitySection", () => ({ ActivitySection: marker("activity") }));
 vi.mock("./UsageSection", () => ({ UsageSection: marker("usage") }));
+vi.mock("./ModelHostingSettings", () => ({ ModelHostingSettings: marker("modelHosting") }));
 vi.mock("./WorkspaceBackupSettings", () => ({ WorkspaceBackupSettings: marker("backups") }));
 vi.mock("./RoomTurnTimeoutSettings", () => ({ RoomTurnTimeoutSettings: () => null }));
 vi.mock("./CompanyBackupSettings", () => ({ CompanyBackupSettings: () => null }));
@@ -127,6 +128,7 @@ describe("Settings in Simple mode", () => {
     const headings = [...html.matchAll(/<h3[^>]*>([^<]+)<\/h3>/g)].map((match) => match[1]);
     expect(headings).toEqual(["Model providers", "API keys", "Decision model"]);
     expect(markers(html).filter((name) => name === "engines" || name === "decisionModel")).toEqual(["engines", "decisionModel"]);
+    expect(markers(html)).toContain("modelHosting");
     expect(html).toContain("More providers for OpenCode bots");
   });
 

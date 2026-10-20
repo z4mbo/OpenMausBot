@@ -1,0 +1,50 @@
+{
+  "algorithm": "sha256",
+  "files": [
+    {
+      "name": "after-agent-light-375.png",
+      "bytes": 49857,
+      "sha256": "5e71d244e47b507488d0dcaa0d7a5b8666029490a08598590becd33cbd452835"
+    },
+    {
+      "name": "before-agent-light-375-overflow.png",
+      "bytes": 53934,
+      "sha256": "595b7d08aaa2ec123247ea938a98965137b53517764394a6659a2b42c1841b29"
+    },
+    {
+      "name": "browser-proof.json",
+      "bytes": 17200,
+      "sha256": "23f077f755862a151002ed6581391a930248735a0363876ee8cbd4ba02d64e8b"
+    },
+    {
+      "name": "owner-project-model-grants-light-375.jpg",
+      "bytes": 33659,
+      "sha256": "7942f4ccd2f02392049f23aeb71ac59950bb1810c6788cf0e28cf33a8b26aab9"
+    },
+    {
+      "name": "paid-shared-model-confirmation.png",
+      "bytes": 48181,
+      "sha256": "29c2b77e79a3dc669223941b28d9db2414274f0f7b95b675251f82219350cd47"
+    },
+    {
+      "name": "ranked-shared-models-dark.png",
+      "bytes": 75556,
+      "sha256": "4a6e151a9c22f593edb2450f33d2bf309e86102162e2a847653b7fc8fac64874"
+    },
+    {
+      "name": "shared-model-picker-expanded-light-375.jpg",
+      "bytes": 41332,
+      "sha256": "989ed07dd17437e98f5729b40c727fa426aaac2ead153b9c6949b043d42b90dd"
+    },
+    {
+      "name": "shared-model-picker-light-375.jpg",
+      "bytes": 32300,
+      "sha256": "58685fbcb01115101f2beba71e5fc600275ee039d096a81bf5efa8c0037c06dc"
+    },
+    {
+      "name": "subscription-owner-confirmation-light-375.jpg",
+      "bytes": 36423,
+      "sha256": "40e6828318ecb72e89f9e5e1514811c934d34a1bbd784177efe4088a5d8e710e"
+    }
+  ]
+}

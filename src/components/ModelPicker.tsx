@@ -22,13 +22,13 @@ import { COMPACT_SQUARE } from "@/lib/compact-chip";
 import { threadsOnOwnModel } from "../../shared/thread-model";
 import { ThreadModelsLine } from "./ThreadModelsLine";
 import { Select } from "./Select";
+import { ModelFallbackSettings, modelLabel } from "./ModelFallbackSettings";
+import { RemoteModelPicker } from "./RemoteModelPicker";
+import { modelSelectionForPick } from "@/lib/model-picker-selection";
+export { modelSelectionForPick } from "@/lib/model-picker-selection";
 
 type ModelOption = InstanceInfo["models"]["options"][number];
 const COMPACT_MODEL_COUNT = 5;
-
-function modelLabel(instance: InstanceInfo | undefined, model: string): string {
-  return instance?.models.options.find((option) => option.id === model)?.label ?? model;
-}
 
 function modelProvider(instance: InstanceInfo | undefined, model: string): string | undefined {
   return instance?.models.options.find((option) => option.id === model)?.provider;
@@ -221,16 +221,6 @@ export function ModelVariantRow({ bot, threadId, updateBotDefault, className, la
       )}
     </div>
   );
-}
-
-export function modelSelectionForPick(selection: ModelSelection, instance: InstanceInfo, model: string): ModelSelection {
-  const next: ModelSelection = { instanceId: instance.instanceId, model };
-  if (instance.instanceId === selection.instanceId) {
-    if (instance.capabilities?.modelVariants) {
-      if (model === selection.model && selection.variant !== undefined) next.variant = selection.variant;
-    } else if (selection.effort) next.effort = selection.effort;
-  }
-  return next;
 }
 
 function ModelRow({
@@ -484,6 +474,7 @@ export function ModelPicker({
   const [placement, setPlacement] = useState<{ left: number; maxHeight: number }>();
   const [changedBotModel, setChangedBotModel] = useState(false);
   const refreshingRef = useRef(false);
+  const remoteConfirmation = useRef(false);
   const lastClaudeIdRef = useRef<string | null>(null);
   const lastOpenaiIdRef = useRef<string | null>(null);
 
@@ -574,10 +565,12 @@ export function ModelPicker({
   useEffect(() => {
     if (!open) return;
     const closeOnOutsideClick = (event: MouseEvent) => {
+      if (remoteConfirmation.current) return;
       const clickedNode = event.target instanceof Node ? event.target : null;
       if (!rootRef.current?.contains(clickedNode)) setOpen(false);
     };
     const closeOnEscape = (event: KeyboardEvent) => {
+      if (remoteConfirmation.current) return;
       if (event.key !== "Escape") return;
       if (query) setQuery("");
       else if (!simpleView && pane === "custom" && railInstance?.models.options.some((option) => !option.custom)) setPane("main");
@@ -801,6 +794,7 @@ export function ModelPicker({
             <span data-model-account className="text-ink-secondary">{active.displayName} · </span>
           )}
           {modelLabel(active, selection.model)}
+          {selection.source && <span className="text-ink-secondary"> · {t("modelHost.shared")}</span>}
           {active && modelProvider(active, selection.model) && (
             <span className="text-ink-secondary"> · {modelProvider(active, selection.model)}</span>
           )}
@@ -825,9 +819,9 @@ export function ModelPicker({
   );
 
   return (
-    <div ref={rootRef} className={cn(contained ? "w-full" : "relative", className)}>
+    <div ref={rootRef} className={cn(contained ? "w-full min-w-0" : "relative", className)}>
       {contained ? (
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center justify-between gap-4">
           {label}
           {trigger}
         </div>
@@ -1167,6 +1161,8 @@ export function ModelPicker({
           </>
           )}
           </div>
+          <RemoteModelPicker key={`${profile.id}:${threadId ?? bot.threadId}`} bot={bot} threadId={threadId} updateBotDefault={!threadId || (simpleView ? simpleUpdatesBotDefault : scope === "bot")} onChosen={() => setOpen(false)} confirmationRef={remoteConfirmation} />
+          <ModelFallbackSettings key={profile.id} bot={profile} compact />
         </div>
       )}
       {!contained && changedBotModel && !open && ownModelThreads > 0 && (
