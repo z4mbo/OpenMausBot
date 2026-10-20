@@ -27,7 +27,10 @@ export interface StudioDraft {
   seed?: number;
   negativePrompt?: string;
   motion?: string;
+  angle?: string;
   sound?: boolean;
+  /** The STUDIO_PRESETS entry the draft was set up from. */
+  preset?: string;
   count: number;
   parent?: { generationId: string; action: string };
   /** A studioLibrary entry the generation follows. */

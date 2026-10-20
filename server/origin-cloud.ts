@@ -31,7 +31,7 @@ import { callNotesTools } from "./origin-call-notes.ts";
 import { launchpadTools } from "./origin-launchpad-tools.ts";
 import { shipTools } from "./ship/tools.ts";
 import type { PipelineSender } from "./origin-pipeline.ts";
-import { runStudioTool, STUDIO_TOOL_NAMES, type StudioRunner, type WorkflowExecutor } from "./origin-studio-tools.ts";
+import { runStudioTool, STUDIO_TOOL_NAMES, type StudioRunner, type StudioToolResult, type WorkflowExecutor } from "./origin-studio-tools.ts";
 
 export interface OriginCloudState {
   url?: string;
@@ -66,7 +66,7 @@ export interface OriginReviewRequest {
   reason: string;
 }
 
-export interface OriginToolResult {
+export interface OriginToolResult extends Pick<StudioToolResult, "studio"> {
   text: string;
   isError?: boolean;
   cards?: OriginIssueCards;

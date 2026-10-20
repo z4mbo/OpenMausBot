@@ -174,7 +174,7 @@ try {
       await page.keyboard.press("Escape");
       step(tag, "a library entry is saved from a generated image, followed by the next generation (references and description reach fal), and L on a tile seeds a new one");
     } else {
-      await page.getByRole("button", { name: "Create", exact: true }).click();
+      await page.getByRole("button", { name: "Studio", exact: true }).click();
       step(tag, "the Library tab lists the project's characters, products and styles");
     }
 
@@ -202,7 +202,7 @@ try {
       await page.locator("[data-workflow-run=done]").waitFor();
       await page.locator("[data-workflow-posts]").getByText("2 Broadcast drafts").waitFor();
       await capture(page, `campaign-workflow-${tag}`);
-      await page.getByRole("button", { name: "Create", exact: true }).click();
+      await page.getByRole("button", { name: "Studio", exact: true }).click();
       const broadcast = await open(width, theme, { page: "broadcast" });
       await broadcast.getByText(`${brief} #launch`).first().waitFor({ timeout: 20_000 });
       await capture(broadcast, `broadcast-drafts-${tag}`);
@@ -238,6 +238,32 @@ try {
       await tile(page, poster).getByRole("button", { name: "Use in Broadcast" }).click();
       await tile(page, poster).getByRole("button", { name: "Remove from Broadcast" }).waitFor();
       step(tag, "an output is picked for Broadcast from its tile");
+
+      await prompt.blur();
+      await page.keyboard.press("t");
+      await page.getByRole("dialog", { name: "Presets" }).locator("[data-preset-card='motion-transfer'] img").waitFor();
+      await capture(page, `presets-${tag}`);
+      await page.keyboard.type("motion transfer");
+      await page.keyboard.press("Enter");
+      await page.locator("[data-studio-preset='motion-transfer']").waitFor();
+      await page.getByRole("button", { name: "Model: Kling 3 Pro · motion transfer" }).waitFor();
+      if (!(await page.getByTitle(`Change: ${poster}`).count())) {
+        await page.getByRole("button", { name: "Character", exact: true }).click();
+        await page.locator("[data-studio-media-picker] button", { hasText: poster }).click();
+      }
+      await page.getByRole("button", { name: "Motion video", exact: true }).click();
+      await page.locator("[data-studio-media-picker] button", { hasText: "Five second teaser clip" }).click();
+      await capture(page, `preset-motion-transfer-${tag}`);
+      await page.keyboard.press("Control+Enter");
+      let motion;
+      for (let tries = 0; !motion && tries < 60; tries += 1) {
+        motion = (await submitted(page, "fal-ai/kling-video/v3/pro/motion-control")).at(-1);
+        if (!motion) await page.waitForTimeout(250);
+      }
+      assert.match(motion.body.image_url, /^https:\/\/127\.0\.0\.1:\d+\/image\//, "the character is the poster's output");
+      assert.ok(motion.body.video_url, "the motion video is sent");
+      assert.equal(motion.body.character_orientation, "video");
+      step(tag, "T opens the presets with ComfyUI preview images; Motion transfer labels its inputs Character and Motion video and sends both to Kling's motion control");
     }
 
     await tile(page, poster).focus();

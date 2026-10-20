@@ -5,7 +5,7 @@ import { Select } from "../Select";
 import { inputClass } from "../origin-pages/ui";
 import { KIND_ICON, MediaThumb } from "./studio-ui";
 import { NODE_HEADER, NODE_WIDTH, PORT_ROW } from "./workflow-geometry";
-import { STUDIO_CAMERA_MOTIONS, STUDIO_VOICES, studioModel, type StudioMediaKind, type StudioParams } from "../../../shared/studio";
+import { STUDIO_CAMERA_ANGLES, STUDIO_CAMERA_MOTIONS, STUDIO_VOICES, studioModel, type StudioMediaKind, type StudioParams } from "../../../shared/studio";
 import { STUDIO_BROADCAST_GROUPS, WORKFLOW_PALETTE, workflowNodeModel, workflowPorts, type StudioPort, type StudioRunNode, type StudioWorkflowNode } from "../../../shared/studio-workflow";
 
 const PORT_COLOR: Record<StudioPort["kind"], string> = {
@@ -70,13 +70,14 @@ function ModelSettings({ node, disabled, characters, set }: { node: StudioWorkfl
         <textarea className={cn(inputClass, "resize-none text-[12px]")} rows={2} maxLength={8_000} aria-label="Node prompt" disabled={disabled}
           placeholder={model.prompt === "required" ? "Prompt, or link a Prompt node" : "Prompt (optional)"} value={String(node.params.prompt ?? "")} onChange={(event) => set({ prompt: event.target.value })} />
       )}
-      {model && (model.aspectRatios || model.durations || model.resolutions || model.voices || model.motion) && (
+      {model && (model.aspectRatios || model.durations || model.resolutions || model.voices || model.motion || model.angles) && (
         <div className="grid grid-cols-2 gap-1.5">
           {model.aspectRatios && <Select size="sm" className={select} aria-label="Aspect ratio" value={value("aspectRatio", model.aspectRatios)} disabled={disabled} onChange={(event) => set({ aspectRatio: event.target.value })}>{model.aspectRatios.map((ratio) => <option key={ratio} value={ratio}>{ratio}</option>)}</Select>}
           {model.durations && <Select size="sm" className={select} aria-label="Duration" value={value("duration", model.durations)} disabled={disabled} onChange={(event) => set({ duration: event.target.value })}>{model.durations.map((entry) => <option key={entry} value={entry}>{entry.endsWith("s") ? entry : `${entry}s`}</option>)}</Select>}
           {model.resolutions && <Select size="sm" className={select} aria-label="Resolution" value={value("resolution", model.resolutions)} disabled={disabled} onChange={(event) => set({ resolution: event.target.value })}>{model.resolutions.map((entry) => <option key={entry} value={entry}>{entry}</option>)}</Select>}
           {model.voices && <Select size="sm" className={select} aria-label="Voice" value={value("voice", model.voices)} disabled={disabled} onChange={(event) => set({ voice: event.target.value })}>{STUDIO_VOICES.map((voice) => <option key={voice.name} value={voice.name}>{voice.name}</option>)}</Select>}
           {model.motion && <Select size="sm" className={select} aria-label="Camera motion" value={String(node.params.motion ?? "")} disabled={disabled} onChange={(event) => set({ motion: event.target.value })}><option value="">Free camera</option>{STUDIO_CAMERA_MOTIONS.map((motion) => <option key={motion.id} value={motion.id}>{motion.label}</option>)}</Select>}
+          {model.angles && <Select size="sm" className={select} aria-label="Camera angle" value={value("angle", STUDIO_CAMERA_ANGLES.map((angle) => angle.id))} disabled={disabled} onChange={(event) => set({ angle: event.target.value })}>{STUDIO_CAMERA_ANGLES.map((angle) => <option key={angle.id} value={angle.id}>{angle.label}</option>)}</Select>}
         </div>
       )}
       {model && model.kind !== "audio" && !model.needs.includes("video") && (characters.length > 0 || node.params.character) && (

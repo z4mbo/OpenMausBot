@@ -690,6 +690,7 @@ describe("agents-proxy MCP surface", () => {
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
       "origin_broadcast_list",
@@ -794,7 +795,7 @@ describe("agents-proxy MCP surface", () => {
       "list_team_setup",
       "session_search", "session_read", "list_routines", "skills_list",
       "origin_list_projects", "origin_list_issues", "origin_get_issue", "origin_list_assets", "origin_vault_list", "origin_repo_status",
-      "origin_team_chat", "origin_feedback", "origin_canvas", "origin_canvas_screenshot", "origin_page_list", "origin_pulse", "origin_call_notes", "origin_studio_list", "origin_studio_workflow_list", "origin_broadcast_list", "origin_pipeline_list_leads",
+      "origin_team_chat", "origin_feedback", "origin_canvas", "origin_canvas_screenshot", "origin_page_list", "origin_pulse", "origin_call_notes", "origin_studio_list", "origin_studio_workflow_list", "origin_studio_presets", "origin_broadcast_list", "origin_pipeline_list_leads",
       "origin_pipeline_conversations", "origin_campaign_get", "origin_doc_list", "origin_doc_get", "origin_milestone_list", "origin_brand_get", "origin_ship_status",
     ];
     expect(list.result.tools.filter((tool: any) => tool.annotations?.readOnlyHint)

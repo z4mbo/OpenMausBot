@@ -845,6 +845,18 @@ describe("origin-cloud routes", () => {
     expect(appended[0]!.message).toMatchObject({ role: "bot", kind: "activity", tool: { name: "origin_list_assets", ok: true }, originCard: { kind: "assets", assets: [{ id: "a1" }] } });
   });
 
+  it("shows a Studio tool's cards in the turn's thread and keeps them out of the answer", async () => {
+    const { call, file, appended } = await serve();
+    writeOriginCloud(file, { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "proj" } });
+    const [status, body] = await call("POST", "/api/internal/origin/tool", { name: "origin_studio_presets", arguments: { group: "audio" } }, { authorization: "Bearer cap-coder" });
+    expect(status).toBe(200);
+    expect((body as { text: string }).text).toContain("voice-over \"Voice-over\"");
+    expect(body).not.toHaveProperty("studio");
+    expect(appended).toHaveLength(1);
+    expect(appended[0]!.message).toMatchObject({ role: "bot", kind: "activity", tool: { name: "origin_studio_presets", ok: true } });
+    expect(appended[0]!.message.originStudio).toEqual({ heading: "Studio presets", projectId: "proj", presets: ["voice-over", "song", "sound-effect"] });
+  });
+
   it("takes the record phase only for origin_assign_issue", async () => {
     const { call, file, fake } = await serve();
     writeOriginCloud(file, { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "proj" } });

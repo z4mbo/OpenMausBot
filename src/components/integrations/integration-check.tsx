@@ -43,7 +43,7 @@ export function integrationsChanged(): void {
 
 /** Changes whenever a key is saved or a check finishes, so a list can reload what the server now reports. */
 export function useCheckRevision(): number {
-  return useSyncExternalStore(subscribe, () => revision);
+  return useSyncExternalStore(subscribe, () => revision, () => revision);
 }
 
 export function CheckResult({ id, className }: { id: string; className?: string }) {
