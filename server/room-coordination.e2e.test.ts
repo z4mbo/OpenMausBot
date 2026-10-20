@@ -221,6 +221,8 @@ it.each(["rename", "delete"])("withholds an in-flight result after team %s and r
   await f.api(`/api/bots/${f.target.id}`, { section: "Engineering" }, "PATCH");
   await f.api(`/api/bots/${f.sender.id}`, { chiefOfStaff: true, managedSections: ["Engineering"], acknowledgePeerScope: true }, "PATCH");
   const gateFile = join(f.session.info.dataDir, "team-recreation.gate");
+  const resumeGate = join(f.session.info.dataDir, "team-recreation-resume.gate");
+  f.plan[f.sender.id] = { turns: [f.plan[f.sender.id], { gateFile: resumeGate, reply: "Reviewed downstream outcome" }] };
   f.plan[f.target.id] = { gateFile, reply: "PRIVATE_RESULT_AFTER_TEAM_RECREATION" };
   await f.start();
   await expect.poll(() => f.nodes().find((n: any) => n.parentId)?.status, { timeout: 30_000 }).toBe("running");
@@ -228,6 +230,20 @@ it.each(["rename", "delete"])("withholds an in-flight result after team %s and r
   const move = (section: string) => request(`/api/bots/${f.target.id}`, { method: "PATCH", headers: { Origin: f.session.info.url },
     body: JSON.stringify({ section }) }, f.session.info.url);
   await move("Parking");
+  await expect.poll(() => f.nodes().find((node: any) => !node.parentId)?.executions, { timeout: 30_000 }).toBe(2);
+  if (mode === "rename") {
+    const refused = await fetch(`${f.session.info.url}/api/sidebar-sections?section=Engineering`, {
+      method: "PATCH", headers: { Origin: f.session.info.url }, body: JSON.stringify({ name: "Renamed" }),
+    });
+    expect(refused.status).toBe(409);
+    expect(await refused.json()).toEqual({ error: "Stop this team's active work before renaming the team" });
+  }
+  writeFileSync(resumeGate, "release");
+  expect((await f.wait()).status).toBe("settled");
+  await expect.poll(async () => {
+    const chief = (await f.api("/api/bots?messages=0")).bots.find((bot: any) => bot.id === f.sender.id);
+    return !chief.busy && !chief.tasks.some((task: any) => task.busy);
+  }, { timeout: 30_000 }).toBe(true);
   await f.api("/api/sidebar-sections?section=Engineering", mode === "rename" ? { name: "Renamed" } : {}, mode === "rename" ? "PATCH" : "DELETE");
   await f.api("/api/sidebar-sections", { name: "Engineering" });
   await move("Engineering");
