@@ -1,0 +1,41 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ src/components/origin-pipeline/LeadDrawer.readiness.test.ts (8 tests | 5 failed) 117ms
+     × blocks Email while connection status is unknown 42ms
+     × blocks Text while connection status is unknown 12ms
+     × blocks WhatsApp while connection status is unknown 10ms
+     × blocks Call while connection status is unknown 15ms
+     × blocks AI call while connection status is unknown 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks Email while connection status is unknown
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks Text while connection status is unknown
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks WhatsApp while connection status is unknown
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks Call while connection status is unknown
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks AI call while connection status is unknown
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/components/origin-pipeline/LeadDrawer.readiness.test.ts:52:36
+     50|   it.each(["Email", "Text", "WhatsApp", "Call", "AI call"])("blocks %s…
+     51|     show(null);
+     52|     expect(prepare(mode).disabled).toBe(true);
+       |                                    ^
+     53|     expect(host.textContent).toContain("Connections are not confirmed …
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 3 passed (8)
+   Start at  08:13:05
+   Duration  2.45s (transform 656ms, setup 621ms, import 1.15s, tests 117ms, environment 382ms)
+

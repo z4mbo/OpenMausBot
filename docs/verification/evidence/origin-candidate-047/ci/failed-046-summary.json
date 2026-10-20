@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "runId": "39375851729",
+  "attempt": 1,
+  "url": "https://github.com/z4mbo/Origin/actions/runs/39375851729/attempts/1",
+  "source": "8fa1c8ce2f4eb5a76faade6f2541819a7f8cfd3f",
+  "conclusion": "failure",
+  "aggregateConclusion": "failure as recorded by root",
+  "basis": "Eight previously captured official job logs; only aggregate counts, source file names, official links and hashes are archived. No fresh GitHub query.",
+  "totals": {
+    "Linux": {
+      "failedTests": 43,
+      "failedFiles": 10,
+      "shardJobs": 4
+    },
+    "Windows": {
+      "failedTests": 45,
+      "failedFiles": 11,
+      "shardJobs": 4
+    }
+  },
+  "jobs": [
+    {
+      "jobId": "118474514646",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39375851729/job/118474514646",
+      "platform": "Windows",
+      "shard": "1/4",
+      "files": {
+        "failed": 2,
+        "passed": 351,
+        "skipped": 19,
+        "total": 372
+      },
+      "tests": {
+        "failed": 2,
+        "passed": 4409,
+        "skipped": 103,
+        "total": 4514
+      },
+      "failedFiles": [
+        "server/incidents.e2e.test.ts",
+        "src/state/notification-open.test.ts"
+      ],
+      "privateRawLog": {
+        "name": "job-118474514646.log",
+        "bytes": 314611,
+        "sha256": "0910ccecccf6f31402bcf783e33bc07e9cd70f96df6052ddc58dfe1ee5b78e9f",
+        "archived": false
+      }
+    },
+    {
+      "jobId": "118474514655",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39375851729/job/118474514655",
+      "platform": "Linux",
+      "shard": "2/4",
+      "files": {
+        "failed": 2,
+        "passed": 361,
+        "skipped": 9,
+        "total": 372
+      },
+      "tests": {
+        "failed": 10,
+        "passed": 5143,
+        "skipped": 15,
+        "total": 5168
+      },
+      "failedFiles": [
+        "server/long-running-chief.e2e.test.ts",
+        "server/notification-routing.e2e.test.ts"
+      ],
+      "privateRawLog": {
+        "name": "job-118474514655.log",
+        "bytes": 307717,
+        "sha256": "a605efc5af8b85f19c7fe6e540a4a64f908666c0fffe8ac91d541f2858f12df7",
+        "archived": false
+      }
+    },
+    {
+      "jobId": "118474514681",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39375851729/job/118474514681",
+      "platform": "Linux",
+      "shard": "3/4",
+      "files": {
+        "failed": 6,
+        "passed": 357,
+        "skipped": 9,
+        "total": 372
+      },
+      "tests": {
+        "failed": 28,
+        "passed": 5233,
+        "skipped": 22,
+        "total": 5283
+      },
+      "failedFiles": [
+        "server/cloud-guest-shell.e2e.test.ts",
+        "server/cloud-lending-memory.e2e.test.ts",
+        "server/independent-threads-api.test.ts",
+        "server/index.test.ts",
+        "server/managed-desktop-cleanup.test.ts",
+        "server/thread-aware-bots.e2e.test.ts"
+      ],
+      "privateRawLog": {
+        "name": "job-118474514681.log",
+        "bytes": 548248,
+        "sha256": "e3281f1a0deaa4db899c8d54b2ff06c9468e4c561c8980f9fef6034ecfd01645",
+        "archived": false
+      }
+    },
+    {
+      "jobId": "118474514702",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39375851729/job/118474514702",
+      "platform": "Windows",
+      "shard": "2/4",
+      "files": {
+        "failed": 2,
+        "passed": 353,
+        "skipped": 17,
+        "total": 372
+      },
+      "tests": {
+        "failed": 11,
+        "passed": 5034,
+        "skipped": 123,
+        "total": 5168
+      },
+      "failedFiles": [
+        "server/long-running-chief.e2e.test.ts",
+        "server/notification-routing.e2e.test.ts"
+      ],
+      "privateRawLog": {
+        "name": "job-118474514702.log",
+        "bytes": 345935,
+        "sha256": "dc778d1593e3f8ff406644603655f6aa68ba678a09b0902c9d153387325fb931",
+        "archived": false
+      }
+    },
+    {
+      "jobId": "118474514725",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39375851729/job/118474514725",
+      "platform": "Linux",
+      "shard": "4/4",
+      "files": {
+        "failed": 1,
+        "passed": 365,
+        "skipped": 6,
+        "total": 372
+      },
+      "tests": {
+        "failed": 4,
+        "passed": 4873,
+        "skipped": 28,
+        "total": 4905
+      },
+      "failedFiles": [
+        "server/group-local-vm.e2e.test.ts"
+      ],
+      "privateRawLog": {
+        "name": "job-118474514725.log",
+        "bytes": 312989,
+        "sha256": "27f166bcf1f870319685c02d655d4fac55cee5f41563d0d32df6d9a7da9b7afd",
+        "archived": false
+      }
+    },
+    {
+      "jobId": "118474514737",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39375851729/job/118474514737",
+      "platform": "Windows",
+      "shard": "3/4",
+      "files": {
+        "failed": 6,
+        "passed": 352,
+        "skipped": 14,
+        "total": 372
+      },
+      "tests": {
+        "failed": 28,
+        "passed": 5191,
+        "skipped": 64,
+        "total": 5283
+      },
+      "failedFiles": [
+        "server/cloud-guest-shell.e2e.test.ts",
+        "server/cloud-lending-memory.e2e.test.ts",
+        "server/independent-threads-api.test.ts",
+        "server/index.test.ts",
+        "server/managed-desktop-cleanup.test.ts",
+        "server/thread-aware-bots.e2e.test.ts"
+      ],
+      "privateRawLog": {
+        "name": "job-118474514737.log",
+        "bytes": 573786,
+        "sha256": "12e075fd08cf00131a50c71db57bf94af171cc28b05786a3c3b2c99b6d8ea4e2",
+        "archived": false
+      }
+    },
+    {
+      "jobId": "118474514742",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39375851729/job/118474514742",
+      "platform": "Linux",
+      "shard": "1/4",
+      "files": {
+        "failed": 1,
+        "passed": 362,
+        "skipped": 9,
+        "total": 372
+      },
+      "tests": {
+        "failed": 1,
+        "passed": 4481,
+        "skipped": 32,
+        "total": 4514
+      },
+      "failedFiles": [
+        "server/incidents.e2e.test.ts"
+      ],
+      "privateRawLog": {
+        "name": "job-118474514742.log",
+        "bytes": 276912,
+        "sha256": "15d3a12c1eaa6b3e17358e2a4af49962a16315a2c9fe6653e3f279adca9faa5e",
+        "archived": false
+      }
+    },
+    {
+      "jobId": "118474514749",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39375851729/job/118474514749",
+      "platform": "Windows",
+      "shard": "4/4",
+      "files": {
+        "failed": 1,
+        "passed": 357,
+        "skipped": 14,
+        "total": 372
+      },
+      "tests": {
+        "failed": 4,
+        "passed": 4756,
+        "skipped": 145,
+        "total": 4905
+      },
+      "failedFiles": [
+        "server/group-local-vm.e2e.test.ts"
+      ],
+      "privateRawLog": {
+        "name": "job-118474514749.log",
+        "bytes": 332643,
+        "sha256": "5751f31e144edc274ff80bd54685b9499e82ca88c1239f5ea8a7503e76c05107",
+        "archived": false
+      }
+    }
+  ],
+  "limits": [
+    "Counts are test executions per platform, not unique product bugs.",
+    "This failed historical 0.3.1 validation run cannot qualify 0.3.2.",
+    "The 0.3.1 native packaging success does not replace server CI.",
+    "No raw CI log, runner environment, secret or production data is included."
+  ]
+}

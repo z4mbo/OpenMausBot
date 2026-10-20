@@ -1,5 +1,7 @@
 # Origin 0.3.1 integration candidate
 
+**Held, unpublished:** the [0.3.2 correction candidate](origin-candidate-047.md) supersedes this source after actual feature-body inspection and CI 39375851729 found additional defects. Its immutable source tag and successful native packages remain historical evidence. No 0.3.1 artifact download/draft, backend key/export/deployment, website build or public promotion occurred. Preparation operators remain unadmitted.
+
 Prepared on 2026-10-20. This candidate combines the model continuity work frozen at `fb7b838aab70c1308023e5df27209641fff5e9c1` with concurrent feature branch `84b0ccedb30615f2fa0a1c9c0d3fd18da0f730d3`. Neither parent was overwritten. PR 3 targets `origin-integration`; PR 2 and all app task pull requests remain unmerged by this workflow.
 
 ## Publication drift and hold

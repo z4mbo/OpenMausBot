@@ -1,0 +1,54 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/long-running-chief.e2e.test.ts (9 tests | 1 failed) 54134ms
+   × carries a consult-and-implement job over several teammate turns, through a step cap, to one final answer 5942ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/long-running-chief.e2e.test.ts > carries a consult-and-implement job over several teammate turns, through a step cap, to one final answer
+AssertionError: expected [ Array(6) ] to deeply equal [ [ 'done', …(1) ], …(5) ]
+
+- Expected
++ Received
+
+@@ -1,17 +1,17 @@
+  [
+    [
+-     "done",
+-     "A0: Mira is consulting and Eli is implementing.",
+-   ],
+-   [
+      "delegation-started",
+      "CONSULT-ONE: Which CSV approach and which edge cases should we handle?",
+    ],
+    [
+      "delegation-started",
+      "IMPLEMENT-CAP: Build the invoice CSV export end to end, run the tests, and report.",
++   ],
++   [
++     "done",
++     "A0: Mira is consulting and Eli is implementing.",
+    ],
+    [
+      "delegation-settled",
+      "Results in from Mira, Eli",
+    ],
+
+ ❯ server/long-running-chief.e2e.test.ts:234:94
+    232|   for (const node of f.tree(job).filter((candidate: any) => candidate.…
+    233|   expect(f.notifications.filter((notification: any) => notification.ki…
+    234|   expect(f.notifications.map((notification: any) => [notification.kind…
+       |                                                                                              ^
+    235|     ["done", "A0: Mira is consulting and Eli is implementing."],
+    236|     ["delegation-started", "CONSULT-ONE: Which CSV approach and which …
+ ❯ chiefJob server/long-running-chief.e2e.test.ts:165:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 53 passed (54)
+   Start at  08:23:49
+   Duration  75.54s (transform 652ms, setup 1.00s, import 1.43s, tests 72.50s, environment 0ms)
+

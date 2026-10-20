@@ -3,7 +3,7 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.3.1",
+  version: "0.3.2",
   date: "2026-10-20",
   title: "Model continuity and shared project work",
   changes: [
@@ -15,6 +15,9 @@ export const releases: Release[] = [{
     { title: "A quieter Usage panel", body: "Open a compact quota panel from the agent conversation header and expand context details when needed. Unavailable quota checks stay neutral. Appearance offers Compact, Medium and Wide layouts that keep the conversation and composer aligned on this device." },
     { title: "Opt-in teammate model sources", body: "Share supported model accounts with selected projects. Shared choices identify the owner and computer, run on that owner's device and keep provider credentials there. Ordered backups can cross local and teammate sources after a safe initial quota refusal. Paid sources require consent and the owner's budget checks; partial or uncertain accepted work is not silently replayed." },
     { title: "Safer media and call integrations", body: "Daily AI model API limits also stop unpriced Studio generations, cloud transcription and AI calls before they can spend. Pipeline summaries use the same budget gate as live calls and resolve the project's agent on the server. Integration errors remove configured credentials before reaching shared project data or chat." },
+    { title: "Project tools fit narrow windows", body: "Broadcast connection notices remain readable, Pipeline search keeps its space and Canvas panels leave their own controls reachable in narrow windows. Publishing and outreach wait for confirmed channel connections; saving a draft or adding a note stays available." },
+    { title: "Coordination stays quiet", body: "Chief-to-specialist work keeps its own notifications. Consultations and background coordination stay quiet unless they ask for your attention. Explicitly named delegated chats keep their own identity, and opening a notification marks the displayed chat as read." },
+    { title: "Actionable model settings errors", body: "Invalid model settings identify the field and explain unsupported effort values or extra fields, while continuing to check the live provider catalog." },
   ],
 }, {
   version: "0.3.0",

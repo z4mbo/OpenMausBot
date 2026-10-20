@@ -1,0 +1,75 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ src/components/origin-broadcast/BroadcastComposer.readiness.test.ts (7 tests | 4 failed) 28ms
+     × keeps publishing unavailable for a disconnected channel while allowing draft saves 14ms
+     × requires confirmed channel readiness instead of treating null as connected 2ms
+     × requires confirmed channel readiness instead of treating {} as connected 2ms
+     × requires every pending channel before scheduling 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/origin-broadcast/BroadcastComposer.readiness.test.ts > Broadcast publishing connections > keeps publishing unavailable for a disconnected channel while allowing draft saves
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/components/origin-broadcast/BroadcastComposer.readiness.test.ts:39:45
+     37|     const markup = render({ x: false });
+     38|     expect(markup).toContain("not connected on this computer");
+     39|     expect(disabled(markup, "Publish now")).toBe(true);
+       |                                             ^
+     40|     expect(disabled(markup, "Save draft")).toBe(false);
+     41|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/origin-broadcast/BroadcastComposer.readiness.test.ts > Broadcast publishing connections > requires confirmed channel readiness instead of treating null as connected
+ FAIL  src/components/origin-broadcast/BroadcastComposer.readiness.test.ts > Broadcast publishing connections > requires confirmed channel readiness instead of treating {} as connected
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/components/origin-broadcast/BroadcastComposer.readiness.test.ts:44:56
+     42|
+     43|   it.each([null, {}])("requires confirmed channel readiness instead of…
+     44|     expect(disabled(render(connected), "Publish now")).toBe(true);
+       |                                                        ^
+     45|   });
+     46|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/components/origin-broadcast/BroadcastComposer.readiness.test.ts > Broadcast publishing connections > requires every pending channel before scheduling
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/components/origin-broadcast/BroadcastComposer.readiness.test.ts:52:42
+     50|       scheduledAt: Date.now() + 3_600_000,
+     51|     });
+     52|     expect(disabled(markup, "Schedule")).toBe(true);
+       |                                          ^
+     53|     expect(disabled(markup, "Save draft")).toBe(false);
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 3 passed (7)
+   Start at  08:09:21
+   Duration  1.42s (transform 413ms, setup 744ms, import 466ms, tests 28ms, environment 0ms)
+

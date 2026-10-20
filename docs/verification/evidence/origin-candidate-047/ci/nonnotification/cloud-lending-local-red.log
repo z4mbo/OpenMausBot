@@ -1,0 +1,31 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/cloud-lending-memory.e2e.test.ts (29 tests | 1 failed | 28 skipped) 6346ms
+   × no command the owner saved answers for a conversation a guest left behind: it still asks the owner 4144ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/cloud-lending-memory.e2e.test.ts > no command the owner saved answers for a conversation a guest left behind: it still asks the owner
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/cloud-lending-memory.e2e.test.ts:805:74
+
+
+Caused by: Error: Matcher did not succeed in time.
+ ❯ server/cloud-lending-memory.e2e.test.ts:805:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 28 skipped (29)
+   Start at  08:16:51
+   Duration  7.48s (transform 365ms, setup 557ms, import 384ms, tests 6.35s, environment 0ms)
+

@@ -1,0 +1,157 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/model-selection-check.test.ts (21 tests | 6 failed) 14ms
+     × retains actionable model validation for null 5ms
+     × retains actionable model validation for [] 1ms
+     × retains actionable model validation for {"model":"synthetic"} 1ms
+     × retains actionable model validation for {"instanceId":"claude"} 0ms
+     × retains actionable model validation for {"instanceId":"claude","model":"synthetic","effort":"turbo"} 1ms
+     × retains actionable model validation for {"instanceId":"claude","model":"synthetic","autoApprove":true} 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/model-selection-check.test.ts > scoped shared model selection > retains actionable model validation for null
+AssertionError: expected { ok: false, status: 400, …(1) } to deeply equal { ok: false, status: 400, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "error": "modelSelection must be an object",
++   "error": "Invalid input: expected object, received null",
+    "ok": false,
+    "status": 400,
+  }
+
+ ❯ server/model-selection-check.test.ts:25:38
+     23|   ])("retains actionable model validation for %j", async (selection, e…
+     24|     const f = fixture();
+     25|     expect(await f.check(selection)).toEqual({ ok: false, status: 400,…
+       |                                      ^
+     26|     expect(f.localCheck).not.toHaveBeenCalled();
+     27|     expect(f.remoteCheck).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  server/model-selection-check.test.ts > scoped shared model selection > retains actionable model validation for []
+AssertionError: expected { ok: false, status: 400, …(1) } to deeply equal { ok: false, status: 400, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "error": "modelSelection must be an object",
++   "error": "Invalid input: expected object, received array",
+    "ok": false,
+    "status": 400,
+  }
+
+ ❯ server/model-selection-check.test.ts:25:38
+     23|   ])("retains actionable model validation for %j", async (selection, e…
+     24|     const f = fixture();
+     25|     expect(await f.check(selection)).toEqual({ ok: false, status: 400,…
+       |                                      ^
+     26|     expect(f.localCheck).not.toHaveBeenCalled();
+     27|     expect(f.remoteCheck).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  server/model-selection-check.test.ts > scoped shared model selection > retains actionable model validation for {"model":"synthetic"}
+AssertionError: expected { ok: false, status: 400, …(1) } to deeply equal { ok: false, status: 400, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "error": "modelSelection.instanceId is required",
++   "error": "Invalid input: expected string, received undefined",
+    "ok": false,
+    "status": 400,
+  }
+
+ ❯ server/model-selection-check.test.ts:25:38
+     23|   ])("retains actionable model validation for %j", async (selection, e…
+     24|     const f = fixture();
+     25|     expect(await f.check(selection)).toEqual({ ok: false, status: 400,…
+       |                                      ^
+     26|     expect(f.localCheck).not.toHaveBeenCalled();
+     27|     expect(f.remoteCheck).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  server/model-selection-check.test.ts > scoped shared model selection > retains actionable model validation for {"instanceId":"claude"}
+AssertionError: expected { ok: false, status: 400, …(1) } to deeply equal { ok: false, status: 400, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "error": "modelSelection.model is required",
++   "error": "Invalid input: expected string, received undefined",
+    "ok": false,
+    "status": 400,
+  }
+
+ ❯ server/model-selection-check.test.ts:25:38
+     23|   ])("retains actionable model validation for %j", async (selection, e…
+     24|     const f = fixture();
+     25|     expect(await f.check(selection)).toEqual({ ok: false, status: 400,…
+       |                                      ^
+     26|     expect(f.localCheck).not.toHaveBeenCalled();
+     27|     expect(f.remoteCheck).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  server/model-selection-check.test.ts > scoped shared model selection > retains actionable model validation for {"instanceId":"claude","model":"synthetic","effort":"turbo"}
+AssertionError: expected { ok: false, status: 400, …(1) } to deeply equal { ok: false, status: 400, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "error": "effort \"turbo\" is not recognized",
++   "error": "Invalid option: expected one of \"none\"|\"low\"|\"medium\"|\"high\"|\"xhigh\"|\"max\"",
+    "ok": false,
+    "status": 400,
+  }
+
+ ❯ server/model-selection-check.test.ts:25:38
+     23|   ])("retains actionable model validation for %j", async (selection, e…
+     24|     const f = fixture();
+     25|     expect(await f.check(selection)).toEqual({ ok: false, status: 400,…
+       |                                      ^
+     26|     expect(f.localCheck).not.toHaveBeenCalled();
+     27|     expect(f.remoteCheck).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  server/model-selection-check.test.ts > scoped shared model selection > retains actionable model validation for {"instanceId":"claude","model":"synthetic","autoApprove":true}
+AssertionError: expected { ok: false, status: 400, …(1) } to deeply equal { ok: false, status: 400, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "error": "unsupported model field: autoApprove",
++   "error": "Unrecognized key: \"autoApprove\"",
+    "ok": false,
+    "status": 400,
+  }
+
+ ❯ server/model-selection-check.test.ts:25:38
+     23|   ])("retains actionable model validation for %j", async (selection, e…
+     24|     const f = fixture();
+     25|     expect(await f.check(selection)).toEqual({ ok: false, status: 400,…
+       |                                      ^
+     26|     expect(f.localCheck).not.toHaveBeenCalled();
+     27|     expect(f.remoteCheck).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 15 passed (21)
+   Start at  08:16:19
+   Duration  732ms (transform 221ms, setup 515ms, import 31ms, tests 14ms, environment 0ms)
+

@@ -89,6 +89,8 @@ Use only mapped, tested commands:
 - [Origin 0.2.16 release notes](origin-0.2.16-release-notes.md)
 - [Origin 0.3.1 combined source, concurrent-publication hold and acceptance boundary](origin-candidate-046.md)
 - [Origin 0.3.1 release notes](origin-0.3.1-release-notes.md)
+- [Origin 0.3.2 correction candidate](origin-candidate-047.md)
+- [Origin 0.3.2 release notes](origin-0.3.2-release-notes.md)
 - [Real isolated backend, two-client invitations, persistence and revocation](evidence/origin-native-039/report.md)
 - [Authentication response ownership and two-tab session races](origin-session-scope.md)
 - [Account, connection and shared-run ownership follow-up](origin-ownership-037.md)

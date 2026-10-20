@@ -1,0 +1,9 @@
+
+ RUN  v5.0.2 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/backend
+
+
+ Test Files  2 passed (2)
+      Tests  2 passed | 31 skipped (33)
+   Start at  08:25:06
+   Duration  996ms (tests 48%, import 27%, transform 17%, environment 8%, worker 1%)
+
