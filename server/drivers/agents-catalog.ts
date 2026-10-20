@@ -4,7 +4,6 @@ import { OPTIONS_CARD_LIMITS, WATCHER_OPTIONS_CARD_BOT_ID } from "../../shared/o
 import { agentToolAnnotations } from "../agent-tool-policy.ts";
 import { WIDGET_TOOL_DEFINITIONS } from "./agents-widget-tools.ts";
 import { CANVAS_TOOL_DEFINITIONS } from "./agents-canvas-tools.ts";
-import { PIPELINE_TOOL_DEFINITIONS } from "./agents-pipeline-tools.ts";
 import { STANDUP_TOOL_DEFINITIONS } from "./agents-standup-tools.ts";
 import { CAMPAIGN_TOOL_DEFINITIONS } from "./agents-campaign-tools.ts";
 import { LAUNCHPAD_TOOL_DEFINITIONS } from "./agents-launchpad-tools.ts";
@@ -408,7 +407,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
       required: ["post_id"],
     },
   },
-  ...PIPELINE_TOOL_DEFINITIONS, ...CAMPAIGN_TOOL_DEFINITIONS, ...LAUNCHPAD_TOOL_DEFINITIONS, ...BRAND_TOOL_DEFINITIONS,
+  ...CAMPAIGN_TOOL_DEFINITIONS, ...LAUNCHPAD_TOOL_DEFINITIONS, ...BRAND_TOOL_DEFINITIONS,
 ];
 
 export const ORIGIN_TOOL_NAMES: ReadonlySet<string> = new Set(ORIGIN_TOOL_DEFINITIONS.map((tool) => tool.name));

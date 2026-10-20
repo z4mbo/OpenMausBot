@@ -177,9 +177,6 @@ export function verificationServerEnvironment(parentEnv: NodeJS.ProcessEnv, data
     childEnv.OMB_OPENAI_LIVE_URL = liveUrl;
     if (parentEnv.OMB_OPENAI_LIVE_KEY) childEnv.OMB_OPENAI_LIVE_KEY = parentEnv.OMB_OPENAI_LIVE_KEY;
   }
-  // Pipeline's Brevo, Twilio and ElevenLabs requests go to a loopback fake only.
-  const pipelineUrl = parentEnv.OMB_PIPELINE_PROVIDER_URL?.trim() ?? "";
-  if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(pipelineUrl)) childEnv.OMB_PIPELINE_PROVIDER_URL = pipelineUrl;
   // Studio's fal.ai queue requests go to a loopback fake only.
   const falQueueUrl = parentEnv.OMB_FAL_QUEUE_URL?.trim() ?? "";
   if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(falQueueUrl)) childEnv.OMB_FAL_QUEUE_URL = falQueueUrl;

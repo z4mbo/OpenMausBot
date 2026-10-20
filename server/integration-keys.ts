@@ -20,35 +20,15 @@ type Field = {
 type Integration = { label: string; help: string; fields: Record<string, Field> };
 
 /**
- * Third-party accounts a member connects for server-side work (Studio generations, Broadcast posts, Sales mail, SMS and
- * payment links, Ship deploys). Each member keeps their own keys in this computer's data folder: they are never put in a
- * backup and never returned to a client (non-secret fields such as a sender address are). An admin may share theirs
- * with the workspace or a project through the backend; a member's own key always wins over a shared one.
+ * Third-party accounts a member connects for server-side work (Studio generations, Broadcast posts, Ship deploys). Each
+ * member keeps their own keys in this computer's data folder: they are never put in a backup and never returned to a
+ * client (non-secret fields such as a sender address are). An admin may share theirs with the workspace or a project
+ * through the backend; a member's own key always wins over a shared one.
  */
 export const INTEGRATIONS = {
   fal: { label: "fal.ai", help: "https://fal.ai/dashboard/keys", fields: { key: { label: "API key", secret: true, placeholder: "key-id:secret" } } },
   elevenlabs: { label: "ElevenLabs", help: "https://elevenlabs.io/app/settings/api-keys", fields: { apiKey: { label: "API key", secret: true, placeholder: "sk_…" } } },
   openai: { label: "OpenAI", help: "https://platform.openai.com/api-keys", fields: { apiKey: { label: "API key", secret: true, placeholder: "sk-…" } } },
-  twilio: {
-    label: "Twilio", help: "https://console.twilio.com",
-    fields: {
-      accountSid: { label: "Account SID", secret: false, placeholder: "AC…" },
-      authToken: { label: "Auth token", secret: true },
-      fromNumber: { label: "From number", secret: false, placeholder: "+15551234567" },
-    },
-  },
-  brevo: {
-    label: "Brevo", help: "https://app.brevo.com/settings/keys/api",
-    fields: {
-      apiKey: { label: "API key", secret: true, placeholder: "xkeysib-…" },
-      senderEmail: { label: "Sender email", secret: false, placeholder: "hello@example.com" },
-      senderName: { label: "Sender name", secret: false, optional: true },
-    },
-  },
-  stripe: {
-    label: "Stripe", help: "https://dashboard.stripe.com/apikeys",
-    fields: { secretKey: { label: "Secret or restricted key (Prices, Payment Links, Checkout Sessions)", secret: true, placeholder: "rk_live_… or sk_live_…" } },
-  },
   resend: {
     label: "Resend", help: "https://resend.com/api-keys",
     fields: {

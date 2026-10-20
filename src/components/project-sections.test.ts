@@ -14,9 +14,8 @@ describe("project sections", () => {
     expect(sectionEntry("broadcast").label).toBe("Publish");
   });
 
-  it("keeps Canvas and Sales off the bar", () => {
+  it("keeps Canvas off the bar", () => {
     const shown = [...tabSections(), ...toolSections()].map((item) => item.id);
     expect(shown).not.toContain("draw");
-    expect(shown).not.toContain("pipeline");
   });
 });

@@ -5,19 +5,16 @@ import { canEdit, requireMember, touchProject } from "./lib/permissions";
 import { cleanText, validDay } from "./lib/features";
 import { broadcastChannel } from "./broadcastTables";
 import { campaignMetric, campaignStatus } from "./campaignTables";
-import { CAMPAIGN_LIMITS, CAMPAIGN_LINKS_MAX, campaignSlug, utmCampaignOf } from "../../shared/origin-campaigns";
-import { PIPELINE_STAGES } from "../../shared/origin-pipeline";
+import { CAMPAIGN_LIMITS, CAMPAIGN_LINKS_MAX, campaignSlug } from "../../shared/origin-campaigns";
 
 type Ctx = QueryCtx | MutationCtx;
 type Campaign = Doc<"campaigns">;
 
 const CAMPAIGNS_SHOWN = 100;
-const LEADS_SCANNED = 2_000;
-const CAPTURES_SCANNED = 2_000;
 const METRICS_MAX = 400;
 const AGENT_NAME_MAX = 80;
 
-const linkKind = v.union(v.literal("post"), v.literal("generation"), v.literal("lead"), v.literal("issue"));
+const linkKind = v.union(v.literal("post"), v.literal("generation"), v.literal("issue"));
 const fields = {
   name: v.optional(v.string()),
   goal: v.optional(v.string()),
@@ -70,37 +67,15 @@ async function uniqueSlug(ctx: Ctx, projectId: Id<"projects">, name: string, exc
   }
 }
 
-/** Every lead of the project with the `utm_campaign` values of the pages it was captured on. */
-async function leadsWithCaptures(ctx: Ctx, projectId: Id<"projects">) {
-  const leads = await ctx.db.query("pipelineLeads").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(LEADS_SCANNED);
-  const captures = await ctx.db.query("pipelineActivities").withIndex("by_projectId_and_kind_and_createdAt", (q) => q.eq("projectId", projectId).eq("kind", "capture")).order("desc").take(CAPTURES_SCANNED);
-  const tagged = new Map<Id<"pipelineLeads">, Set<string>>();
-  for (const capture of captures) {
-    const utm = utmCampaignOf(capture.subject);
-    if (!utm) continue;
-    const set = tagged.get(capture.leadId) ?? new Set<string>();
-    set.add(utm);
-    tagged.set(capture.leadId, set);
-  }
-  return { leads, tagged };
-}
-
-function campaignLeads(campaign: Campaign, all: Awaited<ReturnType<typeof leadsWithCaptures>>) {
-  const linked = new Set<string>(campaign.leadIds);
-  return all.leads.filter((lead) => linked.has(lead._id) || lead.source.trim().toLowerCase() === campaign.slug || all.tagged.get(lead._id)?.has(campaign.slug))
-    .map((lead) => ({ lead, linked: linked.has(lead._id) }));
-}
-
 async function present<T extends "broadcastPosts" | "studioGenerations" | "tasks">(ctx: Ctx, projectId: Id<"projects">, ids: readonly Id<T>[]) {
   const rows = await Promise.all(ids.map((id) => ctx.db.get(id)));
   return rows.filter((row): row is NonNullable<typeof row> => Boolean(row && (row as { projectId: Id<"projects"> }).projectId === projectId));
 }
 
-async function summaryOf(ctx: Ctx, campaign: Campaign, all: Awaited<ReturnType<typeof leadsWithCaptures>>) {
+async function summaryOf(ctx: Ctx, campaign: Campaign) {
   const posts = await present(ctx, campaign.projectId, campaign.postIds) as Doc<"broadcastPosts">[];
   const generations = await present(ctx, campaign.projectId, campaign.generationIds);
   const tasks = await present(ctx, campaign.projectId, campaign.taskIds) as Doc<"tasks">[];
-  const leads = campaignLeads(campaign, all);
   return {
     _id: campaign._id, name: campaign.name, slug: campaign.slug, goal: campaign.goal, audience: campaign.audience, channels: campaign.channels,
     ...(campaign.startDate ? { startDate: campaign.startDate } : {}), ...(campaign.endDate ? { endDate: campaign.endDate } : {}),
@@ -108,7 +83,7 @@ async function summaryOf(ctx: Ctx, campaign: Campaign, all: Awaited<ReturnType<t
     status: campaign.status, createdAt: campaign.createdAt, updatedAt: campaign.updatedAt,
     counts: {
       posts: posts.length, published: posts.filter((post) => post.status === "published").length, generations: generations.length,
-      leads: leads.length, won: leads.filter(({ lead }) => lead.stage === "Won").length, openIssues: tasks.filter((task) => !task.done).length,
+      openIssues: tasks.filter((task) => !task.done).length,
     },
   };
 }
@@ -118,8 +93,7 @@ export const list = query({
   handler: async (ctx, args) => {
     const { member } = await requireMember(ctx, args.projectId, args.sessionToken);
     const campaigns = await ctx.db.query("campaigns").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", args.projectId)).order("desc").take(CAMPAIGNS_SHOWN);
-    const all = await leadsWithCaptures(ctx, args.projectId);
-    return { canEdit: canEdit(member), campaigns: await Promise.all(campaigns.map((campaign) => summaryOf(ctx, campaign, all))) };
+    return { canEdit: canEdit(member), campaigns: await Promise.all(campaigns.map((campaign) => summaryOf(ctx, campaign))) };
   },
 });
 
@@ -129,19 +103,14 @@ export const get = query({
     await requireMember(ctx, args.projectId, args.sessionToken);
     const campaign = await ctx.db.get(args.campaignId);
     if (!campaign || campaign.projectId !== args.projectId) return null;
-    const all = await leadsWithCaptures(ctx, args.projectId);
     const posts = await present(ctx, campaign.projectId, campaign.postIds) as Doc<"broadcastPosts">[];
     const generations = await present(ctx, campaign.projectId, campaign.generationIds) as Doc<"studioGenerations">[];
     const tasks = await present(ctx, campaign.projectId, campaign.taskIds) as Doc<"tasks">[];
     const columns = new Map<string, string>();
     for (const task of tasks) if (!columns.has(task.columnId)) columns.set(task.columnId, (await ctx.db.get(task.columnId))?.title ?? "");
-    const settings = await ctx.db.query("pipelineSettings").withIndex("by_projectId", (q) => q.eq("projectId", args.projectId)).unique();
-    const stages = settings?.stages?.length ? settings.stages : [...PIPELINE_STAGES];
-    const leads = campaignLeads(campaign, all);
     const postIds = new Set<string>(posts.map((post) => post._id));
     return {
-      ...await summaryOf(ctx, campaign, all),
-      currency: settings?.currency ?? "EUR",
+      ...await summaryOf(ctx, campaign),
       posts: posts.map((post) => ({
         _id: post._id, status: post.status, needsApproval: Boolean(post.agentName) && !post.approvedAt,
         ...(post.scheduledAt ? { scheduledAt: post.scheduledAt } : {}),
@@ -152,14 +121,6 @@ export const get = query({
         _id: row._id, kind: row.kind, status: row.status, prompt: row.prompt.slice(0, 300), modelLabel: row.modelLabel, createdAt: row.createdAt,
         ...(row.outputs[0] ? { output: row.outputs[0].url } : {}),
       })),
-      leads: leads.map(({ lead, linked }) => ({
-        _id: lead._id, name: lead.name, stage: lead.stage, source: lead.source, linked, createdAt: lead.createdAt,
-        ...(lead.company ? { company: lead.company } : {}), ...(lead.value !== undefined ? { value: lead.value } : {}),
-      })),
-      stages: stages.map((stage) => {
-        const inStage = leads.filter(({ lead }) => lead.stage === stage);
-        return { stage, count: inStage.length, value: inStage.reduce((sum, { lead }) => sum + (lead.value ?? 0), 0) };
-      }),
       issues: tasks.map((task) => ({
         _id: task._id, title: task.title, done: task.done, column: columns.get(task.columnId) ?? "", priority: task.priority,
         ...(task.githubIssueNumber ? { githubIssueNumber: task.githubIssueNumber } : {}), ...(task.assignedToName || task.assignedToEmail ? { assignee: task.assignedToName || task.assignedToEmail } : {}),
@@ -212,8 +173,8 @@ export const link = mutation({
   handler: async (ctx, args) => {
     await editorOf(ctx, args.projectId, args.sessionToken);
     const campaign = await campaignOf(ctx, args.projectId, args.campaignId);
-    const table = ({ post: "broadcastPosts", generation: "studioGenerations", lead: "pipelineLeads", issue: "tasks" } as const)[args.kind];
-    const field = ({ post: "postIds", generation: "generationIds", lead: "leadIds", issue: "taskIds" } as const)[args.kind];
+    const table = ({ post: "broadcastPosts", generation: "studioGenerations", issue: "tasks" } as const)[args.kind];
+    const field = ({ post: "postIds", generation: "generationIds", issue: "taskIds" } as const)[args.kind];
     const id = ctx.db.normalizeId(table, args.itemId);
     const current = campaign[field] as string[];
     if (args.remove) {

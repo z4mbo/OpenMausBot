@@ -16,7 +16,6 @@ import { requestIssueFocus } from "@/lib/origin-issue-focus";
 import { handOff as handIssueTo } from "@/lib/origin-handoff";
 import { StudioPage } from "./origin-studio/StudioPage";
 import { BroadcastPage } from "./origin-broadcast/BroadcastPage";
-import { PipelinePage } from "./origin-pipeline/PipelinePage";
 import { LaunchpadDialog } from "./origin-launchpad/LaunchpadDialog";
 import { ChiefSectionBar } from "./ProjectSectionBar";
 import { sectionEntry, teamAgents } from "./project-sections";
@@ -85,7 +84,6 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   if (section === "draw") return <ProjectDrawPage {...page} agent={bot} />;
   if (section === "studio") return <StudioPage {...page} agent={bot} />;
   if (section === "broadcast") return <BroadcastPage {...page} agent={bot} />;
-  if (section === "pipeline") return <PipelinePage {...page} agent={bot} />;
   if (section === "settings") return <ProjectSettingsPage {...page} />;
   const Icon = entry.icon;
   return (

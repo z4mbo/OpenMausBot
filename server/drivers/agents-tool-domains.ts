@@ -1,5 +1,5 @@
 // Origin's domain sections, whose tools a turn may list in short with find_tool for the whole definition. A tool joins
-// its section by its name's prefix, so a new Studio, Broadcast, Pipeline, Canvas, Pages, Campaign or Standup tool is
+// its section by its name's prefix, so a new Studio, Broadcast, Canvas, Pages, Campaign or Standup tool is
 // deferred without being listed anywhere else.
 
 export interface DeferredToolDomain {
@@ -15,8 +15,6 @@ export const DEFERRED_TOOL_DOMAINS: readonly DeferredToolDomain[] = [
     tools: { origin_studio_workflow_list: "workflow workflows pipeline template templates node graph", origin_studio_workflow_run: "run workflow template reel avatar podcast chain steps campaign pack", origin_studio_library: "character characters product style library consistent reference", origin_studio_presets: "preset presets effect effects motion transfer try-on relight angle higgsfield comfyui" } },
   { prefix: "origin_broadcast_", words: "social media post tweet twitter publish share announce linkedin instagram bluesky facebook tiktok",
     tools: { origin_broadcast_draft: "write compose", origin_broadcast_list: "scheduled queued posts" } },
-  { prefix: "origin_pipeline_", words: "sales crm lead contact prospect customer client deal outreach follow-up inbox conversation reply quote payment won",
-    tools: { origin_pipeline_contact: "call phone ring email text message reach send", origin_pipeline_list_leads: "list show my leads board" } },
   { prefix: "origin_canvas", words: "mockup wireframe layout ui screen frame",
     tools: { origin_canvas_edit: "design build draw create make change section hero pricing landing" } },
   { prefix: "origin_campaign_", words: "campaign launch marketing promotion" },

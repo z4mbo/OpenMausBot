@@ -1,21 +1,20 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
 
-export const pipelineActor = v.object({ kind: v.union(v.literal("member"), v.literal("agent"), v.literal("system")), name: v.string(), id: v.optional(v.string()) });
+const pipelineActor = v.object({ kind: v.union(v.literal("member"), v.literal("agent"), v.literal("system")), name: v.string(), id: v.optional(v.string()) });
 
-export const pipelineActivityKind = v.union(
+const pipelineActivityKind = v.union(
   v.literal("email"), v.literal("sms"), v.literal("whatsapp"), v.literal("call"), v.literal("ai_call"),
   v.literal("note"), v.literal("stage"), v.literal("capture"), v.literal("import"), v.literal("deal"),
 );
 
-/** pending: an agent drafted it and a person must approve it; approved: cleared for the app server to send; received: the lead wrote in. */
-export const pipelineActivityStatus = v.union(
+const pipelineActivityStatus = v.union(
   v.literal("logged"), v.literal("pending"), v.literal("approved"), v.literal("sending"), v.literal("sent"),
   v.literal("in_progress"), v.literal("done"), v.literal("failed"), v.literal("discarded"), v.literal("received"),
 );
 
-export const sequenceChannel = v.union(v.literal("email"), v.literal("sms"), v.literal("whatsapp"), v.literal("ai_call"), v.literal("call_task"));
-export const sequenceStep = v.object({
+const sequenceChannel = v.union(v.literal("email"), v.literal("sms"), v.literal("whatsapp"), v.literal("ai_call"), v.literal("call_task"));
+const sequenceStep = v.object({
   day: v.number(),
   channel: sequenceChannel,
   subject: v.optional(v.string()),
@@ -25,7 +24,7 @@ export const sequenceStep = v.object({
   activityId: v.optional(v.id("pipelineActivities")),
 });
 
-export const inboxState = v.union(v.literal("open"), v.literal("snoozed"), v.literal("archived"));
+const inboxState = v.union(v.literal("open"), v.literal("snoozed"), v.literal("archived"));
 
 const coachAdvice = {
   nextAction: v.string(),
@@ -33,15 +32,15 @@ const coachAdvice = {
   riskReason: v.string(),
   followUp: v.object({ channel: v.union(v.literal("email"), v.literal("sms"), v.literal("whatsapp")), subject: v.optional(v.string()), body: v.string() }),
 };
-export const dealCoachAdvice = v.object(coachAdvice);
-export const dealCoach = v.object({ ...coachAdvice, by: v.string(), at: v.number() });
+const dealCoach = v.object({ ...coachAdvice, by: v.string(), at: v.number() });
 
-export const salesLineItem = v.object({ name: v.string(), quantity: v.number(), unitPrice: v.number() });
-export const salesViewFilters = v.object({
+const salesLineItem = v.object({ name: v.string(), quantity: v.number(), unitPrice: v.number() });
+const salesViewFilters = v.object({
   query: v.optional(v.string()), stage: v.optional(v.string()), owner: v.optional(v.string()), source: v.optional(v.string()), tag: v.optional(v.string()),
   unread: v.optional(v.boolean()), reach: v.optional(v.union(v.literal("email"), v.literal("phone"))),
 });
 
+/** Known risk: these tables keep existing Sales rows that no code reads or writes any more. */
 export const pipelineTables = {
   pipelineLeads: defineTable({
     projectId: v.id("projects"),

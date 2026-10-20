@@ -3,21 +3,12 @@ import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { BodyTooLarge, readBoundedText } from "../lib/http-body";
 import { upload, uploadOptions } from "./storage";
-import { captureLead, captureOptions } from "./pipelineCapture";
-import { brevoWebhook, twilioWebhook } from "./pipelineInbound";
-import { stripeWebhook } from "./pipelineStripe";
-import { servePage, submitPage } from "./pagesHttp";
+import { servePage } from "./pagesHttp";
 
 const http = httpRouter();
 http.route({ path: "/uploads", method: "POST", handler: upload });
 http.route({ path: "/uploads", method: "OPTIONS", handler: uploadOptions });
-http.route({ path: "/pipeline/capture", method: "POST", handler: captureLead });
-http.route({ path: "/pipeline/capture", method: "OPTIONS", handler: captureOptions });
-http.route({ path: "/pipeline/twilio", method: "POST", handler: twilioWebhook });
-http.route({ path: "/pipeline/brevo", method: "POST", handler: brevoWebhook });
-http.route({ path: "/pipeline/stripe", method: "POST", handler: stripeWebhook });
 http.route({ pathPrefix: "/p/", method: "GET", handler: servePage });
-http.route({ pathPrefix: "/p/", method: "POST", handler: submitPage });
 http.route({ path: "/integrations", method: "POST", handler: httpAction(async (ctx, request) => {
   const secret = process.env.ORIGIN_INTEGRATION_SECRET;
   if (!secret || secret.length < 32) return new Response("Unavailable", { status: 503 });

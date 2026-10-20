@@ -20,9 +20,7 @@ export function CampaignCard({ card }: { card: Card }) {
   const dates = [campaign.startDate, campaign.endDate].filter(Boolean).join(" – ");
   const stats = [
     { label: "Posts published", value: `${campaign.counts.published}/${campaign.counts.posts}` },
-    { label: "Studio pieces", value: String(campaign.counts.generations) },
-    { label: "Leads won", value: `${campaign.counts.won}/${campaign.counts.leads}` },
-    { label: "Open issues", value: String(campaign.counts.openIssues) },
+    { label: "Studio pieces", value: String(campaign.counts.generations) },    { label: "Open issues", value: String(campaign.counts.openIssues) },
   ];
   return (
     <CardFrame kind="campaign" label={`Campaign ${campaign.name}`} icon={Megaphone}

@@ -21,14 +21,12 @@ import { addedAssetCard, appendOriginCards, assetsCard, CARD_NOTE, feedbackCard,
 import { PASS, type RouteHandler } from "./routes/table.ts";
 import { sectionKey, type BotRecord, type Store } from "./store.ts";
 import { broadcastDraft, broadcastList, broadcastSchedule, type BroadcastToolScope } from "./broadcast/tools.ts";
-import { pipelineTools } from "./origin-pipeline-tools.ts";
 import { standupTools } from "./origin-standup-tool.ts";
 import { campaignTools } from "./origin-campaign-tools.ts";
 import { brandTools } from "./origin-brand-tools.ts";
 import { vaultAgentSecrets } from "./origin-vault-agent.ts";
 import { callNotesTools } from "./origin-call-notes.ts";
 import { launchpadTools } from "./origin-launchpad-tools.ts";
-import type { PipelineSender } from "./origin-pipeline.ts";
 import { runStudioTool, STUDIO_TOOL_NAMES, type StudioRunner, type StudioToolResult, type WorkflowExecutor } from "./origin-studio-tools.ts";
 
 export interface OriginCloudState {
@@ -298,7 +296,6 @@ interface ToolContext {
   github?: OriginGitHub;
   teamChat?: OriginTeamChat;
   folder?(projectId: string): OriginProjectFolder | null;
-  pipeline?: PipelineSender;
   cloudUrl: string;
   studio?: StudioRunner;
   studioWorkflows?: WorkflowExecutor;
@@ -984,10 +981,6 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
 
   ...Object.fromEntries(STUDIO_TOOL_NAMES.map((name) => [name, async (args: Args, ctx: ToolContext) => runStudioTool(name, args, await studioScope(ctx, args))])),
 
-  ...pipelineTools(async (args, ctx: ToolContext) => {
-    const project = await pickProject(ctx, args.project);
-    return { client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId, projectName: await projectName(ctx, project.projectId), caller: ctx.caller, ...(ctx.pipeline ? { sender: ctx.pipeline } : {}) };
-  }),
   ...campaignTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...brandTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...callNotesTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), origin_vault_list: (args, ctx) => vaultAgentSecrets().tools((a, c: ToolContext) => broadcastScope(c, a)).origin_vault_list(args, ctx),
   ...launchpadTools((args, ctx: ToolContext) => broadcastScope(ctx, args)),
   ...standupTools(async (args, ctx: ToolContext) => Promise.all((trimmed(args.project) || ctx.reachable.length === 1 ? [await pickProject(ctx, args.project)] : ctx.reachable).map(async ({ projectId }) => { const doc = await projectDoc(ctx, projectId); return { client: ctx.client, sessionToken: ctx.sessionToken, projectId, projectName: text(doc.name) || projectId, teamId: text(doc.teamId) }; }))),
@@ -1004,7 +997,6 @@ export interface OriginToolDeps {
   file?(path: string): Promise<OriginAssetFile>;
   teamChat?: OriginTeamChat;
   folder?(projectId: string): OriginProjectFolder | null;
-  pipeline?: PipelineSender;
   studio?: StudioRunner;
   studioWorkflows?: WorkflowExecutor;
 }
@@ -1026,7 +1018,7 @@ export async function runOriginTool(name: string, args: Args, botId: string, dep
       client: deps.connect(url), sessionToken, bots: deps.bots, links: deps.state.projects, caller, reachable,
       ...(phase ? { phase } : {}), ...(deps.file ? { file: deps.file } : {}), ...(deps.github ? { github: deps.github } : {}),
       ...(deps.teamChat ? { teamChat: deps.teamChat } : {}), ...(deps.folder ? { folder: deps.folder } : {}),
-      ...(deps.pipeline ? { pipeline: deps.pipeline } : {}), cloudUrl: url, ...(deps.studio ? { studio: deps.studio } : {}), ...(deps.studioWorkflows ? { studioWorkflows: deps.studioWorkflows } : {}), projectDocs: new Map(),
+      cloudUrl: url, ...(deps.studio ? { studio: deps.studio } : {}), ...(deps.studioWorkflows ? { studioWorkflows: deps.studioWorkflows } : {}), projectDocs: new Map(),
     });
   } catch (error) {
     if (error instanceof OriginRefusal) return { text: error.message, isError: true };
@@ -1067,7 +1059,6 @@ export interface OriginCloudRouteDeps {
   github?: () => OriginGitHub;
   teamChat?: OriginTeamChat;
   folder?(projectId: string): OriginProjectFolder | null;
-  pipeline?: PipelineSender;
   /** After a bot changed Origin data or a project link changed, so cached project context refreshes. */
   changed?(): void;
 }
@@ -1089,7 +1080,7 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
       const readFile = deps.turnFile ? (requested: string) => deps.turnFile!(turn, requested) : undefined;
       const result = await runOriginTool(name, record(body.arguments), turn.botId, {
         bots: store.bots, state: readOriginCloud(file()), connect, ...(readFile ? { file: readFile } : {}), ...(deps.github ? { github: deps.github() } : {}),
-        ...(deps.teamChat ? { teamChat: deps.teamChat } : {}), ...(deps.folder ? { folder: deps.folder } : {}), ...(deps.pipeline ? { pipeline: deps.pipeline } : {}),
+        ...(deps.teamChat ? { teamChat: deps.teamChat } : {}), ...(deps.folder ? { folder: deps.folder } : {}),
       }, phase);
       if (!result.isError && !isReadOnlyAgentTool(name)) deps.changed?.();
       return json(res, 200, appendOriginCards(store, turn, bot, name, result));

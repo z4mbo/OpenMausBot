@@ -37,7 +37,7 @@ export function ProjectSettingsPage(props: OriginPageProps) {
               {project.teamId && <ChiefHeartbeatCard projectId={projectId} />}
               {project.teamId && (
                 <Card icon={<KeyRound size={15} />} title="Integration keys">
-                  <p className="mb-2 text-[12.5px] leading-relaxed text-ink-secondary">The keys this project's Studio, Sales and agents use. A key shared with this project only works here; a key of your own always wins.</p>
+                  <p className="mb-2 text-[12.5px] leading-relaxed text-ink-secondary">The keys this project's Studio and agents use. A key shared with this project only works here; a key of your own always wins.</p>
                   <IntegrationKeyList teamId={project.teamId} project={{ id: projectId, name: project.name, canManage: isAdmin }} />
                 </Card>
               )}

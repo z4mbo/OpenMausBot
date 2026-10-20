@@ -82,7 +82,7 @@ function StepBody({ step, integrations, github, canEdit }: { step: StackStep; in
   );
 }
 
-/** A workspace's guided setup: each service the idea-to-sale journey uses, whether it is connected, and by whom. */
+/** A workspace's guided setup: each service the project journey uses, whether it is connected, and by whom. */
 export function ConnectStackChecklist({ teamId, canEdit }: { teamId: string | null; canEdit: boolean }) {
   const [integrations, setIntegrations] = useState<IntegrationStatus[] | null>(null);
   const [github, setGitHub] = useState<GitHubState>(null);

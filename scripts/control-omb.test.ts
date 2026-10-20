@@ -44,12 +44,4 @@ describe("the fixture's Live call environment", () => {
     }
     expect(childEnv({ OMB_OPENAI_LIVE_KEY: "sk-real" })).not.toHaveProperty("OMB_OPENAI_LIVE_KEY");
   });
-
-  it("passes only a loopback fake Pipeline provider through", () => {
-    expect(childEnv({ OMB_PIPELINE_PROVIDER_URL: "http://127.0.0.1:4200" }).OMB_PIPELINE_PROVIDER_URL).toBe("http://127.0.0.1:4200");
-    for (const url of ["https://api.brevo.com", "http://localhost:4200", "http://127.0.0.1:4200/v3"]) {
-      expect(childEnv({ OMB_PIPELINE_PROVIDER_URL: url }), url).not.toHaveProperty("OMB_PIPELINE_PROVIDER_URL");
-    }
-  });
-
 });

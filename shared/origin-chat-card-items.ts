@@ -65,7 +65,7 @@ export function campaignCardItem(value: unknown): OriginCampaignCardItem {
     ...optional("slug", text(campaign.slug)),
     counts: {
       posts: count(counts.posts), published: count(counts.published), generations: count(counts.generations),
-      leads: count(counts.leads), won: count(counts.won), openIssues: count(counts.openIssues),
+      openIssues: count(counts.openIssues),
     },
   };
 }

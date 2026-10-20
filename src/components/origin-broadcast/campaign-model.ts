@@ -54,7 +54,7 @@ export function campaignBrief(campaign: CampaignSummary, projectName: string): s
     linked,
     "Break it into Origin issues with origin_create_issue and attach each with origin_campaign_link, handing them to the right agents. "
       + "Make the creatives with origin_studio_generate and attach the keepers; draft the posts per channel with origin_broadcast_draft and attach them too. "
-      + `Tag every link to the site with utm_campaign=${campaign.slug} so the leads it brings count toward it. `
+      + `Tag every link to the site with utm_campaign=${campaign.slug} so its traffic counts toward it. `
       + "Posts wait for my approval in Broadcast, so tell me when they are ready, and set the campaign to running with origin_campaign_create when it starts.",
   ].filter(Boolean).join("\n\n");
 }

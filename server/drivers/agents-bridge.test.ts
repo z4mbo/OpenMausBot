@@ -268,7 +268,6 @@ describe("find_tool", () => {
     ["cron", "propose_routine"],
     ["make an image", "origin_studio_generate"],
     ["post this on X", "origin_broadcast_draft"],
-    ["call this lead", "origin_pipeline_contact"],
     ["design a pricing section", "origin_canvas_edit"],
   ])("ranks the hidden tool first from how a person would ask: %s", async (query, expected) => {
     const matches = (await found(bridgeFor(FULL_CHIEF), query)).matches;
@@ -557,7 +556,7 @@ describe("a turn that lists its domain tools in short", () => {
   it("defers the domain sections only, never a Chief's or an issue's tool", () => {
     const tools = availableTools(profile(FULL_CHIEF)) as BridgeTool[];
     const deferred = names(createToolDeferral(tools).deferred);
-    for (const domain of ["origin_studio_", "origin_broadcast_", "origin_pipeline_", "origin_canvas"]) {
+    for (const domain of ["origin_studio_", "origin_broadcast_", "origin_canvas"]) {
       expect(deferred.some((tool) => tool.startsWith(domain)), domain).toBe(true);
     }
     expect(deferred.every((tool) => DEFERRED_TOOL_DOMAINS.some((domain) => tool.startsWith(domain.prefix)))).toBe(true);
@@ -588,12 +587,10 @@ describe("a turn that lists its domain tools in short", () => {
   it.each([
     ["make an image", "origin_studio_generate"],
     ["post this on X", "origin_broadcast_draft"],
-    ["call this lead", "origin_pipeline_contact"],
     ["design a pricing section", "origin_canvas_edit"],
     ["read the canvas", "origin_canvas"],
     ["what posts are scheduled", "origin_broadcast_list"],
     ["save that picture to assets", "origin_studio_save_asset"],
-    ["list my leads", "origin_pipeline_list_leads"],
   ])("ranks the domain tool first from how a person would ask: %s", async (query, expected) => {
     const matches = await matchesFor(deferralFor(FULL_CHIEF), query);
     expect(matches[0]!.name).toBe(expected);

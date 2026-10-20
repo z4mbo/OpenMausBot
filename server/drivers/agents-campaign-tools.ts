@@ -3,7 +3,7 @@ import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 export const CAMPAIGN_TOOL_DEFINITIONS = [
   {
     name: "origin_campaign_create",
-    description: "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Broadcast posts, Studio generations, Pipeline leads and issues of one push; leads captured with its utm_campaign count toward it." + ORIGIN_SCOPE,
+    description: "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Broadcast posts, Studio generations and issues of one push." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -22,7 +22,7 @@ export const CAMPAIGN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_campaign_get",
-    description: "List an Origin project's campaigns, or read one with campaign: its brief, posts with per-channel status, links and likes or reposts, Studio generations, attributed leads by stage, and issues." + ORIGIN_SCOPE,
+    description: "List an Origin project's campaigns, or read one with campaign: its brief, posts with per-channel status, links and likes or reposts, Studio generations and issues." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: { campaign: { type: "string", maxLength: 120, description: "Id or name; omit to list them." }, project: ORIGIN_PROJECT },
@@ -30,13 +30,13 @@ export const CAMPAIGN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_campaign_link",
-    description: "Attach a Broadcast post, Studio generation, Pipeline lead or Origin issue to a campaign, or detach it with remove." + ORIGIN_SCOPE,
+    description: "Attach a Broadcast post, Studio generation or Origin issue to a campaign, or detach it with remove." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
         campaign: { type: "string", minLength: 1, maxLength: 120, description: "Id or name from origin_campaign_get." },
-        kind: { type: "string", enum: ["post", "generation", "lead", "issue"] },
-        item_id: { type: "string", minLength: 1, maxLength: 64, description: "From origin_broadcast_list, origin_studio_list, origin_pipeline_list_leads or origin_list_issues." },
+        kind: { type: "string", enum: ["post", "generation", "issue"] },
+        item_id: { type: "string", minLength: 1, maxLength: 64, description: "From origin_broadcast_list, origin_studio_list or origin_list_issues." },
         remove: { type: "boolean" },
         project: ORIGIN_PROJECT,
       },

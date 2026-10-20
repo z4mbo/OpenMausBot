@@ -3,7 +3,6 @@ import { internalMutation, internalQuery, mutation, query, type MutationCtx, typ
 import type { Doc, Id } from "./_generated/dataModel";
 import { canEdit, requireMember } from "./lib/permissions";
 import { invitationAddress } from "./lib/invitationMail";
-import { newToken, settingsOf } from "./lib/pipelineCore";
 import { countPageView } from "./pulse";
 import { PAGE_BODY_MAX, PAGE_DESCRIPTION_MAX, PAGE_SLUG, PAGE_TITLE_MAX, pageSlug, renderCanvasPage } from "../../shared/canvas-page";
 import { decodeScene, descendants } from "../../shared/canvas-scene";
@@ -11,7 +10,6 @@ import { decodeScene, descendants } from "../../shared/canvas-scene";
 type Ctx = QueryCtx | MutationCtx;
 
 const PAGES_PER_PROJECT = 50;
-const CAPTURES_COUNTED = 5000;
 
 const pageRow = v.object({
   _id: v.id("publishedPages"),
@@ -22,7 +20,6 @@ const pageRow = v.object({
   description: v.string(),
   url: v.string(),
   views: v.number(),
-  leads: v.number(),
   leadForms: v.number(),
   publishedBy: v.string(),
   updatedAt: v.number(),
@@ -43,26 +40,17 @@ async function siteFor(ctx: Ctx, team: Doc<"teams">): Promise<string> {
   return taken && taken.teamId !== team._id ? `w-${team._id.toLowerCase()}` : preferred;
 }
 
-async function captureCounts(ctx: Ctx, projectId: Id<"projects">): Promise<Map<string, number>> {
-  const rows = await ctx.db.query("pipelineActivities").withIndex("by_projectId_and_kind_and_createdAt", (q) => q.eq("projectId", projectId).eq("kind", "capture")).order("desc").take(CAPTURES_COUNTED);
-  const counts = new Map<string, number>();
-  for (const row of rows) if (row.actor.kind === "system") counts.set(row.actor.name, (counts.get(row.actor.name) ?? 0) + 1);
-  return counts;
-}
-
 export const list = query({
   args: { sessionToken: v.string(), projectId: v.id("projects") },
-  returns: v.object({ pages: v.array(pageRow), captureEnabled: v.boolean() }),
+  returns: v.object({ pages: v.array(pageRow) }),
   handler: async (ctx, args) => {
     await requireMember(ctx, args.projectId, args.sessionToken);
     const pages = await ctx.db.query("publishedPages").withIndex("by_projectId", (q) => q.eq("projectId", args.projectId)).take(PAGES_PER_PROJECT);
-    const counts = pages.length ? await captureCounts(ctx, args.projectId) : new Map<string, number>();
     const origin = pagesOrigin();
     return {
-      captureEnabled: (await settingsOf(ctx, args.projectId))?.captureEnabled ?? false,
       pages: pages.sort((a, b) => b.updatedAt - a.updatedAt).map((page) => ({
         _id: page._id, canvasId: page.canvasId, frameId: page.frameId, slug: page.slug, title: page.title, description: page.description,
-        url: `${origin}${pagePath(page)}`, views: page.views, leads: counts.get(page.slug) ?? 0, leadForms: page.leadForms, publishedBy: page.publishedBy, updatedAt: page.updatedAt,
+        url: `${origin}${pagePath(page)}`, views: page.views, leadForms: page.leadForms, publishedBy: page.publishedBy, updatedAt: page.updatedAt,
       })),
     };
   },
@@ -78,7 +66,7 @@ export const publish = mutation({
     sessionToken: v.string(), projectId: v.id("projects"), canvasId: v.id("canvases"), frameId: v.string(),
     slug: v.string(), title: v.string(), description: v.optional(v.string()), ogFileId: v.optional(v.string()),
   },
-  returns: v.object({ pageId: v.id("publishedPages"), url: v.string(), created: v.boolean(), leadForms: v.number(), captureTurnedOn: v.boolean() }),
+  returns: v.object({ pageId: v.id("publishedPages"), url: v.string(), created: v.boolean(), leadForms: v.number() }),
   handler: async (ctx, args) => {
     const { member, user, project } = await requireMember(ctx, args.projectId, args.sessionToken);
     if (!canEdit(member)) throw new Error("Edit role required");
@@ -122,14 +110,7 @@ export const publish = mutation({
     if (existing) { await ctx.db.patch(existing._id, fields); pageId = existing._id; }
     else pageId = await ctx.db.insert("publishedPages", { teamId: team._id, projectId: project._id, canvasId: canvas._id, frameId: frame.id, site, views: 0, publishedAt: now, ...fields });
 
-    let captureTurnedOn = false;
-    if (rendered.leadForms) {
-      const settings = await settingsOf(ctx, project._id);
-      if (!settings) await ctx.db.insert("pipelineSettings", { projectId: project._id, captureToken: newToken(), captureEnabled: true, autoSend: false });
-      else if (!settings.captureEnabled) await ctx.db.patch(settings._id, { captureEnabled: true });
-      captureTurnedOn = !settings?.captureEnabled;
-    }
-    return { pageId, url: `${pagesOrigin()}/p/${site}/${slug}`, created: !existing, leadForms: rendered.leadForms, captureTurnedOn };
+    return { pageId, url: `${pagesOrigin()}/p/${site}/${slug}`, created: !existing, leadForms: rendered.leadForms };
   },
 });
 
@@ -172,15 +153,5 @@ export const viewed = internalMutation({
     await ctx.db.patch(page._id, { views: page.views + 1 });
     await countPageView(ctx, page.projectId, Date.now());
     return null;
-  },
-});
-
-export const captureTarget = internalQuery({
-  args: address, returns: v.union(v.null(), v.object({ token: v.string(), leadForms: v.number() })),
-  handler: async (ctx, args) => {
-    const page = await pageAt(ctx, args.site, args.slug);
-    if (!page) return null;
-    const settings = await settingsOf(ctx, page.projectId);
-    return { token: settings?.captureToken ?? "", leadForms: page.leadForms };
   },
 });

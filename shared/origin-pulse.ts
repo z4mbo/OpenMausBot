@@ -1,9 +1,9 @@
 export const PULSE_RANGES = [7, 30] as const;
 export type PulseRange = (typeof PULSE_RANGES)[number];
 
-export const PULSE_STAGES = ["idea", "build", "launch", "grow"] as const;
+export const PULSE_STAGES = ["idea", "build", "launch"] as const;
 export type PulseStage = (typeof PULSE_STAGES)[number];
-export const PULSE_STAGE_LABEL: Record<PulseStage, string> = { idea: "Plan", build: "Build", launch: "Launch", grow: "Sell" };
+export const PULSE_STAGE_LABEL: Record<PulseStage, string> = { idea: "Plan", build: "Build", launch: "Launch" };
 
 export type PulseBudgetLevel = "ok" | "warn" | "over";
 
@@ -45,23 +45,6 @@ export interface ProjectPulse {
     /** Last read numbers of campaign posts published in range. */
     engagement: { likes: number; reposts: number; replies: number; impressions: number; posts: number };
   };
-  grow: {
-    currency: string;
-    total: number;
-    stages: { stage: string; count: number; value: number }[];
-    leads: PulseCount;
-    leadsSeries: number[];
-    won: PulseCount;
-    /** Won leads over all leads, 0 to 1; null with no leads. */
-    conversion: number | null;
-    /** What contacts moved to Won in range were worth: the amounts their deals were won for, or their value. */
-    revenue: PulseCount;
-    /** Value of leads in open stages. */
-    pipelineValue: number;
-    repliesAwaiting: number;
-    leadsAwaiting: number;
-    draftsAwaiting: number;
-  };
   team: {
     runs: PulseCount;
     runsSeries: number[];
@@ -81,7 +64,7 @@ export interface ProjectPulse {
   truncated: boolean;
 }
 
-export type PulseAttentionKind = "prs" | "replies" | "drafts" | "approvals" | "failed" | "budget";
+export type PulseAttentionKind = "prs" | "approvals" | "failed" | "budget";
 export interface PulseAttention { kind: PulseAttentionKind; count: number; tone: "warn" | "danger" }
 
 export interface PulseStageInput {
@@ -91,7 +74,6 @@ export interface PulseStageInput {
   prs: number;
   pagesLive: number;
   postsPublished: number;
-  leads: number;
 }
 
 /** Each stage counts as reached on real data; the project sits at the furthest one reached. */
@@ -100,17 +82,14 @@ export function inferStage(input: PulseStageInput): { stage: PulseStage; reached
     idea: true,
     build: input.issues > 0 || input.runs > 0 || input.prs > 0,
     launch: input.pagesLive > 0 || input.postsPublished > 0,
-    grow: input.leads > 0,
   };
   const stage = [...PULSE_STAGES].reverse().find((candidate) => reached[candidate]) ?? "idea";
   return { stage, reached };
 }
 
-export function pulseAttention(pulse: Pick<ProjectPulse, "build" | "grow" | "team">): PulseAttention[] {
+export function pulseAttention(pulse: Pick<ProjectPulse, "build" | "team">): PulseAttention[] {
   const items: PulseAttention[] = [
     { kind: "prs", count: pulse.build.prsWaiting, tone: "warn" },
-    { kind: "replies", count: pulse.grow.leadsAwaiting, tone: "warn" },
-    { kind: "drafts", count: pulse.grow.draftsAwaiting, tone: "warn" },
     { kind: "approvals", count: pulse.team.approvalsWaiting, tone: "warn" },
     { kind: "failed", count: pulse.team.failed, tone: "danger" },
     { kind: "budget", count: pulse.team.budgetLevel === "ok" ? 0 : 1, tone: pulse.team.budgetLevel === "over" ? "danger" : "warn" },
@@ -123,8 +102,6 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 export function attentionLabel(item: PulseAttention, budgetLevel: PulseBudgetLevel = "warn"): string {
   switch (item.kind) {
     case "prs": return `${plural(item.count, "PR", "PRs")} waiting`;
-    case "replies": return `${plural(item.count, "lead", "leads")} replied`;
-    case "drafts": return `${plural(item.count, "draft", "drafts")} to approve`;
     case "approvals": return `${plural(item.count, "agent", "agents")} waiting for approval`;
     case "failed": return `${plural(item.count, "failed run", "failed runs")}`;
     case "budget": return budgetLevel === "over" ? "Budget reached" : "Budget at 80%";

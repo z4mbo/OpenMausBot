@@ -4,7 +4,6 @@ import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import { BROADCAST_CHANNELS, BROADCAST_RULES } from "../../../shared/broadcast";
 import { CAMPAIGN_LIMITS, campaignSlug, type CampaignDetail, type CampaignLinkKind, type CampaignSummary } from "../../../shared/origin-campaigns";
-import type { PipelineBoard } from "../../../shared/origin-pipeline";
 import type { CloudBoard } from "../origin-pages/cloud-types";
 import { Field, Modal, Notice, ghostButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
 import { ChannelMark } from "./ChannelMark";
@@ -82,28 +81,25 @@ export function CampaignDialog({ projectId, campaign, onSaved, onClose }: {
 
 type Candidate = { id: string; title: string; meta: string; thumb?: string };
 
-const LINK_TITLE: Record<CampaignLinkKind, string> = { post: "Link posts", generation: "Link Studio content", lead: "Link leads", issue: "Link issues" };
+const LINK_TITLE: Record<CampaignLinkKind, string> = { post: "Link posts", generation: "Link Studio content", issue: "Link issues" };
 
 type StudioRow = { _id: string; kind: string; status: string; prompt: string; modelLabel: string; outputs: { url: string; kind: string }[] };
 
 function useCandidates(projectId: string, kind: CampaignLinkKind, posts: readonly BroadcastPost[]): Candidate[] | undefined {
   const studio = useCloudQuery<StudioRow[]>("studio:list", kind === "generation" ? { projectId } : "skip");
-  const pipeline = useCloudQuery<PipelineBoard>("pipeline:board", kind === "lead" ? { projectId } : "skip");
   const board = useCloudQuery<CloudBoard>("tasks:board", kind === "issue" ? { projectId } : "skip");
   return useMemo(() => {
     if (kind === "post") return posts.map((post) => ({ id: post._id, title: post.variants[0]?.text.trim() || "Media post", meta: `${post.status} · ${post.variants.map((variant) => BROADCAST_RULES[variant.channel].label).join(", ")}` }));
     if (kind === "generation") return studio?.filter((row) => row.status !== "failed").map((row) => ({ id: row._id, title: row.prompt || row.modelLabel, meta: `${row.kind} · ${row.modelLabel}`, ...(row.outputs[0]?.kind === "image" ? { thumb: row.outputs[0].url } : {}) }));
-    if (kind === "lead") return pipeline?.leads.map((lead) => ({ id: lead._id, title: lead.name, meta: [lead.company, lead.stage, lead.source].filter(Boolean).join(" · ") }));
     if (!board) return undefined;
     const columns = new Map(board.columns.map((column) => [column._id, column.title]));
     return board.tasks.map((task) => ({ id: task._id, title: task.title, meta: `${task.done ? "Done" : columns.get(task.columnId) ?? ""}${task.assignedToName ? ` · ${task.assignedToName}` : ""}` }));
-  }, [kind, posts, studio, pipeline, board]);
+  }, [kind, posts, studio, board]);
 }
 
 function linkedIds(detail: CampaignDetail, kind: CampaignLinkKind): Set<string> {
   if (kind === "post") return new Set(detail.posts.map((post) => post._id));
   if (kind === "generation") return new Set(detail.generations.map((row) => row._id));
-  if (kind === "lead") return new Set(detail.leads.filter((lead) => lead.linked).map((lead) => lead._id));
   return new Set(detail.issues.map((issue) => issue._id));
 }
 

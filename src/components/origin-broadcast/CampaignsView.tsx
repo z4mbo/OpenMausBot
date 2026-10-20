@@ -10,11 +10,9 @@ import { useCopyFeedback } from "@/lib/copy-text";
 import { handOff } from "@/lib/origin-handoff";
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
 import { requestIssueFocus } from "@/lib/origin-issue-focus";
-import { requestLeadFocus } from "@/lib/origin-lead-focus";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { BROADCAST_RULES } from "../../../shared/broadcast";
 import { originIssueKey } from "../../../shared/origin-issues";
-import { formatLeadValue } from "../../../shared/origin-pipeline";
 import {
   CAMPAIGN_METRIC_CHANNELS, CAMPAIGN_STATUS_LABEL, CAMPAIGN_STATUSES, type CampaignDetail, type CampaignLinkKind, type CampaignList, type CampaignPost, type CampaignStatus, type CampaignSummary,
 } from "../../../shared/origin-campaigns";
@@ -68,7 +66,7 @@ export function CampaignsView({ projectId, projectName, canEdit, agent, posts, c
 
 function CampaignGrid({ campaigns, canEdit, onOpen, onNew }: { campaigns: CampaignSummary[]; canEdit: boolean; onOpen(id: string): void; onNew(): void }) {
   if (!campaigns.length) {
-    return <EmptyState icon={<Megaphone size={22} />} title="No campaigns yet" body="Group a launch's posts, Studio content, leads and issues, and let your Chief plan it."
+    return <EmptyState icon={<Megaphone size={22} />} title="No campaigns yet" body="Group a launch's posts, Studio content and issues, and let your Chief plan it."
       action={canEdit ? <button type="button" className={primaryButton} onClick={onNew}><Plus size={14} />New campaign</button> : undefined} />;
   }
   return (
@@ -85,7 +83,6 @@ function CampaignGrid({ campaigns, canEdit, onOpen, onNew }: { campaigns: Campai
             {dateRange(campaign) && <span>{dateRange(campaign)}</span>}
             {campaign.channels.length > 0 && <span className="flex items-center gap-1 text-ink-secondary">{campaign.channels.map((channel) => <ChannelMark key={channel} channel={channel} size={11} />)}</span>}
             <span>{campaign.counts.published}/{campaign.counts.posts} posts</span>
-            <span>{campaign.counts.leads} leads</span>
             {campaign.counts.openIssues > 0 && <span>{campaign.counts.openIssues} open</span>}
           </span>
         </button>
@@ -94,7 +91,7 @@ function CampaignGrid({ campaigns, canEdit, onOpen, onNew }: { campaigns: Campai
   );
 }
 
-type Sections = "studio" | "pipeline" | "issues";
+type Sections = "studio" | "issues";
 
 function CampaignDetailView({ projectId, projectName, summary, canEdit, agent, posts, onBack, onOpenPost }: {
   projectId: string; projectName: string; summary: CampaignSummary; canEdit: boolean; agent: Bot; posts: readonly BroadcastPost[]; onBack(): void; onOpenPost(postId: string): void;
@@ -109,7 +106,7 @@ function CampaignDetailView({ projectId, projectName, summary, canEdit, agent, p
   const go = (section: Sections) => setChiefSectionOf(agent.id, section);
   const setStatus = (status: CampaignStatus) => void cloudMutation("campaigns:update", { projectId, campaignId: summary._id, status }).catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not change the status"));
   const remove = async () => {
-    if (!window.confirm(`Delete the campaign "${summary.name}"? Its posts, content, leads and issues stay.`)) return;
+    if (!window.confirm(`Delete the campaign "${summary.name}"? Its posts, content and issues stay.`)) return;
     try {
       await cloudMutation("campaigns:remove", { projectId, campaignId: summary._id });
       onBack();
@@ -157,7 +154,6 @@ function CampaignDetailView({ projectId, projectName, summary, canEdit, agent, p
             </div>
             <div className="flex min-w-0 flex-col gap-4">
               <Gallery detail={detail} canEdit={canEdit} onLink={() => setLinking("generation")} onOpen={() => go("studio")} />
-              <Leads detail={detail} canEdit={canEdit} onLink={() => setLinking("lead")} onOpen={(leadId) => { requestLeadFocus({ projectId, leadId }); go("pipeline"); }} />
             </div>
           </div>
           {linking && <LinkDialog projectId={projectId} detail={detail} kind={linking} posts={posts} onClose={() => setLinking(null)} />}
@@ -170,15 +166,13 @@ function CampaignDetailView({ projectId, projectName, summary, canEdit, agent, p
 
 function Stats({ detail }: { detail: CampaignDetail }) {
   const totals = metricTotals(detail.metrics);
-  const won = detail.stages.find((row) => row.stage === "Won");
   const tiles: { label: string; value: string; note?: string }[] = [
     { label: "Posts published", value: `${detail.counts.published}/${detail.counts.posts}` },
     { label: "Engagement", value: compactNumber(totals.likes + totals.reposts + totals.replies), note: detail.metrics.length ? `${compactNumber(totals.likes)} likes · ${compactNumber(totals.reposts)} reposts` : "Not read yet" },
-    { label: "Leads", value: String(detail.leads.length), note: won?.count ? `${won.count} won${won.value ? ` · ${formatLeadValue(won.value, detail.currency)}` : ""}` : undefined },
     { label: "Open issues", value: String(detail.counts.openIssues), note: detail.issues.length ? `of ${detail.issues.length}` : undefined },
   ];
   return (
-    <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
       {tiles.map((tile) => (
         <div key={tile.label} className="flex min-w-0 flex-col gap-0.5 rounded-xl bg-inset/60 px-3 py-2.5">
           <span className="text-[11.5px] text-ink-tertiary">{tile.label}</span>
@@ -303,39 +297,6 @@ function Gallery({ detail, canEdit, onLink, onOpen }: { detail: CampaignDetail; 
           ))}
         </div>
       )}
-    </Section>
-  );
-}
-
-function Leads({ detail, canEdit, onLink, onOpen }: { detail: CampaignDetail; canEdit: boolean; onLink(): void; onOpen(leadId: string): void }) {
-  const max = Math.max(1, ...detail.stages.map((row) => row.count));
-  return (
-    <Section title="Leads" count={detail.leads.length} action={canEdit && linkButton(onLink, "Link leads")}>
-      <div className="flex flex-col gap-1 rounded-xl bg-inset/60 px-3 py-2.5">
-        {detail.stages.map((row) => (
-          <div key={row.stage} className="grid grid-cols-[72px_minmax(0,1fr)_28px] items-center gap-2 text-[11.5px]">
-            <span className="truncate text-ink-secondary">{row.stage}</span>
-            <span className="h-1.5 overflow-hidden rounded-full bg-raised">
-              <span className={cn("block h-full rounded-full transition-[width] duration-(--motion-base)", row.stage === "Lost" ? "bg-ink-tertiary/50" : "bg-accent")} style={{ width: `${(row.count / max) * 100}%` }} />
-            </span>
-            <span className="text-right tabular-nums text-ink">{row.count}</span>
-          </div>
-        ))}
-      </div>
-      {detail.leads.length === 0
-        ? <p className="text-[11.5px] text-ink-tertiary">Leads count here when captured with source or utm_campaign {detail.slug}.</p>
-        : (
-          <div className={cn(cardClass, "divide-y divide-hairline/30 overflow-hidden")}>
-            {detail.leads.slice(0, 12).map((lead) => (
-              <button key={lead._id} type="button" onClick={() => onOpen(lead._id)}
-                className="flex w-full min-w-0 items-center gap-2 px-3 py-2 text-left outline-none transition-colors duration-(--motion-fast) hover:bg-raised/40 focus-visible:bg-raised/40">
-                <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink">{lead.name}{lead.company && <span className="text-ink-tertiary"> · {lead.company}</span>}</span>
-                <span className="shrink-0 text-[11.5px] text-ink-secondary">{lead.stage}</span>
-              </button>
-            ))}
-            {detail.leads.length > 12 && <span className="block px-3 py-2 text-[11.5px] text-ink-tertiary">{detail.leads.length - 12} more in Pipeline</span>}
-          </div>
-        )}
     </Section>
   );
 }

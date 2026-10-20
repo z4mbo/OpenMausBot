@@ -38,7 +38,5 @@ export interface IntegrationCheck {
   account?: string;
   /** One short sentence the person can act on. */
   detail: string;
-  /** Stripe and similar providers: whether the key is a test-mode key. */
-  mode?: "test" | "live";
   checkedAt: number;
 }

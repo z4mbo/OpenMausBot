@@ -34,7 +34,7 @@ export interface OriginCampaignCardItem {
   endDate?: string;
   channels: BroadcastChannel[];
   slug?: string;
-  counts: { posts: number; published: number; generations: number; leads: number; won: number; openIssues: number };
+  counts: { posts: number; published: number; generations: number; openIssues: number };
 }
 
 export interface OriginAssetCardItem {

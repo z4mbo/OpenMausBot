@@ -1,6 +1,6 @@
 import type { IntegrationStatus } from "../../shared/integration-keys";
 
-export type StackStepId = "github" | "studio" | "social" | "sms" | "email" | "payments";
+export type StackStepId = "github" | "studio" | "social";
 
 export interface StackStep {
   id: StackStepId;
@@ -11,14 +11,11 @@ export interface StackStep {
   providers: readonly string[];
 }
 
-/** The services a workspace connects to go from idea to sale, in the order the journey reaches them. */
+/** The services a workspace connects to go from idea to launch, in the order the journey reaches them. */
 export const STACK: readonly StackStep[] = [
   { id: "github", title: "GitHub", unlocks: "Repositories, issues and pushes for every member", providers: [] },
   { id: "studio", title: "Studio generation", unlocks: "Images, video and voice", providers: ["fal", "openai", "elevenlabs"] },
   { id: "social", title: "Social accounts", unlocks: "Posts and reels from Broadcast", providers: ["x", "bluesky", "linkedin", "meta", "tiktok"] },
-  { id: "sms", title: "SMS", unlocks: "Texts from Sales", providers: ["twilio"] },
-  { id: "email", title: "Email", unlocks: "Sales mail and sequences", providers: ["brevo", "resend"] },
-  { id: "payments", title: "Payments", unlocks: "Prices, payment links and checkout", providers: ["stripe"] },
 ];
 
 export type StepState = "done" | "partial" | "todo";
