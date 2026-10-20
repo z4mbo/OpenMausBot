@@ -1,5 +1,3 @@
-import { pulseTools } from "./origin-pulse-tool.ts";
-
 type Args = Record<string, unknown>;
 
 interface StandupClient {
@@ -57,10 +55,9 @@ async function readStandup(scope: StandupToolScope): Promise<{ digest: Digest | 
 
 type StandupTool<C> = (args: Args, ctx: C) => Promise<{ text: string }>;
 
-/** origin_standup and origin_pulse; `scopes` picks the named project, or every project the agent reaches. */
+/** origin_standup; `scopes` picks the named project, or every project the agent reaches. */
 export function standupTools<C>(scopes: (args: Args, ctx: C) => Promise<StandupToolScope[]>): Record<string, StandupTool<C>> {
   return {
-    ...pulseTools(scopes),
     async origin_standup(args, ctx) {
       const targets = (await scopes(args, ctx)).slice(0, PROJECTS_MAX);
       const blocks = await Promise.all(targets.map(async (scope) => {

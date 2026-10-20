@@ -62,7 +62,7 @@ export function delegatedApprovalMode(input: {
 // no answer ("The user did not answer the questions."), so no mode may answer one.
 const ASKS_A_PERSON = new Set(["askuserquestion", "ask_user"]);
 // Irreversible changes outside the app that Full access still never answers.
-const ALWAYS_CONFIRMED = new Set(["origin_merge_pr", "origin_ship_deploy"]);
+const ALWAYS_CONFIRMED = new Set(["origin_merge_pr"]);
 
 // Approve for me allows these names and nothing wider: a page fetch and every other tool stay a prompt.
 const WEB_SEARCH = new Set(["websearch", "web_search", "web-search", "search_web"]);

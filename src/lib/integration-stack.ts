@@ -1,6 +1,6 @@
 import type { IntegrationStatus } from "../../shared/integration-keys";
 
-export type StackStepId = "github" | "studio" | "social" | "sms" | "email" | "payments" | "deploy";
+export type StackStepId = "github" | "studio" | "social" | "sms" | "email" | "payments";
 
 export interface StackStep {
   id: StackStepId;
@@ -19,7 +19,6 @@ export const STACK: readonly StackStep[] = [
   { id: "sms", title: "SMS", unlocks: "Texts from Sales", providers: ["twilio"] },
   { id: "email", title: "Email", unlocks: "Sales mail and sequences", providers: ["brevo", "resend"] },
   { id: "payments", title: "Payments", unlocks: "Prices, payment links and checkout", providers: ["stripe"] },
-  { id: "deploy", title: "Deploy", unlocks: "Ship previews and releases", providers: ["vercel", "netlify", "cloudflare"] },
 ];
 
 export type StepState = "done" | "partial" | "todo";

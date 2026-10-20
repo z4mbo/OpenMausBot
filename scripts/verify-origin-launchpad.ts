@@ -8,39 +8,9 @@ import { launchpadTools, type LaunchpadToolScope } from "../server/origin-launch
 
 type Json = Record<string, unknown>;
 
-const BRIEF = `## Problem
-Dog owners in busy cities cannot find a trusted walker on short notice.
-
-## Audience
-Working dog owners in Milan, 25 to 45, who book on their phone.
-
-## Core features
-- Book a vetted walker for today in three taps
-- Live walk map and photo report
-- Pay in the app
-
-## Success metric
-200 paid walks in the first 30 days after launch.
-
-## Non-goals
-Grooming, vet visits and boarding.
-
-## Milestones
-MVP, then Launch.
-
-## Team
-Add a **Growth marketer** for the launch and a **QA tester** before the MVP ships.
-
-## Kickoff checklist
-- [x] Build the MVP issues
-- [ ] Landing page in Canvas, published with Pages
-- [ ] Launch content in Studio and a Broadcast campaign
-- [ ] First lead list in Pipeline
-`;
-
 const day = (offset: number) => { const at = new Date(); at.setDate(at.getDate() + offset); return at.toISOString().slice(0, 10); };
 
-/** Two projects: Walkies after its Chief ran the kickoff through the real Docs and Milestone tools, and an empty one. */
+/** Two projects: Walkies after its Chief ran the kickoff through the real Milestone tool, and an empty one. */
 async function seed(convex: FakeConvex) {
   const { t, ref } = convex;
   const { createSession } = await convex.load<{ createSession(ctx: unknown, userId: string): Promise<string> }>("convex/lib/auth.ts");
@@ -49,18 +19,12 @@ async function seed(convex: FakeConvex) {
     return { userId, token: await createSession(ctx, userId) };
   });
   const owner = await user("ada@fixture.test");
-  const viewer = await user("vic@fixture.test");
   const query = (name: string, args: Json) => t.query(ref(name), args);
   const mutation = (name: string, args: Json) => t.mutation(ref(name), args);
   const o = { query: (name: string, args: Json) => query(name, { sessionToken: owner.token, ...args }), mutation: (name: string, args: Json) => mutation(name, { sessionToken: owner.token, ...args }) };
   const { teamId } = await o.mutation("workspaces:create", { name: "Fixture" }) as { teamId: string };
   const walkies = String(await o.mutation("projects:create", { teamId, name: "Walkies" }));
   const empty = String(await o.mutation("projects:create", { teamId, name: "Empty idea" }));
-  await t.run(async (ctx) => {
-    const now = Date.now();
-    await ctx.db.insert("teamMembers", { teamId, userId: viewer.userId, email: "vic@fixture.test", name: "vic", role: "viewer", status: "active", createdAt: now, updatedAt: now });
-    await ctx.db.insert("members", { projectId: walkies, userId: viewer.userId, email: "vic@fixture.test", name: "vic", role: "viewer", status: "active", createdAt: now, updatedAt: now });
-  });
 
   const scope: LaunchpadToolScope = { client: { query, mutation }, sessionToken: owner.token, projectId: walkies, projectName: "Walkies", caller: { id: "fixture-chief", name: "Atlas" } };
   const tools = launchpadTools(async () => scope);
@@ -77,9 +41,7 @@ async function seed(convex: FakeConvex) {
   await run("origin_milestone_set", { milestone: "MVP", target_date: day(14), issues: mvp });
   await run("origin_milestone_set", { milestone: "Launch", target_date: day(30), issues: launch });
   await o.mutation("tasks:updateTask", { projectId: walkies, taskId: mvp[0], done: true });
-  await run("origin_doc_write", { doc: "Brief", brief: true, content: BRIEF });
-  await run("origin_doc_write", { title: "Booking flow spec", content: "# Booking flow\n\n1. Pick a time slot\n2. Confirm the walker\n3. Pay\n" });
-  return { ownerToken: owner.token, viewerToken: viewer.token, teamId, projects: { walkies, empty }, tools: run };
+  return { ownerToken: owner.token, teamId, projects: { walkies, empty } };
 }
 
 const convex = await startFakeConvex();
@@ -95,10 +57,7 @@ try {
     entry: "/scripts/testing/origin-launchpad-preview.tsx", route: "/__origin-launchpad.html", title: "Isolated Origin Launchpad",
     extraRoutes: [
       { path: "/__origin-launchpad.json", handler: json({ url: convex.url, teamId: seeded.teamId, projects: seeded.projects }) },
-      { path: "/__origin-campaigns.json", handler: json({ url: convex.url, token: seeded.ownerToken, viewerToken: seeded.viewerToken }) },
-      { path: "/__origin-launchpad/agent-edit", method: "POST", handler: async (_req, res) => {
-        json({ text: await seeded.tools("origin_doc_write", { doc: "Brief", append: true, content: "## Risks\nWalkers cancel last minute." }) })(_req, res);
-      } },
+      { path: "/__origin-campaigns.json", handler: json({ url: convex.url, token: seeded.ownerToken }) },
     ],
     aliases: [
       { find: /^@\/lib\/origin-cloud(?:\/client)?$/, replacement: cloud },

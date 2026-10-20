@@ -19,11 +19,6 @@ async function convex(kind, path, args) {
   assert.equal(body.status, "success", body.errorMessage);
   return body.value;
 }
-const brief = async () => {
-  const { docs } = await convex("query", "projectDocs:list", { projectId: config.projects.walkies });
-  return convex("query", "projectDocs:get", { projectId: config.projects.walkies, docId: docs.find((doc) => doc.tags.includes("brief"))._id });
-};
-
 async function open(width, query = {}) {
   const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
   page.on("pageerror", (error) => evidence.pageErrors.push(`${width}: ${error.message}`));
@@ -39,56 +34,24 @@ const capture = async (page, name) => {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${name} scrolls sideways`);
   await page.screenshot({ path: resolve(output, `${name}.png`), fullPage: true });
 };
-const section = (page) => page.getByTestId("navigation").evaluate((node) => node.dataset.section);
 const sent = (page) => page.evaluate(() => window.originLaunchpadDispatched.filter((action) => action.type === "send").map((action) => ({ botId: action.botId, text: action.text })));
 
 try {
   for (const width of [375, 1280]) {
-    const page = await open(width, { section: "docs" });
-    if (width === 375) await page.getByRole("button", { name: /^Brief/ }).click();
-    const doc = page.getByRole("article", { name: "Brief" });
-    await doc.getByRole("heading", { name: "Success metric" }).waitFor();
-    await doc.getByText("Atlas", { exact: false }).first().waitFor();
-    const progress = page.locator("[data-brief-progress]");
-    await progress.getByRole("button", { name: /MVP.*1\/4/ }).waitFor();
-    await progress.getByRole("button", { name: /Launch.*0\/2/ }).waitFor();
-    await progress.getByText("1/4", { exact: true }).last().waitFor();
-    await capture(page, `brief-${width}`);
-    evidence.cases.push({ width, step: "Brief written by the Chief's origin_doc_write: listed first, saved by Atlas (agent), milestone progress and checklist count on top" });
+    const page = await open(width);
+    const strip = page.getByRole("group", { name: "Milestones" });
+    await strip.getByRole("button", { name: /MVP.*1\/4/ }).waitFor();
+    await strip.getByRole("button", { name: /Launch.*0\/2/ }).waitFor();
+    await capture(page, `issues-${width}`);
+    evidence.cases.push({ width, step: "milestones written by the Chief's origin_milestone_set show on the Issues strip with their progress" });
 
     if (width === 1280) {
-      await doc.getByRole("checkbox", { name: "Mark done" }).first().check();
-      await progress.getByText("2/4", { exact: true }).waitFor();
-      assert.match((await brief()).content, /- \[x\] Landing page in Canvas/);
-      evidence.cases.push({ width, step: "ticking a checklist item in Read mode saves the markdown source" });
-
-      await doc.getByRole("button", { name: "Edit" }).click();
-      const editor = doc.getByRole("textbox", { name: "Markdown" });
-      await editor.press("Control+End");
-      await editor.type("\n## Pricing\nEUR 12 per walk.\n");
-      await doc.getByText("Saved", { exact: true }).waitFor();
-      assert.match((await brief()).content, /## Pricing\nEUR 12 per walk\./);
-      evidence.cases.push({ width, step: "editing autosaves through projectDocs:save with the loaded version" });
-
-      await editor.type("Weekend surcharge.");
-      await fetch(new URL("/__origin-launchpad/agent-edit", url), { method: "POST" });
-      await doc.getByText("changed this document while you were editing").waitFor({ timeout: 10_000 });
-      await capture(page, "brief-conflict-1280");
-      await doc.getByRole("button", { name: "Keep mine" }).click();
-      await doc.getByText("Saved", { exact: true }).waitFor();
-      const kept = (await brief()).content;
-      assert.match(kept, /Weekend surcharge\./);
-      assert.equal(kept.includes("Walkers cancel last minute."), false, "Keep mine replaces the agent's concurrent append");
-      evidence.cases.push({ width, step: "an agent's concurrent write is caught: the person sees who changed it and chooses Keep mine" });
-      await doc.getByRole("button", { name: "Read" }).click();
-
-      await progress.getByRole("button", { name: /MVP/ }).click();
-      assert.equal(await section(page), "issues");
+      await strip.getByRole("button", { name: /MVP/ }).click();
       await page.getByRole("button", { name: /MVP.*1\/4/, pressed: true }).waitFor();
       await page.getByText("Book a walk for today").waitFor();
       assert.equal(await page.getByText("Pick a name for the push notifications").count(), 0, "the milestone filter hides other issues");
       await capture(page, "issues-mvp-1280");
-      evidence.cases.push({ width, step: "a milestone on the Brief opens Issues filtered to it" });
+      evidence.cases.push({ width, step: "a milestone on the strip filters Issues to it" });
 
       await page.getByRole("button", { name: "All issues" }).click();
       await page.getByText("Pick a name for the push notifications").click();
@@ -106,13 +69,6 @@ try {
       await dialog.getByRole("button", { name: "Create" }).click();
       await page.getByRole("button", { name: /Beta.*0\/0/, pressed: true }).waitFor();
       evidence.cases.push({ width, step: "creating a milestone from Issues selects it" });
-    } else {
-      await page.getByRole("button", { name: "All documents" }).click();
-      await page.getByRole("button", { name: /Booking flow spec/ }).waitFor();
-      await capture(page, `docs-list-${width}`);
-      await page.getByRole("button", { name: "Issues" }).click();
-      await page.getByRole("group", { name: "Milestones" }).waitFor();
-      await capture(page, `issues-${width}`);
     }
     await page.close();
   }
@@ -132,15 +88,14 @@ try {
     assert.match(kickoff.text, /Kickoff for Empty idea/);
     assert.match(kickoff.text, /Audience:\nUniversity robotics clubs in Europe/);
     assert.doesNotMatch(kickoff.text, /Constraints:/);
-    for (const tool of ["origin_doc_write", "origin_milestone_set", "origin_create_issue"]) assert.match(kickoff.text, new RegExp(tool));
+    for (const tool of ["origin_milestone_set", "origin_create_issue"]) assert.match(kickoff.text, new RegExp(tool));
     evidence.cases.push({ width, step: "an empty project offers Launchpad; it sends the Chief the kickoff brief with only the fields given" });
     await page.close();
   }
 
   {
-    const page = await open(1280, { project: "empty", section: "docs" });
-    await page.getByRole("button", { name: "Plan from an idea" }).waitFor();
-    await capture(page, "empty-docs-1280");
+    const page = await open(1280, { project: "empty" });
+    await page.locator("[data-launchpad-cta]").waitFor();
     await page.getByRole("button", { name: "New project" }).click();
     const dialog = page.getByRole("dialog", { name: "New project from an idea" });
     await dialog.getByLabel("Idea").fill("Habit tracker for students that turns study streaks into a shared class leaderboard.");
@@ -173,16 +128,6 @@ try {
     await mobile.getByRole("dialog", { name: "New project from an idea" }).getByLabel("Idea").fill("Pet sitter booking for weekends");
     await capture(mobile, "launchpad-new-375");
     await mobile.close();
-  }
-
-  {
-    const page = await open(1280, { section: "docs", viewer: "1" });
-    await page.getByRole("article", { name: "Brief" }).waitFor();
-    assert.equal(await page.getByRole("button", { name: "Edit" }).count(), 0, "a viewer cannot edit");
-    assert.equal(await page.getByRole("button", { name: "New doc" }).count(), 0);
-    assert.equal(await page.getByRole("checkbox").first().isDisabled(), true);
-    evidence.cases.push({ width: 1280, step: "a viewer reads the Brief without edit, new-doc or checklist controls" });
-    await page.close();
   }
 
   assert.deepEqual(evidence.pageErrors, []);

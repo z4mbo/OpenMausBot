@@ -183,9 +183,6 @@ export function verificationServerEnvironment(parentEnv: NodeJS.ProcessEnv, data
   // Studio's fal.ai queue requests go to a loopback fake only.
   const falQueueUrl = parentEnv.OMB_FAL_QUEUE_URL?.trim() ?? "";
   if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(falQueueUrl)) childEnv.OMB_FAL_QUEUE_URL = falQueueUrl;
-  // Ship's Vercel, Netlify, Cloudflare and GitHub requests go to a loopback fake only.
-  const shipUrl = parentEnv.OMB_SHIP_PROVIDER_URL?.trim() ?? "";
-  if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(shipUrl)) childEnv.OMB_SHIP_PROVIDER_URL = shipUrl;
   // The GitHub integration's API and sign-in requests go to a loopback fake only.
   const githubUrl = parentEnv.OMB_GITHUB_API_URL?.trim() ?? "";
   if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(githubUrl)) childEnv.OMB_GITHUB_API_URL = githubUrl;
