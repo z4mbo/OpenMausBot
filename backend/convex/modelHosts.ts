@@ -9,6 +9,7 @@ import { cleanPayload, cleanText, cleanTool, messageByClientId, nextSeq, settleR
 import { canEdit, projectMember, requireTeamMember } from "./lib/permissions";
 import { authenticateModelHost, cleanHostText, executionHasReplies, executionRun, fencedModelExecution, hostCapacity, hostModels, hostOnline, hostOwner, hostWorkView, hostedSourceContext, liveHostClaims, MODEL_HOST_SCOPE_MAX, MODEL_HOST_TTL, opaqueHostId } from "./lib/modelHostAccess";
 import { latestModelExecution, modelExecutionRetryable, recoveryQueryTime } from "./lib/modelHostRecovery";
+import { budgetRefusal, recordSpend } from "./budgets";
 
 const hostAuth = { hostId: v.id("agentHosts"), hostToken: v.string() };
 const fenced = { ...hostAuth, executionId: v.id("modelHostExecutions"), leaseToken: v.string() };
@@ -22,6 +23,11 @@ const workView = v.object({
 const requestKey = (value: string) => cleanHostText(value, 160, "Request key");
 const secret = () => Array.from(crypto.getRandomValues(new Uint8Array(32)), value => value.toString(16).padStart(2, "0")).join("");
 
+async function requireMonthlyBudget(ctx: MutationCtx, agent: Doc<"workspaceAgents">, projectId: Id<"projects"> | undefined, now: number) {
+  const refusal = await budgetRefusal(ctx, agent, projectId ?? agent.projectId, now);
+  if (refusal) throw new Error(refusal);
+}
+
 async function ownedHost(ctx: MutationCtx, sessionToken: string, hostId: Id<"agentHosts">) {
   const user = await requireUser(ctx, sessionToken), host = await ctx.db.get(hostId);
   if (!host || host.ownerUserId !== user._id || !host.deviceId || host.revoked) throw new Error("Host not found");
@@ -33,7 +39,8 @@ async function offer(ctx: MutationCtx, run: Doc<"workspaceAgentRuns">, sourceId:
   const thread = run.threadId ? await ctx.db.get(run.threadId) : null, requester = await ctx.db.get(run.requesterUserId), source = await ctx.db.get(sourceId);
   const now = Date.now();
   if (!thread || !requester || !source || run.status !== "running" && run.status !== "queued") throw new Error("Run or source not found");
-  await hostedSourceContext(ctx, source, thread, requester, model, now, allowMetered);
+  const { agent } = await hostedSourceContext(ctx, source, thread, requester, model, now, allowMetered);
+  await requireMonthlyBudget(ctx, agent, thread.projectId, now);
   const attempts = await ctx.db.query("modelHostExecutions").withIndex("by_runId", q => q.eq("runId", run._id)).take(17);
   if (attempts.length >= 16) throw new Error("This message reached its model attempt limit");
   if (attempts.some(attempt => attempt.sourceId === sourceId && attempt.model === model || attempt.requestKey === key)) throw new Error("This source or request was already attempted for this message");
@@ -171,6 +178,7 @@ export const begin = mutation({
       if (existing.authorUserId !== user._id || !run || !execution || execution.sourceId !== args.sourceId || execution.model !== args.model) throw new Error("This message already has another execution route");
       return { runId: run._id, messageId: existing._id, executionId: execution._id, status: run.status, seq: existing.seq };
     }
+    await requireMonthlyBudget(ctx, agent, thread.projectId, now);
     const holder = thread.activeRunId ? await ctx.db.get(thread.activeRunId) : null;
     if (holder?.status === "running" && (thread.leaseUntil ?? 0) <= now) await settleRun(ctx, holder, "interrupted", now);
     const fresh = (await ctx.db.get(thread._id))!, status = fresh.activeRunId ? "queued" as const : "running" as const;
@@ -225,6 +233,7 @@ export const claim = mutation({
     const context = await executionRun(ctx, execution, now);
     if (execution.status === "claimed" && execution.claimId === claimId && execution.leaseHash === leaseHash && (execution.leaseUntil ?? 0) > now) return { work: await hostWorkView(ctx, execution, now), leaseUntil: execution.leaseUntil! };
     if (execution.status !== "pending") throw new Error("This execution was already accepted or ended; it cannot be replayed");
+    await requireMonthlyBudget(ctx, context.agent, context.thread.projectId, now);
     const active = await liveHostClaims(ctx, host._id, now);
     if (active.length >= host.capabilities.capacity || active.filter(row => row.sourceId === execution.sourceId).length >= context.source.capacity) throw new Error("This model account or computer is at capacity");
     await ctx.db.patch(execution._id, { status: "claimed", claimId, leaseHash, leaseUntil: now + MODEL_HOST_TTL, updatedAt: now });
@@ -237,7 +246,8 @@ export const claim = mutation({
 
 export const started = mutation({
   args: fenced, returns: v.null(), handler: async (ctx, args) => {
-    const { execution, now } = await fencedModelExecution(ctx, args);
+    const { execution, now, agent, thread } = await fencedModelExecution(ctx, args);
+    if (execution.status !== "running") await requireMonthlyBudget(ctx, agent, thread.projectId, now);
     await ctx.db.patch(execution._id, { status: "running", startedAt: execution.startedAt ?? now, updatedAt: now }); return null;
   },
 });
@@ -313,7 +323,10 @@ export const finish = mutation({
     const safeToRetry = args.outcome === "quota_exhausted" && args.safeInitialRefusal === true && args.quiesced === true && !execution.activityObserved && !await executionHasReplies(ctx, run._id);
     await ctx.db.patch(execution._id, { status: safeToRetry ? "refused" : args.outcome === "succeeded" ? "succeeded" : "failed", safeToRetry, ...(safeToRetry ? { refusal: "quota_exhausted" } : {}), leaseUntil: undefined, updatedAt: now });
     if (safeToRetry) { await ctx.db.patch(run._id, { heartbeatAt: now, updatedAt: now }); await ctx.db.patch(thread._id, { leaseUntil: now + MODEL_HOST_TTL }); }
-    else await settleRun(ctx, run, args.outcome === "succeeded" ? "succeeded" : "failed", now, args.usage ? { usage: args.usage } : {});
+    else {
+      await settleRun(ctx, run, args.outcome === "succeeded" ? "succeeded" : "failed", now, args.usage ? { usage: args.usage } : {});
+      await recordSpend(ctx, run, args.usage?.costUsd, now);
+    }
     return { safeToRetry };
   },
 });

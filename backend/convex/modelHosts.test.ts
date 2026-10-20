@@ -122,6 +122,45 @@ describe("explicit model source sharing", () => {
 });
 
 describe("fenced executor admission and transcript ownership", () => {
+  test("monthly agent and project budgets also refuse hosted requests before creating work", async () => {
+    for (const target of ["agent", "project"] as const) {
+      const f = await fixture(), threadId = await f.thread();
+      await f.t.mutation(api.budgets.set, { sessionToken: f.owner.token, teamId: f.teamId, ...(target === "agent" ? { agentId: f.agentId } : { projectId: f.projectId }), monthlyUsd: 1 });
+      await f.t.run(async ctx => { await ctx.db.insert("budgetSpend", { teamId: f.teamId, ...(target === "agent" ? { agentId: f.agentId } : { projectId: f.projectId }), month: new Date().toISOString().slice(0, 7), costUsd: 1, runs: 1, updatedAt: Date.now() }); });
+      await expect(f.begin(threadId)).rejects.toThrow(/Budget reached/);
+      expect(await f.t.run(ctx => ctx.db.query("modelHostExecutions").collect())).toEqual([]);
+      expect(await f.t.run(ctx => ctx.db.query("workspaceAgentRuns").collect())).toEqual([]);
+    }
+  });
+
+  test("hosted dispatch rechecks a cap changed after admission", async () => {
+    const f = await fixture(), threadId = await f.thread(), begun = await f.begin(threadId);
+    await f.t.mutation(api.budgets.set, { sessionToken: f.owner.token, teamId: f.teamId, agentId: f.agentId, monthlyUsd: 1 });
+    const spendId = await f.t.run(ctx => ctx.db.insert("budgetSpend", { teamId: f.teamId, agentId: f.agentId, month: new Date().toISOString().slice(0, 7), costUsd: 1, runs: 1, updatedAt: Date.now() }));
+    const claim = { ...f.hostAuth, executionId: begun.executionId, claimId, leaseToken };
+    await expect(f.t.mutation(api.modelHosts.claim, claim)).rejects.toThrow(/Budget reached/);
+    await f.t.run(ctx => ctx.db.delete(spendId));
+    await f.t.mutation(api.modelHosts.claim, claim);
+    const changed = await f.t.run(ctx => ctx.db.insert("budgetSpend", { teamId: f.teamId, agentId: f.agentId, month: new Date().toISOString().slice(0, 7), costUsd: 1, runs: 1, updatedAt: Date.now() }));
+    await expect(f.t.mutation(api.modelHosts.started, leaseArgs(claim))).rejects.toThrow(/Budget reached/);
+    await f.t.run(ctx => ctx.db.delete(changed));
+    await f.t.mutation(api.modelHosts.started, leaseArgs(claim));
+  });
+
+  test.each(["succeeded", "failed"] as const)("a %s hosted receipt books monthly spend exactly once", async outcome => {
+    const f = await fixture(), begun = await f.begin(await f.thread());
+    const claim = { ...f.hostAuth, executionId: begun.executionId, claimId, leaseToken };
+    await f.t.mutation(api.modelHosts.claim, claim);
+    await f.t.mutation(api.modelHosts.started, leaseArgs(claim));
+    const finish = { ...leaseArgs(claim), outcome, usage: { input: 1, output: 1, costUsd: 0.75 } };
+    await f.t.mutation(api.modelHosts.finish, finish);
+    await expect(f.t.mutation(api.modelHosts.finish, finish)).rejects.toThrow(/expired|replaced/);
+    await expect(f.t.mutation(api.agentRuns.finish, { sessionToken: f.sender.token, runId: begun.runId, status: "succeeded", usage: finish.usage })).rejects.toThrow(/executor lease/);
+    const rows = await f.t.run(ctx => ctx.db.query("budgetSpend").collect());
+    expect(rows).toHaveLength(2);
+    for (const row of rows) expect(row).toMatchObject({ costUsd: 0.75, runs: 1 });
+  });
+
   test("reconciles one canonical request only for its requester and reports sender transfer without new work", async () => {
     const f = await fixture(), threadId = await f.thread();
     const lookup = { sessionToken: f.sender.token, threadId, clientId: "send:synthetic" };
