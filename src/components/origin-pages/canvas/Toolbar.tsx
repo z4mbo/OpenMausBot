@@ -32,38 +32,40 @@ export function CanvasToolbar({ tool, readOnly, onTool, canUndo, canRedo, onUndo
   usePopoverDismiss(imageMenu, menu, () => onImageMenu(false));
   return (
     <div className="pointer-events-none absolute inset-x-2 bottom-3 z-10 flex justify-center">
-      <div role="toolbar" aria-label="Canvas tools" className={cn(surface, "pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto p-1 [scrollbar-width:none]")}>
+      <div role="toolbar" aria-label="Canvas tools" className={cn(surface, "pointer-events-auto flex min-w-0 max-w-full items-center gap-0.5 p-1")}>
         <button type="button" className={cn(button, panels.layers && "bg-raised text-ink")} aria-label="Layers" aria-pressed={panels.layers} title="Layers" onClick={() => onPanels({ ...panels, layers: !panels.layers })}><Layers size={16} /></button>
         <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-hairline/60" />
-        {TOOLS.filter((item) => !readOnly || !item.edits).map((item) => (
-          <button key={item.tool} type="button" aria-label={item.label} aria-pressed={tool === item.tool} title={`${item.label} (${item.key})`} onClick={() => onTool(item.tool)}
-            className={cn(button, tool === item.tool && "bg-accent text-accent-ink hover:bg-accent hover:text-accent-ink")}>
-            {item.icon}
-          </button>
-        ))}
-        {!readOnly && (
-          <div ref={menu} className="relative">
-            <button type="button" className={cn(button, imageMenu && "bg-raised text-ink")} aria-label="Image" aria-expanded={imageMenu} title="Image (I)" onClick={() => onImageMenu(!imageMenu)}><ImagePlus size={16} /></button>
-            {imageMenu && (
-              <div className={cn(surface, "fixed bottom-16 left-1/2 z-30 flex w-[min(320px,calc(100vw-24px))] -translate-x-1/2 flex-col gap-2 p-2 animate-pop-in")}>
-                <button type="button" onClick={() => file.current?.click()}
-                  className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-left text-[13px] text-ink outline-none hover:bg-raised focus-visible:ring-2 focus-visible:ring-accent/60">
-                  <Upload size={15} className="text-ink-secondary" />Upload from this device
-                </button>
-                {imagePicker?.(() => onImageMenu(false))}
-              </div>
-            )}
-            <input ref={file} type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" multiple hidden
-              onChange={(event) => { onUpload([...(event.target.files ?? [])]); event.target.value = ""; onImageMenu(false); }} />
-          </div>
-        )}
-        {!readOnly && (
-          <>
-            <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-hairline/60" />
-            <button type="button" className={button} aria-label="Undo" title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={onUndo}><Undo2 size={16} /></button>
-            <button type="button" className={button} aria-label="Redo" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={onRedo}><Redo2 size={16} /></button>
-          </>
-        )}
+        <div className="-my-0.5 flex min-w-0 items-center gap-0.5 overflow-x-auto p-0.5 [scrollbar-width:none]">
+          {TOOLS.filter((item) => !readOnly || !item.edits).map((item) => (
+            <button key={item.tool} type="button" aria-label={item.label} aria-pressed={tool === item.tool} title={`${item.label} (${item.key})`} onClick={() => onTool(item.tool)}
+              className={cn(button, tool === item.tool && "bg-accent text-accent-ink hover:bg-accent hover:text-accent-ink")}>
+              {item.icon}
+            </button>
+          ))}
+          {!readOnly && (
+            <div ref={menu} className="relative">
+              <button type="button" className={cn(button, imageMenu && "bg-raised text-ink")} aria-label="Image" aria-expanded={imageMenu} title="Image (I)" onClick={() => onImageMenu(!imageMenu)}><ImagePlus size={16} /></button>
+              {imageMenu && (
+                <div className={cn(surface, "fixed bottom-16 left-1/2 z-30 flex w-[min(320px,calc(100vw-24px))] -translate-x-1/2 flex-col gap-2 p-2 animate-pop-in")}>
+                  <button type="button" onClick={() => file.current?.click()}
+                    className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-left text-[13px] text-ink outline-none hover:bg-raised focus-visible:ring-2 focus-visible:ring-accent/60">
+                    <Upload size={15} className="text-ink-secondary" />Upload from this device
+                  </button>
+                  {imagePicker?.(() => onImageMenu(false))}
+                </div>
+              )}
+              <input ref={file} type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" multiple hidden
+                onChange={(event) => { onUpload([...(event.target.files ?? [])]); event.target.value = ""; onImageMenu(false); }} />
+            </div>
+          )}
+          {!readOnly && (
+            <>
+              <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-hairline/60" />
+              <button type="button" className={button} aria-label="Undo" title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={onUndo}><Undo2 size={16} /></button>
+              <button type="button" className={button} aria-label="Redo" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={onRedo}><Redo2 size={16} /></button>
+            </>
+          )}
+        </div>
         <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-hairline/60" />
         <button type="button" className={cn(button, panels.inspector && "bg-raised text-ink")} aria-label="Design panel" aria-pressed={panels.inspector} title="Design panel" onClick={() => onPanels({ ...panels, inspector: !panels.inspector })}><SlidersHorizontal size={16} /></button>
       </div>
