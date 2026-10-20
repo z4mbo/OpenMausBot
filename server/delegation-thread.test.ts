@@ -124,10 +124,10 @@ describe("parent delegation conversations", () => {
     expect(f.allocate()).toEqual({ task: child, created: false });
   });
 
-  it("keeps a fresh named job separate when no canonical child exists yet", () => {
+  it.each([undefined, "Independent job"])("keeps a fresh job separate when no canonical child exists yet (title: %s)", title => {
     const history: HandoffView[] = [];
     const f = fixture([task("direct-B")], history);
-    const fresh = f.allocate({ fresh: true, title: "Independent job" });
+    const fresh = f.allocate({ fresh: true, title });
     history.push(...previous(fresh.task.threadId));
     const saved = structuredClone(fresh.task);
     const canonical = f.allocate();
