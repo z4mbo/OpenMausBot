@@ -5,13 +5,10 @@ import { launchVerificationServer } from "./control-omb.ts";
 import { mountPreview, parkUntilSignal } from "./testing/preview-fixture.ts";
 
 const fixture = await launchVerificationServer();
-// Synthetic test values in the disposable data directory: fal, X and a Stripe test key are connected, Twilio is half
-// filled in, and X has an extra "Founder" account. Nothing here is a real key.
+// Synthetic test values in the disposable data directory: X is connected and has an extra "Founder" account, Studio
+// generation is not. Nothing here is a real key.
 writeFileSync(join(fixture.info.dataDir, "integration-keys.json"), JSON.stringify({
-  fal: { key: "fixture-id:fixture-secret" },
   x: { apiKey: "fixture", apiSecret: "fixture", accessToken: "fixture", accessSecret: "fixture" },
-  stripe: { secretKey: "sk_test_fixture" },
-  twilio: { accountSid: "ACfixture" },
 }), { mode: 0o600 });
 writeFileSync(join(fixture.info.dataDir, "broadcast-accounts.json"), JSON.stringify({ accounts: [
   { id: "acct-founder-x", integration: "x", label: "Founder", values: { apiKey: "fixture", apiSecret: "fixture", accessToken: "fixture", accessSecret: "fixture" }, createdAt: 1 },

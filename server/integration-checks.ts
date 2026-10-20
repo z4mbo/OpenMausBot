@@ -13,7 +13,6 @@ type Probe = {
   body?: string;
   account?: (data: Data) => unknown;
   verdict?: (response: Response, data: Data, message: string) => Verdict | undefined;
-  mode?: "test" | "live";
 };
 
 const defaults: Environment = { fetch: (...args) => fetch(...args), now: Date.now, nonce: randomUUID };
@@ -34,21 +33,6 @@ const probes: Record<IntegrationId, (values: Record<string, string>, env: Enviro
     account: (d) => text(object(d.subscription).tier) ?? d.first_name,
   }),
   openai: (v) => ({ url: "https://api.openai.com/v1/models", headers: bearer(v.apiKey!) }),
-  twilio: (v) => ({
-    url: `https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(v.accountSid!)}.json`,
-    headers: { Authorization: `Basic ${Buffer.from(`${v.accountSid}:${v.authToken}`).toString("base64")}` },
-    account: (d) => d.friendly_name,
-  }),
-  brevo: (v) => ({
-    url: "https://api.brevo.com/v3/account", headers: { "api-key": v.apiKey! },
-    account: (d) => text(d.companyName) ?? d.email,
-  }),
-  stripe: (v) => ({
-    url: "https://api.stripe.com/v1/prices?limit=1", headers: bearer(v.secretKey!),
-    mode: /^(sk|rk)_test_/.test(v.secretKey!) ? "test" : "live",
-    verdict: (r, _d, message) => r.status === 403 && /permission/i.test(message)
-      ? { ok: false, detail: "Stripe accepted the key but needs the Prices permission" } : undefined,
-  }),
   resend: (v) => ({
     url: "https://api.resend.com/domains", headers: bearer(v.apiKey!),
     verdict: (r, d) => r.status === 401 && d.name === "restricted_api_key"
@@ -125,7 +109,7 @@ export async function checkIntegration(id: IntegrationId, values: Record<string,
     const account = ok ? text(probe.account?.(data)) : undefined;
     const vendorDetail = scrub(message, values).slice(0, 200);
     const detail = verdict?.detail ?? (ok ? `${label} accepted the key` : `${label} rejected the key${vendorDetail ? `: ${vendorDetail}` : ""}`);
-    return { ok, detail: scrub(detail, values), checkedAt, ...(account ? { account } : {}), ...(probe.mode ? { mode: probe.mode } : {}) };
+    return { ok, detail: scrub(detail, values), checkedAt, ...(account ? { account } : {}) };
   } catch {
     return { ok: false, detail: `Could not reach ${label}`, checkedAt };
   }

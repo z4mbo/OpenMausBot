@@ -56,7 +56,7 @@ try {
       assert.ok(await page.getByRole("navigation", { name: "Fixture project with a long title agents", exact: true }).isVisible());
       evidence.cases.push({ screen: "project-agent-chat", size, theme, backToAgents: true });
     }
-    if (phase === "after") for (const [id, label, phaseName] of [["issues", "Issues", "build"], ["team-chat", "Team", "plan"], ["call", "Call", "plan"], ["draw", "Canvas", "plan"], ["studio", "Studio", "launch"], ["broadcast", "Broadcast", "launch"], ["pipeline", "Sales", "sell"], ["assets", "Assets", "launch"], ["vault", "Vault"], ["repo", "Repo", "build"], ["feedback", "Feedback", "sell"], ["settings", "Settings"]]) {
+    if (phase === "after") for (const [id, label, phaseName] of [["issues", "Issues", "build"], ["team-chat", "Team", "plan"], ["call", "Call", "plan"], ["draw", "Canvas", "plan"], ["studio", "Studio", "launch"], ["broadcast", "Broadcast", "launch"], ["assets", "Assets", "launch"], ["vault", "Vault"], ["repo", "Repo", "build"], ["feedback", "Feedback", "sell"], ["settings", "Settings"]]) {
       if (phaseName && await page.locator(`[data-project-phase="${phaseName}"]`).getAttribute("aria-current") !== "true") await page.locator(`[data-project-phase="${phaseName}"]`).click();
       const button = page.locator(`[data-chief-section="${id}"]`);
       if (await button.isVisible()) {

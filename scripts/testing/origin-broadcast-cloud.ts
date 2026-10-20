@@ -86,7 +86,7 @@ const measured = (id: string, channel: BroadcastChannel, text: string, published
 let nextId = 1;
 const posts: BroadcastPost[] = [
   { _id: "post-agent", projectId: "fixture-project", status: "draft", agentName: "Echo", needsApproval: true, createdAt: 1, updatedAt: 9, assetIds: ["asset-cover"], media: mediaOf(["asset-cover"]),
-    variants: [{ channel: "x", text: "Origin 0.6 is out: Studio, Broadcast and Pipeline in one app. https://origin.test/0.6" }, { channel: "linkedin", text: "Origin 0.6 is out. Your team and its agents now plan, generate and publish launch content in one place. #launch #buildinpublic" }] },
+    variants: [{ channel: "x", text: "Origin 0.6 is out: Studio, Broadcast and Ship in one app. https://origin.test/0.6" }, { channel: "linkedin", text: "Origin 0.6 is out. Your team and its agents now plan, generate and publish launch content in one place. #launch #buildinpublic" }] },
   { _id: "post-scheduled", projectId: "fixture-project", status: "scheduled", scheduledAt: day(1, 10), createdAt: 2, updatedAt: 8, assetIds: ["asset-team"], media: mediaOf(["asset-team"]),
     variants: [{ channel: "bluesky", text: "Meet the team behind Origin." }, { channel: "instagram", text: "Meet the team behind Origin. #team #startup" }] },
   { _id: "post-reel", projectId: "fixture-project", status: "scheduled", format: "reel", reel: { coverMs: 2_500, music: "Nightcall · Kavinsky" }, scheduledAt: day(3, 18), createdAt: 3, updatedAt: 7,

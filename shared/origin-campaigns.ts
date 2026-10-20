@@ -4,7 +4,7 @@ export const CAMPAIGN_STATUSES = ["planning", "running", "done"] as const;
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 export const CAMPAIGN_STATUS_LABEL: Record<CampaignStatus, string> = { planning: "Planning", running: "Running", done: "Done" };
 
-export const CAMPAIGN_LINK_KINDS = ["post", "generation", "lead", "issue"] as const;
+export const CAMPAIGN_LINK_KINDS = ["post", "generation", "issue"] as const;
 export type CampaignLinkKind = (typeof CAMPAIGN_LINK_KINDS)[number];
 
 /** Per kind, how many items one campaign links by hand. */
@@ -54,8 +54,6 @@ export type CampaignPost = {
 
 export type CampaignGeneration = { _id: string; kind: "image" | "video" | "audio"; status: "queued" | "running" | "done" | "failed"; prompt: string; modelLabel: string; output?: string; createdAt: number };
 
-export type CampaignLead = { _id: string; name: string; company?: string; stage: string; value?: number; source: string; linked: boolean; createdAt: number };
-
 export type CampaignIssue = { _id: string; title: string; done: boolean; column: string; priority: string; githubIssueNumber?: number; assignee?: string };
 
 export type CampaignSummary = {
@@ -70,7 +68,7 @@ export type CampaignSummary = {
   budgetNote?: string;
   status: CampaignStatus;
   agentName?: string;
-  counts: { posts: number; published: number; generations: number; leads: number; won: number; openIssues: number };
+  counts: { posts: number; published: number; generations: number; openIssues: number };
   createdAt: number;
   updatedAt: number;
 };
@@ -78,9 +76,6 @@ export type CampaignSummary = {
 export type CampaignDetail = CampaignSummary & {
   posts: CampaignPost[];
   generations: CampaignGeneration[];
-  leads: CampaignLead[];
-  stages: { stage: string; count: number; value: number }[];
-  currency: string;
   issues: CampaignIssue[];
   metrics: CampaignMetric[];
   metricsAt?: number;

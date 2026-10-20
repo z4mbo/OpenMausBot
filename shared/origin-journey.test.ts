@@ -3,7 +3,7 @@ import { journeyContextLine, nextJourneyStep, phasesDone, type JourneyFacts } fr
 
 const empty: JourneyFacts = {
   name: "Rocket", brief: false, docs: 0, canvases: 0, drafts: 0, issuesOpen: 0, issuesDone: 0, shipped: false,
-  content: 0, postsLive: 0, postsScheduled: 0, leads: 0, repliesAwaiting: 0,
+  content: 0, postsLive: 0, postsScheduled: 0,
 };
 
 describe("nextJourneyStep", () => {
@@ -15,7 +15,7 @@ describe("nextJourneyStep", () => {
     [{ issuesOpen: 0, issuesDone: 4 }, "ship", "build", "ship"],
     [{ shipped: true }, "content", "launch", "studio"],
     [{ shipped: true, content: 2 }, "post", "launch", "broadcast"],
-    [{ postsLive: 1 }, "sell", "sell", "pipeline"],
+    [{ postsLive: 1 }, "post", "launch", "broadcast"],
   ] as const)("%o leads to %s", (facts, id, phase, section) => {
     expect(nextJourneyStep({ ...empty, ...facts })).toMatchObject({ id, phase, section });
   });
@@ -28,7 +28,7 @@ describe("nextJourneyStep", () => {
   it("names its numbers and briefs the Chief about the project by name", () => {
     expect(nextJourneyStep({ ...empty, issuesOpen: 1 }).title).toBe("Build the MVP · 1 issue open");
     expect(nextJourneyStep({ ...empty, brief: true, canvases: 1, drafts: 2 }).detail).toBe("2 Draft issues wait to be moved onto the board.");
-    expect(nextJourneyStep({ ...empty, postsLive: 3, leads: 4 }).detail).toBe("4 leads so far.");
+    expect(nextJourneyStep({ ...empty, postsLive: 3, postsScheduled: 2 }).detail).toBe("2 posts scheduled; plan the rest of the launch.");
     expect(nextJourneyStep(empty).brief).toContain("Brief for Rocket");
   });
 });
@@ -43,6 +43,6 @@ describe("phasesDone", () => {
 describe("journeyContextLine", () => {
   it("says the phase, what exists and the next step", () => {
     const line = journeyContextLine({ ...empty, brief: true, canvases: 2, issuesOpen: 4, issuesDone: 6, drafts: 1 });
-    expect(line).toBe("- Journey (Plan → Build → Launch → Sell): Rocket is in Build; Brief written, 2 canvases, 4 open / 6 done issues (1 in Draft), not shipped, 0 Studio outputs, 0 posts live, 0 leads. Next step: Build the MVP · 4 issues open. Hand issues to agents, or take one yourself. Steer plans and suggestions toward it unless the person asks for something else.");
+    expect(line).toBe("- Journey (Plan → Build → Launch → Sell): Rocket is in Build; Brief written, 2 canvases, 4 open / 6 done issues (1 in Draft), not shipped, 0 Studio outputs, 0 posts live. Next step: Build the MVP · 4 issues open. Hand issues to agents, or take one yourself. Steer plans and suggestions toward it unless the person asks for something else.");
   });
 });

@@ -2492,81 +2492,6 @@
       }
     },
     {
-      "name": "origin_pipeline_list_leads",
-      "description": "List an Origin project's Sales contacts: totals per stage and its leads (id, stage, contact details, value, owner, next step, sources), filtered by stage or a search; or read one lead with its notes, deals and timeline (emails, texts, calls with summaries) with lead_id. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      }
-    },
-    {
-      "name": "origin_pipeline_upsert_lead",
-      "description": "Add a lead you researched to an Origin project's pipeline, or change one with lead_id. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
-      "name": "origin_pipeline_log_activity",
-      "description": "Record something that already happened with a lead on its Pipeline timeline: a note, or an email, text or call that took place outside Origin. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
-      "name": "origin_pipeline_sequence",
-      "description": "Start, pause, resume or stop a lead's follow-up sequence in an Origin project's Pipeline. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
-      "name": "origin_pipeline_contact",
-      "description": "Reach or answer a lead from an Origin project's Sales with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
-      "name": "origin_pipeline_conversations",
-      "description": "Read an Origin project's Sales inbox: every contact's conversation, newest first, with unread replies, agent drafts waiting for approval and won deals waiting for confirmation; or one contact's emails, texts, WhatsApp messages and call summaries in order with lead_id. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      }
-    },
-    {
-      "name": "origin_pipeline_deal",
-      "description": "List, open or change the deals in an Origin project's Sales: value and currency, stage, expected close date, simple line items and notes. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
       "name": "origin_campaign_create",
       "description": "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
@@ -2577,7 +2502,7 @@
     },
     {
       "name": "origin_campaign_get",
-      "description": "List an Origin project's campaigns, or read one with campaign: its brief, posts with per-channel status, links and likes or reposts, Studio generations, attributed leads by stage, and issues. Before the first call, get its input schema from find_tool.",
+      "description": "List an Origin project's campaigns, or read one with campaign: its brief, posts with per-channel status, links and likes or reposts, Studio generations and issues. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2592,7 +2517,7 @@
     },
     {
       "name": "origin_campaign_link",
-      "description": "Attach a Broadcast post, Studio generation, Pipeline lead or Origin issue to a campaign, or detach it with remove. Before the first call, get its input schema from find_tool.",
+      "description": "Attach a Broadcast post, Studio generation or Origin issue to a campaign, or detach it with remove. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},

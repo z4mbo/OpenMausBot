@@ -24,14 +24,6 @@ const cases: ProviderCase[] = [
     headers: { "xi-api-key": secret }, response: { subscription: { tier: "creator" }, first_name: "Ada" }, account: "creator" },
   { id: "openai", values: { apiKey: secret }, url: "https://api.openai.com/v1/models",
     headers: { Authorization: `Bearer ${secret}` }, response: { data: [] } },
-  { id: "twilio", values: { accountSid: "AC123456789", authToken: secret, fromNumber: "+15550001111" },
-    url: "https://api.twilio.com/2010-04-01/Accounts/AC123456789.json",
-    headers: { Authorization: `Basic ${Buffer.from(`AC123456789:${secret}`).toString("base64")}` },
-    response: { friendly_name: "Ada's account" }, account: "Ada's account" },
-  { id: "brevo", values: { apiKey: secret, senderEmail: "sender@example.test", senderName: "Sender Name" }, url: "https://api.brevo.com/v3/account",
-    headers: { "api-key": secret }, response: { companyName: "Example Company", email: "ada@example.test" }, account: "Example Company" },
-  { id: "stripe", values: { secretKey: `sk_test_${secret}` }, url: "https://api.stripe.com/v1/prices?limit=1",
-    headers: { Authorization: `Bearer sk_test_${secret}` }, response: { data: [] } },
   { id: "resend", values: { apiKey: secret, senderEmail: "sender@example.test" }, url: "https://api.resend.com/domains",
     headers: { Authorization: `Bearer ${secret}` }, response: { data: [] } },
   { id: "x", values: { apiKey: "consumer-key-value", apiSecret: "consumer-secret-value", accessToken: "access-token-value", accessSecret: "access-secret-value" },
@@ -67,7 +59,7 @@ describe("integration checks", () => {
       try {
         const check = await checkIntegration(provider.id, provider.values, environment(request));
         expect(check).toEqual({ ok: true, detail: `${INTEGRATIONS[provider.id].label} accepted the key`, checkedAt,
-          ...(provider.account ? { account: provider.account } : {}), ...(provider.id === "stripe" ? { mode: "test" } : {}) });
+          ...(provider.account ? { account: provider.account } : {}) });
         expect(request).toHaveBeenCalledTimes(1);
         const [url, init] = request.mock.calls[0]!;
         expect(url).toBe(provider.url);
@@ -136,17 +128,6 @@ describe("integration checks", () => {
     expect(await checkIntegration("fal", { key: secret }, environment(request))).toMatchObject({ ok: false });
   });
 
-  it.each(["sk_test_example", "rk_test_example", "sk_live_example", "rk_live_example"])("reports Stripe mode for %s", async (secretKey) => {
-    const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ data: [] }));
-    expect(await checkIntegration("stripe", { secretKey }, environment(request))).toMatchObject({ mode: secretKey.includes("_test_") ? "test" : "live" });
-  });
-
-  it("names Stripe's missing Prices permission", async () => {
-    const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ error: { message: `Permission denied for ${secret}` } }, { status: 403 }));
-    const check = await checkIntegration("stripe", { secretKey: secret }, environment(request));
-    expect(check).toMatchObject({ ok: false, detail: "Stripe accepted the key but needs the Prices permission" });
-  });
-
   it("accepts Resend's sending-only key", async () => {
     const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ name: "restricted_api_key" }, { status: 401 }));
     expect(await checkIntegration("resend", { apiKey: secret, senderEmail: "ada@example.test" }, environment(request)))
@@ -172,7 +153,6 @@ describe("integration checks", () => {
 
   it.each([
     { id: "elevenlabs", response: { first_name: "Ada" }, account: "Ada" },
-    { id: "brevo", response: { email: "ada@example.test" }, account: "ada@example.test" },
     { id: "netlify", response: { email: "ada@example.test" }, account: "ada@example.test" },
   ] as const)("uses $id's fallback account", async ({ id, response, account }) => {
     const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json(response));
@@ -192,8 +172,8 @@ describe("integration checks", () => {
     const apiKey = "a-secret-key";
     const senderEmail = "a-secret-key@example.test";
     const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(`${senderEmail} ${apiKey} ${apiKey} ${"x".repeat(300)}`, { status: 400 }));
-    const check = await checkIntegration("brevo", { apiKey, senderEmail }, environment(request));
-    expect(check.detail).toHaveLength("Brevo rejected the key: ".length + 200);
+    const check = await checkIntegration("resend", { apiKey, senderEmail }, environment(request));
+    expect(check.detail).toHaveLength("Resend rejected the key: ".length + 200);
     expect(check.detail).not.toContain(apiKey);
     expect(check.detail).not.toContain(senderEmail);
   });

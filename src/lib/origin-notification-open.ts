@@ -5,7 +5,6 @@ import { setChiefSectionOf } from "./origin-chief-section";
 import { useCloudLinks } from "./origin-cloud-links";
 import { projectBotFor, useOpenOriginIssue } from "./origin-issue-focus";
 import { openOriginPage } from "./origin-pages";
-import { requestLeadFocus } from "./origin-lead-focus";
 import { useShowThreads } from "./thread-preferences";
 
 /** Where an Origin notification points: an issue, a member chat message, or a line of a shared agent thread. */
@@ -15,7 +14,6 @@ export interface OriginNotificationTarget {
   messageId?: string;
   conversation?: string;
   agentThreadId?: string;
-  leadId?: string;
   available: boolean;
 }
 
@@ -54,17 +52,6 @@ export function useOpenOriginNotification(): (target: OriginNotificationTarget) 
     if (messageId) {
       if (conversation !== undefined) requestChatFocus({ conversation, messageId });
       openOriginPage("chat");
-      return "opened";
-    }
-    if (target.leadId && target.projectId) {
-      if (!target.available) return "gone";
-      const botId = projectBotFor(projects, state.bots, target.projectId);
-      const bot = botId ? state.bots.find((candidate) => candidate.id === botId) : undefined;
-      if (!bot) return "elsewhere";
-      requestLeadFocus({ projectId: target.projectId, leadId: target.leadId });
-      setChiefSectionOf(bot.id, "pipeline");
-      openOriginPage(null);
-      openBot(dispatch, bot, showThreads);
       return "opened";
     }
     if (!target.available || !target.projectId || !target.taskId) return "gone";

@@ -56,7 +56,6 @@ export function CheckResult({ id, className }: { id: string; className?: string 
     <p className={cn("flex min-w-0 flex-wrap items-center gap-x-1.5 text-[12px]", check.ok ? "text-success" : "text-danger", className)} role={check.ok ? "status" : "alert"}>
       {check.ok ? <CircleCheck size={12} className="shrink-0" /> : <CircleAlert size={12} className="shrink-0" />}
       <span>{check.ok ? (check.account ? `Works as ${check.account}` : "Works") : check.detail}</span>
-      {check.mode === "test" && <span className="rounded bg-warning/12 px-1 text-[11px] text-warning">Test mode</span>}
     </p>
   );
 }

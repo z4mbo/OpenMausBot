@@ -5,8 +5,6 @@ import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 import { createSession } from "./lib/auth";
-import { makeFunctionReference } from "convex/server";
-import { pulseTools } from "../../server/origin-pulse-tool.ts";
 import { nextJourneyStep } from "../../shared/origin-journey";
 
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
@@ -31,10 +29,9 @@ describe("pulse", () => {
     const f = await fixture();
     const pulse = await f.t.query(api.pulse.project, { sessionToken: f.owner.token, projectId: f.projectId, range: 7 });
     expect(pulse.stage).toBe("idea");
-    expect(pulse.reached).toEqual({ idea: true, build: false, launch: false, grow: false });
+    expect(pulse.reached).toMatchObject({ idea: true, build: false, launch: false });
     expect(pulse.days).toHaveLength(7);
     expect(pulse.build.doneSeries).toEqual([0, 0, 0, 0, 0, 0, 0]);
-    expect(pulse.grow.conversion).toBeNull();
     expect(pulse.attention).toEqual([]);
   });
 
@@ -63,7 +60,7 @@ describe("pulse", () => {
     expect(pulse.attention).toEqual([{ kind: "prs", count: 1, tone: "warn" }]);
   });
 
-  test("page views land on the day's rollup, posts and leads move the stage to Grow", async () => {
+  test("page views land on the day's rollup and posts move the stage to Launch", async () => {
     const f = await fixture();
     const now = Date.now();
     await f.t.run(async (ctx) => {
@@ -71,9 +68,6 @@ describe("pulse", () => {
       await ctx.db.insert("publishedPages", { teamId: f.teamId, projectId: f.projectId, canvasId, frameId: "f", site: "pulse", slug: "home", title: "Home", description: "", body: "", background: "#000", fonts: [], leadForms: 1, views: 0, publishedBy: "owner", publishedAt: now, updatedAt: now });
       await ctx.db.insert("broadcastPosts", { projectId: f.projectId, variants: [{ channel: "x", text: "Live", result: "published", publishedAt: now - DAY }], assetIds: [], status: "published", authorUserId: f.owner.userId, createdAt: now - DAY, updatedAt: now - DAY });
       await ctx.db.insert("broadcastPosts", { projectId: f.projectId, variants: [{ channel: "x", text: "Old", result: "published", publishedAt: now - 10 * DAY }], assetIds: [], status: "published", authorUserId: f.owner.userId, createdAt: now - 10 * DAY, updatedAt: now - 10 * DAY });
-      for (const [name, stage, value, unread] of [["Ada", "Won", 1000, 0], ["Bob", "Qualified", 500, 2], ["Cy", "New", 250, 0]] as const) {
-        await ctx.db.insert("pipelineLeads", { projectId: f.projectId, name, source: "page", stage, order: 0, value, tags: [], ...(unread ? { unreadReplies: unread } : {}), stageChangedAt: now, createdAt: now - DAY, updatedAt: now });
-      }
     });
     for (let i = 0; i < 3; i++) await f.t.mutation(internal.pages.viewed, { site: "pulse", slug: "home" });
 
@@ -81,11 +75,8 @@ describe("pulse", () => {
     expect(week.launch).toMatchObject({ pagesLive: 1, viewsTotal: 3, views: { value: 3, previous: 0 } });
     expect(week.launch.viewsSeries[week.launch.viewsSeries.length - 1]).toBe(3);
     expect(week.launch.posts).toEqual({ value: 1, previous: 1 });
-    expect(week.grow).toMatchObject({ total: 3, pipelineValue: 750, repliesAwaiting: 2, leadsAwaiting: 1, won: { value: 1, previous: 0 } });
-    expect(week.grow.conversion).toBeCloseTo(1 / 3);
-    expect(week.grow.stages.find((row) => row.stage === "Qualified")).toEqual({ stage: "Qualified", count: 1, value: 500 });
-    expect(week.stage).toBe("grow");
-    expect(week.reached).toEqual({ idea: true, build: false, launch: true, grow: true });
+    expect(week.stage).toBe("launch");
+    expect(week.reached).toMatchObject({ idea: true, build: false, launch: true });
 
     const month = await f.t.query(api.pulse.project, { sessionToken: f.owner.token, projectId: f.projectId, range: 30 });
     expect(month.days).toHaveLength(30);
@@ -132,28 +123,11 @@ describe("pulse", () => {
     expect((await f.t.query(api.pulse.projects, { sessionToken: member.token, teamId: f.teamId })).projects.map((row) => row.name)).toEqual(["Apollo"]);
   });
 
-  test("origin_pulse reports a project's numbers through the real query, and names a project it cannot read", async () => {
-    const f = await fixture();
-    await f.t.run(async (ctx) => {
-      const now = Date.now();
-      await ctx.db.insert("pipelineLeads", { projectId: f.projectId, name: "Ada", source: "page", stage: "Won", order: 0, value: 900, tags: [], stageChangedAt: now, createdAt: now, updatedAt: now });
-    });
-    const client = { query: (name: string, args: Record<string, unknown>) => f.t.query(makeFunctionReference<"query">(name), args) };
-    const tool = pulseTools(async () => [
-      { client, sessionToken: f.owner.token, projectId: f.projectId, projectName: "Rocket" },
-      { client, sessionToken: (await f.user("stranger@test.dev")).token, projectId: f.projectId, projectName: "Hidden" },
-    ]).origin_pulse!;
-    const { text } = await tool({ range: 30 }, null);
-    expect(text).toContain("Rocket, last 30 days (UTC):");
-    expect(text).toContain("Stage: Plan (reached) → Build → Launch → Sell (current).");
-    expect(text).toContain("1 won, conversion 100% of 1 leads");
-    expect(text).toContain("Hidden: Origin did not return its pulse (No active project access).");
-  });
-  test("journey facts walk a project from Brief to leads, and its next step follows the furthest thing made", async () => {
+  test("journey facts walk a project from Brief to published posts, and its next step follows the furthest thing made", async () => {
     const f = await fixture();
     const facts = () => f.t.query(api.pulse.journey, { sessionToken: f.owner.token, projectId: f.projectId });
     const step = async () => nextJourneyStep(await facts()).id;
-    expect(await facts()).toMatchObject({ name: "Rocket", brief: false, canvases: 0, issuesOpen: 0, issuesDone: 0, shipped: false, postsLive: 0, leads: 0 });
+    expect(await facts()).toMatchObject({ name: "Rocket", brief: false, canvases: 0, issuesOpen: 0, issuesDone: 0, shipped: false, postsLive: 0 });
     expect(await step()).toBe("brief");
 
     await f.t.mutation(api.projectDocs.save, { sessionToken: f.owner.token, projectId: f.projectId, title: "Brief", content: "## Problem", tags: ["brief"] });
@@ -182,10 +156,8 @@ describe("pulse", () => {
     await f.t.run(async (ctx) => {
       const now = Date.now();
       await ctx.db.insert("broadcastPosts", { projectId: f.projectId, variants: [{ channel: "x", text: "Live", result: "published", publishedAt: now }], assetIds: [], status: "published", authorUserId: f.owner.userId, createdAt: now, updatedAt: now });
-      await ctx.db.insert("pipelineLeads", { projectId: f.projectId, name: "Ada", source: "page", stage: "New", order: 0, tags: [], unreadReplies: 2, createdAt: now, updatedAt: now });
     });
-    expect(await facts()).toMatchObject({ postsLive: 1, leads: 1, repliesAwaiting: 2 });
-    expect(nextJourneyStep(await facts())).toMatchObject({ id: "sell", phase: "sell", section: "pipeline", detail: "2 replies wait for an answer." });
+    expect(await facts()).toMatchObject({ postsLive: 1 });
 
     const stranger = await f.user("stranger@test.dev");
     await expect(f.t.query(api.pulse.journey, { sessionToken: stranger.token, projectId: f.projectId })).rejects.toThrow();

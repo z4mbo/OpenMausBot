@@ -18,12 +18,10 @@ export interface JourneyFacts {
   content: number;
   postsLive: number;
   postsScheduled: number;
-  leads: number;
-  repliesAwaiting: number;
 }
 
-export type JourneyStepId = "brief" | "sketch" | "issues" | "build" | "ship" | "content" | "post" | "sell";
-export type JourneySection = "docs" | "draw" | "issues" | "ship" | "studio" | "broadcast" | "pipeline";
+export type JourneyStepId = "brief" | "sketch" | "issues" | "build" | "ship" | "content" | "post";
+export type JourneySection = "docs" | "draw" | "issues" | "ship" | "studio" | "broadcast";
 
 export interface JourneyStep {
   id: JourneyStepId;
@@ -39,7 +37,7 @@ export interface JourneyStep {
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 function stepId(facts: JourneyFacts): JourneyStepId {
-  if (facts.postsLive > 0) return "sell";
+  if (facts.postsLive > 0) return "post";
   if (facts.shipped) return facts.content > 0 ? "post" : "content";
   if (facts.issuesOpen === 0 && facts.issuesDone > 0) return "ship";
   if (facts.issuesOpen > 0) return "build";
@@ -88,13 +86,6 @@ export function nextJourneyStep(facts: JourneyFacts): JourneyStep {
       detail: facts.postsScheduled ? `${plural(facts.postsScheduled, "post", "posts")} scheduled; plan the rest of the launch.` : "Plan the launch posts across your channels.",
       brief: `Draft a launch campaign for ${name} in Broadcast with the Studio content, for my approval.`,
     };
-    case "sell": return {
-      id: "sell", phase: "sell", section: "pipeline", action: "Open Sales",
-      title: "Posts live → follow up leads in Sales",
-      detail: facts.repliesAwaiting ? `${plural(facts.repliesAwaiting, "reply waits", "replies wait")} for an answer.`
-        : facts.leads ? `${plural(facts.leads, "lead", "leads")} so far.` : "Capture leads from your pages and posts, then reach out.",
-      brief: `Posts for ${name} are live. Go through the leads in Sales, draft follow-ups for the warm ones and plan outreach to find more.`,
-    };
   }
 }
 
@@ -114,7 +105,6 @@ export function journeyContextLine(facts: JourneyFacts): string {
     facts.shipped ? "shipped" : "not shipped",
     plural(facts.content, "Studio output", "Studio outputs"),
     plural(facts.postsLive, "post live", "posts live"),
-    plural(facts.leads, "lead", "leads"),
   ].join(", ");
   return `- Journey (Plan → Build → Launch → Sell): ${facts.name} is in ${JOURNEY_PHASE_LABEL[step.phase]}; ${made}. Next step: ${step.title}. ${step.detail} Steer plans and suggestions toward it unless the person asks for something else.`;
 }

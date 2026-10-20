@@ -30,8 +30,6 @@ describe("built-in agent tool read policy", () => {
       "origin_studio_list",
       "origin_studio_workflow_list",
       "origin_studio_presets",
-      "origin_pipeline_list_leads",
-      "origin_pipeline_conversations",
       "origin_campaign_get",
       "origin_brand_get",
       "origin_milestone_list",

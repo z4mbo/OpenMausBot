@@ -29,13 +29,13 @@ function tempFile() {
 describe("integration keys", () => {
   it("returns values only once every required field is set", () => {
     const file = tempFile();
-    expect(integrationKey("twilio", file)).toBeNull();
-    expect(saveIntegrationKeys("twilio", { accountSid: "AC123", authToken: "tok" }, file)).toEqual({ ok: true });
-    expect(integrationConfigured("twilio", file)).toBe(false);
-    saveIntegrationKeys("twilio", { fromNumber: "+15550001111" }, file);
-    expect(integrationKey("twilio", file)).toEqual({ accountSid: "AC123", authToken: "tok", fromNumber: "+15550001111" });
-    saveIntegrationKeys("brevo", { apiKey: "xkeysib-1", senderEmail: "a@b.co" }, file);
-    expect(integrationKey("brevo", file)).toEqual({ apiKey: "xkeysib-1", senderEmail: "a@b.co" });
+    expect(integrationKey("linkedin", file)).toBeNull();
+    expect(saveIntegrationKeys("linkedin", { accessToken: "tok" }, file)).toEqual({ ok: true });
+    expect(integrationConfigured("linkedin", file)).toBe(false);
+    saveIntegrationKeys("linkedin", { authorUrn: "urn:li:person:ada" }, file);
+    expect(integrationKey("linkedin", file)).toEqual({ accessToken: "tok", authorUrn: "urn:li:person:ada" });
+    saveIntegrationKeys("resend", { apiKey: "re_1", senderEmail: "a@b.co" }, file);
+    expect(integrationKey("resend", file)).toEqual({ apiKey: "re_1", senderEmail: "a@b.co" });
   });
 
   it("never shows a secret in the client status, only that it is set", () => {
@@ -114,23 +114,23 @@ describe("integration check route", () => {
 
   it("merges trimmed draft fields over stored values without saving them", async () => {
     const file = tempFile();
-    saveIntegrationKeys("twilio", { accountSid: "AC123456789", authToken: "stored-secret", fromNumber: "+15550001111" }, file);
+    saveIntegrationKeys("linkedin", { accessToken: "stored-secret", authorUrn: "urn:li:person:ada" }, file);
     const stored = readFileSync(file, "utf8");
-    const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ friendly_name: "Ada's account" }));
+    const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ name: "Ada Lovelace" }));
     const base = await serve(file, ["admin"], { fetch: request });
     const before = Date.now();
-    const response = await fetch(`${base}/api/integrations/twilio/check`, {
-      method: "POST", body: JSON.stringify({ fields: { accountSid: "   ", authToken: "  draft-secret  " } }),
+    const response = await fetch(`${base}/api/integrations/linkedin/check`, {
+      method: "POST", body: JSON.stringify({ fields: { authorUrn: "   ", accessToken: "  draft-secret  " } }),
     });
     expect(response.status).toBe(200);
     const { check } = await response.json() as { check: IntegrationCheck };
-    expect(check).toEqual({ ok: true, account: "Ada's account", detail: "Twilio accepted the key", checkedAt: expect.any(Number) });
+    expect(check).toEqual({ ok: true, account: "Ada Lovelace", detail: "LinkedIn accepted the key", checkedAt: expect.any(Number) });
     expect(check.checkedAt).toBeGreaterThanOrEqual(before);
     expect(check.checkedAt).toBeLessThanOrEqual(Date.now());
     expect(request).toHaveBeenCalledTimes(1);
     const [url, init] = request.mock.calls[0]!;
-    expect(url).toBe("https://api.twilio.com/2010-04-01/Accounts/AC123456789.json");
-    expect(new Headers(init?.headers).get("Authorization")).toBe(`Basic ${Buffer.from("AC123456789:draft-secret").toString("base64")}`);
+    expect(url).toBe("https://api.linkedin.com/v2/userinfo");
+    expect(new Headers(init?.headers).get("Authorization")).toBe("Bearer draft-secret");
     expect(readFileSync(file, "utf8")).toBe(stored);
   });
 
@@ -147,14 +147,14 @@ describe("integration check route", () => {
 
   it("completes an incomplete own key from the draft", async () => {
     const file = tempFile();
-    saveIntegrationKeys("brevo", { senderEmail: "ada@example.test" }, file);
-    const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ companyName: "Example Company" }));
+    saveIntegrationKeys("resend", { senderEmail: "ada@example.test" }, file);
+    const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ data: [] }));
     const base = await serve(file, ["admin"], { fetch: request });
-    const response = await fetch(`${base}/api/integrations/brevo/check`, { method: "POST", body: JSON.stringify({ fields: { apiKey: "draft-secret" } }) });
+    const response = await fetch(`${base}/api/integrations/resend/check`, { method: "POST", body: JSON.stringify({ fields: { apiKey: "draft-secret" } }) });
     expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ check: { ok: true, account: "Example Company" } });
-    expect(new Headers(request.mock.calls[0]![1]?.headers).get("api-key")).toBe("draft-secret");
-    expect(integrationConfigured("brevo", file)).toBe(false);
+    expect(await response.json()).toMatchObject({ check: { ok: true, detail: "Resend accepted the key" } });
+    expect(new Headers(request.mock.calls[0]![1]?.headers).get("Authorization")).toBe("Bearer draft-secret");
+    expect(integrationConfigured("resend", file)).toBe(false);
   });
 
   it("checks shared values only without a complete own key or draft fields", async () => {
@@ -162,29 +162,29 @@ describe("integration check route", () => {
     mkdirSync(dirname(file), { recursive: true });
     const cache = createSharedKeys({
       cloud: () => ({ url: "http://convex.test", sessionToken: "fixture-session", projects: {} }),
-      resolve: async () => [{ integration: "brevo", teamId: "team1", projectId: null, projectName: null, sharedByName: "Ada",
+      resolve: async () => [{ integration: "resend", teamId: "team1", projectId: null, projectName: null, sharedByName: "Ada",
         values: { apiKey: "shared-secret", senderEmail: "shared@example.test" }, updatedAt: 1 }],
     });
     await cache.current();
     const shared = vi.spyOn(sharedIntegrationKeys, "sharedKeys").mockReturnValue(cache);
     try {
-      saveIntegrationKeys("brevo", { senderEmail: "own@example.test" }, file);
-      const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ companyName: "Example Company" }));
+      saveIntegrationKeys("resend", { senderEmail: "own@example.test" }, file);
+      const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ data: [] }));
       const base = await serve(file, ["admin"], { fetch: request });
-      const response = await fetch(`${base}/api/integrations/brevo/check`, { method: "POST", body: "{}" });
+      const response = await fetch(`${base}/api/integrations/resend/check`, { method: "POST", body: "{}" });
       expect(response.status).toBe(200);
       expect(await response.json()).toMatchObject({ check: { ok: true } });
-      expect(new Headers(request.mock.calls[0]![1]?.headers).get("api-key")).toBe("shared-secret");
-      saveIntegrationKeys("brevo", null, file);
-      const draft = await fetch(`${base}/api/integrations/brevo/check`, {
+      expect(new Headers(request.mock.calls[0]![1]?.headers).get("Authorization")).toBe("Bearer shared-secret");
+      saveIntegrationKeys("resend", null, file);
+      const draft = await fetch(`${base}/api/integrations/resend/check`, {
         method: "POST", body: JSON.stringify({ fields: { apiKey: "draft-secret" } }),
       });
       expect(await draft.json()).toMatchObject({ check: { ok: false, detail: "Fill in Sender email first" } });
       expect(request).toHaveBeenCalledTimes(1);
-      saveIntegrationKeys("brevo", { apiKey: "own-secret", senderEmail: "own@example.test" }, file);
-      const own = await fetch(`${base}/api/integrations/brevo/check`, { method: "POST", body: "{}" });
+      saveIntegrationKeys("resend", { apiKey: "own-secret", senderEmail: "own@example.test" }, file);
+      const own = await fetch(`${base}/api/integrations/resend/check`, { method: "POST", body: "{}" });
       expect(await own.json()).toMatchObject({ check: { ok: true } });
-      expect(new Headers(request.mock.calls[1]![1]?.headers).get("api-key")).toBe("own-secret");
+      expect(new Headers(request.mock.calls[1]![1]?.headers).get("Authorization")).toBe("Bearer own-secret");
     } finally { shared.mockRestore(); cache.close(); }
   });
 

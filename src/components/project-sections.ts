@@ -1,4 +1,4 @@
-import { Bot as BotIcon, Brush, CircleDot, GitBranch, Headset, Images, LockKeyhole, Megaphone, MessageCircle, MessagesSquare, Palette, Send, Settings, Target, type LucideIcon } from "lucide-react";
+import { Bot as BotIcon, Brush, CircleDot, GitBranch, Headset, Images, LockKeyhole, Megaphone, MessageCircle, MessagesSquare, Palette, Send, Settings, type LucideIcon } from "lucide-react";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { unreadReplies } from "@/lib/origin-unread";
 import type { ChiefSection } from "@/lib/origin-chief-section";
@@ -22,9 +22,7 @@ export const CHIEF_SECTIONS = [
   { id: "repo", label: "Repo", icon: GitBranch, blurb: "The project's code repository and its pull requests.", place: "tool" },
   { id: "feedback", label: "Feedback", icon: Megaphone, blurb: "What users say about the project, collected in one place.", place: "tool" },
   { id: "settings", label: "Settings", icon: Settings, blurb: "Settings for the whole project: its name, members, integrations and defaults for its agents.", place: "tool" },
-  { id: "draw", label: "Canvas", icon: Brush, blurb: "Shared design canvases the people and agents in this project build on.", place: "nested" },
-  { id: "pipeline", label: "Sales", icon: Target, blurb: "Every contact, conversation and deal, from first message to payment.", place: "nested" },
-] as const satisfies readonly ProjectSectionEntry[];
+  { id: "draw", label: "Canvas", icon: Brush, blurb: "Shared design canvases the people and agents in this project build on.", place: "nested" },] as const satisfies readonly ProjectSectionEntry[];
 
 export const sectionEntry = (id: ChiefSection): ProjectSectionEntry => CHIEF_SECTIONS.find((item) => item.id === id) ?? CHIEF_SECTIONS[0];
 export const tabSections = (): ProjectSectionEntry[] => CHIEF_SECTIONS.filter((item) => item.place === "tab");

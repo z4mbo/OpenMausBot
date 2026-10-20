@@ -592,7 +592,6 @@ import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, initializeWorkspaceTeams } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
 import { createOriginCloudRoutes, cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
-import { createPipelineRoutes, createPipelineSender, loopbackProviderOrigin } from "./origin-pipeline.ts";
 import { BroadcastScheduler, createBroadcastRoutes } from "./broadcast/scheduler.ts";
 import { awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, recordCallNotes, transcribeWith } from "./origin-call-agent.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
@@ -13571,23 +13570,8 @@ const originAgents = createOriginAgentSupport({
   localFolders: !CLOUD_HOME, git: CLOUD_HOME ? undefined : createProjectGit({ service: () => githubService(), cloud: () => readOriginCloud(defaultOriginCloudFile()), connect: convexOriginClient, port: PORT, dataDir: DATA_DIR }),
 });
 ROUTES.push(originAgents.routes); PUBLIC_ROUTES.push(originAgents.publicRoutes);
-const pipelineProviderOrigin = loopbackProviderOrigin(process.env.OMB_PIPELINE_PROVIDER_URL);
-const summarizeForAgent = async ({ botId, prompt }: { botId: string; prompt: string }) => {
-  const bot = store.bot(botId);
-  if (!bot) throw new CallAgentError("The agent no longer exists");
-  const writer = callSummaryWriter(bot);
-  assertWithinBudget(cfg, DATA_DIR);
-  return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), timeoutMs: 180_000 });
-};
-const pipelineSender = createPipelineSender({
-  ...(pipelineProviderOrigin ? { providerOrigin: pipelineProviderOrigin } : {}),
-  summarize: summarizeForAgent,
-  log: (line) => console.log(line),
-});
-ROUTES.push(createPipelineRoutes({ sender: pipelineSender, generate: summarizeForAgent, providerOrigin: pipelineProviderOrigin }));
 ROUTES.push(createOriginCloudRoutes({
   store,
-  pipeline: pipelineSender,
   github: () => originGitHub(githubService()),
   teamChat: originAgents.teamChat,
   folder: originAgents.folder,

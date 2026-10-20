@@ -26,7 +26,7 @@ describe("chat card items", () => {
 
   it("reads assets, campaigns, feedback and call notes", () => {
     expect(assetCardItem({ _id: "a1", name: "logo.svg", type: "figma", fileUrl: "https://cdn.test/logo.svg", folder: "Brand" })).toEqual({ id: "a1", name: "logo.svg", type: "figma", kind: "image", url: "https://cdn.test/logo.svg", folder: "Brand" });
-    expect(campaignCardItem({ _id: "c1", name: "Launch", status: "running", channels: ["x", "nope"], counts: { posts: 3, published: 1 } }).counts).toEqual({ posts: 3, published: 1, generations: 0, leads: 0, won: 0, openIssues: 0 });
+    expect(campaignCardItem({ _id: "c1", name: "Launch", status: "running", channels: ["x", "nope"], counts: { posts: 3, published: 1 } }).counts).toEqual({ posts: 3, published: 1, generations: 0, openIssues: 0 });
     expect(feedbackCardItem({ _id: "f1", title: "Crash", body: "on save", kind: "bug", status: "weird", createdAt: 9 })).toEqual({ id: "f1", title: "Crash", body: "on save", kind: "bug", status: "new", createdAt: 9 });
     expect(callCardItem({ _id: "n1", callName: "Sync", startedAt: 1, minutes: 30, keyPoints: ["a"], decisions: [], actionItems: [{ title: "Ship", taskId: "t1" }] }).actionItems).toEqual([{ title: "Ship", taskId: "t1" }]);
     expect(mediaKindOf("", "", "theme.mp3")).toBe("audio");

@@ -3,7 +3,6 @@ import { query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { projectMember, requireMember, requireTeamMember } from "./lib/permissions";
 import { budgetLevel, monthOf } from "./budgets";
-import { CLOSED_STAGES, PIPELINE_STAGES } from "../../shared/origin-pipeline";
 import { inferStage, pulseAttention, pulseDays, type ProjectPulse, type PulseCount, type PulseRange } from "../../shared/origin-pulse";
 import { BRIEF_TAG } from "../../shared/origin-docs";
 import type { JourneyFacts } from "../../shared/origin-journey";
@@ -16,8 +15,6 @@ const PRS_MAX = 300;
 const PAGES_MAX = 50;
 const POSTS_MAX = 600;
 const CAMPAIGNS_MAX = 100;
-const LEADS_MAX = 1_500;
-const DRAFTS_MAX = 200;
 const RUNS_MAX = 800;
 const LIVE_MAX = 50;
 const APPROVALS_MAX = 50;
@@ -149,36 +146,6 @@ async function launchSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window
   };
 }
 
-async function growSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window) {
-  const settings = await ctx.db.query("pipelineSettings").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).unique();
-  const stageNames = settings?.stages?.length ? settings.stages : [...PIPELINE_STAGES];
-  const leads = await ctx.db.query("pipelineLeads").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(LEADS_MAX);
-  const stages = new Map(stageNames.map((stage) => [stage, { stage, count: 0, value: 0 }]));
-  const created = zero();
-  const leadsSeries = w.series();
-  const won = zero();
-  const revenue = zero();
-  let pipelineValue = 0, repliesAwaiting = 0, leadsAwaiting = 0, wonTotal = 0;
-  for (const lead of leads) {
-    const row = stages.get(lead.stage) ?? { stage: lead.stage, count: 0, value: 0 };
-    row.count += 1;
-    row.value += lead.value ?? 0;
-    stages.set(lead.stage, row);
-    w.add(created, lead.createdAt, leadsSeries);
-    if (lead.stage === "Won") { wonTotal += 1; w.add(won, lead.stageChangedAt ?? lead.updatedAt); w.add(revenue, lead.stageChangedAt ?? lead.updatedAt, undefined, lead.value ?? 0); }
-    if (!CLOSED_STAGES.includes(lead.stage)) pipelineValue += lead.value ?? 0;
-    if (lead.unreadReplies) { repliesAwaiting += lead.unreadReplies; leadsAwaiting += 1; }
-  }
-  const drafts = await ctx.db.query("pipelineActivities").withIndex("by_projectId_and_status", (q) => q.eq("projectId", projectId).eq("status", "pending")).take(DRAFTS_MAX);
-  return {
-    truncated: leads.length === LEADS_MAX,
-    grow: {
-      currency: settings?.currency ?? "EUR", total: leads.length, stages: [...stages.values()], leads: created, leadsSeries, won,
-      conversion: leads.length ? wonTotal / leads.length : null, revenue, pipelineValue, repliesAwaiting, leadsAwaiting, draftsAwaiting: drafts.length,
-    },
-  };
-}
-
 async function teamSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window, now: number) {
   const runs = await ctx.db.query("workspaceAgentRuns").withIndex("by_projectId", (q) => q.eq("projectId", projectId).gte("_creationTime", w.previousSince)).take(RUNS_MAX);
   const count = zero();
@@ -213,18 +180,18 @@ async function teamSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window, 
 
 export async function projectPulse(ctx: QueryCtx, project: Doc<"projects">, range: PulseRange, now: number): Promise<ProjectPulse> {
   const w = new Window(now, range);
-  const [build, launch, grow, team] = await Promise.all([
-    buildSignals(ctx, project, w), launchSignals(ctx, project._id, w), growSignals(ctx, project._id, w), teamSignals(ctx, project._id, w, now),
+  const [build, launch, team] = await Promise.all([
+    buildSignals(ctx, project, w), launchSignals(ctx, project._id, w), teamSignals(ctx, project._id, w, now),
   ]);
   const { stage, reached } = inferStage({
     ideas: build.ideas, issues: build.hasIssues ? 1 : 0, runs: team.team.runs.value + team.team.runs.previous, prs: build.prsSeen,
-    pagesLive: launch.launch.pagesLive, postsPublished: launch.everPublished ? 1 : 0, leads: grow.grow.total,
+    pagesLive: launch.launch.pagesLive, postsPublished: launch.everPublished ? 1 : 0,
   });
-  const signals = { build: build.build, grow: grow.grow, team: team.team };
+  const signals = { build: build.build, team: team.team };
   return {
     projectId: project._id, name: project.name, accent: project.accent, range, days: w.days, generatedAt: now, stage, reached,
     idea: { ideas: build.ideas }, ...signals, launch: launch.launch, attention: pulseAttention(signals),
-    truncated: build.truncated || launch.truncated || grow.truncated || team.truncated,
+    truncated: build.truncated || launch.truncated || team.truncated,
   };
 }
 
@@ -251,7 +218,6 @@ export async function journeyFacts(ctx: QueryCtx, project: Doc<"projects">): Pro
   const releases = await ctx.db.query("shipReleases").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(50);
   const generations = await ctx.db.query("studioGenerations").withIndex("by_projectId_and_createdAt", (q) => q.eq("projectId", projectId)).order("desc").take(JOURNEY_MAX);
   const posts = await ctx.db.query("broadcastPosts").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(POSTS_MAX);
-  const leads = await ctx.db.query("pipelineLeads").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(LEADS_MAX);
   return {
     name: project.name,
     brief: docs.some((doc) => doc.tags.includes(BRIEF_TAG)),
@@ -264,12 +230,10 @@ export async function journeyFacts(ctx: QueryCtx, project: Doc<"projects">): Pro
     content: generations.filter((generation) => generation.status === "done").length,
     postsLive: posts.filter((post) => post.status === "published" || post.variants.some((variant) => variant.result === "published")).length,
     postsScheduled: posts.filter((post) => post.status === "scheduled").length,
-    leads: leads.length,
-    repliesAwaiting: leads.reduce((sum, lead) => sum + (lead.unreadReplies ?? 0), 0),
   };
 }
 
-/** What a project has made so far, from Brief to leads, for its next step. */
+/** What a project has made so far, from Brief to published posts, for its next step. */
 export const journey = query({
   args: { sessionToken: v.string(), projectId: v.id("projects") },
   handler: async (ctx, args): Promise<JourneyFacts> => {

@@ -13,10 +13,8 @@ const evidence = { checkedAt: new Date().toISOString(), previewUrl: url.href, ca
 
 /** Each provider's answer to a key check, standing in for the vendor so nothing leaves this computer. */
 const CHECKS = {
-  fal: { ok: true, detail: "fal.ai accepted the key" },
-  stripe: { ok: true, account: "Acme test", detail: "Stripe accepted the key", mode: "test" },
+  fal: { ok: false, detail: "fal.ai rejected the key: Unauthorized" },
   x: { ok: true, account: "@origin", detail: "X accepted the keys" },
-  brevo: { ok: false, detail: "Brevo rejected the key: Key not found" },
 };
 
 async function open(width, theme) {
@@ -51,20 +49,15 @@ try {
     const step = (id) => stack.locator(`[data-stack-step="${id}"]`);
     const provider = (id) => stack.locator(`[data-stack-provider="${id}"]`);
 
-    await stack.getByText("4 of 6 ready").waitFor();
-    await step("sms").getByRole("button", { expanded: true }).waitFor();
-    await provider("twilio").getByText("Incomplete").waitFor();
-    assert.equal(await provider("twilio").getByRole("link", { name: "Get Twilio keys" }).getAttribute("href"), "https://console.twilio.com");
+    await stack.getByText("2 of 3 ready").waitFor();
+    await step("studio").getByRole("button", { expanded: true }).waitFor();
+    await provider("fal").getByText("Not connected").waitFor();
+    assert.equal(await provider("fal").getByRole("link", { name: "Get fal.ai keys" }).getAttribute("href"), "https://fal.ai/dashboard/keys");
     await capture(page, `stack-${tag}`);
-    evidence.cases.push({ tag, step: "checklist: 4 of 6 ready (GitHub shared, fal, X, Stripe), the first unfinished step (SMS, half filled) open with its key page" });
-
-    await step("payments").getByRole("button", { expanded: false }).click();
-    await provider("stripe").getByText("Yours").waitFor();
-    await provider("stripe").getByRole("button", { name: "Check" }).click();
-    await provider("stripe").getByText("Works as Acme test").waitFor();
-    await provider("stripe").getByText("Test mode").waitFor();
+    evidence.cases.push({ tag, step: "checklist: 2 of 3 ready (GitHub shared, X), the first unfinished step (Studio generation) open with its key pages" });
 
     await step("social").getByRole("button", { expanded: false }).click();
+    await provider("x").getByText("Yours").waitFor();
     await provider("x").getByRole("button", { name: "Check" }).click();
     await provider("x").getByText("Works as @origin").waitFor();
     const socials = stack.getByRole("group", { name: "Accounts per service" });
@@ -80,24 +73,23 @@ try {
     page.once("dialog", (dialog) => void dialog.accept());
     await socials.getByRole("button", { name: `Remove Support ${tag}` }).click();
     await socials.getByText(`Support ${tag}`).waitFor({ state: "detached" });
-    evidence.cases.push({ tag, step: "checks show the account and Stripe test mode; a second X account is added and removed through the server" });
+    evidence.cases.push({ tag, step: "a check shows the X handle; a second X account is added and removed through the server" });
 
-    await step("email").getByRole("button", { expanded: false }).click();
-    await provider("brevo").getByRole("button", { name: "Add key" }).click();
-    const row = page.locator('[data-integration="brevo"]');
+    await step("studio").getByRole("button", { expanded: false }).click();
+    await provider("fal").getByRole("button", { name: "Add key" }).click();
+    const row = page.locator('[data-integration="fal"]');
     await row.getByRole("button", { expanded: true }).waitFor();
-    await row.getByLabel("API key").fill("xkeysib-fixture");
-    await row.getByLabel("Sender email").fill("hello@fixture.test");
+    await row.getByLabel("API key").fill("fixture-id:fixture-secret");
     await row.getByRole("button", { name: "Save" }).click();
-    await row.getByText("Brevo rejected the key: Key not found").waitFor();
-    await provider("brevo").getByText("Brevo rejected the key: Key not found").waitFor();
-    await stack.getByText("4 of 6 ready").waitFor();
-    await step("email").locator("span.border-warning").waitFor();
+    await row.getByText("fal.ai rejected the key: Unauthorized").waitFor();
+    await provider("fal").getByText("fal.ai rejected the key: Unauthorized").waitFor();
+    await stack.getByText("2 of 3 ready").waitFor();
+    await step("studio").locator("span.border-warning").waitFor();
     await capture(page, `inline-check-${tag}`);
-    evidence.cases.push({ tag, step: "Add key opens Brevo's form; saving checks the key at once and shows the rejection in the form and in the checklist" });
+    evidence.cases.push({ tag, step: "Add key opens fal.ai's form; saving checks the key at once and shows the rejection in the form and in the checklist" });
     page.once("dialog", (dialog) => void dialog.accept());
     await row.getByRole("button", { name: "Disconnect" }).click();
-    await stack.getByText("4 of 6 ready").waitFor();
+    await stack.getByText("2 of 3 ready").waitFor();
     await page.close();
   }
 } finally {

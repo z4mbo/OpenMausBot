@@ -19,7 +19,7 @@ export const campaignTables = {
   campaigns: defineTable({
     projectId: v.id("projects"),
     name: v.string(),
-    /** The `utm_campaign` value; a captured lead with this source, or captured on a page tagged with it, counts toward the campaign. */
+    /** The campaign's `utm_campaign` value. */
     slug: v.string(),
     goal: v.string(),
     audience: v.string(),
@@ -30,6 +30,7 @@ export const campaignTables = {
     status: campaignStatus,
     postIds: v.array(v.id("broadcastPosts")),
     generationIds: v.array(v.id("studioGenerations")),
+    /** Known risk: holds links from existing rows to Sales leads; nothing reads it. */
     leadIds: v.array(v.id("pipelineLeads")),
     taskIds: v.array(v.id("tasks")),
     metrics: v.array(campaignMetric),

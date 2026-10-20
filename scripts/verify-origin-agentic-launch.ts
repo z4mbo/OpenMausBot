@@ -12,7 +12,7 @@ import { REPO_ROOT } from "./testing/preview-fixture.ts";
 type Json = Record<string, unknown>;
 
 const CHEAP_MODELS = /^(claude-haiku-[\w.-]+|gpt-[\w.-]*luna[\w.-]*)$/i;
-const PROMPT = "We launch Origin Lite next week. Make a launch image for it, draft a post for it on X and Bluesky that uses the image, and add a lead: Grace Hopper, grace@navy.test, from Navy, who asked for a demo. Use the Origin project tools; do not ask me anything first.";
+const PROMPT = "We launch Origin Lite next week. Make a launch image for it, and draft a post for it on X and Bluesky that uses the image. Use the Origin project tools; do not ask me anything first.";
 
 const { values } = parseArgs({
   options: {
@@ -104,13 +104,11 @@ try {
   const q = (name: string) => convex.t.query(convex.ref(name), { sessionToken: seeded.token, projectId: seeded.projectId }) as Promise<unknown>;
   const generations = await q("studio:list") as Json[];
   const posts = (await q("broadcast:list") as { posts: Json[] }).posts;
-  const leads = (await q("pipeline:board") as { leads: Json[] }).leads;
   const falSubmits = fal.requests.filter((request) => request.method === "POST");
 
   const checks = {
     studioGenerationRequested: falSubmits.length > 0 && falSubmits.every((request) => request.auth) && generations.some((row) => row.agentName === "Atlas"),
     broadcastDraftAwaitsApproval: posts.some((post) => post.status === "draft" && post.needsApproval === true && post.agentName === "Atlas"),
-    pipelineLeadExists: leads.some((lead) => /grace/i.test(String(lead.name)) || /grace@navy\.test/i.test(String(lead.email))),
   };
   const report = {
     model, engine: "claudeAgent (Claude Code CLI)", prompt: PROMPT, seconds: Math.round((Date.now() - started) / 1000), checks,
@@ -118,7 +116,6 @@ try {
     fal: falSubmits.map((request) => ({ path: request.path, body: request.body })),
     generations: generations.map((row) => ({ status: row.status, model: row.model, prompt: row.prompt, agentName: row.agentName, saved: (row.saved as unknown[]).length, broadcast: (row.broadcast as unknown[]).length })),
     posts: posts.map((post) => ({ status: post.status, needsApproval: post.needsApproval, agentName: post.agentName, channels: (post.variants as Json[]).map((variant) => variant.channel), text: (post.variants as Json[])[0]?.text, media: (post.media as unknown[] | undefined)?.length ?? 0 })),
-    leads: leads.map((lead) => ({ name: lead.name, email: lead.email, company: lead.company, stage: lead.stage })),
     reply,
   };
   mkdirSync(values.evidence!, { recursive: true });

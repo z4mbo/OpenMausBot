@@ -5,7 +5,6 @@ import { initialState, StoreContext, type Action, type Bot } from "../../src/sta
 import { applySkin } from "../../src/lib/skins";
 import { chiefSectionOf, chiefSectionsVersion, subscribeChiefSections } from "../../src/lib/origin-chief-section";
 import { useIssueFocus } from "../../src/lib/origin-issue-focus";
-import { useLeadFocus } from "../../src/lib/origin-lead-focus";
 import { GlassHeaderFrame } from "../../src/components/GlassScrollFrame";
 import "../../src/styles.css";
 
@@ -19,8 +18,7 @@ Object.assign(window, { originCampaignsDispatched: dispatched });
 function Navigation() {
   useSyncExternalStore(subscribeChiefSections, chiefSectionsVersion);
   const issue = useIssueFocus(config.projectId);
-  const lead = useLeadFocus(config.projectId);
-  return <output hidden data-testid="navigation" data-section={chiefSectionOf(chief.id)} data-issue={issue?.issueId ?? ""} data-lead={lead?.leadId ?? ""} />;
+  return <output hidden data-testid="navigation" data-section={chiefSectionOf(chief.id)} data-issue={issue?.issueId ?? ""} />;
 }
 
 createRoot(document.getElementById("root")!).render(
