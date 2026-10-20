@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { copyFileSync, existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { hostname } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { ConvexClient, ConvexHttpClient } from "convex/browser";
 import { makeFunctionReference } from "convex/server";
 import { definitionHash, definitionOf } from "../shared/origin-shared-agents.ts";
@@ -13,6 +13,7 @@ import { UNSEEN_MAX_BYTES, UNSEEN_MAX_MESSAGES } from "./delta-context.ts";
 import { defaultCloudLinksFile, readSharedLinks, writeSharedLinks } from "./origin-cloud-sync.ts";
 import { defaultOriginCloudFile, readOriginCloud } from "./origin-cloud.ts";
 import { openOutbox, type Outbox, type QueuedRun } from "./origin-outbox.ts";
+import { createHostedRequests, type HostedRequest, type RequestBackup } from "./origin-hosted-requests.ts";
 import { createRunLease, type RunLease } from "./origin-run-lease.ts";
 import { clientIdFor, createThreadMirror, type CloudPort } from "./origin-thread-mirror.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
@@ -85,9 +86,14 @@ export interface SharedAgentsDeps {
   redact(text: string): string;
   connect?: (url: string, sessionToken: string) => CloudConnection;
   files?: { cloud?: string; links?: string; state?: string; outbox?: string; bots?: string };
+  validateHostedSelection?(botId: string, selection: ModelSelection, allowMetered: boolean): Promise<unknown>;
+  nextHostedBackup?(request: HostedRequest, current: () => boolean): Promise<RequestBackup | null>;
+  startHostedSender?(request: HostedRequest, target: RequestBackup): Promise<void>;
+  locallyRunning?(threadId: string): boolean;
 }
 
-export type SendDecision = { status: "running"; sendId: string } | { status: "queued"; sendId: string; runId: string; teamId: string; cloudThreadId: string };
+export type SendDecision = { status: "running"; sendId: string } | { status: "queued"; sendId: string; runId: string; teamId: string; cloudThreadId: string }
+  | { status: "hosted"; sendId: string; message: Message };
 
 const TICK_MS = 15_000;
 const MENTIONS_PER_MESSAGE = 10;
@@ -158,6 +164,33 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   let flushTimer: ReturnType<typeof setTimeout> | null = null;
   let tickTimer: ReturnType<typeof setInterval> | null = null;
   const stops: Array<() => void> = [];
+  const cancelledAdmissions = new Map<string, number>();
+  let sharedStopped = false;
+  const hostedRequests = createHostedRequests({
+    file: join(dirname(files.state), "origin-hosted-requests.json"), store,
+    scope: () => {
+      const cloud = readOriginCloud(files.cloud);
+      return connection?.me && cloud.url === connection.url && cloud.sessionToken === connection.token
+        ? { origin: connection.url, userId: connection.me.id, identity: connection, port: connection.cloud } : null;
+    },
+    validate: (botId, selection, paid) => deps.validateHostedSelection?.(botId, selection, paid) ?? Promise.reject(new Error("Shared accounts are unavailable")),
+    next: (request, current) => deps.nextHostedBackup?.(request, current) ?? Promise.resolve(null),
+    handover: (threadId, runId) => lease?.handover(threadId, runId) ?? false,
+    release: (threadId, publish, runId) => mirror?.release(threadId, publish, runId), redact: deps.redact,
+    locallyRunning: deps.locallyRunning,
+    startSender: async (request, target, current) => {
+      if (!lease || !current() || !deps.startHostedSender) throw new Error("The local backup is unavailable");
+      const message = store.messagesFor(request.threadId).find(message => message.id === request.messageId);
+      if (!message?.text) throw new Error("The original shared message is missing");
+      const result = await lease.begin({ botId: request.botId, threadId: request.threadId, cloudThreadId: request.cloudThreadId, teamId: request.teamId,
+        clientId: request.clientId, text: deps.redact(message.text), engineLabel: target.selection.model });
+      if (!current() || result.runId !== request.runId || result.status !== "running") throw new Error("The shared run changed before its local backup started");
+      if (deps.locallyRunning?.(request.threadId)) throw new Error("A local turn is already running in this conversation");
+      mirror?.hold(request.threadId, result.runId);
+      store.setTaskActivity(request.botId, request.threadId, "idle");
+      await deps.startHostedSender(request, target);
+    },
+  });
 
   const box = () => (outbox ??= openOutbox(files.outbox));
   const threads = () => readSharedLinks(files.links).threads;
@@ -278,6 +311,12 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     mirror = createThreadMirror({
       store, outbox: box(), cloud, threads, runFor: (threadId) => lease?.runFor(threadId), me: () => connection?.me?.id ?? null,
       redact: deps.redact, kick: () => schedule(),
+      onSnapshot: (threadId, snapshot) => {
+        const me = connection?.me?.id;
+        const bot = store.botByThread(threadId);
+        if (!bot || deps.isBusy(bot.id, threadId) || snapshot.activeRun?.requesterUserId === me || snapshot.queued.some(run => run.requesterUserId === me)) return;
+        for (const message of store.messagesFor(threadId)) if (message.role === "user" && message.requestPending && message.sendId && !message.queued) store.patchMessage(threadId, message.id, { requestPending: false });
+      },
     });
     syncWatches();
     schedule();
@@ -298,6 +337,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   const tick = async () => {
     await ensureConnection().catch(() => undefined);
     syncWatches();
+    await hostedRequests.tick();
     await lease?.tick().catch(() => undefined);
     await publishHost().catch(() => undefined);
     schedule();
@@ -305,8 +345,19 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
 
   /** Called before a direct message is admitted. Null: the thread is not shared and runs as before. */
   const beforeSend = async (input: { botId: string; threadId: string; text: string; sendId?: string }): Promise<SendDecision | null> => {
+    const admission = cancelledAdmissions.get(input.threadId) ?? 0;
+    const admissionCloud = readOriginCloud(files.cloud);
+    let admissionConnection: typeof connection | undefined;
+    const admissionCurrent = () => {
+      const cloud = readOriginCloud(files.cloud);
+      return !sharedStopped && (cancelledAdmissions.get(input.threadId) ?? 0) === admission && cloud.url === admissionCloud.url &&
+        cloud.sessionToken === admissionCloud.sessionToken && (admissionConnection === undefined || connection === admissionConnection);
+    };
+    const assertAdmission = () => { if (!admissionCurrent()) throw refusal(409, "This shared request was stopped before it could start"); };
     const bot = store.projectBotForTask(input.botId, input.threadId) ?? store.bot(input.botId);
     const shared = bot?.shared;
+    const hosted = Boolean(bot?.modelSelection.source || bot?.modelSelection.instanceId === "origin-remote");
+    if (hosted && !shared) throw refusal(409, "Choose a shared Origin conversation to use a teammate's model account", "model_host_shared_required");
     if (!bot || !shared) return null;
     if (shared.review) throw refusal(409, `${shared.review.by} changed ${bot.name}'s instructions. Review the change before sending.`, "shared_definition_review");
     const task = store.taskByThread(bot.id, input.threadId);
@@ -314,9 +365,14 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     let cloudThreadId = threads()[input.threadId];
     const meta = readState(files.state).bots[bot.id];
     const eligible = !cloudThreadId && !task.sharedPrivate && meta && task.createdAt >= meta.boundAt && !store.messagesFor(input.threadId).some((m) => m.role === "user");
-    if (!cloudThreadId && !eligible) return null;
+    if (!cloudThreadId && !eligible) {
+      if (hosted) throw refusal(409, "A private conversation cannot run on another person's model account", "model_host_private_thread");
+      return null;
+    }
     await ensureConnection();
+    assertAdmission();
     if (!connection || !lease) throw refusal(503, "Origin is unreachable, so this shared thread can't take a message right now.", "shared_offline");
+    admissionConnection = connection;
     if (!cloudThreadId) {
       try {
         cloudThreadId = await connection.cloud.mutation("agentThreads:create", { agentId: shared.agentId, title: task.title, clientId: input.threadId }) as string;
@@ -324,6 +380,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
         if (sharingWithdrawn(error)) return null;
         throw error;
       }
+      assertAdmission();
       bindThread(bot.id, input.threadId, cloudThreadId);
     }
     const me = connection.me!.id;
@@ -332,6 +389,25 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       store.patchTask(bot.id, input.threadId, { lastRunnerUserId: me, ...(replay ? { resumeCursors: {} } : {}) });
     }
     const sendId = input.sendId ?? randomUUID();
+    if (hosted) {
+      if (!deps.validateHostedSelection || !bot.modelSelection.source) throw refusal(409, "Teammate model hosting is unavailable on this server");
+      if (/<attached-(?:image|file|audio)\b/i.test(input.text)) throw refusal(409, "Teammate-hosted chats currently accept text only; local attachments cannot be forwarded as another computer's file paths");
+      const selected = structuredClone(bot.modelSelection), hostConnection = connection;
+      await deps.validateHostedSelection(bot.id, selected, true);
+      assertAdmission();
+      const live = store.projectBotForTask(bot.id, input.threadId) ?? store.bot(bot.id), cloud = readOriginCloud(files.cloud);
+      if (connection !== hostConnection || cloud.sessionToken !== hostConnection.token || cloud.url !== hostConnection.url ||
+          JSON.stringify(live?.modelSelection) !== JSON.stringify(selected)) throw refusal(409, "The account or model choice changed before the shared request was sent");
+      const message = store.appendMessage(input.threadId, { role: "user", kind: "text", text: input.text, sendId, requestPending: true, queued: true,
+        sender: { name: hostConnection.me!.name, id: `origin:${me}` } });
+      try {
+        await hostedRequests.begin({ botId: bot.id, threadId: input.threadId, cloudThreadId, teamId: shared.teamId, clientId: `send:${sendId}`, message, selection: selected, current: admissionCurrent });
+      } catch {
+        if (!hostedRequests.owns(input.threadId)) store.patchMessage(input.threadId, message.id, { requestPending: false, queued: undefined });
+        throw refusal(503, "Origin could not confirm this shared execution. Check the shared conversation before sending the work again.", "model_host_begin_unconfirmed");
+      }
+      return { status: "hosted", sendId, message };
+    }
     let begun: Awaited<ReturnType<RunLease["begin"]>>;
     try {
       begun = await lease.begin({
@@ -343,6 +419,12 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       unbindThread(bot.id, input.threadId);
       return null;
     }
+    if (!admissionCurrent()) {
+      await connection.cloud.mutation("agentRuns:cancel", { runId: begun.runId }).catch(() => undefined);
+      lease.handover(input.threadId, begun.runId);
+      assertAdmission();
+    }
+    if (begun.status === "running" && bot.quotaFallback && bot.fallback?.some(selection => selection.source)) mirror?.hold(input.threadId, begun.runId);
     return begun.status === "running"
       ? { status: "running", sendId }
       : { status: "queued", sendId, runId: begun.runId, teamId: shared.teamId, cloudThreadId };
@@ -435,7 +517,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       writeSharedLinks(files.links, { agents: { ...Object.fromEntries(Object.entries(links.agents).filter(([, id]) => id !== agentId)), [botId]: agentId } });
       const link: SharedBotLink = { agentId, teamId, canEdit: body?.canEdit === true, ...(bot.shared?.review ? { review: bot.shared.review } : {}) };
       store.patchBot(botId, { shared: link });
-      if (body?.adoptModel === true) {
+      if (body?.adoptModel === true && !bot.modelSelection.source && bot.modelSelection.instanceId !== "origin-remote") {
         const { selection, via } = resolveSharedModel(await deps.instances(), intent, state.defaults, deps.selectionContext);
         if (via !== "none") store.applyModelDefault(botId, selection);
       }
@@ -499,6 +581,17 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   return {
     routes,
     beforeSend,
+    async transferToHost(input: { botId: string; threadId: string; messageId: string; selection: ModelSelection; visited: string[]; blockedAccounts: string[]; current(): boolean }) {
+      const bot = store.bot(input.botId), message = store.messagesFor(input.threadId).find(message => message.id === input.messageId);
+      const runId = lease?.runFor(input.threadId), cloudThreadId = threads()[input.threadId];
+      if (!bot?.shared || !message?.sendId || !runId || !lease?.holds(input.threadId) || !cloudThreadId) return false;
+      return hostedRequests.offer({ ...input, cloudThreadId, teamId: bot.shared.teamId, clientId: clientIdFor(message), runId });
+    },
+    releaseHandoff(threadId: string, publish = true): void { const runId = lease?.runFor(threadId); if (runId) mirror?.release(threadId, publish, runId); },
+    cancelHosted(botId: string, threadId: string) {
+      cancelledAdmissions.set(threadId, (cancelledAdmissions.get(threadId) ?? 0) + 1);
+      return hostedRequests.cancelThread(botId, threadId);
+    },
     /** A queued send: remember the local line so the run can start it once it holds the thread. */
     queued(run: QueuedRun): void {
       lease?.remember(run);
@@ -516,6 +609,9 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       void tick();
     },
     stop(): void {
+      sharedStopped = true;
+      cancelledAdmissions.clear();
+      hostedRequests.stop();
       if (tickTimer) clearInterval(tickTimer);
       if (flushTimer) clearTimeout(flushTimer);
       for (const stop of stops.splice(0)) stop();

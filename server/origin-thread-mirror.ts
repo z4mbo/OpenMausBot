@@ -24,11 +24,15 @@ export interface CloudRow extends OutboundRow {
   runBy?: string;
   runByUserId?: string;
   engineLabel?: string;
+  executedByUserId?: string;
+  executedByName?: string;
+  hostId?: string;
+  sourceId?: string;
   status: "streaming" | "final" | "interrupted";
   createdAt: number;
 }
 
-export interface CloudRun { runId: string; requesterUserId: string; requesterName: string; status: string; engineLabel?: string }
+export interface CloudRun { runId: string; requesterUserId: string; requesterName: string; status: string; engineLabel?: string; executedByName?: string; hostId?: string; sourceId?: string }
 
 export interface ThreadSnapshot {
   seq: number;
@@ -109,8 +113,8 @@ function parsed<T>(payload: string | undefined): T | undefined {
 
 /** A cloud row as this machine shows it. Compaction rows stay out: each machine folds its own context. */
 export function fromCloudRow(row: CloudRow, local: { botId: string; threadId: string }): RemoteInput | null {
-  const name = (row.role === "user" ? row.authorName : row.runBy) ?? "Someone";
-  const userId = row.role === "user" ? row.authorUserId : row.runByUserId;
+  const name = (row.role === "user" ? row.authorName : row.executedByName ?? row.runBy) ?? "Someone";
+  const userId = row.role === "user" ? row.authorUserId : row.executedByUserId ?? row.runByUserId;
   const remote: RemoteInput["remote"] = {
     cloudId: row._id, name, ...(userId ? { userId } : {}), ...(row.runId ? { runId: row.runId } : {}),
     ...(row.engineLabel ? { model: row.engineLabel } : {}), status: row.status,
@@ -171,7 +175,8 @@ export function threadLinkFrom(cloudThreadId: string, snapshot: Pick<ThreadSnaps
   const mineQueued = snapshot.queued.filter((queued) => queued.requesterUserId === me).length;
   return {
     cloudThreadId,
-    ...(run ? { run: { by: run.requesterName, mine: run.requesterUserId === me, ...(run.engineLabel ? { model: run.engineLabel } : {}) } } : {}),
+    ...(run ? { run: { by: run.requesterName, mine: run.requesterUserId === me, ...(run.engineLabel ? { model: run.engineLabel } : {}),
+      ...(run.executedByName ? { executedByName: run.executedByName } : {}), ...(run.hostId ? { hostId: run.hostId } : {}), ...(run.sourceId ? { sourceId: run.sourceId } : {}) } } : {}),
     ...(snapshot.queued.length ? { queued: snapshot.queued.length } : {}),
     ...(mineQueued ? { mineQueued } : {}),
   };
@@ -203,8 +208,9 @@ const PATCH_COALESCE_MS = 400;
 export function createThreadMirror(deps: MirrorDeps) {
   const mirrored = new Map<string, { clientId: string; cloudThreadId: string }>();
   const subscriptions = new Map<string, { cloudThreadId: string; afterSeq: number; stop: () => void }>();
+  const held = new Map<string, { key?: string; rows: StoreChange[]; bytes: number }>();
 
-  const outbound = (change: StoreChange) => {
+  const publish = (change: StoreChange) => {
     if (change.type !== "message" && change.type !== "message.patch") return;
     const cloudThreadId = deps.threads()[change.threadId];
     if (!cloudThreadId || change.message.remote) return;
@@ -271,10 +277,27 @@ export function createThreadMirror(deps: MirrorDeps) {
     }
   };
 
-  const unsubscribe = deps.store.onChange(outbound);
+  const release = (threadId: string, send: boolean, key?: string): void => {
+    const entry = held.get(threadId);
+    if (!entry || key !== undefined && entry.key !== key) return;
+    held.delete(threadId);
+    if (send) for (const row of entry.rows) publish(row);
+  };
+  const unsubscribe = deps.store.onChange(change => {
+    const entry = (change.type === "message" || change.type === "message.patch") && change.message.role === "bot" && !change.message.remote ? held.get(change.threadId) : undefined;
+    if (!entry || (change.type !== "message" && change.type !== "message.patch")) { publish(change); return; }
+    entry.rows.push(structuredClone(change)); entry.bytes += Buffer.byteLength(JSON.stringify(change.message));
+    if (entry.rows.length > 20 || entry.bytes > 64 * 1024) release(change.threadId, true, entry.key);
+  });
   return {
     sync,
+    hold(threadId: string, key?: string): void {
+      if (held.get(threadId)?.key === key && held.has(threadId)) return;
+      held.set(threadId, { key, rows: [], bytes: 0 });
+    },
+    release,
     stop() {
+      held.clear();
       unsubscribe();
       for (const entry of subscriptions.values()) entry.stop();
       subscriptions.clear();

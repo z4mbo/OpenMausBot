@@ -201,6 +201,12 @@ export function createRunLease(deps: LeaseDeps) {
       const run = active.get(threadId);
       return Boolean(run?.confirmed && monotonicNow() < run.expiresAt);
     },
+    handover(threadId: string, expectedRunId: string): boolean {
+      const run = active.get(threadId);
+      if (!run || run.runId !== expectedRunId || !run.confirmed || expire(threadId, run)) return false;
+      remove(threadId, run); recent.delete(threadId);
+      return true;
+    },
 
     /** The local turn could not start or failed before it ran. */
     failed(threadId: string): void {

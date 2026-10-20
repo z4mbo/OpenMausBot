@@ -1,3 +1,4 @@
+import type { ModelSelectionChecker } from "../model-selection-check.ts";
 import { z } from "zod";
 
 import { approvalModeFor, isApprovalMode, type ApprovalMode } from "../../shared/approval-mode.ts";
@@ -10,6 +11,7 @@ import { parseBotProfilePatch } from "../bot-profile.ts";
 import { parseVisibility } from "../bot-visibility.ts";
 import type { BrowserLive } from "../browser-live.ts";
 import type { BrowserRuntime } from "../browser-runtime.ts";
+import { agentDailyBudgetConflict } from "../budget-settings-guard.ts";
 import type { CacheKeepWarm } from "../cache-keepwarm.ts";
 import { cloudBackendChangeError } from "../cloud-backend.ts";
 import * as composio from "../composio.ts";
@@ -28,7 +30,7 @@ import type { SessionRegistry } from "../sessions.ts";
 import { parseConnectorTools } from "../connector-tools.ts";
 import { sectionKey, type BotRecord, type GroupRecord, type Store } from "../store.ts";
 import { pinnedClientThreadGuard } from "./pinned-client-thread.ts";
-import type { ModelSelectionCheck } from "./bots-create.ts";
+import { modelPairKey } from "../../shared/model-selection.ts";
 import { PASS, type RouteHandler } from "./table.ts";
 
 export interface BotPatchRouteDeps {
@@ -57,7 +59,7 @@ export interface BotPatchRouteDeps {
   requestedTaskBot(botId: string, rawThreadId: unknown): BotRecord;
   threadBusy(botId: string, threadId: string): boolean;
   activeGroupTurnForBot(botId: string): { group: GroupRecord; threadId: string } | null;
-  checkedModelSelection(raw: unknown, current?: { selection: ModelSelection; busy: boolean }, requireAvailableModel?: boolean): ModelSelectionCheck;
+  checkedModelSelection: ModelSelectionChecker;
   engineSwitchNeedsAsk(mode: ApprovalMode, from: ModelSelection, to: ModelSelection): boolean;
   currentBrowserSession(botId: string, profile: string | undefined): string;
   interruptAllDirectThreads(botId: string): Promise<void>;
@@ -71,7 +73,7 @@ export interface BotPatchRouteDeps {
 
 export function createBotPatchRoutes(deps: BotPatchRouteDeps): RouteHandler {
   const {
-    store, cfg, registry, sessions, browserRuntime, browserLive, memoryUpkeep, cacheKeepWarm, hostedModels, supportsApprovalMode, activeVpsThreads,
+    store, cfg, sessions, browserRuntime, browserLive, memoryUpkeep, cacheKeepWarm, hostedModels, supportsApprovalMode, activeVpsThreads,
     hostedWorkspace: HOSTED_WORKSPACE, hostedFullAccessRefusal: HOSTED_FULL_ACCESS_REFUSAL, desktopManaged: DESKTOP_MANAGED, maxWorkspaceBots: MAX_WORKSPACE_BOTS,
     broadcast, wireBot, publicGroupState, audienceChanged, storedAvatarExists, requestedTaskBot, threadBusy, activeGroupTurnForBot,
     checkedModelSelection, engineSwitchNeedsAsk, currentBrowserSession, interruptAllDirectThreads, cancelGroupTurnOperations,
@@ -142,15 +144,16 @@ export function createBotPatchRoutes(deps: BotPatchRouteDeps): RouteHandler {
       }
       let normalizedSelection: ModelSelection | undefined;
       if (rawSelection !== undefined) {
-        const checked = checkedModelSelection(
+        const checked = await checkedModelSelection(
           rawSelection,
           movedTask ? { selection: movedTask.modelSelection, busy: threadBusy(movedTask.id, movedTask.threadId) } : undefined,
           body.requireAvailableModel === true,
+          existingBot ? { botId: existingBot.id, ...(movedTask ? { threadId: movedTask.threadId } : {}) } : undefined,
         );
         if (!checked.ok) return json(res, checked.status, { error: checked.error });
         normalizedSelection = checked.selection;
         if (existingBot && activeGroupTurnForBot(existingBot.id)) {
-          const groupChecked = checkedModelSelection(normalizedSelection, { selection: existingBot.modelSelection, busy: true });
+          const groupChecked = await checkedModelSelection(normalizedSelection, { selection: existingBot.modelSelection, busy: true }, false, { botId: existingBot.id });
           if (!groupChecked.ok) return json(res, groupChecked.status, { error: groupChecked.error });
         }
       }
@@ -206,17 +209,25 @@ export function createBotPatchRoutes(deps: BotPatchRouteDeps): RouteHandler {
         if (!Array.isArray(body.fallback) || body.fallback.length > 5) {
           return json(res, 400, { error: "fallback must be a list of up to five { instanceId, model } entries" });
         }
-        const chain: Array<{ instanceId: string; model: string }> = [];
+        const chain: ModelSelection[] = [];
         for (const entry of body.fallback as unknown[]) {
-          const row = entry && typeof entry === "object" ? (entry as { instanceId?: unknown; model?: unknown }) : null;
-          if (!row || typeof row.instanceId !== "string" || !/^[\w.-]+$/.test(row.instanceId) || typeof row.model !== "string" || !row.model.trim() || row.model.length > 500) {
-            return json(res, 400, { error: "fallback must be a list of up to five { instanceId, model } entries" });
-          }
-          if (!registry.get(row.instanceId)) return json(res, 400, { error: `fallback engine "${row.instanceId}" is not available` });
-          if (chain.some((seen) => seen.instanceId === row.instanceId)) continue;
-          chain.push({ instanceId: row.instanceId, model: row.model.trim() });
+          const checked = await checkedModelSelection(entry, undefined, true, existingBot ? { botId: existingBot.id } : undefined);
+          if (!checked.ok) return json(res, checked.status, { error: checked.error });
+          if (chain.some(seen => modelPairKey(seen) === modelPairKey(checked.selection))) continue;
+          chain.push(checked.selection);
         }
         patch.fallback = chain;
+      }
+      for (const key of ["quotaFallback", "fallbackApiAllowed"] as const) {
+        if (body[key] === undefined) continue;
+        if (typeof body[key] !== "boolean") return json(res, 400, { error: `${key} must be true or false` });
+        patch[key] = body[key];
+      }
+      if (Object.hasOwn(body, "dailyApiBudgetUsd")) {
+        const value = body.dailyApiBudgetUsd;
+        if (value === null) patch.dailyApiBudgetUsd = undefined;
+        else if (typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1_000_000) patch.dailyApiBudgetUsd = value;
+        else return json(res, 400, { error: "dailyApiBudgetUsd must be a nonnegative dollar amount or null" });
       }
       // null clears back to every connected app.
       if (body.connectorScopes !== undefined) {
@@ -511,6 +522,11 @@ export function createBotPatchRoutes(deps: BotPatchRouteDeps): RouteHandler {
       // Known gap: outside the packaged desktop, loopback is the owner, so these loosenings are one curl from
       // the bot they constrain. An originless, session-less loopback caller may loosen only while every bot is idle.
       const loosened: string[] = [];
+      const nextAgentBudget = typeof patch.dailyApiBudgetUsd === "number" ? patch.dailyApiBudgetUsd : undefined;
+      if (patch.quotaFallback && !existingBot?.quotaFallback) loosened.push("quotaFallback");
+      if (patch.fallbackApiAllowed && !existingBot?.fallbackApiAllowed) loosened.push("fallbackApiAllowed");
+      if (Object.hasOwn(body, "dailyApiBudgetUsd") && existingBot?.dailyApiBudgetUsd !== undefined &&
+          (nextAgentBudget === undefined || nextAgentBudget > existingBot.dailyApiBudgetUsd)) loosened.push("dailyApiBudgetUsd");
       const trustPatch = patch as Pick<Partial<BotRecord>, "outbound" | "connectorScopes" | "fallback">;
       if (body.outbound !== undefined && trustPatch.outbound?.policy === "allow" &&
           (existingBot?.outbound?.policy !== "allow" || trustPatch.outbound.dailyCap > existingBot.outbound.dailyCap)) loosened.push("outbound");
@@ -518,7 +534,7 @@ export function createBotPatchRoutes(deps: BotPatchRouteDeps): RouteHandler {
           (!trustPatch.connectorScopes || Object.entries(trustPatch.connectorScopes.apps).some(([slug, scope]) =>
             !existingBot.connectorScopes!.apps[slug] || (scope === "write" && existingBot.connectorScopes!.apps[slug] === "read")))) loosened.push("connectorScopes");
       if (body.fallback !== undefined && trustPatch.fallback?.some(candidate =>
-          !existingBot?.fallback?.some(previous => previous.instanceId === candidate.instanceId && previous.model === candidate.model))) loosened.push("fallback");
+          !existingBot?.fallback?.some(previous => modelPairKey(previous) === modelPairKey(candidate)))) loosened.push("fallback");
       if (Array.isArray(patch.managedSections) && patch.managedSections.some(section => !(existingBot?.managedSections ?? []).includes(section))) {
         loosened.push("managedSections");
       }
@@ -607,10 +623,10 @@ export function createBotPatchRoutes(deps: BotPatchRouteDeps): RouteHandler {
       if (normalizedSelection && movedTask) {
         const current = store.projectBotForTask(movedTask.id, movedTask.threadId);
         if (!current) return json(res, 404, { error: "no such task" });
-        const checked = checkedModelSelection(normalizedSelection, { selection: current.modelSelection, busy: threadBusy(current.id, current.threadId) });
+        const checked = await checkedModelSelection(normalizedSelection, { selection: current.modelSelection, busy: threadBusy(current.id, current.threadId) }, false, { botId: current.id, threadId: current.threadId });
         if (!checked.ok) return json(res, checked.status, { error: checked.error });
         if (freshBrowserBot && activeGroupTurnForBot(freshBrowserBot.id)) {
-          const groupChecked = checkedModelSelection(normalizedSelection, { selection: freshBrowserBot.modelSelection, busy: true });
+          const groupChecked = await checkedModelSelection(normalizedSelection, { selection: freshBrowserBot.modelSelection, busy: true }, false, { botId: freshBrowserBot.id });
           if (!groupChecked.ok) return json(res, groupChecked.status, { error: groupChecked.error });
         }
       }
@@ -619,6 +635,12 @@ export function createBotPatchRoutes(deps: BotPatchRouteDeps): RouteHandler {
           (freshBrowserBot.busy || browserRuntime.heldBy(currentBrowserSession(freshBrowserBot.id, freshBrowserBot.browserProfile)))) {
         return json(res, 409, { error: "Stop the bot and release browser control before changing its profile." });
       }
+      if ((normalizedSelection || body.fallback !== undefined) && store.bot(m[1]) !== existingBot) {
+        return json(res, 409, { error: "The agent changed while its model accounts were checked. Review its current settings and try again." });
+      }
+      const budgetConflict = agentDailyBudgetConflict(patch.dailyApiBudgetUsd, freshBrowserBot?.dailyApiBudgetUsd,
+        Boolean(freshBrowserBot?.busy || (freshBrowserBot && activeGroupTurnForBot(freshBrowserBot.id))));
+      if (budgetConflict) return json(res, 409, { error: budgetConflict });
       if (profile.patch.soul !== undefined) {
         if (freshBrowserBot) assertTeamComputerChangeIdle(freshBrowserBot, { ...freshBrowserBot, ...patch } as BotRecord);
       // Runtime fields keep their fail-closed order; only the profile fields commit atomically.

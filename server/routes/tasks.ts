@@ -1,3 +1,4 @@
+import type { ModelSelectionChecker } from "../model-selection-check.ts";
 import { approvalModeFor, isApprovalMode, type ApprovalMode } from "../../shared/approval-mode.ts";
 import { threadLinkUrl } from "../../shared/thread-link.ts";
 import type { WireBot, WireTask } from "../../shared/wire.ts";
@@ -52,12 +53,10 @@ export interface TaskRouteDeps {
   wireTask(task: TaskRecord, botModel: ModelSelection): WireTask;
   pageSize(raw: string | null): number | null | undefined;
   messagePage(threadId: string, limit: number | undefined): MessagePage;
-  checkedModelSelection(raw: unknown, current?: { selection: ModelSelection; busy: boolean }, requireAvailableModel?: boolean):
-    | { ok: true; selection: ModelSelection }
-    | { ok: false; status: number; error: string };
-  checkedTaskModelSwitch(current: BotRecord, raw: unknown, updateBotDefault: boolean, resetApprovalToAsk: boolean, requireAvailableModel?: boolean):
+  checkedModelSelection: ModelSelectionChecker;
+  checkedTaskModelSwitch(current: BotRecord, raw: unknown, updateBotDefault: boolean, resetApprovalToAsk: boolean, requireAvailableModel?: boolean): Promise<
     | { ok: true }
-    | { ok: false; status: number; error: string };
+    | { ok: false; status: number; error: string }> | { ok: true } | { ok: false; status: number; error: string };
   threadTitleGate(bot: Pick<BotRecord, "modelSelection">): { ok: true; instance: ProviderInstance } | { ok: false; refusal: string };
   generateThreadTitle(provider: ProviderInstance, text: string, source: ThreadTitleSource): Promise<string | null>;
   settleDirectFollowup(generation: string | undefined): void;
@@ -339,7 +338,7 @@ export function createTaskRoutes(deps: TaskRouteDeps): RouteHandler {
       }
       if (body.modelSelection !== undefined) {
         if (current.approvalGrant) return json(res, 409, { error: "the bot's approval mode is still being confirmed" });
-        const checked = checkedModelSelection(body.modelSelection, { selection: current.modelSelection, busy: threadBusy(current.id, current.threadId) }, body.requireAvailableModel === true);
+        const checked = await checkedModelSelection(body.modelSelection, { selection: current.modelSelection, busy: threadBusy(current.id, current.threadId) }, body.requireAvailableModel === true, { botId: current.id, threadId: current.threadId });
         if (!checked.ok) return json(res, checked.status, { error: checked.error });
         patch.modelSelection = checked.selection;
       }
@@ -366,7 +365,7 @@ export function createTaskRoutes(deps: TaskRouteDeps): RouteHandler {
         patch.autoApprove = mode === "auto";
       }
       if (patch.modelSelection) {
-        const checked = checkedTaskModelSwitch({ ...current,
+        const checked = await checkedTaskModelSwitch({ ...current,
           ...(patch.approvalMode ? { approvalMode: patch.approvalMode, autoApprove: patch.autoApprove } : {}),
         }, patch.modelSelection, body.updateBotDefault === true, body.resetApprovalToAsk === true, body.requireAvailableModel === true);
         if (!checked.ok) return json(res, checked.status, { error: checked.error });
