@@ -2295,6 +2295,7 @@ function restoreBotSettingsSection(state: AppState): AppState {
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const navigation = useRef(new Map<string, { revision: number; threadId?: string }>()).current;
   const taskWrites = useRef(new Map<string, { botId: string; updatesDefault: boolean; promise: Promise<BotAnnouncement>; execution: Promise<unknown>; patch: TaskUpdatePatch }>()).current;
   const withTaskWrites = (bot: BotAnnouncement): BotAnnouncement => ({
     ...bot,
@@ -2342,7 +2343,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [botPatchQueue]);
 
   const dispatch = useMemo(() => {
-    const navigation = new Map<string, number>();
     let selectionRevision = 0;
     const olderPagesInFlight = new Set<string>();
     let creatingBot = false;
@@ -3037,8 +3037,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           break;
         case "newTask":
         case "switchTask": {
-          const revision = (navigation.get(action.botId) ?? 0) + 1;
-          navigation.set(action.botId, revision);
+          const revision = (navigation.get(action.botId)?.revision ?? 0) + 1;
+          navigation.set(action.botId, { revision, ...(action.type === "switchTask" ? { threadId: action.threadId } : {}) });
           const selectedAtStart = selectionRevision;
           const ready = action.type === "newTask"
             ? botPatchQueue.flush(action.botId)
@@ -3048,14 +3048,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             : `/api/bots/${action.botId}/tasks/${action.threadId}${action.whole ? "" : `?messages=${MESSAGE_PAGE_SIZE}`}`, { method: "POST", body: JSON.stringify(action.type === "newTask" ? { projectId: action.projectId, cwd: action.cwd } : {}) }))
             .then((r) => {
               if (action.type === "newTask" && r?.bot) action.onCreated?.(r.bot.threadId);
-              if (!r?.bot || navigation.get(action.botId) !== revision) return;
+              if (!r?.bot || navigation.get(action.botId)?.revision !== revision) return;
               const selectsAfterCreation = action.type === "newTask" && action.cwd !== undefined && !action.preserveSelection;
               if (selectsAfterCreation && selectionRevision !== selectedAtStart) return;
               dispatch({ type: "taskSwitched", bot: r.bot });
               if (selectsAfterCreation) rawDispatch({ type: "select", id: action.botId });
             })
             .catch((error) => {
-              if (action.type === "switchTask" && navigation.get(action.botId) === revision) {
+              if (action.type === "switchTask" && navigation.get(action.botId)?.revision === revision) {
+                delete navigation.get(action.botId)!.threadId;
                 rawDispatch({ type: "switchTaskFailed", botId: action.botId, threadId: action.threadId });
               }
               if (action.onError) action.onError(error instanceof Error ? error.message : String(error));
@@ -3140,16 +3141,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     };
     return wrapped;
-  }, [botPatchQueue]);
-
+  }, [botPatchQueue, navigation]);
   const launched = useRef(false);
   useEffect(() => {
+    for (const bot of state.bots) if (!bot.switchingTo && navigation.get(bot.id)?.threadId === bot.threadId) delete navigation.get(bot.id)!.threadId;
     if (!state.hydrated || launched.current) return;
     launched.current = true;
     const bot = state.bots.find((candidate) => candidate.id === state.selectedId);
     if (bot && state.activeView === "chat" && botOpensTo(bot, showThreads) !== bot.threadId) openBot(dispatch, bot, showThreads);
-  }, [state.hydrated, state.bots, state.selectedId, state.activeView, showThreads, dispatch]);
-
+  }, [state.hydrated, state.bots, state.selectedId, state.activeView, showThreads, dispatch, navigation]);
   useEffect(() => {
     let alive = true;
     type PeripheralKey = "instances" | "config" | "routines" | "webhooks" | "notifications";
@@ -3365,7 +3365,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         case "bot": {
           const bot = frame.bot as BotAnnouncement;
           const selected = stateRef.current.bots.find((candidate) => candidate.id === bot.id);
-          const shown = selected?.switchingTo ?? selected?.threadId;
+          const shown = navigation.get(bot.id)?.threadId ?? selected?.switchingTo ?? selected?.threadId;
           const selectedTask = bot.tasks?.find((task) => task.threadId === shown);
           if (bot.id === stateRef.current.selectedId && stateRef.current.activeView === "chat" && !chatHiddenFor(bot.id) &&
               (selectedTask?.unread || (!bot.tasks && bot.unread))) {

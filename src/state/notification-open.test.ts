@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 // The real provider, its live stream and display preference, and a fake server answering in the real one's order.
-import { createElement } from "react";
+import { createElement, startTransition } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -42,6 +42,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 const requests: Array<{ path: string; body?: string }> = [];
 let server: BotAnnouncement;
 let firstBot = "other";
+let immediateSwitchFrame = false;
 let state: AppState;
 let dispatch: (action: Action) => void;
 
@@ -85,6 +86,7 @@ beforeAll(() => {
       if (!server.tasks!.some((task) => task.threadId === switched[1])) return Promise.resolve(json({ error: "no such task" }, 404));
       // Like store.switchTask: announce the switch, then answer with the snapshot taken then.
       server = { ...server, threadId: switched[1]! };
+      if (immediateSwitchFrame) { stream().send({ kind: "bot", bot: structuredClone(server) }); return Promise.resolve(json({ bot: { ...structuredClone(server), messages: [] } })); }
       return announcedThen({ bot: { ...structuredClone(server), messages: [] } });
     }
     if (path === "/api/bots/scout/read" && init?.method === "POST") {
@@ -114,6 +116,7 @@ async function launch() {
 }
 beforeEach(async () => {
   firstBot = "other";
+  immediateSwitchFrame = false;
   await launch();
   expect(state.selectedId).toBe("other");
   expect(server.threadId).toBe("left-behind");
@@ -174,6 +177,19 @@ describe("following a notification", () => {
 });
 
 describe("opening a bot with threads hidden", () => {
+  it("keeps a switch announcement ahead of React's navigation commit from reading the old reply", async () => {
+    await threadsShown(false);
+    flushSync(() => dispatch({ type: "botAdded", bot: { ...scoutNow(), messages: [] } }));
+    expect(state.selectedId).toBe("scout");
+    requests.length = 0;
+    immediateSwitchFrame = true;
+    startTransition(() => openBot(dispatch, scoutNow(), false));
+    await settle();
+    expect(reads()).toEqual([]);
+    expect(scoutNow().threadId).toBe("main-chat");
+    expect(unread("left-behind")).toBe(true);
+  });
+
   it("opens its main thread from its row and leaves the thread it was left on unread, with an activity row", async () => {
     await threadsShown(false);
     flushSync(() => openBot(dispatch, scoutNow(), false));
