@@ -1,0 +1,85 @@
+{
+  "createdAt": "2026-10-20T04:17:42.504Z",
+  "repository": "milind-soni/OpenMausBot",
+  "cutoff": "2026-10-20T04:03:12Z",
+  "files": [
+    {
+      "path": "comparison-checks.json",
+      "bytes": 2516,
+      "sha256": "ae34819f529f9403b48812184b3b4d67a570bf0938414766c6a28589019f1907"
+    },
+    {
+      "path": "ledger.json",
+      "bytes": 204426,
+      "sha256": "d95709d9623b9e5f32b172437f13d9f2494a8d57cc4086e0111ed7622e474c39"
+    },
+    {
+      "path": "pr-3090.json",
+      "bytes": 3962,
+      "sha256": "ee45915497a8bc29f1cddf74eeecff47651ba87e8c7c199a9f89de9833b09b31"
+    },
+    {
+      "path": "pr-3095.json",
+      "bytes": 4393,
+      "sha256": "ac862ad3c9ca8a3c38ab15d23e93253b9d6bcd550ae4e529727e3035ca5699f1"
+    },
+    {
+      "path": "pr-3097.json",
+      "bytes": 5482,
+      "sha256": "d77d79c50c3f8c6002799f39a9275b3f1cbf7e081e150e89b894be8ebecad3bc"
+    },
+    {
+      "path": "pr-3124.json",
+      "bytes": 8825,
+      "sha256": "f2c7372d18e4c7cf1c6805ec44f865765736f3682afbca6ba31d5638e7ce5f6c"
+    },
+    {
+      "path": "pr-3127.json",
+      "bytes": 2431,
+      "sha256": "85104f762a37ace7639d034402b5dd32f6d32c37a1befdc7af4f9abc54debfe9"
+    },
+    {
+      "path": "pr-3129.json",
+      "bytes": 1459,
+      "sha256": "5ac8ec6ed316a7647c330467003db20e504d83e5766a2e0e330c1e23f2b0ef8c"
+    },
+    {
+      "path": "pr-3130.json",
+      "bytes": 1448,
+      "sha256": "8cf3f1403d7e16f65ef1cee5e351690fed3dd35310f4228977b526a311572c0b"
+    },
+    {
+      "path": "pr-3132.json",
+      "bytes": 2420,
+      "sha256": "4b8ace63c5024e777b47b6bf3e7d9b520f57f3c98f5a240b170f03e07f6b3fa5"
+    },
+    {
+      "path": "report.md",
+      "bytes": 14624,
+      "sha256": "1d4fcb8533174ab8d83c054ae81caceb064d20dc65b296b23359140816a1cf00"
+    },
+    {
+      "path": "search.json",
+      "bytes": 8661,
+      "sha256": "2dc9f17dcdb005731df7ffe17ca6f42d3072f2d196d98e923dab8809237e8be5"
+    }
+  ],
+  "checks": {
+    "jsonParsed": true,
+    "searchLedgerIdsMatch": true,
+    "allReportedFileCountsMatch": true,
+    "allMergedTimesWithinBounds": true,
+    "sourceComparisons": 8,
+    "fileProductTriages": 28,
+    "deferred": 36,
+    "adopted": 0,
+    "fullPrBodiesPresent": false,
+    "rawPatchesPresent": false,
+    "selectedSourceShapesMatchFrozenAndActive": true
+  },
+  "limits": {
+    "runtimeAcceptance": false,
+    "upstreamTestsRun": false,
+    "productionActionPerformed": false
+  }
+}

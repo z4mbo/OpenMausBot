@@ -1,0 +1,100 @@
+{
+  "frozenSource": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "activeHeadAtCapture": "f7ee7d2b6894b337553c6ae148b43076cb2f3e86",
+  "activeWorkingTree": true,
+  "capturedAt": "2026-10-20T04:15:50.204Z",
+  "scope": "Targeted source-shape and component-presence checks only; no runtime acceptance or full patch equivalence.",
+  "checks": [
+    {
+      "pr": 3090,
+      "id": "htmlPreviewComponent",
+      "path": "src/components/HtmlFilePreview.tsx",
+      "frozenResult": false,
+      "activeResult": false
+    },
+    {
+      "pr": 3095,
+      "id": "readyBotGallery",
+      "path": "src/components/ReadyBotGallery.tsx",
+      "frozenResult": false,
+      "activeResult": false
+    },
+    {
+      "pr": 3097,
+      "id": "freeTierRoutingHelper",
+      "path": "server/drivers/openrouter-free.ts",
+      "frozenResult": false,
+      "activeResult": false
+    },
+    {
+      "pr": 3097,
+      "id": "fallbackCatalogDefaultHasFreeSuffix",
+      "path": "server/drivers/openai-compat.ts",
+      "frozenResult": false,
+      "activeResult": false
+    },
+    {
+      "pr": 3124,
+      "id": "ownMcpHttpRoute",
+      "path": "server/routes/own-mcp-http.ts",
+      "frozenResult": false,
+      "activeResult": false
+    },
+    {
+      "pr": 3127,
+      "id": "replayCount500",
+      "path": "server/index.ts",
+      "frozenResult": true,
+      "activeResult": true
+    },
+    {
+      "pr": 3127,
+      "id": "sseSizeBoundHelper",
+      "path": "server/host/sse-replay.ts",
+      "frozenResult": false,
+      "activeResult": false
+    },
+    {
+      "pr": 3129,
+      "id": "nativeSecretRedaction",
+      "path": "server/drivers/native.ts",
+      "frozenResult": true,
+      "activeResult": true
+    },
+    {
+      "pr": 3129,
+      "id": "nativeInlineBase64Scrub",
+      "path": "server/drivers/native.ts",
+      "frozenResult": false,
+      "activeResult": false
+    },
+    {
+      "pr": 3130,
+      "id": "serializeRedactionForQueueSize",
+      "path": "server/harness/bus.ts",
+      "frozenResult": true,
+      "activeResult": true
+    },
+    {
+      "pr": 3130,
+      "id": "redactAgainWhenAppending",
+      "path": "server/harness/bus.ts",
+      "frozenResult": true,
+      "activeResult": true
+    },
+    {
+      "pr": 3132,
+      "id": "threadMap",
+      "path": "server/store.ts",
+      "frozenResult": true,
+      "activeResult": true
+    },
+    {
+      "pr": 3132,
+      "id": "idleThreadCacheHelper",
+      "path": "server/thread-cache.ts",
+      "frozenResult": false,
+      "activeResult": false
+    }
+  ]
+}

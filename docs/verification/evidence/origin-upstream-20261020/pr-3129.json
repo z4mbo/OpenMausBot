@@ -1,0 +1,33 @@
+{
+  "number": 3129,
+  "url": "https://github.com/milind-soni/OpenMausBot/pull/3129",
+  "mergeCommit": "8509df4ab87561e68db022e8f34c9a8f06a987b9",
+  "baseCommit": "615fe65e17f88d99f12d34682750d9ae2fa402bc",
+  "headCommit": "a25843cb5f37f5df1e0bf7d008c21735aa05438a",
+  "originalCaptureSha256": "048e815f4d23dd97d39c8fc1c61a17345045f5ee1ef90d600fbe2aa1446462ba",
+  "patchRepresentation": "Per-file GitHub patch SHA-256; raw patch text stays in ignored local capture.",
+  "files": [
+    {
+      "sha": "476ea7d3be75a60fb7dad1c599b902a18c2a4a06",
+      "filename": "server/drivers/native.test.ts",
+      "status": "modified",
+      "additions": 42,
+      "deletions": 0,
+      "changes": 42,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/a25843cb5f37f5df1e0bf7d008c21735aa05438a/server%2Fdrivers%2Fnative.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "78dcaa0f243aa5c59255817ebf8afe3de043a66279559d1c5f439f9da90bb568"
+    },
+    {
+      "sha": "c1bf48ad0c107650fc9b592f7b156a95eef4a951",
+      "filename": "server/drivers/native.ts",
+      "status": "modified",
+      "additions": 39,
+      "deletions": 1,
+      "changes": 40,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/a25843cb5f37f5df1e0bf7d008c21735aa05438a/server%2Fdrivers%2Fnative.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "1122b5b137528790443fbd90ee3f70fe5de322b738e7bf2276e32eaec2eabd47"
+    }
+  ]
+}

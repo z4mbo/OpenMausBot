@@ -1,0 +1,198 @@
+{
+  "number": 3124,
+  "url": "https://github.com/milind-soni/OpenMausBot/pull/3124",
+  "mergeCommit": "6263a92fb4ac12c559bee4b9e2acd628b5f9f8ba",
+  "baseCommit": "615fe65e17f88d99f12d34682750d9ae2fa402bc",
+  "headCommit": "51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d",
+  "originalCaptureSha256": "2fabd8f6755e65e8f2e366aa32910ce3d6b3b82b871b940eb624c6b05e1a9c6c",
+  "patchRepresentation": "Per-file GitHub patch SHA-256; raw patch text stays in ignored local capture.",
+  "files": [
+    {
+      "sha": "f573a788fb3d32b47f143ab4f2cd01b7bb317a25",
+      "filename": "docs/cloud-pro.md",
+      "status": "modified",
+      "additions": 7,
+      "deletions": 0,
+      "changes": 7,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/docs%2Fcloud-pro.md",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "f5ea7be3bd703e43e3a90ccdb3c83a3c15a25c18688b5d7cd42343462aa94ddd"
+    },
+    {
+      "sha": "8960ada6f7b134c1af8db01a0673dc91886661a5",
+      "filename": "scripts/testing/file-size-ratchet.test.ts",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/scripts%2Ftesting%2Ffile-size-ratchet.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "d7ce4526dab58b7afe050c54fbe7537feb33addd11b1e22495284743163a9d2e"
+    },
+    {
+      "sha": "7ab711790bfdde5874b0932b203c9b8c474e45cf",
+      "filename": "server/drivers/acp/acp.test.ts",
+      "status": "modified",
+      "additions": 19,
+      "deletions": 0,
+      "changes": 19,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fdrivers%2Facp%2Facp.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "637c3c7ec5b46fa5278950f22778774933c64c128afdc24aed20fb019d105e20"
+    },
+    {
+      "sha": "f5d699eec87a465ba18a112606b7a0b04f3dfe48",
+      "filename": "server/drivers/acp/cline.ts",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fdrivers%2Facp%2Fcline.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "b3e6d93e1f908a415488ab94489805dee35c15ee982c46e93fa07d29fb632470"
+    },
+    {
+      "sha": "077b7c377964eafe902ef148e16baba52e41fcf3",
+      "filename": "server/drivers/acp/core.ts",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 11,
+      "changes": 16,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fdrivers%2Facp%2Fcore.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "ddc5813e2fbb88aa56ecaf9889f51037e42e54ab0e0b1a4ea13a3f3f2d796f39"
+    },
+    {
+      "sha": "95bef3ae5d7d8be4f9591e883badb0217482acae",
+      "filename": "server/drivers/acp/opencode-go.ts",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fdrivers%2Facp%2Fopencode-go.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "70bd9a8bbe7f36c73d43c61ab176e15ff4ed2c84101f19f0e5f2e9cc15bb19c9"
+    },
+    {
+      "sha": "94b7198b092f7186e3d6e1193205362a01bfc5bc",
+      "filename": "server/drivers/agents-mcp-env.ts",
+      "status": "added",
+      "additions": 6,
+      "deletions": 0,
+      "changes": 6,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fdrivers%2Fagents-mcp-env.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "a1ebb1f2a04272528340e00d6172ed56143ba900f70ec573297756a33844870a"
+    },
+    {
+      "sha": "73cc9c4a315aaeea5432812b3e1983c3e4bc7e3d",
+      "filename": "server/drivers/agents-mcp.ts",
+      "status": "added",
+      "additions": 58,
+      "deletions": 0,
+      "changes": 58,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fdrivers%2Fagents-mcp.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "f9c19477391608b33fd7112911c8b103b6d81faa791a3390d883b0c9dfef6d21"
+    },
+    {
+      "sha": "c7f7d6dc160983c7580a2bcfb7aa7f0a9b0ff4c3",
+      "filename": "server/drivers/agents-proxy.ts",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 61,
+      "changes": 66,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fdrivers%2Fagents-proxy.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "80465f34f23e46a7055a19c9aaa6008414b6ce8cf43969f97529f585cb4f0f2e"
+    },
+    {
+      "sha": "6883c4590b062ce5e1f5eeb4e4311ff7403ad858",
+      "filename": "server/drivers/turn-mcp.test.ts",
+      "status": "added",
+      "additions": 54,
+      "deletions": 0,
+      "changes": 54,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fdrivers%2Fturn-mcp.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "8c605fb8045597928d96b1abb5c1dc6645ee66d1762518235528dfee108b4e27"
+    },
+    {
+      "sha": "6b3c13a7a63cb6426b9a098a1afba482fbc978cd",
+      "filename": "server/drivers/turn-mcp.ts",
+      "status": "modified",
+      "additions": 38,
+      "deletions": 0,
+      "changes": 38,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fdrivers%2Fturn-mcp.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "b8ccfc5d5b1ba4ed3462614d58ec2dac523664f4921105163a90414d9a07519a"
+    },
+    {
+      "sha": "07c881871d2ab2289e8d029aa0eaf1963962938b",
+      "filename": "server/harness-mcp-proxy.ts",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 97,
+      "changes": 100,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fharness-mcp-proxy.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "b6e35dbfc76bd833d20373695fdf56ff450454d5b9c9264aab172e63d6003b9d"
+    },
+    {
+      "sha": "f4b7c3e96ecd7c6657443a7f3fffc0c79b8f07c8",
+      "filename": "server/harness-mcp-request.ts",
+      "status": "added",
+      "additions": 101,
+      "deletions": 0,
+      "changes": 101,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Fharness-mcp-request.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "b22aec1b355e21e3b52c3f8343bc41f27c467647de63972b09b5d5d39573800f"
+    },
+    {
+      "sha": "5b4b7bcd4cb471e5d0afb4c204efe516a0a59637",
+      "filename": "server/routes/own-mcp-http-path.ts",
+      "status": "added",
+      "additions": 3,
+      "deletions": 0,
+      "changes": 3,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Froutes%2Fown-mcp-http-path.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "6121040c337d6c71cbe7d8e167b9bdd67c1140f6e6bb2ab03103e8cc29c2d882"
+    },
+    {
+      "sha": "0779a31f195db08c5bbeffbe4725ec026975a33f",
+      "filename": "server/routes/own-mcp-http.test.ts",
+      "status": "added",
+      "additions": 83,
+      "deletions": 0,
+      "changes": 83,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Froutes%2Fown-mcp-http.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "a1a1995c1a61c79f1bbd8c9a8256ed14fa99425d5b26cabd88419f91238c57f4"
+    },
+    {
+      "sha": "8218f86513e531630db98a0ee2925735f3a94df3",
+      "filename": "server/routes/own-mcp-http.ts",
+      "status": "added",
+      "additions": 59,
+      "deletions": 0,
+      "changes": 59,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Froutes%2Fown-mcp-http.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "33a99a0d0a6a9291abb192808363d3f844e597f3ff8eb3f2a6aaf5793d7b2fb1"
+    },
+    {
+      "sha": "6bb1143c506ba7117965430f189b6027cd7a0885",
+      "filename": "server/routes/table.ts",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1,
+      "changes": 3,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/51a1d9787c6cb2969975a0055aaffb1b4a5a8e5d/server%2Froutes%2Ftable.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "6dc5b1fceea61079c8d0ac6b156cd8da18855e6ec778cf5d3e6fcf35641c5254"
+    }
+  ]
+}

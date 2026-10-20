@@ -1,0 +1,88 @@
+{
+  "number": 3090,
+  "url": "https://github.com/milind-soni/OpenMausBot/pull/3090",
+  "mergeCommit": "1da0f35525abc234b5bf7a5e1df54d61d3051da6",
+  "baseCommit": "b4faab6feb9f2c3a12972fa7b249695df272d36f",
+  "headCommit": "e5b9c22d424a01873f93cb6f32f9fcc9f74ed328",
+  "originalCaptureSha256": "8f9602858158f9b46d9c231ee2b6c7825ada8179ed8b91ef06dd933773aa1813",
+  "patchRepresentation": "Per-file GitHub patch SHA-256; raw patch text stays in ignored local capture.",
+  "files": [
+    {
+      "sha": "a878cf8def1167291970232fde4e14cf181bad5e",
+      "filename": "src/components/AttachmentPreview.tsx",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 3,
+      "changes": 6,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/e5b9c22d424a01873f93cb6f32f9fcc9f74ed328/src%2Fcomponents%2FAttachmentPreview.tsx",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "79034d2c0610682b3bc2ddd9d89e738c9a4ea793b6d43593d506e83505a32961"
+    },
+    {
+      "sha": "767df55a091ed86793090bce868e748b25e10029",
+      "filename": "src/components/ChatMarkdown.tsx",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2,
+      "changes": 4,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/e5b9c22d424a01873f93cb6f32f9fcc9f74ed328/src%2Fcomponents%2FChatMarkdown.tsx",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "b6ed2ecf7bf777e33a0a0791b3448a0a1549213d6bdc346d9cbaed672f00c15e"
+    },
+    {
+      "sha": "c1f7a2c7bd146466e02d76b96dd68b52a00c06e9",
+      "filename": "src/components/FilePreviewButton.tsx",
+      "status": "added",
+      "additions": 8,
+      "deletions": 0,
+      "changes": 8,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/e5b9c22d424a01873f93cb6f32f9fcc9f74ed328/src%2Fcomponents%2FFilePreviewButton.tsx",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "5dd5274f61fd5e3621ab30d529870fa813306f79e074946478bacd219144379f"
+    },
+    {
+      "sha": "09cfa486b1e19ec8735fbbcbbeb1b08faf574cac",
+      "filename": "src/components/HtmlFilePreview.test.ts",
+      "status": "added",
+      "additions": 68,
+      "deletions": 0,
+      "changes": 68,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/e5b9c22d424a01873f93cb6f32f9fcc9f74ed328/src%2Fcomponents%2FHtmlFilePreview.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "c43e672fe6fefd505c6967014ec25ffde772d11ecb6cd329c0529ccd247e860e"
+    },
+    {
+      "sha": "9692f2d1d7952e88468ff7f9a41322692644b9cd",
+      "filename": "src/components/HtmlFilePreview.tsx",
+      "status": "added",
+      "additions": 69,
+      "deletions": 0,
+      "changes": 69,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/e5b9c22d424a01873f93cb6f32f9fcc9f74ed328/src%2Fcomponents%2FHtmlFilePreview.tsx",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "a003e643a344948cc3dfa27e193c9c64ad2a223443a666220dc522c818b0d067"
+    },
+    {
+      "sha": "81e1232e50f2607ce118e7de1d945bc26ba05fbf",
+      "filename": "src/components/TableFilePreview.tsx",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 3,
+      "changes": 6,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/e5b9c22d424a01873f93cb6f32f9fcc9f74ed328/src%2Fcomponents%2FTableFilePreview.tsx",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "9abe86d7aed0cb9cdd97cef33c159d3ce70fef678f48c541a7af016590843803"
+    },
+    {
+      "sha": "87b4270c663b5d6039051ea99add596eaf935b33",
+      "filename": "src/locales/en.json",
+      "status": "modified",
+      "additions": 8,
+      "deletions": 0,
+      "changes": 8,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/e5b9c22d424a01873f93cb6f32f9fcc9f74ed328/src%2Flocales%2Fen.json",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "4f00418496501d02308f94c8dd97d6121a8e1fef9c17ddd36e5a1cc81ab3a52b"
+    }
+  ]
+}
