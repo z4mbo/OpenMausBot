@@ -2,10 +2,15 @@
 
 Canvas covers the design work of a Figma-class tool: components and variants, constraints, complete auto layout,
 the pen tool with bezier editing (click a segment to add a point), non-destructive boolean groups whose shapes stay
-editable, corner radius per corner, linear and radial gradient fills, image fill, fit, stretch, crop and tile modes, brand-bound colour and text styles, effects, pages, rulers and
+editable, corner radius per corner, linear and radial gradient fills, image fill, fit, stretch, crop and tile modes, brand-bound colour and text styles, effects, rulers and
 guides, layout grids, comments, version history, prototype links with Present mode, a Dev mode code panel, SVG import
 and PNG, SVG and PDF export. Agents read and edit the same scene, see their work as screenshots, comment, and design
 Origin issues for the Chief to review.
+
+Canvas lives in Studio as its Design mode, after Workflows; a link to the old Canvas section
+(`setChiefSectionOf(chief, "draw")`, used by issue design chips) opens Studio there. The stage takes the app's ground
+colour (the header's black in dark skins, the inset tone in light ones) and the Layers, Design and Ask panels float
+over it, with the toolbar, zoom controls, rulers and zoom-to-fit kept to the area between them.
 
 Start the disposable fixture (fake engine plus the production DrawingCanvas against a synthetic cloud adapter):
 
@@ -44,14 +49,14 @@ The checker accepts only the loopback fixture path. At 1280 pixels in Midnight a
 - opens the Ask panel with the zoom controls and toolbar still clear of it, and briefs the agent to design an
   issue, which asks for `origin_design_submit`; then picks Dana from the panel's agent menu, asks her, and reads her
   streamed reply and tool step from her own thread's transcript;
-- adds a page, checks a shape drawn there stays off the first page;
+- checks a canvas is a single page with no Add page control and no published pages menu;
 - builds a Design system frame from the Assets tab: colour swatches and text specimens bound to the brand styles, and
   Button (primary and secondary variants), Input, Card and Nav components;
 - in Midnight, presses every tool key and shortcut (tools, group, frame, ungroup, the four booleans, flatten, nudges,
   hide, z-order, copy and paste, lock, rulers, zoom, space-pan and the image menu);
 - loads a frame of 1,500 shapes, drags it, and records the frame times.
 
-At 375 pixels it adds a page, opens Assets and the code tab, comments with the comment tool, presents, and opens the
+At 375 pixels it opens Assets and the code tab, comments with the comment tool, presents, and opens the
 Ask panel. Screenshots and `browser-checks.json` go to `docs/verification/evidence/origin-canvas-pro/`; the `round5-*`
 screenshots (1280 pixels, Midnight) show a boolean group, corners and gradient, a crop, the design system and the Ask
 panel streaming another agent's reply.

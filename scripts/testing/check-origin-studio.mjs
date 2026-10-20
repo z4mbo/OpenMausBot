@@ -254,7 +254,7 @@ try {
       await page.getByRole("button", { name: "Motion video", exact: true }).click();
       await page.locator("[data-studio-media-picker] button", { hasText: "Five second teaser clip" }).click();
       await capture(page, `preset-motion-transfer-${tag}`);
-      await page.keyboard.press("Control+Enter");
+      await page.locator("[data-studio-composer]").getByRole("button", { name: "Generate" }).click();
       let motion;
       for (let tries = 0; !motion && tries < 60; tries += 1) {
         motion = (await submitted(page, "fal-ai/kling-video/v3/pro/motion-control")).at(-1);

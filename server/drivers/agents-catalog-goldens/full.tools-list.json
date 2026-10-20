@@ -2354,30 +2354,6 @@
       }
     },
     {
-      "name": "origin_page_publish",
-      "description": "Publish a top-level canvas frame as a public web page, or republish it after changes: auto-layout frames reflow on phones, and a leadForm frame files each signup as a Pipeline lead with the slug as its source. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
-      "name": "origin_page_list",
-      "description": "List an Origin project's published pages with their addresses, views and the leads each one collected. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      }
-    },
-    {
       "name": "origin_standup",
       "description": "What happened in an Origin project in the last 24 hours, as its Chief's standup: PRs waiting for a merge, blocked agents (approvals, failed runs), issues done and moved. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
