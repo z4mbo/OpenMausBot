@@ -267,7 +267,7 @@ export const publishHost = mutation({
     const capabilities = { engines: list(args.engines), models: list(args.models), computers: list(args.computers), capacity: 1 };
     const now = Date.now();
     const hosts = await ctx.db.query("agentHosts").withIndex("by_teamId", (q) => q.eq("teamId", args.teamId)).take(500);
-    const mine = hosts.find((host) => host.ownerUserId === user._id && host.name === name && host.kind === "local");
+    const mine = hosts.find((host) => !host.deviceId && host.ownerUserId === user._id && host.name === name && host.kind === "local");
     if (mine) {
       await ctx.db.patch(mine._id, { capabilities, online: true, heartbeatAt: now });
       return mine._id;

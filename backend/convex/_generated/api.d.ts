@@ -12,6 +12,8 @@ import type * as agentRuns from "../agentRuns.js";
 import type * as agentThreads from "../agentThreads.js";
 import type * as agents from "../agents.js";
 import type * as agentsTables from "../agentsTables.js";
+import type * as modelHosts from "../modelHosts.js";
+import type * as modelHostsTables from "../modelHostsTables.js";
 import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
 import type * as commits from "../commits.js";
@@ -69,6 +71,8 @@ declare const fullApi: ApiFromModules<{
   agentThreads: typeof agentThreads;
   agents: typeof agents;
   agentsTables: typeof agentsTables;
+  modelHosts: typeof modelHosts;
+  modelHostsTables: typeof modelHostsTables;
   auth: typeof auth;
   chat: typeof chat;
   commits: typeof commits;

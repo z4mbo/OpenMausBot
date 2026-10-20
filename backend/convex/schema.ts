@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { featureTables } from "./featureTables";
 import { agentAttribution, agentsTables } from "./agentsTables";
+import { modelHostsTables } from "./modelHostsTables";
 import { storageScope, uploadTarget } from "./lib/storageValidators";
 import {
   assetTypeValidator,
@@ -21,6 +22,7 @@ import {
 export default defineSchema({
   ...featureTables,
   ...agentsTables,
+  ...modelHostsTables,
   storageAdmissions: defineTable({ storageId: v.id("_storage"), scopeKey: v.string(), scope: storageScope, contentType: v.optional(v.string()), createdAt: v.number() }).index("by_storageId_and_scopeKey", ["storageId", "scopeKey"]),
   storageUploadIntents: defineTable({ tokenHash: v.string(), sessionId: v.id("sessions"), userId: v.id("users"), target: uploadTarget, state: v.union(v.literal("issued"), v.literal("uploading"), v.literal("complete")), expiresAt: v.number(), storageId: v.optional(v.id("_storage")) }).index("by_tokenHash", ["tokenHash"]).index("by_expiresAt", ["expiresAt"]).index("by_userId_and_expiresAt", ["userId", "expiresAt"]),
   notifications: defineTable({ teamId: v.id("teams"), userId: v.id("users"), actorId: v.id("users"), kind: v.union(v.literal("assignment"), v.literal("comment"), v.literal("mention")), eventId: v.string(), projectId: v.optional(v.id("projects")), taskId: v.optional(v.id("tasks")), messageId: v.optional(v.string()), conversation: v.optional(v.string()), agentThreadId: v.optional(v.id("agentThreads")), preview: v.optional(v.string()), read: v.boolean(), snoozedUntil: v.optional(v.number()), createdAt: v.number() })

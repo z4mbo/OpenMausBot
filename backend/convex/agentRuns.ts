@@ -61,6 +61,7 @@ export const heartbeat = mutation({
     const user = await requireUser(ctx, args.sessionToken);
     const run = await ctx.db.get(args.runId);
     if (!run || run.requesterUserId !== user._id) throw new Error("Run not found");
+    if (run.modelExecutionId) throw new Error("Hosted runs require their executor lease");
     if (run.status !== "running" || !run.threadId) return { status: run.status };
     const now = Date.now();
     if (!await canResumeThreadRun(ctx, run, user)) {
@@ -143,6 +144,7 @@ export const finish = mutation({
     const user = await requireUser(ctx, args.sessionToken);
     const run = await ctx.db.get(args.runId);
     if (!run || run.requesterUserId !== user._id) throw new Error("Run not found");
+    if (run.modelExecutionId) throw new Error("Hosted runs require their executor lease");
     if (run.status !== "running" && run.status !== "queued") return null;
     const engineLabel = args.engineLabel?.trim().slice(0, ENGINE_LABEL_MAX);
     await settleRun(ctx, run, args.status, Date.now(), { ...(args.usage ? { usage: args.usage } : {}), ...(engineLabel ? { engineLabel } : {}) });

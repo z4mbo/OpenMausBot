@@ -93,7 +93,7 @@ export async function canResumeThreadRun(ctx: Ctx, run: Doc<"workspaceAgentRuns"
 export const BOT_WRITE_GRACE_MS = 120_000;
 
 export function runAcceptsBotWrites(run: Doc<"workspaceAgentRuns"> | null, userId: Id<"users">, threadId: Id<"agentThreads">, now: number): boolean {
-  if (!run || run.requesterUserId !== userId || run.threadId !== threadId) return false;
+  if (!run || run.modelExecutionId || run.requesterUserId !== userId || run.threadId !== threadId) return false;
   if (run.status === "running") return true;
   return run.endedAt !== undefined && now - run.endedAt <= BOT_WRITE_GRACE_MS && run.status !== "queued";
 }
