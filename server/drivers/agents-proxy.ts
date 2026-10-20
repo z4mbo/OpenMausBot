@@ -7,16 +7,18 @@
 //   OMB_EXTERNAL_RUNTIME  "1" for a standing process: oversized results are cut instead of cached
 //   OMB_CHIEF_OF_STAFF  "1" for a Chief of Staff, the only bot shown the Chief-only tools
 //   OMB_AGENTS_TOOL_BRIDGE  "1" lists a few tools and puts the rest behind find_tool and use_tool
+//   OMB_AGENTS_TOOL_DEFER  "1" (when not bridged) lists the domain tools in short, their schemas from find_tool
 // scripts/bundle-server.mjs inlines agents-catalog/-call/-client/-bridge into this file, which the harness spawns.
 import readline from "node:readline";
 
-import { TOOL_BRIDGE_ENV, createToolBridge } from "./agents-bridge.ts";
+import { TOOL_BRIDGE_ENV, TOOL_DEFER_ENV, createToolBridge, createToolDeferral, type ToolListing } from "./agents-bridge.ts";
 import { availableTools, catalogProfileFromEnv } from "./agents-catalog.ts";
 import { callTool, capResult, toolCallContextFromEnv } from "./agents-call.ts";
 import type { Json } from "./agents-client.ts";
 
 const AVAILABLE_TOOLS = availableTools(catalogProfileFromEnv(process.env));
-const BRIDGE = process.env[TOOL_BRIDGE_ENV] === "1" ? createToolBridge(AVAILABLE_TOOLS) : undefined;
+const BRIDGE: ToolListing | undefined = process.env[TOOL_BRIDGE_ENV] === "1" ? createToolBridge(AVAILABLE_TOOLS)
+  : process.env[TOOL_DEFER_ENV] === "1" ? createToolDeferral(AVAILABLE_TOOLS) : undefined;
 const CONTEXT = toolCallContextFromEnv(process.env);
 
 const send = (msg: Json) => process.stdout.write(JSON.stringify(msg) + "\n");

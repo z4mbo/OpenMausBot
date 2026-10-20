@@ -1,5 +1,7 @@
 # Origin 0.3.2 correction candidate
 
+**Held, unpublished:** concurrent [0.4.0 publication](https://github.com/z4mbo/Origin/releases/tag/origin-v0.4.0) superseded this candidate. The [0.4.1 integration candidate](origin-candidate-048.md) preserves both sources. Immutable tag `origin-v0.3.2` resolves to `5aafbf02ab2ded075d2c75955419f35a45cce99a`; its fresh client/shared run passed 604 files and 6,254 tests. No 0.3.2 artifact download/draft, backend key/export/deployment, private website build or public promotion occurred. Its native and duplicate tag-triggered cloud runs were cancelled; preparation operators remain unadmitted.
+
 Prepared on 2026-10-20. This continues the combined [0.3.1 candidate](origin-candidate-046.md), which remains unpublished. Its immutable tag points to `3e6f5c3b563efad735d2b4773347174f7492655e`; the sole README-link validation commit is `8fa1c8ce2f4eb5a76faade6f2541819a7f8cfd3f`. Native run 39375586128 succeeded for Windows x64 and both Mac architectures, but native packaging is not a substitute for the full server CI or actual feature-body inspection.
 
 ## Why publication is held

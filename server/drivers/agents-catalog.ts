@@ -4,6 +4,11 @@ import { OPTIONS_CARD_LIMITS, WATCHER_OPTIONS_CARD_BOT_ID } from "../../shared/o
 import { STUDIO_CUSTOM_MODEL, STUDIO_MODELS } from "../../shared/studio.ts";
 import { agentToolAnnotations } from "../agent-tool-policy.ts";
 import { WIDGET_TOOL_DEFINITIONS } from "./agents-widget-tools.ts";
+import { CANVAS_TOOL_DEFINITIONS } from "./agents-canvas-tools.ts";
+import { PIPELINE_TOOL_DEFINITIONS } from "./agents-pipeline-tools.ts";
+import { STANDUP_TOOL_DEFINITIONS } from "./agents-standup-tools.ts";
+import { CAMPAIGN_TOOL_DEFINITIONS } from "./agents-campaign-tools.ts";
+import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 
 /** Which tools a turn is shown. Presentation only: the server still authenticates and scopes every call. */
 export interface CatalogProfile {
@@ -172,8 +177,6 @@ const SELF_CHANGE_OUTCOME = " Read the result: a change to your own routines, sk
 
 const START_THREAD_SELF_ID = "Leave out, or use your own bot ID. For teammates use coordinate_bots.";
 
-const ORIGIN_SCOPE = " Acts on your team's Origin project unless you pass project.";
-const ORIGIN_PROJECT = { type: "string", maxLength: 120, description: "Name or id from origin_list_projects." };
 const ORIGIN_ISSUE_ID = { type: "string", minLength: 1, maxLength: 64, description: "Issue id or ORI- key from origin_list_issues." };
 const ORIGIN_PRIORITY = { type: "string", enum: ["low", "medium", "high"] };
 const ORIGIN_CARDS = " The person sees issue cards; do not repeat them.";
@@ -364,32 +367,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
       },
     },
   },
-  {
-    name: "origin_canvas",
-    description: "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images and their layout, editable with origin_canvas_edit." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        canvas: { type: "string", maxLength: 120, description: "Canvas name or id; omit to list them." },
-        node: { type: "string", maxLength: 100, description: "Read only this node and its children." },
-        project: ORIGIN_PROJECT,
-      },
-    },
-  },
-  {
-    name: "origin_canvas_edit",
-    description: "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both}; children of a layout frame need no x, y, and grow:true shares its free space. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        canvas: { type: "string", maxLength: 120, description: "Canvas name or id; optional when the project has one." },
-        new_canvas: { type: "string", maxLength: 80, description: "Start a new canvas with this name and apply ops to it." },
-        ops: { type: "array", minItems: 1, maxItems: 200, items: { type: "object" } },
-        project: ORIGIN_PROJECT,
-      },
-      required: ["ops"],
-    },
-  },
+  ...CANVAS_TOOL_DEFINITIONS, ...STANDUP_TOOL_DEFINITIONS,
   {
     name: "origin_studio_generate",
     description: "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live. count makes several variations. Images and audio wait for the result (up to 40 s); video returns at once. Keep the good ones with origin_studio_save_asset." + ORIGIN_SCOPE,
@@ -473,73 +451,8 @@ const ORIGIN_TOOL_DEFINITIONS = [
       required: ["post_id"],
     },
   },
-  {
-    name: "origin_pipeline_list_leads",
-    description: "List an Origin project's sales pipeline: totals per stage and its leads (id, stage, contact details, value, owner, next step), filtered by stage or a search; or read one lead with its notes and timeline (emails, texts, calls with summaries) with lead_id." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        stage: { type: "string", maxLength: 40, description: "New, Contacted, Qualified, Proposal, Won or Lost." },
-        query: { type: "string", maxLength: 200, description: "Matches name, company, email, phone, notes and tags." },
-        lead_id: { type: "string", maxLength: 64, description: "Read this lead in full." },
-        project: ORIGIN_PROJECT,
-      },
-    },
-  },
-  {
-    name: "origin_pipeline_upsert_lead",
-    description: "Add a lead you researched to an Origin project's pipeline, or change one with lead_id. A lead with the same email is updated instead of duplicated. Only add real people or companies you found; never invent contact details." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        lead_id: { type: "string", maxLength: 64, description: "Omit to add a lead." },
-        name: { type: "string", maxLength: 200, description: "Required for a new lead." },
-        company: { type: "string", maxLength: 200 },
-        email: { type: "string", maxLength: 254 },
-        phone: { type: "string", maxLength: 40, description: "With its country code, like +39 333 123 4567." },
-        source: { type: "string", maxLength: 60, description: "Where you found them; default agent research." },
-        stage: { type: "string", maxLength: 40 },
-        value: { type: "number", minimum: 0, description: "Expected deal value in the project's currency." },
-        tags: { type: "array", maxItems: 12, items: { type: "string", maxLength: 40 } },
-        notes: { type: "string", maxLength: 8_000, description: "What you know about them and why they fit; cite your sources." },
-        next_step: { type: "string", maxLength: 300 },
-        next_due: { type: "string", maxLength: 10, description: "YYYY-MM-DD." },
-        project: ORIGIN_PROJECT,
-      },
-    },
-  },
-  {
-    name: "origin_pipeline_log_activity",
-    description: "Record something that already happened with a lead on its Pipeline timeline: a note, or an email, text or call that took place outside Origin. Sends nothing." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        lead_id: { type: "string", minLength: 1, maxLength: 64 },
-        kind: { type: "string", enum: ["note", "email", "sms", "whatsapp", "call", "ai_call"], description: "Default note." },
-        subject: { type: "string", maxLength: 300 },
-        body: { type: "string", maxLength: 20_000 },
-        summary: { type: "string", maxLength: 8_000 },
-        project: ORIGIN_PROJECT,
-      },
-      required: ["lead_id"],
-    },
-  },
-  {
-    name: "origin_pipeline_contact",
-    description: "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Unless the project's admin turned on auto-send, nothing goes out until a person approves your draft in the app; say so instead of retrying. AI calls are summarised into the lead's timeline when they end." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        lead_id: { type: "string", minLength: 1, maxLength: 64 },
-        channel: { type: "string", enum: ["email", "sms", "whatsapp", "ai_call"] },
-        subject: { type: "string", maxLength: 300, description: "Email only." },
-        body: { type: "string", maxLength: 20_000, description: "The email or message text." },
-        goal: { type: "string", maxLength: 8_000, description: "AI call only: its goal and script." },
-        project: ORIGIN_PROJECT,
-      },
-      required: ["lead_id", "channel"],
-    },
-  },
+  ...PIPELINE_TOOL_DEFINITIONS,
+  ...CAMPAIGN_TOOL_DEFINITIONS,
 ];
 
 export const ORIGIN_TOOL_NAMES: ReadonlySet<string> = new Set(ORIGIN_TOOL_DEFINITIONS.map((tool) => tool.name));
@@ -1261,7 +1174,7 @@ export const SHARED_COMPUTER_TOOL_NAMES = new Set(["list_shared_computers", "sha
 const VOICE_TOOL_NAMES = new Set(["send_voice_note"]);
 const CHIEF_ONLY_TOOL_NAMES = new Set([
   "create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue",
-  "origin_review_pr", "origin_merge_pr",
+  "origin_review_pr", "origin_merge_pr", "origin_standup",
 ]);
 const CHIEF_TARGET_TOOL_NAMES = new Set(["propose_profile", "propose_model"]);
 const WATCHER_TOOL_NAMES = new Set(["create_options_card"]);

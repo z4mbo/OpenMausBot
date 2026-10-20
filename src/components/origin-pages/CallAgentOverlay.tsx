@@ -2,6 +2,8 @@ import { Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { CallAgentControls } from "@/lib/call-agent";
 
+export { CallActionItems } from "./CallActionItems";
+
 /** Everyone in the call sees this while the agent is in it: it hears and transcribes the call. */
 export function CallAgentBadge({ name, call }: { name: string; call: CallAgentControls }) {
   const session = call.session;

@@ -1,5 +1,6 @@
 import { memo, type ReactNode } from "react";
-import { FONT_STACKS, layoutText, type CanvasNode } from "../../../../shared/canvas-scene";
+import { FONT_STACKS, layoutText, type CanvasNode, type LeadForm } from "../../../../shared/canvas-scene";
+import { LEAD_FIELD_LABELS, LEAD_FORM_METRICS, arrowHead, leadFormColors, pathData } from "../../../../shared/canvas-page";
 import { measureText } from "./geometry";
 
 export type RenderOptions = {
@@ -9,27 +10,6 @@ export type RenderOptions = {
   editing?: string | null;
   prefix: string;
 };
-
-function pairs(points: readonly number[]) {
-  const out: [number, number][] = [];
-  for (let index = 0; index + 1 < points.length; index += 2) out.push([points[index], points[index + 1]]);
-  return out;
-}
-
-function arrowHead(points: readonly number[], size: number): string {
-  const list = pairs(points);
-  const [x2, y2] = list[list.length - 1];
-  let [x1, y1] = list[list.length - 2];
-  for (let index = list.length - 2; index >= 0 && x1 === x2 && y1 === y2; index--) [x1, y1] = list[index];
-  const angle = Math.atan2(y2 - y1, x2 - x1);
-  const spread = Math.PI / 7;
-  const a = { x: x2 - size * Math.cos(angle - spread), y: y2 - size * Math.sin(angle - spread) };
-  const b = { x: x2 - size * Math.cos(angle + spread), y: y2 - size * Math.sin(angle + spread) };
-  return `M${x2} ${y2}L${a.x} ${a.y}L${b.x} ${b.y}Z`;
-}
-
-const pathData = (points: readonly number[], closed?: boolean) =>
-  pairs(points).map(([x, y], index) => `${index ? "L" : "M"}${x} ${y}`).join("") + (closed ? "Z" : "");
 
 function TextShape({ node, hiddenText }: { node: CanvasNode; hiddenText: boolean }) {
   const layout = layoutText(node, measureText);
@@ -46,14 +26,46 @@ function TextShape({ node, hiddenText }: { node: CanvasNode; hiddenText: boolean
   );
 }
 
-function Shape({ node, options }: { node: CanvasNode; options: RenderOptions }): ReactNode {
+function LeadFormPreview({ node, form, surface }: { node: CanvasNode; form: LeadForm; surface: string }) {
+  const colors = leadFormColors(form, node.fill ?? surface);
+  const { gap, radius } = LEAD_FORM_METRICS;
+  let y = 0;
+  const rows = form.fields.map((field) => {
+    const height = field === "message" ? LEAD_FORM_METRICS.message : LEAD_FORM_METRICS.field;
+    const row = { field, y, height };
+    y += height + gap;
+    return row;
+  });
+  const fontFamily = FONT_STACKS.sans;
+  return (
+    <g pointerEvents="none">
+      {rows.map((row) => (
+        <g key={row.field} transform={`translate(0 ${row.y})`}>
+          <rect width={node.width} height={row.height} rx={radius} fill={colors.field} stroke={colors.border} />
+          <text x={14} y={22} dominantBaseline="central" fontSize={16} fontFamily={fontFamily} fill={colors.placeholder}>{LEAD_FIELD_LABELS[row.field]}</text>
+        </g>
+      ))}
+      <g transform={`translate(0 ${y})`}>
+        <rect width={node.width} height={LEAD_FORM_METRICS.button} rx={radius} fill={colors.button} />
+        <text x={node.width / 2} y={LEAD_FORM_METRICS.button / 2} dominantBaseline="central" textAnchor="middle" fontSize={16} fontWeight={600} fontFamily={fontFamily} fill={colors.buttonText}>{form.button}</text>
+      </g>
+    </g>
+  );
+}
+
+function Shape({ node, options, surface }: { node: CanvasNode; options: RenderOptions; surface: string }): ReactNode {
   const stroke = node.stroke && node.strokeWidth > 0 ? { stroke: node.stroke, strokeWidth: node.strokeWidth } : {};
   const radius = Math.min(node.radius, node.width / 2, node.height / 2);
   const hit = options.interactive ? { "data-node-id": node.id } : {};
   switch (node.type) {
     case "rect":
     case "frame":
-      return <rect {...hit} width={node.width} height={node.height} rx={radius || undefined} fill={node.fill ?? (options.interactive ? "transparent" : "none")} {...stroke} />;
+      return (
+        <>
+          <rect {...hit} width={node.width} height={node.height} rx={radius || undefined} fill={node.fill ?? (options.interactive ? "transparent" : "none")} {...stroke} />
+          {node.leadForm && <LeadFormPreview node={node} form={node.leadForm} surface={surface} />}
+        </>
+      );
     case "ellipse":
       return <ellipse {...hit} cx={node.width / 2} cy={node.height / 2} rx={node.width / 2} ry={node.height / 2} fill={node.fill ?? (options.interactive ? "transparent" : "none")} {...stroke} />;
     case "text":
@@ -95,20 +107,20 @@ function Shape({ node, options }: { node: CanvasNode; options: RenderOptions }):
   }
 }
 
-export function NodeView({ node, options }: { node: CanvasNode; options: RenderOptions }): ReactNode {
+export function NodeView({ node, options, surface = "#FFFFFF" }: { node: CanvasNode; options: RenderOptions; surface?: string }): ReactNode {
   if (node.hidden || node.deleted) return null;
-  const children = options.index.get(node.id) ?? [];
+  const children = node.leadForm ? [] : options.index.get(node.id) ?? [];
   const transform = `translate(${node.x} ${node.y})${node.rotation ? ` rotate(${node.rotation} ${node.width / 2} ${node.height / 2})` : ""}`;
   const clip = node.type === "frame" && node.clip ? `${options.prefix}clip-${node.id}` : null;
   const radius = Math.min(node.radius, node.width / 2, node.height / 2);
   return (
     <g transform={transform} opacity={node.opacity < 1 ? node.opacity : undefined}>
-      {node.type !== "group" && <Shape node={node} options={options} />}
+      {node.type !== "group" && <Shape node={node} options={options} surface={surface} />}
       {children.length > 0 && (
         <>
           {clip && <clipPath id={clip}><rect width={node.width} height={node.height} rx={radius || undefined} /></clipPath>}
           <g clipPath={clip ? `url(#${clip})` : undefined}>
-            {children.map((child) => <NodeView key={child.id} node={child} options={options} />)}
+            {children.map((child) => <NodeView key={child.id} node={child} options={options} surface={node.fill ?? surface} />)}
           </g>
         </>
       )}

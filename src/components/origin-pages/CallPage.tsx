@@ -17,7 +17,7 @@ import {
   endMemberCall, memberCallKey, publishMemberCallState, showingCallPage, startMemberCall, useMemberCallConfig, useMemberCallFailure, useMemberCallState,
   type MemberCallConfig, type MemberCallMedia,
 } from "@/lib/member-call-session";
-import { CallAgentBadge, CallAgentCaptions } from "./CallAgentOverlay";
+import { CallActionItems, CallAgentBadge, CallAgentCaptions } from "./CallAgentOverlay";
 import { useStore, type Bot } from "@/state/store";
 import { Select } from "../Select";
 import { BotAvatar } from "../Avatar";
@@ -732,7 +732,7 @@ export function MemberCall({ target, me, canJoin, name, agent, open }: { target:
         audioEnabled={media.audioEnabled} videoEnabled={media.videoEnabled} audioDevice={media.audioDevice} videoDevice={media.videoDevice}
         onAudio={(on) => patch({ audioEnabled: on })} onVideo={(on) => patch({ videoEnabled: on })} onAudioDevice={(id) => patch({ audioDevice: id })} onVideoDevice={(id) => patch({ videoDevice: id })}
         onJoin={() => startMemberCall({ key, target, me, name, agentId: agent?.id, media, open })} notice={failure}
-        elsewhere={config && !here ? config.name : undefined} />
+        elsewhere={config && !here ? config.name : undefined} />{target.room && <CallActionItems projectId={target.room} />}
     </section>
   );
 }

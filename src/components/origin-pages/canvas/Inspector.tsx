@@ -9,12 +9,13 @@ import { cn } from "@/lib/cn";
 import { Select } from "../../Select";
 import type { SelectionApi } from "./CanvasEditor";
 import { unionBox, worldBounds, worldBox } from "./geometry";
+import { LeadFormSection, LinkSection } from "./PageInspector";
 import type { CanvasScene } from "./use-canvas-scene";
 
-const field = "h-7 w-full min-w-0 rounded-md border border-transparent bg-inset px-1.5 text-[12px] tabular-nums text-ink outline-none transition-colors hover:border-hairline/60 focus:border-accent/70 disabled:opacity-50";
-const iconToggle = "inline-flex h-7 min-w-7 flex-1 items-center justify-center rounded-md text-ink-secondary outline-none transition-colors duration-100 hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-40";
+export const field = "h-7 w-full min-w-0 rounded-md border border-transparent bg-inset px-1.5 text-[12px] tabular-nums text-ink outline-none transition-colors hover:border-hairline/60 focus:border-accent/70 disabled:opacity-50";
+export const iconToggle = "inline-flex h-7 min-w-7 flex-1 items-center justify-center rounded-md text-ink-secondary outline-none transition-colors duration-100 hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-40";
 
-function Section({ title, action, children }: { title: string; action?: ReactNode; children?: ReactNode }) {
+export function Section({ title, action, children }: { title: string; action?: ReactNode; children?: ReactNode }) {
   return (
     <section className="border-b border-hairline/40 px-3 py-2.5">
       <div className="mb-1.5 flex h-6 items-center justify-between">
@@ -65,7 +66,7 @@ export function NumberField({ label, value, onCommit, min, max, step = 1, disabl
   );
 }
 
-function ColorField({ label, value, onPreview, onCommit, onRemove, disabled }: { label: string; value: string | null | undefined; onPreview(value: string): void; onCommit(value: string): void; onRemove?: () => void; disabled?: boolean }) {
+export function ColorField({ label, value, onPreview, onCommit, onRemove, disabled }: { label: string; value: string | null | undefined; onPreview(value: string): void; onCommit(value: string): void; onRemove?: () => void; disabled?: boolean }) {
   const picker = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<string | null>(null);
   const commitRef = useRef(onCommit);
@@ -332,6 +333,8 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
             options={[{ value: "cover", label: "Fill", title: "Fill the box" }, { value: "contain", label: "Fit", title: "Fit inside the box" }]} />
         </Section>
       )}
+      {single && <LinkSection node={single} disabled={disabled} update={update} />}
+      {single?.type === "frame" && <LeadFormSection node={single} readOnly={readOnly} disabled={disabled} update={update} />}
       {exportSection}
     </div>
   );

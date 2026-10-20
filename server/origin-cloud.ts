@@ -9,6 +9,7 @@ import { isDraftColumn } from "../shared/origin-columns.ts";
 import { columnNames, findColumn, normalizedTitle } from "./origin-cloud-columns.ts";
 import { createOriginCloudSession } from "./origin-cloud-session.ts";
 import { editCanvas, readCanvas, type CanvasToolProject } from "./origin-canvas-tools.ts";
+import { listPages, publishPage } from "./origin-page-tools.ts";
 import { isReadOnlyAgentTool } from "./agent-tool-policy.ts";
 import { DATA_DIR } from "./config.ts";
 import type { MirrorResult } from "./github/sync.ts";
@@ -19,6 +20,8 @@ import { PASS, type RouteHandler } from "./routes/table.ts";
 import { sectionKey, type BotRecord, type Message, type Store } from "./store.ts";
 import { broadcastDraft, broadcastList, broadcastSchedule, type BroadcastToolScope } from "./broadcast/tools.ts";
 import { pipelineTools } from "./origin-pipeline-tools.ts";
+import { standupTools } from "./origin-standup-tool.ts";
+import { campaignTools } from "./origin-campaign-tools.ts";
 import type { PipelineSender } from "./origin-pipeline.ts";
 import { runStudioTool, studioRunner, type StudioRunner } from "./origin-studio.ts";
 
@@ -966,26 +969,18 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
 
   async origin_canvas(args, ctx) { return readCanvas(args, await canvasProject(ctx, args)); },
   async origin_canvas_edit(args, ctx) { return editCanvas(args, await canvasProject(ctx, args)); },
+  async origin_page_publish(args, ctx) { return publishPage(args, await canvasProject(ctx, args)); },
+  async origin_page_list(args, ctx) { return listPages(args, await canvasProject(ctx, args)); },
 
-  async origin_broadcast_draft(args, ctx) {
-    return broadcastDraft(args, await broadcastScope(ctx, args));
-  },
-
-  async origin_broadcast_list(args, ctx) {
-    return broadcastList(args, await broadcastScope(ctx, args));
-  },
-
-  async origin_broadcast_schedule(args, ctx) {
-    return broadcastSchedule(args, await broadcastScope(ctx, args));
-  },
+  async origin_broadcast_draft(args, ctx) { return broadcastDraft(args, await broadcastScope(ctx, args)); },
+  async origin_broadcast_list(args, ctx) { return broadcastList(args, await broadcastScope(ctx, args)); },
+  async origin_broadcast_schedule(args, ctx) { return broadcastSchedule(args, await broadcastScope(ctx, args)); },
 
   async origin_studio_generate(args, ctx) {
     return runStudioTool("origin_studio_generate", args, await studioScope(ctx, args));
   },
 
-  async origin_studio_list(args, ctx) {
-    return runStudioTool("origin_studio_list", args, await studioScope(ctx, args));
-  },
+  async origin_studio_list(args, ctx) { return runStudioTool("origin_studio_list", args, await studioScope(ctx, args)); },
 
   async origin_studio_save_asset(args, ctx) {
     return runStudioTool("origin_studio_save_asset", args, await studioScope(ctx, args));
@@ -995,6 +990,8 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     const project = await pickProject(ctx, args.project);
     return { client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId, projectName: await projectName(ctx, project.projectId), caller: ctx.caller, ...(ctx.pipeline ? { sender: ctx.pipeline } : {}) };
   }),
+  ...campaignTools((args, ctx: ToolContext) => broadcastScope(ctx, args)),
+  ...standupTools(async (args, ctx: ToolContext) => Promise.all((trimmed(args.project) || ctx.reachable.length === 1 ? [await pickProject(ctx, args.project)] : ctx.reachable).map(async ({ projectId }) => { const doc = await projectDoc(ctx, projectId); return { client: ctx.client, sessionToken: ctx.sessionToken, projectId, projectName: text(doc.name) || projectId, teamId: text(doc.teamId) }; }))),
 };
 
 export const ORIGIN_SERVER_TOOL_NAMES: ReadonlySet<string> = new Set(Object.keys(TOOLS));

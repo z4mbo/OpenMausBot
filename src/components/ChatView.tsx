@@ -103,7 +103,7 @@ import { useCloudProjectFor } from "@/lib/origin-cloud-links";
 import type { MentionPeer } from "@/lib/mentions";
 import { useAgentThreadFocus } from "@/lib/origin-chat-focus";
 import { ChatErrorBanner, ChatNotice } from "./ChatErrorBanner";
-import { ThreadContextWarning } from "./ContextWarning";
+import { AgentBudgetPill, ThreadContextWarning } from "./ContextWarning";
 import { ChatFindBar } from "./ChatFindBar";
 import { ReplyQuote } from "./ReplyQuote";
 import { ConnectorCard } from "./ConnectorCard";
@@ -118,7 +118,6 @@ import { RenameTitle } from "./RenameTitle";
 import { BotActivityPicker } from "./TaskPicker";
 import { ModelPicker } from "./ModelPicker";
 import { CitationSelectionToolbar, SentCitations } from "./CitationUI";
-
 import { SpeakButton } from "./SpeakButton";
 import { CallOverlay } from "./CallView";
 import { LiveCallBar } from "./LiveCallBar";
@@ -1374,6 +1373,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
             </button>
           )}
           <ThreadContextWarning bot={bot} messages={messages} />
+          <AgentBudgetPill shared={bot.shared} />
           <ChatUsagePopover bot={bot} messages={messages} />
           {!remoteClient && <ModelPicker key={bot.threadId} bot={bot} threadId={bot.threadId} />}
           <LiveCallChip currentBotId={bot.id} onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)} />

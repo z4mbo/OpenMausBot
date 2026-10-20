@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internalMutation, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
-import { projectMember, requireAdmin, requireTeamMember } from "./lib/permissions";
+import { projectMember, requireAdmin, requireMember, requireTeamMember } from "./lib/permissions";
 import { standupBlocker, standupIssue, standupPull } from "./standupTables";
 
 const DAY_MS = 86_400_000;
@@ -145,6 +145,17 @@ export const requestNow = mutation({
   handler: async (ctx, a) => {
     await requireAdmin(ctx, a.projectId, a.sessionToken);
     return publishStandup(ctx, a.projectId, Date.now());
+  },
+});
+
+/** What the Chief's standup would say right now, for any project member, without writing it or notifying anyone. */
+export const preview = query({
+  args: { sessionToken: v.string(), projectId: v.id("projects") },
+  returns: v.object({ chiefName: v.string(), since: v.number(), completed: v.array(standupIssue), moved: v.array(standupIssue), waiting: v.array(standupPull), blockers: v.array(standupBlocker) }),
+  handler: async (ctx, a) => {
+    const { project } = await requireMember(ctx, a.projectId, a.sessionToken);
+    const now = Date.now();
+    return { chiefName: await chiefName(ctx, project._id), since: now - DAY_MS, ...await composeStandup(ctx, project, now - DAY_MS, now) };
   },
 });
 

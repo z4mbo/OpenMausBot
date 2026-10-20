@@ -20,6 +20,7 @@ import { CanvasEditor, type PlacedImage, type SelectionApi } from "./canvas/Canv
 import { download, exportSvg, fileSafe, svgToPng } from "./canvas/export";
 import { Inspector } from "./canvas/Inspector";
 import { LayersPanel } from "./canvas/LayersPanel";
+import { PublishSection } from "./canvas/PublishSection";
 import { useCanvasScene, type CanvasScene } from "./canvas/use-canvas-scene";
 import type { CloudDesign, CloudDesignAsset } from "./cloud-types";
 import { errorText } from "./repo-url";
@@ -179,7 +180,10 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
           onSelection={setSelected}
           layers={(selection) => <LayersPanel canvas={canvas} selection={selection} readOnly={readOnly} />}
           inspector={(selection) => <Inspector canvas={canvas} selection={selection} readOnly={readOnly}
-            exportSection={<ExportSection canvas={canvas} selection={selection} images={images} name={name} projectId={readOnly ? undefined : projectId} />} />} />
+            exportSection={<>
+              {projectId && canvasId && <PublishSection canvas={canvas} selection={selection} images={images} projectId={projectId} teamId={teamId} canvasId={canvasId} readOnly={readOnly} />}
+              <ExportSection canvas={canvas} selection={selection} images={images} name={name} projectId={readOnly ? undefined : projectId} />
+            </>} />} />
       </div>
     </div>
   );

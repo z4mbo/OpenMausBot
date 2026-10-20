@@ -23,7 +23,7 @@ const record = (value: unknown): Args => (value && typeof value === "object" && 
 const list = (value: unknown): Args[] => (Array.isArray(value) ? value.map(record) : []);
 const text = (value: unknown) => (typeof value === "string" ? value : "");
 
-async function canvasesOf(project: CanvasToolProject) {
+export async function canvasesOf(project: CanvasToolProject) {
   return list(await project.client.query("draw:canvases", { sessionToken: project.sessionToken, projectId: project.projectId }));
 }
 
@@ -31,13 +31,13 @@ function namesOf(canvases: Args[]) {
   return canvases.map((canvas) => `"${text(canvas.name)}" (${text(canvas._id)})`).join(", ");
 }
 
-function pickCanvas(project: CanvasToolProject, canvases: Args[], wanted: string): Args {
+export function pickCanvas(project: CanvasToolProject, canvases: Args[], wanted: string): Args {
   // Security: the canvas must be one of this project's, whatever else the person's sign-in may open.
   const found = canvases.find((canvas) => canvas._id === wanted) ?? canvases.find((canvas) => text(canvas.name).trim().toLowerCase() === wanted.toLowerCase());
   return found ?? project.refuse(`No canvas ${wanted.slice(0, 80)} in ${project.name}; its canvases: ${namesOf(canvases) || "none"}.`);
 }
 
-async function sceneOf(project: CanvasToolProject, canvasId: string): Promise<Map<string, CanvasNode>> {
+export async function sceneOf(project: CanvasToolProject, canvasId: string): Promise<Map<string, CanvasNode>> {
   const teamId = project.teamId || project.refuse(`${project.name} is not in an Origin workspace.`);
   const rows = await project.client.query("draw:scene", { sessionToken: project.sessionToken, teamId, canvasId });
   return new Map(decodeScene(Array.isArray(rows) ? rows.filter((row): row is string => typeof row === "string") : []).map((node) => [node.id, node]));

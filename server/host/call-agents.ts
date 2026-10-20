@@ -3,6 +3,7 @@ import { createAgentCard } from "../chat-widgets.ts";
 import type { AppConfig } from "../config.ts";
 import type { ApiRequestBudget, ModelSelection, ProviderInstance } from "../contracts.ts";
 import { awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, transcribeWith } from "../origin-call-agent.ts";
+import { recordCallNotes } from "../origin-call-notes.ts";
 import type { RequestAuth } from "../request-auth.ts";
 import { helperSelection } from "../side-jobs.ts";
 import type { BotRecord, Store } from "../store.ts";
@@ -91,6 +92,7 @@ export function createCallAgentHost(deps: {
       return transcribeWith({ audio, mime, settings, keys: { groq: cfg.groq?.key, openai: cfg.openai?.key } });
     },
     settings: () => callAgentSettings,
+    record: input => recordCallNotes(input),
     log: (line) => console.log(line),
   });
   return { settingsRoute, callAgents, summarize };

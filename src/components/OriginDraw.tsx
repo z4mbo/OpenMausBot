@@ -5,6 +5,7 @@ import { usePopoverDismiss } from "@/hooks/use-popover-dismiss";
 import { cn } from "@/lib/cn";
 import type { Bot } from "@/state/store";
 import { lazyScreen } from "./lazy-screens";
+import { PagesMenu } from "./origin-pages/canvas/PagesMenu";
 import { CloudGate, EmptyState, Loading, Notice, inputClass, primaryButton, useAction, type OriginPageProps } from "./origin-pages/ui";
 
 export const DrawingCanvas = lazyScreen("DrawingCanvas", async () => (await import("./origin-pages/DrawingCanvas")).DrawingCanvas);
@@ -82,6 +83,7 @@ function ProjectCanvases({ projectId, teamId, userId, canEdit, agent }: { projec
           </button>
         ))}
       </div>
+      <PagesMenu projectId={projectId} canEdit={canEdit} canvasName={(id) => canvases.find((canvas) => canvas._id === id)?.name} onOpenCanvas={setChosen} />
       {canEdit && <CanvasMenu name={current.name} onRename={() => setRenaming(current._id)} onDelete={() => void remove(current)} />}
       {newCanvas}
     </div>

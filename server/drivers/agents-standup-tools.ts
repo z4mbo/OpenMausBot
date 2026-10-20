@@ -1,0 +1,11 @@
+import { ORIGIN_PROJECT } from "./agents-origin-scope.ts";
+
+type ToolDefinition = { name: string; description: string; inputSchema: { type: string; additionalProperties: boolean; properties: Record<string, unknown>; required?: string[] } };
+
+export const STANDUP_TOOL_DEFINITIONS: ToolDefinition[] = [
+  {
+    name: "origin_standup",
+    description: "What happened in an Origin project in the last 24 hours, as its Chief's standup: PRs waiting for a merge, blocked agents (approvals, failed runs), issues done and moved. Without project, every project you reach. With a project admin's sign-in it is also posted to the members' Inbox.",
+    inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
+  },
+];

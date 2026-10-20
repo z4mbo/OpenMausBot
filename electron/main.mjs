@@ -95,6 +95,7 @@ import { cloudPageSenderAllowed, createCloudMove, mintOwnerCode, moveBlocked, mo
 import { createOrgLibrary } from "./org-library.mjs";
 import { createCompanyBackups } from "./company-backups.mjs";
 import { createCompanyBackupSchedule } from "./company-backup-schedule.mjs";
+import { installServerSessions, reportOwnListeners } from "./server-session.mjs";
 
 const { desktopCapabilities, nativeDesktopActions } = capabilitiesModule;
 const nativeActions = nativeDesktopActions(process.platform);
@@ -344,6 +345,7 @@ const serverSupervisor = createServerSupervisor({
     slog(`server ready pid=${proc.pid} port=${SERVER_PORT}`);
     void readCloudOfferBrand();
     syncManagedComposioCredentials();
+    reportOwnListeners(proc);
     orgLibrary?.runtimeReady();
     if (managedDesktop) void managedDesktop.refresh().catch(() => {});
     routineWake.start();
@@ -1191,28 +1193,6 @@ function syncDesktopMutationToken(proc) {
   } catch (error) {
     slog(`desktop mutation capability sync failed: ${error?.message ?? error}`);
   }
-}
-
-function installDesktopMutationHeader() {
-  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    let ownsTarget = false;
-    try {
-      const target = new URL(details.url);
-      ownsTarget = serverReady && target.protocol === "http:" &&
-        target.hostname === "127.0.0.1" &&
-        Number(target.port || 80) === SERVER_PORT;
-    } catch {}
-    if (!ownsTarget) {
-      callback({ requestHeaders: details.requestHeaders });
-      return;
-    }
-    callback({
-      requestHeaders: {
-        ...details.requestHeaders,
-        [DESKTOP_MUTATION_HEADER]: desktopMutationToken,
-      },
-    });
-  });
 }
 
 const savePhoneSecretOnce = createPhoneSecretSaveCoordinator((target, value) =>
@@ -3238,11 +3218,9 @@ app.whenReady().then(async () => {
       return;
     }
   }
-  if (app.isPackaged) {
-    app.setAsDefaultProtocolClient(APP_SCHEME);
-    // Chromium adds this header below JavaScript, so a shell using curl cannot impersonate the person at the desktop.
-    installDesktopMutationHeader();
-  }
+  installServerSessions({ app, defaultSession: session.defaultSession, serverPort: () => SERVER_PORT,
+    ownerToken: () => (app.isPackaged && serverReady ? desktopMutationToken : null) });
+  if (app.isPackaged) app.setAsDefaultProtocolClient(APP_SCHEME);
   if (process.platform === "darwin") app.dock.setIcon(APP_ICON);
   secureCredentials = await loadSecureCredentials();
   // An orphaned third-party key with no clear handler left: drop it rather than keep it at rest.

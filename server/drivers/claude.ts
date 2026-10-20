@@ -1193,7 +1193,7 @@ export const ClaudeDriver: ProviderDriver<ClaudeConfig> = {
           cwd,
           env,
           stdio: ["pipe", "pipe", "pipe"],
-        });
+        }, "bot");
       } catch (error) {
         cleanupUnownedLaunch();
         throw error;

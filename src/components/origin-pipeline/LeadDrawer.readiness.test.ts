@@ -8,10 +8,10 @@ import type { PipelineChannel } from "../../../shared/origin-pipeline";
 
 vi.mock("@/lib/origin-cloud", () => ({
   cloudMutation: vi.fn(),
-  useCloudQuery: () => ({ lead: {
+  useCloudQuery: (name: string) => name === "pipeline:lead" ? { lead: {
     _id: "lead", projectId: "project", name: "Synthetic lead", email: "lead@example.test", phone: "+12025550101",
     company: "Example", source: "Fixture", stage: "New", order: 1, tags: [], createdAt: 0, updatedAt: 0,
-  }, activities: [] }),
+  }, activities: [] } : null,
 }));
 vi.mock("./pipeline-api", () => ({
   pipelineServer: { send: vi.fn(), refresh: vi.fn() }, rememberedCallerPhone: () => "+12025550102", rememberCallerPhone: vi.fn(),
@@ -27,8 +27,8 @@ function show(channels: Record<PipelineChannel, boolean> | null) {
   flushSync(() => root!.render(createElement(LeadDrawer, {
     projectId: "project", projectName: "Origin", leadId: "lead", stages: ["New"], currency: "USD", canEdit: true, owners: [],
     chief: { id: "chief", name: "Origin" } as Bot, channels,
-    settings: { configured: true, captureEnabled: false, autoSend: false, currency: "USD", aiAgentId: "agent", aiPhoneNumberId: "number" },
-    onClose() {}, onPlan() {},
+    settings: { configured: true, captureEnabled: false, inboundEnabled: false, autoSend: false, currency: "USD", aiAgentId: "agent", aiPhoneNumberId: "number" },
+    onClose() {}, onPlan() {}, onSequence() {},
   })));
 }
 

@@ -1,13 +1,13 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { internalMutation, mutation, query, type MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { canEdit, requireAdmin, requireMember, touchProject } from "./lib/permissions";
 import { cleanText, validDay } from "./lib/features";
+import {
+  actorOf, addActivity, leadOf, newToken, requireEditor, settingsOf, siteUrl, stagesOf, stopSequences, type PipelineActorValue as Actor, type PipelineCtx as Ctx,
+} from "./lib/pipelineCore";
 import { pipelineActor } from "./pipelineTables";
-import { CLOSED_STAGES, PIPELINE_IMPORT_MAX, PIPELINE_STAGES, normalizeLeadEmail, normalizeLeadPhone } from "../../shared/origin-pipeline";
-
-type Ctx = QueryCtx | MutationCtx;
-type Actor = Doc<"pipelineLeads">["owner"] & {};
+import { CLOSED_STAGES, PIPELINE_IMPORT_MAX, normalizeLeadEmail, normalizeLeadPhone } from "../../shared/origin-pipeline";
 
 const LEADS_MAX = 2000;
 const TIMELINE_MAX = 200;
@@ -33,25 +33,6 @@ const leadFields = {
   nextStep: v.optional(v.string()),
   nextDue: v.optional(v.string()),
 };
-
-async function requireEditor(ctx: Ctx, projectId: Id<"projects">, sessionToken: string) {
-  const access = await requireMember(ctx, projectId, sessionToken);
-  if (!canEdit(access.member)) throw new Error("Edit role required");
-  return access;
-}
-
-function actorOf(user: Doc<"users">, agent?: { name: string; id?: string }): Actor {
-  if (agent) return { kind: "agent", name: agent.name.trim().slice(0, 80) || "Agent", ...(agent.id ? { id: agent.id.slice(0, 80) } : {}) };
-  return { kind: "member", name: user.name || user.email, id: user._id };
-}
-
-async function settingsOf(ctx: Ctx, projectId: Id<"projects">) {
-  return ctx.db.query("pipelineSettings").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).unique();
-}
-
-function stagesOf(settings: Doc<"pipelineSettings"> | null): string[] {
-  return settings?.stages?.length ? settings.stages : [...PIPELINE_STAGES];
-}
 
 function stageIn(stages: readonly string[], wanted: string | undefined): string | undefined {
   const name = wanted?.trim().toLowerCase();
@@ -108,13 +89,6 @@ async function topOrder(ctx: Ctx, projectId: Id<"projects">, stage: string) {
   return min - 1;
 }
 
-async function addActivity(ctx: MutationCtx, lead: Doc<"pipelineLeads">, fields: Omit<Doc<"pipelineActivities">, "_id" | "_creationTime" | "projectId" | "leadId" | "createdAt" | "updatedAt">) {
-  const now = Date.now();
-  const id = await ctx.db.insert("pipelineActivities", { projectId: lead.projectId, leadId: lead._id, createdAt: now, updatedAt: now, ...fields });
-  if (fields.status !== "pending" && fields.status !== "discarded") await ctx.db.patch(lead._id, { lastActivityAt: now, updatedAt: now });
-  return id;
-}
-
 async function findByEmail(ctx: Ctx, projectId: Id<"projects">, email: string | undefined) {
   if (!email) return null;
   return ctx.db.query("pipelineLeads").withIndex("by_projectId_and_email", (q) => q.eq("projectId", projectId).eq("email", email)).first();
@@ -122,14 +96,10 @@ async function findByEmail(ctx: Ctx, projectId: Id<"projects">, email: string | 
 
 async function moveTo(ctx: MutationCtx, lead: Doc<"pipelineLeads">, stage: string, order: number, actor: Actor) {
   const now = Date.now();
-  await ctx.db.patch(lead._id, { stage, order, updatedAt: now });
-  if (stage !== lead.stage) await addActivity(ctx, lead, { kind: "stage", status: "logged", actor, subject: lead.stage, body: stage });
-}
-
-async function leadOf(ctx: Ctx, projectId: Id<"projects">, leadId: Id<"pipelineLeads">) {
-  const lead = await ctx.db.get(leadId);
-  if (!lead || lead.projectId !== projectId) throw new Error("Lead not found");
-  return lead;
+  await ctx.db.patch(lead._id, { stage, order, updatedAt: now, ...(stage !== lead.stage ? { stageChangedAt: now } : {}) });
+  if (stage === lead.stage) return;
+  await addActivity(ctx, lead, { kind: "stage", status: "logged", actor, subject: lead.stage, body: stage });
+  if (CLOSED_STAGES.includes(stage)) await stopSequences(ctx, lead._id, `Moved to ${stage}`);
 }
 
 async function activityOf(ctx: Ctx, projectId: Id<"projects">, activityId: Id<"pipelineActivities">) {
@@ -138,13 +108,13 @@ async function activityOf(ctx: Ctx, projectId: Id<"projects">, activityId: Id<"p
   return activity;
 }
 
-function captureUrl(token: string) {
-  const site = (process.env.CONVEX_SITE_URL ?? "").replace(/\/+$/, "");
-  return site ? `${site}/pipeline/capture?token=${token}` : undefined;
-}
+const captureUrl = (token: string) => siteUrl(`/pipeline/capture?token=${token}`);
 
-function newToken() {
-  return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+function inboundView(settings: Doc<"pipelineSettings">) {
+  const twilioUrl = settings.inboundToken && siteUrl(`/pipeline/twilio?token=${settings.inboundToken}`);
+  const brevoUrl = settings.inboundToken && siteUrl(`/pipeline/brevo?token=${settings.inboundToken}`);
+  if (!twilioUrl || !brevoUrl || !settings.brevoSecret) return {};
+  return { inbound: { twilioUrl, brevoUrl, brevoSecret: settings.brevoSecret, twilioSigning: Boolean(settings.twilioAuthToken), ...(settings.replyToEmail ? { replyToEmail: settings.replyToEmail } : {}) } };
 }
 
 export const board = query({
@@ -169,6 +139,8 @@ export const board = query({
         currency: settings?.currency ?? "EUR",
         ...(settings?.aiAgentId ? { aiAgentId: settings.aiAgentId } : {}),
         ...(settings?.aiPhoneNumberId ? { aiPhoneNumberId: settings.aiPhoneNumberId } : {}),
+        inboundEnabled: settings?.inboundEnabled ?? false,
+        ...(editor && settings?.inboundEnabled ? inboundView(settings) : {}),
       },
     };
   },
@@ -206,7 +178,7 @@ export const upsertLead = mutation({
     const stage = patch.stage ?? stages[0]!;
     const leadId = await ctx.db.insert("pipelineLeads", {
       ...defined(patch), projectId: args.projectId, name: patch.name, stage, source: patch.source || (args.agent ? "agent research" : "manual"), tags: patch.tags ?? [],
-      order: await topOrder(ctx, args.projectId, stage), createdAt: now, updatedAt: now,
+      order: await topOrder(ctx, args.projectId, stage), stageChangedAt: now, createdAt: now, updatedAt: now,
     });
     if (args.agent) {
       const created = (await ctx.db.get(leadId))!;
@@ -248,6 +220,7 @@ export const removeLead = mutation({
     for await (const activity of ctx.db.query("pipelineActivities").withIndex("by_leadId_and_createdAt", (q) => q.eq("leadId", lead._id))) {
       await ctx.db.delete(activity._id);
     }
+    for (const sequence of await ctx.db.query("pipelineSequences").withIndex("by_leadId", (q) => q.eq("leadId", lead._id)).take(50)) await ctx.db.delete(sequence._id);
     await ctx.db.delete(lead._id);
     return null;
   },
@@ -377,9 +350,12 @@ export const claimContact = mutation({
     const lead = await leadOf(ctx, args.projectId, activity.leadId);
     const settings = await settingsOf(ctx, args.projectId);
     await ctx.db.patch(activity._id, { status: "sending", error: undefined, updatedAt: Date.now() });
+    const statusCallback = settings?.inboundEnabled && settings.inboundToken && settings.twilioAuthToken ? siteUrl(`/pipeline/twilio?token=${settings.inboundToken}`) : undefined;
     return {
       activity: { ...activity, status: "sending" as const }, lead,
       ai: { agentId: settings?.aiAgentId, phoneNumberId: settings?.aiPhoneNumberId },
+      ...(statusCallback ? { statusCallback } : {}),
+      ...(settings?.inboundEnabled && settings.replyToEmail ? { replyTo: settings.replyToEmail } : {}),
     };
   },
 });
@@ -414,11 +390,33 @@ export const finishContact = mutation({
   },
 });
 
+/** Inbound webhooks carry secrets, so only project admins turn them on, rotate them or store the Twilio auth token. */
+async function inboundPatch(
+  ctx: MutationCtx,
+  args: { projectId: Id<"projects">; sessionToken: string; inboundEnabled?: boolean; rotateInbound?: boolean; twilioAuthToken?: string; replyToEmail?: string },
+  existing: Doc<"pipelineSettings"> | null,
+  admin: boolean,
+) {
+  if (args.inboundEnabled === undefined && !args.rotateInbound && args.twilioAuthToken === undefined && args.replyToEmail === undefined) return {};
+  if (!admin) await requireAdmin(ctx, args.projectId, args.sessionToken);
+  const token = args.twilioAuthToken?.trim();
+  if (token && !/^[A-Za-z0-9]{32}$/.test(token)) throw new Error("A Twilio auth token is 32 letters and digits");
+  const replyTo = args.replyToEmail === undefined ? undefined : args.replyToEmail.trim() ? normalizeLeadEmail(args.replyToEmail) ?? (() => { throw new Error("Enter a valid reply-to address"); })() : "";
+  const fresh = args.rotateInbound || (args.inboundEnabled && !existing?.inboundToken);
+  return {
+    ...(args.inboundEnabled !== undefined ? { inboundEnabled: args.inboundEnabled } : {}),
+    ...(fresh ? { inboundToken: newToken(), brevoSecret: newToken() } : {}),
+    ...(token !== undefined ? { twilioAuthToken: token || undefined } : {}),
+    ...(replyTo !== undefined ? { replyToEmail: replyTo || undefined } : {}),
+  };
+}
+
 export const configure = mutation({
   args: {
     ...scope,
     captureEnabled: v.optional(v.boolean()), rotateToken: v.optional(v.boolean()), autoSend: v.optional(v.boolean()),
     currency: v.optional(v.string()), aiAgentId: v.optional(v.string()), aiPhoneNumberId: v.optional(v.string()),
+    inboundEnabled: v.optional(v.boolean()), rotateInbound: v.optional(v.boolean()), twilioAuthToken: v.optional(v.string()), replyToEmail: v.optional(v.string()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -430,7 +428,9 @@ export const configure = mutation({
     const id = (value: string | undefined) => value === undefined ? undefined : value.trim() ? /^[\w-]{1,120}$/.test(value.trim()) ? value.trim() : (() => { throw new Error("That ElevenLabs id is not valid"); })() : "";
     const agentId = id(args.aiAgentId);
     const phoneId = id(args.aiPhoneNumberId);
+    const inbound = await inboundPatch(ctx, args, existing, member.role === "owner" || member.role === "admin");
     const patch = {
+      ...inbound,
       ...(args.captureEnabled !== undefined ? { captureEnabled: args.captureEnabled } : {}),
       ...(args.rotateToken ? { captureToken: newToken() } : {}),
       ...(args.autoSend !== undefined ? { autoSend: args.autoSend } : {}),
@@ -482,5 +482,57 @@ export const capture = internalMutation({
     }
     await addActivity(ctx, lead, { kind: "capture", status: "logged", actor: { kind: "system", name: source }, ...(page ? { subject: page } : {}), ...(message ? { body: message } : {}) });
     return "ok";
+  },
+});
+
+export const markRead = mutation({
+  args: { ...scope, leadId: v.id("pipelineLeads") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await requireMember(ctx, args.projectId, args.sessionToken);
+    const lead = await leadOf(ctx, args.projectId, args.leadId);
+    if (lead.unreadReplies) await ctx.db.patch(lead._id, { unreadReplies: undefined });
+    return null;
+  },
+});
+
+const STAGES_MAX = 12;
+
+/** Renames, adds, reorders and removes stages; Won and Lost stay, and leads in a removed stage move to `moveTo`. */
+export const setStages = mutation({
+  args: { ...scope, stages: v.array(v.object({ name: v.string(), was: v.optional(v.string()) })), moveTo: v.optional(v.string()) },
+  returns: v.object({ moved: v.number() }),
+  handler: async (ctx, args) => {
+    const { user } = await requireEditor(ctx, args.projectId, args.sessionToken);
+    const settings = await settingsOf(ctx, args.projectId);
+    const current = stagesOf(settings);
+    const next = args.stages.map((stage) => ({ name: cleanText(stage.name, 40, "Stage name"), was: stage.was === undefined ? undefined : stageIn(current, stage.was) ?? (() => { throw new Error(`Unknown stage ${stage.was}`); })() }));
+    if (next.length < 3 || next.length > STAGES_MAX) throw new Error(`Keep between 3 and ${STAGES_MAX} stages`);
+    if (new Set(next.map((stage) => stage.name.toLowerCase())).size !== next.length) throw new Error("Stage names must be different");
+    if (new Set(next.flatMap((stage) => (stage.was ? [stage.was] : []))).size !== next.filter((stage) => stage.was).length) throw new Error("A stage can only be kept once");
+    for (const closed of CLOSED_STAGES) {
+      if (!next.some((stage) => stage.was === closed && stage.name === closed)) throw new Error(`${closed} stays; you can move it but not rename or remove it`);
+    }
+    const renamed = new Map(next.flatMap((stage) => (stage.was ? [[stage.was, stage.name] as const] : [])));
+    const removed = current.filter((stage) => !renamed.has(stage));
+    const names = next.map((stage) => stage.name);
+    const target = args.moveTo === undefined ? names.find((name) => !CLOSED_STAGES.includes(name))! : stageIn(names, args.moveTo) ?? (() => { throw new Error("Choose a stage to move the leads to"); })();
+    const actor = actorOf(user);
+    const now = Date.now();
+    let moved = 0;
+    for (const lead of await ctx.db.query("pipelineLeads").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", args.projectId)).take(LEADS_MAX)) {
+      const rename = renamed.get(lead.stage);
+      if (rename !== undefined) {
+        if (rename !== lead.stage) await ctx.db.patch(lead._id, { stage: rename });
+      } else if (removed.includes(lead.stage)) {
+        await ctx.db.patch(lead._id, { stage: target, stageChangedAt: now, updatedAt: now });
+        await addActivity(ctx, lead, { kind: "stage", status: "logged", actor, subject: lead.stage, body: target });
+        moved++;
+      }
+    }
+    if (settings) await ctx.db.patch(settings._id, { stages: names });
+    else await ctx.db.insert("pipelineSettings", { projectId: args.projectId, captureToken: newToken(), captureEnabled: false, autoSend: false, stages: names });
+    await touchProject(ctx, args.projectId);
+    return { moved };
   },
 });

@@ -45,7 +45,7 @@ export const summary = query({
 export const list = query({
   args: { ...scope, unreadOnly: v.boolean(), paginationOpts: paginationOptsValidator },
   returns: v.object({ isDone: v.boolean(), continueCursor: v.string(), page: v.array(v.object({
-    _id: v.id("notifications"), kind: v.union(v.literal("assignment"), v.literal("comment"), v.literal("mention"), v.literal("digest")), digestId: v.optional(v.id("standupDigests")), read: v.boolean(), createdAt: v.number(), snoozedUntil: v.optional(v.number()),
+    _id: v.id("notifications"), kind: v.union(v.literal("assignment"), v.literal("comment"), v.literal("mention"), v.literal("digest"), v.literal("lead")), digestId: v.optional(v.id("standupDigests")), leadId: v.optional(v.id("pipelineLeads")), read: v.boolean(), createdAt: v.number(), snoozedUntil: v.optional(v.number()),
     projectId: v.optional(v.id("projects")), taskId: v.optional(v.id("tasks")), messageId: v.optional(v.string()), conversation: v.optional(v.string()), agentThreadId: v.optional(v.id("agentThreads")), preview: v.optional(v.string()),
     actorName: v.string(), actorAvatar: v.union(v.string(), v.null()), projectName: v.optional(v.string()), taskTitle: v.optional(v.string()), available: v.boolean(),
     iconType: v.optional(projectIconTypeValidator), iconValue: v.optional(v.string()), iconUrl: v.union(v.string(), v.null()),
@@ -57,9 +57,10 @@ export const list = query({
     const visible = await Promise.all(page.page.map(async row => {
       const actor = await ctx.db.get(row.actorId), project = row.projectId ? await ctx.db.get(row.projectId) : null, task = row.taskId ? await ctx.db.get(row.taskId) : null;
       const digest = row.digestId ? await ctx.db.get(row.digestId) : null;
+      const lead = row.leadId ? await ctx.db.get(row.leadId) : null;
       if (row.projectId && (!project || !await projectMember(ctx, project, user) || (a.unreadOnly && project.status !== "active"))) return null;
-      return { _id: row._id, kind: row.kind, ...(row.digestId ? { digestId: row.digestId } : {}), read: row.read, createdAt: row.createdAt, snoozedUntil: row.snoozedUntil, projectId: row.projectId, taskId: row.taskId, messageId: row.messageId, conversation: row.conversation, agentThreadId: row.agentThreadId, preview: row.preview, actorName: digest?.chiefName ?? (actor?.username || actor?.name || "Teammate"), actorAvatar: !digest && actor?.avatarStorageId ? await ctx.storage.getUrl(actor.avatarStorageId) : null,
-        projectName: project?.name, taskTitle: task?.title, available: Boolean(row.messageId) || Boolean(digest) || Boolean(task && project?.teamId === a.teamId),
+      return { _id: row._id, kind: row.kind, ...(row.digestId ? { digestId: row.digestId } : {}), ...(row.leadId ? { leadId: row.leadId } : {}), read: row.read, createdAt: row.createdAt, snoozedUntil: row.snoozedUntil, projectId: row.projectId, taskId: row.taskId, messageId: row.messageId, conversation: row.conversation, agentThreadId: row.agentThreadId, preview: row.preview, actorName: digest?.chiefName ?? (row.kind === "lead" ? lead?.name ?? "A lead" : actor?.username || actor?.name || "Teammate"), actorAvatar: !digest && row.kind !== "lead" && actor?.avatarStorageId ? await ctx.storage.getUrl(actor.avatarStorageId) : null,
+        projectName: project?.name, taskTitle: task?.title, available: Boolean(row.messageId) || Boolean(digest) || Boolean(task && project?.teamId === a.teamId) || Boolean(lead && lead.projectId === row.projectId),
         iconType: project?.iconType, iconValue: project?.iconValue, iconUrl: project?.iconStorageId ? await ctx.storage.getUrl(project.iconStorageId) : null };
     }));
     return { isDone: page.isDone, continueCursor: page.continueCursor, page: visible.filter((row): row is NonNullable<typeof row> => row !== null) };

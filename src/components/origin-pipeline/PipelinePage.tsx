@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type RefObject } from "react";
-import { CalendarDays, Columns3, GripVertical, Inbox, List, Mail, Phone, Plus, Search, SlidersHorizontal, Sparkles, Target, Upload } from "lucide-react";
+import { CalendarDays, Columns3, GripVertical, Inbox, List, Mail, Phone, Plus, Reply, Search, SlidersHorizontal, Sparkles, Target, Upload } from "lucide-react";
 import { useStore, type Bot } from "@/state/store";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
 import { openBot } from "@/state/thread-navigation";
 import { useShowThreads } from "@/lib/thread-preferences";
+import { consumeLeadFocus, useLeadFocus } from "@/lib/origin-lead-focus";
 import { BotAvatar } from "../Avatar";
 import { GlassHeader } from "../GlassScrollFrame";
 import { Select } from "../Select";
@@ -18,11 +19,13 @@ import {
   type OriginPageProps,
 } from "../origin-pages/ui";
 import { CLOSED_STAGES, formatLeadValue, stageTotals, type PipelineBoard, type PipelineChannel, type PipelineLead } from "../../../shared/origin-pipeline";
-import { dueTone, inStage, matchesLead, orderForDrop, ownerKey, pipelineValue, planBrief, withPendingMoves, type PendingMove } from "./pipeline-model";
+import { nextActions, scoreLead, topOpenValue } from "../../../shared/origin-pipeline-score";
+import { dueTone, inStage, matchesLead, orderForDrop, ownerKey, pipelineValue, planBrief, sequenceBrief, withPendingMoves, type LeadInsight, type PendingMove } from "./pipeline-model";
 import { pipelineServer } from "./pipeline-api";
 import { LeadDrawer } from "./LeadDrawer";
 import { OwnerAvatar, type OwnerOption } from "./owners";
 import { CaptureDialog, ImportDialog, NewLeadDialog, PendingContacts, PipelineSettingsDialog, PlanDialog } from "./PipelineDialogs";
+import { NextActionChip, ScoreBadge } from "./LeadInsight";
 
 export function PipelinePage({ agent, ...props }: OriginPageProps & { agent: Bot }) {
   return (
@@ -56,8 +59,15 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
   const [query, setQuery] = useState("");
   const [stageFilter, setStageFilter] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("");
+  const [repliesOnly, setRepliesOnly] = useState(false);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [open, setOpen] = useState<string | null>(null);
+  const focus = useLeadFocus(projectId);
+  useEffect(() => {
+    if (!focus) return;
+    setOpen(focus.leadId);
+    consumeLeadFocus(focus);
+  }, [focus]);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [pending, setPending] = useState<ReadonlyMap<string, PendingMove>>(new Map());
   const [notice, setNotice] = useState("");
@@ -87,11 +97,19 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
   if (!board) return <Loading label="Loading pipeline" variant="board" />;
 
   const leads = withPendingMoves(board.leads, pending);
-  const visible = leads.filter((lead) => matchesLead(lead, query.trim()) && (!stageFilter || lead.stage === stageFilter) && (!ownerFilter || ownerKey(lead.owner) === ownerFilter));
+  const visible = leads.filter((lead) => matchesLead(lead, query.trim()) && (!stageFilter || lead.stage === stageFilter) && (!ownerFilter || ownerKey(lead.owner) === ownerFilter)
+    && (!repliesOnly || Boolean(lead.unreadReplies)));
   const totals = stageTotals(visible, board.stages);
   const value = pipelineValue(board.leads);
   const currency = board.settings.currency;
   const pendingLeads = new Set(board.pending.map((row) => row.leadId));
+  const scoring = { stages: board.stages, topValue: topOpenValue(board.leads), currency, now: Date.now() };
+  const insights = new Map<string, LeadInsight>(leads.map((lead) => {
+    const context = { ...scoring, pending: pendingLeads.has(lead._id) };
+    return [lead._id, { ...scoreLead(lead, context), actions: nextActions(lead, context) }];
+  }));
+  const unreadLeads = board.leads.filter((lead) => lead.unreadReplies).length;
+  const stageCounts = new Map(board.stages.map((stage) => [stage, board.leads.filter((lead) => lead.stage === stage).length]));
   const report = (error: unknown) => setNotice(errorText(error, "Something went wrong"));
 
   const move = (leadId: string, stage: string, beforeLeadId?: string) => {
@@ -148,6 +166,12 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
             {ownerOptions.map((owner) => <option key={owner.value} value={owner.value}>{owner.label}</option>)}
           </Select>
         </div>
+        {(unreadLeads > 0 || repliesOnly) && (
+          <button type="button" aria-pressed={repliesOnly} onClick={() => setRepliesOnly((value) => !value)} title={repliesOnly ? "Show every lead" : "Show leads with unread replies"}
+            className={cn(ghostButton, "h-8 rounded-full px-2.5", repliesOnly && "border-accent/50 bg-accent/10 text-accent-text hover:bg-accent/15")}>
+            <Reply size={14} />Replies{unreadLeads > 0 && <span className="rounded-full bg-accent px-1.5 text-[11px] font-semibold tabular-nums text-accent-ink">{unreadLeads}</span>}
+          </button>
+        )}
         <div className="flex items-center">
           <button type="button" className={iconButton} title="Lead capture" aria-label="Lead capture" onClick={() => setDialog("capture")}><Inbox size={16} /></button>
           {canEdit && <button type="button" className={iconButton} title="Import CSV" aria-label="Import CSV" onClick={() => setDialog("import")}><Upload size={16} /></button>}
@@ -180,7 +204,7 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
             ) : undefined} />
         </div>
       ) : layout === "table" ? (
-        <LeadTable leads={visible} stages={board.stages} currency={currency} canEdit={canEdit} selected={selected} pendingLeads={pendingLeads}
+        <LeadTable leads={visible} stages={board.stages} currency={currency} canEdit={canEdit} selected={selected} pendingLeads={pendingLeads} insights={insights}
           onSelect={setSelected} onOpen={setOpen} onStage={(lead, stage) => move(lead._id, stage)} />
       ) : (
         <div ref={lanesRef} className={cn("flex min-h-0 flex-1 snap-x gap-3 overflow-x-auto px-4 pb-4 md:px-6", underGlass)}>
@@ -204,7 +228,7 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
                   {items.map((lead) => lifted?.taskId === lead._id ? null : (
                     <li key={lead._id} className="flex flex-col gap-2">
                       {here?.beforeTaskId === lead._id && lifted && <DropGap height={lifted.height} />}
-                      <LeadCard lead={lead} currency={currency} canEdit={canEdit} awaiting={pendingLeads.has(lead._id)} owners={owners}
+                      <LeadCard lead={lead} currency={currency} canEdit={canEdit} awaiting={pendingLeads.has(lead._id)} owners={owners} insight={insights.get(lead._id)}
                         onOpen={() => { if (!cardDrag.justDropped()) setOpen(lead._id); }}
                         onPointerDown={(event) => cardDrag.press(event, lead._id)} onKeyDown={(event) => keyMove(event, lead)} />
                     </li>
@@ -212,7 +236,7 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
                   {here && !here.beforeTaskId && lifted && <li><DropGap height={lifted.height} /></li>}
                   {!items.some((lead) => lead._id !== lifted?.taskId) && !here && (
                     <li className="rounded-xl border border-dashed border-hairline/50 px-3 py-5 text-center text-[12.5px] text-ink-tertiary">
-                      {query || ownerFilter ? "No matching leads" : canEdit ? "Drop leads here" : "No leads"}
+                      {query || ownerFilter || repliesOnly ? "No matching leads" : canEdit ? "Drop leads here" : "No leads"}
                     </li>
                   )}
                 </ol>
@@ -224,11 +248,12 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
       )}
 
       {open && <LeadDrawer key={open} projectId={projectId} projectName={projectName} leadId={open} stages={board.stages} currency={currency} canEdit={canEdit}
-        owners={owners} chief={chief} channels={channels} settings={board.settings} onClose={() => setOpen(null)} onPlan={(lead) => handOff(planFor([lead]))} />}
+        owners={owners} chief={chief} channels={channels} settings={board.settings} insight={insights.get(open)} onClose={() => setOpen(null)} onPlan={(lead) => handOff(planFor([lead]))}
+        onSequence={(lead) => handOff(sequenceBrief({ projectName, lead, currency }))} />}
       {dialog === "new" && <NewLeadDialog projectId={projectId} stages={board.stages} onClose={() => setDialog(null)} onCreated={(leadId) => { setDialog(null); setOpen(leadId); }} />}
       {dialog === "import" && <ImportDialog projectId={projectId} onClose={() => setDialog(null)} />}
       {dialog === "capture" && <CaptureDialog projectId={projectId} settings={board.settings} canEdit={canEdit} onClose={() => setDialog(null)} />}
-      {dialog === "settings" && <PipelineSettingsDialog projectId={projectId} settings={board.settings} canEdit={canEdit} isAdmin={isAdmin} channels={channels} onClose={() => setDialog(null)} />}
+      {dialog === "settings" && <PipelineSettingsDialog projectId={projectId} settings={board.settings} stages={board.stages} counts={stageCounts} canEdit={canEdit} isAdmin={isAdmin} channels={channels} onClose={() => setDialog(null)} />}
       {dialog === "plan" && <PlanDialog chief={chief} leads={planLeads} selected={selected.size > 0} onClose={() => setDialog(null)} onSend={(direction) => handOff(planFor(planLeads, direction))} />}
     </section>
   );
@@ -249,11 +274,12 @@ function DragGhost({ drag, ghost, lead, currency, owners }: { drag: CardDrag; gh
   );
 }
 
-function LeadCard({ lead, currency, canEdit, awaiting, owners, lifted = false, onOpen, onPointerDown, onKeyDown }: {
-  lead: PipelineLead; currency: string; canEdit: boolean; awaiting: boolean; owners: readonly OwnerOption[]; lifted?: boolean;
+function LeadCard({ lead, currency, canEdit, awaiting, owners, insight, lifted = false, onOpen, onPointerDown, onKeyDown }: {
+  lead: PipelineLead; currency: string; canEdit: boolean; awaiting: boolean; owners: readonly OwnerOption[]; insight?: LeadInsight; lifted?: boolean;
   onOpen?(): void; onPointerDown?(event: PointerEvent<HTMLElement>): void; onKeyDown?(event: KeyboardEvent<HTMLElement>): void;
 }) {
   const due = dueTone(lead.nextDue);
+  const hint = insight?.actions.find((item) => item.kind !== "reply" && item.kind !== "approve" && item.kind !== "overdue");
   return (
     <article tabIndex={lifted ? -1 : 0} data-task-id={lifted ? undefined : lead._id} aria-label={`${lead.name}${lead.company ? `, ${lead.company}` : ""}`}
       aria-keyshortcuts={canEdit ? "Alt+ArrowLeft Alt+ArrowRight" : undefined}
@@ -268,7 +294,11 @@ function LeadCard({ lead, currency, canEdit, awaiting, owners, lifted = false, o
       <div className="flex items-start gap-2">
         {canEdit && <GripVertical size={12} className="-ml-1.5 mt-1 shrink-0 text-ink-tertiary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100 max-md:hidden" aria-hidden="true" />}
         <div className="min-w-0 flex-1">
-          <strong className="block truncate text-[13.5px] font-medium leading-snug text-ink">{lead.name}</strong>
+          <strong className="flex min-w-0 items-center gap-1.5 text-[13.5px] font-medium leading-snug text-ink">
+            <span className="truncate">{lead.name}</span>
+            {lead.unreadReplies ? <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-accent px-1.5 text-[10.5px] font-semibold text-accent-ink" title={`${lead.unreadReplies} unread ${lead.unreadReplies === 1 ? "reply" : "replies"}`}>
+              <Reply size={10} aria-hidden="true" />{lead.unreadReplies}<span className="sr-only"> unread {lead.unreadReplies === 1 ? "reply" : "replies"}</span></span> : null}
+          </strong>
           {lead.company && <span className="block truncate text-[12px] text-ink-secondary">{lead.company}</span>}
         </div>
         {lead.value ? <span className="shrink-0 text-[12.5px] font-medium tabular-nums text-ink">{formatLeadValue(lead.value, currency)}</span> : null}
@@ -279,6 +309,7 @@ function LeadCard({ lead, currency, canEdit, awaiting, owners, lifted = false, o
         {lead.phone && <Phone size={12} aria-label="Has phone" />}
         {due && <span className={cn("flex items-center gap-1", due.tone === "late" ? "text-danger" : due.tone === "soon" ? "text-warning" : "text-ink-secondary")}><CalendarDays size={11} aria-hidden="true" />{due.label}</span>}
         {awaiting && <span className="rounded-full bg-accent/15 px-1.5 py-px text-[11px] text-accent-text">Needs approval</span>}
+        {!awaiting && hint && <NextActionChip action={hint} />}
         {lead.tags.slice(0, 2).map((tag) => <span key={tag} className="truncate rounded-full border border-hairline/50 px-1.5 py-px text-[11px]">{tag}</span>)}
         <span className="ml-auto"><OwnerAvatar owner={lead.owner} owners={owners} /></span>
       </div>
@@ -286,16 +317,17 @@ function LeadCard({ lead, currency, canEdit, awaiting, owners, lifted = false, o
   );
 }
 
-function LeadTable({ leads, stages, currency, canEdit, selected, pendingLeads, onSelect, onOpen, onStage }: {
-  leads: readonly PipelineLead[]; stages: readonly string[]; currency: string; canEdit: boolean; selected: ReadonlySet<string>; pendingLeads: ReadonlySet<string>;
+function LeadTable({ leads, stages, currency, canEdit, selected, pendingLeads, insights, onSelect, onOpen, onStage }: {
+  leads: readonly PipelineLead[]; stages: readonly string[]; currency: string; canEdit: boolean; selected: ReadonlySet<string>; pendingLeads: ReadonlySet<string>; insights: ReadonlyMap<string, LeadInsight>;
   onSelect(next: ReadonlySet<string>): void; onOpen(leadId: string): void; onStage(lead: PipelineLead, stage: string): void;
 }) {
-  const [sort, setSort] = useState<{ key: "name" | "stage" | "value" | "due" | "activity"; desc: boolean }>({ key: "activity", desc: true });
+  const [sort, setSort] = useState<{ key: "name" | "stage" | "value" | "due" | "activity" | "score"; desc: boolean }>({ key: "activity", desc: true });
   const sorted = [...leads].sort((a, b) => {
     const order = sort.key === "name" ? a.name.localeCompare(b.name)
       : sort.key === "stage" ? stages.indexOf(a.stage) - stages.indexOf(b.stage)
       : sort.key === "value" ? (a.value ?? 0) - (b.value ?? 0)
       : sort.key === "due" ? (a.nextDue ?? "9999").localeCompare(b.nextDue ?? "9999")
+      : sort.key === "score" ? (insights.get(a._id)?.score ?? 0) - (insights.get(b._id)?.score ?? 0)
       : (a.lastActivityAt ?? a.createdAt) - (b.lastActivityAt ?? b.createdAt);
     return sort.desc ? -order : order;
   });
@@ -311,7 +343,7 @@ function LeadTable({ leads, stages, currency, canEdit, selected, pendingLeads, o
   return (
     <div className={cn("min-h-0 flex-1 overflow-auto px-4 pb-6 md:px-6", underGlass)}>
       <div className={cn(cardClass, "overflow-x-auto")}>
-        <table className="w-full min-w-[760px] border-collapse text-left text-[13px]">
+        <table className="w-full min-w-[920px] border-collapse text-left text-[13px]">
           <thead className="border-b border-hairline/40 text-[12px] text-ink-tertiary">
             <tr>
               <th scope="col" className="w-9 px-3 py-2">
@@ -321,6 +353,8 @@ function LeadTable({ leads, stages, currency, canEdit, selected, pendingLeads, o
               {header("name", "Lead")}
               {header("stage", "Stage")}
               {header("value", "Value", "text-right")}
+              {header("score", "Score", "text-right")}
+              <th scope="col" className="px-2 py-2 font-medium">Next</th>
               <th scope="col" className="px-2 py-2 font-medium">Contact</th>
               <th scope="col" className="px-2 py-2 font-medium">Next step</th>
               {header("due", "Due")}
@@ -332,6 +366,7 @@ function LeadTable({ leads, stages, currency, canEdit, selected, pendingLeads, o
             {sorted.map((lead) => {
               const due = dueTone(lead.nextDue);
               const touched = lead.lastActivityAt ?? lead.createdAt;
+              const insight = insights.get(lead._id);
               return (
                 <tr key={lead._id} className={cn("cursor-pointer transition-colors hover:bg-raised/30", selected.has(lead._id) && "bg-accent/[0.06]")} onClick={() => onOpen(lead._id)}>
                   <td className="px-3 py-1.5" onClick={(event) => event.stopPropagation()}>
@@ -339,7 +374,10 @@ function LeadTable({ leads, stages, currency, canEdit, selected, pendingLeads, o
                       onChange={() => { const next = new Set(selected); if (next.has(lead._id)) next.delete(lead._id); else next.add(lead._id); onSelect(next); }} />
                   </td>
                   <td className="max-w-[220px] px-2 py-1.5">
-                    <button type="button" className="block max-w-full truncate rounded text-left font-medium text-ink outline-none focus-visible:ring-2 focus-visible:ring-accent/60" onClick={(event) => { event.stopPropagation(); onOpen(lead._id); }}>{lead.name}</button>
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <button type="button" className="block min-w-0 truncate rounded text-left font-medium text-ink outline-none focus-visible:ring-2 focus-visible:ring-accent/60" onClick={(event) => { event.stopPropagation(); onOpen(lead._id); }}>{lead.name}</button>
+                      {lead.unreadReplies ? <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-accent px-1.5 text-[10.5px] font-semibold text-accent-ink"><Reply size={10} aria-hidden="true" />{lead.unreadReplies}<span className="sr-only"> unread</span></span> : null}
+                    </span>
                     {lead.company && <span className="block truncate text-[12px] text-ink-secondary">{lead.company}</span>}
                   </td>
                   <td className="px-2 py-1.5" onClick={(event) => event.stopPropagation()}>
@@ -351,6 +389,8 @@ function LeadTable({ leads, stages, currency, canEdit, selected, pendingLeads, o
                     {pendingLeads.has(lead._id) && <span className="ml-1.5 rounded-full bg-accent/15 px-1.5 py-px text-[11px] text-accent-text">Approval</span>}
                   </td>
                   <td className="px-2 py-1.5 text-right tabular-nums text-ink">{lead.value ? formatLeadValue(lead.value, currency) : <span className="text-ink-tertiary">—</span>}</td>
+                  <td className="px-2 py-1.5 text-right">{insight && !CLOSED_STAGES.includes(lead.stage) ? <ScoreBadge score={insight} /> : <span className="text-ink-tertiary">—</span>}</td>
+                  <td className="px-2 py-1.5"><span className="flex flex-wrap gap-1">{insight?.actions.map((item) => <NextActionChip key={item.kind} action={item} />)}</span></td>
                   <td className="max-w-[200px] px-2 py-1.5 text-[12px] text-ink-secondary"><span className="block truncate">{lead.email ?? ""}</span><span className="block truncate tabular-nums">{lead.phone ?? ""}</span></td>
                   <td className="max-w-[220px] truncate px-2 py-1.5 text-ink-secondary">{lead.nextStep ?? ""}</td>
                   <td className={cn("whitespace-nowrap px-2 py-1.5 text-[12px]", due?.tone === "late" ? "text-danger" : due?.tone === "soon" ? "text-warning" : "text-ink-secondary")}>{due?.label ?? ""}</td>

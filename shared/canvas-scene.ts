@@ -6,6 +6,17 @@ export type StackAlign = "start" | "center" | "end" | "stretch";
 export type StackJustify = "start" | "center" | "end" | "between";
 export type StackHug = "width" | "height" | "both";
 export type Padding = [top: number, right: number, bottom: number, left: number];
+export const LEAD_FIELDS = ["name", "email", "phone", "message"] as const;
+export type LeadField = (typeof LEAD_FIELDS)[number];
+
+/** A frame that a published page shows as a form in place of its layers; each submission becomes a Pipeline lead. */
+export interface LeadForm {
+  /** At least one of email and phone, so every lead can be contacted. */
+  fields: LeadField[];
+  button: string;
+  /** The button's colour; dark text or light text follows from it. */
+  accent: string | null;
+}
 
 /** Auto layout of a frame: its visible children stack in layer order, bottom layer first. */
 export interface StackLayout {
@@ -64,7 +75,9 @@ export interface CanvasNode {
   layout?: StackLayout;
   /** Inside an auto-layout parent, the node shares the parent's free space along its direction. */
   grow?: boolean;
+  /** Where the node leads on a published page: an http(s) or mailto address. */
   link?: string;
+  leadForm?: LeadForm;
 }
 
 export const CANVAS_ROW_FORMAT = "canvas";
@@ -134,6 +147,17 @@ export function stackLayout(value: unknown): StackLayout | undefined {
   };
 }
 
+export function leadForm(value: unknown): LeadForm | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  const wanted: readonly unknown[] = Array.isArray(raw.fields) ? raw.fields : LEAD_FIELDS;
+  const fields = LEAD_FIELDS.filter((field) => wanted.includes(field));
+  if (!fields.includes("email") && !fields.includes("phone")) fields.splice(fields.includes("name") ? 1 : 0, 0, "email");
+  return { fields, button: shortText(raw.button, 40).trim() || "Submit", accent: canvasColor(raw.accent) };
+}
+
+export const isLinkAddress = (value: unknown): value is string => typeof value === "string" && /^(https?:\/\/[^\s]+|mailto:[^\s]+)$/i.test(value);
+
 /** A node read from untrusted JSON, with every field checked and clamped, or null when it is not a Canvas node. */
 export function sanitizeNode(raw: unknown): CanvasNode | null {
   if (!raw || typeof raw !== "object") return null;
@@ -157,7 +181,7 @@ export function sanitizeNode(raw: unknown): CanvasNode | null {
   if (value.hidden === true) node.hidden = true;
   if (value.locked === true) node.locked = true;
   if (value.grow === true) node.grow = true;
-  if (typeof value.link === "string" && /^https?:\/\//.test(value.link)) node.link = value.link.slice(0, 2000);
+  if (isLinkAddress(value.link) && value.link.length <= 2000) node.link = value.link;
   if (type === "text") {
     node.text = shortText(value.text, CANVAS_LIMITS.text);
     node.fontSize = finite(value.fontSize, 16, 1, 1000);
@@ -182,6 +206,8 @@ export function sanitizeNode(raw: unknown): CanvasNode | null {
     node.clip = value.clip !== false;
     const layout = stackLayout(value.layout);
     if (layout) node.layout = layout;
+    const form = leadForm(value.leadForm);
+    if (form) node.leadForm = form;
   }
   return node;
 }

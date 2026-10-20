@@ -250,3 +250,37 @@ describe("pipeline agent tools", () => {
     expect(refused.isError).toBe(true);
   });
 });
+
+describe("pipeline inbound wiring and sequences", () => {
+  const BOTS = [{ id: "chief", name: "Chief", section: "Apollo", chiefOfStaff: true }] as unknown as BotRecord[];
+  const state = { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "proj" } };
+
+  it("asks Brevo for the project's reply-to address and Twilio for status callbacks", async () => {
+    const providers = fakeProviders([{ body: { messageId: "<m2@brevo>" } }, { body: { sid: "SM9" } }]);
+    const sender = createPipelineSender({ keys: KEYS, fetch: providers.fetch });
+    const wired = (activity: Record<string, unknown>) => {
+      const answers = claimed(activity);
+      return fakeConvex({ "pipeline:claimContact": { ...answers["pipeline:claimContact"], replyTo: "replies@in.example.test", statusCallback: "https://x.convex.site/pipeline/twilio?token=abc" } });
+    };
+    await sender.send({ client: wired({ kind: "email", subject: "Hi", body: "B" }).client, ...base });
+    await sender.send({ client: wired({ kind: "sms", body: "Hi" }).client, ...base });
+    expect(JSON.parse(String(providers.requests[0]!.init.body)).replyTo).toEqual({ email: "replies@in.example.test" });
+    expect(Object.fromEntries(new URLSearchParams(String(providers.requests[1]!.init.body))).StatusCallback).toBe("https://x.convex.site/pipeline/twilio?token=abc");
+  });
+
+  it("starts and controls a lead's sequence as the agent", async () => {
+    const convex = fakeConvex({ "pipelineSequences:start": { sequenceId: "seq1", drafted: 1 }, "pipelineSequences:control": "paused", "projects:get": { name: "Apollo" } });
+    const started = await runOriginTool("origin_pipeline_sequence", {
+      lead_id: "lead1", steps: [{ day: 0, channel: "email", subject: "Hi {first_name}", body: "Intro" }, { day: 3, channel: "sms", body: "Follow up" }, { day: 7, channel: "call_task" }],
+    }, "chief", { bots: BOTS, state, connect: () => convex.client });
+    expect(started.text).toContain("Started a 3-step sequence for lead lead1. 1 step(s) due today wait in Apollo's Pipeline for a person's approval.");
+    expect(convex.calls.find((call) => call.name === "pipelineSequences:start")!.args).toEqual({
+      projectId: "proj", sessionToken: "tok", leadId: "lead1", agent: { name: "Chief", id: "chief" },
+      steps: [{ day: 0, channel: "email", subject: "Hi {first_name}", body: "Intro" }, { day: 3, channel: "sms", body: "Follow up" }, { day: 7, channel: "call_task" }],
+    });
+    const paused = await runOriginTool("origin_pipeline_sequence", { lead_id: "lead1", action: "pause" }, "chief", { bots: BOTS, state, connect: () => convex.client });
+    expect(paused.text).toBe("The sequence for lead lead1 is paused.");
+    const empty = await runOriginTool("origin_pipeline_sequence", { lead_id: "lead1" }, "chief", { bots: BOTS, state, connect: () => convex.client });
+    expect(empty.isError).toBe(true);
+  });
+});

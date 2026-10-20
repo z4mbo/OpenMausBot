@@ -119,7 +119,7 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
   const twilioAuth = (twilio: NonNullable<ReturnType<PipelineProviderKeys["twilio"]>>) =>
     `Basic ${Buffer.from(`${twilio.accountSid}:${twilio.authToken}`).toString("base64")}`;
 
-  async function email(activity: Args, lead: Args): Promise<string> {
+  async function email(activity: Args, lead: Args, replyTo: string): Promise<string> {
     const brevo = keys.brevo() ?? (() => { throw new ProviderError("Connect Brevo under Settings > Integrations to send email"); })();
     const result = await call("Brevo", `${origin("https://api.brevo.com")}/v3/smtp/email`, {
       method: "POST",
@@ -128,30 +128,31 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
         sender: senderName(brevo.senderName, brevo.senderEmail),
         to: [{ email: text(lead.email), ...(text(lead.name) ? { name: text(lead.name).slice(0, 70) } : {}) }],
         subject: text(activity.subject), textContent: text(activity.body),
+        ...(replyTo ? { replyTo: { email: replyTo } } : {}),
       }),
     });
     return text(result.messageId);
   }
 
-  async function textMessage(activity: Args, lead: Args, whatsapp: boolean): Promise<string> {
+  async function textMessage(activity: Args, lead: Args, whatsapp: boolean, statusCallback: string): Promise<string> {
     const twilio = keys.twilio() ?? (() => { throw new ProviderError("Connect Twilio under Settings > Integrations to send messages"); })();
     const prefix = whatsapp ? "whatsapp:" : "";
     const result = await call("Twilio", `${origin("https://api.twilio.com")}/2010-04-01/Accounts/${encodeURIComponent(twilio.accountSid)}/Messages.json`, {
       method: "POST",
       headers: { Authorization: twilioAuth(twilio), "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ To: `${prefix}${text(lead.phone)}`, From: `${prefix}${twilio.fromNumber}`, Body: text(activity.body) }).toString(),
+      body: new URLSearchParams({ To: `${prefix}${text(lead.phone)}`, From: `${prefix}${twilio.fromNumber}`, Body: text(activity.body), ...(statusCallback ? { StatusCallback: statusCallback } : {}) }).toString(),
     });
     return text(result.sid);
   }
 
-  async function bridge(lead: Args, callerPhone: string | undefined): Promise<string> {
+  async function bridge(lead: Args, callerPhone: string | undefined, statusCallback: string): Promise<string> {
     const twilio = keys.twilio() ?? (() => { throw new ProviderError("Connect Twilio under Settings > Integrations to place calls"); })();
     const member = normalizeLeadPhone(callerPhone) ?? (() => { throw new ProviderError("Enter your own phone number, with its country code, so Twilio can ring you first"); })();
     const twiml = `<Response><Say>Connecting you to ${escapeXml(text(lead.name).slice(0, 80))}.</Say><Dial callerId="${escapeXml(twilio.fromNumber)}"><Number>${escapeXml(text(lead.phone))}</Number></Dial></Response>`;
     const result = await call("Twilio", `${origin("https://api.twilio.com")}/2010-04-01/Accounts/${encodeURIComponent(twilio.accountSid)}/Calls.json`, {
       method: "POST",
       headers: { Authorization: twilioAuth(twilio), "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ To: member, From: twilio.fromNumber, Twiml: twiml }).toString(),
+      body: new URLSearchParams({ To: member, From: twilio.fromNumber, Twiml: twiml, ...(statusCallback ? { StatusCallback: statusCallback } : {}) }).toString(),
     });
     return text(result.sid);
   }
@@ -245,14 +246,15 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
       const activity = record(claimed.activity);
       const lead = record(claimed.lead);
       const kind = text(activity.kind);
+      const statusCallback = text(claimed.statusCallback);
       try {
         if (kind === "ai_call") {
           if (!deps.checkAiBudget) throw new ProviderError("Pipeline is not ready to check the AI call's daily API budget. Try again.");
           await deps.checkAiBudget({ projectId: input.projectId, ...(input.botId ? { botId: input.botId } : {}) });
         }
-        const providerId = kind === "email" ? await email(activity, lead)
-          : kind === "sms" || kind === "whatsapp" ? await textMessage(activity, lead, kind === "whatsapp")
-          : kind === "call" ? await bridge(lead, input.callerPhone)
+        const providerId = kind === "email" ? await email(activity, lead, text(claimed.replyTo))
+          : kind === "sms" || kind === "whatsapp" ? await textMessage(activity, lead, kind === "whatsapp", statusCallback)
+          : kind === "call" ? await bridge(lead, input.callerPhone, statusCallback)
           : kind === "ai_call" ? await aiCall(activity, lead, record(claimed.ai))
           : (() => { throw new ProviderError(`A ${kind} cannot be sent`); })();
         const status = kind === "ai_call" ? "in_progress" as const : "sent" as const;
@@ -271,7 +273,7 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
   };
 }
 
-const CONVEX_ID = /^[a-z0-9]{10,64}$/;
+const CONVEX_ID = /^[A-Za-z0-9]{10,64}$/;
 
 function convexMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : "";
