@@ -10,7 +10,7 @@ const marker = join(dataDir, 'expire-approvals');
 registerHooks({
   load(url, context, nextLoad) {
     const result = nextLoad(url, context);
-    if (!url.endsWith('/server/drivers/claude.ts')) return result;
+    if (!url.endsWith('/server/drivers/claude-permission-broker.ts')) return result;
     const source = String(result.source);
     // The broker's one timer is the only setTimeout in its scope.
     const anchor = 'const timeoutMs = opts.timeoutMs ?? 15 * 60_000;';
