@@ -35,6 +35,14 @@ export interface RuntimeEventBase {
   synthetic?: boolean;
 }
 
+/** A provider-confirmed exhausted allowance. Safe retry additionally requires no work and a quiescent runtime. */
+export interface QuotaRefusal {
+  kind: "quota_exhausted";
+  scope: "model" | "account";
+  retry: "safe_initial_refusal" | "manual";
+  resetsAt?: string;
+}
+
 export type RuntimeEvent = RuntimeEventBase &
   (
     | {
@@ -64,6 +72,7 @@ export type RuntimeEvent = RuntimeEventBase &
          * one figure the harness accumulates. thread.token-usage.updated means
          * something different per driver and must never be summed. */
         usage?: { input: number; output: number; cachedInput?: number };
+        refusal?: QuotaRefusal;
       }
     | {
         /** A resumable terminal: the turn exhausted its model/tool budget and
