@@ -3,15 +3,15 @@ import { Flag, Pencil, Plus, Trash2 } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import { MILESTONE_LIMITS, milestoneDay, milestonePercent, type MilestoneList, type MilestoneSummary } from "../../../shared/origin-milestones";
-import { Field, Modal, Notice, chipButton, ghostButton, iconButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
-import { ChipSelect } from "../origin-pages/issue-fields";
+import { Field, Modal, Notice, chipButton, ghostButton, iconButton, inputClass, primaryButton, useAction } from "./ui";
+import { ChipSelect } from "./issue-fields";
 
 export function useMilestones(projectId: string): MilestoneList | undefined {
   const list = useCloudQuery<MilestoneList>("projectMilestones:list", { projectId });
   return list && Array.isArray(list.milestones) ? list : undefined;
 }
 
-export function ProgressBar({ done, total, className }: { done: number; total: number; className?: string }) {
+function ProgressBar({ done, total, className }: { done: number; total: number; className?: string }) {
   const percent = milestonePercent({ done, total });
   return (
     <span role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} aria-label={`${done} of ${total} done`}
@@ -19,25 +19,6 @@ export function ProgressBar({ done, total, className }: { done: number; total: n
       <span className={cn("block h-full rounded-full transition-[width] duration-(--motion-slow) ease-out motion-reduce:transition-none", percent === 100 ? "bg-success" : "bg-accent")} style={{ width: `${percent}%` }} />
     </span>
   );
-}
-
-/** One milestone as a row: name, target day, a progress bar and done of total. */
-export function MilestoneRow({ milestone, onOpen }: { milestone: MilestoneSummary; onOpen?(): void }) {
-  const day = milestoneDay(milestone.targetDate);
-  const body = (
-    <>
-      <span className="flex min-w-0 items-center gap-2">
-        <Flag size={13} aria-hidden="true" className={milestone.total && milestone.done === milestone.total ? "text-success" : "text-ink-tertiary"} />
-        <span className="truncate text-[13px] font-medium text-ink">{milestone.title}</span>
-        {day && <span className="shrink-0 text-[12px] text-ink-tertiary">{day}</span>}
-        <span className="ml-auto shrink-0 text-[12px] tabular-nums text-ink-secondary">{milestone.done}/{milestone.total}</span>
-      </span>
-      <ProgressBar done={milestone.done} total={milestone.total} className="mt-1.5" />
-    </>
-  );
-  return onOpen
-    ? <button type="button" onClick={onOpen} className="block w-full rounded-lg px-2 py-2 text-left outline-none transition-colors hover:bg-raised/50 focus-visible:ring-2 focus-visible:ring-accent/60">{body}</button>
-    : <div className="px-2 py-2">{body}</div>;
 }
 
 /** The Issues board's milestone filter: every issue, or one milestone's, each with its progress. */
@@ -68,7 +49,7 @@ export function MilestoneStrip({ projectId, list, selected, onSelect }: { projec
   );
 }
 
-export function MilestoneDialog({ projectId, milestone, onClose, onSaved }: { projectId: string; milestone: MilestoneSummary | null; onClose(): void; onSaved(id: string | null): void }) {
+function MilestoneDialog({ projectId, milestone, onClose, onSaved }: { projectId: string; milestone: MilestoneSummary | null; onClose(): void; onSaved(id: string | null): void }) {
   const [title, setTitle] = useState(milestone?.title ?? "");
   const [targetDate, setTargetDate] = useState(milestone?.targetDate ?? "");
   const action = useAction();

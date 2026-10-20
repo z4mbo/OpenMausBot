@@ -25,7 +25,6 @@ describe("built-in agent tool read policy", () => {
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_screenshot",
-      "origin_pulse",
       "origin_call_notes",
       "origin_broadcast_list",
       "origin_studio_list",
@@ -34,10 +33,7 @@ describe("built-in agent tool read policy", () => {
       "origin_pipeline_list_leads",
       "origin_pipeline_conversations",
       "origin_campaign_get",
-      "origin_ship_status",
       "origin_brand_get",
-      "origin_doc_list",
-      "origin_doc_get",
       "origin_milestone_list",
     ]);
     for (const name of READ_ONLY_AGENT_TOOL_NAMES) {

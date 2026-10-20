@@ -1,38 +1,9 @@
-import { DOC_LIMITS } from "../../shared/origin-docs.ts";
 import { MILESTONE_LIMITS } from "../../shared/origin-milestones.ts";
 import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 
-const DOC = { type: "string", maxLength: DOC_LIMITS.title, description: "Id or title from origin_doc_list; \"Brief\" finds the project's Brief." };
 const ISSUES = { type: "array", maxItems: MILESTONE_LIMITS.assignAtOnce, uniqueItems: true, items: { type: "string", minLength: 1, maxLength: 64 } };
 
 export const LAUNCHPAD_TOOL_DEFINITIONS = [
-  {
-    name: "origin_doc_list",
-    description: "List an Origin project's Docs, its Brief first, with who saved each last." + ORIGIN_SCOPE,
-    inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
-  },
-  {
-    name: "origin_doc_get",
-    description: "Read an Origin project document as markdown." + ORIGIN_SCOPE,
-    inputSchema: { type: "object", additionalProperties: false, properties: { doc: DOC, project: ORIGIN_PROJECT }, required: ["doc"] },
-  },
-  {
-    name: "origin_doc_write",
-    description: "Write an Origin project document in markdown: doc replaces one's content (read it first and keep people's edits), no doc creates one with title. "
-      + "brief true makes it the project's Brief; - [ ] items show as checkboxes." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        doc: DOC,
-        title: { type: "string", maxLength: DOC_LIMITS.title, description: "Required for a new document; renames an existing one." },
-        content: { type: "string", maxLength: DOC_LIMITS.content, description: "The whole markdown document." },
-        append: { type: "boolean", description: "Add content at the end instead of replacing it." },
-        brief: { type: "boolean" },
-        project: ORIGIN_PROJECT,
-      },
-      required: ["content"],
-    },
-  },
   {
     name: "origin_milestone_list",
     description: "List an Origin project's milestones with target day, progress and issues." + ORIGIN_SCOPE,

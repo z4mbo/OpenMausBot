@@ -51,12 +51,12 @@ try {
     const step = (id) => stack.locator(`[data-stack-step="${id}"]`);
     const provider = (id) => stack.locator(`[data-stack-provider="${id}"]`);
 
-    await stack.getByText("4 of 7 ready").waitFor();
+    await stack.getByText("4 of 6 ready").waitFor();
     await step("sms").getByRole("button", { expanded: true }).waitFor();
     await provider("twilio").getByText("Incomplete").waitFor();
     assert.equal(await provider("twilio").getByRole("link", { name: "Get Twilio keys" }).getAttribute("href"), "https://console.twilio.com");
     await capture(page, `stack-${tag}`);
-    evidence.cases.push({ tag, step: "checklist: 4 of 7 ready (GitHub shared, fal, X, Stripe), the first unfinished step (SMS, half filled) open with its key page" });
+    evidence.cases.push({ tag, step: "checklist: 4 of 6 ready (GitHub shared, fal, X, Stripe), the first unfinished step (SMS, half filled) open with its key page" });
 
     await step("payments").getByRole("button", { expanded: false }).click();
     await provider("stripe").getByText("Yours").waitFor();
@@ -91,13 +91,13 @@ try {
     await row.getByRole("button", { name: "Save" }).click();
     await row.getByText("Brevo rejected the key: Key not found").waitFor();
     await provider("brevo").getByText("Brevo rejected the key: Key not found").waitFor();
-    await stack.getByText("4 of 7 ready").waitFor();
+    await stack.getByText("4 of 6 ready").waitFor();
     await step("email").locator("span.border-warning").waitFor();
     await capture(page, `inline-check-${tag}`);
     evidence.cases.push({ tag, step: "Add key opens Brevo's form; saving checks the key at once and shows the rejection in the form and in the checklist" });
     page.once("dialog", (dialog) => void dialog.accept());
     await row.getByRole("button", { name: "Disconnect" }).click();
-    await stack.getByText("4 of 7 ready").waitFor();
+    await stack.getByText("4 of 6 ready").waitFor();
     await page.close();
   }
 } finally {

@@ -52,11 +52,4 @@ describe("the fixture's Live call environment", () => {
     }
   });
 
-  it("passes only a loopback fake Ship provider through", () => {
-    expect(childEnv({ OMB_SHIP_PROVIDER_URL: "http://127.0.0.1:4300" }).OMB_SHIP_PROVIDER_URL).toBe("http://127.0.0.1:4300");
-    for (const url of ["https://api.vercel.com", "http://localhost:4300", "http://127.0.0.1:4300/vercel"]) {
-      expect(childEnv({ OMB_SHIP_PROVIDER_URL: url }), url).not.toHaveProperty("OMB_SHIP_PROVIDER_URL");
-    }
-  });
-
 });

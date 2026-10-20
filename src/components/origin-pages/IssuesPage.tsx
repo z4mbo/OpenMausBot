@@ -31,7 +31,7 @@ import { isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-column
 import { PersonAvatar } from "./PersonAvatar";
 import { useCardDrag, type CardDrag, type DropTarget } from "./use-card-drag";
 import { openIssueColumns } from "./issue-columns";
-import { MilestoneChip, MilestoneStrip, useMilestones } from "../origin-docs/milestones";
+import { MilestoneChip, MilestoneStrip, useMilestones } from "./milestones";
 import { useMilestoneFilter } from "@/lib/origin-milestone-filter";
 
 /** What the Issues page hands to `onAssignToAgent`. */

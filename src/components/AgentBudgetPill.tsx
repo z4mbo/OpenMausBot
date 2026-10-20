@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 import { useCloudQuery } from "@/lib/origin-cloud";
 import { budgetPercent, formatUsd, type AgentBudget } from "@/lib/agent-budget";
 import type { SharedBotLink } from "../../shared/wire";
-import { BudgetEditor } from "./origin-org/BudgetEditor";
+import { BudgetEditor } from "./BudgetEditor";
 
 const pill = "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12.5px] text-ink";
 

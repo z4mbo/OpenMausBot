@@ -17,11 +17,7 @@ import { handOff as handIssueTo } from "@/lib/origin-handoff";
 import { StudioPage } from "./origin-studio/StudioPage";
 import { BroadcastPage } from "./origin-broadcast/BroadcastPage";
 import { PipelinePage } from "./origin-pipeline/PipelinePage";
-import { ShipPage } from "./origin-ship/ShipPage";
-import { DocsPage } from "./origin-docs/DocsPage";
 import { LaunchpadDialog } from "./origin-launchpad/LaunchpadDialog";
-import { setMilestoneFilter } from "@/lib/origin-milestone-filter";
-import { PulsePage } from "./origin-pulse/PulsePage";
 import { ChiefSectionBar } from "./ProjectSectionBar";
 import { sectionEntry, teamAgents } from "./project-sections";
 
@@ -75,12 +71,6 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
       </>
     );
   }
-  if (section === "docs") {
-    return <><DocsPage {...page} onLaunch={() => setLaunching(true)} onOpenMilestone={(milestoneId) => {
-      if (cloudProjectId) setMilestoneFilter(cloudProjectId, milestoneId);
-      setChiefSectionOf(bot.id, "issues");
-    }} />{launchpad}</>;
-  }
   if (section === "assets") return <AssetsPage {...page} />;
   if (section === "vault") return <VaultPage {...page} />;
   if (section === "repo") return <RepoPage {...page} onOpenSettings={() => setChiefSectionOf(bot.id, "settings")} />;
@@ -96,9 +86,7 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   if (section === "studio") return <StudioPage {...page} agent={bot} />;
   if (section === "broadcast") return <BroadcastPage {...page} agent={bot} />;
   if (section === "pipeline") return <PipelinePage {...page} agent={bot} />;
-  if (section === "ship") return <ShipPage {...page} agent={bot} />;
   if (section === "settings") return <ProjectSettingsPage {...page} />;
-  if (section === "pulse") return <PulsePage {...page} botId={bot.id} />;
   const Icon = entry.icon;
   return (
     <section className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center" aria-label={entry.label}>

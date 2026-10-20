@@ -215,11 +215,3 @@ describe("merging a pull request", () => {
     expect(autoVerdict("auto", "origin_merge_pr")).toEqual({ approve: null, source: "outbound-guard" });
   });
 });
-
-describe("deploying a project", () => {
-  it("always asks the person, even with Full access", () => {
-    expect(autoVerdict("full", "mcp__agents__origin_ship_deploy")).toEqual({ approve: null, source: "outbound-guard" });
-    expect(autoVerdict("auto", "origin_ship_deploy")).toEqual({ approve: null, source: "outbound-guard" });
-    expect(autoVerdict("full", "origin_release_draft")).toEqual({ approve: "approved origin_release_draft (full access)", source: "full-access" });
-  });
-});
