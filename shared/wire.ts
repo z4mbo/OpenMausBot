@@ -22,6 +22,7 @@ import type { OriginIssueCards } from "./origin-issues.ts";
 import type { OriginPullRequestCard } from "./origin-pull-request.ts";
 import type { OriginChatCard } from "./origin-chat-cards.ts";
 import type { OriginStudioCards } from "./origin-studio-cards.ts";
+import type { OriginDesignCard } from "./origin-design.ts";
 import type { WidgetPayload } from "./widget.ts";
 import type { GroupGoalRunCardData } from "./group-goal-run.ts";
 import type { RuntimeEvent } from "./runtime-events.ts";
@@ -558,6 +559,8 @@ export interface WireMessage {
   originPullRequest?: OriginPullRequestCard;
   /** A post, generation, asset, vault entry, repository, feedback or call an Origin tool returned, drawn as a card that opens it in its project. */
   originCard?: OriginChatCard;
+  /** Canvas frames an Origin design tool worked on, drawn as thumbnails that open the canvas in Studio's Design mode. */
+  originDesign?: OriginDesignCard;
   /** user messages: the Data result the person was viewing when they sent
    * this. `text` stays exactly what they typed. */
   dataContext?: { cardId: string; draftSql?: string };

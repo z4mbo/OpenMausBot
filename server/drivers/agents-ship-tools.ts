@@ -3,7 +3,7 @@ import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 export const SHIP_TOOL_DEFINITIONS = [
   {
     name: "origin_ship_status",
-    description: "Read where an Origin project ships: its deploy targets (Vercel, Netlify, Cloudflare Pages, GitHub Actions) with recent deployments, their state, address, commit, which serves production now and what can be redeployed, promoted or rolled back, plus its releases." + ORIGIN_SCOPE,
+    description: "Read where an Origin project ships: its deploy targets (Vercel, Netlify, Cloudflare Pages, GitHub Actions) with recent deployments, their state, address, commit, which one is live in production now and what can be redeployed, promoted or rolled back, plus its releases." + ORIGIN_SCOPE,
     inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
   },
   {

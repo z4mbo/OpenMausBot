@@ -49,6 +49,8 @@ describe("origin_canvas and origin_canvas_edit", () => {
     expect(edit.isError).toBeUndefined();
     expect(edit.text).toContain('Saved 3 node(s) on canvas "Landing" (canvas1) of Kai');
     expect(edit.text).toMatch(/Created: hero=\w+ frame "Hero"/);
+    const hero = /hero=(\w+)/.exec(edit.text)![1]!;
+    expect(edit.design).toEqual({ heading: "Designed 1 frame on Landing", projectId: "kai", teamId: "team1", canvasId: "canvas1", canvasName: "Landing", frames: [{ id: hero, name: "Hero" }] });
     expect(calls.find((call) => call.name === "draw:saveFile")?.args).toMatchObject({ canvasId: "canvas1", fileId: "asset-logo1", storageId: "storage1", mimeType: "image/png" });
     const saved = decodeScene(rows.get("canvas1")!);
     expect(saved.find((node) => node.type === "image")?.fileId).toBe("asset-logo1");
@@ -109,6 +111,8 @@ describe("agent design tools", () => {
     expect(fontRequests.at(-1)).toEqual(["inter", "fraunces"]);
     expect(shot.image).toMatchObject({ mimeType: "image/png" });
     expect(Buffer.from(shot.image!.data, "base64").toString()).toMatch(/^png:\d+:1$/);
+    expect(shot.design).toMatchObject({ heading: "Checked Home", canvasId: "canvas1", frames: [{ id, name: "Home" }] });
+    expect(shot.design?.issueKey).toBeUndefined();
     expect(await run(client, "origin_canvas_screenshot", { node: "nope" })).toMatchObject({ isError: true });
   });
 
@@ -121,6 +125,7 @@ describe("agent design tools", () => {
     const submitted = await run(client, "origin_design_submit", { issue_id: "task1", frames: ["Pricing"], rationale: "Three tiers, the middle one highlighted." });
     expect(submitted.text).toContain("is asked to review it");
     expect(submitted.reviewer).toMatchObject({ botId: "chief", botName: "Kai" });
+    expect(submitted.design).toEqual({ heading: "ORI-ASK1 design · in review", projectId: "kai", teamId: "team1", canvasId: "canvas1", canvasName: "Landing", frames: [{ id: frame, name: "Pricing" }], issueKey: "ORI-ASK1" });
     expect(calls.find((call) => call.name === "canvasCollab:linkDesign")?.args).toMatchObject({ taskId: "task1", frameId: frame, status: "review", agentName: "Developer" });
     expect(decodeScene(rows.get("canvas1")!).filter((node) => node.id === frame).at(-1)?.issue).toBe("task1");
     expect(calls.filter((call) => call.name === "canvasCollab:addComment").at(-1)?.args).toMatchObject({ nodeId: frame, agentName: "Developer" });

@@ -24,8 +24,8 @@ function ticks(start: number, length: number, view: View, axis: "x" | "y") {
 }
 
 /** Rulers along the stage's top and left edges; drag out of one to add a guide, drag a guide back onto it to remove it. */
-export function Rulers({ view, size, guides, onGuides, readOnly, selection }: {
-  view: View; size: { width: number; height: number }; guides: readonly PageGuide[]; onGuides(guides: PageGuide[]): void; readOnly: boolean;
+export function Rulers({ view, size, insets, guides, onGuides, readOnly, selection }: {
+  view: View; size: { width: number; height: number }; insets: { left: number; right: number }; guides: readonly PageGuide[]; onGuides(guides: PageGuide[]): void; readOnly: boolean;
   selection: { x: number; y: number; width: number; height: number } | null;
 }) {
   const [drag, setDrag] = useState<{ index: number | null; axis: "x" | "y"; at: number } | null>(null);
@@ -49,7 +49,7 @@ export function Rulers({ view, size, guides, onGuides, readOnly, selection }: {
   const end = (event: ReactPointerEvent) => {
     if (!drag) return;
     const point = local(event);
-    const gone = (drag.axis === "x" ? point.x : point.y) < RULER;
+    const gone = drag.axis === "x" ? point.x < insets.left + RULER : point.y < RULER;
     const next = guides.filter((_, index) => index !== drag.index);
     onGuides(gone ? next : [...next, { axis: drag.axis, at: drag.at }]);
     setDrag(null);
@@ -58,12 +58,12 @@ export function Rulers({ view, size, guides, onGuides, readOnly, selection }: {
   if (drag && drag.index === null) shown.push({ axis: drag.axis, at: drag.at });
   const edges = (axis: "x" | "y") => (selection ? [axis === "x" ? selection.x : selection.y, axis === "x" ? selection.x + selection.width : selection.y + selection.height].map((value) => value * view.zoom + (axis === "x" ? view.x : view.y)) : []);
   const crowded = (axis: "x" | "y", at: number) => edges(axis).some((edge) => Math.abs(edge - at) < 30);
-  const band = "absolute z-10 overflow-hidden bg-panel/95 text-[9.5px] tabular-nums text-ink-tertiary select-none";
+  const band = "absolute z-10 overflow-hidden bg-app/90 text-[9.5px] tabular-nums text-ink-tertiary select-none";
   const highlight = (axis: "x" | "y") => {
     if (!selection) return null;
-    const from = (axis === "x" ? selection.x : selection.y) * view.zoom + (axis === "x" ? view.x : view.y);
+    const from = (axis === "x" ? selection.x : selection.y) * view.zoom + (axis === "x" ? view.x - insets.left : view.y);
     const length = (axis === "x" ? selection.width : selection.height) * view.zoom;
-    const edge = "absolute z-[1] bg-panel px-0.5 font-medium leading-[14px] text-accent-text";
+    const edge = "absolute z-[1] bg-app px-0.5 font-medium leading-[14px] text-accent-text";
     const value = (offset: number) => Math.round((axis === "x" ? selection.x : selection.y) + offset);
     const size = axis === "x" ? selection.width : selection.height;
     return (
@@ -76,21 +76,21 @@ export function Rulers({ view, size, guides, onGuides, readOnly, selection }: {
   };
   return (
     <div data-canvas-chrome className="contents" onPointerMove={move} onPointerUp={end} onPointerCancel={() => setDrag(null)}>
-      <div aria-hidden="true" className={`${band} left-0 right-0 top-0 border-b border-hairline/40`} style={{ height: RULER, cursor: readOnly ? "default" : "row-resize" }}
+      <div aria-hidden="true" className={`${band} top-0 border-b border-hairline/40`} style={{ left: insets.left, right: insets.right, height: RULER, cursor: readOnly ? "default" : "row-resize" }}
         onPointerDown={(event) => start(event, "y", null)}>
         {highlight("x")}
-        {ticks(RULER, size.width, view, "x").map((tick) => (
-          <span key={tick.at} className="absolute top-0 h-full border-l border-hairline/60 pl-0.5 leading-[14px]" style={{ left: tick.at }}>{crowded("x", tick.at) ? "" : tick.label}</span>
+        {ticks(insets.left + RULER, size.width - insets.left - insets.right - RULER, view, "x").map((tick) => (
+          <span key={tick.at} className="absolute top-0 h-full border-l border-hairline/60 pl-0.5 leading-[14px]" style={{ left: tick.at - insets.left }}>{crowded("x", tick.at) ? "" : tick.label}</span>
         ))}
       </div>
-      <div aria-hidden="true" className={`${band} bottom-0 left-0 top-0 border-r border-hairline/40`} style={{ width: RULER, cursor: readOnly ? "default" : "col-resize" }}
+      <div aria-hidden="true" className={`${band} bottom-0 top-0 border-r border-hairline/40`} style={{ left: insets.left, width: RULER, cursor: readOnly ? "default" : "col-resize" }}
         onPointerDown={(event) => start(event, "x", null)}>
         {highlight("y")}
         {ticks(RULER, size.height, view, "y").map((tick) => (
           <span key={tick.at} className="absolute left-0 w-full border-t border-hairline/60 [writing-mode:vertical-rl] rotate-180 leading-[14px]" style={{ top: tick.at }}>{crowded("y", tick.at) ? "" : tick.label}</span>
         ))}
       </div>
-      <span aria-hidden="true" className="absolute left-0 top-0 z-10 border-b border-r border-hairline/40 bg-panel" style={{ width: RULER, height: RULER }} />
+      <span aria-hidden="true" className="absolute top-0 z-10 border-b border-r border-hairline/40 bg-app" style={{ left: insets.left, width: RULER, height: RULER }} />
       {shown.map((guide, index) => {
         const at = guide.at * view.zoom + (guide.axis === "x" ? view.x : view.y);
         return (

@@ -11,7 +11,7 @@ import { cn } from "@/lib/cn";
 import { Select } from "../../Select";
 import type { SelectionApi } from "./CanvasEditor";
 import { unionBox, worldBounds, worldBox } from "./geometry";
-import { LeadFormSection, LinkSection } from "./PageInspector";
+import { LinkSection } from "./PageInspector";
 import type { CanvasScene } from "./use-canvas-scene";
 import { BrandSection } from "./BrandSection";
 import { brandFont } from "../../../../shared/brand-fonts";
@@ -268,7 +268,6 @@ function DesignPanel({ canvas, selection, readOnly, exportSection, brand, teamId
       {single?.type === "frame" && <GridsSection node={single} disabled={disabled} update={update} />}
       {nodes.every((node) => node.type === "image") && <ImageSection nodes={nodes} disabled={disabled} update={update} />}
       {single && <LinkSection node={single} disabled={disabled} update={update} />}
-      {single?.type === "frame" && <LeadFormSection node={single} readOnly={readOnly} disabled={disabled} update={update} />}
       {exportSection}
     </div>
   );

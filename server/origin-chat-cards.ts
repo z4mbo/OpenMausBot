@@ -3,7 +3,7 @@ import { assetCardItem, feedbackCardItem } from "../shared/origin-chat-card-item
 import type { OriginCloudClient, OriginToolResult } from "./origin-cloud.ts";
 import type { BotRecord, Message, Store } from "./store.ts";
 
-type CardFields = Pick<Message, "originIssues" | "originPullRequest" | "originStudio" | "originCard">;
+type CardFields = Pick<Message, "originIssues" | "originPullRequest" | "originStudio" | "originDesign" | "originCard">;
 
 export function appendOriginCards(
   store: Pick<Store, "appendMessage" | "groupByThread">,
@@ -11,12 +11,13 @@ export function appendOriginCards(
   bot: Pick<BotRecord, "id" | "name" | "color">,
   name: string,
   result: OriginToolResult,
-): Omit<OriginToolResult, "cards" | "pullRequest" | "studio" | "card"> {
-  const { cards, pullRequest, studio, card, ...answer } = result;
+): Omit<OriginToolResult, "cards" | "pullRequest" | "studio" | "design" | "card"> {
+  const { cards, pullRequest, studio, design, card, ...answer } = result;
   const shown: CardFields[] = result.isError ? [] : [
     ...(pullRequest ? [{ originPullRequest: pullRequest }] : []),
     ...(cards ? [{ originIssues: cards }] : []),
     ...(studio ? [{ originStudio: studio }] : []),
+    ...(design ? [{ originDesign: design }] : []),
     ...(card ? [{ originCard: card }] : []),
   ];
   for (const fields of shown) {

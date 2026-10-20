@@ -1,7 +1,7 @@
 {
   "default": {
-    "bytes": 85203,
-    "sha256": "bdffe90baeb1517107d4c2223e5b51d16acb1508da341bf9a2b69f6418397f5f",
+    "bytes": 84431,
+    "sha256": "71d2658ad69ad913fe0600d0007e083fd93ce3164cdf0dd48bdb562b52662d88",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -61,8 +61,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -100,8 +98,8 @@
     ]
   },
   "voice": {
-    "bytes": 85944,
-    "sha256": "cba9e758ecab16be42265a65dc04147d85706af0490d11dd094c1b4ad71dde29",
+    "bytes": 85172,
+    "sha256": "4f8b645a82e58fc8e0f398da2616f61a401f9eb84ee7b6a68e5513d6c6325a5c",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -162,8 +160,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -201,8 +197,8 @@
     ]
   },
   "shared": {
-    "bytes": 86948,
-    "sha256": "c0af487370b362c187a7d1615c7aa1bdae1b343c078a6d3f6441750055c3d9cd",
+    "bytes": 86176,
+    "sha256": "7477aaaba1267e48dd5149bb2efe68b647660242cece2715b3455fb9b174b239",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -264,8 +260,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -303,8 +297,8 @@
     ]
   },
   "shared+voice": {
-    "bytes": 87689,
-    "sha256": "fa4b9b89e166cbd4f837fb894f80c56e09bdc02a6c1de7215689f3413c84b977",
+    "bytes": 86917,
+    "sha256": "c038b7fcc5893975df33dac3906b4821671cbe55e52dcf90cc23a9cc3bf76a45",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -367,8 +361,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -406,8 +398,8 @@
     ]
   },
   "skills": {
-    "bytes": 88102,
-    "sha256": "4d4f6ecd3ed3de599a40a506f08ececb4479be0217f4cb292cdbc6001775ce58",
+    "bytes": 87330,
+    "sha256": "28a11cea9f8adf77468d383c914e2dab17836bbfdbd7c778ef04733bcd59f0fa",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -469,8 +461,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -508,8 +498,8 @@
     ]
   },
   "skills+voice": {
-    "bytes": 88843,
-    "sha256": "cd870feeb9343e196cf2ee6e1ac9df78ee7ba497d4801b006495b44d507f68e6",
+    "bytes": 88071,
+    "sha256": "6caa8dfcd11c5ea891e17b29b3a3943653d6d0591455debb169384d78f88352d",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -572,8 +562,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -611,8 +599,8 @@
     ]
   },
   "skills+shared": {
-    "bytes": 89847,
-    "sha256": "90b71ab099d7fde65b2683bff606348a3737cb9be5fe595a55e881c4974b715a",
+    "bytes": 89075,
+    "sha256": "f73efe0bef1d845a8d0182a194dc10cb5931cf45c286e2a90757f51a671c503e",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -676,8 +664,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -715,8 +701,8 @@
     ]
   },
   "skills+shared+voice": {
-    "bytes": 90588,
-    "sha256": "c67659d15cbacea1bf67cab7bbc7ebd0fad2bde922b4637a2420c2d567a7ee0b",
+    "bytes": 89816,
+    "sha256": "913255b6779d1e6bdbeb8d4abf2e4411281241d31b16b4df75a8ee84d07ae9c2",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -781,8 +767,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -820,8 +804,8 @@
     ]
   },
   "non-chief": {
-    "bytes": 72085,
-    "sha256": "65e748bd70c317cf245287ad01c2086c7c7026ddecbe5686083a4bc22f9c50e6",
+    "bytes": 71313,
+    "sha256": "76edb1fe9cc9a7941a497c66b42595e6f3995b1b42ed0c38f603938972a63bc5",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -871,8 +855,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_pulse",
       "origin_call_notes",
       "origin_studio_generate",
@@ -908,8 +890,8 @@
     ]
   },
   "voice+non-chief": {
-    "bytes": 72826,
-    "sha256": "de923624436edadc44aa6743e9886abe13b9c7c93773bf6b6bc5f7534327ca40",
+    "bytes": 72054,
+    "sha256": "f8de199c6eacb06c8dbd1265925eccfd9c08547e4b709fed15425c5e643cae36",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -960,8 +942,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_pulse",
       "origin_call_notes",
       "origin_studio_generate",
@@ -997,8 +977,8 @@
     ]
   },
   "shared+non-chief": {
-    "bytes": 73830,
-    "sha256": "aec259c28454e496fad3c33289d6b11da6894cd8dc3d48d9fa7c74206c910048",
+    "bytes": 73058,
+    "sha256": "8b14d81916aa065ed138f8615739c66ab2954879845df742ff50618502041034",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1050,8 +1030,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_pulse",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1087,8 +1065,8 @@
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 74571,
-    "sha256": "ba22c33055b8329aa64faccc3f9f93bf378e649ce10bc4c22d4a1c3238ff9215",
+    "bytes": 73799,
+    "sha256": "eea23ea78aa039fd0eb9757a35c052e67a42493a246eba993f856f1d8ebffb17",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1141,8 +1119,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_pulse",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1178,8 +1154,8 @@
     ]
   },
   "skills+non-chief": {
-    "bytes": 74984,
-    "sha256": "5a92d19641fd3e8a686fc34c345d6f861257b8fa33e90ecbe26da6c18dcc679e",
+    "bytes": 74212,
+    "sha256": "2fc45a311e2f574c8a5e1f9e86353626f5e7a7a1a44d50eb0b8ef8640b226b1a",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1231,8 +1207,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_pulse",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1268,8 +1242,8 @@
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 75725,
-    "sha256": "cd11b1c9f31b6e3f288843e1e177b16cb824eacf234b7a00b909c361c4de6c6a",
+    "bytes": 74953,
+    "sha256": "d23d2646604deeb59818a835fd94cf6479040007187f3cc7cebf0628eb91b152",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1322,8 +1296,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_pulse",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1359,8 +1331,8 @@
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 76729,
-    "sha256": "9b40dbbfbd85f37ece5dae4cbb85c8d5b81bf73832920d4a8991e53619da08de",
+    "bytes": 75957,
+    "sha256": "4ab456a2c4a81930458ed10835558cff55cf6871436ee3ce12cf079632be08c1",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1414,8 +1386,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_pulse",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1451,8 +1421,8 @@
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 77470,
-    "sha256": "c7c7aee6418714166e271d3f97bb1cc193b3f09734f20ceffa42ed0bcd1b67ae",
+    "bytes": 76698,
+    "sha256": "2f495b72f509ba11aba97f3eac9882d10cd8497f05ca47a14641e62ecdfb3cd0",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1507,8 +1477,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_pulse",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1544,8 +1512,8 @@
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 89643,
-    "sha256": "73fcc37084cb20ef473d31335f55621f727ea712868079e98f549d5e91d44261",
+    "bytes": 88871,
+    "sha256": "2e5a1d7000a6d1938b5da25ff2b0a51a5190b5da3c44e20c888aff44d120130b",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1609,8 +1577,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -1648,8 +1614,8 @@
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 76525,
-    "sha256": "cdce3cf9b147b2b0c3e477cac35d92dea6246f9d045a7044d739124c1cbbf1bd",
+    "bytes": 75753,
+    "sha256": "76e59b2ddea3e15966d7d2ffd3db50241c43a06c773b4944d8ab3db8881a65b0",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1703,8 +1669,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_pulse",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1740,8 +1704,8 @@
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 91448,
-    "sha256": "66657863ea0680b059195cff6ae98bea215deae834f3f583dd0e79829efadd53",
+    "bytes": 90676,
+    "sha256": "ef9bc58d55e3eec48fdf556b5c485e9b243353cb35fc31c16821e50590228f7e",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1807,8 +1771,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -1846,8 +1808,8 @@
     ]
   },
   "default+legacy-switches": {
-    "bytes": 85203,
-    "sha256": "bdffe90baeb1517107d4c2223e5b51d16acb1508da341bf9a2b69f6418397f5f",
+    "bytes": 84431,
+    "sha256": "71d2658ad69ad913fe0600d0007e083fd93ce3164cdf0dd48bdb562b52662d88",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1907,8 +1869,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",
@@ -1946,8 +1906,8 @@
     ]
   },
   "skills+shared+voice+escalations+whole-schemas": {
-    "bytes": 118367,
-    "sha256": "542ba24213942f1fbddec26824e888ad509efdd3272a8d5487cf52324d90ecb2",
+    "bytes": 116788,
+    "sha256": "3ef1e582c73fc66d0de0d3091d0859c3e43b1d73a100cd3dacb62ec9f8ddc020",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -2013,8 +1973,6 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
-      "origin_page_publish",
-      "origin_page_list",
       "origin_standup",
       "origin_pulse",
       "origin_call_notes",

@@ -10,7 +10,6 @@ import { columnNames, findColumn, normalizedTitle } from "./origin-cloud-columns
 import { createOriginCloudSession } from "./origin-cloud-session.ts";
 import { DESIGN_BRIEF, canvasTools, type CanvasToolProject } from "./origin-canvas-tools.ts";
 import { canvasFonts, svgToPng } from "./canvas-raster.ts";
-import { listPages, publishPage } from "./origin-page-tools.ts";
 import { isReadOnlyAgentTool } from "./agent-tool-policy.ts";
 import { DATA_DIR } from "./config.ts";
 import type { MirrorResult } from "./github/sync.ts";
@@ -72,6 +71,7 @@ export interface OriginToolResult extends Pick<StudioToolResult, "studio"> {
   cards?: OriginIssueCards;
   pullRequest?: OriginPullRequestCard;
   card?: OriginChatCard;
+  design?: import("../shared/origin-design.ts").OriginDesignCard;
   handoff?: OriginHandoff;
   reviewer?: OriginReviewRequest;
   /** A picture the model sees with the text, such as a canvas screenshot. */
@@ -978,8 +978,6 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
   },
 
   ...canvasTools((args, ctx: ToolContext) => canvasProject(ctx, args), svgToPng, canvasFonts),
-  async origin_page_publish(args, ctx) { return publishPage(args, await canvasProject(ctx, args)); },
-  async origin_page_list(args, ctx) { return listPages(args, await canvasProject(ctx, args)); },
 
   async origin_broadcast_draft(args, ctx) { return broadcastDraft(args, await broadcastScope(ctx, args)); },
   async origin_broadcast_list(args, ctx) { return broadcastList(args, await broadcastScope(ctx, args)); },

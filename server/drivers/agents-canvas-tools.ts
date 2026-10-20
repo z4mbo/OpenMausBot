@@ -75,25 +75,4 @@ export const CANVAS_TOOL_DEFINITIONS = [
       required: ["issue_id", "frames"],
     },
   },
-  {
-    name: "origin_page_publish",
-    description: "Publish a top-level canvas frame as a public web page, or republish it after changes: auto-layout frames reflow on phones, and a leadForm frame files each signup as a Pipeline lead with the slug as its source. Returns the page's address." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        canvas: { type: "string", maxLength: 120, description: "Canvas name or id; optional when the project has one." },
-        frame: { type: "string", maxLength: 120, description: "The frame's id or name." },
-        slug: { type: "string", maxLength: 48, description: "The page's address, like waitlist. Default: from the title." },
-        title: { type: "string", maxLength: 120, description: "Browser and link-preview title. Default: the frame's name." },
-        description: { type: "string", maxLength: 300, description: "Search and link-preview summary. Default: the page's first paragraph." },
-        project: ORIGIN_PROJECT,
-      },
-      required: ["frame"],
-    },
-  },
-  {
-    name: "origin_page_list",
-    description: "List an Origin project's published pages with their addresses, views and the leads each one collected." + ORIGIN_SCOPE,
-    inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
-  },
 ];

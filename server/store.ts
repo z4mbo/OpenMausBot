@@ -14,8 +14,7 @@ import { runCommand, type Command } from "./commands.ts";
 import type { Destination } from "./surface.ts";
 import { newId, type ModelSelection } from "./contracts.ts";
 import { redactSecretsInText } from "./redact.ts";
-import { redactOriginCard } from "../shared/origin-chat-cards.ts";
-import { withStudioCardText } from "../shared/origin-studio-cards.ts";
+import { redactToolCards } from "./redact-tool-cards.ts";
 import { scrubbedSkillRequest } from "./skill-request-card.ts";
 import { AVATAR_FOCUS_CENTER, AVATAR_ZOOM_MIN, botAvatarProfile, clampAvatarFocus, clampAvatarZoom } from "../shared/bot-avatar.ts";
 import { approvalModeFor, isApprovalMode, modelSwitchNeedsAsk, type ApprovalMode } from "../shared/approval-mode.ts";
@@ -126,11 +125,7 @@ function redactBotAuthored<T extends Omit<Message, "id" | "at"> & { at?: number 
     title: redactSecretsInText(out.dataResult.title),
     ...(out.dataResult.sql === undefined ? {} : { sql: redactSecretsInText(out.dataResult.sql) }),
   };
-  if (out.originIssues) out.originIssues = { ...out.originIssues, heading: redactSecretsInText(out.originIssues.heading), issues: out.originIssues.issues.map((issue) => ({ ...issue, title: redactSecretsInText(issue.title) })) };
-  if (out.originCard) out.originCard = redactOriginCard(out.originCard, redactSecretsInText);
-  if (out.originStudio) out.originStudio = withStudioCardText(out.originStudio, redactSecretsInText);
-  const pull = out.originPullRequest;
-  if (pull) out.originPullRequest = { ...pull, title: redactSecretsInText(pull.title), ...(pull.blocker === undefined ? {} : { blocker: redactSecretsInText(pull.blocker) }) };
+  redactToolCards(out);
   if (typeof out.text === "string") out.text = redactSecretsInText(out.text);
   if (out.compaction) out.compaction = { ...out.compaction, summary: redactSecretsInText(out.compaction.summary) };
   if (out.tool?.name) {
