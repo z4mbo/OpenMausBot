@@ -1,8 +1,9 @@
 import {
   CANVAS_NODE_TYPES, CANVAS_LIMITS, canvasColor, childrenIndex, descendants, effectiveParent, estimateTextWidth, isContainer, isLive,
-  layoutRoot, layoutStacks, layoutText, nextZ, randomId, randomNonce, sanitizeNode, stackLayout, typeName,
-  type CanvasNode, type CanvasNodeType, type Scene, type StackLayout, type TextMeasure,
+  layoutRoot, layoutStacks, layoutText, leadForm, nextZ, randomId, randomNonce, sanitizeNode, stackLayout, typeName,
+  type CanvasNode, type CanvasNodeType, type LeadForm, type Scene, type StackLayout, type TextMeasure,
 } from "./canvas-scene.ts";
+import { leadFormHeight } from "./canvas-page.ts";
 
 /**
  * A node as agents read and write it: `x` and `y` relative to the parent, sizes as `w` and `h`, defaults left out,
@@ -42,6 +43,8 @@ export interface CanvasSpec {
   layout?: Partial<Omit<StackLayout, "padding">> & { padding?: number | number[] } | null;
   grow?: boolean;
   link?: string;
+  /** Frames only: shown on a published page as a form whose submissions become Pipeline leads; null removes it. */
+  leadForm?: Partial<LeadForm> | null;
   children?: CanvasSpec[];
 }
 
@@ -78,6 +81,7 @@ export function compactScene(scene: Scene, options: { root?: string; max?: numbe
     if (node.locked) spec.locked = true;
     if (node.grow) spec.grow = true;
     if (node.link) spec.link = node.link;
+    if (node.leadForm) spec.leadForm = node.leadForm;
     if (node.type === "text") {
       spec.text = (node.text ?? "").slice(0, 2000);
       spec.fontSize = node.fontSize;
@@ -137,6 +141,14 @@ function applySpec(target: CanvasNode, spec: CanvasSpec, assets: ReadonlyMap<str
   for (const key of ["strokeWidth", "radius", "rotation", "opacity", "fontSize", "fontWeight", "lineHeight"] as const) set(key, num(spec[key]));
   for (const key of ["hidden", "locked", "autoWidth", "closed", "clip", "grow"] as const) if (typeof spec[key] === "boolean") raw[key] = spec[key];
   for (const key of ["text", "font", "align", "imageFit", "fileId", "link"] as const) if (typeof spec[key] === "string") raw[key] = spec[key];
+  if (spec.link === "") delete raw.link;
+  if (spec.leadForm === null) delete raw.leadForm;
+  else if (spec.leadForm && target.type === "frame") {
+    const form = leadForm({ ...target.leadForm, ...spec.leadForm });
+    raw.leadForm = form;
+    delete raw.layout;
+    if (form && spec.h === undefined) raw.height = leadFormHeight(form);
+  } else if (spec.leadForm) problems.push(`Only frames can be lead forms; ${target.name} is a ${typeName(target.type).toLowerCase()}.`);
   if (spec.layout === null) delete raw.layout;
   else if (spec.layout) raw.layout = stackLayout({ ...target.layout, ...spec.layout, ...(spec.layout.padding === undefined && target.layout ? { padding: target.layout.padding } : {}) });
   if (Array.isArray(spec.points)) {

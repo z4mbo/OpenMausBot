@@ -17,7 +17,7 @@ const LISTED_FROM = 1000;
 const LINES: Record<string, number> = {
   "server/index.ts": 17699,
   "src/state/store.tsx": 3615,
-  "electron/main.mjs": 3518,
+  "electron/main.mjs": 3496,
   "server/store.ts": 2428,
   "src/components/Sidebar.tsx": 2523,
   "server/drivers/claude.ts": 2166,
@@ -42,7 +42,7 @@ const LINES: Record<string, number> = {
   "src/components/Composer.tsx": 1149,
   "src/components/ModelPicker.tsx": 1204,
   "src/components/PhoneSetupFlow.tsx": 1283,
-  "server/cli.ts": 1125,
+  "server/cli.ts": 1080,
   "src/components/SettingsModal.tsx": 1155,
   "server/drivers/agents-call.ts": 1011,
   "src/components/ChatMarkdown.tsx": 1014,
@@ -50,8 +50,8 @@ const LINES: Record<string, number> = {
   "server/org-library.ts": 1003,
   "src/components/TeamLibraryPanel.tsx": 1120,
   "src/components/AttachmentPreview.tsx": 1044,
-  "server/drivers/agents-catalog.ts": 1311,
-  "server/origin-cloud.ts": 1164,
+  "server/drivers/agents-catalog.ts": 1224,
+  "server/origin-cloud.ts": 1161,
   "src/components/origin-pages/CallPage.tsx": 1239,
   "src/components/zap-dots/scene.ts": 1413,
 };

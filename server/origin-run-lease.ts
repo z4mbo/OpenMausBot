@@ -12,6 +12,8 @@ export interface LeaseDeps {
   interrupt(botId: string, threadId: string): void;
   /** A queued run will never start: clear its local waiting state. */
   abandoned(run: QueuedRun): void;
+  /** The thread's running usage totals, so a finished run reports what it spent. */
+  usage?(botId: string, threadId: string): RunUsage | null;
   now?: () => number;
   monotonicNow?: () => number;
 }
@@ -26,9 +28,12 @@ export interface BeginInput {
   engineLabel?: string;
 }
 
+export interface RunUsage { input: number; output: number; costUsd: number | null }
+
 interface ActiveRun {
   runId: string;
   botId: string;
+  baseline: RunUsage | null;
   startedAt: number;
   sawBusy: boolean;
   expiresAt: number;
@@ -46,6 +51,16 @@ const START_TIMEOUT_MS = 10 * 60_000;
 const WRITE_GRACE_MS = 100_000;
 /** A subscription snapshot may predate the run it is missing. */
 const SNAPSHOT_LAG_MS = 30_000;
+
+/** What a run added to its thread's usage totals; null when the turn reported nothing. */
+export function spentSince(before: RunUsage | null, after: RunUsage | null): { input: number; output: number; costUsd?: number } | null {
+  if (!after) return null;
+  const input = Math.max(0, after.input - (before?.input ?? 0));
+  const output = Math.max(0, after.output - (before?.output ?? 0));
+  const cost = after.costUsd === null ? null : Math.max(0, after.costUsd - (before?.costUsd ?? 0));
+  if (!input && !output && !cost) return null;
+  return { input, output, ...(cost ? { costUsd: Math.round(cost * 1e6) / 1e6 } : {}) };
+}
 
 /** Holds this machine's side of the thread lease: begins runs, heartbeats them, finishes them when the local turn ends,
  * and starts a waiting run of mine once Origin hands it the thread. */
@@ -117,7 +132,8 @@ export function createRunLease(deps: LeaseDeps) {
     if (!run || (expected && run !== expected) || expire(threadId, run)) return;
     remove(threadId, run);
     recent.set(threadId, { runId: run.runId, endedAt: now() });
-    deps.outbox.enqueue("agentRuns:finish", { runId: run.runId, status });
+    const usage = spentSince(run.baseline, deps.usage?.(run.botId, threadId) ?? null);
+    deps.outbox.enqueue("agentRuns:finish", { runId: run.runId, status, ...(usage ? { usage } : {}) });
     deps.kick();
   };
 
@@ -171,7 +187,7 @@ export function createRunLease(deps: LeaseDeps) {
           } else {
             if (previous) withdraw(input.threadId, previous);
             recent.delete(input.threadId);
-            const run: ActiveRun = { runId: result.runId, botId: input.botId, startedAt: now(), sawBusy: false, expiresAt: requestedAt + LEASE_MS, confirmed: true, heartbeatInFlight: false };
+            const run: ActiveRun = { runId: result.runId, botId: input.botId, baseline: deps.usage?.(input.botId, input.threadId) ?? null, startedAt: now(), sawBusy: false, expiresAt: requestedAt + LEASE_MS, confirmed: true, heartbeatInFlight: false };
             active.set(input.threadId, run);
             armExpiry(input.threadId, run);
           }
@@ -234,7 +250,7 @@ export function createRunLease(deps: LeaseDeps) {
         const previous = active.get(run.threadId);
         if (previous) withdraw(run.threadId, previous);
         recent.delete(run.threadId);
-        const claiming: ActiveRun = { runId: run.runId, botId: run.botId, startedAt: now(), sawBusy: false, expiresAt: monotonicNow() + LEASE_MS, confirmed: false, heartbeatInFlight: false, queued: run };
+        const claiming: ActiveRun = { runId: run.runId, botId: run.botId, baseline: deps.usage?.(run.botId, run.threadId) ?? null, startedAt: now(), sawBusy: false, expiresAt: monotonicNow() + LEASE_MS, confirmed: false, heartbeatInFlight: false, queued: run };
         active.set(run.threadId, claiming);
         armExpiry(run.threadId, claiming);
         void heartbeat(run.threadId, claiming);

@@ -1,4 +1,7 @@
-import { CLOSED_STAGES, formatLeadValue, type PipelineActor, type PipelineLead } from "../../../shared/origin-pipeline";
+import { CLOSED_STAGES, formatLeadValue, type PipelineActor, type PipelineLead, type PipelineSequenceChannel } from "../../../shared/origin-pipeline";
+import type { LeadScore, NextAction } from "../../../shared/origin-pipeline-score";
+
+export type LeadInsight = LeadScore & { actions: NextAction[] };
 
 export type PendingMove = { stage: string; order: number };
 
@@ -73,4 +76,28 @@ export function planBrief(input: { projectName: string; leads: readonly Pipeline
       + "Hand research to your agents where it helps. Draft the first touches with origin_pipeline_contact: they wait for my approval in Pipeline, so tell me when they are ready. "
       + "Record the plan as each lead's next step with origin_pipeline_upsert_lead.",
   ].filter(Boolean).join("\n\n");
+}
+
+export type SequenceDraftStep = { key: string; day: number; channel: PipelineSequenceChannel; subject: string; body: string; goal: string };
+
+/** Day 0 email, day 3 text, day 7 call task; steps the lead cannot receive fall back to a call task. */
+export function defaultSequence(lead: Pick<PipelineLead, "email" | "phone">): SequenceDraftStep[] {
+  const step = (day: number, channel: PipelineSequenceChannel, subject: string, body: string): SequenceDraftStep => ({ key: `${day}-${channel}`, day, channel, subject, body, goal: "" });
+  return [
+    lead.email
+      ? step(0, "email", "A quick idea for {company}", "Hi {first_name},\n\nI would love to show you how we could help {company}. Do you have 20 minutes this week?")
+      : step(0, "call_task", "", "Call {name} to introduce us"),
+    lead.phone ? step(3, "sms", "", "Hi {first_name}, did you get a chance to look at my note? Happy to find a time that suits you.") : step(3, "call_task", "", "Follow up with {name}"),
+    step(7, "call_task", "", "Call {name}"),
+  ];
+}
+
+/** What "Ask the Chief" sends to write a follow-up sequence for one lead. */
+export function sequenceBrief(input: { projectName: string; lead: PipelineLead; currency: string }): string {
+  const { lead } = input;
+  return [
+    `Write a follow-up sequence for ${lead.name}${lead.company ? ` (${lead.company})` : ""} in ${input.projectName}'s Pipeline (lead id ${lead._id}, stage ${lead.stage}${lead.value ? `, ${formatLeadValue(lead.value, input.currency)}` : ""}).`,
+    "Read the lead's timeline with origin_pipeline_list_leads (lead_id) first. Then start it with origin_pipeline_sequence: about three steps over a week, such as a day 0 email, a day 3 text and a day 7 call task, "
+      + "each written for this lead. Only use channels they can receive. Each contact step waits for my approval on its day, and the sequence stops when they reply.",
+  ].join("\n\n");
 }

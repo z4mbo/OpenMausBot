@@ -449,6 +449,7 @@ import { parseLoginFields, parseTotpField, createLoginRoutes } from "./routes/lo
 import { savedLoginResumePrompt } from "../shared/logins.ts";
 import { BrowserLive, browserRestartRefusal } from "./browser-live.ts";
 import { createBrowserViewAccess } from "./host/browser-view-access.ts";
+import { browserEgress } from "./browser/egress/registry.ts";
 import {
   agentBrowserIntegration,
   browserEngineEncryptionKey,
@@ -593,7 +594,7 @@ import { createOriginCloudRoutes, cloudProjectFor, convexOriginClient, defaultOr
 import { createPipelineRoutes, createPipelineSender, loopbackProviderOrigin } from "./origin-pipeline.ts";
 import { BroadcastScheduler, createBroadcastRoutes } from "./broadcast/scheduler.ts";
 import {
-  awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, transcribeWith,
+  awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, recordCallNotes, transcribeWith,
 } from "./origin-call-agent.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
 import { createOriginImportRoutes } from "./routes/origin-import.ts";
@@ -763,7 +764,7 @@ const sharedWorkspaceFullAccessEnabled = () => SHARED_WORKSPACE_FULL_ACCESS && B
 const HOSTED_FULL_ACCESS_REFUSAL = "On a shared company workspace Full access comes only from the operator's dedicated policy";
 if (HOSTED_WORKSPACE) setDefaultApprovalMode("ask");
 // On a shared workspace loopback is a service, not the owner: every bot's shell is a loopback caller too.
-const LOOPBACK = resolveLoopbackTrust({ desktopManaged: DESKTOP_MANAGED, hostedWorkspace: HOSTED_WORKSPACE, cloudHome: Boolean(CLOUD_HOME) });
+const LOOPBACK = resolveLoopbackTrust({ desktopManaged: DESKTOP_MANAGED, hostedWorkspace: HOSTED_WORKSPACE, cloudHome: Boolean(CLOUD_HOME), fromSource: import.meta.url.endsWith(".ts") });
 // The CLI's per-launch secret comes on stdin, never an env var: every engine this server starts inherits its environment.
 let cliOwnerToken: string | undefined;
 if (process.env.OMB_CLI_OWNER_STDIN === "1" && LOOPBACK.trust === "service" && process.stdin) {
@@ -2476,6 +2477,7 @@ const browserRuntime = new BrowserRuntime({
 });
 const browserLive = new BrowserLive({ runtime: browserRuntime });
 const usedBrowserSessions = new Map<string, { command: string; env: Record<string, string> }>();
+browserEgress.configure({ host: DESKTOP_MANAGED ? "desktop" : CLOUD_HOME ? "cloud" : "server", config: () => cfg.browserEngine?.egress });
 // The agent-browser daemon outlives its MCP transport and this server; My Chrome is the person's own.
 const browserSweep = new BrowserSweep({
   engine: () => { const engine = browserEngineStatus(); return engine.kind === "ready" ? engine.binaryPath : null; },
@@ -2519,13 +2521,10 @@ function usesMyChrome(profileId: string | undefined): boolean {
   return Boolean(profileId) && myChromeAvailable()
     && cfg.browserProfiles?.some((profile) => profile.id === profileId && profile.browser === "chrome") === true;
 }
-function browserSessionSpec(binaryPath: string, session: string, profile: string | undefined) {
+function browserSessionSpec(binaryPath: string, session: string, profile: string | undefined, egressPort?: number) {
   const attachCdpUrl = browserEngineAttachCdpUrl(cfg);
   return agentBrowserIntegration({
-    binaryPath,
-    session,
-    encryptionKey: browserEngineEncryptionKey(),
-    persistent: profile !== "guest",
+    binaryPath, session, encryptionKey: browserEngineEncryptionKey(), persistent: profile !== "guest", egressPort,
     env: { ...process.env, PATH: augmentedPath() },
     ...(usesMyChrome(profile) ? { attach: attachCdpUrl ? { cdpUrl: attachCdpUrl } : {} } : {}),
   });
@@ -2542,7 +2541,8 @@ async function browserIntegration(botId: string, profile: string | undefined, tu
   const profileTarget = profile && profile !== "guest" ? browserProfilePartitionTarget(cfg, profile) : null;
   const partitionId = profile === "guest" ? "guest" : (profileTarget?.partitionId ?? "");
   const session = currentBrowserSession(botId, profile);
-  const spec = browserSessionSpec(status.binaryPath, session, profileTarget?.profileId ?? profile);
+  const browserProfileId = profileTarget?.profileId ?? profile;
+  const spec = browserSessionSpec(status.binaryPath, session, browserProfileId, usesMyChrome(browserProfileId) ? undefined : await browserEgress.open(session));
   usedBrowserSessions.set(session, spec);
   await prepareBrowserSessionState(status.binaryPath, session, { env: spec.env, persistent: profile !== "guest" && !attachesToChrome(spec.env), isCurrent: () => {
     const current = store.bot(botId);
@@ -12935,8 +12935,8 @@ async function fillLoginForTurn(bot: BotRecord, capability: InternalCapability, 
   const engine = browserEngineStatus();
   if (engine.kind !== "ready") return { ok: false, text: "The browser is not available on this computer right now. Call request_sign_in instead." };
   const session = currentBrowserSession(current.id, current.browserProfile);
-  const profileTarget = current.browserProfile && current.browserProfile !== "guest" ? browserProfilePartitionTarget(cfg, current.browserProfile) : null;
-  const spec = usedBrowserSessions.get(session) ?? browserSessionSpec(engine.binaryPath, session, profileTarget?.profileId ?? current.browserProfile);
+  const browserProfileId = (current.browserProfile && current.browserProfile !== "guest" ? browserProfilePartitionTarget(cfg, current.browserProfile)?.profileId : undefined) ?? current.browserProfile;
+  const spec = usedBrowserSessions.get(session) ?? browserSessionSpec(engine.binaryPath, session, browserProfileId, usesMyChrome(browserProfileId) ? undefined : await browserEgress.open(session));
   if (!claimTurnResource(capability, `browser:${session}`)) {
     return { ok: false, text: "Another conversation is using this browser. Wait until it finishes, then call fill_login again." };
   }
@@ -13469,7 +13469,7 @@ const workspaceBackupAccess = {
     const current = resolveRequestAuth(req, {
       sessions, cookieName: SESSION_COOKIE, streamPath: "/api/events",
       url: new URL(req.url ?? "/", `http://localhost:${PORT}`),
-      loopbackMutationToken: desktopMutationToken, companionMutationToken, loopbackTrust: LOOPBACK.trust, cliOwnerToken,
+      loopbackMutationToken: desktopMutationToken, companionMutationToken, loopbackTrust: LOOPBACK.trust, cliOwnerToken, trustLocalBrowser: LOOPBACK.localBrowsers,
     }).auth;
     return Boolean(current?.scopes.includes("admin") && current.kind === original.kind &&
       (current.kind !== "session" || (original.kind === "session" && current.session.id === original.session.id)));
@@ -13630,7 +13630,7 @@ const sharedAgents = createSharedAgents({
     await startTurn(run.botId, run.text, { threadId: run.threadId, ...(message ? { userMessage: message } : {}), ...(run.sender ? { sender: run.sender } : {}) });
   },
   interrupt: (botId, threadId) => void interruptDirectThread(botId, threadId).catch(() => undefined),
-  redact: redactSecretsInText,
+  redact: redactSecretsInText, quickText: async (botId, prompt) => { const bot = store.bot(botId); if (!bot) throw new Error("The Chief no longer exists"); const writer = callSummaryWriter(bot); assertWithinBudget(cfg, DATA_DIR); return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), timeoutMs: 120_000 }); },
 });
 ROUTES.push(sharedAgents.routes);
 sharedAgents.start();
@@ -13690,7 +13690,7 @@ const callAgents = createCallAgents({
     if (transcript) store.appendMessage(bot.threadId, { role: "bot", kind: "text", text: `Call transcript\n\n${transcript}` });
   },
   transcribe: ({ audio, mime, settings }) => transcribeWith({ audio, mime, settings, keys: { groq: cfg.groq?.key, openai: cfg.openai?.key } }),
-  settings: () => callAgentSettings,
+  settings: () => callAgentSettings, record: (input) => recordCallNotes(input),
   log: (line) => console.log(line),
 });
 ROUTES.push(createOriginMemberRoutes({ callAgents }));
@@ -13860,7 +13860,7 @@ ROUTES.push(createTeamRoutes({
   ...skillExport(skillsHost),
 }));
 ROUTES.push(createBrowserSiteRoutes({
-  target: (which) => {
+  target: async (which) => {
     const engine = browserEngineStatus();
     if (engine.kind !== "ready") return { status: 409, error: engine.reason };
     let session: string;
@@ -13878,7 +13878,7 @@ ROUTES.push(createBrowserSiteRoutes({
       profile = bot.browserProfile;
     }
     if (usesMyChrome(profile)) return { status: 409, error: "This profile uses your own Chrome. Sign in and out of sites there." };
-    return { binaryPath: engine.binaryPath, session, env: browserSessionSpec(engine.binaryPath, session, profile).env, encryptionKey: browserEngineEncryptionKey() };
+    return { binaryPath: engine.binaryPath, session, env: browserSessionSpec(engine.binaryPath, session, profile, await browserEgress.open(session)).env, encryptionKey: browserEngineEncryptionKey() };
   },
   list: (target) => listSignedInSites(target),
   signOut: (target, site) => signOutOfSites(target, site),
@@ -14259,7 +14259,7 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
       companionMutationToken,
       features: { sharedComputers: lendingEnabled() },
       loopbackTrust: LOOPBACK.trust,
-      cliOwnerToken,
+      cliOwnerToken, trustLocalBrowser: LOOPBACK.localBrowsers,
     });
     // The session term slides on use, so re-issue the cookie on every cookie request; handlers that clear it later overwrite this header.
     if (gate.auth?.kind === "session" && gate.auth.via === "cookie") {

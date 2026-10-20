@@ -3,6 +3,19 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.4.0",
+  date: "2026-10-20",
+  title: "Pages, campaigns and a self-running pipeline",
+  changes: [
+    { title: "Pages", body: "Publish any Canvas frame as a public landing page at origin.imbored.fun, with a lead form that drops sign-ups straight into Pipeline. Republish to update it; each page shows its views and leads. A Chief can design and publish a waitlist page for you." },
+    { title: "Campaigns", body: "Broadcast has Campaigns: a goal, audience, channels and dates that tie together the campaign's Studio content, posts, leads and issues, with engagement from X and Bluesky and leads attributed by utm_campaign. Plan with your Chief in one click." },
+    { title: "Replies and sequences", body: "Texts, WhatsApp messages, calls and email replies from leads land on their timeline and in your Inbox. Follow-up sequences draft each step when it's due and stop when the lead replies or closes. Stages are editable, drafts can be edited before sending, and every lead gets a score with its next best action." },
+    { title: "Budgets", body: "Set a monthly spend cap for each agent or project on the Org page. Agents warn at 80% and stop at 100% until an admin raises the budget." },
+    { title: "Chief heartbeat", body: "Turn on a periodic check in Project settings: the Chief reviews stale issues, blocked agents and waiting PRs and writes a short note only when something needs you." },
+    { title: "From calls to issues", body: "After a call, its action items appear on the Call page; create them as Draft issues for the Chief in one click." },
+    { title: "Lighter agents and safer local access", body: "Content, marketing and sales tools load on demand, cutting each turn's tool list by about 13%. The local server now requires sign-in from browsers, the companion control port needs a per-launch token, and agents' browsers pass through an egress gate." },
+  ],
+}, {
   version: "0.3.0",
   date: "2026-10-20",
   title: "From idea to launch: Studio, Broadcast, Pipeline and Canvas",

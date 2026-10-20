@@ -6,9 +6,12 @@ import { isOutboundTool } from "../../shared/outbound.ts";
 import { READ_ONLY_ANNOTATIONS } from "../agent-tool-policy.ts";
 import { bm25Ranker } from "../mcp-directory.ts";
 import type { Json } from "./agents-client.ts";
+import { deferredToolWords, isDeferredTool } from "./agents-tool-domains.ts";
 
 /** The proxy's switch: "1" lists through the bridge, anything else lists the whole catalog. */
 export const TOOL_BRIDGE_ENV = "OMB_AGENTS_TOOL_BRIDGE";
+/** The proxy's other switch, for a turn not bridged: "1" lists the domain tools in short, anything else lists them whole. */
+export const TOOL_DEFER_ENV = "OMB_AGENTS_TOOL_DEFER";
 export const FIND_TOOL = "find_tool";
 export const USE_TOOL = "use_tool";
 
@@ -97,12 +100,13 @@ export function bridgedCallTitle(title: string, input: unknown, isCatalogTool: (
   return inner !== undefined && isCatalogTool(inner) ? `${prefix}${inner}` : title;
 }
 
-/** Security: an agents server spec forced to list its whole catalog, for a mount whose tool selection
- * matches the name in the call. */
+/** Security: an agents server spec forced to list its whole catalog with every schema whole, for a mount whose tool
+ * selection matches the name in the call and may leave find_tool out. */
 export function unbridgedServer<Spec extends { env?: Record<string, string> }>(server: Spec): Spec {
-  return server.env && Object.hasOwn(server.env, TOOL_BRIDGE_ENV) && server.env[TOOL_BRIDGE_ENV] !== "0"
-    ? { ...server, env: { ...server.env, [TOOL_BRIDGE_ENV]: "0" } }
-    : server;
+  const env = server.env;
+  if (!env) return server;
+  const forced = [TOOL_BRIDGE_ENV, TOOL_DEFER_ENV].filter((key) => Object.hasOwn(env, key) && env[key] !== "0");
+  return forced.length ? { ...server, env: { ...env, ...Object.fromEntries(forced.map((key) => [key, "0"])) } } : server;
 }
 
 /** Whether a turn's agents integration was asked to bridge. A selection may still mount it unbridged,
@@ -127,10 +131,64 @@ function namesList(names: readonly string[], maxChars: number): string {
 }
 
 const FIND_USAGE = `${FIND_TOOL} needs { "query": "what you want to do, in a few words" }, for example "schedule a routine", or a tool's exact name.`;
+const FIND_SCHEMA: Json = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    query: { type: "string", description: "What you want to do, in a few words, or a tool's exact name." },
+  },
+  required: ["query"],
+};
 const USE_USAGE = `${USE_TOOL} needs { "name": "the tool's exact name", "arguments": { ... } }, with arguments a JSON object as the tool's input schema describes it. Find the name and the schema with ${FIND_TOOL}.`;
 const HOW_TO_RUN = `Run one with ${USE_TOOL}({ "name": "...", "arguments": { ... } }), with arguments that fit its inputSchema. Follow its description as you would for a tool in your list.`;
 
-export interface ToolBridge {
+/** What the proxy lists and which calls it answers itself; any other call runs as it came. */
+export interface ToolListing {
+  readonly listed: readonly BridgeTool[];
+  route(name: string, args: Json): Promise<BridgeRoute | undefined>;
+}
+
+/** The ranker reads a domain tool with the words people use for its section, which never reach the wire. */
+async function rankedNames(query: string, pool: readonly BridgeTool[], limit: number): Promise<string[]> {
+  const searched = pool.map((tool) => {
+    const words = deferredToolWords(tool.name);
+    return words ? { ...tool, title: words } : tool;
+  });
+  return (await bm25Ranker(query, searched, limit)).map((tool) => tool.name);
+}
+
+interface FinderText {
+  inList(name: string): string;
+  next: string;
+  nothing(names: string): string;
+}
+
+/** find_tool over `pool`: the best few matches, each with its whole description and input schema. */
+function toolFinder(pool: readonly BridgeTool[], listedNames: ReadonlySet<string>, text: FinderText): (args: unknown) => Promise<BridgeAnswer> {
+  return async (args) => {
+    const query = record(args) && typeof args.query === "string" ? args.query.trim() : "";
+    if (!query || query.length > QUERY_CHARS) return { text: FIND_USAGE, isError: true };
+    if (listedNames.has(query)) return { text: text.inList(query) };
+    const ranked = await rankedNames(query, pool, FIND_MATCHES_MAX);
+    const matches: Array<Pick<BridgeTool, "name" | "description" | "inputSchema">> = [];
+    let chars = 0;
+    for (const name of ranked.slice(0, FIND_MATCHES_MAX)) {
+      // Security: only ever a tool of this turn's profile, whatever the ranker returns.
+      const tool = pool.find((entry) => entry.name === name);
+      if (!tool) continue;
+      const match = { name: tool.name, description: tool.description, inputSchema: tool.inputSchema };
+      const size = JSON.stringify(match).length;
+      if (matches.length && chars + size > FIND_CHARS_MAX) break;
+      matches.push(match);
+      chars += size;
+    }
+    return { text: JSON.stringify(matches.length
+      ? { matches, next: text.next }
+      : { matches, next: text.nothing(namesList(pool.map((tool) => tool.name), BRIDGE_NAMES_MAX_CHARS)) }) };
+  };
+}
+
+export interface ToolBridge extends ToolListing {
   /** What tools/list answers: the hot tools in catalog order, then find_tool and use_tool. */
   readonly listed: readonly BridgeTool[];
   /** The rest of the profile, in catalog order: what find_tool searches. */
@@ -153,14 +211,7 @@ export function createToolBridge(tools: readonly BridgeTool[]): ToolBridge {
     {
       name: FIND_TOOL,
       description: `Find an Origin tool that is not in your tool list. Say what you want to do in a few words, or give the tool's name. Each match comes back with its description and exact input schema; run one with ${USE_TOOL}. A tool in your tool list is called directly, not found here. Tools reached this way: ${namesList(hidden.map((tool) => tool.name), BRIDGE_NAMES_MAX_CHARS)}`,
-      inputSchema: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          query: { type: "string", description: "What you want to do, in a few words, or a tool's exact name." },
-        },
-        required: ["query"],
-      },
+      inputSchema: FIND_SCHEMA,
       annotations: READ_ONLY_ANNOTATIONS,
     },
     {
@@ -179,27 +230,11 @@ export function createToolBridge(tools: readonly BridgeTool[]): ToolBridge {
   ];
   const listedNames = new Set(listed.map((tool) => tool.name));
 
-  async function find(args: unknown): Promise<BridgeAnswer> {
-    const query = record(args) && typeof args.query === "string" ? args.query.trim() : "";
-    if (!query || query.length > QUERY_CHARS) return { text: FIND_USAGE, isError: true };
-    if (listedNames.has(query)) return { text: `${query} is in your tool list: call it directly.` };
-    const ranked = await bm25Ranker(query, hidden, FIND_MATCHES_MAX);
-    const matches: Array<Pick<BridgeTool, "name" | "description" | "inputSchema">> = [];
-    let chars = 0;
-    for (const candidate of ranked.slice(0, FIND_MATCHES_MAX)) {
-      // Security: only ever a tool of this turn's profile, whatever the ranker returns.
-      const tool = hidden.find((entry) => entry.name === candidate.name);
-      if (!tool) continue;
-      const match = { name: tool.name, description: tool.description, inputSchema: tool.inputSchema };
-      const size = JSON.stringify(match).length;
-      if (matches.length && chars + size > FIND_CHARS_MAX) break;
-      matches.push(match);
-      chars += size;
-    }
-    return { text: JSON.stringify(matches.length
-      ? { matches, next: HOW_TO_RUN }
-      : { matches, next: `Nothing matched. Try other words, or one of these names: ${namesList(hidden.map((tool) => tool.name), BRIDGE_NAMES_MAX_CHARS)} A tool in your tool list is called directly.` }) };
-  }
+  const find = toolFinder(hidden, listedNames, {
+    inList: (name) => `${name} is in your tool list: call it directly.`,
+    next: HOW_TO_RUN,
+    nothing: (names) => `Nothing matched. Try other words, or one of these names: ${names} A tool in your tool list is called directly.`,
+  });
 
   // Only the call's shape is checked here: the tool reads its own arguments, as on a direct call.
   function use(args: unknown): BridgeRoute {
@@ -221,4 +256,45 @@ export function createToolBridge(tools: readonly BridgeTool[]): ToolBridge {
   }
 
   return { listed, hidden, find, use, route };
+}
+
+/** What a domain tool's short entry says after its first sentence. */
+export const DEFERRED_NOTE = `Before the first call, get its input schema from ${FIND_TOOL}.`;
+/** A short entry takes any object: the tool reads its own arguments, as on every call. */
+const DEFERRED_SCHEMA: Json = { type: "object", properties: {}, additionalProperties: true };
+
+function firstSentence(text: string): string {
+  return /^.*?[.!?](?=\s|$)/s.exec(text)?.[0] ?? text;
+}
+
+/** A turn that lists its whole catalog, with the domain tools in short: each keeps its name, first sentence and
+ * annotations, and find_tool returns its whole definition. Security: a domain tool is still called by its own name, never
+ * through another tool, so every gate that judges a call by its name sees it as it would on a full listing. */
+export function createToolDeferral(tools: readonly BridgeTool[]): ToolListing & { readonly deferred: readonly BridgeTool[] } {
+  const deferred = tools.filter((tool) => isDeferredTool(tool.name));
+  if (!deferred.length) return { listed: tools, deferred, route: async () => undefined };
+  const full = new Set(tools.filter((tool) => !isDeferredTool(tool.name)).map((tool) => tool.name));
+  const listed: BridgeTool[] = [
+    ...tools.map((tool) => isDeferredTool(tool.name)
+      ? { name: tool.name, description: `${firstSentence(tool.description)} ${DEFERRED_NOTE}`, inputSchema: DEFERRED_SCHEMA, ...(tool.annotations ? { annotations: tool.annotations } : {}) }
+      : tool),
+    {
+      name: FIND_TOOL,
+      description: `The full description and exact input schema of a tool your list shows in short (its description says to ask ${FIND_TOOL}). Give the tool's name, or say what you want to do in a few words; then call that tool directly by its own name.`,
+      inputSchema: FIND_SCHEMA,
+      annotations: READ_ONLY_ANNOTATIONS,
+    },
+  ];
+  const find = toolFinder(deferred, full, {
+    inList: (name) => `${name} is in your tool list with its whole input schema: call it directly.`,
+    next: "Call the tool directly by its own name, with arguments that fit its inputSchema, and follow its description.",
+    nothing: (names) => `Nothing matched. Try other words, or one of these names: ${names}`,
+  });
+  return {
+    listed,
+    deferred,
+    async route(name, args) {
+      return name === FIND_TOOL ? { answer: await find(args) } : undefined;
+    },
+  };
 }

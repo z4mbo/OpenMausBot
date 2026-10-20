@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, List, Plus, Send, ShieldCheck } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, List, Megaphone, Plus, Send, ShieldCheck } from "lucide-react";
 import { useCloudQuery } from "@/lib/origin-cloud";
 import { api, useStore, type Bot } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { BROADCAST_CHANNELS, BROADCAST_RULES, type BroadcastChannel, type BroadcastStatus } from "../../../shared/broadcast";
 import { CloudGate, EmptyState, Loading, PageHeader, Segmented, cardClass, chipButton, iconButton, pageClass, primaryButton, type OriginPageProps } from "../origin-pages/ui";
 import { BroadcastComposer } from "./BroadcastComposer";
+import { CampaignsView } from "./CampaignsView";
 import { ChannelMark } from "./ChannelMark";
 import {
   defaultSlot, isPast, listOrder, matchesFilter, placeInWeek, postTime, sameDay, shiftWeek, weekDays, weekStart,
@@ -26,8 +27,8 @@ function useConnectedChannels(): Connected | null {
   return connected;
 }
 
-export function BroadcastPage({ agent: _agent, ...props }: OriginPageProps & { agent: Bot }) {
-  return <CloudGate {...props} label="Broadcast">{({ projectId, canEdit }) => <Broadcast projectId={projectId} canEdit={canEdit} />}</CloudGate>;
+export function BroadcastPage({ agent, ...props }: OriginPageProps & { agent: Bot }) {
+  return <CloudGate {...props} label="Broadcast">{({ project, projectId, canEdit }) => <Broadcast projectId={projectId} projectName={project.name} canEdit={canEdit} agent={agent} />}</CloudGate>;
 }
 
 const STATUS_LABEL: Record<BroadcastStatus, string> = { draft: "Draft", scheduled: "Scheduled", publishing: "Publishing", published: "Published", failed: "Failed" };
@@ -56,10 +57,12 @@ const timeOf = (at: number) => new Date(at).toLocaleTimeString([], { hour: "2-di
 const dateTimeOf = (at: number) => new Date(at).toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const excerpt = (post: BroadcastPost) => post.variants[0]?.text.trim() || (post.media.length ? `${post.media.length} media` : "Empty post");
 
-function Broadcast({ projectId, canEdit: projectEdit }: { projectId: string; canEdit: boolean }) {
+function Broadcast({ projectId, projectName, canEdit: projectEdit, agent }: { projectId: string; projectName: string; canEdit: boolean; agent: Bot }) {
   const data = useCloudQuery<BroadcastList>("broadcast:list", { projectId });
   const connected = useConnectedChannels();
   const { dispatch } = useStore();
+  const [mode, setMode] = useState<"posts" | "campaigns">("posts");
+  const [creatingCampaign, setCreatingCampaign] = useState(false);
   const [view, setView] = useState<"week" | "list">("week");
   const [start, setStart] = useState(() => weekStart(Date.now()));
   const [filter, setFilter] = useState<ListFilter>("all");
@@ -74,13 +77,17 @@ function Broadcast({ projectId, canEdit: projectEdit }: { projectId: string; can
 
   return (
     <section className={pageClass} aria-label="Broadcast">
-      <PageHeader title="Broadcast" count={posts.length}>
-        <Segmented label="Broadcast view" value={view} onChange={setView}
-          options={[{ value: "week", label: <><CalendarDays size={13} />Week</> }, { value: "list", label: <><List size={13} />List</> }]} />
-        {canEdit && <button type="button" className={primaryButton} onClick={() => setOpen({ post: null })}><Plus size={14} />New post</button>}
+      <PageHeader title="Broadcast" count={mode === "posts" ? posts.length : undefined}>
+        <Segmented label="Broadcast section" value={mode} onChange={setMode}
+          options={[{ value: "posts", label: <><Send size={13} />Posts</> }, { value: "campaigns", label: <><Megaphone size={13} />Campaigns</> }]} />
+        {mode === "posts" && <Segmented label="Broadcast view" value={view} onChange={setView}
+          options={[{ value: "week", label: <><CalendarDays size={13} />Week</> }, { value: "list", label: <><List size={13} />List</> }]} />}
+        {canEdit && (mode === "posts"
+          ? <button type="button" className={primaryButton} onClick={() => setOpen({ post: null })}><Plus size={14} />New post</button>
+          : <button type="button" className={primaryButton} onClick={() => setCreatingCampaign(true)}><Plus size={14} />New campaign</button>)}
       </PageHeader>
 
-      {missing.length > 0 && missing.length < BROADCAST_CHANNELS.length && (
+      {mode === "posts" && missing.length > 0 && missing.length < BROADCAST_CHANNELS.length && (
         <div className="mb-3 flex flex-wrap items-center gap-1.5 text-[12px] text-ink-tertiary">
           <span>Not connected:</span>
           {missing.map((channel) => (
@@ -90,7 +97,7 @@ function Broadcast({ projectId, canEdit: projectEdit }: { projectId: string; can
           ))}
         </div>
       )}
-      {missing.length === BROADCAST_CHANNELS.length && (
+      {mode === "posts" && missing.length === BROADCAST_CHANNELS.length && (
         <div className={cn(cardClass, "mb-3 flex flex-wrap items-center gap-3 px-4 py-3")}>
           <span className="flex items-center gap-1.5 text-ink-secondary">{BROADCAST_CHANNELS.map((channel) => <ChannelMark key={channel} channel={channel} size={14} />)}</span>
           <p className="min-w-0 flex-1 text-[13px] text-ink-secondary">Connect a channel to publish from this computer. Drafts and approvals work without one.</p>
@@ -98,15 +105,18 @@ function Broadcast({ projectId, canEdit: projectEdit }: { projectId: string; can
         </div>
       )}
 
-      {pending > 0 && view === "week" && (
-        <button type="button" onClick={() => { setView("list"); setFilter("approval"); }}
+      {pending > 0 && (mode === "campaigns" || view === "week") && (
+        <button type="button" onClick={() => { setMode("posts"); setView("list"); setFilter("approval"); }}
           className="mb-3 flex w-full items-center gap-2 rounded-lg bg-warning/10 px-3 py-2 text-left text-[12.5px] text-warning transition-colors duration-150 hover:bg-warning/15">
           <ShieldCheck size={14} />{pending} {pending === 1 ? "post waits" : "posts wait"} for your approval
           <ChevronRight size={14} className="ml-auto" />
         </button>
       )}
 
-      {view === "week"
+      {mode === "campaigns"
+        ? <CampaignsView projectId={projectId} projectName={projectName} canEdit={canEdit} agent={agent} posts={posts} creating={creatingCampaign} onCreating={setCreatingCampaign}
+          onOpenPost={(postId) => { const post = posts.find((candidate) => candidate._id === postId); if (post) setOpen({ post }); }} />
+        : view === "week"
         ? <Week posts={posts} start={start} onStart={setStart} canEdit={canEdit} onOpen={(post) => setOpen({ post })} onNew={(slot) => setOpen({ post: null, slot })} />
         : <PostList posts={posts} filter={filter} onFilter={setFilter} onOpen={(post) => setOpen({ post })} />}
 

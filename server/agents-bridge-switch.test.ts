@@ -20,6 +20,7 @@ import {
   agentsToolBridgeEnabled,
   agentsToolBridgeEnv as decide,
   agentsToolBridgeRefusal as refusal,
+  agentsToolDeferEnv,
   applyAgentsBridge,
   bridgedAgents,
   bridgedToolTitle,
@@ -513,13 +514,28 @@ describe("which bots a turn is bridged for", () => {
   it("starts every agents proxy unbridged until a turn's decision says otherwise", () => {
     // what server/index.ts spreads into each agents integration it builds
     expect(agentsProxyLaunch()).toEqual({ command: process.execPath, args: [SPAWNED_PROXIES.agents] });
-    expect(AGENTS_PROXY_ENV).toEqual({ ELECTRON_RUN_AS_NODE: "1", OMB_AGENTS_TOOL_BRIDGE: "0" });
+    expect(AGENTS_PROXY_ENV).toEqual({ ELECTRON_RUN_AS_NODE: "1", OMB_AGENTS_TOOL_BRIDGE: "0", OMB_AGENTS_TOOL_DEFER: "0" });
+  });
+
+  it("lists the domain tools in short only for a bot with no tool selection", () => {
+    const short = { OMB_AGENTS_TOOL_DEFER: "1" };
+    const whole = { OMB_AGENTS_TOOL_DEFER: "0" };
+    expect(agentsToolDeferEnv(bot, {})).toEqual(short);
+    expect(agentsToolDeferEnv({}, {})).toEqual(short);
+    for (const toolScope of [{ deny: ["mcp:agents:vm_exec"] }, { allow: ["mcp:agents:list_bots"] }, "not a selection", 7]) {
+      expect(agentsToolDeferEnv({ toolScope }, {}), JSON.stringify(toolScope)).toEqual(whole);
+    }
+    expect(agentsToolDeferEnv(null, {})).toEqual(whole);
+    expect(agentsToolDeferEnv(undefined, {})).toEqual(whole);
+    expect(agentsToolDeferEnv(bot, { OMB_AGENTS_TOOL_DEFER: "0" })).toEqual(whole);
+    const selected = bridgedAgents("thread-defer-selected", { command: "node", args: [], env: {} }, ON, { toolScope: { deny: ["mcp:agents:vm_exec"] } }, CLAUDE, {}, HOST)!;
+    expect(selected.env).toEqual({ OMB_AGENTS_TOOL_BRIDGE: "0", OMB_AGENTS_TOOL_DEFER: "0" });
   });
 
   it("gives back the integration a turn mounts with the decision in it, over whatever it carried, and leaves the rest alone", () => {
     const agents = { command: "node", args: ["agents-proxy.js"], env: { OMB_BOT_ID: "bot-1", OMB_AGENTS_TOOL_BRIDGE: "0", OMB_COMMS_TOKEN: "t" } };
     const mounted = bridgedAgents("thread-mount", agents, ON, bot, CLAUDE, {}, HOST);
-    expect(mounted).toEqual({ command: "node", args: ["agents-proxy.js"], env: { OMB_BOT_ID: "bot-1", OMB_AGENTS_TOOL_BRIDGE: "1", OMB_COMMS_TOKEN: "t" } });
+    expect(mounted).toEqual({ command: "node", args: ["agents-proxy.js"], env: { OMB_BOT_ID: "bot-1", OMB_AGENTS_TOOL_BRIDGE: "1", OMB_COMMS_TOKEN: "t", OMB_AGENTS_TOOL_DEFER: "1" } });
     // a new value for the turn to assign: what was handed in is not rewritten
     expect(agents.env.OMB_AGENTS_TOOL_BRIDGE).toBe("0");
     const asked = { ...agents, env: { ...agents.env, OMB_AGENTS_TOOL_BRIDGE: "1" } };
@@ -540,7 +556,7 @@ describe("which bots a turn is bridged for", () => {
     expect(integrations).toEqual({ composio: { env: { KEY: "k" } } });
     const mounted = { agents: { command: "node", args: ["agents-proxy.js"], env: { OMB_BOT_ID: "bot-1", OMB_AGENTS_TOOL_BRIDGE: "0" } } };
     applyAgentsBridge("thread-apply", mounted, ON, bot, CLAUDE, {}, HOST);
-    expect(mounted.agents).toEqual({ command: "node", args: ["agents-proxy.js"], env: { OMB_BOT_ID: "bot-1", OMB_AGENTS_TOOL_BRIDGE: "1" } });
+    expect(mounted.agents).toEqual({ command: "node", args: ["agents-proxy.js"], env: { OMB_BOT_ID: "bot-1", OMB_AGENTS_TOOL_BRIDGE: "1", OMB_AGENTS_TOOL_DEFER: "1" } });
     expect(agentsToolBridged(mounted.agents)).toBe(true);
     expect(bridgedToolTitle("thread-apply", "use_tool", { name: "list_routines" })).toBe("list_routines");
     // the next turn of that thread mounts no agents tools: its mark goes
@@ -549,7 +565,7 @@ describe("which bots a turn is bridged for", () => {
     // a bot or an engine that is turned down is written in as "0"
     const turnedDown = { agents: { command: "node", args: [] as string[], env: { OMB_AGENTS_TOOL_BRIDGE: "1" } } };
     applyAgentsBridge("thread-apply-acp", turnedDown, ON, bot, { driverKind: "grokAgent" }, {}, HOST);
-    expect(turnedDown.agents.env).toEqual({ OMB_AGENTS_TOOL_BRIDGE: "0" });
+    expect(turnedDown.agents.env).toEqual({ OMB_AGENTS_TOOL_BRIDGE: "0", OMB_AGENTS_TOOL_DEFER: "1" });
   });
 
   it("stays off for a bot with a tool selection, whose gates read the tool's own name", () => {

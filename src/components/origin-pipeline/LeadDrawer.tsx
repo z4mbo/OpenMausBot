@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
-  ArrowRight, AudioLines, Building2, Check, ChevronDown, CircleDollarSign, Inbox, Loader2, Mail, MessageCircle, MessageSquareText, Phone, RotateCw, Send, Sparkles,
+  ArrowRight, AudioLines, Building2, Check, ChevronDown, CircleDollarSign, Inbox, Loader2, Mail, MessageCircle, MessageSquareText, Pencil, Phone, RotateCw, Send, Sparkles,
   StickyNote, Tag, Trash2, Upload, UserRound, X,
 } from "lucide-react";
 import type { Bot } from "@/state/store";
@@ -15,6 +15,9 @@ import {
 import { ownerKey } from "./pipeline-model";
 import { pipelineServer, rememberCallerPhone, rememberedCallerPhone } from "./pipeline-api";
 import { OwnerAvatar, type OwnerOption } from "./owners";
+import { SequencePanel } from "./SequencePanel";
+import { InsightRow } from "./LeadInsight";
+import type { LeadInsight } from "./pipeline-model";
 
 const inputClass = cn(baseInput, "font-normal");
 
@@ -38,12 +41,12 @@ const KIND_LABEL: Record<PipelineActivityKind, string> = {
   note: "Note", email: "Email", sms: "Text", whatsapp: "WhatsApp", call: "Call", ai_call: "AI call", stage: "Stage", capture: "Form", import: "Imported",
 };
 const STATUS_LABEL: Partial<Record<PipelineActivity["status"], string>> = {
-  pending: "Awaiting approval", approved: "Approved", sending: "Sending", sent: "Sent", in_progress: "In progress", failed: "Failed", discarded: "Discarded",
+  pending: "Awaiting approval", approved: "Approved", sending: "Sending", sent: "Sent", in_progress: "In progress", failed: "Failed", discarded: "Discarded", received: "New",
 };
 
-export function LeadDrawer({ projectId, projectName, leadId, stages, currency, canEdit, owners, chief, channels, settings, onClose, onPlan }: {
+export function LeadDrawer({ projectId, projectName, leadId, stages, currency, canEdit, owners, chief, channels, settings, insight, onClose, onPlan, onSequence }: {
   projectId: string; projectName: string; leadId: string; stages: readonly string[]; currency: string; canEdit: boolean; owners: readonly OwnerOption[];
-  chief: Bot; channels: Record<PipelineChannel, boolean> | null; settings: PipelineSettingsView; onClose(): void; onPlan(lead: PipelineLead): void;
+  chief: Bot; channels: Record<PipelineChannel, boolean> | null; settings: PipelineSettingsView; insight?: LeadInsight; onClose(): void; onPlan(lead: PipelineLead): void; onSequence(lead: PipelineLead): void;
 }) {
   const detail = useCloudQuery<{ lead: PipelineLead; activities: PipelineActivity[] } | null>("pipeline:lead", { projectId, leadId });
   const panel = useRef<HTMLDivElement>(null);
@@ -58,6 +61,11 @@ export function LeadDrawer({ projectId, projectName, leadId, stages, currency, c
   useEffect(() => {
     if (detail === null) onClose();
   }, [detail, onClose]);
+
+  const unread = lead?.unreadReplies ?? 0;
+  useEffect(() => {
+    if (unread) void cloudMutation("pipeline:markRead", { projectId, leadId }).catch(() => undefined);
+  }, [unread, projectId, leadId]);
 
   const original = (field: EditableField): string => {
     if (!lead) return "";
@@ -128,6 +136,7 @@ export function LeadDrawer({ projectId, projectName, leadId, stages, currency, c
                   <DateChip value={lead.nextDue ?? ""} disabled={!canEdit} onChange={(nextDue) => update({ nextDue }, "Could not change the date")} />
                   <span className={cn(chipButton, "cursor-default gap-1 hover:bg-raised/60")} title="Source"><Inbox size={13} aria-hidden="true" />{lead.source}</span>
                 </div>
+                {insight && insight.reasons.length > 1 && <InsightRow insight={insight} />}
                 <fieldset disabled={!canEdit} className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2.5 max-sm:grid-cols-1">
                   <Field label="Email"><input className={inputClass} type="email" value={value("email")} onChange={(event) => edit("email", event.target.value)} placeholder="name@company.com" /></Field>
                   <Field label="Phone"><input className={inputClass} type="tel" value={value("phone")} onChange={(event) => edit("phone", event.target.value)} placeholder="+39 333 123 4567" /></Field>
@@ -154,6 +163,7 @@ export function LeadDrawer({ projectId, projectName, leadId, stages, currency, c
                 )}
               </form>
               {canEdit && <Composer projectId={projectId} projectName={projectName} lead={lead} chief={chief} channels={channels} settings={settings} dirty={dirty} />}
+              <SequencePanel projectId={projectId} lead={lead} canEdit={canEdit} chief={chief} onAsk={() => onSequence(lead)} />
               <Timeline projectId={projectId} lead={lead} activities={detail?.activities ?? []} canEdit={canEdit} chief={chief} />
             </div>
           )}
@@ -268,34 +278,47 @@ const when = (at: number) => new Date(at).toLocaleString(undefined, { month: "sh
 function ActivityRow({ projectId, leadId, activity, canEdit, chief }: { projectId: string; leadId: string; activity: PipelineActivity; canEdit: boolean; chief: Bot }) {
   const action = useAction();
   const [transcript, setTranscript] = useState(false);
+  const [draft, setDraft] = useState<{ subject: string; body: string; goal: string } | null>(null);
   const status = STATUS_LABEL[activity.status];
+  const received = activity.status === "received";
   const send = () => action.run(() => pipelineServer.send({ projectId, activityId: activity._id, botId: chief.id }), "Could not send");
   const approve = () => action.run(async () => {
-    await cloudMutation("pipeline:reviewContact", { projectId, activityId: activity._id, approve: true });
+    const edits = draft ? Object.fromEntries((["subject", "body", "goal"] as const).filter((key) => activity[key] !== undefined && draft[key].trim() && draft[key] !== activity[key]).map((key) => [key, draft[key]])) : {};
+    await cloudMutation("pipeline:reviewContact", { projectId, activityId: activity._id, approve: true, ...edits });
+    setDraft(null);
     await pipelineServer.send({ projectId, activityId: activity._id, botId: chief.id });
   }, "Could not send");
   const discard = () => action.run(() => cloudMutation("pipeline:reviewContact", { projectId, activityId: activity._id, approve: false }), "Could not discard");
   const check = () => action.run(() => pipelineServer.refresh({ projectId, leadId, activityId: activity._id, botId: chief.id }), "Could not check the call");
-  const title = activity.kind === "stage" ? <>Moved from {activity.subject} <ArrowRight size={11} className="inline" aria-hidden="true" /> {activity.body}</> : KIND_LABEL[activity.kind];
+  const title = activity.kind === "stage" ? <>Moved from {activity.subject} <ArrowRight size={11} className="inline" aria-hidden="true" /> {activity.body}</>
+    : received ? activity.kind === "call" ? "Called in" : `${KIND_LABEL[activity.kind]} reply` : KIND_LABEL[activity.kind];
   return (
     <li className="relative flex gap-3 motion-safe:animate-msg-in">
       <span className={cn("z-[1] flex size-6 shrink-0 items-center justify-center rounded-full border bg-app",
-        activity.status === "pending" ? "border-accent/60 text-accent-text" : activity.status === "failed" ? "border-danger/60 text-danger" : "border-hairline/50 text-ink-secondary")}>
+        activity.status === "pending" || received ? "border-accent/60 text-accent-text" : activity.status === "failed" ? "border-danger/60 text-danger" : "border-hairline/50 text-ink-secondary")}>
         {KIND_ICON[activity.kind]}
       </span>
       <div className="min-w-0 flex-1">
         <header className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pt-0.5 text-[12.5px]">
           <strong className="font-medium text-ink">{title}</strong>
-          {status && activity.kind !== "note" && (
+          {status && activity.kind !== "note" && !received && (
             <span className={cn("rounded-full px-1.5 py-px text-[11px]", activity.status === "pending" ? "bg-accent/15 text-accent-text" : activity.status === "failed" ? "bg-danger/10 text-danger" : activity.status === "in_progress" ? "bg-warning/10 text-warning" : "bg-raised text-ink-secondary")}>
               {activity.status === "in_progress" && <span className="mr-1 inline-block size-1.5 rounded-full bg-current align-middle motion-safe:animate-pulse" aria-hidden="true" />}{status}
             </span>
           )}
           <span className="text-ink-tertiary">{activity.actor.name}{activity.actor.kind === "agent" ? " (agent)" : ""} · {when(activity.createdAt)}</span>
         </header>
-        {activity.subject && activity.kind !== "stage" && <p className="mt-0.5 text-[13px] font-medium text-ink-secondary">{activity.subject}</p>}
-        {activity.goal && <p className="mt-0.5 whitespace-pre-wrap text-[12.5px] text-ink-secondary"><span className="text-ink-tertiary">Goal: </span>{activity.goal}</p>}
-        {activity.body && activity.kind !== "stage" && activity.kind !== "import" && <ClampedText text={activity.body} />}
+        {draft ? (
+          <div className="mt-1.5 flex flex-col gap-1.5">
+            {activity.subject !== undefined && <input className={inputClass} aria-label="Subject" value={draft.subject} maxLength={300} onChange={(event) => setDraft({ ...draft, subject: event.target.value })} />}
+            {activity.goal !== undefined && <textarea className={cn(inputClass, "min-h-[84px] resize-y")} aria-label="Call goal" value={draft.goal} maxLength={8000} onChange={(event) => setDraft({ ...draft, goal: event.target.value })} />}
+            {activity.body !== undefined && <textarea className={cn(inputClass, "min-h-[96px] resize-y")} aria-label="Message" value={draft.body} maxLength={20000} onChange={(event) => setDraft({ ...draft, body: event.target.value })} />}
+          </div>
+        ) : <>
+          {activity.subject && activity.kind !== "stage" && <p className="mt-0.5 text-[13px] font-medium text-ink-secondary">{activity.subject}</p>}
+          {activity.goal && <p className="mt-0.5 whitespace-pre-wrap text-[12.5px] text-ink-secondary"><span className="text-ink-tertiary">Goal: </span>{activity.goal}</p>}
+          {activity.body && activity.kind !== "stage" && activity.kind !== "import" && <ClampedText text={activity.body} />}
+        </>}
         {activity.summary && <div className="mt-1.5 whitespace-pre-wrap rounded-lg bg-raised/40 px-3 py-2 text-[12.5px] leading-relaxed text-ink-secondary">{activity.summary}</div>}
         {activity.transcript && (
           <div className="mt-1.5">
@@ -312,6 +335,10 @@ function ActivityRow({ projectId, leadId, activity, canEdit, chief }: { projectI
               <button type="button" className={cn(primaryButton, "h-7 min-h-7 rounded-full px-3 text-[12px]")} disabled={action.busy} onClick={() => void approve()}>
                 {action.busy ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}Approve and send
               </button>
+              {draft
+                ? <button type="button" className={cn(ghostButton, "h-7 min-h-7 rounded-full px-3 text-[12px]")} disabled={action.busy} onClick={() => setDraft(null)}>Cancel edits</button>
+                : <button type="button" className={cn(ghostButton, "h-7 min-h-7 rounded-full px-3 text-[12px]")} disabled={action.busy}
+                  onClick={() => setDraft({ subject: activity.subject ?? "", body: activity.body ?? "", goal: activity.goal ?? "" })}><Pencil size={12} />Edit</button>}
               <button type="button" className={cn(ghostButton, "h-7 min-h-7 rounded-full px-3 text-[12px]")} disabled={action.busy} onClick={() => void discard()}>Discard</button>
             </>}
             {(activity.status === "failed" || activity.status === "approved") && (

@@ -10,6 +10,7 @@ import { cn } from "@/lib/cn";
 import type { CloudPerson, CloudProject, CloudProjectMember, GitHubTaskMode, MemberRole } from "./cloud-types";
 import { githubRepoHref } from "./repo-url";
 import { ProjectAccessCard } from "../origin-members/ProjectAccessCard";
+import { ChiefHeartbeatCard } from "./ChiefHeartbeatCard";
 import { CloudGate, Field, Loading, Notice, PageHeader, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 type IconType = NonNullable<CloudProject["iconType"]>;
@@ -32,6 +33,7 @@ export function ProjectSettingsPage(props: OriginPageProps) {
             <div className="flex min-w-0 flex-col gap-4">
               <ProjectAccessCard projectId={projectId} teamId={project.teamId} />
               <Members project={project} projectId={projectId} isAdmin={isAdmin} />
+              {project.teamId && <ChiefHeartbeatCard projectId={projectId} />}
             </div>
           </div>
         </section>

@@ -52,6 +52,7 @@ export const captureLead = httpAction(async (ctx, request) => {
     return typeof value === "string" && value.trim() ? [[key, value.slice(0, 8000)]] : [];
   }));
   if (!fields.page && request.headers.get("referer")) fields.page = request.headers.get("referer")!.slice(0, 300);
+  if (!fields.source && typeof input.utm_campaign === "string" && input.utm_campaign.trim()) fields.source = input.utm_campaign.trim().toLowerCase().slice(0, 60);
   const outcome = await ctx.runMutation(internal.pipeline.capture, { token, ...fields });
   return done(outcome);
 });

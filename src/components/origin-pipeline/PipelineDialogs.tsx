@@ -1,8 +1,7 @@
 import { useRef, useState, type FormEvent } from "react";
-import { AudioLines, Check, Copy, FileSpreadsheet, Loader2, Mail, MessageSquareText, Plus, RotateCw, Send, Upload, X } from "lucide-react";
+import { AudioLines, Check, FileSpreadsheet, Loader2, Mail, MessageSquareText, Plus, RotateCw, Send, Upload, X } from "lucide-react";
 import type { Bot } from "@/state/store";
 import { cloudMutation } from "@/lib/origin-cloud";
-import { useCopyFeedback } from "@/lib/copy-text";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import { Switch } from "../SettingsPrimitives";
@@ -12,6 +11,7 @@ import {
   captureFetchSnippet, captureFormSnippet, parseLeadsCsv, type PipelineChannel, type PipelineImportRow, type PipelinePendingContact, type PipelineSettingsView,
 } from "../../../shared/origin-pipeline";
 import { pipelineServer } from "./pipeline-api";
+import { CopyBlock, InboundSettings, StageEditor } from "./PipelineSettingsPanels";
 
 const inputClass = cn(baseInput, "font-normal");
 
@@ -115,23 +115,6 @@ export function ImportDialog({ projectId, onClose }: { projectId: string; onClos
   );
 }
 
-function CopyBlock({ label, text, multiline = false }: { label: string; text: string; multiline?: boolean }) {
-  const { state, copy } = useCopyFeedback(text);
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2 text-[12px] font-medium text-ink-secondary">
-        {label}
-        <button type="button" className={cn(ghostButton, "ml-auto h-7 min-h-7 px-2 text-[12px]")} onClick={copy}>
-          {state === "copied" ? <Check size={12} /> : <Copy size={12} />}{state === "copied" ? "Copied" : state === "failed" ? "Copy failed" : "Copy"}
-        </button>
-      </div>
-      {multiline
-        ? <pre className="max-h-56 overflow-auto rounded-lg border border-hairline/50 bg-inset px-3 py-2 font-mono text-[11.5px] leading-relaxed text-ink-secondary">{text}</pre>
-        : <code className="block truncate rounded-lg border border-hairline/50 bg-inset px-3 py-2 font-mono text-[12px] text-ink-secondary" title={text}>{text}</code>}
-    </div>
-  );
-}
-
 export function CaptureDialog({ projectId, settings, canEdit, onClose }: { projectId: string; settings: PipelineSettingsView; canEdit: boolean; onClose(): void }) {
   const [snippet, setSnippet] = useState<"form" | "fetch">("form");
   const action = useAction();
@@ -174,7 +157,27 @@ const CHANNEL_ROWS: readonly { channel: PipelineChannel; label: string; via: str
   { channel: "ai_call", label: "AI calls", via: "ElevenLabs", icon: AudioLines },
 ];
 
-export function PipelineSettingsDialog({ projectId, settings, canEdit, isAdmin, channels, onClose }: {
+export type SettingsTab = "general" | "stages" | "inbound";
+
+export function PipelineSettingsDialog({ projectId, settings, stages, counts, canEdit, isAdmin, channels, initialTab = "general", onClose }: {
+  projectId: string; settings: PipelineSettingsView; stages: readonly string[]; counts: ReadonlyMap<string, number>; canEdit: boolean; isAdmin: boolean;
+  channels: Record<PipelineChannel, boolean> | null; initialTab?: SettingsTab; onClose(): void;
+}) {
+  const [tab, setTab] = useState<SettingsTab>(initialTab);
+  return (
+    <Modal title="Pipeline settings" onClose={onClose} className={tab === "inbound" ? "sm:max-w-xl" : undefined}>
+      <div className="mb-4">
+        <Segmented label="Settings section" value={tab} onChange={setTab}
+          options={[{ value: "general", label: "General" }, { value: "stages", label: "Stages" }, { value: "inbound", label: "Replies" }]} />
+      </div>
+      {tab === "general" && <GeneralSettings projectId={projectId} settings={settings} canEdit={canEdit} isAdmin={isAdmin} channels={channels} onClose={onClose} />}
+      {tab === "stages" && <StageEditor projectId={projectId} stages={stages} counts={counts} canEdit={canEdit} onSaved={onClose} />}
+      {tab === "inbound" && <InboundSettings projectId={projectId} settings={settings} isAdmin={isAdmin} canEdit={canEdit} />}
+    </Modal>
+  );
+}
+
+function GeneralSettings({ projectId, settings, canEdit, isAdmin, channels, onClose }: {
   projectId: string; settings: PipelineSettingsView; canEdit: boolean; isAdmin: boolean; channels: Record<PipelineChannel, boolean> | null; onClose(): void;
 }) {
   const [currency, setCurrency] = useState(settings.currency);
@@ -187,7 +190,6 @@ export function PipelineSettingsDialog({ projectId, settings, canEdit, isAdmin, 
     if (await action.run(() => cloudMutation("pipeline:configure", { projectId, currency, aiAgentId: agentId, aiPhoneNumberId: phoneId }), "Could not save the settings")) onClose();
   };
   return (
-    <Modal title="Pipeline settings" onClose={onClose}>
       <form onSubmit={save} className="flex flex-col gap-4">
         <section className="flex flex-col gap-1.5">
           <h4 className="text-[12px] font-medium text-ink-secondary">Your connections</h4>
@@ -226,7 +228,6 @@ export function PipelineSettingsDialog({ projectId, settings, canEdit, isAdmin, 
           {canEdit && <button className={primaryButton} disabled={!dirty || action.busy}>{action.busy ? <Loader2 size={14} className="animate-spin" /> : null}Save</button>}
         </div>
       </form>
-    </Modal>
   );
 }
 

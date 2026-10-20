@@ -19,6 +19,8 @@ it.skipIf(process.platform === "win32")("saves a login from the sign-in card, an
   // The bridge plays the running browser: the stand-in engine forwards each command here, and the input relay is here too.
   const port = await freePortBlock([0], 19_960, 40);
   const engineArgs: string[][] = [];
+  // The proxy each browser command carries (a version probe starts no browser): a bot's browser goes through its egress gate.
+  const proxies = new Set<string>();
   const bridge = createServer(async (req, res) => {
     let raw = "";
     for await (const chunk of req) raw += String(chunk);
@@ -30,8 +32,9 @@ it.skipIf(process.platform === "win32")("saves a login from the sign-in card, an
         await page.insertText(command.text);
         return reply({ success: true, data: {} });
       }
-      const { args } = JSON.parse(raw) as { args: string[] };
+      const { args, proxy } = JSON.parse(raw) as { args: string[]; proxy?: string };
       engineArgs.push(args);
+      if (args[0] !== "--version") proxies.add(proxy ?? "none");
       const data = await page.engine(args);
       return reply({ success: true, data: data && "port" in data ? { ...data, port } : data });
     } catch (error) {
@@ -48,7 +51,7 @@ const args = process.argv.slice(2).filter((arg) => arg !== "--json" && arg !== "
 const say = (value) => { process.stdout.write(JSON.stringify(value)); process.exit(0); };
 if (args[0] === "session" && args[1] === "list") say({ success: true, data: { sessions: [process.env.AGENT_BROWSER_SESSION] } });
 else if (args[0] === "mcp" || args[0] === "close" || args[0] === "set") process.exit(0);
-else fetch("http://127.0.0.1:${port}/engine", { method: "POST", body: JSON.stringify({ args }) })
+else fetch("http://127.0.0.1:${port}/engine", { method: "POST", body: JSON.stringify({ args, proxy: process.env.AGENT_BROWSER_PROXY }) })
   .then((response) => response.text()).then((text) => { process.stdout.write(text); process.exit(0); }, () => process.exit(1));
 `, { mode: 0o755 });
 
@@ -98,6 +101,7 @@ else fetch("http://127.0.0.1:${port}/engine", { method: "POST", body: JSON.strin
     expect(page.field("#email").value).toBe(USERNAME);
     expect(page.field("#password").value).toBe(PASSWORD);
     expect(page.state).toMatchObject({ email: USERNAME, password: PASSWORD });
+    expect([...proxies]).toEqual([expect.stringMatching(/^socks5:\/\/127\.0\.0\.1:[1-9]\d*$/u)]);
 
     await expect.poll(async () => (await messages()).some((message) => message.role === "bot" && String(message.text).startsWith("Signed in.")), { timeout: 15_000 }).toBe(true);
     const reply = (await messages()).find((message) => message.role === "bot" && String(message.text).startsWith("Signed in."));

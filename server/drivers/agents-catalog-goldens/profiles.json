@@ -1,7 +1,7 @@
 {
   "default": {
-    "bytes": 81033,
-    "sha256": "3a08abaffbf87d9f8b5e5c52faba67fcc51ef26c445ce8afb458b25c2f1992d1",
+    "bytes": 75780,
+    "sha256": "1f3f1e8113e951f520becf1536473d7af9299a2319dd5093561c4b373eb16989",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -58,6 +58,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -67,12 +70,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "voice": {
-    "bytes": 81774,
-    "sha256": "8b0193c8e055a9220f368d79a71c3ac1a37864237ec84f23b8b447a01d260e03",
+    "bytes": 76521,
+    "sha256": "c88ae80f0252f98f7fe49526ed287a86acca86a47320932aa76b78e6d0fd841b",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -130,6 +138,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -139,12 +150,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "shared": {
-    "bytes": 82778,
-    "sha256": "3f90764c07c76c9642d2654f40c8c9a46472b60ac41d68e1dd09948d5bbe4a97",
+    "bytes": 77525,
+    "sha256": "f9ac00bb661f554da5066a4877d7cd4168091e296e668163059ef43752f216c7",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -203,6 +219,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -212,12 +231,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "shared+voice": {
-    "bytes": 83519,
-    "sha256": "118f6d291629427c173fe723b14c665b3b30a3188cb65d98e663fc3b8497e907",
+    "bytes": 78266,
+    "sha256": "f78f59a560a1644290f455d36ce202225d5f002aa37b446ceff436b25354e8b3",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -277,6 +301,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -286,12 +313,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills": {
-    "bytes": 83932,
-    "sha256": "c162ff80270494ef5716cea92340c0e24bb5f729d2a3df8b8d7a1b315c5f709e",
+    "bytes": 78679,
+    "sha256": "9cfb3bdf60e627d0eff162005e7c598586da795cd6bb452b8959ffd194d4bbb8",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -350,6 +382,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -359,12 +394,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+voice": {
-    "bytes": 84673,
-    "sha256": "38100dd1e19cad574ad27632cd0281fb8f8eda9ea9aeeb3ce7e748a117f61df4",
+    "bytes": 79420,
+    "sha256": "b244ebe00b6b6779967bfbfc284a191abbc628fafe49322da876006627628540",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -424,6 +464,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -433,12 +476,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+shared": {
-    "bytes": 85677,
-    "sha256": "ae1b706bc7c1a911921800e017f318fc7f8ff354c73c63591ab3813b39cf049a",
+    "bytes": 80424,
+    "sha256": "55af30e86aef388344dec856a3e54e097d0145ec3bf03a2e559c138ad1304301",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -499,6 +547,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -508,12 +559,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+shared+voice": {
-    "bytes": 86418,
-    "sha256": "3e8dc31090dfb544e1a402e7c389507044c093bcd5e4d2e8bda094a16a8caf6b",
+    "bytes": 81165,
+    "sha256": "a8e71abd4a82e6457c1ea3891fad1ac33d102351c59ac448db848622e9483584",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -575,6 +631,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -584,12 +643,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "non-chief": {
-    "bytes": 68794,
-    "sha256": "6c1e97ae5f29ee3434473dc9896075c24f3c1a6d85579936b15242ee856c34eb",
+    "bytes": 63193,
+    "sha256": "09cea1a953e4772a440e879a495b60ccc95dd779ec62173af846288b565969a8",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -636,6 +700,8 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -645,12 +711,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "voice+non-chief": {
-    "bytes": 69535,
-    "sha256": "39727cbfac1913b0fdd1d007115d6ea22899002ab3c8635998dc2cd6678eb784",
+    "bytes": 63934,
+    "sha256": "921ec849e36d1ec4beac3573a90548768f3bdf29f699db1b9b370d7021e01ff9",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -698,6 +769,8 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -707,12 +780,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "shared+non-chief": {
-    "bytes": 70539,
-    "sha256": "720bd8d91740576fae2293cd0753fd27162694e8b49ed8a613ed4f89d65d098f",
+    "bytes": 64938,
+    "sha256": "59f7ada7ea2a3bac668b649a7b66e3529549e1768acebb0d34135ed974563800",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -761,6 +839,8 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -770,12 +850,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 71280,
-    "sha256": "b1ce3a51cee602ccdce6748d34607df867a21ac98f370b06d0de087d5dd32cf0",
+    "bytes": 65679,
+    "sha256": "238764e4859916b760cab9853cfad06e3f50419485eb613172b054db5c83200c",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -825,6 +910,8 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -834,12 +921,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+non-chief": {
-    "bytes": 71693,
-    "sha256": "a1646be1bfbb0a35d400cc5eee60e9bffad9482a7c075d6a2e1f731a11a2e27a",
+    "bytes": 66092,
+    "sha256": "908ed48d148f73f10d3bb21f327c0dbca7c79d6090643721d4b1c79888c5917b",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -888,6 +980,8 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -897,12 +991,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 72434,
-    "sha256": "9515196bf247eeb71bf0a47ace3194cb64187471b3b8ff7850cc041d4d7e5f4b",
+    "bytes": 66833,
+    "sha256": "feb2bc378e0e2bb45981faa02883d93403c4b5b74010e78794be175ca86f81a3",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -952,6 +1051,8 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -961,12 +1062,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 73438,
-    "sha256": "4f77b89b80d37fa485d60274e34942e3ffa13791210f5730ac4eb1e50674858f",
+    "bytes": 67837,
+    "sha256": "e48426975198290f7a33d4762354330e883e07836739c285da110a37397b9ac6",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1017,6 +1123,8 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1026,12 +1134,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 74179,
-    "sha256": "b513ee9aef05c5c26ca08ca12eb8ce5eced2586fcfde63626365e425b38a2b76",
+    "bytes": 68578,
+    "sha256": "69f4ebfc2d93cb92f4d432375e4935a260399edb71cd40e3666b2e98ad239884",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1083,6 +1196,8 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1092,12 +1207,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 85473,
-    "sha256": "8526243905f2e644dce962d0eb390b917414eb2b26c982e8c6fdd9befe1ce2af",
+    "bytes": 80220,
+    "sha256": "6bf66b46db072abf7e0be3ddd9c61244a8c63625d32917b878b39f8d2cdfc93b",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1158,6 +1278,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1167,12 +1290,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 73234,
-    "sha256": "c4e059dde5b908fa7e05f6e4051aa4a70a0869ddd1e73127f96258944cea6bfe",
+    "bytes": 67633,
+    "sha256": "dd8320649e35b23a4f4ff13096c60054f5cfd1327f67eb0308db6bf47c32ceff",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1223,6 +1351,8 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1232,12 +1362,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 87278,
-    "sha256": "130168c36132377cca4a09749378e723cf8957cabd57bf614b9bf936792074ef",
+    "bytes": 82025,
+    "sha256": "fce1fba6f1dc2bc58744b8aafdaab749f0cee75149aabf8d8e486a4cfcfc3e9e",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1300,6 +1435,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1309,12 +1447,17 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
     ]
   },
   "default+legacy-switches": {
-    "bytes": 81033,
-    "sha256": "3a08abaffbf87d9f8b5e5c52faba67fcc51ef26c445ce8afb458b25c2f1992d1",
+    "bytes": 75780,
+    "sha256": "1f3f1e8113e951f520becf1536473d7af9299a2319dd5093561c4b373eb16989",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1371,6 +1514,9 @@
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1380,7 +1526,96 @@
       "origin_pipeline_list_leads",
       "origin_pipeline_upsert_lead",
       "origin_pipeline_log_activity",
-      "origin_pipeline_contact"
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "find_tool"
+    ]
+  },
+  "skills+shared+voice+escalations+whole-schemas": {
+    "bytes": 93711,
+    "sha256": "faafe90c526dbb5adb693c96fd2c4ca86cf535e1b864ba1025053dd1241dbd59",
+    "tools": [
+      "tool_result_read",
+      "list_shared_computers",
+      "shared_computer",
+      "list_room_targets",
+      "coordinate_bots",
+      "assignment_status",
+      "raise_escalation",
+      "list_bots",
+      "list_rooms",
+      "select_computer",
+      "list_threads",
+      "close_thread",
+      "start_thread",
+      "vm_exec",
+      "attach_file",
+      "show_widget",
+      "update_widget",
+      "post_to_room",
+      "create_bot",
+      "list_team_setup",
+      "propose_team_setup",
+      "propose_bot_deletion",
+      "create_room",
+      "manage_room",
+      "request_credential",
+      "request_sign_in",
+      "fill_login",
+      "send_voice_note",
+      "memory_update",
+      "retry_thread",
+      "memory_log",
+      "session_search",
+      "session_read",
+      "list_routines",
+      "propose_routine",
+      "propose_routine_action",
+      "propose_profile",
+      "propose_model",
+      "propose_team_memory",
+      "skills_list",
+      "skill_manage",
+      "add_mcp_server",
+      "origin_list_projects",
+      "origin_list_issues",
+      "origin_get_issue",
+      "origin_create_issue",
+      "origin_update_issue",
+      "origin_comment_issue",
+      "origin_assign_issue",
+      "origin_complete_issue",
+      "origin_review_pr",
+      "origin_merge_pr",
+      "origin_list_assets",
+      "origin_add_asset",
+      "origin_vault_list",
+      "origin_repo_status",
+      "origin_team_chat",
+      "origin_team_chat_post",
+      "origin_feedback",
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link"
     ]
   }
 }

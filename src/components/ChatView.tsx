@@ -100,7 +100,7 @@ import { useCloudProjectFor } from "@/lib/origin-cloud-links";
 import type { MentionPeer } from "@/lib/mentions";
 import { useAgentThreadFocus } from "@/lib/origin-chat-focus";
 import { ChatErrorBanner, ChatNotice } from "./ChatErrorBanner";
-import { ThreadContextWarning } from "./ContextWarning";
+import { AgentBudgetPill, ThreadContextWarning } from "./ContextWarning";
 import { ChatFindBar } from "./ChatFindBar";
 import { ReplyQuote } from "./ReplyQuote";
 import { ConnectorCard } from "./ConnectorCard";
@@ -1370,7 +1370,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
               <span className="@max-4xl/chathead:hidden">{t("chat.stop")}</span>
             </button>
           )}
-          <ThreadContextWarning bot={bot} messages={messages} />
+          <ThreadContextWarning bot={bot} messages={messages} /><AgentBudgetPill shared={bot.shared} />
           {!remoteClient && <ModelPicker key={bot.threadId} bot={bot} threadId={bot.threadId} />}
           <LiveCallChip currentBotId={bot.id} onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)} />
           <button

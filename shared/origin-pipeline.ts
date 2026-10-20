@@ -6,7 +6,8 @@ export type PipelineActorKind = "member" | "agent" | "system";
 export type PipelineActor = { kind: PipelineActorKind; name: string; id?: string };
 export type PipelineChannel = "email" | "sms" | "whatsapp" | "call" | "ai_call";
 export type PipelineActivityKind = PipelineChannel | "note" | "stage" | "capture" | "import";
-export type PipelineActivityStatus = "logged" | "pending" | "approved" | "sending" | "sent" | "in_progress" | "done" | "failed" | "discarded";
+/** received: the lead wrote or called in, through the project's Twilio or Brevo webhook. */
+export type PipelineActivityStatus = "logged" | "pending" | "approved" | "sending" | "sent" | "in_progress" | "done" | "failed" | "discarded" | "received";
 
 /** A lead as `pipeline:board` and `pipeline:lead` return it. `value` is in the project's currency; `nextDue` is YYYY-MM-DD. */
 export interface PipelineLead {
@@ -26,6 +27,10 @@ export interface PipelineLead {
   nextStep?: string;
   nextDue?: string;
   lastActivityAt?: number;
+  /** Inbound messages nobody on the team has opened yet; opening the lead clears it. */
+  unreadReplies?: number;
+  lastReplyAt?: number;
+  stageChangedAt?: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -45,8 +50,20 @@ export interface PipelineActivity {
   providerId?: string;
   error?: string;
   approvedBy?: string;
+  sequenceId?: string;
   createdAt: number;
   updatedAt: number;
+}
+
+/** Present for editors once inbound is on: the webhook addresses to paste into Twilio and Brevo. */
+export interface PipelineInboundView {
+  twilioUrl: string;
+  brevoUrl: string;
+  /** Brevo sends it as a Bearer token, or as the password of the address's credentials. */
+  brevoSecret: string;
+  /** Whether a Twilio auth token is stored to check X-Twilio-Signature; it is never sent back. */
+  twilioSigning: boolean;
+  replyToEmail?: string;
 }
 
 export interface PipelineSettingsView {
@@ -58,6 +75,44 @@ export interface PipelineSettingsView {
   currency: string;
   aiAgentId?: string;
   aiPhoneNumberId?: string;
+  inboundEnabled: boolean;
+  inbound?: PipelineInboundView;
+}
+
+export type PipelineSequenceChannel = "email" | "sms" | "whatsapp" | "ai_call" | "call_task";
+export type PipelineSequenceStatus = "active" | "paused" | "stopped" | "done";
+
+/** One follow-up of a sequence: due `day` days after it starts; contact steps become drafts a person approves. */
+export interface PipelineSequenceStep {
+  day: number;
+  channel: PipelineSequenceChannel;
+  subject?: string;
+  body?: string;
+  goal?: string;
+  state: "waiting" | "drafted" | "done" | "skipped";
+  activityId?: string;
+}
+
+export interface PipelineSequence {
+  _id: string;
+  leadId: string;
+  status: PipelineSequenceStatus;
+  steps: PipelineSequenceStep[];
+  startedAt: number;
+  pausedAt?: number;
+  nextDueAt?: number;
+  createdBy: PipelineActor;
+  stopReason?: string;
+  updatedAt: number;
+}
+
+export const SEQUENCE_STEPS_MAX = 8;
+export const SEQUENCE_DAYS_MAX = 90;
+
+/** Fills {first_name}, {name} and {company} in a sequence step with the lead's own details. */
+export function fillLeadTemplate(text: string, lead: { name: string; company?: string }): string {
+  const first = lead.name.trim().split(/\s+/)[0] || lead.name;
+  return text.replace(/\{first_name\}/g, first).replace(/\{name\}/g, lead.name).replace(/\{company\}/g, lead.company ?? "your team");
 }
 
 export interface PipelinePendingContact extends PipelineActivity {

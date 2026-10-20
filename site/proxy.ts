@@ -13,4 +13,5 @@ export function proxy(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"] };
+// Security: published pages under /p/ keep the stricter policy Convex serves with them.
+export const config = { matcher: ["/((?!_next/static|_next/image|favicon.ico|p/).*)"] };
