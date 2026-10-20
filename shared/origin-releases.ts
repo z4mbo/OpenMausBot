@@ -3,6 +3,19 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.6.0",
+  date: "2026-10-20",
+  title: "One flow from idea to sale, for the whole team",
+  changes: [
+    { title: "Plan, Build, Launch, Sell", body: "A project's sections are grouped by phase, with Pulse as its home. Origin always shows the next step, from writing the Brief to following up leads, and you can open it or hand it to the Chief in one click." },
+    { title: "GitHub for every member", body: "The workspace owner connects GitHub once and every invited member can create repositories, choose public or private, sync issues and let their agents push, without access to the owner's account. Members can also link their own GitHub to be invited as collaborators." },
+    { title: "Shared keys and Vault for agents", body: "Admins can share integration keys such as fal, Twilio or Stripe with the workspace; a member's own key still wins. Vault items marked for agents can be used by agents while you're unlocked." },
+    { title: "Studio, rebuilt", body: "A new create view with model cards, per-model controls, live progress and one-key actions to animate, upscale, remix or remove backgrounds. Node workflows chain models into reels, talking avatars or podcast intros. Everything you make lands in Assets automatically." },
+    { title: "Sales", body: "Pipeline is now Sales: every contact from your apps, pages and imports in one deduplicated list, a conversation inbox across email, SMS, WhatsApp and calls with suggested replies, and deals you close with a Stripe payment link." },
+    { title: "Canvas, Figma-class", body: "Components and variants, constraints, a pen tool and boolean operations, pages, rulers and grids, comments with mentions, named versions, prototypes with Present mode and a Dev panel with React, Tailwind and CSS. Agents design from issues, check their work with screenshots and submit it for the Chief's review." },
+    { title: "Editors can create projects", body: "Workspace members with edit access can start projects and share them, not only admins." },
+  ],
+}, {
   version: "0.5.0",
   date: "2026-10-20",
   title: "From idea to shipped: Launchpad, Ship, Brand and Pulse",
