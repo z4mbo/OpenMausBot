@@ -3,6 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 import { canEdit, getActiveTeamMember, normalizeEmail, projectMember, projectPeople, requireAdmin, requireMember, requireTeamMember, touchProject } from "./lib/permissions";
 import { repositoryUrl } from "./lib/repository";
+import { compareProjectOrder, reorderWorkspaceProjects } from "./lib/projectOrder";
 import { callSignalKindValidator, projectIconTypeValidator, projectStatusValidator } from "./lib/validators";
 import type { Id, Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
@@ -19,7 +20,7 @@ export const listForUser = query({
     if (args.teamId) {
       await requireTeamMember(ctx, args.teamId, args.sessionToken);
       const projects = await ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", args.teamId)).take(500);
-      const rows = await Promise.all(projects.sort((a, b) => (a.order ?? a.createdAt) - (b.order ?? b.createdAt)).map(async project => {
+      const rows = await Promise.all(projects.sort(compareProjectOrder).map(async project => {
         const member = await projectMember(ctx, project, user);
         return member ? {
         ...project, status: project.status === "active" ? "active" as const : "inactive" as const, memberRole: member.role,
@@ -364,19 +365,9 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
 }
 
 export const reorder = mutation({
-  args: { sessionToken: v.string(), teamId: v.id("teams"), projectIds: v.array(v.id("projects")) },
+  args: { sessionToken: v.string(), teamId: v.id("teams"), projectIds: v.array(v.id("projects")), expectedProjectIds: v.optional(v.array(v.id("projects"))) },
   returns: v.null(),
-  handler: async (ctx, args) => {
-    const { member, user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
-    if (!canEdit(member)) throw new Error("Edit role required");
-    if (args.projectIds.length > 500 || new Set(args.projectIds).size !== args.projectIds.length) throw new Error("Invalid project order");
-    for (const [order, id] of args.projectIds.entries()) {
-      const project = await ctx.db.get(id);
-      if (!project || project.teamId !== args.teamId || !await projectMember(ctx, project, user)) throw new Error("Project does not belong to this workspace");
-      await ctx.db.patch(id, { order });
-    }
-    return null;
-  },
+  handler: reorderWorkspaceProjects,
 });
 
 export const importRepos = mutation({

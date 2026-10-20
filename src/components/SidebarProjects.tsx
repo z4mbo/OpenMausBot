@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Archive, ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Plus, UserPlus, X } from "lucide-react";
+import { Archive, ArrowUpDown, Check, ChevronRight, ChevronsUpDown, GripVertical, Plus, UserPlus, X } from "lucide-react";
 import { RuntimeHelp, WorkspaceMembersPanel } from "./origin-members";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
 import type { Bot } from "@/state/store";
 import { UnreadBadge } from "./UnreadBadge";
 import { cn } from "@/lib/cn";
+import { useOriginProjectOrder } from "@/lib/origin-project-order";
+import { usePointerReorder } from "@/lib/use-pointer-reorder";
 import {
-  movedOrder, orderedGroups, setGroupOrder, setProjectOrder, setProjectSort, setProjectsCollapsed, sortProjects, switchWorkspace, toggleGroup, useWorkspaces, type ProjectSort,
+  movedOrder, orderedGroups, setGroupOrder, setProjectSort, setProjectsCollapsed, switchWorkspace, toggleGroup, useWorkspaces, type ProjectSort,
 } from "@/lib/origin-workspaces";
 import { createPortal } from "react-dom";
 import { STANDALONE_SECTION } from "../../shared/origin-workspaces";
@@ -84,7 +86,7 @@ export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = f
   );
 }
 
-export function SidebarProjects({ projects, row, onNewProject, archived, selectedId }: {
+export function SidebarProjects({ projects, row, onNewProject, archived, selectedId, cloudTeamId = null }: {
   projects: readonly Bot[];
   row(bot: Bot): ReactNode;
   /** Absent when the signed-in person may not create projects here. */
@@ -92,23 +94,21 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
   /** Projects that are inactive in Origin: listed under a folded "Archived" group. */
   archived?: (bot: Bot) => boolean;
   selectedId?: string | null;
+  cloudTeamId?: string | null;
 }) {
   const workspaces = useWorkspaces();
-  const ordered = sortProjects(projects.map((bot) => ({ id: bot.id, name: bot.name, updatedAt: lastUpdate(bot), bot })), workspaces);
-  const dragging = useRef<string | null>(null);
-  const [drop, setDrop] = useState<{ id: string; place: "before" | "after" } | null>(null);
+  const links = useCloudLinks();
+  const order = useOriginProjectOrder(projects.map(bot => ({ id: bot.id, name: bot.name, updatedAt: lastUpdate(bot), bot })), links.projects, workspaces, cloudTeamId);
+  const { ordered } = order;
+  const reorder = usePointerReorder<HTMLDivElement>(ordered.map(project => project.id), order.saving || workspaces.sort !== "custom", (from, to) => void order.move(from, to));
   const open = !workspaces.collapsed;
   const shelved = archived ? ordered.filter(({ bot }) => archived(bot)) : [];
   const live = shelved.length ? ordered.filter((item) => !shelved.includes(item)) : ordered;
   const holdsSelection = shelved.some(({ id }) => id === selectedId);
   const [shelfOpen, setShelfOpen] = useState(holdsSelection);
   useEffect(() => { if (holdsSelection) setShelfOpen(true); }, [holdsSelection]);
-  const place = (event: React.DragEvent<HTMLElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return event.clientY < rect.top + rect.height / 2 ? "before" as const : "after" as const;
-  };
   return (
-    <div data-sidebar-projects className="flex flex-col gap-0.5 pt-2">
+    <div ref={reorder.listRef} data-reorder-list data-sidebar-projects onKeyDown={reorder.onKeyDown} className="flex flex-col gap-0.5 pt-2">
       <div className="flex items-center gap-1 px-2 pb-1">
         <button type="button" aria-expanded={open} onClick={() => setProjectsCollapsed(open)}
           className="flex min-w-0 flex-1 items-center gap-1 rounded text-[12px] font-medium text-ink-secondary hover:text-ink">
@@ -139,24 +139,20 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
           </div>}
         </div>
       )}
+      {order.error && <p role="alert" className="break-words px-2 py-1 text-[12px] text-danger">{order.error}</p>}
+      {order.saving && <span role="status" className="sr-only">Saving workspace project order…</span>}
     </div>
   );
 
   function projectRow(id: string, bot: Bot) {
+    const handle = reorder.handleProps(id);
     return (
-        <div key={id} data-sidebar-project-row={id} draggable={workspaces.sort === "custom"}
-          onDragStart={(event) => { dragging.current = id; event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("application/x-origin-project", id); }}
-          onDragOver={(event) => { if (!dragging.current || dragging.current === id) return; event.preventDefault(); setDrop({ id, place: place(event) }); }}
-          onDragLeave={() => setDrop(null)}
-          onDrop={(event) => {
-            event.preventDefault();
-            const from = dragging.current;
-            if (from && from !== id) setProjectOrder(movedOrder(ordered.map((item) => item.id), from, id, place(event)));
-            dragging.current = null; setDrop(null);
-          }}
-          onDragEnd={() => { dragging.current = null; setDrop(null); }}
-          className={cn(drop?.id === id && (drop.place === "before" ? "shadow-[0_-2px_var(--color-accent)]" : "shadow-[0_2px_var(--color-accent)]"))}>
-          {row(bot)}
+        <div key={id} data-sidebar-project-row={id} data-reorder-key={id} className={cn("flex min-w-0 items-center rounded-lg", reorder.targetKey === id && "ring-1 ring-inset ring-accent")}>
+          <button type="button" {...handle} disabled={order.disabledFor(id)} aria-label={`Reorder ${bot.name}`} title="Drag to reorder, or use the Up and Down arrow keys"
+            onPointerDown={event => { if (!order.disabledFor(id)) handle.onPointerDown(event); }}
+            onKeyDown={event => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); event.stopPropagation(); reorder.cancel(); order.moveBy(id, event.key === "ArrowUp" ? -1 : 1); } }}
+            className="shrink-0 touch-none select-none cursor-grab rounded p-1 text-ink-tertiary hover:text-ink-secondary active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-default disabled:opacity-30"><GripVertical size={12} /></button>
+          <div className="min-w-0 flex-1">{row(bot)}</div>
         </div>
     );
   }

@@ -2147,7 +2147,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           )}
           {WORKSPACE_NAV && <OriginNav density={density} />}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
-            <SidebarProjects projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} {...originRows.rowProps(bot)} />}
+            <SidebarProjects cloudTeamId={cloudTeamId} projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} {...originRows.rowProps(bot)} />}
               archived={originRows.isArchived} selectedId={state.activeView === "chat" ? state.selectedId : null}
               onNewProject={createsProjects ? () => dispatch({ type: "toggleNewBot", open: true }) : undefined} />
           )}

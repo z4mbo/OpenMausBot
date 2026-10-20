@@ -36,6 +36,12 @@ describe("Origin workspaces", () => {
     expect(sortProjects(projects, { ...view, sort: "name" }).map((p) => p.id)).toEqual(["ada", "kai", "yuki"]);
   });
 
+  it("shares canonical linked order while retaining a separate local-only order", () => {
+    expect(sortProjects(projects, view, ["kai", "yuki"]).map(project => project.id)).toEqual(["kai", "yuki", "ada"]);
+    expect(sortProjects(projects, { ...view, order: ["ada", "yuki", "kai"] }, ["kai", "yuki"]).map(project => project.id)).toEqual(["kai", "yuki", "ada"]);
+    expect(sortProjects(projects, { ...view, sort: "name" }, ["kai", "yuki"]).map(project => project.id)).toEqual(["ada", "kai", "yuki"]);
+  });
+
   it("moves a dragged project before or after its target", () => {
     expect(movedOrder(["a", "b", "c"], "c", "a", "before")).toEqual(["c", "a", "b"]);
     expect(movedOrder(["a", "b", "c"], "a", "b", "after")).toEqual(["b", "a", "c"]);

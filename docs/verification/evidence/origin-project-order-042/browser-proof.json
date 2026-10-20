@@ -1,0 +1,58 @@
+{
+  "cases": [
+    {
+      "name": "Member keyboard reorder propagates live",
+      "pass": true,
+      "owner": [
+        "Alpha",
+        "Private planning",
+        "Charlie",
+        "Bravo"
+      ],
+      "member": [
+        "Alpha",
+        "Charlie",
+        "Bravo"
+      ]
+    },
+    {
+      "name": "Owner pointer reorder propagates to member",
+      "pass": true,
+      "owner": [
+        "Private planning",
+        "Charlie",
+        "Alpha",
+        "Bravo"
+      ],
+      "member": [
+        "Charlie",
+        "Alpha",
+        "Bravo"
+      ]
+    },
+    {
+      "name": "Member reload retains canonical order",
+      "pass": true
+    },
+    {
+      "name": "Viewer edit revocation disables every grip",
+      "pass": true,
+      "grips": [
+        {
+          "disabled": true,
+          "label": "Reorder Charlie"
+        },
+        {
+          "disabled": true,
+          "label": "Reorder Alpha"
+        },
+        {
+          "disabled": true,
+          "label": "Reorder Bravo"
+        }
+      ]
+    }
+  ],
+  "scope": "Two browser origins and independent local Chief IDs, fresh synthetic Convex backend; actual SidebarProjects/query/mutation hooks; controlled outer shell, not full App or packaged acceptance",
+  "checkedAt": "2026-10-19T21:25:38.161Z"
+}
