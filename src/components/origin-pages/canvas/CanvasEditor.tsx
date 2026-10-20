@@ -775,7 +775,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   return (
     <div ref={root} className="relative flex min-h-0 min-w-0 flex-1">
       {shown.layers && (
-        <aside aria-label="Layers" className={cn("flex w-60 shrink-0 flex-col border-r border-hairline/40 bg-panel", compact && "absolute inset-y-0 left-0 z-20 w-[min(260px,80vw)] origin-overlay-in")}>
+        <aside aria-label="Layers" className={cn("flex w-60 shrink-0 flex-col border-r border-hairline/40 bg-panel", compact && "absolute bottom-16 left-0 top-0 z-20 w-[min(260px,80vw)] origin-overlay-in")}>
           {layers(selectionApi)}
         </aside>
       )}
@@ -814,7 +814,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         </div>
       </div>
       {shown.inspector && (
-        <aside aria-label="Design" className={cn("flex w-64 shrink-0 flex-col border-l border-hairline/40 bg-panel", compact && "absolute inset-x-0 bottom-0 z-20 max-h-[55%] w-auto border-l-0 border-t origin-overlay-in")}>
+        <aside aria-label="Design" className={cn("flex w-64 shrink-0 flex-col border-l border-hairline/40 bg-panel", compact && "absolute inset-x-0 bottom-16 z-20 max-h-[55%] w-auto border-l-0 border-t origin-overlay-in")}>
           {inspector(selectionApi)}
         </aside>
       )}

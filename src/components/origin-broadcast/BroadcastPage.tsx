@@ -91,9 +91,9 @@ function Broadcast({ projectId, canEdit: projectEdit }: { projectId: string; can
         </div>
       )}
       {missing.length === BROADCAST_CHANNELS.length && (
-        <div className={cn(cardClass, "mb-3 flex flex-wrap items-center gap-3 px-4 py-3")}>
+        <div className={cn(cardClass, "mb-3 flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center")}>
           <span className="flex items-center gap-1.5 text-ink-secondary">{BROADCAST_CHANNELS.map((channel) => <ChannelMark key={channel} channel={channel} size={14} />)}</span>
-          <p className="min-w-0 flex-1 text-[13px] text-ink-secondary">Connect a channel to publish from this computer. Drafts and approvals work without one.</p>
+          <p className="min-w-0 text-[13px] text-ink-secondary sm:flex-1">Connect a channel to publish from this computer. Drafts and approvals work without one.</p>
           <button type="button" className={cn(chipButton, "h-8")} onClick={connect}>Connect channels</button>
         </div>
       )}

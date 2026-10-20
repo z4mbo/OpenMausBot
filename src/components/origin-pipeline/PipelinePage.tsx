@@ -131,7 +131,7 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
       <PageHeader title="Pipeline" count={<span title="Open pipeline value · won">{formatLeadValue(value.open, currency)} open{value.won ? ` · ${formatLeadValue(value.won, currency)} won` : ""}</span>}>
         <Segmented label="Layout" value={layout} onChange={setLayout}
           options={[{ value: "board", label: <Columns3 size={14} aria-label="Board" />, title: "Board" }, { value: "table", label: <List size={14} aria-label="Table" />, title: "Table" }]} />
-        <label className="relative flex min-w-0 flex-1 items-center sm:flex-none">
+        <label className="relative flex min-w-[12rem] flex-1 items-center sm:min-w-0 sm:flex-none">
           <Search size={14} className="pointer-events-none absolute left-2.5 text-ink-tertiary" aria-hidden="true" />
           <input ref={search} className={cn(inputClass, "h-8 pl-8 sm:w-44")} placeholder="Search leads" aria-label="Search leads" value={query} onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => { if (event.key === "Escape") { setQuery(""); event.currentTarget.blur(); } }} />
