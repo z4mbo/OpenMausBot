@@ -52,7 +52,7 @@ export function workflowPorts(node: StudioWorkflowNode): { inputs: StudioPort[];
     case "model": {
       const model = workflowNodeModel(node);
       if (!model) return { inputs: [], outputs: [] };
-      const inputs: StudioPort[] = model.needs.map((kind, index) => ({ id: `in${index}`, kind, label: model.needs.filter((other) => other === kind).length > 1 ? `${NEED_LABEL[kind]} ${index + 1}` : NEED_LABEL[kind], required: true }));
+      const inputs: StudioPort[] = model.needs.map((kind, index) => ({ id: `in${index}`, kind, label: model.inputLabels?.[index] ?? model.needs.filter((other) => other === kind).length > 1 ? `${NEED_LABEL[kind]} ${index + 1}` : NEED_LABEL[kind], required: true }));
       if (model.prompt !== "none") inputs.unshift({ id: "prompt", kind: "text", label: "Prompt", required: false });
       for (let index = 0; index < (model.references ?? 0) && index < 2; index += 1) inputs.push({ id: `ref${index}`, kind: "image", label: `Reference ${index + 1}`, required: false });
       return { inputs, outputs: [{ id: "media", kind: model.kind, label: NEED_LABEL[model.kind], required: false }] };
@@ -157,6 +157,8 @@ export interface StudioWorkflowTemplate {
   name: string;
   description: string;
   graph: StudioWorkflowGraph;
+  /** The STUDIO_PRESETS id whose preview image the template's card shows. */
+  preview?: string;
 }
 
 const node = (id: string, type: StudioNodeType, x: number, y: number, params: StudioParams): StudioWorkflowNode => ({ id, type, x, y, params });
@@ -171,9 +173,77 @@ export const CAMPAIGN_SCRIPT_NODE = "p2";
 
 export const STUDIO_WORKFLOW_TEMPLATES: readonly StudioWorkflowTemplate[] = [
   {
+    id: "template:motion-transfer",
+    name: "Motion transfer",
+    description: "A generated character performs every move of your reference video, as in ComfyUI's Kling Motion Control template.",
+    preview: "motion-transfer",
+    graph: {
+      nodes: [
+        node("p1", "prompt", 40, 40, { label: "Character", text: "Full-body portrait of a stylish dancer in streetwear, plain studio backdrop, even light" }),
+        node("m1", "model", 340, 40, { model: "fal-ai/nano-banana-pro", aspectRatio: "9:16" }),
+        node("a1", "asset", 40, 340, { kind: "video", label: "Motion video", assetId: "" }),
+        node("m2", "model", 660, 180, { model: "fal-ai/kling-video/v3/pro/motion-control" }),
+        node("o1", "output", 960, 180, { name: "Motion transfer" }),
+      ],
+      edges: [link("p1", "m1", "prompt"), link("m1", "m2", "in0"), link("a1", "m2", "in1"), link("m2", "o1", "media")],
+    },
+  },
+  {
+    id: "template:character-swap",
+    name: "Character swap",
+    description: "Your character takes the lead role in an existing video, as in ComfyUI's Wan Animate character replacement.",
+    preview: "character-swap",
+    graph: {
+      nodes: [
+        node("a1", "asset", 40, 40, { kind: "image", label: "Character", assetId: "" }),
+        node("a2", "asset", 40, 300, { kind: "video", label: "Video", assetId: "" }),
+        node("m1", "model", 340, 140, { model: "fal-ai/wan/v2.2-14b/animate/replace", resolution: "720p" }),
+        node("o1", "output", 640, 140, { name: "Character swap" }),
+      ],
+      edges: [link("a1", "m1", "in0"), link("a2", "m1", "in1"), link("m1", "o1", "media")],
+    },
+  },
+  {
+    id: "template:try-on-reel",
+    name: "Try-on to runway clip",
+    description: "A person wears your garment, then turns for the camera in a vertical clip.",
+    preview: "virtual-try-on",
+    graph: {
+      nodes: [
+        node("a1", "asset", 40, 40, { kind: "image", label: "Person", assetId: "" }),
+        node("a2", "asset", 40, 300, { kind: "image", label: "Garment", assetId: "" }),
+        node("m1", "model", 340, 140, { model: "fal-ai/fashn/tryon/v1.6" }),
+        node("o1", "output", 640, 0, { name: "Try-on photo" }),
+        node("p1", "prompt", 340, 440, { label: "Motion", text: "The model turns slowly to show the outfit, confident runway pose, soft studio light" }),
+        node("m2", "model", 660, 240, { model: "fal-ai/kling-video/v3/pro/image-to-video", duration: "5", motion: "orbit", sound: false }),
+        node("o2", "output", 960, 240, { name: "Try-on clip" }),
+      ],
+      edges: [link("a1", "m1", "in0"), link("a2", "m1", "in1"), link("m1", "o1", "media"), link("m1", "m2", "in0"), link("p1", "m2", "prompt"), link("m2", "o2", "media")],
+    },
+  },
+  {
+    id: "template:product-angles",
+    name: "Product from every angle",
+    description: "One product photo becomes a set of new camera angles, as in ComfyUI's multiple-angles template.",
+    preview: "camera-angle",
+    graph: {
+      nodes: [
+        node("a1", "asset", 40, 200, { kind: "image", label: "Product photo", assetId: "" }),
+        node("m1", "model", 340, 0, { model: "fal-ai/qwen-image-edit-2511-multiple-angles", angle: "three-quarter-left" }),
+        node("m2", "model", 340, 260, { model: "fal-ai/qwen-image-edit-2511-multiple-angles", angle: "back" }),
+        node("m3", "model", 340, 520, { model: "fal-ai/qwen-image-edit-2511-multiple-angles", angle: "top" }),
+        node("o1", "output", 660, 0, { name: "Three-quarter view" }),
+        node("o2", "output", 660, 260, { name: "Back view" }),
+        node("o3", "output", 660, 520, { name: "Top view" }),
+      ],
+      edges: [link("a1", "m1", "in0"), link("a1", "m2", "in0"), link("a1", "m3", "in0"), link("m1", "o1", "media"), link("m2", "o2", "media"), link("m3", "o3", "media")],
+    },
+  },
+  {
     id: "template:product-reel",
     name: "Product shot to 9:16 reel",
     description: "A product photo becomes a studio shot, then a vertical clip with its own music.",
+    preview: "product-turntable",
     graph: {
       nodes: [
         node("a1", "asset", 40, 40, { kind: "image", label: "Product photo", assetId: "" }),
@@ -193,6 +263,7 @@ export const STUDIO_WORKFLOW_TEMPLATES: readonly StudioWorkflowTemplate[] = [
     id: "template:talking-avatar",
     name: "Talking avatar",
     description: "A generated presenter reads your script in an ElevenLabs voice, lip-synced by Kling Avatar.",
+    preview: "talking-photo",
     graph: {
       nodes: [
         node("p1", "prompt", 40, 60, { label: "Presenter", text: "Friendly founder portrait, looking at camera, soft office light, shallow depth of field" }),
@@ -209,6 +280,7 @@ export const STUDIO_WORKFLOW_TEMPLATES: readonly StudioWorkflowTemplate[] = [
     id: "template:podcast-kit",
     name: "Podcast cover and voice intro",
     description: "A square cover, a spoken intro and a music bed, each saved to Assets.",
+    preview: "voice-over",
     graph: {
       nodes: [
         node("p1", "prompt", 40, 40, { label: "Cover", text: "Bold podcast cover art, big readable title, graphic shapes, high contrast" }),

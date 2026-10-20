@@ -56,6 +56,10 @@ check covers:
 - at 1280 px dark: a workflow is built from the palette, with Ctrl+Z,
   Ctrl+Shift+Z, Ctrl+C then Ctrl+V and a double-click on empty canvas, links
   are dragged, and it is saved with Ctrl+S, run with Ctrl+Enter and listed;
+- at 1280 px dark: T opens the presets with their ComfyUI preview images;
+  search plus Enter picks Motion transfer, whose inputs read Character and
+  Motion video, and fal's Kling motion control receives the character image,
+  the video and `character_orientation`;
 - Assets shows every finished output under the Studio folder without a Save
   step.
 
@@ -65,7 +69,17 @@ uploaded-copy swap, workflow steps kept out of Assets, run permissions, the
 library, joining a large output's pieces, a run's Broadcast drafts) by
 `backend/convex/studio.test.ts` and `backend/convex/studioWorkflows.test.ts`;
 copy, paste, undo and palette search by
-`src/components/origin-studio/workflow-edit.test.ts`.
+`src/components/origin-studio/workflow-edit.test.ts`. Presets are covered the
+same way:
+
+- `shared/studio-presets.test.ts` checks every preset's model, unique id,
+  preview image in `src/assets/studio-presets/` and its credit in
+  `third_party/comfyui-workflow-templates/README.md`, and the fal input of the
+  motion transfer, Wan Animate, start and end frame, try-on, camera angle,
+  video edit and video background models; `server/origin-studio.test.ts`
+  lists presets with `origin_studio_presets` and generates from one with
+  `origin_studio_generate`, and `server/origin-cloud.test.ts` shows a Studio
+  tool's cards in the turn's thread.
 
 ## Outputs over 15 MB
 

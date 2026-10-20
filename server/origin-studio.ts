@@ -12,6 +12,7 @@ import {
   type StudioCharacter, type StudioGenerateRequest, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel, type StudioParams, type StudioSource,
 } from "../shared/studio.ts";
 import { brandedPrompt, type StoredBrandKit } from "../shared/brand-kit.ts";
+import { studioPreset } from "../shared/studio-presets.ts";
 
 /** The signed-in Origin account this app's server acts as. */
 export interface StudioCloud {
@@ -207,6 +208,8 @@ function paramsOf(request: StudioGenerateRequest, references: number, character?
   if (request.negativePrompt?.trim()) params.negativePrompt = request.negativePrompt.trim();
   if (request.sound === false) params.sound = false;
   if (request.motion) params.motion = request.motion;
+  if (request.angle) params.angle = request.angle;
+  if (request.preset && studioPreset(request.preset)) params.preset = request.preset;
   if (references) params.references = references;
   if (character) params.character = character.name;
   return Object.keys(params).length ? params : undefined;

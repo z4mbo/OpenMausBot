@@ -104,7 +104,7 @@ export function createWorkflowExecutor(deps: WorkflowDeps): WorkflowExecutor {
         projectId, mode: model.mode, model: model.id, prompt,
         ...(param("aspectRatio") ? { aspectRatio: String(param("aspectRatio")) } : {}), ...(param("duration") ? { duration: String(param("duration")) } : {}),
         ...(param("voice") ? { voice: String(param("voice")) } : {}), ...(param("resolution") ? { resolution: String(param("resolution")) } : {}),
-        ...(param("motion") ? { motion: String(param("motion")) } : {}), ...(param("negativePrompt") ? { negativePrompt: String(param("negativePrompt")) } : {}),
+        ...(param("motion") ? { motion: String(param("motion")) } : {}), ...(param("angle") ? { angle: String(param("angle")) } : {}), ...(param("negativePrompt") ? { negativePrompt: String(param("negativePrompt")) } : {}),
         ...(Number.isInteger(param("seed")) ? { seed: Number(param("seed")) } : {}), ...(node.params.sound === false ? { sound: false } : {}),
         ...(node.params.brand === false ? { brand: false } : {}), ...(param("character") ? { characterId: String(param("character")) } : {}),
       }, agentName, { media: { sources, references }, workflow: { runId, nodeId: node.id }, intermediate: true });

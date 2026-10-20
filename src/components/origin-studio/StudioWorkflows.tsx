@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { Loading, cardClass, iconButton } from "../origin-pages/ui";
 import { WorkflowEditor, type WorkflowDraft } from "./WorkflowEditor";
 import { MediaThumb } from "./studio-ui";
+import { presetImage } from "./StudioPresets";
 import type { StudioGeneration } from "../../../shared/studio";
 import { CAMPAIGN_PACK_ID, STUDIO_WORKFLOW_TEMPLATES, workflowNodeModel, type StudioWorkflow, type StudioWorkflowGraph, type StudioWorkflowRun } from "../../../shared/studio-workflow";
 
@@ -20,11 +21,12 @@ function RunMark({ status }: { status: StudioWorkflowRun["status"] }) {
   return <Ban size={13} className="text-ink-tertiary" aria-label="Stopped" />;
 }
 
-function WorkflowCard({ name, description, graph, meta, featured, onOpen, onRemove }: { name: string; description?: string; graph: StudioWorkflowGraph; meta?: string; featured?: boolean; onOpen(): void; onRemove?(): void }) {
+function WorkflowCard({ name, description, graph, meta, featured, image, onOpen, onRemove }: { name: string; description?: string; graph: StudioWorkflowGraph; meta?: string; featured?: boolean; image?: string; onOpen(): void; onRemove?(): void }) {
   const Icon = featured ? Megaphone : Workflow;
   return (
     <article className={cn(cardClass, "group relative flex flex-col transition-colors duration-(--motion-fast) hover:border-hairline", featured && "border-accent/40")}>
-      <button type="button" onClick={onOpen} className="flex flex-1 flex-col gap-1.5 rounded-xl p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-accent/60">
+      <button type="button" onClick={onOpen} className="flex flex-1 flex-col gap-1.5 overflow-hidden rounded-xl p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-accent/60">
+        {image && <img src={image} alt="" loading="lazy" draggable={false} className="-mx-3 -mt-3 mb-1 h-28 w-[calc(100%+1.5rem)] max-w-none object-cover" />}
         <span className="flex items-center gap-2 text-[13.5px] font-medium text-ink"><Icon size={14} className={cn("shrink-0", featured ? "text-accent-text" : "text-ink-tertiary")} aria-hidden="true" /><span className="truncate">{name}</span></span>
         {description && <span className="line-clamp-2 text-[12px] text-ink-secondary">{description}</span>}
         <span className="line-clamp-2 text-[11.5px] text-ink-tertiary">{steps(graph)}</span>
@@ -80,7 +82,7 @@ export function StudioWorkflows({ projectId, canEdit, falReady, rows, draft, onD
         <h3 className="mb-2 text-[12px] font-medium uppercase tracking-[0.06em] text-ink-tertiary">Templates</h3>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] gap-3">
           {[...STUDIO_WORKFLOW_TEMPLATES].sort((a, b) => Number(b.id === CAMPAIGN_PACK_ID) - Number(a.id === CAMPAIGN_PACK_ID)).map((template) => (
-            <WorkflowCard key={template.id} name={template.name} description={template.description} graph={template.graph} featured={template.id === CAMPAIGN_PACK_ID}
+            <WorkflowCard key={template.id} name={template.name} description={template.description} graph={template.graph} featured={template.id === CAMPAIGN_PACK_ID} image={template.preview ? presetImage(template.preview) : undefined}
               onOpen={() => setDraft({ name: template.name, graph: structuredClone(template.graph) })} />
           ))}
         </div>

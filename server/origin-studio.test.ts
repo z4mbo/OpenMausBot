@@ -478,13 +478,18 @@ describe("Studio agent tools", () => {
     expect(made.isError).toBeUndefined();
     expect(made.text).toContain("gen1 [done] Nano Banana Pro image");
     expect(made.text).toContain("https://v3.fal.media/files/out.png · asset asset-gen1-0");
+    expect(made.studio).toMatchObject({ heading: "Made in Kai's Studio", projectId: "kai" });
+    expect(made.studio!.generations![0]).toEqual({ id: "gen1", status: "done", modelLabel: "Nano Banana Pro", kind: "image", prompt: "launch image", outputs: [{ url: "https://v3.fal.media/files/out.png", kind: "image" }] });
     expect(base.convex.calls.filter((call) => call.name === "studio:create").map((call) => call.args.agentName)).toEqual(["Designer", "Designer", "Designer"]);
     const listed = await runOriginTool("origin_studio_list", { status: "done" }, "kai-dev", toolDeps);
     expect(listed.text).toContain("3 of 3");
+    expect(listed.studio!.generations!.map((generation) => generation.id)).toEqual(["gen3", "gen2", "gen1"]);
     const saved = await runOriginTool("origin_studio_save_asset", { generation_id: "gen2", broadcast: true }, "kai-dev", toolDeps);
     expect(saved.text).toContain("output 0 → asset asset-gen2-0 (picked for Broadcast)");
+    expect(saved.studio!.generations!.map((generation) => generation.id)).toEqual(["gen2"]);
     const animated = await runOriginTool("origin_studio_generate", { mode: "video", prompt: "make it move", sources: ["gen1"], wait: false }, "kai-dev", toolDeps);
     expect(animated.text).toContain("Started 1 generation(s)");
+    expect(animated.studio!.generations).toEqual([{ id: "gen4", status: "queued", modelLabel: "Veo 3.1 · animate", kind: "video", prompt: "make it move", outputs: [] }]);
     expect(base.convex.rows.get("gen4")).toMatchObject({ model: "fal-ai/veo3.1/image-to-video", parentId: "gen1", action: "remix" });
     const refused = await runOriginTool("origin_studio_generate", { mode: "video", model: "fal-ai/kling-video/v3/pro/image-to-video", prompt: "x" }, "kai-dev", toolDeps);
     expect(refused).toMatchObject({ isError: true, text: expect.stringContaining("starts from image") });
@@ -521,6 +526,38 @@ describe("Studio agent tools", () => {
     expect(base.convex.rows.get("gen1")!.params).toMatchObject({ character: "Mia" });
     const unknown = await runOriginTool("origin_studio_generate", { prompt: "x", character: "Zed" }, "kai-dev", toolDeps);
     expect(unknown).toMatchObject({ isError: true, text: expect.stringContaining("No library entry \"Zed\"") });
+    studio.stop();
+  });
+
+  it("lists presets and generates with one, keeping what the agent passes", async () => {
+    const base = setup();
+    const studio = createStudioRunner({ ...base.deps, pollMs: 1 });
+    const toolDeps = { bots: BOTS, state: { url: DEPLOYMENT, sessionToken: "session", projects: { "kai-chief": "kai" } }, connect: () => base.convex.client, studio };
+    const motion = await runOriginTool("origin_studio_presets", { group: "motion" }, "kai-dev", toolDeps);
+    expect(motion.text).toContain("- motion-transfer \"Motion transfer\": Your character copies every move of a reference video. · Kling 3 Pro · motion transfer (video) · sources: Character (image) then Motion video (video)");
+    expect(motion.text).not.toContain("virtual-try-on");
+    expect(motion.studio).toEqual({ heading: "Studio presets", projectId: "kai", presets: ["motion-transfer", "animate-character", "character-swap", "talking-photo", "lip-sync"] });
+    const all = await runOriginTool("origin_studio_presets", {}, "kai-dev", toolDeps);
+    expect(all.text).toContain("- virtual-try-on \"Virtual try-on\"");
+    expect(all.text).toContain("sources: Person (image) then Garment (image)");
+    expect(all.studio!.presets).toHaveLength(12);
+    expect(all.studio!.presets!.slice(0, 5)).toEqual(["motion-transfer", "start-end-frame", "camera-angle", "virtual-try-on", "voice-over"]);
+    expect(await runOriginTool("origin_studio_presets", { group: "nope" }, "kai-dev", toolDeps)).toMatchObject({ isError: true });
+
+    const frames = await runOriginTool("origin_studio_generate", { preset: "start-end-frame", sources: ["asset-logo", "asset-link"], wait: false }, "kai-dev", toolDeps);
+    expect(frames.studio!.generations).toEqual([{ id: "gen1", status: "queued", modelLabel: "Kling 3 Pro · start & end", kind: "video", prompt: "A smooth continuous camera move from the first frame to the last", outputs: [] }]);
+    expect(base.convex.rows.get("gen1")).toMatchObject({ model: "fal-ai/kling-video/v3/pro/start-end", mode: "video", params: { preset: "start-end-frame" } });
+    expect(base.fal.submits()[0]).toMatchObject({
+      url: "https://queue.fal.run/fal-ai/kling-video/v3/pro/image-to-video",
+      body: { start_image_url: "data:image/png;base64,CQk=", end_image_url: "https://images.example.com/mood.png", duration: "5" },
+    });
+    await runOriginTool("origin_studio_generate", { preset: "camera-angle", prompt: "keep the logo", camera_angle: "top", sources: ["asset-link"], wait: false }, "kai-dev", toolDeps);
+    expect(base.convex.rows.get("gen2")).toMatchObject({ model: "fal-ai/qwen-image-edit-2511-multiple-angles", prompt: "keep the logo", params: { angle: "top", preset: "camera-angle" } });
+    expect(base.fal.submits()[1]!.body).toMatchObject({ image_urls: ["https://images.example.com/mood.png"], vertical_angle: 90, zoom: 4, additional_prompt: "keep the logo" });
+    await runOriginTool("origin_studio_generate", { preset: "relight", sources: ["asset-link"], wait: false, brand: false }, "kai-dev", toolDeps);
+    expect(base.convex.rows.get("gen3")!.prompt).toBe("Warm golden hour sunlight from the left, soft shadows, cinematic");
+    const unknown = await runOriginTool("origin_studio_generate", { preset: "nope", sources: ["asset-link"] }, "kai-dev", toolDeps);
+    expect(unknown).toMatchObject({ isError: true, text: expect.stringContaining("No Studio preset nope") });
     studio.stop();
   });
 });
