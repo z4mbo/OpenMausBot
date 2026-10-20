@@ -12,7 +12,7 @@ const svg = (body: string) => `data:image/svg+xml;utf8,${encodeURIComponent(`<sv
 const cover = svg(`<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e1b4b"/><stop offset="1" stop-color="#4338ca"/></linearGradient></defs>
 <rect width="1080" height="1080" fill="url(#g)"/><circle cx="820" cy="260" r="220" fill="#818cf8" opacity=".35"/><circle cx="900" cy="760" r="120" fill="#c7d2fe" opacity=".25"/>
 <text x="90" y="560" font-family="Segoe UI, Helvetica, Arial" font-weight="700" font-size="128" fill="#fff">Origin 0.6</text>
-<text x="94" y="650" font-family="Segoe UI, Helvetica, Arial" font-size="48" fill="#c7d2fe">Idea to sale, in one app</text>`);
+<text x="94" y="650" font-family="Segoe UI, Helvetica, Arial" font-size="48" fill="#c7d2fe">Idea to launch, in one app</text>`);
 const team = svg(`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset="1" stop-color="#f97316"/></linearGradient></defs>
 <rect width="1080" height="1080" fill="url(#g)"/><g fill="#7c2d12" opacity=".85"><circle cx="300" cy="520" r="110"/><circle cx="540" cy="470" r="130"/><circle cx="780" cy="520" r="110"/>
 <rect x="170" y="640" width="260" height="440" rx="120"/><rect x="400" y="610" width="280" height="470" rx="130"/><rect x="650" y="640" width="260" height="440" rx="120"/></g>`);
@@ -86,7 +86,7 @@ const measured = (id: string, channel: BroadcastChannel, text: string, published
 let nextId = 1;
 const posts: BroadcastPost[] = [
   { _id: "post-agent", projectId: "fixture-project", status: "draft", agentName: "Echo", needsApproval: true, createdAt: 1, updatedAt: 9, assetIds: ["asset-cover"], media: mediaOf(["asset-cover"]),
-    variants: [{ channel: "x", text: "Origin 0.6 is out: Studio, Broadcast and Ship in one app. https://origin.test/0.6" }, { channel: "linkedin", text: "Origin 0.6 is out. Your team and its agents now plan, generate and publish launch content in one place. #launch #buildinpublic" }] },
+    variants: [{ channel: "x", text: "Origin 0.6 is out: Studio and Publish in one app. https://origin.test/0.6" }, { channel: "linkedin", text: "Origin 0.6 is out. Your team and its agents now plan, generate and publish launch content in one place. #launch #buildinpublic" }] },
   { _id: "post-scheduled", projectId: "fixture-project", status: "scheduled", scheduledAt: day(1, 10), createdAt: 2, updatedAt: 8, assetIds: ["asset-team"], media: mediaOf(["asset-team"]),
     variants: [{ channel: "bluesky", text: "Meet the team behind Origin." }, { channel: "instagram", text: "Meet the team behind Origin. #team #startup" }] },
   { _id: "post-reel", projectId: "fixture-project", status: "scheduled", format: "reel", reel: { coverMs: 2_500, music: "Nightcall · Kavinsky" }, scheduledAt: day(3, 18), createdAt: 3, updatedAt: 7,

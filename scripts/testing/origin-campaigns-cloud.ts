@@ -29,7 +29,9 @@ async function call<T>(kind: "query" | "mutation" | "action", name: string, args
 export const cloudUrl = () => config.url;
 export const useCloudUrl = cloudUrl;
 export const sessionStore = { get: token };
-export const useCloudSession = () => ({ token: token(), user: { _id: "fixture-user" }, ready: true });
+const signedIn = await call<{ _id: string } | null>("query", "auth:me").catch(() => null);
+const user = { _id: signedIn?._id ?? "fixture-user" };
+export const useCloudSession = () => ({ token: token(), user, ready: true });
 export const isCurrentCloudSession = () => true;
 export const captureCloudSession = () => ({ url: cloudUrl(), token: token(), isCurrent: () => true, assertCurrent() {} });
 export const setCloudUrl = () => {};
