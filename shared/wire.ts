@@ -86,8 +86,8 @@ export interface TaskOpenedBy {
   threadId?: string;
   /** A parallel room job's thread: `threadId` is the room thread it came from, and the member must stay in that room. */
   roomLane?: true;
-  /** The canonical specialist conversation for this parent thread and recipient. */
-  continuity?: true;
+  /** True marks the canonical specialist conversation for this parent and recipient; false keeps an explicitly new conversation independent. */
+  continuity?: boolean;
   at: number;
 }
 

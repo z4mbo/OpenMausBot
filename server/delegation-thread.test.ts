@@ -57,12 +57,20 @@ describe("parent delegation conversations", () => {
     expect(f.history).not.toHaveBeenCalled();
   });
 
-  it.each([undefined, opened(), opened({ threadId: undefined })])("migrates only a unique coordinator-proven child (%j)", openedBy => {
+  it.each([undefined, opened({ threadId: undefined })])("migrates only a unique coordinator-proven child (%j)", openedBy => {
     const child = task("child-A", { openedBy });
     const f = fixture([task("direct-B"), child], previous(child.threadId));
     expect(f.allocate()).toEqual({ task: child, created: false });
     expect(child.openedBy).toMatchObject({ ...parent, kind: "work", continuity: true });
     expect(f.store.createTask).not.toHaveBeenCalled();
+  });
+
+  it("preserves a legacy fresh job with an exact opener but no work kind", () => {
+    const fresh = task("legacy-named-job", { openedBy: opened() });
+    const f = fixture([fresh], previous(fresh.threadId));
+    expect(f.allocate().created).toBe(true);
+    expect(fresh.openedBy).not.toHaveProperty("continuity");
+    expect(f.store.setTaskOpenedBy).not.toHaveBeenCalled();
   });
 
   it("does not infer ownership from a matching opener name or current conversation", () => {
@@ -111,9 +119,22 @@ describe("parent delegation conversations", () => {
     const f = fixture([child]);
     const created = f.allocate({ fresh: true });
     expect(created.created).toBe(true);
-    expect(created.task.openedBy).not.toHaveProperty("continuity");
+    expect(created.task.openedBy?.continuity).toBe(false);
     expect(created.task.openedBy).not.toHaveProperty("kind");
     expect(f.allocate()).toEqual({ task: child, created: false });
+  });
+
+  it("keeps a fresh named job separate when no canonical child exists yet", () => {
+    const history: HandoffView[] = [];
+    const f = fixture([task("direct-B")], history);
+    const fresh = f.allocate({ fresh: true, title: "Independent job" });
+    history.push(...previous(fresh.task.threadId));
+    const saved = structuredClone(fresh.task);
+    const canonical = f.allocate();
+    expect(canonical.created).toBe(true);
+    expect(canonical.task.threadId).not.toBe(fresh.task.threadId);
+    expect(fresh.task).toEqual(saved);
+    expect(f.allocate()).toEqual({ task: canonical.task, created: false });
   });
 
   it("refuses conflicting canonical links instead of picking either context or creating more", () => {
