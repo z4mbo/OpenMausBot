@@ -335,6 +335,7 @@ Origin's inspection and delivery records:
 - [Member call lifecycle and audio recovery](origin-calls.md)
 - [Canvas design editing and agent sections](origin-draw.md)
 - [Published pages and lead forms from Canvas](origin-published-pages.md)
+- [Pipeline replies, sequences and lead scores](origin-pipeline-v2.md)
 - [Storage admission security investigation](origin-storage-admission.md)
 - [Upstream fit review and paired appearance](origin-upstream-review.md)
 - [Thirty additional upstream source-fit decisions](origin-upstream-fit-034.md)

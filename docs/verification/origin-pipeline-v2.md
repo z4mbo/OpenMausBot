@@ -15,7 +15,7 @@ node --experimental-strip-types scripts/verify-origin-pipeline.ts
 $env:OMB_VERIFY_PLAYWRIGHT = 'file:///ABSOLUTE/PATH/TO/playwright/index.mjs'
 node scripts/testing/check-origin-pipeline.mjs http://127.0.0.1:PRINTED_PORT/__origin-pipeline.html
 npx.cmd vitest run shared/origin-pipeline-score.test.ts server/origin-pipeline.test.ts src/components/origin-pipeline
-cd backend; npx.cmd vitest run convex/pipeline.test.ts convex/pipelineInbound.test.ts
+npx.cmd vitest run --root backend backend/convex/pipeline.test.ts backend/convex/pipelineInbound.test.ts
 ```
 
 The check mutates the fixture, so launch a fresh one for each run. Stop the launcher

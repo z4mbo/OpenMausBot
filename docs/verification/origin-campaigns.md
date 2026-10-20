@@ -28,7 +28,7 @@ and 375 px dark, and a viewer:
 - the campaign list and detail: brief, utm tag, stat tiles, the timeline with
   per-channel state and X numbers, the content gallery, leads by stage (the
   other campaign's lead is not attributed) and issues;
-- Refresh calls `/api/origin/campaigns/metrics`, which reads the campaign from
+- Refresh calls the local campaign metrics route, which reads the campaign from
   the backend and reports that X is not connected; LinkedIn is named as
   unread;
 - Plan with the Chief sends the brief into its chat;
