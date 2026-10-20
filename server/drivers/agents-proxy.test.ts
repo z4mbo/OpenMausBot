@@ -677,6 +677,9 @@ describe("agents-proxy MCP surface", () => {
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
+      "origin_canvas_screenshot",
+      "origin_canvas_comment",
+      "origin_design_submit",
       "origin_page_publish",
       "origin_page_list",
       "origin_standup",
@@ -684,6 +687,8 @@ describe("agents-proxy MCP surface", () => {
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
+      "origin_studio_workflow_list",
+      "origin_studio_workflow_run",
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
@@ -692,6 +697,8 @@ describe("agents-proxy MCP surface", () => {
       "origin_pipeline_log_activity",
       "origin_pipeline_sequence",
       "origin_pipeline_contact",
+      "origin_pipeline_conversations",
+      "origin_pipeline_deal",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -785,8 +792,8 @@ describe("agents-proxy MCP surface", () => {
       "list_team_setup",
       "session_search", "session_read", "list_routines", "skills_list",
       "origin_list_projects", "origin_list_issues", "origin_get_issue", "origin_list_assets", "origin_vault_list", "origin_repo_status",
-      "origin_team_chat", "origin_feedback", "origin_canvas", "origin_page_list", "origin_pulse", "origin_studio_list", "origin_broadcast_list", "origin_pipeline_list_leads",
-      "origin_campaign_get", "origin_doc_list", "origin_doc_get", "origin_milestone_list", "origin_brand_get", "origin_ship_status",
+      "origin_team_chat", "origin_feedback", "origin_canvas", "origin_canvas_screenshot", "origin_page_list", "origin_pulse", "origin_studio_list", "origin_studio_workflow_list", "origin_broadcast_list", "origin_pipeline_list_leads",
+      "origin_pipeline_conversations", "origin_campaign_get", "origin_doc_list", "origin_doc_get", "origin_milestone_list", "origin_brand_get", "origin_ship_status",
     ];
     expect(list.result.tools.filter((tool: any) => tool.annotations?.readOnlyHint)
       .map((tool: any) => tool.name)).toEqual(readNames);

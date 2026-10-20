@@ -1,7 +1,7 @@
 import { useRef, useState, type FormEvent } from "react";
-import { AudioLines, Check, FileSpreadsheet, Loader2, Mail, MessageSquareText, Plus, RotateCw, Send, Upload, X } from "lucide-react";
+import { AudioLines, Check, CreditCard, FileSpreadsheet, Loader2, Mail, MessageSquareText, Plus, RotateCw, Send, Upload, X } from "lucide-react";
 import type { Bot } from "@/state/store";
-import { cloudMutation } from "@/lib/origin-cloud";
+import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import { Switch } from "../SettingsPrimitives";
@@ -11,6 +11,8 @@ import {
   captureFetchSnippet, captureFormSnippet, parseLeadsCsv, type PipelineChannel, type PipelineImportRow, type PipelinePendingContact, type PipelineSettingsView,
 } from "../../../shared/origin-pipeline";
 import { pipelineServer } from "./pipeline-api";
+import { captureCurlSnippet, type CaptureHealth } from "../../../shared/origin-sales";
+import { since } from "./activity-labels";
 import { CopyBlock, InboundSettings, StageEditor } from "./PipelineSettingsPanels";
 
 export function NewLeadDialog({ projectId, stages, onClose, onCreated }: { projectId: string; stages: readonly string[]; onClose(): void; onCreated(leadId: string): void }) {
@@ -113,29 +115,46 @@ export function ImportDialog({ projectId, onClose }: { projectId: string; onClos
   );
 }
 
+const SNIPPET_LABEL = {
+  form: "Paste into your page; set redirect to your thank-you page",
+  fetch: "Send from your own form handler or app",
+  api: "POST JSON or a form from any server, script or no-code tool",
+} as const;
+
 export function CaptureDialog({ projectId, settings, canEdit, onClose }: { projectId: string; settings: PipelineSettingsView; canEdit: boolean; onClose(): void }) {
-  const [snippet, setSnippet] = useState<"form" | "fetch">("form");
+  const [snippet, setSnippet] = useState<"form" | "fetch" | "api">("form");
+  const health = useCloudQuery<CaptureHealth>("pipelineContacts:captureHealth", { projectId });
   const action = useAction();
   const configure = (patch: Record<string, unknown>) => action.run(() => cloudMutation("pipeline:configure", { projectId, ...patch }), "Could not change lead capture");
   return (
-    <Modal title="Lead capture" onClose={onClose} wide>
+    <Modal title="Capture contacts" onClose={onClose} wide>
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3">
           <p className="flex-1 text-[13px] leading-relaxed text-ink-secondary">
-            Your landing page posts its form to this project's own address, and every submission lands in New with the message on its timeline. A lead with a known email is updated, not duplicated; bursts are rate limited and a hidden field catches bots.
+            Your pages, forms, apps and webhooks post to this project's own address, and every submission lands in Contacts with the message on its timeline. A contact with a known email or phone is updated, not duplicated; bursts are rate limited and a hidden field catches bots.
           </p>
           {canEdit && <Switch checked={settings.captureEnabled} aria-label="Accept leads from forms" disabled={action.busy} onClick={() => void configure({ captureEnabled: !settings.captureEnabled })} />}
         </div>
         {!settings.captureEnabled ? (
           <Notice>{canEdit ? "Turn on capture to get this project's form address." : "Lead capture is off. An editor can turn it on."}</Notice>
         ) : settings.captureUrl ? <>
-          <CopyBlock label="Form address" text={settings.captureUrl} />
+          <CopyBlock label="Capture and webhook address" text={settings.captureUrl} />
           <div className="flex flex-col gap-2">
-            <Segmented label="Snippet" value={snippet} onChange={setSnippet} options={[{ value: "form", label: "HTML form" }, { value: "fetch", label: "JavaScript" }]} />
-            <CopyBlock label={snippet === "form" ? "Paste into your page; set redirect to your thank-you page" : "Send from your own form handler"} multiline
-              text={snippet === "form" ? captureFormSnippet(settings.captureUrl) : captureFetchSnippet(settings.captureUrl)} />
+            <Segmented label="Snippet" value={snippet} onChange={setSnippet} options={[{ value: "form", label: "HTML form" }, { value: "fetch", label: "JavaScript" }, { value: "api", label: "API" }]} />
+            <CopyBlock label={SNIPPET_LABEL[snippet]} multiline
+              text={snippet === "form" ? captureFormSnippet(settings.captureUrl) : snippet === "fetch" ? captureFetchSnippet(settings.captureUrl) : captureCurlSnippet(settings.captureUrl)} />
           </div>
-          <p className="text-[12px] text-ink-tertiary">Fields: name, email, phone, company, message, source. Anyone with the address can submit, so get a new one if it leaks.</p>
+          <div className="text-[12px] leading-relaxed text-ink-tertiary">
+            <p>Fields: <code>name</code>, <code>email</code> or <code>phone</code> (one is required), <code>company</code>, <code>message</code>, <code>source</code> (shown on the contact; <code>utm_campaign</code> fills it in), <code>page</code>. JSON answers <code>{"{\"ok\":true}"}</code>; a form gets a thank-you page or its <code>redirect</code>.</p>
+            <p className="mt-1">Point any webhook that sends JSON with these fields at the same address. Anyone with it can submit, so get a new one if it leaks.</p>
+          </div>
+          {health && (
+            <p className="flex items-center gap-2 text-[12.5px] text-ink-secondary" role="status">
+              <span className={cn("size-1.5 rounded-full", health.lastCaptureAt ? "bg-success" : "bg-ink-tertiary/60")} aria-hidden="true" />
+              {health.lastCaptureAt ? `Last captured ${since(health.lastCaptureAt)} · ${health.last24h} in 24 hours · ${health.last30d} in 30 days` : "Nothing captured yet."}
+              {health.sources.length > 0 && <span className="truncate text-ink-tertiary">{health.sources.slice(0, 4).map((row) => `${row.source} ${row.count}`).join(" · ")}</span>}
+            </p>
+          )}
           {canEdit && (
             <button type="button" className={cn(ghostButton, "self-start")} disabled={action.busy}
               onClick={() => { if (window.confirm("Get a new address? Forms using the current one stop working.")) void configure({ rotateToken: true }); }}>
@@ -149,26 +168,28 @@ export function CaptureDialog({ projectId, settings, canEdit, onClose }: { proje
   );
 }
 
-const CHANNEL_ROWS: readonly { channel: PipelineChannel; label: string; via: string; icon: typeof Mail }[] = [
+const CHANNEL_ROWS: readonly { channel: PipelineChannel | "stripe"; label: string; via: string; icon: typeof Mail }[] = [
   { channel: "email", label: "Email", via: "Brevo", icon: Mail },
   { channel: "sms", label: "Texts, WhatsApp and calls", via: "Twilio", icon: MessageSquareText },
   { channel: "ai_call", label: "AI calls", via: "ElevenLabs", icon: AudioLines },
+  { channel: "stripe", label: "Payment links", via: "Stripe", icon: CreditCard },
 ];
 
 export type SettingsTab = "general" | "stages" | "inbound";
 
-export function PipelineSettingsDialog({ projectId, settings, stages, counts, canEdit, isAdmin, channels, initialTab = "general", onClose }: {
+export function PipelineSettingsDialog({ projectId, settings, stages, counts, canEdit, isAdmin, channels, stripe = null, initialTab = "general", onClose }: {
   projectId: string; settings: PipelineSettingsView; stages: readonly string[]; counts: ReadonlyMap<string, number>; canEdit: boolean; isAdmin: boolean;
-  channels: Record<PipelineChannel, boolean> | null; initialTab?: SettingsTab; onClose(): void;
+  channels: Record<PipelineChannel, boolean> | null; stripe?: boolean | null; initialTab?: SettingsTab; onClose(): void;
 }) {
   const [tab, setTab] = useState<SettingsTab>(initialTab);
+  const connected = channels ? { ...channels, stripe: stripe ?? false } : null;
   return (
-    <Modal title="Pipeline settings" onClose={onClose} className={tab === "inbound" ? "sm:max-w-xl" : undefined}>
+    <Modal title="Sales settings" onClose={onClose} className={tab === "inbound" ? "sm:max-w-xl" : undefined}>
       <div className="mb-4">
         <Segmented label="Settings section" value={tab} onChange={setTab}
           options={[{ value: "general", label: "General" }, { value: "stages", label: "Stages" }, { value: "inbound", label: "Replies" }]} />
       </div>
-      {tab === "general" && <GeneralSettings projectId={projectId} settings={settings} canEdit={canEdit} isAdmin={isAdmin} channels={channels} onClose={onClose} />}
+      {tab === "general" && <GeneralSettings projectId={projectId} settings={settings} canEdit={canEdit} isAdmin={isAdmin} channels={connected} onClose={onClose} />}
       {tab === "stages" && <StageEditor projectId={projectId} stages={stages} counts={counts} canEdit={canEdit} onSaved={onClose} />}
       {tab === "inbound" && <InboundSettings projectId={projectId} settings={settings} isAdmin={isAdmin} canEdit={canEdit} />}
     </Modal>
@@ -176,7 +197,7 @@ export function PipelineSettingsDialog({ projectId, settings, stages, counts, ca
 }
 
 function GeneralSettings({ projectId, settings, canEdit, isAdmin, channels, onClose }: {
-  projectId: string; settings: PipelineSettingsView; canEdit: boolean; isAdmin: boolean; channels: Record<PipelineChannel, boolean> | null; onClose(): void;
+  projectId: string; settings: PipelineSettingsView; canEdit: boolean; isAdmin: boolean; channels: Record<PipelineChannel | "stripe", boolean> | null; onClose(): void;
 }) {
   const [currency, setCurrency] = useState(settings.currency);
   const [agentId, setAgentId] = useState(settings.aiAgentId ?? "");
@@ -207,7 +228,7 @@ function GeneralSettings({ projectId, settings, canEdit, isAdmin, channels, onCl
         <section className="flex items-start gap-3">
           <div className="flex-1">
             <h4 className="text-[13px] font-medium text-ink">Let agents send without approval</h4>
-            <p className="mt-0.5 text-[12px] leading-relaxed text-ink-secondary">Off: emails, texts and AI calls agents draft wait in Pipeline until a person approves them. Only project admins change this.</p>
+            <p className="mt-0.5 text-[12px] leading-relaxed text-ink-secondary">Off: emails, texts and AI calls agents draft wait in the Sales inbox until a person approves them. Only project admins change this.</p>
           </div>
           <Switch checked={settings.autoSend} aria-label="Let agents send without approval" disabled={!isAdmin || action.busy}
             onClick={() => { if (settings.autoSend || window.confirm("Agents will email, text and call leads without asking. Turn on auto-send?")) void action.run(() => cloudMutation("pipeline:configure", { projectId, autoSend: !settings.autoSend }), "Could not change auto-send"); }} />

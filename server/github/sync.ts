@@ -3,12 +3,13 @@ import { originIssueKey } from "../../shared/origin-issues.ts";
 import { jobPayload } from "./store.ts";
 import { parseGitHubRepo, repoName } from "./repo.ts";
 import { GitHubHttpError, githubRequest, workspaceGitHubToken, type GitHubService } from "./service.ts";
+import { brokeredToken } from "./broker.ts";
 
 type Connection = { teamId: string; login: string; connectedBy: string; autoCreate: boolean };
 export type IntegrationContext = {
   credentialAllowed: boolean;
   legacyOwner: boolean;
-  project: { _id: string; teamId?: string; name: string; status?: string; description?: string; repoUrl?: string; githubRepoId?: number; githubWorkspaceAccess?: boolean };
+  project: { _id: string; teamId?: string; name: string; status?: string; description?: string; repoUrl?: string; githubRepoId?: number; githubWorkspaceAccess?: boolean; githubRepoVisibility?: "private" | "public" };
   connection: Connection | null;
   task: {
     _id: string; title: string; description?: string; done: boolean; githubIssueNumber?: number; githubIssueUrl?: string; githubIssueState?: "open" | "closed"; githubIssueReopenRequested?: boolean;
@@ -64,10 +65,16 @@ async function contextWithToken(service: GitHubService, projectId: string, taskI
     }
   }
   if (!token && context.project.githubWorkspaceAccess && context.connection) token = await workspaceGitHubToken(service, context.connection.teamId, context.connection.connectedBy);
+  let tokenError: string | undefined;
+  if (!token && repo && context.project.githubWorkspaceAccess) {
+    token = await brokeredToken(service, projectId, "write").then((minted) => minted.token, (error: unknown) => { tokenError = error instanceof Error ? error.message : undefined; return undefined; });
+  }
   if (!token && context.legacyOwner) token = service.env.legacyToken;
   if (repo && context.task?.githubIssueUrl && context.task.githubIssueUrl.split("/issues/")[0].toLowerCase() !== `https://github.com/${repo.owner}/${repo.repo}`.toLowerCase()) throw new Error("This issue is linked to the previous repository");
-  return { ...context, token, repo };
+  return { ...context, token, repo, tokenError };
 }
+
+const NO_CONNECTION = "GitHub isn't set up for this workspace yet. A workspace owner or admin connects it once in Settings > Integrations; then every member can use it.";
 
 /** The token of this project's own GitHub connection (its saved connection, else the workspace's), never the legacy fallback. */
 export async function projectConnection(service: GitHubService, projectId: string): Promise<{ repoUrl: string; token: string | undefined }> {
@@ -77,12 +84,17 @@ export async function projectConnection(service: GitHubService, projectId: strin
   return { repoUrl, token: context.token && context.token !== service.env.legacyToken ? context.token : undefined };
 }
 
-export async function createProjectRepository(service: GitHubService, projectId: string, manual = false, requestedName?: string): Promise<RepositoryResult> {
+export async function createProjectRepository(service: GitHubService, projectId: string, manual = false, requestedName?: string, requestedVisibility?: "private" | "public"): Promise<RepositoryResult> {
   const { store } = service;
   const key = `repo:${projectId}`;
   if (!store.lockJob(key)) return { state: "working" };
   try {
     const context = await service.bridge<IntegrationContext>("context", { projectId });
+    if (!context.project.repoUrl && context.connection && !store.workspaceInfo(context.connection.teamId)) {
+      store.saveJob(key, "done");
+      return await service.bridge<RepositoryResult>("createRepository", { projectId, manual, ...(requestedName ? { name: requestedName } : {}), ...(requestedVisibility ? { visibility: requestedVisibility } : {}) });
+    }
+    const visibility = requestedVisibility ?? context.project.githubRepoVisibility ?? "private";
     if (context.project.status && context.project.status !== "active") { store.saveJob(key, "waiting"); return { state: "error", error: "Reactivate the project before creating a repository" }; }
     if (context.project.repoUrl) { store.saveJob(key, "done"); return { state: "ready", repoUrl: context.project.repoUrl }; }
     if (!context.connection || (!manual && !context.connection.autoCreate)) {
@@ -105,10 +117,10 @@ export async function createProjectRepository(service: GitHubService, projectId:
     if (!repo) {
       store.saveJob(key, "working", { started: true, name });
       const description = [context.project.description && withoutControlCharacters(context.project.description).trim().slice(0, 200), marker].filter(Boolean).join(" | ");
-      repo = await createOnGitHub<Repository>(service, key, "/user/repos", token, { name, description, private: true, has_issues: true, auto_init: true });
+      repo = await createOnGitHub<Repository>(service, key, "/user/repos", token, { name, description, private: visibility !== "public", has_issues: true, auto_init: true });
       store.saveJob(key, "working", { repo });
     }
-    if (repo.owner.login.toLowerCase() !== connection.login.toLowerCase() || !repo.private) throw new Error("GitHub returned an unexpected repository owner or visibility. Review it on GitHub before linking.");
+    if (repo.owner.login.toLowerCase() !== connection.login.toLowerCase() || repo.private !== (visibility !== "public")) throw new Error("GitHub returned an unexpected repository owner or visibility. Review it on GitHub before linking.");
     await service.bridge("repoResult", { projectId, state: "ready", repoUrl: repo.html_url, repoId: repo.id });
     store.saveJob(key, "done", { repo });
     return { state: "ready", repoUrl: repo.html_url };
@@ -128,7 +140,7 @@ async function link(service: GitHubService, projectId: string, taskId: string, r
 
 export async function createGitHubTask(service: GitHubService, projectId: string, taskId: string) {
   const { store } = service;
-  const { task, repo, token, connection, project } = await contextWithToken(service, projectId, taskId);
+  const { task, repo, token, connection, project, tokenError } = await contextWithToken(service, projectId, taskId);
   if (project.status && project.status !== "active") throw new Error("Reactivate the project before creating GitHub issues");
   if (!task || !repo) throw new Error("Connect a GitHub repository first");
   const repoUrl = `https://github.com/${repo.owner}/${repo.repo}`;
@@ -136,7 +148,7 @@ export async function createGitHubTask(service: GitHubService, projectId: string
   if (task.draft) throw new Error(DRAFT_STAYS_LOCAL);
   if (!token) throw new Error(connection && !project.githubWorkspaceAccess
     ? "GitHub is connected. A workspace admin must enable this repository in the project's Repo tab."
-    : "A workspace admin needs to reconnect GitHub in Settings > Integrations");
+    : tokenError ?? NO_CONNECTION);
   const key = `issue:${taskId}:${repoUrl.toLowerCase()}`;
   if (!store.lockJob(key)) throw new Error("This issue is already being created. Wait a moment before retrying.");
   try {
@@ -182,8 +194,8 @@ export function issueStateMove(task: { done: boolean; draft?: boolean; githubIss
 }
 
 async function syncTarget(service: GitHubService, target: Target, pushChanges = true) {
-  const { token, repo, task } = await contextWithToken(service, target.projectId, target.taskId);
-  if (!repo || !token) throw new Error("Repository sync needs an authorized GitHub connection");
+  const { token, repo, task, tokenError } = await contextWithToken(service, target.projectId, target.taskId);
+  if (!repo || !token) throw new Error(tokenError ?? "Repository sync needs an authorized GitHub connection");
   const expectedRepo = parseGitHubRepo(target.repoUrl);
   if (!expectedRepo || repoName(repo) !== repoName(expectedRepo) || !task || task._id !== target.taskId || task.githubIssueNumber !== target.number) throw new Error("GitHub issue link changed; refresh before synchronizing");
   const path = `/repos/${repo.owner}/${repo.repo}/issues/${target.number}`;
@@ -227,13 +239,13 @@ async function issueOrGone(service: GitHubService, repoPath: string, number: num
  * that right, or for an issue Origin did not create, it is closed as not planned with a note instead.
  */
 export async function removeGitHubIssue(service: GitHubService, projectId: string, taskId: string, issueUrl: string): Promise<GitHubIssueRemoval> {
-  const { repo, token } = await contextWithToken(service, projectId);
+  const { repo, token, tokenError } = await contextWithToken(service, projectId);
   if (!repo) throw new Error("This project has no GitHub repository");
   const repoUrl = `https://github.com/${repo.owner}/${repo.repo}`;
   const linked = /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/issues\/(\d{1,9})$/.exec(issueUrl);
   if (!linked || linked[1].toLowerCase() !== repoUrl.toLowerCase()) throw new Error("This issue is linked to another repository; remove its GitHub issue there");
   const number = Number(linked[2]);
-  if (!token) throw new Error("A workspace admin needs to reconnect GitHub in Settings > Integrations");
+  if (!token) throw new Error(tokenError ?? NO_CONNECTION);
   const repoPath = `/repos/${repo.owner}/${repo.repo}`;
   const issue = await issueOrGone(service, repoPath, number, token);
   if (!issue) return { outcome: "missing", number };

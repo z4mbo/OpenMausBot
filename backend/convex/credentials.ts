@@ -126,3 +126,16 @@ export const remove = mutation({
     await touchProject(ctx, args.projectId);
   },
 });
+
+/** Whether the project's agents may use this item while a member has the vault unlocked on their computer. */
+export const setAgentUse = mutation({
+  args: { projectId: v.id("projects"), sessionToken: v.string(), credentialId: v.id("credentials"), agentUse: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await requireEditor(ctx, args.projectId, args.sessionToken);
+    const item = await ctx.db.get(args.credentialId);
+    if (!item || item.projectId !== args.projectId) throw new Error("Credential not found");
+    await ctx.db.patch(args.credentialId, { agentUse: args.agentUse || undefined, updatedAt: Date.now() });
+    return null;
+  },
+});

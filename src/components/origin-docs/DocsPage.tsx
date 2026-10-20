@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import {
   BRIEF_TAG, BRIEF_TITLE, DOC_CHANGED, DOC_LIMITS, checklistItems, isBrief, toggleChecklistItem, type ProjectDoc, type ProjectDocList, type ProjectDocSummary,
 } from "../../../shared/origin-docs";
-import { CloudGate, EmptyState, Loading, Notice, PageHeader, Segmented, cardClass, ghostButton, iconButton, inputClass, primaryButton, underGlass, useAction, type OriginPageProps } from "../origin-pages/ui";
+import { CloudGate, EmptyState, Loading, Notice, PageHeader, Segmented, cardClass, ghostButton, iconButton, inputClass, itemIn, primaryButton, underGlass, useAction, type OriginPageProps } from "../origin-pages/ui";
 import { errorText } from "../origin-pages/repo-url";
 import { DocMarkdown } from "./DocMarkdown";
 import { MilestoneRow, ProgressBar, useMilestones } from "./milestones";
@@ -102,7 +102,7 @@ function DocsBoard({ projectId, canEdit: memberCanEdit, onOpenMilestone, onLaunc
 
 function DocLink({ doc, current, onOpen }: { doc: ProjectDocSummary; current: boolean; onOpen(): void }) {
   return (
-    <li>
+    <li className={itemIn}>
       <button type="button" onClick={onOpen} aria-current={current ? "page" : undefined}
         className={cn("flex w-full min-w-0 flex-col gap-0.5 rounded-lg px-3 py-2 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/60",
           current ? "bg-raised text-ink" : "text-ink-secondary hover:bg-raised/50 hover:text-ink")}>

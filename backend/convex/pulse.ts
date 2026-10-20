@@ -5,6 +5,8 @@ import { projectMember, requireMember, requireTeamMember } from "./lib/permissio
 import { budgetLevel, monthOf } from "./budgets";
 import { CLOSED_STAGES, PIPELINE_STAGES } from "../../shared/origin-pipeline";
 import { inferStage, pulseAttention, pulseDays, type ProjectPulse, type PulseCount, type PulseRange } from "../../shared/origin-pulse";
+import { BRIEF_TAG } from "../../shared/origin-docs";
+import type { JourneyFacts } from "../../shared/origin-journey";
 
 const DAY_MS = 86_400_000;
 const COMPLETIONS_MAX = 2_000;
@@ -155,6 +157,7 @@ async function growSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window) 
   const created = zero();
   const leadsSeries = w.series();
   const won = zero();
+  const revenue = zero();
   let pipelineValue = 0, repliesAwaiting = 0, leadsAwaiting = 0, wonTotal = 0;
   for (const lead of leads) {
     const row = stages.get(lead.stage) ?? { stage: lead.stage, count: 0, value: 0 };
@@ -162,7 +165,7 @@ async function growSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window) 
     row.value += lead.value ?? 0;
     stages.set(lead.stage, row);
     w.add(created, lead.createdAt, leadsSeries);
-    if (lead.stage === "Won") { wonTotal += 1; w.add(won, lead.stageChangedAt ?? lead.updatedAt); }
+    if (lead.stage === "Won") { wonTotal += 1; w.add(won, lead.stageChangedAt ?? lead.updatedAt); w.add(revenue, lead.stageChangedAt ?? lead.updatedAt, undefined, lead.value ?? 0); }
     if (!CLOSED_STAGES.includes(lead.stage)) pipelineValue += lead.value ?? 0;
     if (lead.unreadReplies) { repliesAwaiting += lead.unreadReplies; leadsAwaiting += 1; }
   }
@@ -171,7 +174,7 @@ async function growSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window) 
     truncated: leads.length === LEADS_MAX,
     grow: {
       currency: settings?.currency ?? "EUR", total: leads.length, stages: [...stages.values()], leads: created, leadsSeries, won,
-      conversion: leads.length ? wonTotal / leads.length : null, pipelineValue, repliesAwaiting, leadsAwaiting, draftsAwaiting: drafts.length,
+      conversion: leads.length ? wonTotal / leads.length : null, revenue, pipelineValue, repliesAwaiting, leadsAwaiting, draftsAwaiting: drafts.length,
     },
   };
 }
@@ -231,6 +234,47 @@ export const project = query({
   handler: async (ctx, args): Promise<ProjectPulse> => {
     const { project } = await requireMember(ctx, args.projectId, args.sessionToken);
     return projectPulse(ctx, project, args.range, Date.now());
+  },
+});
+
+const JOURNEY_MAX = 200;
+
+export async function journeyFacts(ctx: QueryCtx, project: Doc<"projects">): Promise<JourneyFacts> {
+  const projectId = project._id;
+  const docs = (await ctx.db.query("wikiPages").withIndex("by_project", (q) => q.eq("projectId", projectId)).take(JOURNEY_MAX)).filter((page) => page.type !== "credential_note");
+  const canvases = await ctx.db.query("canvases").withIndex("by_project", (q) => q.eq("projectId", projectId).eq("archived", false)).take(50);
+  const draft = await ctx.db.query("columns").withIndex("by_projectId_and_isDraft_and_order", (q) => q.eq("projectId", projectId).eq("isDraft", true)).first();
+  const open = await ctx.db.query("tasks").withIndex("by_project_and_done", (q) => q.eq("projectId", projectId).eq("done", false)).take(JOURNEY_MAX * 5);
+  const drafts = draft ? open.filter((task) => task.columnId === draft._id).length : 0;
+  const done = await ctx.db.query("tasks").withIndex("by_project_and_done", (q) => q.eq("projectId", projectId).eq("done", true)).take(JOURNEY_MAX);
+  const page = await ctx.db.query("publishedPages").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).first();
+  const releases = await ctx.db.query("shipReleases").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(50);
+  const generations = await ctx.db.query("studioGenerations").withIndex("by_projectId_and_createdAt", (q) => q.eq("projectId", projectId)).order("desc").take(JOURNEY_MAX);
+  const posts = await ctx.db.query("broadcastPosts").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(POSTS_MAX);
+  const leads = await ctx.db.query("pipelineLeads").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(LEADS_MAX);
+  return {
+    name: project.name,
+    brief: docs.some((doc) => doc.tags.includes(BRIEF_TAG)),
+    docs: docs.length,
+    canvases: canvases.length,
+    drafts,
+    issuesOpen: open.length - drafts,
+    issuesDone: done.filter((task) => !draft || task.columnId !== draft._id).length,
+    shipped: Boolean(page) || releases.some((release) => release.status === "published"),
+    content: generations.filter((generation) => generation.status === "done").length,
+    postsLive: posts.filter((post) => post.status === "published" || post.variants.some((variant) => variant.result === "published")).length,
+    postsScheduled: posts.filter((post) => post.status === "scheduled").length,
+    leads: leads.length,
+    repliesAwaiting: leads.reduce((sum, lead) => sum + (lead.unreadReplies ?? 0), 0),
+  };
+}
+
+/** What a project has made so far, from Brief to leads, for its next step. */
+export const journey = query({
+  args: { sessionToken: v.string(), projectId: v.id("projects") },
+  handler: async (ctx, args): Promise<JourneyFacts> => {
+    const { project } = await requireMember(ctx, args.projectId, args.sessionToken);
+    return journeyFacts(ctx, project);
   },
 });
 

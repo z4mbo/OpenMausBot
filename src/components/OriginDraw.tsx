@@ -1,7 +1,8 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Brush, Loader2, MoreHorizontal, Plus } from "lucide-react";
 import { cloudMutation, useCloudQuery, useCloudSession } from "@/lib/origin-cloud";
 import { usePopoverDismiss } from "@/hooks/use-popover-dismiss";
+import { consumeCanvasFocus, useCanvasFocus } from "@/lib/origin-canvas-focus";
 import { cn } from "@/lib/cn";
 import type { Bot } from "@/state/store";
 import { lazyScreen } from "./lazy-screens";
@@ -30,6 +31,8 @@ function ProjectCanvases({ projectId, teamId, userId, canEdit, agent }: { projec
   const [name, setName] = useState("");
   const [renaming, setRenaming] = useState<string | null>(null);
   const action = useAction();
+  const focus = useCanvasFocus(projectId);
+  useEffect(() => { if (focus && canvases?.some((canvas) => canvas._id === focus.canvasId)) setChosen(focus.canvasId); }, [focus, canvases]);
   const current = canvases?.find((canvas) => canvas._id === chosen) ?? canvases?.[0];
   const create = async (event: FormEvent) => {
     event.preventDefault();
@@ -91,7 +94,8 @@ function ProjectCanvases({ projectId, teamId, userId, canEdit, agent }: { projec
   return (
     <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]">
       {action.error && <div className="px-4 pt-2"><Notice tone="danger">{action.error}</Notice></div>}
-      <DrawingCanvas key={current._id} teamId={teamId} canvasId={current._id} projectId={projectId} userId={userId} name={current.name} readOnly={!canEdit} agent={agent} lead={tabs} />
+      <DrawingCanvas key={current._id} teamId={teamId} canvasId={current._id} projectId={projectId} userId={userId} name={current.name} readOnly={!canEdit} agent={agent} lead={tabs}
+        focus={focus?.canvasId === current._id ? focus.frameId : undefined} onFocused={() => { if (focus) consumeCanvasFocus(focus); }} />
     </div>
   );
 }

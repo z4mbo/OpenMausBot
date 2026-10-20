@@ -32,12 +32,15 @@ function Assets({ projectId, canEdit, projectName, botId }: { projectId: string;
   const [tab, setTab] = useState<"assets" | "tokens" | "brand">("assets");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<AssetType | "all">("all");
+  const [folder, setFolder] = useState("all");
   const [editing, setEditing] = useState<CloudDesignAsset | "new" | null>(null);
   const [tokenEditing, setTokenEditing] = useState<CloudDesignToken | "new" | null>(null);
   const [notice, setNotice] = useState("");
   if (!design) return <Loading label="Loading assets" variant="grid" />;
   const needle = query.trim().toLowerCase();
-  const assets = design.assets.filter((asset) => (filter === "all" || asset.type === filter) && `${asset.name} ${asset.notes ?? ""}`.toLowerCase().includes(needle));
+  const folders = [...new Set(design.assets.flatMap((asset) => (asset.folder ? [asset.folder] : [])))].sort();
+  const assets = design.assets.filter((asset) => (filter === "all" || asset.type === filter) && (folder === "all" || (folder === "" ? !asset.folder : asset.folder === folder))
+    && `${asset.name} ${asset.notes ?? ""}`.toLowerCase().includes(needle));
   const tokens = design.tokens.filter((token) => `${token.name} ${token.value} ${token.description ?? ""}`.toLowerCase().includes(needle));
   const removeAsset = (asset: CloudDesignAsset) => {
     if (!window.confirm(`Delete ${asset.name}?`)) return;
@@ -60,6 +63,13 @@ function Assets({ projectId, canEdit, projectName, botId }: { projectId: string;
           <Select size="sm" aria-label="Asset type" value={filter} onChange={(e) => setFilter(e.target.value as AssetType | "all")}>
             <option value="all">All types</option>
             {ASSET_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+          </Select>
+        )}
+        {tab === "assets" && folders.length > 0 && (
+          <Select size="sm" aria-label="Folder" value={folder} onChange={(e) => setFolder(e.target.value)}>
+            <option value="all">All folders</option>
+            {folders.map((name) => <option key={name} value={name}>{name}</option>)}
+            <option value="">No folder</option>
           </Select>
         )}
         {canEdit && tab !== "brand" && <button type="button" className={primaryButton} onClick={() => (tab === "assets" ? setEditing("new") : setTokenEditing("new"))}><Plus size={14} />{tab === "assets" ? "Add asset" : "Add token"}</button>}
@@ -85,7 +95,7 @@ function Assets({ projectId, canEdit, projectName, botId }: { projectId: string;
                   )}
                   <div className="min-w-0 p-3">
                     <strong className="block truncate text-[13px] font-medium text-ink" title={asset.name}>{asset.name}</strong>
-                    <small className="text-[11.5px] text-ink-tertiary">{asset.type}{asset.size ? ` · ${Math.ceil(asset.size / 1024)} KB` : ""}</small>
+                    <small className="text-[11.5px] text-ink-tertiary">{asset.type}{asset.size ? ` · ${Math.ceil(asset.size / 1024)} KB` : ""}{asset.folder ? ` · ${asset.folder}` : ""}{asset.studio ? ` · ${asset.studio.modelLabel}` : ""}</small>
                     {asset.notes && <p className="mt-1 line-clamp-3 text-[12px] text-ink-secondary">{asset.notes}</p>}
                   </div>
                 </article>

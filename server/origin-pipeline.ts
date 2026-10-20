@@ -4,6 +4,8 @@ import type { OriginCloudClient } from "./origin-cloud.ts";
 import { connectedConvex, originSessionToken } from "./origin-members.ts";
 import { integrationKey } from "./integration-keys.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
+import { createSalesService, SalesError, type SalesService } from "./origin-sales.ts";
+import { SALES_REPLY_CHANNELS, type SalesReplyChannel } from "../shared/origin-sales.ts";
 
 type Args = Record<string, unknown>;
 
@@ -270,36 +272,52 @@ const CONVEX_ID = /^[A-Za-z0-9]{10,64}$/;
 
 function convexMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : "";
-  return /Uncaught Error: ([^\n]+)/.exec(message)?.[1]?.trim() || (error instanceof ProviderError ? message : "Origin refused the request");
+  return /Uncaught Error: ([^\n]+)/.exec(message)?.[1]?.trim() || (error instanceof ProviderError || error instanceof SalesError ? message : "Origin refused the request");
 }
 
 export interface PipelineRouteDeps {
   sender: PipelineSender;
   convex?: () => OriginCloudClient | null;
+  sales?: SalesService;
+  /** For the default Sales service: the quick-call model that suggests replies, and the loopback Stripe of a fixture. */
+  generate?(input: { botId: string; prompt: string }): Promise<string>;
+  providerOrigin?: string | undefined;
 }
 
-/** The renderer's Pipeline calls; each carries the person's own Origin session, so Convex checks their project role. */
+const SALES_PATHS = new Set(["/api/origin/pipeline/send", "/api/origin/pipeline/refresh", "/api/origin/pipeline/suggest", "/api/origin/pipeline/quote", "/api/origin/pipeline/quote/check"]);
+
+/** The renderer's Sales calls; each carries the person's own Origin session, so Convex checks their project role. */
 export function createPipelineRoutes(deps: PipelineRouteDeps): RouteHandler {
   const convex = deps.convex ?? connectedConvex;
+  const sales = deps.sales ?? createSalesService({ ...(deps.generate ? { generate: deps.generate } : {}), providerOrigin: deps.providerOrigin });
   return async ({ req, res, path, method, json, readBody }) => {
     if (!path.startsWith("/api/origin/pipeline/")) return PASS;
-    if (path === "/api/origin/pipeline/channels" && method === "GET") return json(res, 200, { channels: deps.sender.channels() });
-    if (method !== "POST" || (path !== "/api/origin/pipeline/send" && path !== "/api/origin/pipeline/refresh")) return PASS;
+    if (path === "/api/origin/pipeline/channels" && method === "GET") return json(res, 200, { channels: deps.sender.channels(), stripe: sales.stripeConnected() });
+    if (method !== "POST" || !SALES_PATHS.has(path)) return PASS;
     const body = record(await readBody(req));
     const sessionToken = originSessionToken(req, body);
     const client = convex();
     if (!sessionToken || !client) return json(res, 401, { error: "Sign in to Origin first" });
-    const ids = ["projectId", "activityId", ...(path.endsWith("refresh") ? ["leadId"] : [])].map((key) => text(body[key]));
-    if (ids.some((id) => !CONVEX_ID.test(id))) return json(res, 400, { error: "projectId, activityId and leadId must be Origin ids" });
+    const action = path.slice("/api/origin/pipeline/".length);
+    const keys = ["projectId", ...(action === "suggest" ? ["leadId"] : action.startsWith("quote") ? ["dealId"] : ["activityId", ...(action === "refresh" ? ["leadId"] : [])])];
+    const ids = Object.fromEntries(keys.map((key) => [key, text(body[key])]));
+    if (Object.values(ids).some((id) => !CONVEX_ID.test(id))) return json(res, 400, { error: `${keys.join(", ")} must be Origin ids` });
+    const scope = { client, sessionToken, projectId: ids.projectId! };
     const botId = text(body.botId).slice(0, 120) || undefined;
     try {
-      if (path.endsWith("send")) {
-        const result = await deps.sender.send({ client, sessionToken, projectId: ids[0]!, activityId: ids[1]!, ...(botId ? { botId } : {}), ...(text(body.callerPhone) ? { callerPhone: text(body.callerPhone) } : {}) });
+      if (action === "send") {
+        const result = await deps.sender.send({ ...scope, activityId: ids.activityId!, ...(botId ? { botId } : {}), ...(text(body.callerPhone) ? { callerPhone: text(body.callerPhone) } : {}) });
         return json(res, result.ok ? 200 : 502, result);
       }
-      return json(res, 200, await deps.sender.refresh({ client, sessionToken, projectId: ids[0]!, activityId: ids[1]!, leadId: ids[2]!, ...(botId ? { botId } : {}) }));
+      if (action === "refresh") return json(res, 200, await deps.sender.refresh({ ...scope, activityId: ids.activityId!, leadId: ids.leadId!, ...(botId ? { botId } : {}) }));
+      if (action === "quote") return json(res, 200, await sales.quote({ ...scope, dealId: ids.dealId! }));
+      if (action === "quote/check") return json(res, 200, await sales.checkPayment({ ...scope, dealId: ids.dealId! }));
+      const channel = text(body.channel) as SalesReplyChannel;
+      if (!SALES_REPLY_CHANNELS.includes(channel)) return json(res, 400, { error: `channel must be one of ${SALES_REPLY_CHANNELS.join(", ")}` });
+      if (!botId) return json(res, 400, { error: "Name the agent whose model suggests the reply" });
+      return json(res, 200, await sales.suggest({ ...scope, leadId: ids.leadId!, channel, botId, projectName: text(body.projectName).slice(0, 120) || "this project" }));
     } catch (error) {
-      return json(res, 400, { ok: false, error: convexMessage(error) });
+      return json(res, error instanceof SalesError ? 502 : 400, { ok: false, error: convexMessage(error) });
     }
   };
 }

@@ -14,6 +14,7 @@ type Loader = () => Promise<Record<string, unknown>>;
 type ConvexTest = {
   query(ref: unknown, args: Json): Promise<unknown>;
   mutation(ref: unknown, args: Json): Promise<unknown>;
+  action(ref: unknown, args: Json): Promise<unknown>;
   run<T>(fn: (ctx: { db: { insert(table: string, doc: Json): Promise<string>; patch(id: string, doc: Json): Promise<void>; query(table: string): { first(): Promise<Json | null> } } }) => Promise<T>): Promise<T>;
 };
 
@@ -59,7 +60,7 @@ export async function startFakeConvex(): Promise<FakeConvex> {
   };
   const server = createHttpServer(async (req, res) => {
     if (req.method === "OPTIONS") return answer(res, 204, null);
-    const kind = req.url === "/api/query" ? "query" : req.url === "/api/mutation" ? "mutation" : null;
+    const kind = req.url === "/api/query" ? "query" : req.url === "/api/mutation" ? "mutation" : req.url === "/api/action" ? "action" : null;
     if (req.method !== "POST" || !kind) return answer(res, 404, { status: "error", errorMessage: "Not found" });
     try {
       const body = await read(req);

@@ -1,9 +1,9 @@
 import { useRef, type ReactNode } from "react";
-import { Circle, Frame, Hand, ImagePlus, Layers, Minus, MousePointer2, MoveUpRight, Redo2, SlidersHorizontal, Square, Type, Undo2, Upload } from "lucide-react";
+import { Circle, Frame, Hand, ImagePlus, Layers, MessageCircle, Minus, MousePointer2, MoveUpRight, PenTool, Redo2, SlidersHorizontal, Square, Type, Undo2, Upload } from "lucide-react";
 import { usePopoverDismiss } from "@/hooks/use-popover-dismiss";
 import { cn } from "@/lib/cn";
 
-export type Tool = "move" | "hand" | "frame" | "rect" | "ellipse" | "line" | "arrow" | "text";
+export type Tool = "move" | "hand" | "frame" | "rect" | "ellipse" | "line" | "arrow" | "text" | "pen" | "comment";
 
 const TOOLS: { tool: Tool; label: string; key: string; icon: ReactNode; edits: boolean; wideOnly?: boolean }[] = [
   { tool: "move", label: "Move", key: "V", icon: <MousePointer2 size={16} />, edits: false },
@@ -13,26 +13,29 @@ const TOOLS: { tool: Tool; label: string; key: string; icon: ReactNode; edits: b
   { tool: "ellipse", label: "Ellipse", key: "O", icon: <Circle size={16} />, edits: true },
   { tool: "line", label: "Line", key: "L", icon: <Minus size={16} className="-rotate-45" />, edits: true, wideOnly: true },
   { tool: "arrow", label: "Arrow", key: "Shift+L", icon: <MoveUpRight size={16} />, edits: true },
+  { tool: "pen", label: "Pen", key: "P", icon: <PenTool size={16} />, edits: true, wideOnly: true },
   { tool: "text", label: "Text", key: "T", icon: <Type size={16} />, edits: true },
+  { tool: "comment", label: "Comment", key: "C", icon: <MessageCircle size={16} />, edits: false },
 ];
 
 const button = "inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-secondary outline-none transition-[background-color,color,transform] duration-150 hover:bg-raised hover:text-ink active:scale-95 focus-visible:ring-2 focus-visible:ring-accent/60 disabled:pointer-events-none disabled:opacity-35 motion-reduce:transition-none";
 const surface = "rounded-xl border border-hairline/60 bg-menu";
 
-export function CanvasToolbar({ tool, readOnly, narrow, onTool, canUndo, canRedo, onUndo, onRedo, imageMenu, onImageMenu, imagePicker, onUpload, panels, onPanels }: {
+export function CanvasToolbar({ tool, readOnly, narrow, onTool, canUndo, canRedo, onUndo, onRedo, imageMenu, onImageMenu, imagePicker, onUpload, panels, onPanels, inset = 0 }: {
   tool: Tool; readOnly: boolean; narrow: boolean; onTool(tool: Tool): void;
   canUndo: boolean; canRedo: boolean; onUndo(): void; onRedo(): void;
   imageMenu: boolean; onImageMenu(open: boolean): void;
   imagePicker?: (close: () => void) => ReactNode;
   onUpload(files: File[]): void;
   panels: { layers: boolean; inspector: boolean }; onPanels(panels: { layers: boolean; inspector: boolean }): void;
+  inset?: number;
 }) {
   const tight = cn(button, narrow && "size-7");
   const file = useRef<HTMLInputElement>(null);
   const menu = useRef<HTMLDivElement>(null);
   usePopoverDismiss(imageMenu, menu, () => onImageMenu(false));
   return (
-    <div className="pointer-events-none absolute inset-x-2 bottom-3 z-30 flex justify-center">
+    <div className="pointer-events-none absolute left-2 bottom-3 z-30 flex justify-center" style={{ right: 8 + inset }}>
       <div role="toolbar" aria-label="Canvas tools" className={cn(surface, "pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto p-1 [scrollbar-width:none]")}>
         <button type="button" className={cn(tight, panels.layers && "bg-raised text-ink")} aria-label="Layers" aria-pressed={panels.layers} title="Layers" onClick={() => onPanels({ ...panels, layers: !panels.layers })}><Layers size={16} /></button>
         <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-hairline/60" />
@@ -72,9 +75,9 @@ export function CanvasToolbar({ tool, readOnly, narrow, onTool, canUndo, canRedo
   );
 }
 
-export function ZoomControls({ zoom, onZoom, onFit, onSelection, onActual }: { zoom: number; onZoom(factor: number): void; onFit(): void; onSelection?: () => void; onActual(): void }) {
+export function ZoomControls({ zoom, onZoom, onFit, onSelection, onActual, offset = 0, inset = 0 }: { zoom: number; onZoom(factor: number): void; onFit(): void; onSelection?: () => void; onActual(): void; offset?: number; inset?: number }) {
   return (
-    <div className={cn(surface, "absolute right-3 top-3 z-10 flex items-center gap-0.5 p-0.5")}>
+    <div className={cn(surface, "absolute z-10 flex items-center gap-0.5 p-0.5 transition-[right] duration-(--motion-fast)")} style={{ top: 12 + offset, right: 12 + inset }}>
       <button type="button" className={cn(button, "size-7")} aria-label="Zoom out" title="Zoom out (Ctrl+-)" onClick={() => onZoom(0.8)}><Minus size={14} /></button>
       <button type="button" className="h-7 min-w-12 rounded-lg px-1.5 text-[12px] tabular-nums text-ink-secondary outline-none hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60"
         aria-label="Zoom to 100%" title="Zoom to 100% (Shift+0)" onClick={onActual}>{Math.round(zoom * 100)}%</button>

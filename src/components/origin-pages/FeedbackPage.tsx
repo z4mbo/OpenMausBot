@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 import { feedbackLink, useAppAddress } from "@/lib/origin-members";
 import type { CloudBoard, CloudFeedbackEntry, CloudFeedbackPortal, CloudPerson, CloudProject } from "./cloud-types";
 import { fmtDate, taskKey } from "./repo-url";
-import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, ghostButton, iconButton, inputClass, itemIn, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 import { newIssueColumn, openIssueColumns } from "./issue-columns";
 
 export type FeedbackPageProps = OriginPageProps & {
@@ -84,7 +84,7 @@ function Feedback({ project, teamId, projectId, canEdit, onOpenIssue }: {
       ) : (
         <div className="flex flex-col gap-3">
           {visible.map((entry) => (
-            <article key={entry._id} className={cn(cardClass, "p-4")}>
+            <article key={entry._id} className={cn(cardClass, "p-4", itemIn)}>
               <header className="mb-1.5 flex items-center gap-2">
                 {entry.kind === "bug" ? <Bug size={15} className="text-danger" aria-label="Bug" /> : <Lightbulb size={15} className="text-warning" aria-label="Idea" />}
                 <strong className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-ink">{entry.title}</strong>

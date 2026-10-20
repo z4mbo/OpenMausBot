@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { fitGroup } from "../../../../shared/canvas-ops";
+import { constrainChildren, settleComponents } from "../../../../shared/canvas-components";
+import { unbindEdited } from "../../../../shared/canvas-styles";
 import {
   CANVAS_ROW_FORMAT, childrenIndex, decodeScene, isLive, layoutRoot, layoutStacks, layoutText, randomNonce,
   type CanvasNode,
@@ -23,8 +25,24 @@ const sameNode = (a: CanvasNode, b: CanvasNode | undefined) => {
 const newer = (incoming: CanvasNode, current: CanvasNode | undefined) =>
   !current || incoming.version > current.version || (incoming.version === current.version && incoming.versionNonce < current.versionNonce);
 
-function settle(work: Map<string, CanvasNode>, touched: Set<string>, before: Snapshot) {
+function settle(work: Map<string, CanvasNode>, touched: Set<string>, before: Snapshot, byPerson: boolean) {
   const put = (node: CanvasNode) => { work.set(node.id, node); touched.add(node.id); };
+  if (byPerson) {
+    for (const id of touched) {
+      const node = work.get(id)!;
+      const unbound = unbindEdited(node, before.get(id));
+      if (unbound !== node) work.set(id, unbound);
+    }
+    const index = childrenIndex(work);
+    for (const id of touched) {
+      const node = work.get(id);
+      const previous = before.get(id);
+      if (!isLive(node) || !previous || previous.deleted) continue;
+      const moved = constrainChildren(index, node, previous).filter((child) => !touched.has(child.id));
+      for (const child of moved) put(child);
+    }
+    settleComponents(work, touched, before);
+  } else settleComponents(work, touched, new Map());
   for (const id of touched) {
     const node = work.get(id);
     if (!isLive(node) || node.type !== "text") continue;
@@ -107,7 +125,7 @@ export function useCanvasScene(rows: readonly string[] | undefined, outbox: Outb
     send(restored);
   }, [send, nextVersion, stopSharing]);
 
-  const write = useCallback((nodes: readonly CanvasNode[], before: ReadonlyMap<string, CanvasNode | undefined> | undefined): Snapshot => {
+  const write = useCallback((nodes: readonly CanvasNode[], before: ReadonlyMap<string, CanvasNode | undefined> | undefined, byPerson = false): Snapshot => {
     const work = new Map(base.current);
     const touched = new Set<string>();
     const snapshot: Snapshot = new Map();
@@ -116,7 +134,7 @@ export function useCanvasScene(rows: readonly string[] | undefined, outbox: Outb
       work.set(node.id, node);
       touched.add(node.id);
     }
-    settle(work, touched, snapshot);
+    settle(work, touched, snapshot, byPerson);
     const saved: CanvasNode[] = [];
     for (const id of touched) {
       if (!snapshot.has(id)) snapshot.set(id, base.current.get(id));
@@ -133,7 +151,7 @@ export function useCanvasScene(rows: readonly string[] | undefined, outbox: Outb
     const nodes = all.filter((node) => !sameNode(node, base.current.get(node.id)));
     if (readOnly || !nodes.length) { restoreShared(new Set()); if (draft.current.size) { draft.current.clear(); bump(); } return; }
     draft.current.clear();
-    const snapshot = write(nodes, options.before);
+    const snapshot = write(nodes, options.before, true);
     restoreShared(new Set(snapshot.keys()));
     if (options.history !== false) {
       undoStack.current.push(snapshot);

@@ -29,7 +29,48 @@ export interface StackLayout {
   justify: StackJustify;
   /** Which of the frame's sides follow its content instead of keeping their size. */
   hug?: StackHug;
+  /** Rows only: children that do not fit start a new line, `crossGap` apart. */
+  wrap?: boolean;
+  crossGap?: number;
 }
+
+export type HorizontalConstraint = "left" | "right" | "center" | "scale" | "stretch";
+export type VerticalConstraint = "top" | "bottom" | "center" | "scale" | "stretch";
+/** How a child of a frame without auto layout follows the frame when it is resized; left and top when absent. */
+export interface Constraints { h: HorizontalConstraint; v: VerticalConstraint }
+
+/** A frame other frames instantiate. Components sharing `set` are variants of one another, told apart by `props`. */
+export interface ComponentInfo {
+  set?: string;
+  props?: Record<string, string>;
+  description?: string;
+}
+
+/** A subtle drop shadow; the editor offers it but never adds one by default. */
+export interface Shadow { x: number; y: number; blur: number; spread: number; color: string }
+
+export const GRID_KINDS = ["columns", "rows", "grid"] as const;
+/** An editor-only guide grid drawn over a frame: columns or rows with gutters and margins, or a square grid of `size`. */
+export interface LayoutGrid {
+  kind: (typeof GRID_KINDS)[number];
+  count: number;
+  gutter: number;
+  margin: number;
+  size: number;
+  color: string;
+}
+
+export const TRANSITIONS = ["instant", "dissolve", "slide"] as const;
+/** Clicking the node in Present mode shows frame `to`. */
+export interface PrototypeLink { to: string; transition: (typeof TRANSITIONS)[number] }
+
+/** Node properties an instance copies from its component; an instance node keeps the keys listed in its `overrides`. */
+export const SYNCED_KEYS = [
+  "name", "x", "y", "width", "height", "rotation", "opacity", "hidden", "fill", "stroke", "strokeWidth", "radius", "text", "fontSize", "fontWeight",
+  "font", "family", "align", "lineHeight", "autoWidth", "points", "curves", "breaks", "closed", "fileId", "imageFit", "clip", "layout", "grow",
+  "link", "constraints", "absolute", "minW", "maxW", "minH", "maxH", "fillStyle", "strokeStyle", "textStyle", "shadow", "blur",
+] as const;
+export type SyncedKey = (typeof SYNCED_KEYS)[number];
 
 /**
  * One node of a Canvas scene, stored as one `drawingElements` row. `x` and `y` are relative to the parent's top-left
@@ -82,6 +123,39 @@ export interface CanvasNode {
   /** Where the node leads on a published page: an http(s) or mailto address. */
   link?: string;
   leadForm?: LeadForm;
+  /** Paths: per anchor [inDx, inDy, outDx, outDy] cubic handle offsets from the anchor; 0, 0 is a sharp corner. */
+  curves?: number[];
+  /** Paths: anchor indices where another subpath starts; subpaths fill with the even-odd rule. */
+  breaks?: number[];
+  component?: ComponentInfo;
+  /** On an instance's root: the component it shows. */
+  instanceOf?: string;
+  /** On an instance's root: the canvas holding its component, when that is another canvas of the project. */
+  library?: string;
+  /** On every node of an instance: the component node it mirrors. */
+  sourceId?: string;
+  overrides?: SyncedKey[];
+  constraints?: Constraints;
+  /** Inside an auto-layout parent, the node keeps its own x and y and the stack ignores it. */
+  absolute?: boolean;
+  minW?: number;
+  maxW?: number;
+  minH?: number;
+  maxH?: number;
+  /** A colour style: a brand kit token whose colour the fill (or a text's colour) follows. */
+  fillStyle?: string;
+  strokeStyle?: string;
+  /** A text style id whose size, weight, line height and brand face the text follows. */
+  textStyle?: string;
+  shadow?: Shadow;
+  /** Layer blur radius. */
+  blur?: number;
+  /** On a top-level node: the canvas page it sits on; absent means the first page. */
+  page?: string;
+  grids?: LayoutGrid[];
+  prototype?: PrototypeLink;
+  /** On a frame: the Origin issue it designs. */
+  issue?: string;
 }
 
 export const CANVAS_ROW_FORMAT = "canvas";
@@ -153,8 +227,59 @@ export function stackLayout(value: unknown): StackLayout | undefined {
     align: oneOf(raw.align, ["start", "center", "end", "stretch"] as const) ?? "start",
     justify: oneOf(raw.justify, ["start", "center", "end", "between"] as const) ?? "start",
     ...(hug ? { hug } : {}),
+    ...(raw.wrap === true ? { wrap: true, crossGap: finite(raw.crossGap, finite(raw.gap, 0, 0, 10_000), 0, 10_000) } : {}),
   };
 }
+
+const ID = (value: unknown) => (typeof value === "string" && value.length > 0 && value.length <= 100 ? value : undefined);
+const TOKEN = (value: unknown) => (typeof value === "string" && /^[a-z0-9-]{1,40}$/.test(value) ? value : undefined);
+
+function constraints(value: unknown): Constraints | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  const h = oneOf(raw.h, ["left", "right", "center", "scale", "stretch"] as const) ?? "left";
+  const v = oneOf(raw.v, ["top", "bottom", "center", "scale", "stretch"] as const) ?? "top";
+  return h === "left" && v === "top" ? undefined : { h, v };
+}
+
+function componentInfo(value: unknown): ComponentInfo | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  const info: ComponentInfo = {};
+  const set = shortText(raw.set, 80).trim();
+  if (set) info.set = set;
+  if (raw.props && typeof raw.props === "object") {
+    const props = Object.entries(raw.props as Record<string, unknown>).slice(0, 8)
+      .map(([key, prop]) => [key.trim().slice(0, 40), shortText(prop, 40).trim()] as const).filter(([key, prop]) => key && prop);
+    if (props.length) info.props = Object.fromEntries(props);
+  }
+  const description = shortText(raw.description, 400).trim();
+  if (description) info.description = description;
+  return info;
+}
+
+export function shadowOf(value: unknown): Shadow | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  const color = canvasColor(raw.color);
+  if (!color) return undefined;
+  return { x: finite(raw.x, 0, -1000, 1000), y: finite(raw.y, 4, -1000, 1000), blur: finite(raw.blur, 12, 0, 1000), spread: finite(raw.spread, 0, -1000, 1000), color };
+}
+
+function grids(value: unknown): LayoutGrid[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const list = value.slice(0, 4).flatMap((item): LayoutGrid[] => {
+    if (!item || typeof item !== "object") return [];
+    const raw = item as Record<string, unknown>;
+    const kind = oneOf(raw.kind, GRID_KINDS);
+    if (!kind) return [];
+    return [{ kind, count: Math.round(finite(raw.count, 12, 1, 100)), gutter: finite(raw.gutter, 20, 0, 1000), margin: finite(raw.margin, 0, 0, 10_000), size: finite(raw.size, 8, 1, 1000), color: canvasColor(raw.color) ?? "#FF4D4D1A" }];
+  });
+  return list.length ? list : undefined;
+}
+
+const numbers = (value: unknown, max: number, min: number = -CANVAS_LIMITS.coordinate, top: number = CANVAS_LIMITS.coordinate) =>
+  Array.isArray(value) && value.length <= max && value.every((item) => typeof item === "number" && Number.isFinite(item)) ? value.map((item) => finite(item, 0, min, top)) : undefined;
 
 export function leadForm(value: unknown): LeadForm | undefined {
   if (!value || typeof value !== "object") return undefined;
@@ -207,7 +332,40 @@ export function sanitizeNode(raw: unknown): CanvasNode | null {
     node.points = points.length >= 4 && points.length % 2 === 0 && points.every((point) => typeof point === "number" && Number.isFinite(point))
       ? points.map((point) => finite(point, 0)) : [0, 0, node.width, node.height];
     if (type === "path" && value.closed === true) node.closed = true;
+    if (type === "path") {
+      const curves = numbers(value.curves, CANVAS_LIMITS.points * 4);
+      if (curves && curves.length === node.points.length * 2 && curves.some((item) => item !== 0)) node.curves = curves;
+      const anchors = node.points.length / 2;
+      const breaks = numbers(value.breaks, 500, 1, anchors - 1)?.map(Math.round).filter((at, index, list) => at > 0 && at < anchors && (index === 0 || at > list[index - 1]!));
+      if (breaks?.length) node.breaks = breaks;
+    }
   }
+  const info = type === "frame" ? componentInfo(value.component) : undefined;
+  if (info) node.component = info;
+  if (ID(value.instanceOf) && (type === "frame" || type === "group")) node.instanceOf = value.instanceOf as string;
+  if (node.instanceOf && ID(value.library)) node.library = value.library as string;
+  if (ID(value.sourceId)) node.sourceId = value.sourceId as string;
+  if (node.sourceId && Array.isArray(value.overrides)) {
+    const overrides = (SYNCED_KEYS as readonly unknown[]).filter((key) => (value.overrides as unknown[]).includes(key)) as SyncedKey[];
+    if (overrides.length) node.overrides = overrides;
+  }
+  const constraint = constraints(value.constraints);
+  if (constraint) node.constraints = constraint;
+  if (value.absolute === true) node.absolute = true;
+  for (const key of ["minW", "maxW", "minH", "maxH"] as const) if (typeof value[key] === "number" && Number.isFinite(value[key])) node[key] = finite(value[key], 0, 0, CANVAS_LIMITS.size);
+  for (const key of ["fillStyle", "strokeStyle", "textStyle"] as const) { const token = TOKEN(value[key]); if (token) node[key] = token; }
+  const shadow = shadowOf(value.shadow);
+  if (shadow) node.shadow = shadow;
+  if (typeof value.blur === "number" && value.blur > 0) node.blur = finite(value.blur, 0, 0, 250);
+  const page = TOKEN(value.page);
+  if (page) node.page = page;
+  const grid = type === "frame" ? grids(value.grids) : undefined;
+  if (grid) node.grids = grid;
+  if (value.prototype && typeof value.prototype === "object" && ID((value.prototype as Record<string, unknown>).to)) {
+    const link = value.prototype as Record<string, unknown>;
+    node.prototype = { to: link.to as string, transition: oneOf(link.transition, TRANSITIONS) ?? "dissolve" };
+  }
+  if (type === "frame" && ID(value.issue)) node.issue = value.issue as string;
   if (type === "image") {
     if (typeof value.fileId === "string" && value.fileId.length <= 100) node.fileId = value.fileId;
     node.imageFit = value.imageFit === "contain" ? "contain" : "cover";
@@ -414,8 +572,11 @@ export function layoutStacks(scene: Scene, rootIds: Iterable<string>, measure: T
   const read = (id: string) => next.get(id) ?? scene.get(id)!;
   const write = (node: CanvasNode, patch: Partial<CanvasNode>) => {
     const current = read(node.id);
-    const changed = Object.entries(patch).some(([key, value]) => Math.abs(Number(current[key as keyof CanvasNode]) - Number(value)) > 0.01);
-    if (changed) next.set(node.id, { ...current, ...patch });
+    const bounded = { ...patch };
+    if (bounded.width !== undefined) bounded.width = clampSize(bounded.width, current.minW, current.maxW);
+    if (bounded.height !== undefined) bounded.height = clampSize(bounded.height, current.minH, current.maxH);
+    const changed = Object.entries(bounded).some(([key, value]) => Math.abs(Number(current[key as keyof CanvasNode]) - Number(value)) > 0.01);
+    if (changed) next.set(node.id, { ...current, ...bounded });
   };
   const fitText = (id: string) => {
     const node = read(id);
@@ -425,57 +586,86 @@ export function layoutStacks(scene: Scene, rootIds: Iterable<string>, measure: T
   };
   const visit = (id: string) => {
     const frame = read(id);
-    const children = (index.get(id) ?? []).filter((child) => !child.hidden);
-    for (const child of children) if (child.type === "frame" && child.layout) visit(child.id); else fitText(child.id);
+    const visible = (index.get(id) ?? []).filter((child) => !child.hidden);
+    for (const child of visible) if (child.type === "frame" && child.layout) visit(child.id); else fitText(child.id);
     const layout = frame.layout;
     if (frame.type !== "frame" || !layout) return;
+    const children = visible.filter((child) => !child.absolute);
     const row = layout.direction === "row";
     const [top, right, bottom, left] = layout.padding;
     const hugMain = layout.hug === "both" || layout.hug === (row ? "width" : "height");
     const hugCross = layout.hug === "both" || layout.hug === (row ? "height" : "width");
+    const wrap = Boolean(layout.wrap && row && !hugMain);
     const main = (node: CanvasNode) => (row ? node.width : node.height);
     const cross = (node: CanvasNode) => (row ? node.height : node.width);
-    let crossInner = (row ? frame.height - top - bottom : frame.width - left - right);
-    if (hugCross) crossInner = Math.max(0, ...children.map((child) => cross(read(child.id))));
-    if (layout.align === "stretch") for (const child of children) {
+    const stretch = (child: CanvasNode, size: number) => {
       const current = read(child.id);
-      write(current, row ? { height: Math.max(1, crossInner) } : { width: Math.max(1, crossInner) });
+      write(current, row ? { height: Math.max(1, size) } : { width: Math.max(1, size) });
       if (!row && current.type === "text") { const text = read(child.id); write(text, { autoWidth: false, height: layoutText({ ...text, autoWidth: false }, measure).height } as Partial<CanvasNode>); }
       if (current.type === "frame" && current.layout) visit(current.id);
-    }
-    const fixed = children.reduce((sum, child) => sum + (child.grow && !hugMain ? 0 : main(read(child.id))), 0);
-    const gaps = layout.gap * Math.max(0, children.length - 1);
-    const mainInner = hugMain ? fixed + gaps : (row ? frame.width - left - right : frame.height - top - bottom);
-    const growing = hugMain ? [] : children.filter((child) => child.grow);
-    if (growing.length) {
-      const share = Math.max(1, (mainInner - fixed - gaps) / growing.length);
-      for (const child of growing) {
-        write(read(child.id), row ? { width: share } : { height: share });
-        const grown = read(child.id);
-        if (grown.type === "text" && row) write(grown, { autoWidth: false, height: layoutText({ ...grown, autoWidth: false }, measure).height } as Partial<CanvasNode>);
-        if (grown.type === "frame" && grown.layout) visit(grown.id);
+    };
+    let crossInner = (row ? frame.height - top - bottom : frame.width - left - right);
+    if (hugCross && !wrap) crossInner = Math.max(0, ...children.map((child) => cross(read(child.id))));
+    if (layout.align === "stretch" && !wrap) for (const child of children) stretch(child, crossInner);
+    const fixedOf = (list: readonly CanvasNode[]) => list.reduce((sum, child) => sum + (child.grow && !hugMain ? 0 : main(read(child.id))), 0);
+    const gapsOf = (list: readonly CanvasNode[]) => layout.gap * Math.max(0, list.length - 1);
+    const mainInner = hugMain ? fixedOf(children) + gapsOf(children) : (row ? frame.width - left - right : frame.height - top - bottom);
+    const lines: CanvasNode[][] = [];
+    if (wrap) {
+      let line: CanvasNode[] = [];
+      let used = 0;
+      for (const child of children) {
+        const size = child.grow ? Math.max(child.minW ?? 0, 1) : main(read(child.id));
+        if (line.length && used + layout.gap + size > mainInner + 0.5) { lines.push(line); line = []; used = 0; }
+        used += (line.length ? layout.gap : 0) + size;
+        line.push(child);
       }
-    }
-    const used = children.reduce((sum, child) => sum + main(read(child.id)), 0) + gaps;
-    const free = Math.max(0, mainInner - used);
-    let cursor = (row ? left : top) + (layout.justify === "center" ? free / 2 : layout.justify === "end" ? free : 0);
-    const between = layout.justify === "between" && children.length > 1 ? free / (children.length - 1) : 0;
-    for (const child of children) {
-      const current = read(child.id);
-      const room = crossInner - cross(current);
-      const offset = layout.align === "center" ? room / 2 : layout.align === "end" ? room : 0;
-      const crossStart = (row ? top : left) + offset;
-      write(current, row ? { x: cursor, y: crossStart } : { x: crossStart, y: cursor });
-      cursor += main(current) + layout.gap + between;
-    }
+      if (line.length) lines.push(line);
+    } else lines.push(children);
+    const crossGap = layout.crossGap ?? layout.gap;
+    let crossCursor = row ? top : left;
+    let totalCross = 0;
+    lines.forEach((line, lineIndex) => {
+      const lineCross = wrap ? Math.max(0, ...line.map((child) => cross(read(child.id)))) : crossInner;
+      if (wrap && layout.align === "stretch") for (const child of line) stretch(child, lineCross);
+      const fixed = fixedOf(line);
+      const gaps = gapsOf(line);
+      const growing = hugMain ? [] : line.filter((child) => child.grow);
+      if (growing.length) {
+        const share = Math.max(1, (mainInner - fixed - gaps) / growing.length);
+        for (const child of growing) {
+          write(read(child.id), row ? { width: share } : { height: share });
+          const grown = read(child.id);
+          if (grown.type === "text" && row) write(grown, { autoWidth: false, height: layoutText({ ...grown, autoWidth: false }, measure).height } as Partial<CanvasNode>);
+          if (grown.type === "frame" && grown.layout) visit(grown.id);
+        }
+      }
+      const used = line.reduce((sum, child) => sum + main(read(child.id)), 0) + gaps;
+      const free = Math.max(0, mainInner - used);
+      let cursor = (row ? left : top) + (layout.justify === "center" ? free / 2 : layout.justify === "end" ? free : 0);
+      const between = layout.justify === "between" && line.length > 1 ? free / (line.length - 1) : 0;
+      for (const child of line) {
+        const current = read(child.id);
+        const room = lineCross - cross(current);
+        const offset = layout.align === "center" ? room / 2 : layout.align === "end" ? room : 0;
+        const crossStart = crossCursor + offset;
+        write(current, row ? { x: cursor, y: crossStart } : { x: crossStart, y: cursor });
+        cursor += main(current) + layout.gap + between;
+      }
+      crossCursor += lineCross + crossGap;
+      totalCross += lineCross + (lineIndex ? crossGap : 0);
+    });
     const size: Partial<CanvasNode> = {};
     if (hugMain) Object.assign(size, row ? { width: mainInner + left + right } : { height: mainInner + top + bottom });
-    if (hugCross) Object.assign(size, row ? { height: crossInner + top + bottom } : { width: crossInner + left + right });
+    const crossTotal = wrap ? totalCross : crossInner;
+    if (hugCross) Object.assign(size, row ? { height: crossTotal + top + bottom } : { width: crossTotal + left + right });
     if (Object.keys(size).length) write(read(id), size);
   };
   for (const id of rootIds) if (isLive(scene.get(id))) visit(id);
   return [...next.values()];
 }
+
+export const clampSize = (value: number, min: number | undefined, max: number | undefined) => Math.max(min ?? 0, Math.min(max ?? Infinity, value));
 
 /** The outermost auto-layout frame whose arrangement depends on `id`, so a change re-runs layout from there. */
 export function layoutRoot(scene: Scene, id: string): string | null {

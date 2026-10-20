@@ -91,12 +91,12 @@ it("exports only one agent snapshot when submit events arrive before the busy re
   expect(fixture.exportSvg).toHaveBeenCalledOnce();
 });
 
-it("cancels a pending snapshot when its popover closes", async () => {
+it("cancels a pending snapshot when its panel closes", async () => {
   const snapshot = Promise.withResolvers<unknown>(); fixture.exportSvg.mockReturnValue(snapshot.promise);
   mount("ask-cancel", true);
   flushSync(() => host.querySelector<HTMLButtonElement>('[aria-label="Ask Atlas"]')!.click());
   flushSync(() => host.querySelector('form[aria-label^="Ask"]')!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
-  flushSync(() => host.querySelector<HTMLButtonElement>('form [aria-label="Close"]')!.click());
+  flushSync(() => host.querySelector<HTMLButtonElement>('[data-agent-panel] [aria-label="Close"]')!.click());
   snapshot.resolve({ svg: "<svg/>", width: 1, height: 1 }); await vi.advanceTimersByTimeAsync(0);
   expect(fixture.png).not.toHaveBeenCalled(); expect(fixture.dispatch).not.toHaveBeenCalled();
 });

@@ -7,6 +7,7 @@ import schema from "./schema";
 import { createSession } from "./lib/auth";
 import { makeFunctionReference } from "convex/server";
 import { pulseTools } from "../../server/origin-pulse-tool.ts";
+import { nextJourneyStep } from "../../shared/origin-journey";
 
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
 const DAY = 86_400_000;
@@ -144,8 +145,49 @@ describe("pulse", () => {
     ]).origin_pulse!;
     const { text } = await tool({ range: 30 }, null);
     expect(text).toContain("Rocket, last 30 days (UTC):");
-    expect(text).toContain("Stage: Idea (reached) → Build → Launch → Grow (current).");
+    expect(text).toContain("Stage: Plan (reached) → Build → Launch → Sell (current).");
     expect(text).toContain("1 won, conversion 100% of 1 leads");
     expect(text).toContain("Hidden: Origin did not return its pulse (No active project access).");
+  });
+  test("journey facts walk a project from Brief to leads, and its next step follows the furthest thing made", async () => {
+    const f = await fixture();
+    const facts = () => f.t.query(api.pulse.journey, { sessionToken: f.owner.token, projectId: f.projectId });
+    const step = async () => nextJourneyStep(await facts()).id;
+    expect(await facts()).toMatchObject({ name: "Rocket", brief: false, canvases: 0, issuesOpen: 0, issuesDone: 0, shipped: false, postsLive: 0, leads: 0 });
+    expect(await step()).toBe("brief");
+
+    await f.t.mutation(api.projectDocs.save, { sessionToken: f.owner.token, projectId: f.projectId, title: "Brief", content: "## Problem", tags: ["brief"] });
+    expect(await step()).toBe("sketch");
+    await f.t.mutation(api.draw.createCanvas, { sessionToken: f.owner.token, projectId: f.projectId, name: "Flow" });
+    const base = { sessionToken: f.owner.token, projectId: f.projectId, priority: "medium" as const, assignedToEmail: "owner@test.dev", dueDate: new Date(Date.now() + 7 * DAY).toISOString().slice(0, 10) };
+    await f.t.mutation(api.tasks.createTask, { ...base, title: "An idea" });
+    expect(await facts()).toMatchObject({ drafts: 1, issuesOpen: 0 });
+    expect(await step()).toBe("issues");
+    const issue = await f.t.mutation(api.tasks.createTask, { ...base, title: "Sign-up", columnId: f.todo });
+    expect(await step()).toBe("build");
+    await f.t.mutation(api.tasks.updateTask, { sessionToken: f.owner.token, projectId: f.projectId, taskId: issue, done: true });
+    expect(await facts()).toMatchObject({ issuesOpen: 0, issuesDone: 1 });
+    expect(await step()).toBe("ship");
+
+    await f.t.run(async (ctx) => {
+      const now = Date.now();
+      await ctx.db.insert("shipReleases", { projectId: f.projectId, tag: "v1.0.0", title: "v1", notes: "", status: "published", pulls: [], announce: false, createdBy: f.owner.userId, createdAt: now, updatedAt: now, publishedAt: now });
+    });
+    expect(await step()).toBe("content");
+    await f.t.run(async (ctx) => {
+      const now = Date.now();
+      await ctx.db.insert("studioGenerations", { projectId: f.projectId, mode: "image", model: "m", modelLabel: "M", kind: "image", prompt: "launch", status: "done", outputs: [], saved: [], broadcast: [], createdBy: f.owner.userId, createdByName: "o", createdAt: now, updatedAt: now });
+    });
+    expect(await step()).toBe("post");
+    await f.t.run(async (ctx) => {
+      const now = Date.now();
+      await ctx.db.insert("broadcastPosts", { projectId: f.projectId, variants: [{ channel: "x", text: "Live", result: "published", publishedAt: now }], assetIds: [], status: "published", authorUserId: f.owner.userId, createdAt: now, updatedAt: now });
+      await ctx.db.insert("pipelineLeads", { projectId: f.projectId, name: "Ada", source: "page", stage: "New", order: 0, tags: [], unreadReplies: 2, createdAt: now, updatedAt: now });
+    });
+    expect(await facts()).toMatchObject({ postsLive: 1, leads: 1, repliesAwaiting: 2 });
+    expect(nextJourneyStep(await facts())).toMatchObject({ id: "sell", phase: "sell", section: "pipeline", detail: "2 replies wait for an answer." });
+
+    const stranger = await f.user("stranger@test.dev");
+    await expect(f.t.query(api.pulse.journey, { sessionToken: stranger.token, projectId: f.projectId })).rejects.toThrow();
   });
 });

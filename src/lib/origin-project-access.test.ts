@@ -4,7 +4,7 @@ import type { WorkspaceMember } from "./origin-members";
 vi.mock("@/lib/origin-cloud", () => ({ cloudMutation: vi.fn(), cloudQueryOnce: vi.fn() }));
 vi.mock("@/lib/origin-github", () => ({ originGitHub: { createRepository: vi.fn() } }));
 
-const { accessChanges, createOriginProject, currentAccess, grantsFor } = await import("./origin-project-access");
+const { accessChanges, canCreateProjects, createOriginProject, currentAccess, grantsFor } = await import("./origin-project-access");
 const { cloudMutation } = await import("@/lib/origin-cloud");
 const { originGitHub } = await import("@/lib/origin-github");
 const { exclusiveWithSync } = await import("./origin-sync");
@@ -14,6 +14,10 @@ const members = [person("me@x.io", "admin"), person("boss@x.io", "owner"), perso
 const row = (email: string, role: WorkspaceMember["role"] = "member") => ({ _id: `row-${email}`, email, role, status: "active" });
 
 describe("project access", () => {
+  it("lets every workspace editor create projects, not viewers", () => {
+    expect((["owner", "admin", "member", "viewer"] as const).filter(canCreateProjects)).toEqual(["owner", "admin", "member"]);
+  });
+
   it("grants nobody for a private project and every non-admin for everyone, viewers read-only", () => {
     expect(grantsFor({ mode: "private", emails: [] }, members, "me@x.io")).toEqual([]);
     expect(grantsFor({ mode: "everyone", emails: [] }, members, "me@x.io")).toEqual([
@@ -64,7 +68,10 @@ describe("a new project's repository", () => {
     vi.mocked(originGitHub.createRepository).mockReset().mockResolvedValue({ state: "ready", repoUrl: "https://github.com/octo/My-App" });
     expect(await create()).toEqual({ projectId: "p1", missed: [], repository: { state: "ready", repoUrl: "https://github.com/octo/My-App" } });
     expect(vi.mocked(cloudMutation).mock.calls[0]).toEqual(["projects:create", { teamId: "team1", name: "My App", githubRepo: "later" }]);
-    expect(vi.mocked(originGitHub.createRepository).mock.calls[0]).toEqual(["team1", "p1", "My-App"]);
+    expect(vi.mocked(originGitHub.createRepository).mock.calls[0]).toEqual(["team1", "p1", "My-App", undefined]);
+    await create({ mode: "new", name: null, visibility: "public" });
+    expect(vi.mocked(cloudMutation).mock.calls[1]).toEqual(["projects:create", { teamId: "team1", name: "My App", githubRepo: "later", githubRepoVisibility: "public" }]);
+    expect(vi.mocked(originGitHub.createRepository).mock.calls[1]).toEqual(["team1", "p1", "My-App", "public"]);
     vi.mocked(originGitHub.createRepository).mockResolvedValue({ state: "error", error: "name already exists" });
     expect((await create({ mode: "new", name: "taken" })).repository).toEqual({ state: "error", error: "name already exists" });
   });

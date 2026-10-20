@@ -4,7 +4,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { canEdit, requireAdmin, requireMember, touchProject } from "./lib/permissions";
 import { cleanText, validDay } from "./lib/features";
 import {
-  actorOf, addActivity, leadOf, newToken, requireEditor, settingsOf, siteUrl, stagesOf, stopSequences, type PipelineActorValue as Actor, type PipelineCtx as Ctx,
+  actorOf, addActivity, findLead, leadOf, newToken, requireEditor, settingsOf, siteUrl, sourcePatch, stagesOf, stopSequences, type PipelineActorValue as Actor, type PipelineCtx as Ctx,
 } from "./lib/pipelineCore";
 import { pipelineActor } from "./pipelineTables";
 import { CLOSED_STAGES, PIPELINE_IMPORT_MAX, normalizeLeadEmail, normalizeLeadPhone } from "../../shared/origin-pipeline";
@@ -81,7 +81,7 @@ function leadPatch(input: { [K in keyof typeof leadFields]?: unknown }, stages: 
   return patch;
 }
 
-async function topOrder(ctx: Ctx, projectId: Id<"projects">, stage: string) {
+export async function topOrder(ctx: Ctx, projectId: Id<"projects">, stage: string) {
   let min = 0;
   for await (const lead of ctx.db.query("pipelineLeads").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId))) {
     if (lead.stage === stage && lead.order < min) min = lead.order;
@@ -94,7 +94,7 @@ async function findByEmail(ctx: Ctx, projectId: Id<"projects">, email: string | 
   return ctx.db.query("pipelineLeads").withIndex("by_projectId_and_email", (q) => q.eq("projectId", projectId).eq("email", email)).first();
 }
 
-async function moveTo(ctx: MutationCtx, lead: Doc<"pipelineLeads">, stage: string, order: number, actor: Actor) {
+export async function moveTo(ctx: MutationCtx, lead: Doc<"pipelineLeads">, stage: string, order: number, actor: Actor) {
   const now = Date.now();
   await ctx.db.patch(lead._id, { stage, order, updatedAt: now, ...(stage !== lead.stage ? { stageChangedAt: now } : {}) });
   if (stage === lead.stage) return;
@@ -221,6 +221,7 @@ export const removeLead = mutation({
       await ctx.db.delete(activity._id);
     }
     for (const sequence of await ctx.db.query("pipelineSequences").withIndex("by_leadId", (q) => q.eq("leadId", lead._id)).take(50)) await ctx.db.delete(sequence._id);
+    for (const deal of await ctx.db.query("pipelineDeals").withIndex("by_leadId", (q) => q.eq("leadId", lead._id)).take(100)) await ctx.db.delete(deal._id);
     await ctx.db.delete(lead._id);
     return null;
   },
@@ -260,7 +261,7 @@ export const importLeads = mutation({
       if (existing) {
         const { stage: _stage, source: _source, tags, ...rest } = patch;
         const gaps = Object.fromEntries(Object.entries(defined(rest)).filter(([key]) => existing[key as keyof typeof existing] === undefined));
-        await ctx.db.patch(existing._id, { ...gaps, tags: [...new Set([...existing.tags, ...(tags ?? [])])].slice(0, 12), updatedAt: now });
+        await ctx.db.patch(existing._id, { ...gaps, ...sourcePatch(existing, source), tags: [...new Set([...existing.tags, ...(tags ?? [])])].slice(0, 12), updatedAt: now });
         updated++;
         continue;
       }
@@ -468,10 +469,12 @@ export const capture = internalMutation({
     const message = optionalText(args.message, 4000);
     const source = optionalText(args.source, 60) ?? "form";
     const page = optionalText(args.page, 300);
-    const existing = await findByEmail(ctx, projectId, email);
+    const existing = await findLead(ctx, projectId, { email, phone });
     let lead: Doc<"pipelineLeads">;
     if (existing) {
-      await ctx.db.patch(existing._id, { ...(phone && !existing.phone ? { phone } : {}), ...(company && !existing.company ? { company } : {}), updatedAt: now });
+      await ctx.db.patch(existing._id, {
+        ...(phone && !existing.phone ? { phone } : {}), ...(email && !existing.email ? { email } : {}), ...(company && !existing.company ? { company } : {}), ...sourcePatch(existing, source), updatedAt: now,
+      });
       lead = existing;
     } else {
       const leadId = await ctx.db.insert("pipelineLeads", {

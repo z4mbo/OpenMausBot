@@ -5,9 +5,9 @@ import { applySkin } from "../../src/lib/skins";
 import { GlassHeaderFrame } from "../../src/components/GlassScrollFrame";
 import "../../src/styles.css";
 
-const config = await (await fetch("/__origin-campaigns.json")).json() as { projectId: string };
+const config = await (await fetch("/__origin-campaigns.json")).json() as { projectId: string; chiefId?: string };
 applySkin(new URLSearchParams(location.search).get("theme") === "light" ? "daylight" : "midnight");
-const chief = { id: "fixture-chief", name: "Atlas", title: "Chief", chiefOfStaff: true, color: "green", section: "Fixture project", messages: [], modelSelection: { instanceId: "fixture", model: "fixture" }, threadId: "fixture-thread", description: "", notifications: false, unread: false } as Bot;
+const chief = { id: config.chiefId ?? "fixture-chief", name: "Atlas", title: "Chief", chiefOfStaff: true, color: "green", section: "Fixture project", messages: [], modelSelection: { instanceId: "fixture", model: "fixture" }, threadId: "fixture-thread", description: "", notifications: false, unread: false } as Bot;
 const dispatched: Action[] = [];
 Object.assign(window, { originPipelineDispatched: dispatched });
 

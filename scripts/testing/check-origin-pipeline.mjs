@@ -20,7 +20,8 @@ async function open(width, theme, query = {}) {
   target.searchParams.set("theme", theme);
   for (const [key, value] of Object.entries(query)) target.searchParams.set(key, value);
   await page.goto(target.href);
-  await page.getByRole("heading", { name: "Pipeline" }).waitFor();
+  await page.getByRole("heading", { name: "Sales" }).waitFor();
+  await page.getByRole("button", { name: "Pipeline" }).click();
   await page.getByText("Grace Hopper").first().waitFor();
   return page;
 }
@@ -50,6 +51,7 @@ try {
 
   await page.getByRole("article", { name: "Alan Turing, Bletchley" }).click();
   const drawer = page.getByRole("dialog");
+  await drawer.getByRole("button", { name: "Activity" }).click();
   await drawer.getByText("Email reply").waitFor();
   await drawer.getByText("Sounds good. Send me the numbers first.").waitFor();
   await drawer.getByRole("button", { name: "Edit" }).click();
@@ -71,6 +73,7 @@ try {
   evidence.cases.push({ step: "opening the lead clears its unread replies" });
 
   await page.getByRole("article", { name: "Linus Torvalds, Kernel" }).click();
+  await drawer.getByRole("button", { name: "Activity" }).click();
   await drawer.getByRole("region", { name: "Follow-up sequence" }).getByText("Running").waitFor();
   await drawer.getByText("Drafted for approval").waitFor();
   await capture(page, "sequence-1280-dark");
@@ -84,7 +87,8 @@ try {
   evidence.cases.push({ step: "an agent's sequence drafted day 0 for approval, turned its day 3 call task into the next step, paused and resumed" });
 
   await page.getByRole("article", { name: "Margaret Hamilton, MIT" }).click();
-  await drawer.getByRole("button", { name: "New" }).click();
+  await drawer.getByRole("button", { name: "Activity" }).click();
+  await drawer.getByRole("button", { name: "New", exact: true }).click();
   await drawer.getByRole("button", { name: "Start" }).click();
   await drawer.getByText("Running").waitFor();
   assert.equal((await fixture("/__origin-pipeline-inbound", { method: "POST", body: JSON.stringify({ kind: "whatsapp", from: "+16175550123", body: "Not this quarter, sorry." }) })).status, 200);
@@ -94,14 +98,14 @@ try {
   await drawer.getByRole("button", { name: "Close" }).click();
   evidence.cases.push({ step: "a person's sequence stops by itself when the lead replies on WhatsApp" });
 
-  await page.getByRole("button", { name: "Table" }).click();
+  await page.getByRole("button", { name: "Contacts" }).click();
   await page.getByRole("button", { name: /^Score/ }).click();
   const first = await page.locator("tbody tr").first().getByRole("button").first().textContent();
   assert.equal(first, "Grace Hopper");
   await capture(page, "table-by-score-1280-dark");
-  evidence.cases.push({ step: "the table sorts by score with next-action chips" });
+  evidence.cases.push({ step: "the contacts table sorts by score with next-action chips" });
 
-  await page.getByRole("button", { name: "Pipeline settings" }).click();
+  await page.getByRole("button", { name: "Sales settings" }).click();
   const settings = page.getByRole("dialog");
   await settings.getByRole("button", { name: "Replies" }).click();
   await settings.getByText(/pipeline\/twilio\?token=[a-f0-9]{48}/).waitFor();
@@ -117,7 +121,7 @@ try {
   await capture(page, "settings-stages-1280-dark");
   await settings.getByRole("button", { name: "Save stages" }).click();
   await settings.waitFor({ state: "detached" });
-  await page.getByRole("button", { name: "Board" }).click();
+  await page.getByRole("button", { name: "Pipeline" }).click();
   await page.getByRole("list", { name: "Demo leads" }).waitFor();
   await page.getByRole("list", { name: "Discovery leads" }).getByText("Alan Turing").waitFor();
   assert.equal(await page.getByRole("list", { name: "Contacted leads" }).count(), 0);
@@ -130,10 +134,11 @@ try {
     const view = await open(width, theme);
     await capture(view, `board-${tag}`);
     await view.getByRole("article", { name: "Grace Hopper, Navy" }).click();
+    await view.getByRole("dialog").getByRole("button", { name: "Activity" }).click();
     await view.getByRole("dialog").getByText("Text reply").waitFor();
     await capture(view, `lead-${tag}`);
     await view.getByRole("dialog").getByRole("button", { name: "Close" }).click();
-    await view.getByRole("button", { name: "Pipeline settings" }).click();
+    await view.getByRole("button", { name: "Sales settings" }).click();
     await view.getByRole("dialog").getByRole("button", { name: "Replies" }).click();
     await view.getByRole("dialog").getByText("Messaging webhook", { exact: false }).waitFor();
     await capture(view, `settings-replies-${tag}`);
@@ -142,7 +147,7 @@ try {
   }
 
   const viewer = await open(1280, "dark", { viewer: "1" });
-  await viewer.getByRole("button", { name: "Pipeline settings" }).click();
+  await viewer.getByRole("button", { name: "Sales settings" }).click();
   await viewer.getByRole("dialog").getByRole("button", { name: "Replies" }).click();
   await viewer.getByRole("dialog").getByText("Only editors see the webhook addresses.").waitFor();
   await viewer.close();

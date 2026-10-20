@@ -602,7 +602,7 @@ import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
 import { createSharedAgents, type SendDecision } from "./origin-shared-agents.ts";
 import { createOriginMemberRoutes } from "./origin-members.ts";
 import { createOriginMcpRoutes } from "./origin-mcp.ts";
-import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService } from "./routes/github.ts";
+import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService, createProjectGit } from "./routes/github.ts";
 import { createShipRoutes } from "./ship/routes.ts";
 import { originGitHub } from "./github/review.ts";
 import { removalSentence, removeGitHubIssue } from "./github/sync.ts";
@@ -13569,9 +13569,9 @@ const originAgents = createOriginAgentSupport({
     const bot = store.patchBot(botId, { cwd });
     if (bot) broadcast({ kind: "bot", bot: wireBot(bot) });
   },
-  localFolders: !CLOUD_HOME,
+  localFolders: !CLOUD_HOME, git: CLOUD_HOME ? undefined : createProjectGit({ service: () => githubService(), cloud: () => readOriginCloud(defaultOriginCloudFile()), connect: convexOriginClient, port: PORT, dataDir: DATA_DIR }),
 });
-ROUTES.push(originAgents.routes);
+ROUTES.push(originAgents.routes); PUBLIC_ROUTES.push(originAgents.publicRoutes);
 const pipelineProviderOrigin = loopbackProviderOrigin(process.env.OMB_PIPELINE_PROVIDER_URL);
 const summarizeForAgent = async ({ botId, prompt }: { botId: string; prompt: string }) => {
   const bot = store.bot(botId);
@@ -13585,7 +13585,7 @@ const pipelineSender = createPipelineSender({
   summarize: summarizeForAgent,
   log: (line) => console.log(line),
 });
-ROUTES.push(createPipelineRoutes({ sender: pipelineSender }));
+ROUTES.push(createPipelineRoutes({ sender: pipelineSender, generate: summarizeForAgent, providerOrigin: pipelineProviderOrigin }));
 ROUTES.push(createOriginCloudRoutes({
   store,
   pipeline: pipelineSender,

@@ -24,6 +24,7 @@ local-only; its data never leaves the machine.
 | `ORIGIN_INTEGRATION_SECRET` | random 64-hex string; read it with `npx convex env get ORIGIN_INTEGRATION_SECRET`. Also in `backend/.env.local`; `site/.env.local` only needs the two `NEXT_PUBLIC_CONVEX_*` URLs. |
 | `ORIGIN_PUBLIC_URL` | `http://localhost:3000` |
 | `ORIGIN_SIGNUP_MODE` | unset, so sign-up is open (`invite` would make it invite-only). |
+| `ORIGIN_SEALING_KEY` | 32 random bytes, base64 or 64-hex: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`. Seals the workspace GitHub connections and shared integration keys; without it nothing can be shared. Rotating it makes every shared connection and key unreadable until an admin shares them again. |
 
 ### Start (detached, survives closing the terminal)
 
@@ -100,6 +101,31 @@ GitHub App manifest, OAuth callback and webhook point at this app:
 | `GET /api/github/oauth/install`, `GET /api/github/oauth/callback`, `GET /api/github/setup/callback` | GitHub redirect | state bound to the `origin.github` cookie, PKCE |
 | `POST /api/github/webhook` | GitHub | `X-Hub-Signature-256` HMAC, 1 MB body limit |
 | `POST /api/integrations/tick` | Convex cron `integrations:kick` | `x-origin-signature` HMAC of `ORIGIN_INTEGRATION_SECRET`, 60 s freshness |
+| `POST /api/github/share?teamId=` | Origin client (workspace owner or admin) | `x-origin-session`; hands this server's App credentials and GitHub connection to the backend, which seals them for the whole workspace |
+
+### Workspace GitHub held by the backend
+
+An owner or admin connects GitHub once; the server they connected on shares the
+App's credentials and their GitHub connection with the backend
+(`backend/convex/teamGitHub.ts`), sealed under `ORIGIN_SEALING_KEY`. From then
+on a member's own server, which holds no App, connection or integration secret,
+reaches GitHub through the backend's `teamGitHub:bridge` action with the
+member's Origin session: the backend checks the member's project role, mints an
+installation token for that one repository (read for viewers; issues, pull
+requests and contents for editors; contents only for git), creates
+repositories (private or public, in the connecting admin's account or an
+organization the App is installed on), and reads every issue link, merge and
+pull request back from GitHub before recording it. A server that holds
+`ORIGIN_INTEGRATION_SECRET` keeps its own connection and also mints tokens for
+shared workspaces through the signed bridge (`githubToken`, `createRepository`).
+A repository a member links by hand still needs an admin's approval before the
+workspace's connection works on it.
+
+Agents get git access through a credential helper the server writes to
+`<data dir>/origin-git/` and configures in each project folder; it answers
+git with a contents-only token for that folder's repository, never in a prompt,
+command line or remote URL. Linking a member's own GitHub uses the App's device
+sign-in, so the App's settings need "Enable Device Flow".
 
 The client routes sit behind the app's own sign-in (admin scope for paired
 sessions); the browser, GitHub and Convex legs run before it and check their

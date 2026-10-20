@@ -1,14 +1,19 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
-import { Check, Clock3, FolderGit2, FolderPlus, Lock, Search } from "lucide-react";
+import { Check, Clock3, FolderGit2, FolderPlus, Globe, Lock, Search } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { originGitHub, type GitHubRepository } from "@/lib/origin-github";
 import { isRepositoryName, repositoryNameFor } from "../../../shared/github-repo-name";
-import type { RepositoryChoice } from "@/lib/origin-project-access";
+import type { RepositoryChoice, RepositoryVisibility } from "@/lib/origin-project-access";
 
 const MODES: { id: RepositoryChoice["mode"]; title: string; body: string; icon: ReactNode }[] = [
   { id: "new", title: "Create new repo", body: "In the workspace's GitHub", icon: <FolderPlus size={15} /> },
   { id: "existing", title: "Use existing", body: "Pick or paste one", icon: <FolderGit2 size={15} /> },
   { id: "later", title: "Later", body: "Link one from Settings", icon: <Clock3 size={15} /> },
+];
+
+const VISIBILITIES: { id: RepositoryVisibility; label: string; icon: ReactNode }[] = [
+  { id: "private", label: "Private", icon: <Lock size={12} /> },
+  { id: "public", label: "Public", icon: <Globe size={12} /> },
 ];
 
 const GITHUB_REPO = /^(?:https:\/\/github\.com\/)?([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/i;
@@ -62,7 +67,7 @@ export function RepositoryPicker({ teamId, projectName, value, onChange, disable
                 selected ? "border-accent/70 bg-accent/[0.07]" : "border-hairline/60 hover:border-hairline hover:bg-raised/40",
                 "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent/60")}>
               <input type="radio" name={name} value={mode.id} aria-label={mode.title} checked={selected} className="sr-only"
-                onChange={() => onChange(mode.id === "new" ? { mode: "new", name: value.mode === "new" ? value.name : null } : mode.id === "existing" ? { mode: "existing", url: pastedRepository(query) ?? "" } : { mode: "later" })} />
+                onChange={() => onChange(mode.id === "new" ? { mode: "new", name: value.mode === "new" ? value.name : null, ...(value.mode === "new" && value.visibility ? { visibility: value.visibility } : {}) } : mode.id === "existing" ? { mode: "existing", url: pastedRepository(query) ?? "" } : { mode: "later" })} />
               <span className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-(--motion-fast)", selected ? "bg-accent text-accent-ink" : "bg-raised text-ink-secondary group-hover:text-ink")} aria-hidden="true">{mode.icon}</span>
               <span className="min-w-0">
                 <span className="block text-[13px] font-medium text-ink">{mode.title}</span>
@@ -78,10 +83,21 @@ export function RepositoryPicker({ teamId, projectName, value, onChange, disable
           <label className="flex min-w-0 items-center rounded-lg border border-hairline/60 bg-inset text-[13px] transition-colors focus-within:border-accent/70">
             <span className="shrink-0 truncate pl-2.5 text-ink-tertiary">{login ? `${login}/` : "github/"}</span>
             <input className="min-w-0 flex-1 bg-transparent py-1.5 pr-2.5 text-ink outline-none max-md:text-[16px]" aria-label="Repository name" maxLength={100}
-              value={value.name ?? repositoryNameFor(projectName)} placeholder="repository-name" onChange={(event) => onChange({ mode: "new", name: event.target.value.trim() })} />
+              value={value.name ?? repositoryNameFor(projectName)} placeholder="repository-name" onChange={(event) => onChange({ ...value, name: event.target.value.trim() })} />
           </label>
+          <div role="radiogroup" aria-label="Repository visibility" className="mt-2 inline-flex rounded-lg bg-inset p-0.5 text-[12.5px]">
+            {VISIBILITIES.map((option) => {
+              const on = (value.visibility ?? "private") === option.id;
+              return (
+                <button key={option.id} type="button" role="radio" aria-checked={on} onClick={() => onChange({ ...value, visibility: option.id })}
+                  className={cn("inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 transition-colors duration-(--motion-fast)", on ? "bg-raised text-ink" : "text-ink-tertiary hover:text-ink")}>
+                  <span aria-hidden="true">{option.icon}</span>{option.label}
+                </button>
+              );
+            })}
+          </div>
           {value.name !== null && !isRepositoryName(value.name) && <p className="mt-1 text-[12px] text-danger" role="alert">Letters, digits, dots, dashes and underscores only.</p>}
-          {login === null && <p className="mt-1 text-[12px] text-ink-tertiary">GitHub is not connected to this workspace yet; the repository is created once an admin connects it.</p>}
+          {login === null && <p className="mt-1 text-[12px] text-ink-tertiary">GitHub isn't set up for this workspace yet; the repository is created once an owner or admin connects it in Settings &gt; Integrations.</p>}
         </div>
       )}
 

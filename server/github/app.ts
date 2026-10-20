@@ -1,4 +1,5 @@
 import { createSign } from "node:crypto";
+import { brokeredToken, sameRepository } from "./broker.ts";
 import { parseGitHubRepo } from "./repo.ts";
 import { appConfig, githubRequest, type GitHubService } from "./service.ts";
 
@@ -50,6 +51,14 @@ export async function installationToken(service: GitHubService, repoUrl: string,
 
 type ProjectContext = { project: { repoUrl?: string; githubWorkspaceAccess?: boolean }; connection: { teamId: string; login: string; connectedBy: string } | null };
 
+/** Whether this server mints the project's installation tokens itself: it holds the App's key and the workspace's connection. */
+async function mintsLocally(service: GitHubService, projectId: string): Promise<boolean> {
+  const config = appConfig(service);
+  if (!config?.appId || !config.privateKey) return false;
+  const context = await service.bridge<ProjectContext>("context", { projectId });
+  return Boolean(context.connection && service.store.workspaceInfo(context.connection.teamId));
+}
+
 async function projectAccount(service: GitHubService, projectId: string, repoUrl: string): Promise<Account> {
   const context = await service.bridge<ProjectContext>("context", { projectId });
   const connection = context.connection;
@@ -75,7 +84,13 @@ export async function projectInstallationToken(service: GitHubService, projectId
   }
 }
 
+/** Runs `fn` with an installation token for the project's repository: minted here, or by the backend from the workspace's shared connection. */
 export async function withInstallation<T>(service: GitHubService, projectId: string, repoUrl: string, fn: (token: string) => Promise<T>, extra: Readonly<Record<string, string>> = {}): Promise<T> {
+  if (!await mintsLocally(service, projectId)) {
+    const brokered = await brokeredToken(service, projectId, "write", extra, repoUrl);
+    if (!sameRepository(brokered.repoUrl, repoUrl)) throw new Error("The project's repository changed during authorization; reload and retry");
+    return fn(brokered.token);
+  }
   const { token } = await projectInstallationToken(service, projectId, repoUrl, false, extra);
   try { return await fn(token); }
   finally { await revokeInstallationToken(service, token); }
@@ -83,4 +98,12 @@ export async function withInstallation<T>(service: GitHubService, projectId: str
 
 export async function revokeInstallationToken(service: Pick<GitHubService, "fetch">, token: string): Promise<void> {
   await service.fetch("https://api.github.com/installation/token", { method: "DELETE", headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" }, signal: AbortSignal.timeout(10_000) }).catch(() => undefined);
+}
+
+/** A contents-only token for git in the project's folder; the caller keeps it in memory. */
+export async function pushToken(service: GitHubService, projectId: string, repoUrl: string): Promise<{ token: string; expiresAt: string }> {
+  if (await mintsLocally(service, projectId)) return projectInstallationToken(service, projectId, repoUrl, true);
+  const brokered = await brokeredToken(service, projectId, "push", {}, repoUrl);
+  if (!sameRepository(brokered.repoUrl, repoUrl)) throw new Error("The project's repository changed during authorization");
+  return brokered;
 }

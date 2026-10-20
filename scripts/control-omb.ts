@@ -186,6 +186,9 @@ export function verificationServerEnvironment(parentEnv: NodeJS.ProcessEnv, data
   // Ship's Vercel, Netlify, Cloudflare and GitHub requests go to a loopback fake only.
   const shipUrl = parentEnv.OMB_SHIP_PROVIDER_URL?.trim() ?? "";
   if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(shipUrl)) childEnv.OMB_SHIP_PROVIDER_URL = shipUrl;
+  // The GitHub integration's API and sign-in requests go to a loopback fake only.
+  const githubUrl = parentEnv.OMB_GITHUB_API_URL?.trim() ?? "";
+  if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(githubUrl)) childEnv.OMB_GITHUB_API_URL = githubUrl;
   // Arms the one-shot audio-append failure inside the fixture server.
   if (parentEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE) {
     childEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE = parentEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE;

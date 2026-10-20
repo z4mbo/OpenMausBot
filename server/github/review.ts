@@ -200,8 +200,7 @@ export async function linkClosingReference(service: GitHubService, repoUrl: stri
 export async function withProjectGitHub<T>(service: GitHubService, projectId: string, fn: (token: string, repoUrl: string) => Promise<T>, extra: Readonly<Record<string, string>> = {}): Promise<T> {
   const { repoUrl, token } = await projectConnection(service, projectId);
   const config = appConfig(service);
-  if (config?.appId && config.privateKey) return withInstallation(service, projectId, repoUrl, (installation) => fn(installation, repoUrl), extra);
-  if (!token) throw new Error("This project has no GitHub connection. A workspace admin connects GitHub in Settings > Integrations and authorizes the repository.");
+  if ((config?.appId && config.privateKey) || !token) return withInstallation(service, projectId, repoUrl, (installation) => fn(installation, repoUrl), extra);
   return fn(token, repoUrl);
 }
 

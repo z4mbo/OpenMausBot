@@ -3,8 +3,10 @@ import { originGitHub } from "@/lib/origin-github";
 import type { WorkspaceMember, WorkspaceRole } from "@/lib/origin-members";
 import { repositoryNameFor } from "../../shared/github-repo-name";
 
+export type RepositoryVisibility = "private" | "public";
+
 /** A new project's repository: created under the workspace's GitHub connection (`name` null follows the project name), an existing one, or none yet. */
-export type RepositoryChoice = { mode: "new"; name: string | null } | { mode: "existing"; url: string } | { mode: "later" };
+export type RepositoryChoice = { mode: "new"; name: string | null; visibility?: RepositoryVisibility } | { mode: "existing"; url: string } | { mode: "later" };
 
 export type RepositoryOutcome = { state: "ready"; repoUrl: string } | { state: "working" | "waiting" | "later" } | { state: "error"; error: string };
 
@@ -22,7 +24,7 @@ const sameEmail = (a: string, b: string) => a.trim().toLowerCase() === b.trim().
 
 export const seesEveryProject = (role: WorkspaceRole) => role === "owner" || role === "admin";
 
-export const canCreateProjects = seesEveryProject;
+export const canCreateProjects = (role: WorkspaceRole) => role !== "viewer";
 
 /** The workspace members whose access this choice decides: everyone except admins, owners and the person choosing. */
 export function grantable(members: readonly WorkspaceMember[], myEmail: string): WorkspaceMember[] {
@@ -78,17 +80,18 @@ async function applyGrants(projectId: string, add: readonly Grant[], remove: rea
 /** An Origin backend without the `githubRepo` argument rejects it; the project is then created the older way. */
 async function createProjectRecord(teamId: string, name: string, repository: RepositoryChoice): Promise<{ projectId: string; deferred: boolean }> {
   if (repository.mode === "existing") return { projectId: await cloudMutation<string>("projects:create", { teamId, name, repoUrl: repository.url }), deferred: false };
+  const visibility = repository.mode === "new" && repository.visibility === "public" ? { githubRepoVisibility: "public" } : {};
   try {
-    return { projectId: await cloudMutation<string>("projects:create", { teamId, name, githubRepo: "later" }), deferred: true };
+    return { projectId: await cloudMutation<string>("projects:create", { teamId, name, githubRepo: "later", ...visibility }), deferred: true };
   } catch (error) {
     if (!(error instanceof Error) || !error.message.includes("githubRepo")) throw error;
     return { projectId: await cloudMutation<string>("projects:create", { teamId, name }), deferred: false };
   }
 }
 
-async function createRepository(teamId: string, projectId: string, name: string): Promise<RepositoryOutcome> {
+async function createRepository(teamId: string, projectId: string, name: string, visibility?: RepositoryVisibility): Promise<RepositoryOutcome> {
   try {
-    const result = await originGitHub.createRepository(teamId, projectId, name);
+    const result = await originGitHub.createRepository(teamId, projectId, name, visibility);
     if (result.state === "ready" && result.repoUrl) return { state: "ready", repoUrl: result.repoUrl };
     if (result.state === "error") return { state: "error", error: result.error ?? "Repository creation failed" };
     return { state: result.state === "working" ? "working" : "waiting" };
@@ -108,7 +111,7 @@ export async function createOriginProject(args: { teamId: string; name: string; 
   const missed = await applyGrants(projectId, grantsFor(args.access, args.members, args.myEmail), []);
   const repository: RepositoryOutcome = choice.mode === "existing" ? { state: "ready", repoUrl: choice.url }
     : choice.mode === "later" ? { state: "later" }
-    : deferred ? await createRepository(args.teamId, projectId, choice.name ?? repositoryNameFor(name))
+    : deferred ? await createRepository(args.teamId, projectId, choice.name ?? repositoryNameFor(name), choice.visibility)
     : { state: "waiting" };
   return { projectId, missed, repository };
 }

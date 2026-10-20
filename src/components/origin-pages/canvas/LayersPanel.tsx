@@ -1,5 +1,5 @@
 import { useState, type DragEvent, type ReactNode } from "react";
-import { ChevronRight, Circle, Eye, EyeOff, Frame, Group, Image as ImageIcon, Lock, LockOpen, Minus, MoveUpRight, Spline, Square, Type } from "lucide-react";
+import { ChevronRight, Circle, Component, Diamond, Eye, EyeOff, Frame, Group, Image as ImageIcon, Lock, LockOpen, Minus, MoveUpRight, Spline, Square, Type } from "lucide-react";
 import { effectiveParent, nextZ, type CanvasNode, type CanvasNodeType } from "../../../../shared/canvas-scene";
 import { cn } from "@/lib/cn";
 import { reparent, zAt } from "./actions";
@@ -13,15 +13,17 @@ const ICONS: Record<CanvasNodeType, ReactNode> = {
 
 type Drop = { id: string; zone: "above" | "below" | "inside" };
 
-export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: CanvasScene; selection: SelectionApi; readOnly: boolean; header?: ReactNode }) {
+const OPEN_CHILDREN = 40;
+
+export function LayersPanel({ canvas, selection, readOnly, header, titled = true }: { canvas: CanvasScene; selection: SelectionApi; readOnly: boolean; header?: ReactNode; titled?: boolean }) {
   const { scene, index } = canvas;
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
+  const [toggled, setToggled] = useState<Set<string>>(() => new Set());
   const [renaming, setRenaming] = useState<string | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [drop, setDrop] = useState<Drop | null>(null);
   const roots = index.get(null) ?? [];
 
-  const toggle = (id: string) => setCollapsed((current) => {
+  const toggle = (id: string) => setToggled((current) => {
     const next = new Set(current);
     if (next.has(id)) next.delete(id); else next.add(id);
     return next;
@@ -69,7 +71,7 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
 
   const row = (node: CanvasNode, depth: number): ReactNode => {
     const children = index.get(node.id) ?? [];
-    const open = !collapsed.has(node.id);
+    const open = (children.length <= OPEN_CHILDREN) !== toggled.has(node.id);
     const chosen = selection.ids.includes(node.id);
     const marker = drop?.id === node.id ? drop.zone : null;
     return (
@@ -107,7 +109,7 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
               <ChevronRight size={12} className={cn("transition-transform duration-150 motion-reduce:transition-none", open && "rotate-90")} />
             </button>
           ) : <span className="size-4 shrink-0" />}
-          <span className={cn("shrink-0", chosen ? "text-accent-text" : "text-ink-tertiary")}>{ICONS[node.type]}</span>
+          <span className={cn("shrink-0", chosen || node.component || node.instanceOf ? "text-accent-text" : "text-ink-tertiary")}>{node.component ? <Component size={13} /> : node.instanceOf ? <Diamond size={13} /> : ICONS[node.type]}</span>
           {renaming === node.id ? (
             <input autoFocus defaultValue={node.name} aria-label="Layer name" maxLength={120}
               className="h-6 min-w-0 flex-1 rounded border border-accent/70 bg-inset px-1 text-[12.5px] text-ink outline-none"
@@ -136,7 +138,7 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {header}
-      <div className="flex h-9 shrink-0 items-center px-3 text-[11.5px] font-medium uppercase tracking-wide text-ink-tertiary">Layers</div>
+      {titled && <div className="flex h-9 shrink-0 items-center px-3 text-[11.5px] font-medium uppercase tracking-wide text-ink-tertiary">Layers</div>}
       {roots.length ? (
         <ul role="tree" aria-label="Layers" aria-multiselectable="true" className="min-h-0 flex-1 overflow-y-auto px-1.5 pb-3">
           {[...roots].reverse().map((node) => row(node, 0))}

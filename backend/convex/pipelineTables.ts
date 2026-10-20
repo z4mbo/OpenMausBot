@@ -5,7 +5,7 @@ export const pipelineActor = v.object({ kind: v.union(v.literal("member"), v.lit
 
 export const pipelineActivityKind = v.union(
   v.literal("email"), v.literal("sms"), v.literal("whatsapp"), v.literal("call"), v.literal("ai_call"),
-  v.literal("note"), v.literal("stage"), v.literal("capture"), v.literal("import"),
+  v.literal("note"), v.literal("stage"), v.literal("capture"), v.literal("import"), v.literal("deal"),
 );
 
 /** pending: an agent drafted it and a person must approve it; approved: cleared for the app server to send; received: the lead wrote in. */
@@ -25,6 +25,12 @@ export const sequenceStep = v.object({
   activityId: v.optional(v.id("pipelineActivities")),
 });
 
+export const salesLineItem = v.object({ name: v.string(), quantity: v.number(), unitPrice: v.number() });
+export const salesViewFilters = v.object({
+  query: v.optional(v.string()), stage: v.optional(v.string()), owner: v.optional(v.string()), source: v.optional(v.string()), tag: v.optional(v.string()),
+  unread: v.optional(v.boolean()), reach: v.optional(v.union(v.literal("email"), v.literal("phone"))),
+});
+
 export const pipelineTables = {
   pipelineLeads: defineTable({
     projectId: v.id("projects"),
@@ -33,6 +39,7 @@ export const pipelineTables = {
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
     source: v.string(),
+    sources: v.optional(v.array(v.string())),
     stage: v.string(),
     order: v.number(),
     value: v.optional(v.number()),
@@ -98,4 +105,42 @@ export const pipelineTables = {
     stopReason: v.optional(v.string()),
     updatedAt: v.number(),
   }).index("by_leadId", ["leadId"]).index("by_status_and_nextDueAt", ["status", "nextDueAt"]),
+  pipelineDeals: defineTable({
+    projectId: v.id("projects"),
+    leadId: v.id("pipelineLeads"),
+    title: v.string(),
+    value: v.number(),
+    currency: v.string(),
+    stage: v.string(),
+    closeDate: v.optional(v.string()),
+    lineItems: v.array(salesLineItem),
+    notes: v.optional(v.string()),
+    wonAmount: v.optional(v.number()),
+    reason: v.optional(v.string()),
+    closedAt: v.optional(v.number()),
+    closedBy: v.optional(pipelineActor),
+    wonRequest: v.optional(v.object({ amount: v.number(), reason: v.optional(v.string()), by: pipelineActor, at: v.number() })),
+    payment: v.optional(v.object({
+      url: v.string(), linkId: v.string(), amount: v.number(), createdAt: v.number(), paidAt: v.optional(v.number()), paidAmount: v.optional(v.number()),
+    })),
+    createdBy: pipelineActor,
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_projectId_and_updatedAt", ["projectId", "updatedAt"]).index("by_leadId", ["leadId"]),
+  pipelineViews: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    filters: salesViewFilters,
+    createdBy: v.string(),
+    createdAt: v.number(),
+  }).index("by_projectId", ["projectId"]),
+  pipelineTemplates: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    channel: v.optional(v.union(v.literal("email"), v.literal("sms"), v.literal("whatsapp"))),
+    subject: v.optional(v.string()),
+    body: v.string(),
+    updatedBy: v.string(),
+    updatedAt: v.number(),
+  }).index("by_projectId", ["projectId"]),
 };

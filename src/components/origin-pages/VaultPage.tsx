@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Select } from "../Select";
 import { copyText } from "@/lib/copy-text";
-import { Copy, ExternalLink, Eye, EyeOff, KeyRound, Loader2, LockKeyhole, Pencil, Plus, Search, ShieldCheck, Shuffle, Trash2, Unlock } from "lucide-react";
+import { Bot, Copy, ExternalLink, Eye, EyeOff, KeyRound, Loader2, LockKeyhole, Pencil, Plus, Search, ShieldCheck, Shuffle, Trash2, Unlock } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import type { CloudCredential, CredentialKind } from "./cloud-types";
 import { errorText } from "./repo-url";
-import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, cardClass, ghostButton, iconButton, inputClass, itemIn, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 import { decryptSecret, encryptSecret, generatePassword } from "./vaultCrypto";
+import { forgetForAgents, setAgentUse, shareUnlockedWithAgents } from "./vault-agent";
 
 const KINDS: Record<CredentialKind, string> = { password: "Website login", api_key: "API key", secret: "Secret", note: "Secure note", apk: "APK", file: "File" };
 const EDITABLE_KINDS: readonly CredentialKind[] = ["password", "api_key", "secret", "note"];
@@ -64,6 +65,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
       if (items.length) await decryptSecret(items[0], passphrase);
       else if (passphrase.length < MIN_NEW_PASSPHRASE) throw new Error(`Use a passphrase of at least ${MIN_NEW_PASSPHRASE} characters`);
       setUnlocked(true);
+      void shareUnlockedWithAgents(projectId, items, passphrase);
     } catch (error) {
       setNotice(items.length ? "Could not unlock. Check your vault passphrase." : errorText(error, "Could not create vault"));
     } finally {
@@ -101,7 +103,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
           <Search size={14} className="pointer-events-none absolute left-2 text-ink-tertiary" aria-hidden="true" />
           <input className={cn(inputClass, "w-44 pl-7")} placeholder="Search vault" aria-label="Search vault" value={query} onChange={(e) => setQuery(e.target.value)} />
         </label>
-        {unlocked && <button type="button" className={ghostButton} onClick={lock}><LockKeyhole size={14} />Lock</button>}
+        {unlocked && <button type="button" className={ghostButton} onClick={() => { lock(); void forgetForAgents(projectId); }} title="Locks the vault and takes its items back from this computer's agents"><LockKeyhole size={14} />Lock</button>}
         {unlocked && canEdit && <button type="button" className={primaryButton} onClick={() => setEditing("new")}><Plus size={14} />New item</button>}
       </PageHeader>
 
@@ -122,13 +124,14 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
       {!filtered.length ? <EmptyState icon={<KeyRound size={24} />} title={needle ? "No matching items" : "No saved secrets"} body="Keys, logins and secrets this project's agents may use." /> : (
         <div className={cn(cardClass, "divide-y divide-hairline/30")}>
           {filtered.map((item) => (
-            <article key={item._id} className="flex items-start gap-3 px-4 py-3">
+            <article key={item._id} className={`flex items-start gap-3 px-4 py-3 ${itemIn}`}>
               <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-inset text-ink-secondary"><KeyRound size={15} /></span>
               <div className="min-w-0 flex-1">
                 <strong className="block truncate text-[13px] font-medium text-ink">{item.title}</strong>
                 <div className="flex flex-wrap gap-x-2 text-[12px] text-ink-tertiary">
                   <span>{KINDS[item.kind ?? "password"]}</span>
                   {item.username && <span className="text-ink-secondary">{item.username}</span>}
+                  {item.agentUse && <span className="inline-flex items-center gap-1 text-ink-secondary"><Bot size={11} aria-hidden="true" />Agents may use</span>}
                   {item.url && <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 truncate text-accent-text hover:underline">{item.url}<ExternalLink size={10} /></a>}
                 </div>
                 {shown(item) !== undefined && <code className="mt-1.5 block whitespace-pre-wrap break-all rounded-md bg-inset px-2 py-1 font-mono text-[12px] text-ink">{shown(item)}</code>}
@@ -139,6 +142,8 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
                     {shown(item) !== undefined ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                   <button type="button" className={iconButton} title="Copy secret" aria-label={`Copy ${item.title}`} onClick={() => void reveal(item, true)}><Copy size={14} /></button>
+                  {canEdit && <button type="button" className={cn(iconButton, item.agentUse && "text-accent-text")} aria-pressed={Boolean(item.agentUse)} title={item.agentUse ? "Agents may use this while the vault is unlocked here; click to stop" : "Let this project's agents use this while the vault is unlocked here"} aria-label={`Agents may use ${item.title}`}
+                    onClick={() => void setAgentUse(projectId, item, !item.agentUse, passphrase).catch(() => setNotice("Could not change agent access"))}><Bot size={14} /></button>}
                   {canEdit && <button type="button" className={iconButton} title="Edit" aria-label={`Edit ${item.title}`} onClick={() => setEditing(item)}><Pencil size={14} /></button>}
                   {canEdit && <button type="button" className={iconButton} title="Delete" aria-label={`Delete ${item.title}`} onClick={() => remove(item)}><Trash2 size={14} /></button>}
                 </div>

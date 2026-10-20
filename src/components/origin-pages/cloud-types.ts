@@ -20,6 +20,7 @@ export interface CloudProject {
   githubRepoState?: "pending" | "ready" | "error" | "awaiting_connection";
   githubRepoError?: string;
   githubWorkspaceAccess?: boolean;
+  githubRepoVisibility?: "private" | "public";
 }
 
 export interface CloudColumn {
@@ -122,6 +123,8 @@ export interface CloudDesignAsset {
   contentType?: string;
   size?: number;
   notes?: string;
+  folder?: string;
+  studio?: { generationId: string; model: string; modelLabel: string; prompt: string };
   updatedAt: number;
 }
 
@@ -152,6 +155,7 @@ export interface CloudCredential {
   salt: string;
   iterations: number;
   kdf: string;
+  agentUse?: boolean;
   updatedAt: number;
 }
 

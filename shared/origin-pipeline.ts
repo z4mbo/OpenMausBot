@@ -5,7 +5,8 @@ export const PIPELINE_IMPORT_MAX = 500;
 export type PipelineActorKind = "member" | "agent" | "system";
 export type PipelineActor = { kind: PipelineActorKind; name: string; id?: string };
 export type PipelineChannel = "email" | "sms" | "whatsapp" | "call" | "ai_call";
-export type PipelineActivityKind = PipelineChannel | "note" | "stage" | "capture" | "import";
+/** deal: a deal was opened, changed, quoted, paid, won or lost. */
+export type PipelineActivityKind = PipelineChannel | "note" | "stage" | "capture" | "import" | "deal";
 /** received: the lead wrote or called in, through the project's Twilio or Brevo webhook. */
 export type PipelineActivityStatus = "logged" | "pending" | "approved" | "sending" | "sent" | "in_progress" | "done" | "failed" | "discarded" | "received";
 
@@ -18,6 +19,8 @@ export interface PipelineLead {
   email?: string;
   phone?: string;
   source: string;
+  /** Every other place the contact came in from: forms, imports, replies, agents, merged duplicates. */
+  sources?: string[];
   stage: string;
   order: number;
   value?: number;

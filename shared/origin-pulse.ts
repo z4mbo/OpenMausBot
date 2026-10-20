@@ -3,7 +3,7 @@ export type PulseRange = (typeof PULSE_RANGES)[number];
 
 export const PULSE_STAGES = ["idea", "build", "launch", "grow"] as const;
 export type PulseStage = (typeof PULSE_STAGES)[number];
-export const PULSE_STAGE_LABEL: Record<PulseStage, string> = { idea: "Idea", build: "Build", launch: "Launch", grow: "Grow" };
+export const PULSE_STAGE_LABEL: Record<PulseStage, string> = { idea: "Plan", build: "Build", launch: "Launch", grow: "Sell" };
 
 export type PulseBudgetLevel = "ok" | "warn" | "over";
 
@@ -54,6 +54,8 @@ export interface ProjectPulse {
     won: PulseCount;
     /** Won leads over all leads, 0 to 1; null with no leads. */
     conversion: number | null;
+    /** What contacts moved to Won in range were worth: the amounts their deals were won for, or their value. */
+    revenue: PulseCount;
     /** Value of leads in open stages. */
     pipelineValue: number;
     repliesAwaiting: number;

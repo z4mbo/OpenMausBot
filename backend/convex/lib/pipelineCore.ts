@@ -41,6 +41,20 @@ export async function addActivity(ctx: MutationCtx, lead: Doc<"pipelineLeads">, 
   return id;
 }
 
+export function sourcePatch(lead: Pick<Doc<"pipelineLeads">, "source" | "sources">, source: string | undefined): { sources?: string[] } {
+  const name = source?.trim().slice(0, 60);
+  if (!name || name === lead.source || lead.sources?.includes(name)) return {};
+  return { sources: [...(lead.sources ?? []), name].slice(-20) };
+}
+
+export async function findLead(ctx: PipelineCtx, projectId: Id<"projects">, contact: { email?: string; phone?: string }) {
+  const byEmail = contact.email
+    ? await ctx.db.query("pipelineLeads").withIndex("by_projectId_and_email", (q) => q.eq("projectId", projectId).eq("email", contact.email)).first()
+    : null;
+  if (byEmail || !contact.phone) return byEmail;
+  return ctx.db.query("pipelineLeads").withIndex("by_projectId_and_phone", (q) => q.eq("projectId", projectId).eq("phone", contact.phone)).first();
+}
+
 export function newToken() {
   return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 }

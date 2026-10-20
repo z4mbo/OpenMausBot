@@ -25,6 +25,7 @@ import {
 import { orderForMove, settlePendingMove, stepTarget, useFlip, withPendingMoves, type PendingMove } from "./issue-order";
 import { NewIssueComposer } from "./NewIssueComposer";
 import { CompleteIssueDialog, completesThroughPullRequest, type IssueImplementer } from "./CompleteIssueDialog";
+import { DesignChips } from "./canvas/DesignChips";
 import { originGitHub } from "@/lib/origin-github";
 import { isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-columns";
 import { PersonAvatar } from "./PersonAvatar";
@@ -50,7 +51,7 @@ export type AssignableIssue = {
 };
 
 /** The project's Chief, handed an issue marked complete that still needs its pull request. */
-export type IssueChief = { name: string; implement(issue: AssignableIssue): void };
+export type IssueChief = { name: string; implement(issue: AssignableIssue): void; openCanvas?(): void };
 
 export type IssuesPageProps = OriginPageProps & {
   /** The project's agents, offered wherever an issue can be handed off. */
@@ -709,6 +710,7 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
           <MilestoneChip projectId={projectId} taskId={taskId} milestoneId={task.milestoneId} canEdit={canEdit} onError={action.setError} />
           {onAssign && !task.done && <AgentChip agents={agents} onPick={(agentId) => onAssign(task, agentId)} />}
           <GitHubChips project={project} projectId={projectId} task={task} canEdit={canEdit} draft={inDraft(task.columnId)} />
+          <DesignChips projectId={projectId} taskId={task._id} onOpen={chief?.openCanvas} className={chipButton} />
         </IssueChips>
         {action.error && <div className="mt-3"><Notice tone="danger">{action.error}</Notice></div>}
         {completing && <CompleteIssueDialog project={project} projectId={projectId} task={task} implementer={handOver(chief, project, projectId, details.columns, task)} onClose={() => setCompleting(false)} />}

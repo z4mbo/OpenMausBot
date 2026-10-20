@@ -4,6 +4,9 @@ import { writeFileAtomic } from "./atomic.ts";
 import { DATA_DIR } from "./config.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
 import type { IntegrationStatus } from "../shared/integration-keys.ts";
+import { convexAction } from "./github/broker.ts";
+import { convexOriginClient, defaultOriginCloudFile, readOriginCloud } from "./origin-cloud.ts";
+import { sharedKeys } from "./shared-integration-keys.ts";
 
 type Field = {
   label: string;
@@ -16,9 +19,10 @@ type Field = {
 type Integration = { label: string; help: string; fields: Record<string, Field> };
 
 /**
- * Third-party accounts a member connects for server-side work (Studio generations, Broadcast posts, Pipeline mail and
- * SMS, Ship deploys). Each member keeps their own keys in this computer's data folder: they are never synced to Origin's backend,
- * never put in a backup and never returned to a client (non-secret fields such as a sender address are).
+ * Third-party accounts a member connects for server-side work (Studio generations, Broadcast posts, Sales mail, SMS and
+ * payment links, Ship deploys). Each member keeps their own keys in this computer's data folder: they are never put in a
+ * backup and never returned to a client (non-secret fields such as a sender address are). An admin may share theirs
+ * with the workspace or a project through the backend; a member's own key always wins over a shared one.
  */
 export const INTEGRATIONS = {
   fal: { label: "fal.ai", help: "https://fal.ai/dashboard/keys", fields: { key: { label: "API key", secret: true, placeholder: "key-id:secret" } } },
@@ -39,6 +43,10 @@ export const INTEGRATIONS = {
       senderEmail: { label: "Sender email", secret: false, placeholder: "hello@example.com" },
       senderName: { label: "Sender name", secret: false, optional: true },
     },
+  },
+  stripe: {
+    label: "Stripe", help: "https://dashboard.stripe.com/apikeys",
+    fields: { secretKey: { label: "Secret or restricted key (Prices, Payment Links, Checkout Sessions)", secret: true, placeholder: "rk_live_… or sk_live_…" } },
   },
   resend: {
     label: "Resend", help: "https://resend.com/api-keys",
@@ -133,11 +141,21 @@ function readStored(file: string): Stored {
   }
 }
 
-/** The member's values for one integration, or null until every required field is set. Server-side only. */
-export function integrationKey<I extends IntegrationId>(id: I, file = defaultIntegrationKeysFile()): IntegrationValues<I> | null {
+const complete = (id: IntegrationId, values: Record<string, string>) => !Object.entries(fieldsOf(id)).some(([name, field]) => !field.optional && !values[name]);
+
+function sharedValues(id: IntegrationId, file: string, projectId?: string): Record<string, string> | null {
+  if (file !== defaultIntegrationKeysFile()) return null;
+  const known = fieldsOf(id);
+  const found = sharedKeys().find(id, projectId);
+  const values = found ? Object.fromEntries(Object.entries(found.values).filter(([name]) => Object.hasOwn(known, name))) : null;
+  return values && complete(id, values) ? values : null;
+}
+
+/** The values for one integration: the member's own, else a key shared with the project or workspace; null until every required field is set. Server-side only. */
+export function integrationKey<I extends IntegrationId>(id: I, file = defaultIntegrationKeysFile(), projectId?: string): IntegrationValues<I> | null {
   const values: Record<string, string> = readStored(file)[id] ?? {};
-  const missing = Object.entries(fieldsOf(id)).some(([name, field]) => !field.optional && !values[name]);
-  return missing ? null : (values as IntegrationValues<I>);
+  if (complete(id, values)) return values as IntegrationValues<I>;
+  return sharedValues(id, file, projectId) as IntegrationValues<I> | null;
 }
 
 export function integrationConfigured(id: IntegrationId, file = defaultIntegrationKeysFile()): boolean {
@@ -154,7 +172,14 @@ export function integrationStatuses(file = defaultIntegrationKeysFile()): Integr
       set: Boolean(values[name]),
       ...(!field.secret && values[name] ? { value: values[name] } : {}),
     }));
-    return { id: id as string, label: INTEGRATIONS[id].label, help: INTEGRATIONS[id].help, configured: integrationConfigured(id, file), fields };
+    const found = file === defaultIntegrationKeysFile() ? sharedKeys().find(id) : null;
+    const own = complete(id, values);
+    const usable = !own && sharedValues(id, file) !== null;
+    return {
+      id: id as string, label: INTEGRATIONS[id].label, help: INTEGRATIONS[id].help, configured: own || usable,
+      source: own ? "yours" as const : usable ? "shared" as const : null,
+      shared: found ? { by: found.sharedByName, projectName: found.projectName } : null, fields,
+    };
   });
 }
 
@@ -181,9 +206,49 @@ export function saveIntegrationKeys(id: IntegrationId, change: Record<string, st
   return { ok: true };
 }
 
+/** Hands this person's own key for `id` to the backend, sealed there for the workspace or one project. */
+async function shareIntegration(id: IntegrationId, file: string, sessionToken: string, scope: { teamId: string; projectId?: string }): Promise<void> {
+  const values = readStored(file)[id] ?? {};
+  if (!complete(id, values)) throw new Error(`Connect ${INTEGRATIONS[id].label} on this computer before sharing it`);
+  const visible = Object.fromEntries(Object.entries(values).filter(([name]) => !fieldsOf(id)[name]?.secret));
+  const { url } = readOriginCloud(defaultOriginCloudFile());
+  if (!url) throw new Error("Sign in to Origin first");
+  await convexAction(url, "sharedKeys:share", { sessionToken, teamId: scope.teamId, ...(scope.projectId ? { projectId: scope.projectId } : {}), integration: id, values, visible });
+}
+
+const unwrap = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  return /Uncaught Error: ([^\n]+)/.exec(message)?.[1]?.trim() ?? message;
+};
+
 export function createIntegrationKeyRoutes(file: () => string = defaultIntegrationKeysFile): RouteHandler {
-  return async ({ req, res, path, method, auth, json, readBody }) => {
-    if (path === "/api/integrations" && method === "GET") return json(res, 200, { integrations: integrationStatuses(file()) });
+  return async ({ req, res, url, path, method, auth, json, readBody }) => {
+    if (path === "/api/integrations" && method === "GET") {
+      await sharedKeys().current();
+      return json(res, 200, { integrations: integrationStatuses(file()), sharedError: sharedKeys().error() || null });
+    }
+    const sharing = /^\/api\/integrations\/([a-z]+)\/share$/.exec(path);
+    if (sharing && (method === "POST" || method === "DELETE")) {
+      if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Sharing integration keys needs the admin scope" });
+      const id = sharing[1];
+      if (!isIntegrationId(id)) return json(res, 404, { error: "No such integration" });
+      const teamId = url.searchParams.get("teamId") ?? "";
+      const projectId = url.searchParams.get("projectId") || undefined;
+      if (!teamId) return json(res, 400, { error: "Workspace required" });
+      const header = req.headers["x-origin-session"];
+      const sessionToken = (Array.isArray(header) ? header[0] : header)?.trim() ?? "";
+      if (!sessionToken) return json(res, 401, { error: "Sign in to Origin first" });
+      try {
+        if (method === "POST") await shareIntegration(id, file(), sessionToken, { teamId, projectId });
+        else {
+          const { url: convexUrl } = readOriginCloud(defaultOriginCloudFile());
+          if (!convexUrl) throw new Error("Sign in to Origin first");
+          await convexOriginClient(convexUrl).mutation("sharedKeys:unshare", { sessionToken, teamId, ...(projectId ? { projectId } : {}), integration: id });
+        }
+      } catch (error) { return json(res, 400, { error: unwrap(error) }); }
+      await sharedKeys().refresh();
+      return json(res, 200, { integration: integrationStatuses(file()).find((entry) => entry.id === id) });
+    }
     const match = /^\/api\/integrations\/([a-z]+)$/.exec(path);
     if (!match || (method !== "PUT" && method !== "DELETE")) return PASS;
     if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Changing integration keys needs the admin scope" });

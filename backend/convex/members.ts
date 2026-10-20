@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
-import { getActiveTeamMember, normalizeEmail, projectPeople, requireAdmin, requireMember, requireTeamAdmin } from "./lib/permissions";
+import { getActiveTeamMember, normalizeEmail, projectPeople, requireAdmin, requireMember } from "./lib/permissions";
 import { roleValidator } from "./lib/validators";
 
 function makeInviteToken() {
@@ -32,9 +32,8 @@ export const addWorkspaceMember = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string(), email: v.string(), role: v.union(v.literal("member"), v.literal("viewer")) },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const project = await ctx.db.get(args.projectId);
-    if (!project?.teamId) throw new Error("Workspace project required");
-    await requireTeamAdmin(ctx, project.teamId, args.sessionToken);
+    const { project } = await requireAdmin(ctx, args.projectId, args.sessionToken);
+    if (!project.teamId) throw new Error("Workspace project required");
     const person = await getActiveTeamMember(ctx, project.teamId, args.email);
     const user = person?.userId ? await ctx.db.get(person.userId) : null;
     if (!person || user?.status !== "active") throw new Error("Choose an active workspace member");

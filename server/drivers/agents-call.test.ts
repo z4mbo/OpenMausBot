@@ -308,4 +308,18 @@ describe("origin_assign_issue", () => {
     expect(result).toEqual({ text: "Commented on ORI-AB12." });
     expect(calls[1]).toEqual({ path: "/api/internal/coordinate-bots", body: { botIds: ["kai-chief"], message: "Review #7", reason: reviewer.reason, thread: "new", reply: "none" } });
   });
+
+  it("origin_design_submit starts the Chief's design review, and a canvas screenshot reaches the model as an image", async () => {
+    const reviewer = { botId: "kai-chief", botName: "Kai", message: "Review the design", reason: "Review the design for ORI-AB12" };
+    const review = originHarness({
+      "origin:prepare": { ok: true, status: 200, body: { text: "Linked \"Pricing\" to ORI-AB12.", reviewer } },
+      "/api/internal/coordinate-bots": { ok: true, status: 200, body: { receipts: [] } },
+    });
+    expect(await callTool("origin_design_submit", { issue_id: "task1", frames: ["Pricing"] }, context({ client: review.client }))).toEqual({ text: "Linked \"Pricing\" to ORI-AB12." });
+    expect(review.calls[1]?.path).toBe("/api/internal/coordinate-bots");
+    const shot = originHarness({ "origin:prepare": { ok: true, status: 200, body: { text: "Screenshot of \"Pricing\".", image: { mimeType: "image/png", data: "iVBORw0KGgo=" } } } });
+    expect(await callTool("origin_canvas_screenshot", { node: "Pricing" }, context({ client: shot.client }))).toEqual({
+      text: "", passthrough: { content: [{ type: "text", text: "Screenshot of \"Pricing\"." }, { type: "image", mimeType: "image/png", data: "iVBORw0KGgo=" }] },
+    });
+  });
 });

@@ -90,8 +90,8 @@ function Row({ project, range, onLoad, open }: { project: ProjectRow; range: Pul
             <Metric label="PRs waiting" value={pulse.build.prsWaiting.toLocaleString()} tone={pulse.build.prsWaiting ? "warn" : undefined} />
             <Metric label="Views" value={formatCompact(pulse.launch.views.value)} />
             <Metric label="New leads" value={pulse.grow.leads.value.toLocaleString()} />
-            <Metric label="Pipeline" value={formatLeadValue(pulse.grow.pipelineValue, pulse.grow.currency)} />
-            <Metric label={pulse.team.budgetUsd !== null ? `Spend of ${formatUsd(pulse.team.budgetUsd)}` : "Spend, month"} value={formatUsd(pulse.team.spendMonthUsd)}
+            <Metric label="Open sales" value={formatLeadValue(pulse.grow.pipelineValue, pulse.grow.currency)} />
+            <Metric label="Spend" value={pulse.team.budgetUsd !== null ? `${formatUsd(pulse.team.spendMonthUsd)} / ${formatUsd(pulse.team.budgetUsd)}` : formatUsd(pulse.team.spendMonthUsd)}
               tone={pulse.team.budgetLevel === "ok" ? undefined : "warn"} />
           </dl>
           {pulse.attention.length === 0 ? <span className="hidden md:block md:w-44 md:shrink-0" /> : (

@@ -1,20 +1,53 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { AudioLines, Clapperboard, Image as ImageIcon, ImagePlus, KeyRound, Loader2, Sparkles, Wand2, X } from "lucide-react";
-import { api, useStore } from "@/state/store";
-import { useCloudQuery } from "@/lib/origin-cloud";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
+import { AudioLines, ChevronDown, Clapperboard, Image as ImageIcon, KeyRound, Loader2, Plus, Sparkles, Wand2, WandSparkles, X } from "lucide-react";
+import { useStore } from "@/state/store";
 import { useBrandKit } from "@/lib/origin-brand";
 import { cn } from "@/lib/cn";
-import { Select } from "../Select";
 import { requestIntegrationFocus } from "../IntegrationKeysSettings";
-import type { CloudDesign, CloudDesignAsset } from "../origin-pages/cloud-types";
-import { EmptyState, Modal, Notice, Segmented, cardClass, chipButton, ghostButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
-import { STUDIO_CUSTOM_MODEL, studioModel, studioModelsFor, type StudioMode } from "../../../shared/studio";
+import { Notice, chipButton, ghostButton, primaryButton, useAction } from "../origin-pages/ui";
+import { StudioControls } from "./StudioControls";
+import { StudioMediaPicker } from "./StudioMediaPicker";
+import { StudioModelPicker } from "./StudioModelPicker";
+import { KIND_ICON, MediaThumb, studioPost, type SourceRef, type StudioDraft } from "./studio-ui";
+import { studioModel, studioModelsFor, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel } from "../../../shared/studio";
 import { brandedPrompt, type BrandKit } from "../../../shared/brand-kit";
+
+export const STUDIO_MODES: readonly { value: StudioMode; label: string; icon: typeof ImageIcon }[] = [
+  { value: "image", label: "Image", icon: ImageIcon },
+  { value: "video", label: "Video", icon: Clapperboard },
+  { value: "audio", label: "Audio", icon: AudioLines },
+  { value: "edit", label: "Edit", icon: Wand2 },
+];
+
+const PLACEHOLDER: Record<StudioMode, string> = {
+  image: "Describe the image",
+  video: "Describe the shot and how it moves",
+  audio: "Words to speak, or the music or sound you want",
+  edit: "How to change it",
+};
+
+export function emptyDraft(mode: StudioMode = "image"): StudioDraft {
+  return { mode, model: studioModelsFor(mode)[0]!.id, prompt: "", sources: [], references: [], count: 1 };
+}
+
+/** The draft after switching to a model: sources it cannot take are dropped, settings it lacks are cleared. */
+export function draftForModel(draft: StudioDraft, model: StudioModel): StudioDraft {
+  return {
+    ...draft, mode: model.mode, model: model.id,
+    sources: model.needs.map((kind, index) => draft.sources[index]?.kind === kind ? draft.sources[index]! : null).filter((ref): ref is SourceRef => ref !== null),
+    references: draft.references.slice(0, model.references ?? 0), count: Math.min(draft.count, model.maxCount),
+  };
+}
+
+export function openFalSettings(dispatch: ReturnType<typeof useStore>["dispatch"]) {
+  requestIntegrationFocus("fal");
+  dispatch({ type: "toggleAppSettings", open: true, section: "integrations" });
+}
 
 function BrandToggle({ kit, on, disabled, onChange }: { kit: BrandKit; on: boolean; disabled: boolean; onChange(on: boolean): void }) {
   return (
-    <button type="button" role="switch" aria-checked={on} disabled={disabled} onClick={() => onChange(!on)} title={`Prompts start with: ${brandedPrompt(kit, "").trim()}`}
-      className={cn(chipButton, "ml-auto", on ? "border-accent/50 text-ink" : "text-ink-tertiary")}>
+    <button type="button" role="switch" aria-checked={on} disabled={disabled} onClick={() => onChange(!on)} title={`Prompts start with: ${brandedPrompt(kit, "").trim()} (B)`}
+      className={cn(chipButton, on ? "border-accent/50 text-ink" : "text-ink-tertiary")}>
       <span className={cn("flex transition-opacity duration-(--motion-fast)", !on && "opacity-40")} aria-hidden="true">
         <span className="size-3 rounded-full ring-2 ring-panel" style={{ background: kit.colors.primary }} />
         <span className="-ml-1 size-3 rounded-full ring-2 ring-panel" style={{ background: kit.colors.secondary }} />
@@ -24,190 +57,186 @@ function BrandToggle({ kit, on, disabled, onChange }: { kit: BrandKit; on: boole
   );
 }
 
-/** A finished generation's settings, put back into the composer to run again. */
-export type StudioDraft = { mode: StudioMode; model: string; prompt: string; aspectRatio?: string; duration?: string; sourceAssetId?: string };
-
-const MODES = [
-  { value: "image", label: <><ImageIcon size={13} />Image</> },
-  { value: "video", label: <><Clapperboard size={13} />Video</> },
-  { value: "audio", label: <><AudioLines size={13} />Audio</> },
-  { value: "edit", label: <><Wand2 size={13} />Edit</> },
-] as const;
-
-const PLACEHOLDER: Record<StudioMode, string> = {
-  image: "Describe the image",
-  video: "Describe the shot and how it moves",
-  audio: "Words to speak, or the music or sound you want",
-  edit: "How to change it (optional for upscales)",
-};
-
-const isImageAsset = (asset: CloudDesignAsset) => asset.type === "image" || asset.type === "icon" || Boolean(asset.contentType?.startsWith("image/"));
-const assetLink = (asset: CloudDesignAsset) => asset.fileUrl || asset.url || "";
-
-export function openFalSettings(dispatch: ReturnType<typeof useStore>["dispatch"]) {
-  requestIntegrationFocus("fal");
-  dispatch({ type: "toggleAppSettings", open: true, section: "integrations" });
+function SourceChip({ value: source, kind, label, onPick, onClear, disabled }: { value?: SourceRef; kind: StudioMediaKind; label: string; onPick(): void; onClear(): void; disabled: boolean }) {
+  const Icon = KIND_ICON[kind];
+  if (!source) {
+    return <button type="button" className={cn(chipButton, "border-dashed")} onClick={onPick} disabled={disabled}><Icon size={13} />{label}</button>;
+  }
+  return (
+    <span className={cn(chipButton, "gap-2 pl-1 pr-1")}>
+      <button type="button" className="flex min-w-0 items-center gap-2" onClick={onPick} disabled={disabled} title={`Change: ${source.label}`}>
+        <MediaThumb kind={kind} url={source.url} className="size-6 shrink-0 rounded-full" />
+        <span className="truncate">{source.label}</span>
+      </button>
+      <button type="button" aria-label={`Remove ${source.label}`} onClick={onClear} disabled={disabled} className="flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
+    </span>
+  );
 }
 
-export function StudioComposer({ projectId, canEdit, falReady, draft }: { projectId: string; canEdit: boolean; falReady: boolean | null; draft: StudioDraft | null }) {
+export interface StudioComposerHandle {
+  focus(): void;
+  openModels(): void;
+  generate(): void;
+  toggleBrand(): void;
+}
+
+type Props = {
+  projectId: string; canEdit: boolean; falReady: boolean | null; rows: readonly StudioGeneration[];
+  draft: StudioDraft; onDraft(draft: StudioDraft): void;
+};
+
+/** The prompt bar: mode chips, starting files, the prompt, the model and its settings, then Generate. */
+export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function StudioComposer({ projectId, canEdit, falReady, rows, draft, onDraft }, handle) {
   const { dispatch } = useStore();
-  const [mode, setMode] = useState<StudioMode>("image");
-  const [model, setModel] = useState(studioModelsFor("image")[0]!.id);
-  const [prompt, setPrompt] = useState("");
-  const [aspectRatio, setAspectRatio] = useState("");
-  const [duration, setDuration] = useState("");
-  const [voice, setVoice] = useState("");
-  const [count, setCount] = useState(1);
-  const [useBrand, setUseBrand] = useState(true);
   const brand = useBrandKit(projectId);
-  const [source, setSource] = useState<CloudDesignAsset | null>(null);
-  const [picking, setPicking] = useState(false);
-  const [endpoint, setEndpoint] = useState("");
-  const [inputJson, setInputJson] = useState("");
+  const [useBrand, setUseBrand] = useState(true);
+  const [picking, setPicking] = useState<{ slot: "source" | "reference"; index: number; kind: StudioMediaKind } | null>(null);
+  const [models, setModels] = useState(false);
   const action = useAction();
-  const promptRef = useRef<HTMLTextAreaElement>(null);
-  const design = useCloudQuery<CloudDesign>("design:list", { projectId });
-  const images = design?.assets.filter(isImageAsset) ?? [];
-  const custom = model === STUDIO_CUSTOM_MODEL;
-  const spec = custom ? undefined : studioModel(model);
-  const needsSource = spec?.source === "image";
+  const enhancing = useAction();
+  const prompt = useRef<HTMLTextAreaElement>(null);
+  const model = studioModel(draft.model) ?? studioModelsFor(draft.mode)[0]!;
+  const patch = (next: Partial<StudioDraft>) => onDraft({ ...draft, ...next });
+  const branded = Boolean(brand) && (draft.mode === "image" || draft.mode === "video") && !model.needs.includes("video");
 
-  const switchMode = (next: StudioMode) => {
-    setMode(next);
-    setModel(studioModelsFor(next)[0]!.id);
-    setCount(1);
-    action.setError("");
-  };
-
-  const applied = useRef<StudioDraft | null>(null);
   useEffect(() => {
-    if (!draft || applied.current === draft) return;
-    applied.current = draft;
-    setMode(draft.mode);
-    setModel(draft.model);
-    setPrompt(draft.prompt);
-    setAspectRatio(draft.aspectRatio ?? "");
-    setDuration(draft.duration ?? "");
-    setSource(draft.sourceAssetId ? design?.assets.find((asset) => asset._id === draft.sourceAssetId) ?? null : null);
-    promptRef.current?.focus();
-  }, [draft, design]);
+    const field = prompt.current;
+    if (!field) return;
+    field.style.height = "auto";
+    field.style.height = `${Math.min(field.scrollHeight, 220)}px`;
+  }, [draft.prompt]);
 
-  const parsedInput = (): Record<string, unknown> | undefined => {
-    if (!custom || !inputJson.trim()) return undefined;
-    const value = JSON.parse(inputJson) as unknown;
-    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("The input must be a JSON object");
-    return value as Record<string, unknown>;
-  };
+  const missing = model.needs.findIndex((kind, index) => draft.sources[index]?.kind !== kind);
+  const ready = canEdit && falReady === true && (model.prompt !== "required" || draft.prompt.trim()) && missing < 0;
 
   const generate = () => {
-    if (!canEdit || action.busy || !falReady) return;
+    if (!ready || action.busy) return;
     void action.run(async () => {
-      const input = parsedInput();
-      await api("/api/studio/generate", {
-        method: "POST",
-        body: JSON.stringify({
-          projectId, mode, model, prompt, count,
-          ...(aspectRatio ? { aspectRatio } : {}), ...(duration ? { duration } : {}), ...(voice ? { voice } : {}),
-          ...(source && (needsSource || custom) ? { sourceAssetId: source._id } : {}),
-          ...(custom ? { endpoint, ...(input ? { input } : {}) } : {}),
-          ...(brand ? { brand: useBrand } : {}),
-        }),
+      await studioPost("generate", {
+        projectId, mode: draft.mode, model: model.id, prompt: draft.prompt, count: draft.count,
+        ...(draft.aspectRatio ? { aspectRatio: draft.aspectRatio } : {}), ...(draft.duration ? { duration: draft.duration } : {}),
+        ...(draft.resolution ? { resolution: draft.resolution } : {}), ...(draft.voice ? { voice: draft.voice } : {}),
+        ...(draft.seed !== undefined ? { seed: draft.seed } : {}), ...(draft.negativePrompt?.trim() ? { negativePrompt: draft.negativePrompt } : {}),
+        ...(draft.motion ? { motion: draft.motion } : {}), ...(draft.sound === false ? { sound: false } : {}),
+        sources: draft.sources.map((ref) => ref.source), referenceAssetIds: draft.references.flatMap((ref) => ("assetId" in ref.source ? [ref.source.assetId] : [])),
+        ...(draft.parent ? { parent: draft.parent } : {}), ...(branded ? { brand: useBrand } : {}),
       });
+      onDraft({ ...draft, parent: undefined, seed: draft.seed });
     }, "Could not start the generation");
   };
+
+  const enhance = () => {
+    if (!draft.prompt.trim() || enhancing.busy || !canEdit || !falReady) return;
+    void enhancing.run(async () => {
+      const { prompt: better } = await studioPost<{ prompt: string }>("enhance", { prompt: draft.prompt, mode: draft.mode });
+      onDraft({ ...draft, prompt: better });
+    }, "Could not enhance the prompt");
+  };
+
+  useImperativeHandle(handle, () => ({
+    focus: () => prompt.current?.focus(),
+    openModels: () => setModels(true),
+    generate,
+    toggleBrand: () => setUseBrand((on) => !on),
+  }));
 
   const onKey = (event: KeyboardEvent) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
       generate();
+    } else if (event.key.toLowerCase() === "e" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      enhance();
+    } else if (event.key === "Escape") {
+      prompt.current?.blur();
     }
   };
 
-  const ready = canEdit && falReady === true && (prompt.trim() || spec?.family === "upscale" || (custom && inputJson.trim())) && (!needsSource || source) && (!custom || endpoint.trim());
+  const pickRef = (ref: SourceRef) => {
+    if (!picking) return;
+    if (picking.slot === "source") {
+      const sources = [...draft.sources];
+      sources[picking.index] = ref;
+      patch({ sources });
+    } else {
+      patch({ references: [...draft.references.slice(0, picking.index), ref, ...draft.references.slice(picking.index + 1)] });
+    }
+  };
+
+  const ModelIcon = KIND_ICON[model.kind];
+  const latest = rows.find((row) => row.model === model.id && row.status === "done" && row.outputs[0]);
+  const hasMedia = model.needs.length > 0 || Boolean(model.references);
 
   return (
-    <div className={cn(cardClass, "mb-5 flex flex-col gap-3 p-3")} data-studio-composer>
-      <div className="flex flex-wrap items-center gap-2">
-        <Segmented label="What to make" value={mode} onChange={switchMode} options={MODES} />
-        {(needsSource || custom) && (
-          source ? (
-            <span className={cn(chipButton, "pr-1")}>
-              <img src={assetLink(source)} alt="" className="size-5 rounded object-cover" />
-              <span className="truncate">{source.name}</span>
-              <button type="button" aria-label="Remove the starting image" onClick={() => setSource(null)} className="flex size-6 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
-            </span>
-          ) : (
-            <button type="button" className={chipButton} onClick={() => setPicking(true)} disabled={!canEdit}>
-              <ImagePlus size={14} />{needsSource ? "Choose a starting image" : "Starting image (optional)"}
+    <div className="ui-panel flex flex-col gap-2 p-2.5" data-studio-composer>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <div role="group" aria-label="What to make" className="flex rounded-lg bg-inset p-0.5">
+          {STUDIO_MODES.map(({ value, label, icon: Icon }, index) => (
+            <button key={value} type="button" aria-pressed={draft.mode === value} aria-label={label} title={`${label} (${index + 1})`}
+              onClick={() => onDraft(draftForModel(draft.mode === value ? draft : { ...draft, aspectRatio: undefined, duration: undefined, resolution: undefined }, draft.mode === value ? model : studioModelsFor(value)[0]!))}
+              className={cn("flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] text-ink-secondary outline-none transition-colors duration-(--motion-fast) hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60", draft.mode === value && "bg-raised text-ink")}>
+              <Icon size={13} /><span className="max-sm:hidden">{label}</span>
             </button>
-          )
-        )}
-        {brand && (mode === "image" || mode === "video") && <BrandToggle kit={brand} on={useBrand} disabled={!canEdit} onChange={setUseBrand} />}
-      </div>
-      <textarea ref={promptRef} value={prompt} onChange={(event) => setPrompt(event.target.value)} onKeyDown={onKey} disabled={!canEdit}
-        rows={3} maxLength={8_000} aria-label="Prompt" placeholder={PLACEHOLDER[mode]}
-        className="min-h-[76px] w-full resize-y rounded-lg bg-inset px-3 py-2.5 text-[14px] leading-relaxed text-ink outline-none placeholder:text-ink-tertiary focus-visible:ring-1 focus-visible:ring-accent/50 disabled:opacity-60 max-md:text-[16px]" />
-      {custom && (
-        <div className="grid gap-2 md:grid-cols-[1fr_2fr]">
-          <input className={inputClass} value={endpoint} onChange={(event) => setEndpoint(event.target.value)} placeholder="fal endpoint, such as owner/app/path" aria-label="fal endpoint" spellCheck={false} />
-          <textarea className={cn(inputClass, "font-mono text-[12px]")} rows={2} value={inputJson} onChange={(event) => setInputJson(event.target.value)}
-            placeholder='Input JSON, such as {"workflow": …}' aria-label="Input JSON" spellCheck={false} />
+          ))}
         </div>
-      )}
-      <div className="flex flex-wrap items-center gap-2">
-        <Select variant="pill" size="sm" aria-label="Model" value={model} onChange={(event) => { setModel(event.target.value); setCount(1); }} disabled={!canEdit}>
-          {studioModelsFor(mode).map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-          <option value={STUDIO_CUSTOM_MODEL}>Custom fal endpoint</option>
-        </Select>
-        {spec?.aspectRatios && (
-          <Select variant="pill" size="sm" aria-label="Aspect ratio" value={spec.aspectRatios.includes(aspectRatio) ? aspectRatio : spec.aspectRatios[0]} onChange={(event) => setAspectRatio(event.target.value)} disabled={!canEdit}>
-            {spec.aspectRatios.map((ratio) => <option key={ratio} value={ratio}>{ratio === "auto" ? "Auto ratio" : ratio}</option>)}
-          </Select>
+        {draft.parent && (
+          <span className={cn(chipButton, "pr-1 capitalize text-ink")}>
+            {draft.parent.action}
+            <button type="button" aria-label="Start fresh" onClick={() => onDraft(emptyDraft(draft.mode))} className="flex size-6 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
+          </span>
         )}
-        {spec?.durations && (
-          <Select variant="pill" size="sm" aria-label="Duration" value={spec.durations.includes(duration) ? duration : spec.durations[0]} onChange={(event) => setDuration(event.target.value)} disabled={!canEdit}>
-            {spec.durations.map((value) => <option key={value} value={value}>{value.endsWith("s") ? value : `${value}s`}</option>)}
-          </Select>
+        {hasMedia && (
+          <div className="contents" data-studio-sources>
+            {model.needs.map((kind, index) => (
+              <SourceChip key={`${kind}-${index}`} value={draft.sources[index]?.kind === kind ? draft.sources[index] : undefined} kind={kind} disabled={!canEdit}
+                label={`${kind === "image" ? "Image" : kind === "video" ? "Video" : "Audio"}${model.needs.length > 1 ? ` ${index + 1}` : ""}`}
+                onPick={() => setPicking({ slot: "source", index, kind })} onClear={() => patch({ sources: draft.sources.filter((_, other) => other !== index) })} />
+            ))}
+            {draft.references.map((ref, index) => (
+              <SourceChip key={`ref-${index}`} value={ref} kind="image" label="Reference" disabled={!canEdit}
+                onPick={() => setPicking({ slot: "reference", index, kind: "image" })} onClear={() => patch({ references: draft.references.filter((_, other) => other !== index) })} />
+            ))}
+            {(model.references ?? 0) > draft.references.length && (
+              <button type="button" className={cn(chipButton, "border-dashed")} disabled={!canEdit} onClick={() => setPicking({ slot: "reference", index: draft.references.length, kind: "image" })}
+                title="Reference images keep a character, product or style consistent">
+                <Plus size={13} />Reference
+              </button>
+            )}
+          </div>
         )}
-        {spec?.voices && (
-          <Select variant="pill" size="sm" aria-label="Voice" value={voice || spec.voices[0]} onChange={(event) => setVoice(event.target.value)} disabled={!canEdit}>
-            {spec.voices.map((value) => <option key={value} value={value}>{value}</option>)}
-          </Select>
+        <span className="flex-1" />
+        {branded && brand && <BrandToggle kit={brand} on={useBrand} disabled={!canEdit} onChange={setUseBrand} />}
+      </div>
+      <textarea ref={prompt} value={draft.prompt} onChange={(event) => patch({ prompt: event.target.value })} onKeyDown={onKey} disabled={!canEdit}
+        rows={2} maxLength={8_000} aria-label="Prompt" placeholder={model.prompt === "none" ? `${model.label} needs no prompt` : `${PLACEHOLDER[draft.mode]}${model.prompt === "optional" ? " (optional)" : ""}`}
+        className="max-h-[220px] min-h-[52px] w-full resize-none bg-transparent px-1.5 py-1 text-[14.5px] leading-relaxed text-ink outline-none placeholder:text-ink-tertiary disabled:opacity-60 max-md:text-[16px]" />
+      <div className="flex flex-wrap items-center gap-1.5">
+        <button type="button" className={cn(chipButton, "max-w-[240px] pl-1 text-ink")} disabled={!canEdit} onClick={() => setModels(true)} aria-label={`Model: ${model.label}`} title="Choose a model (M)" data-studio-model>
+          {latest?.outputs[0] ? <MediaThumb kind={model.kind} url={latest.outputs[0].url} className="size-6 shrink-0 rounded-full" /> : <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-inset"><ModelIcon size={12} /></span>}
+          <span className="truncate">{model.label}</span><ChevronDown size={13} className="shrink-0 text-ink-tertiary" />
+        </button>
+        <StudioControls model={model} draft={draft} disabled={!canEdit} patch={patch} />
+        <div className="ml-auto flex items-center gap-1.5">
+        {model.prompt !== "none" && (
+          <button type="button" className={cn(chipButton, "px-2.5")} disabled={!canEdit || !falReady || !draft.prompt.trim() || enhancing.busy} onClick={enhance} title="Enhance the prompt (Ctrl+E)" aria-label="Enhance prompt">
+            {enhancing.busy ? <Loader2 size={13} className="animate-spin" /> : <WandSparkles size={13} />}<span className="max-sm:hidden">Enhance</span>
+          </button>
         )}
-        {(spec?.maxCount ?? 4) > 1 && (
-          <Select variant="pill" size="sm" aria-label="Variations" value={String(count)} onChange={(event) => setCount(Number(event.target.value))} disabled={!canEdit}>
-            {Array.from({ length: spec?.maxCount ?? 4 }, (_, index) => <option key={index} value={index + 1}>{index + 1} ×</option>)}
-          </Select>
+        {falReady === false ? (
+          <span className="flex items-center gap-2 text-[12.5px] text-ink-secondary" data-studio-missing-key>
+            <KeyRound size={14} aria-hidden="true" />Add your fal.ai key to generate.
+            <button type="button" className={ghostButton} onClick={() => openFalSettings(dispatch)}>Add key</button>
+          </span>
+        ) : (
+          <button type="button" className={primaryButton} disabled={!ready || action.busy} onClick={generate} title="Generate (Ctrl+Enter)">
+            {action.busy ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}Generate
+          </button>
         )}
-        <div className="ml-auto flex items-center gap-2">
-          {falReady === false ? (
-            <span className="flex items-center gap-2 text-[12.5px] text-ink-secondary" data-studio-missing-key>
-              <KeyRound size={14} aria-hidden="true" />Add your fal.ai key to generate.
-              <button type="button" className={ghostButton} onClick={() => openFalSettings(dispatch)}>Add key</button>
-            </span>
-          ) : (
-            <button type="button" className={primaryButton} disabled={!ready || action.busy} onClick={generate} title="Generate (Ctrl+Enter)">
-              {action.busy ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}Generate
-            </button>
-          )}
         </div>
       </div>
-      {action.error && <Notice tone="danger">{action.error}</Notice>}
-      {picking && (
-        <Modal title="Choose a starting image" onClose={() => setPicking(false)} wide>
-          {!images.length ? <EmptyState compact icon={<ImageIcon size={22} />} title="No images in Assets yet" body="Generate an image and save it to Assets, or upload one there." /> : (
-            <div className="grid max-h-[60vh] grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2 overflow-y-auto">
-              {images.map((asset) => (
-                <button key={asset._id} type="button" onClick={() => { setSource(asset); setPicking(false); }}
-                  className="group flex flex-col overflow-hidden rounded-lg border border-hairline/40 bg-inset text-left outline-none transition-colors hover:border-accent/60 focus-visible:border-accent">
-                  <img src={assetLink(asset)} alt="" loading="lazy" className="aspect-square w-full object-cover" />
-                  <span className="truncate px-2 py-1.5 text-[12px] text-ink-secondary group-hover:text-ink">{asset.name}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </Modal>
-      )}
+      {(action.error || enhancing.error) && <Notice tone="danger">{action.error || enhancing.error}</Notice>}
+      {models && <StudioModelPicker mode={draft.mode} current={model.id} rows={rows} onClose={() => setModels(false)} onPick={(next) => { onDraft(draftForModel(draft, next)); setModels(false); prompt.current?.focus(); }} />}
+      {picking && <StudioMediaPicker projectId={projectId} kind={picking.kind} rows={rows} title={picking.slot === "reference" ? "Choose a reference image" : undefined} assetsOnly={picking.slot === "reference"} onPick={pickRef} onClose={() => setPicking(null)} />}
     </div>
   );
-}
+});

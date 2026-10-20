@@ -49,10 +49,29 @@ export function leadFormColors(form: LeadForm, surface: string) {
   };
 }
 
-export function pathData(points: readonly number[], closed?: boolean): string {
+/** SVG path data for anchors, with cubic segments where `curves` has handles and a new subpath at each of `breaks`. */
+export function pathData(points: readonly number[], closed?: boolean, curves?: readonly number[], breaks?: readonly number[]): string {
+  const count = Math.floor(points.length / 2);
+  const starts = [0, ...(breaks ?? []).filter((at) => at > 0 && at < count), count];
+  const handle = (at: number, side: 0 | 2) => (curves ? [curves[at * 4 + side] ?? 0, curves[at * 4 + side + 1] ?? 0] : [0, 0]);
+  const segment = (from: number, to: number) => {
+    const [ox, oy] = handle(from, 2);
+    const [ix, iy] = handle(to, 0);
+    const x = points[to * 2]!;
+    const y = points[to * 2 + 1]!;
+    if (!ox && !oy && !ix && !iy) return `L${x} ${y}`;
+    return `C${points[from * 2]! + ox} ${points[from * 2 + 1]! + oy} ${x + ix} ${y + iy} ${x} ${y}`;
+  };
   let out = "";
-  for (let index = 0; index + 1 < points.length; index += 2) out += `${index ? "L" : "M"}${points[index]} ${points[index + 1]}`;
-  return out + (closed ? "Z" : "");
+  for (let part = 0; part + 1 < starts.length; part++) {
+    const first = starts[part]!;
+    const last = starts[part + 1]! - 1;
+    if (last < first) continue;
+    out += `M${points[first * 2]} ${points[first * 2 + 1]}`;
+    for (let at = first + 1; at <= last; at++) out += segment(at - 1, at);
+    if (closed) out += (last > first ? segment(last, first) : "") + "Z";
+  }
+  return out;
 }
 
 export function arrowHead(points: readonly number[], size: number): string {
@@ -123,9 +142,19 @@ function placement(node: CanvasNode, place: Place, context: Context): Style {
       ...(isBoard(node) ? { "aspect-ratio": `${round(node.width)}/${round(Math.max(1, node.height))}` } : autoHeight(node) ? {} : { "min-height": `${round(node.height)}px` }),
     };
   }
-  if (place.kind === "board") {
+  if (place.kind === "board" || node.absolute) {
     return { position: "absolute", left: size(node.x), top: size(node.y), width: size(node.width), ...(node.type === "text" || node.leadForm ? {} : { height: size(node.height) }) };
   }
+  const bounds: Style = {
+    ...(node.minW !== undefined ? { "min-width": size(node.minW) } : {}), ...(node.maxW !== undefined ? { "max-width": `min(100%,${size(node.maxW)})` } : {}),
+    ...(node.minH !== undefined ? { "min-height": size(node.minH) } : {}), ...(node.maxH !== undefined ? { "max-height": size(node.maxH) } : {}),
+  };
+  return { ...stacked(node, place.layout, context), ...bounds };
+}
+
+function stacked(node: CanvasNode, layout: StackLayout, context: Context): Style {
+  const size = (value: number) => len(value, context);
+  const place = { layout };
   const row = place.layout.direction === "row";
   const stretch = place.layout.align === "stretch";
   const style: Style = { "max-width": "100%" };
@@ -153,6 +182,14 @@ function visuals(node: CanvasNode, context: Context): Style {
   else if (node.radius > 0) style["border-radius"] = len(Math.min(node.radius, node.width / 2, node.height / 2), context);
   if (node.opacity < 1) style.opacity = round(node.opacity);
   if (node.rotation && node.type !== "frame" && node.type !== "group") style.transform = `rotate(${round(node.rotation)}deg)`;
+  const filters: string[] = [];
+  if (node.shadow) {
+    const { x, y, blur, spread, color } = node.shadow;
+    if (node.type === "text" || node.type === "line" || node.type === "arrow" || node.type === "path") filters.push(`drop-shadow(${len(x, context)} ${len(y, context)} ${len(blur / 2, context)} ${color})`);
+    else style["box-shadow"] = `${len(x, context)} ${len(y, context)} ${len(blur, context)} ${len(spread, context)} ${color}`;
+  }
+  if (node.blur) filters.push(`blur(${len(node.blur, context)})`);
+  if (filters.length) style.filter = filters.join(" ");
   if ((node.type === "frame" && node.clip && !node.leadForm) || node.type === "image") style.overflow = "hidden";
   return style;
 }
@@ -164,7 +201,9 @@ function container(node: CanvasNode, context: Context): Style {
   const [top, right, bottom, left] = layout.padding;
   return {
     display: "flex", "flex-direction": layout.direction, ...(layout.direction === "row" ? { "flex-wrap": "wrap" } : {}),
-    gap: space(layout.gap, context), padding: [top, right, bottom, left].map((value) => space(value, context)).join(" "),
+    ...((context.index.get(node.id) ?? []).some((child) => child.absolute) ? { position: "relative" } : {}),
+    gap: space(layout.gap, context), ...(layout.wrap && layout.direction === "row" ? { "row-gap": space(layout.crossGap ?? layout.gap, context) } : {}),
+    padding: [top, right, bottom, left].map((value) => space(value, context)).join(" "),
     "align-items": ALIGN[layout.align], "justify-content": JUSTIFY[layout.justify],
   };
 }
@@ -219,7 +258,7 @@ function renderVector(node: CanvasNode, style: Style): string {
   const fill = node.type === "path" && node.closed && node.fill ? node.fill : "none";
   const head = node.type === "arrow" && points.length >= 4 ? `<path d="${arrowHead(points, Math.max(8, width * 3.5))}" fill="${stroke}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round"/>` : "";
   return `<svg aria-hidden="true" viewBox="0 0 ${round(Math.max(1, node.width))} ${round(Math.max(1, node.height))}" preserveAspectRatio="none"${styleAttr({ ...style, overflow: "visible" })}>`
-    + `<path d="${pathData(points, node.closed)}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>${head}</svg>`;
+    + `<path d="${pathData(points, node.closed, node.curves, node.breaks)}" fill="${fill}" fill-rule="evenodd" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>${head}</svg>`;
 }
 
 function renderNode(node: CanvasNode, place: Place, context: Context): string {

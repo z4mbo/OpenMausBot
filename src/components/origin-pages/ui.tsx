@@ -34,6 +34,8 @@ export const chipButton =
   `inline-flex h-8 max-w-[220px] items-center gap-1.5 rounded-full border border-hairline/60 bg-raised/60 px-3 text-[12.5px] text-ink-secondary transition-colors hover:border-hairline hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 /** Clears the glass header a page scrolls beneath; `--glass-top` is the header's height, published by its frame. */
 export const underGlass = "pt-[calc(var(--glass-top,0px)+1.25rem)] [scroll-padding-top:var(--glass-top,0px)]";
+/** A list row that eases in when it is added. */
+export const itemIn = "motion-safe:animate-[item-in_var(--motion-base)_var(--ease-out)_backwards]";
 /** The scrolling body every project and workspace page shares. */
 export const pageClass = `flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-4 pb-5 md:px-6 ${underGlass} motion-safe:animate-[rise_var(--motion-base)_var(--ease-out)_backwards]`;
 

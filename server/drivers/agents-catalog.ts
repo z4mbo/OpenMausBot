@@ -1,7 +1,6 @@
 // The agents tool catalog and which tools a turn sees: definitions only, no environment, no calls.
 import { CREDENTIAL_TARGETS } from "../../shared/credential-request.ts";
 import { OPTIONS_CARD_LIMITS, WATCHER_OPTIONS_CARD_BOT_ID } from "../../shared/options-card.ts";
-import { STUDIO_CUSTOM_MODEL, STUDIO_MODELS } from "../../shared/studio.ts";
 import { agentToolAnnotations } from "../agent-tool-policy.ts";
 import { WIDGET_TOOL_DEFINITIONS } from "./agents-widget-tools.ts";
 import { CANVAS_TOOL_DEFINITIONS } from "./agents-canvas-tools.ts";
@@ -11,6 +10,7 @@ import { CAMPAIGN_TOOL_DEFINITIONS } from "./agents-campaign-tools.ts";
 import { SHIP_TOOL_DEFINITIONS } from "./agents-ship-tools.ts";
 import { LAUNCHPAD_TOOL_DEFINITIONS } from "./agents-launchpad-tools.ts";
 import { BRAND_TOOL_DEFINITIONS, BRAND_VOICE } from "./agents-brand-tools.ts";
+import { STUDIO_TOOL_DEFINITIONS } from "./agents-studio-tools.ts";
 import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 
 /** Which tools a turn is shown. Presentation only: the server still authenticates and scopes every call. */
@@ -265,6 +265,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
         issue_id: ORIGIN_ISSUE_ID,
         bot_id: { type: "string", minLength: 1, maxLength: 128, description: "Bot id from origin_list_projects, or a unique name." },
         instructions: { type: "string", maxLength: 1_000, description: "Optional extra direction for the agent." },
+        design: { type: "boolean", description: "Design work: the agent designs it on the Canvas and submits frames instead of a pull request." },
         project: ORIGIN_PROJECT,
       },
       required: ["issue_id", "bot_id"],
@@ -333,7 +334,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_vault_list",
-    description: "List an Origin project's vault: titles, kinds, URLs and usernames. Values are encrypted with the person's passphrase and never readable here; ask for one with request_credential." + ORIGIN_SCOPE,
+    description: "List an Origin project's vault: titles, kinds, URLs, usernames, and the values members let agents use and unlocked here. Ask for any other with request_credential." + ORIGIN_SCOPE,
     inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
   },
   {
@@ -371,52 +372,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
     },
   },
   ...CANVAS_TOOL_DEFINITIONS, ...STANDUP_TOOL_DEFINITIONS,
-  {
-    name: "origin_studio_generate",
-    description: "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live. count makes several variations. Images and audio wait for the result (up to 40 s); video returns at once. Keep the good ones with origin_studio_save_asset." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        mode: { type: "string", enum: ["image", "video", "audio", "edit"], description: "edit changes or upscales an existing image asset. Default image." },
-        prompt: { type: "string", maxLength: 8_000, description: "What to make; for an ElevenLabs voice, the words spoken." },
-        model: { type: "string", enum: [...STUDIO_MODELS.map((model) => model.id), STUDIO_CUSTOM_MODEL], description: "Default: the mode's first model. Models ending in image-to-video, edit or upscale need source_asset_id." },
-        aspect_ratio: { type: "string", maxLength: 10, description: "Such as 1:1, 16:9, 9:16." },
-        duration: { type: "string", maxLength: 10, description: "Video or audio length, such as 5, 8s or 30s." },
-        voice: { type: "string", maxLength: 40, description: "ElevenLabs voice name, such as Rachel or Brian." },
-        count: { type: "integer", minimum: 1, maximum: 4 },
-        source_asset_id: { type: "string", maxLength: 64, description: "An image asset id from origin_list_assets to start from." },
-        endpoint: { type: "string", maxLength: 200, description: "With model custom: any fal.ai endpoint id, such as a deployed ComfyUI workflow." },
-        input: { type: "object", description: "With model custom: the endpoint's whole input." },
-        wait: { type: "boolean", description: "Wait for the result. Default true except for video." }, brand: { type: "boolean", description: "Put the brand kit's imagery style and colours ahead of an image or video prompt. Default true." }, project: ORIGIN_PROJECT,
-      },
-    },
-  },
-  {
-    name: "origin_studio_list",
-    description: "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Broadcast." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        status: { type: "string", enum: ["queued", "running", "done", "failed", "cancelled"] },
-        limit: { type: "integer", minimum: 1, maximum: 30, description: "Default 15." },
-        project: ORIGIN_PROJECT,
-      },
-    },
-  },
-  {
-    name: "origin_studio_save_asset",
-    description: "Save a finished Studio generation to the project's Assets (all its outputs, or one with index), and with broadcast true also pick it for Broadcast posts. Returns the asset ids." + ORIGIN_SCOPE,
-    inputSchema: {
-      type: "object", additionalProperties: false,
-      properties: {
-        generation_id: { type: "string", minLength: 1, maxLength: 64, description: "From origin_studio_list or origin_studio_generate." },
-        index: { type: "integer", minimum: 0, maximum: 7, description: "One output; omit for all." },
-        broadcast: { type: "boolean", description: "Also pick it for Broadcast." },
-        project: ORIGIN_PROJECT,
-      },
-      required: ["generation_id"],
-    },
-  },
+  ...STUDIO_TOOL_DEFINITIONS,
   {
     name: "origin_broadcast_draft",
     description: "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval." + BRAND_VOICE + ORIGIN_SCOPE,

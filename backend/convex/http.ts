@@ -47,6 +47,8 @@ http.route({ path: "/integrations", method: "POST", handler: httpAction(async (c
       case "repoResult": result = await ctx.runMutation(internal.integrations.repoResult, p.args); break;
       case "linkIssue": result = await ctx.runMutation(internal.integrations.linkIssue, p.args); break;
       case "completeMergedIssue": result = await ctx.runMutation(internal.integrations.completeMergedIssue, p.args); break;
+      case "githubToken": result = await ctx.runAction(internal.teamGitHub.operatorToken, p.args); break;
+      case "createRepository": result = await ctx.runAction(internal.teamGitHub.operatorCreateRepository, p.args); break;
       case "chatMentions": result = await ctx.runMutation(internal.notifications.chatMentions, p.args); break;
       case "feedback": result = await ctx.runMutation(internal.feedback.submit, p.args); break;
       default: return new Response("Unknown operation", { status: 400 });

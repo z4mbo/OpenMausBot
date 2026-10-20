@@ -7,7 +7,7 @@ import { isLive, layoutText, type CanvasNode } from "../../../../shared/canvas-s
 import { useBrandFonts } from "@/lib/origin-brand";
 import { cn } from "@/lib/cn";
 import { forgetTextWidths, measureText } from "./geometry";
-import { Section, iconToggle } from "./Inspector";
+import { Section, iconToggle } from "./controls";
 import type { CanvasScene } from "./use-canvas-scene";
 
 /** Loads the kit's faces and every brand face the scene uses, then re-measures the text set in a face that arrived late. */

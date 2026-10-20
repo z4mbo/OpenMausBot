@@ -4,6 +4,7 @@ import { CREDENTIAL_TARGETS, isCredentialTargetId } from "../../shared/credentia
 
 import { peerName } from "../peer-roster.ts";
 import { callCardTool, CARD_TOOL_NAMES } from "./agents-call-cards.ts";
+import { callOriginTool } from "./agents-call-origin.ts";
 import { catalogProfileFromEnv, ORIGIN_TOOL_NAMES, SHARED_COMPUTER_TOOL_NAMES } from "./agents-catalog.ts";
 import { harnessClientFromEnv } from "./agents-client.ts";
 import type { HarnessClient, Json } from "./agents-client.ts";
@@ -211,46 +212,6 @@ function recallWhen(at: unknown, dateOnly: boolean): string {
   return dateOnly ? day : `${day} ${pad(said.getHours())}:${pad(said.getMinutes())}`;
 }
 
-/** The issue goes out through coordinate_bots, with every check that route makes, before Origin records who has it. */
-async function assignOriginIssue(args: Json, context: ToolCallContext): Promise<ToolCallResult> {
-  const { apiResponse } = context.client;
-  const origin = (phase?: "record") => apiResponse("/api/internal/origin/tool", {
-    method: "POST", body: JSON.stringify({ name: "origin_assign_issue", arguments: args, ...(phase ? { phase } : {}) }),
-  });
-  const prepared = await origin();
-  const handoff = prepared.body.handoff && typeof prepared.body.handoff === "object" ? prepared.body.handoff as Json : null;
-  if (!prepared.ok || prepared.body.isError === true || !handoff) {
-    return { text: String(prepared.body.text ?? prepared.body.error ?? "origin_assign_issue did not answer."), isError: true };
-  }
-  const sent = await apiResponse("/api/internal/coordinate-bots", {
-    method: "POST",
-    body: JSON.stringify({ botIds: [handoff.botId], message: handoff.message, reason: handoff.reason, done_when: handoff.doneWhen, thread: "new" }),
-  });
-  if (!sent.ok || sent.body.error) return { text: `Not assigned, nothing was sent: ${String(sent.body.error ?? `HTTP ${sent.status}`)}`, isError: true };
-  const recorded = await origin("record");
-  const noted = recorded.ok && recorded.body.isError !== true
-    ? String(recorded.body.text ?? "")
-    : `The assignment went out, but Origin did not record it: ${String(recorded.body.text ?? recorded.body.error ?? `HTTP ${recorded.status}`)}`;
-  return { text: `Assigned to ${String(handoff.botName)}: ${JSON.stringify(sent.body)} ${noted} End your turn now; the result resumes you.` };
-}
-
-/** After the issue moves to review, the project's Chief gets a new thread asking it to review and merge the pull request. */
-async function completeOriginIssue(args: Json, context: ToolCallContext): Promise<ToolCallResult> {
-  const { apiResponse } = context.client;
-  const { ok, body } = await apiResponse("/api/internal/origin/tool", { method: "POST", body: JSON.stringify({ name: "origin_complete_issue", arguments: args }) });
-  const text = String(body.text ?? body.error ?? "origin_complete_issue did not answer.");
-  if (!ok || body.isError === true) return { text, isError: true };
-  const reviewer = body.reviewer && typeof body.reviewer === "object" ? body.reviewer as Json : null;
-  if (!reviewer) return { text };
-  const sent = await apiResponse("/api/internal/coordinate-bots", {
-    method: "POST",
-    body: JSON.stringify({ botIds: [reviewer.botId], message: reviewer.message, reason: reviewer.reason, thread: "new", reply: "none" }),
-  });
-  return sent.ok && !sent.body.error
-    ? { text }
-    : { text: `${text} Asking ${String(reviewer.botName)} to review did not go through (${String(sent.body.error ?? `HTTP ${sent.status}`)}); tell your Chief the pull request is ready.` };
-}
-
 export async function callTool(name: string, args: Json, context: ToolCallContext): Promise<ToolCallResult> {
   const { botId: BOT_ID, threadId: THREAD_ID, depth: DEPTH } = context;
   const { api, apiResponse } = context.client;
@@ -278,12 +239,7 @@ export async function callTool(name: string, args: Json, context: ToolCallContex
     return { text: `Attached ${String(body.name ?? "the file")} (${Number(body.bytes ?? 0)} bytes). It now appears in the chat with a preview.` };
   }
   if (CARD_TOOL_NAMES.has(name)) return callCardTool(name, args, context);
-  if (name === "origin_assign_issue") return assignOriginIssue(args, context);
-  if (name === "origin_complete_issue") return completeOriginIssue(args, context);
-  if (ORIGIN_TOOL_NAMES.has(name)) {
-    const { ok, body } = await apiResponse("/api/internal/origin/tool", { method: "POST", body: JSON.stringify({ name, arguments: args }) });
-    return { text: String(body.text ?? body.error ?? `${name} did not answer.`), ...(!ok || body.isError === true ? { isError: true } : {}) };
-  }
+  if (ORIGIN_TOOL_NAMES.has(name)) return callOriginTool(name, args, context);
   // Second lock: with sharing off the catalog already omits these tools.
   if (SHARED_COMPUTER_TOOL_NAMES.has(name) && !context.sharedComputers) {
     return { text: "Computer sharing is turned off in this workspace. There are no shared computers to use.", isError: true };

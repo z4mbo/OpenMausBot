@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import type { Priority } from "./cloud-types";
 import { errorText } from "./repo-url";
-import { EmptyState, Loading, Notice, Segmented, ghostButton, iconButton, inputClass, type WorkspaceContext } from "./ui";
+import { EmptyState, Loading, Notice, Segmented, ghostButton, iconButton, inputClass, itemIn, type WorkspaceContext } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
 import { PriorityIcon } from "./issue-fields";
 import { StandupDigest } from "./StandupDigest";
@@ -119,7 +119,7 @@ function Notifications({ teamId, onError, onOpenIssue }: { teamId: string; onErr
           <ul className="flex flex-col">
             {results.map((row) => (
               <Fragment key={row._id}>
-              <li className={cn("flex items-start gap-2 rounded-lg px-2 py-2 hover:bg-raised/50", !row.read && "bg-raised/30")} data-notification={row._id}>
+              <li className={cn("flex items-start gap-2 rounded-lg px-2 py-2 transition-colors duration-(--motion-fast) hover:bg-raised/50", itemIn, !row.read && "bg-raised/30")} data-notification={row._id}>
                 <span className="mt-0.5 text-ink-secondary" aria-hidden="true">
                   {row.kind === "digest" ? <Sunrise size={15} /> : row.kind === "lead" ? <Reply size={15} /> : row.kind === "mention" ? <AtSign size={15} /> : row.kind === "comment" ? <MessageSquare size={15} /> : <Circle size={15} />}
                 </span>
@@ -222,7 +222,7 @@ function IssueList({ teamId, projects, filters, canEdit, onOpen, onError, hasFil
             const assignee = members?.find((member) => member.email === task.assignedToEmail);
             const overdue = Boolean(task.dueDate && task.dueDate < today && !task.done);
             return (
-              <li key={task._id} className="flex items-center gap-2 px-2 py-1.5" data-inbox-issue={task._id}>
+              <li key={task._id} className={cn("flex items-center gap-2 px-2 py-1.5", itemIn)} data-inbox-issue={task._id}>
                 <button type="button" className={iconButton} disabled={!editsProject(projects, canEdit, task.projectId) || pending === task._id}
                   aria-label={`${task.done ? "Reopen" : "Complete"} ${task.title}`} title={task.done ? "Reopen issue" : "Complete issue"} onClick={() => void toggle(task)}>
                   {pending === task._id ? <Loader2 size={15} className="animate-spin" /> : task.done ? <CheckCircle2 size={15} className="text-success" /> : <Circle size={15} />}

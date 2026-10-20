@@ -3,7 +3,7 @@ import { httpAction, internalMutation, internalQuery, type MutationCtx } from ".
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { BodyTooLarge, readBoundedText } from "../lib/http-body";
-import { addActivity, notifyLeadReply, siteUrl, stagesOf, stopSequences } from "./lib/pipelineCore";
+import { addActivity, notifyLeadReply, siteUrl, sourcePatch, stagesOf, stopSequences } from "./lib/pipelineCore";
 import { normalizeLeadEmail, normalizeLeadPhone } from "../../shared/origin-pipeline";
 
 const TWILIO_BODY_MAX = 64_000;
@@ -61,7 +61,11 @@ async function leadFor(ctx: MutationCtx, settings: Doc<"pipelineSettings">, cont
   const known = contact.email
     ? await ctx.db.query("pipelineLeads").withIndex("by_projectId_and_email", (q) => q.eq("projectId", projectId).eq("email", contact.email)).first()
     : await ctx.db.query("pipelineLeads").withIndex("by_projectId_and_phone", (q) => q.eq("projectId", projectId).eq("phone", contact.phone)).first();
-  if (known) return known;
+  if (known) {
+    const sources = sourcePatch(known, fallback.source);
+    if (sources.sources) await ctx.db.patch(known._id, sources);
+    return known;
+  }
   const stage = stagesOf(settings)[0]!;
   const now = Date.now();
   const leadId = await ctx.db.insert("pipelineLeads", {

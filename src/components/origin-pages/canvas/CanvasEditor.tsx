@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { newNode } from "../../../../shared/canvas-ops";
 import {
-  fontStack, ancestors, descendants, effectiveParent, isLive, layoutText, nextZ, worldOrigin,
+  ancestors, descendants, effectiveParent, isLive, layoutText, nextZ, worldOrigin,
   type CanvasNode, type CanvasNodeType, type Scene,
 } from "../../../../shared/canvas-scene";
 import { cn } from "@/lib/cn";
@@ -15,10 +15,16 @@ import {
   clampZoom, contains, containsPoint, fitView, intersects, measureText, normalizedBox, snapBox, toScreen, toWorld, unionBox, worldBounds, worldBox,
   type Box, type Guide, type Point, type View,
 } from "./geometry";
-import { SceneLayer, type RenderOptions } from "./NodeView";
-import { Overlay, type Handle, type RemoteCursor } from "./Overlay";
+import { SceneLayer, changedSubtrees, type RenderOptions } from "./NodeView";
+import { Overlay, type Handle, type RemoteCursor, type RemoteSelection } from "./Overlay";
 import { CanvasToolbar, ZoomControls, type Tool } from "./Toolbar";
 import type { CanvasScene } from "./use-canvas-scene";
+import { anchorsOf, isPathNode, toggleSmooth, usePenTool, withAnchors, type Anchor } from "./pen";
+import { combine } from "./booleans";
+import { detach, makeComponent } from "../../../../shared/canvas-components";
+import { Rulers, RULER, type PageGuide } from "./Rulers";
+import { TextEditor, contrastInk, themeInk } from "./TextEditor";
+import { svgNodes } from "./svg-import";
 
 export type PlacedImage = { fileId: string; width: number; height: number; name: string };
 
@@ -34,6 +40,23 @@ export type CanvasEditorProps = {
   onSelection?: (ids: readonly string[]) => void;
   inspector: (selection: SelectionApi) => ReactNode;
   notify(message: string): void;
+  /** The current page's ruler guides; rulers and guides show when `onGuides` is given. */
+  guides?: readonly PageGuide[];
+  onGuides?(guides: PageGuide[]): void;
+  remoteSelections?: readonly RemoteSelection[];
+  /** A click with the comment tool, at a world point, on the node under it if any. */
+  onComment?(world: Point, nodeId: string | null): void;
+  /** Drawn over the stage in screen space: comment pins and the like. */
+  stageLayer?: (view: View) => ReactNode;
+  onPresent?(frameId: string | null): void;
+  /** Overlay arrows of prototype links show while this is on. */
+  showPrototype?: boolean;
+  /** The page on show; switching it clears the selection and fits the new page. */
+  page?: string;
+  /** A node to select and zoom to once it is on the page. */
+  focus?: string;
+  onFocused?(): void;
+  coveredRight?: number;
 };
 
 export type SelectionApi = {
@@ -42,9 +65,12 @@ export type SelectionApi = {
   select(ids: readonly string[]): void;
   zoomTo(ids: readonly string[]): void;
   run(command: Command): void;
+  /** The world point at the centre of the visible canvas. */
+  centre(): Point;
 };
 
-export type Command = "delete" | "duplicate" | "group" | "ungroup" | "frame" | "copy" | "paste" | "select-all" | "fit" | Reorder | "hide" | "lock";
+export type Command = "delete" | "duplicate" | "group" | "ungroup" | "frame" | "copy" | "paste" | "select-all" | "fit" | Reorder | "hide" | "lock"
+  | "union" | "subtract" | "intersect" | "exclude" | "flatten" | "component" | "detach" | "present" | "edit-path";
 
 type Gesture =
   | { kind: "pan"; start: Point; view: View }
@@ -54,28 +80,25 @@ type Gesture =
   | { kind: "rotate"; centre: Point; start: number; original: CanvasNode }
   | { kind: "create"; type: CanvasNodeType; start: Point; parentId: string | null; node: CanvasNode | null }
   | { kind: "endpoint"; end: 0 | 1; original: CanvasNode }
-  | { kind: "pinch"; distance: number; mid: Point; view: View };
+  | { kind: "pinch"; distance: number; mid: Point; view: View }
+  | { kind: "pen"; start: Point }
+  | { kind: "anchor"; at: number; part: "point" | "in" | "out"; start: Point; anchors: Anchor[]; original: CanvasNode; world: Point; mirror: boolean };
 
-const TOOL_KEYS: Record<string, Tool> = { v: "move", h: "hand", f: "frame", a: "frame", r: "rect", o: "ellipse", e: "ellipse", l: "line", t: "text" };
+const TOOL_KEYS: Record<string, Tool> = { v: "move", h: "hand", f: "frame", a: "frame", r: "rect", o: "ellipse", e: "ellipse", l: "line", t: "text", p: "pen", c: "comment" };
 const isTyping = (target: EventTarget | null) => target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
-const contrastInk = (fill: string | null | undefined, fallback: string) => {
-  if (!fill || fill.length < 7) return fallback;
-  const [r, g, b] = [1, 3, 5].map((at) => parseInt(fill.slice(at, at + 2), 16));
-  return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? "#111111" : "#F5F5F5";
-};
 const round = (value: number) => Math.round(value);
+
+const FAR = 1e9;
+const near = (list: Guide[]) => list.filter((guide) => Math.abs(guide.from) < FAR / 2 && Math.abs(guide.to) < FAR / 2);
 type Panels = { layers: boolean; inspector: boolean };
 const oneOverlay = (current: Panels, next: Panels): Panels =>
   next.layers && !current.layers ? { layers: true, inspector: false } : next.inspector && !current.inspector ? { layers: false, inspector: true } : next;
 const textName = (text: string | undefined) => (text ?? "").trim().replace(/\s+/g, " ").slice(0, 60) || "Text";
 
-function themeInk(element: Element | null): string {
-  const match = element ? /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(element).color) : null;
-  if (!match) return "#F5F5F5";
-  return `#${match.slice(1, 4).map((value) => Number(value).toString(16).padStart(2, "0")).join("")}`.toUpperCase();
-}
 
-export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, addImage, imagePicker, layers, inspector, notify, onSelection }: CanvasEditorProps) {
+const INSPECTOR_WIDTH = 256;
+
+export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, addImage, imagePicker, layers, inspector, notify, onSelection, guides: pageGuides, onGuides, remoteSelections, onComment, stageLayer, onPresent, showPrototype, page, focus, onFocused, coveredRight = 0 }: CanvasEditorProps) {
   const { scene, index } = canvas;
   const root = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -99,6 +122,8 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   const lastDown = useRef<{ at: number; hit: string | null }>({ at: 0, hit: null });
   const [imageMenu, setImageMenu] = useState(false);
   const [pendingZoom, setPendingZoom] = useState<string[] | null>(null);
+  const [pathEdit, setPathEdit] = useState<{ id: string; at: number | null } | null>(null);
+  const [rulers, setRulers] = useState(true);
 
   const live = useMemo(() => selected.filter((id) => isLive(scene.get(id))), [selected, scene]);
   const nodes = useMemo(() => live.map((id) => scene.get(id)!), [live, scene]);
@@ -136,10 +161,27 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   }, [pendingZoom, scene, zoomTo]);
 
   useEffect(() => {
+    if (!focus || !index.get(null)?.some((node) => node.id === focus || descendants(scene, node.id, index).some((child) => child.id === focus))) return;
+    setSelected([focus]);
+    setPendingZoom([focus]);
+    onFocused?.();
+  }, [focus, index]);
+
+  const shownPage = useRef(page);
+  useEffect(() => {
+    if (shownPage.current === page) return;
+    shownPage.current = page;
+    fitted.current = false;
+    setSelected([]);
+    setPathEdit(null);
+    penTool.cancel();
+  }, [page]);
+
+  useEffect(() => {
     if (fitted.current || !size.width) return;
     fitted.current = true;
     zoomTo();
-  }, [size.width, zoomTo]);
+  }, [size.width, zoomTo, page]);
 
   const zoomAt = useCallback((factor: number, anchor: Point) => {
     setView((current) => {
@@ -213,6 +255,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         if (clip) paste(clip);
         return;
       }
+      case "present": {
+        const frame = ids.length ? [...ancestors(scene, scene.get(ids[0])!), scene.get(ids[0])!].find((node) => node.type === "frame" && !effectiveParent(scene, node)) : undefined;
+        onPresent?.(frame?.id ?? null);
+        return;
+      }
     }
     if (readOnly || !ids.length) return;
     switch (command) {
@@ -226,9 +273,24 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       }
       case "hide": { const hidden = !nodes.every((node) => node.hidden); commit(nodes.map((node) => ({ ...node, hidden }))); break; }
       case "lock": { const locked = !nodes.every((node) => node.locked); commit(nodes.map((node) => ({ ...node, locked })), locked ? [] : ids); break; }
+      case "union": case "subtract": case "intersect": case "exclude": case "flatten": {
+        const combined = combine(scene, index, ids, command);
+        if (combined) commit(combined.nodes, [combined.id]);
+        else notify(command === "flatten" ? "Select shapes to flatten" : "Select two or more shapes to combine");
+        break;
+      }
+      case "component": {
+        const only = ids.length === 1 ? scene.get(ids[0]) : undefined;
+        if (only?.type === "frame" && !only.instanceOf) { commit([makeComponent(only)]); break; }
+        const wrapped = wrapNodes(scene, ids, "frame");
+        if (wrapped) commit([makeComponent({ ...wrapped.nodes[0]!, fill: null, name: "Component" }), ...wrapped.nodes.slice(1)], [wrapped.id]);
+        break;
+      }
+      case "detach": commit(ids.flatMap((id) => detach(scene, index, id))); break;
+      case "edit-path": { const only = scene.get(ids[0]!); if (ids.length === 1 && isPathNode(only)) setPathEdit({ id: only.id, at: null }); break; }
       default: commit(reorder(scene, index, ids, command));
     }
-  }, [live, nodes, scene, index, canvas, readOnly, zoomTo]);
+  }, [live, nodes, scene, index, canvas, readOnly, zoomTo, onPresent, notify]);
 
   const pasteTarget = (clip?: Clipboard) => {
     const only = live.length === 1 ? scene.get(live[0]) : undefined;
@@ -251,13 +313,20 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     const created: CanvasNode[] = [];
     for (const file of files.filter((item) => item.type.startsWith("image/"))) {
       try {
+        if (file.type === "image/svg+xml") {
+          const target = at ? frameAt(at, new Set()) : null;
+          const vectors = svgNodes(await file.text(), file.name, { x: centre.x + created.length * 24, y: centre.y + created.length * 24 }, target, target ? worldOrigin(scene, scene.get(target)!) : { x: 0, y: 0 }, nextZ(index.get(target) ?? []) + created.length);
+          if (vectors) { canvas.commit(vectors); created.push(vectors[0]!); continue; }
+        }
         const image = await addImage(file);
         created.push(imageNode(image, { x: centre.x + created.length * 24, y: centre.y + created.length * 24 }, at !== null));
       } catch (error) {
         notify(error instanceof Error ? error.message : "Could not add the image");
       }
     }
-    if (created.length) { canvas.commit(created); setSelected(created.map((node) => node.id)); setTool("move"); }
+    const images = created.filter((node) => node.type === "image");
+    if (images.length) canvas.commit(images);
+    if (created.length) { setSelected(created.map((node) => node.id)); setTool("move"); }
   };
 
   const imageNode = (image: PlacedImage, centre: Point, dropped: boolean): CanvasNode => {
@@ -301,6 +370,9 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     setTool("move");
   };
 
+  const penTool = usePenTool({ canvas, index, scene, zoom: view.zoom, frameAt, inkOn, onDone: (id) => { setSelected([id]); setTool("move"); } });
+  const pen = penTool.draft;
+
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (editing && !(event.target as Element).closest("textarea")) finishText();
     if ((event.target as Element).closest("[data-canvas-chrome]")) return;
@@ -323,10 +395,35 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       return;
     }
     if (event.button !== 0) return;
+    if (tool === "comment") {
+      const hit = target.closest("[data-node-id]")?.getAttribute("data-node-id") ?? null;
+      onComment?.(world, hit ? pick(hit, true) : null);
+      return;
+    }
+    if (!readOnly && tool === "pen") { if (penTool.down(world, event.shiftKey)) gesture.current = { kind: "pen", start: world }; return; }
+    const anchor = (target as HTMLElement).dataset?.anchor;
+    if (pathEdit && anchor !== undefined && !readOnly) {
+      const node = scene.get(pathEdit.id);
+      if (!isPathNode(node)) { setPathEdit(null); return; }
+      const [at, part] = anchor.split(":") as [string, "point" | "in" | "out"];
+      const origin = worldOrigin(scene, node);
+      const anchors = anchorsOf(node, origin);
+      const index = Number(at);
+      const again = event.timeStamp - lastDown.current.at < 400 && lastDown.current.hit === `anchor:${anchor}`;
+      lastDown.current = { at: event.timeStamp, hit: `anchor:${anchor}` };
+      setPathEdit({ id: node.id, at: index });
+      if (again && part === "point") { canvas.commit([withAnchors(node, origin, toggleSmooth(anchors, index, Boolean(node.closed)))]); return; }
+      const current = anchors[index]!;
+      const mirror = part !== "point" && Math.abs(current.in.x + current.out.x) < 0.5 && Math.abs(current.in.y + current.out.y) < 0.5;
+      gesture.current = { kind: "anchor", at: index, part, start: world, anchors, original: node, world: origin, mirror };
+      setBusy(true);
+      return;
+    }
+    if (pathEdit && !target.closest("[data-anchor]")) setPathEdit(null);
     if (!readOnly && tool !== "move") {
       if (tool === "text") { gesture.current = { kind: "create", type: "text", start: world, parentId: null, node: null }; return; }
       const parentId = frameAt(world, new Set());
-      gesture.current = { kind: "create", type: tool, start: world, parentId, node: null };
+      gesture.current = { kind: "create", type: tool as Exclude<Tool, "move" | "hand" | "pen" | "comment" | "text">, start: world, parentId, node: null };
       return;
     }
     const handle = (target as HTMLElement).dataset?.handle as Handle | undefined;
@@ -384,6 +481,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         if (intersects(box, visible)) targets.push(box);
       }
     }
+    for (const guide of pageGuides ?? []) targets.push(guide.axis === "x" ? { x: guide.at, y: FAR, width: 0, height: 0 } : { x: FAR, y: guide.at, width: 0, height: 0 });
     return targets;
   };
 
@@ -394,6 +492,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (pointers.current.has(event.pointerId)) pointers.current.set(event.pointerId, screen);
     const current = gesture.current;
     if (!current) {
+      if (tool === "pen" && pen) penTool.hover(world);
       if (tool !== "move" || event.pointerType === "touch") return;
       const target = event.target as Element;
       const label = target.closest("[data-frame-label]")?.getAttribute("data-frame-label");
@@ -449,7 +548,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         const snap = snapping ? snapBox(box, snapTargets(moving, parents), threshold, { x: event.shiftKey ? dx !== 0 : true, y: event.shiftKey ? dy !== 0 : true }) : { dx: 0, dy: 0, guides: [] };
         dx = round(current.box.x + dx + snap.dx) - current.box.x;
         dy = round(current.box.y + dy + snap.dy) - current.box.y;
-        setGuides(snap.guides);
+        setGuides(near(snap.guides));
         const extra = current.copiedFrom.length ? pendingCopies.current.filter((node) => !current.originals.some((root) => root.id === node.id)) : [];
         canvas.preview([...extra, ...current.originals.map((node) => ({ ...node, x: node.x + dx, y: node.y + dy }))], { share: true });
         return;
@@ -464,7 +563,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             const handleY = current.handle.includes("n") ? 0 : current.handle.includes("s") ? 2 : -1;
             const snap = snapBox({ x: world.x, y: world.y, width: 0, height: 0 }, snapTargets(exclude, new Set([effectiveParent(scene, node)])), threshold, { x: handleX >= 0, y: handleY >= 0 }, { x: [0], y: [0] });
             pointer = { x: world.x + snap.dx, y: world.y + snap.dy };
-            setGuides(snap.guides);
+            setGuides(near(snap.guides));
           }
           canvas.preview(resizeSingle(current.base, current.baseIndex, node, current.handle, { x: round(pointer.x), y: round(pointer.y) }, event.shiftKey, event.altKey), { share: true });
         } else {
@@ -491,6 +590,21 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
           target = { x: other.x + Math.cos(angle) * length, y: other.y + Math.sin(angle) * length };
         }
         canvas.preview([moveEndpoint(scene, current.original, current.end, { x: round(target.x), y: round(target.y) })], { share: true });
+        return;
+      }
+      case "pen": penTool.pull(world); return;
+      case "anchor": {
+        const dx = world.x - current.start.x;
+        const dy = world.y - current.start.y;
+        const anchors = current.anchors.map((item, at) => {
+          if (at !== current.at) return item;
+          if (current.part === "point") return { ...item, point: { x: round(item.point.x + dx), y: round(item.point.y + dy) } };
+          const moved = { x: item[current.part].x + dx, y: item[current.part].y + dy };
+          const other = current.part === "in" ? "out" : "in";
+          const mirrored = current.mirror && !event.altKey ? { [other]: { x: -moved.x, y: -moved.y } } : {};
+          return { ...item, [current.part]: moved, ...mirrored };
+        });
+        canvas.preview([withAnchors(current.original, current.world, anchors)], { share: true });
         return;
       }
       case "create": {
@@ -552,6 +666,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         pendingCopies.current = [];
         return;
       }
+      case "anchor": {
+        const node = canvas.scene.get(current.original.id);
+        if (node) canvas.commit([node]);
+        return;
+      }
       case "resize": case "rotate": case "endpoint": {
         const ids = current.kind === "resize" ? current.originals.flatMap((node) => [node.id, ...(node.type === "group" ? descendants(scene, node.id, index).map((child) => child.id) : [])]) : [current.original.id];
         canvas.commit(ids.map((id) => canvas.scene.get(id)).filter(isLive));
@@ -589,6 +708,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     const current = live.length === 1 ? chain.findIndex((item) => item.id === live[0]) : -1;
     if (current >= 0 && current < chain.length - 1) { setSelected([chain[current + 1].id]); return true; }
     if (node.type === "text" && !node.locked && live.includes(node.id)) { setEditing({ id: node.id, created: false, original: node }); return true; }
+    if (isPathNode(node) && !node.rotation && live.includes(node.id)) { setPathEdit({ id: node.id, at: null }); return true; }
     return false;
   };
 
@@ -616,6 +736,24 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     const command = event.ctrlKey || event.metaKey;
     const done = () => { event.preventDefault(); event.stopPropagation(); };
     if (key === " " && !space.current) { space.current = true; setPanning(true); done(); return; }
+    if (pen && (key === "enter" || key === "escape")) { done(); penTool.finish(false); return; }
+    if (pen && key === "backspace") { done(); penTool.undo(); return; }
+    if (pathEdit && (key === "enter" || key === "escape")) { done(); setPathEdit(null); return; }
+    if (pathEdit && pathEdit.at !== null && (key === "delete" || key === "backspace") && !readOnly) {
+      done();
+      const node = scene.get(pathEdit.id);
+      if (!isPathNode(node) || (node.points?.length ?? 0) <= 4) return;
+      const origin = worldOrigin(scene, node);
+      canvas.commit([withAnchors({ ...node, breaks: undefined }, origin, anchorsOf(node, origin).filter((_, at) => at !== pathEdit.at))]);
+      setPathEdit({ id: node.id, at: null });
+      return;
+    }
+    if (command && event.altKey && ["u", "s", "i", "x"].includes(key)) { done(); run(({ u: "union", s: "subtract", i: "intersect", x: "exclude" } as const)[key as "u" | "s" | "i" | "x"]); return; }
+    if (command && event.altKey && key === "k") { done(); run("component"); return; }
+    if (command && event.altKey && key === "b") { done(); run("detach"); return; }
+    if (command && event.altKey && key === "enter") { done(); run("present"); return; }
+    if (command && key === "e" && !event.shiftKey) { done(); run("flatten"); return; }
+    if (!command && event.shiftKey && key === "r") { done(); setRulers((on) => !on); return; }
     if (command && key === "z") { done(); if (event.shiftKey) canvas.redo(); else canvas.undo(); return; }
     if (command && key === "y") { done(); canvas.redo(); return; }
     if (command && key === "a") { done(); run("select-all"); return; }
@@ -660,6 +798,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       done();
       const node = scene.get(live[0])!;
       if (node.type === "text") setEditing({ id: node.id, created: false, original: node });
+      else if (isPathNode(node) && !node.rotation) setPathEdit({ id: node.id, at: null });
       else if (index.get(node.id)?.length) setSelected(index.get(node.id)!.map((child) => child.id));
       return;
     }
@@ -691,6 +830,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     event.preventDefault();
     if (clip) { clipboard.current = clip; paste(clip); return; }
     if (clipboard.current && !text) { paste(clipboard.current); return; }
+    if (/^\s*(<\?xml[^>]*>\s*)?<svg[\s>]/i.test(text)) {
+      const parent = pasteTarget();
+      const vectors = svgNodes(text, "Vector", toWorld(view, { x: size.width / 2, y: size.height / 2 }), parent, parent ? worldOrigin(scene, scene.get(parent)!) : { x: 0, y: 0 }, nextZ(index.get(parent) ?? []));
+      if (vectors) { canvas.commit(vectors); setSelected([vectors[0]!.id]); return; }
+    }
     if (text.trim()) {
       const world = toWorld(view, { x: size.width / 2, y: size.height / 2 });
       const parent = pasteTarget();
@@ -710,6 +854,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     event.clipboardData.setData("text/plain", JSON.stringify(clip));
     if (cut && !readOnly) run("delete");
   };
+
+  useEffect(() => {
+    if (tool !== "pen" && pen) penTool.finish(false);
+    if (tool !== "move") setPathEdit(null);
+  }, [tool]);
 
   const listeners = useRef({ onKeyDown, onKeyUp, onPaste, onCopy });
   listeners.current = { onKeyDown, onKeyUp, onPaste, onCopy };
@@ -738,9 +887,17 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   }, []);
 
   const editingNode = editing ? scene.get(editing.id) : undefined;
-  const options = useMemo<RenderOptions>(() => ({ index, images, interactive: true, editing: editing?.id ?? null, prefix: "c-" }), [index, images, editing?.id]);
-  const selectionApi: SelectionApi = { ids: live, nodes, select, zoomTo: (ids) => setPendingZoom([...ids]), run };
-  const cursor = panning ? (gesture.current?.kind === "pan" ? "grabbing" : "grab") : tool === "hand" ? "grab" : tool === "move" ? "default" : tool === "text" ? "text" : "crosshair";
+  const rendered = useRef<Scene | null>(null);
+  useEffect(() => { rendered.current = scene; });
+  const options = useMemo<RenderOptions>(() => {
+    const before = rendered.current;
+    return { index, images, interactive: true, editing: editing?.id ?? null, prefix: "c-", ...(before ? { dirty: changedSubtrees(before, scene) } : {}) };
+  }, [index, images, editing?.id]);
+  const selectionApi: SelectionApi = { ids: live, nodes, select, zoomTo: (ids) => setPendingZoom([...ids]), run, centre: () => toWorld(view, { x: size.width / 2, y: size.height / 2 }) };
+  const cursor = panning ? (gesture.current?.kind === "pan" ? "grabbing" : "grab") : tool === "hand" ? "grab" : tool === "move" ? "default" : tool === "text" ? "text" : tool === "comment" ? "copy" : "crosshair";
+  const showRulers = rulers && Boolean(onGuides) && !narrow;
+  const stageCovered = Math.max(0, coveredRight - (shown.inspector && !compact ? INSPECTOR_WIDTH : 0));
+  const editedPath = pathEdit ? scene.get(pathEdit.id) : undefined;
 
   return (
     <div ref={root} className="relative flex min-h-0 min-w-0 flex-1">
@@ -761,8 +918,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             <SceneLayer options={options} />
           </g>
           <Overlay scene={scene} index={index} view={view} selected={nodes} hover={hover ? scene.get(hover) ?? null : null} guides={guides} marquee={marquee}
-            cursors={cursors} editing={editing?.id ?? null} readOnly={readOnly} busy={busy} />
+            cursors={cursors} editing={editing?.id ?? null} readOnly={readOnly} busy={busy} remoteSelections={remoteSelections} showPrototype={showPrototype}
+            pathEdit={isPathNode(editedPath) ? { node: editedPath, at: pathEdit!.at } : null} pen={pen ? { anchors: pen.anchors, hover: penTool.hovered } : null} />
         </svg>
+        {stageLayer?.(view)}
+        {showRulers && <Rulers view={view} size={size} guides={pageGuides ?? []} onGuides={(next) => onGuides?.(next)} readOnly={readOnly} selection={contentBox(live)} />}
         {editing && editingNode && (
           <TextEditor node={editingNode} origin={toScreen(view, worldOrigin(scene, editingNode))} zoom={view.zoom}
             onChange={(text) => canvas.preview([{ ...editingNode, text, ...(editingNode.autoWidth ? { width: layoutText({ ...editingNode, text }, measureText).width } : {}) }])}
@@ -778,39 +938,16 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             imageMenu={imageMenu} onImageMenu={setImageMenu}
             imagePicker={imagePicker ? (close) => imagePicker((image) => { placePicked(image); close(); }, close) : undefined}
             onUpload={(files) => void placeImages(files, null)}
-            narrow={narrow && !readOnly} panels={shown} onPanels={(next) => setPanels(compact ? oneOverlay(shown, next) : next)} />
-          <ZoomControls zoom={view.zoom} onZoom={(factor) => zoomAt(factor, { x: size.width / 2, y: size.height / 2 })}
+            narrow={narrow && !readOnly} inset={stageCovered} panels={shown} onPanels={(next) => setPanels(compact ? oneOverlay(shown, next) : next)} />
+          <ZoomControls offset={showRulers ? RULER : 0} inset={stageCovered} zoom={view.zoom} onZoom={(factor) => zoomAt(factor, { x: size.width / 2, y: size.height / 2 })}
             onFit={() => zoomTo()} onSelection={live.length ? () => zoomTo(live) : undefined} onActual={() => zoomAt(1 / view.zoom, { x: size.width / 2, y: size.height / 2 })} />
         </div>
       </div>
       {shown.inspector && (
-        <aside aria-label="Design" className={cn("flex w-64 shrink-0 flex-col border-l border-hairline/40 bg-panel", compact && "absolute inset-x-0 bottom-0 z-20 max-h-[55%] w-auto border-l-0 border-t pb-16 origin-overlay-in")}>
+        <aside aria-label="Design" style={compact ? undefined : { width: INSPECTOR_WIDTH }} className={cn("flex shrink-0 flex-col border-l border-hairline/40 bg-panel", compact && "absolute inset-x-0 bottom-0 z-20 max-h-[55%] w-auto border-l-0 border-t pb-16 origin-overlay-in")}>
           {inspector(selectionApi)}
         </aside>
       )}
     </div>
-  );
-}
-
-function TextEditor({ node, origin, zoom, onChange, onDone }: { node: CanvasNode; origin: Point; zoom: number; onChange(text: string): void; onDone(): void }) {
-  const area = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => { area.current?.focus(); area.current?.select(); }, []);
-  const layout = layoutText(node, measureText);
-  const size = (node.fontSize ?? 16) * zoom;
-  return (
-    <textarea ref={area} aria-label="Text" value={node.text ?? ""} spellCheck={false}
-      onChange={(event) => onChange(event.target.value)}
-      onBlur={onDone}
-      onKeyDown={(event) => {
-        event.stopPropagation();
-        if (event.key === "Escape" || (event.key === "Enter" && (event.metaKey || event.ctrlKey))) { event.preventDefault(); onDone(); }
-      }}
-      className="absolute z-10 m-0 resize-none overflow-hidden border-0 bg-transparent p-0 outline outline-1 outline-accent"
-      style={{
-        left: origin.x, top: origin.y, width: Math.max(layout.width, node.fontSize ?? 16) * zoom + (node.autoWidth ? size : 0), height: Math.max(layout.height, layout.lineHeight) * zoom,
-        font: `${node.fontWeight ?? 400} ${size}px/${layout.lineHeight * zoom}px ${fontStack(node)}`, color: node.fill ?? "inherit",
-        textAlign: node.align ?? "left", whiteSpace: node.autoWidth ? "pre" : "pre-wrap", transform: node.rotation ? `rotate(${node.rotation}deg)` : undefined,
-        transformOrigin: `${(node.width * zoom) / 2}px ${(node.height * zoom) / 2}px`, caretColor: "var(--color-accent)",
-      }} />
   );
 }

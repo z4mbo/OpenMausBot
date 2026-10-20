@@ -103,7 +103,7 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
       <div className="mb-3 flex flex-col gap-2 empty:hidden">
         {!href && <Notice tone="danger">{project.repoUrl} is not a GitHub repository address.</Notice>}
         {project.githubRepoState === "error" && project.githubRepoError && <Notice tone="danger">{project.githubRepoError}</Notice>}
-        {project.githubRepoState === "awaiting_connection" && <div className="flex flex-wrap items-center gap-2"><Notice>A workspace admin connects GitHub before this repository can sync.</Notice>
+        {project.githubRepoState === "awaiting_connection" && <div className="flex flex-wrap items-center gap-2"><Notice>GitHub isn't set up for this workspace yet. An owner or admin connects it once in Settings &gt; Integrations, and the repository is created then.</Notice>
           {isAdmin && project.teamId && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void action.run(async () => {
             await originGitHub.connectWorkspace(project.teamId!, projectId);
             setMessage("Finish connecting GitHub in your browser, then come back here.");

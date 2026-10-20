@@ -37,9 +37,10 @@ try {
     const page = await open(width, theme);
     await page.getByRole("heading", { name: "Pulse" }).waitFor();
     await page.getByRole("region", { name: "Build" }).waitFor();
-    assert.match(await page.getByRole("list", { name: "Stage: Grow" }).innerText(), /Idea[\s\S]*3 ideas[\s\S]*Grow[\s\S]*26 leads/);
+    assert.match(await page.getByRole("list", { name: "Journey: Sell" }).innerText(), /Plan[\s\S]*No Brief · 1 canvas[\s\S]*Sell[\s\S]*26 leads/);
+    await page.getByRole("region", { name: "Next step" }).getByRole("heading", { name: "Posts live → follow up leads in Sales" }).waitFor();
     assert.match(await stat(page, "Launch", "Pages live"), /^2/);
-    assert.match(await stat(page, "Grow", "Conversion"), /^15%/);
+    assert.match(await stat(page, "Sell", "Conversion"), /^15%/);
     assert.match(await page.getByRole("region", { name: "Team" }).innerText(), /\$71\.40 of \$120(?!\.)/);
     await page.getByRole("img", { name: /Page views per day: .* over 7 days/ }).waitFor();
     await page.getByLabel("Needs attention").getByRole("button", { name: "2 PRs waiting" }).waitFor();
@@ -49,7 +50,7 @@ try {
     await page.getByRole("img", { name: /Issues done per day: .* over 30 days/ }).waitFor();
     assert.match(await stat(page, "Build", "Done"), /^22/);
     await capture(page, `project-30d-${tag}`);
-    evidence.cases.push({ tag, step: "project pulse: stage strip at Grow, Build, Launch, Grow and Team tiles from real Convex data, 7d and 30d ranges, attention chips" });
+    evidence.cases.push({ tag, step: "project pulse: journey strip at Sell with its next step, Build, Launch, Sell and Team tiles from real Convex data, 7d and 30d ranges, attention chips" });
 
     if (width === 1280 && theme === "dark") {
       const bars = page.getByRole("img", { name: /Page views per day/ });
@@ -61,20 +62,21 @@ try {
 
       await page.getByLabel("Needs attention").getByRole("button", { name: "2 PRs waiting" }).click();
       assert.equal((await nav(page)).rocket, "repo");
-      await page.getByRole("region", { name: "Grow" }).getByRole("button", { name: "Pipeline" }).click();
+      await page.getByRole("region", { name: "Sell" }).getByRole("button", { name: "Sales" }).click();
       assert.equal((await nav(page)).rocket, "pipeline");
-      await page.getByRole("list", { name: /^Stage:/ }).getByRole("button", { name: /Launch/ }).click();
+      await page.getByRole("list", { name: /^Journey:/ }).getByRole("button", { name: /Launch/ }).click();
       assert.equal((await nav(page)).rocket, "broadcast");
-      evidence.cases.push({ tag, step: "attention chips, tile links and stage buttons open Repo, Pipeline and Broadcast" });
+      evidence.cases.push({ tag, step: "attention chips, tile links and journey buttons open Repo, Sales and Broadcast" });
     }
     await page.close();
 
     const notes = await open(width, theme, { project: "notes" });
-    await notes.getByRole("list", { name: "Stage: Idea" }).waitFor();
+    await notes.getByRole("list", { name: "Journey: Plan" }).waitFor();
+    await notes.getByRole("region", { name: "Next step" }).getByRole("heading", { name: "Write the Brief" }).waitFor();
     await notes.getByText("No issues outside Draft yet.").waitFor();
     await notes.getByText("No agent has run in this project yet.").waitFor();
     await capture(notes, `idea-${tag}`);
-    evidence.cases.push({ tag, step: "a project with only an idea sits at Idea and each tile says what moves it on" });
+    evidence.cases.push({ tag, step: "a project with only an idea sits at Plan, its next step is the Brief, and each tile says what moves it on" });
     await notes.close();
 
     const org = await open(width, theme, { view: "workspace" });

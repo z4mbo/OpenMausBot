@@ -31,12 +31,13 @@ Set `OMB_VERIFY_PLAYWRIGHT` to Playwright's `index.mjs` when it is not
 resolvable from the repository root. The check covers 1280 px dark and light
 and 375 px dark:
 
-- the project Pulse at 7 and 30 days: the stage strip at Grow, the Build,
-  Launch, Grow and Team tiles with their numbers, daily bars and their hover
-  readout, the budget meter and the attention chips;
-- attention chips, tile links and stage buttons open Repo, Pipeline and
+- the project Pulse at 7 and 30 days: the journey strip at Sell with its next
+  step, the Build, Launch, Sell and Team tiles with their numbers, daily bars
+  and their hover readout, the budget meter and the attention chips;
+- attention chips, tile links and journey buttons open Repo, Sales and
   Broadcast;
-- Notes sits at Idea and each tile says what moves it on;
+- Notes sits at Plan, its next step is the Brief, and each tile says what
+  moves it on;
 - the workspace Pulse on the Org page lists one row per project, Apollo first
   because it has the most waiting, and a row opens that project's Pulse.
 

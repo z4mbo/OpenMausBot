@@ -3,7 +3,7 @@ import { Minus, Plus } from "lucide-react";
 import { LEAD_FIELDS, isLinkAddress, leadForm, type CanvasNode, type LeadField } from "../../../../shared/canvas-scene";
 import { DEFAULT_LEAD_FORM, LEAD_FIELD_LABELS, leadFormHeight } from "../../../../shared/canvas-page";
 import { cn } from "@/lib/cn";
-import { ColorField, Section, field, iconToggle } from "./Inspector";
+import { ColorField, Section, field, iconToggle } from "./controls";
 
 type Update = (patch: Partial<CanvasNode>) => void;
 

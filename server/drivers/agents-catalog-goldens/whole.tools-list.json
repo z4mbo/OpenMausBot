@@ -1933,6 +1933,10 @@
             "maxLength": 1000,
             "description": "Optional extra direction for the agent."
           },
+          "design": {
+            "type": "boolean",
+            "description": "Design work: the agent designs it on the Canvas and submits frames instead of a pull request."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,
@@ -2119,7 +2123,7 @@
     },
     {
       "name": "origin_vault_list",
-      "description": "List an Origin project's vault: titles, kinds, URLs and usernames. Values are encrypted with the person's passphrase and never readable here; ask for one with request_credential. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's vault: titles, kinds, URLs, usernames, and the values members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2250,7 +2254,7 @@
     },
     {
       "name": "origin_canvas",
-      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images and their layout, editable with origin_canvas_edit. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2264,6 +2268,10 @@
             "type": "string",
             "maxLength": 100,
             "description": "Read only this node and its children."
+          },
+          "selection": {
+            "type": "boolean",
+            "description": "Read only what people have selected right now."
           },
           "project": {
             "type": "string",
@@ -2281,7 +2289,7 @@
     },
     {
       "name": "origin_canvas_edit",
-      "description": "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), link (an https or mailto address it opens on a published page), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both}; children of a layout frame need no x, y, and grow:true shares its free space. leadForm {fields: [name, email, phone, message], button, accent} turns an empty frame into a signup form on the published page. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style. Acts on your team's Origin project unless you pass project.",
+      "description": "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), link (an https or mailto address it opens on a published page), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both, wrap}; children of a layout frame need no x, y; grow:true shares its free space, absolute:true opts out, minW/maxW/minH/maxH bound it. Outside layout, constraints {h: left|right|center|stretch|scale, v: top|bottom|center|stretch|scale} follow a resized parent. component {set, props} makes a frame a component (variants share set); {op:\"instance\",component,parent?,key?,set} places a copy whose layers you update by id. fillStyle (primary, secondary, background, text, neutral-N) and textStyle (display, h1, h2, h3, body-lg, body, small, caption) bind to the brand kit; shadow {x,y,blur,color} and blur are allowed but keep designs flat. prototype {to: frame} links a click in Present mode. Paths take points with curves [inDx,inDy,outDx,outDy per point]. leadForm {fields: [name, email, phone, message], button, accent} turns an empty frame into a signup form on the published page. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2304,6 +2312,16 @@
               "type": "object"
             }
           },
+          "page": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Page id for new top-level nodes; default the first page."
+          },
+          "save_version": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Save a named version of the canvas before these changes."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,
@@ -2312,6 +2330,133 @@
         },
         "required": [
           "ops"
+        ]
+      }
+    },
+    {
+      "name": "origin_canvas_screenshot",
+      "description": "See a canvas frame or node (or the canvas's first page) as a PNG, to check your own design work. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "canvas": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Canvas name or id; optional when the project has one."
+          },
+          "node": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "The frame or node id (or a frame's name); omit for the whole first page."
+          },
+          "scale": {
+            "type": "number",
+            "minimum": 0.25,
+            "maximum": 2
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_canvas_comment",
+      "description": "Read a canvas's comment threads, or comment as yourself: pinned to a node, or as a reply. Answer a comment that mentions you here. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "canvas": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Canvas name or id; optional when the project has one."
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4000,
+            "description": "The comment; omit to read the threads."
+          },
+          "node": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Pin the comment to this node."
+          },
+          "reply_to": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "The thread's comment id."
+          },
+          "include_resolved": {
+            "type": "boolean"
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      }
+    },
+    {
+      "name": "origin_design_submit",
+      "description": "Link the canvas frames that design an Origin issue to it: they show as Design on the issue, the issue key shows on each frame, your rationale is pinned on the canvas, and in review the project's Chief is asked to review. A Chief approves with status approved. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "frames": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "description": "Frame ids or names."
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 3000,
+            "description": "Why the design looks the way it does."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "review",
+              "approved"
+            ],
+            "description": "Default review."
+          },
+          "canvas": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Canvas name or id; optional when the project has one."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "issue_id",
+          "frames"
         ]
       }
     },
@@ -2425,7 +2570,7 @@
     },
     {
       "name": "origin_studio_generate",
-      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live. count makes several variations. Images and audio wait for the result (up to 40 s); video returns at once. Keep the good ones with origin_studio_save_asset. Acts on your team's Origin project unless you pass project.",
+      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. Images and audio wait for the result (up to 40 s); video returns at once. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2438,7 +2583,7 @@
               "audio",
               "edit"
             ],
-            "description": "edit changes or upscales an existing image asset. Default image."
+            "description": "edit changes, upscales or cuts out an image. Default image."
           },
           "prompt": {
             "type": "string",
@@ -2460,15 +2605,40 @@
               "fal-ai/veo3.1/image-to-video",
               "fal-ai/kling-video/v3/pro/image-to-video",
               "bytedance/seedance-2.5/image-to-video",
+              "fal-ai/kling-video/ai-avatar/v2/pro",
+              "fal-ai/sync-lipsync/v2",
+              "fal-ai/veo3.1/fast/extend-video",
+              "fal-ai/topaz/upscale/video",
+              "fal-ai/ffmpeg-api/merge-audio-video",
+              "fal-ai/ffmpeg-api/merge-videos",
               "fal-ai/elevenlabs/tts/eleven-v3",
               "fal-ai/elevenlabs/music",
               "fal-ai/elevenlabs/sound-effects/v2",
               "fal-ai/nano-banana-pro/edit",
+              "fal-ai/bria/background/remove",
               "fal-ai/seedvr/upscale/image",
               "fal-ai/topaz/upscale/image",
               "custom"
             ],
-            "description": "Default: the mode's first model. Models ending in image-to-video, edit or upscale need source_asset_id."
+            "description": "Default: the mode's first model that takes as many sources as you pass."
+          },
+          "sources": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "maxLength": 70
+            },
+            "description": "What the model starts from, in order (image, video or audio): asset ids from origin_list_assets, or generation ids with an optional :index."
+          },
+          "reference_asset_ids": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "description": "Image assets to keep a character, product or style consistent (Nano Banana Pro, FLUX.2 Pro)."
           },
           "aspect_ratio": {
             "type": "string",
@@ -2480,10 +2650,46 @@
             "maxLength": 10,
             "description": "Video or audio length, such as 5, 8s or 30s."
           },
+          "resolution": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Such as 2K, 1080p."
+          },
           "voice": {
             "type": "string",
             "maxLength": 40,
             "description": "ElevenLabs voice name, such as Rachel or Brian."
+          },
+          "camera_motion": {
+            "type": "string",
+            "enum": [
+              "static",
+              "dolly-in",
+              "dolly-out",
+              "pan-left",
+              "pan-right",
+              "orbit",
+              "crane-up",
+              "handheld",
+              "fpv",
+              "zoom-in"
+            ],
+            "description": "Video camera move."
+          },
+          "negative_prompt": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "sound": {
+            "type": "boolean",
+            "description": "Video soundtrack where the model makes one. Default true."
+          },
+          "enhance": {
+            "type": "boolean",
+            "description": "Rewrite the prompt with a cheap model first."
           },
           "count": {
             "type": "integer",
@@ -2493,7 +2699,7 @@
           "source_asset_id": {
             "type": "string",
             "maxLength": 64,
-            "description": "An image asset id from origin_list_assets to start from."
+            "description": "Same as one sources entry."
           },
           "endpoint": {
             "type": "string",
@@ -2559,7 +2765,7 @@
     },
     {
       "name": "origin_studio_save_asset",
-      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index), and with broadcast true also pick it for Broadcast posts. Returns the asset ids. Acts on your team's Origin project unless you pass project.",
+      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Broadcast posts. Returns the asset ids. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2588,6 +2794,78 @@
         },
         "required": [
           "generation_id"
+        ]
+      }
+    },
+    {
+      "name": "origin_studio_workflow_list",
+      "description": "List an Origin project's Studio workflows (node graphs that chain fal models, such as product shot to music reel) and the built-in templates, with each one's input nodes and the latest runs and their outputs. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "workflow_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Show only this workflow or template and its runs."
+          },
+          "runs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Recent runs to show. Default 3."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_studio_workflow_run",
+      "description": "Run a Studio workflow or template on the person's fal key; the team watches each step live and Output nodes save to Assets (folder Studio). Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "workflow_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "From origin_studio_workflow_list, such as template:product-reel."
+          },
+          "inputs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 8000
+            },
+            "description": "Input node id to prompt text, or to an asset id for a file input."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "wait": {
+            "type": "boolean",
+            "description": "Wait up to 40 s for the run. Default false."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "workflow_id"
         ]
       }
     },
@@ -2713,7 +2991,7 @@
     },
     {
       "name": "origin_pipeline_list_leads",
-      "description": "List an Origin project's sales pipeline: totals per stage and its leads (id, stage, contact details, value, owner, next step), filtered by stage or a search; or read one lead with its notes and timeline (emails, texts, calls with summaries) with lead_id. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Sales contacts: totals per stage and its leads (id, stage, contact details, value, owner, next step, sources), filtered by stage or a search; or read one lead with its notes, deals and timeline (emails, texts, calls with summaries) with lead_id. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2945,7 +3223,7 @@
     },
     {
       "name": "origin_pipeline_contact",
-      "description": "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Unless the project's admin turned on auto-send, nothing goes out until a person approves your draft in the app; say so instead of retrying. AI calls are summarised into the lead's timeline when they end. Match the brand voice. Acts on your team's Origin project unless you pass project.",
+      "description": "Reach or answer a lead from an Origin project's Sales with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Leave channel out to reply on the one they last wrote on. Unless the project's admin turned on auto-send, nothing goes out until a person approves your draft in the Sales inbox; say so instead of retrying. AI calls are summarised into the lead's timeline when they end. Match the brand voice. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2962,7 +3240,8 @@
               "sms",
               "whatsapp",
               "ai_call"
-            ]
+            ],
+            "description": "Default: the channel they last wrote on."
           },
           "subject": {
             "type": "string",
@@ -2986,9 +3265,137 @@
           }
         },
         "required": [
-          "lead_id",
-          "channel"
+          "lead_id"
         ]
+      }
+    },
+    {
+      "name": "origin_pipeline_conversations",
+      "description": "Read an Origin project's Sales inbox: every contact's conversation, newest first, with unread replies, agent drafts waiting for approval and won deals waiting for confirmation; or one contact's emails, texts, WhatsApp messages and call summaries in order with lead_id. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lead_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Read this contact's conversation."
+          },
+          "unread_only": {
+            "type": "boolean",
+            "description": "Only conversations that need someone."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_pipeline_deal",
+      "description": "List, open or change the deals in an Origin project's Sales: value and currency, stage, expected close date, simple line items and notes. action won only asks a person to confirm the sale (with the amount and reason); nothing is won until they do. action lost closes it with a reason. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "list",
+              "save",
+              "won",
+              "lost"
+            ],
+            "description": "Default save."
+          },
+          "lead_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "The contact: opens a deal, or lists theirs."
+          },
+          "deal_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "The deal to change, win or lose."
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Ignored when line_items are given: their total is the value."
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 3,
+            "description": "Default the project's."
+          },
+          "stage": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "An open stage; use won or lost to close."
+          },
+          "close_date": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Expected close, YYYY-MM-DD."
+          },
+          "line_items": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "quantity": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "unit_price": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "name",
+                "unit_price"
+              ]
+            }
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "won only: what the customer agreed to pay."
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "won or lost: why."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
       }
     },
     {

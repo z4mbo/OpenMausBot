@@ -296,29 +296,32 @@ function GitHubConnectionCard({ project, projectId, isAdmin }: { project: CloudP
         {!teamId ? <Notice>This project is not in a shared workspace yet.</Notice> : workspace === null ? <Loading label="Reading GitHub connection" variant="inline" /> : (
           <>
             <p className="text-ink-secondary">
-              {workspace.login ? <>Workspace connected as <strong className="text-ink">@{workspace.login}</strong>.</> : "This workspace has not connected GitHub."}
+              {workspace.shared
+                ? <>Workspace GitHub: <strong className="text-ink">@{workspace.shared.accountLogin}</strong>, shared by {workspace.shared.sharedByName}. Every member works through it.</>
+                : workspace.login ? <>Connected as <strong className="text-ink">@{workspace.login}</strong> on this computer.</> : "GitHub isn't set up for this workspace yet."}
             </p>
-            {!workspace.configured && (workspace.canSetup
+            {workspace.sharedStale && <Notice>The admin who connected GitHub is no longer an admin of this workspace, so it stopped working. An owner or admin reconnects it.</Notice>}
+            {!workspace.configured && !workspace.shared && (workspace.canSetup
               ? <Notice>Create the GitHub App once for this server; GitHub opens in your browser.</Notice>
-              : <Notice>A server administrator has not set up the GitHub App yet.</Notice>)}
+              : !isAdmin && <Notice>An owner or admin connects GitHub once in Settings &gt; Integrations; then every member can use it.</Notice>)}
+            {workspace.shareError && <Notice tone="danger">{workspace.shareError}</Notice>}
             {project.githubTaskMode === "pull_request" && workspace.prPermissionNotice && <Notice>{workspace.prPermissionNotice}</Notice>}
-            {isAdmin && (
-              <div className="flex flex-wrap gap-2">
-                {!workspace.configured && workspace.canSetup && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.setupApp(teamId), "Could not start the App setup", "Finish creating the App in your browser, then come back here.")}>Create GitHub App</button>}
-                {workspace.configured && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.connectWorkspace(teamId, projectId), "Could not connect GitHub", "Finish connecting in your browser, then come back here.")}>{workspace.login ? "Reconnect GitHub" : "Connect GitHub"}</button>}
-                {workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(() => originGitHub.disconnectWorkspace(teamId), "Could not disconnect GitHub", "GitHub disconnected from this workspace")}>Disconnect</button>}
-                {!project.repoUrl && workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(async () => {
-                  const result = await originGitHub.createRepository(teamId, projectId);
-                  if (result.state === "error") throw new Error(result.error ?? "Repository creation failed");
-                }, "Could not create the repository", "Creating a private repository for this project")}>Create repository</button>}
-              </div>
-            )}
+            <div className="flex flex-wrap gap-2">
+              {isAdmin && !workspace.configured && workspace.canSetup && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.setupApp(teamId), "Could not start the App setup", "Finish creating the App in your browser, then come back here.")}>Create GitHub App</button>}
+              {isAdmin && workspace.localApp && <button type="button" className={workspace.shared ? ghostButton : primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.connectWorkspace(teamId, projectId), "Could not connect GitHub", "Finish connecting in your browser, then come back here.")}>{workspace.login ? "Reconnect GitHub" : "Connect GitHub"}</button>}
+              {isAdmin && workspace.canShare && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.shareWorkspace(teamId), "Could not share GitHub with the workspace", "Every member of the workspace can now use GitHub")}>Share with the workspace</button>}
+              {isAdmin && workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(() => originGitHub.disconnectWorkspace(teamId), "Could not disconnect GitHub", "GitHub disconnected from this workspace")}>Disconnect</button>}
+              {!project.repoUrl && project.memberRole !== "viewer" && workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(async () => {
+                const result = await originGitHub.createRepository(teamId, projectId);
+                if (result.state === "error") throw new Error(result.error ?? "Repository creation failed");
+              }, "Could not create the repository", `Creating a ${project.githubRepoVisibility === "public" ? "public" : "private"} repository for this project`)}>Create repository</button>}
+            </div>
           </>
         )}
         {project.repoUrl && (
           <form onSubmit={saveToken} className="flex flex-col gap-2 border-t border-hairline/30 pt-3">
             <p className="text-ink-secondary">
-              {connection ? <>This project uses {connection.source === "project" ? "a personal access token of" : "the workspace connection of"} <strong className="text-ink">@{connection.login}</strong>.</> : "This project has no GitHub access of its own."}
+              {connection ? <>This project uses {connection.source === "project" ? "a personal access token of" : connection.source === "shared" ? "the workspace's shared GitHub," : "the workspace connection of"} <strong className="text-ink">@{connection.login}</strong>.</> : "This project has no GitHub access of its own."}
             </p>
             {isAdmin && (
               <div className="flex flex-wrap gap-2">

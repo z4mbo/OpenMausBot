@@ -119,8 +119,9 @@ export const createAsset = mutation({
     contentType: v.optional(v.string()),
     size: v.optional(v.number()),
     notes: v.optional(v.string()),
+    folder: v.optional(v.string()),
   },
-  returns: v.null(),
+  returns: v.id("designAssets"),
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     if (!args.url && !args.storageId) throw new Error("Asset file or URL required");
@@ -132,7 +133,7 @@ export const createAsset = mutation({
       await admitStorageReference(ctx, args.storageId, await requireUser(ctx, args.sessionToken), { kind: "project", projectId: args.projectId });
     }
     const now = Date.now();
-    await ctx.db.insert("designAssets", {
+    const assetId = await ctx.db.insert("designAssets", {
       projectId: args.projectId,
       type: args.type,
       name: args.name.trim(),
@@ -141,11 +142,12 @@ export const createAsset = mutation({
       contentType: args.contentType,
       size: args.size,
       notes: args.notes?.trim() || undefined,
+      folder: args.folder?.trim().slice(0, 60) || undefined,
       createdAt: now,
       updatedAt: now,
     });
     await touchProject(ctx, args.projectId);
-    return null;
+    return assetId;
   },
 });
 

@@ -48,21 +48,50 @@ describe("Studio generations", () => {
     expect(done.error).toBeUndefined();
   });
 
-  test("an output saved as an asset can be picked for Broadcast", async () => {
+  test("a finished output lands in Assets under Studio at once and can be picked for Broadcast", async () => {
     const f = await fixture();
     const generationId = await f.create(f.owner);
     await f.t.mutation(api.studio.update, { sessionToken: f.owner, projectId: f.projectId, generationId, status: "done", outputs: [OUTPUT] });
-    await expect(f.t.mutation(api.studio.useInBroadcast, { sessionToken: f.owner, projectId: f.projectId, generationId, index: 0, picked: true })).rejects.toThrow(/Save this output/);
-    const assetId = await f.t.mutation(api.studio.saveAsset, { sessionToken: f.member, projectId: f.projectId, generationId, index: 0, name: "poster.png" });
+    const done = await f.t.query(api.studio.get, { sessionToken: f.owner, projectId: f.projectId, generationId });
+    const assetId = done.saved[0]!.assetId;
     expect(await f.t.mutation(api.studio.saveAsset, { sessionToken: f.owner, projectId: f.projectId, generationId, index: 0, name: "again.png" })).toBe(assetId);
     const design = await f.t.query(api.design.list, { sessionToken: f.owner, projectId: f.projectId });
-    expect(design.assets).toEqual([expect.objectContaining({ _id: assetId, type: "image", name: "poster.png", url: OUTPUT.url, contentType: "image/png" })]);
+    expect(design.assets).toEqual([expect.objectContaining({
+      _id: assetId, type: "image", name: "launch poster.png", url: OUTPUT.url, contentType: "image/png", folder: "Studio",
+      studio: { generationId, model: "fal-ai/nano-banana-pro", modelLabel: "Nano Banana Pro", prompt: "launch poster" },
+    })]);
     await f.t.mutation(api.studio.useInBroadcast, { sessionToken: f.member, projectId: f.projectId, generationId, index: 0, picked: true });
     expect(await f.t.query(api.studio.forBroadcast, { sessionToken: f.owner, projectId: f.projectId })).toEqual([
       expect.objectContaining({ generationId, assetId, kind: "image", prompt: "launch poster", url: OUTPUT.url }),
     ]);
     await f.t.mutation(api.studio.useInBroadcast, { sessionToken: f.member, projectId: f.projectId, generationId, index: 0, picked: false });
     expect(await f.t.query(api.studio.forBroadcast, { sessionToken: f.owner, projectId: f.projectId })).toEqual([]);
+  });
+
+  test("the app swaps an output's link for its uploaded copy", async () => {
+    const f = await fixture();
+    const generationId = await f.create(f.owner);
+    await f.t.mutation(api.studio.update, { sessionToken: f.owner, projectId: f.projectId, generationId, status: "done", outputs: [{ ...OUTPUT, contentType: undefined }] });
+    const storageId = await f.t.run(async (ctx) => {
+      const id = await ctx.storage.store(new Blob([new Uint8Array([1, 2, 3])], { type: "image/webp" }));
+      await ctx.db.insert("storageAdmissions", { storageId: id, scopeKey: `project:${f.projectId}`, scope: { kind: "project", projectId: f.projectId }, createdAt: 1 });
+      return id;
+    });
+    const assetId = await f.t.mutation(api.studio.storeFile, { sessionToken: f.owner, projectId: f.projectId, generationId, index: 0, storageId, contentType: "image/webp", size: 3 });
+    const asset = await f.t.run((ctx) => ctx.db.get(assetId!));
+    expect(asset).toMatchObject({ storageId, contentType: "image/webp", size: 3, name: "launch poster.webp", folder: "Studio" });
+    expect(asset!.url).toBeUndefined();
+  });
+
+  test("a workflow step stays out of the canvas and Assets until an Output saves it", async () => {
+    const f = await fixture();
+    const runId = await f.t.mutation(api.studioWorkflows.startRun, { sessionToken: f.owner, projectId: f.projectId, name: "Reel", graph: { nodes: [{ id: "m1", type: "model", x: 0, y: 0, params: { model: "fal-ai/flux/schnell" } }], edges: [] } });
+    const generationId = await f.create(f.owner, { intermediate: true, workflowRunId: runId, nodeId: "m1" });
+    await f.t.mutation(api.studio.update, { sessionToken: f.owner, projectId: f.projectId, generationId, status: "done", outputs: [OUTPUT] });
+    expect(await f.t.query(api.studio.list, { sessionToken: f.owner, projectId: f.projectId })).toEqual([]);
+    expect((await f.t.query(api.design.list, { sessionToken: f.owner, projectId: f.projectId })).assets).toEqual([]);
+    await f.t.mutation(api.studio.saveAsset, { sessionToken: f.owner, projectId: f.projectId, generationId, index: 0, name: "Reel.png" });
+    expect((await f.t.query(api.design.list, { sessionToken: f.owner, projectId: f.projectId })).assets).toEqual([expect.objectContaining({ name: "Reel.png", folder: "Studio" })]);
   });
 
   test("a cancelled generation stays cancelled", async () => {
@@ -75,12 +104,11 @@ describe("Studio generations", () => {
     expect(row.finishedAt).toBeTypeOf("number");
   });
 
-  test("video and audio outputs are saved as assets of their own kind", async () => {
+  test("video and audio outputs land as assets of their own kind", async () => {
     const f = await fixture();
     for (const kind of ["video", "audio"] as const) {
       const generationId = await f.create(f.owner, { mode: kind, kind });
       await f.t.mutation(api.studio.update, { sessionToken: f.owner, projectId: f.projectId, generationId, status: "done", outputs: [{ url: `https://v3.fal.media/files/out.${kind}`, kind }] });
-      await f.t.mutation(api.studio.saveAsset, { sessionToken: f.owner, projectId: f.projectId, generationId, index: 0, name: `out-${kind}` });
     }
     const design = await f.t.query(api.design.list, { sessionToken: f.owner, projectId: f.projectId });
     expect(design.assets.map((asset: { type: string }) => asset.type).sort()).toEqual(["audio", "video"]);

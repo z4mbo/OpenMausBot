@@ -11,7 +11,9 @@ import { standupTables } from "./standupTables";
 import { chiefOpsTables } from "./chiefOpsTables";
 import { shipTables } from "./shipTables";
 import { brandTables } from "./brandTables";
+import { drawTables } from "./drawTables";
 import { pulseTables } from "./pulseTables";
+import { integrationTables, repoVisibility } from "./integrationTables";
 import { storageScope, uploadTarget } from "./lib/storageValidators";
 import {
   assetTypeValidator,
@@ -40,7 +42,9 @@ export default defineSchema({
   ...chiefOpsTables,
   ...shipTables,
   ...brandTables,
+  ...drawTables,
   ...pulseTables,
+  ...integrationTables,
   storageAdmissions: defineTable({ storageId: v.id("_storage"), scopeKey: v.string(), scope: storageScope, contentType: v.optional(v.string()), createdAt: v.number() }).index("by_storageId_and_scopeKey", ["storageId", "scopeKey"]),
   storageUploadIntents: defineTable({ tokenHash: v.string(), sessionId: v.id("sessions"), userId: v.id("users"), target: uploadTarget, state: v.union(v.literal("issued"), v.literal("uploading"), v.literal("complete")), expiresAt: v.number(), storageId: v.optional(v.id("_storage")) }).index("by_tokenHash", ["tokenHash"]).index("by_expiresAt", ["expiresAt"]).index("by_userId_and_expiresAt", ["userId", "expiresAt"]),
   notifications: defineTable({ teamId: v.id("teams"), userId: v.id("users"), actorId: v.id("users"), kind: v.union(v.literal("assignment"), v.literal("comment"), v.literal("mention"), v.literal("digest"), v.literal("lead")), eventId: v.string(), digestId: v.optional(v.id("standupDigests")), leadId: v.optional(v.id("pipelineLeads")), projectId: v.optional(v.id("projects")), taskId: v.optional(v.id("tasks")), messageId: v.optional(v.string()), conversation: v.optional(v.string()), agentThreadId: v.optional(v.id("agentThreads")), preview: v.optional(v.string()), read: v.boolean(), snoozedUntil: v.optional(v.number()), createdAt: v.number() })
@@ -52,10 +56,10 @@ export default defineSchema({
     .index("by_team_updatedAt", ["teamId", "updatedAt"])
     .index("by_updatedAt", ["updatedAt"]),
   authAttempts: defineTable({ key: v.string(), count: v.number(), expiresAt: v.number() }).index("by_key", ["key"]),
-  canvases: defineTable({ teamId: v.id("teams"), projectId: v.id("projects"), name: v.string(), archived: v.boolean(), drawingElementCount: v.optional(v.number()), drawingBytes: v.optional(v.number()), createdAt: v.number(), updatedAt: v.number() }).index("by_project", ["projectId", "archived"]),
+  canvases: defineTable({ teamId: v.id("teams"), projectId: v.id("projects"), name: v.string(), archived: v.boolean(), pages: v.optional(v.array(v.object({ id: v.string(), name: v.string(), guides: v.optional(v.array(v.object({ axis: v.union(v.literal("x"), v.literal("y")), at: v.number() }))) }))), drawingElementCount: v.optional(v.number()), drawingBytes: v.optional(v.number()), createdAt: v.number(), updatedAt: v.number() }).index("by_project", ["projectId", "archived"]),
   drawingElements: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), elementId: v.string(), version: v.number(), nonce: v.number(), data: v.string(), updatedAt: v.number() }).index("by_teamId", ["teamId"]).index("by_teamId_and_elementId", ["teamId", "elementId"]).index("by_scene", ["teamId", "canvasId", "elementId"]),
   drawingFiles: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), fileId: v.string(), storageId: v.id("_storage"), mimeType: v.string() }).index("by_teamId", ["teamId"]).index("by_teamId_and_fileId", ["teamId", "fileId"]).index("by_scene", ["teamId", "canvasId", "fileId"]).index("by_storageId", ["storageId"]),
-  drawingPresence: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), userId: v.id("users"), name: v.string(), x: v.number(), y: v.number(), button: v.string(), updatedAt: v.number() }).index("by_teamId", ["teamId"]).index("by_teamId_and_userId", ["teamId", "userId"]).index("by_scene", ["teamId", "canvasId", "userId"]),
+  drawingPresence: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), userId: v.id("users"), agentId: v.optional(v.string()), name: v.string(), x: v.number(), y: v.number(), button: v.string(), selection: v.optional(v.array(v.string())), page: v.optional(v.string()), updatedAt: v.number() }).index("by_teamId", ["teamId"]).index("by_teamId_and_userId", ["teamId", "userId"]).index("by_scene", ["teamId", "canvasId", "userId"]),
   users: defineTable({
     email: v.string(),
     name: v.string(),
@@ -138,6 +142,8 @@ export default defineSchema({
     githubRepoError: v.optional(v.string()),
     githubRepoId: v.optional(v.number()),
     githubWorkspaceAccess: v.optional(v.boolean()),
+    /** The visibility a repository Origin creates for this project gets; private unless chosen. */
+    githubRepoVisibility: v.optional(repoVisibility),
     legacySourceKey: v.optional(v.string()),
     teamId: v.optional(v.id("teams")),
     order: v.optional(v.number()),
@@ -361,6 +367,8 @@ export default defineSchema({
     salt: v.string(),
     iterations: v.number(),
     kdf: v.string(),
+    /** The project's agents may use this item while a member has the vault unlocked. */
+    agentUse: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_project", ["projectId"]),
@@ -385,6 +393,10 @@ export default defineSchema({
     contentType: v.optional(v.string()),
     size: v.optional(v.number()),
     notes: v.optional(v.string()),
+    /** The Assets folder it is filed under, such as Studio for every Studio output. */
+    folder: v.optional(v.string()),
+    /** The Studio generation that made it, with the model and prompt it ran. */
+    studio: v.optional(v.object({ generationId: v.id("studioGenerations"), model: v.string(), modelLabel: v.string(), prompt: v.string() })),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_project", ["projectId"]).index("by_storageId", ["storageId"]),

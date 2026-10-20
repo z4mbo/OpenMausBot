@@ -48,9 +48,18 @@ export interface GitHubService {
   fetch: typeof fetch;
   /** The Origin Convex deployment, called with the caller's own Origin session token. */
   convex(): OriginCloudClient;
-  /** The signed `/integrations` HTTP action of the Convex deployment. */
+  /**
+   * The integration bridge: the signed `/integrations` HTTP action where this server holds ORIGIN_INTEGRATION_SECRET,
+   * otherwise the backend's `teamGitHub:bridge`, authorized by an Origin session instead.
+   */
   bridge<T>(operation: string, args: unknown): Promise<T>;
   now(): number;
+  /** Runs a Convex action on the Origin deployment; the Origin cloud client carries only queries and mutations. */
+  action?<T>(name: string, args: Record<string, unknown>): Promise<T>;
+  /** A hash of the Origin session brokered calls act for, so cached tokens never cross sessions. */
+  readonly principal?: string;
+  /** This service acting for one Origin session. */
+  as?(sessionToken: string): GitHubService;
 }
 
 export class GitHubHttpError extends Error {
@@ -88,7 +97,7 @@ export function appConfig(service: Pick<GitHubService, "store" | "env">): GitHub
 }
 
 export function signIntegration(secret: string | undefined, body: string): string {
-  if (!secret || secret.length < 32) throw new Error("Integration service is not configured");
+  if (!secret || secret.length < 32) throw new Error("This Origin server has no ORIGIN_INTEGRATION_SECRET, so it cannot sign integration requests. Members reach the workspace's GitHub through their Origin sign-in instead.");
   return createHmac("sha256", secret).update(body).digest("hex");
 }
 

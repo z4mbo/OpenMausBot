@@ -9,7 +9,7 @@ import { AssignIssueDialog } from "../../src/components/origin-pages/AssignIssue
 import { OriginConnectDialog } from "../../src/components/OriginConnect";
 import { WorkspaceSwitcher } from "../../src/components/SidebarProjects";
 import { initialState, StoreContext, type Bot, type Message } from "../../src/state/store";
-import { ChiefSectionFrame } from "../../src/components/ChiefSections";
+import { ChiefSectionBar, ChiefSectionFrame } from "../../src/components/ChiefSections";
 import { OriginSearch } from "../../src/components/OriginSearch";
 import { DelegationBlock } from "../../src/components/DelegationBlock";
 import type { ChiefSection } from "../../src/lib/origin-chief-section";
@@ -35,7 +35,9 @@ function Fixture() {
   const [nested, setNested] = useState(false);
   const [assigned, setAssigned] = useState("");
   const [section, setSection] = useState<ChiefSection>((params.get("section") as ChiefSection | null) ?? "agents");
-  if (screen === "project") return <main className="flex h-dvh min-w-0 flex-col bg-app text-ink"><ChiefSectionFrame bot={fixtureLead} section={section === "chat" ? "agents" : section} onSection={setSection} /></main>;
+  if (screen === "project") return <main className="flex h-dvh min-w-0 flex-col bg-app text-ink">{section === "chat"
+    ? <ChiefSectionBar bot={fixtureLead} section={section} onSection={setSection} />
+    : <ChiefSectionFrame bot={fixtureLead} section={section} onSection={setSection} />}</main>;
   if (screen === "delegation") return <main className="min-h-dvh bg-app p-4 text-ink"><DelegationBlock sent={fixtureSent} agent={fixtureAgent} failed={false}
     renderTranscript={(messages) => <div>{messages.map((message) => <p key={message.id} className="text-sm">{message.text}</p>)}</div>} /></main>;
   if (screen === "search") return <main className="min-h-dvh bg-app p-4 text-ink"><button className={primaryButton} onClick={() => setOpen(true)}>Open search</button>{open && <OriginSearch onClose={() => setOpen(false)} />}</main>;

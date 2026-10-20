@@ -1,5 +1,6 @@
 import { createServer, type IncomingMessage } from "node:http";
-import { writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { launchVerificationServer } from "./control-omb.ts";
@@ -21,21 +22,27 @@ const read = async (req: IncomingMessage) => {
   return Buffer.concat(chunks).toString("utf8");
 };
 
-/** Stands in for Brevo and Twilio on 127.0.0.1 and remembers every request the app server made. */
+/** Stands in for Brevo, Twilio and Stripe on 127.0.0.1 and remembers every request the app server made. */
 async function startProviders() {
   const requests: { path: string; body: string }[] = [];
+  const stripe = { paid: 0 };
   const server = createServer(async (req, res) => {
     const body = await read(req);
     requests.push({ path: req.url ?? "", body });
     const n = requests.length;
-    const answer = req.url?.includes("/smtp/email") ? { messageId: `<fixture-${n}@smtp-relay.mailin.fr>` } : req.url?.includes("/Calls.json") ? { sid: `CAfixture${n}` } : { sid: `SMfixture${n}` };
+    const url = req.url ?? "";
+    const answer = url.includes("/smtp/email") ? { messageId: `<fixture-${n}@smtp-relay.mailin.fr>` } : url.includes("/Calls.json") ? { sid: `CAfixture${n}` }
+      : url.startsWith("/v1/prices") ? { id: `price_fixture${n}` }
+      : url.startsWith("/v1/payment_links") ? { id: `plink_fixture${n}`, url: `https://buy.stripe.com/test_fixture${n}` }
+      : url.startsWith("/v1/checkout/sessions") ? { data: stripe.paid ? [{ id: "cs_fixture", amount_total: stripe.paid, currency: "eur" }] : [] }
+      : { sid: `SMfixture${n}` };
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify(answer));
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address();
   if (!address || typeof address === "string") throw new Error("The fake providers have no port");
-  return { origin: `http://127.0.0.1:${address.port}`, requests, close: () => new Promise((resolve) => server.close(resolve)) };
+  return { origin: `http://127.0.0.1:${address.port}`, requests, stripe, close: () => new Promise((resolve) => server.close(resolve)) };
 }
 
 async function seed(convex: FakeConvex) {
@@ -58,7 +65,8 @@ async function seed(convex: FakeConvex) {
     await ctx.db.insert("teamMembers", { teamId, userId: viewer.userId, email: "vic@fixture.test", name: "vic", role: "viewer", status: "active", createdAt: now, updatedAt: now });
     await ctx.db.insert("members", { projectId, userId: viewer.userId, email: "vic@fixture.test", name: "vic", role: "viewer", status: "active", createdAt: now, updatedAt: now });
   });
-  await o.mutation("pipeline:configure", { projectId, inboundEnabled: true, twilioAuthToken: TWILIO_AUTH, replyToEmail: "replies@in.fixture.test", currency: "EUR" });
+  await o.mutation("pipeline:configure", { projectId, inboundEnabled: true, twilioAuthToken: TWILIO_AUTH, replyToEmail: "replies@in.fixture.test", currency: "EUR", captureEnabled: true });
+  await o.mutation("brand:update", { projectId, kit: { name: "Fixture", voice: { adjectives: ["warm", "plain-spoken"], do: ["answer the question first"], dont: ["use jargon"] } } });
 
   const lead = async (fields: Json, ageDays = 0) => {
     const { leadId } = await o.mutation("pipeline:upsertLead", { projectId, ...fields }) as { leadId: string };
@@ -72,6 +80,11 @@ async function seed(convex: FakeConvex) {
   await lead({ name: "Margaret Hamilton", company: "MIT", phone: "+16175550123", value: 2500, stage: "Contacted" }, 10);
   await lead({ name: "Katherine Johnson", company: "NASA", email: "katherine@nasa.test", value: 9000, stage: "Won" });
   await lead({ name: "Barbara Liskov", stage: "Qualified", nextStep: "Find her email", nextDue: new Date(Date.now() - 2 * DAY).toISOString().slice(0, 10) }, 1);
+  await o.mutation("pipeline:importLeads", { projectId, source: "conference", rows: [{ name: "G. Hopper", phone: "+1 555 000 1001", company: "US Navy", tags: ["conference"] }] });
+  await o.mutation("pipelineDeals:upsert", { projectId, leadId: grace, title: "Navy annual plan", value: 12000, closeDate: "2026-12-15" });
+  const alanDeal = await o.mutation("pipelineDeals:upsert", { projectId, leadId: alan, title: "Bletchley pilot", lineItems: [{ name: "Pilot seats", quantity: 4, unitPrice: 1000 }] });
+  await o.mutation("pipelineDeals:closeDeal", { projectId, dealId: alanDeal, outcome: "won", amount: 4000, reason: "Signed the pilot", agent: { name: "Atlas", id: "fixture-chief" } });
+  await o.mutation("pipelineInbox:saveTemplate", { projectId, name: "Numbers follow-up", channel: "email", subject: "The numbers for {company}", body: "Hi {first_name},\n\nHere are the numbers we discussed." });
   await o.mutation("pipeline:draftContact", { projectId, leadId: alan, channel: "email", agent: { name: "Atlas", id: "fixture-chief" }, subject: "Bletchley follow-up", body: "Hi Alan,\n\nThanks for the call. Here is the plan we discussed." });
   await o.mutation("pipelineSequences:start", { projectId, leadId: linus, agent: { name: "Atlas", id: "fixture-chief" }, steps: [
     { day: 0, channel: "email", subject: "A quick idea for {company}", body: "Hi {first_name}, could we help {company} ship faster?" },
@@ -80,7 +93,8 @@ async function seed(convex: FakeConvex) {
   ] });
 
   const settings = (await o.query("pipeline:board", { projectId }) as { settings: { inbound: { twilioUrl: string; brevoUrl: string; brevoSecret: string } } }).settings.inbound;
-  return { ownerToken: owner.token, samToken: sam.token, viewerToken: viewer.token, projectId, teamId, inbound: settings, leads: { grace, alan, linus } };
+  const captureUrl = (await o.query("pipeline:board", { projectId }) as { settings: { captureUrl: string } }).settings.captureUrl;
+  return { ownerToken: owner.token, samToken: sam.token, viewerToken: viewer.token, projectId, teamId, inbound: settings, captureUrl, leads: { grace, alan, linus } };
 }
 
 const twilioSignature = async (convex: FakeConvex, url: string, params: URLSearchParams) => {
@@ -112,10 +126,25 @@ const convex = await startFakeConvex();
 const seeded = await seed(convex);
 await deliver(convex, seeded.inbound, { kind: "sms", from: "+15550001001", body: "Grace here. Can we move the call to Thursday?" });
 await deliver(convex, seeded.inbound, { kind: "email", from: "alan@bletchley.test", name: "Alan Turing", subject: "Re: our call", body: "Sounds good. Send me the numbers first." });
+const captured = await (convex.t as unknown as Fetching).fetch(seeded.captureUrl.replace(SITE, ""), {
+  method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: "Ada Lovelace", email: "ada@engines.test", message: "Signed up in the app", source: "fixture-app" }),
+});
+if (captured.status !== 200) throw new Error(`The capture endpoint answered ${captured.status}`);
+const scratch = mkdtempSync(join(tmpdir(), "origin-sales-fixture-"));
+process.env.FAKE_CLAUDE_TEXT_FILE = join(scratch, "suggestion.txt");
+process.env.FAKE_CLAUDE_TEXT_LOG = join(scratch, "prompts.jsonl");
+writeFileSync(process.env.FAKE_CLAUDE_TEXT_FILE, JSON.stringify({ subject: "Re: our call", body: "Hi Alan, the numbers are attached. Shall we start the pilot on Monday?" }));
 const fixture = await launchVerificationServer();
+const fixtureCall = async (path: string, body: object) => {
+  const response = await fetch(new URL(path, fixture.info.url), { method: "POST", headers: { "content-type": "application/json", origin: fixture.info.url }, body: JSON.stringify(body) });
+  if (!response.ok) throw new Error(`Synthetic setup failed: POST ${path} ${response.status}`);
+  return response.json() as Promise<{ bot: { id: string; name: string } }>;
+};
+const chiefBot = (await fixtureCall("/api/bots", { name: "Atlas" })).bot;
 writeFileSync(join(fixture.info.dataDir, "integration-keys.json"), JSON.stringify({
   brevo: { apiKey: "fixture-brevo-key", senderEmail: "sales@fixture.test", senderName: "Fixture Sales" },
   twilio: { accountSid: "ACfixture", authToken: "fixture-twilio-key", fromNumber: "+15550000000" },
+  stripe: { secretKey: "rk_test_fixture" },
 }), { mode: 0o600 });
 writeFileSync(join(fixture.info.dataDir, "origin-cloud.json"), JSON.stringify({ url: convex.url, sessionToken: seeded.ownerToken, projects: {} }), { mode: 0o600 });
 const cloud = fileURLToPath(new URL("./testing/origin-campaigns-cloud.ts", import.meta.url));
@@ -125,7 +154,13 @@ try {
   preview = await mountPreview(fixture, {
     entry: "/scripts/testing/origin-pipeline-preview.tsx", route: "/__origin-pipeline.html", title: "Isolated Origin Pipeline",
     extraRoutes: [
-      { path: "/__origin-campaigns.json", handler: (_req, res) => json(res, { url: convex.url, token: seeded.ownerToken, viewerToken: seeded.viewerToken, projectId: seeded.projectId }) },
+      { path: "/__origin-campaigns.json", handler: (_req, res) => json(res, { url: convex.url, token: seeded.ownerToken, viewerToken: seeded.viewerToken, projectId: seeded.projectId, chiefId: chiefBot.id }) },
+      { path: "/__origin-pipeline-prompts.json", handler: (_req, res) => {
+        let lines: string[] = [];
+        try { lines = readFileSync(process.env.FAKE_CLAUDE_TEXT_LOG!, "utf8").split("\n").filter(Boolean); } catch { lines = []; }
+        json(res, lines.map((line) => JSON.parse(line)));
+      } },
+      { path: "/__origin-pipeline-pay", method: "POST", handler: async (req, res) => { providers.stripe.paid = Number(JSON.parse(await read(req)).amount) || 0; json(res, { ok: true }); } },
       { path: "/__origin-pipeline-providers.json", handler: (_req, res) => json(res, providers.requests) },
       { path: "/__origin-pipeline-inbound", method: "POST", handler: async (req, res) => json(res, { status: await deliver(convex, seeded.inbound, JSON.parse(await read(req))) }) },
       { path: "/__origin-pipeline-notifications.json", handler: async (_req, res) => json(res, await convex.t.query(convex.ref("notifications:list"), { sessionToken: seeded.samToken, teamId: seeded.teamId, unreadOnly: false, paginationOpts: { numItems: 20, cursor: null } })) },

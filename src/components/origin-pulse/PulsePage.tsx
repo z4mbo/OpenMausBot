@@ -1,33 +1,39 @@
 import { useState, type ReactNode } from "react";
-import { ArrowRight, Bot as BotIcon, Check, CircleDot, Rocket, Target } from "lucide-react";
+import { ArrowRight, Bot as BotIcon, CircleDot, Rocket, Target } from "lucide-react";
 import { useCloudQuery } from "@/lib/origin-cloud";
 import { setChiefSectionOf, type ChiefSection } from "@/lib/origin-chief-section";
 import { cn } from "@/lib/cn";
+import { useStore } from "@/state/store";
+import { useProjectJourney } from "@/lib/origin-journey";
+import { JourneyStrip, NextStepCard } from "../origin-journey/NextStep";
 import { formatLeadValue } from "../../../shared/origin-pipeline";
-import { PULSE_STAGES, PULSE_STAGE_LABEL, attentionLabel, formatCompact, formatHours, formatUsd, type PulseCount, type PulseRange, type PulseStage } from "../../../shared/origin-pulse";
+import { attentionLabel, formatCompact, formatHours, formatUsd, type PulseCount, type PulseRange } from "../../../shared/origin-pulse";
 import { CloudGate, Loading, Notice, PageHeader, Segmented, cardClass, pageClass, type OriginPageProps } from "../origin-pages/ui";
 import { BudgetMeter, DayBars, StageBars } from "./PulseCharts";
-import { ATTENTION_SECTION, STAGE_SECTION, deltaText, stageLine, type ProjectPulse } from "./pulse-model";
+import { ATTENTION_SECTION, deltaText, type ProjectPulse } from "./pulse-model";
 
 export const RANGE_OPTIONS = [{ value: "7", label: "7d", title: "Last 7 days" }, { value: "30", label: "30d", title: "Last 30 days" }] as const;
 
 export function PulsePage({ botId, ...props }: OriginPageProps & { botId: string }) {
-  return <CloudGate {...props} label="Pulse">{({ projectId }) => <Pulse projectId={projectId} go={(section) => setChiefSectionOf(botId, section)} />}</CloudGate>;
+  return <CloudGate {...props} label="Pulse">{({ projectId }) => <Pulse projectId={projectId} botId={botId} go={(section) => setChiefSectionOf(botId, section)} />}</CloudGate>;
 }
 
 const focusRing = "outline-none focus-visible:ring-2 focus-visible:ring-accent/60";
 
-function Pulse({ projectId, go }: { projectId: string; go(section: ChiefSection): void }) {
+function Pulse({ projectId, botId, go }: { projectId: string; botId: string; go(section: ChiefSection): void }) {
   const [range, setRange] = useState<PulseRange>(7);
   const pulse = useCloudQuery<ProjectPulse>("pulse:project", { projectId, range });
+  const journey = useProjectJourney(projectId);
+  const chief = useStore().state.bots.find((bot) => bot.id === botId);
   return (
     <section className={pageClass} aria-label="Pulse">
       <PageHeader title="Pulse">
         <Segmented label="Range" value={String(range) as "7" | "30"} options={RANGE_OPTIONS} onChange={(value) => setRange(Number(value) as PulseRange)} />
       </PageHeader>
-      {!pulse ? <Loading label="Loading the project's pulse" variant="grid" /> : (
+      {!pulse || !journey ? <Loading label="Loading the project's pulse" variant="grid" /> : (
         <div className="flex flex-col gap-3">
-          <StageStrip pulse={pulse} go={go} />
+          <JourneyStrip journey={journey} go={go} />
+          {chief && <NextStepCard chief={chief} step={journey.step} />}
           {pulse.attention.length > 0 && (
             <div className="flex flex-wrap gap-1.5" aria-label="Needs attention">
               {pulse.attention.map((item) => (
@@ -50,35 +56,6 @@ function Pulse({ projectId, go }: { projectId: string; go(section: ChiefSection)
         </div>
       )}
     </section>
-  );
-}
-
-function StageStrip({ pulse, go }: { pulse: ProjectPulse; go(section: ChiefSection): void }) {
-  return (
-    <ol className="grid grid-cols-2 gap-1.5 sm:grid-cols-4" aria-label={`Stage: ${PULSE_STAGE_LABEL[pulse.stage]}`}>
-      {PULSE_STAGES.map((stage: PulseStage) => {
-        const current = stage === pulse.stage;
-        const reached = pulse.reached[stage];
-        return (
-          <li key={stage} className="min-w-0">
-            <button type="button" onClick={() => go(STAGE_SECTION[stage])} aria-current={current ? "step" : undefined}
-              className={cn("flex w-full min-w-0 items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-colors duration-(--motion-fast)", focusRing,
-                current ? "border-accent/60 bg-accent/10" : "border-hairline/40 bg-panel hover:bg-raised/50")}>
-              <span aria-hidden="true" className={cn("flex size-5 shrink-0 items-center justify-center rounded-full border",
-                reached ? "border-accent bg-accent text-accent-ink" : "border-hairline text-transparent")}>
-                <Check size={12} strokeWidth={3} />
-              </span>
-              <span className="min-w-0">
-                <span className={cn("block text-[13px] font-semibold", current ? "text-ink" : reached ? "text-ink-secondary" : "text-ink-tertiary")}>
-                  {PULSE_STAGE_LABEL[stage]}<span className="sr-only">{current ? ", current stage" : reached ? ", reached" : ", not reached"}</span>
-                </span>
-                <span className="block truncate text-[11.5px] tabular-nums text-ink-tertiary">{stageLine(pulse, stage)}</span>
-              </span>
-            </button>
-          </li>
-        );
-      })}
-    </ol>
   );
 }
 
@@ -176,10 +153,10 @@ function GrowCard({ pulse, go }: { pulse: ProjectPulse; go(section: ChiefSection
   const { grow, range, days } = pulse;
   const money = (value: number) => formatLeadValue(value, grow.currency);
   return (
-    <Card icon={<Target size={15} />} title="Grow" section="pipeline" linkLabel="Pipeline" go={go}>
+    <Card icon={<Target size={15} />} title="Sell" section="pipeline" linkLabel="Sales" go={go}>
       <Stats>
         <Stat label="New leads" value={n(grow.leads.value)} count={grow.leads} range={range} />
-        <Stat label="Won" value={n(grow.won.value)} count={grow.won} range={range} />
+        <Stat label="Revenue" value={money(grow.revenue.value)} count={grow.revenue} range={range} hint={`${n(grow.won.value)} won`} />
         <Stat label="Conversion" value={grow.conversion === null ? "–" : `${Math.round(grow.conversion * 100)}%`} hint={grow.total ? `of ${n(grow.total)}` : undefined} />
         <Stat label="Open pipeline" value={money(grow.pipelineValue)} />
       </Stats>
@@ -188,7 +165,7 @@ function GrowCard({ pulse, go }: { pulse: ProjectPulse; go(section: ChiefSection
           <StageBars rows={grow.stages} format={money} />
           <DayBars label="New leads per day" values={grow.leadsSeries} days={days} />
         </div>
-      ) : <Hint action="Open Pipeline" onAction={() => go("pipeline")}>Leads from a page's form, an import or an agent show here.</Hint>}
+      ) : <Hint action="Open Sales" onAction={() => go("pipeline")}>Leads from a page's form, an import or an agent show here.</Hint>}
       {(grow.leadsAwaiting > 0 || grow.draftsAwaiting > 0) && (
         <button type="button" onClick={() => go("pipeline")} className={cn("flex items-center gap-2 rounded-lg px-1 text-left text-[12.5px] text-ink-secondary hover:text-ink", focusRing)}>
           <span aria-hidden="true" className="size-1.5 rounded-full bg-warning" />

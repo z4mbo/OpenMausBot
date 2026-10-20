@@ -1,5 +1,5 @@
 import { memo, type ReactNode } from "react";
-import { FONT_STACKS, fontStack, layoutText, type CanvasNode, type LeadForm } from "../../../../shared/canvas-scene";
+import { FONT_STACKS, fontStack, layoutText, type CanvasNode, type LeadForm, type Scene } from "../../../../shared/canvas-scene";
 import { LEAD_FIELD_LABELS, LEAD_FORM_METRICS, arrowHead, leadFormColors, pathData } from "../../../../shared/canvas-page";
 import { measureText } from "./geometry";
 
@@ -9,6 +9,8 @@ export type RenderOptions = {
   interactive: boolean;
   editing?: string | null;
   prefix: string;
+  /** Nodes whose subtree changed since the last render; the rest skip rendering. Absent: render everything. */
+  dirty?: ReadonlySet<string>;
 };
 
 function TextShape({ node, hiddenText }: { node: CanvasNode; hiddenText: boolean }) {
@@ -82,8 +84,8 @@ function Shape({ node, options, surface }: { node: CanvasNode; options: RenderOp
       const width = Math.max(node.strokeWidth, 0.5);
       return (
         <g {...hit}>
-          {options.interactive && <path d={pathData(points, node.closed)} fill="none" stroke="transparent" strokeWidth={12} vectorEffect="non-scaling-stroke" strokeLinecap="round" />}
-          <path d={pathData(points, node.closed)} fill={node.type === "path" && node.closed && node.fill ? node.fill : "none"} stroke={node.stroke ?? "transparent"} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" />
+          {options.interactive && <path d={pathData(points, node.closed, node.curves, node.breaks)} fill={node.type === "path" && node.closed ? "transparent" : "none"} stroke="transparent" strokeWidth={12} vectorEffect="non-scaling-stroke" strokeLinecap="round" />}
+          <path d={pathData(points, node.closed, node.curves, node.breaks)} fill={node.type === "path" && node.closed && node.fill ? node.fill : "none"} fillRule="evenodd" stroke={node.stroke ?? "transparent"} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" />
           {node.type === "arrow" && points.length >= 4 && <path d={arrowHead(points, Math.max(8, width * 3.5))} fill={node.stroke ?? "transparent"} stroke={node.stroke ?? "transparent"} strokeWidth={width} strokeLinejoin="round" />}
         </g>
       );
@@ -107,14 +109,32 @@ function Shape({ node, options, surface }: { node: CanvasNode; options: RenderOp
   }
 }
 
-export function NodeView({ node, options, surface = "#FFFFFF" }: { node: CanvasNode; options: RenderOptions; surface?: string }): ReactNode {
+function Effects({ id, node }: { id: string; node: CanvasNode }) {
+  const shadow = node.shadow;
+  return (
+    <filter id={id} x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
+      {shadow && <feDropShadow dx={shadow.x} dy={shadow.y} stdDeviation={shadow.blur / 2} floodColor={shadow.color.slice(0, 7)} floodOpacity={shadow.color.length === 9 ? parseInt(shadow.color.slice(7), 16) / 255 : 1} />}
+      {node.blur ? <feGaussianBlur stdDeviation={node.blur / 2} /> : null}
+    </filter>
+  );
+}
+
+type NodeProps = { node: CanvasNode; options: RenderOptions; surface?: string };
+
+const unchanged = (before: NodeProps, after: NodeProps) => Boolean(after.options.dirty) && before.node === after.node && before.surface === after.surface
+  && !after.options.dirty!.has(after.node.id) && before.options.images === after.options.images && before.options.editing === after.options.editing
+  && before.options.interactive === after.options.interactive && before.options.prefix === after.options.prefix;
+
+export const NodeView = memo(function NodeView({ node, options, surface = "#FFFFFF" }: NodeProps): ReactNode {
   if (node.hidden || node.deleted) return null;
   const children = node.leadForm ? [] : options.index.get(node.id) ?? [];
   const transform = `translate(${node.x} ${node.y})${node.rotation ? ` rotate(${node.rotation} ${node.width / 2} ${node.height / 2})` : ""}`;
   const clip = node.type === "frame" && node.clip ? `${options.prefix}clip-${node.id}` : null;
   const radius = Math.min(node.radius, node.width / 2, node.height / 2);
+  const effect = node.shadow || node.blur ? `${options.prefix}fx-${node.id}` : null;
   return (
-    <g transform={transform} opacity={node.opacity < 1 ? node.opacity : undefined}>
+    <g transform={transform} opacity={node.opacity < 1 ? node.opacity : undefined} filter={effect ? `url(#${effect})` : undefined}>
+      {effect && <Effects id={effect} node={node} />}
       {node.type !== "group" && <Shape node={node} options={options} surface={surface} />}
       {children.length > 0 && (
         <>
@@ -126,8 +146,25 @@ export function NodeView({ node, options, surface = "#FFFFFF" }: { node: CanvasN
       )}
     </g>
   );
-}
+}, unchanged);
 
 export const SceneLayer = memo(function SceneLayer({ options }: { options: RenderOptions }) {
   return <>{(options.index.get(null) ?? []).map((node) => <NodeView key={node.id} node={node} options={options} />)}</>;
 });
+
+/** The nodes whose own object or subtree differs between two scenes, with their ancestors. */
+export function changedSubtrees(before: Scene, after: Scene): Set<string> {
+  const dirty = new Set<string>();
+  const mark = (id: string | null | undefined, scene: Scene) => {
+    let current = id;
+    while (current && !dirty.has(current)) { dirty.add(current); current = scene.get(current)?.parentId; }
+  };
+  for (const [id, node] of after) {
+    const old = before.get(id);
+    if (old === node) continue;
+    mark(id, after);
+    if (old) mark(old.parentId, before);
+  }
+  for (const [id, node] of before) if (!after.has(id)) mark(node.parentId, before);
+  return dirty;
+}

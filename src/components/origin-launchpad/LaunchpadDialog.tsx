@@ -107,7 +107,7 @@ export function LaunchpadDialog({ target, onClose }: { target: LaunchTarget; onC
                   <input className={inputClass} maxLength={LAUNCH_LIMITS.name} value={name ?? projectNameFromIdea(input.idea)} placeholder="Named from the idea" onChange={(event) => setName(event.target.value)} />
                 </label>
                 <Disclosure open={settings} onToggle={() => setSettings((open) => !open)}
-                  summary={`${people.members ? accessSummary(access, people.members, people.myEmail) : "Loading people…"} · ${REPOSITORY_SUMMARY[repository.mode]}`}>
+                  summary={`${people.members ? accessSummary(access, people.members, people.myEmail) : "Loading people…"} · ${repository.mode === "new" && repository.visibility === "public" ? "new public GitHub repository" : REPOSITORY_SUMMARY[repository.mode]}`}>
                   <ProjectAccessPicker members={people.members} myEmail={people.myEmail} value={access} onChange={setAccess} disabled={busy} />
                   <RepositoryPicker teamId={teamId} projectName={projectName} value={repository} onChange={setRepository} disabled={busy} />
                 </Disclosure>

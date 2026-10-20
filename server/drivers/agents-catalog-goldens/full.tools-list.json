@@ -1933,6 +1933,10 @@
             "maxLength": 1000,
             "description": "Optional extra direction for the agent."
           },
+          "design": {
+            "type": "boolean",
+            "description": "Design work: the agent designs it on the Canvas and submits frames instead of a pull request."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,
@@ -2119,7 +2123,7 @@
     },
     {
       "name": "origin_vault_list",
-      "description": "List an Origin project's vault: titles, kinds, URLs and usernames. Values are encrypted with the person's passphrase and never readable here; ask for one with request_credential. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's vault: titles, kinds, URLs, usernames, and the values members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2250,7 +2254,7 @@
     },
     {
       "name": "origin_canvas",
-      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images and their layout, editable with origin_canvas_edit. Before the first call, get its input schema from find_tool.",
+      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2270,6 +2274,83 @@
         "type": "object",
         "properties": {},
         "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_canvas_screenshot",
+      "description": "See a canvas frame or node (or the canvas's first page) as a PNG, to check your own design work. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_canvas_comment",
+      "description": "Read a canvas's comment threads, or comment as yourself: pinned to a node, or as a reply. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_design_submit",
+      "description": "Link the canvas frames that design an Origin issue to it: they show as Design on the issue, the issue key shows on each frame, your rationale is pinned on the canvas, and in review the project's Chief is asked to review. A Chief approves with status approved. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "frames": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "description": "Frame ids or names."
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 3000,
+            "description": "Why the design looks the way it does."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "review",
+              "approved"
+            ],
+            "description": "Default review."
+          },
+          "canvas": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Canvas name or id; optional when the project has one."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "issue_id",
+          "frames"
+        ]
       }
     },
     {
@@ -2322,7 +2403,7 @@
     },
     {
       "name": "origin_studio_generate",
-      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live. Before the first call, get its input schema from find_tool.",
+      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2346,7 +2427,31 @@
     },
     {
       "name": "origin_studio_save_asset",
-      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index), and with broadcast true also pick it for Broadcast posts. Before the first call, get its input schema from find_tool.",
+      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Broadcast posts. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_studio_workflow_list",
+      "description": "List an Origin project's Studio workflows (node graphs that chain fal models, such as product shot to music reel) and the built-in templates, with each one's input nodes and the latest runs and their outputs. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_studio_workflow_run",
+      "description": "Run a Studio workflow or template on the person's fal key; the team watches each step live and Output nodes save to Assets (folder Studio). Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2388,7 +2493,7 @@
     },
     {
       "name": "origin_pipeline_list_leads",
-      "description": "List an Origin project's sales pipeline: totals per stage and its leads (id, stage, contact details, value, owner, next step), filtered by stage or a search; or read one lead with its notes and timeline (emails, texts, calls with summaries) with lead_id. Before the first call, get its input schema from find_tool.",
+      "description": "List an Origin project's Sales contacts: totals per stage and its leads (id, stage, contact details, value, owner, next step, sources), filtered by stage or a search; or read one lead with its notes, deals and timeline (emails, texts, calls with summaries) with lead_id. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2430,7 +2535,31 @@
     },
     {
       "name": "origin_pipeline_contact",
-      "description": "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Before the first call, get its input schema from find_tool.",
+      "description": "Reach or answer a lead from an Origin project's Sales with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_pipeline_conversations",
+      "description": "Read an Origin project's Sales inbox: every contact's conversation, newest first, with unread replies, agent drafts waiting for approval and won deals waiting for confirmation; or one contact's emails, texts, WhatsApp messages and call summaries in order with lead_id. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_pipeline_deal",
+      "description": "List, open or change the deals in an Origin project's Sales: value and currency, stage, expected close date, simple line items and notes. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},

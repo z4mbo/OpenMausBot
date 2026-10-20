@@ -76,6 +76,7 @@ export function OriginPageView({ page }: { page: OriginPage }) {
           <span className="hidden truncate text-[12.5px] text-ink-tertiary sm:inline">· {head?.name ?? "Workspace"}</span>
         </header>
       }>
+        <div key={page} data-origin-page-body className="flex min-h-0 min-w-0 flex-1 flex-col motion-safe:animate-[section-in_var(--motion-base)_var(--ease-out)_backwards]">
         <WorkspaceGate key={teamId ?? ""} teamId={teamId} head={head} label={entry.contents}>
           {(ctx) => page === "inbox" ? <WorkspaceInbox {...ctx} />
             : page === "chat" ? <WorkspaceChat {...ctx} />
@@ -83,6 +84,7 @@ export function OriginPageView({ page }: { page: OriginPage }) {
             : page === "call" ? <MemberCall key={ctx.teamId} target={{ teamId: ctx.teamId }} me={ctx.me} canJoin={ctx.canEdit} name={head?.name ?? "Workspace"} agent={headBot} open={() => openOriginPage("call")} />
             : <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]"><DrawingCanvas key={ctx.teamId} teamId={ctx.teamId} userId={ctx.me._id} name="Workspace drawing" readOnly={!ctx.canEdit} agent={headBot} /></div>}
         </WorkspaceGate>
+        </div>
       </GlassHeaderFrame>
     </main>
   );
