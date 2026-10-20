@@ -13,7 +13,7 @@ Use the exact printed `previewUrl` in a second terminal:
 $env:OMB_VERIFY_PLAYWRIGHT = 'file:///ABSOLUTE/PATH/TO/playwright/index.mjs'
 node scripts/testing/check-origin-draw.mjs http://127.0.0.1:PRINTED_PORT/__origin-draw.html
 pnpm exec vitest run src/components/origin-pages/DrawingCanvas.test.ts src/lib/origin-drawing-outbox.test.ts shared/canvas-ops.test.ts server/origin-canvas-tools.test.ts
-pnpm --filter @origin/backend exec vitest run convex/projectWorkflow.test.ts
+pnpm --filter @origin/backend exec vitest run projectWorkflow
 ```
 
 The checker accepts only the loopback fixture path. The page renders the production DrawingCanvas and ProjectDrawPage

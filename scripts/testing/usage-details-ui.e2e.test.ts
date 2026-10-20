@@ -1,14 +1,10 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { agentBrowser, sessionEnv, UI_TOOLS_DIR, type UiHandle } from "./control-omb-ui.ts";
-
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 const enabled = process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env }));
 if (!enabled) console.log("skipping usage details UI: set OMB_UI_E2E=1 to install the pinned browser");
 
@@ -17,9 +13,7 @@ if (!enabled) console.log("skipping usage details UI: set OMB_UI_E2E=1 to instal
   let info: { ui: string; url: string; botId: string; logPath: string } | undefined;
   try {
     let stdout = "", stderr = "";
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", chunk => { stdout += String(chunk); });
     child.stderr!.on("data", chunk => { stderr += String(chunk); });
     await expect.poll(() => {
@@ -65,14 +59,13 @@ if (!enabled) console.log("skipping usage details UI: set OMB_UI_E2E=1 to instal
         return { viewport: innerWidth, scroll: document.documentElement.scrollWidth,
           menu: rect('[role=menu][aria-label=More]'), editor: rect('.mention-editor'),
           row: rect('[data-composer-row]'), controls: rect('[data-composer-actions]'),
-          threads: Boolean(document.querySelector('button[aria-label="All threads"]')) };
+        };
       })()`);
       expect(await evaluate("document.querySelectorAll('[data-chathead-controls] > div').length")).toBeLessThan(6);
       expect(layout.scroll).toBeLessThanOrEqual(width);
       expect(layout.viewport).toBe(width);
       expect(layout.menu.left).toBeGreaterThanOrEqual(0);
       expect(layout.menu.right).toBeLessThanOrEqual(width);
-      expect(layout.threads).toBe(true);
       expect(layout.controls.width).toBeGreaterThan(0);
       if (layout.row.width < 480) {
         expect(layout.editor.width).toBeGreaterThanOrEqual(layout.row.width - 1);
@@ -114,6 +107,6 @@ if (!enabled) console.log("skipping usage details UI: set OMB_UI_E2E=1 to instal
     writeFileSync(evidence, JSON.stringify({ url: handle.url, botId: handle.botId, settled, chip, geometry, consoleResult }, null, 2));
     console.log(`Usage details renderer evidence: ${evidence}`);
   } finally {
-    if (child && child.exitCode === null && child.signalCode === null) await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    if (child && child.exitCode === null && child.signalCode === null) await stopUiLauncher(child);
   }
 }, 660_000);

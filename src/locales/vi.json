@@ -1949,7 +1949,7 @@
   "approvalMode.customLocalOnly": "Chỉ có thể thay đổi phê duyệt tùy chỉnh trong ứng dụng desktop cài đặt cục bộ",
   "approvalMode.customLocalOnlyDot": "Chỉ có thể thay đổi phê duyệt tùy chỉnh trong ứng dụng desktop cài đặt cục bộ.",
   "onboarding.welcome": "Chào mừng bạn đến với {app}",
-  "onboarding.intro": "Các bot làm việc thực tế trên máy tính của riêng chúng. Hãy cho chúng tôi biết bạn là ai và chúng tôi sẽ thông báo cho bạn khi có những cập nhật lớn được phát hành.",
+  "onboarding.intro": "Bạn, đội của bạn và các agent AI cùng đưa một dự án từ ý tưởng đến phát hành. Hãy cho chúng tôi biết bạn là ai và chúng tôi sẽ thông báo khi có cập nhật lớn.",
   "onboarding.name": "Tên của bạn",
   "onboarding.continue": "Tiếp tục",
   "onboarding.profile.error": "Không thể lưu thông tin của bạn. Hãy thử lại hoặc chọn Để sau.",

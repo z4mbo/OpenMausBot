@@ -476,7 +476,7 @@ function generationLine(row: StudioGeneration): string {
     `${row._id} [${row.status}] ${row.modelLabel} ${row.kind}`,
     `"${clip(row.prompt.replace(/\s+/g, " "), 160)}"`,
     row.agentName ? `by ${row.agentName}` : `by ${row.createdByName}`,
-    row.error ? `error: ${clip(row.error, 200)}` : "",
+    row.error ? `failed: ${clip(row.error, 200)}` : "",
   ];
   const outputs = row.outputs.map((output, index) => {
     const saved = row.saved.find((entry) => entry.index === index);

@@ -163,7 +163,7 @@ export function BroadcastComposer({ projectId, post, slot, canEdit, connected, o
                 {item.kind === "video" && <Film size={12} className="absolute bottom-1 left-1 text-white drop-shadow" aria-hidden="true" />}
                 {!locked && (
                   <button type="button" aria-label={`Remove ${item.name}`} onClick={() => set({ assetIds: draft.assetIds.filter((id) => id !== item.id) })}
-                    className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover:opacity-100">
+                    className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover:opacity-100 touch:opacity-100">
                     <X size={11} />
                   </button>
                 )}

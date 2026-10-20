@@ -1949,7 +1949,7 @@
   "approvalMode.customLocalOnly": "Özel onay, yerel paketlenmiş masaüstü uygulamasında değiştirilmelidir",
   "approvalMode.customLocalOnlyDot": "Özel onay, yerel paketlenmiş masaüstü uygulamasında değiştirilmelidir.",
   "onboarding.welcome": "{app} uygulamasına hoş geldiniz",
-  "onboarding.intro": "Kendi bilgisayarlarında gerçek işler yapan botlar. Bize kim olduğunuzu söyleyin, önemli gelişmeler olduğunda size haber verelim.",
+  "onboarding.intro": "Siz, ekibiniz ve yapay zekâ ajanları bir projeyi fikirden yayına taşırsınız. Bize kim olduğunuzu söyleyin, önemli gelişmeler olduğunda size haber verelim.",
   "onboarding.name": "Adınız",
   "onboarding.continue": "Devam et",
   "onboarding.profile.error": "Bilgileriniz kaydedilemedi. Tekrar deneyin veya Belki daha sonra seçeneğini belirleyin.",

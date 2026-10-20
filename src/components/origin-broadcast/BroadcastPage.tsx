@@ -164,7 +164,7 @@ function Week({ posts, start, onStart, canEdit, onOpen, onNew }: {
                 <span className={cn("flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[12px] tabular-nums", isToday ? "bg-accent text-accent-ink" : "text-ink-secondary")}>{day.getDate()}</span>
                 {canEdit && !past && (
                   <button type="button" aria-label={`New post on ${day.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" })}`} onClick={() => onNew(defaultSlot(day))}
-                    className="ml-auto flex size-6 items-center justify-center rounded-md text-ink-tertiary opacity-0 transition-opacity duration-150 hover:bg-raised hover:text-ink focus-visible:opacity-100 group-hover/day:opacity-100 max-lg:opacity-100">
+                    className="ml-auto flex size-6 items-center justify-center rounded-md text-ink-tertiary opacity-0 transition-opacity duration-150 hover:bg-raised hover:text-ink focus-visible:opacity-100 group-hover/day:opacity-100 touch:opacity-100 max-lg:opacity-100">
                     <Plus size={13} />
                   </button>
                 )}

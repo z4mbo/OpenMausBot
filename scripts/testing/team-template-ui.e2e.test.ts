@@ -1,12 +1,12 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { request } from "../mcp-server.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
@@ -17,15 +17,13 @@ if (!enabled) console.log("skipping template UI e2e: set OMB_UI_E2E=1 to install
 
 describe("additive template imports in the real renderer", () => {
   let child: ChildProcess | undefined;
-  afterAll(async () => { await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 }); });
+  afterAll(async () => { await stopUiLauncher(child); });
 
   (enabled ? it : it.skip)("adds library and file templates as sections without losing existing chats", async () => {
     let stdout = "";
     let stderr = "";
     let info: { ui: string; url: string; botId: string; logPath: string };
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
     child.on("error", (error) => { stderr += error.message; });
@@ -82,7 +80,8 @@ describe("additive template imports in the real renderer", () => {
       expect(current.bots.filter((bot: { section?: string }) => bot.section === section)).toHaveLength(2);
       for (const bot of original.bots) expect(current.bots.find((value: { id: string }) => value.id === bot.id)).toEqual(bot);
       expect(await control("messages", "--bot", info!.botId, "--limit", "10")).toEqual(transcript);
-      expect(await snapshot()).toContain('button "Existing work"');
+      const lead = original.bots.find((bot: { id: string; name: string }) => bot.id === info!.botId)!;
+      expect(await snapshot()).toContain(`button "Chat with ${lead.name}"`);
       expect(await snapshot()).toContain('button "Personal"');
     }
     const evidence = join(ROOT, ".omb-scratch", "verify-evidence", "template-import-sections.png");

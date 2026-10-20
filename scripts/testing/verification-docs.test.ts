@@ -22,6 +22,9 @@ const cited = (pattern: RegExp) => {
   return hits;
 };
 const target = (hit: string) => hit.slice(hit.indexOf(": ") + 2);
+// Screenshots and reports under evidence/ are kept outside the repository.
+const EVIDENCE = join(DOCS, "evidence");
+const inEvidence = (path: string) => resolve(ROOT, path).startsWith(EVIDENCE);
 
 // The verbs `help` prints, minus the shell line under "isolated fixture".
 const helpVerbs = new Set([...HELP.matchAll(/^ {2}([a-z][\w-]*)(?= |$)/gm)].map((match) => match[1]!).filter((verb) => verb !== "node"));
@@ -70,7 +73,7 @@ describe("docs/verification recipes cite things that exist", () => {
   it("cite test files that exist", () => {
     const refs = cited(/(?<![\w/.-])([\w./-]+\.test\.(?:ts|mjs))(?![\w/])/g);
     expect(refs.length).toBeGreaterThan(20);
-    expect([...new Set(refs.filter((hit) => !existsSync(join(ROOT, target(hit)))))]).toEqual([]);
+    expect([...new Set(refs.filter((hit) => !inEvidence(target(hit)) && !existsSync(join(ROOT, target(hit)))))]).toEqual([]);
   });
 
   it("cite API routes the server registers", () => {
@@ -109,6 +112,7 @@ describe("docs/verification recipes cite things that exist", () => {
         if (/^(https?:|mailto:|#)/.test(link!)) continue;
         const [file, anchor] = link!.split("#");
         const resolved = resolve(DOCS, file!);
+        if (resolved.startsWith(EVIDENCE)) continue;
         if (!existsSync(resolved)) { broken.push(`${recipe}: ${link}`); continue; }
         if (anchor && resolved.endsWith(".md")) {
           const headings = [...readFileSync(resolved, "utf8").matchAll(/^#+\s+(.+)$/gm)].map((match) => slug(match[1]!));

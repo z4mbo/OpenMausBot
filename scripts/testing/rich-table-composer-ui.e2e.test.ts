@@ -4,16 +4,12 @@
 // pinned agent-browser binary: runs when one resolves (tools directory,
 // OMB_AGENT_BROWSER_PATH, or PATH) or OMB_UI_E2E=1 asks for the verified
 // download; otherwise skipped.
-import { spawn, type ChildProcess } from "node:child_process";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import type { ChildProcess } from "node:child_process";
 import { expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
-
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
 const enabled = process.env.OMB_UI_E2E === "1" || Boolean(binary);
 if (!enabled) console.info("skipping rich table composer UI e2e: set OMB_UI_E2E=1 to install the pinned browser");
@@ -71,11 +67,7 @@ const PROBE = `(() => {
   let info: { ui: string } | undefined;
   try {
     let stdout = "", stderr = "";
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT,
-      env: { ...process.env, FAKE_CLAUDE_REPLIES: JSON.stringify([REPLY]), FAKE_CLAUDE_TOOL_CALLS: "[]" },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([], { ...process.env, FAKE_CLAUDE_REPLIES: JSON.stringify([REPLY]), FAKE_CLAUDE_TOOL_CALLS: "[]" });
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
     child.on("error", (error) => { stderr += error.message; });
@@ -100,6 +92,6 @@ const PROBE = `(() => {
     const state = await probeState();
     expect(state).toMatchObject({ overlap: true, hitIsComposer: true, hitInHeader: false });
   } finally {
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
   }
 }, binary ? 360_000 : 720_000);

@@ -1,15 +1,11 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
 import { fixtureApi } from "./preview-fixture.ts";
-
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
 const enabled = process.env.OMB_UI_E2E === "1" || Boolean(binary);
 if (!enabled) console.info("skipping team canvas UI e2e: set OMB_UI_E2E=1 to install the pinned browser");
@@ -26,9 +22,7 @@ type BotRecord = {
   const receipts: Record<string, unknown> = { pointerInput: "synthetic DOM events; native pointer capture is not proven" };
   try {
     let stdout = "", stderr = "";
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
     child.on("error", error => { stderr += error.message; });
@@ -73,7 +67,6 @@ type BotRecord = {
     })()`);
     const messages = async (id: string) => (await control("messages", "--bot", id, "--limit", "10")).messages;
     const openMap = async () => {
-      await click("Tools");
       await click("Team map");
       await expect.poll(() => evaluate("Boolean(document.querySelector('[data-team-canvas]'))"), { timeout: 10_000 }).toBe(true);
     };
@@ -147,7 +140,7 @@ type BotRecord = {
     receipts.beforeBots = beforeBots.map(identity);
     receipts.transcript = transcript;
     await evaluate("location.reload(); true");
-    await expect.poll(snapshot, { timeout: 15_000 }).toContain("Actions for Ada");
+    await expect.poll(snapshot, { timeout: 15_000 }).toContain('complementary "Bots and navigation"');
     await openMap();
     await expect.poll(() => evaluate("[...document.querySelectorAll('[data-team-key]')].map(team => team.dataset.teamKey)"))
       .toEqual(expect.arrayContaining(["Engineering", "Research", "Delivery"]));
@@ -334,7 +327,7 @@ type BotRecord = {
     expect(Object.keys(layout).filter(key => key.endsWith(":bot-order"))).toHaveLength(1);
     receipts.layout = layout;
     await evaluate("location.reload(); true");
-    await expect.poll(snapshot, { timeout: 15_000 }).toContain("Actions for Ada");
+    await expect.poll(snapshot, { timeout: 15_000 }).toContain('complementary "Bots and navigation"');
     await openMap();
     await expect.poll(() => teamPosition("Delivery"), { timeout: 10_000 }).toEqual(arranged);
     await expect.poll(() => cardOrder("Delivery"), { timeout: 10_000 }).toEqual(reordered);
@@ -380,6 +373,6 @@ type BotRecord = {
       writeFileSync(evidence, JSON.stringify({ fixture: info, ...receipts }, null, 2));
       console.info(JSON.stringify({ evidence }));
     }
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
   }
 }, binary ? 240_000 : 720_000);

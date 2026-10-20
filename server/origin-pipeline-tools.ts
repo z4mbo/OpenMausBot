@@ -44,7 +44,7 @@ function leadLine(lead: Args, currency: string): string {
 function activityLine(activity: Args): string {
   const when = new Date(Number(activity.createdAt)).toISOString().slice(0, 16).replace("T", " ");
   const head = `${when} ${text(activity.kind)}${text(activity.status) && !["logged"].includes(text(activity.status)) ? ` (${text(activity.status)})` : ""} by ${text(record(activity.actor).name)}`;
-  const body = [text(activity.subject), text(activity.goal) && `goal: ${text(activity.goal)}`, text(activity.body), text(activity.summary) && `summary: ${text(activity.summary)}`, text(activity.error) && `error: ${text(activity.error)}`]
+  const body = [text(activity.subject), text(activity.goal) && `goal: ${text(activity.goal)}`, text(activity.body), text(activity.summary) && `summary: ${text(activity.summary)}`, text(activity.error) && `failed: ${text(activity.error)}`]
     .filter(Boolean).map((part) => clip(part.replace(/\s+/g, " "), 400)).join(" · ");
   return `- ${head}${body ? `: ${body}` : ""}`;
 }

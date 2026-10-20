@@ -750,7 +750,7 @@
   "approvalMode.customLocalOnly": "A aprovação personalizada só pode ser alterada no app de desktop instalado",
   "approvalMode.customLocalOnlyDot": "A aprovação personalizada só pode ser alterada no app de desktop instalado.",
   "onboarding.welcome": "Boas-vindas ao {app}",
-  "onboarding.intro": "Bots que fazem trabalho de verdade no próprio computador. Diga quem você é e avisamos quando algo grande sair.",
+  "onboarding.intro": "Você, seu time e agentes de IA levam um projeto da ideia ao lançamento. Diga quem você é e avisamos quando algo grande sair.",
   "onboarding.name": "Seu nome",
   "onboarding.continue": "Continuar",
   "onboarding.maybeLater": "Talvez depois",

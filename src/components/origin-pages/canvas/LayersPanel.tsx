@@ -103,7 +103,7 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
               onKeyDown={(event) => { event.stopPropagation(); if (event.key === "Enter") event.currentTarget.blur(); if (event.key === "Escape") setRenaming(null); }} />
           ) : <span className="min-w-0 flex-1 truncate">{node.name}</span>}
           {!readOnly && renaming !== node.id && (
-            <span className={cn("flex shrink-0 items-center", !node.locked && !node.hidden && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100")}>
+            <span className={cn("flex shrink-0 items-center", !node.locked && !node.hidden && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100")}>
               <button type="button" aria-label={node.locked ? `Unlock ${node.name}` : `Lock ${node.name}`} onClick={(event) => { event.stopPropagation(); canvas.commit([{ ...node, locked: !node.locked }]); }}
                 className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary hover:text-ink">
                 {node.locked ? <Lock size={12} /> : <LockOpen size={12} />}

@@ -1,13 +1,9 @@
-import { spawn, type ChildProcess } from "node:child_process";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import type { ChildProcess } from "node:child_process";
 import { expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
-
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
 const enabled = process.env.OMB_UI_E2E === "1" || Boolean(binary);
 if (!enabled) console.info("skipping reply focus UI e2e: set OMB_UI_E2E=1 to install the pinned browser");
@@ -17,9 +13,7 @@ if (!enabled) console.info("skipping reply focus UI e2e: set OMB_UI_E2E=1 to ins
   let info: { ui: string } | undefined;
   try {
     let stdout = "", stderr = "";
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
     child.on("error", error => { stderr += error.message; });
@@ -48,6 +42,6 @@ if (!enabled) console.info("skipping reply focus UI e2e: set OMB_UI_E2E=1 to ins
     await expect.poll(() => evaluate("/Replying to Pepper/.test(document.body.innerText)"), { timeout: 5_000 }).toBe(false);
     expect(await focused()).toBe("BODY");
   } finally {
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
   }
 }, binary ? 240_000 : 720_000);

@@ -142,10 +142,12 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
             {board.stages.map((stage) => <option key={stage} value={stage}>{stage}</option>)}
           </Select>
         )}
-        <Select size="sm" className="max-sm:hidden" aria-label="Owner" value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)}>
-          <option value="">Everyone</option>
-          {ownerOptions.map((owner) => <option key={owner.value} value={owner.value}>{owner.label}</option>)}
-        </Select>
+        <div className="max-sm:hidden">
+          <Select size="sm" aria-label="Owner" value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)}>
+            <option value="">Everyone</option>
+            {ownerOptions.map((owner) => <option key={owner.value} value={owner.value}>{owner.label}</option>)}
+          </Select>
+        </div>
         <div className="flex items-center">
           <button type="button" className={iconButton} title="Lead capture" aria-label="Lead capture" onClick={() => setDialog("capture")}><Inbox size={16} /></button>
           {canEdit && <button type="button" className={iconButton} title="Import CSV" aria-label="Import CSV" onClick={() => setDialog("import")}><Upload size={16} /></button>}
@@ -264,7 +266,7 @@ function LeadCard({ lead, currency, canEdit, awaiting, owners, lifted = false, o
       className={cn("group relative cursor-pointer rounded-xl border border-hairline/40 bg-panel px-3 py-2.5 outline-none transition-[border-color,background-color] duration-150 hover:border-hairline hover:bg-raised/40 focus-visible:ring-2 focus-visible:ring-accent/60",
         canEdit && "cursor-grab select-none active:cursor-grabbing", lifted && "cursor-grabbing border-hairline")}>
       <div className="flex items-start gap-2">
-        {canEdit && <GripVertical size={12} className="-ml-1.5 mt-1 shrink-0 text-ink-tertiary opacity-0 transition-opacity group-hover:opacity-100 max-md:hidden" aria-hidden="true" />}
+        {canEdit && <GripVertical size={12} className="-ml-1.5 mt-1 shrink-0 text-ink-tertiary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100 max-md:hidden" aria-hidden="true" />}
         <div className="min-w-0 flex-1">
           <strong className="block truncate text-[13.5px] font-medium leading-snug text-ink">{lead.name}</strong>
           {lead.company && <span className="block truncate text-[12px] text-ink-secondary">{lead.company}</span>}

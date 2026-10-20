@@ -5,6 +5,7 @@ import {
   type CanvasNode, type CanvasNodeType, type Scene,
 } from "../../../../shared/canvas-scene";
 import { cn } from "@/lib/cn";
+import { copyText } from "@/lib/copy-text";
 import {
   CLIPBOARD_MARK, copySelection, deleteNodes, duplicateNodes, parseClipboard, pasteClipboard, reparent, reorder, topmost, unwrap, wrapNodes, zAt,
   type Clipboard, type Reorder,
@@ -215,7 +216,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         const clip = copySelection(scene, index, ids);
         if (!clip) return;
         clipboard.current = clip;
-        void navigator.clipboard?.writeText(JSON.stringify(clip)).catch(() => {});
+        void copyText(JSON.stringify(clip));
         return;
       }
       case "paste": {

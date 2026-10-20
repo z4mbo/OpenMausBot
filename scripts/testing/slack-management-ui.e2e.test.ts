@@ -1,16 +1,12 @@
 // Real settings in the disposable browser harness; synthetic Admin responses
 // remain in this page. No Slack or Admin service is contacted.
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
-
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
 const forced = process.env.OMB_UI_E2E === "1";
 const enabled = forced || Boolean(binary);
@@ -19,15 +15,13 @@ if (!enabled) console.log("skipping Slack settings UI e2e: no agent-browser; set
 
 describe("Slack management in agent settings", () => {
   let child: ChildProcess | undefined;
-  afterAll(async () => { await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 }); });
+  afterAll(async () => { await stopUiLauncher(child); });
 
   (enabled ? it : it.skip)("shows the Slack row only when Admin can manage it, and never another agent's link", async () => {
     let output = "";
     let errors = "";
     let info: { ui: string; url: string; botId: string; dataDir: string; logPath: string } | undefined;
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", (chunk: Buffer) => { output += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { errors += String(chunk); });
     child.on("error", (error) => { errors += error.message; });
@@ -110,7 +104,7 @@ describe("Slack management in agent settings", () => {
     await expect.poll(() => evaluate("window.slackFixture.pending.length"), { timeout: 10_000 }).toBe(1);
     expect(await row()).toBe(false);
     await click("Close settings");
-    await runControlOmb(["new-bot", "--name", "Slack Juniper", "--url", fixture.url]);
+    await runControlOmb(["new-bot", "--name", "Slack Juniper", "--section", "Slack team", "--url", fixture.url]);
     const saved = await fetch(`${fixture.url}/api/bots?messages=0`).then((response) => response.json()) as { bots: Array<{ id: string; name: string }> };
     const second = saved.bots.find((bot) => bot.name === "Slack Juniper")!;
     expect(second).toBeDefined();
@@ -124,14 +118,14 @@ describe("Slack management in agent settings", () => {
     await evaluate("window.slackFixture.mode = 'ready'; true");
     await openProfile();
     await expect.poll(row, { timeout: 10_000 }).toBe(true);
-    await click("Slack");
+    if (await link() === null) await click("Slack");
     const expected = `https://admin.example.test/slack?workspace=acme&bot=${second.id}`;
     await expect.poll(link, { timeout: 10_000 }).toBe(expected);
     await evaluate("window.slackFixture.pending.forEach(resolve => resolve()); true");
     expect(await link()).toBe(expected);
     await ui("screenshot", "--out", `${fixture.logPath}.slack-settings.png`);
     console.info(JSON.stringify({ logPath: fixture.logPath, screenshotPath: `${fixture.logPath}.slack-settings.png`, managementUrl: expected }));
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
     expect(child.exitCode).toBe(0);
     expect(existsSync(fixture.dataDir)).toBe(false);
   }, launchTimeout + 180_000);

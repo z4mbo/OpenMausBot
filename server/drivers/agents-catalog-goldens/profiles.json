@@ -1,7 +1,7 @@
 {
   "default": {
-    "bytes": 68469,
-    "sha256": "760961c9f01cef156bb97f09e86e9674a57c834bf0f7ec18aaacb53fba9c32f7",
+    "bytes": 81033,
+    "sha256": "3a08abaffbf87d9f8b5e5c52faba67fcc51ef26c445ce8afb458b25c2f1992d1",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -56,12 +56,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "voice": {
-    "bytes": 69210,
-    "sha256": "8864eb31b5ac6cb63ca7aa6662602a742f83053de20aba3aee2b17b4873220c5",
+    "bytes": 81774,
+    "sha256": "8b0193c8e055a9220f368d79a71c3ac1a37864237ec84f23b8b447a01d260e03",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -117,12 +128,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "shared": {
-    "bytes": 70214,
-    "sha256": "2b1ac44b8487d6244a0323107f2c4c8173292f8be17d0be3b76061f7c7e4c205",
+    "bytes": 82778,
+    "sha256": "3f90764c07c76c9642d2654f40c8c9a46472b60ac41d68e1dd09948d5bbe4a97",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -179,12 +201,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "shared+voice": {
-    "bytes": 70955,
-    "sha256": "1ad18fae06be98348aa001ae21c53a92937ce18a590fa06584e31cca0eea5222",
+    "bytes": 83519,
+    "sha256": "118f6d291629427c173fe723b14c665b3b30a3188cb65d98e663fc3b8497e907",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -242,12 +275,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills": {
-    "bytes": 71368,
-    "sha256": "ca472550a9522309eabffebcb29d7b0a4a8763b71bc92c5d079e6b8201816444",
+    "bytes": 83932,
+    "sha256": "c162ff80270494ef5716cea92340c0e24bb5f729d2a3df8b8d7a1b315c5f709e",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -304,12 +348,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+voice": {
-    "bytes": 72109,
-    "sha256": "a524ed27d17cd4fae00f00849c265359e4b0b712dcf7fe663d80c977797545bb",
+    "bytes": 84673,
+    "sha256": "38100dd1e19cad574ad27632cd0281fb8f8eda9ea9aeeb3ce7e748a117f61df4",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -367,12 +422,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+shared": {
-    "bytes": 73113,
-    "sha256": "c18ca7edf17042b2734587e94ffa07cd5622f3854521d8f3a4753ea498c4b813",
+    "bytes": 85677,
+    "sha256": "ae1b706bc7c1a911921800e017f318fc7f8ff354c73c63591ab3813b39cf049a",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -431,12 +497,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+shared+voice": {
-    "bytes": 73854,
-    "sha256": "c8f4ef9996326144179bd811aa6479f2ef4dd812f8836551031adebe40d8c230",
+    "bytes": 86418,
+    "sha256": "3e8dc31090dfb544e1a402e7c389507044c093bcd5e4d2e8bda094a16a8caf6b",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -496,12 +573,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "non-chief": {
-    "bytes": 56230,
-    "sha256": "e17ad8b4258636c2c1a67d511eef5c9235dfa5f3e4b94c230da93716de569781",
+    "bytes": 68794,
+    "sha256": "6c1e97ae5f29ee3434473dc9896075c24f3c1a6d85579936b15242ee856c34eb",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -546,12 +634,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "voice+non-chief": {
-    "bytes": 56971,
-    "sha256": "a45bec24e2cf517e8f0d787f3181b816847822284e436441f9af70da46ec3d20",
+    "bytes": 69535,
+    "sha256": "39727cbfac1913b0fdd1d007115d6ea22899002ab3c8635998dc2cd6678eb784",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -597,12 +696,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "shared+non-chief": {
-    "bytes": 57975,
-    "sha256": "d8e66d2cef19c050dac349eda38bfa98f1dd802a38a16c85c3b4a72df1f996c9",
+    "bytes": 70539,
+    "sha256": "720bd8d91740576fae2293cd0753fd27162694e8b49ed8a613ed4f89d65d098f",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -649,12 +759,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 58716,
-    "sha256": "b0efa59db2163b6a225e53148c73dfacbae74e44be9795b703bd5061a63e7e7d",
+    "bytes": 71280,
+    "sha256": "b1ce3a51cee602ccdce6748d34607df867a21ac98f370b06d0de087d5dd32cf0",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -702,12 +823,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+non-chief": {
-    "bytes": 59129,
-    "sha256": "ba23330f83b7a12b618a791f52ce80e80d38927353ea1d2f0aeecda880a26274",
+    "bytes": 71693,
+    "sha256": "a1646be1bfbb0a35d400cc5eee60e9bffad9482a7c075d6a2e1f731a11a2e27a",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -754,12 +886,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 59870,
-    "sha256": "b0939d61e7f70d19cd0866b492bb48e33e4bdac6342ea5db73740e01767b2a18",
+    "bytes": 72434,
+    "sha256": "9515196bf247eeb71bf0a47ace3194cb64187471b3b8ff7850cc041d4d7e5f4b",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -807,12 +950,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 60874,
-    "sha256": "2de0f3c5dbef041f5e9c3a04f954c78fcabdab5f9ca52756d620779d0e308800",
+    "bytes": 73438,
+    "sha256": "4f77b89b80d37fa485d60274e34942e3ffa13791210f5730ac4eb1e50674858f",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -861,12 +1015,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 61615,
-    "sha256": "9b29dc9d80b55dd6374ae3ce1d016a094a3c3e3b0ce069b6c6f76da74f9b4eb1",
+    "bytes": 74179,
+    "sha256": "b513ee9aef05c5c26ca08ca12eb8ce5eced2586fcfde63626365e425b38a2b76",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -916,12 +1081,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 72909,
-    "sha256": "9a1c128f2a89a55f03993bf31a214a2b18680db24b2a2beed7818a7fd50a8a95",
+    "bytes": 85473,
+    "sha256": "8526243905f2e644dce962d0eb390b917414eb2b26c982e8c6fdd9befe1ce2af",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -980,12 +1156,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 60670,
-    "sha256": "2c09c170e8a9349127846578f9c206fdb394851b905bcf0dfeccd23ac7770d0b",
+    "bytes": 73234,
+    "sha256": "c4e059dde5b908fa7e05f6e4051aa4a70a0869ddd1e73127f96258944cea6bfe",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1034,12 +1221,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 74714,
-    "sha256": "ebf6145f2dcac9d586d83e9e4cda185d506f1255314f8fc1f779039f0bd15ea6",
+    "bytes": 87278,
+    "sha256": "130168c36132377cca4a09749378e723cf8957cabd57bf614b9bf936792074ef",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1100,12 +1298,23 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   },
   "default+legacy-switches": {
-    "bytes": 68469,
-    "sha256": "760961c9f01cef156bb97f09e86e9674a57c834bf0f7ec18aaacb53fba9c32f7",
+    "bytes": 81033,
+    "sha256": "3a08abaffbf87d9f8b5e5c52faba67fcc51ef26c445ce8afb458b25c2f1992d1",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1160,7 +1369,18 @@
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw"
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_contact"
     ]
   }
 }

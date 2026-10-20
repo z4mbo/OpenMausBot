@@ -305,6 +305,7 @@ it("stops after one failed backup instead of looping between engines", async () 
 it.each(["workspace", "bot"])("uses the configured %s backup when Claude refuses a turn because it is signed out", async scope => {
   await withRecoveryFixture({ backupFails: true, codexBackup: true }, async ({ api, control, backupPrompts, evidence }) => {
     const healthy = { instanceId: "codex", model: "gpt-fake-default" };
+    await expect.poll(async () => JSON.stringify(await api("GET", "/api/instances")).includes(healthy.model), { timeout: 30_000 }).toBe(true);
     await api("PUT", "/api/config", { automaticRecovery: { enabled: true, backup: healthy } });
     const { bot } = await control("new-bot", "--name", "Signed out primary");
     const threadId = bot.activeTaskId;
