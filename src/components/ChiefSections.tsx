@@ -16,7 +16,7 @@ import { requestIssueFocus } from "@/lib/origin-issue-focus";
 import { handOff as handIssueTo } from "@/lib/origin-handoff";
 import { StudioPage } from "./origin-studio/StudioPage";
 import { BroadcastPage } from "./origin-broadcast/BroadcastPage";
-import { PipelinePage } from "./origin-pipeline/PipelinePage";
+import { OpenSales } from "./origin-broadcast/OpenSales";
 import { ShipPage } from "./origin-ship/ShipPage";
 import { DocsPage } from "./origin-docs/DocsPage";
 import { LaunchpadDialog } from "./origin-launchpad/LaunchpadDialog";
@@ -95,7 +95,7 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   if (section === "draw") return <ProjectDrawPage {...page} agent={bot} />;
   if (section === "studio") return <StudioPage {...page} agent={bot} />;
   if (section === "broadcast") return <BroadcastPage {...page} agent={bot} />;
-  if (section === "pipeline") return <PipelinePage {...page} agent={bot} />;
+  if (section === "pipeline") return <OpenSales botId={bot.id} />;
   if (section === "ship") return <ShipPage {...page} agent={bot} />;
   if (section === "settings") return <ProjectSettingsPage {...page} />;
   if (section === "pulse") return <PulsePage {...page} botId={bot.id} />;

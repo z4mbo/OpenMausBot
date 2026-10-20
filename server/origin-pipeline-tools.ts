@@ -171,7 +171,7 @@ export function pipelineTools<C>(scope: (args: Args, ctx: C) => Promise<Pipeline
       const started = record(await target.client.mutation("pipelineSequences:start", { ...base(target), leadId, agent: agent(target), steps }));
       const drafted = Number(started.drafted) || 0;
       return {
-        text: `Started a ${steps.length}-step sequence for lead ${leadId}. ${drafted ? `${drafted} step(s) due today wait in ${target.projectName}'s Sales inbox for a person's approval. ` : ""}`
+        text: `Started a ${steps.length}-step sequence for lead ${leadId}. ${drafted ? `${drafted} step(s) due today wait in ${target.projectName}'s Publish › Sales inbox for a person's approval. ` : ""}`
           + "Later steps are drafted for approval on their day; the sequence stops by itself when the lead replies or is moved to Won or Lost.",
       };
     },
@@ -194,9 +194,9 @@ export function pipelineTools<C>(scope: (args: Args, ctx: C) => Promise<Pipeline
       }
       const threads = list(await target.client.query("pipelineInbox:threads", base(target)));
       const shown = (args.unread_only === true ? threads.filter((row) => Number(row.unread) > 0 || Number(row.pending) > 0 || row.wonRequest) : threads).slice(0, THREADS_SHOWN);
-      if (!shown.length) return { text: `No ${args.unread_only === true ? "unread " : ""}conversations in ${target.projectName}'s Sales inbox.` };
+      if (!shown.length) return { text: `No ${args.unread_only === true ? "unread " : ""}conversations in ${target.projectName}'s Publish › Sales inbox.` };
       return {
-        text: [NOTE, `${target.projectName}'s Sales inbox, newest first:`, ...shown.map((row) => {
+        text: [NOTE, `${target.projectName}'s Publish › Sales inbox, newest first:`, ...shown.map((row) => {
           const last = record(row.last);
           const parts = [
             `${text(row.leadId)} ${text(row.name)}${text(row.company) ? ` (${text(row.company)})` : ""} [${text(row.stage)}]`,
@@ -231,7 +231,7 @@ export function pipelineTools<C>(scope: (args: Args, ctx: C) => Promise<Pipeline
       }
       if (action === "coach") {
         if (!dealId) return { text: "Pass deal_id from action list.", isError: true };
-        if (!target.sender?.coach) return { text: "This server has no model for the deal coach; a person can ask it from the deal in Sales.", isError: true };
+        if (!target.sender?.coach) return { text: "This server has no model for the deal coach; a person can ask it from the deal in Publish › Sales.", isError: true };
         const coach = await target.sender.coach({ client: target.client, ...base(target), dealId, botId: target.caller.id, projectName: target.projectName, agent: agent(target) });
         const follow = coach.followUp;
         return {
@@ -247,7 +247,7 @@ export function pipelineTools<C>(scope: (args: Args, ctx: C) => Promise<Pipeline
           ...(typeof args.amount === "number" ? { amount: args.amount } : {}), ...(trimmed(args.reason) ? { reason: trimmed(args.reason) } : {}),
         }));
         return { text: outcome === "requested"
-          ? `Asked a person to confirm deal ${dealId} as won. Nothing changes until they confirm it in ${target.projectName}'s Sales; do not ask again.`
+          ? `Asked a person to confirm deal ${dealId} as won. Nothing changes until they confirm it in ${target.projectName}'s Publish › Sales; do not ask again.`
           : `Deal ${dealId} is marked lost.` };
       }
       if (!dealId && !leadId) return { text: "Pass lead_id to open a deal, or deal_id to change one.", isError: true };
@@ -258,7 +258,7 @@ export function pipelineTools<C>(scope: (args: Args, ctx: C) => Promise<Pipeline
         ...(typeof args.close_date === "string" ? { closeDate: args.close_date } : {}),
         ...(typeof args.value === "number" ? { value: args.value } : {}), ...(items ? { lineItems: items } : {}),
       }));
-      return { text: `${dealId ? "Updated" : "Opened"} deal ${saved} in ${target.projectName}'s Sales.` };
+      return { text: `${dealId ? "Updated" : "Opened"} deal ${saved} in ${target.projectName}'s Publish › Sales.` };
     },
 
     async origin_pipeline_contact(args, ctx) {
@@ -280,9 +280,9 @@ export function pipelineTools<C>(scope: (args: Args, ctx: C) => Promise<Pipeline
       }));
       const label = channel === "ai_call" ? "AI call" : channel === "sms" ? "text" : channel === "whatsapp" ? "WhatsApp message" : "email";
       if (drafted.status === "pending") {
-        return { text: `Drafted the ${label}. Nothing was sent: it waits in ${target.projectName}'s Sales inbox for a person to approve it. Do not draft it again.` };
+        return { text: `Drafted the ${label}. Nothing was sent: it waits in ${target.projectName}'s Publish › Sales inbox for a person to approve it. Do not draft it again.` };
       }
-      if (!target.sender) return { text: `The ${label} is approved but this server cannot send it; a person can send it from Sales.`, isError: true };
+      if (!target.sender) return { text: `The ${label} is approved but this server cannot send it; a person can send it from Publish › Sales.`, isError: true };
       const sent = await target.sender.send({ ...base(target), client: target.client, activityId: text(drafted.activityId), botId: target.caller.id });
       return sent.ok ? { text: sent.message } : { text: `The ${label} failed: ${sent.error}`, isError: true };
     },

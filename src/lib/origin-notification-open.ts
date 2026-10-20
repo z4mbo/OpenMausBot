@@ -6,6 +6,7 @@ import { useCloudLinks } from "./origin-cloud-links";
 import { projectBotFor, useOpenOriginIssue } from "./origin-issue-focus";
 import { openOriginPage } from "./origin-pages";
 import { requestLeadFocus } from "./origin-lead-focus";
+import { openSales } from "./origin-publish-mode";
 import { useShowThreads } from "./thread-preferences";
 
 /** Where an Origin notification points: an issue, a member chat message, or a line of a shared agent thread. */
@@ -62,7 +63,7 @@ export function useOpenOriginNotification(): (target: OriginNotificationTarget) 
       const bot = botId ? state.bots.find((candidate) => candidate.id === botId) : undefined;
       if (!bot) return "elsewhere";
       requestLeadFocus({ projectId: target.projectId, leadId: target.leadId });
-      setChiefSectionOf(bot.id, "pipeline");
+      openSales(bot.id);
       openOriginPage(null);
       openBot(dispatch, bot, showThreads);
       return "opened";

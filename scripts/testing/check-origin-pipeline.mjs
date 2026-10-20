@@ -20,7 +20,7 @@ async function open(width, theme, query = {}) {
   target.searchParams.set("theme", theme);
   for (const [key, value] of Object.entries(query)) target.searchParams.set(key, value);
   await page.goto(target.href);
-  await page.getByRole("heading", { name: "Sales" }).waitFor();
+  await page.getByRole("heading", { name: "Publish" }).waitFor();
   await page.getByRole("button", { name: "Pipeline" }).click();
   await page.getByText("Grace Hopper").first().waitFor();
   return page;

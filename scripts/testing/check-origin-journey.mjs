@@ -125,7 +125,7 @@ try {
     await strip(rocket).getByRole("button", { name: "Hide this step" }).click();
     await strip(rocket).waitFor({ state: "detached" });
     await rocket.reload();
-    await rocket.getByRole("heading", { name: "Broadcast" }).waitFor();
+    await rocket.getByRole("heading", { name: "Publish" }).waitFor();
     await rocket.waitForTimeout(1_000);
     assert.equal(await strip(rocket).count(), 0, "a hidden step stays hidden");
     await rocket.locator('[data-chief-sections] [data-chief-section="pulse"]').click();

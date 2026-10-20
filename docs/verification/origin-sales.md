@@ -1,9 +1,13 @@
 # Sales: contacts, conversations and deals
 
-The Sales section (the Pipeline section renamed; its ids, tables and agent tool
-names are unchanged) is checked against the same isolated fixture as
+Sales (contacts, inbox and deals) is a view of the project's Publish page, next
+to Posts and Campaigns, with no tab of its own; its ids, tables and agent tool
+names are unchanged. Links that opened the old Sales section (notifications,
+campaign leads) open Publish on that view. It is checked against the same
+isolated fixture as
 [Pipeline replies, stages, sequences and scoring](origin-pipeline-v2.md):
-`scripts/verify-origin-pipeline.ts` mounts the production `PipelinePage` on the
+`scripts/verify-origin-pipeline.ts` mounts the production `BroadcastPage` on its
+Sales view on the
 real functions of `backend/convex` run in memory by convex-test, and a
 disposable `launchVerificationServer` whose Brevo, Twilio and Stripe requests
 go to a loopback stand-in. The fixture's quick model is the repository's fake

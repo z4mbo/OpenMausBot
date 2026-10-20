@@ -207,7 +207,7 @@ describe("pipeline inbound wiring and sequences", () => {
     const started = await runOriginTool("origin_pipeline_sequence", {
       lead_id: "lead1", steps: [{ day: 0, channel: "email", subject: "Hi {first_name}", body: "Intro" }, { day: 3, channel: "sms", body: "Follow up" }, { day: 7, channel: "call_task" }],
     }, "chief", { bots: BOTS, state, connect: () => convex.client });
-    expect(started.text).toContain("Started a 3-step sequence for lead lead1. 1 step(s) due today wait in Apollo's Sales inbox for a person's approval.");
+    expect(started.text).toContain("Started a 3-step sequence for lead lead1. 1 step(s) due today wait in Apollo's Publish › Sales inbox for a person's approval.");
     expect(convex.calls.find((call) => call.name === "pipelineSequences:start")!.args).toEqual({
       projectId: "proj", sessionToken: "tok", leadId: "lead1", agent: { name: "Chief", id: "chief" },
       steps: [{ day: 0, channel: "email", subject: "Hi {first_name}", body: "Intro" }, { day: 3, channel: "sms", body: "Follow up" }, { day: 7, channel: "call_task" }],

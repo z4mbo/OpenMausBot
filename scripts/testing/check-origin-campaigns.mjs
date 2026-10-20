@@ -20,7 +20,7 @@ async function open(width, theme, query = {}) {
   for (const [key, value] of Object.entries(query)) target.searchParams.set(key, value);
   await page.goto(target.href);
   assert.equal(await page.title(), "Isolated Origin Campaigns");
-  await page.getByRole("heading", { name: "Broadcast" }).waitFor();
+  await page.getByRole("heading", { name: "Publish" }).waitFor();
   await page.getByRole("button", { name: "Campaigns" }).click();
   await page.getByRole("button", { name: /Spring launch/ }).waitFor();
   return page;
@@ -64,15 +64,21 @@ try {
     assert.match(sent.text, /utm_campaign=spring-launch/);
     evidence.cases.push({ tag, step: "Plan with the Chief sends the brief into its chat" });
 
-    await page.getByRole("button", { name: /Grace Hopper/ }).click();
-    assert.equal((await nav(page)).section, "pipeline");
-    assert.notEqual((await nav(page)).lead, "");
     await page.getByRole("button", { name: /Landing page for the launch/ }).click();
     assert.equal((await nav(page)).section, "issues");
     assert.notEqual((await nav(page)).issue, "");
     await page.getByRole("button", { name: "Hero shot of the app on a dark desk" }).click();
     assert.equal((await nav(page)).section, "studio");
-    evidence.cases.push({ tag, step: "lead, issue and content links open Pipeline (with the lead), Issues (with the issue) and Studio" });
+    await page.getByRole("button", { name: /Grace Hopper/ }).click();
+    assert.equal((await nav(page)).section, "broadcast");
+    assert.notEqual((await nav(page)).lead, "");
+    await page.getByRole("group", { name: "Publish section" }).getByRole("button", { name: /Sales/, pressed: true }).waitFor();
+    evidence.cases.push({ tag, step: "issue, content and lead links open Issues (with the issue), Studio and the Sales view of Publish (with the lead)" });
+    await page.getByRole("dialog").waitFor();
+    await page.keyboard.press("Escape");
+    await page.getByRole("dialog").waitFor({ state: "detached" });
+    await page.getByRole("group", { name: "Publish section" }).getByRole("button", { name: /Campaigns/ }).click();
+    await page.getByRole("button", { name: /Spring launch/ }).click();
 
     await page.getByRole("button", { name: /Teaser: one place to launch/ }).click();
     const dialog = page.getByRole("dialog");

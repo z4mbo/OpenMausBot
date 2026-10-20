@@ -31,10 +31,10 @@ import { InboxView } from "./InboxView";
 import { DealsView } from "./DealsView";
 import { NewDealDialog } from "./SalesDialogs";
 
-export function PipelinePage({ agent, ...props }: OriginPageProps & { agent: Bot }) {
+export function PipelinePage({ agent, nav, ...props }: OriginPageProps & { agent: Bot; nav(projectId: string): ReactNode }) {
   return (
-    <CloudGate {...props} label="Sales">
-      {({ project, projectId, canEdit, isAdmin }) => <Pipeline projectId={projectId} projectName={project.name} canEdit={canEdit} isAdmin={isAdmin} chief={agent} />}
+    <CloudGate {...props} label="Publish">
+      {({ project, projectId, canEdit, isAdmin }) => <Pipeline projectId={projectId} projectName={project.name} canEdit={canEdit} isAdmin={isAdmin} chief={agent} nav={nav(projectId)} />}
     </CloudGate>
   );
 }
@@ -64,7 +64,7 @@ function useOwners(projectId: string, chief: Bot): OwnerOption[] {
   }, [people, state.bots, chief]);
 }
 
-function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { projectId: string; projectName: string; canEdit: boolean; isAdmin: boolean; chief: Bot }) {
+function Pipeline({ projectId, projectName, canEdit, isAdmin, chief, nav }: { projectId: string; projectName: string; canEdit: boolean; isAdmin: boolean; chief: Bot; nav: ReactNode }) {
   const board = useCloudQuery<PipelineBoard>("pipeline:board", { projectId });
   const owners = useOwners(projectId, chief);
   const { dispatch } = useStore();
@@ -169,7 +169,7 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden motion-safe:animate-[rise_var(--motion-base)_var(--ease-out)_backwards]" aria-label="Sales">
-      <PageHeader title="Sales" count={<span title="Open value · won">{formatLeadValue(value.open, currency)} open{value.won ? ` · ${formatLeadValue(value.won, currency)} won` : ""}</span>}>
+      <PageHeader title="Publish" nav={nav} count={<span title="Open value · won">{formatLeadValue(value.open, currency)} open{value.won ? ` · ${formatLeadValue(value.won, currency)} won` : ""}</span>}>
         <Segmented label="Sales view" value={view} onChange={setView} options={[
           { value: "inbox", label: viewLabel(<MessagesSquare size={14} aria-hidden="true" />, "Inbox", unreadLeads), title: "Conversations" },
           { value: "contacts", label: viewLabel(<Users size={14} aria-hidden="true" />, "Contacts"), title: "Every contact" },

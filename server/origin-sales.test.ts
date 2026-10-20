@@ -172,7 +172,7 @@ describe("sales agent tools", () => {
       "pipeline:lead": { lead: { ...LEAD, phone: "+15550001111" }, activities: [{ kind: "whatsapp", status: "received", createdAt: 5 }, { kind: "email", status: "received", createdAt: 1 }] },
     });
     const drafted = await run("origin_pipeline_contact", { lead_id: "lead1", body: "On it" }, convex);
-    expect(drafted.text).toContain("Drafted the WhatsApp message. Nothing was sent: it waits in Apollo's Sales inbox");
+    expect(drafted.text).toContain("Drafted the WhatsApp message. Nothing was sent: it waits in Apollo's Publish › Sales inbox");
     expect(convex.calls.find((row) => row.name === "pipeline:draftContact")!.args).toMatchObject({ channel: "whatsapp", body: "On it", agent: { name: "Chief", id: "chief" } });
   });
 
@@ -182,7 +182,7 @@ describe("sales agent tools", () => {
       "pipelineDeals:list": { deals: [{ ...DEAL, leadName: "Ada", wonRequest: { amount: 300, by: { kind: "agent", name: "Chief" }, at: 1 } }], totals: { currency: "EUR", openValue: 350.5, openCount: 1, wonMonth: 0, wonTotal: 0 } },
     });
     const opened = await run("origin_pipeline_deal", { lead_id: "lead1", title: "Annual plan", line_items: [{ name: "Seat", quantity: 3, unit_price: 100 }], close_date: "2026-12-01" }, convex);
-    expect(opened.text).toBe("Opened deal deal1 in Apollo's Sales.");
+    expect(opened.text).toBe("Opened deal deal1 in Apollo's Publish › Sales.");
     expect(convex.calls.find((row) => row.name === "pipelineDeals:upsert")!.args).toEqual({
       ...scope, agent: { name: "Chief", id: "chief" }, leadId: "lead1", title: "Annual plan", closeDate: "2026-12-01", lineItems: [{ name: "Seat", quantity: 3, unitPrice: 100 }],
     });

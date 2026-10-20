@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
-import { PipelinePage } from "../../src/components/origin-pipeline/PipelinePage";
+import { BroadcastPage } from "../../src/components/origin-broadcast/BroadcastPage";
+import { setPublishMode } from "../../src/lib/origin-publish-mode";
 import { initialState, StoreContext, type Action, type Bot } from "../../src/state/store";
 import { applySkin } from "../../src/lib/skins";
 import { GlassHeaderFrame } from "../../src/components/GlassScrollFrame";
@@ -11,11 +12,12 @@ const chief = { id: config.chiefId ?? "fixture-chief", name: "Atlas", title: "Ch
 const dispatched: Action[] = [];
 Object.assign(window, { originPipelineDispatched: dispatched });
 
+setPublishMode(chief.id, "sales");
 createRoot(document.getElementById("root")!).render(
   <StoreContext.Provider value={{ state: { ...initialState, bots: [chief] }, dispatch: (action) => { dispatched.push(action); }, flushBotPatches: async () => null, refreshInstances: async () => {}, refreshModels: async () => {} }}>
     <main className="flex h-dvh min-w-0 flex-col bg-app text-ink">
       <GlassHeaderFrame className="flex min-h-0 flex-1 flex-col [--glass-tint:var(--color-app)]" barClassName="z-[25]" bar={<div className="h-2" />}>
-        <PipelinePage agent={chief} cloudProjectId={config.projectId} projectName="Fixture project" />
+        <BroadcastPage agent={chief} cloudProjectId={config.projectId} projectName="Fixture project" />
       </GlassHeaderFrame>
     </main>
   </StoreContext.Provider>,

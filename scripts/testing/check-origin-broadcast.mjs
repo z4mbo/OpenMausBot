@@ -20,7 +20,7 @@ async function open(width, theme, query = {}) {
   for (const [key, value] of Object.entries(query)) target.searchParams.set(key, value);
   await page.goto(target.href);
   assert.equal(await page.title(), "Isolated Origin Broadcast");
-  await page.getByRole("heading", { name: "Broadcast" }).waitFor();
+  await page.getByRole("heading", { name: "Publish" }).waitFor();
   await page.evaluate(() => window.originBroadcastFixture.clipReady);
   return page;
 }

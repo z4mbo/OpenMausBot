@@ -1,10 +1,13 @@
-import { useCallback, useState } from "react";
-import { CalendarDays, CalendarRange, Clapperboard, Heart, List, Loader2, Megaphone, MessageCircle, Plus, Repeat2, RotateCw, Send, ShieldCheck } from "lucide-react";
+import { useCallback, useState, type ReactNode } from "react";
+import { CalendarDays, CalendarRange, Clapperboard, Heart, List, Loader2, MessageCircle, Plus, Repeat2, RotateCw, Send, ShieldCheck } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { api, useStore, type Bot } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { BROADCAST_CHANNELS, BROADCAST_RULES, type BroadcastFormat } from "../../../shared/broadcast";
 import { CloudGate, EmptyState, Loading, PageHeader, Segmented, cardClass, ghostButton, pageClass, primaryButton, useAction, type OriginPageProps } from "../origin-pages/ui";
+import { setPublishMode, usePublishMode, type PublishMode } from "@/lib/origin-publish-mode";
+import { PipelinePage } from "../origin-pipeline/PipelinePage";
+import { PublishModes } from "./PublishModes";
 import { BroadcastComposer } from "./BroadcastComposer";
 import { Channels, MonthView, StatusPill, WeekView, dateTimeOf, excerpt } from "./BroadcastCalendar";
 import { CampaignsView } from "./CampaignsView";
@@ -13,17 +16,23 @@ import { listOrder, matchesFilter, monthStart, movedTo, postTime, weekStart, typ
 import { useBroadcastAccounts, type ChannelAccounts } from "./use-broadcast-accounts";
 
 export function BroadcastPage({ agent, ...props }: OriginPageProps & { agent: Bot }) {
-  return <CloudGate {...props} label="Broadcast">{({ project, projectId, canEdit }) => <Broadcast projectId={projectId} projectName={project.name} canEdit={canEdit} agent={agent} />}</CloudGate>;
+  const [mode, setMode] = usePublishMode(agent.id);
+  if (mode === "sales") return <PipelinePage {...props} agent={agent} nav={(projectId) => <PublishModes projectId={projectId} value={mode} onChange={setMode} />} />;
+  return (
+    <CloudGate {...props} label="Publish">
+      {({ project, projectId, canEdit }) => <Broadcast projectId={projectId} projectName={project.name} canEdit={canEdit} agent={agent}
+        mode={mode} nav={<PublishModes projectId={projectId} value={mode} onChange={setMode} />} />}
+    </CloudGate>
+  );
 }
 
 type View = "month" | "week" | "list";
 type Opened = { post: BroadcastPost | null; slot?: number; format?: BroadcastFormat };
 
-function Broadcast({ projectId, projectName, canEdit: projectEdit, agent }: { projectId: string; projectName: string; canEdit: boolean; agent: Bot }) {
+function Broadcast({ projectId, projectName, canEdit: projectEdit, agent, mode, nav }: { projectId: string; projectName: string; canEdit: boolean; agent: Bot; mode: PublishMode; nav: ReactNode }) {
   const data = useCloudQuery<BroadcastList>("broadcast:list", { projectId });
   const accounts = useBroadcastAccounts(projectId);
   const { dispatch } = useStore();
-  const [mode, setMode] = useState<"posts" | "campaigns">("posts");
   const [creatingCampaign, setCreatingCampaign] = useState(false);
   const [view, setView] = useState<View>("week");
   const [week, setWeek] = useState(() => weekStart(Date.now()));
@@ -37,7 +46,7 @@ function Broadcast({ projectId, projectName, canEdit: projectEdit, agent }: { pr
   const posts = data.posts;
   const pending = posts.filter((post) => post.needsApproval).length;
   const live = open?.post ? posts.find((post) => post._id === open.post!._id) ?? null : null;
-  const reviewApprovals = () => { setMode("posts"); setView("list"); setFilter("approval"); };
+  const reviewApprovals = () => { setPublishMode(agent.id, "posts"); setView("list"); setFilter("approval"); };
   const move = (post: BroadcastPost, day: Date) => void moving.run(() => cloudMutation("broadcast:reschedule", { postId: post._id, at: movedTo(post.scheduledAt!, day) }), "Could not move the post");
   const approvals = pending > 0 && (
     <button type="button" onClick={reviewApprovals}
@@ -48,10 +57,8 @@ function Broadcast({ projectId, projectName, canEdit: projectEdit, agent }: { pr
   const calendar = { posts, canEdit, onOpen: (post: BroadcastPost) => setOpen({ post }), onNew: (slot: number) => setOpen({ post: null, slot }), onMove: move, toolbar: approvals };
 
   return (
-    <section className={pageClass} aria-label="Broadcast">
-      <PageHeader title="Broadcast">
-        <Segmented label="Broadcast section" value={mode} onChange={setMode}
-          options={[{ value: "posts", label: <><Send size={13} />Posts</> }, { value: "campaigns", label: <><Megaphone size={13} />Campaigns</> }]} />
+    <section className={pageClass} aria-label="Publish">
+      <PageHeader title="Publish" nav={nav}>
         {mode === "posts" && <Segmented label="Broadcast view" value={view} onChange={setView}
           options={[{ value: "month", label: <><CalendarRange size={13} />Month</> }, { value: "week", label: <><CalendarDays size={13} />Week</> }, { value: "list", label: <><List size={13} />List</> }]} />}
         {canEdit && (mode === "posts" ? <>

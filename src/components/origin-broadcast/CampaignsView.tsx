@@ -10,6 +10,7 @@ import { handOff } from "@/lib/origin-handoff";
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
 import { requestIssueFocus } from "@/lib/origin-issue-focus";
 import { requestLeadFocus } from "@/lib/origin-lead-focus";
+import { openSales } from "@/lib/origin-publish-mode";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { BROADCAST_RULES } from "../../../shared/broadcast";
 import { originIssueKey } from "../../../shared/origin-issues";
@@ -87,7 +88,7 @@ function CampaignGrid({ campaigns, canEdit, onOpen, onNew }: { campaigns: Campai
   );
 }
 
-type Sections = "studio" | "pipeline" | "issues";
+type Sections = "studio" | "issues";
 
 function CampaignDetailView({ projectId, projectName, summary, canEdit, agent, posts, onBack, onOpenPost }: {
   projectId: string; projectName: string; summary: CampaignSummary; canEdit: boolean; agent: Bot; posts: readonly BroadcastPost[]; onBack(): void; onOpenPost(postId: string): void;
@@ -150,7 +151,7 @@ function CampaignDetailView({ projectId, projectName, summary, canEdit, agent, p
             </div>
             <div className="flex min-w-0 flex-col gap-4">
               <Gallery detail={detail} canEdit={canEdit} onLink={() => setLinking("generation")} onOpen={() => go("studio")} />
-              <Leads detail={detail} canEdit={canEdit} onLink={() => setLinking("lead")} onOpen={(leadId) => { requestLeadFocus({ projectId, leadId }); go("pipeline"); }} />
+              <Leads detail={detail} canEdit={canEdit} onLink={() => setLinking("lead")} onOpen={(leadId) => { requestLeadFocus({ projectId, leadId }); openSales(agent.id); }} />
             </div>
           </div>
           {linking && <LinkDialog projectId={projectId} detail={detail} kind={linking} posts={posts} onClose={() => setLinking(null)} />}
