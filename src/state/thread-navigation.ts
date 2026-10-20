@@ -1,10 +1,14 @@
 import type { NotificationTarget } from "@/lib/notify";
 import type { Action, AppState } from "./store";
+import { chiefSectionOf, setChiefSectionOf } from "@/lib/origin-chief-section";
+import { revealProjectAgentThread, visibleProjectAgentThread } from "@/lib/origin-agent-navigation";
 
 interface NotificationThreadOwner {
   id: string;
   threadId: string;
   mainThreadId?: string;
+  chiefOfStaff?: boolean;
+  section?: string;
   tasks?: Array<{ threadId: string }>;
 }
 
@@ -17,6 +21,8 @@ export function visibleNotificationThread(
   state: NotificationRoutingState & Pick<AppState, "activeView" | "selectedId">,
 ): string | null {
   if (state.activeView !== "chat") return null;
+  const project = state.bots.find(candidate => candidate.id === state.selectedId && candidate.chiefOfStaff);
+  if (project && chiefSectionOf(project.id) !== "chat") return chiefSectionOf(project.id) === "agents" ? visibleProjectAgentThread(project.id) : null;
   return (
     state.bots.find((candidate) => candidate.id === state.selectedId)?.threadId ??
     state.groups.find((candidate) => candidate.id === state.selectedId)?.threadId ??
@@ -53,7 +59,13 @@ export function openNotificationTarget(
   const known =
     bot.threadId === target.threadId ||
     (bot.tasks ?? []).some((task) => task.threadId === target.threadId);
-  if (known) openBotThread(dispatch, bot, target.threadId, threadsShown);
+  const project = known && !bot.chiefOfStaff && bot.section ? state.bots.find(candidate => candidate.chiefOfStaff && candidate.section?.trim() === bot.section?.trim()) : undefined;
+  if (project) {
+    revealProjectAgentThread(project.id, bot.id, target.threadId);
+    setChiefSectionOf(project.id, "agents");
+    dispatch({ type: "select", id: project.id });
+    if (bot.threadId !== target.threadId) dispatch({ type: "switchTask", botId: bot.id, threadId: target.threadId, preserveSelection: true });
+  } else if (known) openBotThread(dispatch, bot, target.threadId, threadsShown);
   else openBot(dispatch, bot, threadsShown);
 }
 

@@ -26,6 +26,7 @@ export interface ConfigStatus {
   /** a fleet agent exists on this server (Settings → Workspaces) */
   fleet?: { available: boolean };
   budgets?: { monthlyUsd?: number; warnAtPercent?: number };
+  dailyApiBudget?: { limitUsd: number; timeZone: string };
   billing?: { currency?: string; prices?: Record<string, { inputPerMillion: number; outputPerMillion: number; cachedInputPerMillion?: number }> };
   composio: { configured: boolean; mode?: "managed" | "self-hosted" | "unavailable" };
   /** `included`: cloud computers come with Cloud Pro, no key is saved. */
@@ -140,4 +141,50 @@ export interface BrowserProfile {
   /** Read-only durable Electron routing inherited from legacy profiles.
    * Config PATCH payloads must omit it. */
   partitionId?: string;
+}
+
+export type ConfigStatusFrame = Pick<
+  ConfigStatus,
+  "xai" | "mistral" | "cerebras" | "groq" | "meta" | "anthropic" | "openai" | "openrouter" | "openaiCompat" | "fleet" | "composio" | "box" | "vps" | "rooms" | "mcp" | "threads" | "automaticRecovery" | "cacheKeepWarm" | "localVm" | "opencodeGo" | "tts" | "decider" | "imageGen" | "live" | "profile" | "language" | "features" | "onboarding" | "browserEngine" | "browserProfiles" | "edition" | "budgets" | "dailyApiBudget" | "billing" | "managedPolicy" | "cloudHome"
+>;
+
+export function configStatusFromFrame(frame: ConfigStatusFrame): ConfigStatus {
+  return {
+    xai: frame.xai,
+    mistral: frame.mistral,
+    cerebras: frame.cerebras,
+    groq: frame.groq,
+    meta: frame.meta,
+    anthropic: frame.anthropic,
+    openai: frame.openai,
+    openrouter: frame.openrouter,
+    openaiCompat: frame.openaiCompat,
+    fleet: frame.fleet,
+    composio: frame.composio,
+    box: frame.box,
+    vps: frame.vps,
+    rooms: frame.rooms,
+    mcp: frame.mcp,
+    threads: frame.threads,
+    automaticRecovery: frame.automaticRecovery,
+    cacheKeepWarm: frame.cacheKeepWarm,
+    localVm: frame.localVm,
+    opencodeGo: frame.opencodeGo,
+    tts: frame.tts,
+    decider: frame.decider,
+    imageGen: frame.imageGen,
+    live: frame.live,
+    profile: frame.profile,
+    language: frame.language,
+    features: frame.features,
+    onboarding: frame.onboarding,
+    browserEngine: frame.browserEngine,
+    browserProfiles: frame.browserProfiles,
+    edition: frame.edition,
+    budgets: frame.budgets,
+    dailyApiBudget: frame.dailyApiBudget,
+    billing: frame.billing,
+    managedPolicy: frame.managedPolicy,
+    ...(frame.cloudHome ? { cloudHome: true } : {}),
+  };
 }

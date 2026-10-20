@@ -605,6 +605,49 @@ it("gives another conversation of the same Chief its own thread with the teammat
   expect(new Set(f.nodes().filter((node: any) => node.botId === f.lead.id).map((node: any) => node.threadId))).toEqual(new Set(work.map((task: any) => task.threadId)));
 }), 60_000);
 
+it("continues its original delegated child after the person selects an independent specialist conversation", () => fixture(async f => {
+  const projectMarker = "PROJECT_A_RESEARCH_CONTEXT_7J";
+  const privateMarker = "DIRECT_B_PRIVATE_CONTEXT_8K";
+  f.plan[f.chief.id] = { turns: [
+    { steps: [{ arguments: { bot_ids: [f.lead.id], message: projectMarker, thread: "new" } }], reply: "Research assigned" },
+    { reply: "Research received" },
+    { steps: [{ arguments: { bot_ids: [f.lead.id], message: "Continue that project research" } }], reply: "Follow-up assigned" },
+    { reply: "Follow-up received" },
+  ] };
+  f.plan[f.lead.id] = { turns: [
+    { reply: "Project research result" },
+    { reply: "Private direct answer" },
+    { expectContextIncludes: ["Continue that project research"], reply: "Project follow-up result" },
+  ] };
+  await f.start();
+  expect((await f.wait()).status).toBe("settled");
+  const originalChild = f.nodes().find((node: any) => node.botId === f.lead.id);
+  const direct = (await f.api(`/api/bots/${f.lead.id}/tasks`, { title: "Independent conversation B", approvalMode: "ask" })).task;
+  await f.cli("send", "--bot", f.lead.id, "--task", direct.threadId, "--text", privateMarker);
+  expect((await f.cli("wait", "--bot", f.lead.id, "--task", direct.threadId, "--timeout", "30")).status).toBe("settled");
+  const directBefore = await f.messages(direct.threadId);
+  f.save();
+  await f.cli("send", "--bot", f.chief.id, "--task", f.chief.activeTaskId, "--text", "Ask Engineering to continue the project research");
+  expect((await f.wait()).status).toBe("settled");
+  const children = f.nodes().filter((node: any) => node.parentId && node.botId === f.lead.id);
+  expect(children.map((node: any) => node.threadId)).toEqual([originalChild.threadId, originalChild.threadId]);
+  const specialist = (await f.api("/api/bots")).bots.find((bot: any) => bot.id === f.lead.id);
+  expect(specialist.threadId).toBe(direct.threadId);
+  expect(specialist.tasks).toHaveLength(3);
+  expect(specialist.tasks.find((task: any) => task.threadId === direct.threadId)).toMatchObject({ approvalMode: "ask", busy: false });
+  expect(await f.messages(direct.threadId)).toEqual(directBefore);
+  const childMessages = await f.messages(originalChild.threadId);
+  expect(JSON.stringify(childMessages)).toContain(projectMarker);
+  expect(childMessages.some((message: any) => message.text === "Project research result")).toBe(true);
+  expect(childMessages.some((message: any) => message.text === "Project follow-up result")).toBe(true);
+  expect(JSON.stringify(childMessages)).not.toContain(privateMarker);
+  expect(specialist.tasks.find((task: any) => task.threadId === originalChild.threadId).openedBy)
+    .toMatchObject({ botId: f.chief.id, threadId: f.chief.activeTaskId, kind: "work" });
+  const secondTurn = f.evidence().filter((turn: any) => turn.botId === f.lead.id).at(-1);
+  expect(told(secondTurn)).not.toContain(privateMarker);
+  expect((await f.messages(f.chief.activeTaskId)).filter((message: any) => message.text === "Follow-up received")).toHaveLength(1);
+}), 90_000);
+
 it("runs an identical call made twice in one turn once, without an extra recipient thread", () => fixture(async f => {
   f.plan[f.chief.id].steps.push(structuredClone(f.plan[f.chief.id].steps[0]));
   await f.start(); expect((await f.wait()).status).toBe("settled");

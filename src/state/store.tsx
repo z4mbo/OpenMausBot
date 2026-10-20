@@ -216,12 +216,7 @@ export interface GroupTask {
   busyBotId?: string | null;
 }
 
-export interface ModelSelection {
-  instanceId: string;
-  model: string;
-  effort?: EffortLevel;
-  variant?: string;
-}
+export type ModelSelection = import("../../shared/wire").ModelSelection;
 
 export interface Task extends Pick<import("../../shared/wire").WireTask, "shared" | "sharedPrivate"> {
   waitingForTeammates?: boolean;
@@ -256,12 +251,7 @@ export interface Task extends Pick<import("../../shared/wire").WireTask, "shared
   snoozedUntil?: number;
 }
 
-export interface ThreadOpener {
-  botId: string;
-  name: string;
-  delegationId?: string;
-  at: number;
-}
+export type ThreadOpener = import("../../shared/wire").TaskOpenedBy;
 
 export interface ThreadCloser {
   botId: string;
@@ -330,7 +320,10 @@ export interface Bot {
   connectorTools?: Record<string, ConnectorToolGrant>;
   connectorScopes?: { apps: Record<string, "read" | "write"> };
   outbound?: { policy: "ask" | "allow"; dailyCap: number };
-  fallback?: Array<{ instanceId: string; model: string }>;
+  fallback?: ModelSelection[];
+  quotaFallback?: boolean;
+  fallbackApiAllowed?: boolean;
+  dailyApiBudgetUsd?: number;
   browser?: boolean;
   recordBrowserSteps?: boolean;
   memoryUpkeep?: boolean;
@@ -429,51 +422,9 @@ export function visibleMessages(bot: Pick<Bot, "messages" | "activeLeafId">): Me
 import type { BrowserEngineSummary, BrowserProfile, ConfigStatus, ManagedPolicySummary } from "./config-status";
 export type { BrowserEngineSummary, BrowserProfile, ConfigStatus, ManagedPolicySummary };
 
-// A section left out here is wiped from state.config whenever a config frame lands.
-export type ConfigStatusFrame = Pick<
-  ConfigStatus,
-  "xai" | "mistral" | "cerebras" | "groq" | "meta" | "anthropic" | "openai" | "openrouter" | "openaiCompat" | "fleet" | "composio" | "box" | "vps" | "rooms" | "mcp" | "threads" | "automaticRecovery" | "cacheKeepWarm" | "localVm" | "opencodeGo" | "tts" | "decider" | "imageGen" | "live" | "profile" | "language" | "features" | "onboarding" | "browserEngine" | "browserProfiles" | "edition" | "budgets" | "billing" | "managedPolicy" | "cloudHome"
->;
-
-export function configStatusFromFrame(frame: ConfigStatusFrame): ConfigStatus {
-  return {
-    xai: frame.xai,
-    mistral: frame.mistral,
-    cerebras: frame.cerebras,
-    groq: frame.groq,
-    meta: frame.meta,
-    anthropic: frame.anthropic,
-    openai: frame.openai,
-    openrouter: frame.openrouter,
-    openaiCompat: frame.openaiCompat,
-    fleet: frame.fleet,
-    composio: frame.composio,
-    box: frame.box,
-    vps: frame.vps,
-    rooms: frame.rooms,
-    mcp: frame.mcp,
-    threads: frame.threads,
-    automaticRecovery: frame.automaticRecovery,
-    cacheKeepWarm: frame.cacheKeepWarm,
-    localVm: frame.localVm,
-    opencodeGo: frame.opencodeGo,
-    tts: frame.tts,
-    decider: frame.decider,
-    imageGen: frame.imageGen,
-    live: frame.live,
-    profile: frame.profile,
-    language: frame.language,
-    features: frame.features,
-    onboarding: frame.onboarding,
-    browserEngine: frame.browserEngine,
-    browserProfiles: frame.browserProfiles,
-    edition: frame.edition,
-    budgets: frame.budgets,
-    billing: frame.billing,
-    managedPolicy: frame.managedPolicy,
-    ...(frame.cloudHome ? { cloudHome: true } : {}),
-  };
-}
+import { configStatusFromFrame, type ConfigStatusFrame } from "./config-status";
+export { configStatusFromFrame };
+export type { ConfigStatusFrame };
 
 export interface EngineInstall {
   platform?: "darwin" | "win32" | "linux";
@@ -515,7 +466,7 @@ export interface InstanceInfo {
       message: string;
     };
   };
-  models: { default: string; options: Array<{ id: string; label: string; custom?: boolean; loaded?: boolean; provider?: string; variants?: ModelVariantOption[] }> };
+  models: { default: string; options: Array<{ id: string; label: string; custom?: boolean; loaded?: boolean; provider?: string; contextWindow?: number; variants?: ModelVariantOption[] }> };
   capabilities?: {
     computerMcp?: boolean;
     agentsMcp?: boolean;
@@ -835,8 +786,8 @@ export type Action =
       rememberCommand?: boolean;
       onError?: (message: string) => void;
     }
-  | { type: "newTask"; botId: string; projectId?: string; cwd?: string; onCreated?: () => void; onError?: (message: string) => void }
-  | { type: "switchTask"; botId: string; threadId: string; whole?: true }
+  | { type: "newTask"; botId: string; projectId?: string; cwd?: string; preserveSelection?: true; onCreated?: (threadId: string) => void; onError?: (message: string) => void }
+  | { type: "switchTask"; botId: string; threadId: string; whole?: true; preserveSelection?: true; onError?: (message: string) => void }
   | { type: "switchTaskFailed"; botId: string; threadId: string }
   | { type: "taskSwitched"; bot: Bot }
   | { type: "renameTask"; botId: string; threadId: string; title: string }
@@ -1865,10 +1816,10 @@ export function reducer(state: AppState, action: Action): AppState {
     case "regenerateTaskTitle":
       return state;
     case "newTask":
-      return action.cwd !== undefined ? state : { ...state, selectedId: action.botId, activeView: "chat" };
+      return action.cwd !== undefined || action.preserveSelection ? state : { ...state, selectedId: action.botId, activeView: "chat" };
     case "switchTask": {
       const { [action.threadId]: _old, ...backgroundThreadEvents } = state.backgroundThreadEvents;
-      return updateBot({ ...state, backgroundThreadEvents, selectedId: action.botId, activeView: "chat" }, action.botId,
+      return updateBot({ ...state, backgroundThreadEvents, ...(action.preserveSelection ? {} : { selectedId: action.botId, activeView: "chat" as const }) }, action.botId,
         (bot) => ({ ...bot, switchingTo: action.threadId }));
     }
     case "switchTaskFailed":
@@ -3094,9 +3045,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             ? `/api/bots/${action.botId}/tasks`
             : `/api/bots/${action.botId}/tasks/${action.threadId}${action.whole ? "" : `?messages=${MESSAGE_PAGE_SIZE}`}`, { method: "POST", body: JSON.stringify(action.type === "newTask" ? { projectId: action.projectId, cwd: action.cwd } : {}) }))
             .then((r) => {
-              if (action.type === "newTask") action.onCreated?.();
+              if (action.type === "newTask" && r?.bot) action.onCreated?.(r.bot.threadId);
               if (!r?.bot || navigation.get(action.botId) !== revision) return;
-              const selectsAfterCreation = action.type === "newTask" && action.cwd !== undefined;
+              const selectsAfterCreation = action.type === "newTask" && action.cwd !== undefined && !action.preserveSelection;
               if (selectsAfterCreation && selectionRevision !== selectedAtStart) return;
               dispatch({ type: "taskSwitched", bot: r.bot });
               if (selectsAfterCreation) rawDispatch({ type: "select", id: action.botId });
@@ -3105,7 +3056,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               if (action.type === "switchTask" && navigation.get(action.botId) === revision) {
                 rawDispatch({ type: "switchTaskFailed", botId: action.botId, threadId: action.threadId });
               }
-              if (action.type === "newTask" && action.onError) action.onError(error instanceof Error ? error.message : String(error));
+              if (action.onError) action.onError(error instanceof Error ? error.message : String(error));
               else showError(error);
             });
           break;

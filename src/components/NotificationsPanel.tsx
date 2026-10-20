@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, AtSign, Bell, CheckCircle2, CircleHelp, HandHelping, LogIn, Pin, RotateCcw, Wallet, X, type LucideIcon } from "lucide-react";
+import { AlertTriangle, AtSign, Bell, CheckCircle2, CircleHelp, GitBranch, HandHelping, LogIn, Pin, RotateCcw, Wallet, X, type LucideIcon } from "lucide-react";
 import { api, useStore, openNotificationTarget, type Action } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n";
@@ -13,6 +13,7 @@ import { Select } from "./Select";
 const KIND_LOOK: Record<NotifyKind, { Icon: LucideIcon; className: string; status: LocaleKey }> = {
   done: { Icon: CheckCircle2, className: "text-success", status: "notifications.status.done" },
   "delegation-settled": { Icon: CheckCircle2, className: "text-success", status: "notifications.status.done" },
+  "delegation-started": { Icon: GitBranch, className: "text-accent", status: "notifications.status.delegation" },
   approval: { Icon: HandHelping, className: "text-warning", status: "notifications.status.approval" },
   question: { Icon: CircleHelp, className: "text-warning", status: "notifications.status.question" },
   "sign-in": { Icon: LogIn, className: "text-warning", status: "notifications.status.signIn" },

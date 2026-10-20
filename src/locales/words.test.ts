@@ -7,9 +7,16 @@ import en from "./en.json";
 const ALLOWED = new Set([
   "engines.account.apiKey", // the Anthropic Console's "workspace API key"
   "engineSetup.device.enableHint", // a ChatGPT "workspace admin"
+  "modelHost.noWorkspace",
+  "modelHost.workspace",
+  "modelHost.chooseWorkspace",
+  "modelHost.workspaceHead",
+  "modelHost.revoke",
+  "modelHost.revokeBody",
+  "modelHost.help",
 ]);
 
-it("English copy says Organization and installation, not Organisation or workspace", () => {
+it("English installation copy keeps Origin workspace and vendor terms scoped to their own controls", () => {
   const offending = Object.entries(en)
     .filter(([key, value]) => !ALLOWED.has(key) && (/organis/i.test(value) || /(?<!Slack )\bworkspaces?\b/i.test(value)))
     .map(([key]) => key);

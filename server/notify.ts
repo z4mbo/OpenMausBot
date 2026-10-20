@@ -49,6 +49,8 @@ export function buildNotification(
               ? `${who} couldn't start`
               : kind === "incident"
                 ? `${who} hit a problem`
+                : kind === "delegation-started"
+                  ? `${who} started delegated work`
                 : kind === "delegation-settled"
                   ? `${who} resumed with results`
                   : kind === "mention"
