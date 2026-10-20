@@ -8,6 +8,7 @@ import { homedir, tmpdir } from "node:os";
 import { lstat, mkdir, readFile, realpath, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { createHash } from "node:crypto";
+import { createQuotaEventProofs, providerQuotaRefusal, type QuotaEvidence } from "../../quota-refusal.ts";
 
 import { PROVIDER_CREDENTIAL_ENV, stripControlPlaneEnv, WORKSPACE_CREDENTIAL_ENV } from "../../config.ts";
 import { openStartupModelCatalog, writeStartupModelCache } from "../../startup-model-catalog.ts";
@@ -43,7 +44,6 @@ import type {
   ProviderSnapshot,
   ModelCatalog,
   ModelVariantOption,
-  RuntimeEvent,
   RuntimeEventListener,
   SendTurnInput,
   ProviderErrorCode,
@@ -61,7 +61,7 @@ import { acpSessionOperationKey, acpShellRequest, answersAlone, permissionLaunch
 import { openQuestionRequest, questionRequestFor, type AcpQuestionRequest } from "./question-requests.ts";
 import { commandSummary, toolDetailPreview } from "../../tool-summary.ts";
 import { extractMcpImages } from "../../mcp-tool-images.ts";
-import { redactSecretsInText } from "../../redact.ts";
+import { acpRpcError } from "./rpc-error.ts";
 import { recoveryPromptFor } from "../../resume-recovery.ts";
 import { sessionIdlePolicy } from "../session-idle.ts";
 import { classifyError } from "../retry.ts";
@@ -76,29 +76,6 @@ const ACCOUNT_ERROR_CODES: ReadonlySet<ProviderErrorCode> = new Set<AccountError
 ]);
 const isAccountError = (code: ProviderErrorCode | undefined): code is AccountErrorCode =>
   code !== undefined && ACCOUNT_ERROR_CODES.has(code);
-
-/** ACP vendors put the actionable cause in error.data under a generic JSON-RPC message. Only known
- * text fields surface, redacted, never a response body or config dump. */
-function acpRpcError(value: any, method: string): Error {
-  const message = typeof value?.message === "string" ? value.message : "ACP request failed";
-  const data = value?.data;
-  const detail = typeof data === "string" ? data
-    : typeof data?.details === "string" ? data.details
-    : typeof data?.message === "string" ? data.message
-    : typeof data?.error?.message === "string" ? data.error.message
-    : "";
-  const context = [
-    method,
-    typeof data?.service === "string" ? `service: ${data.service}` : "",
-    typeof data?.errorName === "string" ? data.errorName : "",
-  ].filter(Boolean).join(", ");
-  const diagnostic = `${detail && detail !== message ? `${message}: ${detail}` : message} (${context})`;
-  const error = new Error(redactSecretsInText(diagnostic).slice(0, 1500));
-  return Object.assign(error, { code: value?.code, data,
-    // -32603 is JSON-RPC's internal error; invalid params, unsupported methods and auth refusals keep the session.
-    acpSessionFailure: value?.code === -32603,
-  });
-}
 
 export interface AcpConfig {
   cli: string;
@@ -123,6 +100,7 @@ interface AcpTurn {
     usagePeak: number | null;
     usageLast: number | null;
     usageCompacted: boolean;
+    quotaEvidence?: QuotaEvidence;
   };
   acknowledge: () => void;
   asks: Map<string, AcpAskFinish>;
@@ -177,6 +155,7 @@ interface AcpSession {
 
 /** Per-CLI specifics plugged into the shared ACP runtime. */
 export interface AcpSupport {
+  billing?: "subscription" | "metered";
   questionRequests?: Readonly<Record<string, AcpQuestionRequest>>;
   /** Verified native catalog parameters, applied before both new and restored sessions. */
   toolScopeSessionParams?(turn: SendTurnInput, initializeResult: unknown, hasMcp: boolean,
@@ -603,9 +582,8 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
     // thread, for the native session's life. A generic title with no input is never remembered.
       const sessionAllows = new Map<string, Set<string>>();
 
-      const emit = (event: RuntimeEvent) => {
-        for (const listener of listeners) listener(event);
-      };
+      const quotaProofs = createQuotaEventProofs(event => { for (const listener of Array.from(listeners)) listener(event); });
+      const emit = quotaProofs.emit;
 
     // Inline images stay on the wire but never go into the native log as base64.
       const nativeLogMessage = (msg: any): unknown => {
@@ -759,7 +737,17 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
             message: `${DRIVER_KIND} ended the turn with no reply, image, or tool result`,
           });
         }
-        emit({ ...base(threadId, current.turnId), type: "turn.completed", ok: finalOk, stopReason: finalStopReason, cost: null });
+        const complete = (quiesced = false) => {
+          const refusal = !finalOk && current.state.quotaEvidence && quotaProofs.refusal(threadId, current.state.quotaEvidence,
+            quiesced && !current.state.stopped && current.asks.size === 0 && current.runningTools.size === 0);
+          emit({ ...base(threadId, current.turnId), type: "turn.completed", ok: finalOk, stopReason: finalStopReason, cost: null, ...(refusal ? { refusal } : {}) });
+        };
+        if (!finalOk && current.state.quotaEvidence) {
+          closeSession(threadId, "subscription quota refused");
+          void retireChild(threadId, session.child).then(stopped => complete(stopped), () => complete(false));
+          return;
+        }
+        complete();
         if (session.child.exitCode === null && !session.closing && !session.dead) {
           armIdle(threadId);
         } else if (session.dead && sessions.get(threadId) === session) {
@@ -1798,6 +1786,7 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
               });
             }
             const reason = result?.stopReason;
+            if (DRIVER_KIND === "grokAgent") state.quotaEvidence = providerQuotaRefusal(result?.error) ?? providerQuotaRefusal({ code: reason }) ?? undefined;
             if (reason === "end_turn") settle(threadId, session, true, null);
             else if (reason === "cancelled") settle(threadId, session, true, "cancelled");
             else {
@@ -1819,6 +1808,7 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
             }
             if (!state.settled) {
               const message = e instanceof Error ? e.message : String(e);
+              if (DRIVER_KIND === "grokAgent") state.quotaEvidence = providerQuotaRefusal(e) ?? undefined;
               const code = support.classifyError?.(e);
               const needsAuth = code === "invalid_credentials" || code === "inactive_subscription"
                 || code === "insufficient_funds" || message === support.loginNote;
@@ -1895,7 +1885,7 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
           });
         });
         if (!probe.version) return { state: "unavailable", reason: probe.reason };
-        return { state: "available", version: probe.version, authenticated: await support.isAuthenticated(env, config, instanceId) };
+        return { state: "available", version: probe.version, authenticated: await support.isAuthenticated(env, config, instanceId), ...(support.billing ? { billing: support.billing } : {}) };
       };
 
     /** Memory upkeep's one-shot: a fresh process and session, no MCP servers, an empty folder, and

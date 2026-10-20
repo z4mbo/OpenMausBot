@@ -7,6 +7,7 @@ import type {
   RuntimeEventListener,
   SendTurnInput,
   TextGenerationOptions,
+  ApiRequestBudget,
 } from "../contracts.ts";
 import { newEventId, newId } from "../contracts.ts";
 import { ASK_USER_TOOL, ASK_USER_TOOL_DEFINITION, askQuestionSummary, parseAskQuestions, questionChoices } from "../../shared/ask-question.ts";
@@ -22,6 +23,8 @@ import { appendNative } from "./native.ts";
 import { classifyError, computeBackoff, interruptibleDelay, RETRY_MAX_ATTEMPTS } from "./retry.ts";
 import { classifyContinuable, writeTurnHandoff } from "../turn-continuation.ts";
 import { KEY_REJECTED_REASON, keyRejected, noteKeyAccepted, noteKeyRejected, rejectsKey } from "../key-rejections.ts";
+import { apiBudgetContextWindow, boundedApiRequestBody, DailyApiBudgetError, supportsApiRequestBudget, type ApiRequestBudgetLease } from "../daily-api-budget.ts";
+import { createQuotaActivityProof, httpQuotaRefusal, type QuotaEvidence } from "../quota-refusal.ts";
 
 export interface OpenAIChatMessage {
   role: "system" | "user" | "assistant" | "tool";
@@ -215,6 +218,11 @@ function rejectsToolsParameter(status: number, body: string): boolean {
 
 class UnsupportedReasoningReplayError extends Error {}
 
+class ApiQuotaRefusalError extends Error {
+  readonly evidence: QuotaEvidence;
+  constructor(message: string, evidence: QuotaEvidence) { super(message); this.evidence = evidence; }
+}
+
 /** DeepSeek-style providers need `reasoning_content` echoed on a tool-call message; Groq rejects it. */
 function rejectsReasoningReplay(status: number, body: string): boolean {
   if (status !== 400 && status !== 422) return false;
@@ -276,10 +284,12 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
   }>();
   const reasoningReplayRejected = new Set<string>();
   const delivered = new Map<string, DeliveredUserMessage[]>();
+  const quotaProofs = new Map<string, ReturnType<typeof createQuotaActivityProof>>();
   /** Not cleared on `sessionReset`: with no cursor the harness sends it on nearly every turn. */
   const sessionGrants = new Map<string, Set<string>>();
 
   const emit = (event: RuntimeEvent) => {
+    quotaProofs.get(event.threadId)?.note(event);
     for (const listener of Array.from(listeners)) listener(event);
   };
   const base = (threadId: string, turnId: string) => ({
@@ -298,6 +308,9 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
     onDelta?: (delta: string, kind: "assistant_text" | "reasoning_text") => void,
     tools: ChatToolDefinition[] = [],
     onUsage?: TextGenerationOptions["onUsage"],
+    apiBudget?: ApiRequestBudget,
+    onDispatched?: () => void,
+    onActivity?: () => void,
   ): Promise<Completion> => {
     const timeoutController = new AbortController();
     let idleTimer: NodeJS.Timeout | null = null;
@@ -309,26 +322,46 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
     };
 
     resetIdleTimer();
+    let budgetLease: ApiRequestBudgetLease | undefined;
+    let dispatched = false;
+    let budgetUsage: CompletionJson["usage"] | null = null;
+    let budgetUsageFinal = false;
+    let responseCompleted = false;
 
     try {
+      const activeBudget = apiBudget && (apiBudget.enabled?.() ?? true) ? apiBudget : undefined;
       const activeSignal = signal
         ? AbortSignal.any([signal, timeoutController.signal])
         : timeoutController.signal;
 
+      let requestBody: Record<string, unknown> = { ...options.requestBody(model, messages, stream), ...(tools.length ? { tools } : {}) };
+      if (activeBudget) {
+        if (!supportsApiRequestBudget(options.apiUrl)) throw new DailyApiBudgetError("This API endpoint cannot enforce bounded requests under a daily API budget.");
+        if (messages.some(message => Array.isArray(message.content) && message.content.some(part => part.type !== "text"))) throw new DailyApiBudgetError("Image and other multimodal API requests are unavailable under the daily API budget.");
+        const selectedLimit = Number(requestBody.max_completion_tokens ?? requestBody.max_tokens ?? 4096);
+        if (!Number.isSafeInteger(selectedLimit) || selectedLimit < 1) throw new DailyApiBudgetError("This API request has no valid output limit.");
+        budgetLease = activeBudget.begin({ model, contextWindow: apiBudgetContextWindow(model, options.models().options.find(option => option.id === model)?.contextWindow), maxOutputTokens: Math.min(selectedLimit, 4096) });
+        requestBody = boundedApiRequestBody(options.apiUrl, requestBody, budgetLease);
+      }
+      const serializedBody = JSON.stringify(requestBody);
+      activeSignal.throwIfAborted();
+      onDispatched?.();
+      dispatched = true;
       const response = await fetch(`${options.apiUrl}/chat/completions`, {
         method: "POST",
-        ...(messages.some(message => Array.isArray(message.content) && message.content.some(part => part.type === "image_url")) ? { redirect: "error" as const } : {}),
+        ...(activeBudget || messages.some(message => Array.isArray(message.content) && message.content.some(part => part.type === "image_url")) ? { redirect: "error" as const } : {}),
         headers: { authorization: `Bearer ${options.apiKey}`, "content-type": "application/json" },
-        body: JSON.stringify({
-          ...options.requestBody(model, messages, stream),
-          ...(tools.length ? { tools } : {}),
-        }),
+        body: serializedBody,
         signal: activeSignal,
       });
       if (!response.ok) {
         const body = await response.text().catch(() => "");
         if (rejectsKey(response.status, body)) noteKeyRejected(options.apiUrl, options.apiKey);
         const message = `${options.httpErrorLabel} HTTP ${response.status}${body ? `: ${httpErrorDetail(body)}` : ""}`;
+        let parsedBody: unknown;
+        try { parsedBody = JSON.parse(body); } catch { parsedBody = null; }
+        const quota = httpQuotaRefusal(response.status, parsedBody);
+        if (quota) throw new ApiQuotaRefusalError(message, quota);
         if (rejectsToolsParameter(response.status, body)) throw new UnsupportedChatToolsError(message);
         const refusal = refusedToolCall(response.status, body);
         if (refusal) throw new RejectedToolCallError(message, refusal);
@@ -342,6 +375,8 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
       if (!stream || response.headers.get("content-type")?.includes("application/json")) {
         const json = await response.json() as CompletionJson;
         const tokenUsage = completionUsage(json);
+        budgetUsage = tokenUsage ?? null;
+        if (json.choices?.some(choice => choice.message && (choice.message.content || choice.message.reasoning || choice.message.reasoning_content || choice.message.tool_calls))) onActivity?.();
         if (onUsage) {
           activeSignal.throwIfAborted();
           const count = (value: unknown) => typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
@@ -367,6 +402,8 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
         const reasoning = message.reasoning_content ?? message.reasoning;
         const finishReason = json.choices?.[0]?.finish_reason ?? null;
         activeSignal.throwIfAborted();
+        budgetUsageFinal = true;
+        responseCompleted = true;
         return {
           text: options.contentText ? options.contentText(message?.content) : typeof message?.content === "string" ? message.content : "",
           reasoning: options.reasoning && typeof reasoning === "string"
@@ -411,6 +448,7 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
         if (chunkError) throw chunkError;
         const choice = chunk.choices?.find((row) => row.index === undefined || row.index === 0);
         const delta = choice?.delta;
+        if (delta && (delta.content || delta.reasoning || delta.reasoning_content || delta.tool_calls)) onActivity?.();
         if (object(delta)) sawChoice = true;
         if (delta?.function_call) throw new ChatProtocolError("legacy function_call is unsupported; use structured tool_calls");
         calls.add(delta?.tool_calls, true);
@@ -431,7 +469,7 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
           onDelta?.(contentDelta, "assistant_text");
         }
         const tokenUsage = completionUsage(chunk);
-        if (tokenUsage) usage = usageFrom(tokenUsage);
+        if (tokenUsage) { usage = usageFrom(tokenUsage); budgetUsage = tokenUsage; budgetUsageFinal = Boolean(finishReason); }
         return false;
       };
       try {
@@ -467,9 +505,15 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
       }
       activeSignal.throwIfAborted();
       if (!sawChoice) throw new ChatProtocolError("provider returned no streaming completion choice");
+      responseCompleted = true;
       return { text, reasoning, usage, toolCalls: calls.finish(finishReason, malformedFrame), finishReason, protocolReasoning, protocolReasoningDetails: details.blocks };
     } finally {
       if (idleTimer) clearTimeout(idleTimer);
+      if (budgetLease) {
+        if (!dispatched) budgetLease.notDispatched();
+        else budgetLease.settle(responseCompleted && budgetUsageFinal && budgetUsage ? { input: budgetUsage.prompt_tokens, output: budgetUsage.completion_tokens,
+          cachedInput: budgetUsage.prompt_tokens_details?.cached_tokens, costUsd: budgetUsage.cost } : null);
+      }
     }
   };
 
@@ -571,6 +615,8 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
     let resolveDone!: () => void;
     const done = new Promise<void>((resolve) => { resolveDone = resolve; });
     const turnEntry = { abort, turnId, done, approval, asides: [] as string[] };
+    const quotaProof = createQuotaActivityProof();
+    quotaProofs.set(turn.threadId, quotaProof);
     active.set(turn.threadId, turnEntry);
     emit({ ...base(turn.threadId, turnId), type: "turn.started" });
     emit({ ...base(turn.threadId, turnId), type: "session.started", sessionId: null, model });
@@ -582,6 +628,8 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
       let ok = false;
       let stopReason: string | null = null;
       let failure: string | undefined;
+      let quotaEvidence: QuotaEvidence | undefined;
+      let requestCount = 0;
       let toolFailed = false;
       let correctiveRounds = 0;
       const denials: string[] = [];
@@ -633,13 +681,16 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
                 streamed = true;
                 if (streamKind === "assistant_text") answerStreamed = true;
                 delta(text, streamKind);
-              }, tools.definitions);
+              }, tools.definitions, undefined, turn.apiBudget, () => { requestCount++; }, () => {
+                quotaProof.note({ ...base(turn.threadId, turnId), type: "content.delta", streamKind: "reasoning_text", delta: "observed" });
+              });
               delta("", "assistant_text", true);
               delta("", "reasoning_text", true);
               break;
             } catch (value) {
               const error = asError(value);
               const verdict = classifyError(error);
+              if (error instanceof ApiQuotaRefusalError || error instanceof DailyApiBudgetError) throw error;
               // A rejected reasoning echo executed nothing upstream, so the stripped resend repeats nothing.
               if (error instanceof UnsupportedReasoningReplayError && !streamed && !abort.signal.aborted) {
                 reasoningReplayRejected.add(model);
@@ -803,6 +854,7 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
         }
         if (!ok) throw new ChatProtocolError(stoppedAfter(`${MAX_CHAT_ROUNDS} steps`));
       } catch (value) {
+        if (value instanceof ApiQuotaRefusalError) quotaEvidence = value.evidence;
         stopReason = abort.signal.aborted ? "interrupted" : stopReason ?? "error";
         failure = safeText(asError(value).message).slice(0, 2_000);
       } finally {
@@ -837,9 +889,11 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
         }
         active.delete(turn.threadId);
         emit({ ...base(turn.threadId, turnId), type: "turn.completed", ok, stopReason, cost: null,
+          ...(quotaEvidence ? { refusal: quotaProof.refusal(quotaEvidence, !cleanupFailed && !abort.signal.aborted && requestCount === 1) } : {}),
           ...(hasUsage && (options.includeUsageInCompleted || seenCalls.size) ? { usage } : {}),
           ...(denials.length ? { denials } : {}),
         });
+        quotaProofs.delete(turn.threadId);
         resolveDone();
       }
     })();
@@ -865,6 +919,7 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
       capabilities: { ...(options.computerUse ? { computerMcp: options.tools !== false,
         localComputerMcp: options.tools !== false,
         browserMcp: options.tools !== false, nativeImageInput: true, images: true } : {}),
+        ...(supportsApiRequestBudget(options.apiUrl) ? { apiRequestBudget: true as const } : {}),
         sessionModelSwitch: "in-session", customMcp: options.tools !== false, agentsMcp: options.tools !== false, composioMcp: options.tools !== false,
         dataMcp: options.tools !== false,
         highlevelMcp: options.tools !== false,
@@ -896,9 +951,9 @@ export function createOpenAIChatRuntime<Config>(options: RuntimeOptions<Config>)
         return () => listeners.delete(listener);
       },
     },
-    generateText: async (prompt, { signal, onUsage, model: named } = {}) => {
+    generateText: async (prompt, { signal, onUsage, model: named, apiBudget } = {}) => {
       const model = named ?? options.generateModel?.() ?? options.models().default;
-      const { text, reasoning, toolCalls } = await complete([{ role: "user", content: prompt }], model, false, signal, undefined, [], onUsage);
+      const { text, reasoning, toolCalls } = await complete([{ role: "user", content: prompt }], model, false, signal, undefined, [], onUsage, apiBudget);
       if (toolCalls.length) throw new ChatProtocolError("provider returned tool calls to a text-only helper");
       return text.trim() ? text : reasoning;
     },

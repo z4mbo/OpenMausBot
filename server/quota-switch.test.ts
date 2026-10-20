@@ -191,6 +191,19 @@ describe("quota-switch card", () => {
       expect(cards()).toHaveLength(0);
     });
 
+    it("offers a typed refusal after partial work as a model switch without resending", async () => {
+      const messageId = said("Do not repeat my external action");
+      const turn = begin(bot.threadId, { messageId });
+      cause = "Provider allowance exhausted";
+      const event = { ...turn.event, refusal: { kind: "quota_exhausted", scope: "account", retry: "manual" } } as const;
+      coordinator.endTurn(turn.id, { ok: false, text: cause });
+      const card = await quota.turnFailed(thread(), event, false);
+      expect(card!.card!.subtitle).toContain("nothing will be sent again");
+      expect(card!.card!.quotaSwitch!.messageId).toBeUndefined();
+      expect(await answer(card!, "Codex")).toBe("answered");
+      expect(resend).not.toHaveBeenCalled();
+    });
+
     it("raises no card when no other engine is configured", async () => {
       engines = [engines[0]!];
       expect(await failed()).toBeNull();
@@ -337,6 +350,33 @@ describe("quota-switch card", () => {
   });
 
   describe("the person's answer", () => {
+    it("does not overwrite a newer conversation choice while an asynchronous model gate waits", async () => {
+      const card = (await failed(QUOTA, { messageId: said("Continue once") }))!;
+      let release!: () => void;
+      const waiting = new Promise<void>(resolve => { release = resolve; });
+      gate.mockImplementationOnce(async (_thread, selection) => { await waiting; return { ok: true, selection }; });
+      const answering = answer(card, "Codex");
+      await vi.waitFor(() => expect(gate).toHaveBeenCalledOnce());
+      store.switchTaskModel(bot.id, bot.threadId, { instanceId: "cursor", model: "cursor-default" }, false, false);
+      release();
+      expect(await answering).toBe("unavailable");
+      expect(thread().modelSelection).toEqual({ instanceId: "cursor", model: "cursor-default" });
+      expect(resend).not.toHaveBeenCalled(); expect(cardNow(card).answered).toBeUndefined();
+    });
+
+    it("does not consume a dismissed quota card when its asynchronous model gate returns", async () => {
+      const card = (await failed(QUOTA, { messageId: said("Continue once") }))!;
+      let release!: () => void;
+      const waiting = new Promise<void>(resolve => { release = resolve; });
+      gate.mockImplementationOnce(async (_thread, selection) => { await waiting; return { ok: true, selection }; });
+      const answering = answer(card, "Codex");
+      await vi.waitFor(() => expect(gate).toHaveBeenCalledOnce());
+      store.patchMessage(bot.threadId, card.id, { card: { ...cardNow(card), dismissed: true } });
+      release();
+      expect(await answering).toBe("unavailable");
+      expect(thread().modelSelection).toEqual(defaultSelection()); expect(resend).not.toHaveBeenCalled();
+    });
+
     it("switches this conversation through the model-switch gate and resends the exact message that failed", async () => {
       const quoted = store.appendMessage(bot.threadId, { role: "bot", kind: "text", text: "It will rain on Friday." }).id;
       const messageId = said("how's the weather", { dataContext: { cardId: "sales" }, replyToId: quoted });

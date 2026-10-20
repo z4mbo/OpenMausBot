@@ -9,6 +9,7 @@ import { runControlOmb, verificationServerArgs, verificationServerEnvironment } 
 import { removeTempDir, waitForExit } from "./testing/cleanup.ts";
 import { readHandoffs } from "./testing/handoff-rows.ts";
 import { freePortBlock } from "./testing/ports.ts";
+import type { InstanceConfig } from "./contracts.ts";
 
 const LIMITED = "Limited Claude";
 const BACKUP = "Backup Claude";
@@ -17,7 +18,7 @@ const jsonLines = (path: string): any[] => existsSync(path)
   ? readFileSync(path, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line)) : [];
 
 async function withQuotaFixture(
-  options: { env?: Record<string, string> },
+  options: { env?: Record<string, string>; primary?: (dataDir: string) => InstanceConfig; backup?: (dataDir: string, prompts: string) => InstanceConfig },
   check: (fixture: {
     api: (method: string, path: string, body?: unknown) => Promise<any>;
     control: (...args: string[]) => Promise<any>;
@@ -38,8 +39,8 @@ async function withQuotaFixture(
     ({ driver: "claudeAgent", displayName, config: { cli: FAKE_CLI }, environment });
   writeFileSync(join(dataDir, "config.json"), JSON.stringify({
     instances: {
-      claude: engine(LIMITED, { FAKE_CLAUDE_MODE: "usage-limit" }),
-      backup: engine(BACKUP, { FAKE_CLAUDE_MODE: "happy", FAKE_CLAUDE_PROMPTS: backupFile, FAKE_CLAUDE_TOOL_CALLS: "[]" }),
+      claude: options.primary?.(dataDir) ?? engine(LIMITED, { FAKE_CLAUDE_MODE: "usage-limit" }),
+      backup: options.backup?.(dataDir, backupFile) ?? engine(BACKUP, { FAKE_CLAUDE_MODE: "happy", FAKE_CLAUDE_PROMPTS: backupFile, FAKE_CLAUDE_TOOL_CALLS: "[]" }),
     },
   }));
   const evidence: unknown[] = [{ url, options }];
@@ -87,6 +88,153 @@ async function withQuotaFixture(
     console.info(JSON.stringify({ logPath, evidencePath, fixtureRemoved: !existsSync(dataDir) }));
   }
 }
+
+it.each(["claude", "codex", "grok"] as const)("automatically continues one explicitly refused %s request on its ranked backup", async driver => {
+  await withQuotaFixture({ primary: (dataDir): InstanceConfig => {
+    if (driver === "claude") return { driver: "claudeAgent", config: { cli: FAKE_CLI }, environment: { FAKE_CLAUDE_MODE: "usage-limit" } };
+    if (driver === "codex") return { driver: "codex", config: { cli: fileURLToPath(new URL("./testing/fake-codex-app-server.ts", import.meta.url)) }, environment: { FAKE_CODEX_MODE: "usage-limit" } };
+    const failure = join(dataDir, "grok-quota.json"), home = join(dataDir, "grok");
+    mkdirSync(home);
+    writeFileSync(join(home, "auth.json"), "{}");
+    writeFileSync(failure, JSON.stringify({ code: -32000, message: "Provider allowance exhausted", data: { code: "usage_limit_reached" } }));
+    return { driver: "grokAgent", config: { cli: fileURLToPath(new URL("./testing/fake-acp-cli.ts", import.meta.url)) },
+      environment: { GROK_HOME: home, FAKE_ACP_RPC_FAILURE_FILE: failure, FAKE_ACP_RPC_FAILURE_METHOD: "session/prompt" } };
+  } }, async ({ api, control, backupPrompts, dataDir }) => {
+    const descriptions = (await api("GET", "/api/instances")).instances as any[];
+    const primary = descriptions.find(instance => instance.instanceId === "claude"), backup = descriptions.find(instance => instance.instanceId === "backup");
+    expect(primary.snapshot.billing).toBe("subscription");
+    await api("PUT", "/api/config", { dailyApiBudget: { limitUsd: 0, timeZone: "Europe/Rome" } });
+    const { bot } = await control("new-bot", "--name", "Ranked quota backup");
+    const threadId = bot.activeTaskId;
+    await api("PATCH", `/api/bots/${bot.id}/tasks/${threadId}`, { modelSelection: { instanceId: "claude", model: primary.models.default }, updateBotDefault: true });
+    await api("PATCH", `/api/bots/${bot.id}`, { quotaFallback: true, fallback: [{ instanceId: "backup", model: backup.models.default }] });
+    const { task: sibling } = await api("POST", `/api/bots/${bot.id}/tasks`, { title: "Sibling unchanged" });
+    const text = "QUOTA_FALLBACK_ONCE_8K";
+    await control("send", "--bot", bot.id, "--task", threadId, "--text", text);
+    expect((await control("wait", "--bot", bot.id, "--task", threadId, "--timeout", "30")).status).toBe("settled");
+    expect(backupPrompts()).toHaveLength(1);
+    const messages = (await api("GET", `/api/threads/${threadId}/messages?limit=100`)).messages as any[];
+    expect(messages.filter(message => message.role === "user" && message.text === text)).toHaveLength(1);
+    expect(messages.filter(message => message.card?.quotaSwitch)).toHaveLength(0);
+    expect(messages.findLast(message => message.role === "bot" && message.kind === "text")).toMatchObject({ text: "hello from fake claude", turnSucceeded: true });
+    const after = (await api("GET", "/api/bots")).bots.find((entry: any) => entry.id === bot.id);
+    expect(after.modelSelection.instanceId).toBe("claude");
+    expect(after.tasks.find((entry: any) => entry.threadId === sibling.threadId).modelSelection.instanceId).toBe("claude");
+    expect(after.tasks.find((entry: any) => entry.threadId === threadId).modelSelection.instanceId).toBe("backup");
+    const roots = readHandoffs(dataDir);
+    expect(roots.filter(root => !root.parentId && root.status === "completed")).toHaveLength(1);
+  });
+}, 90_000);
+
+it.each(["usage-limit-after-text", "usage-limit-after-tool"])("does not automatically replay after %s", async mode => {
+  await withQuotaFixture({ primary: () => ({ driver: "claudeAgent", config: { cli: FAKE_CLI }, environment: { FAKE_CLAUDE_MODE: mode } }) }, async ({ api, control, respond, backupPrompts }) => {
+    const instances = (await api("GET", "/api/instances")).instances as any[];
+    const { bot } = await control("new-bot", "--name", "Partial work must not replay");
+    const threadId = bot.activeTaskId;
+    await api("PATCH", `/api/bots/${bot.id}/tasks/${threadId}`, { modelSelection: { instanceId: "claude", model: instances.find(row => row.instanceId === "claude").models.default }, updateBotDefault: true });
+    await api("PATCH", `/api/bots/${bot.id}`, { quotaFallback: true, fallback: [{ instanceId: "backup", model: instances.find(row => row.instanceId === "backup").models.default }] });
+    await control("send", "--bot", bot.id, "--task", threadId, "--text", "DO_NOT_REPEAT_PARTIAL_WORK");
+    expect((await control("wait", "--bot", bot.id, "--task", threadId, "--timeout", "30")).job.state).toBe("failed");
+    expect(backupPrompts()).toHaveLength(0);
+    let messages: any[] = [];
+    await expect.poll(async () => {
+      messages = (await api("GET", `/api/threads/${threadId}/messages?limit=100`)).messages;
+      return messages.filter(message => message.card?.quotaSwitch).length;
+    }, { timeout: 10_000 }).toBe(1);
+    const offer = messages.find(message => message.card?.quotaSwitch);
+    expect(offer.card.subtitle).toContain("nothing will be sent again");
+    expect(offer.card.quotaSwitch.messageId).toBeUndefined();
+    expect((await respond(threadId, { requestId: offer.card.requestId, behavior: "answer", message: BACKUP })).body.outcome).toBe("answered");
+    expect(backupPrompts()).toHaveLength(0);
+    expect((await api("GET", `/api/threads/${threadId}/messages?limit=100`)).messages.filter((message: any) => message.role === "user")).toHaveLength(1);
+  });
+}, 90_000);
+
+it("terminates an exhausted ranked chain without cycling back to an account", async () => {
+  await withQuotaFixture({ backup: (_dir, prompts) => ({ driver: "claudeAgent", displayName: BACKUP, config: { cli: FAKE_CLI },
+    environment: { FAKE_CLAUDE_MODE: "usage-limit", FAKE_CLAUDE_PROMPTS: prompts } }) }, async ({ api, control, backupPrompts, dataDir }) => {
+    const instances = (await api("GET", "/api/instances")).instances as any[];
+    const selection = (instanceId: string) => ({ instanceId, model: instances.find(row => row.instanceId === instanceId).models.default });
+    const { bot } = await control("new-bot", "--name", "Finite ranked fallback");
+    await api("PATCH", `/api/bots/${bot.id}/tasks/${bot.activeTaskId}`, { modelSelection: selection("claude"), updateBotDefault: true });
+    await api("PATCH", `/api/bots/${bot.id}`, { quotaFallback: true, fallback: [selection("backup"), selection("claude"), selection("backup")] });
+    await control("send", "--bot", bot.id, "--task", bot.activeTaskId, "--text", "NO_QUOTA_CYCLE");
+    expect((await control("wait", "--bot", bot.id, "--task", bot.activeTaskId, "--timeout", "30")).status).toBe("failed");
+    expect(backupPrompts()).toHaveLength(1);
+    const messages = (await api("GET", `/api/threads/${bot.activeTaskId}/messages?limit=100`)).messages as any[];
+    expect(messages.filter(message => message.role === "user")).toHaveLength(1);
+    expect(messages.filter(message => message.tool?.name?.startsWith("recovery:"))).toHaveLength(1);
+    expect(readHandoffs(dataDir).filter(row => !row.parentId && row.status === "failed")).toHaveLength(2);
+  });
+}, 90_000);
+
+it.each([{ apiAllowed: false }, { apiAllowed: true, cap: 0 }])("does not silently use a paid CLI backup with $apiAllowed and cap $cap", async ({ apiAllowed, cap }) => {
+  await withQuotaFixture({ backup: (_dir, prompts) => ({ driver: "claudeAgent", displayName: BACKUP, config: { cli: FAKE_CLI, requireApiKey: true },
+    environment: { ANTHROPIC_API_KEY: "synthetic-fixture-only", FAKE_CLAUDE_MODE: "happy", FAKE_CLAUDE_PROMPTS: prompts } }) }, async ({ api, control, backupPrompts }) => {
+    const instances = (await api("GET", "/api/instances")).instances as any[];
+    expect(instances.find(row => row.instanceId === "backup").snapshot.billing).toBe("metered");
+    if (cap !== undefined) await api("PUT", "/api/config", { dailyApiBudget: { limitUsd: cap, timeZone: "Europe/Rome" } });
+    const { bot } = await control("new-bot", "--name", "Paid fallback consent");
+    await api("PATCH", `/api/bots/${bot.id}/tasks/${bot.activeTaskId}`, { modelSelection: { instanceId: "claude", model: instances.find(row => row.instanceId === "claude").models.default }, updateBotDefault: true });
+    await api("PATCH", `/api/bots/${bot.id}`, { quotaFallback: true, fallbackApiAllowed: apiAllowed, fallback: [{ instanceId: "backup", model: instances.find(row => row.instanceId === "backup").models.default }] });
+    await control("send", "--bot", bot.id, "--task", bot.activeTaskId, "--text", "NO_UNAPPROVED_API_SPEND");
+    expect((await control("wait", "--bot", bot.id, "--task", bot.activeTaskId, "--timeout", "30")).status).toBe("failed");
+    expect(backupPrompts()).toHaveLength(0);
+    const after = (await api("GET", "/api/bots")).bots.find((row: any) => row.id === bot.id);
+    expect(after.tasks.find((task: any) => task.threadId === bot.activeTaskId).modelSelection.instanceId).toBe("claude");
+  });
+}, 90_000);
+
+it("returns the HTTP send while the model is silent and Stop cancels the pending quota gate", async () => {
+  await withQuotaFixture({ primary: () => ({ driver: "claudeAgent", config: { cli: FAKE_CLI }, environment: { FAKE_CLAUDE_MODE: "hang" } }) }, async ({ api, control, backupPrompts, dataDir }) => {
+    const instances = (await api("GET", "/api/instances")).instances as any[];
+    const { bot } = await control("new-bot", "--name", "Stop silent model");
+    await api("PATCH", `/api/bots/${bot.id}/tasks/${bot.activeTaskId}`, { modelSelection: { instanceId: "claude", model: instances.find(row => row.instanceId === "claude").models.default }, updateBotDefault: true });
+    await api("PATCH", `/api/bots/${bot.id}`, { quotaFallback: true, fallback: [{ instanceId: "backup", model: instances.find(row => row.instanceId === "backup").models.default }] });
+    const sent = await Promise.race([control("send", "--bot", bot.id, "--task", bot.activeTaskId, "--text", "STOP_THE_SILENT_MODEL"),
+      new Promise<never>((_resolve, reject) => { const timer = setTimeout(() => reject(new Error("HTTP send waited for model output")), 5_000); timer.unref?.(); })]);
+    expect(sent).toBeTruthy();
+    await control("interrupt", "--bot", bot.id, "--task", bot.activeTaskId);
+    await expect.poll(async () => (await api("GET", "/api/bots")).bots.find((row: any) => row.id === bot.id).busy, { timeout: 10_000 }).toBe(false);
+    expect(backupPrompts()).toHaveLength(0);
+    expect(readHandoffs(dataDir).filter(row => row.status === "cancelled")).toHaveLength(1);
+  });
+}, 90_000);
+
+it("delivers a quota-recovered specialist result to its Chief exactly once", async () => {
+  await withQuotaFixture({ backup: (dataDir, prompts) => ({ driver: "claudeAgent", displayName: BACKUP, config: { cli: FAKE_CLI },
+    environment: { FAKE_CLAUDE_ROOM_PLAN: join(dataDir, "room-plan.json"), FAKE_CLAUDE_PROMPTS: prompts, FAKE_CLAUDE_TOOL_CALLS: "[]" } }) }, async ({ api, control, dataDir }) => {
+    const instances = (await api("GET", "/api/instances")).instances as any[];
+    const selection = (instanceId: string) => ({ instanceId, model: instances.find(row => row.instanceId === instanceId).models.default });
+    const { bot: chief } = await control("new-bot", "--name", "Quota Chief", "--section", "Leadership");
+    const { bot: specialist } = await control("new-bot", "--name", "Quota specialist", "--section", "Engineering");
+    await api("PATCH", `/api/bots/${chief.id}/tasks/${chief.activeTaskId}`, { modelSelection: selection("backup"), updateBotDefault: true });
+    await api("PATCH", `/api/bots/${chief.id}`, { chiefOfStaff: true, managedSections: ["Engineering"], acknowledgePeerScope: true });
+    await api("PATCH", `/api/bots/${specialist.id}/tasks/${specialist.activeTaskId}`, { modelSelection: selection("claude"), updateBotDefault: true });
+    await api("PATCH", `/api/bots/${specialist.id}`, { quotaFallback: true, fallback: [selection("backup")] });
+    const brief = "VERIFY_QUOTA_SPECIALIST_ONCE", result = "QUOTA_SPECIALIST_VERIFIED", final = "Chief received one quota specialist result";
+    const planPath = join(dataDir, "room-plan.json");
+    writeFileSync(planPath, JSON.stringify({
+      [chief.id]: { turns: [{ steps: [{ arguments: { bot_ids: [specialist.id], request_key: "quota-check", message: brief } }], reply: "Assigned quota check" },
+        { expectContextIncludes: [result], reply: final }] },
+      [specialist.id]: { turns: [{ expectContextIncludes: [brief], reply: result }] },
+    }));
+    await control("send", "--bot", chief.id, "--task", chief.activeTaskId, "--text", "Ask Engineering to verify and return one result.");
+    expect((await control("wait", "--bot", chief.id, "--task", chief.activeTaskId, "--timeout", "30")).status).toBe("settled");
+    const nodes = readHandoffs(dataDir);
+    expect(nodes).toHaveLength(2);
+    expect(nodes.every(row => row.status === "completed" && row.reported)).toBe(true);
+    const child = nodes.find(row => row.botId === specialist.id)!;
+    expect(child.result).toBe(result);
+    expect(jsonLines(`${planPath}.evidence.jsonl`).filter(row => row.botId === specialist.id)).toHaveLength(1);
+    const messages = (await api("GET", `/api/threads/${chief.activeTaskId}/messages?limit=100`)).messages as any[];
+    expect(messages.filter(row => row.text === final)).toHaveLength(1);
+    expect(messages.filter(row => row.roomRequest?.id === child.id && row.roomRequest.phase === "result")).toHaveLength(1);
+    const after = (await api("GET", "/api/bots")).bots.find((row: any) => row.id === specialist.id);
+    expect(after.modelSelection.instanceId).toBe("claude");
+    expect(after.tasks.find((row: any) => row.threadId === child.threadId).modelSelection.instanceId).toBe("backup");
+  });
+}, 90_000);
 
 /** A bot whose conversation runs on the limited engine, and the turn that
  * meets the limit. */

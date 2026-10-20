@@ -1,5 +1,7 @@
 import type { ModelRequestCardData } from "../shared/model-request.ts";
 import type { ModelSelection } from "../shared/wire.ts";
+import { sameModelSelection } from "../shared/thread-model.ts";
+import { REMOTE_MODEL_INSTANCE } from "../shared/model-selection.ts";
 import { harnessCapabilityLines, type DriverCapabilities } from "./harness-capabilities.ts";
 import { newId } from "./contracts.ts";
 import { UNDO_STALE, type DirectApply, type DirectApplyCheck } from "./direct-apply.ts";
@@ -74,8 +76,7 @@ export type UndoModelRequestResult =
   | { claimed: true; state: "invalid"; error: string; status: number; stale?: true }
   | { claimed: true; state: "undone"; targetBotId: string };
 
-const sameSelection = (a: ModelSelection, b: ModelSelection) =>
-  a.instanceId === b.instanceId && a.model === b.model && a.effort === b.effort && a.variant === b.variant;
+const sameSelection = sameModelSelection;
 
 function reasonText(value: unknown): string {
   if (typeof value !== "string") throw new ModelRequestError("reason is required");
@@ -89,7 +90,10 @@ function parseSelection(input: unknown): ModelSelection {
   if (typeof input !== "object" || input === null || Array.isArray(input)) {
     throw new ModelRequestError("model_selection must be an object with instanceId and model");
   }
-  const value = input as { instanceId?: unknown; model?: unknown; effort?: unknown; variant?: unknown };
+  const value = input as { instanceId?: unknown; model?: unknown; effort?: unknown; variant?: unknown; source?: unknown };
+  if (value.source !== undefined || value.instanceId === REMOTE_MODEL_INSTANCE) {
+    throw new ModelRequestError("Choose shared accounts yourself in the agent model settings");
+  }
   if (typeof value.instanceId !== "string" || !value.instanceId.trim()) {
     throw new ModelRequestError("model_selection.instanceId is required");
   }

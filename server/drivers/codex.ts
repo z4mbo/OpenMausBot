@@ -3,7 +3,7 @@ import { codexShellDisabled, GUEST_CONFINED_CODEX_ARGS } from "./codex-guest.ts"
 import { TEAM_TOOLS_FAILED, teamToolsFailed } from "./team-tools.ts";
 // The `codex` CLI headless over its app-server JSON-RPC (NDJSON on stdio): completion is
 // `turn/completed`, approvals arrive as server→client requests, resumeCursor is the codex thread id.
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { homedir } from "node:os";
@@ -15,6 +15,7 @@ import { hostedWorkspaceConfigured } from "../enterprise.ts";
 import { cloudHomeConfigured } from "../cloud-home.ts";
 import { serverVersion } from "../environment.ts";
 import { ChatGptPlanAuthController } from "./chatgpt-plan-auth.ts";
+import { createQuotaEventProofs, type QuotaEvidence } from "../quota-refusal.ts";
 import { describeSpawnFailure, execCli, killCliTree, spawnCli, waitForExit } from "../procs.ts";
 import { codexLaunchesStarting, codexLaunchSlot, codexRpcTimeoutMs, keepStopping, RELAUNCH_EXIT_WAIT_MS, spawnHoldingSlot, tryCodexLaunchSlot } from "./codex-process.ts";
 import { isReservedMcpEnvEntry } from "../mcp-registry.ts";
@@ -25,7 +26,6 @@ import type {
   ProviderDriver,
   ProviderInstance,
   ProviderSnapshot,
-  RuntimeEvent,
   RuntimeEventListener,
   SendTurnInput,
   StdioMcpSpec,
@@ -36,7 +36,7 @@ import { newEventId, newId } from "../contracts.ts";
 import { decodeCodexSelection, OFFICIAL_CODEX_PROVIDER, readCodexModelCatalog, STATIC_CODEX_MODELS } from "./codex-catalog.ts";
 import { codexLocalProviderArgs } from "./local-inject.ts";
 import { codexBackgroundModel, runCodexOneShot } from "./codex-background-text.ts";
-import { augmentedPath, splitCliString } from "../env-path.ts";
+import { augmentedPath } from "../env-path.ts";
 import { classifyError, computeBackoff, interruptibleDelay, RETRY_MAX_ATTEMPTS } from "./retry.ts";
 import { appendNative } from "./native.ts";
 import { answersAlone, permissionLaunchCwd, shellRequest } from "./permission-command.ts";
@@ -47,7 +47,7 @@ import type { ApprovalMode } from "../../shared/approval-mode.ts";
 import { CodexDeviceAuthController } from "./codex-device-auth.ts";
 import { codexAccountEmail, codexHome } from "./codex-identity.ts";
 import { CODEX_MISSING_CREDENTIALS, CODEX_SIGN_IN_EXPIRED, codexNotSignedIn, codexSignInExpired, codexSignInRefused, codexUserError, type CodexRoute } from "./codex-errors.ts";
-import { codexLoginCheck, codexLoginStatus, storedCodexLogin } from "./codex-login.ts";
+import { codexLoginCheck, codexLoginDetails, storedCodexLogin } from "./codex-login.ts";
 import { keyRejected, noteKeyAccepted, noteKeyRejected } from "../key-rejections.ts";
 import { classifyResumeFailure, mayReplay, rebuiltSessionNotice, recoveryPromptFor } from "../resume-recovery.ts";
 import { extractMcpImages } from "../mcp-tool-images.ts";
@@ -60,6 +60,8 @@ import { assertToolScopeSupported } from "../../shared/tool-scope-support.ts";
 import { gateServer, mcpStdioServer } from "../mcp-gate-config.ts";
 import { CALL_TOOL, DESCRIBE_TOOL, SEARCH_TOOL, directoryCallTarget } from "../mcp-directory.ts";
 
+import { codexUpdateCommand } from "./codex-update-command.ts";
+export { codexUpdateCommand } from "./codex-update-command.ts";
 export { decodeCodexSelection, readCodexModelCatalog, STATIC_CODEX_MODELS } from "./codex-catalog.ts";
 
 const DRIVER_KIND = "codex";
@@ -82,20 +84,6 @@ function missingNativeCodexThread(error: unknown, cursor: string): boolean {
 /** Codex refuses to resume an archived session: "session <id> is archived. Run `codex unarchive <id>` to unarchive it first." */
 const archivedNativeCodexThread = (error: unknown, cursor: string): boolean =>
   error instanceof CodexRpcError && error.message.includes(cursor) && /\bis archived\b/.test(error.message);
-
-/** Ask the configured executable to update itself, so a non-PATH Codex is the one updated. */
-export function codexUpdateCommand(cli: string, platform: NodeJS.Platform = process.platform): string {
-  if (cli === "codex") return "codex update";
-  const trimmed = cli.trim();
-  const tokens = trimmed.includes(" ") && existsSync(trimmed)
-    ? [trimmed]
-    : splitCliString(trimmed);
-  const quote = platform === "win32"
-    ? (token: string) => `'${token.replaceAll("'", "''")}'`
-    : (token: string) => `'${token.replaceAll("'", `'\\''`)}'`;
-  const command = (tokens.length > 0 ? tokens : [trimmed]).map(quote).join(" ");
-  return platform === "win32" ? `& ${command} update` : `${command} update`;
-}
 
 async function codexReleaseUpdate(version: string, cli: string): Promise<ProviderSnapshot["update"] | undefined> {
   const latest = await readLatestCodexRelease();
@@ -633,9 +621,8 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
     }
     const active = new Map<string, Turn>();
 
-    const emit = (event: RuntimeEvent) => {
-      for (const l of Array.from(listeners)) l(event);
-    };
+    const quotaProofs = createQuotaEventProofs(event => { for (const listener of Array.from(listeners)) listener(event); });
+    const emit = quotaProofs.emit;
     const base = (threadId: string, turnId: string) => ({
       eventId: newEventId(),
       provider: DRIVER_KIND,
@@ -789,7 +776,7 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
         // A `-c` override merges with a same-named server in config.toml, and stdio over url is
         // "invalid configuration" that kills the turn, so such a server mounts under its own name.
         const declaredInCodexConfig = codexConfigMcpServerNames(env);
-        if (turn.toolScope !== undefined) {
+        if (turn.toolScope !== undefined || turn.guestConfined) {
           for (const name of declaredInCodexConfig) appServerArgs.push("-c", `mcp_servers.${name}.enabled=false`);
         }
         for (const [name, server] of Object.entries(turn.integrations?.custom ?? {})) {
@@ -827,7 +814,7 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
         const provenPrivateEnv = turn.toolScope !== undefined || directoryMounts.size > 0;
         if (privateEnv.length && turn.toolScope === undefined) appServerArgs.push("-c", "features.shell_snapshot=false");
 
-        const selectionConfig: { config?: Record<string, unknown> } = turn.toolScope === undefined ? {} : { config: { mcp_servers: Object.fromEntries(
+        const selectionConfig: { config?: Record<string, unknown> } = turn.toolScope === undefined && !turn.guestConfined ? {} : { config: { mcp_servers: Object.fromEntries(
           [...selectedMcp].map(([name, server]) => [name, {
             command: server.command, args: server.args, env_vars: Object.keys(server.env), env: {}, default_tools_approval_mode: selectedApprovals.get(name) ?? "prompt",
           }]),
@@ -843,6 +830,7 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
         }));
 
       let abandoned = false;
+      let quotaEvidence: QuotaEvidence | null = null;
       let codexThreadId: string | null = null;
       let codexTurnId: string | null = null;
       let startingNativeTurn = false;
@@ -959,10 +947,13 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
         for (const finish of Array.from(asks.values())) finish("deny", "Origin: the turn ended", "system");
         for (const p of rpcPending.values()) p.reject(new Error("turn settled"));
         rpcPending.clear();
+        const wasStopped = stopRequested;
         const complete = () => {
           if (active.get(threadId)?.stop !== stop) return;
           active.delete(threadId);
-          emit({ ...base(threadId, turnId), type: "turn.completed", ok, stopReason, cost: null, ...(state.usage ? { usage: state.usage } : {}) });
+          const quiesced = child.exitCode !== null || child.signalCode !== null;
+          const refusal = !ok && quotaEvidence && quotaProofs.refusal(threadId, quotaEvidence, quiesced && !wasStopped && attempt === 0);
+          emit({ ...base(threadId, turnId), type: "turn.completed", ok, stopReason, cost: null, ...(state.usage ? { usage: state.usage } : {}), ...(refusal ? { refusal } : {}) });
         };
         completeStoppedTurn = complete;
         if (await stop()) return;
@@ -1181,6 +1172,7 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
         const refused = chatgptTurn && loginMark() !== null && (codexSignInRefused(error) ||
           (state.authRecovery && !/\b403\b|forbidden/i.test(raw) && /\b401\b|unauthorized/i.test(raw)));
         if (retryLoginRace(raw, refused)) return;
+        if (!refused && chatgptTurn && error.codexErrorInfo === "usageLimitExceeded") quotaEvidence = { kind: "quota_exhausted", scope: "account" };
         if (refused) loginRefused();
         const message = refused ? codexSignInExpired(raw) : codexUserError(raw, route, error.codexErrorInfo);
         const setup = refused || classifyError({ text: raw }).reason === "auth";
@@ -1515,7 +1507,7 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
           selectionConfig.config = { ...selectionConfig.config,
             ...extendShellExclusions((rawPolicy ?? {}) as Record<string, unknown>, [...(plan ? ["OPENMAUSBOT_CHATGPT_TOKEN"] : []), ...privateEnv]) };
         }
-        if (turn.toolScope !== undefined) {
+        if (turn.toolScope !== undefined || turn.guestConfined) {
           const catalog = (effectiveConfig as { mcp_servers?: unknown } | null)?.mcp_servers;
           if (!catalog || typeof catalog !== "object" || Array.isArray(catalog)) throw new Error("Codex could not confirm its selected MCP configuration. No prompt was sent.");
           for (const [name, entry] of Object.entries(catalog)) {
@@ -1541,7 +1533,7 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
           : null;
         const promptSplit = stableInstructions !== null;
         const developerInstructions = codexDeveloperInstructions(
-          effectiveConfig,
+          turn.guestConfined ? {} : effectiveConfig,
           stableInstructions ?? turn.system ?? "",
         );
         let approvalParams: CodexApprovalParams;
@@ -1716,10 +1708,11 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
     const previousCliVersion = modelsCliVersion;
     modelsCliVersion = version;
     if (previousCliVersion !== null && previousCliVersion !== version) await refreshModels();
-    const authenticated = await codexLoginStatus(config.cli, env) === "signed-in";
+    const login = await codexLoginDetails(config.cli, env);
+    const authenticated = login.status === "signed-in";
     if (authenticated && loginRejected()) {
       return { state: "available", version, authenticated: false, reason: CODEX_SIGN_IN_EXPIRED,
-        update: await codexReleaseUpdate(version, config.cli), billing: "subscription" };
+        update: await codexReleaseUpdate(version, config.cli), ...(login.billing ? { billing: login.billing } : {}) };
     }
     const email = authenticated ? await codexAccountEmail(config.cli, env) : null;
     return {
@@ -1728,7 +1721,7 @@ export const CodexDriver: ProviderDriver<CodexConfig> = {
       authenticated,
       ...(email ? { account: { email } } : {}),
       update: await codexReleaseUpdate(version, config.cli),
-      billing: "subscription",
+      ...(login.billing ? { billing: login.billing } : {}),
     };
   };
 

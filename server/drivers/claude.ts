@@ -1,8 +1,7 @@
 // Claude Code over stream-json both ways: prompt on stdin, one retained CLI process per thread,
 // each turn settled by the CLI's own `result` frame.
 import { createHash, randomBytes, randomUUID } from "node:crypto";
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
-import { createServer as createNetServer } from "node:net";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join, dirname, isAbsolute, normalize } from "node:path";
 
@@ -11,6 +10,11 @@ import { openStartupModelCatalog, writeStartupModelCache } from "../startup-mode
 import { writeFileAtomic, writeFileAtomicIfChanged } from "../atomic.ts";
 import { augmentedPath } from "../env-path.ts";
 import { brokerSocketPath, describeSpawnFailure, execCli, killCliTree, spawnCli } from "../procs.ts";
+import { createPermissionBroker, type Ask } from "./claude-permission-broker.ts";
+import { confinedPermissionRefusal } from "./confined-permission.ts";
+export { createPermissionBroker } from "./claude-permission-broker.ts";
+import { firstText } from "./claude-message-text.ts";
+import { removePrivateTempDir } from "./claude-temp.ts";
 import { claudeAuthStatus } from "./claude-auth-status.ts";
 import { claudeModelExtras } from "./claude-model-extras.ts";
 import { classifyResumeFailure, mayReplay, rebuiltSessionNotice, recoveryPromptFor } from "../resume-recovery.ts";
@@ -22,7 +26,6 @@ import type {
   ProviderDriver,
   ProviderInstance,
   ProviderSnapshot,
-  RuntimeEvent,
   RuntimeEventListener,
   SendTurnInput,
   SteerOutcome,
@@ -51,6 +54,7 @@ import { BACKGROUND_CALL_TIMEOUT_MS, backgroundCallArgs, spawnBackgroundCall } f
 import { permissionLaunchCwd, shellRequest } from "./permission-command.ts";
 import { SPAWNED_PROXIES } from "../proxy-paths.ts";
 import { extractMcpImages } from "../mcp-tool-images.ts";
+import { createQuotaEventProofs, type QuotaEvidence } from "../quota-refusal.ts";
 import {
   ASK_USER_QUESTION_TOOL,
   ASK_USER_TOOL,
@@ -356,37 +360,6 @@ const HOOK_HELPER_PATH = SPAWNED_PROXIES.hook;
 // In the packaged app process.execPath is the Electron binary; this makes it run as plain node.
 const NODE_ENV_FLAG = { ELECTRON_RUN_AS_NODE: "1" };
 
-function removePrivateTempDir(filePath: string | null | undefined): boolean {
-  if (!filePath) return true;
-  try {
-    rmSync(dirname(filePath), { recursive: true, force: true, maxRetries: 3, retryDelay: 50 });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-interface Ask {
-  id: string;
-  kind: "permission" | "question";
-  tool: string;
-  input: Record<string, unknown>;
-  at: number;
-}
-type AskBehavior = "allow" | "deny" | "answer";
-type AskResolutionSource = "user" | "timeout" | "system";
-
-const DENY_TIMEOUT_NOTE =
-  "Origin: nobody answered this permission request in time. Skip this action and finish what you can without it.";
-const QUESTION_TIMEOUT_NOTE = "Origin: nobody answered in time. Use your best judgment and continue.";
-const DUPLICATE_ASK_ID_NOTE = "Origin: duplicate ask id — skipping this request.";
-
-function systemEndedReply(kind: Ask["kind"]): { behavior: AskBehavior; message: string } {
-  return kind === "question"
-    ? { behavior: "answer", message: "Origin: the turn is ending — wrap up." }
-    : { behavior: "deny", message: "Origin: the turn ended" };
-}
-
 function askQuestions(ask: Ask): AskQuestion[] | null {
   return ask.tool === ASK_USER_QUESTION_TOOL || ask.tool === ASK_USER_TOOL ? parseAskQuestions(ask.input) : null;
 }
@@ -484,166 +457,6 @@ export function brokerSocketCandidates(threadId: string, botId?: string): string
   ];
 }
 
-export async function createPermissionBroker(opts: {
-  socketPaths: string[];
-  onAsk: (ask: Ask) => void;
-  onResolve: (resolved: Ask & { behavior: AskBehavior; source: AskResolutionSource }) => void;
-  isActive?: () => boolean;
-  timeoutMs?: number;
-}) {
-  const timeoutMs = opts.timeoutMs ?? 15 * 60_000;
-  const pending = new Map<
-    string,
-    { ask: Ask; finish: (behavior: AskBehavior, message: string | undefined, source: AskResolutionSource, always?: boolean) => void }
-  >();
-  // server.close() leaves open connections wired: asks after close must never become cards.
-  let closed = false;
-  let boundPath = opts.socketPaths[0] ?? "";
-  const connectionHandler = (conn: import("node:net").Socket) => {
-    conn.on("error", () => {});
-    conn.setEncoding("utf8");
-    let buf = "";
-    conn.on("data", (chunk) => {
-      buf += chunk;
-      let nl;
-      while ((nl = buf.indexOf("\n")) !== -1) {
-        const line = buf.slice(0, nl);
-        buf = buf.slice(nl + 1);
-        let msg: any;
-        try {
-          msg = JSON.parse(line);
-        } catch {
-          continue;
-        }
-        if (msg.t !== "ask") continue;
-        const askId = String(msg.id ?? newId());
-        const kind = msg.kind === "question" ? ("question" as const) : ("permission" as const);
-        if (closed) {
-          // Always answer: permission-proxy.ts resolves only on an answer, so a drop hangs the tool.
-          try {
-            conn.write(JSON.stringify({ t: "answer", id: askId, ...systemEndedReply(kind) }) + "\n");
-          } catch {}
-          continue;
-        }
-        // A retained process keeps its proxy connection between turns; late asks fail closed.
-        if (opts.isActive && !opts.isActive()) {
-          try {
-            conn.write(JSON.stringify({ t: "answer", id: askId, ...systemEndedReply(kind) }) + "\n");
-          } catch {}
-          continue;
-        }
-        // `pending` is server-scoped: a duplicate id would orphan the first ask.
-        if (pending.has(askId)) {
-          // askId is client-controlled; JSON.stringify keeps it from corrupting the log line.
-          console.error(`permission broker on ${boundPath}: duplicate ask id ${JSON.stringify(askId)} — denying`);
-          try {
-            conn.write(JSON.stringify({ t: "answer", id: askId, behavior: "deny", message: DUPLICATE_ASK_ID_NOTE }) + "\n");
-          } catch {}
-          continue;
-        }
-        const ask: Ask = { id: askId, kind, tool: msg.tool ?? "tool", input: msg.input ?? {}, at: Date.now() };
-        const finish = (behavior: AskBehavior, message: string | undefined, source: AskResolutionSource, always?: boolean) => {
-          if (!pending.delete(askId)) return;
-          clearTimeout(timer);
-          try {
-            // On `always` the proxy returns the CLI's own suggested rules, so Claude, not the
-            // harness, remembers the allow. `source` keeps a timeout note from passing as human words.
-            conn.write(
-              JSON.stringify({ t: "answer", id: askId, behavior, message, source, ...(always ? { always: true } : {}) }) + "\n",
-            );
-          } catch {}
-          opts.onResolve({ ...ask, behavior, source });
-        };
-        const timer = setTimeout(
-          () =>
-            kind === "question"
-              ? finish("answer", QUESTION_TIMEOUT_NOTE, "timeout")
-              : finish("deny", DENY_TIMEOUT_NOTE, "timeout"),
-          timeoutMs,
-        );
-        timer.unref?.();
-        pending.set(askId, { ask, finish });
-        opts.onAsk(ask);
-      }
-    });
-  };
-  let server: ReturnType<typeof createNetServer> | null = null;
-  for (const [index, candidate] of opts.socketPaths.entries()) {
-    const attempt = createNetServer(connectionHandler);
-    try {
-      unlinkSync(candidate);
-    } catch {}
-    let outcome = await new Promise<"listening" | (Error & { code?: string })>((resolve) => {
-      attempt.once("listening", () => resolve("listening"));
-      attempt.once("error", (error) => resolve(error as Error & { code?: string }));
-      attempt.listen(candidate);
-    });
-    // A fallback under the shared OS temp root must not be connectable by another local account.
-    if (outcome === "listening" && process.platform !== "win32") {
-      try {
-        chmodSync(candidate, 0o600);
-      } catch (error) {
-        try {
-          attempt.close();
-        } catch {}
-        try {
-          unlinkSync(candidate);
-        } catch {}
-        outcome = error as Error & { code?: string };
-      }
-    }
-    if (outcome === "listening") {
-      if (index > 0) {
-        console.error(`permission broker: ${opts.socketPaths[0]} is still held — bound fallback ${candidate}`);
-      }
-      boundPath = candidate;
-      server = attempt;
-      attempt.on("error", (error) => {
-        console.error(`permission broker error on ${candidate}: ${error.message}`);
-      });
-      break;
-    }
-    try {
-      attempt.close();
-    } catch {}
-    if (index === opts.socketPaths.length - 1) {
-      console.error(`permission broker unavailable on ${candidate}: ${outcome.message}`);
-      break;
-    }
-  }
-  // Fail closed: an unbound candidate could connect the proxy to a stale or unrelated listener.
-  if (!server) throw new Error("claude: permission broker could not bind a local socket");
-  const drain = () => {
-    for (const p of Array.from(pending.values())) {
-      const { behavior, message } = systemEndedReply(p.ask.kind);
-      p.finish(behavior, message, "system");
-    }
-  };
-  return {
-    answer(askId: string, behavior: AskBehavior, message?: string, always?: boolean): boolean {
-      const p = pending.get(askId);
-      if (!p) return false;
-      if (p.ask.kind === "question" ? behavior !== "answer" : behavior === "answer") return false;
-      p.finish(behavior, message, "user", always && behavior === "allow");
-      return true;
-    },
-    pause() {
-      drain();
-    },
-    close() {
-      closed = true;
-      drain();
-      try {
-        server?.close();
-      } catch {}
-      try {
-        unlinkSync(boundPath);
-      } catch {}
-    },
-    socketPath: boundPath,
-  };
-}
-
 function decodeToolList(value: unknown, field: "tools" | "disallowedTools"): string[] | undefined {
   if (value === undefined) return undefined;
   if (!Array.isArray(value)) throw new Error(`claude: ${field} must be an array of non-empty strings`);
@@ -683,17 +496,6 @@ function decodeConfig(raw: unknown): ClaudeConfig {
     ...(disallowedTools !== undefined ? { disallowedTools } : {}),
     ...(o.requireApiKey === true ? { requireApiKey: true } : {}),
   };
-}
-
-function firstText(content: unknown): string {
-  if (typeof content === "string") return content;
-  if (Array.isArray(content)) {
-    return content
-      .filter((b) => b?.type === "text" && b.text)
-      .map((b) => b.text)
-      .join("");
-  }
-  return "";
 }
 
 /** A turn's cost from total_cost_usd, which is the process's running total (2.1.282): the growth
@@ -948,6 +750,7 @@ export const ClaudeDriver: ProviderDriver<ClaudeConfig> = {
         updateRequired?: boolean;
         limit?: ClaudeLimit | null;
         limitReached?: boolean;
+        quotaEvidence?: QuotaEvidence;
         explained?: boolean;
         stopRequested?: boolean;
         /** Steer uuids no model call has taken in yet. Without --replay-user-messages the CLI never
@@ -1026,9 +829,8 @@ export const ClaudeDriver: ProviderDriver<ClaudeConfig> = {
       });
     };
 
-    const emit = (event: RuntimeEvent) => {
-      for (const l of Array.from(listeners)) l(event);
-    };
+    const quotaProofs = createQuotaEventProofs(event => { for (const listener of Array.from(listeners)) listener(event); });
+    const emit = quotaProofs.emit;
     const base = (threadId: string, turnId: string) => ({
       eventId: newEventId(),
       provider: DRIVER_KIND,
@@ -1103,7 +905,7 @@ export const ClaudeDriver: ProviderDriver<ClaudeConfig> = {
       }
       const replaysUserMessages = cliVersion === null || versionAtLeast(cliVersion, CLAUDE_REPLAY_FLOOR);
       if (replaysUserMessages) args.push("--replay-user-messages");
-      const isolated = !inheritsUserConfig(turnEnvironment);
+      const isolated = turn.guestConfined === true || !inheritsUserConfig(turnEnvironment);
       if (turn.toolScope !== undefined && (!isolated || turn.mcpFromUserConfig || cliVersion === null || !claudeCliSupports(cliVersion, "--strict-mcp-config"))) {
         throw new Error("Claude cannot confirm a restricted MCP configuration for this account. Disable inherited Claude MCP servers and use a current, identifiable Claude CLI before using tool selection.");
       }
@@ -1324,6 +1126,7 @@ export const ClaudeDriver: ProviderDriver<ClaudeConfig> = {
           broker = await createPermissionBroker({
             socketPaths: brokerSocketCandidates(threadId, botId),
             isActive: () => Boolean(sessions.get(threadId)?.turn),
+            refuse: ask => turn.guestConfined ? confinedPermissionRefusal(ask, cwd) : undefined,
             onAsk: (ask) => {
               const eventTurnId = sessions.get(threadId)?.turn?.turnId ?? turnId;
               askTools.set(ask.id, typeof ask.tool === "string" ? ask.tool : undefined);
@@ -1469,16 +1272,31 @@ export const ClaudeDriver: ProviderDriver<ClaudeConfig> = {
         else if (session.teamToolsFailed) closeSession(threadId, "team tools did not connect");
         const cost = turnCostFromRunningTotal(total, session.costTotal ?? null);
         if (total !== null) session.costTotal = total;
-        emit({ ...base(threadId, t.turnId), type: "turn.completed", ok, stopReason, cost, ...(usage ? { usage } : {}) });
+        const complete = (quiesced = false) => {
+          const refusal = t.quotaEvidence && quotaProofs.refusal(threadId, t.quotaEvidence,
+            quiesced && !t.stopRequested && t.pendingSteers.size === 0 && retry.attempt === 0);
+          emit({ ...base(threadId, t.turnId), type: "turn.completed", ok, stopReason, cost, ...(usage ? { usage } : {}), ...(refusal ? { refusal } : {}) });
+        };
+        if (!ok && t.quotaEvidence) {
+          closeSession(threadId, "subscription quota refused");
+          void killCliTree(session.child).then(stopped => complete(stopped), () => complete(false));
+          return;
+        }
+        complete();
         if (session.child.exitCode === null && !session.closing) armIdle(threadId);
       };
       const settleResult = (result: NativeTurnResult) => settle(result.ok, result.stopReason, result.cost, result.usage);
       const currentTurnId = () => session.turn?.turnId ?? turnId;
-      const reachLimit = (frame: { api_error_params?: { rate_limit_info?: unknown } }, words: unknown) => {
+      const reachLimit = (frame: { api_error?: unknown; api_error_params?: { rate_limit_info?: unknown } }, words: unknown) => {
         const t = session.turn;
         if (!t || t.limitReached) return;
         t.limitReached = t.explained = true;
         t.limit = claudeLimitRefusal(frame.api_error_params?.rate_limit_info) ?? t.limit;
+        if (frame.api_error === "usage_limit_reached" || t.limit) {
+          const resetsAt = t.limit?.resetsAt && Number.isFinite(t.limit.resetsAt) ? new Date(t.limit.resetsAt * 1000) : null;
+          t.quotaEvidence = { kind: "quota_exhausted", scope: /^seven_day_(?:opus|sonnet)$/.test(t.limit?.window ?? "") ? "model" : "account",
+            ...(resetsAt && Number.isFinite(resetsAt.getTime()) ? { resetsAt: resetsAt.toISOString() } : {}) };
+        }
         const said = typeof words === "string" && USAGE_LIMIT.test(words) ? words : undefined;
         emit({ ...base(threadId, currentTurnId()), type: "runtime.error", message: claudeLimitMessage(t.limit ?? null, said) });
       };
@@ -1982,7 +1800,7 @@ export const ClaudeDriver: ProviderDriver<ClaudeConfig> = {
       const probed = await claudeAuthStatus(config.cli, env);
       const auth = probed.authenticated === undefined ? lastAuth : (lastAuth = probed);
       // Turns run on the CLI's own login, so its reported cost is what the call would bill.
-      return { state: "available", version, ...auth, ...(update ? { update } : {}), ...(warning ? { warning } : {}), billing: "subscription" };
+      return { state: "available", version, ...auth, ...(update ? { update } : {}), ...(warning ? { warning } : {}), billing: auth.account?.method === "api-key" ? "metered" : "subscription" };
     };
 
     /** One-shot call, prompt on stdin (approval summaries can hold secrets), no tools or MCP servers. */

@@ -365,6 +365,7 @@ export const GROK_ASK_USER_QUESTION: AcpQuestionRequest = {
 };
 
 const support: AcpSupport = {
+  billing: "subscription",
   driverKind: "grokAgent",
   questionRequests: {
     "_x.ai/ask_user_question": GROK_ASK_USER_QUESTION,

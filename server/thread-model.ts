@@ -2,6 +2,7 @@
 import type { ModelSelection } from "./contracts.ts";
 import { readyToRun, signedOut, type DefaultSelectionContext, type SelectableInstance } from "./default-model-selection.ts";
 import { sameModelSelection } from "../shared/thread-model.ts";
+import { REMOTE_MODEL_INSTANCE } from "../shared/model-selection.ts";
 
 export type ThreadEngine = SelectableInstance & { enabled: boolean };
 
@@ -23,6 +24,7 @@ export function threadModelFallback(
   context: ThreadModelContext = {},
 ): ThreadModelFallback | null {
   if (sameModelSelection(own, botModel)) return null;
+  if (own.instanceId === REMOTE_MODEL_INSTANCE || own.source) return null;
   const mine = engine(own.instanceId);
   if (!canRunOn(mine, own, context)) return "unavailable";
   if (!signedOut(mine)) return null;
