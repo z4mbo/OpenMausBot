@@ -25,7 +25,6 @@ import { campaignTools } from "./origin-campaign-tools.ts";
 import { brandTools } from "./origin-brand-tools.ts";
 import { vaultAgentSecrets } from "./origin-vault-agent.ts";
 import { launchpadTools } from "./origin-launchpad-tools.ts";
-import { shipTools } from "./ship/tools.ts";
 import type { PipelineSender } from "./origin-pipeline.ts";
 import { runStudioTool, STUDIO_TOOL_NAMES, type StudioRunner, type StudioToolResult, type WorkflowExecutor } from "./origin-studio-tools.ts";
 
@@ -985,7 +984,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     return { client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId, projectName: await projectName(ctx, project.projectId), caller: ctx.caller, ...(ctx.pipeline ? { sender: ctx.pipeline } : {}) };
   }),
   ...campaignTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...brandTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), origin_vault_list: (args, ctx) => vaultAgentSecrets().tools((a, c: ToolContext) => broadcastScope(c, a)).origin_vault_list(args, ctx),
-  ...launchpadTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...shipTools(async (args, ctx: ToolContext) => ({ ...await broadcastScope(ctx, args), chief: Boolean(ctx.caller.chiefOfStaff) })),
+  ...launchpadTools((args, ctx: ToolContext) => broadcastScope(ctx, args)),
   ...standupTools(async (args, ctx: ToolContext) => Promise.all((trimmed(args.project) || ctx.reachable.length === 1 ? [await pickProject(ctx, args.project)] : ctx.reachable).map(async ({ projectId }) => { const doc = await projectDoc(ctx, projectId); return { client: ctx.client, sessionToken: ctx.sessionToken, projectId, projectName: text(doc.name) || projectId, teamId: text(doc.teamId) }; }))),
 };
 

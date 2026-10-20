@@ -11,7 +11,7 @@ const step = (id: string) => STACK.find((candidate) => candidate.id === id)!;
 describe("connect your stack", () => {
   it("completes a step when any of its providers is connected, by anyone", () => {
     expect(stepState(step("social"), [status("x"), status("tiktok", { configured: true, source: "shared" })], null)).toBe("done");
-    expect(stepState(step("deploy"), [status("vercel")], null)).toBe("todo");
+    expect(stepState(step("payments"), [status("stripe")], null)).toBe("todo");
   });
 
   it("marks a step partial while a key is half filled in", () => {
@@ -21,7 +21,7 @@ describe("connect your stack", () => {
   it("counts GitHub done only once it is shared with the workspace", () => {
     expect(stepState(step("github"), [], { connected: true, shared: false })).toBe("partial");
     expect(stepState(step("github"), [], { connected: true, shared: true })).toBe("done");
-    expect(stackProgress([status("fal", { configured: true, source: "yours" })], { connected: true, shared: true })).toEqual({ done: 2, total: 7 });
+    expect(stackProgress([status("fal", { configured: true, source: "yours" })], { connected: true, shared: true })).toEqual({ done: 2, total: 6 });
   });
 
   it("names whose key a provider uses", () => {

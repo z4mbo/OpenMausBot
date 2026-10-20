@@ -604,7 +604,6 @@ import { createSharedAgents, type SendDecision } from "./origin-shared-agents.ts
 import { createOriginMemberRoutes } from "./origin-members.ts";
 import { createOriginMcpRoutes } from "./origin-mcp.ts";
 import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService, createProjectGit } from "./routes/github.ts";
-import { createShipRoutes } from "./ship/routes.ts";
 import { originGitHub } from "./github/review.ts";
 import { removalSentence, removeGitHubIssue } from "./github/sync.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
@@ -13699,7 +13698,7 @@ PUBLIC_ROUTES.push(createOriginMcpRoutes({
   publicUrl,
   removeGitHubIssue: async (projectId, taskId, issueUrl) => removalSentence(await removeGitHubIssue(githubService(), projectId, taskId, issueUrl)),
 }));
-ROUTES.push(createGitHubRoutes({ service: githubService }), createShipRoutes({ github: githubService, summarize: summarizeForAgent }));
+ROUTES.push(createGitHubRoutes({ service: githubService }));
 PUBLIC_ROUTES.push(createGitHubPublicRoutes({ service: githubService }));
 ROUTES.push(createBotSettingsRoutes({
   store, cfg, registry, commandAllowlist, commandAllowlistDrivers: COMMAND_ALLOWLIST_DRIVERS,

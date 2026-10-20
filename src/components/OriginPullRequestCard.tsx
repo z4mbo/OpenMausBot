@@ -6,8 +6,6 @@ import { originGitHub } from "@/lib/origin-github";
 import { cn } from "@/lib/cn";
 import { pullRequestCardTone, type OriginPullRequestCard as Card } from "../../shared/origin-pull-request";
 import { ghostButton, primaryButton } from "./origin-pages/ui";
-import { useShipPreviews } from "@/lib/origin-ship";
-import { PreviewLinks } from "./origin-ship/PreviewLinks";
 
 const CHECKS: Record<string, { label: string; tone: string }> = {
   success: { label: "Checks passed", tone: "text-success" },
@@ -32,8 +30,6 @@ export function mergeConfirmation(card: Pick<Card, "number" | "baseBranch" | "he
 export function OriginPullRequestCard({ message }: { message: Message }) {
   const card = message.originPullRequest;
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
-  const live = card && (card.state === "open" || card.state === "draft");
-  const previews = useShipPreviews(live ? card.projectId : null, live ? [{ number: card.number, branch: card.branch }] : [])[card?.number ?? 0];
   if (!card) return null;
   const tone = phase.kind === "merged" ? "done" : pullRequestCardTone(card);
   const checks = CHECKS[card.checks] ?? { label: "Checks unknown", tone: "text-ink-tertiary" };
@@ -80,7 +76,6 @@ export function OriginPullRequestCard({ message }: { message: Message }) {
         <dt className="sr-only">Closes</dt>
         <dd className="truncate text-ink-secondary">{card.closes.length ? `Closes ${card.closes.join(", ")}` : "Closes no issue"}</dd>
       </dl>
-      <PreviewLinks previews={previews} className="mt-2" />
 
       {phase.kind === "merged" ? (
         <p className="mt-2.5 flex items-center gap-1.5 text-[12px] text-success" role="status">

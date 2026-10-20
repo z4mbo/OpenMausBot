@@ -86,7 +86,6 @@ describe("what a bridged turn is listed", () => {
       "fill_login",
       "memory_update",
       "origin_team_chat_post",
-      "origin_ship_deploy",
       FIND_TOOL,
       USE_TOOL,
     ]);
@@ -107,7 +106,6 @@ describe("what a bridged turn is listed", () => {
       "send_voice_note",
       "memory_update",
       "origin_team_chat_post",
-      "origin_ship_deploy",
       FIND_TOOL,
       USE_TOOL,
     ]);
@@ -168,7 +166,7 @@ describe("what a bridged turn is listed", () => {
       }
     }
     // today that is the two the hot list names, and the team chat post
-    expect(names(availableTools(profile({ ...FULL_CHIEF }))).filter((tool) => reportedAs(tool).some(isOutboundTool))).toEqual(["post_to_room", "send_voice_note", "origin_team_chat_post", "origin_ship_deploy"]);
+    expect(names(availableTools(profile({ ...FULL_CHIEF }))).filter((tool) => reportedAs(tool).some(isOutboundTool))).toEqual(["post_to_room", "send_voice_note", "origin_team_chat_post"]);
     // and the bridge's own two names are not outward either
     for (const spelling of [...reportedAs(USE_TOOL), ...reportedAs(FIND_TOOL)]) expect(isOutboundTool(spelling), spelling).toBe(false);
     // derived, not listed by hand: a future tool named like a send is kept,
@@ -574,7 +572,6 @@ describe("a turn that lists its domain tools in short", () => {
       expect(names(deferral.listed)).toContain(tool.name);
       expect(await deferral.route(tool.name, {}), tool.name).toBeUndefined();
     }
-    expect(deferral.deferred.filter((tool) => isOutboundTool(tool.name)).length).toBeGreaterThan(0);
     expect(await deferral.route(USE_TOOL, { name: "origin_studio_generate" })).toBeUndefined();
   });
 
@@ -597,8 +594,6 @@ describe("a turn that lists its domain tools in short", () => {
     ["what posts are scheduled", "origin_broadcast_list"],
     ["save that picture to assets", "origin_studio_save_asset"],
     ["list my leads", "origin_pipeline_list_leads"],
-    ["write the release notes", "origin_release_draft"],
-    ["is the vercel deployment live", "origin_ship_status"],
   ])("ranks the domain tool first from how a person would ask: %s", async (query, expected) => {
     const matches = await matchesFor(deferralFor(FULL_CHIEF), query);
     expect(matches[0]!.name).toBe(expected);

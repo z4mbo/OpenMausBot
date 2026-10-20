@@ -2,28 +2,10 @@ import { useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { cloudMutation } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
-import { budgetLevel, budgetPercent, formatUsd, parseBudgetInput, type BudgetLevel, type BudgetLine } from "@/lib/agent-budget";
-import { ghostButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
+import { parseBudgetInput } from "@/lib/agent-budget";
+import { ghostButton, inputClass, primaryButton, useAction } from "./origin-pages/ui";
 
-export type BudgetTarget = { agentId: string } | { projectId: string };
-
-const LEVEL_TONE: Record<Exclude<BudgetLevel, "ok">, string> = {
-  warn: "bg-warning/15 text-warning",
-  over: "bg-danger/15 text-danger",
-};
-
-/** The 80% and 100% marks on an Org node: nothing below 80%. */
-export function BudgetBadge({ line }: { line: BudgetLine | undefined }) {
-  if (!line || line.monthlyUsd === undefined) return null;
-  const level = budgetLevel(line.spentUsd, line.monthlyUsd);
-  if (level === "ok") return null;
-  return (
-    <span className={cn("shrink-0 rounded-full px-1.5 py-px text-[10.5px] font-medium tabular-nums", LEVEL_TONE[level])}
-      title={`${formatUsd(line.spentUsd)} of ${formatUsd(line.monthlyUsd)} this month`}>
-      {level === "over" ? "Budget reached" : `${budgetPercent(line)}% of budget`}
-    </span>
-  );
-}
+type BudgetTarget = { agentId: string } | { projectId: string };
 
 /** Sets, changes or clears one agent's or one project's monthly budget. Workspace admins only. */
 export function BudgetEditor({ teamId, target, label, monthlyUsd, onDone }: { teamId: string; target: BudgetTarget; label: string; monthlyUsd?: number; onDone(): void }) {

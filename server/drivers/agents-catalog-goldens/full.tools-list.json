@@ -2363,21 +2363,6 @@
       }
     },
     {
-      "name": "origin_pulse",
-      "description": "How an Origin project is doing, in numbers over the last 7 or 30 days: its stage (Idea, Build, Launch, Grow), issues done and opened, cycle time, PRs waiting, pages live and views, posts published and engagement, leads by stage, conversion, pipeline value, unread replies, agent runs and spend against budget, and what needs a person. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      }
-    },
-    {
       "name": "origin_studio_generate",
       "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
@@ -2600,45 +2585,6 @@
       }
     },
     {
-      "name": "origin_doc_list",
-      "description": "List an Origin project's Docs, its Brief first, with who saved each last. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      }
-    },
-    {
-      "name": "origin_doc_get",
-      "description": "Read an Origin project document as markdown. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      }
-    },
-    {
-      "name": "origin_doc_write",
-      "description": "Write an Origin project document in markdown: doc replaces one's content (read it first and keep people's edits), no doc creates one with title. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
       "name": "origin_milestone_list",
       "description": "List an Origin project's milestones with target day, progress and issues. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
@@ -2680,39 +2626,6 @@
     {
       "name": "origin_brand_update",
       "description": "Draft or change an Origin project's brand kit; fields you leave out keep their value. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
-      "name": "origin_ship_status",
-      "description": "Read where an Origin project ships: its deploy targets (Vercel, Netlify, Cloudflare Pages, GitHub Actions) with recent deployments, their state, address, commit, which one is live in production now and what can be redeployed, promoted or rolled back, plus its releases. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      }
-    },
-    {
-      "name": "origin_ship_deploy",
-      "description": "Deploy an Origin project's target from its production branch (default), or redeploy, promote or roll back to a deployment_id from origin_ship_status. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
-      "name": "origin_release_draft",
-      "description": "Draft an Origin project's next release from the pull requests merged since its last tag, or update the open draft: the version is suggested from them and the notes are written for users unless you pass notes. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},

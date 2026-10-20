@@ -1,32 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { CHIEF_SECTIONS, phaseLanding, phaseOf, phaseSections, rememberSection, toolSections } from "./project-sections";
-import { stepOrigin } from "@/lib/origin-journey";
+import { CHIEF_SECTIONS, sectionEntry, tabSections, toolSections } from "./project-sections";
 
-describe("project sections by phase", () => {
-  it("puts every section in one place, Pulse at home and Vault and Settings as tools", () => {
-    expect(phaseSections("plan").map((item) => item.id)).toEqual(["chat", "team-chat", "call", "docs", "draw"]);
-    expect(phaseSections("build").map((item) => item.id)).toEqual(["issues", "agents", "repo", "ship"]);
-    expect(phaseSections("launch").map((item) => item.id)).toEqual(["studio", "broadcast", "assets"]);
-    expect(phaseSections("sell").map((item) => item.id)).toEqual(["pipeline", "feedback"]);
-    expect(toolSections().map((item) => item.id)).toEqual(["vault", "settings"]);
+describe("project sections", () => {
+  it("puts the Chief first, then the bar's tabs, then its tools", () => {
+    expect(sectionEntry("chat").place).toBe("lead");
+    expect(tabSections().map((item) => item.id)).toEqual(["agents", "issues", "team-chat", "call", "studio", "broadcast"]);
+    expect(toolSections().map((item) => item.id)).toEqual(["assets", "vault", "repo", "feedback", "settings"]);
     expect(new Set(CHIEF_SECTIONS.map((item) => item.id)).size).toBe(CHIEF_SECTIONS.length);
-    expect(phaseOf("pulse")).toBeNull();
-    expect(phaseOf("vault")).toBeNull();
-    expect(phaseOf("pipeline")).toBe("sell");
   });
 
-  it("opens a phase on the section last seen in it, per project", () => {
-    expect(phaseLanding("a", "build")).toBe("issues");
-    rememberSection("a", "ship");
-    rememberSection("a", "settings");
-    expect(phaseLanding("a", "build")).toBe("ship");
-    expect(phaseLanding("b", "build")).toBe("issues");
+  it("names the bar's pages as people see them", () => {
+    expect(sectionEntry("team-chat").label).toBe("Chat");
+    expect(sectionEntry("broadcast").label).toBe("Publish");
   });
 
-  it("points a step from the section whose work leads to it", () => {
-    expect(stepOrigin({ id: "sketch" })).toBe("docs");
-    expect(stepOrigin({ id: "ship" })).toBe("issues");
-    expect(stepOrigin({ id: "sell" })).toBe("broadcast");
-    expect(stepOrigin({ id: "brief" })).toBeUndefined();
+  it("keeps Canvas and Sales off the bar", () => {
+    const shown = [...tabSections(), ...toolSections()].map((item) => item.id);
+    expect(shown).not.toContain("draw");
+    expect(shown).not.toContain("pipeline");
   });
 });

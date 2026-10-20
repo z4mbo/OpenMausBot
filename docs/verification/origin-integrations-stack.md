@@ -1,8 +1,8 @@
 # Connect your stack: the guided Integrations checklist
 
 Settings, Integrations opens with a checklist of the services the idea-to-sale
-journey uses: GitHub, Studio generation, social accounts, SMS, email, payments
-and deploy targets. Each step shows whether it is ready, whose key it uses
+journey uses: GitHub, Studio generation, social accounts, SMS, email and
+payments. Each step shows whether it is ready, whose key it uses
 (yours or shared, and by whom), a link to the provider's key page, and a Check
 that makes the provider's cheapest read-only call with the saved key. Saving a
 key checks it at once.
@@ -26,7 +26,7 @@ node scripts/testing/check-origin-integrations.mjs <previewUrl> docs/verificatio
 The check answers every key check itself, so no request reaches a provider. At
 1280 px and 375 px, dark and light, it proves:
 
-- 4 of 7 steps are ready, and the first unfinished one (SMS, half filled in)
+- 4 of 6 steps are ready, and the first unfinished one (SMS, half filled in)
   opens with Twilio's key page;
 - checking Stripe shows the account and that the key is in test mode; checking
   X shows the handle;

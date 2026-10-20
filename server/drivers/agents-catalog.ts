@@ -7,7 +7,6 @@ import { CANVAS_TOOL_DEFINITIONS } from "./agents-canvas-tools.ts";
 import { PIPELINE_TOOL_DEFINITIONS } from "./agents-pipeline-tools.ts";
 import { STANDUP_TOOL_DEFINITIONS } from "./agents-standup-tools.ts";
 import { CAMPAIGN_TOOL_DEFINITIONS } from "./agents-campaign-tools.ts";
-import { SHIP_TOOL_DEFINITIONS } from "./agents-ship-tools.ts";
 import { LAUNCHPAD_TOOL_DEFINITIONS } from "./agents-launchpad-tools.ts";
 import { BRAND_TOOL_DEFINITIONS, BRAND_VOICE } from "./agents-brand-tools.ts";
 import { STUDIO_TOOL_DEFINITIONS } from "./agents-studio-tools.ts";
@@ -409,7 +408,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
       required: ["post_id"],
     },
   },
-  ...PIPELINE_TOOL_DEFINITIONS, ...CAMPAIGN_TOOL_DEFINITIONS, ...LAUNCHPAD_TOOL_DEFINITIONS, ...BRAND_TOOL_DEFINITIONS, ...SHIP_TOOL_DEFINITIONS,
+  ...PIPELINE_TOOL_DEFINITIONS, ...CAMPAIGN_TOOL_DEFINITIONS, ...LAUNCHPAD_TOOL_DEFINITIONS, ...BRAND_TOOL_DEFINITIONS,
 ];
 
 export const ORIGIN_TOOL_NAMES: ReadonlySet<string> = new Set(ORIGIN_TOOL_DEFINITIONS.map((tool) => tool.name));
@@ -1131,7 +1130,7 @@ export const SHARED_COMPUTER_TOOL_NAMES = new Set(["list_shared_computers", "sha
 const VOICE_TOOL_NAMES = new Set(["send_voice_note"]);
 const CHIEF_ONLY_TOOL_NAMES = new Set([
   "create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue",
-  "origin_review_pr", "origin_merge_pr", "origin_standup", "origin_release_draft"]);
+  "origin_review_pr", "origin_merge_pr", "origin_standup"]);
 const CHIEF_TARGET_TOOL_NAMES = new Set(["propose_profile", "propose_model"]);
 const WATCHER_TOOL_NAMES = new Set(["create_options_card"]);
 

@@ -1,4 +1,4 @@
-import { Brush, Headset, Inbox, MessageCircle, Network } from "lucide-react";
+import { Brush, Headset, Inbox, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { openOriginPage, useOriginPage, type OriginPage } from "@/lib/origin-pages";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
@@ -10,7 +10,6 @@ import { useShowThreads } from "@/lib/thread-preferences";
 import { MemberCall } from "./origin-pages/CallPage";
 import { WorkspaceChat } from "./origin-pages/WorkspaceChatPage";
 import { WorkspaceInbox } from "./origin-pages/WorkspaceInboxPage";
-import { OrgPage } from "./origin-org/OrgPage";
 import { WorkspaceGate } from "./origin-pages/ui";
 import { DrawingCanvas } from "./OriginDraw";
 import { GlassHeaderFrame } from "./GlassScrollFrame";
@@ -23,7 +22,6 @@ export const ORIGIN_PAGES: { id: OriginPage; label: string; contents: string; ic
   { id: "chat", label: "Chat", contents: "Messages", icon: MessageCircle },
   { id: "call", label: "Call", contents: "Calls", icon: Headset },
   { id: "draw", label: "Canvas", contents: "Canvases", icon: Brush },
-  { id: "org", label: "Org", contents: "The boss, Chiefs and agents", icon: Network },
 ];
 
 export function OriginNav({ density }: { density: SidebarDensity }) {
@@ -80,7 +78,6 @@ export function OriginPageView({ page }: { page: OriginPage }) {
         <WorkspaceGate key={teamId ?? ""} teamId={teamId} head={head} label={entry.contents}>
           {(ctx) => page === "inbox" ? <WorkspaceInbox {...ctx} />
             : page === "chat" ? <WorkspaceChat {...ctx} />
-            : page === "org" ? <OrgPage {...ctx} />
             : page === "call" ? <MemberCall key={ctx.teamId} target={{ teamId: ctx.teamId }} me={ctx.me} canJoin={ctx.canEdit} name={head?.name ?? "Workspace"} agent={headBot} open={() => openOriginPage("call")} />
             : <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]"><DrawingCanvas key={ctx.teamId} teamId={ctx.teamId} userId={ctx.me._id} name="Workspace drawing" readOnly={!ctx.canEdit} agent={headBot} /></div>}
         </WorkspaceGate>
