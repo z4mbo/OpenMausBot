@@ -39,3 +39,7 @@ The post-native production-readiness changes in `server/index.ts` and `server/te
 ## Limits
 
 These checks use a fake CLI. Emitted settings and real permission/MCP denial paths do not establish a real vendor CLI or operating-system sandbox. Distinct source accounts ran on one native owner computer; the offline case used controlled backend presence, not a third native computer. Positive metered HTTP API execution, owner cost settlement, owner crash/restart after unknown accepted work, packaged desktop behavior and production delivery were not established by this manifest.
+
+## Cleanup
+
+[cleanup-receipt.json](cleanup-receipt.json) records the final shutdown. Eight raw capture files were archived and rehashed before the owned native pair and backend stopped. All six owned listener ports closed; the protected-port listener snapshot was identical before and after. The original backend data/profile remain intact. The backend holder's stdin was closed, so its exact process was stopped only after verifying the executable, instance and data path. The [pre-cleanup manifest](manifest-before-cleanup.json) and all original 044 artifacts remain preserved.
