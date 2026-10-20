@@ -2688,7 +2688,7 @@
     },
     {
       "name": "origin_ship_status",
-      "description": "Read where an Origin project ships: its deploy targets (Vercel, Netlify, Cloudflare Pages, GitHub Actions) with recent deployments, their state, address, commit, which serves production now and what can be redeployed, promoted or rolled back, plus its releases. Before the first call, get its input schema from find_tool.",
+      "description": "Read where an Origin project ships: its deploy targets (Vercel, Netlify, Cloudflare Pages, GitHub Actions) with recent deployments, their state, address, commit, which one is live in production now and what can be redeployed, promoted or rolled back, plus its releases. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},

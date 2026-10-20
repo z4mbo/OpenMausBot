@@ -3989,7 +3989,7 @@
     },
     {
       "name": "origin_ship_status",
-      "description": "Read where an Origin project ships: its deploy targets (Vercel, Netlify, Cloudflare Pages, GitHub Actions) with recent deployments, their state, address, commit, which serves production now and what can be redeployed, promoted or rolled back, plus its releases. Acts on your team's Origin project unless you pass project.",
+      "description": "Read where an Origin project ships: its deploy targets (Vercel, Netlify, Cloudflare Pages, GitHub Actions) with recent deployments, their state, address, commit, which one is live in production now and what can be redeployed, promoted or rolled back, plus its releases. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,

@@ -1089,8 +1089,7 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
       }, phase);
       if (!result.isError && !isReadOnlyAgentTool(name)) deps.changed?.();
       const shown: Pick<Message, "originIssues" | "originPullRequest" | "originStudio" | "originDesign">[] = result.isError ? [] : [
-        ...(result.pullRequest ? [{ originPullRequest: result.pullRequest }] : []),
-        ...(result.cards ? [{ originIssues: result.cards }] : []), ...(result.studio ? [{ originStudio: result.studio }] : []), ...(result.design ? [{ originDesign: result.design }] : []),
+        ...(result.pullRequest ? [{ originPullRequest: result.pullRequest }] : []), ...(result.cards ? [{ originIssues: result.cards }] : []), ...(result.studio ? [{ originStudio: result.studio }] : []), ...(result.design ? [{ originDesign: result.design }] : []),
       ];
       for (const fields of shown) {
         const card: Omit<Message, "id" | "at"> = { role: "bot", kind: "activity", tool: { name, ok: true }, ...fields };
