@@ -32,7 +32,7 @@ export function generateRequest(body: Record<string, unknown>): StudioGenerateRe
     model: text(body.model) || refuse("Choose a model."),
     prompt: text(body.prompt),
     ...optional("aspectRatio"), ...optional("duration"), ...optional("voice"), ...optional("sourceAssetId"), ...optional("endpoint"),
-    ...optional("resolution"), ...optional("motion"), ...optional("characterId"),
+    ...optional("resolution"), ...optional("motion"), ...optional("angle"), ...optional("preset"), ...optional("characterId"),
     ...(text(body.negativePrompt).trim() ? { negativePrompt: text(body.negativePrompt).slice(0, 2_000) } : {}),
     ...(Number.isInteger(body.seed) ? { seed: Number(body.seed) } : {}),
     ...(typeof body.sound === "boolean" ? { sound: body.sound } : {}),

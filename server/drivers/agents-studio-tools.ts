@@ -1,17 +1,19 @@
-import { STUDIO_CAMERA_MOTIONS, STUDIO_CHARACTER_KINDS, STUDIO_CUSTOM_MODEL, STUDIO_MODELS } from "../../shared/studio.ts";
+import { STUDIO_CAMERA_ANGLES, STUDIO_CAMERA_MOTIONS, STUDIO_CHARACTER_KINDS, STUDIO_CUSTOM_MODEL, STUDIO_MODELS } from "../../shared/studio.ts";
+import { STUDIO_PRESET_GROUPS, STUDIO_PRESETS } from "../../shared/studio-presets.ts";
 import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 
 export const STUDIO_TOOL_DEFINITIONS = [
   {
     name: "origin_studio_generate",
-    description: "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. Images and audio wait for the result (up to 40 s); video returns at once." + ORIGIN_SCOPE,
+    description: "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. preset picks a ready-made effect from origin_studio_presets. Images and audio wait for the result (up to 40 s); video returns at once." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
+        preset: { type: "string", enum: STUDIO_PRESETS.map((preset) => preset.id), description: "A ready-made effect from origin_studio_presets: its model, settings and prompt, unless you pass your own." },
         mode: { type: "string", enum: ["image", "video", "audio", "edit"], description: "edit changes, upscales or cuts out an image. Default image." },
         prompt: { type: "string", maxLength: 8_000, description: "What to make; for an ElevenLabs voice, the words spoken." },
         model: { type: "string", enum: [...STUDIO_MODELS.map((model) => model.id), STUDIO_CUSTOM_MODEL], description: "Default: the mode's first model that takes as many sources as you pass." },
-        sources: { type: "array", maxItems: 4, items: { type: "string", maxLength: 70 }, description: "What the model starts from, in order (image, video or audio): asset ids from origin_list_assets, or generation ids with an optional :index." },
+        sources: { type: "array", maxItems: 4, items: { type: "string", maxLength: 70 }, description: "What the model starts from, in order (image, video or audio): asset ids from origin_list_assets, or generation ids with an optional :index. Presets and models that take two take them in their listed order, such as the character image then the motion video." },
         reference_asset_ids: { type: "array", maxItems: 4, items: { type: "string", maxLength: 64 }, description: "Image assets to keep a character, product or style consistent (Nano Banana Pro, FLUX.2 Pro)." },
         character: { type: "string", maxLength: 64, description: "A library entry id or name from origin_studio_library: adds its reference images and description." },
         aspect_ratio: { type: "string", maxLength: 10, description: "Such as 1:1, 16:9, 9:16." },
@@ -19,6 +21,7 @@ export const STUDIO_TOOL_DEFINITIONS = [
         resolution: { type: "string", maxLength: 10, description: "Such as 2K, 1080p." },
         voice: { type: "string", maxLength: 40, description: "ElevenLabs voice name, such as Rachel or Brian." },
         camera_motion: { type: "string", enum: STUDIO_CAMERA_MOTIONS.map((motion) => motion.id), description: "Video camera move." },
+        camera_angle: { type: "string", enum: STUDIO_CAMERA_ANGLES.map((angle) => angle.id), description: "The viewpoint the Camera angles model re-renders an image from." },
         negative_prompt: { type: "string", maxLength: 2_000 },
         seed: { type: "integer" },
         sound: { type: "boolean", description: "Video soundtrack where the model makes one. Default true." },
@@ -84,6 +87,17 @@ export const STUDIO_TOOL_DEFINITIONS = [
         project: ORIGIN_PROJECT,
       },
       required: ["workflow_id"],
+    },
+  },
+  {
+    name: "origin_studio_presets",
+    description: "List Studio's ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt template. Pass an id as preset to origin_studio_generate." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        group: { type: "string", enum: STUDIO_PRESET_GROUPS.map((group) => group.value), description: "Only this group." },
+        project: ORIGIN_PROJECT,
+      },
     },
   },
   {

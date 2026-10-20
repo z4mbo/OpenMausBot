@@ -27,7 +27,7 @@ import { brandTools } from "./origin-brand-tools.ts";
 import { vaultAgentSecrets } from "./origin-vault-agent.ts";
 import { launchpadTools } from "./origin-launchpad-tools.ts";
 import type { PipelineSender } from "./origin-pipeline.ts";
-import { runStudioTool, STUDIO_TOOL_NAMES, type StudioRunner, type WorkflowExecutor } from "./origin-studio-tools.ts";
+import { runStudioTool, STUDIO_TOOL_NAMES, type StudioRunner, type StudioToolResult, type WorkflowExecutor } from "./origin-studio-tools.ts";
 
 export interface OriginCloudState {
   url?: string;
@@ -62,7 +62,7 @@ export interface OriginReviewRequest {
   reason: string;
 }
 
-export interface OriginToolResult {
+export interface OriginToolResult extends Pick<StudioToolResult, "studio"> {
   text: string;
   isError?: boolean;
   cards?: OriginIssueCards;
@@ -1089,16 +1089,16 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
         ...(deps.teamChat ? { teamChat: deps.teamChat } : {}), ...(deps.folder ? { folder: deps.folder } : {}), ...(deps.pipeline ? { pipeline: deps.pipeline } : {}),
       }, phase);
       if (!result.isError && !isReadOnlyAgentTool(name)) deps.changed?.();
-      const shown: Pick<Message, "originIssues" | "originPullRequest">[] = result.isError ? [] : [
+      const shown: Pick<Message, "originIssues" | "originPullRequest" | "originStudio">[] = result.isError ? [] : [
         ...(result.pullRequest ? [{ originPullRequest: result.pullRequest }] : []),
-        ...(result.cards ? [{ originIssues: result.cards }] : []),
+        ...(result.cards ? [{ originIssues: result.cards }] : []), ...(result.studio ? [{ originStudio: result.studio }] : []),
       ];
       for (const fields of shown) {
         const card: Omit<Message, "id" | "at"> = { role: "bot", kind: "activity", tool: { name, ok: true }, ...fields };
         if (store.groupByThread(turn.threadId)) card.from = { botId: bot.id, name: bot.name, color: bot.color };
         store.appendMessage(turn.threadId, card);
       }
-      const { cards: _cards, pullRequest: _pullRequest, ...answer } = result;
+      const { cards: _cards, pullRequest: _pullRequest, studio: _studio, ...answer } = result;
       return json(res, 200, answer);
     }
     if (path === "/api/origin/cloud-session" && method === "GET") {

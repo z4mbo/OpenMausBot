@@ -11,6 +11,9 @@ import { STUDIO_MODES, StudioComposer, draftForModel, emptyDraft, type StudioCom
 import { CharacterEditor, StudioLibrary, type CharacterSeed } from "./StudioLibrary";
 import { StudioViewer } from "./StudioViewer";
 import { StudioWorkflows } from "./StudioWorkflows";
+import { PresetStrip } from "./StudioPresets";
+import { consumeStudioFocus, useStudioFocus } from "@/lib/studio-focus";
+import { studioPreset } from "../../../shared/studio-presets";
 import type { WorkflowDraft } from "./WorkflowEditor";
 import { outputRef, studioPost, typing, type StudioDraft } from "./studio-ui";
 import { STUDIO_ACTIONS, studioModel, type StudioCharacter, type StudioGeneration, type StudioMediaKind } from "../../../shared/studio";
@@ -41,7 +44,7 @@ function useFalReady(projectId: string): boolean | null {
 }
 
 const SHORTCUTS: readonly [string, string][] = [
-  ["/", "Write a prompt"], ["Ctrl Enter", "Generate"], ["Ctrl E", "Enhance the prompt"], ["1 – 4", "Image, video, audio, edit"], ["M", "Choose a model"],
+  ["/", "Write a prompt"], ["Ctrl Enter", "Generate"], ["Ctrl E", "Enhance the prompt"], ["1 – 4", "Image, video, audio, edit"], ["M", "Choose a model"], ["T", "Presets"],
   ["Arrows", "Move between results"], ["Enter", "Open a result"], ["A U R X", "Animate, upscale, remix, extend"], ["P", "Reuse its settings"], ["L", "Save to the library"],
   ["B", "Use in Broadcast"], ["C", "Campaign pack"], ["W", "Workflows"], ["?", "These shortcuts"],
   ["N", "Workflow: add a node"], ["Ctrl Z / Ctrl Shift Z", "Workflow: undo, redo"], ["Ctrl C / V / D", "Workflow: copy, paste, duplicate"],
@@ -56,7 +59,8 @@ function draftFrom(row: StudioGeneration): StudioDraft {
   return {
     ...base, prompt: row.prompt, ...(row.aspectRatio ? { aspectRatio: row.aspectRatio } : {}), ...(row.duration ? { duration: row.duration } : {}),
     ...(typeof params.resolution === "string" ? { resolution: params.resolution } : {}), ...(typeof params.voice === "string" ? { voice: params.voice } : {}),
-    ...(typeof params.motion === "string" ? { motion: params.motion } : {}), ...(typeof params.negativePrompt === "string" ? { negativePrompt: params.negativePrompt } : {}),
+    ...(typeof params.motion === "string" ? { motion: params.motion } : {}), ...(typeof params.angle === "string" ? { angle: params.angle } : {}),
+    ...(typeof params.preset === "string" && studioPreset(params.preset)?.model === row.model ? { preset: params.preset } : {}), ...(typeof params.negativePrompt === "string" ? { negativePrompt: params.negativePrompt } : {}),
     ...(typeof params.seed === "number" ? { seed: params.seed } : {}), ...(params.sound === false ? { sound: false } : {}),
   };
 }
@@ -78,6 +82,7 @@ function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; c
   const [busy, setBusy] = useState<ReadonlySet<string>>(new Set());
   const [error, setError] = useState("");
   const composer = useRef<StudioComposerHandle>(null);
+  const focus = useStudioFocus(projectId);
   const all = rows ?? [];
   const shown = all.filter((row) => filter === "all" || (row.outputs[0]?.kind ?? row.kind) === filter);
   const running = all.filter((row) => row.status === "queued" || row.status === "running").length;
@@ -94,6 +99,14 @@ function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; c
     if (next !== "workflows") setWorkflow(null);
     showTab(next);
   }, []);
+
+  useEffect(() => {
+    if (!focus) return;
+    const preset = focus.presetId ? studioPreset(focus.presetId) : undefined;
+    if (preset) { setTab("create"); window.setTimeout(() => composer.current?.applyPreset(preset), 0); }
+    if (focus.generationId) { setTab("create"); setViewing(focus.generationId); }
+    consumeStudioFocus(focus);
+  }, [focus, setTab]);
 
   const prepare = (next: StudioDraft) => {
     setDraft(next);
@@ -176,6 +189,7 @@ function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; c
       else if (key === "c" && canEdit && !(tab === "workflows" && workflow)) { event.preventDefault(); setCampaign(true); }
       else if (tab !== "create") return;
       else if (index >= 0 && canEdit) { event.preventDefault(); setDraft((current) => draftForModel(current, studioModel(emptyDraft(STUDIO_MODES[index]!.value).model)!)); }
+      else if (key === "t" && canEdit) { event.preventDefault(); composer.current?.openPresets(); }
       else if (key === "m" && canEdit && !(event.target as HTMLElement | null)?.closest?.("[data-studio-tile]")) { event.preventDefault(); composer.current?.openModels(); }
     };
     window.addEventListener("keydown", onKey);
@@ -199,9 +213,8 @@ function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; c
       <PageHeader title="Studio" count={tab === "create" ? rows?.length : undefined}>
         <Segmented label="Studio view" value={tab} onChange={setTab}
           options={[
-            { value: "create", label: <><Sparkles size={13} />Create</>, title: "Create" },
+            { value: "create", label: <><Sparkles size={13} />Studio</>, title: "Studio" },
             { value: "workflows", label: <><Workflow size={13} />Workflows</>, title: "Workflows (W)" },
-            { value: "library", label: <><UserRound size={13} />Library</>, title: "Characters, products and styles" },
           ]} />
         {tab === "create" && (
           <Segmented label="Show" value={filter} onChange={setFilter}
@@ -213,6 +226,9 @@ function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; c
             <Megaphone size={13} className="text-accent-text" />Campaign pack
           </button>
         )}
+        <button type="button" aria-pressed={tab === "library"} className={cn(chipButton, tab === "library" && "border-accent/50 text-ink")} onClick={() => setTab(tab === "library" ? "create" : "library")} aria-label="Library" title="Characters, products and styles">
+          <UserRound size={13} /><span className="max-sm:hidden">Library</span>
+        </button>
         <button type="button" className="hidden size-8 items-center justify-center rounded-lg text-ink-tertiary hover:bg-raised hover:text-ink md:flex" onClick={() => setHelp(true)} aria-label="Keyboard shortcuts (?)" title="Keyboard shortcuts (?)">
           <Keyboard size={15} />
         </button>
@@ -230,10 +246,11 @@ function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; c
               <CampaignStrip run={pack} onOpenRun={() => openRun(pack)} onOpenBroadcast={openBroadcast} onDismiss={() => setHidden((current) => new Set(current).add(pack._id))}
                 onStop={() => void studioPost("workflow/cancel", { projectId, runId: pack._id }).catch((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)))} />
             )}
-            {!rows ? <Loading label="Loading generations" variant="grid" /> : !shown.length ? (
+            {!rows ? <Loading label="Loading generations" variant="grid" /> : !shown.length ? (<>
+              {filter === "all" && canEdit && <PresetStrip onPick={(preset) => composer.current?.applyPreset(preset)} onMore={() => composer.current?.openPresets()} />}
               <EmptyState icon={<Sparkles size={22} />} title={filter === "all" ? "Nothing generated yet" : "Nothing here yet"}
                 body={filter === "all" ? "What you and the project's agents make appears here for the whole team, and in Assets." : undefined} />
-            ) : <StudioCanvas rows={shown} all={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy} onAction={act} />}
+            </>) : <StudioCanvas rows={shown} all={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy} onAction={act} />}
           </div>
           <div className="sticky bottom-0 z-20 -mx-4 bg-gradient-to-t from-app from-70% to-transparent px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-4 md:-mx-6 md:px-6">
             <div className="mx-auto w-full max-w-3xl">

@@ -4,11 +4,14 @@ export type StudioStatus = "queued" | "running" | "done" | "failed" | "cancelled
 
 type Family =
   | "nano" | "flux3" | "imageSize" | "veo" | "kling" | "seedance" | "tts" | "music" | "sfx" | "nanoEdit" | "fluxEdit" | "upscale"
-  | "videoUpscale" | "removeBg" | "avatar" | "lipsync" | "extend" | "mergeAudio" | "mergeVideos" | "custom";
+  | "videoUpscale" | "removeBg" | "avatar" | "lipsync" | "extend" | "mergeAudio" | "mergeVideos" | "custom"
+  | "motionControl" | "wanAnimate" | "videoEdit" | "relight" | "tryOn" | "angles" | "styleRef" | "productShot" | "videoBg";
 
 /** One fal.ai endpoint Studio offers; fields checked against fal's OpenAPI schemas on 2026-10-20. */
 export interface StudioModel {
   id: string;
+  /** The fal endpoint, when two Studio models share one with different inputs. */
+  endpoint?: string;
   label: string;
   description: string;
   mode: StudioMode;
@@ -16,6 +19,8 @@ export interface StudioModel {
   family: Family;
   /** The media it starts from, in order, beside the prompt. */
   needs: readonly StudioMediaKind[];
+  /** What each of `needs` is for, such as Character and Motion video, when the kind alone does not say. */
+  inputLabels?: readonly string[];
   prompt: "required" | "optional" | "none";
   aspectRatios?: readonly string[];
   durations?: readonly string[];
@@ -30,6 +35,8 @@ export interface StudioModel {
   sound?: boolean;
   /** Takes a camera-motion preset, written into the prompt. */
   motion?: boolean;
+  /** Takes a STUDIO_CAMERA_ANGLES id: the same subject seen from another viewpoint. */
+  angles?: boolean;
   /** Typical seconds from start to result, until the project has its own history. */
   eta: number;
   /** The largest batch one prompt may ask for. */
@@ -66,6 +73,20 @@ export const STUDIO_CAMERA_MOTIONS: readonly { id: string; label: string; phrase
   { id: "zoom-in", label: "Crash zoom", phrase: "quick crash zoom in" },
 ];
 
+/** Viewpoints a multiple-angles model re-renders a subject from, as fal's azimuth, elevation and zoom. */
+export const STUDIO_CAMERA_ANGLES: readonly { id: string; label: string; horizontal: number; vertical: number; zoom: number }[] = [
+  { id: "three-quarter-right", label: "¾ right", horizontal: 45, vertical: 0, zoom: 5 },
+  { id: "right", label: "Right side", horizontal: 90, vertical: 0, zoom: 5 },
+  { id: "back", label: "Back", horizontal: 180, vertical: 0, zoom: 5 },
+  { id: "left", label: "Left side", horizontal: 270, vertical: 0, zoom: 5 },
+  { id: "three-quarter-left", label: "¾ left", horizontal: 315, vertical: 0, zoom: 5 },
+  { id: "high", label: "High angle", horizontal: 0, vertical: 60, zoom: 5 },
+  { id: "top", label: "Bird's-eye", horizontal: 0, vertical: 90, zoom: 4 },
+  { id: "low", label: "Low angle", horizontal: 0, vertical: -30, zoom: 5 },
+  { id: "close", label: "Close-up", horizontal: 0, vertical: 0, zoom: 9 },
+  { id: "wide", label: "Wide shot", horizontal: 0, vertical: 0, zoom: 1 },
+];
+
 /** The endpoint id a custom generation uses: any fal.ai model or deployed workflow, such as a ComfyUI one. */
 export const STUDIO_CUSTOM_MODEL = "custom";
 /** fal's OpenRouter proxy; Studio's prompt enhancer asks its cheapest fast model. */
@@ -81,6 +102,7 @@ export const STUDIO_MODELS: readonly StudioModel[] = [
   { id: "fal-ai/flux-2-pro", label: "FLUX.2 Pro", description: "Polished photography and illustration; takes reference images.", mode: "image", kind: "image", family: "imageSize", needs: none, prompt: "required", aspectRatios: IMAGE_RATIOS, seed: true, references: 4, referenceModel: "fal-ai/flux-2-pro/edit", eta: 12, maxCount: 4 },
   { id: "fal-ai/krea-2/turbo", label: "Krea 2 Turbo", description: "Fast, aesthetic stills with natural light.", mode: "image", kind: "image", family: "imageSize", needs: none, prompt: "required", aspectRatios: IMAGE_RATIOS, seed: true, eta: 8, maxCount: 4 },
   { id: "fal-ai/flux/schnell", label: "FLUX.1 schnell", description: "Drafts in about three seconds for pennies.", mode: "image", kind: "image", family: "imageSize", needs: none, prompt: "required", aspectRatios: IMAGE_RATIOS, seed: true, eta: 4, maxCount: 4 },
+  { id: "fal-ai/krea-2/turbo/style", label: "Krea 2 · style match", description: "New images in the look of a style reference.", mode: "image", kind: "image", family: "styleRef", needs: image, inputLabels: ["Style"], prompt: "required", aspectRatios: IMAGE_RATIOS, seed: true, eta: 10, maxCount: 4 },
   { id: "fal-ai/veo3.1", label: "Veo 3.1", description: "Cinematic video with synced sound and dialogue.", mode: "video", kind: "video", family: "veo", needs: none, prompt: "required", aspectRatios: ["16:9", "9:16"], durations: ["4s", "6s", "8s"], resolutions: ["720p", "1080p", "4k"], seed: true, negative: true, sound: true, motion: true, eta: 120, maxCount: 2 },
   { id: "fal-ai/veo3.1/fast", label: "Veo 3.1 Fast", description: "Veo at half the wait and cost.", mode: "video", kind: "video", family: "veo", needs: none, prompt: "required", aspectRatios: ["16:9", "9:16"], durations: ["4s", "6s", "8s"], resolutions: ["720p", "1080p", "4k"], seed: true, negative: true, sound: true, motion: true, eta: 60, maxCount: 2 },
   { id: "fal-ai/kling-video/v3/pro/text-to-video", label: "Kling 3 Pro", description: "Fluid motion and physics, up to 15 seconds.", mode: "video", kind: "video", family: "kling", needs: none, prompt: "required", aspectRatios: ["16:9", "9:16", "1:1"], durations: ["5", "10", "15"], negative: true, sound: true, motion: true, eta: 150, maxCount: 2 },
@@ -88,7 +110,15 @@ export const STUDIO_MODELS: readonly StudioModel[] = [
   { id: "fal-ai/veo3.1/image-to-video", label: "Veo 3.1 · animate", description: "Brings a still to life with sound.", mode: "video", kind: "video", family: "veo", needs: image, prompt: "required", aspectRatios: ["auto", "16:9", "9:16"], durations: ["4s", "6s", "8s"], resolutions: ["720p", "1080p", "4k"], seed: true, negative: true, sound: true, motion: true, eta: 120, maxCount: 2 },
   { id: "fal-ai/kling-video/v3/pro/image-to-video", label: "Kling 3 Pro · animate", description: "Animates an image with Kling's motion.", mode: "video", kind: "video", family: "kling", needs: image, prompt: "optional", durations: ["5", "10", "15"], negative: true, sound: true, motion: true, eta: 150, maxCount: 2 },
   { id: "bytedance/seedance-2.5/image-to-video", label: "Seedance 2.5 · animate", description: "Animates an image, keeping its look.", mode: "video", kind: "video", family: "seedance", needs: image, prompt: "optional", durations: ["5", "10", "15"], resolutions: ["480p", "720p", "1080p"], sound: true, motion: true, eta: 120, maxCount: 2 },
+  { id: "fal-ai/kling-video/v3/pro/start-end", endpoint: "fal-ai/kling-video/v3/pro/image-to-video", label: "Kling 3 Pro · start & end", description: "A shot that travels from one frame to another.", mode: "video", kind: "video", family: "kling", needs: ["image", "image"], inputLabels: ["Start frame", "End frame"], prompt: "optional", durations: ["5", "10", "15"], negative: true, sound: true, motion: true, eta: 150, maxCount: 2 },
+  { id: "fal-ai/kling-video/v3/pro/motion-control", label: "Kling 3 Pro · motion transfer", description: "A character copies every move of a reference video.", mode: "video", kind: "video", family: "motionControl", needs: ["image", "video"], inputLabels: ["Character", "Motion video"], prompt: "optional", eta: 240, maxCount: 1 },
+  { id: "fal-ai/kling-video/v3/standard/motion-control", label: "Kling 3 · motion transfer", description: "Motion transfer at a lower cost.", mode: "video", kind: "video", family: "motionControl", needs: ["image", "video"], inputLabels: ["Character", "Motion video"], prompt: "optional", eta: 180, maxCount: 1 },
+  { id: "fal-ai/wan/v2.2-14b/animate/move", label: "Wan Animate · move", description: "Drives a still character with a video's body and face motion.", mode: "video", kind: "video", family: "wanAnimate", needs: ["image", "video"], inputLabels: ["Character", "Motion video"], prompt: "none", resolutions: ["480p", "580p", "720p"], seed: true, eta: 300, maxCount: 1 },
+  { id: "fal-ai/wan/v2.2-14b/animate/replace", label: "Wan Animate · swap", description: "Puts your character into a video in place of its actor.", mode: "video", kind: "video", family: "wanAnimate", needs: ["image", "video"], inputLabels: ["Character", "Video"], prompt: "none", resolutions: ["480p", "580p", "720p"], seed: true, eta: 300, maxCount: 1 },
+  { id: "fal-ai/kling-video/o3/pro/video-to-video/edit", label: "Kling O3 · video edit", description: "Restyles or changes a 3 to 15 second clip by instruction.", mode: "video", kind: "video", family: "videoEdit", needs: video, prompt: "required", references: 4, eta: 240, maxCount: 1 },
+  { id: "bria/video/background-removal/v3", label: "Remove video background", description: "Cuts the subject out of a clip onto transparency.", mode: "video", kind: "video", family: "videoBg", needs: video, prompt: "none", eta: 90, maxCount: 1 },
   { id: "fal-ai/kling-video/ai-avatar/v2/pro", label: "Kling Avatar", description: "A talking video from a portrait and a voice track.", mode: "video", kind: "video", family: "avatar", needs: ["image", "audio"], prompt: "optional", eta: 240, maxCount: 1 },
+  { id: "fal-ai/sync-lipsync/v3", label: "Sync 3 lipsync", description: "Sync's sharpest lip sync of a video to new audio.", mode: "video", kind: "video", family: "lipsync", needs: ["video", "audio"], prompt: "none", eta: 150, maxCount: 1 },
   { id: "fal-ai/sync-lipsync/v2", label: "Sync lipsync", description: "Re-times a video's lips to new audio.", mode: "video", kind: "video", family: "lipsync", needs: ["video", "audio"], prompt: "none", eta: 120, maxCount: 1 },
   { id: "fal-ai/veo3.1/fast/extend-video", label: "Veo 3.1 · extend", description: "Continues a clip by seven seconds.", mode: "video", kind: "video", family: "extend", needs: video, prompt: "required", seed: true, negative: true, sound: true, motion: true, eta: 90, maxCount: 1 },
   { id: "fal-ai/topaz/upscale/video", label: "Topaz video upscale", description: "Doubles a video's resolution.", mode: "video", kind: "video", family: "videoUpscale", needs: video, prompt: "none", eta: 180, maxCount: 1 },
@@ -98,6 +128,10 @@ export const STUDIO_MODELS: readonly StudioModel[] = [
   { id: "fal-ai/elevenlabs/music", label: "ElevenLabs Music", description: "Full songs or instrumentals from a description.", mode: "audio", kind: "audio", family: "music", needs: none, prompt: "required", durations: ["15s", "30s", "60s", "120s"], eta: 45, maxCount: 2 },
   { id: "fal-ai/elevenlabs/sound-effects/v2", label: "ElevenLabs sound effect", description: "Foley, whooshes and ambience.", mode: "audio", kind: "audio", family: "sfx", needs: none, prompt: "required", durations: ["2s", "5s", "10s", "20s"], eta: 10, maxCount: 4 },
   { id: "fal-ai/nano-banana-pro/edit", label: "Nano Banana Pro edit", description: "Changes an image by instruction: remix, restyle, add text.", mode: "edit", kind: "image", family: "nanoEdit", needs: image, prompt: "required", aspectRatios: ["auto", "1:1", "16:9", "9:16", "4:3", "3:4"], resolutions: ["1K", "2K", "4K"], seed: true, references: 3, eta: 25, maxCount: 4 },
+  { id: "fal-ai/qwen-image-edit-2511-multiple-angles", label: "Camera angles", description: "The same subject from another side, height or distance.", mode: "edit", kind: "image", family: "angles", needs: image, prompt: "optional", angles: true, seed: true, eta: 20, maxCount: 4 },
+  { id: "fal-ai/iclight-v2", label: "IC-Light relight", description: "Relights a photo and its background from a description.", mode: "edit", kind: "image", family: "relight", needs: image, prompt: "required", aspectRatios: IMAGE_RATIOS, seed: true, eta: 20, maxCount: 4 },
+  { id: "fal-ai/fashn/tryon/v1.6", label: "FASHN try-on", description: "Dresses a person in a garment from a photo or flat lay.", mode: "edit", kind: "image", family: "tryOn", needs: ["image", "image"], inputLabels: ["Person", "Garment"], prompt: "none", seed: true, eta: 20, maxCount: 4 },
+  { id: "fal-ai/bria/product-shot", label: "Bria product shot", description: "Places a product cut-out into a described scene.", mode: "edit", kind: "image", family: "productShot", needs: image, inputLabels: ["Product"], prompt: "optional", eta: 20, maxCount: 1 },
   { id: "fal-ai/bria/background/remove", label: "Remove background", description: "Cuts the subject out onto transparency.", mode: "edit", kind: "image", family: "removeBg", needs: image, prompt: "none", eta: 8, maxCount: 1 },
   { id: "fal-ai/seedvr/upscale/image", label: "SeedVR upscale", description: "Doubles an image's resolution, faithfully.", mode: "edit", kind: "image", family: "upscale", needs: image, prompt: "none", eta: 15, maxCount: 1 },
   { id: "fal-ai/topaz/upscale/image", label: "Topaz upscale", description: "Upscale with face and detail recovery.", mode: "edit", kind: "image", family: "upscale", needs: image, prompt: "optional", eta: 30, maxCount: 1 },
@@ -142,6 +176,10 @@ export interface StudioGenerateRequest {
   sound?: boolean;
   /** A STUDIO_CAMERA_MOTIONS id. */
   motion?: string;
+  /** A STUDIO_CAMERA_ANGLES id, for a model with `angles`. */
+  angle?: string;
+  /** The STUDIO_PRESETS id the generation was set up from. */
+  preset?: string;
   /** A designAssets id of the project: the image an edit, upscale or image-to-video starts from. */
   sourceAssetId?: string;
   /** The model's `needs`, in order; overrides sourceAssetId. */
@@ -275,7 +313,7 @@ export function validStudioEndpoint(endpoint: string): boolean {
 
 const seconds = (value: string | undefined) => Number.parseFloat(value ?? "") || undefined;
 
-export type StudioInputRequest = Pick<StudioGenerateRequest, "prompt" | "aspectRatio" | "duration" | "voice" | "resolution" | "seed" | "negativePrompt" | "sound" | "motion">;
+export type StudioInputRequest = Pick<StudioGenerateRequest, "prompt" | "aspectRatio" | "duration" | "voice" | "resolution" | "seed" | "negativePrompt" | "sound" | "motion" | "angle">;
 
 /** The prompt with its camera move, for models that take one. */
 export function studioMotionPrompt(model: StudioModel, prompt: string, motion: string | undefined): string {
@@ -286,7 +324,7 @@ export function studioMotionPrompt(model: StudioModel, prompt: string, motion: s
 
 /** The endpoint one generation runs on: a model with references switches to its reference-taking twin. */
 export function studioEndpoint(model: StudioModel, references: readonly string[]): string {
-  return references.length && model.referenceModel ? model.referenceModel : model.id;
+  return references.length && model.referenceModel ? model.referenceModel : model.endpoint ?? model.id;
 }
 
 /**
@@ -316,7 +354,7 @@ export function studioInput(model: StudioModel, request: StudioInputRequest, med
       ? { prompt, image_urls: references, image_size: SIZE_FOR_RATIO[aspect ?? "1:1"] ?? "auto", ...extras }
       : { prompt, image_size: SIZE_FOR_RATIO[aspect ?? "1:1"] ?? "square_hd", num_images: 1, ...extras };
     case "veo": return { prompt, aspect_ratio: aspect, duration, resolution, ...(first ? { image_url: first } : {}), ...extras };
-    case "kling": return first ? { prompt, start_image_url: first, duration, ...extras } : { prompt, aspect_ratio: aspect, duration, ...extras };
+    case "kling": return first ? { prompt, start_image_url: first, ...(second ? { end_image_url: second } : {}), duration, ...extras } : { prompt, aspect_ratio: aspect, duration, ...extras };
     case "seedance": return first ? { prompt, image_url: first, duration, resolution, ...extras } : { prompt, aspect_ratio: aspect, duration, resolution, ...extras };
     case "tts": return { text: prompt, voice: pick(model.voices, request.voice) };
     case "music": return { prompt, music_length_ms: Math.round((seconds(duration) ?? 30) * 1000) };
@@ -331,6 +369,18 @@ export function studioInput(model: StudioModel, request: StudioInputRequest, med
     case "extend": return { prompt, video_url: first, ...extras };
     case "mergeAudio": return { video_url: first, audio_url: second };
     case "mergeVideos": return { video_urls: (media.sources ?? []).filter(Boolean) };
+    case "motionControl": return { image_url: first, video_url: second, character_orientation: "video", keep_original_sound: true, ...(prompt ? { prompt } : {}) };
+    case "wanAnimate": return { image_url: first, video_url: second, resolution, ...extras };
+    case "videoEdit": return { prompt, video_url: first, keep_audio: true, ...(references.length ? { image_urls: references } : {}) };
+    case "videoBg": return { video_url: first, background_color: "Transparent", output_container_and_codec: "webm_vp9" };
+    case "relight": return { prompt, image_url: first, image_size: SIZE_FOR_RATIO[aspect ?? "1:1"] ?? "square_hd", ...extras };
+    case "tryOn": return { model_image: first, garment_image: second, num_samples: 1, ...extras };
+    case "angles": {
+      const view = STUDIO_CAMERA_ANGLES.find((entry) => entry.id === request.angle) ?? STUDIO_CAMERA_ANGLES[0]!;
+      return { image_urls: [first], horizontal_angle: view.horizontal, vertical_angle: view.vertical, zoom: view.zoom, ...(prompt ? { additional_prompt: prompt } : {}), ...extras };
+    }
+    case "styleRef": return { prompt, reference_image_urls: [first], image_size: SIZE_FOR_RATIO[aspect ?? "1:1"] ?? "square_hd", ...extras };
+    case "productShot": return { image_url: first, ...(prompt ? { scene_description: prompt } : {}), num_results: 1, fast: true };
     case "custom": return { prompt };
   }
 }
