@@ -1,0 +1,82 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ ↓ server/direct-coordination.e2e.test.ts > sends cross-bot work onward without resuming either sender
+ ↓ server/direct-coordination.e2e.test.ts > marks a failed one-way send so restart recovery cannot duplicate its notice
+ ↓ server/direct-coordination.e2e.test.ts > does not grant a specialist direct access to its supervising Chief
+ ↓ server/direct-coordination.e2e.test.ts > starts independent work immediately and frees the Chief while waiting (source fails: false)
+ ↓ server/direct-coordination.e2e.test.ts > starts independent work immediately and frees the Chief while waiting (source fails: true)
+ ↓ server/direct-coordination.e2e.test.ts > coordinates a lead and its specialist from ordinary chat, returns to Clive, and leaves unrelated tasks untouched
+ ↓ server/direct-coordination.e2e.test.ts > announces a settled delegation and its resume in the parent thread
+ ↓ server/direct-coordination.e2e.test.ts > keeps a guarded Chief request exact through coordination and resume
+ ↓ server/direct-coordination.e2e.test.ts > keeps a guarded Chief request exact through coordination and stop
+ ↓ server/direct-coordination.e2e.test.ts > keeps a guarded Chief request exact through coordination and failed resume
+ ↓ server/direct-coordination.e2e.test.ts > keeps a guarded Chief request exact through coordination and failed root
+ ↓ server/direct-coordination.e2e.test.ts > opens a fresh thread on a teammate with coordinate_bots thread "new" and gets the result back
+ ↓ server/direct-coordination.e2e.test.ts > lets the opener find and close the completed task
+ ↓ server/direct-coordination.e2e.test.ts > does not treat self-opened work or an abandoned human branch as new human authority
+ ↓ server/direct-coordination.e2e.test.ts > returns a nested coordinated result after Claude retries a transient provider exit
+ ↓ server/direct-coordination.e2e.test.ts > returns nested results after Claude rejects the source's prior resume cursor
+ ↓ server/direct-coordination.e2e.test.ts > uses recipient bot defaults for its new task, never the sender's or its selected old thread's settings
+ ↓ server/direct-coordination.e2e.test.ts > continues one recipient thread for every follow-up from the same conversation
+ ↓ server/direct-coordination.e2e.test.ts > on a headless server, holds a follow-up sent while the teammate still works and runs it next in the same thread
+ ↓ server/direct-coordination.e2e.test.ts > on the desktop app, holds a follow-up sent while the teammate still works and runs it next in the same thread
+ ↓ server/direct-coordination.e2e.test.ts > runs two assignments to one teammate from one turn in its thread, one after the other
+ ↓ server/direct-coordination.e2e.test.ts > gives another conversation of the same Chief its own thread with the teammate
+ × server/direct-coordination.e2e.test.ts > continues its original delegated child after the person selects an independent specialist conversation 5633ms
+   → expected [ …(2) ] to deeply equal [ …(2) ]
+ ↓ server/direct-coordination.e2e.test.ts > runs an identical call made twice in one turn once, without an extra recipient thread
+ ↓ server/direct-coordination.e2e.test.ts > runs an identical brief again only with rework=true once its first run finished
+ ↓ server/direct-coordination.e2e.test.ts > runs an identical brief again only with rework=true once its first run failed
+ ↓ server/direct-coordination.e2e.test.ts > dispatches to a spare recipient thread without waiting for unrelated work
+ ↓ server/direct-coordination.e2e.test.ts > queues a recipient at capacity, preserving its existing task and resuming only the pinned parent
+ ↓ server/direct-coordination.e2e.test.ts > runs a message sent while a teammate works, keeps the assignment, and names it in that turn
+ ↓ server/direct-coordination.e2e.test.ts > parks a message behind outstanding teammate work when the bot opts in, then runs it after
+ ↓ server/direct-coordination.e2e.test.ts > runs a teammate's hand-off to the Chief in the Chief's work thread for that sender, cancelling no live coordination
+ ↓ server/direct-coordination.e2e.test.ts > stops a waiting source without reaching into the teammate already working
+ ↓ server/direct-coordination.e2e.test.ts > deleting the waiting source cancels its tree and never recreates the deleted conversation
+ ↓ server/direct-coordination.e2e.test.ts > withholds direct results when the owner's cross-team grant is revoked
+ ↓ server/direct-coordination.e2e.test.ts > retains returned direct reports for follow-up turns but rechecks access before replay
+ ↓ server/direct-coordination.e2e.test.ts > runs the owed direct follow-up while the same bot works in another thread
+ ↓ server/direct-coordination.e2e.test.ts > sends each teammate result once in the turn that reviews it
+ ↓ server/direct-coordination.e2e.test.ts > gives a teammate each request once, never also as a bare assistant line
+ ↓ server/direct-coordination.e2e.test.ts > continues a teammate's step cap in place and stops it once it makes no progress
+ ↓ server/direct-coordination.e2e.test.ts > tells the Chief a teammate's provider refused the turn, in the provider's words
+ ↓ server/direct-coordination.e2e.test.ts > keeps a teammate working through a provider settings save that does not touch its engine
+ ↓ server/direct-coordination.e2e.test.ts > tells the Chief a teammate's turn stopped because its engine's settings changed
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/direct-coordination.e2e.test.ts > continues its original delegated child after the person selects an independent specialist conversation
+AssertionError: expected [ …(2) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  [
+    "908f7aa3-a23b-49c4-9747-ce1cda67fe7e",
+-   "908f7aa3-a23b-49c4-9747-ce1cda67fe7e",
++   "c1dbc9f5-9732-4534-a5da-b94051610951",
+  ]
+
+ ❯ server/direct-coordination.e2e.test.ts:633:54
+    631|   expect((await f.wait()).status).toBe("settled");
+    632|   const children = f.nodes().filter((node: any) => node.parentId && no…
+    633|   expect(children.map((node: any) => node.threadId)).toEqual([original…
+       |                                                      ^
+    634|   const specialist = (await f.api("/api/bots")).bots.find((bot: any) =…
+    635|   expect(specialist.threadId).toBe(direct.threadId);
+ ❯ fixtureSession server/direct-coordination.e2e.test.ts:57:5
+ ❯ fixture server/direct-coordination.e2e.test.ts:27:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 41 skipped (42)
+   Start at  09:25:53
+   Duration  7.77s (transform 559ms, setup 687ms, import 1.26s, tests 5.63s, environment 0ms)
+

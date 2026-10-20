@@ -1,0 +1,29 @@
+{
+  "supersededPreparedVersion": "0.3.2",
+  "preparedSource": "5aafbf02ab2ded075d2c75955419f35a45cce99a",
+  "preparationSha256": "491f58c3bc9de17c9006c0495be7a8f34bc41093377d02360d445b8fd1a913c7",
+  "operatorSha256": "c908d70a0723c083c95dd23afc819f55b9a4b9708c6f9771738a434cda642a1e",
+  "status": "UNADMITTED, held after concurrent public0.4.0 was observed",
+  "historicalPreparation": {
+    "syntheticGuards": 62,
+    "frozenArchiveFiles": 263,
+    "archiveTypecheckPassed": true,
+    "backendTestsQualifiedForReuse": 265,
+    "compiledSchemaTables": 68
+  },
+  "currentValidity": "032 source-qualified preparation is historical. New75-table combined source requires a fresh release/admission cycle; no old workflow/tag/deployment authority is reused.",
+  "backendOperationsExecuted": false,
+  "temporaryDeployKeyCreated": false,
+  "backupCreated": false,
+  "backendDeployed": false,
+  "mail": {
+    "preserveExistingConfiguration": true,
+    "activationRecord": "../../origin-mail-activation-031.json",
+    "historicalConfigurationConfirmedAt": "2026-10-18T17:05:26.745Z",
+    "recipientEmailSent": false,
+    "providerAcceptanceVerified": false,
+    "inboxVerified": false
+  },
+  "operatorsArchived": false,
+  "reason": "Public evidence retains readiness/hold summary and hashes, not credential-capable operators or raw backups."
+}

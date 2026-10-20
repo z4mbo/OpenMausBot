@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "cycle": "048",
+  "scope": "finite-auth-egress-review-and-visible-branding-targeted-checks",
+  "createdAt": "2026-10-20T06:56:53.166Z",
+  "status": "targeted-checks-passed",
+  "reviewedTag": "origin-v0.4.0",
+  "reviewedTagSource": "1a5ce4e975af376e43c32a75110756bfb80105eb",
+  "proposed032SourceHistorical": "5aafbf02ab2ded075d2c75955419f35a45cce99a",
+  "targetedTestFiles": 4,
+  "testsPassed": 112,
+  "existingPlatformSkips": 4,
+  "redFailures": 4,
+  "globalChecksClaimed": false,
+  "installedOrProviderAcceptance": false,
+  "externalActions": 0,
+  "originals": [
+    {
+      "source": ".omb-scratch/branding-04-047/REVIEW.md",
+      "sourceSha256": "c9ee23f6db03019af3804e95551d21948da56b366281dcc7a464e7586180a51d",
+      "archivedAs": "REVIEW.md",
+      "archivedSha256": "c9ee23f6db03019af3804e95551d21948da56b366281dcc7a464e7586180a51d",
+      "checkoutPathSanitized": false
+    },
+    {
+      "source": ".omb-scratch/branding-04-047/red.log",
+      "sourceSha256": "7ecf92ccc17dc4136aca5ad6d32cb65de6e4896336184b4441f496c0aa8d7a00",
+      "archivedAs": "red.log",
+      "archivedSha256": "53f04771bbb4f37ee9b8fb6ea324d383a12e3c589e1c56a5e737a3a406889966",
+      "checkoutPathSanitized": true
+    },
+    {
+      "source": ".omb-scratch/branding-04-047/green.log",
+      "sourceSha256": "b64516e2cc7b3e29192708bc395ebe2ec1e7864e63cf07da5c121daac9307d98",
+      "archivedAs": "green.log",
+      "archivedSha256": "59f2520615f15b0b9b43750e302c1419ee87d5509cc111868e63bdfe2154db36",
+      "checkoutPathSanitized": true
+    },
+    {
+      "source": ".omb-scratch/branding-04-047/lint.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedAs": "lint.log",
+      "archivedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "checkoutPathSanitized": false
+    },
+    {
+      "source": ".omb-scratch/branding-04-047/receipt.json",
+      "sourceSha256": "c47ef3f98d33e50ccac4b3dd2ca2180c128b8f7219ec2e8d0bb7ebf60c51aff6",
+      "archivedAs": "source-receipt.json",
+      "archivedSha256": "c47ef3f98d33e50ccac4b3dd2ca2180c128b8f7219ec2e8d0bb7ebf60c51aff6",
+      "checkoutPathSanitized": false
+    }
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2820,
+      "sha256": "57b34ad05e4ee17a1776a69c66f786b67f25287ca871201bedbd4b415231f945"
+    },
+    {
+      "path": "REVIEW.md",
+      "bytes": 5832,
+      "sha256": "c9ee23f6db03019af3804e95551d21948da56b366281dcc7a464e7586180a51d"
+    },
+    {
+      "path": "green.log",
+      "bytes": 928,
+      "sha256": "59f2520615f15b0b9b43750e302c1419ee87d5509cc111868e63bdfe2154db36"
+    },
+    {
+      "path": "lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "red.log",
+      "bytes": 16895,
+      "sha256": "53f04771bbb4f37ee9b8fb6ea324d383a12e3c589e1c56a5e737a3a406889966"
+    },
+    {
+      "path": "source-receipt.json",
+      "bytes": 2358,
+      "sha256": "c47ef3f98d33e50ccac4b3dd2ca2180c128b8f7219ec2e8d0bb7ebf60c51aff6"
+    }
+  ]
+}

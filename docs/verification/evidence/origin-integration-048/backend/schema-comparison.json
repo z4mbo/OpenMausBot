@@ -1,0 +1,62 @@
+{
+  "incomingSource": "f76cbe9b8019b648bb08f9125daefe35e6625185",
+  "candidateWorkingMerge": true,
+  "finalCommitBindingPending": true,
+  "tables": {
+    "source032": 68,
+    "source040": 73,
+    "merged": 75
+  },
+  "incomingVs032": {
+    "removedTables": [
+      "modelHostSources",
+      "modelHostExecutions"
+    ],
+    "narrowedTables": [
+      "agentHosts",
+      "workspaceAgentRuns"
+    ],
+    "removedIndexes": [
+      "agentHosts.by_ownerUserId_and_teamId_and_deviceId"
+    ],
+    "addedTables": [
+      "campaigns",
+      "pipelineSequences",
+      "publishedPages",
+      "agentBudgets",
+      "budgetSpend",
+      "chiefHeartbeats",
+      "callNotes"
+    ]
+  },
+  "mergedVs032": {
+    "removedTables": [],
+    "narrowedTables": [],
+    "removedIndexes": [],
+    "addedTables": [
+      "campaigns",
+      "pipelineSequences",
+      "publishedPages",
+      "agentBudgets",
+      "budgetSpend",
+      "chiefHeartbeats",
+      "callNotes"
+    ]
+  },
+  "mergedVs040": {
+    "removedTables": [],
+    "narrowedTables": [],
+    "removedIndexes": [],
+    "addedTables": [
+      "modelHostSources",
+      "modelHostExecutions"
+    ]
+  },
+  "schemaHashes": {
+    "source032": "031136a0b9fc10f71dc21df6ab0ac0cdfb4e48ab7dc87f09559174e65dc12c10",
+    "source040": "a6d433759c6da5948bf0d019fb91514841a358c1d5399caa0bcb9e3f53fda785",
+    "merged": "76bfcf70f0e931fb114d5d388dedfa5d33c71947075006ea70025e10784ebe1e"
+  },
+  "productionOperations": false,
+  "productionDataUsed": false
+}

@@ -1,0 +1,67 @@
+{
+  "kind": "isolated-ci-fixture-lifecycle-repair",
+  "productionOperations": false,
+  "protectedServicesTouched": false,
+  "sourceEdits": [
+    "server/room-coordination.e2e.test.ts",
+    "server/card-answerers.e2e.test.ts",
+    "server/testing/bind-fixture.ts",
+    "server/testing/bind-fixture.test.ts"
+  ],
+  "sourceCommitBindingPending": false,
+  "red": {
+    "cardPort": {
+      "failure": "Unchecked random main port34930 collides with an occupied listener; webhook34931 started; suite setup fails before7 card tests.",
+      "source": "GitHub CI39381788335 Linux shard3 job118493171187"
+    },
+    "roomRename": {
+      "scenario": "Recipient movement revokes its running assignment and resumes the managing Chief. A gated resume deterministically causes the old immediate rename to return409.",
+      "failed": 1,
+      "filtered": 41
+    }
+  },
+  "green": {
+    "platformSkippedCardTests": 7,
+    "ownedDiffCheckExit": 0,
+    "ownedLintExit": 0,
+    "realRoomRenameAndDelete": 2,
+    "fixtureRetryUnit": 3,
+    "serverTypecheckExit": 0,
+    "filteredRoomTests": 40
+  },
+  "fixes": {
+    "room": "Assert active-work409 while resumed Chief is gated, release it, wait coordinator settlement and bot+task idle before team rename/recreation; retain transcript privacy/revocation assertions.",
+    "card": "Choose existing probed low harness/webhook pair. Retry only own child EADDRINUSE at most3 times, await failed child close, require owned listening line then health before requests. Other failures propagate unchanged."
+  },
+  "limits": [
+    "POSIX card scenarios were not run on Windows; Linux CI must establish their functional acceptance.",
+    "No product runtime, authorization or active-work guard changed.",
+    "No timeout increases, skips, automatic flaky retries or assertion relaxations added."
+  ],
+  "logs": [
+    {
+      "file": "room-rename-red.log",
+      "originalPrivatePath": ".omb-scratch/ci-048/room-rename-red.log",
+      "originalSha256": "d39d131ded0483610ba40fe59c54e3f08e1b657ef787e6cafe976042e0dc6d2e"
+    },
+    {
+      "file": "focused-green.log",
+      "originalPrivatePath": ".omb-scratch/ci-048/fixture-repairs-green.log",
+      "originalSha256": "52eeef0688acea974a36f61d97388e2c3f15b8083ec0a7a8be0f7a5c4710a46a"
+    },
+    {
+      "file": "server-typecheck.log",
+      "originalPrivatePath": ".omb-scratch/ci-048/fixture-repairs-tsc.log",
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "owned-lint.log",
+      "originalPrivatePath": ".omb-scratch/ci-048/fixture-repairs-lint.log",
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "commits": [
+    "77c8b4c77",
+    "2ab64717d"
+  ]
+}

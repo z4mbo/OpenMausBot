@@ -1,0 +1,22 @@
+{
+  "scope": "Ignored synthetic fixture preparation only",
+  "parents": [
+    {
+      "path": "scripts/testing/origin-chief-ops-preview.tsx",
+      "sha256": "16e93a0fcacae1664d728c86b0a4e907b262619645643accc411c12e67b88cbf",
+      "derivation": "Existing static query seed only; no setSessionToken/root render; viewer treated as nonadmin"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/preview.tsx",
+      "sha256": "28f10f1cf60130c61521951809a033710999ceaafbb0225d125857349fb52de9",
+      "derivation": "Preserve core Usage/hosting/width/PR preview; core-prefixed routing and synthetic shared link for monthly budget"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-pipeline-api.mjs",
+      "sha256": "c24446053c3fcbf977bbffb80d9e336e4d2f8228e4e4d03b98d0de74c43f3799",
+      "derivation": "Same narrow API adapter under new fixture path; no session storage"
+    }
+  ],
+  "bindingCount": 46,
+  "launchPerformed": false
+}

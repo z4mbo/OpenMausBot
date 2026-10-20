@@ -1,0 +1,15 @@
+{
+  "mode": "plan only; no listeners started",
+  "required": "--expected-head FULL_COMMIT --run-id SAFE_UNIQUE_NAME",
+  "route": "/__origin048.html",
+  "rootOwnsBrowser": true,
+  "launches": "One synthetic read-only status listener and documented mountPreview Vite listener, both free loopback ports",
+  "noProductServer": true,
+  "noBackendOrProvider": true,
+  "protectedPorts": [
+    3210,
+    3211,
+    5199,
+    8799
+  ]
+}

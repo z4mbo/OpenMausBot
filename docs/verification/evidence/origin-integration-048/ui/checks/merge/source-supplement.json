@@ -1,0 +1,8 @@
+{
+  "recordedAt": "2026-10-20T07:04:02.079Z",
+  "priorReceiptSha256": "9e97badbeea30b99c8570cd8b7a4336559ca6a58bc7045b383a906da065cee16",
+  "source": "6d1c772d121d557e9742e71da8102f453d9e336f",
+  "qualifiedChange": "Root added required no-op onSequence callback to the existing LeadDrawer readiness fixture after the117focusedtests. Assertions unchanged; globalclienttypecheck is root-owned. No rerun claim from this supplement.",
+  "path": "src/components/origin-pipeline/LeadDrawer.readiness.test.ts",
+  "currentRawSha256": "e11558a3c7a9cda588bb5684408b1000c1129104c258bc5fc10defe74404960d"
+}

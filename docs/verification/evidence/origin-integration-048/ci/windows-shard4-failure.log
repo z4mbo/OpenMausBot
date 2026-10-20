@@ -1,0 +1,21 @@
+2026-10-20T07:08:12.9554280Z ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+2026-10-20T07:08:12.9554627Z 
+2026-10-20T07:08:12.9555972Z  FAIL  server/room-coordination.e2e.test.ts > withholds an in-flight result after team rename and recreation
+2026-10-20T07:08:12.9562674Z Error: Origin API error (409): {"error":"Stop this team's active work before renaming the team"}
+2026-10-20T07:08:12.9563777Z  ❯ fetchJson scripts/mcp-server.ts:58:11
+2026-10-20T07:08:12.9709115Z      56|       );
+2026-10-20T07:08:12.9709612Z      57|     }
+2026-10-20T07:08:12.9709909Z      58|     throw new OpenMausBotApiError(response.status, `Origin API error (…
+2026-10-20T07:08:12.9710212Z        |           ^
+2026-10-20T07:08:12.9710373Z      59|   }
+2026-10-20T07:08:12.9710533Z      60|   try {
+2026-10-20T07:08:12.9710900Z  ❯ server/room-coordination.e2e.test.ts:231:3
+2026-10-20T07:08:12.9711723Z  ❯ withRooms server/room-coordination.e2e.test.ts:46:5
+2026-10-20T07:08:12.9711896Z 
+2026-10-20T07:08:12.9712555Z ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+2026-10-20T07:08:12.9712664Z 
+2026-10-20T07:08:12.9715924Z 
+2026-10-20T07:08:12.9734899Z  Test Files  1 failed | 357 passed | 14 skipped (372)
+2026-10-20T07:08:12.9766448Z       Tests  1 failed | 4933 passed | 145 skipped (5079)
+2026-10-20T07:08:12.9767071Z    Start at  06:44:47
+2026-10-20T07:08:12.9770042Z    Duration  1405.64s (transform 16.92s, setup 41.29s, import 57.75s, tests 1248.50s, environment 6.75s)

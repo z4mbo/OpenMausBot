@@ -1,0 +1,17 @@
+{
+  "parents": {
+    "previous032": "5aafbf02ab2ded075d2c75955419f35a45cce99a",
+    "incomingPublished040": "f76cbe9b8019b648bb08f9125daefe35e6625185"
+  },
+  "candidateWorkingMerge": true,
+  "finalCommitBindingPending": true,
+  "files": {
+    "backend/convex/pipeline.ts": "bc5c9774c528885c2cae6386020c94266cd102c292449bf499fa02f449477a76",
+    "server/origin-call-agent.ts": "e213e65571631bc21e67eb3cfc12633bdb8733b27b5c4ae82f447342ab420c9d",
+    "server/origin-pipeline.ts": "bd607e60dff8860160c57338d2c987e670d9cf6af603a40dbd128cc905a84a7c",
+    "backend/convex/budgets.ts": "df66505194beb29a7896208e6383f1027f7a6b8effd828d23bf1baaeeb05652d",
+    "backend/convex/budgets.access.test.ts": "5c7901cd84d4b674153abcbc5c5e363798a5a60f9a8382fb90021c2a0cc34611",
+    "backend/convex/modelHosts.ts": "27cdcb0300626ed9b67dec11ef2667026c2f741266a42af82f19da56c7b13480",
+    "backend/convex/modelHosts.test.ts": "8d92da4cda80477ff758b27660103eee9c7d0ec354ca587dfebb52f9511cd2f9"
+  }
+}

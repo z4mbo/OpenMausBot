@@ -1,0 +1,74 @@
+{
+  "bounded": true,
+  "limit": 1000,
+  "calls": [
+    {
+      "method": "GET",
+      "path": "/api/origin/avatar-looks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/cloud-links"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plan-usage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/avatar-looks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/avatar-looks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/avatar-looks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/cloud-links"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plan-usage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/avatar-looks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/cloud-links"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plan-usage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/session"
+    }
+  ]
+}

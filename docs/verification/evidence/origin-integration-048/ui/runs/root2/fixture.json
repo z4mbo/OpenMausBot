@@ -1,0 +1,10 @@
+{
+  "pid": 53280,
+  "apiPort": 52492,
+  "url": "http://127.0.0.1:5176/__origin048.html",
+  "runId": "root2",
+  "source": "86b9326afd81d277117ec953b7a9b70caed07d07",
+  "sourceManifestSha256": "3f1b3c61ca3891b0876aa94aae812d20987e840c09e3c5934aff4d74dd655e75",
+  "rootOwnsBrowser": true,
+  "noProductServer": true
+}

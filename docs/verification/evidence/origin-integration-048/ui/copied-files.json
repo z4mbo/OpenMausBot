@@ -1,0 +1,344 @@
+[
+  {
+    "path": "checks/merge/receipt.json",
+    "original": ".omb-scratch/integration-048/ui-merge-review/receipt.json",
+    "bytes": 5255,
+    "sha256": "9e97badbeea30b99c8570cd8b7a4336559ca6a58bc7045b383a906da065cee16"
+  },
+  {
+    "path": "checks/merge/source-supplement.json",
+    "original": ".omb-scratch/integration-048/ui-merge-review/source-supplement.json",
+    "bytes": 595,
+    "sha256": "60411414e99d37c18a2cfca2b70deb82c345ed0e34c94022df69d40d98248181"
+  },
+  {
+    "path": "checks/merge/focused-initial.log",
+    "original": ".omb-scratch/integration-048/ui-merge-review/focused-initial.log",
+    "bytes": 22915,
+    "sha256": "54b46e60920e01c1f084591517f630471682295ca27a1551c60934bbf1abfcef"
+  },
+  {
+    "path": "checks/merge/focused-green.log",
+    "original": ".omb-scratch/integration-048/ui-merge-review/focused-green.log",
+    "bytes": 265,
+    "sha256": "03ba18173b4595b348866700a28d7fa0aebafbdf6f580e4b205195a704a8dfad"
+  },
+  {
+    "path": "checks/merge/lint.log",
+    "original": ".omb-scratch/integration-048/ui-merge-review/lint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "checks/budget/budget-pill-fix-receipt.json",
+    "original": ".omb-scratch/integration-048/budget-pill-fix-receipt.json",
+    "bytes": 3247,
+    "sha256": "dd22643d895774d3be24524f8599d023b880d432579d44011b113c1717e24763"
+  },
+  {
+    "path": "checks/budget/budget-pill-red.log",
+    "original": ".omb-scratch/integration-048/budget-pill-red.log",
+    "bytes": 2816,
+    "sha256": "eb94cabe1c73b45b32fc89793cf63d7c3dff604d84313ae3f0ae191f58979b8b"
+  },
+  {
+    "path": "checks/budget/budget-pill-green-final.log",
+    "original": ".omb-scratch/integration-048/budget-pill-green-final.log",
+    "bytes": 261,
+    "sha256": "56c70bfa1babf7c84592675b6df83414073685c85d116673d8eecefa4641cd57"
+  },
+  {
+    "path": "checks/budget/budget-pill-tsc.log",
+    "original": ".omb-scratch/integration-048/budget-pill-tsc.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "checks/budget/budget-pill-oxlint.log",
+    "original": ".omb-scratch/integration-048/budget-pill-oxlint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "checks/canvas/wheel-red.log",
+    "original": ".omb-scratch/canvas-toolbar-048/wheel-red.log",
+    "bytes": 1199,
+    "sha256": "838250f5761f29b9d0e88a277a6897d2a34aa4be4c0352744ab5d02967d65c88"
+  },
+  {
+    "path": "checks/canvas/wheel-green.log",
+    "original": ".omb-scratch/canvas-toolbar-048/wheel-green.log",
+    "bytes": 395,
+    "sha256": "27d1f480c266666ed6ae8e3725bf42b3df70a5df19d2a417383fca143b6ca6dc"
+  },
+  {
+    "path": "checks/canvas/wheel-lint.log",
+    "original": ".omb-scratch/canvas-toolbar-048/wheel-lint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "checks/canvas/wheel-client-typecheck.log",
+    "original": ".omb-scratch/canvas-toolbar-048/wheel-client-typecheck.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "checks/canvas/behavior.log",
+    "original": ".omb-scratch/canvas-toolbar-048/behavior.log",
+    "bytes": 393,
+    "sha256": "372f080c93dda457182bd32410c94e4456449f2b6ffc1f49f1898d245cd372aa"
+  },
+  {
+    "path": "checks/canvas/lint.log",
+    "original": ".omb-scratch/canvas-toolbar-048/lint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "checks/canvas/client-typecheck.log",
+    "original": ".omb-scratch/canvas-toolbar-048/client-typecheck.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "fixture/binding-paths.json",
+    "original": ".omb-scratch/integration-048/ui-preview/binding-paths.json",
+    "bytes": 2109,
+    "sha256": "2d484c8f6c1bdc16cd3ac5d5105c3d0ef6301ba8463d36da870c34abb1f60c56"
+  },
+  {
+    "path": "fixture/chief-data.ts",
+    "original": ".omb-scratch/integration-048/ui-preview/chief-data.ts",
+    "bytes": 2923,
+    "sha256": "b8572beeccdc12d44a482a8f3483a8d790368407fd26e7a653c0892afda9a83a"
+  },
+  {
+    "path": "fixture/cloud.ts",
+    "original": ".omb-scratch/integration-048/ui-preview/cloud.ts",
+    "bytes": 1009,
+    "sha256": "5ff96a4e8461482c73d19b53ee241d55ceed4a13d99b17cc22f0e39443c24e43"
+  },
+  {
+    "path": "fixture/core-preview.tsx",
+    "original": ".omb-scratch/integration-048/ui-preview/core-preview.tsx",
+    "bytes": 4955,
+    "sha256": "a16e6b78f941cc8c990cf4f5b138dbd75f275ccd16faa01323f595aeaf7b4a08"
+  },
+  {
+    "path": "fixture/data.mjs",
+    "original": ".omb-scratch/integration-048/ui-preview/data.mjs",
+    "bytes": 6180,
+    "sha256": "09905be9f47d978991db2216291f46ad8be63715c4e0a4d61013ff2548160a62"
+  },
+  {
+    "path": "fixture/default-plan.json",
+    "original": ".omb-scratch/integration-048/ui-preview/default-plan.json",
+    "bytes": 427,
+    "sha256": "972cb93a6a59272b593957a986795ca568c5dfef5a9f2f6e3d3ee03bb454b1e5"
+  },
+  {
+    "path": "fixture/derivation.json",
+    "original": ".omb-scratch/integration-048/ui-preview/derivation.json",
+    "bytes": 955,
+    "sha256": "fc0a1c3142e0cc79add948b28735f1d571ddb45df395038392989220371ac581"
+  },
+  {
+    "path": "fixture/guard.mjs",
+    "original": ".omb-scratch/integration-048/ui-preview/guard.mjs",
+    "bytes": 1281,
+    "sha256": "08f410408af5663c077d63a86361be243a67942c59e4378c134e03d932a2a4a8"
+  },
+  {
+    "path": "fixture/launch.mjs",
+    "original": ".omb-scratch/integration-048/ui-preview/launch.mjs",
+    "bytes": 6189,
+    "sha256": "7fb9050f990f892cc6e1ce9c4f9cbfa95d6aad330416f04f663749d4dfb1960a"
+  },
+  {
+    "path": "fixture/pipeline-api.mjs",
+    "original": ".omb-scratch/integration-048/ui-preview/pipeline-api.mjs",
+    "bytes": 1135,
+    "sha256": "958b321c2ac61c60029a1a598117ce5422f324060db1202a86550ce20bb0ee3a"
+  },
+  {
+    "path": "fixture/preparation-receipt.json",
+    "original": ".omb-scratch/integration-048/ui-preview/preparation-receipt.json",
+    "bytes": 11791,
+    "sha256": "989d8a67f535ef6111f162ae879a8ddb2b381969324082cce9d1ab5c3ce9190d"
+  },
+  {
+    "path": "fixture/prepare-derived.mjs",
+    "original": ".omb-scratch/integration-048/ui-preview/prepare-derived.mjs",
+    "bytes": 4588,
+    "sha256": "62f84b80242e56e00e566f35affa647f07f71acfe3103fff4a875fae6d7a1060"
+  },
+  {
+    "path": "fixture/preview.tsx",
+    "original": ".omb-scratch/integration-048/ui-preview/preview.tsx",
+    "bytes": 3118,
+    "sha256": "1959bf9d4d499202b41794b69b55d308f271c22b9c435868d5bc7fa35574e9a9"
+  },
+  {
+    "path": "fixture/README.md",
+    "original": ".omb-scratch/integration-048/ui-preview/README.md",
+    "bytes": 5499,
+    "sha256": "b4d844b3b38062ec9ee7d533fc79f07f288cdae01bce8f56d3515c18484fa0cb"
+  },
+  {
+    "path": "fixture/status-responses.mjs",
+    "original": ".omb-scratch/integration-048/ui-preview/status-responses.mjs",
+    "bytes": 2273,
+    "sha256": "f673e9236c467d0e206bbc0777158be82182d8dda162f5f2ffcc0b66ab556ce6"
+  },
+  {
+    "path": "runs/root1/fixture.json",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/fixture.json",
+    "bytes": 314,
+    "sha256": "5187d440cf3718a10d40f34e72ba424f641d25d6401f3329029a67abe50804c0"
+  },
+  {
+    "path": "runs/root1/source.json",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/source.json",
+    "bytes": 8286,
+    "sha256": "e049a2a9084fef8b7d697c44256e6fe9d02e62163996158fe38e824546e87717"
+  },
+  {
+    "path": "runs/root1/backup-order-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/backup-order-light-375.jpg",
+    "bytes": 43784,
+    "sha256": "d0a7d398d99ca58c840ab9af0b865d2ed7c0d9628dab190d7d7d2644fe362ece"
+  },
+  {
+    "path": "runs/root1/call-actions-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/call-actions-light-375.jpg",
+    "bytes": 19530,
+    "sha256": "226ee812095312d546a90060fcba1b897f0ec48f0cd7e39e81801daa808e16b9"
+  },
+  {
+    "path": "runs/root1/campaign-form-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/campaign-form-light-375.jpg",
+    "bytes": 32609,
+    "sha256": "6eb5b89582998b4fd4e7539f06c2f448dc5f61f3320976c54d6f19875759e62b"
+  },
+  {
+    "path": "runs/root1/campaign-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/campaign-light-375.jpg",
+    "bytes": 34043,
+    "sha256": "e59ffa50bebd580020d4dcab156faf12b096c0d78cab3359856a41aa5d41baac"
+  },
+  {
+    "path": "runs/root1/campaign-light-desktop.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/campaign-light-desktop.jpg",
+    "bytes": 57057,
+    "sha256": "73fae59def137d91d95bd41d8a03d6c1ee9945b665a4c25230604cd7cc4fb264"
+  },
+  {
+    "path": "runs/root1/canvas-pages-dark-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/canvas-pages-dark-375.jpg",
+    "bytes": 24913,
+    "sha256": "4bd214b8ad04125f884493cba632b5a8e7accde0fe22b3767f824232b01790df"
+  },
+  {
+    "path": "runs/root1/canvas-publish-dark-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/canvas-publish-dark-375.jpg",
+    "bytes": 25531,
+    "sha256": "c6a6654f3443e378d09285cccf1bedb2ce3eb4c0369a13fbf437f5f1f283c58e"
+  },
+  {
+    "path": "runs/root1/canvas-publish-form-dark-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/canvas-publish-form-dark-375.jpg",
+    "bytes": 30367,
+    "sha256": "221f297b279cc2ad7fb3a37df26bb660f25f23fd1479e4166f1b0d1a11fa7653"
+  },
+  {
+    "path": "runs/root1/chat-header-before-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/chat-header-before-375.jpg",
+    "bytes": 35907,
+    "sha256": "b2cf89ea3822a5069760a7a95d85544b62f21d009120b7bc148df0ef8d1af4e9"
+  },
+  {
+    "path": "runs/root1/heartbeat-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/heartbeat-light-375.jpg",
+    "bytes": 21841,
+    "sha256": "96a2dfce7376b1e5cea6111a4893e1399aab59555a7902174665146892db33a2"
+  },
+  {
+    "path": "runs/root1/hosting-source-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/hosting-source-light-375.jpg",
+    "bytes": 37388,
+    "sha256": "516b8e26c14c821c9282df96d0510c1b3abb6a605a253d5eec9b896941bc3ba2"
+  },
+  {
+    "path": "runs/root1/org-budget-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/org-budget-light-375.jpg",
+    "bytes": 33466,
+    "sha256": "04ce413e40e8f3f400e0fbfe486205b57b15afccdf3da4d394ce18c07b408c4f"
+  },
+  {
+    "path": "runs/root1/pipeline-sequence-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root1/pipeline-sequence-light-375.jpg",
+    "bytes": 34811,
+    "sha256": "d273c7a15dcd8767715a0c2874a4d404ab8f6e3dfa92d3b4576c7276e93d5659"
+  },
+  {
+    "path": "runs/root2/fixture.json",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/fixture.json",
+    "bytes": 314,
+    "sha256": "1a00039967f9f1a23cb4263ae9d485dcb469f2b62607370be17ae848545b4bba"
+  },
+  {
+    "path": "runs/root2/source.json",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/source.json",
+    "bytes": 8467,
+    "sha256": "3f1b3c61ca3891b0876aa94aae812d20987e840c09e3c5934aff4d74dd655e75"
+  },
+  {
+    "path": "runs/root2/http-calls-live.json",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/http-calls-live.json",
+    "bytes": 1293,
+    "sha256": "2304a699f53f6f0a9d6d2109bb6fa0d6ca9d658648f733c600f8f265399bd91e"
+  },
+  {
+    "path": "runs/root2/budget-editor-after-dark-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/budget-editor-after-dark-375.jpg",
+    "bytes": 34539,
+    "sha256": "bbb4b9aefc982e52bc750a860fea33385344955ac509d6c3310f3de5015ea25b"
+  },
+  {
+    "path": "runs/root2/canvas-panels-after-dark-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/canvas-panels-after-dark-375.jpg",
+    "bytes": 26182,
+    "sha256": "c45ce16f40d87fc8754b7f8454531eb31cc691097c4c2588187078e8d8656d1b"
+  },
+  {
+    "path": "runs/root2/canvas-viewer-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/canvas-viewer-light-375.jpg",
+    "bytes": 20073,
+    "sha256": "14b0cd33b0cadc22532fecc79e7f8b1da8d2657413018f20af7b3045e02cc22a"
+  },
+  {
+    "path": "runs/root2/chat-header-after-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/chat-header-after-375.jpg",
+    "bytes": 33746,
+    "sha256": "105a7213015f0cc8777b250856172342471e7a14a249cbd3da450224c28615cd"
+  },
+  {
+    "path": "runs/root2/chat-header-after-desktop.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/chat-header-after-desktop.jpg",
+    "bytes": 46056,
+    "sha256": "834ed5ee44865d47e4a978cb28dce5b4ee5c937551f948641b626317d289ece5"
+  },
+  {
+    "path": "runs/root2/chat-header-after-light-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/chat-header-after-light-375.jpg",
+    "bytes": 35385,
+    "sha256": "4d2aa647e3c619da1b96460d37d5bb96f08358210654ef78bc0e473214a07c06"
+  },
+  {
+    "path": "runs/root2/usage-context-after-dark-375.jpg",
+    "original": ".omb-scratch/integration-048/ui-preview/runs/root2/usage-context-after-dark-375.jpg",
+    "bytes": 34722,
+    "sha256": "67fc71cc59af6b88adbee7cd8894cfaf498c4266807634ab42e874fbb7e1ae73"
+  }
+]

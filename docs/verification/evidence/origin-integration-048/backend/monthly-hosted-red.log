@@ -1,0 +1,106 @@
+
+ RUN  v5.0.2 [isolated Origin checkout]/backend
+
+ ❯ convex/modelHosts.test.ts (27 tests | 4 failed | 23 skipped) 456ms
+   ❯ fenced executor admission and transcript ownership (19)
+     × monthly agent and project budgets also refuse hosted requests before creating work 343ms
+     × hosted dispatch rechecks a cap changed after admission 20ms
+     × a succeeded hosted receipt books monthly spend exactly once 63ms
+     × a failed hosted receipt books monthly spend exactly once 28ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  convex/modelHosts.test.ts > fenced executor admission and transcript ownership > monthly agent and project budgets also refuse hosted requests before creating work
+AssertionError: promise resolved "{ …(5) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "executionId": "[synthetic row identifier]",
++   "messageId": "[synthetic row identifier]",
++   "runId": "[synthetic row identifier]",
++   "seq": 1,
++   "status": "running",
+  }
+
+ ❯ convex/modelHosts.test.ts:130:37
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  convex/modelHosts.test.ts > fenced executor admission and transcript ownership > hosted dispatch rechecks a cap changed after admission
+AssertionError: promise resolved "{ leaseUntil: 1792479082800, …(1) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "leaseUntil": 1792479082800,
++   "work": {
++     "agentId": "[synthetic row identifier]",
++     "allowMetered": false,
++     "billing": "subscription",
++     "definition": {
++       "color": "green",
++       "description": "",
++       "name": "Project Chief",
++       "soul": "Synthetic instructions",
++       "title": "",
++     },
++     "definitionHash": "7ef7e4b9",
++     "definitionVersion": 1,
++     "executionId": "[synthetic row identifier]",
++     "leaseUntil": 1792479082800,
++     "model": "synthetic-model",
++     "projectId": "[synthetic row identifier]",
++     "provider": "claudeAgent",
++     "requestClientId": "send:synthetic",
++     "requestSeq": 1,
++     "requesterName": "Sender",
++     "requesterUserId": "[synthetic row identifier]",
++     "runId": "[synthetic row identifier]",
++     "sourceId": "[synthetic row identifier]",
++     "sourceKey": "[redacted synthetic credential]",
++     "status": "claimed",
++     "teamId": "[synthetic row identifier]",
++     "text": "Canonical full synthetic request",
++     "threadId": "[synthetic row identifier]",
++   },
+  }
+
+ ❯ convex/modelHosts.test.ts:141:59
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  convex/modelHosts.test.ts > fenced executor admission and transcript ownership > a succeeded hosted receipt books monthly spend exactly once
+ FAIL  convex/modelHosts.test.ts > fenced executor admission and transcript ownership > a failed hosted receipt books monthly spend exactly once
+AssertionError: expected [] to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ convex/modelHosts.test.ts:157:18
+    155|     await expect(f.t.mutation(api.agentRuns.finish, { sessionToken: f.…
+    156|     const rows = await f.t.run(ctx => ctx.db.query("budgetSpend").coll…
+    157|     expect(rows).toHaveLength(2);
+       |                  ^
+    158|     for (const row of rows) expect(row).toMatchObject({ costUsd: 0.75,…
+    159|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 23 skipped (27)
+   Start at  08:50:21
+   Duration  939ms (tests 57%, import 20%, transform 18%, environment 4%)
+

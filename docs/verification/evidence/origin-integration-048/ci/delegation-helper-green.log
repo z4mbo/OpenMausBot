@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > reuses the canonical child, leaving a direct conversation and its context untouched 2ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > marks one existing exact work link as canonical without selecting it 1ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > migrates only a unique coordinator-proven child (undefined) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > migrates only a unique coordinator-proven child ({"botId":"chief","name":"Chief","at":1}) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > preserves a legacy fresh job with an exact opener but no work kind 1ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > does not infer ownership from a matching opener name or current conversation 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > does not reuse a historical child outside this conversation scope ({"openedBy":{"botId":"other-chief","name":"Chief","threadId":"project-A","at":1}}) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > does not reuse a historical child outside this conversation scope ({"openedBy":{"botId":"chief","name":"Chief","threadId":"project-C","at":1}}) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > does not reuse a historical child outside this conversation scope ({"openedBy":{"botId":"chief","name":"Chief","threadId":"project-A","at":1,"roomLane":true}}) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > does not reuse a historical child outside this conversation scope ({"openedBy":{"botId":"chief","name":"Chief","threadId":"project-A","at":1,"kind":"pair"}}) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > does not reuse a historical child outside this conversation scope ({"archivedAt":5}) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > does not reuse a historical child outside this conversation scope ({"routineRunId":"routine"}) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > does not infer a direct child from a room assignment or another parent's work 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > creates one canonical child for ambiguous historical links (exact work: false) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > creates one canonical child for ambiguous historical links (exact work: true) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > preserves an explicit new conversation without replacing the canonical child 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > keeps a fresh job separate when no canonical child exists yet (title: undefined) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > keeps a fresh job separate when no canonical child exists yet (title: Independent job) 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > refuses conflicting canonical links instead of picking either context or creating more 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > gives an explicit fresh delegation its requested folder without replacing the standing child 0ms
+ ✓ server/delegation-thread.test.ts > parent delegation conversations > does not pin an unrelated folder when allocating a standing delegation 0ms
+
+ Test Files  1 passed (1)
+      Tests  21 passed (21)
+   Start at  09:30:34
+   Duration  765ms (transform 229ms, setup 558ms, import 27ms, tests 9ms, environment 0ms)
+

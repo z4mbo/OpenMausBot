@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "cycle": "047",
+  "scope": "finite-04-auth-egress-static-review-and-visible-branding-fixes",
+  "status": "targeted-checks-passed",
+  "reviewedTag": "origin-v0.4.0",
+  "reviewedTagSource": "1a5ce4e975af376e43c32a75110756bfb80105eb",
+  "worktreeContext": "Root-owned unresolved integration; not a frozen release",
+  "tests": {
+    "redFailures": 4,
+    "greenPassed": 112,
+    "greenPlatformSkipped": 4,
+    "greenFiles": 4,
+    "focusedLint": "passed",
+    "diffCheck": "passed",
+    "staticAuthReviewOnly": true
+  },
+  "files": [
+    {
+      "path": "server/cli-pairing.ts",
+      "sha256": "8b902bd2163a6db81886b4b27d98012cc489d4df9b5f19a125d8b7c55a855047"
+    },
+    {
+      "path": "server/cli.test.ts",
+      "sha256": "6c9edb523249fd6d3a454bc924205f9f3b46927442ccb8c114f85345110aa36d"
+    },
+    {
+      "path": "server/browser/egress/policy.ts",
+      "sha256": "558c11d8892e2baed961b53766172e3d5cd5d3deb5e33a2fefb493040b4f63a2"
+    },
+    {
+      "path": "server/browser/egress/registry.test.ts",
+      "sha256": "4256928d150e63fdb77aa5313315693426943e13d4bffeb05808b9316d1c02f7"
+    },
+    {
+      "path": "companion/src/control.ts",
+      "sha256": "1a60ededcb533e4d432a822f7c59c345ca7f8d198bb53ac0d68df875c6f5df2d"
+    },
+    {
+      "path": "companion/test/control.test.ts",
+      "sha256": "bf87002cbb3a852cd7c002e88300ad56271be8b748fa1b116ce07e8dd5245518"
+    }
+  ],
+  "evidence": [
+    {
+      "name": "green.log",
+      "bytes": 978,
+      "sha256": "b64516e2cc7b3e29192708bc395ebe2ec1e7864e63cf07da5c121daac9307d98"
+    },
+    {
+      "name": "lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "red.log",
+      "bytes": 16945,
+      "sha256": "7ecf92ccc17dc4136aca5ad6d32cb65de6e4896336184b4441f496c0aa8d7a00"
+    },
+    {
+      "name": "REVIEW.md",
+      "bytes": 5832,
+      "sha256": "c9ee23f6db03019af3804e95551d21948da56b366281dcc7a464e7586180a51d"
+    }
+  ],
+  "staged": false,
+  "committed": false,
+  "externalActions": 0,
+  "limits": [
+    "No broad security clearance; finite static review only.",
+    "No current freeze, Linux/native/GUI/provider/production acceptance.",
+    "Root owns all conflict resolution and publication decisions."
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "version": "0.4.1",
+  "head": "6d1c772d121d557e9742e71da8102f453d9e336f",
+  "startedAt": "2026-10-20T06:56:11.654Z",
+  "runtime": {
+    "version": "v24.21.0",
+    "executableSha256": "ba4e6d110e8c1592a1ecd390f6b05f3da124b13871a5be62b341a07a853c6c32"
+  },
+  "before": {
+    "files": 2960,
+    "sha256": "5e48c941d6047e08022d887975c70e8e4f34d36f213ac534e7924c5810b193a1"
+  },
+  "steps": [
+    {
+      "name": "client-typecheck",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "-b"
+      ],
+      "startedAt": "2026-10-20T06:56:11.718Z",
+      "finishedAt": "2026-10-20T06:56:38.482Z",
+      "exitCode": 0,
+      "signal": null,
+      "log": "client-typecheck.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "server-typecheck",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.server.json"
+      ],
+      "startedAt": "2026-10-20T06:56:38.484Z",
+      "finishedAt": "2026-10-20T06:57:00.831Z",
+      "exitCode": 0,
+      "signal": null,
+      "log": "server-typecheck.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "lint",
+      "args": [
+        "node_modules/oxlint/bin/oxlint",
+        "--deny-warnings",
+        "."
+      ],
+      "startedAt": "2026-10-20T06:57:00.831Z",
+      "finishedAt": "2026-10-20T06:57:00.990Z",
+      "exitCode": 0,
+      "signal": null,
+      "log": "lint.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "release-check",
+      "args": [
+        "scripts/origin-release-notes.mjs",
+        "--check"
+      ],
+      "startedAt": "2026-10-20T06:57:00.991Z",
+      "finishedAt": "2026-10-20T06:57:01.094Z",
+      "exitCode": 0,
+      "signal": null,
+      "log": "release-check.log",
+      "logSha256": "3d5b94dad43d45f7e8d19f1ab68fa2e181d7e419fbe30db3925e46715c799271"
+    },
+    {
+      "name": "locale-check",
+      "args": [
+        "scripts/generate-locale.mjs",
+        "--check"
+      ],
+      "startedAt": "2026-10-20T06:57:01.102Z",
+      "finishedAt": "2026-10-20T06:57:01.229Z",
+      "exitCode": 0,
+      "signal": null,
+      "log": "locale-check.log",
+      "logSha256": "7459c7d94e35ad42b28857a1f1726402d09080527bdb5c5808533bf86b264dbc"
+    },
+    {
+      "name": "electron-check",
+      "args": [
+        "scripts/check-electron.mjs"
+      ],
+      "startedAt": "2026-10-20T06:57:01.235Z",
+      "finishedAt": "2026-10-20T06:57:08.278Z",
+      "exitCode": 0,
+      "signal": null,
+      "log": "electron-check.log",
+      "logSha256": "208b3077f04cc2d5a34c03311241dac939976ecf6fd9c7e77efc0349a0409afb"
+    },
+    {
+      "name": "guards",
+      "args": [
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "scripts/ci-scope.test.ts",
+        "scripts/ci-workflow.test.ts",
+        "scripts/testing/verification-docs.test.ts",
+        "scripts/testing/file-size-ratchet.test.ts",
+        "--reporter=dot"
+      ],
+      "startedAt": "2026-10-20T06:57:08.284Z",
+      "finishedAt": "2026-10-20T06:57:23.980Z",
+      "exitCode": 0,
+      "signal": null,
+      "log": "guards.log",
+      "logSha256": "465ed76247a7e6d98de32688a91bbe5f983643d47b6e439f5701ae6b968505ba"
+    },
+    {
+      "name": "client-shared",
+      "args": [
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src",
+        "shared",
+        "--reporter=dot"
+      ],
+      "startedAt": "2026-10-20T06:56:11.712Z",
+      "finishedAt": "2026-10-20T07:03:29.759Z",
+      "exitCode": 0,
+      "signal": null,
+      "log": "client-shared.log",
+      "logSha256": "cd95f24956f921320a977c5ad078037515c90e20e6832844bd3aa5a46703bd3f"
+    }
+  ],
+  "after": {
+    "files": 2960,
+    "sha256": "5e48c941d6047e08022d887975c70e8e4f34d36f213ac534e7924c5810b193a1"
+  },
+  "sourceUnchanged": true,
+  "finishedAt": "2026-10-20T07:03:30.124Z",
+  "passed": true
+}

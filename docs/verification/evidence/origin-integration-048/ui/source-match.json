@@ -1,0 +1,292 @@
+{
+  "recordedAt": "2026-10-20T07:22:43.6771648Z",
+  "source": "86b9326afd81d277117ec953b7a9b70caed07d07",
+  "currentHead": "86b9326afd81d277117ec953b7a9b70caed07d07",
+  "bindingCount": 47,
+  "allMatch": true,
+  "qualification": "Raw bytes match root2 source manifest at archive time; final docs-only HEAD equivalence remains root-owned.",
+  "files": [
+    {
+      "path": "package.json",
+      "bytes": 8036,
+      "sha256": "1096d2df9032b0c0db83cb3f5544e30f18f54b667652437a3ba376fa0c0980b1",
+      "matches": true
+    },
+    {
+      "path": "vite.config.ts",
+      "bytes": 3202,
+      "sha256": "d31854023c8a35a6cfe2099add258ba9098bca3d53b8668b86b6a3752914973a",
+      "matches": true
+    },
+    {
+      "path": "src/styles.css",
+      "bytes": 91990,
+      "sha256": "0f9f682d0c20705e7c66b2550da1f2af8d9e0dffc159a00395dd86b8f3e0f8da",
+      "matches": true
+    },
+    {
+      "path": "src/state/store.tsx",
+      "bytes": 161877,
+      "sha256": "514ff94e38f859de5fd6045d164c11adbf278bb1510ce4d2a86847ac777a9166",
+      "matches": true
+    },
+    {
+      "path": "src/components/ChatView.tsx",
+      "bytes": 74904,
+      "sha256": "16ab4e49e0d1d318d9f4329b93fb37820666542991dbbbae57fffb01c621eafe",
+      "matches": true
+    },
+    {
+      "path": "src/components/ChatUsagePopover.tsx",
+      "bytes": 6383,
+      "sha256": "3ae9b1436a38307389d6920b8a74aa0f6c98b8b65fd71a147544187d23eb5f69",
+      "matches": true
+    },
+    {
+      "path": "src/components/ModelHostingSettings.tsx",
+      "bytes": 14267,
+      "sha256": "cb246bd0dde5f52bd25896e5755d6761948ad5e4370d0f1d51c7b3240066c058",
+      "matches": true
+    },
+    {
+      "path": "src/components/bot-settings/ModelSection.tsx",
+      "bytes": 3680,
+      "sha256": "1ae7f42129255cb4d71d2dd2c7454cadd1e56a986337c3d95b225ae668b78643",
+      "matches": true
+    },
+    {
+      "path": "src/components/ContextWarning.tsx",
+      "bytes": 4432,
+      "sha256": "178c44290ae783d96ed7dc2ee6a2a0687ede3863c93f44f431b91b66d840e720",
+      "matches": true
+    },
+    {
+      "path": "src/components/AgentBudgetPill.tsx",
+      "bytes": 6808,
+      "sha256": "0ce554385105687b433864afade832f7a9fda20fe435fa51b14ccc94fb36b4d0",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastPage.tsx",
+      "bytes": 16113,
+      "sha256": "a78124c29ec2efd805856b011826d2b2f8bf75a1718fe6bc7f06fe4b0dda68f7",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastComposer.tsx",
+      "bytes": 18275,
+      "sha256": "c7d8e316a5a50a4d5166901d2cc54e4f49dd10da0cb35db1286ca546aa90d27a",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-broadcast/CampaignsView.tsx",
+      "bytes": 24459,
+      "sha256": "7919408ae7a9d23d72efbd18aecc4bb9603c141de0e0ea4dca9abeb89c9b2757",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-broadcast/CampaignDialogs.tsx",
+      "bytes": 11121,
+      "sha256": "677d9451cdc5fcfc98aa1fab4a2aca1b5b108b01feb455b857478280c8ca93c1",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-broadcast/campaign-model.ts",
+      "bytes": 5116,
+      "sha256": "105119cdd0f9c69da43768272de28b5e93936042f11257a16eaafedc14cb5520",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pipeline/PipelinePage.tsx",
+      "bytes": 30882,
+      "sha256": "a37d96eb31835f851caa03864ff10886bf17f22ab28d106e69d6891af2b0371b",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pipeline/LeadDrawer.tsx",
+      "bytes": 29950,
+      "sha256": "2f3434f150d7c6063410c5c5d57d9f15999354e92e77d57509f528e359484220",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pipeline/SequencePanel.tsx",
+      "bytes": 11044,
+      "sha256": "f13c57d41894a0531cd4b32fd8167454f8bc2f67eb47189792dca47f6f982526",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pipeline/LeadInsight.tsx",
+      "bytes": 3495,
+      "sha256": "e15c2cb9b58a4eb4b10a83429a0b37f05a157248a704b567a7dd1f6065d4eb31",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pipeline/PipelineSettingsPanels.tsx",
+      "bytes": 12093,
+      "sha256": "8f7a706b7a6e8f2074c8817f025ee1c8e4091a65dbb4e19339288b5e02b2a5e4",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pipeline/pipeline-model.ts",
+      "bytes": 6525,
+      "sha256": "54d9a963996e51700698358b2b703863ff6faa3f7e6a5cb659d014fe7cda457c",
+      "matches": true
+    },
+    {
+      "path": "src/components/OriginDraw.tsx",
+      "bytes": 8534,
+      "sha256": "6d53b1384edee5f18fa7182be96e4952b6e246225778b48e024f06ea66896051",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pages/DrawingCanvas.tsx",
+      "bytes": 23410,
+      "sha256": "17c09bfa06d8c46d801e1cb5c162d121e30dc3f991695dfd5a5d28354b02da3a",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pages/canvas/CanvasEditor.tsx",
+      "bytes": 47918,
+      "sha256": "ab619c28c89892dcee328b1ff972025dadc5365077589f95f886318c7fb94afa",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pages/canvas/Inspector.tsx",
+      "bytes": 25897,
+      "sha256": "bf7f5c604025da2a9b058fc480d4a6c48408fc359a303f23b3302cfab71faa5f",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pages/canvas/PagesMenu.tsx",
+      "bytes": 6737,
+      "sha256": "04ca1eac29ed74e7d02339c647546d7a0c1ff0466603686858662b844f9925fb",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pages/canvas/PublishSection.tsx",
+      "bytes": 9590,
+      "sha256": "4f338eca5f60b1d9206b7148fd08563cb794d839d221f7cd68077dd43ebb6188",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pages/canvas/PageInspector.tsx",
+      "bytes": 4554,
+      "sha256": "c8eeff95be03c77c837310e196f4f8d845adbc9e73530cfa8e3d17b81251ac93",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-org/OrgPage.tsx",
+      "bytes": 8045,
+      "sha256": "ecec20d26ea589f6af1153e5c07054589a0f9d57a8a609e8e15ca8b51a279355",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-org/BudgetEditor.tsx",
+      "bytes": 3606,
+      "sha256": "4221f107ac7fcc56191fb768aeb7eafd249d43226ba1ef05544ee9bb173252cb",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pages/ChiefHeartbeatCard.tsx",
+      "bytes": 4466,
+      "sha256": "81305ea7f11b0d2bf857aa45ba5ccf380b5ce4cdf50865cc88f8e47685b213b9",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pages/CallActionItems.tsx",
+      "bytes": 5347,
+      "sha256": "470db64f174d897c706ca016e573b972c883ce2dc04f8d13f6837ee95bfa9eb1",
+      "matches": true
+    },
+    {
+      "path": "shared/origin-campaigns.ts",
+      "bytes": 3839,
+      "sha256": "b8affe86999cec676d07a7a9c92863991d12a4d6a3409914723e3094f4de7f89",
+      "matches": true
+    },
+    {
+      "path": "shared/origin-pipeline.ts",
+      "bytes": 11496,
+      "sha256": "805baa81c11d5c24098274afacf78daae1ae97ba1fe044e5b09e63452e5cbc1b",
+      "matches": true
+    },
+    {
+      "path": "shared/origin-pipeline-score.ts",
+      "bytes": 5102,
+      "sha256": "df3a1de8b688c2cf9785b327f70733124673cdff7301365ea16225253c266955",
+      "matches": true
+    },
+    {
+      "path": "shared/canvas-page.ts",
+      "bytes": 20143,
+      "sha256": "3b008d5b26ddd108b987bc53bab9e39c3819f86eabdd008aeaa58966e0ac0802",
+      "matches": true
+    },
+    {
+      "path": "shared/canvas-scene.ts",
+      "bytes": 25894,
+      "sha256": "cd77bb71db83b9056850b0aad805c090232aa1fbeef5b119b2ee073b01b38d34",
+      "matches": true
+    },
+    {
+      "path": "shared/canvas-ops.ts",
+      "bytes": 16778,
+      "sha256": "4cf3d54d684f31dd0ce95e61aa3cd3bfb642327ab73c98e70d6b9569e9083837",
+      "matches": true
+    },
+    {
+      "path": "shared/origin-releases.ts",
+      "bytes": 21904,
+      "sha256": "1fc64d0b5e74d80c238be2cd891eead69dde054ca4ee8640f1412ed5839771b0",
+      "matches": true
+    },
+    {
+      "path": "scripts/testing/preview-fixture.ts",
+      "bytes": 6715,
+      "sha256": "7360c759e5e32327f507b94476a9757c3a3abb36ab7a36c30feca3f083e58e08",
+      "matches": true
+    },
+    {
+      "path": "scripts/testing/origin-pages-cloud.ts",
+      "bytes": 7773,
+      "sha256": "e614ed5e98cf390cff0bfaec0fa084187bb526d0d68c0ad267845c08b1ab528b",
+      "matches": true
+    },
+    {
+      "path": "scripts/testing/origin-chief-ops-cloud.ts",
+      "bytes": 1930,
+      "sha256": "16265080e40a63fc418a04fbea7f3028df1ca6eac4d0922366782625e516a5b1",
+      "matches": true
+    },
+    {
+      "path": "scripts/testing/origin-chief-ops-preview.tsx",
+      "bytes": 5210,
+      "sha256": "16e93a0fcacae1664d728c86b0a4e907b262619645643accc411c12e67b88cbf",
+      "matches": true
+    },
+    {
+      "path": "scripts/testing/origin-campaigns-preview.tsx",
+      "bytes": 2172,
+      "sha256": "00e27d38967f6b108ac23bd0694888657397d64f1a3137b92d7681179405649f",
+      "matches": true
+    },
+    {
+      "path": "scripts/testing/origin-pipeline-preview.tsx",
+      "bytes": 1409,
+      "sha256": "a9f3a6b870755d235841f13508434b5c7f04a5a34dc1c2e0cdddf2ee9b6570c5",
+      "matches": true
+    },
+    {
+      "path": "scripts/testing/origin-published-pages-preview.tsx",
+      "bytes": 1212,
+      "sha256": "97fe30480b776868da1b8446300f9a9c62d9f254ce00fe58c513b285c09350e1",
+      "matches": true
+    },
+    {
+      "path": "src/components/origin-pages/canvas/Toolbar.tsx",
+      "bytes": 7463,
+      "sha256": "f28072544002b1a24190005bc7bb7bd5dd80a26312c756494b05215fd97a57df",
+      "matches": true
+    }
+  ]
+}

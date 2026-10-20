@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "status": "passed-working-merge",
+  "finalCommitBindingPending": true,
+  "checkedAt": "2026-10-20T06:55:06.916Z",
+  "sources": {
+    "previous032": "5aafbf02ab2ded075d2c75955419f35a45cce99a",
+    "incomingPublished040": "f76cbe9b8019b648bb08f9125daefe35e6625185"
+  },
+  "releaseIdentity": {
+    "tag": "origin-v0.4.0",
+    "peeledSource": "f76cbe9b8019b648bb08f9125daefe35e6625185",
+    "publishedAt": "2026-10-20T06:37:29Z",
+    "pullRequest": 2,
+    "pullRequestState": "open",
+    "base": "origin-integration"
+  },
+  "conflictsResolved": [
+    "backend/convex/pipeline.ts",
+    "server/origin-call-agent.ts",
+    "server/origin-pipeline.ts"
+  ],
+  "extraApprovedFixFiles": [
+    "backend/convex/budgets.ts",
+    "backend/convex/budgets.access.test.ts",
+    "backend/convex/modelHosts.ts",
+    "backend/convex/modelHosts.test.ts"
+  ],
+  "stagedByThisAgent": false,
+  "committedByThisAgent": false,
+  "findings": [
+    {
+      "severity": "P2",
+      "file": "backend/convex/budgets.ts",
+      "scenario": "Workspace outsider supplies known private-project agent ID and receives agent/project budget names and amounts.",
+      "fix": "Require project membership in addition to workspace membership; retain owner/admin and project-viewer access.",
+      "redFailures": 1
+    },
+    {
+      "severity": "budget composition gap",
+      "file": "backend/convex/modelHosts.ts",
+      "scenario": "Teammate-hosted requests bypass the incoming monthly agent/project cap and do not record hosted spend.",
+      "fix": "Monthly checks at admission/offer/claim/start; receipt accounting under existing authenticated generation fence; replays cannot charge twice. Owner daily caps, paid consent and source grants remain enforced separately.",
+      "redFailures": 4
+    }
+  ],
+  "schema": {
+    "tables": {
+      "source032": 68,
+      "source040": 73,
+      "merged": 75
+    },
+    "validatorsAndIndexesPreservedFromBothParents": true,
+    "incomingAloneRegressions": {
+      "removedTables": [
+        "modelHostSources",
+        "modelHostExecutions"
+      ],
+      "narrowedTables": [
+        "agentHosts",
+        "workspaceAgentRuns"
+      ],
+      "removedIndexes": [
+        "agentHosts.by_ownerUserId_and_teamId_and_deviceId"
+      ],
+      "addedTables": [
+        "campaigns",
+        "pipelineSequences",
+        "publishedPages",
+        "agentBudgets",
+        "budgetSpend",
+        "chiefHeartbeats",
+        "callNotes"
+      ]
+    },
+    "migrationsRequired": []
+  },
+  "generatedApiModuleClosure": {
+    "source032": {
+      "source": "5aafbf02ab2ded075d2c75955419f35a45cce99a",
+      "modules": 61,
+      "removed": [],
+      "added": [
+        "budgets",
+        "callNotes",
+        "campaignTables",
+        "campaigns",
+        "chiefHeartbeat",
+        "chiefOpsTables",
+        "lib/pipelineCore",
+        "pages",
+        "pagesHttp",
+        "pagesTables",
+        "pipelineInbound",
+        "pipelineSequences"
+      ]
+    },
+    "source040": {
+      "source": "f76cbe9b8019b648bb08f9125daefe35e6625185",
+      "modules": 71,
+      "removed": [],
+      "added": [
+        "modelHosts",
+        "modelHostsTables"
+      ]
+    }
+  },
+  "tests": {
+    "fullBackend": {
+      "files": 35,
+      "passed": 293
+    },
+    "finalFocusedBackend": {
+      "files": 3,
+      "passed": 37,
+      "includesLastStartRaceAssertion": true
+    },
+    "callPipelineHostLeaves": {
+      "files": 3,
+      "passed": 45
+    },
+    "backendTypecheck": "passed",
+    "ownedLint": "passed"
+  },
+  "httpReview": {
+    "added": [
+      "POST /pipeline/twilio",
+      "POST /pipeline/brevo",
+      "GET /p/*",
+      "POST /p/*"
+    ],
+    "boundedReview": "Signed Twilio or separate Brevo secret/token; bounded request bodies; page rendering limited to published content; lead form uses existing capture token/rate limits. No additional proven P1 found.",
+    "externalAcceptanceClaimed": false
+  },
+  "files": {
+    "backend/convex/pipeline.ts": "bc5c9774c528885c2cae6386020c94266cd102c292449bf499fa02f449477a76",
+    "server/origin-call-agent.ts": "e213e65571631bc21e67eb3cfc12633bdb8733b27b5c4ae82f447342ab420c9d",
+    "server/origin-pipeline.ts": "bd607e60dff8860160c57338d2c987e670d9cf6af603a40dbd128cc905a84a7c",
+    "backend/convex/budgets.ts": "df66505194beb29a7896208e6383f1027f7a6b8effd828d23bf1baaeeb05652d",
+    "backend/convex/budgets.access.test.ts": "5c7901cd84d4b674153abcbc5c5e363798a5a60f9a8382fb90021c2a0cc34611",
+    "backend/convex/modelHosts.ts": "27cdcb0300626ed9b67dec11ef2667026c2f741266a42af82f19da56c7b13480",
+    "backend/convex/modelHosts.test.ts": "8d92da4cda80477ff758b27660103eee9c7d0ec354ca587dfebb52f9511cd2f9"
+  },
+  "evidence": {
+    "budgets-access-red.log": "704f3fa032df8790243d770df9002e230ba21c95686838896352fa40e793587f",
+    "hosted-monthly-red.log": "03d061e368877278a99044214ad424789dff0663ac380b9f038b0f976ed2893b",
+    "backend-040-monthly-access-green.log": "fa8dc5049818d688a68d90edecbe7aa215b053fb41607e97d99b26de9f0ef23f",
+    "backend-040-tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend-040-full.log": "42ec7a97c6309976f1d8af891450bcefa3f36324f3ae06cdf77bbe85dd0c7f7f",
+    "040-leaf-merge-tests.log": "709b20ae52007d021f8ab9961b859e7ce9b956d254292a1c577073434bd41678",
+    "040-owned-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "040-schema-comparison.json": "6b927248becd6d96eb634adad5994bd7a1cdaa1d56bd8742353a21bd1b8bc0cc"
+  },
+  "productionOperations": false,
+  "productionDataUsed": false,
+  "protectedServicesTouched": false,
+  "limits": [
+    "Source is an uncommitted merge; final immutable-source binding, complete CI and delivery admission remain with root.",
+    "No current deployed backend/schema or production data was queried.",
+    "All prior032 delivery operators remain unadmitted and must not execute."
+  ]
+}

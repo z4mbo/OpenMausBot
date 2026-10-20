@@ -1,0 +1,221 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+stderr | src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks Email while connection status is unknown
+TypeError: Cannot read properties of undefined (reading 'map')
+    at Steps (C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/src/components/origin-pipeline/SequencePanel.tsx:73:23)
+    at Object.react_stack_bottom_frame (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+An error occurred in the <Steps> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks Text while connection status is unknown
+TypeError: Cannot read properties of undefined (reading 'map')
+    at Steps (C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/src/components/origin-pipeline/SequencePanel.tsx:73:23)
+    at Object.react_stack_bottom_frame (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+An error occurred in the <Steps> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks WhatsApp while connection status is unknown
+TypeError: Cannot read properties of undefined (reading 'map')
+    at Steps (C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/src/components/origin-pipeline/SequencePanel.tsx:73:23)
+    at Object.react_stack_bottom_frame (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+An error occurred in the <Steps> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks Call while connection status is unknown
+TypeError: Cannot read properties of undefined (reading 'map')
+    at Steps (C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/src/components/origin-pipeline/SequencePanel.tsx:73:23)
+    at Object.react_stack_bottom_frame (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+An error occurred in the <Steps> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks AI call while connection status is unknown
+TypeError: Cannot read properties of undefined (reading 'map')
+    at Steps (C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/src/components/origin-pipeline/SequencePanel.tsx:73:23)
+    at Object.react_stack_bottom_frame (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+An error occurred in the <Steps> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > keeps local notes available while connection status is unknown
+TypeError: Cannot read properties of undefined (reading 'map')
+    at Steps (C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/src/components/origin-pipeline/SequencePanel.tsx:73:23)
+    at Object.react_stack_bottom_frame (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+An error occurred in the <Steps> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > keeps known disconnected email unavailable and explains how to connect it
+TypeError: Cannot read properties of undefined (reading 'map')
+    at Steps (C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/src/components/origin-pipeline/SequencePanel.tsx:73:23)
+    at Object.react_stack_bottom_frame (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+An error occurred in the <Steps> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > allows a complete email when the connection is confirmed
+TypeError: Cannot read properties of undefined (reading 'map')
+    at Steps (C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/src/components/origin-pipeline/SequencePanel.tsx:73:23)
+    at Object.react_stack_bottom_frame (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\aless\Documents\Origin-bugfix\node_modules\.pnpm\react-dom@19.2.8_react@19.2.8\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+An error occurred in the <Steps> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+ ❯ src/components/origin-pipeline/LeadDrawer.readiness.test.ts (8 tests | 8 failed) 250ms
+     × blocks Email while connection status is unknown 36ms
+     × blocks Text while connection status is unknown 16ms
+     × blocks WhatsApp while connection status is unknown 35ms
+     × blocks Call while connection status is unknown 31ms
+     × blocks AI call while connection status is unknown 47ms
+     × keeps local notes available while connection status is unknown 36ms
+     × keeps known disconnected email unavailable and explains how to connect it 23ms
+     × allows a complete email when the connection is confirmed 24ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks Email while connection status is unknown
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks Text while connection status is unknown
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks WhatsApp while connection status is unknown
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks Call while connection status is unknown
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > blocks AI call while connection status is unknown
+TypeError: Cannot read properties of null (reading 'querySelectorAll')
+ ❯ prepare src/components/origin-pipeline/LeadDrawer.readiness.test.ts:37:27
+     35| function prepare(mode: string): HTMLButtonElement {
+     36|   const section = host.querySelector<HTMLElement>('section[aria-label=…
+     37|   const tab = [...section.querySelectorAll<HTMLButtonElement>('[role="…
+       |                           ^
+     38|   flushSync(() => tab.click());
+     39|   for (const field of section.querySelectorAll<HTMLInputElement | HTML…
+ ❯ src/components/origin-pipeline/LeadDrawer.readiness.test.ts:52:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > keeps local notes available while connection status is unknown
+TypeError: Cannot read properties of null (reading 'querySelectorAll')
+ ❯ prepare src/components/origin-pipeline/LeadDrawer.readiness.test.ts:37:27
+     35| function prepare(mode: string): HTMLButtonElement {
+     36|   const section = host.querySelector<HTMLElement>('section[aria-label=…
+     37|   const tab = [...section.querySelectorAll<HTMLButtonElement>('[role="…
+       |                           ^
+     38|   flushSync(() => tab.click());
+     39|   for (const field of section.querySelectorAll<HTMLInputElement | HTML…
+ ❯ src/components/origin-pipeline/LeadDrawer.readiness.test.ts:58:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > keeps known disconnected email unavailable and explains how to connect it
+TypeError: Cannot read properties of null (reading 'querySelectorAll')
+ ❯ prepare src/components/origin-pipeline/LeadDrawer.readiness.test.ts:37:27
+     35| function prepare(mode: string): HTMLButtonElement {
+     36|   const section = host.querySelector<HTMLElement>('section[aria-label=…
+     37|   const tab = [...section.querySelectorAll<HTMLButtonElement>('[role="…
+       |                           ^
+     38|   flushSync(() => tab.click());
+     39|   for (const field of section.querySelectorAll<HTMLInputElement | HTML…
+ ❯ src/components/origin-pipeline/LeadDrawer.readiness.test.ts:63:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/components/origin-pipeline/LeadDrawer.readiness.test.ts > Pipeline outreach connections > allows a complete email when the connection is confirmed
+TypeError: Cannot read properties of null (reading 'querySelectorAll')
+ ❯ prepare src/components/origin-pipeline/LeadDrawer.readiness.test.ts:37:27
+     35| function prepare(mode: string): HTMLButtonElement {
+     36|   const section = host.querySelector<HTMLElement>('section[aria-label=…
+     37|   const tab = [...section.querySelectorAll<HTMLButtonElement>('[role="…
+       |                           ^
+     38|   flushSync(() => tab.click());
+     39|   for (const field of section.querySelectorAll<HTMLInputElement | HTML…
+ ❯ src/components/origin-pipeline/LeadDrawer.readiness.test.ts:69:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+
+ Test Files  1 failed | 12 passed (13)
+      Tests  8 failed | 109 passed (117)
+   Start at  08:49:42
+   Duration  15.72s (transform 3.87s, setup 2.39s, import 9.57s, tests 1.07s, environment 697ms)
+
