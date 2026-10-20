@@ -1,0 +1,251 @@
+{
+  "scope": "Actual ProjectAgentsPage/ChatView/StoreProvider and disposable native server/fake CLI coordinator. Two browser views share that isolated server. Baseline transforms only the exact previous ProjectAgentsPage component; surrounding source and synthetic backend are current. No real provider semantics, cloud hosting, full App or packaged desktop claim.",
+  "checkedAt": "2026-10-19T21:44:25.399Z",
+  "baseline": {
+    "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+    "file": "src/components/ProjectAgentsPage.tsx",
+    "sha256": "28446999149990e7005ba84447e55de87961cc8c0b580e56372f167e36d68208"
+  },
+  "sourceBindings": [
+    {
+      "name": "src/components/ProjectAgentsPage.tsx",
+      "sha256": "bc0da387b9209d91d8f2e6026f10b49a2e6af93e0289288652ce1a419ccf938f"
+    },
+    {
+      "name": "src/components/AgentThreads.tsx",
+      "sha256": "1d9eebdd75ed407267d033ee568f0f1c0f0284ba3c864484d6f48c5b89449827"
+    },
+    {
+      "name": "src/lib/origin-agent-navigation.ts",
+      "sha256": "a1af6d3643a57e5dc20ff719841c05a538d062406f5b36cdcb9ddd7f8f710548"
+    },
+    {
+      "name": "src/state/store.tsx",
+      "sha256": "0d51034069faf7c33f744e14582894353367f1f6bc41430a4346bf4d0cbe4048"
+    },
+    {
+      "name": "src/state/thread-navigation.ts",
+      "sha256": "1dba4724bceffd6db9c15de765125588d7958336836d3213c3ad817960912a17"
+    },
+    {
+      "name": "shared/wire.ts",
+      "sha256": "97395362c195ddb0462e87afa612853f90d5ef3097f6337c7796e8fed5b3c469"
+    },
+    {
+      "name": "server/delegation-thread.ts",
+      "sha256": "eb63c754afb25427c5081e82e3abb4d9dbeb45b62e5049487c94d8d83a6cea85"
+    },
+    {
+      "name": "server/delegation-notification.ts",
+      "sha256": "de01f45a324fbe93922e60d26322ca2aa42fe6d94b54c929317f9bdd4f3d6bcc"
+    }
+  ],
+  "proven": [
+    "Project Chief is absent from specialist rows; delegated and independent threads are listed.",
+    "Notification opens the exact child transcript; Project conversation returns to its exact parent with inline delegation.",
+    "Chief A follow-up reused the same specialist child A while a second browser remained on direct B.",
+    "Direct B retains its own user message and one settled turn; parent follow-up does not appear there.",
+    "New specialist thread creates without leaving the selected project.",
+    "375px light-theme list and child chat have no horizontal overflow.",
+    "Mobile notification opens chat directly; Back shows the list; the same notification reopens chat.",
+    "Each new delegated request emits one exact-child notification; parent resume does not duplicate it."
+  ],
+  "fixture": {
+    "chiefId": "4c974afd-0839-47ca-89bd-e0f52987f558",
+    "researcherId": "31e9399b-9cf4-4871-9e61-855c140a0081",
+    "parentThreadId": "9c942bd8-a695-4460-9b26-271f2097d0b0",
+    "childThreadId": "a99a9ac2-5c73-4f84-a16d-00ac3e956ac7",
+    "directThreadId": "70f3899c-36a7-4249-899b-62bf410162f7"
+  },
+  "persisted": {
+    "childTask": {
+      "threadId": "a99a9ac2-5c73-4f84-a16d-00ac3e956ac7",
+      "title": "Research the project navigation",
+      "createdAt": 1792445553871,
+      "updatedAt": 1792446066629,
+      "openedBy": {
+        "botId": "4c974afd-0839-47ca-89bd-e0f52987f558",
+        "name": "Origin",
+        "threadId": "9c942bd8-a695-4460-9b26-271f2097d0b0",
+        "at": 1792445553871,
+        "kind": "work",
+        "continuity": true
+      },
+      "approvalMode": "full",
+      "autoApprove": false,
+      "alwaysAllow": [],
+      "unread": false,
+      "activity": "idle",
+      "busy": false,
+      "lastThreadOrderAt": 1792446066618,
+      "cwd": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-DLAxTV\\task-workspaces\\31e9399b-9cf4-4871-9e61-855c140a0081\\a99a9ac2-5c73-4f84-a16d-00ac3e956ac7",
+      "usage": {
+        "input": 20,
+        "output": 10,
+        "costUsd": null,
+        "turns": 2,
+        "lastTurn": {
+          "input": 10,
+          "output": 5,
+          "costUsd": null
+        }
+      },
+      "closedBy": {
+        "botId": "4c974afd-0839-47ca-89bd-e0f52987f558",
+        "name": "Origin",
+        "at": 1792446066645
+      },
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "followsBotModel": true,
+      "waitingForTeammates": false
+    },
+    "directTask": {
+      "threadId": "70f3899c-36a7-4249-899b-62bf410162f7",
+      "title": "Independent B",
+      "createdAt": 1792445554910,
+      "updatedAt": 1792445555191,
+      "approvalMode": "full",
+      "autoApprove": false,
+      "alwaysAllow": [],
+      "unread": false,
+      "activity": "idle",
+      "busy": false,
+      "lastThreadOrderAt": 1792445555184,
+      "cwd": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-DLAxTV\\task-workspaces\\31e9399b-9cf4-4871-9e61-855c140a0081\\70f3899c-36a7-4249-899b-62bf410162f7",
+      "usage": {
+        "input": 10,
+        "output": 5,
+        "costUsd": null,
+        "turns": 1,
+        "lastTurn": {
+          "input": 10,
+          "output": 5,
+          "costUsd": null
+        }
+      },
+      "lastReadMessageId": "cc45cf65-27a0-4fbd-907b-32388867de94",
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "followsBotModel": true,
+      "waitingForTeammates": false
+    },
+    "linkedRequests": [
+      {
+        "id": "b78f6164-85fe-4716-9b8d-b3fb45cf6fd4",
+        "at": 1792445553984,
+        "parentId": null,
+        "role": "bot",
+        "kind": "text",
+        "roomRequest": {
+          "id": "2a6e1ef8-1ed7-4b5c-980c-a211bebcf75f",
+          "phase": "request"
+        },
+        "from": {
+          "botId": "4c974afd-0839-47ca-89bd-e0f52987f558",
+          "name": "Origin",
+          "color": "blue"
+        },
+        "text": "@Researcher Research the project navigation"
+      },
+      {
+        "id": "e2d22f14-d41b-4fe8-b7d3-4af355fb8571",
+        "at": 1792446066284,
+        "parentId": "5fced0b9-cc80-4be5-a609-656ca201a230",
+        "role": "bot",
+        "kind": "text",
+        "roomRequest": {
+          "id": "02adc717-83e5-4d00-ab84-c8e1227ab4f9",
+          "phase": "request"
+        },
+        "from": {
+          "botId": "4c974afd-0839-47ca-89bd-e0f52987f558",
+          "name": "Origin",
+          "color": "blue"
+        },
+        "text": "@Researcher Research the project navigation"
+      }
+    ],
+    "directMessages": [
+      {
+        "id": "2af51197-8651-42f7-9f77-f84e74bde81c",
+        "at": 1792445554922,
+        "parentId": null,
+        "role": "user",
+        "kind": "text",
+        "text": "This is an independent direct conversation B.",
+        "sendId": "cli-4mtAYGvUqbAQKed5",
+        "requestPending": false
+      },
+      {
+        "id": "07dbb229-a668-4579-915b-6ab15c425fc9",
+        "at": 1792445555173,
+        "parentId": "2af51197-8651-42f7-9f77-f84e74bde81c",
+        "role": "bot",
+        "kind": "text",
+        "text": "This direct conversation is independent of the project research.",
+        "turnId": "6f24478c-1c82-422a-a1f7-394a63aa0969",
+        "requestMessageId": "2af51197-8651-42f7-9f77-f84e74bde81c",
+        "turnTerminal": true,
+        "turnCompletedAt": 1792445555184,
+        "turnSucceeded": true
+      },
+      {
+        "id": "cc45cf65-27a0-4fbd-907b-32388867de94",
+        "at": 1792445555191,
+        "parentId": "07dbb229-a668-4579-915b-6ab15c425fc9",
+        "role": "bot",
+        "kind": "digest",
+        "text": "[digest] · no tool activity observed in this turn · reply: This direct conversation is independent of the project research.",
+        "digest": {
+          "turnId": "6f24478c-1c82-422a-a1f7-394a63aa0969",
+          "botId": "31e9399b-9cf4-4871-9e61-855c140a0081",
+          "threadId": "70f3899c-36a7-4249-899b-62bf410162f7",
+          "at": 1792445555191,
+          "durationMs": 246,
+          "tools": [],
+          "toolCalls": 0,
+          "memory": [],
+          "reply": "This direct conversation is independent of the project research.",
+          "usage": {
+            "input": 10,
+            "output": 5,
+            "costUsd": null
+          },
+          "hookCoverage": "none"
+        },
+        "turnId": "6f24478c-1c82-422a-a1f7-394a63aa0969",
+        "requestMessageId": "2af51197-8651-42f7-9f77-f84e74bde81c",
+        "turnSucceeded": true
+      }
+    ],
+    "startedNotifications": [
+      {
+        "id": "397eebe8-7921-41aa-a891-5771fa46f0db",
+        "at": 1792446066285,
+        "kind": "delegation-started",
+        "botId": "31e9399b-9cf4-4871-9e61-855c140a0081",
+        "botName": "Researcher",
+        "threadId": "a99a9ac2-5c73-4f84-a16d-00ac3e956ac7",
+        "title": "Researcher started delegated work",
+        "body": "Research the project navigation",
+        "read": false
+      },
+      {
+        "id": "a46889fc-926c-40f0-8649-66ddc6ebc16f",
+        "at": 1792445553984,
+        "kind": "delegation-started",
+        "botId": "31e9399b-9cf4-4871-9e61-855c140a0081",
+        "botName": "Researcher",
+        "threadId": "a99a9ac2-5c73-4f84-a16d-00ac3e956ac7",
+        "title": "Researcher started delegated work",
+        "body": "Research the project navigation",
+        "read": false
+      }
+    ]
+  }
+}

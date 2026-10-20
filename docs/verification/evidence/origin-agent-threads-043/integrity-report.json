@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "folder": "origin-agent-threads-043",
+  "reviewedAt": "2026-10-20T04:33:42.843Z",
+  "reviewerScope": "Retained bytes, declared bindings and relative references only; no browser recapture or runtime re-execution.",
+  "browserProof": {
+    "file": "browser-proof.json",
+    "sha256": "fba7d54c7baf42df06c0882b9268eccec6e253cd6a0040320a86e7b80306a0f0",
+    "recordedTime": "2026-10-19T21:44:25.399Z",
+    "timeProvenance": "checkedAt field in retained proof",
+    "scope": "Actual ProjectAgentsPage/ChatView/StoreProvider and disposable native server/fake CLI coordinator. Two browser views share that isolated server. Baseline transforms only the exact previous ProjectAgentsPage component; surrounding source and synthetic backend are current. No real provider semantics, cloud hosting, full App or packaged desktop claim."
+  },
+  "recordedSourceBindings": {
+    "provenance": "Digests retained in browser-proof.json beside its checkedAt field. This review does not independently establish digest-computation time or browser startup identity.",
+    "entries": [
+      {
+        "name": "src/components/ProjectAgentsPage.tsx",
+        "recordedSha256": "bc0da387b9209d91d8f2e6026f10b49a2e6af93e0289288652ce1a419ccf938f",
+        "currentBytes": 12093,
+        "currentSha256": "bc0da387b9209d91d8f2e6026f10b49a2e6af93e0289288652ce1a419ccf938f",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "src/components/AgentThreads.tsx",
+        "recordedSha256": "1d9eebdd75ed407267d033ee568f0f1c0f0284ba3c864484d6f48c5b89449827",
+        "currentBytes": 1772,
+        "currentSha256": "1d9eebdd75ed407267d033ee568f0f1c0f0284ba3c864484d6f48c5b89449827",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "src/lib/origin-agent-navigation.ts",
+        "recordedSha256": "a1af6d3643a57e5dc20ff719841c05a538d062406f5b36cdcb9ddd7f8f710548",
+        "currentBytes": 2218,
+        "currentSha256": "a1af6d3643a57e5dc20ff719841c05a538d062406f5b36cdcb9ddd7f8f710548",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "src/state/store.tsx",
+        "recordedSha256": "0d51034069faf7c33f744e14582894353367f1f6bc41430a4346bf4d0cbe4048",
+        "currentBytes": 161637,
+        "currentSha256": "0d51034069faf7c33f744e14582894353367f1f6bc41430a4346bf4d0cbe4048",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "src/state/thread-navigation.ts",
+        "recordedSha256": "1dba4724bceffd6db9c15de765125588d7958336836d3213c3ad817960912a17",
+        "currentBytes": 5386,
+        "currentSha256": "1dba4724bceffd6db9c15de765125588d7958336836d3213c3ad817960912a17",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "shared/wire.ts",
+        "recordedSha256": "97395362c195ddb0462e87afa612853f90d5ef3097f6337c7796e8fed5b3c469",
+        "currentBytes": 42964,
+        "currentSha256": "902b640633a9062184485e563b17791660d9d7d9f68b1936d71698eb0068f47f",
+        "result": "current_source_drifted"
+      },
+      {
+        "name": "server/delegation-thread.ts",
+        "recordedSha256": "eb63c754afb25427c5081e82e3abb4d9dbeb45b62e5049487c94d8d83a6cea85",
+        "currentBytes": 3077,
+        "currentSha256": "eb63c754afb25427c5081e82e3abb4d9dbeb45b62e5049487c94d8d83a6cea85",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "server/delegation-notification.ts",
+        "recordedSha256": "de01f45a324fbe93922e60d26322ca2aa42fe6d94b54c929317f9bdd4f3d6bcc",
+        "currentBytes": 1197,
+        "currentSha256": "de01f45a324fbe93922e60d26322ca2aa42fe6d94b54c929317f9bdd4f3d6bcc",
+        "result": "matches_current_raw_bytes"
+      }
+    ]
+  },
+  "baseline": {
+    "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+    "file": "src/components/ProjectAgentsPage.tsx",
+    "sha256": "28446999149990e7005ba84447e55de87961cc8c0b580e56372f167e36d68208",
+    "gitObjectSha256": "28446999149990e7005ba84447e55de87961cc8c0b580e56372f167e36d68208",
+    "gitObjectBytes": 7102,
+    "result": "recorded_git_blob_matches",
+    "scope": "Only the recorded baseline component blob; not the surrounding app or runtime."
+  },
+  "previousManifest": {
+    "file": "manifest.json",
+    "entries": [
+      {
+        "name": "after-delegated-desktop-dark.png",
+        "recordedBytes": 42164,
+        "currentBytes": 42164,
+        "recordedSha256": "3f40a4989614f3831ed9ff690251fbf1c7390b1ec660f089403232c3e29f4b70",
+        "currentSha256": "3f40a4989614f3831ed9ff690251fbf1c7390b1ec660f089403232c3e29f4b70",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "after-direct-desktop-dark.png",
+        "recordedBytes": 36282,
+        "currentBytes": 36282,
+        "recordedSha256": "adbf48fe866c5c09faaa5fe53e1a5a431df8517a746931baa18b4cea7e2562dc",
+        "currentSha256": "adbf48fe866c5c09faaa5fe53e1a5a431df8517a746931baa18b4cea7e2562dc",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "agents-light-375.png",
+        "recordedBytes": 11893,
+        "currentBytes": 11893,
+        "recordedSha256": "466c65d095cb6a29fb624533ca5782f3e0d3805b3b7bcef7382516e3c916e0d5",
+        "currentSha256": "466c65d095cb6a29fb624533ca5782f3e0d3805b3b7bcef7382516e3c916e0d5",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "before-desktop-dark.png",
+        "recordedBytes": 32216,
+        "currentBytes": 32216,
+        "recordedSha256": "9f5268faef3b441ca4937bca4298c5f63a8282f1fce980cef1a26292a67b08ba",
+        "currentSha256": "9f5268faef3b441ca4937bca4298c5f63a8282f1fce980cef1a26292a67b08ba",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "browser-proof.json",
+        "recordedBytes": 9184,
+        "currentBytes": 9184,
+        "recordedSha256": "fba7d54c7baf42df06c0882b9268eccec6e253cd6a0040320a86e7b80306a0f0",
+        "currentSha256": "fba7d54c7baf42df06c0882b9268eccec6e253cd6a0040320a86e7b80306a0f0",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "console-review.json",
+        "recordedBytes": 1364,
+        "currentBytes": 1364,
+        "recordedSha256": "2560597db9464aa0c18b41d06c22ec6ce32c0c56f3fbd63b9c77fec4cf02d983",
+        "currentSha256": "2560597db9464aa0c18b41d06c22ec6ce32c0c56f3fbd63b9c77fec4cf02d983",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "delegated-light-375.png",
+        "recordedBytes": 29023,
+        "currentBytes": 29023,
+        "recordedSha256": "1abce6738e31abb1049bd6a7ecfc544a67da8ba30972374a22fd260d1a4f9eb3",
+        "currentSha256": "1abce6738e31abb1049bd6a7ecfc544a67da8ba30972374a22fd260d1a4f9eb3",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "direct-b-after-project-follow-up.png",
+        "recordedBytes": 36296,
+        "currentBytes": 36296,
+        "recordedSha256": "d854a4f33e4a39b0b4aeb425f652148f5f7e6b5777fbf5915066b7795a9fc57a",
+        "currentSha256": "d854a4f33e4a39b0b4aeb425f652148f5f7e6b5777fbf5915066b7795a9fc57a",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "new-independent-thread.png",
+        "recordedBytes": 31304,
+        "currentBytes": 31304,
+        "recordedSha256": "3c0d9f0642a462629b7119a4b40a74f93cf73ac611de54e4b77a92e94119d8b4",
+        "currentSha256": "3c0d9f0642a462629b7119a4b40a74f93cf73ac611de54e4b77a92e94119d8b4",
+        "result": "matches_current_raw_bytes"
+      },
+      {
+        "name": "same-notification-reopens-mobile.png",
+        "recordedBytes": 28989,
+        "currentBytes": 28989,
+        "recordedSha256": "0dbf677e84cd3528ef8fdd39db7383230fe1377dcb6527a89c1bb9bb655336b4",
+        "currentSha256": "0dbf677e84cd3528ef8fdd39db7383230fe1377dcb6527a89c1bb9bb655336b4",
+        "result": "matches_current_raw_bytes"
+      }
+    ]
+  },
+  "currentSourceInventory": {
+    "observedAt": "2026-10-20T04:33:42.843Z",
+    "gitHeadAtReview": "2a29a82702fef4f9b3b4c2c91e52fb3af72deab4",
+    "tree": "working-tree",
+    "captureTimeBinding": false,
+    "purpose": "Supplementary current-source inventory only. These hashes must not be presented as the source loaded when the screenshots were captured.",
+    "files": [
+      {
+        "name": "scripts/verify-origin-agent-threads.ts",
+        "bytes": 5622,
+        "sha256": "549fdb0ea73a67475d508567eddbaefa2900eb96ee59fa758ad368512d8664a6",
+        "present": true
+      },
+      {
+        "name": "scripts/testing/origin-agent-threads-preview.tsx",
+        "bytes": 2836,
+        "sha256": "cea6dfd44e908b459bfc18532598fb51d3a19a8a6f7632d5a982129cf4c9fe6c",
+        "present": true
+      },
+      {
+        "name": "src/components/ProjectAgentsPage.tsx",
+        "bytes": 12093,
+        "sha256": "bc0da387b9209d91d8f2e6026f10b49a2e6af93e0289288652ce1a419ccf938f",
+        "present": true
+      },
+      {
+        "name": "src/components/AgentThreads.tsx",
+        "bytes": 1772,
+        "sha256": "1d9eebdd75ed407267d033ee568f0f1c0f0284ba3c864484d6f48c5b89449827",
+        "present": true
+      },
+      {
+        "name": "src/lib/origin-agent-navigation.ts",
+        "bytes": 2218,
+        "sha256": "a1af6d3643a57e5dc20ff719841c05a538d062406f5b36cdcb9ddd7f8f710548",
+        "present": true
+      },
+      {
+        "name": "src/state/store.tsx",
+        "bytes": 161637,
+        "sha256": "0d51034069faf7c33f744e14582894353367f1f6bc41430a4346bf4d0cbe4048",
+        "present": true
+      },
+      {
+        "name": "src/state/thread-navigation.ts",
+        "bytes": 5386,
+        "sha256": "1dba4724bceffd6db9c15de765125588d7958336836d3213c3ad817960912a17",
+        "present": true
+      },
+      {
+        "name": "shared/wire.ts",
+        "bytes": 42964,
+        "sha256": "902b640633a9062184485e563b17791660d9d7d9f68b1936d71698eb0068f47f",
+        "present": true
+      },
+      {
+        "name": "server/delegation-thread.ts",
+        "bytes": 3077,
+        "sha256": "eb63c754afb25427c5081e82e3abb4d9dbeb45b62e5049487c94d8d83a6cea85",
+        "present": true
+      },
+      {
+        "name": "server/delegation-notification.ts",
+        "bytes": 1197,
+        "sha256": "de01f45a324fbe93922e60d26322ca2aa42fe6d94b54c929317f9bdd4f3d6bcc",
+        "present": true
+      }
+    ]
+  },
+  "originalFiles": [
+    {
+      "name": "after-delegated-desktop-dark.png",
+      "bytes": 42164,
+      "sha256": "3f40a4989614f3831ed9ff690251fbf1c7390b1ec660f089403232c3e29f4b70"
+    },
+    {
+      "name": "after-direct-desktop-dark.png",
+      "bytes": 36282,
+      "sha256": "adbf48fe866c5c09faaa5fe53e1a5a431df8517a746931baa18b4cea7e2562dc"
+    },
+    {
+      "name": "agents-light-375.png",
+      "bytes": 11893,
+      "sha256": "466c65d095cb6a29fb624533ca5782f3e0d3805b3b7bcef7382516e3c916e0d5"
+    },
+    {
+      "name": "before-desktop-dark.png",
+      "bytes": 32216,
+      "sha256": "9f5268faef3b441ca4937bca4298c5f63a8282f1fce980cef1a26292a67b08ba"
+    },
+    {
+      "name": "browser-proof.json",
+      "bytes": 9184,
+      "sha256": "fba7d54c7baf42df06c0882b9268eccec6e253cd6a0040320a86e7b80306a0f0"
+    },
+    {
+      "name": "console-review.json",
+      "bytes": 1364,
+      "sha256": "2560597db9464aa0c18b41d06c22ec6ce32c0c56f3fbd63b9c77fec4cf02d983"
+    },
+    {
+      "name": "delegated-light-375.png",
+      "bytes": 29023,
+      "sha256": "1abce6738e31abb1049bd6a7ecfc544a67da8ba30972374a22fd260d1a4f9eb3"
+    },
+    {
+      "name": "direct-b-after-project-follow-up.png",
+      "bytes": 36296,
+      "sha256": "d854a4f33e4a39b0b4aeb425f652148f5f7e6b5777fbf5915066b7795a9fc57a"
+    },
+    {
+      "name": "manifest.json",
+      "bytes": 1630,
+      "sha256": "432cb3650a53d6e4333c9ded9a01d6f77c045ae4821a769aa3b13a2b4fbe23d9"
+    },
+    {
+      "name": "new-independent-thread.png",
+      "bytes": 31304,
+      "sha256": "3c0d9f0642a462629b7119a4b40a74f93cf73ac611de54e4b77a92e94119d8b4"
+    },
+    {
+      "name": "same-notification-reopens-mobile.png",
+      "bytes": 28989,
+      "sha256": "0dbf677e84cd3528ef8fdd39db7383230fe1377dcb6527a89c1bb9bb655336b4"
+    }
+  ],
+  "images": [
+    {
+      "name": "after-delegated-desktop-dark.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 720,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "after-direct-desktop-dark.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 720,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "agents-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "before-desktop-dark.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 720,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "delegated-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "direct-b-after-project-follow-up.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 720,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "new-independent-thread.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 720,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "same-notification-reopens-mobile.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    }
+  ],
+  "referenceChecks": {
+    "originalManifestRelativeFiles": "checked entry by entry",
+    "recordedSourcePaths": "checked entry by entry",
+    "imageHeaders": "encoding and dimensions checked without re-rendering",
+    "markdown": "relative links generated from files confirmed present",
+    "gitTextAttribute": "\"docs\\\\verification\\\\evidence\\\\origin-agent-threads-043\\\\browser-proof.json\": text: unset",
+    "gitIndexOrCommitBytesVerified": false
+  },
+  "limitations": [
+    "No missing capture-time source bindings or timestamps were reconstructed.",
+    "A matching recorded binding proves raw file equality at review; it does not independently prove browser startup or complete runtime identity.",
+    "Current source drift is reported without changing original proof or historical manifest.",
+    "Retained screenshot filenames use .png, but their encoding is recorded from the bytes; no original was renamed or re-encoded.",
+    "Screenshots were not recaptured; pixel correctness, runtime behavior, native packages, real vendors and production are outside this integrity review."
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-20T04:33:42.843Z",
+  "scope": "Current raw evidence bytes; includes the integrity reports and excludes this manifest itself.",
+  "files": [
+    {
+      "name": "browser-proof.json",
+      "bytes": 1275,
+      "sha256": "abb0aded608818ee0949654e34b10ddf290c18497d05641bc06ba27eec38382a"
+    },
+    {
+      "name": "integrity-report.json",
+      "bytes": 6789,
+      "sha256": "66f485239b261fffd9b892b075d6139c96e7f4994d86c9af60cf6a79f2affdb5"
+    },
+    {
+      "name": "integrity-report.md",
+      "bytes": 2274,
+      "sha256": "9796876e725607c73f848d3d2343df1ef0a9ba86287c18e2465b58fdbce64fec"
+    },
+    {
+      "name": "member-after-reload.png",
+      "bytes": 21357,
+      "sha256": "d462a2e5adf722427e41c7b3ccdeaf1f2db009e50c9bfde571812b8e35153e65"
+    },
+    {
+      "name": "member-before.png",
+      "bytes": 21400,
+      "sha256": "985ad2f6ce1def7880a189a0291307b240562a2d08d5067bdfcf33dfc70145e6"
+    },
+    {
+      "name": "member-change-owner-live.png",
+      "bytes": 25185,
+      "sha256": "e9d9bbc7d07b9e7e0b9990af700353f0a250f19a175048979006aa8293ea0909"
+    },
+    {
+      "name": "member-read-only.png",
+      "bytes": 21223,
+      "sha256": "adb868c9037bb9c08f19a75bcc7b9831d459808c1c1451220614049921c4e065"
+    },
+    {
+      "name": "owner-after.png",
+      "bytes": 67736,
+      "sha256": "b7a4b8529c3117b16100bedbc70bac6a8eccab87d0a87dcdd7daf03a4452ea89"
+    },
+    {
+      "name": "owner-before.png",
+      "bytes": 25170,
+      "sha256": "1b7518971daa9624681a4f41ffb084198262ecd6c35aed2be151acb89465bd59"
+    },
+    {
+      "name": "persisted-after-drag.json",
+      "bytes": 1524,
+      "sha256": "7f1e5246a797a5f3c196cc9fd2478c7120b228389820e61978bbcea4c008dcd4"
+    }
+  ]
+}

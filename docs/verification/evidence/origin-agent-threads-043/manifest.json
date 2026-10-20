@@ -1,0 +1,54 @@
+{
+  "files": [
+    {
+      "name": "after-delegated-desktop-dark.png",
+      "size": 42164,
+      "sha256": "3f40a4989614f3831ed9ff690251fbf1c7390b1ec660f089403232c3e29f4b70"
+    },
+    {
+      "name": "after-direct-desktop-dark.png",
+      "size": 36282,
+      "sha256": "adbf48fe866c5c09faaa5fe53e1a5a431df8517a746931baa18b4cea7e2562dc"
+    },
+    {
+      "name": "agents-light-375.png",
+      "size": 11893,
+      "sha256": "466c65d095cb6a29fb624533ca5782f3e0d3805b3b7bcef7382516e3c916e0d5"
+    },
+    {
+      "name": "before-desktop-dark.png",
+      "size": 32216,
+      "sha256": "9f5268faef3b441ca4937bca4298c5f63a8282f1fce980cef1a26292a67b08ba"
+    },
+    {
+      "name": "browser-proof.json",
+      "size": 9184,
+      "sha256": "fba7d54c7baf42df06c0882b9268eccec6e253cd6a0040320a86e7b80306a0f0"
+    },
+    {
+      "name": "console-review.json",
+      "size": 1364,
+      "sha256": "2560597db9464aa0c18b41d06c22ec6ce32c0c56f3fbd63b9c77fec4cf02d983"
+    },
+    {
+      "name": "delegated-light-375.png",
+      "size": 29023,
+      "sha256": "1abce6738e31abb1049bd6a7ecfc544a67da8ba30972374a22fd260d1a4f9eb3"
+    },
+    {
+      "name": "direct-b-after-project-follow-up.png",
+      "size": 36296,
+      "sha256": "d854a4f33e4a39b0b4aeb425f652148f5f7e6b5777fbf5915066b7795a9fc57a"
+    },
+    {
+      "name": "new-independent-thread.png",
+      "size": 31304,
+      "sha256": "3c0d9f0642a462629b7119a4b40a74f93cf73ac611de54e4b77a92e94119d8b4"
+    },
+    {
+      "name": "same-notification-reopens-mobile.png",
+      "size": 28989,
+      "sha256": "0dbf677e84cd3528ef8fdd39db7383230fe1377dcb6527a89c1bb9bb655336b4"
+    }
+  ]
+}
