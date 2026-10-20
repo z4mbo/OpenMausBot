@@ -65,6 +65,27 @@ describe("Studio generations", () => {
     expect(await f.t.query(api.studio.forBroadcast, { sessionToken: f.owner, projectId: f.projectId })).toEqual([]);
   });
 
+  test("a cancelled generation stays cancelled", async () => {
+    const f = await fixture();
+    const generationId = await f.create(f.member);
+    await f.t.mutation(api.studio.update, { sessionToken: f.member, projectId: f.projectId, generationId, status: "cancelled" });
+    await f.t.mutation(api.studio.update, { sessionToken: f.member, projectId: f.projectId, generationId, status: "done", outputs: [OUTPUT] });
+    const row = await f.t.query(api.studio.get, { sessionToken: f.owner, projectId: f.projectId, generationId });
+    expect(row).toMatchObject({ status: "cancelled", outputs: [] });
+    expect(row.finishedAt).toBeTypeOf("number");
+  });
+
+  test("video and audio outputs are saved as assets of their own kind", async () => {
+    const f = await fixture();
+    for (const kind of ["video", "audio"] as const) {
+      const generationId = await f.create(f.owner, { mode: kind, kind });
+      await f.t.mutation(api.studio.update, { sessionToken: f.owner, projectId: f.projectId, generationId, status: "done", outputs: [{ url: `https://v3.fal.media/files/out.${kind}`, kind }] });
+      await f.t.mutation(api.studio.saveAsset, { sessionToken: f.owner, projectId: f.projectId, generationId, index: 0, name: `out-${kind}` });
+    }
+    const design = await f.t.query(api.design.list, { sessionToken: f.owner, projectId: f.projectId });
+    expect(design.assets.map((asset: { type: string }) => asset.type).sort()).toEqual(["audio", "video"]);
+  });
+
   test("only the creator or a project admin deletes a generation", async () => {
     const f = await fixture();
     const generationId = await f.create(f.owner);

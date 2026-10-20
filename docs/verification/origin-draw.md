@@ -24,10 +24,13 @@ The browser matrix covers Midnight and Daylight at 375 and 1280 pixels with redu
 
 - draws a frame, rectangle, text, ellipse and arrow with the keyboard tools and checks they land inside the frame;
 - moves, undoes, redoes, duplicates and deletes a shape;
+- holds a drag and checks the shape's new position is saved before the pointer is released, then undoes it in one step;
+- at 375 pixels, opens Layers and checks the Rectangle tool is still the element under its own centre, and that opening
+  the Design panel closes Layers;
 - receives an agent-built pricing section (built with `applyCanvasOps`, as `origin_canvas_edit` does) plus two
   Excalidraw rows from before Canvas, checks the agent's estimated text sizes are measured and saved once, and that the
   old drawing renders converted;
-- at 1280 pixels, drills into a card, edits its radius and the row's auto-layout gap in the inspector, hides and shows a
+- at 1280 pixels, Alt-drags a card inside the auto-layout pricing row and checks the copy lands in that row, then drills into a card, edits its radius and the row's auto-layout gap in the inspector, hides and shows a
   layer, exports PNG and SVG, saves the selection to Assets, inserts an asset image and sends the selection to Ask;
 - in view-only mode, checks there are no editing tools and that dragging and Delete change nothing;
 - on the project page, creates, renames and deletes a canvas.

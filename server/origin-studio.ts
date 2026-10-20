@@ -9,6 +9,7 @@ import {
   STUDIO_CUSTOM_MODEL, STUDIO_MODELS, studioInput, studioModel, studioOutputs, validStudioEndpoint,
   type StudioGenerateRequest, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel,
 } from "../shared/studio.ts";
+import { brandedPrompt, type StoredBrandKit } from "../shared/brand-kit.ts";
 
 /** The signed-in Origin account this app's server acts as. */
 export interface StudioCloud {
@@ -25,6 +26,8 @@ export interface StudioDeps {
   journalFile: string;
   now(): number;
   pollMs: number;
+  /** Where generations are queued; https://queue.fal.run unless a loopback fake stands in. */
+  queueOrigin?: string;
 }
 
 interface Job {
@@ -33,6 +36,7 @@ interface Job {
   kind: StudioMediaKind;
   statusUrl: string;
   responseUrl: string;
+  cancelUrl?: string;
   submittedAt: number;
   running?: boolean;
   failures?: number;
@@ -50,7 +54,13 @@ const STATUS_FAILURES_MAX = 10;
 const SOURCE_INLINE_MAX = 8 * 1024 * 1024;
 const ASSET_MAX_BYTES = 15 * 1024 * 1024;
 const PROMPT_MAX = 8_000;
-const TERMINAL = new Set(["done", "failed"]);
+const TERMINAL = new Set(["done", "failed", "cancelled"]);
+
+/** fal's queue, or a loopback fake (OMB_FAL_QUEUE_URL, http://127.0.0.1:PORT) so a fixture's key never reaches fal.ai. */
+export function falQueueOrigin(env: NodeJS.ProcessEnv = process.env): string {
+  const override = env.OMB_FAL_QUEUE_URL?.trim() ?? "";
+  return /^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(override) ? override : QUEUE_ORIGIN;
+}
 
 function text(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -147,9 +157,20 @@ function resolveModel(request: StudioGenerateRequest): Omit<Resolved, "input"> {
   return { model, endpoint: model.id, label: model.label };
 }
 
+const BRANDED_MODES: ReadonlySet<StudioMode> = new Set(["image", "video"]);
+
+/** The prompt fal receives: the user's, after the project's imagery style and colours when the generation uses the brand. */
+async function brandPrompt(cloud: StudioCloud, request: StudioGenerateRequest, prompt: string): Promise<string> {
+  if (request.brand === false || !prompt || !BRANDED_MODES.has(request.mode)) return prompt;
+  const kit = await cloud.client.query("brand:get", { projectId: request.projectId, sessionToken: cloud.sessionToken }).catch(() => null);
+  return kit && typeof kit === "object" ? brandedPrompt(kit as StoredBrandKit, prompt) : prompt;
+}
+
 export interface StudioRunner {
   generate(cloud: StudioCloud, request: StudioGenerateRequest, agentName?: string): Promise<string[]>;
   saveAsset(cloud: StudioCloud, projectId: string, generationId: string, index: number): Promise<{ assetId: string; copied: boolean }>;
+  /** Stops a queued or running generation; false when fal had already finished it, which then settles as done. */
+  cancel(cloud: StudioCloud, projectId: string, generationId: string): Promise<{ cancelled: boolean }>;
   pickForBroadcast(cloud: StudioCloud, projectId: string, generationId: string, index: number, picked: boolean): Promise<{ assetId?: string }>;
   wait(cloud: StudioCloud, projectId: string, ids: readonly string[], timeoutMs: number): Promise<StudioGeneration[]>;
   /** Picks up the generations this app was polling before it last stopped. */
@@ -161,6 +182,8 @@ export interface StudioRunner {
 }
 
 export function createStudioRunner(deps: StudioDeps): StudioRunner {
+  const queueOrigin = deps.queueOrigin ?? QUEUE_ORIGIN;
+  const isQueueUrl = (value: unknown): value is string => isFalQueueUrl(value, queueOrigin);
   let jobs: Job[] = [];
   let loaded = false;
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -173,7 +196,8 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
       if (!existsSync(deps.journalFile)) return;
       const raw = JSON.parse(readFileSync(deps.journalFile, "utf8")) as unknown;
       jobs = Array.isArray(raw) ? raw.filter((job): job is Job => Boolean(job) && typeof job.generationId === "string"
-        && typeof job.projectId === "string" && isFalQueueUrl(job.statusUrl) && isFalQueueUrl(job.responseUrl)) : [];
+        && typeof job.projectId === "string" && isQueueUrl(job.statusUrl) && isQueueUrl(job.responseUrl)
+        && (job.cancelUrl === undefined || isQueueUrl(job.cancelUrl))) : [];
     } catch {
       jobs = [];
     }
@@ -217,15 +241,16 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
   /** Queues one generation on fal; a refusal is recorded on the generation itself, and false stops a batch. */
   async function submit(cloud: StudioCloud, projectId: string, generationId: string, endpoint: string, kind: StudioMediaKind, input: Record<string, unknown>): Promise<boolean> {
     try {
-      const response = await falFetch(`${QUEUE_ORIGIN}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
+      const response = await falFetch(`${queueOrigin}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new StudioRefusal(falError(body, response.status));
       const data = record(body);
       const statusUrl = text(data.status_url);
       const responseUrl = text(data.response_url);
-      if (!isFalQueueUrl(statusUrl) || !isFalQueueUrl(responseUrl)) throw new StudioRefusal("fal.ai did not queue the request");
+      const cancelUrl = text(data.cancel_url);
+      if (!isQueueUrl(statusUrl) || !isQueueUrl(responseUrl)) throw new StudioRefusal("fal.ai did not queue the request");
       await update(cloud, { projectId, generationId }, { status: "queued", falRequestId: text(data.request_id) });
-      jobs.push({ generationId, projectId, kind, statusUrl, responseUrl, submittedAt: deps.now() });
+      jobs.push({ generationId, projectId, kind, statusUrl, responseUrl, ...(isQueueUrl(cancelUrl) ? { cancelUrl } : {}), submittedAt: deps.now() });
       persist();
       schedule();
       return true;
@@ -317,6 +342,28 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     return { assetId: text(await cloud.client.mutation("studio:saveAsset", base)), copied: false };
   }
 
+  async function cancel(cloud: StudioCloud, projectId: string, generationId: string): Promise<{ cancelled: boolean }> {
+    load();
+    const job = jobs.find((candidate) => candidate.generationId === generationId && candidate.projectId === projectId);
+    if (job) {
+      const cancelUrl = job.cancelUrl ?? job.statusUrl.replace(/\/status$/, "/cancel");
+      const response = await falFetch(cancelUrl, { method: "PUT" });
+      const body = record(await response.json().catch(() => ({})));
+      if (text(body.status) === "ALREADY_COMPLETED") {
+        if (await step(cloud, job).catch(() => false)) {
+          jobs = jobs.filter((candidate) => candidate !== job);
+          persist();
+        }
+        return { cancelled: false };
+      }
+      if (!response.ok) refuse(falError(body, response.status));
+      jobs = jobs.filter((candidate) => candidate !== job);
+      persist();
+    }
+    await update(cloud, { projectId, generationId }, { status: "cancelled" });
+    return { cancelled: true };
+  }
+
   return {
     async generate(cloud, request, agentName) {
       load();
@@ -329,9 +376,10 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
       if (model.source === "image" && !request.sourceAssetId) refuse(`${model.label} starts from an image: pass a project image asset.`);
       const source = request.sourceAssetId && (model.source === "image" || model.family === "custom")
         ? await sourceFor(cloud, request.projectId, request.sourceAssetId) : undefined;
+      const sent = await brandPrompt(cloud, request, prompt);
       const input = model.family === "custom"
-        ? { ...(prompt ? { prompt } : {}), ...(source ? { image_url: source } : {}), ...record(request.input) }
-        : studioInput(model, request, source);
+        ? { ...(sent ? { prompt: sent } : {}), ...(source ? { image_url: source } : {}), ...record(request.input) }
+        : studioInput(model, { ...request, prompt: sent }, source);
       const count = Math.min(Math.max(Math.trunc(Number(request.count) || 1), 1), model.maxCount);
       const ids: string[] = [];
       for (let index = 0; index < count; index += 1) {
@@ -339,6 +387,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
           projectId: request.projectId, sessionToken: cloud.sessionToken, mode: request.mode, model: endpoint, modelLabel: label, kind: model.kind, prompt,
           ...(request.aspectRatio ? { aspectRatio: request.aspectRatio } : {}), ...(request.duration ? { duration: request.duration } : {}),
           ...(request.sourceAssetId ? { sourceAssetId: request.sourceAssetId } : {}), ...(agentName ? { agentName } : {}),
+          ...(sent !== prompt ? { branded: true } : {}),
         }));
         ids.push(generationId);
         if (!await submit(cloud, request.projectId, generationId, endpoint, model.kind, input)) break;
@@ -347,6 +396,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     },
 
     saveAsset,
+    cancel,
 
     async pickForBroadcast(cloud, projectId, generationId, index, picked) {
       const assetId = picked ? (await saveAsset(cloud, projectId, generationId, index)).assetId : undefined;
@@ -380,9 +430,10 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
   };
 }
 
-function isFalQueueUrl(value: unknown): value is string {
+function isFalQueueUrl(value: unknown, queueOrigin: string): value is string {
   try {
     const url = new URL(text(value));
+    if (queueOrigin !== QUEUE_ORIGIN) return url.origin === queueOrigin;
     return url.protocol === "https:" && (url.hostname === "queue.fal.run" || url.hostname.endsWith(".fal.run"));
   } catch {
     return false;
@@ -405,6 +456,7 @@ export function studioRunner(): StudioRunner {
     journalFile: join(DATA_DIR, "studio-jobs.json"),
     now: () => Date.now(),
     pollMs: 2_500,
+    queueOrigin: falQueueOrigin(),
   });
   return shared;
 }
@@ -419,7 +471,7 @@ function generateRequest(body: Record<string, unknown>): StudioGenerateRequest {
     model: text(body.model) || refuse("Choose a model."),
     prompt: text(body.prompt),
     ...optional("aspectRatio"), ...optional("duration"), ...optional("voice"), ...optional("sourceAssetId"), ...optional("endpoint"),
-    ...(typeof body.count === "number" ? { count: body.count } : {}),
+    ...(typeof body.count === "number" ? { count: body.count } : {}), ...(typeof body.brand === "boolean" ? { brand: body.brand } : {}),
     ...(body.input && typeof body.input === "object" && !Array.isArray(body.input) ? { input: body.input as Record<string, unknown> } : {}),
   };
 }
@@ -438,7 +490,7 @@ export function createStudioRoutes(options: { runner?: () => StudioRunner; cloud
       return json(res, 200, { fal: (options.falConfigured ?? (() => integrationKey("fal") !== null))(), connected: Boolean(cloud) });
     }
     if (method !== "POST") return PASS;
-    if (!["/api/studio/generate", "/api/studio/save-asset", "/api/studio/broadcast"].includes(path)) return PASS;
+    if (!["/api/studio/generate", "/api/studio/save-asset", "/api/studio/broadcast", "/api/studio/cancel"].includes(path)) return PASS;
     if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Studio runs on this app's own keys and needs the admin scope" });
     if (!cloud) return json(res, 409, { error: "Sign in to Origin first." });
     const body = record(await readBody(req));
@@ -448,6 +500,7 @@ export function createStudioRoutes(options: { runner?: () => StudioRunner; cloud
       const generationId = text(body.generationId);
       const index = Math.trunc(Number(body.index) || 0);
       if (!projectId || !generationId) return json(res, 400, { error: "projectId and generationId are required" });
+      if (path === "/api/studio/cancel") return json(res, 200, await runner.cancel(cloud, projectId, generationId));
       if (path === "/api/studio/save-asset") return json(res, 200, await runner.saveAsset(cloud, projectId, generationId, index));
       return json(res, 200, await runner.pickForBroadcast(cloud, projectId, generationId, index, body.picked !== false));
     } catch (error) {
@@ -476,6 +529,7 @@ function generationLine(row: StudioGeneration): string {
     `${row._id} [${row.status}] ${row.modelLabel} ${row.kind}`,
     `"${clip(row.prompt.replace(/\s+/g, " "), 160)}"`,
     row.agentName ? `by ${row.agentName}` : `by ${row.createdByName}`,
+    row.branded ? "with the brand kit" : "",
     row.error ? `failed: ${clip(row.error, 200)}` : "",
   ];
   const outputs = row.outputs.map((output, index) => {
@@ -527,7 +581,7 @@ export async function runStudioTool(name: string, args: Record<string, unknown>,
       ...(text(args.source_asset_id) ? { sourceAssetId: text(args.source_asset_id) } : {}),
       ...(text(args.endpoint) ? { endpoint: text(args.endpoint) } : {}),
       ...(args.input && typeof args.input === "object" && !Array.isArray(args.input) ? { input: args.input as Record<string, unknown> } : {}),
-      ...(args.count !== undefined ? { count: Number(args.count) } : {}),
+      ...(args.count !== undefined ? { count: Number(args.count) } : {}), ...(typeof args.brand === "boolean" ? { brand: args.brand } : {}),
     }, scope.agentName);
     const wait = args.wait === undefined ? mode !== "video" : args.wait === true;
     if (!wait) return { text: `Started ${ids.length} generation(s) in ${projectName}'s Studio: ${ids.join(", ")}. The team sees them live; check with origin_studio_list.` };

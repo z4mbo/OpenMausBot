@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, AudioLines, Check, ExternalLink, FolderDown, Loader2, RotateCcw, Send, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, AudioLines, Ban, Check, ExternalLink, FolderDown, Loader2, RotateCcw, Send, Sparkles, Square, Trash2 } from "lucide-react";
 import { api, useStore, type Bot } from "@/state/store";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { relativeTime } from "@/lib/memory";
@@ -49,7 +49,7 @@ function Studio({ projectId, canEdit, isAdmin }: { projectId: string; canEdit: b
         <EmptyState compact icon={<Sparkles size={22} />} title={filter === "all" ? "Nothing generated yet" : "Nothing here yet"}
           body={filter === "all" ? "What you and the project's agents make appears here for the whole team." : undefined} />
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-3" data-studio-gallery>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-3" data-studio-gallery>
           {shown.map((row) => (
             <GenerationCard key={row._id} row={row} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin}
               onReuse={() => setDraft({ mode: row.mode, model: row.model, prompt: row.prompt, ...(row.aspectRatio ? { aspectRatio: row.aspectRatio } : {}), ...(row.duration ? { duration: row.duration } : {}), ...(row.sourceAssetId ? { sourceAssetId: row.sourceAssetId } : {}) })} />
@@ -80,12 +80,12 @@ function useElapsed(since: number, live: boolean): string {
 function GenerationCard({ row, projectId, canEdit, isAdmin, onReuse }: { row: StudioGeneration; projectId: string; canEdit: boolean; isAdmin: boolean; onReuse(): void }) {
   const live = row.status === "queued" || row.status === "running";
   const elapsed = useElapsed(row.startedAt ?? row.createdAt, live);
-  const [busy, setBusy] = useState<"save" | "broadcast" | "delete" | null>(null);
+  const [busy, setBusy] = useState<"save" | "broadcast" | "delete" | "cancel" | null>(null);
   const [error, setError] = useState("");
   const output = row.outputs[0];
   const saved = row.saved.some((entry) => entry.index === 0);
   const picked = row.broadcast.some((entry) => entry.index === 0);
-  const run = async (kind: "save" | "broadcast" | "delete", task: () => Promise<unknown>) => {
+  const run = async (kind: "save" | "broadcast" | "delete" | "cancel", task: () => Promise<unknown>) => {
     setBusy(kind);
     setError("");
     try {
@@ -98,13 +98,14 @@ function GenerationCard({ row, projectId, canEdit, isAdmin, onReuse }: { row: St
   };
   const save = () => run("save", () => api("/api/studio/save-asset", { method: "POST", body: JSON.stringify({ projectId, generationId: row._id, index: 0 }) }));
   const broadcast = () => run("broadcast", () => api("/api/studio/broadcast", { method: "POST", body: JSON.stringify({ projectId, generationId: row._id, index: 0, picked: !picked }) }));
+  const cancel = () => run("cancel", () => api("/api/studio/cancel", { method: "POST", body: JSON.stringify({ projectId, generationId: row._id }) }));
   const remove = () => {
     if (!window.confirm("Delete this generation? Saved assets stay in Assets.")) return;
     void run("delete", () => cloudMutation("studio:remove", { projectId, generationId: row._id }));
   };
   return (
     <article className={cn(cardClass, "flex flex-col overflow-hidden motion-safe:animate-pop-in")} data-studio-generation={row.status}>
-      <div className={cn("relative flex items-center justify-center overflow-hidden bg-inset", row.kind === "audio" && "!aspect-auto min-h-[112px]")} style={{ aspectRatio: ratioOf(row) }}>
+      <div className={cn("relative flex items-center justify-center overflow-hidden bg-inset", (row.kind === "audio" || row.status === "failed" || row.status === "cancelled") && "!aspect-auto min-h-[112px]")} style={{ aspectRatio: ratioOf(row) }}>
         {live && (
           <div className="flex flex-col items-center gap-2 text-[12.5px] text-ink-secondary" role="status">
             <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-transparent via-raised/40 to-transparent [background-size:200%_100%] motion-safe:animate-shimmer" />
@@ -113,9 +114,15 @@ function GenerationCard({ row, projectId, canEdit, isAdmin, onReuse }: { row: St
           </div>
         )}
         {row.status === "failed" && (
-          <div className="flex flex-col items-center gap-1.5 px-4 text-center text-[12.5px] text-danger" role="alert">
+          <div className="flex flex-col items-center gap-1.5 px-4 py-4 text-center text-[12.5px] text-danger" role="alert">
             <AlertTriangle size={18} />
             <span className="line-clamp-4">{row.error ?? "The generation failed"}</span>
+          </div>
+        )}
+        {row.status === "cancelled" && (
+          <div className="flex flex-col items-center gap-1.5 text-[12.5px] text-ink-tertiary">
+            <Ban size={18} aria-hidden="true" />
+            <span>Cancelled</span>
           </div>
         )}
         {row.status === "done" && output && (
@@ -124,7 +131,7 @@ function GenerationCard({ row, projectId, canEdit, isAdmin, onReuse }: { row: St
               : (
                 <div className="flex w-full flex-col items-center gap-3 px-3 py-4">
                   <AudioLines size={22} className="text-accent-text" aria-hidden="true" />
-                  <audio src={output.url} controls preload="none" className="h-9 w-full" />
+                  <audio src={output.url} controls preload="none" className="h-9 w-full [color-scheme:var(--code-color-scheme)]" />
                 </div>
               )
         )}
@@ -149,6 +156,11 @@ function GenerationCard({ row, projectId, canEdit, isAdmin, onReuse }: { row: St
                 {busy === "broadcast" ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}{picked ? "In Broadcast" : "Broadcast"}
               </button>
             </>
+          )}
+          {live && canEdit && (
+            <button type="button" className={cn(iconButton, "w-auto gap-1.5 px-2 text-[12px]")} disabled={busy !== null} onClick={() => void cancel()} title="Stop this generation">
+              {busy === "cancel" ? <Loader2 size={13} className="animate-spin" /> : <Square size={12} />}Cancel
+            </button>
           )}
           <span className="flex-1" />
           {canEdit && <button type="button" className={iconButton} onClick={onReuse} title="Reuse prompt" aria-label="Reuse prompt"><RotateCcw size={13} /></button>}

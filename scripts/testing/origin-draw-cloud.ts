@@ -50,6 +50,8 @@ export function useCloudQuery<T>(name: string): T {
   if (name === "draw:canvases") return canvases as T;
   if (name === "design:list") return design as T;
   if (name === "draw:files") return files as T;
+  if (name === "pages:list") return { pages: [], captureEnabled: true } as T;
+  if (name === "brand:get") return null as T;
   return (name === "draw:scene" ? rows : name === "draw:presence" ? presence : []) as T;
 }
 export async function cloudMutation<T>(name: string, args: Record<string, unknown>): Promise<T> {

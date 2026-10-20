@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { canEdit, requireMember, touchProject } from "./lib/permissions";
 import { assetTypeValidator, tokenTypeValidator } from "./lib/validators";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { admitStorageReference, issueUpload } from "./lib/storage";
 import { requireUser } from "./lib/auth";
 
@@ -164,7 +164,7 @@ export const updateAsset = mutation({
     const asset = await ctx.db.get(args.assetId);
     if (!asset || asset.projectId !== args.projectId) throw new Error("Asset not found");
     const patch: Partial<{
-      type: "figma" | "image" | "icon" | "font" | "document" | "apk" | "other";
+      type: Doc<"designAssets">["type"];
       name: string;
       url: string | undefined;
       notes: string | undefined;

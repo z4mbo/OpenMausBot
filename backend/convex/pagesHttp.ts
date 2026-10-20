@@ -1,7 +1,7 @@
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { readBoundedText } from "../lib/http-body";
-import { pageDocument, type FormStatus } from "../../shared/canvas-page";
+import { isPageFont, pageDocument, type FormStatus } from "../../shared/canvas-page";
 import { pagesOrigin } from "./pages";
 
 const MAX_FORM_BYTES = 16_000;
@@ -43,7 +43,7 @@ export const servePage = httpAction(async (ctx, request) => {
   if (!status && !BOTS.test(request.headers.get("user-agent") ?? "")) await ctx.runMutation(internal.pages.viewed, where);
   const html = pageDocument({
     title: page.title, description: page.description, url: `${pagesOrigin()}/p/${where.site}/${where.slug}`, ...(page.image ? { image: page.image } : {}),
-    page: { body: page.body, background: page.background, fonts: page.fonts.filter((font): font is "sans" | "serif" | "mono" => ["sans", "serif", "mono"].includes(font)) }, status,
+    page: { body: page.body, background: page.background, fonts: page.fonts.filter(isPageFont) }, status,
   });
   return new Response(html, {
     headers: {

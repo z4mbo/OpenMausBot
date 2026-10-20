@@ -17,7 +17,7 @@ type Integration = { label: string; help: string; fields: Record<string, Field> 
 
 /**
  * Third-party accounts a member connects for server-side work (Studio generations, Broadcast posts, Pipeline mail and
- * SMS). Each member keeps their own keys in this computer's data folder: they are never synced to Origin's backend,
+ * SMS, Ship deploys). Each member keeps their own keys in this computer's data folder: they are never synced to Origin's backend,
  * never put in a backup and never returned to a client (non-secret fields such as a sender address are).
  */
 export const INTEGRATIONS = {
@@ -81,6 +81,12 @@ export const INTEGRATIONS = {
   tiktok: {
     label: "TikTok", help: "https://developers.tiktok.com/doc/content-posting-api-get-started",
     fields: { accessToken: { label: "Access token (video.publish)", secret: true, placeholder: "act.…" } },
+  },
+  vercel: { label: "Vercel", help: "https://vercel.com/account/settings/tokens", fields: { apiToken: { label: "Access token", secret: true } } },
+  netlify: { label: "Netlify", help: "https://app.netlify.com/user/applications#personal-access-tokens", fields: { apiToken: { label: "Personal access token", secret: true, placeholder: "nfp_…" } } },
+  cloudflare: {
+    label: "Cloudflare Pages", help: "https://dash.cloudflare.com/profile/api-tokens",
+    fields: { apiToken: { label: "API token (Pages: Edit)", secret: true } },
   },
 } as const satisfies Record<string, Integration>;
 

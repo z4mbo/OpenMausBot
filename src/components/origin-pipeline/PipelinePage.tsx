@@ -145,11 +145,11 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
   const ownerOptions = owners.map((owner) => ({ value: ownerKey(owner), label: owner.name }));
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-hidden motion-safe:animate-[rise_0.2s_cubic-bezier(0.22,1,0.36,1)_backwards]" aria-label="Pipeline">
+    <section className="flex min-h-0 flex-1 flex-col overflow-hidden motion-safe:animate-[rise_var(--motion-base)_var(--ease-out)_backwards]" aria-label="Pipeline">
       <PageHeader title="Pipeline" count={<span title="Open pipeline value · won">{formatLeadValue(value.open, currency)} open{value.won ? ` · ${formatLeadValue(value.won, currency)} won` : ""}</span>}>
         <Segmented label="Layout" value={layout} onChange={setLayout}
           options={[{ value: "board", label: <Columns3 size={14} aria-label="Board" />, title: "Board" }, { value: "table", label: <List size={14} aria-label="Table" />, title: "Table" }]} />
-        <label className="relative flex min-w-0 flex-1 items-center sm:flex-none">
+        <label className="relative flex min-w-32 flex-1 items-center sm:flex-none">
           <Search size={14} className="pointer-events-none absolute left-2.5 text-ink-tertiary" aria-hidden="true" />
           <input ref={search} className={cn(inputClass, "h-8 pl-8 sm:w-44")} placeholder="Search leads" aria-label="Search leads" value={query} onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => { if (event.key === "Escape") { setQuery(""); event.currentTarget.blur(); } }} />
@@ -194,7 +194,7 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
 
       {!board.leads.length ? (
         <div className={cn("flex min-h-0 flex-1 flex-col px-4 md:px-6", underGlass)}>
-          <EmptyState icon={<Target size={22} />} title="No leads yet" body="Add the people you want to win, import a CSV, or turn on lead capture so your landing page fills this in."
+          <EmptyState icon={<Target size={22} />} title="No leads yet" body={canEdit ? "Add the people you want to win, import a CSV, or turn on lead capture so your landing page fills this in." : undefined}
             action={canEdit ? (
               <div className="flex flex-wrap justify-center gap-2">
                 <button type="button" className={primaryButton} onClick={() => setDialog("new")}><Plus size={14} />New lead</button>
@@ -207,7 +207,7 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
         <LeadTable leads={visible} stages={board.stages} currency={currency} canEdit={canEdit} selected={selected} pendingLeads={pendingLeads} insights={insights}
           onSelect={setSelected} onOpen={setOpen} onStage={(lead, stage) => move(lead._id, stage)} />
       ) : (
-        <div ref={lanesRef} className={cn("flex min-h-0 flex-1 snap-x gap-3 overflow-x-auto px-4 pb-4 md:px-6", underGlass)}>
+        <div ref={lanesRef} className={cn("flex min-h-0 flex-1 snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pb-4 md:scroll-px-6 md:px-6", underGlass)}>
           {board.stages.map((stage) => {
             const items = inStage(visible, stage);
             const here = cardDrag.target?.columnId === stage ? cardDrag.target : null;
@@ -216,7 +216,7 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
             const closed = CLOSED_STAGES.includes(stage);
             return (
               <div key={stage} data-column-id={stage}
-                className={cn("flex w-[min(17.5rem,85vw)] shrink-0 snap-start flex-col rounded-2xl p-2 transition-[background-color] duration-150", closed ? "bg-inset/25" : "bg-inset/50", lifted && "bg-inset/70", here && "bg-inset/90")}>
+                className={cn("flex w-[min(17.5rem,85vw)] shrink-0 snap-start flex-col rounded-2xl p-2 transition-[background-color] duration-(--motion-fast)", closed ? "bg-inset/25" : "bg-inset/50", lifted && "bg-inset/70", here && "bg-inset/90")}>
                 <div className="flex items-baseline gap-2 px-2 pb-2 pt-1">
                   <span aria-hidden="true" className={cn("size-2 shrink-0 self-center rounded-full", stage === "Won" ? "bg-success" : stage === "Lost" ? "bg-ink-tertiary/60" : "bg-accent")}
                     style={closed ? undefined : { opacity: 0.35 + (board.stages.indexOf(stage) / Math.max(1, board.stages.length - 3)) * 0.65 }} />
@@ -260,14 +260,14 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
 }
 
 function DropGap({ height }: { height: number }) {
-  return <span aria-hidden="true" className="block rounded-xl border-2 border-dashed border-accent/45 bg-accent/[0.06] motion-safe:animate-[pop-in_0.16s_cubic-bezier(0.22,1,0.36,1)]" style={{ height }} />;
+  return <span aria-hidden="true" className="block rounded-xl border-2 border-dashed border-accent/45 bg-accent/[0.06] motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)]" style={{ height }} />;
 }
 
 function DragGhost({ drag, ghost, lead, currency, owners }: { drag: CardDrag; ghost: RefObject<HTMLDivElement | null>; lead?: PipelineLead; currency: string; owners: readonly OwnerOption[] }) {
   if (!lead) return null;
   return (
     <div ref={ghost} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[60]" style={{ width: drag.width, transform: `translate3d(${drag.x}px, ${drag.y}px, 0)` }}>
-      <div className="rotate-[1.5deg] scale-[1.03] motion-safe:animate-[pop-in_0.14s_ease-out]">
+      <div className="rotate-[1.5deg] scale-[1.03] motion-safe:animate-[pop-in_var(--motion-fast)_var(--ease-out)]">
         <LeadCard lead={lead} currency={currency} canEdit={false} awaiting={false} owners={owners} lifted />
       </div>
     </div>
@@ -289,10 +289,10 @@ function LeadCard({ lead, currency, canEdit, awaiting, owners, insight, lifted =
         if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onOpen?.(); return; }
         onKeyDown?.(event);
       }}
-      className={cn("group relative cursor-pointer rounded-xl border border-hairline/40 bg-panel px-3 py-2.5 outline-none transition-[border-color,background-color] duration-150 hover:border-hairline hover:bg-raised/40 focus-visible:ring-2 focus-visible:ring-accent/60",
+      className={cn("group relative cursor-pointer rounded-xl border border-hairline/40 bg-panel px-3 py-2.5 outline-none transition-[border-color,background-color] duration-(--motion-fast) hover:border-hairline hover:bg-raised/40 focus-visible:ring-2 focus-visible:ring-accent/60",
         canEdit && "cursor-grab select-none active:cursor-grabbing", lifted && "cursor-grabbing border-hairline")}>
       <div className="flex items-start gap-2">
-        {canEdit && <GripVertical size={12} className="-ml-1.5 mt-1 shrink-0 text-ink-tertiary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100 max-md:hidden" aria-hidden="true" />}
+        {canEdit && <GripVertical size={12} className="absolute left-0 top-[13px] text-ink-tertiary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100 max-md:hidden" aria-hidden="true" />}
         <div className="min-w-0 flex-1">
           <strong className="flex min-w-0 items-center gap-1.5 text-[13.5px] font-medium leading-snug text-ink">
             <span className="truncate">{lead.name}</span>

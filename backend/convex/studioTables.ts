@@ -3,7 +3,7 @@ import { v } from "convex/values";
 
 export const studioMode = v.union(v.literal("image"), v.literal("video"), v.literal("audio"), v.literal("edit"));
 export const studioKind = v.union(v.literal("image"), v.literal("video"), v.literal("audio"));
-export const studioStatus = v.union(v.literal("queued"), v.literal("running"), v.literal("done"), v.literal("failed"));
+export const studioStatus = v.union(v.literal("queued"), v.literal("running"), v.literal("done"), v.literal("failed"), v.literal("cancelled"));
 export const studioOutput = v.object({ url: v.string(), kind: studioKind, contentType: v.optional(v.string()) });
 
 export const studioTables = {
@@ -29,6 +29,7 @@ export const studioTables = {
     createdBy: v.id("users"),
     createdByName: v.string(),
     agentName: v.optional(v.string()),
+    branded: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
     startedAt: v.optional(v.number()),

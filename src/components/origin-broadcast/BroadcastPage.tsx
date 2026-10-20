@@ -107,7 +107,7 @@ function Broadcast({ projectId, projectName, canEdit: projectEdit, agent }: { pr
 
       {pending > 0 && (mode === "campaigns" || view === "week") && (
         <button type="button" onClick={() => { setMode("posts"); setView("list"); setFilter("approval"); }}
-          className="mb-3 flex w-full items-center gap-2 rounded-lg bg-warning/10 px-3 py-2 text-left text-[12.5px] text-warning transition-colors duration-150 hover:bg-warning/15">
+          className="mb-3 flex w-full items-center gap-2 rounded-lg bg-warning/10 px-3 py-2 text-left text-[12.5px] text-warning transition-colors duration-(--motion-fast) hover:bg-warning/15">
           <ShieldCheck size={14} />{pending} {pending === 1 ? "post waits" : "posts wait"} for your approval
           <ChevronRight size={14} className="ml-auto" />
         </button>
@@ -132,7 +132,7 @@ function PostCard({ post, onOpen, compact }: { post: BroadcastPost; onOpen(): vo
   const at = postTime(post);
   return (
     <button type="button" onClick={onOpen}
-      className={cn("group flex w-full min-w-0 flex-col gap-1.5 rounded-lg border bg-panel p-2 text-left outline-none transition-[border-color,transform] duration-150 hover:border-hairline focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.99]",
+      className={cn("group flex w-full min-w-0 flex-col gap-1.5 rounded-lg border bg-panel p-2 text-left outline-none transition-[border-color,transform] duration-(--motion-fast) hover:border-hairline focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.99]",
         post.needsApproval ? "border-warning/40" : "border-hairline/40")}>
       <span className="flex w-full items-center gap-1.5 text-[11px] text-ink-tertiary">
         {at !== undefined && <span className="tabular-nums text-ink-secondary">{compact ? timeOf(at) : dateTimeOf(at)}</span>}
@@ -174,7 +174,7 @@ function Week({ posts, start, onStart, canEdit, onOpen, onNew }: {
                 <span className={cn("flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[12px] tabular-nums", isToday ? "bg-accent text-accent-ink" : "text-ink-secondary")}>{day.getDate()}</span>
                 {canEdit && !past && (
                   <button type="button" aria-label={`New post on ${day.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" })}`} onClick={() => onNew(defaultSlot(day))}
-                    className="ml-auto flex size-6 items-center justify-center rounded-md text-ink-tertiary opacity-0 transition-opacity duration-150 hover:bg-raised hover:text-ink focus-visible:opacity-100 group-hover/day:opacity-100 touch:opacity-100 max-lg:opacity-100">
+                    className="ml-auto flex size-6 items-center justify-center rounded-md text-ink-tertiary opacity-0 transition-opacity duration-(--motion-fast) hover:bg-raised hover:text-ink focus-visible:opacity-100 group-hover/day:opacity-100 touch:opacity-100 max-lg:opacity-100">
                     <Plus size={13} />
                   </button>
                 )}
@@ -214,7 +214,7 @@ function PostList({ posts, filter, onFilter, onOpen }: { posts: BroadcastPost[];
             const at = postTime(post);
             return (
               <button key={post._id} type="button" onClick={() => onOpen(post)}
-                className="flex w-full min-w-0 items-center gap-3 px-4 py-2.5 text-left outline-none transition-colors duration-150 hover:bg-raised/40 focus-visible:bg-raised/40">
+                className="flex w-full min-w-0 items-center gap-3 px-4 py-2.5 text-left outline-none transition-colors duration-(--motion-fast) hover:bg-raised/40 focus-visible:bg-raised/40">
                 <span className="w-[112px] shrink-0"><StatusPill post={post} /></span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] text-ink">{excerpt(post)}</span>

@@ -8,6 +8,9 @@ import { CANVAS_TOOL_DEFINITIONS } from "./agents-canvas-tools.ts";
 import { PIPELINE_TOOL_DEFINITIONS } from "./agents-pipeline-tools.ts";
 import { STANDUP_TOOL_DEFINITIONS } from "./agents-standup-tools.ts";
 import { CAMPAIGN_TOOL_DEFINITIONS } from "./agents-campaign-tools.ts";
+import { SHIP_TOOL_DEFINITIONS } from "./agents-ship-tools.ts";
+import { LAUNCHPAD_TOOL_DEFINITIONS } from "./agents-launchpad-tools.ts";
+import { BRAND_TOOL_DEFINITIONS, BRAND_VOICE } from "./agents-brand-tools.ts";
 import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 
 /** Which tools a turn is shown. Presentation only: the server still authenticates and scopes every call. */
@@ -319,7 +322,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
       type: "object", additionalProperties: false,
       properties: {
         name: { type: "string", minLength: 1, maxLength: 150 },
-        type: { type: "string", enum: ["figma", "image", "icon", "font", "document", "apk", "other"], description: "Default other." },
+        type: { type: "string", enum: ["figma", "image", "video", "audio", "icon", "font", "document", "apk", "other"], description: "Default other." },
         url: { type: "string", maxLength: 2_000, description: "http(s) link; url or path, not both." },
         path: { type: "string", maxLength: 1_000, description: "A file in your working folder." },
         notes: { type: "string", maxLength: 1_000 },
@@ -384,8 +387,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
         source_asset_id: { type: "string", maxLength: 64, description: "An image asset id from origin_list_assets to start from." },
         endpoint: { type: "string", maxLength: 200, description: "With model custom: any fal.ai endpoint id, such as a deployed ComfyUI workflow." },
         input: { type: "object", description: "With model custom: the endpoint's whole input." },
-        wait: { type: "boolean", description: "Wait for the result. Default true except for video." },
-        project: ORIGIN_PROJECT,
+        wait: { type: "boolean", description: "Wait for the result. Default true except for video." }, brand: { type: "boolean", description: "Put the brand kit's imagery style and colours ahead of an image or video prompt. Default true." }, project: ORIGIN_PROJECT,
       },
     },
   },
@@ -395,7 +397,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
-        status: { type: "string", enum: ["queued", "running", "done", "failed"] },
+        status: { type: "string", enum: ["queued", "running", "done", "failed", "cancelled"] },
         limit: { type: "integer", minimum: 1, maximum: 30, description: "Default 15." },
         project: ORIGIN_PROJECT,
       },
@@ -417,7 +419,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_broadcast_draft",
-    description: "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval." + ORIGIN_SCOPE,
+    description: "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval." + BRAND_VOICE + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -451,8 +453,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
       required: ["post_id"],
     },
   },
-  ...PIPELINE_TOOL_DEFINITIONS,
-  ...CAMPAIGN_TOOL_DEFINITIONS,
+  ...PIPELINE_TOOL_DEFINITIONS, ...CAMPAIGN_TOOL_DEFINITIONS, ...LAUNCHPAD_TOOL_DEFINITIONS, ...BRAND_TOOL_DEFINITIONS, ...SHIP_TOOL_DEFINITIONS,
 ];
 
 export const ORIGIN_TOOL_NAMES: ReadonlySet<string> = new Set(ORIGIN_TOOL_DEFINITIONS.map((tool) => tool.name));
@@ -1174,8 +1175,7 @@ export const SHARED_COMPUTER_TOOL_NAMES = new Set(["list_shared_computers", "sha
 const VOICE_TOOL_NAMES = new Set(["send_voice_note"]);
 const CHIEF_ONLY_TOOL_NAMES = new Set([
   "create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue",
-  "origin_review_pr", "origin_merge_pr", "origin_standup",
-]);
+  "origin_review_pr", "origin_merge_pr", "origin_standup", "origin_release_draft"]);
 const CHIEF_TARGET_TOOL_NAMES = new Set(["propose_profile", "propose_model"]);
 const WATCHER_TOOL_NAMES = new Set(["create_options_card"]);
 

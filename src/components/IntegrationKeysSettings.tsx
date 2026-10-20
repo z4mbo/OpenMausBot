@@ -31,7 +31,7 @@ export function IntegrationKeysSettings() {
   }, []);
   const replace = (next: IntegrationStatus) => setIntegrations((current) => current?.map((entry) => (entry.id === next.id ? next : entry)) ?? null);
   return (
-    <Card subtitle="Your own keys for the services Studio, Broadcast and Pipeline use. They stay on this computer, are never synced to your team, and are never shown again after saving.">
+    <Card subtitle="Your own keys for the services Studio, Broadcast, Pipeline and Ship use. They stay on this computer, are never synced to your team, and are never shown again after saving.">
       {error && <p role="alert" className="text-[12.5px] text-danger">{error}</p>}
       {!integrations && !error && <div className="flex items-center gap-2 text-[13px] text-ink-secondary"><Loader2 size={13} className="animate-spin" />Loading</div>}
       {integrations && (
@@ -83,10 +83,10 @@ function IntegrationRow({ integration, open, onToggle, onSaved }: { integration:
         <span aria-hidden="true" className={cn("size-1.5 shrink-0 rounded-full", integration.configured ? "bg-success" : anySet ? "bg-warning" : "bg-raised-hover")} />
         <span className="flex-1 font-medium">{integration.label}</span>
         <span className="text-[12px] text-ink-secondary">{integration.configured ? "Connected" : anySet ? "Incomplete" : ""}</span>
-        <ChevronRight size={14} aria-hidden="true" className={cn("text-ink-tertiary transition-transform duration-150 motion-reduce:transition-none", open && "rotate-90")} />
+        <ChevronRight size={14} aria-hidden="true" className={cn("text-ink-tertiary transition-transform duration-(--motion-fast) motion-reduce:transition-none", open && "rotate-90")} />
       </button>
       {open && (
-        <form onSubmit={save} className="flex flex-col gap-2.5 px-2 pb-3 pt-1 motion-safe:animate-[rise_0.15s_ease-out_backwards]">
+        <form onSubmit={save} className="flex flex-col gap-2.5 px-2 pb-3 pt-1 motion-safe:animate-[rise_var(--motion-fast)_var(--ease-out)_backwards]">
           {integration.fields.map((field) => (
             <label key={field.name} className="flex flex-col gap-1">
               <span className="flex items-center gap-2 text-[12px] text-ink-secondary">
@@ -108,7 +108,8 @@ function IntegrationRow({ integration, open, onToggle, onSaved }: { integration:
               {busy && <Loader2 size={13} className="animate-spin" />}Save
             </button>
             {anySet && (
-              <button type="button" disabled={busy} onClick={() => void send(api(`/api/integrations/${integration.id}`, { method: "DELETE" }))}
+              <button type="button" disabled={busy}
+                onClick={() => { if (window.confirm(`Disconnect ${integration.label}? Its keys are removed from this computer.`)) void send(api(`/api/integrations/${integration.id}`, { method: "DELETE" })); }}
                 className="inline-flex min-h-8 items-center rounded-lg bg-control px-3 text-[13px] text-danger hover:bg-raised-hover disabled:opacity-50">
                 Disconnect
               </button>

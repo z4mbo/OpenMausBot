@@ -82,7 +82,20 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
           onDragEnd={() => { setDragging(null); setDrop(null); }}
           onClick={(event) => click(node, event.shiftKey || event.metaKey || event.ctrlKey)}
           onDoubleClick={() => { if (!readOnly) setRenaming(node.id); }}
-          className={cn("group relative flex h-7 cursor-default items-center gap-1 rounded-md pr-1 text-[12.5px] transition-colors duration-100",
+          tabIndex={renaming === node.id ? -1 : 0} data-layer-row
+          onKeyDown={(event) => {
+            if (event.target !== event.currentTarget) return;
+            const step = event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
+            if (step) {
+              const rows = [...(event.currentTarget.closest('[role="tree"]')?.querySelectorAll<HTMLElement>("[data-layer-row]") ?? [])];
+              rows[rows.indexOf(event.currentTarget) + step]?.focus();
+            } else if (event.key === "Enter" || event.key === " ") click(node, event.shiftKey || event.metaKey || event.ctrlKey);
+            else if (event.key === "F2" && !readOnly) setRenaming(node.id);
+            else return;
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          className={cn("group relative flex h-7 cursor-default items-center gap-1 rounded-md pr-1 text-[12.5px] outline-none transition-colors duration-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/60",
             chosen ? "bg-accent/15 text-ink" : "text-ink-secondary hover:bg-raised/70 hover:text-ink",
             node.hidden && "opacity-50", marker === "inside" && "ring-1 ring-inset ring-accent")}
           style={{ paddingLeft: 6 + depth * 14 }}>
@@ -90,7 +103,7 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
           {marker === "below" && <span aria-hidden="true" className="absolute inset-x-1 -bottom-px h-0.5 rounded bg-accent" />}
           {children.length ? (
             <button type="button" aria-label={open ? `Collapse ${node.name}` : `Expand ${node.name}`} onClick={(event) => { event.stopPropagation(); toggle(node.id); }}
-              className="inline-flex size-4 shrink-0 items-center justify-center rounded text-ink-tertiary hover:text-ink">
+              className="inline-flex size-4 shrink-0 items-center justify-center rounded text-ink-tertiary outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
               <ChevronRight size={12} className={cn("transition-transform duration-150 motion-reduce:transition-none", open && "rotate-90")} />
             </button>
           ) : <span className="size-4 shrink-0" />}
@@ -105,11 +118,11 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
           {!readOnly && renaming !== node.id && (
             <span className={cn("flex shrink-0 items-center", !node.locked && !node.hidden && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100")}>
               <button type="button" aria-label={node.locked ? `Unlock ${node.name}` : `Lock ${node.name}`} onClick={(event) => { event.stopPropagation(); canvas.commit([{ ...node, locked: !node.locked }]); }}
-                className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary hover:text-ink">
+                className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
                 {node.locked ? <Lock size={12} /> : <LockOpen size={12} />}
               </button>
               <button type="button" aria-label={node.hidden ? `Show ${node.name}` : `Hide ${node.name}`} onClick={(event) => { event.stopPropagation(); canvas.commit([{ ...node, hidden: !node.hidden }]); }}
-                className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary hover:text-ink">
+                className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
                 {node.hidden ? <EyeOff size={12} /> : <Eye size={12} />}
               </button>
             </span>

@@ -79,6 +79,7 @@ export const create = mutation({
     duration: v.optional(v.string()),
     sourceAssetId: v.optional(v.id("designAssets")),
     agentName: v.optional(v.string()),
+    branded: v.optional(v.boolean()),
   },
   returns: v.id("studioGenerations"),
   handler: async (ctx, args) => {
@@ -94,7 +95,7 @@ export const create = mutation({
       projectId: args.projectId, mode: args.mode, model: args.model.trim(), modelLabel: clip(args.modelLabel.trim(), 200), kind: args.kind,
       prompt: args.prompt.trim(), aspectRatio: args.aspectRatio?.slice(0, 20), duration: args.duration?.slice(0, 20), sourceAssetId: args.sourceAssetId,
       status: "queued", outputs: [], saved: [], broadcast: [], createdBy: user._id, createdByName: user.name || user.email,
-      agentName: args.agentName ? clip(args.agentName.trim(), 120) : undefined, createdAt: now, updatedAt: now,
+      agentName: args.agentName ? clip(args.agentName.trim(), 120) : undefined, branded: args.branded || undefined, createdAt: now, updatedAt: now,
     });
     await touchProject(ctx, args.projectId);
     return id;
@@ -117,13 +118,13 @@ export const update = mutation({
     const { user } = await editorOf(ctx, args.projectId, args.sessionToken);
     const generation = await generationOf(ctx, args.projectId, args.generationId);
     if (generation.createdBy !== user._id) throw new Error("Only the member who started this generation can update it");
-    if (generation.status === "done" || generation.status === "failed") return null;
+    if (generation.status === "done" || generation.status === "failed" || generation.status === "cancelled") return null;
     if (args.outputs && (args.outputs.length > OUTPUTS_MAX || args.outputs.some((output) => !httpsUrl(output.url)))) throw new Error("Outputs must be https links");
     const now = Date.now();
     const patch: Partial<Doc<"studioGenerations">> = { status: args.status, updatedAt: now };
     if (args.falRequestId) patch.falRequestId = args.falRequestId.slice(0, 200);
     if (args.status === "running" && !generation.startedAt) patch.startedAt = now;
-    if (args.status === "done" || args.status === "failed") patch.finishedAt = now;
+    if (args.status === "done" || args.status === "failed" || args.status === "cancelled") patch.finishedAt = now;
     if (args.status === "failed") patch.error = clip(args.error?.trim() || "The generation failed", ERROR_MAX);
     if (args.outputs) patch.outputs = args.outputs;
     await ctx.db.patch(args.generationId, patch);
@@ -159,7 +160,7 @@ export const saveAsset = mutation({
     const now = Date.now();
     const name = clip(args.name.trim() || `${generation.modelLabel} ${output.kind}`, 150);
     const assetId = await ctx.db.insert("designAssets", {
-      projectId: args.projectId, type: output.kind === "image" ? "image" : "other", name,
+      projectId: args.projectId, type: output.kind, name,
       url: args.storageId ? undefined : output.url, storageId: args.storageId,
       contentType: args.contentType ?? output.contentType, size: args.size,
       notes: clip(`Made in Studio with ${generation.modelLabel}: ${generation.prompt}`, 1_000), createdAt: now, updatedAt: now,

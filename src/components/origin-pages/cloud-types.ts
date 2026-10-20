@@ -41,6 +41,7 @@ export interface CloudTask {
   done: boolean;
   dueDate?: string;
   labels?: string[];
+  milestoneId?: string;
   githubIssueNumber?: number;
   githubIssueUrl?: string;
   githubIssueState?: "open" | "closed";
@@ -109,7 +110,7 @@ export interface CloudTaskPullRequest {
   baseSha?: string;
 }
 
-export type AssetType = "figma" | "image" | "icon" | "font" | "document" | "apk" | "other";
+export type AssetType = "figma" | "image" | "video" | "audio" | "icon" | "font" | "document" | "apk" | "other";
 export type TokenType = "color" | "typography" | "spacing" | "component" | "motion" | "other";
 
 export interface CloudDesignAsset {

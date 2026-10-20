@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { newNode } from "../../../../shared/canvas-ops";
 import {
-  FONT_STACKS, ancestors, descendants, effectiveParent, isLive, layoutText, nextZ, worldOrigin,
+  fontStack, ancestors, descendants, effectiveParent, isLive, layoutText, nextZ, worldOrigin,
   type CanvasNode, type CanvasNodeType, type Scene,
 } from "../../../../shared/canvas-scene";
 import { cn } from "@/lib/cn";
 import { copyText } from "@/lib/copy-text";
 import {
-  CLIPBOARD_MARK, copySelection, deleteNodes, duplicateNodes, parseClipboard, pasteClipboard, reparent, reorder, topmost, unwrap, wrapNodes, zAt,
+  CLIPBOARD_MARK, copySelection, deleteNodes, dropMoved, duplicateNodes, frameAt as findFrameAt, parseClipboard, pasteClipboard, reorder, topmost, unwrap, wrapNodes,
   type Clipboard, type Reorder,
 } from "./actions";
 import { angleOf, moveEndpoint, refitPoints, resizeBox, resizeMany, resizeSingle } from "./gestures";
@@ -49,7 +49,7 @@ export type Command = "delete" | "duplicate" | "group" | "ungroup" | "frame" | "
 type Gesture =
   | { kind: "pan"; start: Point; view: View }
   | { kind: "marquee"; start: Point; base: string[]; scope: string | null }
-  | { kind: "move"; start: Point; originals: CanvasNode[]; box: Box; moved: boolean; click: string | null; copies: boolean }
+  | { kind: "move"; start: Point; originals: CanvasNode[]; box: Box; moved: boolean; click: string | null; copiedFrom: string[] }
   | { kind: "resize"; handle: Handle; originals: CanvasNode[]; box: Box; base: Scene; baseIndex: Map<string | null, CanvasNode[]> }
   | { kind: "rotate"; centre: Point; start: number; original: CanvasNode }
   | { kind: "create"; type: CanvasNodeType; start: Point; parentId: string | null; node: CanvasNode | null }
@@ -64,6 +64,9 @@ const contrastInk = (fill: string | null | undefined, fallback: string) => {
   return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? "#111111" : "#F5F5F5";
 };
 const round = (value: number) => Math.round(value);
+type Panels = { layers: boolean; inspector: boolean };
+const oneOverlay = (current: Panels, next: Panels): Panels =>
+  next.layers && !current.layers ? { layers: true, inspector: false } : next.inspector && !current.inspector ? { layers: false, inspector: true } : next;
 const textName = (text: string | undefined) => (text ?? "").trim().replace(/\s+/g, " ").slice(0, 60) || "Text";
 
 function themeInk(element: Element | null): string {
@@ -86,7 +89,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   const [editing, setEditing] = useState<{ id: string; created: boolean; original: CanvasNode } | null>(null);
   const [panning, setPanning] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [panels, setPanels] = useState<{ layers: boolean; inspector: boolean } | null>(null);
+  const [panels, setPanels] = useState<Panels | null>(null);
   const gesture = useRef<Gesture | null>(null);
   const pointers = useRef(new Map<number, Point>());
   const space = useRef(false);
@@ -102,6 +105,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   useEffect(() => { onSelection?.(live); }, [live, onSelection]);
   const [outerWidth, setOuterWidth] = useState(0);
   const compact = outerWidth > 0 && outerWidth < 860;
+  const narrow = outerWidth > 0 && outerWidth < 480;
   const shown = panels ?? { layers: !compact, inspector: !compact };
 
   useLayoutEffect(() => {
@@ -162,22 +166,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
 
   const select = useCallback((ids: readonly string[]) => { setSelected([...ids]); }, []);
 
-  const frameAt = useCallback((point: Point, exclude: ReadonlySet<string>): string | null => {
-    let best: { id: string; depth: number; order: number } | null = null;
-    let order = 0;
-    const walk = (parent: string | null, depth: number) => {
-      for (const node of index.get(parent) ?? []) {
-        order++;
-        if (node.hidden || exclude.has(node.id)) continue;
-        if (node.type === "frame" && containsPoint(worldBox(scene, node), point)) {
-          if (!best || depth > best.depth || (depth === best.depth && order > best.order)) best = { id: node.id, depth, order };
-          walk(node.id, depth + 1);
-        } else if (node.type === "group") walk(node.id, depth + 1);
-      }
-    };
-    walk(null, 0);
-    return (best as { id: string } | null)?.id ?? null;
-  }, [scene, index]);
+  const frameAt = useCallback((point: Point, exclude: ReadonlySet<string>) => findFrameAt(scene, index, point, exclude), [scene, index]);
 
   const pick = useCallback((hitId: string, deep: boolean): string | null => {
     const node = scene.get(hitId);
@@ -189,7 +178,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (deep) return chain[chain.length - 1].id;
     for (let depth = chain.length - 1; depth > 0; depth--) {
       const level = chain[depth];
-      if (live.some((id) => id !== level.id && effectiveParent(scene, scene.get(id)!) === effectiveParent(scene, level))) return level.id;
+      if (live.some((id) => effectiveParent(scene, scene.get(id)!) === effectiveParent(scene, level))) return level.id;
     }
     if (live.includes(chain[0].id)) return chain[0].id;
     if (chain[0].type === "frame" && !chain[0].parentId && chain.length > 1) return chain[1].id;
@@ -367,7 +356,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     const picked = label ?? (hit ? pick(hit, event.ctrlKey || event.metaKey) : null);
     const insideSelection = !event.shiftKey && live.length > 0 && topmost(scene, live).some((node) => containsPoint(worldBounds(scene, node), world));
     if (insideSelection && !readOnly && (!picked || live.includes(picked) || live.some((id) => descendants(scene, id, index).some((child) => child.id === picked)))) {
-      gesture.current = { kind: "move", start: world, originals: topmost(scene, live), box: contentBox(live)!, moved: false, click: picked && !live.includes(picked) ? picked : null, copies: false };
+      gesture.current = { kind: "move", start: world, originals: topmost(scene, live), box: contentBox(live)!, moved: false, click: picked && !live.includes(picked) ? picked : null, copiedFrom: [] };
       return;
     }
     if (!picked) {
@@ -381,7 +370,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     setSelected(next);
     if (readOnly || event.shiftKey) return;
     const moving = topmost(scene, next).filter((node) => !node.locked);
-    gesture.current = { kind: "move", start: world, originals: moving, box: contentBox(next) ?? { x: world.x, y: world.y, width: 0, height: 0 }, moved: false, click: null, copies: false };
+    gesture.current = { kind: "move", start: world, originals: moving, box: contentBox(next) ?? { x: world.x, y: world.y, width: 0, height: 0 }, moved: false, click: null, copiedFrom: [] };
   };
 
   const snapTargets = (exclude: ReadonlySet<string>, parentIds: ReadonlySet<string | null>) => {
@@ -446,9 +435,9 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
           setBusy(true);
           if (event.altKey) {
             const copy = duplicateNodes(scene, index, current.originals.map((node) => node.id), 0);
+            current.copiedFrom = current.originals.map((node) => node.id);
             current.originals = copy.nodes.filter((node) => copy.roots.includes(node.id));
-            current.copies = true;
-            canvas.preview(copy.nodes);
+            canvas.preview(copy.nodes, { share: true });
             setSelected(copy.roots);
             pendingCopies.current = copy.nodes;
           }
@@ -461,8 +450,8 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         dx = round(current.box.x + dx + snap.dx) - current.box.x;
         dy = round(current.box.y + dy + snap.dy) - current.box.y;
         setGuides(snap.guides);
-        const extra = current.copies ? pendingCopies.current.filter((node) => !current.originals.some((root) => root.id === node.id)) : [];
-        canvas.preview([...extra, ...current.originals.map((node) => ({ ...node, x: node.x + dx, y: node.y + dy }))]);
+        const extra = current.copiedFrom.length ? pendingCopies.current.filter((node) => !current.originals.some((root) => root.id === node.id)) : [];
+        canvas.preview([...extra, ...current.originals.map((node) => ({ ...node, x: node.x + dx, y: node.y + dy }))], { share: true });
         return;
       }
       case "resize": {
@@ -477,10 +466,10 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             pointer = { x: world.x + snap.dx, y: world.y + snap.dy };
             setGuides(snap.guides);
           }
-          canvas.preview(resizeSingle(current.base, current.baseIndex, node, current.handle, { x: round(pointer.x), y: round(pointer.y) }, event.shiftKey, event.altKey));
+          canvas.preview(resizeSingle(current.base, current.baseIndex, node, current.handle, { x: round(pointer.x), y: round(pointer.y) }, event.shiftKey, event.altKey), { share: true });
         } else {
           const next = resizeBox(current.box, current.handle, world, event.shiftKey, event.altKey);
-          canvas.preview(resizeMany(current.base, current.baseIndex, current.originals, current.box, next));
+          canvas.preview(resizeMany(current.base, current.baseIndex, current.originals, current.box, next), { share: true });
         }
         return;
       }
@@ -488,7 +477,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         let angle = angleOf(current.centre, world) - current.start;
         if (event.shiftKey) angle = Math.round(angle / 15) * 15;
         angle = ((angle + 540) % 360) - 180;
-        canvas.preview([{ ...current.original, rotation: Math.round(angle * 10) / 10 }]);
+        canvas.preview([{ ...current.original, rotation: Math.round(angle * 10) / 10 }], { share: true });
         return;
       }
       case "endpoint": {
@@ -501,7 +490,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
           const length = Math.hypot(world.x - other.x, world.y - other.y);
           target = { x: other.x + Math.cos(angle) * length, y: other.y + Math.sin(angle) * length };
         }
-        canvas.preview([moveEndpoint(scene, current.original, current.end, { x: round(target.x), y: round(target.y) })]);
+        canvas.preview([moveEndpoint(scene, current.original, current.end, { x: round(target.x), y: round(target.y) })], { share: true });
         return;
       }
       case "create": {
@@ -557,34 +546,15 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
           return;
         }
         const drafts = current.originals.map((node) => canvas.scene.get(node.id) ?? node);
-        const exclude = new Set(drafts.flatMap((node) => [node.id, ...descendants(scene, node.id, index).map((child) => child.id)]));
-        const dropTarget = frameAt(world, exclude);
-        const changed = drafts.map((node) => {
-          const parent = effectiveParent(scene, node);
-          if (parent && scene.get(parent)?.type === "group") return node;
-          const target = dropTarget;
-          const container = target ? scene.get(target) : undefined;
-          const siblings = (index.get(target) ?? []).filter((item) => !exclude.has(item.id));
-          if (container?.layout) {
-            const row = container.layout.direction === "row";
-            const origin = worldOrigin(scene, container);
-            const position = siblings.filter((item) => (row ? origin.x + item.x + item.width / 2 : origin.y + item.y + item.height / 2) < (row ? world.x : world.y)).length;
-            const z = zAt(siblings, position);
-            return target === parent ? { ...node, z } : reparent(scene, node, target, z);
-          }
-          if (target === parent) return node;
-          return reparent(scene, node, target, nextZ(siblings));
-        });
-        const copies = current.copies ? pendingCopies.current.filter((node) => !current.originals.some((root) => root.id === node.id)) : [];
+        const changed = dropMoved(scene, index, drafts, world, current.copiedFrom);
+        const copies = current.copiedFrom.length ? pendingCopies.current.filter((node) => !current.originals.some((root) => root.id === node.id)) : [];
         canvas.commit([...copies, ...changed]);
         pendingCopies.current = [];
         return;
       }
       case "resize": case "rotate": case "endpoint": {
         const ids = current.kind === "resize" ? current.originals.flatMap((node) => [node.id, ...(node.type === "group" ? descendants(scene, node.id, index).map((child) => child.id) : [])]) : [current.original.id];
-        const finals = ids.map((id) => canvas.scene.get(id)).filter(isLive);
-        canvas.preview(null);
-        canvas.commit(finals);
+        canvas.commit(ids.map((id) => canvas.scene.get(id)).filter(isLive));
         return;
       }
       case "create": {
@@ -775,7 +745,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   return (
     <div ref={root} className="relative flex min-h-0 min-w-0 flex-1">
       {shown.layers && (
-        <aside aria-label="Layers" className={cn("flex w-60 shrink-0 flex-col border-r border-hairline/40 bg-panel", compact && "absolute inset-y-0 left-0 z-20 w-[min(260px,80vw)] origin-overlay-in")}>
+        <aside aria-label="Layers" className={cn("flex w-60 shrink-0 flex-col border-r border-hairline/40 bg-panel", compact && "absolute inset-y-0 left-0 z-20 w-[min(260px,80vw)] pb-16 origin-overlay-in")}>
           {layers(selectionApi)}
         </aside>
       )}
@@ -800,7 +770,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         )}
         {!(index.get(null)?.length) && !editing && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center text-[13px] text-ink-tertiary">
-            {readOnly ? "Nothing on this canvas yet" : "Press F for a frame, R for a rectangle, T for text"}
+            {readOnly ? "Nothing on this canvas yet" : narrow ? "Pick a tool below to start" : "Press F for a frame, R for a rectangle, T for text"}
           </div>
         )}
         <div data-canvas-chrome className="contents">
@@ -808,13 +778,13 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             imageMenu={imageMenu} onImageMenu={setImageMenu}
             imagePicker={imagePicker ? (close) => imagePicker((image) => { placePicked(image); close(); }, close) : undefined}
             onUpload={(files) => void placeImages(files, null)}
-            panels={shown} onPanels={(next) => setPanels(next)} />
+            narrow={narrow && !readOnly} panels={shown} onPanels={(next) => setPanels(compact ? oneOverlay(shown, next) : next)} />
           <ZoomControls zoom={view.zoom} onZoom={(factor) => zoomAt(factor, { x: size.width / 2, y: size.height / 2 })}
             onFit={() => zoomTo()} onSelection={live.length ? () => zoomTo(live) : undefined} onActual={() => zoomAt(1 / view.zoom, { x: size.width / 2, y: size.height / 2 })} />
         </div>
       </div>
       {shown.inspector && (
-        <aside aria-label="Design" className={cn("flex w-64 shrink-0 flex-col border-l border-hairline/40 bg-panel", compact && "absolute inset-x-0 bottom-0 z-20 max-h-[55%] w-auto border-l-0 border-t origin-overlay-in")}>
+        <aside aria-label="Design" className={cn("flex w-64 shrink-0 flex-col border-l border-hairline/40 bg-panel", compact && "absolute inset-x-0 bottom-0 z-20 max-h-[55%] w-auto border-l-0 border-t pb-16 origin-overlay-in")}>
           {inspector(selectionApi)}
         </aside>
       )}
@@ -838,7 +808,7 @@ function TextEditor({ node, origin, zoom, onChange, onDone }: { node: CanvasNode
       className="absolute z-10 m-0 resize-none overflow-hidden border-0 bg-transparent p-0 outline outline-1 outline-accent"
       style={{
         left: origin.x, top: origin.y, width: Math.max(layout.width, node.fontSize ?? 16) * zoom + (node.autoWidth ? size : 0), height: Math.max(layout.height, layout.lineHeight) * zoom,
-        font: `${node.fontWeight ?? 400} ${size}px/${layout.lineHeight * zoom}px ${FONT_STACKS[node.font ?? "sans"]}`, color: node.fill ?? "inherit",
+        font: `${node.fontWeight ?? 400} ${size}px/${layout.lineHeight * zoom}px ${fontStack(node)}`, color: node.fill ?? "inherit",
         textAlign: node.align ?? "left", whiteSpace: node.autoWidth ? "pre" : "pre-wrap", transform: node.rotation ? `rotate(${node.rotation}deg)` : undefined,
         transformOrigin: `${(node.width * zoom) / 2}px ${(node.height * zoom) / 2}px`, caretColor: "var(--color-accent)",
       }} />

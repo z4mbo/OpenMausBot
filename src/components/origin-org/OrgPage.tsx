@@ -6,6 +6,7 @@ import { budgetCaption, type BudgetLine, type BudgetOverview } from "@/lib/agent
 import { EmptyState, Loading, Notice, type WorkspaceContext } from "../origin-pages/ui";
 import { BudgetBadge, BudgetEditor, type BudgetTarget } from "./BudgetEditor";
 import { formatTokens, groupOrg, PHASE_LABEL, type OrgNode, type OrgTree } from "./org-tree";
+import { WorkspacePulse } from "../origin-pulse/WorkspacePulse";
 
 const PHASE_TONE: Record<OrgNode["phase"], string> = {
   idle: "bg-ink-tertiary/50",
@@ -16,7 +17,7 @@ const PHASE_TONE: Record<OrgNode["phase"], string> = {
 
 const editButton = "ml-1 shrink-0 rounded px-1 text-[11.5px] text-ink-tertiary opacity-0 outline-none transition-[opacity,color] duration-(--motion-fast) hover:text-ink focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent/60 group-hover:opacity-100 touch:opacity-100";
 
-type Budgets = { lines: Map<string, BudgetLine>; teamId: string; canEdit: boolean; editing: string | null; edit(key: string | null): void };
+type Budgets = { lines: Map<string, BudgetLine>; teamId: string; canEdit: boolean; editing: string | null; edit(key: string): void; done(key: string): void };
 
 const keyOf = (target: BudgetTarget) => ("agentId" in target ? target.agentId : target.projectId);
 
@@ -24,7 +25,7 @@ function BudgetButton({ budgets, target, label }: { budgets: Budgets; target: Bu
   if (!budgets.canEdit || budgets.editing === keyOf(target)) return null;
   const set = budgets.lines.get(keyOf(target))?.monthlyUsd !== undefined;
   return (
-    <button type="button" className={editButton} onClick={() => budgets.edit(keyOf(target))} aria-label={`${set ? "Change" : "Set"} the monthly budget for ${label}`}>
+    <button type="button" className={editButton} data-budget-key={keyOf(target)} onClick={() => budgets.edit(keyOf(target))} aria-label={`${set ? "Change" : "Set"} the monthly budget for ${label}`}>
       {set ? "Edit" : "Set budget"}
     </button>
   );
@@ -35,7 +36,7 @@ function BudgetRow({ budgets, target, label }: { budgets: Budgets; target: Budge
   const line = budgets.lines.get(keyOf(target));
   const caption = budgetCaption(line);
   if (budgets.editing === keyOf(target)) {
-    return <BudgetEditor teamId={budgets.teamId} target={target} label={label} monthlyUsd={line?.monthlyUsd} onDone={() => budgets.edit(null)} />;
+    return <BudgetEditor teamId={budgets.teamId} target={target} label={label} monthlyUsd={line?.monthlyUsd} onDone={() => budgets.done(keyOf(target))} />;
   }
   if (!caption) return null;
   return (
@@ -48,7 +49,7 @@ function BudgetRow({ budgets, target, label }: { budgets: Budgets; target: Budge
 
 function Node({ node, budgets, depth = 0 }: { node: OrgNode; budgets: Budgets; depth?: number }) {
   return (
-    <div className={cn("group flex min-w-0 items-start gap-2.5 rounded-xl px-2.5 py-2 transition-colors duration-150 hover:bg-raised/40", depth > 0 && "ml-5")} data-org-node={node._id}>
+    <div className={cn("group flex min-w-0 items-start gap-2.5 rounded-xl px-2.5 py-2 transition-colors duration-(--motion-fast) hover:bg-raised/40", depth > 0 && "ml-5")} data-org-node={node._id}>
       <span className="mt-1 size-2.5 shrink-0 rounded-full" style={{ backgroundColor: node.color }} aria-hidden="true" />
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-1.5">
@@ -80,7 +81,14 @@ export function OrgPage({ teamId }: WorkspaceContext) {
   if (tree === undefined) return <Loading label="Loading the org" />;
   const org = groupOrg(tree);
   if (!org.heads.length && !org.projects.length && !org.unplaced.length) {
-    return <EmptyState icon={<Network size={22} />} title="No agents yet" body="Publish the workspace's boss and each project's Chief, and they show here with what they are working on." />;
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-[var(--glass-top,0px)]">
+        <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4 md:p-6">
+          <WorkspacePulse teamId={teamId} />
+          <EmptyState icon={<Network size={22} />} title="No agents yet" body="Publish the workspace's boss and each project's Chief, and they show here with what they are working on." />
+        </div>
+      </div>
+    );
   }
   const budgets: Budgets = {
     lines: new Map<string, BudgetLine>([
@@ -88,10 +96,15 @@ export function OrgPage({ teamId }: WorkspaceContext) {
       ...(overview?.projects ?? []).map((row) => [row.projectId, row] as const),
     ]),
     teamId, canEdit: overview?.canEdit ?? false, editing, edit: setEditing,
+    done: (key) => {
+      setEditing(null);
+      requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-budget-key="${CSS.escape(key)}"]`)?.focus());
+    },
   };
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-[var(--glass-top,0px)]">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 md:p-6">
+        <WorkspacePulse teamId={teamId} />
         {tree.truncated && <Notice>Showing the most recent agents and runs.</Notice>}
         {(org.heads.length > 0 || org.unplaced.length > 0) && (
           <section aria-label="Workspace" className="rounded-xl border border-hairline/40 bg-panel p-1.5">

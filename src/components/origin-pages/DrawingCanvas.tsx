@@ -10,6 +10,7 @@ import { composeMessage, imageAttachmentFromFile } from "@/lib/composer-attachme
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
 import { openOriginPage } from "@/lib/origin-pages";
 import { useShowThreads } from "@/lib/thread-preferences";
+import { useBrandKit } from "@/lib/origin-brand";
 import { openBot } from "@/state/thread-navigation";
 import { useStore, type Bot } from "@/state/store";
 import { cn } from "@/lib/cn";
@@ -19,6 +20,7 @@ import { topmost } from "./canvas/actions";
 import { CanvasEditor, type PlacedImage, type SelectionApi } from "./canvas/CanvasEditor";
 import { download, exportSvg, fileSafe, svgToPng } from "./canvas/export";
 import { Inspector } from "./canvas/Inspector";
+import { useCanvasBrandFonts } from "./canvas/BrandSection";
 import { LayersPanel } from "./canvas/LayersPanel";
 import { PublishSection } from "./canvas/PublishSection";
 import { useCanvasScene, type CanvasScene } from "./canvas/use-canvas-scene";
@@ -72,6 +74,8 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
   const outbox = useMemo(() => drawingOutbox({ server, userId, teamId, canvasId }), [server, userId, teamId, canvasId]);
   useSyncExternalStore(outbox.subscribe, outbox.snapshot);
   const canvas = useCanvasScene(rows, outbox, readOnly);
+  const brand = useBrandKit(projectId);
+  useCanvasBrandFonts(canvas, brand, readOnly);
   const [notice, setNotice] = useState("");
   const [clock, setClock] = useState(Date.now());
   const [admitted, setAdmitted] = useState<ReadonlyMap<string, string>>(new Map());
@@ -179,7 +183,7 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
           imagePicker={projectId ? (place, close) => <AssetPicker projectId={projectId} onPick={async (asset) => { try { place(await placeAsset(asset)); } catch (error) { setNotice(errorText(error, "Could not add the asset")); close(); } }} /> : undefined}
           onSelection={setSelected}
           layers={(selection) => <LayersPanel canvas={canvas} selection={selection} readOnly={readOnly} />}
-          inspector={(selection) => <Inspector canvas={canvas} selection={selection} readOnly={readOnly}
+          inspector={(selection) => <Inspector canvas={canvas} selection={selection} readOnly={readOnly} brand={brand}
             exportSection={<>
               {projectId && canvasId && <PublishSection canvas={canvas} selection={selection} images={images} projectId={projectId} teamId={teamId} canvasId={canvasId} readOnly={readOnly} />}
               <ExportSection canvas={canvas} selection={selection} images={images} name={name} projectId={readOnly ? undefined : projectId} />

@@ -22,6 +22,9 @@ import { broadcastDraft, broadcastList, broadcastSchedule, type BroadcastToolSco
 import { pipelineTools } from "./origin-pipeline-tools.ts";
 import { standupTools } from "./origin-standup-tool.ts";
 import { campaignTools } from "./origin-campaign-tools.ts";
+import { brandTools } from "./origin-brand-tools.ts";
+import { launchpadTools } from "./origin-launchpad-tools.ts";
+import { shipTools } from "./ship/tools.ts";
 import type { PipelineSender } from "./origin-pipeline.ts";
 import { runStudioTool, studioRunner, type StudioRunner } from "./origin-studio.ts";
 
@@ -207,7 +210,7 @@ const isDoneColumn = (column: Args) => column.isDone === true || text(column.tit
 const PRIORITIES = new Set(["low", "medium", "high"]);
 const PRIORITY_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
 const REVIEW_COLUMNS = new Set(["review", "inreview", "codereview", "toreview", "readyforreview"]);
-const ASSET_TYPES = new Set(["figma", "image", "icon", "font", "document", "apk", "other"]);
+const ASSET_TYPES = new Set(["figma", "image", "video", "audio", "icon", "font", "document", "apk", "other"]);
 export const ORIGIN_ASSET_MAX_BYTES = 15 * 1024 * 1024;
 const ISSUE_KEY = /^ORI-([A-Z0-9]{1,8})$/i;
 const ISSUE_LIST_MAX = 100;
@@ -976,21 +979,16 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
   async origin_broadcast_list(args, ctx) { return broadcastList(args, await broadcastScope(ctx, args)); },
   async origin_broadcast_schedule(args, ctx) { return broadcastSchedule(args, await broadcastScope(ctx, args)); },
 
-  async origin_studio_generate(args, ctx) {
-    return runStudioTool("origin_studio_generate", args, await studioScope(ctx, args));
-  },
-
+  async origin_studio_generate(args, ctx) { return runStudioTool("origin_studio_generate", args, await studioScope(ctx, args)); },
   async origin_studio_list(args, ctx) { return runStudioTool("origin_studio_list", args, await studioScope(ctx, args)); },
-
-  async origin_studio_save_asset(args, ctx) {
-    return runStudioTool("origin_studio_save_asset", args, await studioScope(ctx, args));
-  },
+  async origin_studio_save_asset(args, ctx) { return runStudioTool("origin_studio_save_asset", args, await studioScope(ctx, args)); },
 
   ...pipelineTools(async (args, ctx: ToolContext) => {
     const project = await pickProject(ctx, args.project);
     return { client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId, projectName: await projectName(ctx, project.projectId), caller: ctx.caller, ...(ctx.pipeline ? { sender: ctx.pipeline } : {}) };
   }),
-  ...campaignTools((args, ctx: ToolContext) => broadcastScope(ctx, args)),
+  ...campaignTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...brandTools((args, ctx: ToolContext) => broadcastScope(ctx, args)),
+  ...launchpadTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...shipTools(async (args, ctx: ToolContext) => ({ ...await broadcastScope(ctx, args), chief: Boolean(ctx.caller.chiefOfStaff) })),
   ...standupTools(async (args, ctx: ToolContext) => Promise.all((trimmed(args.project) || ctx.reachable.length === 1 ? [await pickProject(ctx, args.project)] : ctx.reachable).map(async ({ projectId }) => { const doc = await projectDoc(ctx, projectId); return { client: ctx.client, sessionToken: ctx.sessionToken, projectId, projectName: text(doc.name) || projectId, teamId: text(doc.teamId) }; }))),
 };
 

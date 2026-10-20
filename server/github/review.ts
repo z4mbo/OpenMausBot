@@ -197,10 +197,10 @@ export async function linkClosingReference(service: GitHubService, repoUrl: stri
  * Runs `fn` with this project's GitHub credential: the Origin App's installation on the project's repository when the
  * App can mint one, else the project's own connection. Security: never the legacy owner token or another project's.
  */
-export async function withProjectGitHub<T>(service: GitHubService, projectId: string, fn: (token: string, repoUrl: string) => Promise<T>): Promise<T> {
+export async function withProjectGitHub<T>(service: GitHubService, projectId: string, fn: (token: string, repoUrl: string) => Promise<T>, extra: Readonly<Record<string, string>> = {}): Promise<T> {
   const { repoUrl, token } = await projectConnection(service, projectId);
   const config = appConfig(service);
-  if (config?.appId && config.privateKey) return withInstallation(service, projectId, repoUrl, (installation) => fn(installation, repoUrl));
+  if (config?.appId && config.privateKey) return withInstallation(service, projectId, repoUrl, (installation) => fn(installation, repoUrl), extra);
   if (!token) throw new Error("This project has no GitHub connection. A workspace admin connects GitHub in Settings > Integrations and authorizes the repository.");
   return fn(token, repoUrl);
 }

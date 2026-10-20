@@ -7,7 +7,7 @@ const cloud = vi.hoisted(() => ({ mutation: vi.fn() }));
 vi.mock("@/lib/origin-cloud", () => ({ useCloudQuery: () => ({ assets: [], tokens: [] }), cloudMutation: cloud.mutation }));
 vi.mock("./ui", async (original) => ({
   ...await original<typeof import("./ui")>(),
-  CloudGate: ({ children }: { children(gate: { projectId: string; canEdit: boolean }): ReactNode }) => children({ projectId: "p", canEdit: true }),
+  CloudGate: ({ children }: { children(gate: { projectId: string; canEdit: boolean; project: { name: string } }): ReactNode }) => children({ projectId: "p", canEdit: true, project: { name: "Fixture" } }),
 }));
 const { AssetsPage } = await import("./AssetsPage");
 

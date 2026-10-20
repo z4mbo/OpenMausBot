@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
-import { ArrowLeft, Bot as BotIcon, Brush, ChevronDown, CircleDot, GitBranch, Headset, Images, LockKeyhole, Megaphone, MessageCircle, Send, Settings, Sparkles, Target, type LucideIcon } from "lucide-react";
+import { Activity, ArrowLeft, Bot as BotIcon, Brush, ChevronDown, CircleDot, FileText, GitBranch, Headset, Images, LockKeyhole, Megaphone, MessageCircle, Rocket, Send, Settings, Sparkles, Target, type LucideIcon } from "lucide-react";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { unreadReplies } from "@/lib/origin-unread";
 import { UnreadBadge } from "./UnreadBadge";
@@ -23,13 +23,21 @@ import { handOff as handIssueTo } from "@/lib/origin-handoff";
 import { StudioPage } from "./origin-studio/StudioPage";
 import { BroadcastPage } from "./origin-broadcast/BroadcastPage";
 import { PipelinePage } from "./origin-pipeline/PipelinePage";
+import { ShipPage } from "./origin-ship/ShipPage";
+import { DocsPage } from "./origin-docs/DocsPage";
+import { LaunchpadDialog } from "./origin-launchpad/LaunchpadDialog";
+import { setMilestoneFilter } from "@/lib/origin-milestone-filter";
+import { PulsePage } from "./origin-pulse/PulsePage";
 
 export const CHIEF_SECTIONS = [
+  { id: "pulse", label: "Pulse", icon: Activity, blurb: "The project at a glance, from idea to growth.", place: "tab" },
   { id: "agents", label: "Agents", icon: BotIcon, blurb: "", place: "tab" },
   { id: "issues", label: "Issues", icon: CircleDot, blurb: "Track the project's bugs and tasks, and hand them to its agents.", place: "tab" },
+  { id: "docs", label: "Docs", icon: FileText, blurb: "The project's Brief and specs, written by people and agents.", place: "tab" },
   { id: "team-chat", label: "Chat", icon: MessageCircle, blurb: "Talk with the people in this project.", place: "tab" },
   { id: "call", label: "Call", icon: Headset, blurb: "Voice and video calls with the people in this project.", place: "tab" },
   { id: "draw", label: "Canvas", icon: Brush, blurb: "Shared design canvases the people and agents in this project build on.", place: "tab" },
+  { id: "ship", label: "Ship", icon: Rocket, blurb: "Deploy the project and release what the team merged.", place: "tab" },
   { id: "studio", label: "Studio", icon: Sparkles, blurb: "Generate images, video and audio for this project.", place: "tab" },
   { id: "broadcast", label: "Broadcast", icon: Send, blurb: "Plan and publish this project's posts on social channels.", place: "tab" },
   { id: "pipeline", label: "Pipeline", icon: Target, blurb: "Leads and sales: see them, reach them, and plan how to win them.", place: "tab" },
@@ -192,7 +200,9 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   const cloudTeamId = useCloudWorkspaceFor(bot);
   const showThreads = useShowThreads();
   const [assigning, setAssigning] = useState<AssignableIssue | null>(null);
+  const [launching, setLaunching] = useState(false);
   const entry = CHIEF_SECTIONS.find((item) => item.id === section)!;
+  const launchpad = launching && <LaunchpadDialog target={{ kind: "project", chief: bot, projectName: bot.name }} onClose={() => setLaunching(false)} />;
   if (section === "agents") return <ProjectAgentsPage lead={bot} agents={teamAgents(state.bots, bot)} />;
   const page = { cloudProjectId: cloudProjectId ?? null, projectName: bot.name, link: { botId: bot.id, teamId: cloudTeamId ?? null } };
   if (section === "issues") {
@@ -208,10 +218,17 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
           const agent = agentId ? team.find((candidate) => candidate.id === agentId) : undefined;
           if (agent) handOff(issue, agent);
           else setAssigning(issue);
-        }} chief={{ name: bot.name, implement: (issue) => dispatch({ type: "send", botId: bot.id, text: implementBrief(issue) }) }} />
+        }} chief={{ name: bot.name, implement: (issue) => dispatch({ type: "send", botId: bot.id, text: implementBrief(issue) }) }} onLaunch={() => setLaunching(true)} />
         {assigning && <AssignIssueDialog issue={assigning} agents={team} onPick={(agent) => handOff(assigning, agent)} onClose={() => setAssigning(null)} />}
+        {launchpad}
       </>
     );
+  }
+  if (section === "docs") {
+    return <><DocsPage {...page} onLaunch={() => setLaunching(true)} onOpenMilestone={(milestoneId) => {
+      if (cloudProjectId) setMilestoneFilter(cloudProjectId, milestoneId);
+      setChiefSectionOf(bot.id, "issues");
+    }} />{launchpad}</>;
   }
   if (section === "assets") return <AssetsPage {...page} />;
   if (section === "vault") return <VaultPage {...page} />;
@@ -228,7 +245,9 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   if (section === "studio") return <StudioPage {...page} agent={bot} />;
   if (section === "broadcast") return <BroadcastPage {...page} agent={bot} />;
   if (section === "pipeline") return <PipelinePage {...page} agent={bot} />;
+  if (section === "ship") return <ShipPage {...page} agent={bot} />;
   if (section === "settings") return <ProjectSettingsPage {...page} />;
+  if (section === "pulse") return <PulsePage {...page} botId={bot.id} />;
   const Icon = entry.icon;
   return (
     <section className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center" aria-label={entry.label}>

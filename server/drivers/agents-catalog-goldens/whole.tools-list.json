@@ -2082,6 +2082,8 @@
             "enum": [
               "figma",
               "image",
+              "video",
+              "audio",
               "icon",
               "font",
               "document",
@@ -2393,6 +2395,35 @@
       }
     },
     {
+      "name": "origin_pulse",
+      "description": "How an Origin project is doing, in numbers over the last 7 or 30 days: its stage (Idea, Build, Launch, Grow), issues done and opened, cycle time, PRs waiting, pages live and views, posts published and engagement, leads by stage, conversion, pipeline value, unread replies, agent runs and spend against budget, and what needs a person. Without project, every project you reach.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          },
+          "range": {
+            "type": "integer",
+            "enum": [
+              7,
+              30
+            ],
+            "description": "Days to cover. Default 7."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
       "name": "origin_studio_generate",
       "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live. count makes several variations. Images and audio wait for the result (up to 40 s); video returns at once. Keep the good ones with origin_studio_save_asset. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
@@ -2477,6 +2508,10 @@
             "type": "boolean",
             "description": "Wait for the result. Default true except for video."
           },
+          "brand": {
+            "type": "boolean",
+            "description": "Put the brand kit's imagery style and colours ahead of an image or video prompt. Default true."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,
@@ -2498,7 +2533,8 @@
               "queued",
               "running",
               "done",
-              "failed"
+              "failed",
+              "cancelled"
             ]
           },
           "limit": {
@@ -2557,7 +2593,7 @@
     },
     {
       "name": "origin_broadcast_draft",
-      "description": "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval. Acts on your team's Origin project unless you pass project.",
+      "description": "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval. Match the brand voice. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2834,7 +2870,7 @@
     },
     {
       "name": "origin_pipeline_sequence",
-      "description": "Start, pause, resume or stop a lead's follow-up sequence in an Origin project's Pipeline. Each step is due `day` days after the start: email (subject, body), sms or whatsapp (body), ai_call (goal) or call_task (a reminder for a person to call; body optional). {first_name}, {name} and {company} fill in. Due contact steps are drafted for a person to approve; the sequence stops when the lead replies or moves to Won or Lost, and a new one replaces the old. Acts on your team's Origin project unless you pass project.",
+      "description": "Start, pause, resume or stop a lead's follow-up sequence in an Origin project's Pipeline. Each step is due `day` days after the start: email (subject, body), sms or whatsapp (body), ai_call (goal) or call_task (a reminder for a person to call; body optional). {first_name}, {name} and {company} fill in. Due contact steps are drafted for a person to approve; the sequence stops when the lead replies or moves to Won or Lost, and a new one replaces the old. Match the brand voice. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2909,7 +2945,7 @@
     },
     {
       "name": "origin_pipeline_contact",
-      "description": "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Unless the project's admin turned on auto-send, nothing goes out until a person approves your draft in the app; say so instead of retrying. AI calls are summarised into the lead's timeline when they end. Acts on your team's Origin project unless you pass project.",
+      "description": "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Unless the project's admin turned on auto-send, nothing goes out until a person approves your draft in the app; say so instead of retrying. AI calls are summarised into the lead's timeline when they end. Match the brand voice. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3094,6 +3130,443 @@
           "kind",
           "item_id"
         ]
+      }
+    },
+    {
+      "name": "origin_doc_list",
+      "description": "List an Origin project's Docs, its Brief first, with who saved each last. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_doc_get",
+      "description": "Read an Origin project document as markdown. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "doc": {
+            "type": "string",
+            "maxLength": 160,
+            "description": "Id or title from origin_doc_list; \"Brief\" finds the project's Brief."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "doc"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_doc_write",
+      "description": "Write an Origin project document in markdown: doc replaces one's content (read it first and keep people's edits), no doc creates one with title. brief true makes it the project's Brief; - [ ] items show as checkboxes. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "doc": {
+            "type": "string",
+            "maxLength": 160,
+            "description": "Id or title from origin_doc_list; \"Brief\" finds the project's Brief."
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "description": "Required for a new document; renames an existing one."
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 60000,
+            "description": "The whole markdown document."
+          },
+          "append": {
+            "type": "boolean",
+            "description": "Add content at the end instead of replacing it."
+          },
+          "brief": {
+            "type": "boolean"
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "content"
+        ]
+      }
+    },
+    {
+      "name": "origin_milestone_list",
+      "description": "List an Origin project's milestones with target day, progress and issues. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_milestone_set",
+      "description": "Create, change or delete an Origin project milestone such as MVP or Launch; issues puts issues in it, remove_issues takes them out. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "milestone": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Id or name of the milestone; a name not found creates it."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Renames an existing milestone."
+          },
+          "target_date": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "YYYY-MM-DD; empty clears it."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "active",
+              "completed"
+            ]
+          },
+          "issues": {
+            "type": "array",
+            "maxItems": 100,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "description": "Issue ids or ORI keys from origin_list_issues to put in this milestone."
+          },
+          "remove_issues": {
+            "type": "array",
+            "maxItems": 100,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "description": "Issue ids or ORI keys to take out of it."
+          },
+          "delete": {
+            "type": "boolean",
+            "description": "Delete the milestone; its issues stay."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "milestone"
+        ]
+      }
+    },
+    {
+      "name": "origin_brand_get",
+      "description": "Read an Origin project's brand kit: name, tagline, voice (adjectives, do and don't), colours with contrast checks, heading and body fonts, logo and icon assets and imagery style. Read it before you design, generate media or write copy. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_brand_update",
+      "description": "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand. Canvas, Pages, Studio, Broadcast and Pipeline all use it. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "tagline": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "voice_adjectives": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "description": "How the brand sounds, such as warm, precise."
+          },
+          "voice_do": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Writing rules to follow."
+          },
+          "voice_dont": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Writing habits to avoid."
+          },
+          "primary": {
+            "type": "string",
+            "maxLength": 9,
+            "description": "Hex, such as #2563EB."
+          },
+          "secondary": {
+            "type": "string",
+            "maxLength": 9,
+            "description": "Hex."
+          },
+          "neutrals": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "maxLength": 9
+            },
+            "description": "Hex; the lightest is the background, the darkest the text."
+          },
+          "heading_font": {
+            "type": "string",
+            "enum": [
+              "inter",
+              "manrope",
+              "dm-sans",
+              "plus-jakarta-sans",
+              "space-grotesk",
+              "outfit",
+              "work-sans",
+              "ibm-plex-sans",
+              "system",
+              "playfair-display",
+              "fraunces",
+              "dm-serif-display",
+              "instrument-serif",
+              "lora",
+              "source-serif-4",
+              "georgia",
+              "jetbrains-mono",
+              "ibm-plex-mono"
+            ]
+          },
+          "body_font": {
+            "type": "string",
+            "enum": [
+              "inter",
+              "manrope",
+              "dm-sans",
+              "plus-jakarta-sans",
+              "space-grotesk",
+              "outfit",
+              "work-sans",
+              "ibm-plex-sans",
+              "system",
+              "playfair-display",
+              "fraunces",
+              "dm-serif-display",
+              "instrument-serif",
+              "lora",
+              "source-serif-4",
+              "georgia",
+              "jetbrains-mono",
+              "ibm-plex-mono"
+            ]
+          },
+          "logos": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Image asset names or ids from origin_list_assets; [] removes them."
+          },
+          "icon": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "An image asset name or id; empty removes it."
+          },
+          "imagery": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "description": "Style words for generated images and video, such as soft daylight, film grain."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      }
+    },
+    {
+      "name": "origin_ship_status",
+      "description": "Read where an Origin project ships: its deploy targets (Vercel, Netlify, Cloudflare Pages, GitHub Actions) with recent deployments, their state, address, commit, which serves production now and what can be redeployed, promoted or rolled back, plus its releases. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_ship_deploy",
+      "description": "Deploy an Origin project's target from its production branch (default), or redeploy, promote or roll back to a deployment_id from origin_ship_status. Chief only; the person approves each call. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "target": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "Id or name from origin_ship_status."
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "deploy",
+              "redeploy",
+              "promote",
+              "rollback"
+            ]
+          },
+          "deployment_id": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "target"
+        ]
+      }
+    },
+    {
+      "name": "origin_release_draft",
+      "description": "Draft an Origin project's next release from the pull requests merged since its last tag, or update the open draft: the version is suggested from them and the notes are written for users unless you pass notes. A project admin edits and approves it in Ship, which tags it on GitHub, then deploys deploy_target to production and drafts a Broadcast announcement when announce is true. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tag": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Like v1.4.0; omit for the suggested one."
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 20000,
+            "description": "Markdown for the project's users; omit to have them written."
+          },
+          "deploy_target": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Target id or name from origin_ship_status."
+          },
+          "announce": {
+            "type": "boolean"
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
       }
     }
   ]

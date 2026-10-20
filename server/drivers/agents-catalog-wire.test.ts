@@ -63,34 +63,34 @@ const FULL = "skills+shared+voice+escalations";
 /** The fullest profile as a bot with a tool selection gets it: every domain tool's schema whole. */
 const WHOLE = `${FULL}+whole-schemas`;
 const PROFILES = profiles();
-const CHIEF_ONLY_TOOLS = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr", "origin_standup"];
+const CHIEF_ONLY_TOOLS = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr", "origin_standup", "origin_release_draft"];
 const CHIEF_TARGET_TOOLS = ["propose_profile", "propose_model"];
 const CHIEF_PROFILE_TARGET = " A Chief of Staff may pass for_bot_id (from list_bots) for a requested change to another bot in its section.";
 const TEAMWORK_TOOLS = ["list_room_targets", "coordinate_bots", "assignment_status", "list_bots", "list_rooms", "list_threads", "close_thread", "start_thread", "post_to_room"];
 
 /** Bytes when the budget was last set; a profile may move at most 2% either way (lower it to lock in a win). */
 const BUDGET_BASELINE: Record<string, number> = {
-  "default": 75780,
-  "voice": 76521,
-  "shared": 77525,
-  "shared+voice": 78266,
-  "skills": 78679,
-  "skills+voice": 79420,
-  "skills+shared": 80424,
-  "skills+shared+voice": 81165,
-  "non-chief": 63193,
-  "voice+non-chief": 63934,
-  "shared+non-chief": 64938,
-  "shared+voice+non-chief": 65679,
-  "skills+non-chief": 66092,
-  "skills+voice+non-chief": 66833,
-  "skills+shared+non-chief": 67837,
-  "skills+shared+voice+non-chief": 68578,
-  "skills+shared+voice+cloud-home": 80220,
-  "skills+shared+voice+non-chief+cloud-home": 67633,
-  "skills+shared+voice+escalations": 82025,
-  "default+legacy-switches": 75780,
-  "skills+shared+voice+escalations+whole-schemas": 93711,
+  "default": 80103,
+  "voice": 80844,
+  "shared": 81848,
+  "shared+voice": 82589,
+  "skills": 83002,
+  "skills+voice": 83743,
+  "skills+shared": 84747,
+  "skills+shared+voice": 85488,
+  "non-chief": 66244,
+  "voice+non-chief": 66985,
+  "shared+non-chief": 67989,
+  "shared+voice+non-chief": 69609,
+  "skills+non-chief": 70022,
+  "skills+voice+non-chief": 70763,
+  "skills+shared+non-chief": 71767,
+  "skills+shared+voice+non-chief": 72508,
+  "skills+shared+voice+cloud-home": 84543,
+  "skills+shared+voice+non-chief+cloud-home": 71563,
+  "skills+shared+voice+escalations": 86348,
+  "default+legacy-switches": 80103,
+  "skills+shared+voice+escalations+whole-schemas": 104123,
 };
 
 const RPC_PREFIX = '{"jsonrpc":"2.0","id":1,"result":';

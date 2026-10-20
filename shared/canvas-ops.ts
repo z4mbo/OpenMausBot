@@ -4,6 +4,7 @@ import {
   type CanvasNode, type CanvasNodeType, type LeadForm, type Scene, type StackLayout, type TextMeasure,
 } from "./canvas-scene.ts";
 import { leadFormHeight } from "./canvas-page.ts";
+import { BRAND_FONT_IDS, isBrandFont } from "./brand-fonts.ts";
 
 /**
  * A node as agents read and write it: `x` and `y` relative to the parent, sizes as `w` and `h`, defaults left out,
@@ -30,6 +31,8 @@ export interface CanvasSpec {
   fontSize?: number;
   fontWeight?: number;
   font?: CanvasNode["font"];
+  /** A brand kit typeface id, such as the kit's heading or body font; null removes it. */
+  family?: string | null;
   align?: CanvasNode["align"];
   lineHeight?: number;
   autoWidth?: boolean;
@@ -87,6 +90,7 @@ export function compactScene(scene: Scene, options: { root?: string; max?: numbe
       spec.fontSize = node.fontSize;
       if (node.fontWeight !== 400) spec.fontWeight = node.fontWeight;
       if (node.font !== "sans") spec.font = node.font;
+      if (node.family) spec.family = node.family;
       if (node.align !== "left") spec.align = node.align;
       if (node.autoWidth) spec.autoWidth = true;
     }
@@ -142,6 +146,10 @@ function applySpec(target: CanvasNode, spec: CanvasSpec, assets: ReadonlyMap<str
   for (const key of ["hidden", "locked", "autoWidth", "closed", "clip", "grow"] as const) if (typeof spec[key] === "boolean") raw[key] = spec[key];
   for (const key of ["text", "font", "align", "imageFit", "fileId", "link"] as const) if (typeof spec[key] === "string") raw[key] = spec[key];
   if (spec.link === "") delete raw.link;
+  if (spec.family === null || spec.family === "") delete raw.family;
+  else if (typeof spec.family === "string") {
+    if (isBrandFont(spec.family)) raw.family = spec.family; else problems.push(`No brand font "${spec.family.slice(0, 40)}"; use one of ${BRAND_FONT_IDS.join(", ")}.`);
+  }
   if (spec.leadForm === null) delete raw.leadForm;
   else if (spec.leadForm && target.type === "frame") {
     const form = leadForm({ ...target.leadForm, ...spec.leadForm });
@@ -163,7 +171,7 @@ function applySpec(target: CanvasNode, spec: CanvasSpec, assets: ReadonlyMap<str
     const fileId = assets.get(spec.asset.trim());
     if (fileId) raw.fileId = fileId; else problems.push(`No image asset "${spec.asset}" in this project.`);
   }
-  if (target.type === "text" && (spec.text !== undefined || spec.fontSize !== undefined || spec.w !== undefined || spec.autoWidth !== undefined || spec.fontWeight !== undefined)) raw.unmeasured = true;
+  if (target.type === "text" && (spec.text !== undefined || spec.fontSize !== undefined || spec.w !== undefined || spec.autoWidth !== undefined || spec.fontWeight !== undefined || spec.family !== undefined)) raw.unmeasured = true;
   return sanitizeNode(raw) ?? target;
 }
 

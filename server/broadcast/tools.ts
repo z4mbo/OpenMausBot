@@ -49,7 +49,7 @@ async function resolveMedia(scope: BroadcastToolScope, wanted: unknown): Promise
     if (!asset) return `No asset "${clip(name, 80)}" in ${scope.projectName}; origin_list_assets lists them.`;
     ids.push(text(asset._id));
     const type = text(asset.contentType).toLowerCase();
-    kinds.push(type.startsWith("video/") ? "video" : type.startsWith("image/") || asset.type === "image" ? "image" : "other");
+    kinds.push(type.startsWith("video/") || asset.type === "video" ? "video" : type.startsWith("image/") || asset.type === "image" ? "image" : "other");
   }
   return { ids, kinds };
 }

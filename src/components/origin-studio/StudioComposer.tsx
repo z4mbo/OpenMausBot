@@ -2,12 +2,27 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { AudioLines, Clapperboard, Image as ImageIcon, ImagePlus, KeyRound, Loader2, Sparkles, Wand2, X } from "lucide-react";
 import { api, useStore } from "@/state/store";
 import { useCloudQuery } from "@/lib/origin-cloud";
+import { useBrandKit } from "@/lib/origin-brand";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import { requestIntegrationFocus } from "../IntegrationKeysSettings";
 import type { CloudDesign, CloudDesignAsset } from "../origin-pages/cloud-types";
 import { EmptyState, Modal, Notice, Segmented, cardClass, chipButton, ghostButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
 import { STUDIO_CUSTOM_MODEL, studioModel, studioModelsFor, type StudioMode } from "../../../shared/studio";
+import { brandedPrompt, type BrandKit } from "../../../shared/brand-kit";
+
+function BrandToggle({ kit, on, disabled, onChange }: { kit: BrandKit; on: boolean; disabled: boolean; onChange(on: boolean): void }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} disabled={disabled} onClick={() => onChange(!on)} title={`Prompts start with: ${brandedPrompt(kit, "").trim()}`}
+      className={cn(chipButton, "ml-auto", on ? "border-accent/50 text-ink" : "text-ink-tertiary")}>
+      <span className={cn("flex transition-opacity duration-(--motion-fast)", !on && "opacity-40")} aria-hidden="true">
+        <span className="size-3 rounded-full ring-2 ring-panel" style={{ background: kit.colors.primary }} />
+        <span className="-ml-1 size-3 rounded-full ring-2 ring-panel" style={{ background: kit.colors.secondary }} />
+      </span>
+      Use brand
+    </button>
+  );
+}
 
 /** A finished generation's settings, put back into the composer to run again. */
 export type StudioDraft = { mode: StudioMode; model: string; prompt: string; aspectRatio?: string; duration?: string; sourceAssetId?: string };
@@ -43,6 +58,8 @@ export function StudioComposer({ projectId, canEdit, falReady, draft }: { projec
   const [duration, setDuration] = useState("");
   const [voice, setVoice] = useState("");
   const [count, setCount] = useState(1);
+  const [useBrand, setUseBrand] = useState(true);
+  const brand = useBrandKit(projectId);
   const [source, setSource] = useState<CloudDesignAsset | null>(null);
   const [picking, setPicking] = useState(false);
   const [endpoint, setEndpoint] = useState("");
@@ -93,6 +110,7 @@ export function StudioComposer({ projectId, canEdit, falReady, draft }: { projec
           ...(aspectRatio ? { aspectRatio } : {}), ...(duration ? { duration } : {}), ...(voice ? { voice } : {}),
           ...(source && (needsSource || custom) ? { sourceAssetId: source._id } : {}),
           ...(custom ? { endpoint, ...(input ? { input } : {}) } : {}),
+          ...(brand ? { brand: useBrand } : {}),
         }),
       });
     }, "Could not start the generation");
@@ -124,6 +142,7 @@ export function StudioComposer({ projectId, canEdit, falReady, draft }: { projec
             </button>
           )
         )}
+        {brand && (mode === "image" || mode === "video") && <BrandToggle kit={brand} on={useBrand} disabled={!canEdit} onChange={setUseBrand} />}
       </div>
       <textarea ref={promptRef} value={prompt} onChange={(event) => setPrompt(event.target.value)} onKeyDown={onKey} disabled={!canEdit}
         rows={3} maxLength={8_000} aria-label="Prompt" placeholder={PLACEHOLDER[mode]}

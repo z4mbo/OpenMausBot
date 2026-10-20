@@ -1,4 +1,5 @@
 import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
+import { BRAND_VOICE } from "./agents-brand-tools.ts";
 
 export const PIPELINE_TOOL_DEFINITIONS = [
   {
@@ -54,7 +55,7 @@ export const PIPELINE_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_pipeline_sequence",
-    description: "Start, pause, resume or stop a lead's follow-up sequence in an Origin project's Pipeline. Each step is due `day` days after the start: email (subject, body), sms or whatsapp (body), ai_call (goal) or call_task (a reminder for a person to call; body optional). {first_name}, {name} and {company} fill in. Due contact steps are drafted for a person to approve; the sequence stops when the lead replies or moves to Won or Lost, and a new one replaces the old." + ORIGIN_SCOPE,
+    description: "Start, pause, resume or stop a lead's follow-up sequence in an Origin project's Pipeline. Each step is due `day` days after the start: email (subject, body), sms or whatsapp (body), ai_call (goal) or call_task (a reminder for a person to call; body optional). {first_name}, {name} and {company} fill in. Due contact steps are drafted for a person to approve; the sequence stops when the lead replies or moves to Won or Lost, and a new one replaces the old." + BRAND_VOICE + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -81,7 +82,7 @@ export const PIPELINE_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_pipeline_contact",
-    description: "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Unless the project's admin turned on auto-send, nothing goes out until a person approves your draft in the app; say so instead of retrying. AI calls are summarised into the lead's timeline when they end." + ORIGIN_SCOPE,
+    description: "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Unless the project's admin turned on auto-send, nothing goes out until a person approves your draft in the app; say so instead of retrying. AI calls are summarised into the lead's timeline when they end." + BRAND_VOICE + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {

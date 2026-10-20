@@ -30,6 +30,8 @@ export const cloudUrl = () => config.url;
 export const useCloudUrl = cloudUrl;
 export const sessionStore = { get: token };
 export const useCloudSession = () => ({ token: token(), user: { _id: "fixture-user" }, ready: true });
+export const isCurrentCloudSession = () => true;
+export const captureCloudSession = () => ({ url: cloudUrl(), token: token(), isCurrent: () => true, assertCurrent() {} });
 export const setCloudUrl = () => {};
 export const setSessionToken = () => {};
 export const logoutCloud = async () => {};

@@ -7,7 +7,7 @@ import type { Bot } from "@/state/store";
 
 const fixture = vi.hoisted(() => ({ attach: vi.fn(), dispatch: vi.fn(), exportSvg: vi.fn(), png: vi.fn(), currentToken: "fixture-token", mutation: vi.fn(), rows: [] as string[] }));
 vi.mock("./canvas/export", () => ({ exportSvg: fixture.exportSvg, svgToPng: fixture.png, download: vi.fn(), fileSafe: (name: string) => name }));
-vi.mock("@/lib/origin-cloud", () => ({ cloudMutation: fixture.mutation, useCloudQuery: (name: string) => (name === "draw:scene" ? fixture.rows : name === "design:list" ? { assets: [], tokens: [] } : name === "pages:list" ? { pages: [], captureEnabled: false } : []), useCloudSession: () => ({ token: "fixture-token" }), useCloudUrl: () => "https://fixture.test" }));
+vi.mock("@/lib/origin-cloud", () => ({ cloudMutation: fixture.mutation, useCloudQuery: (name: string) => (name === "draw:scene" ? fixture.rows : name === "design:list" ? { assets: [], tokens: [] } : name === "pages:list" ? { pages: [], captureEnabled: false } : name === "brand:get" ? null : []), useCloudSession: () => ({ token: "fixture-token" }), useCloudUrl: () => "https://fixture.test" }));
 vi.mock("@/lib/origin-cloud/client", () => ({ cloudUrl: () => "https://fixture.test", sessionStore: { get: () => fixture.currentToken } }));
 vi.mock("@/state/store", () => ({ useStore: () => ({ dispatch: fixture.dispatch }) }));
 vi.mock("@/lib/composer-attachments", () => ({ imageAttachmentFromFile: fixture.attach, composeMessage: (text: string) => text }));

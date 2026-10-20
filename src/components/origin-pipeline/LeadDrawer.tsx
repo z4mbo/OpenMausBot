@@ -8,7 +8,7 @@ import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import { ModalFocusScope, useModalDialog } from "@/hooks/use-modal-dialog";
 import { ChipSelect, DateChip } from "../origin-pages/issue-fields";
-import { Field, Loading, Notice, chipButton, ghostButton, iconButton, inputClass as baseInput, overlayMotion, primaryButton, useAction, useDismiss } from "../origin-pages/ui";
+import { Field, Loading, Notice, chipButton, ghostButton, iconButton, inputClass, overlayMotion, primaryButton, useAction, useDismiss } from "../origin-pages/ui";
 import {
   normalizeLeadPhone, type PipelineActivity, type PipelineActivityKind, type PipelineChannel, type PipelineLead, type PipelineSettingsView,
 } from "../../../shared/origin-pipeline";
@@ -18,8 +18,6 @@ import { OwnerAvatar, type OwnerOption } from "./owners";
 import { SequencePanel } from "./SequencePanel";
 import { InsightRow } from "./LeadInsight";
 import type { LeadInsight } from "./pipeline-model";
-
-const inputClass = cn(baseInput, "font-normal");
 
 type Compose = "note" | PipelineChannel;
 type EditableField = "name" | "company" | "email" | "phone" | "source" | "notes" | "nextStep" | "value" | "tags";
@@ -101,9 +99,9 @@ export function LeadDrawer({ projectId, projectName, leadId, stages, currency, c
 
   return (
     <div className={cn("fixed inset-0 z-50 flex justify-end bg-black/45", overlayMotion(closing))} onMouseDown={(event) => { if (event.target === event.currentTarget) dismiss(); }}>
-      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={heading} tabIndex={-1}
-        className={cn("flex h-full w-full max-w-[600px] flex-col border-l border-hairline/60 bg-app outline-none transition-[transform,opacity] duration-150 ease-out motion-reduce:transition-none",
-          "motion-safe:animate-[panel-in_0.18s_cubic-bezier(0.22,1,0.36,1)]", closing && "translate-x-6 opacity-0")}>
+      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={heading} tabIndex={-1} style={{ outline: "none" }}
+        className={cn("flex h-full w-full max-w-[600px] flex-col border-l border-hairline/60 bg-app transition-[transform,opacity] duration-(--motion-exit) ease-in motion-reduce:transition-none",
+          "motion-safe:animate-panel-in", closing && "translate-x-6 opacity-0")}>
         <ModalFocusScope panelRef={panel}>
           <header className="flex items-center gap-2 border-b border-hairline/40 px-5 py-3">
             <span className="text-[12.5px] text-ink-tertiary">{projectName} · Lead</span>
@@ -155,7 +153,7 @@ export function LeadDrawer({ projectId, projectName, leadId, stages, currency, c
                 </fieldset>
                 {action.error && <div className="mt-3"><Notice tone="danger">{action.error}</Notice></div>}
                 {canEdit && dirty && (
-                  <div className="mt-3 flex items-center justify-end gap-2 motion-safe:animate-[pop-in_0.14s_ease-out]">
+                  <div className="mt-3 flex items-center justify-end gap-2 motion-safe:animate-pop-in">
                     <span className="mr-auto text-[12px] text-ink-tertiary">Ctrl+Enter to save</span>
                     <button type="button" className={cn(ghostButton, "rounded-full")} onClick={() => setEdits({})}>Discard</button>
                     <button className={cn(primaryButton, "rounded-full px-4")} disabled={action.busy}>{action.busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}Save</button>
@@ -323,7 +321,7 @@ function ActivityRow({ projectId, leadId, activity, canEdit, chief }: { projectI
         {activity.transcript && (
           <div className="mt-1.5">
             <button type="button" className="flex items-center gap-1 text-[12px] text-ink-tertiary hover:text-ink" aria-expanded={transcript} onClick={() => setTranscript((open) => !open)}>
-              <ChevronDown size={12} className={cn("transition-transform duration-150", transcript && "rotate-180")} />Transcript
+              <ChevronDown size={12} className={cn("transition-transform duration-(--motion-fast)", transcript && "rotate-180")} />Transcript
             </button>
             {transcript && <pre className="mt-1 max-h-72 overflow-auto whitespace-pre-wrap rounded-lg border border-hairline/40 px-3 py-2 font-sans text-[12px] leading-relaxed text-ink-secondary">{activity.transcript}</pre>}
           </div>

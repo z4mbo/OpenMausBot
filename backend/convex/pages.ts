@@ -4,6 +4,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { canEdit, requireMember } from "./lib/permissions";
 import { invitationAddress } from "./lib/invitationMail";
 import { newToken, settingsOf } from "./lib/pipelineCore";
+import { countPageView } from "./pulse";
 import { PAGE_BODY_MAX, PAGE_DESCRIPTION_MAX, PAGE_SLUG, PAGE_TITLE_MAX, pageSlug, renderCanvasPage } from "../../shared/canvas-page";
 import { decodeScene, descendants } from "../../shared/canvas-scene";
 
@@ -167,7 +168,9 @@ export const viewed = internalMutation({
   args: address, returns: v.null(),
   handler: async (ctx, args) => {
     const page = await pageAt(ctx, args.site, args.slug);
-    if (page) await ctx.db.patch(page._id, { views: page.views + 1 });
+    if (!page) return null;
+    await ctx.db.patch(page._id, { views: page.views + 1 });
+    await countPageView(ctx, page.projectId, Date.now());
     return null;
   },
 });

@@ -1,5 +1,5 @@
 /** Which page each project shows: its chat, or one of its sections. Messages count as read only while the chat is on screen. */
-export type ChiefSection = "chat" | "issues" | "agents" | "team-chat" | "call" | "draw" | "studio" | "broadcast" | "pipeline" | "assets" | "vault" | "repo" | "feedback" | "settings";
+export type ChiefSection = "chat" | "pulse" | "issues" | "docs" | "agents" | "team-chat" | "call" | "draw" | "ship" | "studio" | "broadcast" | "pipeline" | "assets" | "vault" | "repo" | "feedback" | "settings";
 
 const chosen = new Map<string, ChiefSection>();
 

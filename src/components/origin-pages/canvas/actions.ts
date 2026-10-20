@@ -2,7 +2,7 @@ import { newNode } from "../../../../shared/canvas-ops";
 import {
   descendants, effectiveParent, isLive, nextZ, randomId, sanitizeNode, worldOrigin, type CanvasNode, type CanvasNodeType, type Scene,
 } from "../../../../shared/canvas-scene";
-import { unionBox, worldBounds, type Box } from "./geometry";
+import { containsPoint, unionBox, worldBounds, worldBox, type Box, type Point } from "./geometry";
 
 type Index = ReadonlyMap<string | null, readonly CanvasNode[]>;
 
@@ -109,6 +109,43 @@ export function reparent(scene: Scene, node: CanvasNode, parentId: string | null
   const parent = parentId ? scene.get(parentId) : undefined;
   const origin = parent ? worldOrigin(scene, parent) : { x: 0, y: 0 };
   return { ...node, parentId, z, x: world.x - origin.x, y: world.y - origin.y };
+}
+
+export function frameAt(scene: Scene, index: Index, point: Point, exclude: ReadonlySet<string>): string | null {
+  let best: { id: string; depth: number; order: number } | null = null;
+  let order = 0;
+  const walk = (parent: string | null, depth: number) => {
+    for (const node of index.get(parent) ?? []) {
+      order++;
+      if (node.hidden || exclude.has(node.id)) continue;
+      if (node.type === "frame" && containsPoint(worldBox(scene, node), point)) {
+        if (!best || depth > best.depth || (depth === best.depth && order > best.order)) best = { id: node.id, depth, order };
+        walk(node.id, depth + 1);
+      } else if (node.type === "group") walk(node.id, depth + 1);
+    }
+  };
+  walk(null, 0);
+  return (best as { id: string } | null)?.id ?? null;
+}
+
+export function dropMoved(scene: Scene, index: Index, moved: readonly CanvasNode[], world: Point, copiedFrom: readonly string[] = []): CanvasNode[] {
+  const exclude = new Set([...moved, ...topmost(scene, copiedFrom)].flatMap((node) => [node.id, ...descendants(scene, node.id, index as Map<string | null, CanvasNode[]>).map((child) => child.id)]));
+  const target = frameAt(scene, index, world, exclude);
+  const container = target ? scene.get(target) : undefined;
+  const siblings = (index.get(target) ?? []).filter((item) => !moved.some((node) => node.id === item.id));
+  return moved.map((node) => {
+    const parent = effectiveParent(scene, node);
+    if (parent && scene.get(parent)?.type === "group") return node;
+    if (container?.layout) {
+      const row = container.layout.direction === "row";
+      const origin = worldOrigin(scene, container);
+      const position = siblings.filter((item) => (row ? origin.x + item.x + item.width / 2 : origin.y + item.y + item.height / 2) < (row ? world.x : world.y)).length;
+      const z = zAt(siblings, position);
+      return target === parent ? { ...node, z } : reparent(scene, node, target, z);
+    }
+    if (target === parent) return node;
+    return reparent(scene, node, target, nextZ(siblings));
+  });
 }
 
 export const CLIPBOARD_MARK = "origin-canvas/v1";

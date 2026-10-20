@@ -11,6 +11,9 @@ import { PersonAvatar } from "./PersonAvatar";
 import { errorText, fmtDate, githubRepoHref, githubRepoLabel, shortSha, taskKey } from "./repo-url";
 import { CloudGate, EmptyState, Notice, PageHeader, Skeleton, cardClass, ghostButton, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 import { isDraftColumn } from "../../../shared/origin-columns";
+import type { ShipPreview } from "../../../shared/origin-ship";
+import { useShipPreviews } from "@/lib/origin-ship";
+import { PreviewLinks } from "../origin-ship/PreviewLinks";
 
 export function RepoPage({ onOpenSettings, ...props }: OriginPageProps & { onOpenSettings?(): void }) {
   return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo key={project.repoUrl ?? ""} project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />}</CloudGate>;
@@ -59,6 +62,7 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
   const { snapshot, error, loading, reload } = useRepository(projectId, Boolean(href));
   const [message, setMessage] = useState("");
   const action = useAction();
+  const previews = useShipPreviews(href ? projectId : null, (snapshot?.pullRequests ?? []).filter((pr) => pr.state === "open" || pr.state === "draft"));
 
   if (!project.repoUrl) {
     return <EmptyState icon={<FolderGit2 size={22} />} title="No repository linked" body="Link or create the project's GitHub repository in Settings. Its issues, pull requests and commits then show here."
@@ -128,7 +132,7 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
             <ul className="flex flex-col gap-2">
               {pulls.map((pr) => (
                 <li key={pr.number}>
-                  <PullCard pr={pr} issueKey={(number) => { const task = keyFor(number); return task ? taskKey(task._id) : `#${number}`; }}
+                  <PullCard pr={pr} previews={previews[pr.number]} issueKey={(number) => { const task = keyFor(number); return task ? taskKey(task._id) : `#${number}`; }}
                     canReview={isAdmin && (pr.state === "open" || pr.state === "draft")} busy={action.busy} onReview={(kind) => void review(pr, kind)} />
                 </li>
               ))}
@@ -224,7 +228,7 @@ function ChecksBadge({ checks }: { checks?: string }) {
   return <span className={cn(pill, tone)}>{icon}{label}</span>;
 }
 
-function PullCard({ pr, issueKey, canReview, busy, onReview }: { pr: RepoPull; issueKey(number: number): string; canReview: boolean; busy: boolean; onReview(kind: "approve" | "merge"): void }) {
+function PullCard({ pr, previews, issueKey, canReview, busy, onReview }: { pr: RepoPull; previews?: ShipPreview[]; issueKey(number: number): string; canReview: boolean; busy: boolean; onReview(kind: "approve" | "merge"): void }) {
   const state = PULL_STATE[pr.state];
   const Icon = state.icon;
   const mergeable = pr.checks === "success" || pr.checks === "none";
@@ -244,6 +248,7 @@ function PullCard({ pr, issueKey, canReview, busy, onReview }: { pr: RepoPull; i
         {pr.closes.map((number) => <span key={number} className={cn(pill, "bg-raised text-ink-secondary")}>Closes {issueKey(number)}</span>)}
         {pr.author && <span className="ml-auto text-ink-tertiary">{pr.author}</span>}
       </div>
+      <PreviewLinks previews={previews} className="mt-2" />
       {canReview && (
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5 border-t border-hairline/30 pt-2.5">
           <a className={cn(ghostButton, "min-h-7 px-2 py-1 text-[12px]")} href={pr.url} target="_blank" rel="noreferrer"><ExternalLink size={12} />Open on GitHub</a>

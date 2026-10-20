@@ -38,7 +38,7 @@ export function InsightRow({ insight }: { insight: LeadInsight }) {
         <button type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)}
           className="flex h-6 items-center gap-1 rounded-full px-1.5 text-[12px] text-ink-secondary outline-none transition-colors hover:bg-raised/60 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
           Score <strong className="font-semibold tabular-nums text-ink">{insight.score}</strong>
-          <ChevronDown size={12} className={cn("transition-transform duration-150", open && "rotate-180")} aria-hidden="true" />
+          <ChevronDown size={12} className={cn("transition-transform duration-(--motion-fast)", open && "rotate-180")} aria-hidden="true" />
         </button>
         {insight.actions.map((action) => <NextActionChip key={action.kind} action={action} />)}
       </div>

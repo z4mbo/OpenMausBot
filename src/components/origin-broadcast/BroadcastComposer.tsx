@@ -106,7 +106,7 @@ export function BroadcastComposer({ projectId, post, slot, canEdit, connected, o
             const done = published.get(channel);
             return (
               <button key={channel} type="button" aria-pressed={on} disabled={locked || Boolean(done)} onClick={() => toggleChannel(channel)}
-                className={cn("inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12.5px] transition-colors duration-150 disabled:cursor-default",
+                className={cn("inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12.5px] transition-colors duration-(--motion-fast) disabled:cursor-default",
                   on ? "border-accent/60 bg-accent/15 text-ink" : "border-hairline/60 text-ink-secondary hover:border-hairline hover:text-ink")}>
                 <ChannelMark channel={channel} size={13} />{BROADCAST_RULES[channel].label}
                 {done && <Check size={12} className="text-success" aria-label="Published" />}
@@ -130,7 +130,7 @@ export function BroadcastComposer({ projectId, post, slot, canEdit, connected, o
                 const over = item !== "all" && length! > BROADCAST_RULES[item].limit;
                 return (
                   <button key={item} type="button" role="tab" aria-selected={tab === item} onClick={() => setTab(item)}
-                    className={cn("flex h-8 shrink-0 items-center gap-1.5 rounded-t-lg px-2.5 text-[12px] transition-colors duration-150",
+                    className={cn("flex h-8 shrink-0 items-center gap-1.5 rounded-t-lg px-2.5 text-[12px] transition-colors duration-(--motion-fast)",
                       tab === item ? "bg-panel text-ink" : "text-ink-secondary hover:text-ink")}>
                     {item === "all" ? "All channels" : <><ChannelMark channel={item} size={12} />
                       <span className={cn("tabular-nums", over ? "text-danger" : draft.custom[item] !== undefined ? "text-accent-text" : "")}>{length}/{BROADCAST_RULES[item].limit}</span></>}
@@ -163,7 +163,7 @@ export function BroadcastComposer({ projectId, post, slot, canEdit, connected, o
                 {item.kind === "video" && <Film size={12} className="absolute bottom-1 left-1 text-white drop-shadow" aria-hidden="true" />}
                 {!locked && (
                   <button type="button" aria-label={`Remove ${item.name}`} onClick={() => set({ assetIds: draft.assetIds.filter((id) => id !== item.id) })}
-                    className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover:opacity-100 touch:opacity-100">
+                    className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity duration-(--motion-fast) focus-visible:opacity-100 group-hover:opacity-100 touch:opacity-100">
                     <X size={11} />
                   </button>
                 )}
@@ -171,7 +171,7 @@ export function BroadcastComposer({ projectId, post, slot, canEdit, connected, o
             ))}
             {!locked && (
               <button type="button" aria-expanded={picking} onClick={() => setPicking((open) => !open)}
-                className={cn("flex size-20 flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-[11.5px] transition-colors duration-150",
+                className={cn("flex size-20 flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-[11.5px] transition-colors duration-(--motion-fast)",
                   picking ? "border-accent/60 text-ink" : "border-hairline text-ink-secondary hover:border-accent/60 hover:text-ink")}>
                 <ImagePlus size={16} />Media
               </button>
@@ -187,7 +187,7 @@ export function BroadcastComposer({ projectId, post, slot, canEdit, connected, o
                       const video = mediaKindOf(asset.contentType, asset.name) === "video";
                       return (
                         <button key={asset._id} type="button" title={asset.name} onClick={() => set({ assetIds: [...draft.assetIds, asset._id] })}
-                          className="relative aspect-square overflow-hidden rounded-lg border border-hairline/40 bg-panel outline-none transition-[border-color,transform] duration-150 hover:border-accent/60 focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.97]">
+                          className="relative aspect-square overflow-hidden rounded-lg border border-hairline/40 bg-panel outline-none transition-[border-color,transform] duration-(--motion-fast) hover:border-accent/60 focus-visible:ring-2 focus-visible:ring-accent/60 active:scale-[0.97]">
                           {video ? <video src={href} muted preload="metadata" className="size-full object-cover" /> : <img src={href} alt={asset.name} loading="lazy" className="size-full object-cover" />}
                           {video && <Film size={12} className="absolute bottom-1 left-1 text-white drop-shadow" aria-hidden="true" />}
                         </button>

@@ -83,7 +83,7 @@ try {
     await page.keyboard.press("v");
     const rectBox = await page.locator(`[data-node-id="${rect.id}"]`).boundingBox();
     await drag({ x: rectBox.x + 20, y: rectBox.y + 20 }, { x: rectBox.x + 60, y: rectBox.y + 45 });
-    await page.waitForFunction((id) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.version > 1; }), rect.id);
+    await page.waitForFunction(() => !document.body.textContent.includes("Saving…"));
     const moved = (await nodes()).find((node) => node.id === rect.id);
     assert.ok(moved.x > rect.x && moved.y > rect.y);
     await page.keyboard.press("Control+z");
@@ -100,6 +100,29 @@ try {
     assert.equal((await nodes()).filter((node) => node.type === "rect").length, 1);
     result.drawMoveUndoDuplicateDelete = true;
 
+    const held = (await nodes()).find((node) => node.type === "rect");
+    const heldBox = await page.locator(`[data-node-id="${held.id}"]`).boundingBox();
+    await page.mouse.move(heldBox.x + 10, heldBox.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(heldBox.x + 40, heldBox.y + 30, { steps: 4 });
+    await page.waitForFunction(({ id, x }) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.x !== x; }), { id: held.id, x: held.x });
+    await page.mouse.up();
+    await page.keyboard.press("Control+z");
+    await page.waitForFunction(({ id, x }) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.x === x; }), { id: held.id, x: held.x });
+    result.dragSharedWhileHeld = true;
+
+    if (width < 500) {
+      await page.getByRole("button", { name: "Layers", exact: true }).click();
+      await page.locator('aside[aria-label="Layers"]').waitFor();
+      const rectangle = await page.getByRole("button", { name: "Rectangle", exact: true }).boundingBox();
+      assert.equal(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest("button")?.getAttribute("aria-label"), { x: rectangle.x + rectangle.width / 2, y: rectangle.y + rectangle.height / 2 }), "Rectangle");
+      await capture("layers-open");
+      await page.getByRole("button", { name: "Design panel", exact: true }).click();
+      assert.equal(await page.locator('aside[aria-label="Layers"]').count(), 0);
+      await page.getByRole("button", { name: "Design panel", exact: true }).click();
+      result.narrowPanelsKeepToolbar = true;
+    }
+
     await page.evaluate((rows) => window.originDrawFixture.remote(rows), [...agentRows, ...legacyRows]);
     await page.waitForFunction(() => window.originDrawFixture.requests.some((request) => request.name === "draw:updateElements" && request.args.elements.some((row) => row.includes("Simple pricing"))));
     assert.ok(!(await nodes()).some((node) => node.unmeasured));
@@ -108,6 +131,23 @@ try {
     await capture("agent-section");
     result.agentSectionMeasured = true;
     result.legacyConverted = true;
+
+    if (width >= 1000) {
+      const plans = await named("Plans", "frame");
+      const starter = await named("Starter", "frame");
+      await page.locator('[role="tree"]').getByText("Starter", { exact: true }).first().click();
+      const starterBox = await page.locator(`[data-node-id="${starter.id}"]`).first().boundingBox();
+      const from = { x: starterBox.x + starterBox.width / 2, y: starterBox.y + starterBox.height - 6 };
+      await page.keyboard.down("Alt");
+      await drag(from, { x: from.x + 30, y: from.y });
+      await page.keyboard.up("Alt");
+      await page.waitForFunction(() => window.originDrawFixture.scene.filter((row) => { const node = JSON.parse(row); return node.name === "Starter" && node.type === "frame" && !node.deleted; }).length === 2);
+      const copies = (await nodes()).filter((node) => node.name === "Starter" && node.type === "frame");
+      assert.ok(copies.every((node) => node.parentId === plans.id));
+      await page.keyboard.press("Control+z");
+      await page.waitForFunction(() => window.originDrawFixture.scene.filter((row) => { const node = JSON.parse(row); return node.name === "Starter" && node.type === "frame" && !node.deleted; }).length === 1);
+      result.altDragInAutoLayout = true;
+    }
 
     if (width >= 1000) {
       const team = await named("Team", "frame");

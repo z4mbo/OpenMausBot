@@ -3,6 +3,19 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.5.0",
+  date: "2026-10-20",
+  title: "From idea to shipped: Launchpad, Ship, Brand and Pulse",
+  changes: [
+    { title: "Launchpad", body: "Start a project from a rough idea. Origin creates the project, its repository and its Chief, and the Chief writes a Brief, sets MVP and Launch milestones, files Draft issues and suggests the team, then waits for you before starting work." },
+    { title: "Docs and milestones", body: "Each project has Docs: the Brief and other specs as markdown that you and agents edit, with clickable checklists and a warning when an agent changes a doc you're editing. Issues group by milestone with progress." },
+    { title: "Ship", body: "Connect Vercel, Netlify, Cloudflare Pages or a GitHub Actions workflow and see every deployment live, with redeploy, promote and rollback where the provider allows. Draft a release from merged PRs; once you approve, Origin tags it on GitHub, deploys and drafts the announcement. PR cards show preview links." },
+    { title: "Brand kit", body: "Assets has a Brand tab for your name, voice, colours with contrast checks, fonts, logos and imagery style. Canvas can apply it to a frame, Pages use its fonts, Studio adds it to prompts, and agents write posts and outreach in its voice." },
+    { title: "Pulse", body: "A project's Pulse shows where it stands from idea to growth: issues and PRs, pages and posts, leads and pipeline, agent activity and spend, with what needs you first. The Org page rolls it up for every project." },
+    { title: "Studio and Canvas improvements", body: "Cancel a running generation, and saved video and audio keep their own type in Assets. Canvas drags reach collaborators while you move, Alt-drag works inside auto layout, and panels fit on phones." },
+    { title: "More reliable agents", body: "Agents now pass list and number options to on-demand tools correctly, which a real Haiku run showed could fail before. Disconnecting an integration asks first, and a dozen layout and focus issues are fixed." },
+  ],
+}, {
   version: "0.4.0",
   date: "2026-10-20",
   title: "Pages, campaigns and a self-running pipeline",

@@ -6,14 +6,12 @@ import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import { Switch } from "../SettingsPrimitives";
 import { BotAvatar } from "../Avatar";
-import { Field, Modal, Notice, Segmented, cardClass, ghostButton, inputClass as baseInput, primaryButton, useAction } from "../origin-pages/ui";
+import { Field, Modal, Notice, Segmented, cardClass, ghostButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
 import {
   captureFetchSnippet, captureFormSnippet, parseLeadsCsv, type PipelineChannel, type PipelineImportRow, type PipelinePendingContact, type PipelineSettingsView,
 } from "../../../shared/origin-pipeline";
 import { pipelineServer } from "./pipeline-api";
 import { CopyBlock, InboundSettings, StageEditor } from "./PipelineSettingsPanels";
-
-const inputClass = cn(baseInput, "font-normal");
 
 export function NewLeadDialog({ projectId, stages, onClose, onCreated }: { projectId: string; stages: readonly string[]; onClose(): void; onCreated(leadId: string): void }) {
   const [fields, setFields] = useState({ name: "", company: "", email: "", phone: "", value: "", stage: stages[0] ?? "", source: "", notes: "" });
@@ -276,10 +274,10 @@ export function PendingContacts({ projectId, pending, canEdit, botId, onOpen, on
   return (
     <section className={cn(cardClass, "overflow-hidden")} aria-label="Waiting for approval">
       <header className="flex items-center gap-2 px-3 py-2 text-[12.5px]">
-        <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
-        <strong className="font-medium text-ink">{pending.length} {pending.length === 1 ? "contact waits" : "contacts wait"} for approval</strong>
-        <span className="text-ink-tertiary">Agents drafted these; nothing goes out until you approve.</span>
-        {pending.length > 3 && <button type="button" className="ml-auto text-ink-secondary hover:text-ink" onClick={() => setExpanded((open) => !open)}>{expanded ? "Show fewer" : "Show all"}</button>}
+        <span className="size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+        <strong className="shrink-0 font-medium text-ink">{pending.length} {pending.length === 1 ? "contact waits" : "contacts wait"} for approval</strong>
+        <span className="min-w-0 truncate text-ink-tertiary max-sm:hidden">Agents drafted these; nothing goes out until you approve.</span>
+        {pending.length > 3 && <button type="button" className="ml-auto shrink-0 text-ink-secondary hover:text-ink" onClick={() => setExpanded((open) => !open)}>{expanded ? "Show fewer" : "Show all"}</button>}
       </header>
       <ul className="divide-y divide-hairline/30 border-t border-hairline/30">
         {shown.map((row) => (

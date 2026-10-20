@@ -1,6 +1,7 @@
+import { googleFontsHref, isBrandFont, type BrandFontId } from "./brand-fonts.ts";
 import {
-  FONT_STACKS, LEAD_FIELDS, childrenIndex, isLinkAddress,
-  type CanvasNode, type LeadField, type LeadForm, type Scene, type StackLayout,
+  FONT_STACKS, LEAD_FIELDS, childrenIndex, fontStack, isLinkAddress,
+  type CanvasFont, type CanvasNode, type LeadField, type LeadForm, type Scene, type StackLayout,
 } from "./canvas-scene.ts";
 
 /** A page address segment: lowercase letters, digits and inner hyphens, at most 48 characters. */
@@ -206,7 +207,7 @@ function renderText(node: CanvasNode, style: Style, context: Context): string {
   const body = escapeHtml(text);
   const content = node.link ? `<a${linkAttrs(node)}>${body}</a>` : body;
   return `<${tag} class="o-t"${styleAttr({
-    ...style, color: node.fill ?? undefined, "font-family": FONT_STACKS[node.font ?? "sans"], "font-weight": node.fontWeight ?? 400,
+    ...style, color: node.fill ?? undefined, "font-family": fontStack(node), "font-weight": node.fontWeight ?? 400,
     "font-size": fontSize(size, context), "line-height": node.lineHeight ?? 1.3, "text-align": node.align ?? "left",
   })}>${content}</${tag}>`;
 }
@@ -243,10 +244,15 @@ function renderNode(node: CanvasNode, place: Place, context: Context): string {
   return `<${tag}${tag === "a" ? linkAttrs(node) : ""}${styleAttr(own)}>${children}</${tag}>`;
 }
 
+/** A face a published page loads: a Canvas font or a brand kit typeface. */
+export type PageFont = CanvasFont | BrandFontId;
+
+export const isPageFont = (value: unknown): value is PageFont => value === "sans" || value === "serif" || value === "mono" || isBrandFont(value);
+
 export interface RenderedPage {
   body: string;
   background: string;
-  fonts: ("sans" | "serif" | "mono")[];
+  fonts: PageFont[];
   leadForms: number;
   summary: string;
 }
@@ -263,13 +269,13 @@ export function renderCanvasPage(scene: Scene, frameId: string, images: Readonly
   const background = frame.fill ?? "#FFFFFF";
   const context: Context = { board: null, root: Math.max(320, frame.width), surface: background, images, index, heading, state: { headingUsed: false, forms: 0, texts: [] } };
   const body = renderNode(frame, { kind: "root" }, context);
-  const fonts = [...new Set(visible.filter((node) => node.type === "text").map((node) => node.font ?? "sans"))];
+  const fonts = [...new Set(visible.filter((node) => node.type === "text").map((node): PageFont => node.family ?? node.font ?? "sans"))];
   const { texts, forms } = context.state;
   const summary = texts.find((text) => text.length >= 40) ?? texts.slice(1).join(" ").slice(0, PAGE_DESCRIPTION_MAX);
   return { body, background, fonts, leadForms: forms, summary: summary.replace(/\s+/g, " ").slice(0, PAGE_DESCRIPTION_MAX) };
 }
 
-const FONT_FAMILIES = { sans: "Inter:wght@300..900", serif: null, mono: "JetBrains+Mono:wght@400;600" } as const;
+const FONT_FAMILIES: Record<CanvasFont, BrandFontId | null> = { sans: "inter", serif: null, mono: "jetbrains-mono" };
 
 const PAGE_CSS = `*,*::before,*::after{box-sizing:border-box}html,body{margin:0}body{font-family:${FONT_STACKS.sans};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}`
   + "img{display:block}a{color:inherit;text-decoration:none}.o-t{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.o-t a{text-decoration:underline;text-underline-offset:.15em}"
@@ -289,10 +295,9 @@ export interface PageDocument {
 
 /** The whole HTML document of a published page, with its SEO and social tags; `status` reports the last form submission. */
 export function pageDocument({ title, description, url, image, page, status }: PageDocument): string {
-  const families = page.fonts.map((font) => FONT_FAMILIES[font]).filter(Boolean);
-  const fonts = families.length
-    ? `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?${families.map((family) => `family=${family}`).join("&amp;")}&amp;display=swap">`
-    : "";
+  const families = page.fonts.map((font) => (isBrandFont(font) ? font : FONT_FAMILIES[font])).filter((font): font is BrandFontId => Boolean(font));
+  const href = googleFontsHref(families);
+  const fonts = href ? `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="${escapeHtml(href)}">` : "";
   const meta = [
     `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">`,
     `<title>${escapeHtml(title)}</title>`,

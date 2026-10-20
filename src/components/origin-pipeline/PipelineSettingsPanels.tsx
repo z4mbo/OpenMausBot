@@ -5,10 +5,8 @@ import { useCopyFeedback } from "@/lib/copy-text";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import { Switch } from "../SettingsPrimitives";
-import { Field, Notice, cardClass, ghostButton, iconButton, inputClass as baseInput, primaryButton, useAction } from "../origin-pages/ui";
+import { Field, Notice, cardClass, ghostButton, iconButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
 import { CLOSED_STAGES, type PipelineSettingsView } from "../../../shared/origin-pipeline";
-
-const inputClass = cn(baseInput, "font-normal");
 
 export function CopyBlock({ label, text, multiline = false }: { label: string; text: string; multiline?: boolean }) {
   const { state, copy } = useCopyFeedback(text);

@@ -593,9 +593,7 @@ import { createProjectIconRoutes } from "./origin-project-icons.ts";
 import { createOriginCloudRoutes, cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
 import { createPipelineRoutes, createPipelineSender, loopbackProviderOrigin } from "./origin-pipeline.ts";
 import { BroadcastScheduler, createBroadcastRoutes } from "./broadcast/scheduler.ts";
-import {
-  awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, recordCallNotes, transcribeWith,
-} from "./origin-call-agent.ts";
+import { awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, recordCallNotes, transcribeWith } from "./origin-call-agent.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
 import { createOriginImportRoutes } from "./routes/origin-import.ts";
 import { createOriginAgentSupport } from "./origin-agent-support.ts";
@@ -605,6 +603,7 @@ import { createSharedAgents, type SendDecision } from "./origin-shared-agents.ts
 import { createOriginMemberRoutes } from "./origin-members.ts";
 import { createOriginMcpRoutes } from "./origin-mcp.ts";
 import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService } from "./routes/github.ts";
+import { createShipRoutes } from "./ship/routes.ts";
 import { originGitHub } from "./github/review.ts";
 import { removalSentence, removeGitHubIssue } from "./github/sync.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
@@ -13574,15 +13573,16 @@ const originAgents = createOriginAgentSupport({
 });
 ROUTES.push(originAgents.routes);
 const pipelineProviderOrigin = loopbackProviderOrigin(process.env.OMB_PIPELINE_PROVIDER_URL);
+const summarizeForAgent = async ({ botId, prompt }: { botId: string; prompt: string }) => {
+  const bot = store.bot(botId);
+  if (!bot) throw new CallAgentError("The agent no longer exists");
+  const writer = callSummaryWriter(bot);
+  assertWithinBudget(cfg, DATA_DIR);
+  return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), timeoutMs: 180_000 });
+};
 const pipelineSender = createPipelineSender({
   ...(pipelineProviderOrigin ? { providerOrigin: pipelineProviderOrigin } : {}),
-  summarize: async ({ botId, prompt }) => {
-    const bot = store.bot(botId);
-    if (!bot) throw new CallAgentError("The agent no longer exists");
-    const writer = callSummaryWriter(bot);
-    assertWithinBudget(cfg, DATA_DIR);
-    return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), timeoutMs: 180_000 });
-  },
+  summarize: summarizeForAgent,
   log: (line) => console.log(line),
 });
 ROUTES.push(createPipelineRoutes({ sender: pipelineSender }));
@@ -13699,7 +13699,7 @@ PUBLIC_ROUTES.push(createOriginMcpRoutes({
   publicUrl,
   removeGitHubIssue: async (projectId, taskId, issueUrl) => removalSentence(await removeGitHubIssue(githubService(), projectId, taskId, issueUrl)),
 }));
-ROUTES.push(createGitHubRoutes({ service: githubService }));
+ROUTES.push(createGitHubRoutes({ service: githubService }), createShipRoutes({ github: githubService, summarize: summarizeForAgent }));
 PUBLIC_ROUTES.push(createGitHubPublicRoutes({ service: githubService }));
 ROUTES.push(createBotSettingsRoutes({
   store, cfg, registry, commandAllowlist, commandAllowlistDrivers: COMMAND_ALLOWLIST_DRIVERS,

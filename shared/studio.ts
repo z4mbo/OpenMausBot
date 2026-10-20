@@ -1,6 +1,6 @@
 export type StudioMode = "image" | "video" | "audio" | "edit";
 export type StudioMediaKind = "image" | "video" | "audio";
-export type StudioStatus = "queued" | "running" | "done" | "failed";
+export type StudioStatus = "queued" | "running" | "done" | "failed" | "cancelled";
 
 type Family =
   | "nano" | "flux3" | "imageSize" | "veo" | "kling" | "seedance" | "tts" | "music" | "sfx" | "nanoEdit" | "upscale" | "custom";
@@ -73,6 +73,8 @@ export interface StudioGenerateRequest {
   endpoint?: string;
   /** The custom endpoint's whole input; `prompt` is added when it has none. */
   input?: Record<string, unknown>;
+  /** Image and video prompts carry the project's brand kit unless this is false. */
+  brand?: boolean;
 }
 
 /** One finished file of a generation, as fal hosts it. */
@@ -103,6 +105,8 @@ export interface StudioGeneration {
   broadcast: Array<{ index: number; assetId: string; at: number }>;
   createdByName: string;
   agentName?: string;
+  /** fal received the prompt with the brand kit's imagery style and colours ahead of it. */
+  branded?: boolean;
   createdAt: number;
   updatedAt: number;
   startedAt?: number;

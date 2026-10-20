@@ -11,6 +11,7 @@ type Outbox = ReturnType<typeof drawingOutbox>;
 type Snapshot = Map<string, CanvasNode | undefined>;
 
 const HISTORY_MAX = 200;
+const SHARE_MS = 80;
 
 const sameNode = (a: CanvasNode, b: CanvasNode | undefined) => {
   if (!b) return false;
@@ -56,7 +57,8 @@ export interface CanvasScene {
   index: Map<string | null, CanvasNode[]>;
   revision: number;
   commit(nodes: readonly CanvasNode[], options?: { history?: boolean; before?: ReadonlyMap<string, CanvasNode | undefined> }): void;
-  preview(nodes: readonly CanvasNode[] | null): void;
+  /** Shows nodes locally without saving; `share` also streams them to collaborators, throttled, until the next commit or `preview(null)` settles them. */
+  preview(nodes: readonly CanvasNode[] | null, options?: { share?: boolean }): void;
   undo(): void;
   redo(): void;
   canUndo: boolean;
@@ -68,7 +70,42 @@ export function useCanvasScene(rows: readonly string[] | undefined, outbox: Outb
   const draft = useRef(new Map<string, CanvasNode>());
   const undoStack = useRef<Snapshot[]>([]);
   const redoStack = useRef<Snapshot[]>([]);
+  const shared = useRef(new Map<string, CanvasNode>());
+  const shareTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sharedAt = useRef(0);
   const [revision, bump] = useReducer((value: number) => value + 1, 0);
+
+  const nextVersion = useCallback((id: string) => Math.max(base.current.get(id)?.version ?? 0, shared.current.get(id)?.version ?? 0) + 1, []);
+  const send = useCallback((nodes: readonly CanvasNode[]) => {
+    outbox.enqueue(nodes.map((node) => ({ format: CANVAS_ROW_FORMAT, ...node })));
+  }, [outbox]);
+  const stopSharing = useCallback(() => { if (shareTimer.current) { clearTimeout(shareTimer.current); shareTimer.current = null; } }, []);
+
+  const shareDraft = useCallback(() => {
+    stopSharing();
+    sharedAt.current = Date.now();
+    const nodes = [...draft.current.values()].filter((node) => !sameNode(node, shared.current.get(node.id) ?? base.current.get(node.id)));
+    if (!nodes.length) return;
+    send(nodes.map((node) => {
+      const sent = { ...node, version: nextVersion(node.id), versionNonce: randomNonce() };
+      shared.current.set(node.id, sent);
+      return sent;
+    }));
+  }, [send, nextVersion, stopSharing]);
+
+  const restoreShared = useCallback((written: ReadonlySet<string>) => {
+    stopSharing();
+    const restored: CanvasNode[] = [];
+    for (const [id, sent] of shared.current) {
+      if (written.has(id)) continue;
+      restored.push({ ...(base.current.get(id) ?? { ...sent, deleted: true }), version: nextVersion(id), versionNonce: randomNonce() });
+    }
+    shared.current.clear();
+    if (!restored.length) return;
+    base.current = new Map(base.current);
+    for (const node of restored) base.current.set(node.id, node);
+    send(restored);
+  }, [send, nextVersion, stopSharing]);
 
   const write = useCallback((nodes: readonly CanvasNode[], before: ReadonlyMap<string, CanvasNode | undefined> | undefined): Snapshot => {
     const work = new Map(base.current);
@@ -83,27 +120,28 @@ export function useCanvasScene(rows: readonly string[] | undefined, outbox: Outb
     const saved: CanvasNode[] = [];
     for (const id of touched) {
       if (!snapshot.has(id)) snapshot.set(id, base.current.get(id));
-      const node = { ...work.get(id)!, version: (base.current.get(id)?.version ?? 0) + 1, versionNonce: randomNonce() };
+      const node = { ...work.get(id)!, version: nextVersion(id), versionNonce: randomNonce() };
       work.set(id, node);
       saved.push(node);
     }
     base.current = work;
-    outbox.enqueue(saved.map((node) => ({ format: CANVAS_ROW_FORMAT, ...node })));
+    send(saved);
     return snapshot;
-  }, [outbox]);
+  }, [send, nextVersion]);
 
   const commit = useCallback<CanvasScene["commit"]>((all, options = {}) => {
     const nodes = all.filter((node) => !sameNode(node, base.current.get(node.id)));
-    if (readOnly || !nodes.length) { if (draft.current.size) { draft.current.clear(); bump(); } return; }
+    if (readOnly || !nodes.length) { restoreShared(new Set()); if (draft.current.size) { draft.current.clear(); bump(); } return; }
     draft.current.clear();
     const snapshot = write(nodes, options.before);
+    restoreShared(new Set(snapshot.keys()));
     if (options.history !== false) {
       undoStack.current.push(snapshot);
       if (undoStack.current.length > HISTORY_MAX) undoStack.current.shift();
       redoStack.current = [];
     }
     bump();
-  }, [readOnly, write]);
+  }, [readOnly, write, restoreShared]);
 
   const travel = useCallback((from: { current: Snapshot[] }, to: { current: Snapshot[] }) => {
     const step = from.current.pop();
@@ -122,6 +160,8 @@ export function useCanvasScene(rows: readonly string[] | undefined, outbox: Outb
     let changed = false;
     const merged = decodeScene([...rows, ...outbox.elements().map((element) => JSON.stringify(element))]);
     for (const node of merged) {
+      const own = shared.current.get(node.id);
+      if (own && !newer(node, own)) continue;
       if (newer(node, base.current.get(node.id))) { base.current.set(node.id, node); changed = true; }
     }
     if (changed) {
@@ -134,6 +174,8 @@ export function useCanvasScene(rows: readonly string[] | undefined, outbox: Outb
     }
   }, [rows, outbox, readOnly, write]);
 
+  useEffect(() => stopSharing, [stopSharing]);
+
   const scene = useMemo(() => {
     if (!draft.current.size) return base.current;
     const merged = new Map(base.current);
@@ -144,10 +186,16 @@ export function useCanvasScene(rows: readonly string[] | undefined, outbox: Outb
 
   return {
     scene, index, revision, commit,
-    preview: useCallback((nodes) => {
+    preview: useCallback((nodes, options) => {
       draft.current = new Map((nodes ?? []).map((node) => [node.id, node]));
+      if (!nodes) restoreShared(new Set());
+      else if (options?.share && !readOnly) {
+        const wait = SHARE_MS - (Date.now() - sharedAt.current);
+        if (wait <= 0) shareDraft();
+        else shareTimer.current ??= setTimeout(shareDraft, wait);
+      }
       bump();
-    }, []),
+    }, [readOnly, restoreShared, shareDraft]),
     undo: useCallback(() => travel(undoStack, redoStack), [travel]),
     redo: useCallback(() => travel(redoStack, undoStack), [travel]),
     canUndo: undoStack.current.length > 0,

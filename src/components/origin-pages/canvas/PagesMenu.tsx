@@ -30,7 +30,7 @@ export function PagesMenu({ projectId, canEdit, canvasName, onOpenCanvas }: { pr
           {list === undefined ? (
             <p className="px-3 py-3 text-[12.5px] text-ink-tertiary">Loading pages…</p>
           ) : pages.length === 0 ? (
-            <p className="px-3 py-3 text-[12.5px] leading-snug text-ink-secondary">No published pages yet. Select a top-level frame and publish it from the panel on the right.</p>
+            <p className="px-3 py-3 text-[12.5px] leading-snug text-ink-secondary">No published pages yet. Select a top-level frame and publish it from the Design panel.</p>
           ) : (
             <ul className="min-h-0 overflow-y-auto p-1">
               {pages.map((page) => <PageRow key={page._id} page={page} projectId={projectId} canEdit={canEdit} canvasName={canvasName(page.canvasId)}

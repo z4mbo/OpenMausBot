@@ -1,3 +1,5 @@
+import { brandFontStack, isBrandFont, type BrandFontId } from "./brand-fonts.ts";
+
 export const CANVAS_NODE_TYPES = ["frame", "rect", "ellipse", "line", "arrow", "text", "image", "group", "path"] as const;
 export type CanvasNodeType = (typeof CANVAS_NODE_TYPES)[number];
 export type TextAlign = "left" | "center" | "right";
@@ -60,6 +62,8 @@ export interface CanvasNode {
   fontSize?: number;
   fontWeight?: number;
   font?: CanvasFont;
+  /** A brand kit typeface drawn ahead of `font`, which stays its fallback. */
+  family?: BrandFontId;
   align?: TextAlign;
   lineHeight?: number;
   /** Text grows sideways with its content instead of wrapping at `width`. */
@@ -96,6 +100,11 @@ export const FONT_STACKS: Record<CanvasFont, string> = {
   sans: "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif",
   serif: "Georgia, \"Times New Roman\", ui-serif, serif",
   mono: "\"JetBrains Mono\", ui-monospace, \"SF Mono\", Consolas, monospace",
+};
+
+export const fontStack = (node: Pick<CanvasNode, "font" | "family">) => {
+  const fallback = FONT_STACKS[node.font ?? "sans"];
+  return node.family ? brandFontStack(node.family, fallback) : fallback;
 };
 
 const TYPE_NAMES: Record<CanvasNodeType, string> = { frame: "Frame", rect: "Rectangle", ellipse: "Ellipse", line: "Line", arrow: "Arrow", text: "Text", image: "Image", group: "Group", path: "Vector" };
@@ -187,6 +196,7 @@ export function sanitizeNode(raw: unknown): CanvasNode | null {
     node.fontSize = finite(value.fontSize, 16, 1, 1000);
     node.fontWeight = Math.round(finite(value.fontWeight, 400, 100, 900) / 100) * 100;
     node.font = oneOf(value.font, ["sans", "serif", "mono"] as const) ?? "sans";
+    if (isBrandFont(value.family)) node.family = value.family;
     node.align = oneOf(value.align, ["left", "center", "right"] as const) ?? "left";
     node.lineHeight = finite(value.lineHeight, 1.3, 0.5, 4);
     if (value.autoWidth === true) node.autoWidth = true;
@@ -353,7 +363,7 @@ export function descendants(scene: Scene, id: string, index = childrenIndex(scen
   return out;
 }
 
-export type TextMeasure = (text: string, node: Pick<CanvasNode, "fontSize" | "fontWeight" | "font">) => number;
+export type TextMeasure = (text: string, node: Pick<CanvasNode, "fontSize" | "fontWeight" | "font" | "family">) => number;
 
 /** A width estimate for writers without fonts: close to Inter's average advance. */
 export const estimateTextWidth: TextMeasure = (text, node) => {
@@ -364,7 +374,7 @@ export const estimateTextWidth: TextMeasure = (text, node) => {
   return width;
 };
 
-export function wrapText(text: string, maxWidth: number | null, node: Pick<CanvasNode, "fontSize" | "fontWeight" | "font">, measure: TextMeasure): string[] {
+export function wrapText(text: string, maxWidth: number | null, node: Pick<CanvasNode, "fontSize" | "fontWeight" | "font" | "family">, measure: TextMeasure): string[] {
   const lines: string[] = [];
   for (const paragraph of text.split("\n")) {
     if (maxWidth === null || !paragraph) { lines.push(paragraph); continue; }

@@ -4,13 +4,12 @@ import type { Bot } from "@/state/store";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
-import { Notice, ghostButton, iconButton, inputClass as baseInput, primaryButton, useAction } from "../origin-pages/ui";
+import { Notice, ghostButton, iconButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
 import {
   SEQUENCE_DAYS_MAX, SEQUENCE_STEPS_MAX, fillLeadTemplate, type PipelineLead, type PipelineSequence, type PipelineSequenceChannel, type PipelineSequenceStep,
 } from "../../../shared/origin-pipeline";
 import { defaultSequence, type SequenceDraftStep } from "./pipeline-model";
 
-const inputClass = cn(baseInput, "font-normal");
 const DAY_MS = 86_400_000;
 
 const CHANNELS: readonly { value: PipelineSequenceChannel; label: string; icon: typeof Mail }[] = [

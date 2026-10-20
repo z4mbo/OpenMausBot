@@ -356,8 +356,8 @@ export function PageHeader({ title, count, children }: { title: string; count?: 
 
 export function Field({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <label className={cn("flex min-w-0 flex-col gap-1 text-[12px] font-medium text-ink-secondary", className)}>
-      {label}
+    <label className={cn("flex min-w-0 flex-col gap-1 text-[12px] text-ink-secondary", className)}>
+      <span className="font-medium">{label}</span>
       {children}
     </label>
   );

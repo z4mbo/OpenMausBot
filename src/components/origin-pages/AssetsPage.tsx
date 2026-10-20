@@ -1,12 +1,13 @@
 import { useRef, useState, type FormEvent } from "react";
 import { Select } from "../Select";
-import { File, Image as ImageIcon, Loader2, Palette, Pencil, Plus, Search, Trash2, Upload } from "lucide-react";
+import { AudioLines, File, Film, Image as ImageIcon, Loader2, Palette, Pencil, Plus, Search, SwatchBook, Trash2, Upload } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
+import { BrandPanel } from "../origin-brand/BrandPanel";
 import type { AssetType, CloudDesign, CloudDesignAsset, CloudDesignToken, TokenType } from "./cloud-types";
 import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
-const ASSET_TYPES: readonly AssetType[] = ["image", "document", "figma", "icon", "font", "apk", "other"];
+const ASSET_TYPES: readonly AssetType[] = ["image", "video", "audio", "document", "figma", "icon", "font", "apk", "other"];
 const TOKEN_TYPES: readonly TokenType[] = ["color", "typography", "spacing", "component", "motion", "other"];
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 
@@ -15,18 +16,20 @@ function assetFileType(file: { name: string; type: string }): AssetType {
   if (name.endsWith(".apk")) return "apk";
   if (name.endsWith(".svg") || name.endsWith(".ico")) return "icon";
   if (file.type.startsWith("image/")) return "image";
+  if (file.type.startsWith("video/")) return "video";
+  if (file.type.startsWith("audio/")) return "audio";
   if (file.type.startsWith("font/") || /\.(ttf|otf|woff2?)$/.test(name)) return "font";
   if (name.endsWith(".fig")) return "figma";
   return file.type ? "document" : "other";
 }
 
 export function AssetsPage(props: OriginPageProps) {
-  return <CloudGate {...props} label="Assets">{({ projectId, canEdit }) => <Assets projectId={projectId} canEdit={canEdit} />}</CloudGate>;
+  return <CloudGate {...props} label="Assets">{({ project, projectId, canEdit }) => <Assets projectId={projectId} canEdit={canEdit} projectName={project.name} botId={props.link?.botId} />}</CloudGate>;
 }
 
-function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean }) {
+function Assets({ projectId, canEdit, projectName, botId }: { projectId: string; canEdit: boolean; projectName: string; botId?: string }) {
   const design = useCloudQuery<CloudDesign>("design:list", { projectId });
-  const [tab, setTab] = useState<"assets" | "tokens">("assets");
+  const [tab, setTab] = useState<"assets" | "tokens" | "brand">("assets");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<AssetType | "all">("all");
   const [editing, setEditing] = useState<CloudDesignAsset | "new" | null>(null);
@@ -46,23 +49,23 @@ function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean })
   };
   return (
     <section className={pageClass} aria-label="Assets">
-      <PageHeader title="Assets" count={tab === "assets" ? design.assets.length : design.tokens.length}>
+      <PageHeader title="Assets" count={tab === "brand" ? undefined : tab === "assets" ? design.assets.length : design.tokens.length}>
         <Segmented label="Asset view" value={tab} onChange={setTab}
-          options={[{ value: "assets", label: <><ImageIcon size={13} />Files</> }, { value: "tokens", label: <><Palette size={13} />Tokens</> }]} />
-        <label className="relative flex items-center">
+          options={[{ value: "assets", label: <><ImageIcon size={13} />Files</> }, { value: "tokens", label: <><Palette size={13} />Tokens</> }, { value: "brand", label: <><SwatchBook size={13} />Brand</> }]} />
+        {tab !== "brand" && <label className="relative flex items-center">
           <Search size={14} className="pointer-events-none absolute left-2 text-ink-tertiary" aria-hidden="true" />
           <input className={cn(inputClass, "w-44 pl-7")} placeholder={tab === "assets" ? "Search assets" : "Search tokens"} aria-label="Search" value={query} onChange={(e) => setQuery(e.target.value)} />
-        </label>
+        </label>}
         {tab === "assets" && (
           <Select size="sm" aria-label="Asset type" value={filter} onChange={(e) => setFilter(e.target.value as AssetType | "all")}>
             <option value="all">All types</option>
             {ASSET_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
           </Select>
         )}
-        {canEdit && <button type="button" className={primaryButton} onClick={() => (tab === "assets" ? setEditing("new") : setTokenEditing("new"))}><Plus size={14} />{tab === "assets" ? "Add asset" : "Add token"}</button>}
+        {canEdit && tab !== "brand" && <button type="button" className={primaryButton} onClick={() => (tab === "assets" ? setEditing("new") : setTokenEditing("new"))}><Plus size={14} />{tab === "assets" ? "Add asset" : "Add token"}</button>}
       </PageHeader>
       {notice && <div className="mb-3"><Notice tone="danger">{notice}</Notice></div>}
-      {tab === "assets" ? (
+      {tab === "brand" ? <BrandPanel projectId={projectId} projectName={projectName} canEdit={canEdit} botId={botId} /> : tab === "assets" ? (
         !assets.length ? <EmptyState icon={<ImageIcon size={24} />} title={needle || filter !== "all" ? "No matching assets" : "No assets yet"} body="Images, documents and files the team makes for this project." /> : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
             {assets.map((asset) => {
@@ -70,7 +73,9 @@ function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean })
               return (
                 <article key={asset._id} className={cn(cardClass, "group relative flex flex-col overflow-hidden")}>
                   <a href={href} target="_blank" rel="noreferrer" aria-label={`Open ${asset.name}`} className="flex h-32 items-center justify-center bg-inset">
-                    {href && (asset.type === "image" || asset.type === "icon") ? <img src={href} alt={asset.name} loading="lazy" className="size-full object-contain" /> : <File size={30} className="text-ink-tertiary" />}
+                    {href && (asset.type === "image" || asset.type === "icon") ? <img src={href} alt={asset.name} loading="lazy" className="size-full object-contain" />
+                      : href && asset.type === "video" ? <span className="relative flex size-full items-center justify-center"><Film size={30} className="absolute text-ink-tertiary" aria-hidden="true" /><video src={href} muted playsInline preload="metadata" className="relative size-full object-cover" /></span>
+                        : asset.type === "audio" ? <AudioLines size={30} className="text-ink-tertiary" /> : <File size={30} className="text-ink-tertiary" />}
                   </a>
                   {canEdit && (
                     <div className="absolute right-2 top-2 flex gap-0.5 rounded-lg border border-hairline/40 bg-panel p-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 touch:opacity-100">

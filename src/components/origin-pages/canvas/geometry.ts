@@ -1,4 +1,4 @@
-import { FONT_STACKS, estimateTextWidth, worldOrigin, type CanvasNode, type Scene, type TextMeasure } from "../../../../shared/canvas-scene";
+import { estimateTextWidth, fontStack, worldOrigin, type CanvasNode, type Scene, type TextMeasure } from "../../../../shared/canvas-scene";
 
 export type Box = { x: number; y: number; width: number; height: number };
 export type Point = { x: number; y: number };
@@ -11,12 +11,14 @@ export const clampZoom = (zoom: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM,
 export const toWorld = (view: View, point: Point): Point => ({ x: (point.x - view.x) / view.zoom, y: (point.y - view.y) / view.zoom });
 export const toScreen = (view: View, point: Point): Point => ({ x: point.x * view.zoom + view.x, y: point.y * view.zoom + view.y });
 
-export function fontString(node: Pick<CanvasNode, "fontSize" | "fontWeight" | "font">): string {
-  return `${node.fontWeight ?? 400} ${node.fontSize ?? 16}px ${FONT_STACKS[node.font ?? "sans"]}`;
+export function fontString(node: Pick<CanvasNode, "fontSize" | "fontWeight" | "font" | "family">): string {
+  return `${node.fontWeight ?? 400} ${node.fontSize ?? 16}px ${fontStack(node)}`;
 }
 
 let context: CanvasRenderingContext2D | null | undefined;
 const widths = new Map<string, number>();
+
+export const forgetTextWidths = () => widths.clear();
 
 export const measureText: TextMeasure = (text, node) => {
   if (context === undefined) {

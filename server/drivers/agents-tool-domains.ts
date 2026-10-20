@@ -13,7 +13,7 @@ export interface DeferredToolDomain {
 export const DEFERRED_TOOL_DOMAINS: readonly DeferredToolDomain[] = [
   { prefix: "origin_studio_", words: "image picture photo illustration logo artwork thumbnail video clip animation audio voice voiceover music sound generate make create render" },
   { prefix: "origin_broadcast_", words: "social media post tweet twitter publish share announce linkedin instagram bluesky facebook tiktok",
-    tools: { origin_broadcast_draft: "write compose" } },
+    tools: { origin_broadcast_draft: "write compose", origin_broadcast_list: "scheduled queued posts" } },
   { prefix: "origin_pipeline_", words: "sales crm lead prospect customer client deal outreach follow-up",
     tools: { origin_pipeline_contact: "call phone ring email text message reach send" } },
   { prefix: "origin_canvas", words: "mockup wireframe layout ui screen frame",
@@ -21,7 +21,14 @@ export const DEFERRED_TOOL_DOMAINS: readonly DeferredToolDomain[] = [
   { prefix: "origin_page_", words: "landing page website site web signup waitlist",
     tools: { origin_page_publish: "publish launch live put online" } },
   { prefix: "origin_campaign_", words: "campaign launch marketing promotion" },
+  { prefix: "origin_brand_", words: "brand kit identity colours colors palette fonts typography voice tone style guide" },
   { prefix: "origin_standup", words: "standup daily update status report" },
+  { prefix: "origin_ship_", words: "ship deploy deployment release production preview vercel netlify cloudflare pages rollback promote live site",
+    tools: { origin_ship_deploy: "redeploy push live go roll back" } },
+  { prefix: "origin_release_", words: "release notes changelog version tag ship merged publish announce" },
+  { prefix: "origin_pulse", words: "pulse dashboard metrics numbers kpi stats progress how are we doing overview" },
+  { prefix: "origin_doc_", words: "document doc docs brief spec prd requirements notes wiki write read" },
+  { prefix: "origin_milestone_", words: "milestone roadmap mvp launch deadline target date progress plan" },
 ];
 
 export function deferredToolDomain(name: string): DeferredToolDomain | undefined {

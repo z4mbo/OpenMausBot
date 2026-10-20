@@ -37,7 +37,7 @@ export function CampaignDialog({ projectId, campaign, onSaved, onClose }: {
       <form className="flex flex-col gap-3" onSubmit={(event) => { event.preventDefault(); if (!problem) void save(); }}>
         <Field label="Name">
           <input className={inputClass} value={form.name} maxLength={CAMPAIGN_LIMITS.name} autoFocus onChange={(event) => set({ name: event.target.value })} placeholder="Spring launch" />
-          {!campaign && form.name.trim() && <span className="text-[11.5px] font-normal text-ink-tertiary">utm_campaign={campaignSlug(form.name)}</span>}
+          {!campaign && form.name.trim() && <span className="text-[11.5px] text-ink-tertiary">utm_campaign={campaignSlug(form.name)}</span>}
         </Field>
         <Field label="Goal">
           <textarea className={cn(inputClass, "min-h-[64px] resize-y")} value={form.goal} maxLength={CAMPAIGN_LIMITS.goal} onChange={(event) => set({ goal: event.target.value })} placeholder="200 sign-ups for the beta" />
@@ -117,6 +117,7 @@ export function LinkDialog({ projectId, detail, kind, posts, onClose }: { projec
   const shown = (candidates ?? []).filter((item) => !needle || `${item.title} ${item.meta}`.toLowerCase().includes(needle)).slice(0, 80);
 
   const toggle = async (item: Candidate) => {
+    if (busy !== null) return;
     setBusy(item.id);
     setError("");
     try {
@@ -141,8 +142,9 @@ export function LinkDialog({ projectId, detail, kind, posts, onClose }: { projec
           : shown.map((item) => {
             const on = linked.has(item.id);
             return (
-              <button key={item.id} type="button" aria-pressed={on} disabled={busy !== null} onClick={() => void toggle(item)}
-                className="flex min-w-0 items-center gap-3 rounded-lg px-2 py-2 text-left outline-none transition-colors duration-(--motion-fast) hover:bg-raised/60 focus-visible:bg-raised/60 disabled:opacity-60">
+              <button key={item.id} type="button" aria-pressed={on} aria-busy={busy === item.id} onClick={() => void toggle(item)}
+                className={cn("flex min-w-0 items-center gap-3 rounded-lg px-2 py-2 text-left outline-none transition-[background-color,opacity] duration-(--motion-fast) hover:bg-raised/60 focus-visible:bg-raised/60",
+                  busy !== null && busy !== item.id && "opacity-60")}>
                 {item.thumb ? <img src={item.thumb} alt="" className="size-9 shrink-0 rounded-md object-cover" /> : null}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] text-ink">{item.title}</span>

@@ -11,6 +11,9 @@ import type { SelectionApi } from "./CanvasEditor";
 import { unionBox, worldBounds, worldBox } from "./geometry";
 import { LeadFormSection, LinkSection } from "./PageInspector";
 import type { CanvasScene } from "./use-canvas-scene";
+import { BrandSection } from "./BrandSection";
+import { brandFont } from "../../../../shared/brand-fonts";
+import type { BrandKit } from "../../../../shared/brand-kit";
 
 export const field = "h-7 w-full min-w-0 rounded-md border border-transparent bg-inset px-1.5 text-[12px] tabular-nums text-ink outline-none transition-colors hover:border-hairline/60 focus:border-accent/70 disabled:opacity-50";
 export const iconToggle = "inline-flex h-7 min-w-7 flex-1 items-center justify-center rounded-md text-ink-secondary outline-none transition-colors duration-100 hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-40";
@@ -147,7 +150,7 @@ const WEIGHTS = [300, 400, 500, 600, 700, 800, 900] as const;
 const WEIGHT_NAMES: Record<number, string> = { 300: "Light", 400: "Regular", 500: "Medium", 600: "Semibold", 700: "Bold", 800: "Extra bold", 900: "Black" };
 const DEFAULT_LAYOUT: StackLayout = { direction: "column", gap: 16, padding: [16, 16, 16, 16], align: "start", justify: "start" };
 
-export function Inspector({ canvas, selection, readOnly, exportSection }: { canvas: CanvasScene; selection: SelectionApi; readOnly: boolean; exportSection: ReactNode }) {
+export function Inspector({ canvas, selection, readOnly, exportSection, brand }: { canvas: CanvasScene; selection: SelectionApi; readOnly: boolean; exportSection: ReactNode; brand?: BrandKit | null }) {
   const { scene, index } = canvas;
   const nodes = selection.nodes;
   const update = (patch: Partial<CanvasNode> | ((node: CanvasNode) => Partial<CanvasNode>)) =>
@@ -190,6 +193,8 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
   const parent = single ? effectiveParent(scene, single) : null;
   const parentLayout = parent ? scene.get(parent)?.layout : undefined;
   const texts = nodes.filter((node) => node.type === "text");
+  const sharedFamily = same(texts.map((node) => node.family));
+  const familyName = sharedFamily ? brandFont(sharedFamily)?.family : texts.some((node) => node.family) ? "Mixed" : undefined;
   const strokeOnly = nodes.every((node) => node.type === "line" || node.type === "arrow");
   const radiusable = nodes.every((node) => node.type === "rect" || node.type === "frame" || node.type === "image");
   const rotatable = nodes.every((node) => node.type !== "frame" && node.type !== "group");
@@ -238,6 +243,7 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
           </label>
         </Section>
       )}
+      {brand && !readOnly && <BrandSection canvas={canvas} nodes={nodes} kit={brand} disabled={disabled} />}
       <Section title="Layout">
         <div className="grid grid-cols-2 gap-1.5">
           <NumberField label="X" value={position?.x} disabled={disabled || !single || Boolean(parentLayout)} onCommit={(x) => update({ x })} />
@@ -282,8 +288,9 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
       {texts.length > 0 && texts.length === nodes.length && (
         <Section title="Text">
           <div className="grid grid-cols-2 gap-1.5">
-            <Select size="sm" aria-label="Font" disabled={disabled} value={same(texts.map((node) => node.font)) ?? ""} onChange={(event) => update({ font: event.target.value as CanvasFont })}>
-              {same(texts.map((node) => node.font)) === undefined && <option value="">Mixed</option>}
+            <Select size="sm" aria-label="Font" disabled={disabled} value={familyName ? "family" : same(texts.map((node) => node.font)) ?? ""} onChange={(event) => update({ font: event.target.value as CanvasFont, family: undefined })}>
+              {familyName && <option value="family" disabled>{familyName}</option>}
+              {!familyName && same(texts.map((node) => node.font)) === undefined && <option value="">Mixed</option>}
               <option value="sans">Sans</option><option value="serif">Serif</option><option value="mono">Mono</option>
             </Select>
             <Select size="sm" aria-label="Weight" disabled={disabled} value={String(same(texts.map((node) => node.fontWeight)) ?? "")} onChange={(event) => update({ fontWeight: Number(event.target.value) })}>

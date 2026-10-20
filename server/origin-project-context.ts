@@ -1,4 +1,5 @@
 import { originIssueKey } from "../shared/origin-issues.ts";
+import { brandContextLine, type BrandKit } from "../shared/brand-kit.ts";
 import {
   folderLine, reachableCloudProjects, repoCoordinates,
   type OriginCloudClient, type OriginCloudState, type OriginGitHub, type OriginProjectBot, type OriginProjectFolder, type OriginTeamChat, type ReachableProject,
@@ -38,6 +39,7 @@ export interface ProjectSnapshot {
   feedback: string[];
   chat: string[];
   canvases: string[];
+  brand: string;
   members: string[];
   at: number;
 }
@@ -71,7 +73,7 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
   const teamId = text(doc.teamId);
   const repo = repoCoordinates(text(doc.repoUrl));
   const github = repo ? deps.github?.() : undefined;
-  const [board, vault, design, people, canvases, portals, repository] = await Promise.all([
+  const [board, vault, design, people, canvases, portals, repository, brand] = await Promise.all([
     optional(client.query("tasks:board", base)),
     optional(client.query("credentials:list", base)),
     optional(client.query("design:list", base)),
@@ -79,6 +81,7 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
     optional(client.query("draw:canvases", base)),
     teamId ? optional(client.query("feedback:portals", { sessionToken, teamId })) : null,
     github?.repository ? optional(github.repository(projectId)) : null,
+    optional(client.query("brand:get", base)),
   ]);
   const columns = list(record(board).columns);
   const tasks = list(record(board).tasks);
@@ -119,6 +122,7 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
     feedback: openFeedback.slice(0, FEEDBACK_SHOWN).map((entry) => `[${text(entry.kind)}] ${quoted(text(entry.title), 90)}`),
     chat: chat.map((line) => `${oneLine(line.authorName, 40)}: ${quoted(line.body, 140)}`),
     canvases: list(canvases).map((canvas) => oneLine(text(canvas.name), 40)).filter(Boolean),
+    brand: brand && typeof brand === "object" ? oneLine(brandContextLine(brand as BrandKit), 600) : "",
     members: list(people).slice(0, MEMBERS_SHOWN).map((person) => `${oneLine(text(person.name) || text(person.email), 40)} (${text(person.role)})`),
     at: now,
   };
@@ -167,6 +171,7 @@ export function projectStatusPrompt(snapshot: ProjectSnapshot, folder: OriginPro
     snapshot.feedbackOpen === null ? "- Feedback: no portal" : `- Feedback: ${snapshot.feedbackOpen} open${snapshot.feedback.length ? `; latest ${snapshot.feedback.join("; ")}` : ""}`,
     snapshot.chat.length ? `- Team chat, latest: ${snapshot.chat.join(" | ")}` : "- Team chat: quiet",
     `- Draw canvases: ${snapshot.canvases.length ? snapshot.canvases.join(", ") : "none"}`,
+    snapshot.brand ? `- Brand: ${snapshot.brand}` : "- Brand: no kit yet (draft one with origin_brand_update)",
     snapshot.members.length ? `- Members: ${snapshot.members.join(", ")}` : "",
     TOOLS_LINE,
   ].filter(Boolean).join("\n");

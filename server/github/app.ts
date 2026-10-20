@@ -31,12 +31,13 @@ async function installationFor(service: GitHubService, repoUrl: string, account?
 }
 
 /** Security: installation tokens live only in memory for GitHub's one-hour lifetime and are never persisted or returned to a model. */
-export async function installationToken(service: GitHubService, repoUrl: string, pushOnly = false, account?: Account) {
+/** `extra` widens the token by permissions such as Actions for Ship's workflow runs; the installation must have granted them. */
+export async function installationToken(service: GitHubService, repoUrl: string, pushOnly = false, account?: Account, extra: Readonly<Record<string, string>> = {}) {
   const repo = parseGitHubRepo(repoUrl);
   if (!repo) throw new Error("GitHub repository required");
   const installation = await installationFor(service, repoUrl, account);
   const result = await githubRequest<{ token: string; expires_at: string; repositories?: { full_name: string }[] }>(service, `/app/installations/${installation.id}/access_tokens`, appJwt(service), {
-    method: "POST", body: JSON.stringify({ repositories: [repo.repo], permissions: pushOnly ? { contents: "write" } : prPermissions }),
+    method: "POST", body: JSON.stringify({ repositories: [repo.repo], permissions: pushOnly ? { contents: "write" } : { ...prPermissions, ...extra } }),
   });
   const expires = Date.parse(result.expires_at);
   const now = service.now();
@@ -61,9 +62,9 @@ async function projectAccount(service: GitHubService, projectId: string, repoUrl
   return { id: saved.account_id, login: saved.login };
 }
 
-export async function projectInstallationToken(service: GitHubService, projectId: string, repoUrl: string, pushOnly = false) {
+export async function projectInstallationToken(service: GitHubService, projectId: string, repoUrl: string, pushOnly = false, extra: Readonly<Record<string, string>> = {}) {
   const account = await projectAccount(service, projectId, repoUrl);
-  const credentials = await installationToken(service, repoUrl, pushOnly, account);
+  const credentials = await installationToken(service, repoUrl, pushOnly, account, extra);
   try {
     const current = await projectAccount(service, projectId, repoUrl);
     if (current.id !== account.id || current.login.toLowerCase() !== account.login.toLowerCase()) throw new Error("GitHub connection changed during authorization");
@@ -74,8 +75,8 @@ export async function projectInstallationToken(service: GitHubService, projectId
   }
 }
 
-export async function withInstallation<T>(service: GitHubService, projectId: string, repoUrl: string, fn: (token: string) => Promise<T>): Promise<T> {
-  const { token } = await projectInstallationToken(service, projectId, repoUrl);
+export async function withInstallation<T>(service: GitHubService, projectId: string, repoUrl: string, fn: (token: string) => Promise<T>, extra: Readonly<Record<string, string>> = {}): Promise<T> {
+  const { token } = await projectInstallationToken(service, projectId, repoUrl, false, extra);
   try { return await fn(token); }
   finally { await revokeInstallationToken(service, token); }
 }

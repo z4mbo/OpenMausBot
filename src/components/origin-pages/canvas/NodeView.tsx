@@ -1,5 +1,5 @@
 import { memo, type ReactNode } from "react";
-import { FONT_STACKS, layoutText, type CanvasNode, type LeadForm } from "../../../../shared/canvas-scene";
+import { FONT_STACKS, fontStack, layoutText, type CanvasNode, type LeadForm } from "../../../../shared/canvas-scene";
 import { LEAD_FIELD_LABELS, LEAD_FORM_METRICS, arrowHead, leadFormColors, pathData } from "../../../../shared/canvas-page";
 import { measureText } from "./geometry";
 
@@ -17,7 +17,7 @@ function TextShape({ node, hiddenText }: { node: CanvasNode; hiddenText: boolean
   const anchor = node.align === "center" ? "middle" : node.align === "right" ? "end" : "start";
   const x = node.align === "center" ? node.width / 2 : node.align === "right" ? node.width : 0;
   return (
-    <text x={x} fill={node.fill ?? "transparent"} fontSize={size} fontWeight={node.fontWeight} fontFamily={FONT_STACKS[node.font ?? "sans"]} textAnchor={anchor}
+    <text x={x} fill={node.fill ?? "transparent"} fontSize={size} fontWeight={node.fontWeight} fontFamily={fontStack(node)} textAnchor={anchor}
       opacity={hiddenText ? 0 : undefined} style={{ whiteSpace: "pre" }}>
       {layout.lines.map((line, index) => (
         <tspan key={index} x={x} y={index * layout.lineHeight + layout.lineHeight / 2 + size * 0.35}>{line || " "}</tspan>

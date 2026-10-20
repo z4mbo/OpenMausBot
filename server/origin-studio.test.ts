@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { runOriginTool, type OriginCloudClient } from "./origin-cloud.ts";
-import { createStudioRunner, isFalMediaUrl, type StudioCloud, type StudioDeps } from "./origin-studio.ts";
+import { createStudioRunner, falQueueOrigin, isFalMediaUrl, type StudioCloud, type StudioDeps } from "./origin-studio.ts";
 import type { BotRecord } from "./store.ts";
 import type { StudioGeneration } from "../shared/studio.ts";
 
@@ -80,7 +80,8 @@ function fakeConvex() {
   return { client, rows, calls, uploads };
 }
 
-function fakeFal(options: { submitStatus?: number; submitBody?: unknown; result?: unknown; failWith?: string } = {}) {
+function fakeFal(options: { submitStatus?: number; submitBody?: unknown; result?: unknown; failWith?: string; cancelled?: "requested" | "completed"; origin?: string } = {}) {
+  const origin = options.origin ?? "https://queue.fal.run";
   const requests: Array<{ url: string; method: string; auth: string | null; body?: unknown }> = [];
   const polls = new Map<string, number>();
   let submitted = 0;
@@ -89,11 +90,14 @@ function fakeFal(options: { submitStatus?: number; submitBody?: unknown; result?
     const headers = new Headers(init?.headers);
     const body = typeof init?.body === "string" ? JSON.parse(init.body) as unknown : undefined;
     requests.push({ url, method: init?.method ?? "GET", auth: headers.get("authorization"), ...(body ? { body } : {}) });
-    if (url.startsWith("https://queue.fal.run/") && init?.method === "POST") {
+    if (url.startsWith(`${origin}/`) && init?.method === "POST") {
       if (options.submitStatus) return Response.json(options.submitBody ?? {}, { status: options.submitStatus });
       submitted += 1;
-      const base = `https://queue.fal.run/fal-ai/nano-banana-pro/requests/req${submitted}`;
+      const base = `${origin}/fal-ai/nano-banana-pro/requests/req${submitted}`;
       return Response.json({ request_id: `req${submitted}`, status_url: `${base}/status`, response_url: base, cancel_url: `${base}/cancel` });
+    }
+    if (url.endsWith("/cancel") && init?.method === "PUT") {
+      return options.cancelled === "completed" ? Response.json({ status: "ALREADY_COMPLETED" }, { status: 400 }) : Response.json({ status: "CANCELLATION_REQUESTED" }, { status: 202 });
     }
     if (url.endsWith("/status")) {
       const count = (polls.get(url) ?? 0) + 1;
@@ -101,7 +105,7 @@ function fakeFal(options: { submitStatus?: number; submitBody?: unknown; result?
       if (count === 1) return Response.json({ status: "IN_PROGRESS" });
       return Response.json(options.failWith ? { status: "COMPLETED", error: options.failWith } : { status: "COMPLETED" });
     }
-    if (url.startsWith("https://queue.fal.run/")) {
+    if (url.startsWith(`${origin}/`)) {
       return Response.json(options.result ?? { images: [{ url: "https://v3.fal.media/files/out.png", content_type: "image/png" }], description: "" });
     }
     if (url === "https://v3.fal.media/files/out.png") return new Response(new Uint8Array([1, 2, 3, 4]), { headers: { "content-type": "image/png" } });
@@ -111,13 +115,13 @@ function fakeFal(options: { submitStatus?: number; submitBody?: unknown; result?
   return { fetch: fetchFn, requests };
 }
 
-function setup(options: { key?: string | null; fal?: ReturnType<typeof fakeFal>; file?: string } = {}) {
+function setup(options: { key?: string | null; fal?: ReturnType<typeof fakeFal>; file?: string; queueOrigin?: string } = {}) {
   const convex = fakeConvex();
   const fal = options.fal ?? fakeFal();
   const cloud: StudioCloud = { client: convex.client, sessionToken: "session", url: DEPLOYMENT };
   const deps: StudioDeps = {
     fetch: fal.fetch, falKey: () => (options.key === undefined ? "fal-test-key" : options.key), cloud: () => cloud,
-    journalFile: options.file ?? journal(), now: () => 1_000, pollMs: 60_000,
+    journalFile: options.file ?? journal(), now: () => 1_000, pollMs: 60_000, ...(options.queueOrigin ? { queueOrigin: options.queueOrigin } : {}),
   };
   return { convex, fal, cloud, deps, runner: createStudioRunner(deps) };
 }
@@ -210,6 +214,45 @@ describe("Studio runner", () => {
     await second.tick();
     await second.tick();
     expect(first.convex.rows.get("gen1")!.status).toBe("done");
+  });
+
+  it("cancels a queued generation on fal and stops polling it", async () => {
+    const { runner, cloud, convex, fal } = setup();
+    await runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/nano-banana-pro", prompt: "x" });
+    expect(await runner.cancel(cloud, "kai", "gen1")).toEqual({ cancelled: true });
+    expect(fal.requests.find((request) => request.method === "PUT")).toMatchObject({ url: "https://queue.fal.run/fal-ai/nano-banana-pro/requests/req1/cancel", auth: "Key fal-test-key" });
+    expect(convex.rows.get("gen1")!.status).toBe("cancelled");
+    expect(runner.pending()).toBe(0);
+  });
+
+  it("settles a generation fal had already finished instead of cancelling it", async () => {
+    const { runner, cloud, convex } = setup({ fal: fakeFal({ cancelled: "completed" }) });
+    await runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/nano-banana-pro", prompt: "x" });
+    await runner.tick();
+    expect(await runner.cancel(cloud, "kai", "gen1")).toEqual({ cancelled: false });
+    expect(convex.rows.get("gen1")!.status).toBe("done");
+    expect(runner.pending()).toBe(0);
+  });
+
+  it("marks a generation no app is polling as cancelled", async () => {
+    const { runner, cloud, convex, fal } = setup();
+    await runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/nano-banana-pro", prompt: "x" });
+    const other = createStudioRunner({ ...setup().deps, cloud: () => cloud });
+    expect(await other.cancel(cloud, "kai", "gen1")).toEqual({ cancelled: true });
+    expect(fal.requests.some((request) => request.method === "PUT")).toBe(false);
+    expect(convex.rows.get("gen1")!.status).toBe("cancelled");
+  });
+
+  it("queues on a loopback fake only when one is configured", async () => {
+    expect(falQueueOrigin({ OMB_FAL_QUEUE_URL: "http://127.0.0.1:4555" })).toBe("http://127.0.0.1:4555");
+    expect(falQueueOrigin({ OMB_FAL_QUEUE_URL: "http://fal.example.com" })).toBe("https://queue.fal.run");
+    const origin = "http://127.0.0.1:4555";
+    const { runner, cloud, convex, fal } = setup({ fal: fakeFal({ origin }), queueOrigin: origin });
+    await runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/nano-banana-pro", prompt: "x" });
+    await runner.tick();
+    await runner.tick();
+    expect(fal.requests.every((request) => !request.url.startsWith("https://queue.fal.run"))).toBe(true);
+    expect(convex.rows.get("gen1")!.status).toBe("done");
   });
 
   it("trusts only fal's media hosts for downloads", () => {

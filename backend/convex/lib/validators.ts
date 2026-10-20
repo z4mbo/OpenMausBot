@@ -61,6 +61,8 @@ export const tokenTypeValidator = v.union(
 export const assetTypeValidator = v.union(
   v.literal("figma"),
   v.literal("image"),
+  v.literal("video"),
+  v.literal("audio"),
   v.literal("icon"),
   v.literal("font"),
   v.literal("document"),
