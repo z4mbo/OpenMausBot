@@ -18,9 +18,9 @@ function fixture(tasks: TaskRecord[], nodes: HandoffView[] = []) {
   let serial = 0;
   const store: Pick<Store, "tasks" | "createTask" | "setTaskOpenedBy"> = {
     tasks: vi.fn(() => tasks),
-    createTask: vi.fn((_botId, title, activate, projectId, openedBy) => {
+    createTask: vi.fn((_botId, title, activate, projectId, openedBy, _resume, _surface, cwd) => {
       expect(activate).toBe(false);
-      const created = task(`created-${++serial}`, { title: title!, projectId, openedBy });
+      const created = task(`created-${++serial}`, { title: title!, projectId, openedBy, cwd });
       tasks.unshift(created);
       return created;
     }),
@@ -32,7 +32,7 @@ function fixture(tasks: TaskRecord[], nodes: HandoffView[] = []) {
     }),
   };
   const history = vi.fn(() => nodes);
-  const allocate = (patch: Partial<typeof input> = {}) => allocateDelegationThread(store, history, { ...input, ...patch });
+  const allocate = (patch: Partial<Parameters<typeof allocateDelegationThread>[2]> = {}) => allocateDelegationThread(store, history, { ...input, ...patch });
   return { store, history, allocate };
 }
 
@@ -120,5 +120,17 @@ describe("parent delegation conversations", () => {
     const f = fixture([task("A", { openedBy: opened({ kind: "work", continuity: true }) }), task("B", { openedBy: opened({ kind: "work", continuity: true }) })]);
     expect(() => f.allocate()).toThrow("More than one delegated conversation");
     expect(f.store.createTask).not.toHaveBeenCalled();
+  });
+
+  it("gives an explicit fresh delegation its requested folder without replacing the standing child", () => {
+    const child = task("child-A", { cwd: "/project/standing", openedBy: opened({ kind: "work", continuity: true }) });
+    const f = fixture([child]);
+    expect(f.allocate({ fresh: true, cwd: "/project/shared" }).task.cwd).toBe("/project/shared");
+    expect(f.allocate({ cwd: "/other" })).toEqual({ task: child, created: false });
+    expect(child.cwd).toBe("/project/standing");
+  });
+
+  it("does not pin an unrelated folder when allocating a standing delegation", () => {
+    expect(fixture([]).allocate({ cwd: "/unrelated" }).task.cwd).toBeUndefined();
   });
 });

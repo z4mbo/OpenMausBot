@@ -10,7 +10,8 @@ export function acpRpcError(value: any, method: string): Error {
     : typeof data?.message === "string" ? data.message
     : typeof data?.error?.message === "string" ? data.error.message
     : "";
-  const context = [method,
+  const context = [
+    method,
     typeof data?.service === "string" ? `service: ${data.service}` : "",
     typeof data?.errorName === "string" ? data.errorName : "",
   ].filter(Boolean).join(", ");

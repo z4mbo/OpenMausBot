@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, type RefObject } from "react";
+import { EASE_OUT, MOTION_MS } from "@/lib/motion";
 
 type Ordered = { _id: string; columnId: string; order: number };
 
@@ -13,6 +14,14 @@ export function orderForMove(tasks: readonly Ordered[], taskId: string, columnId
 }
 
 export type PendingMove = { columnId: string; order: number };
+
+/** Drops `move` once its request settles, unless a later move of the same task has replaced it. */
+export function settlePendingMove(pending: ReadonlyMap<string, PendingMove>, taskId: string, move: PendingMove): ReadonlyMap<string, PendingMove> {
+  if (pending.get(taskId) !== move) return pending;
+  const next = new Map(pending);
+  next.delete(taskId);
+  return next;
+}
 
 export function withPendingMoves<T extends Ordered>(tasks: readonly T[], pending: ReadonlyMap<string, PendingMove>): T[] {
   return tasks.map((task) => {
@@ -41,7 +50,7 @@ function spotOf(root: HTMLElement, element: HTMLElement, rect: { left: number; t
 }
 
 /**
- * Slides each `[data-flip-id]` child from where it was to where it is, on the renders where `moves` changed.
+ * Slides each `[data-flip-id]` child from where it was to where it is, on the renders where `moves` changed, and fades in a child that was not there before.
  * The returned `seed` sets where one child should start from, such as the spot a dragged copy was let go.
  */
 export function useFlip(container: RefObject<HTMLElement | null>, moves: unknown): (id: string, from: DOMRect) => void {
@@ -64,7 +73,9 @@ export function useFlip(container: RefObject<HTMLElement | null>, moves: unknown
     if (!root) return;
     const animate = seen.current !== moves;
     seen.current = moves;
-    const still = !animate || (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const still = !animate || reduced;
+    const arriving = last.current.size > 0 && !reduced;
     const next = new Map<string, Spot>();
     for (const element of root.querySelectorAll<HTMLElement>("[data-flip-id]")) {
       const id = element.dataset.flipId!;
@@ -76,11 +87,15 @@ export function useFlip(container: RefObject<HTMLElement | null>, moves: unknown
       let before = seed ? spotOf(root, element, seed) : last.current.get(id);
       const visual = displayed.get(element);
       if (!seed && before && visual) before = { x: before.x + visual.left - rect.left, y: before.y + visual.top - rect.top };
+      if (!before && arriving && typeof element.animate === "function") {
+        animations.current.set(element, element.animate([{ opacity: 0, transform: "scale(0.97)" }, { opacity: 1, transform: "none" }], { duration: MOTION_MS.base, easing: EASE_OUT }));
+        continue;
+      }
       if (still || !before || typeof element.animate !== "function") continue;
       const dx = before.x - spot.x;
       const dy = before.y - spot.y;
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
-      animations.current.set(element, element.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: 180, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }));
+      animations.current.set(element, element.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: MOTION_MS.slow, easing: EASE_OUT }));
     }
     if (animate) seeds.current.clear();
     last.current = next;

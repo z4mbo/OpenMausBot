@@ -1,0 +1,100 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/origin-studio.test.ts (12 tests | 1 failed) 72ms
+     × keeps rejected and completion-echoed fal credentials out of shared generations 14ms
+ ❯ server/origin-pipeline.test.ts (12 tests | 3 failed) 88ms
+     × keeps a rejected 'email' credential out of shared contact errors 14ms
+     × keeps a rejected 'sms' credential out of shared contact errors 1ms
+     × keeps a rejected 'ai_call' credential out of shared contact errors 1ms
+ ❯ server/broadcast/scheduler.test.ts (6 tests | 1 failed) 20ms
+     × keeps a rejected channel key out of the shared publication result 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/origin-pipeline.test.ts > pipeline sender > keeps a rejected 'email' credential out of shared contact errors
+AssertionError: expected '{"result":{"ok":false,"error":"Brevo …' not to contain 'brevo-test-key'
+
+Expected: "brevo-test-key"
+Received: "{"result":{"ok":false,"error":"Brevo refused the request (HTTP 401): Rejected brevo-test-key; encoded brevo-test-key; authorization QUN0ZXN0OmJyZXZvLXRlc3Qta2V5"},"finished":[{"sessionToken":"tok","projectId":"proj","activityId":"act1","status":"failed","error":"Brevo refused the request (HTTP 401): Rejected brevo-test-key; encoded brevo-test-key; authorization QUN0ZXN0OmJyZXZvLXRlc3Qta2V5"}]}"
+
+ ❯ server/origin-pipeline.test.ts:56:24
+     54|     expect(result).toMatchObject({ ok: false, error: expect.stringCont…
+     55|     const output = JSON.stringify({ result, finished: convex.finished(…
+     56|     expect(output).not.toContain(secret);
+       |                        ^
+     57|     if (kind === "sms") expect(output).not.toContain(basic);
+     58|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  server/origin-pipeline.test.ts > pipeline sender > keeps a rejected 'sms' credential out of shared contact errors
+AssertionError: expected '{"result":{"ok":false,"error":"Twilio…' not to contain 'twilio-test-token'
+
+Expected: "twilio-test-token"
+Received: "{"result":{"ok":false,"error":"Twilio refused the request (HTTP 401): Rejected twilio-test-token; encoded twilio-test-token; authorization QUN0ZXN0OnR3aWxpby10ZXN0LXRva2Vu"},"finished":[{"sessionToken":"tok","projectId":"proj","activityId":"act1","status":"failed","error":"Twilio refused the request (HTTP 401): Rejected twilio-test-token; encoded twilio-test-token; authorization QUN0ZXN0OnR3aWxpby10ZXN0LXRva2Vu"}]}"
+
+ ❯ server/origin-pipeline.test.ts:56:24
+     54|     expect(result).toMatchObject({ ok: false, error: expect.stringCont…
+     55|     const output = JSON.stringify({ result, finished: convex.finished(…
+     56|     expect(output).not.toContain(secret);
+       |                        ^
+     57|     if (kind === "sms") expect(output).not.toContain(basic);
+     58|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  server/origin-pipeline.test.ts > pipeline sender > keeps a rejected 'ai_call' credential out of shared contact errors
+AssertionError: expected '{"result":{"ok":false,"error":"Eleven…' not to contain 'eleven-test-key'
+
+Expected: "eleven-test-key"
+Received: "{"result":{"ok":false,"error":"ElevenLabs refused the request (HTTP 401): Rejected eleven-test-key; encoded eleven-test-key; authorization QUN0ZXN0OmVsZXZlbi10ZXN0LWtleQ=="},"finished":[{"sessionToken":"tok","projectId":"proj","activityId":"act1","status":"failed","error":"ElevenLabs refused the request (HTTP 401): Rejected eleven-test-key; encoded eleven-test-key; authorization QUN0ZXN0OmVsZXZlbi10ZXN0LWtleQ=="}]}"
+
+ ❯ server/origin-pipeline.test.ts:56:24
+     54|     expect(result).toMatchObject({ ok: false, error: expect.stringCont…
+     55|     const output = JSON.stringify({ result, finished: convex.finished(…
+     56|     expect(output).not.toContain(secret);
+       |                        ^
+     57|     if (kind === "sms") expect(output).not.toContain(basic);
+     58|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  server/origin-studio.test.ts > Studio runner > keeps rejected and completion-echoed fal credentials out of shared generations
+AssertionError: expected '[{"_id":"gen1","projectId":"kai","mod…' not to contain 'fal-test-key'
+
+Expected: "fal-test-key"
+Received: "[{"_id":"gen1","projectId":"kai","mode":"image","model":"fal-ai/flux/schnell","modelLabel":"FLUX.1 schnell (fast)","kind":"image","prompt":"x","status":"failed","outputs":[],"saved":[],"broadcast":[],"createdByName":"Ana","createdAt":2,"updatedAt":2,"error":"fal.ai refused the key: Rejected fal-test-key"}]"
+
+ ❯ server/origin-studio.test.ts:133:61
+    131|       await runner.tick();
+    132|       expect(convex.rows.get("gen1")?.status).toBe("failed");
+    133|       expect(JSON.stringify([...convex.rows.values()])).not.toContain(…
+       |                                                             ^
+    134|       expect(JSON.stringify(convex.calls)).not.toContain("fal-test-key…
+    135|       runner.stop();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  server/broadcast/scheduler.test.ts > BroadcastScheduler > keeps a rejected channel key out of the shared publication result
+AssertionError: expected '{"name":"broadcast:finish","args":{"s…' not to contain 'linkedin-private-token'
+
+Expected: "linkedin-private-token"
+Received: "{"name":"broadcast:finish","args":{"sessionToken":"token","postId":"p1","results":[{"channel":"linkedin","ok":false,"error":"LinkedIn answered 401: Rejected linkedin-private-token"}]}}"
+
+ ❯ server/broadcast/scheduler.test.ts:38:40
+     36|     const finish = calls.find(call => call.name === "broadcast:finish"…
+     37|     expect(finish?.args.results).toEqual([{ channel: "linkedin", ok: f…
+     38|     expect(JSON.stringify(finish)).not.toContain("linkedin-private-tok…
+       |                                        ^
+     39|   });
+     40|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  5 failed | 25 passed (30)
+   Start at  07:14:27
+   Duration  3.13s (transform 721ms, setup 836ms, import 1.63s, tests 180ms, environment 0ms)
+

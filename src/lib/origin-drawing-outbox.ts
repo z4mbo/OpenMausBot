@@ -1,14 +1,16 @@
-import type { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
-import type { BinaryFileData } from "@excalidraw/excalidraw/types";
+/** A scene row waiting to be saved; the server keeps the higher version, then the lower nonce. */
+export type OutboxElement = { id: string; version: number; versionNonce: number };
+/** An image added on this device, kept as a data URL until its upload is acknowledged. */
+export type OutboxFile = { id: string; dataURL: string; mimeType: string };
 
-type Save = (elements: readonly OrderedExcalidrawElement[]) => Promise<unknown>;
+type Save = (elements: readonly OutboxElement[]) => Promise<unknown>;
 const queues = new Map<string, DrawingOutbox>();
 const BATCH = 100;
-const versionOf = (element: OrderedExcalidrawElement) => `${element.version}:${element.versionNonce}`;
+const versionOf = (element: OutboxElement) => `${element.version}:${element.versionNonce}`;
 
 class DrawingOutbox {
-  private pending = new Map<string, OrderedExcalidrawElement>();
-  private images = new Map<string, BinaryFileData>();
+  private pending = new Map<string, OutboxElement>();
+  private images = new Map<string, OutboxFile>();
   private uploading = new Set<string>();
   private listeners = new Set<() => void>();
   private revision = 0;
@@ -22,10 +24,10 @@ class DrawingOutbox {
       const stored = JSON.parse(localStorage.getItem(key) ?? "{}") as { elements?: unknown[]; files?: unknown[] } | unknown[];
       const elements = Array.isArray(stored) ? stored : stored.elements;
       if (Array.isArray(elements)) for (const element of elements) {
-        if (element && typeof element === "object" && "id" in element && typeof element.id === "string" && "version" in element && Number.isSafeInteger(element.version) && "versionNonce" in element && Number.isSafeInteger(element.versionNonce)) this.pending.set(element.id, element as OrderedExcalidrawElement);
+        if (element && typeof element === "object" && "id" in element && typeof element.id === "string" && "version" in element && Number.isSafeInteger(element.version) && "versionNonce" in element && Number.isSafeInteger(element.versionNonce)) this.pending.set(element.id, element as OutboxElement);
       }
       if (!Array.isArray(stored) && Array.isArray(stored.files)) for (const file of stored.files) {
-        if (file && typeof file === "object" && "id" in file && typeof file.id === "string" && "dataURL" in file && typeof file.dataURL === "string" && "mimeType" in file && typeof file.mimeType === "string") this.images.set(file.id, file as BinaryFileData);
+        if (file && typeof file === "object" && "id" in file && typeof file.id === "string" && "dataURL" in file && typeof file.dataURL === "string" && "mimeType" in file && typeof file.mimeType === "string") this.images.set(file.id, file as OutboxFile);
       }
     } catch { this.durable = false; }
   }
@@ -45,11 +47,11 @@ class DrawingOutbox {
     } catch { this.durable = false; }
     this.notify();
   }
-  enqueue(elements: readonly OrderedExcalidrawElement[]) {
+  enqueue(elements: readonly OutboxElement[]) {
     for (const element of elements) this.pending.set(element.id, element);
     this.persist();
   }
-  enqueueFiles(files: readonly BinaryFileData[]) {
+  enqueueFiles(files: readonly OutboxFile[]) {
     for (const file of files) this.images.set(file.id, file);
     this.persist();
   }

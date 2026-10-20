@@ -1,8 +1,9 @@
 // Runs one agents tool: check arguments, call the harness, render the model's text. Stateless;
 // per-turn limits are the harness's, since one proxy can serve many turns of a warm engine.
 import { CREDENTIAL_TARGETS, isCredentialTargetId } from "../../shared/credential-request.ts";
-
 import { peerName } from "../peer-roster.ts";
+
+import { assignmentLine, renderAssignmentStatus } from "./agents-assignment-status.ts";
 import { callCardTool, CARD_TOOL_NAMES } from "./agents-call-cards.ts";
 import { catalogProfileFromEnv, ORIGIN_TOOL_NAMES, SHARED_COMPUTER_TOOL_NAMES } from "./agents-catalog.ts";
 import { harnessClientFromEnv } from "./agents-client.ts";
@@ -46,45 +47,6 @@ const SIGN_IN_PLACES: Record<string, string> = {
   vm: "the Local VM",
   cloud: "the cloud computer",
 };
-
-const STATUS_WORDS: Record<string, string> = {
-  queued: "queued, not started yet",
-  running: "running",
-  needs_input: "waiting on the person",
-  waiting: "waiting on its own hand-offs",
-  resume: "wrapping up (its hand-offs settled)",
-  completed: "completed",
-  failed: "failed",
-  cancelled: "cancelled",
-};
-const RESULT_HEAD = 2_000;
-
-function assignmentLine(a: Json): string {
-  const id = typeof a.id === "string" && a.id ? a.id : "?";
-  const who = typeof a.botName === "string" && a.botName ? `@${peerName(a.botName)}`
-    : typeof a.botId === "string" && a.botId ? a.botId : "a teammate";
-  const status = String(a.status ?? "unknown");
-  const outcome = typeof a.outcome === "string" && a.outcome && a.outcome !== "done" && a.outcome !== status ? ` (${a.outcome})` : "";
-  const detail = typeof a.outcomeDetail === "string" && a.outcomeDetail.trim() ? `: ${a.outcomeDetail.trim()}` : "";
-  return `${id} → ${who}: ${STATUS_WORDS[status] ?? status}${outcome}${detail}`;
-}
-
-function renderAssignmentStatus(r: Json, id: string): string {
-  const raw = jsonRecord(r.assignment) ? r.assignment : r;
-  const a: Json = { id, ...raw, botName: raw.botName ?? r.toBotName };
-  const lines = [`Assignment ${assignmentLine(a)}`];
-  const question = typeof a.question === "string" ? a.question.trim() : "";
-  if (question && (a.status === "needs_input" || a.outcome === "needs_input")) {
-    lines.push(`It is parked on a question for the person: ${JSON.stringify(question)}. Nothing moves until the person answers it in that thread; tell them and do not keep checking.`);
-  }
-  const result = typeof a.result === "string" ? a.result.trim() : "";
-  if (result) lines.push(`Result${result.length > RESULT_HEAD ? " (first part)" : ""}: ${result.slice(0, RESULT_HEAD)}`);
-  const children = Array.isArray(r.children) ? r.children.filter(jsonRecord) : [];
-  if (children.length) lines.push("Its own hand-offs:", ...children.map((child) => `- ${assignmentLine(child)}`));
-  const settled = a.status === "completed" || a.status === "failed" || a.status === "cancelled" || a.status === "done";
-  if (!settled) lines.push("It is not settled. Its result resumes you on its own; do not wait on it in this turn.");
-  return lines.join("\n");
-}
 
 function handoffIds(r: Json): string[] {
   const receipts = Array.isArray(r.receipts) ? r.receipts.filter(jsonRecord) : [];
@@ -326,11 +288,12 @@ export async function callTool(name: string, args: Json, context: ToolCallContex
       && (canonical.thread === undefined || canonical.thread === "standing" || canonical.thread === "new")
       && (canonical.reply === undefined || canonical.reply === "resume" || canonical.reply === "none")
       && (canonical.consult === undefined || typeof canonical.consult === "boolean")
+      && (canonical.in_my_folder === undefined || typeof canonical.in_my_folder === "boolean")
       && (canonical.done_when === undefined || typeof canonical.done_when === "string")
       && (canonical.reason === undefined || typeof canonical.reason === "string");
     if (!usable) {
       return {
-        text: `coordinate_bots takes snake_case arguments: bot_ids (an array of 1-4 teammate ids) and message are required; group_id, reason, rework, thread ("standing" or "new"), reply ("resume" or "none"), consult (true or false) and done_when are optional. Received: ${Object.keys(args).join(", ") || "none"}.`,
+        text: `coordinate_bots takes snake_case arguments: bot_ids (an array of 1-4 teammate ids) and message are required; group_id, reason, rework, thread ("standing" or "new"), reply ("resume" or "none"), consult (true or false), in_my_folder (true or false) and done_when are optional. Received: ${Object.keys(args).join(", ") || "none"}.`,
         isError: true,
       };
     }
@@ -338,7 +301,7 @@ export async function callTool(name: string, args: Json, context: ToolCallContex
       groupId: canonical.group_id, botIds: ids, message: canonical.message,
       reason: typeof canonical.reason === "string" && canonical.reason.trim() ? canonical.reason.trim() : undefined,
       rework: canonical.rework,
-      thread: canonical.thread, reply: canonical.reply, consult: canonical.consult,
+      thread: canonical.thread, reply: canonical.reply, consult: canonical.consult, inMyFolder: canonical.in_my_folder,
       done_when: typeof canonical.done_when === "string" && canonical.done_when.trim() ? canonical.done_when.trim() : undefined,
     }) });
     return { text: JSON.stringify(r), ...(r.error ? { isError: true } : {}) };

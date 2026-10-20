@@ -22,6 +22,31 @@ const fixture = (options: { snapshot?: ProviderSnapshot; config?: InstanceConfig
 };
 
 describe("API billing admission", () => {
+  it("requires live agent attribution and current policy for unpriced paid AI", () => {
+    const dataDir = mkdtempSync(join(tmpdir(), "origin-unpriced-policy-")); dirs.push(dataDir);
+    const config: { dailyApiBudget?: { limitUsd: number; timeZone: string } } = {};
+    const bot: { dailyApiBudgetUsd?: number } = {};
+    const host = createApiBudgetHost({ dataDir, config: () => config, bot: id => id === "agent" ? bot : null,
+      provider: () => undefined, snapshot: () => undefined });
+    expect(() => host.assertUnpriced(undefined, "Speech transcription")).not.toThrow();
+    expect(() => host.assertUnpriced("", "Speech transcription")).toThrow(/agent/i);
+    expect(() => host.assertUnpriced("missing", "Speech transcription")).toThrow(/agent/i);
+    expect(() => host.assertUnpriced("agent", "Speech transcription")).not.toThrow();
+    for (const limitUsd of [0, 2]) {
+      config.dailyApiBudget = { limitUsd, timeZone: "Europe/Rome" };
+      expect(() => host.assertUnpriced(undefined, "Speech transcription")).toThrow(/daily API budget/);
+      expect(() => host.assertUnpriced("agent", "Speech transcription")).toThrow(/Speech transcription.*daily API budget/);
+    }
+    delete config.dailyApiBudget;
+    for (const limitUsd of [0, 2]) {
+      bot.dailyApiBudgetUsd = limitUsd;
+      expect(() => host.assertUnpriced("agent", "Speech transcription")).toThrow(/daily API budget/);
+      expect(() => host.assertUnpriced(undefined, "Speech transcription")).not.toThrow();
+    }
+    delete bot.dailyApiBudgetUsd;
+    expect(() => host.assertUnpriced("agent", "Speech transcription")).not.toThrow();
+  });
+
   it.each(["claudeAgent", "codex", "grokAgent"])("permits confirmed %s subscriptions under a zero API cap", driver => {
     const { host } = fixture({ snapshot: subscription, limitUsd: 0 });
     expect(host(instance(driver), "agent", "gpt-5.4")).toBeUndefined();

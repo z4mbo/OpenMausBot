@@ -281,7 +281,8 @@ export function ApiKeyRow({
       const result = await api("/api/keys/test", { method: "POST", body: JSON.stringify({ provider: testProvider }) });
       if (generation !== testGeneration.current) return;
       const outcome = result.ok
-        ? result.check === "authentication" ? t("keys.testAuthenticated")
+        ? result.check === "authentication"
+          ? result.freeTier === true ? `${t("keys.testAuthenticated")}\n${t("keys.testFreeTier")}` : t("keys.testAuthenticated")
           : result.models?.length ? t("keys.testCatalog", { models: result.models.join(", ") }) : t("keys.testCatalogNoModels")
         : result.reason === "rejected" ? t("keys.testRejected")
           : result.reason === "unreachable" ? t("keys.testUnreachable")
@@ -394,7 +395,7 @@ export function ApiKeyRow({
       )}
       {credential.note && <p className="mt-1.5 text-[11.5px] leading-[1.4] text-ink-secondary">{credential.note}</p>}
       {error && <div className="mt-1 text-[12px] text-danger">{error}</div>}
-      {verdict && <div role="status" className="mt-1 text-[12px] text-ink-secondary">{verdict}</div>}
+      {verdict && <div role="status" className="mt-1 whitespace-pre-line text-[12px] text-ink-secondary">{verdict}</div>}
     </div>
   );
 }

@@ -239,7 +239,7 @@ export interface CallAgentDeps {
   summarize(input: { botId: string; prompt: string }): Promise<string>;
   /** Posts the summary card, and the transcript when it was kept, in the chief's chat. */
   post(input: { botId: string; widget: Record<string, unknown>; fallback: string; transcript?: string }): void;
-  transcribe(input: { audio: Uint8Array; mime: string; settings: CallAgentSettings }): Promise<string>;
+  transcribe(input: { botId: string; audio: Uint8Array; mime: string; settings: CallAgentSettings }): Promise<string>;
   settings(): CallAgentSettings;
   log?(line: string): void;
   now?(): number;
@@ -428,7 +428,7 @@ export function createCallAgents(deps: CallAgentDeps) {
       const settings = deps.settings();
       if (settings.transcription.engine === "browser") throw new CallAgentError("This workspace transcribes in the browser");
       limit(`audio:${scope.user.userId}`, AUDIO_PER_MINUTE);
-      const said = await deps.transcribe({ audio, mime, settings });
+      const said = await deps.transcribe({ botId: session.bot.id, audio, mime, settings });
       if (sessions.get(session.key) !== session) return { line: null };
       return { line: hear(session, auth, scope.user, said) };
     },

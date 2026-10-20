@@ -1,0 +1,39 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/origin-studio.test.ts (14 tests | 2 failed | 12 skipped) 24ms
+     × refuses an unpriced generation under an active $0 budget before any cloud or provider call 19ms
+     × refuses an unpriced generation under an active $2 budget before any cloud or provider call 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/origin-studio.test.ts > Studio runner > refuses an unpriced generation under an active $0 budget before any cloud or provider call
+ FAIL  server/origin-studio.test.ts > Studio runner > refuses an unpriced generation under an active $2 budget before any cloud or provider call
+AssertionError: promise resolved "[ 'gen1' ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  "gen1",
+]
+
+ ❯ server/origin-studio.test.ts:129:120
+    127|   it.each([0, 2])("refuses an unpriced generation under an active $%s …
+    128|     const { runner, cloud, convex, fal } = setup({ checkBudget: () => …
+    129|     await expect(runner.generate(cloud, { projectId: "kai", mode: "ima…
+       |                                                                                                                        ^
+    130|     expect(convex.calls).toHaveLength(0);
+    131|     expect(fal.requests).toHaveLength(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 12 skipped (14)
+   Start at  07:16:25
+   Duration  2.04s (transform 683ms, setup 579ms, import 1.25s, tests 24ms, environment 0ms)
+

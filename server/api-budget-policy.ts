@@ -4,6 +4,12 @@ import { createApiRequestBudget, dailyApiBudgetEnabled, dailyApiBudgetForDataDir
 
 export type ModelBilling = "subscription" | "metered" | "unknown";
 
+export function assertUnpricedAiBudget(policy: { limitUsd?: number; agentLimitUsd?: number }, service: string): void {
+  if (policy.limitUsd !== undefined || policy.agentLimitUsd !== undefined) {
+    throw new DailyApiBudgetError(`${service} cannot enforce the daily API budget because its maximum request cost is unknown. Remove the applicable limit or choose a supported API model.`);
+  }
+}
+
 export function modelBilling(driverKind: string, config: InstanceConfig | undefined, snapshot: ProviderSnapshot | undefined, model?: string, customModel = false): ModelBilling {
   const raw = config?.config && typeof config.config === "object" ? config.config as Record<string, unknown> : undefined;
   if (config?.access === "api" || snapshot?.billing === "metered" || snapshot?.account?.method === "api-key" || raw?.requireApiKey === true || raw?.managed ||
@@ -51,6 +57,11 @@ export function createApiBudgetHost(deps: {
     return createApiRequestBudget({ budget, botId, policy });
   };
   return Object.assign(forModel, {
+    assertUnpriced(botId: string | undefined, service: string): void {
+      const bot = botId !== undefined ? deps.bot(botId) : undefined;
+      if (botId !== undefined && !bot) throw new DailyApiBudgetError(`${service} needs an existing agent to check its API budget.`);
+      assertUnpricedAiBudget({ limitUsd: deps.config().dailyApiBudget?.limitUsd, agentLimitUsd: bot?.dailyApiBudgetUsd }, service);
+    },
     async prepare(instance: ProviderInstance | null | undefined, botId: string, model?: string): Promise<ApiRequestBudget | undefined> {
       if (instance && (!instance.enabled || deps.current?.(instance) === false)) throw new DailyApiBudgetError("This model connection changed before dispatch. Try again.");
       const policy = { limitUsd: deps.config().dailyApiBudget?.limitUsd, agentLimitUsd: deps.bot(botId)?.dailyApiBudgetUsd,

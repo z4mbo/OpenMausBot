@@ -1,0 +1,34 @@
+{
+  "version": "0.3.1",
+  "scope": "Combined working tree after reconciling fb7b838aab70c1308023e5df27209641fff5e9c1 and 84b0ccedb30615f2fa0a1c9c0d3fd18da0f730d3; final commit binding pending",
+  "provenance": "Root and specialist tool outputs; only separately named logs are retained as files",
+  "checks": [
+    { "command": "vitest run src shared", "files": 602, "passed": 6238, "failed": 0, "startedAtLocal": "2026-10-20 07:12:14 Europe/Rome", "durationSeconds": 408.6, "limit": "Canonical release text gained its final integration-safety note afterward; runtime UI inputs did not change" },
+    { "command": "backend typecheck and tests", "files": 30, "passed": 265, "failed": 0, "receipt": "backend-merge-receipt.json" },
+    { "command": "all five touched driver suites", "files": 5, "passed": 696, "skipped": 4, "durationSeconds": 253.6 },
+    { "command": "quota-switch E2E and hosted confinement/requester composite", "files": 9, "passed": 62, "durationSeconds": 55.75, "limit": "Actual isolated fake-provider quota fixture plus separate policy/requester tests; not a new real-provider two-host run" },
+    { "command": "focused driver/helper regressions", "files": 9, "passed": 230, "limit": "Overlaps full driver suites" },
+    { "command": "focused merged UI suites", "files": 13, "passed": 143, "groups": [118,25], "limit": "Two separate groups; not full App acceptance" },
+    { "command": "final feature security leaf suites", "files": 8, "passed": 86, "receipt": "feature-security-receipt.json" },
+    { "command": "transcription/budget policy/host regressions", "files": 3, "passed": 38, "limit": "Seven failing-before cases reported by specialist; overlaps policy checks" },
+    { "command": "root integration, delegation, route/size/release/documentation guards", "files": 7, "passed": 57, "startedAtLocal": "2026-10-20 07:24:30 Europe/Rome" },
+    { "command": "independent Studio storage guard review", "passed": 4, "limit": "Other20 cases intentionally filtered; no real requests" },
+    { "command": "pnpm test:site", "cspNodeTests": 3, "componentFiles": 2, "componentVitestTests": 31, "failed": 0, "startedAtLocal": "2026-10-20 07:28:01 Europe/Rome" },
+    { "command": "tsc -b", "status": "pass" },
+    { "command": "tsc -p tsconfig.server.json", "status": "pass", "limit": "Fresh specialist compile includes final leaf security code and root wiring" },
+    { "command": "check-electron.mjs", "modules": 183, "status": "pass" },
+    { "command": "generate-locale.mjs --check", "languages": 12, "englishKeys": 4736, "status": "pass", "limit": "Translations remain partially complete" }
+  ],
+  "retainedCorrections": [
+    "Initial typecheck caught removed peerName import, unused static-file imports and nullable static directory after extraction; corrected before the successful fresh compile.",
+    "Initial ratchets correctly requested lowered counts after extractions and one removed route guard; pins were lowered, never raised.",
+    "The concurrent site command passed only3 Node CSP checks while31 component tests remained; the corrected command runs and passes both.",
+    "UI fixture startup/bundling/context failures and a stale preview handoff are described separately in ui/browser-proof.json."
+  ],
+  "noise": "The complete client/shared run logged ECONNREFUSED from its loopback3000 test paths and still passed; no protected listener was started or stopped to hide it.",
+  "limits": [
+    "Counts overlap and must not be summed into one unique total.",
+    "Fresh exact-source CI, final production builds, native artifacts and production publication remain separate gates.",
+    "No real provider or production application data was used."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "pid": 73112,
+  "port": 50063,
+  "url": "http://127.0.0.1:50063/__integration046.html",
+  "sourceManifest": "source-before-2.json",
+  "protectedPortsUntouched": true,
+  "scope": "Actual merged UI components with controlled StoreContext/reducer, HTTP catalog/quota/settings responses and cloud-query adapter. No native backend, provider, real host, credential, production data or full App acceptance."
+}

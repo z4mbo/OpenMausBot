@@ -66,6 +66,15 @@ describe("issue editor collaboration", () => {
     render();
     expect(field("Issue title").value).toBe("Teammate changed the saved title");
   });
+  it("treats a title saved without its surrounding space as saved", () => {
+    open();
+    input("Issue title", "Trimmed title ");
+    expect(host.textContent).toContain("Save changes");
+    fixture.task = { ...fixture.task, title: "Trimmed title" };
+    render();
+    render();
+    expect(host.textContent).not.toContain("Save changes");
+  });
   it("does not carry a local draft into a different selected task", () => {
     open();
     input("Issue title", "Unsaved first task title");

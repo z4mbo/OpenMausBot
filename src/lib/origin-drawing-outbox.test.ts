@@ -1,8 +1,7 @@
-import type { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
-import type { BinaryFileData } from "@excalidraw/excalidraw/types";
+import type { OutboxElement, OutboxFile } from "./origin-drawing-outbox";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const scope = { server: "https://fixture.test", userId: "user", teamId: "team", canvasId: "canvas" };
-const shape = (version = 1) => ({ id: "shape", type: "rectangle", version, versionNonce: 1, x: 1, y: 1, width: 20, height: 20 }) as OrderedExcalidrawElement;
+const shape = (version = 1) => ({ id: "shape", type: "rectangle", version, versionNonce: 1, x: 1, y: 1, width: 20, height: 20 }) as OutboxElement;
 let stored: Map<string, string>;
 beforeEach(() => {
   vi.resetModules();
@@ -13,7 +12,7 @@ afterEach(() => vi.unstubAllGlobals());
 it("restores unsaved elements and image bytes after a renderer reload", async () => {
   let { drawingOutbox } = await import("./origin-drawing-outbox");
   const outbox = drawingOutbox(scope);
-  const file = { id: "image", dataURL: "data:image/png;base64,YQ==", mimeType: "image/png", created: 1 } as BinaryFileData;
+  const file = { id: "image", dataURL: "data:image/png;base64,YQ==", mimeType: "image/png", created: 1 } as OutboxFile;
   outbox.enqueue([shape()]); outbox.enqueueFiles([file]);
   vi.resetModules();
   ({ drawingOutbox } = await import("./origin-drawing-outbox"));
@@ -57,7 +56,7 @@ it("retains edits in memory and requires an open window when device storage is f
 it("keeps unacknowledged images when element saves succeed", async () => {
   const { drawingOutbox } = await import("./origin-drawing-outbox");
   const outbox = drawingOutbox(scope);
-  outbox.enqueue([shape()]); outbox.enqueueFiles([{ id: "image", dataURL: "data:image/png;base64,YQ==", mimeType: "image/png", created: 1 } as BinaryFileData]);
+  outbox.enqueue([shape()]); outbox.enqueueFiles([{ id: "image", dataURL: "data:image/png;base64,YQ==", mimeType: "image/png", created: 1 } as OutboxFile]);
   await outbox.flush(async () => {});
   expect(outbox.size).toBe(1); expect(stored.size).toBe(1);
   outbox.acknowledgeFile("image"); expect(outbox.size).toBe(0); expect(stored.size).toBe(0);

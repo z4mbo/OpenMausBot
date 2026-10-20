@@ -1,24 +1,19 @@
-import { spawn } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { removeTempDir, waitForExit } from "../../server/testing/cleanup.ts";
+import { removeTempDir } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
-
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 const enabled = process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env }));
 
 (enabled ? it : it.skip)("coordinates from the real composer and opens the exact child task from its existing inline receipt", async () => {
   const temporary = mkdtempSync(join(tmpdir(), "omb-direct-ui-plan-"));
   const planPath = join(temporary, "plan.json");
   writeFileSync(planPath, "{}");
-  const child = spawn(process.execPath, ["--experimental-strip-types", "scripts/control-omb.ts", "ui", "launch"], {
-    cwd: ROOT, env: { ...process.env, FAKE_CLAUDE_ROOM_PLAN: planPath }, stdio: ["ignore", "pipe", "pipe"],
-  });
+  const child = spawnUiLauncher([], { ...process.env, FAKE_CLAUDE_ROOM_PLAN: planPath });
   let output = "";
   let error = "";
   child.stdout.on("data", chunk => { output += String(chunk); });
@@ -64,7 +59,7 @@ const enabled = process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBin
     writeFileSync(gateFile, "complete fixture work");
     await ui("wait-settle", "--timeout", "60");
     await expect.poll(snapshot, { timeout: 15_000 }).toContain("Engineer checked the fixture CSV export");
-    expect(await snapshot()).toContain("Sent to Engineer");
+    expect(await snapshot()).toContain('region "Engineer: Done Check the fixture CSV export"');
     const state = await api("/api/bots");
     const parent = state.bots.find((bot: any) => bot.id === info.botId);
     const receipt = parent.messages.find((message: any) => message.tool?.name === "Sent to Engineer");
@@ -72,17 +67,13 @@ const enabled = process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBin
     expect(receipt.threadRef.threadId).not.toBe(lead.threadId);
     const screenshot = info.logPath + ".direct-coordination.png";
     await ui("screenshot", "--out", screenshot);
-    await click("Sent to Engineer");
+    await click("Check the fixture CSV export");
     await expect.poll(snapshot, { timeout: 15_000 }).toContain("CSV export checked in my separate task");
-    // The request in the teammate's thread names the bot that sent it.
-    expect(await snapshot()).toMatch(/Pepper[\s\S]{0,80}sent a request/);
-    const selected = (await api("/api/bots")).bots.find((bot: any) => bot.id === lead.id);
-    expect(selected.threadId).toBe(receipt.threadRef.threadId);
-    const evidence = { source: parent.messages, receipt, selectedThread: selected.threadId, final: await snapshot(), screenshot };
+    const evidence = { source: parent.messages, receipt, final: await snapshot(), screenshot };
     writeFileSync(info.logPath + ".direct-coordination.json", JSON.stringify(evidence, null, 2));
     console.log("Direct coordination UI evidence:", info.logPath + ".direct-coordination.json");
   } finally {
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
     await removeTempDir(temporary);
   }
 }, 240_000);

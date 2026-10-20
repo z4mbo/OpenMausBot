@@ -10,6 +10,7 @@ type Delegation = {
   message: string;
   title?: string;
   projectId?: string;
+  cwd?: string;
 };
 
 function eligible(task: TaskRecord, parent: Parent): boolean {
@@ -51,7 +52,7 @@ export function allocateDelegationThread(store: DelegationStore, history: () => 
   }
   const title = fresh ? input.title ?? (input.message.replace(/\s+/g, " ").trim().slice(0, 60) || `From ${parent.name}`) : `@${parent.name} · work`;
   const task = store.createTask(recipientId, title, false, fresh ? input.projectId : undefined,
-    { ...parent, at: Date.now(), ...(fresh ? {} : { kind: "work", continuity: true }) });
+    { ...parent, at: Date.now(), ...(fresh ? {} : { kind: "work", continuity: true }) }, undefined, undefined, fresh ? input.cwd : undefined);
   if (!task) throw new Error("The recipient no longer exists");
   return { task, created: true };
 }

@@ -27,11 +27,12 @@ describe("chat width", () => {
     expect(readChatWidth()).toBe("standard");
   });
 
-  it("keeps the standard width at the original bubble cap", () => {
-    const body = css.match(/:root\s*\{\s*(--chat-bubble-max[^}]*)\}/)?.[1] ?? "";
-    expect(body).toMatch(/--chat-bubble-max:\s*42rem/);
-    expect(body).toMatch(/--chat-bubble-pct:\s*78%/);
+  it("keeps the compact column at 680px and caps bubbles at 80% or 560px", () => {
+    const body = css.match(/:root\s*\{([^}]*--chat-bubble-max[^}]*)\}/)?.[1] ?? "";
+    expect(body).toMatch(/--chat-bubble-max:\s*35rem/);
+    expect(body).toMatch(/--chat-bubble-pct:\s*80%/);
     expect(body).toMatch(/--chat-card-pct:\s*88%/);
+    expect(body).toMatch(/--chat-column-max:\s*42.5rem/);
   });
 
   it("gives every non-default width a stylesheet block that sets the bubble variables", () => {
@@ -44,6 +45,30 @@ describe("chat width", () => {
     }
   });
 
+  it.each(CHAT_WIDTH_IDS)("keeps the %s column and bubbles within their selected limits", (id) => {
+    const selector = id === DEFAULT_CHAT_WIDTH ? ":root" : `:root\\[data-chat-width="${id}"\\]`;
+    const body = css.match(new RegExp(`${selector}\\s*\\{([^}]*--chat-bubble-max[^}]*)\\}`))?.[1] ?? "";
+    const token = (name: string) => body.match(new RegExp(`--${name}:\\s*([\\d.]+)(rem|%)?`))?.slice(1) ?? [];
+    const [column] = token("chat-column-max");
+    const [bubble] = token("chat-bubble-max");
+    const [pct] = token("chat-bubble-pct");
+    expect(column, `${id} sets --chat-column-max`).toBeDefined();
+    expect(Number(column)).toBeGreaterThan(0);
+    expect(Number(bubble)).toBeGreaterThan(0);
+    expect(Number(pct)).toBeGreaterThan(0);
+    expect(Number(pct)).toBeLessThanOrEqual(100);
+  });
+
+  it("centers the transcript and the composer in one column, in a chat and in a room", () => {
+    expect(css).toMatch(/\.chat-column \{[^}]*margin-inline: auto;[^}]*max-width: var\(--chat-column-max\);/);
+    expect(css).toMatch(/\.chat-column-dock \{[^}]*margin-inline: auto;[^}]*max-width: calc\(var\(--chat-column-max\) \+ 2\.5rem\);/);
+    for (const f of ["ChatView", "GroupView"]) {
+      const source = readFileSync(join(root, "components", `${f}.tsx`), "utf8");
+      expect(source, f).toMatch(/className="glass-scroller-content chat-column /);
+      expect(source, f).toMatch(/ref=\{composerDockRef\} className="[^"]* chat-column-dock"/);
+    }
+  });
+
   it("registers every stylesheet block", () => {
     for (const id of blocks) expect<readonly string[]>(CHAT_WIDTH_IDS).toContain(id);
   });
@@ -53,8 +78,8 @@ describe("chat width", () => {
     expect(css).toContain("--chat-column-max: 52.5rem");
     expect(css).toContain("--chat-column-max: 100%");
     const chat = readFileSync(join(root, "components/ChatView.tsx"), "utf8");
-    expect(chat).toContain("max-w-[var(--chat-column-max)]");
-    expect(chat).toContain("max-w-[calc(var(--chat-column-max)+2.5rem)]");
+    expect(chat).toContain("glass-scroller-content chat-column");
+    expect(chat).toContain("chat-column-dock");
   });
 
   it("stamps a chosen width, remembers it, and clears the attribute for the default", () => {

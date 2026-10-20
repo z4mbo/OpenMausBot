@@ -1,6 +1,6 @@
 import { releases } from "../../shared/origin-releases";
 
-export { releases, type Release, type ReleaseChange } from "../../shared/origin-releases";
+export { releases } from "../../shared/origin-releases";
 
 export const WHATS_NEW_SEEN_KEY = "origin-whats-new-seen";
 

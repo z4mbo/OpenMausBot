@@ -1,20 +1,10 @@
 import type { MemberCallSignalKind } from "./origin-realtime";
 
-export type CallTileRef = { id: string; screenSharing?: boolean };
-
 export const SELF_CAMERA = "self:camera";
 export const SELF_SCREEN = "self:screen";
 
 export function isScreenTrack(transceivers: readonly { receiver: { track: { kind: string } } }[], track: { kind: string }): boolean {
   return track.kind === "video" && transceivers.find((item) => item.receiver.track.kind === "video")?.receiver.track !== track;
-}
-
-export function selectCallFocus(tiles: readonly CallTileRef[], current: string | null, previousScreens: ReadonlySet<string>): string | null {
-  const screens = tiles.filter((tile) => tile.screenSharing);
-  const newScreen = screens.find((tile) => !previousScreens.has(tile.id));
-  if (newScreen) return newScreen.id;
-  if (tiles.some((tile) => tile.id === current)) return current;
-  return screens[0]?.id ?? tiles.find((tile) => tile.id !== SELF_CAMERA)?.id ?? tiles[0]?.id ?? null;
 }
 
 export const CALL_REACTIONS = ["👍", "❤️", "🎉", "😂", "👏", "🤔"] as const;

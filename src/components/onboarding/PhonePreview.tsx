@@ -6,8 +6,7 @@ import { brand } from "@/lib/brand";
 export function PhonePreview({ className }: { className?: string }) {
   return (
     <div className={cn("relative", className)} aria-hidden="true">
-      <div className="absolute inset-x-6 bottom-2 top-6 rounded-[40px] bg-accent/20 blur-2xl" />
-      <div className="relative mx-auto w-[168px] rounded-[30px] border border-hairline/60 bg-panel p-[6px] shadow-[0_28px_60px_-24px_rgba(0,0,0,0.6),0_1px_0_rgba(255,255,255,0.06)_inset]">
+      <div className="relative mx-auto w-[168px] rounded-[30px] border border-hairline/60 bg-panel p-[6px]">
         <div className="overflow-hidden rounded-[24px] bg-app">
           <div className="relative flex h-7 items-center justify-between px-4 text-[8px] font-medium tabular-nums text-ink">
             <span>9:41</span>

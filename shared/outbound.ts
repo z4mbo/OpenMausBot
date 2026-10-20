@@ -68,11 +68,22 @@ export function isReadOnlyTool(name: string): boolean {
   return tokens.length > 0 && READ_VERBS.has(tokens[0]);
 }
 
+/** Security: Origin's built-in Broadcast tools carry the section's name, not its act. They draft, list or schedule a
+ * post, and a post an agent wrote is published only after a person approves it in the app. Only the built-in agents
+ * server's spellings match, so another server's tool of the same name stays classified by its words. */
+const BROADCAST_SECTION_TOOLS = new Set(["origin_broadcast_draft", "origin_broadcast_list", "origin_broadcast_schedule"]);
+const AGENTS_SERVER_PREFIXES = ["", "mcp__agents__", "agents__", "agents_"] as const;
+
+function isBroadcastSectionTool(name: string): boolean {
+  return AGENTS_SERVER_PREFIXES.some((prefix) => name.startsWith(prefix) && BROADCAST_SECTION_TOOLS.has(name.slice(prefix.length)));
+}
+
 /** Does this tool send something to someone, or move money? */
 export function isOutboundTool(name: string): boolean {
   // A raw API call from the workbench can do anything an app tool can, and
   // nothing here can read which; it is treated as a send.
   if (name === "COMPOSIO_PROXY_EXECUTE") return true;
+  if (isBroadcastSectionTool(name)) return false;
   const tokens = actionTokens(name);
   if (tokens.length === 0) return false;
   if (isReadOnlyTool(name)) return false;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { orderForMove, stepTarget, withPendingMoves } from "./issue-order";
+import { orderForMove, settlePendingMove, stepTarget, withPendingMoves } from "./issue-order";
 
 const tasks = [
   { _id: "a", columnId: "todo", order: 0 },
@@ -30,5 +30,15 @@ describe("issue ordering", () => {
     expect(stepTarget(lane, "b", 1)).toEqual({});
     expect(stepTarget(lane, "a", -1)).toBeNull();
     expect(stepTarget(lane, "c", 1)).toBeNull();
+  });
+});
+
+describe("pending moves", () => {
+  it("keeps a newer move of the same task when an older request settles", () => {
+    const first = { columnId: "doing", order: 1 };
+    const second = { columnId: "review", order: 1 };
+    const pending = new Map([["a", second]]);
+    expect(settlePendingMove(pending, "a", first)).toBe(pending);
+    expect(settlePendingMove(pending, "a", second).has("a")).toBe(false);
   });
 });

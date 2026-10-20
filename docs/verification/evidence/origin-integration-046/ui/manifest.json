@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-20T05:28:00.384Z",
+  "files": [
+    {
+      "path": "captures/agent-dark.jpg",
+      "bytes": 65839,
+      "sha256": "28a9a565a55068a7940386a17769f32c4e084eb90c3da96820c7660015be22a2",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/agent-light-375.jpg",
+      "bytes": 44994,
+      "sha256": "bbc0a1ecfca66ba69f01b0e9a4810bd3420877d445123052e3955a743778dcb6",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/chat-medium-dark.jpg",
+      "bytes": 43692,
+      "sha256": "4c32fed5dd71faa721fabf49f1fc747cb7c28f0247f1aa0fdb84ab11f4091b93",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/chat-wide-light.jpg",
+      "bytes": 44435,
+      "sha256": "4f6a0a3bbcfceafd6ae7795c58e13c29873f1d4cf5a662fd039c506cb84a9235",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/hosting-light-375.jpg",
+      "bytes": 22363,
+      "sha256": "6c969a2cc68fff7610237aa9c60ab23539918538f4ed3960537cb96dbdf81ef5",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/hosting-light-desktop.jpg",
+      "bytes": 30278,
+      "sha256": "5fd06fd2d36d778a2727713d1d2b06a842217cb91cd5f87b1882c230e2404dde",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/project-more-dark-375.jpg",
+      "bytes": 12587,
+      "sha256": "89dd972faab2aca0ffd9080be1404301295389774a1fe339baa4c4ab0babd0a3",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/project-more-open-dark-375.jpg",
+      "bytes": 15432,
+      "sha256": "a3bacb5b9de6280f8582e7d054bca9f19983dfc3bfec63daeaefe0fa05c1edb9",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/settings-integrations-light-375.jpg",
+      "bytes": 20327,
+      "sha256": "f630bd98417d8dda585c19cc77e314ae0b688773851ec2bfbfa17265917ea16f",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/usage-context-expanded-dark-375.jpg",
+      "bytes": 34705,
+      "sha256": "b83c35e62aa74be34fdb04a4391addfac7eaae303fecd1542f793083f346a836",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "captures/usage-pr-dark-375.jpg",
+      "bytes": 33247,
+      "sha256": "7003fd9a09047560e4bcbad85637200bf78736e4146f8f91a7329cd071d5f87b",
+      "encoding": "JPEG"
+    },
+    {
+      "path": "browser-proof.json",
+      "bytes": 4436,
+      "sha256": "74fb00e4bfa6be69ca0501521eb15fb4dc673e15bbf725007019e207e64810d3"
+    },
+    {
+      "path": "launch-root.mjs",
+      "bytes": 6326,
+      "sha256": "0d8eb237913cb008f28c25a623c618a210f0dd5586c83caf35f2af65e6c2f702"
+    },
+    {
+      "path": "preview.tsx",
+      "bytes": 4855,
+      "sha256": "28f10f1cf60130c61521951809a033710999ceaafbb0225d125857349fb52de9"
+    },
+    {
+      "path": "source-before-4.json",
+      "bytes": 242981,
+      "sha256": "878385f6764f1f446c8b1308df53d3440881322a3f4a07c706fb3c22576461ca"
+    },
+    {
+      "path": "fixture-4.json",
+      "bytes": 407,
+      "sha256": "56c532628ebd2a2e7b01b7a3ed553e20d4fec864bee3446a5be892db5dbdac11"
+    },
+    {
+      "path": "handoff3.json",
+      "bytes": 4171,
+      "sha256": "5f6f9e110724dc507e53bf48aa973c6f78ef4d4435020d0f61c0359c671b5d4d"
+    },
+    {
+      "path": "attempt2-failure.json",
+      "bytes": 349,
+      "sha256": "178efbc83bb290deefc731a612ef118b81e4ecd5924c8d77bfd2a03bda7fb6b8"
+    }
+  ]
+}

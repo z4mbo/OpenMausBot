@@ -1,9 +1,9 @@
-/** One entry of the What's new history bundled into the app and website. */
+/** One entry of the What's new history, served at GET /api/releases and bundled into the client. */
 export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.2.16",
+  version: "0.3.1",
   date: "2026-10-20",
   title: "Model continuity and shared project work",
   changes: [
@@ -14,6 +14,21 @@ export const releases: Release[] = [{
     { title: "Specialist conversations stay separate", body: "The project Agents page lists each specialist's independent and delegated conversations. Chief follow-ups return to the same delegated child, leaving your direct conversation in place. Notifications open the exact child, with a link back to its project conversation." },
     { title: "A quieter Usage panel", body: "Open a compact quota panel from the agent conversation header and expand context details when needed. Unavailable quota checks stay neutral. Appearance offers Compact, Medium and Wide layouts that keep the conversation and composer aligned on this device." },
     { title: "Opt-in teammate model sources", body: "Share supported model accounts with selected projects. Shared choices identify the owner and computer, run on that owner's device and keep provider credentials there. Ordered backups can cross local and teammate sources after a safe initial quota refusal. Paid sources require consent and the owner's budget checks; partial or uncertain accepted work is not silently replayed." },
+    { title: "Safer media and call integrations", body: "Daily AI model API limits also stop unpriced Studio generations, cloud transcription and AI calls before they can spend. Pipeline summaries use the same budget gate as live calls and resolve the project's agent on the server. Integration errors remove configured credentials before reaching shared project data or chat." },
+  ],
+}, {
+  version: "0.3.0",
+  date: "2026-10-20",
+  title: "From idea to launch: Studio, Broadcast, Pipeline and Canvas",
+  changes: [
+    { title: "Studio", body: "Generate images, video, voice, music and edits with fal.ai models from a project's Studio tab. Results stay with the project, save to Assets in one click and can go straight to Broadcast. Agents can generate too." },
+    { title: "Broadcast", body: "Plan posts on a week calendar and publish them to X, Bluesky, LinkedIn, Facebook, Instagram and TikTok with your own accounts. Posts written by agents wait for a person's approval before they can be scheduled." },
+    { title: "Pipeline", body: "See every lead on a board or table, capture new ones from your landing page with a copyable form snippet, import CSV, and reach out by email, SMS, phone or an AI voice call whose transcript and summary land on the lead's timeline. Ask the project's Chief for an outreach plan." },
+    { title: "Canvas", body: "Draw is now Canvas, a design editor with frames, auto layout, layers, smart guides and export. Agents read and edit the same layers, so you can ask a Chief to design a section and refine it yourself. Existing drawings open converted." },
+    { title: "Integrations", body: "Settings has an Integrations section for fal.ai, ElevenLabs, Twilio, Brevo, Resend and your social accounts. Keys stay on your computer, are never shown again and are never synced or backed up." },
+    { title: "Chief standups and PR cards", body: "Each project's Chief posts a daily digest to the Inbox with finished and moved issues, PRs waiting for you and blockers. Pull requests appear as cards in agent chat with CI status, and Approve & merge asks you first." },
+    { title: "Org", body: "A workspace Org page shows you, your project Chiefs and their agents, with what each is doing now and its recent runs and cost." },
+    { title: "Smoother app", body: "The project bar keeps every section reachable with a More menu, animations share one fast timing, heavy shadows are gone, and 18 bugs are fixed across issues, chat, calls, assets, the vault and onboarding." },
   ],
 }, {
   version: "0.2.15",

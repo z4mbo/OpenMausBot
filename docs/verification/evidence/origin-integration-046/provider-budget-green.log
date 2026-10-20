@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+
+ Test Files  8 passed (8)
+      Tests  76 passed (76)
+   Start at  07:18:36
+   Duration  4.44s (transform 708ms, setup 1.34s, import 1.71s, tests 224ms, environment 0ms)
+

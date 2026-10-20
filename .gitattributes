@@ -132,3 +132,4 @@ docs/verification/evidence/origin-model-host-ui-044/** -text whitespace=cr-at-eo
 docs/verification/evidence/origin-model-host-native-044/** -text whitespace=cr-at-eol
 docs/verification/evidence/origin-candidate-045/** -text -whitespace
 docs/verification/evidence/origin-model-host-native-045/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-integration-046/** -text -whitespace

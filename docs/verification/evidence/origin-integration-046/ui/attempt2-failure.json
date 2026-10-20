@@ -1,0 +1,9 @@
+{
+  "observedBy": "root CUA",
+  "error": "useStore outside provider in ThreadRefsProvider",
+  "classification": "Fixture provider order: ThreadRefsProvider wrapped Fixture before its StoreContext",
+  "productCodeChanged": false,
+  "sourceManifest": "source-before-2.json",
+  "fixture": "fixture-2.json",
+  "recordedAt": "2026-10-20T05:15:39.666Z"
+}

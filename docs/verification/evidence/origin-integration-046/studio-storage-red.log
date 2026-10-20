@@ -1,0 +1,57 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/origin-studio.test.ts (23 tests | 2 failed | 21 skipped) 22ms
+     × never inlines a teammate's non-storage local asset URL http://127.0.0.1:8799/api/config 17ms
+     × never inlines a teammate's non-storage local asset URL http://127.0.0.1:3210/api/config 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/origin-studio.test.ts > Studio runner > never inlines a teammate's non-storage local asset URL http://127.0.0.1:8799/api/config
+AssertionError: expected [ 'http://127.0.0.1:8799/api/config' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "http://127.0.0.1:8799/api/config",
++ ]
+
+ ❯ server/origin-studio.test.ts:140:26
+    138|     cloud.client.query = async name => name === "design:list" ? { asse…
+    139|     await runner.generate(cloud, { projectId: "kai", mode: "edit", mod…
+    140|     expect(privateReads).toEqual([]);
+       |                          ^
+    141|     expect(JSON.stringify(fal.requests)).not.toContain(Buffer.from(pri…
+    142|     runner.stop();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  server/origin-studio.test.ts > Studio runner > never inlines a teammate's non-storage local asset URL http://127.0.0.1:3210/api/config
+AssertionError: expected [ 'http://127.0.0.1:3210/api/config' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "http://127.0.0.1:3210/api/config",
++ ]
+
+ ❯ server/origin-studio.test.ts:140:26
+    138|     cloud.client.query = async name => name === "design:list" ? { asse…
+    139|     await runner.generate(cloud, { projectId: "kai", mode: "edit", mod…
+    140|     expect(privateReads).toEqual([]);
+       |                          ^
+    141|     expect(JSON.stringify(fal.requests)).not.toContain(Buffer.from(pri…
+    142|     runner.stop();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 21 skipped (23)
+   Start at  07:25:20
+   Duration  1.96s (transform 614ms, setup 669ms, import 1.10s, tests 22ms, environment 0ms)
+

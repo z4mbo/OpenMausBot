@@ -1,6 +1,6 @@
 # Origin 0.2.16 candidate: model continuity and shared project work
 
-Prepared on 2026-10-20. This is an unpublished source candidate. The package version and canonical release history now match 0.2.16; no tag, artifact build, deployment or publication is established by this document update. The [0.2.15 delivery](evidence/origin-delivery-040/final-audit-report.md) remains the separately recorded published source and artifact set.
+Prepared on 2026-10-20, then superseded by the [0.3.1 integration candidate](origin-candidate-046.md). Frozen source `fb7b838aab70c1308023e5df27209641fff5e9c1` and its `origin-v0.2.16` tag remain historical. PR 3 preserves the work. The native build was cancelled before publication after a fresh baseline check discovered independently published 0.3.0, source `924d587c03767fb0b6d5d899872f69b00a6f03e7`, at `2026-10-20T04:28:39Z`. No 0.2.16 release, download promotion, backend or website deployment occurred. Earlier results below keep their original source and scope.
 
 The first entry in [shared/origin-releases.ts](../../shared/origin-releases.ts) supplies the [canonical Markdown notes](origin-0.2.16-release-notes.md), in-app What's new, website history and updater generation for 0.2.16. Published 0.2.15 binaries and the website do not acquire these source changes until their matching delivery is verified.
 

@@ -18,6 +18,7 @@ export function createCallAgentHost(deps: {
   project(botId: string): string | null | undefined;
   send(bot: BotRecord, auth: RequestAuth, prompt: string, sendId: string): Promise<void>;
   assertBudget(): void;
+  unpricedApiBudget(botId: string, service: string): void;
   apiBudget(instance: ProviderInstance, botId: string, model?: string): Promise<ApiRequestBudget | undefined>;
 }) {
   const { cfg, store } = deps;
@@ -42,6 +43,13 @@ export function createCallAgentHost(deps: {
     }
     return { instance, ...(chosen.model ? { model: chosen.model } : {}) };
   }
+  const summarize = async ({ botId, prompt }: { botId: string; prompt: string }) => {
+    const bot = store.bot(botId);
+    if (!bot) throw new CallAgentError("The chief no longer exists");
+    const writer = callSummaryWriter(bot);
+    deps.assertBudget();
+    return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), apiBudget: await deps.apiBudget(writer.instance, botId, writer.model), timeoutMs: 180_000 });
+  };
   const callAgents = createCallAgents({
     bot: (botId) => {
       const bot = store.bot(botId);
@@ -59,13 +67,7 @@ export function createCallAgentHost(deps: {
         await deps.send(bot, auth, prompt, randomUUID().replaceAll("-", ""));
       }, 120_000);
     },
-    summarize: async ({ botId, prompt }) => {
-      const bot = store.bot(botId);
-      if (!bot) throw new CallAgentError("The chief no longer exists");
-      const writer = callSummaryWriter(bot);
-      deps.assertBudget();
-      return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), apiBudget: await deps.apiBudget(writer.instance, botId, writer.model), timeoutMs: 180_000 });
-    },
+    summarize,
     post: ({ botId, widget, fallback, transcript }) => {
       const bot = store.bot(botId);
       if (!bot) return;
@@ -73,9 +75,23 @@ export function createCallAgentHost(deps: {
       if (!card.ok) store.appendMessage(bot.threadId, { role: "bot", kind: "text", text: fallback });
       if (transcript) store.appendMessage(bot.threadId, { role: "bot", kind: "text", text: `Call transcript\n\n${transcript}` });
     },
-    transcribe: ({ audio, mime, settings }) => transcribeWith({ audio, mime, settings, keys: { groq: cfg.groq?.key, openai: cfg.openai?.key } }),
+    transcribe: ({ botId, audio, mime, settings }) => {
+      let loopback = false;
+      if (settings.transcription.engine === "local") {
+        try {
+          const url = new URL(settings.transcription.baseUrl);
+          loopback = ["http:", "https:"].includes(url.protocol) && !url.username && !url.password
+            && ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname);
+        } catch {}
+      }
+      if (settings.transcription.engine !== "browser" && !loopback) {
+        deps.assertBudget();
+        deps.unpricedApiBudget(botId, "Call transcription");
+      }
+      return transcribeWith({ audio, mime, settings, keys: { groq: cfg.groq?.key, openai: cfg.openai?.key } });
+    },
     settings: () => callAgentSettings,
     log: (line) => console.log(line),
   });
-  return { settingsRoute, callAgents };
+  return { settingsRoute, callAgents, summarize };
 }

@@ -30,15 +30,15 @@ export function OriginAccountMenu({ iconOnly = false, titlebar = false }: { icon
       <SidebarProfileMenu account={{
         label: "Open account menu",
         renderTrigger: ({ open }) => iconOnly ? (
-          <span data-origin-account title={name} className={cn("flex size-[46px] items-center justify-center rounded-xl transition-colors duration-150", open ? "bg-raised" : "hover:bg-raised/50")}>
+          <span data-origin-account title={name} className={cn("flex size-[46px] items-center justify-center rounded-xl transition-colors duration-(--motion-fast)", open ? "bg-raised" : "hover:bg-raised/50")}>
             <MemberAvatar person={me} size={30} />
           </span>
         ) : (
-          <span data-origin-account title={name} className={cn("flex h-8 w-full min-w-0 items-center gap-2 rounded-lg pl-1 pr-1.5 transition-colors duration-150",
+          <span data-origin-account title={name} className={cn("flex h-8 w-full min-w-0 items-center gap-2 rounded-lg pl-1 pr-1.5 transition-colors duration-(--motion-fast)",
             open ? "bg-raised" : "hover:bg-raised/60")}>
             <MemberAvatar person={me} size={24} />
             <span className={cn("min-w-0 truncate text-[13.5px] font-semibold leading-5 text-ink", titlebar && "@max-[96px]/sidebar-top:sr-only")}>{name}</span>
-            <ChevronDown size={13} aria-hidden="true" className={cn("shrink-0 text-ink-tertiary transition-transform duration-200", titlebar && "@max-[56px]/sidebar-top:hidden", open && "rotate-180")} />
+            <ChevronDown size={13} aria-hidden="true" className={cn("shrink-0 text-ink-tertiary transition-transform duration-(--motion-slow)", titlebar && "@max-[56px]/sidebar-top:hidden", open && "rotate-180")} />
           </span>
         ),
         before: [{
@@ -105,7 +105,7 @@ function OriginAccountDialog({ me, onClose, onSignOut }: { me: OriginMe; onClose
     <Modal title="Origin account" onClose={onClose}>
       <form onSubmit={(event) => void save(event)} className="flex flex-col gap-4">
         <div className="flex items-center gap-3.5">
-          <button type="button" onClick={() => picker.current?.click()} aria-label="Change profile picture" title="Change profile picture"
+          <button type="button" onClick={() => picker.current?.click()} disabled={action.busy} aria-label="Change profile picture" title="Change profile picture"
             className="group/avatar relative shrink-0 overflow-hidden rounded-[14px] outline-none focus-visible:ring-2 focus-visible:ring-accent/60">
             <MemberAvatar person={{ ...me, username, avatarUrl: preview ?? me.avatarUrl }} size={56} shape="square" />
             <span className="absolute inset-0 flex items-center justify-center bg-black/45 text-white opacity-0 transition-opacity group-hover/avatar:opacity-100 group-focus-visible/avatar:opacity-100 focus-visible:opacity-100 touch:opacity-60">
@@ -161,13 +161,15 @@ function PasswordChanger() {
   };
   return (
     <form onSubmit={(event) => void submit(event)} className="mt-3 flex flex-col gap-2 rounded-xl border border-hairline/40 p-3 motion-safe:animate-pop-in">
+      <fieldset disabled={action.busy} className="contents">
       <input className={inputClass} type="password" autoComplete="current-password" placeholder="Current password" aria-label="Current password" value={current} onChange={(event) => setCurrent(event.target.value)} />
       <input className={inputClass} type="password" autoComplete="new-password" placeholder="New password, 10 characters or more" aria-label="New password" value={next} onChange={(event) => setNext(event.target.value)} />
       {action.error && <Notice tone="danger">{action.error}</Notice>}
       <div className="flex justify-end gap-2">
         <button type="button" className={ghostButton} onClick={() => { setCurrent(""); setNext(""); action.setError(""); setOpen(false); }}>Cancel</button>
-        <button type="submit" className={primaryButton} disabled={action.busy || !current || next.length < 10}>Save password</button>
+        <button type="submit" className={primaryButton} disabled={!current || next.length < 10}>Save password</button>
       </div>
+      </fieldset>
     </form>
   );
 }

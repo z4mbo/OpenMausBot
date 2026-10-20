@@ -1,5 +1,5 @@
 export type { CloudUser, CloudWorkspace, CloudProject } from "./types";
 export { cloudUrl, setCloudUrl, cloudMutation, cloudAction, cloudQueryOnce } from "./client";
-export { useCloudPages, useCloudQuery, useCloudSession, useCloudUrl, type CloudPages } from "./hooks";
+export { useCloudPages, useCloudQuery, useCloudSession, useCloudUrl } from "./hooks";
 export { CloudProvider } from "./provider";
 export { cloud } from "./domains";

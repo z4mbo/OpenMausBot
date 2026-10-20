@@ -75,7 +75,7 @@ export function ChipSelect({ label, value, options, onChange, icon, disabled, pl
   useEffect(() => { if (open) document.getElementById(`${id}-${active}`)?.scrollIntoView({ block: "nearest" }); }, [active, id, open]);
   return (
     <div ref={root} className={cn("relative", className)} onKeyDown={(event) => {
-      if (!open) return;
+      if (!open || event.nativeEvent.isComposing) return;
       if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); }
       else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();

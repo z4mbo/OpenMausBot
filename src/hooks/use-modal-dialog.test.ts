@@ -3,7 +3,7 @@ import { createElement, StrictMode, useRef, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ModalFocusScope, useModalDialog } from "./use-modal-dialog";
+import { ModalFocusScope, modalOpen, useModalDialog } from "./use-modal-dialog";
 
 let host: HTMLDivElement, root: Root, opener: HTMLButtonElement;
 function Dialog({ open = true, canClose = true, onClose = () => {}, children, fallback }: {
@@ -127,5 +127,15 @@ describe("shared modal focus lifetime", () => {
     expect(document.activeElement).toBe(opener);
     expect(key("Tab").defaultPrevented).toBe(false);
     key("Escape"); expect(close).not.toHaveBeenCalled();
+  });
+});
+
+describe("modalOpen", () => {
+  it("reports an open dialog so surfaces beneath it leave Escape alone", () => {
+    expect(modalOpen(document)).toBe(false);
+    render();
+    expect(modalOpen(document)).toBe(true);
+    render({ open: false });
+    expect(modalOpen(document)).toBe(false);
   });
 });

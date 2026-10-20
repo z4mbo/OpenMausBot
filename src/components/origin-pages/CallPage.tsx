@@ -625,7 +625,7 @@ function useMemberCallEngine(config: MemberCallConfig, agent: Bot | undefined) {
     if (fresh) setPinned(fresh);
     previousScreens.current = new Set(screens);
   }, [screenIds]);
-  const stageId = tiles.some((tile) => tile.id === pinned) ? pinned : tiles.find((tile) => tile.screenSharing)?.id ?? null;
+  const stageId = stageTile(tiles, pinned);
 
   const changeDevice = async (kind: "audio" | "video", deviceId: string) => {
     const stream = localRef.current;
@@ -844,6 +844,11 @@ type TileProps = Tile & { hand?: boolean; reaction?: CallReaction };
 
 const AGENT_STATE: Record<CallAgentParticipant["state"], string> = { joining: "Joining", listening: "Listening", thinking: "Thinking", speaking: "Speaking", failed: "Could not join" };
 
+/** The tile on the call's stage: the pinned one while it is in the call; no pin shows the gallery. */
+export function stageTile(tiles: readonly { id: string }[], pinned: string | null): string | null {
+  return pinned !== null && tiles.some((tile) => tile.id === pinned) ? pinned : null;
+}
+
 function CallTile({ stream, person, label, audioEnabled, videoEnabled, screenSharing = false, self = false, agent, hand = false, reaction, thumbnail = false, pinned = false, onPin }: TileProps & { thumbnail?: boolean; pinned?: boolean; onPin?: () => void }) {
   const video = useRef<HTMLVideoElement | null>(null);
   const tile = useRef<HTMLDivElement | null>(null);
@@ -857,7 +862,7 @@ function CallTile({ stream, person, label, audioEnabled, videoEnabled, screenSha
   return (
     <div ref={tile} data-call-tile={label} data-speaking={speaking || undefined}
       style={{ "--level": Math.min(1, level * 1.6) } as CSSProperties}
-      className={cn("group relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-[#0d0f12] ring-1 ring-white/5 origin-tile-in transition-[box-shadow] duration-150",
+      className={cn("group relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-[#0d0f12] ring-1 ring-white/5 origin-tile-in transition-[box-shadow] duration-(--motion-fast)",
         speaking && "origin-speaking-ring")}>
       <button type="button" className="absolute inset-0 z-10 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
         aria-label={pinned ? `Unpin ${label}` : `Pin ${label}`} title={pinned ? "Back to gallery" : "Pin to the stage"} onClick={onPin} />
@@ -908,7 +913,7 @@ function SpeakingBars({ level }: { level: number }) {
   return (
     <span className="flex h-3 items-end gap-[2px]" role="img" aria-label={level > SPEAKING_LEVEL ? "Speaking" : "Microphone on"}>
       {[0.55, 1, 0.75].map((weight, index) => (
-        <span key={index} className="w-[3px] rounded-full bg-white transition-[height] duration-100" style={{ height: `${Math.max(3, Math.min(12, 3 + level * weight * 14))}px` }} />
+        <span key={index} className="w-[3px] rounded-full bg-white transition-[height] duration-(--motion-fast)" style={{ height: `${Math.max(3, Math.min(12, 3 + level * weight * 14))}px` }} />
       ))}
     </span>
   );
@@ -933,7 +938,7 @@ function DockButton({ label, active = false, off = false, onClick, children, pre
 }) {
   return (
     <button type="button" aria-label={label} title={label} aria-pressed={pressed} aria-expanded={expanded} onClick={onClick}
-      className={cn("flex size-11 shrink-0 items-center justify-center rounded-full outline-none transition-[background-color,color,transform] duration-150 hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-accent/60 motion-reduce:hover:scale-100",
+      className={cn("flex size-11 shrink-0 items-center justify-center rounded-full outline-none transition-[background-color,color,transform] duration-(--motion-fast) hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-accent/60 motion-reduce:hover:scale-100",
         off ? "bg-danger/90 text-white hover:bg-danger" : active ? "bg-ink text-app" : "bg-white/[0.07] text-ink hover:bg-white/[0.14]")}>
       {children}
     </button>
@@ -1041,7 +1046,7 @@ function CallLobby({ self, present, name, canJoin, joining, audioEnabled, videoE
     onJoin();
   };
   const showVideo = Boolean(preview?.getVideoTracks().length) && videoEnabled;
-  const toggleClass = (on: boolean) => cn("flex size-11 items-center justify-center rounded-full outline-none transition-[background-color,transform] duration-150 hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-accent/60 motion-reduce:hover:scale-100",
+  const toggleClass = (on: boolean) => cn("flex size-11 items-center justify-center rounded-full outline-none transition-[background-color,transform] duration-(--motion-fast) hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-accent/60 motion-reduce:hover:scale-100",
     on ? "bg-white/15 text-white backdrop-blur-md hover:bg-white/25" : "bg-danger text-white");
 
   return (
@@ -1062,7 +1067,7 @@ function CallLobby({ self, present, name, canJoin, joining, audioEnabled, videoE
           </ul>
         )}
         <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-hairline/40 bg-[#0d0f12]">
-          <video ref={video} autoPlay muted playsInline className={cn("absolute inset-0 h-full w-full -scale-x-100 object-cover transition-opacity duration-150", showVideo ? "opacity-100" : "opacity-0")} />
+          <video ref={video} autoPlay muted playsInline className={cn("absolute inset-0 h-full w-full -scale-x-100 object-cover transition-opacity duration-(--motion-fast)", showVideo ? "opacity-100" : "opacity-0")} />
           {!showVideo && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
               <PersonAvatar person={self} size={84} />
@@ -1118,7 +1123,7 @@ function MicMeter({ level, live }: { level: number; live: boolean }) {
       <Mic size={14} className={live ? "text-ink-secondary" : "text-ink-tertiary"} aria-hidden="true" />
       <span className="flex h-4 items-center gap-[3px]">
         {Array.from({ length: segments }, (_, index) => (
-          <span key={index} className={cn("w-[4px] rounded-full transition-[background-color,height] duration-75",
+          <span key={index} className={cn("w-[4px] rounded-full transition-[background-color,height] duration-(--motion-fast)",
             index < lit ? index > segments * 0.8 ? "h-4 bg-warning" : "h-4 bg-success" : "h-2 bg-ink-tertiary/30")} />
         ))}
       </span>

@@ -71,6 +71,17 @@ it("reads the actual configured Grok profile and refuses unknown profile sources
   expect(() => grokInheritedProfile("grok", { HOME: home, GROK_AGENT: "unverified" }, home)).toThrow(/existing agent profile/);
 });
 
+it("reads a Grok config whose other sections are arrays of tables, and refuses an agent array", () => {
+  const home = mkdtempSync(join(tmpdir(), "omb-grok-tables-")); directories.push(home);
+  const directory = join(home, ".grok"); mkdirSync(directory);
+  const path = join(home, "profile.md");
+  writeFileSync(path, '---\nname: reader\ndescription: Existing profile\ntools: [read_file]\n---\n');
+  writeFileSync(join(directory, "config.toml"), `[[marketplace.sources]]\nname = "xAI Official"\ngit = "https://example.test/marketplace.git"\n\n[agent]\nname="grok-build"\ndefinition=${JSON.stringify(path)}\n`);
+  expect(grokInheritedProfile("grok", { HOME: home }, home)?.tools).toEqual(["read_file"]);
+  writeFileSync(join(directory, "config.toml"), `[[agent]]\nname="grok-build"\n`);
+  expect(() => grokInheritedProfile("grok", { HOME: home }, home)).toThrow(/cannot be safely intersected/);
+});
+
 it("requires explicit Grok MCP helper permissions for a selected remote tool", () => {
   expect(() => grokToolScopeProfile({ allow: ["mcp:mail:read_notes"] }, init, undefined, true)).toThrow(/native:search_tool.*native:use_tool/);
   const profile = grokToolScopeProfile({ allow: ["native:search_tool", "native:use_tool", "mcp:mail:read_notes"] }, init, undefined, true);

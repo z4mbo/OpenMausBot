@@ -56,10 +56,16 @@ try {
       assert.ok(await page.getByRole("navigation", { name: "Fixture project with a long title agents", exact: true }).isVisible());
       evidence.cases.push({ screen: "project-agent-chat", size, theme, backToAgents: true });
     }
-    if (phase === "after") for (const [id, label] of [["issues", "Issues"], ["team-chat", "Chat"], ["call", "Call"], ["draw", "Draw"], ["assets", "Assets"], ["vault", "Vault"], ["repo", "Repo"], ["feedback", "Feedback"], ["settings", "Settings"]]) {
+    if (phase === "after") for (const [id, label] of [["issues", "Issues"], ["team-chat", "Chat"], ["call", "Call"], ["draw", "Canvas"], ["studio", "Studio"], ["broadcast", "Broadcast"], ["pipeline", "Pipeline"], ["assets", "Assets"], ["vault", "Vault"], ["repo", "Repo"], ["feedback", "Feedback"], ["settings", "Settings"]]) {
       const button = page.locator(`[data-chief-section="${id}"]`);
-      await button.click();
-      assert.equal(await button.getAttribute("aria-current"), "page");
+      if (await button.isVisible()) {
+        await button.click();
+        assert.equal(await button.getAttribute("aria-current"), "page");
+      } else {
+        await page.getByRole("button", { name: /^More sections/ }).click();
+        await page.getByRole("menuitem", { name: label, exact: true }).click();
+        await page.getByRole("button", { name: `More sections, ${label} open`, exact: true }).waitFor();
+      }
       await page.getByRole("heading", { name: "No workspace server", exact: true }).waitFor();
       const geometry = await overflow();
       assert.ok(geometry.document <= viewport.width, JSON.stringify({ id, geometry }));

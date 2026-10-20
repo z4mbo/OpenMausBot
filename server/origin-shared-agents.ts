@@ -622,5 +622,3 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     tick,
   };
 }
-
-export type SharedAgents = ReturnType<typeof createSharedAgents>;

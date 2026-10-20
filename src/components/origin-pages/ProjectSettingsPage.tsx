@@ -65,12 +65,12 @@ function ProjectAccent({ botId }: { botId: string }) {
       .finally(() => setSaving(false));
   };
   const custom = Boolean(look.color && !(ZAP_SWATCHES as readonly string[]).some((swatch) => swatch.toLowerCase() === look.color?.toLowerCase()));
-  const swatch = "relative size-7 shrink-0 rounded-full outline-none transition-transform duration-150 hover:scale-110 focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-panel disabled:opacity-50 motion-reduce:hover:scale-100";
+  const swatch = "relative size-7 shrink-0 rounded-full outline-none transition-transform duration-(--motion-fast) hover:scale-110 focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-panel disabled:opacity-50 motion-reduce:hover:scale-100";
   const chosen = "ring-2 ring-ink ring-offset-2 ring-offset-panel";
   return (
     <div role="group" aria-label="Accent colour" className="flex flex-col gap-2 rounded-xl border border-hairline/40 bg-inset/60 p-3">
       <div className="flex items-center gap-2.5">
-        <span className="size-5 shrink-0 rounded-full transition-colors duration-150" style={{ background: color }} aria-hidden="true" />
+        <span className="size-5 shrink-0 rounded-full transition-colors duration-(--motion-fast)" style={{ background: color }} aria-hidden="true" />
         <span className="min-w-0 flex-1">
           <span className="block text-[12.5px] font-medium text-ink">Accent <span className="font-mono text-[11.5px] uppercase text-ink-tertiary">{color}</span></span>
         </span>
@@ -104,7 +104,7 @@ function ProjectGlyph({ project, iconType, iconValue }: { project: CloudProject;
   const base = "flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl text-[18px] font-semibold";
   if (iconType === "image" && project.iconUrl) return <img src={project.iconUrl} alt="" className={cn(base, "object-cover")} />;
   if (iconType === "emoji" && iconValue) return <span className={cn(base, "bg-raised")}>{iconValue}</span>;
-  return <span className={cn(base, "bg-accent text-accent-ink transition-colors duration-150")}>{project.name.slice(0, 1).toUpperCase()}</span>;
+  return <span className={cn(base, "bg-accent text-accent-ink transition-colors duration-(--motion-fast)")}>{project.name.slice(0, 1).toUpperCase()}</span>;
 }
 
 function GeneralSettings({ project, projectId, isAdmin, accent }: { project: CloudProject; projectId: string; isAdmin: boolean; accent: ReactNode }) {

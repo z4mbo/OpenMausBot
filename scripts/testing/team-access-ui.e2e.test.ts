@@ -1,19 +1,16 @@
-import { spawn } from "node:child_process";
 import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
+import { SHOWS_CHIEF_LABEL } from "../../src/lib/origin-teams.ts";
 
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
-const enabled = process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env }));
+const enabled = SHOWS_CHIEF_LABEL && (process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env })));
+if (!SHOWS_CHIEF_LABEL) console.log("skipping team access UI e2e: this build hides the Chief of Staff settings");
 
 (enabled ? it : it.skip)("lets an owner select and revoke exactly the Chief's additional teams in the real settings UI", async () => {
-  const child = spawn(process.execPath, ["--experimental-strip-types", "scripts/control-omb.ts", "ui", "launch"], {
-    cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-  });
+  const child = spawnUiLauncher([]);
   let output = "";
   let error = "";
   child.stdout.on("data", chunk => { output += String(chunk); });
@@ -51,8 +48,8 @@ const enabled = process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBin
     await api("/api/bots", { name: "Private accountant", section: "Finance" }, "POST");
     await api("/api/sidebar-sections", { name: "Empty delivery" }, "POST");
     await ui("eval", "--js", "location.reload(); true");
-    await expect.poll(snapshot, { timeout: 15_000 }).toContain("Actions for Clive");
-    await clickRole("button", /^Clive Rename Clive /);
+    await expect.poll(snapshot, { timeout: 15_000 }).toContain('button "Chat with Clive"');
+    await clickRole("button", "Chat with Clive");
     await expect.poll(snapshot, { timeout: 10_000 }).toContain("Open Clive's profile");
     await clickRole("button", "Open Clive's profile");
     await click("Permissions");
@@ -93,6 +90,6 @@ const enabled = process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBin
     writeFileSync(info.logPath + ".team-access.json", JSON.stringify(receipts, null, 2));
     console.log("Team access evidence:", info.logPath + ".team-access.json");
   } finally {
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
   }
 }, 240_000);

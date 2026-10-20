@@ -3,6 +3,7 @@ import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/s
 import type { Id } from "./_generated/dataModel";
 import { canEdit, requireMember, requireTeamMember } from "./lib/permissions";
 import { admitStorageReference, issueUpload, writableUploadScope } from "./lib/storage";
+import { encodeNode, isCanvasRow, sanitizeNode } from "../../shared/canvas-scene";
 
 const scope = { sessionToken: v.string(), teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")) };
 async function sceneAccess(ctx: QueryCtx | MutationCtx, args: { sessionToken: string; teamId: Id<"teams">; canvasId?: Id<"canvases"> }) {
@@ -63,12 +64,11 @@ export const updateElements = mutation({
     const rows = team.drawingElementCount === undefined ? await ctx.db.query("drawingElements").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId)).take(5001) : [];
     let count = team.drawingElementCount ?? rows.length;
     let bytes = team.drawingBytes ?? rows.reduce((sum, row) => sum + new TextEncoder().encode(row.data).byteLength, 0);
-    for (const data of args.elements) {
-      if (data.length > 64000) throw new Error("Drawing element is too large");
-      const element = JSON.parse(data) as { id: string; version: number; versionNonce: number; type: string; x: number; y: number; width: number; height: number };
-      if (!element || typeof element.id !== "string" || !element.id.length || element.id.length > 100 || !Number.isSafeInteger(element.version) || element.version < 1 || !Number.isSafeInteger(element.versionNonce) || ![element.x, element.y, element.width, element.height].every(Number.isFinite) || !["rectangle", "diamond", "ellipse", "arrow", "line", "freedraw", "text", "image", "frame", "magicframe", "embeddable", "iframe"].includes(element.type)) throw new Error("Invalid drawing element");
+    for (const raw of args.elements) {
+      if (raw.length > 64000) throw new Error("Drawing element is too large");
+      const { element, data } = storedElement(raw);
       const existing = await ctx.db.query("drawingElements").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId).eq("elementId", element.id)).unique();
-      // Excalidraw versions and nonce tie-breaks preserve concurrent element edits.
+      // Higher versions win and equal versions keep the lower nonce, so concurrent edits converge on every client.
       if (existing && (existing.version > element.version || (existing.version === element.version && existing.nonce <= element.versionNonce))) continue;
       count += existing ? 0 : 1;
       bytes += new TextEncoder().encode(data).byteLength - (existing ? new TextEncoder().encode(existing.data).byteLength : 0);
@@ -81,6 +81,30 @@ export const updateElements = mutation({
     return null;
   },
 });
+export const archiveCanvas = mutation({
+  args: { ...scope, canvasId: v.id("canvases") }, returns: v.null(),
+  handler: async (ctx, args) => {
+    if (!canEdit((await sceneAccess(ctx, args)).member)) throw new Error("Edit role required");
+    await ctx.db.patch(args.canvasId, { archived: true, updatedAt: Date.now() });
+    return null;
+  },
+});
+
+type StoredElement = { id: string; version: number; versionNonce: number; type: string; x: number; y: number; width: number; height: number };
+const LEGACY_TYPES = ["rectangle", "diamond", "ellipse", "arrow", "line", "freedraw", "text", "image", "frame", "magicframe", "embeddable", "iframe"];
+
+function storedElement(raw: string): { element: StoredElement; data: string } {
+  const parsed: unknown = JSON.parse(raw);
+  if (isCanvasRow(parsed)) {
+    const node = sanitizeNode(parsed);
+    if (!node) throw new Error("Invalid canvas node");
+    return { element: node, data: encodeNode(node) };
+  }
+  const element = parsed as StoredElement;
+  if (!element || typeof element.id !== "string" || !element.id.length || element.id.length > 100 || !Number.isSafeInteger(element.version) || element.version < 1 || !Number.isSafeInteger(element.versionNonce) || ![element.x, element.y, element.width, element.height].every(Number.isFinite) || !LEGACY_TYPES.includes(element.type)) throw new Error("Invalid drawing element");
+  return { element, data: raw };
+}
+
 export const presence = query({
   args: scope, returns: v.any(),
   handler: async (ctx, args) => { await sceneAccess(ctx, args); return ctx.db.query("drawingPresence").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId)).take(100); },

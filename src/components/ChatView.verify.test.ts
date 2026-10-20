@@ -83,7 +83,7 @@ const saveable = (): void => {
 };
 const CARD = `aria-label="${t("chat.verify.aria")}"`;
 const TAG = `>${t("chat.verify.verifiedTag")}<`;
-const COMPOSER_DOCK = 'class="pointer-events-none absolute bottom-0 left-1/2 z-[2] w-full max-w-[calc(var(--chat-column-max)+2.5rem)] -translate-x-1/2"';
+const COMPOSER_DOCK = 'class="pointer-events-none absolute inset-x-0 bottom-0 z-[2] chat-column-dock"';
 const render = (messages: Message[]) => renderToStaticMarkup(createElement(ChatView, { bot: { ...bot, messages } }));
 const draft = (): string => fixture.appendComposerDraft.mock.calls[0]![1] as string;
 

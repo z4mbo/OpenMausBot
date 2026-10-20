@@ -463,6 +463,9 @@ describe("GitHub-first issues", () => {
     expect(listed.text).not.toContain("#3 merged");
     const read = await runOriginTool("origin_review_pr", { action: "read", number: 7 }, "kai-chief", workspaceDeps(client, { github: github.api }));
     expect(read.text).toContain(`Ready to merge: pass head_sha ${"a".repeat(40)}`);
+    expect(read.pullRequest).toMatchObject({ projectId: "kai", number: 7, title: "CI", headSha: "a".repeat(40), closes: ["ORI-AB12"] });
+    expect(read.pullRequest?.blocker).toBeUndefined();
+    expect(listed.pullRequest).toBeUndefined();
     expect((await runOriginTool("origin_review_pr", { action: "approve", number: 7, comment: "Good." }, "kai-chief", workspaceDeps(client, { github: github.api }))).text).toBe("Approved #7 with your comment.");
     const merged = await runOriginTool("origin_merge_pr", { number: 7, head_sha: "a".repeat(40) }, "kai-chief", workspaceDeps(client, { github: github.api }));
     expect(merged.text).toContain("Merged #7 into the default branch (ccccccc). GitHub closes ORI-AB12");

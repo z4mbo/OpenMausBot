@@ -18,7 +18,7 @@ describe("canonical-only hosted context", () => {
     const integrations = { agents: { env: {} }, browser: {}, composio: {}, custom: {}, hooks: {}, data: {} } as NonNullable<SendTurnInput["integrations"]>;
     restrictHostedIntegrations(integrations);
     expect(Object.keys(integrations)).toEqual(["agents"]);
-    for (const path of ["memory", "memory/log", "session-search", "session-read", "threads", "coordinate", "hook", "credential", "browser/mcp"]) {
+    for (const path of ["memory", "memory/log", "session-search", "session-read", "threads", "coordinate", "hook", "credential", "browser/mcp", "origin/tool"]) {
       expect(hostedInternalAllowed("POST", `/api/internal/${path}`)).toBe(false);
       expect(hostedInternalAllowed("GET", `/api/internal/${path}`)).toBe(false);
     }

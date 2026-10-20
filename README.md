@@ -12,7 +12,7 @@ Origin combines project management with the local agent runtime from [OpenMausBo
 - **Local agents:** the Electron app runs a Node server and the coding engines on the machine doing the work. Model execution and provider credentials use that machine.
 - **Shared conversations:** the sender runs a turn on their own machine by default. Members can explicitly choose a supported teammate model source when its owner grants access. Leases and a queue coordinate shared agents across members and computers.
 - **Issues and pull requests:** Draft issues stay private to Origin. Other issues can mirror to GitHub; the project Chief reviews the pull request, and merging requires a person's approval.
-- **Team tools:** project chat, mentions, notifications, calls, drawing, client-encrypted vault entries, assets, feedback and search.
+- **Team tools:** project chat, mentions, notifications, calls, Canvas, client-encrypted vault entries, assets, feedback and search. Studio generates media; Broadcast prepares and schedules approved posts; Pipeline tracks leads and outreach; Org shows the workspace's people and agents.
 
 ## Repository map
 
@@ -27,13 +27,15 @@ Origin combines project management with the local agent runtime from [OpenMausBo
 | `docs/verification/` | Isolated fixture recipes and their evidence |
 | `scripts/` | Development controls, checks, build and packaging tools |
 
-## 0.2.16 candidate
+## 0.3.1 candidate
 
-The [0.2.16 source candidate](docs/verification/origin-candidate-045.md) is unpublished. Its [release notes](docs/verification/origin-0.2.16-release-notes.md) cover per-agent ordered model backups, daily API budgets, opt-in teammate model sources, shared-agent identity preservation, synchronized project order, specialist conversation navigation and a compact Usage panel. The package and canonical What's new history now match 0.2.16; published downloads remain 0.2.15 until delivery is verified.
+The [0.3.1 integration candidate](docs/verification/origin-candidate-046.md) combines the independently published 0.3.0 features with per-agent ordered model backups, daily AI model API budgets, opt-in teammate model sources, shared-agent identity preservation, synchronized project order, specialist conversation navigation and compact Usage. The earlier [0.2.16 candidate](docs/verification/origin-candidate-045.md) was held when concurrent 0.3.0 publication was discovered; it was never published. The package and canonical What's new history now match 0.3.1. GitHub's newer release and the website/update feeds are checked separately before delivery.
 
 Model backups are opt-in and follow up to five exact account/model choices. Only a provider-confirmed quota refusal can trigger quota fallback; unavailable Usage meters, sign-in failures and ordinary rate limits cannot. Origin automatically sends the original request again only when no reply, reasoning or tool action began and the first attempt has stopped. After partial work, switching models leaves the existing work for a person to continue. Paid API backups require their own permission.
 
 Daily API limits apply to this computer's local spending ledger, with an optional limit for each agent and a configured daily reset time zone. Supported bounded API requests reserve funds before every provider request, including later tool rounds and helper calls. Unknown costs retain their reservation. When a cap applies, unpriced or unsupported API routes are refused; confirmed subscription turns are separate from API spending. This is not a provider invoice or an account-wide budget across several computers.
+
+These limits cover AI model API spending. Unpriced Studio generations, paid transcription and ElevenLabs AI calls stop while an applicable cap is active. Manual Studio work checks this computer's cap; agent work also checks that agent's cap. SMS, email and social service charges are outside this model budget.
 
 Teammate model sources are available in this candidate through explicit owner grants, disabled by default. A selected online source executes on its owner's computer with that computer's provider credentials, project folder, approval policy and applicable API budget. Only eligible confined runtimes can be shared. Sender-runs remains the default, and an unavailable or uncertain accepted request is not silently rerouted into another account. The isolated native evidence covers direct execution, local/remote quota transfers, offline-source skipping, partial-output refusal, Stop, revocation and pre-dispatch budget refusal. Repository fake providers establish these paths; real CLI/OS isolation, a third physical host, positive hosted API invoice accounting and unknown owner-crash recovery remain separate limits. See the [hosting acceptance boundary](docs/verification/origin-candidate-045.md#opt-in-teammate-model-hosting).
 

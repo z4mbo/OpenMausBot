@@ -103,11 +103,11 @@ export function WelcomeGate({ viewer }: { viewer: WelcomeViewer | null }) {
         setResumeAt("engines");
         dispatch({ type: "toggleAppSettings", open: true, section: "organization" });
       }}
-      onDone={() => {
+      onDone={(reason) => {
         setDismissed(true);
         setResumeAt(undefined);
         dispatch({ type: "toggleWelcome", open: false });
-        if (!replay) dispatch({ type: "toggleTour", open: true });
+        if (!replay && reason === "completed") dispatch({ type: "toggleTour", open: true });
       }}
     />
   );

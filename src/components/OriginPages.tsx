@@ -1,4 +1,4 @@
-import { Brush, Headset, Inbox, MessageCircle } from "lucide-react";
+import { Brush, Headset, Inbox, MessageCircle, Network } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { openOriginPage, useOriginPage, type OriginPage } from "@/lib/origin-pages";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
@@ -10,6 +10,7 @@ import { useShowThreads } from "@/lib/thread-preferences";
 import { MemberCall } from "./origin-pages/CallPage";
 import { WorkspaceChat } from "./origin-pages/WorkspaceChatPage";
 import { WorkspaceInbox } from "./origin-pages/WorkspaceInboxPage";
+import { OrgPage } from "./origin-org/OrgPage";
 import { WorkspaceGate } from "./origin-pages/ui";
 import { DrawingCanvas } from "./OriginDraw";
 import { GlassHeaderFrame } from "./GlassScrollFrame";
@@ -21,7 +22,8 @@ export const ORIGIN_PAGES: { id: OriginPage; label: string; contents: string; ic
   { id: "inbox", label: "Inbox", contents: "Issues and notifications", icon: Inbox },
   { id: "chat", label: "Chat", contents: "Messages", icon: MessageCircle },
   { id: "call", label: "Call", contents: "Calls", icon: Headset },
-  { id: "draw", label: "Draw", contents: "Drawings", icon: Brush },
+  { id: "draw", label: "Canvas", contents: "Canvases", icon: Brush },
+  { id: "org", label: "Org", contents: "The boss, Chiefs and agents", icon: Network },
 ];
 
 export function OriginNav({ density }: { density: SidebarDensity }) {
@@ -42,11 +44,11 @@ export function OriginNav({ density }: { density: SidebarDensity }) {
         return (
           <button key={id} type="button" aria-current={active ? "page" : undefined} title={iconsOnly ? name : undefined} aria-label={iconsOnly || count ? name : undefined}
             data-origin-nav-item={id} onClick={() => openOriginPage(id)}
-            className={cn("group flex items-center rounded-xl outline-none transition-[background-color,transform] duration-150 active:scale-[0.98] focus-visible:ring-1 focus-visible:ring-accent/60 motion-reduce:active:scale-100",
+            className={cn("group flex items-center rounded-xl outline-none transition-[background-color,transform] duration-(--motion-fast) active:scale-[0.98] focus-visible:ring-1 focus-visible:ring-accent/60 motion-reduce:active:scale-100",
               iconsOnly ? "size-[46px] justify-center" : cn("w-full py-1 pr-3 text-left", lead.padding, lead.gap),
               active ? "bg-raised text-ink" : "text-ink hover:bg-raised/50")}>
             <span className="relative flex shrink-0 items-center justify-center" style={iconsOnly ? undefined : { width: lead.size, height: Math.min(lead.size, 32) }}>
-              <Icon size={20} aria-hidden="true" className={cn("transition-colors duration-150 motion-reduce:transition-none", active ? "text-ink" : "text-ink-secondary group-hover:text-ink")} />
+              <Icon size={20} aria-hidden="true" className={cn("transition-colors duration-(--motion-fast) motion-reduce:transition-none", active ? "text-ink" : "text-ink-secondary group-hover:text-ink")} />
               {count && iconsOnly && <span aria-hidden="true" className="absolute -right-1 -top-1 size-2.5 rounded-full bg-accent ring-2 ring-app" />}
             </span>
             {!iconsOnly && <span className="flex-1 truncate text-[14px] font-medium leading-5">{label}</span>}
@@ -77,6 +79,7 @@ export function OriginPageView({ page }: { page: OriginPage }) {
         <WorkspaceGate key={teamId ?? ""} teamId={teamId} head={head} label={entry.contents}>
           {(ctx) => page === "inbox" ? <WorkspaceInbox {...ctx} />
             : page === "chat" ? <WorkspaceChat {...ctx} />
+            : page === "org" ? <OrgPage {...ctx} />
             : page === "call" ? <MemberCall key={ctx.teamId} target={{ teamId: ctx.teamId }} me={ctx.me} canJoin={ctx.canEdit} name={head?.name ?? "Workspace"} agent={headBot} open={() => openOriginPage("call")} />
             : <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]"><DrawingCanvas key={ctx.teamId} teamId={ctx.teamId} userId={ctx.me._id} name="Workspace drawing" readOnly={!ctx.canEdit} agent={headBot} /></div>}
         </WorkspaceGate>

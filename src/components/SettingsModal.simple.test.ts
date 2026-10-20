@@ -120,13 +120,13 @@ describe("Settings in Simple mode", () => {
     expect(blocks(html)).toEqual(["general"]);
   });
 
-  it("stacks Model providers, API keys and Decision model on AI, each under its heading", () => {
+  it("stacks Model providers, API keys, Integrations and Decision model on AI, each under its heading", () => {
     fixture.section = "engines";
     const html = render();
     expect(currentPage(html)).toBe("ai");
-    expect(blocks(html)).toEqual(["engines", "connections", "decisionModel"]);
+    expect(blocks(html)).toEqual(["engines", "connections", "integrations", "decisionModel"]);
     const headings = [...html.matchAll(/<h3[^>]*>([^<]+)<\/h3>/g)].map((match) => match[1]);
-    expect(headings).toEqual(["Model providers", "API keys", "Decision model"]);
+    expect(headings).toEqual(["Model providers", "API keys", "Integrations", "Decision model"]);
     expect(markers(html).filter((name) => name === "engines" || name === "decisionModel")).toEqual(["engines", "decisionModel"]);
     expect(markers(html)).toContain("modelHosting");
     expect(html).toContain("More providers for OpenCode bots");

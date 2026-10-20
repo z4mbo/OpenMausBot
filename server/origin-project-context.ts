@@ -52,7 +52,7 @@ const FEEDBACK_SHOWN = 3;
 const CHAT_SHOWN = 4;
 const MEMBERS_SHOWN = 10;
 const HEAD_PROJECTS_SHOWN = 25;
-const TOOLS_LINE = "More with origin_list_issues, origin_get_issue, origin_vault_list, origin_list_assets, origin_feedback, origin_team_chat, origin_draw and origin_repo_status.";
+const TOOLS_LINE = "More with origin_list_issues, origin_get_issue, origin_vault_list, origin_list_assets, origin_feedback, origin_team_chat, origin_canvas (design with origin_canvas_edit), origin_broadcast_list, origin_studio_generate (images, video, audio), origin_pipeline_list_leads and origin_repo_status.";
 
 const record = (value: unknown): Args => (value && typeof value === "object" && !Array.isArray(value) ? value as Args : {});
 const list = (value: unknown): Args[] => (Array.isArray(value) ? value.map(record) : []);
@@ -268,5 +268,3 @@ export function createOriginTurnContext(deps: OriginContextDeps) {
     },
   };
 }
-
-export type OriginTurnContext = ReturnType<typeof createOriginTurnContext>;

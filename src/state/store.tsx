@@ -167,6 +167,7 @@ export interface Message extends Pick<import("../../shared/wire").WireMessage, "
   threadRef?: { botId: string; threadId: string; title: string };
   dataResult?: import("../../shared/wire").WireMessage["dataResult"];
   originIssues?: import("../../shared/wire").WireMessage["originIssues"];
+  originPullRequest?: import("../../shared/wire").WireMessage["originPullRequest"];
   queued?: boolean;
   queueId?: string;
 }
@@ -500,6 +501,7 @@ export type AppSettingsSection =
   | "appearance"
   | "experimental"
   | "connections"
+  | "integrations"
   | "decisionModel"
   | "engines"
   | "companion"
@@ -3555,10 +3557,4 @@ export function BotEditorStore({ value, children }: { value: ReturnType<typeof u
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 
-const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
-
-export function formatTime(at: number) {
-  const date = new Date(at);
-  // toLocaleTimeString's output, where Intl.DateTimeFormat.format would throw
-  return Number.isNaN(date.getTime()) ? "Invalid Date" : TIME_FORMAT.format(date);
-}
+export { formatTime } from "./time-format";

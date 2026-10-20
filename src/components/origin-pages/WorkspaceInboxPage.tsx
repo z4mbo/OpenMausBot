@@ -1,6 +1,6 @@
-import { useMemo, useState, type DragEvent } from "react";
+import { Fragment, useMemo, useState, type DragEvent } from "react";
 import {
-  AtSign, Bell, CalendarDays, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock3, Inbox, List, Loader2, MessageSquare, Search, X,
+  AtSign, Bell, CalendarDays, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock3, Inbox, List, Loader2, MessageSquare, Search, Sunrise, X,
 } from "lucide-react";
 import { cloudMutation, useCloudPages, useCloudQuery, type CloudProject } from "@/lib/origin-cloud";
 import { useWorkspaceMembers } from "@/lib/origin-members";
@@ -13,6 +13,7 @@ import { errorText } from "./repo-url";
 import { EmptyState, Loading, Notice, Segmented, ghostButton, iconButton, inputClass, type WorkspaceContext } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
 import { PriorityIcon } from "./issue-fields";
+import { StandupDigest } from "./StandupDigest";
 
 type InboxTask = {
   _id: string; projectId: string; title: string; priority: Priority; done: boolean; dueDate?: string;
@@ -20,7 +21,7 @@ type InboxTask = {
 };
 type CalendarTask = { _id: string; projectId: string; title: string; dueDate: string; done: boolean; priority: Priority; projectName: string };
 type Notification = {
-  _id: string; kind: "assignment" | "comment" | "mention"; read: boolean; createdAt: number; projectId?: string; taskId?: string; messageId?: string;
+  _id: string; kind: "assignment" | "comment" | "mention" | "digest"; digestId?: string; read: boolean; createdAt: number; projectId?: string; taskId?: string; messageId?: string;
   conversation?: string; agentThreadId?: string; preview?: string; actorName: string; actorAvatar: string | null; projectName?: string; taskTitle?: string; available: boolean;
 };
 type Filters = { mine: boolean; done: boolean; project: string; priority: "" | Priority; search: string };
@@ -51,7 +52,7 @@ export function WorkspaceInbox({ teamId, canEdit }: WorkspaceContext) {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-[var(--glass-top,0px)] [scroll-padding-top:var(--glass-top,0px)]">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 md:p-6">
-        <Notifications teamId={teamId} onError={setNotice} />
+        <Notifications teamId={teamId} onError={setNotice} onOpenIssue={open} />
         <div className="flex flex-wrap items-center gap-2">
           <Segmented label="Issue ownership" value={filters.mine ? "mine" : "all"} onChange={(value) => patch({ mine: value === "mine" })}
             options={[{ value: "mine", label: "Assigned to me" }, { value: "all", label: "All issues" }]} />
@@ -78,17 +79,18 @@ export function WorkspaceInbox({ teamId, canEdit }: WorkspaceContext) {
         {notice && <Notice tone="danger">{notice}</Notice>}
         {view === "list"
           ? <IssueList teamId={teamId} projects={projects ?? []} filters={filters} canEdit={canEdit} onOpen={open} onError={setNotice} hasFilters={hasFilters} />
-          : <IssueCalendar teamId={teamId} filters={filters} canEdit={canEdit} onOpen={open} onError={setNotice} />}
+          : <IssueCalendar teamId={teamId} projects={projects ?? []} filters={filters} canEdit={canEdit} onOpen={open} onError={setNotice} />}
       </div>
     </div>
   );
 }
 
-function Notifications({ teamId, onError }: { teamId: string; onError(message: string): void }) {
+function Notifications({ teamId, onError, onOpenIssue }: { teamId: string; onError(message: string): void; onOpenIssue(projectId: string, issueId: string): void }) {
   const openTarget = useOpenOriginNotification();
   const summary = useCloudQuery<{ unread: number; more: boolean }>("notifications:summary", { teamId });
   const [openState, setOpenState] = useState<boolean | null>(null);
   const [unreadOnly, setUnreadOnly] = useState(true);
+  const [openDigest, setOpenDigest] = useState<string | null>(null);
   const unread = summary?.unread ?? 0;
   const expanded = openState ?? unread > 0;
   const { results, status, loadMore } = useCloudPages<Notification>("notifications:list", expanded ? { teamId, unreadOnly } : "skip", 30);
@@ -116,18 +118,20 @@ function Notifications({ teamId, onError }: { teamId: string; onError(message: s
           {status !== "loading" && !results.length && <p className="py-4 text-center text-[13px] text-ink-secondary">{unreadOnly ? "No unread notifications" : "No notifications yet"}</p>}
           <ul className="flex flex-col">
             {results.map((row) => (
-              <li key={row._id} className={cn("flex items-start gap-2 rounded-lg px-2 py-2 hover:bg-raised/50", !row.read && "bg-raised/30")} data-notification={row._id}>
+              <Fragment key={row._id}>
+              <li className={cn("flex items-start gap-2 rounded-lg px-2 py-2 hover:bg-raised/50", !row.read && "bg-raised/30")} data-notification={row._id}>
                 <span className="mt-0.5 text-ink-secondary" aria-hidden="true">
-                  {row.kind === "mention" ? <AtSign size={15} /> : row.kind === "comment" ? <MessageSquare size={15} /> : <Circle size={15} />}
+                  {row.kind === "digest" ? <Sunrise size={15} /> : row.kind === "mention" ? <AtSign size={15} /> : row.kind === "comment" ? <MessageSquare size={15} /> : <Circle size={15} />}
                 </span>
-                <button type="button" className="min-w-0 flex-1 text-left" onClick={() => {
+                <button type="button" className="min-w-0 flex-1 text-left" aria-expanded={row.digestId ? openDigest === row._id : undefined} onClick={() => {
                   act(mark(row._id, true), "Could not open the notification");
+                  if (row.digestId) { setOpenDigest(openDigest === row._id ? null : row._id); return; }
                   if (openTarget(row) === "elsewhere") onError("That conversation has not reached this computer yet. It opens here after the next sync.");
                 }}>
                   <span className="flex items-center gap-1.5 text-[13px] text-ink">
                     <PersonAvatar person={{ name: row.actorName, email: row.actorName, avatarUrl: row.actorAvatar }} size={18} />
                     <strong className="font-semibold">{row.actorName}</strong>
-                    {row.kind === "mention" ? row.agentThreadId ? "tagged you in an agent thread" : row.messageId ? "tagged you in chat" : "mentioned you on" : row.kind === "comment" ? "commented on" : "assigned you"}
+                    {row.kind === "digest" ? "posted the daily standup" : row.kind === "mention" ? row.agentThreadId ? "tagged you in an agent thread" : row.messageId ? "tagged you in chat" : "mentioned you on" : row.kind === "comment" ? "commented on" : "assigned you"}
                     {!row.read && <span className="size-1.5 rounded-full bg-accent" aria-label="Unread" />}
                   </span>
                   {row.taskTitle && <span className="mt-0.5 block truncate text-[13px] font-medium text-ink">{row.taskTitle}</span>}
@@ -144,6 +148,8 @@ function Notifications({ teamId, onError }: { teamId: string; onError(message: s
                   {row.read ? <Circle size={13} /> : <Check size={14} />}
                 </button>
               </li>
+              {row.digestId && openDigest === row._id && <li className="px-2 pb-2 pl-9"><StandupDigest teamId={teamId} digestId={row.digestId} onOpenIssue={onOpenIssue} /></li>}
+              </Fragment>
             ))}
           </ul>
           {status === "more" && <button type="button" className={cn(ghostButton, "mt-2 w-full")} onClick={loadMore}>Load more</button>}
@@ -176,9 +182,12 @@ function Snooze({ onSnooze }: { onSnooze(delay: number): void }) {
   );
 }
 
-type ViewProps = { teamId: string; filters: Filters; canEdit: boolean; onOpen(projectId: string, issueId: string): void; onError(message: string): void };
+type ViewProps = { teamId: string; projects: readonly CloudProject[]; filters: Filters; canEdit: boolean; onOpen(projectId: string, issueId: string): void; onError(message: string): void };
 
-function IssueList({ teamId, projects, filters, canEdit, onOpen, onError, hasFilters }: ViewProps & { projects: readonly CloudProject[]; hasFilters: boolean }) {
+const editsProject = (projects: readonly (CloudProject & { memberRole?: string })[], canEdit: boolean, projectId: string) =>
+  canEdit && projects.find((project) => project._id === projectId)?.memberRole !== "viewer";
+
+function IssueList({ teamId, projects, filters, canEdit, onOpen, onError, hasFilters }: ViewProps & { hasFilters: boolean }) {
   const members = useWorkspaceMembers(teamId);
   const [pending, setPending] = useState<string | null>(null);
   const { results, status, loadMore } = useCloudPages<InboxTask>("inbox:list", {
@@ -214,7 +223,7 @@ function IssueList({ teamId, projects, filters, canEdit, onOpen, onError, hasFil
             const overdue = Boolean(task.dueDate && task.dueDate < today && !task.done);
             return (
               <li key={task._id} className="flex items-center gap-2 px-2 py-1.5" data-inbox-issue={task._id}>
-                <button type="button" className={iconButton} disabled={!canEdit || pending === task._id}
+                <button type="button" className={iconButton} disabled={!editsProject(projects, canEdit, task.projectId) || pending === task._id}
                   aria-label={`${task.done ? "Reopen" : "Complete"} ${task.title}`} title={task.done ? "Reopen issue" : "Complete issue"} onClick={() => void toggle(task)}>
                   {pending === task._id ? <Loader2 size={15} className="animate-spin" /> : task.done ? <CheckCircle2 size={15} className="text-success" /> : <Circle size={15} />}
                 </button>
@@ -284,7 +293,7 @@ function Activity({ teamId, mine, project }: { teamId: string; mine: boolean; pr
   );
 }
 
-function IssueCalendar({ teamId, filters, canEdit, onOpen, onError }: ViewProps) {
+function IssueCalendar({ teamId, projects, filters, canEdit, onOpen, onError }: ViewProps) {
   const [anchor, setAnchor] = useState(() => localDay(new Date()));
   const [mode, setMode] = useState<"week" | "month">("week");
   const [pending, setPending] = useState(false);
@@ -305,7 +314,7 @@ function IssueCalendar({ teamId, filters, canEdit, onOpen, onError }: ViewProps)
     event.preventDefault();
     if (pending || !canEdit || !calendar) return;
     const task = calendar.tasks.find((candidate) => candidate._id === event.dataTransfer.getData(ISSUE_DRAG_TYPE));
-    if (!task || task.dueDate === key) return;
+    if (!task || task.dueDate === key || !editsProject(projects, canEdit, task.projectId)) return;
     setPending(true);
     try {
       await cloudMutation("tasks:updateTask", { projectId: task.projectId, taskId: task._id, dueDate: key });
@@ -341,7 +350,7 @@ function IssueCalendar({ teamId, filters, canEdit, onOpen, onError }: ViewProps)
                   {date.toLocaleDateString(undefined, { weekday: "short" })}<strong className={cn("text-[13px] text-ink", key === today && "text-accent")}>{date.getDate()}</strong>
                 </time>
                 {tasks.map((task) => (
-                  <button key={task._id} type="button" title={task.title} draggable={canEdit && !pending}
+                  <button key={task._id} type="button" title={task.title} draggable={editsProject(projects, canEdit, task.projectId) && !pending}
                     onDragStart={(event) => event.dataTransfer.setData(ISSUE_DRAG_TYPE, task._id)} onClick={() => onOpen(task.projectId, task._id)}
                     className={cn("flex items-start gap-1 rounded-md bg-raised/60 px-1.5 py-1 text-left hover:bg-raised", task.done && "opacity-60")}>
                     {task.done ? <CheckCircle2 size={12} className="mt-0.5 shrink-0 text-success" /> : <Circle size={12} className={cn("mt-0.5 shrink-0", priorityTone[task.priority])} />}

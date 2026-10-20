@@ -87,6 +87,7 @@ Use only mapped, tested commands:
 - [Origin 0.2.15 published provider Usage fix, delivery hashes and retained recovery evidence](evidence/origin-delivery-040/final-audit-report.md)
 - [Origin 0.2.16 source candidate, release notes and shared-hosting acceptance boundary](origin-candidate-045.md)
 - [Origin 0.2.16 release notes](origin-0.2.16-release-notes.md)
+- [Origin 0.3.1 combined source, concurrent-publication hold and acceptance boundary](origin-candidate-046.md)
 - [Real isolated backend, two-client invitations, persistence and revocation](evidence/origin-native-039/report.md)
 - [Authentication response ownership and two-tab session races](origin-session-scope.md)
 - [Account, connection and shared-run ownership follow-up](origin-ownership-037.md)
@@ -255,9 +256,10 @@ The [Origin import integrity fixture](origin-import.md) checks complete local
 team creation, link-write recovery, lost responses and concurrent retries against
 synthetic cloud access responses in a disposable fake-engine server.
 
-The [Origin drawing fixture](origin-draw.md) checks actual Excalidraw edits,
-failed-save navigation and reload recovery, account scope, project canvas creation,
-read-only controls and mobile layout against a synthetic cloud adapter.
+The [Origin Canvas fixture](origin-draw.md) checks drawing, editing, layers, the
+inspector, export, agent-built sections, converted Excalidraw drawings, project
+canvas management, read-only controls and mobile layout against a synthetic cloud
+adapter.
 
 The [mobile generated-image checks](mobile-generated-images.md) cover native image
 attachments and message-scoped download authorization using isolated fixtures.
@@ -333,7 +335,7 @@ Origin's inspection and delivery records:
 - [Public invitations and central email](origin-invitations.md)
 - [Core Settings and onboarding](origin-core.md)
 - [Member call lifecycle and audio recovery](origin-calls.md)
-- [Drawing recovery and canvas controls](origin-draw.md)
+- [Canvas design editing and agent sections](origin-draw.md)
 - [Storage admission security investigation](origin-storage-admission.md)
 - [Upstream fit review and paired appearance](origin-upstream-review.md)
 - [Thirty additional upstream source-fit decisions](origin-upstream-fit-034.md)
