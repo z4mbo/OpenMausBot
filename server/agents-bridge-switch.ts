@@ -9,18 +9,18 @@ import { dirname, join } from "node:path";
 import { parseToolScope } from "../shared/tool-scope.ts";
 
 import { bridgedCallName } from "./agents-bridge-names.ts";
-import { TOOL_BRIDGE_ENV } from "./drivers/agents-bridge.ts";
+import { TOOL_BRIDGE_ENV, TOOL_DEFER_ENV } from "./drivers/agents-bridge.ts";
 import { claudeCliSupports, parseClaudeCliVersion } from "./drivers/claude.ts";
 import { AGENTS_NODE_FLAG, SPAWNED_PROXIES } from "./proxy-paths.ts";
 
-export { TOOL_BRIDGE_ENV };
+export { TOOL_BRIDGE_ENV, TOOL_DEFER_ENV };
 
 /** The command that starts a turn's agents proxy. */
 export const agentsProxyLaunch = () => ({ command: process.execPath, args: [SPAWNED_PROXIES.agents] });
 
 /** Every agents proxy's starting environment. The bridge is always set, never inherited: an engine may
  * hand its MCP children this server's environment, where OMB_AGENTS_TOOL_BRIDGE=1 is the operator switch. */
-export const AGENTS_PROXY_ENV = { ...AGENTS_NODE_FLAG, [TOOL_BRIDGE_ENV]: "0" } as const;
+export const AGENTS_PROXY_ENV = { ...AGENTS_NODE_FLAG, [TOOL_BRIDGE_ENV]: "0", [TOOL_DEFER_ENV]: "0" } as const;
 
 type BridgeConfig = { features?: { agentsToolBridge?: boolean; claudeUserMcp?: boolean } };
 
@@ -307,6 +307,22 @@ export function agentsToolBridgeEnv(
   return { [TOOL_BRIDGE_ENV]: agentsToolBridgeRefusal(cfg, bot, engine, env, host) === null ? "1" : "0" };
 }
 
+/** Whether a turn not bridged lists the domain tools in short. Security: a selection matches the name in the call and may
+ * leave find_tool out, so a bot with one, or one whose selection cannot be read, is shown every schema whole.
+ * OMB_AGENTS_TOOL_DEFER=0 in the server's environment shows them whole to every bot. */
+export function agentsToolDeferEnv(
+  bot: { toolScope?: unknown } | null | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): { [TOOL_DEFER_ENV]: "1" | "0" } {
+  if (env[TOOL_DEFER_ENV] === "0" || !bot) return { [TOOL_DEFER_ENV]: "0" };
+  try {
+    const selection = parseToolScope(bot.toolScope);
+    return { [TOOL_DEFER_ENV]: selection.ok === true && selection.scope === undefined ? "1" : "0" };
+  } catch {
+    return { [TOOL_DEFER_ENV]: "0" };
+  }
+}
+
 /** Caps the bridged-thread marks so the set cannot grow with every thread ever bridged. */
 export const BRIDGED_THREADS_MAX = 5_000;
 
@@ -331,7 +347,7 @@ export function bridgedAgents<Agents extends { env: Record<string, string> }>(
     BRIDGED_THREADS.add(threadId);
     if (BRIDGED_THREADS.size > BRIDGED_THREADS_MAX) BRIDGED_THREADS.delete(BRIDGED_THREADS.values().next().value!);
   }
-  return { ...agents, env: { ...agents.env, ...decided } };
+  return { ...agents, env: { ...agents.env, ...decided, ...agentsToolDeferEnv(bot, env) } };
 }
 
 /** Decides a turn and writes the decision into its integrations in place; call once the turn's folder is

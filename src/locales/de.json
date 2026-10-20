@@ -747,7 +747,7 @@
   "approvalMode.customLocalOnly": "Die benutzerdefinierte Freigabe lässt sich nur in der installierten Desktop-App ändern",
   "approvalMode.customLocalOnlyDot": "Die benutzerdefinierte Freigabe lässt sich nur in der installierten Desktop-App ändern.",
   "onboarding.welcome": "Willkommen bei {app}",
-  "onboarding.intro": "Bots, die auf ihrem eigenen Rechner echte Arbeit erledigen. Sag uns, wer du bist, und wir melden uns, wenn etwas Großes erscheint.",
+  "onboarding.intro": "Du, dein Team und KI-Agenten bringt ein Projekt von der Idee bis zum Release. Sag uns, wer du bist, und wir melden uns, wenn etwas Großes erscheint.",
   "onboarding.name": "Dein Name",
   "onboarding.continue": "Weiter",
   "onboarding.maybeLater": "Vielleicht später",

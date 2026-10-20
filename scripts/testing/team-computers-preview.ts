@@ -78,5 +78,6 @@ export async function launchTeamComputersPreview() {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  await launchTeamComputersPreview();
+  process.on("message", (message) => { if (message === "stop") process.emit("SIGINT"); });
+  try { await launchTeamComputersPreview(); } finally { if (process.connected) process.disconnect(); }
 }

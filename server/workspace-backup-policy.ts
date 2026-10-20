@@ -36,6 +36,7 @@ export function restoredWorkspaceConfig(portable: unknown, destination: unknown)
 export function excludedWorkspaceAuthPath(path: string): boolean {
   if (/^command-allowlist\.json(?:$|\.\d+\.[0-9a-f-]+\.tmp$)/.test(path)) return true;
   if (/^mcp-oauth\.json(?:$|\.\d+\.[0-9a-f-]+\.tmp$)/.test(path)) return true;
+  if (/^integration-keys\.json(?:$|\.\d+\.[0-9a-f-]+\.tmp$)/.test(path)) return true;
   // Saved website logins and their key never leave the computer they were saved on.
   if (/^(?:logins\.json\.enc|logins-key)(?:$|\.\d+\.[0-9a-f-]+\.tmp$)/.test(path)) return true;
   return /^(?:(?:providers|caddy|chrome-profile|\.agent-browser)(?:\/|$)|workspace-credentials\.json$|external-runtimes\.json$|browser-engine-key$)/.test(path) ||

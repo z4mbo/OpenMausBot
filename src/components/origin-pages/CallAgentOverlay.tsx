@@ -2,6 +2,8 @@ import { Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { CallAgentControls } from "@/lib/call-agent";
 
+export { CallActionItems } from "./CallActionItems";
+
 /** Everyone in the call sees this while the agent is in it: it hears and transcribes the call. */
 export function CallAgentBadge({ name, call }: { name: string; call: CallAgentControls }) {
   const session = call.session;
@@ -13,7 +15,7 @@ export function CallAgentBadge({ name, call }: { name: string; call: CallAgentCo
       <span className="truncate">{name} is listening</span>
       <button type="button" aria-pressed={session.keepTranscript} onClick={() => call.setKeep(!session.keepTranscript)}
         title={session.keepTranscript ? "The transcript is kept in the chief's chat after the summary" : "The transcript is deleted after the summary"}
-        className="flex h-5 items-center gap-1 rounded-full px-1.5 text-[11.5px] outline-none transition-colors duration-150 hover:bg-accent/15 focus-visible:ring-1 focus-visible:ring-accent/60">
+        className="flex h-5 items-center gap-1 rounded-full px-1.5 text-[11.5px] outline-none transition-colors duration-(--motion-fast) hover:bg-accent/15 focus-visible:ring-1 focus-visible:ring-accent/60">
         {session.keepTranscript ? <BookmarkCheck size={12} aria-hidden="true" /> : <Bookmark size={12} aria-hidden="true" />}
         {session.keepTranscript ? "Keeping transcript" : "Keep transcript"}
       </button>

@@ -1,8 +1,17 @@
 // The agents tool catalog and which tools a turn sees: definitions only, no environment, no calls.
 import { CREDENTIAL_TARGETS } from "../../shared/credential-request.ts";
 import { OPTIONS_CARD_LIMITS, WATCHER_OPTIONS_CARD_BOT_ID } from "../../shared/options-card.ts";
+import { STUDIO_CUSTOM_MODEL, STUDIO_MODELS } from "../../shared/studio.ts";
 import { agentToolAnnotations } from "../agent-tool-policy.ts";
 import { WIDGET_TOOL_DEFINITIONS } from "./agents-widget-tools.ts";
+import { CANVAS_TOOL_DEFINITIONS } from "./agents-canvas-tools.ts";
+import { PIPELINE_TOOL_DEFINITIONS } from "./agents-pipeline-tools.ts";
+import { STANDUP_TOOL_DEFINITIONS } from "./agents-standup-tools.ts";
+import { CAMPAIGN_TOOL_DEFINITIONS } from "./agents-campaign-tools.ts";
+import { SHIP_TOOL_DEFINITIONS } from "./agents-ship-tools.ts";
+import { LAUNCHPAD_TOOL_DEFINITIONS } from "./agents-launchpad-tools.ts";
+import { BRAND_TOOL_DEFINITIONS, BRAND_VOICE } from "./agents-brand-tools.ts";
+import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 
 /** Which tools a turn is shown. Presentation only: the server still authenticates and scopes every call. */
 export interface CatalogProfile {
@@ -171,8 +180,6 @@ const SELF_CHANGE_OUTCOME = " Read the result: a change to your own routines, sk
 
 const START_THREAD_SELF_ID = "Leave out, or use your own bot ID. For teammates use coordinate_bots.";
 
-const ORIGIN_SCOPE = " Acts on your team's Origin project unless you pass project.";
-const ORIGIN_PROJECT = { type: "string", maxLength: 120, description: "Name or id from origin_list_projects." };
 const ORIGIN_ISSUE_ID = { type: "string", minLength: 1, maxLength: 64, description: "Issue id or ORI- key from origin_list_issues." };
 const ORIGIN_PRIORITY = { type: "string", enum: ["low", "medium", "high"] };
 const ORIGIN_CARDS = " The person sees issue cards; do not repeat them.";
@@ -315,7 +322,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
       type: "object", additionalProperties: false,
       properties: {
         name: { type: "string", minLength: 1, maxLength: 150 },
-        type: { type: "string", enum: ["figma", "image", "icon", "font", "document", "apk", "other"], description: "Default other." },
+        type: { type: "string", enum: ["figma", "image", "video", "audio", "icon", "font", "document", "apk", "other"], description: "Default other." },
         url: { type: "string", maxLength: 2_000, description: "http(s) link; url or path, not both." },
         path: { type: "string", maxLength: 1_000, description: "A file in your working folder." },
         notes: { type: "string", maxLength: 1_000 },
@@ -363,14 +370,90 @@ const ORIGIN_TOOL_DEFINITIONS = [
       },
     },
   },
+  ...CANVAS_TOOL_DEFINITIONS, ...STANDUP_TOOL_DEFINITIONS,
   {
-    name: "origin_draw",
-    description: "List an Origin project's Draw canvases, or read one: its element counts, the text on it top to bottom, and its links." + ORIGIN_SCOPE,
+    name: "origin_studio_generate",
+    description: "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live. count makes several variations. Images and audio wait for the result (up to 40 s); video returns at once. Keep the good ones with origin_studio_save_asset." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
-      properties: { canvas: { type: "string", maxLength: 120, description: "Canvas name or id; omit to list them." }, project: ORIGIN_PROJECT },
+      properties: {
+        mode: { type: "string", enum: ["image", "video", "audio", "edit"], description: "edit changes or upscales an existing image asset. Default image." },
+        prompt: { type: "string", maxLength: 8_000, description: "What to make; for an ElevenLabs voice, the words spoken." },
+        model: { type: "string", enum: [...STUDIO_MODELS.map((model) => model.id), STUDIO_CUSTOM_MODEL], description: "Default: the mode's first model. Models ending in image-to-video, edit or upscale need source_asset_id." },
+        aspect_ratio: { type: "string", maxLength: 10, description: "Such as 1:1, 16:9, 9:16." },
+        duration: { type: "string", maxLength: 10, description: "Video or audio length, such as 5, 8s or 30s." },
+        voice: { type: "string", maxLength: 40, description: "ElevenLabs voice name, such as Rachel or Brian." },
+        count: { type: "integer", minimum: 1, maximum: 4 },
+        source_asset_id: { type: "string", maxLength: 64, description: "An image asset id from origin_list_assets to start from." },
+        endpoint: { type: "string", maxLength: 200, description: "With model custom: any fal.ai endpoint id, such as a deployed ComfyUI workflow." },
+        input: { type: "object", description: "With model custom: the endpoint's whole input." },
+        wait: { type: "boolean", description: "Wait for the result. Default true except for video." }, brand: { type: "boolean", description: "Put the brand kit's imagery style and colours ahead of an image or video prompt. Default true." }, project: ORIGIN_PROJECT,
+      },
     },
   },
+  {
+    name: "origin_studio_list",
+    description: "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Broadcast." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        status: { type: "string", enum: ["queued", "running", "done", "failed", "cancelled"] },
+        limit: { type: "integer", minimum: 1, maximum: 30, description: "Default 15." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_studio_save_asset",
+    description: "Save a finished Studio generation to the project's Assets (all its outputs, or one with index), and with broadcast true also pick it for Broadcast posts. Returns the asset ids." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        generation_id: { type: "string", minLength: 1, maxLength: 64, description: "From origin_studio_list or origin_studio_generate." },
+        index: { type: "integer", minimum: 0, maximum: 7, description: "One output; omit for all." },
+        broadcast: { type: "boolean", description: "Also pick it for Broadcast." },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["generation_id"],
+    },
+  },
+  {
+    name: "origin_broadcast_draft",
+    description: "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval." + BRAND_VOICE + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        post_id: { type: "string", maxLength: 64, description: "Omit to draft a new post." },
+        channels: { type: "array", maxItems: 6, uniqueItems: true, items: { type: "string", enum: ["x", "bluesky", "linkedin", "facebook", "instagram", "tiktok"] }, description: "Required for a new post." },
+        text: { type: "string", maxLength: 64_000, description: "Text for every channel." },
+        texts: { type: "object", additionalProperties: { type: "string", maxLength: 64_000 }, description: "Per-channel text that replaces text, keyed by channel." },
+        media: { type: "array", maxItems: 20, items: { type: "string", maxLength: 200 }, description: "Asset names or ids from origin_list_assets; [] removes all." },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_broadcast_list",
+    description: "List an Origin project's Broadcast posts: id, status, approval, schedule, channels with their published links or errors, media and text." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: { status: { type: "string", enum: ["all", "draft", "scheduled", "publishing", "published", "failed"], description: "Default all." }, project: ORIGIN_PROJECT },
+    },
+  },
+  {
+    name: "origin_broadcast_schedule",
+    description: "Schedule an approved Broadcast post to publish at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        post_id: { type: "string", minLength: 1, maxLength: 64 },
+        at: { type: "string", maxLength: 40, description: "ISO 8601 time with offset; omit to publish now." },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["post_id"],
+    },
+  },
+  ...PIPELINE_TOOL_DEFINITIONS, ...CAMPAIGN_TOOL_DEFINITIONS, ...LAUNCHPAD_TOOL_DEFINITIONS, ...BRAND_TOOL_DEFINITIONS, ...SHIP_TOOL_DEFINITIONS,
 ];
 
 export const ORIGIN_TOOL_NAMES: ReadonlySet<string> = new Set(ORIGIN_TOOL_DEFINITIONS.map((tool) => tool.name));
@@ -437,7 +520,8 @@ const TOOL_DEFINITIONS = [
       message: { type: "string", minLength: 1, maxLength: 4000, description: "Question or task for these teammates; later requests in the same conversation can build on earlier ones. Send separate requests when responsibilities differ." },
       reason: { type: "string", maxLength: 200, description: "Optional one line for the person about why this goes to them (shown as a chip)." },
       rework: { type: "boolean", description: "True only to send concrete work again to someone whose request already finished or failed: a correction, a re-check or a retry." },
-      thread: { type: "string", enum: ["standing", "new"], description: "standing (default): the one work thread this conversation has with each teammate. new: open a new thread on the teammate for this, its own history and run; its result still returns here." },
+      thread: { type: "string", enum: ["standing", "new"], description: "standing (default): this conversation's one work thread with each teammate. new: a new thread on the teammate, its own history and run (in_my_folder: in your folder); its result still returns here." },
+      in_my_folder: { type: "boolean" },
       reply: { type: "string", enum: ["resume", "none"], description: "resume (default): the result resumes you. none: a one-way notice that is never awaited; nothing comes back and nothing resumes you." },
       consult: { type: "boolean", description: "True for a question: the teammate answers from what it knows, acting on nothing, and you are resumed with the answer. Leave out for work." },
       done_when: { type: "string", maxLength: 1000, description: "Optional: what must be true for this to count as done, in one or two sentences; the teammate is held to it." },
@@ -875,7 +959,7 @@ const TOOL_DEFINITIONS = [
   {
     name: "propose_profile",
     description:
-      "Submit user-requested changes to your own name, title, description, standing instructions (SOUL.md), working folder (cwd), or your alert and voice toggles (notifications, speakReplies). Keep SOUL.md short — who you are and the rules you never break; put step-by-step procedure into a skill instead." + CHIEF_PROFILE_TARGET + SELF_CHANGE_OUTCOME,
+      "Submit user-requested changes to your own name, title (your job title), description, standing instructions (SOUL.md), working folder (cwd), or your alert and voice toggles (notifications, speakReplies). Keep SOUL.md short — who you are and the rules you never break; put step-by-step procedure into a skill instead." + CHIEF_PROFILE_TARGET + SELF_CHANGE_OUTCOME,
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1091,8 +1175,7 @@ export const SHARED_COMPUTER_TOOL_NAMES = new Set(["list_shared_computers", "sha
 const VOICE_TOOL_NAMES = new Set(["send_voice_note"]);
 const CHIEF_ONLY_TOOL_NAMES = new Set([
   "create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue",
-  "origin_review_pr", "origin_merge_pr",
-]);
+  "origin_review_pr", "origin_merge_pr", "origin_standup", "origin_release_draft"]);
 const CHIEF_TARGET_TOOL_NAMES = new Set(["propose_profile", "propose_model"]);
 const WATCHER_TOOL_NAMES = new Set(["create_options_card"]);
 

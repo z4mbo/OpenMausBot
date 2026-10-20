@@ -1,3 +1,0 @@
-Browser tab: 14, Title: "What's new | Origin", URL: "http://127.0.0.1:64038/whats-new".
-There has been no change in the accessibility tree.
-The focused UI element is 1 AXWebArea What's new | Origin, URL: 127.0.0.1:64038/whats-new

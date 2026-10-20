@@ -177,6 +177,15 @@ export function verificationServerEnvironment(parentEnv: NodeJS.ProcessEnv, data
     childEnv.OMB_OPENAI_LIVE_URL = liveUrl;
     if (parentEnv.OMB_OPENAI_LIVE_KEY) childEnv.OMB_OPENAI_LIVE_KEY = parentEnv.OMB_OPENAI_LIVE_KEY;
   }
+  // Pipeline's Brevo, Twilio and ElevenLabs requests go to a loopback fake only.
+  const pipelineUrl = parentEnv.OMB_PIPELINE_PROVIDER_URL?.trim() ?? "";
+  if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(pipelineUrl)) childEnv.OMB_PIPELINE_PROVIDER_URL = pipelineUrl;
+  // Studio's fal.ai queue requests go to a loopback fake only.
+  const falQueueUrl = parentEnv.OMB_FAL_QUEUE_URL?.trim() ?? "";
+  if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(falQueueUrl)) childEnv.OMB_FAL_QUEUE_URL = falQueueUrl;
+  // Ship's Vercel, Netlify, Cloudflare and GitHub requests go to a loopback fake only.
+  const shipUrl = parentEnv.OMB_SHIP_PROVIDER_URL?.trim() ?? "";
+  if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(shipUrl)) childEnv.OMB_SHIP_PROVIDER_URL = shipUrl;
   // Arms the one-shot audio-append failure inside the fixture server.
   if (parentEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE) {
     childEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE = parentEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE;
@@ -185,6 +194,8 @@ export function verificationServerEnvironment(parentEnv: NodeJS.ProcessEnv, data
   if (parentEnv.OMB_TEST_APPROVAL_CLOCK === "1") childEnv.OMB_TEST_APPROVAL_CLOCK = "1";
   // The stall watchdog fires on a marker file, not after 20 minutes of silence.
   if (parentEnv.OMB_TEST_STALL_CLOCK === "1") childEnv.OMB_TEST_STALL_CLOCK = "1";
+  // The UI checks drive this fixture from a real browser, as `pnpm dev` does; OMB_DEV_TRUST_LOCAL_BROWSER=0 tests the sign-in.
+  if (parentEnv.OMB_DEV_TRUST_LOCAL_BROWSER !== "0") childEnv.OMB_DEV_TRUST_LOCAL_BROWSER = "1";
   // Desktop mode: the owner capability the app would hand the server.
   if (parentEnv.OMB_TEST_DESKTOP_OWNER_TOKEN) {
     childEnv.OMB_TEST_DESKTOP_OWNER_TOKEN = parentEnv.OMB_TEST_DESKTOP_OWNER_TOKEN;

@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 /** Workspace pages shown in place of a chat while open. */
-export type OriginPage = "inbox" | "chat" | "call" | "draw";
+export type OriginPage = "inbox" | "chat" | "call" | "draw" | "org";
 
 let current: OriginPage | null = null;
 const listeners = new Set<() => void>();

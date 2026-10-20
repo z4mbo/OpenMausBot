@@ -1,7 +1,0 @@
-import assert from "node:assert/strict";import fs from "node:fs";import crypto from "node:crypto";
-const target="/tmp/origin-cua-034-7g3Rzh",out="/mnt/c/Users/aless/.codex/worktrees/origin-workspace-delete/Origin/.omb-scratch/wsl-cua-descriptor-034-dTLtwb";
-assert.equal(process.platform,"linux");assert.equal(fs.realpathSync(target),target);assert.match(target,/^\/tmp\/origin-cua-034-[A-Za-z0-9]{6}$/);assert.equal(fs.lstatSync(target).isSymbolicLink(),false);assert.equal(fs.statSync(target).mode&0o777,0o700);assert.ok(process.execPath.startsWith(target+"/node-v24.21.0-linux-x64/"));
-const sha=b=>crypto.createHash("sha256").update(b).digest("hex"),binary=fs.readFileSync(process.execPath);
-const receipt={completedAt:new Date().toISOString(),node:process.version,binarySha256:sha(binary),binaryBytes:binary.length,fixtureRoot:target,resolvedPathChecked:true,privateMode:"700",fileSystemTypeHex:fs.statfsSync(target).type.toString(16),ownedProviderOrServerProcessesStarted:0};
-fs.rmSync(target,{recursive:true,force:false});assert.equal(fs.existsSync(target),false);receipt.ownedTmpRootRemoved=true;
-fs.writeFileSync(out+"/linux-cleanup.json",JSON.stringify(receipt,null,2)+"\n");console.log(JSON.stringify(receipt));

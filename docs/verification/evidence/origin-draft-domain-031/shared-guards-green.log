@@ -1,8 +1,0 @@
-
- RUN  v4.1.11 <worker>
-
-
- Test Files  3 passed (3)
-      Tests  5 passed (5)
-   Start at  17:22:41
-   Duration  7.27s (transform 248ms, setup 960ms, import 54ms, tests 5.69s, environment 0ms)

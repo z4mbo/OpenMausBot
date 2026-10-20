@@ -151,6 +151,27 @@ describe("a call's agent", () => {
     expect(posted[0]!.transcript).toBe("Ana: Decision: ship v2");
   });
 
+  it("keeps the summary and action items in Origin, with the transcript only when the call kept it", async () => {
+    const recorded: unknown[] = [];
+    const { agents } = harness({ record: async (input) => { recorded.push(input); } });
+    agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
+    agents.line(scopeOf(ana), AUTH, "Bo writes the release notes", [ana.userId]);
+    agents.leave(scopeOf(ana), [ana.userId]);
+    await flush();
+    agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
+    agents.keep(scopeOf(ana), true, [ana.userId]);
+    agents.line(scopeOf(ana), AUTH, "Ship v2", [ana.userId]);
+    agents.leave(scopeOf(ana), [ana.userId]);
+    await flush();
+    expect(recorded).toEqual([
+      {
+        room: "proj0000000001", callName: "Kai", startedAt: 1_700_000_000_000, minutes: 1,
+        summary: { keyPoints: ["Launch moves to Friday"], decisions: ["Ship v2"], actionItems: [{ title: "Write release notes", owner: "Bo" }] },
+      },
+      expect.objectContaining({ transcript: "Ana: Ship v2" }),
+    ]);
+  });
+
   it("posts nothing for a call where nobody spoke, and reports a failed summary", async () => {
     const quiet = harness();
     quiet.agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);

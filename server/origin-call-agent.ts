@@ -2,8 +2,11 @@
 // the transcript lives in memory for the call and is dropped once it is summarised, unless the people in the call keep it.
 import { readFileSync } from "node:fs";
 import { writeFileAtomic } from "./atomic.ts";
+import type { CallNotesInput } from "./origin-call-notes.ts";
 import type { RequestAuth } from "./request-auth.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
+
+export { recordCallNotes } from "./origin-call-notes.ts";
 
 export type TranscriptionEngine = "local" | "groq" | "openai" | "browser";
 
@@ -239,6 +242,8 @@ export interface CallAgentDeps {
   summarize(input: { botId: string; prompt: string }): Promise<string>;
   /** Posts the summary card, and the transcript when it was kept, in the chief's chat. */
   post(input: { botId: string; widget: Record<string, unknown>; fallback: string; transcript?: string }): void;
+  /** Keeps the summary and action items in Origin; the transcript only when the call kept it. */
+  record?(input: CallNotesInput): Promise<unknown>;
   transcribe(input: { audio: Uint8Array; mime: string; settings: CallAgentSettings }): Promise<string>;
   settings(): CallAgentSettings;
   log?(line: string): void;
@@ -356,11 +361,16 @@ export function createCallAgents(deps: CallAgentDeps) {
     const transcript = transcriptText(lines, SUMMARY_CHARS);
     try {
       const raw = await deps.summarize({ botId: session.bot.id, prompt: summaryPrompt({ callName: session.scope.name, chief: session.bot.name, transcript }) });
+      const summary = parseSummary(raw);
+      const minutes = Math.max(1, Math.round((now() - session.startedAt) / 60_000));
       const { widget, fallback } = summaryWidget({
-        callName: session.scope.name, summary: parseSummary(raw), people: [...session.people.values()],
-        minutes: Math.max(1, Math.round((now() - session.startedAt) / 60_000)), when: new Date(session.startedAt).toISOString().slice(0, 16).replace("T", " "),
+        callName: session.scope.name, summary, people: [...session.people.values()],
+        minutes, when: new Date(session.startedAt).toISOString().slice(0, 16).replace("T", " "),
       });
       deps.post({ botId: session.bot.id, widget, fallback, ...(session.keepTranscript ? { transcript } : {}) });
+      void deps.record?.({
+        room: session.scope.room, callName: session.scope.name, startedAt: session.startedAt, minutes, summary, ...(session.keepTranscript ? { transcript } : {}),
+      })?.catch(() => deps.log?.(`call agent: Origin did not keep the notes of ${session.scope.name}`));
       record.status = "posted";
     } catch (error) {
       record.status = "failed";

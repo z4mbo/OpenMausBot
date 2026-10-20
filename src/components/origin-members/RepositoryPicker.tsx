@@ -58,12 +58,12 @@ export function RepositoryPicker({ teamId, projectName, value, onChange, disable
           const selected = value.mode === mode.id;
           return (
             <label key={mode.id}
-              className={cn("group relative flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-out",
+              className={cn("group relative flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-[border-color,background-color] duration-(--motion-fast) ease-out",
                 selected ? "border-accent/70 bg-accent/[0.07]" : "border-hairline/60 hover:border-hairline hover:bg-raised/40",
                 "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent/60")}>
               <input type="radio" name={name} value={mode.id} aria-label={mode.title} checked={selected} className="sr-only"
-                onChange={() => onChange(mode.id === "new" ? { mode: "new", name: value.mode === "new" ? value.name : null } : mode.id === "existing" ? { mode: "existing", url: "" } : { mode: "later" })} />
-              <span className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-150", selected ? "bg-accent text-accent-ink" : "bg-raised text-ink-secondary group-hover:text-ink")} aria-hidden="true">{mode.icon}</span>
+                onChange={() => onChange(mode.id === "new" ? { mode: "new", name: value.mode === "new" ? value.name : null } : mode.id === "existing" ? { mode: "existing", url: pastedRepository(query) ?? "" } : { mode: "later" })} />
+              <span className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-(--motion-fast)", selected ? "bg-accent text-accent-ink" : "bg-raised text-ink-secondary group-hover:text-ink")} aria-hidden="true">{mode.icon}</span>
               <span className="min-w-0">
                 <span className="block text-[13px] font-medium text-ink">{mode.title}</span>
                 <span className="block text-[12px] leading-snug text-ink-tertiary">{mode.body}</span>
@@ -101,11 +101,11 @@ export function RepositoryPicker({ teamId, projectName, value, onChange, disable
               return (
                 <li key={repo.fullName}>
                   <button type="button" onClick={() => onChange({ mode: "existing", url: repo.url })} aria-pressed={on}
-                    className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition-colors duration-150 hover:bg-raised/50">
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition-colors duration-(--motion-fast) hover:bg-raised/50">
                     <FolderGit2 size={13} className="shrink-0 text-ink-tertiary" aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate text-ink">{repo.fullName}</span>
                     {repo.private && <Lock size={11} className="shrink-0 text-ink-tertiary" aria-label="Private" />}
-                    <Check size={13} className={cn("shrink-0 text-accent-text transition-opacity duration-150", on ? "opacity-100" : "opacity-0")} aria-hidden="true" />
+                    <Check size={13} className={cn("shrink-0 text-accent-text transition-opacity duration-(--motion-fast)", on ? "opacity-100" : "opacity-0")} aria-hidden="true" />
                   </button>
                 </li>
               );

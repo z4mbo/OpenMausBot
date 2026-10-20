@@ -1,7 +1,5 @@
 import { useSyncExternalStore } from "react";
 import type { RuntimeEvent } from "../../shared/runtime-events";
-import type { Message } from "@/state/store";
-import { isToolStep } from "./activity-runs";
 import { listenLiveFrames } from "./live-events";
 
 export type LivePhase = "idle" | "thinking" | "tool" | "writing" | "approval" | "waiting";
@@ -116,24 +114,6 @@ function settle(feed: LiveFeed): LiveFeed {
     approval: undefined,
     steps: feed.steps.map((step) => step.ok === undefined ? { ...step, ok: true } : step),
   };
-}
-
-export function stepsFromMessages(messages: readonly Message[], limit = LIVE_STEPS_KEPT): LiveStep[] {
-  const steps: LiveStep[] = [];
-  for (let index = messages.length - 1; index >= 0 && steps.length < limit; index--) {
-    const message = messages[index];
-    if (!isToolStep(message)) continue;
-    steps.push({
-      id: message.id,
-      name: message.tool.name,
-      spoken: message.tool.spoken,
-      detail: oneLine(message.tool.summary ?? message.tool.input, 200),
-      ok: message.tool.ok,
-      output: readableOutput(message.tool.output),
-      at: message.at,
-    });
-  }
-  return steps;
 }
 
 export function pickFeed(feeds: Iterable<LiveFeed | undefined>): LiveFeed | undefined {

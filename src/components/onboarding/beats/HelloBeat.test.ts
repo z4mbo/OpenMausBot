@@ -34,7 +34,7 @@ describe("the greeting beat", () => {
   it("asks a hosted workspace for nothing and saves nothing", () => {
     const { html, tree } = render(true);
     expect(html).not.toContain("<input");
-    expect(html).not.toContain("let you know when big things ship");
+    expect(html).not.toContain("to hear about big releases");
     expect(html).toContain("shared Origin");
     expect(html).toContain("nothing to install");
     const primary = nodes(tree).find((node) => typeof node.type === "function" && node.props.onClick);
@@ -46,7 +46,7 @@ describe("the greeting beat", () => {
   it("keeps the desktop greeting with its name and email fields", () => {
     for (const html of [render().html, render(false).html]) {
       expect(html).toContain("you@example.com");
-      expect(html).toContain("let you know when big things ship");
+      expect(html).toContain("to hear about big releases");
       expect(html).not.toContain("shared Origin");
     }
   });

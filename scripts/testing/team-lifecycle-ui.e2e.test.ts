@@ -1,19 +1,21 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { request } from "../mcp-server.ts";
 import { mountPreview, type MountedPreview } from "./preview-fixture.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
+import { CREATES_FOLDERS_AND_GROUPS } from "../../src/lib/origin-teams.ts";
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
-const enabled = process.env.OMB_UI_E2E === "1" || Boolean(binary);
-if (!enabled) console.log("skipping team lifecycle UI e2e: set OMB_UI_E2E=1 to install the pinned browser");
+const enabled = CREATES_FOLDERS_AND_GROUPS && (process.env.OMB_UI_E2E === "1" || Boolean(binary));
+if (!CREATES_FOLDERS_AND_GROUPS) console.log("skipping team lifecycle UI e2e: this build does not create teams");
+else if (!enabled) console.log("skipping team lifecycle UI e2e: set OMB_UI_E2E=1 to install the pinned browser");
 
 (enabled ? it : it.skip)("creates an empty team, moves bots, and manages shared instructions in the renderer", async () => {
   let child: ChildProcess | undefined;
@@ -24,9 +26,7 @@ if (!enabled) console.log("skipping team lifecycle UI e2e: set OMB_UI_E2E=1 to i
   try {
     let stdout = "", stderr = "";
     let info: { ui: string; url: string; botId: string; logPath: string };
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
     child.on("error", (error) => { stderr += error.message; });
@@ -355,7 +355,7 @@ if (!enabled) console.log("skipping team lifecycle UI e2e: set OMB_UI_E2E=1 to i
         console.info(JSON.stringify({ failureEvidence: `${fixtureLog}.team-lifecycle-failure.json` }));
       } catch { /* The original failure remains authoritative if the browser stopped. */ }
     }
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
     await preview?.close();
   }
 }, binary ? 420_000 : 840_000);

@@ -1,14 +1,14 @@
 // Real Settings controls against simulated backup endpoints in a disposable
 // full-app browser. Archive encryption/restart are separate server tests.
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const binary = resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env });
@@ -21,14 +21,12 @@ interface FixtureInfo { ui: string; url: string; dataDir: string; logPath: strin
 describe("full backup Settings in the real renderer", () => {
   let child: ChildProcess | undefined;
   let info: FixtureInfo;
-  afterAll(async () => { await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 }); });
+  afterAll(async () => { await stopUiLauncher(child); });
 
   (enabled ? it : it.skip)("uses passwords, a file preview and explicit replacement without leaking secrets", async () => {
     let stdout = "";
     let stderr = "";
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
     child.on("error", (error) => { stderr += error.message; });
@@ -124,12 +122,12 @@ describe("full backup Settings in the real renderer", () => {
     const evidence = join(ROOT, ".omb-scratch", "verify-evidence", "workspace-backup-preview.png");
     await ui("screenshot", "--out", evidence);
     await click("Replace installation");
-    await expect.poll(snapshot, { timeout: 10_000 }).toContain("Fully quit OpenMausBot");
+    await expect.poll(snapshot, { timeout: 10_000 }).toContain("Fully quit Origin");
     expect(await evaluate("window.backupFixture.calls.find(call => call.path.endsWith('/restore')).body")).toEqual({ id: "validated-stage", confirmation: "REPLACE" });
     expect(await evaluate("window.backupFixture.calls.find(call => call.path.endsWith('/upload')).rawFile")).toBe(true);
     expect(await evaluate("localStorage.getItem('omb-pending-workspace-restore')")).toBe("validated-stage");
     console.log(JSON.stringify({ fixture: info, screenshot: evidence, archiveApi: "simulated; renderer controls real" }));
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
     expect(child.exitCode).toBe(0);
     expect(existsSync(info.dataDir)).toBe(false);
   }, LAUNCH_TIMEOUT_MS + 120_000);

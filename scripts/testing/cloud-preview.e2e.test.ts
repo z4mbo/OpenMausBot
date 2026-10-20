@@ -1,17 +1,13 @@
 // The real panels, image decoder and fetch cancellation in a disposable
 // browser/server. Only the cloud provider transport is simulated.
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
 import { mountPreview, type MountedPreview } from "./preview-fixture.ts";
-
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+import { spawnUiLauncher, stopUiLauncher } from "./ui-launch-process.ts";
 const enabled = process.env.OMB_UI_E2E === "1" || Boolean(resolveAgentBrowserBinary({ dataDir: UI_TOOLS_DIR, env: process.env }));
 interface FixtureInfo { ui: string; url: string; dataDir: string; logPath: string }
 
@@ -19,7 +15,7 @@ describe("cloud preview recovery in the real renderer", () => {
   let child: ChildProcess | undefined;
   let preview: MountedPreview | undefined;
   afterAll(async () => {
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
     await preview?.close();
   });
 
@@ -27,9 +23,7 @@ describe("cloud preview recovery in the real renderer", () => {
     let stdout = "";
     let stderr = "";
     let info: FixtureInfo;
-    child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/control-omb.ts"), "ui", "launch"], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
-    });
+    child = spawnUiLauncher([]);
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
     child.on("error", (error) => { stderr += error.message; });
@@ -212,7 +206,7 @@ describe("cloud preview recovery in the real renderer", () => {
       await expect.poll(() => stat("joining")).toBe(false);
     }
     process.stdout.write(`${JSON.stringify({ fixture: info!, previewUrl: preview.previewUrl, transport: "simulated; panels and browser real" })}\n`);
-    await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+    await stopUiLauncher(child);
     expect(child.exitCode).toBe(0);
     expect(existsSync(info!.dataDir)).toBe(false);
     expect(existsSync(info!.logPath)).toBe(true);

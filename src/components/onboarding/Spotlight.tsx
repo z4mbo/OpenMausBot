@@ -156,13 +156,13 @@ export function Spotlight({
       aria-live="polite"
     >
       <div
-        className="absolute inset-0 bg-black/55 transition-[clip-path] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+        className="absolute inset-0 bg-black/55 transition-[clip-path] duration-(--motion-slow) ease-out motion-reduce:transition-none"
         style={{ clipPath: cutout(settled ? rect : null) }}
         aria-hidden="true"
       />
       {rect && (
         <div
-          className="absolute ring-2 ring-accent transition-opacity duration-300"
+          className="absolute ring-2 ring-accent transition-opacity duration-(--motion-slow)"
           style={{
             left: rect.x,
             top: rect.y,
@@ -170,8 +170,6 @@ export function Spotlight({
             height: rect.h,
             opacity: settled ? 1 : 0,
             borderRadius: RADIUS,
-            boxShadow:
-              "0 0 0 5px color-mix(in srgb, var(--color-accent) 28%, transparent), 0 0 36px 6px color-mix(in srgb, var(--color-accent) 30%, transparent)",
           }}
           aria-hidden="true"
         />
@@ -179,13 +177,13 @@ export function Spotlight({
       {/* Outer layer positions (transition), inner layer enters (keyframes): the two never fight over transform. */}
       <div
         data-tour-card
-        className="pointer-events-auto absolute left-0 top-0 w-[320px] transition-transform duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+        className="pointer-events-auto absolute left-0 top-0 w-[320px] transition-transform duration-(--motion-slow) ease-out motion-reduce:transition-none"
         style={{ transform, width: cardWidth }}
       >
         <div
           role="dialog"
           className={cn(
-            "flex items-start gap-3 rounded-2xl border border-hairline/50 bg-panel p-3.5 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)]",
+            "flex items-start gap-3 rounded-2xl border border-hairline/50 bg-panel p-3.5",
             rect
               ? beside
                 ? "origin-left"
@@ -196,7 +194,7 @@ export function Spotlight({
             settled ? "animate-spot-in motion-reduce:animate-none" : "opacity-0",
           )}
         >
-          <div className="shrink-0 drop-shadow-[0_6px_14px_rgba(0,0,0,0.35)]">
+          <div className="shrink-0">
             <MausAvatar
               color="green"
               state={mascot}

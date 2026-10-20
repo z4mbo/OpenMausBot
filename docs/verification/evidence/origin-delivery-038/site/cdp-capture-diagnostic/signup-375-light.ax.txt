@@ -1,4 +1,0 @@
-Browser tab: 14, Title: "Create your account | Origin", URL: "http://127.0.0.1:64038/signup".
-The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
-Removed element IDs: 5
-The focused UI element is 1 AXWebArea Create your account | Origin, URL: 127.0.0.1:64038/signup

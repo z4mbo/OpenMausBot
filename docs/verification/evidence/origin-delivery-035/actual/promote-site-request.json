@@ -1,8 +1,0 @@
-{
-  "step": "promote-site",
-  "version": "0.2.13",
-  "source": "1483a7d76fb092b5ef6860afc5ffb520fc4e7707",
-  "image": "sha256:02e51fcd5b86b85392ada154c402f86229369c8894bb377d8ab5487ecc2296b0",
-  "previousImage": "sha256:bfb08fcc03fc781ecf6ea70b301d16e3e429117814608535e4d5a20c3616f5cb",
-  "requestedAt": "2026-10-18T23:50:27.1004905Z"
-}

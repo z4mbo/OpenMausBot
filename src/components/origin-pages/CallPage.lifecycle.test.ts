@@ -149,3 +149,13 @@ describe("member call session ownership", () => {
     await vi.waitFor(() => expect(container.querySelector('[aria-label="Play audio from Remote person"]')).toBeNull());
   });
 });
+
+describe("call stage", () => {
+  it("shows the gallery once the shared screen is unpinned", async () => {
+    const { stageTile } = await import("./CallPage");
+    const tiles = [{ id: "me:camera" }, { id: "peer:screen" }];
+    expect(stageTile(tiles, "peer:screen")).toBe("peer:screen");
+    expect(stageTile(tiles, null)).toBeNull();
+    expect(stageTile(tiles, "gone:screen")).toBeNull();
+  });
+});

@@ -1,4 +1,0 @@
-{
-  "error": "AssertionError [ERR_ASSERTION]: Session snapshot must precede incoming body/auth waits\n    at Object.<anonymous> (C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\native-audit-038-721db7e04c32\\check-bundled-ownership.cjs:98:41)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47",
-  "completedTargets": []
-}

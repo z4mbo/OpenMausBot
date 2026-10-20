@@ -1,7 +1,0 @@
-openmausbot webhook receiver on http://127.0.0.1:21007
-openmausbot open-source edition (enterprise layer present but OMB_LICENSE_KEY is not set)
-local requests: owner trust (self-hosted default)
-brand: default
-openmausbot server on http://127.0.0.1:21006
-[omb-turn] bot=6294911f-2753-4802-b62b-b362cea5921f text="Verify the isolated lease change fixture" images=0 depth=0 card=false
-browser engine: unavailable (agent-browser is not installed on this machine yet); bots get no browser tools until it is installed

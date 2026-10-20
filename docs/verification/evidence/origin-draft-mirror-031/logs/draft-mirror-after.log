@@ -1,8 +1,0 @@
-
- RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-draft-client/Origin
-
-
- Test Files  4 passed (4)
-      Tests  18 passed (18)
-   Start at  17:24:35
-   Duration  6.05s (transform 1.23s, setup 1.29s, import 2.65s, tests 377ms, environment 1.12s)

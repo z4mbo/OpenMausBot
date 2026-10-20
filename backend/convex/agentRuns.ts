@@ -5,6 +5,7 @@ import { requireUser } from "./lib/auth";
 import { canResumeThreadRun, requireThread, requireWritableThread, runAcceptsBotWrites } from "./lib/agentAccess";
 import { cleanPayload, cleanText, cleanTool, LEASE_MS, messageByClientId, nextSeq, promoteQueuedRun, settleRun } from "./lib/agentThreadRows";
 import { requireTeamMember } from "./lib/permissions";
+import { budgetRefusal, recordSpend } from "./budgets";
 
 const CLIENT_ID_MAX = 160;
 const ENGINE_LABEL_MAX = 120;
@@ -31,6 +32,8 @@ export const begin = mutation({
       return { runId: existing.runId, messageId: existing._id, status: run?.status ?? "failed", seq: existing.seq };
     }
     const now = Date.now();
+    const overBudget = await budgetRefusal(ctx, agent, thread.projectId ?? agent.projectId, now);
+    if (overBudget) throw new Error(overBudget);
     const holder = thread.activeRunId ? await ctx.db.get(thread.activeRunId) : null;
     if (holder && holder.status === "running" && (thread.leaseUntil ?? 0) <= now) await settleRun(ctx, holder, "interrupted", now);
     const fresh = (await ctx.db.get(thread._id))!;
@@ -146,6 +149,7 @@ export const finish = mutation({
     if (run.status !== "running" && run.status !== "queued") return null;
     const engineLabel = args.engineLabel?.trim().slice(0, ENGINE_LABEL_MAX);
     await settleRun(ctx, run, args.status, Date.now(), { ...(args.usage ? { usage: args.usage } : {}), ...(engineLabel ? { engineLabel } : {}) });
+    await recordSpend(ctx, run, args.usage?.costUsd, Date.now());
     return null;
   },
 });

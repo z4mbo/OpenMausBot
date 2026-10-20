@@ -3,6 +3,46 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.5.0",
+  date: "2026-10-20",
+  title: "From idea to shipped: Launchpad, Ship, Brand and Pulse",
+  changes: [
+    { title: "Launchpad", body: "Start a project from a rough idea. Origin creates the project, its repository and its Chief, and the Chief writes a Brief, sets MVP and Launch milestones, files Draft issues and suggests the team, then waits for you before starting work." },
+    { title: "Docs and milestones", body: "Each project has Docs: the Brief and other specs as markdown that you and agents edit, with clickable checklists and a warning when an agent changes a doc you're editing. Issues group by milestone with progress." },
+    { title: "Ship", body: "Connect Vercel, Netlify, Cloudflare Pages or a GitHub Actions workflow and see every deployment live, with redeploy, promote and rollback where the provider allows. Draft a release from merged PRs; once you approve, Origin tags it on GitHub, deploys and drafts the announcement. PR cards show preview links." },
+    { title: "Brand kit", body: "Assets has a Brand tab for your name, voice, colours with contrast checks, fonts, logos and imagery style. Canvas can apply it to a frame, Pages use its fonts, Studio adds it to prompts, and agents write posts and outreach in its voice." },
+    { title: "Pulse", body: "A project's Pulse shows where it stands from idea to growth: issues and PRs, pages and posts, leads and pipeline, agent activity and spend, with what needs you first. The Org page rolls it up for every project." },
+    { title: "Studio and Canvas improvements", body: "Cancel a running generation, and saved video and audio keep their own type in Assets. Canvas drags reach collaborators while you move, Alt-drag works inside auto layout, and panels fit on phones." },
+    { title: "More reliable agents", body: "Agents now pass list and number options to on-demand tools correctly, which a real Haiku run showed could fail before. Disconnecting an integration asks first, and a dozen layout and focus issues are fixed." },
+  ],
+}, {
+  version: "0.4.0",
+  date: "2026-10-20",
+  title: "Pages, campaigns and a self-running pipeline",
+  changes: [
+    { title: "Pages", body: "Publish any Canvas frame as a public landing page at origin.imbored.fun, with a lead form that drops sign-ups straight into Pipeline. Republish to update it; each page shows its views and leads. A Chief can design and publish a waitlist page for you." },
+    { title: "Campaigns", body: "Broadcast has Campaigns: a goal, audience, channels and dates that tie together the campaign's Studio content, posts, leads and issues, with engagement from X and Bluesky and leads attributed by utm_campaign. Plan with your Chief in one click." },
+    { title: "Replies and sequences", body: "Texts, WhatsApp messages, calls and email replies from leads land on their timeline and in your Inbox. Follow-up sequences draft each step when it's due and stop when the lead replies or closes. Stages are editable, drafts can be edited before sending, and every lead gets a score with its next best action." },
+    { title: "Budgets", body: "Set a monthly spend cap for each agent or project on the Org page. Agents warn at 80% and stop at 100% until an admin raises the budget." },
+    { title: "Chief heartbeat", body: "Turn on a periodic check in Project settings: the Chief reviews stale issues, blocked agents and waiting PRs and writes a short note only when something needs you." },
+    { title: "From calls to issues", body: "After a call, its action items appear on the Call page; create them as Draft issues for the Chief in one click." },
+    { title: "Lighter agents and safer local access", body: "Content, marketing and sales tools load on demand, cutting each turn's tool list by about 13%. The local server now requires sign-in from browsers, the companion control port needs a per-launch token, and agents' browsers pass through an egress gate." },
+  ],
+}, {
+  version: "0.3.0",
+  date: "2026-10-20",
+  title: "From idea to launch: Studio, Broadcast, Pipeline and Canvas",
+  changes: [
+    { title: "Studio", body: "Generate images, video, voice, music and edits with fal.ai models from a project's Studio tab. Results stay with the project, save to Assets in one click and can go straight to Broadcast. Agents can generate too." },
+    { title: "Broadcast", body: "Plan posts on a week calendar and publish them to X, Bluesky, LinkedIn, Facebook, Instagram and TikTok with your own accounts. Posts written by agents wait for a person's approval before they can be scheduled." },
+    { title: "Pipeline", body: "See every lead on a board or table, capture new ones from your landing page with a copyable form snippet, import CSV, and reach out by email, SMS, phone or an AI voice call whose transcript and summary land on the lead's timeline. Ask the project's Chief for an outreach plan." },
+    { title: "Canvas", body: "Draw is now Canvas, a design editor with frames, auto layout, layers, smart guides and export. Agents read and edit the same layers, so you can ask a Chief to design a section and refine it yourself. Existing drawings open converted." },
+    { title: "Integrations", body: "Settings has an Integrations section for fal.ai, ElevenLabs, Twilio, Brevo, Resend and your social accounts. Keys stay on your computer, are never shown again and are never synced or backed up." },
+    { title: "Chief standups and PR cards", body: "Each project's Chief posts a daily digest to the Inbox with finished and moved issues, PRs waiting for you and blockers. Pull requests appear as cards in agent chat with CI status, and Approve & merge asks you first." },
+    { title: "Org", body: "A workspace Org page shows you, your project Chiefs and their agents, with what each is doing now and its recent runs and cost." },
+    { title: "Smoother app", body: "The project bar keeps every section reachable with a More menu, animations share one fast timing, heavy shadows are gone, and 18 bugs are fixed across issues, chat, calls, assets, the vault and onboarding." },
+  ],
+}, {
   version: "0.2.15",
   date: "2026-10-19",
   title: "Clearer provider usage",

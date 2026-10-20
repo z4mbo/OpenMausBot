@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCallSignaling, formatElapsed, galleryColumns, isScreenTrack, parseCallMessage, selectCallFocus } from "./member-call";
+import { createCallSignaling, formatElapsed, galleryColumns, isScreenTrack, parseCallMessage } from "./member-call";
 
 type Description = { type: string; sdp?: string };
 
@@ -26,16 +26,6 @@ function fakeConnection(name: string) {
   };
   return { connection: connection as unknown as RTCPeerConnection, log };
 }
-
-describe("selectCallFocus", () => {
-  it("jumps to a newly shared screen, then keeps the chosen tile, then prefers someone else's camera", () => {
-    const tiles = [{ id: "self:camera" }, { id: "bo:camera" }, { id: "bo:screen", screenSharing: true }];
-    expect(selectCallFocus(tiles, "self:camera", new Set())).toBe("bo:screen");
-    expect(selectCallFocus(tiles, "self:camera", new Set(["bo:screen"]))).toBe("self:camera");
-    expect(selectCallFocus(tiles.slice(0, 2), null, new Set())).toBe("bo:camera");
-    expect(selectCallFocus([], null, new Set())).toBeNull();
-  });
-});
 
 describe("isScreenTrack", () => {
   it("treats any video track after the first video transceiver as a screen", () => {

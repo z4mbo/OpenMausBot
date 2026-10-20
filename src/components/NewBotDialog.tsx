@@ -35,6 +35,7 @@ import { LocalComputerAutoWarning } from "./LocalComputerAutoWarning";
 import { SharePresetDialog } from "./SharePresetDialog";
 import { SettingRow } from "./SettingsPrimitives";
 import { Select } from "./Select";
+import { LaunchpadFirst } from "./origin-launchpad/LaunchpadFirst";
 
 const SECTIONS = ["Identity", "Soul", "Skills", "Memory", "Routines", "Access", "Model", "Permissions", "Voice & alerts"] as const;
 type Section = typeof SECTIONS[number];
@@ -73,7 +74,8 @@ export function CompanionNewBotDialog() {
 
 export function NewBotDialog(props: Parameters<typeof LocalNewBotDialog>[0] = {}) {
   return typeof window !== "undefined" && window.ogb?.remoteClient?.active
-    ? <CompanionNewBotDialog /> : <LocalNewBotDialog {...props} />;
+    ? <CompanionNewBotDialog />
+    : <LaunchpadFirst enabled={!props.defaultsMode && props.section === undefined} onClose={props.onClose}><LocalNewBotDialog {...props} /></LaunchpadFirst>;
 }
 
 export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCreated, preserveSelection = false }: {

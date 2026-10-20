@@ -675,7 +675,36 @@ describe("agents-proxy MCP surface", () => {
       "origin_team_chat",
       "origin_team_chat_post",
       "origin_feedback",
-      "origin_draw",
+      "origin_canvas",
+      "origin_canvas_edit",
+      "origin_page_publish",
+      "origin_page_list",
+      "origin_standup",
+      "origin_pulse",
+      "origin_studio_generate",
+      "origin_studio_list",
+      "origin_studio_save_asset",
+      "origin_broadcast_draft",
+      "origin_broadcast_list",
+      "origin_broadcast_schedule",
+      "origin_pipeline_list_leads",
+      "origin_pipeline_upsert_lead",
+      "origin_pipeline_log_activity",
+      "origin_pipeline_sequence",
+      "origin_pipeline_contact",
+      "origin_campaign_create",
+      "origin_campaign_get",
+      "origin_campaign_link",
+      "origin_doc_list",
+      "origin_doc_get",
+      "origin_doc_write",
+      "origin_milestone_list",
+      "origin_milestone_set",
+      "origin_brand_get",
+      "origin_brand_update",
+      "origin_ship_status",
+      "origin_ship_deploy",
+      "origin_release_draft",
     ]);
     const tool = (name: string) => list.result.tools.find((entry: { name: string }) => entry.name === name);
     const coordinate = tool("coordinate_bots");
@@ -683,7 +712,7 @@ describe("agents-proxy MCP surface", () => {
     expect(coordinate.description).toContain("consult true asks a question");
     expect(coordinate.description).toContain('reply "none" is a one-way notice');
     expect(coordinate.description).toContain("never call assignment_status in the same turn");
-    expect(Object.keys(coordinate.inputSchema.properties)).toEqual(["group_id", "bot_ids", "message", "reason", "rework", "thread", "reply", "consult", "done_when"]);
+    expect(Object.keys(coordinate.inputSchema.properties)).toEqual(["group_id", "bot_ids", "message", "reason", "rework", "thread", "in_my_folder", "reply", "consult", "done_when"]);
     expect(coordinate.inputSchema.properties.thread.enum).toEqual(["standing", "new"]);
     expect(coordinate.inputSchema.properties.reply.enum).toEqual(["resume", "none"]);
     expect(coordinate.inputSchema.properties.consult.type).toBe("boolean");
@@ -756,7 +785,8 @@ describe("agents-proxy MCP surface", () => {
       "list_team_setup",
       "session_search", "session_read", "list_routines", "skills_list",
       "origin_list_projects", "origin_list_issues", "origin_get_issue", "origin_list_assets", "origin_vault_list", "origin_repo_status",
-      "origin_team_chat", "origin_feedback", "origin_draw",
+      "origin_team_chat", "origin_feedback", "origin_canvas", "origin_page_list", "origin_pulse", "origin_studio_list", "origin_broadcast_list", "origin_pipeline_list_leads",
+      "origin_campaign_get", "origin_doc_list", "origin_doc_get", "origin_milestone_list", "origin_brand_get", "origin_ship_status",
     ];
     expect(list.result.tools.filter((tool: any) => tool.annotations?.readOnlyHint)
       .map((tool: any) => tool.name)).toEqual(readNames);
@@ -2051,7 +2081,7 @@ describe("standing external runtime", () => {
   it("sees the same one tool surface as every turn: the switches it sets change nothing", async () => {
     const list = await externalRpc("tools/list");
     // the main child is a Chief's turn; this one is not, so only the role differs
-    const chiefOnly = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr"];
+    const chiefOnly = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr", "origin_standup", "origin_release_draft"];
     const everyTurn = (await rpc("tools/list")).result.tools.filter((tool: any) => !chiefOnly.includes(tool.name));
     const names = list.result.tools.map((tool: any) => tool.name);
     expect(names).toEqual(everyTurn.map((tool: any) => tool.name));
@@ -2226,7 +2256,7 @@ describe("coordinate_bots arguments", () => {
       lastCoordinateBody = null;
       const res = await callTool("coordinate_bots", args);
       expect(res.result.isError, JSON.stringify(args)).toBe(true);
-      expect(res.result.content[0].text).toContain('thread ("standing" or "new"), reply ("resume" or "none"), consult (true or false) and done_when are optional');
+      expect(res.result.content[0].text).toContain('thread ("standing" or "new"), reply ("resume" or "none"), consult (true or false), in_my_folder (true or false) and done_when are optional');
       expect(lastCoordinateBody).toBeNull();
     }
   });
@@ -2252,7 +2282,7 @@ describe("coordinate_bots arguments", () => {
     });
     expect(res.result.isError).toBe(true);
     const text = res.result.content[0].text;
-    for (const field of ["bot_ids", "message", "group_id", "reason", "rework", "thread", "reply", "consult", "done_when"]) {
+    for (const field of ["bot_ids", "message", "group_id", "reason", "rework", "thread", "reply", "consult", "in_my_folder", "done_when"]) {
       expect(text).toContain(field);
     }
     expect(text).toContain("botIds");
@@ -2305,7 +2335,7 @@ describe("tool bridge", () => {
   /** The main child's switches: a Chief with skills and shared computers. */
   const CHIEF = { OMB_SKILL_AUTHORING_ENABLED: "1", OMB_SHARED_COMPUTERS_ENABLED: "1", OMB_CHIEF_OF_STAFF: "1" };
   const CHIEF_ONLY = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread"];
-  const HOT = ["tool_result_read", "list_room_targets", "coordinate_bots", "list_bots", "list_rooms", "select_computer", "attach_file", "post_to_room", "request_credential", "request_sign_in", "fill_login", "memory_update", "origin_team_chat_post"];
+  const HOT = ["tool_result_read", "list_room_targets", "coordinate_bots", "list_bots", "list_rooms", "select_computer", "attach_file", "post_to_room", "request_credential", "request_sign_in", "fill_login", "memory_update", "origin_team_chat_post", "origin_page_publish", "origin_ship_deploy"];
   let chief: Rpc;
   let plain: Rpc;
   let off: Rpc;

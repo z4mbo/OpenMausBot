@@ -247,7 +247,7 @@ export function OriginSearch({ onClose }: { onClose(): void }) {
                 return (
                   <div key={entry.key} id={`origin-search-${at}`} data-index={at} role="option" aria-selected={current}
                     onMouseMove={() => { if (!current) setCursor(at); }} onClick={() => entry.open()}
-                    className={cn("group/result relative flex cursor-pointer items-center gap-2.5 rounded-xl py-1.5 pr-2 transition-colors duration-100",
+                    className={cn("group/result relative flex cursor-pointer items-center gap-2.5 rounded-xl py-1.5 pr-2 transition-colors duration-(--motion-fast)",
                       entry.depth ? "pl-11" : "pl-2.5", current ? "bg-raised" : "hover:bg-raised/50")}>
                     {entry.depth === 1 && (
                       <span aria-hidden="true" className={cn("absolute left-[22px] top-0 w-3 border-l border-hairline/70", entry.last ? "h-1/2 rounded-bl-md border-b" : "h-full")}>

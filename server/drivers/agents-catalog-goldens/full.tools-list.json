@@ -151,7 +151,10 @@
               "standing",
               "new"
             ],
-            "description": "standing (default): the one work thread this conversation has with each teammate. new: open a new thread on the teammate for this, its own history and run; its result still returns here."
+            "description": "standing (default): this conversation's one work thread with each teammate. new: a new thread on the teammate, its own history and run (in_my_folder: in your folder); its result still returns here."
+          },
+          "in_my_folder": {
+            "type": "boolean"
           },
           "reply": {
             "type": "string",
@@ -383,7 +386,7 @@
     },
     {
       "name": "show_widget",
-      "description": "Show an interactive widget in this chat. Reach for it yourself, without being asked, whenever you need details from the person or are offering a choice: never ask them to type a date, a time, a length or one of a few options, in follow-ups too. To change something that exists, prefill its current values (defaultValue). \"Help me book a call\" gets a Card with a DatePicker, a TimePicker, a Select for the length and a Textarea for an optional note; \"remind me every weekday\" gets a TimePicker and a DayPicker. Also good for a confirmation, a live status or a short pick-one list. Data, comparisons and results go in a markdown table in your message instead, which the chat can copy and export. `widget` is one JSON tree. The root is {type:\"Card\"|\"ListView\", title?, caption?, children:[...], confirm?:{label,action}, cancel?:{label,action}}. Nodes: Row, Col, Box, Spacer, Divider, Text, Title, Caption, Markdown, Badge{label,color}, Icon{name}, Image{src}, Progress{value 0-1, or value and max}, Chart{data,series:[{type,dataKey}],xAxis}, Button{label,onClickAction}, Form{onSubmitAction,children}. Fields, each with a name and a short label: Select|RadioGroup{options:[{label,value}]}, DatePicker{min?,max?} (YYYY-MM-DD), TimePicker{min?,max?,step?} (HH:MM, 24-hour), DayPicker (days of the week, sent as \"mon,wed,fri\"), Checkbox, Input, Textarea. A ListView holds ListViewItem{children}; to have the person choose one row, give the ListView a name and each row a value, and confirm sends the pick. An action is {type,payload?}; {type:\"open_url\",payload:{url}} opens a link. Labels are plain words, no emoji. When the person presses confirm, cancel or a button, their answers arrive as their next message, so end your turn after a widget that asks something. Keep it small: one confirm, one cancel, at most 8 rows. Never ask for passwords here. Not available in rooms.",
+      "description": "Show an interactive widget in this chat. Reach for it yourself, without being asked, whenever you need details from the person or are offering a choice: never ask them to type a date, a time, a length or one of a few options, in follow-ups too. To change something that exists, prefill its current values (defaultValue). \"Help me book a call\" gets a Card with a DatePicker, a TimePicker, a Select for the length and a Textarea for an optional note; \"remind me every weekday\" gets a TimePicker and a DayPicker. Also good for a confirmation, a live status or a short pick-one list. Data, comparisons and results go in a markdown table in your message instead, which the chat can copy and export. `widget` is one JSON tree. The root is {type:\"Card\"|\"ListView\", title?, caption?, children:[...], confirm?:{label,action}, cancel?:{label,action}}. Nodes: Row, Col, Box, Spacer, Divider, Text, Title, Caption, Markdown, Badge{label,color}, Icon{name}, Image{src}, Progress{value 0-1, or value and max}, Chart{data,series:[{type,dataKey}],xAxis}, Button{label,onClickAction}, Form{onSubmitAction,children}. Fields, each with a name and a short label: Select|RadioGroup{options:[{label,value}]}, DatePicker{min?,max?} (YYYY-MM-DD), TimePicker{min?,max?,step?} (HH:MM, 24-hour), DayPicker (days of the week, sent as \"mon,wed,fri\"), Checkbox, Input, Textarea. A ListView holds ListViewItem{children}; to have the person choose one row, give the ListView a name and each row a value, and confirm sends the pick. Select, RadioGroup and such a list also let the person type their own answer instead; set allowOther:false only when nothing but an option will do. An action is {type,payload?}; {type:\"open_url\",payload:{url}} opens a link. Labels are plain words, no emoji. When the person presses confirm, cancel or a button, their answers arrive as their next message, so end your turn after a widget that asks something. Keep it small: one confirm, one cancel, at most 8 rows. Never ask for passwords here. Not available in rooms.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1329,7 +1332,7 @@
     },
     {
       "name": "propose_profile",
-      "description": "Submit user-requested changes to your own name, title, description, standing instructions (SOUL.md), working folder (cwd), or your alert and voice toggles (notifications, speakReplies). Keep SOUL.md short — who you are and the rules you never break; put step-by-step procedure into a skill instead. A Chief of Staff may pass for_bot_id (from list_bots) for a requested change to another bot in its section. Read the result: a change to your own routines, skills, profile or model applies immediately, and the person sees it with an Undo; a change for another bot may wait for the person's confirmation. If applied, continue the requested work without another confirmation. Only a pending result requires ending the turn and waiting for the in-app decision. Never claim success without an applied result; report failed or cancelled results honestly. This does not elevate another bot's execution permissions.",
+      "description": "Submit user-requested changes to your own name, title (your job title), description, standing instructions (SOUL.md), working folder (cwd), or your alert and voice toggles (notifications, speakReplies). Keep SOUL.md short — who you are and the rules you never break; put step-by-step procedure into a skill instead. A Chief of Staff may pass for_bot_id (from list_bots) for a requested change to another bot in its section. Read the result: a change to your own routines, skills, profile or model applies immediately, and the person sees it with an Undo; a change for another bot may wait for the person's confirmation. If applied, continue the requested work without another confirmation. Only a pending result requires ending the turn and waiting for the in-app decision. Never claim success without an applied result; report failed or cancelled results honestly. This does not elevate another bot's execution permissions.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2079,6 +2082,8 @@
             "enum": [
               "figma",
               "image",
+              "video",
+              "audio",
               "icon",
               "font",
               "document",
@@ -2244,23 +2249,362 @@
       }
     },
     {
-      "name": "origin_draw",
-      "description": "List an Origin project's Draw canvases, or read one: its element counts, the text on it top to bottom, and its links. Acts on your team's Origin project unless you pass project.",
+      "name": "origin_canvas",
+      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images and their layout, editable with origin_canvas_edit. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_canvas_edit",
+      "description": "Design on an Origin project's canvas: the people on it see each change live. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_page_publish",
+      "description": "Publish a top-level canvas frame as a public web page, or republish it after changes: auto-layout frames reflow on phones, and a leadForm frame files each signup as a Pipeline lead with the slug as its source. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_page_list",
+      "description": "List an Origin project's published pages with their addresses, views and the leads each one collected. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_standup",
+      "description": "What happened in an Origin project in the last 24 hours, as its Chief's standup: PRs waiting for a merge, blocked agents (approvals, failed runs), issues done and moved. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_pulse",
+      "description": "How an Origin project is doing, in numbers over the last 7 or 30 days: its stage (Idea, Build, Launch, Grow), issues done and opened, cycle time, PRs waiting, pages live and views, posts published and engagement, leads by stage, conversion, pipeline value, unread replies, agent runs and spend against budget, and what needs a person. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_studio_generate",
+      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_studio_list",
+      "description": "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Broadcast. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_studio_save_asset",
+      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index), and with broadcast true also pick it for Broadcast posts. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_broadcast_draft",
+      "description": "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_broadcast_list",
+      "description": "List an Origin project's Broadcast posts: id, status, approval, schedule, channels with their published links or errors, media and text. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_broadcast_schedule",
+      "description": "Schedule an approved Broadcast post to publish at a time, or now; the person's app publishes it with their channel keys. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_pipeline_list_leads",
+      "description": "List an Origin project's sales pipeline: totals per stage and its leads (id, stage, contact details, value, owner, next step), filtered by stage or a search; or read one lead with its notes and timeline (emails, texts, calls with summaries) with lead_id. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_pipeline_upsert_lead",
+      "description": "Add a lead you researched to an Origin project's pipeline, or change one with lead_id. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_pipeline_log_activity",
+      "description": "Record something that already happened with a lead on its Pipeline timeline: a note, or an email, text or call that took place outside Origin. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_pipeline_sequence",
+      "description": "Start, pause, resume or stop a lead's follow-up sequence in an Origin project's Pipeline. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_pipeline_contact",
+      "description": "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_campaign_create",
+      "description": "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_campaign_get",
+      "description": "List an Origin project's campaigns, or read one with campaign: its brief, posts with per-channel status, links and likes or reposts, Studio generations, attributed leads by stage, and issues. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_campaign_link",
+      "description": "Attach a Broadcast post, Studio generation, Pipeline lead or Origin issue to a campaign, or detach it with remove. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_doc_list",
+      "description": "List an Origin project's Docs, its Brief first, with who saved each last. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_doc_get",
+      "description": "Read an Origin project document as markdown. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_doc_write",
+      "description": "Write an Origin project document in markdown: doc replaces one's content (read it first and keep people's edits), no doc creates one with title. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_milestone_list",
+      "description": "List an Origin project's milestones with target day, progress and issues. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_milestone_set",
+      "description": "Create, change or delete an Origin project milestone such as MVP or Launch; issues puts issues in it, remove_issues takes them out. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_brand_get",
+      "description": "Read an Origin project's brand kit: name, tagline, voice (adjectives, do and don't), colours with contrast checks, heading and body fonts, logo and icon assets and imagery style. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_brand_update",
+      "description": "Draft or change an Origin project's brand kit; fields you leave out keep their value. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_ship_status",
+      "description": "Read where an Origin project ships: its deploy targets (Vercel, Netlify, Cloudflare Pages, GitHub Actions) with recent deployments, their state, address, commit, which serves production now and what can be redeployed, promoted or rolled back, plus its releases. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_ship_deploy",
+      "description": "Deploy an Origin project's target from its production branch (default), or redeploy, promote or roll back to a deployment_id from origin_ship_status. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_release_draft",
+      "description": "Draft an Origin project's next release from the pull requests merged since its last tag, or update the open draft: the version is suggested from them and the notes are written for users unless you pass notes. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "find_tool",
+      "description": "The full description and exact input schema of a tool your list shows in short (its description says to ask find_tool). Give the tool's name, or say what you want to do in a few words; then call that tool directly by its own name.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "canvas": {
+          "query": {
             "type": "string",
-            "maxLength": 120,
-            "description": "Canvas name or id; omit to list them."
-          },
-          "project": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Name or id from origin_list_projects."
+            "description": "What you want to do, in a few words, or a tool's exact name."
           }
-        }
+        },
+        "required": [
+          "query"
+        ]
       },
       "annotations": {
         "readOnlyHint": true,

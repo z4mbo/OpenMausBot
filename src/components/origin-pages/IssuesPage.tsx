@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type PointerEvent, type ReactNode, type RefObject } from "react";
 import {
   Bot as BotIcon, CalendarDays, CheckCircle2, ChevronRight, Circle, CircleDashed, Columns3, ExternalLink, GitBranch, GitPullRequest, GripVertical,
-  List, Loader2, MessageCircle, MoreHorizontal, Plus, Search, SignalMedium, Trash2, UserRound,
+  List, Loader2, MessageCircle, MoreHorizontal, Plus, Rocket, Search, SignalMedium, Trash2, UserRound,
 } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { ApiError } from "@/state/store";
@@ -22,7 +22,7 @@ import {
   priorityOptions, statusOptions,
   type CreatedIssue, type IssueAgent,
 } from "./issue-fields";
-import { orderForMove, stepTarget, useFlip, withPendingMoves, type PendingMove } from "./issue-order";
+import { orderForMove, settlePendingMove, stepTarget, useFlip, withPendingMoves, type PendingMove } from "./issue-order";
 import { NewIssueComposer } from "./NewIssueComposer";
 import { CompleteIssueDialog, completesThroughPullRequest, type IssueImplementer } from "./CompleteIssueDialog";
 import { originGitHub } from "@/lib/origin-github";
@@ -30,6 +30,8 @@ import { isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-column
 import { PersonAvatar } from "./PersonAvatar";
 import { useCardDrag, type CardDrag, type DropTarget } from "./use-card-drag";
 import { openIssueColumns } from "./issue-columns";
+import { MilestoneChip, MilestoneStrip, useMilestones } from "../origin-docs/milestones";
+import { useMilestoneFilter } from "@/lib/origin-milestone-filter";
 
 /** What the Issues page hands to `onAssignToAgent`. */
 export type AssignableIssue = {
@@ -56,6 +58,8 @@ export type IssuesPageProps = OriginPageProps & {
   /** Hands an issue to an agent; without `agentId` the host asks which one. */
   onAssignToAgent?(issue: AssignableIssue, agentId?: string): void;
   chief?: IssueChief;
+  /** Starts Launchpad for this project; offered while it has no issues. */
+  onLaunch?(): void;
 };
 
 function dueInfo(value?: string): { label: string; tone: string } | null {
@@ -84,10 +88,10 @@ export function createdToAssignable(issue: CreatedIssue, projectName: string): A
   };
 }
 
-export function IssuesPage({ onAssignToAgent, agents, chief, ...props }: IssuesPageProps) {
+export function IssuesPage({ onAssignToAgent, agents, chief, onLaunch, ...props }: IssuesPageProps) {
   return (
     <CloudGate {...props} label="Issues">
-      {({ project, projectId, canEdit }) => <IssuesBoard project={project} projectId={projectId} canEdit={canEdit} agents={agents ?? []} onAssignToAgent={onAssignToAgent} chief={chief} />}
+      {({ project, projectId, canEdit }) => <IssuesBoard project={project} projectId={projectId} canEdit={canEdit} agents={agents ?? []} onAssignToAgent={onAssignToAgent} chief={chief} onLaunch={onLaunch} />}
     </CloudGate>
   );
 }
@@ -124,10 +128,12 @@ async function deleteIssue(projectId: string, task: CloudTask): Promise<string> 
   }
 }
 
-function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chief }: {
-  project: CloudProject; projectId: string; canEdit: boolean; agents: readonly IssueAgent[]; onAssignToAgent?(issue: AssignableIssue, agentId?: string): void; chief?: IssueChief;
+function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chief, onLaunch }: {
+  project: CloudProject; projectId: string; canEdit: boolean; agents: readonly IssueAgent[]; onAssignToAgent?(issue: AssignableIssue, agentId?: string): void; chief?: IssueChief; onLaunch?(): void;
 }) {
   const board = useCloudQuery<CloudBoard>("tasks:board", { projectId });
+  const milestones = useMilestones(projectId);
+  const [chosenMilestone, setMilestone] = useMilestoneFilter(projectId);
   const people = useCloudQuery<CloudPerson[]>("members:people", { projectId });
   const [view, setView] = useState<"active" | "completed">("active");
   const [layout, setLayout] = useState<"board" | "list">("board");
@@ -194,7 +200,10 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   const draftIds = new Set(columns.filter(isDraftColumn).map((column) => column._id));
   const laneOf = (task: CloudTask) => (visibleIds.has(task.columnId) ? task.columnId : fallback?._id);
   const needle = query.trim().toLowerCase();
-  const matches = (task: CloudTask) => !needle || `${taskKey(task._id)} ${task.title} ${task.description ?? ""} ${task.assignedToName ?? ""}`.toLowerCase().includes(needle);
+  const milestone = milestones?.milestones.some((row) => row._id === chosenMilestone) ? chosenMilestone : null;
+  const matches = (task: CloudTask) => (!milestone || task.milestoneId === milestone)
+    && (!needle || `${taskKey(task._id)} ${task.title} ${task.description ?? ""} ${task.assignedToName ?? ""}`.toLowerCase().includes(needle));
+  const launchable = Boolean(onLaunch) && canEdit && !board.tasks.length;
   const active = tasks.filter((task) => !task.done && matches(task));
   const completed = tasks.filter((task) => task.done && matches(task)).sort((a, b) => b.updatedAt - a.updatedAt);
   const assignees = new Map([...(board.assignees ?? []), ...(people ?? [])].map((person) => [person.email, person]));
@@ -202,15 +211,15 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
 
   const report = (error: unknown) => setNotice(errorText(error, "Something went wrong"));
   const move = (taskId: string, columnId: string, beforeTaskId?: string) => {
-    const order = orderForMove(tasks, taskId, columnId, beforeTaskId);
-    setPending((current) => new Map(current).set(taskId, { columnId, order }));
+    const entry: PendingMove = { columnId, order: orderForMove(tasks, taskId, columnId, beforeTaskId) };
+    setPending((current) => new Map(current).set(taskId, entry));
     setMoves((count) => count + 1);
     const task = tasks.find((item) => item._id === taskId);
     const crossesDraft = Boolean(task && draftIds.has(task.columnId) !== draftIds.has(columnId));
     void cloudMutation("tasks:moveTask", { projectId, taskId, columnId, ...(beforeTaskId ? { beforeTaskId } : {}) })
       .then(() => { if (crossesDraft && task?.githubIssueNumber && project.repoUrl) void originGitHub.mirrorIssues(projectId, [taskId]).catch(() => undefined); })
       .catch(report)
-      .finally(() => setPending((current) => { const next = new Map(current); next.delete(taskId); return next; }));
+      .finally(() => setPending((current) => settlePendingMove(current, taskId, entry)));
   };
   const setDone = (task: CloudTask, done: boolean) => {
     if (done && completesThroughPullRequest(project, task)) { setCompleting(task._id); return; }
@@ -253,7 +262,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   const done = board.tasks.filter((task) => task.done).length;
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-hidden motion-safe:animate-[rise_0.24s_cubic-bezier(0.22,1,0.36,1)_backwards]" aria-label="Issues">
+    <section className="flex min-h-0 flex-1 flex-col overflow-hidden motion-safe:animate-[rise_var(--motion-slow)_var(--ease-out)_backwards]" aria-label="Issues">
       <PageHeader title="Issues" count={board.tasks.length ? <ProgressRing done={done} total={board.tasks.length} /> : undefined}>
         <Segmented label="Issue state" value={view} onChange={setView}
           options={[{ value: "active", label: <><Circle size={13} />Active <span className="tabular-nums text-ink-tertiary">{active.length}</span></> }, { value: "completed", label: <><CheckCircle2 size={13} />Done <span className="tabular-nums text-ink-tertiary">{completed.length}</span></> }]} />
@@ -261,13 +270,27 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
           <Segmented label="Layout" value={layout} onChange={setLayout}
             options={[{ value: "board", label: <Columns3 size={14} aria-label="Board view" />, title: "Board" }, { value: "list", label: <List size={14} aria-label="List view" />, title: "List" }]} />
         )}
-        <label className="relative flex min-w-0 flex-1 items-center sm:flex-none">
+        <label className="relative flex min-w-32 flex-1 items-center sm:flex-none">
           <Search size={14} className="pointer-events-none absolute left-2.5 text-ink-tertiary" aria-hidden="true" />
-          <input ref={search} className={cn(inputClass, "h-8 pl-8 sm:w-48")} placeholder="Search issues" aria-label="Search issues" value={query} onChange={(e) => setQuery(e.target.value)}
+          <input ref={search} className={cn(inputClass, "h-8 min-w-0 pl-8 sm:w-48")} placeholder="Search issues" aria-label="Search issues" value={query} onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(event) => { if (event.key === "Escape") { setQuery(""); event.currentTarget.blur(); } }} />
         </label>
         {canEdit && <button type="button" className={primaryButton} onClick={() => setComposer("")} title="New issue (C)"><Plus size={14} />New issue</button>}
       </PageHeader>
+      {(launchable || (milestones && (milestones.milestones.length > 0 || (milestones.canEdit && board.tasks.length > 0)))) && (
+        <GlassHeader>
+          <div className={cn("flex flex-col gap-2", glassHeaderRow)}>
+            {launchable && (
+              <div className={cn(cardClass, "flex flex-wrap items-center gap-3 px-3 py-2.5")} data-launchpad-cta>
+                <Rocket size={16} aria-hidden="true" className="shrink-0 text-accent-text" />
+                <span className="min-w-0 flex-1 text-[13px] text-ink-secondary">Start from an idea: the Chief drafts the Brief, milestones and the MVP's issues.</span>
+                <button type="button" className={primaryButton} onClick={onLaunch}><Rocket size={14} />Plan from an idea</button>
+              </div>
+            )}
+            {milestones && !launchable && <MilestoneStrip projectId={projectId} list={milestones} selected={milestone} onSelect={setMilestone} />}
+          </div>
+        </GlassHeader>
+      )}
       {(!canEdit || notice || info) && (
         <GlassHeader>
           <div className={cn("flex flex-col gap-2", glassHeaderRow)}>
@@ -342,7 +365,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
             const draft = draftIds.has(column._id);
             return (
               <div key={column._id} data-column-id={column._id} data-draft={draft || undefined}
-                className={cn("flex w-[min(19rem,85vw)] shrink-0 snap-start flex-col rounded-2xl p-2 transition-[background-color,box-shadow] duration-200",
+                className={cn("flex w-[min(19rem,85vw)] shrink-0 snap-start flex-col rounded-2xl p-2 transition-[background-color,box-shadow] duration-(--motion-slow)",
                   draft ? "border border-dashed border-hairline/70 bg-inset/20" : "bg-inset/50", lifted && (draft ? "bg-inset/40" : "bg-inset/70"), here && "bg-inset/90")}>
                 <div className="flex items-center gap-2 px-2 pb-2 pt-1">
                   <ColumnIcon column={column} size={12} strokeWidth={2.5} />
@@ -420,7 +443,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
 }
 
 function DropGap({ height }: { height: number }) {
-  return <span aria-hidden="true" data-drop-gap className="block rounded-xl border-2 border-dashed border-accent/45 bg-accent/[0.06] motion-safe:animate-[pop-in_0.18s_cubic-bezier(0.22,1,0.36,1)]" style={{ height }} />;
+  return <span aria-hidden="true" data-drop-gap className="block rounded-xl border-2 border-dashed border-accent/45 bg-accent/[0.06] motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)]" style={{ height }} />;
 }
 
 type Assignee = { email: string; name: string; username?: string; avatarUrl?: string | null };
@@ -432,7 +455,7 @@ function DragGhost({ drag, ghost, task, columns, assignee }: {
   return (
     <div ref={ghost} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[60]"
       style={{ width: drag.width, transform: `translate3d(${drag.x}px, ${drag.y}px, 0)` }}>
-      <div className="rotate-[1.5deg] scale-[1.03] rounded-xl motion-safe:animate-[pop-in_0.16s_ease-out]">
+      <div className="rotate-[1.5deg] scale-[1.03] rounded-xl motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)]">
         <TaskCard task={task} columns={columns} canEdit={false} agents={[]} lifted draft={columns.some((column) => column._id === task.columnId && isDraftColumn(column))} assignee={assignee(task)} />
       </div>
     </div>
@@ -473,7 +496,7 @@ export function TaskCard({ task, columns, canEdit, assignee, agents, lifted = fa
         if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onOpen?.(); return; }
         onKeyDown?.(event);
       }}
-      className={cn("group relative cursor-pointer rounded-xl border border-hairline/40 bg-panel p-3 outline-none transition-[border-color,background-color,box-shadow,opacity,transform] duration-150 hover:border-hairline hover:bg-raised/40 focus-visible:ring-2 focus-visible:ring-accent/60",
+      className={cn("group relative cursor-pointer rounded-xl border border-hairline/40 bg-panel p-3 outline-none transition-[border-color,background-color,box-shadow,opacity,transform] duration-(--motion-fast) hover:border-hairline hover:bg-raised/40 focus-visible:ring-2 focus-visible:ring-accent/60",
         canEdit && "cursor-grab select-none active:cursor-grabbing", lifted && "cursor-grabbing border-hairline")}>
       <div className="mb-1.5 flex items-center gap-1.5 text-[11.5px] text-ink-tertiary">
         {canEdit && <GripVertical size={12} className="-ml-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100" aria-hidden="true" />}
@@ -610,6 +633,8 @@ function ColumnEditor({ projectId, column, columns, onClose }: { projectId: stri
   );
 }
 
+const savedAs = (draft: string, stored: string | undefined) => draft.trim() === (stored ?? "");
+
 function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClose, onDelete, onAssign }: {
   project: CloudProject; projectId: string; taskId: string; canEdit: boolean; agents: readonly IssueAgent[]; chief?: IssueChief; onClose(): void; onDelete(task: CloudTask): void; onAssign?(task: CloudTask, agentId?: string): void;
 }) {
@@ -623,8 +648,8 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
   useEffect(() => {
     if (!task) return;
     setEdits((current) => {
-      const title = current.title === task.title ? undefined : current.title;
-      const description = current.description === (task.description ?? "") ? undefined : current.description;
+      const title = current.title !== undefined && savedAs(current.title, task.title) ? undefined : current.title;
+      const description = current.description !== undefined && savedAs(current.description, task.description) ? undefined : current.description;
       return title === current.title && description === current.description ? current : { title, description };
     });
   }, [task?.title, task?.description]);
@@ -643,14 +668,16 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
 
   const columns = details.columns.filter((column) => !isDoneColumn(column));
   const inDraft = (columnId: string) => details.columns.some((column) => column._id === columnId && isDraftColumn(column));
-  const dirty = draft.title !== task.title || draft.description !== (task.description ?? "");
+  const titleChanged = !savedAs(draft.title, task.title);
+  const descriptionChanged = !savedAs(draft.description, task.description);
+  const dirty = titleChanged || descriptionChanged;
   const update = (patch: Record<string, unknown>, fallback: string) => void action.run(() => cloudMutation("tasks:updateTask", { projectId, taskId, ...patch }), fallback);
   const save = () => {
     if (!dirty || !draft.title.trim() || action.busy) return;
     void action.run(() => cloudMutation("tasks:updateTask", {
       projectId, taskId,
-      ...(draft.title !== task.title ? { title: draft.title } : {}),
-      ...(draft.description !== (task.description ?? "") ? { description: draft.description } : {}),
+      ...(titleChanged ? { title: draft.title } : {}),
+      ...(descriptionChanged ? { description: draft.description } : {}),
     }), "Could not save issue");
   };
   const toggleDone = () => (!task.done && completesThroughPullRequest(project, task) ? setCompleting(true) : update({ done: !task.done }, "Could not update issue"));
@@ -679,6 +706,7 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
           <ChipSelect label="Assignee" value={task.assignedToEmail ?? ""} options={memberOptions(details.members)} icon={<UserRound size={14} aria-hidden="true" />} disabled={!canEdit}
             onChange={(assignedToEmail) => update({ assignedToEmail }, "Could not change the assignee")} />
           <DateChip value={task.dueDate ?? ""} disabled={!canEdit} onChange={(dueDate) => { if (dueDate) update({ dueDate }, "Could not change the due date"); }} />
+          <MilestoneChip projectId={projectId} taskId={taskId} milestoneId={task.milestoneId} canEdit={canEdit} onError={action.setError} />
           {onAssign && !task.done && <AgentChip agents={agents} onPick={(agentId) => onAssign(task, agentId)} />}
           <GitHubChips project={project} projectId={projectId} task={task} canEdit={canEdit} draft={inDraft(task.columnId)} />
         </IssueChips>

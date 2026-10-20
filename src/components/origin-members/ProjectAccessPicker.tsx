@@ -46,7 +46,7 @@ export function ProjectAccessPicker({ members, myEmail, value, onChange, disable
           const selected = value.mode === mode.id;
           return (
             <label key={mode.id}
-              className={cn("group relative flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-[border-color,background-color,box-shadow] duration-200",
+              className={cn("group relative flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-[border-color,background-color,box-shadow] duration-(--motion-slow)",
                 selected ? "border-accent/70 bg-accent/[0.07]" : "border-hairline/60 hover:border-hairline hover:bg-raised/40",
                 "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent/60")}>
               <input type="radio" name={name} value={mode.id} aria-label={mode.title} checked={selected} className="sr-only"
@@ -89,7 +89,7 @@ export function ProjectAccessPicker({ members, myEmail, value, onChange, disable
                             <span className="block truncate text-[13px] text-ink">{member.name || member.email}</span>
                             <span className="block truncate text-[11.5px] text-ink-tertiary">{member.email}{member.role === "viewer" ? " · read only" : ""}</span>
                           </span>
-                          <span aria-hidden="true" className={cn("flex size-[18px] shrink-0 items-center justify-center rounded-md border transition-[background-color,border-color,transform] duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-accent/60",
+                          <span aria-hidden="true" className={cn("flex size-[18px] shrink-0 items-center justify-center rounded-md border transition-[background-color,border-color,transform] duration-(--motion-fast) peer-focus-visible:ring-2 peer-focus-visible:ring-accent/60",
                             on ? "scale-100 border-accent bg-accent text-accent-ink" : "border-hairline bg-transparent text-transparent")}>
                             <Check size={12} strokeWidth={3} />
                           </span>

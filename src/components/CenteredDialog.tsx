@@ -2,8 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { reducedMotion } from "./MenuMotion";
 import { ModalFocusScope, useModalDialog } from "@/hooks/use-modal-dialog";
-
-const DISMISS_MS = 120;
+import { MOTION_MS } from "@/lib/motion";
 
 export function useDismiss(onClose: () => void): { closing: boolean; dismiss(): void } {
   const [closing, setClosing] = useState(false);
@@ -15,7 +14,7 @@ export function useDismiss(onClose: () => void): { closing: boolean; dismiss(): 
     if (timer.current) return;
     if (reducedMotion()) { close.current(); return; }
     setClosing(true);
-    timer.current = window.setTimeout(() => close.current(), DISMISS_MS);
+    timer.current = window.setTimeout(() => close.current(), MOTION_MS.exit);
   };
   return { closing, dismiss };
 }

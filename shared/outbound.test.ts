@@ -21,6 +21,8 @@ describe("isOutboundTool", () => {
       "mcp__claude_ai_Gmail__reply",
       "mcp__claude_ai_Gmail__forward",
       "mcp__claude_ai_Slack__slack_send_message",
+      "origin_ship_deploy",
+      "mcp__agents__origin_ship_deploy",
     ]) {
       expect(isOutboundTool(name), name).toBe(true);
     }
@@ -43,12 +45,21 @@ describe("isOutboundTool", () => {
       "mcp__claude_ai_Gmail__search_threads",
       "mcp__claude_ai_Linear__save_issue",
       "mcp__computer__click",
+      "origin_ship_status",
+      "origin_release_draft",
       "Bash",
       "Read",
       "Edit",
     ]) {
       expect(isOutboundTool(name), name).toBe(false);
     }
+  });
+
+  it("reads Origin's Broadcast tools by their act, only under the built-in agents server", () => {
+    for (const name of ["origin_broadcast_list", "mcp__agents__origin_broadcast_draft", "agents__origin_broadcast_schedule", "agents_origin_broadcast_list"]) {
+      expect(isOutboundTool(name), name).toBe(false);
+    }
+    expect(isOutboundTool("mcp__other__origin_broadcast_schedule")).toBe(true);
   });
 });
 

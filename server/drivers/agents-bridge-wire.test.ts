@@ -24,7 +24,7 @@ import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { waitForExit } from "../testing/cleanup.ts";
-import { FIND_TOOL, USE_TOOL, createToolBridge, type BridgeTool } from "./agents-bridge.ts";
+import { FIND_TOOL, TOOL_DEFER_ENV, USE_TOOL, createToolBridge, createToolDeferral, type BridgeTool } from "./agents-bridge.ts";
 import { availableTools, catalogProfileFromEnv } from "./agents-catalog.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -75,26 +75,26 @@ const FULL = "skills+shared+voice+escalations";
  * either: lock a saving in by lowering the number. A Chief's list is longer
  * than another bot's only by the Chief-only names in find_tool's description. */
 const BUDGET_BASELINE: Record<string, number> = {
-  "default": 15658,
-  "voice": 16399,
-  "shared": 15698,
-  "shared+voice": 16439,
-  "skills": 15685,
-  "skills+voice": 16426,
-  "skills+shared": 15725,
-  "skills+shared+voice": 16466,
-  "non-chief": 15491,
-  "voice+non-chief": 16232,
-  "shared+non-chief": 15531,
-  "shared+voice+non-chief": 16272,
-  "skills+non-chief": 15518,
-  "skills+voice+non-chief": 16259,
-  "skills+shared+non-chief": 15558,
-  "skills+shared+voice+non-chief": 16299,
-  "skills+shared+voice+cloud-home": 16464,
-  "skills+shared+voice+non-chief+cloud-home": 16297,
-  "skills+shared+voice+escalations": 16484,
-  "default+legacy-switches": 15658,
+  "default": 18043,
+  "voice": 18784,
+  "shared": 18083,
+  "shared+voice": 18824,
+  "skills": 18070,
+  "skills+voice": 18811,
+  "skills+shared": 18110,
+  "skills+shared+voice": 18851,
+  "non-chief": 17838,
+  "voice+non-chief": 18579,
+  "shared+non-chief": 17878,
+  "shared+voice+non-chief": 18619,
+  "skills+non-chief": 17865,
+  "skills+voice+non-chief": 18606,
+  "skills+shared+non-chief": 17905,
+  "skills+shared+voice+non-chief": 18646,
+  "skills+shared+voice+cloud-home": 18849,
+  "skills+shared+voice+non-chief+cloud-home": 18644,
+  "skills+shared+voice+escalations": 18869,
+  "default+legacy-switches": 18043,
 };
 
 type RpcAnswer = { id: number; result?: { tools?: unknown[]; content?: Array<{ text: string }>; isError?: boolean }; error?: { code: number; message: string } };
@@ -161,6 +161,10 @@ const toolsOf = (wire: string) => (JSON.parse(wire) as { tools: Tool[] }).tools;
 /** The turn's whole catalog as the proxy serializes it with the switch off;
  * agents-catalog-wire.test.ts proves these are the proxy's bytes. */
 const unbridgedWire = (name: string) => JSON.stringify({ tools: availableTools(catalogProfileFromEnv({ OMB_BOT_ID: "bot-golden", ...PROFILES[name]! })) });
+/** The same turn as the proxy lists it with its domain tools in short, which is what the unbridged goldens pin. */
+const shortWire = (name: string) => JSON.stringify({ tools: createToolDeferral(toolsOf(unbridgedWire(name)) as unknown as BridgeTool[]).listed });
+/** The unbridged goldens' one profile with every schema whole. */
+const WHOLE = "skills+shared+voice+escalations+whole-schemas";
 
 const goldenPath = join(GOLDENS, "bridged.tools-list.json");
 const manifestPath = join(GOLDENS, "bridged.profiles.json");
@@ -204,12 +208,13 @@ beforeAll(async () => {
 
 describe("agents proxy tools/list golden with the tool bridge on", () => {
   it("has a bridged twin for every profile the unbridged goldens pin, of exactly that catalog", () => {
-    const unbridged = readJson(join(GOLDENS, "profiles.json")) as Manifest;
+    const { [WHOLE]: whole, ...unbridged } = readJson(join(GOLDENS, "profiles.json")) as Manifest;
     expect(Object.keys(PROFILES)).toEqual(Object.keys(unbridged));
     expect(Object.keys(wires)).toEqual(Object.keys(unbridged));
     for (const [name, pinned] of Object.entries(unbridged)) {
-      expect({ bytes: bytes(unbridgedWire(name)), sha256: sha256(unbridgedWire(name)) }, name).toEqual({ bytes: pinned.bytes, sha256: pinned.sha256 });
+      expect({ bytes: bytes(shortWire(name)), sha256: sha256(shortWire(name)) }, name).toEqual({ bytes: pinned.bytes, sha256: pinned.sha256 });
     }
+    expect({ bytes: bytes(unbridgedWire(FULL)), sha256: sha256(unbridgedWire(FULL)) }).toEqual({ bytes: whole!.bytes, sha256: whole!.sha256 });
   });
 
   it("round-trips through JSON.parse unchanged, so a parsed golden can stand for the bytes", () => {
@@ -263,7 +268,7 @@ describe("agents proxy tools/list golden with the tool bridge on", () => {
   it("keeps the same hot tools whatever the role and features, except the ones a profile does not have", () => {
     const hotOf = (name: string) => toolsOf(wires[name]!).slice(0, -2).map((tool) => tool.name);
     const base = hotOf("default");
-    expect(base).toEqual(["tool_result_read", "list_room_targets", "coordinate_bots", "list_bots", "list_rooms", "select_computer", "attach_file", "post_to_room", "request_credential", "request_sign_in", "fill_login", "memory_update", "origin_team_chat_post"]);
+    expect(base).toEqual(["tool_result_read", "list_room_targets", "coordinate_bots", "list_bots", "list_rooms", "select_computer", "attach_file", "post_to_room", "request_credential", "request_sign_in", "fill_login", "memory_update", "origin_team_chat_post", "origin_page_publish", "origin_ship_deploy"]);
     for (const name of Object.keys(PROFILES)) {
       expect(hotOf(name).filter((tool) => tool !== "send_voice_note"), name).toEqual(base);
       expect(hotOf(name).includes("send_voice_note"), name).toBe(PROFILES[name]!.OMB_VOICE_NOTES === "1");
@@ -296,9 +301,10 @@ describe("agents proxy tools/list golden with the tool bridge on", () => {
 
   it("serves the unbridged goldens unless the switch is exactly 1", async () => {
     const full = JSON.stringify(readJson(join(GOLDENS, "full.tools-list.json")));
-    expect(unbridgedWire(FULL)).toBe(full);
-    const served = await Promise.all(["0", "", "true", "yes", "on"].map((value) => toolsListWire(PROXY_SOURCE, { ...PROFILES[FULL]!, OMB_AGENTS_TOOL_BRIDGE: value })));
-    for (const wire of [...served, await toolsListWire(PROXY_SOURCE, PROFILES[FULL]!)]) expect(wire).toBe(full);
+    expect(shortWire(FULL)).toBe(full);
+    const short = { ...PROFILES[FULL]!, [TOOL_DEFER_ENV]: "1" };
+    const served = await Promise.all(["0", "", "true", "yes", "on"].map((value) => toolsListWire(PROXY_SOURCE, { ...short, OMB_AGENTS_TOOL_BRIDGE: value })));
+    for (const wire of [...served, await toolsListWire(PROXY_SOURCE, short)]) expect(wire).toBe(full);
   }, 60_000);
 });
 

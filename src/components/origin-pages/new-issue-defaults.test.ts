@@ -113,3 +113,15 @@ describe("new issue destinations", () => {
     expect(fixture.mutations).toHaveBeenCalledWith("feedback:convert", expect.not.objectContaining({ columnId: expect.anything() }));
   });
 });
+
+describe("new issue draft", () => {
+  it("keeps the title and description when the person picks another project", () => {
+    flushSync(() => root.render(createElement(NewIssueComposer, { projects: [{ id: "project", name: "Fixture" }, { id: "other", name: "Other" }], initialProjectId: "project", myEmail: person.email, onClose() {}, onCreated() {} })));
+    field(document.querySelector<HTMLTextAreaElement>('[aria-label="Issue title"]')!, "Keep me");
+    field(document.querySelector<HTMLTextAreaElement>('[aria-label="Issue description"]')!, "And me");
+    click(document.querySelector<HTMLButtonElement>('button[title="Change project"]')!);
+    click([...document.querySelectorAll<HTMLButtonElement>('[role="option"]')].find((option) => option.textContent?.includes("Other"))!);
+    expect(document.querySelector<HTMLTextAreaElement>('[aria-label="Issue title"]')!.value).toBe("Keep me");
+    expect(document.querySelector<HTMLTextAreaElement>('[aria-label="Issue description"]')!.value).toBe("And me");
+  });
+});

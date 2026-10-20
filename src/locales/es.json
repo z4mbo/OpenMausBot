@@ -740,7 +740,7 @@
   "task.updated.days": "hace {count} d",
   "task.helperGroup": "Abiertos por bots",
   "onboarding.welcome": "Te damos la bienvenida a {app}",
-  "onboarding.intro": "Bots que hacen trabajo de verdad en su propio equipo. Cuéntanos quién eres y te avisamos cuando salga algo grande.",
+  "onboarding.intro": "Tú, tu equipo y agentes de IA llevan un proyecto de la idea al lanzamiento. Cuéntanos quién eres y te avisamos cuando salga algo grande.",
   "onboarding.name": "Tu nombre",
   "onboarding.continue": "Continuar",
   "onboarding.maybeLater": "Quizá más tarde",

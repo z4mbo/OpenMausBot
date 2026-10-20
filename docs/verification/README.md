@@ -74,6 +74,12 @@ Use only mapped, tested commands:
 - [Sidebar footer containment and keyboard access](sidebar-footer-fit.md)
 - [Sidebar footer icons in one row](sidebar-footer-single-row.md)
 - [Origin product identity, startup and compatibility](origin-branding.md)
+- [Campaigns in Broadcast](origin-campaigns.md)
+- [Ship: deploys, previews and releases](origin-ship.md)
+- [Brand kit across Canvas, Pages and Studio](origin-brand-kit.md)
+- [Launchpad, project Docs and milestones](origin-launchpad.md)
+- [Pulse: the project dashboard and the workspace roll-up](origin-pulse.md)
+- [A Chief runs a launch with a cheap real model](origin-agentic-launch.md)
 - [Draft-first boards and default issue creation](origin-draft-defaults.md)
 - [Issue cards remain visible during rapid dragging](origin-issue-drag.md)
 - [Issue dragging after permission or project changes](origin-issue-drag-permission.md)
@@ -84,6 +90,7 @@ Use only mapped, tested commands:
 - [Origin 0.2.13 failed CI, descriptor compatibility and verified follow-up](origin-ci-followup-034.md)
 - [Origin 0.2.13 published delivery, audit report and upstream recommendations](evidence/origin-delivery-035/final-audit-report.md)
 - [Origin 0.2.14 published delivery, CI retry, screenshots and upstream recommendations](evidence/origin-delivery-038/final-audit-report.md)
+- [Origin 0.2.15 published provider Usage fix, delivery hashes and retained recovery evidence](evidence/origin-delivery-040/final-audit-report.md)
 - [Real isolated backend, two-client invitations, persistence and revocation](evidence/origin-native-039/report.md)
 - [Authentication response ownership and two-tab session races](origin-session-scope.md)
 - [Account, connection and shared-run ownership follow-up](origin-ownership-037.md)
@@ -252,9 +259,10 @@ The [Origin import integrity fixture](origin-import.md) checks complete local
 team creation, link-write recovery, lost responses and concurrent retries against
 synthetic cloud access responses in a disposable fake-engine server.
 
-The [Origin drawing fixture](origin-draw.md) checks actual Excalidraw edits,
-failed-save navigation and reload recovery, account scope, project canvas creation,
-read-only controls and mobile layout against a synthetic cloud adapter.
+The [Origin Canvas fixture](origin-draw.md) checks drawing, editing, layers, the
+inspector, export, agent-built sections, converted Excalidraw drawings, project
+canvas management, read-only controls and mobile layout against a synthetic cloud
+adapter.
 
 The [mobile generated-image checks](mobile-generated-images.md) cover native image
 attachments and message-scoped download authorization using isolated fixtures.
@@ -330,7 +338,9 @@ Origin's inspection and delivery records:
 - [Public invitations and central email](origin-invitations.md)
 - [Core Settings and onboarding](origin-core.md)
 - [Member call lifecycle and audio recovery](origin-calls.md)
-- [Drawing recovery and canvas controls](origin-draw.md)
+- [Canvas design editing and agent sections](origin-draw.md)
+- [Published pages and lead forms from Canvas](origin-published-pages.md)
+- [Pipeline replies, sequences and lead scores](origin-pipeline-v2.md)
 - [Storage admission security investigation](origin-storage-admission.md)
 - [Upstream fit review and paired appearance](origin-upstream-review.md)
 - [Thirty additional upstream source-fit decisions](origin-upstream-fit-034.md)

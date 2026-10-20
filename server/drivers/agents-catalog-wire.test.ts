@@ -10,7 +10,9 @@ import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { waitForExit } from "../testing/cleanup.ts";
+import { TOOL_DEFER_ENV, createToolDeferral, type BridgeTool } from "./agents-bridge.ts";
 import { availableTools, catalogProfileFromEnv } from "./agents-catalog.ts";
+import { isDeferredTool } from "./agents-tool-domains.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PROXY_SOURCE = join(HERE, "agents-proxy.ts");
@@ -38,6 +40,7 @@ function profiles(): Record<string, Profile> {
               OMB_SHARED_COMPUTERS_ENABLED: flag(shared),
               OMB_VOICE_NOTES: flag(voice),
               OMB_CHIEF_OF_STAFF: flag(chief),
+              [TOOL_DEFER_ENV]: "1",
             },
           };
         }
@@ -51,39 +54,43 @@ function profiles(): Record<string, Profile> {
   all["default+legacy-switches"] = {
     env: { ...all.default!.env, OMB_ROOM_TURN: "1", OMB_OWN_THREAD_CREATION: "1", OMB_EXTERNAL_RUNTIME: "1" },
   };
+  all[WHOLE] = { env: { ...all[FULL]!.env, [TOOL_DEFER_ENV]: "0" } };
   return all;
 }
 
+/** The fullest profile, checked in whole; every other one is pinned by tool names, bytes and sha256. */
+const FULL = "skills+shared+voice+escalations";
+/** The fullest profile as a bot with a tool selection gets it: every domain tool's schema whole. */
+const WHOLE = `${FULL}+whole-schemas`;
 const PROFILES = profiles();
-const CHIEF_ONLY_TOOLS = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr"];
+const CHIEF_ONLY_TOOLS = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr", "origin_standup", "origin_release_draft"];
 const CHIEF_TARGET_TOOLS = ["propose_profile", "propose_model"];
 const CHIEF_PROFILE_TARGET = " A Chief of Staff may pass for_bot_id (from list_bots) for a requested change to another bot in its section.";
 const TEAMWORK_TOOLS = ["list_room_targets", "coordinate_bots", "assignment_status", "list_bots", "list_rooms", "list_threads", "close_thread", "start_thread", "post_to_room"];
-/** The fullest profile, checked in whole; every other one is pinned by tool names, bytes and sha256. */
-const FULL = "skills+shared+voice+escalations";
 
 /** Bytes when the budget was last set; a profile may move at most 2% either way (lower it to lock in a win). */
 const BUDGET_BASELINE: Record<string, number> = {
-  "default": 68501,
-  "voice": 69242,
-  "shared": 70246,
-  "shared+voice": 70987,
-  "skills": 71400,
-  "skills+voice": 72141,
-  "skills+shared": 73145,
-  "skills+shared+voice": 73886,
-  "non-chief": 56262,
-  "voice+non-chief": 57003,
-  "shared+non-chief": 58007,
-  "shared+voice+non-chief": 58748,
-  "skills+non-chief": 59161,
-  "skills+voice+non-chief": 59902,
-  "skills+shared+non-chief": 60906,
-  "skills+shared+voice+non-chief": 61647,
-  "skills+shared+voice+cloud-home": 72941,
-  "skills+shared+voice+non-chief+cloud-home": 60702,
-  "default+legacy-switches": 68501,
-  "skills+shared+voice+escalations": 74746,
+  "default": 80103,
+  "voice": 80844,
+  "shared": 81848,
+  "shared+voice": 82589,
+  "skills": 83002,
+  "skills+voice": 83743,
+  "skills+shared": 84747,
+  "skills+shared+voice": 85488,
+  "non-chief": 66244,
+  "voice+non-chief": 66985,
+  "shared+non-chief": 67989,
+  "shared+voice+non-chief": 69609,
+  "skills+non-chief": 70022,
+  "skills+voice+non-chief": 70763,
+  "skills+shared+non-chief": 71767,
+  "skills+shared+voice+non-chief": 72508,
+  "skills+shared+voice+cloud-home": 84543,
+  "skills+shared+voice+non-chief+cloud-home": 71563,
+  "skills+shared+voice+escalations": 86348,
+  "default+legacy-switches": 80103,
+  "skills+shared+voice+escalations+whole-schemas": 104123,
 };
 
 const RPC_PREFIX = '{"jsonrpc":"2.0","id":1,"result":';
@@ -129,6 +136,7 @@ type Tool = { name: string };
 const toolsOf = (wire: string) => (JSON.parse(wire) as { tools: Tool[] }).tools;
 
 const goldenPath = join(GOLDENS, "full.tools-list.json");
+const wholeGoldenPath = join(GOLDENS, "whole.tools-list.json");
 const manifestPath = join(GOLDENS, "profiles.json");
 // Pretty-printed for readable diffs and compared after JSON.parse, so a CRLF checkout cannot fail them.
 const readJson = (path: string): unknown => JSON.parse(readFileSync(path, "utf8"));
@@ -149,6 +157,7 @@ beforeAll(async () => {
   wires = await wireForEveryProfile(PROXY_SOURCE);
   if (UPDATE) {
     writeJson(goldenPath, JSON.parse(wires[FULL]!));
+    writeJson(wholeGoldenPath, JSON.parse(wires[WHOLE]!));
     writeJson(manifestPath, manifestOf(wires));
   }
 }, 120_000);
@@ -165,6 +174,35 @@ describe("agents proxy tools/list golden", () => {
     expect(wire).toBe(JSON.stringify(golden));
   });
 
+  it("the fullest profile with every schema whole is byte-identical to its golden", () => {
+    const golden = readJson(wholeGoldenPath);
+    expect(JSON.parse(wires[WHOLE]!)).toEqual(golden);
+    expect(wires[WHOLE]).toBe(JSON.stringify(golden));
+  });
+
+  it("lists every domain tool in short, with find_tool, and every other tool exactly as a whole listing does", () => {
+    type ListedTool = Tool & { description: string; inputSchema: unknown; annotations?: unknown };
+    const whole = toolsOf(wires[WHOLE]!) as ListedTool[];
+    const short = toolsOf(wires[FULL]!) as ListedTool[];
+    expect(short.map((tool) => tool.name)).toEqual([...whole.map((tool) => tool.name), "find_tool"]);
+    const deferred = whole.filter((tool) => isDeferredTool(tool.name));
+    expect(deferred.map((tool) => tool.name)).toEqual(expect.arrayContaining(["origin_studio_generate", "origin_broadcast_draft", "origin_pipeline_contact", "origin_canvas_edit"]));
+    for (const [index, tool] of whole.entries()) {
+      const listed = short[index]!;
+      if (!isDeferredTool(tool.name)) {
+        expect(JSON.stringify(listed), tool.name).toBe(JSON.stringify(tool));
+        continue;
+      }
+      expect(listed.inputSchema, tool.name).toEqual({ type: "object", properties: {}, additionalProperties: true });
+      expect(listed.annotations, tool.name).toEqual(tool.annotations);
+      expect(tool.description.startsWith(listed.description.slice(0, listed.description.indexOf(" Before the first call"))), tool.name).toBe(true);
+      expect(JSON.stringify(listed).length, tool.name).toBeLessThan(JSON.stringify(tool).length);
+    }
+    for (const chief of ["create_bot", "origin_assign_issue", "origin_review_pr", "origin_merge_pr", "coordinate_bots", "origin_create_issue"]) {
+      expect(isDeferredTool(chief), chief).toBe(false);
+    }
+  });
+
   it("every profile matches its pinned tool names, byte count and sha256", () => {
     expect(manifestOf(wires)).toEqual(readJson(manifestPath));
   });
@@ -172,6 +210,7 @@ describe("agents proxy tools/list golden", () => {
   it("every profile is a by-name subset of the full golden, tool bytes included", () => {
     const full = new Map(toolsOf(wires[FULL]!).map((tool) => [tool.name, JSON.stringify(tool)]));
     for (const [name, profile] of Object.entries(PROFILES)) {
+      if (name === WHOLE) continue;
       for (const tool of toolsOf(wires[name]!)) {
         if (profile.env.OMB_CLOUD_HOME === "1" && tool.name === "select_computer") continue;
         if (profile.env.OMB_CHIEF_OF_STAFF === "0" && CHIEF_TARGET_TOOLS.includes(tool.name)) continue;
@@ -188,7 +227,7 @@ describe("agents proxy tools/list golden", () => {
       for (const alias of ["delegate_bot", "ask_bot", "send_to_bot", "check_delegation", "wait_delegation"]) expect(tools.has(alias), `${name}: ${alias}`).toBe(false);
       expect(JSON.stringify([...tools.values()])).not.toMatch(/Deprecated alias|works for this release/);
       const coordinate = tools.get("coordinate_bots")!.inputSchema.properties;
-      expect(Object.keys(coordinate)).toEqual(["group_id", "bot_ids", "message", "reason", "rework", "thread", "reply", "consult", "done_when"]);
+      expect(Object.keys(coordinate)).toEqual(["group_id", "bot_ids", "message", "reason", "rework", "thread", "in_my_folder", "reply", "consult", "done_when"]);
       expect(coordinate.thread!.enum).toEqual(["standing", "new"]);
       expect(coordinate.reply!.enum).toEqual(["resume", "none"]);
       expect(Object.keys(tools.get("assignment_status")!.inputSchema.properties)).toEqual(["id", "wait_ms"]);
@@ -208,7 +247,7 @@ describe("agents proxy tools/list golden", () => {
   it("ignores the switches that once picked a catalog profile", () => {
     expect(wires["default+legacy-switches"]).toBe(wires.default);
     const profile = catalogProfileFromEnv({ OMB_BOT_ID: "bot-golden", OMB_CHIEF_OF_STAFF: "1", OMB_ROOM_TURN: "1", OMB_OWN_THREAD_CREATION: "1", OMB_EXTERNAL_RUNTIME: "1" });
-    expect(JSON.stringify({ tools: availableTools(profile) })).toBe(wires.default);
+    expect(JSON.stringify({ tools: createToolDeferral(availableTools(profile) as BridgeTool[]).listed })).toBe(wires.default);
     expect(profile).not.toHaveProperty("coordinating");
     expect(profile).not.toHaveProperty("externalRuntime");
     expect(profile).not.toHaveProperty("ownThreadCreation");
@@ -259,14 +298,15 @@ describe("agents proxy tools/list golden", () => {
 
   it("is what the catalog module computes in-process, so another front end mounts the same tools", () => {
     for (const [name, profile] of Object.entries(PROFILES)) {
-      const tools = availableTools(catalogProfileFromEnv({ OMB_BOT_ID: "bot-golden", ...profile.env }));
+      const whole = availableTools(catalogProfileFromEnv({ OMB_BOT_ID: "bot-golden", ...profile.env }));
+      const tools = profile.env[TOOL_DEFER_ENV] === "1" ? createToolDeferral(whole as BridgeTool[]).listed : whole;
       expect(JSON.stringify({ tools }), name).toBe(wires[name]);
     }
   });
 
   it("writes the routine fields out identically in both routine tools", () => {
     type RoutineTool = Tool & { inputSchema: { properties: Record<string, unknown> & { changes: { properties: Record<string, unknown> } } } };
-    const tools = new Map(toolsOf(wires[FULL]!).map((tool) => [tool.name, tool as RoutineTool]));
+    const tools = new Map(toolsOf(wires[WHOLE]!).map((tool) => [tool.name, tool as RoutineTool]));
     const created = tools.get("propose_routine")!.inputSchema.properties;
     const changed = tools.get("propose_routine_action")!.inputSchema.properties.changes.properties;
     expect(Object.keys(changed).length).toBeGreaterThan(0);

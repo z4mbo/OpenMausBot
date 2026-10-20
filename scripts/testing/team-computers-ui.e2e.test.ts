@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 import { resolveAgentBrowserBinary } from "../../server/browser-engine.ts";
-import { waitForExit } from "../../server/testing/cleanup.ts";
+import { stopUiLauncher } from "./ui-launch-process.ts";
 import { runControlOmb } from "../control-omb.ts";
 import { UI_TOOLS_DIR } from "./control-omb-ui.ts";
 import { fixtureApi } from "./preview-fixture.ts";
@@ -24,7 +24,7 @@ type Computer = { id: string; name: string; section: string | null; state: strin
   try {
     let stdout = "", stderr = "";
     child = spawn(process.execPath, ["--experimental-strip-types", join(ROOT, "scripts/testing/team-computers-preview.ts")], {
-      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe"],
+      cwd: ROOT, env: process.env, stdio: ["ignore", "pipe", "pipe", "ipc"],
     });
     child.stdout!.on("data", (chunk: Buffer) => { stdout += String(chunk); });
     child.stderr!.on("data", (chunk: Buffer) => { stderr += String(chunk); });
@@ -53,13 +53,13 @@ type Computer = { id: string; name: string; section: string | null; state: strin
     const record = async (id: string) => (await computers()).find(computer => computer.id === id);
     const receipts = () => provider("GET", "/__fixture");
     const focused = () => evaluate("document.activeElement?.getAttribute('aria-label') || document.activeElement?.textContent?.trim()");
-    const openMap = async () => { await click("Tools"); await click("Team map"); await expect.poll(snapshot).toContain('region "Team canvas"'); };
+    const openMap = async () => { await click("Team map"); await expect.poll(snapshot).toContain('region "Team canvas"'); };
     await api("PATCH", `/api/bots/${fixture.botId}`, { name: "Ada", section: "Engineering", computer: "off" });
     await api("POST", "/api/sidebar-sections", { name: "Research" });
     await api("POST", "/api/bots", { name: "Ben", section: "Research", modelSelection: { instanceId: "claude", model: "claude-sonnet-5" } });
     const before = (await api("GET", "/api/bots?messages=10")).bots;
     await evaluate("location.reload(); true");
-    await expect.poll(snapshot, { timeout: 15_000 }).toContain("Actions for Ada");
+    await expect.poll(snapshot, { timeout: 15_000 }).toContain('complementary "Bots and navigation"');
     await openMap();
     await click("Computers");
     await expect.poll(snapshot).toContain('complementary "Team computers"');
@@ -155,10 +155,10 @@ type Computer = { id: string; name: string; section: string | null; state: strin
     await expect.poll(snapshot, { timeout: 10_000 }).toContain("Ben's screen");
     await expect.poll(snapshot, { timeout: 20_000, interval: 250 }).toContain("Uses Engineering desktop, the cloud computer this team shares.");
     expect(await snapshot()).not.toContain("Choose Cloud");
-    await click("Open Team map");
+    expect(await evaluate("(() => { const open = [...document.querySelectorAll('button')].filter(button => button.textContent.trim() === 'Open Team map' && button.getClientRects().length > 0); open[0]?.click(); return open.length; })()")).toBeGreaterThan(0);
     expect((await receipts()).calls.filter((call: { method: string; path: string }) => call.method === "POST" && call.path === "/sandboxes")).toHaveLength(1);
     await evaluate("location.reload(); true");
-    await expect.poll(snapshot, { timeout: 15_000 }).toContain("Actions for Ada");
+    await expect.poll(snapshot, { timeout: 15_000 }).toContain('complementary "Bots and navigation"');
     await openMap();
     await expect.poll(snapshot).toContain("Computer for Research team: Engineering desktop");
     await click("Computer for Research team: Engineering desktop");
@@ -198,7 +198,7 @@ type Computer = { id: string; name: string; section: string | null; state: strin
         console.info(JSON.stringify({ evidence: path }));
       }
     } finally {
-      await waitForExit(child, { signal: "SIGINT", graceMs: 30_000 });
+      await stopUiLauncher(child);
       if (info) expect(existsSync(info.dataDir)).toBe(false);
     }
   }

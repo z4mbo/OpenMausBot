@@ -12,6 +12,7 @@ import { resolveSharedModel, type DefaultSelectionContext, type ModelIntent, typ
 import { UNSEEN_MAX_BYTES, UNSEEN_MAX_MESSAGES } from "./delta-context.ts";
 import { defaultCloudLinksFile, readSharedLinks, writeSharedLinks } from "./origin-cloud-sync.ts";
 import { defaultOriginCloudFile, readOriginCloud } from "./origin-cloud.ts";
+import { runChiefHeartbeats } from "./origin-chief-heartbeat.ts";
 import { openOutbox, type Outbox, type QueuedRun } from "./origin-outbox.ts";
 import { createRunLease, type RunLease } from "./origin-run-lease.ts";
 import { clientIdFor, createThreadMirror, type CloudPort } from "./origin-thread-mirror.ts";
@@ -83,6 +84,8 @@ export interface SharedAgentsDeps {
   startQueued(run: QueuedRun, message: Message | undefined): Promise<void>;
   interrupt(botId: string, threadId: string): void;
   redact(text: string): string;
+  /** The cheap helper model's short answer on this member's keys, for the Chief heartbeat note. */
+  quickText?(botId: string, prompt: string): Promise<string>;
   connect?: (url: string, sessionToken: string) => CloudConnection;
   files?: { cloud?: string; links?: string; state?: string; outbox?: string; bots?: string };
 }
@@ -93,6 +96,8 @@ const TICK_MS = 15_000;
 const MENTIONS_PER_MESSAGE = 10;
 const MENTION_REQUESTS_PER_MINUTE = 20;
 const HOST_EVERY_MS = 10 * 60_000;
+const HEARTBEAT_EVERY_MS = 5 * 60_000;
+const BUDGET_REFUSAL = /Budget reached: [^\n]*/;
 const ID = /^[a-z0-9]{1,64}$/;
 
 const refusal = (status: number, error: string, code?: string) => Object.assign(new Error(error), { status, ...(code ? { code } : {}) });
@@ -112,6 +117,11 @@ export function remoteBacklogExceedsCaps(messages: readonly Pick<Message, "role"
     bytes += (message.text ?? "").length;
   }
   return count > UNSEEN_MAX_MESSAGES || bytes > UNSEEN_MAX_BYTES;
+}
+
+/** Origin refused the run because the agent or its project spent its monthly budget: the one-line reason, or null. */
+export function budgetRefusalLine(error: unknown): string | null {
+  return BUDGET_REFUSAL.exec(error instanceof Error ? error.message : String(error))?.[0].trim() ?? null;
 }
 
 /** Origin no longer shares this agent or thread (sharing turned off, archived, access removed): the thread goes on locally. */
@@ -155,6 +165,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   let mirror: ReturnType<typeof createThreadMirror> | null = null;
   const watches = new Map<string, () => void>();
   let hostPublishedAt = 0;
+  let heartbeatAt = 0;
   let flushTimer: ReturnType<typeof setTimeout> | null = null;
   let tickTimer: ReturnType<typeof setInterval> | null = null;
   const stops: Array<() => void> = [];
@@ -269,6 +280,10 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
         await deps.startQueued(run, message);
       },
       interrupt: deps.interrupt,
+      usage: (botId, threadId) => {
+        const usage = store.taskByThread(botId, threadId)?.usage;
+        return usage ? { input: usage.input, output: usage.output, costUsd: usage.costUsd } : null;
+      },
       abandoned: (run) => {
         const message = store.messagesFor(run.threadId).find((candidate) => candidate.id === run.messageId);
         if (message?.queued) store.patchMessage(run.threadId, message.id, { queued: undefined, queueId: undefined });
@@ -295,11 +310,22 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     }
   };
 
+  const heartbeat = async () => {
+    if (!connection || Date.now() - heartbeatAt < HEARTBEAT_EVERY_MS) return;
+    heartbeatAt = Date.now();
+    const cloud = connection.cloud;
+    await runChiefHeartbeats({
+      cloud, quickText: deps.quickText, log: (line) => console.warn(line),
+      agents: () => sharedBots().map((bot) => ({ teamId: bot.shared!.teamId, agentId: bot.shared!.agentId, botId: bot.id })),
+    });
+  };
+
   const tick = async () => {
     await ensureConnection().catch(() => undefined);
     syncWatches();
     await lease?.tick().catch(() => undefined);
     await publishHost().catch(() => undefined);
+    await heartbeat().catch(() => undefined);
     schedule();
   };
 
@@ -339,6 +365,8 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
         engineLabel: (task.modelSelection ?? bot.modelSelection).model || undefined,
       });
     } catch (error) {
+      const overBudget = budgetRefusalLine(error);
+      if (overBudget) throw refusal(402, overBudget, "budget_exceeded");
       if (!sharingWithdrawn(error)) throw error;
       unbindThread(bot.id, input.threadId);
       return null;
@@ -526,5 +554,3 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     tick,
   };
 }
-
-export type SharedAgents = ReturnType<typeof createSharedAgents>;

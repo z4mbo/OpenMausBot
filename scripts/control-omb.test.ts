@@ -9,6 +9,13 @@ import { verificationServerEnvironment } from "./control-omb.ts";
 
 const childEnv = (parentEnv: NodeJS.ProcessEnv) => verificationServerEnvironment(parentEnv, join(tmpdir(), "omb-fixture-env"), 9100);
 
+describe("a fixture driven from a real browser", () => {
+  it("trusts this machine's browsers as `pnpm dev` does, unless the caller tests the sign-in", () => {
+    expect(childEnv({}).OMB_DEV_TRUST_LOCAL_BROWSER).toBe("1");
+    expect(childEnv({ OMB_DEV_TRUST_LOCAL_BROWSER: "0" })).not.toHaveProperty("OMB_DEV_TRUST_LOCAL_BROWSER");
+  });
+});
+
 describe("the fixture's fake engine knobs", () => {
   it("lets the Claude fake's knobs and the Codex fake's background-call knobs cross, and nothing else", () => {
     const env = childEnv({
@@ -36,6 +43,20 @@ describe("the fixture's Live call environment", () => {
       expect(env, url).not.toHaveProperty("OMB_OPENAI_LIVE_KEY");
     }
     expect(childEnv({ OMB_OPENAI_LIVE_KEY: "sk-real" })).not.toHaveProperty("OMB_OPENAI_LIVE_KEY");
+  });
+
+  it("passes only a loopback fake Pipeline provider through", () => {
+    expect(childEnv({ OMB_PIPELINE_PROVIDER_URL: "http://127.0.0.1:4200" }).OMB_PIPELINE_PROVIDER_URL).toBe("http://127.0.0.1:4200");
+    for (const url of ["https://api.brevo.com", "http://localhost:4200", "http://127.0.0.1:4200/v3"]) {
+      expect(childEnv({ OMB_PIPELINE_PROVIDER_URL: url }), url).not.toHaveProperty("OMB_PIPELINE_PROVIDER_URL");
+    }
+  });
+
+  it("passes only a loopback fake Ship provider through", () => {
+    expect(childEnv({ OMB_SHIP_PROVIDER_URL: "http://127.0.0.1:4300" }).OMB_SHIP_PROVIDER_URL).toBe("http://127.0.0.1:4300");
+    for (const url of ["https://api.vercel.com", "http://localhost:4300", "http://127.0.0.1:4300/vercel"]) {
+      expect(childEnv({ OMB_SHIP_PROVIDER_URL: url }), url).not.toHaveProperty("OMB_SHIP_PROVIDER_URL");
+    }
   });
 
 });

@@ -21,6 +21,7 @@ import {
 import type { ProjectArchiveControl } from "./Sidebar";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { openBot } from "@/state/thread-navigation";
+import { handOff } from "@/lib/origin-handoff";
 import { useStore, type Bot } from "@/state/store";
 
 const AVATAR_PX = 18;
@@ -134,10 +135,7 @@ function NewIssueDialog({ teamId, projectId }: { teamId: string | null; projectI
         closeNewIssue();
         const agent = issue.agentId ? teamFor(cloudId).find((candidate) => candidate.id === issue.agentId) : undefined;
         if (agent) {
-          dispatch({ type: "send", botId: agent.id, text: issueBrief(createdToAssignable(issue, rows?.find((row) => row._id === cloudId)?.name ?? "")) });
-          if (agent.chiefOfStaff) setChiefSectionOf(agent.id, "chat");
-          openOriginPage(null);
-          openBot(dispatch, agent, showThreads);
+          handOff(dispatch, agent, issueBrief(createdToAssignable(issue, rows?.find((row) => row._id === cloudId)?.name ?? "")), showThreads);
           return;
         }
         const chief = chiefFor(cloudId);

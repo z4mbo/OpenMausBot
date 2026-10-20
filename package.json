@@ -1,7 +1,7 @@
 {
   "name": "openmausbot",
   "private": true,
-  "version": "0.2.15",
+  "version": "0.5.0",
   "description": "Origin: projects, people and local AI agents in one desktop workspace.",
   "homepage": "https://origin.imbored.fun",
   "repository": {
@@ -35,7 +35,7 @@
     "companion": "node --experimental-strip-types companion/src/index.ts",
     "omb": "node --experimental-strip-types server/openmausbot.ts",
     "pair": "node --experimental-strip-types server/openmausbot.ts pair",
-    "dev:server": "node --experimental-strip-types server/index.ts",
+    "dev:server": "node --experimental-strip-types server/dev-server.ts",
     "mcp": "node --experimental-strip-types scripts/mcp-server.ts",
     "control:omb": "node --experimental-strip-types scripts/control-omb.ts",
     "eval": "node --experimental-strip-types evals/runners/run-evals.ts",
@@ -100,7 +100,6 @@
     "@codemirror/language": "6.13.1",
     "@codemirror/state": "6.7.6",
     "@duckdb/node-api": "1.5.6-r.1",
-    "@excalidraw/excalidraw": "0.18.1",
     "@hpke/core": "1.9.0",
     "@lezer/highlight": "1.2.5",
     "@muse-code/sdk": "1.4.6",

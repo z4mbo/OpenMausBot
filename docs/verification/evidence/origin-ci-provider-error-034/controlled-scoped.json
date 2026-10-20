@@ -1,7 +1,0 @@
-{
-  "scoped": true,
-  "completions": 1,
-  "mcpStarted": false,
-  "mcpPid": null,
-  "runtimeError": "upstream HTTP 429: Rate limit reached for fake-model: 30 requests per minute"
-}
