@@ -354,49 +354,6 @@
       }
     },
     {
-      "name": "origin_page_publish",
-      "description": "Publish a top-level canvas frame as a public web page, or republish it after changes: auto-layout frames reflow on phones, and a leadForm frame files each signup as a Pipeline lead with the slug as its source. Returns the page's address. Acts on your team's Origin project unless you pass project.",
-      "inputSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "canvas": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Canvas name or id; optional when the project has one."
-          },
-          "frame": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "The frame's id or name."
-          },
-          "slug": {
-            "type": "string",
-            "maxLength": 48,
-            "description": "The page's address, like waitlist. Default: from the title."
-          },
-          "title": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Browser and link-preview title. Default: the frame's name."
-          },
-          "description": {
-            "type": "string",
-            "maxLength": 300,
-            "description": "Search and link-preview summary. Default: the page's first paragraph."
-          },
-          "project": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Name or id from origin_list_projects."
-          }
-        },
-        "required": [
-          "frame"
-        ]
-      }
-    },
-    {
       "name": "origin_ship_deploy",
       "description": "Deploy an Origin project's target from its production branch (default), or redeploy, promote or roll back to a deployment_id from origin_ship_status. Chief only; the person approves each call. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
@@ -435,7 +392,7 @@
     },
     {
       "name": "find_tool",
-      "description": "Find an Origin tool that is not in your tool list. Say what you want to do in a few words, or give the tool's name. Each match comes back with its description and exact input schema; run one with use_tool. A tool in your tool list is called directly, not found here. Tools reached this way: list_shared_computers, shared_computer, assignment_status, raise_escalation, list_threads, close_thread, start_thread, vm_exec, show_widget, update_widget, create_bot, list_team_setup, propose_team_setup, propose_bot_deletion, create_room, manage_room, retry_thread, memory_log, session_search, session_read, list_routines, propose_routine, propose_routine_action, propose_profile, propose_model, propose_team_memory, skills_list, skill_manage, add_mcp_server, origin_list_projects, origin_list_issues, origin_get_issue, origin_create_issue, origin_update_issue, origin_comment_issue, origin_assign_issue, origin_complete_issue, origin_review_pr, origin_merge_pr, origin_list_assets, origin_add_asset, origin_vault_list, origin_repo_status, origin_team_chat, origin_feedback, origin_canvas, origin_canvas_edit, origin_canvas_screenshot, origin_canvas_comment, origin_design_submit, origin_page_list, origin_standup, origin_pulse, origin_studio_generate, origin_studio_list, origin_studio_save_asset, origin_studio_workflow_list, origin_studio_workflow_run, origin_studio_presets, origin_studio_library, origin_broadcast_draft, origin_broadcast_list, origin_broadcast_schedule, origin_pipeline_list_leads, origin_pipeline_upsert_lead, origin_pipeline_log_activity, origin_pipeline_sequence, origin_pipeline_contact, origin_pipeline_conversations, origin_pipeline_deal, origin_campaign_create, origin_campaign_get, origin_campaign_link, origin_doc_list, origin_doc_get, origin_doc_write, origin_milestone_list, origin_milestone_set, origin_brand_get, origin_brand_update, origin_ship_status, origin_release_draft.",
+      "description": "Find an Origin tool that is not in your tool list. Say what you want to do in a few words, or give the tool's name. Each match comes back with its description and exact input schema; run one with use_tool. A tool in your tool list is called directly, not found here. Tools reached this way: list_shared_computers, shared_computer, assignment_status, raise_escalation, list_threads, close_thread, start_thread, vm_exec, show_widget, update_widget, create_bot, list_team_setup, propose_team_setup, propose_bot_deletion, create_room, manage_room, retry_thread, memory_log, session_search, session_read, list_routines, propose_routine, propose_routine_action, propose_profile, propose_model, propose_team_memory, skills_list, skill_manage, add_mcp_server, origin_list_projects, origin_list_issues, origin_get_issue, origin_create_issue, origin_update_issue, origin_comment_issue, origin_assign_issue, origin_complete_issue, origin_review_pr, origin_merge_pr, origin_list_assets, origin_add_asset, origin_vault_list, origin_repo_status, origin_team_chat, origin_feedback, origin_canvas, origin_canvas_edit, origin_canvas_screenshot, origin_canvas_comment, origin_design_submit, origin_standup, origin_pulse, origin_studio_generate, origin_studio_list, origin_studio_save_asset, origin_studio_workflow_list, origin_studio_workflow_run, origin_studio_presets, origin_studio_library, origin_broadcast_draft, origin_broadcast_list, origin_broadcast_schedule, origin_pipeline_list_leads, origin_pipeline_upsert_lead, origin_pipeline_log_activity, origin_pipeline_sequence, origin_pipeline_contact, origin_pipeline_conversations, origin_pipeline_deal, origin_campaign_create, origin_campaign_get, origin_campaign_link, origin_doc_list, origin_doc_get, origin_doc_write, origin_milestone_list, origin_milestone_set, origin_brand_get, origin_brand_update, origin_ship_status, origin_release_draft.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,

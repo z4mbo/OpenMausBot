@@ -21,21 +21,21 @@ const TOOLS: { tool: Tool; label: string; key: string; icon: ReactNode; edits: b
 const button = "inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-secondary outline-none transition-[background-color,color,transform] duration-150 hover:bg-raised hover:text-ink active:scale-95 focus-visible:ring-2 focus-visible:ring-accent/60 disabled:pointer-events-none disabled:opacity-35 motion-reduce:transition-none";
 const surface = "rounded-xl border border-hairline/60 bg-menu";
 
-export function CanvasToolbar({ tool, readOnly, narrow, onTool, canUndo, canRedo, onUndo, onRedo, imageMenu, onImageMenu, imagePicker, onUpload, panels, onPanels, inset = 0 }: {
+export function CanvasToolbar({ tool, readOnly, narrow, onTool, canUndo, canRedo, onUndo, onRedo, imageMenu, onImageMenu, imagePicker, onUpload, panels, onPanels, insets = { left: 0, right: 0 } }: {
   tool: Tool; readOnly: boolean; narrow: boolean; onTool(tool: Tool): void;
   canUndo: boolean; canRedo: boolean; onUndo(): void; onRedo(): void;
   imageMenu: boolean; onImageMenu(open: boolean): void;
   imagePicker?: (close: () => void) => ReactNode;
   onUpload(files: File[]): void;
   panels: { layers: boolean; inspector: boolean }; onPanels(panels: { layers: boolean; inspector: boolean }): void;
-  inset?: number;
+  insets?: { left: number; right: number };
 }) {
   const tight = cn(button, narrow && "size-7");
   const file = useRef<HTMLInputElement>(null);
   const menu = useRef<HTMLDivElement>(null);
   usePopoverDismiss(imageMenu, menu, () => onImageMenu(false));
   return (
-    <div className="pointer-events-none absolute left-2 bottom-3 z-30 flex justify-center" style={{ right: 8 + inset }}>
+    <div className="pointer-events-none absolute bottom-3 z-30 flex justify-center transition-[left,right] duration-(--motion-fast)" style={{ left: 8 + insets.left, right: 8 + insets.right }}>
       <div role="toolbar" aria-label="Canvas tools" className={cn(surface, "pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto p-1 [scrollbar-width:none]")}>
         <button type="button" className={cn(tight, panels.layers && "bg-raised text-ink")} aria-label="Layers" aria-pressed={panels.layers} title="Layers" onClick={() => onPanels({ ...panels, layers: !panels.layers })}><Layers size={16} /></button>
         <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-hairline/60" />

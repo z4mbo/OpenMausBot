@@ -25,7 +25,6 @@ describe("built-in agent tool read policy", () => {
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_screenshot",
-      "origin_page_list",
       "origin_pulse",
       "origin_broadcast_list",
       "origin_studio_list",

@@ -127,6 +127,7 @@ function redactBotAuthored<T extends Omit<Message, "id" | "at"> & { at?: number 
   };
   if (out.originIssues) out.originIssues = { ...out.originIssues, heading: redactSecretsInText(out.originIssues.heading), issues: out.originIssues.issues.map((issue) => ({ ...issue, title: redactSecretsInText(issue.title) })) };
   if (out.originStudio) out.originStudio = withStudioCardText(out.originStudio, redactSecretsInText);
+  if (out.originDesign) out.originDesign = { ...out.originDesign, heading: redactSecretsInText(out.originDesign.heading), canvasName: redactSecretsInText(out.originDesign.canvasName), frames: out.originDesign.frames.map((frame) => ({ ...frame, name: redactSecretsInText(frame.name) })) };
   if (out.originPullRequest) out.originPullRequest = {
     ...out.originPullRequest,
     title: redactSecretsInText(out.originPullRequest.title),
