@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only independent redundant native payload copies under /root/origin-release-staging/0.2.15/downloads",
+  "proofCapturedAt": "2026-10-20T04:58:43.482996+00:00",
+  "backupRoot": "Frozen Origin-bugfix worktree",
+  "verification": "All 11 exact payloads matched the retained local artifact and independent public file in full byte count and SHA-256. Local hashes and remote identity/link/hash guards were checked again immediately before unlink. Public hashes were checked again afterward.",
+  "files": [
+    {
+      "name": "Origin-0.2.15-arm64.dmg",
+      "bytes": 317887454,
+      "sha256": "4cf723f32e69da638b2876056bcecc33df501706c6bfc73f1070c1557f7f29c6",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-arm64.dmg",
+        "bytes": 317887454,
+        "sha256": "4cf723f32e69da638b2876056bcecc33df501706c6bfc73f1070c1557f7f29c6",
+        "device": 2049,
+        "inode": 257445,
+        "nlink": 1,
+        "allocatedBytes": 317894656,
+        "mtimeNs": "1792444696033974093",
+        "ctimeNs": "1792444696033974093"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-arm64.dmg",
+        "bytes": 317887454,
+        "sha256": "4cf723f32e69da638b2876056bcecc33df501706c6bfc73f1070c1557f7f29c6",
+        "device": 2049,
+        "inode": 264793,
+        "nlink": 1,
+        "allocatedBytes": 317894656,
+        "mtimeNs": "1792444696033974093",
+        "ctimeNs": "1792444905099838617"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-arm64.dmg"
+    },
+    {
+      "name": "Origin-0.2.15-arm64.dmg.blockmap",
+      "bytes": 332431,
+      "sha256": "36f32addebf6c693aee7ce42c3f0e3bfe9c737761e9d9e5c0e2d88ad0374f8d5",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-arm64.dmg.blockmap",
+        "bytes": 332431,
+        "sha256": "36f32addebf6c693aee7ce42c3f0e3bfe9c737761e9d9e5c0e2d88ad0374f8d5",
+        "device": 2049,
+        "inode": 257446,
+        "nlink": 1,
+        "allocatedBytes": 335872,
+        "mtimeNs": "1792444696206978945",
+        "ctimeNs": "1792444696206978945"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-arm64.dmg.blockmap",
+        "bytes": 332431,
+        "sha256": "36f32addebf6c693aee7ce42c3f0e3bfe9c737761e9d9e5c0e2d88ad0374f8d5",
+        "device": 2049,
+        "inode": 264795,
+        "nlink": 1,
+        "allocatedBytes": 335872,
+        "mtimeNs": "1792444696206978945",
+        "ctimeNs": "1792444905104838757"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-arm64.dmg.blockmap"
+    },
+    {
+      "name": "Origin-0.2.15-arm64.zip",
+      "bytes": 318273079,
+      "sha256": "cec2c553a2d0927f708d7e1197cc2120c3354b2b2755da220b044c592539e632",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-arm64.zip",
+        "bytes": 318273079,
+        "sha256": "cec2c553a2d0927f708d7e1197cc2120c3354b2b2755da220b044c592539e632",
+        "device": 2049,
+        "inode": 257447,
+        "nlink": 1,
+        "allocatedBytes": 318279680,
+        "mtimeNs": "1792444714236484651",
+        "ctimeNs": "1792444714236484651"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-arm64.zip",
+        "bytes": 318273079,
+        "sha256": "cec2c553a2d0927f708d7e1197cc2120c3354b2b2755da220b044c592539e632",
+        "device": 2049,
+        "inode": 272732,
+        "nlink": 1,
+        "allocatedBytes": 318279680,
+        "mtimeNs": "1792444714236484651",
+        "ctimeNs": "1792444906410875397"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-arm64.zip"
+    },
+    {
+      "name": "Origin-0.2.15-arm64.zip.blockmap",
+      "bytes": 330840,
+      "sha256": "a110201e965c450c3e4d666ae3f34b692dc8f2cd0d8c3c5d5a2c131d43e84e0d",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-arm64.zip.blockmap",
+        "bytes": 330840,
+        "sha256": "a110201e965c450c3e4d666ae3f34b692dc8f2cd0d8c3c5d5a2c131d43e84e0d",
+        "device": 2049,
+        "inode": 257448,
+        "nlink": 1,
+        "allocatedBytes": 331776,
+        "mtimeNs": "1792444714409489504",
+        "ctimeNs": "1792444714409489504"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-arm64.zip.blockmap",
+        "bytes": 330840,
+        "sha256": "a110201e965c450c3e4d666ae3f34b692dc8f2cd0d8c3c5d5a2c131d43e84e0d",
+        "device": 2049,
+        "inode": 273204,
+        "nlink": 1,
+        "allocatedBytes": 331776,
+        "mtimeNs": "1792444714409489504",
+        "ctimeNs": "1792444906415875537"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-arm64.zip.blockmap"
+    },
+    {
+      "name": "Origin-0.2.15-setup.exe",
+      "bytes": 269478428,
+      "sha256": "30233e5036ae81304cc84564faeab79734be17c09ac93a50e1086f2b1a41cca8",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-setup.exe",
+        "bytes": 269478428,
+        "sha256": "30233e5036ae81304cc84564faeab79734be17c09ac93a50e1086f2b1a41cca8",
+        "device": 2049,
+        "inode": 257449,
+        "nlink": 1,
+        "allocatedBytes": 269484032,
+        "mtimeNs": "1792444736160099594",
+        "ctimeNs": "1792444736160099594"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-setup.exe",
+        "bytes": 269478428,
+        "sha256": "30233e5036ae81304cc84564faeab79734be17c09ac93a50e1086f2b1a41cca8",
+        "device": 2049,
+        "inode": 273206,
+        "nlink": 1,
+        "allocatedBytes": 269484032,
+        "mtimeNs": "1792444736160099594",
+        "ctimeNs": "1792444907040893071"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/windows/Origin-0.2.15-setup.exe"
+    },
+    {
+      "name": "Origin-0.2.15-setup.exe.blockmap",
+      "bytes": 278198,
+      "sha256": "ada2d5058176753a416f57f6cd9e5e1480bc23c37a4c2383fd2679e0d78f6fde",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-setup.exe.blockmap",
+        "bytes": 278198,
+        "sha256": "ada2d5058176753a416f57f6cd9e5e1480bc23c37a4c2383fd2679e0d78f6fde",
+        "device": 2049,
+        "inode": 257450,
+        "nlink": 1,
+        "allocatedBytes": 278528,
+        "mtimeNs": "1792444736334104474",
+        "ctimeNs": "1792444736334104474"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-setup.exe.blockmap",
+        "bytes": 278198,
+        "sha256": "ada2d5058176753a416f57f6cd9e5e1480bc23c37a4c2383fd2679e0d78f6fde",
+        "device": 2049,
+        "inode": 273208,
+        "nlink": 1,
+        "allocatedBytes": 278528,
+        "mtimeNs": "1792444736334104474",
+        "ctimeNs": "1792444907046893240"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/windows/Origin-0.2.15-setup.exe.blockmap"
+    },
+    {
+      "name": "Origin-0.2.15-windows-x64.zip",
+      "bytes": 370056422,
+      "sha256": "03892721401920a8bb0abdfb3c405f45aad634ff5bad2781c1691ba65a3863d8",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-windows-x64.zip",
+        "bytes": 370056422,
+        "sha256": "03892721401920a8bb0abdfb3c405f45aad634ff5bad2781c1691ba65a3863d8",
+        "device": 2049,
+        "inode": 257453,
+        "nlink": 1,
+        "allocatedBytes": 370061312,
+        "mtimeNs": "1792444766906962038",
+        "ctimeNs": "1792444766906962038"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-windows-x64.zip",
+        "bytes": 370056422,
+        "sha256": "03892721401920a8bb0abdfb3c405f45aad634ff5bad2781c1691ba65a3863d8",
+        "device": 2049,
+        "inode": 273209,
+        "nlink": 1,
+        "allocatedBytes": 370061312,
+        "mtimeNs": "1792444766906962038",
+        "ctimeNs": "1792444908023920649"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/windows/Origin-0.2.15-x64.zip"
+    },
+    {
+      "name": "Origin-0.2.15-x64.dmg",
+      "bytes": 334965101,
+      "sha256": "2c942f6a8daacba76a2ebeedb8bc292a763c3dccffbc38f71a7e876eff173de0",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-x64.dmg",
+        "bytes": 334965101,
+        "sha256": "2c942f6a8daacba76a2ebeedb8bc292a763c3dccffbc38f71a7e876eff173de0",
+        "device": 2049,
+        "inode": 257454,
+        "nlink": 1,
+        "allocatedBytes": 334970880,
+        "mtimeNs": "1792444789348591539",
+        "ctimeNs": "1792444789348591539"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-x64.dmg",
+        "bytes": 334965101,
+        "sha256": "2c942f6a8daacba76a2ebeedb8bc292a763c3dccffbc38f71a7e876eff173de0",
+        "device": 2049,
+        "inode": 273212,
+        "nlink": 1,
+        "allocatedBytes": 334970880,
+        "mtimeNs": "1792444789348591539",
+        "ctimeNs": "1792444908920945814"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-x64.dmg"
+    },
+    {
+      "name": "Origin-0.2.15-x64.dmg.blockmap",
+      "bytes": 350492,
+      "sha256": "a1e2373aaefeb5abb804241ef48fa4c260cd28d668d47f5ae474658f39744544",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-x64.dmg.blockmap",
+        "bytes": 350492,
+        "sha256": "a1e2373aaefeb5abb804241ef48fa4c260cd28d668d47f5ae474658f39744544",
+        "device": 2049,
+        "inode": 257455,
+        "nlink": 1,
+        "allocatedBytes": 352256,
+        "mtimeNs": "1792444789521596392",
+        "ctimeNs": "1792444789521596392"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-x64.dmg.blockmap",
+        "bytes": 350492,
+        "sha256": "a1e2373aaefeb5abb804241ef48fa4c260cd28d668d47f5ae474658f39744544",
+        "device": 2049,
+        "inode": 273215,
+        "nlink": 1,
+        "allocatedBytes": 352256,
+        "mtimeNs": "1792444789521596392",
+        "ctimeNs": "1792444908925945954"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-x64.dmg.blockmap"
+    },
+    {
+      "name": "Origin-0.2.15-x64.zip",
+      "bytes": 335600685,
+      "sha256": "17f161eee7719269370f45021c55f9c1e9bc0dbe7427d0e7b1201d85ba3598c2",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-x64.zip",
+        "bytes": 335600685,
+        "sha256": "17f161eee7719269370f45021c55f9c1e9bc0dbe7427d0e7b1201d85ba3598c2",
+        "device": 2049,
+        "inode": 257456,
+        "nlink": 1,
+        "allocatedBytes": 335605760,
+        "mtimeNs": "1792444810849194656",
+        "ctimeNs": "1792444810849194656"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-x64.zip",
+        "bytes": 335600685,
+        "sha256": "17f161eee7719269370f45021c55f9c1e9bc0dbe7427d0e7b1201d85ba3598c2",
+        "device": 2049,
+        "inode": 273217,
+        "nlink": 1,
+        "allocatedBytes": 335605760,
+        "mtimeNs": "1792444810849194656",
+        "ctimeNs": "1792444909971975299"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-x64.zip"
+    },
+    {
+      "name": "Origin-0.2.15-x64.zip.blockmap",
+      "bytes": 347241,
+      "sha256": "5df6410ee56bfe4b0bccff759310fbbcd9dac1634480aee0f9c421c1e0fbdacd",
+      "private": {
+        "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-x64.zip.blockmap",
+        "bytes": 347241,
+        "sha256": "5df6410ee56bfe4b0bccff759310fbbcd9dac1634480aee0f9c421c1e0fbdacd",
+        "device": 2049,
+        "inode": 264774,
+        "nlink": 1,
+        "allocatedBytes": 348160,
+        "mtimeNs": "1792444811022199509",
+        "ctimeNs": "1792444811022199509"
+      },
+      "public": {
+        "path": "/root/multi-ghost/origin-downloads/Origin-0.2.15-x64.zip.blockmap",
+        "bytes": 347241,
+        "sha256": "5df6410ee56bfe4b0bccff759310fbbcd9dac1634480aee0f9c421c1e0fbdacd",
+        "device": 2049,
+        "inode": 273220,
+        "nlink": 1,
+        "allocatedBytes": 348160,
+        "mtimeNs": "1792444811022199509",
+        "ctimeNs": "1792444909978975495"
+      },
+      "localBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-x64.zip.blockmap"
+    }
+  ],
+  "preserved": [
+    "Every public /root/multi-ghost/origin-downloads entry, including current 0.2.15 payloads, aliases and update feeds",
+    "Every private 0.2.14 rollback entry",
+    "All private 0.2.15 update feeds, checksums, manifests, helpers, receipts and site/configuration files",
+    "All application data, containers and unrelated applications"
+  ],
+  "scripts": {
+    "proofSha256": "6968447b18b55a3c4b3496378982dab4d784cbe610064c4527604d791a7dd629",
+    "cleanupSha256": "b660c74da7197c8cb1a62a5b4c47d75c2a33b42c4d4d9823652ae238bfc373bc"
+  }
+}
