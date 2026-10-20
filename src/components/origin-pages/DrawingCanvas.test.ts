@@ -47,6 +47,27 @@ it("saves a new frame as a Canvas row", async () => {
   expect(JSON.parse(row)).toMatchObject({ format: "canvas", type: "frame", name: "Desktop", width: 1440, height: 1024, version: 1 });
 });
 
+it("keeps toolbar scrolling from panning the canvas or cancelling native scrolling", () => {
+  mount("toolbar-scroll");
+  const tools = button("Rectangle").parentElement!;
+  expect([...tools.querySelectorAll("button[aria-label]")].map(item => item.getAttribute("aria-label")))
+    .toEqual(["Move", "Hand", "Frame", "Rectangle", "Ellipse", "Line", "Arrow", "Text", "Image", "Undo", "Redo"]);
+  expect(tools.contains(button("Layers"))).toBe(false);
+  expect(tools.contains(button("Design panel"))).toBe(false);
+  button("Rectangle").focus();
+  expect(document.activeElement).toBe(button("Rectangle"));
+  const drawing = host.querySelector("[data-canvas-stage] > svg > g")!;
+  const before = drawing.getAttribute("transform");
+  const wheel = new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaX: 96 });
+  flushSync(() => button("Rectangle").dispatchEvent(wheel));
+  expect(wheel.defaultPrevented).toBe(false);
+  expect(drawing.getAttribute("transform")).toBe(before);
+  const outside = new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 48 });
+  flushSync(() => host.querySelector("[data-canvas-stage]")!.dispatchEvent(outside));
+  expect(outside.defaultPrevented).toBe(true);
+  expect(drawing.getAttribute("transform")).not.toBe(before);
+});
+
 it("recovers an in-flight edit after navigating away before its save fails", async () => {
   const save = Promise.withResolvers<null>();
   fixture.mutation.mockImplementation((name: string) => name === "draw:updateElements" ? save.promise : Promise.resolve(null));
