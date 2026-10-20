@@ -3,6 +3,20 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.7.0",
+  date: "2026-10-21",
+  title: "A simpler Origin: create, publish, and see it all in chat",
+  changes: [
+    { title: "A cleaner project bar", body: "Each project now has its agent, Agents, Issues, Chat, Call, Studio and Publish, with Assets, Vault, Repo, Feedback and Settings as icons on the right. Org, Sales, Docs, Ship, Pulse and the phase grouping are gone." },
+    { title: "Studio with Design", body: "Studio has Create, Workflows and Design. Design is the Figma-class canvas on the same black as the header, with floating panels. Presets cover ComfyUI and Higgsfield-style effects such as motion transfer, with preview images, and agents can use every one of them." },
+    { title: "Publish", body: "Broadcast is now Publish: realistic previews for every platform, a month calendar you drag posts around, reels with cover frames and safe zones, several accounts per platform and suggested posting times." },
+    { title: "Answers you can see", body: "When you ask the Chief or an agent, the reply shows real cards: post previews you can approve and schedule, campaigns, Studio results, designs, assets, vault items without their secrets, repository status, feedback you can turn into issues and call notes you can turn into Draft issues." },
+    { title: "Studio library and campaign packs", body: "Save characters, products and styles and reuse them across generations. A campaign pack turns a brief into a hero image, a square post, a 9:16 reel and a voice-over, ready as Publish drafts." },
+    { title: "Connect your stack", body: "Settings has a checklist for GitHub, Studio and your social accounts that checks each key as you add it and shows whether it is yours or shared by the workspace." },
+    { title: "Safer GitHub for the team", body: "Repositories Origin creates get a protected default branch, members' PRs carry their own GitHub name, and access is removed when someone leaves a project." },
+    { title: "Agents' browser on Windows", body: "The agents' browser no longer closes on heavy pages with hundreds of resources." },
+  ],
+}, {
   version: "0.6.0",
   date: "2026-10-20",
   title: "One flow from idea to sale, for the whole team",
