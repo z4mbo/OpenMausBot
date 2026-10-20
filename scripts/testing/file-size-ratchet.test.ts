@@ -18,7 +18,7 @@ const LINES: Record<string, number> = {
   "server/index.ts": 17699,
   "src/state/store.tsx": 3613,
   "electron/main.mjs": 3496,
-  "server/store.ts": 2426,
+  "server/store.ts": 2420,
   "src/components/Sidebar.tsx": 2523,
   "server/drivers/claude.ts": 2166,
   "server/drivers/acp/core.ts": 2009,
@@ -50,7 +50,7 @@ const LINES: Record<string, number> = {
   "src/components/TeamLibraryPanel.tsx": 1120,
   "src/components/AttachmentPreview.tsx": 1044,
   "server/drivers/agents-catalog.ts": 1180,
-  "server/origin-cloud.ts": 1159,
+  "server/origin-cloud.ts": 1156,
   "src/components/origin-pages/CallPage.tsx": 1239,
   "src/components/zap-dots/scene.ts": 1413,
 };

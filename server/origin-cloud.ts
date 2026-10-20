@@ -10,7 +10,6 @@ import { columnNames, findColumn, normalizedTitle } from "./origin-cloud-columns
 import { createOriginCloudSession } from "./origin-cloud-session.ts";
 import { DESIGN_BRIEF, canvasTools, type CanvasToolProject } from "./origin-canvas-tools.ts";
 import { canvasFonts, svgToPng } from "./canvas-raster.ts";
-import { listPages, publishPage } from "./origin-page-tools.ts";
 import { isReadOnlyAgentTool } from "./agent-tool-policy.ts";
 import { DATA_DIR } from "./config.ts";
 import type { MirrorResult } from "./github/sync.ts";
@@ -68,6 +67,7 @@ export interface OriginToolResult extends Pick<StudioToolResult, "studio"> {
   isError?: boolean;
   cards?: OriginIssueCards;
   pullRequest?: OriginPullRequestCard;
+  design?: import("../shared/origin-design.ts").OriginDesignCard;
   handoff?: OriginHandoff;
   reviewer?: OriginReviewRequest;
   /** A picture the model sees with the text, such as a canvas screenshot. */
@@ -973,8 +973,6 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
   },
 
   ...canvasTools((args, ctx: ToolContext) => canvasProject(ctx, args), svgToPng, canvasFonts),
-  async origin_page_publish(args, ctx) { return publishPage(args, await canvasProject(ctx, args)); },
-  async origin_page_list(args, ctx) { return listPages(args, await canvasProject(ctx, args)); },
 
   async origin_broadcast_draft(args, ctx) { return broadcastDraft(args, await broadcastScope(ctx, args)); },
   async origin_broadcast_list(args, ctx) { return broadcastList(args, await broadcastScope(ctx, args)); },
@@ -1090,16 +1088,15 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
         ...(deps.teamChat ? { teamChat: deps.teamChat } : {}), ...(deps.folder ? { folder: deps.folder } : {}), ...(deps.pipeline ? { pipeline: deps.pipeline } : {}),
       }, phase);
       if (!result.isError && !isReadOnlyAgentTool(name)) deps.changed?.();
-      const shown: Pick<Message, "originIssues" | "originPullRequest" | "originStudio">[] = result.isError ? [] : [
-        ...(result.pullRequest ? [{ originPullRequest: result.pullRequest }] : []),
-        ...(result.cards ? [{ originIssues: result.cards }] : []), ...(result.studio ? [{ originStudio: result.studio }] : []),
+      const shown: Pick<Message, "originIssues" | "originPullRequest" | "originStudio" | "originDesign">[] = result.isError ? [] : [
+        ...(result.pullRequest ? [{ originPullRequest: result.pullRequest }] : []), ...(result.cards ? [{ originIssues: result.cards }] : []), ...(result.studio ? [{ originStudio: result.studio }] : []), ...(result.design ? [{ originDesign: result.design }] : []),
       ];
       for (const fields of shown) {
         const card: Omit<Message, "id" | "at"> = { role: "bot", kind: "activity", tool: { name, ok: true }, ...fields };
         if (store.groupByThread(turn.threadId)) card.from = { botId: bot.id, name: bot.name, color: bot.color };
         store.appendMessage(turn.threadId, card);
       }
-      const { cards: _cards, pullRequest: _pullRequest, studio: _studio, ...answer } = result;
+      const { cards: _cards, pullRequest: _pullRequest, studio: _studio, design: _design, ...answer } = result;
       return json(res, 200, answer);
     }
     if (path === "/api/origin/cloud-session" && method === "GET") {

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Keyboard, Megaphone, Sparkles, UserRound, Workflow } from "lucide-react";
+import { Keyboard, Megaphone, PenTool, Sparkles, UserRound, Workflow } from "lucide-react";
 import { api, useStore, type Bot } from "@/state/store";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
+import { useStudioView, type StudioView } from "@/lib/origin-studio-view";
 import { cn } from "@/lib/cn";
 import { CloudGate, EmptyState, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, chipButton, pageClass, type OriginPageProps } from "../origin-pages/ui";
 import { CampaignDialog, CampaignStrip, isCampaignRun } from "./StudioCampaign";
 import { StudioCanvas, type TileAction } from "./StudioCanvas";
 import { STUDIO_MODES, StudioComposer, draftForModel, emptyDraft, type StudioComposerHandle } from "./StudioComposer";
 import { CharacterEditor, StudioLibrary, type CharacterSeed } from "./StudioLibrary";
+import { StudioDesign } from "./StudioDesign";
 import { StudioViewer } from "./StudioViewer";
 import { StudioWorkflows } from "./StudioWorkflows";
 import { PresetStrip } from "./StudioPresets";
@@ -20,10 +22,10 @@ import { STUDIO_ACTIONS, studioModel, type StudioCharacter, type StudioGeneratio
 import type { StudioWorkflowRun } from "../../../shared/studio-workflow";
 
 type Filter = "all" | StudioMediaKind;
-type Tab = "create" | "workflows" | "library";
+type Tab = StudioView;
 
 export function StudioPage({ agent, ...props }: OriginPageProps & { agent: Bot }) {
-  return <CloudGate {...props} label="Studio">{({ projectId, canEdit, isAdmin }) => <Studio projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} chiefId={agent.id} />}</CloudGate>;
+  return <CloudGate {...props} label="Studio">{({ project, projectId, canEdit, isAdmin }) => <Studio projectId={projectId} teamId={project.teamId} canEdit={canEdit} isAdmin={isAdmin} agent={agent} />}</CloudGate>;
 }
 
 /** Whether this app holds a fal key for the project, read again whenever settings close or the window regains focus. */
@@ -65,11 +67,12 @@ function draftFrom(row: StudioGeneration): StudioDraft {
   };
 }
 
-function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; canEdit: boolean; isAdmin: boolean; chiefId: string }) {
+function Studio({ projectId, teamId, canEdit, isAdmin, agent }: { projectId: string; teamId: string | undefined; canEdit: boolean; isAdmin: boolean; agent: Bot }) {
+  const chiefId = agent.id;
   const rows = useCloudQuery<StudioGeneration[]>("studio:list", { projectId });
   const runs = useCloudQuery<StudioWorkflowRun[]>("studioWorkflows:runs", { projectId });
   const falReady = useFalReady(projectId);
-  const [tab, showTab] = useState<Tab>("create");
+  const [tab, showTab] = useStudioView(chiefId);
   const [filter, setFilter] = useState<Filter>("all");
   const [draft, setDraft] = useState<StudioDraft>(() => emptyDraft());
   const [workflow, setWorkflow] = useState<WorkflowDraft | null>(null);
@@ -98,7 +101,7 @@ function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; c
   const setTab = useCallback((next: Tab) => {
     if (next !== "workflows") setWorkflow(null);
     showTab(next);
-  }, []);
+  }, [showTab]);
 
   useEffect(() => {
     if (!focus) return;
@@ -180,7 +183,7 @@ function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; c
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (typing(event) || event.metaKey || event.ctrlKey || event.altKey || document.querySelector("[data-centered-dialog]")) return;
+      if (tab === "design" || typing(event) || event.metaKey || event.ctrlKey || event.altKey || document.querySelector("[data-centered-dialog]")) return;
       const index = ["1", "2", "3", "4"].indexOf(event.key);
       const key = event.key.toLowerCase();
       if (event.key === "/" && tab === "create") { event.preventDefault(); composer.current?.focus(); }
@@ -208,14 +211,21 @@ function Studio({ projectId, canEdit, isAdmin, chiefId }: { projectId: string; c
     showTab("workflows");
   };
 
+  const views = (
+    <Segmented label="Studio view" value={tab} onChange={setTab}
+      options={[
+        { value: "create", label: <><Sparkles size={13} /><span className={cn(tab === "design" && "hidden lg:inline")}>Studio</span></>, title: "Studio" },
+        { value: "workflows", label: <><Workflow size={13} /><span className={cn(tab === "design" && "hidden lg:inline")}>Workflows</span></>, title: "Workflows (W)" },
+        { value: "design", label: <><PenTool size={13} /><span className={cn(tab === "design" && "hidden lg:inline")}>Design</span></>, title: "Design: canvases and components" },
+      ]} />
+  );
+
+  if (tab === "design") return <StudioDesign projectId={projectId} teamId={teamId} canEdit={canEdit} agent={agent} switcher={views} />;
+
   return (
     <section className={cn(pageClass, "pb-0")} aria-label="Studio">
       <PageHeader title="Studio" count={tab === "create" ? rows?.length : undefined}>
-        <Segmented label="Studio view" value={tab} onChange={setTab}
-          options={[
-            { value: "create", label: <><Sparkles size={13} />Studio</>, title: "Studio" },
-            { value: "workflows", label: <><Workflow size={13} />Workflows</>, title: "Workflows (W)" },
-          ]} />
+        {views}
         {tab === "create" && (
           <Segmented label="Show" value={filter} onChange={setFilter}
             options={[{ value: "all", label: "All" }, { value: "image", label: "Images" }, { value: "video", label: "Video" }, { value: "audio", label: "Audio" }]} />

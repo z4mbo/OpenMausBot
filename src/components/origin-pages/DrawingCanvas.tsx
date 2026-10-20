@@ -18,12 +18,10 @@ import { Inspector } from "./canvas/Inspector";
 import { useCanvasBrandFonts } from "./canvas/BrandSection";
 import { IssueChips, type DesignLink } from "./canvas/IssueChips";
 import { LayersPanel } from "./canvas/LayersPanel";
-import { PagesBar } from "./canvas/PagesBar";
 import { Present } from "./canvas/Present";
-import { PublishSection } from "./canvas/PublishSection";
 import { VersionsPanel } from "./canvas/VersionsPanel";
 import { useCanvasScene } from "./canvas/use-canvas-scene";
-import { pageOf, usePagedCanvas, type CanvasPage } from "./canvas/use-paged-canvas";
+import type { CanvasPage } from "./canvas/use-paged-canvas";
 import type { CloudDesign, CloudDesignAsset } from "./cloud-types";
 import { errorText } from "./repo-url";
 import { Loading } from "./ui";
@@ -93,9 +91,8 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
   }, [brand, rows === undefined]);
   const [localPages, setLocalPages] = useState<CanvasPage[] | null>(null);
   const pages = localPages ?? (meta?.pages?.length ? meta.pages : DEFAULT_PAGES);
-  const [pageId, setPageId] = useState<string | null>(null);
-  const page = pages.find((item) => item.id === pageId) ?? pages[0]!;
-  const canvas = usePagedCanvas(base, page.id, pages[0]!.id);
+  const page = pages[0]!;
+  const canvas = base;
   const [notice, setNotice] = useState("");
   const [clock, setClock] = useState(Date.now());
   const [admitted, setAdmitted] = useState<ReadonlyMap<string, string>>(new Map());
@@ -166,7 +163,7 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
   }, [storedFiles, admitted, pending.length]);
 
   const here = (presence ?? []).filter((member) => member.updatedAt > clock - PRESENCE_TTL_MS);
-  const others = here.filter((member) => (member.userId !== userId || member.agentId) && (member.page ?? pages[0]!.id) === page.id);
+  const others = here.filter((member) => member.userId !== userId || member.agentId);
   const tone = (member: Presence) => personTone({ name: member.agentId ? `agent ${member.name}` : member.name });
   const cursors = others.map((member) => ({ userId: member.agentId ? `agent:${member.agentId}` : member.userId, name: member.name, x: member.x, y: member.y, color: tone(member), agent: Boolean(member.agentId) }));
   const remoteSelections = others.filter((member) => member.selection?.length).map((member) => ({ userId: member.agentId ?? member.userId, name: member.name, color: tone(member), ids: member.selection! }));
@@ -179,13 +176,6 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
   }, [token, server, teamId, canvasId]);
   useEffect(() => { sendPresence(); }, [selected, page.id]);
   const focusNode = focus ? base.scene.get(focus) : undefined;
-  useEffect(() => {
-    if (!focusNode || focusNode.deleted) return;
-    let top = focusNode;
-    while (top.parentId && base.scene.get(top.parentId)) top = base.scene.get(top.parentId)!;
-    setPageId(pageOf(top, pages[0]!.id));
-  }, [focusNode?.id]);
-
   const addImage = async (file: File): Promise<PlacedImage> => {
     if (!IMAGE_TYPES.includes(file.type) || file.size > IMAGE_MAX_BYTES) throw new Error("Choose a PNG, JPEG, WebP, GIF or SVG under 15 MB");
     const dataURL = await readDataUrl(file);
@@ -207,36 +197,13 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
     setLocalPages(next);
     if (canvasId && !readOnly) void cloudMutation("canvasCollab:setPages", { teamId, canvasId, pages: next }).catch((error) => { setLocalPages(null); setNotice(errorText(error, "Could not save the pages")); });
   };
-  const deletePage = (id: string) => {
-    const doomed = [...base.scene.values()].filter((node) => !node.deleted && node.parentId === null && pageOf(node, pages[0]!.id) === id);
-    const gone = doomed.flatMap((node) => [node, ...[...base.scene.values()].filter((child) => !child.deleted && isUnder(base.scene, child.id, node.id))]).map((node) => ({ ...node, deleted: true }));
-    const rest = pages.filter((item) => item.id !== id);
-    if (id === pages[0]!.id) {
-      const moved = [...base.scene.values()].filter((node) => !node.deleted && node.parentId === null && node.page === rest[0]!.id).map((node) => { const { page: _page, ...plain } = node; return plain; });
-      base.commit([...gone, ...moved]);
-    } else if (gone.length) base.commit(gone);
-    savePages(rest);
-    if (page.id === id) setPageId(rest[0]!.id);
-  };
-  const counts = useMemo(() => {
-    const out = new Map<string, number>();
-    for (const node of base.index.get(null) ?? []) { const key = pageOf(node, pages[0]!.id); out.set(key, (out.get(key) ?? 0) + 1); }
-    return out;
-  }, [base.index, pages]);
 
   const team = useMemo(() => (agent ? (state?.bots ?? []).filter((bot) => !bot.hidden && (bot.id === agent.id || (agent.section && bot.section === agent.section))) : []), [state?.bots, agent]);
   const mentionable: Mention[] = useMemo(() => [
     ...team.map((bot) => ({ kind: "agent" as const, id: bot.id, name: bot.name })),
     ...(people ?? []).filter((person) => person.userId !== userId).map((person) => ({ kind: "member" as const, id: person.email, name: person.name })),
   ], [team, people, userId]);
-  const visibleComments = useMemo(() => (comments ?? []).filter((comment) => {
-    if (!comment.nodeId) return page.id === pages[0]!.id;
-    const node = base.scene.get(comment.nodeId);
-    if (!node) return false;
-    let top = node;
-    while (top.parentId && base.scene.get(top.parentId)) top = base.scene.get(top.parentId)!;
-    return pageOf(top, pages[0]!.id) === page.id;
-  }), [comments, base.scene, page.id, pages]);
+  const visibleComments = useMemo(() => (comments ?? []).filter((comment) => !comment.nodeId || base.scene.has(comment.nodeId)), [comments, base.scene]);
 
   const sendComment = async (body: string, mentions: Mention[], at: { parentId?: string; draft?: Draft }) => {
     if (!canvasId) return;
@@ -262,14 +229,14 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
   const scope = canvasId ? { teamId, canvasId } : null;
   return (
     <div className="flex min-h-0 flex-1 flex-col origin-overlay-in" data-drawing-canvas>
-      <div className="flex min-h-12 shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-hairline/40 px-3 py-1.5 md:px-4">
-        <div className={cn("min-w-0 flex-1", lead && "basis-full sm:basis-auto")}>{lead ?? <span className="text-[13px] font-medium text-ink">{name}</span>}</div>
+      <div data-canvas-bar className="flex h-12 shrink-0 items-center gap-2 px-3 md:gap-3 md:px-4">
+        <div className="flex min-w-0 flex-1 items-center">{lead ?? <span className="truncate text-[13px] font-medium text-ink">{name}</span>}</div>
         <CanvasPresence here={here} userId={userId} />
-        {readOnly && <span className="rounded-full bg-raised px-2.5 py-1 text-[11.5px] text-ink-secondary">View only</span>}
-        {outbox.size > 0 && <span role="status" className="text-[11.5px] text-ink-tertiary">{outbox.error ? "Waiting to sync" : "Saving…"}</span>}
+        {readOnly && <span className="shrink-0 rounded-full bg-raised px-2.5 py-1 text-[11.5px] text-ink-secondary">View only</span>}
+        {outbox.size > 0 && <span role="status" className="hidden shrink-0 text-[11.5px] sm:inline text-ink-tertiary">{outbox.error ? "Waiting to sync" : "Saving…"}</span>}
         {scope && (
           <button type="button" aria-label="Version history" aria-pressed={right === "history"} title="Version history" onClick={() => setRight(right === "history" ? "design" : "history")}
-            className={cn("inline-flex size-8 items-center justify-center rounded-lg text-ink-secondary outline-none transition-colors hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60", right === "history" && "bg-raised text-ink")}>
+            className={cn("hidden size-8 shrink-0 items-center justify-center rounded-lg text-ink-secondary outline-none transition-colors hover:bg-raised sm:inline-flex hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60", right === "history" && "bg-raised text-ink")}>
             <History size={15} />
           </button>
         )}
@@ -281,7 +248,7 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
             {outbox.storageNotice || notice || outbox.error}
           </p>
         )}
-        <CanvasEditor page={page.id} coveredRight={agent && asking ? AGENT_PANEL_WIDTH : 0} canvas={canvas} readOnly={readOnly} images={images} cursors={cursors} onPointer={onPointer} addImage={addImage} notify={setNotice}
+        <CanvasEditor page={page.id} coveredRight={agent && asking ? AGENT_PANEL_WIDTH + 16 : 0} canvas={canvas} readOnly={readOnly} images={images} cursors={cursors} onPointer={onPointer} addImage={addImage} notify={setNotice}
           imagePicker={projectId ? (place, close) => <AssetPicker projectId={projectId} onPick={async (asset) => { try { place(await placeAsset(asset)); } catch (error) { setNotice(errorText(error, "Could not add the asset")); close(); } }} /> : undefined}
           onSelection={setSelected}
           guides={page.guides ?? []}
@@ -300,7 +267,6 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
           )}
           layers={(selection) => (
             <div className="flex min-h-0 flex-1 flex-col">
-              {scope && <PagesBar pages={pages} current={page.id} readOnly={readOnly} counts={counts} onSelect={(id) => { setPageId(id); setDraft(null); }} onChange={savePages} onDelete={deletePage} />}
               <div role="tablist" aria-label="Left panel" className="flex h-9 shrink-0 items-center gap-0.5 px-1.5">
                 {(["layers", "assets"] as const).map((tab) => (
                   <button key={tab} type="button" role="tab" aria-selected={left === tab} onClick={() => setLeft(tab)}
@@ -317,21 +283,12 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
           inspector={(selection) => right === "history" && scope
             ? <VersionsPanel canvas={base} scope={scope} readOnly={readOnly} notify={setNotice} />
             : <Inspector canvas={canvas} selection={selection} readOnly={readOnly} brand={brand} teamId={teamId} onPresent={(frameId) => setPresenting(frameId)}
-              exportSection={<>
-                {projectId && canvasId && <PublishSection canvas={canvas} selection={selection} images={images} projectId={projectId} teamId={teamId} canvasId={canvasId} readOnly={readOnly} />}
-                <ExportSection canvas={canvas} selection={selection} images={images} name={name} projectId={readOnly ? undefined : projectId} />
-              </>} />} />
+              exportSection={<ExportSection canvas={canvas} selection={selection} images={images} name={name} projectId={readOnly ? undefined : projectId} />} />} />
         {agent && asking && <AgentPanel agent={agent} team={team} canvas={canvas} selected={selected} images={images} name={name} canvasId={canvasId} projectId={projectId} onClose={() => setAsking(false)} />}
         {presenting !== undefined && <Present scene={canvas.scene} index={canvas.index} images={images} start={presenting} onClose={() => setPresenting(undefined)} />}
       </div>
     </div>
   );
-}
-
-function isUnder(scene: ReadonlyMap<string, { parentId: string | null }>, id: string, ancestor: string): boolean {
-  let current = scene.get(id)?.parentId ?? null;
-  for (let depth = 0; current && depth < 100; depth++) { if (current === ancestor) return true; current = scene.get(current)?.parentId ?? null; }
-  return false;
 }
 
 function CanvasPresence({ here, userId }: { here: readonly Presence[]; userId: string }) {
@@ -340,7 +297,7 @@ function CanvasPresence({ here, userId }: { here: readonly Presence[]; userId: s
   const names = ordered.map((member) => (member.userId === userId && !member.agentId ? "You" : member.name));
   const label = `${names.join(", ")} ${names.length === 1 && (ordered[0]!.userId !== userId || ordered[0]!.agentId) ? "is" : "are"} on this canvas`;
   return (
-    <div role="img" aria-label={label} title={label} className="flex items-center gap-2">
+    <div role="img" aria-label={label} title={label} className="hidden shrink-0 items-center gap-2 sm:flex">
       <span className="flex items-center">
         {ordered.slice(0, 5).map((member, index) => (
           <span key={`${member.userId}-${member.agentId ?? ""}`} style={{ zIndex: 5 - index }} className={cn("relative rounded-[8px] ring-2 ring-app origin-pop-badge", index > 0 && "-ml-1.5")}>

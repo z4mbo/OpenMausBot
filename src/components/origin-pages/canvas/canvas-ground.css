@@ -1,0 +1,7 @@
+[data-canvas-stage] {
+  background-color: var(--color-app);
+}
+
+:is([data-skin="atelier"], [data-skin="lagoon"], [data-skin="linen"], [data-skin="daylight"], [data-skin="meadow"]) [data-canvas-stage] {
+  background-color: var(--color-inset);
+}

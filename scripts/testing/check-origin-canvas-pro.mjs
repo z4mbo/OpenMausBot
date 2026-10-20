@@ -340,17 +340,9 @@ try {
       await page.locator("[data-agent-panel]").getByRole("button", { name: "Close" }).click();
       result.agentPanelDesignIssue = true;
 
-      await page.getByRole("button", { name: "Add page" }).click();
-      await until(() => window.originDrawFixture.pages.length === 2);
-      await page.keyboard.press("r");
-      await drag(at(-50, -50), at(50, 50));
-      await until(() => window.originDrawFixture.scene.some((row) => JSON.parse(row).page === "page-2"));
-      const onSecond = (await nodes()).find((node) => node.page === "page-2");
-      assert.equal(await page.locator(`[data-node-id="${onSecond.id}"]`).count(), 1);
-      await page.getByRole("button", { name: "Page 1", exact: true }).click();
-      await page.locator(`[data-node-id="${frame.id}"]`).first().waitFor();
-      assert.equal(await page.locator(`[data-node-id="${onSecond.id}"]`).count(), 0);
-      result.pages = true;
+      assert.equal(await page.getByRole("button", { name: "Add page" }).count(), 0, "a canvas is one page");
+      assert.equal(await page.getByRole("button", { name: /^Published pages/ }).count(), 0, "no published pages menu");
+      result.onePageNoPublishing = true;
 
       await page.getByRole("tab", { name: "Assets" }).click();
       await page.getByRole("button", { name: "Design system" }).click();
@@ -361,8 +353,10 @@ try {
       result.designSystemFromBrand = true;
 
       if (theme === "dark") {
-        await page.getByRole("button", { name: "Add page" }).click();
-        await until(() => window.originDrawFixture.pages.length === 3);
+        await page.keyboard.press("Escape");
+        await page.keyboard.press("Control+a");
+        await page.keyboard.press("Delete");
+        await until(() => window.originDrawFixture.scene.every((row) => JSON.parse(row).deleted));
         const zoomLabel = () => page.getByRole("button", { name: "Zoom to 100%" }).textContent();
         const pressed = () => page.evaluate(() => [...document.querySelectorAll('[role="toolbar"] button[aria-pressed="true"]')].map((button) => button.getAttribute("aria-label")));
         for (const [key, tool] of [["h", "Hand"], ["l", "Line"], ["o", "Ellipse"], ["e", "Ellipse"], ["r", "Rectangle"], ["t", "Text"], ["f", "Frame"], ["p", "Pen"], ["c", "Comment"], ["Shift+l", "Arrow"], ["v", "Move"]]) {
@@ -375,17 +369,17 @@ try {
         await drag(at(-60, 60), at(0, 120));
         await page.keyboard.press("o");
         await drag(at(-30, 90), at(40, 150));
-        await until(() => window.originDrawFixture.scene.filter((row) => JSON.parse(row).page === "page-3").length === 3);
-        const mine = async () => (await nodes()).filter((node) => node.page === "page-3");
+        await until(() => window.originDrawFixture.scene.filter((row) => !JSON.parse(row).deleted).length === 3);
+        const mine = nodes;
         await page.keyboard.press("Control+a");
         await page.keyboard.press("Control+g");
-        await until(() => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "group" && !node.deleted && node.page === "page-3"; }));
+        await until(() => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "group" && !node.deleted; }));
         await page.keyboard.press("Control+Shift+g");
-        await until(() => !window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "group" && !node.deleted && node.page === "page-3"; }));
+        await until(() => !window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "group" && !node.deleted; }));
         await page.keyboard.press("Control+Alt+g");
-        await until(() => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "frame" && !node.deleted && node.page === "page-3"; }));
+        await until(() => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "frame" && !node.deleted; }));
         await page.keyboard.press("Control+Shift+g");
-        await until(() => !window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "frame" && !node.deleted && node.page === "page-3"; }));
+        await until(() => !window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "frame" && !node.deleted; }));
         await page.keyboard.press("Escape");
         const ellipse = (await mine()).find((node) => node.type === "ellipse");
         const rect = (await mine()).find((node) => node.type === "rect");
@@ -422,9 +416,9 @@ try {
         await page.keyboard.press("[");
         await page.keyboard.press("Control+c");
         await page.keyboard.press("Control+v");
-        await until(() => window.originDrawFixture.scene.filter((row) => { const node = JSON.parse(row); return node.type === "rect" && node.page === "page-3" && !node.deleted; }).length === 2);
+        await until(() => window.originDrawFixture.scene.filter((row) => { const node = JSON.parse(row); return node.type === "rect" && !node.deleted; }).length === 2);
         await page.keyboard.press("Control+Shift+l");
-        await until(() => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "rect" && node.page === "page-3" && node.locked; }));
+        await until(() => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.type === "rect" && node.locked; }));
         await page.keyboard.press("Shift+r");
         assert.equal(await page.locator('[data-canvas-chrome] > div[aria-hidden="true"]').count(), 0, "Shift+R hides rulers");
         await page.keyboard.press("Shift+r");
@@ -444,7 +438,6 @@ try {
         assert.ok(moved);
         await capture("shortcuts");
         result.everyShortcut = true;
-        await page.getByRole("button", { name: "Page 1", exact: true }).click();
       }
 
       await page.evaluate((rows) => window.originDrawFixture.remote(rows), crowd);
@@ -470,7 +463,6 @@ try {
       await capture("crowd");
     } else {
       await page.getByRole("button", { name: "Layers", exact: true }).click();
-      await page.getByRole("button", { name: "Add page" }).click();
       await page.getByRole("tab", { name: "Assets" }).click();
       await page.getByText("Colour styles").waitFor();
       await capture("narrow-assets");

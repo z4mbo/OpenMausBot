@@ -19,8 +19,6 @@ export const DEFERRED_TOOL_DOMAINS: readonly DeferredToolDomain[] = [
     tools: { origin_pipeline_contact: "call phone ring email text message reach send" } },
   { prefix: "origin_canvas", words: "mockup wireframe layout ui screen frame",
     tools: { origin_canvas_edit: "design build draw create make change section hero pricing landing" } },
-  { prefix: "origin_page_", words: "landing page website site web signup waitlist",
-    tools: { origin_page_publish: "publish launch live put online" } },
   { prefix: "origin_campaign_", words: "campaign launch marketing promotion" },
   { prefix: "origin_brand_", words: "brand kit identity colours colors palette fonts typography voice tone style guide" },
   { prefix: "origin_standup", words: "standup daily update status report" },

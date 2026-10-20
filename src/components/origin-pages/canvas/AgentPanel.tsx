@@ -107,7 +107,7 @@ export function AgentPanel({ agent: lead, team = [], canvas, selected, images, n
   };
   const openChat = () => { if (agent.chiefOfStaff) setChiefSectionOf(agent.id, "chat"); openOriginPage(null); openBot(dispatch, agent, showThreads); };
   return (
-    <aside aria-label={`Ask ${agent.name}`} data-agent-panel style={{ width: `min(${AGENT_PANEL_WIDTH}px, 100%)` }} className="absolute inset-y-0 right-0 z-30 flex flex-col border-l border-hairline/40 bg-panel origin-overlay-in">
+    <aside aria-label={`Ask ${agent.name}`} data-agent-panel style={{ width: `min(${AGENT_PANEL_WIDTH}px, calc(100% - 16px))` }} className="absolute bottom-2 right-2 top-2 z-30 flex flex-col overflow-hidden rounded-xl border border-hairline/50 bg-panel origin-overlay-in">
       <div className="flex h-12 shrink-0 items-center gap-2 border-b border-hairline/40 px-3">
         <BotAvatar bot={agent} size={26} animated={working} />
         <div className="min-w-0 flex-1">
@@ -150,9 +150,9 @@ export function AgentPanel({ agent: lead, team = [], canvas, selected, images, n
 export function AskAgentButton({ agent, open, onToggle }: { agent: Bot; open: boolean; onToggle(): void }) {
   return (
     <button type="button" aria-label={`Ask ${agent.name}`} aria-expanded={open} onClick={onToggle}
-      className={cn("group flex h-8 items-center gap-1.5 rounded-lg border border-accent/35 bg-accent/10 py-1 pl-1 pr-3 text-[12.5px] font-medium text-accent-text outline-none transition-[background-color,transform] duration-150 hover:bg-accent/20 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent/60", open && "bg-accent/20")}>
+      className={cn("group flex h-8 min-w-0 max-w-44 shrink-0 items-center gap-1.5 rounded-lg border border-accent/35 bg-accent/10 py-1 pl-1 pr-2 sm:pr-3 text-[12.5px] font-medium text-accent-text outline-none transition-[background-color,transform] duration-150 hover:bg-accent/20 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent/60", open && "bg-accent/20")}>
       <BotAvatar bot={agent} size={22} animated={false} />
-      <Sparkles size={13} aria-hidden="true" className="transition-transform duration-150 group-hover:rotate-12" /><span className="truncate">Ask {agent.name}</span>
+      <Sparkles size={13} aria-hidden="true" className="hidden transition-transform duration-150 group-hover:rotate-12 sm:block" /><span className="hidden truncate sm:inline">Ask {agent.name}</span>
     </button>
   );
 }

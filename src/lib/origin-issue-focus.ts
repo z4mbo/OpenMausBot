@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import { useStore } from "@/state/store";
 import { openBot } from "@/state/thread-navigation";
 import { useCloudLinks } from "./origin-cloud-links";
-import { setChiefSectionOf } from "./origin-chief-section";
+import { setChiefSectionOf, type ChiefSection } from "./origin-chief-section";
 import { openOriginPage } from "./origin-pages";
 import { useShowThreads } from "./thread-preferences";
 
@@ -38,21 +38,27 @@ export function projectBotFor(projects: Record<string, string>, bots: readonly {
   return bots.find((bot) => linked.has(bot.id) && !bot.hidden)?.id ?? null;
 }
 
-/** Opens an Origin issue in its project's Issues section; false when no bot in this app shows that project. */
-export function useOpenOriginIssue(): (issue: IssueFocus) => boolean {
+/** Opens a section of a cloud project's bot after `focus` ran; false when no bot in this app shows that project. */
+export function useOpenOriginSection(): (projectId: string, section: ChiefSection, focus?: () => void) => boolean {
   const { state, dispatch } = useStore();
   const { projects } = useCloudLinks();
   const showThreads = useShowThreads();
-  return (issue) => {
-    const botId = projectBotFor(projects, state.bots, issue.projectId);
+  return (projectId, section, focus) => {
+    const botId = projectBotFor(projects, state.bots, projectId);
     const bot = botId ? state.bots.find((candidate) => candidate.id === botId) : undefined;
     if (!bot) return false;
-    requestIssueFocus(issue);
-    setChiefSectionOf(bot.id, "issues");
+    focus?.();
+    setChiefSectionOf(bot.id, section);
     openOriginPage(null);
     openBot(dispatch, bot, showThreads);
     return true;
   };
+}
+
+/** Opens an Origin issue in its project's Issues section; false when no bot in this app shows that project. */
+export function useOpenOriginIssue(): (issue: IssueFocus) => boolean {
+  const open = useOpenOriginSection();
+  return (issue) => open(issue.projectId, "issues", () => requestIssueFocus(issue));
 }
 
 export function useCanOpenOriginProject(projectId: string): boolean {

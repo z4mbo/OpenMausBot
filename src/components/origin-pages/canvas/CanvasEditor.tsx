@@ -25,6 +25,7 @@ import { isCropped, panCrop } from "./image-crop";
 import { booleanGroup, flatten } from "./booleans";
 import { detach, makeComponent } from "../../../../shared/canvas-components";
 import { Rulers, RULER, type PageGuide } from "./Rulers";
+import "./canvas-ground.css";
 import { TextEditor, contrastInk, themeInk } from "./TextEditor";
 import { svgNodes } from "./svg-import";
 
@@ -98,8 +99,10 @@ const oneOverlay = (current: Panels, next: Panels): Panels =>
   next.layers && !current.layers ? { layers: true, inspector: false } : next.inspector && !current.inspector ? { layers: false, inspector: true } : next;
 const textName = (text: string | undefined) => (text ?? "").trim().replace(/\s+/g, " ").slice(0, 60) || "Text";
 
-
 const INSPECTOR_WIDTH = 256;
+const LAYERS_WIDTH = 240;
+const PANEL_GAP = 8;
+const floatingPanel = "rounded-xl border border-hairline/50";
 
 export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, addImage, imagePicker, layers, inspector, notify, onSelection, guides: pageGuides, onGuides, remoteSelections, onComment, stageLayer, onPresent, showPrototype, page, focus, onFocused, coveredRight = 0 }: CanvasEditorProps) {
   const { scene, index } = canvas;
@@ -137,6 +140,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   const compact = outerWidth > 0 && outerWidth < 860;
   const narrow = outerWidth > 0 && outerWidth < 480;
   const shown = panels ?? { layers: !compact, inspector: !compact };
+  const insets = {
+    left: !compact && shown.layers ? LAYERS_WIDTH + PANEL_GAP * 2 : 0,
+    right: Math.max(!compact && shown.inspector ? INSPECTOR_WIDTH + PANEL_GAP * 2 : 0, coveredRight),
+  };
+  const stageCentre = { x: insets.left + Math.max(0, size.width - insets.left - insets.right) / 2, y: size.height / 2 };
 
   useLayoutEffect(() => {
     const element = stage.current;
@@ -155,9 +163,10 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
 
   const zoomTo = useCallback((ids?: readonly string[]) => {
     const box = contentBox(ids);
-    if (!box || !size.width) { setView({ x: size.width / 2, y: size.height / 2, zoom: 1 }); return; }
-    setView(fitView(box, size, compact ? 24 : 64, ids?.length ? 8 : 1));
-  }, [contentBox, size, compact]);
+    if (!box || !size.width) { setView({ x: stageCentre.x, y: stageCentre.y, zoom: 1 }); return; }
+    const fitted = fitView(box, { width: Math.max(1, size.width - insets.left - insets.right), height: size.height }, compact ? 24 : 64, ids?.length ? 8 : 1);
+    setView({ ...fitted, x: fitted.x + insets.left });
+  }, [contentBox, size, compact, stageCentre.x, stageCentre.y, insets.left, insets.right]);
 
   useEffect(() => {
     if (!pendingZoom || !pendingZoom.every((id) => isLive(scene.get(id)))) return;
@@ -314,7 +323,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
 
   const placeImages = async (files: File[], at: Point | null) => {
     if (readOnly) return;
-    const centre = at ?? toWorld(view, { x: size.width / 2, y: size.height / 2 });
+    const centre = at ?? toWorld(view, stageCentre);
     const created: CanvasNode[] = [];
     for (const file of files.filter((item) => item.type.startsWith("image/"))) {
       try {
@@ -349,7 +358,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   };
 
   const placePicked = (image: PlacedImage) => {
-    const node = imageNode(image, toWorld(view, { x: size.width / 2, y: size.height / 2 }), false);
+    const node = imageNode(image, toWorld(view, stageCentre), false);
     canvas.commit([node]);
     setSelected([node.id]);
     setTool("move");
@@ -784,15 +793,15 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (command && key === "g") { done(); run(event.shiftKey ? "ungroup" : event.altKey ? "frame" : "group"); return; }
     if (command && event.shiftKey && key === "h") { done(); run("hide"); return; }
     if (command && event.shiftKey && key === "l") { done(); run("lock"); return; }
-    if (command && (key === "=" || key === "+")) { done(); zoomAt(1.25, { x: size.width / 2, y: size.height / 2 }); return; }
-    if (command && key === "-") { done(); zoomAt(0.8, { x: size.width / 2, y: size.height / 2 }); return; }
+    if (command && (key === "=" || key === "+")) { done(); zoomAt(1.25, stageCentre); return; }
+    if (command && key === "-") { done(); zoomAt(0.8, stageCentre); return; }
     if (key === "]" || key === "[") { done(); run(key === "]" ? (command ? "front" : "forward") : (command ? "back" : "backward")); return; }
     if (command) return;
     if (event.shiftKey && (event.code === "Digit1" || event.code === "Digit2" || event.code === "Digit0")) {
       done();
       if (event.code === "Digit1") zoomTo();
       else if (event.code === "Digit2") zoomTo(live.length ? live : undefined);
-      else zoomAt(1 / view.zoom, { x: size.width / 2, y: size.height / 2 });
+      else zoomAt(1 / view.zoom, stageCentre);
       return;
     }
     if (event.shiftKey && key === "a" && !readOnly && live.length) {
@@ -847,11 +856,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (clipboard.current && !text) { paste(clipboard.current); return; }
     if (/^\s*(<\?xml[^>]*>\s*)?<svg[\s>]/i.test(text)) {
       const parent = pasteTarget();
-      const vectors = svgNodes(text, "Vector", toWorld(view, { x: size.width / 2, y: size.height / 2 }), parent, parent ? worldOrigin(scene, scene.get(parent)!) : { x: 0, y: 0 }, nextZ(index.get(parent) ?? []));
+      const vectors = svgNodes(text, "Vector", toWorld(view, stageCentre), parent, parent ? worldOrigin(scene, scene.get(parent)!) : { x: 0, y: 0 }, nextZ(index.get(parent) ?? []));
       if (vectors) { canvas.commit(vectors); setSelected([vectors[0]!.id]); return; }
     }
     if (text.trim()) {
-      const world = toWorld(view, { x: size.width / 2, y: size.height / 2 });
+      const world = toWorld(view, stageCentre);
       const parent = pasteTarget();
       const origin = parent ? worldOrigin(scene, scene.get(parent)!) : { x: 0, y: 0 };
       const node = newNode("text", parent, nextZ(index.get(parent) ?? []), { text: text.slice(0, 20_000), name: textName(text), autoWidth: true, x: round(world.x - origin.x), y: round(world.y - origin.y), fill: inkOn(parent) });
@@ -908,21 +917,21 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     const before = rendered.current;
     return { index, images, interactive: true, editing: editing?.id ?? null, prefix: "c-", ...(before ? { dirty: changedSubtrees(before, scene) } : {}) };
   }, [index, images, editing?.id]);
-  const selectionApi: SelectionApi = { ids: live, nodes, select, zoomTo: (ids) => setPendingZoom([...ids]), run, centre: () => toWorld(view, { x: size.width / 2, y: size.height / 2 }) };
+  const selectionApi: SelectionApi = { ids: live, nodes, select, zoomTo: (ids) => setPendingZoom([...ids]), run, centre: () => toWorld(view, stageCentre) };
   const cursor = panning ? (gesture.current?.kind === "pan" ? "grabbing" : "grab") : tool === "hand" ? "grab" : tool === "move" ? "default" : tool === "text" ? "text" : tool === "comment" ? "copy" : "crosshair";
   const showRulers = rulers && Boolean(onGuides) && !narrow;
-  const stageCovered = Math.max(0, coveredRight - (shown.inspector && !compact ? INSPECTOR_WIDTH : 0));
   const editedPath = pathEdit ? scene.get(pathEdit.id) : undefined;
 
   return (
     <div ref={root} className="relative flex min-h-0 min-w-0 flex-1">
       {shown.layers && (
-        <aside aria-label="Layers" className={cn("flex w-60 shrink-0 flex-col border-r border-hairline/40 bg-panel", compact && "absolute inset-y-0 left-0 z-20 w-[min(260px,80vw)] pb-16 origin-overlay-in")}>
+        <aside aria-label="Layers" style={compact ? undefined : { width: LAYERS_WIDTH, inset: `${PANEL_GAP}px auto ${PANEL_GAP}px ${PANEL_GAP}px` }}
+          className={cn("absolute z-20 flex flex-col overflow-hidden bg-panel", compact ? "inset-y-0 left-0 w-[min(260px,80vw)] border-r border-hairline/40 pb-16 origin-overlay-in" : floatingPanel)}>
           {layers(selectionApi)}
         </aside>
       )}
       <div ref={stage} tabIndex={0} aria-label="Canvas" role="application" data-canvas-stage
-        className="relative min-w-0 flex-1 touch-none select-none overflow-hidden bg-inset outline-none focus-visible:outline-none"
+        className="absolute inset-0 touch-none select-none overflow-hidden outline-none focus-visible:outline-none"
         style={{ cursor, outline: "none" }}
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
         onPointerLeave={() => setHover(null)}
@@ -937,7 +946,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             pathEdit={isPathNode(editedPath) ? { node: editedPath, at: pathEdit!.at } : null} pen={pen ? { anchors: pen.anchors, hover: penTool.hovered } : null} crop={isCropped(cropNode) ? cropNode : null} />
         </svg>
         {stageLayer?.(view)}
-        {showRulers && <Rulers view={view} size={size} guides={pageGuides ?? []} onGuides={(next) => onGuides?.(next)} readOnly={readOnly} selection={live.length ? contentBox(live) : null} />}
+        {showRulers && <Rulers view={view} size={size} insets={insets} guides={pageGuides ?? []} onGuides={(next) => onGuides?.(next)} readOnly={readOnly} selection={live.length ? contentBox(live) : null} />}
         {editing && editingNode && (
           <TextEditor node={editingNode} origin={toScreen(view, worldOrigin(scene, editingNode))} zoom={view.zoom}
             onChange={(text) => canvas.preview([{ ...editingNode, text, ...(editingNode.autoWidth ? { width: layoutText({ ...editingNode, text }, measureText).width } : {}) }])}
@@ -953,13 +962,14 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             imageMenu={imageMenu} onImageMenu={setImageMenu}
             imagePicker={imagePicker ? (close) => imagePicker((image) => { placePicked(image); close(); }, close) : undefined}
             onUpload={(files) => void placeImages(files, null)}
-            narrow={narrow && !readOnly} inset={stageCovered} panels={shown} onPanels={(next) => setPanels(compact ? oneOverlay(shown, next) : next)} />
-          <ZoomControls offset={showRulers ? RULER : 0} inset={stageCovered} zoom={view.zoom} onZoom={(factor) => zoomAt(factor, { x: size.width / 2, y: size.height / 2 })}
-            onFit={() => zoomTo()} onSelection={live.length ? () => zoomTo(live) : undefined} onActual={() => zoomAt(1 / view.zoom, { x: size.width / 2, y: size.height / 2 })} />
+            narrow={narrow && !readOnly} insets={insets} panels={shown} onPanels={(next) => setPanels(compact ? oneOverlay(shown, next) : next)} />
+          <ZoomControls offset={showRulers ? RULER : 0} inset={insets.right} zoom={view.zoom} onZoom={(factor) => zoomAt(factor, stageCentre)}
+            onFit={() => zoomTo()} onSelection={live.length ? () => zoomTo(live) : undefined} onActual={() => zoomAt(1 / view.zoom, stageCentre)} />
         </div>
       </div>
       {shown.inspector && (
-        <aside aria-label="Design" style={compact ? undefined : { width: INSPECTOR_WIDTH }} className={cn("flex shrink-0 flex-col border-l border-hairline/40 bg-panel", compact && "absolute inset-x-0 bottom-0 z-20 max-h-[55%] w-auto border-l-0 border-t pb-16 origin-overlay-in")}>
+        <aside aria-label="Design" style={compact ? undefined : { width: INSPECTOR_WIDTH, inset: `${PANEL_GAP}px ${PANEL_GAP}px ${PANEL_GAP}px auto` }}
+          className={cn("absolute z-20 flex flex-col overflow-hidden bg-panel", compact ? "inset-x-0 bottom-0 max-h-[55%] border-t border-hairline/40 pb-16 origin-overlay-in" : floatingPanel)}>
           {inspector(selectionApi)}
         </aside>
       )}
