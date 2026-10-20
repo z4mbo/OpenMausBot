@@ -9,13 +9,13 @@ import { ghostButton, primaryButton } from "./origin-pages/ui";
 import { useShipPreviews } from "@/lib/origin-ship";
 import { PreviewLinks } from "./origin-ship/PreviewLinks";
 
-const CHECKS: Record<string, { label: string; tone: string }> = {
+export const CHECKS: Record<string, { label: string; tone: string }> = {
   success: { label: "Checks passed", tone: "text-success" },
   failure: { label: "Checks failed", tone: "text-danger" },
   pending: { label: "Checks running", tone: "text-warning" },
   none: { label: "No checks", tone: "text-ink-tertiary" },
 };
-const REVIEWS: Record<string, string> = {
+export const REVIEWS: Record<string, string> = {
   approved: "Approved",
   changes_requested: "Changes requested",
   review_required: "Review required",

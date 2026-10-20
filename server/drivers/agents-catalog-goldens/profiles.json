@@ -1,7 +1,7 @@
 {
   "default": {
-    "bytes": 84216,
-    "sha256": "dd44fd3abcb875b83b5181c4d457c910d9111b5d9eac8d2231b9cc3868723cbf",
+    "bytes": 84672,
+    "sha256": "adfcec6ec1d34fe0cf3966d9c713cb0a6438f49e618137da9ec5e5ba4771cbb0",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -65,6 +65,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -98,8 +99,8 @@
     ]
   },
   "voice": {
-    "bytes": 84957,
-    "sha256": "4dce48800a217c979a5061b3e2f7b248959dd8c1d6c4cc97cce0120d6fcb7414",
+    "bytes": 85413,
+    "sha256": "5da687f745fe449127cfab29f0c19dec3fac7ae125345fd4fdf8d153f166a084",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -164,6 +165,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -197,8 +199,8 @@
     ]
   },
   "shared": {
-    "bytes": 85961,
-    "sha256": "55ed2b4b0d0953af139a390b04ffd487c72716b8929d2fe28c9917377aa129ff",
+    "bytes": 86417,
+    "sha256": "7e8bf62d14c390675569d3164bfac920217433a0dd1b16b1098a693f7ebd42cb",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -264,6 +266,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -297,8 +300,8 @@
     ]
   },
   "shared+voice": {
-    "bytes": 86702,
-    "sha256": "b659e3bd90be9e51913a797f61a7118f97cd73e3ddedf199b9e7d7faf8c3e22d",
+    "bytes": 87158,
+    "sha256": "2d8e95d910fe7b5c5cbebbb19ca0b2b27a8de66c7762fd7fbdbf20b7b7a770c0",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -365,6 +368,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -398,8 +402,8 @@
     ]
   },
   "skills": {
-    "bytes": 87115,
-    "sha256": "19a929e01b56732fe3524f43c8198291cf2904686e7bd76b27b01d752c11b46f",
+    "bytes": 87571,
+    "sha256": "132b44404bca5fd403ea1703dfb5dd8f0864544b66848d44524d8645844ea378",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -465,6 +469,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -498,8 +503,8 @@
     ]
   },
   "skills+voice": {
-    "bytes": 87856,
-    "sha256": "234316fac5d8f5be18b269b86efc4a23a0721f151e6cff64363dbfa13a79dc62",
+    "bytes": 88312,
+    "sha256": "a29b197d2c4b30ed801d11d6b992f9c8de05a5a71dd9ad91b4df11f4595b3974",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -566,6 +571,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -599,8 +605,8 @@
     ]
   },
   "skills+shared": {
-    "bytes": 88860,
-    "sha256": "6a17c5da84f40902a756b453270ce01610f9df5475da491bcc2cbce4a13fa1a0",
+    "bytes": 89316,
+    "sha256": "5efd2c8159def7f69dea0fe80c49ffabb115f2c5bb0e5d859f99935274c951eb",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -668,6 +674,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -701,8 +708,8 @@
     ]
   },
   "skills+shared+voice": {
-    "bytes": 89601,
-    "sha256": "70c61b8824ae1eab7050a6c0212431e35d0ed8ce669b24920feeba1b47aaeceb",
+    "bytes": 90057,
+    "sha256": "a5ddd72660eeefdf3da782d69e8fa5634edf51cb86123f0443a972fa18ab432b",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -771,6 +778,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -804,8 +812,8 @@
     ]
   },
   "non-chief": {
-    "bytes": 71098,
-    "sha256": "5a7db61882f2d6322c853b6fa4044768da35c3cb68c65ca4d80f37c713a83882",
+    "bytes": 71554,
+    "sha256": "2cf30a7ecf42398ce280ece2054dae8951a9f24f7c2591c1d08f111dcccb4430",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -858,6 +866,7 @@
       "origin_page_publish",
       "origin_page_list",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -890,8 +899,8 @@
     ]
   },
   "voice+non-chief": {
-    "bytes": 71839,
-    "sha256": "2f8683c54345877c85f62b3712f06fd11513260e6a0ba181d95f6b3acdbb8b2e",
+    "bytes": 72295,
+    "sha256": "5f653b695bb55b997429269cfaae1a19a5401f0edc06ee50412f91351d202d3f",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -945,6 +954,7 @@
       "origin_page_publish",
       "origin_page_list",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -977,8 +987,8 @@
     ]
   },
   "shared+non-chief": {
-    "bytes": 72843,
-    "sha256": "e50d5347ab650d49db13fde291730adad428ed32b5b28a76cf6b2ef495763bb7",
+    "bytes": 73299,
+    "sha256": "7f05e13d6c85465486ebc5dce6493e921e1f2b693956414f038fdbf4a6a73b3d",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1033,6 +1043,7 @@
       "origin_page_publish",
       "origin_page_list",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1065,8 +1076,8 @@
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 73584,
-    "sha256": "387b9bcb5db7397c99a017094e491b16ae71ad8d18898f5f5bfc40ba7a85c1f9",
+    "bytes": 74040,
+    "sha256": "a095587c5396158ba382cbaef79389b7050886dba52d897a575f0d0c79b322f1",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1122,6 +1133,7 @@
       "origin_page_publish",
       "origin_page_list",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1154,8 +1166,8 @@
     ]
   },
   "skills+non-chief": {
-    "bytes": 73997,
-    "sha256": "465b0d904829562155237fe16c719aafab0e7be5e6c94e6d135e1a9a1cc90588",
+    "bytes": 74453,
+    "sha256": "aaadc3abffabb1d81c712e6474f5789f593b5940ea404d18415376fc6158afae",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1210,6 +1222,7 @@
       "origin_page_publish",
       "origin_page_list",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1242,8 +1255,8 @@
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 74738,
-    "sha256": "9b849758e0627a3359e0df1ad88652f2f0bc334d41c71603bb13ccbc72d200a7",
+    "bytes": 75194,
+    "sha256": "4f5799e4d4f8c7a130531eff7a006dfbfe48c31e51267b319f0a2aa819f966af",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1299,6 +1312,7 @@
       "origin_page_publish",
       "origin_page_list",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1331,8 +1345,8 @@
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 75742,
-    "sha256": "ad6811b4b01260b1e1974b84a18818d940698e6af9248022384aa886223ac11a",
+    "bytes": 76198,
+    "sha256": "bf97cb1c8e12263d5a9ae077fb1d7f20dd079a3b44a7a35f3ce0d736f0430e66",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1389,6 +1403,7 @@
       "origin_page_publish",
       "origin_page_list",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1421,8 +1436,8 @@
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 76483,
-    "sha256": "8fa71073c38e8dc9e5934580568dcd35f531103f4bab7df1ca3a2c10d9c9d0f5",
+    "bytes": 76939,
+    "sha256": "f4357e6e0b0a05f7ceffa2a200f913f7c183e151450ff52850da8ffa5fe84299",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1480,6 +1495,7 @@
       "origin_page_publish",
       "origin_page_list",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1512,8 +1528,8 @@
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 88656,
-    "sha256": "98872f653ed7186933627ac38030d89e61146b681846f4d2b835d02e88e7c7af",
+    "bytes": 89112,
+    "sha256": "294a6c73b648c18859759883e8193a65ebe50fcfdb6abfaf7a0e4e092a8ab010",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1581,6 +1597,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1614,8 +1631,8 @@
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 75538,
-    "sha256": "8a4bb4b7cb5876348a1b6847b98848b6bf37675937e1b7c2e0ca0954235d5055",
+    "bytes": 75994,
+    "sha256": "1cf7369fbf93411fb0762f1e5c7ff2b6402e788487746c355ab671083f43a59a",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1672,6 +1689,7 @@
       "origin_page_publish",
       "origin_page_list",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1704,8 +1722,8 @@
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 90461,
-    "sha256": "ca358d29bbdd80cc6560bc4657c342a8ad5208d642f111fdfc3e28bdff7a8d2f",
+    "bytes": 90917,
+    "sha256": "48dd0f4e612fcd6698b0048311e27b8a86fd5caf398700ad781d3340d4a83ca5",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1775,6 +1793,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1808,8 +1827,8 @@
     ]
   },
   "default+legacy-switches": {
-    "bytes": 84216,
-    "sha256": "dd44fd3abcb875b83b5181c4d457c910d9111b5d9eac8d2231b9cc3868723cbf",
+    "bytes": 84672,
+    "sha256": "adfcec6ec1d34fe0cf3966d9c713cb0a6438f49e618137da9ec5e5ba4771cbb0",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1873,6 +1892,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
@@ -1906,8 +1926,8 @@
     ]
   },
   "skills+shared+voice+escalations+whole-schemas": {
-    "bytes": 115519,
-    "sha256": "0a177f17aab7bdbe31e97ccfeec440a9743c4f39c617e771badc7a4649bf954b",
+    "bytes": 116074,
+    "sha256": "915675983bb2ec912b5bd3f6e76429cf72621263b705b963c1e6e725680c2c05",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1977,6 +1997,7 @@
       "origin_page_list",
       "origin_standup",
       "origin_pulse",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",

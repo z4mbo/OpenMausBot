@@ -3,6 +3,7 @@ import { Select } from "../Select";
 import { copyText } from "@/lib/copy-text";
 import { Bot, Copy, ExternalLink, Eye, EyeOff, KeyRound, Loader2, LockKeyhole, Pencil, Plus, Search, ShieldCheck, Shuffle, Trash2, Unlock } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
+import { revealItem, useItemFocus } from "@/lib/origin-item-focus";
 import { cn } from "@/lib/cn";
 import type { CloudCredential, CredentialKind } from "./cloud-types";
 import { errorText } from "./repo-url";
@@ -54,6 +55,12 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
       document.removeEventListener("visibilitychange", hide);
     };
   }, [unlocked, lock]);
+  useItemFocus(projectId, {
+    vault: (itemId) => {
+      setQuery("");
+      return !items?.some((item) => item._id === itemId) || revealItem(itemId);
+    },
+  }, Boolean(items));
 
   if (!items) return <Loading label="Loading vault" />;
 
@@ -124,7 +131,7 @@ function Vault({ projectId, canEdit }: { projectId: string; canEdit: boolean }) 
       {!filtered.length ? <EmptyState icon={<KeyRound size={24} />} title={needle ? "No matching items" : "No saved secrets"} body="Keys, logins and secrets this project's agents may use." /> : (
         <div className={cn(cardClass, "divide-y divide-hairline/30")}>
           {filtered.map((item) => (
-            <article key={item._id} className={`flex items-start gap-3 px-4 py-3 ${itemIn}`}>
+            <article key={item._id} data-origin-item={item._id} className={`flex items-start gap-3 px-4 py-3 ${itemIn}`}>
               <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-inset text-ink-secondary"><KeyRound size={15} /></span>
               <div className="min-w-0 flex-1">
                 <strong className="block truncate text-[13px] font-medium text-ink">{item.title}</strong>

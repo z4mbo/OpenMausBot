@@ -2402,6 +2402,21 @@
       }
     },
     {
+      "name": "origin_call_notes",
+      "description": "The latest call of an Origin project from the last week that still has action items: its key points, decisions and action items with the issues already drafted from them. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
       "name": "origin_studio_generate",
       "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. Before the first call, get its input schema from find_tool.",
       "inputSchema": {

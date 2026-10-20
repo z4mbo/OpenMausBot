@@ -20,6 +20,7 @@ import type { QuestionRequestCardData } from "./ask-question.ts";
 import type { RoutineRunCardData } from "./routine-run.ts";
 import type { OriginIssueCards } from "./origin-issues.ts";
 import type { OriginPullRequestCard } from "./origin-pull-request.ts";
+import type { OriginChatCard } from "./origin-chat-cards.ts";
 import type { WidgetPayload } from "./widget.ts";
 import type { GroupGoalRunCardData } from "./group-goal-run.ts";
 import type { RuntimeEvent } from "./runtime-events.ts";
@@ -552,6 +553,8 @@ export interface WireMessage {
   originIssues?: OriginIssueCards;
   /** A pull request a Chief read with origin_review_pr; a project admin can approve and merge it from the card after confirming. */
   originPullRequest?: OriginPullRequestCard;
+  /** A post, generation, asset, vault entry, repository, feedback or call an Origin tool returned, drawn as a card that opens it in its project. */
+  originCard?: OriginChatCard;
   /** user messages: the Data result the person was viewing when they sent
    * this. `text` stays exactly what they typed. */
   dataContext?: { cardId: string; draftSql?: string };

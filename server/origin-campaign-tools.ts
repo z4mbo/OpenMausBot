@@ -2,6 +2,8 @@ import { BROADCAST_CHANNELS, isBroadcastChannel } from "../shared/broadcast.ts";
 import { CAMPAIGN_LINK_KINDS, CAMPAIGN_STATUS_LABEL, isCampaignLinkKind, isCampaignStatus } from "../shared/origin-campaigns.ts";
 import { formatLeadValue } from "../shared/origin-pipeline.ts";
 import { originIssueKey } from "../shared/origin-issues.ts";
+import { campaignCardItem } from "../shared/origin-chat-card-items.ts";
+import type { OriginChatCard } from "../shared/origin-chat-cards.ts";
 import type { OriginCloudClient, OriginToolResult } from "./origin-cloud.ts";
 
 type Args = Record<string, unknown>;
@@ -41,6 +43,10 @@ async function findCampaign(scope: CampaignToolScope, wanted: string): Promise<A
   return all.length
     ? `No campaign "${clip(wanted, 80)}" in ${scope.projectName}. Campaigns: ${all.slice(0, 20).map((campaign) => `"${text(campaign.name)}" (${text(campaign._id)})`).join(", ")}.`
     : `${scope.projectName} has no campaigns yet; create one with origin_campaign_create.`;
+}
+
+function campaignCard(scope: CampaignToolScope, campaign: Args | undefined): { card?: OriginChatCard } {
+  return campaign ? { card: { kind: "campaign", projectId: scope.projectId, projectName: scope.projectName, campaign: campaignCardItem(campaign) } } : {};
 }
 
 function summaryLine(campaign: Args): string {
@@ -103,13 +109,15 @@ export function campaignTools<C>(scope: (args: Args, ctx: C) => Promise<Campaign
       if (args.status !== undefined) fields.status = args.status;
       if (existing) {
         await target.client.mutation("campaigns:update", { ...base(target), campaignId: text(existing._id), ...fields });
-        return { text: `Updated campaign ${text(existing._id)} "${text(fields.name) || text(existing.name)}" in ${target.projectName}.` };
+        const updated = (await campaigns(target).catch(() => [])).find((campaign) => campaign._id === existing._id);
+        return { text: `Updated campaign ${text(existing._id)} "${text(fields.name) || text(existing.name)}" in ${target.projectName}.`, ...campaignCard(target, updated) };
       }
       const campaignId = text(await target.client.mutation("campaigns:create", { ...base(target), ...fields, name: trimmed(args.name), agentName: target.caller.name }));
-      const created = (await campaigns(target)).find((campaign) => campaign._id === campaignId);
+      const created = (await campaigns(target).catch(() => [])).find((campaign) => campaign._id === campaignId);
       return {
         text: `Created campaign ${campaignId} "${trimmed(args.name)}" in ${target.projectName} (Planning). Tag its links with utm_campaign=${text(created?.slug)} so captured leads count toward it. `
           + "Break the work into Origin issues and attach them, the Broadcast posts and Studio generations with origin_campaign_link.",
+        ...campaignCard(target, created),
       };
     },
 
@@ -124,7 +132,7 @@ export function campaignTools<C>(scope: (args: Args, ctx: C) => Promise<Campaign
       const found = await findCampaign(target, wanted);
       if (typeof found === "string") return { text: found, isError: true };
       const detail = record(await target.client.query("campaigns:get", { ...base(target), campaignId: text(found._id) }));
-      return { text: detailText(detail, target.projectName) };
+      return { text: detailText(detail, target.projectName), ...campaignCard(target, { ...found, ...detail }) };
     },
 
     async origin_campaign_link(args, ctx) {

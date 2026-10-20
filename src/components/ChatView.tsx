@@ -92,8 +92,7 @@ import { optionsCardRow } from "./OptionsCardRow";
 import { RemoteRowNote, SharedThreadBar } from "./SharedThreadBar";
 import { MessageBoundary } from "./MessageBoundary";
 import { WidgetMessage } from "./widget/WidgetMessage";
-import { OriginIssuesCard } from "./OriginIssuesCard";
-import { OriginPullRequestCard } from "./OriginPullRequestCard";
+import { OriginToolCard, hasOriginToolCard } from "./OriginToolCards";
 import { Composer } from "./Composer";
 import { useTeammates } from "./origin-members/teammates";
 import { useCloudProjectFor } from "@/lib/origin-cloud-links";
@@ -918,8 +917,7 @@ const MessagesList = memo(function MessagesList({
               if (isDelegationChip(m, botId)) return <DelegatedWork message={m} failed={failedDelegations.has(m.roomRequest!.id)} />;
               if (resultShownInBlock(m, delegated)) return null;
               if (m.dataResult) return <DataResultChip message={m} />;
-              if (m.originIssues) return <OriginIssuesCard message={m} />;
-              if (m.originPullRequest) return <OriginPullRequestCard message={m} />;
+              if (hasOriginToolCard(m)) return <OriginToolCard message={m} />;
               if (isStatusActivity(m)) return <StatusActivityRow message={m} />;
               if (m.tool && failedTurnCause(m.tool.name) !== null) {
                 return (

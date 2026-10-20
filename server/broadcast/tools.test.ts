@@ -64,3 +64,18 @@ describe("origin_broadcast_list", () => {
     expect(text).toContain("- p1 [failed, approved] x https://x.com/i/web/status/1; tiktok (failed: token expired) · by Marketer");
   });
 });
+
+describe("Broadcast cards", () => {
+  it("shows a drafted post on a card waiting for approval, and a list as one card", async () => {
+    const post = { _id: "post1", status: "draft", agentName: "Marketer", needsApproval: true, variants: [{ channel: "x", text: "Launch" }], media: [{ name: "Cover", kind: "image", url: "https://cdn.test/c.png" }] };
+    const drafted = await broadcastDraft({ channels: ["x"], text: "Launch" }, scope([post]).value);
+    expect(drafted.card).toEqual({
+      kind: "broadcast", projectId: "proj", projectName: "Launch", heading: "New post",
+      posts: [{ id: "post1", status: "draft", needsApproval: true, agentName: "Marketer", channels: [{ channel: "x", text: "Launch" }], media: [{ name: "Cover", kind: "image", url: "https://cdn.test/c.png" }] }],
+    });
+    const many = Array.from({ length: 10 }, (_, index) => ({ ...post, _id: `p${index}` }));
+    const listed = await broadcastList({}, scope(many).value);
+    expect(listed.card).toMatchObject({ kind: "broadcast", heading: "10 posts", more: 2 });
+    expect(listed.card?.kind === "broadcast" && listed.card.posts).toHaveLength(8);
+  });
+});

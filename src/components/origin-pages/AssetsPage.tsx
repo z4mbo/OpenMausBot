@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { Select } from "../Select";
 import { AudioLines, File, Film, Image as ImageIcon, Loader2, Palette, Pencil, Plus, Search, SwatchBook, Trash2, Upload } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
+import { revealItem, useItemFocus } from "@/lib/origin-item-focus";
 import { cn } from "@/lib/cn";
 import { BrandPanel } from "../origin-brand/BrandPanel";
 import type { AssetType, CloudDesign, CloudDesignAsset, CloudDesignToken, TokenType } from "./cloud-types";
@@ -36,6 +37,15 @@ function Assets({ projectId, canEdit, projectName, botId }: { projectId: string;
   const [editing, setEditing] = useState<CloudDesignAsset | "new" | null>(null);
   const [tokenEditing, setTokenEditing] = useState<CloudDesignToken | "new" | null>(null);
   const [notice, setNotice] = useState("");
+  useItemFocus(projectId, {
+    asset: (assetId) => {
+      setTab("assets");
+      setQuery("");
+      setFilter("all");
+      setFolder("all");
+      return !design?.assets.some((asset) => asset._id === assetId) || revealItem(assetId);
+    },
+  }, Boolean(design));
   if (!design) return <Loading label="Loading assets" variant="grid" />;
   const needle = query.trim().toLowerCase();
   const folders = [...new Set(design.assets.flatMap((asset) => (asset.folder ? [asset.folder] : [])))].sort();
@@ -81,7 +91,7 @@ function Assets({ projectId, canEdit, projectName, botId }: { projectId: string;
             {assets.map((asset) => {
               const href = asset.fileUrl || asset.url || undefined;
               return (
-                <article key={asset._id} className={cn(cardClass, "group relative flex flex-col overflow-hidden")}>
+                <article key={asset._id} data-origin-item={asset._id} className={cn(cardClass, "group relative flex flex-col overflow-hidden")}>
                   <a href={href} target="_blank" rel="noreferrer" aria-label={`Open ${asset.name}`} className="flex h-32 items-center justify-center bg-inset">
                     {href && (asset.type === "image" || asset.type === "icon") ? <img src={href} alt={asset.name} loading="lazy" className="size-full object-contain" />
                       : href && asset.type === "video" ? <span className="relative flex size-full items-center justify-center"><Film size={30} className="absolute text-ink-tertiary" aria-hidden="true" /><video src={href} muted playsInline preload="metadata" className="relative size-full object-cover" /></span>

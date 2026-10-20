@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { CalendarDays, CalendarRange, Clapperboard, Heart, List, Loader2, Megaphone, MessageCircle, Plus, Repeat2, RotateCw, Send, ShieldCheck } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
+import { useItemFocus } from "@/lib/origin-item-focus";
 import { api, useStore, type Bot } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { BROADCAST_CHANNELS, BROADCAST_RULES, type BroadcastFormat } from "../../../shared/broadcast";
@@ -32,6 +33,15 @@ function Broadcast({ projectId, projectName, canEdit: projectEdit, agent }: { pr
   const [open, setOpen] = useState<Opened | null>(null);
   const moving = useAction();
   const connect = useCallback(() => dispatch({ type: "toggleAppSettings", open: true, section: "integrations" }), [dispatch]);
+  useItemFocus(projectId, {
+    post: (postId) => {
+      const post = data?.posts.find((candidate) => candidate._id === postId);
+      setMode("posts");
+      if (post) setOpen({ post });
+      return true;
+    },
+    campaign: () => { setMode("campaigns"); return false; },
+  }, Boolean(data));
   if (!data) return <Loading label="Loading posts" variant="board" />;
   const canEdit = projectEdit && data.canEdit;
   const posts = data.posts;

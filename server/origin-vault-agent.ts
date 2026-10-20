@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import { addHeldSecretScrubber, HELD_SECRET_MASK } from "../shared/redact.ts";
 import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, type OriginCloudClient, type OriginCloudState, type OriginToolResult } from "./origin-cloud.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
+import { capped } from "../shared/origin-chat-cards.ts";
+import { vaultCardItem } from "../shared/origin-chat-card-items.ts";
 
 export const VAULT_AGENT_ROUTE = "/api/origin/vault/agent-secrets";
 const VALUE_MAX = 16_384;
@@ -16,6 +18,7 @@ export interface VaultToolScope {
   client: OriginCloudClient;
   sessionToken: string;
   projectId: string;
+  projectName?: string;
 }
 
 const list = (value: unknown): Credential[] => (Array.isArray(value) ? value.filter((row): row is Credential => Boolean(row) && typeof row === "object" && typeof (row as Credential).title === "string") : []);
@@ -88,7 +91,7 @@ export function createVaultAgentSecrets(options: { cloud?: () => OriginCloudStat
 
   const tools = <C>(scope: (args: Args, ctx: C) => Promise<VaultToolScope>) => ({
     async origin_vault_list(args: Args, ctx: C): Promise<OriginToolResult> {
-      const { client, sessionToken, projectId } = await scope(args, ctx);
+      const { client, sessionToken, projectId, projectName } = await scope(args, ctx);
       const [rows, project] = await Promise.all([credentials(client, sessionToken, projectId), (client.query("projects:get", { projectId, sessionToken }) as Promise<{ memberRole?: string } | null>).catch(() => null)]);
       if (!rows.length) return { text: "This Origin project's vault is empty." };
       const editor = Boolean(project?.memberRole) && project?.memberRole !== "viewer";
@@ -97,7 +100,11 @@ export function createVaultAgentSecrets(options: { cloud?: () => OriginCloudStat
         const parts = [row.title, row.kind || "secret", row.username && `username ${row.username}`, row.url];
         return `- ${parts.filter(Boolean).join(" · ")}${value !== undefined ? `\n  value: ${value}` : row.agentUse ? " (agents may use it once a member unlocks the vault)" : ""}`;
       });
-      return { text: `Vault entries. A value shows only for an item a member marked usable by agents and unlocked on this computer; use it where the work needs it (an environment file, a config field) and never repeat it in chat, an issue or a commit. Other values stay encrypted with the person's passphrase; ask for one with request_credential.\n${lines.join("\n")}` };
+      const { items, more } = capped(rows.map(vaultCardItem));
+      return {
+        text: `Vault entries. A value shows only for an item a member marked usable by agents and unlocked on this computer; use it where the work needs it (an environment file, a config field) and never repeat it in chat, an issue or a commit. Other values stay encrypted with the person's passphrase; ask for one with request_credential. The person sees the entries' names on a card in chat, never their values.\n${lines.join("\n")}`,
+        card: { kind: "vault", projectId, ...(projectName ? { projectName } : {}), items, ...(more ? { more } : {}) },
+      };
     },
   });
 

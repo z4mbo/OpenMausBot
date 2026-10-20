@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useCloudQuery } from "@/lib/origin-cloud";
+import { revealItem, useItemFocus } from "@/lib/origin-item-focus";
 import { originGitHub, type PullState, type RepoPull, type RepoSnapshot, type ReviewDecision } from "@/lib/origin-github";
 import { cn } from "@/lib/cn";
 import type { CloudBoard, CloudProject, CloudTask } from "./cloud-types";
@@ -64,6 +65,7 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
   const [message, setMessage] = useState("");
   const action = useAction();
   const previews = useShipPreviews(href ? projectId : null, (snapshot?.pullRequests ?? []).filter((pr) => pr.state === "open" || pr.state === "draft"));
+  useItemFocus(projectId, { repo: (itemId) => !snapshot?.pullRequests.some((pr) => `pr:${pr.number}` === itemId) || revealItem(itemId) }, Boolean(snapshot) || Boolean(error));
 
   if (!project.repoUrl) {
     return <EmptyState icon={<FolderGit2 size={22} />} title="No repository linked" body="Link or create the project's GitHub repository in Settings. Its issues, pull requests and commits then show here."
@@ -133,7 +135,7 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
           {!snapshot && loading ? <Placeholder /> : !pulls.length ? <Empty>{error ? "Unavailable." : "No pull requests yet."}</Empty> : (
             <ul className="flex flex-col gap-2">
               {pulls.map((pr) => (
-                <li key={pr.number}>
+                <li key={pr.number} data-origin-item={`pr:${pr.number}`}>
                   <PullCard pr={pr} previews={previews[pr.number]} issueKey={(number) => { const task = keyFor(number); return task ? taskKey(task._id) : `#${number}`; }}
                     canReview={isAdmin && (pr.state === "open" || pr.state === "draft")} busy={action.busy} onReview={(kind) => void review(pr, kind)} />
                 </li>

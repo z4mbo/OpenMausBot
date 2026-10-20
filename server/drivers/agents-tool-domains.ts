@@ -27,6 +27,7 @@ export const DEFERRED_TOOL_DOMAINS: readonly DeferredToolDomain[] = [
   { prefix: "origin_ship_", words: "ship deploy deployment release production preview vercel netlify cloudflare pages rollback promote live site",
     tools: { origin_ship_deploy: "redeploy push live go roll back" } },
   { prefix: "origin_release_", words: "release notes changelog version tag ship merged publish announce" },
+  { prefix: "origin_call_", words: "call meeting recap summary notes minutes action items decisions follow-ups what did we decide" },
   { prefix: "origin_pulse", words: "pulse dashboard metrics numbers kpi stats progress how are we doing overview" },
   { prefix: "origin_doc_", words: "document doc docs brief spec prd requirements notes wiki write read" },
   { prefix: "origin_milestone_", words: "milestone roadmap mvp launch deadline target date progress plan" },

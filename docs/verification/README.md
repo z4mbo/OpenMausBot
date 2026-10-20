@@ -81,6 +81,7 @@ Use only mapped, tested commands:
 - [Workspace integrations every member can use](origin-shared-integrations.md)
 - [Connect your stack: the guided Integrations checklist](origin-integrations-stack.md)
 - [Studio: create, workflows and Assets](origin-studio.md)
+- [Origin cards in agent chat](origin-chat-cards.md)
 - [Brand kit across Canvas, Pages and Studio](origin-brand-kit.md)
 - [Canvas design tools, collaboration and agents](origin-canvas-pro.md)
 - [Launchpad, project Docs and milestones](origin-launchpad.md)

@@ -13,4 +13,9 @@ export const STANDUP_TOOL_DEFINITIONS: ToolDefinition[] = [
     description: "How an Origin project is doing, in numbers over the last 7 or 30 days: its stage (Idea, Build, Launch, Grow), issues done and opened, cycle time, PRs waiting, pages live and views, posts published and engagement, leads by stage, conversion, pipeline value, unread replies, agent runs and spend against budget, and what needs a person. Without project, every project you reach.",
     inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT, range: { type: "integer", enum: [7, 30], description: "Days to cover. Default 7." } } },
   },
+  {
+    name: "origin_call_notes",
+    description: "The latest call of an Origin project from the last week that still has action items: its key points, decisions and action items with the issues already drafted from them. The person sees it as a card that drafts the rest as issues.",
+    inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
+  },
 ];

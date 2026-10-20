@@ -24,6 +24,7 @@ export const READ_ONLY_AGENT_TOOL_NAMES: ReadonlySet<string> = new Set([
   "origin_canvas_screenshot",
   "origin_page_list",
   "origin_pulse",
+  "origin_call_notes",
   "origin_broadcast_list",
   "origin_studio_list",
   "origin_studio_workflow_list",

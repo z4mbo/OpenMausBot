@@ -3,6 +3,7 @@ import {
   AudioLines, Check, ChevronLeft, CircleDot, Copy, Film, Heart, Link2, MessageCircle, Megaphone, Pencil, Plus, RefreshCw, Repeat2, Sparkles, Trash2,
 } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
+import { useItemFocus } from "@/lib/origin-item-focus";
 import { api, useStore, type Bot } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { useCopyFeedback } from "@/lib/copy-text";
@@ -45,6 +46,12 @@ export function CampaignsView({ projectId, projectName, canEdit, agent, posts, c
 }) {
   const data = useCloudQuery<CampaignList>("campaigns:list", { projectId });
   const [openId, setOpenId] = useState<string | null>(null);
+  useItemFocus(projectId, {
+    campaign: (campaignId) => {
+      if (data?.campaigns.some((campaign) => campaign._id === campaignId)) setOpenId(campaignId);
+      return true;
+    },
+  }, Boolean(data));
   if (!data) return <Loading label="Loading campaigns" variant="grid" />;
   const editable = canEdit && data.canEdit;
   const open = openId ? data.campaigns.find((campaign) => campaign._id === openId) : undefined;
