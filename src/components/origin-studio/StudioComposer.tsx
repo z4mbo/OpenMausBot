@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
-import { AudioLines, Check, ChevronDown, Clapperboard, Image as ImageIcon, KeyRound, Loader2, Plus, Sparkles, UserRound, Wand2, WandSparkles, X } from "lucide-react";
+import { AudioLines, Check, ChevronDown, Clapperboard, Image as ImageIcon, KeyRound, LayoutGrid, Loader2, Plus, Sparkles, UserRound, Wand2, WandSparkles, X } from "lucide-react";
 import { useCloudQuery } from "@/lib/origin-cloud";
 import { useStore } from "@/state/store";
 import { useBrandKit } from "@/lib/origin-brand";
@@ -12,6 +12,8 @@ import { StudioModelPicker } from "./StudioModelPicker";
 import { KIND_ICON, MediaThumb, Popover, studioPost, type SourceRef, type StudioDraft } from "./studio-ui";
 import { studioModel, studioModelsFor, type StudioCharacter, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel } from "../../../shared/studio";
 import { brandedPrompt, type BrandKit } from "../../../shared/brand-kit";
+import { presetBlank, presetPromptText, studioPreset, type StudioPreset } from "../../../shared/studio-presets";
+import { StudioPresetGallery, draftForPreset, presetImage } from "./StudioPresets";
 
 export const STUDIO_MODES: readonly { value: StudioMode; label: string; icon: typeof ImageIcon }[] = [
   { value: "image", label: "Image", icon: ImageIcon },
@@ -34,7 +36,7 @@ export function emptyDraft(mode: StudioMode = "image"): StudioDraft {
 /** The draft after switching to a model: sources it cannot take are dropped, settings it lacks are cleared. */
 export function draftForModel(draft: StudioDraft, model: StudioModel): StudioDraft {
   return {
-    ...draft, mode: model.mode, model: model.id,
+    ...draft, mode: model.mode, model: model.id, preset: draft.preset && studioPreset(draft.preset)?.model === model.id ? draft.preset : undefined,
     sources: model.needs.map((kind, index) => draft.sources[index]?.kind === kind ? draft.sources[index]! : null).filter((ref): ref is SourceRef => ref !== null),
     references: draft.references.slice(0, model.references ?? 0), count: Math.min(draft.count, model.maxCount),
   };
@@ -120,6 +122,8 @@ function CharacterChip({ library, value, disabled, onChange, onManage }: {
 export interface StudioComposerHandle {
   focus(): void;
   openModels(): void;
+  openPresets(): void;
+  applyPreset(preset: StudioPreset): void;
   generate(): void;
   toggleBrand(): void;
 }
@@ -137,10 +141,13 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
   const [useBrand, setUseBrand] = useState(true);
   const [picking, setPicking] = useState<{ slot: "source" | "reference"; index: number; kind: StudioMediaKind } | null>(null);
   const [models, setModels] = useState(false);
+  const [presets, setPresets] = useState(false);
+  const selectBlank = useRef(false);
   const action = useAction();
   const enhancing = useAction();
   const prompt = useRef<HTMLTextAreaElement>(null);
   const model = studioModel(draft.model) ?? studioModelsFor(draft.mode)[0]!;
+  const preset = draft.preset ? studioPreset(draft.preset) : undefined;
   const patch = (next: Partial<StudioDraft>) => onDraft({ ...draft, ...next });
   const branded = Boolean(brand) && (draft.mode === "image" || draft.mode === "video") && !model.needs.includes("video");
   const follows = model.kind !== "audio" && model.prompt !== "none" && !model.needs.includes("video");
@@ -150,7 +157,19 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
     if (!field) return;
     field.style.height = "auto";
     field.style.height = `${Math.min(field.scrollHeight, 220)}px`;
-  }, [draft.prompt]);
+    if (!selectBlank.current) return;
+    selectBlank.current = false;
+    const blank = presetBlank(draft.prompt);
+    field.focus();
+    if (blank) field.setSelectionRange(blank.start, blank.end);
+    else if (draft.mode === "audio") field.select();
+    else field.setSelectionRange(draft.prompt.length, draft.prompt.length);
+  }, [draft.prompt, draft.preset, draft.mode]);
+
+  const applyPreset = (next: StudioPreset) => {
+    selectBlank.current = true;
+    onDraft(draftForPreset(draft, next));
+  };
 
   const missing = model.needs.findIndex((kind, index) => draft.sources[index]?.kind !== kind);
   const ready = canEdit && falReady === true && (model.prompt !== "required" || draft.prompt.trim()) && missing < 0;
@@ -159,7 +178,8 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
     if (!ready || action.busy) return;
     void action.run(async () => {
       await studioPost("generate", {
-        projectId, mode: draft.mode, model: model.id, prompt: draft.prompt, count: draft.count,
+        projectId, mode: draft.mode, model: model.id, prompt: preset && model.family !== "tts" ? presetPromptText(draft.prompt) : draft.prompt, count: draft.count,
+        ...(preset ? { preset: preset.id } : {}), ...(model.angles && draft.angle ? { angle: draft.angle } : {}),
         ...(draft.aspectRatio ? { aspectRatio: draft.aspectRatio } : {}), ...(draft.duration ? { duration: draft.duration } : {}),
         ...(draft.resolution ? { resolution: draft.resolution } : {}), ...(draft.voice ? { voice: draft.voice } : {}),
         ...(draft.seed !== undefined ? { seed: draft.seed } : {}), ...(draft.negativePrompt?.trim() ? { negativePrompt: draft.negativePrompt } : {}),
@@ -183,6 +203,8 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
   useImperativeHandle(handle, () => ({
     focus: () => prompt.current?.focus(),
     openModels: () => setModels(true),
+    openPresets: () => setPresets(true),
+    applyPreset,
     generate,
     toggleBrand: () => setUseBrand((on) => !on),
   }));
@@ -226,6 +248,19 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
             </button>
           ))}
         </div>
+        {preset ? (
+          <span className={cn(chipButton, "gap-2 border-accent/50 pl-1 pr-1 text-ink")} data-studio-preset={preset.id}>
+            <button type="button" className="flex min-w-0 items-center gap-2" onClick={() => setPresets(true)} disabled={!canEdit} title={`${preset.description} (T)`}>
+              <img src={presetImage(preset.id)} alt="" className="size-6 shrink-0 rounded-full object-cover" />
+              <span className="truncate">{preset.label}</span>
+            </button>
+            <button type="button" aria-label={`Stop using ${preset.label}`} onClick={() => onDraft(emptyDraft(draft.mode))} disabled={!canEdit} className="flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
+          </span>
+        ) : (
+          <button type="button" className={chipButton} disabled={!canEdit} onClick={() => setPresets(true)} title="Presets (T)" data-studio-presets-button>
+            <LayoutGrid size={13} /><span className="max-sm:hidden">Presets</span>
+          </button>
+        )}
         {draft.parent && (
           <span className={cn(chipButton, "pr-1 capitalize text-ink")}>
             {draft.parent.action}
@@ -236,7 +271,7 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
           <div className="contents" data-studio-sources>
             {model.needs.map((kind, index) => (
               <SourceChip key={`${kind}-${index}`} value={draft.sources[index]?.kind === kind ? draft.sources[index] : undefined} kind={kind} disabled={!canEdit}
-                label={`${kind === "image" ? "Image" : kind === "video" ? "Video" : "Audio"}${model.needs.length > 1 ? ` ${index + 1}` : ""}`}
+                label={model.inputLabels?.[index] ?? `${kind === "image" ? "Image" : kind === "video" ? "Video" : "Audio"}${model.needs.length > 1 ? ` ${index + 1}` : ""}`}
                 onPick={() => setPicking({ slot: "source", index, kind })} onClear={() => patch({ sources: draft.sources.filter((_, other) => other !== index) })} />
             ))}
             {draft.references.map((ref, index) => (
@@ -286,6 +321,7 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
       </div>
       {(action.error || enhancing.error) && <Notice tone="danger">{action.error || enhancing.error}</Notice>}
       {models && <StudioModelPicker mode={draft.mode} current={model.id} rows={rows} onClose={() => setModels(false)} onPick={(next) => { onDraft(draftForModel(draft, next)); setModels(false); prompt.current?.focus(); }} />}
+      {presets && <StudioPresetGallery current={draft.preset} onClose={() => setPresets(false)} onPick={(next) => { setPresets(false); applyPreset(next); }} />}
       {picking && <StudioMediaPicker projectId={projectId} kind={picking.kind} rows={rows} title={picking.slot === "reference" ? "Choose a reference image" : undefined} assetsOnly={picking.slot === "reference"} onPick={pickRef} onClose={() => setPicking(null)} />}
     </div>
   );

@@ -2570,11 +2570,49 @@
     },
     {
       "name": "origin_studio_generate",
-      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. Images and audio wait for the result (up to 40 s); video returns at once. Acts on your team's Origin project unless you pass project.",
+      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. preset picks a ready-made effect from origin_studio_presets. Images and audio wait for the result (up to 40 s); video returns at once. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "preset": {
+            "type": "string",
+            "enum": [
+              "motion-transfer",
+              "animate-character",
+              "character-swap",
+              "talking-photo",
+              "lip-sync",
+              "start-end-frame",
+              "restyle-video",
+              "product-turntable",
+              "extend-video",
+              "video-background",
+              "video-upscale",
+              "camera-angle",
+              "relight",
+              "expand-frame",
+              "style-match",
+              "illustration-to-photo",
+              "turnaround",
+              "contact-sheet",
+              "remove-object",
+              "object-swap",
+              "miniature",
+              "glitch",
+              "thumbnail",
+              "remove-background",
+              "upscale",
+              "virtual-try-on",
+              "product-scene",
+              "product-mockup",
+              "fashion-editorial",
+              "voice-over",
+              "song",
+              "sound-effect"
+            ],
+            "description": "A ready-made effect from origin_studio_presets: its model, settings and prompt, unless you pass your own."
+          },
           "mode": {
             "type": "string",
             "enum": [
@@ -2598,6 +2636,7 @@
               "fal-ai/flux-2-pro",
               "fal-ai/krea-2/turbo",
               "fal-ai/flux/schnell",
+              "fal-ai/krea-2/turbo/style",
               "fal-ai/veo3.1",
               "fal-ai/veo3.1/fast",
               "fal-ai/kling-video/v3/pro/text-to-video",
@@ -2605,7 +2644,15 @@
               "fal-ai/veo3.1/image-to-video",
               "fal-ai/kling-video/v3/pro/image-to-video",
               "bytedance/seedance-2.5/image-to-video",
+              "fal-ai/kling-video/v3/pro/start-end",
+              "fal-ai/kling-video/v3/pro/motion-control",
+              "fal-ai/kling-video/v3/standard/motion-control",
+              "fal-ai/wan/v2.2-14b/animate/move",
+              "fal-ai/wan/v2.2-14b/animate/replace",
+              "fal-ai/kling-video/o3/pro/video-to-video/edit",
+              "bria/video/background-removal/v3",
               "fal-ai/kling-video/ai-avatar/v2/pro",
+              "fal-ai/sync-lipsync/v3",
               "fal-ai/sync-lipsync/v2",
               "fal-ai/veo3.1/fast/extend-video",
               "fal-ai/topaz/upscale/video",
@@ -2615,6 +2662,10 @@
               "fal-ai/elevenlabs/music",
               "fal-ai/elevenlabs/sound-effects/v2",
               "fal-ai/nano-banana-pro/edit",
+              "fal-ai/qwen-image-edit-2511-multiple-angles",
+              "fal-ai/iclight-v2",
+              "fal-ai/fashn/tryon/v1.6",
+              "fal-ai/bria/product-shot",
               "fal-ai/bria/background/remove",
               "fal-ai/seedvr/upscale/image",
               "fal-ai/topaz/upscale/image",
@@ -2629,7 +2680,7 @@
               "type": "string",
               "maxLength": 70
             },
-            "description": "What the model starts from, in order (image, video or audio): asset ids from origin_list_assets, or generation ids with an optional :index."
+            "description": "What the model starts from, in order (image, video or audio): asset ids from origin_list_assets, or generation ids with an optional :index. Presets and models that take two take them in their listed order, such as the character image then the motion video."
           },
           "reference_asset_ids": {
             "type": "array",
@@ -2680,6 +2731,22 @@
               "zoom-in"
             ],
             "description": "Video camera move."
+          },
+          "camera_angle": {
+            "type": "string",
+            "enum": [
+              "three-quarter-right",
+              "right",
+              "back",
+              "left",
+              "three-quarter-left",
+              "high",
+              "top",
+              "low",
+              "close",
+              "wide"
+            ],
+            "description": "The viewpoint the Camera angles model re-renders an image from."
           },
           "negative_prompt": {
             "type": "string",
@@ -2882,6 +2949,38 @@
         "required": [
           "workflow_id"
         ]
+      }
+    },
+    {
+      "name": "origin_studio_presets",
+      "description": "List Studio's ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt template. Pass an id as preset to origin_studio_generate. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "group": {
+            "type": "string",
+            "enum": [
+              "motion",
+              "video",
+              "photo",
+              "product",
+              "audio"
+            ],
+            "description": "Only this group."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
       }
     },
     {

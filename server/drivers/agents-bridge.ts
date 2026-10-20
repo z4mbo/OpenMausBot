@@ -57,7 +57,7 @@ export const FIND_MATCHES_MAX = 3;
 const FIND_CHARS_MAX = 20_000;
 const QUERY_CHARS = 1_000;
 /** Room for the hidden tools' names in find_tool's own description. */
-export const BRIDGE_NAMES_MAX_CHARS = 1_600;
+export const BRIDGE_NAMES_MAX_CHARS = 1_700;
 /** Room kept to say how many names were left out. */
 const MORE_NAMES_CHARS = 24;
 

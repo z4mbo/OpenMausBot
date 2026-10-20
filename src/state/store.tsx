@@ -126,7 +126,7 @@ export interface SecretRequestCardData {
 
 export type ComputerControlState = { held: boolean; helpReason: string | null; help?: import("../../shared/wire").ComputerHelpRef | null };
 
-export interface Message extends Pick<import("../../shared/wire").WireMessage, "widget" | "routedBy" | "quickModel" | "remote"> {
+export interface Message extends Pick<import("../../shared/wire").WireMessage, "widget" | "routedBy" | "quickModel" | "remote" | "originIssues" | "originStudio" | "originPullRequest"> {
   id: string;
   role: "bot" | "user";
   kind: "text" | "options" | "activity" | "screen" | "connector" | "secret" | "signin" | "routine.run" | "goal.run" | "digest" | "compaction" | "call" | "widget";
@@ -166,8 +166,6 @@ export interface Message extends Pick<import("../../shared/wire").WireMessage, "
   comm?: { groupId: string; threadId?: string; withBotId: string; withName: string; withColor: MausColor };
   threadRef?: { botId: string; threadId: string; title: string };
   dataResult?: import("../../shared/wire").WireMessage["dataResult"];
-  originIssues?: import("../../shared/wire").WireMessage["originIssues"];
-  originPullRequest?: import("../../shared/wire").WireMessage["originPullRequest"];
   queued?: boolean;
   queueId?: string;
 }

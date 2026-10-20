@@ -1,10 +1,10 @@
 import { useCallback, useRef, useState } from "react";
-import { Camera, Check, Dices, Loader2, Mic, Pause, Play, SlidersHorizontal, Volume2, VolumeX } from "lucide-react";
+import { Camera, Check, Dices, Loader2, Mic, Pause, Play, Rotate3d, SlidersHorizontal, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import { chipButton, inputClass } from "../origin-pages/ui";
 import { Popover, studioPost, type StudioDraft } from "./studio-ui";
-import { STUDIO_CAMERA_MOTIONS, STUDIO_VOICES, type StudioModel } from "../../../shared/studio";
+import { STUDIO_CAMERA_ANGLES, STUDIO_CAMERA_MOTIONS, STUDIO_VOICES, type StudioModel } from "../../../shared/studio";
 
 type Patch = (patch: Partial<StudioDraft>) => void;
 
@@ -125,6 +125,11 @@ export function StudioControls({ model, draft, disabled, patch }: { model: Studi
       {model.resolutions && (
         <Select variant="pill" size="sm" aria-label="Resolution" value={valueOf(model.resolutions, draft.resolution)} disabled={disabled} onChange={(event) => patch({ resolution: event.target.value })}>
           {model.resolutions.map((value) => <option key={value} value={value}>{value.toUpperCase().replace("P", "p")}</option>)}
+        </Select>
+      )}
+      {model.angles && (
+        <Select variant="pill" size="sm" icon={<Rotate3d size={13} />} aria-label="Camera angle" value={valueOf(STUDIO_CAMERA_ANGLES.map((angle) => angle.id), draft.angle)} disabled={disabled} onChange={(event) => patch({ angle: event.target.value })}>
+          {STUDIO_CAMERA_ANGLES.map((angle) => <option key={angle.id} value={angle.id}>{angle.label}</option>)}
         </Select>
       )}
       {model.voices && <VoicePicker value={valueOf(model.voices, draft.voice)} disabled={disabled} onChange={(voice) => patch({ voice })} />}
