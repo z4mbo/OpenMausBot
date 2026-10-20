@@ -1,0 +1,22 @@
+
+ RUN  v4.1.11 <isolated-worktree>
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+···························
+
+ Test Files  4 passed (4)
+      Tests  27 passed (27)
+   Start at  10:13:26
+   Duration  25.68s (transform 905ms, setup 883ms, import 1.82s, tests 22.38s, environment 0ms)
+

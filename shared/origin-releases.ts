@@ -3,7 +3,7 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.4.1",
+  version: "0.4.2",
   date: "2026-10-20",
   title: "Model continuity and shared project work",
   changes: [

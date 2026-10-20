@@ -1,0 +1,266 @@
+{
+  "status": "EXISTING_PROOF_ARCHIVED_CI041_FINAL_COMPLETE_FAILED",
+  "archivedAt": "2026-10-20T08:21:07.161Z",
+  "cycle": "049",
+  "candidateVersion": "0.4.2",
+  "sourceBindings": {
+    "baseline041": "daeb5096f6b880443e408c304cb9a7b76004d865",
+    "candidate042FinalSource": null,
+    "phoneCopyCommit": "bfccd2a3f6f266860f01338221fdeb192e91602f",
+    "hostileExpectationCommit": "40bb8be3a0442a434665bd4aa1d1101268813bf2",
+    "commitObjectsVerifiedLocally": true,
+    "acceptanceBoundary": "Existing proof and corrections only; no 0.4.2 freeze, fresh full CI/native build or delivery acceptance implied",
+    "correctionReceiptSourceBindingComplete": true
+  },
+  "ci041": {
+    "observedAt": "2026-10-20T08:17:44.091Z",
+    "runId": 39387873201,
+    "status": "completed",
+    "conclusion": "failure",
+    "totalJobs": 20,
+    "completedJobs": 20,
+    "passedShards": 6,
+    "failedShards": 2,
+    "failedJobs": [
+      {
+        "id": 118513066904,
+        "name": "vitest (ubuntu-latest, shard 4/4)",
+        "conclusion": "failure"
+      },
+      {
+        "id": 118513067305,
+        "name": "vitest (windows-latest, shard 4/4)",
+        "conclusion": "failure"
+      },
+      {
+        "id": 118526136913,
+        "name": "CI",
+        "conclusion": "failure"
+      }
+    ],
+    "pendingJobs": [],
+    "linux4": {
+      "failed": 1,
+      "passed": 4573,
+      "skipped": 31
+    },
+    "windows4": {
+      "failed": 1,
+      "passed": 4507,
+      "skipped": 97
+    }
+  },
+  "phoneCorrection": {
+    "red": 3,
+    "deselected": 63,
+    "green": 66,
+    "files": 2,
+    "protocolChanged": false,
+    "mobileOriginAvailabilityClaimed": false
+  },
+  "correctedHostileLocalAttempt": {
+    "defaultDiscovery": {
+      "executedBrowserCases": 0,
+      "skipped": 4,
+      "originalLogName": "hostile-notice-green.log"
+    },
+    "explicitExistingCacheRun": {
+      "platform": "Windows",
+      "passed": 1,
+      "filteredOrPlatformSkipped": 3,
+      "version": "156.0.8078.4",
+      "binarySha256": "7f08161bbeb2853ffe1780a9ded4985087f52efb9725d7d8207aabdd42f7cfb9",
+      "providerAccountsUsed": false,
+      "productionDataUsed": false,
+      "noOptionalPublicPageCheckSkipLogged": true,
+      "proved": [
+        "blocked own-service request",
+        "zero stand-in service hits",
+        "correct Origin notice",
+        "public navigation"
+      ]
+    },
+    "freshUbuntuWindowsGlobalAcceptance": "Pending next0.4.2 CI"
+  },
+  "rootReleaseDocGuards": {
+    "passed": 27,
+    "files": 4,
+    "rerunByArchiveLane": false
+  },
+  "deliveryOperatorGuardChecks": {
+    "node": 5,
+    "python": 2,
+    "shippingAppTestCoverage": false,
+    "productionMutations": 0
+  },
+  "inputs": [
+    {
+      "source": ".omb-scratch/ci-048/final041/branding-correction.json",
+      "rawBytes": 4131,
+      "rawSha256": "f7e950d21f094190eaf1ac63c39daecefc5500441ebf7fc950c379b6f3151546",
+      "output": "branding-correction.json",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/phone-companion-green.log",
+      "rawBytes": 257,
+      "rawSha256": "ebef42be46290b278291db162593fc73af0cae4cb7a361c769366006024268f1",
+      "output": "phone-companion-green.log",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/hostile-notice-green.log",
+      "rawBytes": 256,
+      "rawSha256": "ede9ba44b3188273c0446860696370eaba7edc465e0be3131eeffcf02bc2d044",
+      "output": "hostile-notice-local-SKIPPED.log",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/brand-corrections-lint.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output": "brand-corrections-lint.log",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/actual-checkouts.json",
+      "rawBytes": 1694,
+      "rawSha256": "891318a071be2d96c20077d0eff6d429270162ac224d4e2265fe1cf6325f026c",
+      "output": "actual-checkouts.json",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/checkout-equivalence.json",
+      "rawBytes": 471,
+      "rawSha256": "116875538c361bbdb6587aabb14872b3249eabb1ae5cb871f3c1e0ffa0a94fee",
+      "output": "checkout-equivalence.json",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/native-artifacts.json",
+      "rawBytes": 1386,
+      "rawSha256": "1e1882e9e3dbc62cac4ede2aecaab703286342285d1173144d16125d4db95d02",
+      "output": "native041-artifact-metadata.json",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/observation.json",
+      "rawBytes": 9167,
+      "rawSha256": "c82882f9ccb8819ada0b40aaddd13f7e7a94122e2b76b2d97a9e2aca193327f7",
+      "output": "ci041-observation-snapshot.json",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/final-checks-049/release-doc-guards.log",
+      "rawBytes": 792,
+      "rawSha256": "792dde0cd4efb356baef386b1c6b7fdd5e67f48ff442498f7acfcc324a09f723",
+      "output": "release-doc-guards.log",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/public-delivery-048/GUARD-REVIEW.json",
+      "rawBytes": 2101,
+      "rawSha256": "11ac4341c14342ae33e171456e1c3bca34623842c9d544d89638655c729e38e2",
+      "output": "delivery-guard-review.json",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/public-delivery-048/guard-review-node.log",
+      "rawBytes": 596,
+      "rawSha256": "7264c9240202ae28a50d60297f4447096d27886b03e77998b8d575bdcf2facbf",
+      "output": "delivery-guard-node.log",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/public-delivery-048/guard-review-python.log",
+      "rawBytes": 100,
+      "rawSha256": "6f283ee6225d2cef4c0127d95456a6f954c45141c92b97dd89016cb1c630e8f4",
+      "output": "delivery-guard-python.log",
+      "transformation": "ANSI/root-path sanitization only"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/phone-companion-red.log",
+      "rawBytes": 8322,
+      "rawSha256": "5ff9d55620246817f944e922a1e1d73f53cb3c2e5b1d094844a64843cf5659d8",
+      "output": "phone-companion-red-excerpt.log",
+      "selectedSourceLines": [
+        12,
+        18,
+        26,
+        66,
+        76,
+        77,
+        82,
+        83,
+        88,
+        91,
+        98,
+        99,
+        104,
+        105,
+        110,
+        113,
+        121,
+        122,
+        123,
+        124
+      ],
+      "transformation": "Only three failing test headings, phone product wording/assertion lines, stack locations and totals; synthetic QR/pairing code/invite output omitted"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/ubuntu4-118513066904.clean.log",
+      "rawBytes": 229075,
+      "rawSha256": "5533a208fd193438feb42b4efa23067eac7a6151a90f4b621110a2e2c53a82dc",
+      "output": "linux041-ubuntu4-failure-excerpt.log",
+      "firstSourceLine": 2579,
+      "lastSourceLine": 2601,
+      "transformation": "Bounded failed-test through totals excerpt only; CI environment/setup/cleanup omitted"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/ubuntu4-118513066904.raw.log",
+      "rawBytes": 276262,
+      "rawSha256": "5a1fbcc9e60ad0ba78c7fa8537e67e611bb06be4e9f2f1952942aadd4a94d6eb",
+      "output": null,
+      "transformation": "Hash only; full CI log remains ignored"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/windows4-118513067305.clean.log",
+      "rawBytes": 257115,
+      "rawSha256": "b9761cae1c2d41cc965ced50e5e3395cc74447bc057095bc803bb9e26b02209e",
+      "output": "windows041-shard4-failure-excerpt.log",
+      "firstSourceLine": 2786,
+      "lastSourceLine": 2808,
+      "transformation": "Bounded failed-test through totals excerpt only; CI environment/setup/cleanup omitted"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/windows4-118513067305.raw.log",
+      "rawBytes": 307447,
+      "rawSha256": "eb5b99074b816853a6854ca83d5133b226edb7174977376d9c831088811e144e",
+      "output": null,
+      "transformation": "Hash only; full CI log remains ignored"
+    },
+    {
+      "source": ".omb-scratch/ci-048/final041/hostile-notice-actual-green.log",
+      "rawBytes": 268,
+      "rawSha256": "a14d4d6673da4f8430b29824e247fe34f4f4a33c8bb110b03f68d48ccae7206a",
+      "output": "hostile-notice-actual-green.log",
+      "transformation": "ANSI/root-path sanitization only"
+    }
+  ],
+  "performedByThisArchiveLane": {
+    "networkCalls": 0,
+    "testRuns": 0,
+    "sourceEdits": 0,
+    "stageOrCommit": 0,
+    "productionOperations": 0
+  },
+  "limits": [
+    "CI041 is final failed: identical stale product-string assertion on Ubuntu4/Windows4 plus aggregate failure; six other shards passed",
+    "Existing native/cloud/Docs041 success applies to immutable daeb/source0.4.1, not future0.4.2",
+    "Phone66 checks do not qualify a public Origin mobile app",
+    "Corrected Windows hostile notice case passed on existing Chromium; other3cases filtered/platform-skipped. Full fresh Ubuntu/Windows0.4.2 CI remains pending.",
+    "Delivery guard tests exercise ignored operators, not shipped app behavior",
+    "Prior048 UI/screenshots/client6275/backend293 retained by reference; no duplicate proof or rerun"
+  ],
+  "finalizedAt": "2026-10-20T08:22:38.646Z"
+}

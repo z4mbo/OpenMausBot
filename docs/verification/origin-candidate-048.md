@@ -1,5 +1,7 @@
 # Origin 0.4.1 integration candidate
 
+Held after final-source CI found a stale hostile-page expectation for the old product name. The correct product response was Origin. Native, backend/site and Docs jobs passed at immutable source `daeb5096f6b880443e408c304cb9a7b76004d865`; their receipts remain source-qualified. No 0.4.1 acquisition, draft, upload, backend credential/export/deployment, private website build or public promotion occurred. Its tag remains immutable, its operators remain unadmitted, and it is omitted from published What's new history. See the [0.4.2 correction candidate](origin-candidate-049.md).
+
 Prepared on 2026-10-20. This finite integration combines correction source `5aafbf02ab2ded075d2c75955419f35a45cce99a` with published 0.4.0 source `f76cbe9b8019b648bb08f9125daefe35e6625185`. Neither source or immutable tag is replaced. PR 3 still targets `origin-integration`; no app task PR is merged by this workflow.
 
 ## Concurrent publication and delivery boundary
@@ -28,9 +30,9 @@ The [combined local check receipt](evidence/origin-integration-048/global/README
 | --- | --- | --- |
 | P2 | `backend/convex/budgets.ts:162`: a workspace member outside a private project could read its agent budget by known ID. Project access now gates the query. | `1697edd4a79a65c7aed0e88199f63e659ebb31e4` |
 | P1 | `backend/convex/modelHosts.ts:26`: hosted runs could bypass a newly introduced monthly cap and omit its spend ledger. Admission/claim/start now enforce it, and fenced completion accounts once. | `a4af30264f6bf30e7fb48495589506db48c53ad1` |
-| P2 | At 375px, the monthly budget message pushed Model, Computer and More outside the viewport. A compact Wallet opens details and the admin editor; desktop keeps the full message. | `d03d8ddf8c78443f74d5c6ef07936b27d0651a26` |
-| P2 | Focusing Design in the editable Canvas scrolled Layers to x-99. Both panel toggles now stay visible while the central tools scroll; wheel events within that strip leave the canvas camera unchanged. | `ccb65fbab1dbfc5261b9bc6ae9b234448157a3d9`, `86b9326afd81d277117ec953b7a9b70caed07d07` |
-| P3 | New pairing, companion and egress messages displayed the upstream product name. Visible names now say Origin; protocol identifiers and legal notices retain compatibility. | `6d1c772d121d557e9742e71da8102f453d9e336f` |
+| P2 | `src/components/AgentBudgetPill.tsx:30`: at 375px, the monthly budget message pushed Model, Computer and More outside the viewport. A compact Wallet opens details and the admin editor; desktop keeps the full message. | `d03d8ddf8c78443f74d5c6ef07936b27d0651a26` |
+| P2 | `src/components/origin-pages/canvas/Toolbar.tsx:38`: focusing Design in the editable Canvas scrolled Layers to x-99. Both panel toggles now stay visible while the central tools scroll; wheel events within that strip leave the canvas camera unchanged. | `ccb65fbab1dbfc5261b9bc6ae9b234448157a3d9`, `86b9326afd81d277117ec953b7a9b70caed07d07` |
+| P3 | `server/cli-pairing.ts:32`, `companion/src/control.ts:294`, `server/browser/egress/policy.ts:21`: new pairing, companion and egress messages displayed the upstream product name. Visible names now say Origin; protocol identifiers and legal notices retain compatibility. | `6d1c772d121d557e9742e71da8102f453d9e336f` |
 
 The [UI archive](evidence/origin-integration-048/ui/README.md) contains 20 captures, actual component/fixture bindings, measured geometry and focused before/after failures. It also records the bounds of each interaction: synthetic data, blocked writes, local drafts cancelled, no real outbound sends or publication.
 

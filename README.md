@@ -27,9 +27,9 @@ Origin combines project management with the local agent runtime from [OpenMausBo
 | `docs/verification/` | Isolated fixture recipes and their evidence |
 | `scripts/` | Development controls, checks, build and packaging tools |
 
-## 0.4.1 candidate
+## 0.4.2 candidate
 
-The [0.4.1 candidate](docs/verification/origin-candidate-048.md) combines the published 0.4.0 Pages, Campaigns, pipeline sequences, monthly budgets and local-access security with per-agent ordered model backups, daily AI model API budgets, opt-in teammate model sources, shared-agent identity preservation, synchronized project order, specialist conversation navigation and compact Usage. The [0.3.2 candidate](docs/verification/origin-candidate-047.md) passed 6,254 client/shared tests but was held when 0.4.0 was published concurrently. Its fixes are carried forward, including readable narrow-window project tools and connection readiness. GitHub, the website, update feeds and backend are verified separately before delivery.
+The [0.4.2 candidate](docs/verification/origin-candidate-049.md) combines the published 0.4.0 Pages, Campaigns, pipeline sequences, monthly budgets and local-access security with per-agent ordered model backups, daily AI model API budgets, opt-in teammate model sources, shared-agent identity preservation, synchronized project order, specialist conversation navigation and compact Usage. The [0.3.2 candidate](docs/verification/origin-candidate-047.md) passed 6,254 client/shared tests but was held when 0.4.0 was published concurrently. Its fixes are carried forward, including readable narrow-window project tools and connection readiness. GitHub, the website, update feeds and backend are verified separately before delivery.
 
 Model backups are opt-in and follow up to five exact account/model choices. Only a provider-confirmed quota refusal can trigger quota fallback; unavailable Usage meters, sign-in failures and ordinary rate limits cannot. Origin automatically sends the original request again only when no reply, reasoning or tool action began and the first attempt has stopped. After partial work, switching models leaves the existing work for a person to continue. Paid API backups require their own permission.
 

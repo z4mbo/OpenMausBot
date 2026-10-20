@@ -1,0 +1,21 @@
+# Bounded wording/assertion excerpt. Full synthetic pairing output and QR remain ignored.
+L12:  FAIL  server/cli-lifecycle.test.ts > CLI startup lifecycle > offers Android client pairing only after verifying the same workspace, without claiming it is connected
+L18: - On Android, open a compatible companion app and scan the QR with its pairing scanner.
+L26: + On Android, open the OpenMausBot app and scan the QR with its pairing scanner. The QR is an app link, so Camera will not open it in a browser.
+L66:  ❯ server/cli-lifecycle.test.ts:311:20
+L76:  FAIL  server/cli-phone-setup.test.ts > phone pairing instructions > describes iOS browser/native options without claiming an app-store release
+L77: AssertionError: expected 'On iPhone or iPad, scan the QR with C…' to contain 'compatible companion app'
+L82: - compatible companion app
+L83: + On iPhone or iPad, scan the QR with Camera to open Safari. If you already have the OpenMausBot iOS app, use its pairing scanner or paste the full pairing link there.
+L88:  ❯ server/cli-phone-setup.test.ts:233:18
+L91:     233|     expect(text).toContain("compatible companion app");
+L98:  FAIL  server/cli-phone-setup.test.ts > phone pairing instructions > sends an Android phone to the app first, and still offers the browser
+L99: AssertionError: expected 'On Android, open the OpenMausBot app …' to contain 'open a compatible companion app and s…'
+L104: - open a compatible companion app and scan the QR with its pairing scanner
+L105: + On Android, open the OpenMausBot app and scan the QR with its pairing scanner. The QR is an app link, so Camera will not open it in a browser.
+L110:  ❯ server/cli-phone-setup.test.ts:242:18
+L113:     242|     expect(text).toContain("open a compatible companion app and scan t…
+L121:  Test Files  2 failed (2)
+L122:       Tests  3 failed | 63 skipped (66)
+L123:    Start at  10:12:07
+L124:    Duration  2.57s (transform 1.12s, setup 947ms, import 1.26s, tests 33ms, environment 0ms)

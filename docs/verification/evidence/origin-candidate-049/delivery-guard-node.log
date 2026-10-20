@@ -1,0 +1,13 @@
+✔ public admission pins source, authority, receipt hashes and old feed bytes (4.2015ms)
+✔ publication requires complete exact backend, full backup and finished credential cleanup (1.0589ms)
+✔ site baseline admits only the preserved old image or exact reviewed candidate (0.1306ms)
+✔ publication rejects live control and candidate file drift after prior HTTP verification (7.0148ms)
+✔ default plan and missing approval make no execution folder or external call (102.7808ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 167.6113

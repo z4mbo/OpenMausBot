@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "source": "daeb5096f6b880443e408c304cb9a7b76004d865",
+  "version": "0.4.1",
+  "cycle": "048",
+  "recordedAt": "2026-10-20T08:06:34.848Z",
+  "admitted": false,
+  "externalOperations": 0,
+  "networkCalls": 0,
+  "scope": "Bounded public delivery drift and image-lock guards",
+  "tests": {
+    "node": {
+      "exitCode": 0,
+      "passed": 5
+    },
+    "python": {
+      "exitCode": 0,
+      "passed": 2
+    },
+    "beforeGuards": {
+      "controlValidation": "failed: validator absent",
+      "imageOrdering": "two tests failed: no image inspection; wrong image admitted"
+    },
+    "unchangedFilesystemRollbackCases": "six existing PromotionTests preserved; not rerun"
+  },
+  "syntax": {
+    "nodeFiles": 3,
+    "pythonFiles": 2,
+    "passed": true
+  },
+  "helperManifestSha256": "685663740292f02fbd5e92baf35069d70e15f742ffcb43dcdd6e434808397004",
+  "files": [
+    {
+      "name": "public-delivery.mjs",
+      "sha256": "7b5393234b675d32fb0dac00c4b93df87c89f982d6bfe0316744a90c2222c028"
+    },
+    {
+      "name": "helpers.manifest.json",
+      "sha256": "685663740292f02fbd5e92baf35069d70e15f742ffcb43dcdd6e434808397004"
+    },
+    {
+      "name": "helpers/public-contract.mjs",
+      "sha256": "7da5c49da820ddbdebdc5ba6981cdabbd7109759a4063ea19da74f1d57b11aab"
+    },
+    {
+      "name": "helpers/promote-downloads-048.py",
+      "sha256": "e1951916ff5aee7ca9ac0ca5e4908d40aee2353012986627da30e07c6e1d3fd2"
+    },
+    {
+      "name": "public-delivery.test.mjs",
+      "sha256": "8e290d83912474c0f997a0c438ece1c74e54d323459e751fdf8eefba96abb6ce"
+    },
+    {
+      "name": "test-promote.py",
+      "sha256": "c9b6e89df49bbf3f551742cfcbea40a69c1d4b0d6e8e9758df079a89664a6d6e"
+    },
+    {
+      "name": "README.md",
+      "sha256": "56f84d83bf496d993314f9f58917c73f5d3c2e5840a7ecebf11330eb411c4a84"
+    },
+    {
+      "name": "guard-review-node.log",
+      "sha256": "7264c9240202ae28a50d60297f4447096d27886b03e77998b8d575bdcf2facbf"
+    },
+    {
+      "name": "guard-review-python.log",
+      "sha256": "6f283ee6225d2cef4c0127d95456a6f954c45141c92b97dd89016cb1c630e8f4"
+    }
+  ]
+}

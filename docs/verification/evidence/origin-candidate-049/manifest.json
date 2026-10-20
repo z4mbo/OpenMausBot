@@ -1,0 +1,100 @@
+{
+  "algorithm": "SHA-256",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3776,
+      "sha256": "92682edb65087ccc27c80182c8eb639f5558b14607e52d1314ae4ee32717e026"
+    },
+    {
+      "path": "actual-checkouts.json",
+      "bytes": 1694,
+      "sha256": "891318a071be2d96c20077d0eff6d429270162ac224d4e2265fe1cf6325f026c"
+    },
+    {
+      "path": "archive-receipt.json",
+      "bytes": 9642,
+      "sha256": "f34bcf64d01177296dd0a86bb4944b36a7d23ed9cab2b3a8bc9a36ce907a2581"
+    },
+    {
+      "path": "brand-corrections-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "branding-correction.json",
+      "bytes": 4131,
+      "sha256": "f7e950d21f094190eaf1ac63c39daecefc5500441ebf7fc950c379b6f3151546"
+    },
+    {
+      "path": "checkout-equivalence.json",
+      "bytes": 471,
+      "sha256": "116875538c361bbdb6587aabb14872b3249eabb1ae5cb871f3c1e0ffa0a94fee"
+    },
+    {
+      "path": "ci041-observation-snapshot.json",
+      "bytes": 9167,
+      "sha256": "c82882f9ccb8819ada0b40aaddd13f7e7a94122e2b76b2d97a9e2aca193327f7"
+    },
+    {
+      "path": "delivery-guard-node.log",
+      "bytes": 596,
+      "sha256": "7264c9240202ae28a50d60297f4447096d27886b03e77998b8d575bdcf2facbf"
+    },
+    {
+      "path": "delivery-guard-python.log",
+      "bytes": 100,
+      "sha256": "6f283ee6225d2cef4c0127d95456a6f954c45141c92b97dd89016cb1c630e8f4"
+    },
+    {
+      "path": "delivery-guard-review.json",
+      "bytes": 2101,
+      "sha256": "11ac4341c14342ae33e171456e1c3bca34623842c9d544d89638655c729e38e2"
+    },
+    {
+      "path": "hostile-notice-actual-green.log",
+      "bytes": 227,
+      "sha256": "bbd6aee3772fdb15edd48d6b6e479a9850dc70171062ad586a24baf602a27817"
+    },
+    {
+      "path": "hostile-notice-local-SKIPPED.log",
+      "bytes": 215,
+      "sha256": "43c444646a9fd74567ade92eab26ac2b49101bc1fdfb106ba2ab856f7c1760d2"
+    },
+    {
+      "path": "linux041-ubuntu4-failure-excerpt.log",
+      "bytes": 2138,
+      "sha256": "8acaf7a69e3b689cd209c8a809523cd85bcdb762185ac841d3985e4ef412fbbb"
+    },
+    {
+      "path": "native041-artifact-metadata.json",
+      "bytes": 1386,
+      "sha256": "1e1882e9e3dbc62cac4ede2aecaab703286342285d1173144d16125d4db95d02"
+    },
+    {
+      "path": "phone-companion-green.log",
+      "bytes": 216,
+      "sha256": "905b4bfcff89791d8d65c29cd956672fb878579e8d49d4b7ea2d33003e3a87c7"
+    },
+    {
+      "path": "phone-companion-red-excerpt.log",
+      "bytes": 1979,
+      "sha256": "c6929c6e6c372c08be4031ba09b1ecd837cb3498af6b002f648d6f219fc668c7"
+    },
+    {
+      "path": "release-doc-guards.log",
+      "bytes": 751,
+      "sha256": "051bceb0c762fc0a92f5b1dfa8743e628b95fdfc26fece80c9c4f53c22405115"
+    },
+    {
+      "path": "source-binding.json",
+      "bytes": 467,
+      "sha256": "41ca1e79934cff6f342fe35fbcd76023538e18e43e37dbf2598fe481debeb2d9"
+    },
+    {
+      "path": "windows041-shard4-failure-excerpt.log",
+      "bytes": 2140,
+      "sha256": "b23978373a3c81a4834e506e270dadae1c3152144944cb4ddf6260643f66ee34"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "baseline041": "daeb5096f6b880443e408c304cb9a7b76004d865",
+  "candidate042FinalSource": null,
+  "phoneCopyCommit": "bfccd2a3f6f266860f01338221fdeb192e91602f",
+  "hostileExpectationCommit": "40bb8be3a0442a434665bd4aa1d1101268813bf2",
+  "commitObjectsVerifiedLocally": true,
+  "acceptanceBoundary": "Existing proof and corrections only; no 0.4.2 freeze, fresh full CI/native build or delivery acceptance implied",
+  "correctionReceiptSourceBindingComplete": true
+}
