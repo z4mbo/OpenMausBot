@@ -1,4 +1,5 @@
 import { definitionHash, definitionOf, needsReview, roleKeyFor, type SharedDefinition } from "../../shared/origin-shared-agents";
+import { DEFAULT_MASCOT_BODY } from "../../shared/mascot-bodies";
 import { isWorkspaceSection } from "../../shared/origin-workspaces";
 import type { CloudLinks } from "./origin-import";
 
@@ -142,7 +143,8 @@ const intentOf = (bot: LocalBot, driverKindOf: SharedSyncDeps["driverKindOf"]) =
 /** One sync round for workspaces that share their agents: publish a project's team once, adopt the published copies,
  * create the missing ones, then pull or push definition changes. Never deletes a cloud agent. */
 export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly { _id: string; teamId: string }[]): Promise<SharedSyncResult> {
-  const { cloud, call, looks } = deps;
+  const { cloud, call } = deps;
+  const looks = { ...deps.looks };
   const result: SharedSyncResult = { published: 0, adopted: 0, created: 0, pulled: 0, pushed: 0, reviews: 0, unbound: 0 };
   const projectTeam = new Map(projects.map((project) => [project._id, project.teamId]));
   const groups = teamsOf(deps.bots, deps.links, projectTeam);
@@ -166,14 +168,15 @@ export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly 
     result.unbound += 1;
   };
   const apply = async (bot: LocalBot, definition: SharedDefinition, withSoul: boolean): Promise<SharedDefinition> => {
+    const patch = {
+      name: definition.name, title: definition.title, description: definition.description, color: definition.color,
+      ...(withSoul ? { soul: definition.soul } : {}),
+      mascotExpression: definition.mascotExpression ?? null,
+      mascotBody: definition.mascotBody ?? DEFAULT_MASCOT_BODY,
+    };
     const patched = await call<{ bot?: LocalBot }>(`/api/bots/${encodeURIComponent(bot.id)}`, {
       method: "PATCH",
-      body: JSON.stringify({
-        name: definition.name, title: definition.title, description: definition.description, color: definition.color,
-        ...(withSoul ? { soul: definition.soul } : {}),
-        ...(definition.mascotExpression ? { mascotExpression: definition.mascotExpression } : {}),
-        ...(definition.mascotBody ? { mascotBody: definition.mascotBody } : {}),
-      }),
+      body: JSON.stringify(patch),
     });
     const look = definition.look ?? {};
     const current = looks[bot.id] ?? {};
@@ -182,7 +185,10 @@ export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly 
         method: "PUT", body: JSON.stringify({ look: look.look ?? "mascot", color: look.color ?? null, face: look.face ?? null }),
       });
     }
-    return definitionOf(patched?.bot ?? { ...bot, ...definition }, definition.look);
+    const applied = { ...bot, ...patch, ...patched?.bot };
+    byId.set(bot.id, applied);
+    looks[bot.id] = definition.look;
+    return definitionOf(applied, definition.look);
   };
 
   const settings = new Map<string, { sharedAgents: boolean; userId: string }>();
@@ -253,7 +259,6 @@ export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly 
         body: JSON.stringify({ name: definition.name, title: definition.title, description: definition.description, soul: definition.soul, ...(group.section ? { section: group.section } : {}) }),
       });
       await bind(bot, agent, definitionHash(await apply(bot, definition, false)), true);
-      byId.set(bot.id, bot);
       claimed.add(agent._id);
       result.created += 1;
     }
@@ -282,8 +287,8 @@ export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly 
           agentId: agent._id, baseVersion: meta.version,
           patch: {
             name: local.name, title: local.title, description: local.description, soul: local.soul, color: local.color,
-            ...(local.mascotExpression ? { mascotExpression: local.mascotExpression } : {}), ...(local.mascotBody ? { mascotBody: local.mascotBody } : {}),
-            ...(local.look ? { look: local.look } : {}),
+            mascotExpression: local.mascotExpression ?? "", mascotBody: local.mascotBody ?? DEFAULT_MASCOT_BODY,
+            look: local.look ?? { look: "mascot" },
           },
         }).catch(() => null);
         if (pushed) {
