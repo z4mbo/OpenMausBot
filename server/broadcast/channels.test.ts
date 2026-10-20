@@ -149,6 +149,21 @@ describe("Facebook and Instagram", () => {
     const container = new URLSearchParams(String(env.seen[1].body));
     expect(container.get("media_type")).toBe("REELS");
     expect(container.get("video_url")).toBe("https://cdn.test/clip.mp4");
+    expect(container.has("thumb_offset")).toBe(false);
+  });
+
+  it.each([0, 1250])("passes the reel cover offset %i to Instagram's container", async (coverMs) => {
+    const env = fakeEnv([
+      { method: "POST", match: /ig1\/media$/, reply: { id: "c1" } },
+      { method: "GET", match: "https://graph.facebook.com/v23.0/c1?", reply: { status_code: "FINISHED" } },
+      { method: "POST", match: /ig1\/media_publish$/, reply: { id: "m1" } },
+      { method: "GET", match: "https://graph.facebook.com/v23.0/m1?", reply: { permalink: "https://www.instagram.com/reel/abc/" } },
+    ]);
+    const keys = { x: () => null, bluesky: () => null, linkedin: () => null, meta: () => ({ ...meta, instagramUserId: "ig1" }), tiktok: () => null };
+    await publishChannel("instagram", "Reel", [video], keys, env, { format: "reel", coverMs });
+    const container = new URLSearchParams(String(env.seen[0].body));
+    expect(container.get("thumb_offset")).toBe(String(coverMs));
+    expect(container.get("media_type")).toBe("REELS");
   });
 
   it("stops when Instagram fails to process the media", async () => {
@@ -161,6 +176,18 @@ describe("Facebook and Instagram", () => {
 });
 
 describe("TikTok", () => {
+  it.each([0, 2400])("passes cover timestamp %i through publishChannel to TikTok", async (coverMs) => {
+    const env = fakeEnv([
+      { match: /creator_info\/query\/$/, reply: { data: { privacy_level_options: ["PUBLIC_TO_EVERYONE"] } } },
+      { match: /video\/init\/$/, reply: { data: { publish_id: "pub", upload_url: "https://upload.tiktok.test/v" } } },
+      { method: "PUT", match: "https://upload.tiktok.test/v", reply: "" },
+      { match: /status\/fetch\/$/, reply: { data: { status: "PUBLISH_COMPLETE" } } },
+    ]);
+    const keys = { x: () => null, bluesky: () => null, linkedin: () => null, meta: () => null, tiktok: () => ({ accessToken: "act.1" }) };
+    await publishChannel("tiktok", "Caption", [video], keys, env, { format: "reel", coverMs });
+    expect(jsonBody(env.seen[1]).post_info).toEqual({ title: "Caption", privacy_level: "PUBLIC_TO_EVERYONE", video_cover_timestamp_ms: coverMs });
+  });
+
   it("uploads the video in one chunk, publishes it publicly and links the video", async () => {
     const env = fakeEnv([
       { match: /creator_info\/query\/$/, reply: { data: { creator_username: "origin", privacy_level_options: ["SELF_ONLY", "PUBLIC_TO_EVERYONE"] }, error: { code: "ok" } } },

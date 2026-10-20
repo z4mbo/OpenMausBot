@@ -9,7 +9,7 @@ import { join } from "node:path";
 
 import { browserDaemonFile, inRunningBrowser } from "./browser-engine.ts";
 import { processAlive } from "./browser-processes.ts";
-import { browserRuntimeEnv, type BrowserSpawnSpec } from "./browser-runtime.ts";
+import { TransportError, browserRuntimeEnv, type BrowserSpawnSpec } from "./browser-runtime.ts";
 
 export interface RelayTarget { session: string; binaryPath: string; env: NodeJS.ProcessEnv }
 
@@ -210,4 +210,6 @@ export function relayTarget(spec: Pick<BrowserSpawnSpec, "command" | "env">, ses
 export const relayFrame = (spec: Pick<BrowserSpawnSpec, "command" | "env">, session: string) => captureFrame(relayPorts, relayTarget(spec, session));
 export const relayInsertText = (spec: Pick<BrowserSpawnSpec, "command" | "env">, session: string, text: string) => typeText(relayPorts, relayTarget(spec, session), text);
 export const relayCommand = (spec: Pick<BrowserSpawnSpec, "command" | "env">, session: string, command: Record<string, unknown>, timeoutMs: number) =>
-  runCommand(relayPorts, relayTarget(spec, session), command, timeoutMs);
+  runCommand(relayPorts, relayTarget(spec, session), command, timeoutMs).catch((error: unknown) => {
+    throw error instanceof RelayTimeout ? new TransportError(error.message) : error;
+  });

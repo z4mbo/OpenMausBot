@@ -47,6 +47,9 @@ export const integrationTables = {
     login: v.string(),
     githubId: v.number(),
     linkedAt: v.number(),
+    /** Sealed user-to-server token of the App whose client id is `clientId`, so pull requests open under the person's own account. */
+    sealed: v.optional(v.string()),
+    clientId: v.optional(v.string()),
   }).index("by_userId", ["userId"]).index("by_githubId", ["githubId"]),
 
   /** Push access Origin gave a person's own GitHub account, so unlinking can take it back. */
@@ -55,6 +58,16 @@ export const integrationTables = {
     repoUrl: v.string(),
     login: v.string(),
   }).index("by_userId", ["userId"]),
+
+  /** Whether the default branch of a project's repository requires a reviewed pull request, as GitHub last answered. */
+  githubBranchProtections: defineTable({
+    projectId: v.id("projects"),
+    repoUrl: v.string(),
+    branch: v.string(),
+    state: v.union(v.literal("on"), v.literal("unavailable"), v.literal("error")),
+    detail: v.optional(v.string()),
+    checkedAt: v.number(),
+  }).index("by_projectId", ["projectId"]),
 
   githubDeviceFlows: defineTable({
     userId: v.id("users"),

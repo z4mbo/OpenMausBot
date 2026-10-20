@@ -2289,7 +2289,7 @@
     },
     {
       "name": "origin_canvas_edit",
-      "description": "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), link (an https or mailto address it opens on a published page), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both, wrap}; children of a layout frame need no x, y; grow:true shares its free space, absolute:true opts out, minW/maxW/minH/maxH bound it. Outside layout, constraints {h: left|right|center|stretch|scale, v: top|bottom|center|stretch|scale} follow a resized parent. component {set, props} makes a frame a component (variants share set); {op:\"instance\",component,parent?,key?,set} places a copy whose layers you update by id. fillStyle (primary, secondary, background, text, neutral-N) and textStyle (display, h1, h2, h3, body-lg, body, small, caption) bind to the brand kit; shadow {x,y,blur,color} and blur are allowed but keep designs flat. prototype {to: frame} links a click in Present mode. Paths take points with curves [inDx,inDy,outDx,outDy per point]. leadForm {fields: [name, email, phone, message], button, accent} turns an empty frame into a signup form on the published page. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style. Acts on your team's Origin project unless you pass project.",
+      "description": "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), link (an https or mailto address it opens on a published page), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both, wrap}; children of a layout frame need no x, y; grow:true shares its free space, absolute:true opts out, minW/maxW/minH/maxH bound it. Outside layout, constraints {h: left|right|center|stretch|scale, v: top|bottom|center|stretch|scale} follow a resized parent. component {set, props} makes a frame a component (variants share set); {op:\"instance\",component,parent?,key?,set} places a copy whose layers you update by id. fillStyle (primary, secondary, background, text, neutral-N) and textStyle (display, h1, h2, h3, body-lg, body, small, caption) bind to the brand kit; shadow {x,y,blur,color} and blur are allowed but keep designs flat. prototype {to: frame} links a click in Present mode. Paths take points with curves [inDx,inDy,outDx,outDy per point]. A group with boolean (union|subtract|intersect|exclude) draws its shapes combined, still editable. radii [tl,tr,br,bl] rounds corners apart; gradient {kind: linear|radial, angle, stops [{at,color}]} replaces the fill; images take imageFit cover|contain|stretch|crop|tile with crop {scale,x,y}. {op:\"design_system\"} builds a Design system frame from the brand kit: colour and text styles plus Button, Input, Card and Nav components. leadForm {fields: [name, email, phone, message], button, accent} turns an empty frame into a signup form on the published page. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2640,6 +2640,11 @@
             },
             "description": "Image assets to keep a character, product or style consistent (Nano Banana Pro, FLUX.2 Pro)."
           },
+          "character": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "A library entry id or name from origin_studio_library: adds its reference images and description."
+          },
           "aspect_ratio": {
             "type": "string",
             "maxLength": 10,
@@ -2850,6 +2855,16 @@
             },
             "description": "Input node id to prompt text, or to an asset id for a file input."
           },
+          "character": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "A library entry every image and video step follows."
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Text of the Broadcast drafts its Output nodes fill, such as template:campaign-pack's feed post and reel."
+          },
           "name": {
             "type": "string",
             "maxLength": 120
@@ -2867,6 +2882,61 @@
         "required": [
           "workflow_id"
         ]
+      }
+    },
+    {
+      "name": "origin_studio_library",
+      "description": "List an Origin project's Studio library (characters, products and styles saved from reference images), or save one so every later generation and workflow keeps it consistent. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "list",
+              "save"
+            ],
+            "description": "Default list."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "character",
+              "product",
+              "style"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 600,
+            "description": "What must stay the same: looks, wardrobe, materials, palette."
+          },
+          "references": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "maxLength": 70
+            },
+            "description": "Image asset ids, or generation ids with an optional :index."
+          },
+          "character_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Replace this entry instead of adding one."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
       }
     },
     {
@@ -3301,7 +3371,7 @@
     },
     {
       "name": "origin_pipeline_deal",
-      "description": "List, open or change the deals in an Origin project's Sales: value and currency, stage, expected close date, simple line items and notes. action won only asks a person to confirm the sale (with the amount and reason); nothing is won until they do. action lost closes it with a reason. Acts on your team's Origin project unless you pass project.",
+      "description": "List, open or change the deals in an Origin project's Sales: value and currency, stage, expected close date, simple line items and notes. action won only asks a person to confirm the sale (with the amount and reason); nothing is won until they do. action lost closes it with a reason. action coach asks the cheap model for the next step, the risk and a follow-up draft in the brand voice. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3312,7 +3382,8 @@
               "list",
               "save",
               "won",
-              "lost"
+              "lost",
+              "coach"
             ],
             "description": "Default save."
           },
@@ -3324,7 +3395,7 @@
           "deal_id": {
             "type": "string",
             "maxLength": 64,
-            "description": "The deal to change, win or lose."
+            "description": "The deal to change, win, lose or coach."
           },
           "title": {
             "type": "string",

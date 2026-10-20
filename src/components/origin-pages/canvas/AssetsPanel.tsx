@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Component, Search } from "lucide-react";
+import { Component, LayoutTemplate, Search } from "lucide-react";
+import { applyCanvasOps } from "../../../../shared/canvas-ops";
 import { componentSets, instantiate, masterTree } from "../../../../shared/canvas-components";
 import { childrenIndex, decodeScene, nextZ, worldOrigin, type CanvasNode, type Scene } from "../../../../shared/canvas-scene";
 import { TEXT_STYLES, colorStyles, textStylePatch } from "../../../../shared/canvas-styles";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/cn";
 import { Select } from "../../Select";
 import type { SelectionApi } from "./CanvasEditor";
 import { NodeView } from "./NodeView";
+import { measureText } from "./geometry";
 import type { CanvasScene } from "./use-canvas-scene";
 
 type Canvas = { _id: string; name: string };
@@ -72,6 +74,15 @@ export function AssetsPanel({ canvas, selection, readOnly, images, brand, teamId
     selection.select([nodes[0]!.id]);
   };
 
+  const buildSystem = () => {
+    const result = applyCanvasOps(canvas.scene, [{ op: "design_system" }], { kit: brand ?? null, measure: measureText });
+    const root = result.created[0];
+    if (!root) return;
+    canvas.commit(result.changed);
+    selection.select([root.id]);
+    selection.zoomTo([root.id]);
+  };
+
   const editable = selection.nodes.filter((node) => !node.locked);
   const texts = editable.filter((node) => node.type === "text");
   const paint = (id: string, color: string) => canvas.commit(editable.map((node) => (node.type === "line" || node.type === "arrow" ? { ...node, stroke: color, strokeStyle: id } : { ...node, fill: color, fillStyle: id })));
@@ -83,12 +94,19 @@ export function AssetsPanel({ canvas, selection, readOnly, images, brand, teamId
       </label>
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-2 pb-3">
         <section aria-label="Components">
-          <h3 className="flex h-7 items-center gap-1.5 px-1.5 text-[11.5px] font-medium text-ink-secondary"><Component size={12} />Components</h3>
+          <h3 className="flex h-7 items-center gap-1.5 px-1.5 text-[11.5px] font-semibold text-ink"><Component size={12} /><span className="flex-1">Components</span>
+            {!readOnly && (
+              <button type="button" onClick={buildSystem} title={`Build colour and text styles, Button, Input, Card and Nav from ${brand ? "the brand kit" : "the default styles"}`}
+                className="inline-flex h-6 items-center gap-1 rounded-md px-1.5 text-[11.5px] font-medium text-ink-secondary outline-none transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
+                <LayoutTemplate size={12} />Design system
+              </button>
+            )}
+          </h3>
           <ComponentGrid scene={canvas.scene} sets={match(local)} images={images} disabled={readOnly} onInsert={(node) => insert(canvas.scene, node)} />
         </section>
         {others.length > 0 && (
           <section aria-label="Project library">
-            <h3 className="flex h-7 items-center px-1.5 text-[11.5px] font-medium text-ink-secondary">Project library</h3>
+            <h3 className="flex h-7 items-center px-1.5 text-[11.5px] font-semibold text-ink">Project library</h3>
             <Select size="sm" aria-label="Library canvas" value={library} onChange={(event) => setLibrary(event.target.value)}>
               <option value="">Choose a canvas</option>
               {others.map((item) => <option key={item._id} value={item._id}>{item.name}</option>)}
@@ -99,7 +117,7 @@ export function AssetsPanel({ canvas, selection, readOnly, images, brand, teamId
           </section>
         )}
         <section aria-label="Colour styles">
-          <h3 className="flex h-7 items-center px-1.5 text-[11.5px] font-medium text-ink-secondary">Colour styles{brand ? "" : " · default"}</h3>
+          <h3 className="flex h-7 items-center px-1.5 text-[11.5px] font-semibold text-ink">Colour styles{brand ? "" : " · default"}</h3>
           <div className="flex flex-col">
             {colorStyles(brand).map((style) => (
               <button key={style.id} type="button" disabled={readOnly || !editable.length} onClick={() => paint(style.id, style.color)} title={editable.length ? `Apply ${style.name}` : "Select layers to apply"}
@@ -112,7 +130,7 @@ export function AssetsPanel({ canvas, selection, readOnly, images, brand, teamId
           </div>
         </section>
         <section aria-label="Text styles">
-          <h3 className="flex h-7 items-center px-1.5 text-[11.5px] font-medium text-ink-secondary">Text styles</h3>
+          <h3 className="flex h-7 items-center px-1.5 text-[11.5px] font-semibold text-ink">Text styles</h3>
           <div className="flex flex-col">
             {TEXT_STYLES.map((style) => (
               <button key={style.id} type="button" disabled={readOnly || !texts.length} onClick={() => canvas.commit(texts.map((node) => ({ ...node, ...textStylePatch(style, brand), unmeasured: true })))}

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { ArrowDown, ArrowUp, Check, Copy, KeyRound, Loader2, Lock, Plus, RotateCw, Trash2 } from "lucide-react";
-import { cloudMutation } from "@/lib/origin-cloud";
+import { cloudAction, cloudMutation } from "@/lib/origin-cloud";
 import { useCopyFeedback } from "@/lib/copy-text";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
@@ -152,6 +152,45 @@ export function InboundSettings({ projectId, settings, isAdmin, canEdit }: { pro
           <button type="button" className={cn(ghostButton, "self-start")} disabled={action.busy}
             onClick={() => { if (window.confirm("Get new webhook addresses and a new secret? Twilio and Brevo stop reaching Origin until you paste the new ones.")) void configure({ rotateInbound: true }, "Could not rotate the addresses"); }}>
             <RotateCw size={14} />New addresses
+          </button>
+        )}
+      </>}
+      {action.error && <Notice tone="danger">{action.error}</Notice>}
+    </div>
+  );
+}
+
+export function StripeWebhookSettings({ projectId, settings, isAdmin }: { projectId: string; settings: PipelineSettingsView; isAdmin: boolean }) {
+  const hook = settings.stripeWebhook;
+  const [secret, setSecret] = useState("");
+  const action = useAction();
+  const configure = (patch: { enabled: boolean; signingSecret?: string; rotate?: boolean }, fallback: string) => action.run(() => cloudAction("pipelineStripe:configure", { projectId, ...patch }), fallback);
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start gap-3">
+        <p className="flex-1 text-[13px] leading-relaxed text-ink-secondary">Stripe tells Origin the moment a payment link is paid, and the deal is marked won for what was paid. Nobody has to check.</p>
+        <Switch checked={Boolean(hook)} aria-label="Receive Stripe payments" disabled={!isAdmin || action.busy}
+          onClick={() => { if (!hook || window.confirm("Stop receiving Stripe payments? Paid links will no longer mark deals won.")) void configure({ enabled: !hook }, "Could not change the Stripe webhook"); }} />
+      </div>
+      {!hook ? <Notice>{isAdmin ? "Turn on to get this project's Stripe webhook address." : "A project admin can turn this on."}</Notice> : <>
+        <CopyBlock label="Endpoint URL: add it in Stripe under Developers > Webhooks" text={hook.url} />
+        <p className="text-[12px] leading-relaxed text-ink-tertiary">Listen to <code className="rounded bg-inset px-1 font-mono text-[11.5px]">checkout.session.completed</code> and <code className="rounded bg-inset px-1 font-mono text-[11.5px]">checkout.session.async_payment_succeeded</code>, then paste the endpoint's signing secret here. It is sealed on the backend and never shown again.</p>
+        {isAdmin ? (
+          <form className="flex items-end gap-2" onSubmit={(event) => { event.preventDefault(); void configure({ enabled: true, signingSecret: secret }, "Could not save the signing secret").then((ok) => { if (ok) setSecret(""); }); }}>
+            <Field label={hook.signing ? "Signing secret saved; paste a new one to replace it" : "Signing secret"} className="flex-1">
+              <span className="relative flex items-center"><KeyRound size={13} className="pointer-events-none absolute left-2.5 text-ink-tertiary" aria-hidden="true" />
+                <input className={cn(inputClass, "pl-7 font-mono")} type="password" autoComplete="off" spellCheck={false} value={secret} onChange={(event) => setSecret(event.target.value.trim())} placeholder={hook.signing ? "••••••••" : "whsec_…"} /></span>
+            </Field>
+            <button className={ghostButton} disabled={!secret || action.busy}>{action.busy && <Loader2 size={14} className="animate-spin" />}Save</button>
+          </form>
+        ) : null}
+        <p className={cn("flex items-center gap-1.5 text-[12px]", hook.signing ? "text-success" : "text-ink-tertiary")} role="status">
+          {hook.signing ? <><Check size={12} />Payments mark deals won as they arrive.</> : "Stripe's requests are refused until the signing secret is saved."}
+        </p>
+        {isAdmin && (
+          <button type="button" className={cn(ghostButton, "self-start")} disabled={action.busy}
+            onClick={() => { if (window.confirm("Get a new webhook address? Stripe stops reaching Origin until you update the endpoint.")) void configure({ enabled: true, rotate: true }, "Could not rotate the address"); }}>
+            <RotateCw size={14} />New address
           </button>
         )}
       </>}

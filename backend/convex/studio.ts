@@ -1,10 +1,10 @@
 import { v } from "convex/values";
-import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { internalMutation, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { admitStorageReference } from "./lib/storage";
+import { addStorageScope, admitStorageReference } from "./lib/storage";
 import { canEdit, requireMember, touchProject } from "./lib/permissions";
 import { studioKind, studioMode, studioOutput, studioParams, studioStatus } from "./studioTables";
-import { STUDIO_ASSET_FOLDER, studioAssetName } from "../../shared/studio";
+import { STUDIO_ASSET_FOLDER, STUDIO_CHUNK_BYTES, STUDIO_STORED_MAX, studioAssetName } from "../../shared/studio";
 
 type Ctx = QueryCtx | MutationCtx;
 
@@ -13,7 +13,8 @@ const PROMPT_MAX = 8_000;
 const ERROR_MAX = 600;
 const OUTPUTS_MAX = 8;
 const PARAMS_MAX = 16;
-const ASSET_MAX_BYTES = 15 * 1024 * 1024;
+const CHUNKS_MAX = Math.ceil(STUDIO_STORED_MAX / STUDIO_CHUNK_BYTES);
+const MEDIA_TYPE = /^(image|video|audio)\/[a-z0-9.+-]{1,60}$/;
 
 async function editorOf(ctx: Ctx, projectId: Id<"projects">, sessionToken: string) {
   const access = await requireMember(ctx, projectId, sessionToken);
@@ -194,7 +195,7 @@ export const storeFile = mutation({
     const entry = generation.saved.find((saved) => saved.index === args.index);
     const asset = entry ? await ctx.db.get(entry.assetId) : null;
     const metadata = await ctx.db.system.get(args.storageId);
-    if (!metadata || metadata.size > ASSET_MAX_BYTES) throw new Error("Choose a file under 15 MB");
+    if (!metadata || metadata.size > STUDIO_STORED_MAX) throw new Error("Studio keeps files up to 150 MB in project storage");
     if (!asset || asset.projectId !== args.projectId || asset.storageId) return null;
     await admitStorageReference(ctx, args.storageId, user, { kind: "project", projectId: args.projectId });
     await ctx.db.patch(asset._id, {
@@ -226,7 +227,7 @@ export const saveAsset = mutation({
     if (existing && await ctx.db.get(existing.assetId)) return existing.assetId;
     if (args.storageId) {
       const metadata = await ctx.db.system.get(args.storageId);
-      if (!metadata || metadata.size > ASSET_MAX_BYTES) throw new Error("Choose a file under 15 MB");
+      if (!metadata || metadata.size > STUDIO_STORED_MAX) throw new Error("Studio keeps files up to 150 MB in project storage");
       await admitStorageReference(ctx, args.storageId, user, { kind: "project", projectId: args.projectId });
     }
     const assetId = await insertAsset(ctx, generation, args.index, { name: args.name, storageId: args.storageId, contentType: args.contentType, size: args.size });
@@ -263,6 +264,52 @@ export const remove = mutation({
     const generation = await generationOf(ctx, args.projectId, args.generationId);
     if (generation.createdBy !== user._id && member.role !== "owner" && member.role !== "admin") throw new Error("Only its creator or a project admin can delete this generation");
     await ctx.db.delete(args.generationId);
+    return null;
+  },
+});
+
+/**
+ * The pieces of one large output this member just uploaded through the project's upload route: each must come from
+ * their own unexpired upload of this project and be referenced by nothing yet, so assembling can never read or delete
+ * another file.
+ */
+async function ownChunks(ctx: MutationCtx, projectId: Id<"projects">, sessionToken: string, chunks: readonly Id<"_storage">[]) {
+  const { user } = await editorOf(ctx, projectId, sessionToken);
+  if (!chunks.length || chunks.length > CHUNKS_MAX || new Set(chunks).size !== chunks.length) throw new Error("Upload the file in up to 13 pieces");
+  const intents = await ctx.db.query("storageUploadIntents").withIndex("by_userId_and_expiresAt", (q) => q.eq("userId", user._id).gte("expiresAt", Date.now())).take(100);
+  let total = 0;
+  for (const chunk of chunks) {
+    const intent = intents.find((entry) => entry.storageId === chunk && entry.state === "complete");
+    if (!intent || intent.target.kind !== "asset" || intent.target.projectId !== projectId) throw new Error("A piece of the upload expired; upload the file again");
+    if (await ctx.db.query("designAssets").withIndex("by_storageId", (q) => q.eq("storageId", chunk)).first()) throw new Error("A piece of the upload is already a file");
+    const metadata = await ctx.db.system.get(chunk);
+    if (!metadata) throw new Error("A piece of the upload is gone");
+    total += metadata.size;
+  }
+  if (total > STUDIO_STORED_MAX) throw new Error("Studio keeps files up to 150 MB in project storage");
+  return { user, intents: intents.filter((entry) => entry.storageId && chunks.includes(entry.storageId)), total };
+}
+
+export const claimChunks = internalMutation({
+  args: { projectId: v.id("projects"), sessionToken: v.string(), chunks: v.array(v.id("_storage")) },
+  returns: v.number(),
+  handler: async (ctx, args) => (await ownChunks(ctx, args.projectId, args.sessionToken, args.chunks)).total,
+});
+
+/** Admits the assembled file to the project and forgets its pieces, which the assembling action then deletes. */
+export const finishAssembly = internalMutation({
+  args: { projectId: v.id("projects"), sessionToken: v.string(), chunks: v.array(v.id("_storage")), storageId: v.id("_storage"), contentType: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const { intents, total } = await ownChunks(ctx, args.projectId, args.sessionToken, args.chunks);
+    if (!MEDIA_TYPE.test(args.contentType)) throw new Error("Studio stores images, video and audio");
+    const metadata = await ctx.db.system.get(args.storageId);
+    if (!metadata || metadata.size !== total) throw new Error("The assembled file does not match its pieces");
+    await addStorageScope(ctx, args.storageId, { kind: "project", projectId: args.projectId }, args.contentType);
+    for (const chunk of args.chunks) {
+      for (const admission of await ctx.db.query("storageAdmissions").withIndex("by_storageId_and_scopeKey", (q) => q.eq("storageId", chunk)).take(10)) await ctx.db.delete(admission._id);
+    }
+    for (const intent of intents) await ctx.db.delete(intent._id);
     return null;
   },
 });

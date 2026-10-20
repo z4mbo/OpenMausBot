@@ -31,6 +31,7 @@ try {
     const capture = async (name) => {
       await page.waitForTimeout(150);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${name} scrolls sideways`);
+      if (name.startsWith("round5-") && theme !== "dark") return;
       await page.screenshot({ path: resolve(output, `${name}-${width}-${theme}.png`) });
     };
     const nodes = () => page.evaluate(() => window.originDrawFixture.scene.map((row) => JSON.parse(row)).filter((node) => !node.deleted));
@@ -66,6 +67,15 @@ try {
       await until((id) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.version > 1 && node.x < 0 + node.x + 1; }), vector.id);
       const edited = (await nodes()).find((node) => node.id === vector.id);
       assert.notDeepEqual(edited.points, vector.points);
+      const segment = await page.evaluate(() => {
+        const path = document.querySelector('[data-segment="0:1"]');
+        const point = path.getPointAtLength(path.getTotalLength() / 2);
+        const box = path.ownerSVGElement.getBoundingClientRect();
+        return { x: box.left + point.x, y: box.top + point.y };
+      });
+      await page.mouse.click(segment.x, segment.y);
+      await until((id) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.points.length === 8; }), vector.id);
+      result.addPointOnSegment = true;
       await page.keyboard.press("Escape");
       await capture("pen-path");
       result.penAndBezierEditing = true;
@@ -82,14 +92,26 @@ try {
       await design.getByRole("button", { name: "Union" }).waitFor();
       await page.keyboard.press("Control+Alt+u");
       await until(() => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.name === "Union" && !node.deleted; }));
-      assert.equal((await nodes()).filter((node) => node.type === "rect").length, 0);
+      const union = await named("Union", "group");
+      assert.equal(union.boolean, "union");
+      assert.equal((await nodes()).filter((node) => node.type === "rect" && node.parentId === union.id).length, 2, "the union keeps its rectangles");
       await page.keyboard.press("Control+z");
       await until(() => window.originDrawFixture.scene.filter((row) => { const node = JSON.parse(row); return node.type === "rect" && !node.deleted; }).length === 2);
       await selectLayer("Rectangle");
       await page.locator('[role="tree"]').getByText("Rectangle", { exact: true }).nth(1).click({ modifiers: ["Shift"] });
       await design.getByRole("button", { name: "Subtract" }).click();
       await until(() => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.name === "Subtract" && !node.deleted; }));
+      const subtract = await named("Subtract", "group");
+      await page.locator("[data-canvas-stage]").focus();
+      await page.keyboard.press("Enter");
+      await design.getByLabel("W", { exact: true }).fill("60");
+      await design.getByLabel("W", { exact: true }).press("Enter");
+      await until((id) => { const rows = window.originDrawFixture.scene.map((row) => JSON.parse(row)).filter((node) => node.parentId === id && !node.deleted); return rows.length === 2 && rows.every((node) => node.width === 60); }, subtract.id);
+      assert.equal((await named("Subtract", "group")).boolean, "subtract");
+      await page.keyboard.press("Escape");
+      await capture("round5-boolean");
       result.booleans = true;
+      result.booleanGroupEditableChildren = true;
 
       await page.keyboard.press("Escape");
       await page.keyboard.press("Escape");
@@ -129,13 +151,46 @@ try {
       await selectLayer("Subtract");
       await design.getByLabel("Horizontal constraint").selectOption("right");
       await until(() => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.name === "Subtract" && !node.deleted && node.constraints?.h === "right"; }));
-      const before = await named("Subtract", "path");
+      const before = await named("Subtract", "group");
       await selectLayer(frame.name);
       await design.getByLabel("W", { exact: true }).fill(String(Math.round(frame.width + 100)));
       await design.getByLabel("W", { exact: true }).press("Enter");
       await until((x) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.name === "Subtract" && !node.deleted && Math.abs(node.x - x) < 1; }), before.x + 100);
       await capture("grid-constraints");
       result.gridsEffectsConstraints = true;
+
+      await selectLayer(frame.name);
+      await design.getByRole("button", { name: "Independent corners" }).click();
+      await design.getByLabel("Top left radius").fill("24");
+      await design.getByLabel("Top left radius").press("Enter");
+      await until((id) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.radii?.[0] === 24; }), frame.id);
+      await design.getByRole("button", { name: "Linear gradient" }).click();
+      await until((id) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.gradient?.kind === "linear"; }), frame.id);
+      await design.getByLabel("Stop 2 hex").fill("#C7D2FE");
+      await design.getByLabel("Stop 2 hex").press("Enter");
+      await design.getByLabel("Gradient angle").fill("45");
+      await design.getByLabel("Gradient angle").press("Enter");
+      await until((id) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.gradient?.angle === 45 && node.gradient.stops[1].color === "#C7D2FE"; }), frame.id);
+      await capture("round5-paint");
+      result.cornerRadiiAndGradient = true;
+
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("i");
+      await page.getByRole("button", { name: "Insert Brand mark" }).click();
+      await until(() => window.originDrawFixture.scene.some((row) => JSON.parse(row).type === "image"));
+      const image = (await nodes()).find((node) => node.type === "image");
+      await design.getByRole("button", { name: "Crop: zoom and move the image" }).click();
+      await until((id) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.imageFit === "crop"; }), image.id);
+      await page.locator("[data-canvas-stage]").focus();
+      await page.keyboard.press("Enter");
+      await page.locator("[data-crop-frame]").waitFor();
+      const picture = await page.locator(`[data-node-id="${image.id}"]`).first().boundingBox();
+      await drag({ x: picture.x + picture.width / 2, y: picture.y + picture.height / 2 }, { x: picture.x + picture.width / 2 + 12, y: picture.y + picture.height / 2 + 8 });
+      await until((id) => window.originDrawFixture.scene.some((row) => { const node = JSON.parse(row); return node.id === id && node.crop && node.crop.x > -0.125; }), image.id);
+      await capture("round5-crop");
+      await page.keyboard.press("Escape");
+      result.imageCrop = true;
 
       await selectLayer("Buy");
       await design.getByLabel("Text style").selectOption("h1");
@@ -266,6 +321,22 @@ try {
       await page.getByRole("button", { name: "Send to Atlas" }).click();
       await page.waitForFunction(() => window.originCanvasSent.some((action) => action.type === "send" && action.text.includes("origin_design_submit")));
       await capture("agent-panel");
+      await page.route("**/api/threads/fixture-designer-thread/messages*", async (route) => {
+        const asked = await page.evaluate(() => window.originCanvasSent.filter((action) => action.type === "send" && action.botId === "fixture-designer").at(-1));
+        const at = Date.now();
+        await route.fulfill({ json: { messages: [
+          { id: "dana-1", role: "user", kind: "text", text: asked.text, sendId: asked.sendId, at },
+          { id: "dana-2", role: "bot", kind: "activity", tool: { name: "origin_canvas_edit", ok: true }, at },
+          { id: "dana-3", role: "bot", kind: "text", text: "Laying out three pricing tiers next to the hero", status: "streaming", at },
+        ] } });
+      });
+      await page.getByLabel("Agent to ask").selectOption("fixture-designer");
+      await page.getByLabel("Question").fill("Add a pricing section");
+      await page.getByRole("button", { name: "Send to Dana" }).click();
+      await page.locator("[data-agent-panel]").getByText("Laying out three pricing tiers next to the hero").waitFor();
+      await page.locator("[data-agent-panel]").getByText("Edited the canvas").waitFor();
+      await capture("round5-agent-stream");
+      result.agentPanelStreamsChosenAgent = true;
       await page.locator("[data-agent-panel]").getByRole("button", { name: "Close" }).click();
       result.agentPanelDesignIssue = true;
 
@@ -280,6 +351,14 @@ try {
       await page.locator(`[data-node-id="${frame.id}"]`).first().waitFor();
       assert.equal(await page.locator(`[data-node-id="${onSecond.id}"]`).count(), 0);
       result.pages = true;
+
+      await page.getByRole("tab", { name: "Assets" }).click();
+      await page.getByRole("button", { name: "Design system" }).click();
+      await until(() => { const rows = window.originDrawFixture.scene.map((row) => JSON.parse(row)).filter((node) => !node.deleted); return rows.some((node) => node.name === "Design system" && !node.parentId) && rows.filter((node) => node.component?.set === "Button").length === 2; });
+      await page.waitForTimeout(300);
+      await capture("round5-design-system");
+      await page.getByRole("tab", { name: "Layers" }).click();
+      result.designSystemFromBrand = true;
 
       if (theme === "dark") {
         await page.getByRole("button", { name: "Add page" }).click();

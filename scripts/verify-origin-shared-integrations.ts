@@ -60,6 +60,11 @@ function client(server: VerificationServer, session: string) {
   };
 }
 
+async function waitFor(check: () => boolean, ms = 10_000): Promise<boolean> {
+  for (const end = Date.now() + ms; Date.now() < end; await new Promise((resolve) => setTimeout(resolve, 100))) if (check()) return true;
+  return check();
+}
+
 function credentialFill(dataDir: string, path: string): Promise<string> {
   const helper = join(dataDir, "origin-git", "credential-helper.cjs").replace(/\\/g, "/");
   const command = `!ELECTRON_RUN_AS_NODE=1 "${process.execPath.replace(/\\/g, "/")}" "${helper}"`;
@@ -113,6 +118,9 @@ try {
   const created = await member<{ state: string; repoUrl?: string; error?: string }>(`/api/github/repo?${teamQuery}&projectId=${projectId}`, { method: "POST", body: { name: "mia-launch", visibility: "public" } });
   expect("the member creates the project's repository in the workspace's GitHub", created.status === 200 && created.body.repoUrl === "https://github.com/octo/mia-launch", created.body);
   expect("the repository is public, as chosen at creation", fake.repos.get("octo/mia-launch")?.private === false);
+  const rule = fake.repos.get("octo/mia-launch")?.protection.get("main") as { required_pull_request_reviews?: { required_approving_review_count?: number }; allow_force_pushes?: boolean; allow_deletions?: boolean } | undefined;
+  expect("Origin protects the new repository's default branch: one approving review, no force-push or deletion",
+    rule?.required_pull_request_reviews?.required_approving_review_count === 1 && rule.allow_force_pushes === false && rule.allow_deletions === false, rule);
 
   const board = await convex.t.query(convex.ref("tasks:board"), { sessionToken: people.member.token, projectId }) as { columns: { _id: string; isDraft?: boolean }[] };
   const columnId = board.columns.find((column) => !column.isDraft)!._id;
@@ -131,6 +139,8 @@ try {
   const password = /password=(\S+)/.exec(filled)?.[1] ?? "";
   expect("git in the member's project folder gets a token from Origin", password.startsWith("ghs_"), filled.replace(password, "<token>"));
   expect("that token can only write contents of that one repository", JSON.stringify(fake.tokenScope(password)) === JSON.stringify({ repositories: ["mia-launch"], permissions: { contents: "write" } }), fake.tokenScope(password));
+  const direct = await fake.handle(new Request("https://api.github.com/repos/octo/mia-launch/contents/skip.md", { method: "PUT", headers: { authorization: `Bearer ${password}` }, body: JSON.stringify({ branch: "main", message: "skip review", content: "" }) }));
+  expect("that token cannot change the default branch without a reviewed pull request", direct.status === 409, direct.status);
   const other = await credentialFill(memberServer.info.dataDir, "octo/secret-plans.git");
   expect("git gets nothing for a repository no linked project uses", !other.includes("password="), other);
 
@@ -152,6 +162,48 @@ try {
   fake.approveDevice(started.userCode, "mia-dev", 31);
   const linked = await convex.t.action(convex.ref("githubLinks:finishLink"), { sessionToken: people.member.token, teamId: people.teamId }) as Json;
   expect("the member links their own GitHub and is invited to push", linked.login === "mia-dev" && fake.repos.get("octo/mia-launch")?.collaborators.get("mia-dev") === "push", linked);
+
+  const createTask = async (title: string, sessionToken: string, email: string) => String(await convex.t.mutation(convex.ref("tasks:createTask"), { sessionToken, projectId, columnId, title, priority: "medium", assignedToEmail: email, dueDate: "2030-01-01" }));
+  const doneColumn = (board.columns as { _id: string; isDone?: boolean }[]).find((column) => column.isDone);
+  await convex.t.mutation(convex.ref("taskPRs:configure"), { sessionToken: people.member.token, projectId, mode: "pull_request", reviewColumnId: null, ...(doneColumn ? { doneColumnId: doneColumn._id } : {}) });
+  const memberTask = await createTask("Hero section", people.member.token, "mia@fixture.test");
+  const opened = await member<{ number?: number; error?: string }>("/api/github/pull-requests", { method: "POST", body: { projectId, taskId: memberTask } });
+  const memberPull = fake.repos.get("octo/mia-launch")?.pulls.find((pull) => pull.number === opened.body.number);
+  expect("the member's draft pull request opens under their own GitHub account", opened.status === 200 && memberPull?.author === "mia-dev" && memberPull.draft, { opened: opened.body, author: memberPull?.author });
+  const memberPlan = fake.commits.find((commit) => commit.repo === "octo/mia-launch" && commit.branch === memberPull?.head.ref);
+  expect("its plan commit names the member as co-author with their GitHub address", Boolean(memberPlan?.message.includes("Co-authored-by: mia <31+mia-dev@users.noreply.github.com>")), memberPlan);
+  const review = (number: number, action: "approve" | "merge") => owner<{ approved?: boolean; merged?: boolean; error?: string }>("/api/github/pull-requests/review", { method: "POST", body: { projectId, number, action } });
+  const approved = await review(memberPull!.number, "approve");
+  expect("the Chief's App approval counts on the member's pull request", approved.status === 200 && approved.body.approved === true, approved.body);
+  const merged = await review(memberPull!.number, "merge");
+  expect("the person-confirmed merge goes through the protected default branch", merged.status === 200 && merged.body.merged === true && memberPull?.merged === true, merged.body);
+
+  const ownerTask = await createTask("Footer links", people.owner.token, "ada@fixture.test");
+  const botOpened = await owner<{ number?: number; error?: string }>("/api/github/pull-requests", { method: "POST", body: { projectId, taskId: ownerTask } });
+  const botPull = fake.repos.get("octo/mia-launch")?.pulls.find((pull) => pull.number === botOpened.body.number);
+  expect("without a linked GitHub the App opens the pull request", botOpened.status === 200 && botPull?.author === `${fake.slug}[bot]`, { opened: botOpened.body, author: botPull?.author });
+  const botPlan = fake.commits.find((commit) => commit.repo === "octo/mia-launch" && commit.branch === botPull?.head.ref);
+  expect("and credits the person in a Co-authored-by trailer", Boolean(botPlan?.message.includes("Co-authored-by: ada <ada@fixture.test>") && botPull?.body.includes("Co-authored-by: ada <ada@fixture.test>")), botPlan);
+  const selfApproval = await review(botPull!.number, "approve");
+  const blocked = await review(botPull!.number, "merge");
+  expect("the App cannot approve its own pull request past branch protection, and says so", selfApproval.body.approved === false && blocked.status === 400 && Boolean(blocked.body.error?.includes("needs an approving review")) && botPull?.merged === false, { approve: selfApproval.body, merge: blocked.body });
+
+  fake.addRepository("octo", "legacy-site", { private: false });
+  const legacyId = String(await convex.t.mutation(convex.ref("projects:create"), { sessionToken: people.owner.token, teamId: people.teamId, name: "Legacy Site", repoUrl: "https://github.com/octo/legacy-site" }));
+  const legacyBefore = await convex.t.query(convex.ref("githubProtection:status"), { sessionToken: people.owner.token, projectId: legacyId });
+  const legacyAfter = await convex.t.action(convex.ref("githubProtection:protect"), { sessionToken: people.owner.token, projectId: legacyId }) as Json;
+  expect("a repository linked before is offered protection, which a project admin applies", legacyBefore === null && legacyAfter.state === "on" && fake.repos.get("octo/legacy-site")?.protection.has("main") === true, { legacyBefore, legacyAfter });
+
+  const memberRow = await convex.t.run(async (ctx) => (ctx as unknown as { db: { query(table: string): { collect(): Promise<Json[]> } } }).db.query("teamMembers").collect())
+    .then((rows) => rows.find((row) => row.email === "mia@fixture.test")!);
+  await convex.t.mutation(convex.ref("teams:updateRole"), { sessionToken: people.owner.token, teamId: people.teamId, memberId: memberRow._id, role: "viewer" });
+  const revoked = await waitFor(() => !fake.repos.get("octo/mia-launch")?.collaborators.has("mia-dev"));
+  expect("making the member a viewer takes back the push access Origin gave their GitHub", revoked, [...(fake.repos.get("octo/mia-launch")?.collaborators.keys() ?? [])]);
+
+  const orgInstallation = fake.install("acme-co", 99, "Organization");
+  await convex.t.action(convex.ref("teamGitHub:chooseAccount"), { sessionToken: people.owner.token, teamId: people.teamId, installationId: orgInstallation });
+  const reshared = await owner(`/api/github/share?${teamQuery}`, { method: "POST" });
+  expect("reconnecting GitHub keeps the organization the workspace works in", reshared.status === 200 && (reshared.body.shared as Json | null)?.accountLogin === "acme-co", reshared.body);
 
   const tokens = fake.calls.filter((call) => call.path.includes("/access_tokens")).length;
   expect("every token came from the backend, minted per repository", tokens > 0);

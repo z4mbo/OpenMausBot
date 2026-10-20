@@ -9,7 +9,7 @@ import { isDraftColumn } from "../shared/origin-columns.ts";
 import { columnNames, findColumn, normalizedTitle } from "./origin-cloud-columns.ts";
 import { createOriginCloudSession } from "./origin-cloud-session.ts";
 import { DESIGN_BRIEF, canvasTools, type CanvasToolProject } from "./origin-canvas-tools.ts";
-import { svgToPng } from "./canvas-raster.ts";
+import { canvasFonts, svgToPng } from "./canvas-raster.ts";
 import { listPages, publishPage } from "./origin-page-tools.ts";
 import { isReadOnlyAgentTool } from "./agent-tool-policy.ts";
 import { DATA_DIR } from "./config.ts";
@@ -515,7 +515,7 @@ async function studioScope(ctx: ToolContext, args: Args) {
   const project = await pickProject(ctx, args.project);
   return {
     cloud: { client: ctx.client, sessionToken: ctx.sessionToken, url: ctx.cloudUrl }, projectId: project.projectId,
-    projectName: await projectName(ctx, project.projectId), agentName: ctx.caller.name, runner: ctx.studio, workflows: ctx.studioWorkflows,
+    projectName: await projectName(ctx, project.projectId), agentName: ctx.caller.name, agentId: ctx.caller.id, runner: ctx.studio, workflows: ctx.studioWorkflows,
   };
 }
 
@@ -972,7 +972,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     return { text: `${FEEDBACK_NOTE}\n${shown.length} ${status === "all" ? "" : `${status} `}feedback item(s) for ${name}, newest first:\n${lines.join("\n")}${more}` };
   },
 
-  ...canvasTools((args, ctx: ToolContext) => canvasProject(ctx, args), svgToPng),
+  ...canvasTools((args, ctx: ToolContext) => canvasProject(ctx, args), svgToPng, canvasFonts),
   async origin_page_publish(args, ctx) { return publishPage(args, await canvasProject(ctx, args)); },
   async origin_page_list(args, ctx) { return listPages(args, await canvasProject(ctx, args)); },
 

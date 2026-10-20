@@ -1,7 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { decodeScene } from "../shared/canvas-scene.ts";
 
-vi.mock("./canvas-raster.ts", () => ({ svgToPng: (svg: string) => Buffer.from(`png:${svg.length}`) }));
+const fontRequests = vi.hoisted(() => [] as string[][]);
+vi.mock("./canvas-raster.ts", () => ({
+  svgToPng: (svg: string, _width: number, _background: string, fontFiles: string[]) => Buffer.from(`png:${svg.length}:${fontFiles.length}`),
+  canvasFonts: async (ids: string[]) => {
+    fontRequests.push([...ids]);
+    return { files: ids.filter((id) => id !== "fraunces").map((id) => `/fonts/${id}.ttf`), missing: ids.includes("fraunces") ? ["Fraunces"] : [] };
+  },
+}));
 import { runOriginTool, type OriginCloudClient, type OriginToolDeps } from "./origin-cloud.ts";
 import type { BotRecord } from "./store.ts";
 
@@ -94,12 +101,14 @@ describe("agent design tools", () => {
 
   it("returns a screenshot of a frame as an image the model sees", async () => {
     const { client } = convex();
-    const made = await run(client, "origin_canvas_edit", { ops: [{ op: "create", node: { type: "frame", key: "home", name: "Home", w: 320, h: 200, fill: "#101014", children: [{ type: "text", text: "Hi", fill: "#FFFFFF" }] } }] });
+    const made = await run(client, "origin_canvas_edit", { ops: [{ op: "create", node: { type: "frame", key: "home", name: "Home", w: 320, h: 200, fill: "#101014", children: [{ type: "text", text: "Hi", fill: "#FFFFFF" }, { type: "text", text: "Serif", family: "fraunces" }] } }] });
     const id = /home=(\w+)/.exec(made.text)![1]!;
     const shot = await run(client, "origin_canvas_screenshot", { node: id });
     expect(shot.text).toContain('Screenshot of "Home"');
+    expect(shot.text).toContain("Fraunces could not be downloaded");
+    expect(fontRequests.at(-1)).toEqual(["inter", "fraunces"]);
     expect(shot.image).toMatchObject({ mimeType: "image/png" });
-    expect(Buffer.from(shot.image!.data, "base64").toString()).toMatch(/^png:\d+$/);
+    expect(Buffer.from(shot.image!.data, "base64").toString()).toMatch(/^png:\d+:1$/);
     expect(await run(client, "origin_canvas_screenshot", { node: "nope" })).toMatchObject({ isError: true });
   });
 

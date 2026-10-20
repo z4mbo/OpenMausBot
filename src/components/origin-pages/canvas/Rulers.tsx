@@ -16,7 +16,10 @@ function ticks(start: number, length: number, view: View, axis: "x" | "y") {
   const offset = axis === "x" ? view.x : view.y;
   const first = Math.floor((start - offset) / view.zoom / step) * step;
   const out: { at: number; label: string }[] = [];
-  for (let value = first; (value * view.zoom + offset) < start + length; value += step) out.push({ at: value * view.zoom + offset, label: String(Math.round(value * 100) / 100) });
+  for (let value = first; (value * view.zoom + offset) < start + length; value += step) {
+    const at = value * view.zoom + offset;
+    if (at >= start) out.push({ at, label: String(Math.round(value * 100) / 100) });
+  }
   return out;
 }
 
@@ -53,12 +56,23 @@ export function Rulers({ view, size, guides, onGuides, readOnly, selection }: {
   };
   const shown = guides.map((guide, index) => (drag?.index === index ? { ...guide, at: drag.at } : guide));
   if (drag && drag.index === null) shown.push({ axis: drag.axis, at: drag.at });
+  const edges = (axis: "x" | "y") => (selection ? [axis === "x" ? selection.x : selection.y, axis === "x" ? selection.x + selection.width : selection.y + selection.height].map((value) => value * view.zoom + (axis === "x" ? view.x : view.y)) : []);
+  const crowded = (axis: "x" | "y", at: number) => edges(axis).some((edge) => Math.abs(edge - at) < 30);
   const band = "absolute z-10 overflow-hidden bg-panel/95 text-[9.5px] tabular-nums text-ink-tertiary select-none";
   const highlight = (axis: "x" | "y") => {
     if (!selection) return null;
     const from = (axis === "x" ? selection.x : selection.y) * view.zoom + (axis === "x" ? view.x : view.y);
     const length = (axis === "x" ? selection.width : selection.height) * view.zoom;
-    return <span aria-hidden="true" className="absolute bg-accent/15" style={axis === "x" ? { left: from, width: length, top: 0, bottom: 0 } : { top: from, height: length, left: 0, right: 0 }} />;
+    const edge = "absolute z-[1] bg-panel px-0.5 font-medium leading-[14px] text-accent-text";
+    const value = (offset: number) => Math.round((axis === "x" ? selection.x : selection.y) + offset);
+    const size = axis === "x" ? selection.width : selection.height;
+    return (
+      <>
+        <span aria-hidden="true" className="absolute bg-accent/[0.07]" style={axis === "x" ? { left: from, width: length, top: 0, bottom: 0 } : { top: from, height: length, left: 0, right: 0 }} />
+        {from >= RULER && <span data-ruler-edge className={axis === "x" ? edge : `${edge} [writing-mode:vertical-rl] rotate-180`} style={axis === "x" ? { left: from, top: 0 } : { top: from, left: 0, width: RULER }}>{value(0)}</span>}
+        {length > 28 && <span data-ruler-edge className={axis === "x" ? edge : `${edge} [writing-mode:vertical-rl] rotate-180`} style={axis === "x" ? { left: from + length, top: 0, transform: "translateX(-100%)" } : { top: from + length, left: 0, width: RULER, transform: "translateY(-100%) rotate(180deg)" }}>{value(size)}</span>}
+      </>
+    );
   };
   return (
     <div data-canvas-chrome className="contents" onPointerMove={move} onPointerUp={end} onPointerCancel={() => setDrag(null)}>
@@ -66,14 +80,14 @@ export function Rulers({ view, size, guides, onGuides, readOnly, selection }: {
         onPointerDown={(event) => start(event, "y", null)}>
         {highlight("x")}
         {ticks(RULER, size.width, view, "x").map((tick) => (
-          <span key={tick.at} className="absolute top-0 h-full border-l border-hairline/60 pl-0.5 leading-[14px]" style={{ left: tick.at }}>{tick.label}</span>
+          <span key={tick.at} className="absolute top-0 h-full border-l border-hairline/60 pl-0.5 leading-[14px]" style={{ left: tick.at }}>{crowded("x", tick.at) ? "" : tick.label}</span>
         ))}
       </div>
       <div aria-hidden="true" className={`${band} bottom-0 left-0 top-0 border-r border-hairline/40`} style={{ width: RULER, cursor: readOnly ? "default" : "col-resize" }}
         onPointerDown={(event) => start(event, "x", null)}>
         {highlight("y")}
         {ticks(RULER, size.height, view, "y").map((tick) => (
-          <span key={tick.at} className="absolute left-0 w-full border-t border-hairline/60 [writing-mode:vertical-rl] rotate-180 leading-[14px]" style={{ top: tick.at }}>{tick.label}</span>
+          <span key={tick.at} className="absolute left-0 w-full border-t border-hairline/60 [writing-mode:vertical-rl] rotate-180 leading-[14px]" style={{ top: tick.at }}>{crowded("y", tick.at) ? "" : tick.label}</span>
         ))}
       </div>
       <span aria-hidden="true" className="absolute left-0 top-0 z-10 border-b border-r border-hairline/40 bg-panel" style={{ width: RULER, height: RULER }} />

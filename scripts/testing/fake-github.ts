@@ -6,9 +6,15 @@
 type Json = Record<string, unknown>;
 export type Permissions = Record<string, string>;
 
-export interface FakeRepository { id: number; owner: string; name: string; private: boolean; description: string; issues: FakeIssue[]; pulls: FakePull[]; collaborators: Map<string, string> }
+export interface FakeRepository {
+  id: number; owner: string; name: string; private: boolean; description: string; issues: FakeIssue[]; pulls: FakePull[]; collaborators: Map<string, string>;
+  /** Branch name to head commit; every repository starts with `main`. */
+  branches: Map<string, string>;
+  /** Branch protection as Origin last set it, by branch. */
+  protection: Map<string, Json>;
+}
 export interface FakeIssue { number: number; title: string; body: string; state: "open" | "closed"; updated_at: string; author: string }
-export interface FakePull { number: number; title: string; body: string; state: "open" | "closed"; draft: boolean; merged: boolean; merged_at: string | null; merge_commit_sha: string | null; head: { ref: string; sha: string }; base: { ref: string; sha: string } }
+export interface FakePull { number: number; title: string; body: string; state: "open" | "closed"; draft: boolean; merged: boolean; merged_at: string | null; merge_commit_sha: string | null; head: { ref: string; sha: string }; base: { ref: string; sha: string }; author?: string; reviews?: { login: string; state: string }[]; updated_at?: string }
 interface Installation { id: number; account: { id: number; login: string; type: "User" | "Organization" } }
 interface IssuedToken { kind: "installation"; installationId: number; repositories: string[] | null; permissions: Permissions; expiresAt: number }
 interface UserToken { kind: "user"; login: string; id: number; refresh?: string }
@@ -19,9 +25,13 @@ export interface FakeGitHub {
   readonly slug: string;
   repos: Map<string, FakeRepository>;
   calls: { method: string; path: string; body: Json | null; token: string | null }[];
+  /** Commits written through the contents API, with who wrote them. */
+  commits: { repo: string; branch: string; message: string; author: string }[];
   user(login: string, id: number): string;
   install(login: string, id: number, type?: "User" | "Organization"): number;
   addRepository(owner: string, name: string, options?: { private?: boolean; description?: string }): FakeRepository;
+  /** Accounts on a paid plan, where private repositories can have branch protection. */
+  paid: Set<string>;
   /** A person finishing GitHub's device sign-in for the code Origin showed them. */
   approveDevice(userCode: string, login: string, id: number): void;
   /** The permissions and repositories an issued installation token carries. */
@@ -64,6 +74,7 @@ export async function createFakeGitHub(options: { appId?: number; slug?: string;
   const tokens = new Map<string, IssuedToken | UserToken>();
   const repos = new Map<string, FakeRepository>();
   const calls: FakeGitHub["calls"] = [];
+  const commits: FakeGitHub["commits"] = [];
   const devices = new Map<string, { userCode: string; approved?: { login: string; id: number } }>();
   let nextId = 1000;
 
@@ -79,13 +90,13 @@ export async function createFakeGitHub(options: { appId?: number; slug?: string;
   const repoJson = (repo: FakeRepository) => ({ id: repo.id, name: repo.name, full_name: `${repo.owner}/${repo.name}`, html_url: `https://github.com/${repo.owner}/${repo.name}`, description: repo.description, owner: { login: repo.owner }, private: repo.private, default_branch: "main" });
   const issueJson = (repo: FakeRepository, issue: FakeIssue) => ({ ...issue, html_url: `https://github.com/${repo.owner}/${repo.name}/issues/${issue.number}`, user: { login: issue.author } });
   const pullJson = (repo: FakeRepository, pull: FakePull) => ({
-    ...pull, html_url: `https://github.com/${repo.owner}/${repo.name}/pull/${pull.number}`, node_id: `PR_${pull.number}`, updated_at: new Date().toISOString(), mergeable: true,
+    ...pull, user: { login: pull.author ?? `${slug}[bot]` }, html_url: `https://github.com/${repo.owner}/${repo.name}/pull/${pull.number}`, node_id: `PR_${pull.number}`, updated_at: pull.updated_at ?? new Date().toISOString(), mergeable: true,
     head: { ...pull.head, repo: { full_name: `${repo.owner}/${repo.name}` } }, base: { ...pull.base, repo: { full_name: `${repo.owner}/${repo.name}` } },
   });
 
   const repoAccess = (token: IssuedToken | UserToken | undefined, repo: FakeRepository, permission: string, level: "read" | "write") => {
     if (!token) return !repo.private && level === "read";
-    if (token.kind === "user") return token.login.toLowerCase() === repo.owner.toLowerCase() || repo.collaborators.has(token.login.toLowerCase());
+    if (token.kind === "user") return token.login.toLowerCase() === repo.owner.toLowerCase() || (repo.collaborators.has(token.login.toLowerCase()) && (level === "read" || repo.collaborators.get(token.login.toLowerCase()) !== "pull"));
     if (token.expiresAt < Date.now()) return false;
     const installation = installations.get(token.installationId);
     if (installation?.account.login.toLowerCase() !== repo.owner.toLowerCase()) return false;
@@ -95,8 +106,10 @@ export async function createFakeGitHub(options: { appId?: number; slug?: string;
     return level === "read" ? granted === "read" || granted === "write" : granted === "write";
   };
 
+  const actor = (token: IssuedToken | UserToken | undefined) => (token?.kind === "user" ? token.login : `${slug}[bot]`);
+  const denied = () => reply(403, { message: "Resource not accessible by integration" });
   const fake: FakeGitHub = {
-    appId, privateKeyPem, slug, repos, calls,
+    appId, privateKeyPem, slug, repos, calls, commits, paid: new Set(),
     user(login, id) {
       users.set(login.toLowerCase(), id);
       const token = random("ghu_");
@@ -109,7 +122,7 @@ export async function createFakeGitHub(options: { appId?: number; slug?: string;
       return installationId;
     },
     addRepository(owner, name, extra = {}) {
-      const repo: FakeRepository = { id: nextId++, owner, name, private: extra.private ?? true, description: extra.description ?? "", issues: [], pulls: [], collaborators: new Map() };
+      const repo: FakeRepository = { id: nextId++, owner, name, private: extra.private ?? true, description: extra.description ?? "", issues: [], pulls: [], collaborators: new Map(), branches: new Map([["main", sha()]]), protection: new Map() };
       repos.set(`${owner}/${name}`.toLowerCase(), repo);
       return repo;
     },
@@ -165,6 +178,11 @@ export async function createFakeGitHub(options: { appId?: number; slug?: string;
         const user = /^\/users\/([^/]+)\/installation$/.exec(path)?.[1];
         if (user) {
           const found = [...installations.values()].find((row) => row.account.login.toLowerCase() === decodeURIComponent(user).toLowerCase());
+          return found ? reply(200, { ...found, suspended_at: null, app_slug: slug, permissions: { administration: "write", issues: "write", contents: "write", pull_requests: "write", checks: "read", actions: "write" } }) : reply(404, { message: "Not Found" });
+        }
+        const owner = /^\/repos\/([^/]+)\/([^/]+)\/installation$/.exec(path);
+        if (owner) {
+          const found = repos.has(`${decodeURIComponent(owner[1])}/${decodeURIComponent(owner[2])}`.toLowerCase()) ? [...installations.values()].find((row) => row.account.login.toLowerCase() === decodeURIComponent(owner[1]).toLowerCase()) : undefined;
           return found ? reply(200, { ...found, suspended_at: null, app_slug: slug, permissions: { administration: "write", issues: "write", contents: "write", pull_requests: "write", checks: "read", actions: "write" } }) : reply(404, { message: "Not Found" });
         }
         const minted = /^\/app\/installations\/(\d+)\/access_tokens$/.exec(path);
@@ -247,6 +265,80 @@ export async function createFakeGitHub(options: { appId?: number; slug?: string;
       }
       if (/^\/issues\/\d+\/comments$/.test(rest) && method === "POST") return reply(201, { id: nextId++ });
       if (rest === "/pulls" && method === "GET") return reply(200, repo.pulls.map((pull) => pullJson(repo, pull)));
+      if (rest === "/pulls" && method === "POST") {
+        if (!repoAccess(token, repo, "pull_requests", "write")) return denied();
+        const head = String(body?.head ?? ""), base = String(body?.base ?? "");
+        if (!repo.branches.has(head) || !repo.branches.has(base)) return reply(422, { message: "Validation Failed", errors: [{ field: "head", code: "invalid" }] });
+        const pull: FakePull = { number: repo.issues.length + repo.pulls.length + 1, title: String(body?.title ?? ""), body: String(body?.body ?? ""), state: "open", draft: body?.draft === true, merged: false, merged_at: null, merge_commit_sha: null, head: { ref: head, sha: repo.branches.get(head)! }, base: { ref: base, sha: repo.branches.get(base)! }, author: actor(token), reviews: [], updated_at: new Date().toISOString() };
+        repo.pulls.push(pull);
+        return reply(201, pullJson(repo, pull));
+      }
+      const branchRef = /^\/git\/refs?\/heads\/(.+)$/.exec(rest);
+      if (branchRef && method === "GET") {
+        const branch = decodeURIComponent(branchRef[1]);
+        return repo.branches.has(branch) ? reply(200, { ref: `refs/heads/${branch}`, object: { sha: repo.branches.get(branch) } }) : reply(404, { message: "Not Found" });
+      }
+      if (branchRef && method === "PATCH") {
+        const branch = decodeURIComponent(branchRef[1]);
+        if (!repoAccess(token, repo, "contents", "write")) return denied();
+        if (repo.protection.has(branch)) return reply(422, { message: "Protected branch update failed" });
+        repo.branches.set(branch, String(body?.sha ?? sha()));
+        return reply(200, { ref: `refs/heads/${branch}`, object: { sha: repo.branches.get(branch) } });
+      }
+      if (rest === "/git/refs" && method === "POST") {
+        if (!repoAccess(token, repo, "contents", "write")) return denied();
+        const branch = String(body?.ref ?? "").replace(/^refs\/heads\//, "");
+        if (repo.branches.has(branch)) return reply(422, { message: "Reference already exists" });
+        repo.branches.set(branch, String(body?.sha ?? sha()));
+        return reply(201, { ref: `refs/heads/${branch}`, object: { sha: repo.branches.get(branch) } });
+      }
+      const contents = /^\/contents\/(.+)$/.exec(rest);
+      if (contents && method === "GET") return reply(404, { message: "Not Found" });
+      if (contents && method === "PUT") {
+        if (!repoAccess(token, repo, "contents", "write")) return denied();
+        const branch = String(body?.branch ?? "main");
+        if (!repo.branches.has(branch)) return reply(404, { message: "Branch not found" });
+        if (repo.protection.has(branch)) return reply(409, { message: "Changes must be made through a pull request." });
+        const commit = sha();
+        repo.branches.set(branch, commit);
+        for (const pull of repo.pulls) if (pull.head.ref === branch && pull.state === "open") pull.head.sha = commit;
+        commits.push({ repo: `${repo.owner}/${repo.name}`, branch, message: String(body?.message ?? ""), author: actor(token) });
+        return reply(201, { commit: { sha: commit } });
+      }
+      const protection = /^\/branches\/([^/]+)\/protection$/.exec(rest);
+      if (protection) {
+        const branch = decodeURIComponent(protection[1]);
+        if (!repoAccess(token, repo, "administration", method === "GET" ? "read" : "write")) return denied();
+        if (repo.private && !fake.paid.has(repo.owner.toLowerCase())) return reply(403, { message: "Upgrade to GitHub Pro or make this repository public to enable this feature." });
+        if (method === "PUT") repo.protection.set(branch, body ?? {});
+        return repo.protection.has(branch) ? reply(200, { url: `https://api.github.com/repos/${repo.owner}/${repo.name}/branches/${branch}/protection`, ...repo.protection.get(branch) }) : reply(404, { message: "Branch not protected" });
+      }
+      const reviews = /^\/pulls\/(\d+)\/reviews$/.exec(rest);
+      const reviewed = reviews ? repo.pulls.find((candidate) => candidate.number === Number(reviews[1])) : undefined;
+      if (reviews && method === "GET") return reviewed ? reply(200, (reviewed.reviews ?? []).map((row) => ({ user: { login: row.login }, state: row.state }))) : reply(404, { message: "Not Found" });
+      if (reviews && method === "POST") {
+        if (!reviewed) return reply(404, { message: "Not Found" });
+        if (!repoAccess(token, repo, "pull_requests", "write")) return denied();
+        const event = String(body?.event ?? "COMMENT");
+        if (event === "APPROVE" && reviewed.author === actor(token)) return reply(422, { message: "Unprocessable Entity", errors: ["Can not approve your own pull request"] });
+        (reviewed.reviews ??= []).push({ login: actor(token), state: event === "APPROVE" ? "APPROVED" : event === "REQUEST_CHANGES" ? "CHANGES_REQUESTED" : "COMMENTED" });
+        return reply(200, { id: nextId++ });
+      }
+      if (/^\/pulls\/\d+\/files$/.test(rest)) return reply(200, []);
+      const merge = /^\/pulls\/(\d+)\/merge$/.exec(rest);
+      if (merge && method === "PUT") {
+        const pull = repo.pulls.find((candidate) => candidate.number === Number(merge[1]));
+        if (!pull) return reply(404, { message: "Not Found" });
+        if (!repoAccess(token, repo, "contents", "write")) return denied();
+        const rule = repo.protection.get(pull.base.ref) as { required_pull_request_reviews?: { required_approving_review_count?: number } } | undefined;
+        const approvals = new Set((pull.reviews ?? []).filter((row) => row.state === "APPROVED" && row.login !== pull.author).map((row) => row.login)).size;
+        if (rule && approvals < (rule.required_pull_request_reviews?.required_approving_review_count ?? 0)) return reply(405, { message: "At least 1 approving review is required by reviewers with write access." });
+        if (body?.sha && body.sha !== pull.head.sha) return reply(409, { message: "Head branch was modified" });
+        const commit = sha();
+        Object.assign(pull, { state: "closed", merged: true, merged_at: new Date().toISOString(), merge_commit_sha: commit, updated_at: new Date(Date.now() + 1000).toISOString() });
+        repo.branches.set(pull.base.ref, commit);
+        return reply(200, { sha: commit, merged: true, message: "Pull Request successfully merged" });
+      }
       const pullMatch = /^\/pulls\/(\d+)$/.exec(rest);
       if (pullMatch && method === "GET") {
         const pull = repo.pulls.find((candidate) => candidate.number === Number(pullMatch[1]));

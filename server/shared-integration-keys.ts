@@ -13,6 +13,9 @@ export interface SharedKey {
   updatedAt: number;
 }
 
+/** Where a key is wanted: a project's work, a workspace, or neither when the caller has no context. */
+export type KeyScope = { teamId?: string; projectId?: string };
+
 const REFRESH_MS = 5 * 60_000;
 
 type Resolve = (url: string, sessionToken: string) => Promise<SharedKey[]>;
@@ -74,16 +77,22 @@ export function createSharedKeys(options: { cloud?: () => OriginCloudState; reso
     },
     /**
      * The values shared for `integration`: the project's own when `projectId` is given, else a workspace's, but only
-     * when a single workspace shared one, so a key never crosses into another workspace's work. Starts a refresh when
-     * the cache is old and answers from what this same sign-in fetched meanwhile.
+     * when a single workspace shared one (or `teamId` names it), so a key never crosses into another workspace's work.
+     * A key shared with one project is never returned for any other. Starts a refresh when the cache is old and answers
+     * from what this same sign-in fetched meanwhile.
      */
-    find(integration: string, projectId?: string): SharedKey | null {
+    find(integration: string, scope: KeyScope = {}): SharedKey | null {
       if (stale()) void refresh();
-      const matching = keys().filter((key) => key.integration === integration);
-      const project = projectId ? matching.find((key) => key.projectId === projectId) : undefined;
+      const matching = keys().filter((key) => key.integration === integration && (!scope.teamId || key.teamId === scope.teamId));
+      const project = scope.projectId ? matching.find((key) => key.projectId === scope.projectId) : undefined;
       const workspace = matching.filter((key) => !key.projectId).sort((a, b) => b.updatedAt - a.updatedAt);
       const oneTeam = new Set(workspace.map((key) => key.teamId)).size === 1;
       return project ?? (oneTeam ? workspace[0]! : null);
+    },
+    /** Every key shared for `integration` with a workspace or one of its projects, newest first. */
+    shares(integration: string, teamId?: string): SharedKey[] {
+      if (stale()) void refresh();
+      return keys().filter((key) => key.integration === integration && (!teamId || key.teamId === teamId)).sort((a, b) => b.updatedAt - a.updatedAt);
     },
     error: () => error,
     close: scrub,

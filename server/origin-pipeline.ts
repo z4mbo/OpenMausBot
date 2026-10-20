@@ -2,17 +2,18 @@ import { normalizeLeadPhone, type PipelineChannel } from "../shared/origin-pipel
 import { parseSummary, summaryPrompt, type CallSummary } from "./origin-call-agent.ts";
 import type { OriginCloudClient } from "./origin-cloud.ts";
 import { connectedConvex, originSessionToken } from "./origin-members.ts";
-import { integrationKey } from "./integration-keys.ts";
+import { projectIntegrationKey } from "./integration-keys.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
-import { createSalesService, SalesError, type SalesService } from "./origin-sales.ts";
-import { SALES_REPLY_CHANNELS, type SalesReplyChannel } from "../shared/origin-sales.ts";
+import { coachDeal, createSalesService, SalesError, type CoachInput, type SalesService } from "./origin-sales.ts";
+import { SALES_REPLY_CHANNELS, type DealCoach, type SalesReplyChannel } from "../shared/origin-sales.ts";
 
 type Args = Record<string, unknown>;
 
+/** Each provider's keys for one project's work: the member's own, else those shared with the project or workspace. */
 export interface PipelineProviderKeys {
-  brevo(): { apiKey: string; senderEmail: string; senderName?: string } | null;
-  twilio(): { accountSid: string; authToken: string; fromNumber: string } | null;
-  elevenlabs(): { apiKey: string } | null;
+  brevo(projectId?: string): { apiKey: string; senderEmail: string; senderName?: string } | null;
+  twilio(projectId?: string): { accountSid: string; authToken: string; fromNumber: string } | null;
+  elevenlabs(projectId?: string): { apiKey: string } | null;
 }
 
 export interface PipelineSenderDeps {
@@ -34,7 +35,8 @@ export type PipelineRefreshInput = { client: OriginCloudClient; sessionToken: st
 export interface PipelineSender {
   send(input: PipelineSendInput): Promise<PipelineSendResult>;
   refresh(input: PipelineRefreshInput): Promise<{ status: "in_progress" | "done" | "failed"; summary?: string }>;
-  channels(): Record<PipelineChannel, boolean>;
+  channels(projectId?: string): Record<PipelineChannel, boolean>;
+  coach?(input: CoachInput): Promise<DealCoach>;
 }
 
 const record = (value: unknown): Args => (value && typeof value === "object" && !Array.isArray(value) ? value as Args : {});
@@ -45,9 +47,9 @@ const SUMMARY_TRANSCRIPT_CHARS = 60_000;
 class ProviderError extends Error {}
 
 export const defaultPipelineKeys: PipelineProviderKeys = {
-  brevo: () => integrationKey("brevo"),
-  twilio: () => integrationKey("twilio"),
-  elevenlabs: () => integrationKey("elevenlabs"),
+  brevo: (projectId) => projectIntegrationKey("brevo", projectId),
+  twilio: (projectId) => projectIntegrationKey("twilio", projectId),
+  elevenlabs: (projectId) => projectIntegrationKey("elevenlabs", projectId),
 };
 
 /** Security: the override only ever points at this computer, so a fixture can never redirect real keys elsewhere. */
@@ -118,8 +120,8 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
   const twilioAuth = (twilio: NonNullable<ReturnType<PipelineProviderKeys["twilio"]>>) =>
     `Basic ${Buffer.from(`${twilio.accountSid}:${twilio.authToken}`).toString("base64")}`;
 
-  async function email(activity: Args, lead: Args, replyTo: string): Promise<string> {
-    const brevo = keys.brevo() ?? (() => { throw new ProviderError("Connect Brevo under Settings > Integrations to send email"); })();
+  async function email(projectId: string, activity: Args, lead: Args, replyTo: string): Promise<string> {
+    const brevo = keys.brevo(projectId) ?? (() => { throw new ProviderError("Connect Brevo under Settings > Integrations to send email"); })();
     const result = await call("Brevo", `${origin("https://api.brevo.com")}/v3/smtp/email`, {
       method: "POST",
       headers: { "api-key": brevo.apiKey, "Content-Type": "application/json", Accept: "application/json" },
@@ -133,8 +135,8 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
     return text(result.messageId);
   }
 
-  async function textMessage(activity: Args, lead: Args, whatsapp: boolean, statusCallback: string): Promise<string> {
-    const twilio = keys.twilio() ?? (() => { throw new ProviderError("Connect Twilio under Settings > Integrations to send messages"); })();
+  async function textMessage(projectId: string, activity: Args, lead: Args, whatsapp: boolean, statusCallback: string): Promise<string> {
+    const twilio = keys.twilio(projectId) ?? (() => { throw new ProviderError("Connect Twilio under Settings > Integrations to send messages"); })();
     const prefix = whatsapp ? "whatsapp:" : "";
     const result = await call("Twilio", `${origin("https://api.twilio.com")}/2010-04-01/Accounts/${encodeURIComponent(twilio.accountSid)}/Messages.json`, {
       method: "POST",
@@ -144,8 +146,8 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
     return text(result.sid);
   }
 
-  async function bridge(lead: Args, callerPhone: string | undefined, statusCallback: string): Promise<string> {
-    const twilio = keys.twilio() ?? (() => { throw new ProviderError("Connect Twilio under Settings > Integrations to place calls"); })();
+  async function bridge(projectId: string, lead: Args, callerPhone: string | undefined, statusCallback: string): Promise<string> {
+    const twilio = keys.twilio(projectId) ?? (() => { throw new ProviderError("Connect Twilio under Settings > Integrations to place calls"); })();
     const member = normalizeLeadPhone(callerPhone) ?? (() => { throw new ProviderError("Enter your own phone number, with its country code, so Twilio can ring you first"); })();
     const twiml = `<Response><Say>Connecting you to ${escapeXml(text(lead.name).slice(0, 80))}.</Say><Dial callerId="${escapeXml(twilio.fromNumber)}"><Number>${escapeXml(text(lead.phone))}</Number></Dial></Response>`;
     const result = await call("Twilio", `${origin("https://api.twilio.com")}/2010-04-01/Accounts/${encodeURIComponent(twilio.accountSid)}/Calls.json`, {
@@ -156,8 +158,8 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
     return text(result.sid);
   }
 
-  async function aiCall(activity: Args, lead: Args, ai: Args): Promise<string> {
-    const eleven = keys.elevenlabs() ?? (() => { throw new ProviderError("Connect ElevenLabs under Settings > Integrations to place AI calls"); })();
+  async function aiCall(projectId: string, activity: Args, lead: Args, ai: Args): Promise<string> {
+    const eleven = keys.elevenlabs(projectId) ?? (() => { throw new ProviderError("Connect ElevenLabs under Settings > Integrations to place AI calls"); })();
     const agentId = text(ai.agentId);
     const phoneId = text(ai.phoneNumberId);
     if (!agentId || !phoneId) throw new ProviderError("Set the ElevenLabs agent and phone number ids in Pipeline settings first");
@@ -204,7 +206,7 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
       leadName = text(record(detail.lead).name) || "Lead";
       conversationId = text(activity.providerId);
     }
-    const eleven = keys.elevenlabs() ?? (() => { throw new ProviderError("Connect ElevenLabs under Settings > Integrations"); })();
+    const eleven = keys.elevenlabs(input.projectId) ?? (() => { throw new ProviderError("Connect ElevenLabs under Settings > Integrations"); })();
     const conversation = await call("ElevenLabs", `${origin("https://api.elevenlabs.io")}/v1/convai/conversations/${encodeURIComponent(conversationId)}`, {
       headers: { "xi-api-key": eleven.apiKey },
     });
@@ -234,11 +236,12 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
   }
 
   return {
-    channels: () => {
-      const twilio = Boolean(keys.twilio());
-      return { email: Boolean(keys.brevo()), sms: twilio, whatsapp: twilio, call: twilio, ai_call: Boolean(keys.elevenlabs()) };
+    channels: (projectId) => {
+      const twilio = Boolean(keys.twilio(projectId));
+      return { email: Boolean(keys.brevo(projectId)), sms: twilio, whatsapp: twilio, call: twilio, ai_call: Boolean(keys.elevenlabs(projectId)) };
     },
     refresh: (input) => refresh(input),
+    ...(deps.summarize ? { coach: (input: CoachInput) => coachDeal(input, deps.summarize!) } : {}),
     async send(input) {
       const base = { sessionToken: input.sessionToken, projectId: input.projectId };
       const claimed = record(await input.client.mutation("pipeline:claimContact", { ...base, activityId: input.activityId }));
@@ -247,10 +250,10 @@ export function createPipelineSender(deps: PipelineSenderDeps = {}): PipelineSen
       const kind = text(activity.kind);
       const statusCallback = text(claimed.statusCallback);
       try {
-        const providerId = kind === "email" ? await email(activity, lead, text(claimed.replyTo))
-          : kind === "sms" || kind === "whatsapp" ? await textMessage(activity, lead, kind === "whatsapp", statusCallback)
-          : kind === "call" ? await bridge(lead, input.callerPhone, statusCallback)
-          : kind === "ai_call" ? await aiCall(activity, lead, record(claimed.ai))
+        const providerId = kind === "email" ? await email(input.projectId, activity, lead, text(claimed.replyTo))
+          : kind === "sms" || kind === "whatsapp" ? await textMessage(input.projectId, activity, lead, kind === "whatsapp", statusCallback)
+          : kind === "call" ? await bridge(input.projectId, lead, input.callerPhone, statusCallback)
+          : kind === "ai_call" ? await aiCall(input.projectId, activity, lead, record(claimed.ai))
           : (() => { throw new ProviderError(`A ${kind} cannot be sent`); })();
         const status = kind === "ai_call" ? "in_progress" as const : "sent" as const;
         await input.client.mutation("pipeline:finishContact", { ...base, activityId: input.activityId, status, ...(providerId ? { providerId } : {}) });
@@ -284,22 +287,25 @@ export interface PipelineRouteDeps {
   providerOrigin?: string | undefined;
 }
 
-const SALES_PATHS = new Set(["/api/origin/pipeline/send", "/api/origin/pipeline/refresh", "/api/origin/pipeline/suggest", "/api/origin/pipeline/quote", "/api/origin/pipeline/quote/check"]);
+const SALES_PATHS = new Set(["/api/origin/pipeline/send", "/api/origin/pipeline/refresh", "/api/origin/pipeline/suggest", "/api/origin/pipeline/quote", "/api/origin/pipeline/quote/check", "/api/origin/pipeline/coach"]);
 
 /** The renderer's Sales calls; each carries the person's own Origin session, so Convex checks their project role. */
 export function createPipelineRoutes(deps: PipelineRouteDeps): RouteHandler {
   const convex = deps.convex ?? connectedConvex;
   const sales = deps.sales ?? createSalesService({ ...(deps.generate ? { generate: deps.generate } : {}), providerOrigin: deps.providerOrigin });
-  return async ({ req, res, path, method, json, readBody }) => {
+  return async ({ req, res, url, path, method, json, readBody }) => {
     if (!path.startsWith("/api/origin/pipeline/")) return PASS;
-    if (path === "/api/origin/pipeline/channels" && method === "GET") return json(res, 200, { channels: deps.sender.channels(), stripe: sales.stripeConnected() });
+    if (path === "/api/origin/pipeline/channels" && method === "GET") {
+      const projectId = url.searchParams.get("projectId") || undefined;
+      return json(res, 200, { channels: deps.sender.channels(projectId), stripe: sales.stripeConnected(projectId) });
+    }
     if (method !== "POST" || !SALES_PATHS.has(path)) return PASS;
     const body = record(await readBody(req));
     const sessionToken = originSessionToken(req, body);
     const client = convex();
     if (!sessionToken || !client) return json(res, 401, { error: "Sign in to Origin first" });
     const action = path.slice("/api/origin/pipeline/".length);
-    const keys = ["projectId", ...(action === "suggest" ? ["leadId"] : action.startsWith("quote") ? ["dealId"] : ["activityId", ...(action === "refresh" ? ["leadId"] : [])])];
+    const keys = ["projectId", ...(action === "suggest" ? ["leadId"] : action.startsWith("quote") || action === "coach" ? ["dealId"] : ["activityId", ...(action === "refresh" ? ["leadId"] : [])])];
     const ids = Object.fromEntries(keys.map((key) => [key, text(body[key])]));
     if (Object.values(ids).some((id) => !CONVEX_ID.test(id))) return json(res, 400, { error: `${keys.join(", ")} must be Origin ids` });
     const scope = { client, sessionToken, projectId: ids.projectId! };
@@ -312,10 +318,15 @@ export function createPipelineRoutes(deps: PipelineRouteDeps): RouteHandler {
       if (action === "refresh") return json(res, 200, await deps.sender.refresh({ ...scope, activityId: ids.activityId!, leadId: ids.leadId!, ...(botId ? { botId } : {}) }));
       if (action === "quote") return json(res, 200, await sales.quote({ ...scope, dealId: ids.dealId! }));
       if (action === "quote/check") return json(res, 200, await sales.checkPayment({ ...scope, dealId: ids.dealId! }));
+      const projectName = text(body.projectName).slice(0, 120) || "this project";
+      if (action === "coach") {
+        if (!botId) return json(res, 400, { error: "Name the agent whose model coaches the deal" });
+        return json(res, 200, await sales.coach({ ...scope, dealId: ids.dealId!, botId, projectName }));
+      }
       const channel = text(body.channel) as SalesReplyChannel;
       if (!SALES_REPLY_CHANNELS.includes(channel)) return json(res, 400, { error: `channel must be one of ${SALES_REPLY_CHANNELS.join(", ")}` });
       if (!botId) return json(res, 400, { error: "Name the agent whose model suggests the reply" });
-      return json(res, 200, await sales.suggest({ ...scope, leadId: ids.leadId!, channel, botId, projectName: text(body.projectName).slice(0, 120) || "this project" }));
+      return json(res, 200, await sales.suggest({ ...scope, leadId: ids.leadId!, channel, botId, projectName }));
     } catch (error) {
       return json(res, error instanceof SalesError ? 502 : 400, { ok: false, error: convexMessage(error) });
     }

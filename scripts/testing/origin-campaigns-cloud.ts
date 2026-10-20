@@ -16,7 +16,7 @@ setInterval(changed, 1_500);
 const requests: { name: string; args: Record<string, unknown> }[] = [];
 Object.assign(window, { originCampaignsFixture: { requests, changed } });
 
-async function call<T>(kind: "query" | "mutation", name: string, args: Record<string, unknown> = {}): Promise<T> {
+async function call<T>(kind: "query" | "mutation" | "action", name: string, args: Record<string, unknown> = {}): Promise<T> {
   const response = await fetch(`${config.url}/api/${kind}`, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ path: name, format: "convex_encoded_json", args: [{ ...args, sessionToken: token() }] }),
@@ -62,4 +62,12 @@ export async function cloudMutation<T>(name: string, args: Record<string, unknow
     changed();
   }
 }
-export const cloudAction = cloudMutation;
+export async function cloudAction<T>(name: string, args: Record<string, unknown> = {}): Promise<T> {
+  requests.push({ name, args });
+  try {
+    return await call<T>("action", name, args);
+  } finally {
+    changed();
+  }
+}
+export const createOriginWorkspace = async (): Promise<{ teamId: string; slug: string }> => { throw new Error("The fixture has one workspace"); };

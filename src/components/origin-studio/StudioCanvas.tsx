@@ -1,11 +1,11 @@
 import { useEffect, useState, type KeyboardEvent } from "react";
-import { AlertTriangle, ArrowUpFromLine, AudioLines, Ban, Clapperboard, FastForward, Loader2, Maximize2, RotateCcw, Scissors, Send, Shuffle, Square, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowUpFromLine, AudioLines, Ban, BookmarkPlus, Clapperboard, Image as ImageIcon, FastForward, Loader2, Maximize2, RotateCcw, Scissors, Send, Shuffle, Square, Trash2, UserRound } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { relativeTime } from "@/lib/memory";
 import { formatSeconds, ratioOf, typing } from "./studio-ui";
 import { studioEta, type StudioGeneration } from "../../../shared/studio";
 
-export type TileAction = "open" | "animate" | "upscale" | "remix" | "removeBackground" | "extend" | "reuse" | "broadcast" | "cancel" | "delete";
+export type TileAction = "open" | "animate" | "upscale" | "remix" | "removeBackground" | "extend" | "reuse" | "library" | "broadcast" | "cancel" | "delete";
 
 interface ActionSpec {
   id: TileAction;
@@ -22,6 +22,7 @@ const ACTIONS: Record<TileAction, ActionSpec> = {
   removeBackground: { id: "removeBackground", label: "Remove background", icon: Scissors },
   extend: { id: "extend", label: "Extend", key: "X", icon: FastForward },
   reuse: { id: "reuse", label: "Reuse settings", key: "P", icon: RotateCcw },
+  library: { id: "library", label: "Save to library", key: "L", icon: BookmarkPlus },
   broadcast: { id: "broadcast", label: "Use in Broadcast", key: "B", icon: Send },
   cancel: { id: "cancel", label: "Cancel", icon: Square },
   delete: { id: "delete", label: "Delete", key: "Del", icon: Trash2 },
@@ -36,6 +37,7 @@ export function tileActions(row: StudioGeneration, canEdit: boolean, isAdmin: bo
     if (kind === "image") list.push("animate", "upscale", "remix", "removeBackground");
     if (kind === "video") list.push("extend", "upscale");
     list.push("broadcast");
+    if (kind === "image") list.push("library");
   }
   if (canEdit) list.push("reuse");
   if (live && canEdit) list.push("cancel");
@@ -43,7 +45,7 @@ export function tileActions(row: StudioGeneration, canEdit: boolean, isAdmin: bo
   return list.map((id) => ACTIONS[id]);
 }
 
-const KEY_ACTION: Record<string, TileAction> = { a: "animate", u: "upscale", r: "remix", x: "extend", p: "reuse", b: "broadcast", Delete: "delete", Backspace: "delete" };
+const KEY_ACTION: Record<string, TileAction> = { a: "animate", u: "upscale", r: "remix", x: "extend", p: "reuse", l: "library", b: "broadcast", Delete: "delete", Backspace: "delete" };
 
 /** Seconds since a live generation started, ticking each second. */
 function useElapsed(since: number, live: boolean): number {
@@ -65,11 +67,10 @@ function Progress({ row, rows }: { row: StudioGeneration; rows: readonly StudioG
     ? row.queuePosition ? `In fal's queue · #${row.queuePosition}` : "Queued"
     : left > 1 ? `~${formatSeconds(left)} left` : elapsed > eta * 1.5 ? "Taking longer than usual" : "Almost done";
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-[12.5px] text-ink-secondary" role="status" aria-label={`${row.modelLabel}: ${label}`}>
-      <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-transparent via-raised/50 to-transparent [background-size:200%_100%] motion-safe:animate-shimmer" />
-      <Loader2 size={16} className="relative animate-spin text-accent-text" aria-hidden="true" />
-      <span className="relative tabular-nums">{label}</span>
-      <span className="relative text-[11px] tabular-nums text-ink-tertiary">{formatSeconds(elapsed)}</span>
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-[12.5px] text-ink-secondary" role="status" aria-label={`${row.modelLabel}: ${label}`}>
+      <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-transparent via-raised/40 to-transparent [background-size:200%_100%] motion-safe:animate-shimmer" />
+      <span className="relative tabular-nums text-ink">{label}</span>
+      <span className="relative text-[11px] tabular-nums text-ink-tertiary">{row.modelLabel} · {formatSeconds(elapsed)}</span>
       <span className="absolute inset-x-0 bottom-0 h-0.5 bg-hairline/30" aria-hidden="true">
         <span className="block h-full bg-accent transition-[width] duration-1000 ease-linear" style={{ width: `${Math.round(share * 100)}%` }} />
       </span>
@@ -78,19 +79,19 @@ function Progress({ row, rows }: { row: StudioGeneration; rows: readonly StudioG
 }
 
 function Media({ row }: { row: StudioGeneration }) {
+  const [broken, setBroken] = useState(false);
   const output = row.outputs[0];
   if (!output) return null;
-  if (output.kind === "image") return <img src={output.url} alt={row.prompt} loading="lazy" className="block h-auto w-full" />;
+  if (broken && output.kind !== "audio") {
+    const Icon = output.kind === "video" ? Clapperboard : ImageIcon;
+    return <span className="flex w-full items-center justify-center text-ink-tertiary" style={{ aspectRatio: ratioOf(row.aspectRatio, output.kind) }}><Icon size={20} aria-hidden="true" /></span>;
+  }
+  if (output.kind === "image") return <img src={output.url} alt={row.prompt} loading="lazy" className="block h-auto w-full" onError={() => setBroken(true)} />;
   if (output.kind === "video") {
-    return <video src={output.url} muted loop playsInline preload="metadata" className="block h-auto w-full"
+    return <video src={output.url} muted loop playsInline preload="metadata" className="block h-auto w-full" onError={() => setBroken(true)}
       onMouseEnter={(event) => void event.currentTarget.play().catch(() => undefined)} onMouseLeave={(event) => event.currentTarget.pause()} />;
   }
-  return (
-    <div className="flex w-full flex-col gap-3 px-3 pb-3 pt-4">
-      <span className="flex items-center gap-2 text-[12px] text-ink-secondary"><AudioLines size={16} className="text-accent-text" aria-hidden="true" />{row.modelLabel}</span>
-      <audio src={output.url} controls preload="none" className="h-9 w-full [color-scheme:var(--code-color-scheme)]" onClick={(event) => event.stopPropagation()} />
-    </div>
-  );
+  return <audio src={output.url} controls preload="none" className="h-9 w-full [color-scheme:var(--code-color-scheme)]" onClick={(event) => event.stopPropagation()} />;
 }
 
 function Tile({ row, rows, canEdit, isAdmin, busy, onAction }: {
@@ -99,8 +100,9 @@ function Tile({ row, rows, canEdit, isAdmin, busy, onAction }: {
   const live = row.status === "queued" || row.status === "running";
   const actions = tileActions(row, canEdit, isAdmin);
   const picked = row.broadcast.some((entry) => entry.index === 0);
-  const audio = row.outputs[0]?.kind === "audio";
-  const placeholder = live || row.status !== "done" || !row.outputs[0];
+  const kind = row.outputs[0]?.kind ?? row.kind;
+  const visual = row.status === "done" && Boolean(row.outputs[0]) && kind !== "audio";
+  const character = typeof row.params?.character === "string" ? row.params.character : undefined;
   const onKey = (event: KeyboardEvent<HTMLElement>) => {
     if (typing(event) || event.target !== event.currentTarget || event.metaKey || event.ctrlKey || event.altKey) return;
     if (event.key === "Enter" || event.key === " ") {
@@ -114,44 +116,53 @@ function Tile({ row, rows, canEdit, isAdmin, busy, onAction }: {
       onAction(row, action);
     }
   };
+  const caption = (
+    <>
+      <p className="line-clamp-2 text-[12.5px] leading-snug text-ink" title={row.prompt}>{row.prompt || <span className="text-ink-tertiary">{row.action ? `${row.action[0]!.toUpperCase()}${row.action.slice(1)}` : "No prompt"}</span>}</p>
+      <p className="truncate text-[11px] text-ink-tertiary">{row.modelLabel} · {row.agentName ?? row.createdByName} · {relativeTime(row.createdAt)}</p>
+    </>
+  );
   return (
     <article tabIndex={0} onKeyDown={onKey} onDoubleClick={() => row.status === "done" && onAction(row, "open")} data-studio-generation={row.status} data-studio-tile={row._id}
       aria-label={`${row.modelLabel} ${row.kind}: ${row.prompt || "no prompt"}`}
-      className="group relative mb-3 break-inside-avoid overflow-hidden rounded-xl border border-hairline/40 bg-panel outline-none transition-colors duration-(--motion-fast) focus-visible:border-accent motion-safe:animate-pop-in">
-      <div className={cn("relative bg-inset", placeholder && "min-h-[132px]")} style={live ? { aspectRatio: ratioOf(row.aspectRatio, row.kind) } : undefined}>
-        {live && <Progress row={row} rows={rows} />}
-        {row.status === "failed" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 px-4 text-center text-[12.5px] text-danger" role="alert">
-            <AlertTriangle size={18} aria-hidden="true" /><span className="line-clamp-4">{row.error ?? "The generation failed"}</span>
-          </div>
-        )}
-        {row.status === "cancelled" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-[12.5px] text-ink-tertiary"><Ban size={18} aria-hidden="true" /><span>Cancelled</span></div>
-        )}
-        {row.status === "done" && <button type="button" tabIndex={-1} className="block w-full cursor-zoom-in text-left" onClick={() => onAction(row, "open")} aria-label="Open">{!audio && <Media row={row} />}</button>}
-        {row.status === "done" && audio && <Media row={row} />}
-        {row.outputs.length > 1 && <span className="absolute right-2 top-2 rounded-full bg-app/85 px-2 py-0.5 text-[11px] text-ink-secondary">+{row.outputs.length - 1}</span>}
-        {picked && <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-app/85 px-2 py-0.5 text-[11px] text-accent-text"><Send size={10} aria-hidden="true" />Broadcast</span>}
+      className="group relative mb-2 break-inside-avoid overflow-hidden rounded-lg bg-panel outline-none ring-1 ring-hairline/30 transition-shadow duration-(--motion-fast) focus-visible:ring-2 focus-visible:ring-accent motion-safe:animate-pop-in">
+      {live && <div className="relative bg-inset" style={{ aspectRatio: ratioOf(row.aspectRatio, row.kind) }}><Progress row={row} rows={rows} /></div>}
+      {visual && <button type="button" tabIndex={-1} className="block w-full cursor-zoom-in bg-inset text-left" onClick={() => onAction(row, "open")} aria-label="Open"><Media row={row} /></button>}
+      {(row.status === "failed" || row.status === "cancelled") && (
+        <div className={cn("flex items-start gap-2 pb-1 pl-3 pr-20 pt-3 text-[12.5px]", row.status === "failed" ? "text-danger" : "text-ink-tertiary")} role={row.status === "failed" ? "alert" : undefined}>
+          {row.status === "failed" ? <AlertTriangle size={14} className="mt-px shrink-0" aria-hidden="true" /> : <Ban size={14} className="mt-px shrink-0" aria-hidden="true" />}
+          <span className="line-clamp-3">{row.status === "failed" ? row.error ?? "The generation failed" : "Cancelled"}</span>
+        </div>
+      )}
+      {row.status === "done" && kind === "audio" && (
+        <div className="flex flex-col gap-2 px-3 pt-3">
+          <span className="flex items-center gap-1.5 text-[11.5px] text-ink-tertiary"><AudioLines size={14} className="text-accent-text" aria-hidden="true" />{row.modelLabel}</span>
+          <Media row={row} />
+        </div>
+      )}
+      {visual ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-gradient-to-t from-app/90 via-app/60 to-transparent px-2.5 pb-2 pt-10 opacity-0 transition-opacity duration-(--motion-fast) group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100">
+          {caption}
+        </div>
+      ) : <div className="flex flex-col gap-0.5 px-3 pb-2.5 pt-2">{caption}</div>}
+      <div className="absolute left-2 top-2 flex flex-wrap gap-1">
+        {picked && <span className="flex items-center gap-1 rounded-full bg-app/85 px-2 py-0.5 text-[11px] text-accent-text"><Send size={10} aria-hidden="true" />Broadcast</span>}
+        {character && visual && <span className="flex max-w-[140px] items-center gap-1 rounded-full bg-app/85 px-2 py-0.5 text-[11px] text-ink-secondary"><UserRound size={10} aria-hidden="true" /><span className="truncate">{character}</span></span>}
+        {row.outputs.length > 1 && <span className="rounded-full bg-app/85 px-2 py-0.5 text-[11px] tabular-nums text-ink-secondary">+{row.outputs.length - 1}</span>}
       </div>
-      <div className="flex flex-col gap-1 px-2.5 pb-2 pt-2">
-        <p className="line-clamp-2 text-[12.5px] leading-snug text-ink" title={row.prompt}>{row.prompt || <span className="text-ink-tertiary">{row.action ? `${row.action[0]!.toUpperCase()}${row.action.slice(1)}` : "No prompt"}</span>}</p>
-        <p className="truncate text-[11.5px] text-ink-tertiary">{row.modelLabel} · {row.agentName ?? row.createdByName} · {relativeTime(row.createdAt)}</p>
-      </div>
-      <div className={cn("flex flex-wrap items-center gap-0.5 border-t border-hairline/30 px-1.5 py-1",
-        "md:absolute md:inset-x-0 md:bottom-0 md:border-t-0 md:bg-panel opacity-0 transition-opacity duration-(--motion-fast) group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100 max-md:opacity-100")}>
-        {actions.filter((spec) => spec.id !== "delete").map((spec) => (
-          <button key={spec.id} type="button" disabled={busy} onClick={() => onAction(row, spec.id)} aria-pressed={spec.id === "broadcast" ? picked : undefined}
-            title={`${spec.id === "broadcast" && picked ? "Remove from Broadcast" : spec.label}${spec.key ? ` (${spec.key})` : ""}`} aria-label={spec.id === "broadcast" && picked ? "Remove from Broadcast" : spec.label}
-            className={cn("flex size-8 items-center justify-center rounded-lg text-ink-secondary outline-none transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-40", spec.id === "broadcast" && picked && "text-accent-text")}>
-            {busy && spec.id === "cancel" ? <Loader2 size={14} className="animate-spin" /> : <spec.icon size={14} />}
-          </button>
-        ))}
-        <span className="flex-1" />
-        {actions.some((spec) => spec.id === "delete") && (
-          <button type="button" disabled={busy} onClick={() => onAction(row, "delete")} title="Delete (Del)" aria-label="Delete generation"
-            className="flex size-8 items-center justify-center rounded-lg text-ink-secondary outline-none hover:bg-raised hover:text-danger focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-40"><Trash2 size={14} /></button>
-        )}
-      </div>
+      {actions.length > 0 && (
+        <div className={cn("absolute right-1.5 top-1.5 flex max-w-[calc(100%-12px)] flex-wrap items-center justify-end gap-px rounded-lg border border-hairline/40 bg-panel/95 p-0.5",
+          "opacity-0 transition-opacity duration-(--motion-fast) group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100", visual ? "max-md:hidden" : "max-md:opacity-100")}>
+          {actions.map((spec) => (
+            <button key={spec.id} type="button" disabled={busy} onClick={() => onAction(row, spec.id)} aria-pressed={spec.id === "broadcast" ? picked : undefined}
+              title={`${spec.id === "broadcast" && picked ? "Remove from Broadcast" : spec.label}${spec.key ? ` (${spec.key})` : ""}`} aria-label={spec.id === "broadcast" && picked ? "Remove from Broadcast" : spec.id === "delete" ? "Delete generation" : spec.label}
+              className={cn("flex size-7 items-center justify-center rounded-md text-ink-secondary outline-none transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-40",
+                spec.id === "broadcast" && picked && "text-accent-text", spec.id === "delete" && "hover:text-danger")}>
+              {busy && spec.id === "cancel" ? <Loader2 size={13} className="animate-spin" /> : <spec.icon size={13} />}
+            </button>
+          ))}
+        </div>
+      )}
     </article>
   );
 }
@@ -182,7 +193,7 @@ export function StudioCanvas({ rows, all, canEdit, isAdmin, busy, onAction }: {
     tiles[next]?.scrollIntoView({ block: "nearest" });
   };
   return (
-    <div className="columns-1 gap-3 min-[480px]:columns-2 md:columns-3 xl:columns-4 2xl:columns-5" onKeyDown={move} data-studio-gallery>
+    <div className="columns-2 gap-2 md:columns-3 xl:columns-4 2xl:columns-5" onKeyDown={move} data-studio-gallery>
       {rows.map((row) => <Tile key={row._id} row={row} rows={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy.has(row._id)} onAction={onAction} />)}
     </div>
   );

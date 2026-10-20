@@ -1,4 +1,4 @@
-import { STUDIO_CAMERA_MOTIONS, STUDIO_CUSTOM_MODEL, STUDIO_MODELS } from "../../shared/studio.ts";
+import { STUDIO_CAMERA_MOTIONS, STUDIO_CHARACTER_KINDS, STUDIO_CUSTOM_MODEL, STUDIO_MODELS } from "../../shared/studio.ts";
 import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 
 export const STUDIO_TOOL_DEFINITIONS = [
@@ -13,6 +13,7 @@ export const STUDIO_TOOL_DEFINITIONS = [
         model: { type: "string", enum: [...STUDIO_MODELS.map((model) => model.id), STUDIO_CUSTOM_MODEL], description: "Default: the mode's first model that takes as many sources as you pass." },
         sources: { type: "array", maxItems: 4, items: { type: "string", maxLength: 70 }, description: "What the model starts from, in order (image, video or audio): asset ids from origin_list_assets, or generation ids with an optional :index." },
         reference_asset_ids: { type: "array", maxItems: 4, items: { type: "string", maxLength: 64 }, description: "Image assets to keep a character, product or style consistent (Nano Banana Pro, FLUX.2 Pro)." },
+        character: { type: "string", maxLength: 64, description: "A library entry id or name from origin_studio_library: adds its reference images and description." },
         aspect_ratio: { type: "string", maxLength: 10, description: "Such as 1:1, 16:9, 9:16." },
         duration: { type: "string", maxLength: 10, description: "Video or audio length, such as 5, 8s or 30s." },
         resolution: { type: "string", maxLength: 10, description: "Such as 2K, 1080p." },
@@ -76,11 +77,29 @@ export const STUDIO_TOOL_DEFINITIONS = [
       properties: {
         workflow_id: { type: "string", minLength: 1, maxLength: 64, description: "From origin_studio_workflow_list, such as template:product-reel." },
         inputs: { type: "object", additionalProperties: { type: "string", maxLength: 8_000 }, description: "Input node id to prompt text, or to an asset id for a file input." },
+        character: { type: "string", maxLength: 64, description: "A library entry every image and video step follows." },
+        caption: { type: "string", maxLength: 2_000, description: "Text of the Broadcast drafts its Output nodes fill, such as template:campaign-pack's feed post and reel." },
         name: { type: "string", maxLength: 120 },
         wait: { type: "boolean", description: "Wait up to 40 s for the run. Default false." },
         project: ORIGIN_PROJECT,
       },
       required: ["workflow_id"],
+    },
+  },
+  {
+    name: "origin_studio_library",
+    description: "List an Origin project's Studio library (characters, products and styles saved from reference images), or save one so every later generation and workflow keeps it consistent." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        action: { type: "string", enum: ["list", "save"], description: "Default list." },
+        name: { type: "string", maxLength: 60 },
+        kind: { type: "string", enum: STUDIO_CHARACTER_KINDS.map((kind) => kind.value) },
+        description: { type: "string", maxLength: 600, description: "What must stay the same: looks, wardrobe, materials, palette." },
+        references: { type: "array", minItems: 1, maxItems: 4, items: { type: "string", maxLength: 70 }, description: "Image asset ids, or generation ids with an optional :index." },
+        character_id: { type: "string", maxLength: 64, description: "Replace this entry instead of adding one." },
+        project: ORIGIN_PROJECT,
+      },
     },
   },
 ];

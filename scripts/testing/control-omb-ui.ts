@@ -21,6 +21,7 @@ import {
   installAgentBrowserBinary,
   resolveAgentBrowserBinary,
 } from "../../server/browser-engine.ts";
+import { startBrowserDaemon } from "../../server/browser-daemon.ts";
 import { fixtureApi, mountPreview, type MountedPreview } from "./preview-fixture.ts";
 import { credentialStoreFlags } from "../../server/browser/egress/gate.ts";
 
@@ -136,41 +137,11 @@ export function agentBrowser(
   });
 }
 
-const DAEMON_START_MS = 15_000;
-
-/** Start the session's agent-browser daemon as this process's child, reading its stderr.
- * agent-browser 0.36.0 pipes the daemon's stderr to whichever CLI call spawned
- * it, and that call exits; the daemon's next eprintln! then panics on the closed
- * pipe. It prints one when more than 4096 CDP events queue up, as during a load
- * of the Vite-served threads preview, and the panic drops the command or the
- * daemon. The CLI reuses a daemon only beside the options fingerprint it wrote
- * for one it spawned, so a throwaway session supplies the fingerprint. */
+/** Start the session's agent-browser daemon the way the server does on Windows, so a page load of more than ~600
+ * requests cannot crash it. */
 export async function startSessionDaemon(binary: string, env: NodeJS.ProcessEnv): Promise<ChildProcess> {
-  const session = env.AGENT_BROWSER_SESSION;
-  if (!session || !env.XDG_RUNTIME_DIR) throw new ControlOmbError("startSessionDaemon needs the environment sessionEnv builds");
-  const socketDir = join(env.XDG_RUNTIME_DIR, "agent-browser");
-  const donor = { ...env, AGENT_BROWSER_SESSION: `${session}0` };
-  await agentBrowser(binary, donor, ["console"]);
-  const fingerprint = readFileSync(join(socketDir, `${donor.AGENT_BROWSER_SESSION}.config`), "utf8");
-  if (!await closeBrowserSession(binary, donor)) await agentBrowser(binary, donor, ["close"], 15_000).catch(() => {});
-
-  const daemon = spawn(binary, [], { env: { ...env, AGENT_BROWSER_DAEMON: "1" }, stdio: ["ignore", "ignore", "pipe"], windowsHide: true });
-  daemon.stderr?.resume();
-  daemon.unref();
-  (daemon.stderr as { unref?: () => void } | null)?.unref?.();
-  const deadline = Date.now() + DAEMON_START_MS;
-  for (;;) {
-    if (daemon.exitCode !== null) throw new ControlOmbError(`the agent-browser daemon exited with ${daemon.exitCode} while starting`);
-    const listed = await agentBrowser(binary, env, ["session", "list"], 10_000).catch(() => ({ sessions: [] }));
-    if (Array.isArray(listed.sessions) && listed.sessions.includes(session)) break;
-    if (Date.now() >= deadline) {
-      daemon.kill();
-      throw new ControlOmbError(`the agent-browser daemon for ${session} did not start within ${DAEMON_START_MS}ms`);
-    }
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  writeFileSync(join(socketDir, `${session}.config`), fingerprint);
-  return daemon;
+  try { return await startBrowserDaemon(binary, env); }
+  catch (error) { throw new ControlOmbError(error instanceof Error ? error.message : String(error)); }
 }
 
 /** Chrome for Testing that `agent-browser install` unpacked under the tools

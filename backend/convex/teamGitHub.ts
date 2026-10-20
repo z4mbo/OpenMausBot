@@ -11,6 +11,7 @@ import {
 } from "./lib/githubApi";
 import { githubAccountType, repoVisibility } from "./integrationTables";
 import { inviteCreator } from "./githubLinks";
+import { protectCreated } from "./githubProtection";
 import { githubPR, checksSummary, toSnapshot, type PRSnapshot } from "../lib/github-pr-snapshot";
 import { isRepositoryName, repositoryNameFor } from "../../shared/github-repo-name";
 
@@ -222,6 +223,30 @@ async function requireProject(ctx: ActionCtx, sessionToken: string, projectId: u
   return found;
 }
 
+type InstallationRow = { id: number; app_slug?: string; suspended_at?: string | null; account: { id: number; login: string; type: string } };
+
+const usableInstallations = (rows: InstallationRow[], app: GitHubAppSecrets) =>
+  rows.filter((row) => !row.suspended_at && (!app.slug || row.app_slug === app.slug) && ["User", "Organization"].includes(row.account.type));
+
+export const sharedAccount = internalQuery({
+  args: { teamId: v.id("teams") },
+  handler: async (ctx, a) => {
+    const row = await ctx.db.query("teamGitHub").withIndex("by_teamId", q => q.eq("teamId", a.teamId)).unique();
+    return row ? { accountType: row.accountType, installationId: row.installationId } : null;
+  },
+});
+
+/** The organization a workspace already works in, when the reconnecting admin can still reach the App's installation there. */
+type SharedAccount = { accountLogin: string; accountId: number; accountType: "User" | "Organization"; installationId: number };
+
+async function keptOrganization(ctx: ActionCtx, teamId: Id<"teams">, app: GitHubAppSecrets, token: string): Promise<SharedAccount | null> {
+  const previous: { accountType: "User" | "Organization"; installationId: number } | null = await ctx.runQuery(internal.teamGitHub.sharedAccount, { teamId });
+  if (previous?.accountType !== "Organization") return null;
+  const reachable: InstallationRow[] = await github<{ installations: InstallationRow[] }>("/user/installations?per_page=100", token).then((reply) => usableInstallations(reply.installations, app)).catch(() => []);
+  const kept = reachable.find((row) => row.id === previous.installationId && row.account.type === "Organization");
+  return kept ? { accountLogin: kept.account.login, accountId: kept.account.id, accountType: "Organization" as const, installationId: kept.id } : null;
+}
+
 export const share = action({
   args: {
     sessionToken: v.string(), teamId: v.id("teams"),
@@ -241,19 +266,16 @@ export const share = action({
     });
     if (installation.suspended_at || installation.account.id !== user.id) throw new Error("The Origin GitHub App's installation on your account is suspended or belongs to someone else");
     const sealed = await seal(JSON.stringify({ app: a.app, token: a.token } satisfies Secrets), purpose(a.teamId));
-    await ctx.runMutation(internal.teamGitHub.store, {
-      teamId: a.teamId, sealed, accountLogin: user.login, accountId: user.id, accountType: "User", installationId: installation.id,
-      connectorLogin: user.login, connectorId: user.id, sharedBy: admin.userId,
-    });
-    return { accountLogin: user.login };
+    const account: SharedAccount = await keptOrganization(ctx, a.teamId, a.app, a.token.access_token) ?? { accountLogin: user.login, accountId: user.id, accountType: "User", installationId: installation.id };
+    await ctx.runMutation(internal.teamGitHub.store, { teamId: a.teamId, sealed, ...account, connectorLogin: user.login, connectorId: user.id, sharedBy: admin.userId });
+    return { accountLogin: account.accountLogin };
   },
 });
 
-type InstallationRow = { id: number; app_slug?: string; suspended_at?: string | null; account: { id: number; login: string; type: string } };
 
 async function installations(ctx: ActionCtx, found: Connection): Promise<InstallationRow[]> {
   const result = await github<{ installations: InstallationRow[] }>("/user/installations?per_page=100", await userToken(ctx, found));
-  return result.installations.filter((row) => !row.suspended_at && (!found.secrets.app.slug || row.app_slug === found.secrets.app.slug) && ["User", "Organization"].includes(row.account.type));
+  return usableInstallations(result.installations, found.secrets.app);
 }
 
 export const accounts = action({
@@ -347,6 +369,7 @@ async function createRepositoryFor(ctx: ActionCtx, projectId: Id<"projects">, re
     if (repo.owner.login.toLowerCase() !== owner.toLowerCase() || repo.private !== (begun.visibility !== "public")) throw new Error("GitHub returned an unexpected repository owner or visibility. Review it on GitHub before linking.");
     await ctx.runMutation(internal.integrations.repoResult, { projectId, state: "ready", repoUrl: repo.html_url, repoId: repo.id });
     await ctx.runMutation(internal.teamGitHub.finishRepository, { projectId, state: "done" });
+    await protectCreated(ctx, found, projectId, repo.html_url);
     if (request.requestedBy) await inviteCreator(ctx, found, request.requestedBy, repo.html_url).catch(() => undefined);
     return { state: "ready", repoUrl: repo.html_url };
   } catch (error) {

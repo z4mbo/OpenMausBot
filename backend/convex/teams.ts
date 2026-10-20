@@ -4,6 +4,7 @@ import { requireUser } from "./lib/auth";
 import { normalizeEmail, projectMember, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
 import schema from "./schema";
 import { roleValidator } from "./lib/validators";
+import { reviewGitHubAccess } from "./lib/githubAccess";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 
@@ -23,6 +24,7 @@ async function removeMembership(ctx: MutationCtx, member: Doc<"teamMembers">) {
     for (const grant of grants) await ctx.db.patch(grant._id, { revoked: true });
   }
   await ctx.db.delete(member._id);
+  await reviewGitHubAccess(ctx, member.teamId, member.email);
 }
 
 export const leave = mutation({
@@ -184,6 +186,7 @@ export const updateRole = mutation({
     if (!member || member.teamId !== args.teamId) throw new Error("Member not found");
     if (member.role === "owner" || args.role === "owner") throw new Error("Workspace ownership cannot be changed here");
     await ctx.db.patch(args.memberId, { role: args.role, updatedAt: Date.now() });
+    await reviewGitHubAccess(ctx, args.teamId, member.email);
     return null;
   },
 });

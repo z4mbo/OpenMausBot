@@ -9,6 +9,7 @@ import { Field, Loading, Notice, cardClass, ghostButton, iconButton, inputClass,
 import { CLOSED_STAGES, formatLeadValue, type PipelineChannel, type PipelineLead } from "../../../shared/origin-pipeline";
 import { dealTotal, paymentMessage, type SalesDeal, type SalesLineItem, type SalesReplyChannel } from "../../../shared/origin-sales";
 import { pipelineServer } from "./pipeline-api";
+import { DealCoachPanel } from "./DealCoach";
 import { when } from "./activity-labels";
 
 const WON_REASONS = ["Product fit", "Price", "Relationship", "Timing", "Referral"];
@@ -37,8 +38,9 @@ export function WonRequestBanner({ projectId, deal, canEdit }: { projectId: stri
   );
 }
 
-export function DealPanel({ projectId, lead, stages, currency, canEdit, stripe, chief, channels }: {
-  projectId: string; lead: PipelineLead; stages: readonly string[]; currency: string; canEdit: boolean; stripe: boolean; chief: Bot; channels: Record<PipelineChannel, boolean> | null;
+export function DealPanel({ projectId, projectName, lead, stages, currency, canEdit, stripe, liveStripe, chief, channels }: {
+  projectId: string; projectName: string; lead: PipelineLead; stages: readonly string[]; currency: string; canEdit: boolean; stripe: boolean; liveStripe: boolean; chief: Bot;
+  channels: Record<PipelineChannel, boolean> | null;
 }) {
   const deals = useCloudQuery<SalesDeal[]>("pipelineDeals:forLead", { projectId, leadId: lead._id });
   const [editing, setEditing] = useState<string | null>(null);
@@ -54,13 +56,14 @@ export function DealPanel({ projectId, lead, stages, currency, canEdit, stripe, 
         : !deals.length && editing !== "new" ? <p className="py-4 text-center text-[12.5px] text-ink-tertiary">No deals with {lead.name} yet.</p>
         : deals.map((deal) => editing === deal._id
           ? <DealEditor key={deal._id} projectId={projectId} lead={lead} stages={open} currency={currency} deal={deal} onDone={() => setEditing(null)} />
-          : <DealCard key={deal._id} projectId={projectId} lead={lead} deal={deal} stages={open} canEdit={canEdit} stripe={stripe} chief={chief} channels={channels} onEdit={() => setEditing(deal._id)} />)}
+          : <DealCard key={deal._id} projectId={projectId} projectName={projectName} lead={lead} deal={deal} stages={open} canEdit={canEdit} stripe={stripe} liveStripe={liveStripe} chief={chief} channels={channels} onEdit={() => setEditing(deal._id)} />)}
     </section>
   );
 }
 
-function DealCard({ projectId, lead, deal, stages, canEdit, stripe, chief, channels, onEdit }: {
-  projectId: string; lead: PipelineLead; deal: SalesDeal; stages: readonly string[]; canEdit: boolean; stripe: boolean; chief: Bot; channels: Record<PipelineChannel, boolean> | null; onEdit(): void;
+function DealCard({ projectId, projectName, lead, deal, stages, canEdit, stripe, liveStripe, chief, channels, onEdit }: {
+  projectId: string; projectName: string; lead: PipelineLead; deal: SalesDeal; stages: readonly string[]; canEdit: boolean; stripe: boolean; liveStripe: boolean; chief: Bot;
+  channels: Record<PipelineChannel, boolean> | null; onEdit(): void;
 }) {
   const action = useAction();
   const [closing, setClosing] = useState<"won" | "lost" | null>(null);
@@ -72,7 +75,7 @@ function DealCard({ projectId, lead, deal, stages, canEdit, stripe, chief, chann
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <strong className="block truncate text-[13.5px] font-medium text-ink">{deal.title}</strong>
-          <span className="text-[12px] text-ink-tertiary">{[deal.closeDate && `Closes ${deal.closeDate}`, `Opened by ${deal.createdBy.name}`].filter(Boolean).join(" · ")}</span>
+          <span className="text-[12px] text-ink-tertiary">{[deal.closeDate && `Closes ${new Date(`${deal.closeDate}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`, `Opened by ${deal.createdBy.name}`].filter(Boolean).join(" · ")}</span>
         </div>
         <span className="shrink-0 text-[14px] font-semibold tabular-nums text-ink">{money(deal, deal.stage === "Won" ? deal.wonAmount ?? deal.value : deal.value)}</span>
       </div>
@@ -110,7 +113,8 @@ function DealCard({ projectId, lead, deal, stages, canEdit, stripe, chief, chann
         </div>
       )}
       {closing && <CloseForm projectId={projectId} deal={deal} outcome={closing} onDone={() => setClosing(null)} />}
-      {canEdit && !closed && <PaymentBox projectId={projectId} lead={lead} deal={deal} stripe={stripe} chief={chief} channels={channels} />}
+      {!closed && <DealCoachPanel projectId={projectId} projectName={projectName} lead={lead} deal={deal} canEdit={canEdit} chief={chief} channels={channels} />}
+      {canEdit && !closed && <PaymentBox projectId={projectId} lead={lead} deal={deal} stripe={stripe} live={liveStripe} chief={chief} channels={channels} />}
       {deal.payment?.paidAt && <p className="text-[12px] text-success">Paid {money(deal, deal.payment.paidAmount ?? deal.payment.amount)} through Stripe · {when(deal.payment.paidAt)}</p>}
       {action.error && <Notice tone="danger">{action.error}</Notice>}
     </article>
@@ -146,7 +150,9 @@ function CloseForm({ projectId, deal, outcome, onDone }: { projectId: string; de
   );
 }
 
-function PaymentBox({ projectId, lead, deal, stripe, chief, channels }: { projectId: string; lead: PipelineLead; deal: SalesDeal; stripe: boolean; chief: Bot; channels: Record<PipelineChannel, boolean> | null }) {
+function PaymentBox({ projectId, lead, deal, stripe, live, chief, channels }: {
+  projectId: string; lead: PipelineLead; deal: SalesDeal; stripe: boolean; live: boolean; chief: Bot; channels: Record<PipelineChannel, boolean> | null;
+}) {
   const action = useAction();
   const [info, setInfo] = useState("");
   const payment = deal.payment;
@@ -194,8 +200,13 @@ function PaymentBox({ projectId, lead, deal, stripe, chief, channels }: { projec
             {reachable.map((value) => <option key={value} value={value} disabled={channels ? !channels[value] : false}>{{ email: "Email", sms: "Text", whatsapp: "WhatsApp" }[value]}</option>)}
           </Select>
           <button type="button" className={cn(primaryButton, small)} disabled={!channel || action.busy || !text.trim()} onClick={send}><Send size={12} />Send to {lead.name.split(" ")[0]}</button>
-          <button type="button" className={cn(ghostButton, small, "ml-auto")} disabled={action.busy} onClick={check}>{action.busy ? <Loader2 size={12} className="animate-spin" /> : <RotateCw size={12} />}Check payment</button>
+          {!live && <button type="button" className={cn(ghostButton, small, "ml-auto")} disabled={action.busy} onClick={check}>{action.busy ? <Loader2 size={12} className="animate-spin" /> : <RotateCw size={12} />}Check payment</button>}
         </div>
+        <p className="flex items-center gap-1.5 text-[11.5px] text-ink-tertiary" role="note">
+          {live
+            ? <><span className="size-1.5 rounded-full bg-accent motion-safe:animate-pulse" aria-hidden="true" />Waiting for payment. Stripe marks it won here the moment it is paid.</>
+            : "Add the Stripe webhook in Sales settings and paid links mark the deal won by themselves."}
+        </p>
       </>}
       {info && <p className="text-[12px] text-ink-secondary" role="status">{info}</p>}
       {action.error && <p className="text-[12px] text-danger" role="alert">{action.error}</p>}

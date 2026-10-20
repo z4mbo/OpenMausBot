@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { action, internalMutation, internalQuery } from "./_generated/server";
+import { action, internalAction, internalMutation, internalQuery, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { ActionCtx } from "./_generated/server";
@@ -11,6 +11,8 @@ import { connection, NOT_SHARED, type Connection } from "./teamGitHub";
 
 const FLOW_PURPOSE = (userId: Id<"users">) => `github-device:${userId}`;
 const REPOS_MAX = 50;
+const REVIEW_RETRIES = 24;
+const REVIEW_RETRY_MS = 60 * 60_000;
 
 export const flow = internalQuery({
   args: { userId: v.id("users"), teamId: v.id("teams") },
@@ -32,15 +34,34 @@ export const saveFlow = internalMutation({
 });
 
 export const saveLink = internalMutation({
-  args: { userId: v.id("users"), login: v.string(), githubId: v.number() },
-  returns: v.null(),
+  args: { userId: v.id("users"), login: v.string(), githubId: v.number(), sealed: v.string(), clientId: v.string() },
+  returns: v.union(v.null(), v.object({ sealed: v.string(), clientId: v.string() })),
   handler: async (ctx, a) => {
     const other = await ctx.db.query("githubUserLinks").withIndex("by_githubId", q => q.eq("githubId", a.githubId)).unique();
     if (other && other.userId !== a.userId) throw new Error(`@${a.login} is already linked to another Origin account`);
     const mine = await ctx.db.query("githubUserLinks").withIndex("by_userId", q => q.eq("userId", a.userId)).unique();
-    if (mine) await ctx.db.patch(mine._id, { login: a.login, githubId: a.githubId, linkedAt: Date.now() });
+    if (mine) await ctx.db.patch(mine._id, { login: a.login, githubId: a.githubId, sealed: a.sealed, clientId: a.clientId, linkedAt: Date.now() });
     else await ctx.db.insert("githubUserLinks", { ...a, linkedAt: Date.now() });
-    return null;
+    return mine?.sealed && mine.clientId ? { sealed: mine.sealed, clientId: mine.clientId } : null;
+  },
+});
+
+export const userTokenRow = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, a) => {
+    const row = await ctx.db.query("githubUserLinks").withIndex("by_userId", q => q.eq("userId", a.userId)).unique();
+    return row?.sealed && row.clientId ? { login: row.login, githubId: row.githubId, sealed: row.sealed, clientId: row.clientId, linkedAt: row.linkedAt } : null;
+  },
+});
+
+export const saveUserToken = internalMutation({
+  args: { userId: v.id("users"), linkedAt: v.number(), sealed: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, a) => {
+    const row = await ctx.db.query("githubUserLinks").withIndex("by_userId", q => q.eq("userId", a.userId)).unique();
+    if (!row || row.linkedAt !== a.linkedAt) return false;
+    await ctx.db.patch(row._id, { sealed: a.sealed });
+    return true;
   },
 });
 
@@ -81,7 +102,16 @@ async function oauth<T>(path: string, body: Record<string, string>): Promise<T> 
   return await response.json() as T;
 }
 
-async function revokeUserToken(app: GitHubAppSecrets, token: string) {
+export const userTokenPurpose = (userId: Id<"users">) => `github-user:${userId}`;
+
+/** Revokes a user token Origin kept, when it belongs to this App; one from another App expires on GitHub's schedule. */
+async function revokeKept(app: GitHubAppSecrets, userId: Id<"users">, kept: { sealed: string; clientId: string } | null) {
+  if (!kept || kept.clientId !== app.clientId) return;
+  const token = await unseal(kept.sealed, userTokenPurpose(userId)).then((text) => (JSON.parse(text) as { access_token: string }).access_token).catch(() => null);
+  if (token) await revokeUserToken(app, token);
+}
+
+export async function revokeUserToken(app: GitHubAppSecrets, token: string) {
   await fetch(`${githubWebOrigin() === "https://github.com" ? "https://api.github.com" : githubWebOrigin()}/applications/${app.clientId}/token`, {
     method: "DELETE", body: JSON.stringify({ access_token: token }), signal: AbortSignal.timeout(10_000),
     headers: { Accept: "application/vnd.github+json", "Content-Type": "application/json", "User-Agent": "origin-backend", Authorization: `Basic ${btoa(`${app.clientId}:${app.clientSecret}`)}` },
@@ -163,20 +193,25 @@ export const finishLink = action({
     const row = await ctx.runQuery(internal.githubLinks.flow, { userId: me.userId, teamId: a.teamId });
     if (!row) throw new Error("The GitHub sign-in expired. Start again.");
     const found = await requireShared(ctx, a.teamId);
-    const answer = await oauth<{ access_token?: string; error?: string }>("/login/oauth/access_token", {
+    const answer = await oauth<{ access_token?: string; refresh_token?: string; expires_in?: number; error?: string }>("/login/oauth/access_token", {
       client_id: found.secrets.app.clientId, device_code: await unseal(row.sealed, FLOW_PURPOSE(me.userId)), grant_type: "urn:ietf:params:oauth:grant-type:device_code",
     });
     if (answer.error === "authorization_pending" || answer.error === "slow_down") return { state: "pending" };
     await ctx.runMutation(internal.githubLinks.saveFlow, { userId: me.userId, teamId: a.teamId });
     if (!answer.access_token) throw new Error(answer.error === "access_denied" ? "The GitHub sign-in was cancelled" : "The GitHub sign-in expired. Start again.");
+    let replaced: { sealed: string; clientId: string } | null;
+    let account: { id: number; login: string };
     try {
-      const account = await github<{ id: number; login: string }>("/user", answer.access_token);
-      await ctx.runMutation(internal.githubLinks.saveLink, { userId: me.userId, login: account.login, githubId: account.id });
-      const repos = await ctx.runQuery(internal.githubLinks.editableRepositories, { userId: me.userId, teamId: a.teamId });
-      return { state: "linked", login: account.login, invited: await invite(ctx, me.userId, found, repos, account.login) };
-    } finally {
+      account = await github<{ id: number; login: string }>("/user", answer.access_token);
+      const sealed = await seal(JSON.stringify({ access_token: answer.access_token, refresh_token: answer.refresh_token, expires_at: answer.expires_in ? Date.now() + answer.expires_in * 1000 : undefined }), userTokenPurpose(me.userId));
+      replaced = await ctx.runMutation(internal.githubLinks.saveLink, { userId: me.userId, login: account.login, githubId: account.id, sealed, clientId: found.secrets.app.clientId });
+    } catch (error) {
       await revokeUserToken(found.secrets.app, answer.access_token);
+      throw error;
     }
+    await revokeKept(found.secrets.app, me.userId, replaced);
+    const repos = await ctx.runQuery(internal.githubLinks.editableRepositories, { userId: me.userId, teamId: a.teamId });
+    return { state: "linked", login: account.login, invited: await invite(ctx, me.userId, found, repos, account.login) };
   },
 });
 
@@ -186,7 +221,41 @@ export const me = internalQuery({
   handler: async (ctx, a) => (await requireUser(ctx, a.sessionToken))._id,
 });
 
-/** Removes the person's GitHub link and the push access and pending invitations Origin gave that account. */
+type Grant = { _id: Id<"githubCollaborators">; repoUrl: string; login: string };
+
+/** Takes back the push access and pending invitation Origin gave each grant's account; a grant GitHub kept stays recorded. */
+async function withdraw(ctx: ActionCtx, found: Connection, grants: readonly Grant[]): Promise<number> {
+  let removed = 0;
+  for (const grant of grants) {
+    const repo = parseRepository(grant.repoUrl);
+    if (!repo || repo.owner.toLowerCase() !== found.row.accountLogin.toLowerCase()) continue;
+    try {
+      const minted = await installationToken(found.secrets.app, found.row.installationId, { administration: "write" }, repo);
+      try {
+        const path = `/repos/${repo.owner}/${repo.repo}`;
+        const pending = await github<{ id: number; invitee?: { login?: string } | null }[]>(`${path}/invitations?per_page=100`, minted.token).catch(() => []);
+        for (const invitation of pending) if (invitation.invitee?.login?.toLowerCase() === grant.login.toLowerCase()) await github(`${path}/invitations/${invitation.id}`, minted.token, { method: "DELETE" });
+        await github(`${path}/collaborators/${encodeURIComponent(grant.login)}`, minted.token, { method: "DELETE" });
+        await ctx.runMutation(internal.githubLinks.forgetGrant, { id: grant._id });
+        removed += 1;
+      } finally { await revokeInstallationToken(minted.token); }
+    } catch (error) {
+      console.warn("GitHub collaborator removal skipped", grant.repoUrl, error instanceof Error ? error.message : error);
+    }
+  }
+  return removed;
+}
+
+export const forgetGrant = internalMutation({
+  args: { id: v.id("githubCollaborators") },
+  returns: v.null(),
+  handler: async (ctx, a) => {
+    if (await ctx.db.get(a.id)) await ctx.db.delete(a.id);
+    return null;
+  },
+});
+
+/** Removes the person's GitHub link, revokes the token Origin kept for it, and takes back the push access Origin gave that account. */
 export const unlink = action({
   args: { sessionToken: v.string(), teamId: v.id("teams") },
   returns: v.number(),
@@ -194,25 +263,73 @@ export const unlink = action({
     const userId: Id<"users"> = await ctx.runQuery(internal.githubLinks.me, { sessionToken: a.sessionToken });
     const rows = await ctx.runQuery(internal.githubLinks.collaborators, { userId });
     const found = await connection(ctx, a.teamId);
-    let removed = 0;
-    for (const row of found ? rows : []) {
-      const repo = parseRepository(row.repoUrl);
-      if (!repo || repo.owner.toLowerCase() !== found!.row.accountLogin.toLowerCase()) continue;
-      try {
-        const minted = await installationToken(found!.secrets.app, found!.row.installationId, { administration: "write" }, repo);
-        try {
-          const path = `/repos/${repo.owner}/${repo.repo}`;
-          const pending = await github<{ id: number; invitee?: { login?: string } | null }[]>(`${path}/invitations?per_page=100`, minted.token).catch(() => []);
-          for (const invitation of pending) if (invitation.invitee?.login?.toLowerCase() === row.login.toLowerCase()) await github(`${path}/invitations/${invitation.id}`, minted.token, { method: "DELETE" });
-          await github(`${path}/collaborators/${encodeURIComponent(row.login)}`, minted.token, { method: "DELETE" });
-          removed += 1;
-        } finally { await revokeInstallationToken(minted.token); }
-      } catch (error) {
-        console.warn("GitHub collaborator removal skipped", row.repoUrl, error instanceof Error ? error.message : error);
-      }
-    }
+    const removed = found ? await withdraw(ctx, found, rows) : 0;
+    if (found) await revokeKept(found.secrets.app, userId, await ctx.runQuery(internal.githubLinks.userTokenRow, { userId }));
     await ctx.runMutation(internal.githubLinks.forget, { userId });
     return removed;
+  },
+});
+
+type AccessReview = { userId: Id<"users">; login: string | null; stale: Grant[]; missing: string[] };
+
+export const accessReview = internalQuery({
+  args: { teamId: v.id("teams"), email: v.string() },
+  handler: async (ctx, a) => {
+    const user = await ctx.db.query("users").withIndex("by_email", q => q.eq("email", a.email)).unique();
+    if (!user) return null;
+    const link = await ctx.db.query("githubUserLinks").withIndex("by_userId", q => q.eq("userId", user._id)).unique();
+    const grants = await ctx.db.query("githubCollaborators").withIndex("by_userId", q => q.eq("userId", user._id)).take(200);
+    const teamRepos = new Set<string>();
+    const editable = new Map<string, string>();
+    for (const project of await ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", a.teamId)).take(500)) {
+      if (!project.repoUrl) continue;
+      teamRepos.add(project.repoUrl.toLowerCase());
+      if (user.status !== "active" || project.status !== "active" || !project.githubWorkspaceAccess) continue;
+      const access = await projectMember(ctx, project, user);
+      if (access && canEdit(access)) editable.set(project.repoUrl.toLowerCase(), project.repoUrl);
+    }
+    const stale = grants.filter((grant) => teamRepos.has(grant.repoUrl.toLowerCase()) && !editable.has(grant.repoUrl.toLowerCase()));
+    const granted = new Set(grants.map((grant) => grant.repoUrl.toLowerCase()));
+    const missing = link ? [...editable].filter(([key]) => !granted.has(key)).map(([, url]) => url).slice(0, REPOS_MAX) : [];
+    return { userId: user._id, login: link?.login ?? null, stale: stale.map(({ _id, repoUrl, login }) => ({ _id, repoUrl, login })), missing };
+  },
+});
+
+/**
+ * Security: brings the push access Origin gave a person's linked GitHub in line with their current roles, after a
+ * workspace or project role change or removal. Viewers and people who left lose it; editors who linked GitHub get it.
+ */
+export const reviewAccess = internalAction({
+  args: { teamId: v.id("teams"), email: v.string(), attempt: v.optional(v.number()) },
+  returns: v.object({ removed: v.number(), invited: v.number() }),
+  handler: async (ctx, a): Promise<{ removed: number; invited: number }> => {
+    const { attempt = 0, ...target } = a;
+    const review: AccessReview | null = await ctx.runQuery(internal.githubLinks.accessReview, target);
+    if (!review || (!review.stale.length && !review.missing.length)) return { removed: 0, invited: 0 };
+    const found = await connection(ctx, a.teamId);
+    let removed = 0, invited = 0;
+    if (found) {
+      removed = await withdraw(ctx, found, review.stale);
+      invited = review.login ? await invite(ctx, review.userId, found, review.missing, review.login) : 0;
+      const after: AccessReview | null = await ctx.runQuery(internal.githubLinks.accessReview, target);
+      removed += after ? await withdraw(ctx, found, after.stale) : 0;
+      if (!after?.stale.length) return { removed, invited };
+    }
+    if (attempt < REVIEW_RETRIES) await ctx.scheduler.runAfter(REVIEW_RETRY_MS, internal.githubLinks.reviewAccess, { ...target, attempt: attempt + 1 });
+    return { removed, invited };
+  },
+});
+
+/** The name and address git records for this person's commits: their linked GitHub account's private address when they linked one. */
+export const gitIdentity = query({
+  args: { sessionToken: v.string() },
+  returns: v.object({ name: v.string(), email: v.string(), login: v.union(v.string(), v.null()) }),
+  handler: async (ctx, a) => {
+    const user = await requireUser(ctx, a.sessionToken);
+    const link = await ctx.db.query("githubUserLinks").withIndex("by_userId", q => q.eq("userId", user._id)).unique();
+    return link
+      ? { name: user.name.trim() || link.login, email: `${link.githubId}+${link.login}@users.noreply.github.com`, login: link.login }
+      : { name: user.name.trim() || user.email, email: user.email, login: null };
   },
 });
 

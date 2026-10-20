@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import type { Doc } from "./_generated/dataModel";
+import { mutation, query, type MutationCtx } from "./_generated/server";
+import type { Doc, Id } from "./_generated/dataModel";
 import { requireMember, touchProject } from "./lib/permissions";
 import { cleanText } from "./lib/features";
 import { actorOf, addActivity, leadOf, requireEditor, settingsOf, stagesOf } from "./lib/pipelineCore";
@@ -13,7 +13,23 @@ const MERGE_MAX = 10;
 const HEALTH_WINDOW_MS = 30 * 86_400_000;
 const HEALTH_ROWS = 1_000;
 
+const CAMPAIGNS_MAX = 200;
+const NOTIFICATIONS_PER_LEAD = 500;
+const INBOX_RANK = { open: 2, snoozed: 1, archived: 0 } as const;
+
 const later = (a: number | undefined, b: number | undefined) => (a === undefined ? b : b === undefined ? a : Math.max(a, b));
+
+async function repoint(ctx: MutationCtx, projectId: Id<"projects">, from: ReadonlySet<Id<"pipelineLeads">>, to: Id<"pipelineLeads">) {
+  for (const leadId of from) {
+    for (const note of await ctx.db.query("notifications").withIndex("by_leadId", (q) => q.eq("leadId", leadId)).take(NOTIFICATIONS_PER_LEAD)) {
+      await ctx.db.patch(note._id, { leadId: to });
+    }
+  }
+  for (const campaign of await ctx.db.query("campaigns").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).take(CAMPAIGNS_MAX)) {
+    if (!campaign.leadIds.some((id) => from.has(id))) continue;
+    await ctx.db.patch(campaign._id, { leadIds: [...new Set(campaign.leadIds.map((id) => (from.has(id) ? to : id)))] });
+  }
+}
 
 export const merge = mutation({
   args: { ...scope, primaryId: v.id("pipelineLeads"), otherIds: v.array(v.id("pipelineLeads")) },
@@ -43,6 +59,12 @@ export const merge = mutation({
       createdAt = Math.min(createdAt, other.createdAt);
       patch.lastActivityAt = later(patch.lastActivityAt ?? primary.lastActivityAt, other.lastActivityAt);
       patch.lastReplyAt = later(patch.lastReplyAt ?? primary.lastReplyAt, other.lastReplyAt);
+      patch.inboxAt = later(patch.inboxAt ?? primary.inboxAt, other.inboxAt);
+      const state = patch.inbox ?? primary.inbox;
+      if (other.inbox && (!state || INBOX_RANK[other.inbox] > INBOX_RANK[state])) {
+        patch.inbox = other.inbox;
+        patch.snoozedUntil = other.snoozedUntil;
+      }
       for await (const activity of ctx.db.query("pipelineActivities").withIndex("by_leadId_and_createdAt", (q) => q.eq("leadId", other._id))) {
         await ctx.db.patch(activity._id, { leadId: primary._id });
       }
@@ -50,6 +72,7 @@ export const merge = mutation({
       for (const deal of await ctx.db.query("pipelineDeals").withIndex("by_leadId", (q) => q.eq("leadId", other._id)).take(100)) await ctx.db.patch(deal._id, { leadId: primary._id });
       await ctx.db.delete(other._id);
     }
+    await repoint(ctx, args.projectId, new Set(others.map((other) => other._id)), primary._id);
     await ctx.db.patch(primary._id, {
       ...patch, sources: [...sources].slice(-20), tags: [...tags].slice(0, 12), createdAt, updatedAt: Date.now(),
       ...(notes.length ? { notes: notes.join("\n\n").slice(0, 8000) } : {}), ...(unread ? { unreadReplies: unread } : {}),

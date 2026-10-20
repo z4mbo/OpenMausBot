@@ -65,6 +65,21 @@ export function wrapNodes(scene: Scene, ids: readonly string[], type: Extract<Ca
   return { id: wrapper.id, nodes: [wrapper, ...chosen.map((node) => ({ ...node, parentId: wrapper.id, x: node.x - left, y: node.y - top }))] };
 }
 
+/** Shift+A: a frame gains or loses auto layout; other layers are wrapped in a hugging auto-layout frame. */
+export function toggleAutoLayout(scene: Scene, ids: readonly string[]): { nodes: CanvasNode[]; id: string } | null {
+  const only = ids.length === 1 ? scene.get(ids[0]!) : undefined;
+  if (only?.type === "frame") {
+    if (!only.layout) return { nodes: [{ ...only, layout: { direction: "column", gap: 16, padding: [16, 16, 16, 16], align: "start", justify: "start" } }], id: only.id };
+    const { layout: _layout, ...rest } = only;
+    return { nodes: [rest], id: only.id };
+  }
+  const wrapped = wrapNodes(scene, ids, "frame");
+  if (!wrapped) return null;
+  const frame = wrapped.nodes[0]!;
+  const direction = frame.height >= frame.width ? "column" : "row";
+  return { id: wrapped.id, nodes: [{ ...frame, fill: null, layout: { direction, gap: 16, padding: [0, 0, 0, 0], align: "start", justify: "start", hug: "both" } }, ...wrapped.nodes.slice(1)] };
+}
+
 export function unwrap(scene: Scene, index: Index, id: string): CanvasNode[] {
   const wrapper = scene.get(id);
   if (!isLive(wrapper) || (wrapper.type !== "group" && wrapper.type !== "frame")) return [];

@@ -6,7 +6,8 @@ import { PASS, type RouteHandler } from "./routes/table.ts";
 import type { IntegrationStatus } from "../shared/integration-keys.ts";
 import { convexAction } from "./github/broker.ts";
 import { convexOriginClient, defaultOriginCloudFile, readOriginCloud } from "./origin-cloud.ts";
-import { sharedKeys } from "./shared-integration-keys.ts";
+import { sharedKeys, type KeyScope, type SharedKey, type SharedKeys } from "./shared-integration-keys.ts";
+import { checkIntegration } from "./integration-checks.ts";
 
 type Field = {
   label: string;
@@ -143,10 +144,10 @@ function readStored(file: string): Stored {
 
 const complete = (id: IntegrationId, values: Record<string, string>) => !Object.entries(fieldsOf(id)).some(([name, field]) => !field.optional && !values[name]);
 
-function sharedValues(id: IntegrationId, file: string, projectId?: string): Record<string, string> | null {
-  if (file !== defaultIntegrationKeysFile()) return null;
+const sharedFor = (file: string): SharedKeys | null => (file === defaultIntegrationKeysFile() ? sharedKeys() : null);
+
+function usableValues(id: IntegrationId, found: SharedKey | null): Record<string, string> | null {
   const known = fieldsOf(id);
-  const found = sharedKeys().find(id, projectId);
   const values = found ? Object.fromEntries(Object.entries(found.values).filter(([name]) => Object.hasOwn(known, name))) : null;
   return values && complete(id, values) ? values : null;
 }
@@ -155,14 +156,22 @@ function sharedValues(id: IntegrationId, file: string, projectId?: string): Reco
 export function integrationKey<I extends IntegrationId>(id: I, file = defaultIntegrationKeysFile(), projectId?: string): IntegrationValues<I> | null {
   const values: Record<string, string> = readStored(file)[id] ?? {};
   if (complete(id, values)) return values as IntegrationValues<I>;
-  return sharedValues(id, file, projectId) as IntegrationValues<I> | null;
+  return usableValues(id, sharedFor(file)?.find(id, { projectId }) ?? null) as IntegrationValues<I> | null;
+}
+
+/** The values one project's work uses: the member's own, else the key shared with that project, else the workspace's. */
+export function projectIntegrationKey<I extends IntegrationId>(id: I, projectId: string | undefined): IntegrationValues<I> | null {
+  return integrationKey(id, defaultIntegrationKeysFile(), projectId);
 }
 
 export function integrationConfigured(id: IntegrationId, file = defaultIntegrationKeysFile()): boolean {
   return integrationKey(id, file) !== null;
 }
 
-export function integrationStatuses(file = defaultIntegrationKeysFile()): IntegrationStatus[] {
+const describeShare = (key: SharedKey) => ({ by: key.sharedByName, projectId: key.projectId, projectName: key.projectName });
+
+/** Each service's state for a workspace or one of its projects; `shared` lets tests stand in for the backend's shared keys. */
+export function integrationStatuses(file = defaultIntegrationKeysFile(), scope: KeyScope = {}, shared = sharedFor(file)): IntegrationStatus[] {
   const stored = readStored(file);
   return (Object.keys(INTEGRATIONS) as IntegrationId[]).map((id) => {
     const values = stored[id] ?? {};
@@ -172,13 +181,15 @@ export function integrationStatuses(file = defaultIntegrationKeysFile()): Integr
       set: Boolean(values[name]),
       ...(!field.secret && values[name] ? { value: values[name] } : {}),
     }));
-    const found = file === defaultIntegrationKeysFile() ? sharedKeys().find(id) : null;
+    const found = shared?.find(id, scope) ?? null;
     const own = complete(id, values);
-    const usable = !own && sharedValues(id, file) !== null;
+    const usable = !own && usableValues(id, found) !== null;
     return {
       id: id as string, label: INTEGRATIONS[id].label, help: INTEGRATIONS[id].help, configured: own || usable,
       source: own ? "yours" as const : usable ? "shared" as const : null,
-      shared: found ? { by: found.sharedByName, projectName: found.projectName } : null, fields,
+      shared: found ? describeShare(found) : null,
+      shares: scope.teamId && shared ? shared.shares(id, scope.teamId).map(describeShare) : [],
+      fields,
     };
   });
 }
@@ -221,19 +232,42 @@ const unwrap = (error: unknown) => {
   return /Uncaught Error: ([^\n]+)/.exec(message)?.[1]?.trim() ?? message;
 };
 
-export function createIntegrationKeyRoutes(file: () => string = defaultIntegrationKeysFile): RouteHandler {
+export function createIntegrationKeyRoutes(file: () => string = defaultIntegrationKeysFile, deps: { fetch?: typeof fetch } = {}): RouteHandler {
   return async ({ req, res, url, path, method, auth, json, readBody }) => {
+    const scope: KeyScope = { teamId: url.searchParams.get("teamId") || undefined, projectId: url.searchParams.get("projectId") || undefined };
     if (path === "/api/integrations" && method === "GET") {
       await sharedKeys().current();
-      return json(res, 200, { integrations: integrationStatuses(file()), sharedError: sharedKeys().error() || null });
+      return json(res, 200, { integrations: integrationStatuses(file(), scope), sharedError: sharedKeys().error() || null });
+    }
+    const checking = /^\/api\/integrations\/([a-z]+)\/check$/.exec(path);
+    if (checking && method === "POST") {
+      if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Checking integration keys needs the admin scope" });
+      const id = checking[1];
+      if (!isIntegrationId(id)) return json(res, 404, { error: "No such integration" });
+      const body = await readBody(req) as { fields?: unknown } | null;
+      if (!body || typeof body !== "object" || Array.isArray(body)) return json(res, 400, { error: "body must be an object" });
+      if (body.fields !== undefined && (!body.fields || typeof body.fields !== "object" || Array.isArray(body.fields))) return json(res, 400, { error: "fields must be an object" });
+      const known = fieldsOf(id);
+      const draft: Record<string, string> = {};
+      for (const [name, raw] of Object.entries(body.fields ?? {})) {
+        if (!Object.hasOwn(known, name)) return json(res, 400, { error: `${INTEGRATIONS[id].label} has no field ${name.slice(0, 40)}` });
+        if (typeof raw !== "string") return json(res, 400, { error: `${known[name]!.label} must be text` });
+        const value = raw.trim();
+        if (value.length > VALUE_MAX || /[\0\r\n]/.test(value)) return json(res, 400, { error: `${known[name]!.label} doesn't look right. Paste only the value.` });
+        if (value) draft[name] = value;
+      }
+      const keyFile = file();
+      const own = readStored(keyFile)[id] ?? {};
+      const values = Object.keys(draft).length || complete(id, own) ? { ...own, ...draft } : integrationKey(id, keyFile) ?? own;
+      const check = await checkIntegration(id, values, { fetch: deps.fetch ?? fetch, now: Date.now, nonce: () => crypto.randomUUID() });
+      return json(res, 200, { check });
     }
     const sharing = /^\/api\/integrations\/([a-z]+)\/share$/.exec(path);
     if (sharing && (method === "POST" || method === "DELETE")) {
       if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Sharing integration keys needs the admin scope" });
       const id = sharing[1];
       if (!isIntegrationId(id)) return json(res, 404, { error: "No such integration" });
-      const teamId = url.searchParams.get("teamId") ?? "";
-      const projectId = url.searchParams.get("projectId") || undefined;
+      const { teamId, projectId } = scope;
       if (!teamId) return json(res, 400, { error: "Workspace required" });
       const header = req.headers["x-origin-session"];
       const sessionToken = (Array.isArray(header) ? header[0] : header)?.trim() ?? "";
@@ -247,7 +281,7 @@ export function createIntegrationKeyRoutes(file: () => string = defaultIntegrati
         }
       } catch (error) { return json(res, 400, { error: unwrap(error) }); }
       await sharedKeys().refresh();
-      return json(res, 200, { integration: integrationStatuses(file()).find((entry) => entry.id === id) });
+      return json(res, 200, { integration: integrationStatuses(file(), scope).find((entry) => entry.id === id) });
     }
     const match = /^\/api\/integrations\/([a-z]+)$/.exec(path);
     if (!match || (method !== "PUT" && method !== "DELETE")) return PASS;
@@ -262,6 +296,6 @@ export function createIntegrationKeyRoutes(file: () => string = defaultIntegrati
     }
     const saved = saveIntegrationKeys(id, change, file());
     if (!saved.ok) return json(res, 400, { error: saved.error });
-    return json(res, 200, { integration: integrationStatuses(file()).find((entry) => entry.id === id) });
+    return json(res, 200, { integration: integrationStatuses(file(), scope).find((entry) => entry.id === id) });
   };
 }

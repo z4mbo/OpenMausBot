@@ -110,13 +110,13 @@ export const PIPELINE_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_pipeline_deal",
-    description: "List, open or change the deals in an Origin project's Sales: value and currency, stage, expected close date, simple line items and notes. action won only asks a person to confirm the sale (with the amount and reason); nothing is won until they do. action lost closes it with a reason." + ORIGIN_SCOPE,
+    description: "List, open or change the deals in an Origin project's Sales: value and currency, stage, expected close date, simple line items and notes. action won only asks a person to confirm the sale (with the amount and reason); nothing is won until they do. action lost closes it with a reason. action coach asks the cheap model for the next step, the risk and a follow-up draft in the brand voice." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
-        action: { type: "string", enum: ["list", "save", "won", "lost"], description: "Default save." },
+        action: { type: "string", enum: ["list", "save", "won", "lost", "coach"], description: "Default save." },
         lead_id: { type: "string", maxLength: 64, description: "The contact: opens a deal, or lists theirs." },
-        deal_id: { type: "string", maxLength: 64, description: "The deal to change, win or lose." },
+        deal_id: { type: "string", maxLength: 64, description: "The deal to change, win, lose or coach." },
         title: { type: "string", maxLength: 200 },
         value: { type: "number", minimum: 0, description: "Ignored when line_items are given: their total is the value." },
         currency: { type: "string", maxLength: 3, description: "Default the project's." },

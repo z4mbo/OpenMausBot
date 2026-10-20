@@ -1,4 +1,4 @@
-import type { BroadcastChannel, BroadcastMediaKind, BroadcastStatus } from "../../../shared/broadcast";
+import type { BroadcastChannel, BroadcastFormat, BroadcastMediaKind, BroadcastMetrics, BroadcastReel, BroadcastStatus } from "../../../shared/broadcast";
 
 export type BroadcastVariant = {
   channel: BroadcastChannel;
@@ -7,6 +7,9 @@ export type BroadcastVariant = {
   url?: string;
   error?: string;
   publishedAt?: number;
+  accountId?: string;
+  accountLabel?: string;
+  metrics?: BroadcastMetrics;
 };
 
 export type BroadcastMedia = { assetId: string; name: string; url: string | null; contentType: string | null; kind: BroadcastMediaKind };
@@ -17,6 +20,8 @@ export type BroadcastPost = {
   variants: BroadcastVariant[];
   assetIds: string[];
   status: BroadcastStatus;
+  format?: BroadcastFormat;
+  reel?: BroadcastReel;
   scheduledAt?: number;
   agentName?: string;
   approvedAt?: number;
@@ -123,4 +128,57 @@ export function listOrder(posts: readonly BroadcastPost[]): BroadcastPost[] {
   const rank = (post: BroadcastPost) => post.needsApproval ? 0 : post.status === "failed" ? 1 : post.status === "scheduled" || post.status === "publishing" ? 2 : post.status === "draft" ? 3 : 4;
   return [...posts].sort((a, b) => rank(a) - rank(b)
     || (rank(a) === 2 ? (a.scheduledAt ?? 0) - (b.scheduledAt ?? 0) : (postTime(b) ?? b.updatedAt) - (postTime(a) ?? a.updatedAt)));
+}
+
+/** Local midnight of the first day of `at`'s month. */
+export function monthStart(at: number): Date {
+  const day = new Date(at);
+  day.setHours(0, 0, 0, 0);
+  day.setDate(1);
+  return day;
+}
+
+export function shiftMonth(start: Date, months: number): Date {
+  return new Date(start.getFullYear(), start.getMonth() + months, 1);
+}
+
+/** The Monday-first weeks that cover `start`'s month, as whole weeks of days. */
+export function monthGrid(start: Date): Date[][] {
+  const last = shiftMonth(start, 1).getTime() - 1;
+  const weeks: Date[][] = [];
+  for (let week = weekStart(start.getTime()); week.getTime() <= last; week = shiftWeek(week, 1)) weeks.push(weekDays(week));
+  return weeks;
+}
+
+export const dayKey = (day: Date) => `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
+
+/** Posts with a time, by local day, earliest first. */
+export function postsByDay(posts: readonly BroadcastPost[]): Map<string, BroadcastPost[]> {
+  const days = new Map<string, BroadcastPost[]>();
+  for (const post of posts) {
+    const at = postTime(post);
+    if (at === undefined) continue;
+    const key = dayKey(new Date(at));
+    days.set(key, [...days.get(key) ?? [], post]);
+  }
+  for (const list of days.values()) list.sort((a, b) => (postTime(a) ?? 0) - (postTime(b) ?? 0));
+  return days;
+}
+
+/** Only a scheduled post moves; it keeps its time of day on the new date. */
+export function canMove(post: BroadcastPost): boolean {
+  return post.status === "scheduled" && !post.needsApproval && post.scheduledAt !== undefined;
+}
+
+export function movedTo(scheduledAt: number, day: Date): number {
+  const from = new Date(scheduledAt);
+  const to = new Date(day);
+  to.setHours(from.getHours(), from.getMinutes(), 0, 0);
+  return to.getTime();
+}
+
+/** Published channels with engagement read back, the input for best-time suggestions. */
+export function metricSamples(posts: readonly BroadcastPost[]) {
+  return posts.flatMap((post) => post.variants.flatMap((variant) => variant.publishedAt !== undefined && variant.metrics
+    ? [{ channel: variant.channel, publishedAt: variant.publishedAt, metrics: variant.metrics }] : []));
 }

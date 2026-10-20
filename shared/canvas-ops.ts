@@ -1,12 +1,14 @@
 import {
   CANVAS_NODE_TYPES, CANVAS_LIMITS, canvasColor, childrenIndex, descendants, effectiveParent, estimateTextWidth, isContainer, isLive,
   layoutRoot, layoutStacks, layoutText, leadForm, nextZ, randomId, randomNonce, sanitizeNode, stackLayout, typeName,
-  type CanvasNode, type CanvasNodeType, type ComponentInfo, type Constraints, type LeadForm, type PrototypeLink, type Scene, type Shadow, type StackLayout, type TextMeasure,
+  type BooleanOperation, type CanvasNode, type CanvasNodeType, type ComponentInfo, type Constraints, type CornerRadii, type Gradient, type ImageCrop, type LeadForm, type PrototypeLink,
+  type Scene, type Shadow, type StackLayout, type TextMeasure,
 } from "./canvas-scene.ts";
 import { constrainChildren, instantiate, masterTree, settleComponents } from "./canvas-components.ts";
 import { colorStyles, textStyle, textStylePatch } from "./canvas-styles.ts";
 import { leadFormHeight } from "./canvas-page.ts";
 import { BRAND_FONT_IDS, isBrandFont } from "./brand-fonts.ts";
+import { designSystemSpec } from "./canvas-design-system.ts";
 
 /**
  * A node as agents read and write it: `x` and `y` relative to the parent, sizes as `w` and `h`, defaults left out,
@@ -72,6 +74,14 @@ export interface CanvasSpec {
   page?: string;
   /** Present mode: clicking the node opens this frame (id or key); null removes it. */
   prototype?: { to: string; transition?: PrototypeLink["transition"] } | null;
+  /** Rectangles, frames and images: [topLeft, topRight, bottomRight, bottomLeft]; null goes back to `radius`. */
+  radii?: CornerRadii | null;
+  /** A gradient fill: {kind: linear|radial, angle, stops: [{at 0..1, color}]}; null goes back to the solid fill. */
+  gradient?: Gradient | null;
+  /** Images with imageFit crop or tile: {scale, x, y}. */
+  crop?: ImageCrop | null;
+  /** Groups: union, subtract, intersect or exclude its shapes into one outline that keeps them editable; null makes it a plain group. */
+  boolean?: BooleanOperation | null;
   children?: CanvasSpec[];
 }
 
@@ -79,7 +89,8 @@ export type CanvasOp =
   | { op: "create"; parent?: string | null; node: CanvasSpec }
   | { op: "instance"; component: string; parent?: string | null; key?: string; set?: CanvasSpec }
   | { op: "update"; id: string; set: CanvasSpec & { parent?: string | null } }
-  | { op: "delete"; id: string };
+  | { op: "delete"; id: string }
+  | { op: "design_system"; x?: number; y?: number };
 
 export interface CanvasOpsResult {
   changed: CanvasNode[];
@@ -103,6 +114,11 @@ export function compactScene(scene: Scene, options: { root?: string; max?: numbe
     if (node.fill) spec.fill = node.fill;
     if (node.stroke) { spec.stroke = node.stroke; spec.strokeWidth = node.strokeWidth; }
     if (node.radius) spec.radius = node.radius;
+    if (node.radii) spec.radii = node.radii;
+    if (node.gradient) spec.gradient = node.gradient;
+    if (node.boolean) spec.boolean = node.boolean;
+    if (node.type === "image" && node.imageFit !== "cover") spec.imageFit = node.imageFit;
+    if (node.crop) spec.crop = node.crop;
     if (node.rotation) spec.rotation = round(node.rotation);
     if (node.opacity !== 1) spec.opacity = round(node.opacity);
     if (node.hidden) spec.hidden = true;
@@ -231,6 +247,7 @@ function applyDesignSpec(raw: Record<string, unknown>, target: CanvasNode, spec:
   if (!clear("blur", spec.blur) && num(spec.blur) !== undefined) raw.blur = spec.blur;
   if (typeof spec.page === "string") raw.page = spec.page;
   if (!clear("prototype", spec.prototype) && spec.prototype && typeof spec.prototype.to === "string") raw.prototype = { transition: "dissolve", ...spec.prototype };
+  for (const key of ["radii", "gradient", "crop", "boolean"] as const) if (!clear(key, spec[key]) && spec[key] !== undefined) raw[key] = spec[key];
 }
 
 function defaults(type: CanvasNodeType): Partial<CanvasNode> {
@@ -342,7 +359,10 @@ export function applyCanvasOps(scene: Scene, ops: readonly unknown[], options: {
       for (const node of nodes) put(node);
       if (typeof op.key === "string" && op.key) keys.set(op.key, root.id);
       created.push({ id: root.id, ...(typeof op.key === "string" && op.key ? { key: op.key } : {}), name: root.name, type: root.type });
-    } else problems.push(`${path}: op must be create, update, delete or instance.`);
+    } else if (op.op === "design_system") {
+      const spec = designSystemSpec(kit as Parameters<typeof designSystemSpec>[0]);
+      build({ ...spec, ...(num(op.x) !== undefined ? { x: num(op.x) } : {}), ...(num(op.y) !== undefined ? { y: num(op.y) } : {}) }, null, path);
+    } else problems.push(`${path}: op must be create, update, delete, instance or design_system.`);
   });
   for (const id of touched) {
     const node = work.get(id)!;

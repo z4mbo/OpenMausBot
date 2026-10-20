@@ -71,8 +71,10 @@ class SweepNode {
   parent: SweepNode | undefined;
   readonly priority: number;
   parity: number;
+  readonly edge: Segment;
 
-  constructor(readonly edge: Segment) {
+  constructor(edge: Segment) {
+    this.edge = edge;
     let hash = edge.id + 1;
     hash = Math.imul(hash ^ (hash >>> 16), 0x21f0aaad);
     hash = Math.imul(hash ^ (hash >>> 15), 0x735a2d97);
@@ -128,7 +130,11 @@ class EventQueue {
 class SweepStatus {
   root: SweepNode | undefined;
 
-  constructor(private readonly compare: (a: Segment, b: Segment) => number) {}
+  private readonly compare: (a: Segment, b: Segment) => number;
+
+  constructor(compare: (a: Segment, b: Segment) => number) {
+    this.compare = compare;
+  }
 
   private update(node: SweepNode): void {
     node.parity = (node.left?.parity ?? 0) ^ node.edge.mask ^ (node.right?.parity ?? 0);

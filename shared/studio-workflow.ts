@@ -164,6 +164,11 @@ const link = (from: string, to: string, toPort: string, fromPort?: string): Stud
   id: `${from}-${to}-${toPort}`, from, fromPort: fromPort ?? (from.startsWith("p") ? "text" : "media"), to, toPort,
 });
 
+/** The one-click set: hero, square post, a 9:16 reel with its voice-over, each saved and the posts drafted in Broadcast. */
+export const CAMPAIGN_PACK_ID = "template:campaign-pack";
+export const CAMPAIGN_BRIEF_NODE = "p1";
+export const CAMPAIGN_SCRIPT_NODE = "p2";
+
 export const STUDIO_WORKFLOW_TEMPLATES: readonly StudioWorkflowTemplate[] = [
   {
     id: "template:product-reel",
@@ -219,7 +224,56 @@ export const STUDIO_WORKFLOW_TEMPLATES: readonly StudioWorkflowTemplate[] = [
       edges: [link("p1", "m1", "prompt"), link("m1", "o1", "media"), link("p2", "m2", "prompt"), link("m2", "o2", "media"), link("p3", "m3", "prompt"), link("m3", "o3", "media")],
     },
   },
+  {
+    id: CAMPAIGN_PACK_ID,
+    name: "Campaign pack",
+    description: "From one brief: a hero image, a square post, a 9:16 reel with its voice-over, drafted as Broadcast posts.",
+    graph: {
+      nodes: [
+        node("p1", "prompt", 40, 420, { label: "Brief", text: "A sleek productivity app on a phone, bright morning desk, confident and optimistic" }),
+        node("p2", "prompt", 40, 1260, { label: "Voice-over", text: "Meet the app that gives your team an hour back every day. Try it free today." }),
+        node("m1", "model", 380, 0, { model: "fal-ai/nano-banana-pro", aspectRatio: "16:9", prompt: "Campaign hero image, wide composition with room for a headline" }),
+        node("m2", "model", 380, 420, { model: "fal-ai/nano-banana-pro", aspectRatio: "1:1", prompt: "Square social post, one bold centred subject, clean background" }),
+        node("m3", "model", 380, 840, { model: "fal-ai/nano-banana-pro", aspectRatio: "9:16", prompt: "Vertical key frame for a short reel" }),
+        node("m4", "model", 720, 840, { model: "fal-ai/kling-video/v3/pro/image-to-video", duration: "5", motion: "dolly-in", sound: false, prompt: "Subtle cinematic motion, the scene comes alive" }),
+        node("m5", "model", 380, 1260, { model: "fal-ai/elevenlabs/tts/eleven-v3", voice: "Rachel" }),
+        node("m6", "model", 1060, 1020, { model: "fal-ai/ffmpeg-api/merge-audio-video" }),
+        node("o1", "output", 720, 40, { name: "Campaign hero" }),
+        node("o2", "output", 720, 460, { name: "Square post", broadcast: "feed" }),
+        node("o3", "output", 1400, 1040, { name: "Reel", broadcast: "reel" }),
+        node("o4", "output", 720, 1300, { name: "Voice-over" }),
+      ],
+      edges: [
+        link("p1", "m1", "prompt"), link("p1", "m2", "prompt"), link("p1", "m3", "prompt"), link("m3", "m4", "in0"), link("p2", "m5", "prompt"),
+        link("m4", "m6", "in0"), link("m5", "m6", "in1"), link("m1", "o1", "media"), link("m2", "o2", "media"), link("m6", "o3", "media"), link("m5", "o4", "media"),
+      ],
+    },
+  },
 ];
+
+/** Where an Output node's file goes in Broadcast: one draft per group, on that group's channels. */
+export const STUDIO_BROADCAST_GROUPS = {
+  feed: { label: "Feed post", channels: ["instagram", "x", "linkedin"] },
+  reel: { label: "Reel", channels: ["tiktok", "instagram"] },
+} as const;
+export type StudioBroadcastGroup = keyof typeof STUDIO_BROADCAST_GROUPS;
+
+export function broadcastGroupOf(node: StudioWorkflowNode): StudioBroadcastGroup | undefined {
+  const value = String(node.params.broadcast ?? "");
+  return node.type === "output" && value in STUDIO_BROADCAST_GROUPS ? value as StudioBroadcastGroup : undefined;
+}
+
+/** A copy of the graph whose image and video steps follow one library entry. */
+export function withCharacter(graph: StudioWorkflowGraph, characterId: string | undefined): StudioWorkflowGraph {
+  if (!characterId) return graph;
+  return {
+    ...graph,
+    nodes: graph.nodes.map((entry) => {
+      const model = workflowNodeModel(entry);
+      return model && model.kind !== "audio" && !model.needs.includes("video") ? { ...entry, params: { ...entry.params, character: characterId.slice(0, 64) } } : entry;
+    }),
+  };
+}
 
 export function studioWorkflowTemplate(id: string): StudioWorkflowTemplate | undefined {
   return STUDIO_WORKFLOW_TEMPLATES.find((template) => template.id === id);
@@ -257,6 +311,10 @@ export interface StudioWorkflowRun {
   nodes: StudioRunNode[];
   createdByName: string;
   agentName?: string;
+  /** The text of the Broadcast drafts its Output nodes fill. */
+  caption?: string;
+  /** The Broadcast drafts the run filled, one per group. */
+  posts?: Array<{ group: string; postId: string }>;
   createdAt: number;
   updatedAt: number;
   finishedAt?: number;

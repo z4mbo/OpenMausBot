@@ -62,3 +62,4 @@ export async function cloudMutation<T>(name: string, args: Record<string, unknow
   }
 }
 export const cloudAction = cloudMutation;
+export const createOriginWorkspace = async (): Promise<{ teamId: string; slug: string }> => { throw new Error("The fixture has one workspace"); };

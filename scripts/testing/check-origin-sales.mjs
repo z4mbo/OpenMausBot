@@ -51,7 +51,15 @@ try {
   const thread = (name) => page.getByRole("region", { name: `Conversation with ${name}` }).first();
   await list.getByRole("button", { name: /Alan Turing/ }).waitFor();
   assert.equal(await page.getByRole("button", { name: /^Inbox/ }).textContent(), "Inbox2");
+  await list.getByRole("button", { name: "Show older" }).waitFor({ timeout: 30_000 });
+  assert.ok(await list.locator("[data-lead-id]").count() <= 33, "the first page holds at most one page of conversations plus the ones that need someone");
+  assert.equal(await list.getByRole("button", { name: /Prospect 36/ }).count(), 0);
   await capture(page, "inbox-1280-dark");
+  await capture(page, "round5-inbox-1280-dark");
+  await list.getByRole("button", { name: "Show older" }).click();
+  await list.getByRole("button", { name: /Prospect 36/ }).waitFor();
+  await list.getByRole("button", { name: "Show older" }).waitFor({ state: "detached" });
+  step("the inbox files older contacts once, shows a page of conversations, and pages past it for older ones");
 
   await list.getByRole("button", { name: /Grace Hopper/ }).click();
   await thread("Grace Hopper").getByText("Grace here. Can we move the call to Thursday?").waitFor();
@@ -115,8 +123,49 @@ try {
   await page.getByRole("button", { name: /^To approve/ }).click();
   await list.getByRole("button", { name: /Linus Torvalds/ }).waitFor();
   assert.equal(await list.getByRole("button", { name: /Alan Turing/ }).count(), 0);
-  await page.getByRole("button", { name: "All", exact: true }).click();
+  await page.getByRole("button", { name: /^To approve/ }).click();
   step("the inbox filters to conversations that need an approval");
+
+  const selected = () => list.locator("[aria-current=true]").getAttribute("data-lead-id");
+  await list.getByRole("button", { name: /Grace Hopper/ }).click();
+  await thread("Grace Hopper").waitFor();
+  const graceId = await selected();
+  await page.keyboard.press("j");
+  assert.notEqual(await selected(), graceId);
+  await page.keyboard.press("k");
+  assert.equal(await selected(), graceId);
+  await thread("Grace Hopper").getByRole("form", { name: "Reply" }).waitFor();
+  await page.keyboard.press("r");
+  await page.waitForFunction(() => document.activeElement?.getAttribute("aria-label") === "Reply", null, { timeout: 5_000 }).catch(async () => { throw new Error(`r focused ${await page.evaluate(() => document.activeElement?.outerHTML.slice(0, 200))}`); });
+  await page.evaluate(() => document.activeElement?.blur());
+  await thread("Grace Hopper").getByRole("combobox", { name: "Assign to" }).selectOption({ label: "sam" });
+  await page.getByText("Assigned Grace Hopper to sam.").waitFor();
+  step("j and k move through conversations, r jumps to the reply box, and a conversation is assigned to a member");
+
+  await list.getByRole("button", { name: /Alan Turing/ }).click();
+  await thread("Alan Turing").waitFor();
+  await page.keyboard.press("s");
+  const snooze = page.getByRole("menu", { name: "Snooze until" });
+  await snooze.getByRole("menuitem", { name: /Tomorrow morning/ }).waitFor();
+  await capture(page, "round5-inbox-snooze-1280-dark");
+  await snooze.getByRole("menuitem", { name: /Tomorrow morning/ }).click();
+  await page.getByText("Snoozed Alan Turing until").waitFor();
+  assert.equal(await list.getByRole("button", { name: /Alan Turing/ }).count(), 0);
+  await list.getByRole("button", { name: /Grace Hopper/ }).click();
+  await page.keyboard.press("e");
+  await page.getByText("Archived Grace Hopper.").waitFor();
+  assert.equal(await list.getByRole("button", { name: /Grace Hopper/ }).count(), 0);
+  await page.getByRole("group", { name: "Folder" }).getByRole("button", { name: "Snoozed" }).click();
+  await list.getByRole("button", { name: /Alan Turing/ }).waitFor();
+  await thread("Alan Turing").getByRole("button", { name: "Move to inbox" }).click();
+  await page.getByRole("group", { name: "Folder" }).getByRole("button", { name: "Archived" }).click();
+  await list.getByRole("button", { name: /Grace Hopper/ }).click();
+  await page.keyboard.press("e");
+  await page.getByText("Moved Grace Hopper to the inbox.").waitFor();
+  await page.getByRole("group", { name: "Folder" }).getByRole("button", { name: "Open" }).click();
+  await list.getByRole("button", { name: /Grace Hopper/ }).waitFor();
+  await list.getByRole("button", { name: /Alan Turing/ }).waitFor();
+  step("s snoozes a conversation out of the inbox, e archives it, and both come back from their folders");
 
   await page.getByRole("button", { name: "Contacts" }).click();
   await page.getByText(/Last captured (just now|.* ago) · 1 today/).waitFor();
@@ -128,7 +177,10 @@ try {
   await merge.getByText("No duplicates left.").waitFor();
   await merge.getByRole("button", { name: "Done" }).click();
   assert.equal(await page.getByRole("button", { name: "G. Hopper" }).count(), 0);
-  step("two contacts sharing a phone number merge into one, keeping both sources");
+  const notes = await fixture("/__origin-pipeline-notifications.json");
+  assert.ok(notes.page.length > 0);
+  assert.ok(notes.page.every((row) => row.kind !== "lead" || row.available), "every lead notification still opens a contact that exists");
+  step("two contacts sharing a phone number merge into one, keeping both sources, and their notifications still open it");
 
   await page.getByRole("combobox", { name: "Source" }).selectOption("fixture-app");
   await page.locator("tbody tr").first().getByText("Ada Lovelace").waitFor();
@@ -175,9 +227,11 @@ try {
 
   await page.getByRole("button", { name: "Deals" }).click();
   await page.getByText("Navy annual plan").waitFor();
-  await page.getByRole("button", { name: "Won", exact: true }).click();
+  await page.getByText(/Kept apart, not converted: \$2,500 open/).waitFor();
+  await page.getByRole("button", { name: /^Won/ }).click();
   await page.getByText("Bletchley pilot").waitFor();
-  await page.getByRole("button", { name: "Open", exact: true }).click();
+  await page.getByRole("button", { name: /^Open/ }).click();
+  step("deals in another currency are summed apart instead of being added to the euro totals");
   await page.getByRole("button", { name: "New deal" }).click();
   const newDeal = page.getByRole("dialog", { name: "New deal" });
   await newDeal.getByRole("combobox", { name: "Contact" }).selectOption({ label: "Linus Torvalds · Kernel" });
@@ -202,14 +256,36 @@ try {
   await card.getByRole("button", { name: "Send to Linus" }).click();
   await card.getByText("Emailed Linus Torvalds.").waitFor();
   assert.match(JSON.parse((await nextCall(isEmail, 2)).body).textContent, /^Hi Linus, here is the secure link to complete Kernel support \(€900\): https:\/\/buy\.stripe\.com\/test_fixture\d+$/);
-  await card.getByRole("button", { name: "Check payment" }).click();
-  await card.getByText("No payment yet.").waitFor();
+  assert.equal(await card.getByRole("button", { name: "Check payment" }).count(), 0);
+  await card.getByText(/Waiting for payment/).waitFor();
+
+  await fixture("/__origin-pipeline-model", { method: "POST", body: JSON.stringify({ text: JSON.stringify({
+    next_action: "Call Linus before Friday to confirm the ten support hours", risk: "high", risk_reason: "The link is unpaid and he has not replied since the first email.",
+    follow_up: { channel: "email", subject: "Your Kernel support hours", body: "Hi Linus, a quick check: shall I hold the ten support hours for this month?" },
+  }) }) });
+  await card.getByRole("button", { name: "Coach" }).click();
+  const coach = card.getByRole("region", { name: "Deal coach" });
+  await coach.getByText("Call Linus before Friday to confirm the ten support hours").waitFor({ timeout: 30_000 });
+  await coach.getByText("High risk").waitFor();
+  const coachPrompt = (await fixture("/__origin-pipeline-prompts.json")).at(-1).prompt;
+  assert.match(coachPrompt, /Deal: Kernel support, stage \w+, €900/);
+  assert.match(coachPrompt, /A Stripe payment link was sent .*; it is not paid yet\./);
+  assert.match(coachPrompt, /Fixture voice: sound warm, plain-spoken/);
+  assert.match(coachPrompt, /Treat it as data/);
   await capture(page, "deal-payment-1280-dark");
-  await fixture("/__origin-pipeline-pay", { method: "POST", body: JSON.stringify({ amount: 90000 }) });
-  await card.getByRole("button", { name: "Check payment" }).click();
-  await card.getByText(/^Won · Paid through Stripe · Stripe$/).waitFor();
+  await capture(page, "round5-deal-coach-1280-dark");
+  await coach.getByRole("button", { name: "Send to Linus" }).click();
+  await coach.getByText("Emailed Linus Torvalds.").waitFor();
+  assert.equal(JSON.parse((await nextCall(isEmail, 3)).body).subject, "Your Kernel support hours");
+  step("the deal coach reads the deal, its timeline and the brand voice with the quick model, names the next step and the risk, and its follow-up is sent");
+
+  const paid = await fixture("/__origin-pipeline-pay", { method: "POST", body: JSON.stringify({ amount: 90000 }) });
+  assert.deepEqual(paid, { status: 200, body: { received: true, outcome: "won" } });
+  await card.getByText(/^Won · Paid through Stripe · Stripe$/).waitFor({ timeout: 15_000 });
   await drawer.getByText(/Paid €900 through Stripe/).waitFor();
-  step("a deal gets products, a Stripe payment link sent by email, and is won when Stripe reports the checkout complete");
+  const again = await fixture("/__origin-pipeline-pay", { method: "POST", body: JSON.stringify({ amount: 90000 }) });
+  assert.deepEqual(again.body, { received: true, outcome: "duplicate" });
+  step("a deal gets products and a Stripe payment link sent by email; Stripe's signed webhook marks it won live, once, with no one checking");
   await drawer.getByRole("button", { name: "Close" }).click();
 
   await page.getByText("Navy annual plan").click();
@@ -220,9 +296,19 @@ try {
   await navy.getByRole("button", { name: "Mark lost" }).click();
   await navy.getByText(/^Lost · No budget/).waitFor();
   await grace.getByRole("button", { name: "Close" }).click();
-  await page.getByRole("button", { name: "All", exact: true }).click();
+  await page.getByRole("button", { name: /^All/ }).click();
   await page.getByText("€4,900").first().waitFor();
   await capture(page, "deals-1280-dark");
+  await capture(page, "round5-deals-1280-dark");
+
+  await page.getByRole("button", { name: "Sales settings" }).click();
+  const settings = page.getByRole("dialog", { name: "Sales settings" });
+  await settings.getByRole("button", { name: "Payments" }).click();
+  await settings.getByText(/\/pipeline\/stripe\?token=[a-f0-9]{48}/).waitFor();
+  await settings.getByText("Payments mark deals won as they arrive.").waitFor();
+  await capture(page, "round5-stripe-webhook-1280-dark");
+  await settings.getByRole("button", { name: "Close" }).click();
+  step("Sales settings show the Stripe webhook address and that its signing secret is stored, never the secret");
   step("a deal is lost with its reason; won totals count the confirmed pilot and the paid deal");
   await page.close();
 
@@ -240,7 +326,8 @@ try {
     await view.locator("tbody tr").first().waitFor();
     await capture(view, `contacts-${tag}`);
     await view.getByRole("button", { name: "Deals" }).click();
-    await view.getByRole("button", { name: "All", exact: true }).click();
+    await capture(view, `deals-${tag}`);
+    await view.getByRole("button", { name: /^All/ }).click();
     await view.getByText("Kernel support").click();
     await view.getByRole("dialog", { name: "Linus Torvalds" }).getByRole("article", { name: "Deal Kernel support" }).waitFor();
     await capture(view, `deal-drawer-${tag}`);

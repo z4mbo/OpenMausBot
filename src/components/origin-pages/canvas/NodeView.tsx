@@ -1,6 +1,8 @@
 import { memo, type ReactNode } from "react";
 import { FONT_STACKS, fontStack, layoutText, type CanvasNode, type LeadForm, type Scene } from "../../../../shared/canvas-scene";
 import { LEAD_FIELD_LABELS, LEAD_FORM_METRICS, arrowHead, leadFormColors, pathData } from "../../../../shared/canvas-page";
+import { cornerRadii, gradientLine, gradientStops, imagePlacement, roundedRectPath, unevenCorners } from "../../../../shared/canvas-paint";
+import { booleanGroupPath } from "../../../../shared/canvas-boolean-group";
 import { measureText } from "./geometry";
 
 export type RenderOptions = {
@@ -13,13 +15,29 @@ export type RenderOptions = {
   dirty?: ReadonlySet<string>;
 };
 
-function TextShape({ node, hiddenText }: { node: CanvasNode; hiddenText: boolean }) {
+function GradientDef({ id, node }: { id: string; node: CanvasNode }) {
+  const gradient = node.gradient!;
+  const stops = gradientStops(gradient).map((stop, at) => <stop key={at} offset={stop.offset} stopColor={stop.color} stopOpacity={stop.opacity < 1 ? stop.opacity : undefined} />);
+  if (gradient.kind === "radial") return <radialGradient id={id} cx={0.5} cy={0.5} r={0.5}>{stops}</radialGradient>;
+  return <linearGradient id={id} gradientUnits="userSpaceOnUse" {...gradientLine(gradient, node.width, node.height)}>{stops}</linearGradient>;
+}
+
+/** The node's fill: its gradient (defined next to it under `id`) or its solid colour. */
+const paint = (node: CanvasNode, id: string, fallback: string) => (node.gradient ? `url(#${id})` : node.fill ?? fallback);
+
+function Box({ node, fill, hit, stroke }: { node: CanvasNode; fill: string; hit?: object; stroke?: object }) {
+  const radii = cornerRadii(node);
+  if (radii && unevenCorners(radii)) return <path {...hit} d={roundedRectPath(node.width, node.height, radii)} fill={fill} {...stroke} />;
+  return <rect {...hit} width={node.width} height={node.height} rx={radii?.[0] || undefined} fill={fill} {...stroke} />;
+}
+
+function TextShape({ node, hiddenText, fill }: { node: CanvasNode; hiddenText: boolean; fill: string }) {
   const layout = layoutText(node, measureText);
   const size = node.fontSize ?? 16;
   const anchor = node.align === "center" ? "middle" : node.align === "right" ? "end" : "start";
   const x = node.align === "center" ? node.width / 2 : node.align === "right" ? node.width : 0;
   return (
-    <text x={x} fill={node.fill ?? "transparent"} fontSize={size} fontWeight={node.fontWeight} fontFamily={fontStack(node)} textAnchor={anchor}
+    <text x={x} fill={fill} fontSize={size} fontWeight={node.fontWeight} fontFamily={fontStack(node)} textAnchor={anchor}
       opacity={hiddenText ? 0 : undefined} style={{ whiteSpace: "pre" }}>
       {layout.lines.map((line, index) => (
         <tspan key={index} x={x} y={index * layout.lineHeight + layout.lineHeight / 2 + size * 0.35}>{line || " "}</tspan>
@@ -57,56 +75,76 @@ function LeadFormPreview({ node, form, surface }: { node: CanvasNode; form: Lead
 
 function Shape({ node, options, surface }: { node: CanvasNode; options: RenderOptions; surface: string }): ReactNode {
   const stroke = node.stroke && node.strokeWidth > 0 ? { stroke: node.stroke, strokeWidth: node.strokeWidth } : {};
-  const radius = Math.min(node.radius, node.width / 2, node.height / 2);
   const hit = options.interactive ? { "data-node-id": node.id } : {};
+  const gradient = `${options.prefix}grad-${node.id}`;
+  const empty = options.interactive ? "transparent" : "none";
+  const defs = node.gradient ? <GradientDef id={gradient} node={node} /> : null;
   switch (node.type) {
     case "rect":
     case "frame":
       return (
         <>
-          <rect {...hit} width={node.width} height={node.height} rx={radius || undefined} fill={node.fill ?? (options.interactive ? "transparent" : "none")} {...stroke} />
+          {defs}
+          <Box node={node} hit={hit} fill={paint(node, gradient, empty)} stroke={stroke} />
           {node.leadForm && <LeadFormPreview node={node} form={node.leadForm} surface={surface} />}
         </>
       );
     case "ellipse":
-      return <ellipse {...hit} cx={node.width / 2} cy={node.height / 2} rx={node.width / 2} ry={node.height / 2} fill={node.fill ?? (options.interactive ? "transparent" : "none")} {...stroke} />;
+      return <>{defs}<ellipse {...hit} cx={node.width / 2} cy={node.height / 2} rx={node.width / 2} ry={node.height / 2} fill={paint(node, gradient, empty)} {...stroke} /></>;
     case "text":
       return (
         <g {...hit}>
+          {defs}
           {options.interactive && <rect width={Math.max(node.width, 4)} height={Math.max(node.height, 4)} fill="transparent" />}
-          <TextShape node={node} hiddenText={options.editing === node.id} />
+          <TextShape node={node} hiddenText={options.editing === node.id} fill={paint(node, gradient, "transparent")} />
         </g>
       );
+    case "group":
+      return node.boolean ? <>{defs}<path {...hit} d={booleanGroupPath(node, options.index)} fill={paint(node, gradient, "none")} fillRule="evenodd" strokeLinejoin="round" {...stroke} /></> : null;
     case "line":
     case "arrow":
     case "path": {
       const points = node.points ?? [0, 0, node.width, node.height];
       const width = Math.max(node.strokeWidth, 0.5);
+      const filled = node.type === "path" && node.closed && (node.fill || node.gradient);
       return (
         <g {...hit}>
+          {defs}
           {options.interactive && <path d={pathData(points, node.closed, node.curves, node.breaks)} fill={node.type === "path" && node.closed ? "transparent" : "none"} stroke="transparent" strokeWidth={12} vectorEffect="non-scaling-stroke" strokeLinecap="round" />}
-          <path d={pathData(points, node.closed, node.curves, node.breaks)} fill={node.type === "path" && node.closed && node.fill ? node.fill : "none"} fillRule="evenodd" stroke={node.stroke ?? "transparent"} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" />
+          <path d={pathData(points, node.closed, node.curves, node.breaks)} fill={filled ? paint(node, gradient, "none") : "none"} fillRule="evenodd" stroke={node.stroke ?? "transparent"} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" />
           {node.type === "arrow" && points.length >= 4 && <path d={arrowHead(points, Math.max(8, width * 3.5))} fill={node.stroke ?? "transparent"} stroke={node.stroke ?? "transparent"} strokeWidth={width} strokeLinejoin="round" />}
         </g>
       );
     }
-    case "image": {
-      const url = node.fileId ? options.images.get(node.fileId) : undefined;
-      const clip = `${options.prefix}img-${node.id}`;
-      return (
-        <g {...hit}>
-          {radius > 0 && <clipPath id={clip}><rect width={node.width} height={node.height} rx={radius} /></clipPath>}
-          <g clipPath={radius > 0 ? `url(#${clip})` : undefined}>
-            <rect width={node.width} height={node.height} fill={url ? "transparent" : node.fill ?? "#E5E7EB"} />
-            {url && <image href={url} width={node.width} height={node.height} preserveAspectRatio={node.imageFit === "contain" ? "xMidYMid meet" : "xMidYMid slice"} />}
-          </g>
-          {stroke.stroke && <rect width={node.width} height={node.height} rx={radius || undefined} fill="none" {...stroke} />}
-        </g>
-      );
-    }
+    case "image":
+      return <ImageShape node={node} options={options} hit={hit} stroke={stroke} />;
     default:
       return null;
   }
+}
+
+function ImageShape({ node, options, hit, stroke }: { node: CanvasNode; options: RenderOptions; hit: object; stroke: object }) {
+  const url = node.fileId ? options.images.get(node.fileId) : undefined;
+  const clip = `${options.prefix}img-${node.id}`;
+  const tile = `${options.prefix}tile-${node.id}`;
+  const place = imagePlacement(node);
+  const clipped = Boolean(cornerRadii(node)) || place.kind === "crop";
+  return (
+    <g {...hit}>
+      {clipped && <clipPath id={clip}><Box node={node} fill="#000" /></clipPath>}
+      {url && place.kind === "tile" && (
+        <pattern id={tile} patternUnits="userSpaceOnUse" width={place.width} height={place.height}>
+          <image href={url} width={place.width} height={place.height} preserveAspectRatio="xMidYMid slice" />
+        </pattern>
+      )}
+      <g clipPath={clipped ? `url(#${clip})` : undefined}>
+        <rect width={node.width} height={node.height} fill={!url ? node.fill ?? "#E5E7EB" : place.kind === "tile" ? `url(#${tile})` : "transparent"} />
+        {url && place.kind === "fit" && <image href={url} width={node.width} height={node.height} preserveAspectRatio={place.preserve} />}
+        {url && place.kind === "crop" && <image href={url} x={place.x} y={place.y} width={place.width} height={place.height} preserveAspectRatio="xMidYMid slice" />}
+      </g>
+      {"stroke" in stroke && <Box node={node} fill="none" stroke={stroke} />}
+    </g>
+  );
 }
 
 function Effects({ id, node }: { id: string; node: CanvasNode }) {
@@ -130,16 +168,15 @@ export const NodeView = memo(function NodeView({ node, options, surface = "#FFFF
   const children = node.leadForm ? [] : options.index.get(node.id) ?? [];
   const transform = `translate(${node.x} ${node.y})${node.rotation ? ` rotate(${node.rotation} ${node.width / 2} ${node.height / 2})` : ""}`;
   const clip = node.type === "frame" && node.clip ? `${options.prefix}clip-${node.id}` : null;
-  const radius = Math.min(node.radius, node.width / 2, node.height / 2);
   const effect = node.shadow || node.blur ? `${options.prefix}fx-${node.id}` : null;
   return (
     <g transform={transform} opacity={node.opacity < 1 ? node.opacity : undefined} filter={effect ? `url(#${effect})` : undefined}>
       {effect && <Effects id={effect} node={node} />}
-      {node.type !== "group" && <Shape node={node} options={options} surface={surface} />}
+      <Shape node={node} options={options} surface={surface} />
       {children.length > 0 && (
         <>
-          {clip && <clipPath id={clip}><rect width={node.width} height={node.height} rx={radius || undefined} /></clipPath>}
-          <g clipPath={clip ? `url(#${clip})` : undefined}>
+          {clip && <clipPath id={clip}><Box node={node} fill="#000" /></clipPath>}
+          <g clipPath={clip ? `url(#${clip})` : undefined} opacity={node.boolean ? 0 : undefined}>
             {children.map((child) => <NodeView key={child.id} node={child} options={options} surface={node.fill ?? surface} />)}
           </g>
         </>

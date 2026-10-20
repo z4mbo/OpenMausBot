@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from "react";
-import { Circle, Frame, Hand, ImagePlus, Layers, MessageCircle, Minus, MousePointer2, MoveUpRight, PenTool, Redo2, SlidersHorizontal, Square, Type, Undo2, Upload } from "lucide-react";
+import { Circle, Expand, Focus, Frame, Hand, ImagePlus, Layers, MessageCircle, Minus, MousePointer2, Plus, MoveUpRight, PenTool, Redo2, SlidersHorizontal, Square, Type, Undo2, Upload } from "lucide-react";
 import { usePopoverDismiss } from "@/hooks/use-popover-dismiss";
 import { cn } from "@/lib/cn";
 
@@ -81,10 +81,10 @@ export function ZoomControls({ zoom, onZoom, onFit, onSelection, onActual, offse
       <button type="button" className={cn(button, "size-7")} aria-label="Zoom out" title="Zoom out (Ctrl+-)" onClick={() => onZoom(0.8)}><Minus size={14} /></button>
       <button type="button" className="h-7 min-w-12 rounded-lg px-1.5 text-[12px] tabular-nums text-ink-secondary outline-none hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60"
         aria-label="Zoom to 100%" title="Zoom to 100% (Shift+0)" onClick={onActual}>{Math.round(zoom * 100)}%</button>
-      <button type="button" className={cn(button, "size-7")} aria-label="Zoom in" title="Zoom in (Ctrl+=)" onClick={() => onZoom(1.25)}><span className="text-[15px] leading-none">+</span></button>
+      <button type="button" className={cn(button, "size-7")} aria-label="Zoom in" title="Zoom in (Ctrl+=)" onClick={() => onZoom(1.25)}><Plus size={14} /></button>
       <span aria-hidden="true" className="mx-0.5 h-4 w-px bg-hairline/60" />
-      <button type="button" className="h-7 rounded-lg px-2 text-[12px] text-ink-secondary outline-none hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60" title="Zoom to fit (Shift+1)" onClick={onFit}>Fit</button>
-      {onSelection && <button type="button" className="h-7 rounded-lg px-2 text-[12px] text-ink-secondary outline-none hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60" title="Zoom to selection (Shift+2)" onClick={onSelection}>Selection</button>}
+      <button type="button" className={cn(button, "size-7")} aria-label="Fit" title="Zoom to fit (Shift+1)" onClick={onFit}><Expand size={14} /></button>
+      {onSelection && <button type="button" className={cn(button, "size-7")} aria-label="Selection" title="Zoom to selection (Shift+2)" onClick={onSelection}><Focus size={14} /></button>}
     </div>
   );
 }

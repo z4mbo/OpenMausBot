@@ -13,7 +13,7 @@ import {
 import { pipelineServer } from "./pipeline-api";
 import { captureCurlSnippet, type CaptureHealth } from "../../../shared/origin-sales";
 import { since } from "./activity-labels";
-import { CopyBlock, InboundSettings, StageEditor } from "./PipelineSettingsPanels";
+import { CopyBlock, InboundSettings, StageEditor, StripeWebhookSettings } from "./PipelineSettingsPanels";
 
 export function NewLeadDialog({ projectId, stages, onClose, onCreated }: { projectId: string; stages: readonly string[]; onClose(): void; onCreated(leadId: string): void }) {
   const [fields, setFields] = useState({ name: "", company: "", email: "", phone: "", value: "", stage: stages[0] ?? "", source: "", notes: "" });
@@ -175,7 +175,7 @@ const CHANNEL_ROWS: readonly { channel: PipelineChannel | "stripe"; label: strin
   { channel: "stripe", label: "Payment links", via: "Stripe", icon: CreditCard },
 ];
 
-export type SettingsTab = "general" | "stages" | "inbound";
+export type SettingsTab = "general" | "stages" | "inbound" | "payments";
 
 export function PipelineSettingsDialog({ projectId, settings, stages, counts, canEdit, isAdmin, channels, stripe = null, initialTab = "general", onClose }: {
   projectId: string; settings: PipelineSettingsView; stages: readonly string[]; counts: ReadonlyMap<string, number>; canEdit: boolean; isAdmin: boolean;
@@ -184,14 +184,15 @@ export function PipelineSettingsDialog({ projectId, settings, stages, counts, ca
   const [tab, setTab] = useState<SettingsTab>(initialTab);
   const connected = channels ? { ...channels, stripe: stripe ?? false } : null;
   return (
-    <Modal title="Sales settings" onClose={onClose} className={tab === "inbound" ? "sm:max-w-xl" : undefined}>
+    <Modal title="Sales settings" onClose={onClose} className={tab === "inbound" || tab === "payments" ? "sm:max-w-xl" : undefined}>
       <div className="mb-4">
         <Segmented label="Settings section" value={tab} onChange={setTab}
-          options={[{ value: "general", label: "General" }, { value: "stages", label: "Stages" }, { value: "inbound", label: "Replies" }]} />
+          options={[{ value: "general", label: "General" }, { value: "stages", label: "Stages" }, { value: "inbound", label: "Replies" }, { value: "payments", label: "Payments" }]} />
       </div>
       {tab === "general" && <GeneralSettings projectId={projectId} settings={settings} canEdit={canEdit} isAdmin={isAdmin} channels={connected} onClose={onClose} />}
       {tab === "stages" && <StageEditor projectId={projectId} stages={stages} counts={counts} canEdit={canEdit} onSaved={onClose} />}
       {tab === "inbound" && <InboundSettings projectId={projectId} settings={settings} isAdmin={isAdmin} canEdit={canEdit} />}
+      {tab === "payments" && <StripeWebhookSettings projectId={projectId} settings={settings} isAdmin={isAdmin} />}
     </Modal>
   );
 }

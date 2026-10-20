@@ -5,6 +5,7 @@ import { BodyTooLarge, readBoundedText } from "../lib/http-body";
 import { upload, uploadOptions } from "./storage";
 import { captureLead, captureOptions } from "./pipelineCapture";
 import { brevoWebhook, twilioWebhook } from "./pipelineInbound";
+import { stripeWebhook } from "./pipelineStripe";
 import { servePage, submitPage } from "./pagesHttp";
 
 const http = httpRouter();
@@ -14,6 +15,7 @@ http.route({ path: "/pipeline/capture", method: "POST", handler: captureLead });
 http.route({ path: "/pipeline/capture", method: "OPTIONS", handler: captureOptions });
 http.route({ path: "/pipeline/twilio", method: "POST", handler: twilioWebhook });
 http.route({ path: "/pipeline/brevo", method: "POST", handler: brevoWebhook });
+http.route({ path: "/pipeline/stripe", method: "POST", handler: stripeWebhook });
 http.route({ pathPrefix: "/p/", method: "GET", handler: servePage });
 http.route({ pathPrefix: "/p/", method: "POST", handler: submitPage });
 http.route({ path: "/integrations", method: "POST", handler: httpAction(async (ctx, request) => {

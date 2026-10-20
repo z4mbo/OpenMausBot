@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Select } from "../Select";
-import { Check, GitBranch, Link2, Loader2, Palette, RotateCcw, Settings, Trash2, UserPlus, Users } from "lucide-react";
+import { Check, GitBranch, KeyRound, Link2, Loader2, Palette, RotateCcw, Settings, Trash2, UserPlus, Users } from "lucide-react";
 import { ZAP_SWATCHES, setAvatarLook, useAvatarLook, useBotColor } from "@/lib/origin-avatar-looks";
 import { botPalette } from "@/lib/user-bubble-tone";
 import { useStore } from "@/state/store";
@@ -11,6 +11,7 @@ import type { CloudPerson, CloudProject, CloudProjectMember, GitHubTaskMode, Mem
 import { githubRepoHref } from "./repo-url";
 import { ProjectAccessCard } from "../origin-members/ProjectAccessCard";
 import { ChiefHeartbeatCard } from "./ChiefHeartbeatCard";
+import { IntegrationKeyList } from "../IntegrationKeysSettings";
 import { CloudGate, Field, Loading, Notice, PageHeader, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 type IconType = NonNullable<CloudProject["iconType"]>;
@@ -34,6 +35,12 @@ export function ProjectSettingsPage(props: OriginPageProps) {
               <ProjectAccessCard projectId={projectId} teamId={project.teamId} />
               <Members project={project} projectId={projectId} isAdmin={isAdmin} />
               {project.teamId && <ChiefHeartbeatCard projectId={projectId} />}
+              {project.teamId && (
+                <Card icon={<KeyRound size={15} />} title="Integration keys">
+                  <p className="mb-2 text-[12.5px] leading-relaxed text-ink-secondary">The keys this project's Studio, Sales, Ship and agents use. A key shared with this project only works here; a key of your own always wins.</p>
+                  <IntegrationKeyList teamId={project.teamId} project={{ id: projectId, name: project.name, canManage: isAdmin }} />
+                </Card>
+              )}
             </div>
           </div>
         </section>

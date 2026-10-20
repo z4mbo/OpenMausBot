@@ -1,6 +1,7 @@
 import { worldOrigin, type CanvasNode, type Scene } from "../../../../shared/canvas-scene";
 import { corners, toScreen, worldBox, type Box, type Guide, type Point, type View } from "./geometry";
 import { anchorsOf } from "./pen";
+import { cubicOf, segmentsOf } from "./path-edit";
 
 export const HANDLES = ["nw", "n", "ne", "e", "se", "s", "sw", "w"] as const;
 export type Handle = (typeof HANDLES)[number];
@@ -35,9 +36,11 @@ export type OverlayProps = {
   showPrototype?: boolean;
   pathEdit?: { node: CanvasNode; at: number | null } | null;
   pen?: { anchors: readonly Point[]; hover: Point | null } | null;
+  /** An image whose crop is being moved: its whole picture is outlined. */
+  crop?: CanvasNode | null;
 };
 
-export function Overlay({ scene, index, view, selected, hover, guides, marquee, cursors, editing, readOnly, busy, remoteSelections, showPrototype, pathEdit, pen }: OverlayProps) {
+export function Overlay({ scene, index, view, selected, hover, guides, marquee, cursors, editing, readOnly, busy, remoteSelections, showPrototype, pathEdit, pen, crop }: OverlayProps) {
   const single = selected.length === 1 ? selected[0] : null;
   const line = single && (single.type === "line" || single.type === "arrow") ? single : null;
   let frame: Point[] | null = null;
@@ -144,6 +147,12 @@ export function Overlay({ scene, index, view, selected, hover, guides, marquee, 
         const a = toScreen(view, { x: marquee.x, y: marquee.y });
         return <rect x={a.x} y={a.y} width={marquee.width * view.zoom} height={marquee.height * view.zoom} className="fill-accent/10 stroke-accent" strokeWidth={1} pointerEvents="none" />;
       })()}
+      {crop && (() => {
+        const origin = worldOrigin(scene, crop);
+        const scale = crop.crop?.scale ?? 1;
+        const a = toScreen(view, { x: origin.x + (crop.crop?.x ?? 0) * crop.width, y: origin.y + (crop.crop?.y ?? 0) * crop.height });
+        return <rect data-crop-frame={crop.id} x={a.x} y={a.y} width={crop.width * scale * view.zoom} height={crop.height * scale * view.zoom} fill="none" className="stroke-accent" strokeWidth={1} strokeDasharray="4 3" pointerEvents="none" />;
+      })()}
       {pathEdit && <PathHandles node={pathEdit.node} at={pathEdit.at} scene={scene} view={view} />}
       {pen && pen.anchors.length > 0 && (
         <g pointerEvents="none">
@@ -234,6 +243,15 @@ function PathHandles({ node, at, scene, view }: { node: CanvasNode; at: number |
   const anchors = anchorsOf(node, worldOrigin(scene, node));
   return (
     <g>
+      {segmentsOf(node).map((segment) => {
+        const [p0, p1, p2, p3] = cubicOf(anchors, segment).map((point) => toScreen(view, point));
+        return (
+          <path key={`s${segment.from}-${segment.to}`} data-segment={`${segment.from}:${segment.to}`} d={`M${p0!.x} ${p0!.y}C${p1!.x} ${p1!.y} ${p2!.x} ${p2!.y} ${p3!.x} ${p3!.y}`}
+            fill="none" stroke="transparent" strokeWidth={10} className="hover:stroke-accent/40" style={{ cursor: "crosshair" }}>
+            <title>Click to add a point</title>
+          </path>
+        );
+      })}
       {anchors.map((anchor) => {
         const point = toScreen(view, anchor.point);
         const handles = (["in", "out"] as const).filter((side) => anchor[side].x || anchor[side].y);

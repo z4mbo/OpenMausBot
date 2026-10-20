@@ -1,5 +1,6 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
-import { AudioLines, ChevronDown, Clapperboard, Image as ImageIcon, KeyRound, Loader2, Plus, Sparkles, Wand2, WandSparkles, X } from "lucide-react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
+import { AudioLines, Check, ChevronDown, Clapperboard, Image as ImageIcon, KeyRound, Loader2, Plus, Sparkles, UserRound, Wand2, WandSparkles, X } from "lucide-react";
+import { useCloudQuery } from "@/lib/origin-cloud";
 import { useStore } from "@/state/store";
 import { useBrandKit } from "@/lib/origin-brand";
 import { cn } from "@/lib/cn";
@@ -8,8 +9,8 @@ import { Notice, chipButton, ghostButton, primaryButton, useAction } from "../or
 import { StudioControls } from "./StudioControls";
 import { StudioMediaPicker } from "./StudioMediaPicker";
 import { StudioModelPicker } from "./StudioModelPicker";
-import { KIND_ICON, MediaThumb, studioPost, type SourceRef, type StudioDraft } from "./studio-ui";
-import { studioModel, studioModelsFor, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel } from "../../../shared/studio";
+import { KIND_ICON, MediaThumb, Popover, studioPost, type SourceRef, type StudioDraft } from "./studio-ui";
+import { studioModel, studioModelsFor, type StudioCharacter, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel } from "../../../shared/studio";
 import { brandedPrompt, type BrandKit } from "../../../shared/brand-kit";
 
 export const STUDIO_MODES: readonly { value: StudioMode; label: string; icon: typeof ImageIcon }[] = [
@@ -73,6 +74,49 @@ function SourceChip({ value: source, kind, label, onPick, onClear, disabled }: {
   );
 }
 
+/** The library entry the next generation follows: its references and description join the prompt. */
+function CharacterChip({ library, value, disabled, onChange, onManage }: {
+  library: readonly StudioCharacter[]; value?: string; disabled: boolean; onChange(id: string | undefined): void; onManage(): void;
+}) {
+  const [open, setOpen] = useState(false);
+  const close = useCallback(() => setOpen(false), []);
+  const chosen = library.find((entry) => entry._id === value);
+  return (
+    <div className="relative">
+      {chosen ? (
+        <span className={cn(chipButton, "gap-2 border-accent/50 pl-1 pr-1 text-ink")}>
+          <button type="button" className="flex min-w-0 items-center gap-2" onClick={() => setOpen(!open)} disabled={disabled} aria-label={`Following ${chosen.name}`} aria-expanded={open}>
+            <MediaThumb kind="image" url={chosen.references[0]?.url ?? undefined} className="size-6 shrink-0 rounded-full" />
+            <span className="truncate">{chosen.name}</span>
+          </button>
+          <button type="button" aria-label={`Stop following ${chosen.name}`} onClick={() => onChange(undefined)} disabled={disabled} className="flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
+        </span>
+      ) : (
+        <button type="button" className={cn(chipButton, "border-dashed")} onClick={() => setOpen(!open)} disabled={disabled} aria-expanded={open} title="Keep a character, product or style consistent">
+          <UserRound size={13} />Character
+        </button>
+      )}
+      <Popover open={open} onClose={close} label="Library">
+        {library.map((entry) => (
+          <button key={entry._id} type="button" aria-pressed={entry._id === value} onClick={() => { onChange(entry._id); close(); }}
+            className={cn("flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left outline-none hover:bg-raised focus-visible:bg-raised", entry._id === value && "bg-raised")}>
+            <MediaThumb kind="image" url={entry.references[0]?.url ?? undefined} className="size-8 shrink-0 rounded-md" />
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-[13px] text-ink">{entry.name}</span>
+              <span className="truncate text-[11.5px] capitalize text-ink-tertiary">{entry.kind}</span>
+            </span>
+            {entry._id === value && <Check size={13} className="text-accent-text" aria-hidden="true" />}
+          </button>
+        ))}
+        {!library.length && <p className="px-2 py-2 text-[12.5px] text-ink-tertiary">Nothing saved yet</p>}
+        <button type="button" onClick={() => { close(); onManage(); }} className="mt-1 flex w-full items-center gap-2 rounded-lg border-t border-hairline/30 px-2 py-2 text-left text-[12.5px] text-ink-secondary outline-none hover:bg-raised hover:text-ink focus-visible:bg-raised">
+          <Plus size={13} />{library.length ? "Manage library" : "Add to the library"}
+        </button>
+      </Popover>
+    </div>
+  );
+}
+
 export interface StudioComposerHandle {
   focus(): void;
   openModels(): void;
@@ -82,13 +126,14 @@ export interface StudioComposerHandle {
 
 type Props = {
   projectId: string; canEdit: boolean; falReady: boolean | null; rows: readonly StudioGeneration[];
-  draft: StudioDraft; onDraft(draft: StudioDraft): void;
+  draft: StudioDraft; onDraft(draft: StudioDraft): void; onOpenLibrary(): void;
 };
 
 /** The prompt bar: mode chips, starting files, the prompt, the model and its settings, then Generate. */
-export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function StudioComposer({ projectId, canEdit, falReady, rows, draft, onDraft }, handle) {
+export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function StudioComposer({ projectId, canEdit, falReady, rows, draft, onDraft, onOpenLibrary }, handle) {
   const { dispatch } = useStore();
   const brand = useBrandKit(projectId);
+  const library = useCloudQuery<StudioCharacter[]>("studioLibrary:list", { projectId });
   const [useBrand, setUseBrand] = useState(true);
   const [picking, setPicking] = useState<{ slot: "source" | "reference"; index: number; kind: StudioMediaKind } | null>(null);
   const [models, setModels] = useState(false);
@@ -98,6 +143,7 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
   const model = studioModel(draft.model) ?? studioModelsFor(draft.mode)[0]!;
   const patch = (next: Partial<StudioDraft>) => onDraft({ ...draft, ...next });
   const branded = Boolean(brand) && (draft.mode === "image" || draft.mode === "video") && !model.needs.includes("video");
+  const follows = model.kind !== "audio" && model.prompt !== "none" && !model.needs.includes("video");
 
   useEffect(() => {
     const field = prompt.current;
@@ -120,6 +166,7 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
         ...(draft.motion ? { motion: draft.motion } : {}), ...(draft.sound === false ? { sound: false } : {}),
         sources: draft.sources.map((ref) => ref.source), referenceAssetIds: draft.references.flatMap((ref) => ("assetId" in ref.source ? [ref.source.assetId] : [])),
         ...(draft.parent ? { parent: draft.parent } : {}), ...(branded ? { brand: useBrand } : {}),
+        ...(follows && draft.characterId ? { characterId: draft.characterId } : {}),
       });
       onDraft({ ...draft, parent: undefined, seed: draft.seed });
     }, "Could not start the generation");
@@ -203,6 +250,9 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
               </button>
             )}
           </div>
+        )}
+        {follows && library && (library.length > 0 || draft.characterId) && (
+          <CharacterChip library={library} value={draft.characterId} disabled={!canEdit} onChange={(characterId) => patch({ characterId })} onManage={onOpenLibrary} />
         )}
         <span className="flex-1" />
         {branded && brand && <BrandToggle kit={brand} on={useBrand} disabled={!canEdit} onChange={setUseBrand} />}

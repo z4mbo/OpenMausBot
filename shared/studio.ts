@@ -155,6 +155,8 @@ export interface StudioGenerateRequest {
   input?: Record<string, unknown>;
   /** Image and video prompts carry the project's brand kit unless this is false. */
   brand?: boolean;
+  /** A studioCharacters id: its reference images and description keep a person, product or style consistent. */
+  characterId?: string;
   /** The generation this one was made from, and how. */
   parent?: { generationId: string; action: string };
 }
@@ -205,6 +207,46 @@ export interface StudioGeneration {
   startedAt?: number;
   finishedAt?: number;
 }
+
+export type StudioCharacterKind = "character" | "product" | "style";
+export const STUDIO_CHARACTER_KINDS: readonly { value: StudioCharacterKind; label: string }[] = [
+  { value: "character", label: "Character" }, { value: "product", label: "Product" }, { value: "style", label: "Style" },
+];
+export const STUDIO_CHARACTER_REFERENCES_MAX = 4;
+
+/** A row of studioCharacters as studioLibrary:list returns it, with each reference's current link. */
+export interface StudioCharacter {
+  _id: string;
+  projectId: string;
+  name: string;
+  kind: StudioCharacterKind;
+  description: string;
+  referenceAssetIds: string[];
+  references: Array<{ assetId: string; url: string | null }>;
+  createdByName: string;
+  agentName?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** The sentence a library entry adds to an image or video prompt. */
+export function studioCharacterLine(character: Pick<StudioCharacter, "name" | "kind" | "description">): string {
+  const about = character.description.replace(/\s+/g, " ").trim().replace(/[.\s]+$/, "");
+  const name = character.name.trim();
+  if (character.kind === "style") return `In the ${name} style${about ? `: ${about}` : ""}.`;
+  if (character.kind === "product") return `Show ${name} exactly as in the reference images${about ? `: ${about}` : ""}.`;
+  return `Keep ${name} consistent with the reference images${about ? `: ${about}` : ""}.`;
+}
+
+export function studioCharacterPrompt(character: Pick<StudioCharacter, "name" | "kind" | "description">, prompt: string): string {
+  const line = studioCharacterLine(character);
+  return prompt.trim() ? `${prompt.trim().replace(/[.\s]*$/, ".")} ${line}` : line;
+}
+
+/** The largest output the app copies into project storage; a larger one keeps fal's link. */
+export const STUDIO_STORED_MAX = 150 * 1024 * 1024;
+/** Each piece of a larger output: one request to the deployment's upload route, which takes 15 MB. */
+export const STUDIO_CHUNK_BYTES = 12 * 1024 * 1024;
 
 /** The Assets folder every Studio output lands in. */
 export const STUDIO_ASSET_FOLDER = "Studio";

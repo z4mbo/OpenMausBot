@@ -50,7 +50,8 @@ export default defineSchema({
   notifications: defineTable({ teamId: v.id("teams"), userId: v.id("users"), actorId: v.id("users"), kind: v.union(v.literal("assignment"), v.literal("comment"), v.literal("mention"), v.literal("digest"), v.literal("lead")), eventId: v.string(), digestId: v.optional(v.id("standupDigests")), leadId: v.optional(v.id("pipelineLeads")), projectId: v.optional(v.id("projects")), taskId: v.optional(v.id("tasks")), messageId: v.optional(v.string()), conversation: v.optional(v.string()), agentThreadId: v.optional(v.id("agentThreads")), preview: v.optional(v.string()), read: v.boolean(), snoozedUntil: v.optional(v.number()), createdAt: v.number() })
     .index("by_user_team", ["userId", "teamId"])
     .index("by_user_team_read", ["userId", "teamId", "read"])
-    .index("by_user_event", ["userId", "eventId"]),
+    .index("by_user_event", ["userId", "eventId"])
+    .index("by_leadId", ["leadId"]),
   projectPresence: defineTable({ teamId: v.id("teams"), userId: v.id("users"), clientId: v.string(), projectId: v.optional(v.id("projects")), sequence: v.number(), updatedAt: v.number() })
     .index("by_team_user_client", ["teamId", "userId", "clientId"])
     .index("by_team_updatedAt", ["teamId", "updatedAt"])

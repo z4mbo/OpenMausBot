@@ -49,7 +49,11 @@ async function seed(convex: FakeConvex) {
   await generation({ kind: "audio", mode: "audio", model: "fal-ai/elevenlabs/tts/eleven-v3", modelLabel: "ElevenLabs v3 voice", prompt: "Welcome to the Origin launch", status: "done", outputs: [{ url: "https://cdn.fixture.test/welcome.mp3", kind: "audio", contentType: "audio/mpeg" }] });
   await generation({ kind: "video", mode: "video", model: "fal-ai/kling-video/v3/pro/text-to-video", modelLabel: "Kling 3 Pro", prompt: "Five second teaser clip", status: "done", aspectRatio: "16:9", outputs: [{ url: "https://cdn.fixture.test/teaser.mp4", kind: "video", contentType: "video/mp4" }] });
   await generation({ kind: "image", model: "fal-ai/nano-banana-pro", modelLabel: "Nano Banana Pro", prompt: "Hero shot of the app on a dark desk", status: "done", aspectRatio: "16:9", agentName: "Atlas", outputs: [{ url: swatch("#3b5bdb", "hero"), kind: "image" }] });
-  await t.run((ctx) => ctx.db.insert("designAssets", { projectId, type: "image", name: "Product photo.png", url: swatch("#2b8a3e", "product"), createdAt: Date.now(), updatedAt: Date.now() }));
+  const product = await t.run((ctx) => ctx.db.insert("designAssets", { projectId, type: "image", name: "Product photo.png", url: swatch("#2b8a3e", "product"), createdAt: Date.now(), updatedAt: Date.now() }));
+  await t.run((ctx) => ctx.db.insert("studioCharacters", {
+    projectId, name: "Aurora bottle", kind: "product", description: "Frosted glass bottle, copper cap, embossed logo", referenceAssetIds: [product],
+    createdBy: userId, createdByName: "ada", createdAt: Date.now(), updatedAt: Date.now(),
+  }));
   return { token, projectId };
 }
 
@@ -76,6 +80,9 @@ async function startFakeFal() {
   const jobs = new Map<string, { endpoint: string; body: Json; polls: number }>();
   const SIZES: Record<string, [number, number]> = { "16:9": [640, 360], "9:16": [360, 640], "3:4": [480, 640], "4:3": [640, 480], "21:9": [700, 300] };
   const result = (endpoint: string, body: Json, index: number): Json => {
+    if (endpoint === "fal-ai/any-llm" && /JSON/.test(String(body.system_prompt))) {
+      return { output: JSON.stringify({ script: `Meet the launch: ${String(body.prompt)}. Try it today.`, caption: `${String(body.prompt)} #launch` }) };
+    }
     if (endpoint === "fal-ai/any-llm") return { output: `A cinematic ${String(body.prompt)}, soft rim light, shallow depth of field, 35mm` };
     if (endpoint.includes("elevenlabs")) return { audio: { url: `${mediaBase}/audio/${index}.wav`, content_type: "audio/wav" } };
     if (/video|ffmpeg|avatar|lipsync/.test(endpoint)) return { video: { url: `${mediaBase}/video/${index}.mp4`, content_type: "video/mp4" } };

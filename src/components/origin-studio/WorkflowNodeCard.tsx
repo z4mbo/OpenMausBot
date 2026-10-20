@@ -1,12 +1,12 @@
 import { memo, type PointerEvent as ReactPointerEvent } from "react";
-import { AlertTriangle, Ban, Check, CircleDashed, FolderInput, FolderOutput, Loader2, Type, X } from "lucide-react";
+import { AlertTriangle, Ban, Check, CircleDashed, FolderInput, FolderOutput, Loader2, Send, Type, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import { inputClass } from "../origin-pages/ui";
 import { KIND_ICON, MediaThumb } from "./studio-ui";
 import { NODE_HEADER, NODE_WIDTH, PORT_ROW } from "./workflow-geometry";
 import { STUDIO_CAMERA_MOTIONS, STUDIO_VOICES, studioModel, type StudioMediaKind, type StudioParams } from "../../../shared/studio";
-import { WORKFLOW_PALETTE, workflowNodeModel, workflowPorts, type StudioPort, type StudioRunNode, type StudioWorkflowNode } from "../../../shared/studio-workflow";
+import { STUDIO_BROADCAST_GROUPS, WORKFLOW_PALETTE, workflowNodeModel, workflowPorts, type StudioPort, type StudioRunNode, type StudioWorkflowNode } from "../../../shared/studio-workflow";
 
 const PORT_COLOR: Record<StudioPort["kind"], string> = {
   text: "var(--color-ink-secondary)", image: "var(--color-accent)", video: "var(--color-success)", audio: "var(--color-warning)", any: "var(--color-ink-tertiary)",
@@ -41,8 +41,11 @@ type Props = {
   canEdit: boolean;
   assetLabel?: { name: string; url: string };
   linked: ReadonlySet<string>;
-  onSelect(id: string): void;
-  onParams(id: string, params: StudioParams): void;
+  /** The project's library, for steps that can follow a character, product or style. */
+  characters: readonly { id: string; name: string }[];
+  onSelect(id: string, additive: boolean): void;
+  /** `field` names what changed, so a burst of typing in one field undoes as one step. */
+  onParams(id: string, params: StudioParams, field: string): void;
   onRemove(id: string): void;
   onDragStart(id: string, event: ReactPointerEvent): void;
   onPortDown(id: string, side: "in" | "out", port: StudioPort, event: ReactPointerEvent): void;
@@ -51,7 +54,7 @@ type Props = {
 
 const select = "w-full [&_select]:w-full";
 
-function ModelSettings({ node, disabled, set }: { node: StudioWorkflowNode; disabled: boolean; set(patch: StudioParams): void }) {
+function ModelSettings({ node, disabled, characters, set }: { node: StudioWorkflowNode; disabled: boolean; characters: Props["characters"]; set(patch: StudioParams): void }) {
   const model = workflowNodeModel(node);
   const value = (key: string, allowed: readonly string[] | undefined) => (allowed?.includes(String(node.params[key] ?? "")) ? String(node.params[key]) : allowed?.[0] ?? "");
   return (
@@ -76,21 +79,29 @@ function ModelSettings({ node, disabled, set }: { node: StudioWorkflowNode; disa
           {model.motion && <Select size="sm" className={select} aria-label="Camera motion" value={String(node.params.motion ?? "")} disabled={disabled} onChange={(event) => set({ motion: event.target.value })}><option value="">Free camera</option>{STUDIO_CAMERA_MOTIONS.map((motion) => <option key={motion.id} value={motion.id}>{motion.label}</option>)}</Select>}
         </div>
       )}
+      {model && model.kind !== "audio" && !model.needs.includes("video") && (characters.length > 0 || node.params.character) && (
+        <Select size="sm" className={select} aria-label="Library" value={String(node.params.character ?? "")} disabled={disabled} onChange={(event) => set({ character: event.target.value })}>
+          <option value="">No character or style</option>
+          {characters.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}
+          {node.params.character && !characters.some((entry) => entry.id === node.params.character) && <option value={String(node.params.character)}>Removed entry</option>}
+        </Select>
+      )}
     </>
   );
 }
 
 /** One workflow node: header to drag, a row per port, then its own settings and, after a run, its output. */
-export const WorkflowNodeCard = memo(function WorkflowNodeCard({ node, selected, state, problem, canEdit, assetLabel, linked, onSelect, onParams, onRemove, onDragStart, onPortDown, onPickAsset }: Props) {
+export const WorkflowNodeCard = memo(function WorkflowNodeCard({ node, selected, state, problem, canEdit, assetLabel, linked, characters, onSelect, onParams, onRemove, onDragStart, onPortDown, onPickAsset }: Props) {
   const { inputs, outputs } = workflowPorts(node);
   const rows = Math.max(inputs.length, outputs.length);
   const model = workflowNodeModel(node);
   const kind = (node.type === "asset" ? String(node.params.kind || "image") : model?.kind ?? "image") as StudioMediaKind;
   const Icon = node.type === "prompt" ? Type : node.type === "output" ? FolderOutput : node.type === "asset" ? FolderInput : KIND_ICON[kind];
-  const set = (patch: StudioParams) => onParams(node.id, { ...node.params, ...patch });
+  const set = (patch: StudioParams) => onParams(node.id, { ...node.params, ...patch }, Object.keys(patch).join(","));
+  const group = node.type === "output" ? String(node.params.broadcast ?? "") : "";
   return (
     <div role="group" aria-label={`${title(node)} node`} data-workflow-node={node.id} tabIndex={0}
-      onPointerDown={() => onSelect(node.id)} onFocus={() => onSelect(node.id)}
+      onPointerDown={(event) => onSelect(node.id, event.shiftKey)} onFocus={() => onSelect(node.id, false)}
       className={cn("absolute flex flex-col rounded-xl border bg-panel text-[12px] outline-none", selected ? "border-accent" : problem ? "border-danger/60" : "border-hairline/60")}
       style={{ left: node.x, top: node.y, width: NODE_WIDTH }}>
       <div className="flex cursor-grab items-center gap-2 rounded-t-xl border-b border-hairline/40 bg-raised/40 px-2.5 active:cursor-grabbing" style={{ height: NODE_HEADER }}
@@ -142,9 +153,15 @@ export const WorkflowNodeCard = memo(function WorkflowNodeCard({ node, selected,
             </button>
           </>
         )}
-        {node.type === "model" && <ModelSettings node={node} disabled={!canEdit} set={set} />}
+        {node.type === "model" && <ModelSettings node={node} disabled={!canEdit} characters={characters} set={set} />}
         {node.type === "output" && (
-          <input className={cn(inputClass, "py-1 text-[12px]")} aria-label="Asset name" placeholder="Asset name" maxLength={120} disabled={!canEdit} value={String(node.params.name ?? "")} onChange={(event) => set({ name: event.target.value })} />
+          <>
+            <input className={cn(inputClass, "py-1 text-[12px]")} aria-label="Asset name" placeholder="Asset name" maxLength={120} disabled={!canEdit} value={String(node.params.name ?? "")} onChange={(event) => set({ name: event.target.value })} />
+            <Select size="sm" className={select} aria-label="Broadcast" value={group} disabled={!canEdit} onChange={(event) => set({ broadcast: event.target.value })}>
+              <option value="">Assets only</option>
+              {Object.entries(STUDIO_BROADCAST_GROUPS).map(([value, entry]) => <option key={value} value={value}>{`Also draft a ${entry.label.toLowerCase()}`}</option>)}
+            </Select>
+          </>
         )}
         {state?.output && node.type !== "prompt" && (
           <a href={state.output.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg bg-inset" aria-label="Open this step's output">
@@ -154,6 +171,7 @@ export const WorkflowNodeCard = memo(function WorkflowNodeCard({ node, selected,
         {state?.status === "failed" && state.error && <p className="line-clamp-3 text-[11.5px] text-danger">{state.error}</p>}
         {!state && problem && <p className="text-[11.5px] text-danger">{problem}</p>}
         {node.type === "output" && state?.status === "done" && <p className="text-[11.5px] text-success">Saved to Assets</p>}
+        {group && !state && <p className="flex items-center gap-1 text-[11.5px] text-ink-tertiary"><Send size={11} aria-hidden="true" />Drafted in Broadcast after a run</p>}
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ export function PagesBar({ pages, current, readOnly, counts, onSelect, onChange,
   return (
     <section aria-label="Pages" className="shrink-0 border-b border-hairline/40 px-1.5 pb-1.5">
       <div className="flex h-9 items-center justify-between pl-1.5">
-        <span className="text-[11.5px] font-medium uppercase tracking-wide text-ink-tertiary">Pages</span>
+        <span className="text-[11.5px] font-semibold text-ink">Pages</span>
         {!readOnly && pages.length < 50 && (
           <button type="button" aria-label="Add page" title="Add page" onClick={add}
             className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary outline-none hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60"><Plus size={13} /></button>

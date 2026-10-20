@@ -2,17 +2,21 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { writeFileAtomic } from "./atomic.ts";
 import { DATA_DIR } from "./config.ts";
-import { integrationKey } from "./integration-keys.ts";
+import { projectIntegrationKey } from "./integration-keys.ts";
+import { ConvexHttpClient } from "convex/browser";
+import { makeFunctionReference } from "convex/server";
 import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, type OriginCloudClient } from "./origin-cloud.ts";
 import {
-  STUDIO_CUSTOM_MODEL, STUDIO_ENHANCER, STUDIO_VOICES, studioAssetName, studioEndpoint, studioInput, studioModel, studioOutputs, validStudioEndpoint,
-  type StudioGenerateRequest, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel, type StudioParams, type StudioSource,
+  STUDIO_CHUNK_BYTES, STUDIO_CUSTOM_MODEL, STUDIO_ENHANCER, STUDIO_STORED_MAX, STUDIO_VOICES, studioAssetName, studioCharacterPrompt, studioEndpoint, studioInput, studioModel,
+  studioOutputs, validStudioEndpoint,
+  type StudioCharacter, type StudioGenerateRequest, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel, type StudioParams, type StudioSource,
 } from "../shared/studio.ts";
 import { brandedPrompt, type StoredBrandKit } from "../shared/brand-kit.ts";
 
 /** The signed-in Origin account this app's server acts as. */
 export interface StudioCloud {
-  client: OriginCloudClient;
+  /** `action` runs a Convex action; without one the runner opens its own client on `url`. */
+  client: OriginCloudClient & { action?(name: string, args: Record<string, unknown>): Promise<unknown> };
   sessionToken: string;
   /** The Convex deployment address; its own storage links are the only ones fetched here. */
   url: string;
@@ -20,7 +24,8 @@ export interface StudioCloud {
 
 export interface StudioDeps {
   fetch: typeof fetch;
-  falKey(): string | null;
+  /** The fal.ai key for one project's work, or for work outside any project. */
+  falKey(projectId?: string): string | null;
   cloud(): StudioCloud | null;
   journalFile: string;
   now(): number;
@@ -55,7 +60,6 @@ const QUEUE_ORIGIN = "https://queue.fal.run";
 const JOB_TIMEOUT_MS = 45 * 60_000;
 const STATUS_FAILURES_MAX = 10;
 const SOURCE_INLINE_MAX = 8 * 1024 * 1024;
-const ASSET_MAX_BYTES = 15 * 1024 * 1024;
 const PROMPT_MAX = 8_000;
 const QUICK_TIMEOUT_MS = 60_000;
 export const STUDIO_TERMINAL: ReadonlySet<string> = new Set(["done", "failed", "cancelled"]);
@@ -106,10 +110,44 @@ function isDeploymentStorageUrl(raw: string, deployment: string): boolean {
   try {
     const url = new URL(raw);
     const base = new URL(deployment);
-    const site = base.hostname.replace(/\.convex\.cloud$/, ".convex.site");
-    return (url.protocol === "https:" || url.protocol === base.protocol) && (url.hostname === base.hostname || url.hostname === site);
+    const site = new URL(base.origin);
+    if (site.hostname.endsWith(".convex.cloud")) site.hostname = site.hostname.replace(/\.convex\.cloud$/, ".convex.site");
+    else if (site.port) site.port = String(Number(site.port) + 1);
+    return url.origin === base.origin || url.origin === site.origin;
   } catch {
     return false;
+  }
+}
+
+function runAction(cloud: StudioCloud, name: string, args: Record<string, unknown>): Promise<unknown> {
+  return cloud.client.action ? cloud.client.action(name, args) : new ConvexHttpClient(cloud.url, { logger: false }).action(makeFunctionReference<"action">(name), args);
+}
+
+/** A response body in pieces of exactly `size` bytes, the last one shorter. */
+export async function* pieces(body: ReadableStream<Uint8Array>, size: number): AsyncGenerator<Uint8Array> {
+  const reader = body.getReader();
+  let piece = new Uint8Array(size);
+  let filled = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      let offset = 0;
+      while (offset < value.byteLength) {
+        const take = Math.min(size - filled, value.byteLength - offset);
+        piece.set(value.subarray(offset, offset + take), filled);
+        filled += take;
+        offset += take;
+        if (filled === size) {
+          yield piece;
+          piece = new Uint8Array(size);
+          filled = 0;
+        }
+      }
+    }
+    if (filled) yield piece.slice(0, filled);
+  } finally {
+    reader.releaseLock();
   }
 }
 
@@ -161,7 +199,7 @@ async function brandPrompt(cloud: StudioCloud, request: StudioGenerateRequest, m
 }
 
 /** The controls a generation ran with, kept so Remix can run it again. */
-function paramsOf(request: StudioGenerateRequest, references: number): StudioParams | undefined {
+function paramsOf(request: StudioGenerateRequest, references: number, character?: StudioCharacter): StudioParams | undefined {
   const params: StudioParams = {};
   if (request.voice) params.voice = request.voice;
   if (request.resolution) params.resolution = request.resolution;
@@ -170,6 +208,7 @@ function paramsOf(request: StudioGenerateRequest, references: number): StudioPar
   if (request.sound === false) params.sound = false;
   if (request.motion) params.motion = request.motion;
   if (references) params.references = references;
+  if (character) params.character = character.name;
   return Object.keys(params).length ? params : undefined;
 }
 
@@ -198,6 +237,8 @@ export interface StudioRunner {
   enhance(prompt: string, mode: StudioMode): Promise<string>;
   /** A short sample of an ElevenLabs voice. */
   voicePreview(voice: string): Promise<string>;
+  /** A spoken script and a post caption for a campaign brief, from the same cheap model. */
+  campaignCopy(brief: string): Promise<{ script: string; caption: string }>;
   /** Picks up the generations this app was polling before it last stopped. */
   resume(): void;
   /** Runs one polling pass now; tests drive the runner with it. */
@@ -236,8 +277,8 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     }, deps.pollMs);
     timer.unref?.();
   };
-  const falFetch = (url: string, init: RequestInit = {}) => {
-    const key = deps.falKey() ?? refuse(STUDIO_FAL_MISSING);
+  const falFetch = (projectId: string | undefined, url: string, init: RequestInit = {}) => {
+    const key = deps.falKey(projectId) ?? refuse(STUDIO_FAL_MISSING);
     return deps.fetch(url, { ...init, headers: { ...init.headers, Authorization: `Key ${key}`, "Content-Type": "application/json" } });
   };
   const update = (cloud: StudioCloud, job: Pick<Job, "projectId" | "generationId">, patch: Record<string, unknown>) =>
@@ -277,7 +318,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
   /** Queues one generation on fal; a refusal is recorded on the generation itself, and false stops a batch. */
   async function submit(cloud: StudioCloud, projectId: string, generationId: string, endpoint: string, kind: StudioMediaKind, input: Record<string, unknown>, intermediate: boolean): Promise<boolean> {
     try {
-      const response = await falFetch(`${queueOrigin}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
+      const response = await falFetch(projectId, `${queueOrigin}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new StudioRefusal(falError(body, response.status));
       const data = record(body);
@@ -297,20 +338,49 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     }
   }
 
-  /** Copies a finished output from fal into project storage, so its Assets file outlives fal's link. */
-  async function copyIntoAssets(cloud: StudioCloud, projectId: string, generationId: string, index: number, url: string): Promise<void> {
-    if (!isFalMediaUrl(url) || !cloud.client.upload) return;
+  /**
+   * Copies a fal file into project storage, streaming it through in pieces the upload route accepts and joining
+   * them in the deployment when there is more than one. Null when it is not fal's, too large, or not copyable here.
+   */
+  async function storeOutput(cloud: StudioCloud, projectId: string, url: string, fallbackType?: string): Promise<{ storageId: string; contentType: string; size: number } | null> {
+    const upload = cloud.client.upload?.bind(cloud.client);
+    if (!isFalMediaUrl(url) || !upload) return null;
     const response = await deps.fetch(url);
-    const data = response.ok ? await readLimited(response, ASSET_MAX_BYTES) : null;
-    if (!data) return;
-    const contentType = response.headers.get("content-type")?.split(";")[0] || "application/octet-stream";
-    const uploadUrl = text(await cloud.client.mutation("design:generateUploadUrl", { projectId, sessionToken: cloud.sessionToken }));
-    const storageId = await cloud.client.upload(uploadUrl, data, contentType);
-    await cloud.client.mutation("studio:storeFile", { projectId, sessionToken: cloud.sessionToken, generationId, index, storageId, contentType, size: data.byteLength });
+    if (!response.ok || !response.body) return null;
+    if (Number(response.headers.get("content-length") ?? 0) > STUDIO_STORED_MAX) {
+      await response.body.cancel();
+      return null;
+    }
+    const contentType = response.headers.get("content-type")?.split(";")[0] || fallbackType || "application/octet-stream";
+    const chunks: string[] = [];
+    let size = 0;
+    for await (const piece of pieces(response.body, STUDIO_CHUNK_BYTES)) {
+      size += piece.byteLength;
+      if (size > STUDIO_STORED_MAX) return null;
+      const uploadUrl = text(await cloud.client.mutation("design:generateUploadUrl", { projectId, sessionToken: cloud.sessionToken }));
+      chunks.push(await upload(uploadUrl, piece, contentType));
+    }
+    if (!chunks.length) return null;
+    const storageId = chunks.length === 1 ? chunks[0]! : text(await runAction(cloud, "studioUpload:assemble", { projectId, sessionToken: cloud.sessionToken, chunks, contentType }));
+    return { storageId, contentType, size };
+  }
+
+  /** Copies a finished output into project storage, so its Assets file outlives fal's link. */
+  async function copyIntoAssets(cloud: StudioCloud, projectId: string, generationId: string, index: number, url: string): Promise<void> {
+    const stored = await storeOutput(cloud, projectId, url);
+    if (stored) await cloud.client.mutation("studio:storeFile", { projectId, sessionToken: cloud.sessionToken, generationId, index, ...stored });
+  }
+
+  async function characterOf(cloud: StudioCloud, projectId: string, characterId: string): Promise<{ character: StudioCharacter; references: string[] }> {
+    const character = await cloud.client.query("studioLibrary:get", { projectId, sessionToken: cloud.sessionToken, characterId }).catch(() => null) as StudioCharacter | null;
+    if (!character) return refuse(`No library entry ${clip(characterId, 64)} in this project; list them with origin_studio_library.`);
+    const references: string[] = [];
+    for (const assetId of character.referenceAssetIds) references.push(await assetMedia(cloud, projectId, assetId, "image"));
+    return { character, references };
   }
 
   async function finish(cloud: StudioCloud, job: Job): Promise<void> {
-    const response = await falFetch(job.responseUrl);
+    const response = await falFetch(job.projectId, job.responseUrl);
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
       await update(cloud, job, { status: "failed", error: falError(body, response.status) });
@@ -332,7 +402,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     }
     let status: Record<string, unknown>;
     try {
-      const response = await falFetch(job.statusUrl);
+      const response = await falFetch(job.projectId, job.statusUrl);
       status = record(await response.json().catch(() => ({})));
       if (!response.ok) throw new Error(falError(status, response.status));
       job.failures = 0;
@@ -365,11 +435,12 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     load();
     if (ticking || !jobs.length) return;
     const cloud = deps.cloud();
-    if (!cloud || !deps.falKey()) return;
+    const keyed = jobs.filter((job) => deps.falKey(job.projectId));
+    if (!cloud || !keyed.length) return;
     ticking = true;
     try {
       const settled = new Set<Job>();
-      await Promise.all(jobs.map(async (job) => {
+      await Promise.all(keyed.map(async (job) => {
         const done = await step(cloud, job).catch((error: unknown) => /Generation not found/.test(String(error)));
         if (done) settled.add(job);
       }));
@@ -382,7 +453,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
 
   /** Runs one quick fal request to completion: the prompt enhancer and voice samples. */
   async function falRun(endpoint: string, input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    const response = await falFetch(`${queueOrigin}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
+    const response = await falFetch(undefined, `${queueOrigin}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
     const queued = record(await response.json().catch(() => ({})));
     if (!response.ok) refuse(falError(queued, response.status));
     const statusUrl = text(queued.status_url);
@@ -390,7 +461,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     if (!isQueueUrl(statusUrl) || !isQueueUrl(responseUrl)) refuse("fal.ai did not queue the request");
     const deadline = deps.now() + QUICK_TIMEOUT_MS;
     for (;;) {
-      const status = record(await (await falFetch(statusUrl)).json().catch(() => ({})));
+      const status = record(await (await falFetch(undefined, statusUrl)).json().catch(() => ({})));
       if (text(status.status) === "COMPLETED") {
         if (status.error) refuse(clip(text(status.error), 400));
         break;
@@ -398,7 +469,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
       if (deps.now() > deadline) refuse("fal.ai took too long; try again.");
       await new Promise((done) => setTimeout(done, Math.min(deps.pollMs, 600)));
     }
-    const result = await falFetch(responseUrl);
+    const result = await falFetch(undefined, responseUrl);
     const body = record(await result.json().catch(() => ({})));
     if (!result.ok) refuse(falError(body, result.status));
     return body;
@@ -418,16 +489,8 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     const saved = generation.saved.find((entry) => entry.index === index);
     if (saved) return { assetId: saved.assetId, copied: true };
     const base = { projectId, sessionToken: cloud.sessionToken, generationId, index, name: name?.trim() ? `${clip(name.trim(), 120)}.${studioAssetName(generation, index).split(".").pop()}` : studioAssetName(generation, index) };
-    if (isFalMediaUrl(output.url) && cloud.client.upload) {
-      const response = await deps.fetch(output.url);
-      const data = response.ok ? await readLimited(response, ASSET_MAX_BYTES) : null;
-      if (data) {
-        const contentType = response.headers.get("content-type")?.split(";")[0] || output.contentType || "application/octet-stream";
-        const uploadUrl = text(await cloud.client.mutation("design:generateUploadUrl", { projectId, sessionToken: cloud.sessionToken }));
-        const storageId = await cloud.client.upload(uploadUrl, data, contentType);
-        return { assetId: text(await cloud.client.mutation("studio:saveAsset", { ...base, storageId, contentType, size: data.byteLength })), copied: true };
-      }
-    }
+    const stored = await storeOutput(cloud, projectId, output.url, output.contentType);
+    if (stored) return { assetId: text(await cloud.client.mutation("studio:saveAsset", { ...base, ...stored })), copied: true };
     return { assetId: text(await cloud.client.mutation("studio:saveAsset", base)), copied: false };
   }
 
@@ -436,7 +499,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     const job = jobs.find((candidate) => candidate.generationId === generationId && candidate.projectId === projectId);
     if (job) {
       const cancelUrl = job.cancelUrl ?? job.statusUrl.replace(/\/status$/, "/cancel");
-      const response = await falFetch(cancelUrl, { method: "PUT" });
+      const response = await falFetch(projectId, cancelUrl, { method: "PUT" });
       const body = record(await response.json().catch(() => ({})));
       if (text(body.status) === "ALREADY_COMPLETED") {
         if (await step(cloud, job).catch(() => false)) {
@@ -456,7 +519,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
   return {
     async generate(cloud, request, agentName, extra = {}) {
       load();
-      if (!deps.falKey()) refuse(STUDIO_FAL_MISSING);
+      if (!deps.falKey(request.projectId)) refuse(STUDIO_FAL_MISSING);
       const { model, label } = resolveModel(request);
       if (model.mode !== request.mode) refuse(`${model.label} makes ${model.mode === "edit" ? "edits" : model.kind}, not ${request.mode}; pick a model of that mode.`);
       const prompt = text(request.prompt).trim();
@@ -473,15 +536,18 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
         for (const assetId of (request.referenceAssetIds ?? []).slice(0, model.references ?? 0)) references.push(await assetMedia(cloud, request.projectId, assetId, "image"));
         media = { sources: resolved, references };
       }
-      const references = media.references ?? [];
-      const sent = await brandPrompt(cloud, request, model, prompt);
+      const follows = request.characterId ? await characterOf(cloud, request.projectId, request.characterId) : undefined;
+      const references = [...new Set([...(media.references ?? []), ...(follows?.references ?? [])])].slice(0, model.references ?? 0);
+      media = { ...media, references };
+      const described = follows && model.kind !== "audio" && model.prompt !== "none" ? studioCharacterPrompt(follows.character, prompt) : prompt;
+      const sent = await brandPrompt(cloud, request, model, described);
       const endpoint = model.family === "custom" ? model.id : studioEndpoint(model, references);
       const input = model.family === "custom"
         ? { ...(sent ? { prompt: sent } : {}), ...(media.sources[0] ? { image_url: media.sources[0] } : {}), ...record(request.input) }
         : studioInput(model, { ...request, prompt: sent }, media);
       const count = Math.min(Math.max(Math.trunc(Number(request.count) || 1), 1), model.maxCount);
       const sourceAssetId = sources[0] && "assetId" in sources[0] && !extra.media ? sources[0].assetId : undefined;
-      const params = paramsOf(request, references.length);
+      const params = paramsOf(request, references.length, follows?.character);
       const ids: string[] = [];
       for (let index = 0; index < count; index += 1) {
         const generationId = text(await cloud.client.mutation("studio:create", {
@@ -490,7 +556,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
           ...(sourceAssetId ? { sourceAssetId } : {}), ...(params ? { params } : {}), ...(agentName ? { agentName } : {}),
           ...(request.parent ? { parentId: request.parent.generationId, action: request.parent.action } : {}),
           ...(extra.workflow ? { workflowRunId: extra.workflow.runId, nodeId: extra.workflow.nodeId } : {}), ...(extra.intermediate ? { intermediate: true } : {}),
-          ...(sent !== prompt ? { branded: true } : {}),
+          ...(sent !== described ? { branded: true } : {}),
         }));
         ids.push(generationId);
         if (!await submit(cloud, request.projectId, generationId, endpoint, model.kind, input, extra.intermediate === true)) break;
@@ -542,6 +608,18 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
       return url;
     },
 
+    async campaignCopy(brief) {
+      const idea = clip(brief.trim(), 2_000) || refuse("Write a brief first.");
+      const body = await falRun(STUDIO_ENHANCER.endpoint, {
+        model: STUDIO_ENHANCER.model, max_tokens: 500, temperature: 0.7,
+        system_prompt: "You write launch campaign copy. From the brief, reply with JSON only: {\"script\": a spoken voice-over of at most 40 words, \"caption\": a social post caption of at most 220 characters with up to three hashtags}. Keep names and quoted text exactly.",
+        prompt: idea,
+      });
+      const raw = text(body.output).trim();
+      const script = clip(text(copyField(raw, "script")).trim() || idea, PROMPT_MAX);
+      return { script, caption: clip(text(copyField(raw, "caption")).trim() || idea, 2_000) };
+    },
+
     resume() {
       load();
       schedule();
@@ -555,6 +633,15 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
       loaded = true;
     },
   };
+}
+
+/** One field of the JSON object a model wrote, wherever it sits in its reply. */
+function copyField(reply: string, field: string): unknown {
+  try {
+    return record(JSON.parse(/\{[\s\S]*\}/.exec(reply)?.[0] ?? "") as unknown)[field];
+  } catch {
+    return undefined;
+  }
 }
 
 function isFalQueueUrl(value: unknown, queueOrigin: string): value is string {
@@ -578,7 +665,7 @@ let shared: StudioRunner | null = null;
 export function studioRunner(): StudioRunner {
   shared ??= createStudioRunner({
     fetch: (input, init) => fetch(input, init),
-    falKey: () => integrationKey("fal")?.key ?? null,
+    falKey: (projectId) => projectIntegrationKey("fal", projectId)?.key ?? null,
     cloud: () => connectedStudioCloud(),
     journalFile: join(DATA_DIR, "studio-jobs.json"),
     voiceCacheFile: join(DATA_DIR, "studio-voices.json"),

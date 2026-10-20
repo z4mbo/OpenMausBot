@@ -169,7 +169,7 @@ export function LeadDrawer({ projectId, projectName, leadId, stages, currency, c
                   <Conversation projectId={projectId} projectName={projectName} lead={lead} activities={detail?.activities ?? []} canEdit={canEdit} chief={chief} channels={channels} />
                 </div>
               )}
-              {tab === "deals" && <DealPanel projectId={projectId} lead={lead} stages={stages} currency={currency} canEdit={canEdit} stripe={stripe} chief={chief} channels={channels} />}
+              {tab === "deals" && <DealPanel projectId={projectId} projectName={projectName} lead={lead} stages={stages} currency={currency} canEdit={canEdit} stripe={stripe} liveStripe={Boolean(settings.stripeWebhook?.signing)} chief={chief} channels={channels} />}
               {tab === "activity" && <>
                 {canEdit && <Composer projectId={projectId} projectName={projectName} lead={lead} chief={chief} channels={channels} settings={settings} dirty={dirty} />}
                 <SequencePanel projectId={projectId} lead={lead} canEdit={canEdit} chief={chief} onAsk={() => onSequence(lead)} />

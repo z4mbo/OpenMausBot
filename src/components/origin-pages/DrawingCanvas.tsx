@@ -321,7 +321,7 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
                 {projectId && canvasId && <PublishSection canvas={canvas} selection={selection} images={images} projectId={projectId} teamId={teamId} canvasId={canvasId} readOnly={readOnly} />}
                 <ExportSection canvas={canvas} selection={selection} images={images} name={name} projectId={readOnly ? undefined : projectId} />
               </>} />} />
-        {agent && asking && <AgentPanel agent={agent} canvas={canvas} selected={selected} images={images} name={name} canvasId={canvasId} projectId={projectId} onClose={() => setAsking(false)} />}
+        {agent && asking && <AgentPanel agent={agent} team={team} canvas={canvas} selected={selected} images={images} name={name} canvasId={canvasId} projectId={projectId} onClose={() => setAsking(false)} />}
         {presenting !== undefined && <Present scene={canvas.scene} index={canvas.index} images={images} start={presenting} onClose={() => setPresenting(undefined)} />}
       </div>
     </div>

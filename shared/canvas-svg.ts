@@ -1,5 +1,7 @@
 import { FONT_STACKS, childrenIndex, descendants, effectiveParent, estimateTextWidth, fontStack, layoutText, worldOrigin, type CanvasNode, type Scene, type TextMeasure } from "./canvas-scene.ts";
 import { LEAD_FIELD_LABELS, LEAD_FORM_METRICS, arrowHead, escapeHtml, leadFormColors, pathData } from "./canvas-page.ts";
+import { cornerRadii, gradientSvg, imageSvg, roundedRectPath, unevenCorners } from "./canvas-paint.ts";
+import { booleanGroupPath } from "./canvas-boolean-group.ts";
 
 type Index = ReadonlyMap<string | null, readonly CanvasNode[]>;
 
@@ -37,13 +39,28 @@ function effects(node: CanvasNode, context: Context): string {
   return ` filter="url(#${id})"`;
 }
 
+/** The node's fill attribute value: a gradient defined in `defs`, its colour, or `fallback`. */
+function paint(node: CanvasNode, context: Context, fallback: string): string {
+  if (!node.gradient) return node.fill ?? fallback;
+  const id = `${context.prefix}grad-${node.id}`;
+  context.defs.push(gradientSvg(id, node.gradient, node.width, node.height));
+  return `url(#${id})`;
+}
+
+/** The node's box with its corners, as a rect or a path when the corners differ. */
+function box(node: CanvasNode, rest: string): string {
+  const radii = cornerRadii(node);
+  if (radii && unevenCorners(radii)) return `<path d="${roundedRectPath(node.width, node.height, radii)}"${rest}/>`;
+  return `<rect width="${round(node.width)}" height="${round(node.height)}"${radii ? attr("rx", radii[0]) : ""}${rest}/>`;
+}
+
 function text(node: CanvasNode, context: Context): string {
   const layout = layoutText(node, context.measure);
   const size = node.fontSize ?? 16;
   const anchor = node.align === "center" ? "middle" : node.align === "right" ? "end" : "start";
   const x = node.align === "center" ? node.width / 2 : node.align === "right" ? node.width : 0;
   const lines = layout.lines.map((line, index) => `<tspan x="${round(x)}" y="${round(index * layout.lineHeight + layout.lineHeight / 2 + size * 0.35)}">${escapeHtml(line || " ")}</tspan>`).join("");
-  return `<text${attr("fill", node.fill ?? "none")}${attr("font-size", size)}${attr("font-weight", node.fontWeight)}${attr("font-family", fontStack(node))}${attr("text-anchor", anchor)} xml:space="preserve">${lines}</text>`;
+  return `<text${attr("fill", paint(node, context, "none"))}${attr("font-size", size)}${attr("font-weight", node.fontWeight)}${attr("font-family", fontStack(node))}${attr("text-anchor", anchor)} xml:space="preserve">${lines}</text>`;
 }
 
 function leadForm(node: CanvasNode, surface: string): string {
@@ -63,29 +80,29 @@ function leadForm(node: CanvasNode, surface: string): string {
 
 function shape(node: CanvasNode, context: Context, surface: string): string {
   const stroke = node.stroke && node.strokeWidth > 0 ? `${attr("stroke", node.stroke)}${attr("stroke-width", node.strokeWidth)}` : "";
-  const radius = Math.min(node.radius, node.width / 2, node.height / 2);
   switch (node.type) {
     case "rect": case "frame":
-      return `<rect width="${round(node.width)}" height="${round(node.height)}"${radius ? attr("rx", radius) : ""}${attr("fill", node.fill ?? "none")}${stroke}/>${node.leadForm ? leadForm(node, surface) : ""}`;
+      return `${box(node, `${attr("fill", paint(node, context, "none"))}${stroke}`)}${node.leadForm ? leadForm(node, surface) : ""}`;
     case "ellipse":
-      return `<ellipse cx="${round(node.width / 2)}" cy="${round(node.height / 2)}" rx="${round(node.width / 2)}" ry="${round(node.height / 2)}"${attr("fill", node.fill ?? "none")}${stroke}/>`;
+      return `<ellipse cx="${round(node.width / 2)}" cy="${round(node.height / 2)}" rx="${round(node.width / 2)}" ry="${round(node.height / 2)}"${attr("fill", paint(node, context, "none"))}${stroke}/>`;
+    case "group":
+      return node.boolean ? `<path d="${booleanGroupPath(node, context.index)}" fill-rule="evenodd" stroke-linejoin="round"${attr("fill", paint(node, context, "none"))}${stroke}/>` : "";
     case "text":
       return text(node, context);
     case "line": case "arrow": case "path": {
       const points = node.points ?? [0, 0, node.width, node.height];
       const width = Math.max(node.strokeWidth, 0.5);
-      const fill = node.type === "path" && node.closed && node.fill ? node.fill : "none";
+      const fill = node.type === "path" && node.closed && (node.fill || node.gradient) ? paint(node, context, "none") : "none";
       const head = node.type === "arrow" && points.length >= 4 ? `<path d="${arrowHead(points, Math.max(8, width * 3.5))}"${attr("fill", node.stroke ?? "none")}${attr("stroke", node.stroke ?? "none")} stroke-width="${round(width)}" stroke-linejoin="round"/>` : "";
       return `<path d="${pathData(points, node.closed, node.curves, node.breaks)}" fill="${fill}" fill-rule="evenodd"${attr("stroke", node.stroke ?? "none")} stroke-width="${round(width)}" stroke-linecap="round" stroke-linejoin="round"/>${head}`;
     }
     case "image": {
       const url = node.fileId ? context.images.get(node.fileId) : undefined;
       const clip = `${context.prefix}img-${node.id}`;
-      if (radius) context.defs.push(`<clipPath id="${clip}"><rect width="${round(node.width)}" height="${round(node.height)}" rx="${round(radius)}"/></clipPath>`);
-      const inner = url
-        ? `<image href="${escapeHtml(url)}" width="${round(node.width)}" height="${round(node.height)}" preserveAspectRatio="${node.imageFit === "contain" ? "xMidYMid meet" : "xMidYMid slice"}"/>`
-        : `<rect width="${round(node.width)}" height="${round(node.height)}" fill="${node.fill ?? "#E5E7EB"}"/>`;
-      return `<g${radius ? ` clip-path="url(#${clip})"` : ""}>${inner}</g>${stroke ? `<rect width="${round(node.width)}" height="${round(node.height)}"${radius ? attr("rx", radius) : ""} fill="none"${stroke}/>` : ""}`;
+      const clipped = Boolean(cornerRadii(node)) || node.imageFit === "crop";
+      if (clipped) context.defs.push(`<clipPath id="${clip}">${box(node, "")}</clipPath>`);
+      const inner = url ? imageSvg(node, escapeHtml(url), context.prefix, context.defs) : `<rect width="${round(node.width)}" height="${round(node.height)}" fill="${node.fill ?? "#E5E7EB"}"/>`;
+      return `<g${clipped ? ` clip-path="url(#${clip})"` : ""}>${inner}</g>${stroke ? box(node, ` fill="none"${stroke}`) : ""}`;
     }
     default:
       return "";
@@ -96,10 +113,10 @@ function render(node: CanvasNode, context: Context, surface: string): string {
   if (node.hidden || node.deleted) return "";
   const children = node.leadForm ? [] : context.index.get(node.id) ?? [];
   const transform = `translate(${round(node.x)} ${round(node.y)})${node.rotation ? ` rotate(${round(node.rotation)} ${round(node.width / 2)} ${round(node.height / 2)})` : ""}`;
-  let inner = node.type === "group" ? "" : shape(node, context, surface);
-  if (children.length) {
+  let inner = shape(node, context, surface);
+  if (children.length && !node.boolean) {
     const clipId = node.type === "frame" && node.clip ? `${context.prefix}clip-${node.id}` : null;
-    if (clipId) context.defs.push(`<clipPath id="${clipId}"><rect width="${round(node.width)}" height="${round(node.height)}"${node.radius ? attr("rx", Math.min(node.radius, node.width / 2, node.height / 2)) : ""}/></clipPath>`);
+    if (clipId) context.defs.push(`<clipPath id="${clipId}">${box(node, "")}</clipPath>`);
     inner += `<g${clipId ? ` clip-path="url(#${clipId})"` : ""}>${children.map((child) => render(child, context, node.fill ?? surface)).join("")}</g>`;
   }
   return `<g transform="${transform}"${node.opacity < 1 ? attr("opacity", node.opacity) : ""}${effects(node, context)}>${inner}</g>`;

@@ -1,9 +1,10 @@
 import { isIP } from "node:net";
 import { BROADCAST_CHANNELS, BROADCAST_RULES, isBroadcastChannel, type BroadcastChannel } from "../../shared/broadcast.ts";
-import { integrationConfigured, integrationKey, type IntegrationId } from "../integration-keys.ts";
+import { integrationConfigured, type IntegrationId } from "../integration-keys.ts";
 import type { OriginCloudClient } from "../origin-cloud.ts";
 import { PASS, type RouteHandler } from "../routes/table.ts";
 import { defaultPublishEnv, publishChannel, PublishError, type ChannelKeys, type PublishEnv, type PublishMedia } from "./channels.ts";
+import { createBroadcastAccounts, type SocialIntegration } from "./accounts.ts";
 
 type Json = Record<string, unknown>;
 const record = (value: unknown): Json => (value && typeof value === "object" && !Array.isArray(value) ? value as Json : {});
@@ -17,6 +18,7 @@ export interface BroadcastSchedulerDeps {
   session(): { url?: string; sessionToken?: string };
   connect(url: string): OriginCloudClient;
   keys?: ChannelKeys;
+  accounts?: ReturnType<typeof createBroadcastAccounts>;
   env?: PublishEnv;
   log?(message: string): void;
 }
@@ -78,11 +80,6 @@ function mediaItem(env: PublishEnv, raw: Json, deployment: string): PublishMedia
   };
 }
 
-const memberKeys: ChannelKeys = {
-  x: () => integrationKey("x"), bluesky: () => integrationKey("bluesky"), linkedin: () => integrationKey("linkedin"),
-  meta: () => integrationKey("meta"), tiktok: () => integrationKey("tiktok"),
-};
-
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error)).slice(0, 600);
 
 /** Publishes the posts this member scheduled once they are due, while the app runs, with this member's channel keys. */
@@ -90,14 +87,14 @@ export class BroadcastScheduler {
   private timer: ReturnType<typeof setInterval> | null = null;
   private running: Promise<number> | null = null;
   private readonly env: PublishEnv;
-  private readonly keys: ChannelKeys;
+  private readonly accounts: ReturnType<typeof createBroadcastAccounts>;
 
   private readonly deps: BroadcastSchedulerDeps;
 
   constructor(deps: BroadcastSchedulerDeps) {
     this.deps = deps;
     this.env = deps.env ?? defaultPublishEnv;
-    this.keys = deps.keys ?? memberKeys;
+    this.accounts = deps.accounts ?? createBroadcastAccounts();
   }
 
   get isTicking(): boolean { return this.running !== null; }
@@ -123,6 +120,15 @@ export class BroadcastScheduler {
     return this.running;
   }
 
+  private variantKeys(channel: BroadcastChannel, accountId: string | undefined, projectId: string | undefined): ChannelKeys {
+    if (this.deps.keys && (accountId === undefined || accountId === "default")) return this.deps.keys;
+    const read = <I extends SocialIntegration>(integration: I) => this.accounts.keys(integration, accountId, projectId);
+    if (accountId !== undefined && !read(BROADCAST_RULES[channel].integration as SocialIntegration)) {
+      throw new PublishError(`The ${BROADCAST_RULES[channel].label} account chosen for this post is not on this computer`);
+    }
+    return { x: () => read("x"), bluesky: () => read("bluesky"), linkedin: () => read("linkedin"), meta: () => read("meta"), tiktok: () => read("tiktok") };
+  }
+
   private async run(): Promise<number> {
     const { url, sessionToken } = this.deps.session();
     if (!url || !sessionToken) return 0;
@@ -136,7 +142,12 @@ export class BroadcastScheduler {
         const channel = text(variant.channel);
         if (!isBroadcastChannel(channel)) continue;
         try {
-          const published = await publishChannel(channel, text(variant.text), media, this.keys, this.env);
+          const keys = this.variantKeys(channel, typeof variant.accountId === "string" ? variant.accountId : undefined, text(post.projectId) || undefined);
+          const reel = record(post.reel);
+          const published = await publishChannel(channel, text(variant.text), media, keys, this.env, {
+            ...(post.format === "post" || post.format === "reel" ? { format: post.format } : {}),
+            ...(typeof reel.coverMs === "number" ? { coverMs: reel.coverMs } : {}),
+          });
           results.push({ channel, ok: true, ...(published.url ? { url: published.url } : {}) });
         } catch (error) {
           results.push({ channel, ok: false, error: errorText(error) });
@@ -152,8 +163,22 @@ export function connectedChannels(configured: (id: IntegrationId) => boolean = i
   return Object.fromEntries(BROADCAST_CHANNELS.map((channel) => [channel, configured(BROADCAST_RULES[channel].integration as IntegrationId)])) as Record<BroadcastChannel, boolean>;
 }
 
-export function createBroadcastRoutes(deps: { scheduler: BroadcastScheduler; configured?: (id: IntegrationId) => boolean }): RouteHandler {
-  return async ({ res, path, method, json }) => {
+export function createBroadcastRoutes(deps: { scheduler: BroadcastScheduler; configured?: (id: IntegrationId) => boolean; accounts?: ReturnType<typeof createBroadcastAccounts> }): RouteHandler {
+  const accounts = deps.accounts ?? createBroadcastAccounts();
+  return async ({ req, res, url, path, method, auth, json, readBody }) => {
+    if (path === "/api/origin/broadcast/accounts") {
+      if (method === "GET") return json(res, 200, { accounts: accounts.list(url.searchParams.get("projectId") ?? undefined) });
+      if (method === "POST") {
+        if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Changing integration keys needs the admin scope" });
+        const saved = accounts.add(await readBody(req));
+        return saved.ok ? json(res, 200, { account: saved.account }) : json(res, 400, { error: saved.error });
+      }
+    }
+    const account = /^\/api\/origin\/broadcast\/accounts\/([^/]+)$/.exec(path);
+    if (account && method === "DELETE") {
+      if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Changing integration keys needs the admin scope" });
+      return accounts.remove(account[1]) ? json(res, 200, { ok: true }) : json(res, 404, { error: "No such account" });
+    }
     if (path === "/api/origin/broadcast/channels" && method === "GET") return json(res, 200, { channels: connectedChannels(deps.configured) });
     if (path === "/api/origin/broadcast/run" && method === "POST") return json(res, 200, { handled: await deps.scheduler.tick() });
     return PASS;

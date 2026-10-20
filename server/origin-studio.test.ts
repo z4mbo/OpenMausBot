@@ -3,12 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { runOriginTool, type OriginCloudClient } from "./origin-cloud.ts";
-import { createStudioRunner, falQueueOrigin, isFalMediaUrl, type StudioCloud, type StudioDeps } from "./origin-studio.ts";
+import { runOriginTool } from "./origin-cloud.ts";
+import { createStudioRunner, falQueueOrigin, isFalMediaUrl, pieces, type StudioCloud, type StudioDeps } from "./origin-studio.ts";
 import { createWorkflowExecutor } from "./origin-studio-workflow.ts";
 import type { BotRecord } from "./store.ts";
 import type { StudioGeneration } from "../shared/studio.ts";
-import { studioWorkflowTemplate, withWorkflowInputs, type StudioWorkflowRun } from "../shared/studio-workflow.ts";
+import { CAMPAIGN_PACK_ID, studioWorkflowTemplate, withCharacter, withWorkflowInputs, type StudioWorkflowRun } from "../shared/studio-workflow.ts";
 
 const folders: string[] = [];
 afterEach(() => {
@@ -34,6 +34,11 @@ function fakeConvex() {
     { _id: "asset-voice", name: "Voice", type: "audio", contentType: "audio/mpeg", url: "https://cdn.example.com/voice.mp3", fileUrl: "https://cdn.example.com/voice.mp3" },
   ];
   const calls: Array<{ name: string; args: Record<string, unknown> }> = [];
+  const mia = {
+    _id: "char-mia", projectId: "kai", name: "Mia", kind: "character", description: "Red bob haircut, green bomber jacket", referenceAssetIds: ["asset-link"],
+    references: [{ assetId: "asset-link", url: "https://images.example.com/mood.png" }], createdByName: "Ana", createdAt: 1, updatedAt: 1,
+  };
+  let posts = 0;
   const uploads: Array<{ url: string; bytes: number; contentType: string }> = [];
   let next = 1;
   const handle = async (name: string, args: Record<string, unknown>): Promise<unknown> => {
@@ -89,7 +94,7 @@ function fakeConvex() {
         const node = args.node as StudioWorkflowRun["nodes"][number] | undefined;
         const nodes = node ? run.nodes.map((entry) => (entry.nodeId === node.nodeId ? node : entry)) : run.nodes;
         const status = (args.status as StudioWorkflowRun["status"] | undefined) ?? run.status;
-        runs.set(run._id, { ...run, status, nodes: status === "running" ? nodes : nodes.map((entry) => (entry.status === "waiting" || entry.status === "running" ? { ...entry, status: "skipped" } : entry)) });
+        runs.set(run._id, { ...run, status, ...(args.posts ? { posts: args.posts as StudioWorkflowRun["posts"] } : {}), nodes: status === "running" ? nodes : nodes.map((entry) => (entry.status === "waiting" || entry.status === "running" ? { ...entry, status: "skipped" } : entry)) });
         return null;
       }
       case "studioWorkflows:cancelRun": {
@@ -103,16 +108,22 @@ function fakeConvex() {
       case "studioWorkflows:get": return null;
       case "design:list": return { assets, tokens: [] };
       case "design:generateUploadUrl": return `${DEPLOYMENT}/upload?token=1`;
+      case "studioLibrary:get": return args.characterId === mia._id ? mia : null;
+      case "studioLibrary:list": return [mia];
+      case "studioLibrary:save": return "char-new";
+      case "broadcast:save": return `post${++posts}`;
+      case "studioUpload:assemble": return "storage-joined";
       case "projects:get": return { _id: args.projectId, name: "Kai", teamId: "team1", memberRole: "member" };
       default: return null;
     }
   };
-  const client: OriginCloudClient = {
+  const client: StudioCloud["client"] = {
     query: handle,
     mutation: handle,
+    action: handle,
     async upload(url, data, contentType) {
       uploads.push({ url, bytes: data.byteLength, contentType });
-      return "storage1";
+      return `storage${uploads.length}`;
     },
   };
   return { client, rows, runs, calls, uploads };
@@ -155,6 +166,7 @@ function fakeFal(options: { submitStatus?: number; submitBody?: unknown; result?
       return Response.json({ images: [{ url: "https://v3.fal.media/files/out.png", content_type: "image/png" }], description: "" });
     }
     if (url === "https://v3.fal.media/files/out.png") return new Response(new Uint8Array([1, 2, 3, 4]), { headers: { "content-type": "image/png" } });
+    if (url === "https://v3.fal.media/files/big.mp4") return new Response(new Uint8Array(30 * 1024 * 1024), { headers: { "content-type": "video/mp4" } });
     if (url === "http://127.0.0.1:3211/api/storage/logo") return new Response(new Uint8Array([9, 9]), { headers: { "content-type": "image/png" } });
     return new Response("unexpected", { status: 500 });
   }) as typeof fetch;
@@ -189,6 +201,7 @@ describe("Studio runner", () => {
     expect(convex.rows.get("gen1")).toMatchObject({ status: "done", outputs: [{ url: "https://v3.fal.media/files/out.png", kind: "image", contentType: "image/png" }], saved: [{ index: 0, assetId: "asset-gen1-0" }] });
     expect(convex.uploads).toHaveLength(2);
     expect(convex.uploads[0]).toEqual({ url: `${DEPLOYMENT}/upload?token=1`, bytes: 4, contentType: "image/png" });
+    expect(convex.calls.some((call) => call.name === "studioUpload:assemble")).toBe(false);
     expect(convex.calls.find((call) => call.name === "studio:storeFile")!.args).toMatchObject({ generationId: "gen1", index: 0, storageId: "storage1", size: 4 });
     expect(runner.pending()).toBe(0);
   });
@@ -283,7 +296,7 @@ describe("Studio runner", () => {
     const row = convex.rows.get("gen1")!;
     convex.rows.set("gen1", { ...row, saved: [] });
     expect(await runner.saveAsset(cloud, "kai", "gen1", 0, "Hero")).toEqual({ assetId: "asset-gen1-0", copied: true });
-    expect(convex.calls.filter((call) => call.name === "studio:saveAsset").at(-1)!.args).toMatchObject({ storageId: "storage1", name: "Hero.png", size: 4 });
+    expect(convex.calls.filter((call) => call.name === "studio:saveAsset").at(-1)!.args).toMatchObject({ storageId: "storage2", name: "Hero.png", size: 4 });
     convex.rows.set("gen1", { ...row, saved: [], outputs: [{ url: "https://169.254.169.254/latest", kind: "image" }] });
     const before = fal.requests.length;
     expect(await runner.saveAsset(cloud, "kai", "gen1", 0)).toMatchObject({ copied: false });
@@ -360,7 +373,7 @@ describe("Studio workflows", () => {
     const base = setup();
     const { runner, workflows } = executor(base);
     const graph = withWorkflowInputs(studioWorkflowTemplate("template:product-reel")!.graph, { a1: "asset-link" });
-    const runId = await workflows.start(base.cloud, "kai", { name: "Reel", graph, agentName: "Designer" });
+    const runId = await workflows.start(base.cloud, "kai", { name: "Reel", graph, agent: { id: "kai-dev", name: "Designer" } });
     await workflows.settled(runId);
     const run = base.convex.runs.get(runId)!;
     expect(run.status).toBe("done");
@@ -385,6 +398,27 @@ describe("Studio workflows", () => {
     expect(base.convex.runs.size).toBe(0);
   });
 
+  it("runs the Campaign pack with a character and drafts its feed post and reel in Broadcast", async () => {
+    const base = setup();
+    const { runner, workflows } = executor(base);
+    const graph = withCharacter(withWorkflowInputs(studioWorkflowTemplate(CAMPAIGN_PACK_ID)!.graph, { p1: "Mia launches Kai at a rooftop party", p2: "Kai is live." }), "char-mia");
+    const runId = await workflows.start(base.cloud, "kai", { name: "Campaign", graph, caption: "Kai is live #launch", agent: { id: "kai-dev", name: "Designer" } });
+    await workflows.settled(runId);
+    const run = base.convex.runs.get(runId)!;
+    expect(run.status).toBe("done");
+    const images = base.fal.submits().filter((request) => request.url.endsWith("nano-banana-pro/edit"));
+    expect(images).toHaveLength(3);
+    expect(images[0]!.body).toMatchObject({ image_urls: ["https://images.example.com/mood.png"], prompt: expect.stringContaining("Keep Mia consistent with the reference images: Red bob haircut, green bomber jacket.") });
+    expect(base.fal.submits().find((request) => request.url.endsWith("tts/eleven-v3"))!.body).toEqual({ text: "Kai is live.", voice: "Rachel" });
+    const drafts = base.convex.calls.filter((call) => call.name === "broadcast:save").map((call) => call.args);
+    expect(drafts).toEqual([
+      expect.objectContaining({ assetIds: [run.nodes.find((node) => node.nodeId === "o2")!.assetId], variants: [{ channel: "instagram", text: "Kai is live #launch" }, { channel: "x", text: "Kai is live #launch" }, { channel: "linkedin", text: "Kai is live #launch" }], agent: { botId: "kai-dev", name: "Designer" } }),
+      expect.objectContaining({ assetIds: [run.nodes.find((node) => node.nodeId === "o3")!.assetId], format: "reel" }),
+    ]);
+    expect(run.posts).toEqual([{ group: "feed", postId: "post1" }, { group: "reel", postId: "post2" }]);
+    runner.stop();
+  });
+
   it("stops at a failed step and skips what depends on it", async () => {
     const base = setup({ fal: fakeFal({ failWith: "NSFW content detected" }) });
     const { runner, workflows } = executor(base);
@@ -394,6 +428,38 @@ describe("Studio workflows", () => {
     expect(run.status).toBe("failed");
     expect(run.nodes.find((node) => node.nodeId === "m1")).toMatchObject({ status: "failed", error: "NSFW content detected" });
     expect(run.nodes.find((node) => node.nodeId === "o1")!.status).toBe("skipped");
+    runner.stop();
+  });
+});
+
+describe("Large outputs", () => {
+  it("splits a body into pieces of one size, the last shorter", async () => {
+    const body = new Blob([new Uint8Array(10), new Uint8Array(7)]).stream();
+    const sizes: number[] = [];
+    for await (const piece of pieces(body, 4)) sizes.push(piece.byteLength);
+    expect(sizes).toEqual([4, 4, 4, 4, 1]);
+  });
+
+  it("copies an output over 15 MB in pieces and joins them in the deployment", async () => {
+    const base = setup({ fal: fakeFal({ result: { video: { url: "https://v3.fal.media/files/big.mp4", content_type: "video/mp4" } } }) });
+    await base.runner.generate(base.cloud, { projectId: "kai", mode: "video", model: "fal-ai/veo3.1/fast", prompt: "launch film" });
+    await base.runner.tick();
+    await base.runner.tick();
+    expect(base.convex.uploads.map((upload) => upload.bytes)).toEqual([12 * 1024 * 1024, 12 * 1024 * 1024, 6 * 1024 * 1024]);
+    expect(base.convex.calls.find((call) => call.name === "studioUpload:assemble")!.args).toMatchObject({ projectId: "kai", chunks: ["storage1", "storage2", "storage3"], contentType: "video/mp4" });
+    expect(base.convex.calls.find((call) => call.name === "studio:storeFile")!.args).toMatchObject({ storageId: "storage-joined", size: 30 * 1024 * 1024, contentType: "video/mp4" });
+  });
+});
+
+describe("Studio library", () => {
+  it("adds a character's references and description to a generation and records its name", async () => {
+    const { runner, cloud, convex, fal } = setup();
+    await runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/nano-banana-pro", prompt: "Mia on stage", characterId: "char-mia", brand: false });
+    expect(fal.submits()[0]).toMatchObject({ url: "https://queue.fal.run/fal-ai/nano-banana-pro/edit", body: { image_urls: ["https://images.example.com/mood.png"], prompt: "Mia on stage. Keep Mia consistent with the reference images: Red bob haircut, green bomber jacket." } });
+    expect(convex.rows.get("gen1")).toMatchObject({ prompt: "Mia on stage", params: { references: 1, character: "Mia" } });
+    await runner.generate(cloud, { projectId: "kai", mode: "audio", model: "fal-ai/elevenlabs/tts/eleven-v3", prompt: "Hello", characterId: "char-mia" });
+    expect(fal.submits()[1]!.body).toEqual({ text: "Hello", voice: "Rachel" });
+    await expect(runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/flux/schnell", prompt: "x", characterId: "gone" })).rejects.toThrow(/No library entry gone/);
     runner.stop();
   });
 });
@@ -439,6 +505,22 @@ describe("Studio agent tools", () => {
     expect(ran.text).toContain("[done] by Designer");
     expect(ran.text).toContain("o2 output: done");
     expect(base.fal.submits().find((request) => request.url.endsWith("tts/eleven-v3"))!.body).toMatchObject({ text: "Welcome to Kai weekly", voice: "George" });
+    studio.stop();
+  });
+
+  it("lists and saves library entries and generates with one by name", async () => {
+    const base = setup();
+    const studio = createStudioRunner({ ...base.deps, pollMs: 1 });
+    const toolDeps = { bots: BOTS, state: { url: DEPLOYMENT, sessionToken: "session", projects: { "kai-chief": "kai" } }, connect: () => base.convex.client, studio };
+    const listed = await runOriginTool("origin_studio_library", {}, "kai-dev", toolDeps);
+    expect(listed.text).toContain("char-mia character \"Mia\": Red bob haircut, green bomber jacket · 1 reference(s): asset-link");
+    const saved = await runOriginTool("origin_studio_library", { action: "save", name: "Bottle", kind: "product", references: ["asset-logo"] }, "kai-dev", toolDeps);
+    expect(saved.text).toContain("Saved product \"Bottle\"");
+    expect(base.convex.calls.find((call) => call.name === "studioLibrary:save")!.args).toMatchObject({ kind: "product", referenceAssetIds: ["asset-logo"], agentName: "Designer" });
+    await runOriginTool("origin_studio_generate", { prompt: "Mia waves", character: "mia", wait: false }, "kai-dev", toolDeps);
+    expect(base.convex.rows.get("gen1")!.params).toMatchObject({ character: "Mia" });
+    const unknown = await runOriginTool("origin_studio_generate", { prompt: "x", character: "Zed" }, "kai-dev", toolDeps);
+    expect(unknown).toMatchObject({ isError: true, text: expect.stringContaining("No library entry \"Zed\"") });
     studio.stop();
   });
 });

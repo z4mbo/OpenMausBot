@@ -4,7 +4,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { canEdit, requireAdmin, requireMember, touchProject } from "./lib/permissions";
 import { cleanText, validDay } from "./lib/features";
 import {
-  actorOf, addActivity, findLead, leadOf, newToken, requireEditor, settingsOf, siteUrl, sourcePatch, stagesOf, stopSequences, type PipelineActorValue as Actor, type PipelineCtx as Ctx,
+  actorOf, addActivity, findLead, inboxPatch, leadOf, newToken, requireEditor, settingsOf, siteUrl, sourcePatch, stagesOf, stopSequences, type PipelineActorValue as Actor, type PipelineCtx as Ctx,
 } from "./lib/pipelineCore";
 import { pipelineActor } from "./pipelineTables";
 import { CLOSED_STAGES, PIPELINE_IMPORT_MAX, normalizeLeadEmail, normalizeLeadPhone } from "../../shared/origin-pipeline";
@@ -141,6 +141,7 @@ export const board = query({
         ...(settings?.aiPhoneNumberId ? { aiPhoneNumberId: settings.aiPhoneNumberId } : {}),
         inboundEnabled: settings?.inboundEnabled ?? false,
         ...(editor && settings?.inboundEnabled ? inboundView(settings) : {}),
+        ...(editor && settings?.stripeToken ? { stripeWebhook: { url: siteUrl(`/pipeline/stripe?token=${settings.stripeToken}`) ?? "", signing: Boolean(settings.stripeSecret) } } : {}),
       },
     };
   },
@@ -382,7 +383,7 @@ export const finishContact = mutation({
     });
     const lead = await ctx.db.get(activity.leadId);
     if (!lead || args.status === "failed") return null;
-    await ctx.db.patch(lead._id, { lastActivityAt: now, updatedAt: now });
+    await ctx.db.patch(lead._id, { lastActivityAt: now, updatedAt: now, ...inboxPatch(lead, now, false) });
     const stages = stagesOf(await settingsOf(ctx, args.projectId));
     if (lead.stage === stages[0] && stages[1] && !CLOSED_STAGES.includes(stages[1])) {
       await moveTo(ctx, lead, stages[1], await topOrder(ctx, args.projectId, stages[1]), { kind: "system", name: "Origin" });

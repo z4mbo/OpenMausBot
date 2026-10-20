@@ -7,7 +7,7 @@ import {
 import { cn } from "@/lib/cn";
 import { copyText } from "@/lib/copy-text";
 import {
-  CLIPBOARD_MARK, copySelection, deleteNodes, dropMoved, duplicateNodes, frameAt as findFrameAt, parseClipboard, pasteClipboard, reorder, topmost, unwrap, wrapNodes,
+  CLIPBOARD_MARK, copySelection, deleteNodes, dropMoved, duplicateNodes, frameAt as findFrameAt, parseClipboard, pasteClipboard, reorder, toggleAutoLayout, topmost, unwrap, wrapNodes,
   type Clipboard, type Reorder,
 } from "./actions";
 import { angleOf, moveEndpoint, refitPoints, resizeBox, resizeMany, resizeSingle } from "./gestures";
@@ -20,7 +20,9 @@ import { Overlay, type Handle, type RemoteCursor, type RemoteSelection } from ".
 import { CanvasToolbar, ZoomControls, type Tool } from "./Toolbar";
 import type { CanvasScene } from "./use-canvas-scene";
 import { anchorsOf, isPathNode, toggleSmooth, usePenTool, withAnchors, type Anchor } from "./pen";
-import { combine } from "./booleans";
+import { addPointAt } from "./path-edit";
+import { isCropped, panCrop } from "./image-crop";
+import { booleanGroup, flatten } from "./booleans";
 import { detach, makeComponent } from "../../../../shared/canvas-components";
 import { Rulers, RULER, type PageGuide } from "./Rulers";
 import { TextEditor, contrastInk, themeInk } from "./TextEditor";
@@ -82,6 +84,7 @@ type Gesture =
   | { kind: "endpoint"; end: 0 | 1; original: CanvasNode }
   | { kind: "pinch"; distance: number; mid: Point; view: View }
   | { kind: "pen"; start: Point }
+  | { kind: "crop"; start: Point; original: CanvasNode }
   | { kind: "anchor"; at: number; part: "point" | "in" | "out"; start: Point; anchors: Anchor[]; original: CanvasNode; world: Point; mirror: boolean };
 
 const TOOL_KEYS: Record<string, Tool> = { v: "move", h: "hand", f: "frame", a: "frame", r: "rect", o: "ellipse", e: "ellipse", l: "line", t: "text", p: "pen", c: "comment" };
@@ -124,6 +127,8 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   const [pendingZoom, setPendingZoom] = useState<string[] | null>(null);
   const [pathEdit, setPathEdit] = useState<{ id: string; at: number | null } | null>(null);
   const [rulers, setRulers] = useState(true);
+  const [cropEdit, setCropEdit] = useState<string | null>(null);
+  const cropNode = cropEdit ? scene.get(cropEdit) : undefined;
 
   const live = useMemo(() => selected.filter((id) => isLive(scene.get(id))), [selected, scene]);
   const nodes = useMemo(() => live.map((id) => scene.get(id)!), [live, scene]);
@@ -274,7 +279,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       case "hide": { const hidden = !nodes.every((node) => node.hidden); commit(nodes.map((node) => ({ ...node, hidden }))); break; }
       case "lock": { const locked = !nodes.every((node) => node.locked); commit(nodes.map((node) => ({ ...node, locked })), locked ? [] : ids); break; }
       case "union": case "subtract": case "intersect": case "exclude": case "flatten": {
-        const combined = combine(scene, index, ids, command);
+        const combined = command === "flatten" ? flatten(scene, index, ids) : booleanGroup(scene, ids, command);
         if (combined) commit(combined.nodes, [combined.id]);
         else notify(command === "flatten" ? "Select shapes to flatten" : "Select two or more shapes to combine");
         break;
@@ -330,7 +335,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   };
 
   const imageNode = (image: PlacedImage, centre: Point, dropped: boolean): CanvasNode => {
-    const outer = (index.get(null) ?? []).find((node) => node.type === "frame" && !node.hidden && !node.layout && containsPoint(worldBox(scene, node), centre));
+    const outer = (index.get(null) ?? []).find((node) => node.type === "frame" && !node.hidden && !node.layout && !node.instanceOf && containsPoint(worldBox(scene, node), centre));
     const parent = dropped ? frameAt(centre, new Set()) : outer?.id ?? null;
     const origin = parent ? worldOrigin(scene, scene.get(parent)!) : { x: 0, y: 0 };
     const room = parent ? Math.max(48, scene.get(parent)!.width * 0.8) : 800;
@@ -401,6 +406,16 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       return;
     }
     if (!readOnly && tool === "pen") { if (penTool.down(world, event.shiftKey)) gesture.current = { kind: "pen", start: world }; return; }
+    const segment = (target as HTMLElement).dataset?.segment;
+    const editedNode = pathEdit ? scene.get(pathEdit.id) : undefined;
+    const added = segment && isPathNode(editedNode) && !readOnly ? addPointAt(editedNode, worldOrigin(scene, editedNode), segment, world) : null;
+    if (added) {
+      canvas.preview([added.node]);
+      setPathEdit({ id: added.node.id, at: added.at });
+      gesture.current = { kind: "anchor", at: added.at, part: "point", start: world, anchors: added.anchors, original: added.node, world: added.origin, mirror: false };
+      setBusy(true);
+      return;
+    }
     const anchor = (target as HTMLElement).dataset?.anchor;
     if (pathEdit && anchor !== undefined && !readOnly) {
       const node = scene.get(pathEdit.id);
@@ -420,6 +435,12 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       return;
     }
     if (pathEdit && !target.closest("[data-anchor]")) setPathEdit(null);
+    if (isCropped(cropNode) && !readOnly && tool === "move" && containsPoint(worldBox(scene, cropNode), world)) {
+      gesture.current = { kind: "crop", start: world, original: cropNode };
+      setBusy(true);
+      return;
+    }
+    if (cropEdit) setCropEdit(null);
     if (!readOnly && tool !== "move") {
       if (tool === "text") { gesture.current = { kind: "create", type: "text", start: world, parentId: null, node: null }; return; }
       const parentId = frameAt(world, new Set());
@@ -593,6 +614,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         return;
       }
       case "pen": penTool.pull(world); return;
+      case "crop": canvas.preview([panCrop(current.original, current.start, world)], { share: true }); return;
       case "anchor": {
         const dx = world.x - current.start.x;
         const dy = world.y - current.start.y;
@@ -666,7 +688,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         pendingCopies.current = [];
         return;
       }
-      case "anchor": {
+      case "anchor": case "crop": {
         const node = canvas.scene.get(current.original.id);
         if (node) canvas.commit([node]);
         return;
@@ -709,6 +731,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (current >= 0 && current < chain.length - 1) { setSelected([chain[current + 1].id]); return true; }
     if (node.type === "text" && !node.locked && live.includes(node.id)) { setEditing({ id: node.id, created: false, original: node }); return true; }
     if (isPathNode(node) && !node.rotation && live.includes(node.id)) { setPathEdit({ id: node.id, at: null }); return true; }
+    if (isCropped(node) && live.includes(node.id)) { setCropEdit(node.id); return true; }
     return false;
   };
 
@@ -738,7 +761,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (key === " " && !space.current) { space.current = true; setPanning(true); done(); return; }
     if (pen && (key === "enter" || key === "escape")) { done(); penTool.finish(false); return; }
     if (pen && key === "backspace") { done(); penTool.undo(); return; }
-    if (pathEdit && (key === "enter" || key === "escape")) { done(); setPathEdit(null); return; }
+    if ((pathEdit || cropEdit) && (key === "enter" || key === "escape")) { done(); setPathEdit(null); setCropEdit(null); return; }
     if (pathEdit && pathEdit.at !== null && (key === "delete" || key === "backspace") && !readOnly) {
       done();
       const node = scene.get(pathEdit.id);
@@ -774,17 +797,8 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     }
     if (event.shiftKey && key === "a" && !readOnly && live.length) {
       done();
-      const only = live.length === 1 ? scene.get(live[0]) : undefined;
-      if (only?.type === "frame") canvas.commit([only.layout ? (() => { const { layout: _layout, ...rest } = only; return rest; })() : { ...only, layout: { direction: "column", gap: 16, padding: [16, 16, 16, 16], align: "start", justify: "start" } }]);
-      else {
-        const wrapped = wrapNodes(scene, live, "frame");
-        if (wrapped) {
-          const frame = wrapped.nodes[0];
-          const vertical = (frame.height >= frame.width);
-          canvas.commit([{ ...frame, fill: null, layout: { direction: vertical ? "column" : "row", gap: 16, padding: [0, 0, 0, 0], align: "start", justify: "start", hug: "both" } }, ...wrapped.nodes.slice(1)]);
-          setSelected([wrapped.id]);
-        }
-      }
+      const toggled = toggleAutoLayout(scene, live);
+      if (toggled) { canvas.commit(toggled.nodes); setSelected([toggled.id]); }
       return;
     }
     if (key === "escape") {
@@ -799,6 +813,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       const node = scene.get(live[0])!;
       if (node.type === "text") setEditing({ id: node.id, created: false, original: node });
       else if (isPathNode(node) && !node.rotation) setPathEdit({ id: node.id, at: null });
+      else if (isCropped(node)) setCropEdit(cropEdit === node.id ? null : node.id);
       else if (index.get(node.id)?.length) setSelected(index.get(node.id)!.map((child) => child.id));
       return;
     }
@@ -919,10 +934,10 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
           </g>
           <Overlay scene={scene} index={index} view={view} selected={nodes} hover={hover ? scene.get(hover) ?? null : null} guides={guides} marquee={marquee}
             cursors={cursors} editing={editing?.id ?? null} readOnly={readOnly} busy={busy} remoteSelections={remoteSelections} showPrototype={showPrototype}
-            pathEdit={isPathNode(editedPath) ? { node: editedPath, at: pathEdit!.at } : null} pen={pen ? { anchors: pen.anchors, hover: penTool.hovered } : null} />
+            pathEdit={isPathNode(editedPath) ? { node: editedPath, at: pathEdit!.at } : null} pen={pen ? { anchors: pen.anchors, hover: penTool.hovered } : null} crop={isCropped(cropNode) ? cropNode : null} />
         </svg>
         {stageLayer?.(view)}
-        {showRulers && <Rulers view={view} size={size} guides={pageGuides ?? []} onGuides={(next) => onGuides?.(next)} readOnly={readOnly} selection={contentBox(live)} />}
+        {showRulers && <Rulers view={view} size={size} guides={pageGuides ?? []} onGuides={(next) => onGuides?.(next)} readOnly={readOnly} selection={live.length ? contentBox(live) : null} />}
         {editing && editingNode && (
           <TextEditor node={editingNode} origin={toScreen(view, worldOrigin(scene, editingNode))} zoom={view.zoom}
             onChange={(text) => canvas.preview([{ ...editingNode, text, ...(editingNode.autoWidth ? { width: layoutText({ ...editingNode, text }, measureText).width } : {}) }])}

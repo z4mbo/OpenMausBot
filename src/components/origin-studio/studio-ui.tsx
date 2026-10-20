@@ -30,6 +30,8 @@ export interface StudioDraft {
   sound?: boolean;
   count: number;
   parent?: { generationId: string; action: string };
+  /** A studioLibrary entry the generation follows. */
+  characterId?: string;
 }
 
 export const KIND_ICON: Record<StudioMediaKind, typeof ImageIcon> = { image: ImageIcon, video: Clapperboard, audio: AudioLines };

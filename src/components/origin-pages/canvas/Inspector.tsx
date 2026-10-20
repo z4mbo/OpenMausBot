@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { ColorField, NumberField, Section, iconToggle } from "./controls";
+import { ColorField, NumberField, Section, Toggles, iconToggle } from "./controls";
+import { CornerFields, FillSection, ImageSection } from "./InspectorPaint";
 import {
   AlignCenter, AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignLeft, AlignRight,
   AlignStartHorizontal, AlignStartVertical, AlignVerticalDistributeCenter, ArrowDown, ArrowRight, Minus, Plus,
@@ -16,23 +17,12 @@ import { BrandSection } from "./BrandSection";
 import { brandFont } from "../../../../shared/brand-fonts";
 import type { BrandKit } from "../../../../shared/brand-kit";
 import { TEXT_STYLES, textStylePatch } from "../../../../shared/canvas-styles";
-import { BooleanSection, ComponentSection, ConstraintsSection, EffectsSection, GridsSection, LayoutExtras, StyleChip } from "./InspectorExtras";
+import { BooleanSection, ComponentSection, ConstraintsSection, EffectsSection, GridsSection, LayoutExtras } from "./InspectorExtras";
 import { DevPanel, PrototypePanel, TabBar, type InspectorTab } from "./InspectorTabs";
 
 const same = <T,>(values: readonly T[]): T | undefined => (values.every((value) => value === values[0]) ? values[0] : undefined);
 
 export { ColorField, NumberField, Section, field, iconToggle } from "./controls";
-
-function Toggles<T extends string>({ value, options, onChange, label, disabled }: { value: T | undefined; options: readonly { value: T; label: ReactNode; title: string }[]; onChange(value: T): void; label: string; disabled?: boolean }) {
-  return (
-    <div role="group" aria-label={label} className="flex gap-0.5 rounded-md bg-inset p-0.5">
-      {options.map((option) => (
-        <button key={option.value} type="button" title={option.title} aria-label={option.title} aria-pressed={option.value === value} disabled={disabled} onClick={() => onChange(option.value)}
-          className={cn(iconToggle, "h-6 text-[11.5px]", option.value === value && "bg-raised text-ink")}>{option.label}</button>
-      ))}
-    </div>
-  );
-}
 
 type Align = "left" | "hcenter" | "right" | "top" | "vcenter" | "bottom" | "hspace" | "vspace";
 
@@ -136,8 +126,6 @@ function DesignPanel({ canvas, selection, readOnly, exportSection, brand, teamId
   const strokeOnly = nodes.every((node) => node.type === "line" || node.type === "arrow");
   const radiusable = nodes.every((node) => node.type === "rect" || node.type === "frame" || node.type === "image");
   const rotatable = nodes.every((node) => node.type !== "frame" && node.type !== "group");
-  const fill = same(nodes.map((node) => node.fill));
-  const fillStyle = same(nodes.map((node) => node.fillStyle));
   const constrained = nodes.every((node) => { const owner = scene.get(effectiveParent(scene, node) ?? ""); return owner && (owner.type === "frame" || owner.type === "group") && !owner.layout; });
   const stroke = same(nodes.map((node) => node.stroke));
   const position = single ? { x: single.x, y: single.y } : undefined;
@@ -193,8 +181,8 @@ function DesignPanel({ canvas, selection, readOnly, exportSection, brand, teamId
           <NumberField label="W" value={same(nodes.map((node) => node.width))} min={1} disabled={disabled} onCommit={(width) => update((node) => ({ width, ...(node.type === "text" ? { autoWidth: false } : {}), ...(node.points ? { points: node.points.map((value, at) => (at % 2 === 0 ? value * (width / Math.max(1, node.width)) : value)) } : {}) }))} />
           <NumberField label="H" value={same(nodes.map((node) => node.height))} min={0} disabled={disabled || texts.length > 0} onCommit={(height) => update((node) => ({ height, ...(node.points ? { points: node.points.map((value, at) => (at % 2 === 1 ? value * (height / Math.max(1, node.height)) : value)) } : {}) }))} />
           {rotatable && <NumberField label="°" value={same(nodes.map((node) => node.rotation))} min={-180} max={180} disabled={disabled} onCommit={(rotation) => update({ rotation })} />}
-          {radiusable && <NumberField label="R" value={same(nodes.map((node) => node.radius))} min={0} disabled={disabled} onCommit={(radius) => update({ radius })} />}
         </div>
+        {radiusable && <CornerFields nodes={nodes} disabled={disabled} update={update} />}
         {parentLayout && single && (
           <label className="flex items-center gap-2 text-[12px] text-ink-secondary">
             <input type="checkbox" className="accent-[var(--color-accent)]" checked={Boolean(single.grow)} disabled={disabled} onChange={(event) => update({ grow: event.target.checked || undefined })} />Fill the free space
@@ -258,16 +246,7 @@ function DesignPanel({ canvas, selection, readOnly, exportSection, brand, teamId
           </label>
         </Section>
       )}
-      {!strokeOnly && (
-        <Section title={texts.length === nodes.length ? "Colour" : "Fill"} action={!readOnly && fill === null && (
-          <button type="button" className={cn(iconToggle, "max-w-7 flex-none")} aria-label="Add fill" onClick={() => update({ fill: texts.length ? "#111111" : "#D9D9D9" })}><Plus size={13} /></button>
-        )}>
-          {fillStyle ? <StyleChip id={fillStyle} kit={brand} disabled={disabled} onDetach={() => update({ fillStyle: undefined })} /> : fill !== null && (
-            <ColorField label="Fill" value={fill} disabled={disabled} onPreview={(value) => preview({ fill: value })} onCommit={(value) => update({ fill: value })}
-              onRemove={texts.length === nodes.length ? undefined : () => update({ fill: null })} />
-          )}
-        </Section>
-      )}
+      {!strokeOnly && <FillSection nodes={nodes} brand={brand} readOnly={readOnly} disabled={disabled} update={update} preview={preview} text={texts.length === nodes.length} />}
       {texts.length < nodes.length && (
         <Section title="Stroke" action={!readOnly && stroke === null && (
           <button type="button" className={cn(iconToggle, "max-w-7 flex-none")} aria-label="Add stroke" onClick={() => update((node) => ({ stroke: "#111111", strokeWidth: node.strokeWidth || 1 }))}><Plus size={13} /></button>
@@ -287,12 +266,7 @@ function DesignPanel({ canvas, selection, readOnly, exportSection, brand, teamId
       </Section>
       <EffectsSection nodes={nodes} disabled={disabled} update={update} preview={preview} />
       {single?.type === "frame" && <GridsSection node={single} disabled={disabled} update={update} />}
-      {nodes.every((node) => node.type === "image") && (
-        <Section title="Image">
-          <Toggles label="Image fit" value={same(nodes.map((node) => node.imageFit))} disabled={disabled} onChange={(imageFit) => update({ imageFit })}
-            options={[{ value: "cover", label: "Fill", title: "Fill the box" }, { value: "contain", label: "Fit", title: "Fit inside the box" }]} />
-        </Section>
-      )}
+      {nodes.every((node) => node.type === "image") && <ImageSection nodes={nodes} disabled={disabled} update={update} />}
       {single && <LinkSection node={single} disabled={disabled} update={update} />}
       {single?.type === "frame" && <LeadFormSection node={single} readOnly={readOnly} disabled={disabled} update={update} />}
       {exportSection}

@@ -16,7 +16,7 @@ import { MemberCallBanner } from "./MemberCallBanner";
 import { OriginAccountMenu } from "./OriginAccountMenu";
 import { SidebarComputerRow, SidebarTitlebarSlot } from "./SidebarIdentity";
 import { cloudProjectOf, linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
-import { cloudMutation, cloudUrl } from "@/lib/origin-cloud";
+import { cloudUrl, createOriginWorkspace } from "@/lib/origin-cloud";
 import { sessionStore } from "@/lib/origin-cloud/client";
 import { exclusiveWithSync, requestOriginSync } from "@/lib/origin-sync";
 import { useCanCreateProject } from "@/lib/use-origin-workspace";
@@ -1699,7 +1699,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     const createLocal = () => api<{ bot: Bot }>("/api/workspaces", { method: "POST", body: JSON.stringify({ name }) });
     const created = cloudUrl() && sessionStore.get()
       ? exclusiveWithSync(async () => {
-        const { teamId } = await cloudMutation<{ teamId: string }>("workspaces:create", { name });
+        const { teamId } = await createOriginWorkspace(name);
         let local: { bot: Bot };
         try { local = await createLocal(); }
         catch (cause) {

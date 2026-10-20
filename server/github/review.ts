@@ -150,6 +150,9 @@ export async function mergePullRequest(service: GitHubService, repoUrl: string, 
   }
   const merged = await githubRequest<{ sha: string; merged: boolean }>(service, `${repositoryPath(repoUrl)}/pulls/${number}/merge`, token, {
     method: "PUT", body: JSON.stringify({ sha: detail.headSha, merge_method: "squash", commit_title: `${detail.title} (#${number})` }),
+  }).catch((error: unknown) => {
+    if (error instanceof GitHubHttpError && error.status === 405) throw new Error(`GitHub refused to merge #${number}. On a protected default branch this usually means it needs an approving review of its latest commit from someone other than its author: approve it here when someone else opened it, or on GitHub, then merge again.`);
+    throw error;
   });
   if (!merged.merged) throw new Error(`GitHub did not merge #${number}`);
   return { sha: merged.sha, detail };

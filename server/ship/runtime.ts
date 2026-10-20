@@ -1,6 +1,6 @@
 import { BROADCAST_RULES, type BroadcastChannel } from "../../shared/broadcast.ts";
 import type { GitHubService } from "../github/service.ts";
-import { integrationConfigured, integrationKey, type IntegrationId } from "../integration-keys.ts";
+import { integrationConfigured, projectIntegrationKey, type IntegrationId } from "../integration-keys.ts";
 import { loopbackShipGitHub, projectShipGitHub } from "./github.ts";
 import { providerClients, type ShipHttp } from "./providers.ts";
 import type { ShipRuntime } from "./service.ts";
@@ -32,7 +32,7 @@ export function createShipRuntime(options: ShipRuntimeOptions = {}): ShipRuntime
   return {
     http, providers: providerClients(http),
     github: origin ? loopbackShipGitHub({ ...http, origin }) : options.github ? projectShipGitHub(http, options.github) : null,
-    token: (provider) => integrationKey(provider)?.apiToken ?? null,
+    token: (provider, projectId) => projectIntegrationKey(provider, projectId)?.apiToken ?? null,
     ...(options.summarize ? { summarize: options.summarize } : {}),
     channels: () => TEXT_CHANNELS.filter((channel) => integrationConfigured(BROADCAST_RULES[channel].integration as IntegrationId)),
     now: Date.now,

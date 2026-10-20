@@ -25,6 +25,17 @@ export const sequenceStep = v.object({
   activityId: v.optional(v.id("pipelineActivities")),
 });
 
+export const inboxState = v.union(v.literal("open"), v.literal("snoozed"), v.literal("archived"));
+
+const coachAdvice = {
+  nextAction: v.string(),
+  risk: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+  riskReason: v.string(),
+  followUp: v.object({ channel: v.union(v.literal("email"), v.literal("sms"), v.literal("whatsapp")), subject: v.optional(v.string()), body: v.string() }),
+};
+export const dealCoachAdvice = v.object(coachAdvice);
+export const dealCoach = v.object({ ...coachAdvice, by: v.string(), at: v.number() });
+
 export const salesLineItem = v.object({ name: v.string(), quantity: v.number(), unitPrice: v.number() });
 export const salesViewFilters = v.object({
   query: v.optional(v.string()), stage: v.optional(v.string()), owner: v.optional(v.string()), source: v.optional(v.string()), tag: v.optional(v.string()),
@@ -52,10 +63,13 @@ export const pipelineTables = {
     unreadReplies: v.optional(v.number()),
     lastReplyAt: v.optional(v.number()),
     stageChangedAt: v.optional(v.number()),
+    inbox: v.optional(inboxState),
+    inboxAt: v.optional(v.number()),
+    snoozedUntil: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_projectId_and_updatedAt", ["projectId", "updatedAt"]).index("by_projectId_and_email", ["projectId", "email"])
-    .index("by_projectId_and_phone", ["projectId", "phone"]),
+    .index("by_projectId_and_phone", ["projectId", "phone"]).index("by_projectId_and_inbox_and_inboxAt", ["projectId", "inbox", "inboxAt"]),
   pipelineActivities: defineTable({
     projectId: v.id("projects"),
     leadId: v.id("pipelineLeads"),
@@ -92,7 +106,11 @@ export const pipelineTables = {
     twilioAuthToken: v.optional(v.string()),
     brevoSecret: v.optional(v.string()),
     replyToEmail: v.optional(v.string()),
-  }).index("by_projectId", ["projectId"]).index("by_captureToken", ["captureToken"]).index("by_inboundToken", ["inboundToken"]),
+    inboxIndexed: v.optional(v.boolean()),
+    stripeToken: v.optional(v.string()),
+    /** Security: the Stripe webhook signing secret, sealed with ORIGIN_SEALING_KEY; no query ever returns it. */
+    stripeSecret: v.optional(v.string()),
+  }).index("by_projectId", ["projectId"]).index("by_captureToken", ["captureToken"]).index("by_inboundToken", ["inboundToken"]).index("by_stripeToken", ["stripeToken"]),
   pipelineSequences: defineTable({
     projectId: v.id("projects"),
     leadId: v.id("pipelineLeads"),
@@ -122,11 +140,13 @@ export const pipelineTables = {
     wonRequest: v.optional(v.object({ amount: v.number(), reason: v.optional(v.string()), by: pipelineActor, at: v.number() })),
     payment: v.optional(v.object({
       url: v.string(), linkId: v.string(), amount: v.number(), createdAt: v.number(), paidAt: v.optional(v.number()), paidAmount: v.optional(v.number()),
+      paidCurrency: v.optional(v.string()), checkoutId: v.optional(v.string()),
     })),
+    coach: v.optional(dealCoach),
     createdBy: pipelineActor,
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_projectId_and_updatedAt", ["projectId", "updatedAt"]).index("by_leadId", ["leadId"]),
+  }).index("by_projectId_and_updatedAt", ["projectId", "updatedAt"]).index("by_leadId", ["leadId"]).index("by_paymentLinkId", ["payment.linkId"]),
   pipelineViews: defineTable({
     projectId: v.id("projects"),
     name: v.string(),

@@ -14,6 +14,7 @@ import { isDraftColumn } from "../../../shared/origin-columns";
 import type { ShipPreview } from "../../../shared/origin-ship";
 import { useShipPreviews } from "@/lib/origin-ship";
 import { PreviewLinks } from "../origin-ship/PreviewLinks";
+import { BranchProtectionNotice } from "./BranchProtectionNotice";
 
 export function RepoPage({ onOpenSettings, ...props }: OriginPageProps & { onOpenSettings?(): void }) {
   return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo key={project.repoUrl ?? ""} project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />}</CloudGate>;
@@ -109,6 +110,7 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
             setMessage("Finish connecting GitHub in your browser, then come back here.");
           }, "Could not connect GitHub")}>Connect GitHub</button>}
         </div>}
+        {href && <BranchProtectionNotice project={project} projectId={projectId} isAdmin={isAdmin} />}
         {error && <Notice tone="danger">{error}</Notice>}
         {message && <Notice>{message}</Notice>}
         {action.error && <Notice tone="danger">{action.error}</Notice>}

@@ -8,12 +8,14 @@ import { originGitHub, type GitHubWorkspaceStatus } from "@/lib/origin-github";
 const button = "inline-flex min-h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] transition-opacity disabled:cursor-not-allowed disabled:opacity-50";
 
 /** The workspace's GitHub as every member sees it, with connect and share for owners and admins. */
-export function WorkspaceGitHubCard({ teamId }: { teamId: string }) {
+export function WorkspaceGitHubCard({ teamId, onStatus }: { teamId: string; onStatus?(status: GitHubWorkspaceStatus): void }) {
   const [status, setStatus] = useState<GitHubWorkspaceStatus | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
-  const refresh = useCallback(() => originGitHub.workspace(teamId).then((next) => { setStatus(next); setError(""); }, (cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause))), [teamId]);
+  const reported = useRef(onStatus);
+  reported.current = onStatus;
+  const refresh = useCallback(() => originGitHub.workspace(teamId).then((next) => { setStatus(next); setError(""); reported.current?.(next); }, (cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause))), [teamId]);
   useEffect(() => {
     void refresh();
     const onFocus = () => void refresh();
@@ -45,7 +47,9 @@ export function WorkspaceGitHubCard({ teamId }: { teamId: string }) {
       </div>
       {status && (
         <p className="pl-[22px] text-[12.5px] leading-relaxed text-ink-secondary">
-          {shared
+          {shared && !status.canManage
+            ? <>GitHub is connected for this workspace by {shared.sharedByName}; you can use it. Repositories live in <strong className="text-ink">@{shared.accountLogin}</strong>, and you and your agents create repositories, open issues and push through it, without access to anyone's GitHub account.</>
+            : shared
             ? <>Repositories live in <strong className="text-ink">@{shared.accountLogin}</strong>, shared by {shared.sharedByName}. Every member and their agents create repositories, open issues and push through it, without access to anyone's GitHub account.</>
             : status.login
               ? <>Connected as <strong className="text-ink">@{status.login}</strong> on this computer only. Share it so the rest of the workspace can use it.</>

@@ -4,6 +4,9 @@ import { childrenIndex, decodeScene, encodeNode, worldOrigin, type CanvasNode } 
 import { imageIds, sceneSvg } from "../shared/canvas-svg.ts";
 import { originIssueKey } from "../shared/origin-issues.ts";
 import type { BrandKit } from "../shared/brand-kit.ts";
+import { canvasFontIds, type CanvasFontLoader } from "./canvas-fonts.ts";
+
+type Rasterize = (svg: string, width: number, background: string, fontFiles: readonly string[]) => Buffer;
 
 type Args = Record<string, unknown>;
 
@@ -221,7 +224,7 @@ async function inlineImages(project: CanvasToolProject, canvasId: string, wanted
 }
 
 /** A PNG of one frame or node (or the whole canvas), rendered on this computer, so the model can see its own work. */
-export async function screenshotCanvas(args: Args, project: CanvasToolProject, rasterize: (svg: string, width: number, background: string) => Buffer): Promise<{ text: string; image?: CanvasImage }> {
+export async function screenshotCanvas(args: Args, project: CanvasToolProject, rasterize: Rasterize, fonts: CanvasFontLoader): Promise<{ text: string; image?: CanvasImage }> {
   const canvas = await chosenCanvas(args, project);
   const scene = await sceneOf(project, canvas.id);
   const wanted = text(args.node).trim();
@@ -233,9 +236,11 @@ export async function screenshotCanvas(args: Args, project: CanvasToolProject, r
   const document = sceneSvg(scene, ids, { images, padding: node ? 0 : 40, background: node?.fill ? undefined : "#FFFFFF", ...(roots ? { roots } : {}) });
   if (!document) return { text: `Nothing to show on "${canvas.name}": it is empty.` };
   const width = Math.min(SHOT_PIXELS, Math.max(document.width, 1) * Math.min(2, Number(args.scale) || 1));
-  const png = rasterize(document.svg, width, node?.fill ?? "#FFFFFF");
+  const faces = await fonts(canvasFontIds(document.svg));
+  const png = rasterize(document.svg, width, node?.fill ?? "#FFFFFF", faces.files);
+  const fallback = faces.missing.length ? ` ${faces.missing.join(", ")} could not be downloaded, so that text shows in a fallback face.` : "";
   const label = node ? `"${node.name}" (${node.id}), ${Math.round(document.width)}×${Math.round(document.height)}` : `the first page of "${canvas.name}"`;
-  return { text: `Screenshot of ${label} on canvas "${canvas.name}" (${canvas.id}). Text uses this computer's fonts, so a brand web font may show as its fallback. ${DATA_NOTE}`, image: { mimeType: "image/png", data: png.toString("base64") } };
+  return { text: `Screenshot of ${label} on canvas "${canvas.name}" (${canvas.id}).${fallback} ${DATA_NOTE}`, image: { mimeType: "image/png", data: png.toString("base64") } };
 }
 
 const commentLine = (comment: Args) => `${text(comment._id)}${comment.parentId ? ` (reply to ${text(comment.parentId)})` : ""}${comment.resolved ? " [resolved]" : ""} ${text(comment.agentName) || text(comment.authorName)}${comment.nodeId ? ` on node ${text(comment.nodeId)}` : ""}: ${text(comment.body).slice(0, 600)}`;
@@ -302,11 +307,11 @@ export async function submitDesign(args: Args, project: CanvasToolProject) {
 export const DESIGN_BRIEF = "This is design work, done on the project's Canvas rather than in code: read the canvas with origin_canvas, build the screens as frames with origin_canvas_edit (reuse its components, and the brand kit's colour and text styles), check each frame with origin_canvas_screenshot, then call origin_design_submit with this issue, the frames and a short rationale. That links the frames to the issue, pins the rationale on the canvas and asks the Chief to review.";
 
 /** The Canvas tools of the Origin tool table, each resolving its project through `scope`. */
-export function canvasTools<Context>(scope: (args: Args, ctx: Context) => Promise<CanvasToolProject>, rasterize: (svg: string, width: number, background: string) => Buffer) {
+export function canvasTools<Context>(scope: (args: Args, ctx: Context) => Promise<CanvasToolProject>, rasterize: Rasterize, fonts: CanvasFontLoader) {
   return {
     async origin_canvas(args: Args, ctx: Context) { return readCanvas(args, await scope(args, ctx)); },
     async origin_canvas_edit(args: Args, ctx: Context) { return editCanvas(args, await scope(args, ctx)); },
-    async origin_canvas_screenshot(args: Args, ctx: Context) { return screenshotCanvas(args, await scope(args, ctx), rasterize); },
+    async origin_canvas_screenshot(args: Args, ctx: Context) { return screenshotCanvas(args, await scope(args, ctx), rasterize, fonts); },
     async origin_canvas_comment(args: Args, ctx: Context) { return commentCanvas(args, await scope(args, ctx)); },
     async origin_design_submit(args: Args, ctx: Context) { return submitDesign(args, await scope(args, ctx)); },
   };

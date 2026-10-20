@@ -7,7 +7,7 @@ import { tileActions, type TileAction } from "./StudioCanvas";
 import { typing } from "./studio-ui";
 import { STUDIO_CAMERA_MOTIONS, type StudioGeneration } from "../../../shared/studio";
 
-const KEYS: Record<string, TileAction> = { a: "animate", u: "upscale", r: "remix", x: "extend", p: "reuse", b: "broadcast" };
+const KEYS: Record<string, TileAction> = { a: "animate", u: "upscale", r: "remix", x: "extend", p: "reuse", l: "library", b: "broadcast" };
 
 function settings(row: StudioGeneration): string[] {
   const params = row.params ?? {};
@@ -17,7 +17,7 @@ function settings(row: StudioGeneration): string[] {
     typeof params.motion === "string" ? STUDIO_CAMERA_MOTIONS.find((motion) => motion.id === params.motion)?.label : undefined,
     params.sound === false ? "silent" : undefined, typeof params.seed === "number" ? `seed ${params.seed}` : undefined,
     typeof params.references === "number" ? `${params.references} reference${params.references === 1 ? "" : "s"}` : undefined,
-    row.branded ? "brand kit" : undefined,
+    typeof params.character === "string" ? params.character : undefined, row.branded ? "brand kit" : undefined,
   ].filter((value): value is string => Boolean(value));
 }
 

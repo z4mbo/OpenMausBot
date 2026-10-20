@@ -1,6 +1,6 @@
 import { Component, Fragment, useCallback, useContext, useEffect, useId, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { CloudOff, FolderPlus, Link2, Loader2, LogIn, Plus, RotateCw, SearchX, ServerOff, Users, X } from "lucide-react";
-import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
+import { cloudMutation, createOriginWorkspace, useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
 import { linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
 import { useWorkspaceAccess, type WorkspaceRole } from "@/lib/origin-members";
 import { cn } from "@/lib/cn";
@@ -213,7 +213,7 @@ function SetUpWorkspace({ label, head }: { label: string; head?: { id: string; n
   const action = useAction();
   const create = () => action.run(async () => {
     if (!head) return;
-    const { teamId } = await cloudMutation<{ teamId: string }>("workspaces:create", { name: head.name });
+    const { teamId } = await createOriginWorkspace(head.name);
     await linkCloudRecord({ workspaces: { [head.id]: teamId } });
   }, "Could not share the workspace");
   return (

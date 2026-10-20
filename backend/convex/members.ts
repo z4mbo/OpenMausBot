@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { getActiveTeamMember, normalizeEmail, projectPeople, requireAdmin, requireMember } from "./lib/permissions";
 import { roleValidator } from "./lib/validators";
+import { reviewGitHubAccess } from "./lib/githubAccess";
 
 function makeInviteToken() {
   return crypto.randomUUID().replace(/-/g, "");
@@ -42,6 +43,7 @@ export const addWorkspaceMember = mutation({
     const fields = { userId: user._id, email: user.email, name: user.name, role: args.role, status: "active" as const, inviteToken: undefined, updatedAt: Date.now(), joinedAt: Date.now() };
     if (existing) await ctx.db.patch(existing._id, fields);
     else await ctx.db.insert("members", { projectId: project._id, ...fields, createdAt: Date.now() });
+    await reviewGitHubAccess(ctx, project.teamId, user.email);
     return null;
   },
 });
@@ -157,12 +159,13 @@ export const updateRole = mutation({
     role: roleValidator,
   },
   handler: async (ctx, args) => {
-    const { member: requester } = await requireAdmin(ctx, args.projectId, args.sessionToken);
+    const { member: requester, project } = await requireAdmin(ctx, args.projectId, args.sessionToken);
     const member = await ctx.db.get(args.memberId);
     if (!member || member.projectId !== args.projectId) throw new Error("Member not found");
     if (member.role === "owner" && requester.role !== "owner") throw new Error("Owner role required");
     if (args.role === "owner" && requester.role !== "owner") throw new Error("Owner role required");
     await ctx.db.patch(args.memberId, { role: args.role, updatedAt: Date.now() });
+    await reviewGitHubAccess(ctx, project.teamId, member.email);
   },
 });
 
@@ -173,11 +176,12 @@ export const remove = mutation({
     memberId: v.id("members"),
   },
   handler: async (ctx, args) => {
-    const { member: requester, user } = await requireAdmin(ctx, args.projectId, args.sessionToken);
+    const { member: requester, user, project } = await requireAdmin(ctx, args.projectId, args.sessionToken);
     const member = await ctx.db.get(args.memberId);
     if (!member || member.projectId !== args.projectId) throw new Error("Member not found");
     if (member.role === "owner" && requester.role !== "owner") throw new Error("Owner role required");
     if (member.email === user.email) throw new Error("Cannot remove yourself");
     await ctx.db.delete(args.memberId);
+    await reviewGitHubAccess(ctx, project.teamId, member.email);
   },
 });

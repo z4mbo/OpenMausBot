@@ -1,6 +1,9 @@
 import { useState, type DragEvent, type ReactNode } from "react";
-import { ChevronRight, Circle, Component, Diamond, Eye, EyeOff, Frame, Group, Image as ImageIcon, Lock, LockOpen, Minus, MoveUpRight, Spline, Square, Type } from "lucide-react";
-import { effectiveParent, nextZ, type CanvasNode, type CanvasNodeType } from "../../../../shared/canvas-scene";
+import {
+  ChevronRight, Circle, Component, Diamond, Eye, EyeOff, Frame, Group, Image as ImageIcon, Lock, LockOpen, Minus, MoveUpRight, Spline, Square, SquaresExclude,
+  SquaresIntersect, SquaresSubtract, SquaresUnite, Type,
+} from "lucide-react";
+import { effectiveParent, nextZ, type BooleanOperation, type CanvasNode, type CanvasNodeType } from "../../../../shared/canvas-scene";
 import { cn } from "@/lib/cn";
 import { reparent, zAt } from "./actions";
 import type { SelectionApi } from "./CanvasEditor";
@@ -9,6 +12,10 @@ import type { CanvasScene } from "./use-canvas-scene";
 const ICONS: Record<CanvasNodeType, ReactNode> = {
   frame: <Frame size={13} />, rect: <Square size={13} />, ellipse: <Circle size={13} />, line: <Minus size={13} className="-rotate-45" />,
   arrow: <MoveUpRight size={13} />, text: <Type size={13} />, image: <ImageIcon size={13} />, group: <Group size={13} />, path: <Spline size={13} />,
+};
+
+const BOOLEAN_ICONS: Record<BooleanOperation, ReactNode> = {
+  union: <SquaresUnite size={13} />, subtract: <SquaresSubtract size={13} />, intersect: <SquaresIntersect size={13} />, exclude: <SquaresExclude size={13} />,
 };
 
 type Drop = { id: string; zone: "above" | "below" | "inside" };
@@ -109,7 +116,7 @@ export function LayersPanel({ canvas, selection, readOnly, header, titled = true
               <ChevronRight size={12} className={cn("transition-transform duration-150 motion-reduce:transition-none", open && "rotate-90")} />
             </button>
           ) : <span className="size-4 shrink-0" />}
-          <span className={cn("shrink-0", chosen || node.component || node.instanceOf ? "text-accent-text" : "text-ink-tertiary")}>{node.component ? <Component size={13} /> : node.instanceOf ? <Diamond size={13} /> : ICONS[node.type]}</span>
+          <span className={cn("shrink-0", chosen || node.component || node.instanceOf ? "text-accent-text" : "text-ink-tertiary")}>{node.component ? <Component size={13} /> : node.instanceOf ? <Diamond size={13} /> : node.boolean ? BOOLEAN_ICONS[node.boolean] : ICONS[node.type]}</span>
           {renaming === node.id ? (
             <input autoFocus defaultValue={node.name} aria-label="Layer name" maxLength={120}
               className="h-6 min-w-0 flex-1 rounded border border-accent/70 bg-inset px-1 text-[12.5px] text-ink outline-none"

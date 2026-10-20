@@ -101,7 +101,7 @@ describe("agent operations", () => {
     expect(result.problems).toEqual([
       "ops[2]: no node missing.",
       `ops[3]: parent ${pro.id} is not a frame or group on this canvas.`,
-      "ops[5]: op must be create, update, delete or instance.",
+      "ops[5]: op must be create, update, delete, instance or design_system.",
     ]);
   });
 

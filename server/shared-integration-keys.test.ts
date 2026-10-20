@@ -15,14 +15,30 @@ describe("keys shared with the workspace", () => {
     });
     try {
       await cache.current();
-      expect(cache.find("fal", "p1")?.values.key).toBe("project-secret-value");
-      expect(cache.find("fal", "p2")?.values.key).toBe("workspace-new-secret");
+      expect(cache.find("fal", { projectId: "p1" })?.values.key).toBe("project-secret-value");
+      expect(cache.find("fal", { projectId: "p2" })?.values.key).toBe("workspace-new-secret");
       expect(cache.find("fal")?.values.key).toBe("workspace-new-secret");
       expect(cache.find("brevo")).toBeNull();
       expect(cache.find("vercel")).toBeNull();
+      expect(cache.find("vercel", { teamId: "team2" })?.values.key).toBe("team-two-vercel");
       expect(redactSecretsInText("curl -H 'Authorization: Key project-secret-value' https://fal.run")).not.toContain("project-secret-value");
       await cache.current();
       expect(calls).toBe(1);
+    } finally { cache.close(); }
+  });
+
+  it("keeps a project's key to that project and lists every share of a workspace", async () => {
+    const cache = createSharedKeys({
+      cloud: () => ({ url: "http://convex.test", sessionToken: "s".repeat(64), projects: {} }),
+      resolve: async () => [key("stripe", "p1", "project-only-stripe", 2), { ...key("stripe", null, "other-team-stripe", 1), teamId: "team2" }],
+    });
+    try {
+      await cache.current();
+      expect(cache.find("stripe", { projectId: "p1" })?.values.key).toBe("project-only-stripe");
+      expect(cache.find("stripe", { projectId: "p2", teamId: "team1" })).toBeNull();
+      expect(cache.find("stripe", { teamId: "team1" })).toBeNull();
+      expect(cache.shares("stripe", "team1").map((share) => share.projectId)).toEqual(["p1"]);
+      expect(cache.shares("stripe").map((share) => share.teamId)).toEqual(["team1", "team2"]);
     } finally { cache.close(); }
   });
 

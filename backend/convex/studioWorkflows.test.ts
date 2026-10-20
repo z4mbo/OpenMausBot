@@ -60,3 +60,13 @@ describe("Studio workflows", () => {
     expect(await f.t.query(api.studioWorkflows.runs, { sessionToken: f.owner, projectId: f.projectId })).toEqual([]);
   });
 });
+
+describe("Studio runs and Broadcast", () => {
+  test("a run keeps its caption and the Broadcast drafts it filled", async () => {
+    const f = await fixture();
+    const runId = await f.t.mutation(api.studioWorkflows.startRun, { sessionToken: f.member, projectId: f.projectId, name: "Campaign pack", graph, caption: "  Launch day  " });
+    const postId = await f.t.mutation(api.broadcast.save, { sessionToken: f.member, projectId: f.projectId, variants: [{ channel: "x", text: "Launch day" }], assetIds: [] });
+    await f.t.mutation(api.studioWorkflows.updateRun, { sessionToken: f.member, projectId: f.projectId, runId, posts: [{ group: "feed", postId }] });
+    expect(await f.t.query(api.studioWorkflows.getRun, { sessionToken: f.owner, projectId: f.projectId, runId })).toMatchObject({ caption: "Launch day", posts: [{ group: "feed", postId }] });
+  });
+});

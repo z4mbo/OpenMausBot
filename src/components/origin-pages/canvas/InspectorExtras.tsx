@@ -17,6 +17,7 @@ const small = cn(iconToggle, "h-6 max-w-none flex-none gap-1 px-2 text-[11.5px]"
 export function BooleanSection({ canvas, selection, disabled }: { canvas: CanvasScene; selection: SelectionApi; disabled: boolean }) {
   const many = canBoolean(canvas.scene, selection.ids);
   if (!many && !canFlatten(canvas.scene, selection.ids)) return null;
+  const current = selection.nodes.length === 1 ? selection.nodes[0]!.boolean : undefined;
   const items = [
     { command: "union", title: "Union (Ctrl+Alt+U)", icon: <SquaresUnite size={14} /> },
     { command: "subtract", title: "Subtract (Ctrl+Alt+S)", icon: <SquaresSubtract size={14} /> },
@@ -24,10 +25,10 @@ export function BooleanSection({ canvas, selection, disabled }: { canvas: Canvas
     { command: "exclude", title: "Exclude (Ctrl+Alt+X)", icon: <SquaresExclude size={14} /> },
   ] as const;
   return (
-    <Section title="Combine">
+    <Section title={current ? "Boolean group" : "Combine"}>
       <div className="flex gap-0.5">
         {many && items.map((item) => (
-          <button key={item.command} type="button" className={iconToggle} title={item.title} aria-label={item.title.replace(/ \(.*/, "")} disabled={disabled} onClick={() => selection.run(item.command)}>{item.icon}</button>
+          <button key={item.command} type="button" className={cn(iconToggle, current === item.command && "bg-raised text-ink")} aria-pressed={current ? current === item.command : undefined} title={item.title} aria-label={item.title.replace(/ \(.*/, "")} disabled={disabled} onClick={() => selection.run(item.command)}>{item.icon}</button>
         ))}
         <button type="button" className={iconToggle} title="Flatten to a vector (Ctrl+E)" aria-label="Flatten" disabled={disabled} onClick={() => selection.run("flatten")}><Waypoints size={14} /></button>
       </div>
@@ -162,7 +163,7 @@ export function LayoutExtras({ canvas, node, disabled, update }: { canvas: Canva
       {(inStack || node.layout) && (
         <div className="grid grid-cols-2 gap-1.5">
           {(["minW", "maxW", "minH", "maxH"] as const).map((key) => (
-            <NumberField key={key} label={<span className="text-[9.5px]">{key.slice(0, 3)}{key.endsWith("W") ? "W" : "H"}</span>} value={node[key]} min={0} disabled={disabled}
+            <NumberField key={key} label={`${key.slice(0, 3)} ${key.at(-1)}`} name={`${key.startsWith("min") ? "Min" : "Max"} ${key.endsWith("W") ? "width" : "height"}`} placeholder="None" value={node[key]} min={0} disabled={disabled}
               onCommit={(value) => update({ [key]: value > 0 ? value : undefined })} />
           ))}
         </div>

@@ -105,3 +105,4 @@ export async function cloudMutation<T>(name: string, args: Record<string, unknow
   return null as T;
 }
 export const cloudAction = cloudMutation;
+export const createOriginWorkspace = async (name: string) => ({ teamId: "fixture-team", slug: name.toLowerCase() });

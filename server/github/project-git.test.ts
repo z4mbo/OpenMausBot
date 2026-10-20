@@ -29,7 +29,7 @@ const temp = (name: string) => {
 const PROJECTS: Record<string, string> = { p1: "https://github.com/octo/app", p2: "https://github.com/octo/other" };
 const TOKEN = `ghs_${"a".repeat(36)}`;
 
-function harness(options: { port?: number; git?: GitRun } = {}) {
+function harness(options: { port?: number; git?: GitRun; identity?: { name: string; email: string } } = {}) {
   const dataDir = temp("data");
   const store = createGitHubStore(join(dataDir, "github"));
   closers.push(() => store.close());
@@ -42,7 +42,10 @@ function harness(options: { port?: number; git?: GitRun } = {}) {
       return { token: TOKEN, expiresAt: new Date(Date.now() + 3_600_000).toISOString(), repoUrl: PROJECTS[(args as { projectId: string }).projectId] };
     },
   } as unknown as GitHubService;
-  const client = { query: async (_name: string, args: Record<string, unknown>) => ({ repoUrl: PROJECTS[String(args.projectId)] }), mutation: async () => null } as OriginCloudClient;
+  const client = {
+    query: async (name: string, args: Record<string, unknown>) => (name === "githubLinks:gitIdentity" ? options.identity ?? null : { repoUrl: PROJECTS[String(args.projectId)] }),
+    mutation: async () => null,
+  } as OriginCloudClient;
   const git = createProjectGit({
     service: () => service, connect: () => client, port: options.port ?? 1, dataDir, ...(options.git ? { git: options.git } : {}),
     cloud: () => ({ url: "http://convex.test", sessionToken: "s".repeat(64), projects: { bot1: "p1" } }),
@@ -111,5 +114,16 @@ describe("git access to a project's repository", () => {
     writeFileSync(join(other, ".git", "HEAD"), "ref: refs/heads/main\n");
     await projectGit.prepare({ p1: other });
     expect(calls.map((call) => call.args[0])).toEqual(["remote"]);
+  });
+
+  it("signs commits in the project folder as the person this computer is signed in as", async () => {
+    const { git } = harness({ identity: { name: "Mia\nRossi", email: "31+mia-dev@users.noreply.github.com" } });
+    const repo = temp("identity");
+    execFileSync("git", ["init", "-q"], { cwd: repo });
+    execFileSync("git", ["remote", "add", "origin", "https://github.com/octo/app.git"], { cwd: repo });
+    await git.prepare({ p1: repo });
+    const read = (key: string) => execFileSync("git", ["config", "--local", "--get", key], { cwd: repo, encoding: "utf8" }).trim();
+    expect(read("user.name")).toBe("Mia Rossi");
+    expect(read("user.email")).toBe("31+mia-dev@users.noreply.github.com");
   });
 });

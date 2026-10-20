@@ -1,9 +1,11 @@
-import { integrationKey } from "../integration-keys.ts";
+import { projectIntegrationKey } from "../integration-keys.ts";
 import { clip, connectedStudioCloud, record, refuse, StudioRefusal, studioRunner, text, type StudioCloud, type StudioRunner } from "../origin-studio.ts";
 import { studioWorkflows, type WorkflowExecutor } from "../origin-studio-workflow.ts";
 import { PASS, type RouteHandler } from "./table.ts";
 import type { StudioGenerateRequest, StudioMode, StudioSource } from "../../shared/studio.ts";
-import { studioWorkflowTemplate, type StudioWorkflowGraph } from "../../shared/studio-workflow.ts";
+import {
+  CAMPAIGN_BRIEF_NODE, CAMPAIGN_PACK_ID, CAMPAIGN_SCRIPT_NODE, studioWorkflowTemplate, withCharacter, withWorkflowInputs, type StudioWorkflowGraph,
+} from "../../shared/studio-workflow.ts";
 
 const MODES = ["image", "video", "audio", "edit"];
 
@@ -30,7 +32,7 @@ export function generateRequest(body: Record<string, unknown>): StudioGenerateRe
     model: text(body.model) || refuse("Choose a model."),
     prompt: text(body.prompt),
     ...optional("aspectRatio"), ...optional("duration"), ...optional("voice"), ...optional("sourceAssetId"), ...optional("endpoint"),
-    ...optional("resolution"), ...optional("motion"),
+    ...optional("resolution"), ...optional("motion"), ...optional("characterId"),
     ...(text(body.negativePrompt).trim() ? { negativePrompt: text(body.negativePrompt).slice(0, 2_000) } : {}),
     ...(Number.isInteger(body.seed) ? { seed: Number(body.seed) } : {}),
     ...(typeof body.sound === "boolean" ? { sound: body.sound } : {}),
@@ -43,12 +45,28 @@ export function generateRequest(body: Record<string, unknown>): StudioGenerateRe
 
 const POSTS = new Set([
   "/api/studio/generate", "/api/studio/save-asset", "/api/studio/broadcast", "/api/studio/cancel", "/api/studio/enhance", "/api/studio/voice-preview",
-  "/api/studio/workflow/run", "/api/studio/workflow/cancel",
+  "/api/studio/workflow/run", "/api/studio/workflow/cancel", "/api/studio/campaign",
 ]);
 
-export function createStudioRoutes(options: { runner?: () => StudioRunner; workflows?: () => WorkflowExecutor; cloud?: () => StudioCloud | null; falConfigured?: () => boolean } = {}): RouteHandler {
+/** Starts the Campaign pack from a brief; the script and caption the person left empty are written from it. */
+async function startCampaign(runner: StudioRunner, workflows: WorkflowExecutor, cloud: StudioCloud, projectId: string, body: Record<string, unknown>) {
+  const brief = text(body.brief).trim().slice(0, 4_000) || refuse("Write a brief first.");
+  let script = text(body.script).trim();
+  let caption = text(body.caption).trim();
+  if (!script || !caption) {
+    const copy = await runner.campaignCopy(brief).catch(() => ({ script: brief, caption: brief }));
+    script ||= copy.script;
+    caption ||= copy.caption;
+  }
+  const template = studioWorkflowTemplate(CAMPAIGN_PACK_ID)!;
+  const graph = withCharacter(withWorkflowInputs(template.graph, { [CAMPAIGN_BRIEF_NODE]: brief, [CAMPAIGN_SCRIPT_NODE]: script }), text(body.characterId) || undefined);
+  const runId = await workflows.start(cloud, projectId, { name: clip(`${template.name}: ${brief.replace(/\s+/g, " ")}`, 120), graph, caption });
+  return { runId, script, caption };
+}
+
+export function createStudioRoutes(options: { runner?: () => StudioRunner; workflows?: () => WorkflowExecutor; cloud?: () => StudioCloud | null; falConfigured?: (projectId: string | undefined) => boolean } = {}): RouteHandler {
   let resumed = false;
-  return async ({ req, res, path, method, auth, json, readBody }) => {
+  return async ({ req, res, url, path, method, auth, json, readBody }) => {
     if (!path.startsWith("/api/studio/")) return PASS;
     const runner = (options.runner ?? studioRunner)();
     const workflows = (options.workflows ?? studioWorkflows)();
@@ -59,7 +77,8 @@ export function createStudioRoutes(options: { runner?: () => StudioRunner; workf
       void workflows.resume().catch(() => undefined);
     }
     if (path === "/api/studio/status" && method === "GET") {
-      return json(res, 200, { fal: (options.falConfigured ?? (() => integrationKey("fal") !== null))(), connected: Boolean(cloud) });
+      const projectId = url.searchParams.get("projectId") || undefined;
+      return json(res, 200, { fal: (options.falConfigured ?? ((id) => projectIntegrationKey("fal", id) !== null))(projectId), connected: Boolean(cloud) });
     }
     if (method !== "POST" || !POSTS.has(path)) return PASS;
     if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Studio runs on this app's own keys and needs the admin scope" });
@@ -75,9 +94,13 @@ export function createStudioRoutes(options: { runner?: () => StudioRunner; workf
         const template = text(body.templateId) ? studioWorkflowTemplate(text(body.templateId)) : undefined;
         const graph = (body.graph && typeof body.graph === "object" ? body.graph : template?.graph) as StudioWorkflowGraph | undefined;
         if (!graph || !Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) return json(res, 400, { error: "graph is required" });
-        const runId = await workflows.start(cloud, projectId, { name: clip(text(body.name) || template?.name || "Workflow", 120), graph, ...(text(body.workflowId) ? { workflowId: text(body.workflowId) } : {}) });
+        const runId = await workflows.start(cloud, projectId, {
+          name: clip(text(body.name) || template?.name || "Workflow", 120), graph,
+          ...(text(body.workflowId) ? { workflowId: text(body.workflowId) } : {}), ...(text(body.caption).trim() ? { caption: text(body.caption) } : {}),
+        });
         return json(res, 200, { runId });
       }
+      if (path === "/api/studio/campaign") return json(res, 200, await startCampaign(runner, workflows, cloud, projectId, body));
       if (path === "/api/studio/workflow/cancel") {
         await workflows.cancel(cloud, projectId, text(body.runId) || refuse("runId is required."));
         return json(res, 200, { ok: true });

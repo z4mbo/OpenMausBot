@@ -96,9 +96,9 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
 
   useEffect(() => {
     let live = true;
-    void pipelineServer.connections().then((value) => { if (live) setConnections(value); }, () => { if (live) setConnections(null); });
+    void pipelineServer.connections(projectId).then((value) => { if (live) setConnections(value); }, () => { if (live) setConnections(null); });
     return () => { live = false; };
-  }, [dialog]);
+  }, [dialog, projectId]);
 
   useEffect(() => {
     const onKey = (event: globalThis.KeyboardEvent) => {
@@ -218,7 +218,7 @@ function Pipeline({ projectId, projectName, canEdit, isAdmin, chief }: { project
       )}
 
       {view === "inbox" ? (
-        <InboxView projectId={projectId} projectName={projectName} canEdit={canEdit} chief={chief} channels={channels} onOpenContact={(leadId) => openLead(leadId, "deals")} onSetUp={() => openSettings("inbound")} />
+        <InboxView projectId={projectId} projectName={projectName} canEdit={canEdit} chief={chief} channels={channels} owners={owners} onOpenContact={(leadId) => openLead(leadId, "deals")} onSetUp={() => openSettings("inbound")} />
       ) : view === "contacts" ? (
         <ContactsView projectId={projectId} leads={leads} stages={board.stages} currency={currency} canEdit={canEdit} owners={owners} insights={insights} pendingLeads={pendingLeads}
           onOpen={(leadId) => openLead(leadId)} onStage={(lead, stage) => move(lead._id, stage)} onCapture={() => setDialog("capture")} onImport={() => setDialog("import")} onNew={() => setDialog("new")} />

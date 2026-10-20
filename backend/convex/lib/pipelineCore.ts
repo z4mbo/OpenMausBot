@@ -34,10 +34,19 @@ export async function leadOf(ctx: PipelineCtx, projectId: Id<"projects">, leadId
   return lead;
 }
 
+const MESSAGE_KINDS: ReadonlySet<string> = new Set(["email", "sms", "whatsapp", "call", "ai_call"]);
+
+/** A message the contact sends brings their conversation back to the open inbox; one the team sends keeps it where it is. */
+export function inboxPatch(lead: Pick<Doc<"pipelineLeads">, "inbox">, at: number, inbound: boolean): Partial<Doc<"pipelineLeads">> {
+  return inbound || !lead.inbox ? { inboxAt: at, inbox: "open", snoozedUntil: undefined } : { inboxAt: at };
+}
+
 export async function addActivity(ctx: MutationCtx, lead: Doc<"pipelineLeads">, fields: ActivityFields) {
   const now = Date.now();
   const id = await ctx.db.insert("pipelineActivities", { projectId: lead.projectId, leadId: lead._id, createdAt: now, updatedAt: now, ...fields });
-  if (fields.status !== "pending" && fields.status !== "discarded") await ctx.db.patch(lead._id, { lastActivityAt: now, updatedAt: now });
+  if (fields.status === "pending" || fields.status === "discarded") return id;
+  const message = MESSAGE_KINDS.has(fields.kind) && fields.status !== "approved";
+  await ctx.db.patch(lead._id, { lastActivityAt: now, updatedAt: now, ...(message ? inboxPatch(lead, now, fields.status === "received") : {}) });
   return id;
 }
 

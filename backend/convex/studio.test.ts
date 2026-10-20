@@ -131,3 +131,71 @@ describe("Studio generations", () => {
     await expect(f.create(f.owner, { mode: "edit", sourceAssetId: foreign })).rejects.toThrow(/Source asset not found/);
   });
 });
+
+describe("Studio library", () => {
+  test("editors save characters from project images; every member lists them with live links", async () => {
+    const f = await fixture();
+    const image = await f.t.run((ctx) => ctx.db.insert("designAssets", { projectId: f.projectId, type: "image", name: "Mia.png", url: "https://cdn.test/mia.png", createdAt: 1, updatedAt: 1 }));
+    const pdf = await f.t.run((ctx) => ctx.db.insert("designAssets", { projectId: f.projectId, type: "document", name: "Brief.pdf", url: "https://cdn.test/brief.pdf", createdAt: 1, updatedAt: 1 }));
+    const save = (sessionToken: string, extra: Record<string, unknown> = {}) => f.t.mutation(api.studioLibrary.save, {
+      sessionToken, projectId: f.projectId, name: "  Mia  ", kind: "character", description: "Red bob haircut, green bomber jacket", referenceAssetIds: [image], ...extra,
+    });
+    await expect(save(f.outsider)).rejects.toThrow();
+    await expect(save(f.member, { referenceAssetIds: [] })).rejects.toThrow(/at least one reference/);
+    await expect(save(f.member, { referenceAssetIds: [pdf] })).rejects.toThrow(/not an image/);
+    const characterId = await save(f.member, { agentName: "Designer" });
+    await save(f.owner, { characterId, name: "Mia v2" });
+    expect(await f.t.query(api.studioLibrary.list, { sessionToken: f.member, projectId: f.projectId })).toEqual([expect.objectContaining({
+      _id: characterId, name: "Mia v2", kind: "character", createdByName: "member", references: [{ assetId: image, url: "https://cdn.test/mia.png" }],
+    })]);
+    await f.t.mutation(api.studioLibrary.remove, { sessionToken: f.member, projectId: f.projectId, characterId });
+    expect(await f.t.query(api.studioLibrary.list, { sessionToken: f.member, projectId: f.projectId })).toEqual([]);
+  });
+});
+
+describe("Large Studio outputs", () => {
+  async function uploaded(f: Awaited<ReturnType<typeof fixture>>, email: string, parts: string[], projectId = f.projectId) {
+    return f.t.run(async (ctx) => {
+      const user = (await ctx.db.query("users").collect()).find((row) => row.email === email)!;
+      const session = (await ctx.db.query("sessions").collect()).find((row) => row.userId === user._id)!;
+      const ids = [];
+      for (const [index, part] of parts.entries()) {
+        const storageId = await ctx.storage.store(new Blob([part], { type: "video/mp4" }));
+        await ctx.db.insert("storageUploadIntents", { tokenHash: `hash-${email}-${index}-${part.length}`, sessionId: session._id, userId: user._id, target: { kind: "asset", projectId }, state: "complete", expiresAt: Date.now() + 60_000, storageId });
+        await ctx.db.insert("storageAdmissions", { storageId, scopeKey: `project:${projectId}`, scope: { kind: "project", projectId }, contentType: "video/mp4", createdAt: 1 });
+        ids.push(storageId);
+      }
+      return ids;
+    });
+  }
+
+  test("pieces the member just uploaded join into one project file and the pieces go away", async () => {
+    const f = await fixture();
+    const chunks = await uploaded(f, "owner@studio.test", ["abc", "defg", "hi"]);
+    const storageId = await f.t.action(api.studioUpload.assemble, { sessionToken: f.owner, projectId: f.projectId, chunks, contentType: "video/mp4" });
+    const joined = await f.t.run(async (ctx) => ({
+      text: await (await ctx.storage.get(storageId))!.text(),
+      admitted: await ctx.db.query("storageAdmissions").withIndex("by_storageId_and_scopeKey", (q) => q.eq("storageId", storageId)).collect(),
+      pieces: await Promise.all(chunks.map((chunk) => ctx.storage.get(chunk))),
+      intents: await ctx.db.query("storageUploadIntents").collect(),
+    }));
+    expect(joined.text).toBe("abcdefghi");
+    expect(joined.admitted).toEqual([expect.objectContaining({ scopeKey: `project:${f.projectId}` })]);
+    expect(joined.pieces).toEqual([null, null, null]);
+    expect(joined.intents).toEqual([]);
+    const generationId = await f.create(f.owner, { mode: "video", kind: "video" });
+    await f.t.mutation(api.studio.update, { sessionToken: f.owner, projectId: f.projectId, generationId, status: "done", outputs: [{ url: "https://v3.fal.media/files/reel.mp4", kind: "video" }] });
+    expect(await f.t.mutation(api.studio.storeFile, { sessionToken: f.owner, projectId: f.projectId, generationId, index: 0, storageId, contentType: "video/mp4" })).toBeTruthy();
+  });
+
+  test("assembling never touches another member's upload or an existing file", async () => {
+    const f = await fixture();
+    const theirs = await uploaded(f, "member@studio.test", ["one", "two"]);
+    await expect(f.t.action(api.studioUpload.assemble, { sessionToken: f.owner, projectId: f.projectId, chunks: theirs, contentType: "video/mp4" })).rejects.toThrow(/expired/);
+    const mine = await uploaded(f, "owner@studio.test", ["three", "four"]);
+    await f.t.run((ctx) => ctx.db.insert("designAssets", { projectId: f.projectId, type: "video", name: "kept.mp4", storageId: mine[0], createdAt: 1, updatedAt: 1 }));
+    await expect(f.t.action(api.studioUpload.assemble, { sessionToken: f.owner, projectId: f.projectId, chunks: mine, contentType: "video/mp4" })).rejects.toThrow(/already a file/);
+    await expect(f.t.action(api.studioUpload.assemble, { sessionToken: f.outsider, projectId: f.projectId, chunks: mine, contentType: "video/mp4" })).rejects.toThrow();
+    expect(await f.t.run(async (ctx) => (await Promise.all([...theirs, ...mine].map((chunk) => ctx.storage.get(chunk)))).every(Boolean))).toBe(true);
+  });
+});

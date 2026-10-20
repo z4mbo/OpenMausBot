@@ -4,10 +4,10 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { requireMember, touchProject } from "./lib/permissions";
 import { cleanText, validDay } from "./lib/features";
 import { actorOf, addActivity, leadOf, requireEditor, settingsOf, stagesOf, type PipelineActorValue as Actor } from "./lib/pipelineCore";
-import { salesLineItem } from "./pipelineTables";
+import { dealCoachAdvice, salesLineItem } from "./pipelineTables";
 import { moveTo, topOrder } from "./pipeline";
 import { CLOSED_STAGES, formatLeadValue } from "../../shared/origin-pipeline";
-import { SALES_LINE_ITEMS_MAX, dealTotal } from "../../shared/origin-sales";
+import { SALES_LINE_ITEMS_MAX, dealTotal, type SalesCurrencyTotals } from "../../shared/origin-sales";
 
 const scope = { projectId: v.id("projects"), sessionToken: v.string() };
 const agentArg = v.optional(v.object({ name: v.string(), id: v.optional(v.string()) }));
@@ -80,6 +80,36 @@ async function close(ctx: MutationCtx, deal: Deal, outcome: "won" | "lost", fiel
 
 const reasonOf = (value: string | undefined) => value?.trim().slice(0, 300) || undefined;
 
+function currencyTotals(rows: readonly Deal[], currency: string): SalesCurrencyTotals {
+  const month = new Date();
+  const monthStart = Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), 1);
+  const same = rows.filter((deal) => deal.currency === currency);
+  const won = same.filter((deal) => deal.stage === "Won");
+  const open = same.filter((deal) => !CLOSED_STAGES.includes(deal.stage));
+  const total = (list: readonly Deal[], pick: (deal: Deal) => number) => Math.round(list.reduce((sum, deal) => sum + pick(deal), 0) * 100) / 100;
+  return {
+    currency, openValue: total(open, (deal) => deal.value), openCount: open.length,
+    wonMonth: total(won.filter((deal) => (deal.closedAt ?? 0) >= monthStart), (deal) => deal.wonAmount ?? deal.value),
+    wonTotal: total(won, (deal) => deal.wonAmount ?? deal.value), wonCount: won.length, lostCount: same.filter((deal) => deal.stage === "Lost").length,
+  };
+}
+
+/** Stripe's word that the link was paid closes the deal as won for what was paid; a second word about the same link changes nothing. */
+export async function markPaid(ctx: MutationCtx, deal: Deal, paid: { amount: number; currency: string; checkoutId?: string }) {
+  if (!deal.payment || deal.payment.paidAt) return false;
+  const paidAmount = amount(paid.amount, "The amount paid");
+  const foreign = paid.currency.toUpperCase() !== deal.currency;
+  await ctx.db.patch(deal._id, {
+    payment: { ...deal.payment, paidAt: Date.now(), paidAmount, ...(foreign ? { paidCurrency: paid.currency.toUpperCase() } : {}), ...(paid.checkoutId ? { checkoutId: paid.checkoutId.slice(0, 100) } : {}) },
+  });
+  if (deal.stage !== "Won") {
+    const fresh = (await ctx.db.get(deal._id))!;
+    await close(ctx, fresh, "won", { amount: foreign ? deal.payment.amount : paidAmount, reason: "Paid through Stripe" }, { kind: "system", name: "Stripe" });
+  }
+  await touchProject(ctx, deal.projectId);
+  return true;
+}
+
 export const forLead = query({
   args: { ...scope, leadId: v.id("pipelineLeads") },
   handler: async (ctx, args) => {
@@ -114,19 +144,12 @@ export const list = query({
       const lead = leads.get(deal.leadId);
       if (lead) rows.push({ ...deal, leadName: lead.name, ...(lead.company ? { leadCompany: lead.company } : {}) });
     }
-    const month = new Date();
-    const monthStart = Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), 1);
-    const same = rows.filter((deal) => deal.currency === currency);
-    const won = same.filter((deal) => deal.stage === "Won");
-    const open = same.filter((deal) => !CLOSED_STAGES.includes(deal.stage));
-    const total = (list: typeof rows, pick: (deal: Deal) => number) => Math.round(list.reduce((sum, deal) => sum + pick(deal), 0) * 100) / 100;
+    const others = [...new Set(rows.map((deal) => deal.currency).filter((code) => code !== currency))].sort();
     return {
       deals: rows,
       totals: {
-        currency, openValue: total(open, (deal) => deal.value), openCount: open.length,
-        wonMonth: total(won.filter((deal) => (deal.closedAt ?? 0) >= monthStart), (deal) => deal.wonAmount ?? deal.value),
-        wonTotal: total(won, (deal) => deal.wonAmount ?? deal.value), wonCount: won.length,
-        lostCount: same.filter((deal) => deal.stage === "Lost").length, awaitingConfirmation: rows.filter((deal) => deal.wonRequest).length,
+        ...currencyTotals(rows, currency), awaitingConfirmation: rows.filter((deal) => deal.wonRequest).length,
+        others: others.map((code) => currencyTotals(rows, code)),
       },
     };
   },
@@ -257,11 +280,26 @@ export const recordPayment = mutation({
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const deal = await dealOf(ctx, args.projectId, args.dealId);
     if (!deal.payment || deal.payment.linkId !== args.linkId) throw new Error("That payment link is not this deal's");
-    if (deal.payment.paidAt) return null;
-    const paidAmount = amount(args.paidAmount, "The amount paid");
-    await ctx.db.patch(deal._id, { payment: { ...deal.payment, paidAt: Date.now(), paidAmount } });
-    if (deal.stage !== "Won") await close(ctx, deal, "won", { amount: paidAmount, reason: "Paid through Stripe" }, { kind: "system", name: "Stripe" });
-    await touchProject(ctx, args.projectId);
+    await markPaid(ctx, deal, { amount: args.paidAmount, currency: deal.currency });
+    return null;
+  },
+});
+
+export const saveCoach = mutation({
+  args: { ...scope, dealId: v.id("pipelineDeals"), agent: agentArg, coach: dealCoachAdvice },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const { user } = await requireEditor(ctx, args.projectId, args.sessionToken);
+    const deal = await dealOf(ctx, args.projectId, args.dealId);
+    const { coach } = args;
+    const clip = (value: string, max: number) => value.trim().slice(0, max);
+    await ctx.db.patch(deal._id, {
+      coach: {
+        nextAction: cleanText(coach.nextAction, 300, "Next action"), risk: coach.risk, riskReason: clip(coach.riskReason, 400),
+        followUp: { channel: coach.followUp.channel, body: cleanText(coach.followUp.body, 4_000, "Follow-up"), ...(coach.followUp.subject?.trim() ? { subject: clip(coach.followUp.subject, 300) } : {}) },
+        by: actorOf(user, args.agent).name, at: Date.now(),
+      },
+    });
     return null;
   },
 });

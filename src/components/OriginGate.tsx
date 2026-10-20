@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
-import { cloud, cloudAction, cloudMutation, setCloudUrl, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
+import { cloud, cloudAction, cloudMutation, createOriginWorkspace, setCloudUrl, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
 import { captureCloudSession, cloudQueryOnce, cloudUrl as cloudUrlNow, sessionStore, setSessionToken } from "@/lib/origin-cloud/client";
 import { refreshCloudLinks } from "@/lib/origin-cloud-links";
 import { exclusiveWithSync, onSyncRequest, syncFromOrigin } from "@/lib/origin-sync";
@@ -145,7 +145,7 @@ function NoWorkspace({ onReady }: { onReady(): void }) {
     <div className="fixed inset-0 z-[80]"><Shell>
       <h1 className={title}>Welcome{session.user?.name ? `, ${session.user.name}` : ""}</h1>
       <p className={cn(subtitle, "mb-7")}>You're not in a workspace yet. Create one, or join with an invite link.</p>
-      <form className="grid gap-3.5" onSubmit={(event) => { event.preventDefault(); void run(() => cloudMutation("workspaces:create", { name: name.trim() })); }}>
+      <form className="grid gap-3.5" onSubmit={(event) => { event.preventDefault(); void run(() => createOriginWorkspace(name.trim())); }}>
         <Field label="Workspace name"><input className={field} placeholder="Your team" value={name} onChange={(event) => setName(event.target.value)} /></Field>
         <button type="submit" className={primary} disabled={busy || !name.trim()}>Create workspace<ArrowRight size={16} /></button>
       </form>

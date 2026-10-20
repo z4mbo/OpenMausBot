@@ -60,6 +60,29 @@ export interface LayoutGrid {
   color: string;
 }
 
+export const BOOLEAN_OPS = ["union", "subtract", "intersect", "exclude"] as const;
+export type BooleanOperation = (typeof BOOLEAN_OPS)[number];
+
+/** A gradient paint, drawn in place of the solid fill while it is set. */
+export interface Gradient {
+  kind: "linear" | "radial";
+  /** Linear only: the direction in degrees, 0 left to right and 90 top to bottom. */
+  angle: number;
+  /** Two to eight stops, `at` from 0 to 1 in increasing order. */
+  stops: { at: number; color: string }[];
+}
+
+/** Per-corner radii: top left, top right, bottom right, bottom left. */
+export type CornerRadii = [topLeft: number, topRight: number, bottomRight: number, bottomLeft: number];
+
+export const IMAGE_FITS = ["cover", "contain", "stretch", "crop", "tile"] as const;
+export type ImageFit = (typeof IMAGE_FITS)[number];
+/**
+ * Crop: the image covers a box `scale` times the node's size whose top-left corner sits at `x`, `y` (fractions of the
+ * node's width and height, from 1 - scale to 0). Tile: each tile is `scale` of the node's size, from 0.05 to 1.
+ */
+export interface ImageCrop { scale: number; x: number; y: number }
+
 export const TRANSITIONS = ["instant", "dissolve", "slide"] as const;
 /** Clicking the node in Present mode shows frame `to`. */
 export interface PrototypeLink { to: string; transition: (typeof TRANSITIONS)[number] }
@@ -69,6 +92,7 @@ export const SYNCED_KEYS = [
   "name", "x", "y", "width", "height", "rotation", "opacity", "hidden", "fill", "stroke", "strokeWidth", "radius", "text", "fontSize", "fontWeight",
   "font", "family", "align", "lineHeight", "autoWidth", "points", "curves", "breaks", "closed", "fileId", "imageFit", "clip", "layout", "grow",
   "link", "constraints", "absolute", "minW", "maxW", "minH", "maxH", "fillStyle", "strokeStyle", "textStyle", "shadow", "blur",
+  "radii", "gradient", "crop", "boolean",
 ] as const;
 export type SyncedKey = (typeof SYNCED_KEYS)[number];
 
@@ -115,7 +139,8 @@ export interface CanvasNode {
   points?: number[];
   closed?: boolean;
   fileId?: string;
-  imageFit?: "cover" | "contain";
+  imageFit?: ImageFit;
+  crop?: ImageCrop;
   clip?: boolean;
   layout?: StackLayout;
   /** Inside an auto-layout parent, the node shares the parent's free space along its direction. */
@@ -156,6 +181,11 @@ export interface CanvasNode {
   prototype?: PrototypeLink;
   /** On a frame: the Origin issue it designs. */
   issue?: string;
+  /** Rectangles, frames and images: radii per corner, in place of `radius`. */
+  radii?: CornerRadii;
+  gradient?: Gradient;
+  /** On a group: its children stay editable and it draws as their combined outline, filled and stroked as the group. */
+  boolean?: BooleanOperation;
 }
 
 export const CANVAS_ROW_FORMAT = "canvas";
@@ -278,6 +308,26 @@ function grids(value: unknown): LayoutGrid[] | undefined {
   return list.length ? list : undefined;
 }
 
+export function gradientOf(value: unknown): Gradient | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  const stops = (Array.isArray(raw.stops) ? raw.stops : []).slice(0, 8).flatMap((item) => {
+    const stop = item && typeof item === "object" ? item as Record<string, unknown> : {};
+    const color = canvasColor(stop.color);
+    return color ? [{ at: finite(stop.at, 0, 0, 1), color }] : [];
+  }).sort((a, b) => a.at - b.at);
+  if (stops.length < 2) return undefined;
+  return { kind: raw.kind === "radial" ? "radial" : "linear", angle: finite(raw.angle, 90, -360, 360), stops };
+}
+
+function cropOf(value: unknown, fit: ImageFit): ImageCrop | undefined {
+  if ((fit !== "crop" && fit !== "tile") || !value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  if (fit === "tile") return { scale: finite(raw.scale, 0.25, 0.05, 1), x: 0, y: 0 };
+  const scale = finite(raw.scale, 1, 1, 10);
+  return { scale, x: finite(raw.x, 0, 1 - scale, 0), y: finite(raw.y, 0, 1 - scale, 0) };
+}
+
 const numbers = (value: unknown, max: number, min: number = -CANVAS_LIMITS.coordinate, top: number = CANVAS_LIMITS.coordinate) =>
   Array.isArray(value) && value.length <= max && value.every((item) => typeof item === "number" && Number.isFinite(item)) ? value.map((item) => finite(item, 0, min, top)) : undefined;
 
@@ -368,8 +418,17 @@ export function sanitizeNode(raw: unknown): CanvasNode | null {
   if (type === "frame" && ID(value.issue)) node.issue = value.issue as string;
   if (type === "image") {
     if (typeof value.fileId === "string" && value.fileId.length <= 100) node.fileId = value.fileId;
-    node.imageFit = value.imageFit === "contain" ? "contain" : "cover";
+    node.imageFit = oneOf(value.imageFit, IMAGE_FITS) ?? "cover";
+    const crop = cropOf(value.crop, node.imageFit);
+    if (crop) node.crop = crop;
   }
+  if (type === "rect" || type === "frame" || type === "image") {
+    const radii = numbers(value.radii, 4, 0, 10_000);
+    if (radii?.length === 4) node.radii = radii as CornerRadii;
+  }
+  const gradient = type === "line" || type === "arrow" || type === "image" ? undefined : gradientOf(value.gradient);
+  if (gradient) node.gradient = gradient;
+  if (type === "group") { const operation = oneOf(value.boolean, BOOLEAN_OPS); if (operation) node.boolean = operation; }
   if (type === "frame") {
     node.clip = value.clip !== false;
     const layout = stackLayout(value.layout);

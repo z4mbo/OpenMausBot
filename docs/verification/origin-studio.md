@@ -14,8 +14,9 @@ Start the fixture in one terminal:
 node --experimental-strip-types scripts/verify-origin-studio.ts
 ```
 
-It seeds a project with finished, failed and cancelled generations and a
-product photo in Assets, then prints `previewUrl`. Drive it from a second
+It seeds a project with finished, failed and cancelled generations, a
+product photo in Assets and an "Aurora bottle" product in the Studio library,
+then prints `previewUrl`. Drive it from a second
 terminal:
 
 ```sh
@@ -39,14 +40,43 @@ check covers:
 - Enter opens the viewer, the arrows walk the results and ? lists the
   shortcuts;
 - the Podcast template runs step by step and its three Outputs land in Assets;
-- at 1280 px dark: a workflow is built by adding nodes and dragging links,
-  saved with Ctrl+S, run with Ctrl+Enter and listed;
+- the Library tab lists the project's characters, products and styles; at
+  1280 px dark a character is saved from a generated image, "Create with" it
+  sets up the next generation, and fal receives its reference image and the
+  line "Keep … consistent with the reference images: …"; L on a tile opens a
+  new entry seeded with that output;
+- C opens the Campaign pack: one brief runs `POST /api/studio/campaign`, the
+  cheap model writes the voice-over and caption, the strip shows hero, square
+  post, 9:16 reel (Kling plus the voice-over merged in) and voice-over as they
+  finish, and the feed post and reel are drafted in Broadcast; at 1280 px dark
+  the run's editor shows "2 Broadcast drafts" and Broadcast lists them with the
+  written caption;
+- in the template editor the node palette searches models, Undo and Redo walk
+  the edit, and a two-finger pinch (touch pointer events) zooms the canvas;
+- at 1280 px dark: a workflow is built from the palette, with Ctrl+Z,
+  Ctrl+Shift+Z, Ctrl+C then Ctrl+V and a double-click on empty canvas, links
+  are dragged, and it is saved with Ctrl+S, run with Ctrl+Enter and listed;
 - Assets shows every finished output under the Studio folder without a Save
   step.
 
 The runner, workflow executor and agent tools are covered without a browser by
 `server/origin-studio.test.ts`; the Convex side (auto-filing in Assets, the
-uploaded-copy swap, workflow steps kept out of Assets, run permissions) by
-`backend/convex/studio.test.ts` and `backend/convex/studioWorkflows.test.ts`.
+uploaded-copy swap, workflow steps kept out of Assets, run permissions, the
+library, joining a large output's pieces, a run's Broadcast drafts) by
+`backend/convex/studio.test.ts` and `backend/convex/studioWorkflows.test.ts`;
+copy, paste, undo and palette search by
+`src/components/origin-studio/workflow-edit.test.ts`.
+
+## Outputs over 15 MB
+
+The deployment's upload route is a Convex HTTP action, whose request body
+stops at 20 MB, and Convex storage has no append or multipart upload. The app
+therefore streams a fal output through in 12 MB pieces, each an ordinary
+scoped upload, and the `studioUpload:assemble` Node action (512 MiB of memory)
+joins them into one project file and deletes the pieces. It joins only pieces
+the same member uploaded to that project within the last ten minutes that no
+asset references yet. Files up to 150 MB are copied; a larger output keeps its
+fal link. The fixture's media host is not fal's, so this path is proven by the
+unit and convex-test suites rather than the browser check.
 
 Stop the launcher with Ctrl-C so it removes its temporary data.

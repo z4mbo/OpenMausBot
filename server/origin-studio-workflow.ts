@@ -5,7 +5,7 @@ import { DATA_DIR } from "./config.ts";
 import { clip, connectedStudioCloud, refuse, record, studioRunner, STUDIO_TERMINAL, text, type StudioCloud, type StudioRunner } from "./origin-studio.ts";
 import type { StudioGeneration, StudioMediaKind } from "../shared/studio.ts";
 import {
-  validateWorkflow, workflowNodeModel, workflowOrder, workflowPorts,
+  STUDIO_BROADCAST_GROUPS, broadcastGroupOf, validateWorkflow, workflowNodeModel, workflowOrder, workflowPorts,
   type StudioRunNode, type StudioWorkflowGraph, type StudioWorkflowNode, type StudioWorkflowRun,
 } from "../shared/studio-workflow.ts";
 
@@ -28,9 +28,24 @@ interface Active {
 const NODE_TIMEOUT_MS = 45 * 60_000;
 const CANCEL_CHECK_EVERY = 4;
 
+/** Who started a run: a person when absent, else the agent, whose Broadcast drafts then wait for a person's approval. */
+export interface WorkflowAgent {
+  id: string;
+  name: string;
+}
+
+export interface WorkflowStart {
+  workflowId?: string;
+  name: string;
+  graph: StudioWorkflowGraph;
+  agent?: WorkflowAgent;
+  /** The text of the Broadcast drafts its Output nodes fill. */
+  caption?: string;
+}
+
 export interface WorkflowExecutor {
   /** Records a run and executes it in the background; returns its id at once. */
-  start(cloud: StudioCloud, projectId: string, run: { workflowId?: string; name: string; graph: StudioWorkflowGraph; agentName?: string }): Promise<string>;
+  start(cloud: StudioCloud, projectId: string, run: WorkflowStart): Promise<string>;
   /** Resolves when the run settles; tests and agents waiting on a run use it. */
   settled(runId: string): Promise<void>;
   cancel(cloud: StudioCloud, projectId: string, runId: string): Promise<void>;
@@ -50,7 +65,9 @@ export function createWorkflowExecutor(deps: WorkflowDeps): WorkflowExecutor {
   };
   const writeJournal = (entries: Active[]) => writeFileAtomic(deps.journalFile, JSON.stringify(entries), { mode: 0o600 });
 
-  async function execute(cloud: StudioCloud, projectId: string, runId: string, graph: StudioWorkflowGraph, agentName: string | undefined): Promise<void> {
+  async function execute(cloud: StudioCloud, projectId: string, runId: string, run: WorkflowStart): Promise<void> {
+    const { graph } = run;
+    const agentName = run.agent?.name;
     const runner = deps.runner();
     const values = new Map<string, Value>();
     const states = new Map<string, StudioRunNode>();
@@ -89,7 +106,7 @@ export function createWorkflowExecutor(deps: WorkflowDeps): WorkflowExecutor {
         ...(param("voice") ? { voice: String(param("voice")) } : {}), ...(param("resolution") ? { resolution: String(param("resolution")) } : {}),
         ...(param("motion") ? { motion: String(param("motion")) } : {}), ...(param("negativePrompt") ? { negativePrompt: String(param("negativePrompt")) } : {}),
         ...(Number.isInteger(param("seed")) ? { seed: Number(param("seed")) } : {}), ...(node.params.sound === false ? { sound: false } : {}),
-        ...(node.params.brand === false ? { brand: false } : {}),
+        ...(node.params.brand === false ? { brand: false } : {}), ...(param("character") ? { characterId: String(param("character")) } : {}),
       }, agentName, { media: { sources, references }, workflow: { runId, nodeId: node.id }, intermediate: true });
       if (!generationId) refuse("fal.ai did not start this step.");
       generations.add(generationId!);
@@ -160,6 +177,7 @@ export function createWorkflowExecutor(deps: WorkflowDeps): WorkflowExecutor {
       }));
     }
     for (const generationId of generations) await runner.cancel(cloud, projectId, generationId).catch(() => undefined);
+    if (!stopped && !failure) await draftPosts(cloud, projectId, runId, run, states);
     if (!stopped) await cloud.client.mutation("studioWorkflows:updateRun", { projectId, sessionToken: cloud.sessionToken, runId, status: failure ? "failed" : "done" });
   }
 
@@ -169,10 +187,11 @@ export function createWorkflowExecutor(deps: WorkflowDeps): WorkflowExecutor {
       if (problems.length) refuse(problems.map((problem) => problem.message).join(" "));
       const runId = text(await cloud.client.mutation("studioWorkflows:startRun", {
         projectId, sessionToken: cloud.sessionToken, name: run.name, graph: run.graph,
-        ...(run.workflowId ? { workflowId: run.workflowId } : {}), ...(run.agentName ? { agentName: run.agentName } : {}),
+        ...(run.workflowId ? { workflowId: run.workflowId } : {}), ...(run.agent ? { agentName: run.agent.name } : {}),
+        ...(run.caption?.trim() ? { caption: run.caption.trim() } : {}),
       }));
       writeJournal([...readJournal(), { runId, projectId }]);
-      const task = execute(cloud, projectId, runId, run.graph, run.agentName)
+      const task = execute(cloud, projectId, runId, run)
         .catch(async (error: unknown) => {
           console.warn(`studio: workflow run failed: ${error instanceof Error ? error.message : String(error)}`);
           await cloud.client.mutation("studioWorkflows:updateRun", { projectId, sessionToken: cloud.sessionToken, runId, status: "failed" }).catch(() => undefined);
@@ -207,6 +226,29 @@ export function createWorkflowExecutor(deps: WorkflowDeps): WorkflowExecutor {
   };
 }
 
+/** One Broadcast draft per group of Output nodes, holding the files they saved; an agent's drafts wait for approval. */
+async function draftPosts(cloud: StudioCloud, projectId: string, runId: string, run: WorkflowStart, states: ReadonlyMap<string, StudioRunNode>): Promise<void> {
+  const groups = new Map<keyof typeof STUDIO_BROADCAST_GROUPS, string[]>();
+  for (const node of run.graph.nodes) {
+    const group = broadcastGroupOf(node);
+    const assetId = states.get(node.id)?.assetId;
+    if (group && assetId) groups.set(group, [...groups.get(group) ?? [], assetId]);
+  }
+  const posts: Array<{ group: string; postId: string }> = [];
+  for (const [group, assetIds] of groups) {
+    const postId = await cloud.client.mutation("broadcast:save", {
+      projectId, sessionToken: cloud.sessionToken, assetIds,
+      variants: STUDIO_BROADCAST_GROUPS[group].channels.map((channel) => ({ channel, text: run.caption?.trim() ?? "" })),
+      ...(group === "reel" ? { format: "reel" } : {}), ...(run.agent ? { agent: { botId: run.agent.id, name: run.agent.name } } : {}),
+    }).catch((error: unknown) => {
+      console.warn(`studio: could not draft the ${group} post: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
+    });
+    if (postId) posts.push({ group, postId: text(postId) });
+  }
+  if (posts.length) await cloud.client.mutation("studioWorkflows:updateRun", { projectId, sessionToken: cloud.sessionToken, runId, posts });
+}
+
 let shared: WorkflowExecutor | null = null;
 
 /** The app server's one executor, shared by the Studio page and agents. */
@@ -224,5 +266,6 @@ export function runSummary(run: StudioWorkflowRun): string {
     const label = graphNode?.type === "model" ? workflowNodeModel(graphNode)?.label ?? "model" : graphNode?.type ?? node.nodeId;
     return `  ${node.nodeId} ${label}: ${node.status}${node.output ? ` ${node.output.url}` : ""}${node.assetId && graphNode?.type === "output" ? ` · asset ${node.assetId}` : ""}${node.error ? ` (${clip(node.error, 160)})` : ""}`;
   });
-  return [`- run ${run._id} "${run.name}" [${run.status}] by ${run.agentName ?? run.createdByName}`, ...lines].join("\n");
+  const posts = (run.posts ?? []).map((post) => `  Broadcast ${post.group} draft ${post.postId}`);
+  return [`- run ${run._id} "${run.name}" [${run.status}] by ${run.agentName ?? run.createdByName}`, ...lines, ...posts].join("\n");
 }

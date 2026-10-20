@@ -2459,6 +2459,15 @@
       }
     },
     {
+      "name": "origin_studio_library",
+      "description": "List an Origin project's Studio library (characters, products and styles saved from reference images), or save one so every later generation and workflow keeps it consistent. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
       "name": "origin_broadcast_draft",
       "description": "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. Before the first call, get its input schema from find_tool.",
       "inputSchema": {

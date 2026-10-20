@@ -14,6 +14,15 @@ import { pipelineServer } from "./pipeline-api";
 import { TemplatesDialog } from "./SalesDialogs";
 
 const REPLY_LABEL: Record<SalesReplyChannel, string> = { email: "Email", sms: "Text", whatsapp: "WhatsApp" };
+const clock = (at: number) => new Date(at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+
+function dayLabel(at: number, now = new Date()): string {
+  const start = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const days = Math.round((start(now) - start(new Date(at))) / 86_400_000);
+  if (days === 0) return "Today";
+  if (days === 1) return "Yesterday";
+  return new Date(at).toLocaleDateString(undefined, { weekday: days < 7 ? "long" : undefined, month: "short", day: "numeric" });
+}
 const PROVIDER: Record<SalesReplyChannel, string> = { email: "Brevo", sms: "Twilio", whatsapp: "Twilio" };
 
 export function ClampedText({ text, className }: { text: string; className?: string }) {
@@ -39,9 +48,16 @@ export function Conversation({ projectId, projectName, lead, activities, canEdit
     <div className="flex min-h-0 flex-col gap-3">
       <ol className="flex flex-col gap-2.5" aria-label={`Conversation with ${lead.name}`}>
         {!messages.length && <li className="py-6 text-center text-[12.5px] text-ink-tertiary">No messages with {lead.name} yet.</li>}
-        {messages.map((row) => row.kind === "deal"
-          ? <li key={row._id} className="text-center text-[11.5px] text-ink-tertiary">{row.subject} · {row.body} · {when(row.createdAt)}</li>
-          : <Message key={row._id} projectId={projectId} leadId={lead._id} leadName={lead.name} activity={row} canEdit={canEdit} chief={chief} />)}
+        {messages.map((row, index) => {
+          const day = dayLabel(row.createdAt);
+          const divider = index === 0 || dayLabel(messages[index - 1]!.createdAt) !== day;
+          return [
+            divider && <li key={`day-${row._id}`} className="sticky top-0 z-[1] flex justify-center py-1" aria-hidden="true"><span className="rounded-full bg-app px-2.5 py-0.5 text-[11px] font-medium text-ink-tertiary">{day}</span></li>,
+            row.kind === "deal"
+              ? <li key={row._id} className="flex items-center justify-center gap-1.5 text-[11.5px] text-ink-tertiary"><span className="text-ink-tertiary/80">{KIND_ICON.deal}</span><span className="truncate"><span className="text-ink-secondary">{row.subject}</span> · {row.body}</span><span className="shrink-0 tabular-nums">{clock(row.createdAt)}</span></li>
+              : <Message key={row._id} projectId={projectId} leadId={lead._id} leadName={lead.name} activity={row} canEdit={canEdit} chief={chief} />,
+          ];
+        })}
       </ol>
       <div ref={end} />
       {canEdit && <ReplyBox projectId={projectId} projectName={projectName} lead={lead} activities={activities} chief={chief} channels={channels} />}
@@ -64,7 +80,7 @@ function Message({ projectId, leadId, leadName, activity, canEdit, chief }: { pr
           activity.status === "pending" && "border-dashed border-accent/60", activity.status === "failed" && "border-danger/40")}>
         <header className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11.5px] text-ink-tertiary">
           <span className="flex items-center gap-1 text-ink-secondary">{KIND_ICON[activity.kind]}{call && inbound ? "Called in" : KIND_LABEL[activity.kind]}</span>
-          <span>· {author} · {when(activity.createdAt)}</span>
+          <span>· {author}</span><span className="tabular-nums" title={when(activity.createdAt)}>· {clock(activity.createdAt)}</span>
           {status && <span className={cn("rounded-full px-1.5 py-px text-[11px]", statusTone(activity.status))}>{status}</span>}
         </header>
         {actions.draft ? <DraftFields activity={activity} actions={actions} /> : <>

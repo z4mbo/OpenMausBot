@@ -689,6 +689,7 @@ describe("agents-proxy MCP surface", () => {
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_library",
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",

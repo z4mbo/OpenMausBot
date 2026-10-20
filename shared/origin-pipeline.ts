@@ -34,6 +34,10 @@ export interface PipelineLead {
   unreadReplies?: number;
   lastReplyAt?: number;
   stageChangedAt?: number;
+  /** Where the conversation sits in the Sales inbox; absent until the first message. */
+  inbox?: "open" | "snoozed" | "archived";
+  inboxAt?: number;
+  snoozedUntil?: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -80,6 +84,8 @@ export interface PipelineSettingsView {
   aiPhoneNumberId?: string;
   inboundEnabled: boolean;
   inbound?: PipelineInboundView;
+  /** Present for editors once an admin set it up: the address Stripe posts completed checkouts to, and whether its signing secret is stored. */
+  stripeWebhook?: { url: string; signing: boolean };
 }
 
 export type PipelineSequenceChannel = "email" | "sms" | "whatsapp" | "ai_call" | "call_task";

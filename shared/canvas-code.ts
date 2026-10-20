@@ -1,5 +1,7 @@
 import { pathData } from "./canvas-page.ts";
 import { childrenIndex, fontStack, type CanvasNode, type Scene } from "./canvas-scene.ts";
+import { cornerRadii, cssRadii, gradientCss } from "./canvas-paint.ts";
+import { booleanGroupPath } from "./canvas-boolean-group.ts";
 
 type Index = ReadonlyMap<string | null, readonly CanvasNode[]>;
 type Decl = [property: string, value: string];
@@ -19,10 +21,12 @@ function declarations(node: CanvasNode, parent: CanvasNode | undefined): Decl[] 
   if (node.type === "text") {
     out.push(["font-family", fontStack(node)], ["font-size", px(node.fontSize ?? 16)], ["font-weight", String(node.fontWeight ?? 400)], ["line-height", String(node.lineHeight ?? 1.3)]);
     if (node.align && node.align !== "left") out.push(["text-align", node.align]);
-    if (node.fill) out.push(["color", node.fill]);
-  } else if (node.fill && node.type !== "line" && node.type !== "arrow" && node.type !== "path") out.push(["background", node.fill]);
+    if (node.gradient) out.push(["background", gradientCss(node.gradient)], ["background-clip", "text"], ["color", "transparent"]);
+    else if (node.fill) out.push(["color", node.fill]);
+  } else if (node.type !== "line" && node.type !== "arrow" && node.type !== "path" && !node.boolean && (node.gradient || node.fill)) out.push(["background", node.gradient ? gradientCss(node.gradient) : node.fill!]);
   if (node.stroke && node.strokeWidth > 0 && node.type !== "line" && node.type !== "arrow" && node.type !== "path") out.push(["border", `${px(node.strokeWidth)} solid ${node.stroke}`]);
-  if (node.type === "ellipse") out.push(["border-radius", "50%"]); else if (node.radius) out.push(["border-radius", px(node.radius)]);
+  const radii = cornerRadii(node);
+  if (node.type === "ellipse") out.push(["border-radius", "50%"]); else if (radii) out.push(["border-radius", cssRadii(radii, px)]);
   if (node.opacity < 1) out.push(["opacity", String(Math.round(node.opacity * 100) / 100)]);
   if (node.rotation) out.push(["transform", `rotate(${node.rotation}deg)`]);
   if (node.shadow) out.push(["box-shadow", `${px(node.shadow.x)} ${px(node.shadow.y)} ${px(node.shadow.blur)} ${px(node.shadow.spread)} ${node.shadow.color}`]);
@@ -50,8 +54,9 @@ const TW: Record<string, (value: string) => string> = {
   position: (value) => value, left: (value) => `left-[${value}]`, top: (value) => `top-[${value}]`, width: (value) => (value === "auto" ? "w-auto" : `w-[${value}]`),
   height: (value) => (value === "auto" ? "h-auto" : `h-[${value}]`), "min-width": (value) => `min-w-[${value}]`, "max-width": (value) => `max-w-[${value}]`,
   "min-height": (value) => `min-h-[${value}]`, "max-height": (value) => `max-h-[${value}]`, "font-size": (value) => `text-[${value}]`, "font-weight": (value) => `font-[${value}]`,
-  "line-height": (value) => `leading-[${value}]`, "text-align": (value) => `text-${value}`, color: (value) => `text-[${value}]`, background: (value) => `bg-[${value}]`,
-  border: (value) => `border-[${value.split(" ")[0]}] border-[${value.split(" ")[2]}]`, "border-radius": (value) => (value === "50%" ? "rounded-full" : `rounded-[${value}]`),
+  "line-height": (value) => `leading-[${value}]`, "text-align": (value) => `text-${value}`, color: (value) => (value === "transparent" ? "text-transparent" : `text-[${value}]`),
+  background: (value) => `bg-[${value.replace(/ /g, "_")}]`, "background-clip": () => "bg-clip-text",
+  border: (value) => `border-[${value.split(" ")[0]}] border-[${value.split(" ")[2]}]`, "border-radius": (value) => (value === "50%" ? "rounded-full" : `rounded-[${value.replace(/ /g, "_")}]`),
   opacity: (value) => `opacity-[${value}]`, transform: (value) => `rotate-[${value.slice(7, -1)}]`, "box-shadow": (value) => `shadow-[${value.replace(/ /g, "_")}]`,
   filter: (value) => `blur-[${value.slice(5, -1)}]`, overflow: () => "overflow-hidden", display: () => "flex", "flex-direction": (value) => (value === "row" ? "flex-row" : "flex-col"),
   "flex-wrap": () => "flex-wrap", "row-gap": (value) => `gap-y-[${value}]`, gap: (value) => `gap-[${value}]`, padding: (value) => `p-[${value.replace(/ /g, "_")}]`,
@@ -81,6 +86,9 @@ function jsx(scene: Scene, index: Index, node: CanvasNode, depth: number): strin
   if (node.type === "line" || node.type === "arrow" || node.type === "path") {
     const fill = node.type === "path" && node.closed && node.fill ? node.fill : "none";
     return `${pad}<svg${attr} viewBox="0 0 ${Math.max(1, Math.round(node.width))} ${Math.max(1, Math.round(node.height))}" fill="none"><path d="${pathData(node.points ?? [], node.closed, node.curves, node.breaks)}" fill="${fill}" stroke="${node.stroke ?? "none"}" strokeWidth={${node.strokeWidth}} /></svg>`;
+  }
+  if (node.boolean) {
+    return `${pad}<svg${attr} viewBox="0 0 ${Math.max(1, Math.round(node.width))} ${Math.max(1, Math.round(node.height))}"><path d="${booleanGroupPath(node, index)}" fillRule="evenodd" fill="${node.fill ?? "none"}" stroke="${node.stroke ?? "none"}" strokeWidth={${node.strokeWidth}} /></svg>`;
   }
   const children = (index.get(node.id) ?? []).map((child) => jsx(scene, index, child, depth + 1)).filter(Boolean);
   const tag = node.link ? "a" : "div";

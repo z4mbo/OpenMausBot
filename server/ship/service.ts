@@ -13,8 +13,8 @@ export interface ShipRuntime {
   http: ShipHttp;
   providers: Record<KeyedProvider, ProviderClient>;
   github: ShipGitHub | null;
-  /** Security: the member's own provider token, read only on this computer and never returned to a client or model. */
-  token(provider: KeyedProvider): string | null;
+  /** Security: the member's own provider token, or one shared with the project or workspace, read only on this computer and never returned to a client or model. */
+  token(provider: KeyedProvider, projectId?: string): string | null;
   /** The cheap model that writes release notes for a project's Chief; absent, notes come from pull request titles. */
   summarize?(input: { botId: string; prompt: string }): Promise<string>;
   /** Text-only Broadcast channels this computer can publish to. */
@@ -48,13 +48,13 @@ async function loadTarget(runtime: ShipRuntime, scope: ShipScope, overview: Ship
     return { ...empty, connected: true, deployments: await runtime.github.runs(scope.projectId, overview.repoUrl, target) };
   }
   const provider = SHIP_PROVIDER_KEY[target.provider]!;
-  const token = runtime.token(provider);
+  const token = runtime.token(provider, scope.projectId);
   if (!token) return { ...empty, connected: false };
   return { ...empty, connected: true, deployments: await runtime.providers[provider].deployments(target, token) };
 }
 
 function targetStatus(runtime: ShipRuntime, scope: ShipScope, overview: ShipOverview, target: ShipTarget, fresh = false): Promise<ShipTargetStatus> {
-  const key = `${scope.projectId}:${target._id}:${target.updatedAt}:${runtime.token(SHIP_PROVIDER_KEY[target.provider] ?? "vercel") ? 1 : 0}`;
+  const key = `${scope.projectId}:${target._id}:${target.updatedAt}:${runtime.token(SHIP_PROVIDER_KEY[target.provider] ?? "vercel", scope.projectId) ? 1 : 0}`;
   const hit = cache.get(key);
   if (!fresh && hit && runtime.now() - hit.at < CACHE_MS) return hit.value;
   const value = loadTarget(runtime, scope, overview, target).catch((error: unknown) => {
@@ -72,7 +72,7 @@ export function forgetShipCache(): void {
 export async function shipStatus(runtime: ShipRuntime, scope: ShipScope, overview?: ShipOverview, fresh = false): Promise<ShipStatus> {
   const resolved = overview ?? await shipOverview(scope);
   const targets = await Promise.all(resolved.targets.map((target) => targetStatus(runtime, scope, resolved, target, fresh)));
-  return { targets, keys: { vercel: Boolean(runtime.token("vercel")), netlify: Boolean(runtime.token("netlify")), cloudflare: Boolean(runtime.token("cloudflare")) } };
+  return { targets, keys: { vercel: Boolean(runtime.token("vercel", scope.projectId)), netlify: Boolean(runtime.token("netlify", scope.projectId)), cloudflare: Boolean(runtime.token("cloudflare", scope.projectId)) } };
 }
 
 export function findTarget(overview: ShipOverview, wanted: string): ShipTarget | undefined {
@@ -105,7 +105,7 @@ export async function shipAct(runtime: ShipRuntime, scope: ShipScope, overview: 
     }
   } else {
     const provider = SHIP_PROVIDER_KEY[target.provider]!;
-    const token = runtime.token(provider);
+    const token = runtime.token(provider, scope.projectId);
     if (!token) throw new ShipError(`Add your ${SHIP_PROVIDER_LABEL[target.provider]} token in Settings > Integrations first.`, 409);
     said = await runtime.providers[provider].act(target, token, action, deployment, repoOf(overview));
   }

@@ -5,6 +5,7 @@ export const studioMode = v.union(v.literal("image"), v.literal("video"), v.lite
 export const studioKind = v.union(v.literal("image"), v.literal("video"), v.literal("audio"));
 export const studioStatus = v.union(v.literal("queued"), v.literal("running"), v.literal("done"), v.literal("failed"), v.literal("cancelled"));
 export const studioOutput = v.object({ url: v.string(), kind: studioKind, contentType: v.optional(v.string()) });
+export const studioCharacterKind = v.union(v.literal("character"), v.literal("product"), v.literal("style"));
 export const studioParams = v.record(v.string(), v.union(v.string(), v.number(), v.boolean()));
 
 export const studioGraph = v.object({
@@ -90,8 +91,25 @@ export const studioTables = {
     createdBy: v.id("users"),
     createdByName: v.string(),
     agentName: v.optional(v.string()),
+    /** The text of the Broadcast drafts its Output nodes fill. */
+    caption: v.optional(v.string()),
+    posts: v.optional(v.array(v.object({ group: v.string(), postId: v.id("broadcastPosts") }))),
     createdAt: v.number(),
     updatedAt: v.number(),
     finishedAt: v.optional(v.number()),
   }).index("by_projectId_and_createdAt", ["projectId", "createdAt"]),
+
+  /** A person, product or style saved from reference images, reused by people, workflows and agents. */
+  studioCharacters: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    kind: studioCharacterKind,
+    description: v.string(),
+    referenceAssetIds: v.array(v.id("designAssets")),
+    createdBy: v.id("users"),
+    createdByName: v.string(),
+    agentName: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_projectId_and_updatedAt", ["projectId", "updatedAt"]),
 };

@@ -23,7 +23,14 @@ async function open(width, theme, query = {}) {
   return page;
 }
 
-const capture = async (page, name) => {
+const capture = async (page, name, { top = false } = {}) => {
+  if (top) {
+    await page.mouse.move(0, 0);
+    await page.evaluate(() => {
+      document.activeElement?.blur?.();
+      document.querySelector("section[aria-label]")?.scrollTo(0, 0);
+    });
+  }
   await page.waitForTimeout(250);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${name} scrolls sideways`);
   await page.screenshot({ path: resolve(output, `${name}.png`) });
@@ -39,6 +46,36 @@ async function dragBy(page, locator, dx, dy) {
   await page.mouse.down();
   await page.mouse.move(box.x + 60 + dx, box.y + 15 + dy, { steps: 6 });
   await page.mouse.up();
+}
+
+/** Two touch pointers spread apart on the workflow canvas; returns the zoom label before and after. */
+async function pinch(page) {
+  const zoom = page.locator("[data-workflow-zoom]");
+  const before = await zoom.textContent();
+  await page.evaluate(() => {
+    const canvas = document.querySelector("[data-workflow-canvas]");
+    const box = canvas.getBoundingClientRect();
+    const y = box.top + box.height / 2;
+    const x = box.left + box.width / 2;
+    const fire = (type, pointerId, clientX) => canvas.dispatchEvent(new PointerEvent(type, { pointerId, pointerType: "touch", clientX, clientY: y, bubbles: true, button: 0, buttons: 1 }));
+    fire("pointerdown", 11, x - 30);
+    fire("pointerdown", 12, x + 30);
+    for (let step = 1; step <= 6; step += 1) {
+      fire("pointermove", 11, x - 30 - step * 12);
+      fire("pointermove", 12, x + 30 + step * 12);
+    }
+    fire("pointerup", 11, x - 102);
+    fire("pointerup", 12, x + 102);
+  });
+  return { before, after: await zoom.textContent() };
+}
+
+const nodeCount = (page) => page.locator("[data-workflow-node]").count();
+
+async function addNode(page, query) {
+  await page.getByRole("button", { name: "Node", exact: true }).click();
+  await page.getByRole("combobox", { name: "Search nodes" }).fill(query);
+  await page.keyboard.press("Enter");
 }
 
 async function link(page, from, to) {
@@ -102,6 +139,77 @@ try {
     await page.waitForFunction(() => document.querySelector("textarea[aria-label=Prompt]")?.value.startsWith("A cinematic poster idea"));
     step(tag, "Enhance rewrites the prompt through the cheap model");
 
+    await prompt.fill("");
+    await prompt.blur();
+    await page.getByRole("button", { name: "Library", exact: true }).click();
+    await page.locator("[data-library-entry='Aurora bottle']").waitFor();
+    const mia = `Mia ${run}`;
+    if (full) {
+      await page.getByRole("button", { name: "New character, product or style" }).click();
+      const editor = page.getByRole("dialog", { name: "New library entry" });
+      await editor.getByLabel("Name").fill(mia);
+      await editor.getByLabel("What stays the same").fill("Red bob haircut, green bomber jacket");
+      await editor.getByRole("button", { name: "Add a reference image" }).click();
+      await page.locator("[data-studio-media-picker] button").first().click();
+      await editor.locator("[data-library-references] img").first().waitFor();
+      await editor.getByRole("button", { name: "Add to library" }).click();
+      await page.locator(`[data-library-entry='${mia}']`).waitFor();
+    }
+    await capture(page, `library-${tag}`);
+    if (full) {
+      await page.getByRole("button", { name: `Create with ${mia}` }).click();
+      await page.getByRole("button", { name: `Following ${mia}`, exact: true }).waitFor();
+      const followed = `Mia waves from the stage ${run}`;
+      await prompt.fill(followed);
+      await page.keyboard.press("Control+Enter");
+      await tile(page, followed).waitFor();
+      const sent = (await submitted(page, "fal-ai/nano-banana-pro/edit")).at(-1);
+      assert.ok(sent.body.prompt.includes(`Keep ${mia} consistent with the reference images: Red bob haircut, green bomber jacket.`), "the library entry joins the prompt");
+      assert.equal(sent.body.image_urls.length, 1, "the library entry's reference image is sent");
+      await tile(page, followed).getByText(mia, { exact: true }).waitFor({ state: "attached" });
+      await page.getByRole("button", { name: `Stop following ${mia}` }).click();
+      await tile(page, poster).focus();
+      await page.keyboard.press("l");
+      await page.getByRole("dialog", { name: "New library entry" }).locator("[data-library-references] img").waitFor();
+      await page.keyboard.press("Escape");
+      step(tag, "a library entry is saved from a generated image, followed by the next generation (references and description reach fal), and L on a tile seeds a new one");
+    } else {
+      await page.getByRole("button", { name: "Create", exact: true }).click();
+      step(tag, "the Library tab lists the project's characters, products and styles");
+    }
+
+    await page.keyboard.press("c");
+    const pack = page.getByRole("dialog", { name: "Campaign pack" });
+    const brief = `Aurora sparkling water launch ${tag} ${run}`;
+    await pack.getByRole("textbox", { name: "Brief" }).fill(brief);
+    if (full) {
+      await pack.getByRole("radio", { name: mia }).click();
+      await capture(page, `campaign-dialog-${tag}`);
+    }
+    await pack.getByRole("button", { name: "Generate pack" }).click();
+    const strip = page.locator("[data-campaign-run]", { hasText: brief });
+    await strip.waitFor();
+    await page.locator("[data-campaign-run=done]", { hasText: brief }).waitFor({ timeout: 120_000 });
+    await strip.getByText("Feed post and Reel drafted").waitFor();
+    await capture(page, `campaign-${tag}`, { top: true });
+    const voice = (await submitted(page, "fal-ai/elevenlabs/tts/eleven-v3")).at(-1);
+    assert.match(voice.body.text, new RegExp(`^Meet the launch: Aurora sparkling water launch ${tag}`), "the voice-over is written from the brief");
+    assert.ok((await submitted(page, "fal-ai/ffmpeg-api/merge-audio-video")).length > 0, "the reel gets its voice-over");
+    step(tag, "C opens the Campaign pack; one brief runs hero, square post, 9:16 reel and voice-over, and the feed post and reel are drafted in Broadcast");
+
+    if (full) {
+      await strip.getByRole("button", { name: "Open its workflow" }).click();
+      await page.locator("[data-workflow-run=done]").waitFor();
+      await page.locator("[data-workflow-posts]").getByText("2 Broadcast drafts").waitFor();
+      await capture(page, `campaign-workflow-${tag}`);
+      await page.getByRole("button", { name: "Create", exact: true }).click();
+      const broadcast = await open(width, theme, { page: "broadcast" });
+      await broadcast.getByText(`${brief} #launch`).first().waitFor({ timeout: 20_000 });
+      await capture(broadcast, `broadcast-drafts-${tag}`);
+      await broadcast.close();
+      step(tag, "the pack's run shows its two Broadcast drafts, and Broadcast lists them with the written caption");
+    }
+
     if (full) {
       await prompt.blur();
       await page.keyboard.press("3");
@@ -149,6 +257,17 @@ try {
     await page.getByRole("region", { name: "Templates" }).waitFor();
     await page.getByRole("region", { name: "Templates" }).getByRole("button", { name: /Podcast cover and voice intro/ }).click();
     await page.locator("[data-workflow-node]").first().waitFor();
+    const templateNodes = await nodeCount(page);
+    await addNode(page, "kling");
+    assert.equal(await nodeCount(page), templateNodes + 1, "the palette adds the searched model");
+    await page.getByRole("button", { name: "Undo" }).click();
+    assert.equal(await nodeCount(page), templateNodes, "Undo removes it");
+    await page.getByRole("button", { name: "Redo" }).click();
+    assert.equal(await nodeCount(page), templateNodes + 1, "Redo brings it back");
+    await page.getByRole("button", { name: "Undo" }).click();
+    const zoomed = await pinch(page);
+    assert.notEqual(zoomed.after, zoomed.before, "a two-finger pinch zooms the canvas");
+    step(tag, `the node palette searches models, Undo and Redo walk the edit, and a pinch zooms the canvas (${zoomed.before} to ${zoomed.after})`);
     await page.getByRole("button", { name: "Run" }).click();
     await page.locator("[data-workflow-run=done]").waitFor({ timeout: 60_000 });
     assert.equal(await page.getByText("Saved to Assets", { exact: true }).count(), 3, "each Output node saved its file");
@@ -159,11 +278,25 @@ try {
       await page.getByRole("button", { name: "All workflows" }).click();
       await page.getByRole("button", { name: "New workflow" }).click();
       await page.getByRole("textbox", { name: "Workflow name" }).fill(`Teaser builder ${run}`);
-      for (const name of ["Prompt", "FLUX.1 schnell", "Output to Assets"]) {
-        await page.getByRole("button", { name: "Node", exact: true }).click();
-        await page.getByRole("dialog", { name: "Add a node" }).getByRole("button", { name, exact: true }).click();
-      }
+      for (const query of ["prompt", "schnell", "output to assets"]) await addNode(page, query);
       const nodes = page.locator("[data-workflow-node]");
+      assert.equal(await nodeCount(page), 3);
+      await page.keyboard.press("Control+z");
+      assert.equal(await nodeCount(page), 2, "Ctrl+Z undoes the last node");
+      await page.keyboard.press("Control+Shift+z");
+      assert.equal(await nodeCount(page), 3, "Ctrl+Shift+Z redoes it");
+      await nodes.nth(1).locator("span.truncate").first().click();
+      await page.keyboard.press("Control+c");
+      await page.keyboard.press("Control+v");
+      assert.equal(await nodeCount(page), 4, "Ctrl+C then Ctrl+V pastes a copy");
+      await page.keyboard.press("Control+z");
+      assert.equal(await nodeCount(page), 3);
+      const canvas = page.locator("[data-workflow-canvas]");
+      const box = await canvas.boundingBox();
+      await page.mouse.dblclick(box.x + 40, box.y + box.height - 60);
+      await page.getByRole("combobox", { name: "Search nodes" }).waitFor();
+      await page.keyboard.press("Escape");
+      await page.getByRole("combobox", { name: "Search nodes" }).waitFor({ state: "detached" });
       await dragBy(page, nodes.nth(0), -320, 0);
       await dragBy(page, nodes.nth(2), 320, 40);
       await link(page, nodes.nth(0).locator("[data-port-out]"), nodes.nth(1).locator("[data-port-in=prompt]"));
@@ -178,7 +311,7 @@ try {
       assert.ok(flux, "the built workflow ran FLUX.1 schnell");
       await page.getByRole("button", { name: "All workflows" }).click();
       await page.getByRole("button", { name: new RegExp(`Teaser builder ${run}`) }).first().waitFor();
-      step(tag, "a workflow built by adding nodes and dragging links is saved with Ctrl+S, runs with Ctrl+Enter and is listed");
+      step(tag, "a workflow built from the searchable palette (with Ctrl+Z, Ctrl+Shift+Z, Ctrl+C/V and double-click to add) and dragged links is saved with Ctrl+S, runs with Ctrl+Enter and is listed");
     }
     await page.close();
 

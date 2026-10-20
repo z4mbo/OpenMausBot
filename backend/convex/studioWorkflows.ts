@@ -11,6 +11,7 @@ type Graph = Doc<"studioWorkflows">["graph"];
 const WORKFLOWS_SHOWN = 60;
 const RUNS_SHOWN = 30;
 const NAME_MAX = 120;
+const CAPTION_MAX = 2_000;
 
 async function editorOf(ctx: Ctx, projectId: Id<"projects">, sessionToken: string) {
   const access = await requireMember(ctx, projectId, sessionToken);
@@ -110,7 +111,10 @@ export const getRun = query({
 });
 
 export const startRun = mutation({
-  args: { projectId: v.id("projects"), sessionToken: v.string(), workflowId: v.optional(v.id("studioWorkflows")), name: v.string(), graph: studioGraph, agentName: v.optional(v.string()) },
+  args: {
+    projectId: v.id("projects"), sessionToken: v.string(), workflowId: v.optional(v.id("studioWorkflows")), name: v.string(), graph: studioGraph,
+    agentName: v.optional(v.string()), caption: v.optional(v.string()),
+  },
   returns: v.id("studioWorkflowRuns"),
   handler: async (ctx, args) => {
     const { user } = await editorOf(ctx, args.projectId, args.sessionToken);
@@ -123,7 +127,8 @@ export const startRun = mutation({
     const id = await ctx.db.insert("studioWorkflowRuns", {
       projectId: args.projectId, workflowId: args.workflowId, name: clip(args.name.trim() || "Workflow", NAME_MAX), graph, status: "running",
       nodes: graph.nodes.map((node) => ({ nodeId: node.id, status: "waiting" as const })), createdBy: user._id, createdByName: user.name || user.email,
-      agentName: args.agentName ? clip(args.agentName.trim(), 120) : undefined, createdAt: now, updatedAt: now,
+      agentName: args.agentName ? clip(args.agentName.trim(), 120) : undefined, caption: args.caption?.trim() ? clip(args.caption.trim(), CAPTION_MAX) : undefined,
+      createdAt: now, updatedAt: now,
     });
     await touchProject(ctx, args.projectId);
     return id;
@@ -145,6 +150,7 @@ export const updateRun = mutation({
       output: v.optional(v.object({ url: v.string(), kind: studioKind })),
       error: v.optional(v.string()),
     })),
+    posts: v.optional(v.array(v.object({ group: v.string(), postId: v.id("broadcastPosts") }))),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -158,6 +164,13 @@ export const updateRun = mutation({
       const node = { ...args.node, ...(args.node.error ? { error: clip(args.node.error, 600) } : {}) };
       if (node.output && !/^https:\/\/\S+$/i.test(node.output.url)) throw new Error("Outputs must be https links");
       patch.nodes = run.nodes.map((entry) => (entry.nodeId === node.nodeId ? node : entry));
+    }
+    if (args.posts) {
+      for (const entry of args.posts) {
+        const post = await ctx.db.get(entry.postId);
+        if (!post || post.projectId !== args.projectId) throw new Error("Post not found");
+      }
+      patch.posts = args.posts.slice(0, 8).map((entry) => ({ group: entry.group.slice(0, 20), postId: entry.postId }));
     }
     if (args.status && args.status !== "running") {
       patch.status = args.status;

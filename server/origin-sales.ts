@@ -1,21 +1,23 @@
 import { brandVoiceGuide, type BrandKit } from "../shared/brand-kit.ts";
 import type { PipelineActivity, PipelineLead } from "../shared/origin-pipeline.ts";
-import { parseSuggestedReply, suggestReplyPrompt, type SalesDeal, type SalesReplyChannel } from "../shared/origin-sales.ts";
+import {
+  dealCoachPrompt, majorUnits, minorUnits, parseDealCoach, parseSuggestedReply, reachableChannels, suggestReplyPrompt, type DealCoach, type SalesDeal, type SalesReplyChannel,
+} from "../shared/origin-sales.ts";
 import type { OriginCloudClient } from "./origin-cloud.ts";
-import { integrationKey } from "./integration-keys.ts";
+import { projectIntegrationKey } from "./integration-keys.ts";
 
 type Args = Record<string, unknown>;
 const record = (value: unknown): Args => (value && typeof value === "object" && !Array.isArray(value) ? value as Args : {});
 const text = (value: unknown): string => (typeof value === "string" ? value : "");
 
 const PROVIDER_TIMEOUT_MS = 20_000;
-/** Stripe charges these currencies in whole units, not cents (https://docs.stripe.com/currencies#zero-decimal). */
-const ZERO_DECIMAL = new Set(["bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf", "ugx", "vnd", "vuv", "xaf", "xof", "xpf"]);
+
+export { majorUnits, minorUnits };
 
 export class SalesError extends Error {}
 
 export interface SalesKeys {
-  stripe(): { secretKey: string } | null;
+  stripe(projectId?: string): { secretKey: string } | null;
 }
 
 export interface SalesServiceDeps {
@@ -30,18 +32,39 @@ export interface SalesServiceDeps {
 type Scope = { client: OriginCloudClient; sessionToken: string; projectId: string };
 
 export interface SalesService {
-  stripeConnected(): boolean;
+  stripeConnected(projectId?: string): boolean;
   quote(input: Scope & { dealId: string }): Promise<{ url: string; amount: number }>;
   checkPayment(input: Scope & { dealId: string }): Promise<{ paid: boolean; amount?: number }>;
   suggest(input: Scope & { leadId: string; channel: SalesReplyChannel; botId: string; projectName: string }): Promise<{ subject?: string; body: string }>;
+  coach(input: CoachInput): Promise<DealCoach>;
 }
 
-export function minorUnits(amount: number, currency: string): number {
-  return Math.round(amount * (ZERO_DECIMAL.has(currency.toLowerCase()) ? 1 : 100));
-}
+type Generate = (input: { botId: string; prompt: string }) => Promise<string>;
+export type CoachInput = Scope & { dealId: string; botId: string; projectName: string; agent?: { name: string; id?: string } };
 
-export function majorUnits(amount: number, currency: string): number {
-  return ZERO_DECIMAL.has(currency.toLowerCase()) ? amount : amount / 100;
+/** Reads the deal, its contact's timeline and the brand voice, asks the cheap model, and keeps its answer on the deal. */
+export async function coachDeal(input: CoachInput, generate: Generate): Promise<DealCoach> {
+  const base = { sessionToken: input.sessionToken, projectId: input.projectId };
+  const found = record(await input.client.query("pipelineDeals:get", { ...base, dealId: input.dealId }));
+  if (!found.deal) throw new SalesError("No such deal");
+  const deal = found.deal as SalesDeal;
+  const lead = found.lead as PipelineLead;
+  const detail = record(await input.client.query("pipeline:lead", { ...base, leadId: lead._id }));
+  const kit = await input.client.query("brand:get", base).catch(() => null) as Pick<BrandKit, "name" | "tagline" | "voice"> | null;
+  const channels = reachableChannels(lead);
+  const prompt = dealCoachPrompt({
+    projectName: input.projectName, today: new Date().toISOString().slice(0, 10), voice: kit?.voice ? brandVoiceGuide(kit) : "", channels, deal, lead,
+    activities: (Array.isArray(detail.activities) ? detail.activities : []) as PipelineActivity[],
+  });
+  let coach: Omit<DealCoach, "by" | "at">;
+  try {
+    coach = parseDealCoach(await generate({ botId: input.botId, prompt }), channels);
+  } catch (error) {
+    throw new SalesError(error instanceof Error ? error.message : "The model could not coach this deal");
+  }
+  await input.client.mutation("pipelineDeals:saveCoach", { ...base, dealId: deal._id, coach, ...(input.agent ? { agent: input.agent } : {}) });
+  const saved = record(await input.client.query("pipelineDeals:get", { ...base, dealId: deal._id }));
+  return (record(saved.deal).coach as DealCoach | undefined) ?? { ...coach, by: input.agent?.name ?? "", at: Date.now() };
 }
 
 /** Stripe prices take whole quantities only, so a fractional line becomes one price for the whole deal. */
@@ -55,12 +78,12 @@ export function stripeLines(deal: Pick<SalesDeal, "title" | "value" | "currency"
 }
 
 export function createSalesService(deps: SalesServiceDeps = {}): SalesService {
-  const keys = deps.keys ?? { stripe: () => integrationKey("stripe") };
+  const keys = deps.keys ?? { stripe: (projectId) => projectIntegrationKey("stripe", projectId) };
   const doFetch = deps.fetch ?? fetch;
   const stripeBase = deps.providerOrigin ?? "https://api.stripe.com";
 
-  async function stripe(path: string, form?: URLSearchParams): Promise<Args> {
-    const key = keys.stripe()?.secretKey ?? (() => { throw new SalesError("Connect Stripe under Settings > Integrations to send payment links"); })();
+  async function stripe(projectId: string, path: string, form?: URLSearchParams): Promise<Args> {
+    const key = keys.stripe(projectId)?.secretKey ?? (() => { throw new SalesError("Connect Stripe under Settings > Integrations to send payment links"); })();
     let response: Response;
     try {
       response = await doFetch(`${stripeBase}${path}`, {
@@ -84,7 +107,7 @@ export function createSalesService(deps: SalesServiceDeps = {}): SalesService {
   }
 
   return {
-    stripeConnected: () => Boolean(keys.stripe()),
+    stripeConnected: (projectId) => Boolean(keys.stripe(projectId)),
 
     async quote(input) {
       const { deal } = await dealOf(input);
@@ -92,13 +115,13 @@ export function createSalesService(deps: SalesServiceDeps = {}): SalesService {
       const currency = deal.currency.toLowerCase();
       const form = new URLSearchParams();
       for (const [index, line] of stripeLines(deal).entries()) {
-        const price = await stripe("/v1/prices", new URLSearchParams({ currency, unit_amount: String(line.unitAmount), "product_data[name]": line.name.slice(0, 250) }));
+        const price = await stripe(input.projectId, "/v1/prices", new URLSearchParams({ currency, unit_amount: String(line.unitAmount), "product_data[name]": line.name.slice(0, 250) }));
         form.set(`line_items[${index}][price]`, text(price.id));
         form.set(`line_items[${index}][quantity]`, String(line.quantity));
       }
       form.set("metadata[origin_deal]", deal._id);
       form.set("metadata[origin_project]", input.projectId);
-      const link = await stripe("/v1/payment_links", form);
+      const link = await stripe(input.projectId, "/v1/payment_links", form);
       const url = text(link.url);
       const linkId = text(link.id);
       if (!url || !linkId) throw new SalesError("Stripe made no payment link");
@@ -111,12 +134,17 @@ export function createSalesService(deps: SalesServiceDeps = {}): SalesService {
       const payment = deal.payment ?? (() => { throw new SalesError("This deal has no payment link yet"); })();
       if (payment.paidAt) return { paid: true, amount: payment.paidAmount ?? payment.amount };
       const query = new URLSearchParams({ payment_link: payment.linkId, status: "complete", limit: "1" });
-      const sessions = await stripe(`/v1/checkout/sessions?${query.toString()}`);
+      const sessions = await stripe(input.projectId, `/v1/checkout/sessions?${query.toString()}`);
       const session = record(Array.isArray(sessions.data) ? sessions.data[0] : undefined);
       if (!text(session.id)) return { paid: false };
       const amount = majorUnits(Number(session.amount_total) || 0, text(session.currency) || deal.currency);
       await input.client.mutation("pipelineDeals:recordPayment", { sessionToken: input.sessionToken, projectId: input.projectId, dealId: deal._id, linkId: payment.linkId, paidAmount: amount });
       return { paid: true, amount };
+    },
+
+    async coach(input) {
+      if (!deps.generate) throw new SalesError("The deal coach needs a model; choose one under Settings");
+      return coachDeal(input, deps.generate);
     },
 
     async suggest(input) {

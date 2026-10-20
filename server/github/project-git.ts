@@ -136,9 +136,28 @@ export function createProjectGit(deps: ProjectGitDeps) {
     await git(["config", "--local", "credential.https://github.com.useHttpPath", "true"], folder);
   };
 
+  const gitIdentity = async (): Promise<{ name: string; email: string } | null> => {
+    const { url, sessionToken } = deps.cloud();
+    if (!url || !sessionToken) return null;
+    const found = await deps.connect(url).query("githubLinks:gitIdentity", { sessionToken }).catch(() => null) as { name?: unknown; email?: unknown } | null;
+    const clean = (value: unknown) => (typeof value === "string" ? value.replace(/[\r\n<>]+/g, " ").trim() : "");
+    const name = clean(found?.name), email = clean(found?.email);
+    return name && email ? { name, email } : null;
+  };
+
+  /** Commits made in the folder carry this person's identity: their linked GitHub account's address, or their Origin one. */
+  const sign = async (folder: string, who: { name: string; email: string } | null) => {
+    if (!who) return;
+    for (const [key, value] of [["user.name", who.name], ["user.email", who.email]] as const) {
+      const current = await git(["config", "--local", "--get", key], folder);
+      if (current.stdout.trim() !== value) await git(["config", "--local", key, value], folder);
+    }
+  };
+
   /** Gives each project folder git access to its repository, cloning into a folder that is still empty. */
   const prepare = async (folders: Record<string, string>) => {
     const byRepo = await linkedRepositories();
+    const who = byRepo.size ? await gitIdentity() : null;
     for (const { projectId, repoUrl } of byRepo.values()) {
       const folder = folders[projectId];
       if (!folder) continue;
@@ -146,7 +165,10 @@ export function createProjectGit(deps: ProjectGitDeps) {
       if (state.kind === "empty") {
         const source = `${repoUrl.replace("https://github.com", loopbackGitHubOrigin() ?? "https://github.com")}.git`;
         const cloned = await git(["-c", `${HELPER_KEY}=`, "-c", `${HELPER_KEY}=${helperCommand}`, "-c", "credential.https://github.com.useHttpPath=true", "clone", source, "."], folder);
-        if (cloned.ok) await configure(folder);
+        if (cloned.ok) {
+          await configure(folder);
+          await sign(folder, who);
+        }
         continue;
       }
       if (state.kind !== "checkout") continue;
@@ -156,6 +178,7 @@ export function createProjectGit(deps: ProjectGitDeps) {
       if (!current || !wanted || repoName(current) !== repoName(wanted)) continue;
       const helpers = await git(["config", "--local", "--get-all", HELPER_KEY], folder);
       if (!helpers.stdout.split("\n").includes(helperCommand)) await configure(folder);
+      await sign(folder, who);
     }
   };
 

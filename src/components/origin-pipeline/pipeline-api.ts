@@ -1,7 +1,7 @@
 import { api } from "@/state/store";
 import { sessionStore } from "@/lib/origin-cloud/client";
 import type { PipelineChannel } from "../../../shared/origin-pipeline";
-import type { SalesReplyChannel } from "../../../shared/origin-sales";
+import type { DealCoach, SalesReplyChannel } from "../../../shared/origin-sales";
 
 function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   const session = sessionStore.get();
@@ -11,7 +11,7 @@ function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 /** The app server sends with the member's own keys, which never leave this computer. */
 export const pipelineServer = {
-  connections: () => call<{ channels: Record<PipelineChannel, boolean>; stripe?: boolean }>("/api/origin/pipeline/channels")
+  connections: (projectId: string) => call<{ channels: Record<PipelineChannel, boolean>; stripe?: boolean }>(`/api/origin/pipeline/channels?projectId=${encodeURIComponent(projectId)}`)
     .then((result) => ({ channels: result.channels, stripe: result.stripe === true })),
   send: (input: { projectId: string; activityId: string; botId?: string; callerPhone?: string }) =>
     call<{ ok: true; status: string; message: string }>("/api/origin/pipeline/send", { method: "POST", body: JSON.stringify(input) }),
@@ -20,6 +20,8 @@ export const pipelineServer = {
   suggest: (input: { projectId: string; leadId: string; channel: SalesReplyChannel; botId: string; projectName: string }) =>
     call<{ subject?: string; body: string }>("/api/origin/pipeline/suggest", { method: "POST", body: JSON.stringify(input) }),
   quote: (input: { projectId: string; dealId: string }) => call<{ url: string; amount: number }>("/api/origin/pipeline/quote", { method: "POST", body: JSON.stringify(input) }),
+  coach: (input: { projectId: string; dealId: string; botId: string; projectName: string }) =>
+    call<DealCoach>("/api/origin/pipeline/coach", { method: "POST", body: JSON.stringify(input) }),
   checkPayment: (input: { projectId: string; dealId: string }) =>
     call<{ paid: boolean; amount?: number }>("/api/origin/pipeline/quote/check", { method: "POST", body: JSON.stringify(input) }),
 };
