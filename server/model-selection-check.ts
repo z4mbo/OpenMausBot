@@ -16,7 +16,20 @@ export function createScopedModelSelectionChecker(deps: {
 }): ModelSelectionChecker {
   return async (raw, current, requireAvailableModel, scope) => {
     const parsed = defaultModelSelectionSchema.safeParse(raw);
-    if (!parsed.success) return { ok: false, status: 400, error: parsed.error.issues[0]?.message ?? "Invalid model selection" };
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      let error = issue?.message ?? "Invalid model selection";
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) error = "modelSelection must be an object";
+      else {
+        const value = raw as Record<string, unknown>;
+        const field = issue?.path[0];
+        if ((field === "instanceId" || field === "model") &&
+          (typeof value[field] !== "string" || !value[field].trim())) error = `modelSelection.${field} is required`;
+        else if (field === "effort" && issue?.code === "invalid_value") error = `effort "${String(value.effort)}" is not recognized`;
+        else if (issue?.code === "unrecognized_keys") error = `unsupported model field: ${[...issue.path, issue.keys[0]].join(".")}`;
+      }
+      return { ok: false, status: 400, error };
+    }
     const selection: ModelSelection = parsed.data;
     if (current?.busy && !sameModelSelection(selection, current.selection)) {
       return { ok: false, status: 409, error: "the bot is working — stop it before changing models" };

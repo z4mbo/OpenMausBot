@@ -13,6 +13,20 @@ const fixture = () => {
 };
 
 describe("scoped shared model selection", () => {
+  it.each([
+    [null, "modelSelection must be an object"],
+    [[], "modelSelection must be an object"],
+    [{ model: "synthetic" }, "modelSelection.instanceId is required"],
+    [{ instanceId: "claude" }, "modelSelection.model is required"],
+    [{ ...local, effort: "turbo" }, 'effort "turbo" is not recognized'],
+    [{ ...local, autoApprove: true }, "unsupported model field: autoApprove"],
+  ])("retains actionable model validation for %j", async (selection, error) => {
+    const f = fixture();
+    expect(await f.check(selection)).toEqual({ ok: false, status: 400, error });
+    expect(f.localCheck).not.toHaveBeenCalled();
+    expect(f.remoteCheck).not.toHaveBeenCalled();
+  });
+
   it("never maps a hosted selection into a local runnable provider", async () => {
     const f = fixture();
     expect(await f.check(remote, undefined, false, scope)).toEqual({ ok: true, selection: remote });
