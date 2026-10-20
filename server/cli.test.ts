@@ -107,7 +107,7 @@ describe("openmausbot command line", () => {
       const out = block({ phone: "android" });
       expect(out).toContain(qrToString(invite));
       expect(out).not.toContain(qrToString(url));
-      expect(out).toContain("Scan that in the OpenMausBot app");
+      expect(out).toContain("Scan that in the Origin app");
       expect(out).toContain(`web browser:   ${url}`);
       expect(out).not.toContain("open or scan:");
     });
@@ -118,6 +118,7 @@ describe("openmausbot command line", () => {
       expect(out).not.toContain(qrToString(invite));
       expect(out).toContain(`phone app:     ${invite}`);
       expect(out).toContain(`open or scan:  ${url}`);
+      expect(out).toContain("above into the Origin app.");
     });
 
     it("says plainly when an Android phone asked for an app link this server cannot build", () => {
@@ -125,7 +126,7 @@ describe("openmausbot command line", () => {
       expect(out).toContain(qrToString(url));
       expect(out).toContain("The Android app needs the phone-app link");
       expect(out).toContain("OMB_PUBLIC_URL");
-      expect(out).not.toContain("Scan that in the OpenMausBot app");
+      expect(out).not.toContain("Scan that in the Origin app");
     });
   });
 

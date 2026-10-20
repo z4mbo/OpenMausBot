@@ -18,7 +18,7 @@ export type Refusal = "omb" | "this-computer" | "local-network" | "link-local" |
 
 /** How a refusal reads in the page-health line. */
 export const REFUSAL_TEXT: Record<Refusal, string> = {
-  omb: "OpenMausBot's own service",
+  omb: "Origin's own service",
   "this-computer": "a service on this computer that no bot started",
   "local-network": "the local network",
   "link-local": "a link-local address",
