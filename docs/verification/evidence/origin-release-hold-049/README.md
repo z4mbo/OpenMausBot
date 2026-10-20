@@ -1,0 +1,13 @@
+# Origin 0.4.2 verification and release hold
+
+Exact immutable app source: `7e89e33def92a3cce1b574a12e478eb392133fa2`. All final workflows and package audit passed. Publication is held because the live website changed to concurrent 0.5.0 source during verification. This archive does not claim a production release or private compiled-site browser acceptance.
+
+The 15 prepared distribution files total 1,858,102,633 bytes. The release manifest contains 13 payload/feed records; its checksum file covers those records. GitHub's two compressed workflow archives total 1,853,540,321 bytes, a separate quantity. No candidate draft/assets, backend key/export/deployment, public download/feed switch or website promotion occurred.
+
+Native static proof covers Windows x64 and macOS arm64/x64. The final receipt consumes the exact passed static proof and rehashes retained resources before running the frozen Git smoke script. Windows checkout CRLF serialization is accepted only when it equals exact Git LF-to-CRLF bytes; Mac retains raw Git equality. A selected compiled closure is compared only after its capture declarations, initializers and resolved references are verified. The failed attempts remain retained outside this archive with hashes in the final receipts. No passing static work was repeated for the final smoke continuation.
+
+The actual copied Windows server/browser smoke passed and left no owned processes, listeners or temporary files. Mac checks remain static; no installed Electron GUI, physical Mac, installer/updater, provider billing/reset or recipient email acceptance is asserted. No production account data was used.
+
+The private site image was built and source labelled. Docker's internal-network port behavior prevented its first browser start; owned cleanup passed and a guarded endpoint repair was prepared. The next admission stopped before starting when it observed a different live image. No private browser acceptance is fabricated. The live-image diagnostic never started its container, inspected only explicit source-file hashes, then removed that exact owned container. Its 321 matching files establish a 0.5.0 source fingerprint, not complete image provenance.
+
+See [the report](../../origin-0.4.2-verification-and-release-hold.md), [all workflow results](final-workflows.json), [native audit](native-audit.json), [distribution hashes](SHA256SUMS-0.4.2.txt), [concurrent source comparison](concurrent-source.json), and [explicit release hold](release-hold.json). The [prior UI archive](../origin-integration-048/ui/README.md) retains the 20 before/after and feature captures; they are not relabelled as production acceptance.

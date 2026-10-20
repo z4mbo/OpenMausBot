@@ -1,0 +1,15 @@
+{
+  "image": "sha256:af52ccde9fb6a84e6b915ebc6d95634ff8038202e1e2ce8ca51f8d235376c396",
+  "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+  "version": "0.4.2",
+  "publicMutation": false,
+  "validationSource": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+  "phase": "build",
+  "completed": true,
+  "completedAt": "2026-10-20T09:27:25.260Z",
+  "imageTag": "origin-audit-site:0.4.2-049-final",
+  "privateSite": "/root/origin-release-staging/0.4.2-cycle049/site",
+  "archiveSha256": "5b3ca74c8909329937eb11978dd9b30e2e9ff974aa0cf7f1e0b8be974a130a04",
+  "contextProofSha256": "028df721a7f6cd22c54c9d5e1df405d32cb1202dc7d38126f0164a1e48bd75ac",
+  "remoteResultSha256": "59aff8a47c9570cf51152881478190593e1b7d881e0afdd6eda5742dfcd688bc"
+}

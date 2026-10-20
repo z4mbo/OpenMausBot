@@ -1,0 +1,112 @@
+{
+  "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+  "version": "0.4.2",
+  "status": "HELD_CONCURRENT_0_5_SOURCE",
+  "files": [
+    {
+      "name": "README.md",
+      "bytes": 2658,
+      "sha256": "a3daa465cda6e35d8455b7876c006faebae91a8ca5af981fe484bb00fdefdbda"
+    },
+    {
+      "name": "SHA256SUMS-0.4.2.txt",
+      "bytes": 1180,
+      "sha256": "ba73ac7b41ef250177fcca1940c8ed5013e3fab4207b9feacc3ea4ccc8668813"
+    },
+    {
+      "name": "actual-checkouts.json",
+      "bytes": 1694,
+      "sha256": "1b10630a9bcc6ac45e72b92b6860156c94e11750dd31ff19a5a8fd2fd8d0528f"
+    },
+    {
+      "name": "checkout-equivalence.json",
+      "bytes": 471,
+      "sha256": "0e6cfe4ac67701b80a26600edc7714457dfa4feea7a63b95b08710bb123b8a2e"
+    },
+    {
+      "name": "concurrent-handoff.md",
+      "bytes": 4005,
+      "sha256": "65a5038e475ef74fd73861b0a76032e57c00937c33d786faeac8bae4c77fd428"
+    },
+    {
+      "name": "concurrent-patch-presence.json",
+      "bytes": 6452,
+      "sha256": "efe9ddf2cd80b74acc1e374bf67dd3eef6ca8a07c9ee1aff731315fb1267e3c9"
+    },
+    {
+      "name": "concurrent-source.json",
+      "bytes": 13840,
+      "sha256": "f515e9484c2574f3944d827bdb132b903a0eb66a7a1e2ea8f35977bbe74383a6"
+    },
+    {
+      "name": "distribution-ready.json",
+      "bytes": 836,
+      "sha256": "6ccf9df0738c2a9fee163d256a13e91dc1bedb92765707c7a866db25c89fb34c"
+    },
+    {
+      "name": "download-ready.json",
+      "bytes": 634,
+      "sha256": "6bb8d1fec878c0f88fd56638b4dc9f00a9682c6346cc230106d921d6fa4c34b2"
+    },
+    {
+      "name": "failed-preview-cleanup.json",
+      "bytes": 290,
+      "sha256": "b234f06629cec059e73d0b60f935738f629966ba3b48151ea749e5f4b19aec1e"
+    },
+    {
+      "name": "final-workflows.json",
+      "bytes": 9501,
+      "sha256": "149d574a0a5b5f7ea73baed3a436e98b55cfd251bdaadc03462a93135edfb99e"
+    },
+    {
+      "name": "native-artifacts.json",
+      "bytes": 1386,
+      "sha256": "b903f36c44f7f91fd7096875129e3183bb8ff3774c9a3d59c1539818054f27ab"
+    },
+    {
+      "name": "native-audit.json",
+      "bytes": 10102,
+      "sha256": "1bc70ee4d5387e8a3e5c9fc896f9291a4e430bf230f59794fcb0420f91aab938"
+    },
+    {
+      "name": "native-static-results.json",
+      "bytes": 456113,
+      "sha256": "b14fdd3df2d9f49230dda16770a40eb19bc40a2738bd34ce87ff3247adc1cf0a"
+    },
+    {
+      "name": "preview-repair-review.json",
+      "bytes": 6488,
+      "sha256": "92b6904540a5f67a803e3bdfc32efab24dcfacc8dc549d02a6ca7ea6062e7087"
+    },
+    {
+      "name": "private-build-completion.json",
+      "bytes": 3501,
+      "sha256": "32be23cbb285b320361061f4d0717812d11016792696f97d322399e03aafcf76"
+    },
+    {
+      "name": "private-site-build.json",
+      "bytes": 737,
+      "sha256": "79f062de0a290478d8cc24a7e05693a2be29627084c24b3d13d4f6dc7a678a2c"
+    },
+    {
+      "name": "release-hold.json",
+      "bytes": 1137,
+      "sha256": "a31aa114e96a02eb764acd57ebfb0ba4d9f7bcb891fbd47e0fe4dfecff56e348"
+    },
+    {
+      "name": "release-manifest-0.4.2.json",
+      "bytes": 2244,
+      "sha256": "1958d0d15e37f6c48eb8c848fb8aa1d2792d5ca23d42f87a80e45073f71bbf7d"
+    },
+    {
+      "name": "windows-process-closure.json",
+      "bytes": 1371,
+      "sha256": "ae3415dee97a90dc1718f3c84944c2782d7976c1a74b68bc944d8cfdfccf84fa"
+    },
+    {
+      "name": "windows-smoke.log",
+      "bytes": 668,
+      "sha256": "c19d158e8917b3f8c0e4f746769f93c1b2f4cf317d956937cabdaa5be093d038"
+    }
+  ]
+}

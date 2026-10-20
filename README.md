@@ -29,6 +29,8 @@ Origin combines project management with the local agent runtime from [OpenMausBo
 
 ## 0.4.2 candidate
 
+The [final verification and release hold](docs/verification/origin-0.4.2-verification-and-release-hold.md) records green final CI, all three package inspections and the isolated Windows server smoke. Publication is held because another task deployed newer 0.5.0 website source while verification ran. These fixes need integration with that concurrent work under one release owner; 0.4.2 is not advertised as published.
+
 The [0.4.2 candidate](docs/verification/origin-candidate-049.md) combines the published 0.4.0 Pages, Campaigns, pipeline sequences, monthly budgets and local-access security with per-agent ordered model backups, daily AI model API budgets, opt-in teammate model sources, shared-agent identity preservation, synchronized project order, specialist conversation navigation and compact Usage. The [0.3.2 candidate](docs/verification/origin-candidate-047.md) passed 6,254 client/shared tests but was held when 0.4.0 was published concurrently. Its fixes are carried forward, including readable narrow-window project tools and connection readiness. GitHub, the website, update feeds and backend are verified separately before delivery.
 
 Model backups are opt-in and follow up to five exact account/model choices. Only a provider-confirmed quota refusal can trigger quota fallback; unavailable Usage meters, sign-in failures and ordinary rate limits cannot. Origin automatically sends the original request again only when no reply, reasoning or tool action began and the first attempt has stopped. After partial work, switching models leaves the existing work for a person to continue. Paid API backups require their own permission.

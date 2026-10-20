@@ -1,0 +1,282 @@
+{
+  "observedAt": "2026-10-20T09:06:27.5804286Z",
+  "expectedSource": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+  "runs": [
+    {
+      "kind": "ci",
+      "id": 39393325724,
+      "path": ".github/workflows/ci.yml",
+      "event": "pull_request",
+      "branch": "codex/shared-agent-conversations",
+      "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+      "attempt": 1,
+      "pinMatches": true,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39393325724",
+      "jobs": [
+        {
+          "id": 118529858652,
+          "name": "typecheck + lint",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:25:46Z",
+          "completed_at": "2026-10-20T08:28:47Z"
+        },
+        {
+          "id": 118531062588,
+          "name": "packaged server smoke (windows-latest)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T08:31:20Z"
+        },
+        {
+          "id": 118531062650,
+          "name": "macOS smokes (packaged server + Electron)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:56Z",
+          "completed_at": "2026-10-20T08:31:53Z"
+        },
+        {
+          "id": 118531062694,
+          "name": "packaged server smoke (ubuntu-latest)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T08:30:04Z"
+        },
+        {
+          "id": 118531062756,
+          "name": "Windows CUA host smoke",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:50Z",
+          "completed_at": "2026-10-20T08:30:13Z"
+        },
+        {
+          "id": 118531062758,
+          "name": "behavior evals (offline tiers 1-3)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T08:32:52Z"
+        },
+        {
+          "id": 118531062872,
+          "name": "vitest (ubuntu-latest, shard 2/4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T08:53:07Z"
+        },
+        {
+          "id": 118531062897,
+          "name": "vitest (ubuntu-latest, shard 1/4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T08:54:52Z"
+        },
+        {
+          "id": 118531062920,
+          "name": "renderer smoke (control-omb ui, Ubuntu 24.04)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T08:34:12Z"
+        },
+        {
+          "id": 118531062923,
+          "name": "vitest (ubuntu-latest, shard 4/4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T08:46:40Z"
+        },
+        {
+          "id": 118531062937,
+          "name": "cloudflared installer (Linux ARM64)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:51Z",
+          "completed_at": "2026-10-20T08:29:03Z"
+        },
+        {
+          "id": 118531062946,
+          "name": "vitest (ubuntu-latest, shard 3/4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T08:50:14Z"
+        },
+        {
+          "id": 118531062997,
+          "name": "vitest (windows-latest, shard 3/4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T09:04:06Z"
+        },
+        {
+          "id": 118531063003,
+          "name": "vitest (windows-latest, shard 4/4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T09:04:25Z"
+        },
+        {
+          "id": 118531063031,
+          "name": "vitest (windows-latest, shard 2/4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T09:00:00Z"
+        },
+        {
+          "id": 118531063348,
+          "name": "control-plane check + workerd tests + dry run",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T08:29:56Z"
+        },
+        {
+          "id": 118531063362,
+          "name": "vitest (windows-latest, shard 1/4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:49Z",
+          "completed_at": "2026-10-20T09:03:50Z"
+        },
+        {
+          "id": 118531064619,
+          "name": "open-source edition builds without enterprise/",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:28:50Z",
+          "completed_at": "2026-10-20T08:30:53Z"
+        },
+        {
+          "id": 118531520665,
+          "name": "deploy composio broker (Cloudflare Worker)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-20T08:29:57Z",
+          "completed_at": "2026-10-20T08:29:56Z"
+        },
+        {
+          "id": 118545424040,
+          "name": "CI",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T09:04:28Z",
+          "completed_at": "2026-10-20T09:04:31Z"
+        }
+      ]
+    },
+    {
+      "kind": "cloud-pr",
+      "id": 39393325708,
+      "path": ".github/workflows/origin-cloud.yml",
+      "event": "pull_request",
+      "branch": "codex/shared-agent-conversations",
+      "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+      "attempt": 1,
+      "pinMatches": true,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39393325708",
+      "jobs": [
+        {
+          "id": 118529858561,
+          "name": "Backend tests, site build",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:25:46Z",
+          "completed_at": "2026-10-20T08:27:30Z"
+        }
+      ]
+    },
+    {
+      "kind": "docs",
+      "id": 39393325713,
+      "path": ".github/workflows/docs.yml",
+      "event": "pull_request",
+      "branch": "codex/shared-agent-conversations",
+      "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+      "attempt": 1,
+      "pinMatches": true,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39393325713",
+      "jobs": [
+        {
+          "id": 118529857899,
+          "name": "Build, typecheck, and lint",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:25:45Z",
+          "completed_at": "2026-10-20T08:26:46Z"
+        }
+      ]
+    },
+    {
+      "kind": "native",
+      "id": 39393415574,
+      "path": ".github/workflows/origin-desktop.yml",
+      "event": "push",
+      "branch": "origin-v0.4.2",
+      "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+      "attempt": 1,
+      "pinMatches": true,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39393415574",
+      "jobs": [
+        {
+          "id": 118530158063,
+          "name": "Version and changelog",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:26:31Z",
+          "completed_at": "2026-10-20T08:27:20Z"
+        },
+        {
+          "id": 118530494018,
+          "name": "Windows x64",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:27:22Z",
+          "completed_at": "2026-10-20T08:37:19Z"
+        },
+        {
+          "id": 118530494145,
+          "name": "macOS (arm64 + x64)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-20T08:27:26Z",
+          "completed_at": "2026-10-20T08:33:44Z"
+        }
+      ]
+    }
+  ],
+  "checkout": {
+    "releaseSource": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+    "mergeSource": "bb4204f926fde779010f63eaf158e7e8a6ed61f2",
+    "parents": [
+      "8dc1c710a1a98636a1dc159e59b6ce838fff45aa",
+      "7e89e33def92a3cce1b574a12e478eb392133fa2"
+    ],
+    "tree": "39ad7d092b51a54eb70c78f3b8602a84fddc1d52",
+    "recursiveBytesEqual": true,
+    "entries": 8365,
+    "recursiveSha256": "c98eb63d0a8d1e5fd345a8969fd3e0dc96abcb519ee7ee9000c70cbbce36d30b",
+    "sourceEdits": false
+  },
+  "allSuccessful": true,
+  "sourceEdits": false,
+  "workflowMutations": false
+}

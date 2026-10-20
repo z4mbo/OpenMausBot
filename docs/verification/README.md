@@ -92,6 +92,7 @@ Use only mapped, tested commands:
 - [Origin 0.3.1 release notes](origin-0.3.1-release-notes.md)
 - [Origin 0.3.2 correction candidate](origin-candidate-047.md)
 - [Origin 0.3.2 release notes](origin-0.3.2-release-notes.md)
+- [Origin 0.4.2 final verification and concurrent-release hold](origin-0.4.2-verification-and-release-hold.md)
 - [Origin 0.4.2 final correction candidate](origin-candidate-049.md)
 - [Origin 0.4.2 release notes](origin-0.4.2-release-notes.md)
 - [Origin 0.4.1 held combined correction candidate](origin-candidate-048.md)
