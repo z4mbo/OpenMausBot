@@ -44,15 +44,22 @@ export function ChatUsagePopover({ bot, messages }: { bot: Bot; messages: readon
   const [position, setPosition] = useState<ReturnType<typeof chatUsagePosition> | null>(null);
   useLayoutEffect(() => {
     if (!open || !trigger.current) return;
-    const header = trigger.current.closest<HTMLElement>('[data-glass-bar="top"]') ?? trigger.current;
+    const button = trigger.current;
+    const header = button.closest<HTMLElement>('[data-glass-bar="top"]') ?? button;
     const update = () => {
+      const triggerBounds = button.getBoundingClientRect();
+      const visibility = window.getComputedStyle(button).visibility;
+      if (!button.isConnected || !button.getClientRects().length || triggerBounds.width <= 0 || triggerBounds.height <= 0 || visibility === "hidden" || visibility === "collapse") {
+        setPosition(null);
+        return;
+      }
       const bounds = header.getBoundingClientRect();
-      const main = trigger.current?.closest("main")?.getBoundingClientRect() ?? bounds;
+      const main = button.closest("main")?.getBoundingClientRect() ?? bounds;
       const next = chatUsagePosition({ bottom: bounds.bottom, left: main.left, right: main.right }, { width: window.innerWidth, height: window.innerHeight });
       setPosition(current => current && Object.keys(next).every(key => current[key as keyof typeof next] === next[key as keyof typeof next]) ? current : next);
     };
     update();
-    const observer = new ResizeObserver(update); observer.observe(header);
+    const observer = new ResizeObserver(update); observer.observe(header); observer.observe(button);
     window.addEventListener("resize", update); window.addEventListener("scroll", update, true);
     return () => { observer.disconnect(); window.removeEventListener("resize", update); window.removeEventListener("scroll", update, true); };
   }, [open, bot.id, bot.threadId]);
