@@ -5,6 +5,8 @@ export const broadcastChannel = v.union(v.literal("x"), v.literal("bluesky"), v.
 
 export const broadcastStatus = v.union(v.literal("draft"), v.literal("scheduled"), v.literal("publishing"), v.literal("published"), v.literal("failed"));
 
+export const broadcastMetrics = v.object({ likes: v.number(), reposts: v.number(), replies: v.number(), impressions: v.optional(v.number()), at: v.number() });
+
 /** One channel of a post: its own text and, once tried, how publishing there went. */
 export const broadcastVariant = v.object({
   channel: broadcastChannel,
@@ -13,7 +15,15 @@ export const broadcastVariant = v.object({
   url: v.optional(v.string()),
   error: v.optional(v.string()),
   publishedAt: v.optional(v.number()),
+  /** Which of the publisher's accounts on this channel posts it; absent means their default account. */
+  accountId: v.optional(v.string()),
+  accountLabel: v.optional(v.string()),
+  metrics: v.optional(broadcastMetrics),
 });
+
+export const broadcastFormat = v.union(v.literal("post"), v.literal("reel"));
+
+export const broadcastReel = v.object({ coverMs: v.optional(v.number()), music: v.optional(v.string()) });
 
 export const broadcastTables = {
   broadcastPosts: defineTable({
@@ -21,6 +31,8 @@ export const broadcastTables = {
     variants: v.array(broadcastVariant),
     assetIds: v.array(v.id("designAssets")),
     status: broadcastStatus,
+    format: v.optional(broadcastFormat),
+    reel: v.optional(broadcastReel),
     scheduledAt: v.optional(v.number()),
     authorUserId: v.id("users"),
     /** Set when an agent wrote or last changed the post; such a post publishes only after a person approves it. */

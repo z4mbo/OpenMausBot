@@ -452,6 +452,7 @@ export class BrowserLive {
     const resetting = this.sessionResets.get(viewer.session);
     if (resetting) await resetting;
     await this.runtime.settled(viewer.session);
+    await this.runtime.ownDaemon(viewer.session, viewer.spec);
     let status = await this.command(viewer, ["stream", "status"], STATUS_PROBE_MS);
     if (status.enabled !== true) {
       try { status = await this.command(viewer, ["stream", "enable"]); }

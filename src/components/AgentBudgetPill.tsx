@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
 import { useCloudQuery } from "@/lib/origin-cloud";
 import { budgetPercent, formatUsd, type AgentBudget } from "@/lib/agent-budget";
 import type { SharedBotLink } from "../../shared/wire";
-import { BudgetEditor, type BudgetTarget } from "./origin-org/BudgetEditor";
+import { BudgetEditor, type BudgetTarget } from "./BudgetEditor";
 
 const pill = "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12.5px] text-ink";
 
@@ -35,7 +35,7 @@ export function AgentBudgetPillView({ budget, onRaise, onDetails, panelId, open 
         <Wallet size={13} className={cn("shrink-0", over ? "text-danger" : "text-warning")} aria-hidden="true" />
         <span className="tabular-nums">{budgetStatus(budget)}</span>
         {onRaise && <button type="button" aria-haspopup={onDetails ? "dialog" : undefined} aria-expanded={open} aria-controls={open ? panelId : undefined}
-          className="rounded-full px-1.5 font-medium text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus" onClick={onRaise}>Raise budget</button>}
+          className="rounded-full px-1.5 font-medium text-accent-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus" onClick={onRaise}>Raise budget</button>}
       </span>
     </span>
   );
@@ -77,7 +77,7 @@ function AgentBudgetControl({ budget, target }: { budget: AgentBudget; target: B
         <div className="flex items-start justify-between gap-2"><span role="status" className="min-w-0 break-words">{budgetStatus(budget)}</span><button type="button" aria-label="Close monthly budget" autoFocus={panel === "details"} onClick={close} className="shrink-0 rounded p-1 text-ink-secondary hover:bg-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"><X size={13} /></button></div>
         <p className="mt-1 text-ink-secondary">{formatUsd(budget.spentUsd)} of {formatUsd(budget.monthlyUsd)} this month</p>
         {panel === "edit" && budget.canRaise ? <BudgetEditor teamId={budget.teamId} target={target} label={budget.name} monthlyUsd={budget.monthlyUsd} onDone={close} />
-          : budget.canRaise && <button type="button" onClick={() => setPanel("edit")} className="mt-2 rounded px-1 py-1 font-medium text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">Raise budget</button>}
+          : budget.canRaise && <button type="button" onClick={() => setPanel("edit")} className="mt-2 rounded px-1 py-1 font-medium text-accent-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">Raise budget</button>}
       </div>, document.body)}
     </span>
   );

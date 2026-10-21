@@ -150,6 +150,9 @@ export async function mergePullRequest(service: GitHubService, repoUrl: string, 
   }
   const merged = await githubRequest<{ sha: string; merged: boolean }>(service, `${repositoryPath(repoUrl)}/pulls/${number}/merge`, token, {
     method: "PUT", body: JSON.stringify({ sha: detail.headSha, merge_method: "squash", commit_title: `${detail.title} (#${number})` }),
+  }).catch((error: unknown) => {
+    if (error instanceof GitHubHttpError && error.status === 405) throw new Error(`GitHub refused to merge #${number}. On a protected default branch this usually means it needs an approving review of its latest commit from someone other than its author: approve it here when someone else opened it, or on GitHub, then merge again.`);
+    throw error;
   });
   if (!merged.merged) throw new Error(`GitHub did not merge #${number}`);
   return { sha: merged.sha, detail };
@@ -197,11 +200,10 @@ export async function linkClosingReference(service: GitHubService, repoUrl: stri
  * Runs `fn` with this project's GitHub credential: the Origin App's installation on the project's repository when the
  * App can mint one, else the project's own connection. Security: never the legacy owner token or another project's.
  */
-export async function withProjectGitHub<T>(service: GitHubService, projectId: string, fn: (token: string, repoUrl: string) => Promise<T>): Promise<T> {
+export async function withProjectGitHub<T>(service: GitHubService, projectId: string, fn: (token: string, repoUrl: string) => Promise<T>, extra: Readonly<Record<string, string>> = {}): Promise<T> {
   const { repoUrl, token } = await projectConnection(service, projectId);
   const config = appConfig(service);
-  if (config?.appId && config.privateKey) return withInstallation(service, projectId, repoUrl, (installation) => fn(installation, repoUrl));
-  if (!token) throw new Error("This project has no GitHub connection. A workspace admin connects GitHub in Settings > Integrations and authorizes the repository.");
+  if ((config?.appId && config.privateKey) || !token) return withInstallation(service, projectId, repoUrl, (installation) => fn(installation, repoUrl), extra);
   return fn(token, repoUrl);
 }
 

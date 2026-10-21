@@ -31,6 +31,37 @@ The desktop application ships two separate components:
   checks are required before those executable bytes are published and pinned.
   Upstream 0.37.0 does not include that fix; keep this tested Windows build
   until an updated official or backported release passes those native checks.
+  Both Windows revisions also start a session's daemon with its stderr piped to
+  the short-lived CLI call that spawned it (`ensure_daemon` in
+  `cli/src/connection.rs`). Once that call exits, the daemon's next stderr
+  write fails and panics; it writes one when more than 4096 CDP events queue
+  up, so a page load of ~600+ requests breaks the session. The server works
+  around it with `server/browser-daemon.ts`, which starts each session's daemon
+  itself with stderr on the NUL device. A vendor fix, `0.36.0-omb.3`, fits the
+  existing flow; nothing is downloaded outside the reviewed Linux runner:
+  1. On that runner, extract the pinned source archive and apply the current
+     patch, as `scripts/build-windows-browser-vendor.mjs` does, in a git
+     working tree.
+  2. In the Windows branch of `ensure_daemon`, spawn the daemon with
+     `.stderr(Stdio::null())` (or a log file under the socket directory)
+     instead of `Stdio::piped()`, and drop or adapt the code that reads that
+     pipe for startup errors. Add a `// Modified by OpenMausBot` notice and set
+     `0.36.0-omb.3` in `cli/Cargo.toml` and `cli/Cargo.lock`.
+  3. Regenerate `agent-browser-windows-stdio.patch` with `git diff` against
+     the base commit, keeping the header notice, then update
+     `WINDOWS_VENDOR_VERSION`, `WINDOWS_VENDOR_PATCH_SHA256` (SHA-256 of the
+     new patch) and the provenance `scope` in that script, and its test.
+  4. Run `node scripts/build-windows-browser-vendor.mjs --output
+     /absolute/new/dir`; it records the executable digest in
+     `provenance.json`.
+  5. On native Windows, point `OMB_AGENT_BROWSER_PATH` at the candidate and
+     run the cold-start and close/reopen checks plus
+     `server/browser-daemon.e2e.test.ts` and
+     `scripts/testing/session-daemon.e2e.test.ts`, once with the server's
+     daemon start disabled, to prove the build alone survives the 1,200-module
+     page.
+  6. Publish the executable and pin its URL, size and SHA-256 in the `win32-x64`
+     entry of `server/browser-engine-release.ts`.
 - **Chromium Headless Shell 153.0.8010.47**, Google's official
   `chrome-headless-shell` assets published through Chrome for Testing:
   <https://googlechromelabs.github.io/chrome-for-testing/153.0.8010.47.json>.

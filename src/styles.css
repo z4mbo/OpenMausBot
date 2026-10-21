@@ -103,6 +103,8 @@
 }
 .table-action:hover, .table-action[aria-pressed="true"] { background: var(--color-raised); color: var(--color-ink); }
 .table-action:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+[data-origin-item][data-origin-focused] { outline: 2px solid var(--color-accent); outline-offset: 2px; animation: origin-focus-in var(--motion-slow) var(--ease-out); }
+@keyframes origin-focus-in { from { outline-color: transparent; } }
 @media (pointer: coarse) { .table-action { min-width: 40px; min-height: 40px; } }
 /* inside a 28px file pill under a reply, the table preview is a 24px circle */
 .file-chip .table-action { width: 24px; height: 24px; min-width: 24px; min-height: 24px; border-radius: 9999px; }
@@ -1105,6 +1107,11 @@ body {
 .glass-bar[data-glass-bar="top"]::before {
   mask-image: linear-gradient(to bottom, black calc(100% - var(--glass-edge)), transparent);
 }
+.glass-bar.glass-bar-plain::before {
+  background: var(--glass-tint, var(--color-panel));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 .glass-bar[data-glass-bar="bottom"]::before {
   top: calc(-1 * var(--glass-reach, 0px));
   mask-image: linear-gradient(to top, black calc(100% - var(--glass-reach, 0px)), transparent);
@@ -1298,6 +1305,14 @@ body {
 }
 @keyframes rise {
   from { transform: translateY(10px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes section-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes item-in {
+  from { transform: translateY(4px); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
 /* thinking dots in the onboarding chat scenes */

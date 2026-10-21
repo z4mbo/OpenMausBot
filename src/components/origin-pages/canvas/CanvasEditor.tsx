@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { newNode } from "../../../../shared/canvas-ops";
 import {
-  FONT_STACKS, ancestors, descendants, effectiveParent, isLive, layoutText, nextZ, worldOrigin,
+  ancestors, descendants, effectiveParent, isLive, layoutText, nextZ, worldOrigin,
   type CanvasNode, type CanvasNodeType, type Scene,
 } from "../../../../shared/canvas-scene";
 import { cn } from "@/lib/cn";
 import { copyText } from "@/lib/copy-text";
 import {
-  CLIPBOARD_MARK, copySelection, deleteNodes, duplicateNodes, parseClipboard, pasteClipboard, reparent, reorder, topmost, unwrap, wrapNodes, zAt,
+  CLIPBOARD_MARK, copySelection, deleteNodes, dropMoved, duplicateNodes, frameAt as findFrameAt, parseClipboard, pasteClipboard, reorder, toggleAutoLayout, topmost, unwrap, wrapNodes,
   type Clipboard, type Reorder,
 } from "./actions";
 import { angleOf, moveEndpoint, refitPoints, resizeBox, resizeMany, resizeSingle } from "./gestures";
@@ -15,10 +15,19 @@ import {
   clampZoom, contains, containsPoint, fitView, intersects, measureText, normalizedBox, snapBox, toScreen, toWorld, unionBox, worldBounds, worldBox,
   type Box, type Guide, type Point, type View,
 } from "./geometry";
-import { SceneLayer, type RenderOptions } from "./NodeView";
-import { Overlay, type Handle, type RemoteCursor } from "./Overlay";
+import { SceneLayer, changedSubtrees, type RenderOptions } from "./NodeView";
+import { Overlay, type Handle, type RemoteCursor, type RemoteSelection } from "./Overlay";
 import { CanvasToolbar, ZoomControls, type Tool } from "./Toolbar";
 import type { CanvasScene } from "./use-canvas-scene";
+import { anchorsOf, isPathNode, toggleSmooth, usePenTool, withAnchors, type Anchor } from "./pen";
+import { addPointAt } from "./path-edit";
+import { isCropped, panCrop } from "./image-crop";
+import { booleanGroup, flatten } from "./booleans";
+import { detach, makeComponent } from "../../../../shared/canvas-components";
+import { Rulers, RULER, type PageGuide } from "./Rulers";
+import "./canvas-ground.css";
+import { TextEditor, contrastInk, themeInk } from "./TextEditor";
+import { svgNodes } from "./svg-import";
 
 export type PlacedImage = { fileId: string; width: number; height: number; name: string };
 
@@ -34,6 +43,23 @@ export type CanvasEditorProps = {
   onSelection?: (ids: readonly string[]) => void;
   inspector: (selection: SelectionApi) => ReactNode;
   notify(message: string): void;
+  /** The current page's ruler guides; rulers and guides show when `onGuides` is given. */
+  guides?: readonly PageGuide[];
+  onGuides?(guides: PageGuide[]): void;
+  remoteSelections?: readonly RemoteSelection[];
+  /** A click with the comment tool, at a world point, on the node under it if any. */
+  onComment?(world: Point, nodeId: string | null): void;
+  /** Drawn over the stage in screen space: comment pins and the like. */
+  stageLayer?: (view: View) => ReactNode;
+  onPresent?(frameId: string | null): void;
+  /** Overlay arrows of prototype links show while this is on. */
+  showPrototype?: boolean;
+  /** The page on show; switching it clears the selection and fits the new page. */
+  page?: string;
+  /** A node to select and zoom to once it is on the page. */
+  focus?: string;
+  onFocused?(): void;
+  coveredRight?: number;
 };
 
 export type SelectionApi = {
@@ -42,37 +68,43 @@ export type SelectionApi = {
   select(ids: readonly string[]): void;
   zoomTo(ids: readonly string[]): void;
   run(command: Command): void;
+  /** The world point at the centre of the visible canvas. */
+  centre(): Point;
 };
 
-export type Command = "delete" | "duplicate" | "group" | "ungroup" | "frame" | "copy" | "paste" | "select-all" | "fit" | Reorder | "hide" | "lock";
+export type Command = "delete" | "duplicate" | "group" | "ungroup" | "frame" | "copy" | "paste" | "select-all" | "fit" | Reorder | "hide" | "lock"
+  | "union" | "subtract" | "intersect" | "exclude" | "flatten" | "component" | "detach" | "present" | "edit-path";
 
 type Gesture =
   | { kind: "pan"; start: Point; view: View }
   | { kind: "marquee"; start: Point; base: string[]; scope: string | null }
-  | { kind: "move"; start: Point; originals: CanvasNode[]; box: Box; moved: boolean; click: string | null; copies: boolean }
+  | { kind: "move"; start: Point; originals: CanvasNode[]; box: Box; moved: boolean; click: string | null; copiedFrom: string[] }
   | { kind: "resize"; handle: Handle; originals: CanvasNode[]; box: Box; base: Scene; baseIndex: Map<string | null, CanvasNode[]> }
   | { kind: "rotate"; centre: Point; start: number; original: CanvasNode }
   | { kind: "create"; type: CanvasNodeType; start: Point; parentId: string | null; node: CanvasNode | null }
   | { kind: "endpoint"; end: 0 | 1; original: CanvasNode }
-  | { kind: "pinch"; distance: number; mid: Point; view: View };
+  | { kind: "pinch"; distance: number; mid: Point; view: View }
+  | { kind: "pen"; start: Point }
+  | { kind: "crop"; start: Point; original: CanvasNode }
+  | { kind: "anchor"; at: number; part: "point" | "in" | "out"; start: Point; anchors: Anchor[]; original: CanvasNode; world: Point; mirror: boolean };
 
-const TOOL_KEYS: Record<string, Tool> = { v: "move", h: "hand", f: "frame", a: "frame", r: "rect", o: "ellipse", e: "ellipse", l: "line", t: "text" };
+const TOOL_KEYS: Record<string, Tool> = { v: "move", h: "hand", f: "frame", a: "frame", r: "rect", o: "ellipse", e: "ellipse", l: "line", t: "text", p: "pen", c: "comment" };
 const isTyping = (target: EventTarget | null) => target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
-const contrastInk = (fill: string | null | undefined, fallback: string) => {
-  if (!fill || fill.length < 7) return fallback;
-  const [r, g, b] = [1, 3, 5].map((at) => parseInt(fill.slice(at, at + 2), 16));
-  return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? "#111111" : "#F5F5F5";
-};
 const round = (value: number) => Math.round(value);
+
+const FAR = 1e9;
+const near = (list: Guide[]) => list.filter((guide) => Math.abs(guide.from) < FAR / 2 && Math.abs(guide.to) < FAR / 2);
+type Panels = { layers: boolean; inspector: boolean };
+const oneOverlay = (current: Panels, next: Panels): Panels =>
+  next.layers && !current.layers ? { layers: true, inspector: false } : next.inspector && !current.inspector ? { layers: false, inspector: true } : next;
 const textName = (text: string | undefined) => (text ?? "").trim().replace(/\s+/g, " ").slice(0, 60) || "Text";
 
-function themeInk(element: Element | null): string {
-  const match = element ? /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(element).color) : null;
-  if (!match) return "#F5F5F5";
-  return `#${match.slice(1, 4).map((value) => Number(value).toString(16).padStart(2, "0")).join("")}`.toUpperCase();
-}
+const INSPECTOR_WIDTH = 256;
+const LAYERS_WIDTH = 240;
+const PANEL_GAP = 8;
+const floatingPanel = "rounded-xl border border-hairline/50";
 
-export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, addImage, imagePicker, layers, inspector, notify, onSelection }: CanvasEditorProps) {
+export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, addImage, imagePicker, layers, inspector, notify, onSelection, guides: pageGuides, onGuides, remoteSelections, onComment, stageLayer, onPresent, showPrototype, page, focus, onFocused, coveredRight = 0 }: CanvasEditorProps) {
   const { scene, index } = canvas;
   const root = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -86,7 +118,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   const [editing, setEditing] = useState<{ id: string; created: boolean; original: CanvasNode } | null>(null);
   const [panning, setPanning] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [panels, setPanels] = useState<{ layers: boolean; inspector: boolean } | null>(null);
+  const [panels, setPanels] = useState<Panels | null>(null);
   const gesture = useRef<Gesture | null>(null);
   const pointers = useRef(new Map<number, Point>());
   const space = useRef(false);
@@ -96,13 +128,23 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   const lastDown = useRef<{ at: number; hit: string | null }>({ at: 0, hit: null });
   const [imageMenu, setImageMenu] = useState(false);
   const [pendingZoom, setPendingZoom] = useState<string[] | null>(null);
+  const [pathEdit, setPathEdit] = useState<{ id: string; at: number | null } | null>(null);
+  const [rulers, setRulers] = useState(true);
+  const [cropEdit, setCropEdit] = useState<string | null>(null);
+  const cropNode = cropEdit ? scene.get(cropEdit) : undefined;
 
   const live = useMemo(() => selected.filter((id) => isLive(scene.get(id))), [selected, scene]);
   const nodes = useMemo(() => live.map((id) => scene.get(id)!), [live, scene]);
   useEffect(() => { onSelection?.(live); }, [live, onSelection]);
   const [outerWidth, setOuterWidth] = useState(0);
   const compact = outerWidth > 0 && outerWidth < 860;
+  const narrow = outerWidth > 0 && outerWidth < 480;
   const shown = panels ?? { layers: !compact, inspector: !compact };
+  const insets = {
+    left: !compact && shown.layers ? LAYERS_WIDTH + PANEL_GAP * 2 : 0,
+    right: Math.max(!compact && shown.inspector ? INSPECTOR_WIDTH + PANEL_GAP * 2 : 0, coveredRight),
+  };
+  const stageCentre = { x: insets.left + Math.max(0, size.width - insets.left - insets.right) / 2, y: size.height / 2 };
 
   useLayoutEffect(() => {
     const element = stage.current;
@@ -121,9 +163,10 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
 
   const zoomTo = useCallback((ids?: readonly string[]) => {
     const box = contentBox(ids);
-    if (!box || !size.width) { setView({ x: size.width / 2, y: size.height / 2, zoom: 1 }); return; }
-    setView(fitView(box, size, compact ? 24 : 64, ids?.length ? 8 : 1));
-  }, [contentBox, size, compact]);
+    if (!box || !size.width) { setView({ x: stageCentre.x, y: stageCentre.y, zoom: 1 }); return; }
+    const fitted = fitView(box, { width: Math.max(1, size.width - insets.left - insets.right), height: size.height }, compact ? 24 : 64, ids?.length ? 8 : 1);
+    setView({ ...fitted, x: fitted.x + insets.left });
+  }, [contentBox, size, compact, stageCentre.x, stageCentre.y, insets.left, insets.right]);
 
   useEffect(() => {
     if (!pendingZoom || !pendingZoom.every((id) => isLive(scene.get(id)))) return;
@@ -132,10 +175,27 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   }, [pendingZoom, scene, zoomTo]);
 
   useEffect(() => {
+    if (!focus || !index.get(null)?.some((node) => node.id === focus || descendants(scene, node.id, index).some((child) => child.id === focus))) return;
+    setSelected([focus]);
+    setPendingZoom([focus]);
+    onFocused?.();
+  }, [focus, index]);
+
+  const shownPage = useRef(page);
+  useEffect(() => {
+    if (shownPage.current === page) return;
+    shownPage.current = page;
+    fitted.current = false;
+    setSelected([]);
+    setPathEdit(null);
+    penTool.cancel();
+  }, [page]);
+
+  useEffect(() => {
     if (fitted.current || !size.width) return;
     fitted.current = true;
     zoomTo();
-  }, [size.width, zoomTo]);
+  }, [size.width, zoomTo, page]);
 
   const zoomAt = useCallback((factor: number, anchor: Point) => {
     setView((current) => {
@@ -162,22 +222,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
 
   const select = useCallback((ids: readonly string[]) => { setSelected([...ids]); }, []);
 
-  const frameAt = useCallback((point: Point, exclude: ReadonlySet<string>): string | null => {
-    let best: { id: string; depth: number; order: number } | null = null;
-    let order = 0;
-    const walk = (parent: string | null, depth: number) => {
-      for (const node of index.get(parent) ?? []) {
-        order++;
-        if (node.hidden || exclude.has(node.id)) continue;
-        if (node.type === "frame" && containsPoint(worldBox(scene, node), point)) {
-          if (!best || depth > best.depth || (depth === best.depth && order > best.order)) best = { id: node.id, depth, order };
-          walk(node.id, depth + 1);
-        } else if (node.type === "group") walk(node.id, depth + 1);
-      }
-    };
-    walk(null, 0);
-    return (best as { id: string } | null)?.id ?? null;
-  }, [scene, index]);
+  const frameAt = useCallback((point: Point, exclude: ReadonlySet<string>) => findFrameAt(scene, index, point, exclude), [scene, index]);
 
   const pick = useCallback((hitId: string, deep: boolean): string | null => {
     const node = scene.get(hitId);
@@ -189,7 +234,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (deep) return chain[chain.length - 1].id;
     for (let depth = chain.length - 1; depth > 0; depth--) {
       const level = chain[depth];
-      if (live.some((id) => id !== level.id && effectiveParent(scene, scene.get(id)!) === effectiveParent(scene, level))) return level.id;
+      if (live.some((id) => effectiveParent(scene, scene.get(id)!) === effectiveParent(scene, level))) return level.id;
     }
     if (live.includes(chain[0].id)) return chain[0].id;
     if (chain[0].type === "frame" && !chain[0].parentId && chain.length > 1) return chain[1].id;
@@ -224,6 +269,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         if (clip) paste(clip);
         return;
       }
+      case "present": {
+        const frame = ids.length ? [...ancestors(scene, scene.get(ids[0])!), scene.get(ids[0])!].find((node) => node.type === "frame" && !effectiveParent(scene, node)) : undefined;
+        onPresent?.(frame?.id ?? null);
+        return;
+      }
     }
     if (readOnly || !ids.length) return;
     switch (command) {
@@ -237,9 +287,24 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       }
       case "hide": { const hidden = !nodes.every((node) => node.hidden); commit(nodes.map((node) => ({ ...node, hidden }))); break; }
       case "lock": { const locked = !nodes.every((node) => node.locked); commit(nodes.map((node) => ({ ...node, locked })), locked ? [] : ids); break; }
+      case "union": case "subtract": case "intersect": case "exclude": case "flatten": {
+        const combined = command === "flatten" ? flatten(scene, index, ids) : booleanGroup(scene, ids, command);
+        if (combined) commit(combined.nodes, [combined.id]);
+        else notify(command === "flatten" ? "Select shapes to flatten" : "Select two or more shapes to combine");
+        break;
+      }
+      case "component": {
+        const only = ids.length === 1 ? scene.get(ids[0]) : undefined;
+        if (only?.type === "frame" && !only.instanceOf) { commit([makeComponent(only)]); break; }
+        const wrapped = wrapNodes(scene, ids, "frame");
+        if (wrapped) commit([makeComponent({ ...wrapped.nodes[0]!, fill: null, name: "Component" }), ...wrapped.nodes.slice(1)], [wrapped.id]);
+        break;
+      }
+      case "detach": commit(ids.flatMap((id) => detach(scene, index, id))); break;
+      case "edit-path": { const only = scene.get(ids[0]!); if (ids.length === 1 && isPathNode(only)) setPathEdit({ id: only.id, at: null }); break; }
       default: commit(reorder(scene, index, ids, command));
     }
-  }, [live, nodes, scene, index, canvas, readOnly, zoomTo]);
+  }, [live, nodes, scene, index, canvas, readOnly, zoomTo, onPresent, notify]);
 
   const pasteTarget = (clip?: Clipboard) => {
     const only = live.length === 1 ? scene.get(live[0]) : undefined;
@@ -258,21 +323,28 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
 
   const placeImages = async (files: File[], at: Point | null) => {
     if (readOnly) return;
-    const centre = at ?? toWorld(view, { x: size.width / 2, y: size.height / 2 });
+    const centre = at ?? toWorld(view, stageCentre);
     const created: CanvasNode[] = [];
     for (const file of files.filter((item) => item.type.startsWith("image/"))) {
       try {
+        if (file.type === "image/svg+xml") {
+          const target = at ? frameAt(at, new Set()) : null;
+          const vectors = svgNodes(await file.text(), file.name, { x: centre.x + created.length * 24, y: centre.y + created.length * 24 }, target, target ? worldOrigin(scene, scene.get(target)!) : { x: 0, y: 0 }, nextZ(index.get(target) ?? []) + created.length);
+          if (vectors) { canvas.commit(vectors); created.push(vectors[0]!); continue; }
+        }
         const image = await addImage(file);
         created.push(imageNode(image, { x: centre.x + created.length * 24, y: centre.y + created.length * 24 }, at !== null));
       } catch (error) {
         notify(error instanceof Error ? error.message : "Could not add the image");
       }
     }
-    if (created.length) { canvas.commit(created); setSelected(created.map((node) => node.id)); setTool("move"); }
+    const images = created.filter((node) => node.type === "image");
+    if (images.length) canvas.commit(images);
+    if (created.length) { setSelected(created.map((node) => node.id)); setTool("move"); }
   };
 
   const imageNode = (image: PlacedImage, centre: Point, dropped: boolean): CanvasNode => {
-    const outer = (index.get(null) ?? []).find((node) => node.type === "frame" && !node.hidden && !node.layout && containsPoint(worldBox(scene, node), centre));
+    const outer = (index.get(null) ?? []).find((node) => node.type === "frame" && !node.hidden && !node.layout && !node.instanceOf && containsPoint(worldBox(scene, node), centre));
     const parent = dropped ? frameAt(centre, new Set()) : outer?.id ?? null;
     const origin = parent ? worldOrigin(scene, scene.get(parent)!) : { x: 0, y: 0 };
     const room = parent ? Math.max(48, scene.get(parent)!.width * 0.8) : 800;
@@ -286,7 +358,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   };
 
   const placePicked = (image: PlacedImage) => {
-    const node = imageNode(image, toWorld(view, { x: size.width / 2, y: size.height / 2 }), false);
+    const node = imageNode(image, toWorld(view, stageCentre), false);
     canvas.commit([node]);
     setSelected([node.id]);
     setTool("move");
@@ -312,6 +384,9 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     setTool("move");
   };
 
+  const penTool = usePenTool({ canvas, index, scene, zoom: view.zoom, frameAt, inkOn, onDone: (id) => { setSelected([id]); setTool("move"); } });
+  const pen = penTool.draft;
+
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (editing && !(event.target as Element).closest("textarea")) finishText();
     if ((event.target as Element).closest("[data-canvas-chrome]")) return;
@@ -334,10 +409,51 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       return;
     }
     if (event.button !== 0) return;
+    if (tool === "comment") {
+      const hit = target.closest("[data-node-id]")?.getAttribute("data-node-id") ?? null;
+      onComment?.(world, hit ? pick(hit, true) : null);
+      return;
+    }
+    if (!readOnly && tool === "pen") { if (penTool.down(world, event.shiftKey)) gesture.current = { kind: "pen", start: world }; return; }
+    const segment = (target as HTMLElement).dataset?.segment;
+    const editedNode = pathEdit ? scene.get(pathEdit.id) : undefined;
+    const added = segment && isPathNode(editedNode) && !readOnly ? addPointAt(editedNode, worldOrigin(scene, editedNode), segment, world) : null;
+    if (added) {
+      canvas.preview([added.node]);
+      setPathEdit({ id: added.node.id, at: added.at });
+      gesture.current = { kind: "anchor", at: added.at, part: "point", start: world, anchors: added.anchors, original: added.node, world: added.origin, mirror: false };
+      setBusy(true);
+      return;
+    }
+    const anchor = (target as HTMLElement).dataset?.anchor;
+    if (pathEdit && anchor !== undefined && !readOnly) {
+      const node = scene.get(pathEdit.id);
+      if (!isPathNode(node)) { setPathEdit(null); return; }
+      const [at, part] = anchor.split(":") as [string, "point" | "in" | "out"];
+      const origin = worldOrigin(scene, node);
+      const anchors = anchorsOf(node, origin);
+      const index = Number(at);
+      const again = event.timeStamp - lastDown.current.at < 400 && lastDown.current.hit === `anchor:${anchor}`;
+      lastDown.current = { at: event.timeStamp, hit: `anchor:${anchor}` };
+      setPathEdit({ id: node.id, at: index });
+      if (again && part === "point") { canvas.commit([withAnchors(node, origin, toggleSmooth(anchors, index, Boolean(node.closed)))]); return; }
+      const current = anchors[index]!;
+      const mirror = part !== "point" && Math.abs(current.in.x + current.out.x) < 0.5 && Math.abs(current.in.y + current.out.y) < 0.5;
+      gesture.current = { kind: "anchor", at: index, part, start: world, anchors, original: node, world: origin, mirror };
+      setBusy(true);
+      return;
+    }
+    if (pathEdit && !target.closest("[data-anchor]")) setPathEdit(null);
+    if (isCropped(cropNode) && !readOnly && tool === "move" && containsPoint(worldBox(scene, cropNode), world)) {
+      gesture.current = { kind: "crop", start: world, original: cropNode };
+      setBusy(true);
+      return;
+    }
+    if (cropEdit) setCropEdit(null);
     if (!readOnly && tool !== "move") {
       if (tool === "text") { gesture.current = { kind: "create", type: "text", start: world, parentId: null, node: null }; return; }
       const parentId = frameAt(world, new Set());
-      gesture.current = { kind: "create", type: tool, start: world, parentId, node: null };
+      gesture.current = { kind: "create", type: tool as Exclude<Tool, "move" | "hand" | "pen" | "comment" | "text">, start: world, parentId, node: null };
       return;
     }
     const handle = (target as HTMLElement).dataset?.handle as Handle | undefined;
@@ -367,7 +483,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     const picked = label ?? (hit ? pick(hit, event.ctrlKey || event.metaKey) : null);
     const insideSelection = !event.shiftKey && live.length > 0 && topmost(scene, live).some((node) => containsPoint(worldBounds(scene, node), world));
     if (insideSelection && !readOnly && (!picked || live.includes(picked) || live.some((id) => descendants(scene, id, index).some((child) => child.id === picked)))) {
-      gesture.current = { kind: "move", start: world, originals: topmost(scene, live), box: contentBox(live)!, moved: false, click: picked && !live.includes(picked) ? picked : null, copies: false };
+      gesture.current = { kind: "move", start: world, originals: topmost(scene, live), box: contentBox(live)!, moved: false, click: picked && !live.includes(picked) ? picked : null, copiedFrom: [] };
       return;
     }
     if (!picked) {
@@ -381,7 +497,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     setSelected(next);
     if (readOnly || event.shiftKey) return;
     const moving = topmost(scene, next).filter((node) => !node.locked);
-    gesture.current = { kind: "move", start: world, originals: moving, box: contentBox(next) ?? { x: world.x, y: world.y, width: 0, height: 0 }, moved: false, click: null, copies: false };
+    gesture.current = { kind: "move", start: world, originals: moving, box: contentBox(next) ?? { x: world.x, y: world.y, width: 0, height: 0 }, moved: false, click: null, copiedFrom: [] };
   };
 
   const snapTargets = (exclude: ReadonlySet<string>, parentIds: ReadonlySet<string | null>) => {
@@ -395,6 +511,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         if (intersects(box, visible)) targets.push(box);
       }
     }
+    for (const guide of pageGuides ?? []) targets.push(guide.axis === "x" ? { x: guide.at, y: FAR, width: 0, height: 0 } : { x: FAR, y: guide.at, width: 0, height: 0 });
     return targets;
   };
 
@@ -405,6 +522,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (pointers.current.has(event.pointerId)) pointers.current.set(event.pointerId, screen);
     const current = gesture.current;
     if (!current) {
+      if (tool === "pen" && pen) penTool.hover(world);
       if (tool !== "move" || event.pointerType === "touch") return;
       const target = event.target as Element;
       const label = target.closest("[data-frame-label]")?.getAttribute("data-frame-label");
@@ -446,9 +564,9 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
           setBusy(true);
           if (event.altKey) {
             const copy = duplicateNodes(scene, index, current.originals.map((node) => node.id), 0);
+            current.copiedFrom = current.originals.map((node) => node.id);
             current.originals = copy.nodes.filter((node) => copy.roots.includes(node.id));
-            current.copies = true;
-            canvas.preview(copy.nodes);
+            canvas.preview(copy.nodes, { share: true });
             setSelected(copy.roots);
             pendingCopies.current = copy.nodes;
           }
@@ -460,9 +578,9 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         const snap = snapping ? snapBox(box, snapTargets(moving, parents), threshold, { x: event.shiftKey ? dx !== 0 : true, y: event.shiftKey ? dy !== 0 : true }) : { dx: 0, dy: 0, guides: [] };
         dx = round(current.box.x + dx + snap.dx) - current.box.x;
         dy = round(current.box.y + dy + snap.dy) - current.box.y;
-        setGuides(snap.guides);
-        const extra = current.copies ? pendingCopies.current.filter((node) => !current.originals.some((root) => root.id === node.id)) : [];
-        canvas.preview([...extra, ...current.originals.map((node) => ({ ...node, x: node.x + dx, y: node.y + dy }))]);
+        setGuides(near(snap.guides));
+        const extra = current.copiedFrom.length ? pendingCopies.current.filter((node) => !current.originals.some((root) => root.id === node.id)) : [];
+        canvas.preview([...extra, ...current.originals.map((node) => ({ ...node, x: node.x + dx, y: node.y + dy }))], { share: true });
         return;
       }
       case "resize": {
@@ -475,12 +593,12 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             const handleY = current.handle.includes("n") ? 0 : current.handle.includes("s") ? 2 : -1;
             const snap = snapBox({ x: world.x, y: world.y, width: 0, height: 0 }, snapTargets(exclude, new Set([effectiveParent(scene, node)])), threshold, { x: handleX >= 0, y: handleY >= 0 }, { x: [0], y: [0] });
             pointer = { x: world.x + snap.dx, y: world.y + snap.dy };
-            setGuides(snap.guides);
+            setGuides(near(snap.guides));
           }
-          canvas.preview(resizeSingle(current.base, current.baseIndex, node, current.handle, { x: round(pointer.x), y: round(pointer.y) }, event.shiftKey, event.altKey));
+          canvas.preview(resizeSingle(current.base, current.baseIndex, node, current.handle, { x: round(pointer.x), y: round(pointer.y) }, event.shiftKey, event.altKey), { share: true });
         } else {
           const next = resizeBox(current.box, current.handle, world, event.shiftKey, event.altKey);
-          canvas.preview(resizeMany(current.base, current.baseIndex, current.originals, current.box, next));
+          canvas.preview(resizeMany(current.base, current.baseIndex, current.originals, current.box, next), { share: true });
         }
         return;
       }
@@ -488,7 +606,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         let angle = angleOf(current.centre, world) - current.start;
         if (event.shiftKey) angle = Math.round(angle / 15) * 15;
         angle = ((angle + 540) % 360) - 180;
-        canvas.preview([{ ...current.original, rotation: Math.round(angle * 10) / 10 }]);
+        canvas.preview([{ ...current.original, rotation: Math.round(angle * 10) / 10 }], { share: true });
         return;
       }
       case "endpoint": {
@@ -501,7 +619,23 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
           const length = Math.hypot(world.x - other.x, world.y - other.y);
           target = { x: other.x + Math.cos(angle) * length, y: other.y + Math.sin(angle) * length };
         }
-        canvas.preview([moveEndpoint(scene, current.original, current.end, { x: round(target.x), y: round(target.y) })]);
+        canvas.preview([moveEndpoint(scene, current.original, current.end, { x: round(target.x), y: round(target.y) })], { share: true });
+        return;
+      }
+      case "pen": penTool.pull(world); return;
+      case "crop": canvas.preview([panCrop(current.original, current.start, world)], { share: true }); return;
+      case "anchor": {
+        const dx = world.x - current.start.x;
+        const dy = world.y - current.start.y;
+        const anchors = current.anchors.map((item, at) => {
+          if (at !== current.at) return item;
+          if (current.part === "point") return { ...item, point: { x: round(item.point.x + dx), y: round(item.point.y + dy) } };
+          const moved = { x: item[current.part].x + dx, y: item[current.part].y + dy };
+          const other = current.part === "in" ? "out" : "in";
+          const mirrored = current.mirror && !event.altKey ? { [other]: { x: -moved.x, y: -moved.y } } : {};
+          return { ...item, [current.part]: moved, ...mirrored };
+        });
+        canvas.preview([withAnchors(current.original, current.world, anchors)], { share: true });
         return;
       }
       case "create": {
@@ -557,34 +691,20 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
           return;
         }
         const drafts = current.originals.map((node) => canvas.scene.get(node.id) ?? node);
-        const exclude = new Set(drafts.flatMap((node) => [node.id, ...descendants(scene, node.id, index).map((child) => child.id)]));
-        const dropTarget = frameAt(world, exclude);
-        const changed = drafts.map((node) => {
-          const parent = effectiveParent(scene, node);
-          if (parent && scene.get(parent)?.type === "group") return node;
-          const target = dropTarget;
-          const container = target ? scene.get(target) : undefined;
-          const siblings = (index.get(target) ?? []).filter((item) => !exclude.has(item.id));
-          if (container?.layout) {
-            const row = container.layout.direction === "row";
-            const origin = worldOrigin(scene, container);
-            const position = siblings.filter((item) => (row ? origin.x + item.x + item.width / 2 : origin.y + item.y + item.height / 2) < (row ? world.x : world.y)).length;
-            const z = zAt(siblings, position);
-            return target === parent ? { ...node, z } : reparent(scene, node, target, z);
-          }
-          if (target === parent) return node;
-          return reparent(scene, node, target, nextZ(siblings));
-        });
-        const copies = current.copies ? pendingCopies.current.filter((node) => !current.originals.some((root) => root.id === node.id)) : [];
+        const changed = dropMoved(scene, index, drafts, world, current.copiedFrom);
+        const copies = current.copiedFrom.length ? pendingCopies.current.filter((node) => !current.originals.some((root) => root.id === node.id)) : [];
         canvas.commit([...copies, ...changed]);
         pendingCopies.current = [];
         return;
       }
+      case "anchor": case "crop": {
+        const node = canvas.scene.get(current.original.id);
+        if (node) canvas.commit([node]);
+        return;
+      }
       case "resize": case "rotate": case "endpoint": {
         const ids = current.kind === "resize" ? current.originals.flatMap((node) => [node.id, ...(node.type === "group" ? descendants(scene, node.id, index).map((child) => child.id) : [])]) : [current.original.id];
-        const finals = ids.map((id) => canvas.scene.get(id)).filter(isLive);
-        canvas.preview(null);
-        canvas.commit(finals);
+        canvas.commit(ids.map((id) => canvas.scene.get(id)).filter(isLive));
         return;
       }
       case "create": {
@@ -619,6 +739,8 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     const current = live.length === 1 ? chain.findIndex((item) => item.id === live[0]) : -1;
     if (current >= 0 && current < chain.length - 1) { setSelected([chain[current + 1].id]); return true; }
     if (node.type === "text" && !node.locked && live.includes(node.id)) { setEditing({ id: node.id, created: false, original: node }); return true; }
+    if (isPathNode(node) && !node.rotation && live.includes(node.id)) { setPathEdit({ id: node.id, at: null }); return true; }
+    if (isCropped(node) && live.includes(node.id)) { setCropEdit(node.id); return true; }
     return false;
   };
 
@@ -646,6 +768,24 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     const command = event.ctrlKey || event.metaKey;
     const done = () => { event.preventDefault(); event.stopPropagation(); };
     if (key === " " && !space.current) { space.current = true; setPanning(true); done(); return; }
+    if (pen && (key === "enter" || key === "escape")) { done(); penTool.finish(false); return; }
+    if (pen && key === "backspace") { done(); penTool.undo(); return; }
+    if ((pathEdit || cropEdit) && (key === "enter" || key === "escape")) { done(); setPathEdit(null); setCropEdit(null); return; }
+    if (pathEdit && pathEdit.at !== null && (key === "delete" || key === "backspace") && !readOnly) {
+      done();
+      const node = scene.get(pathEdit.id);
+      if (!isPathNode(node) || (node.points?.length ?? 0) <= 4) return;
+      const origin = worldOrigin(scene, node);
+      canvas.commit([withAnchors({ ...node, breaks: undefined }, origin, anchorsOf(node, origin).filter((_, at) => at !== pathEdit.at))]);
+      setPathEdit({ id: node.id, at: null });
+      return;
+    }
+    if (command && event.altKey && ["u", "s", "i", "x"].includes(key)) { done(); run(({ u: "union", s: "subtract", i: "intersect", x: "exclude" } as const)[key as "u" | "s" | "i" | "x"]); return; }
+    if (command && event.altKey && key === "k") { done(); run("component"); return; }
+    if (command && event.altKey && key === "b") { done(); run("detach"); return; }
+    if (command && event.altKey && key === "enter") { done(); run("present"); return; }
+    if (command && key === "e" && !event.shiftKey) { done(); run("flatten"); return; }
+    if (!command && event.shiftKey && key === "r") { done(); setRulers((on) => !on); return; }
     if (command && key === "z") { done(); if (event.shiftKey) canvas.redo(); else canvas.undo(); return; }
     if (command && key === "y") { done(); canvas.redo(); return; }
     if (command && key === "a") { done(); run("select-all"); return; }
@@ -653,30 +793,21 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (command && key === "g") { done(); run(event.shiftKey ? "ungroup" : event.altKey ? "frame" : "group"); return; }
     if (command && event.shiftKey && key === "h") { done(); run("hide"); return; }
     if (command && event.shiftKey && key === "l") { done(); run("lock"); return; }
-    if (command && (key === "=" || key === "+")) { done(); zoomAt(1.25, { x: size.width / 2, y: size.height / 2 }); return; }
-    if (command && key === "-") { done(); zoomAt(0.8, { x: size.width / 2, y: size.height / 2 }); return; }
+    if (command && (key === "=" || key === "+")) { done(); zoomAt(1.25, stageCentre); return; }
+    if (command && key === "-") { done(); zoomAt(0.8, stageCentre); return; }
     if (key === "]" || key === "[") { done(); run(key === "]" ? (command ? "front" : "forward") : (command ? "back" : "backward")); return; }
     if (command) return;
     if (event.shiftKey && (event.code === "Digit1" || event.code === "Digit2" || event.code === "Digit0")) {
       done();
       if (event.code === "Digit1") zoomTo();
       else if (event.code === "Digit2") zoomTo(live.length ? live : undefined);
-      else zoomAt(1 / view.zoom, { x: size.width / 2, y: size.height / 2 });
+      else zoomAt(1 / view.zoom, stageCentre);
       return;
     }
     if (event.shiftKey && key === "a" && !readOnly && live.length) {
       done();
-      const only = live.length === 1 ? scene.get(live[0]) : undefined;
-      if (only?.type === "frame") canvas.commit([only.layout ? (() => { const { layout: _layout, ...rest } = only; return rest; })() : { ...only, layout: { direction: "column", gap: 16, padding: [16, 16, 16, 16], align: "start", justify: "start" } }]);
-      else {
-        const wrapped = wrapNodes(scene, live, "frame");
-        if (wrapped) {
-          const frame = wrapped.nodes[0];
-          const vertical = (frame.height >= frame.width);
-          canvas.commit([{ ...frame, fill: null, layout: { direction: vertical ? "column" : "row", gap: 16, padding: [0, 0, 0, 0], align: "start", justify: "start", hug: "both" } }, ...wrapped.nodes.slice(1)]);
-          setSelected([wrapped.id]);
-        }
-      }
+      const toggled = toggleAutoLayout(scene, live);
+      if (toggled) { canvas.commit(toggled.nodes); setSelected([toggled.id]); }
       return;
     }
     if (key === "escape") {
@@ -690,6 +821,8 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       done();
       const node = scene.get(live[0])!;
       if (node.type === "text") setEditing({ id: node.id, created: false, original: node });
+      else if (isPathNode(node) && !node.rotation) setPathEdit({ id: node.id, at: null });
+      else if (isCropped(node)) setCropEdit(cropEdit === node.id ? null : node.id);
       else if (index.get(node.id)?.length) setSelected(index.get(node.id)!.map((child) => child.id));
       return;
     }
@@ -721,8 +854,13 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     event.preventDefault();
     if (clip) { clipboard.current = clip; paste(clip); return; }
     if (clipboard.current && !text) { paste(clipboard.current); return; }
+    if (/^\s*(<\?xml[^>]*>\s*)?<svg[\s>]/i.test(text)) {
+      const parent = pasteTarget();
+      const vectors = svgNodes(text, "Vector", toWorld(view, stageCentre), parent, parent ? worldOrigin(scene, scene.get(parent)!) : { x: 0, y: 0 }, nextZ(index.get(parent) ?? []));
+      if (vectors) { canvas.commit(vectors); setSelected([vectors[0]!.id]); return; }
+    }
     if (text.trim()) {
-      const world = toWorld(view, { x: size.width / 2, y: size.height / 2 });
+      const world = toWorld(view, stageCentre);
       const parent = pasteTarget();
       const origin = parent ? worldOrigin(scene, scene.get(parent)!) : { x: 0, y: 0 };
       const node = newNode("text", parent, nextZ(index.get(parent) ?? []), { text: text.slice(0, 20_000), name: textName(text), autoWidth: true, x: round(world.x - origin.x), y: round(world.y - origin.y), fill: inkOn(parent) });
@@ -740,6 +878,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     event.clipboardData.setData("text/plain", JSON.stringify(clip));
     if (cut && !readOnly) run("delete");
   };
+
+  useEffect(() => {
+    if (tool !== "pen" && pen) penTool.finish(false);
+    if (tool !== "move") setPathEdit(null);
+  }, [tool]);
 
   const listeners = useRef({ onKeyDown, onKeyUp, onPaste, onCopy });
   listeners.current = { onKeyDown, onKeyUp, onPaste, onCopy };
@@ -768,19 +911,27 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   }, []);
 
   const editingNode = editing ? scene.get(editing.id) : undefined;
-  const options = useMemo<RenderOptions>(() => ({ index, images, interactive: true, editing: editing?.id ?? null, prefix: "c-" }), [index, images, editing?.id]);
-  const selectionApi: SelectionApi = { ids: live, nodes, select, zoomTo: (ids) => setPendingZoom([...ids]), run };
-  const cursor = panning ? (gesture.current?.kind === "pan" ? "grabbing" : "grab") : tool === "hand" ? "grab" : tool === "move" ? "default" : tool === "text" ? "text" : "crosshair";
+  const rendered = useRef<Scene | null>(null);
+  useEffect(() => { rendered.current = scene; });
+  const options = useMemo<RenderOptions>(() => {
+    const before = rendered.current;
+    return { index, images, interactive: true, editing: editing?.id ?? null, prefix: "c-", ...(before ? { dirty: changedSubtrees(before, scene) } : {}) };
+  }, [index, images, editing?.id]);
+  const selectionApi: SelectionApi = { ids: live, nodes, select, zoomTo: (ids) => setPendingZoom([...ids]), run, centre: () => toWorld(view, stageCentre) };
+  const cursor = panning ? (gesture.current?.kind === "pan" ? "grabbing" : "grab") : tool === "hand" ? "grab" : tool === "move" ? "default" : tool === "text" ? "text" : tool === "comment" ? "copy" : "crosshair";
+  const showRulers = rulers && Boolean(onGuides) && !narrow;
+  const editedPath = pathEdit ? scene.get(pathEdit.id) : undefined;
 
   return (
     <div ref={root} className="relative flex min-h-0 min-w-0 flex-1">
       {shown.layers && (
-        <aside aria-label="Layers" className={cn("flex w-60 shrink-0 flex-col border-r border-hairline/40 bg-panel", compact && "absolute bottom-16 left-0 top-0 z-20 w-[min(260px,80vw)] origin-overlay-in")}>
+        <aside aria-label="Layers" style={compact ? undefined : { width: LAYERS_WIDTH, inset: `${PANEL_GAP}px auto ${PANEL_GAP}px ${PANEL_GAP}px` }}
+          className={cn("absolute z-20 flex flex-col overflow-hidden bg-panel", compact ? "bottom-16 left-0 top-0 w-[min(260px,80vw)] border-r border-hairline/40 origin-overlay-in" : floatingPanel)}>
           {layers(selectionApi)}
         </aside>
       )}
       <div ref={stage} tabIndex={0} aria-label="Canvas" role="application" data-canvas-stage
-        className="relative min-w-0 flex-1 touch-none select-none overflow-hidden bg-inset outline-none focus-visible:outline-none"
+        className="absolute inset-0 touch-none select-none overflow-hidden outline-none focus-visible:outline-none"
         style={{ cursor, outline: "none" }}
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
         onPointerLeave={() => setHover(null)}
@@ -791,8 +942,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             <SceneLayer options={options} />
           </g>
           <Overlay scene={scene} index={index} view={view} selected={nodes} hover={hover ? scene.get(hover) ?? null : null} guides={guides} marquee={marquee}
-            cursors={cursors} editing={editing?.id ?? null} readOnly={readOnly} busy={busy} />
+            cursors={cursors} editing={editing?.id ?? null} readOnly={readOnly} busy={busy} remoteSelections={remoteSelections} showPrototype={showPrototype}
+            pathEdit={isPathNode(editedPath) ? { node: editedPath, at: pathEdit!.at } : null} pen={pen ? { anchors: pen.anchors, hover: penTool.hovered } : null} crop={isCropped(cropNode) ? cropNode : null} />
         </svg>
+        {stageLayer?.(view)}
+        {showRulers && <Rulers view={view} size={size} insets={insets} guides={pageGuides ?? []} onGuides={(next) => onGuides?.(next)} readOnly={readOnly} selection={live.length ? contentBox(live) : null} />}
         {editing && editingNode && (
           <TextEditor node={editingNode} origin={toScreen(view, worldOrigin(scene, editingNode))} zoom={view.zoom}
             onChange={(text) => canvas.preview([{ ...editingNode, text, ...(editingNode.autoWidth ? { width: layoutText({ ...editingNode, text }, measureText).width } : {}) }])}
@@ -800,7 +954,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         )}
         {!(index.get(null)?.length) && !editing && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center text-[13px] text-ink-tertiary">
-            {readOnly ? "Nothing on this canvas yet" : "Press F for a frame, R for a rectangle, T for text"}
+            {readOnly ? "Nothing on this canvas yet" : narrow ? "Pick a tool below to start" : "Press F for a frame, R for a rectangle, T for text"}
           </div>
         )}
         <div data-canvas-chrome className="contents">
@@ -808,39 +962,17 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
             imageMenu={imageMenu} onImageMenu={setImageMenu}
             imagePicker={imagePicker ? (close) => imagePicker((image) => { placePicked(image); close(); }, close) : undefined}
             onUpload={(files) => void placeImages(files, null)}
-            panels={shown} onPanels={(next) => setPanels(next)} />
-          <ZoomControls zoom={view.zoom} onZoom={(factor) => zoomAt(factor, { x: size.width / 2, y: size.height / 2 })}
-            onFit={() => zoomTo()} onSelection={live.length ? () => zoomTo(live) : undefined} onActual={() => zoomAt(1 / view.zoom, { x: size.width / 2, y: size.height / 2 })} />
+            narrow={narrow && !readOnly} insets={insets} panels={shown} onPanels={(next) => setPanels(compact ? oneOverlay(shown, next) : next)} />
+          <ZoomControls offset={showRulers ? RULER : 0} inset={insets.right} zoom={view.zoom} onZoom={(factor) => zoomAt(factor, stageCentre)}
+            onFit={() => zoomTo()} onSelection={live.length ? () => zoomTo(live) : undefined} onActual={() => zoomAt(1 / view.zoom, stageCentre)} />
         </div>
       </div>
       {shown.inspector && (
-        <aside aria-label="Design" className={cn("flex w-64 shrink-0 flex-col border-l border-hairline/40 bg-panel", compact && "absolute inset-x-0 bottom-16 z-20 max-h-[55%] w-auto border-l-0 border-t origin-overlay-in")}>
+        <aside aria-label="Design" style={compact ? undefined : { width: INSPECTOR_WIDTH, inset: `${PANEL_GAP}px ${PANEL_GAP}px ${PANEL_GAP}px auto` }}
+          className={cn("absolute z-20 flex flex-col overflow-hidden bg-panel", compact ? "inset-x-0 bottom-16 max-h-[55%] border-t border-hairline/40 origin-overlay-in" : floatingPanel)}>
           {inspector(selectionApi)}
         </aside>
       )}
     </div>
-  );
-}
-
-function TextEditor({ node, origin, zoom, onChange, onDone }: { node: CanvasNode; origin: Point; zoom: number; onChange(text: string): void; onDone(): void }) {
-  const area = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => { area.current?.focus(); area.current?.select(); }, []);
-  const layout = layoutText(node, measureText);
-  const size = (node.fontSize ?? 16) * zoom;
-  return (
-    <textarea ref={area} aria-label="Text" value={node.text ?? ""} spellCheck={false}
-      onChange={(event) => onChange(event.target.value)}
-      onBlur={onDone}
-      onKeyDown={(event) => {
-        event.stopPropagation();
-        if (event.key === "Escape" || (event.key === "Enter" && (event.metaKey || event.ctrlKey))) { event.preventDefault(); onDone(); }
-      }}
-      className="absolute z-10 m-0 resize-none overflow-hidden border-0 bg-transparent p-0 outline outline-1 outline-accent"
-      style={{
-        left: origin.x, top: origin.y, width: Math.max(layout.width, node.fontSize ?? 16) * zoom + (node.autoWidth ? size : 0), height: Math.max(layout.height, layout.lineHeight) * zoom,
-        font: `${node.fontWeight ?? 400} ${size}px/${layout.lineHeight * zoom}px ${FONT_STACKS[node.font ?? "sans"]}`, color: node.fill ?? "inherit",
-        textAlign: node.align ?? "left", whiteSpace: node.autoWidth ? "pre" : "pre-wrap", transform: node.rotation ? `rotate(${node.rotation}deg)` : undefined,
-        transformOrigin: `${(node.width * zoom) / 2}px ${(node.height * zoom) / 2}px`, caretColor: "var(--color-accent)",
-      }} />
   );
 }

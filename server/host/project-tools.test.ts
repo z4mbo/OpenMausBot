@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { projectChiefForBudget } from "./project-tools.ts";
 
-describe("trusted Pipeline project budget attribution", () => {
+describe("trusted project budget attribution", () => {
   it("uses only the visible linked project Chief", () => {
     expect(projectChiefForBudget([
       { id: "hidden", chiefOfStaff: true, hidden: true },

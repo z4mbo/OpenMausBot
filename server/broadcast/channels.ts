@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { BROADCAST_RULES, type BroadcastChannel } from "../../shared/broadcast.ts";
+import { BROADCAST_RULES, type BroadcastChannel, type BroadcastFormat } from "../../shared/broadcast.ts";
 import type { IntegrationValues } from "../integration-keys.ts";
 import { oauth1Header } from "./oauth1.ts";
 import { integrationCredentialSecrets, integrationErrorScrubber } from "../integration-errors.ts";
@@ -32,6 +32,8 @@ export const defaultPublishEnv: PublishEnv = {
 export interface Published {
   url?: string;
 }
+
+export type PublishOptions = { format?: BroadcastFormat; coverMs?: number };
 
 export class PublishError extends Error {}
 
@@ -260,7 +262,7 @@ export async function publishFacebook(credentials: IntegrationValues<"meta">, bo
   return text(posted.id) ? { url: `https://www.facebook.com/${text(posted.id)}` } : {};
 }
 
-export async function publishInstagram(credentials: IntegrationValues<"meta">, body: string, media: readonly PublishMedia[], env = defaultPublishEnv): Promise<Published> {
+export async function publishInstagram(credentials: IntegrationValues<"meta">, body: string, media: readonly PublishMedia[], env = defaultPublishEnv, options: PublishOptions = {}): Promise<Published> {
   if (!media.length) throw new PublishError("Instagram needs an image or a video");
   const call = graph(env, credentials.pageAccessToken);
   let account = credentials.instagramUserId?.trim() ?? "";
@@ -278,7 +280,10 @@ export async function publishInstagram(credentials: IntegrationValues<"meta">, b
   let container: string;
   if (media.length === 1) {
     const item = media[0];
-    container = text((await call("Instagram", "POST", `${account}/media`, { ...source(item), ...(item.kind === "video" ? { media_type: "REELS" } : {}), caption: body })).id);
+    container = text((await call("Instagram", "POST", `${account}/media`, {
+      ...source(item), caption: body,
+      ...(item.kind === "video" ? { media_type: "REELS", ...(options.coverMs !== undefined ? { thumb_offset: String(options.coverMs) } : {}) } : {}),
+    })).id);
   } else {
     const children: string[] = [];
     for (const item of media) {
@@ -303,7 +308,7 @@ export function tiktokChunks(size: number): { chunkSize: number; count: number }
   return { chunkSize: TIKTOK_CHUNK, count: Math.floor(size / TIKTOK_CHUNK) };
 }
 
-export async function publishTikTok(credentials: IntegrationValues<"tiktok">, body: string, media: readonly PublishMedia[], env = defaultPublishEnv): Promise<Published> {
+export async function publishTikTok(credentials: IntegrationValues<"tiktok">, body: string, media: readonly PublishMedia[], env = defaultPublishEnv, publishOptions: PublishOptions = {}): Promise<Published> {
   const video = media.length === 1 && media[0].kind === "video" ? media[0] : refuse("TikTok needs exactly one video");
   const headers = { Authorization: `Bearer ${credentials.accessToken}`, "Content-Type": "application/json; charset=UTF-8" };
   const api = async (label: string, path: string, payload: Json = {}) => {
@@ -318,7 +323,7 @@ export async function publishTikTok(credentials: IntegrationValues<"tiktok">, bo
   const data = await video.bytes();
   const { chunkSize, count } = tiktokChunks(data.byteLength);
   const init = await api("TikTok", "video/init/", {
-    post_info: { title: body, privacy_level: privacy },
+    post_info: { title: body, privacy_level: privacy, ...(publishOptions.coverMs !== undefined ? { video_cover_timestamp_ms: publishOptions.coverMs } : {}) },
     source_info: { source: "FILE_UPLOAD", video_size: data.byteLength, chunk_size: chunkSize, total_chunk_count: count },
   });
   const uploadUrl = text(init.upload_url);
@@ -352,7 +357,7 @@ function refuse(message: string): never {
 /** Each channel's credentials as the member stored them, or null when that integration is not connected. */
 export type ChannelKeys = { [I in "x" | "bluesky" | "linkedin" | "meta" | "tiktok"]: () => IntegrationValues<I> | null };
 
-export async function publishChannel(channel: BroadcastChannel, body: string, media: readonly PublishMedia[], keys: ChannelKeys, env = defaultPublishEnv): Promise<Published> {
+export async function publishChannel(channel: BroadcastChannel, body: string, media: readonly PublishMedia[], keys: ChannelKeys, env = defaultPublishEnv, options: PublishOptions = {}): Promise<Published> {
   const missing = (): never => refuse(`${BROADCAST_RULES[channel].label} is not connected; add its keys in Settings, Integrations`);
   const publish = async <T extends object>(credentials: T, action: (value: T) => Promise<Published>) => {
     const scrub = integrationErrorScrubber(integrationCredentialSecrets(credentials));
@@ -364,7 +369,7 @@ export async function publishChannel(channel: BroadcastChannel, body: string, me
     case "bluesky": return publish(keys.bluesky() ?? missing(), credentials => publishBluesky(credentials, body, media, env));
     case "linkedin": return publish(keys.linkedin() ?? missing(), credentials => publishLinkedIn(credentials, body, media, env));
     case "facebook": return publish(keys.meta() ?? missing(), credentials => publishFacebook(credentials, body, media, env));
-    case "instagram": return publish(keys.meta() ?? missing(), credentials => publishInstagram(credentials, body, media, env));
-    case "tiktok": return publish(keys.tiktok() ?? missing(), credentials => publishTikTok(credentials, body, media, env));
+    case "instagram": return publish(keys.meta() ?? missing(), credentials => publishInstagram(credentials, body, media, env, options));
+    case "tiktok": return publish(keys.tiktok() ?? missing(), credentials => publishTikTok(credentials, body, media, env, options));
   }
 }

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { getActiveTeamMember, requireTeamAdmin, requireTeamMember, changeOpenIssueCount, touchProject } from "./lib/permissions";
+import { canEdit, getActiveTeamMember, requireMember, requireTeamAdmin, requireTeamMember, changeOpenIssueCount, touchProject } from "./lib/permissions";
 import { hasCurrentMergeReceipt, recordCompletion } from "./lib/completions";
 import { DEFAULT_OWNER_EMAIL } from "./lib/auth";
 import { isDraftColumn, projectDraftStatus } from "./lib/columns";
@@ -86,7 +86,7 @@ export const context = internalQuery({
     const team = p.teamId ? await ctx.db.get(p.teamId) : null;
     const teamOwner = team ? await ctx.db.get(team.ownerUserId) : null;
     const legacyOwner = p.ownerEmail === DEFAULT_OWNER_EMAIL && teamOwner?.email === DEFAULT_OWNER_EMAIL && teamOwner.status === "active";
-    return JSON.stringify({ credentialAllowed, legacyOwner, project: { _id: p._id, teamId: p.teamId, name: p.name, status: p.status, description: p.description, repoUrl: p.repoUrl, githubRepoId: p.githubRepoId, githubWorkspaceAccess: p.githubWorkspaceAccess }, connection: await connection(ctx, p),
+    return JSON.stringify({ credentialAllowed, legacyOwner, project: { _id: p._id, teamId: p.teamId, name: p.name, status: p.status, description: p.description, repoUrl: p.repoUrl, githubRepoId: p.githubRepoId, githubWorkspaceAccess: p.githubWorkspaceAccess, githubRepoVisibility: p.githubRepoVisibility }, connection: await connection(ctx, p),
       task: task ? { _id: task._id, title: task.title, description: task.description, done: task.done, draft: await inDraft(ctx, task), githubIssueNumber: task.githubIssueNumber, githubIssueUrl: task.githubIssueUrl, githubIssueState: task.githubIssueState, githubIssueReopenRequested: task.githubIssueReopenRequested } : null });
   },
 });
@@ -233,9 +233,13 @@ export const retryRepo = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string() }, returns: v.null(),
   handler: async (ctx, a) => {
     const p = await ctx.db.get(a.projectId); if (!p?.teamId || p.repoUrl) throw new Error("No repository to create");
-    await requireTeamAdmin(ctx, p.teamId, a.sessionToken);
+    const { member } = await requireMember(ctx, p._id, a.sessionToken);
+    if (!canEdit(member)) throw new Error("Edit role required");
     await ctx.db.patch(p._id, { githubRepoState: "pending", githubRepoError: undefined });
-    await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId: p._id }); return null;
+    const shared = await ctx.db.query("teamGitHub").withIndex("by_teamId", q => q.eq("teamId", p.teamId!)).unique();
+    if (shared) await ctx.scheduler.runAfter(0, internal.teamGitHub.autoCreate, { projectId: p._id, manual: true });
+    else await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId: p._id });
+    return null;
   },
 });
 

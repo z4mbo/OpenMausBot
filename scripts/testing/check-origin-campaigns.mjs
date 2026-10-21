@@ -20,7 +20,7 @@ async function open(width, theme, query = {}) {
   for (const [key, value] of Object.entries(query)) target.searchParams.set(key, value);
   await page.goto(target.href);
   assert.equal(await page.title(), "Isolated Origin Campaigns");
-  await page.getByRole("heading", { name: "Broadcast" }).waitFor();
+  await page.getByRole("heading", { name: "Publish" }).waitFor();
   await page.getByRole("button", { name: "Campaigns" }).click();
   await page.getByRole("button", { name: /Spring launch/ }).waitFor();
   return page;
@@ -31,7 +31,7 @@ const capture = async (page, name) => {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${name} scrolls sideways`);
   await page.screenshot({ path: resolve(output, `${name}.png`), fullPage: true });
 };
-const nav = (page) => page.getByTestId("navigation").evaluate((node) => ({ section: node.dataset.section, issue: node.dataset.issue, lead: node.dataset.lead }));
+const nav = (page) => page.getByTestId("navigation").evaluate((node) => ({ section: node.dataset.section, issue: node.dataset.issue }));
 const requests = (page) => page.evaluate(() => window.originCampaignsFixture.requests.map((request) => request.name));
 
 try {
@@ -44,14 +44,11 @@ try {
     await page.getByRole("button", { name: /Spring launch/ }).click();
     await page.getByText("200 beta sign-ups from indie founders in three weeks.").waitFor();
     await page.getByRole("img", { name: "Hero shot of the app on a dark desk" }).waitFor();
-    await page.getByRole("button", { name: /Grace Hopper/ }).waitFor();
-    await page.getByRole("button", { name: /Alan Turing/ }).waitFor();
-    assert.equal(await page.getByRole("button", { name: /Linus/ }).count(), 0, "a lead from another campaign is not attributed");
     await page.getByRole("button", { name: /Landing page for the launch/ }).waitFor();
     await page.getByText("128", { exact: true }).waitFor();
     await page.getByText("LinkedIn numbers need an API review; only X and Bluesky are read here.").waitFor();
     await capture(page, `detail-${tag}`);
-    evidence.cases.push({ tag, step: "campaign detail: brief, timeline with per-channel state and X numbers, content, attributed leads by stage, issues" });
+    evidence.cases.push({ tag, step: "campaign detail: brief, timeline with per-channel state and X numbers, content, issues" });
 
     await page.getByRole("button", { name: "Refresh metrics" }).click();
     await page.getByText("Connect X in Settings to read its numbers.").waitFor();
@@ -64,22 +61,19 @@ try {
     assert.match(sent.text, /utm_campaign=spring-launch/);
     evidence.cases.push({ tag, step: "Plan with the Chief sends the brief into its chat" });
 
-    await page.getByRole("button", { name: /Grace Hopper/ }).click();
-    assert.equal((await nav(page)).section, "pipeline");
-    assert.notEqual((await nav(page)).lead, "");
     await page.getByRole("button", { name: /Landing page for the launch/ }).click();
     assert.equal((await nav(page)).section, "issues");
     assert.notEqual((await nav(page)).issue, "");
     await page.getByRole("button", { name: "Hero shot of the app on a dark desk" }).click();
     assert.equal((await nav(page)).section, "studio");
-    evidence.cases.push({ tag, step: "lead, issue and content links open Pipeline (with the lead), Issues (with the issue) and Studio" });
+    evidence.cases.push({ tag, step: "issue and content links open Issues (with the issue) and Studio" });
 
     await page.getByRole("button", { name: /Teaser: one place to launch/ }).click();
     const dialog = page.getByRole("dialog");
     await dialog.waitFor();
     await dialog.getByRole("button", { name: "Close" }).click();
     await dialog.waitFor({ state: "detached" });
-    evidence.cases.push({ tag, step: "a timeline post opens in the Broadcast composer" });
+    evidence.cases.push({ tag, step: "a timeline post opens in the Publish composer" });
 
     if (tag === "1280-dark") {
       await page.getByRole("button", { name: "Link issues" }).click();
@@ -117,7 +111,7 @@ try {
   const viewer = await open(1280, "dark", { viewer: "1" });
   assert.equal(await viewer.getByRole("button", { name: "New campaign" }).count(), 0);
   await viewer.getByRole("button", { name: /Spring launch/ }).click();
-  await viewer.getByRole("button", { name: /Grace Hopper/ }).waitFor();
+  await viewer.getByRole("button", { name: /Landing page for the launch/ }).waitFor();
   assert.equal(await viewer.getByRole("button", { name: /Plan with/ }).count(), 0);
   assert.equal(await viewer.getByRole("button", { name: /^Link / }).count(), 0);
   await capture(viewer, "viewer-1280-dark");

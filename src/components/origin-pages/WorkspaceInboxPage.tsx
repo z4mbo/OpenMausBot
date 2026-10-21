@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState, type DragEvent } from "react";
 import {
-  AtSign, Bell, CalendarDays, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock3, Inbox, List, Loader2, MessageSquare, Reply, Search, Sunrise, X,
+  AtSign, Bell, CalendarDays, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock3, Inbox, List, Loader2, MessageSquare, Search, Sunrise, X,
 } from "lucide-react";
 import { cloudMutation, useCloudPages, useCloudQuery, type CloudProject } from "@/lib/origin-cloud";
 import { useWorkspaceMembers } from "@/lib/origin-members";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 import { Select } from "../Select";
 import type { Priority } from "./cloud-types";
 import { errorText } from "./repo-url";
-import { EmptyState, Loading, Notice, Segmented, ghostButton, iconButton, inputClass, type WorkspaceContext } from "./ui";
+import { EmptyState, Loading, Notice, Segmented, ghostButton, iconButton, inputClass, itemIn, type WorkspaceContext } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
 import { PriorityIcon } from "./issue-fields";
 import { StandupDigest } from "./StandupDigest";
@@ -21,7 +21,7 @@ type InboxTask = {
 };
 type CalendarTask = { _id: string; projectId: string; title: string; dueDate: string; done: boolean; priority: Priority; projectName: string };
 type Notification = {
-  _id: string; kind: "assignment" | "comment" | "mention" | "digest" | "lead"; digestId?: string; leadId?: string; read: boolean; createdAt: number; projectId?: string; taskId?: string; messageId?: string;
+  _id: string; kind: "assignment" | "comment" | "mention" | "digest"; digestId?: string; read: boolean; createdAt: number; projectId?: string; taskId?: string; messageId?: string;
   conversation?: string; agentThreadId?: string; preview?: string; actorName: string; actorAvatar: string | null; projectName?: string; taskTitle?: string; available: boolean;
 };
 type Filters = { mine: boolean; done: boolean; project: string; priority: "" | Priority; search: string };
@@ -119,9 +119,9 @@ function Notifications({ teamId, onError, onOpenIssue }: { teamId: string; onErr
           <ul className="flex flex-col">
             {results.map((row) => (
               <Fragment key={row._id}>
-              <li className={cn("flex items-start gap-2 rounded-lg px-2 py-2 hover:bg-raised/50", !row.read && "bg-raised/30")} data-notification={row._id}>
+              <li className={cn("flex items-start gap-2 rounded-lg px-2 py-2 transition-colors duration-(--motion-fast) hover:bg-raised/50", itemIn, !row.read && "bg-raised/30")} data-notification={row._id}>
                 <span className="mt-0.5 text-ink-secondary" aria-hidden="true">
-                  {row.kind === "digest" ? <Sunrise size={15} /> : row.kind === "lead" ? <Reply size={15} /> : row.kind === "mention" ? <AtSign size={15} /> : row.kind === "comment" ? <MessageSquare size={15} /> : <Circle size={15} />}
+                  {row.kind === "digest" ? <Sunrise size={15} /> : row.kind === "mention" ? <AtSign size={15} /> : row.kind === "comment" ? <MessageSquare size={15} /> : <Circle size={15} />}
                 </span>
                 <button type="button" className="min-w-0 flex-1 text-left" aria-expanded={row.digestId ? openDigest === row._id : undefined} onClick={() => {
                   act(mark(row._id, true), "Could not open the notification");
@@ -131,7 +131,7 @@ function Notifications({ teamId, onError, onOpenIssue }: { teamId: string; onErr
                   <span className="flex items-center gap-1.5 text-[13px] text-ink">
                     <PersonAvatar person={{ name: row.actorName, email: row.actorName, avatarUrl: row.actorAvatar }} size={18} />
                     <strong className="font-semibold">{row.actorName}</strong>
-                    {row.kind === "digest" ? "posted the daily standup" : row.kind === "lead" ? "replied to your outreach" : row.kind === "mention" ? row.agentThreadId ? "tagged you in an agent thread" : row.messageId ? "tagged you in chat" : "mentioned you on" : row.kind === "comment" ? "commented on" : "assigned you"}
+                    {row.kind === "digest" ? "posted the daily standup" : row.kind === "mention" ? row.agentThreadId ? "tagged you in an agent thread" : row.messageId ? "tagged you in chat" : "mentioned you on" : row.kind === "comment" ? "commented on" : "assigned you"}
                     {!row.read && <span className="size-1.5 rounded-full bg-accent" aria-label="Unread" />}
                   </span>
                   {row.taskTitle && <span className="mt-0.5 block truncate text-[13px] font-medium text-ink">{row.taskTitle}</span>}
@@ -139,7 +139,7 @@ function Notifications({ teamId, onError, onOpenIssue }: { teamId: string; onErr
                   <span className="mt-0.5 block text-[11.5px] text-ink-tertiary">
                     {row.projectName && `${row.projectName} · `}
                     <time dateTime={new Date(row.createdAt).toISOString()}>{new Date(row.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</time>
-                    {!row.available && (row.kind === "lead" ? " · Lead removed" : " · Issue removed")}
+                    {!row.available && " · Issue removed"}
                   </span>
                 </button>
                 <Snooze onSnooze={(delay) => act(cloudMutation("notifications:snooze", { teamId, id: row._id, until: Date.now() + delay }), "Could not snooze the notification")} />
@@ -222,7 +222,7 @@ function IssueList({ teamId, projects, filters, canEdit, onOpen, onError, hasFil
             const assignee = members?.find((member) => member.email === task.assignedToEmail);
             const overdue = Boolean(task.dueDate && task.dueDate < today && !task.done);
             return (
-              <li key={task._id} className="flex items-center gap-2 px-2 py-1.5" data-inbox-issue={task._id}>
+              <li key={task._id} className={cn("flex items-center gap-2 px-2 py-1.5", itemIn)} data-inbox-issue={task._id}>
                 <button type="button" className={iconButton} disabled={!editsProject(projects, canEdit, task.projectId) || pending === task._id}
                   aria-label={`${task.done ? "Reopen" : "Complete"} ${task.title}`} title={task.done ? "Reopen issue" : "Complete issue"} onClick={() => void toggle(task)}>
                   {pending === task._id ? <Loader2 size={15} className="animate-spin" /> : task.done ? <CheckCircle2 size={15} className="text-success" /> : <Circle size={15} />}

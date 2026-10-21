@@ -1,10 +1,11 @@
-import { Circle } from "lucide-react";
+import { Circle, CircleDot } from "lucide-react";
 import type { Message } from "@/state/store";
 import { useCanOpenOriginProject, useOpenOriginIssue } from "@/lib/origin-issue-focus";
 import type { CloudTask } from "./origin-pages/cloud-types";
 import { laneTone } from "./origin-pages/issue-fields";
 import { TaskCard } from "./origin-pages/IssuesPage";
 import type { OriginIssueCard } from "../../shared/origin-issues";
+import { CardFrame, More } from "./origin-cards/CardFrame";
 
 function asTask(issue: OriginIssueCard): CloudTask {
   return {
@@ -39,13 +40,13 @@ export function OriginIssuesCard({ message }: { message: Message }) {
     lanes.set(lane, [...(lanes.get(lane) ?? []), issue]);
   }
   return (
-    <section data-origin-issues={message.id} aria-label={cards.heading} className="w-full max-w-[26rem] rounded-2xl bg-inset/50 p-2">
-      <div className="px-2 pb-1.5 pt-1 text-[12px] text-ink-tertiary">{cards.heading}</div>
+    <CardFrame kind="issues" data={{ "data-origin-issues": message.id }} label={cards.heading} icon={CircleDot} title={cards.heading}
+      meta={projects.size === 1 ? cards.issues[0]!.projectName : undefined}>
       {[...lanes].map(([lane, issues]) => (
-        <div key={lane} className="pb-1">
-          <div className="flex items-center gap-2 px-2 pb-2 pt-1">
-            <Circle size={12} strokeWidth={2.5} className={laneTone(issues[0]!.done ? "done" : issues[0]!.status)} aria-hidden="true" />
-            <strong className="truncate text-[13px] font-semibold text-ink">{lane}</strong>
+        <div key={lane} className="mt-2.5">
+          <div className="flex items-center gap-2 px-0.5 pb-1.5">
+            <Circle size={11} strokeWidth={2.5} className={laneTone(issues[0]!.done ? "done" : issues[0]!.status)} aria-hidden="true" />
+            <strong className="truncate text-[12px] font-medium text-ink-secondary">{lane}</strong>
             <span className="text-[12px] tabular-nums text-ink-tertiary">{issues.length}</span>
           </div>
           <ol className="flex flex-col gap-2 p-0.5" aria-label={`${lane} issues`}>
@@ -53,7 +54,7 @@ export function OriginIssuesCard({ message }: { message: Message }) {
           </ol>
         </div>
       ))}
-      {cards.more ? <div className="px-2 pb-1 pt-0.5 text-[12px] text-ink-tertiary">{cards.more} more in Origin</div> : null}
-    </section>
+      <More count={cards.more} where="Origin" />
+    </CardFrame>
   );
 }

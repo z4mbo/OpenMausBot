@@ -21,6 +21,7 @@ import {
   installAgentBrowserBinary,
   resolveAgentBrowserBinary,
 } from "../../server/browser-engine.ts";
+import { startBrowserDaemon } from "../../server/browser-daemon.ts";
 import { fixtureApi, mountPreview, type MountedPreview } from "./preview-fixture.ts";
 import { credentialStoreFlags } from "../../server/browser/egress/gate.ts";
 
@@ -134,6 +135,13 @@ export function agentBrowser(
       fail(new ControlOmbError(`agent-browser ${args[0]} failed: ${reason.slice(0, 300)}`, "take a fresh `ui snapshot`; refs change after the page updates"));
     });
   });
+}
+
+/** Start the session's agent-browser daemon the way the server does on Windows, so a page load of more than ~600
+ * requests cannot crash it. */
+export async function startSessionDaemon(binary: string, env: NodeJS.ProcessEnv): Promise<ChildProcess> {
+  try { return await startBrowserDaemon(binary, env); }
+  catch (error) { throw new ControlOmbError(error instanceof Error ? error.message : String(error)); }
 }
 
 /** Chrome for Testing that `agent-browser install` unpacked under the tools
@@ -472,6 +480,7 @@ export async function launchUi(
     const session: SessionEnv = { home: fixture.info.dataDir, session: `omb-ui-${new URL(fixture.info.url).port}`, chrome };
     const env = sessionEnv(session, parentEnv);
     opened = { binary, env };
+    await startSessionDaemon(binary, env);
     await agentBrowser(binary, env, ["open", preview.previewUrl], 120_000);
     checkpoint();
     const handle: UiHandle = {

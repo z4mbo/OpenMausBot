@@ -57,7 +57,7 @@ export const FIND_MATCHES_MAX = 3;
 const FIND_CHARS_MAX = 20_000;
 const QUERY_CHARS = 1_000;
 /** Room for the hidden tools' names in find_tool's own description. */
-export const BRIDGE_NAMES_MAX_CHARS = 1_200;
+export const BRIDGE_NAMES_MAX_CHARS = 1_800;
 /** Room kept to say how many names were left out. */
 const MORE_NAMES_CHARS = 24;
 
@@ -263,6 +263,39 @@ export const DEFERRED_NOTE = `Before the first call, get its input schema from $
 /** A short entry takes any object: the tool reads its own arguments, as on every call. */
 const DEFERRED_SCHEMA: Json = { type: "object", properties: {}, additionalProperties: true };
 
+const TYPED = new Set(["array", "object", "boolean", "integer", "number"]);
+
+function fitsType(value: unknown, type: string): boolean {
+  if (type === "array") return Array.isArray(value);
+  if (type === "object") return record(value);
+  if (type === "integer") return Number.isInteger(value);
+  return typeof value === type;
+}
+
+/**
+ * A short entry declares no properties, so Claude Code (2.1.302) hands every value it cannot type as a string: an array
+ * arrives as '["x","bluesky"]' or "x,bluesky", a boolean as "true". Each such string is read back as the type the tool's
+ * whole schema declares; anything else stays as it came and the tool refuses it as it would on a full listing.
+ */
+export function typedDeferredArguments(args: Json, schema: Json): Json {
+  const properties = record(schema.properties) ? schema.properties : {};
+  const typed: Json = { ...args };
+  for (const [key, value] of Object.entries(args)) {
+    const property = properties[key];
+    const type = record(property) && typeof property.type === "string" ? property.type : "";
+    if (typeof value !== "string" || !TYPED.has(type)) continue;
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      parsed = value;
+    }
+    if (type === "array" && typeof parsed === "string") parsed = parsed.split(",").map((item) => item.trim()).filter(Boolean);
+    if (fitsType(parsed, type)) typed[key] = parsed;
+  }
+  return typed;
+}
+
 function firstSentence(text: string): string {
   return /^.*?[.!?](?=\s|$)/s.exec(text)?.[0] ?? text;
 }
@@ -294,7 +327,10 @@ export function createToolDeferral(tools: readonly BridgeTool[]): ToolListing & 
     listed,
     deferred,
     async route(name, args) {
-      return name === FIND_TOOL ? { answer: await find(args) } : undefined;
+      if (name === FIND_TOOL) return { answer: await find(args) };
+      const tool = deferred.find((entry) => entry.name === name);
+      const typed = tool && record(args) ? typedDeferredArguments(args, tool.inputSchema) : args;
+      return Object.entries(typed).some(([key, value]) => value !== args[key]) ? { name, arguments: typed } : undefined;
     },
   };
 }

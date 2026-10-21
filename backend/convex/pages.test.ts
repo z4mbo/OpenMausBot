@@ -36,47 +36,36 @@ async function fixture() {
   return { t, owner: owner!, viewer: viewer!, scope: { sessionToken, projectId }, canvasId, frameId, teamId };
 }
 
-test("a published frame is served as a page whose form files Pipeline leads under its slug", async () => {
+test("a published frame is served as a page that counts views and accepts no form posts", async () => {
   const { t, scope, canvasId, frameId } = await fixture();
   const published = await t.mutation(api.pages.publish, { ...scope, canvasId, frameId, slug: "waitlist", title: "Origin waitlist" });
-  expect(published).toMatchObject({ created: true, leadForms: 1, captureTurnedOn: true });
+  expect(published).toMatchObject({ created: true, leadForms: 1 });
   expect(published.url).toBe("https://fixture.convex.site/p/acme-launch/waitlist");
   const path = new URL(published.url).pathname;
 
   const page = await t.fetch(path, { headers: { "User-Agent": "Mozilla/5.0" } });
   expect(page.status).toBe(200);
-  expect(page.headers.get("content-security-policy")).toContain("form-action 'self'");
+  expect(page.headers.get("content-security-policy")).toContain("form-action 'none'");
   const html = await page.text();
   expect(html).toContain("<title>Origin waitlist</title>");
   expect(html).toContain('<meta name="description" content="Join the waitlist and we will let you know the moment your seat is ready.">');
   expect(html).toMatch(/<h1 class="o-t"[^>]*>Ship faster with Origin<\/h1>/);
   expect(html).toContain('<a href="https://example.com/docs"');
   expect(html).toContain("Read &lt;docs&gt;");
-  expect(html).toContain('<form method="post" id="lead"');
   expect(html).not.toContain("<script");
   await t.fetch(path, { headers: { "User-Agent": "Googlebot/2.1" } });
 
-  const sent = await t.fetch(path, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ name: "Ada", email: "ada@example.com" }).toString() });
-  expect(sent.status).toBe(303);
-  expect(sent.headers.get("location")).toBe(`${path}?sent=1#lead`);
-  expect(await (await t.fetch(`${path}?sent=1`)).text()).toContain('class="o-page o-sent"');
-  const invalid = await t.fetch(path, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: "name=NoContact" });
-  expect(invalid.headers.get("location")).toBe(`${path}?form=invalid#lead`);
-  const trap = await t.fetch(path, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: "email=bot%40spam.test&website=x" });
-  expect(trap.headers.get("location")).toBe(`${path}?sent=1#lead`);
-
-  const board = await t.query(api.pipeline.board, scope);
-  expect(board.leads.map(lead => [lead.name, lead.source])).toEqual([["Ada", "waitlist"]]);
+  const posted = await t.fetch(path, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ name: "Ada", email: "ada@example.com" }).toString() });
+  expect(posted.status).toBe(404);
   const listed = await t.query(api.pages.list, scope);
-  expect(listed.captureEnabled).toBe(true);
-  expect(listed.pages).toEqual([expect.objectContaining({ slug: "waitlist", views: 1, leads: 1, url: published.url })]);
+  expect(listed.pages).toEqual([expect.objectContaining({ slug: "waitlist", views: 1, url: published.url })]);
 });
 
 test("republishing keeps one page per frame, slugs stay unique and unpublishing takes it down", async () => {
   const { t, scope, canvasId, frameId, viewer } = await fixture();
   const first = await t.mutation(api.pages.publish, { ...scope, canvasId, frameId, slug: "waitlist", title: "One" });
   const again = await t.mutation(api.pages.publish, { ...scope, canvasId, frameId, slug: "join", title: "Two", description: "Custom" });
-  expect(again).toMatchObject({ pageId: first.pageId, created: false, captureTurnedOn: false });
+  expect(again).toMatchObject({ pageId: first.pageId, created: false });
   expect((await t.fetch(new URL(first.url).pathname)).status).toBe(404);
   expect(await (await t.fetch(new URL(again.url).pathname)).text()).toContain('content="Custom"');
   await expect(t.mutation(api.pages.publish, { ...scope, canvasId, frameId, slug: "Bad Slug", title: "x" })).rejects.toThrow("lowercase");

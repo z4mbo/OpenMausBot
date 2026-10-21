@@ -3,11 +3,12 @@ import { Select } from "../Select";
 import { copyText } from "@/lib/copy-text";
 import { ArrowUpRight, Bug, Check, CirclePlus, Copy, Lightbulb, Loader2, MessageSquareHeart, RotateCcw, Settings2, X } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
+import { revealItem, useItemFocus } from "@/lib/origin-item-focus";
 import { cn } from "@/lib/cn";
 import { feedbackLink, useAppAddress } from "@/lib/origin-members";
 import type { CloudBoard, CloudFeedbackEntry, CloudFeedbackPortal, CloudPerson, CloudProject } from "./cloud-types";
 import { fmtDate, taskKey } from "./repo-url";
-import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
+import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, ghostButton, iconButton, inputClass, itemIn, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 import { newIssueColumn, openIssueColumns } from "./issue-columns";
 
 export type FeedbackPageProps = OriginPageProps & {
@@ -40,6 +41,14 @@ function Feedback({ project, teamId, projectId, canEdit, onOpenIssue }: {
   const [settings, setSettings] = useState(false);
   const [converting, setConverting] = useState<CloudFeedbackEntry | null>(null);
   const [notice, setNotice] = useState("");
+
+  useItemFocus(projectId, {
+    feedback: (entryId) => {
+      if (!entries?.some((entry) => entry._id === entryId) || revealItem(entryId)) return true;
+      setFilter("all");
+      return false;
+    },
+  }, Boolean(entries));
 
   if (!portals) return <Loading label="Loading feedback" />;
 
@@ -84,7 +93,7 @@ function Feedback({ project, teamId, projectId, canEdit, onOpenIssue }: {
       ) : (
         <div className="flex flex-col gap-3">
           {visible.map((entry) => (
-            <article key={entry._id} className={cn(cardClass, "p-4")}>
+            <article key={entry._id} data-origin-item={entry._id} className={cn(cardClass, "p-4", itemIn)}>
               <header className="mb-1.5 flex items-center gap-2">
                 {entry.kind === "bug" ? <Bug size={15} className="text-danger" aria-label="Bug" /> : <Lightbulb size={15} className="text-warning" aria-label="Idea" />}
                 <strong className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-ink">{entry.title}</strong>
@@ -145,7 +154,7 @@ function PortalSettings({ teamId, projectId, canEdit, projectName, portal, onClo
   );
 }
 
-function ConvertFeedback({ teamId, projectId, canEdit, entry, onClose, onCreated }: { teamId: string; projectId: string; canEdit: boolean; entry: CloudFeedbackEntry; onClose(): void; onCreated(taskId: string): void }) {
+export function ConvertFeedback({ teamId, projectId, canEdit, entry, onClose, onCreated }: { teamId: string; projectId: string; canEdit: boolean; entry: CloudFeedbackEntry; onClose(): void; onCreated(taskId: string): void }) {
   const board = useCloudQuery<CloudBoard>("tasks:board", { projectId });
   const people = useCloudQuery<CloudPerson[]>("members:people", { projectId });
   const [column, setColumn] = useState("");

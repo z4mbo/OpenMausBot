@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useCloudQuery } from "@/lib/origin-cloud";
+import { revealItem, useItemFocus } from "@/lib/origin-item-focus";
 import { originGitHub, type PullState, type RepoPull, type RepoSnapshot, type ReviewDecision } from "@/lib/origin-github";
 import { cn } from "@/lib/cn";
 import type { CloudBoard, CloudProject, CloudTask } from "./cloud-types";
@@ -11,6 +12,7 @@ import { PersonAvatar } from "./PersonAvatar";
 import { errorText, fmtDate, githubRepoHref, githubRepoLabel, shortSha, taskKey } from "./repo-url";
 import { CloudGate, EmptyState, Notice, PageHeader, Skeleton, cardClass, ghostButton, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 import { isDraftColumn } from "../../../shared/origin-columns";
+import { BranchProtectionNotice } from "./BranchProtectionNotice";
 
 export function RepoPage({ onOpenSettings, ...props }: OriginPageProps & { onOpenSettings?(): void }) {
   return <CloudGate {...props} label="Repo">{({ project, projectId, canEdit, isAdmin }) => <Repo key={project.repoUrl ?? ""} project={project} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />}</CloudGate>;
@@ -59,6 +61,7 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
   const { snapshot, error, loading, reload } = useRepository(projectId, Boolean(href));
   const [message, setMessage] = useState("");
   const action = useAction();
+  useItemFocus(projectId, { repo: (itemId) => !snapshot?.pullRequests.some((pr) => `pr:${pr.number}` === itemId) || revealItem(itemId) }, Boolean(snapshot) || Boolean(error));
 
   if (!project.repoUrl) {
     return <EmptyState icon={<FolderGit2 size={22} />} title="No repository linked" body="Link or create the project's GitHub repository in Settings. Its issues, pull requests and commits then show here."
@@ -99,12 +102,13 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
       <div className="mb-3 flex flex-col gap-2 empty:hidden">
         {!href && <Notice tone="danger">{project.repoUrl} is not a GitHub repository address.</Notice>}
         {project.githubRepoState === "error" && project.githubRepoError && <Notice tone="danger">{project.githubRepoError}</Notice>}
-        {project.githubRepoState === "awaiting_connection" && <div className="flex flex-wrap items-center gap-2"><Notice>A workspace admin connects GitHub before this repository can sync.</Notice>
+        {project.githubRepoState === "awaiting_connection" && <div className="flex flex-wrap items-center gap-2"><Notice>GitHub isn't set up for this workspace yet. An owner or admin connects it once in Settings &gt; Integrations, and the repository is created then.</Notice>
           {isAdmin && project.teamId && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void action.run(async () => {
             await originGitHub.connectWorkspace(project.teamId!, projectId);
             setMessage("Finish connecting GitHub in your browser, then come back here.");
           }, "Could not connect GitHub")}>Connect GitHub</button>}
         </div>}
+        {href && <BranchProtectionNotice project={project} projectId={projectId} isAdmin={isAdmin} />}
         {error && <Notice tone="danger">{error}</Notice>}
         {message && <Notice>{message}</Notice>}
         {action.error && <Notice tone="danger">{action.error}</Notice>}
@@ -127,7 +131,7 @@ function Repo({ project, projectId, canEdit, isAdmin, onOpenSettings }: { projec
           {!snapshot && loading ? <Placeholder /> : !pulls.length ? <Empty>{error ? "Unavailable." : "No pull requests yet."}</Empty> : (
             <ul className="flex flex-col gap-2">
               {pulls.map((pr) => (
-                <li key={pr.number}>
+                <li key={pr.number} data-origin-item={`pr:${pr.number}`}>
                   <PullCard pr={pr} issueKey={(number) => { const task = keyFor(number); return task ? taskKey(task._id) : `#${number}`; }}
                     canReview={isAdmin && (pr.state === "open" || pr.state === "draft")} busy={action.busy} onReview={(kind) => void review(pr, kind)} />
                 </li>

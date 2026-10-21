@@ -1,3 +1,4 @@
+import { constrainChildren } from "../../../../shared/canvas-components";
 import { descendants, effectiveParent, worldOrigin, type CanvasNode, type Scene } from "../../../../shared/canvas-scene";
 import { rotatePoint, worldBox, type Box, type Point } from "./geometry";
 import type { Handle } from "./Overlay";
@@ -62,6 +63,7 @@ export function resizeSingle(scene: Scene, index: Map<string | null, CanvasNode[
     return [{ ...node, x: sideways ? world.x - origin.x : node.x, width: sideways ? next.width : node.width, autoWidth: sideways ? false : node.autoWidth }];
   }
   const resized = withoutHug({ ...scaled(node, fx, fy, world.x - origin.x, world.y - origin.y), width: next.width, height: node.type === "line" || node.type === "arrow" ? node.height * fy : next.height }, handle !== "n" && handle !== "s", handle !== "e" && handle !== "w");
+  if (node.type === "frame") return [resized, ...constrainChildren(index, resized, node)];
   if (node.type !== "group") return [resized];
   return [resized, ...descendants(scene, node.id, index).map((child) => scaled(child, fx, fy, child.x * fx, child.y * fy))];
 }

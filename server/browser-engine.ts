@@ -63,7 +63,7 @@ function daemonControlEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv | null {
   return controlEnv;
 }
 
-function runBrowserCommand(binaryPath: string, env: NodeJS.ProcessEnv, args: string[], deadline: number, capture = false): Promise<{ ok: boolean; output: string }> {
+export function runBrowserCommand(binaryPath: string, env: NodeJS.ProcessEnv, args: string[], deadline: number, capture = false): Promise<{ ok: boolean; output: string }> {
   return new Promise((done) => {
     let settled = false;
     let output = "";

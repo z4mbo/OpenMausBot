@@ -1,4 +1,5 @@
 import { originIssueKey } from "../shared/origin-issues.ts";
+import { brandContextLine, type BrandKit } from "../shared/brand-kit.ts";
 import {
   folderLine, reachableCloudProjects, repoCoordinates,
   type OriginCloudClient, type OriginCloudState, type OriginGitHub, type OriginProjectBot, type OriginProjectFolder, type OriginTeamChat, type ReachableProject,
@@ -38,6 +39,7 @@ export interface ProjectSnapshot {
   feedback: string[];
   chat: string[];
   canvases: string[];
+  brand: string;
   members: string[];
   at: number;
 }
@@ -52,7 +54,7 @@ const FEEDBACK_SHOWN = 3;
 const CHAT_SHOWN = 4;
 const MEMBERS_SHOWN = 10;
 const HEAD_PROJECTS_SHOWN = 25;
-const TOOLS_LINE = "More with origin_list_issues, origin_get_issue, origin_vault_list, origin_list_assets, origin_feedback, origin_team_chat, origin_canvas (design with origin_canvas_edit, publish a frame as a page with origin_page_publish), origin_broadcast_list, origin_studio_generate (images, video, audio), origin_pipeline_list_leads and origin_repo_status.";
+const TOOLS_LINE = "More with origin_list_issues, origin_get_issue, origin_vault_list, origin_list_assets, origin_feedback, origin_team_chat, origin_canvas (design with origin_canvas_edit), origin_broadcast_list (Publish posts), origin_studio_generate (images, video, audio) and origin_repo_status.";
 
 const record = (value: unknown): Args => (value && typeof value === "object" && !Array.isArray(value) ? value as Args : {});
 const list = (value: unknown): Args[] => (Array.isArray(value) ? value.map(record) : []);
@@ -71,7 +73,7 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
   const teamId = text(doc.teamId);
   const repo = repoCoordinates(text(doc.repoUrl));
   const github = repo ? deps.github?.() : undefined;
-  const [board, vault, design, people, canvases, portals, repository] = await Promise.all([
+  const [board, vault, design, people, canvases, portals, repository, brand] = await Promise.all([
     optional(client.query("tasks:board", base)),
     optional(client.query("credentials:list", base)),
     optional(client.query("design:list", base)),
@@ -79,6 +81,7 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
     optional(client.query("draw:canvases", base)),
     teamId ? optional(client.query("feedback:portals", { sessionToken, teamId })) : null,
     github?.repository ? optional(github.repository(projectId)) : null,
+    optional(client.query("brand:get", base)),
   ]);
   const columns = list(record(board).columns);
   const tasks = list(record(board).tasks);
@@ -119,6 +122,7 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
     feedback: openFeedback.slice(0, FEEDBACK_SHOWN).map((entry) => `[${text(entry.kind)}] ${quoted(text(entry.title), 90)}`),
     chat: chat.map((line) => `${oneLine(line.authorName, 40)}: ${quoted(line.body, 140)}`),
     canvases: list(canvases).map((canvas) => oneLine(text(canvas.name), 40)).filter(Boolean),
+    brand: brand && typeof brand === "object" ? oneLine(brandContextLine(brand as BrandKit), 600) : "",
     members: list(people).slice(0, MEMBERS_SHOWN).map((person) => `${oneLine(text(person.name) || text(person.email), 40)} (${text(person.role)})`),
     at: now,
   };
@@ -146,7 +150,7 @@ export function projectIdentityPrompt(snapshot: Pick<ProjectSnapshot, "projectId
     `Origin project: you work on ${name} (Origin project ${snapshot.projectId})${role === "chief" ? " as its Chief" : chief ? ` on the team ${chief} leads` : ""}. Everything here is about ${name} unless the person names another project: "the project", "the app", "the repo", "the site" and "localhost" mean ${name}'s. You reach only ${name}'s Origin data (issues, vault, assets, feedback, team chat, Draw); never look for another project's.`,
     snapshot.description.trim() ? `About ${name}: ${oneLine(snapshot.description, 300)}` : "",
     repo
-      ? `Repository: ${repo.slug} ${repo.web}${snapshot.defaultBranch ? `, default branch ${snapshot.defaultBranch}` : ""}. Clone it with: git clone ${repo.clone}`
+      ? `Repository: ${repo.slug} ${repo.web}${snapshot.defaultBranch ? `, default branch ${snapshot.defaultBranch}` : ""}. Clone it with: git clone ${repo.clone}. Origin clones it into an empty project folder and answers git's GitHub sign-in there with the workspace's access, so pull and push work as they are; never put a token in a command or a remote URL`
       : snapshot.repoUrl ? `Repository: ${oneLine(snapshot.repoUrl, 200)}` : `${name} has no GitHub repository linked yet.`,
     folder ? `Project folder on this computer: ${folder.path}. It is ${name}'s working folder: work there, and when it is empty clone the repository into it, then install and run the project as its README says.` : "",
     role === "chief" ? CHIEF_RULE(name) : AGENT_RULE(name, chief),
@@ -166,7 +170,8 @@ export function projectStatusPrompt(snapshot: ProjectSnapshot, folder: OriginPro
     `- Assets: ${snapshot.assetCount}${snapshot.assets.length ? ` (${snapshot.assets.join(", ")}${snapshot.assetCount > snapshot.assets.length ? ", …" : ""})` : ""}; ${snapshot.tokenCount} design token(s)`,
     snapshot.feedbackOpen === null ? "- Feedback: no portal" : `- Feedback: ${snapshot.feedbackOpen} open${snapshot.feedback.length ? `; latest ${snapshot.feedback.join("; ")}` : ""}`,
     snapshot.chat.length ? `- Team chat, latest: ${snapshot.chat.join(" | ")}` : "- Team chat: quiet",
-    `- Draw canvases: ${snapshot.canvases.length ? snapshot.canvases.join(", ") : "none"}`,
+    `- Design canvases (Studio, Design mode): ${snapshot.canvases.length ? snapshot.canvases.join(", ") : "none"}`,
+    snapshot.brand ? `- Brand: ${snapshot.brand}` : "- Brand: no kit yet (draft one with origin_brand_update)",
     snapshot.members.length ? `- Members: ${snapshot.members.join(", ")}` : "",
     TOOLS_LINE,
   ].filter(Boolean).join("\n");

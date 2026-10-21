@@ -287,6 +287,8 @@ class BrowserClient {
 }
 
 export type ApplyViewport = (spec: BrowserSpawnSpec) => Promise<unknown>;
+/** Starts the session's native daemon itself when the engine's own start would leave it unsafe; a failure leaves the start to the engine. */
+export type OwnDaemon = (session: string, spec: Pick<BrowserSpawnSpec, "command"> & { env?: BrowserSpawnSpec["env"] }) => Promise<unknown>;
 
 interface Gate {
   owner: string | null;
@@ -328,6 +330,7 @@ export class BrowserRuntime {
   private options: { requestTimeoutMs: number; takeoverTimeoutMs: number; idleMs: number; maxPending: number; resultBudget: number; recoveryCheckMs: number; laneWaitMs: number; callBudgetMs: number; followUpReserveMs: number };
   private closeBrowser: CloseBrowser;
   private applyViewport?: ApplyViewport;
+  private ownDaemonHook?: OwnDaemon;
   private relayCommand?: RelayCommand;
   private steps?: Pick<BrowserSteps, "before" | "after" | "signIn" | "note" | "forget" | "recentFrame" | "personTook">;
   private lanes = new BrowserLanes();
@@ -335,10 +338,11 @@ export class BrowserRuntime {
   private scrub: (text: string) => string;
   private onTiming?: (timing: BrowserTiming) => void;
 
-  constructor({ closeBrowser, applyViewport, relayCommand, steps, scrub, onTiming, ...options }: Partial<BrowserRuntime["options"]> & { closeBrowser?: CloseBrowser; applyViewport?: ApplyViewport; relayCommand?: RelayCommand; steps?: BrowserRuntime["steps"]; scrub?: (text: string) => string; onTiming?: (timing: BrowserTiming) => void } = {}) {
+  constructor({ closeBrowser, applyViewport, ownDaemon, relayCommand, steps, scrub, onTiming, ...options }: Partial<BrowserRuntime["options"]> & { closeBrowser?: CloseBrowser; applyViewport?: ApplyViewport; ownDaemon?: OwnDaemon; relayCommand?: RelayCommand; steps?: BrowserRuntime["steps"]; scrub?: (text: string) => string; onTiming?: (timing: BrowserTiming) => void } = {}) {
     this.options = { ...BROWSER_CALL_DEFAULTS, takeoverTimeoutMs: 15_000, idleMs: 60_000, maxPending: 16, resultBudget: DEFAULT_BROWSER_RESULT_BUDGET, recoveryCheckMs: 30_000, ...options };
     this.closeBrowser = closeBrowser ?? (async () => false);
     this.applyViewport = applyViewport;
+    this.ownDaemonHook = ownDaemon;
     this.relayCommand = relayCommand;
     this.steps = steps;
     this.scrub = scrub ?? scrubHeldSecrets;
@@ -494,6 +498,11 @@ export class BrowserRuntime {
       await entry.client.ready;
       beforeDispatch?.();
       if (method === "tools/call" && this.gate(session).owner !== null) throw new Error(BROWSER_CONTROL_REFUSAL);
+      if (method === "tools/call" && this.ownDaemonHook) {
+        await this.ownDaemon(session, spec);
+        beforeDispatch?.();
+        if (this.gate(session).owner !== null) throw new Error(BROWSER_CONTROL_REFUSAL);
+      }
       if (method === "tools/call" && this.applyViewport) {
         entry.viewport ??= this.applyViewport(spec).catch(() => undefined);
         await entry.viewport;
@@ -801,6 +810,12 @@ export class BrowserRuntime {
   }
 
   async settled(session: string): Promise<void> { await this.gates.get(session)?.idleClose; }
+
+  async ownDaemon(session: string, spec: Parameters<OwnDaemon>[1]): Promise<void> {
+    await this.ownDaemonHook?.(session, spec).catch((error: unknown) => {
+      console.warn(`browser: agent-browser starts ${session}'s daemon itself: ${error instanceof Error ? error.message : String(error)}`);
+    });
+  }
 
   /** The same barrier as a restart. Saved sign-ins stay, and a browser attached to the person's own Chrome is never closed. */
   async closeIfIdle(session: string, idleMs: number, spec?: { command: string; args?: readonly string[]; env: Record<string, string | undefined> }): Promise<boolean> {

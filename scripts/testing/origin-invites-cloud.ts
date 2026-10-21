@@ -31,3 +31,4 @@ export const cloudQueryOnce = cloudMutation;
 export const useCloudLinks = () => ({ workspaces: {}, projects: {} });
 export const linkCloudRecord = cloudMutation;
 export const requestOriginSync = noop;
+export const createOriginWorkspace = async (): Promise<{ teamId: string; slug: string }> => { throw new Error("The fixture has one workspace"); };

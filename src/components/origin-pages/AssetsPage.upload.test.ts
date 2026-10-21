@@ -7,7 +7,7 @@ const cloud = vi.hoisted(() => ({ mutation: vi.fn() }));
 vi.mock("@/lib/origin-cloud", () => ({ useCloudQuery: () => ({ assets: [], tokens: [] }), cloudMutation: cloud.mutation }));
 vi.mock("./ui", async (original) => ({
   ...await original<typeof import("./ui")>(),
-  CloudGate: ({ children }: { children(gate: { projectId: string; canEdit: boolean }): ReactNode }) => children({ projectId: "p", canEdit: true }),
+  CloudGate: ({ children }: { children(gate: { projectId: string; canEdit: boolean; project: { name: string } }): ReactNode }) => children({ projectId: "p", canEdit: true, project: { name: "Fixture" } }),
 }));
 const { AssetsPage } = await import("./AssetsPage");
 
@@ -30,6 +30,30 @@ it("retries only the files a failed batch did not save", async () => {
   await act(async () => { form.requestSubmit(); });
   const created = cloud.mutation.mock.calls.filter(([name]) => name === "design:createAsset").map(([, args]) => (args as { name: string }).name);
   expect(created).toEqual(["a.png", "b.png"]);
+  act(() => root.unmount());
+  vi.unstubAllGlobals();
+});
+
+it("keeps the file choice fixed while a batch is uploading", async () => {
+  cloud.mutation.mockReset().mockImplementation(async (name: string) => (name === "design:generateUploadUrl" ? "https://upload.example.test" : null));
+  let finish!: () => void;
+  vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>((resolve) => { finish = () => resolve(Response.json({ storageId: "s1" })); })));
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  act(() => root.render(createElement(AssetsPage, { cloudProjectId: "p", projectName: "Project" })));
+  act(() => [...host.querySelectorAll("button")].find((button) => button.textContent === "Add asset")!.click());
+  const picker = document.querySelector<HTMLInputElement>('input[aria-label="Asset files"]')!;
+  Object.defineProperty(picker, "files", { configurable: true, value: [new File(["a"], "a.png", { type: "image/png" })] });
+  act(() => { picker.dispatchEvent(new Event("change", { bubbles: true })); });
+  const form = picker.closest("form")!;
+  await act(async () => { form.requestSubmit(); });
+  expect(form.querySelector("fieldset")!.disabled).toBe(true);
+  Object.defineProperty(picker, "files", { configurable: true, value: [new File(["c"], "c.png", { type: "image/png" })] });
+  act(() => { picker.dispatchEvent(new Event("change", { bubbles: true })); });
+  expect(form.textContent).toContain("1 file selected");
+  expect(form.querySelector<HTMLInputElement>('input[required]')!.value).toBe("a.png");
+  await act(async () => { finish(); });
   act(() => root.unmount());
   vi.unstubAllGlobals();
 });

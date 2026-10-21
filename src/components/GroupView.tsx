@@ -86,8 +86,7 @@ import { highlightCitationSource } from "@/lib/citations-dom";
 import { latestFailure, latestReply, type TranscriptSnapshot } from "@/lib/transcript-announcer";
 import { pendingApprovals } from "./PendingApproval";
 import { DataResultChip } from "./DataResultChip";
-import { OriginIssuesCard } from "./OriginIssuesCard";
-import { OriginPullRequestCard } from "./OriginPullRequestCard";
+import { OriginToolCard, hasOriginToolCard } from "./OriginToolCards";
 import { TranscriptAnnouncer } from "./TranscriptAnnouncer";
 import { dayLabel, localDay } from "@/lib/transcript-derivations";
 import { roomSpeakerIds, roomThreadSpeakerId, roomThreadWorking } from "@/lib/room-threads";
@@ -488,7 +487,7 @@ export const Transcript = memo(function Transcript({
             </div>
           ) : m.kind === "activity" && m.tool ? (
             roomActivityVisible(m, showToolCalls) ? (
-              m.dataResult ? <DataResultChip message={m} /> : m.originIssues ? <OriginIssuesCard message={m} /> : m.originPullRequest ? <OriginPullRequestCard message={m} /> : isStatusActivity(m) ? <StatusActivityRow message={m} /> : <RoomToolChip message={m} roomId={group.id} />
+              m.dataResult ? <DataResultChip message={m} /> : hasOriginToolCard(m) ? <OriginToolCard message={m} /> : isStatusActivity(m) ? <StatusActivityRow message={m} /> : <RoomToolChip message={m} roomId={group.id} />
             ) : null
           ) : m.kind === "screen" ? (
             <ScreenFrame threadId={group.threadId} message={m} />
@@ -1301,7 +1300,7 @@ export function GroupView({ group }: { group: Group }) {
       )}
       <GlassScrollFrame className="flex-1 [--glass-tint:var(--color-app)]">
       {/* z-[25]: above the room set-up card (z-20), below the GroupCallOverlay (z-30). */}
-      <GlassBar edge="top" className="z-[25]">
+      <GlassBar edge="top" className="glass-bar-plain z-[25]">
       <div
         {...headerDragProps}
         className={cn(

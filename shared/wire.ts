@@ -20,6 +20,9 @@ import type { QuestionRequestCardData } from "./ask-question.ts";
 import type { RoutineRunCardData } from "./routine-run.ts";
 import type { OriginIssueCards } from "./origin-issues.ts";
 import type { OriginPullRequestCard } from "./origin-pull-request.ts";
+import type { OriginChatCard } from "./origin-chat-cards.ts";
+import type { OriginStudioCards } from "./origin-studio-cards.ts";
+import type { OriginDesignCard } from "./origin-design.ts";
 import type { WidgetPayload } from "./widget.ts";
 import type { GroupGoalRunCardData } from "./group-goal-run.ts";
 import type { RuntimeEvent } from "./runtime-events.ts";
@@ -569,8 +572,14 @@ export interface WireMessage {
   dataResult?: { botId: string; cardId: string; title: string; kind: "table" | "chart" | "text"; sql?: string };
   /** Issues an Origin tool returned, drawn as cards that open each issue in its project. */
   originIssues?: OriginIssueCards;
+  /** Generations or presets an Origin Studio tool returned, drawn as media tiles and preset cards that open Studio. */
+  originStudio?: OriginStudioCards;
   /** A pull request a Chief read with origin_review_pr; a project admin can approve and merge it from the card after confirming. */
   originPullRequest?: OriginPullRequestCard;
+  /** A post, generation, asset, vault entry, repository, feedback or call an Origin tool returned, drawn as a card that opens it in its project. */
+  originCard?: OriginChatCard;
+  /** Canvas frames an Origin design tool worked on, drawn as thumbnails that open the canvas in Studio's Design mode. */
+  originDesign?: OriginDesignCard;
   /** user messages: the Data result the person was viewing when they sent
    * this. `text` stays exactly what they typed. */
   dataContext?: { cardId: string; draftSql?: string };

@@ -1,6 +1,9 @@
 import { useState, type DragEvent, type ReactNode } from "react";
-import { ChevronRight, Circle, Eye, EyeOff, Frame, Group, Image as ImageIcon, Lock, LockOpen, Minus, MoveUpRight, Spline, Square, Type } from "lucide-react";
-import { effectiveParent, nextZ, type CanvasNode, type CanvasNodeType } from "../../../../shared/canvas-scene";
+import {
+  ChevronRight, Circle, Component, Diamond, Eye, EyeOff, Frame, Group, Image as ImageIcon, Lock, LockOpen, Minus, MoveUpRight, Spline, Square, SquaresExclude,
+  SquaresIntersect, SquaresSubtract, SquaresUnite, Type,
+} from "lucide-react";
+import { effectiveParent, nextZ, type BooleanOperation, type CanvasNode, type CanvasNodeType } from "../../../../shared/canvas-scene";
 import { cn } from "@/lib/cn";
 import { reparent, zAt } from "./actions";
 import type { SelectionApi } from "./CanvasEditor";
@@ -11,17 +14,23 @@ const ICONS: Record<CanvasNodeType, ReactNode> = {
   arrow: <MoveUpRight size={13} />, text: <Type size={13} />, image: <ImageIcon size={13} />, group: <Group size={13} />, path: <Spline size={13} />,
 };
 
+const BOOLEAN_ICONS: Record<BooleanOperation, ReactNode> = {
+  union: <SquaresUnite size={13} />, subtract: <SquaresSubtract size={13} />, intersect: <SquaresIntersect size={13} />, exclude: <SquaresExclude size={13} />,
+};
+
 type Drop = { id: string; zone: "above" | "below" | "inside" };
 
-export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: CanvasScene; selection: SelectionApi; readOnly: boolean; header?: ReactNode }) {
+const OPEN_CHILDREN = 40;
+
+export function LayersPanel({ canvas, selection, readOnly, header, titled = true }: { canvas: CanvasScene; selection: SelectionApi; readOnly: boolean; header?: ReactNode; titled?: boolean }) {
   const { scene, index } = canvas;
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
+  const [toggled, setToggled] = useState<Set<string>>(() => new Set());
   const [renaming, setRenaming] = useState<string | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [drop, setDrop] = useState<Drop | null>(null);
   const roots = index.get(null) ?? [];
 
-  const toggle = (id: string) => setCollapsed((current) => {
+  const toggle = (id: string) => setToggled((current) => {
     const next = new Set(current);
     if (next.has(id)) next.delete(id); else next.add(id);
     return next;
@@ -69,7 +78,7 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
 
   const row = (node: CanvasNode, depth: number): ReactNode => {
     const children = index.get(node.id) ?? [];
-    const open = !collapsed.has(node.id);
+    const open = (children.length <= OPEN_CHILDREN) !== toggled.has(node.id);
     const chosen = selection.ids.includes(node.id);
     const marker = drop?.id === node.id ? drop.zone : null;
     return (
@@ -82,7 +91,20 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
           onDragEnd={() => { setDragging(null); setDrop(null); }}
           onClick={(event) => click(node, event.shiftKey || event.metaKey || event.ctrlKey)}
           onDoubleClick={() => { if (!readOnly) setRenaming(node.id); }}
-          className={cn("group relative flex h-7 cursor-default items-center gap-1 rounded-md pr-1 text-[12.5px] transition-colors duration-100",
+          tabIndex={renaming === node.id ? -1 : 0} data-layer-row
+          onKeyDown={(event) => {
+            if (event.target !== event.currentTarget) return;
+            const step = event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
+            if (step) {
+              const rows = [...(event.currentTarget.closest('[role="tree"]')?.querySelectorAll<HTMLElement>("[data-layer-row]") ?? [])];
+              rows[rows.indexOf(event.currentTarget) + step]?.focus();
+            } else if (event.key === "Enter" || event.key === " ") click(node, event.shiftKey || event.metaKey || event.ctrlKey);
+            else if (event.key === "F2" && !readOnly) setRenaming(node.id);
+            else return;
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          className={cn("group relative flex h-7 cursor-default items-center gap-1 rounded-md pr-1 text-[12.5px] outline-none transition-colors duration-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/60",
             chosen ? "bg-accent/15 text-ink" : "text-ink-secondary hover:bg-raised/70 hover:text-ink",
             node.hidden && "opacity-50", marker === "inside" && "ring-1 ring-inset ring-accent")}
           style={{ paddingLeft: 6 + depth * 14 }}>
@@ -90,11 +112,11 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
           {marker === "below" && <span aria-hidden="true" className="absolute inset-x-1 -bottom-px h-0.5 rounded bg-accent" />}
           {children.length ? (
             <button type="button" aria-label={open ? `Collapse ${node.name}` : `Expand ${node.name}`} onClick={(event) => { event.stopPropagation(); toggle(node.id); }}
-              className="inline-flex size-4 shrink-0 items-center justify-center rounded text-ink-tertiary hover:text-ink">
+              className="inline-flex size-4 shrink-0 items-center justify-center rounded text-ink-tertiary outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
               <ChevronRight size={12} className={cn("transition-transform duration-150 motion-reduce:transition-none", open && "rotate-90")} />
             </button>
           ) : <span className="size-4 shrink-0" />}
-          <span className={cn("shrink-0", chosen ? "text-accent-text" : "text-ink-tertiary")}>{ICONS[node.type]}</span>
+          <span className={cn("shrink-0", chosen || node.component || node.instanceOf ? "text-accent-text" : "text-ink-tertiary")}>{node.component ? <Component size={13} /> : node.instanceOf ? <Diamond size={13} /> : node.boolean ? BOOLEAN_ICONS[node.boolean] : ICONS[node.type]}</span>
           {renaming === node.id ? (
             <input autoFocus defaultValue={node.name} aria-label="Layer name" maxLength={120}
               className="h-6 min-w-0 flex-1 rounded border border-accent/70 bg-inset px-1 text-[12.5px] text-ink outline-none"
@@ -105,11 +127,11 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
           {!readOnly && renaming !== node.id && (
             <span className={cn("flex shrink-0 items-center", !node.locked && !node.hidden && "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100")}>
               <button type="button" aria-label={node.locked ? `Unlock ${node.name}` : `Lock ${node.name}`} onClick={(event) => { event.stopPropagation(); canvas.commit([{ ...node, locked: !node.locked }]); }}
-                className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary hover:text-ink">
+                className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
                 {node.locked ? <Lock size={12} /> : <LockOpen size={12} />}
               </button>
               <button type="button" aria-label={node.hidden ? `Show ${node.name}` : `Hide ${node.name}`} onClick={(event) => { event.stopPropagation(); canvas.commit([{ ...node, hidden: !node.hidden }]); }}
-                className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary hover:text-ink">
+                className="inline-flex size-6 items-center justify-center rounded text-ink-tertiary outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60">
                 {node.hidden ? <EyeOff size={12} /> : <Eye size={12} />}
               </button>
             </span>
@@ -123,7 +145,7 @@ export function LayersPanel({ canvas, selection, readOnly, header }: { canvas: C
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {header}
-      <div className="flex h-9 shrink-0 items-center px-3 text-[11.5px] font-medium uppercase tracking-wide text-ink-tertiary">Layers</div>
+      {titled && <div className="flex h-9 shrink-0 items-center px-3 text-[11.5px] font-medium uppercase tracking-wide text-ink-tertiary">Layers</div>}
       {roots.length ? (
         <ul role="tree" aria-label="Layers" aria-multiselectable="true" className="min-h-0 flex-1 overflow-y-auto px-1.5 pb-3">
           {[...roots].reverse().map((node) => row(node, 0))}

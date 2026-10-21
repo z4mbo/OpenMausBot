@@ -70,27 +70,27 @@ const TEAMWORK_TOOLS = ["list_room_targets", "coordinate_bots", "assignment_stat
 
 /** Bytes when the budget was last set; a profile may move at most 2% either way (lower it to lock in a win). */
 const BUDGET_BASELINE: Record<string, number> = {
-  "default": 75780,
-  "voice": 76521,
-  "shared": 77525,
-  "shared+voice": 78266,
-  "skills": 78679,
-  "skills+voice": 79420,
-  "skills+shared": 80424,
-  "skills+shared+voice": 81165,
-  "non-chief": 63193,
-  "voice+non-chief": 63934,
-  "shared+non-chief": 64938,
-  "shared+voice+non-chief": 65679,
-  "skills+non-chief": 66092,
-  "skills+voice+non-chief": 66833,
-  "skills+shared+non-chief": 67837,
-  "skills+shared+voice+non-chief": 68578,
-  "skills+shared+voice+cloud-home": 80220,
-  "skills+shared+voice+non-chief+cloud-home": 67633,
-  "skills+shared+voice+escalations": 82025,
-  "default+legacy-switches": 75780,
-  "skills+shared+voice+escalations+whole-schemas": 93711,
+  "default": 78695,
+  "voice": 79436,
+  "shared": 80440,
+  "shared+voice": 81181,
+  "skills": 81594,
+  "skills+voice": 82335,
+  "skills+shared": 83339,
+  "skills+shared+voice": 84080,
+  "non-chief": 65970,
+  "voice+non-chief": 66711,
+  "shared+non-chief": 67715,
+  "shared+voice+non-chief": 68456,
+  "skills+non-chief": 68869,
+  "skills+voice+non-chief": 69610,
+  "skills+shared+non-chief": 70614,
+  "skills+shared+voice+non-chief": 71355,
+  "skills+shared+voice+cloud-home": 83135,
+  "skills+shared+voice+non-chief+cloud-home": 70410,
+  "skills+shared+voice+escalations": 84940,
+  "default+legacy-switches": 78695,
+  "skills+shared+voice+escalations+whole-schemas": 102832,
 };
 
 const RPC_PREFIX = '{"jsonrpc":"2.0","id":1,"result":';
@@ -186,7 +186,7 @@ describe("agents proxy tools/list golden", () => {
     const short = toolsOf(wires[FULL]!) as ListedTool[];
     expect(short.map((tool) => tool.name)).toEqual([...whole.map((tool) => tool.name), "find_tool"]);
     const deferred = whole.filter((tool) => isDeferredTool(tool.name));
-    expect(deferred.map((tool) => tool.name)).toEqual(expect.arrayContaining(["origin_studio_generate", "origin_broadcast_draft", "origin_pipeline_contact", "origin_canvas_edit"]));
+    expect(deferred.map((tool) => tool.name)).toEqual(expect.arrayContaining(["origin_studio_generate", "origin_broadcast_draft", "origin_canvas_edit"]));
     for (const [index, tool] of whole.entries()) {
       const listed = short[index]!;
       if (!isDeferredTool(tool.name)) {

@@ -20,3 +20,15 @@ it("leaves Enter to the input method while it composes a search", () => {
   act(() => { search.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })); });
   expect(onChange).toHaveBeenCalledWith("a");
 });
+
+it("keeps the Enter that picks an option from also submitting the form around it", () => {
+  const onChange = vi.fn();
+  const submit = vi.fn();
+  act(() => root.render(createElement("div", { onKeyDown: submit }, createElement(ChipSelect, { label: "Status", value: "a", options: [{ value: "a", label: "Draft" }, { value: "b", label: "Todo" }], onChange }))));
+  act(() => host.querySelector("button")!.click());
+  const search = host.querySelector("input")!;
+  act(() => { search.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })); });
+  act(() => { search.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true })); });
+  expect(onChange).toHaveBeenCalledWith("b");
+  expect(submit.mock.calls.filter(([event]) => (event as KeyboardEvent).key === "Enter")).toEqual([]);
+});

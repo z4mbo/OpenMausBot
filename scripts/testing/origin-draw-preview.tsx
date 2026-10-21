@@ -8,6 +8,7 @@ import "../../src/styles.css";
 const params = new URLSearchParams(location.search);
 applySkin(params.get("theme") === "light" ? "daylight" : "midnight");
 const chief = { id: "fixture-chief", name: "Atlas", title: "Chief", chiefOfStaff: true, color: "green", section: "Fixture project", messages: [], modelSelection: { instanceId: "fixture", model: "fixture" }, threadId: "fixture-thread", description: "", notifications: false, unread: false } as Bot;
+const designer = { ...chief, id: "fixture-designer", name: "Dana", title: "Designer", chiefOfStaff: false, color: "purple", threadId: "fixture-designer-thread" } as Bot;
 const sent: unknown[] = [];
 Object.assign(window, { originCanvasSent: sent });
 function Fixture() {
@@ -19,4 +20,4 @@ function Fixture() {
     {open ? params.has("project") ? <ProjectDrawPage agent={chief} cloudProjectId="fixture-project" projectName="Fixture project" /> : <DrawingCanvas teamId="fixture-team" canvasId="fixture-canvas" projectId="fixture-project" userId="fixture-user" name="Release planning" agent={chief} readOnly={params.has("viewer")} /> : <p className="p-4 text-sm">Canvas closed</p>}
   </main>;
 }
-createRoot(document.getElementById("root")!).render(<StoreContext.Provider value={{ state: initialState, dispatch: (action: unknown) => { sent.push(action); }, flushBotPatches: async () => null, refreshInstances: async () => {}, refreshModels: async () => {} }}><Fixture /></StoreContext.Provider>);
+createRoot(document.getElementById("root")!).render(<StoreContext.Provider value={{ state: { ...initialState, bots: [chief, designer] }, dispatch: (action: unknown) => { sent.push(action); }, flushBotPatches: async () => null, refreshInstances: async () => {}, refreshModels: async () => {} }}><Fixture /></StoreContext.Provider>);

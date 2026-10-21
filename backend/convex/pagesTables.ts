@@ -1,8 +1,6 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
 
-export const pageFont = v.union(v.literal("sans"), v.literal("serif"), v.literal("mono"));
-
 export const pagesTables = {
   /** A Canvas frame published as a public page at /p/<site>/<slug>; `body` is the snapshot taken at the last publish. */
   publishedPages: defineTable({
@@ -16,7 +14,8 @@ export const pagesTables = {
     description: v.string(),
     body: v.string(),
     background: v.string(),
-    fonts: v.array(pageFont),
+    /** PageFont ids from shared/canvas-page; the public route drops any it does not know. */
+    fonts: v.array(v.string()),
     leadForms: v.number(),
     ogStorageId: v.optional(v.id("_storage")),
     views: v.number(),

@@ -4,6 +4,7 @@ import { requireUser } from "./lib/auth";
 import { canEdit, getActiveTeamMember, normalizeEmail, projectMember, projectPeople, requireAdmin, requireMember, requireTeamMember, touchProject } from "./lib/permissions";
 import { repositoryUrl } from "./lib/repository";
 import { compareProjectOrder, reorderWorkspaceProjects } from "./lib/projectOrder";
+import { repoVisibility } from "./integrationTables";
 import { callSignalKindValidator, projectIconTypeValidator, projectStatusValidator } from "./lib/validators";
 import type { Id, Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
@@ -302,6 +303,8 @@ export const create = mutation({
     repoUrl: v.optional(v.string()),
     /** "later": no repository is created automatically; the person links or creates one from the project afterwards. */
     githubRepo: v.optional(v.literal("later")),
+    /** Who can see the repository Origin creates for the project; private unless chosen. */
+    githubRepoVisibility: v.optional(repoVisibility),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
@@ -312,7 +315,7 @@ export const create = mutation({
   },
 });
 
-export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"teams">; name: string; description?: string; repoUrl?: string; githubRepo?: "later" }, user: Doc<"users">) {
+export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"teams">; name: string; description?: string; repoUrl?: string; githubRepo?: "later"; githubRepoVisibility?: "private" | "public" }, user: Doc<"users">) {
   if (!args.name.trim() || args.name.length > 100) throw new Error("Enter a project name under 100 characters");
     const repoUrl = repositoryUrl(args.repoUrl);
     const teamMember = await getActiveTeamMember(ctx, args.teamId, user.email);
@@ -322,6 +325,7 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
     const projectId = await ctx.db.insert("projects", {
       githubRepoState: repoUrl ? "ready" : args.githubRepo === "later" ? undefined : "pending",
       githubWorkspaceAccess: Boolean(repoUrl && teamMember && ["owner", "admin"].includes(teamMember.role)),
+      ...(args.githubRepoVisibility ? { githubRepoVisibility: args.githubRepoVisibility } : {}),
       teamId: args.teamId,
       openIssueCount: 0,
       order: Math.max(-1, ...workspaceProjects.map(p => p.order ?? 0)) + 1,
@@ -360,7 +364,11 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
       });
     }
 
-    if (!repoUrl && args.githubRepo !== "later") await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId });
+    if (!repoUrl && args.githubRepo !== "later") {
+      const shared = await ctx.db.query("teamGitHub").withIndex("by_teamId", q => q.eq("teamId", args.teamId)).unique();
+      if (shared) await ctx.scheduler.runAfter(0, internal.teamGitHub.autoCreate, { projectId });
+      else await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId });
+    }
     return projectId;
 }
 

@@ -28,3 +28,4 @@ export async function cloudMutation<T = unknown>(name: string, args: Record<stri
   if (name === "callNotes:dismiss") store.setQuery("callNotes:latest", null);
   return null as T;
 }
+export const createOriginWorkspace = async (): Promise<{ teamId: string; slug: string }> => { throw new Error("The fixture has one workspace"); };

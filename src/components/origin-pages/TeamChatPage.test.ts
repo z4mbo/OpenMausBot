@@ -82,3 +82,14 @@ describe("TeamChat sending", () => {
     expect(calls.send).toHaveBeenCalledOnce();
   });
 });
+
+describe("message groups", () => {
+  it("continues an author's run of messages for five minutes and starts over for someone else", async () => {
+    const { continuesGroup } = await import("./TeamChatPage");
+    const message = (authorUserId: string, minute: number) => ({ id: `${authorUserId}${minute}`, authorUserId, authorName: authorUserId, authorEmail: "", body: "", createdAt: minute * 60_000 });
+    expect(continuesGroup(undefined, message("ada", 0))).toBe(false);
+    expect(continuesGroup(message("ada", 0), message("ada", 4))).toBe(true);
+    expect(continuesGroup(message("ada", 0), message("ada", 5))).toBe(false);
+    expect(continuesGroup(message("ada", 0), message("ben", 1))).toBe(false);
+  });
+});

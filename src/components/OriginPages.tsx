@@ -1,4 +1,4 @@
-import { Brush, Headset, Inbox, MessageCircle, Network } from "lucide-react";
+import { Headset, Inbox, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { openOriginPage, useOriginPage, type OriginPage } from "@/lib/origin-pages";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
@@ -10,9 +10,7 @@ import { useShowThreads } from "@/lib/thread-preferences";
 import { MemberCall } from "./origin-pages/CallPage";
 import { WorkspaceChat } from "./origin-pages/WorkspaceChatPage";
 import { WorkspaceInbox } from "./origin-pages/WorkspaceInboxPage";
-import { OrgPage } from "./origin-org/OrgPage";
 import { WorkspaceGate } from "./origin-pages/ui";
-import { DrawingCanvas } from "./OriginDraw";
 import { GlassHeaderFrame } from "./GlassScrollFrame";
 import { useBotColor } from "@/lib/origin-avatar-looks";
 import { useOriginInboxAlerts } from "@/lib/origin-inbox-alerts";
@@ -22,8 +20,6 @@ export const ORIGIN_PAGES: { id: OriginPage; label: string; contents: string; ic
   { id: "inbox", label: "Inbox", contents: "Issues and notifications", icon: Inbox },
   { id: "chat", label: "Chat", contents: "Messages", icon: MessageCircle },
   { id: "call", label: "Call", contents: "Calls", icon: Headset },
-  { id: "draw", label: "Canvas", contents: "Canvases", icon: Brush },
-  { id: "org", label: "Org", contents: "The boss, Chiefs and agents", icon: Network },
 ];
 
 export function OriginNav({ density }: { density: SidebarDensity }) {
@@ -69,20 +65,20 @@ export function OriginPageView({ page }: { page: OriginPage }) {
   const accent = accentVars(useBotColor(headBot));
   return (
     <main className="relative flex h-full min-w-0 flex-1 flex-col bg-app" data-origin-page={page} style={accent}>
-      <GlassHeaderFrame className="flex min-h-0 flex-1 flex-col [--glass-tint:var(--color-app)]" barClassName="z-[25]" bar={
+      <GlassHeaderFrame className="flex min-h-0 flex-1 flex-col [--glass-tint:var(--color-app)]" barClassName="glass-bar-plain z-[25]" bar={
         <header className="flex h-14 shrink-0 items-center gap-2.5 px-4 pl-11 md:pl-5">
           <span key={page} className="flex size-8 items-center justify-center rounded-xl bg-raised text-ink-secondary"><Icon size={18} aria-hidden="true" /></span>
           <h1 key={`${page}-title`} className="text-[15px] font-semibold text-ink origin-rise">{entry.label}</h1>
           <span className="hidden truncate text-[12.5px] text-ink-tertiary sm:inline">· {head?.name ?? "Workspace"}</span>
         </header>
       }>
+        <div key={page} data-origin-page-body className="flex min-h-0 min-w-0 flex-1 flex-col motion-safe:animate-[section-in_var(--motion-base)_var(--ease-out)_backwards]">
         <WorkspaceGate key={teamId ?? ""} teamId={teamId} head={head} label={entry.contents}>
           {(ctx) => page === "inbox" ? <WorkspaceInbox {...ctx} />
             : page === "chat" ? <WorkspaceChat {...ctx} />
-            : page === "org" ? <OrgPage {...ctx} />
-            : page === "call" ? <MemberCall key={ctx.teamId} target={{ teamId: ctx.teamId }} me={ctx.me} canJoin={ctx.canEdit} name={head?.name ?? "Workspace"} agent={headBot} open={() => openOriginPage("call")} />
-            : <div className="flex min-h-0 flex-1 flex-col pt-[var(--glass-top,0px)]"><DrawingCanvas key={ctx.teamId} teamId={ctx.teamId} userId={ctx.me._id} name="Workspace drawing" readOnly={!ctx.canEdit} agent={headBot} /></div>}
+            : <MemberCall key={ctx.teamId} target={{ teamId: ctx.teamId }} me={ctx.me} canJoin={ctx.canEdit} name={head?.name ?? "Workspace"} agent={headBot} open={() => openOriginPage("call")} />}
         </WorkspaceGate>
+        </div>
       </GlassHeaderFrame>
     </main>
   );

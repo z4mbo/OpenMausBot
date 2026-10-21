@@ -1,9 +1,14 @@
 import {
   CANVAS_NODE_TYPES, CANVAS_LIMITS, canvasColor, childrenIndex, descendants, effectiveParent, estimateTextWidth, isContainer, isLive,
   layoutRoot, layoutStacks, layoutText, leadForm, nextZ, randomId, randomNonce, sanitizeNode, stackLayout, typeName,
-  type CanvasNode, type CanvasNodeType, type LeadForm, type Scene, type StackLayout, type TextMeasure,
+  type BooleanOperation, type CanvasNode, type CanvasNodeType, type ComponentInfo, type Constraints, type CornerRadii, type Gradient, type ImageCrop, type LeadForm, type PrototypeLink,
+  type Scene, type Shadow, type StackLayout, type TextMeasure,
 } from "./canvas-scene.ts";
+import { constrainChildren, instantiate, masterTree, settleComponents } from "./canvas-components.ts";
+import { colorStyles, textStyle, textStylePatch } from "./canvas-styles.ts";
 import { leadFormHeight } from "./canvas-page.ts";
+import { BRAND_FONT_IDS, isBrandFont } from "./brand-fonts.ts";
+import { designSystemSpec } from "./canvas-design-system.ts";
 
 /**
  * A node as agents read and write it: `x` and `y` relative to the parent, sizes as `w` and `h`, defaults left out,
@@ -30,6 +35,8 @@ export interface CanvasSpec {
   fontSize?: number;
   fontWeight?: number;
   font?: CanvasNode["font"];
+  /** A brand kit typeface id, such as the kit's heading or body font; null removes it. */
+  family?: string | null;
   align?: CanvasNode["align"];
   lineHeight?: number;
   autoWidth?: boolean;
@@ -45,13 +52,45 @@ export interface CanvasSpec {
   link?: string;
   /** Frames only: shown on a published page as a form whose submissions become Pipeline leads; null removes it. */
   leadForm?: Partial<LeadForm> | null;
+  /** Paths: flat [inDx, inDy, outDx, outDy] per point, cubic handles relative to each point. */
+  curves?: number[];
+  breaks?: number[];
+  /** Frames: makes the frame a reusable component; set and props make it a variant of a set; null turns it back into a frame. */
+  component?: ComponentInfo | null;
+  constraints?: Partial<Constraints> | null;
+  absolute?: boolean;
+  minW?: number | null;
+  maxW?: number | null;
+  minH?: number | null;
+  maxH?: number | null;
+  /** A colour style id (primary, secondary, background, text, neutral-N) the fill follows; null unbinds. */
+  fillStyle?: string | null;
+  strokeStyle?: string | null;
+  /** A text style id (display, h1, h2, h3, body-lg, body, small, caption); null unbinds. */
+  textStyle?: string | null;
+  shadow?: Partial<Shadow> | null;
+  blur?: number | null;
+  /** Top-level nodes: the canvas page id they sit on. */
+  page?: string;
+  /** Present mode: clicking the node opens this frame (id or key); null removes it. */
+  prototype?: { to: string; transition?: PrototypeLink["transition"] } | null;
+  /** Rectangles, frames and images: [topLeft, topRight, bottomRight, bottomLeft]; null goes back to `radius`. */
+  radii?: CornerRadii | null;
+  /** A gradient fill: {kind: linear|radial, angle, stops: [{at 0..1, color}]}; null goes back to the solid fill. */
+  gradient?: Gradient | null;
+  /** Images with imageFit crop or tile: {scale, x, y}. */
+  crop?: ImageCrop | null;
+  /** Groups: union, subtract, intersect or exclude its shapes into one outline that keeps them editable; null makes it a plain group. */
+  boolean?: BooleanOperation | null;
   children?: CanvasSpec[];
 }
 
 export type CanvasOp =
   | { op: "create"; parent?: string | null; node: CanvasSpec }
+  | { op: "instance"; component: string; parent?: string | null; key?: string; set?: CanvasSpec }
   | { op: "update"; id: string; set: CanvasSpec & { parent?: string | null } }
-  | { op: "delete"; id: string };
+  | { op: "delete"; id: string }
+  | { op: "design_system"; x?: number; y?: number };
 
 export interface CanvasOpsResult {
   changed: CanvasNode[];
@@ -75,6 +114,11 @@ export function compactScene(scene: Scene, options: { root?: string; max?: numbe
     if (node.fill) spec.fill = node.fill;
     if (node.stroke) { spec.stroke = node.stroke; spec.strokeWidth = node.strokeWidth; }
     if (node.radius) spec.radius = node.radius;
+    if (node.radii) spec.radii = node.radii;
+    if (node.gradient) spec.gradient = node.gradient;
+    if (node.boolean) spec.boolean = node.boolean;
+    if (node.type === "image" && node.imageFit !== "cover") spec.imageFit = node.imageFit;
+    if (node.crop) spec.crop = node.crop;
     if (node.rotation) spec.rotation = round(node.rotation);
     if (node.opacity !== 1) spec.opacity = round(node.opacity);
     if (node.hidden) spec.hidden = true;
@@ -87,6 +131,7 @@ export function compactScene(scene: Scene, options: { root?: string; max?: numbe
       spec.fontSize = node.fontSize;
       if (node.fontWeight !== 400) spec.fontWeight = node.fontWeight;
       if (node.font !== "sans") spec.font = node.font;
+      if (node.family) spec.family = node.family;
       if (node.align !== "left") spec.align = node.align;
       if (node.autoWidth) spec.autoWidth = true;
     }
@@ -131,7 +176,9 @@ export function assetReferences(ops: readonly unknown[]): string[] {
   return [...names];
 }
 
-function applySpec(target: CanvasNode, spec: CanvasSpec, assets: ReadonlyMap<string, string>, problems: string[]): CanvasNode {
+type StyleKit = Parameters<typeof textStylePatch>[1] & Parameters<typeof colorStyles>[0];
+
+function applySpec(target: CanvasNode, spec: CanvasSpec, assets: ReadonlyMap<string, string>, problems: string[], kit: StyleKit = null): CanvasNode {
   const raw: Record<string, unknown> = { ...target };
   const set = (key: string, value: unknown) => { if (value !== undefined) raw[key] = value; };
   set("name", typeof spec.name === "string" ? spec.name.slice(0, CANVAS_LIMITS.name) : undefined);
@@ -142,6 +189,10 @@ function applySpec(target: CanvasNode, spec: CanvasSpec, assets: ReadonlyMap<str
   for (const key of ["hidden", "locked", "autoWidth", "closed", "clip", "grow"] as const) if (typeof spec[key] === "boolean") raw[key] = spec[key];
   for (const key of ["text", "font", "align", "imageFit", "fileId", "link"] as const) if (typeof spec[key] === "string") raw[key] = spec[key];
   if (spec.link === "") delete raw.link;
+  if (spec.family === null || spec.family === "") delete raw.family;
+  else if (typeof spec.family === "string") {
+    if (isBrandFont(spec.family)) raw.family = spec.family; else problems.push(`No brand font "${spec.family.slice(0, 40)}"; use one of ${BRAND_FONT_IDS.join(", ")}.`);
+  }
   if (spec.leadForm === null) delete raw.leadForm;
   else if (spec.leadForm && target.type === "frame") {
     const form = leadForm({ ...target.leadForm, ...spec.leadForm });
@@ -163,8 +214,40 @@ function applySpec(target: CanvasNode, spec: CanvasSpec, assets: ReadonlyMap<str
     const fileId = assets.get(spec.asset.trim());
     if (fileId) raw.fileId = fileId; else problems.push(`No image asset "${spec.asset}" in this project.`);
   }
-  if (target.type === "text" && (spec.text !== undefined || spec.fontSize !== undefined || spec.w !== undefined || spec.autoWidth !== undefined || spec.fontWeight !== undefined)) raw.unmeasured = true;
+  applyDesignSpec(raw, target, spec, kit, problems);
+  if (target.type === "text" && (spec.text !== undefined || spec.fontSize !== undefined || spec.w !== undefined || spec.autoWidth !== undefined || spec.fontWeight !== undefined || spec.family !== undefined || spec.textStyle)) raw.unmeasured = true;
   return sanitizeNode(raw) ?? target;
+}
+
+function applyDesignSpec(raw: Record<string, unknown>, target: CanvasNode, spec: CanvasSpec, kit: StyleKit, problems: string[]) {
+  const clear = (key: string, value: unknown) => { if (value === null) { delete raw[key]; return true; } return false; };
+  if (Array.isArray(spec.curves)) raw.curves = spec.curves;
+  if (Array.isArray(spec.breaks)) raw.breaks = spec.breaks;
+  if (!clear("component", spec.component) && spec.component) {
+    if (target.type === "frame") raw.component = { ...target.component, ...spec.component };
+    else problems.push(`Only frames can be components; ${target.name} is a ${typeName(target.type).toLowerCase()}.`);
+  }
+  if (!clear("constraints", spec.constraints) && spec.constraints) raw.constraints = { ...(target.constraints ?? { h: "left", v: "top" }), ...spec.constraints };
+  if (typeof spec.absolute === "boolean") raw.absolute = spec.absolute;
+  for (const key of ["minW", "maxW", "minH", "maxH"] as const) if (!clear(key, spec[key]) && num(spec[key]) !== undefined) raw[key] = spec[key];
+  const colors = new Map(colorStyles(kit).map((style) => [style.id, style.color]));
+  for (const [key, paint] of [["fillStyle", "fill"], ["strokeStyle", "stroke"]] as const) {
+    const id = spec[key];
+    if (clear(key, id) || typeof id !== "string") continue;
+    const color = colors.get(id);
+    if (color) Object.assign(raw, { [key]: id, [paint]: color });
+    else problems.push(`No colour style "${id.slice(0, 40)}"; use one of ${[...colors.keys()].join(", ")}.`);
+  }
+  if (!clear("textStyle", spec.textStyle) && typeof spec.textStyle === "string") {
+    const style = textStyle(spec.textStyle);
+    if (style && target.type === "text") Object.assign(raw, textStylePatch(style, kit));
+    else problems.push(style ? `Only text takes a text style; ${target.name} is a ${typeName(target.type).toLowerCase()}.` : `No text style "${spec.textStyle.slice(0, 40)}".`);
+  }
+  if (!clear("shadow", spec.shadow) && spec.shadow) raw.shadow = { x: 0, y: 4, blur: 12, spread: 0, color: "#0000001F", ...target.shadow, ...spec.shadow };
+  if (!clear("blur", spec.blur) && num(spec.blur) !== undefined) raw.blur = spec.blur;
+  if (typeof spec.page === "string") raw.page = spec.page;
+  if (!clear("prototype", spec.prototype) && spec.prototype && typeof spec.prototype.to === "string") raw.prototype = { transition: "dissolve", ...spec.prototype };
+  for (const key of ["radii", "gradient", "crop", "boolean"] as const) if (!clear(key, spec[key]) && spec[key] !== undefined) raw[key] = spec[key];
 }
 
 function defaults(type: CanvasNodeType): Partial<CanvasNode> {
@@ -187,7 +270,8 @@ export function newNode(type: CanvasNodeType, parentId: string | null, z: number
 }
 
 /** Applies agent operations to a scene and returns the nodes to save, with versions already bumped. */
-export function applyCanvasOps(scene: Scene, ops: readonly unknown[], options: { measure?: TextMeasure; assets?: ReadonlyMap<string, string> } = {}): CanvasOpsResult {
+export function applyCanvasOps(scene: Scene, ops: readonly unknown[], options: { measure?: TextMeasure; assets?: ReadonlyMap<string, string>; kit?: StyleKit; page?: string } = {}): CanvasOpsResult {
+  const kit = options.kit ?? null;
   const measure = options.measure ?? estimateTextWidth;
   const assets = options.assets ?? new Map<string, string>();
   const work = new Map(scene);
@@ -215,7 +299,8 @@ export function applyCanvasOps(scene: Scene, ops: readonly unknown[], options: {
     if (work.size >= CANVAS_LIMITS.nodes) { problems.push(`${path}: the canvas is full.`); return; }
     let node = newNode(type, parentId, nextZ(siblingsOf(parentId)));
     if (type === "text" && spec.w === undefined && spec.autoWidth === undefined) node.autoWidth = true;
-    node = applySpec(node, spec, assets, problems);
+    node = applySpec(node, spec, assets, problems, kit);
+    if (!parentId && options.page && !node.page) node = { ...node, page: options.page };
     if (type === "text") node = { ...node, unmeasured: true, ...(spec.name ? {} : { name: (node.text ?? "").trim().replace(/\s+/g, " ").slice(0, 60) || "Text" }), ...sizeOfText(node, measure) };
     if (!parentId && num(spec.x) === undefined && num(spec.y) === undefined) node = { ...node, ...placeOnCanvas() };
     put(node);
@@ -241,7 +326,7 @@ export function applyCanvasOps(scene: Scene, ops: readonly unknown[], options: {
       const node = resolve(op.id);
       if (!node) { problems.push(`${path}: no node ${String(op.id)}.`); return; }
       const set = (op.set && typeof op.set === "object" ? op.set : {}) as CanvasSpec & { parent?: string | null };
-      let next = applySpec(node, set, assets, problems);
+      let next = applySpec(node, set, assets, problems, kit);
       if (set.parent !== undefined) {
         const parent = set.parent === null ? null : resolve(set.parent);
         if (set.parent !== null && (!isContainer(parent) || parent.id === node.id || descendants(work, node.id).some((child) => child.id === parent.id))) problems.push(`${path}: cannot move ${node.id} into ${String(set.parent)}.`);
@@ -249,6 +334,7 @@ export function applyCanvasOps(scene: Scene, ops: readonly unknown[], options: {
       }
       if (next.type === "text") next = { ...next, ...sizeOfText(next, measure) };
       put(next);
+      for (const child of constrainChildren(childrenIndex(work), next, node)) put(child);
       if (Array.isArray(set.children)) {
         if (next.type === "frame" || next.type === "group") set.children.forEach((child, childIndex) => build(child, next.id, `${path}.set.children[${childIndex}]`));
         else problems.push(`${path}: only frames and groups have children.`);
@@ -257,8 +343,32 @@ export function applyCanvasOps(scene: Scene, ops: readonly unknown[], options: {
       const node = resolve(op.id);
       if (!node) { problems.push(`${path}: no node ${String(op.id)}.`); return; }
       for (const gone of [node, ...descendants(work, node.id)]) put({ ...gone, deleted: true });
-    } else problems.push(`${path}: op must be create, update or delete.`);
+    } else if (op.op === "instance") {
+      const parent = op.parent === undefined || op.parent === null ? null : resolve(op.parent);
+      if (op.parent && !isContainer(parent)) { problems.push(`${path}: parent ${String(op.parent)} is not a frame or group on this canvas.`); return; }
+      const wanted = typeof op.component === "string" ? op.component.trim() : "";
+      const master = resolve(wanted) ?? [...work.values()].find((node) => isLive(node) && node.component && node.name.toLowerCase() === wanted.toLowerCase());
+      if (!master?.component) { problems.push(`${path}: no component ${wanted.slice(0, 80)} on this canvas; components: ${[...work.values()].filter((node) => isLive(node) && node.component).map((node) => `"${node.name}" (${node.id})`).slice(0, 30).join(", ") || "none"}.`); return; }
+      const parentId = parent?.id ?? null;
+      const nodes = instantiate(masterTree(work, childrenIndex(work), master.id), parentId, { x: 0, y: 0, z: nextZ(siblingsOf(parentId)) });
+      const set = (op.set && typeof op.set === "object" ? op.set : {}) as CanvasSpec;
+      let root = applySpec(nodes[0]!, set, assets, problems, kit);
+      if (!parentId && num(set.x) === undefined && num(set.y) === undefined) root = { ...root, ...placeOnCanvas() };
+      if (!parentId && options.page && !root.page) root = { ...root, page: options.page };
+      nodes[0] = root;
+      for (const node of nodes) put(node);
+      if (typeof op.key === "string" && op.key) keys.set(op.key, root.id);
+      created.push({ id: root.id, ...(typeof op.key === "string" && op.key ? { key: op.key } : {}), name: root.name, type: root.type });
+    } else if (op.op === "design_system") {
+      const spec = designSystemSpec(kit as Parameters<typeof designSystemSpec>[0]);
+      build({ ...spec, ...(num(op.x) !== undefined ? { x: num(op.x) } : {}), ...(num(op.y) !== undefined ? { y: num(op.y) } : {}) }, null, path);
+    } else problems.push(`${path}: op must be create, update, delete, instance or design_system.`);
   });
+  for (const id of touched) {
+    const node = work.get(id)!;
+    if (node.prototype && keys.has(node.prototype.to)) work.set(id, { ...node, prototype: { ...node.prototype, to: keys.get(node.prototype.to)! } });
+  }
+  settleComponents(work, touched, scene);
   const roots = new Set<string>();
   for (const id of touched) {
     const node = work.get(id)!;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CheckCircle2, ListChecks, Loader2, X } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
+import { revealItem, useItemFocus } from "@/lib/origin-item-focus";
 import { Notice, cardClass, iconButton, primaryButton, useAction } from "./ui";
 
 type ActionItem = { title: string; owner?: string; taskId?: string };
@@ -30,7 +31,7 @@ export function CallActionItemsView({ note, busy, error, onCreate, onDismiss }: 
   });
   return (
     <div className="mx-auto w-full max-w-xl px-4 pb-4 md:px-6">
-      <section className={cn(cardClass, "p-3 origin-rise")} aria-label="Action items from the last call">
+      <section data-origin-item={note._id} className={cn(cardClass, "p-3 origin-rise")} aria-label="Action items from the last call">
         <div className="flex items-start gap-2">
           <ListChecks size={15} className="mt-0.5 shrink-0 text-ink-secondary" aria-hidden="true" />
           <div className="min-w-0 flex-1">
@@ -77,6 +78,7 @@ export function CallActionItemsView({ note, busy, error, onCreate, onDismiss }: 
 export function CallActionItems({ projectId }: { projectId: string }) {
   const note = useCloudQuery<CallNote | null>("callNotes:latest", { projectId });
   const action = useAction();
+  useItemFocus(projectId, { call: (noteId) => note?._id !== noteId || revealItem(noteId) }, note !== undefined);
   if (!note) return null;
   return (
     <CallActionItemsView key={note._id} note={note} busy={action.busy} error={action.error}

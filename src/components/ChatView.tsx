@@ -95,8 +95,7 @@ import { optionsCardRow } from "./OptionsCardRow";
 import { RemoteRowNote, SharedThreadBar } from "./SharedThreadBar";
 import { MessageBoundary } from "./MessageBoundary";
 import { WidgetMessage } from "./widget/WidgetMessage";
-import { OriginIssuesCard } from "./OriginIssuesCard";
-import { OriginPullRequestCard } from "./OriginPullRequestCard";
+import { OriginToolCard, hasOriginToolCard } from "./OriginToolCards";
 import { Composer } from "./Composer";
 import { useTeammates } from "./origin-members/teammates";
 import { useCloudProjectFor } from "@/lib/origin-cloud-links";
@@ -920,8 +919,7 @@ const MessagesList = memo(function MessagesList({
               if (isDelegationChip(m, botId)) return <DelegatedWork message={m} failed={failedDelegations.has(m.roomRequest!.id)} />;
               if (resultShownInBlock(m, delegated)) return null;
               if (m.dataResult) return <DataResultChip message={m} />;
-              if (m.originIssues) return <OriginIssuesCard message={m} />;
-              if (m.originPullRequest) return <OriginPullRequestCard message={m} />;
+              if (hasOriginToolCard(m)) return <OriginToolCard message={m} />;
               if (isStatusActivity(m)) return <StatusActivityRow message={m} />;
               if (m.tool && failedTurnCause(m.tool.name) !== null) {
                 return (
@@ -1270,7 +1268,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
       {projectPage && chiefSection !== "chat" && <ChiefSectionFrame bot={bot} section={chiefSection} onSection={setChiefSection} />}
       <GlassScrollFrame className={cn("flex-1 [--glass-tint:var(--color-app)]", projectPage && chiefSection !== "chat" && "hidden")}>
       {/* z-[25]: above the room set-up card (z-20), below the CallOverlay (z-30). */}
-      <GlassBar edge="top" className="z-[25]">
+      <GlassBar edge="top" className="glass-bar-plain z-[25]">
       {projectPage && chiefSection === "chat" && <ChiefSectionBar bot={bot} section={chiefSection} onSection={setChiefSection} joined />}
       {placedHeader(embedded, headerSlot, (
       <div
@@ -1278,7 +1276,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
         className={cn(
           // A container query never matches the container itself, so the row that wraps is the child below.
           "@container/chathead px-5 py-3",
-          "pl-11 md:pl-5",
+          embedded || projectPage ? "pl-3 md:pl-5" : "pl-11 md:pl-5",
         )}
       >
         <div data-chathead-row className="flex items-center justify-between @max-[30rem]/chathead:flex-wrap @max-[30rem]/chathead:gap-y-1 @min-[30rem]/chathead:grid @min-[30rem]/chathead:grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(max-content,1fr)]">

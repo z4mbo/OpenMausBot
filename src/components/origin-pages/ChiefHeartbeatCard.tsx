@@ -2,6 +2,7 @@ import { HeartPulse, Loader2 } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import { Select } from "../Select";
+import { Switch } from "../SettingsPrimitives";
 import { Field, Notice, cardClass, useAction } from "./ui";
 
 type HeartbeatSettings = { enabled: boolean; intervalHours: number; staleDays: number; lastRunAt?: number; canEdit: boolean; chiefName: string | null };
@@ -33,13 +34,8 @@ export function ChiefHeartbeatCard({ projectId }: { projectId: string }) {
       <div className="mb-1 flex items-center gap-2">
         <h3 className="flex items-center gap-2 text-[14px] font-semibold text-ink"><span className="text-ink-secondary"><HeartPulse size={15} /></span>Chief heartbeat</h3>
         {action.busy && <Loader2 size={13} className="animate-spin text-ink-tertiary" aria-hidden="true" />}
-        <button type="button" role="switch" aria-checked={settings.enabled} aria-label="Chief heartbeat" disabled={disabled || !settings.chiefName} onClick={() => save({ enabled: !settings.enabled })}
-          className="ml-auto flex items-center gap-2 rounded-lg px-2 py-1 text-[12.5px] text-ink-secondary transition-colors duration-(--motion-fast) hover:bg-raised disabled:cursor-not-allowed disabled:opacity-60">
-          <span className={cn("relative h-4 w-7 rounded-full transition-colors duration-(--motion-fast)", settings.enabled ? "bg-success" : "bg-raised")}>
-            <span className={cn("absolute top-0.5 size-3 rounded-full bg-white transition-all duration-(--motion-fast)", settings.enabled ? "left-3.5" : "left-0.5")} />
-          </span>
-          {settings.enabled ? "On" : "Off"}
-        </button>
+        <span className="ml-auto text-[12.5px] text-ink-secondary" aria-hidden="true">{settings.enabled ? "On" : "Off"}</span>
+        <Switch checked={settings.enabled} aria-label="Chief heartbeat" disabled={disabled || !settings.chiefName} onClick={() => save({ enabled: !settings.enabled })} />
       </div>
       <p className="mb-3 text-[12.5px] text-ink-secondary">
         {settings.chiefName

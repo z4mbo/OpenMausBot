@@ -6,7 +6,7 @@ import { admitStorageReference, issueUpload, writableUploadScope } from "./lib/s
 import { encodeNode, isCanvasRow, sanitizeNode } from "../../shared/canvas-scene";
 
 const scope = { sessionToken: v.string(), teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")) };
-async function sceneAccess(ctx: QueryCtx | MutationCtx, args: { sessionToken: string; teamId: Id<"teams">; canvasId?: Id<"canvases"> }) {
+export async function sceneAccess(ctx: QueryCtx | MutationCtx, args: { sessionToken: string; teamId: Id<"teams">; canvasId?: Id<"canvases"> }) {
   if (args.canvasId) {
     const canvas = await ctx.db.get(args.canvasId);
     if (!canvas || canvas.teamId !== args.teamId || canvas.archived) throw new Error("Canvas not found");
@@ -110,13 +110,15 @@ export const presence = query({
   handler: async (ctx, args) => { await sceneAccess(ctx, args); return ctx.db.query("drawingPresence").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId)).take(100); },
 });
 export const setPresence = mutation({
-  args: { ...scope, x: v.number(), y: v.number(), button: v.union(v.literal("up"), v.literal("down")), leave: v.optional(v.boolean()) }, returns: v.null(),
+  args: { ...scope, x: v.number(), y: v.number(), button: v.union(v.literal("up"), v.literal("down")), leave: v.optional(v.boolean()), selection: v.optional(v.array(v.string())), page: v.optional(v.string()) }, returns: v.null(),
   handler: async (ctx, args) => {
     const { user } = await sceneAccess(ctx, args);
-    const row = await ctx.db.query("drawingPresence").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId).eq("userId", user._id)).unique();
+    const rows = await ctx.db.query("drawingPresence").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId).eq("userId", user._id)).take(20);
+    const row = rows.find(item => !item.agentId);
     if (args.leave) { if (row) await ctx.db.delete(row._id); return null; }
     if (!Number.isFinite(args.x) || !Number.isFinite(args.y)) throw new Error("Invalid pointer");
-    const patch = { name: user.name, x: args.x, y: args.y, button: args.button, updatedAt: Date.now() };
+    const selection = (args.selection ?? []).filter(id => id.length <= 100).slice(0, 50);
+    const patch = { name: user.name, x: args.x, y: args.y, button: args.button, selection, ...(args.page && args.page.length <= 40 ? { page: args.page } : {}), updatedAt: Date.now() };
     if (row) await ctx.db.patch(row._id, patch); else await ctx.db.insert("drawingPresence", { teamId: args.teamId, canvasId: args.canvasId, userId: user._id, ...patch });
     return null;
   },

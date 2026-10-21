@@ -8,4 +8,9 @@ export const STANDUP_TOOL_DEFINITIONS: ToolDefinition[] = [
     description: "What happened in an Origin project in the last 24 hours, as its Chief's standup: PRs waiting for a merge, blocked agents (approvals, failed runs), issues done and moved. Without project, every project you reach. With a project admin's sign-in it is also posted to the members' Inbox.",
     inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
   },
+  {
+    name: "origin_call_notes",
+    description: "The latest call of an Origin project from the last week that still has action items: its key points, decisions and action items with the issues already drafted from them. The person sees it as a card that drafts the rest as issues.",
+    inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
+  },
 ];

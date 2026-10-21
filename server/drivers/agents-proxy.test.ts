@@ -677,23 +677,28 @@ describe("agents-proxy MCP surface", () => {
       "origin_feedback",
       "origin_canvas",
       "origin_canvas_edit",
-      "origin_page_publish",
-      "origin_page_list",
+      "origin_canvas_screenshot",
+      "origin_canvas_comment",
+      "origin_design_submit",
       "origin_standup",
+      "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
       "origin_studio_save_asset",
+      "origin_studio_workflow_list",
+      "origin_studio_workflow_run",
+      "origin_studio_presets",
+      "origin_studio_library",
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
-      "origin_pipeline_list_leads",
-      "origin_pipeline_upsert_lead",
-      "origin_pipeline_log_activity",
-      "origin_pipeline_sequence",
-      "origin_pipeline_contact",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
+      "origin_milestone_list",
+      "origin_milestone_set",
+      "origin_brand_get",
+      "origin_brand_update",
     ]);
     const tool = (name: string) => list.result.tools.find((entry: { name: string }) => entry.name === name);
     const coordinate = tool("coordinate_bots");
@@ -774,8 +779,8 @@ describe("agents-proxy MCP surface", () => {
       "list_team_setup",
       "session_search", "session_read", "list_routines", "skills_list",
       "origin_list_projects", "origin_list_issues", "origin_get_issue", "origin_list_assets", "origin_vault_list", "origin_repo_status",
-      "origin_team_chat", "origin_feedback", "origin_canvas", "origin_page_list", "origin_studio_list", "origin_broadcast_list", "origin_pipeline_list_leads",
-      "origin_campaign_get",
+      "origin_team_chat", "origin_feedback", "origin_canvas", "origin_canvas_screenshot", "origin_call_notes", "origin_studio_list", "origin_studio_workflow_list", "origin_studio_presets", "origin_broadcast_list",
+      "origin_campaign_get", "origin_milestone_list", "origin_brand_get",
     ];
     expect(list.result.tools.filter((tool: any) => tool.annotations?.readOnlyHint)
       .map((tool: any) => tool.name)).toEqual(readNames);
@@ -2324,7 +2329,7 @@ describe("tool bridge", () => {
   /** The main child's switches: a Chief with skills and shared computers. */
   const CHIEF = { OMB_SKILL_AUTHORING_ENABLED: "1", OMB_SHARED_COMPUTERS_ENABLED: "1", OMB_CHIEF_OF_STAFF: "1" };
   const CHIEF_ONLY = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread"];
-  const HOT = ["tool_result_read", "list_room_targets", "coordinate_bots", "list_bots", "list_rooms", "select_computer", "attach_file", "post_to_room", "request_credential", "request_sign_in", "fill_login", "memory_update", "origin_team_chat_post", "origin_page_publish"];
+  const HOT = ["tool_result_read", "list_room_targets", "coordinate_bots", "list_bots", "list_rooms", "select_computer", "attach_file", "post_to_room", "request_credential", "request_sign_in", "fill_login", "memory_update", "origin_team_chat_post"];
   let chief: Rpc;
   let plain: Rpc;
   let off: Rpc;

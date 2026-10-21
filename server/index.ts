@@ -453,14 +453,15 @@ import { addHeldSecretScrubber, redactSecretsInText } from "./redact.ts";
 import * as vps from "./vps-computer.ts";
 import { ROUTINE_RESTARTED, RoutineManager, type RoutineRun, type RoutineRunOn, type RoutineRunTrigger } from "./routines.ts";
 import { CalendarCallManager, type CalendarCall } from "./calendar-calls.ts";
-import { BROWSER_CONTROL_REFUSAL, BROWSER_UPLOAD_TOOL, BrowserRuntime, TransportError, attachesToChrome, browserRuntimeEnv, formatBrowserTiming } from "./browser-runtime.ts";
+import { BROWSER_CONTROL_REFUSAL, BROWSER_UPLOAD_TOOL, BrowserRuntime, attachesToChrome, browserRuntimeEnv, formatBrowserTiming } from "./browser-runtime.ts";
 import { namedUploadPaths, uploadableFiles } from "./browser-upload.ts";
 import { listSignedInSites, signOutOfSites } from "./browser-sites.ts";
 import { HeldSecrets, LoginStore } from "./login-store.ts";
 import { OnePasswordLogins, sdkOnePasswordClient, type OnePasswordSdk } from "./onepassword.ts";
 import { nativeRequire } from "./data/engine.ts";
 import { fillLogin, type FillCandidate } from "./login-fill.ts";
-import { RelayTimeout, relayCommand, relayFrame, relayInsertText } from "./browser-relay.ts";
+import { relayCommand, relayFrame, relayInsertText } from "./browser-relay.ts";
+import { ownRuntimeBrowserDaemon } from "./browser-daemon.ts";
 import { browserEvidence, browserSteps, stepContext } from "./browser-steps.ts";
 import { parseLoginFields, parseTotpField, createLoginRoutes } from "./routes/logins.ts";
 import { savedLoginResumePrompt } from "../shared/logins.ts";
@@ -607,7 +608,7 @@ import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, initializeWorkspaceTeams } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
-import { cloudProjectFor, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
+import { cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
 import { createProjectToolsHost } from "./host/project-tools.ts";
 import { createStaticResponder } from "./host/static-files.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
@@ -618,7 +619,7 @@ import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
 import { createSharedAgents, type SendDecision } from "./origin-shared-agents.ts";
 import { createOriginMemberRoutes } from "./origin-members.ts";
 import { createOriginMcpRoutes } from "./origin-mcp.ts";
-import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService } from "./routes/github.ts";
+import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService, createProjectGit } from "./routes/github.ts";
 import { originGitHub } from "./github/review.ts";
 import { removalSentence, removeGitHubIssue } from "./github/sync.ts";
 import { createBotSettingsRoutes } from "./routes/bot-settings.ts";
@@ -2450,9 +2451,8 @@ const browserRuntime = new BrowserRuntime({
     return closed;
   },
   applyViewport: (spec) => setBrowserViewport(spec.command, spec.env),
-  relayCommand: (spec, session, command, timeoutMs) => relayCommand(spec, session, command, timeoutMs).catch((error: unknown) => {
-    throw error instanceof RelayTimeout ? new TransportError(error.message) : error;
-  }),
+  ownDaemon: ownRuntimeBrowserDaemon,
+  relayCommand,
   steps: browserSteps,
   onTiming: process.env.OMB_BROWSER_TIMING === "1" ? (timing) => console.info(formatBrowserTiming(timing)) : undefined,
 });
@@ -13538,9 +13538,9 @@ const originAgents = createOriginAgentSupport({
     const bot = store.patchBot(botId, { cwd });
     if (bot) broadcast({ kind: "bot", bot: wireBot(bot) });
   },
-  localFolders: !CLOUD_HOME,
+  localFolders: !CLOUD_HOME, git: CLOUD_HOME ? undefined : createProjectGit({ service: () => githubService(), cloud: () => readOriginCloud(defaultOriginCloudFile()), connect: convexOriginClient, port: PORT, dataDir: DATA_DIR }),
 });
-ROUTES.push(originAgents.routes);
+ROUTES.push(originAgents.routes); PUBLIC_ROUTES.push(originAgents.publicRoutes);
 const projectTools = createProjectToolsHost({
   store,
   github: () => originGitHub(githubService()),
@@ -13560,8 +13560,7 @@ const projectTools = createProjectToolsHost({
       await opened.handle.close().catch(() => undefined);
     }
   },
-}, { summarize: input => summarizeCall(input), studioBudget: ({ botId }) => apiBudgetFor.assertUnpriced(botId, "Studio generation"),
-  pipelineAiBudget: ({ botId }) => apiBudgetFor.assertUnpriced(botId, "ElevenLabs AI calls") });
+}, { studioBudget: ({ botId }) => apiBudgetFor.assertUnpriced(botId, "Studio generation") });
 ROUTES.push(...projectTools.routes);
 ROUTES.push(createCloudLinkRoutes({ store, changed: originAgents.changed }));
 ROUTES.push(createOriginImportRoutes({

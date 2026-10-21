@@ -16,12 +16,15 @@ import { createGitHubStore, RateLimited, type GithubState } from "../github/stor
 import { approvePullRequest, listPullRequests, mergeAndComplete, withProjectGitHub } from "../github/review.ts";
 import {
   createGitHubTask, createProjectRepository, DRAFT_STAYS_LOCAL, mirrorTasks, mirrorUnlinkedPage, removalSentence, removeGitHubIssue, syncGitHubEvent, syncGitHubPage,
-  syncLinkedTask, type MirrorResult,
+  syncLinkedTask, type MirrorResult, type RepositoryResult,
 } from "../github/sync.ts";
 import { parseGitHubEvent, verifyGitHubSignature, WEBHOOK_EVENTS, WEBHOOK_MAX_BYTES } from "../github/webhook.ts";
 import { isRepositoryName } from "../../shared/github-repo-name.ts";
 import { isDraftColumn } from "../../shared/origin-columns.ts";
+import { brokeredToken, convexAction, holdsLocalGitHub, loopbackGitHub, sessionKey, shareWorkspaceGitHub, sharedStatus } from "../github/broker.ts";
 import { PASS, type PublicRouteHandler, type RouteHandler } from "./table.ts";
+
+export { createProjectGit } from "../github/project-git.ts";
 
 type Args = Record<string, unknown>;
 type BoardColumn = { _id: string; title: string; isDraft?: boolean };
@@ -43,20 +46,37 @@ export interface GitHubServiceOptions {
   serverPublicUrl?: () => string | null;
   fetch?: typeof fetch;
   connect?: (url: string) => OriginCloudClient;
+  /** Runs a Convex action; the Origin cloud client carries only queries and mutations. */
+  action?: (url: string, name: string, args: Record<string, unknown>) => Promise<unknown>;
+  /** The Origin session this server signed in with, used for brokered calls no request carries. */
+  sharedSession?: () => string | undefined;
   now?: () => number;
 }
+
+const uncaught = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  return new Error(/Uncaught Error: ([^\n]+)/.exec(message)?.[1]?.trim() ?? message);
+};
 
 export function createGitHubService(options: GitHubServiceOptions = {}): () => GitHubService {
   const env = options.env ?? githubEnvFrom(process.env);
   const sharedConvexUrl = options.sharedConvexUrl ?? (() => readOriginCloud(defaultOriginCloudFile()).url);
+  const sharedSession = options.sharedSession ?? (() => readOriginCloud(defaultOriginCloudFile()).sessionToken);
   const now = options.now ?? Date.now;
-  const fetcher = options.fetch ?? fetch;
+  const fetcher = options.fetch ?? loopbackGitHub(fetch, process.env.OMB_GITHUB_API_URL);
   const connect = options.connect ?? convexOriginClient;
+  const runAction = options.action ?? convexAction;
   const store = createGitHubStore(join(options.dataDir ?? DATA_DIR, "origin-github"), now);
   const convexUrl = () => sharedConvexUrl() ?? env.convexUrl;
   let client: { url: string; client: OriginCloudClient } | undefined;
-  const service: GitHubService = {
-    store, env, fetch: fetcher, now,
+  const signed = createIntegrationBridge({ fetch: fetcher, now, secret: () => env.integrationSecret, siteUrl: () => convexSiteUrl(env, convexUrl()) });
+  const action = async <T>(name: string, args: Record<string, unknown>) => {
+    const url = convexUrl();
+    if (!url) throw new Error("Sign in to Origin first: this server has no Origin backend address");
+    return await runAction(url, name, args).catch((error: unknown) => { throw uncaught(error); }) as T;
+  };
+  const build = (sessionToken?: string): GitHubService => ({
+    store, env, fetch: fetcher, now, action,
     publicUrl: () => env.publicUrl ?? options.serverPublicUrl?.() ?? undefined,
     convex() {
       const url = convexUrl();
@@ -64,8 +84,15 @@ export function createGitHubService(options: GitHubServiceOptions = {}): () => G
       if (client?.url !== url) client = { url, client: connect(url) };
       return client.client;
     },
-    bridge: createIntegrationBridge({ fetch: fetcher, now, secret: () => env.integrationSecret, siteUrl: () => convexSiteUrl(env, convexUrl()) }),
-  };
+    get principal() { return sessionKey(sessionToken ?? sharedSession() ?? ""); },
+    bridge: env.integrationSecret ? signed : async <T>(operation: string, args: unknown) => {
+      const session = sessionToken ?? sharedSession();
+      if (!session) throw new Error("Sign in to Origin on this computer first: the workspace's GitHub is reached through your Origin account");
+      return action<T>("teamGitHub:bridge", { sessionToken: session, operation, args: args ?? {} });
+    },
+    as: (token) => build(token),
+  });
+  const service = build();
   return () => service;
 }
 
@@ -103,8 +130,11 @@ async function requireWorkspace(service: GitHubService, sessionToken: string, te
   return { ...user, teamId: access.teamId, workspaceRole: access.role, slug: access.slug };
 }
 
-async function githubProject(service: GitHubService, sessionToken: string, projectId: string | null | undefined, write = false) {
+const scope = (service: GitHubService, sessionToken: string) => (sessionToken && service.as ? service.as(sessionToken) : service);
+
+async function githubProject(base: GitHubService, sessionToken: string, projectId: string | null | undefined, write = false) {
   if (!projectId) throw new Error("Project required");
+  const service = scope(base, sessionToken);
   const user = await requireUser(service, sessionToken);
   const convex = service.convex();
   const project = await convex.query("projects:get", { sessionToken, projectId }) as Project;
@@ -118,7 +148,7 @@ async function githubProject(service: GitHubService, sessionToken: string, proje
   const legacyToken = owner && user.email.toLowerCase() === owner && project.ownerEmail?.toLowerCase() === owner ? service.env.legacyToken : undefined;
   const workspace = project.teamId ? await convex.query("integrations:status", { sessionToken, teamId: project.teamId }) as { connectedBy: string | null } : null;
   const workspaceToken = !token && project.githubWorkspaceAccess && workspace?.connectedBy && project.teamId ? await workspaceGitHubToken(service, project.teamId, workspace.connectedBy) : undefined;
-  return { project, user, token: token || workspaceToken || legacyToken, repo: name };
+  return { project, user, token: token || workspaceToken || legacyToken, repo: name, github: service };
 }
 
 function failure(res: ServerResponse, json: (res: ServerResponse, status: number, body: unknown) => void, error: unknown, fallback: string, status = 400) {
@@ -155,7 +185,7 @@ function appManifest(origin: string) {
     redirect_url: `${origin}/api/github/setup/callback`, callback_urls: [`${origin}/api/github/oauth/callback`],
     setup_url: `${origin}/api/github/oauth/install`, request_oauth_on_install: false,
     hook_attributes: { url: `${origin}/api/github/webhook`, active: true },
-    default_permissions: { administration: "write", issues: "write", contents: "write", pull_requests: "write", checks: "read", metadata: "read" },
+    default_permissions: { administration: "write", issues: "write", contents: "write", pull_requests: "write", checks: "read", actions: "write", metadata: "read" },
     default_events: ["issues", "pull_request", "pull_request_review", "check_suite", "check_run"],
   };
 }
@@ -180,8 +210,10 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
           const projectConnection = repo ? store.connectionInfo(project._id, repo) : null;
           const workspace = project.teamId && project.githubWorkspaceAccess && token ? store.workspaceInfo(project.teamId) : null;
           const status = workspace && project.teamId ? await service.convex().query("integrations:status", { sessionToken, teamId: project.teamId }) as { connectedBy: string | null } : null;
+          const shared = !projectConnection && !workspace && project.teamId && project.githubWorkspaceAccess ? (await sharedStatus(service, sessionToken, project.teamId))?.shared : null;
           const connection = projectConnection ? { ...projectConnection, source: "project" }
-            : workspace && status?.connectedBy === workspace.connected_by ? { login: workspace.login, source: "workspace" } : null;
+            : workspace && status?.connectedBy === workspace.connected_by ? { login: workspace.login, source: "workspace" }
+            : shared ? { login: shared.accountLogin, source: "shared", sharedBy: shared.sharedByName } : null;
           return json(res, 200, { connection });
         }
         if (!ADMIN_ROLES.has(project.memberRole ?? "")) throw new Error(`A project admin must ${method === "POST" ? "connect" : "disconnect"} GitHub`);
@@ -212,7 +244,7 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const body = await readBoundedJson(req);
         if (typeof body.projectId !== "string" || typeof body.taskId !== "string") throw new Error("Project and issue required");
         const sessionToken = originSession(req, body);
-        const { user, project, token } = await githubProject(service, sessionToken, body.projectId, true);
+        const { user, project, token, github } = await githubProject(service, sessionToken, body.projectId, true);
         store.limit(`github-create:${user._id}`, 20, MINUTE);
         const convex = service.convex();
         if (!token && project.teamId && project.repoUrl && !project.githubWorkspaceAccess) {
@@ -223,7 +255,7 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const details = await convex.query("tasks:details", { sessionToken, projectId: project._id, taskId: body.taskId }) as { task: { columnId: string; githubTaskMode?: string }; columns: BoardColumn[] };
         if (details.columns.some((column) => column._id === details.task.columnId && isDraftColumn(column))) throw new Error(DRAFT_STAYS_LOCAL);
         const asPullRequest = details.task.githubTaskMode === "pull_request" || (!details.task.githubTaskMode && project.githubTaskMode === "pull_request");
-        return json(res, 200, asPullRequest ? await createTaskPR(service, sessionToken, body.projectId, body.taskId) : await createGitHubTask(service, body.projectId, body.taskId));
+        return json(res, 200, asPullRequest ? await createTaskPR(github, sessionToken, body.projectId, body.taskId) : await createGitHubTask(github, body.projectId, body.taskId));
       } catch (error) { return failure(res, json, error, "GitHub issue creation failed"); }
     }
 
@@ -232,14 +264,14 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const body = JSON.parse(await readBoundedText(req, 2_000)) as Args;
         if (typeof body.projectId !== "string" || typeof body.taskId !== "string") throw new Error("Project and issue required");
         const sessionToken = originSession(req, body);
-        const { user, project } = await githubProject(service, sessionToken, body.projectId, true);
+        const { user, project, github: scoped } = await githubProject(service, sessionToken, body.projectId, true);
         store.limit(`github-delete:${user._id}`, 20, MINUTE);
         const key = `delete-issue:${body.taskId}`;
         if (!store.lockJob(key)) throw new Error("This issue is already being deleted");
         try {
           const convex = service.convex();
           const details = await convex.query("tasks:details", { sessionToken, projectId: project._id, taskId: body.taskId }) as { task: { githubIssueUrl?: string } };
-          const github = details.task.githubIssueUrl ? await removeGitHubIssue(service, project._id, body.taskId, details.task.githubIssueUrl) : null;
+          const github = details.task.githubIssueUrl ? await removeGitHubIssue(scoped, project._id, body.taskId, details.task.githubIssueUrl) : null;
           try {
             await convex.mutation("tasks:deleteTask", { sessionToken, projectId: project._id, taskId: body.taskId });
           } catch (error) {
@@ -256,9 +288,9 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const body = JSON.parse(await readBoundedText(req, 2_000)) as Args;
         if (typeof body.projectId !== "string" || typeof body.taskId !== "string") throw new Error("Project and task required");
         const sessionToken = originSession(req, body);
-        const { user } = await githubProject(service, sessionToken, body.projectId, true);
+        const { user, github } = await githubProject(service, sessionToken, body.projectId, true);
         store.limit(`github-pr:${user._id}`, 20, MINUTE);
-        return json(res, 200, await createTaskPR(service, sessionToken, body.projectId, body.taskId));
+        return json(res, 200, await createTaskPR(github, sessionToken, body.projectId, body.taskId));
       } catch (error) { return failure(res, json, error, "PR creation failed"); }
     }
 
@@ -266,28 +298,32 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
       try {
         const sessionToken = originSession(req);
         const user = await requireWorkspace(service, sessionToken, query("teamId") ?? "");
-        if (!ADMIN_ROLES.has(user.workspaceRole)) return json(res, 403, { error: "A workspace admin must create the repository" });
         const projectId = query("projectId");
         if (!projectId) throw new Error("Project required");
         const requested = JSON.parse(await readBoundedText(req, 2_000) || "{}") as Args;
         const name = typeof requested.name === "string" ? requested.name.trim() : undefined;
         if (name !== undefined && !isRepositoryName(name)) throw new Error("Use a repository name of up to 100 letters, digits, dots, dashes or underscores");
+        const visibility = requested.visibility === "public" || requested.visibility === "private" ? requested.visibility : undefined;
         const project = await service.convex().query("projects:get", { sessionToken, projectId }) as Project;
         if (project.teamId !== user.teamId) return json(res, 404, { error: "Project not found" });
+        if (project.memberRole === "viewer") return json(res, 403, { error: "Edit role required to create the repository" });
         if (project.repoUrl) return json(res, 200, { state: "ready", repoUrl: project.repoUrl });
-        if (!store.workspaceInfo(user.teamId)) return json(res, 409, { error: "Connect GitHub to this workspace first" });
         store.limit(`github-create-repo:${user._id}`, 10, MINUTE);
-        const result = await createProjectRepository(service, projectId, true, name);
-        const status = { error: 400, awaiting_connection: 409, working: 202, ready: 200 }[result.state];
+        const github = scope(service, sessionToken);
+        const result = holdsLocalGitHub(service, user.teamId) && ADMIN_ROLES.has(user.workspaceRole)
+          ? await createProjectRepository(github, projectId, true, name, visibility)
+          : await github.bridge<RepositoryResult>("createRepository", { projectId, ...(name ? { name } : {}), ...(visibility ? { visibility } : {}) });
+        const status = { error: 400, awaiting_connection: 202, working: 202, ready: 200 }[result.state];
         return json(res, status, result);
       } catch (error) { return failure(res, json, error, "Request failed"); }
     }
 
     if (path === "/api/github/repo" && method === "GET") {
       try {
-        const { user, project, token } = await githubProject(service, originSession(req), query("projectId"));
+        const { user, project, token, github } = await githubProject(service, originSession(req), query("projectId"));
         store.limit(`github-read:${user._id}`, 60, MINUTE);
-        return json(res, 200, await readRepository(service, project.repoUrl, token));
+        const reader = token ?? (project.githubWorkspaceAccess ? (await brokeredToken(github, project._id, "read").catch(() => undefined))?.token : undefined);
+        return json(res, 200, await readRepository(github, project.repoUrl, reader));
       } catch (error) { return failure(res, json, error, "Request failed"); }
     }
 
@@ -298,8 +334,9 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         if (!ADMIN_ROLES.has(user.workspaceRole)) return json(res, 403, { error: "A workspace admin chooses the repository" });
         const status = await service.convex().query("integrations:status", { sessionToken, teamId: user.teamId }) as { connectedBy: string | null; login: string | null };
         const token = status.connectedBy ? await workspaceGitHubToken(service, user.teamId, status.connectedBy) : undefined;
-        if (!token) return json(res, 409, { error: "Connect GitHub to this workspace first" });
         store.limit(`github-read:${user._id}`, 60, MINUTE);
+        if (!token && service.env.integrationSecret) return json(res, 409, { error: "Connect GitHub to this workspace first" });
+        if (!token) return json(res, 200, await scope(service, sessionToken).bridge("repositories", { teamId: user.teamId }));
         const rows = await githubRequest<{ full_name: string; html_url: string; private: boolean }[]>(service, "/user/repos?per_page=100&sort=updated&affiliation=owner,collaborator,organization_member", token);
         return json(res, 200, { login: status.login, repositories: rows.map((row) => ({ fullName: row.full_name, url: row.html_url, private: row.private })) });
       } catch (error) { return failure(res, json, error, "Could not list repositories"); }
@@ -310,7 +347,7 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const body = JSON.parse(await readBoundedText(req, 20_000) || "{}") as Args;
         if (typeof body.projectId !== "string") throw new Error("Project required");
         const sessionToken = originSession(req, body);
-        const { user, project } = await githubProject(service, sessionToken, body.projectId, true);
+        const { user, project, github } = await githubProject(service, sessionToken, body.projectId, true);
         if (!project.repoUrl) return json(res, 200, { results: [] });
         store.limit(`github-mirror:${user._id}`, 12, MINUTE);
         const board = await service.convex().query("tasks:board", { sessionToken, projectId: project._id }) as {
@@ -320,11 +357,11 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const drafts = new Set(board.columns.filter(isDraftColumn).map((column) => column._id));
         const open = board.tasks.filter((task) => !task.done && (!wanted || wanted.has(task._id)));
         const taskIds = open.filter((task) => !task.githubIssueNumber && !drafts.has(task.columnId)).slice(0, MIRROR_BATCH).map((task) => task._id);
-        const results = await mirrorTasks(service, project._id, taskIds);
+        const results = await mirrorTasks(github, project._id, taskIds);
         if (wanted) results.push(...open.filter((task) => !task.githubIssueNumber && drafts.has(task.columnId)).map((task) => ({ taskId: task._id, error: DRAFT_STAYS_LOCAL })));
         const linked = wanted ? open.flatMap((task) => (task.githubIssueNumber ? [{ taskId: task._id, issueNumber: task.githubIssueNumber }] : [])) : [];
         for (const { taskId, issueNumber } of linked.slice(0, MIRROR_BATCH)) {
-          results.push(await syncLinkedTask(service, project._id, taskId, issueNumber, project.repoUrl).then(
+          results.push(await syncLinkedTask(github, project._id, taskId, issueNumber, project.repoUrl).then(
             (): MirrorResult => ({ taskId, issueNumber }),
             (error: unknown): MirrorResult => ({ taskId, issueNumber, error: error instanceof Error ? error.message : "GitHub issue sync failed" }),
           ));
@@ -339,15 +376,15 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         if (typeof body.projectId !== "string" || !Number.isSafeInteger(body.number) || Number(body.number) < 1) throw new Error("Project and pull request required");
         if (body.action !== "approve" && body.action !== "merge") throw new Error("action must be approve or merge");
         const sessionToken = originSession(req, body);
-        const { user, project } = await githubProject(service, sessionToken, body.projectId, true);
+        const { user, project, github } = await githubProject(service, sessionToken, body.projectId, true);
         if (!ADMIN_ROLES.has(project.memberRole ?? "")) return json(res, 403, { error: "A project admin approves and merges pull requests" });
         store.limit(`github-review:${user._id}`, 20, MINUTE);
         const number = Number(body.number);
         const comment = typeof body.body === "string" ? body.body.slice(0, 4_000) : "";
         const headSha = typeof body.headSha === "string" ? body.headSha : undefined;
-        const result = await withProjectGitHub<object>(service, project._id, (token, repoUrl) => body.action === "approve"
-          ? approvePullRequest(service, repoUrl, number, token, comment || "Approved in Origin.")
-          : mergeAndComplete(service, project._id, repoUrl, number, token, headSha).then(({ sha, completed }) => ({ merged: true, sha, completed })));
+        const result = await withProjectGitHub<object>(github, project._id, (token, repoUrl) => body.action === "approve"
+          ? approvePullRequest(github, repoUrl, number, token, comment || "Approved in Origin.")
+          : mergeAndComplete(github, project._id, repoUrl, number, token, headSha).then(({ sha, completed }) => ({ merged: true, sha, completed })));
         return json(res, 200, result);
       } catch (error) { return failure(res, json, error, "Pull request review failed"); }
     }
@@ -384,16 +421,22 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
     }
 
     if (path === "/api/github/workspace" && method === "GET") {
+      let user: WorkspaceUser;
+      const sessionToken = originSession(req);
+      try { user = await requireWorkspace(service, sessionToken, query("teamId") ?? ""); }
+      catch { return json(res, 403, { error: "Workspace access required" }); }
+      return json(res, 200, await workspaceStatus(service, sessionToken, user));
+    }
+
+    if (path === "/api/github/share" && method === "POST") {
       try {
-        const user = await requireWorkspace(service, originSession(req), query("teamId") ?? "");
-        const config = appConfig(service);
-        const connection = store.workspaceInfo(user.teamId);
-        return json(res, 200, {
-          configured: Boolean(config), canSetup: isSetupOwner(service, user.email), login: connection?.login ?? null,
-          prPermissionNotice: config ? permissionNotice : null, permissionApprovalUrl: "https://github.com/settings/installations",
-          installationUrl: config?.slug ? `https://github.com/apps/${config.slug}/installations/new` : null,
-        });
-      } catch { return json(res, 403, { error: "Workspace access required" }); }
+        const sessionToken = originSession(req);
+        const user = await requireWorkspace(service, sessionToken, query("teamId") ?? "");
+        if (!ADMIN_ROLES.has(user.workspaceRole)) return json(res, 403, { error: "A workspace owner or admin shares GitHub with the workspace" });
+        store.limit(`github-share:${user._id}`, 5, MINUTE);
+        await shareWorkspaceGitHub(service, sessionToken, user.teamId);
+        return json(res, 200, await workspaceStatus(service, sessionToken, user, false));
+      } catch (error) { return failure(res, json, error, "Could not share GitHub with the workspace"); }
     }
 
     if (path === "/api/github/workspace" && method === "DELETE") {
@@ -401,12 +444,38 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const sessionToken = originSession(req);
         const user = await requireWorkspace(service, sessionToken, query("teamId") ?? "");
         if (!ADMIN_ROLES.has(user.workspaceRole)) throw new Error("Admin role required");
+        await service.convex().mutation("teamGitHub:unshare", { sessionToken, teamId: user.teamId }).catch(() => undefined);
         await service.convex().mutation("integrations:configure", { sessionToken, teamId: user.teamId, disconnect: true });
         store.disconnectWorkspace(user.teamId);
         return json(res, 200, { ok: true });
       } catch { return json(res, 403, { error: "Workspace admin access required" }); }
     }
     return PASS;
+  };
+}
+
+/**
+ * What this workspace's GitHub looks like to the caller: this server's own connection, the one shared with the whole
+ * workspace through the backend, or neither. An admin whose server holds a connection the workspace lacks shares it.
+ */
+async function workspaceStatus(service: GitHubService, sessionToken: string, user: WorkspaceUser, share = true) {
+  const config = appConfig(service);
+  const connection = service.store.workspaceInfo(user.teamId);
+  const admin = ADMIN_ROLES.has(user.workspaceRole);
+  let shared = await sharedStatus(service, sessionToken, user.teamId);
+  let shareError: string | null = null;
+  if (share && admin && connection?.connected_by === user._id && config?.appId && config.privateKey && shared && !shared.shared && shared.sealing) {
+    try {
+      await shareWorkspaceGitHub(service, sessionToken, user.teamId);
+      shared = await sharedStatus(service, sessionToken, user.teamId);
+    } catch (error) { shareError = error instanceof Error ? error.message : "Could not share GitHub with the workspace"; }
+  }
+  return {
+    configured: Boolean(config) || Boolean(shared?.shared), localApp: Boolean(config), canSetup: isSetupOwner(service, user.email), login: connection?.login ?? shared?.shared?.accountLogin ?? null,
+    shared: shared?.shared ?? null, sharedStale: shared?.stale ?? false, sealing: shared?.sealing ?? false, canManage: admin, shareError,
+    canShare: Boolean(admin && connection && config && !shared?.shared), linkedLogin: shared?.linkedLogin ?? null,
+    prPermissionNotice: config ? permissionNotice : null, permissionApprovalUrl: "https://github.com/settings/installations",
+    installationUrl: config?.slug ? `https://github.com/apps/${config.slug}/installations/new` : null,
   };
 }
 
@@ -550,6 +619,7 @@ export function createGitHubPublicRoutes(deps: GitHubRouteDeps): PublicRouteHand
         await service.convex().mutation("integrations:configure", { sessionToken: pending.sessionToken, teamId: pending.teamId, login: account.login, autoCreate: true });
         store.saveWorkspace(pending.teamId, account.login, account.id, pending.userId, token);
         background(retryAwaitingRepositories(service, pending));
+        if (app.appId && app.privateKey) background(shareWorkspaceGitHub(service, pending.sessionToken, pending.teamId).then(() => undefined));
         return page(res, 200, "GitHub connected", DONE_BODY, { cookie: stateCookie(service, null) });
       } catch (error) {
         console.warn("GitHub authorization callback failed", error instanceof Error ? error.message : "Authorization rejected");

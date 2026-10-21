@@ -1933,6 +1933,10 @@
             "maxLength": 1000,
             "description": "Optional extra direction for the agent."
           },
+          "design": {
+            "type": "boolean",
+            "description": "Design work: the agent designs it on the Canvas and submits frames instead of a pull request."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,
@@ -2082,6 +2086,8 @@
             "enum": [
               "figma",
               "image",
+              "video",
+              "audio",
               "icon",
               "font",
               "document",
@@ -2117,7 +2123,7 @@
     },
     {
       "name": "origin_vault_list",
-      "description": "List an Origin project's vault: titles, kinds, URLs and usernames. Values are encrypted with the person's passphrase and never readable here; ask for one with request_credential. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's vault: titles, kinds, URLs, usernames, and the values members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2248,7 +2254,7 @@
     },
     {
       "name": "origin_canvas",
-      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images and their layout, editable with origin_canvas_edit. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2262,6 +2268,10 @@
             "type": "string",
             "maxLength": 100,
             "description": "Read only this node and its children."
+          },
+          "selection": {
+            "type": "boolean",
+            "description": "Read only what people have selected right now."
           },
           "project": {
             "type": "string",
@@ -2279,7 +2289,7 @@
     },
     {
       "name": "origin_canvas_edit",
-      "description": "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), link (an https or mailto address it opens on a published page), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both}; children of a layout frame need no x, y, and grow:true shares its free space. leadForm {fields: [name, email, phone, message], button, accent} turns an empty frame into a signup form on the published page. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style. Acts on your team's Origin project unless you pass project.",
+      "description": "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), link (an https or mailto address it opens on a published page), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both, wrap}; children of a layout frame need no x, y; grow:true shares its free space, absolute:true opts out, minW/maxW/minH/maxH bound it. Outside layout, constraints {h: left|right|center|stretch|scale, v: top|bottom|center|stretch|scale} follow a resized parent. component {set, props} makes a frame a component (variants share set); {op:\"instance\",component,parent?,key?,set} places a copy whose layers you update by id. fillStyle (primary, secondary, background, text, neutral-N) and textStyle (display, h1, h2, h3, body-lg, body, small, caption) bind to the brand kit; shadow {x,y,blur,color} and blur are allowed but keep designs flat. prototype {to: frame} links a click in Present mode. Paths take points with curves [inDx,inDy,outDx,outDy per point]. A group with boolean (union|subtract|intersect|exclude) draws its shapes combined, still editable. radii [tl,tr,br,bl] rounds corners apart; gradient {kind: linear|radial, angle, stops [{at,color}]} replaces the fill; images take imageFit cover|contain|stretch|crop|tile with crop {scale,x,y}. {op:\"design_system\"} builds a Design system frame from the brand kit: colour and text styles plus Button, Input, Card and Nav components. leadForm {fields: [name, email, phone, message], button, accent} turns an empty frame into a signup form on the published page. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2302,6 +2312,16 @@
               "type": "object"
             }
           },
+          "page": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Page id for new top-level nodes; default the first page."
+          },
+          "save_version": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Save a named version of the canvas before these changes."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,
@@ -2314,8 +2334,8 @@
       }
     },
     {
-      "name": "origin_page_publish",
-      "description": "Publish a top-level canvas frame as a public web page, or republish it after changes: auto-layout frames reflow on phones, and a leadForm frame files each signup as a Pipeline lead with the slug as its source. Returns the page's address. Acts on your team's Origin project unless you pass project.",
+      "name": "origin_canvas_screenshot",
+      "description": "See a canvas frame or node (or the canvas's first page) as a PNG, to check your own design work. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2325,25 +2345,108 @@
             "maxLength": 120,
             "description": "Canvas name or id; optional when the project has one."
           },
-          "frame": {
+          "node": {
             "type": "string",
             "maxLength": 120,
-            "description": "The frame's id or name."
+            "description": "The frame or node id (or a frame's name); omit for the whole first page."
           },
-          "slug": {
-            "type": "string",
-            "maxLength": 48,
-            "description": "The page's address, like waitlist. Default: from the title."
+          "scale": {
+            "type": "number",
+            "minimum": 0.25,
+            "maximum": 2
           },
-          "title": {
+          "project": {
             "type": "string",
             "maxLength": 120,
-            "description": "Browser and link-preview title. Default: the frame's name."
-          },
-          "description": {
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_canvas_comment",
+      "description": "Read a canvas's comment threads, or comment as yourself: pinned to a node, or as a reply. Answer a comment that mentions you here. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "canvas": {
             "type": "string",
-            "maxLength": 300,
-            "description": "Search and link-preview summary. Default: the page's first paragraph."
+            "maxLength": 120,
+            "description": "Canvas name or id; optional when the project has one."
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4000,
+            "description": "The comment; omit to read the threads."
+          },
+          "node": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Pin the comment to this node."
+          },
+          "reply_to": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "The thread's comment id."
+          },
+          "include_resolved": {
+            "type": "boolean"
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      }
+    },
+    {
+      "name": "origin_design_submit",
+      "description": "Link the canvas frames that design an Origin issue to it: they show as Design on the issue, the issue key shows on each frame, your rationale is pinned on the canvas, and in review the project's Chief is asked to review. A Chief approves with status approved. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "frames": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "description": "Frame ids or names."
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 3000,
+            "description": "Why the design looks the way it does."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "review",
+              "approved"
+            ],
+            "description": "Default review."
+          },
+          "canvas": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Canvas name or id; optional when the project has one."
           },
           "project": {
             "type": "string",
@@ -2352,13 +2455,29 @@
           }
         },
         "required": [
-          "frame"
+          "issue_id",
+          "frames"
         ]
       }
     },
     {
-      "name": "origin_page_list",
-      "description": "List an Origin project's published pages with their addresses, views and the leads each one collected. Acts on your team's Origin project unless you pass project.",
+      "name": "origin_standup",
+      "description": "What happened in an Origin project in the last 24 hours, as its Chief's standup: PRs waiting for a merge, blocked agents (approvals, failed runs), issues done and moved. Without project, every project you reach. With a project admin's sign-in it is also posted to the members' Inbox.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      }
+    },
+    {
+      "name": "origin_call_notes",
+      "description": "The latest call of an Origin project from the last week that still has action items: its key points, decisions and action items with the issues already drafted from them. The person sees it as a card that drafts the rest as issues.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2378,27 +2497,50 @@
       }
     },
     {
-      "name": "origin_standup",
-      "description": "What happened in an Origin project in the last 24 hours, as its Chief's standup: PRs waiting for a merge, blocked agents (approvals, failed runs), issues done and moved. Without project, every project you reach. With a project admin's sign-in it is also posted to the members' Inbox.",
-      "inputSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "project": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Name or id from origin_list_projects."
-          }
-        }
-      }
-    },
-    {
       "name": "origin_studio_generate",
-      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live. count makes several variations. Images and audio wait for the result (up to 40 s); video returns at once. Keep the good ones with origin_studio_save_asset. Acts on your team's Origin project unless you pass project.",
+      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. preset picks a ready-made effect from origin_studio_presets. Images and audio wait for the result (up to 40 s); video returns at once. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "preset": {
+            "type": "string",
+            "enum": [
+              "motion-transfer",
+              "animate-character",
+              "character-swap",
+              "talking-photo",
+              "lip-sync",
+              "start-end-frame",
+              "restyle-video",
+              "product-turntable",
+              "extend-video",
+              "video-background",
+              "video-upscale",
+              "camera-angle",
+              "relight",
+              "expand-frame",
+              "style-match",
+              "illustration-to-photo",
+              "turnaround",
+              "contact-sheet",
+              "remove-object",
+              "object-swap",
+              "miniature",
+              "glitch",
+              "thumbnail",
+              "remove-background",
+              "upscale",
+              "virtual-try-on",
+              "product-scene",
+              "product-mockup",
+              "fashion-editorial",
+              "voice-over",
+              "song",
+              "sound-effect"
+            ],
+            "description": "A ready-made effect from origin_studio_presets: its model, settings and prompt, unless you pass your own."
+          },
           "mode": {
             "type": "string",
             "enum": [
@@ -2407,7 +2549,7 @@
               "audio",
               "edit"
             ],
-            "description": "edit changes or upscales an existing image asset. Default image."
+            "description": "edit changes, upscales or cuts out an image. Default image."
           },
           "prompt": {
             "type": "string",
@@ -2422,6 +2564,7 @@
               "fal-ai/flux-2-pro",
               "fal-ai/krea-2/turbo",
               "fal-ai/flux/schnell",
+              "fal-ai/krea-2/turbo/style",
               "fal-ai/veo3.1",
               "fal-ai/veo3.1/fast",
               "fal-ai/kling-video/v3/pro/text-to-video",
@@ -2429,15 +2572,57 @@
               "fal-ai/veo3.1/image-to-video",
               "fal-ai/kling-video/v3/pro/image-to-video",
               "bytedance/seedance-2.5/image-to-video",
+              "fal-ai/kling-video/v3/pro/start-end",
+              "fal-ai/kling-video/v3/pro/motion-control",
+              "fal-ai/kling-video/v3/standard/motion-control",
+              "fal-ai/wan/v2.2-14b/animate/move",
+              "fal-ai/wan/v2.2-14b/animate/replace",
+              "fal-ai/kling-video/o3/pro/video-to-video/edit",
+              "bria/video/background-removal/v3",
+              "fal-ai/kling-video/ai-avatar/v2/pro",
+              "fal-ai/sync-lipsync/v3",
+              "fal-ai/sync-lipsync/v2",
+              "fal-ai/veo3.1/fast/extend-video",
+              "fal-ai/topaz/upscale/video",
+              "fal-ai/ffmpeg-api/merge-audio-video",
+              "fal-ai/ffmpeg-api/merge-videos",
               "fal-ai/elevenlabs/tts/eleven-v3",
               "fal-ai/elevenlabs/music",
               "fal-ai/elevenlabs/sound-effects/v2",
               "fal-ai/nano-banana-pro/edit",
+              "fal-ai/qwen-image-edit-2511-multiple-angles",
+              "fal-ai/iclight-v2",
+              "fal-ai/fashn/tryon/v1.6",
+              "fal-ai/bria/product-shot",
+              "fal-ai/bria/background/remove",
               "fal-ai/seedvr/upscale/image",
               "fal-ai/topaz/upscale/image",
               "custom"
             ],
-            "description": "Default: the mode's first model. Models ending in image-to-video, edit or upscale need source_asset_id."
+            "description": "Default: the mode's first model that takes as many sources as you pass."
+          },
+          "sources": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "maxLength": 70
+            },
+            "description": "What the model starts from, in order (image, video or audio): asset ids from origin_list_assets, or generation ids with an optional :index. Presets and models that take two take them in their listed order, such as the character image then the motion video."
+          },
+          "reference_asset_ids": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "description": "Image assets to keep a character, product or style consistent (Nano Banana Pro, FLUX.2 Pro)."
+          },
+          "character": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "A library entry id or name from origin_studio_library: adds its reference images and description."
           },
           "aspect_ratio": {
             "type": "string",
@@ -2449,10 +2634,62 @@
             "maxLength": 10,
             "description": "Video or audio length, such as 5, 8s or 30s."
           },
+          "resolution": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Such as 2K, 1080p."
+          },
           "voice": {
             "type": "string",
             "maxLength": 40,
             "description": "ElevenLabs voice name, such as Rachel or Brian."
+          },
+          "camera_motion": {
+            "type": "string",
+            "enum": [
+              "static",
+              "dolly-in",
+              "dolly-out",
+              "pan-left",
+              "pan-right",
+              "orbit",
+              "crane-up",
+              "handheld",
+              "fpv",
+              "zoom-in"
+            ],
+            "description": "Video camera move."
+          },
+          "camera_angle": {
+            "type": "string",
+            "enum": [
+              "three-quarter-right",
+              "right",
+              "back",
+              "left",
+              "three-quarter-left",
+              "high",
+              "top",
+              "low",
+              "close",
+              "wide"
+            ],
+            "description": "The viewpoint the Camera angles model re-renders an image from."
+          },
+          "negative_prompt": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "sound": {
+            "type": "boolean",
+            "description": "Video soundtrack where the model makes one. Default true."
+          },
+          "enhance": {
+            "type": "boolean",
+            "description": "Rewrite the prompt with a cheap model first."
           },
           "count": {
             "type": "integer",
@@ -2462,7 +2699,7 @@
           "source_asset_id": {
             "type": "string",
             "maxLength": 64,
-            "description": "An image asset id from origin_list_assets to start from."
+            "description": "Same as one sources entry."
           },
           "endpoint": {
             "type": "string",
@@ -2477,6 +2714,10 @@
             "type": "boolean",
             "description": "Wait for the result. Default true except for video."
           },
+          "brand": {
+            "type": "boolean",
+            "description": "Put the brand kit's imagery style and colours ahead of an image or video prompt. Default true."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,
@@ -2487,7 +2728,7 @@
     },
     {
       "name": "origin_studio_list",
-      "description": "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Broadcast. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Publish. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2498,7 +2739,8 @@
               "queued",
               "running",
               "done",
-              "failed"
+              "failed",
+              "cancelled"
             ]
           },
           "limit": {
@@ -2523,7 +2765,7 @@
     },
     {
       "name": "origin_studio_save_asset",
-      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index), and with broadcast true also pick it for Broadcast posts. Returns the asset ids. Acts on your team's Origin project unless you pass project.",
+      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Publish posts. Returns the asset ids. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2542,7 +2784,7 @@
           },
           "broadcast": {
             "type": "boolean",
-            "description": "Also pick it for Broadcast."
+            "description": "Also pick it for Publish."
           },
           "project": {
             "type": "string",
@@ -2556,8 +2798,177 @@
       }
     },
     {
+      "name": "origin_studio_workflow_list",
+      "description": "List an Origin project's Studio workflows (node graphs that chain fal models, such as product shot to music reel) and the built-in templates, with each one's input nodes and the latest runs and their outputs. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "workflow_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Show only this workflow or template and its runs."
+          },
+          "runs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Recent runs to show. Default 3."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_studio_workflow_run",
+      "description": "Run a Studio workflow or template on the person's fal key; the team watches each step live and Output nodes save to Assets (folder Studio). Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "workflow_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "From origin_studio_workflow_list, such as template:product-reel."
+          },
+          "inputs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 8000
+            },
+            "description": "Input node id to prompt text, or to an asset id for a file input."
+          },
+          "character": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "A library entry every image and video step follows."
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Text of the Publish drafts its Output nodes fill, such as template:campaign-pack's feed post and reel."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "wait": {
+            "type": "boolean",
+            "description": "Wait up to 40 s for the run. Default false."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "workflow_id"
+        ]
+      }
+    },
+    {
+      "name": "origin_studio_presets",
+      "description": "List Studio's ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt template. Pass an id as preset to origin_studio_generate. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "group": {
+            "type": "string",
+            "enum": [
+              "motion",
+              "video",
+              "photo",
+              "product",
+              "audio"
+            ],
+            "description": "Only this group."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_studio_library",
+      "description": "List an Origin project's Studio library (characters, products and styles saved from reference images), or save one so every later generation and workflow keeps it consistent. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "list",
+              "save"
+            ],
+            "description": "Default list."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "character",
+              "product",
+              "style"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 600,
+            "description": "What must stay the same: looks, wardrobe, materials, palette."
+          },
+          "references": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "maxLength": 70
+            },
+            "description": "Image asset ids, or generation ids with an optional :index."
+          },
+          "character_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Replace this entry instead of adding one."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      }
+    },
+    {
       "name": "origin_broadcast_draft",
-      "description": "Draft a social post in an Origin project's Broadcast, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval. Acts on your team's Origin project unless you pass project.",
+      "description": "Draft a social post in an Origin project's Publish section, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval. Match the brand voice. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2616,7 +3027,7 @@
     },
     {
       "name": "origin_broadcast_list",
-      "description": "List an Origin project's Broadcast posts: id, status, approval, schedule, channels with their published links or errors, media and text. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Publish posts: id, status, approval, schedule, channels with their published links or errors, media and text. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2649,7 +3060,7 @@
     },
     {
       "name": "origin_broadcast_schedule",
-      "description": "Schedule an approved Broadcast post to publish at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first. Acts on your team's Origin project unless you pass project.",
+      "description": "Schedule an approved Publish post to go out at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2676,288 +3087,8 @@
       }
     },
     {
-      "name": "origin_pipeline_list_leads",
-      "description": "List an Origin project's sales pipeline: totals per stage and its leads (id, stage, contact details, value, owner, next step), filtered by stage or a search; or read one lead with its notes and timeline (emails, texts, calls with summaries) with lead_id. Acts on your team's Origin project unless you pass project.",
-      "inputSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "stage": {
-            "type": "string",
-            "maxLength": 40,
-            "description": "New, Contacted, Qualified, Proposal, Won or Lost."
-          },
-          "query": {
-            "type": "string",
-            "maxLength": 200,
-            "description": "Matches name, company, email, phone, notes and tags."
-          },
-          "lead_id": {
-            "type": "string",
-            "maxLength": 64,
-            "description": "Read this lead in full."
-          },
-          "project": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Name or id from origin_list_projects."
-          }
-        }
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      }
-    },
-    {
-      "name": "origin_pipeline_upsert_lead",
-      "description": "Add a lead you researched to an Origin project's pipeline, or change one with lead_id. A lead with the same email is updated instead of duplicated. Only add real people or companies you found; never invent contact details. Acts on your team's Origin project unless you pass project.",
-      "inputSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "lead_id": {
-            "type": "string",
-            "maxLength": 64,
-            "description": "Omit to add a lead."
-          },
-          "name": {
-            "type": "string",
-            "maxLength": 200,
-            "description": "Required for a new lead."
-          },
-          "company": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "email": {
-            "type": "string",
-            "maxLength": 254
-          },
-          "phone": {
-            "type": "string",
-            "maxLength": 40,
-            "description": "With its country code, like +39 333 123 4567."
-          },
-          "source": {
-            "type": "string",
-            "maxLength": 60,
-            "description": "Where you found them; default agent research."
-          },
-          "stage": {
-            "type": "string",
-            "maxLength": 40
-          },
-          "value": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Expected deal value in the project's currency."
-          },
-          "tags": {
-            "type": "array",
-            "maxItems": 12,
-            "items": {
-              "type": "string",
-              "maxLength": 40
-            }
-          },
-          "notes": {
-            "type": "string",
-            "maxLength": 8000,
-            "description": "What you know about them and why they fit; cite your sources."
-          },
-          "next_step": {
-            "type": "string",
-            "maxLength": 300
-          },
-          "next_due": {
-            "type": "string",
-            "maxLength": 10,
-            "description": "YYYY-MM-DD."
-          },
-          "project": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Name or id from origin_list_projects."
-          }
-        }
-      }
-    },
-    {
-      "name": "origin_pipeline_log_activity",
-      "description": "Record something that already happened with a lead on its Pipeline timeline: a note, or an email, text or call that took place outside Origin. Sends nothing. Acts on your team's Origin project unless you pass project.",
-      "inputSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "lead_id": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 64
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "note",
-              "email",
-              "sms",
-              "whatsapp",
-              "call",
-              "ai_call"
-            ],
-            "description": "Default note."
-          },
-          "subject": {
-            "type": "string",
-            "maxLength": 300
-          },
-          "body": {
-            "type": "string",
-            "maxLength": 20000
-          },
-          "summary": {
-            "type": "string",
-            "maxLength": 8000
-          },
-          "project": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Name or id from origin_list_projects."
-          }
-        },
-        "required": [
-          "lead_id"
-        ]
-      }
-    },
-    {
-      "name": "origin_pipeline_sequence",
-      "description": "Start, pause, resume or stop a lead's follow-up sequence in an Origin project's Pipeline. Each step is due `day` days after the start: email (subject, body), sms or whatsapp (body), ai_call (goal) or call_task (a reminder for a person to call; body optional). {first_name}, {name} and {company} fill in. Due contact steps are drafted for a person to approve; the sequence stops when the lead replies or moves to Won or Lost, and a new one replaces the old. Acts on your team's Origin project unless you pass project.",
-      "inputSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "lead_id": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 64
-          },
-          "action": {
-            "type": "string",
-            "enum": [
-              "start",
-              "pause",
-              "resume",
-              "stop"
-            ],
-            "description": "Default start."
-          },
-          "steps": {
-            "type": "array",
-            "maxItems": 8,
-            "description": "start only, in day order.",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "day": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 90
-                },
-                "channel": {
-                  "type": "string",
-                  "enum": [
-                    "email",
-                    "sms",
-                    "whatsapp",
-                    "ai_call",
-                    "call_task"
-                  ]
-                },
-                "subject": {
-                  "type": "string",
-                  "maxLength": 300
-                },
-                "body": {
-                  "type": "string",
-                  "maxLength": 20000
-                },
-                "goal": {
-                  "type": "string",
-                  "maxLength": 8000
-                }
-              },
-              "required": [
-                "day",
-                "channel"
-              ]
-            }
-          },
-          "project": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Name or id from origin_list_projects."
-          }
-        },
-        "required": [
-          "lead_id"
-        ]
-      }
-    },
-    {
-      "name": "origin_pipeline_contact",
-      "description": "Reach a lead from an Origin project's Pipeline with the person's own keys: an email (subject and body), a text or WhatsApp message (body), or an AI phone call by the project's ElevenLabs agent (goal: what the call should achieve and how to open it). Unless the project's admin turned on auto-send, nothing goes out until a person approves your draft in the app; say so instead of retrying. AI calls are summarised into the lead's timeline when they end. Acts on your team's Origin project unless you pass project.",
-      "inputSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "lead_id": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 64
-          },
-          "channel": {
-            "type": "string",
-            "enum": [
-              "email",
-              "sms",
-              "whatsapp",
-              "ai_call"
-            ]
-          },
-          "subject": {
-            "type": "string",
-            "maxLength": 300,
-            "description": "Email only."
-          },
-          "body": {
-            "type": "string",
-            "maxLength": 20000,
-            "description": "The email or message text."
-          },
-          "goal": {
-            "type": "string",
-            "maxLength": 8000,
-            "description": "AI call only: its goal and script."
-          },
-          "project": {
-            "type": "string",
-            "maxLength": 120,
-            "description": "Name or id from origin_list_projects."
-          }
-        },
-        "required": [
-          "lead_id",
-          "channel"
-        ]
-      }
-    },
-    {
       "name": "origin_campaign_create",
-      "description": "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Broadcast posts, Studio generations, Pipeline leads and issues of one push; leads captured with its utm_campaign count toward it. Acts on your team's Origin project unless you pass project.",
+      "description": "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Publish posts, Studio generations and issues of one push. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3028,7 +3159,7 @@
     },
     {
       "name": "origin_campaign_get",
-      "description": "List an Origin project's campaigns, or read one with campaign: its brief, posts with per-channel status, links and likes or reposts, Studio generations, attributed leads by stage, and issues. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's campaigns, or read one with campaign: its brief, posts with per-channel status, links and likes or reposts, Studio generations and issues. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3054,7 +3185,7 @@
     },
     {
       "name": "origin_campaign_link",
-      "description": "Attach a Broadcast post, Studio generation, Pipeline lead or Origin issue to a campaign, or detach it with remove. Acts on your team's Origin project unless you pass project.",
+      "description": "Attach a Publish post, Studio generation or Origin issue to a campaign, or detach it with remove. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3070,7 +3201,6 @@
             "enum": [
               "post",
               "generation",
-              "lead",
               "issue"
             ]
           },
@@ -3078,7 +3208,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 64,
-            "description": "From origin_broadcast_list, origin_studio_list, origin_pipeline_list_leads or origin_list_issues."
+            "description": "From origin_broadcast_list, origin_studio_list or origin_list_issues."
           },
           "remove": {
             "type": "boolean"
@@ -3094,6 +3224,258 @@
           "kind",
           "item_id"
         ]
+      }
+    },
+    {
+      "name": "origin_milestone_list",
+      "description": "List an Origin project's milestones with target day, progress and issues. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_milestone_set",
+      "description": "Create, change or delete an Origin project milestone such as MVP or Launch; issues puts issues in it, remove_issues takes them out. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "milestone": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Id or name of the milestone; a name not found creates it."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Renames an existing milestone."
+          },
+          "target_date": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "YYYY-MM-DD; empty clears it."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "active",
+              "completed"
+            ]
+          },
+          "issues": {
+            "type": "array",
+            "maxItems": 100,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "description": "Issue ids or ORI keys from origin_list_issues to put in this milestone."
+          },
+          "remove_issues": {
+            "type": "array",
+            "maxItems": 100,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "description": "Issue ids or ORI keys to take out of it."
+          },
+          "delete": {
+            "type": "boolean",
+            "description": "Delete the milestone; its issues stay."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "milestone"
+        ]
+      }
+    },
+    {
+      "name": "origin_brand_get",
+      "description": "Read an Origin project's brand kit: name, tagline, voice (adjectives, do and don't), colours with contrast checks, heading and body fonts, logo and icon assets and imagery style. Read it before you design, generate media or write copy. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "origin_brand_update",
+      "description": "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand. Canvas, Pages, Studio and Publish all use it. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "tagline": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "voice_adjectives": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "description": "How the brand sounds, such as warm, precise."
+          },
+          "voice_do": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Writing rules to follow."
+          },
+          "voice_dont": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Writing habits to avoid."
+          },
+          "primary": {
+            "type": "string",
+            "maxLength": 9,
+            "description": "Hex, such as #2563EB."
+          },
+          "secondary": {
+            "type": "string",
+            "maxLength": 9,
+            "description": "Hex."
+          },
+          "neutrals": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "maxLength": 9
+            },
+            "description": "Hex; the lightest is the background, the darkest the text."
+          },
+          "heading_font": {
+            "type": "string",
+            "enum": [
+              "inter",
+              "manrope",
+              "dm-sans",
+              "plus-jakarta-sans",
+              "space-grotesk",
+              "outfit",
+              "work-sans",
+              "ibm-plex-sans",
+              "system",
+              "playfair-display",
+              "fraunces",
+              "dm-serif-display",
+              "instrument-serif",
+              "lora",
+              "source-serif-4",
+              "georgia",
+              "jetbrains-mono",
+              "ibm-plex-mono"
+            ]
+          },
+          "body_font": {
+            "type": "string",
+            "enum": [
+              "inter",
+              "manrope",
+              "dm-sans",
+              "plus-jakarta-sans",
+              "space-grotesk",
+              "outfit",
+              "work-sans",
+              "ibm-plex-sans",
+              "system",
+              "playfair-display",
+              "fraunces",
+              "dm-serif-display",
+              "instrument-serif",
+              "lora",
+              "source-serif-4",
+              "georgia",
+              "jetbrains-mono",
+              "ibm-plex-mono"
+            ]
+          },
+          "logos": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Image asset names or ids from origin_list_assets; [] removes them."
+          },
+          "icon": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "An image asset name or id; empty removes it."
+          },
+          "imagery": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "description": "Style words for generated images and video, such as soft daylight, film grain."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
       }
     }
   ]

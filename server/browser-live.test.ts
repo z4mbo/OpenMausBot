@@ -76,6 +76,7 @@ beforeEach(() => {
     withHumanAction: vi.fn(async (_session: string, _owner: string, fn: () => unknown) => fn()),
     watch: vi.fn(() => () => {}),
     settled: vi.fn(async () => {}),
+    ownDaemon: vi.fn(async () => {}),
   } as unknown as BrowserRuntime;
   live = new BrowserLive({ runtime });
   SocketFixture.instances = [];

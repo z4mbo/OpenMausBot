@@ -1,12 +1,14 @@
 import { useRef, useState, type FormEvent } from "react";
 import { Select } from "../Select";
-import { File, Image as ImageIcon, Loader2, Palette, Pencil, Plus, Search, Trash2, Upload } from "lucide-react";
+import { AudioLines, File, Film, Image as ImageIcon, Loader2, Palette, Pencil, Plus, Search, SwatchBook, Trash2, Upload } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
+import { revealItem, useItemFocus } from "@/lib/origin-item-focus";
 import { cn } from "@/lib/cn";
+import { BrandPanel } from "../origin-brand/BrandPanel";
 import type { AssetType, CloudDesign, CloudDesignAsset, CloudDesignToken, TokenType } from "./cloud-types";
 import { CloudGate, EmptyState, Field, Loading, Modal, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
-const ASSET_TYPES: readonly AssetType[] = ["image", "document", "figma", "icon", "font", "apk", "other"];
+const ASSET_TYPES: readonly AssetType[] = ["image", "video", "audio", "document", "figma", "icon", "font", "apk", "other"];
 const TOKEN_TYPES: readonly TokenType[] = ["color", "typography", "spacing", "component", "motion", "other"];
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 
@@ -15,26 +17,40 @@ function assetFileType(file: { name: string; type: string }): AssetType {
   if (name.endsWith(".apk")) return "apk";
   if (name.endsWith(".svg") || name.endsWith(".ico")) return "icon";
   if (file.type.startsWith("image/")) return "image";
+  if (file.type.startsWith("video/")) return "video";
+  if (file.type.startsWith("audio/")) return "audio";
   if (file.type.startsWith("font/") || /\.(ttf|otf|woff2?)$/.test(name)) return "font";
   if (name.endsWith(".fig")) return "figma";
   return file.type ? "document" : "other";
 }
 
 export function AssetsPage(props: OriginPageProps) {
-  return <CloudGate {...props} label="Assets">{({ projectId, canEdit }) => <Assets projectId={projectId} canEdit={canEdit} />}</CloudGate>;
+  return <CloudGate {...props} label="Assets">{({ project, projectId, canEdit }) => <Assets projectId={projectId} canEdit={canEdit} projectName={project.name} botId={props.link?.botId} />}</CloudGate>;
 }
 
-function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean }) {
+function Assets({ projectId, canEdit, projectName, botId }: { projectId: string; canEdit: boolean; projectName: string; botId?: string }) {
   const design = useCloudQuery<CloudDesign>("design:list", { projectId });
-  const [tab, setTab] = useState<"assets" | "tokens">("assets");
+  const [tab, setTab] = useState<"assets" | "tokens" | "brand">("assets");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<AssetType | "all">("all");
+  const [folder, setFolder] = useState("all");
   const [editing, setEditing] = useState<CloudDesignAsset | "new" | null>(null);
   const [tokenEditing, setTokenEditing] = useState<CloudDesignToken | "new" | null>(null);
   const [notice, setNotice] = useState("");
+  useItemFocus(projectId, {
+    asset: (assetId) => {
+      setTab("assets");
+      setQuery("");
+      setFilter("all");
+      setFolder("all");
+      return !design?.assets.some((asset) => asset._id === assetId) || revealItem(assetId);
+    },
+  }, Boolean(design));
   if (!design) return <Loading label="Loading assets" variant="grid" />;
   const needle = query.trim().toLowerCase();
-  const assets = design.assets.filter((asset) => (filter === "all" || asset.type === filter) && `${asset.name} ${asset.notes ?? ""}`.toLowerCase().includes(needle));
+  const folders = [...new Set(design.assets.flatMap((asset) => (asset.folder ? [asset.folder] : [])))].sort();
+  const assets = design.assets.filter((asset) => (filter === "all" || asset.type === filter) && (folder === "all" || (folder === "" ? !asset.folder : asset.folder === folder))
+    && `${asset.name} ${asset.notes ?? ""}`.toLowerCase().includes(needle));
   const tokens = design.tokens.filter((token) => `${token.name} ${token.value} ${token.description ?? ""}`.toLowerCase().includes(needle));
   const removeAsset = (asset: CloudDesignAsset) => {
     if (!window.confirm(`Delete ${asset.name}?`)) return;
@@ -46,31 +62,40 @@ function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean })
   };
   return (
     <section className={pageClass} aria-label="Assets">
-      <PageHeader title="Assets" count={tab === "assets" ? design.assets.length : design.tokens.length}>
+      <PageHeader title="Assets" count={tab === "brand" ? undefined : tab === "assets" ? design.assets.length : design.tokens.length}>
         <Segmented label="Asset view" value={tab} onChange={setTab}
-          options={[{ value: "assets", label: <><ImageIcon size={13} />Files</> }, { value: "tokens", label: <><Palette size={13} />Tokens</> }]} />
-        <label className="relative flex items-center">
+          options={[{ value: "assets", label: <><ImageIcon size={13} />Files</> }, { value: "tokens", label: <><Palette size={13} />Tokens</> }, { value: "brand", label: <><SwatchBook size={13} />Brand</> }]} />
+        {tab !== "brand" && <label className="relative flex items-center">
           <Search size={14} className="pointer-events-none absolute left-2 text-ink-tertiary" aria-hidden="true" />
           <input className={cn(inputClass, "w-44 pl-7")} placeholder={tab === "assets" ? "Search assets" : "Search tokens"} aria-label="Search" value={query} onChange={(e) => setQuery(e.target.value)} />
-        </label>
+        </label>}
         {tab === "assets" && (
           <Select size="sm" aria-label="Asset type" value={filter} onChange={(e) => setFilter(e.target.value as AssetType | "all")}>
             <option value="all">All types</option>
             {ASSET_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
           </Select>
         )}
-        {canEdit && <button type="button" className={primaryButton} onClick={() => (tab === "assets" ? setEditing("new") : setTokenEditing("new"))}><Plus size={14} />{tab === "assets" ? "Add asset" : "Add token"}</button>}
+        {tab === "assets" && folders.length > 0 && (
+          <Select size="sm" aria-label="Folder" value={folder} onChange={(e) => setFolder(e.target.value)}>
+            <option value="all">All folders</option>
+            {folders.map((name) => <option key={name} value={name}>{name}</option>)}
+            <option value="">No folder</option>
+          </Select>
+        )}
+        {canEdit && tab !== "brand" && <button type="button" className={primaryButton} onClick={() => (tab === "assets" ? setEditing("new") : setTokenEditing("new"))}><Plus size={14} />{tab === "assets" ? "Add asset" : "Add token"}</button>}
       </PageHeader>
       {notice && <div className="mb-3"><Notice tone="danger">{notice}</Notice></div>}
-      {tab === "assets" ? (
+      {tab === "brand" ? <BrandPanel projectId={projectId} projectName={projectName} canEdit={canEdit} botId={botId} /> : tab === "assets" ? (
         !assets.length ? <EmptyState icon={<ImageIcon size={24} />} title={needle || filter !== "all" ? "No matching assets" : "No assets yet"} body="Images, documents and files the team makes for this project." /> : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
             {assets.map((asset) => {
               const href = asset.fileUrl || asset.url || undefined;
               return (
-                <article key={asset._id} className={cn(cardClass, "group relative flex flex-col overflow-hidden")}>
+                <article key={asset._id} data-origin-item={asset._id} className={cn(cardClass, "group relative flex flex-col overflow-hidden")}>
                   <a href={href} target="_blank" rel="noreferrer" aria-label={`Open ${asset.name}`} className="flex h-32 items-center justify-center bg-inset">
-                    {href && (asset.type === "image" || asset.type === "icon") ? <img src={href} alt={asset.name} loading="lazy" className="size-full object-contain" /> : <File size={30} className="text-ink-tertiary" />}
+                    {href && (asset.type === "image" || asset.type === "icon") ? <img src={href} alt={asset.name} loading="lazy" className="size-full object-contain" />
+                      : href && asset.type === "video" ? <span className="relative flex size-full items-center justify-center"><Film size={30} className="absolute text-ink-tertiary" aria-hidden="true" /><video src={href} muted playsInline preload="metadata" className="relative size-full object-cover" /></span>
+                        : asset.type === "audio" ? <AudioLines size={30} className="text-ink-tertiary" /> : <File size={30} className="text-ink-tertiary" />}
                   </a>
                   {canEdit && (
                     <div className="absolute right-2 top-2 flex gap-0.5 rounded-lg border border-hairline/40 bg-panel p-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 touch:opacity-100">
@@ -80,7 +105,7 @@ function Assets({ projectId, canEdit }: { projectId: string; canEdit: boolean })
                   )}
                   <div className="min-w-0 p-3">
                     <strong className="block truncate text-[13px] font-medium text-ink" title={asset.name}>{asset.name}</strong>
-                    <small className="text-[11.5px] text-ink-tertiary">{asset.type}{asset.size ? ` · ${Math.ceil(asset.size / 1024)} KB` : ""}</small>
+                    <small className="text-[11.5px] text-ink-tertiary">{asset.type}{asset.size ? ` · ${Math.ceil(asset.size / 1024)} KB` : ""}{asset.folder ? ` · ${asset.folder}` : ""}{asset.studio ? ` · ${asset.studio.modelLabel}` : ""}</small>
                     {asset.notes && <p className="mt-1 line-clamp-3 text-[12px] text-ink-secondary">{asset.notes}</p>}
                   </div>
                 </article>
@@ -129,6 +154,7 @@ function AssetEditor({ projectId, canEdit, asset, onClose }: { projectId: string
   const action = useAction();
   const batch = files.length > 1;
   const choose = (selection: File[]) => {
+    if (action.busy) return;
     const tooBig = selection.find((file) => file.size > MAX_UPLOAD_BYTES);
     if (tooBig) { action.setError(`${tooBig.name} is over 15 MB`); return; }
     action.setError("");
@@ -167,7 +193,7 @@ function AssetEditor({ projectId, canEdit, asset, onClose }: { projectId: string
     <Modal title={asset ? "Edit asset" : batch ? "Add assets" : "Add asset"} onClose={onClose} canClose={() => !action.busy}>
       <form onSubmit={save} className="flex flex-col gap-3">
         <ReadOnlyEditorNotice canEdit={canEdit} />
-        <fieldset disabled={!canEdit} className="contents">
+        <fieldset disabled={!canEdit || action.busy} className="contents">
         {!asset && (
           <>
             <button type="button" onClick={() => input.current?.click()}

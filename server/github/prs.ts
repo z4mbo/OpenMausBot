@@ -18,6 +18,12 @@ type TaskDoc = { _id: string; title: string; description?: string; githubTaskBra
 type Context = { project: { repoUrl?: string }; task: TaskDoc; existingPR?: { number: number } | null };
 type Target = { _id: string; projectId: string; url: string; number: number };
 type OpenedPR = { status: "opened"; number: number; url: string; state: string; id: string };
+/** The person a draft pull request is opened for, as git records them. */
+export type PRAuthor = { name: string; email: string; login: string | null };
+type OpenAsMember = (request: { head: string; base: string; title: string; body: string }) => Promise<number | null>;
+
+const trailerPart = (value: string) => value.replace(/[\r\n<>]+/g, " ").trim();
+export const coAuthorTrailer = (author: PRAuthor | null) => author ? `Co-authored-by: ${trailerPart(author.name)} <${trailerPart(author.email)}>` : "";
 
 export function taskBranch(task: { _id: string; title: string; githubTaskBranch?: string }): string {
   return task.githubTaskBranch ?? `origin/ORI-${task._id.slice(-4).toUpperCase()}-${task.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60).replace(/^-+|-+$/g, "") || "task"}`;
@@ -56,7 +62,7 @@ export async function readPRSnapshot(service: GitHubService, repoUrl: string, nu
 
 const definitiveRejection = (error: unknown) => error instanceof GitHubHttpError && [400, 401, 403, 404, 422, 429].includes(error.status);
 
-async function openPR(service: GitHubService, repoUrl: string, taskId: string, branch: string, title: string, body: string, token: string) {
+async function openPR(service: GitHubService, repoUrl: string, taskId: string, branch: string, title: string, body: string, token: string, author: PRAuthor | null, asMember?: OpenAsMember) {
   const { store } = service;
   const path = repositoryPath(repoUrl), repo = path.slice("/repos/".length), owner = repo.split("/")[0];
   const metadata = await githubRequest<{ default_branch: string }>(service, path, token);
@@ -77,8 +83,10 @@ async function openPR(service: GitHubService, repoUrl: string, taskId: string, b
     if (!number) {
       store.saveJob(key, "working", { started: true });
       try {
-        const pr = await githubRequest<{ number: number }>(service, `${path}/pulls`, token, { method: "POST", body: JSON.stringify({ head: branch, base, title, body: `${body}\n\n${marker}`.trim(), draft: true }) });
-        number = pr.number;
+        number = await asMember?.({ head: branch, base, title, body: `${body}\n\n${marker}`.trim() }) ?? undefined;
+        number ??= (await githubRequest<{ number: number }>(service, `${path}/pulls`, token, {
+          method: "POST", body: JSON.stringify({ head: branch, base, title, body: [body, coAuthorTrailer(author), marker].filter(Boolean).join("\n\n").trim(), draft: true }),
+        })).number;
         store.saveJob(key, "working", { number });
       } catch (error) {
         if (definitiveRejection(error)) store.saveJob(key, "working");
@@ -97,7 +105,7 @@ async function openPR(service: GitHubService, repoUrl: string, taskId: string, b
 }
 
 /** GitHub cannot open a PR without a diff, so a new task branch gets a visible plan commit first. */
-async function prepareDraftBranch(service: GitHubService, context: Context, appToken: string) {
+async function prepareDraftBranch(service: GitHubService, context: Context, appToken: string, author: PRAuthor | null) {
   const { project, task } = context;
   const path = repositoryPath(project.repoUrl ?? ""), branch = taskBranch(task);
   const metadata = await githubRequest<{ default_branch: string }>(service, path, appToken);
@@ -113,7 +121,7 @@ async function prepareDraftBranch(service: GitHubService, context: Context, appT
   } else {
     const head = await githubRequest<{ object: { sha: string } }>(service, `${path}/git/ref/heads/${encodeURIComponent(branch)}`, appToken);
     if (head.object.sha !== base.object.sha) throw new Error("Existing branch is not an empty task branch");
-    await githubRequest(service, `${path}/contents/${file}`, appToken, { method: "PUT", body: JSON.stringify({ branch, message: `Plan Origin task: ${task.title}`, content: Buffer.from(`# ${task.title}\n\n${task.description ?? ""}\n\n${marker}\n`).toString("base64") }) });
+    await githubRequest(service, `${path}/contents/${file}`, appToken, { method: "PUT", body: JSON.stringify({ branch, message: [`Plan Origin task: ${task.title}`, coAuthorTrailer(author)].filter(Boolean).join("\n\n"), content: Buffer.from(`# ${task.title}\n\n${task.description ?? ""}\n\n${marker}\n`).toString("base64") }) });
   }
   return branch;
 }
@@ -123,8 +131,17 @@ export function draftBody(task: Pick<TaskDoc, "description" | "githubIssueNumber
   return [task.description?.trim(), task.githubIssueNumber ? `Closes #${task.githubIssueNumber}` : ""].filter(Boolean).join("\n\n");
 }
 
+/**
+ * Opens the issue's draft pull request under the person's own linked GitHub account when they have one, so GitHub
+ * attributes it to them; otherwise the App opens it, with the person as co-author of its plan commit.
+ */
 export async function createTaskPR(service: GitHubService, sessionToken: string, projectId: string, taskId: string) {
   const context = await service.bridge<Context>("prHumanContext", { sessionToken, projectId, taskId, choosePR: true });
+  const author = await Promise.resolve().then(() => service.convex().query("githubLinks:gitIdentity", { sessionToken })).catch(() => null) as PRAuthor | null;
+  const asMember: OpenAsMember | undefined = service.action && (async (request) => {
+    const opened = await service.action!<{ state: string; number?: number }>("githubPulls:openAsMember", { sessionToken, projectId, taskId, ...request });
+    return opened.state === "opened" && opened.number ? opened.number : null;
+  });
   const repoUrl = context.project.repoUrl ?? "";
   const key = `draft-task:${taskId}:${repoUrl.toLowerCase()}`;
   if (!service.store.lockJob(key)) throw new Error("Task PR creation in progress; retry shortly");
@@ -133,8 +150,8 @@ export async function createTaskPR(service: GitHubService, sessionToken: string,
       const current = await service.bridge<Context>("prHumanContext", { sessionToken, projectId, taskId });
       if (repositoryPath(current.project.repoUrl ?? "") !== repositoryPath(repoUrl)) throw new Error("PR repository changed during authorization");
       if (context.existingPR) return readPRSnapshot(service, repoUrl, context.existingPR.number, appToken);
-      const branch = await prepareDraftBranch(service, context, appToken);
-      return openPR(service, repoUrl, taskId, branch, context.task.title, draftBody(context.task), appToken);
+      const branch = await prepareDraftBranch(service, context, appToken, author);
+      return openPR(service, repoUrl, taskId, branch, context.task.title, draftBody(context.task), appToken, author, asMember);
     });
     const result = await service.bridge<OpenedPR>("prFinalize", { sessionToken, projectId, taskId, snapshot });
     return { ...result, ok: true, message: `Linked draft PR #${result.number}` };

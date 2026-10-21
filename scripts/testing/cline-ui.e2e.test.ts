@@ -2,7 +2,7 @@
 import { expect, it } from "vitest";
 import { closeBrowserSession } from "../../server/browser-engine.ts";
 import { launchVerificationServer, runControlOmb } from "../control-omb.ts";
-import { agentBrowser, ensureUiBrowser, sessionEnv } from "./control-omb-ui.ts";
+import { agentBrowser, ensureUiBrowser, sessionEnv, startSessionDaemon } from "./control-omb-ui.ts";
 import { mountPreview } from "./preview-fixture.ts";
 
 const enabled = process.env.OMB_UI_E2E === "1";
@@ -25,6 +25,7 @@ const enabled = process.env.OMB_UI_E2E === "1";
     }, { timeout: 15_000 }).toEqual(expect.objectContaining({ state: "available", authenticated: true }));
     const bot = (await cli("new-bot", "--name", "Cline specialist")).bot;
     preview = await mountPreview(fixture, { entry: "/scripts/testing/threads-preview.tsx", route: "/__cline.html", title: "Cline verification", logLevel: "warn" });
+    await startSessionDaemon(tools.binary, env);
     await browser("open", preview.previewUrl);
     for (const advanced of [false, true]) {
       await evaluate(`localStorage.setItem('omb-advanced-mode', '${advanced ? "1" : "0"}'); location.reload(); true`);

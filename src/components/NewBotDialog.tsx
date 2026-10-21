@@ -35,6 +35,7 @@ import { LocalComputerAutoWarning } from "./LocalComputerAutoWarning";
 import { SharePresetDialog } from "./SharePresetDialog";
 import { SettingRow } from "./SettingsPrimitives";
 import { Select } from "./Select";
+import { LaunchpadFirst } from "./origin-launchpad/LaunchpadFirst";
 
 const SECTIONS = ["Identity", "Soul", "Skills", "Memory", "Routines", "Access", "Model", "Permissions", "Voice & alerts"] as const;
 type Section = typeof SECTIONS[number];
@@ -73,7 +74,8 @@ export function CompanionNewBotDialog() {
 
 export function NewBotDialog(props: Parameters<typeof LocalNewBotDialog>[0] = {}) {
   return typeof window !== "undefined" && window.ogb?.remoteClient?.active
-    ? <CompanionNewBotDialog /> : <LocalNewBotDialog {...props} />;
+    ? <CompanionNewBotDialog />
+    : <LaunchpadFirst enabled={!props.defaultsMode && props.section === undefined} onClose={props.onClose}><LocalNewBotDialog {...props} /></LaunchpadFirst>;
 }
 
 export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCreated, preserveSelection = false }: {
@@ -212,7 +214,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
     },
   };
   const projectDialog = NEW_PROJECT_DIALOG && section === undefined;
-  if (cloudTeamId && canCreateProject === false) return <ProjectsNeedAdmin onClose={() => closeRef.current()} />;
+  if (cloudTeamId && canCreateProject === false) return <ProjectsNeedEditAccess onClose={() => closeRef.current()} />;
   const accessIncomplete = Boolean(cloudTeamId) && (canCreateProject === undefined || workspacePeople.members === undefined || (projectAccess.mode === "people" && projectAccess.emails.length === 0)
     || !repositoryChoiceReady(repository, bot.name));
   const accessPicker = cloudTeamId ? <>
@@ -312,13 +314,13 @@ function DraftSection({ active, draft, defaultsMode, access }: { active: Section
   return <VoiceSection bot={bot} derived={derived} />;
 }
 
-function ProjectsNeedAdmin({ onClose }: { onClose(): void }) {
+function ProjectsNeedEditAccess({ onClose }: { onClose(): void }) {
   return <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
     onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); onClose(); } }}>
     <div role="alertdialog" aria-modal="true" aria-label="New project" className="w-full max-w-sm rounded-2xl border border-hairline/50 bg-panel p-5 text-center shadow-2xl motion-safe:animate-pop-in">
       <span className="mx-auto mb-3 flex size-11 items-center justify-center rounded-2xl bg-raised text-ink-secondary" aria-hidden="true"><Lock size={20} /></span>
-      <h2 className="text-[16px] font-semibold text-ink">Only admins create projects</h2>
-      <p className="mt-1.5 text-[13px] leading-relaxed text-ink-secondary">Ask a workspace owner or admin to create the project and give you access.</p>
+      <h2 className="text-[16px] font-semibold text-ink">Viewers can't create projects</h2>
+      <p className="mt-1.5 text-[13px] leading-relaxed text-ink-secondary">Ask a workspace owner or admin to make you a member, or to create the project and give you access.</p>
       <button type="button" autoFocus onClick={onClose} className="mt-4 rounded-lg bg-control px-4 py-2 text-[13px] text-ink hover:bg-raised-hover">{t("common.close")}</button>
     </div>
   </div>;

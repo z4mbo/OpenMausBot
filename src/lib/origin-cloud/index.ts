@@ -3,3 +3,4 @@ export { cloudUrl, setCloudUrl, cloudMutation, cloudAction, cloudQueryOnce } fro
 export { useCloudPages, useCloudQuery, useCloudSession, useCloudUrl } from "./hooks";
 export { CloudProvider } from "./provider";
 export { cloud } from "./domains";
+export { createOriginWorkspace } from "./workspace-setup";

@@ -261,6 +261,44 @@ describe("runOriginTool", () => {
     expect(result.text).not.toMatch(/SECRET|SALT|IV\b/);
   });
 
+  it("shows vault entries on a card by name only", async () => {
+    const { client } = fakeConvex({ "credentials:list": [{ _id: "c1", title: "Stripe", kind: "api_key", agentUse: true, url: "https://stripe.com", username: "ops", ciphertext: "SECRET", notes: "n" }] });
+    const result = await runOriginTool("origin_vault_list", {}, "coder", { bots: BOTS, state, connect: () => client });
+    expect(result.card).toEqual({ kind: "vault", projectId: "proj", projectName: "proj", items: [{ id: "c1", title: "Stripe", kind: "api_key", agentUse: true }] });
+    expect(JSON.stringify(result.card)).not.toMatch(/SECRET|ops|stripe\.com/);
+  });
+
+  it("shows assets, feedback and the repository on cards", async () => {
+    const { client } = fakeConvex({
+      "projects:get": { name: "Mars", teamId: "team1", repoUrl: "https://github.com/acme/mars" },
+      "design:list": { assets: [{ _id: "a1", name: "Hero", type: "image", fileUrl: "https://cdn.test/hero.png" }], tokens: [] },
+      "feedback:portals": [{ _id: "portal1", projectId: "proj" }],
+      "feedback:list": [{ _id: "f1", title: "Crash on save", body: "Every time", kind: "bug", status: "new", createdAt: 1 }],
+      "tasks:board": BOARD, "github:listPullRequests": [{ number: 7, title: "Dark mode", url: "https://github.com/acme/mars/pull/7", state: "open", branch: "dark" }],
+      "commits:list": [{ sha: "abc1234def", message: "Fix\nbody", author: "ada", committedAt: 2 }], "githubProtection:status": { state: "on", branch: "main" },
+    });
+    const deps = { bots: BOTS, state, connect: () => client };
+    expect((await runOriginTool("origin_list_assets", {}, "coder", deps)).card).toEqual({
+      kind: "assets", projectId: "proj", projectName: "Mars", heading: "1 asset", assets: [{ id: "a1", name: "Hero", type: "image", kind: "image", url: "https://cdn.test/hero.png" }],
+    });
+    expect((await runOriginTool("origin_feedback", {}, "coder", deps)).card).toMatchObject({ kind: "feedback", teamId: "team1", entries: [{ id: "f1", kind: "bug", status: "new" }] });
+    expect((await runOriginTool("origin_repo_status", {}, "coder", deps)).card).toEqual({
+      kind: "repo", projectId: "proj", projectName: "Mars",
+      repo: { slug: "acme/mars", url: "https://github.com/acme/mars", protection: "on", pulls: [{ number: 7, title: "Dark mode", url: "https://github.com/acme/mars/pull/7", branch: "dark" }], commits: [{ sha: "abc1234def", message: "Fix", author: "ada", at: 2 }] },
+    });
+  });
+
+  it("reads the latest call's notes for a card that drafts its action items", async () => {
+    const { client } = fakeConvex({
+      "projects:get": { name: "Mars" },
+      "callNotes:latest": { _id: "n1", callName: "Weekly", startedAt: Date.UTC(2026, 9, 20, 9), minutes: 25, keyPoints: ["Beta slipped"], decisions: ["Ship Friday"], actionItems: [{ title: "Fix login", owner: "Ada" }, { title: "Write notes", taskId: "t9" }] },
+    });
+    const result = await runOriginTool("origin_call_notes", {}, "coder", { bots: BOTS, state, connect: () => client });
+    expect(result.text).toContain("0. Fix login (owner: Ada) · no issue yet");
+    expect(result.text).toContain("1. Write notes · issue t9");
+    expect(result.card).toMatchObject({ kind: "call", projectId: "proj", note: { id: "n1", decisions: ["Ship Friday"], actionItems: [{ title: "Fix login", owner: "Ada" }, { title: "Write notes", taskId: "t9" }] } });
+  });
+
   it("reports Convex errors and an expired sign-in", async () => {
     const { client } = fakeConvex({ "tasks:board": new Error("[CONVEX Q(tasks:board)] Server Error\nUncaught Error: Login required\n    at handler") });
     const result = await runOriginTool("origin_list_issues", {}, "coder", { bots: BOTS, state, connect: () => client });
@@ -794,6 +832,29 @@ describe("origin-cloud routes", () => {
     expect(appended[0]!.message.from).toMatchObject({ botId: "coder", name: "Coder" });
     await call("POST", "/api/internal/origin/tool", { name: "origin_list_issues", arguments: { priority: "urgent" } }, { authorization: "Bearer cap-room" });
     expect(appended).toHaveLength(1);
+  });
+
+  it("draws a tool's card in the turn's thread and keeps it out of the model's answer", async () => {
+    const { call, file, appended } = await serve({ answers: { "auth:me": { email: "me@x.dev" }, "projects:get": { name: "Mars" }, "design:list": { assets: [{ _id: "a1", name: "Hero", type: "image", url: "https://cdn.test/hero.png" }], tokens: [] } } });
+    writeOriginCloud(file, { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "proj" } });
+    const [status, body] = await call("POST", "/api/internal/origin/tool", { name: "origin_list_assets", arguments: {} }, { authorization: "Bearer cap-coder" });
+    expect(status).toBe(200);
+    expect(body).not.toHaveProperty("card");
+    expect((body as { text: string }).text).toContain("do not repeat them");
+    expect(appended).toHaveLength(1);
+    expect(appended[0]!.message).toMatchObject({ role: "bot", kind: "activity", tool: { name: "origin_list_assets", ok: true }, originCard: { kind: "assets", assets: [{ id: "a1" }] } });
+  });
+
+  it("shows a Studio tool's cards in the turn's thread and keeps them out of the answer", async () => {
+    const { call, file, appended } = await serve();
+    writeOriginCloud(file, { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "proj" } });
+    const [status, body] = await call("POST", "/api/internal/origin/tool", { name: "origin_studio_presets", arguments: { group: "audio" } }, { authorization: "Bearer cap-coder" });
+    expect(status).toBe(200);
+    expect((body as { text: string }).text).toContain("voice-over \"Voice-over\"");
+    expect(body).not.toHaveProperty("studio");
+    expect(appended).toHaveLength(1);
+    expect(appended[0]!.message).toMatchObject({ role: "bot", kind: "activity", tool: { name: "origin_studio_presets", ok: true } });
+    expect(appended[0]!.message.originStudio).toEqual({ heading: "Studio presets", projectId: "proj", presets: ["voice-over", "song", "sound-effect"] });
   });
 
   it("takes the record phase only for origin_assign_issue", async () => {

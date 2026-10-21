@@ -4,7 +4,6 @@ import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import { BROADCAST_CHANNELS, BROADCAST_RULES } from "../../../shared/broadcast";
 import { CAMPAIGN_LIMITS, campaignSlug, type CampaignDetail, type CampaignLinkKind, type CampaignSummary } from "../../../shared/origin-campaigns";
-import type { PipelineBoard } from "../../../shared/origin-pipeline";
 import type { CloudBoard } from "../origin-pages/cloud-types";
 import { Field, Modal, Notice, ghostButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
 import { ChannelMark } from "./ChannelMark";
@@ -37,7 +36,7 @@ export function CampaignDialog({ projectId, campaign, onSaved, onClose }: {
       <form className="flex flex-col gap-3" onSubmit={(event) => { event.preventDefault(); if (!problem) void save(); }}>
         <Field label="Name">
           <input className={inputClass} value={form.name} maxLength={CAMPAIGN_LIMITS.name} autoFocus onChange={(event) => set({ name: event.target.value })} placeholder="Spring launch" />
-          {!campaign && form.name.trim() && <span className="text-[11.5px] font-normal text-ink-tertiary">utm_campaign={campaignSlug(form.name)}</span>}
+          {!campaign && form.name.trim() && <span className="text-[11.5px] text-ink-tertiary">utm_campaign={campaignSlug(form.name)}</span>}
         </Field>
         <Field label="Goal">
           <textarea className={cn(inputClass, "min-h-[64px] resize-y")} value={form.goal} maxLength={CAMPAIGN_LIMITS.goal} onChange={(event) => set({ goal: event.target.value })} placeholder="200 sign-ups for the beta" />
@@ -82,28 +81,25 @@ export function CampaignDialog({ projectId, campaign, onSaved, onClose }: {
 
 type Candidate = { id: string; title: string; meta: string; thumb?: string };
 
-const LINK_TITLE: Record<CampaignLinkKind, string> = { post: "Link posts", generation: "Link Studio content", lead: "Link leads", issue: "Link issues" };
+const LINK_TITLE: Record<CampaignLinkKind, string> = { post: "Link posts", generation: "Link Studio content", issue: "Link issues" };
 
 type StudioRow = { _id: string; kind: string; status: string; prompt: string; modelLabel: string; outputs: { url: string; kind: string }[] };
 
 function useCandidates(projectId: string, kind: CampaignLinkKind, posts: readonly BroadcastPost[]): Candidate[] | undefined {
   const studio = useCloudQuery<StudioRow[]>("studio:list", kind === "generation" ? { projectId } : "skip");
-  const pipeline = useCloudQuery<PipelineBoard>("pipeline:board", kind === "lead" ? { projectId } : "skip");
   const board = useCloudQuery<CloudBoard>("tasks:board", kind === "issue" ? { projectId } : "skip");
   return useMemo(() => {
     if (kind === "post") return posts.map((post) => ({ id: post._id, title: post.variants[0]?.text.trim() || "Media post", meta: `${post.status} · ${post.variants.map((variant) => BROADCAST_RULES[variant.channel].label).join(", ")}` }));
     if (kind === "generation") return studio?.filter((row) => row.status !== "failed").map((row) => ({ id: row._id, title: row.prompt || row.modelLabel, meta: `${row.kind} · ${row.modelLabel}`, ...(row.outputs[0]?.kind === "image" ? { thumb: row.outputs[0].url } : {}) }));
-    if (kind === "lead") return pipeline?.leads.map((lead) => ({ id: lead._id, title: lead.name, meta: [lead.company, lead.stage, lead.source].filter(Boolean).join(" · ") }));
     if (!board) return undefined;
     const columns = new Map(board.columns.map((column) => [column._id, column.title]));
     return board.tasks.map((task) => ({ id: task._id, title: task.title, meta: `${task.done ? "Done" : columns.get(task.columnId) ?? ""}${task.assignedToName ? ` · ${task.assignedToName}` : ""}` }));
-  }, [kind, posts, studio, pipeline, board]);
+  }, [kind, posts, studio, board]);
 }
 
 function linkedIds(detail: CampaignDetail, kind: CampaignLinkKind): Set<string> {
   if (kind === "post") return new Set(detail.posts.map((post) => post._id));
   if (kind === "generation") return new Set(detail.generations.map((row) => row._id));
-  if (kind === "lead") return new Set(detail.leads.filter((lead) => lead.linked).map((lead) => lead._id));
   return new Set(detail.issues.map((issue) => issue._id));
 }
 
@@ -117,6 +113,7 @@ export function LinkDialog({ projectId, detail, kind, posts, onClose }: { projec
   const shown = (candidates ?? []).filter((item) => !needle || `${item.title} ${item.meta}`.toLowerCase().includes(needle)).slice(0, 80);
 
   const toggle = async (item: Candidate) => {
+    if (busy !== null) return;
     setBusy(item.id);
     setError("");
     try {
@@ -141,8 +138,9 @@ export function LinkDialog({ projectId, detail, kind, posts, onClose }: { projec
           : shown.map((item) => {
             const on = linked.has(item.id);
             return (
-              <button key={item.id} type="button" aria-pressed={on} disabled={busy !== null} onClick={() => void toggle(item)}
-                className="flex min-w-0 items-center gap-3 rounded-lg px-2 py-2 text-left outline-none transition-colors duration-(--motion-fast) hover:bg-raised/60 focus-visible:bg-raised/60 disabled:opacity-60">
+              <button key={item.id} type="button" aria-pressed={on} aria-busy={busy === item.id} onClick={() => void toggle(item)}
+                className={cn("flex min-w-0 items-center gap-3 rounded-lg px-2 py-2 text-left outline-none transition-[background-color,opacity] duration-(--motion-fast) hover:bg-raised/60 focus-visible:bg-raised/60",
+                  busy !== null && busy !== item.id && "opacity-60")}>
                 {item.thumb ? <img src={item.thumb} alt="" className="size-9 shrink-0 rounded-md object-cover" /> : null}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] text-ink">{item.title}</span>

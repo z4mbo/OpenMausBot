@@ -6,7 +6,7 @@ import { campaignBrief, formProblem, emptyCampaignForm, metricTotals, timelineOr
 const summary: CampaignSummary = {
   _id: "c1", name: "Spring launch", slug: "spring-launch", goal: "200 beta sign-ups", audience: "Indie founders", channels: ["x", "bluesky"],
   startDate: "2026-11-02", endDate: "2026-11-30", budgetNote: "€300", status: "planning",
-  counts: { posts: 0, published: 0, generations: 0, leads: 0, won: 0, openIssues: 0 }, createdAt: 1, updatedAt: 1,
+  counts: { posts: 0, published: 0, generations: 0, openIssues: 0 }, createdAt: 1, updatedAt: 1,
 };
 
 const post = (id: string, patch: Partial<CampaignPost> = {}): CampaignPost => ({ _id: id, status: "draft", needsApproval: false, excerpt: "", variants: [{ channel: "x" }], ...patch });

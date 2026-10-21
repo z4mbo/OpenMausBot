@@ -8,22 +8,26 @@ import {
 import { isDraftColumn } from "../shared/origin-columns.ts";
 import { columnNames, findColumn, normalizedTitle } from "./origin-cloud-columns.ts";
 import { createOriginCloudSession } from "./origin-cloud-session.ts";
-import { editCanvas, readCanvas, type CanvasToolProject } from "./origin-canvas-tools.ts";
-import { listPages, publishPage } from "./origin-page-tools.ts";
+import { DESIGN_BRIEF, canvasTools, type CanvasToolProject } from "./origin-canvas-tools.ts";
+import { canvasFonts, svgToPng } from "./canvas-raster.ts";
 import { isReadOnlyAgentTool } from "./agent-tool-policy.ts";
 import { DATA_DIR } from "./config.ts";
 import type { MirrorResult } from "./github/sync.ts";
 import { mergeBlocker, type PullDetail, type PullSummary } from "./github/review.ts";
 import type { OriginPullRequestCard } from "../shared/origin-pull-request.ts";
 import { pullRequestCard } from "./github/pull-request-card.ts";
+import type { OriginChatCard } from "../shared/origin-chat-cards.ts";
+import { addedAssetCard, appendOriginCards, assetsCard, CARD_NOTE, feedbackCard, repoCard } from "./origin-chat-cards.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
-import { sectionKey, type BotRecord, type Message, type Store } from "./store.ts";
+import { sectionKey, type BotRecord, type Store } from "./store.ts";
 import { broadcastDraft, broadcastList, broadcastSchedule, type BroadcastToolScope } from "./broadcast/tools.ts";
-import { pipelineTools } from "./origin-pipeline-tools.ts";
 import { standupTools } from "./origin-standup-tool.ts";
 import { campaignTools } from "./origin-campaign-tools.ts";
-import type { PipelineSender } from "./origin-pipeline.ts";
-import { runStudioTool, studioRunner, type StudioRunner } from "./origin-studio.ts";
+import { brandTools } from "./origin-brand-tools.ts";
+import { vaultAgentSecrets } from "./origin-vault-agent.ts";
+import { callNotesTools } from "./origin-call-notes.ts";
+import { launchpadTools } from "./origin-launchpad-tools.ts";
+import { runStudioTool, STUDIO_TOOL_NAMES, type StudioRunner, type StudioToolResult, type WorkflowExecutor } from "./origin-studio-tools.ts";
 
 export interface OriginCloudState {
   url?: string;
@@ -58,13 +62,17 @@ export interface OriginReviewRequest {
   reason: string;
 }
 
-export interface OriginToolResult {
+export interface OriginToolResult extends Pick<StudioToolResult, "studio"> {
   text: string;
   isError?: boolean;
   cards?: OriginIssueCards;
   pullRequest?: OriginPullRequestCard;
+  card?: OriginChatCard;
+  design?: import("../shared/origin-design.ts").OriginDesignCard;
   handoff?: OriginHandoff;
   reviewer?: OriginReviewRequest;
+  /** A picture the model sees with the text, such as a canvas screenshot. */
+  image?: { mimeType: string; data: string };
 }
 
 /** GitHub work of the Origin tools, each call through the named project's own GitHub connection. */
@@ -207,7 +215,7 @@ const isDoneColumn = (column: Args) => column.isDone === true || text(column.tit
 const PRIORITIES = new Set(["low", "medium", "high"]);
 const PRIORITY_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
 const REVIEW_COLUMNS = new Set(["review", "inreview", "codereview", "toreview", "readyforreview"]);
-const ASSET_TYPES = new Set(["figma", "image", "icon", "font", "document", "apk", "other"]);
+const ASSET_TYPES = new Set(["figma", "image", "video", "audio", "icon", "font", "document", "apk", "other"]);
 export const ORIGIN_ASSET_MAX_BYTES = 15 * 1024 * 1024;
 const ISSUE_KEY = /^ORI-([A-Z0-9]{1,8})$/i;
 const ISSUE_LIST_MAX = 100;
@@ -288,9 +296,9 @@ interface ToolContext {
   github?: OriginGitHub;
   teamChat?: OriginTeamChat;
   folder?(projectId: string): OriginProjectFolder | null;
-  pipeline?: PipelineSender;
   cloudUrl: string;
   studio?: StudioRunner;
+  studioWorkflows?: WorkflowExecutor;
   projectDocs: Map<string, Promise<Args>>;
 }
 
@@ -491,7 +499,11 @@ async function canvasProject(ctx: ToolContext, args: Args): Promise<CanvasToolPr
   const project = await pickProject(ctx, args.project);
   const doc = await projectDoc(ctx, project.projectId);
   const name = text(doc.name) || project.projectId;
-  return { client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId, name, teamId: text(doc.teamId), canEdit: text(doc.memberRole) !== "viewer", refuse };
+  const chief = projectChief(ctx, project);
+  return {
+    client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId, name, teamId: text(doc.teamId), canEdit: text(doc.memberRole) !== "viewer", refuse,
+    agent: { id: ctx.caller.id, name: ctx.caller.name }, chief: chief ? { id: chief.id, name: chief.name } : null,
+  };
 }
 
 async function broadcastScope(ctx: ToolContext, args: Args): Promise<BroadcastToolScope> {
@@ -503,7 +515,7 @@ async function studioScope(ctx: ToolContext, args: Args) {
   const project = await pickProject(ctx, args.project);
   return {
     cloud: { client: ctx.client, sessionToken: ctx.sessionToken, url: ctx.cloudUrl }, projectId: project.projectId,
-    projectName: await projectName(ctx, project.projectId), agentName: ctx.caller.name, botId: ctx.caller.id, runner: ctx.studio ?? studioRunner(),
+    projectName: await projectName(ctx, project.projectId), agentName: ctx.caller.name, agentId: ctx.caller.id, runner: ctx.studio, workflows: ctx.studioWorkflows,
   };
 }
 
@@ -701,13 +713,17 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
         priority: text(found.task.priority) || "medium", dueDate: text(found.task.dueDate) || undefined, labels,
         githubIssueNumber: Number(found.task.githubIssueNumber) || undefined,
       });
+      const design = args.design === true;
+      const briefed = design ? `${brief}\n\n${DESIGN_BRIEF}` : brief;
       return {
         text: `Ready to hand ${key} to ${agent.name}.`,
         handoff: {
           botId: agent.id,
           botName: agent.name,
-          message: clip(note ? `${brief}\n\nFrom ${ctx.caller.name}: ${note}` : brief, 4_000),
-          doneWhen: `${key} has a pull request linked in an issue comment and is in review or done through origin_complete_issue, or the reason it cannot be done is commented on the issue.`,
+          message: clip(note ? `${briefed}\n\nFrom ${ctx.caller.name}: ${note}` : briefed, 4_000),
+          doneWhen: design
+            ? `${key} has canvas frames linked through origin_design_submit with a rationale, or the reason it cannot be designed is commented on the issue.`
+            : `${key} has a pull request linked in an issue comment and is in review or done through origin_complete_issue, or the reason it cannot be done is commented on the issue.`,
           reason: clip(`Origin issue ${key}: ${text(found.task.title)}`, 200),
         },
       };
@@ -849,7 +865,8 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
       `Design tokens (${tokens.length}):`,
       ...tokens.map((token) => `- ${text(token.type)} ${text(token.name)}: ${text(token.value)}`),
     ];
-    return { text: lines.join("\n") };
+    if (!assets.length) return { text: lines.join("\n") };
+    return { text: `${lines.join("\n")}\n${CARD_NOTE}`, card: assetsCard(project.projectId, await projectName(ctx, project.projectId), assets, `${assets.length} asset${assets.length === 1 ? "" : "s"}`) };
   },
 
   async origin_add_asset(args, ctx) {
@@ -863,28 +880,17 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     if (url && !/^https?:\/\/\S+$/i.test(url)) return { text: "url must be an http(s) link.", isError: true };
     const project = await pickProject(ctx, args.project);
     const base = { projectId: project.projectId, sessionToken: ctx.sessionToken, type, name, ...(trimmed(args.notes) ? { notes: trimmed(args.notes) } : {}) };
-    if (url) {
-      await ctx.client.mutation("design:createAsset", { ...base, url });
-      return { text: `Added the link "${name}" to ${await projectName(ctx, project.projectId)}'s assets.` };
-    }
+    const added = async (assetId: unknown, line: string) => {
+      const projectTitle = await projectName(ctx, project.projectId);
+      return { text: `${line} ${projectTitle}'s assets.`, card: await addedAssetCard({ client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId }, projectTitle, text(assetId)) };
+    };
+    if (url) return added(await ctx.client.mutation("design:createAsset", { ...base, url }), `Added the link "${name}" to`);
     if (!ctx.file || !ctx.client.upload) return { text: "Uploading files is not available in this conversation; pass url instead.", isError: true };
     const file = await ctx.file(path).catch((error: unknown) => refuse(`Could not read ${clip(path, 200)}: ${error instanceof Error ? error.message : String(error)}.`));
     if (file.data.byteLength > ORIGIN_ASSET_MAX_BYTES) return { text: `${file.name} is over 15 MB, the limit for an Origin asset.`, isError: true };
     const uploadUrl = text(await ctx.client.mutation("design:generateUploadUrl", { projectId: project.projectId, sessionToken: ctx.sessionToken }));
     const storageId = await ctx.client.upload(uploadUrl, file.data, file.contentType);
-    await ctx.client.mutation("design:createAsset", { ...base, storageId, contentType: file.contentType, size: file.data.byteLength });
-    return { text: `Uploaded ${file.name} (${file.data.byteLength} bytes) as "${name}" to ${await projectName(ctx, project.projectId)}'s assets.` };
-  },
-
-  async origin_vault_list(args, ctx) {
-    const project = await pickProject(ctx, args.project);
-    const rows = list(await ctx.client.query("credentials:list", { projectId: project.projectId, sessionToken: ctx.sessionToken }));
-    if (!rows.length) return { text: "This Origin project's vault is empty." };
-    const lines = rows.map((row) => {
-      const parts = [text(row.title), text(row.kind) || "secret", text(row.username) && `username ${text(row.username)}`, text(row.url)];
-      return `- ${parts.filter(Boolean).join(" · ")}`;
-    });
-    return { text: `Vault entries (metadata only; values are encrypted with a passphrase only the person holds and cannot be read here; ask the person to hand you one with request_credential if needed):\n${lines.join("\n")}` };
+    return added(await ctx.client.mutation("design:createAsset", { ...base, storageId, contentType: file.contentType, size: file.data.byteLength }), `Uploaded ${file.name} (${file.data.byteLength} bytes) as "${name}" to`);
   },
 
   async origin_repo_status(args, ctx) {
@@ -926,7 +932,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     for (const commit of recent) {
       lines.push(`- ${text(commit.sha).slice(0, 7)} ${clip(text(commit.message).split("\n")[0] ?? "", 120)} (${text(commit.author)}, ${new Date(Number(commit.committedAt)).toISOString().slice(0, 10)})`);
     }
-    return { text: lines.join("\n") };
+    return { text: lines.join("\n"), ...(repo ? { card: await repoCard(scope, text(doc.name) || project.projectId, repo, defaultBranch, open, byUrl, commits) } : {}) };
   },
   async origin_team_chat(args, ctx) {
     const { project, name, teamId } = await chatProject(ctx, args.project);
@@ -957,40 +963,26 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     const wanted = trimmed(args.entry_id);
     if (wanted) {
       const entry = entries.find((candidate) => candidate._id === wanted) ?? refuse(`No feedback ${clip(wanted, 64)} in ${name}; list it with origin_feedback.`);
-      return { text: `${FEEDBACK_NOTE}\n${feedbackLine(entry)}\n\n${clip(text(entry.body), 4_000)}${text(entry.taskId) ? `\n\nTracked as issue ${text(entry.taskId)} (${originIssueKey(text(entry.taskId))}).` : ""}` };
+      return { text: `${FEEDBACK_NOTE}\n${feedbackLine(entry)}\n\n${clip(text(entry.body), 4_000)}${text(entry.taskId) ? `\n\nTracked as issue ${text(entry.taskId)} (${originIssueKey(text(entry.taskId))}).` : ""}`, card: feedbackCard(project.projectId, name, teamId, [entry], "Feedback") };
     }
     const status = FEEDBACK_STATUSES.has(text(args.status)) ? text(args.status) : "open";
     const shown = entries.filter((entry) => status === "all" || (status === "open" ? entry.status === "new" || entry.status === "planned" : entry.status === status));
     if (!shown.length) return { text: `No ${status === "all" ? "" : `${status} `}feedback for ${name}.` };
     const lines = shown.slice(0, FEEDBACK_LIST_MAX).map((entry) => `${feedbackLine(entry)} · ${clip(text(entry.body).replace(/\s+/g, " "), 160)}`);
     const more = shown.length > lines.length ? `\n(${shown.length - lines.length} more not shown.)` : "";
-    return { text: `${FEEDBACK_NOTE}\n${shown.length} ${status === "all" ? "" : `${status} `}feedback item(s) for ${name}, newest first:\n${lines.join("\n")}${more}` };
+    return { text: `${FEEDBACK_NOTE}\n${shown.length} ${status === "all" ? "" : `${status} `}feedback item(s) for ${name}, newest first:\n${lines.join("\n")}${more}\n${CARD_NOTE}`, card: feedbackCard(project.projectId, name, teamId, shown, `${shown.length} ${status === "all" ? "" : `${status} `}feedback`) };
   },
 
-  async origin_canvas(args, ctx) { return readCanvas(args, await canvasProject(ctx, args)); },
-  async origin_canvas_edit(args, ctx) { return editCanvas(args, await canvasProject(ctx, args)); },
-  async origin_page_publish(args, ctx) { return publishPage(args, await canvasProject(ctx, args)); },
-  async origin_page_list(args, ctx) { return listPages(args, await canvasProject(ctx, args)); },
+  ...canvasTools((args, ctx: ToolContext) => canvasProject(ctx, args), svgToPng, canvasFonts),
 
   async origin_broadcast_draft(args, ctx) { return broadcastDraft(args, await broadcastScope(ctx, args)); },
   async origin_broadcast_list(args, ctx) { return broadcastList(args, await broadcastScope(ctx, args)); },
   async origin_broadcast_schedule(args, ctx) { return broadcastSchedule(args, await broadcastScope(ctx, args)); },
 
-  async origin_studio_generate(args, ctx) {
-    return runStudioTool("origin_studio_generate", args, await studioScope(ctx, args));
-  },
+  ...Object.fromEntries(STUDIO_TOOL_NAMES.map((name) => [name, async (args: Args, ctx: ToolContext) => runStudioTool(name, args, await studioScope(ctx, args))])),
 
-  async origin_studio_list(args, ctx) { return runStudioTool("origin_studio_list", args, await studioScope(ctx, args)); },
-
-  async origin_studio_save_asset(args, ctx) {
-    return runStudioTool("origin_studio_save_asset", args, await studioScope(ctx, args));
-  },
-
-  ...pipelineTools(async (args, ctx: ToolContext) => {
-    const project = await pickProject(ctx, args.project);
-    return { client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId, projectName: await projectName(ctx, project.projectId), caller: ctx.caller, ...(ctx.pipeline ? { sender: ctx.pipeline } : {}) };
-  }),
-  ...campaignTools((args, ctx: ToolContext) => broadcastScope(ctx, args)),
+  ...campaignTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...brandTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...callNotesTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), origin_vault_list: (args, ctx) => vaultAgentSecrets().tools((a, c: ToolContext) => broadcastScope(c, a)).origin_vault_list(args, ctx),
+  ...launchpadTools((args, ctx: ToolContext) => broadcastScope(ctx, args)),
   ...standupTools(async (args, ctx: ToolContext) => Promise.all((trimmed(args.project) || ctx.reachable.length === 1 ? [await pickProject(ctx, args.project)] : ctx.reachable).map(async ({ projectId }) => { const doc = await projectDoc(ctx, projectId); return { client: ctx.client, sessionToken: ctx.sessionToken, projectId, projectName: text(doc.name) || projectId, teamId: text(doc.teamId) }; }))),
 };
 
@@ -1005,8 +997,8 @@ export interface OriginToolDeps {
   file?(path: string): Promise<OriginAssetFile>;
   teamChat?: OriginTeamChat;
   folder?(projectId: string): OriginProjectFolder | null;
-  pipeline?: PipelineSender;
   studio?: StudioRunner;
+  studioWorkflows?: WorkflowExecutor;
 }
 
 export async function runOriginTool(name: string, args: Args, botId: string, deps: OriginToolDeps, phase?: "record"): Promise<OriginToolResult> {
@@ -1026,7 +1018,7 @@ export async function runOriginTool(name: string, args: Args, botId: string, dep
       client: deps.connect(url), sessionToken, bots: deps.bots, links: deps.state.projects, caller, reachable,
       ...(phase ? { phase } : {}), ...(deps.file ? { file: deps.file } : {}), ...(deps.github ? { github: deps.github } : {}),
       ...(deps.teamChat ? { teamChat: deps.teamChat } : {}), ...(deps.folder ? { folder: deps.folder } : {}),
-      ...(deps.pipeline ? { pipeline: deps.pipeline } : {}), cloudUrl: url, ...(deps.studio ? { studio: deps.studio } : {}), projectDocs: new Map(),
+      cloudUrl: url, ...(deps.studio ? { studio: deps.studio } : {}), ...(deps.studioWorkflows ? { studioWorkflows: deps.studioWorkflows } : {}), projectDocs: new Map(),
     });
   } catch (error) {
     if (error instanceof OriginRefusal) return { text: error.message, isError: true };
@@ -1067,7 +1059,6 @@ export interface OriginCloudRouteDeps {
   github?: () => OriginGitHub;
   teamChat?: OriginTeamChat;
   folder?(projectId: string): OriginProjectFolder | null;
-  pipeline?: PipelineSender;
   /** After a bot changed Origin data or a project link changed, so cached project context refreshes. */
   changed?(): void;
 }
@@ -1089,20 +1080,10 @@ export function createOriginCloudRoutes(deps: OriginCloudRouteDeps): RouteHandle
       const readFile = deps.turnFile ? (requested: string) => deps.turnFile!(turn, requested) : undefined;
       const result = await runOriginTool(name, record(body.arguments), turn.botId, {
         bots: store.bots, state: readOriginCloud(file()), connect, ...(readFile ? { file: readFile } : {}), ...(deps.github ? { github: deps.github() } : {}),
-        ...(deps.teamChat ? { teamChat: deps.teamChat } : {}), ...(deps.folder ? { folder: deps.folder } : {}), ...(deps.pipeline ? { pipeline: deps.pipeline } : {}),
+        ...(deps.teamChat ? { teamChat: deps.teamChat } : {}), ...(deps.folder ? { folder: deps.folder } : {}),
       }, phase);
       if (!result.isError && !isReadOnlyAgentTool(name)) deps.changed?.();
-      const shown: Pick<Message, "originIssues" | "originPullRequest">[] = result.isError ? [] : [
-        ...(result.pullRequest ? [{ originPullRequest: result.pullRequest }] : []),
-        ...(result.cards ? [{ originIssues: result.cards }] : []),
-      ];
-      for (const fields of shown) {
-        const card: Omit<Message, "id" | "at"> = { role: "bot", kind: "activity", tool: { name, ok: true }, ...fields };
-        if (store.groupByThread(turn.threadId)) card.from = { botId: bot.id, name: bot.name, color: bot.color };
-        store.appendMessage(turn.threadId, card);
-      }
-      const { cards: _cards, pullRequest: _pullRequest, ...answer } = result;
-      return json(res, 200, answer);
+      return json(res, 200, appendOriginCards(store, turn, bot, name, result));
     }
     if (path === "/api/origin/cloud-session" && method === "GET") {
       const { url, sessionToken } = readOriginCloud(file());

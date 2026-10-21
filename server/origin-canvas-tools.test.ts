@@ -1,5 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { decodeScene } from "../shared/canvas-scene.ts";
+
+const fontRequests = vi.hoisted(() => [] as string[][]);
+vi.mock("./canvas-raster.ts", () => ({
+  svgToPng: (svg: string, _width: number, _background: string, fontFiles: string[]) => Buffer.from(`png:${svg.length}:${fontFiles.length}`),
+  canvasFonts: async (ids: string[]) => {
+    fontRequests.push([...ids]);
+    return { files: ids.filter((id) => id !== "fraunces").map((id) => `/fonts/${id}.ttf`), missing: ids.includes("fraunces") ? ["Fraunces"] : [] };
+  },
+}));
 import { runOriginTool, type OriginCloudClient, type OriginToolDeps } from "./origin-cloud.ts";
 import type { BotRecord } from "./store.ts";
 
@@ -9,6 +18,7 @@ function convex(role = "member") {
   const rows = new Map<string, string[]>([["canvas1", []], ["foreign", []]]);
   const calls: { name: string; args: Record<string, unknown> }[] = [];
   const canvases = [{ _id: "canvas1", name: "Landing" }];
+  const comments: Record<string, unknown>[] = [];
   const answer = async (name: string, args: Record<string, unknown>): Promise<unknown> => {
     calls.push({ name, args });
     if (name === "projects:get") return { _id: "kai", teamId: "team1", name: "Kai", memberRole: role };
@@ -16,11 +26,14 @@ function convex(role = "member") {
     if (name === "draw:createCanvas") { canvases.push({ _id: "canvas2", name: String(args.name) }); rows.set("canvas2", []); return "canvas2"; }
     if (name === "draw:scene") return rows.get(String(args.canvasId)) ?? [];
     if (name === "draw:updateElements") { rows.get(String(args.canvasId))!.push(...(args.elements as string[])); return null; }
+    if (name === "canvasCollab:comments") return comments;
+    if (name === "canvasCollab:addComment") { comments.push({ _id: `c${comments.length + 1}`, ...args, authorName: "Ada", resolved: false }); return `c${comments.length}`; }
+    if (name === "draw:presence") return [{ userId: "u1", name: "Ada", selection: ["sel"], updatedAt: Date.now() }];
     if (name === "design:list") return { assets: [{ _id: "logo1", name: "Logo", storageId: "storage1", contentType: "image/png" }, { _id: "doc1", name: "Brief", storageId: "storage2", contentType: "application/pdf" }], tokens: [] };
     return null;
   };
   const client: OriginCloudClient = { query: answer, mutation: answer };
-  return { client, calls, rows };
+  return { client, calls, rows, comments };
 }
 
 const deps = (client: OriginCloudClient): OriginToolDeps => ({ bots: BOTS, state: { url: "http://127.0.0.1:3210", sessionToken: "tok", projects: { chief: "kai" } }, connect: () => client });
@@ -36,6 +49,8 @@ describe("origin_canvas and origin_canvas_edit", () => {
     expect(edit.isError).toBeUndefined();
     expect(edit.text).toContain('Saved 3 node(s) on canvas "Landing" (canvas1) of Kai');
     expect(edit.text).toMatch(/Created: hero=\w+ frame "Hero"/);
+    const hero = /hero=(\w+)/.exec(edit.text)![1]!;
+    expect(edit.design).toEqual({ heading: "Designed 1 frame on Landing", projectId: "kai", teamId: "team1", canvasId: "canvas1", canvasName: "Landing", frames: [{ id: hero, name: "Hero" }] });
     expect(calls.find((call) => call.name === "draw:saveFile")?.args).toMatchObject({ canvasId: "canvas1", fileId: "asset-logo1", storageId: "storage1", mimeType: "image/png" });
     const saved = decodeScene(rows.get("canvas1")!);
     expect(saved.find((node) => node.type === "image")?.fileId).toBe("asset-logo1");
@@ -63,5 +78,56 @@ describe("origin_canvas and origin_canvas_edit", () => {
     expect(await run(client, "origin_canvas_edit", { canvas: "foreign", ops: [{ op: "create", node: { type: "rect" } }] })).toMatchObject({ isError: true });
     expect(await run(client, "origin_canvas_edit", { ops: [{ op: "delete", id: "nope" }] })).toMatchObject({ isError: true, text: expect.stringContaining("Nothing changed") });
     expect(calls.filter((call) => call.args.canvasId === "foreign")).toEqual([]);
+  });
+});
+
+describe("agent design tools", () => {
+  it("streams a large edit under the agent's cursor, components included", async () => {
+    const { client, calls, rows } = convex();
+    const cards = Array.from({ length: 30 }, (_, at) => ({ type: "rect", name: `Card ${at}`, w: 40, h: 40 }));
+    const result = await run(client, "origin_canvas_edit", { save_version: "Before cards", ops: [
+      { op: "create", node: { type: "frame", key: "chip", name: "Chip", w: 80, h: 24, component: { set: "Chip" }, children: [{ type: "text", text: "New" }] } },
+      { op: "instance", component: "chip", set: { x: 200, y: 0 } },
+      { op: "create", node: { type: "frame", name: "Grid", w: 600, layout: { direction: "row", wrap: true, gap: 8, hug: "height" }, children: cards } },
+    ] });
+    expect(result.isError).toBeUndefined();
+    expect(calls.filter((call) => call.name === "draw:updateElements").length).toBeGreaterThan(1);
+    expect(calls.find((call) => call.name === "canvasCollab:agentPresence")?.args).toMatchObject({ agentId: "dev", name: "Developer", canvasId: "canvas1" });
+    expect(calls.findIndex((call) => call.name === "canvasCollab:saveVersion")).toBeLessThan(calls.findIndex((call) => call.name === "draw:updateElements"));
+    const saved = decodeScene(rows.get("canvas1")!);
+    expect(saved.filter((node) => node.instanceOf)).toHaveLength(1);
+    const read = await run(client, "origin_canvas", { canvas: "Landing" });
+    expect(read.text).toContain('Components: "Chip"');
+    expect(read.text).toContain("Selected now: Ada: sel");
+  });
+
+  it("returns a screenshot of a frame as an image the model sees", async () => {
+    const { client } = convex();
+    const made = await run(client, "origin_canvas_edit", { ops: [{ op: "create", node: { type: "frame", key: "home", name: "Home", w: 320, h: 200, fill: "#101014", children: [{ type: "text", text: "Hi", fill: "#FFFFFF" }, { type: "text", text: "Serif", family: "fraunces" }] } }] });
+    const id = /home=(\w+)/.exec(made.text)![1]!;
+    const shot = await run(client, "origin_canvas_screenshot", { node: id });
+    expect(shot.text).toContain('Screenshot of "Home"');
+    expect(shot.text).toContain("Fraunces could not be downloaded");
+    expect(fontRequests.at(-1)).toEqual(["inter", "fraunces"]);
+    expect(shot.image).toMatchObject({ mimeType: "image/png" });
+    expect(Buffer.from(shot.image!.data, "base64").toString()).toMatch(/^png:\d+:1$/);
+    expect(shot.design).toMatchObject({ heading: "Checked Home", canvasId: "canvas1", frames: [{ id, name: "Home" }] });
+    expect(shot.design?.issueKey).toBeUndefined();
+    expect(await run(client, "origin_canvas_screenshot", { node: "nope" })).toMatchObject({ isError: true });
+  });
+
+  it("comments as the agent and submits a design for the Chief's review", async () => {
+    const { client, calls, rows } = convex();
+    const made = await run(client, "origin_canvas_edit", { ops: [{ op: "create", node: { type: "frame", key: "pricing", name: "Pricing", w: 400, h: 300 } }] });
+    const frame = /pricing=(\w+)/.exec(made.text)![1]!;
+    await run(client, "origin_canvas_comment", { text: "Tighter spacing here", node: frame });
+    expect((await run(client, "origin_canvas_comment", {})).text).toContain("Tighter spacing here");
+    const submitted = await run(client, "origin_design_submit", { issue_id: "task1", frames: ["Pricing"], rationale: "Three tiers, the middle one highlighted." });
+    expect(submitted.text).toContain("is asked to review it");
+    expect(submitted.reviewer).toMatchObject({ botId: "chief", botName: "Kai" });
+    expect(submitted.design).toEqual({ heading: "ORI-ASK1 design · in review", projectId: "kai", teamId: "team1", canvasId: "canvas1", canvasName: "Landing", frames: [{ id: frame, name: "Pricing" }], issueKey: "ORI-ASK1" });
+    expect(calls.find((call) => call.name === "canvasCollab:linkDesign")?.args).toMatchObject({ taskId: "task1", frameId: frame, status: "review", agentName: "Developer" });
+    expect(decodeScene(rows.get("canvas1")!).filter((node) => node.id === frame).at(-1)?.issue).toBe("task1");
+    expect(calls.filter((call) => call.name === "canvasCollab:addComment").at(-1)?.args).toMatchObject({ nodeId: frame, agentName: "Developer" });
   });
 });

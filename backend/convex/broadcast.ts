@@ -3,11 +3,12 @@ import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/s
 import type { Doc, Id } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
 import { canEdit, requireMember } from "./lib/permissions";
-import { broadcastChannel, type broadcastVariant } from "./broadcastTables";
-import { channelProblems, mediaKindOf, type BroadcastMediaKind } from "../../shared/broadcast";
+import { broadcastChannel, broadcastFormat, broadcastReel, type broadcastVariant } from "./broadcastTables";
+import { channelProblems, mediaKindOf, reelProblems, type BroadcastFormat, type BroadcastMediaKind } from "../../shared/broadcast";
 
 type Ctx = QueryCtx | MutationCtx;
 type Variant = Infer<typeof broadcastVariant>;
+type Reel = Infer<typeof broadcastReel>;
 
 const POSTS_SHOWN = 300;
 const ASSETS_MAX = 20;
@@ -15,10 +16,14 @@ const TEXT_MAX = 64_000;
 const AGENT_NAME_MAX = 120;
 const SCHEDULE_AHEAD_MS = 400 * 86_400_000;
 const CLAIM_BATCH = 5;
+const ACCOUNT_MAX = 120;
+const MUSIC_MAX = 200;
+const COVER_MAX_MS = 3 * 3_600_000;
 /** A claim older than this means the publishing app stopped mid-way; the channels it did not report may or may not have the post. */
 const CLAIM_STALE_MS = 10 * 60_000;
 
-const variantInput = v.object({ channel: broadcastChannel, text: v.string() });
+const variantInput = v.object({ channel: broadcastChannel, text: v.string(), accountId: v.optional(v.string()), accountLabel: v.optional(v.string()) });
+const metricInput = v.object({ postId: v.id("broadcastPosts"), channel: broadcastChannel, likes: v.number(), reposts: v.number(), replies: v.number(), impressions: v.optional(v.number()) });
 const agentInput = v.object({ botId: v.string(), name: v.string() });
 const resultInput = v.object({ channel: broadcastChannel, ok: v.boolean(), url: v.optional(v.string()), error: v.optional(v.string()) });
 
@@ -47,20 +52,44 @@ async function mediaOf(ctx: Ctx, projectId: Id<"projects">, assetIds: readonly I
 
 const needsApproval = (post: Doc<"broadcastPosts">) => Boolean(post.agentName) && !post.approvedAt;
 
-function cleanVariants(input: readonly { channel: Variant["channel"]; text: string }[], previous: readonly Variant[]): Variant[] {
+type VariantInput = { channel: Variant["channel"]; text: string; accountId?: string; accountLabel?: string };
+
+function accountOf(input: VariantInput): Pick<Variant, "accountId" | "accountLabel"> {
+  const accountId = input.accountId?.trim().slice(0, ACCOUNT_MAX);
+  if (!accountId) return {};
+  return { accountId, ...(input.accountLabel?.trim() ? { accountLabel: input.accountLabel.trim().slice(0, ACCOUNT_MAX) } : {}) };
+}
+
+/** A variant ready to publish again: its text and account, without a previous attempt's outcome. */
+const pending = (variant: Variant): Variant => variant.result === "published" ? variant
+  : { channel: variant.channel, text: variant.text, ...(variant.accountId ? { accountId: variant.accountId } : {}), ...(variant.accountLabel ? { accountLabel: variant.accountLabel } : {}) };
+
+function cleanReel(format: BroadcastFormat, reel: Reel | undefined): Reel | undefined {
+  if (format !== "reel" || !reel) return undefined;
+  const coverMs = reel.coverMs !== undefined && Number.isFinite(reel.coverMs) ? Math.round(Math.min(Math.max(reel.coverMs, 0), COVER_MAX_MS)) : undefined;
+  const music = reel.music?.trim().slice(0, MUSIC_MAX);
+  return { ...(coverMs !== undefined ? { coverMs } : {}), ...(music ? { music } : {}) };
+}
+
+function cleanVariants(input: readonly VariantInput[], previous: readonly Variant[]): Variant[] {
   if (!input.length) throw new Error("Choose at least one channel");
   const seen = new Set<string>();
-  return input.map(({ channel, text }) => {
+  return input.map((item) => {
+    const { channel, text } = item;
     if (seen.has(channel)) throw new Error(`${channel} is listed twice`);
     seen.add(channel);
     if (text.length > TEXT_MAX) throw new Error("Post text is too long");
     const before = previous.find((variant) => variant.channel === channel);
-    return before?.result === "published" ? before : { channel, text };
+    return before?.result === "published" ? before : { channel, text, ...accountOf(item) };
   });
 }
 
-function problemsOf(variants: readonly Variant[], media: readonly BroadcastMediaKind[]): string[] {
-  return variants.filter((variant) => variant.result !== "published").flatMap((variant) => channelProblems(variant.channel, variant.text, media));
+function problemsOf(post: Pick<Doc<"broadcastPosts">, "variants" | "format">, media: readonly BroadcastMediaKind[]): string[] {
+  const open = post.variants.filter((variant) => variant.result !== "published");
+  return [
+    ...(post.format === "reel" ? reelProblems(open.map((variant) => variant.channel), media) : []),
+    ...open.flatMap((variant) => channelProblems(variant.channel, variant.text, media)),
+  ];
 }
 
 export const list = query({
@@ -79,6 +108,7 @@ export const save = mutation({
   args: {
     sessionToken: v.string(), projectId: v.id("projects"), postId: v.optional(v.id("broadcastPosts")),
     variants: v.array(variantInput), assetIds: v.array(v.id("designAssets")), agent: v.optional(agentInput),
+    format: v.optional(broadcastFormat), reel: v.optional(broadcastReel),
   },
   returns: v.id("broadcastPosts"),
   handler: async (ctx, args) => {
@@ -90,9 +120,12 @@ export const save = mutation({
     }
     const agent = args.agent ? { botId: args.agent.botId.slice(0, AGENT_NAME_MAX), name: args.agent.name.trim().slice(0, AGENT_NAME_MAX) || "Agent" } : null;
     const now = Date.now();
+    const format = args.format ?? "post";
+    const reel = cleanReel(format, args.reel);
     if (!args.postId) {
       return ctx.db.insert("broadcastPosts", {
         projectId: args.projectId, variants: cleanVariants(args.variants, []), assetIds: [...new Set(args.assetIds)], status: "draft",
+        ...(format === "reel" ? { format, ...(reel ? { reel } : {}) } : {}),
         authorUserId: user._id, ...(agent ? { agentName: agent.name, agentBotId: agent.botId } : {}), createdAt: now, updatedAt: now,
       });
     }
@@ -102,6 +135,7 @@ export const save = mutation({
     if (post.status === "published") throw new Error("This post is already published");
     await ctx.db.patch(post._id, {
       variants: cleanVariants(args.variants, post.variants), assetIds: [...new Set(args.assetIds)], updatedAt: now,
+      ...(args.format !== undefined ? { format: args.format === "reel" ? "reel" as const : undefined, reel } : {}),
       ...(post.status === "failed" ? { status: "draft" as const } : {}),
       ...(agent ? {
         agentName: agent.name, agentBotId: agent.botId, approvedBy: undefined, approvedAt: undefined,
@@ -132,14 +166,14 @@ export const schedule = mutation({
     if (needsApproval(post)) throw new Error("A person must approve this post before it is scheduled");
     const media = await mediaOf(ctx, post.projectId, post.assetIds);
     if (media.some((item) => !item.url)) throw new Error("A media file has no address to publish from");
-    const problems = problemsOf(post.variants, media.map((item) => item.kind));
+    const problems = problemsOf(post, media.map((item) => item.kind));
     if (problems.length) throw new Error(problems.join("; "));
     const now = Date.now();
     const at = Math.max(args.at ?? now, now);
     if (!Number.isFinite(at) || at > now + SCHEDULE_AHEAD_MS) throw new Error("Choose a time within a year");
     await ctx.db.patch(post._id, {
       status: "scheduled", scheduledAt: at, publisherUserId: user._id, updatedAt: now,
-      variants: post.variants.map((variant) => variant.result === "published" ? variant : { channel: variant.channel, text: variant.text }),
+      variants: post.variants.map(pending),
     });
     return at;
   },
@@ -153,6 +187,54 @@ export const unschedule = mutation({
     if (post.status !== "scheduled") throw new Error("This post is not scheduled");
     await ctx.db.patch(post._id, { status: "draft", scheduledAt: undefined, publisherUserId: undefined, updatedAt: Date.now() });
     return null;
+  },
+});
+
+/** Moves a scheduled post to another time, keeping who publishes it. */
+export const reschedule = mutation({
+  args: { sessionToken: v.string(), postId: v.id("broadcastPosts"), at: v.number() },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const { post } = await postFor(ctx, args.postId, args.sessionToken);
+    if (post.status !== "scheduled") throw new Error("Only a scheduled post can be moved");
+    const now = Date.now();
+    if (!Number.isFinite(args.at) || args.at <= now) throw new Error("Choose a time in the future");
+    if (args.at > now + SCHEDULE_AHEAD_MS) throw new Error("Choose a time within a year");
+    await ctx.db.patch(post._id, { scheduledAt: args.at, updatedAt: now });
+    return args.at;
+  },
+});
+
+const METRICS_BATCH = 200;
+const metricCount = (value: number) => (Number.isFinite(value) && value > 0 ? Math.round(value) : 0);
+
+/** Stores the engagement a member's app read back from the channels for this project's published posts. */
+export const recordMetrics = mutation({
+  args: { sessionToken: v.string(), projectId: v.id("projects"), metrics: v.array(metricInput) },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    await editorOf(ctx, args.projectId, args.sessionToken);
+    if (args.metrics.length > METRICS_BATCH) throw new Error(`Record up to ${METRICS_BATCH} numbers at once`);
+    const at = Date.now();
+    let recorded = 0;
+    for (const postId of new Set(args.metrics.map((metric) => metric.postId))) {
+      const post = await ctx.db.get(postId);
+      if (!post || post.projectId !== args.projectId) continue;
+      const variants = post.variants.map((variant) => {
+        const metric = args.metrics.find((item) => item.postId === postId && item.channel === variant.channel);
+        if (!metric || variant.result !== "published") return variant;
+        recorded += 1;
+        return {
+          ...variant,
+          metrics: {
+            likes: metricCount(metric.likes), reposts: metricCount(metric.reposts), replies: metricCount(metric.replies), at,
+            ...(metric.impressions !== undefined ? { impressions: metricCount(metric.impressions) } : {}),
+          },
+        };
+      });
+      await ctx.db.patch(post._id, { variants });
+    }
+    return recorded;
   },
 });
 
@@ -194,8 +276,8 @@ export const claimDue = mutation({
       }
       await ctx.db.patch(post._id, { status: "publishing", claimedAt: now, updatedAt: now });
       claimed.push({
-        postId: post._id, projectId: post.projectId,
-        variants: post.variants.filter((variant) => variant.result !== "published").map(({ channel, text }) => ({ channel, text })),
+        postId: post._id, projectId: post.projectId, format: post.format ?? "post", ...(post.reel ? { reel: post.reel } : {}),
+        variants: post.variants.filter((variant) => variant.result !== "published").map(({ channel, text, accountId }) => ({ channel, text, ...(accountId ? { accountId } : {}) })),
         media: await mediaOf(ctx, post.projectId, post.assetIds),
       });
     }
@@ -215,8 +297,8 @@ export const finish = mutation({
       const result = args.results.find((item) => item.channel === variant.channel);
       if (!result || variant.result === "published") return variant;
       return result.ok
-        ? { channel: variant.channel, text: variant.text, result: "published", publishedAt: now, ...(result.url ? { url: result.url.slice(0, 2_000) } : {}) }
-        : { channel: variant.channel, text: variant.text, result: "failed", error: (result.error ?? "Publishing failed").slice(0, 1_000) };
+        ? { ...pending(variant), result: "published", publishedAt: now, ...(result.url ? { url: result.url.slice(0, 2_000) } : {}) }
+        : { ...pending(variant), result: "failed", error: (result.error ?? "Publishing failed").slice(0, 1_000) };
     });
     await ctx.db.patch(post._id, { variants, status: variants.every((variant) => variant.result === "published") ? "published" : "failed", claimedAt: undefined, updatedAt: now });
     return null;

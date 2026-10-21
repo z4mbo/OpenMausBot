@@ -241,6 +241,14 @@ test("repository linking normalizes URLs and only workspace admins approve crede
   expect((await f.t.query(api.projects.get, { sessionToken: f.member.token, projectId })).githubWorkspaceAccess).toBe(false);
 });
 
+test("a member who creates a project can share it, but not into projects they do not own", async () => {
+  const f = await fixture();
+  const projectId = await f.t.mutation(api.projects.create, { sessionToken: f.member.token, teamId: f.teamId, name: "Member share", repoUrl: "https://github.com/example/member-share" });
+  await f.t.mutation(api.members.addWorkspaceMember, { sessionToken: f.member.token, projectId, email: f.viewer.email, role: "viewer" });
+  expect((await f.t.query(api.projects.get, { sessionToken: f.viewer.token, projectId })).memberRole).toBe("viewer");
+  await expect(f.t.mutation(api.members.addWorkspaceMember, { sessionToken: f.member.token, projectId: f.shared, email: f.viewer.email, role: "member" })).rejects.toThrow("Admin role required");
+});
+
 test("assignees and legacy local attachments respect project membership", async () => {
   const f = await fixture();
   const people = await f.t.query(api.members.people, { sessionToken: f.owner.token, projectId: f.privateProject });

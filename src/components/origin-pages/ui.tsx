@@ -1,6 +1,6 @@
 import { Component, Fragment, useCallback, useContext, useEffect, useId, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { CloudOff, FolderPlus, Link2, Loader2, LogIn, Plus, RotateCw, SearchX, ServerOff, Users, X } from "lucide-react";
-import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
+import { cloudMutation, createOriginWorkspace, useCloudQuery, useCloudSession, useCloudUrl, type CloudUser } from "@/lib/origin-cloud";
 import { linkCloudRecord, useCloudLinks } from "@/lib/origin-cloud-links";
 import { useWorkspaceAccess, type WorkspaceRole } from "@/lib/origin-members";
 import { cn } from "@/lib/cn";
@@ -34,6 +34,8 @@ export const chipButton =
   `inline-flex h-8 max-w-[220px] items-center gap-1.5 rounded-full border border-hairline/60 bg-raised/60 px-3 text-[12.5px] text-ink-secondary transition-colors hover:border-hairline hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 /** Clears the glass header a page scrolls beneath; `--glass-top` is the header's height, published by its frame. */
 export const underGlass = "pt-[calc(var(--glass-top,0px)+1.25rem)] [scroll-padding-top:var(--glass-top,0px)]";
+/** A list row that eases in when it is added. */
+export const itemIn = "motion-safe:animate-[item-in_var(--motion-base)_var(--ease-out)_backwards]";
 /** The scrolling body every project and workspace page shares. */
 export const pageClass = `flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-4 pb-5 md:px-6 ${underGlass} motion-safe:animate-[rise_var(--motion-base)_var(--ease-out)_backwards]`;
 
@@ -211,7 +213,7 @@ function SetUpWorkspace({ label, head }: { label: string; head?: { id: string; n
   const action = useAction();
   const create = () => action.run(async () => {
     if (!head) return;
-    const { teamId } = await cloudMutation<{ teamId: string }>("workspaces:create", { name: head.name });
+    const { teamId } = await createOriginWorkspace(head.name);
     await linkCloudRecord({ workspaces: { [head.id]: teamId } });
   }, "Could not share the workspace");
   return (
@@ -345,7 +347,7 @@ export function PageHeader({ title, count, children }: { title: string; count?: 
   const pinned = useInGlassHeader();
   return (
     <GlassHeader>
-      <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-2", pinned ? glassHeaderRow : "mb-4")}>
+      <div className={cn("flex min-h-8 flex-wrap items-center gap-x-3 gap-y-2", pinned ? glassHeaderRow : "mb-4")}>
         <h2 className="text-[18px] font-semibold tracking-[-0.01em] text-ink">{title}</h2>
         {count !== undefined && <span className="text-[13px] tabular-nums text-ink-tertiary">{count}</span>}
         <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">{children}</div>
@@ -356,8 +358,8 @@ export function PageHeader({ title, count, children }: { title: string; count?: 
 
 export function Field({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <label className={cn("flex min-w-0 flex-col gap-1 text-[12px] font-medium text-ink-secondary", className)}>
-      {label}
+    <label className={cn("flex min-w-0 flex-col gap-1 text-[12px] text-ink-secondary", className)}>
+      <span className="font-medium">{label}</span>
       {children}
     </label>
   );

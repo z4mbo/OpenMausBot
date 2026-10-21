@@ -178,9 +178,12 @@ export function verificationServerEnvironment(parentEnv: NodeJS.ProcessEnv, data
     childEnv.OMB_OPENAI_LIVE_URL = liveUrl;
     if (parentEnv.OMB_OPENAI_LIVE_KEY) childEnv.OMB_OPENAI_LIVE_KEY = parentEnv.OMB_OPENAI_LIVE_KEY;
   }
-  // Pipeline's Brevo, Twilio and ElevenLabs requests go to a loopback fake only.
-  const pipelineUrl = parentEnv.OMB_PIPELINE_PROVIDER_URL?.trim() ?? "";
-  if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(pipelineUrl)) childEnv.OMB_PIPELINE_PROVIDER_URL = pipelineUrl;
+  // Studio's fal.ai queue requests go to a loopback fake only.
+  const falQueueUrl = parentEnv.OMB_FAL_QUEUE_URL?.trim() ?? "";
+  if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(falQueueUrl)) childEnv.OMB_FAL_QUEUE_URL = falQueueUrl;
+  // The GitHub integration's API and sign-in requests go to a loopback fake only.
+  const githubUrl = parentEnv.OMB_GITHUB_API_URL?.trim() ?? "";
+  if (/^http:\/\/127\.0\.0\.1:\d{1,5}$/.test(githubUrl)) childEnv.OMB_GITHUB_API_URL = githubUrl;
   // Arms the one-shot audio-append failure inside the fixture server.
   if (parentEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE) {
     childEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE = parentEnv.OMB_TEST_FAIL_AUDIO_APPEND_ONCE;

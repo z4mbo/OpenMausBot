@@ -5,7 +5,7 @@ import { useOpenOriginNotification, type OriginNotificationTarget } from "./orig
 import { currentOriginPage, openOriginPage } from "./origin-pages";
 
 export type InboxAlertRow = OriginNotificationTarget & {
-  _id: string; kind: "assignment" | "comment" | "mention" | "digest" | "lead"; read: boolean; createdAt: number;
+  _id: string; kind: "assignment" | "comment" | "mention" | "digest"; read: boolean; createdAt: number;
   actorName: string; preview?: string; taskTitle?: string; projectName?: string;
 };
 
@@ -15,7 +15,6 @@ const FRESH_MS = 120_000;
 
 export function inboxAlert(row: InboxAlertRow): { tag: string; title: string; body: string } {
   if (row.kind === "digest") return { tag: row._id, title: `${row.actorName}'s standup${row.projectName ? ` for ${row.projectName}` : ""}`, body: row.preview || "Open your Origin inbox" };
-  if (row.kind === "lead") return { tag: row._id, title: `${row.actorName} replied${row.projectName ? ` · ${row.projectName}` : ""}`, body: row.preview?.replace(/^[^:]*:\s*/, "") || "Open the lead in Pipeline" };
   const title = row.kind === "mention"
     ? `${row.actorName} tagged you${row.agentThreadId ? " in an agent thread" : row.messageId ? " in chat" : ""}`
     : row.kind === "comment" ? `${row.actorName} commented` : `${row.actorName} assigned you`;

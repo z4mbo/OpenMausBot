@@ -2,6 +2,8 @@ import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, type Origi
 import { originTeamChat } from "./origin-members.ts";
 import { createOriginTurnContext } from "./origin-project-context.ts";
 import { createProjectFolders } from "./origin-project-folders.ts";
+import type { ProjectGit } from "./github/project-git.ts";
+import { PASS, type PublicRouteHandler } from "./routes/table.ts";
 
 const RECONCILE_EVERY_MS = 120_000;
 const FIRST_RECONCILE_MS = 5_000;
@@ -15,6 +17,8 @@ export interface OriginAgentSupportDeps {
   setCwd(botId: string, cwd: string): void;
   /** False where bots do not run on the person's own computer. */
   localFolders: boolean;
+  /** Git access to each project's repository from its folder. */
+  git?: ProjectGit;
 }
 
 /** Project folders, the per-turn project context and the team chat the Origin agent tools share. */
@@ -29,17 +33,19 @@ export function createOriginAgentSupport(deps: OriginAgentSupportDeps) {
   const context = createOriginTurnContext({
     bots: deps.bots, state: cloud, connect: convexOriginClient, github: deps.github, teamChat, folder: folders.folderOf,
   });
-  const reconcile = () => void folders.reconcile().catch(warn);
+  const reconcile = () => void folders.reconcile().then((paths) => deps.localFolders ? deps.git?.prepare(paths) : undefined).catch(warn);
   setTimeout(reconcile, FIRST_RECONCILE_MS).unref();
   setInterval(reconcile, RECONCILE_EVERY_MS).unref();
   return {
     routes: folders.routes,
+    publicRoutes: deps.git?.routes ?? ((async () => PASS) satisfies PublicRouteHandler),
     context,
     teamChat,
     folder: folders.folderOf,
     /** A project link or a project's Origin data changed. */
     changed() {
       context.invalidate();
+      deps.git?.invalidate();
       reconcile();
     },
   };

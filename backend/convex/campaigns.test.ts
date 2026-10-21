@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { api, internal } from "./_generated/api";
+import { api } from "./_generated/api";
 import schema from "./schema";
 import { createSession } from "./lib/auth";
 
@@ -48,20 +48,6 @@ describe("campaigns", () => {
     await f.t.mutation(api.campaigns.link, { sessionToken: f.sessionToken, projectId: f.projectId, campaignId, kind: "post", itemId: postId, remove: true });
     detail = await f.t.query(api.campaigns.get, { sessionToken: f.sessionToken, projectId: f.projectId, campaignId });
     expect(detail?.posts).toEqual([]);
-  });
-
-  test("attributes leads by capture source and by the page's utm_campaign", async () => {
-    const f = await fixture();
-    const campaignId = await f.t.mutation(api.campaigns.create, { sessionToken: f.sessionToken, projectId: f.projectId, name: "Black Friday" });
-    await f.t.mutation(api.pipeline.configure, { sessionToken: f.sessionToken, projectId: f.projectId, captureEnabled: true });
-    const token = await f.t.run(async (ctx) => (await ctx.db.query("pipelineSettings").first())!.captureToken);
-    await f.t.mutation(internal.pipeline.capture, { token, name: "Ada", email: "ada@test.dev", source: "black-friday" });
-    await f.t.mutation(internal.pipeline.capture, { token, name: "Bob", email: "bob@test.dev", page: "https://site.test/?utm_source=x&utm_campaign=Black-Friday" });
-    await f.t.mutation(internal.pipeline.capture, { token, name: "Cy", email: "cy@test.dev", page: "https://site.test/?utm_campaign=other" });
-    const detail = await f.t.query(api.campaigns.get, { sessionToken: f.sessionToken, projectId: f.projectId, campaignId });
-    expect(detail?.leads.map((lead) => lead.name).sort()).toEqual(["Ada", "Bob"]);
-    expect(detail?.stages.find((row) => row.stage === "New")?.count).toBe(2);
-    expect(detail?.counts.leads).toBe(2);
   });
 
   test("viewers cannot change a campaign, and dates must be in order", async () => {

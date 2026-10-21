@@ -1,26 +1,41 @@
-import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, AudioLines, Check, ExternalLink, FolderDown, Loader2, RotateCcw, Send, Sparkles, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Keyboard, Megaphone, Sparkles, UserRound } from "lucide-react";
 import { api, useStore, type Bot } from "@/state/store";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
-import { relativeTime } from "@/lib/memory";
+import { setChiefSectionOf } from "@/lib/origin-chief-section";
+import { useStudioView, type StudioView } from "@/lib/origin-studio-view";
 import { cn } from "@/lib/cn";
-import { CloudGate, EmptyState, Loading, Notice, PageHeader, ReadOnlyEditorNotice, Segmented, cardClass, iconButton, pageClass, type OriginPageProps } from "../origin-pages/ui";
-import { StudioComposer, type StudioDraft } from "./StudioComposer";
-import type { StudioGeneration, StudioMediaKind } from "../../../shared/studio";
+import { CloudGate, EmptyState, Loading, Modal, Notice, ReadOnlyEditorNotice, Segmented, chipButton, glassHeaderRow, pageClass, type OriginPageProps } from "../origin-pages/ui";
+import { GlassHeader, useInGlassHeader } from "../GlassScrollFrame";
+import { CampaignDialog, CampaignStrip, isCampaignRun } from "./StudioCampaign";
+import { StudioCanvas, type TileAction } from "./StudioCanvas";
+import { STUDIO_MODES, StudioComposer, draftForModel, emptyDraft, type StudioComposerHandle } from "./StudioComposer";
+import { CharacterEditor, StudioLibrary, type CharacterSeed } from "./StudioLibrary";
+import { StudioDesign } from "./StudioDesign";
+import { StudioViewer } from "./StudioViewer";
+import { StudioWorkflows } from "./StudioWorkflows";
+import { PresetStrip, StudioPresetsPage } from "./StudioPresets";
+import { consumeStudioFocus, useStudioFocus } from "@/lib/studio-focus";
+import { studioPreset, type StudioPreset } from "../../../shared/studio-presets";
+import type { WorkflowDraft } from "./WorkflowEditor";
+import { StudioTabs, outputRef, studioPost, studioTitle, typing, type StudioDraft } from "./studio-ui";
+import { STUDIO_ACTIONS, studioModel, type StudioCharacter, type StudioGeneration, type StudioMediaKind } from "../../../shared/studio";
+import type { StudioWorkflowRun } from "../../../shared/studio-workflow";
 
 type Filter = "all" | StudioMediaKind;
+type Tab = StudioView;
 
-export function StudioPage({ agent: _agent, ...props }: OriginPageProps & { agent: Bot }) {
-  return <CloudGate {...props} label="Studio">{({ projectId, canEdit, isAdmin }) => <Studio projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} />}</CloudGate>;
+export function StudioPage({ agent, ...props }: OriginPageProps & { agent: Bot }) {
+  return <CloudGate {...props} label="Studio">{({ project, projectId, canEdit, isAdmin }) => <Studio projectId={projectId} teamId={project.teamId} canEdit={canEdit} isAdmin={isAdmin} agent={agent} />}</CloudGate>;
 }
 
-/** Whether this app holds a fal key, read again whenever settings close or the window regains focus. */
-function useFalReady(): boolean | null {
+/** Whether this app holds a fal key for the project, read again whenever settings close or the window regains focus. */
+function useFalReady(projectId: string): boolean | null {
   const { state } = useStore();
   const [ready, setReady] = useState<boolean | null>(null);
   const check = useCallback(() => {
-    api<{ fal: boolean }>("/api/studio/status").then((body) => setReady(body.fal), () => setReady(null));
-  }, []);
+    api<{ fal: boolean }>(`/api/studio/status?projectId=${encodeURIComponent(projectId)}`).then((body) => setReady(body.fal), () => setReady(null));
+  }, [projectId]);
   useEffect(() => {
     if (!state.appSettingsOpen) check();
   }, [state.appSettingsOpen, check]);
@@ -31,131 +46,260 @@ function useFalReady(): boolean | null {
   return ready;
 }
 
-function Studio({ projectId, canEdit, isAdmin }: { projectId: string; canEdit: boolean; isAdmin: boolean }) {
+const SHORTCUTS: readonly [string, string][] = [
+  ["/", "Write a prompt"], ["Ctrl Enter", "Generate"], ["Ctrl E", "Enhance the prompt"], ["1 – 4", "Image, video, audio, edit"], ["M", "Choose a model"], ["T", "Presets"],
+  ["Arrows", "Move between results"], ["Enter", "Open a result"], ["A U R X", "Animate, upscale, remix, extend"], ["P", "Reuse its settings"], ["L", "Save to the library"],
+  ["B", "Add to Publish"], ["C", "Campaign pack"], ["W", "Workflows"], ["?", "These shortcuts"],
+  ["N", "Workflow: add a node"], ["Ctrl Z / Ctrl Shift Z", "Workflow: undo, redo"], ["Ctrl C / V / D", "Workflow: copy, paste, duplicate"],
+];
+
+const RECENT_MS = 15 * 60_000;
+
+function draftFrom(row: StudioGeneration): StudioDraft {
+  const model = studioModel(row.model);
+  const params = row.params ?? {};
+  const base = model ? draftForModel(emptyDraft(row.mode), model) : emptyDraft(row.mode);
+  return {
+    ...base, prompt: row.prompt, ...(row.aspectRatio ? { aspectRatio: row.aspectRatio } : {}), ...(row.duration ? { duration: row.duration } : {}),
+    ...(typeof params.resolution === "string" ? { resolution: params.resolution } : {}), ...(typeof params.voice === "string" ? { voice: params.voice } : {}),
+    ...(typeof params.motion === "string" ? { motion: params.motion } : {}), ...(typeof params.angle === "string" ? { angle: params.angle } : {}),
+    ...(typeof params.preset === "string" && studioPreset(params.preset)?.model === row.model ? { preset: params.preset } : {}), ...(typeof params.negativePrompt === "string" ? { negativePrompt: params.negativePrompt } : {}),
+    ...(typeof params.seed === "number" ? { seed: params.seed } : {}), ...(params.sound === false ? { sound: false } : {}),
+  };
+}
+
+function Studio({ projectId, teamId, canEdit, isAdmin, agent }: { projectId: string; teamId: string | undefined; canEdit: boolean; isAdmin: boolean; agent: Bot }) {
+  const chiefId = agent.id;
   const rows = useCloudQuery<StudioGeneration[]>("studio:list", { projectId });
-  const falReady = useFalReady();
+  const runs = useCloudQuery<StudioWorkflowRun[]>("studioWorkflows:runs", { projectId });
+  const falReady = useFalReady(projectId);
+  const [tab, showTab] = useStudioView(chiefId);
   const [filter, setFilter] = useState<Filter>("all");
-  const [draft, setDraft] = useState<StudioDraft | null>(null);
-  const shown = rows?.filter((row) => filter === "all" || row.kind === filter) ?? [];
-  return (
-    <section className={pageClass} aria-label="Studio">
-      <PageHeader title="Studio" count={rows?.length}>
-        <Segmented label="Show" value={filter} onChange={setFilter}
-          options={[{ value: "all", label: "All" }, { value: "image", label: "Images" }, { value: "video", label: "Video" }, { value: "audio", label: "Audio" }]} />
-      </PageHeader>
-      {!canEdit && <div className="mb-3"><ReadOnlyEditorNotice canEdit={canEdit} /></div>}
-      <StudioComposer projectId={projectId} canEdit={canEdit} falReady={falReady} draft={draft} />
-      {!rows ? <Loading label="Loading generations" variant="grid" /> : !shown.length ? (
-        <EmptyState compact icon={<Sparkles size={22} />} title={filter === "all" ? "Nothing generated yet" : "Nothing here yet"}
-          body={filter === "all" ? "What you and the project's agents make appears here for the whole team." : undefined} />
-      ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-3" data-studio-gallery>
-          {shown.map((row) => (
-            <GenerationCard key={row._id} row={row} projectId={projectId} canEdit={canEdit} isAdmin={isAdmin}
-              onReuse={() => setDraft({ mode: row.mode, model: row.model, prompt: row.prompt, ...(row.aspectRatio ? { aspectRatio: row.aspectRatio } : {}), ...(row.duration ? { duration: row.duration } : {}), ...(row.sourceAssetId ? { sourceAssetId: row.sourceAssetId } : {}) })} />
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function ratioOf(row: StudioGeneration): string {
-  const match = /^(\d+):(\d+)$/.exec(row.aspectRatio ?? "");
-  if (match) return `${match[1]} / ${match[2]}`;
-  return row.kind === "video" ? "16 / 9" : "1 / 1";
-}
-
-function useElapsed(since: number, live: boolean): string {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!live) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1_000);
-    return () => window.clearInterval(timer);
-  }, [live]);
-  const seconds = Math.max(0, Math.round((now - since) / 1000));
-  return seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
-}
-
-function GenerationCard({ row, projectId, canEdit, isAdmin, onReuse }: { row: StudioGeneration; projectId: string; canEdit: boolean; isAdmin: boolean; onReuse(): void }) {
-  const live = row.status === "queued" || row.status === "running";
-  const elapsed = useElapsed(row.startedAt ?? row.createdAt, live);
-  const [busy, setBusy] = useState<"save" | "broadcast" | "delete" | null>(null);
+  const [draft, setDraft] = useState<StudioDraft>(() => emptyDraft());
+  const [workflow, setWorkflow] = useState<WorkflowDraft | null>(null);
+  const [viewing, setViewing] = useState<string | null>(null);
+  const [help, setHelp] = useState(false);
+  const [campaign, setCampaign] = useState(false);
+  const [started, setStarted] = useState<string | null>(null);
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
+  const [saving, setSaving] = useState<CharacterSeed | null>(null);
+  const [busy, setBusy] = useState<ReadonlySet<string>>(new Set());
   const [error, setError] = useState("");
-  const output = row.outputs[0];
-  const saved = row.saved.some((entry) => entry.index === 0);
-  const picked = row.broadcast.some((entry) => entry.index === 0);
-  const run = async (kind: "save" | "broadcast" | "delete", task: () => Promise<unknown>) => {
-    setBusy(kind);
+  const composer = useRef<StudioComposerHandle>(null);
+  const focus = useStudioFocus(projectId);
+  const all = rows ?? [];
+  const shown = all.filter((row) => filter === "all" || (row.outputs[0]?.kind ?? row.kind) === filter);
+  const running = all.filter((row) => row.status === "queued" || row.status === "running").length;
+  const viewed = viewing ? shown.find((row) => row._id === viewing) ?? null : null;
+  const pack = useMemo(() => {
+    const latest = (runs ?? []).find(isCampaignRun);
+    if (!latest || hidden.has(latest._id)) return null;
+    return latest._id === started || latest.status === "running" || Date.now() - (latest.finishedAt ?? latest.createdAt) < RECENT_MS ? latest : null;
+  }, [runs, hidden, started]);
+
+  const openBroadcast = () => setChiefSectionOf(chiefId, "broadcast");
+  /** Leaving Workflows closes the open editor. */
+  const setTab = useCallback((next: Tab) => {
+    if (next !== "workflows") setWorkflow(null);
+    showTab(next);
+  }, [showTab]);
+
+  useEffect(() => {
+    if (!focus) return;
+    const preset = focus.presetId ? studioPreset(focus.presetId) : undefined;
+    if (preset) { setTab("create"); window.setTimeout(() => composer.current?.applyPreset(preset), 0); }
+    if (focus.generationId) { setTab("create"); setViewing(focus.generationId); }
+    consumeStudioFocus(focus);
+  }, [focus, setTab]);
+
+  const prepare = (next: StudioDraft) => {
+    setDraft(next);
+    setViewing(null);
+    setTab("create");
+    window.setTimeout(() => composer.current?.focus(), 0);
+  };
+
+  const run = async (row: StudioGeneration, task: () => Promise<unknown>) => {
+    setBusy((current) => new Set(current).add(row._id));
     setError("");
     try {
       await task();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
-      setBusy(null);
+      setBusy((current) => { const next = new Set(current); next.delete(row._id); return next; });
     }
   };
-  const save = () => run("save", () => api("/api/studio/save-asset", { method: "POST", body: JSON.stringify({ projectId, generationId: row._id, index: 0 }) }));
-  const broadcast = () => run("broadcast", () => api("/api/studio/broadcast", { method: "POST", body: JSON.stringify({ projectId, generationId: row._id, index: 0, picked: !picked }) }));
-  const remove = () => {
-    if (!window.confirm("Delete this generation? Saved assets stay in Assets.")) return;
-    void run("delete", () => cloudMutation("studio:remove", { projectId, generationId: row._id }));
+
+  const saveToLibrary = (row: StudioGeneration) => {
+    const ref = outputRef(row);
+    if (!ref) return;
+    const saved = row.saved.find((entry) => entry.index === 0);
+    if (saved) {
+      setSaving({ references: [{ ...ref, source: { assetId: saved.assetId } }] });
+      return;
+    }
+    void run(row, async () => {
+      const { assetId } = await studioPost<{ assetId: string }>("save-asset", { projectId, generationId: row._id, index: 0 });
+      setSaving({ references: [{ ...ref, source: { assetId } }] });
+    });
   };
+
+  const act = (row: StudioGeneration, action: TileAction) => {
+    const ref = outputRef(row);
+    const kind = row.outputs[0]?.kind ?? row.kind;
+    const parent = { generationId: row._id, action };
+    switch (action) {
+      case "open": setViewing(row._id); return;
+      case "reuse": prepare({ ...draftFrom(row), characterId: draft.characterId }); return;
+      case "library": saveToLibrary(row); return;
+      case "animate": if (ref) prepare({ ...draftForModel(emptyDraft("video"), studioModel(STUDIO_ACTIONS.animate)!), sources: [ref], parent }); return;
+      case "remix": if (ref) prepare({ ...draftForModel(emptyDraft("edit"), studioModel(STUDIO_ACTIONS.remix)!), prompt: row.prompt, sources: [ref], parent }); return;
+      case "extend": if (ref) prepare({ ...draftForModel(emptyDraft("video"), studioModel(STUDIO_ACTIONS.extend)!), prompt: row.prompt, sources: [ref], parent }); return;
+      case "upscale":
+      case "removeBackground": {
+        if (!ref) return;
+        const model = studioModel(action === "removeBackground" ? STUDIO_ACTIONS.removeBackground : kind === "video" ? STUDIO_ACTIONS.upscaleVideo : STUDIO_ACTIONS.upscale)!;
+        void run(row, () => studioPost("generate", { projectId, mode: model.mode, model: model.id, prompt: "", sources: [ref.source], parent }));
+        return;
+      }
+      case "broadcast": {
+        const picked = row.broadcast.some((entry) => entry.index === 0);
+        void run(row, () => studioPost("broadcast", { projectId, generationId: row._id, index: 0, picked: !picked }));
+        return;
+      }
+      case "cancel": void run(row, () => studioPost("cancel", { projectId, generationId: row._id })); return;
+      case "delete":
+        if (!window.confirm("Delete this generation? Its files stay in Assets.")) return;
+        if (viewing === row._id) setViewing(null);
+        void run(row, () => cloudMutation("studio:remove", { projectId, generationId: row._id }));
+    }
+  };
+
+  const followCharacter = (character: StudioCharacter) => {
+    const follows = studioModel(draft.model)?.references || draft.mode === "video";
+    const base = follows ? draft : draftForModel(draft, studioModel(emptyDraft(draft.mode === "edit" ? "edit" : "image").model)!);
+    prepare({ ...base, characterId: character._id });
+  };
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (tab === "design" || typing(event) || event.metaKey || event.ctrlKey || event.altKey || document.querySelector("[data-centered-dialog]")) return;
+      const index = ["1", "2", "3", "4"].indexOf(event.key);
+      const key = event.key.toLowerCase();
+      if (event.key === "/" && tab === "create") { event.preventDefault(); composer.current?.focus(); }
+      else if (event.key === "?") { event.preventDefault(); setHelp(true); }
+      else if (key === "w" && !(tab === "workflows" && workflow)) { event.preventDefault(); setTab(tab === "workflows" ? "create" : "workflows"); }
+      else if (key === "c" && canEdit && !(tab === "workflows" && workflow)) { event.preventDefault(); setCampaign(true); }
+      else if (key === "t" && canEdit && tab !== "presets" && !(tab === "workflows" && workflow)) { event.preventDefault(); setTab("presets"); }
+      else if (tab !== "create") return;
+      else if (index >= 0 && canEdit) { event.preventDefault(); setDraft((current) => draftForModel(current, studioModel(emptyDraft(STUDIO_MODES[index]!.value).model)!)); }
+      else if (key === "m" && canEdit && !(event.target as HTMLElement | null)?.closest?.("[data-studio-tile]")) { event.preventDefault(); composer.current?.openModels(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [tab, canEdit, workflow, setTab]);
+
+  const moveViewer = (step: -1 | 1) => {
+    const done = shown.filter((row) => row.status === "done");
+    const at = done.findIndex((row) => row._id === viewing);
+    const next = done[(at + step + done.length) % done.length];
+    if (next) setViewing(next._id);
+  };
+
+  const openRun = (target: StudioWorkflowRun) => {
+    setWorkflow({ ...(target.workflowId ? { workflowId: target.workflowId } : {}), name: target.name, graph: target.graph, runId: target._id });
+    showTab("workflows");
+  };
+
+  const pickPreset = (preset: StudioPreset) => {
+    setTab("create");
+    window.setTimeout(() => composer.current?.applyPreset(preset), 0);
+  };
+
+  if (tab === "design") {
+    return <StudioDesign projectId={projectId} teamId={teamId} canEdit={canEdit} agent={agent}
+      switcher={<><h2 className={cn(studioTitle, "max-sm:hidden")}>Studio</h2><StudioTabs value={tab} onChange={setTab} compact /></>} />;
+  }
+
   return (
-    <article className={cn(cardClass, "flex flex-col overflow-hidden motion-safe:animate-pop-in")} data-studio-generation={row.status}>
-      <div className={cn("relative flex items-center justify-center overflow-hidden bg-inset", row.kind === "audio" && "!aspect-auto min-h-[112px]")} style={{ aspectRatio: ratioOf(row) }}>
-        {live && (
-          <div className="flex flex-col items-center gap-2 text-[12.5px] text-ink-secondary" role="status">
-            <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-transparent via-raised/40 to-transparent [background-size:200%_100%] motion-safe:animate-shimmer" />
-            <Loader2 size={18} className="animate-spin text-accent-text" />
-            <span className="relative">{row.status === "queued" ? "Queued" : "Generating"} · {elapsed}</span>
+    <section className={cn(pageClass, "pb-0")} aria-label="Studio">
+      <StudioHeader tabs={<StudioTabs value={tab} onChange={setTab} className="order-3 w-full sm:order-none sm:w-auto" />}
+        filter={tab === "create" && (
+          <Segmented label="Show" value={filter} onChange={setFilter}
+            options={[{ value: "all", label: "All" }, { value: "image", label: "Images" }, { value: "video", label: "Video" }, { value: "audio", label: "Audio" }]} />
+        )}>
+        {running > 0 && tab === "create" && <span className="text-[12px] tabular-nums text-ink-tertiary max-sm:hidden" role="status">{running} running</span>}
+        {canEdit && (
+          <button type="button" className={cn(chipButton, "text-ink max-sm:px-2.5")} onClick={() => setCampaign(true)} title="One brief, a whole campaign (C)" aria-label="Campaign pack">
+            <Megaphone size={13} className="text-accent-text" /><span className="max-sm:hidden">Campaign pack</span>
+          </button>
+        )}
+        <button type="button" aria-pressed={tab === "library"} className={cn(chipButton, "max-sm:px-2.5", tab === "library" && "border-accent/50 text-ink")} onClick={() => setTab(tab === "library" ? "create" : "library")} aria-label="Library" title="Characters, products and styles">
+          <UserRound size={13} /><span className="max-sm:hidden">Library</span>
+        </button>
+        <button type="button" className="hidden size-8 items-center justify-center rounded-lg text-ink-tertiary transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink md:flex" onClick={() => setHelp(true)} aria-label="Keyboard shortcuts (?)" title="Keyboard shortcuts (?)">
+          <Keyboard size={15} />
+        </button>
+      </StudioHeader>
+      {!canEdit && <div className="mb-3"><ReadOnlyEditorNotice canEdit={canEdit} /></div>}
+      {error && <div className="mb-3"><Notice tone="danger">{error}</Notice></div>}
+      <div key={tab === "workflows" && workflow ? "workflow" : tab} className="flex min-h-0 flex-1 flex-col motion-safe:animate-[section-in_var(--motion-base)_var(--ease-out)_backwards]" data-studio-body={tab}>
+      {tab === "workflows" && (
+        <StudioWorkflows projectId={projectId} canEdit={canEdit} falReady={falReady} rows={all} draft={workflow} onDraft={setWorkflow} onOpenBroadcast={openBroadcast} />
+      )}
+      {tab === "library" && <StudioLibrary projectId={projectId} canEdit={canEdit} rows={all} onUse={followCharacter} />}
+      {tab === "presets" && <StudioPresetsPage current={draft.preset} onPick={pickPreset} />}
+      {tab === "create" && (
+        <>
+          <div className="flex-1 pb-4">
+            {pack && (
+              <CampaignStrip run={pack} onOpenRun={() => openRun(pack)} onOpenBroadcast={openBroadcast} onDismiss={() => setHidden((current) => new Set(current).add(pack._id))}
+                onStop={() => void studioPost("workflow/cancel", { projectId, runId: pack._id }).catch((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)))} />
+            )}
+            {!rows ? <Loading label="Loading generations" variant="grid" /> : !shown.length ? (<>
+              {filter === "all" && canEdit && <PresetStrip onPick={(preset) => composer.current?.applyPreset(preset)} onMore={() => setTab("presets")} />}
+              <EmptyState icon={<Sparkles size={22} />} title={filter === "all" ? "Nothing generated yet" : "Nothing here yet"}
+                body={filter === "all" ? "What you and the project's agents make appears here for the whole team, and in Assets." : undefined} />
+            </>) : <StudioCanvas rows={shown} all={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy} onAction={act} />}
           </div>
-        )}
-        {row.status === "failed" && (
-          <div className="flex flex-col items-center gap-1.5 px-4 text-center text-[12.5px] text-danger" role="alert">
-            <AlertTriangle size={18} />
-            <span className="line-clamp-4">{row.error ?? "The generation failed"}</span>
+          <div className="sticky bottom-0 z-20 -mx-4 bg-gradient-to-t from-app from-70% to-transparent px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-4 md:-mx-6 md:px-6">
+            <div className="mx-auto w-full max-w-3xl">
+              <StudioComposer ref={composer} projectId={projectId} canEdit={canEdit} falReady={falReady} rows={all} draft={draft} onDraft={setDraft} onOpenLibrary={() => setTab("library")} onOpenPresets={() => setTab("presets")} />
+            </div>
           </div>
-        )}
-        {row.status === "done" && output && (
-          output.kind === "image" ? <img src={output.url} alt={row.prompt} loading="lazy" className="size-full object-cover" />
-            : output.kind === "video" ? <video src={output.url} controls loop muted playsInline preload="metadata" className="size-full object-cover" />
-              : (
-                <div className="flex w-full flex-col items-center gap-3 px-3 py-4">
-                  <AudioLines size={22} className="text-accent-text" aria-hidden="true" />
-                  <audio src={output.url} controls preload="none" className="h-9 w-full" />
-                </div>
-              )
-        )}
-        {row.outputs.length > 1 && <span className="absolute right-2 top-2 rounded-full bg-app/80 px-2 py-0.5 text-[11px] text-ink-secondary">+{row.outputs.length - 1}</span>}
+        </>
+      )}
       </div>
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
-        <p className="line-clamp-2 text-[12.5px] leading-snug text-ink" title={row.prompt}>{row.prompt || <span className="text-ink-tertiary">No prompt</span>}</p>
-        <p className="truncate text-[11.5px] text-ink-tertiary">{row.modelLabel} · {row.agentName ?? row.createdByName} · {relativeTime(row.createdAt)}</p>
-        {error && <Notice tone="danger">{error}</Notice>}
-        <div className="mt-auto flex items-center gap-0.5 pt-1">
-          {row.status === "done" && canEdit && (
-            <>
-              {saved ? (
-                <span className="inline-flex h-8 items-center gap-1.5 px-2 text-[12px] text-success" title="Saved to Assets"><Check size={13} />Saved</span>
-              ) : (
-                <button type="button" className={cn(iconButton, "w-auto gap-1.5 px-2 text-[12px]")} disabled={busy !== null} onClick={() => void save()} title="Save to Assets">
-                  {busy === "save" ? <Loader2 size={13} className="animate-spin" /> : <FolderDown size={13} />}Save
-                </button>
-              )}
-              <button type="button" className={cn(iconButton, "w-auto gap-1.5 px-2 text-[12px]", picked && "text-accent-text")} disabled={busy !== null} onClick={() => void broadcast()}
-                aria-pressed={picked} title={picked ? "Remove from Broadcast" : "Use in Broadcast"}>
-                {busy === "broadcast" ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}{picked ? "In Broadcast" : "Broadcast"}
-              </button>
-            </>
-          )}
-          <span className="flex-1" />
-          {canEdit && <button type="button" className={iconButton} onClick={onReuse} title="Reuse prompt" aria-label="Reuse prompt"><RotateCcw size={13} /></button>}
-          {output && <a className={iconButton} href={output.url} target="_blank" rel="noreferrer" title="Open" aria-label="Open the output"><ExternalLink size={13} /></a>}
-          {(canEdit || isAdmin) && <button type="button" className={iconButton} disabled={busy !== null} onClick={remove} title="Delete" aria-label="Delete generation"><Trash2 size={13} /></button>}
-        </div>
+      {viewed && <StudioViewer row={viewed} rows={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy.has(viewed._id)} onAction={act} onMove={moveViewer} onClose={() => setViewing(null)} />}
+      {campaign && <CampaignDialog projectId={projectId} falReady={falReady} onStarted={(runId) => { setStarted(runId); setTab("create"); }} onClose={() => setCampaign(false)} />}
+      {saving && <CharacterEditor projectId={projectId} rows={all} seed={saving} onClose={() => setSaving(null)} />}
+      {help && (
+        <Modal title="Keyboard shortcuts" onClose={() => setHelp(false)}>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13px]">
+            {SHORTCUTS.map(([keys, label]) => (
+              <div key={keys} className="contents">
+                <dt><kbd className="rounded-md border border-hairline/60 bg-inset px-1.5 py-0.5 font-mono text-[11.5px] text-ink-secondary">{keys}</kbd></dt>
+                <dd className="text-ink-secondary">{label}</dd>
+              </div>
+            ))}
+          </dl>
+        </Modal>
+      )}
+    </section>
+  );
+}
+
+function StudioHeader({ tabs, filter, children }: { tabs: ReactNode; filter: ReactNode; children: ReactNode }) {
+  const pinned = useInGlassHeader();
+  return (
+    <GlassHeader>
+      <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-2", pinned ? glassHeaderRow : "mb-4")} data-studio-header>
+        <h2 className={studioTitle}>Studio</h2>
+        {tabs}
+        {filter && <div className="order-4 w-full sm:order-none sm:ml-auto sm:w-auto">{filter}</div>}
+        <div className={cn("ml-auto flex items-center gap-1.5", filter && "sm:ml-0")}>{children}</div>
       </div>
-    </article>
+    </GlassHeader>
   );
 }

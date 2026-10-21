@@ -159,3 +159,23 @@ describe("call stage", () => {
     expect(stageTile(tiles, "gone:screen")).toBeNull();
   });
 });
+
+describe("microphone changes", () => {
+  it("keeps the replacement microphone muted when the person mutes while it is being captured", async () => {
+    const track = (id: string) => ({ id, kind: "audio", enabled: true, stop: vi.fn() }) as unknown as MediaStreamTrack;
+    const capture = vi.mocked(navigator.mediaDevices.getUserMedia);
+    capture.mockImplementationOnce(async () => new FakeStream([track("first")]) as unknown as MediaStream);
+    const target = { teamId: "fixture-team", room: "mic" };
+    flushSync(() => startMemberCall({ key: memberCallKey(target), target, me: { _id: "fixture-user", name: "Fixture user", email: "fixture@example.test" }, name: "mic",
+      media: { audioEnabled: true, videoEnabled: false, audioDevice: "", videoDevice: "" }, open() {} }));
+    await vi.waitFor(() => expect(call?.inCall).toBe(true));
+    let finishCapture!: (stream: MediaStream) => void;
+    capture.mockImplementationOnce(() => new Promise((resolve) => { finishCapture = resolve; }));
+    const changing = call!.changeDevice("audio", "second-microphone");
+    await call!.toggle("audio");
+    const replacement = track("second");
+    finishCapture(new FakeStream([replacement]) as unknown as MediaStream);
+    await changing;
+    expect(replacement.enabled).toBe(false);
+  });
+});

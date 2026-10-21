@@ -7,7 +7,7 @@ import type { Bot } from "@/state/store";
 
 const fixture = vi.hoisted(() => ({ attach: vi.fn(), dispatch: vi.fn(), exportSvg: vi.fn(), png: vi.fn(), currentToken: "fixture-token", mutation: vi.fn(), rows: [] as string[] }));
 vi.mock("./canvas/export", () => ({ exportSvg: fixture.exportSvg, svgToPng: fixture.png, download: vi.fn(), fileSafe: (name: string) => name }));
-vi.mock("@/lib/origin-cloud", () => ({ cloudMutation: fixture.mutation, useCloudQuery: (name: string) => (name === "draw:scene" ? fixture.rows : name === "design:list" ? { assets: [], tokens: [] } : name === "pages:list" ? { pages: [], captureEnabled: false } : []), useCloudSession: () => ({ token: "fixture-token" }), useCloudUrl: () => "https://fixture.test" }));
+vi.mock("@/lib/origin-cloud", () => ({ cloudMutation: fixture.mutation, useCloudQuery: (name: string) => (name === "draw:scene" ? fixture.rows : name === "design:list" ? { assets: [], tokens: [] } : name === "pages:list" ? { pages: [], captureEnabled: false } : name === "brand:get" ? null : []), useCloudSession: () => ({ token: "fixture-token" }), useCloudUrl: () => "https://fixture.test" }));
 vi.mock("@/lib/origin-cloud/client", () => ({ cloudUrl: () => "https://fixture.test", sessionStore: { get: () => fixture.currentToken } }));
 vi.mock("@/state/store", () => ({ useStore: () => ({ dispatch: fixture.dispatch }) }));
 vi.mock("@/lib/composer-attachments", () => ({ imageAttachmentFromFile: fixture.attach, composeMessage: (text: string) => text }));
@@ -51,7 +51,7 @@ it("keeps toolbar scrolling from panning the canvas or cancelling native scrolli
   mount("toolbar-scroll");
   const tools = button("Rectangle").parentElement!;
   expect([...tools.querySelectorAll("button[aria-label]")].map(item => item.getAttribute("aria-label")))
-    .toEqual(["Move", "Hand", "Frame", "Rectangle", "Ellipse", "Line", "Arrow", "Text", "Image", "Undo", "Redo"]);
+    .toEqual(["Move", "Hand", "Frame", "Rectangle", "Ellipse", "Line", "Arrow", "Pen", "Text", "Comment", "Image", "Undo", "Redo"]);
   expect(tools.contains(button("Layers"))).toBe(false);
   expect(tools.contains(button("Design panel"))).toBe(false);
   button("Rectangle").focus();
@@ -112,12 +112,12 @@ it("exports only one agent snapshot when submit events arrive before the busy re
   expect(fixture.exportSvg).toHaveBeenCalledOnce();
 });
 
-it("cancels a pending snapshot when its popover closes", async () => {
+it("cancels a pending snapshot when its panel closes", async () => {
   const snapshot = Promise.withResolvers<unknown>(); fixture.exportSvg.mockReturnValue(snapshot.promise);
   mount("ask-cancel", true);
   flushSync(() => host.querySelector<HTMLButtonElement>('[aria-label="Ask Atlas"]')!.click());
   flushSync(() => host.querySelector('form[aria-label^="Ask"]')!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
-  flushSync(() => host.querySelector<HTMLButtonElement>('form [aria-label="Close"]')!.click());
+  flushSync(() => host.querySelector<HTMLButtonElement>('[data-agent-panel] [aria-label="Close"]')!.click());
   snapshot.resolve({ svg: "<svg/>", width: 1, height: 1 }); await vi.advanceTimersByTimeAsync(0);
   expect(fixture.png).not.toHaveBeenCalled(); expect(fixture.dispatch).not.toHaveBeenCalled();
 });

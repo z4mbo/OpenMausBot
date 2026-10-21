@@ -30,6 +30,7 @@ const SEND_VERBS = new Set([
   "PAY",
   "PAYOUT",
   "TRANSFER",
+  "DEPLOY",
 ]);
 
 /** Creating one of these is sending it: a created comment is a comment

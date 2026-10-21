@@ -102,15 +102,15 @@ export interface CampaignMetricsDeps {
 
 export type MetricsRefresh = { read: number; notes: string[] };
 
-/** Reads the numbers of a campaign's published X and Bluesky posts and stores them on the campaign. */
-export async function refreshCampaignMetrics(deps: CampaignMetricsDeps, projectId: string, campaignId: string): Promise<MetricsRefresh> {
+function metricsSession(deps: CampaignMetricsDeps) {
   const { url, sessionToken } = deps.session();
   if (!url || !sessionToken) throw new MetricsError("Sign in to Origin first.");
-  const client = deps.connect(url);
-  const detail = record(await client.query("campaigns:get", { sessionToken, projectId, campaignId }));
-  if (!detail._id) throw new MetricsError("Campaign not found");
-  const published = list(detail.posts).flatMap((post) => list(post.variants)
-    .filter((variant) => variant.result === "published" && text(variant.url))
+  return { client: deps.connect(url), sessionToken };
+}
+
+async function publishedMetrics(deps: CampaignMetricsDeps, posts: unknown) {
+  const published = list(posts).flatMap((post) => list(post.variants)
+    .filter((variant) => variant.result === "published" && text(variant.url) && (variant.channel === "x" || variant.channel === "bluesky"))
     .map((variant) => ({ postId: text(post._id), channel: text(variant.channel), url: text(variant.url) })));
   const env = deps.env ?? defaultPublishEnv;
   const notes: string[] = [];
@@ -125,12 +125,31 @@ export async function refreshCampaignMetrics(deps: CampaignMetricsDeps, projectI
   if (blueskyUrls.length) {
     await blueskyMetrics(blueskyUrls, env).then((found) => found.forEach((value, key) => numbers.set(key, value)), (error: unknown) => { notes.push(error instanceof Error ? error.message : String(error)); });
   }
-  const at = env.now();
   const metrics = published.flatMap((item) => {
     const found = numbers.get(item.url);
-    return found ? [{ postId: item.postId, channel: item.channel, ...found, at }] : [];
+    return found ? [{ postId: item.postId, channel: item.channel, ...found }] : [];
   });
+  return { metrics, notes };
+}
+
+export async function refreshCampaignMetrics(deps: CampaignMetricsDeps, projectId: string, campaignId: string): Promise<MetricsRefresh> {
+  const { client, sessionToken } = metricsSession(deps);
+  const detail = record(await client.query("campaigns:get", { sessionToken, projectId, campaignId }));
+  if (!detail._id) throw new MetricsError("Campaign not found");
+  const found = await publishedMetrics(deps, detail.posts);
+  const at = (deps.env ?? defaultPublishEnv).now();
+  const metrics = found.metrics.map((metric) => ({ ...metric, at }));
   if (metrics.length) await client.mutation("campaigns:recordMetrics", { sessionToken, projectId, campaignId, metrics });
+  return { read: metrics.length, notes: found.notes };
+}
+
+export async function refreshBroadcastMetrics(deps: CampaignMetricsDeps, projectId: string): Promise<MetricsRefresh> {
+  const { client, sessionToken } = metricsSession(deps);
+  const detail = record(await client.query("broadcast:list", { sessionToken, projectId }));
+  const { metrics, notes } = await publishedMetrics(deps, detail.posts);
+  for (let start = 0; start < metrics.length; start += 200) {
+    await client.mutation("broadcast:recordMetrics", { sessionToken, projectId, metrics: metrics.slice(start, start + 200) });
+  }
   return { read: metrics.length, notes };
 }
 
@@ -142,14 +161,15 @@ export function createCampaignRoutes(deps: Partial<CampaignMetricsDeps> = {}): R
     ...(deps.env ? { env: deps.env } : {}),
   };
   return async ({ req, res, path, method, auth, json, readBody }) => {
-    if (path !== "/api/origin/campaigns/metrics" || method !== "POST") return PASS;
+    const broadcast = path === "/api/origin/broadcast/metrics";
+    if ((!broadcast && path !== "/api/origin/campaigns/metrics") || method !== "POST") return PASS;
     if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Reading post metrics uses this app's own keys and needs the admin scope" });
     const body = record(await readBody(req));
     const projectId = text(body.projectId);
     const campaignId = text(body.campaignId);
-    if (!projectId || !campaignId) return json(res, 400, { error: "projectId and campaignId are required" });
+    if (!projectId || (!broadcast && !campaignId)) return json(res, 400, { error: broadcast ? "projectId is required" : "projectId and campaignId are required" });
     try {
-      return json(res, 200, await refreshCampaignMetrics(resolved, projectId, campaignId));
+      return json(res, 200, await (broadcast ? refreshBroadcastMetrics(resolved, projectId) : refreshCampaignMetrics(resolved, projectId, campaignId)));
     } catch (error) {
       return json(res, error instanceof MetricsError ? 409 : 502, { error: (error instanceof Error ? error.message : String(error)).slice(0, 400) });
     }

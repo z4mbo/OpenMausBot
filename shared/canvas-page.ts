@@ -1,7 +1,10 @@
+import { googleFontsHref, isBrandFont, type BrandFontId } from "./brand-fonts.ts";
 import {
-  FONT_STACKS, LEAD_FIELDS, childrenIndex, isLinkAddress,
-  type CanvasNode, type LeadField, type LeadForm, type Scene, type StackLayout,
+  FONT_STACKS, LEAD_FIELDS, childrenIndex, fontStack, isLinkAddress,
+  type CanvasFont, type CanvasNode, type LeadField, type LeadForm, type Scene, type StackLayout,
 } from "./canvas-scene.ts";
+import { cornerRadii, cssRadii, gradientCss, gradientSvg, imageSvg } from "./canvas-paint.ts";
+import { booleanGroupPath } from "./canvas-boolean-group.ts";
 
 /** A page address segment: lowercase letters, digits and inner hyphens, at most 48 characters. */
 export const PAGE_SLUG = /^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/;
@@ -48,10 +51,29 @@ export function leadFormColors(form: LeadForm, surface: string) {
   };
 }
 
-export function pathData(points: readonly number[], closed?: boolean): string {
+/** SVG path data for anchors, with cubic segments where `curves` has handles and a new subpath at each of `breaks`. */
+export function pathData(points: readonly number[], closed?: boolean, curves?: readonly number[], breaks?: readonly number[]): string {
+  const count = Math.floor(points.length / 2);
+  const starts = [0, ...(breaks ?? []).filter((at) => at > 0 && at < count), count];
+  const handle = (at: number, side: 0 | 2) => (curves ? [curves[at * 4 + side] ?? 0, curves[at * 4 + side + 1] ?? 0] : [0, 0]);
+  const segment = (from: number, to: number) => {
+    const [ox, oy] = handle(from, 2);
+    const [ix, iy] = handle(to, 0);
+    const x = points[to * 2]!;
+    const y = points[to * 2 + 1]!;
+    if (!ox && !oy && !ix && !iy) return `L${x} ${y}`;
+    return `C${points[from * 2]! + ox} ${points[from * 2 + 1]! + oy} ${x + ix} ${y + iy} ${x} ${y}`;
+  };
   let out = "";
-  for (let index = 0; index + 1 < points.length; index += 2) out += `${index ? "L" : "M"}${points[index]} ${points[index + 1]}`;
-  return out + (closed ? "Z" : "");
+  for (let part = 0; part + 1 < starts.length; part++) {
+    const first = starts[part]!;
+    const last = starts[part + 1]! - 1;
+    if (last < first) continue;
+    out += `M${points[first * 2]} ${points[first * 2 + 1]}`;
+    for (let at = first + 1; at <= last; at++) out += segment(at - 1, at);
+    if (closed) out += (last > first ? segment(last, first) : "") + "Z";
+  }
+  return out;
 }
 
 export function arrowHead(points: readonly number[], size: number): string {
@@ -122,9 +144,19 @@ function placement(node: CanvasNode, place: Place, context: Context): Style {
       ...(isBoard(node) ? { "aspect-ratio": `${round(node.width)}/${round(Math.max(1, node.height))}` } : autoHeight(node) ? {} : { "min-height": `${round(node.height)}px` }),
     };
   }
-  if (place.kind === "board") {
+  if (place.kind === "board" || node.absolute) {
     return { position: "absolute", left: size(node.x), top: size(node.y), width: size(node.width), ...(node.type === "text" || node.leadForm ? {} : { height: size(node.height) }) };
   }
+  const bounds: Style = {
+    ...(node.minW !== undefined ? { "min-width": size(node.minW) } : {}), ...(node.maxW !== undefined ? { "max-width": `min(100%,${size(node.maxW)})` } : {}),
+    ...(node.minH !== undefined ? { "min-height": size(node.minH) } : {}), ...(node.maxH !== undefined ? { "max-height": size(node.maxH) } : {}),
+  };
+  return { ...stacked(node, place.layout, context), ...bounds };
+}
+
+function stacked(node: CanvasNode, layout: StackLayout, context: Context): Style {
+  const size = (value: number) => len(value, context);
+  const place = { layout };
   const row = place.layout.direction === "row";
   const stretch = place.layout.align === "stretch";
   const style: Style = { "max-width": "100%" };
@@ -146,12 +178,22 @@ function placement(node: CanvasNode, place: Place, context: Context): Style {
 
 function visuals(node: CanvasNode, context: Context): Style {
   const style: Style = {};
-  if (node.fill && node.type !== "text" && node.type !== "line" && node.type !== "arrow" && node.type !== "path") style.background = node.fill;
+  const painted = node.type !== "text" && node.type !== "line" && node.type !== "arrow" && node.type !== "path" && !node.boolean;
+  if (painted && node.gradient) style.background = gradientCss(node.gradient);
+  else if (painted && node.fill) style.background = node.fill;
   if (node.stroke && node.strokeWidth > 0 && (node.type === "frame" || node.type === "rect" || node.type === "ellipse" || node.type === "image")) style.border = `${len(node.strokeWidth, context)} solid ${node.stroke}`;
   if (node.type === "ellipse") style["border-radius"] = "50%";
-  else if (node.radius > 0) style["border-radius"] = len(Math.min(node.radius, node.width / 2, node.height / 2), context);
+  else { const radii = cornerRadii(node); if (radii) style["border-radius"] = cssRadii(radii, (value) => len(value, context)); }
   if (node.opacity < 1) style.opacity = round(node.opacity);
   if (node.rotation && node.type !== "frame" && node.type !== "group") style.transform = `rotate(${round(node.rotation)}deg)`;
+  const filters: string[] = [];
+  if (node.shadow) {
+    const { x, y, blur, spread, color } = node.shadow;
+    if (node.type === "text" || node.type === "line" || node.type === "arrow" || node.type === "path") filters.push(`drop-shadow(${len(x, context)} ${len(y, context)} ${len(blur / 2, context)} ${color})`);
+    else style["box-shadow"] = `${len(x, context)} ${len(y, context)} ${len(blur, context)} ${len(spread, context)} ${color}`;
+  }
+  if (node.blur) filters.push(`blur(${len(node.blur, context)})`);
+  if (filters.length) style.filter = filters.join(" ");
   if ((node.type === "frame" && node.clip && !node.leadForm) || node.type === "image") style.overflow = "hidden";
   return style;
 }
@@ -163,7 +205,9 @@ function container(node: CanvasNode, context: Context): Style {
   const [top, right, bottom, left] = layout.padding;
   return {
     display: "flex", "flex-direction": layout.direction, ...(layout.direction === "row" ? { "flex-wrap": "wrap" } : {}),
-    gap: space(layout.gap, context), padding: [top, right, bottom, left].map((value) => space(value, context)).join(" "),
+    ...((context.index.get(node.id) ?? []).some((child) => child.absolute) ? { position: "relative" } : {}),
+    gap: space(layout.gap, context), ...(layout.wrap && layout.direction === "row" ? { "row-gap": space(layout.crossGap ?? layout.gap, context) } : {}),
+    padding: [top, right, bottom, left].map((value) => space(value, context)).join(" "),
     "align-items": ALIGN[layout.align], "justify-content": JUSTIFY[layout.justify],
   };
 }
@@ -205,20 +249,46 @@ function renderText(node: CanvasNode, style: Style, context: Context): string {
   else if (size >= 28) tag = "h2";
   const body = escapeHtml(text);
   const content = node.link ? `<a${linkAttrs(node)}>${body}</a>` : body;
+  const gradient = node.gradient ? { "background-image": gradientCss(node.gradient), "-webkit-background-clip": "text", "background-clip": "text", "-webkit-text-fill-color": "transparent" } : {};
   return `<${tag} class="o-t"${styleAttr({
-    ...style, color: node.fill ?? undefined, "font-family": FONT_STACKS[node.font ?? "sans"], "font-weight": node.fontWeight ?? 400,
+    ...style, ...gradient, color: node.fill ?? undefined, "font-family": fontStack(node), "font-weight": node.fontWeight ?? 400,
     "font-size": fontSize(size, context), "line-height": node.lineHeight ?? 1.3, "text-align": node.align ?? "left",
   })}>${content}</${tag}>`;
+}
+
+function vectorPaint(node: CanvasNode, filled: boolean): { fill: string; defs: string } {
+  if (!filled) return { fill: "none", defs: "" };
+  if (!node.gradient) return { fill: node.fill ?? "none", defs: "" };
+  const id = `g-${node.id}`;
+  return { fill: `url(#${id})`, defs: `<defs>${gradientSvg(id, node.gradient, node.width, node.height)}</defs>` };
+}
+
+function renderBooleanGroup(node: CanvasNode, style: Style, context: Context): string {
+  const stroke = node.stroke && node.strokeWidth > 0 ? ` stroke="${node.stroke}" stroke-width="${node.strokeWidth}" vector-effect="non-scaling-stroke"` : "";
+  const { fill, defs } = vectorPaint(node, true);
+  return `<svg aria-hidden="true" viewBox="0 0 ${round(Math.max(1, node.width))} ${round(Math.max(1, node.height))}" preserveAspectRatio="none"${styleAttr({ ...style, overflow: "visible" })}>`
+    + `${defs}<path d="${booleanGroupPath(node, context.index)}" fill="${fill}" fill-rule="evenodd" stroke-linejoin="round"${stroke}/></svg>`;
+}
+
+function renderImage(node: CanvasNode, url: string, style: Style): string {
+  const fit = node.imageFit ?? "cover";
+  let image: string;
+  if (fit === "crop" || fit === "tile") {
+    const defs: string[] = [];
+    const inner = imageSvg(node, escapeHtml(url), "p-", defs);
+    image = `<svg role="img" aria-label="${escapeHtml(node.name)}" viewBox="0 0 ${round(Math.max(1, node.width))} ${round(Math.max(1, node.height))}" preserveAspectRatio="none"${styleAttr({ width: "100%", height: "100%", display: "block" })}>${defs.length ? `<defs>${defs.join("")}</defs>` : ""}${inner}</svg>`;
+  } else image = `<img src="${escapeHtml(url)}" alt="${escapeHtml(node.name)}" loading="lazy"${styleAttr({ width: "100%", height: "100%", "object-fit": fit === "stretch" ? "fill" : fit })}>`;
+  return node.link ? `<a${linkAttrs(node)}${styleAttr({ ...style, display: "block" })}>${image}</a>` : `<div${styleAttr(style)}>${image}</div>`;
 }
 
 function renderVector(node: CanvasNode, style: Style): string {
   const points = node.points ?? [0, 0, node.width, node.height];
   const stroke = node.stroke ?? "none";
   const width = Math.max(node.strokeWidth, 0.5);
-  const fill = node.type === "path" && node.closed && node.fill ? node.fill : "none";
+  const { fill, defs } = vectorPaint(node, node.type === "path" && Boolean(node.closed) && Boolean(node.fill || node.gradient));
   const head = node.type === "arrow" && points.length >= 4 ? `<path d="${arrowHead(points, Math.max(8, width * 3.5))}" fill="${stroke}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round"/>` : "";
   return `<svg aria-hidden="true" viewBox="0 0 ${round(Math.max(1, node.width))} ${round(Math.max(1, node.height))}" preserveAspectRatio="none"${styleAttr({ ...style, overflow: "visible" })}>`
-    + `<path d="${pathData(points, node.closed)}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>${head}</svg>`;
+    + `${defs}<path d="${pathData(points, node.closed, node.curves, node.breaks)}" fill="${fill}" fill-rule="evenodd" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>${head}</svg>`;
 }
 
 function renderNode(node: CanvasNode, place: Place, context: Context): string {
@@ -228,10 +298,9 @@ function renderNode(node: CanvasNode, place: Place, context: Context): string {
   if (node.type === "line" || node.type === "arrow" || node.type === "path") return renderVector(node, style);
   if (node.type === "image") {
     const url = node.fileId ? context.images.get(node.fileId) : undefined;
-    if (!url) return `<div${styleAttr(style)}></div>`;
-    const image = `<img src="${escapeHtml(url)}" alt="${escapeHtml(node.name)}" loading="lazy"${styleAttr({ width: "100%", height: "100%", "object-fit": node.imageFit === "contain" ? "contain" : "cover" })}>`;
-    return node.link ? `<a${linkAttrs(node)}${styleAttr({ ...style, display: "block" })}>${image}</a>` : `<div${styleAttr(style)}>${image}</div>`;
+    return url ? renderImage(node, url, style) : `<div${styleAttr(style)}></div>`;
   }
+  if (node.type === "group" && node.boolean) return renderBooleanGroup(node, style, context);
   if (node.type === "rect" || node.type === "ellipse") {
     return node.link ? `<a${linkAttrs(node)}${styleAttr({ ...style, display: "block" })}></a>` : `<div${styleAttr(style)}></div>`;
   }
@@ -243,10 +312,15 @@ function renderNode(node: CanvasNode, place: Place, context: Context): string {
   return `<${tag}${tag === "a" ? linkAttrs(node) : ""}${styleAttr(own)}>${children}</${tag}>`;
 }
 
+/** A face a published page loads: a Canvas font or a brand kit typeface. */
+export type PageFont = CanvasFont | BrandFontId;
+
+export const isPageFont = (value: unknown): value is PageFont => value === "sans" || value === "serif" || value === "mono" || isBrandFont(value);
+
 export interface RenderedPage {
   body: string;
   background: string;
-  fonts: ("sans" | "serif" | "mono")[];
+  fonts: PageFont[];
   leadForms: number;
   summary: string;
 }
@@ -263,13 +337,13 @@ export function renderCanvasPage(scene: Scene, frameId: string, images: Readonly
   const background = frame.fill ?? "#FFFFFF";
   const context: Context = { board: null, root: Math.max(320, frame.width), surface: background, images, index, heading, state: { headingUsed: false, forms: 0, texts: [] } };
   const body = renderNode(frame, { kind: "root" }, context);
-  const fonts = [...new Set(visible.filter((node) => node.type === "text").map((node) => node.font ?? "sans"))];
+  const fonts = [...new Set(visible.filter((node) => node.type === "text").map((node): PageFont => node.family ?? node.font ?? "sans"))];
   const { texts, forms } = context.state;
   const summary = texts.find((text) => text.length >= 40) ?? texts.slice(1).join(" ").slice(0, PAGE_DESCRIPTION_MAX);
   return { body, background, fonts, leadForms: forms, summary: summary.replace(/\s+/g, " ").slice(0, PAGE_DESCRIPTION_MAX) };
 }
 
-const FONT_FAMILIES = { sans: "Inter:wght@300..900", serif: null, mono: "JetBrains+Mono:wght@400;600" } as const;
+const FONT_FAMILIES: Record<CanvasFont, BrandFontId | null> = { sans: "inter", serif: null, mono: "jetbrains-mono" };
 
 const PAGE_CSS = `*,*::before,*::after{box-sizing:border-box}html,body{margin:0}body{font-family:${FONT_STACKS.sans};-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}`
   + "img{display:block}a{color:inherit;text-decoration:none}.o-t{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.o-t a{text-decoration:underline;text-underline-offset:.15em}"
@@ -289,10 +363,9 @@ export interface PageDocument {
 
 /** The whole HTML document of a published page, with its SEO and social tags; `status` reports the last form submission. */
 export function pageDocument({ title, description, url, image, page, status }: PageDocument): string {
-  const families = page.fonts.map((font) => FONT_FAMILIES[font]).filter(Boolean);
-  const fonts = families.length
-    ? `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?${families.map((family) => `family=${family}`).join("&amp;")}&amp;display=swap">`
-    : "";
+  const families = page.fonts.map((font) => (isBrandFont(font) ? font : FONT_FAMILIES[font])).filter((font): font is BrandFontId => Boolean(font));
+  const href = googleFontsHref(families);
+  const fonts = href ? `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="${escapeHtml(href)}">` : "";
   const meta = [
     `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">`,
     `<title>${escapeHtml(title)}</title>`,

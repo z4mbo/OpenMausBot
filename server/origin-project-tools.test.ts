@@ -245,6 +245,7 @@ describe("per-turn Origin context", () => {
     expect(chief).toContain("you work on Kai (Origin project kai) as its Chief");
     expect(chief).toContain("you plan and delegate; your agents do the hands-on work");
     expect(chief).toContain("origin_assign_issue");
+    expect(chief).not.toMatch(/Journey|next step/);
 
     const head = (await context(client).parts("head")).map((part) => part.text).join("");
     expect(head).toContain("- Kai (Origin project kai) · repo ggs/kai · Chief Kai");

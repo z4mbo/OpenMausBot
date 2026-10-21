@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Select } from "../Select";
-import { Check, GitBranch, Link2, Loader2, Palette, RotateCcw, Settings, Trash2, UserPlus, Users } from "lucide-react";
+import { Check, GitBranch, KeyRound, Link2, Loader2, Palette, RotateCcw, RotateCw, Settings, Trash2, UserPlus, Users } from "lucide-react";
 import { ZAP_SWATCHES, setAvatarLook, useAvatarLook, useBotColor } from "@/lib/origin-avatar-looks";
 import { botPalette } from "@/lib/user-bubble-tone";
 import { useStore } from "@/state/store";
@@ -9,8 +9,10 @@ import { originGitHub, type GitHubProjectConnection, type GitHubWorkspaceStatus 
 import { cn } from "@/lib/cn";
 import type { CloudPerson, CloudProject, CloudProjectMember, GitHubTaskMode, MemberRole } from "./cloud-types";
 import { githubRepoHref } from "./repo-url";
+import { capitalize } from "./issue-fields";
 import { ProjectAccessCard } from "../origin-members/ProjectAccessCard";
 import { ChiefHeartbeatCard } from "./ChiefHeartbeatCard";
+import { IntegrationKeyList } from "../IntegrationKeysSettings";
 import { CloudGate, Field, Loading, Notice, PageHeader, cardClass, ghostButton, iconButton, inputClass, pageClass, primaryButton, useAction, type OriginPageProps } from "./ui";
 
 type IconType = NonNullable<CloudProject["iconType"]>;
@@ -34,6 +36,12 @@ export function ProjectSettingsPage(props: OriginPageProps) {
               <ProjectAccessCard projectId={projectId} teamId={project.teamId} />
               <Members project={project} projectId={projectId} isAdmin={isAdmin} />
               {project.teamId && <ChiefHeartbeatCard projectId={projectId} />}
+              {project.teamId && (
+                <Card icon={<KeyRound size={15} />} title="Integration keys">
+                  <p className="mb-2 text-[12.5px] leading-relaxed text-ink-secondary">The keys this project's Studio and agents use. A key shared with this project only works here; a key of your own always wins.</p>
+                  <IntegrationKeyList teamId={project.teamId} project={{ id: projectId, name: project.name, canManage: isAdmin }} />
+                </Card>
+              )}
             </div>
           </div>
         </section>
@@ -250,17 +258,20 @@ function useGitHubStatus(teamId: string | undefined, projectId: string) {
   const [workspace, setWorkspace] = useState<GitHubWorkspaceStatus | null>(null);
   const [connection, setConnection] = useState<GitHubProjectConnection | null>(null);
   const [error, setError] = useState("");
+  const latest = useRef(0);
   const refresh = useCallback(async () => {
+    const request = ++latest.current;
     try {
       const [status, project] = await Promise.all([
         teamId ? originGitHub.workspace(teamId) : Promise.resolve(null),
         originGitHub.connection(projectId).catch(() => ({ connection: null })),
       ]);
+      if (request !== latest.current) return;
       setWorkspace(status);
       setConnection(project.connection);
       setError("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not read the GitHub connection");
+      if (request === latest.current) setError(err instanceof Error ? err.message : "Could not read the GitHub connection");
     }
   }, [teamId, projectId]);
   useEffect(() => {
@@ -272,7 +283,7 @@ function useGitHubStatus(teamId: string | undefined, projectId: string) {
   return { workspace, connection, error, refresh, setConnection };
 }
 
-function GitHubConnectionCard({ project, projectId, isAdmin }: { project: CloudProject; projectId: string; isAdmin: boolean }) {
+export function GitHubConnectionCard({ project, projectId, isAdmin }: { project: CloudProject; projectId: string; isAdmin: boolean }) {
   const { workspace, connection, error, refresh, setConnection } = useGitHubStatus(project.teamId, projectId);
   const [token, setToken] = useState("");
   const [notice, setNotice] = useState("");
@@ -293,32 +304,37 @@ function GitHubConnectionCard({ project, projectId, isAdmin }: { project: CloudP
     <Card icon={<Link2 size={15} />} title="GitHub connection">
       <div className="flex flex-col gap-3 text-[13px]">
         {error && <Notice tone="danger">{error}</Notice>}
-        {!teamId ? <Notice>This project is not in a shared workspace yet.</Notice> : workspace === null ? <Loading label="Reading GitHub connection" variant="inline" /> : (
+        {!teamId ? <Notice>This project is not in a shared workspace yet.</Notice> : workspace === null ? (error
+          ? <button type="button" className={cn(ghostButton, "self-start")} onClick={() => void refresh()}><RotateCw size={14} />Try again</button>
+          : <Loading label="Reading GitHub connection" variant="inline" />) : (
           <>
             <p className="text-ink-secondary">
-              {workspace.login ? <>Workspace connected as <strong className="text-ink">@{workspace.login}</strong>.</> : "This workspace has not connected GitHub."}
+              {workspace.shared
+                ? <>Workspace GitHub: <strong className="text-ink">@{workspace.shared.accountLogin}</strong>, shared by {workspace.shared.sharedByName}. Every member works through it.</>
+                : workspace.login ? <>Connected as <strong className="text-ink">@{workspace.login}</strong> on this computer.</> : "GitHub isn't set up for this workspace yet."}
             </p>
-            {!workspace.configured && (workspace.canSetup
+            {workspace.sharedStale && <Notice>The admin who connected GitHub is no longer an admin of this workspace, so it stopped working. An owner or admin reconnects it.</Notice>}
+            {!workspace.configured && !workspace.shared && (workspace.canSetup
               ? <Notice>Create the GitHub App once for this server; GitHub opens in your browser.</Notice>
-              : <Notice>A server administrator has not set up the GitHub App yet.</Notice>)}
+              : !isAdmin && <Notice>An owner or admin connects GitHub once in Settings &gt; Integrations; then every member can use it.</Notice>)}
+            {workspace.shareError && <Notice tone="danger">{workspace.shareError}</Notice>}
             {project.githubTaskMode === "pull_request" && workspace.prPermissionNotice && <Notice>{workspace.prPermissionNotice}</Notice>}
-            {isAdmin && (
-              <div className="flex flex-wrap gap-2">
-                {!workspace.configured && workspace.canSetup && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.setupApp(teamId), "Could not start the App setup", "Finish creating the App in your browser, then come back here.")}>Create GitHub App</button>}
-                {workspace.configured && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.connectWorkspace(teamId, projectId), "Could not connect GitHub", "Finish connecting in your browser, then come back here.")}>{workspace.login ? "Reconnect GitHub" : "Connect GitHub"}</button>}
-                {workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(() => originGitHub.disconnectWorkspace(teamId), "Could not disconnect GitHub", "GitHub disconnected from this workspace")}>Disconnect</button>}
-                {!project.repoUrl && workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(async () => {
-                  const result = await originGitHub.createRepository(teamId, projectId);
-                  if (result.state === "error") throw new Error(result.error ?? "Repository creation failed");
-                }, "Could not create the repository", "Creating a private repository for this project")}>Create repository</button>}
-              </div>
-            )}
+            <div className="flex flex-wrap gap-2">
+              {isAdmin && !workspace.configured && workspace.canSetup && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.setupApp(teamId), "Could not start the App setup", "Finish creating the App in your browser, then come back here.")}>Create GitHub App</button>}
+              {isAdmin && workspace.localApp && <button type="button" className={workspace.shared ? ghostButton : primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.connectWorkspace(teamId, projectId), "Could not connect GitHub", "Finish connecting in your browser, then come back here.")}>{workspace.login ? "Reconnect GitHub" : "Connect GitHub"}</button>}
+              {isAdmin && workspace.canShare && <button type="button" className={primaryButton} disabled={action.busy} onClick={() => void run(() => originGitHub.shareWorkspace(teamId), "Could not share GitHub with the workspace", "Every member of the workspace can now use GitHub")}>Share with the workspace</button>}
+              {isAdmin && workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(() => originGitHub.disconnectWorkspace(teamId), "Could not disconnect GitHub", "GitHub disconnected from this workspace")}>Disconnect</button>}
+              {!project.repoUrl && project.memberRole !== "viewer" && workspace.login && <button type="button" className={ghostButton} disabled={action.busy} onClick={() => void run(async () => {
+                const result = await originGitHub.createRepository(teamId, projectId);
+                if (result.state === "error") throw new Error(result.error ?? "Repository creation failed");
+              }, "Could not create the repository", `Creating a ${project.githubRepoVisibility === "public" ? "public" : "private"} repository for this project`)}>Create repository</button>}
+            </div>
           </>
         )}
         {project.repoUrl && (
           <form onSubmit={saveToken} className="flex flex-col gap-2 border-t border-hairline/30 pt-3">
             <p className="text-ink-secondary">
-              {connection ? <>This project uses {connection.source === "project" ? "a personal access token of" : "the workspace connection of"} <strong className="text-ink">@{connection.login}</strong>.</> : "This project has no GitHub access of its own."}
+              {connection ? <>This project uses {connection.source === "project" ? "a personal access token of" : connection.source === "shared" ? "the workspace's shared GitHub," : "the workspace connection of"} <strong className="text-ink">@{connection.login}</strong>.</> : "This project has no GitHub access of its own."}
             </p>
             {isAdmin && (
               <div className="flex flex-wrap gap-2">
@@ -369,7 +385,7 @@ function Members({ project, projectId, isAdmin }: { project: CloudProject; proje
                   <>
                     <Select size="sm" aria-label={`Role for ${person.name}`} value={row.role} disabled={action.busy}
                       onChange={(e) => void action.run(() => cloudMutation("members:updateRole", { projectId, memberId: row._id, role: e.target.value }), "Could not change role")}>
-                      {ROLES.map((value) => <option key={value} value={value}>{value}</option>)}
+                      {ROLES.map((value) => <option key={value} value={value}>{capitalize(value)}</option>)}
                     </Select>
                     <button type="button" className={iconButton} aria-label={`Remove ${person.name}`} title="Remove from project" disabled={action.busy}
                       onClick={() => { if (window.confirm(`Remove ${person.name} from ${project.name}?`)) void action.run(() => cloudMutation("members:remove", { projectId, memberId: row._id }), "Could not remove member"); }}>

@@ -74,4 +74,51 @@ describe("broadcast posts", () => {
     expect(posts[0].status).toBe("published");
     await expect(f.t.mutation(api.broadcast.save, { sessionToken: f.sessionToken, projectId: f.projectId, postId, variants: [{ channel: "x", text: "edit" }], assetIds: [] })).rejects.toThrow(/already published/);
   });
+
+  test("a reel needs one video on reel channels and carries its cover and account to the publisher", async () => {
+    const f = await fixture();
+    const video = await f.asset("reel.mp4", "video/mp4");
+    const image = await f.asset("cover.png", "image/png");
+    const bad = await f.t.mutation(api.broadcast.save, { sessionToken: f.sessionToken, projectId: f.projectId, format: "reel", variants: [{ channel: "linkedin", text: "Reel" }], assetIds: [image] });
+    await expect(f.t.mutation(api.broadcast.schedule, { sessionToken: f.sessionToken, postId: bad })).rejects.toThrow(/LinkedIn does not take reels; A reel is exactly one video/);
+    const postId = await f.t.mutation(api.broadcast.save, {
+      sessionToken: f.sessionToken, projectId: f.projectId, format: "reel", reel: { coverMs: 2_480.4, music: "  Nightcall  " }, assetIds: [video],
+      variants: [{ channel: "instagram", text: "Reel" }, { channel: "tiktok", text: "Reel", accountId: "acct-1", accountLabel: "Founder" }],
+    });
+    await f.t.mutation(api.broadcast.schedule, { sessionToken: f.sessionToken, postId });
+    const [claimed] = await f.t.mutation(api.broadcast.claimDue, { sessionToken: f.sessionToken });
+    expect(claimed).toMatchObject({ format: "reel", reel: { coverMs: 2_480, music: "Nightcall" } });
+    expect(claimed.variants).toEqual([{ channel: "instagram", text: "Reel" }, { channel: "tiktok", text: "Reel", accountId: "acct-1" }]);
+    await f.t.mutation(api.broadcast.finish, { sessionToken: f.sessionToken, postId, results: [{ channel: "instagram", ok: true }, { channel: "tiktok", ok: false, error: "401" }] });
+    const { posts } = await f.t.query(api.broadcast.list, { sessionToken: f.sessionToken, projectId: f.projectId });
+    expect(posts.find((post) => post._id === postId)!.variants[1]).toMatchObject({ accountId: "acct-1", accountLabel: "Founder", result: "failed" });
+  });
+
+  test("a scheduled post moves to a later time and keeps its publisher", async () => {
+    const f = await fixture();
+    const postId = await f.t.mutation(api.broadcast.save, { sessionToken: f.sessionToken, projectId: f.projectId, variants: [{ channel: "x", text: "Move me" }], assetIds: [] });
+    await expect(f.t.mutation(api.broadcast.reschedule, { sessionToken: f.sessionToken, postId, at: Date.now() + 3_600_000 })).rejects.toThrow(/scheduled/);
+    await f.t.mutation(api.broadcast.schedule, { sessionToken: f.sessionToken, postId, at: Date.now() + 3_600_000 });
+    await expect(f.t.mutation(api.broadcast.reschedule, { sessionToken: f.sessionToken, postId, at: Date.now() - 1 })).rejects.toThrow(/future/);
+    const later = Date.now() + 2 * 86_400_000;
+    await f.t.mutation(api.broadcast.reschedule, { sessionToken: f.sessionToken, postId, at: later });
+    const { posts } = await f.t.query(api.broadcast.list, { sessionToken: f.sessionToken, projectId: f.projectId });
+    expect(posts[0]).toMatchObject({ status: "scheduled", scheduledAt: later });
+  });
+
+  test("engagement is recorded only on this project's published channels", async () => {
+    const f = await fixture();
+    const postId = await f.t.mutation(api.broadcast.save, { sessionToken: f.sessionToken, projectId: f.projectId, variants: [{ channel: "x", text: "Hi" }, { channel: "bluesky", text: "Hi" }], assetIds: [] });
+    await f.t.mutation(api.broadcast.schedule, { sessionToken: f.sessionToken, postId });
+    await f.t.mutation(api.broadcast.claimDue, { sessionToken: f.sessionToken });
+    await f.t.mutation(api.broadcast.finish, { sessionToken: f.sessionToken, postId, results: [{ channel: "x", ok: true, url: "https://x.com/i/web/status/1" }, { channel: "bluesky", ok: false, error: "down" }] });
+    const recorded = await f.t.mutation(api.broadcast.recordMetrics, {
+      sessionToken: f.sessionToken, projectId: f.projectId,
+      metrics: [{ postId, channel: "x", likes: 12.4, reposts: -3, replies: 2, impressions: 900 }, { postId, channel: "bluesky", likes: 1, reposts: 0, replies: 0 }],
+    });
+    expect(recorded).toBe(1);
+    const { posts } = await f.t.query(api.broadcast.list, { sessionToken: f.sessionToken, projectId: f.projectId });
+    expect(posts[0].variants[0].metrics).toMatchObject({ likes: 12, reposts: 0, replies: 2, impressions: 900 });
+    expect(posts[0].variants[1].metrics).toBeUndefined();
+  });
 });

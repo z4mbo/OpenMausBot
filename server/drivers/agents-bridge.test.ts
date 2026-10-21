@@ -23,6 +23,7 @@ import {
   bridgedCallTitle,
   createToolBridge,
   createToolDeferral,
+  typedDeferredArguments,
   unbridgedServer,
   type BridgeTool,
 } from "./agents-bridge.ts";
@@ -85,7 +86,6 @@ describe("what a bridged turn is listed", () => {
       "fill_login",
       "memory_update",
       "origin_team_chat_post",
-      "origin_page_publish",
       FIND_TOOL,
       USE_TOOL,
     ]);
@@ -106,7 +106,6 @@ describe("what a bridged turn is listed", () => {
       "send_voice_note",
       "memory_update",
       "origin_team_chat_post",
-      "origin_page_publish",
       FIND_TOOL,
       USE_TOOL,
     ]);
@@ -115,12 +114,12 @@ describe("what a bridged turn is listed", () => {
   it("names every hot tool the catalog really has, so a renamed tool cannot fall out of the list unnoticed", () => {
     const everyName = new Set(everyProfile().flatMap(({ profile: turn }) => names(availableTools(turn))));
     for (const hot of BRIDGE_HOT_TOOL_NAMES) expect(everyName.has(hot), hot).toBe(true);
-    // 12 to 15 of them on any one turn, always fewer than the turn has
+    // 12 to 16 of them on any one turn, always fewer than the turn has
     for (const { name, profile: turn } of everyProfile()) {
       const tools = availableTools(turn);
       const hot = createToolBridge(tools as BridgeTool[]).listed.length - 2;
       expect(hot, name).toBeGreaterThanOrEqual(12);
-      expect(hot, name).toBeLessThanOrEqual(15);
+      expect(hot, name).toBeLessThanOrEqual(16);
       expect(hot, name).toBeLessThan(tools.length / 2);
     }
   });
@@ -167,7 +166,7 @@ describe("what a bridged turn is listed", () => {
       }
     }
     // today that is the two the hot list names, and the team chat post
-    expect(names(availableTools(profile({ ...FULL_CHIEF }))).filter((tool) => reportedAs(tool).some(isOutboundTool))).toEqual(["post_to_room", "send_voice_note", "origin_team_chat_post", "origin_page_publish"]);
+    expect(names(availableTools(profile({ ...FULL_CHIEF }))).filter((tool) => reportedAs(tool).some(isOutboundTool))).toEqual(["post_to_room", "send_voice_note", "origin_team_chat_post"]);
     // and the bridge's own two names are not outward either
     for (const spelling of [...reportedAs(USE_TOOL), ...reportedAs(FIND_TOOL)]) expect(isOutboundTool(spelling), spelling).toBe(false);
     // derived, not listed by hand: a future tool named like a send is kept,
@@ -269,7 +268,6 @@ describe("find_tool", () => {
     ["cron", "propose_routine"],
     ["make an image", "origin_studio_generate"],
     ["post this on X", "origin_broadcast_draft"],
-    ["call this lead", "origin_pipeline_contact"],
     ["design a pricing section", "origin_canvas_edit"],
   ])("ranks the hidden tool first from how a person would ask: %s", async (query, expected) => {
     const matches = (await found(bridgeFor(FULL_CHIEF), query)).matches;
@@ -558,7 +556,7 @@ describe("a turn that lists its domain tools in short", () => {
   it("defers the domain sections only, never a Chief's or an issue's tool", () => {
     const tools = availableTools(profile(FULL_CHIEF)) as BridgeTool[];
     const deferred = names(createToolDeferral(tools).deferred);
-    for (const domain of ["origin_studio_", "origin_broadcast_", "origin_pipeline_", "origin_canvas"]) {
+    for (const domain of ["origin_studio_", "origin_broadcast_", "origin_canvas"]) {
       expect(deferred.some((tool) => tool.startsWith(domain)), domain).toBe(true);
     }
     expect(deferred.every((tool) => DEFERRED_TOOL_DOMAINS.some((domain) => tool.startsWith(domain.prefix)))).toBe(true);
@@ -573,7 +571,6 @@ describe("a turn that lists its domain tools in short", () => {
       expect(names(deferral.listed)).toContain(tool.name);
       expect(await deferral.route(tool.name, {}), tool.name).toBeUndefined();
     }
-    expect(deferral.deferred.filter((tool) => isOutboundTool(tool.name)).length).toBeGreaterThan(0);
     expect(await deferral.route(USE_TOOL, { name: "origin_studio_generate" })).toBeUndefined();
   });
 
@@ -590,12 +587,10 @@ describe("a turn that lists its domain tools in short", () => {
   it.each([
     ["make an image", "origin_studio_generate"],
     ["post this on X", "origin_broadcast_draft"],
-    ["call this lead", "origin_pipeline_contact"],
     ["design a pricing section", "origin_canvas_edit"],
     ["read the canvas", "origin_canvas"],
     ["what posts are scheduled", "origin_broadcast_list"],
     ["save that picture to assets", "origin_studio_save_asset"],
-    ["list my leads", "origin_pipeline_list_leads"],
   ])("ranks the domain tool first from how a person would ask: %s", async (query, expected) => {
     const matches = await matchesFor(deferralFor(FULL_CHIEF), query);
     expect(matches[0]!.name).toBe(expected);
@@ -627,5 +622,25 @@ describe("a turn that lists its domain tools in short", () => {
     const deferral = createToolDeferral(tools);
     expect(deferral.listed).toBe(tools);
     expect(await deferral.route(FIND_TOOL, { query: "make an image" })).toBeUndefined();
+  });
+});
+
+describe("typed arguments for tools listed without their schema", () => {
+  const draft = (availableTools(profile(FULL_CHIEF)) as BridgeTool[]).find((tool) => tool.name === "origin_broadcast_draft")!;
+  const save = (availableTools(profile(FULL_CHIEF)) as BridgeTool[]).find((tool) => tool.name === "origin_studio_save_asset")!;
+
+  it("reads stringified arrays, lists and booleans back as the tool's schema types", () => {
+    expect(typedDeferredArguments({ channels: "[\"x\",\"bluesky\"]", text: "[launch] day", media: "launch.png" }, draft.inputSchema))
+      .toEqual({ channels: ["x", "bluesky"], text: "[launch] day", media: ["launch.png"] });
+    expect(typedDeferredArguments({ channels: "\"x,bluesky\"" }, draft.inputSchema)).toEqual({ channels: ["x", "bluesky"] });
+    expect(typedDeferredArguments({ generation_id: "g1", broadcast: "true", index: "0" }, save.inputSchema)).toEqual({ generation_id: "g1", broadcast: true, index: 0 });
+    expect(typedDeferredArguments({ broadcast: "maybe", index: "1.5" }, save.inputSchema)).toEqual({ broadcast: "maybe", index: "1.5" });
+  });
+
+  it("types a deferred tool's call and leaves every other call as it came", async () => {
+    const deferral = createToolDeferral(availableTools(profile(FULL_CHIEF)) as BridgeTool[]);
+    expect(await deferral.route("origin_broadcast_draft", { channels: "[\"x\"]", text: "hi" })).toEqual({ name: "origin_broadcast_draft", arguments: { channels: ["x"], text: "hi" } });
+    expect(await deferral.route("origin_broadcast_draft", { channels: ["x"], text: "hi" })).toBeUndefined();
+    expect(await deferral.route("origin_create_issue", { title: "[x]" })).toBeUndefined();
   });
 });

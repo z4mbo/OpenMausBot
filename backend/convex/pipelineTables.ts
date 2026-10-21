@@ -1,21 +1,20 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
 
-export const pipelineActor = v.object({ kind: v.union(v.literal("member"), v.literal("agent"), v.literal("system")), name: v.string(), id: v.optional(v.string()) });
+const pipelineActor = v.object({ kind: v.union(v.literal("member"), v.literal("agent"), v.literal("system")), name: v.string(), id: v.optional(v.string()) });
 
-export const pipelineActivityKind = v.union(
+const pipelineActivityKind = v.union(
   v.literal("email"), v.literal("sms"), v.literal("whatsapp"), v.literal("call"), v.literal("ai_call"),
-  v.literal("note"), v.literal("stage"), v.literal("capture"), v.literal("import"),
+  v.literal("note"), v.literal("stage"), v.literal("capture"), v.literal("import"), v.literal("deal"),
 );
 
-/** pending: an agent drafted it and a person must approve it; approved: cleared for the app server to send; received: the lead wrote in. */
-export const pipelineActivityStatus = v.union(
+const pipelineActivityStatus = v.union(
   v.literal("logged"), v.literal("pending"), v.literal("approved"), v.literal("sending"), v.literal("sent"),
   v.literal("in_progress"), v.literal("done"), v.literal("failed"), v.literal("discarded"), v.literal("received"),
 );
 
-export const sequenceChannel = v.union(v.literal("email"), v.literal("sms"), v.literal("whatsapp"), v.literal("ai_call"), v.literal("call_task"));
-export const sequenceStep = v.object({
+const sequenceChannel = v.union(v.literal("email"), v.literal("sms"), v.literal("whatsapp"), v.literal("ai_call"), v.literal("call_task"));
+const sequenceStep = v.object({
   day: v.number(),
   channel: sequenceChannel,
   subject: v.optional(v.string()),
@@ -25,6 +24,23 @@ export const sequenceStep = v.object({
   activityId: v.optional(v.id("pipelineActivities")),
 });
 
+const inboxState = v.union(v.literal("open"), v.literal("snoozed"), v.literal("archived"));
+
+const coachAdvice = {
+  nextAction: v.string(),
+  risk: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+  riskReason: v.string(),
+  followUp: v.object({ channel: v.union(v.literal("email"), v.literal("sms"), v.literal("whatsapp")), subject: v.optional(v.string()), body: v.string() }),
+};
+const dealCoach = v.object({ ...coachAdvice, by: v.string(), at: v.number() });
+
+const salesLineItem = v.object({ name: v.string(), quantity: v.number(), unitPrice: v.number() });
+const salesViewFilters = v.object({
+  query: v.optional(v.string()), stage: v.optional(v.string()), owner: v.optional(v.string()), source: v.optional(v.string()), tag: v.optional(v.string()),
+  unread: v.optional(v.boolean()), reach: v.optional(v.union(v.literal("email"), v.literal("phone"))),
+});
+
+/** Known risk: these tables keep existing Sales rows that no code reads or writes any more. */
 export const pipelineTables = {
   pipelineLeads: defineTable({
     projectId: v.id("projects"),
@@ -33,6 +49,7 @@ export const pipelineTables = {
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
     source: v.string(),
+    sources: v.optional(v.array(v.string())),
     stage: v.string(),
     order: v.number(),
     value: v.optional(v.number()),
@@ -45,10 +62,13 @@ export const pipelineTables = {
     unreadReplies: v.optional(v.number()),
     lastReplyAt: v.optional(v.number()),
     stageChangedAt: v.optional(v.number()),
+    inbox: v.optional(inboxState),
+    inboxAt: v.optional(v.number()),
+    snoozedUntil: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_projectId_and_updatedAt", ["projectId", "updatedAt"]).index("by_projectId_and_email", ["projectId", "email"])
-    .index("by_projectId_and_phone", ["projectId", "phone"]),
+    .index("by_projectId_and_phone", ["projectId", "phone"]).index("by_projectId_and_inbox_and_inboxAt", ["projectId", "inbox", "inboxAt"]),
   pipelineActivities: defineTable({
     projectId: v.id("projects"),
     leadId: v.id("pipelineLeads"),
@@ -85,7 +105,11 @@ export const pipelineTables = {
     twilioAuthToken: v.optional(v.string()),
     brevoSecret: v.optional(v.string()),
     replyToEmail: v.optional(v.string()),
-  }).index("by_projectId", ["projectId"]).index("by_captureToken", ["captureToken"]).index("by_inboundToken", ["inboundToken"]),
+    inboxIndexed: v.optional(v.boolean()),
+    stripeToken: v.optional(v.string()),
+    /** Security: the Stripe webhook signing secret, sealed with ORIGIN_SEALING_KEY; no query ever returns it. */
+    stripeSecret: v.optional(v.string()),
+  }).index("by_projectId", ["projectId"]).index("by_captureToken", ["captureToken"]).index("by_inboundToken", ["inboundToken"]).index("by_stripeToken", ["stripeToken"]),
   pipelineSequences: defineTable({
     projectId: v.id("projects"),
     leadId: v.id("pipelineLeads"),
@@ -98,4 +122,44 @@ export const pipelineTables = {
     stopReason: v.optional(v.string()),
     updatedAt: v.number(),
   }).index("by_leadId", ["leadId"]).index("by_status_and_nextDueAt", ["status", "nextDueAt"]),
+  pipelineDeals: defineTable({
+    projectId: v.id("projects"),
+    leadId: v.id("pipelineLeads"),
+    title: v.string(),
+    value: v.number(),
+    currency: v.string(),
+    stage: v.string(),
+    closeDate: v.optional(v.string()),
+    lineItems: v.array(salesLineItem),
+    notes: v.optional(v.string()),
+    wonAmount: v.optional(v.number()),
+    reason: v.optional(v.string()),
+    closedAt: v.optional(v.number()),
+    closedBy: v.optional(pipelineActor),
+    wonRequest: v.optional(v.object({ amount: v.number(), reason: v.optional(v.string()), by: pipelineActor, at: v.number() })),
+    payment: v.optional(v.object({
+      url: v.string(), linkId: v.string(), amount: v.number(), createdAt: v.number(), paidAt: v.optional(v.number()), paidAmount: v.optional(v.number()),
+      paidCurrency: v.optional(v.string()), checkoutId: v.optional(v.string()),
+    })),
+    coach: v.optional(dealCoach),
+    createdBy: pipelineActor,
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_projectId_and_updatedAt", ["projectId", "updatedAt"]).index("by_leadId", ["leadId"]).index("by_paymentLinkId", ["payment.linkId"]),
+  pipelineViews: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    filters: salesViewFilters,
+    createdBy: v.string(),
+    createdAt: v.number(),
+  }).index("by_projectId", ["projectId"]),
+  pipelineTemplates: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    channel: v.optional(v.union(v.literal("email"), v.literal("sms"), v.literal("whatsapp"))),
+    subject: v.optional(v.string()),
+    body: v.string(),
+    updatedBy: v.string(),
+    updatedAt: v.number(),
+  }).index("by_projectId", ["projectId"]),
 };

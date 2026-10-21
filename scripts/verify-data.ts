@@ -10,7 +10,7 @@ import { closeBrowserSession } from "../server/browser-engine.ts";
 import { waitForExit } from "../server/testing/cleanup.ts";
 import { DATA_ROUTES, DATA_TOOL_NAMES, type DataSheet } from "../shared/data-surface.ts";
 import { launchVerificationServer, runControlOmb, verificationServerEnvironment } from "./control-omb.ts";
-import { agentBrowser, ensureUiBrowser, sessionEnv, type UiHandle } from "./testing/control-omb-ui.ts";
+import { agentBrowser, ensureUiBrowser, sessionEnv, startSessionDaemon, type UiHandle } from "./testing/control-omb-ui.ts";
 import { mountPreview, parkUntilSignal, type MountedPreview } from "./testing/preview-fixture.ts";
 
 assert(process.argv.slice(2).every((arg) => arg === "--check"), "Usage: node --experimental-strip-types scripts/verify-data.ts [--check]");
@@ -125,6 +125,7 @@ try {
   const { binary, chrome } = await ensureUiBrowser(process.env, (line) => console.error(`Data fixture: ${line}`));
   // The private HOME isolates sessions; one letter fits macOS's socket-path limit.
   handle = { url, previewUrl: preview.previewUrl, binary, chrome, home: dataDir, session: "d", botId: bot.id, logPath };
+  await startSessionDaemon(binary, sessionEnv(handle));
   await agentBrowser(binary, sessionEnv(handle), ["open", preview.previewUrl], 120_000);
   const handlePath = join(dataDir, "ui.json");
   writeFileSync(handlePath, JSON.stringify(handle, null, 2) + "\n", { mode: 0o600 });

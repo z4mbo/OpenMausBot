@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { ColorField, NumberField, Section, Toggles, iconToggle } from "./controls";
+import { CornerFields, FillSection, ImageSection } from "./InspectorPaint";
 import {
   AlignCenter, AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignHorizontalDistributeCenter, AlignLeft, AlignRight,
   AlignStartHorizontal, AlignStartVertical, AlignVerticalDistributeCenter, ArrowDown, ArrowRight, Minus, Plus,
@@ -9,102 +11,18 @@ import { cn } from "@/lib/cn";
 import { Select } from "../../Select";
 import type { SelectionApi } from "./CanvasEditor";
 import { unionBox, worldBounds, worldBox } from "./geometry";
-import { LeadFormSection, LinkSection } from "./PageInspector";
+import { LinkSection } from "./PageInspector";
 import type { CanvasScene } from "./use-canvas-scene";
-
-export const field = "h-7 w-full min-w-0 rounded-md border border-transparent bg-inset px-1.5 text-[12px] tabular-nums text-ink outline-none transition-colors hover:border-hairline/60 focus:border-accent/70 disabled:opacity-50";
-export const iconToggle = "inline-flex h-7 min-w-7 flex-1 items-center justify-center rounded-md text-ink-secondary outline-none transition-colors duration-100 hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-40";
-
-export function Section({ title, action, children }: { title: string; action?: ReactNode; children?: ReactNode }) {
-  return (
-    <section className="border-b border-hairline/40 px-3 py-2.5">
-      <div className="mb-1.5 flex h-6 items-center justify-between">
-        <h3 className="text-[11.5px] font-medium text-ink-secondary">{title}</h3>
-        {action}
-      </div>
-      {children && <div className="flex flex-col gap-1.5">{children}</div>}
-    </section>
-  );
-}
+import { BrandSection } from "./BrandSection";
+import { brandFont } from "../../../../shared/brand-fonts";
+import type { BrandKit } from "../../../../shared/brand-kit";
+import { TEXT_STYLES, textStylePatch } from "../../../../shared/canvas-styles";
+import { BooleanSection, ComponentSection, ConstraintsSection, EffectsSection, GridsSection, LayoutExtras } from "./InspectorExtras";
+import { DevPanel, PrototypePanel, TabBar, type InspectorTab } from "./InspectorTabs";
 
 const same = <T,>(values: readonly T[]): T | undefined => (values.every((value) => value === values[0]) ? values[0] : undefined);
-const tidy = (value: number) => String(Math.round(value * 100) / 100);
 
-export function NumberField({ label, value, onCommit, min, max, step = 1, disabled, suffix }: {
-  label: ReactNode; value: number | undefined; onCommit(value: number): void; min?: number; max?: number; step?: number; disabled?: boolean; suffix?: string;
-}) {
-  const [draft, setDraft] = useState<string | null>(null);
-  const shown = draft ?? (value === undefined ? "" : tidy(value));
-  const clamp = (next: number) => Math.min(max ?? Infinity, Math.max(min ?? -Infinity, next));
-  const commit = (text: string) => {
-    setDraft(null);
-    const parsed = Number(text.replace(",", ".").replace(/[^\d.+-]/g, ""));
-    if (text.trim() && Number.isFinite(parsed) && parsed !== value) onCommit(clamp(parsed));
-  };
-  const scrub = useRef<{ x: number; start: number } | null>(null);
-  return (
-    <label className="flex min-w-0 items-center gap-1 rounded-md">
-      <span className={cn("w-4 shrink-0 select-none text-center text-[11px] text-ink-tertiary", !disabled && value !== undefined && "cursor-ew-resize")}
-        onPointerDown={(event) => { if (disabled || value === undefined) return; event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); scrub.current = { x: event.clientX, start: value }; }}
-        onPointerMove={(event) => { if (!scrub.current) return; const next = clamp(Math.round(scrub.current.start + (event.clientX - scrub.current.x) * step)); setDraft(tidy(next)); }}
-        onPointerUp={() => { if (!scrub.current) return; scrub.current = null; if (draft !== null) commit(draft); }}>
-        {label}
-      </span>
-      <input className={field} value={shown} placeholder={value === undefined ? "Mixed" : undefined} disabled={disabled} inputMode="decimal" aria-label={typeof label === "string" ? label : undefined}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={(event) => commit(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); }
-          if (event.key === "Escape") { setDraft(null); event.currentTarget.blur(); }
-          if ((event.key === "ArrowUp" || event.key === "ArrowDown") && value !== undefined) {
-            event.preventDefault();
-            onCommit(clamp(value + (event.key === "ArrowUp" ? 1 : -1) * step * (event.shiftKey ? 10 : 1)));
-          }
-        }} />
-      {suffix && <span className="shrink-0 text-[11px] text-ink-tertiary">{suffix}</span>}
-    </label>
-  );
-}
-
-export function ColorField({ label, value, onPreview, onCommit, onRemove, disabled }: { label: string; value: string | null | undefined; onPreview(value: string): void; onCommit(value: string): void; onRemove?: () => void; disabled?: boolean }) {
-  const picker = useRef<HTMLInputElement>(null);
-  const [draft, setDraft] = useState<string | null>(null);
-  const commitRef = useRef(onCommit);
-  commitRef.current = onCommit;
-  useEffect(() => {
-    const input = picker.current;
-    if (!input) return;
-    const change = () => commitRef.current(input.value.toUpperCase());
-    input.addEventListener("change", change);
-    return () => input.removeEventListener("change", change);
-  }, []);
-  const hex = value ? value.slice(0, 7) : "#000000";
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="relative size-7 shrink-0 overflow-hidden rounded-md border border-hairline/60" style={{ background: value ?? "transparent" }}>
-        <input ref={picker} type="color" aria-label={`${label} colour`} value={hex.length === 7 ? hex : "#000000"} disabled={disabled}
-          onInput={(event) => onPreview(event.currentTarget.value.toUpperCase())}
-          className="absolute inset-0 size-full cursor-pointer opacity-0" />
-      </span>
-      <input className={field} aria-label={`${label} hex`} value={draft ?? (value ?? "")} placeholder="Mixed" disabled={disabled}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={(event) => { setDraft(null); const next = event.target.value.trim(); if (/^#?[0-9a-f]{3,8}$/i.test(next)) onCommit((next.startsWith("#") ? next : `#${next}`).toUpperCase()); }}
-        onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} />
-      {onRemove && <button type="button" className={cn(iconToggle, "max-w-7")} aria-label={`Remove ${label.toLowerCase()}`} disabled={disabled} onClick={onRemove}><Minus size={13} /></button>}
-    </div>
-  );
-}
-
-function Toggles<T extends string>({ value, options, onChange, label, disabled }: { value: T | undefined; options: readonly { value: T; label: ReactNode; title: string }[]; onChange(value: T): void; label: string; disabled?: boolean }) {
-  return (
-    <div role="group" aria-label={label} className="flex gap-0.5 rounded-md bg-inset p-0.5">
-      {options.map((option) => (
-        <button key={option.value} type="button" title={option.title} aria-label={option.title} aria-pressed={option.value === value} disabled={disabled} onClick={() => onChange(option.value)}
-          className={cn(iconToggle, "h-6 text-[11.5px]", option.value === value && "bg-raised text-ink")}>{option.label}</button>
-      ))}
-    </div>
-  );
-}
+export { ColorField, NumberField, Section, field, iconToggle } from "./controls";
 
 type Align = "left" | "hcenter" | "right" | "top" | "vcenter" | "bottom" | "hspace" | "vspace";
 
@@ -147,7 +65,20 @@ const WEIGHTS = [300, 400, 500, 600, 700, 800, 900] as const;
 const WEIGHT_NAMES: Record<number, string> = { 300: "Light", 400: "Regular", 500: "Medium", 600: "Semibold", 700: "Bold", 800: "Extra bold", 900: "Black" };
 const DEFAULT_LAYOUT: StackLayout = { direction: "column", gap: 16, padding: [16, 16, 16, 16], align: "start", justify: "start" };
 
-export function Inspector({ canvas, selection, readOnly, exportSection }: { canvas: CanvasScene; selection: SelectionApi; readOnly: boolean; exportSection: ReactNode }) {
+export function Inspector(props: { canvas: CanvasScene; selection: SelectionApi; readOnly: boolean; exportSection: ReactNode; brand?: BrandKit | null; teamId?: string; onPresent?: (frameId: string | null) => void; header?: ReactNode }) {
+  const [tab, setTab] = useState<InspectorTab>("design");
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      {props.header}
+      <TabBar tab={tab} onTab={setTab} />
+      {tab === "design" ? <DesignPanel {...props} />
+        : tab === "prototype" ? <PrototypePanel canvas={props.canvas} selection={props.selection} readOnly={props.readOnly} onPresent={(id) => props.onPresent?.(id)} />
+        : <DevPanel canvas={props.canvas} selection={props.selection} />}
+    </div>
+  );
+}
+
+function DesignPanel({ canvas, selection, readOnly, exportSection, brand, teamId }: { canvas: CanvasScene; selection: SelectionApi; readOnly: boolean; exportSection: ReactNode; brand?: BrandKit | null; teamId?: string }) {
   const { scene, index } = canvas;
   const nodes = selection.nodes;
   const update = (patch: Partial<CanvasNode> | ((node: CanvasNode) => Partial<CanvasNode>)) =>
@@ -190,10 +121,12 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
   const parent = single ? effectiveParent(scene, single) : null;
   const parentLayout = parent ? scene.get(parent)?.layout : undefined;
   const texts = nodes.filter((node) => node.type === "text");
+  const sharedFamily = same(texts.map((node) => node.family));
+  const familyName = sharedFamily ? brandFont(sharedFamily)?.family : texts.some((node) => node.family) ? "Mixed" : undefined;
   const strokeOnly = nodes.every((node) => node.type === "line" || node.type === "arrow");
   const radiusable = nodes.every((node) => node.type === "rect" || node.type === "frame" || node.type === "image");
   const rotatable = nodes.every((node) => node.type !== "frame" && node.type !== "group");
-  const fill = same(nodes.map((node) => node.fill));
+  const constrained = nodes.every((node) => { const owner = scene.get(effectiveParent(scene, node) ?? ""); return owner && (owner.type === "frame" || owner.type === "group") && !owner.layout; });
   const stroke = same(nodes.map((node) => node.stroke));
   const position = single ? { x: single.x, y: single.y } : undefined;
   const layout = single?.type === "frame" ? single.layout : undefined;
@@ -226,6 +159,8 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
           )}
         </Section>
       )}
+      {!readOnly && <BooleanSection canvas={canvas} selection={selection} disabled={disabled} />}
+      {single && <ComponentSection canvas={canvas} selection={selection} node={single} disabled={disabled} teamId={teamId ?? ""} />}
       {single?.type === "frame" && (
         <Section title="Frame">
           <Select size="sm" aria-label="Frame size" disabled={disabled} value={FRAME_PRESETS.find((preset) => preset.width === single.width && preset.height === single.height)?.name ?? ""}
@@ -238,6 +173,7 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
           </label>
         </Section>
       )}
+      {brand && !readOnly && <BrandSection canvas={canvas} nodes={nodes} kit={brand} disabled={disabled} />}
       <Section title="Layout">
         <div className="grid grid-cols-2 gap-1.5">
           <NumberField label="X" value={position?.x} disabled={disabled || !single || Boolean(parentLayout)} onCommit={(x) => update({ x })} />
@@ -245,14 +181,16 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
           <NumberField label="W" value={same(nodes.map((node) => node.width))} min={1} disabled={disabled} onCommit={(width) => update((node) => ({ width, ...(node.type === "text" ? { autoWidth: false } : {}), ...(node.points ? { points: node.points.map((value, at) => (at % 2 === 0 ? value * (width / Math.max(1, node.width)) : value)) } : {}) }))} />
           <NumberField label="H" value={same(nodes.map((node) => node.height))} min={0} disabled={disabled || texts.length > 0} onCommit={(height) => update((node) => ({ height, ...(node.points ? { points: node.points.map((value, at) => (at % 2 === 1 ? value * (height / Math.max(1, node.height)) : value)) } : {}) }))} />
           {rotatable && <NumberField label="°" value={same(nodes.map((node) => node.rotation))} min={-180} max={180} disabled={disabled} onCommit={(rotation) => update({ rotation })} />}
-          {radiusable && <NumberField label="R" value={same(nodes.map((node) => node.radius))} min={0} disabled={disabled} onCommit={(radius) => update({ radius })} />}
         </div>
+        {radiusable && <CornerFields nodes={nodes} disabled={disabled} update={update} />}
         {parentLayout && single && (
           <label className="flex items-center gap-2 text-[12px] text-ink-secondary">
             <input type="checkbox" className="accent-[var(--color-accent)]" checked={Boolean(single.grow)} disabled={disabled} onChange={(event) => update({ grow: event.target.checked || undefined })} />Fill the free space
           </label>
         )}
+        {parentLayout && single && <LayoutExtras canvas={canvas} node={single} disabled={disabled} update={update} />}
       </Section>
+      {constrained && <ConstraintsSection nodes={nodes} disabled={disabled} update={update} />}
       {single?.type === "frame" && (
         <Section title="Auto layout" action={!readOnly && (
           <button type="button" className={cn(iconToggle, "max-w-7 flex-none")} aria-label={layout ? "Remove auto layout" : "Add auto layout"} title={layout ? "Remove auto layout" : "Add auto layout (Shift+A)"}
@@ -275,15 +213,23 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
                 <button type="button" aria-pressed={hug("width")} disabled={disabled} onClick={() => toggleHug("width")} className={cn(iconToggle, "text-[11.5px]", hug("width") && "bg-raised text-ink")}>Hug width</button>
                 <button type="button" aria-pressed={hug("height")} disabled={disabled} onClick={() => toggleHug("height")} className={cn(iconToggle, "text-[11.5px]", hug("height") && "bg-raised text-ink")}>Hug height</button>
               </div>
+              <LayoutExtras canvas={canvas} node={single} disabled={disabled} update={update} />
             </>
           )}
         </Section>
       )}
       {texts.length > 0 && texts.length === nodes.length && (
         <Section title="Text">
+          <Select size="sm" aria-label="Text style" disabled={disabled} value={same(texts.map((node) => node.textStyle ?? "")) ?? "mixed"}
+            onChange={(event) => { const style = TEXT_STYLES.find((item) => item.id === event.target.value); if (style) update({ ...textStylePatch(style, brand), unmeasured: true }); else update({ textStyle: undefined }); }}>
+            {same(texts.map((node) => node.textStyle ?? "")) === undefined && <option value="mixed" disabled>Mixed styles</option>}
+            <option value="">No text style</option>
+            {TEXT_STYLES.map((style) => <option key={style.id} value={style.id}>{style.name} · {style.fontSize}</option>)}
+          </Select>
           <div className="grid grid-cols-2 gap-1.5">
-            <Select size="sm" aria-label="Font" disabled={disabled} value={same(texts.map((node) => node.font)) ?? ""} onChange={(event) => update({ font: event.target.value as CanvasFont })}>
-              {same(texts.map((node) => node.font)) === undefined && <option value="">Mixed</option>}
+            <Select size="sm" aria-label="Font" disabled={disabled} value={familyName ? "family" : same(texts.map((node) => node.font)) ?? ""} onChange={(event) => update({ font: event.target.value as CanvasFont, family: undefined })}>
+              {familyName && <option value="family" disabled>{familyName}</option>}
+              {!familyName && same(texts.map((node) => node.font)) === undefined && <option value="">Mixed</option>}
               <option value="sans">Sans</option><option value="serif">Serif</option><option value="mono">Mono</option>
             </Select>
             <Select size="sm" aria-label="Weight" disabled={disabled} value={String(same(texts.map((node) => node.fontWeight)) ?? "")} onChange={(event) => update({ fontWeight: Number(event.target.value) })}>
@@ -300,16 +246,7 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
           </label>
         </Section>
       )}
-      {!strokeOnly && (
-        <Section title={texts.length === nodes.length ? "Colour" : "Fill"} action={!readOnly && fill === null && (
-          <button type="button" className={cn(iconToggle, "max-w-7 flex-none")} aria-label="Add fill" onClick={() => update({ fill: texts.length ? "#111111" : "#D9D9D9" })}><Plus size={13} /></button>
-        )}>
-          {fill !== null && (
-            <ColorField label="Fill" value={fill} disabled={disabled} onPreview={(value) => preview({ fill: value })} onCommit={(value) => update({ fill: value })}
-              onRemove={texts.length === nodes.length ? undefined : () => update({ fill: null })} />
-          )}
-        </Section>
-      )}
+      {!strokeOnly && <FillSection nodes={nodes} brand={brand} readOnly={readOnly} disabled={disabled} update={update} preview={preview} text={texts.length === nodes.length} />}
       {texts.length < nodes.length && (
         <Section title="Stroke" action={!readOnly && stroke === null && (
           <button type="button" className={cn(iconToggle, "max-w-7 flex-none")} aria-label="Add stroke" onClick={() => update((node) => ({ stroke: "#111111", strokeWidth: node.strokeWidth || 1 }))}><Plus size={13} /></button>
@@ -327,14 +264,10 @@ export function Inspector({ canvas, selection, readOnly, exportSection }: { canv
         <NumberField label="%" value={(() => { const value = same(nodes.map((node) => node.opacity)); return value === undefined ? undefined : Math.round(value * 100); })()} min={0} max={100} disabled={disabled}
           onCommit={(value) => update({ opacity: value / 100 })} />
       </Section>
-      {nodes.every((node) => node.type === "image") && (
-        <Section title="Image">
-          <Toggles label="Image fit" value={same(nodes.map((node) => node.imageFit))} disabled={disabled} onChange={(imageFit) => update({ imageFit })}
-            options={[{ value: "cover", label: "Fill", title: "Fill the box" }, { value: "contain", label: "Fit", title: "Fit inside the box" }]} />
-        </Section>
-      )}
+      <EffectsSection nodes={nodes} disabled={disabled} update={update} preview={preview} />
+      {single?.type === "frame" && <GridsSection node={single} disabled={disabled} update={update} />}
+      {nodes.every((node) => node.type === "image") && <ImageSection nodes={nodes} disabled={disabled} update={update} />}
       {single && <LinkSection node={single} disabled={disabled} update={update} />}
-      {single?.type === "frame" && <LeadFormSection node={single} readOnly={readOnly} disabled={disabled} update={update} />}
       {exportSection}
     </div>
   );

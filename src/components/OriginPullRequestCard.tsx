@@ -5,15 +5,15 @@ import { openExternalLink } from "@/lib/app-links";
 import { originGitHub } from "@/lib/origin-github";
 import { cn } from "@/lib/cn";
 import { pullRequestCardTone, type OriginPullRequestCard as Card } from "../../shared/origin-pull-request";
-import { ghostButton, primaryButton } from "./origin-pages/ui";
+import { CardFrame, quietButton, solidButton } from "./origin-cards/CardFrame";
 
-const CHECKS: Record<string, { label: string; tone: string }> = {
+export const CHECKS: Record<string, { label: string; tone: string }> = {
   success: { label: "Checks passed", tone: "text-success" },
   failure: { label: "Checks failed", tone: "text-danger" },
   pending: { label: "Checks running", tone: "text-warning" },
   none: { label: "No checks", tone: "text-ink-tertiary" },
 };
-const REVIEWS: Record<string, string> = {
+export const REVIEWS: Record<string, string> = {
   approved: "Approved",
   changes_requested: "Changes requested",
   review_required: "Review required",
@@ -46,24 +46,11 @@ export function OriginPullRequestCard({ message }: { message: Message }) {
     }
   };
 
+  const meta = `#${card.number}${card.projectName ? ` · ${card.projectName}` : ""}${card.branch ? ` · ${card.branch} → ${card.baseBranch}` : ""}`;
   return (
-    <section data-origin-pull-request={card.number} aria-label={`Pull request #${card.number}`}
-      className="w-full max-w-[26rem] rounded-2xl bg-inset/50 p-3">
-      <div className="flex items-start gap-2.5">
-        {tone === "done" ? <GitMerge size={16} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" />
-          : <GitPullRequest size={16} className={cn("mt-0.5 shrink-0", tone === "ready" ? "text-success" : tone === "blocked" ? "text-danger" : "text-ink-tertiary")} aria-hidden="true" />}
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-semibold text-ink" title={card.title}>{card.title}</div>
-          <div className="truncate text-[12px] text-ink-tertiary">
-            #{card.number}{card.projectName ? ` · ${card.projectName}` : ""}{card.branch ? ` · ${card.branch} → ${card.baseBranch}` : ""}
-          </div>
-        </div>
-        <button type="button" className="shrink-0 rounded-md p-1 text-ink-tertiary transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink"
-          aria-label="Open on GitHub" title="Open on GitHub" onClick={() => void openExternalLink(card.url)}>
-          <ExternalLink size={13} />
-        </button>
-      </div>
-
+    <CardFrame kind="pull-request" data={{ "data-origin-pull-request": String(card.number) }} label={`Pull request #${card.number}`}
+      icon={tone === "done" ? GitMerge : GitPullRequest} iconClassName={tone === "done" ? undefined : tone === "ready" ? "text-success" : tone === "blocked" ? "text-danger" : "text-ink-tertiary"}
+      title={card.title} titleHint={card.title} meta={meta} openLabel="Open on GitHub" openIcon={ExternalLink} onOpen={() => void openExternalLink(card.url)}>
       <dl className="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-1 text-[12px]">
         <dt className="sr-only">Size</dt>
         <dd className="tabular-nums text-ink-secondary">
@@ -89,10 +76,10 @@ export function OriginPullRequestCard({ message }: { message: Message }) {
         <div className="mt-2.5 flex flex-col gap-2 motion-safe:animate-pop-in" role="group" aria-label="Confirm merge">
           <p className="text-[12px] text-ink-secondary">{mergeConfirmation(card)}</p>
           <div className="flex gap-2">
-            <button type="button" className={primaryButton} disabled={phase.kind === "working"} onClick={() => void merge()}>
+            <button type="button" className={solidButton} disabled={phase.kind === "working"} onClick={() => void merge()}>
               {phase.kind === "working" ? <Loader2 size={13} className="animate-spin" /> : <GitMerge size={13} />}Merge
             </button>
-            <button type="button" className={ghostButton} disabled={phase.kind === "working"} onClick={() => setPhase({ kind: "idle" })}>
+            <button type="button" className={quietButton} disabled={phase.kind === "working"} onClick={() => setPhase({ kind: "idle" })}>
               <X size={13} />Cancel
             </button>
           </div>
@@ -100,11 +87,11 @@ export function OriginPullRequestCard({ message }: { message: Message }) {
       ) : (
         <div className="mt-2.5 flex flex-col gap-1.5">
           {phase.kind === "error" && <p className="text-[12px] text-danger" role="alert">{phase.text}</p>}
-          <button type="button" className={cn(primaryButton, "self-start")} onClick={() => setPhase({ kind: "confirm" })}>
+          <button type="button" className={cn(solidButton, "self-start")} onClick={() => setPhase({ kind: "confirm" })}>
             <GitMerge size={13} />Approve &amp; merge
           </button>
         </div>
       )}
-    </section>
+    </CardFrame>
   );
 }

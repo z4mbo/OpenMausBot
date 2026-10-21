@@ -85,3 +85,31 @@ describe("issue editor collaboration", () => {
     expect(field("Issue title").value).toBe("Second task title");
   });
 });
+
+describe("issue actions menu", () => {
+  it("opens outside the lane that would clip it and returns focus to its button when Escape closes it", async () => {
+    fixture.task = { _id: "task", columnId: "todo", title: "Original title", priority: "medium", done: false, order: 0, createdAt: 1, updatedAt: 1 };
+    render();
+    const trigger = host.querySelector<HTMLButtonElement>('button[aria-label="Actions for Original title"]')!;
+    flushSync(() => trigger.click());
+    const menu = document.querySelector<HTMLElement>('[role="menu"]')!;
+    expect(menu).not.toBeNull();
+    expect(host.contains(menu)).toBe(false);
+    flushSync(() => { (document.activeElement ?? menu).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
+    await vi.waitFor(() => expect(document.querySelector('[role="menu"]')).toBeNull());
+    expect(document.activeElement).toBe(trigger);
+  });
+});
+
+describe("completing through the Chief", () => {
+  it("only promises a move to In progress when the board has that column", async () => {
+    const { CompleteIssueDialog } = await import("./CompleteIssueDialog");
+    const task = { _id: "task", columnId: "todo", title: "Original title", priority: "medium", done: false, order: 0, createdAt: 1, updatedAt: 1, githubIssueNumber: 4 } as CloudTask;
+    const project = { _id: "project", name: "Fixture", memberRole: "owner", repoUrl: "https://github.com/fixture/app" } as never;
+    const dialog = (column?: string) => flushSync(() => root.render(createElement(CompleteIssueDialog, { project, projectId: "project", task, implementer: { name: "Atlas", column, start: async () => {} }, onClose() {} })));
+    dialog();
+    expect(document.body.textContent).not.toContain("In progress");
+    dialog("Doing");
+    expect(document.body.textContent).toContain("It moves to Doing now.");
+  });
+});

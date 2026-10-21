@@ -9,7 +9,7 @@ type Json = Record<string, unknown>;
 
 const swatch = (fill: string, label: string) => `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"><rect width="320" height="320" fill="${fill}"/><text x="24" y="290" font-family="sans-serif" font-size="28" fill="white">${label}</text></svg>`)}`;
 
-/** One project with posts, Studio content, captured leads and issues, and a campaign that links some of them. */
+/** One project with posts, Studio content and issues, and a campaign that links some of them. */
 async function seed(convex: FakeConvex) {
   const { t, ref } = convex;
   const { createSession } = await convex.load<{ createSession(ctx: unknown, userId: string): Promise<string> }>("convex/lib/auth.ts");
@@ -31,7 +31,7 @@ async function seed(convex: FakeConvex) {
 
   const day = (offset: number, hour: number) => { const at = new Date(); at.setDate(at.getDate() + offset); at.setHours(hour, 0, 0, 0); return at.getTime(); };
   const post = (variants: Json[], agent?: Json) => o.mutation("broadcast:save", { projectId, variants, assetIds: [], ...(agent ? { agent } : {}) }).then(String);
-  const launched = await post([{ channel: "x", text: "Origin 0.4 is live: campaigns tie Studio, Broadcast and Pipeline together. https://origin.test/?utm_campaign=spring-launch" }, { channel: "linkedin", text: "Origin 0.4 is live." }]);
+  const launched = await post([{ channel: "x", text: "Origin 0.4 is live: campaigns tie Studio and Broadcast together. https://origin.test/?utm_campaign=spring-launch" }, { channel: "linkedin", text: "Origin 0.4 is live." }]);
   await t.run((ctx) => ctx.db.patch(launched, { status: "published", variants: [
     { channel: "x", text: "Origin 0.4 is live.", result: "published", url: "https://x.com/i/web/status/1849", publishedAt: day(-2, 10) },
     { channel: "linkedin", text: "Origin 0.4 is live.", result: "published", url: "https://www.linkedin.com/feed/update/urn:li:share:1", publishedAt: day(-2, 10) },
@@ -50,16 +50,6 @@ async function seed(convex: FakeConvex) {
   const square = await generation("Square launch card with the logo", "image", "#2b8a3e");
   const clip = await generation("Five second teaser clip", "video", "#000");
   await generation("Team photo collage", "image", "#a61e4d");
-
-  await o.mutation("pipeline:configure", { projectId, captureEnabled: true });
-  const token = await t.run(async (ctx) => String((await ctx.db.query("pipelineSettings").first())!.captureToken));
-  const capture = (fields: Json) => t.mutation(ref("pipeline:capture"), { token, ...fields });
-  await capture({ name: "Grace Hopper", email: "grace@navy.test", company: "Navy", source: "spring-launch" });
-  await capture({ name: "Alan Turing", email: "alan@bletchley.test", page: "https://origin.test/pricing?utm_source=x&utm_campaign=spring-launch" });
-  await capture({ name: "Linus", email: "linus@kernel.test", page: "https://origin.test/?utm_campaign=other" });
-  const board = await o.query("pipeline:board", { projectId }) as { leads: { _id: string; name: string }[] };
-  const grace = board.leads.find((lead) => lead.name === "Grace Hopper")!._id;
-  await o.mutation("pipeline:upsertLead", { projectId, leadId: grace, stage: "Won", value: 1200 });
 
   const issue = (title: string) => o.mutation("tasks:createTask", { projectId, title, priority: "medium", assignedToEmail: "ada@fixture.test", dueDate: new Date(day(7, 12)).toISOString().slice(0, 10) }).then(String);
   const landing = await issue("Landing page for the launch");
