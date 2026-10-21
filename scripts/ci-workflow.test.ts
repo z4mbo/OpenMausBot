@@ -29,7 +29,7 @@ function gateNeeds(runtime: string) {
 
 describe("CI concurrency", () => {
   it("supersedes old PR checks but never cancels a running main or merge-queue run", () => {
-    expect(workflow.on.push.branches).toEqual(["main"]);
+    expect(workflow.on.push.branches).toEqual(["main", "origin-integration"]);
     expect(workflow.on).toHaveProperty("merge_group");
     expect(workflow.concurrency["cancel-in-progress"]).toBe("${{ github.event_name == 'pull_request' }}");
   });

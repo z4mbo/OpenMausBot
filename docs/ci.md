@@ -4,6 +4,10 @@ Every PR still runs the workflow and its static checks: locale validation,
 typecheck, lint, Electron checks, the UI build, CI-selection tests and the
 verification-documentation checks. Selection never skips the entire workflow.
 
+Direct pushes to `main` and `origin-integration` also run CI. Origin releases
+are prepared on the integration branch, so a desktop build or backend/site
+build alone cannot stand in for its full CI result.
+
 - Root Markdown files, Markdown under `docs/`, and `.github/FUNDING.yml` alone
   do not run the runtime jobs.
 - Any other change runs the runtime suite.
