@@ -1,0 +1,33 @@
+{
+  "scope": "Read-only release review plus explicitly assigned Composer/Page conflict integration",
+  "baselineSource": "fa83fb6b9e7e6e7e8195e93405a975007917872a",
+  "auditHeadAtStart": "bdea56e9ed6bc0882fa8173465bcb735d4fe3f66",
+  "frozenMergedSource": null,
+  "ownedPaths": {
+    "src/components/origin-broadcast/BroadcastComposer.tsx": "37e5438e33e0b34eb0331849e7745f155e5e69795f2cbadefa6dbb96397656bd",
+    "src/components/origin-broadcast/BroadcastPage.tsx": "9cf7bc7ada3dc5962952364921f4059ef97cada7b4aebb9a56449b90f4653d58",
+    "src/components/origin-broadcast/BroadcastComposer.readiness.test.ts": "67e257a39eb3c3b847f618e987d2163525e31c873b092c7583e4b572a8d6f2ef"
+  },
+  "behavior": [
+    "Preserve 0.7.1 Publish naming, multiple account selection, reel format, previews and calendar controls",
+    "Require known local accounts for every unpublished channel before publish or schedule",
+    "Do not adopt another account silently when an explicit saved account is missing",
+    "Keep draft and approval available without a connection; preserve saved account identity in draft mutations",
+    "Offer an explicit action to replace an unavailable selected account with an available one",
+    "Wrap account connection controls and show unknown/empty state notices",
+    "Remount per-project Publish state so a project switch cannot retain previous-project accounts or editor state"
+  ],
+  "verification": {
+    "red": { "log": "publish-readiness-red.log", "failed": 4, "passed": 4, "scope": "Adapted real component assertions against unguarded 0.7.1 implementation before the correction" },
+    "green": { "log": "publish-readiness-final-green.log", "sha256": "22bcc833689fc6ca5a95fc6f775585a3d916e49e431d6f06b740d341a7d419fc", "files": 4, "passed": 39, "failed": 0, "composerCases": 12, "mockedMutationAndClickCoverage": true },
+    "lint": { "log": "publish-owned-lint.log", "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "exitCode": 0 },
+    "ownedDiffWhitespaceCheckExitCode": 0,
+    "reactReview": "Unconditional hooks, cheap derived account state, project-key lifecycle reset, shared focus/button styles and explicit account choice reviewed",
+    "fullTypecheck": "Root-owned; no global tsc rerun in this lane",
+    "browserGeometry": "Not claimed; root owns actual browser inspection"
+  },
+  "staged": false,
+  "committed": false,
+  "workflowDispatched": false,
+  "deployed": false
+}

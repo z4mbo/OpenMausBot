@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-10-21T04:43:32.235Z",
+  "fixture": "http://127.0.0.1:62144/__origin-publish-compare.html",
+  "baseline": "fa83fb6b9e7e6e7e8195e93405a975007917872a",
+  "before": {
+    "wide": 1902,
+    "narrow": 375,
+    "publishDisabled": false,
+    "accountLabel": "@synthetic-default",
+    "savedExplicitAccount": "removed-extra"
+  },
+  "afterFinal": {
+    "accountLabel": "Choose an account",
+    "documentWidth": 375,
+    "publishDisabled": true,
+    "selectedAccount": "",
+    "viewport": 375
+  },
+  "afterHelperSha256": "64fb303ace06a88870f35edf702f2852d9a1bb66776ed9b2db7d51db598fd32a",
+  "baselineHelperSha256": "5dc9433019f1f33bf6a603894ba536799b94d258fb4343b7a86dfe96af235d4d",
+  "synthetic": true,
+  "writesPerformed": false,
+  "rendererOnly": true,
+  "explicitReplacement": {
+    "selectedBy": "real browser Select interaction",
+    "identity": "Post as@synthetic-default",
+    "publishDisabled": false,
+    "writesPerformed": false
+  },
+  "commit": "a78e0438afe1a0165c352163122ce144a8f0ce88"
+}

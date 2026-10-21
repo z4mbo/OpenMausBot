@@ -1,0 +1,36 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/config.test.ts (212 tests | 1 failed | 2 skipped) 572ms
+     × replaces only the engines whose launch config a save changed 6ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 425 passed | 5 skipped (431)
+   Start at  06:14:50
+   Duration  75.72s (transform 601ms, setup 681ms, import 891ms, tests 73.82s, environment 0ms)
+
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/config.test.ts > changedInstanceIds > replaces only the engines whose launch config a save changed
+AssertionError: expected [ 'claude', 'claudeApi' ] to deeply equal [ 'claude' ]
+
+- Expected
++ Received
+
+  [
+    "claude",
++   "claudeApi",
+  ]
+
+ ❯ server/config.test.ts:1983:58
+    1981|     expect(reloaded({ openaiCompat: { key: "c2", url: "https://compat.…
+    1982|     expect(reloaded({ openaiCompat: { key: "c1", url: "https://other.e…
+    1983|     expect(reloaded({ anthropic: { key: "a" } }, saved)).toEqual(["cla…
+       |                                                          ^
+    1984|   });
+    1985|   it("replaces nothing for sections no driver reads", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

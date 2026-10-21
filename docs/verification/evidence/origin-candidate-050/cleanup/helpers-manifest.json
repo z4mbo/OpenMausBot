@@ -1,0 +1,42 @@
+{
+  "preparedAt": "2026-10-21T04:29:29.692Z",
+  "unadmitted": true,
+  "files": [
+    {
+      "name": "README.md",
+      "bytes": 3293,
+      "sha256": "cf9097ad11b1343682cd38f62e20faadce8da96b66b4fff6411b7b543c86d38b"
+    },
+    {
+      "name": "admission.json",
+      "bytes": 881,
+      "sha256": "4138e7506ecde68a220c04b4276fbe6ab7647e115cb41e0f821ae3df3eed5e0d"
+    },
+    {
+      "name": "admission.template.json",
+      "bytes": 881,
+      "sha256": "4138e7506ecde68a220c04b4276fbe6ab7647e115cb41e0f821ae3df3eed5e0d"
+    },
+    {
+      "name": "cleanup.mjs",
+      "bytes": 13789,
+      "sha256": "6507975a61ea6bf96f35d9ec6a0ecfaa3c3b96a26c76346edad3e44e258cfe8b"
+    },
+    {
+      "name": "default-plan.json",
+      "bytes": 1562,
+      "sha256": "da80d93fe0862f083d7bca3a2fe33cf51eddbabe6c538dd8677d27ef9aee5ad8"
+    },
+    {
+      "name": "preparation-receipt.json",
+      "bytes": 642,
+      "sha256": "5bc64132e3b89e6bbc24b32d4ff21286f90aa513dac2e0bede60a4d648101a7c"
+    },
+    {
+      "name": "remote-cleanup.py",
+      "bytes": 13877,
+      "sha256": "6f6b00ca8250586ca30d6a567b3c1df251859153bbc72cbe458482e7d7d2d748"
+    }
+  ],
+  "selfExcluded": true
+}

@@ -1,0 +1,90 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ src/components/origin-broadcast/AccountRow.test.ts (8 tests | 5 failed) 31ms
+     × shows an unselected placeholder for a removed explicit account with 1 available accounts 12ms
+     × shows an unselected placeholder for a removed explicit account with 2 available accounts 4ms
+     × allows an explicit replacement from 1 available accounts 8ms
+     × allows an explicit replacement from 2 available accounts 2ms
+     × keeps an unresolved account choice disabled while editing is locked 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/origin-broadcast/AccountRow.test.ts > Publish account identity > shows an unselected placeholder for a removed explicit account with 1 available accounts
+AssertionError: expected null not to be null
+ ❯ src/components/origin-broadcast/AccountRow.test.ts:29:24
+     27|   it.each([1, 2])("shows an unselected placeholder for a removed expli…
+     28|     const select = render(count, "removed").querySelector("select");
+     29|     expect(select).not.toBeNull();
+       |                        ^
+     30|     expect(select!.value).toBe("");
+     31|     expect(select!.selectedOptions[0].textContent).toBe("Choose an acc…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/components/origin-broadcast/AccountRow.test.ts > Publish account identity > shows an unselected placeholder for a removed explicit account with 2 available accounts
+AssertionError: expected 'default' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ default
+
+ ❯ src/components/origin-broadcast/AccountRow.test.ts:30:27
+     28|     const select = render(count, "removed").querySelector("select");
+     29|     expect(select).not.toBeNull();
+     30|     expect(select!.value).toBe("");
+       |                           ^
+     31|     expect(select!.selectedOptions[0].textContent).toBe("Choose an acc…
+     32|     expect(select!.selectedOptions[0].disabled).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/components/origin-broadcast/AccountRow.test.ts > Publish account identity > allows an explicit replacement from 1 available accounts
+AssertionError: expected null not to be null
+ ❯ src/components/origin-broadcast/AccountRow.test.ts:49:26
+     47|       act(() => root.render(createElement(ChoiceRow)));
+     48|       const select = host.querySelector("select");
+     49|       expect(select).not.toBeNull();
+       |                          ^
+     50|       expect(select!.value).toBe("");
+     51|       expect(onChoose).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/components/origin-broadcast/AccountRow.test.ts > Publish account identity > allows an explicit replacement from 2 available accounts
+AssertionError: expected 'default' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ default
+
+ ❯ src/components/origin-broadcast/AccountRow.test.ts:50:29
+     48|       const select = host.querySelector("select");
+     49|       expect(select).not.toBeNull();
+     50|       expect(select!.value).toBe("");
+       |                             ^
+     51|       expect(onChoose).not.toHaveBeenCalled();
+     52|       const target = available[count - 1];
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/components/origin-broadcast/AccountRow.test.ts > Publish account identity > keeps an unresolved account choice disabled while editing is locked
+AssertionError: expected null not to be null
+ ❯ src/components/origin-broadcast/AccountRow.test.ts:74:24
+     72|   it("keeps an unresolved account choice disabled while editing is loc…
+     73|     const select = render(1, "removed", true).querySelector("select");
+     74|     expect(select).not.toBeNull();
+       |                        ^
+     75|     expect(select!.disabled).toBe(true);
+     76|     expect(select!.value).toBe("");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 3 passed (8)
+   Start at  06:42:18
+   Duration  2.23s (transform 622ms, setup 563ms, import 1.13s, tests 31ms, environment 324ms)
+

@@ -1,0 +1,21 @@
+{
+  "observer": "Root agent via actual CUA; archive agent did not drive or independently observe the browser.",
+  "sourceQualification": "Root reports current integrated source through b13f328a9; screenshots are observed integration evidence, not a frozen release or complete fixture manifest.",
+  "fixtures": [
+    "http://127.0.0.1:5174/__origin-core-sections.html",
+    "http://127.0.0.1:5173/ (owned Draw fixture)"
+  ],
+  "observations": {
+    "agents": "Chief to Agents excludes the project Chief. New Echo independent thread survives reload; two threads remain.",
+    "usageBefore": "Two portals: stale Chief 12/200k (12 tokens; the historical handoff receipt abbreviated this incorrectly) plus active Echo Not reported.",
+    "usageAfter": "After settling, exactly one correct Echo Usage portal. Final screenshot also shows two threads and no Chief in Agents.",
+    "publish": "Empty connections at 375px: document width 375; Publish disabled and Save enabled. Actual Save in the isolated fixture persists an Unscheduled Draft.",
+    "canvas": "At 375px: Layers x13..41, Design x334..362; Design panel bottom748 and toolbar start767, document width375."
+  },
+  "newRendererPublishMatchedBeforeAfter": "Pending separate root/release-agent fixture; no claim from current after-only screenshots.",
+  "limits": [
+    "Synthetic isolated fixture state only",
+    "No real channel publication, provider billing, native install, final CI or production delivery acceptance",
+    "Historical receipts retain their original pending/committed=false fields; this supplement records later root observations and commits."
+  ]
+}

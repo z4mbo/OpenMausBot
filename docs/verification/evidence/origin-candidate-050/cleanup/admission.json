@@ -1,0 +1,18 @@
+{
+  "operation": "private-cache-cleanup-050",
+  "authorized": true,
+  "executeOnce": true,
+  "approvedBy": "root",
+  "approvedAt": "2026-10-21T04:31:20.6846065Z",
+  "payloadCount": 33,
+  "manifestSha256": "30d8f56ef58c392993d31f4639cc9121bd785ec8c8fc95a7348e1c41b197ed44",
+  "expectedImage": "sha256:78a8daf8ce012d91fa9cb6d041c97ede04c5b2c3d42cec140945ab7a7ab9ab52",
+  "exactPrivateDirectories": [
+    "/root/origin-release-staging/0.2.8/downloads",
+    "/root/origin-release-staging/0.2.9/downloads",
+    "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads"
+  ],
+  "operatorSha256": "6507975a61ea6bf96f35d9ec6a0ecfaa3c3b96a26c76346edad3e44e258cfe8b",
+  "remoteMethodSha256": "6f6b00ca8250586ca30d6a567b3c1df251859153bbc72cbe458482e7d7d2d748",
+  "authority": "Root reviewed exact methods, 33-file manifest, retained backups and literal private directories. One recoverable private-cache cleanup under existing Origin delivery authorization; public/rollback/images/data excluded. No replay."
+}

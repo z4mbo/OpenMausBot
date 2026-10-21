@@ -1,0 +1,12 @@
+
+ RUN  v5.0.2 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/backend
+
+
+ Test Files  42 passed (42)
+      Tests  333 passed (333)
+   Start at  06:18:01
+   Duration  18.85s (tests 68%, import 16%, environment 9%, transform 6%, worker 1%)
+
+    Isolate  42 workers spawned · ~118ms startup each (spawn + environment, per file)
+             at least ~4.83s faster with isolate: false — reuses workers across files instead of one per file
+

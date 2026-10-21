@@ -1,0 +1,220 @@
+{
+  "synthetic": true,
+  "productionDataUsed": false,
+  "realProviderCalls": false,
+  "checks": [
+    "Both configured API-key routes report API-key authentication and metered billing through HTTP",
+    "Saved API selection reaches the fake CLI through the real HTTP send/wait path",
+    "Config and provider HTTP responses omit the fixture key"
+  ],
+  "cleanup": {
+    "ownedServerExited": true,
+    "ownedDataRemoved": true
+  },
+  "fixture": {
+    "url": "http://127.0.0.1:41909",
+    "pid": 57844,
+    "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792556461230-50904.log"
+  },
+  "providerSnapshots": [
+    {
+      "instanceId": "claudeApi",
+      "snapshot": {
+        "state": "available",
+        "version": "2.1.232 (Claude Code)",
+        "authenticated": true,
+        "account": {
+          "method": "api-key"
+        },
+        "update": {
+          "title": "Update Claude Code for context controls",
+          "message": "Claude Code 2.1.232 predates 2.1.267, so bots run without --system-prompt-snapshot, --restricted, --tools: resumed turns cannot refresh stale system prompts. Update it, then refresh Engines.",
+          "command": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\server\\testing\\fake-claude-cli.ts update"
+        },
+        "billing": "metered"
+      }
+    },
+    {
+      "instanceId": "claude",
+      "snapshot": {
+        "state": "available",
+        "version": "2.1.232 (Claude Code)",
+        "authenticated": true,
+        "account": {
+          "method": "api-key"
+        },
+        "billing": "metered",
+        "update": {
+          "title": "Update Claude Code for context controls",
+          "message": "Claude Code 2.1.232 predates 2.1.267, so bots run without --system-prompt-snapshot, --restricted, --tools: resumed turns cannot refresh stale system prompts. Update it, then refresh Engines.",
+          "command": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\server\\testing\\fake-claude-cli.ts update"
+        }
+      }
+    }
+  ],
+  "runResult": {
+    "status": "settled",
+    "state": "completed",
+    "targetType": "bot",
+    "targetId": "13c3be30-e6d6-4f20-81e4-dce85b5e13d3",
+    "taskId": "d4bd899a-ea58-4da9-b65d-5fec0a35690e",
+    "target": {
+      "id": "13c3be30-e6d6-4f20-81e4-dce85b5e13d3",
+      "name": "Review050 API route",
+      "title": "",
+      "description": "",
+      "section": null,
+      "chiefOfStaff": false,
+      "modelSelection": {
+        "instanceId": "claudeApi",
+        "model": "claude-sonnet-5"
+      },
+      "busy": false,
+      "waitingForTeammates": false,
+      "activity": "idle",
+      "unread": true,
+      "activeTaskId": "d4bd899a-ea58-4da9-b65d-5fec0a35690e",
+      "tasks": [
+        {
+          "taskId": "d4bd899a-ea58-4da9-b65d-5fec0a35690e",
+          "title": "Synthetic API routing verification",
+          "createdAt": 1792556463423,
+          "busy": false,
+          "waitingForTeammates": false,
+          "activity": "idle",
+          "modelSelection": {
+            "instanceId": "claudeApi",
+            "model": "claude-sonnet-5"
+          },
+          "active": true,
+          "usage": {
+            "input": 12,
+            "output": 5,
+            "cachedInput": 2,
+            "costUsd": 0.01,
+            "turns": 1,
+            "lastTurn": {
+              "input": 12,
+              "output": 5,
+              "cachedInput": 2,
+              "costUsd": 0.01
+            },
+            "context": {
+              "tokens": 12,
+              "window": 200000
+            }
+          }
+        },
+        {
+          "taskId": "b89cee35-232b-4d5d-9383-bc03195b17a6",
+          "title": "New thread",
+          "createdAt": 1792556463409,
+          "busy": false,
+          "waitingForTeammates": false,
+          "activity": "idle",
+          "modelSelection": {
+            "instanceId": "claudeApi",
+            "model": "claude-sonnet-5"
+          },
+          "active": false
+        }
+      ]
+    },
+    "messages": [
+      {
+        "id": "9df3da4e-6575-41d3-84bf-2633fc0f29e4",
+        "at": 1792556463432,
+        "role": "user",
+        "kind": "text",
+        "text": "Synthetic API routing verification"
+      },
+      {
+        "id": "627632a2-b987-4c15-b1b2-c9f2c2c6ac60",
+        "at": 1792556463605,
+        "role": "bot",
+        "kind": "text",
+        "text": "hello from fake claude"
+      },
+      {
+        "id": "c2047db7-980d-4d3a-86bc-999eb0dd82a4",
+        "at": 1792556463606,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "Bash",
+          "ok": true,
+          "spoken": "running a command"
+        }
+      },
+      {
+        "id": "65edab9b-ff1b-4f32-9b11-a9b1d96a7fcd",
+        "at": 1792556463628,
+        "role": "bot",
+        "kind": "digest",
+        "text": "[digest] · tools: Bash ×1 (from tool previews) · reply: hello from fake claude"
+      }
+    ],
+    "hasMore": false,
+    "job": {
+      "threadId": "d4bd899a-ea58-4da9-b65d-5fec0a35690e",
+      "scope": "turn",
+      "since": 1792556463426,
+      "now": 1792556463800,
+      "state": "completed",
+      "reason": "Review050 API route finished",
+      "version": "WAGWs_iCzljvStFG",
+      "conversation": {
+        "kind": "bot",
+        "busy": false,
+        "activity": "idle",
+        "queued": 0
+      },
+      "roots": [
+        "cdf46b51-cdb7-444c-beca-29f7bbe616d4"
+      ],
+      "nodes": [
+        {
+          "id": "cdf46b51-cdb7-444c-beca-29f7bbe616d4",
+          "rootId": "cdf46b51-cdb7-444c-beca-29f7bbe616d4",
+          "depth": 0,
+          "botId": "13c3be30-e6d6-4f20-81e4-dce85b5e13d3",
+          "botName": "Review050 API route",
+          "threadId": "d4bd899a-ea58-4da9-b65d-5fec0a35690e",
+          "threadTitle": "Synthetic API routing verification",
+          "status": "completed",
+          "outcome": "done",
+          "mode": "work",
+          "reply": "resume",
+          "awaited": true,
+          "createdAt": 1792556463434,
+          "startedAt": 1792556463434,
+          "finishedAt": 1792556463610,
+          "executions": 1,
+          "result": "hello from fake claude"
+        }
+      ],
+      "hidden": 0,
+      "counts": {
+        "queued": 0,
+        "running": 0,
+        "waiting": 0,
+        "needsInput": 0,
+        "completed": 1,
+        "failed": 0,
+        "cancelled": 0
+      },
+      "needsInput": []
+    },
+    "ok": true,
+    "exitCode": 0,
+    "threadId": "d4bd899a-ea58-4da9-b65d-5fec0a35690e",
+    "reply": {
+      "text": "hello from fake claude",
+      "files": []
+    },
+    "sendId": "cli-0nyBnBLRAUgCQN8l",
+    "since": 1792556463426
+  },
+  "cliDumpSha256": "bca2ecaf2494777cd5e361101bdc86174f12dcaa9ebc428daf12229c9d2dc86b",
+  "parentTemporaryHomeRemoved": true
+}

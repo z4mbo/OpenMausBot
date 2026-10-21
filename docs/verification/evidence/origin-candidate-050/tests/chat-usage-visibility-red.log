@@ -1,0 +1,93 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ src/components/ChatUsagePopover.visibility.test.ts (4 tests | 4 failed) 46ms
+     × only portals the visible chat when a hidden Chief remains mounted 28ms
+     × moves the persistent open panel across visibility changes using ResizeObserver 4ms
+     × removes a panel when its trigger becomes visibility-hidden without collapsing layout 5ms
+     × closes with Escape and returns focus to the visible chat trigger 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ChatUsagePopover.visibility.test.ts > retained chat usage visibility > only portals the visible chat when a hidden Chief remains mounted
+AssertionError: expected [ …(2) ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/components/ChatUsagePopover.visibility.test.ts:59:22
+     57|     show("echo");
+     58|     act(() => trigger("echo").click());
+     59|     expect(panels()).toHaveLength(1);
+       |                      ^
+     60|     expect(panels()[0].textContent).toContain("echo-model");
+     61|     expect(panels()[0].textContent).toContain("Not reported");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/components/ChatUsagePopover.visibility.test.ts > retained chat usage visibility > moves the persistent open panel across visibility changes using ResizeObserver
+AssertionError: expected [ …(2) ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/components/ChatUsagePopover.visibility.test.ts:69:22
+     67|     act(() => setChatUsageOpen(true));
+     68|     show("chief");
+     69|     expect(panels()).toHaveLength(1);
+       |                      ^
+     70|     expect(panels()[0].textContent).toContain("12k");
+     71|     expect([...observers].some(observer => observer.targets.has(trigge…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/components/ChatUsagePopover.visibility.test.ts > retained chat usage visibility > removes a panel when its trigger becomes visibility-hidden without collapsing layout
+AssertionError: expected [ …(2) ] to have a length of +0 but got 2
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ src/components/ChatUsagePopover.visibility.test.ts:86:22
+     84|     trigger("echo").style.visibility = "hidden";
+     85|     act(resize);
+     86|     expect(panels()).toHaveLength(0);
+       |                      ^
+     87|     trigger("echo").style.visibility = "visible";
+     88|     act(resize);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/components/ChatUsagePopover.visibility.test.ts > retained chat usage visibility > closes with Escape and returns focus to the visible chat trigger
+AssertionError: expected [ …(2) ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/components/ChatUsagePopover.visibility.test.ts:101:22
+     99|     expect(localStorage.getItem("origin-chat-usage-open")).toBe("0");
+    100|     act(() => trigger("echo").click());
+    101|     expect(panels()).toHaveLength(1);
+       |                      ^
+    102|     act(() => trigger("echo").dispatchEvent(new KeyboardEvent("keydown…
+    103|     expect(panels()).toHaveLength(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  06:22:38
+   Duration  1.53s (transform 386ms, setup 522ms, import 477ms, tests 46ms, environment 315ms)
+

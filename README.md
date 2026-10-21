@@ -12,7 +12,7 @@ Origin combines project management with the local agent runtime from [OpenMausBo
 - **Local agents:** the Electron app runs a Node server and the coding engines on the machine doing the work. Model execution and provider credentials use that machine.
 - **Shared conversations:** the sender runs a turn on their own machine by default. Members can explicitly choose a supported teammate model source when its owner grants access. Leases and a queue coordinate shared agents across members and computers.
 - **Issues and pull requests:** Draft issues stay private to Origin. Other issues can mirror to GitHub; the project Chief reviews the pull request, and merging requires a person's approval.
-- **Team tools:** project chat, mentions, notifications, calls, Canvas, client-encrypted vault entries, assets, feedback and search. Studio generates media; Broadcast prepares and schedules approved posts; Pipeline tracks leads and outreach; Org shows the workspace's people and agents.
+- **Team tools:** project chat, mentions, notifications, calls, client-encrypted vault entries, assets, feedback and search. Studio brings together media generation, workflows, presets and the Design canvas. Publish prepares and schedules approved posts and campaigns with explicitly chosen channel accounts.
 
 ## Repository map
 
@@ -27,11 +27,11 @@ Origin combines project management with the local agent runtime from [OpenMausBo
 | `docs/verification/` | Isolated fixture recipes and their evidence |
 | `scripts/` | Development controls, checks, build and packaging tools |
 
-## 0.4.2 candidate
+## 0.7.2 integration candidate
 
-The [final verification and release hold](docs/verification/origin-0.4.2-verification-and-release-hold.md) records green final CI, all three package inspections and the isolated Windows server smoke. Publication is held because another task deployed newer 0.5.0 website source while verification ran. These fixes need integration with that concurrent work under one release owner; 0.4.2 is not advertised as published.
+This candidate combines the published 0.7.1 Studio, Publish and project navigation with shared conversations, model fallback, daily API budgets, teammate model sources and the audit fixes. The [verification report](docs/verification/origin-candidate-050.md) records completed checks and pending delivery; a candidate version is not a published download. The current public version observed on October 21 is [0.7.1](https://github.com/z4mbo/Origin/releases/tag/origin-v0.7.1).
 
-The [0.4.2 candidate](docs/verification/origin-candidate-049.md) combines the published 0.4.0 Pages, Campaigns, pipeline sequences, monthly budgets and local-access security with per-agent ordered model backups, daily AI model API budgets, opt-in teammate model sources, shared-agent identity preservation, synchronized project order, specialist conversation navigation and compact Usage. The [0.3.2 candidate](docs/verification/origin-candidate-047.md) passed 6,254 client/shared tests but was held when 0.4.0 was published concurrently. Its fixes are carried forward, including readable narrow-window project tools and connection readiness. GitHub, the website, update feeds and backend are verified separately before delivery.
+The earlier [0.4.2 verification and hold](docs/verification/origin-0.4.2-verification-and-release-hold.md) remains historical evidence, with its packages unpublished. Its shared-agent identity preservation, synchronized project order, specialist thread navigation, compact Usage and project budget boundaries are carried into the newer product. The integration preserves 0.7.1's removal of Sales and the older project sections. GitHub, the website, update feeds and backend are verified separately before delivery.
 
 Model backups are opt-in and follow up to five exact account/model choices. Only a provider-confirmed quota refusal can trigger quota fallback; unavailable Usage meters, sign-in failures and ordinary rate limits cannot. Origin automatically sends the original request again only when no reply, reasoning or tool action began and the first attempt has stopped. After partial work, switching models leaves the existing work for a person to continue. Paid API backups require their own permission.
 

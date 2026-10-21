@@ -1,0 +1,56 @@
+{
+  "checkedAt": "2026-10-21T04:37:14.653Z",
+  "rendererExecuted": false,
+  "browserUsed": false,
+  "checks": [
+    {
+      "route": "/__origin-publish-compare.html?phase=before&theme=dark",
+      "status": 200,
+      "method": "GET",
+      "bytes": 331
+    },
+    {
+      "route": "/__origin-publish-compare.html?phase=after&theme=dark",
+      "status": 200,
+      "method": "GET",
+      "bytes": 331
+    },
+    {
+      "route": "/__origin-publish-entry.tsx",
+      "status": 200,
+      "method": "GET",
+      "bytes": 12829
+    },
+    {
+      "route": "/@id/__x00__origin-publish-before.tsx",
+      "status": 200,
+      "method": "GET",
+      "bytes": 128281
+    },
+    {
+      "route": "/@id/__x00__origin-publish-cloud.ts",
+      "status": 200,
+      "method": "GET",
+      "bytes": 4750
+    },
+    {
+      "route": "/src/components/origin-broadcast/BroadcastComposer.tsx",
+      "status": 200,
+      "method": "GET",
+      "bytes": 95331
+    },
+    {
+      "route": "/api/health",
+      "status": 200,
+      "method": "GET",
+      "bytes": 36
+    },
+    {
+      "route": "/api/origin/broadcast/run",
+      "status": 405,
+      "method": "POST",
+      "bytes": 26
+    }
+  ],
+  "allPassed": true
+}
