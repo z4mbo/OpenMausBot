@@ -449,6 +449,7 @@ jobs:
           path: |
             .omb-scratch/verify-evidence/chat-ui.png
             .omb-scratch/verify-evidence/thinking-timer-anchored.png
+            .omb-scratch/verify-evidence/*.thinking-timer.json
             .omb-scratch/verify-evidence/share-team-dialog.png
           if-no-files-found: warn
           retention-days: 7

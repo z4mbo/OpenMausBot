@@ -1,10 +1,23 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { matchesGlob } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
 const workflow = parse(readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8"));
 const requiredRuntimeJobs = ["vitest", "behavior-evals", "packaged-server", "windows-cua", "electron-smokes"];
+
+describe("Renderer failure evidence", () => {
+  it("uploads unique timer fixture diagnostics even when the renderer command fails", () => {
+    const upload = workflow.jobs["ui-smoke"].steps.find((step: { uses?: string }) => step.uses?.startsWith("actions/upload-artifact@"));
+    expect(upload.if).toBe("always()");
+    const patterns = (upload.with.path as string).trim().split(/\r?\n/);
+    for (const fixture of ["first-failed", "second-passed"]) {
+      const file = `.omb-scratch/verify-evidence/openmausbot-verify-data-${fixture}.thinking-timer.json`;
+      expect(patterns.some((pattern) => matchesGlob(file, pattern))).toBe(true);
+    }
+  });
+});
 
 describe("Docs release coverage", () => {
   it("runs for Origin release tags independently of pull-request path selection", () => {
