@@ -37,11 +37,14 @@ export function AccountRow({ channels, accounts, chosen, locked, onChoose, onCon
             </button>
           );
         }
-        const value = chosen[channel] ?? options[0].id;
-        if (options.length > 1) {
+        const selected = chosen[channel];
+        const missing = selected !== undefined && !options.some((account) => account.id === selected);
+        const value = missing ? "" : selected ?? options[0].id;
+        if (options.length > 1 || missing) {
           return (
             <Select key={channel} size="sm" icon={<ChannelMark channel={channel} size={12} />} aria-label={`${label} account`} value={value} disabled={locked}
               onChange={(event) => onChoose(channel, event.target.value)} className="max-w-[200px]">
+              {missing && <option value="" disabled>Choose an account</option>}
               {options.map((account) => <option key={account.id} value={account.id}>{account.label}</option>)}
             </Select>
           );
