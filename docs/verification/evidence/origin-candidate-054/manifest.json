@@ -1,0 +1,195 @@
+{
+  "proposedVersion": "0.7.6",
+  "cycle": "054",
+  "archivedAt": "2026-10-21T20:59:07.026Z",
+  "historicalWorkflowSource": "7a48de142b35eff2f7c9d2537d28030e1b841fcb",
+  "historicalTag": "origin-v0.7.5",
+  "historicalTagHeld": true,
+  "finalSource": null,
+  "archiveComplete": true,
+  "pending": [
+    "Final 0.7.6 source freeze/binding",
+    "Exact-source 0.7.6 CI/cloud/Docs/native workflows including actual macos-15 execution",
+    "Fresh 054 package/browser/backup/deployment/publication/hash gates"
+  ],
+  "qualification": "Completed historical 0.7.5 workflow/checkout evidence: CI16success/3failure/1expectedskip; both native attempts failed with Mac cancelled before any step. Subsequent focused local test-only canary and persisted-event observation corrections are retained separately. No delivery operator executed and no final 0.7.6 source/workflow/package/production acceptance is claimed.",
+  "files": [
+    {
+      "name": "checkout/actual-checkout-commit.json",
+      "bytes": 2601,
+      "sha256": "2eb93e420d136780561bed207e565f5fb7ecd5a8fcf648c16e1a9edfb06a7e8e",
+      "provenance": ".omb-scratch/reconciliation-053/renderer-observation/actual-checkout-commit.json"
+    },
+    {
+      "name": "checkout/actual-tree-by-tree-sha.json",
+      "bytes": 2421707,
+      "sha256": "700e80803d7a84bc7e51886498ceae785147a86e62de6ed4be055607c169a180",
+      "provenance": ".omb-scratch/reconciliation-053/actual-tree-by-tree-sha.json"
+    },
+    {
+      "name": "checkout/merge-tree-proof-053.json",
+      "bytes": 1222,
+      "sha256": "3b0b0c3b80f537a9306aee6b9ff96b6739515e1fcded039cb80b30e2654b327f",
+      "provenance": ".omb-scratch/reconciliation-053/renderer-observation/merge-tree-proof-053.json"
+    },
+    {
+      "name": "checkout/static-job-complete.log",
+      "bytes": 214543,
+      "sha256": "1a5fa47f7f3ec8b0903f49ce637aa22c07236e93d2192f31f35cde2f1d54f010",
+      "provenance": ".omb-scratch/reconciliation-053/static-job-complete.log"
+    },
+    {
+      "name": "ci/windows-shard3-complete.log",
+      "bytes": 356758,
+      "sha256": "49de58f4cdbd86754ac70163d487f85f7a363d31a2f4b6c02cd4731a708bd213",
+      "provenance": ".omb-scratch/reconciliation-053/windows-shard3-complete.log"
+    },
+    {
+      "name": "ci/windows-shard4-complete.log",
+      "bytes": 358532,
+      "sha256": "26e5466032703dd7acc6eabbf6c8b53b3b2037baab45c2f78f0ff2fb11a08161",
+      "provenance": ".omb-scratch/reconciliation-053/windows-shard4-complete.log"
+    },
+    {
+      "name": "local/credential-canary-green.log",
+      "bytes": 262,
+      "sha256": "7cf2bfca131a00191ecbe9ad3a4c82da1b3436cc5bef31ccf08ddd8dd05abd91",
+      "provenance": ".omb-scratch/reconciliation-054/credential-canary-green.log"
+    },
+    {
+      "name": "local/credential-canary-red.log",
+      "bytes": 5661,
+      "sha256": "47ab845b13429f424b040091d2363aa24e1c00a8f87eb04fadc536ab820c1e49",
+      "provenance": ".omb-scratch/reconciliation-054/credential-canary-red.log"
+    },
+    {
+      "name": "local/parked-wait-ci-red-excerpt.log",
+      "bytes": 2112,
+      "sha256": "506736bc58b884e3b728231d0d904be8bd7ea9ea4d9ef8d714f5547e477852fe",
+      "provenance": ".omb-scratch/reconciliation-054/parked-wait-ci-red-excerpt.log"
+    },
+    {
+      "name": "local/parked-wait-focused.log",
+      "bytes": 36278,
+      "sha256": "5b59b5dd41341617abea6db84fe329a75ab73c5d385bd7cb5b731debfc176769",
+      "provenance": ".omb-scratch/reconciliation-054/parked-wait-focused.log"
+    },
+    {
+      "name": "local/parked-wait-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "provenance": ".omb-scratch/reconciliation-054/parked-wait-lint.log"
+    },
+    {
+      "name": "local/parked-wait-observation-receipt.json",
+      "bytes": 3933,
+      "sha256": "309df5359c54ff4a6fdb2bec9d9456ebb8021b30d2a95cd50858c141ff964337",
+      "provenance": ".omb-scratch/reconciliation-054/parked-wait-observation-receipt.json"
+    },
+    {
+      "name": "native/attempt-1-annotations.json",
+      "bytes": 1390,
+      "sha256": "341ed0dec1ef10071fb8a9030ad54a8d100fbadce41f9fb0c6a9fef1b3956db7",
+      "provenance": ".omb-scratch/reconciliation-053/native-failed-annotations.json"
+    },
+    {
+      "name": "native/attempt-1-check.json",
+      "bytes": 3039,
+      "sha256": "2cc48a712fdbd0e8e13c4dfa32c1781f565d4691ecbb766d89bdcd0a1a3d133c",
+      "provenance": ".omb-scratch/reconciliation-053/native-failed-check.json"
+    },
+    {
+      "name": "native/attempt-1-jobs.json",
+      "bytes": 7906,
+      "sha256": "63ff249df520ce558aa6c9adfad6ec9a5c2794a6c63f32009cd6e93b0833ae26",
+      "provenance": ".omb-scratch/reconciliation-053/native-attempt-1/native-jobs.json"
+    },
+    {
+      "name": "native/attempt-1-run.json",
+      "bytes": 11714,
+      "sha256": "77649966fb9f44693d2d0cfb672746a6484a6a42d517c98f88ad445326c387a8",
+      "provenance": ".omb-scratch/reconciliation-053/native-attempt-1/native-run.json"
+    },
+    {
+      "name": "native/attempt-2-annotations.json",
+      "bytes": 1390,
+      "sha256": "341ed0dec1ef10071fb8a9030ad54a8d100fbadce41f9fb0c6a9fef1b3956db7",
+      "provenance": ".omb-scratch/reconciliation-053/native-attempt-2-annotations.json"
+    },
+    {
+      "name": "native/attempt-2-jobs.json",
+      "bytes": 7912,
+      "sha256": "688f63aecf7a91ff4f4853effa7694e2179b55ead384f036224979e10e7b2a44",
+      "provenance": ".omb-scratch/reconciliation-053/native-jobs.json"
+    },
+    {
+      "name": "native/attempt-2-run.json",
+      "bytes": 11789,
+      "sha256": "948fddb300c582c79dfa3ba9973247bde4bd4ad87e4fa78ea5ee9316a335236a",
+      "provenance": ".omb-scratch/reconciliation-053/native-run.json"
+    },
+    {
+      "name": "native/mac-only-retry-request.json",
+      "bytes": 257,
+      "sha256": "5afc77894240715eb9422736ad6176ad48cc2e6d5f34392a9bfd1122aae9638a",
+      "provenance": ".omb-scratch/reconciliation-053/native-mac-retry-request.json"
+    },
+    {
+      "name": "renderer/renderer-complete.log",
+      "bytes": 38774,
+      "sha256": "b26c1201bad564963fa4af30b60e062bfa5942c77fd7511b2bf255fab024465d",
+      "provenance": ".omb-scratch/reconciliation-053/renderer-complete.log"
+    },
+    {
+      "name": "workflows/ci-final-jobs.json",
+      "bytes": 59879,
+      "sha256": "8e427ecc77b1ebca4abd3aab6c4697b5ca124c851eef03b87c6d92f3252aa93a",
+      "provenance": ".omb-scratch/reconciliation-053/ci-jobs.json"
+    },
+    {
+      "name": "workflows/ci-final-run.json",
+      "bytes": 12167,
+      "sha256": "b73c8687915222640119539711415ddb9df9d0d5b34eee98921123cff98a641b",
+      "provenance": ".omb-scratch/reconciliation-053/ci-run.json"
+    },
+    {
+      "name": "workflows/ci-observed-pending-jobs.json",
+      "bytes": 58214,
+      "sha256": "0a61e5a963d7caba80ad78e908fa9a794a95a4fe933b828ef09e2fa02f69002d",
+      "provenance": ".omb-scratch/reconciliation-053/ci-jobs.json"
+    },
+    {
+      "name": "workflows/ci-observed-pending-run.json",
+      "bytes": 12164,
+      "sha256": "1871932ae0a3f1f22e2c4aa72b88516b1fc0f169f839b5341a44e1003ac0bf66",
+      "provenance": ".omb-scratch/reconciliation-053/ci-run.json"
+    },
+    {
+      "name": "workflows/cloud-jobs.json",
+      "bytes": 3347,
+      "sha256": "fbc360db87f69eeae4bcef750a3ae536232d3446915dac4c36b278f6666d5415",
+      "provenance": ".omb-scratch/reconciliation-053/cloud-jobs.json"
+    },
+    {
+      "name": "workflows/cloud-run.json",
+      "bytes": 11721,
+      "sha256": "1acaad850ecc59b05d0a7627f5bbecc9b7395b946298d6485c90cb925493b276",
+      "provenance": ".omb-scratch/reconciliation-053/cloud-run.json"
+    },
+    {
+      "name": "workflows/docs-jobs.json",
+      "bytes": 3147,
+      "sha256": "43e059601945d50be01e06696d842843385c48725c6fd2057f56c8f86f636fb3",
+      "provenance": ".omb-scratch/reconciliation-053/docs-jobs.json"
+    },
+    {
+      "name": "workflows/docs-run.json",
+      "bytes": 11694,
+      "sha256": "23891e4e8bbdd1db21f84697ea983422f79911a6f99d16348175fbe3fba7fd6e",
+      "provenance": ".omb-scratch/reconciliation-053/docs-run.json"
+    }
+  ],
+  "updatedAt": "2026-10-21T21:01:14.212Z",
+  "historicalEvidenceComplete": true,
+  "sealedAt": "2026-10-21T21:05:31.529Z"
+}

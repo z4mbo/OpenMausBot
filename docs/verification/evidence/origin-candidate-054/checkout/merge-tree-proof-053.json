@@ -1,0 +1,21 @@
+{
+  "source": "7a48de142b35eff2f7c9d2537d28030e1b841fcb",
+  "actualPRCheckout": "ae0bfe5b2f467e73fc7d1aa62a660f0c11e1db04",
+  "base": "fa83fb6b9e7e6e7e8195e93405a975007917872a",
+  "ciRun": 39669276391,
+  "attempt": 1,
+  "staticJob": 119462509088,
+  "staticJobConclusion": "success",
+  "checkoutLogSha256": "1a5fa47f7f3ec8b0903f49ce637aa22c07236e93d2192f31f35cde2f1d54f010",
+  "checkoutCommitResponseSha256": "2eb93e420d136780561bed207e565f5fb7ecd5a8fcf648c16e1a9edfb06a7e8e",
+  "recursiveTreeApiSha256": "700e80803d7a84bc7e51886498ceae785147a86e62de6ed4be055607c169a180",
+  "recursiveTreeApiTruncated": false,
+  "identicalEntries": 9318,
+  "normalizedRecursiveEntriesSha256": "0e4260f493be740927024f44464723eebd61ff2bd90dc5b61c13a81cc8f3d1f9",
+  "actualNormalizedRecursiveEntriesSha256": "0e4260f493be740927024f44464723eebd61ff2bd90dc5b61c13a81cc8f3d1f9",
+  "tree": "a3d3217f8769586643c79fd5d573d6ba0b42d43b",
+  "actualPRTree": "a3d3217f8769586643c79fd5d573d6ba0b42d43b",
+  "proofMethod": "Exact completed static checkout log plus official Git commit and full nontruncated recursive-tree API compared with local frozen Git objects; Git operations read-only.",
+  "passed": true,
+  "checkedAt": "2026-10-21T20:25:58.785Z"
+}

@@ -1,0 +1,8 @@
+{
+  "retryExit": 0,
+  "run": 39669265224,
+  "job": 119462876365,
+  "source": "7a48de142b35eff2f7c9d2537d28030e1b841fcb",
+  "reason": "Official annotation: hosted Mac runner not acquired due to capacity; no build step ran",
+  "onlyFailedJob": true
+}

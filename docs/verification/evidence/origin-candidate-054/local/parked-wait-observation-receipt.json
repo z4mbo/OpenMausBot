@@ -1,0 +1,76 @@
+{
+  "recordedAt": "2026-10-21T21:03:54.337Z",
+  "classification": "ISOLATED_TEST_OBSERVATION_RACE",
+  "baselineSource": "7a48de142b35eff2f7c9d2537d28030e1b841fcb",
+  "sourceFrozen": false,
+  "ciRed": {
+    "run": 39669276391,
+    "attempt": 1,
+    "job": 119463881747,
+    "file": ".omb-scratch/reconciliation-053/windows-shard3-complete.log",
+    "bytes": 356758,
+    "sha256": "49de58f4cdbd86754ac70163d487f85f7a363d31a2f4b6c02cd4731a708bd213",
+    "failure": "server/index.test.ts:3682: turn.wait_ended lookup returned undefined after parked message and wait_started were already observed",
+    "otherResults": "5109 passed,113 skipped,1 failed",
+    "excerpt": ".omb-scratch/reconciliation-054/parked-wait-ci-red-excerpt.log",
+    "excerptSha256": "506736bc58b884e3b728231d0d904be8bd7ea9ea4d9ef8d714f5547e477852fe"
+  },
+  "concreteScenario": [
+    "Synthetic holder keeps shared computer busy; sibling reaches2000mswait cap",
+    "bindTurnComputer.endWait appends Parked activity synchronously, then publishes turn.wait_ended",
+    "EventBus.write queues NDJSON append asynchronously before delivering live event",
+    "Test observes parked /messages row then immediately reads disk-backed /events while append is still queued",
+    "Single snapshot includes wait_started but not yet wait_ended, so holder/outcome assertion receives undefined"
+  ],
+  "realCodePath": {
+    "activityThenPublish": "server/index.ts:2185",
+    "asynchronousWrite": "server/harness/bus.ts:120",
+    "queuedAppend": "server/harness/bus.ts:211",
+    "persistedRead": "server/thread-events.ts:250"
+  },
+  "fix": {
+    "file": "server/index.test.ts",
+    "line": 3676,
+    "addedLines": 3,
+    "behavior": "Bounded5secondpoll of actual persisted events endpoint before taking the asserted snapshot",
+    "existingAssertionsRetained": [
+      "wait_started holder/resource",
+      "wait_ended holder and parked outcome",
+      "waitedMs >=0",
+      "parked task state",
+      "resume prompt count and content",
+      "room waiting/routing/cancellation"
+    ],
+    "existingTestDeadlineUnchangedMs": 75000,
+    "sleepAdded": false,
+    "assertionRelaxed": false,
+    "runtimeFilesChanged": [],
+    "testFileSha256": "97246ed0d7e5d074f50c3f94c6807c837212455be4438f43e5df970e8de4fa04",
+    "uncommitted": true
+  },
+  "verification": {
+    "command": "node node_modules/vitest/vitest.mjs run server/index.test.ts -t \"queues computer waiters in arrival order|parks the turn at the wait ceiling|routes a goal run around a member parked\" --reporter=verbose",
+    "testNames": [
+      "queues computer waiters in arrival order and estimates the wait only from history",
+      "parks the turn at the wait ceiling and resumes when the computer frees",
+      "routes a goal run around a member parked at the computer wait ceiling and never runs that step again"
+    ],
+    "passed": 3,
+    "filtered": 294,
+    "files": 1,
+    "durationSeconds": 39.83,
+    "log": ".omb-scratch/reconciliation-054/parked-wait-focused.log",
+    "logSha256": "5b59b5dd41341617abea6db84fe329a75ab73c5d385bd7cb5b731debfc176769",
+    "targetedOxlintPassed": true,
+    "lintLog": ".omb-scratch/reconciliation-054/parked-wait-lint.log",
+    "gitDiffCheckPassed": true,
+    "fixtures": "Existing test-owned disposable homes, free loopback ports, fake CLI and fake provider HTTP server",
+    "ownedCleanup": "The passing cases execute finally waitForExit/removeTempDir and exact expected child termination checks; shared fixture afterAll cleanup also completes",
+    "originalRedReplayed": false,
+    "wholeFileOrSuiteRun": false,
+    "productionDataUsed": false,
+    "productionRequests": false,
+    "protectedProcessesTouched": false
+  },
+  "qualification": "Code path and retained actualCIRED establish an invalid immediate disk-snapshot assumption. Local focused green verifies affected real synthetic wait paths; it does not claim Linux/Windows CI or product/production acceptance."
+}

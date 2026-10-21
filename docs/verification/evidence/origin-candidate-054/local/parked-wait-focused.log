@@ -1,0 +1,309 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ ↓ server/index.test.ts > harness HTTP API > restores a live unanswered provider question after a server restart
+ ↓ server/index.test.ts > harness HTTP API > reconciles durable working goal cards with scheduler truth after a restart
+ ↓ server/index.test.ts > harness HTTP API > attributes a paired person's message to them, and leaves the owner's own sends unstamped
+ ↓ server/index.test.ts > harness HTTP API > rejects non-loopback authorities while accepting IPv4 and IPv6 loopback forms
+ ↓ server/index.test.ts > harness HTTP API > keeps the fleet screen behind the admin entitlement on the open-source edition
+ ↓ server/index.test.ts > harness HTTP API > identifies itself on /api/health
+ ↓ server/index.test.ts > harness HTTP API > refuses a second live server that shares the same data directory
+ ↓ server/index.test.ts > harness HTTP API > serves packaged UI assets and preserves API 404s
+ ↓ server/index.test.ts > harness HTTP API > rejects malformed and oversized JSON bodies without hanging
+ ↓ server/index.test.ts > harness HTTP API > seeds one starter bot with its greeting
+ ↓ server/index.test.ts > harness HTTP API > projects privacy-safe live team-map metadata
+ ↓ server/index.test.ts > harness HTTP API > rejects non-object bot and channel create bodies without writing records
+ ↓ server/index.test.ts > harness HTTP API > adds and removes room members through PATCH
+ ↓ server/index.test.ts > harness HTTP API > protects a team-goal lead and pauses the routine when its room is deleted
+ ↓ server/index.test.ts > harness HTTP API > refuses to empty a room's roster
+ ↓ server/index.test.ts > harness HTTP API > refuses a room whose every member is archived
+ ↓ server/index.test.ts > harness HTTP API > deduplicates repeated room members while preserving their first-seen order
+ ↓ server/index.test.ts > harness HTTP API > keeps direct-message channels a fixed pair at the API boundary
+ ↓ server/index.test.ts > harness HTTP API > hands the lead to a remaining member when the lead leaves the room
+ ↓ server/index.test.ts > harness HTTP API > persists room setup and blocks the first message until it is finished
+ ↓ server/index.test.ts > harness HTTP API > creates an MCP-ready channel in one request without exposing partial setup
+ ↓ server/index.test.ts > harness HTTP API > returns the canonical stored user message for direct and channel sends
+ ↓ server/index.test.ts > harness HTTP API > deduplicates direct send retries by sendId, including after the accepted task becomes inactive
+ ↓ server/index.test.ts > harness HTTP API > replaces a first-message snippet title with a generated one once the one-shot answers
+ ↓ server/index.test.ts > harness HTTP API > keeps the snippet title when the one-shot fails
+ ↓ server/index.test.ts > harness HTTP API > replaces a channel task's first-message snippet with a generated title
+ ↓ server/index.test.ts > harness HTTP API > keeps a channel task's snippet title when the one-shot fails
+ ↓ server/index.test.ts > harness HTTP API > deduplicates channel send retries by sendId
+ ↓ server/index.test.ts > harness HTTP API > rejects an entire channel roster when any requested member is unknown
+ ↓ server/index.test.ts > harness HTTP API > creates, switches, renames and deletes independent channel tasks
+ ↓ server/index.test.ts > harness HTTP API > saves a longer turn limit on one conversation and leaves the others at the group default
+ ↓ server/index.test.ts > harness HTTP API > lets a Chief create operators from its direct and channel tasks but not from channels it cannot access
+ ↓ server/index.test.ts > harness HTTP API > scopes Chief room management to its section, allowed peers and explicit room fields
+ ↓ server/index.test.ts > harness HTTP API > binds Chief room management to the bearer and rechecks it after a slow body
+ ↓ server/index.test.ts > harness HTTP API > rejects a slow internal mutation when its bot is deleted before the body arrives
+ ↓ server/index.test.ts > harness HTTP API > lands a created operator in a requested working folder or refuses it with the profile copy
+ ↓ server/index.test.ts > harness HTTP API > keeps create_bot on its review card below Full Access, whatever the Chief always allows
+ ↓ server/index.test.ts > harness HTTP API > keeps one suggested specialist open per conversation and remembers Not now
+ ↓ server/index.test.ts > harness HTTP API > rejects null and array task, channel, and bot mutation bodies
+ ↓ server/index.test.ts > harness HTTP API > keeps bot-to-bot channels single-threaded and lets another task start beside an open approval
+ ↓ server/index.test.ts > harness HTTP API > keeps Chief room changes behind pending user approvals
+ ↓ server/index.test.ts > harness HTTP API > keeps direct-message channels folderless at the API boundary
+ ↓ server/index.test.ts > harness HTTP API > rejects working-folder changes after a room has pinned its first turn
+ ↓ server/index.test.ts > harness HTTP API > renames rooms through a bounded non-empty name
+ ↓ server/index.test.ts > harness HTTP API > describes the configured fleet, shadows included
+ ↓ server/index.test.ts > harness HTTP API > searches transcripts and exports a conversation
+ ↓ server/index.test.ts > harness HTTP API > stores a room reply as a flat reference and rejects foreign targets
+ ↓ server/index.test.ts > harness HTTP API > creates, patches, and deletes a bot
+ ↓ server/index.test.ts > harness HTTP API > broadcasts browser install start, Chrome failure, and a clean retry with the binary present
+ ↓ server/index.test.ts > harness HTTP API > keeps failed browser bot cleanup pending without crashing (key-write)
+ ↓ server/index.test.ts > harness HTTP API > keeps failed browser bot cleanup pending without crashing (engine-exit)
+ ↓ server/index.test.ts > harness HTTP API > keeps failed browser profile cleanup pending without crashing (key-write)
+ ↓ server/index.test.ts > harness HTTP API > keeps failed browser profile cleanup pending without crashing (engine-exit)
+ ↓ server/index.test.ts > harness HTTP API > clears an explicit computer to Auto and refuses passive Auto Boat provisioning
+ ↓ server/index.test.ts > harness HTTP API > refuses a room Works-on Local VM turn for an engine without computer tools
+ ↓ server/index.test.ts > harness HTTP API > creates team computers only with consent, retains failed creates, and assigns safely
+ ↓ server/index.test.ts > harness HTTP API > shares one team computer across direct and room turns without overriding explicit destinations
+ ✓ server/index.test.ts > harness HTTP API > queues computer waiters in arrival order and estimates the wait only from history 2363ms
+ ✓ server/index.test.ts > harness HTTP API > parks the turn at the wait ceiling and resumes when the computer frees 20671ms
+ ✓ server/index.test.ts > harness HTTP API > routes a goal run around a member parked at the computer wait ceiling and never runs that step again 10933ms
+ ↓ server/index.test.ts > harness HTTP API > blocks bot-scoped Boat lifecycle changes after a direct turn claims the bot
+ ↓ server/index.test.ts > harness HTTP API > blocks bot-scoped Boat lifecycle changes while the bot owns a room turn
+ ↓ server/index.test.ts > harness HTTP API > lists sanitized cloud computers and requires explicit safe lifecycle actions
+ ↓ server/index.test.ts > harness HTTP API > deletes a bot-owned Boat automatically even after the bot changes destination
+ ↓ server/index.test.ts > harness HTTP API > keeps a reviewed deletion target that changes during slow cloud cleanup
+ ↓ server/index.test.ts > harness HTTP API > keeps the bot while an owned Boat deletion is pending and finishes on retry
+ ↓ server/index.test.ts > harness HTTP API > keeps a bot when its Boat provider is unavailable and fences deletion races
+ ↓ server/index.test.ts > harness HTTP API > keeps the bot owner while Boat creation recovery is unresolved
+ ↓ server/index.test.ts > harness HTTP API > finds and deletes a remembered Boat even while account LIST omits it
+ ↓ server/index.test.ts > harness HTTP API > elects one Chief of Staff per section and preserves other section Chiefs
+ ↓ server/index.test.ts > harness HTTP API > files a sidebar section atomically, trims and dedupes, and preserves its Chief
+ ↓ server/index.test.ts > harness HTTP API > rejects a sidebar section Chief collision without changing any bot
+ ↓ server/index.test.ts > harness HTTP API > rejects malformed or unavailable sidebar section targets without partially filing bots
+ ↓ server/index.test.ts > harness HTTP API > explains when archived room members cannot respond
+ ↓ server/index.test.ts > harness HTTP API > saves, serves, and guards image attachments
+ ↓ server/index.test.ts > harness HTTP API > serves audio attachments with single-range 206s and keeps images full
+ ↓ server/index.test.ts > harness HTTP API > keeps a channel image in its transcript while sending native pixels to the responder
+ ↓ server/index.test.ts > harness HTTP API > sends an earlier image as native pixels again when an edit rewinds the chat
+ ↓ server/index.test.ts > harness HTTP API > streams shared documents safely into the local attachments directory
+ ↓ server/index.test.ts > harness HTTP API > persists only app-owned bot avatars and supported crop shapes
+ ↓ server/index.test.ts > harness HTTP API > limits paired profile writes to validated profile fields and broadcasts the result
+ ↓ server/index.test.ts > harness HTTP API > starts new bots with the workspace's new-bot effort unless they choose their own
+ ↓ server/index.test.ts > harness HTTP API > updates a paired bot's model, persists it, broadcasts it, and clears effort
+ ↓ server/index.test.ts > harness HTTP API > keeps paired model writes inside the live catalog and exact request shape
+ ↓ server/index.test.ts > harness HTTP API > refuses paired model changes while the bot is working
+ ↓ server/index.test.ts > harness HTTP API > carries a Full bot's access across engines silently, and keeps Custom bots on Codex
+ ↓ server/index.test.ts > harness HTTP API > exports every visible bot and imports the team without creating a room
+ ↓ server/index.test.ts > harness HTTP API > imports a team as a project: one room, on a folder
+ ↓ server/index.test.ts > harness HTTP API > allocates editable template sections without colliding with rooms or archived bots
+ ↓ server/index.test.ts > harness HTTP API > installs a complete bot package with a Chief, room, playbook, connector intent, and paused routine
+ ↓ server/index.test.ts > harness HTTP API > the scout reads a folder, proposes an importable team, and creates nothing until the human imports
+ ↓ server/index.test.ts > harness HTTP API > team import is additive-only: smuggled grants, claimed ids, and re-imports never touch existing records
+ ↓ server/index.test.ts > harness HTTP API > keeps the rest of a duplicate's fields when the source engine is offline
+ ↓ server/index.test.ts > harness HTTP API > rejects an unknown effort value even while the engine is offline
+ ↓ server/index.test.ts > harness HTTP API > buzzes when a turn dies before it can start
+ ↓ server/index.test.ts > harness HTTP API > shows a card continuation that cannot start as the root's failed turn, without buzzing twice
+ ↓ server/index.test.ts > harness HTTP API > asks the person to sign in with one card and one notification, supersedes the older card, and resumes the bot on Done or Cancel
+ ↓ server/index.test.ts > harness HTTP API > answers a sign-in finished while its turn still runs once that turn ends, and never after a Stop
+ ↓ server/index.test.ts > harness HTTP API > saves a login from the sign-in card for its exact host, resumes the bot to fill it, and never hands the password back
+ ↓ server/index.test.ts > harness HTTP API > fill_login answers where it cannot reach with a status that sends the bot to request_sign_in
+ ↓ server/index.test.ts > harness HTTP API > refuses a sign-in request where nothing names a place to sign in
+ ↓ server/index.test.ts > harness HTTP API > supersedes an earlier pending credential card when the same key is asked for again
+ ↓ server/index.test.ts > harness HTTP API > leaves the earlier pending credential card actionable when the fresh card append fails
+ ↓ server/index.test.ts > harness HTTP API > keeps credential-card ownership stable while an encrypted phone save is in flight
+ ↓ server/index.test.ts > harness HTTP API > reports a failed routine once, not twice
+ ↓ server/index.test.ts > harness HTTP API > creates a fully configured bot in one request and greets with its final name
+ ↓ server/index.test.ts > harness HTTP API > opts MCP-style model writes into the current live catalog without narrowing general writes
+ ↓ server/index.test.ts > harness HTTP API > rejects incomplete model selections instead of persisting a broken bot
+ ↓ server/index.test.ts > harness HTTP API > switches a bot's selected task without stopping its running task
+ ↓ server/index.test.ts > harness HTTP API > rechecks bot state after a delayed body for tasks
+ ↓ server/index.test.ts > harness HTTP API > rechecks bot state after a delayed body for active-branch
+ ↓ server/index.test.ts > harness HTTP API > rechecks channel state after a delayed body for POST tasks
+ ↓ server/index.test.ts > harness HTTP API > rechecks channel state after a delayed body for PATCH tasks
+ ↓ server/index.test.ts > harness HTTP API > refuses to interrupt a conversation after its active task changed
+ ↓ server/index.test.ts > harness HTTP API > pins sends to the expected task and offers compact switch responses
+ ↓ server/index.test.ts > harness HTTP API > leaves a bot with no effort level untouched
+ ↓ server/index.test.ts > harness HTTP API > round-trips an effort level and clears it when the key is dropped
+ ↓ server/index.test.ts > harness HTTP API > preserves an opaque variant separately from effort and rejects ambiguous or malformed selections
+ ↓ server/index.test.ts > harness HTTP API > grants Auto on this computer only through the warning acknowledgement
+ ↓ server/index.test.ts > harness HTTP API > stores safe approval levels and Full over HTTP, and keeps Custom on the desktop
+ ↓ server/index.test.ts > harness HTTP API > applies Full access over HTTP at once, and the bot's next turns run at Full
+ ↓ server/index.test.ts > harness HTTP API > sets a team-wide level on every thread, New-thread threads included, the same way for every level
+ ↓ server/index.test.ts > harness HTTP API > asks for the local-computer warning when a team-wide Auto reaches a thread not on Auto yet
+ ↓ server/index.test.ts > harness HTTP API > moves a team's following threads to a new bot model and leaves each thread's own model, on screen or not
+ ↓ server/index.test.ts > harness HTTP API > pins provider approval support at the thread settings gate
+ ↓ server/index.test.ts > harness HTTP API > maps legacy autoApprove PATCHes to safe Auto or Ask
+ ↓ server/index.test.ts > harness HTTP API > refuses approval-level changes while a bot is working
+ ↓ server/index.test.ts > harness HTTP API > offers an idempotent stop boundary for active local turns
+ ↓ server/index.test.ts > harness HTTP API > a new bot opens with one greeting and no quiz card
+ ↓ server/index.test.ts > harness HTTP API > validates approval decisions and reports a request that is no longer open
+ ↓ server/index.test.ts > harness HTTP API > answers a room approval whose turn is already over instead of stranding the room
+ ↓ server/index.test.ts > harness HTTP API > closes cancelled approvals but preserves unanswered questions
+ ↓ server/index.test.ts > harness HTTP API > rejects an empty message and explains an unavailable provider
+ ↓ server/index.test.ts > harness HTTP API > refuses to fork a message when the provider is unavailable, without mutating
+ ↓ server/index.test.ts > harness HTTP API > switches the active branch and reports the new leaf
+ ↓ server/index.test.ts > harness HTTP API > refuses a box token the provider rejects, at the point of pasting
+ ↓ server/index.test.ts > harness HTTP API > saves config keys write-only and reports booleans
+ ↓ server/index.test.ts > harness HTTP API > clears incompatible default and per-agent voices when switching to fish
+ ↓ server/index.test.ts > harness HTTP API > clears incompatible default and per-agent voices when switching to xai
+ ↓ server/index.test.ts > harness HTTP API > saves the Fish Audio model and keeps it across provider switches
+ ↓ server/index.test.ts > harness HTTP API > does not switch voice providers when per-agent voices cannot be cleared
+ ↓ server/index.test.ts > harness HTTP API > keeps Boat resources attached while allowing a proven same-account token rotation
+ ↓ server/index.test.ts > harness HTTP API > replaces a rejected Boat key without losing remembered computers (provisioned=false)
+ ↓ server/index.test.ts > harness HTTP API > replaces a rejected Boat key without losing remembered computers (provisioned=true)
+ ↓ server/index.test.ts > harness HTTP API > retires a journaled Boat proven gone before clearing and later restoring credentials
+ ↓ server/index.test.ts > harness HTTP API > pins where a conversation works from the composer, validates the place, and lets it follow the bot again
+ ↓ server/index.test.ts > harness HTTP API > dispatches the conversation's pinned computer on the bot's own engine, and previews that same surface
+ ↓ server/index.test.ts > harness HTTP API > excludes new Boat turns, lifecycle actions, and bot deletion while a token change validates
+ ↓ server/index.test.ts > harness HTTP API > rejects a Boat token change while create and rename own the lifecycle lane
+ ↓ server/index.test.ts > harness HTTP API > manages and probes custom MCP servers without returning secret values
+ ↓ server/index.test.ts > harness HTTP API > lets a bot file an MCP server only as a disabled row
+ ↓ server/index.test.ts > harness HTTP API > manages and probes a url MCP server, and the Claude Code servers switch
+ ↓ server/index.test.ts > harness HTTP API > signs in to an OAuth URL MCP server, and keeps its token out of every response
+ ↓ server/index.test.ts > harness HTTP API > signs in as a pre-registered app where self-registration is off, keeping its secret write-only
+ ↓ server/index.test.ts > harness HTTP API > completes remote MCP OAuth only in its initiating admin session (pre-registered: false)
+ ↓ server/index.test.ts > harness HTTP API > completes remote MCP OAuth only in its initiating admin session (pre-registered: true)
+ ↓ server/index.test.ts > harness HTTP API > brings a sign-in started in a browser on another computer back to this server's https address
+ ↓ server/index.test.ts > harness HTTP API > round-trips the UI language and clears it back to system
+ ↓ server/index.test.ts > harness HTTP API > keeps an active turn alive when the UI language changes
+ ↓ server/index.test.ts > harness HTTP API > validates and persists the global room turn timeout
+ ↓ server/index.test.ts > harness HTTP API > cards asks when Claude's reviewer never started and remembers an exact configured MCP read
+ ↓ server/index.test.ts > harness HTTP API > mounts the verification skill into a real turn when its trigger appears
+ ↓ server/index.test.ts > harness HTTP API > injects the bot's standing instructions (soul) into a real turn, directly after the persona
+ ↓ server/index.test.ts > harness HTTP API > ends a Chief of Staff's team section at the roster, in the preview and in a real turn
+ ↓ server/index.test.ts > harness HTTP API > saves Record browser steps as a true-or-false bot setting, shown to the app
+ ↓ server/index.test.ts > harness HTTP API > Works on: Off withholds the browser and tells the model why
+ ↓ server/index.test.ts > harness HTTP API > does not coach an ordinary request even when the bot profile is blank
+ ↓ server/index.test.ts > harness HTTP API > re-enters setup mode for a configured bot when the user sends /setup, and rewrites the turn text
+ ↓ server/index.test.ts > harness HTTP API > tells a /setup turn to connect an app itself when its connected-apps tools are mounted, and names the switch when they are off
+ ↓ server/index.test.ts > harness HTTP API > never lets an out-of-band SOUL.md edit reach the prompt, and surfaces it as drift instead
+ ↓ server/index.test.ts > harness HTTP API > mounts the verification skill only for the latest channel request
+ ↓ server/index.test.ts > harness HTTP API > keeps skill authoring on by default and persists an explicit opt-out
+ ↓ server/index.test.ts > harness HTTP API > refuses to delete a bot while it owns an active channel turn
+ ↓ server/index.test.ts > harness HTTP API > creates, edits, lists, and deletes scheduled multi-bot calls
+ ↓ server/index.test.ts > harness HTTP API > opens one calendar room and posts the scheduled seed to everyone
+ ↓ server/index.test.ts > harness HTTP API > refuses to delete a bot while one of its routines is active
+ ↓ server/index.test.ts > harness HTTP API > stops a local bot's exact channel and routine work through the emergency endpoint
+ ↓ server/index.test.ts > harness HTTP API > releases a room bot when preparing its saved browser fails, then allows retry
+ ↓ server/index.test.ts > harness HTTP API > mounts the browser engine's MCP server and the sign-in policy in direct turns and preview
+ ↓ server/index.test.ts > harness HTTP API > mounts the browser engine's MCP server and the sign-in policy in room turns and preview
+ ↓ server/index.test.ts > harness HTTP API > loads the browser tools up front only when the browser is the conversation's place in direct turns
+ ↓ server/index.test.ts > harness HTTP API > loads the browser tools up front only when the browser is the conversation's place in room turns
+ ↓ server/index.test.ts > harness HTTP API > resolves the same computer paragraph in the settings preview and direct turns
+ ↓ server/index.test.ts > harness HTTP API > resolves the same computer paragraph in the settings preview and room turns
+ ↓ server/index.test.ts > harness HTTP API > reconciles a committed crash-stale bot reference before ACK and profile-id reuse
+ ↓ server/index.test.ts > harness HTTP API > clears bot references when a named browser profile is removed
+ ↓ server/index.test.ts > harness HTTP API > does not remove a browser profile from a bot whose turn is active
+ ↓ server/index.test.ts > harness HTTP API > rechecks profile use after awaited provider validation before deleting it
+ ↓ server/index.test.ts > harness HTTP API > hands out a Local VM's viewer only to the lease holding the computer, once the VM is ready
+ ↓ server/index.test.ts > harness HTTP API > lets a phone paired directly with Full access ask for the Local VM desktop under its lease, and nobody else
+ ↓ server/index.test.ts > harness HTTP API > refuses Local VM phone joins in shared mode for direct and companion callers
+ ↓ server/index.test.ts > harness HTTP API > refuses Local VM phone joins in pool mode for direct and companion callers
+ ↓ server/index.test.ts > harness HTTP API > keeps shared Local VM mode by default and resolves isolated targets per bot when enabled
+ ↓ server/index.test.ts > harness HTTP API > validates, persists and applies the Local VM idle timeout in shared and per-bot modes
+ ↓ server/index.test.ts > harness HTTP API > never removes an unmanaged container that squats on a bot's exact Local VM name
+ ↓ server/index.test.ts > harness HTTP API > removes a managed per-bot Local VM and its private files with the bot
+ ↓ server/index.test.ts > harness HTTP API > removes the exact managed VPS computer with its bot
+ ↓ server/index.test.ts > harness HTTP API > keeps an active turn alive when only the room timeout changes
+ ↓ server/index.test.ts > harness HTTP API > tracks and interrupts the whole queued channel turn
+ ↓ server/index.test.ts > harness HTTP API > keeps a room credential card owned by the member that raised it
+ ↓ server/index.test.ts > harness HTTP API > records where the person stopped reading a thread
+ ↓ server/index.test.ts > harness HTTP API > applies a bot's own chat-created routine at once and keeps a teammate's behind its card
+ ↓ server/index.test.ts > harness HTTP API > gates targeted routine actions like creation and re-checks the target at confirm
+ ↓ server/index.test.ts > harness HTTP API > lets a bot change its own routines while 8 cards for a teammate are open
+ ↓ server/index.test.ts > harness HTTP API > applies a bot's own profile change at once, records history, and undoes it from its receipt
+ ↓ server/index.test.ts > harness HTTP API > only lets a section's Chief of Staff propose (and hold) a change to another bot's profile
+ ↓ server/index.test.ts > harness HTTP API > binds profile proposals to the capability's bot and thread and rechecks late bodies
+ ↓ server/index.test.ts > harness HTTP API > stages learned skill references on the card and explains the SKILL.md size cap
+ ↓ server/index.test.ts > harness HTTP API > applies a bot's own learned skill at once and undoes it from its receipt
+ ↓ server/index.test.ts > harness HTTP API > rejects oversized Boat console commands instead of executing a truncated prefix
+ ↓ server/index.test.ts > harness HTTP API > validates the non-secret VPS alias and keeps old bots on Boat by default
+ ↓ server/index.test.ts > harness HTTP API > validates a Composio project key, creates a Session, and keeps externally stored secrets off disk
+ ↓ server/index.test.ts > harness HTTP API > keeps second-account cards separate and waits for the requested alias, not an existing account
+ ↓ server/index.test.ts > harness HTTP API > retries abandoned connector OAuth through Settings and in-chat cards without replacing an active account
+ ↓ server/index.test.ts > harness HTTP API > does not relay a slow connector request after Connected Apps is disabled
+ ↓ server/index.test.ts > harness HTTP API > explains a missing Google permission instead of passing the bare 403 to the bot
+ ↓ server/index.test.ts > harness HTTP API > enforces per-bot connector tool grants on relayed tool calls
+ ↓ server/index.test.ts > harness HTTP API > refuses MULTI_EXECUTE shapes it cannot read and writes connector-scope denial rows
+ ↓ server/index.test.ts > harness HTTP API > validates connector grant patches against connected services and the catalog
+ ↓ server/index.test.ts > harness HTTP API > rechecks memory policy after connector validation when a direct turn starts (enabled=false)
+ ↓ server/index.test.ts > harness HTTP API > rechecks memory policy after connector validation when a room turn starts (enabled=false)
+ ↓ server/index.test.ts > harness HTTP API > rechecks memory policy after connector validation when a direct turn starts (enabled=true)
+ ↓ server/index.test.ts > harness HTTP API > rechecks memory policy after connector validation when a room turn starts (enabled=true)
+ ↓ server/index.test.ts > harness HTTP API > serves the grant editor's tool inventory grouped by service
+ ↓ server/index.test.ts > harness HTTP API > stores the credentials file with owner-only permissions
+ ↓ server/index.test.ts > harness HTTP API > stores and echoes the user profile (not write-only, unlike keys)
+ ↓ server/index.test.ts > harness HTTP API > creates an independent webhook, accepts a delivery, deduplicates it, and rotates its secret
+ ↓ server/index.test.ts > harness HTTP API > stores OpenCode Go credentials as a configured-only status
+ ↓ server/index.test.ts > harness HTTP API > stores the avatar image key as configured-only status
+ ↓ server/index.test.ts > harness HTTP API > keeps avatar providers and externally stored image credentials separate
+ ↓ server/index.test.ts > harness HTTP API > rejects a non-string OpenCode Go API key
+ ↓ server/index.test.ts > harness HTTP API > never hands a client the provider session cursors
+ ↓ server/index.test.ts > harness HTTP API > validates the event inspector limit at the HTTP boundary
+ ↓ server/index.test.ts > harness HTTP API > 404s unknown routes with the route in the error
+ ↓ server/index.test.ts > section context API > keeps user-managed briefs isolated by live section and clears them explicitly
+ ↓ server/index.test.ts > section context API > rejects missing, unknown, invalid, and oversized section context writes
+ ↓ server/index.test.ts > bot memory API > lets a bot attach a file it made, and serves it only through that message
+ ↓ server/index.test.ts > bot memory API > delivers a file a host engine's turn saved outside its folders by copy, and nothing else from there
+ ↓ server/index.test.ts > bot memory API > keeps a turn to its attachment limit when the calls arrive at the same time
+ ↓ server/index.test.ts > bot memory API > serves an image the bot attached through its message, and only that message's own attachments
+ ↓ server/index.test.ts > bot memory API > tells a room when a bot recalls from its private chat, once per source thread
+ ↓ server/index.test.ts > bot memory API > session_search recalls the bot's own earlier task from a later one, and only its own
+ ↓ server/index.test.ts > bot memory API > tells the desktop whether to hold the computer awake for a routine due within the hour
+ ↓ server/index.test.ts > bot memory API > marks every unseen routine failure seen through one client endpoint
+ ↓ server/index.test.ts > bot memory API > session_search by time lists the bot's recent messages, its rooms included, and only its own
+ ↓ server/index.test.ts > bot memory API > reads empty memory for a fresh bot and 404s a bot that does not exist
+ ↓ server/index.test.ts > bot memory API > round-trips a MEMORY.md edit and rejects non-string or oversized text
+ ↓ server/index.test.ts > bot memory API > lists memory/ topic files
+ ↓ server/index.test.ts > bot memory API > round-trips soul through both PATCH routes and mirrors it to SOUL.md
+ ↓ server/index.test.ts > bot memory API > keeps mixed-request runtime revocations effective when profile persistence fails
+ ↓ server/index.test.ts > bot memory API > reads the soul with its file path, and reports, applies, or discards drift
+ ↓ server/index.test.ts > bot memory API > apply-file refuses to apply text the client did not actually see
+ ↓ server/index.test.ts > bot memory API > pins rollback to a unique row and refuses stale or bodyless undo
+ ↓ server/index.test.ts > bot memory API > refuses redacted history restores without changing SOUL and still restores exact safe text
+ ↓ server/index.test.ts > bot memory API > guards file actions against new profile/file edits and reports unreadable mirrors
+ ↓ server/index.test.ts > bot memory API > previews the system prompt the model will see, section by section
+ ↓ server/index.test.ts > bot memory API > builds a plain-language overview from a bot's real settings and history
+ ↓ server/index.test.ts > message pages > returns the whole transcript when nothing is asked for
+ ↓ server/index.test.ts > message pages > returns only the newest n when asked
+ ↓ server/index.test.ts > message pages > pages backwards from a message the client already holds
+ ↓ server/index.test.ts > message pages > returns a bounded transcript window around a search result
+ ↓ server/index.test.ts > message pages > refuses a cursor or size it cannot page from
+ ↓ server/index.test.ts > message pages > bounds a channel task switch the same way as a snapshot
+ ↓ server/index.test.ts > message pages > bounds a bot thread switch the same way as a snapshot
+ ↓ server/index.test.ts > message pages > keeps the switch frame bounded, so a paged switch never emits the whole thread
+ ↓ server/index.test.ts > message pages > 404s an image on a message that has none
+ ↓ server/index.test.ts > message pages > downloads only a file linked by the exact stored bot message
+ ↓ server/index.test.ts > message pages > downloads a structured generated image from an image-only reply
+ ↓ server/index.test.ts > message pages > confines structured generated images to their message and private image files
+ ↓ server/index.test.ts > message pages > downloads an image rendered by the exact stored bot message
+ ↓ server/index.test.ts > message pages > streams an authorized message image directly into the preview
+ ↓ server/index.test.ts > message pages > shows the copy a bot delivered of an outside picture, and says why one it never delivered is refused
+ ↓ server/index.test.ts > message pages > downloads an exact user attachment only from the private attachment store
+ ↓ server/index.test.ts > message pages > 404s an image on a conversation that does not exist, without inventing one
+ ↓ server/index.test.ts > resumable event stream > hands out a cursor and numbers every frame
+ ↓ server/index.test.ts > resumable event stream > sends browser-visible heartbeats without moving the replay cursor
+ ↓ server/index.test.ts > resumable event stream > replays exactly what a disconnected client missed
+ ↓ server/index.test.ts > resumable event stream > resumes a browser EventSource through Last-Event-ID alone
+ ↓ server/index.test.ts > resumable event stream > prefers a newer Last-Event-ID over the EventSource URL's stale cursor
+ ↓ server/index.test.ts > resumable event stream > keeps delivering everything else when a client declines screen frames
+ ↓ server/index.test.ts > resumable event stream > refuses a cursor it cannot honour instead of replaying the wrong run
+ ↓ server/index.test.ts > instance CLI override API > round-trips bounded per-instance icons without changing the driver
+ ↓ server/index.test.ts > instance CLI override API > round-trips a set, clear, and rejects bad input
+ ↓ server/index.test.ts > instance CLI override API > echoes a path-ish name back as the only cli candidate
+ ↓ server/index.test.ts > instance CLI override API > reports a missing binary as a failed probe with install info
+ ↓ server/index.test.ts > instance CLI override API > probes the complete wrapper with fixed arguments and no inherited credentials
+ ↓ server/index.test.ts > instance CLI override API > reports excessive probe output without presenting install guidance
+ ↓ server/index.test.ts > instance CLI override API > updates only the configured Claude instance and verifies its version
+ ↓ server/index.test.ts > instance CLI override API > requires JSON before launching the Claude updater
+ ↓ server/index.test.ts > instance CLI override API > rejects overlapping provider configuration writes
+ ↓ server/index.test.ts > computer control API (who is driving) > starts disengaged
+ ↓ server/index.test.ts > computer control API (who is driving) > take → held, broadcast on the wire, release → disengaged
+ ↓ server/index.test.ts > computer control API (who is driving) > atomically owns and conditionally releases a workspace lease without returning its id
+ ↓ server/index.test.ts > computer control API (who is driving) > rejects malformed workspace leases without echoing them
+ ↓ server/index.test.ts > computer control API (who is driving) > refuses an unknown action and an unknown bot
+ ↓ server/index.test.ts > computer control API (who is driving) > refuses a form-shaped POST — control mutations are JSON-only
+ ↓ server/index.test.ts > computer control API (who is driving) > keeps the internal who-is-driving endpoint behind the boot token
+
+ Test Files  1 passed (1)
+      Tests  3 passed | 294 skipped (297)
+   Start at  23:02:17
+   Duration  39.83s (transform 570ms, setup 512ms, import 862ms, tests 38.28s, environment 0ms)
+

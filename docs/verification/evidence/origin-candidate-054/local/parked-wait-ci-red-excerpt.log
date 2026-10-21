@@ -1,0 +1,35 @@
+2026-10-21T20:55:58.6819971Z ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+2026-10-21T20:55:58.6820548Z 
+2026-10-21T20:55:58.6824201Z  FAIL  server/index.test.ts > harness HTTP API > parks the turn at the wait ceiling and resumes when the computer frees
+2026-10-21T20:55:58.6832469Z AssertionError: expected undefined to match object { …(2) }
+2026-10-21T20:55:58.6833142Z 
+2026-10-21T20:55:58.6833404Z - Expected:
+2026-10-21T20:55:58.6833928Z {
+2026-10-21T20:55:58.6834264Z   "holder": {
+2026-10-21T20:55:58.6834690Z     "name": "Park holder",
+2026-10-21T20:55:58.6835146Z   },
+2026-10-21T20:55:58.6835600Z   "outcome": "parked",
+2026-10-21T20:55:58.6836023Z }
+2026-10-21T20:55:58.6836233Z 
+2026-10-21T20:55:58.6836475Z + Received:
+2026-10-21T20:55:58.6836946Z undefined
+2026-10-21T20:55:58.6837139Z 
+2026-10-21T20:55:58.6837661Z  ❯ server/index.test.ts:3682:76
+2026-10-21T20:55:58.6881614Z     3680|         resource: expect.stringMatching(/^computer:/),
+2026-10-21T20:55:58.6882312Z     3681|       });
+2026-10-21T20:55:58.6882859Z     3682|       expect(waitEvents.find((event) => event.type === "turn.wait_ende…
+2026-10-21T20:55:58.6883529Z        |                                                                            ^
+2026-10-21T20:55:58.6884265Z     3683|         holder: { name: "Park holder" },
+2026-10-21T20:55:58.6885722Z     3684|         outcome: "parked",
+2026-10-21T20:55:58.6886178Z 
+2026-10-21T20:55:58.6886622Z ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+2026-10-21T20:55:58.6887019Z 
+2026-10-21T20:55:58.6891484Z 
+2026-10-21T20:55:58.6916002Z  Test Files  1 failed | 365 passed | 20 skipped (386)
+2026-10-21T20:55:58.6954503Z       Tests  1 failed | 5109 passed | 113 skipped (5223)
+2026-10-21T20:55:58.6955582Z    Start at  20:23:29
+2026-10-21T20:55:58.6963656Z    Duration  1949.37s (transform 27.39s, setup 69.62s, import 95.70s, tests 1695.87s, environment 10.57s)
+2026-10-21T20:55:58.6975841Z 
+2026-10-21T20:55:58.7022615Z 
+2026-10-21T20:55:58.7058277Z ##[error]AssertionError: expected undefined to match object { …(2) }
+
