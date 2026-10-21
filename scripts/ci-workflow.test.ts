@@ -6,6 +6,16 @@ import { parse } from "yaml";
 const workflow = parse(readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8"));
 const requiredRuntimeJobs = ["vitest", "behavior-evals", "packaged-server", "windows-cua", "electron-smokes"];
 
+describe("Docs release coverage", () => {
+  it("runs for Origin release tags independently of pull-request path selection", () => {
+    const docs = parse(readFileSync(new URL("../.github/workflows/docs.yml", import.meta.url), "utf8"));
+    expect(docs.on.push.tags).toContain("origin-v*");
+    expect(docs.on).toHaveProperty("workflow_dispatch");
+    expect(docs.permissions).toEqual({ contents: "read" });
+    expect(docs.jobs.verify.steps[0].with.ref).toBeUndefined();
+  });
+});
+
 function runGate(needs: Record<string, unknown>) {
   // Execute the actual gate, not a duplicate of its success/failure logic.
   const command = workflow.jobs.gate.steps[0].run as string;
