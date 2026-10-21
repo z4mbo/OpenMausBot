@@ -144,6 +144,11 @@ export async function startSessionDaemon(binary: string, env: NodeJS.ProcessEnv)
   catch (error) { throw new ControlOmbError(error instanceof Error ? error.message : String(error)); }
 }
 
+export async function ownUiSessionDaemon(binary: string, env: NodeJS.ProcessEnv, platform: NodeJS.Platform = process.platform): Promise<void> {
+  if (platform !== "win32") return;
+  await startSessionDaemon(binary, env);
+}
+
 /** Chrome for Testing that `agent-browser install` unpacked under the tools
  * directory, newest version first; null when it found a system browser instead. */
 export function installedChrome(toolsDir = UI_TOOLS_DIR, platform: NodeJS.Platform = process.platform): string | null {
@@ -480,7 +485,7 @@ export async function launchUi(
     const session: SessionEnv = { home: fixture.info.dataDir, session: `omb-ui-${new URL(fixture.info.url).port}`, chrome };
     const env = sessionEnv(session, parentEnv);
     opened = { binary, env };
-    await startSessionDaemon(binary, env);
+    await ownUiSessionDaemon(binary, env);
     await agentBrowser(binary, env, ["open", preview.previewUrl], 120_000);
     checkpoint();
     const handle: UiHandle = {
