@@ -1,0 +1,17 @@
+{
+  "owner": "5273847f-b0b4-4d97-a245-1bdb3c104a70",
+  "source": "ec3683b171438905c6171d838ab11c559e1bfa49",
+  "botId": "73d43215-be1e-448b-afd4-d0fbad6b83cb",
+  "threadA": "50226d54-ffc3-44c6-953e-11568bd239b9",
+  "threadB": "f78ca17e-8eee-4ded-bb0f-20b11e71dc2d",
+  "oldAFrameSha256": "89a7c62fb76d4f2d723fb87ccbe84fd08dfc1fe833bba4616eece68462c09b78",
+  "freshBFrameSha256": "f1423a95eaf30cd04a3a05cb1b737cd73bd1571e7b52af74a60ecec89beb00cb",
+  "frozenStoreSha256": "52664be241f0461a1197ef0f868a94046dcb161aa204e96cf0bbefd0b8c34194",
+  "fixture": {
+    "url": "http://127.0.0.1:22416",
+    "pid": 11624,
+    "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-WqDvAb",
+    "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792613013658-4784.log"
+  },
+  "qualification": "Forced startup network/event ordering using actual synthetic-server bodies and announcements. No reducer dispatch injection, transcript fabrication, approval bypass or provider/account access."
+}

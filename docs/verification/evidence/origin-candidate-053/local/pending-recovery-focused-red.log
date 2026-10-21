@@ -1,0 +1,29 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ src/components/ProjectAgentsPage.test.ts (12 tests | 1 failed) 149ms
+     × retries an awaiting specialist read on its current thread row 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ProjectAgentsPage.test.ts > project specialist conversations > retries an awaiting specialist read on its current thread row
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { …(3) } ]
+
+Number of calls: 0
+
+ ❯ src/components/ProjectAgentsPage.test.ts:52:30
+     50|     fixture.dispatch.mockClear();
+     51|     flushSync(() => host.querySelector<HTMLButtonElement>('[data-sideb…
+     52|     expect(fixture.dispatch).toHaveBeenCalledExactlyOnceWith({ type: "…
+       |                              ^
+     53|     expect(projectAgentSelection(lead.id)?.threadId).toBe("child-a");
+     54|     expect(host.querySelector('[data-chat-thread]')).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 25 passed (26)
+   Start at  22:01:42
+   Duration  17.09s (transform 1.16s, setup 728ms, import 1.81s, tests 8.74s, environment 5.14s)
+

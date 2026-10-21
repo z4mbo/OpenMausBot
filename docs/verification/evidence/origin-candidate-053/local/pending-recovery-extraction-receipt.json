@@ -1,0 +1,41 @@
+{
+  "kind": "pending-thread-snapshot-source-extraction",
+  "observedAtUtc": "2026-10-21T20:12:49.0588745Z",
+  "sources": [
+    {
+      "path": "src/state/store.tsx",
+      "lines": 3556,
+      "sha256": "7cc9faec9f4021abe0b749183e1a346971943bab8da1269b1e877c52be28d188"
+    },
+    {
+      "path": "src/state/pending-thread-snapshots.ts",
+      "lines": 132,
+      "sha256": "01b63989e935387627b32f29a51398a5d70d7845a08d2a1217fa4115349e9161"
+    }
+  ],
+  "checks": [
+    {
+      "command": "pnpm.cmd exec vitest run src/state/pending-thread-snapshots.test.ts src/state/store.test.ts",
+      "exitCode": 0,
+      "testsPassed": 236,
+      "testFilesPassed": 2,
+      "durationSeconds": 15.53,
+      "log": "pending-recovery-extraction-tests.log"
+    },
+    {
+      "command": "pnpm.cmd exec oxlint --deny-warnings src/state/store.tsx src/state/pending-thread-snapshots.ts",
+      "exitCode": 0,
+      "log": "pending-recovery-extraction-lint.log"
+    },
+    {
+      "command": "pnpm.cmd exec tsc -p tsconfig.json --noEmit",
+      "exitCode": 0,
+      "log": "pending-recovery-extraction-typecheck.log"
+    },
+    {
+      "command": "git diff --check -- src/state/store.tsx",
+      "exitCode": 0
+    }
+  ],
+  "fileSizeGuard": "Root owns lowering the store.tsx entry from 3558 to 3556 and running the guard."
+}

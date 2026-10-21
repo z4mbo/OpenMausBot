@@ -1,0 +1,139 @@
+{
+  "bots": [
+    {
+      "id": "73d43215-be1e-448b-afd4-d0fbad6b83cb",
+      "threadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+      "name": "Thread recovery",
+      "title": "",
+      "description": "",
+      "soul": "",
+      "soulHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "notifications": true,
+      "color": "green",
+      "unread": true,
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "createdAt": 1792613015433,
+      "section": "Agents",
+      "activity": "idle",
+      "busy": false,
+      "approvalMode": "full",
+      "waitingForTeammates": false,
+      "mainThreadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+      "avatarUrl": null,
+      "tasks": [
+        {
+          "threadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+          "title": "Pinned thread A",
+          "createdAt": 1792613015433,
+          "updatedAt": 1792613015894,
+          "unread": true,
+          "activity": "idle",
+          "busy": false,
+          "lastThreadOrderAt": 1792613015886,
+          "cwd": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-WqDvAb\\task-workspaces\\73d43215-be1e-448b-afd4-d0fbad6b83cb\\50226d54-ffc3-44c6-953e-11568bd239b9",
+          "usage": {
+            "input": 12,
+            "output": 5,
+            "cachedInput": 2,
+            "costUsd": 0.01,
+            "turns": 1,
+            "lastTurn": {
+              "input": 12,
+              "output": 5,
+              "cachedInput": 2,
+              "costUsd": 0.01
+            },
+            "context": {
+              "tokens": 12,
+              "window": 200000
+            }
+          },
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        }
+      ],
+      "messages": [
+        {
+          "id": "f3b2e011-0516-449b-a0eb-4939d1d9dacb",
+          "at": 1792613015444,
+          "parentId": null,
+          "role": "bot",
+          "kind": "text",
+          "text": "Hi, I'm Waffle. What would you like me to do?"
+        },
+        {
+          "id": "75066dd5-b488-442b-a4e8-ef8b170f5a24",
+          "at": 1792613015673,
+          "parentId": "f3b2e011-0516-449b-a0eb-4939d1d9dacb",
+          "role": "user",
+          "kind": "text",
+          "text": "Synthetic saved transcript on A.",
+          "sendId": "cli-4-tfYE-kCvYTF9uB",
+          "requestPending": false
+        },
+        {
+          "id": "920775ac-16a5-48ac-88d5-66ad6bc13418",
+          "at": 1792613015871,
+          "parentId": "75066dd5-b488-442b-a4e8-ef8b170f5a24",
+          "role": "bot",
+          "kind": "text",
+          "text": "Synthetic pinned thread A response.",
+          "turnId": "aae088ef-7ebc-4081-9f2e-31d5fb376388",
+          "requestMessageId": "75066dd5-b488-442b-a4e8-ef8b170f5a24",
+          "turnTerminal": true,
+          "turnCompletedAt": 1792613015886,
+          "turnSucceeded": true
+        },
+        {
+          "id": "40bc792c-211b-4fae-897d-0ac05fd9bd8c",
+          "at": 1792613015894,
+          "parentId": "920775ac-16a5-48ac-88d5-66ad6bc13418",
+          "role": "bot",
+          "kind": "digest",
+          "text": "[digest] · no tool activity observed in this turn · reply: Synthetic pinned thread A response.",
+          "digest": {
+            "turnId": "aae088ef-7ebc-4081-9f2e-31d5fb376388",
+            "botId": "73d43215-be1e-448b-afd4-d0fbad6b83cb",
+            "threadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+            "at": 1792613015894,
+            "durationMs": 98,
+            "tools": [],
+            "toolCalls": 0,
+            "memory": [],
+            "reply": "Synthetic pinned thread A response.",
+            "usage": {
+              "input": 12,
+              "output": 5,
+              "cachedInput": 2,
+              "costUsd": 0.01
+            },
+            "hookCoverage": "none"
+          },
+          "turnId": "aae088ef-7ebc-4081-9f2e-31d5fb376388",
+          "requestMessageId": "75066dd5-b488-442b-a4e8-ef8b170f5a24",
+          "turnSucceeded": true
+        }
+      ],
+      "hasMore": false,
+      "activeLeafId": "40bc792c-211b-4fae-897d-0ac05fd9bd8c"
+    }
+  ],
+  "botQueuedMessages": {},
+  "sections": [
+    "Agents"
+  ],
+  "groups": [],
+  "computerControl": {
+    "73d43215-be1e-448b-afd4-d0fbad6b83cb": {
+      "held": false,
+      "helpReason": null
+    }
+  }
+}

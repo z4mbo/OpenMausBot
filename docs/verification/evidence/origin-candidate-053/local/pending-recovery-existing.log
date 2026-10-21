@@ -1,0 +1,22 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+························································································································································································································································································
+
+ Test Files  4 passed (4)
+      Tests  280 passed (280)
+   Start at  22:04:51
+   Duration  18.94s (transform 3.57s, setup 1.58s, import 8.22s, tests 7.55s, environment 914ms)
+

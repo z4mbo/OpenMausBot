@@ -1,0 +1,19 @@
+{
+  "source": "ec3683b171438905c6171d838ab11c559e1bfa49",
+  "ciRun": 39551218972,
+  "attempt": 1,
+  "jobId": 119061530695,
+  "name": "renderer smoke (control-omb ui, Ubuntu 24.04)",
+  "status": "completed",
+  "conclusion": "failure",
+  "startedAt": "2026-10-21T05:47:02Z",
+  "completedAt": "2026-10-21T05:53:06Z",
+  "jobMetadataSha256": "6c09590edb74b39b391e84570e7a27931906717911154e3b36005eeac0c39970",
+  "fullJobLogsSha256": "8d78cc768d315b8fc8c87c824ff07558a9e8b0336ce6740513e0f73d734e8def",
+  "jobLogBytes": 41236,
+  "mergeTreeProofSha256": "4d2a0eeb2318b392dd838cc52022c3497b17a71e3a3c5c7672db7c63fa5e9800",
+  "readOnly": true,
+  "reruns": 0,
+  "sourceEdits": 0,
+  "checkedAt": "2026-10-21T05:53:34.091Z"
+}

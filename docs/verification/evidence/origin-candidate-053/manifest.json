@@ -1,0 +1,365 @@
+{
+  "proposedVersion": "0.7.5",
+  "archivedAt": "2026-10-21T20:13:14.295Z",
+  "historicalWorkflowSource": "ec3683b171438905c6171d838ab11c559e1bfa49",
+  "finalSource": null,
+  "archiveComplete": true,
+  "pending": [
+    "Final 0.7.5 source freeze/binding",
+    "Exact-source CI including Linux renderer, cloud, Docs and native workflows",
+    "Three-target package/browser/backup/deployment/publication/hash gates"
+  ],
+  "qualification": "Historical 0.7.4 workflow/diagnostic bytes and controlled synthetic local browser/product recovery evidence. No 0.7.5 release, native CUA, packaged-app or production acceptance. Original browser-proof.json remains failed; readonly after-send-reconciliation.json verifies the existing send without replay.",
+  "sanitization": {
+    "scope": "Public workflow metadata and synthetic isolated fixture records only; no production backups or provider credentials retained.",
+    "rawBytesPreserved": true,
+    "sourcePaths": "Original synthetic temporary paths are retained for provenance. Fixture source files are archived as evidence, not mapped runnable recipes."
+  },
+  "files": [
+    {
+      "name": "browser/actual-a-snapshot.json",
+      "bytes": 4463,
+      "sha256": "af3dff477fcfea8c65d15f662198e113f9715507c7991cb75cded5fcfdc37c89",
+      "provenance": "thread-recovery-live/actual-a-snapshot.json"
+    },
+    {
+      "name": "browser/actual-b-snapshot.json",
+      "bytes": 2758,
+      "sha256": "df02cdaba2631451709a138a47d8b698e06cdf48e03c60511f4d680d38d91e49",
+      "provenance": "thread-recovery-live/actual-b-snapshot.json"
+    },
+    {
+      "name": "browser/actual-pinned-a-get.json",
+      "bytes": 2100,
+      "sha256": "b724ca4174bf72ea3a9ec9774c5bed24bef3483b44133dad8d6a6e59414fe8b2",
+      "provenance": "thread-recovery-live/actual-pinned-a-get.json"
+    },
+    {
+      "name": "browser/after-browser-state.json",
+      "bytes": 1696,
+      "sha256": "bf2d659e9bec216546a726ef16582668f4b451fd627c46cd8db6fc24e07064f4",
+      "provenance": "thread-recovery-live/after-browser-state.json"
+    },
+    {
+      "name": "browser/after-chat.png",
+      "bytes": 39874,
+      "sha256": "bf2a9417ef6e65d648a837be6ce7d70e3e8b03473968325a7c264ba3f57c1ecd",
+      "provenance": "thread-recovery-live/after-chat.png"
+    },
+    {
+      "name": "browser/after-console.json",
+      "bytes": 816,
+      "sha256": "1490ad1548167c3f01952fd757e8416122db82e06cb48b4d203b99f3d84ae499",
+      "provenance": "thread-recovery-live/after-console.json"
+    },
+    {
+      "name": "browser/after-send-reconciliation.json",
+      "bytes": 963,
+      "sha256": "ffc78caf7ddcdc609b2b6859973022f6f0c1f07ed024a72da736f0a18c941720",
+      "provenance": "thread-recovery-live/after-send-reconciliation.json"
+    },
+    {
+      "name": "browser/after-sent-chat.png",
+      "bytes": 49175,
+      "sha256": "05a068222838c90a72aa576e3b677fc280d01e9e70cacce50dab7c9790980c2d",
+      "provenance": "thread-recovery-live/after-sent-chat.png"
+    },
+    {
+      "name": "browser/after-sent-page-reconciled.json",
+      "bytes": 3860,
+      "sha256": "7389493cfc743ccc10133698aa26ce39c81e2614e75ef3a37185445dbe52c40d",
+      "provenance": "thread-recovery-live/after-sent-page-reconciled.json"
+    },
+    {
+      "name": "browser/after-sent-rendered-state.json",
+      "bytes": 312,
+      "sha256": "aa766dabdfa1b4ffaf6338db84e66e48a5fe13305dfa934ab797d0bf765b3455",
+      "provenance": "thread-recovery-live/after-sent-rendered-state.json"
+    },
+    {
+      "name": "browser/before-browser-state.json",
+      "bytes": 778,
+      "sha256": "fe1c4eeaf4d4c6f018c2038fcd3108acecdf39393545198d027a373af30811df",
+      "provenance": "thread-recovery-live/before-browser-state.json"
+    },
+    {
+      "name": "browser/before-chat.png",
+      "bytes": 30550,
+      "sha256": "bbd46ecabe4f12185592e9b39857ac468129cf3dc403695e84b81a4d0e4b8e10",
+      "provenance": "thread-recovery-live/before-chat.png"
+    },
+    {
+      "name": "browser/browser-proof.json",
+      "bytes": 4589,
+      "sha256": "af7e0ad77d02ada0131f13efd565dd7657e0ab75f8aecf0ddde831258a257717",
+      "provenance": "thread-recovery-live/browser-proof.json"
+    },
+    {
+      "name": "browser/browser-proof.ts",
+      "bytes": 4895,
+      "sha256": "0aaf7612b6ff40c594b84a8c8176baeaebafcfd835235bf883ad5d0dac424fb5",
+      "provenance": "thread-recovery-live/browser-proof.ts"
+    },
+    {
+      "name": "browser/close-retained-data.ts",
+      "bytes": 1568,
+      "sha256": "5b3e21afe4a8bf02c82e5c2cb87c8a42eb309aa16ee798e19ef8cadc2373b1c1",
+      "provenance": "thread-recovery-live/close-retained-data.ts"
+    },
+    {
+      "name": "browser/closure-reconciled.json",
+      "bytes": 723,
+      "sha256": "b8cdaa9c5cad9fc4c15ff39cdb1f40cdd472984e43a4e2826b2170d44548642e",
+      "provenance": "thread-recovery-live/closure-reconciled.json"
+    },
+    {
+      "name": "browser/entry.tsx",
+      "bytes": 567,
+      "sha256": "38195c2efc50dd2c45d54dc0a3a23962e336dd1b0da4bfc0ee0e560c19edf79b",
+      "provenance": "thread-recovery-live/entry.tsx"
+    },
+    {
+      "name": "browser/fresh-b-announcement.json",
+      "bytes": 2546,
+      "sha256": "ad23d129af5663ac0d0507177804138c7631dcaf8428a7e2d28a1be9b5de8d81",
+      "provenance": "thread-recovery-live/fresh-b-announcement.json"
+    },
+    {
+      "name": "browser/http-source-preflight.json",
+      "bytes": 1812,
+      "sha256": "bb29caa82facf5b3c1ab5410891c797445a5e42002d1e82a48dc7bac6bba9007",
+      "provenance": "thread-recovery-live/http-source-preflight.json"
+    },
+    {
+      "name": "browser/launch.ts",
+      "bytes": 13581,
+      "sha256": "8d87d97135efdf7d90f8ae1647e9de468d1a72b5c9f04ab8b376b2d821486831",
+      "provenance": "thread-recovery-live/launch.ts"
+    },
+    {
+      "name": "browser/old-a-announcement.json",
+      "bytes": 1972,
+      "sha256": "3afa1481182d7d9a62134fc1ad9b6bbd2a28ae0fefdc6893f055b164747f42ee",
+      "provenance": "thread-recovery-live/old-a-announcement.json"
+    },
+    {
+      "name": "browser/probe.tsx",
+      "bytes": 992,
+      "sha256": "005dc9153405a0e2aa4317dba9b3d34391916461d06049d05949974cbd5dff54",
+      "provenance": "thread-recovery-live/probe.tsx"
+    },
+    {
+      "name": "browser/reconcile-send.ts",
+      "bytes": 3374,
+      "sha256": "2dcbf3f4a7c8b54c28fdf558168669c3d3ec42473606fec415aa07462d6bc2ed",
+      "provenance": "thread-recovery-live/reconcile-send.ts"
+    },
+    {
+      "name": "browser/requests-events.jsonl",
+      "bytes": 236553,
+      "sha256": "65f58e88d1069d49bb938e2e595162fe23bf9bf0d77c0bada1914df5303ca5b4",
+      "provenance": "thread-recovery-live/requests-events.jsonl"
+    },
+    {
+      "name": "browser/seed.json",
+      "bytes": 1039,
+      "sha256": "313aabf3deee3dbfe405f48603a7db51b61e1c4771c2627fb5651d5e77c543e6",
+      "provenance": "thread-recovery-live/seed.json"
+    },
+    {
+      "name": "browser/source-loads.json",
+      "bytes": 905,
+      "sha256": "644dd2318c4f0f2727d7b1fb9912d3ca3aa79c0d13691eec7935432ef37a6328",
+      "provenance": "Derived selected records from browser/requests-events.jsonl"
+    },
+    {
+      "name": "local/pending-recovery-existing.log",
+      "bytes": 1301,
+      "sha256": "93f2c083c94e4b554e0517357f340657577013d0c22a1814f2a7ee8481e4ac1e",
+      "provenance": "pending-recovery-existing.log"
+    },
+    {
+      "name": "local/pending-recovery-extraction-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "provenance": "pending-recovery-extraction-lint.log"
+    },
+    {
+      "name": "local/pending-recovery-extraction-receipt.json",
+      "bytes": 1348,
+      "sha256": "09edf4205596d0664eeeb72e8baa114b380c06b89af3795db4f006daece16a9a",
+      "provenance": "pending-recovery-extraction-receipt.json"
+    },
+    {
+      "name": "local/pending-recovery-extraction-tests.log",
+      "bytes": 264,
+      "sha256": "a52f0518de0a74cd365efe9be9687934d6de51605c584f4a58baff0a47f23f64",
+      "provenance": "pending-recovery-extraction-tests.log"
+    },
+    {
+      "name": "local/pending-recovery-extraction-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "provenance": "pending-recovery-extraction-typecheck.log"
+    },
+    {
+      "name": "local/pending-recovery-focused-green.log",
+      "bytes": 261,
+      "sha256": "3ac4a99758fb1d007cd059ec3cd48c617b35a0c16b51863913cf40fbfc78c80d",
+      "provenance": "pending-recovery-focused-20261021b.log"
+    },
+    {
+      "name": "local/pending-recovery-focused-red.log",
+      "bytes": 1302,
+      "sha256": "4764100841c8c3bd6bf74b52c9121077bbff3f847dc50af41a0c008ec7072e57",
+      "provenance": "pending-recovery-focused-20261021a.log"
+    },
+    {
+      "name": "local/recovery-timer.log",
+      "bytes": 394,
+      "sha256": "54185d18a5cacdbc9562f606019eb4ff6fce79decdc7aa411b1be51a408c6f0f",
+      "provenance": "recovery-timer.log"
+    },
+    {
+      "name": "local/thinking-timer-anchored.png",
+      "bytes": 40328,
+      "sha256": "4d42441c26d2321a1b9720cd1a41a0548a6394a15ae0a1474efb82821fae61c4",
+      "provenance": "recovery-timer/thinking-timer-anchored.png"
+    },
+    {
+      "name": "metadata/candidate075-docs-green.log",
+      "bytes": 256,
+      "sha256": "98f729d460664872030fc5744de799d9748f5388b7d86b6c357021fdb0a9a21d",
+      "provenance": "candidate075-docs-green.log"
+    },
+    {
+      "name": "metadata/candidate075-metadata-guards-initial.log",
+      "bytes": 1258,
+      "sha256": "d94658d64081f5470742867ddac147f55006a7da354e302beb5350eeb882daf2",
+      "provenance": "candidate075-metadata-guards.log"
+    },
+    {
+      "name": "metadata/candidate075-notes-check.log",
+      "bytes": 45,
+      "sha256": "e8f85160b1e9b594f3567a16d30c4965d1d10780bc69f8e24ba10d9bec4258ab",
+      "provenance": "candidate075-notes-check.log"
+    },
+    {
+      "name": "renderer/diagnostic-thinking-timer.json",
+      "bytes": 14056,
+      "sha256": "3fd6aa6e3d8bff115f0bcbf51ff8225094da583be40db4d97d6956de71d25184",
+      "provenance": "renderer-observation/diagnostic-thinking-timer.json"
+    },
+    {
+      "name": "renderer/merge-tree-proof-052.json",
+      "bytes": 1312,
+      "sha256": "4d2a0eeb2318b392dd838cc52022c3497b17a71e3a3c5c7672db7c63fa5e9800",
+      "provenance": "renderer-observation/merge-tree-proof-052.json"
+    },
+    {
+      "name": "renderer/renderer-completion-receipt.json",
+      "bytes": 713,
+      "sha256": "21e22e5f0a7d3db1d9a1945c98bd0136db22c87643569a8aeae84219326c68f8",
+      "provenance": "renderer-observation/renderer-completion-receipt.json"
+    },
+    {
+      "name": "renderer/renderer-diagnostic-acquisition.json",
+      "bytes": 642,
+      "sha256": "a0a0cb0c1aca4d3bf97ff623574039f10ab5147efe75da14a167d3fff4da80ae",
+      "provenance": "renderer-observation/renderer-diagnostic-acquisition.json"
+    },
+    {
+      "name": "renderer/renderer-diagnostic-artifact-12323637332.zip",
+      "bytes": 135349,
+      "sha256": "4af2ce8bcfbed4554a066c28523cfee9acd44f26a36f90e467fb43e1568584b3",
+      "provenance": "renderer-observation/renderer-diagnostic-artifact-12323637332.zip"
+    },
+    {
+      "name": "renderer/renderer-diagnostic-artifact-metadata.json",
+      "bytes": 710,
+      "sha256": "0bbf5adbdf132cbb19724203a4f6c550d49318590d76538d9c9653d8c1a54f4b",
+      "provenance": "renderer-observation/renderer-diagnostic-artifact-metadata.json"
+    },
+    {
+      "name": "renderer/renderer-diagnostic-findings.json",
+      "bytes": 2340,
+      "sha256": "dc8cd4fe7f846c7c54712570a8368d2e04ef95ddbca8a25a8b55bd5a97fcee03",
+      "provenance": "renderer-observation/renderer-diagnostic-findings.json"
+    },
+    {
+      "name": "renderer/renderer-diagnostic-inspection.json",
+      "bytes": 1006,
+      "sha256": "36054728ca9ee6c33bf3211aff10d83171f5e79198ce1d1fc8adbf2074a18597",
+      "provenance": "renderer-observation/renderer-diagnostic-inspection.json"
+    },
+    {
+      "name": "renderer/renderer-job-119061530695-complete.json",
+      "bytes": 3169,
+      "sha256": "6c09590edb74b39b391e84570e7a27931906717911154e3b36005eeac0c39970",
+      "provenance": "renderer-observation/renderer-job-119061530695-complete.json"
+    },
+    {
+      "name": "renderer/renderer-job-119061530695-complete.log",
+      "bytes": 41236,
+      "sha256": "8d78cc768d315b8fc8c87c824ff07558a9e8b0336ce6740513e0f73d734e8def",
+      "provenance": "renderer-observation/renderer-job-119061530695-complete.log"
+    },
+    {
+      "name": "workflows/ci-jobs.json",
+      "bytes": 59879,
+      "sha256": "b715bdf6573d167d5a1a39d4b4b570ecf326f09fb67c8b1fc5694dd2d52ff1b1",
+      "provenance": "ci-jobs.json"
+    },
+    {
+      "name": "workflows/ci-run.json",
+      "bytes": 11988,
+      "sha256": "d751163747e59025f8c0243f8561eea192c64dc85147c0d3ec551f1fab33230e",
+      "provenance": "ci-run.json"
+    },
+    {
+      "name": "workflows/cloud-jobs.json",
+      "bytes": 4766,
+      "sha256": "6fe44a2a3ab73f32b4d28ab84c2abd930f6b7415121914583498707f3d4e1707",
+      "provenance": "cloud-jobs.json"
+    },
+    {
+      "name": "workflows/cloud-run.json",
+      "bytes": 13565,
+      "sha256": "56b0835e46e4a72d2bc22df3276f4c38fc01001f59aa4594f38226c73780c519",
+      "provenance": "cloud-run.json"
+    },
+    {
+      "name": "workflows/docs-jobs.json",
+      "bytes": 4457,
+      "sha256": "cb50dce8ded2b2a951bd0b3501b3ef7001598070ce53332281ac6f2ca5e28433",
+      "provenance": "docs-jobs.json"
+    },
+    {
+      "name": "workflows/docs-run.json",
+      "bytes": 12838,
+      "sha256": "26075a883493cfebe78d30e688a2de6000ac8326a7b17d742c10c347bdf5dffa",
+      "provenance": "docs-run.json"
+    },
+    {
+      "name": "workflows/native-artifacts.json",
+      "bytes": 1725,
+      "sha256": "bab259f2ffafc6a0fe4905367838530cea32bd0614ed63de621a883ea0413774",
+      "provenance": "native-artifacts.json"
+    },
+    {
+      "name": "workflows/native-jobs.json",
+      "bytes": 16125,
+      "sha256": "46859dd77e53a02790b9b2bd0eaafeca009bd7060b5ab32eea5a7fefc74cc6a0",
+      "provenance": "native-jobs.json"
+    },
+    {
+      "name": "workflows/native-run.json",
+      "bytes": 12858,
+      "sha256": "d79d063c2d636aac8fdcd0cc90e4e1a6ee9cc309a618785e03f0d7c78677b5a1",
+      "provenance": "native-run.json"
+    }
+  ],
+  "updatedAt": "2026-10-21T20:15:54.458Z",
+  "localEvidenceComplete": true,
+  "sealedAt": "2026-10-21T20:16:35.791Z"
+}

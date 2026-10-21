@@ -1,0 +1,19 @@
+{
+  "readOnlyReconciliation": true,
+  "priorRecipe": "browser-proof.json",
+  "priorFailure": "Incorrect expectation that the fake response echoes the user text; actual configured/default fake replies are fixed strings.",
+  "sendsReplayed": 0,
+  "userMessages": 1,
+  "userMessageId": "425235a5-eab8-439f-a706-c4f394675555",
+  "assistantMessageId": "ea968152-8839-4b3e-93f4-6e70049400e7",
+  "assistantRequestMessageId": "425235a5-eab8-439f-a706-c4f394675555",
+  "turnSucceeded": true,
+  "requestedThread": "50226d54-ffc3-44c6-953e-11568bd239b9",
+  "serverSelectedThread": "f78ca17e-8eee-4ded-bb0f-20b11e71dc2d",
+  "productionData": false,
+  "image": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\reconciliation-052\\thread-recovery-live\\after-sent-chat.png",
+  "sha256": "05a068222838c90a72aa576e3b677fc280d01e9e70cacce50dab7c9790980c2d",
+  "passed": true,
+  "browserClosed": true,
+  "observedAt": "2026-10-21T20:07:59.589Z"
+}

@@ -3,10 +3,11 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
-  version: "0.7.4",
+  version: "0.7.5",
   date: "2026-10-21",
   title: "Shared model continuity and safer project work",
   changes: [
+    { title: "Conversations finish loading", body: "A late thread update cannot leave a conversation locked while it waits for its messages. Origin reloads the exact conversation, rejects replies from an older selection and lets you retry by selecting the same agent or thread." },
     { title: "Ordered model backups", body: "Choose up to five backup models for an agent, including supported teammate sources. Opt-in fallback follows that order after a confirmed quota refusal before any reply or action. Partial work is never replayed automatically, and paid API backups need separate consent." },
     { title: "Daily API budgets", body: "Set a daily USD limit for this computer and optional agent limits, with a reset time zone. Supported API requests reserve their maximum cost before sending; uncertain costs keep their reservation. Unpriced Studio generations, paid transcription and AI calls stop when an applicable limit is active, including Studio workflows." },
     { title: "Opt-in teammate model sources", body: "Owners can share supported model accounts with selected projects. Choices identify the owner and computer, keep credentials on that computer and require it to be online. Hosted work checks project access, monthly limits and the owner's daily API limits, with leases that prevent uncertain work from silently moving to another account." },

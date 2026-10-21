@@ -1,0 +1,490 @@
+﻿2026-10-21T05:47:03.1504831Z Current runner version: '2.338.0'
+2026-10-21T05:47:03.1533240Z ##[group]Runner Image Provisioner
+2026-10-21T05:47:03.1534148Z Hosted Compute Agent
+2026-10-21T05:47:03.1534879Z Version: 20261012.601
+2026-10-21T05:47:03.1535581Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-21T05:47:03.1536325Z Build Date: 2026-10-12T17:48:21Z
+2026-10-21T05:47:03.1537296Z Worker ID: {2b9373ab-510f-44b3-8354-615aa3d51d91}
+2026-10-21T05:47:03.1538027Z Region: centralus
+2026-10-21T05:47:03.1538622Z Cloud: Azure
+2026-10-21T05:47:03.1539208Z ##[endgroup]
+2026-10-21T05:47:03.1540831Z ##[group]Operating System
+2026-10-21T05:47:03.1541579Z Ubuntu
+2026-10-21T05:47:03.1542111Z 24.04.5
+2026-10-21T05:47:03.1542701Z LTS
+2026-10-21T05:47:03.1543272Z ##[endgroup]
+2026-10-21T05:47:03.1543830Z ##[group]Runner Image
+2026-10-21T05:47:03.1544485Z Image: ubuntu-24.04
+2026-10-21T05:47:03.1545056Z Version: 20261012.334.1
+2026-10-21T05:47:03.1546485Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-21T05:47:03.1548632Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-21T05:47:03.1549731Z ##[endgroup]
+2026-10-21T05:47:03.1550870Z ##[group]GITHUB_TOKEN Permissions
+2026-10-21T05:47:03.1553512Z Contents: read
+2026-10-21T05:47:03.1554192Z Metadata: read
+2026-10-21T05:47:03.1554852Z ##[endgroup]
+2026-10-21T05:47:03.1557553Z Secret source: Actions
+2026-10-21T05:47:03.1558634Z Cache mode: write
+2026-10-21T05:47:03.1560115Z Prepare workflow directory
+2026-10-21T05:47:03.1914254Z Prepare all required actions
+2026-10-21T05:47:03.1963832Z Getting action download info
+2026-10-21T05:47:03.4781511Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-10-21T05:47:03.5939650Z Download action repository 'pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3' (SHA:ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3)
+2026-10-21T05:47:03.9320060Z Download action repository 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' (SHA:820762786026740c76f36085b0efc47a31fe5020)
+2026-10-21T05:47:04.0683094Z Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-21T05:47:04.3008539Z Complete job name: renderer smoke (control-omb ui, Ubuntu 24.04)
+2026-10-21T05:47:04.3931079Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-10-21T05:47:04.3932293Z with:
+2026-10-21T05:47:04.3932785Z   persist-credentials: false
+2026-10-21T05:47:04.3933355Z   repository: z4mbo/Origin
+2026-10-21T05:47:04.3938501Z   token: ***
+2026-10-21T05:47:04.3939019Z   ssh-strict: true
+2026-10-21T05:47:04.3939495Z   ssh-user: git
+2026-10-21T05:47:04.3939935Z   clean: true
+2026-10-21T05:47:04.3940398Z   sparse-checkout-cone-mode: true
+2026-10-21T05:47:04.3940962Z   fetch-depth: 1
+2026-10-21T05:47:04.3941414Z   fetch-tags: false
+2026-10-21T05:47:04.3941883Z   show-progress: true
+2026-10-21T05:47:04.3942385Z   lfs: false
+2026-10-21T05:47:04.3942835Z   submodules: false
+2026-10-21T05:47:04.3943323Z   set-safe-directory: true
+2026-10-21T05:47:04.3943863Z   allow-unsafe-pr-checkout: false
+2026-10-21T05:47:04.3944782Z ##[endgroup]
+2026-10-21T05:47:04.5045899Z Syncing repository: z4mbo/Origin
+2026-10-21T05:47:04.5049059Z ##[group]Getting Git version info
+2026-10-21T05:47:04.5050390Z Working directory is '/home/runner/work/Origin/Origin'
+2026-10-21T05:47:04.5052236Z [command]/usr/bin/git version
+2026-10-21T05:47:04.5113981Z git version 2.55.0
+2026-10-21T05:47:04.5145388Z ##[endgroup]
+2026-10-21T05:47:04.5164610Z Temporarily overriding HOME='/home/runner/work/_temp/6dfb54c0-9ecb-4af0-ae22-4f85a7e8162d' before making global git config changes
+2026-10-21T05:47:04.5167309Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-21T05:47:04.5169263Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Origin/Origin
+2026-10-21T05:47:04.5224342Z Deleting the contents of '/home/runner/work/Origin/Origin'
+2026-10-21T05:47:04.5230980Z ##[group]Determining repository object format
+2026-10-21T05:47:04.5232796Z ##[endgroup]
+2026-10-21T05:47:04.5233658Z ##[group]Initializing the repository
+2026-10-21T05:47:04.5239035Z [command]/usr/bin/git init /home/runner/work/Origin/Origin
+2026-10-21T05:47:04.5391785Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-21T05:47:04.5394056Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-21T05:47:04.5397814Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-21T05:47:04.5399302Z hint: call:
+2026-10-21T05:47:04.5399952Z hint:
+2026-10-21T05:47:04.5400688Z hint: 	git config --global init.defaultBranch <name>
+2026-10-21T05:47:04.5401561Z hint:
+2026-10-21T05:47:04.5402392Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-21T05:47:04.5403769Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-21T05:47:04.5405553Z hint:
+2026-10-21T05:47:04.5406295Z hint: 	git branch -m <name>
+2026-10-21T05:47:04.5407574Z hint:
+2026-10-21T05:47:04.5408568Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-21T05:47:04.5410153Z Initialized empty Git repository in /home/runner/work/Origin/Origin/.git/
+2026-10-21T05:47:04.5412674Z [command]/usr/bin/git remote add origin https://github.com/z4mbo/Origin
+2026-10-21T05:47:04.5481500Z ##[endgroup]
+2026-10-21T05:47:04.5482418Z ##[group]Disabling automatic garbage collection
+2026-10-21T05:47:04.5486952Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-21T05:47:04.5529726Z ##[endgroup]
+2026-10-21T05:47:04.5530963Z ##[group]Setting up auth
+2026-10-21T05:47:04.5531586Z Removing SSH command configuration
+2026-10-21T05:47:04.5536072Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-21T05:47:04.5577477Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-21T05:47:04.5971688Z Removing HTTP extra header
+2026-10-21T05:47:04.5978824Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-21T05:47:04.6020314Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-21T05:47:04.6258421Z Removing includeIf entries pointing to credentials config files
+2026-10-21T05:47:04.6270978Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-21T05:47:04.6312907Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-21T05:47:04.6554021Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-21T05:47:04.6600811Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Origin/Origin/.git.path /home/runner/work/_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config
+2026-10-21T05:47:04.6642528Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config
+2026-10-21T05:47:04.6684362Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config
+2026-10-21T05:47:04.6721869Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config
+2026-10-21T05:47:04.6758432Z ##[endgroup]
+2026-10-21T05:47:04.6759379Z ##[group]Fetching the repository
+2026-10-21T05:47:04.6765310Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +bc068e08274870010000987d68abc89bb989ec05:refs/remotes/pull/3/merge
+2026-10-21T05:47:09.2843102Z From https://github.com/z4mbo/Origin
+2026-10-21T05:47:09.2844312Z  * [new ref]         bc068e08274870010000987d68abc89bb989ec05 -> pull/3/merge
+2026-10-21T05:47:09.2853816Z ##[endgroup]
+2026-10-21T05:47:09.2854359Z ##[group]Determining the checkout info
+2026-10-21T05:47:09.2855243Z ##[endgroup]
+2026-10-21T05:47:09.2860582Z [command]/usr/bin/git sparse-checkout disable
+2026-10-21T05:47:09.2917028Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-21T05:47:09.2955273Z ##[group]Checking out the ref
+2026-10-21T05:47:09.2955850Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/3/merge
+2026-10-21T05:47:10.3144587Z Updating files:  71% (6218/8728)
+2026-10-21T05:47:10.3244050Z Updating files:  72% (6285/8728)
+2026-10-21T05:47:10.3317774Z Updating files:  73% (6372/8728)
+2026-10-21T05:47:10.3388724Z Updating files:  74% (6459/8728)
+2026-10-21T05:47:10.3456071Z Updating files:  75% (6546/8728)
+2026-10-21T05:47:10.3537813Z Updating files:  76% (6634/8728)
+2026-10-21T05:47:10.3605085Z Updating files:  77% (6721/8728)
+2026-10-21T05:47:10.3675633Z Updating files:  78% (6808/8728)
+2026-10-21T05:47:10.3740677Z Updating files:  79% (6896/8728)
+2026-10-21T05:47:10.3804008Z Updating files:  80% (6983/8728)
+2026-10-21T05:47:10.3857356Z Updating files:  81% (7070/8728)
+2026-10-21T05:47:10.3918391Z Updating files:  82% (7157/8728)
+2026-10-21T05:47:10.3972953Z Updating files:  83% (7245/8728)
+2026-10-21T05:47:10.4044112Z Updating files:  84% (7332/8728)
+2026-10-21T05:47:10.4113394Z Updating files:  85% (7419/8728)
+2026-10-21T05:47:10.4176193Z Updating files:  86% (7507/8728)
+2026-10-21T05:47:10.4243685Z Updating files:  87% (7594/8728)
+2026-10-21T05:47:10.4313559Z Updating files:  88% (7681/8728)
+2026-10-21T05:47:10.4378521Z Updating files:  89% (7768/8728)
+2026-10-21T05:47:10.4434768Z Updating files:  90% (7856/8728)
+2026-10-21T05:47:10.4498515Z Updating files:  91% (7943/8728)
+2026-10-21T05:47:10.4558517Z Updating files:  92% (8030/8728)
+2026-10-21T05:47:10.4621527Z Updating files:  93% (8118/8728)
+2026-10-21T05:47:10.4670742Z Updating files:  94% (8205/8728)
+2026-10-21T05:47:10.4724024Z Updating files:  95% (8292/8728)
+2026-10-21T05:47:10.4773635Z Updating files:  96% (8379/8728)
+2026-10-21T05:47:10.4823163Z Updating files:  97% (8467/8728)
+2026-10-21T05:47:10.5079460Z Updating files:  98% (8554/8728)
+2026-10-21T05:47:10.5179741Z Updating files:  99% (8641/8728)
+2026-10-21T05:47:10.5180571Z Updating files: 100% (8728/8728)
+2026-10-21T05:47:10.5181331Z Updating files: 100% (8728/8728), done.
+2026-10-21T05:47:10.5263557Z Note: switching to 'refs/remotes/pull/3/merge'.
+2026-10-21T05:47:10.5264016Z 
+2026-10-21T05:47:10.5264385Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-21T05:47:10.5265190Z changes and commit them, and you can discard any commits you make in this
+2026-10-21T05:47:10.5266168Z state without impacting any branches by switching back to a branch.
+2026-10-21T05:47:10.5266996Z 
+2026-10-21T05:47:10.5267344Z If you want to create a new branch to retain commits you create, you may
+2026-10-21T05:47:10.5268202Z do so (now or later) by using -c with the switch command. Example:
+2026-10-21T05:47:10.5268689Z 
+2026-10-21T05:47:10.5268865Z   git switch -c <new-branch-name>
+2026-10-21T05:47:10.5269153Z 
+2026-10-21T05:47:10.5269319Z Or undo this operation with:
+2026-10-21T05:47:10.5269585Z 
+2026-10-21T05:47:10.5269734Z   git switch -
+2026-10-21T05:47:10.5269934Z 
+2026-10-21T05:47:10.5270331Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-21T05:47:10.5270899Z 
+2026-10-21T05:47:10.5271518Z HEAD is now at bc068e0 Merge ec3683b171438905c6171d838ab11c559e1bfa49 into fa83fb6b9e7e6e7e8195e93405a975007917872a
+2026-10-21T05:47:10.5305520Z ##[endgroup]
+2026-10-21T05:47:10.5362301Z [command]/usr/bin/git log -1 --format=%H
+2026-10-21T05:47:10.5394293Z bc068e08274870010000987d68abc89bb989ec05
+2026-10-21T05:47:10.5404195Z ##[group]Removing auth
+2026-10-21T05:47:10.5404640Z Removing SSH command configuration
+2026-10-21T05:47:10.5409057Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-21T05:47:10.5447866Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-21T05:47:10.5691338Z Removing HTTP extra header
+2026-10-21T05:47:10.5695365Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-21T05:47:10.5735752Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-21T05:47:10.6013537Z Removing includeIf entries pointing to credentials config files
+2026-10-21T05:47:10.6017870Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-21T05:47:10.6052421Z includeif.gitdir:/home/runner/work/Origin/Origin/.git.path
+2026-10-21T05:47:10.6053310Z includeif.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path
+2026-10-21T05:47:10.6054314Z includeif.gitdir:/github/workspace/.git.path
+2026-10-21T05:47:10.6055146Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-21T05:47:10.6064712Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Origin/Origin/.git.path
+2026-10-21T05:47:10.6094048Z /home/runner/work/_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config
+2026-10-21T05:47:10.6103956Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Origin/Origin/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-d9177012\-b344\-465c\-881c\-ff738b6263f5\.config
+2026-10-21T05:47:10.6143910Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path
+2026-10-21T05:47:10.6173998Z /home/runner/work/_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config
+2026-10-21T05:47:10.6183512Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-d9177012\-b344\-465c\-881c\-ff738b6263f5\.config
+2026-10-21T05:47:10.6222204Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-21T05:47:10.6250829Z /github/runner_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config
+2026-10-21T05:47:10.6260087Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-d9177012\-b344\-465c\-881c\-ff738b6263f5\.config
+2026-10-21T05:47:10.6308321Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-21T05:47:10.6337649Z /github/runner_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config
+2026-10-21T05:47:10.6345726Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-d9177012\-b344\-465c\-881c\-ff738b6263f5\.config
+2026-10-21T05:47:10.6384810Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-21T05:47:10.6629355Z Removing credentials config '/home/runner/work/_temp/git-credentials-d9177012-b344-465c-881c-ff738b6263f5.config'
+2026-10-21T05:47:10.6639694Z ##[endgroup]
+2026-10-21T05:47:10.6875635Z ##[group]Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3
+2026-10-21T05:47:10.6876075Z with:
+2026-10-21T05:47:10.6876294Z   dest: ~/setup-pnpm
+2026-10-21T05:47:10.6876518Z   run_install: null
+2026-10-21T05:47:10.6877148Z   cache: false
+2026-10-21T05:47:10.6877517Z   cache_dependency_path: pnpm-lock.yaml
+2026-10-21T05:47:10.6878087Z   package_json_file: package.json
+2026-10-21T05:47:10.6878361Z   standalone: false
+2026-10-21T05:47:10.6878581Z ##[endgroup]
+2026-10-21T05:47:10.8509268Z ##[group]Running self-installer...
+2026-10-21T05:47:12.7985363Z 
+2026-10-21T05:47:12.7985909Z added 1 package, and audited 2 packages in 2s
+2026-10-21T05:47:12.7986349Z 
+2026-10-21T05:47:12.7986787Z 1 package is looking for funding
+2026-10-21T05:47:12.7987299Z   run `npm fund` for details
+2026-10-21T05:47:12.7994202Z 
+2026-10-21T05:47:12.7994453Z found 0 vulnerabilities
+2026-10-21T05:47:13.4929904Z Checking for updates...
+2026-10-21T05:47:13.7106170Z Switching pnpm from v11.19.0 to v10.33.0...
+2026-10-21T05:47:14.9430158Z .../v11/985-1a15cffdde0-2361c1fd15861034 | Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-10-21T05:47:14.9455048Z .../v11/985-1a15cffdde0-2361c1fd15861034 |   +1 +
+2026-10-21T05:47:15.2427374Z .../v11/985-1a15cffdde0-2361c1fd15861034 | Progress: resolved 1, reused 0, downloaded 1, added 1, done
+2026-10-21T05:47:15.6546486Z [WARN] Detected a pnpm v10 installation layout at PNPM_HOME. The pnpm shims at PNPM_HOME have been refreshed so the new version is active, but pnpm v11 expects bins in PNPM_HOME/bin. Run "pnpm setup" to migrate your PATH to the v11 layout.
+2026-10-21T05:47:15.6574279Z Successfully updated pnpm to v10.33.0
+2026-10-21T05:47:15.6882479Z ##[endgroup]
+2026-10-21T05:47:15.6882790Z Installation Completed!
+2026-10-21T05:47:15.7073682Z ##[group]Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+2026-10-21T05:47:15.7074080Z with:
+2026-10-21T05:47:15.7074278Z   node-version: 24
+2026-10-21T05:47:15.7074481Z   cache: pnpm
+2026-10-21T05:47:15.7074678Z   check-latest: false
+2026-10-21T05:47:15.7077967Z   token: ***
+2026-10-21T05:47:15.7078198Z   package-manager-cache: true
+2026-10-21T05:47:15.7078444Z env:
+2026-10-21T05:47:15.7078687Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-21T05:47:15.7078996Z ##[endgroup]
+2026-10-21T05:47:15.8438660Z Found in cache @ /opt/hostedtoolcache/node/24.21.0/x64
+2026-10-21T05:47:15.8441902Z ##[group]Environment details
+2026-10-21T05:47:16.2438417Z node: v24.21.0
+2026-10-21T05:47:16.2438842Z npm: 11.19.0
+2026-10-21T05:47:16.2439185Z yarn: 1.22.22
+2026-10-21T05:47:16.2439992Z ##[endgroup]
+2026-10-21T05:47:16.2464383Z [command]/home/runner/setup-pnpm/node_modules/.bin/bin/pnpm store path --silent
+2026-10-21T05:47:16.6475530Z /home/runner/setup-pnpm/node_modules/.bin/store/v10
+2026-10-21T05:47:16.8089925Z Cache hit for: node-cache-Linux-x64-pnpm-6df072a65c593ae1a34c36f5412d880677ef3729879503a3d5a9e8118859bacf
+2026-10-21T05:47:17.9664131Z Received 67108864 of 707914161 (9.5%), 64.0 MBs/sec
+2026-10-21T05:47:18.9661075Z Received 167772160 of 707914161 (23.7%), 80.0 MBs/sec
+2026-10-21T05:47:19.9700484Z Received 327155712 of 707914161 (46.2%), 103.9 MBs/sec
+2026-10-21T05:47:20.9747287Z Received 486539264 of 707914161 (68.7%), 115.9 MBs/sec
+2026-10-21T05:47:21.9711148Z Received 654311424 of 707914161 (92.4%), 124.7 MBs/sec
+2026-10-21T05:47:22.7877704Z Received 707914161 of 707914161 (100.0%), 116.0 MBs/sec
+2026-10-21T05:47:22.7896415Z Cache Size: ~675 MB (707914161 B)
+2026-10-21T05:47:22.7938376Z [command]/usr/bin/tar -xf /home/runner/work/_temp/877ebbb2-36ec-437e-adf2-523af1ac01f0/cache.tzst -P -C /home/runner/work/Origin/Origin --use-compress-program unzstd
+2026-10-21T05:47:29.2550486Z Cache restored successfully
+2026-10-21T05:47:29.2885287Z Cache restored from key: node-cache-Linux-x64-pnpm-6df072a65c593ae1a34c36f5412d880677ef3729879503a3d5a9e8118859bacf
+2026-10-21T05:47:29.3291638Z ##[group]Run pnpm install --frozen-lockfile
+2026-10-21T05:47:29.3292397Z [36;1mpnpm install --frozen-lockfile[0m
+2026-10-21T05:47:29.3567814Z shell: /usr/bin/bash -e {0}
+2026-10-21T05:47:29.3568213Z env:
+2026-10-21T05:47:29.3568580Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-21T05:47:29.3569026Z ##[endgroup]
+2026-10-21T05:47:29.6962782Z Scope: all 5 workspace projects
+2026-10-21T05:47:29.7610943Z Lockfile is up to date, resolution step is skipped
+2026-10-21T05:47:29.8603206Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-10-21T05:47:30.0003709Z Packages: +969
+2026-10-21T05:47:30.0004820Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2026-10-21T05:47:30.8614872Z Progress: resolved 969, reused 965, downloaded 0, added 27
+2026-10-21T05:47:31.8613678Z Progress: resolved 969, reused 965, downloaded 0, added 862
+2026-10-21T05:47:32.7621889Z Progress: resolved 969, reused 965, downloaded 0, added 969, done
+2026-10-21T05:47:33.9341000Z 
+2026-10-21T05:47:33.9341603Z dependencies:
+2026-10-21T05:47:33.9342086Z + @1password/sdk 0.5.0
+2026-10-21T05:47:33.9342558Z + @clack/prompts 1.7.0
+2026-10-21T05:47:33.9343092Z + @codemirror/lang-sql 6.10.0
+2026-10-21T05:47:33.9343673Z + @codemirror/language 6.13.1
+2026-10-21T05:47:33.9344219Z + @codemirror/state 6.7.6
+2026-10-21T05:47:33.9344815Z + @duckdb/node-api 1.5.6-r.1
+2026-10-21T05:47:33.9345405Z + @hpke/core 1.9.0
+2026-10-21T05:47:33.9345947Z + @lezer/highlight 1.2.5
+2026-10-21T05:47:33.9346513Z + @muse-code/sdk 1.4.6
+2026-10-21T05:47:33.9347300Z + @novnc/novnc 1.7.0
+2026-10-21T05:47:33.9347770Z + @resvg/resvg-js 2.6.2
+2026-10-21T05:47:33.9348422Z + @tanstack/react-virtual 3.14.13
+2026-10-21T05:47:33.9349159Z + @trycua/cua-driver 0.28.2
+2026-10-21T05:47:33.9349772Z + ag-grid-community 36.2.0
+2026-10-21T05:47:33.9350387Z + ag-grid-react 36.2.0
+2026-10-21T05:47:33.9350847Z + ajv 8.20.0
+2026-10-21T05:47:33.9351235Z + ajv-formats 3.0.1
+2026-10-21T05:47:33.9351743Z + clsx 2.1.1
+2026-10-21T05:47:33.9352199Z + codemirror 6.0.2
+2026-10-21T05:47:33.9352637Z + convex 1.47.0
+2026-10-21T05:47:33.9353207Z + croner 10.0.1
+2026-10-21T05:47:33.9353632Z + jose 6.2.10
+2026-10-21T05:47:33.9354127Z + katex 0.16.47
+2026-10-21T05:47:33.9354612Z + lucide-react 0.539.0
+2026-10-21T05:47:33.9355207Z + mdast-util-from-markdown 2.0.3
+2026-10-21T05:47:33.9355734Z + mermaid 12.1.0
+2026-10-21T05:47:33.9356199Z + papaparse 5.7.0
+2026-10-21T05:47:33.9356973Z + posthog-js 1.415.6
+2026-10-21T05:47:33.9357541Z + qrcode-terminal 0.12.0
+2026-10-21T05:47:33.9358073Z + qrcode.react 4.2.0
+2026-10-21T05:47:33.9358589Z + react 19.2.8
+2026-10-21T05:47:33.9359064Z + react-dom 19.2.8
+2026-10-21T05:47:33.9359582Z + react-markdown 10.1.0
+2026-10-21T05:47:33.9360169Z + rehype-katex 7.0.1
+2026-10-21T05:47:33.9360646Z + remark-gfm 4.0.1
+2026-10-21T05:47:33.9361058Z + remark-math 6.0.0
+2026-10-21T05:47:33.9361435Z + shiki 4.4.3
+2026-10-21T05:47:33.9361846Z + tailwind-merge 3.6.0
+2026-10-21T05:47:33.9362255Z + tar 7.5.22
+2026-10-21T05:47:33.9362626Z + vega 6.4.0
+2026-10-21T05:47:33.9363005Z + vega-embed 7.3.0
+2026-10-21T05:47:33.9363399Z + vega-lite 6.5.0
+2026-10-21T05:47:33.9391918Z + vega-themes 3.0.0
+2026-10-21T05:47:33.9392421Z + yaml 2.9.0
+2026-10-21T05:47:33.9392828Z + zod 4.4.3
+2026-10-21T05:47:33.9393041Z 
+2026-10-21T05:47:33.9393222Z devDependencies:
+2026-10-21T05:47:33.9393680Z + @tailwindcss/vite 4.3.3
+2026-10-21T05:47:33.9394161Z + @types/node 26.2.0
+2026-10-21T05:47:33.9394620Z + @types/novnc__novnc 1.6.0
+2026-10-21T05:47:33.9395169Z + @types/papaparse 5.5.2
+2026-10-21T05:47:33.9395746Z + @types/qrcode-terminal 0.12.2
+2026-10-21T05:47:33.9396268Z + @types/react 19.2.18
+2026-10-21T05:47:33.9397010Z + @types/react-dom 19.2.4
+2026-10-21T05:47:33.9397527Z + @types/ws 8.18.2
+2026-10-21T05:47:33.9398022Z + @vitejs/plugin-react 4.7.0
+2026-10-21T05:47:33.9398509Z + electron 43.7.9
+2026-10-21T05:47:33.9398956Z + electron-builder 26.15.3
+2026-10-21T05:47:33.9399464Z + electron-updater 6.8.9
+2026-10-21T05:47:33.9399902Z + esbuild 0.28.2
+2026-10-21T05:47:33.9400746Z + happy-dom 20.14.5
+2026-10-21T05:47:33.9401198Z + oxlint 1.80.0
+2026-10-21T05:47:33.9401620Z + tailwindcss 4.3.3
+2026-10-21T05:47:33.9402006Z + typebox 1.3.7
+2026-10-21T05:47:33.9402397Z + typescript 5.9.3
+2026-10-21T05:47:33.9402873Z + vite 7.3.6
+2026-10-21T05:47:33.9403265Z + vitest 4.1.11
+2026-10-21T05:47:33.9403648Z + wrangler 4.123.0
+2026-10-21T05:47:33.9404021Z + ws 8.22.0
+2026-10-21T05:47:33.9404208Z 
+2026-10-21T05:47:34.0422876Z . prepare$ node scripts/install-git-hooks.mjs
+2026-10-21T05:47:34.0815617Z . prepare: Done
+2026-10-21T05:47:34.0911764Z ╭ Warning ─────────────────────────────────────────────────────────────────────╮
+2026-10-21T05:47:34.0912463Z │                                                                              │
+2026-10-21T05:47:34.0913227Z │   Ignored build scripts: core-js@3.50.0, workerd@1.20260811.1,               │
+2026-10-21T05:47:34.0913953Z │   workerd@1.20260820.1.                                                      │
+2026-10-21T05:47:34.0914717Z │   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+2026-10-21T05:47:34.0915840Z │   to run scripts.                                                            │
+2026-10-21T05:47:34.0917028Z │                                                                              │
+2026-10-21T05:47:34.0917705Z ╰──────────────────────────────────────────────────────────────────────────────╯
+2026-10-21T05:47:34.1061557Z Done in 4.7s using pnpm v10.33.0
+2026-10-21T05:47:34.1609514Z ##[group]Run sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+2026-10-21T05:47:34.1610131Z [36;1msudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0[0m
+2026-10-21T05:47:34.1675962Z shell: /usr/bin/bash -e {0}
+2026-10-21T05:47:34.1676232Z env:
+2026-10-21T05:47:34.1676499Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-21T05:47:34.1677026Z ##[endgroup]
+2026-10-21T05:47:34.1835021Z kernel.apparmor_restrict_unprivileged_userns = 0
+2026-10-21T05:47:34.1882549Z ##[group]Run pnpm exec vitest run scripts/testing/control-omb-ui.e2e.test.ts scripts/testing/bot-tools-ui.e2e.test.ts scripts/testing/thinking-timer-ui.e2e.test.ts scripts/testing/team-share-ui.e2e.test.ts scripts/testing/org-library-ui.e2e.test.ts scripts/testing/presets-ui.e2e.test.ts scripts/testing/browser-evidence.e2e.test.ts
+2026-10-21T05:47:34.1884906Z [36;1mpnpm exec vitest run scripts/testing/control-omb-ui.e2e.test.ts scripts/testing/bot-tools-ui.e2e.test.ts scripts/testing/thinking-timer-ui.e2e.test.ts scripts/testing/team-share-ui.e2e.test.ts scripts/testing/org-library-ui.e2e.test.ts scripts/testing/presets-ui.e2e.test.ts scripts/testing/browser-evidence.e2e.test.ts[0m
+2026-10-21T05:47:34.1950188Z shell: /usr/bin/bash -e {0}
+2026-10-21T05:47:34.1950457Z env:
+2026-10-21T05:47:34.1950720Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-21T05:47:34.1951042Z   OMB_UI_E2E: 1
+2026-10-21T05:47:34.1951299Z   OMB_UI_EVIDENCE_DIR: .omb-scratch/verify-evidence
+2026-10-21T05:47:34.1951652Z ##[endgroup]
+2026-10-21T05:47:35.1399601Z 
+2026-10-21T05:47:35.1401747Z [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/home/runner/work/Origin/Origin[39m
+2026-10-21T05:47:35.1402281Z 
+2026-10-21T05:47:35.5323071Z [90mstderr[2m | unknown test
+2026-10-21T05:47:35.5324440Z [22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+2026-10-21T05:47:35.5325229Z 
+2026-10-21T05:49:19.2392287Z  [32m✓[39m scripts/testing/control-omb-ui.e2e.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 102546[2mms[22m[39m
+2026-10-21T05:49:19.2394136Z      [33m[2m✓[22m[39m shows the matched text inside a searched message [33m 53570[2mms[22m[39m
+2026-10-21T05:49:19.2395916Z      [33m[2m✓[22m[39m saves a key on Enter, checks it once saved, and keeps a refused or failed draft [33m 20219[2mms[22m[39m
+2026-10-21T05:49:19.2398114Z      [33m[2m✓[22m[39m sends a turn from the composer and shows the reply and the scripted tool chip [33m 28754[2mms[22m[39m
+2026-10-21T05:49:19.3658220Z [90mstderr[2m | unknown test
+2026-10-21T05:49:19.3659570Z [22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+2026-10-21T05:49:19.3660340Z 
+2026-10-21T05:49:27.8450537Z [90mstdout[2m | scripts/testing/browser-evidence.e2e.test.ts[2m > [22m[2mpage health and browser steps on the real engine[2m > [22m[2mcosts little per call: logged for the record
+2026-10-21T05:49:27.8489786Z [22m[39mbrowser evidence e2e steps ms: {"open":[165,132,23,25,36],"click":[445,1661,136,122,96,146,127,23,22],"fill":[128],"snapshot":[14,14,15,67],"eval":[59]}
+2026-10-21T05:49:27.8517921Z browser evidence e2e image bytes: [14270,15094,14974,6944]
+2026-10-21T05:49:27.8537413Z 
+2026-10-21T05:49:33.1282670Z  [32m✓[39m scripts/testing/browser-evidence.e2e.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 13255[2mms[22m[39m
+2026-10-21T05:49:33.1284067Z      [33m[2m✓[22m[39m tells the bot what the page reported and records each step with its picture, box and page [33m 3820[2mms[22m[39m
+2026-10-21T05:49:33.1285721Z      [33m[2m✓[22m[39m tells a bot that does not record the same, and writes nothing for it [33m 827[2mms[22m[39m
+2026-10-21T05:49:33.1288474Z      [33m[2m✓[22m[39m never hands the bot what the page reported while a person held the browser [33m 1472[2mms[22m[39m
+2026-10-21T05:49:33.1290871Z      [33m[2m✓[22m[39m never starts a dead Chrome itself; the bot's next call does, at 1280x720, and the bot is told [33m 876[2mms[22m[39m
+2026-10-21T05:49:33.1294544Z      [33m[2m✓[22m[39m records a recording bot's steps, serves them, and deletes them with the conversation [33m 4962[2mms[22m[39m
+2026-10-21T05:49:33.2604262Z [90mstderr[2m | unknown test
+2026-10-21T05:49:33.2605904Z [22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+2026-10-21T05:49:33.2607215Z 
+2026-10-21T05:50:50.0349438Z [90mstdout[2m | scripts/testing/thinking-timer-ui.e2e.test.ts[2m > [22m[2mthe thinking timer stays anchored across a thread switch[2m > [22m[2mcounts from the server's turn-start stamp, not from the re-selection
+2026-10-21T05:50:50.0350663Z [22m[39mThinking timer fixture evidence saved.
+2026-10-21T05:50:50.0351087Z 
+2026-10-21T05:51:21.5239990Z  [31m❯[39m scripts/testing/thinking-timer-ui.e2e.test.ts [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 107855[2mms[22m[39m
+2026-10-21T05:51:21.5242572Z [31m     [31m×[31m counts from the server's turn-start stamp, not from the re-selection[39m[33m 76930[2mms[22m[39m
+2026-10-21T05:51:21.5244807Z      [33m[2m✓[22m[39m counts a group's turn from the speaking member's claim, resuming after a switch away [33m 30921[2mms[22m[39m
+2026-10-21T05:51:21.6539269Z [90mstderr[2m | unknown test
+2026-10-21T05:51:21.6540985Z [22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+2026-10-21T05:51:21.6542073Z 
+2026-10-21T05:51:47.0488019Z  [32m✓[39m scripts/testing/bot-tools-ui.e2e.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 24963[2mms[22m[39m
+2026-10-21T05:51:47.0491141Z      [33m[2m✓[22m[39m creates roles, configures per-bot MCP access, and recovers a rejected preset [33m 24961[2mms[22m[39m
+2026-10-21T05:51:47.1831518Z [90mstderr[2m | unknown test
+2026-10-21T05:51:47.1833160Z [22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+2026-10-21T05:51:47.1834037Z 
+2026-10-21T05:52:10.7810676Z {"fixture":{"ok":true,"ui":"/tmp/openmausbot-verify-data-TiXn8S/ui.json","url":"http://127.0.0.1:21938","previewUrl":"http://127.0.0.1:5173/__threads.html","botId":"736691d6-07c4-498e-b40e-763208ecb9b7","dataDir":"/tmp/openmausbot-verify-data-TiXn8S","logPath":"/tmp/openmausbot-verification-evidence/server-1792561908146-6732.log"},"savedFile":true,"presetsInNewBot":2}
+2026-10-21T05:52:11.3550827Z  [32m✓[39m scripts/testing/presets-ui.e2e.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 23732[2mms[22m[39m
+2026-10-21T05:52:11.3551961Z      [33m[2m✓[22m[39m shares New bot defaults as a preset file, adds it back, and makes bots from file and organization presets [33m 23159[2mms[22m[39m
+2026-10-21T05:52:11.4885811Z [90mstderr[2m | unknown test
+2026-10-21T05:52:11.4887535Z [22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+2026-10-21T05:52:11.4888301Z 
+2026-10-21T05:52:35.9658651Z {"fixture":{"ok":true,"ui":"/tmp/openmausbot-verify-data-33BRiJ/ui.json","url":"http://127.0.0.1:20682","previewUrl":"http://127.0.0.1:5173/__threads.html","botId":"86cd8197-5377-4620-8cb1-2f8a1c838b05","dataDir":"/tmp/openmausbot-verify-data-33BRiJ","logPath":"/tmp/openmausbot-verification-evidence/server-1792561932424-7438.log"},"savedFile":true,"importedSection":"Sales desk 2"}
+2026-10-21T05:52:36.4655751Z  [32m✓[39m scripts/testing/team-share-ui.e2e.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 24550[2mms[22m[39m
+2026-10-21T05:52:36.4658113Z      [33m[2m✓[22m[39m shows what a team's file holds, saves it, and adds it back as a new team [33m 24051[2mms[22m[39m
+2026-10-21T05:52:36.6073773Z [90mstderr[2m | unknown test
+2026-10-21T05:52:36.6075686Z [22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+2026-10-21T05:52:36.6077219Z 
+2026-10-21T05:53:02.9011594Z {"fixture":{"ok":true,"ui":"/tmp/openmausbot-verify-data-JxTsud/ui.json","url":"http://127.0.0.1:20313","previewUrl":"http://127.0.0.1:5173/__threads.html","botId":"6bdcacd5-8d3b-41f9-8a00-5764ad15b1ab","dataDir":"/tmp/openmausbot-verify-data-JxTsud","logPath":"/tmp/openmausbot-verification-evidence/server-1792561957573-7995.log"},"addedSection":"Sales desk","offeredSkill":"follow-up"}
+2026-10-21T05:53:03.4286935Z  [32m✓[39m scripts/testing/org-library-ui.e2e.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 26346[2mms[22m[39m
+2026-10-21T05:53:03.4288841Z      [33m[2m✓[22m[39m has no shelf without an organization, then adds a team and a skill with one click each [33m 25819[2mms[22m[39m
+2026-10-21T05:53:03.4310412Z 
+2026-10-21T05:53:03.4310894Z [31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+2026-10-21T05:53:03.4311196Z 
+2026-10-21T05:53:03.4314634Z [41m[1m FAIL [22m[49m scripts/testing/thinking-timer-ui.e2e.test.ts[2m > [22mthe thinking timer stays anchored across a thread switch[2m > [22mcounts from the server's turn-start stamp, not from the re-selection
+2026-10-21T05:53:03.4319953Z [31m[1mError[22m: the task to go busy with a turnStartedAt stamp did not happen within 60000ms (last: null)[39m
+2026-10-21T05:53:03.4321932Z [36m [2m❯[22m waitUntil scripts/testing/thinking-timer-ui.e2e.test.ts:[2m116:38[22m[39m
+2026-10-21T05:53:03.4411215Z     [90m114|[39m     last [33m=[39m [35mawait[39m [34mprobe[39m()[33m;[39m
+2026-10-21T05:53:03.4412392Z     [90m115|[39m     [35mif[39m (last) [35mreturn[39m last[33m;[39m
+2026-10-21T05:53:03.4413664Z     [90m116|[39m     if (Date.now() > deadline) throw new Error(`${what} did not happen…
+2026-10-21T05:53:03.4414742Z     [90m   |[39m                                      [31m^[39m
+2026-10-21T05:53:03.4416289Z     [90m117|[39m     [35mawait[39m [35mnew[39m [33mPromise[39m((done) [33m=>[39m [34msetTimeout[39m(done[33m,[39m [34m250[39m))[33m;[39m
+2026-10-21T05:53:03.4417808Z     [90m118|[39m   }
+2026-10-21T05:53:03.4418841Z [90m [2m❯[22m scripts/testing/thinking-timer-ui.e2e.test.ts:[2m195:18[22m[39m
+2026-10-21T05:53:03.4419517Z 
+2026-10-21T05:53:03.4420016Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+2026-10-21T05:53:03.4420424Z 
+2026-10-21T05:53:03.4420448Z 
+2026-10-21T05:53:03.4423129Z [2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+2026-10-21T05:53:03.4424946Z [2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m14 passed[39m[22m[90m (15)[39m
+2026-10-21T05:53:03.4426159Z [2m   Start at [22m 05:47:35
+2026-10-21T05:53:03.4428053Z [2m   Duration [22m 328.18s[2m (transform 1.08s, setup 1.42s, import 2.38s, tests 323.25s, environment 1ms)[22m
+2026-10-21T05:53:03.4429087Z 
+2026-10-21T05:53:03.4447285Z 
+2026-10-21T05:53:03.4469904Z ##[error]Error: the task to go busy with a turnStartedAt stamp did not happen within 60000ms (last: null)
+ ❯ waitUntil scripts/testing/thinking-timer-ui.e2e.test.ts:116:38
+ ❯ scripts/testing/thinking-timer-ui.e2e.test.ts:195:18
+
+
+2026-10-21T05:53:03.4831568Z ##[error]Process completed with exit code 1.
+2026-10-21T05:53:03.4909400Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-21T05:53:03.4909830Z with:
+2026-10-21T05:53:03.4910053Z   name: control-omb-ui-chat-screenshot
+2026-10-21T05:53:03.4910967Z   path: .omb-scratch/verify-evidence/chat-ui.png
+.omb-scratch/verify-evidence/thinking-timer-anchored.png
+.omb-scratch/verify-evidence/*.thinking-timer.json
+.omb-scratch/verify-evidence/share-team-dialog.png
+
+2026-10-21T05:53:03.4911859Z   if-no-files-found: warn
+2026-10-21T05:53:03.4912094Z   retention-days: 7
+2026-10-21T05:53:03.4912307Z   compression-level: 6
+2026-10-21T05:53:03.4912526Z   overwrite: false
+2026-10-21T05:53:03.4912739Z   include-hidden-files: false
+2026-10-21T05:53:03.4912977Z   archive: true
+2026-10-21T05:53:03.4913164Z env:
+2026-10-21T05:53:03.4913406Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-21T05:53:03.4913715Z ##[endgroup]
+2026-10-21T05:53:03.6399694Z With the provided path, there will be 3 files uploaded
+2026-10-21T05:53:03.6406318Z Artifact name is valid!
+2026-10-21T05:53:03.6407396Z Root directory input is valid!
+2026-10-21T05:53:03.8913971Z Uploading artifact: control-omb-ui-chat-screenshot.zip
+2026-10-21T05:53:03.8956728Z Beginning upload of artifact content to blob storage
+2026-10-21T05:53:04.1917571Z Uploaded bytes 135349
+2026-10-21T05:53:04.2355369Z Finished uploading artifact content to blob storage!
+2026-10-21T05:53:04.2357286Z SHA256 digest of uploaded artifact is 4af2ce8bcfbed4554a066c28523cfee9acd44f26a36f90e467fb43e1568584b3
+2026-10-21T05:53:04.2358954Z Finalizing artifact upload
+2026-10-21T05:53:04.5199484Z Artifact control-omb-ui-chat-screenshot successfully finalized. Artifact ID 12323637332
+2026-10-21T05:53:04.5201402Z Artifact control-omb-ui-chat-screenshot has been successfully uploaded! Final size is 135349 bytes. Artifact ID is 12323637332
+2026-10-21T05:53:04.5203239Z Artifact download URL: https://github.com/z4mbo/Origin/actions/runs/39551218972/artifacts/12323637332
+2026-10-21T05:53:04.5390495Z Post job cleanup.
+2026-10-21T05:53:04.6836014Z Pruning is unnecessary.
+2026-10-21T05:53:04.6998286Z Post job cleanup.
+2026-10-21T05:53:04.7985935Z [command]/usr/bin/git version
+2026-10-21T05:53:04.8038678Z git version 2.55.0
+2026-10-21T05:53:04.8083173Z Temporarily overriding HOME='/home/runner/work/_temp/e17ff113-d5b2-44d7-b8e5-d8b26e44dbd0' before making global git config changes
+2026-10-21T05:53:04.8085239Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-21T05:53:04.8098067Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Origin/Origin
+2026-10-21T05:53:04.8140564Z Removing SSH command configuration
+2026-10-21T05:53:04.8149259Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-21T05:53:04.8194126Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-21T05:53:04.8460597Z Removing HTTP extra header
+2026-10-21T05:53:04.8466311Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-21T05:53:04.8502100Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-21T05:53:04.8775599Z Removing includeIf entries pointing to credentials config files
+2026-10-21T05:53:04.8776317Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-21T05:53:04.8818191Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-21T05:53:04.9223203Z Cleaning up orphan processes

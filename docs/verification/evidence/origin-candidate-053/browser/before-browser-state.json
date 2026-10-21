@@ -1,0 +1,35 @@
+{
+  "state": {
+    "hydrated": true,
+    "selectedId": "73d43215-be1e-448b-afd4-d0fbad6b83cb",
+    "activeView": "chat",
+    "bots": [
+      {
+        "id": "73d43215-be1e-448b-afd4-d0fbad6b83cb",
+        "name": "Thread recovery",
+        "threadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+        "awaitingThreadSnapshot": true,
+        "switchingTo": null,
+        "approvalMode": "full",
+        "tasks": [
+          {
+            "threadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+            "title": "Pinned thread A"
+          }
+        ],
+        "messages": []
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "label": "Message Thread recovery",
+      "disabled": true,
+      "value": "",
+      "visible": true
+    }
+  ],
+  "busy": [
+    "Message Thread recovery"
+  ]
+}

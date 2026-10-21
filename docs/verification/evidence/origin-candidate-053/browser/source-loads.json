@@ -1,0 +1,29 @@
+{
+  "derivedFrom": "requests-events.jsonl",
+  "qualification": "Unmodified selected source-load records from the actual fixture trace; baseline source is not the after working-tree identity.",
+  "rows": [
+    {
+      "sequence": 50,
+      "at": "2026-10-21T20:04:36.119Z",
+      "source": "vite-store-load",
+      "mode": "before",
+      "frozen": true,
+      "sha256": "52664be241f0461a1197ef0f868a94046dcb161aa204e96cf0bbefd0b8c34194"
+    },
+    {
+      "sequence": 51,
+      "at": "2026-10-21T20:04:43.407Z",
+      "source": "vite-store-load",
+      "mode": "after",
+      "frozen": false,
+      "sha256": "54e058ad376545bd0f546f2c4534af1ac15da24c1dbc90c9ef87355bcf1933d0"
+    },
+    {
+      "sequence": 52,
+      "at": "2026-10-21T20:04:47.000Z",
+      "source": "vite-helper-load",
+      "mode": "after",
+      "sha256": "971cff06492a7b1cc84fa437ddfe304a6e24fed0adfd4700cc41f86db5d22e59"
+    }
+  ]
+}

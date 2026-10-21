@@ -1,0 +1,384 @@
+{
+  "info": {
+    "ok": true,
+    "ui": "/tmp/openmausbot-verify-data-YlMeVx/ui.json",
+    "url": "http://127.0.0.1:21824",
+    "previewUrl": "http://127.0.0.1:5173/__threads.html",
+    "botId": "785b658f-07ea-4696-a41e-4ad0f5359bb6",
+    "dataDir": "/tmp/openmausbot-verify-data-YlMeVx",
+    "logPath": "/tmp/openmausbot-verification-evidence/server-1792561774160-5119.log"
+  },
+  "state": {
+    "bots": [
+      {
+        "id": "785b658f-07ea-4696-a41e-4ad0f5359bb6",
+        "threadId": "3d2d0b79-aa8f-42fb-8688-ca6a714bbdaf",
+        "name": "Pepper",
+        "title": "",
+        "description": "",
+        "soul": "",
+        "soulHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "notifications": true,
+        "color": "blue",
+        "unread": false,
+        "modelSelection": {
+          "instanceId": "claude",
+          "model": "claude-sonnet-5"
+        },
+        "createdAt": 1792561776683,
+        "section": "Agents",
+        "avatarUrl": null,
+        "autoApprove": false,
+        "approvalMode": "full",
+        "waitingForTeammates": false,
+        "mainThreadId": "3d2d0b79-aa8f-42fb-8688-ca6a714bbdaf",
+        "tasks": [
+          {
+            "threadId": "3d2d0b79-aa8f-42fb-8688-ca6a714bbdaf",
+            "title": "New thread",
+            "createdAt": 1792561788919,
+            "updatedAt": 1792561788919,
+            "approvalMode": "full",
+            "autoApprove": false,
+            "alwaysAllow": [],
+            "unread": false,
+            "activity": "idle",
+            "busy": false,
+            "modelSelection": {
+              "instanceId": "claude",
+              "model": "claude-sonnet-5"
+            },
+            "followsBotModel": true,
+            "waitingForTeammates": false
+          },
+          {
+            "threadId": "c0828513-e930-43f1-93b2-813846bf5dfe",
+            "title": "New thread",
+            "createdAt": 1792561776683,
+            "updatedAt": 1792561776686,
+            "unread": false,
+            "activity": "idle",
+            "busy": false,
+            "lastThreadOrderAt": 1792561776686,
+            "modelSelection": {
+              "instanceId": "claude",
+              "model": "claude-sonnet-5"
+            },
+            "followsBotModel": true,
+            "waitingForTeammates": false
+          }
+        ],
+        "messages": [],
+        "activeLeafId": null
+      },
+      {
+        "id": "ec942773-3bc0-476e-8ea5-df6b9098d434",
+        "threadId": "be7094d0-7e3c-4dc7-a443-38537bd57399",
+        "name": "Fixture Starter",
+        "title": "",
+        "description": "",
+        "soul": "",
+        "soulHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "notifications": true,
+        "color": "green",
+        "unread": false,
+        "modelSelection": {
+          "instanceId": "claude",
+          "model": "claude-sonnet-5"
+        },
+        "createdAt": 1792561776207,
+        "approvalMode": "full",
+        "waitingForTeammates": false,
+        "mainThreadId": "be7094d0-7e3c-4dc7-a443-38537bd57399",
+        "avatarUrl": null,
+        "tasks": [
+          {
+            "threadId": "be7094d0-7e3c-4dc7-a443-38537bd57399",
+            "title": "New thread",
+            "createdAt": 1792561776207,
+            "updatedAt": 1792561776213,
+            "unread": false,
+            "activity": "idle",
+            "busy": false,
+            "lastThreadOrderAt": 1792561776213,
+            "modelSelection": {
+              "instanceId": "claude",
+              "model": "claude-sonnet-5"
+            },
+            "followsBotModel": true,
+            "waitingForTeammates": false
+          }
+        ],
+        "messages": [
+          {
+            "id": "b266bb5e-c99a-4f64-aabf-5f5e6252f219",
+            "at": 1792561776213,
+            "parentId": null,
+            "role": "bot",
+            "kind": "text",
+            "text": "Hi, I'm Koda. What would you like me to do?"
+          }
+        ],
+        "activeLeafId": "b266bb5e-c99a-4f64-aabf-5f5e6252f219"
+      }
+    ],
+    "botQueuedMessages": {},
+    "sections": [
+      "Agents"
+    ],
+    "groups": [],
+    "computerControl": {
+      "785b658f-07ea-4696-a41e-4ad0f5359bb6": {
+        "held": false,
+        "helpReason": null
+      },
+      "ec942773-3bc0-476e-8ea5-df6b9098d434": {
+        "held": false,
+        "helpReason": null
+      }
+    }
+  },
+  "snapshot": {
+    "ok": true,
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 74894342799847870
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    },
+    "origin": "http://127.0.0.1:5173/__threads.html",
+    "refs": {
+      "e1": {
+        "name": "",
+        "role": "generic"
+      },
+      "e10": {
+        "name": "Rename Pepper",
+        "role": "button"
+      },
+      "e11": {
+        "name": "Show plan usage and context",
+        "role": "button"
+      },
+      "e12": {
+        "name": "Bot's computer",
+        "role": "button"
+      },
+      "e13": {
+        "name": "Rename Pepper",
+        "role": "button"
+      },
+      "e14": {
+        "name": "Inbox",
+        "role": "button"
+      },
+      "e15": {
+        "name": "Chat",
+        "role": "button"
+      },
+      "e16": {
+        "name": "Call",
+        "role": "button"
+      },
+      "e17": {
+        "name": "Sort projects",
+        "role": "button"
+      },
+      "e18": {
+        "name": "Pepper Rename Pepper",
+        "role": "button"
+      },
+      "e19": {
+        "name": "Collapse Pepper threads",
+        "role": "button"
+      },
+      "e2": {
+        "name": "Resize sidebar",
+        "role": "separator"
+      },
+      "e20": {
+        "name": "Tools",
+        "role": "navigation"
+      },
+      "e21": {
+        "name": "Active Threads",
+        "role": "button"
+      },
+      "e22": {
+        "name": "New or share",
+        "role": "button"
+      },
+      "e23": {
+        "name": "Apps",
+        "role": "button"
+      },
+      "e24": {
+        "name": "Claude Sonnet 5",
+        "role": "button"
+      },
+      "e25": {
+        "name": "More",
+        "role": "button"
+      },
+      "e26": {
+        "name": "You",
+        "role": "button"
+      },
+      "e27": {
+        "name": "Search bots and messages",
+        "role": "button"
+      },
+      "e28": {
+        "name": "Create issue",
+        "role": "button"
+      },
+      "e29": {
+        "name": "Collapse sidebar to avatars",
+        "role": "button"
+      },
+      "e3": {
+        "name": "Workspace",
+        "role": "navigation"
+      },
+      "e30": {
+        "name": "Fixture Starter Rename Fixture Starter Hi, I'm Koda. What would you like me to do?",
+        "role": "button"
+      },
+      "e31": {
+        "name": "Rename Pepper",
+        "role": "button"
+      },
+      "e32": {
+        "name": "New thread",
+        "role": "button"
+      },
+      "e33": {
+        "name": "",
+        "role": "generic"
+      },
+      "e34": {
+        "name": "Actions for New thread",
+        "role": "button"
+      },
+      "e35": {
+        "name": "New thread",
+        "role": "button"
+      },
+      "e36": {
+        "name": "",
+        "role": "generic"
+      },
+      "e37": {
+        "name": "Actions for New thread",
+        "role": "button"
+      },
+      "e38": {
+        "name": "Routines",
+        "role": "button"
+      },
+      "e39": {
+        "name": "Triggers",
+        "role": "button"
+      },
+      "e4": {
+        "name": "Projects",
+        "role": "button"
+      },
+      "e40": {
+        "name": "Team map",
+        "role": "button"
+      },
+      "e41": {
+        "name": "Rename Fixture Starter",
+        "role": "button"
+      },
+      "e42": {
+        "name": "Switch workspace",
+        "role": "button"
+      },
+      "e43": {
+        "name": "Message Pepper",
+        "role": "textbox"
+      },
+      "e44": {
+        "name": "Live call with Pepper",
+        "role": "button"
+      },
+      "e45": {
+        "name": "Call mode",
+        "role": "button"
+      },
+      "e5": {
+        "name": "New project",
+        "role": "button"
+      },
+      "e6": {
+        "name": "Agents",
+        "role": "button"
+      },
+      "e7": {
+        "name": "New agent",
+        "role": "button"
+      },
+      "e8": {
+        "name": "What's new, unread update, version 0.7.4",
+        "role": "button"
+      },
+      "e9": {
+        "name": "Open Pepper's profile",
+        "role": "button"
+      }
+    },
+    "snapshot": "- generic [ref=e1] clickable [onclick]\n  - generic\n    - complementary \"Bots and navigation\"\n      - generic\n        - generic\n          - generic\n            - button \"You\" [expanded=false, ref=e26]\n              - StaticText \"?\"\n            - generic\n              - button \"Search bots and messages\" [ref=e27]\n              - button \"Create issue\" [ref=e28]\n              - button \"Collapse sidebar to avatars\" [ref=e29]\n        - separator \"Resize sidebar\" [ref=e2] focusable [tabindex]: 320\n        - generic\n          - button \"Fixture Starter Rename Fixture Starter Hi, I'm Koda. What would you like me to do?\" [ref=e30]\n            - image \"Fixture Starter\"\n            - button \"Rename Fixture Starter\" [ref=e41]\n              - StaticText \"Fixture Starter\"\n            - StaticText \"Hi, I'm Koda. What would you like me to do?\"\n          - button \"Switch workspace\" [expanded=false, ref=e42]\n        - navigation \"Workspace\" [ref=e3]\n          - button \"Inbox\" [ref=e14]\n            - StaticText \"Inbox\"\n          - button \"Chat\" [ref=e15]\n            - StaticText \"Chat\"\n          - button \"Call\" [ref=e16]\n            - StaticText \"Call\"\n        - button \"Projects\" [expanded=true, ref=e4]\n        - button \"Sort projects\" [expanded=false, ref=e17]\n        - button \"New project\" [ref=e5]\n        - button \"Agents\" [expanded=true, ref=e6]\n          - StaticText \"Agents\"\n        - button \"New agent\" [ref=e7]\n        - generic\n          - button \"Pepper Rename Pepper\" [ref=e18]\n            - image \"Pepper\"\n            - button \"Rename Pepper\" [ref=e31]\n              - StaticText \"Pepper\"\n          - button \"Collapse Pepper threads\" [expanded=true, ref=e19]\n        - group \"Pepper threads\"\n          - status\n          - status\n          - generic\n            - button \"New thread\" [ref=e32]\n              - StaticText \"New thread\"\n            - generic [ref=e33] clickable [onclick]\n              - time\n                - StaticText \"1 min ago\"\n            - button \"Actions for New thread\" [expanded=false, ref=e34]\n          - generic\n            - button \"New thread\" [ref=e35]\n              - StaticText \"New thread\"\n            - generic [ref=e36] clickable [onclick]\n              - time\n                - StaticText \"1 min ago\"\n            - button \"Actions for New thread\" [expanded=false, ref=e37]\n        - paragraph\n        - generic\n          - navigation \"Tools\" [ref=e20]\n            - button \"Routines\" [ref=e38]\n            - button \"Triggers\" [ref=e39]\n            - button \"Team map\" [ref=e40]\n          - button \"Active Threads\" [ref=e21]\n          - button \"New or share\" [ref=e22]\n          - button \"Apps\" [ref=e23]\n        - button \"What's new, unread update, version 0.7.4\" [expanded=false, ref=e8]\n          - StaticText \"What's new\"\n          - StaticText \"v\"\n          - StaticText \"0.7.4\"\n    - main\n      - generic\n        - button \"Open Pepper's profile\" [ref=e9]\n          - image \"Pepper\"\n        - button \"Rename Pepper\" [ref=e10]\n          - StaticText \"Pepper\"\n        - status\n        - button \"Show plan usage and context\" [expanded=false, ref=e11]\n        - button \"Claude Sonnet 5\" [expanded=false, ref=e24]\n          - image\n          - StaticText \"Claude Sonnet 5\"\n        - button \"Bot's computer\" [ref=e12]\n        - button \"More\" [expanded=false, ref=e25]\n        - log \"Conversation with Pepper\"\n          - image \"Pepper\"\n          - button \"Rename Pepper\" [ref=e13]\n            - StaticText \"Pepper\"\n          - StaticText \"Send a message to start the conversation.\"\n        - status\n        - generic\n          - textbox \"Message Pepper\" [disabled, ref=e43]\n          - generic\n            - button \"Live call with Pepper\" [ref=e44]\n            - button \"Call mode\" [expanded=false, ref=e45]"
+  },
+  "composer": {
+    "ok": true,
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 74894342799847870
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    },
+    "origin": "http://127.0.0.1:5173/__threads.html",
+    "result": {
+      "busy": [
+        {
+          "label": "Message Pepper",
+          "tag": "TEXTAREA",
+          "value": "true"
+        }
+      ],
+      "currentThreads": [
+        "c0828513-e930-43f1-93b2-813846bf5dfe"
+      ],
+      "focus": {
+        "label": null,
+        "tag": "BODY"
+      },
+      "textareas": [
+        {
+          "disabled": true,
+          "focused": false,
+          "label": "Message Pepper",
+          "value": "",
+          "visible": true
+        }
+      ]
+    }
+  },
+  "serverLog": "openmausbot webhook receiver on http://127.0.0.1:21825\nopenmausbot open-source edition (enterprise layer present but OMB_LICENSE_KEY is not set)\nlocal requests: owner trust (self-hosted default)\nlocal requests: OMB_DEV_TRUST_LOCAL_BROWSER=1: browsers on this machine act as the owner (development only)\nbrand: default\nopenmausbot server on http://127.0.0.1:21824\nbot 785b658f-07ea-4696-a41e-4ad0f5359bb6: section loosened by 127.0.0.1 through the local API with no paired session\n"
+}
