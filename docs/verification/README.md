@@ -106,6 +106,8 @@ Use only mapped, tested commands:
 - [Origin 0.7.2 release notes](origin-0.7.2-release-notes.md)
 - [Origin 0.7.3 release-trigger and upload-fixture follow-up](origin-candidate-051.md)
 - [Origin 0.7.3 release notes](origin-0.7.3-release-notes.md)
+- [Origin 0.7.4 renderer-harness correction and delivery gates](origin-candidate-052.md)
+- [Origin 0.7.4 release notes](origin-0.7.4-release-notes.md)
 - [Origin 0.4.2 final verification and concurrent-release hold](origin-0.4.2-verification-and-release-hold.md)
 - [Origin 0.4.2 final correction candidate](origin-candidate-049.md)
 - [Origin 0.4.2 release notes](origin-0.4.2-release-notes.md)

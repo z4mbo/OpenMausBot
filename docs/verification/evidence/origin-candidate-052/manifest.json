@@ -1,0 +1,162 @@
+{
+  "proposedVersion": "0.7.4",
+  "archivedAt": "2026-10-21T05:38:51.489Z",
+  "headAtArchive": "e12c6c132c07375c30251a204a67d2cd5d74c2fa",
+  "historicalWorkflowSource": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+  "finalSource": null,
+  "qualification": "Bounded completed historical 0.7.3 workflow/renderer evidence and subsequent harness corrections. Linux renderer failed; every 0.7.4 exact-source release gate remains pending. No production acceptance is asserted.",
+  "files": [
+    {
+      "name": "harness/commits.txt",
+      "bytes": 9931,
+      "sha256": "6358a9a96f329ca580dbd5911afbe6d788b1c3f4f2df3ef2138a7ee291a34b63"
+    },
+    {
+      "name": "harness/ui-session-daemon-final-green.log",
+      "bytes": 258,
+      "sha256": "558926d34ee652dad8ce4c21ce28f7f2c536e0022d19f1c03e28b843b83e86e0"
+    },
+    {
+      "name": "harness/ui-session-daemon-fix-receipt.json",
+      "bytes": 4074,
+      "sha256": "e27778597e4a8b3ee50219b53d69eaf8c5ca43fe6af008fa63ab3b7951606b7d"
+    },
+    {
+      "name": "harness/ui-session-daemon-fix.patch",
+      "bytes": 8749,
+      "sha256": "4d6829f9a93189ea0aeaf28ca339cfa3d7c247b982cb429d0dbac7c11fea0eae"
+    },
+    {
+      "name": "harness/ui-session-daemon-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "harness/ui-session-daemon-negative-control-red.log",
+      "bytes": 1351,
+      "sha256": "1e5a3d23bfb8ab716aeeae5872bc40b6fcd24564005c964f465eec45bc071830"
+    },
+    {
+      "name": "harness/ui-session-daemon-red.log",
+      "bytes": 1893,
+      "sha256": "f157520177fa9870bab16f36b403c563587ce3cf53dfef14c3f7248f47894e46"
+    },
+    {
+      "name": "renderer/renderer-job-119048414713-complete.log",
+      "bytes": 41305,
+      "sha256": "4d9c9f5a1c94d4d91967f6cdb9fe91901acb97ae413d79db9b07e0a46c1fd77c"
+    },
+    {
+      "name": "renderer/renderer-previous-375.log",
+      "bytes": 41338,
+      "sha256": "856c452242111195e555762a6796eb69bb953ed918c2b5d53968947cca5f9e03"
+    },
+    {
+      "name": "renderer/thinking-timer-review.md",
+      "bytes": 5238,
+      "sha256": "3c3606c6b76f8092cb6a4c76f0b079be21018bc85ccaef843a4d147eca571fba"
+    },
+    {
+      "name": "windows/diagnosis-closure.json",
+      "bytes": 137,
+      "sha256": "1407de2681e02ef6ee4eab85cf0f4d70757c059e2c2ce5bebcc75f61da3324c3"
+    },
+    {
+      "name": "windows/result.json",
+      "bytes": 1583,
+      "sha256": "f48707dc51525e7b4a6a0e91cae0181a0ebc373ed44dd011780f94e6cf731e5d"
+    },
+    {
+      "name": "windows/stages.json",
+      "bytes": 9860,
+      "sha256": "2647f8b1def33e15a388a87c829a803d73a914fdd7888bcde217300b0beabe04"
+    },
+    {
+      "name": "windows/thinking-timer-anchored.png",
+      "bytes": 48016,
+      "sha256": "83c0432a516c21d5aec6a1ddf58e0ec96e733043157eaaf688309b9758b0eed9"
+    },
+    {
+      "name": "windows/thinking-timer-closure.json",
+      "bytes": 217,
+      "sha256": "d2f32fd8df7fc150bd0f9a1f1765a69a8cd32304b14c9acd4ed03dffbab440c5"
+    },
+    {
+      "name": "windows/thinking-timer-exact.log",
+      "bytes": 270,
+      "sha256": "8cd22069e1ea4ad524fea3db7f04f0b1309b54d6a79c4cf988c92168a6314da2"
+    },
+    {
+      "name": "workflows/ci-in-progress-observed.json",
+      "bytes": 100955,
+      "sha256": "ee91de9eeed4f667877326229ab77f3bdce157c0c307fb2bd52bd38932c77b53"
+    },
+    {
+      "name": "workflows/cloud-39547106185.log",
+      "bytes": 74413,
+      "sha256": "9169f3bc2261de22ceeaa97391e4e71b3b149b4002f4a54087f3cb50bc2ff25c"
+    },
+    {
+      "name": "workflows/cloud-observed.json",
+      "bytes": 19168,
+      "sha256": "c84dba57bda43af727aca43ce62e5371fe047f87b55c29fa9b350803a29b3346"
+    },
+    {
+      "name": "workflows/docs-39547204136.log",
+      "bytes": 69811,
+      "sha256": "52fe7487d208f0dfab98a994b8caf2b8cdb27e1f167d89ff10ac3d4e31d6f769"
+    },
+    {
+      "name": "workflows/docs-observed.json",
+      "bytes": 18071,
+      "sha256": "3be99453c6577b3b23031403f8ee331682194caef3a0161757e3bdb648481d39"
+    },
+    {
+      "name": "workflows/native-artifacts.json",
+      "bytes": 1725,
+      "sha256": "4f3b41372356c05c104713fce69bb28290f0e699b3045976b582b13322146e0d"
+    },
+    {
+      "name": "workflows/native-observed.json",
+      "bytes": 30415,
+      "sha256": "e5faff71281208346f87bb2f420b19b10932face79aaaff44106d3300ff16fe5"
+    },
+    {
+      "name": "workflows/ci-final-run.json",
+      "bytes": 13537,
+      "sha256": "acc6916d90d1956c00fcf08ac81b20a6f5144045738aabc51877a8f851a858aa"
+    },
+    {
+      "name": "workflows/ci-final-jobs.json",
+      "bytes": 84565,
+      "sha256": "03caecb110858b92d0bf72f94f6613afcd9dd22d7e235dc7d154cfae847a6609"
+    },
+    {
+      "name": "metadata/final-074-metadata-tests.log",
+      "bytes": 1543,
+      "sha256": "1b815d376fb6e86224f0409dfe13ceee48d913ff30576144ab5e21eecf496622"
+    },
+    {
+      "name": "metadata/final-074-docs-green.log",
+      "bytes": 391,
+      "sha256": "f92fd99f0a83363c0c085d58e6209b2a9dc73fc4bfddc404b50949ddd0ce6797"
+    },
+    {
+      "name": "delivery-method/promotion-guard-controls.json",
+      "bytes": 5477,
+      "sha256": "e495aefca6e5692a2647dd3da6be490b6de89e04ca8d7d0cde4e5a8a7999f921"
+    },
+    {
+      "name": "delivery-method/promotion-proof.red.log",
+      "bytes": 3306,
+      "sha256": "8732903a3e9b89980fe76a895a0fe67354ed841b68d47a6b545e8b7661b6de2a"
+    },
+    {
+      "name": "delivery-method/promotion-proof.green.log",
+      "bytes": 543,
+      "sha256": "3609f8663f4dafe151897aa464f592f26dc493cec7956794e1f47ea6a05fa79d"
+    }
+  ],
+  "finalHistoricalCiCaptureAt": "2026-10-21T05:41:54.085Z",
+  "deliveryMethodAddedAt": "2026-10-21T05:42:38.290Z"
+}

@@ -1,0 +1,23 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ scripts/testing/ui-session-daemon.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/testing/ui-session-daemon.test.ts [ scripts/testing/ui-session-daemon.test.ts ]
+AssertionError: Expected exactly reviewed platform guard
+  Plugin: negative-control-unconditional-ui-daemon
+  File: C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/scripts/testing/control-omb-ui.ts
+ ❯ TransformPluginContext.transform ../../../../Documents/Origin-bugfix/node_modules/.vite-temp/daemon-negative-control.config.mjs.timestamp-1792560312271-bcc7913711dba.mjs:158:7
+ ❯ EnvironmentPluginContainer.transform ../../../../Documents/Origin-bugfix/node_modules/.pnpm/vite@7.3.6_@types+node@26.2_726c215b972c717867dbb615be6dedb5/node_modules/vite/dist/node/chunks/config.js:28877:51
+ ❯ loadAndTransform ../../../../Documents/Origin-bugfix/node_modules/.pnpm/vite@7.3.6_@types+node@26.2_726c215b972c717867dbb615be6dedb5/node_modules/vite/dist/node/chunks/config.js:22746:48
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  07:25:12
+   Duration  668ms (transform 213ms, setup 485ms, import 0ms, tests 0ms, environment 0ms)
+

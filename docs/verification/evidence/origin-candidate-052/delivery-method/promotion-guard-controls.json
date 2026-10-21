@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "cycle": "052",
+  "version": "0.7.4",
+  "source": null,
+  "validationSource": null,
+  "freezePending": true,
+  "completedAt": "2026-10-21T05:41:54.491Z",
+  "scope": "Bounded local promotion guard tests and syntax only; no release validation or execution",
+  "red": {
+    "command": "node --test .omb-scratch/public-delivery-052/promotion-proof.test.mjs",
+    "exitCode": 1,
+    "tests": 4,
+    "passed": 1,
+    "failed": 3,
+    "log": ".omb-scratch/public-delivery-052/promotion-proof.red.log"
+  },
+  "green": {
+    "command": "node --test .omb-scratch/public-delivery-052/promotion-proof.test.mjs",
+    "exitCode": 0,
+    "tests": 5,
+    "passed": 5,
+    "failed": 0,
+    "identityAndOutputMutationCases": 23,
+    "invalidReferenceCases": 8,
+    "log": ".omb-scratch/public-delivery-052/promotion-proof.green.log",
+    "logCapture": "Verbatim successful tool stdout persisted after the run; no second green run"
+  },
+  "syntax": {
+    "exitCode": 0,
+    "files": [
+      ".omb-scratch/public-delivery-052/helpers/public-contract.mjs",
+      ".omb-scratch/public-delivery-052/public-delivery.mjs",
+      ".omb-scratch/site-preparation-052/site-delivery.mjs"
+    ]
+  },
+  "acceptedPromotion": {
+    "reference": {
+      "path": ".omb-scratch/site-preparation-052/promote-receipt.json",
+      "sha256": "Exact actual completed receipt bytes; pending"
+    },
+    "remoteFields": [
+      "source",
+      "version",
+      "image",
+      "previousImage",
+      "rollbackImage",
+      "rollbackContext",
+      "newContext",
+      "publicMutation",
+      "operatorConfigPreserved"
+    ],
+    "completionFields": [
+      "validationSource",
+      "phase=promote",
+      "completed=true",
+      "completedAt"
+    ],
+    "bindings": [
+      "source=validationSource=frozen input/build source",
+      "version=0.7.4",
+      "expectedCurrentImage=build.image=promoted image; candidate differs from071",
+      "previousImage=preserved071 image",
+      "buildReceiptSha256=input.siteBuild.sha256",
+      "contextProofSha256 and archiveSha256 equal validated build",
+      "remoteResultSha256=exact fixed captured stdout; exactly one marker; all nine remote fields match",
+      "rollbackImage/rollbackContext/newContext share owned UTC+UUID suffix",
+      "publicMutation=true and operatorConfigPreserved=true"
+    ],
+    "everyFreezeRereads": true
+  },
+  "preserved051": {
+    "inventory": ".omb-scratch/site-preparation-052/preserved-051-inventory.json",
+    "inventorySha256": "1eedd43fd309e4d98d162afd1c73d4dffdb07595ae63f92d2b3764f3ff61da51",
+    "files": 545,
+    "matched": true
+  },
+  "independentReadOnlyReview": {
+    "promotion_contract_review": "No new blocker in scoped producer/consumer guard; no tests or external actions",
+    "release_gate_review": "No concrete blocker in bounded code and test-source review; green receipt pending at review time"
+  },
+  "files": [
+    {
+      "path": ".omb-scratch/public-delivery-052/helpers/public-contract.mjs",
+      "bytes": 7963,
+      "sha256": "af380fe63bef335a42a1238fcde9003ed9f453082eef0675ffb404b7f32f5a5c"
+    },
+    {
+      "path": ".omb-scratch/public-delivery-052/public-delivery.mjs",
+      "bytes": 15386,
+      "sha256": "a113437cd5d3238a75a29b3564351dfa1e83869c35e71638380e6af9c51b8765"
+    },
+    {
+      "path": ".omb-scratch/public-delivery-052/INPUT.template.json",
+      "bytes": 1560,
+      "sha256": "441470e243ccad3b921afc7cc5947fdc2e6c928145993ebc394ddb30c6849d3d"
+    },
+    {
+      "path": ".omb-scratch/public-delivery-052/helpers.manifest.json",
+      "bytes": 939,
+      "sha256": "71921730247450ad745f1035193b39630354f70c4bbbecab07d97bc87eafe0ed"
+    },
+    {
+      "path": ".omb-scratch/public-delivery-052/promotion-proof.test.mjs",
+      "bytes": 4545,
+      "sha256": "d9ae2fdc57a577c6ad47d64f847e0c7c33bcb8efd490c4bb65873306db92800d"
+    },
+    {
+      "path": ".omb-scratch/public-delivery-052/promotion-proof.red.log",
+      "bytes": 3306,
+      "sha256": "8732903a3e9b89980fe76a895a0fe67354ed841b68d47a6b545e8b7661b6de2a"
+    },
+    {
+      "path": ".omb-scratch/public-delivery-052/promotion-proof.green.log",
+      "bytes": 543,
+      "sha256": "3609f8663f4dafe151897aa464f592f26dc493cec7956794e1f47ea6a05fa79d"
+    },
+    {
+      "path": ".omb-scratch/public-delivery-052/README.md",
+      "bytes": 1357,
+      "sha256": "0a055848d2fa528d1a81b0e66e34e4f16855f421238e53f37d7431e33ad21203"
+    },
+    {
+      "path": ".omb-scratch/public-delivery-052/preparation-receipt.json",
+      "bytes": 825,
+      "sha256": "f9d526ca16fe036a704af223a484d11f0ff81cf9cf8ec2a04f582b4c704f3fd1"
+    },
+    {
+      "path": ".omb-scratch/site-preparation-052/site-delivery.mjs",
+      "bytes": 14910,
+      "sha256": "a8785e98c3e3b195d4eacd8d38aca4b1c15aac4c3349abcc86629cdb7a47ce05"
+    },
+    {
+      "path": ".omb-scratch/site-preparation-052/README.md",
+      "bytes": 1658,
+      "sha256": "c8fb09cc622a8fedb574d7e202371bf24fa72e384cc550ad81e1d0246d1767b0"
+    },
+    {
+      "path": ".omb-scratch/site-preparation-052/preparation-receipt.json",
+      "bytes": 825,
+      "sha256": "417ce76fae43db24ac6462608e6ca4c2b885e046cecc2c689087be66bbfe2bc3"
+    },
+    {
+      "path": ".omb-scratch/site-preparation-052/helpers-manifest.json",
+      "bytes": 2531,
+      "sha256": "8066471690d42ef3cffe50937a20d93268e1bcde2add4542e8ada930c27865ec"
+    }
+  ],
+  "operatorPhasesExecuted": 0,
+  "network": false,
+  "trackedEdits": false,
+  "authorizedPhases": [],
+  "sourceBindingPerformed": false
+}

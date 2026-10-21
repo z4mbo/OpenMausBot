@@ -1,0 +1,34 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ scripts/testing/ui-session-daemon.test.ts (5 tests | 2 failed) 8ms
+     × keeps the normal CLI launch path on linux without starting a daemon subprocess 4ms
+     × keeps the normal CLI launch path on darwin without starting a daemon subprocess 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/testing/ui-session-daemon.test.ts > UI session daemon ownership > keeps the normal CLI launch path on linux without starting a daemon subprocess
+ FAIL  scripts/testing/ui-session-daemon.test.ts > UI session daemon ownership > keeps the normal CLI launch path on darwin without starting a daemon subprocess
+AssertionError: promise rejected "Error: Unexpected subprocess { …(2) }" instead of resolving
+ ❯ scripts/testing/ui-session-daemon.test.ts:13:92
+     11|   it.each(["linux", "darwin"] as const)("keeps the normal CLI launch p…
+     12|     daemon.start.mockRejectedValue(new Error("Unexpected subprocess"));
+     13|     await expect(ownUiSessionDaemon("unused-browser", { HOME: "synthet…
+       |                                                                                            ^
+     14|     expect(daemon.start).not.toHaveBeenCalled();
+     15|   });
+
+Caused by: Error: Unexpected subprocess
+ ❯ startSessionDaemon scripts/testing/control-omb-ui.ts:144:25
+ ❯ ownUiSessionDaemon scripts/testing/control-omb-ui.ts:149:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { exitCode: 1, hint: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  07:22:45
+   Duration  1.61s (transform 451ms, setup 525ms, import 899ms, tests 8ms, environment 0ms)
+

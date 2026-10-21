@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-21T05:18:04.4954597Z",
+  "ports": [
+    5173,
+    22322,
+    22323
+  ],
+  "listeners": [],
+  "diagnosticLauncher22988Present": false,
+  "exactTestAssertedOwnedDataRemoved": true
+}

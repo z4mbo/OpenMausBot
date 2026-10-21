@@ -1,0 +1,13 @@
+✔ accepts only a candidate image with its completed confirmed promotion proof (2.0715ms)
+✔ requires the hash-bound exact052 promotion receipt reference (1.1488ms)
+✔ rejects the preserved071 image even with otherwise valid candidate evidence (0.2448ms)
+✔ rejects missing promotion proof and a build receipt in its place (0.3273ms)
+✔ rejects mismatched or incomplete promotion identity and confirmation evidence (1.2504ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57.9925
