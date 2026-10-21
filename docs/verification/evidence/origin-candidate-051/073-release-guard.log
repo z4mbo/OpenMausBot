@@ -1,0 +1,35 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ scripts/testing/verification-docs.test.ts (7 tests | 1 failed) 252ms
+     × link to files and headings that exist 44ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/testing/verification-docs.test.ts > docs/verification recipes cite things that exist > link to files and headings that exist
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "README.md: origin-0.7.3-release-notes.md",
++ ]
+
+ ❯ scripts/testing/verification-docs.test.ts:123:20
+    121|       }
+    122|     }
+    123|     expect(broken).toEqual([]);
+       |                    ^
+    124|   });
+    125| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 22 passed (23)
+   Start at  06:58:11
+   Duration  2.95s (transform 474ms, setup 603ms, import 1.08s, tests 967ms, environment 0ms)
+

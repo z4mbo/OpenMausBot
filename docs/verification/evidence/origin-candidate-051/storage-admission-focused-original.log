@@ -1,0 +1,47 @@
+
+ RUN  v5.0.2 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/backend
+
+ ↓ convex/storageAdmission.test.ts > a removed project member cannot rebind its remembered storage ID in their own workspace
+ ↓ convex/storageAdmission.test.ts > unreferenced IDs cannot be claimed by any of the five storage reference writers
+ ↓ convex/storageAdmission.test.ts > all five upload issuers register scoped server-stored bytes and preserve the transport contract
+ ↓ convex/storageAdmission.test.ts > a valid unrelated upload intent cannot authorize an arbitrary ID or someone else's private profile upload
+ ↓ convex/storageAdmission.test.ts > current source readers may reuse legacy files, and an authorized copy survives source removal
+ ↓ convex/storageAdmission.test.ts > a revoked source cannot be rebound through profiles, icons, agents, assets or drawing files
+ ↓ convex/storageAdmission.test.ts > upload URLs are one-use, expire, enforce MIME and bound incoming bytes
+ × convex/storageAdmission.test.ts > an upload rechecks project access after receiving the body and deletes only its rejected new blob 495ms
+   → expected [ { …(4) }, { …(4) } ] to have a length of 1 but got 2
+ ↓ convex/storageAdmission.test.ts > signing out invalidates an already issued upload capability
+ ↓ convex/storageAdmission.test.ts > legacy migration is paginated and idempotent and does not claim unreferenced blobs
+ ↓ convex/storageAdmission.test.ts > concurrent POSTs can consume an upload intent only once
+ ↓ convex/storageAdmission.test.ts > a chunked upload is bounded without trusting Content-Length
+ ↓ convex/storageAdmission.test.ts > session generation revocation during an upload prevents admission
+ ↓ convex/storageAdmission.test.ts > migration covers every live reference scope without exposing unrelated unreferenced blobs
+ ↓ convex/storageAdmission.test.ts > upload preflight permits binary transport without ambient credentials
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  convex/storageAdmission.test.ts > an upload rechecks project access after receiving the body and deletes only its rejected new blob
+AssertionError: expected [ { …(4) }, { …(4) } ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ convex/storageAdmission.test.ts:190:75
+    188|   expect((await response).status).toBe(400);
+    189|   expect(await f.t.run(ctx => ctx.db.system.get(original))).not.toBeNu…
+    190|   expect(await f.t.run(ctx => ctx.db.system.query("_storage").collect(…
+       |                                                                           ^
+    191| });
+    192|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 skipped (15)
+   Start at  06:52:19
+   Duration  940ms (tests 59%, import 20%, transform 17%, environment 4%)
+

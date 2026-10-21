@@ -1,0 +1,87 @@
+{
+  "version": "0.7.3",
+  "previousSource": "375da4cf23cf803da0b045ffec42f7f651082ab5",
+  "qualification": "Historical red and focused green source correction evidence. New final-source workflows and production acceptance are pending.",
+  "files": [
+    {
+      "name": "storage-ci-receipt.json",
+      "bytes": 2751,
+      "sha256": "1cd5962808c5df383ea2d88d32e42320df721852948ba5fe0e53ac704f303afa"
+    },
+    {
+      "name": "storage-admission-focused-original.log",
+      "bytes": 2941,
+      "sha256": "d28e416091dffb0e4d0111a996ea34aebfc1507b45f8708ce9c354dbca79c204"
+    },
+    {
+      "name": "storage-admission-corrected-green.log",
+      "bytes": 2123,
+      "sha256": "417f5da4e7fa3c0dfd3f05f46d68b9da13376e6b657dd042bc1633b9457728ed"
+    },
+    {
+      "name": "storage-reference-green.log",
+      "bytes": 385,
+      "sha256": "9563d9d0a189282aebbad507779dcc90ad9506f68cb879b620fdd79385b03410"
+    },
+    {
+      "name": "storage-ci-diagnostic/syscall-trace.log",
+      "bytes": 5856,
+      "sha256": "f6ccf71d39af7bb8060c65bde2ca98ce038e117a12417316cb9509dd3edd4e9b"
+    },
+    {
+      "name": "storage-ci-diagnostic/syscall-trace-after-delete.log",
+      "bytes": 4906,
+      "sha256": "ff4bb76257c68dc5944934b6b960939bfd57f7486142cb25a38eb85bb1c8b0d0"
+    },
+    {
+      "name": "storage-ci-diagnostic/scheduled-barrier-green.log",
+      "bytes": 2800,
+      "sha256": "cbc204e4e768dc2b8d0c006b9002db6a467260bdf4d435d5ac584df21bdec4b0"
+    },
+    {
+      "name": "storage-ci-diagnostic/deletion-noop-negative.log",
+      "bytes": 3766,
+      "sha256": "8630c531ee903ba28c8afe3ecc2e184badaf004c2b0b68ef04306ddb3d31eba7"
+    },
+    {
+      "name": "docs-release-trigger-red.log",
+      "bytes": 1360,
+      "sha256": "8e89868c81fbd7c3fa4d62ea03bec753e2a83a6e45072dee5158b960f11473d3"
+    },
+    {
+      "name": "docs-release-trigger-green.log",
+      "bytes": 6606,
+      "sha256": "c6c2b83b81ed89f0fa958484b7e5fb161b8fece2bfea5fadb98bdd6caf3cce37"
+    },
+    {
+      "name": "073-release-guard.log",
+      "bytes": 1043,
+      "sha256": "d37afc6ee706b760e64a8799664c60e82862db62bd6f1586959c23e002caffe6"
+    },
+    {
+      "name": "073-docs-guard-final.log",
+      "bytes": 256,
+      "sha256": "06508e0862185aa0817968f84d24ff3aa3537f8225d500dd5bf41563f8d59d06"
+    },
+    {
+      "name": "cloud-pr-run-39546164763.json",
+      "bytes": 12352,
+      "sha256": "7ca14d0dd0450f67af506e5411581a4659749e258a16ec0b4e143bd7734f5dcc"
+    },
+    {
+      "name": "cloud-pr-failed-39546164763.log",
+      "bytes": 19230,
+      "sha256": "24821177802bc8726d1d374671208376896d97bba77c0efafaefb541ac7bfa5d"
+    },
+    {
+      "name": "cloud-push-run-39546160787.json",
+      "bytes": 12350,
+      "sha256": "918aeca770c65ac1140165a96655110b235a6ab28a96ef90e49b6482d168bd93"
+    },
+    {
+      "name": "cloud-tag-run-39546247639.json",
+      "bytes": 11879,
+      "sha256": "88b765b51f99bb32488238f518954922318aaa8485cea6d41651cbef3c8da9ba"
+    }
+  ]
+}

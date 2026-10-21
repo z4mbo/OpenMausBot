@@ -27,9 +27,9 @@ Origin combines project management with the local agent runtime from [OpenMausBo
 | `docs/verification/` | Isolated fixture recipes and their evidence |
 | `scripts/` | Development controls, checks, build and packaging tools |
 
-## 0.7.2 integration candidate
+## 0.7.3 integration candidate
 
-This candidate combines the published 0.7.1 Studio, Publish and project navigation with shared conversations, model fallback, daily API budgets, teammate model sources and the audit fixes. The [verification report](docs/verification/origin-candidate-050.md) records completed checks and pending delivery; a candidate version is not a published download. The current public version observed on October 21 is [0.7.1](https://github.com/z4mbo/Origin/releases/tag/origin-v0.7.1).
+This candidate combines the published 0.7.1 Studio, Publish and project navigation with shared conversations, model fallback, daily API budgets, teammate model sources and the audit fixes. The [verification report](docs/verification/origin-candidate-051.md) records the CI follow-up and pending delivery; a candidate version is not a published download. The current public version observed on October 21 is [0.7.1](https://github.com/z4mbo/Origin/releases/tag/origin-v0.7.1).
 
 The earlier [0.4.2 verification and hold](docs/verification/origin-0.4.2-verification-and-release-hold.md) remains historical evidence, with its packages unpublished. Its shared-agent identity preservation, synchronized project order, specialist thread navigation, compact Usage and project budget boundaries are carried into the newer product. The integration preserves 0.7.1's removal of Sales and the older project sections. GitHub, the website, update feeds and backend are verified separately before delivery.
 
