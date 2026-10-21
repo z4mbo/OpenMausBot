@@ -34,6 +34,8 @@ interface ChatRequest {
 type Script = (body: ChatRequest, response: ServerResponse, round: number) => void;
 type Provider = "openai-compat" | "grok" | "minimax" | "cerebras";
 const API_KEY_CANARY = "fixture-credential-cda00ee8d8384f54";
+const OVERLAPPING_API_KEY_PREFIX = "fixture-key|";
+const OVERLAPPING_API_KEY = OVERLAPPING_API_KEY_PREFIX.repeat(2);
 
 function deferred<T = void>() {
   let resolve!: (value: T | PromiseLike<T>) => void;
@@ -848,20 +850,22 @@ describe("structured tool execution boundaries", () => {
   });
 
   it.each([
-    { scenario: "one chunk", pieces: ["abab"] },
-    { scenario: "split chunks", pieces: ["ab", "ab"] },
+    { scenario: "one chunk", pieces: [OVERLAPPING_API_KEY] },
+    { scenario: "split chunks", pieces: [OVERLAPPING_API_KEY_PREFIX, OVERLAPPING_API_KEY_PREFIX] },
   ])("redacts an overlapping-prefix credential received in $scenario", async ({ pieces }) => {
     const f = await fixture((_request, response) => sse(response, [
       chunk({ content: "Before " }),
       ...pieces.map((piece) => chunk({ content: piece })),
       chunk({ content: " after." }, "stop"),
-    ]), "openai-compat", "abab");
-    await f.start({ integrations: undefined });
+    ]), "openai-compat", OVERLAPPING_API_KEY);
+    const threadId = "12ec893a-d364-4ba8-abab-8f537e12e310";
+    await f.start({ integrations: undefined, threadId });
     expect(await f.completed()).toMatchObject({ ok: true });
     const combined = f.recorder.events.filter((event) => event.type === "content.delta").map((event) => event.delta).join("");
     expect(combined).toBe("Before [redacted] after.");
     expect(f.recorder.events).toContainEqual(expect.objectContaining({ type: "item.completed", itemType: "assistant_text", text: combined }));
-    expect(JSON.stringify(f.recorder.events)).not.toContain("abab");
+    expect(f.recorder.events).toContainEqual(expect.objectContaining({ threadId }));
+    expect(JSON.stringify(f.recorder.events)).not.toContain(OVERLAPPING_API_KEY);
   });
 
   it("redacts a configured credential echoed by a tool from events, diagnostics, and the returned tool result", async () => {
