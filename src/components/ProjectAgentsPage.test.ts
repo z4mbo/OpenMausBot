@@ -37,6 +37,29 @@ beforeEach(() => {
 afterEach(() => { flushSync(() => root.unmount()); host.remove(); vi.unstubAllGlobals(); });
 
 describe("project specialist conversations", () => {
+  it("retries an awaiting specialist read on explicit row selection without selecting or switching the project", () => {
+    mount({ ...researcher, threadId: "child-a", awaitingThreadSnapshot: true });
+    fixture.dispatch.mockClear();
+    flushSync(() => host.querySelector<HTMLButtonElement>('nav[aria-label="Origin agents"] button[aria-current="true"]')!.click());
+    expect(fixture.dispatch).toHaveBeenCalledExactlyOnceWith({ type: "retryPendingThreadSnapshot", botId: researcher.id, threadId: "child-a" });
+    expect(projectAgentSelection(lead.id)?.threadId).toBe("child-a");
+    expect(host.querySelector('[aria-label="Loading agent conversation"]')).not.toBeNull();
+  });
+  it("retries an awaiting specialist read on its current thread row", () => {
+    mount({ ...researcher, threadId: "child-a", awaitingThreadSnapshot: true });
+    fixture.dispatch.mockClear();
+    flushSync(() => host.querySelector<HTMLButtonElement>('[data-sidebar-thread-row="child-a"]')!.click());
+    expect(fixture.dispatch).toHaveBeenCalledExactlyOnceWith({ type: "retryPendingThreadSnapshot", botId: researcher.id, threadId: "child-a" });
+    expect(projectAgentSelection(lead.id)?.threadId).toBe("child-a");
+    expect(host.querySelector('[data-chat-thread]')).toBeNull();
+  });
+  it("does not retry a loaded specialist when its row is selected again", () => {
+    mount({ ...researcher, threadId: "child-a" });
+    fixture.dispatch.mockClear();
+    flushSync(() => host.querySelector<HTMLButtonElement>('nav[aria-label="Origin agents"] button[aria-current="true"]')!.click());
+    expect(fixture.dispatch).not.toHaveBeenCalled();
+    expect(host.querySelector('[data-chat-thread="child-a"]')).not.toBeNull();
+  });
   it("excludes the project boss and shows the specialist's delegated and direct threads", () => {
     mount();
     expect(host.querySelector('nav[aria-label="Origin agents"]')?.textContent).not.toContain("Lead");

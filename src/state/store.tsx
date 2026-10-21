@@ -60,6 +60,7 @@ import { useChatErrorClear } from "./chat-error";
 import { openLiveEvents, publishLiveFrame, publishMissedFrames } from "@/lib/live-events";
 import { chatHiddenFor } from "@/lib/origin-chief-section";
 import { trimRoutineRuns } from "./routine-run-retention";
+import { bumpTranscriptGeneration, hydratedTranscriptState, reducePendingThreadSnapshot, usePendingThreadSnapshotRecovery, type PendingThreadSnapshotPage, type PendingThreadSnapshotTarget } from "./pending-thread-snapshots";
 
 export type { MausColor } from "@/lib/mascot";
 export type { RoutineRunCardData } from "../../shared/routine-run";
@@ -790,6 +791,9 @@ export type Action =
   | { type: "switchTask"; botId: string; threadId: string; whole?: true; preserveSelection?: true; onError?: (message: string) => void }
   | { type: "switchTaskFailed"; botId: string; threadId: string }
   | { type: "taskSwitched"; bot: Bot }
+  | { type: "retryPendingThreadSnapshot"; botId: string; threadId: string }
+  | ({ type: "pendingThreadSnapshotLoaded"; page: PendingThreadSnapshotPage } & PendingThreadSnapshotTarget)
+  | ({ type: "pendingThreadSnapshotFailed"; message: string } & PendingThreadSnapshotTarget)
   | { type: "renameTask"; botId: string; threadId: string; title: string }
   | { type: "regenerateTaskTitle"; botId: string; threadId: string; onSettled?: (ok: boolean) => void }
   | { type: "deleteTask"; botId: string; threadId: string }
@@ -867,17 +871,6 @@ export function pinBotThreadAction(action: Action, bots: Bot[]): Action {
   const botId = action.botId;
   const threadId = bots.find((bot) => bot.id === botId)?.threadId;
   return { ...action, threadId } as Action;
-}
-
-function bumpTranscriptGeneration(state: AppState, threadId: string | undefined | null): AppState {
-  if (!threadId) return state;
-  return {
-    ...state,
-    transcriptGeneration: {
-      ...state.transcriptGeneration,
-      [threadId]: (state.transcriptGeneration[threadId] ?? 0) + 1,
-    },
-  };
 }
 
 function updateBot(state: AppState, botId: string, fn: (b: Bot) => Bot): AppState {
@@ -984,9 +977,7 @@ export function reducer(state: AppState, action: Action): AppState {
         computerControl: action.computerControl,
         selectedId,
         hydrated: true as const,
-        backgroundThreadEvents: {},
-        loadingOlder: {},
-        transcriptGeneration: {},
+        ...hydratedTranscriptState(state, action),
         modelVariantSessions: {},
       };
       return reconcileSnapshotQueues(
@@ -1139,24 +1130,26 @@ export function reducer(state: AppState, action: Action): AppState {
         config: { ...state.config, profile: { name: "", email: "", ...state.config.profile, ...action.profile } },
       } : state;
     case "select": {
-      const room = state.groups.find((g) => g.id === action.id);
+      const pending = state.bots.find((bot) => bot.id === action.id && bot.awaitingThreadSnapshot);
+      const selectedState = pending ? bumpTranscriptGeneration(state, pending.threadId) : state;
+      const room = selectedState.groups.find((g) => g.id === action.id);
       if (room) {
         return {
-          ...state,
-          unreadDivider: openedUnreadDivider(state, room.threadId, room.unread, room.messages, room.lastReadMessageId),
+          ...selectedState,
+          unreadDivider: openedUnreadDivider(selectedState, room.threadId, room.unread, room.messages, room.lastReadMessageId),
           activeView: "chat",
           selectedId: action.id,
-          groups: state.groups.map((g) => (g.id === action.id ? { ...g, unread: false } : g)),
+          groups: selectedState.groups.map((g) => (g.id === action.id ? { ...g, unread: false } : g)),
         };
       }
-      const opened = state.bots.find((b) => b.id === action.id);
+      const opened = selectedState.bots.find((b) => b.id === action.id);
       return updateBot(
         withMascotMotion(
           {
-            ...state,
+            ...selectedState,
             unreadDivider: opened
-              ? openedUnreadDivider(state, opened.threadId, threadOpensUnread(opened), visibleMessages(opened), threadReadCursor(opened))
-              : state.unreadDivider,
+              ? openedUnreadDivider(selectedState, opened.threadId, threadOpensUnread(opened), visibleMessages(opened), threadReadCursor(opened))
+              : selectedState.unreadDivider,
             activeView: "chat",
             selectedId: action.id,
           },
@@ -1243,10 +1236,10 @@ export function reducer(state: AppState, action: Action): AppState {
       const switchedThread =
         typeof action.bot.threadId === "string" && action.bot.threadId !== before.threadId &&
         !action.bot.tasks?.some((task) => task.threadId === before.threadId);
-      let switching = next;
+      let switching = switchedThread ? bumpTranscriptGeneration(next, action.bot.threadId) : next;
       if (switchedThread) {
-        const { [action.bot.threadId]: _stale, ...otherThreadEvents } = next.backgroundThreadEvents;
-        switching = { ...next, backgroundThreadEvents: otherThreadEvents };
+        const { [action.bot.threadId]: _stale, ...otherThreadEvents } = switching.backgroundThreadEvents;
+        switching = { ...switching, backgroundThreadEvents: otherThreadEvents };
       }
       if ((switchedThread || (before.awaitingThreadSnapshot && action.bot.threadId === before.threadId)) &&
           Array.isArray(action.bot.messages)) {
@@ -1875,6 +1868,10 @@ export function reducer(state: AppState, action: Action): AppState {
           };
         }),
       };
+    case "retryPendingThreadSnapshot":
+    case "pendingThreadSnapshotFailed":
+    case "pendingThreadSnapshotLoaded":
+      return reducePendingThreadSnapshot(state, action, reducer);
     case "taskSwitched": {
       let switched = updateBot(bumpTranscriptGeneration(state, action.bot.threadId), action.bot.id, (bot) => ({
         ...bot,
@@ -2302,6 +2299,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, rawDispatch] = useReducer(reducer, initialState, restoreBotSettingsSection);
   const stateRef = useRef(state);
   stateRef.current = state;
+  usePendingThreadSnapshotRecovery(state, stateRef, api<PendingThreadSnapshotPage>, rawDispatch);
   const showThreads = useShowThreads();
   const showThreadsRef = useRef(showThreads);
   showThreadsRef.current = showThreads;

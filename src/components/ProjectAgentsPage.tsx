@@ -47,7 +47,9 @@ function ProjectAgentConversations({ lead, agents }: { lead: Bot; agents: readon
   const team = lead.section?.trim();
   const pick = (agent: Bot) => {
     creation.current = null; setCreating(false); setLoadError(null);
-    revealProjectAgentThread(lead.id, agent.id, agentConversation(agent, picked?.agentId === agent.id ? picked.threadId : undefined)?.threadId ?? agent.threadId);
+    const nextThread = agentConversation(agent, picked?.agentId === agent.id ? picked.threadId : undefined)?.threadId ?? agent.threadId;
+    if (agent.awaitingThreadSnapshot && nextThread === agent.threadId) dispatch({ type: "retryPendingThreadSnapshot", botId: agent.id, threadId: nextThread });
+    revealProjectAgentThread(lead.id, agent.id, nextThread);
   };
   useEffect(() => () => { creation.current = null; loading.current = null; }, []);
   useEffect(() => {
@@ -92,7 +94,11 @@ function ProjectAgentConversations({ lead, agents }: { lead: Bot; agents: readon
           {specialists.map((agent) => <Fragment key={agent.id}>
             <AgentRow bot={agent} active={agent.id === selected?.id} onSelect={() => pick(agent)} />
             {agent.id === selected?.id && <li><AgentThreads agent={agent} threadId={threadId} locale={activeLocale()} creating={creating} onCreate={newThread}
-              onPick={next => { creation.current = null; setCreating(false); setLoadError(null); revealProjectAgentThread(lead.id, agent.id, next); }} dispatch={dispatch} /></li>}
+              onPick={next => {
+                creation.current = null; setCreating(false); setLoadError(null);
+                if (agent.awaitingThreadSnapshot && next === agent.threadId) dispatch({ type: "retryPendingThreadSnapshot", botId: agent.id, threadId: next });
+                revealProjectAgentThread(lead.id, agent.id, next);
+              }} dispatch={dispatch} /></li>}
           </Fragment>)}
           {!specialists.length && (
             <li className="flex flex-col items-start gap-2 px-2 pt-4 text-[13px] text-ink-secondary">

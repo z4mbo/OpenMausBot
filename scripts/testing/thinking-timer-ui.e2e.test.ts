@@ -187,6 +187,10 @@ describe("the thinking timer stays anchored across a thread switch", () => {
     // the renderer before sending the turn whose stamp this case observes.
     await selectThread(busyThread);
     await waitUntil(() => isCurrent(busyThread), 10_000, "the original thread to become current");
+    await waitUntil(() => evaluate(`(() => {
+      const input = document.querySelector('textarea[aria-label="Message Pepper"]');
+      return input && !input.disabled && input.getClientRects().length > 0;
+    })()`), 10_000, "the original thread's composer to finish loading");
 
     await ui("type", info.ui, "--name", "Message Pepper", "--text", "hello");
     await ui("press", info.ui, "--keys", "Enter");
