@@ -543,6 +543,23 @@ describe("ClaudeDriver turns (fake CLI)", () => {
     }
   });
 
+  it.each([
+    ["default", undefined],
+    ["all", true],
+    ["API only", false],
+  ] as const)("runs the dedicated API instance with the workspace Claude scope %s", async (label, everyClaudeBot) => {
+    const map = instanceConfigs({ anthropic: { key: "synthetic-selected-api-key", ...(everyClaudeBot === undefined ? {} : { everyClaudeBot }) } });
+    const selected = map.claudeApi!;
+    const dump = join(scratch, "dedicated-api.json");
+    process.env.FAKE_CLAUDE_DUMP = dump;
+    await create("echo", selected.environment as Record<string, string>, { ...ClaudeDriver.decodeConfig(selected.config), cli: FAKE_CLI });
+    await instance.adapter.sendTurn({ threadId: `dedicated-api-${label}`, text: "Synthetic API route" });
+    await recorder.until((event) => event.type === "turn.completed");
+    expect(recorder.events.at(-1)).toMatchObject({ type: "turn.completed", ok: true });
+    expect(JSON.parse(readFileSync(dump, "utf8")).env.ANTHROPIC_API_KEY).toBe("synthetic-selected-api-key");
+    expect(await instance.snapshot()).toMatchObject({ state: "available", authenticated: true, account: { method: "api-key" }, billing: "metered" });
+  });
+
   it("normalizes a full turn into the canonical event sequence", async () => {
     await create();
     const { turnId } = await instance.adapter.sendTurn({ threadId: "t-happy", text: "hi", model: "claude-sonnet-5" });
@@ -3886,11 +3903,11 @@ describe("ClaudeDriver resume recovery (fake CLI)", () => {
 describe("ClaudeDriver snapshot auth (fake CLI)", () => {
   let instance: ProviderInstance;
 
-  const create = async () => {
+  const create = async (environment: Record<string, string> = {}) => {
     instance = await ClaudeDriver.create({
       instanceId: "claude-auth-test",
       displayName: "Claude Auth Test",
-      environment: {},
+      environment,
       enabled: true,
       config: { cli: FAKE_CLI, permissionMode: "acceptEdits" },
     });
@@ -3916,6 +3933,12 @@ describe("ClaudeDriver snapshot auth (fake CLI)", () => {
   it("reports native API-key authentication as metered without a requireApiKey override", async () => {
     process.env.FAKE_CLAUDE_AUTH = "api-key";
     await create();
+    expect(await instance.snapshot()).toMatchObject({ state: "available", authenticated: true, account: { method: "api-key" }, billing: "metered" });
+  });
+
+  it("reports a selected workspace API key as metered even when the auth probe reports a subscription", async () => {
+    process.env.FAKE_CLAUDE_AUTH = "in";
+    await create({ ANTHROPIC_API_KEY: "synthetic-workspace-api-key" });
     expect(await instance.snapshot()).toMatchObject({ state: "available", authenticated: true, account: { method: "api-key" }, billing: "metered" });
   });
 

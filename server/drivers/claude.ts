@@ -16,6 +16,7 @@ export { createPermissionBroker } from "./claude-permission-broker.ts";
 import { firstText } from "./claude-message-text.ts";
 import { removePrivateTempDir } from "./claude-temp.ts";
 import { claudeAuthStatus } from "./claude-auth-status.ts";
+import { claudeBilling } from "./claude-billing.ts";
 import { claudeAuthFailure } from "./claude-auth-recovery.ts";
 import { claudeTurnEvents } from "./claude-turn-events.ts";
 import { claudeModelExtras } from "./claude-model-extras.ts";
@@ -1791,8 +1792,7 @@ export const ClaudeDriver: ProviderDriver<ClaudeConfig> = {
       }
       const probed = await claudeAuthStatus(config.cli, env);
       const auth = probed.authenticated === undefined ? lastAuth : (lastAuth = probed);
-      // Turns run on the CLI's own login, so its reported cost is what the call would bill.
-      return { state: "available", version, ...auth, ...(update ? { update } : {}), ...(warning ? { warning } : {}), billing: auth.account?.method === "api-key" ? "metered" : "subscription" };
+      return { state: "available", version, ...auth, ...claudeBilling(env, auth.account), ...(update ? { update } : {}), ...(warning ? { warning } : {}) };
     };
 
     /** One-shot call, prompt on stdin (approval summaries can hold secrets), no tools or MCP servers. */
