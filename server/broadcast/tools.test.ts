@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { OriginCloudClient } from "../origin-cloud.ts";
-import { broadcastDraft, broadcastList, broadcastSchedule, type BroadcastToolScope } from "./tools.ts";
+import { broadcastDraft, broadcastList, broadcastSchedule, broadcastUnschedule, type BroadcastToolScope } from "./tools.ts";
 
 function scope(posts: Record<string, unknown>[] = []) {
   const mutations: { name: string; args: Record<string, unknown> }[] = [];
   const client: OriginCloudClient = {
-    query: async (name) => name === "broadcast:list" ? { posts } : { assets: [{ _id: "a1", name: "Launch clip", type: "other", contentType: "video/mp4" }, { _id: "a2", name: "Cover", type: "image", contentType: "image/png" }] },
+    query: async (name) => name === "broadcast:list" ? { posts }
+      : name === "campaigns:list" ? { campaigns: [{ _id: "c1", name: "Spring launch", slug: "spring-launch" }] }
+        : name === "campaigns:get" ? { posts: [{ _id: "p1" }] }
+          : { assets: [{ _id: "a1", name: "Launch clip", type: "other", contentType: "video/mp4" }, { _id: "a2", name: "Cover", type: "image", contentType: "image/png" }] },
     mutation: async (name, args) => {
       mutations.push({ name, args });
       return name === "broadcast:save" ? "post1" : name === "broadcast:schedule" ? Date.UTC(2026, 10, 2, 9, 30) : null;
@@ -32,6 +35,17 @@ describe("origin_broadcast_draft", () => {
     const { value, mutations } = scope([{ _id: "post1", variants: [{ channel: "x", text: "Old" }, { channel: "bluesky", text: "Old" }], media: [{ assetId: "a2", kind: "image" }] }]);
     await broadcastDraft({ post_id: "post1", texts: { bluesky: "New" } }, value);
     expect(mutations[0].args).toMatchObject({ postId: "post1", assetIds: ["a2"], variants: [{ channel: "x", text: "Old" }, { channel: "bluesky", text: "New" }] });
+  });
+
+  it("attaches a new draft to a campaign found by name, and refuses an unknown campaign before saving", async () => {
+    const { value, mutations } = scope();
+    const result = await broadcastDraft({ channels: ["x"], text: "Teaser", campaign: "spring launch" }, value);
+    expect(mutations.map((mutation) => mutation.name)).toEqual(["broadcast:save", "campaigns:link"]);
+    expect(mutations[1].args).toEqual({ sessionToken: "t", projectId: "proj", campaignId: "c1", kind: "post", itemId: "post1" });
+    expect(result.text).toContain('for the campaign "Spring launch"');
+    const missing = scope();
+    expect((await broadcastDraft({ channels: ["x"], text: "a", campaign: "Fall" }, missing.value)).isError).toBe(true);
+    expect(missing.mutations).toEqual([]);
   });
 
   it("refuses an unknown asset or channel", async () => {
@@ -62,6 +76,31 @@ describe("origin_broadcast_list", () => {
     const { value } = scope([{ _id: "p1", status: "failed", agentName: "Marketer", needsApproval: false, variants: [{ channel: "x", text: "Hello", url: "https://x.com/i/web/status/1" }, { channel: "tiktok", text: "Hello", error: "token expired" }], media: [] }]);
     const { text } = await broadcastList({}, value);
     expect(text).toContain("- p1 [failed, approved] x https://x.com/i/web/status/1; tiktok (failed: token expired) · by Marketer");
+  });
+});
+
+describe("origin_broadcast_list filters", () => {
+  it("lists only a campaign's posts, or the ones waiting for approval", async () => {
+    const rows = [
+      { _id: "p1", status: "draft", needsApproval: true, variants: [{ channel: "x", text: "In the campaign" }], media: [] },
+      { _id: "p2", status: "draft", needsApproval: false, variants: [{ channel: "x", text: "Elsewhere" }], media: [] },
+    ];
+    const inCampaign = await broadcastList({ campaign: "Spring launch" }, scope(rows).value);
+    expect(inCampaign.text).toContain("- p1");
+    expect(inCampaign.text).not.toContain("- p2");
+    expect(inCampaign.card).toMatchObject({ heading: '1 post in "Spring launch"' });
+    const waiting = await broadcastList({ status: "approval" }, scope(rows).value);
+    expect(waiting.card).toMatchObject({ heading: "1 post awaiting approval" });
+  });
+});
+
+describe("origin_broadcast_unschedule", () => {
+  it("turns a scheduled post back into a draft and refuses any other", async () => {
+    const { value, mutations } = scope([{ _id: "post1", status: "scheduled", variants: [] }, { _id: "post2", status: "draft", variants: [] }]);
+    const result = await broadcastUnschedule({ post_id: "post1" }, value);
+    expect(mutations).toEqual([{ name: "broadcast:unschedule", args: { sessionToken: "t", postId: "post1" } }]);
+    expect(result.text).toContain("draft again");
+    expect((await broadcastUnschedule({ post_id: "post2" }, value)).isError).toBe(true);
   });
 });
 

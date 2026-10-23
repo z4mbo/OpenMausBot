@@ -1,7 +1,7 @@
 {
   "default": {
-    "bytes": 78690,
-    "sha256": "00d1fae0939e445a724266609d309409f6643005083cc8b70c7ba120e6f4bb07",
+    "bytes": 78996,
+    "sha256": "4de88a370366994b029abcaf2daee13a07e029629e9244aba513d1c3285e52f8",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -73,6 +73,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -84,8 +85,8 @@
     ]
   },
   "voice": {
-    "bytes": 79431,
-    "sha256": "230a76cd6d35637c0e27c0052f1e0b14e378a03ebc766737f85fcbdb5464005e",
+    "bytes": 79737,
+    "sha256": "9b5a1519eb2e383bd97e18c3709335aa8521642dbdc29d2952e6145574fb49c9",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -158,6 +159,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -169,8 +171,8 @@
     ]
   },
   "shared": {
-    "bytes": 80435,
-    "sha256": "e70bc93154717fdfcc06f463e9e597f9282a5a8cf0be57793cc2ced8c9d673c6",
+    "bytes": 80741,
+    "sha256": "1e30770cdf7cbd23e0d160454b2ae5b37d07abad7132580baa9c40dc9030f588",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -244,6 +246,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -255,8 +258,8 @@
     ]
   },
   "shared+voice": {
-    "bytes": 81176,
-    "sha256": "bec1254ceeda87cf9ee926d7d7da034009d853897780142ab262d2db741ca7eb",
+    "bytes": 81482,
+    "sha256": "1a47160e637409e6de658799a34f325480be79a35657ad63aec8280eefaa15fa",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -331,6 +334,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -342,8 +346,8 @@
     ]
   },
   "skills": {
-    "bytes": 81589,
-    "sha256": "24076ce53b6ae277ab0931888149eb6282db8e2fecc36acfcbb867584d028368",
+    "bytes": 81895,
+    "sha256": "f46598b8b2c5bd2a1f202d8ad8203e8bd2f1dfa8901d405a041c47ee3156971d",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -417,6 +421,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -428,8 +433,8 @@
     ]
   },
   "skills+voice": {
-    "bytes": 82330,
-    "sha256": "1887b0eabc264608ac72682192aa5b2145aa7ce2f5a81fd4dc9d619f8f4ecf4c",
+    "bytes": 82636,
+    "sha256": "bbbf3a2d54f68ed885d9f521d2b64bc8097f4e42cc013b770d36e074dc526be3",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -504,6 +509,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -515,8 +521,8 @@
     ]
   },
   "skills+shared": {
-    "bytes": 83334,
-    "sha256": "c37738f335d41a5c2519a209512ee3f427c558acee70621d78056a1af83bd6ad",
+    "bytes": 83640,
+    "sha256": "9e76d92a878f6952c120607e0c2b2f8d2a5e9690505ffbc54d4481b562e9fb0f",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -592,6 +598,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -603,8 +610,8 @@
     ]
   },
   "skills+shared+voice": {
-    "bytes": 84075,
-    "sha256": "262a61315ae9817ca4b209a1599228356a22b34ef084165e07087f283bd7eec3",
+    "bytes": 84381,
+    "sha256": "ef9443048702a9c06a08dece86015c7663c3d3484528150bea52bfd3dcd85492",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -681,6 +688,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -692,8 +700,8 @@
     ]
   },
   "non-chief": {
-    "bytes": 65965,
-    "sha256": "fd44de522d2f82e597e2c6d5459a4fc657d1c606fc4f3cd8cf988f4529b9ee25",
+    "bytes": 66271,
+    "sha256": "d8210c8180eca60ba7dfdc70c1f5f6c9c437722a5d99ddacdc5ab24d6b01a5c2",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -754,6 +762,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -765,8 +774,8 @@
     ]
   },
   "voice+non-chief": {
-    "bytes": 66706,
-    "sha256": "f3aaaba24daec452dde056b240fb0bd0b24374d6d6ff9723b111043bba2ed23b",
+    "bytes": 67012,
+    "sha256": "1b35e767c1489c3b5f1cc23ab0728e26faeb599d53fd6507511d0948fff6c51d",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -828,6 +837,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -839,8 +849,8 @@
     ]
   },
   "shared+non-chief": {
-    "bytes": 67710,
-    "sha256": "1df77f482ef77b95fac9a9edca9af634889a31224be08045ab317fb5237d3e68",
+    "bytes": 68016,
+    "sha256": "d80f08ade6b877c9571f5bb265ca0b054537358d29783d7229ccbb76a324eb62",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -903,6 +913,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -914,8 +925,8 @@
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 68451,
-    "sha256": "90cb78e75b585a71e477a87a23cca96818580bd7dca35b07671d76c9cc588ee5",
+    "bytes": 68757,
+    "sha256": "d40e8e43d368c26412cbdae6d8d7a5c32cef6ed8f7e619c2fbb62549c5e23de0",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -979,6 +990,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -990,8 +1002,8 @@
     ]
   },
   "skills+non-chief": {
-    "bytes": 68864,
-    "sha256": "ca2467429b56094f79a726becd67d5df6fe0739e5686400389488ebee53c2d01",
+    "bytes": 69170,
+    "sha256": "6344bb830e1e384012334a7cda7108551a342b8cfcb1f277d74668fe71746acb",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1054,6 +1066,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -1065,8 +1078,8 @@
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 69605,
-    "sha256": "c96a7dfee497f98cb27844deb1df571aa84293cecf614e23bce85c188ddd0595",
+    "bytes": 69911,
+    "sha256": "f136336cd16dd268e97f7cb8482078303dfa96b5069de6987b9f71c70f0df5b5",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1130,6 +1143,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -1141,8 +1155,8 @@
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 70609,
-    "sha256": "314a85c0910f3410f05bb70fa3593ba763a7b85647c964a591104ac542aec6bd",
+    "bytes": 70915,
+    "sha256": "3a0a6cafdbee726bf9d18bc0731e21438a266d95554d3640533fcf582eab6683",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1207,6 +1221,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -1218,8 +1233,8 @@
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 71350,
-    "sha256": "e31a6d65eaf58188bbd404478c59d54a316d390ddff98032e1291e5d5c1a0108",
+    "bytes": 71656,
+    "sha256": "708282a4212c0af9b9ca82050a8d952f30999ca863b9024022da4d06e9d3bba0",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1285,6 +1300,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -1296,8 +1312,8 @@
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 83130,
-    "sha256": "7cadd43f22581bf63685d153e0402cfebcf13375d0b258017c4a46640fd930f2",
+    "bytes": 83436,
+    "sha256": "944ce557e59f318cb9ba3345e59153fc823540d9e7c5747e8494dbe0b4acfc19",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1373,6 +1389,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -1384,8 +1401,8 @@
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 70405,
-    "sha256": "da614eac8e7144999a2c3ee75fd673bf0aff901ece884773f216e941a17ebec6",
+    "bytes": 70711,
+    "sha256": "bd812e5aa3892e69f294514057cbddcfa72729ec4d4b5578fa10854b0b2f1d78",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1450,6 +1467,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -1461,8 +1479,8 @@
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 84935,
-    "sha256": "db63604469831e71d5cfd387cbd068d5c67af02e359804a68eebbde34c2729e1",
+    "bytes": 85241,
+    "sha256": "f235d7df6b66b3e25a99118f851942e3fdd46c8ec1b292233d725a28d76ba61e",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1540,6 +1558,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -1551,8 +1570,8 @@
     ]
   },
   "default+legacy-switches": {
-    "bytes": 78690,
-    "sha256": "00d1fae0939e445a724266609d309409f6643005083cc8b70c7ba120e6f4bb07",
+    "bytes": 78996,
+    "sha256": "4de88a370366994b029abcaf2daee13a07e029629e9244aba513d1c3285e52f8",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1624,6 +1643,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
@@ -1635,8 +1655,8 @@
     ]
   },
   "skills+shared+voice+escalations+whole-schemas": {
-    "bytes": 102819,
-    "sha256": "a6071ad0ef5540724e14640c0274122785baf121285f2068744fa3942ce22c02",
+    "bytes": 103615,
+    "sha256": "fd02953d8175ed5348912a4e280239afcee713171f91fdbd0341e35cfb4f4a8a",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1714,6 +1734,7 @@
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",

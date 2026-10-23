@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CampaignPost, CampaignSummary } from "../../../shared/origin-campaigns";
 import { campaignSlug, utmCampaignOf } from "../../../shared/origin-campaigns";
-import { campaignBrief, formProblem, emptyCampaignForm, metricTotals, timelineOrder, variantState } from "./campaign-model";
+import { campaignBrief, campaignOrder, formProblem, nextPostAt, emptyCampaignForm, metricTotals, timelineOrder, variantState } from "./campaign-model";
 
 const summary: CampaignSummary = {
   _id: "c1", name: "Spring launch", slug: "spring-launch", goal: "200 beta sign-ups", audience: "Indie founders", channels: ["x", "bluesky"],
@@ -57,5 +57,22 @@ describe("campaign form and timeline", () => {
     expect(variantState(post("a"), { channel: "x", result: "failed" })).toBe("failed");
     expect(metricTotals([{ postId: "a", channel: "x", likes: 2, reposts: 1, replies: 0, at: 1 }, { postId: "a", channel: "bluesky", likes: 3, reposts: 0, replies: 4, at: 1 }]))
       .toEqual({ likes: 5, reposts: 1, replies: 4 });
+  });
+});
+
+describe("campaign list", () => {
+  it("puts running campaigns first and keeps the backend's order within a status", () => {
+    const order = campaignOrder([{ status: "done", id: 1 }, { status: "planning", id: 2 }, { status: "running", id: 3 }, { status: "planning", id: 4 }] as const);
+    expect(order.map((campaign) => campaign.id)).toEqual([3, 2, 4, 1]);
+  });
+
+  it("finds the next scheduled post among the campaign's posts", () => {
+    const posts = [
+      { _id: "a", status: "scheduled" as const, scheduledAt: 30 }, { _id: "b", status: "scheduled" as const, scheduledAt: 20 },
+      { _id: "c", status: "draft" as const }, { _id: "d", status: "scheduled" as const, scheduledAt: 10 },
+    ];
+    expect(nextPostAt({ postIds: ["a", "b", "c"] }, posts)).toBe(20);
+    expect(nextPostAt({ postIds: ["c"] }, posts)).toBeUndefined();
+    expect(nextPostAt({}, posts)).toBeUndefined();
   });
 });

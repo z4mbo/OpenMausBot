@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarClock, ExternalLink, Loader2, Send, ShieldCheck } from "lucide-react";
+import { CalendarClock, CalendarX, ExternalLink, Loader2, Send, ShieldCheck } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { openExternalLink } from "@/lib/app-links";
 import { cn } from "@/lib/cn";
@@ -67,7 +67,19 @@ function PostActions({ post, canEdit, onOpen }: { post: OriginPostCardItem; canE
     ) : null;
   }
   if (post.status === "scheduled") {
-    return <p className="mt-2.5 flex items-center gap-1.5 text-[12px] text-ink-secondary"><CalendarClock size={13} aria-hidden="true" />Goes out {post.scheduledAt ? dateTime(post.scheduledAt) : "soon"}</p>;
+    return (
+      <div className="mt-2.5 flex flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="flex min-w-0 flex-1 items-center gap-1.5 text-[12px] text-ink-secondary"><CalendarClock size={13} aria-hidden="true" />Goes out {post.scheduledAt ? dateTime(post.scheduledAt) : "soon"}</p>
+          {canEdit && (
+            <button type="button" className={quietButton} disabled={busy} onClick={() => void run(() => cloudMutation("broadcast:unschedule", { postId: post.id }), "Could not unschedule the post")}>
+              {busy ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <CalendarX size={13} aria-hidden="true" />}Unschedule
+            </button>
+          )}
+        </div>
+        {error && <p role="alert" className="text-[12px] text-danger">{error}</p>}
+      </div>
+    );
   }
   if (!canEdit) {
     return <p className="mt-2.5 text-[12px] text-ink-tertiary">{post.needsApproval ? "Waits for an editor's approval." : "An editor schedules it."}</p>;

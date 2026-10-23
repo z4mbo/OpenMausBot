@@ -20,7 +20,7 @@ import type { OriginChatCard } from "../shared/origin-chat-cards.ts";
 import { addedAssetCard, appendOriginCards, assetsCard, CARD_NOTE, feedbackCard, repoCard } from "./origin-chat-cards.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
 import { sectionKey, type BotRecord, type Store } from "./store.ts";
-import { broadcastDraft, broadcastList, broadcastSchedule, type BroadcastToolScope } from "./broadcast/tools.ts";
+import { broadcastDraft, broadcastList, broadcastSchedule, broadcastUnschedule, type BroadcastToolScope } from "./broadcast/tools.ts";
 import { standupTools } from "./origin-standup-tool.ts";
 import { campaignTools } from "./origin-campaign-tools.ts";
 import { brandTools } from "./origin-brand-tools.ts";
@@ -978,6 +978,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
   async origin_broadcast_draft(args, ctx) { return broadcastDraft(args, await broadcastScope(ctx, args)); },
   async origin_broadcast_list(args, ctx) { return broadcastList(args, await broadcastScope(ctx, args)); },
   async origin_broadcast_schedule(args, ctx) { return broadcastSchedule(args, await broadcastScope(ctx, args)); },
+  async origin_broadcast_unschedule(args, ctx) { return broadcastUnschedule(args, await broadcastScope(ctx, args)); },
 
   ...Object.fromEntries(STUDIO_TOOL_NAMES.map((name) => [name, async (args: Args, ctx: ToolContext) => runStudioTool(name, args, await studioScope(ctx, args))])),
 
