@@ -58,21 +58,21 @@ export function issueBrief(issue: BriefedIssue): string {
     "1. Read the issue with origin_get_issue and move it to In progress with origin_update_issue if it is not there yet.",
     "2. Work in the project's local repo on a new branch named after the issue key.",
     `3. Commit, push the branch and open a pull request${closingLine(issue)}.`,
-    "4. Call origin_complete_issue with the pull request link and a short summary: it sends the pull request to the project's Chief, who reviews and merges it, and merging completes the issue.",
+    "4. Call origin_complete_issue with the pull request link and a short summary, then send me the link and ask me to merge it. Merging completes the issue.",
     "Ask me before anything you can't undo.",
   ].filter((line) => line !== "").join("\n");
 }
 
-/** What a project's Chief is told when an issue is handed to it, or marked complete while it still needs its pull request. */
+/** What a project's lead is told when an issue is handed to it, or marked complete while it still needs its pull request. */
 export function implementBrief(issue: BriefedIssue): string {
   const github = issue.githubIssueNumber ? `GitHub issue #${issue.githubIssueNumber}` : "its GitHub issue";
   return [
-    `Get issue ${issue.key}: "${issue.title}" (Origin project ${issue.projectName}, issue id ${issue.id}${issue.githubIssueNumber ? `, GitHub issue #${issue.githubIssueNumber}` : ""}) implemented. It completes when its pull request merges.`,
+    `Implement issue ${issue.key}: "${issue.title}" (Origin project ${issue.projectName}, issue id ${issue.id}${issue.githubIssueNumber ? `, GitHub issue #${issue.githubIssueNumber}` : ""}). It completes when its pull request merges.`,
     ...facts(issue),
     "",
-    "1. Move it to In progress with origin_update_issue if it is not there yet, then hand it with origin_assign_issue to the agent of this project best suited to it; implement it yourself only if none fits.",
-    `2. The agent works on a new branch named after the issue key, opens a pull request${closingLine(issue)} and calls origin_complete_issue with its link, which sends it back to you.`,
-    `3. Review it with origin_review_pr and merge it with origin_merge_pr once its checks pass; merging closes ${github} and completes ${issue.key}.`,
-    "Ask me before anything you can't undo.",
+    "1. Move it to In progress with origin_update_issue if it is not there yet.",
+    `2. Work in the project's local repo on a new branch named after the issue key, commit, push it and open a pull request${closingLine(issue)}.`,
+    "3. Check it with origin_review_pr. When its checks pass, send me the pull request link and ask me to merge it; merge it with origin_merge_pr only when I tell you to.",
+    `Merging closes ${github} and completes ${issue.key}. Ask me before anything you can't undo.`,
   ].filter((line) => line !== "").join("\n");
 }

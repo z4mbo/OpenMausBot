@@ -224,9 +224,9 @@ export function BotProfileAvatarCard({
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-hairline/40 bg-card">
-      <div className="flex items-center justify-between border-b border-hairline/40 px-3 py-2.5">
-        <span className="rounded-lg bg-control px-3 py-1.5 text-[14px] font-medium text-ink">Avatar</span>
+    <div>
+      <div className="flex items-center justify-between pb-1">
+        <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-ink-secondary">Avatar</span>
         <button
           disabled={busy}
           onClick={() => onPatch({ avatarCrop: "mascot", color: "green", mascotExpression: null, mascotBody: "cursor" })}
@@ -236,7 +236,7 @@ export function BotProfileAvatarCard({
         </button>
       </div>
 
-      <div className="p-3">
+      <div className="pt-1">
         {Boolean(organization?.icons.length) && <div className="mb-3 border-b border-hairline/40 pb-3">
           <div className="mb-2 text-[13px] font-medium text-ink-secondary">{organization!.name} icons</div>
           <div className="flex flex-wrap gap-2">{organization!.icons.map(icon => <button key={icon.id} type="button" disabled={busy} title={icon.name} aria-label={`Use ${icon.name} icon`} className="flex size-12 items-center justify-center rounded-lg border border-hairline/40 hover:bg-control disabled:opacity-50" onClick={() => {
