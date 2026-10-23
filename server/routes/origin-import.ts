@@ -6,7 +6,7 @@ import { parseBotProfilePatch } from "../bot-profile.ts";
 import type { ModelSelection } from "../contracts.ts";
 import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, writeOriginCloud, type OriginCloudClient } from "../origin-cloud.ts";
 import { CLOUD_ID, defaultCloudLinksFile, readWorkspaceLinks, writeWorkspaceLinks } from "../origin-cloud-sync.ts";
-import { DEFAULT_TEAM_ROLES, uniqueTeamName } from "../origin-teams.ts";
+import { uniqueTeamName } from "../origin-teams.ts";
 import type { RequestAuth } from "../request-auth.ts";
 import { PASS, type RouteHandler } from "./table.ts";
 import type { BotRecord, Store } from "../store.ts";
@@ -111,15 +111,14 @@ export function createOriginImportRoutes(deps: OriginImportRouteDeps): RouteHand
         return member && member.section === bot!.section ? [member] : [];
       }).reverse() : store.bots.filter((member) => member.id !== bot!.id && member.section === bot!.section);
     } else {
-      const count = project ? DEFAULT_TEAM_ROLES.length + 1 : 1;
-      if (store.bots.length + count > maxWorkspaceBots) return json(res, 409, { error: `this workspace is limited to ${maxWorkspaceBots} bots` });
+      if (store.bots.length + 1 > maxWorkspaceBots) return json(res, 409, { error: `this workspace is limited to ${maxWorkspaceBots} bots` });
       if (head && (head.managedSections?.length ?? 0) >= 100) return json(res, 409, { error: "A workspace can manage at most 100 project teams" });
       const name = profile.patch.name!;
       const projectTeam = isWorkspaceSection(name) || name === STANDALONE_SECTION ? `Project: ${name}` : name;
       const section = uniqueTeamName(store, project ? projectTeam : WORKSPACE_PREFIX + name.slice(0, 40));
       const created = store.createOriginImport({ deployment, kind, cloudId: id, ...(head ? { workspaceId: head.id } : {}) },
         { ...profile.patch, name: project ? profile.patch.name : profile.patch.name!.slice(0, 40), title: project ? project.title : "Workspace", section, modelSelection: selection },
-        project ? DEFAULT_TEAM_ROLES.map((role) => ({ name: role.name, title: role.name, soul: role.soul, section, modelSelection: selection })) : []);
+        []);
       bot = created.bot;
       members = created.members;
     }

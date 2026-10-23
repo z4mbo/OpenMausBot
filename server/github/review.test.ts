@@ -33,7 +33,7 @@ describe("merge blockers", () => {
 
 describe("issue state sync", () => {
   it("pushes an Origin change, pulls a GitHub change, and lets GitHub win when both moved", () => {
-    expect(issueStateMove({ done: true, githubIssueState: "open" }, "open")).toBe("close");
+    expect(issueStateMove({ done: true, githubIssueState: "open" }, "open")).toBe("remove");
     expect(issueStateMove({ done: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed")).toBe("reopen");
     expect(issueStateMove({ done: false, githubIssueState: "closed" }, "closed")).toBe("pull");
     expect(issueStateMove({ done: false, githubIssueState: "open" }, "closed")).toBe("pull");
@@ -41,11 +41,11 @@ describe("issue state sync", () => {
     expect(issueStateMove({ done: true }, "open")).toBe("pull");
   });
 
-  it("parks the GitHub issue of a draft as not planned and reopens it when the issue leaves Draft", () => {
-    expect(issueStateMove({ done: false, draft: true, githubIssueState: "open" }, "open")).toBe("park");
+  it("removes the GitHub issue of an issue moved back to Draft", () => {
+    expect(issueStateMove({ done: false, draft: true, githubIssueState: "open" }, "open")).toBe("remove");
     expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "closed")).toBe("pull");
     expect(issueStateMove({ done: false, draft: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed")).toBe("reopen");
-    expect(issueStateMove({ done: true, draft: true, githubIssueState: "open" }, "open")).toBe("close");
+    expect(issueStateMove({ done: true, draft: true, githubIssueState: "open" }, "open")).toBe("remove");
     expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "open")).toBe("pull");
   });
 });
@@ -72,12 +72,12 @@ describe("pull request pipeline text", () => {
     expect(draftBody({ description: "Build it" })).toBe("Build it");
   });
 
-  it("tells the agent to close the GitHub issue, and the Chief to delegate, review and merge", () => {
+  it("tells the agent to close the GitHub issue, and the lead to open the pull request and ask before merging", () => {
     expect(issueBrief(issue)).toContain('open a pull request whose description says "Closes #5"');
-    const chief = implementBrief(issue);
-    expect(chief).toContain("origin_assign_issue");
-    expect(chief).toContain("origin_merge_pr");
-    expect(chief).toContain("merging closes GitHub issue #5 and completes ORI-ABCD");
+    const lead = implementBrief(issue);
+    expect(lead).not.toContain("origin_assign_issue");
+    expect(lead).toContain("ask me to merge it");
+    expect(lead).toContain("Merging closes GitHub issue #5 and completes ORI-ABCD");
     expect(implementBrief({ ...issue, githubIssueNumber: undefined })).toContain("that references the issue key");
   });
 });

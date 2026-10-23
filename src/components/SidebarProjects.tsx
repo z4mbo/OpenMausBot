@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Archive, ArrowUpDown, Check, ChevronRight, ChevronsUpDown, Plus, UserPlus, X } from "lucide-react";
+import { Archive, ArrowUpDown, Check, ChevronRight, ChevronsUpDown, GripVertical, Pin, Plus, UserPlus, X } from "lucide-react";
+import { useCardDrag } from "./origin-pages/use-card-drag";
+import { useFlip } from "./origin-pages/issue-order";
 import { RuntimeHelp, WorkspaceMembersPanel } from "./origin-members";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
 import type { Bot } from "@/state/store";
@@ -84,6 +86,13 @@ export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = f
   );
 }
 
+/** The whole order with `group`'s members put in `groupOrder`'s sequence, every other project keeping its place. */
+export function withGroupOrder(order: readonly string[], groupOrder: readonly string[]): string[] {
+  const members = new Set(groupOrder);
+  const next = [...groupOrder];
+  return order.map((id) => (members.has(id) ? next.shift()! : id));
+}
+
 export function SidebarProjects({ projects, row, onNewProject, archived, selectedId }: {
   projects: readonly Bot[];
   row(bot: Bot): ReactNode;
@@ -95,20 +104,24 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
 }) {
   const workspaces = useWorkspaces();
   const ordered = sortProjects(projects.map((bot) => ({ id: bot.id, name: bot.name, updatedAt: lastUpdate(bot), bot })), workspaces);
-  const dragging = useRef<string | null>(null);
-  const [drop, setDrop] = useState<{ id: string; place: "before" | "after" } | null>(null);
   const open = !workspaces.collapsed;
   const shelved = archived ? ordered.filter(({ bot }) => archived(bot)) : [];
-  const live = shelved.length ? ordered.filter((item) => !shelved.includes(item)) : ordered;
+  const pinned = ordered.filter((item) => item.bot.pinned && !shelved.includes(item));
+  const live = ordered.filter((item) => !item.bot.pinned && !shelved.includes(item));
   const holdsSelection = shelved.some(({ id }) => id === selectedId);
   const [shelfOpen, setShelfOpen] = useState(holdsSelection);
   useEffect(() => { if (holdsSelection) setShelfOpen(true); }, [holdsSelection]);
-  const place = (event: React.DragEvent<HTMLElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return event.clientY < rect.top + rect.height / 2 ? "before" as const : "after" as const;
-  };
+  const reorder = (groupOrder: string[]) => setProjectOrder(withGroupOrder(ordered.map((item) => item.id), groupOrder));
   return (
     <div data-sidebar-projects className="flex flex-col gap-0.5 pt-2">
+      {pinned.length > 0 && (
+        <div data-sidebar-pinned-projects className="mb-2 flex flex-col gap-0.5">
+          <div className="flex h-6 items-center gap-1.5 px-2 pb-1 text-[12px] font-medium text-ink-secondary">
+            <Pin size={11} className="shrink-0" aria-hidden="true" />Pinned
+          </div>
+          <ProjectList label="Pinned projects" items={pinned} row={row} onReorder={reorder} />
+        </div>
+      )}
       <div className="flex items-center gap-1 px-2 pb-1">
         <button type="button" aria-expanded={open} onClick={() => setProjectsCollapsed(open)}
           className="flex min-w-0 flex-1 items-center gap-1 rounded text-[12px] font-medium text-ink-secondary hover:text-ink">
@@ -124,7 +137,7 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
         {onNewProject && <button type="button" aria-label="New project" title="New project" onClick={onNewProject}
           className="flex size-6 items-center justify-center rounded text-ink-secondary hover:bg-raised hover:text-ink"><Plus size={14} /></button>}
       </div>
-      {open && live.map(({ id, bot }) => projectRow(id, bot))}
+      {open && <ProjectList label="Projects" items={live} row={row} onReorder={reorder} />}
       {open && shelved.length > 0 && (
         <div data-sidebar-archived-projects className="mt-1 flex flex-col gap-0.5">
           <button type="button" aria-expanded={shelfOpen} onClick={() => setShelfOpen((value) => !value)}
@@ -135,31 +148,82 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
             <span className="rounded-full bg-raised/70 px-1.5 text-[10.5px] tabular-nums leading-4 text-ink-tertiary">{shelved.length}</span>
           </button>
           {shelfOpen && <div className="flex origin-top animate-pop-in flex-col gap-0.5 opacity-75 transition-opacity hover:opacity-100 focus-within:opacity-100">
-            {shelved.map(({ id, bot }) => projectRow(id, bot))}
+            <ProjectList label="Archived projects" items={shelved} row={row} onReorder={reorder} />
           </div>}
         </div>
       )}
     </div>
   );
+}
 
-  function projectRow(id: string, bot: Bot) {
-    return (
-        <div key={id} data-sidebar-project-row={id} draggable={workspaces.sort === "custom"}
-          onDragStart={(event) => { dragging.current = id; event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("application/x-origin-project", id); }}
-          onDragOver={(event) => { if (!dragging.current || dragging.current === id) return; event.preventDefault(); setDrop({ id, place: place(event) }); }}
-          onDragLeave={() => setDrop(null)}
-          onDrop={(event) => {
-            event.preventDefault();
-            const from = dragging.current;
-            if (from && from !== id) setProjectOrder(movedOrder(ordered.map((item) => item.id), from, id, place(event)));
-            dragging.current = null; setDrop(null);
-          }}
-          onDragEnd={() => { dragging.current = null; setDrop(null); }}
-          className={cn(drop?.id === id && (drop.place === "before" ? "shadow-[0_-2px_var(--color-accent)]" : "shadow-[0_2px_var(--color-accent)]"))}>
-          {row(bot)}
+/** The collapsed sidebar's projects: pinned first, then the rest in the chosen order, without archived ones. */
+export function SidebarProjectIcons({ projects, row, archived }: { projects: readonly Bot[]; row(bot: Bot): ReactNode; archived?: (bot: Bot) => boolean }) {
+  const workspaces = useWorkspaces();
+  const shown = sortProjects(projects.filter((bot) => !archived?.(bot)).map((bot) => ({ id: bot.id, name: bot.name, updatedAt: lastUpdate(bot), bot })), workspaces);
+  const pinned = shown.filter((item) => item.bot.pinned);
+  const rest = shown.filter((item) => !item.bot.pinned);
+  if (!shown.length) return null;
+  return (
+    <div data-sidebar-project-icons role="list" aria-label="Projects" className="flex flex-col items-center gap-1 pt-1">
+      {pinned.map(({ id, bot }) => <div key={id} role="listitem" className="w-full">{row(bot)}</div>)}
+      {pinned.length > 0 && rest.length > 0 && <span aria-hidden="true" className="my-1 h-px w-8 bg-hairline/60" />}
+      {rest.map(({ id, bot }) => <div key={id} role="listitem" className="w-full">{row(bot)}</div>)}
+    </div>
+  );
+}
+
+const LANE = "projects";
+
+/** One reorderable run of project rows, dragged the way issue cards are: a lifted copy follows the pointer over a dashed gap. */
+function ProjectList({ label, items, row, onReorder }: {
+  label: string;
+  items: readonly { id: string; bot: Bot }[];
+  row(bot: Bot): ReactNode;
+  onReorder(order: string[]): void;
+}) {
+  const root = useRef<HTMLDivElement>(null);
+  const [moves, setMoves] = useState(0);
+  const seed = useRef<(id: string, from: DOMRect) => void>(() => {});
+  const drag = useCardDrag({
+    enabled: items.length > 1, root,
+    onDrop(id, target, from) {
+      seed.current(id, from);
+      const ids = items.map((item) => item.id);
+      const next = target.beforeTaskId ? movedOrder(ids, id, target.beforeTaskId, "before") : [...ids.filter((other) => other !== id), id];
+      setMoves((count) => count + 1);
+      if (next.some((other, index) => other !== ids[index])) onReorder(next);
+    },
+  });
+  seed.current = useFlip(root, `${moves}:${drag.target?.beforeTaskId ?? ""}`);
+  const lifted = drag.drag;
+  const gap = lifted && <span aria-hidden="true" data-drop-gap className="block rounded-xl border-2 border-dashed border-accent/45 bg-accent/[0.06] motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)]" style={{ height: lifted.height }} />;
+  const ghostBot = lifted && items.find((item) => item.id === lifted.taskId)?.bot;
+  return (
+    <div ref={root} role="list" aria-label={label} data-column-id={LANE} className="flex flex-col gap-0.5"
+      onClickCapture={(event) => { if (drag.justDropped()) { event.preventDefault(); event.stopPropagation(); } }}>
+      {items.map(({ id, bot }) => lifted?.taskId === id ? null : (
+        <div key={id} role="listitem" className="flex flex-col gap-0.5">
+          {drag.target?.beforeTaskId === id && gap}
+          <div data-sidebar-project-row={id} data-task-id={id} data-flip-id={id} onPointerDown={(event) => drag.press(event, id)}
+            className={cn("group/project relative", items.length > 1 && "active:cursor-grabbing")}>
+            {row(bot)}
+            {items.length > 1 && <GripVertical size={12} aria-hidden="true" data-project-grip
+              className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-ink-tertiary opacity-0 transition-opacity duration-(--motion-fast) group-hover/project:opacity-100" />}
+          </div>
         </div>
-    );
-  }
+      ))}
+      {drag.target && !drag.target.beforeTaskId && gap}
+      {lifted && ghostBot && createPortal(
+        <div ref={drag.ghost} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[60]"
+          style={{ width: lifted.width, transform: `translate3d(${lifted.x}px, ${lifted.y}px, 0)` }}>
+          <div className="rotate-[1.5deg] scale-[1.03] cursor-grabbing rounded-xl border border-hairline bg-panel shadow-2xl shadow-black/40 motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)] [&_[data-sidebar-bot-row]]:bg-raised/60">
+            {row(ghostBot)}
+          </div>
+        </div>,
+        document.body,
+      )}
+    </div>
+  );
 }
 
 /** The right side of a project row: who is in the project, then unread replies. */

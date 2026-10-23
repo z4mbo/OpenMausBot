@@ -39,6 +39,7 @@ http.route({ path: "/integrations", method: "POST", handler: httpAction(async (c
       case "unlinkedTasks": result = JSON.parse(await ctx.runQuery(internal.integrations.unlinkedTasks, p.args)); break;
       case "repoResult": result = await ctx.runMutation(internal.integrations.repoResult, p.args); break;
       case "linkIssue": result = await ctx.runMutation(internal.integrations.linkIssue, p.args); break;
+      case "unlinkIssue": result = await ctx.runMutation(internal.integrations.unlinkIssue, p.args); break;
       case "completeMergedIssue": result = await ctx.runMutation(internal.integrations.completeMergedIssue, p.args); break;
       case "githubToken": result = await ctx.runAction(internal.teamGitHub.operatorToken, p.args); break;
       case "createRepository": result = await ctx.runAction(internal.teamGitHub.operatorCreateRepository, p.args); break;

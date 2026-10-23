@@ -6,7 +6,7 @@ const label = (id: string) => CHIEF_SECTIONS.find((item) => item.id === id)?.lab
 describe("project sections", () => {
   it("puts the Chief first, then the bar's tabs, then its tools", () => {
     expect(CHIEF_SECTIONS[0]).toMatchObject({ id: "chat", place: "lead" });
-    expect(tabSections().map((item) => item.id)).toEqual(["agents", "issues", "team-chat", "call", "studio", "broadcast"]);
+    expect(tabSections().map((item) => item.id)).toEqual(["issues", "team-chat", "call", "studio", "broadcast"]);
     expect(toolSections().map((item) => item.id)).toEqual(["assets", "vault", "repo", "feedback", "settings"]);
     expect(new Set(CHIEF_SECTIONS.map((item) => item.id)).size).toBe(CHIEF_SECTIONS.length);
   });

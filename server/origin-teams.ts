@@ -4,7 +4,8 @@ import type { ModelSelection } from "./contracts.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
 import type { BotRecord, Store } from "./store.ts";
 
-export const DEFAULT_TEAM_ROLES = [
+/** The agents every new project used to start with; new projects start with only their lead. */
+const RETIRED_DEFAULT_ROLES = [
   { name: "Researcher", soul: "You research the project's market, users and competitors, and report findings with sources." },
   { name: "Product Manager", soul: "You turn goals into a prioritized plan: problems, requirements, scope and acceptance criteria." },
   { name: "Designer", soul: "You design the product's flows, screens and visual identity, and explain the reasoning behind them." },
@@ -51,17 +52,33 @@ function fileUnderWorkspace(store: Store, head: BotRecord, team: string) {
   if (!current.includes(team)) store.patchBot(head.id, { managedSections: [...current, team] });
 }
 
-/** A new top-level bot becomes the Chief of its own team, staffed with the default roles, inside one workspace. */
-export function createDefaultTeam(store: Store, chief: BotRecord, selection: ModelSelection, head?: BotRecord): BotRecord[] {
+/** A new top-level bot becomes the lead of its own project team, inside one workspace. */
+export function startProjectTeam(store: Store, chief: BotRecord, head?: BotRecord): void {
   const team = uniqueTeamName(store, chief.name);
   store.patchBot(chief.id, { section: team, title: chief.title || CHIEF_TITLE });
   store.setChiefOfStaff(chief.id);
   const owner = head ?? workspaceHeads(store)[0];
   if (owner) fileUnderWorkspace(store, owner, team);
-  // The store lists newest first, so the last role created shows at the top of the team.
-  return [...DEFAULT_TEAM_ROLES].reverse().map(role => store.createBot({
-    name: role.name, title: role.name, soul: role.soul, section: team, modelSelection: selection,
-  })).reverse();
+}
+
+const talked = (store: Store, bot: BotRecord) =>
+  [bot.threadId, ...store.tasks(bot.id).map(task => task.threadId)].some(threadId => store.messagesFor(threadId).some(message => message.role === "user"));
+
+/**
+ * Removes the default agents projects were once staffed with, while they are still exactly as created. One nobody ever
+ * wrote to is deleted; one with a conversation is archived, so the person can still open or delete it.
+ */
+export function retireDefaultAgents(store: Store): number {
+  const projectTeams = new Set(store.bots.filter(bot => bot.chiefOfStaff && sectionOf(bot) && !isWorkspaceSection(bot.section)).map(sectionOf));
+  let retired = 0;
+  for (const bot of [...store.bots]) {
+    if (bot.chiefOfStaff || bot.hidden || bot.installedPackage || !projectTeams.has(sectionOf(bot))) continue;
+    if (!RETIRED_DEFAULT_ROLES.some(role => role.name === bot.name && role.name === bot.title && role.soul === bot.soul)) continue;
+    if (talked(store, bot)) store.patchBot(bot.id, { hidden: true });
+    else store.deleteBot(bot.id);
+    retired += 1;
+  }
+  return retired;
 }
 
 export function createDefaultTeamRoutes(deps: { store: Store; maxWorkspaceBots: number; wireBot(bot: BotRecord): WireBot }): RouteHandler {
@@ -88,11 +105,8 @@ export function createDefaultTeamRoutes(deps: { store: Store; maxWorkspaceBots: 
     if (!chief) return json(res, 404, { error: "No such bot" });
     if (sectionOf(chief)) return json(res, 409, { error: "This bot already belongs to a team" });
     const head = typeof body?.workspaceId === "string" ? workspaceHeads(store).find(bot => bot.id === body.workspaceId) : undefined;
-    if (store.bots.length + DEFAULT_TEAM_ROLES.length > maxWorkspaceBots) {
-      return json(res, 409, { error: `this workspace is limited to ${maxWorkspaceBots} bots` });
-    }
-    const members = createDefaultTeam(store, chief, chief.modelSelection, head);
-    return json(res, 201, { chief: wireBot(store.bot(chief.id)!), members: members.map(wireBot) });
+    startProjectTeam(store, chief, head);
+    return json(res, 201, { chief: wireBot(store.bot(chief.id)!), members: [] });
   };
 }
 
@@ -149,6 +163,8 @@ export async function initializeWorkspaceTeams(store: Store, selection: () => Pr
   try {
     const chiefs = ensureTeamChiefs(store, await selection());
     if (chiefs.length) console.log(`[teams] gave ${chiefs.length} team(s) a Chief of Staff bot`);
+    const retired = retireDefaultAgents(store);
+    if (retired) console.log(`[teams] removed ${retired} default project agent(s)`);
     ensureWorkspaces(store);
     watchTemplateTeams(store);
   } catch (error) {

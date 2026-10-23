@@ -9,7 +9,6 @@ function Page({ projectName }: { projectName: string }) {
   return createElement("p", null, `${first} page shown for ${projectName}`);
 }
 vi.mock("./origin-pages", () => ({ IssuesPage: Page, AssetsPage: Page, VaultPage: Page, RepoPage: Page, FeedbackPage: Page, ProjectSettingsPage: Page, CallPage: Page, TeamChatPage: Page, AssignIssueDialog: () => null, implementBrief: () => "", issueBrief: () => "" }));
-vi.mock("./ProjectAgentsPage", () => ({ ProjectAgentsPage: () => null }));
 vi.mock("./OriginDraw", () => ({ ProjectDrawPage: () => null }));
 vi.mock("./origin-studio/StudioPage", () => ({ StudioPage: () => null }));
 vi.mock("./origin-broadcast/BroadcastPage", () => ({ BroadcastPage: () => null }));
