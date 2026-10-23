@@ -180,6 +180,8 @@ export interface StudioGenerateRequest {
   angle?: string;
   /** The STUDIO_PRESETS id the generation was set up from. */
   preset?: string;
+  /** The studioTemplates id the generation was set up from. */
+  template?: string;
   /** A designAssets id of the project: the image an edit, upscale or image-to-video starts from. */
   sourceAssetId?: string;
   /** The model's `needs`, in order; overrides sourceAssetId. */

@@ -1,5 +1,5 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
-import { AudioLines, Check, ChevronDown, Clapperboard, Image as ImageIcon, KeyRound, LayoutGrid, Loader2, Plus, Sparkles, UserRound, Wand2, WandSparkles, X } from "lucide-react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type DragEvent, type KeyboardEvent } from "react";
+import { AudioLines, Check, ChevronDown, Clapperboard, Image as ImageIcon, KeyRound, LayoutTemplate, Loader2, PencilLine, Plus, Sparkles, TextCursorInput, UserRound, Wand2, WandSparkles, X } from "lucide-react";
 import { useCloudQuery } from "@/lib/origin-cloud";
 import { useStore } from "@/state/store";
 import { useBrandKit } from "@/lib/origin-brand";
@@ -9,11 +9,15 @@ import { Notice, chipButton, ghostButton, primaryButton, useAction } from "../or
 import { StudioControls } from "./StudioControls";
 import { StudioMediaPicker } from "./StudioMediaPicker";
 import { StudioModelPicker } from "./StudioModelPicker";
-import { KIND_ICON, MediaThumb, Popover, studioPost, type SourceRef, type StudioDraft } from "./studio-ui";
-import { studioModel, studioModelsFor, type StudioCharacter, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel } from "../../../shared/studio";
+import { GENERATION_DRAG, KIND_ICON, MediaThumb, Popover, draftForModel, emptyDraft, outputRef, studioPost, type SourceRef, type StudioDraft } from "./studio-ui";
+import { studioModel, studioModelsFor, type StudioCharacter, type StudioGeneration, type StudioMediaKind, type StudioMode } from "../../../shared/studio";
 import { brandedPrompt, type BrandKit } from "../../../shared/brand-kit";
-import { presetBlank, presetPromptText, studioPreset, type StudioPreset } from "../../../shared/studio-presets";
-import { draftForPreset, presetImage } from "./StudioPresets";
+import { fillBlanks, promptTakesBlanks, setBlank, templateBlanks } from "../../../shared/studio-blanks";
+import { presetCard, projectTemplateCard, type StudioTemplate } from "../../../shared/studio-templates";
+import { studioPreset, type StudioPreset } from "../../../shared/studio-presets";
+import { draftForPreset, draftForTemplate, presetImage, useProjectTemplates } from "./StudioTemplates";
+
+export { draftForModel, emptyDraft } from "./studio-ui";
 
 export const STUDIO_MODES: readonly { value: StudioMode; label: string; icon: typeof ImageIcon }[] = [
   { value: "image", label: "Image", icon: ImageIcon },
@@ -28,19 +32,6 @@ const PLACEHOLDER: Record<StudioMode, string> = {
   audio: "Words to speak, or the music or sound you want",
   edit: "How to change it",
 };
-
-export function emptyDraft(mode: StudioMode = "image"): StudioDraft {
-  return { mode, model: studioModelsFor(mode)[0]!.id, prompt: "", sources: [], references: [], count: 1 };
-}
-
-/** The draft after switching to a model: sources it cannot take are dropped, settings it lacks are cleared. */
-export function draftForModel(draft: StudioDraft, model: StudioModel): StudioDraft {
-  return {
-    ...draft, mode: model.mode, model: model.id, preset: draft.preset && studioPreset(draft.preset)?.model === model.id ? draft.preset : undefined,
-    sources: model.needs.map((kind, index) => draft.sources[index]?.kind === kind ? draft.sources[index]! : null).filter((ref): ref is SourceRef => ref !== null),
-    references: draft.references.slice(0, model.references ?? 0), count: Math.min(draft.count, model.maxCount),
-  };
-}
 
 export function openFalSettings(dispatch: ReturnType<typeof useStore>["dispatch"]) {
   requestIntegrationFocus("fal");
@@ -73,6 +64,60 @@ function SourceChip({ value: source, kind, label, onPick, onClear, disabled }: {
       </button>
       <button type="button" aria-label={`Remove ${source.label}`} onClick={onClear} disabled={disabled} className="flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
     </span>
+  );
+}
+
+/** A starting file as a square: click to choose, or drop a result from the canvas on it. */
+function SourceSlot({ value: source, kind, label, onPick, onClear, onDropRow, disabled }: {
+  value?: SourceRef; kind: StudioMediaKind; label: string; onPick(): void; onClear(): void; onDropRow(id: string): void; disabled: boolean;
+}) {
+  const Icon = KIND_ICON[kind];
+  const [over, setOver] = useState(false);
+  const accepts = (event: DragEvent) => !disabled && event.dataTransfer.types.includes(GENERATION_DRAG);
+  return (
+    <div className="flex w-[68px] shrink-0 flex-col items-center gap-1" data-studio-slot={label}
+      onDragOver={(event) => { if (accepts(event)) { event.preventDefault(); setOver(true); } }} onDragLeave={() => setOver(false)}
+      onDrop={(event) => { setOver(false); if (!accepts(event)) return; event.preventDefault(); onDropRow(event.dataTransfer.getData(GENERATION_DRAG)); }}>
+      <div className={cn("group relative size-[68px] overflow-hidden rounded-xl border transition-colors duration-(--motion-fast)",
+        source ? "border-hairline/50" : "border-dashed border-hairline", over && "border-accent bg-accent/10")}>
+        <button type="button" onClick={onPick} disabled={disabled} aria-label={source ? `${label}: ${source.label}. Change` : `Choose ${label}`} title={source?.label ?? `Choose or drop ${label.toLowerCase()}`}
+          className="flex size-full items-center justify-center text-ink-tertiary outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/60">
+          {source ? <MediaThumb kind={kind} url={source.url} className="size-full" /> : <span className="flex flex-col items-center gap-0.5"><Icon size={16} aria-hidden="true" /><Plus size={11} aria-hidden="true" /></span>}
+        </button>
+        {source && (
+          <button type="button" aria-label={`Remove ${label}`} onClick={onClear} disabled={disabled}
+            className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity duration-(--motion-fast) group-hover:opacity-100 focus-visible:opacity-100 touch:opacity-100"><X size={11} /></button>
+        )}
+      </div>
+      <span className="w-full truncate text-center text-[11px] text-ink-tertiary">{label}</span>
+    </div>
+  );
+}
+
+/** A template prompt read as a sentence, each `[placeholder]` an inline field. */
+function BlankSentence({ prompt, disabled, onChange, onKeyDown }: { prompt: string; disabled: boolean; onChange(prompt: string): void; onKeyDown(event: KeyboardEvent): void }) {
+  const blanks = templateBlanks(prompt);
+  const parts: Array<string | number> = [];
+  let at = 0;
+  blanks.forEach((blank, index) => {
+    if (blank.start > at) parts.push(prompt.slice(at, blank.start));
+    parts.push(index);
+    at = blank.end;
+  });
+  if (at < prompt.length) parts.push(prompt.slice(at));
+  return (
+    <p className="min-h-[52px] px-1.5 py-1 text-[14.5px] leading-[2.1] text-ink-secondary max-md:text-[16px]" data-studio-blanks>
+      {parts.map((part, key) => {
+        if (typeof part === "string") return <span key={key} className="whitespace-pre-wrap">{part}</span>;
+        const blank = blanks[part]!;
+        const width = Math.min(Math.max(blank.value.length, blank.label.length, 6) + 2, 46);
+        return (
+          <input key={key} data-blank-index={part} value={blank.value} disabled={disabled} aria-label={blank.label || `Blank ${part + 1}`} placeholder={blank.label || "…"}
+            onChange={(event) => onChange(setBlank(prompt, part, event.target.value))} onKeyDown={onKeyDown} style={{ width: `${width}ch` }}
+            className="mx-0.5 max-w-full rounded-md border-b-2 border-accent/70 bg-accent/10 px-1.5 py-0.5 align-baseline text-[inherit] font-medium leading-normal text-ink outline-none placeholder:font-normal placeholder:text-accent-text/70 focus:bg-accent/20" />
+        );
+      })}
+    </p>
   );
 }
 
@@ -123,29 +168,39 @@ export interface StudioComposerHandle {
   focus(): void;
   openModels(): void;
   applyPreset(preset: StudioPreset): void;
+  applyTemplate(template: StudioTemplate): void;
   generate(): void;
   toggleBrand(): void;
 }
 
 type Props = {
   projectId: string; canEdit: boolean; falReady: boolean | null; rows: readonly StudioGeneration[];
-  draft: StudioDraft; onDraft(draft: StudioDraft): void; onOpenLibrary(): void; onOpenPresets(): void;
+  draft: StudioDraft; onDraft(draft: StudioDraft): void; onOpenLibrary(): void; onOpenTemplates(): void;
 };
 
-/** The prompt bar: mode chips, starting files, the prompt, the model and its settings, then Generate. */
-export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function StudioComposer({ projectId, canEdit, falReady, rows, draft, onDraft, onOpenLibrary, onOpenPresets }, handle) {
+const NEED_LABEL: Record<StudioMediaKind, string> = { image: "Image", video: "Video", audio: "Audio" };
+
+/** The prompt bar: mode, template, starting files, the prompt with its blanks, the model and its settings, then Generate. */
+export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function StudioComposer({ projectId, canEdit, falReady, rows, draft, onDraft, onOpenLibrary, onOpenTemplates }, handle) {
   const { dispatch } = useStore();
   const brand = useBrandKit(projectId);
   const library = useCloudQuery<StudioCharacter[]>("studioLibrary:list", { projectId });
+  const templates = useProjectTemplates(projectId);
   const [useBrand, setUseBrand] = useState(true);
   const [picking, setPicking] = useState<{ slot: "source" | "reference"; index: number; kind: StudioMediaKind } | null>(null);
   const [models, setModels] = useState(false);
-  const selectBlank = useRef(false);
+  const [raw, setRaw] = useState(false);
+  const focusBlank = useRef(false);
   const action = useAction();
   const enhancing = useAction();
   const prompt = useRef<HTMLTextAreaElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const model = studioModel(draft.model) ?? studioModelsFor(draft.mode)[0]!;
   const preset = draft.preset ? studioPreset(draft.preset) : undefined;
+  const template = draft.template ? templates?.find((entry) => entry._id === draft.template) : undefined;
+  const card = preset ? presetCard(preset, presetImage(preset.id)) : template ? projectTemplateCard(template) : null;
+  const blanks = promptTakesBlanks(model) ? templateBlanks(draft.prompt) : [];
+  const sentence = blanks.length > 0 && !raw;
   const patch = (next: Partial<StudioDraft>) => onDraft({ ...draft, ...next });
   const branded = Boolean(brand) && (draft.mode === "image" || draft.mode === "video") && !model.needs.includes("video");
   const follows = model.kind !== "audio" && model.prompt !== "none" && !model.needs.includes("video");
@@ -155,29 +210,40 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
     if (!field) return;
     field.style.height = "auto";
     field.style.height = `${Math.min(field.scrollHeight, 220)}px`;
-    if (!selectBlank.current) return;
-    selectBlank.current = false;
-    const blank = presetBlank(draft.prompt);
-    field.focus();
-    if (blank) field.setSelectionRange(blank.start, blank.end);
-    else if (draft.mode === "audio") field.select();
-    else field.setSelectionRange(draft.prompt.length, draft.prompt.length);
-  }, [draft.prompt, draft.preset, draft.mode]);
+  }, [draft.prompt, raw]);
+
+  useEffect(() => {
+    if (!focusBlank.current) return;
+    focusBlank.current = false;
+    const first = panel.current?.querySelector<HTMLInputElement>('[data-blank-index="0"]');
+    if (first) { first.focus(); first.select(); return; }
+    const field = prompt.current;
+    field?.focus();
+    if (draft.mode === "audio") field?.select();
+    else field?.setSelectionRange(draft.prompt.length, draft.prompt.length);
+  }, [draft.prompt, draft.preset, draft.template, draft.mode]);
 
   const applyPreset = (next: StudioPreset) => {
-    selectBlank.current = true;
+    focusBlank.current = true;
+    setRaw(false);
     onDraft(draftForPreset(draft, next));
+  };
+  const applyTemplate = (next: StudioTemplate) => {
+    focusBlank.current = true;
+    setRaw(false);
+    onDraft(draftForTemplate(draft, next));
   };
 
   const missing = model.needs.findIndex((kind, index) => draft.sources[index]?.kind !== kind);
-  const ready = canEdit && falReady === true && (model.prompt !== "required" || draft.prompt.trim()) && missing < 0;
+  const written = promptTakesBlanks(model) ? fillBlanks(draft.prompt) : draft.prompt;
+  const ready = canEdit && falReady === true && (model.prompt !== "required" || written.trim()) && missing < 0;
 
   const generate = () => {
     if (!ready || action.busy) return;
     void action.run(async () => {
       await studioPost("generate", {
-        projectId, mode: draft.mode, model: model.id, prompt: preset && model.family !== "tts" ? presetPromptText(draft.prompt) : draft.prompt, count: draft.count,
-        ...(preset ? { preset: preset.id } : {}), ...(model.angles && draft.angle ? { angle: draft.angle } : {}),
+        projectId, mode: draft.mode, model: model.id, prompt: written, count: draft.count,
+        ...(preset ? { preset: preset.id } : {}), ...(draft.template ? { template: draft.template } : {}), ...(model.angles && draft.angle ? { angle: draft.angle } : {}),
         ...(draft.aspectRatio ? { aspectRatio: draft.aspectRatio } : {}), ...(draft.duration ? { duration: draft.duration } : {}),
         ...(draft.resolution ? { resolution: draft.resolution } : {}), ...(draft.voice ? { voice: draft.voice } : {}),
         ...(draft.seed !== undefined ? { seed: draft.seed } : {}), ...(draft.negativePrompt?.trim() ? { negativePrompt: draft.negativePrompt } : {}),
@@ -191,17 +257,18 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
   };
 
   const enhance = () => {
-    if (!draft.prompt.trim() || enhancing.busy || !canEdit || !falReady) return;
+    if (!written.trim() || enhancing.busy || !canEdit || !falReady) return;
     void enhancing.run(async () => {
-      const { prompt: better } = await studioPost<{ prompt: string }>("enhance", { prompt: draft.prompt, mode: draft.mode });
+      const { prompt: better } = await studioPost<{ prompt: string }>("enhance", { prompt: written, mode: draft.mode });
       onDraft({ ...draft, prompt: better });
     }, "Could not enhance the prompt");
   };
 
   useImperativeHandle(handle, () => ({
-    focus: () => prompt.current?.focus(),
+    focus: () => (panel.current?.querySelector<HTMLInputElement>("[data-blank-index]") ?? prompt.current)?.focus(),
     openModels: () => setModels(true),
     applyPreset,
+    applyTemplate,
     generate,
     toggleBrand: () => setUseBrand((on) => !on),
   }));
@@ -214,7 +281,7 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
       event.preventDefault();
       enhance();
     } else if (event.key === "Escape") {
-      prompt.current?.blur();
+      (event.target as HTMLElement).blur();
     }
   };
 
@@ -229,12 +296,20 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
     }
   };
 
+  const dropRow = (index: number, kind: StudioMediaKind, id: string) => {
+    const row = rows.find((candidate) => candidate._id === id);
+    const ref = row && outputRef(row);
+    if (!ref || ref.kind !== kind) return;
+    const sources = [...draft.sources];
+    sources[index] = ref;
+    patch({ sources });
+  };
+
   const ModelIcon = KIND_ICON[model.kind];
   const latest = rows.find((row) => row.model === model.id && row.status === "done" && row.outputs[0]);
-  const hasMedia = model.needs.length > 0 || Boolean(model.references);
 
   return (
-    <div className="ui-panel flex flex-col gap-2 p-2.5" data-studio-composer>
+    <div ref={panel} className="ui-panel flex flex-col gap-2 p-2.5 shadow-[0_18px_50px_-24px_rgb(0_0_0/0.55)]" data-studio-composer>
       <div className="flex flex-wrap items-center gap-1.5">
         <div role="group" aria-label="What to make" className="flex rounded-lg bg-inset p-0.5">
           {STUDIO_MODES.map(({ value, label, icon: Icon }, index) => (
@@ -245,17 +320,17 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
             </button>
           ))}
         </div>
-        {preset ? (
-          <span className={cn(chipButton, "gap-2 border-accent/50 pl-1 pr-1 text-ink")} data-studio-preset={preset.id}>
-            <button type="button" className="flex min-w-0 items-center gap-2" onClick={onOpenPresets} disabled={!canEdit} title={`${preset.description} (T)`}>
-              <img src={presetImage(preset.id)} alt="" className="size-6 shrink-0 rounded-full object-cover" />
-              <span className="truncate">{preset.label}</span>
+        {card ? (
+          <span className={cn(chipButton, "max-w-[240px] gap-2 border-accent/50 pl-1 pr-1 text-ink")} data-studio-preset={card.id} data-studio-template={card.source === "project" ? card.id : undefined}>
+            <button type="button" className="flex min-w-0 items-center gap-2" onClick={onOpenTemplates} disabled={!canEdit} title={`${card.description} (T)`}>
+              {card.cover ? <MediaThumb kind={card.cover.kind} url={card.cover.url} className="size-6 shrink-0 rounded-full" /> : <LayoutTemplate size={13} className="text-accent-text" />}
+              <span className="truncate">{card.name}</span>
             </button>
-            <button type="button" aria-label={`Stop using ${preset.label}`} onClick={() => onDraft(emptyDraft(draft.mode))} disabled={!canEdit} className="flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
+            <button type="button" aria-label={`Stop using ${card.name}`} onClick={() => onDraft(emptyDraft(draft.mode))} disabled={!canEdit} className="flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
           </span>
         ) : (
-          <button type="button" className={chipButton} disabled={!canEdit} onClick={onOpenPresets} title="Presets (T)" aria-label="Choose a preset" data-studio-presets-button>
-            <LayoutGrid size={13} /><span className="max-sm:hidden">Presets</span>
+          <button type="button" className={chipButton} disabled={!canEdit} onClick={onOpenTemplates} title="Templates (T)" aria-label="Choose a template" data-studio-presets-button>
+            <LayoutTemplate size={13} /><span className="max-sm:hidden">Templates</span>
           </button>
         )}
         {draft.parent && (
@@ -264,34 +339,46 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
             <button type="button" aria-label="Start fresh" onClick={() => onDraft(emptyDraft(draft.mode))} className="flex size-6 items-center justify-center rounded-full hover:bg-raised"><X size={12} /></button>
           </span>
         )}
-        {hasMedia && (
-          <div className="contents" data-studio-sources>
-            {model.needs.map((kind, index) => (
-              <SourceChip key={`${kind}-${index}`} value={draft.sources[index]?.kind === kind ? draft.sources[index] : undefined} kind={kind} disabled={!canEdit}
-                label={model.inputLabels?.[index] ?? `${kind === "image" ? "Image" : kind === "video" ? "Video" : "Audio"}${model.needs.length > 1 ? ` ${index + 1}` : ""}`}
-                onPick={() => setPicking({ slot: "source", index, kind })} onClear={() => patch({ sources: draft.sources.filter((_, other) => other !== index) })} />
-            ))}
-            {draft.references.map((ref, index) => (
-              <SourceChip key={`ref-${index}`} value={ref} kind="image" label="Reference" disabled={!canEdit}
-                onPick={() => setPicking({ slot: "reference", index, kind: "image" })} onClear={() => patch({ references: draft.references.filter((_, other) => other !== index) })} />
-            ))}
-            {(model.references ?? 0) > draft.references.length && (
-              <button type="button" className={cn(chipButton, "border-dashed")} disabled={!canEdit} onClick={() => setPicking({ slot: "reference", index: draft.references.length, kind: "image" })}
-                title="Reference images keep a character, product or style consistent">
-                <Plus size={13} />Reference
-              </button>
-            )}
-          </div>
+        {draft.references.map((ref, index) => (
+          <SourceChip key={`ref-${index}`} value={ref} kind="image" label="Reference" disabled={!canEdit}
+            onPick={() => setPicking({ slot: "reference", index, kind: "image" })} onClear={() => patch({ references: draft.references.filter((_, other) => other !== index) })} />
+        ))}
+        {(model.references ?? 0) > draft.references.length && (
+          <button type="button" className={cn(chipButton, "border-dashed")} disabled={!canEdit} onClick={() => setPicking({ slot: "reference", index: draft.references.length, kind: "image" })}
+            title="Reference images keep a character, product or style consistent">
+            <Plus size={13} />Reference
+          </button>
         )}
         {follows && library && (library.length > 0 || draft.characterId) && (
           <CharacterChip library={library} value={draft.characterId} disabled={!canEdit} onChange={(characterId) => patch({ characterId })} onManage={onOpenLibrary} />
         )}
         <span className="flex-1" />
+        {blanks.length > 0 && (
+          <button type="button" className={cn(chipButton, "px-2.5")} onClick={() => setRaw(!raw)} disabled={!canEdit} aria-pressed={raw} title={raw ? "Fill in the blanks" : "Edit the whole prompt"}>
+            {raw ? <TextCursorInput size={13} /> : <PencilLine size={13} />}<span className="max-sm:hidden">{raw ? "Fill in" : "Edit text"}</span>
+          </button>
+        )}
         {branded && brand && <BrandToggle kit={brand} on={useBrand} disabled={!canEdit} onChange={setUseBrand} />}
       </div>
-      <textarea ref={prompt} value={draft.prompt} onChange={(event) => patch({ prompt: event.target.value })} onKeyDown={onKey} disabled={!canEdit}
-        rows={2} maxLength={8_000} aria-label="Prompt" placeholder={model.prompt === "none" ? `${model.label} needs no prompt` : `${PLACEHOLDER[draft.mode]}${model.prompt === "optional" ? " (optional)" : ""}`}
-        className="max-h-[220px] min-h-[52px] w-full resize-none bg-transparent px-1.5 py-1 text-[14.5px] leading-relaxed text-ink outline-none placeholder:text-ink-tertiary disabled:opacity-60 max-md:text-[16px]" />
+      <div className="flex items-start gap-2">
+        {model.needs.length > 0 && (
+          <div className="flex shrink-0 gap-1.5 pt-0.5" data-studio-sources>
+            {model.needs.map((kind, index) => (
+              <SourceSlot key={`${kind}-${index}`} value={draft.sources[index]?.kind === kind ? draft.sources[index] : undefined} kind={kind} disabled={!canEdit}
+                label={model.inputLabels?.[index] ?? `${NEED_LABEL[kind]}${model.needs.length > 1 ? ` ${index + 1}` : ""}`}
+                onPick={() => setPicking({ slot: "source", index, kind })} onClear={() => patch({ sources: draft.sources.filter((_, other) => other !== index) })}
+                onDropRow={(id) => dropRow(index, kind, id)} />
+            ))}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          {sentence ? <BlankSentence prompt={draft.prompt} disabled={!canEdit} onChange={(next) => patch({ prompt: next })} onKeyDown={onKey} /> : (
+            <textarea ref={prompt} value={draft.prompt} onChange={(event) => patch({ prompt: event.target.value })} onKeyDown={onKey} disabled={!canEdit}
+              rows={2} maxLength={8_000} aria-label="Prompt" placeholder={model.prompt === "none" ? `${model.label} needs no prompt` : `${PLACEHOLDER[draft.mode]}${model.prompt === "optional" ? " (optional)" : ""}`}
+              className="max-h-[220px] min-h-[52px] w-full resize-none bg-transparent px-1.5 py-1 text-[14.5px] leading-relaxed text-ink outline-none placeholder:text-ink-tertiary disabled:opacity-60 max-md:text-[16px]" />
+          )}
+        </div>
+      </div>
       <div className="flex flex-wrap items-center gap-1.5">
         <button type="button" className={cn(chipButton, "max-w-[240px] pl-1 text-ink")} disabled={!canEdit} onClick={() => setModels(true)} aria-label={`Model: ${model.label}`} title="Choose a model (M)" data-studio-model>
           {latest?.outputs[0] ? <MediaThumb kind={model.kind} url={latest.outputs[0].url} className="size-6 shrink-0 rounded-full" /> : <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-inset"><ModelIcon size={12} /></span>}
@@ -300,7 +387,7 @@ export const StudioComposer = forwardRef<StudioComposerHandle, Props>(function S
         <StudioControls model={model} draft={draft} disabled={!canEdit} patch={patch} />
         <div className="ml-auto flex items-center gap-1.5">
         {model.prompt !== "none" && (
-          <button type="button" className={cn(chipButton, "px-2.5")} disabled={!canEdit || !falReady || !draft.prompt.trim() || enhancing.busy} onClick={enhance} title="Enhance the prompt (Ctrl+E)" aria-label="Enhance prompt">
+          <button type="button" className={cn(chipButton, "px-2.5")} disabled={!canEdit || !falReady || !written.trim() || enhancing.busy} onClick={enhance} title="Enhance the prompt (Ctrl+E)" aria-label="Enhance prompt">
             {enhancing.busy ? <Loader2 size={13} className="animate-spin" /> : <WandSparkles size={13} />}<span className="max-sm:hidden">Enhance</span>
           </button>
         )}

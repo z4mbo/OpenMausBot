@@ -210,6 +210,7 @@ function paramsOf(request: StudioGenerateRequest, references: number, character?
   if (request.motion) params.motion = request.motion;
   if (request.angle) params.angle = request.angle;
   if (request.preset && studioPreset(request.preset)) params.preset = request.preset;
+  if (request.template && /^[a-z0-9]{1,64}$/i.test(request.template)) params.template = request.template;
   if (references) params.references = references;
   if (character) params.character = character.name;
   return Object.keys(params).length ? params : undefined;

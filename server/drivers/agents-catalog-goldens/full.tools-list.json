@@ -2453,8 +2453,26 @@
       }
     },
     {
+      "name": "origin_studio_workflow_save",
+      "description": "Save a Studio workflow the team can open, edit and run: from a template id (such as template:talking-avatar), a copy of a saved workflow, or a finished generation, whose animate, remix and upscale steps become one model node each with its prompt as an input. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_studio_template_save",
+      "description": "Save a finished Studio generation as one of the project's templates: its model, settings and starting files as examples, its result as the cover. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
       "name": "origin_studio_presets",
-      "description": "List Studio's ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt template. Before the first call, get its input schema from find_tool.",
+      "description": "List the templates Studio offers: the project's own (saved from generations, with [blanks] to fill) and the ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},

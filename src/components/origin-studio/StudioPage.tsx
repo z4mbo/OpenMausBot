@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Keyboard, Megaphone, Sparkles, UserRound } from "lucide-react";
+import { Keyboard, Megaphone, UserRound } from "lucide-react";
 import { api, useStore, type Bot } from "@/state/store";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { setChiefSectionOf } from "@/lib/origin-chief-section";
 import { useStudioView, type StudioView } from "@/lib/origin-studio-view";
 import { cn } from "@/lib/cn";
-import { CloudGate, EmptyState, Loading, Modal, Notice, ReadOnlyEditorNotice, Segmented, chipButton, glassHeaderRow, pageClass, type OriginPageProps } from "../origin-pages/ui";
+import { CloudGate, Loading, Modal, Notice, ReadOnlyEditorNotice, Segmented, chipButton, glassHeaderRow, pageClass, type OriginPageProps } from "../origin-pages/ui";
 import { GlassHeader, useInGlassHeader } from "../GlassScrollFrame";
 import { CampaignDialog, CampaignStrip, isCampaignRun } from "./StudioCampaign";
 import { StudioCanvas, type TileAction } from "./StudioCanvas";
@@ -13,13 +13,13 @@ import { STUDIO_MODES, StudioComposer, draftForModel, emptyDraft, type StudioCom
 import { CharacterEditor, StudioLibrary, type CharacterSeed } from "./StudioLibrary";
 import { StudioViewer } from "./StudioViewer";
 import { StudioWorkflows } from "./StudioWorkflows";
-import { PresetStrip, StudioPresetsPage } from "./StudioPresets";
+import { SaveTemplateDialog, TemplateGallery, TemplateStrip, useProjectTemplates, type TemplatePick } from "./StudioTemplates";
 import { consumeStudioFocus, useStudioFocus } from "@/lib/studio-focus";
-import { studioPreset, type StudioPreset } from "../../../shared/studio-presets";
+import { studioPreset } from "../../../shared/studio-presets";
 import type { WorkflowDraft } from "./WorkflowEditor";
 import { StudioTabs, outputRef, studioPost, studioTitle, typing, type StudioDraft } from "./studio-ui";
 import { STUDIO_ACTIONS, studioModel, type StudioCharacter, type StudioGeneration, type StudioMediaKind } from "../../../shared/studio";
-import type { StudioWorkflowRun } from "../../../shared/studio-workflow";
+import { workflowFromGeneration, type StudioWorkflowRun } from "../../../shared/studio-workflow";
 
 type Filter = "all" | StudioMediaKind;
 type Tab = StudioView;
@@ -46,8 +46,9 @@ function useFalReady(projectId: string): boolean | null {
 }
 
 const SHORTCUTS: readonly [string, string][] = [
-  ["/", "Write a prompt"], ["Ctrl Enter", "Generate"], ["Ctrl E", "Enhance the prompt"], ["1 – 4", "Image, video, audio, edit"], ["M", "Choose a model"], ["T", "Presets"],
-  ["Arrows", "Move between results"], ["Enter", "Open a result"], ["A U R X", "Animate, upscale, remix, extend"], ["P", "Reuse its settings"], ["L", "Save to the library"],
+  ["/", "Write a prompt"], ["Ctrl Enter", "Generate"], ["Ctrl E", "Enhance the prompt"], ["1 – 4", "Image, video, audio, edit"], ["M", "Choose a model"], ["T", "Templates"],
+  ["Arrows", "Move between results"], ["Enter", "Open a result"], ["A U R X", "Animate, upscale, remix, extend"], ["P", "Recreate it"], ["S", "Save it as a template"],
+  ["G", "Open it as a workflow"], ["L", "Save to the library"],
   ["B", "Add to Publish"], ["C", "Campaign pack"], ["W", "Workflows"], ["?", "These shortcuts"],
   ["N", "Workflow: add a node"], ["Ctrl Z / Ctrl Shift Z", "Workflow: undo, redo"], ["Ctrl C / V / D", "Workflow: copy, paste, duplicate"],
 ];
@@ -82,10 +83,14 @@ function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; can
   const [started, setStarted] = useState<string | null>(null);
   const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
   const [saving, setSaving] = useState<CharacterSeed | null>(null);
+  const [templates, setTemplates] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [templateOf, setTemplateOf] = useState<StudioGeneration | null>(null);
   const [busy, setBusy] = useState<ReadonlySet<string>>(new Set());
   const [error, setError] = useState("");
   const composer = useRef<StudioComposerHandle>(null);
   const focus = useStudioFocus(projectId);
+  const projectTemplates = useProjectTemplates(projectId);
   const all = rows ?? [];
   const shown = all.filter((row) => filter === "all" || (row.outputs[0]?.kind ?? row.kind) === filter);
   const running = all.filter((row) => row.status === "queued" || row.status === "running").length;
@@ -107,9 +112,13 @@ function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; can
     if (!focus) return;
     const preset = focus.presetId ? studioPreset(focus.presetId) : undefined;
     if (preset) { setTab("create"); window.setTimeout(() => composer.current?.applyPreset(preset), 0); }
+    if (focus.templateId && !projectTemplates) return;
+    const template = focus.templateId ? projectTemplates?.find((entry) => entry._id === focus.templateId) : undefined;
+    if (template) { setTab("create"); window.setTimeout(() => composer.current?.applyTemplate(template), 0); }
     if (focus.generationId) { setTab("create"); setViewing(focus.generationId); }
+    if (focus.runId) { setWorkflow({ name: "Workflow run", graph: { nodes: [], edges: [] }, runId: focus.runId }); showTab("workflows"); }
     consumeStudioFocus(focus);
-  }, [focus, setTab]);
+  }, [focus, setTab, showTab, projectTemplates]);
 
   const prepare = (next: StudioDraft) => {
     setDraft(next);
@@ -152,6 +161,15 @@ function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; can
       case "open": setViewing(row._id); return;
       case "reuse": prepare({ ...draftFrom(row), characterId: draft.characterId }); return;
       case "library": saveToLibrary(row); return;
+      case "template": setTemplateOf(row); return;
+      case "workflow": {
+        const graph = workflowFromGeneration(all, row._id);
+        if (!graph) return;
+        setViewing(null);
+        setWorkflow({ name: (row.prompt.trim() || row.modelLabel).replace(/\s+/g, " ").slice(0, 60), graph });
+        showTab("workflows");
+        return;
+      }
       case "animate": if (ref) prepare({ ...draftForModel(emptyDraft("video"), studioModel(STUDIO_ACTIONS.animate)!), sources: [ref], parent }); return;
       case "remix": if (ref) prepare({ ...draftForModel(emptyDraft("edit"), studioModel(STUDIO_ACTIONS.remix)!), prompt: row.prompt, sources: [ref], parent }); return;
       case "extend": if (ref) prepare({ ...draftForModel(emptyDraft("video"), studioModel(STUDIO_ACTIONS.extend)!), prompt: row.prompt, sources: [ref], parent }); return;
@@ -190,7 +208,7 @@ function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; can
       else if (event.key === "?") { event.preventDefault(); setHelp(true); }
       else if (key === "w" && !(tab === "workflows" && workflow)) { event.preventDefault(); setTab(tab === "workflows" ? "create" : "workflows"); }
       else if (key === "c" && canEdit && !(tab === "workflows" && workflow)) { event.preventDefault(); setCampaign(true); }
-      else if (key === "t" && canEdit && tab !== "presets" && !(tab === "workflows" && workflow)) { event.preventDefault(); setTab("presets"); }
+      else if (key === "t" && canEdit && !(tab === "workflows" && workflow)) { event.preventDefault(); setTemplates(true); }
       else if (tab !== "create") return;
       else if (index >= 0 && canEdit) { event.preventDefault(); setDraft((current) => draftForModel(current, studioModel(emptyDraft(STUDIO_MODES[index]!.value).model)!)); }
       else if (key === "m" && canEdit && !(event.target as HTMLElement | null)?.closest?.("[data-studio-tile]")) { event.preventDefault(); composer.current?.openModels(); }
@@ -211,9 +229,11 @@ function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; can
     showTab("workflows");
   };
 
-  const pickPreset = (preset: StudioPreset) => {
+  const pickTemplate = (pick: TemplatePick) => {
+    setTemplates(false);
+    setViewing(null);
     setTab("create");
-    window.setTimeout(() => composer.current?.applyPreset(preset), 0);
+    window.setTimeout(() => ("preset" in pick ? composer.current?.applyPreset(pick.preset) : composer.current?.applyTemplate(pick.template)), 0);
   };
 
   return (
@@ -229,7 +249,7 @@ function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; can
             <Megaphone size={13} className="text-accent-text" /><span className="max-sm:hidden">Campaign pack</span>
           </button>
         )}
-        <button type="button" aria-pressed={tab === "library"} className={cn(chipButton, "max-sm:px-2.5", tab === "library" && "border-accent/50 text-ink")} onClick={() => setTab(tab === "library" ? "create" : "library")} aria-label="Library" title="Characters, products and styles">
+        <button type="button" aria-pressed={libraryOpen} className={cn(chipButton, "max-sm:px-2.5", libraryOpen && "border-accent/50 text-ink")} onClick={() => setLibraryOpen(true)} aria-label="Library" title="Characters, products and styles">
           <UserRound size={13} /><span className="max-sm:hidden">Library</span>
         </button>
         <button type="button" className="hidden size-8 items-center justify-center rounded-lg text-ink-tertiary transition-colors duration-(--motion-fast) hover:bg-raised hover:text-ink md:flex" onClick={() => setHelp(true)} aria-label="Keyboard shortcuts (?)" title="Keyboard shortcuts (?)">
@@ -242,8 +262,6 @@ function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; can
       {tab === "workflows" && (
         <StudioWorkflows projectId={projectId} canEdit={canEdit} falReady={falReady} rows={all} draft={workflow} onDraft={setWorkflow} onOpenBroadcast={openBroadcast} />
       )}
-      {tab === "library" && <StudioLibrary projectId={projectId} canEdit={canEdit} rows={all} onUse={followCharacter} />}
-      {tab === "presets" && <StudioPresetsPage current={draft.preset} onPick={pickPreset} />}
       {tab === "create" && (
         <>
           <div className="flex-1 pb-4">
@@ -251,15 +269,23 @@ function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; can
               <CampaignStrip run={pack} onOpenRun={() => openRun(pack)} onOpenBroadcast={openBroadcast} onDismiss={() => setHidden((current) => new Set(current).add(pack._id))}
                 onStop={() => void studioPost("workflow/cancel", { projectId, runId: pack._id }).catch((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)))} />
             )}
-            {!rows ? <Loading label="Loading generations" variant="grid" /> : !shown.length ? (<>
-              {filter === "all" && canEdit && <PresetStrip onPick={(preset) => composer.current?.applyPreset(preset)} onMore={() => setTab("presets")} />}
-              <EmptyState icon={<Sparkles size={22} />} title={filter === "all" ? "Nothing generated yet" : "Nothing here yet"}
-                body={filter === "all" ? "What you and the project's agents make appears here for the whole team, and in Assets." : undefined} />
-            </>) : <StudioCanvas rows={shown} all={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy} onAction={act} />}
+            {!rows ? <Loading label="Loading generations" variant="grid" /> : !shown.length && filter === "all" ? (
+              <div className="flex flex-col gap-4" data-studio-empty>
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">What will you make?</h3>
+                  <p className="text-[13.5px] text-ink-secondary">Pick a template and fill in its blanks, or write your own prompt below. Everything you and the project's agents make lands here and in Assets.</p>
+                </div>
+                <TemplateGallery projectId={projectId} canEdit={canEdit} current={draft.template ?? draft.preset} onPick={pickTemplate} />
+              </div>
+            ) : (<>
+              {filter === "all" && canEdit && <TemplateStrip projectId={projectId} onPick={pickTemplate} onBrowse={() => setTemplates(true)} />}
+              {shown.length ? <StudioCanvas rows={shown} all={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy} onAction={act} />
+                : <p className="py-16 text-center text-[13px] text-ink-tertiary">Nothing here yet.</p>}
+            </>)}
           </div>
           <div className="sticky bottom-0 z-20 -mx-4 bg-gradient-to-t from-app from-70% to-transparent px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-4 md:-mx-6 md:px-6">
             <div className="mx-auto w-full max-w-3xl">
-              <StudioComposer ref={composer} projectId={projectId} canEdit={canEdit} falReady={falReady} rows={all} draft={draft} onDraft={setDraft} onOpenLibrary={() => setTab("library")} onOpenPresets={() => setTab("presets")} />
+              <StudioComposer ref={composer} projectId={projectId} canEdit={canEdit} falReady={falReady} rows={all} draft={draft} onDraft={setDraft} onOpenLibrary={() => setLibraryOpen(true)} onOpenTemplates={() => setTemplates(true)} />
             </div>
           </div>
         </>
@@ -268,6 +294,17 @@ function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; can
       {viewed && <StudioViewer row={viewed} rows={all} canEdit={canEdit} isAdmin={isAdmin} busy={busy.has(viewed._id)} onAction={act} onMove={moveViewer} onClose={() => setViewing(null)} />}
       {campaign && <CampaignDialog projectId={projectId} falReady={falReady} onStarted={(runId) => { setStarted(runId); setTab("create"); }} onClose={() => setCampaign(false)} />}
       {saving && <CharacterEditor projectId={projectId} rows={all} seed={saving} onClose={() => setSaving(null)} />}
+      {templates && (
+        <Modal title="Templates" onClose={() => setTemplates(false)} wide className="sm:max-w-6xl">
+          <TemplateGallery projectId={projectId} canEdit={canEdit} current={draft.template ?? draft.preset} onPick={pickTemplate} autoFocus />
+        </Modal>
+      )}
+      {libraryOpen && (
+        <Modal title="Library" onClose={() => setLibraryOpen(false)} wide className="sm:max-w-5xl">
+          <StudioLibrary projectId={projectId} canEdit={canEdit} rows={all} onUse={(character) => { setLibraryOpen(false); followCharacter(character); }} />
+        </Modal>
+      )}
+      {templateOf && <SaveTemplateDialog projectId={projectId} row={templateOf} rows={all} onClose={() => setTemplateOf(null)} />}
       {help && (
         <Modal title="Keyboard shortcuts" onClose={() => setHelp(false)}>
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13px]">

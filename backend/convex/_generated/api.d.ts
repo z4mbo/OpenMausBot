@@ -93,6 +93,7 @@ import type * as storage from "../storage.js";
 import type * as studio from "../studio.js";
 import type * as studioLibrary from "../studioLibrary.js";
 import type * as studioTables from "../studioTables.js";
+import type * as studioTemplates from "../studioTemplates.js";
 import type * as studioUpload from "../studioUpload.js";
 import type * as studioWorkflows from "../studioWorkflows.js";
 import type * as taskPRs from "../taskPRs.js";
@@ -195,6 +196,7 @@ declare const fullApi: ApiFromModules<{
   studio: typeof studio;
   studioLibrary: typeof studioLibrary;
   studioTables: typeof studioTables;
+  studioTemplates: typeof studioTemplates;
   studioUpload: typeof studioUpload;
   studioWorkflows: typeof studioWorkflows;
   taskPRs: typeof taskPRs;

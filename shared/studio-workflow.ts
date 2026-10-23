@@ -1,4 +1,6 @@
-import { STUDIO_MODELS, studioModel, type StudioMediaKind, type StudioModel, type StudioParams } from "./studio.ts";
+import { STUDIO_MODELS, studioModel, type StudioGeneration, type StudioMediaKind, type StudioModel, type StudioParams } from "./studio.ts";
+import { templateBlanks, type TemplateBlank } from "./studio-blanks.ts";
+import { templateFromGeneration } from "./studio-templates.ts";
 
 export type StudioPortKind = "text" | StudioMediaKind;
 export type StudioNodeType = "prompt" | "asset" | "model" | "output";
@@ -402,4 +404,114 @@ export interface StudioWorkflow {
   updatedByName: string;
   createdAt: number;
   updatedAt: number;
+}
+
+/** The `[placeholders]` of each Prompt node, which a run form offers as fields of their own. */
+export function workflowBlanks(graph: StudioWorkflowGraph): Array<{ nodeId: string; blanks: TemplateBlank[] }> {
+  return graph.nodes.flatMap((entry) => {
+    if (entry.type !== "prompt") return [];
+    const blanks = templateBlanks(String(entry.params.text ?? ""));
+    return blanks.length ? [{ nodeId: entry.id, blanks }] : [];
+  });
+}
+
+const LINEAGE_MAX = 6;
+
+/**
+ * A workflow that makes a generation again: one model step per generation in its line (an animate of a remix of an
+ * image becomes three), each prompt as a Prompt node, starting files as input nodes and the last step saved by an Output.
+ */
+export function workflowFromGeneration(rows: readonly StudioGeneration[], generationId: string): StudioWorkflowGraph | null {
+  const byId = new Map(rows.map((row) => [row._id, row]));
+  const line: StudioGeneration[] = [];
+  for (let row = byId.get(generationId); row && line.length < LINEAGE_MAX; row = row.parentId ? byId.get(row.parentId) : undefined) line.unshift(row);
+  if (!line.length || line.some((row) => !studioModel(row.model))) return null;
+  const nodes: StudioWorkflowNode[] = [];
+  const edges: StudioWorkflowEdge[] = [];
+  const edge = (from: string, fromPort: string, to: string, toPort: string) => edges.push({ id: `${from}-${to}-${toPort}`, from, fromPort, to, toPort });
+  line.forEach((row, step) => {
+    const model = studioModel(row.model)!;
+    const settings = templateFromGeneration(row);
+    const id = `m${step + 1}`;
+    nodes.push(node(id, "model", 380 + step * 340, 40, { model: model.id, ...settings.params }));
+    if (model.prompt !== "none" && row.prompt.trim()) {
+      nodes.push(node(`p${step + 1}`, "prompt", 40 + step * 340, 320, { label: step ? `Step ${step + 1} prompt` : "Prompt", text: row.prompt }));
+      edge(`p${step + 1}`, "text", id, "prompt");
+    }
+    model.needs.forEach((kind, index) => {
+      const previous = step > 0 ? studioModel(line[step - 1]!.model) : undefined;
+      if (index === 0 && previous?.kind === kind) return edge(`m${step}`, "media", id, "in0");
+      const input = `a${step + 1}${index + 1}`;
+      const assetId = index === 0 && step === 0 && row.sourceAssetId ? row.sourceAssetId : "";
+      nodes.push(node(input, "asset", 40 + step * 340, 40 + index * 180, { kind, label: model.inputLabels?.[index] ?? `${kind[0]!.toUpperCase()}${kind.slice(1)}`, assetId }));
+      edge(input, "media", id, `in${index}`);
+    });
+  });
+  const last = line[line.length - 1]!;
+  nodes.push(node("o1", "output", 380 + line.length * 340, 40, { name: (last.prompt.trim() || last.modelLabel).slice(0, 60) }));
+  edge(`m${line.length}`, "media", "o1", "media");
+  return tidyWorkflow({ nodes, edges });
+}
+
+/** A node's height on the canvas, close enough to lay out a graph before it is drawn. */
+export function estimatedNodeHeight(entry: StudioWorkflowNode): number {
+  const { inputs, outputs } = workflowPorts(entry);
+  const ports = Math.max(inputs.length, outputs.length) * 26 + 36;
+  if (entry.type === "prompt") return ports + 130;
+  if (entry.type === "asset") return ports + 96;
+  if (entry.type === "output") return ports + 90;
+  const model = workflowNodeModel(entry);
+  const settings = model && (model.aspectRatios || model.durations || model.resolutions || model.voices || model.motion || model.angles) ? 40 : 0;
+  return ports + 52 + (model?.prompt === "none" ? 0 : 64) + settings + (model && model.kind !== "audio" ? 34 : 0);
+}
+
+export const TIDY_COLUMN = 340;
+export const TIDY_GAP = 28;
+
+/**
+ * The graph laid out left to right: each node one column after its furthest input, columns ordered to keep links
+ * short, nodes stacked without overlapping. A loop leaves the graph as it was.
+ */
+export function tidyWorkflow(graph: StudioWorkflowGraph, heightOf: (entry: StudioWorkflowNode) => number = estimatedNodeHeight): StudioWorkflowGraph {
+  const order = workflowOrder(graph);
+  if (!order) return graph;
+  const column = new Map<string, number>();
+  for (const entry of order) {
+    const parents = graph.edges.filter((link) => link.to === entry.id).map((link) => column.get(link.from) ?? 0);
+    column.set(entry.id, parents.length ? Math.max(...parents) + 1 : 0);
+  }
+  for (const entry of [...order].reverse()) {
+    if (graph.edges.some((link) => link.to === entry.id)) continue;
+    const children = graph.edges.filter((link) => link.from === entry.id).map((link) => column.get(link.to) ?? 1);
+    if (children.length) column.set(entry.id, Math.min(...children) - 1);
+  }
+  const columns = [...new Set(column.values())].sort((a, b) => a - b);
+  const heights = new Map(graph.nodes.map((entry) => [entry.id, heightOf(entry)]));
+  let placed = new Map<string, { x: number; y: number }>();
+  for (let sweep = 0; sweep < 2; sweep += 1) {
+    const previous = placed;
+    placed = new Map();
+    const centre = (id: string) => { const at = placed.get(id) ?? previous.get(id); return at ? at.y + heights.get(id)! / 2 : undefined; };
+    columns.forEach((value, index) => {
+      const members = order.filter((entry) => column.get(entry.id) === value);
+      const wanted = (entry: StudioWorkflowNode) => {
+        const linked = graph.edges.filter((link) => link.to === entry.id || link.from === entry.id).map((link) => centre(link.to === entry.id ? link.from : link.to)).filter((y): y is number => y !== undefined);
+        return linked.length ? linked.reduce((sum, y) => sum + y, 0) / linked.length - heights.get(entry.id)! / 2 : Number.POSITIVE_INFINITY;
+      };
+      const sorted = members.map((entry, at) => ({ entry, at, y: wanted(entry) })).sort((a, b) => (a.y - b.y) || (a.at - b.at));
+      let next = 40;
+      for (const { entry, y } of sorted) {
+        const top = Math.max(next, Number.isFinite(y) ? Math.round(y) : next);
+        placed.set(entry.id, { x: 40 + index * TIDY_COLUMN, y: top });
+        next = top + heights.get(entry.id)! + TIDY_GAP;
+      }
+    });
+  }
+  return { ...graph, nodes: graph.nodes.map((entry) => ({ ...entry, ...placed.get(entry.id) })) };
+}
+
+/** Whether any two nodes' boxes overlap. */
+export function workflowOverlaps(graph: StudioWorkflowGraph, width: number, heightOf: (entry: StudioWorkflowNode) => number = estimatedNodeHeight): boolean {
+  return graph.nodes.some((a, index) => graph.nodes.slice(index + 1).some((b) =>
+    a.x < b.x + width && b.x < a.x + width && a.y < b.y + heightOf(b) && b.y < a.y + heightOf(a)));
 }
