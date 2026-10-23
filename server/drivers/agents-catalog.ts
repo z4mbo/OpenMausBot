@@ -332,7 +332,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
   },
   {
     name: "origin_vault_list",
-    description: "List an Origin project's vault: titles, kinds, URLs, usernames, and the values members let agents use and unlocked here. Ask for any other with request_credential." + ORIGIN_SCOPE,
+    description: "List an Origin project's vault and the signed-in person's: titles, kinds, URLs, usernames, and the values (a service sign-in's as env vars) members let agents use and unlocked here. Ask for any other with request_credential." + ORIGIN_SCOPE,
     inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
   },
   {

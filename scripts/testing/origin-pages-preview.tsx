@@ -23,7 +23,14 @@ applySkin(params.get("theme") === "light" ? "atelier" : "midnight");
 setSessionToken("origin-pages-isolated-fixture");
 if (!["empty", "loading"].includes(params.get("state") ?? "")) {
   const encrypted = await encryptSecret("synthetic-secret-value", "fixture-passphrase");
-  (window as unknown as { originPagesFixture: { setQuery(name: string, value: unknown): void } }).originPagesFixture.setQuery("credentials:list", [{ _id: "fixture-credential", title: "Synthetic API credential", kind: "api_key", username: "fixture-account", ...encrypted, updatedAt: Date.now() }]);
+  const fixture = (window as unknown as { originPagesFixture: { setQuery(name: string, value: unknown): void } }).originPagesFixture;
+  const convex = await encryptSecret(JSON.stringify({ CONVEX_DEPLOY_KEY: "prod:fixture|synthetic-deploy-key" }), "fixture-passphrase");
+  fixture.setQuery("credentials:list", [
+    { _id: "fixture-credential", title: "Synthetic API credential", kind: "api_key", username: "fixture-account", ...encrypted, updatedAt: Date.now() },
+    { _id: "fixture-convex", title: "Production Convex", kind: "service", service: "convex", agentUse: true, ...convex, updatedAt: Date.now() },
+  ]);
+  const vercel = await encryptSecret(JSON.stringify({ VERCEL_TOKEN: "synthetic-vercel-token", VERCEL_ORG_ID: "team_fixture" }), "personal-fixture-passphrase");
+  fixture.setQuery("personalCredentials:list", [{ _id: "fixture-personal-vercel", title: "My Vercel", kind: "service", service: "vercel", agentUse: true, ...vercel, updatedAt: Date.now() }]);
 }
 function Fixture() {
   const [projectId, setProjectId] = useState("fixture-project");

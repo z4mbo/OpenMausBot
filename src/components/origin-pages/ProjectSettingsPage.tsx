@@ -353,12 +353,17 @@ export function GitHubConnectionCard({ project, projectId, isAdmin }: { project:
 }
 
 const ROLES: readonly MemberRole[] = ["owner", "admin", "member", "viewer"];
+const ROLE_HELP: Record<Exclude<MemberRole, "owner">, string> = {
+  admin: "opens issues and pull requests, approves and merges them",
+  member: "opens issues and pull requests in the project's repository, but doesn't merge",
+  viewer: "reads everything, changes nothing",
+};
 
 function Members({ project, projectId, isAdmin }: { project: CloudProject; projectId: string; isAdmin: boolean }) {
   const people = useCloudQuery<CloudPerson[]>("members:people", { projectId });
   const rows = useCloudQuery<CloudProjectMember[]>("members:list", { projectId });
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"member" | "viewer">("member");
+  const [role, setRole] = useState<"admin" | "member" | "viewer">("member");
   const action = useAction();
   const projectRows = new Map((rows ?? []).map((row) => [row.email, row]));
   const add = async (event: FormEvent) => {
@@ -403,13 +408,19 @@ function Members({ project, projectId, isAdmin }: { project: CloudProject; proje
           <Field label="Add a workspace member" className="min-w-[180px] flex-1">
             <input className={inputClass} type="email" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
-          <Select size="sm" aria-label="Role" value={role} onChange={(e) => setRole(e.target.value as "member" | "viewer")}>
+          <Select size="sm" aria-label="Role" value={role} onChange={(e) => setRole(e.target.value as "admin" | "member" | "viewer")}>
+            <option value="admin">Admin</option>
             <option value="member">Member</option>
             <option value="viewer">Viewer</option>
           </Select>
           <button className={primaryButton} disabled={action.busy}><UserPlus size={14} />Add</button>
         </form>
       )}
+      <dl className="mt-3 grid gap-1 border-t border-hairline/40 pt-3 text-[12px]" aria-label="What each role can do">
+        {Object.entries(ROLE_HELP).map(([name, help]) => (
+          <div key={name} className="flex gap-1.5"><dt className="shrink-0 font-medium capitalize text-ink-secondary">{name}</dt><dd className="text-ink-tertiary">{help}</dd></div>
+        ))}
+      </dl>
       {action.error && <div className="mt-2"><Notice tone="danger">{action.error}</Notice></div>}
     </Card>
   );
