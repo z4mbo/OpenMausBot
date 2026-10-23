@@ -4,8 +4,11 @@ let revision = 0;
 const subscribe = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
 const snapshot = () => revision;
 const scene = JSON.parse(sessionStorage.getItem("origin-draw-fixture-scene") ?? "[]") as string[];
-let rows = [...scene];
-const changed = () => { rows = [...scene]; revision++; for (const listener of listeners) listener(); };
+const scenes: Record<string, string[]> = { "fixture-canvas": scene };
+const snapshots: Record<string, string[]> = {};
+const rowsOf = (canvasId: unknown) => snapshots[String(canvasId ?? "fixture-canvas")] ?? [];
+const changed = () => { for (const [id, list] of Object.entries(scenes)) snapshots[id] = [...list]; revision++; for (const listener of listeners) listener(); };
+changed();
 const presence: Record<string, unknown>[] = [{ userId: "other", name: "Fixture teammate", x: 100, y: 80, button: "up", selection: [] as string[], updatedAt: Date.now() }];
 let pages = [{ id: "page-1", name: "Page 1" }] as { id: string; name: string; guides?: { axis: string; at: number }[] }[];
 let comments: Record<string, unknown>[] = [];
@@ -14,7 +17,7 @@ let links: Record<string, unknown>[] = [];
 const people = [{ _id: "m1", userId: "fixture-user", email: "you@fixture.test", role: "owner", status: "active", name: "You", avatarUrl: null }, { _id: "m2", userId: "other", email: "teammate@fixture.test", role: "member", status: "active", name: "Fixture teammate", avatarUrl: null }];
 const issues = [{ _id: "fixtureissue0001", title: "Design the pricing page", done: false }];
 let files: { fileId: string; mimeType: string; url: string | null }[] = [];
-let canvases = [{ _id: "fixture-canvas", name: "Release planning with a long canvas name" }, { _id: "fixture-second", name: "Research and architecture" }];
+let canvases: { _id: string; name: string; kind?: string }[] = [{ _id: "fixture-canvas", name: "Release planning with a long canvas name" }, { _id: "fixture-second", name: "Research and architecture" }];
 const swatch = `data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200"><rect width="320" height="200" fill="#4F46E5"/><circle cx="160" cy="100" r="60" fill="#F59E0B"/></svg>')}`;
 const assets = [{ _id: "asset-logo", type: "image", name: "Brand mark", fileUrl: swatch, storageId: "storage-logo", contentType: "image/svg+xml", updatedAt: 1 }];
 const design = { assets, tokens: [] };
@@ -36,13 +39,15 @@ const api = {
     changed();
   },
   link(frameId: string, frameName: string) { links = [{ _id: `link-${links.length}`, taskId: issues[0]!._id, canvasId: "fixture-canvas", canvasName: "Release planning", frameId, frameName, agentName: "Atlas", status: "review", title: issues[0]!.title, done: false }]; changed(); },
-  remote(rows: string[]) {
+  addCanvas(id: string, name: string, kind: string, rows: string[]) { canvases = [...canvases, { _id: id, name, kind }]; scenes[id] = [...rows]; changed(); },
+  remote(rows: string[], canvasId = "fixture-canvas") {
+    const scene = scenes[canvasId] ??= [];
     for (const data of rows) {
       const element = JSON.parse(data) as { id: string };
       const index = scene.findIndex((row) => JSON.parse(row).id === element.id);
       if (index < 0) scene.push(data); else scene[index] = data;
     }
-    sessionStorage.setItem("origin-draw-fixture-scene", JSON.stringify(scene));
+    if (canvasId === "fixture-canvas") sessionStorage.setItem("origin-draw-fixture-scene", JSON.stringify(scene));
     changed();
   },
 };
@@ -60,7 +65,7 @@ export const cloud = {};
 export const CloudProvider = ({ children }: { children: unknown }) => children;
 export const cloudQueryOnce = async (name: string, args: Record<string, unknown>) => (name === "canvasCollab:versionRows" ? versions.find((item) => item._id === args.versionId)?.rows ?? [] : null);
 export const useCloudPages = () => ({ results: [], status: "done", loadMore() {} });
-export function useCloudQuery<T>(name: string): T {
+export function useCloudQuery<T>(name: string, args?: Record<string, unknown> | "skip"): T {
   useSyncExternalStore(subscribe, snapshot);
   if (name === "projects:get") return { _id: "fixture-project", teamId: "fixture-team", name: "Fixture project", memberRole: new URLSearchParams(location.search).has("viewer") ? "viewer" : "owner" } as T;
   if (name === "draw:canvases") return canvases as T;
@@ -74,13 +79,14 @@ export function useCloudQuery<T>(name: string): T {
   if (name === "canvasCollab:designsForCanvas") return links as T;
   if (name === "members:people") return people as T;
   if (name === "tasks:board") return { columns: [], tasks: issues, assignees: [] } as T;
-  return (name === "draw:scene" ? rows : name === "draw:presence" ? presence : []) as T;
+  return (name === "draw:scene" ? rowsOf(args === "skip" ? undefined : args?.canvasId) : name === "draw:presence" ? presence : []) as T;
 }
 export async function cloudMutation<T>(name: string, args: Record<string, unknown>): Promise<T> {
   requests.push({ name, args });
   if (name === "draw:createCanvas") {
     const id = `fixture-created-${canvases.length}`;
-    canvases = [...canvases, { _id: id, name: String(args.name) }];
+    canvases = [...canvases, { _id: id, name: String(args.name), kind: String(args.kind ?? "design") }];
+    scenes[id] = [];
     changed();
     return id as T;
   }
@@ -100,7 +106,7 @@ export async function cloudMutation<T>(name: string, args: Record<string, unknow
   if (name === "draw:uploadUrl" || name === "design:generateUploadUrl") return `${location.origin}/__origin-draw-upload` as T;
   if (name === "draw:updateElements") {
     if (blocked) { blocked = false; await new Promise<void>((_resolve, reject) => { release = () => reject(new Error("Synthetic offline save")); }); }
-    api.remote(args.elements as string[]);
+    api.remote(args.elements as string[], String(args.canvasId ?? "fixture-canvas"));
   }
   return null as T;
 }

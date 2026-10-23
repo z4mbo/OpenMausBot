@@ -16,7 +16,11 @@ export const DEFERRED_TOOL_DOMAINS: readonly DeferredToolDomain[] = [
   { prefix: "origin_broadcast_", words: "social media post tweet twitter publish share announce linkedin instagram bluesky facebook tiktok",
     tools: { origin_broadcast_draft: "write compose", origin_broadcast_list: "scheduled queued posts approval", origin_broadcast_unschedule: "cancel stop pull unschedule postpone" } },
   { prefix: "origin_canvas", words: "mockup wireframe layout ui screen frame",
-    tools: { origin_canvas_edit: "design build draw create make change section hero pricing landing" } },
+    tools: {
+      origin_canvas_edit: "design build draw create make change section hero pricing landing",
+      origin_canvas_board: "whiteboard board brainstorm sticky stickies notes sketch diagram flowchart mind map retro",
+      origin_canvas_deck: "presentation deck pitch slides slideshow keynote powerpoint investor talk",
+    } },
   { prefix: "origin_campaign_", words: "campaign launch marketing promotion" },
   { prefix: "origin_brand_", words: "brand kit identity colours colors palette fonts typography voice tone style guide" },
   { prefix: "origin_standup", words: "standup daily update status report" },

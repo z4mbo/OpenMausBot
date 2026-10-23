@@ -4,7 +4,7 @@ import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 export const CANVAS_TOOL_DEFINITIONS = [
   {
     name: "origin_canvas",
-    description: "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit." + ORIGIN_SCOPE,
+    description: "List an Origin project's canvases (design files, boards and presentations), or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -23,6 +23,7 @@ export const CANVAS_TOOL_DEFINITIONS = [
       properties: {
         canvas: { type: "string", maxLength: 120, description: "Canvas name or id; optional when the project has one." },
         new_canvas: { type: "string", maxLength: 80, description: "Start a new canvas with this name and apply ops to it." },
+        kind: { type: "string", enum: ["design", "board", "deck"], description: "With new_canvas: a design file (default), a whiteboard or a presentation." },
         ops: { type: "array", minItems: 1, maxItems: 200, items: { type: "object" } },
         page: { type: "string", maxLength: 40, description: "Page id for new top-level nodes; default the first page." },
         save_version: { type: "string", maxLength: 80, description: "Save a named version of the canvas before these changes." },
@@ -73,6 +74,37 @@ export const CANVAS_TOOL_DEFINITIONS = [
         project: ORIGIN_PROJECT,
       },
       required: ["issue_id", "frames"],
+    },
+  },
+  {
+    name: "origin_canvas_board",
+    description: "Work on an Origin project's whiteboard (a board on its Design page) as people do: sticky notes, text, labelled shapes, freehand strokes and connector arrows, live for everyone on it. items run in order: {type: sticky|text|shape|stroke|connector, key, text, color, x, y}; stickies take color yellow|pink|green|blue|purple|orange|gray; shapes take shape box|pill|circle, w, h; strokes take points [[x,y],...] (world coordinates), width, highlight; connectors take from and to (keys from this call or node ids). Items without x and y are laid out in a grid beside what is there. delete removes nodes by id. Read the board first with origin_canvas, and look at it with origin_canvas_screenshot." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        canvas: { type: "string", maxLength: 120, description: "Board name or id; optional when the project has one canvas." },
+        new_board: { type: "string", maxLength: 80, description: "Start a new board with this name." },
+        items: { type: "array", maxItems: 120, items: { type: "object" } },
+        delete: { type: "array", maxItems: 200, items: { type: "string", maxLength: 100 } },
+        project: ORIGIN_PROJECT,
+      },
+    },
+  },
+  {
+    name: "origin_canvas_deck",
+    description: "Build or edit an Origin presentation (a pitch deck on the project's Design page) as people do: its slides are 1920×1080 frames played top to bottom, styled with the brand kit. slides adds slides from an outline: {layout: title|section|bullets|two-column|stat|image|quote|closing, title, subtitle, body, bullets [..], columns [left, right], stat, image (an image asset's name), notes (speaker notes), key, replace (a slide id to replace)}; at inserts them at a position (default the end). order reorders by slide ids, notes [{slide, text}] writes speaker notes, delete removes slides. Refine any slide's layers with origin_canvas_edit and check it with origin_canvas_screenshot." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        canvas: { type: "string", maxLength: 120, description: "Presentation name or id; optional when the project has one canvas." },
+        new_deck: { type: "string", maxLength: 80, description: "Start a new presentation with this name." },
+        slides: { type: "array", maxItems: 40, items: { type: "object" } },
+        at: { type: "integer", minimum: 0 },
+        order: { type: "array", maxItems: 200, items: { type: "string", maxLength: 100 } },
+        notes: { type: "array", maxItems: 80, items: { type: "object" } },
+        delete: { type: "array", maxItems: 200, items: { type: "string", maxLength: 100 } },
+        project: ORIGIN_PROJECT,
+      },
     },
   },
 ];

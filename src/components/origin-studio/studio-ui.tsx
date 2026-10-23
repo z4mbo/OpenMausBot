@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { AudioLines, Clapperboard, Image as ImageIcon, LayoutGrid, PenTool, Sparkles, Workflow } from "lucide-react";
+import { AudioLines, Clapperboard, Image as ImageIcon, LayoutGrid, Sparkles, Workflow } from "lucide-react";
 import { api } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { useVideoPoster } from "@/lib/video-poster";
@@ -48,7 +48,6 @@ export const studioCard = cn(cardClass, "group relative overflow-hidden transiti
 const STUDIO_TABS = [
   { value: "create", label: "Create", icon: Sparkles, title: "Create" },
   { value: "workflows", label: "Workflows", icon: Workflow, title: "Workflows (W)" },
-  { value: "design", label: "Design", icon: PenTool, title: "Design: canvases and components" },
   { value: "presets", label: "Presets", icon: LayoutGrid, title: "Presets (T)" },
 ] as const satisfies readonly { value: StudioView; label: string; icon: typeof Sparkles; title: string }[];
 

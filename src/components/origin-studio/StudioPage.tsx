@@ -11,7 +11,6 @@ import { CampaignDialog, CampaignStrip, isCampaignRun } from "./StudioCampaign";
 import { StudioCanvas, type TileAction } from "./StudioCanvas";
 import { STUDIO_MODES, StudioComposer, draftForModel, emptyDraft, type StudioComposerHandle } from "./StudioComposer";
 import { CharacterEditor, StudioLibrary, type CharacterSeed } from "./StudioLibrary";
-import { StudioDesign } from "./StudioDesign";
 import { StudioViewer } from "./StudioViewer";
 import { StudioWorkflows } from "./StudioWorkflows";
 import { PresetStrip, StudioPresetsPage } from "./StudioPresets";
@@ -26,7 +25,7 @@ type Filter = "all" | StudioMediaKind;
 type Tab = StudioView;
 
 export function StudioPage({ agent, ...props }: OriginPageProps & { agent: Bot }) {
-  return <CloudGate {...props} label="Studio">{({ project, projectId, canEdit, isAdmin }) => <Studio projectId={projectId} teamId={project.teamId} canEdit={canEdit} isAdmin={isAdmin} agent={agent} />}</CloudGate>;
+  return <CloudGate {...props} label="Studio">{({ projectId, canEdit, isAdmin }) => <Studio projectId={projectId} canEdit={canEdit} isAdmin={isAdmin} agent={agent} />}</CloudGate>;
 }
 
 /** Whether this app holds a fal key for the project, read again whenever settings close or the window regains focus. */
@@ -68,7 +67,7 @@ function draftFrom(row: StudioGeneration): StudioDraft {
   };
 }
 
-function Studio({ projectId, teamId, canEdit, isAdmin, agent }: { projectId: string; teamId: string | undefined; canEdit: boolean; isAdmin: boolean; agent: Bot }) {
+function Studio({ projectId, canEdit, isAdmin, agent }: { projectId: string; canEdit: boolean; isAdmin: boolean; agent: Bot }) {
   const chiefId = agent.id;
   const rows = useCloudQuery<StudioGeneration[]>("studio:list", { projectId });
   const runs = useCloudQuery<StudioWorkflowRun[]>("studioWorkflows:runs", { projectId });
@@ -184,7 +183,7 @@ function Studio({ projectId, teamId, canEdit, isAdmin, agent }: { projectId: str
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (tab === "design" || typing(event) || event.metaKey || event.ctrlKey || event.altKey || document.querySelector("[data-centered-dialog]")) return;
+      if (typing(event) || event.metaKey || event.ctrlKey || event.altKey || document.querySelector("[data-centered-dialog]")) return;
       const index = ["1", "2", "3", "4"].indexOf(event.key);
       const key = event.key.toLowerCase();
       if (event.key === "/" && tab === "create") { event.preventDefault(); composer.current?.focus(); }
@@ -216,11 +215,6 @@ function Studio({ projectId, teamId, canEdit, isAdmin, agent }: { projectId: str
     setTab("create");
     window.setTimeout(() => composer.current?.applyPreset(preset), 0);
   };
-
-  if (tab === "design") {
-    return <StudioDesign projectId={projectId} teamId={teamId} canEdit={canEdit} agent={agent}
-      switcher={<><h2 className={cn(studioTitle, "max-sm:hidden")}>Studio</h2><StudioTabs value={tab} onChange={setTab} compact /></>} />;
-  }
 
   return (
     <section className={cn(pageClass, "pb-0")} aria-label="Studio">

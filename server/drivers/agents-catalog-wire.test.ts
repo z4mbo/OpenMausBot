@@ -90,7 +90,7 @@ const BUDGET_BASELINE: Record<string, number> = {
   "skills+shared+voice+non-chief+cloud-home": 70410,
   "skills+shared+voice+escalations": 84940,
   "default+legacy-switches": 78695,
-  "skills+shared+voice+escalations+whole-schemas": 102832,
+  "skills+shared+voice+escalations+whole-schemas": 105854,
 };
 
 const RPC_PREFIX = '{"jsonrpc":"2.0","id":1,"result":';

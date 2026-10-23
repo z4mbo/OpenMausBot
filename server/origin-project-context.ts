@@ -63,7 +63,7 @@ const WORKFLOWS_SHOWN = 6;
 const MILESTONES_SHOWN = 5;
 const MEMBERS_SHOWN = 10;
 const HEAD_PROJECTS_SHOWN = 25;
-const TOOLS_LINE = "More with origin_list_issues, origin_get_issue, origin_vault_list, origin_list_assets, origin_feedback, origin_team_chat, origin_canvas (design with origin_canvas_edit), origin_broadcast_list (Publish posts), origin_studio_generate (images, video, audio) and origin_repo_status.";
+const TOOLS_LINE = "More with origin_list_issues, origin_get_issue, origin_vault_list, origin_list_assets, origin_feedback, origin_team_chat, origin_canvas (design files with origin_canvas_edit, whiteboards with origin_canvas_board, pitch decks with origin_canvas_deck), origin_broadcast_list (Publish posts), origin_studio_generate (images, video, audio) and origin_repo_status.";
 
 const record = (value: unknown): Args => (value && typeof value === "object" && !Array.isArray(value) ? value as Args : {});
 const list = (value: unknown): Args[] => (Array.isArray(value) ? value.map(record) : []);
@@ -130,7 +130,7 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
     feedbackOpen: feedback ? openFeedback.length : null,
     feedback: openFeedback.slice(0, FEEDBACK_SHOWN).map((entry) => `[${text(entry.kind)}] ${quoted(text(entry.title), 90)}`),
     chat: chat.map((line) => `${oneLine(line.authorName, 40)}: ${quoted(line.body, 140)}`),
-    canvases: list(canvases).map((canvas) => oneLine(text(canvas.name), 40)).filter(Boolean),
+    canvases: list(canvases).map((canvas) => { const name = oneLine(text(canvas.name), 40); return name && canvas.kind === "board" ? `${name} (board)` : name && canvas.kind === "deck" ? `${name} (presentation)` : name; }).filter(Boolean),
     studio: list(studio).slice(0, STUDIO_SHOWN).map((item) => `${text(item.kind) || "media"} ${quoted(text(item.prompt), 80)} (${text(item.modelLabel) || text(item.model)}, ${text(item.status)})`),
     workflows: list(workflows).slice(0, WORKFLOWS_SHOWN).map((flow) => oneLine(text(flow.name), 40)).filter(Boolean),
     publish: list(record(publish).posts).slice(0, PUBLISH_SHOWN).map((post) => {
@@ -204,7 +204,7 @@ export function projectStatusPrompt(snapshot: ProjectSnapshot, folder: OriginPro
     `- Assets: ${snapshot.assetCount}${snapshot.assets.length ? ` (${snapshot.assets.join(", ")}${snapshot.assetCount > snapshot.assets.length ? ", …" : ""})` : ""}; ${snapshot.tokenCount} design token(s)`,
     snapshot.feedbackOpen === null ? "- Feedback: no portal" : `- Feedback: ${snapshot.feedbackOpen} open${snapshot.feedback.length ? `; latest ${snapshot.feedback.join("; ")}` : ""}`,
     snapshot.chat.length ? `- Team chat, latest: ${snapshot.chat.join(" | ")}` : "- Team chat: quiet",
-    `- Design canvases: ${snapshot.canvases.length ? snapshot.canvases.join(", ") : "none"}`,
+    `- Design page (design files, boards, presentations): ${snapshot.canvases.length ? snapshot.canvases.join(", ") : "none"}`,
     `- Studio: ${snapshot.studio.length ? `latest ${snapshot.studio.join("; ")}` : "nothing generated yet"}${snapshot.workflows.length ? `; workflows ${snapshot.workflows.join(", ")}` : ""}`,
     `- Publish: ${snapshot.publish.length ? snapshot.publish.join("; ") : "no posts yet"}`,
     snapshot.milestones.length ? `- Milestones: ${snapshot.milestones.join("; ")}` : "",

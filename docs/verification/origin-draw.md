@@ -1,7 +1,7 @@
-# Origin Canvas verification
+# Origin Design verification
 
-Canvas is the project's shared design surface: frames, shapes, text, lines, images and groups that people and agents
-edit together. Start a disposable fake-engine server and the real Canvas renderer:
+Design is a project page with three views over one canvas engine: Design (frames, shapes, text, lines, images and
+groups), Board (a freehand whiteboard) and Presentations (16:9 pitch decks). People and agents edit them together. Start a disposable fake-engine server and the real Canvas renderer:
 
 ```powershell
 node --experimental-strip-types scripts/verify-origin-draw.ts
@@ -12,7 +12,7 @@ Use the exact printed `previewUrl` in a second terminal:
 ```powershell
 $env:OMB_VERIFY_PLAYWRIGHT = 'file:///ABSOLUTE/PATH/TO/playwright/index.mjs'
 node scripts/testing/check-origin-draw.mjs http://127.0.0.1:PRINTED_PORT/__origin-draw.html
-pnpm exec vitest run src/components/origin-pages/DrawingCanvas.test.ts src/lib/origin-drawing-outbox.test.ts shared/canvas-ops.test.ts server/origin-canvas-tools.test.ts
+pnpm exec vitest run src/components/origin-pages/DrawingCanvas.test.ts src/lib/origin-drawing-outbox.test.ts shared/canvas-ops.test.ts shared/canvas-board.test.ts shared/canvas-deck.test.ts server/origin-canvas-tools.test.ts
 pnpm --filter @origin/backend exec vitest run projectWorkflow
 ```
 
@@ -33,7 +33,11 @@ The browser matrix covers Midnight and Daylight at 375 and 1280 pixels with redu
 - at 1280 pixels, Alt-drags a card inside the auto-layout pricing row and checks the copy lands in that row, then drills into a card, edits its radius and the row's auto-layout gap in the inspector, hides and shows a
   layer, exports PNG and SVG, saves the selection to Assets, inserts an asset image and sends the selection to Ask;
 - in view-only mode, checks there are no editing tools and that dragging and Delete change nothing;
-- on the project page, creates, renames and deletes a canvas.
+- on the project page, creates, renames and deletes a design file;
+- on the Design page's Board view, draws a pencil stroke in a chosen ink, places a sticky note and types into it, then
+  erases the stroke, and checks each is saved;
+- on the Presentations view, adds a Big number slide after slide 2, writes speaker notes, moves a slide up, and
+  presents the deck with its notes showing.
 
 Screenshots and machine-readable results are written to `docs/verification/evidence/origin-draw/`.
 

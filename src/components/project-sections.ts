@@ -1,5 +1,5 @@
 import { CircleDot, GitBranch, Images, LockKeyhole, Megaphone, MessageCircle, Settings, type LucideIcon } from "lucide-react";
-import { CallIcon, ChatIcon, PublishIcon, StudioIcon } from "./section-icons";
+import { CallIcon, ChatIcon, DesignIcon, PublishIcon, StudioIcon } from "./section-icons";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { unreadReplies } from "@/lib/origin-unread";
 import type { ShownSection } from "@/lib/origin-chief-section";
@@ -16,6 +16,7 @@ export const CHIEF_SECTIONS = [
   { id: "team-chat", label: "Chat", icon: ChatIcon, place: "tab" },
   { id: "call", label: "Call", icon: CallIcon, place: "tab" },
   { id: "studio", label: "Studio", icon: StudioIcon, place: "tab" },
+  { id: "design", label: "Design", icon: DesignIcon, place: "tab" },
   { id: "broadcast", label: "Publish", icon: PublishIcon, place: "tab" },
   { id: "assets", label: "Assets", icon: Images, place: "tool" },
   { id: "vault", label: "Vault", icon: LockKeyhole, place: "tool" },

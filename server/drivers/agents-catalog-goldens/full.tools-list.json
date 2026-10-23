@@ -2254,7 +2254,7 @@
     },
     {
       "name": "origin_canvas",
-      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Before the first call, get its input schema from find_tool.",
+      "description": "List an Origin project's canvases (design files, boards and presentations), or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2351,6 +2351,24 @@
           "issue_id",
           "frames"
         ]
+      }
+    },
+    {
+      "name": "origin_canvas_board",
+      "description": "Work on an Origin project's whiteboard (a board on its Design page) as people do: sticky notes, text, labelled shapes, freehand strokes and connector arrows, live for everyone on it. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_canvas_deck",
+      "description": "Build or edit an Origin presentation (a pitch deck on the project's Design page) as people do: its slides are 1920×1080 frames played top to bottom, styled with the brand kit. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
       }
     },
     {

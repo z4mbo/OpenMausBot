@@ -18,14 +18,21 @@ import { Notice, iconButton, inputClass, primaryButton } from "../ui";
 import { topmost } from "./actions";
 import { exportSvg, fileSafe, svgToPng } from "./export";
 import type { CanvasScene } from "./use-canvas-scene";
+import type { CanvasKind } from "../../../../shared/origin-design";
 
 const JSON_MAX = 8_000;
 type Issue = { _id: string; title: string; done: boolean };
 
 /** The request an agent gets about the canvas: the person's ask, where it is, and the layers in scope as compact JSON. */
-export function canvasRequest({ asked, scope, name, canvasId, json, issue }: { asked: string; scope: string; name: string; canvasId?: string; json: string; issue?: Issue }) {
+const TOOLS: Record<CanvasKind, string> = {
+  design: "You can change it directly with origin_canvas_edit and read it with origin_canvas; check your work with origin_canvas_screenshot.",
+  board: "It is a whiteboard: add sticky notes, shapes, freehand strokes and connectors with origin_canvas_board, change any layer with origin_canvas_edit, and look at it with origin_canvas_screenshot.",
+  deck: "It is a presentation: add, replace, reorder and annotate slides with origin_canvas_deck, refine a slide's layers with origin_canvas_edit, and check slides with origin_canvas_screenshot.",
+};
+
+export function canvasRequest({ asked, scope, name, canvasId, json, issue, mode = "design" }: { asked: string; scope: string; name: string; canvasId?: string; json: string; issue?: Issue; mode?: CanvasKind }) {
   const layers = json.length > 2 ? `\nLayers (x, y relative to their parent):\n\`\`\`json\n${json.length > JSON_MAX ? `${json.slice(0, JSON_MAX)}…` : json}\n\`\`\`` : "\nThe canvas is empty.";
-  const where = `This is ${scope} on the shared "${name}" canvas${canvasId ? ` (canvas ${canvasId})` : ""}. You can change it directly with origin_canvas_edit and read it with origin_canvas; check your work with origin_canvas_screenshot. People watch your changes land live.`;
+  const where = `This is ${scope} on the shared "${name}" canvas${canvasId ? ` (canvas ${canvasId})` : ""}. ${TOOLS[mode]} People watch your changes land live.`;
   const design = issue ? `\n\nDesign issue ${originIssueKey(issue._id)} (${issue._id}) "${issue.title}": build the screens as frames on this canvas, then link each frame with origin_design_submit (issue ${issue._id}) and explain your choices in its rationale; that asks the Chief to review.` : "";
   return `${asked}\n\n${where}${design}${layers}`;
 }
@@ -36,7 +43,7 @@ function Reply({ message }: { message: Message }) {
     return (
       <p className="flex items-center gap-1.5 text-[11.5px] text-ink-tertiary">
         <span className={cn("size-1.5 rounded-full", message.tool.ok === false ? "bg-danger" : "bg-accent")} />
-        {message.tool.name.startsWith("origin_canvas") ? (message.tool.name === "origin_canvas_edit" ? "Edited the canvas" : message.tool.name === "origin_canvas_screenshot" ? "Looked at a screenshot" : "Read the canvas") : message.tool.name.replace(/_/g, " ")}
+        {message.tool.name.startsWith("origin_canvas") ? (message.tool.name === "origin_canvas_edit" ? "Edited the canvas" : message.tool.name === "origin_canvas_board" ? "Worked on the board" : message.tool.name === "origin_canvas_deck" ? "Edited the slides" : message.tool.name === "origin_canvas_screenshot" ? "Looked at a screenshot" : "Read the canvas") : message.tool.name.replace(/_/g, " ")}
       </p>
     );
   }
@@ -47,8 +54,8 @@ function Reply({ message }: { message: Message }) {
 /** A side panel to brief an agent about the canvas and watch it work: its edits stream onto the canvas under its cursor. */
 export const AGENT_PANEL_WIDTH = 340;
 
-export function AgentPanel({ agent: lead, team = [], canvas, selected, images, name, canvasId, projectId, onClose }: {
-  agent: Bot; team?: readonly Bot[]; canvas: CanvasScene; selected: readonly string[]; images: ReadonlyMap<string, string>; name: string; canvasId?: string; projectId?: string; onClose(): void;
+export function AgentPanel({ mode = "design", agent: lead, team = [], canvas, selected, images, name, canvasId, projectId, onClose }: {
+  mode?: CanvasKind; agent: Bot; team?: readonly Bot[]; canvas: CanvasScene; selected: readonly string[]; images: ReadonlyMap<string, string>; name: string; canvasId?: string; projectId?: string; onClose(): void;
 }) {
   const nodes = topmost(canvas.scene, selected);
   const { state, dispatch } = useStore();
@@ -95,7 +102,7 @@ export function AgentPanel({ agent: lead, team = [], canvas, selected, images, n
       const chosen = issues.find((item) => item._id === issue);
       const asked = question.trim() || (chosen ? `Design ${chosen.title}.` : "What do you make of this design? Point out gaps and improve it.");
       const sendId = crypto.randomUUID();
-      dispatch({ type: "send", botId: agent.id, sendId, text: composeMessage(canvasRequest({ asked, scope, name, canvasId, json, issue: chosen }), image ? [image] : []) });
+      dispatch({ type: "send", botId: agent.id, sendId, text: composeMessage(canvasRequest({ asked, scope, name, canvasId, json, issue: chosen, mode }), image ? [image] : []) });
       setSent({ id: sendId, botId: agent.id, threadId: live.threadId, text: asked });
       setQuestion("");
       setIssue("");
