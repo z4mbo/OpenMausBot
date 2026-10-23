@@ -51,7 +51,7 @@ it("keeps toolbar scrolling from panning the canvas or cancelling native scrolli
   mount("toolbar-scroll");
   const tools = button("Rectangle").parentElement!;
   expect([...tools.querySelectorAll("button[aria-label]")].map(item => item.getAttribute("aria-label")))
-    .toEqual(["Move", "Hand", "Frame", "Rectangle", "Ellipse", "Line", "Arrow", "Pen", "Text", "Comment", "Image", "Undo", "Redo"]);
+    .toEqual(["Move", "Hand", "Frame", "Rectangle", "Ellipse", "Line", "Arrow", "Pen", "Pencil", "Text", "Comment", "Image", "Undo", "Redo"]);
   expect(tools.contains(button("Layers"))).toBe(false);
   expect(tools.contains(button("Design panel"))).toBe(false);
   button("Rectangle").focus();

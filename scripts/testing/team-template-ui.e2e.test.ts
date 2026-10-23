@@ -15,6 +15,13 @@ const enabled = forced || Boolean(binary);
 const launchTimeout = forced && !binary ? 600_000 : 180_000;
 if (!enabled) console.log("skipping template UI e2e: set OMB_UI_E2E=1 to install the pinned browser");
 
+// The open conversation is marked read while the import runs; reading is not a change the import made.
+function withoutReadState(bot: Record<string, unknown> | undefined): unknown {
+  if (!bot) return bot;
+  const { unread: _unread, lastReadMessageId: _read, tasks, ...rest } = bot as { unread?: unknown; lastReadMessageId?: unknown; tasks?: Record<string, unknown>[] };
+  return { ...rest, tasks: tasks?.map(({ unread: _taskUnread, lastReadMessageId: _taskRead, ...task }) => task) };
+}
+
 describe("additive template imports in the real renderer", () => {
   let child: ChildProcess | undefined;
   afterAll(async () => { await stopUiLauncher(child); });
@@ -78,8 +85,8 @@ describe("additive template imports in the real renderer", () => {
       await expect.poll(snapshot, { timeout: 10_000 }).toContain(`button "${section}"`);
       const current = await api("/api/bots");
       expect(current.bots.filter((bot: { section?: string }) => bot.section === section)).toHaveLength(2);
-      for (const bot of original.bots) expect(current.bots.find((value: { id: string }) => value.id === bot.id)).toEqual(bot);
-      expect(await control("messages", "--bot", info!.botId, "--limit", "10")).toEqual(transcript);
+      for (const bot of original.bots) expect(withoutReadState(current.bots.find((value: { id: string }) => value.id === bot.id))).toEqual(withoutReadState(bot));
+      expect((await control("messages", "--bot", info!.botId, "--limit", "10")).messages).toEqual(transcript.messages);
       const lead = original.bots.find((bot: { id: string; name: string }) => bot.id === info!.botId)!;
       expect(await snapshot()).toContain(`button "Chat with ${lead.name}"`);
       expect(await snapshot()).toContain('button "Personal"');

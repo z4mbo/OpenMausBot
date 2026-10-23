@@ -53,7 +53,7 @@ describe("call and Pipeline summaries share the model budget gate", () => {
 describe("call transcription budget admission", () => {
   const auth = { kind: "loopback", scopes: ["admin", "client"] } as const;
   const scope = { teamId: "team", room: "project", name: "Project", user: { userId: "person", name: "Person" } };
-  function transcriptionFixture(transcription: CallAgentSettings["transcription"]) {
+  async function transcriptionFixture(transcription: CallAgentSettings["transcription"]) {
     const dir = mkdtempSync(join(tmpdir(), "origin-call-budget-")); dirs.push(dir);
     const file = join(dir, "call-agent.json");
     writeFileSync(file, JSON.stringify({ ...DEFAULT_CALL_AGENT_SETTINGS, transcription }));
@@ -65,7 +65,7 @@ describe("call transcription budget admission", () => {
       cfg: { groq: { key: "synthetic-groq" }, openai: { key: "synthetic-openai" } } as AppConfig,
       instance: () => null, providerRefusal: () => undefined, hostedModels: () => null, visible: () => true,
       project: () => "project", send: async () => {}, assertBudget: () => {}, apiBudget: async () => undefined, unpricedApiBudget });
-    host.callAgents.join(scope, auth, "chief", [scope.user.userId]);
+    await host.callAgents.join(scope, auth, "chief", [scope.user.userId]);
     const audio = () => host.callAgents.audio(scope, auth, new Uint8Array([1, 2]), "audio/webm", [scope.user.userId]);
     return { audio, unpricedApiBudget, fetch };
   }
@@ -76,7 +76,7 @@ describe("call transcription budget admission", () => {
     { engine: "local", baseUrl: "https://transcribe.example.test/v1", model: "" },
     { engine: "local", baseUrl: "http://127.0.0.1.example.test/v1", model: "" },
   ] satisfies CallAgentSettings["transcription"][])("refuses capped $engine transcription before its audio POST", async transcription => {
-    const f = transcriptionFixture(transcription);
+    const f = await transcriptionFixture(transcription);
     f.unpricedApiBudget.mockImplementation(() => { throw new Error("Daily API budget cannot bound transcription"); });
     await expect(f.audio()).rejects.toThrow(/Daily API budget/);
     expect(f.unpricedApiBudget).toHaveBeenCalledWith("chief", expect.stringMatching(/transcription/i));
@@ -84,7 +84,7 @@ describe("call transcription budget admission", () => {
   });
 
   it.each(["http://127.0.0.1:8000/v1", "http://localhost:8000/v1", "http://[::1]:8000/v1"])("keeps loopback transcription available at %s", async baseUrl => {
-    const f = transcriptionFixture({ engine: "local", baseUrl, model: "" });
+    const f = await transcriptionFixture({ engine: "local", baseUrl, model: "" });
     f.unpricedApiBudget.mockImplementation(() => { throw new Error("Daily API limit reached"); });
     await expect(f.audio()).resolves.toMatchObject({ line: { text: "A meeting note" } });
     expect(f.unpricedApiBudget).not.toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe("call transcription budget admission", () => {
   });
 
   it("rechecks the exact call agent when a cap changes between audio requests", async () => {
-    const f = transcriptionFixture({ engine: "openai", baseUrl: "http://127.0.0.1:8000/v1", model: "" });
+    const f = await transcriptionFixture({ engine: "openai", baseUrl: "http://127.0.0.1:8000/v1", model: "" });
     await f.audio();
     f.unpricedApiBudget.mockImplementation(() => { throw new Error("Daily API budget cannot bound transcription"); });
     await expect(f.audio()).rejects.toThrow(/Daily API budget/);

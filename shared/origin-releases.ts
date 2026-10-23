@@ -3,6 +3,20 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.8.0",
+  date: "2026-10-23",
+  title: "Your project bot in chat and calls, Design, and a cleaner Studio",
+  changes: [
+    { title: "The project bot joins the team", body: "Team chat and calls are shared through your workspace. Mention the project's bot in chat and it answers with the whole conversation in mind; add it to a call, where a light model transcribes, and ask it for its view whenever you want." },
+    { title: "Design is its own page", body: "Design, Board and Presentations live on a dedicated page: design like in Figma, sketch on a board, or build a pitch deck, with agents working on the same canvas." },
+    { title: "Studio: Create and Workflows", body: "Studio keeps Create and Workflows, with a template gallery, placeholders you can fill and an Inputs panel that turns any workflow into a simple app." },
+    { title: "Issues sync with GitHub on their own", body: "New issues start in Draft. Moving one into a column creates its GitHub issue; moving it back to Draft, completing or removing it deletes the GitHub issue. Agents open a PR and ask you to merge." },
+    { title: "Repositories, roles and the Vault", body: "Every project is its official GitHub repository. Admins create issues, PRs and merge; members contribute without merging; viewers only look. A personal Vault sits beside the project one, and service sign-ins stored there reach agents automatically." },
+    { title: "Choose where agents run", body: "Each shared agent can run for whoever writes, on a chosen member's computer or on a server; if that computer is offline, the sender's app takes over." },
+    { title: "A cleaner sidebar", body: "Projects drag like issues, with a Pinned group and handles that appear on hover. Per-project specialist agents are gone, and Chat, Call, Studio and Publish have new icons." },
+    { title: "Publish and the workspace", body: "Publish gains an overview, search and campaign tags. The main agent and new agents know your projects, issues, routines and upcoming calls, and Routines, Calendar, Inbox and Settings received a round of fixes." },
+  ],
+}, {
   version: "0.7.6",
   date: "2026-10-21",
   title: "Shared model continuity and safer project work",
