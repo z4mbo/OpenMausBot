@@ -13,6 +13,7 @@ import { openOriginPage } from "@/lib/origin-pages";
 import { requestIssueFocus } from "@/lib/origin-issue-focus";
 import { handOff as handIssueTo } from "@/lib/origin-handoff";
 import { StudioPage } from "./origin-studio/StudioPage";
+import { DesignPage } from "./origin-design/DesignPage";
 import { BroadcastPage } from "./origin-broadcast/BroadcastPage";
 import { LaunchpadDialog } from "./origin-launchpad/LaunchpadDialog";
 import { ChiefSectionBar } from "./ProjectSectionBar";
@@ -78,6 +79,7 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   if (section === "team-chat") return <TeamChatPage {...page} />;
   if (section === "call") return <CallPage {...page} agent={bot} open={() => { setChiefSectionOf(bot.id, "call"); openOriginPage(null); openBot(dispatch, bot, showThreads); }} />;
   if (section === "studio") return <StudioPage {...page} agent={bot} />;
+  if (section === "design") return <DesignPage {...page} agent={bot} />;
   if (section === "broadcast") return <BroadcastPage {...page} agent={bot} />;
   return <ProjectSettingsPage {...page} />;
 }

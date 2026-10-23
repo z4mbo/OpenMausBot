@@ -2,6 +2,7 @@ import { worldOrigin, type CanvasNode, type Scene } from "../../../../shared/can
 import { corners, toScreen, worldBox, type Box, type Guide, type Point, type View } from "./geometry";
 import { anchorsOf } from "./pen";
 import { cubicOf, segmentsOf } from "./path-edit";
+import { stickyText } from "./board-tools";
 
 export const HANDLES = ["nw", "n", "ne", "e", "se", "s", "sw", "w"] as const;
 export type Handle = (typeof HANDLES)[number];
@@ -97,7 +98,7 @@ export function Overlay({ scene, index, view, selected, hover, guides, marquee, 
       })()}
       {(showPrototype ? [...scene.values()] : selected).map((node) => (node.prototype && !node.deleted ? <PrototypeArrow key={`p-${node.id}`} scene={scene} view={view} node={node} /> : null))}
       {roots.map((node) => {
-        if (node.type !== "frame" || node.hidden || node.deleted) return null;
+        if (node.type !== "frame" || node.hidden || node.deleted || stickyText(scene, index, node)) return null;
         const position = toScreen(view, { x: node.x, y: node.y });
         const chosen = selected.some((item) => item.id === node.id);
         return (

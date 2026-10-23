@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { History, Loader2 } from "lucide-react";
+import { History, Loader2, Play } from "lucide-react";
 import { randomId, worldOrigin } from "../../../shared/canvas-scene";
 import { restyle } from "../../../shared/canvas-styles";
 import { cloudMutation, useCloudQuery, useCloudSession, useCloudUrl } from "@/lib/origin-cloud";
@@ -20,6 +20,8 @@ import { IssueChips, type DesignLink } from "./canvas/IssueChips";
 import { LayersPanel } from "./canvas/LayersPanel";
 import { Present } from "./canvas/Present";
 import { VersionsPanel } from "./canvas/VersionsPanel";
+import { DeckPanel } from "./canvas/DeckPanel";
+import type { CanvasKind } from "../../../shared/origin-design";
 import { useCanvasScene } from "./canvas/use-canvas-scene";
 import type { CanvasPage } from "./canvas/use-paged-canvas";
 import type { CloudDesign, CloudDesignAsset } from "./cloud-types";
@@ -40,6 +42,7 @@ const IMAGE_MAX_BYTES = 15 * 1024 * 1024;
 const DEFAULT_PAGES: CanvasPage[] = [{ id: "page-1", name: "Page 1" }];
 
 export type DrawingCanvasProps = {
+  mode?: CanvasKind;
   teamId: string; canvasId?: string; projectId?: string; userId: string; name: string; readOnly: boolean; agent?: Bot; lead?: ReactNode;
   /** A frame to select and zoom to once it has loaded; `onFocused` reports it was shown. */
   focus?: string; onFocused?: () => void;
@@ -68,7 +71,7 @@ const naturalSize = (url: string) => new Promise<{ width: number; height: number
   image.src = url;
 });
 
-export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readOnly, agent, lead, focus, onFocused }: DrawingCanvasProps) {
+export function DrawingCanvas({ mode = "design", teamId, canvasId, projectId, userId, name, readOnly, agent, lead, focus, onFocused }: DrawingCanvasProps) {
   const args = canvasId ? { teamId, canvasId } : { teamId };
   const rows = useCloudQuery<string[]>("draw:scene", args);
   const presence = useCloudQuery<Presence[]>("draw:presence", args);
@@ -97,7 +100,7 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
   const [clock, setClock] = useState(Date.now());
   const [admitted, setAdmitted] = useState<ReadonlyMap<string, string>>(new Map());
   const [selected, setSelected] = useState<readonly string[]>([]);
-  const [left, setLeft] = useState<"layers" | "assets">("layers");
+  const [left, setLeft] = useState<"slides" | "layers" | "assets">(mode === "deck" ? "slides" : "layers");
   const [right, setRight] = useState<"design" | "history">("design");
   const [asking, setAsking] = useState(false);
   const [presenting, setPresenting] = useState<string | null | undefined>(undefined);
@@ -240,6 +243,12 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
             <History size={15} />
           </button>
         )}
+        {mode === "deck" && (
+          <button type="button" onClick={() => setPresenting(null)} data-present-deck title="Present from the first slide"
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3 text-[12.5px] font-medium text-accent-ink outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-accent/60">
+            <Play size={13} aria-hidden="true" />Present
+          </button>
+        )}
         {agent && <AskAgentButton agent={agent} open={asking} onToggle={() => setAsking(!asking)} />}
       </div>
       <div className="relative flex min-h-0 flex-1">
@@ -248,7 +257,7 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
             {outbox.storageNotice || notice || outbox.error}
           </p>
         )}
-        <CanvasEditor page={page.id} coveredRight={agent && asking ? AGENT_PANEL_WIDTH + 16 : 0} canvas={canvas} readOnly={readOnly} images={images} cursors={cursors} onPointer={onPointer} addImage={addImage} notify={setNotice}
+        <CanvasEditor mode={mode} page={page.id} coveredRight={agent && asking ? AGENT_PANEL_WIDTH + 16 : 0} canvas={canvas} readOnly={readOnly} images={images} cursors={cursors} onPointer={onPointer} addImage={addImage} notify={setNotice}
           imagePicker={projectId ? (place, close) => <AssetPicker projectId={projectId} onPick={async (asset) => { try { place(await placeAsset(asset)); } catch (error) { setNotice(errorText(error, "Could not add the asset")); close(); } }} /> : undefined}
           onSelection={setSelected}
           guides={page.guides ?? []}
@@ -268,14 +277,15 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
           layers={(selection) => (
             <div className="flex min-h-0 flex-1 flex-col">
               <div role="tablist" aria-label="Left panel" className="flex h-9 shrink-0 items-center gap-0.5 px-1.5">
-                {(["layers", "assets"] as const).map((tab) => (
+                {(mode === "deck" ? (["slides", "layers", "assets"] as const) : (["layers", "assets"] as const)).map((tab) => (
                   <button key={tab} type="button" role="tab" aria-selected={left === tab} onClick={() => setLeft(tab)}
                     className={cn("h-7 rounded-md px-2.5 text-[12px] font-medium outline-none transition-colors duration-(--motion-fast) focus-visible:ring-2 focus-visible:ring-accent/60", left === tab ? "bg-raised text-ink" : "text-ink-secondary hover:text-ink")}>
-                    {tab === "layers" ? "Layers" : "Assets"}
+                    {tab === "slides" ? "Slides" : tab === "layers" ? "Layers" : "Assets"}
                   </button>
                 ))}
               </div>
-              {left === "layers"
+              {left === "slides" ? <DeckPanel canvas={canvas} selection={selection} readOnly={readOnly} images={images} brand={brand} />
+                : left === "layers"
                 ? <LayersPanel canvas={canvas} selection={selection} readOnly={readOnly} titled={false} />
                 : <AssetsPanel canvas={canvas} selection={selection} readOnly={readOnly} images={images} brand={brand} teamId={teamId} canvasId={canvasId} projectId={projectId} />}
             </div>
@@ -284,7 +294,7 @@ export function DrawingCanvas({ teamId, canvasId, projectId, userId, name, readO
             ? <VersionsPanel canvas={base} scope={scope} readOnly={readOnly} notify={setNotice} />
             : <Inspector canvas={canvas} selection={selection} readOnly={readOnly} brand={brand} teamId={teamId} onPresent={(frameId) => setPresenting(frameId)}
               exportSection={<ExportSection canvas={canvas} selection={selection} images={images} name={name} projectId={readOnly ? undefined : projectId} />} />} />
-        {agent && asking && <AgentPanel agent={agent} team={team} canvas={canvas} selected={selected} images={images} name={name} canvasId={canvasId} projectId={projectId} onClose={() => setAsking(false)} />}
+        {agent && asking && <AgentPanel mode={mode} agent={agent} team={team} canvas={canvas} selected={selected} images={images} name={name} canvasId={canvasId} projectId={projectId} onClose={() => setAsking(false)} />}
         {presenting !== undefined && <Present scene={canvas.scene} index={canvas.index} images={images} start={presenting} onClose={() => setPresenting(undefined)} />}
       </div>
     </div>

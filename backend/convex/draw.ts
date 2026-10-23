@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { canEdit, requireMember, requireTeamMember } from "./lib/permissions";
+import { canvasKindValidator } from "./lib/validators";
 import { admitStorageReference, issueUpload, writableUploadScope } from "./lib/storage";
 import { encodeNode, isCanvasRow, sanitizeNode } from "../../shared/canvas-scene";
 
@@ -20,22 +21,24 @@ export async function sceneAccess(ctx: QueryCtx | MutationCtx, args: { sessionTo
   return { ...access, container };
 }
 
+const CANVASES_MAX = 150;
+
 export const canvases = query({
   args: { sessionToken: v.string(), projectId: v.id("projects") },
-  returns: v.array(v.object({ _id: v.id("canvases"), name: v.string() })),
+  returns: v.array(v.object({ _id: v.id("canvases"), name: v.string(), kind: canvasKindValidator })),
   handler: async (ctx, args) => {
     await requireMember(ctx, args.projectId, args.sessionToken);
-    return (await ctx.db.query("canvases").withIndex("by_project", q => q.eq("projectId", args.projectId).eq("archived", false)).take(50)).map(({ _id, name }) => ({ _id, name }));
+    return (await ctx.db.query("canvases").withIndex("by_project", q => q.eq("projectId", args.projectId).eq("archived", false)).take(CANVASES_MAX)).map(({ _id, name, kind }) => ({ _id, name, kind: kind ?? "design" }));
   },
 });
 export const createCanvas = mutation({
-  args: { sessionToken: v.string(), projectId: v.id("projects"), name: v.string() }, returns: v.id("canvases"),
+  args: { sessionToken: v.string(), projectId: v.id("projects"), name: v.string(), kind: v.optional(canvasKindValidator) }, returns: v.id("canvases"),
   handler: async (ctx, args) => {
     const { member, project } = await requireMember(ctx, args.projectId, args.sessionToken);
     if (!canEdit(member) || !project.teamId) throw new Error("Edit role required");
-    if (!args.name.trim() || args.name.length > 80) throw new Error("Enter a canvas name under 80 characters");
-    if ((await ctx.db.query("canvases").withIndex("by_project", q => q.eq("projectId", project._id).eq("archived", false)).take(50)).length >= 50) throw new Error("A project can have up to 50 canvases");
-    return ctx.db.insert("canvases", { teamId: project.teamId, projectId: project._id, name: args.name.trim(), archived: false, drawingElementCount: 0, drawingBytes: 0, createdAt: Date.now(), updatedAt: Date.now() });
+    if (!args.name.trim() || args.name.length > 80) throw new Error("Enter a name under 80 characters");
+    if ((await ctx.db.query("canvases").withIndex("by_project", q => q.eq("projectId", project._id).eq("archived", false)).take(CANVASES_MAX)).length >= CANVASES_MAX) throw new Error(`A project can have up to ${CANVASES_MAX} design files, boards and presentations`);
+    return ctx.db.insert("canvases", { teamId: project.teamId, projectId: project._id, name: args.name.trim(), kind: args.kind ?? "design", archived: false, drawingElementCount: 0, drawingBytes: 0, createdAt: Date.now(), updatedAt: Date.now() });
   },
 });
 export const renameCanvas = mutation({

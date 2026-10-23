@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, NotebookText, X } from "lucide-react";
 import { ancestors, type CanvasNode, type PrototypeLink, type Scene } from "../../../../shared/canvas-scene";
 import { NodeView } from "./NodeView";
 
@@ -13,6 +13,7 @@ export function Present({ scene, index, images, start, onClose }: {
   const frames = useMemo(() => (index.get(null) ?? []).filter((node) => node.type === "frame" && !node.hidden).sort((a, b) => a.y - b.y || a.x - b.x), [index]);
   const [current, setCurrent] = useState<{ id: string; transition: PrototypeLink["transition"]; step: number }>(() => ({ id: start ?? frames[0]?.id ?? "", transition: "instant", step: 0 }));
   const [box, setBox] = useState({ width: 0, height: 0 });
+  const [notes, setNotes] = useState(true);
   const stage = useRef<HTMLDivElement>(null);
   const frame = scene.get(current.id);
   const at = frames.findIndex((item) => item.id === current.id);
@@ -32,6 +33,7 @@ export function Present({ scene, index, images, start, onClose }: {
       if (event.key === "Escape") { event.preventDefault(); onClose(); }
       else if (event.key === "ArrowRight" || event.key === " ") { event.preventDefault(); go(frames[at + 1]?.id, "slide"); }
       else if (event.key === "ArrowLeft") { event.preventDefault(); go(frames[at - 1]?.id, "instant"); }
+      else if (event.key.toLowerCase() === "n") { event.preventDefault(); setNotes((on) => !on); }
     };
     window.addEventListener("keydown", key, true);
     return () => window.removeEventListener("keydown", key, true);
@@ -56,6 +58,7 @@ export function Present({ scene, index, images, start, onClose }: {
       <div className="flex h-11 shrink-0 items-center gap-2 border-b border-hairline/40 px-3">
         <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{frame.name}</span>
         <span className="text-[12px] tabular-nums text-ink-tertiary">{at + 1} / {frames.length}</span>
+        {frames.some((item) => item.notes) && <button type="button" className={button} aria-label="Speaker notes" aria-pressed={notes} title="Speaker notes (N)" onClick={() => setNotes(!notes)}><NotebookText size={16} /></button>}
         <button type="button" className={button} aria-label="Previous frame" disabled={at <= 0} onClick={() => go(frames[at - 1]?.id, "instant")}><ChevronLeft size={16} /></button>
         <button type="button" className={button} aria-label="Next frame" disabled={at >= frames.length - 1} onClick={() => go(frames[at + 1]?.id, "slide")}><ChevronRight size={16} /></button>
         <button type="button" className={button} aria-label="Stop presenting" onClick={onClose}><X size={16} /></button>
@@ -68,6 +71,7 @@ export function Present({ scene, index, images, start, onClose }: {
           </svg>
         )}
       </div>
+      {notes && frame.notes && <p data-present-notes className="max-h-[22%] shrink-0 overflow-y-auto whitespace-pre-wrap border-t border-hairline/40 px-5 py-3 text-[14px] leading-relaxed text-ink-secondary">{frame.notes}</p>}
     </div>,
     document.body,
   );

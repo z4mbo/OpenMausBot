@@ -19,3 +19,8 @@ export const PublishIcon = createLucideIcon("origin-publish", [
   ["path", { d: "m7.75 8.25 4.25-4.25 4.25 4.25", key: "head" }],
   ["path", { d: "M4.5 13.5v3.5a3 3 0 0 0 3 3h9a3 3 0 0 0 3-3v-3.5", key: "tray" }],
 ]);
+
+export const DesignIcon = createLucideIcon("origin-design", [
+  ["path", { d: "M4.5 19.5l1-4.2 9.8-9.8a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8l-9.8 9.8z", key: "pencil" }],
+  ["path", { d: "m13.5 7.5 3 3", key: "ferrule" }],
+]);

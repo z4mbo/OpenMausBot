@@ -4,7 +4,9 @@ import { childrenIndex, decodeScene, encodeNode, worldOrigin, type CanvasNode } 
 import { imageIds, sceneSvg } from "../shared/canvas-svg.ts";
 import { originIssueKey } from "../shared/origin-issues.ts";
 import type { BrandKit } from "../shared/brand-kit.ts";
-import type { OriginDesignCard } from "../shared/origin-design.ts";
+import { canvasKind, type CanvasKind, type OriginDesignCard } from "../shared/origin-design.ts";
+import { arrangeSlides, slideSpec, slidesOf, type SlideContent, type SlideLayout, SLIDE_LAYOUTS } from "../shared/canvas-deck.ts";
+import { connectorSpec, stickySpec, strokeSpec, STICKY_SIZE, type Box } from "../shared/canvas-board.ts";
 import { canvasFontIds, type CanvasFontLoader } from "./canvas-fonts.ts";
 import { designCard, framesLabel, topFrames } from "./origin-design-card.ts";
 
@@ -49,9 +51,13 @@ export async function canvasesOf(project: CanvasToolProject) {
   return list(await project.client.query("draw:canvases", { sessionToken: project.sessionToken, projectId: project.projectId }));
 }
 
+const KIND_NAMES: Record<CanvasKind, string> = { design: "design file", board: "board", deck: "presentation" };
+
 function namesOf(canvases: Args[]) {
-  return canvases.map((canvas) => `"${text(canvas.name)}" (${text(canvas._id)})`).join(", ");
+  return canvases.map((canvas) => `"${text(canvas.name)}" (${text(canvas._id)}${canvasKind(canvas.kind) === "design" ? "" : `, ${KIND_NAMES[canvasKind(canvas.kind)]}`})`).join(", ");
 }
+
+type ChosenCanvas = { id: string; name: string; kind: CanvasKind };
 
 export function pickCanvas(project: CanvasToolProject, canvases: Args[], wanted: string): Args {
   // Security: the canvas must be one of this project's, whatever else the person's sign-in may open.
@@ -65,13 +71,13 @@ export async function sceneOf(project: CanvasToolProject, canvasId: string): Pro
   return new Map(decodeScene(Array.isArray(rows) ? rows.filter((row): row is string => typeof row === "string") : []).map((node) => [node.id, node]));
 }
 
-async function chosenCanvas(args: Args, project: CanvasToolProject): Promise<{ id: string; name: string }> {
+async function chosenCanvas(args: Args, project: CanvasToolProject): Promise<ChosenCanvas> {
   const canvases = await canvasesOf(project);
   const wanted = text(args.canvas).trim();
   const canvas = wanted ? pickCanvas(project, canvases, wanted) : canvases.length === 1 ? canvases[0]! : project.refuse(canvases.length
     ? `${project.name} has several canvases; pass canvas, one of: ${namesOf(canvases)}.`
     : `${project.name} has no canvases yet; origin_canvas_edit with new_canvas starts one.`);
-  return { id: text(canvas._id), name: text(canvas.name) };
+  return { id: text(canvas._id), name: text(canvas.name), kind: canvasKind(canvas.kind) };
 }
 
 function compactJson(scene: Map<string, CanvasNode>, root?: string) {
@@ -107,10 +113,12 @@ export async function readCanvas(args: Args, project: CanvasToolProject) {
   const [scene, pages, selected] = await Promise.all([sceneOf(project, canvasId), pagesOf(project, canvasId), selections(project, canvasId)]);
   const root = text(args.node).trim();
   if (root && !scene.get(root)) project.refuse(`No node ${root.slice(0, 80)} on "${text(canvas.name)}".`);
-  const header = `Canvas "${text(canvas.name)}" (${canvasId}) of ${project.name}. ${DATA_NOTE}`;
+  const header = `${KIND_NAMES[canvasKind(canvas.kind)][0]!.toUpperCase()}${KIND_NAMES[canvasKind(canvas.kind)].slice(1)} "${text(canvas.name)}" (${canvasId}) of ${project.name}. ${DATA_NOTE}`;
   const context = [
     pages.length > 1 ? `Pages: ${pages.map((page, at) => `"${page.name}" (${page.id}${at === 0 ? ", the default for nodes without page" : ""})`).join(", ")}.` : "",
     (() => { const sets = componentSets(scene); return sets.length ? `Components: ${sets.flatMap((set) => set.components.map((node) => `"${node.name}" (${node.id}${node.component?.props ? ` ${JSON.stringify(node.component.props)}` : ""})`)).slice(0, 60).join(", ")}.` : ""; })(),
+    canvasKind(canvas.kind) === "deck" ? `Presentation slides in order (top to bottom): ${slidesOf(scene).map((slide, at) => `${at + 1} ${slide.id} "${slide.name}"${slide.notes ? " (has notes)" : ""}`).slice(0, 60).join(", ") || "none"}. Edit with origin_canvas_deck.` : "",
+    canvasKind(canvas.kind) === "board" ? "A whiteboard: add sticky notes, shapes, strokes and connectors with origin_canvas_board." : "",
     selected.length ? `Selected now: ${selected.map((item) => `${item.name}: ${item.ids.slice(0, 20).join(", ")}`).join("; ")}.` : "",
   ].filter(Boolean).join("\n");
   if (args.selection === true) {
@@ -158,29 +166,20 @@ async function showAgent(project: CanvasToolProject, canvasId: string, scene: Re
   }).catch(() => undefined);
 }
 
-export async function editCanvas(args: Args, project: CanvasToolProject) {
+/** Opens the canvas `args` names, or starts a new one of `kind` when `fresh` names it; refuses for a view-only sign-in. */
+async function targetCanvas(args: Args, project: CanvasToolProject, fresh: string, kind: CanvasKind): Promise<ChosenCanvas> {
   if (!project.canEdit) project.refuse(`The Origin sign-in only views ${project.name}, so it cannot change its canvases.`);
+  if (!fresh) return chosenCanvas(args, project);
+  const id = text(await project.client.mutation("draw:createCanvas", { sessionToken: project.sessionToken, projectId: project.projectId, name: fresh.slice(0, 80), kind }));
+  return { id, name: fresh.slice(0, 80), kind };
+}
+
+/** Applies ops to a canvas and saves the changed nodes, streamed under the agent's cursor when there are many. */
+async function saveOps(project: CanvasToolProject, canvas: ChosenCanvas, scene: Map<string, CanvasNode>, ops: readonly unknown[], options: { page?: string; kit?: BrandKit | null } = {}) {
   const teamId = project.teamId || project.refuse(`${project.name} is not in an Origin workspace.`);
-  const ops = Array.isArray(args.ops) ? args.ops : [];
-  if (!ops.length || ops.length > OPS_MAX) project.refuse(`origin_canvas_edit needs 1 to ${OPS_MAX} ops.`);
-  const fresh = text(args.new_canvas).trim();
-  let canvasId: string;
-  let canvasName: string;
-  if (fresh) {
-    canvasId = text(await project.client.mutation("draw:createCanvas", { sessionToken: project.sessionToken, projectId: project.projectId, name: fresh.slice(0, 80) }));
-    canvasName = fresh.slice(0, 80);
-  } else ({ id: canvasId, name: canvasName } = await chosenCanvas(args, project));
-  const snapshot = text(args.save_version).trim();
-  if (snapshot && !fresh) await project.client.mutation("canvasCollab:saveVersion", { sessionToken: project.sessionToken, teamId, canvasId, name: snapshot.slice(0, 80), ...(project.agent ? { agentName: project.agent.name } : {}) });
-  const [scene, kit] = await Promise.all([sceneOf(project, canvasId), brandOf(project)]);
-  const page = text(args.page).trim();
-  if (page) {
-    const pages = await pagesOf(project, canvasId);
-    if (pages.length && !pages.some((item) => item.id === page)) project.refuse(`No page ${page.slice(0, 40)} on "${canvasName}"; its pages: ${pages.map((item) => `"${item.name}" (${item.id})`).join(", ")}.`);
-  }
-  const assets = await admitAssets(project, teamId, canvasId, assetReferences(ops));
-  const result = applyCanvasOps(scene, ops, { assets, kit, ...(page ? { page } : {}) });
-  if (!result.changed.length) project.refuse(`Nothing changed on "${canvasName}". ${result.problems.join(" ")}`.trim());
+  const assets = await admitAssets(project, teamId, canvas.id, assetReferences(ops));
+  const result = applyCanvasOps(scene, ops, { assets, kit: options.kit ?? null, ...(options.page ? { page: options.page } : {}) });
+  if (!result.changed.length) project.refuse(`Nothing changed on "${canvas.name}". ${result.problems.join(" ")}`.trim());
   const after = new Map(scene);
   for (const node of result.changed) after.set(node.id, node);
   const streamed = Boolean(project.agent) && result.changed.length > STREAM_BATCH;
@@ -188,21 +187,169 @@ export async function editCanvas(args: Args, project: CanvasToolProject) {
   let paused = 0;
   for (let start = 0; start < result.changed.length; start += batch) {
     const nodes = result.changed.slice(start, start + batch);
-    await showAgent(project, canvasId, after, nodes);
-    await project.client.mutation("draw:updateElements", { sessionToken: project.sessionToken, teamId, canvasId, elements: nodes.map(encodeNode) });
+    await showAgent(project, canvas.id, after, nodes);
+    await project.client.mutation("draw:updateElements", { sessionToken: project.sessionToken, teamId, canvasId: canvas.id, elements: nodes.map(encodeNode) });
     if (streamed && start + batch < result.changed.length && paused < STREAM_PAUSE_TOTAL_MS) { await sleep(STREAM_PAUSE_MS); paused += STREAM_PAUSE_MS; }
   }
-  if (!streamed) await showAgent(project, canvasId, after, result.changed);
-  const created = result.created.map((node) => `${node.key ? `${node.key}=` : ""}${node.id} ${node.type} "${node.name}"`);
+  if (!streamed) await showAgent(project, canvas.id, after, result.changed);
+  return { ...result, after };
+}
+
+const createdLine = (created: readonly { id: string; key?: string; name: string; type: string }[]) =>
+  created.length ? `Created: ${created.slice(0, 80).map((node) => `${node.key ? `${node.key}=` : ""}${node.id} ${node.type} "${node.name}"`).join("; ")}${created.length > 80 ? `; and ${created.length - 80} more` : ""}.` : "";
+const skippedLine = (problems: readonly string[]) => (problems.length ? `Skipped: ${problems.slice(0, 20).join(" ")}` : "");
+
+export async function editCanvas(args: Args, project: CanvasToolProject) {
+  const ops = Array.isArray(args.ops) ? args.ops : [];
+  if (!ops.length || ops.length > OPS_MAX) project.refuse(`origin_canvas_edit needs 1 to ${OPS_MAX} ops.`);
+  const fresh = text(args.new_canvas).trim();
+  const canvas = await targetCanvas(args, project, fresh, canvasKind(args.kind));
+  const snapshot = text(args.save_version).trim();
+  if (snapshot && !fresh) await project.client.mutation("canvasCollab:saveVersion", { sessionToken: project.sessionToken, teamId: project.teamId, canvasId: canvas.id, name: snapshot.slice(0, 80), ...(project.agent ? { agentName: project.agent.name } : {}) });
+  const [scene, kit] = await Promise.all([sceneOf(project, canvas.id), brandOf(project)]);
+  const page = text(args.page).trim();
+  if (page) {
+    const pages = await pagesOf(project, canvas.id);
+    if (pages.length && !pages.some((item) => item.id === page)) project.refuse(`No page ${page.slice(0, 40)} on "${canvas.name}"; its pages: ${pages.map((item) => `"${item.name}" (${item.id})`).join(", ")}.`);
+  }
+  const result = await saveOps(project, canvas, scene, ops, { kit, ...(page ? { page } : {}) });
   const lines = [
-    `Saved ${result.changed.length} node(s) on canvas "${canvasName}" (${canvasId}) of ${project.name}; the people on it see them now.${snapshot && !fresh ? ` Saved version "${snapshot.slice(0, 80)}" first.` : ""}`,
-    created.length ? `Created: ${created.slice(0, 80).join("; ")}${created.length > 80 ? `; and ${created.length - 80} more` : ""}.` : "",
-    result.problems.length ? `Skipped: ${result.problems.slice(0, 20).join(" ")}` : "",
-    created.length ? "Check the result with origin_canvas_screenshot." : "",
+    `Saved ${result.changed.length} node(s) on canvas "${canvas.name}" (${canvas.id}) of ${project.name}; the people on it see them now.${snapshot && !fresh ? ` Saved version "${snapshot.slice(0, 80)}" first.` : ""}`,
+    createdLine(result.created), skippedLine(result.problems),
+    result.created.length ? "Check the result with origin_canvas_screenshot." : "",
   ];
-  const frames = topFrames(after, result.changed);
-  const design = designCard(project, { id: canvasId, name: canvasName }, frames, `${result.created.length ? "Designed" : "Changed"} ${framesLabel(frames.length)} on ${canvasName}`);
+  const frames = canvas.kind === "board" ? [] : topFrames(result.after, result.changed);
+  const design = designCard(project, canvas, frames, `${result.created.length ? "Designed" : "Changed"} ${canvas.kind === "board" ? "the board" : framesLabel(frames.length)} on ${canvas.name}`);
   return { text: lines.filter(Boolean).join("\n"), ...(design ? { design } : {}) };
+}
+
+const BOARD_ITEMS_MAX = 120;
+const BOARD_GRID = { columns: 4, step: STICKY_SIZE + 40 };
+const BOARD_INK = "#1E1E1E";
+const finiteNumber = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
+
+/** Adds sticky notes, text, labelled shapes, freehand strokes and connectors to a board, placing unplaced items in a grid. */
+export async function boardCanvas(args: Args, project: CanvasToolProject) {
+  const items = list(args.items).slice(0, BOARD_ITEMS_MAX);
+  const removed = (Array.isArray(args.delete) ? args.delete : []).map(text).filter(Boolean).slice(0, 200);
+  if (!items.length && !removed.length) project.refuse("origin_canvas_board needs items or delete.");
+  const canvas = await targetCanvas(args, project, text(args.new_board).trim(), "board");
+  const scene = await sceneOf(project, canvas.id);
+  const roots = (childrenIndex(scene).get(null) ?? []).filter((node) => !node.page);
+  const start = roots.length ? { x: Math.round(Math.max(...roots.map((node) => node.x + node.width)) + 120), y: Math.round(Math.min(...roots.map((node) => node.y))) } : { x: 0, y: 0 };
+  const boxes = new Map<string, Box>();
+  let slot = 0;
+  const place = (item: Args, width: number, height: number): Box => {
+    if (finiteNumber(item.x) && finiteNumber(item.y)) return { x: item.x, y: item.y, width, height };
+    const at = slot++;
+    return { x: start.x + (at % BOARD_GRID.columns) * BOARD_GRID.step, y: start.y + Math.floor(at / BOARD_GRID.columns) * BOARD_GRID.step, width, height };
+  };
+  const boxOf = (ref: string): Box | undefined => {
+    const known = boxes.get(ref);
+    if (known) return known;
+    const node = scene.get(ref);
+    return node && !node.deleted ? { ...worldOrigin(scene, node), width: node.width, height: node.height } : undefined;
+  };
+  const ops: unknown[] = removed.map((id) => ({ op: "delete", id }));
+  const problems: string[] = [];
+  items.forEach((item, at) => {
+    const key = text(item.key).trim() || `item${at + 1}`;
+    const color = text(item.color).trim() || undefined;
+    const label = text(item.text);
+    const type = text(item.type) || "sticky";
+    if (type === "sticky") {
+      const box = place(item, STICKY_SIZE, STICKY_SIZE);
+      boxes.set(key, box);
+      ops.push({ op: "create", node: stickySpec({ text: label, color, x: box.x, y: box.y, key }) });
+    } else if (type === "text") {
+      const width = finiteNumber(item.w) ? item.w : 0;
+      const box = place(item, width || 480, 60);
+      boxes.set(key, box);
+      ops.push({ op: "create", node: { type: "text", key, text: label.slice(0, 4000), x: box.x, y: box.y, ...(width ? { w: width, autoWidth: false } : {}), fontSize: finiteNumber(item.size) ? item.size : 28, fontWeight: item.bold === true ? 700 : 400, fill: color ?? BOARD_INK } });
+    } else if (type === "shape") {
+      const shape = text(item.shape);
+      const width = finiteNumber(item.w) ? item.w : 240;
+      const height = finiteNumber(item.h) ? item.h : shape === "circle" ? width : 120;
+      const box = place(item, width, height);
+      boxes.set(key, box);
+      ops.push({ op: "create", node: {
+        type: "frame", key, name: label.slice(0, 60) || "Shape", x: box.x, y: box.y, w: width, h: height, radius: shape === "circle" || shape === "pill" ? Math.min(width, height) / 2 : 12,
+        fill: color ?? "#FFFFFF", stroke: BOARD_INK, strokeWidth: 2, layout: { direction: "column", justify: "center", align: "center", padding: 16 },
+        children: label ? [{ type: "text", text: label.slice(0, 1000), w: Math.max(20, width - 32), autoWidth: false, align: "center", fontSize: 22, fill: BOARD_INK }] : [],
+      } });
+    } else if (type === "stroke") {
+      const points = (Array.isArray(item.points) ? item.points : []).flatMap((point): [number, number][] => (Array.isArray(point) && finiteNumber(point[0]) && finiteNumber(point[1]) ? [[point[0], point[1]]] : []));
+      const spec = points.length >= 2 ? strokeSpec(points, { color, ...(finiteNumber(item.width) ? { width: item.width } : {}), highlight: item.highlight === true }) : null;
+      if (spec) ops.push({ op: "create", node: { ...spec, key } }); else problems.push(`items[${at}]: a stroke needs at least two [x, y] points.`);
+    } else if (type === "connector") {
+      const from = boxOf(text(item.from));
+      const to = boxOf(text(item.to));
+      if (from && to) ops.push({ op: "create", node: { ...connectorSpec(from, to, { color, label }), key } });
+      else problems.push(`items[${at}]: connector ends ${text(item.from) || "?"} and ${text(item.to) || "?"} must be keys from this call or node ids on the board.`);
+    } else problems.push(`items[${at}]: type must be sticky, text, shape, stroke or connector.`);
+  });
+  if (!ops.length) project.refuse(`Nothing to add to "${canvas.name}". ${problems.join(" ")}`);
+  const result = await saveOps(project, canvas, scene, ops);
+  const design = designCard(project, canvas, [], `${items.length ? "Added to" : "Tidied"} ${canvas.name}`);
+  return {
+    text: [`Saved ${result.changed.length} node(s) on board "${canvas.name}" (${canvas.id}) of ${project.name}; the people on it see them now.`, createdLine(result.created), skippedLine([...problems, ...result.problems]), "See it with origin_canvas_screenshot."].filter(Boolean).join("\n"),
+    ...(design ? { design } : {}),
+  };
+}
+
+function slideContent(item: Args): SlideContent {
+  const layout = (SLIDE_LAYOUTS as readonly string[]).includes(text(item.layout)) ? text(item.layout) as SlideLayout : undefined;
+  const strings = (value: unknown) => (Array.isArray(value) ? value.map(text).filter(Boolean) : undefined);
+  const bullets = strings(item.bullets);
+  const columns = strings(item.columns);
+  return {
+    ...(layout ? { layout } : {}), title: text(item.title), subtitle: text(item.subtitle), body: text(item.body), stat: text(item.stat), image: text(item.image), notes: text(item.notes),
+    ...(bullets ? { bullets } : {}), ...(columns ? { columns } : {}),
+  };
+}
+
+type DeckEntry = { id: string } | { content: SlideContent; key: string };
+
+/** Builds or edits a presentation: adds or replaces slides from an outline, reorders them, writes speaker notes and deletes slides. */
+export async function deckCanvas(args: Args, project: CanvasToolProject) {
+  const outline = list(args.slides).slice(0, 40);
+  const notes = list(args.notes).slice(0, 80);
+  const order = (Array.isArray(args.order) ? args.order : []).map(text).filter(Boolean);
+  const removed = new Set((Array.isArray(args.delete) ? args.delete : []).map(text).filter(Boolean));
+  if (!outline.length && !notes.length && !order.length && !removed.size) project.refuse("origin_canvas_deck needs slides, order, notes or delete.");
+  const canvas = await targetCanvas(args, project, text(args.new_deck).trim(), "deck");
+  const [scene, kit] = await Promise.all([sceneOf(project, canvas.id), brandOf(project)]);
+  const existing = slidesOf(scene).map((slide) => slide.id);
+  const unknown = [...order, ...removed, ...notes.map((note) => text(note.slide)), ...outline.map((item) => text(item.replace))].filter((id) => id && !existing.includes(id));
+  if (unknown.length) project.refuse(`No slide ${unknown.slice(0, 5).join(", ")} in "${canvas.name}"; its slides in order: ${existing.map((id, at) => `${at + 1} ${id} "${scene.get(id)!.name}"`).join(", ") || "none"}.`);
+  const final: DeckEntry[] = [...order, ...existing.filter((id) => !order.includes(id))].map((id) => ({ id }));
+  const added = outline.filter((item) => !text(item.replace));
+  const at = Number.isInteger(args.at) ? Math.max(0, Math.min(final.length, Number(args.at))) : final.length;
+  final.splice(at, 0, ...added.map((item, index) => ({ content: slideContent(item), key: text(item.key).trim() || `slide${index + 1}` })));
+  outline.forEach((item, index) => {
+    const replace = text(item.replace);
+    if (!replace) return;
+    removed.add(replace);
+    final.splice(final.findIndex((entry) => "id" in entry && entry.id === replace), 0, { content: slideContent(item), key: text(item.key).trim() || `replaced${index + 1}` });
+  });
+  const live = final.filter((entry) => !("id" in entry) || !removed.has(entry.id));
+  const theme = kit ? { heading: kit.fonts.heading, body: kit.fonts.body } : {};
+  const ops: unknown[] = [...removed].map((id) => ({ op: "delete", id }));
+  live.forEach((entry, index) => { if (!("id" in entry)) ops.push({ op: "create", node: slideSpec(entry.content, index, theme, entry.key) }); });
+  ops.push(...arrangeSlides(scene, live.map((entry) => ("id" in entry ? entry.id : ""))));
+  for (const note of notes) if (!removed.has(text(note.slide))) ops.push({ op: "update", id: text(note.slide), set: { notes: text(note.text).slice(0, 10_000) } });
+  if (!ops.length) project.refuse(`"${canvas.name}" already has its slides in that order.`);
+  const result = await saveOps(project, canvas, scene, ops, { kit });
+  const slides = slidesOf(result.after);
+  const touched = topFrames(result.after, result.changed).filter((frame) => slides.some((slide) => slide.id === frame.id));
+  const design = designCard(project, canvas, touched.length ? touched : slides, `${added.length ? `Added ${added.length} slide${added.length === 1 ? "" : "s"} to` : "Edited"} ${canvas.name}`);
+  return {
+    text: [
+      `Saved presentation "${canvas.name}" (${canvas.id}) of ${project.name}; ${slides.length} slide(s) in order: ${slides.slice(0, 40).map((slide, index) => `${index + 1} ${slide.id} "${slide.name}"`).join(", ")}.`,
+      createdLine(result.created), skippedLine(result.problems), "Check a slide with origin_canvas_screenshot (node = its id) and refine it with origin_canvas_edit.",
+    ].filter(Boolean).join("\n"),
+    ...(design ? { design } : {}),
+  };
 }
 
 async function inlineImages(project: CanvasToolProject, canvasId: string, wanted: readonly string[]): Promise<Map<string, string>> {
@@ -311,7 +458,7 @@ export async function submitDesign(args: Args, project: CanvasToolProject) {
 }
 
 /** What an agent assigned an issue as design work is told to do. */
-export const DESIGN_BRIEF = "This is design work, done on a canvas in Studio's Design mode rather than in code: read the canvas with origin_canvas, build the screens as frames with origin_canvas_edit (reuse its components, and the brand kit's colour and text styles), check each frame with origin_canvas_screenshot, then call origin_design_submit with this issue, the frames and a short rationale. That links the frames to the issue, pins the rationale on the canvas and asks the Chief to review.";
+export const DESIGN_BRIEF = "This is design work, done on a design file on the project's Design page rather than in code: read the canvas with origin_canvas, build the screens as frames with origin_canvas_edit (reuse its components, and the brand kit's colour and text styles), check each frame with origin_canvas_screenshot, then call origin_design_submit with this issue, the frames and a short rationale. That links the frames to the issue, pins the rationale on the canvas and asks the Chief to review.";
 
 /** The Canvas tools of the Origin tool table, each resolving its project through `scope`. */
 export function canvasTools<Context>(scope: (args: Args, ctx: Context) => Promise<CanvasToolProject>, rasterize: Rasterize, fonts: CanvasFontLoader) {
@@ -321,5 +468,7 @@ export function canvasTools<Context>(scope: (args: Args, ctx: Context) => Promis
     async origin_canvas_screenshot(args: Args, ctx: Context) { return screenshotCanvas(args, await scope(args, ctx), rasterize, fonts); },
     async origin_canvas_comment(args: Args, ctx: Context) { return commentCanvas(args, await scope(args, ctx)); },
     async origin_design_submit(args: Args, ctx: Context) { return submitDesign(args, await scope(args, ctx)); },
+    async origin_canvas_board(args: Args, ctx: Context) { return boardCanvas(args, await scope(args, ctx)); },
+    async origin_canvas_deck(args: Args, ctx: Context) { return deckCanvas(args, await scope(args, ctx)); },
   };
 }

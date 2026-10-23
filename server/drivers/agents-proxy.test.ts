@@ -680,6 +680,8 @@ describe("agents-proxy MCP surface", () => {
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",

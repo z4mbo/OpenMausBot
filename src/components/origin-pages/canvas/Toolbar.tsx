@@ -1,11 +1,14 @@
 import { useRef, type ReactNode } from "react";
-import { Circle, Expand, Focus, Frame, Hand, ImagePlus, Layers, MessageCircle, Minus, MousePointer2, Plus, MoveUpRight, PenTool, Redo2, SlidersHorizontal, Square, Type, Undo2, Upload } from "lucide-react";
+import { Circle, Eraser, Expand, Focus, Frame, Hand, Highlighter, ImagePlus, Layers, MessageCircle, Minus, MousePointer2, Pencil, Plus, MoveUpRight, PenTool, Redo2, SlidersHorizontal, Square, StickyNote, Type, Undo2, Upload } from "lucide-react";
+import type { CanvasKind } from "../../../../shared/origin-design";
 import { usePopoverDismiss } from "@/hooks/use-popover-dismiss";
 import { cn } from "@/lib/cn";
 
-export type Tool = "move" | "hand" | "frame" | "rect" | "ellipse" | "line" | "arrow" | "text" | "pen" | "comment";
+export type Tool = "move" | "hand" | "frame" | "rect" | "ellipse" | "line" | "arrow" | "text" | "pen" | "comment" | "draw" | "highlight" | "sticky" | "eraser";
 
-const TOOLS: { tool: Tool; label: string; key: string; icon: ReactNode; edits: boolean; wideOnly?: boolean }[] = [
+type ToolEntry = { tool: Tool; label: string; key: string; icon: ReactNode; edits: boolean; wideOnly?: boolean };
+
+const TOOLS: ToolEntry[] = [
   { tool: "move", label: "Move", key: "V", icon: <MousePointer2 size={16} />, edits: false },
   { tool: "hand", label: "Hand", key: "H", icon: <Hand size={16} />, edits: false, wideOnly: true },
   { tool: "frame", label: "Frame", key: "F", icon: <Frame size={16} />, edits: true },
@@ -14,15 +17,26 @@ const TOOLS: { tool: Tool; label: string; key: string; icon: ReactNode; edits: b
   { tool: "line", label: "Line", key: "L", icon: <Minus size={16} className="-rotate-45" />, edits: true, wideOnly: true },
   { tool: "arrow", label: "Arrow", key: "Shift+L", icon: <MoveUpRight size={16} />, edits: true },
   { tool: "pen", label: "Pen", key: "P", icon: <PenTool size={16} />, edits: true, wideOnly: true },
+  { tool: "draw", label: "Pencil", key: "D", icon: <Pencil size={16} />, edits: true, wideOnly: true },
   { tool: "text", label: "Text", key: "T", icon: <Type size={16} />, edits: true },
   { tool: "comment", label: "Comment", key: "C", icon: <MessageCircle size={16} />, edits: false },
+];
+
+const BOARD_TOOLS: ToolEntry[] = [
+  ...TOOLS.filter((item) => item.tool === "move" || item.tool === "hand"),
+  { tool: "draw", label: "Pencil", key: "D", icon: <Pencil size={16} />, edits: true },
+  { tool: "highlight", label: "Highlighter", key: "M", icon: <Highlighter size={16} />, edits: true },
+  { tool: "sticky", label: "Sticky note", key: "S", icon: <StickyNote size={16} />, edits: true },
+  ...TOOLS.filter((item) => ["text", "rect", "ellipse", "arrow"].includes(item.tool)).map((item) => ({ ...item, wideOnly: item.tool !== "text" })),
+  { tool: "eraser", label: "Eraser", key: "X", icon: <Eraser size={16} />, edits: true },
+  ...TOOLS.filter((item) => item.tool === "comment"),
 ];
 
 const button = "inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-secondary outline-none transition-[background-color,color,transform] duration-150 hover:bg-raised hover:text-ink active:scale-95 focus-visible:ring-2 focus-visible:ring-accent/60 disabled:pointer-events-none disabled:opacity-35 motion-reduce:transition-none";
 const surface = "rounded-xl border border-hairline/60 bg-menu";
 
-export function CanvasToolbar({ tool, readOnly, narrow, onTool, canUndo, canRedo, onUndo, onRedo, imageMenu, onImageMenu, imagePicker, onUpload, panels, onPanels, insets = { left: 0, right: 0 } }: {
-  tool: Tool; readOnly: boolean; narrow: boolean; onTool(tool: Tool): void;
+export function CanvasToolbar({ mode = "design", options, tool, readOnly, narrow, onTool, canUndo, canRedo, onUndo, onRedo, imageMenu, onImageMenu, imagePicker, onUpload, panels, onPanels, insets = { left: 0, right: 0 } }: {
+  mode?: CanvasKind; options?: ReactNode; tool: Tool; readOnly: boolean; narrow: boolean; onTool(tool: Tool): void;
   canUndo: boolean; canRedo: boolean; onUndo(): void; onRedo(): void;
   imageMenu: boolean; onImageMenu(open: boolean): void;
   imagePicker?: (close: () => void) => ReactNode;
@@ -35,11 +49,12 @@ export function CanvasToolbar({ tool, readOnly, narrow, onTool, canUndo, canRedo
   const menu = useRef<HTMLDivElement>(null);
   usePopoverDismiss(imageMenu, menu, () => onImageMenu(false));
   return (
-    <div className="pointer-events-none absolute bottom-3 z-30 flex justify-center transition-[left,right] duration-(--motion-fast)" style={{ left: 8 + insets.left, right: 8 + insets.right }}>
+    <div className="pointer-events-none absolute bottom-3 z-30 flex flex-col items-center gap-1.5 transition-[left,right] duration-(--motion-fast)" style={{ left: 8 + insets.left, right: 8 + insets.right }}>
+      {options && <div role="toolbar" aria-label="Tool options" data-tool-options className={cn(surface, "pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto p-1 [scrollbar-width:none] animate-pop-in")}>{options}</div>}
       <div role="toolbar" aria-label="Canvas tools" className={cn(surface, "pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto p-1 [scrollbar-width:none]")}>
         <button type="button" className={cn(tight, panels.layers && "bg-raised text-ink")} aria-label="Layers" aria-pressed={panels.layers} title="Layers" onClick={() => onPanels({ ...panels, layers: !panels.layers })}><Layers size={16} /></button>
         <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-hairline/60" />
-        {TOOLS.filter((item) => (!readOnly || !item.edits) && !(narrow && item.wideOnly && tool !== item.tool)).map((item) => (
+        {(mode === "board" ? BOARD_TOOLS : TOOLS).filter((item) => (!readOnly || !item.edits) && !(narrow && item.wideOnly && tool !== item.tool)).map((item) => (
           <button key={item.tool} type="button" aria-label={item.label} aria-pressed={tool === item.tool} title={`${item.label} (${item.key})`} onClick={() => onTool(item.tool)}
             className={cn(tight, tool === item.tool && "bg-accent text-accent-ink hover:bg-accent hover:text-accent-ink")}>
             {item.icon}

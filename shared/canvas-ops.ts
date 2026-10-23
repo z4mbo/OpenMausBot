@@ -50,6 +50,8 @@ export interface CanvasSpec {
   layout?: Partial<Omit<StackLayout, "padding">> & { padding?: number | number[] } | null;
   grow?: boolean;
   link?: string;
+  /** Slides: the speaker notes; "" removes them. */
+  notes?: string;
   /** Frames only: shown on a published page as a form whose submissions become Pipeline leads; null removes it. */
   leadForm?: Partial<LeadForm> | null;
   /** Paths: flat [inDx, inDy, outDx, outDy] per point, cubic handles relative to each point. */
@@ -125,6 +127,7 @@ export function compactScene(scene: Scene, options: { root?: string; max?: numbe
     if (node.locked) spec.locked = true;
     if (node.grow) spec.grow = true;
     if (node.link) spec.link = node.link;
+    if (node.notes) spec.notes = node.notes;
     if (node.leadForm) spec.leadForm = node.leadForm;
     if (node.type === "text") {
       spec.text = (node.text ?? "").slice(0, 2000);
@@ -187,8 +190,9 @@ function applySpec(target: CanvasNode, spec: CanvasSpec, assets: ReadonlyMap<str
   if (spec.stroke !== undefined) raw.stroke = spec.stroke === null ? null : canvasColor(spec.stroke) ?? raw.stroke;
   for (const key of ["strokeWidth", "radius", "rotation", "opacity", "fontSize", "fontWeight", "lineHeight"] as const) set(key, num(spec[key]));
   for (const key of ["hidden", "locked", "autoWidth", "closed", "clip", "grow"] as const) if (typeof spec[key] === "boolean") raw[key] = spec[key];
-  for (const key of ["text", "font", "align", "imageFit", "fileId", "link"] as const) if (typeof spec[key] === "string") raw[key] = spec[key];
+  for (const key of ["text", "font", "align", "imageFit", "fileId", "link", "notes"] as const) if (typeof spec[key] === "string") raw[key] = spec[key];
   if (spec.link === "") delete raw.link;
+  if (spec.notes === "") delete raw.notes;
   if (spec.family === null || spec.family === "") delete raw.family;
   else if (typeof spec.family === "string") {
     if (isBrandFont(spec.family)) raw.family = spec.family; else problems.push(`No brand font "${spec.family.slice(0, 40)}"; use one of ${BRAND_FONT_IDS.join(", ")}.`);

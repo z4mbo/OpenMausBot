@@ -7,7 +7,7 @@ import type { Message } from "@/state/store";
 import { groupTranscript } from "@/lib/activity-runs";
 import { roomActivityVisible } from "@/lib/room-activity";
 import { chiefSectionOf } from "@/lib/origin-chief-section";
-import { studioViewOf } from "@/lib/origin-studio-view";
+import { designViewOf } from "@/lib/origin-design-view";
 import { applyCanvasOps } from "../../shared/canvas-ops";
 import { encodeNode } from "../../shared/canvas-scene";
 
@@ -65,7 +65,7 @@ describe("Origin design cards", () => {
     } finally { unmount(); }
   });
 
-  it("opens a linked project's Studio in Design mode on the first frame, and cannot open an unlinked one", () => {
+  it("opens a linked project's Design page on the first frame, and cannot open an unlinked one", () => {
     dispatch.mockClear();
     let focused: unknown = null;
     function Probe() {
@@ -87,8 +87,8 @@ describe("Origin design cards", () => {
       expect(card.dataset.openable).toBe("true");
       const open = [...card.querySelectorAll("button")].find((button) => button.textContent?.includes("Open in Design"))!;
       flushSync(() => open.click());
-      expect(chiefSectionOf("kai-chief")).toBe("studio");
-      expect(studioViewOf("kai-chief")).toBe("design");
+      expect(chiefSectionOf("kai-chief")).toBe("design");
+      expect(designViewOf("kai-chief")).toBe("design");
       expect(dispatch).toHaveBeenCalledWith({ type: "select", id: "kai-chief" });
       expect(focused).toEqual({ projectId: "kai", canvasId: "canvas1", frameId: home });
     } finally { linked.unmount(); unlinked.unmount(); probe.unmount(); }

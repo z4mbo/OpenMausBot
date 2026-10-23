@@ -1,7 +1,7 @@
 {
   "default": {
-    "bytes": 79057,
-    "sha256": "cfd2aea60ffb385edb01fc4385540515f64ab517df05a5d9eb5a85b918caa0a1",
+    "bytes": 79816,
+    "sha256": "91babd1da558a36e875ac4508f5edb7e09330f7e3d81dbaf4de7720cb48ded4d",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -61,6 +61,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -85,8 +87,8 @@
     ]
   },
   "voice": {
-    "bytes": 79798,
-    "sha256": "6b1724e98fe9d6ab2870f5579641772d5bafb5e3bcd16c680078c60eefe42aff",
+    "bytes": 80557,
+    "sha256": "2374713f4d860d2d034d958d4bff48cc400bd24160621b1bb182fd4559f868c4",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -147,6 +149,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -171,8 +175,8 @@
     ]
   },
   "shared": {
-    "bytes": 80802,
-    "sha256": "ea27c86fa4e282c9be3f7049c40716dbce11c60ef5c8fe9dd2cfc463dd1af390",
+    "bytes": 81561,
+    "sha256": "030c8c63a863699dd83ca1ce30e8a5af922b1d080ac3527a77c029c26c115bca",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -234,6 +238,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -258,8 +264,8 @@
     ]
   },
   "shared+voice": {
-    "bytes": 81543,
-    "sha256": "f64c39c49f2cdad03ee8d2977beced7c0a2a10cbd74444956ab37c4713f6e3a8",
+    "bytes": 82302,
+    "sha256": "017176976577238a94d6563a1f294c445c07253313aa8de3f9acf51154cafe83",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -322,6 +328,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -346,8 +354,8 @@
     ]
   },
   "skills": {
-    "bytes": 81956,
-    "sha256": "a75944e64de08f9b4d5522d81ceedeef3da8aec38f3cd06b47433d407b7968d4",
+    "bytes": 82715,
+    "sha256": "51e4993ffa8092e61a46b1a37986ff06703a4fcf6bb248923e71c770c565931a",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -409,6 +417,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -433,8 +443,8 @@
     ]
   },
   "skills+voice": {
-    "bytes": 82697,
-    "sha256": "ec18c5bfaa21c5a8db8dd5e5f30f072562dd78cc8b0df0c21c5828c48ba5c89c",
+    "bytes": 83456,
+    "sha256": "fde825286e3ae03ba680c573d1d79569d8dcf41d6ee40162d3931afe734730be",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -497,6 +507,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -521,8 +533,8 @@
     ]
   },
   "skills+shared": {
-    "bytes": 83701,
-    "sha256": "f58687771617d24ca8bd57954b95782a960c8313c1cebea532f2316e99cc5669",
+    "bytes": 84460,
+    "sha256": "8b702dec3c738e3912307e4cdf323b1a0e3217d959c8955783dea6fae6def6c5",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -586,6 +598,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -610,8 +624,8 @@
     ]
   },
   "skills+shared+voice": {
-    "bytes": 84442,
-    "sha256": "3907bdfc1e07c2cdbe360d2a3ec1b861f985110a1e37a2adc7c293a5ed40da84",
+    "bytes": 85201,
+    "sha256": "3ff97836cf11e77c0dcd912168042696ddacf186145e7d0b60f4bd41aa6630fd",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -676,6 +690,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -700,8 +716,8 @@
     ]
   },
   "non-chief": {
-    "bytes": 66332,
-    "sha256": "709bae05c05817b0add2e9426165683355ba58fccdfa0c27e678307a3cce18aa",
+    "bytes": 67091,
+    "sha256": "571b3d9a882c81fd6aa3d90258e2baf02b869a1a7a9dc83667fa86f489a36a2b",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -751,6 +767,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
@@ -774,8 +792,8 @@
     ]
   },
   "voice+non-chief": {
-    "bytes": 67073,
-    "sha256": "9266f0d734a129e14e8a136e0c9d8c932510d3cb41c3a520d7d7f50d006ceab4",
+    "bytes": 67832,
+    "sha256": "38976b30222576aefd6e1c88bd7e99b4b6babf542df540a4b5f5a93d7e4a5140",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -826,6 +844,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
@@ -849,8 +869,8 @@
     ]
   },
   "shared+non-chief": {
-    "bytes": 68077,
-    "sha256": "72562da4f8e0d36d4a3d1769df291339bda25b7318cf4ec8591863fcdd2d810b",
+    "bytes": 68836,
+    "sha256": "aa3f34d5b779fb429bf3852fcc7b2fde0b9e724045cfe02664a58d8c71fef833",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -902,6 +922,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
@@ -925,8 +947,8 @@
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 68818,
-    "sha256": "8643697a99d0d546aa9ba1ef67ac3989d9aec5113dd6cc322bc206474db6ea29",
+    "bytes": 69577,
+    "sha256": "3471968cfec642e7af47c770a62b114f00b01748bf668c1a6799bfd5d4a4098c",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -979,6 +1001,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
@@ -1002,8 +1026,8 @@
     ]
   },
   "skills+non-chief": {
-    "bytes": 69231,
-    "sha256": "fcb4d75b796ab826a0f6309b287878b11ee390c50e1034c87fe2cd33f42787a6",
+    "bytes": 69990,
+    "sha256": "2492d9630100cacd9c420334f1d68d67597b1b275bc7ba3db8aa84245fbfc0ff",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1055,6 +1079,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
@@ -1078,8 +1104,8 @@
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 69972,
-    "sha256": "5cc3bceeb3b184a3e1eb8b0da62653d3840a981e22641479345173ffb26f3cdd",
+    "bytes": 70731,
+    "sha256": "4cb3a296dc0582ac02da427c3b745c470c6ead995a89d222413022f29220e567",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1132,6 +1158,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
@@ -1155,8 +1183,8 @@
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 70976,
-    "sha256": "4b2bc08a1a3e0c380e2b222224393eaba43222f3b1cb4f7816f3ba46736f2c17",
+    "bytes": 71735,
+    "sha256": "42057584f168bf29c6448372bac035ab1d66a51d716b05d90c28b903ae244b65",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1210,6 +1238,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
@@ -1233,8 +1263,8 @@
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 71717,
-    "sha256": "d28e0dce561aceb318c92a438dc2c84950f22225f12de8d4df2bf8db5df5d666",
+    "bytes": 72476,
+    "sha256": "3cefec49414e21c71cc3a5b46fb6150a8d1432c4c22a2a1675ae22aff1541205",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1289,6 +1319,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
@@ -1312,8 +1344,8 @@
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 83497,
-    "sha256": "5470cce2a3dfd337929eae17fa3b6c2b1f8cb1ad8268e7f240a1659fb12b5c81",
+    "bytes": 84256,
+    "sha256": "14e9fa4b7e208f47a80ad3fe923de76ec8045765be658570a622cf60b5ac4f9b",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1377,6 +1409,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1401,8 +1435,8 @@
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 70772,
-    "sha256": "f17dd09628b937f543451aa99e9f62e7ebabc974a74b4bd053879660dd242d1b",
+    "bytes": 71531,
+    "sha256": "d6557948f3ac07946642d0570ec1cb4253963717b106637cc941e096310fb305",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1456,6 +1490,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_call_notes",
       "origin_studio_generate",
       "origin_studio_list",
@@ -1479,8 +1515,8 @@
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 85302,
-    "sha256": "edf2ba07b86c6db4ff0efaaa25d6fc35da75e9c26736b6bc1a729c0d0a56bc9e",
+    "bytes": 86061,
+    "sha256": "cb630e6a515d70d70628c78f3153f9cc164549934b8d137a7536c7a67eb7dace",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1546,6 +1582,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1570,8 +1608,8 @@
     ]
   },
   "default+legacy-switches": {
-    "bytes": 79057,
-    "sha256": "cfd2aea60ffb385edb01fc4385540515f64ab517df05a5d9eb5a85b918caa0a1",
+    "bytes": 79816,
+    "sha256": "91babd1da558a36e875ac4508f5edb7e09330f7e3d81dbaf4de7720cb48ded4d",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1631,6 +1669,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",
@@ -1655,8 +1695,8 @@
     ]
   },
   "skills+shared+voice+escalations+whole-schemas": {
-    "bytes": 103676,
-    "sha256": "bfcf69be25715e75171b3b182d0eb488ad60350f4495a94d367c9aa278f7cb40",
+    "bytes": 106711,
+    "sha256": "82d864259c27e90d00291dd336167a790131303adc05f749c7dde1f8e2382e89",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1722,6 +1762,8 @@
       "origin_canvas_screenshot",
       "origin_canvas_comment",
       "origin_design_submit",
+      "origin_canvas_board",
+      "origin_canvas_deck",
       "origin_standup",
       "origin_call_notes",
       "origin_studio_generate",

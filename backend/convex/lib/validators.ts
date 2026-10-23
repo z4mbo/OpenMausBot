@@ -87,3 +87,5 @@ export const credentialKindValidator = v.union(
   v.literal("file"),
   v.literal("service"),
 );
+
+export const canvasKindValidator = v.union(v.literal("design"), v.literal("board"), v.literal("deck"));
