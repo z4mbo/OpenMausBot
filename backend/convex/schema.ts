@@ -19,6 +19,7 @@ import { storageScope, uploadTarget } from "./lib/storageValidators";
 import {
   assetTypeValidator,
   callSignalKindValidator,
+  credentialKindValidator,
   memberStatusValidator,
   priorityValidator,
   storedProjectStatusValidator,
@@ -353,14 +354,9 @@ export default defineSchema({
 
   credentials: defineTable({
     projectId: v.id("projects"),
-    kind: v.optional(v.union(
-      v.literal("password"),
-      v.literal("api_key"),
-      v.literal("secret"),
-      v.literal("note"),
-      v.literal("apk"),
-      v.literal("file"),
-    )),
+    kind: v.optional(credentialKindValidator),
+    /** For a service sign-in, which service in shared/vault-services.ts its variables are for. */
+    service: v.optional(v.string()),
     title: v.string(),
     username: v.optional(v.string()),
     url: v.optional(v.string()),
@@ -375,6 +371,24 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_project", ["projectId"]),
+
+  /** One person's own Vault: only they list it, and their agents use an item in every project while they have it unlocked. */
+  personalCredentials: defineTable({
+    userId: v.id("users"),
+    kind: credentialKindValidator,
+    service: v.optional(v.string()),
+    title: v.string(),
+    username: v.optional(v.string()),
+    url: v.optional(v.string()),
+    ciphertext: v.string(),
+    iv: v.string(),
+    salt: v.string(),
+    iterations: v.number(),
+    kdf: v.string(),
+    agentUse: v.optional(v.boolean()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_userId", ["userId"]),
 
   designTokens: defineTable({
     projectId: v.id("projects"),

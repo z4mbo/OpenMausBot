@@ -2123,7 +2123,7 @@
     },
     {
       "name": "origin_vault_list",
-      "description": "List an Origin project's vault: titles, kinds, URLs, usernames, and the values members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's vault and the signed-in person's: titles, kinds, URLs, usernames, and the values (a service sign-in's as env vars) members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,

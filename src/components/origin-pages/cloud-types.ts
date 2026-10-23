@@ -141,11 +141,12 @@ export interface CloudDesign {
   assets: CloudDesignAsset[];
 }
 
-export type CredentialKind = "password" | "api_key" | "secret" | "note" | "apk" | "file";
+export type CredentialKind = "password" | "api_key" | "secret" | "note" | "apk" | "file" | "service";
 
 export interface CloudCredential {
   _id: string;
   kind?: CredentialKind;
+  service?: string;
   title: string;
   username?: string;
   url?: string;
