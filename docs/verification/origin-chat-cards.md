@@ -12,8 +12,9 @@ item.
 
 | Tool | Card | Actions |
 | --- | --- | --- |
-| `origin_broadcast_draft`, `origin_broadcast_list`, `origin_broadcast_schedule` | Post preview per channel, status, schedule | Approve, then Schedule; Open |
-| `origin_campaign_get`, `origin_campaign_create` | Campaign status, dates, channels, counts | Open |
+| `origin_broadcast_draft`, `origin_broadcast_list`, `origin_broadcast_schedule`, `origin_broadcast_unschedule` | Post preview per channel, status, schedule | Approve, then Schedule; Unschedule; Open |
+| `origin_campaign_get` with a campaign, `origin_campaign_create`, `origin_campaign_link` | Campaign status, dates, channels, published progress, counts | Start campaign or Mark done; Review the posts waiting for approval; Open |
+| `origin_campaign_get` without a campaign | Every campaign with status and published progress | Open each campaign |
 | `origin_list_assets`, `origin_add_asset` | Image, video and audio previews | Open each asset |
 | `origin_vault_list` | Titles, kinds and "Agents may use", never a value | Open |
 | `origin_repo_status` | Branch protection, open pull requests with checks, commits | Open, GitHub |

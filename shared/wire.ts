@@ -559,7 +559,7 @@ export interface WireMessage {
   originPullRequest?: OriginPullRequestCard;
   /** A post, generation, asset, vault entry, repository, feedback or call an Origin tool returned, drawn as a card that opens it in its project. */
   originCard?: OriginChatCard;
-  /** Canvas frames an Origin design tool worked on, drawn as thumbnails that open the canvas in Studio's Design mode. */
+  /** Canvas frames an Origin design tool worked on, drawn as thumbnails that open the canvas on the project's Design page. */
   originDesign?: OriginDesignCard;
   /** user messages: the Data result the person was viewing when they sent
    * this. `text` stays exactly what they typed. */

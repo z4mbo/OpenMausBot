@@ -238,7 +238,9 @@ export function createIntegrationKeyRoutes(file: () => string = defaultIntegrati
       }
       const keyFile = file();
       const own = readStored(keyFile)[id] ?? {};
-      const values = Object.keys(draft).length || complete(id, own) ? { ...own, ...draft } : integrationKey(id, keyFile) ?? own;
+      const mine = Object.keys(draft).length > 0 || complete(id, own);
+      if (!mine) await sharedKeys().current();
+      const values = mine ? { ...own, ...draft } : usableValues(id, sharedFor(keyFile)?.find(id, scope) ?? null) ?? own;
       const check = await checkIntegration(id, values, { fetch: deps.fetch ?? fetch, now: Date.now, nonce: () => crypto.randomUUID() });
       return json(res, 200, { check });
     }

@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { AudioLines, Clapperboard, Image as ImageIcon, LayoutGrid, PenTool, Sparkles, Workflow } from "lucide-react";
+import { AudioLines, Clapperboard, Image as ImageIcon, Sparkles, Workflow } from "lucide-react";
 import { api } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { useVideoPoster } from "@/lib/video-poster";
 import type { StudioView } from "@/lib/origin-studio-view";
 import { cardClass } from "../origin-pages/ui";
 import type { CloudDesignAsset } from "../origin-pages/cloud-types";
-import type { StudioGeneration, StudioMediaKind, StudioMode, StudioSource } from "../../../shared/studio";
+import { studioModelsFor, type StudioGeneration, type StudioMediaKind, type StudioMode, type StudioModel, type StudioSource } from "../../../shared/studio";
+import { studioPreset } from "../../../shared/studio-presets";
 
 /** A starting file the composer shows: what it is, how it looks, and how the server finds it. */
 export interface SourceRef {
@@ -34,10 +35,26 @@ export interface StudioDraft {
   sound?: boolean;
   /** The STUDIO_PRESETS entry the draft was set up from. */
   preset?: string;
+  /** The project template (studioTemplates id) the draft was set up from. */
+  template?: string;
   count: number;
   parent?: { generationId: string; action: string };
   /** A studioLibrary entry the generation follows. */
   characterId?: string;
+}
+
+export function emptyDraft(mode: StudioMode = "image"): StudioDraft {
+  return { mode, model: studioModelsFor(mode)[0]!.id, prompt: "", sources: [], references: [], count: 1 };
+}
+
+/** The draft after switching to a model: sources it cannot take are dropped, settings it lacks are cleared. */
+export function draftForModel(draft: StudioDraft, model: StudioModel): StudioDraft {
+  return {
+    ...draft, mode: model.mode, model: model.id, preset: draft.preset && studioPreset(draft.preset)?.model === model.id ? draft.preset : undefined,
+    template: model.id === draft.model ? draft.template : undefined,
+    sources: model.needs.map((kind, index) => draft.sources[index]?.kind === kind ? draft.sources[index]! : null).filter((ref): ref is SourceRef => ref !== null),
+    references: draft.references.slice(0, model.references ?? 0), count: Math.min(draft.count, model.maxCount),
+  };
 }
 
 export const studioTitle = "text-[18px] font-semibold tracking-[-0.01em] text-ink";
@@ -48,8 +65,6 @@ export const studioCard = cn(cardClass, "group relative overflow-hidden transiti
 const STUDIO_TABS = [
   { value: "create", label: "Create", icon: Sparkles, title: "Create" },
   { value: "workflows", label: "Workflows", icon: Workflow, title: "Workflows (W)" },
-  { value: "design", label: "Design", icon: PenTool, title: "Design: canvases and components" },
-  { value: "presets", label: "Presets", icon: LayoutGrid, title: "Presets (T)" },
 ] as const satisfies readonly { value: StudioView; label: string; icon: typeof Sparkles; title: string }[];
 
 export function StudioTabs({ value, onChange, compact, className }: { value: StudioView; onChange(view: StudioView): void; compact?: boolean; className?: string }) {
@@ -65,6 +80,9 @@ export function StudioTabs({ value, onChange, compact, className }: { value: Stu
     </div>
   );
 }
+
+/** The drag payload of a finished generation: its id, dropped on a prompt-bar slot or a workflow canvas. */
+export const GENERATION_DRAG = "application/x-origin-studio-generation";
 
 export const KIND_ICON: Record<StudioMediaKind, typeof ImageIcon> = { image: ImageIcon, video: Clapperboard, audio: AudioLines };
 

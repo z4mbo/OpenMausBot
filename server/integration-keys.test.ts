@@ -188,6 +188,33 @@ describe("integration check route", () => {
     } finally { shared.mockRestore(); cache.close(); }
   });
 
+  it("checks the key shared with the workspace or project the request names", async () => {
+    const file = defaultIntegrationKeysFile();
+    mkdirSync(dirname(file), { recursive: true });
+    saveIntegrationKeys("resend", null, file);
+    const share = (teamId: string, projectId: string | null, apiKey: string) => ({ integration: "resend", teamId, projectId, projectName: projectId, sharedByName: "Ada",
+      values: { apiKey, senderEmail: "shared@example.test" }, updatedAt: 1 });
+    const cache = createSharedKeys({
+      cloud: () => ({ url: "http://convex.test", sessionToken: "fixture-session", projects: {} }),
+      resolve: async () => [share("team1", null, "team1-secret"), share("team2", null, "team2-secret"), share("team1", "p1", "p1-secret")],
+    });
+    await cache.current();
+    const shared = vi.spyOn(sharedIntegrationKeys, "sharedKeys").mockReturnValue(cache);
+    try {
+      const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ data: [] }));
+      const base = await serve(file, ["admin"], { fetch: request });
+      const used = async (query: string) => {
+        request.mockClear();
+        await fetch(`${base}/api/integrations/resend/check${query}`, { method: "POST", body: "{}" });
+        return request.mock.calls[0] ? new Headers(request.mock.calls[0][1]?.headers).get("Authorization") : null;
+      };
+      expect(await used("")).toBeNull();
+      expect(await used("?teamId=team2")).toBe("Bearer team2-secret");
+      expect(await used("?teamId=team1&projectId=p1")).toBe("Bearer p1-secret");
+      expect(await used("?teamId=team1&projectId=p2")).toBe("Bearer team1-secret");
+    } finally { shared.mockRestore(); cache.close(); }
+  });
+
   it.each([
     null, [], { fields: null }, { fields: [] }, { fields: "secret" }, { fields: { unknown: "secret" } },
     { fields: { key: 42 } }, { fields: { key: "line\nbreak" } }, { fields: { key: "a".repeat(4097) } },

@@ -1,18 +1,20 @@
 import { useMemo, useState } from "react";
-import { Check, ExternalLink, Loader2, RotateCcw, ScanLine, Send, ShieldCheck, Trash2, X } from "lucide-react";
+import { Select } from "../Select";
+import { Check, Copy, ExternalLink, Loader2, Megaphone, RotateCcw, ScanLine, Send, ShieldCheck, Trash2, X } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
-import { api } from "@/state/store";
 import { cn } from "@/lib/cn";
 import {
   BROADCAST_CHANNELS, BROADCAST_RULES, REEL_CHANNELS, channelProblems, countText, mediaKindOf, reelProblems, withHashtag, withoutHashtag,
   type BroadcastAccount, type BroadcastChannel, type BroadcastFormat,
 } from "../../../shared/broadcast";
+import type { CampaignSummary } from "../../../shared/origin-campaigns";
 import type { CloudDesign } from "../origin-pages/cloud-types";
 import { Modal, Notice, Segmented, ghostButton, iconButton, inputClass, primaryButton, useAction } from "../origin-pages/ui";
 import { ChannelMark } from "./ChannelMark";
 import { ChannelPreview, PreviewTabs } from "./ChannelPreview";
 import { AccountRow, BestTimes, HashtagRow, MediaStrip, ReelPanel, type PickableAsset } from "./ComposerParts";
-import { fromLocalInput, metricSamples, toLocalInput, type BroadcastPost } from "./broadcast-model";
+import { fromLocalInput, metricSamples, toLocalInput, type BroadcastPost, type PostCampaign } from "./broadcast-model";
+import { duplicatePost, publishNow } from "./post-actions";
 import type { ChannelAccounts } from "./use-broadcast-accounts";
 
 /** Seconds of slack under which a chosen time counts as "now". */
@@ -53,7 +55,7 @@ function identity(projectName: string, account: BroadcastAccount | undefined): {
   return { name: account && !account.isDefault ? account.label : projectName, handle: slug };
 }
 
-export function BroadcastComposer({ projectId, projectName, post, slot, format = "post", canEdit, accounts, posts, onConnect, onClose }: {
+export function BroadcastComposer({ projectId, projectName, post, slot, format = "post", canEdit, accounts, posts, campaigns, postCampaigns, initialCampaignId, onOpenPost, onConnect, onClose }: {
   projectId: string;
   projectName: string;
   post: BroadcastPost | null;
@@ -62,6 +64,11 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
   canEdit: boolean;
   accounts: ChannelAccounts | null;
   posts: readonly BroadcastPost[];
+  campaigns: readonly CampaignSummary[];
+  /** The campaigns that already list this post. */
+  postCampaigns: readonly PostCampaign[];
+  initialCampaignId?: string;
+  onOpenPost(postId: string): void;
   onConnect(): void;
   onClose(): void;
 }) {
@@ -69,6 +76,7 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
   const [tab, setTab] = useState<BroadcastChannel | "all">("all");
   const [previewChannel, setPreviewChannel] = useState<BroadcastChannel | null>(null);
   const [safeZones, setSafeZones] = useState(true);
+  const [campaignId, setCampaignId] = useState(() => postCampaigns[0]?.id ?? initialCampaignId ?? "");
   const design = useCloudQuery<CloudDesign>("design:list", { projectId });
   const action = useAction();
   const published = new Map((post?.variants ?? []).filter((variant) => variant.result === "published").map((variant) => [variant.channel, variant]));
@@ -122,7 +130,18 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
     return options.find((account) => account.id === draft.accounts[channel]) ?? options[0];
   };
 
-  const save = async () => cloudMutation<string>("broadcast:save", {
+  const linkCampaign = async (postId: string) => {
+    const before = postCampaigns[0]?.id ?? "";
+    if (campaignId === before) return;
+    if (before) await cloudMutation("campaigns:link", { projectId, campaignId: before, kind: "post", itemId: postId, remove: true });
+    if (campaignId) await cloudMutation("campaigns:link", { projectId, campaignId, kind: "post", itemId: postId });
+  };
+  const save = async () => {
+    const postId = await saveFields();
+    await linkCampaign(postId);
+    return postId;
+  };
+  const saveFields = async () => cloudMutation<string>("broadcast:save", {
     projectId, ...(post ? { postId: post._id } : {}), assetIds: draft.assetIds, format: draft.format,
     ...(reel ? { reel: { coverMs: draft.coverMs, ...(draft.music.trim() ? { music: draft.music.trim() } : {}) } } : {}),
     variants: draft.channels.map((channel) => {
@@ -138,9 +157,13 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
   }, "Could not approve the post");
   const schedule = () => run(async () => {
     const postId = await save();
-    await cloudMutation("broadcast:schedule", { postId, ...(now ? {} : { at }) });
-    if (now) void api("/api/origin/broadcast/run", { method: "POST" }).catch(() => undefined);
+    if (now) await publishNow(postId);
+    else await cloudMutation("broadcast:schedule", { postId, at });
   }, "Could not schedule the post");
+  const duplicate = () => run(async () => {
+    const postId = await duplicatePost(projectId, post!, postCampaigns);
+    onOpenPost(postId);
+  }, "Could not copy the post", false);
   const unschedule = () => run(() => cloudMutation("broadcast:unschedule", { postId: post!._id }), "Could not unschedule the post");
   const remove = () => {
     if (!post || !window.confirm("Delete this post?")) return;
@@ -178,6 +201,16 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
               })}
             </div>
           </div>
+
+          {campaigns.length > 0 && (
+            <label className="flex w-fit max-w-full items-center gap-2 text-[12px] text-ink-secondary">
+              <Megaphone size={13} className="shrink-0 text-ink-tertiary" aria-hidden="true" />Campaign
+              <Select size="sm" className="min-w-0 max-w-[240px]" aria-label="Campaign" value={campaignId} disabled={locked} onChange={(event) => setCampaignId(event.target.value)}>
+                <option value="">None</option>
+                {campaigns.map((campaign) => <option key={campaign._id} value={campaign._id}>{campaign.name}</option>)}
+              </Select>
+            </label>
+          )}
 
           <AccountRow channels={open} accounts={accounts} chosen={draft.accounts} locked={locked} onConnect={onConnect}
             onChoose={(channel, accountId) => set({ accounts: { ...draft.accounts, [channel]: accountId } })} />
@@ -265,6 +298,7 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
             </label>
             <div className="ml-auto flex flex-wrap items-center gap-2">
               {post && <button type="button" className={iconButton} aria-label="Delete post" title="Delete post" disabled={action.busy} onClick={remove}><Trash2 size={14} /></button>}
+              {post && <button type="button" className={iconButton} aria-label="Duplicate post" title="Duplicate as a new draft" disabled={action.busy} onClick={duplicate}><Copy size={14} /></button>}
               {post?.status === "scheduled" && <button type="button" className={ghostButton} disabled={action.busy} onClick={unschedule}>Unschedule</button>}
               <button type="button" className={ghostButton} disabled={action.busy || !draft.channels.length} onClick={saveDraft}>Save draft</button>
               {needsApproval ? (
@@ -286,7 +320,10 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
               <ChannelMark channel={variant.channel} size={12} />Open on {BROADCAST_RULES[variant.channel].label}<ExternalLink size={11} />
             </a>
           ))}
-          {canEdit && post.status === "published" && <button type="button" className={cn(iconButton, "ml-auto")} aria-label="Delete post" disabled={action.busy} onClick={remove}><Trash2 size={14} /></button>}
+          {canEdit && post.status === "published" && <>
+            <button type="button" className={cn(iconButton, "ml-auto")} aria-label="Duplicate post" title="Duplicate as a new draft" disabled={action.busy} onClick={duplicate}><Copy size={14} /></button>
+            <button type="button" className={iconButton} aria-label="Delete post" disabled={action.busy} onClick={remove}><Trash2 size={14} /></button>
+          </>}
         </div>
       )}
     </Modal>

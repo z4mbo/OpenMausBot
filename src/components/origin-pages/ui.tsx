@@ -154,7 +154,7 @@ function SetUpProject({ projectName, label, link }: { projectName: string; label
     if (!link || !choice) return;
     await linkCloudRecord({ projects: { [link.botId]: choice } });
   }, "Could not link the project");
-  const body = `${projectName} has no ${label.toLowerCase()} yet. Set up its shared project to track issues, assets, secrets and feedback with your team and its agents.`;
+  const body = `${projectName} has no ${label.toLowerCase()} yet. Set up its shared project to track issues, assets, secrets and feedback with your team.`;
   if (!link || !teamId) {
     return <EmptyState icon={<FolderPlus size={22} />} title={`Set up ${projectName}`}
       body={`${body} Move ${projectName} into a shared workspace first.`} />;

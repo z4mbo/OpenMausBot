@@ -3,10 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { runOriginTool, type OriginCloudClient, type OriginTeamChat, type OriginToolDeps } from "./origin-cloud.ts";
+import { runOriginTool, type OriginCloudClient, type OriginToolDeps } from "./origin-cloud.ts";
+import type { OriginTeamChat } from "./origin-team-chat.ts";
 import { originTeamChat } from "./origin-members.ts";
 import { createOriginTurnContext } from "./origin-project-context.ts";
 import { projectFolderName, projectFolderState, readFolderState, reconcileProjectFolders } from "./origin-project-folders.ts";
+import { localRealtimeBackend } from "./origin-realtime-backend.ts";
 import { openRealtimeStore } from "./origin-realtime-store.ts";
 import type { BotRecord } from "./store.ts";
 
@@ -79,12 +81,12 @@ function fakeChat() {
   const posts: { teamId: string; projectId: string; agent: { id: string; name: string }; body: string }[] = [];
   const reads: string[] = [];
   const chat: OriginTeamChat = {
-    recent: (_teamId, projectId, limit) => {
+    recent: async (_teamId, projectId, limit) => {
       reads.push(projectId);
       return [{ id: "m1", authorName: "Ana", body: `Hello ${projectId} team`, createdAt: 0 }].slice(0, limit);
     },
-    workspace: (teamId, limit) => [{ id: "w1", authorName: "Ben", body: `Launch party is on Friday for ${teamId}`, createdAt: 0 }].slice(0, limit),
-    post: (teamId, projectId, agent, body) => {
+    workspace: async (teamId, limit) => [{ id: "w1", authorName: "Ben", body: `Launch party is on Friday for ${teamId}`, createdAt: 0 }].slice(0, limit),
+    post: async (teamId, projectId, agent, body) => {
       posts.push({ teamId, projectId, agent, body });
       return { id: "m2", authorName: agent.name, body, createdAt: 1 };
     },
@@ -159,22 +161,23 @@ describe("Origin project tools stay in the caller's project", () => {
 });
 
 describe("project team chat", () => {
-  it("posts as the agent in the project's conversation and reads it back", () => {
+  it("posts as the agent in the project's conversation and reads it back", async () => {
     const store = openRealtimeStore(join(tempDir(), "rt.sqlite"));
     try {
-      const chat = originTeamChat(() => store);
-      chat.post("team1", "kaiproject01", { id: "kai-dev", name: "Developer" }, "Cloned and running on :5173");
-      expect(chat.recent("team1", "kaiproject01", 5)).toMatchObject([{ authorName: "Developer", body: "Cloned and running on :5173" }]);
-      expect(chat.recent("team1", "yukiproject1", 5)).toEqual([]);
-      expect(chat.recent("team2", "kaiproject01", 5)).toEqual([]);
+      const backend = localRealtimeBackend(() => store, { id: () => "f", write: () => undefined, read: () => new Uint8Array() });
+      const chat = originTeamChat(() => backend, () => "token");
+      await chat.post("team1", "kaiproject01", { id: "kai-dev", name: "Developer" }, "Cloned and running on :5173");
+      expect(await chat.recent("team1", "kaiproject01", 5)).toMatchObject([{ authorName: "Developer", body: "Cloned and running on :5173" }]);
+      expect(await chat.recent("team1", "yukiproject1", 5)).toEqual([]);
+      expect(await chat.recent("team2", "kaiproject01", 5)).toEqual([]);
       const scope = { user: { userId: "u1", name: "Ana", email: "a@x.dev", teamId: "team1", role: "member" }, conversation: "project:kaiproject01" as const };
       expect(store.messages(scope)[0]).toMatchObject({ authorUserId: "agent:kai-dev", authorName: "Developer" });
       const ana = { userId: "u1", name: "Ana", email: "a@x.dev", teamId: "team1", role: "member" as const };
       store.send({ user: ana, conversation: "" }, "Everyone: launch party Friday");
       const dm = store.openDirectConversation(ana, "u2");
       store.send({ user: ana, conversation: dm }, "Private note");
-      expect(chat.workspace!("team1", 5)).toMatchObject([{ authorName: "Ana", body: "Everyone: launch party Friday" }]);
-      expect(chat.workspace!("team2", 5)).toEqual([]);
+      expect(await chat.workspace!("team1", 5)).toMatchObject([{ authorName: "Ana", body: "Everyone: launch party Friday" }]);
+      expect(await chat.workspace!("team2", 5)).toEqual([]);
     } finally {
       store.close();
     }

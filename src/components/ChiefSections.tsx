@@ -6,7 +6,6 @@ export type { ChiefSection };
 import { openBot } from "@/state/thread-navigation";
 import { useShowThreads } from "@/lib/thread-preferences";
 import { BotAvatar } from "./Avatar";
-import { ProjectAgentsPage } from "./ProjectAgentsPage";
 import { AssignIssueDialog, AssetsPage, CallPage, FeedbackPage, IssuesPage, ProjectSettingsPage, RepoPage, TeamChatPage, VaultPage, implementBrief, issueBrief, type AssignableIssue } from "./origin-pages";
 import { useCloudProjectFor, useCloudWorkspaceFor } from "@/lib/origin-cloud-links";
 import { GlassHeaderFrame } from "./GlassScrollFrame";
@@ -14,6 +13,7 @@ import { openOriginPage } from "@/lib/origin-pages";
 import { requestIssueFocus } from "@/lib/origin-issue-focus";
 import { handOff as handIssueTo } from "@/lib/origin-handoff";
 import { StudioPage } from "./origin-studio/StudioPage";
+import { DesignPage } from "./origin-design/DesignPage";
 import { BroadcastPage } from "./origin-broadcast/BroadcastPage";
 import { LaunchpadDialog } from "./origin-launchpad/LaunchpadDialog";
 import { ChiefSectionBar } from "./ProjectSectionBar";
@@ -47,7 +47,6 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   const [assigning, setAssigning] = useState<AssignableIssue | null>(null);
   const [launching, setLaunching] = useState(false);
   const launchpad = launching && <LaunchpadDialog target={{ kind: "project", chief: bot, projectName: bot.name }} onClose={() => setLaunching(false)} />;
-  if (section === "agents") return <ProjectAgentsPage lead={bot} agents={teamAgents(state.bots, bot)} />;
   const page = { cloudProjectId: cloudProjectId ?? null, projectName: bot.name, link: { botId: bot.id, teamId: cloudTeamId ?? null } };
   if (section === "issues") {
     const team = [bot, ...teamAgents(state.bots, bot)];
@@ -80,6 +79,7 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   if (section === "team-chat") return <TeamChatPage {...page} />;
   if (section === "call") return <CallPage {...page} agent={bot} open={() => { setChiefSectionOf(bot.id, "call"); openOriginPage(null); openBot(dispatch, bot, showThreads); }} />;
   if (section === "studio") return <StudioPage {...page} agent={bot} />;
+  if (section === "design") return <DesignPage {...page} agent={bot} />;
   if (section === "broadcast") return <BroadcastPage {...page} agent={bot} />;
   return <ProjectSettingsPage {...page} />;
 }
@@ -93,7 +93,7 @@ export function AgentProjectBar({ agent }: { agent: Bot }) {
   if (!chief) return null;
   return (
     <div data-agent-project-bar className="flex shrink-0 items-center gap-2 border-b border-hairline/40 px-4 py-2 pl-11 text-[13px] md:pl-4">
-      <button type="button" onClick={() => { setChiefSectionOf(chief.id, "agents"); openBot(dispatch, chief, showThreads); }}
+      <button type="button" onClick={() => { setChiefSectionOf(chief.id, "chat"); openBot(dispatch, chief, showThreads); }}
         className="flex items-center gap-2 rounded-lg px-2 py-1 text-ink-secondary hover:bg-raised hover:text-ink">
         <ArrowLeft size={14} aria-hidden="true" /><BotAvatar bot={chief} size={18} /><span className="font-medium">{chief.name}</span>
       </button>

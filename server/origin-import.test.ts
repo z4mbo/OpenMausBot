@@ -9,7 +9,6 @@ import { closeMessageDb } from "./message-db.ts";
 import { readOriginCloud, writeOriginCloud } from "./origin-cloud.ts";
 import { readWorkspaceLinks } from "./origin-cloud-sync.ts";
 import { createOriginImportRoutes } from "./routes/origin-import.ts";
-import { DEFAULT_TEAM_ROLES } from "./origin-teams.ts";
 import type { RequestAuth } from "./request-auth.ts";
 import { dispatchRoutes } from "./routes/table.ts";
 import { Store, type BotRecord } from "./store.ts";
@@ -98,25 +97,25 @@ describe("resumable Origin imports through HTTP", () => {
     expect(answers.map((answer) => answer.status).sort()).toEqual([200, 200, 201]);
     expect(new Set(answers.map((answer) => answer.body.bot!.id)).size).toBe(1);
     const chief = answers[0].body.bot!;
-    expect(f.store.bots).toHaveLength(8);
-    expect(answers[0].body.members?.map((member) => member.name)).toEqual(DEFAULT_TEAM_ROLES.map((role) => role.name));
+    expect(f.store.bots).toHaveLength(2);
+    expect(answers[0].body.members).toEqual([]);
     expect(f.store.bot(head.id)?.managedSections).toEqual([chief.section]);
     for (const bot of f.store.bots) expect(bot.modelSelection).toEqual(selection);
     expect(readWorkspaceLinks(f.linksFile)).toEqual({ [head.id]: "team1" });
     expect(readOriginCloud(f.cloudFile).projects).toEqual({ [chief.id]: "project1" });
     const loaded = new Store(() => selection);
-    expect(loaded.bots).toHaveLength(8);
+    expect(loaded.bots).toHaveLength(2);
     expect(loaded.bot(chief.id)?.originImport).toMatchObject({ deployment: "http://127.0.0.1:3210", kind: "project", cloudId: "project1", workspaceId: head.id, memberIds: expect.any(Array) });
     f.store.bots = loaded.bots;
     expect(await f.project(head.id)).toMatchObject({ status: 200, body: { bot: { id: chief.id }, replayed: true } });
-    expect(f.store.bots).toHaveLength(8);
+    expect(f.store.bots).toHaveLength(2);
     expect(f.changed).toHaveBeenCalledOnce();
   });
 
-  it("rejects repeated full-team capacity failures without creating orphan Chiefs or changing the workspace", async () => {
-    const f = await fixture({ limit: 7 });
+  it("rejects repeated capacity failures without creating orphan Chiefs or changing the workspace", async () => {
+    const f = await fixture({ limit: 1 });
     const head = (await f.workspace()).body.bot!;
-    for (let round = 0; round < 3; round++) expect(await f.project(head.id)).toMatchObject({ status: 409, body: { error: "this workspace is limited to 7 bots" } });
+    for (let round = 0; round < 3; round++) expect(await f.project(head.id)).toMatchObject({ status: 409, body: { error: "this workspace is limited to 1 bots" } });
     expect(f.store.bots.map((bot) => bot.id)).toEqual([head.id]);
     expect(f.store.bot(head.id)?.managedSections).toBeUndefined();
     expect(readOriginCloud(f.cloudFile).projects).toEqual({});
@@ -144,7 +143,7 @@ describe("resumable Origin imports through HTTP", () => {
     expect(new Store(() => selection).bots.map((bot) => bot.id)).toEqual([head.id]);
     expect(readOriginCloud(f.cloudFile).projects).toEqual({});
     expect((await f.project(head.id)).status).toBe(201);
-    expect(f.store.bots).toHaveLength(8);
+    expect(f.store.bots).toHaveLength(2);
   });
 
   it("reconnects a saved workspace after a failed link write without recreating its head", async () => {
@@ -160,19 +159,19 @@ describe("resumable Origin imports through HTTP", () => {
     expect(readWorkspaceLinks(linksFile)).toEqual({ [head.id]: "team1" });
   });
 
-  it("reconnects a complete project after a failed link write without recreating its Chief or specialists", async () => {
+  it("reconnects a complete project after a failed link write without recreating its Chief", async () => {
     const f = await fixture();
     const head = (await f.workspace()).body.bot!;
     const blocked = `${f.cloudFile}.${process.pid}.tmp`;
     mkdirSync(blocked);
     expect((await f.project(head.id)).status).toBe(503);
-    expect(f.store.bots).toHaveLength(8);
+    expect(f.store.bots).toHaveLength(2);
     const chief = f.store.bots.find((bot) => bot.originImport?.kind === "project")!;
     expect(readOriginCloud(f.cloudFile).projects).toEqual({});
     rmdirSync(blocked);
     f.store.bots = new Store(() => selection).bots;
     expect(await f.project(head.id)).toMatchObject({ status: 200, body: { bot: { id: chief.id }, members: expect.any(Array), replayed: true } });
-    expect(f.store.bots).toHaveLength(8);
+    expect(f.store.bots).toHaveLength(2);
     expect(readOriginCloud(f.cloudFile).projects).toEqual({ [chief.id]: "project1" });
   });
 

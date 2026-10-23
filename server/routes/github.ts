@@ -359,7 +359,7 @@ export function createGitHubRoutes(deps: Pick<GitHubRouteDeps, "service">): Rout
         const taskIds = open.filter((task) => !task.githubIssueNumber && !drafts.has(task.columnId)).slice(0, MIRROR_BATCH).map((task) => task._id);
         const results = await mirrorTasks(github, project._id, taskIds);
         if (wanted) results.push(...open.filter((task) => !task.githubIssueNumber && drafts.has(task.columnId)).map((task) => ({ taskId: task._id, error: DRAFT_STAYS_LOCAL })));
-        const linked = wanted ? open.flatMap((task) => (task.githubIssueNumber ? [{ taskId: task._id, issueNumber: task.githubIssueNumber }] : [])) : [];
+        const linked = wanted ? board.tasks.flatMap((task) => (wanted.has(task._id) && task.githubIssueNumber ? [{ taskId: task._id, issueNumber: task.githubIssueNumber }] : [])) : [];
         for (const { taskId, issueNumber } of linked.slice(0, MIRROR_BATCH)) {
           results.push(await syncLinkedTask(github, project._id, taskId, issueNumber, project.repoUrl).then(
             (): MirrorResult => ({ taskId, issueNumber }),

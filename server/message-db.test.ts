@@ -315,6 +315,8 @@ describe("message-db", () => {
 
     expect(searchMessages("railway", 40, "t5").map((hit) => hit.threadId)).toEqual(["t5"]);
     expect(searchMessages("railway", 40, "missing")).toEqual([]);
+    expect(searchMessages("railway", 1, ["t5", "missing"]).map((hit) => hit.threadId)).toEqual(["t5"]);
+    expect(searchMessages("railway", 40, [])).toEqual([]);
   });
 
   it("search reports the match offset for highlighting, and finds activity chips by tool name", () => {

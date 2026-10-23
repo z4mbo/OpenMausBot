@@ -12,19 +12,19 @@ export interface SearchHit {
   from?: string;
 }
 
-export function searchMessagesInDatabase(database: DatabaseSync, query: string, limit = 40, threadId?: string): SearchHit[] {
+export function searchMessagesInDatabase(database: DatabaseSync, query: string, limit = 40, threads?: string | readonly string[]): SearchHit[] {
   const needle = query.trim().toLowerCase();
   if (!needle) return [];
   const pattern = `%${needle.replace(/([\\%_])/g, "\\$1")}%`;
-  const scope = threadId ? "thread_id = ? AND " : "";
+  const scope = threads === undefined ? "" : "thread_id IN (SELECT value FROM json_each(?)) AND ";
   const statement = database.prepare(
     "SELECT thread_id, id, at, role, kind, text, json_extract(json, '$.tool.name') AS tool_name, json_extract(json, '$.from.name') AS from_name FROM messages " +
       `WHERE ${scope}((kind = 'text' AND text IS NOT NULL AND lower(text) LIKE ? ESCAPE '\\') ` +
       "   OR (kind = 'activity' AND tool_name IS NOT NULL AND lower(tool_name) LIKE ? ESCAPE '\\')) " +
       "ORDER BY at DESC LIMIT ?",
   );
-  const rows = (threadId
-    ? statement.all(threadId, pattern, pattern, limit)
+  const rows = (threads !== undefined
+    ? statement.all(JSON.stringify(typeof threads === "string" ? [threads] : threads), pattern, pattern, limit)
     : statement.all(pattern, pattern, limit)) as Array<{
     thread_id: string;
     id: string;

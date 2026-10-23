@@ -38,6 +38,8 @@ function fakeConvex() {
     _id: "char-mia", projectId: "kai", name: "Mia", kind: "character", description: "Red bob haircut, green bomber jacket", referenceAssetIds: ["asset-link"],
     references: [{ assetId: "asset-link", url: "https://images.example.com/mood.png" }], createdByName: "Ana", createdAt: 1, updatedAt: 1,
   };
+  const templates: Record<string, unknown>[] = [];
+  const workflows: Record<string, unknown>[] = [];
   let posts = 0;
   const uploads: Array<{ url: string; bytes: number; contentType: string }> = [];
   let next = 1;
@@ -111,6 +113,13 @@ function fakeConvex() {
       case "studioLibrary:get": return args.characterId === mia._id ? mia : null;
       case "studioLibrary:list": return [mia];
       case "studioLibrary:save": return "char-new";
+      case "studioTemplates:list": return templates;
+      case "studioTemplates:save": {
+        const templateId = `tpl${templates.length + 1}`;
+        templates.push({ _id: templateId, projectId: args.projectId, name: args.name, description: args.description ?? "", mode: args.mode, model: args.model, prompt: args.prompt, params: args.params, sources: (args.sourceAssetIds as string[]).map((assetId) => ({ assetId, kind: "image", url: "https://images.example.com/mood.png", name: "Moodboard" })), createdByName: "Ana", agentName: args.agentName, createdAt: 1, updatedAt: 1 });
+        return templateId;
+      }
+      case "studioWorkflows:save": workflows.push(args); return `wf${workflows.length}`;
       case "broadcast:save": return `post${++posts}`;
       case "studioUpload:assemble": return "storage-joined";
       case "projects:get": return { _id: args.projectId, name: "Kai", teamId: "team1", memberRole: "member" };
@@ -126,7 +135,7 @@ function fakeConvex() {
       return `storage${uploads.length}`;
     },
   };
-  return { client, rows, runs, calls, uploads };
+  return { client, rows, runs, calls, uploads, templates, workflows };
 }
 
 function fakeFal(options: { submitStatus?: number; submitBody?: unknown; result?: unknown; failWith?: string; cancelled?: "requested" | "completed"; origin?: string; queued?: number } = {}) {
@@ -529,6 +538,47 @@ describe("Studio agent tools", () => {
     studio.stop();
   });
 
+  it("saves a generation as a template, lists it and fills its blanks", async () => {
+    const base = setup();
+    const studio = createStudioRunner({ ...base.deps, pollMs: 1 });
+    const toolDeps = { bots: BOTS, state: { url: DEPLOYMENT, sessionToken: "session", projects: { "kai-chief": "kai" } }, connect: () => base.convex.client, studio };
+    await runOriginTool("origin_studio_generate", { mode: "edit", model: "fal-ai/nano-banana-pro/edit", prompt: "Put the logo on a mug", sources: ["asset-link"], wait: true }, "kai-dev", toolDeps);
+    const saved = await runOriginTool("origin_studio_template_save", { generation_id: "gen1", name: "Merch mockup", prompt: "Put the logo on [Item: a mug] in [a sunny kitchen]" }, "kai-dev", toolDeps);
+    expect(saved.text).toContain("Saved template tpl1 \"Merch mockup\"");
+    expect(saved.text).toContain("2 blank(s)");
+    expect(base.convex.calls.find((call) => call.name === "studioTemplates:save")!.args).toMatchObject({ model: "fal-ai/nano-banana-pro/edit", mode: "edit", generationId: "gen1", agentName: "Designer" });
+    expect(saved.studio!.templates).toEqual([{ id: "tpl1", name: "Merch mockup", description: "", inputs: ["Image"], blanks: ["Item", "a sunny kitchen"] }]);
+    const listed = await runOriginTool("origin_studio_presets", {}, "kai-dev", toolDeps);
+    expect(listed.text).toContain("tpl1 \"Merch mockup\"");
+    expect(listed.text).toContain("blanks: Item (default \"a mug\"); a sunny kitchen");
+    expect(listed.studio!.templates!.map((template) => template.id)).toEqual(["tpl1"]);
+    base.convex.templates[0]!.sources = [{ assetId: "asset-link", kind: "image", url: "https://images.example.com/mood.png", name: "Moodboard" }];
+    await runOriginTool("origin_studio_generate", { template: "merch mockup", fill: { item: "a tote bag" }, wait: false }, "kai-dev", toolDeps);
+    expect(base.convex.rows.get("gen2")).toMatchObject({ model: "fal-ai/nano-banana-pro/edit", prompt: "Put the logo on a tote bag in a sunny kitchen", params: { template: "tpl1" } });
+    expect(await runOriginTool("origin_studio_generate", { template: "nope" }, "kai-dev", toolDeps)).toMatchObject({ isError: true, text: expect.stringContaining("No template \"nope\"") });
+    studio.stop();
+  });
+
+  it("saves a workflow from a template or a generation and runs a template with its blanks filled", async () => {
+    const base = setup();
+    const studio = createStudioRunner({ ...base.deps, pollMs: 1 });
+    const studioWorkflows = createWorkflowExecutor({ runner: () => studio, cloud: () => base.cloud, journalFile: scratch("runs.json"), pollMs: 1, now: () => Date.now() });
+    const toolDeps = { bots: BOTS, state: { url: DEPLOYMENT, sessionToken: "session", projects: { "kai-chief": "kai" } }, connect: () => base.convex.client, studio, studioWorkflows };
+    const fromTemplate = await runOriginTool("origin_studio_workflow_save", { from: "template:talking-avatar", name: "Founder video" }, "kai-dev", toolDeps);
+    expect(fromTemplate.text).toContain("Saved workflow wf1 \"Founder video\"");
+    await runOriginTool("origin_studio_generate", { prompt: "a red sneaker", wait: true }, "kai-dev", toolDeps);
+    await runOriginTool("origin_studio_generate", { mode: "video", prompt: "it spins", sources: ["gen1"], wait: false }, "kai-dev", toolDeps);
+    const fromGeneration = await runOriginTool("origin_studio_workflow_save", { from: "gen2", name: "Sneaker spin" }, "kai-dev", toolDeps);
+    expect(fromGeneration.text).toContain("steps: Nano Banana Pro → Veo 3.1 · animate");
+    const graph = base.convex.workflows[1]!.graph as StudioWorkflowRun["graph"];
+    expect(graph.edges).toContainEqual(expect.objectContaining({ from: "m1", to: "m2", toPort: "in0" }));
+    expect(graph.nodes.filter((node) => node.type === "prompt").map((node) => node.params.text)).toEqual(["a red sneaker", "it spins"]);
+    const ran = await runOriginTool("origin_studio_workflow_run", { workflow_id: "template:podcast-kit", wait: true }, "kai-dev", toolDeps);
+    expect(ran.studio).toMatchObject({ projectId: "kai", runs: [{ id: "run1", status: "done", done: 9, total: 9 }] });
+    expect(ran.studio!.runs![0]!.outputs.map((output) => output.name)).toEqual(["Podcast cover", "Voice intro", "Intro music"]);
+    studio.stop();
+  });
+
   it("lists presets and generates with one, keeping what the agent passes", async () => {
     const base = setup();
     const studio = createStudioRunner({ ...base.deps, pollMs: 1 });
@@ -558,6 +608,8 @@ describe("Studio agent tools", () => {
     expect(base.convex.rows.get("gen3")!.prompt).toBe("Warm golden hour sunlight from the left, soft shadows, cinematic");
     const unknown = await runOriginTool("origin_studio_generate", { preset: "nope", sources: ["asset-link"] }, "kai-dev", toolDeps);
     expect(unknown).toMatchObject({ isError: true, text: expect.stringContaining("No Studio preset nope") });
+    await runOriginTool("origin_studio_generate", { preset: "object-swap", fill: { "the sofa": "the lamp" }, sources: ["asset-link"], wait: false }, "kai-dev", toolDeps);
+    expect(base.convex.rows.get("gen4")!.prompt).toBe("Replace the lamp with a green velvet armchair, matching the room's perspective, light and shadows");
     studio.stop();
   });
 });

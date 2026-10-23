@@ -50,6 +50,19 @@ describe("campaigns", () => {
     expect(detail?.posts).toEqual([]);
   });
 
+  test("a summary lists its posts and counts the agent drafts waiting for approval", async () => {
+    const f = await fixture();
+    const base = { sessionToken: f.sessionToken, projectId: f.projectId };
+    const campaignId = await f.t.mutation(api.campaigns.create, { ...base, name: "Launch" });
+    const mine = await f.t.mutation(api.broadcast.save, { ...base, variants: [{ channel: "x", text: "Mine" }], assetIds: [] });
+    const agents = await f.t.mutation(api.broadcast.save, { ...base, variants: [{ channel: "x", text: "Agent's" }], assetIds: [], agent: { botId: "b1", name: "Atlas" } });
+    for (const itemId of [mine, agents]) await f.t.mutation(api.campaigns.link, { ...base, campaignId, kind: "post", itemId });
+    const summary = async () => (await f.t.query(api.campaigns.list, base)).campaigns[0];
+    expect(await summary()).toMatchObject({ postIds: [mine, agents], counts: { posts: 2, approval: 1 } });
+    await f.t.mutation(api.broadcast.approve, { sessionToken: f.sessionToken, postId: agents });
+    expect((await summary()).counts.approval).toBe(0);
+  });
+
   test("viewers cannot change a campaign, and dates must be in order", async () => {
     const f = await fixture();
     const campaignId = await f.t.mutation(api.campaigns.create, { sessionToken: f.sessionToken, projectId: f.projectId, name: "Launch", startDate: "2026-11-10" });

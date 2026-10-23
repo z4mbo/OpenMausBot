@@ -179,6 +179,9 @@ function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
   useEffect(() => {
     setDrawerOpen(false);
   }, [state.selectedId, bot?.threadId, group?.threadId, state.activeView, state.pluginsOpen, state.settingsOpen, originPage]);
+  useEffect(() => {
+    if (paletteOpen) setDrawerOpen(false);
+  }, [paletteOpen]);
 
   useEffect(() => {
     if (state.activeView === "routines" && previousViewRef.current !== "routines") {
@@ -276,6 +279,7 @@ function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
       <UpdateBanner sidebarIndicator={!calendarFocus && (sidebarInline || drawerOpen)} />
       <AppNotices quiet={paletteOpen || drawerOpen || Boolean(localVmWorkspaceBotId)} viewer={viewer} />
       <div className="relative flex min-h-0 flex-1" data-origin-inset={INSET_PAGE ? "" : undefined}>
+      {INSET_PAGE && captionChrome.draggable && <div aria-hidden data-window-drag-inset {...captionChrome.dragProps} className="pointer-events-none absolute inset-x-0 top-0 z-0 h-2" />}
       {!calendarFocus && <button
         type="button"
         ref={menuButtonRef}

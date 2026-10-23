@@ -394,7 +394,7 @@ export function createThreadRoutes(deps: ThreadRouteDeps): RouteHandler {
         if (!ids) activePaths.set(threadId, (ids = new Set(store.activePath(threadId).map((m) => m.id))));
         return ids.has(messageId);
       };
-      const found = await searchMessagesAsync(q, visible.everything ? limit : Math.min(limit * 10, 1_000), threadId);
+      const found = await searchMessagesAsync(q, limit, threadId ?? visible.threadIds() ?? undefined);
       // A scan may outlive a revocation or audience edit: authorize again after the await.
       if (HOSTED_WORKSPACE && auth.kind === "session") {
         const failure = workspaceAccess ? await workspaceAccess.authorize(req, auth)

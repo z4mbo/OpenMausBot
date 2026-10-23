@@ -83,8 +83,9 @@ async function seed(convex: FakeConvex) {
 }
 
 const TOOL_CALLS = [
-  { name: "origin_broadcast_draft", input: { channels: ["x", "linkedin", "bluesky"], text: "Origin Lite is live. Plan the work, ship it with your agents, launch it the same week. Join the beta: https://origin.example/lite #buildinpublic", media: ["Launch hero.png"] } },
+  { name: "origin_broadcast_draft", input: { channels: ["x", "linkedin", "bluesky"], text: "Origin Lite is live. Plan the work, ship it with your agents, launch it the same week. Join the beta: https://origin.example/lite #buildinpublic", media: ["Launch hero.png"], campaign: "Origin Lite launch" } },
   { name: "origin_campaign_get", input: { campaign: "Origin Lite launch" } },
+  { name: "origin_campaign_get", input: {} },
   { name: "origin_list_assets", input: {} },
   { name: "origin_vault_list", input: {} },
   { name: "origin_repo_status", input: {} },
@@ -134,7 +135,7 @@ try {
   const messages = ((await api("GET", `/api/threads/${chief.activeTaskId}/messages`)).messages ?? []) as Json[];
   const cards = messages.filter((message) => message.originCard).map((message) => (message.originCard as Json).kind);
   report.cardsInTranscript = cards;
-  checks.everyToolDrewItsCard = ["broadcast", "campaign", "assets", "vault", "repo", "feedback", "call"].every((kind) => cards.includes(kind));
+  checks.everyToolDrewItsCard = ["broadcast", "campaign", "campaigns", "assets", "vault", "repo", "feedback", "call"].every((kind) => cards.includes(kind));
   checks.vaultCardHasNoSecrets = !JSON.stringify(messages.filter((message) => message.originCard).map((message) => message.originCard)).match(/CIPHERTEXT|billing@acme|appstoreconnect/);
   const toolAnswers = messages.filter((message) => message.kind === "activity" && (message.tool as Json | undefined)?.output).map((message) => String((message.tool as Json).output));
   checks.modelNeverSawCardPayload = toolAnswers.every((output) => !output.includes("\"originCard\""));
@@ -175,6 +176,13 @@ try {
   const posts = (await convex.t.query(convex.ref("broadcast:list"), { sessionToken: seeded.token, projectId: seeded.projectId }) as { posts: Json[] }).posts;
   checks.scheduledThroughApproval = posts.some((post) => post.agentName === "Atlas" && post.status === "scheduled" && typeof post.approvedAt === "number");
   await shoot("campaign", "campaign");
+  await shoot("campaigns", "campaigns-list");
+  await card("campaign").getByRole("button", { name: "Mark done" }).click();
+  await card("campaign").getByText("Done", { exact: true }).waitFor({ timeout: 10_000 });
+  const campaigns = (await convex.t.query(convex.ref("campaigns:list"), { sessionToken: seeded.token, projectId: seeded.projectId }) as { campaigns: Json[] }).campaigns;
+  checks.campaignMarkedDoneFromCard = campaigns.some((campaign) => campaign.name === "Origin Lite launch" && campaign.status === "done");
+  checks.draftLinkedToCampaign = campaigns.some((campaign) => campaign.name === "Origin Lite launch" && (campaign.counts as Json).posts === 2);
+  await shoot("campaign", "campaign-done");
   await shoot("assets", "assets");
   await shoot("vault", "vault");
   await shoot("repo", "repo");

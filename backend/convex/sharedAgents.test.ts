@@ -92,7 +92,7 @@ describe("shared threads and sender runs", () => {
     await expect(f.t.mutation(api.agentRuns.begin, { sessionToken: f.viewer.token, threadId, clientId: "send:c", text: "no" })).rejects.toThrow(/View-only/);
 
     await expect(f.t.mutation(api.agentRuns.appendMessage, { sessionToken: f.member.token, threadId, runId: a.runId, clientId: "m:x", role: "bot", kind: "text", text: "forged" }))
-      .rejects.toThrow(/requester/);
+      .rejects.toThrow(/app running this reply/);
     await f.t.mutation(api.agentRuns.appendMessage, { sessionToken: f.owner.token, threadId, runId: a.runId, clientId: "m:reply", role: "bot", kind: "text", text: "Hi", status: "streaming" });
     await f.t.mutation(api.agentRuns.patchMessage, { sessionToken: f.owner.token, threadId, clientId: "m:reply", text: "Hi there", status: "final" });
 

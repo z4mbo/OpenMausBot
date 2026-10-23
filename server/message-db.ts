@@ -556,15 +556,15 @@ export function threadsReferencing(fragment: string): string[] {
   return rows.map((row) => row.thread_id);
 }
 
-export function searchMessages(query: string, limit = 40, threadId?: string): SearchHit[] {
-  return searchMessagesInDatabase(db(), query, limit, threadId);
+export function searchMessages(query: string, limit = 40, threads?: string | readonly string[]): SearchHit[] {
+  return searchMessagesInDatabase(db(), query, limit, threads);
 }
 
-export function searchMessagesAsync(query: string, limit = 40, threadId?: string): Promise<SearchHit[]> {
+export function searchMessagesAsync(query: string, limit = 40, threads?: string | readonly string[]): Promise<SearchHit[]> {
   if (!query.trim()) return Promise.resolve([]);
   db(); // The owner initializes/migrates the schema before any read-only scan.
   searchWorker ??= new MessageSearchWorker(DB_FILE());
-  return searchWorker.search(query, limit, threadId);
+  return searchWorker.search(query, limit, threads);
 }
 
 export interface RecallHit {

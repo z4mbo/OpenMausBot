@@ -3,7 +3,7 @@ import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/s
 import type { Doc, Id } from "./_generated/dataModel";
 import { canEdit, requireMember, touchProject } from "./lib/permissions";
 import { cleanText, validDay } from "./lib/features";
-import { broadcastChannel } from "./broadcastTables";
+import { broadcastChannel, needsApproval } from "./broadcastTables";
 import { campaignMetric, campaignStatus } from "./campaignTables";
 import { CAMPAIGN_LIMITS, CAMPAIGN_LINKS_MAX, campaignSlug } from "../../shared/origin-campaigns";
 
@@ -80,10 +80,10 @@ async function summaryOf(ctx: Ctx, campaign: Campaign) {
     _id: campaign._id, name: campaign.name, slug: campaign.slug, goal: campaign.goal, audience: campaign.audience, channels: campaign.channels,
     ...(campaign.startDate ? { startDate: campaign.startDate } : {}), ...(campaign.endDate ? { endDate: campaign.endDate } : {}),
     ...(campaign.budgetNote ? { budgetNote: campaign.budgetNote } : {}), ...(campaign.agentName ? { agentName: campaign.agentName } : {}),
-    status: campaign.status, createdAt: campaign.createdAt, updatedAt: campaign.updatedAt,
+    status: campaign.status, createdAt: campaign.createdAt, updatedAt: campaign.updatedAt, postIds: posts.map((post) => post._id),
     counts: {
       posts: posts.length, published: posts.filter((post) => post.status === "published").length, generations: generations.length,
-      openIssues: tasks.filter((task) => !task.done).length,
+      openIssues: tasks.filter((task) => !task.done).length, approval: posts.filter(needsApproval).length,
     },
   };
 }
@@ -112,7 +112,7 @@ export const get = query({
     return {
       ...await summaryOf(ctx, campaign),
       posts: posts.map((post) => ({
-        _id: post._id, status: post.status, needsApproval: Boolean(post.agentName) && !post.approvedAt,
+        _id: post._id, status: post.status, needsApproval: needsApproval(post),
         ...(post.scheduledAt ? { scheduledAt: post.scheduledAt } : {}),
         excerpt: (post.variants[0]?.text ?? "").trim().slice(0, 280),
         variants: post.variants.map(({ text: _text, ...variant }) => variant),

@@ -52,6 +52,14 @@ describe("campaign tools", () => {
     expect((await tools.origin_campaign_get({}, null)).text).toContain('"New" [Planning]');
   });
 
+  it("shows the campaign list as one card and a linked campaign on its card", async () => {
+    const { tools } = harness();
+    const listed = await tools.origin_campaign_get({}, null);
+    expect(listed.card).toMatchObject({ kind: "campaigns", heading: "2 campaigns", campaigns: [{ id: "c1", name: "Spring launch" }, { id: "c2", status: "planning" }] });
+    const linked = await tools.origin_campaign_link({ campaign: "c1", kind: "issue", item_id: "task0001" }, null);
+    expect(linked.card).toMatchObject({ kind: "campaign", campaign: { id: "c1" } });
+  });
+
   it("links and unlinks items by kind", async () => {
     const { tools, mutations } = harness();
     await tools.origin_campaign_link({ campaign: "Spring launch", kind: "issue", item_id: "task0001" }, null);

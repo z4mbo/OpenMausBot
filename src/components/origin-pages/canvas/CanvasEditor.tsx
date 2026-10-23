@@ -28,10 +28,14 @@ import { Rulers, RULER, type PageGuide } from "./Rulers";
 import "./canvas-ground.css";
 import { TextEditor, contrastInk, themeInk } from "./TextEditor";
 import { svgNodes } from "./svg-import";
+import { isBoardTool, stickyText, useBoardTools } from "./board-tools";
+import type { CanvasKind } from "../../../../shared/origin-design";
 
 export type PlacedImage = { fileId: string; width: number; height: number; name: string };
 
 export type CanvasEditorProps = {
+  /** Boards get whiteboard tools and a dotted ground; design files and presentations the design tools. */
+  mode?: CanvasKind;
   canvas: CanvasScene;
   readOnly: boolean;
   images: ReadonlyMap<string, string>;
@@ -85,10 +89,11 @@ type Gesture =
   | { kind: "endpoint"; end: 0 | 1; original: CanvasNode }
   | { kind: "pinch"; distance: number; mid: Point; view: View }
   | { kind: "pen"; start: Point }
+  | { kind: "board" }
   | { kind: "crop"; start: Point; original: CanvasNode }
   | { kind: "anchor"; at: number; part: "point" | "in" | "out"; start: Point; anchors: Anchor[]; original: CanvasNode; world: Point; mirror: boolean };
 
-const TOOL_KEYS: Record<string, Tool> = { v: "move", h: "hand", f: "frame", a: "frame", r: "rect", o: "ellipse", e: "ellipse", l: "line", t: "text", p: "pen", c: "comment" };
+const TOOL_KEYS: Record<string, Tool> = { v: "move", h: "hand", f: "frame", a: "frame", r: "rect", o: "ellipse", e: "ellipse", l: "line", t: "text", p: "pen", c: "comment", d: "draw", m: "highlight", s: "sticky", x: "eraser" };
 const isTyping = (target: EventTarget | null) => target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
 const round = (value: number) => Math.round(value);
 
@@ -104,7 +109,7 @@ const LAYERS_WIDTH = 240;
 const PANEL_GAP = 8;
 const floatingPanel = "rounded-xl border border-hairline/50";
 
-export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, addImage, imagePicker, layers, inspector, notify, onSelection, guides: pageGuides, onGuides, remoteSelections, onComment, stageLayer, onPresent, showPrototype, page, focus, onFocused, coveredRight = 0 }: CanvasEditorProps) {
+export function CanvasEditor({ mode = "design", canvas, readOnly, images, cursors, onPointer, addImage, imagePicker, layers, inspector, notify, onSelection, guides: pageGuides, onGuides, remoteSelections, onComment, stageLayer, onPresent, showPrototype, page, focus, onFocused, coveredRight = 0 }: CanvasEditorProps) {
   const { scene, index } = canvas;
   const root = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -139,7 +144,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   const [outerWidth, setOuterWidth] = useState(0);
   const compact = outerWidth > 0 && outerWidth < 860;
   const narrow = outerWidth > 0 && outerWidth < 480;
-  const shown = panels ?? { layers: !compact, inspector: !compact };
+  const shown = panels ?? { layers: !compact && mode !== "board", inspector: !compact && mode !== "board" };
   const insets = {
     left: !compact && shown.layers ? LAYERS_WIDTH + PANEL_GAP * 2 : 0,
     right: Math.max(!compact && shown.inspector ? INSPECTOR_WIDTH + PANEL_GAP * 2 : 0, coveredRight),
@@ -236,7 +241,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       const level = chain[depth];
       if (live.some((id) => effectiveParent(scene, scene.get(id)!) === effectiveParent(scene, level))) return level.id;
     }
-    if (live.includes(chain[0].id)) return chain[0].id;
+    if (live.includes(chain[0].id) || stickyText(scene, index, chain[0])) return chain[0].id;
     if (chain[0].type === "frame" && !chain[0].parentId && chain.length > 1) return chain[1].id;
     if (chain[0].type === "frame" && !chain[0].parentId && (index.get(chain[0].id)?.length ?? 0) > 0) return null;
     return chain[0].id;
@@ -386,6 +391,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
 
   const penTool = usePenTool({ canvas, index, scene, zoom: view.zoom, frameAt, inkOn, onDone: (id) => { setSelected([id]); setTool("move"); } });
   const pen = penTool.draft;
+  const board = useBoardTools({ canvas, zoom: view.zoom, onEditText: (node) => { setSelected([node.id]); setEditing({ id: node.id, created: true, original: node }); setTool("move"); } });
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (editing && !(event.target as Element).closest("textarea")) finishText();
@@ -415,6 +421,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       return;
     }
     if (!readOnly && tool === "pen") { if (penTool.down(world, event.shiftKey)) gesture.current = { kind: "pen", start: world }; return; }
+    if (!readOnly && isBoardTool(tool)) { if (board.down(tool, world, event)) gesture.current = { kind: "board" }; return; }
     const segment = (target as HTMLElement).dataset?.segment;
     const editedNode = pathEdit ? scene.get(pathEdit.id) : undefined;
     const added = segment && isPathNode(editedNode) && !readOnly ? addPointAt(editedNode, worldOrigin(scene, editedNode), segment, world) : null;
@@ -453,7 +460,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (!readOnly && tool !== "move") {
       if (tool === "text") { gesture.current = { kind: "create", type: "text", start: world, parentId: null, node: null }; return; }
       const parentId = frameAt(world, new Set());
-      gesture.current = { kind: "create", type: tool as Exclude<Tool, "move" | "hand" | "pen" | "comment" | "text">, start: world, parentId, node: null };
+      gesture.current = { kind: "create", type: tool as Exclude<Tool, "move" | "hand" | "pen" | "comment" | "text" | "draw" | "highlight" | "sticky" | "eraser">, start: world, parentId, node: null };
       return;
     }
     const handle = (target as HTMLElement).dataset?.handle as Handle | undefined;
@@ -623,6 +630,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         return;
       }
       case "pen": penTool.pull(world); return;
+      case "board": board.move(world, event); return;
       case "crop": canvas.preview([panCrop(current.original, current.start, world)], { share: true }); return;
       case "anchor": {
         const dx = world.x - current.start.x;
@@ -697,6 +705,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         pendingCopies.current = [];
         return;
       }
+      case "board": board.up(); return;
       case "anchor": case "crop": {
         const node = canvas.scene.get(current.original.id);
         if (node) canvas.commit([node]);
@@ -737,8 +746,9 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
     if (readOnly || !isLive(node)) return false;
     const chain = [...ancestors(scene, node), node];
     const current = live.length === 1 ? chain.findIndex((item) => item.id === live[0]) : -1;
-    if (current >= 0 && current < chain.length - 1) { setSelected([chain[current + 1].id]); return true; }
-    if (node.type === "text" && !node.locked && live.includes(node.id)) { setEditing({ id: node.id, created: false, original: node }); return true; }
+    const note = stickyText(scene, index, chain[0]) ?? (node.type === "text" && live.includes(node.id) ? node : undefined);
+    if (current >= 0 && current < chain.length - 1 && !note) { setSelected([chain[current + 1].id]); return true; }
+    if (note && !note.locked) { setSelected([note.id]); setEditing({ id: note.id, created: false, original: note }); return true; }
     if (isPathNode(node) && !node.rotation && live.includes(node.id)) { setPathEdit({ id: node.id, at: null }); return true; }
     if (isCropped(node) && live.includes(node.id)) { setCropEdit(node.id); return true; }
     return false;
@@ -919,7 +929,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
   }, [index, images, editing?.id]);
   const selectionApi: SelectionApi = { ids: live, nodes, select, zoomTo: (ids) => setPendingZoom([...ids]), run, centre: () => toWorld(view, stageCentre) };
   const cursor = panning ? (gesture.current?.kind === "pan" ? "grabbing" : "grab") : tool === "hand" ? "grab" : tool === "move" ? "default" : tool === "text" ? "text" : tool === "comment" ? "copy" : "crosshair";
-  const showRulers = rulers && Boolean(onGuides) && !narrow;
+  const showRulers = rulers && Boolean(onGuides) && !narrow && mode !== "board";
   const editedPath = pathEdit ? scene.get(pathEdit.id) : undefined;
 
   return (
@@ -932,7 +942,7 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
       )}
       <div ref={stage} tabIndex={0} aria-label="Canvas" role="application" data-canvas-stage
         className="absolute inset-0 touch-none select-none overflow-hidden outline-none focus-visible:outline-none"
-        style={{ cursor, outline: "none" }}
+        style={{ cursor, outline: "none", ...(mode === "board" ? { backgroundImage: "radial-gradient(circle, color-mix(in srgb, var(--color-ink-tertiary) 55%, transparent) 1.3px, transparent 1.6px)", backgroundSize: `${24 * view.zoom}px ${24 * view.zoom}px`, backgroundPosition: `${view.x}px ${view.y}px` } : {}) }}
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
         onPointerLeave={() => setHover(null)}
         onDragOver={(event) => { if (!readOnly && [...event.dataTransfer.items].some((item) => item.kind === "file")) event.preventDefault(); }}
@@ -954,11 +964,11 @@ export function CanvasEditor({ canvas, readOnly, images, cursors, onPointer, add
         )}
         {!(index.get(null)?.length) && !editing && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center text-[13px] text-ink-tertiary">
-            {readOnly ? "Nothing on this canvas yet" : narrow ? "Pick a tool below to start" : "Press F for a frame, R for a rectangle, T for text"}
+            {readOnly ? "Nothing on this canvas yet" : narrow ? "Pick a tool below to start" : mode === "board" ? "Press D to draw, S for a sticky note, T for text" : "Press F for a frame, R for a rectangle, T for text"}
           </div>
         )}
         <div data-canvas-chrome className="contents">
-          <CanvasToolbar tool={tool} readOnly={readOnly} onTool={setTool} canUndo={canvas.canUndo} canRedo={canvas.canRedo} onUndo={canvas.undo} onRedo={canvas.redo}
+          <CanvasToolbar mode={mode} options={readOnly ? null : board.options(tool)} tool={tool} readOnly={readOnly} onTool={setTool} canUndo={canvas.canUndo} canRedo={canvas.canRedo} onUndo={canvas.undo} onRedo={canvas.redo}
             imageMenu={imageMenu} onImageMenu={setImageMenu}
             imagePicker={imagePicker ? (close) => imagePicker((image) => { placePicked(image); close(); }, close) : undefined}
             onUpload={(files) => void placeImages(files, null)}

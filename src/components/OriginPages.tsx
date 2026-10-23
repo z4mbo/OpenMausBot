@@ -1,4 +1,5 @@
-import { Headset, Inbox, MessageCircle } from "lucide-react";
+import { Inbox } from "lucide-react";
+import { CallIcon, ChatIcon } from "./section-icons";
 import { cn } from "@/lib/cn";
 import { openOriginPage, useOriginPage, type OriginPage } from "@/lib/origin-pages";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
@@ -18,8 +19,8 @@ import { accentVars } from "@/lib/user-bubble-tone";
 
 export const ORIGIN_PAGES: { id: OriginPage; label: string; contents: string; icon: typeof Inbox }[] = [
   { id: "inbox", label: "Inbox", contents: "Issues and notifications", icon: Inbox },
-  { id: "chat", label: "Chat", contents: "Messages", icon: MessageCircle },
-  { id: "call", label: "Call", contents: "Calls", icon: Headset },
+  { id: "chat", label: "Chat", contents: "Messages", icon: ChatIcon },
+  { id: "call", label: "Call", contents: "Calls", icon: CallIcon },
 ];
 
 export function OriginNav({ density }: { density: SidebarDensity }) {

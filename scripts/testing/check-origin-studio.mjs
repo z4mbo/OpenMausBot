@@ -101,7 +101,7 @@ try {
     const views = page.getByRole("group", { name: "Studio view" });
     const viewsLeft = async () => Math.round((await views.boundingBox()).x);
     const createLeft = await viewsLeft();
-    for (const name of ["Workflows", "Presets", "Design"]) {
+    for (const name of ["Workflows"]) {
       await views.getByRole("button", { name, exact: true }).click();
       await views.getByRole("button", { name, exact: true, pressed: true }).waitFor();
       if (width === 1280) {
@@ -111,7 +111,8 @@ try {
     }
     await views.getByRole("button", { name: "Create", exact: true }).click();
     await page.getByRole("textbox", { name: "Prompt" }).waitFor();
-    step(tag, "Create, Workflows, Presets and Design share the Studio header and its four-way control");
+    assert.equal(await views.getByRole("button").count(), 2, "Studio has two views: Create and Workflows");
+    step(tag, "Create and Workflows share the Studio header and its two-way control");
 
     const prompt = page.getByRole("textbox", { name: "Prompt" });
     await page.keyboard.press("/");
@@ -191,8 +192,8 @@ try {
       await page.keyboard.press("Escape");
       step(tag, "a library entry is saved from a generated image, followed by the next generation (references and description reach fal), and L on a tile seeds a new one");
     } else {
-      await page.getByRole("group", { name: "Studio view" }).getByRole("button", { name: "Create", exact: true }).click();
-      step(tag, "the Library tab lists the project's characters, products and styles");
+      await page.keyboard.press("Escape");
+      step(tag, "Library lists the project's characters, products and styles");
     }
 
     await page.keyboard.press("c");
@@ -241,7 +242,7 @@ try {
       await tile(page, poster).focus();
       await page.keyboard.press("a");
       await page.getByRole("button", { name: "Model: Kling 3 Pro · animate" }).waitFor();
-      await page.getByTitle(`Change: ${poster}`).waitFor();
+      await page.getByRole("button", { name: `Image: ${poster}. Change` }).waitFor();
       await prompt.fill(`The rocket lifts off ${run}`);
       await page.keyboard.press("Control+Enter");
       await tile(page, `The rocket lifts off ${run}`).waitFor();
@@ -258,18 +259,17 @@ try {
 
       await prompt.blur();
       await page.keyboard.press("t");
-      await page.locator("[data-studio-presets] [data-preset-card='motion-transfer'] img").waitFor();
-      assert.equal(await page.getByRole("group", { name: "Studio view" }).getByRole("button", { name: "Presets", exact: true }).getAttribute("aria-pressed"), "true", "T opens the Presets tab");
-      await capture(page, `presets-${tag}`);
+      await page.getByRole("dialog", { name: "Templates" }).locator("[data-template-card='motion-transfer'] img").waitFor();
+      await capture(page, `templates-${tag}`);
       await page.keyboard.type("motion transfer");
       await page.keyboard.press("Enter");
       await page.locator("[data-studio-preset='motion-transfer']").waitFor();
       await page.getByRole("button", { name: "Model: Kling 3 Pro · motion transfer" }).waitFor();
-      if (!(await page.getByTitle(`Change: ${poster}`).count())) {
-        await page.getByRole("button", { name: "Character", exact: true }).click();
+      if (!(await page.locator("[data-studio-slot='Character'] img").count())) {
+        await page.getByRole("button", { name: "Choose Character", exact: true }).click();
         await page.locator("[data-studio-media-picker] button", { hasText: poster }).click();
       }
-      await page.getByRole("button", { name: "Motion video", exact: true }).click();
+      await page.getByRole("button", { name: "Choose Motion video", exact: true }).click();
       await page.locator("[data-studio-media-picker] button", { hasText: "Five second teaser clip" }).click();
       await capture(page, `preset-motion-transfer-${tag}`);
       await page.locator("[data-studio-composer]").getByRole("button", { name: "Generate" }).click();
@@ -281,7 +281,46 @@ try {
       assert.match(motion.body.image_url, /^https:\/\/127\.0\.0\.1:\d+\/image\//, "the character is the poster's output");
       assert.ok(motion.body.video_url, "the motion video is sent");
       assert.equal(motion.body.character_orientation, "video");
-      step(tag, "T opens the Presets tab with ComfyUI preview images; Motion transfer labels its inputs Character and Motion video and sends both to Kling's motion control");
+      step(tag, "T opens the template gallery with ComfyUI preview images; Motion transfer labels its slots Character and Motion video and sends both to Kling's motion control");
+
+      await tile(page, poster).focus();
+      await page.keyboard.press("s");
+      const save = page.getByRole("dialog", { name: "Save as template" });
+      const templateName = `Poster ${run}`;
+      await save.getByLabel("Name", { exact: true }).fill(templateName);
+      const field = save.getByRole("textbox", { name: "Prompt" });
+      await field.fill(`A poster of [Subject: ${poster}] at night`);
+      await field.evaluate((node) => { const at = node.value.indexOf("night"); node.focus(); node.setSelectionRange(at, at + 5); });
+      await save.getByLabel("Placeholder name").fill("Time");
+      await save.getByRole("button", { name: "Make placeholder" }).click();
+      assert.equal(await field.inputValue(), `A poster of [Subject: ${poster}] at [Time: night]`, "Make placeholder wraps the selection");
+      await capture(page, `save-template-${tag}`);
+      await save.getByRole("button", { name: "Save template" }).click();
+      await save.waitFor({ state: "detached" });
+      await page.keyboard.press("t");
+      await page.getByRole("dialog", { name: "Templates" }).getByRole("group", { name: "Template groups" }).getByRole("button", { name: /^Yours/ }).click();
+      await page.getByRole("dialog", { name: "Templates" }).locator("[data-template-source='project'] button", { hasText: templateName }).first().click();
+      await page.getByRole("textbox", { name: "Subject" }).fill("a lighthouse");
+      await page.getByRole("textbox", { name: "Time" }).fill("dawn");
+      await capture(page, `template-blanks-${tag}`);
+      await page.locator("[data-studio-composer]").getByRole("button", { name: "Generate" }).click();
+      let filled;
+      for (let tries = 0; !filled && tries < 60; tries += 1) {
+        filled = (await falRequests(page)).filter((request) => request.method === "POST").map((request) => request.body?.prompt).find((text) => typeof text === "string" && text.includes("A poster of a lighthouse at dawn"));
+        if (!filled) await page.waitForTimeout(250);
+      }
+      assert.ok(filled, "the filled blanks reach fal without brackets");
+      step(tag, "S saves a result as a template with named placeholders; picking it shows the blanks as fields and fal receives the filled prompt");
+
+      await page.locator("[data-studio-composer]").getByRole("button", { name: /^Stop using/ }).click();
+      await tile(page, poster).focus();
+      await page.keyboard.press("g");
+      await page.locator("[data-workflow-run-panel]").waitFor();
+      assert.ok(await page.locator("[data-workflow-node='m1']").isVisible(), "the result opens as a workflow with its model step");
+      await capture(page, `workflow-from-result-${tag}`);
+      await page.getByRole("button", { name: "All workflows" }).click();
+      await page.getByRole("group", { name: "Studio view" }).getByRole("button", { name: "Create", exact: true }).click();
+      step(tag, "G opens a result as a workflow, with its inputs panel");
     }
 
     await tile(page, poster).focus();
@@ -312,7 +351,7 @@ try {
     const zoomed = await pinch(page);
     assert.notEqual(zoomed.after, zoomed.before, "a two-finger pinch zooms the canvas");
     step(tag, `the node palette searches models, Undo and Redo walk the edit, and a pinch zooms the canvas (${zoomed.before} to ${zoomed.after})`);
-    await page.getByRole("button", { name: "Run" }).click();
+    await page.getByRole("button", { name: "Run", exact: true }).click();
     await page.locator("[data-workflow-run=done]").waitFor({ timeout: 60_000 });
     assert.equal(await page.getByText("Saved to Assets", { exact: true }).count(), 3, "each Output node saved its file");
     await capture(page, `workflow-run-${tag}`);

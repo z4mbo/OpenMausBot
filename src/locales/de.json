@@ -1555,7 +1555,7 @@
   "engines.icon.sizeError": "Anbietersymbole dürfen höchstens 128 KB groß sein.",
   "engines.icon.invalidError": "Lade ein vollständiges PNG-, JPEG- oder WebP-Bild mit höchstens 128 KB und {dimension} × {dimension} Pixeln hoch.",
   "engines.icon.dimensionError": "Anbietersymbole dürfen höchstens {dimension} × {dimension} Pixel groß sein.",
-  "newBot.defaults": "Standard für neue Bots",
+  "newBot.defaults": "Standard für neue Agenten",
   "newBot.sections": "Bot-Einstellungen",
   "newBot.saveDefaults": "Standard speichern",
   "newBot.create": "Bot erstellen",

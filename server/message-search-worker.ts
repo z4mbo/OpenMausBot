@@ -23,7 +23,7 @@ export class MessageSearchWorker {
     this.timeoutMs = timeoutMs;
   }
 
-  search(query: string, limit: number, threadId?: string): Promise<SearchHit[]> {
+  search(query: string, limit: number, threads?: string | readonly string[]): Promise<SearchHit[]> {
     if (this.pending.size >= 8) return Promise.reject(new SearchUnavailable("Search is busy. Try again shortly."));
     if (!this.worker) {
       const source = new URL("./message-search.worker.ts", import.meta.url);
@@ -56,7 +56,7 @@ export class MessageSearchWorker {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => { void this.close(); }, this.timeoutMs);
       this.pending.set(id, { resolve, reject, timer });
-      try { worker.postMessage({ id, query, limit, threadId }); }
+      try { worker.postMessage({ id, query, limit, threads }); }
       catch { void this.close(); }
     });
   }

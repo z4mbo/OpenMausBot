@@ -30,7 +30,7 @@ export const people = query({
 });
 
 export const addWorkspaceMember = mutation({
-  args: { projectId: v.id("projects"), sessionToken: v.string(), email: v.string(), role: v.union(v.literal("member"), v.literal("viewer")) },
+  args: { projectId: v.id("projects"), sessionToken: v.string(), email: v.string(), role: v.union(v.literal("admin"), v.literal("member"), v.literal("viewer")) },
   returns: v.null(),
   handler: async (ctx, args) => {
     const { project } = await requireAdmin(ctx, args.projectId, args.sessionToken);

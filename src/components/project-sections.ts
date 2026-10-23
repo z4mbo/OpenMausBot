@@ -1,4 +1,5 @@
-import { Bot as BotIcon, CircleDot, GitBranch, Headset, Images, LockKeyhole, Megaphone, MessageCircle, MessagesSquare, Palette, Send, Settings, type LucideIcon } from "lucide-react";
+import { CircleDot, GitBranch, Images, LockKeyhole, Megaphone, MessageCircle, Settings, type LucideIcon } from "lucide-react";
+import { CallIcon, ChatIcon, DesignIcon, PublishIcon, StudioIcon } from "./section-icons";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { unreadReplies } from "@/lib/origin-unread";
 import type { ShownSection } from "@/lib/origin-chief-section";
@@ -11,12 +12,12 @@ export interface ProjectSectionEntry { id: ShownSection; label: string; icon: Lu
 
 export const CHIEF_SECTIONS = [
   { id: "chat", label: "Chief", icon: MessageCircle, place: "lead" },
-  { id: "agents", label: "Agents", icon: BotIcon, place: "tab" },
   { id: "issues", label: "Issues", icon: CircleDot, place: "tab" },
-  { id: "team-chat", label: "Chat", icon: MessagesSquare, place: "tab" },
-  { id: "call", label: "Call", icon: Headset, place: "tab" },
-  { id: "studio", label: "Studio", icon: Palette, place: "tab" },
-  { id: "broadcast", label: "Publish", icon: Send, place: "tab" },
+  { id: "team-chat", label: "Chat", icon: ChatIcon, place: "tab" },
+  { id: "call", label: "Call", icon: CallIcon, place: "tab" },
+  { id: "studio", label: "Studio", icon: StudioIcon, place: "tab" },
+  { id: "design", label: "Design", icon: DesignIcon, place: "tab" },
+  { id: "broadcast", label: "Publish", icon: PublishIcon, place: "tab" },
   { id: "assets", label: "Assets", icon: Images, place: "tool" },
   { id: "vault", label: "Vault", icon: LockKeyhole, place: "tool" },
   { id: "repo", label: "Repo", icon: GitBranch, place: "tool" },

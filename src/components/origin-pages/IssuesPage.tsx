@@ -113,6 +113,11 @@ function handOver(chief: IssueChief | undefined, project: CloudProject, projectI
   };
 }
 
+/** Completing an issue, or moving it back to Draft, removes its GitHub issue; the server pushes that through the mirror. */
+function removeLinkedIssue(projectId: string, project: CloudProject, task: CloudTask) {
+  if (task.githubIssueNumber && project.repoUrl) void originGitHub.mirrorIssues(projectId, [task._id]).catch(() => undefined);
+}
+
 /** Deletes an issue and its GitHub issue; when GitHub cannot be reached, the person may still delete it in Origin alone. */
 async function deleteIssue(projectId: string, task: CloudTask): Promise<string> {
   const deleteHere = () => cloudMutation("tasks:deleteTask", { projectId, taskId: task._id });
@@ -220,14 +225,16 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
     const task = tasks.find((item) => item._id === taskId);
     const crossesDraft = Boolean(task && draftIds.has(task.columnId) !== draftIds.has(columnId));
     void cloudMutation("tasks:moveTask", { projectId, taskId, columnId, ...(beforeTaskId ? { beforeTaskId } : {}) })
-      .then(() => { if (crossesDraft && task?.githubIssueNumber && project.repoUrl) void originGitHub.mirrorIssues(projectId, [taskId]).catch(() => undefined); })
+      .then(() => { if (crossesDraft && task) removeLinkedIssue(projectId, project, task); })
       .catch(report)
       .finally(() => setPending((current) => settlePendingMove(current, taskId, entry)));
   };
   const setDone = (task: CloudTask, done: boolean) => {
     if (done && completesThroughPullRequest(project, task)) { setCompleting(task._id); return; }
     setMoves((count) => count + 1);
-    void cloudMutation("tasks:updateTask", { projectId, taskId: task._id, done }).catch(report);
+    void cloudMutation("tasks:updateTask", { projectId, taskId: task._id, done })
+      .then(() => { if (done) removeLinkedIssue(projectId, project, task); })
+      .catch(report);
   };
   const remove = (task: CloudTask) => {
     const github = task.githubIssueUrl ? `\n\nIts GitHub issue #${task.githubIssueNumber} is deleted too, or closed as not planned if Origin's GitHub connection cannot delete it.` : "";
@@ -654,7 +661,13 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
       ...(descriptionChanged ? { description: draft.description } : {}),
     }), "Could not save issue");
   };
-  const toggleDone = () => (!task.done && completesThroughPullRequest(project, task) ? setCompleting(true) : update({ done: !task.done }, "Could not update issue"));
+  const toggleDone = () => {
+    if (!task.done && completesThroughPullRequest(project, task)) { setCompleting(true); return; }
+    void action.run(async () => {
+      await cloudMutation("tasks:updateTask", { projectId, taskId, done: !task.done });
+      if (!task.done) removeLinkedIssue(projectId, project, task);
+    }, "Could not update issue");
+  };
 
   return (
     <IssueDialog label={`${taskKey(task._id)} ${task.title}`} heading={heading} onClose={onClose}
@@ -673,7 +686,7 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
             disabled={!canEdit || task.done} placeholder={task.done ? "Done" : undefined}
             onChange={(columnId) => void action.run(async () => {
               await cloudMutation("tasks:moveTask", { projectId, taskId, columnId });
-              if (task.githubIssueNumber && project.repoUrl && inDraft(task.columnId) !== inDraft(columnId)) void originGitHub.mirrorIssues(projectId, [taskId]).catch(() => undefined);
+              if (inDraft(task.columnId) !== inDraft(columnId)) removeLinkedIssue(projectId, project, task);
             }, "Could not move issue")} />
           <ChipSelect label="Priority" value={task.priority} options={priorityOptions()} icon={<SignalMedium size={14} aria-hidden="true" />} disabled={!canEdit}
             onChange={(priority) => update({ priority }, "Could not change the priority")} />

@@ -1,18 +1,20 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { ArrowLeft, Loader2, Maximize, Minus, Play, Plus, Redo2, Save, Send, Square, Undo2 } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type DragEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { ArrowLeft, LayoutDashboard, Loader2, Maximize, Minus, PanelRight, Play, Plus, Redo2, Save, Send, Square, Undo2 } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { cn } from "@/lib/cn";
 import { chipButton, ghostButton, iconButton, inputClass, Notice, primaryButton, useAction } from "../origin-pages/ui";
 import { StudioMediaPicker } from "./StudioMediaPicker";
 import { WorkflowNodeCard, portColor } from "./WorkflowNodeCard";
 import { WorkflowPalette } from "./WorkflowPalette";
-import { studioPost, typing } from "./studio-ui";
+import { WorkflowMinimap } from "./WorkflowMinimap";
+import { WorkflowRunPanel } from "./WorkflowRunPanel";
+import { GENERATION_DRAG, studioPost, typing } from "./studio-ui";
 import { useCanvasView } from "./use-canvas-view";
 import { copyNodes, emptyHistory, pasteNodes, recordEdit, redoEdit, undoEdit, type PaletteEntry, type WorkflowClip, type WorkflowHistory } from "./workflow-edit";
 import { NODE_WIDTH, edgePath, fitView, newNodeId, portPoint, toGraph, type Point } from "./workflow-geometry";
 import type { StudioCharacter, StudioGeneration, StudioMediaKind } from "../../../shared/studio";
 import {
-  portsConnect, validateWorkflow, workflowPorts,
+  portsConnect, tidyWorkflow, validateWorkflow, withCharacter, workflowPorts,
   type StudioPort, type StudioWorkflowGraph, type StudioWorkflowNode, type StudioWorkflowRun,
 } from "../../../shared/studio-workflow";
 import type { CloudDesign } from "../origin-pages/cloud-types";
@@ -50,6 +52,10 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
     if (draft.runId) setRunId(draft.runId);
   }
   const [dirty, setDirty] = useState(false);
+  const [panel, setPanel] = useState(() => draft.graph.nodes.length > 0 && window.matchMedia?.("(min-width: 1024px)").matches !== false);
+  const [character, setCharacter] = useState("");
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [heights, setHeights] = useState<ReadonlyMap<string, number>>(new Map());
   const [history, setHistory] = useState<WorkflowHistory>(emptyHistory);
   const pastes = useRef(0);
   const saving = useAction();
@@ -60,6 +66,12 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
   const ownRun = useCloudQuery<StudioWorkflowRun>("studioWorkflows:getRun", runId ? { projectId, runId } : "skip");
   const run = ownRun ?? runs?.[0];
   const problems = useMemo(() => validateWorkflow(graph), [graph]);
+  useEffect(() => {
+    if (!ownRun || draft.runId !== ownRun._id || draft.graph.nodes.length) return;
+    latest.current = { ...draft, name: ownRun.name, graph: ownRun.graph, ...(ownRun.workflowId ? { workflowId: ownRun.workflowId } : {}) };
+    onDraft(latest.current);
+    window.setTimeout(fit, 0);
+  }, [ownRun, draft, onDraft]);
   const problemOf = useMemo(() => new Map(problems.filter((problem) => problem.nodeId).map((problem) => [problem.nodeId!, problem.message])), [problems]);
   const states = useMemo(() => new Map((run?.nodes ?? []).map((node) => [node.nodeId, node])), [run]);
   const live = run?.status === "running";
@@ -99,12 +111,20 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
   const undo = () => restore(undoEdit(historyRef.current, latest.current.graph));
   const redo = () => restore(redoEdit(historyRef.current, latest.current.graph));
 
+  const measured = useCallback(() => new Map([...(surface.current?.querySelectorAll<HTMLElement>("[data-workflow-node]") ?? [])].map((element) => [element.dataset.workflowNode!, element.offsetHeight])), []);
+
   const fit = useCallback(() => {
     const box = surface.current?.getBoundingClientRect();
     if (!box) return;
-    const heights = new Map([...surface.current!.querySelectorAll<HTMLElement>("[data-workflow-node]")].map((element) => [element.dataset.workflowNode!, element.offsetHeight]));
-    setView(fitView(latest.current.graph, box.width, box.height, heights));
-  }, [setView]);
+    setView(fitView(latest.current.graph, box.width, box.height, measured()));
+  }, [setView, measured]);
+
+  /** Lays the graph out left to right by its links, as one undoable step. */
+  const tidy = () => {
+    const sizes = measured();
+    commit(tidyWorkflow(latest.current.graph, (entry) => sizes.get(entry.id) ?? 200), `tidy:${Date.now()}`);
+    window.setTimeout(fit, 0);
+  };
 
   const fitted = useRef(false);
   useLayoutEffect(() => {
@@ -112,6 +132,18 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
     fitted.current = true;
     fit();
   }, [fit]);
+
+  useEffect(() => {
+    const element = surface.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => {
+      setSize({ width: element.clientWidth, height: element.clientHeight });
+      setHeights(measured());
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [measured]);
+  useEffect(() => { setHeights(measured()); }, [graph, run, measured]);
 
   const isSelected = (id: string) => selected.nodes.includes(id);
 
@@ -224,7 +256,7 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
   const start = () => {
     if (!canEdit || running.busy || problems.length || live || !falReady) return;
     void running.run(async () => {
-      const { runId: id } = await studioPost<{ runId: string }>("workflow/run", { projectId, name: draft.name, graph, ...(draft.workflowId ? { workflowId: draft.workflowId } : {}) });
+      const { runId: id } = await studioPost<{ runId: string }>("workflow/run", { projectId, name: draft.name, graph: withCharacter(graph, character || undefined), ...(draft.workflowId ? { workflowId: draft.workflowId } : {}) });
       setRunId(id);
     }, "Could not start the run");
   };
@@ -253,6 +285,8 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
       return;
     }
     if (key === "f") { event.preventDefault(); fit(); return; }
+    if (key === "l" && canEdit) { event.preventDefault(); tidy(); return; }
+    if (key === "i") { event.preventDefault(); setPanel((open) => !open); return; }
     if ((key === "n" || key === "/") && canEdit) { event.preventDefault(); setPalette({}); return; }
     if (event.key === "Escape") { setSelected({ nodes: [] }); return; }
     if ((event.key === "Delete" || event.key === "Backspace") && canEdit) {
@@ -279,6 +313,29 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
     window.addEventListener("keydown", listen);
     return () => window.removeEventListener("keydown", listen);
   }, []);
+
+  const focusNode = (id: string) => {
+    const node = latest.current.graph.nodes.find((entry) => entry.id === id);
+    const box = surface.current?.getBoundingClientRect();
+    if (!node || !box) return;
+    setView({ ...view, x: box.width / 2 - (node.x + NODE_WIDTH / 2) * view.zoom, y: box.height / 2 - (node.y + 80) * view.zoom });
+    setSelected({ nodes: [id] });
+    window.setTimeout(() => surface.current?.querySelector<HTMLElement>(`[data-workflow-node="${id}"]`)?.focus({ preventScroll: true }), 0);
+  };
+
+  /** A result dragged from Create becomes an input file node where it lands. */
+  const onDrop = (event: DragEvent) => {
+    if (!canEdit || !event.dataTransfer.types.includes(GENERATION_DRAG)) return;
+    event.preventDefault();
+    const row = rows.find((candidate) => candidate._id === event.dataTransfer.getData(GENERATION_DRAG));
+    const saved = row?.saved.find((entry) => entry.index === 0);
+    const kind = row?.outputs[0]?.kind;
+    if (!row || !saved || !kind) return;
+    const at = toGraph(local(event), view);
+    const node: StudioWorkflowNode = { id: newNodeId(), type: "asset", x: Math.round(at.x - NODE_WIDTH / 2), y: Math.round(at.y - 20), params: { kind, label: (row.prompt || row.modelLabel).slice(0, 40), assetId: saved.assetId } };
+    commit({ ...latest.current.graph, nodes: [...latest.current.graph.nodes, node] });
+    setSelected({ nodes: [node.id] });
+  };
 
   const onDoubleClick = (event: ReactMouseEvent) => {
     if (!canEdit || (event.target as HTMLElement).closest("[data-workflow-node]")) return;
@@ -307,11 +364,13 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
         <button type="button" className={iconButton} onClick={undo} disabled={!canEdit || !history.past.length} aria-label="Undo" title="Undo (Ctrl+Z)"><Undo2 size={15} /></button>
         <button type="button" className={iconButton} onClick={redo} disabled={!canEdit || !history.future.length} aria-label="Redo" title="Redo (Ctrl+Shift+Z)"><Redo2 size={15} /></button>
         <button type="button" className={iconButton} onClick={fit} aria-label="Fit to view (F)" title="Fit to view (F)"><Maximize size={15} /></button>
+        <button type="button" className={iconButton} onClick={() => tidy()} disabled={!canEdit || graph.nodes.length < 2} aria-label="Tidy up the layout (L)" title="Tidy up the layout (L)" data-workflow-tidy><LayoutDashboard size={15} /></button>
         <span className="flex-1" />
         {problems.length > 0 && !live && <span className="max-w-[260px] truncate text-[12px] text-ink-tertiary max-sm:hidden" title={problems.map((problem) => problem.message).join("\n")}>{problems[0]!.message}{problems.length > 1 ? ` +${problems.length - 1}` : ""}</span>}
         <button type="button" className={ghostButton} onClick={save} disabled={!canEdit || saving.busy || (!dirty && Boolean(draft.workflowId))} title="Save (Ctrl+S)">
           {saving.busy ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}{draft.workflowId && !dirty ? "Saved" : "Save"}
         </button>
+        <button type="button" className={cn(iconButton, panel && "bg-raised text-ink")} onClick={() => setPanel(!panel)} aria-pressed={panel} aria-label="Inputs and runs (I)" title="Inputs and runs (I)" data-workflow-panel-toggle><PanelRight size={15} /></button>
         {live ? (
           <button type="button" className={ghostButton} onClick={stop} disabled={running.busy}><Square size={13} />Stop</button>
         ) : (
@@ -338,7 +397,9 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
           )}
         </div>
       )}
+      <div className="flex min-h-0 flex-1 gap-2 max-lg:flex-col">
       <div ref={surface} tabIndex={-1} onPointerDownCapture={onPointerDownCapture} onPointerDown={onBackground} onDoubleClick={onDoubleClick} data-workflow-canvas
+        onDragOver={(event) => { if (canEdit && event.dataTransfer.types.includes(GENERATION_DRAG)) event.preventDefault(); }} onDrop={onDrop}
         className="relative min-h-[420px] flex-1 touch-none overflow-hidden rounded-xl border border-hairline/40 bg-inset outline-none [background-image:radial-gradient(var(--color-hairline)_1px,transparent_1px)]"
         style={{ backgroundSize: `${20 * view.zoom}px ${20 * view.zoom}px`, backgroundPosition: `${view.x}px ${view.y}px` }}>
         <div className="absolute left-0 top-0 origin-top-left" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})` }}>
@@ -387,6 +448,15 @@ export function WorkflowEditor({ projectId, canEdit, falReady, rows, draft, onDr
           <span className="w-10 text-center text-[11px] tabular-nums text-ink-tertiary" data-workflow-zoom>{Math.round(view.zoom * 100)}%</span>
           <button type="button" className={cn(iconButton, "size-7")} aria-label="Zoom in" onClick={() => zoomBy(1.25)}><Plus size={13} /></button>
         </div>
+        <WorkflowMinimap graph={graph} view={view} size={size} heights={heights} states={states} onView={setView} />
+      </div>
+      {panel && (
+        <WorkflowRunPanel graph={graph} canEdit={canEdit} assets={assets} characters={characters} character={character} run={run} runs={runs ?? (run ? [run] : [])}
+          problems={problems} live={live} busy={running.busy} ready={canEdit && !running.busy && !problems.length && falReady === true}
+          onParams={(id, params, field) => commit({ ...latest.current.graph, nodes: latest.current.graph.nodes.map((candidate) => (candidate.id === id ? { ...candidate, params } : candidate)) }, `params:${id}:${field}`)}
+          onPickAsset={(id, kind) => setPicking({ node: id, kind })} onCharacter={setCharacter} onRun={start} onStop={stop} onShowRun={setRunId} onFocusNode={focusNode}
+          onClose={() => setPanel(false)} />
+      )}
       </div>
       {picking && (
         <StudioMediaPicker projectId={projectId} kind={picking.kind} rows={rows} assetsOnly onClose={() => setPicking(null)}

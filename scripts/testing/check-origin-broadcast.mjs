@@ -42,7 +42,7 @@ try {
     const dialog = page.getByRole("dialog");
 
     await page.getByText("Meet the team behind Origin.").first().waitFor();
-    await page.getByText("1 post waits for your approval").waitFor();
+    await page.getByRole("group", { name: "Overview" }).getByRole("button", { name: /Needs approval/ }).getByText("1", { exact: true }).waitFor();
     const accounts = page.getByRole("group", { name: "Accounts" });
     await accounts.getByText("@origin.bsky.social").waitFor();
     assert.equal(await accounts.getByText("Founder").count(), 2);
@@ -50,10 +50,10 @@ try {
     await capture(page, `week-${tag}`);
     await accounts.getByRole("button", { name: "Connect LinkedIn" }).click();
     assert.deepEqual(await page.evaluate(() => window.originBroadcastDispatched.at(-1)), { type: "toggleAppSettings", open: true, section: "integrations" });
-    evidence.cases.push({ tag, step: "week view with media thumbnails, accounts strip (two Founder accounts, LinkedIn to connect) and the approval pill" });
+    evidence.cases.push({ tag, step: "week view with media thumbnails, accounts strip (two Founder accounts, LinkedIn to connect) and the approvals tile of the overview" });
 
-    await page.getByText("1 post waits for your approval").click();
-    await page.getByRole("button", { name: "Approval", pressed: true }).waitFor();
+    await page.getByRole("group", { name: "Overview" }).getByRole("button", { name: /Needs approval/ }).click();
+    await page.getByRole("button", { name: "Approval", exact: true, pressed: true }).waitFor();
     await page.getByRole("button", { name: /Origin 0\.6 is out/ }).click();
     await dialog.getByText("Echo drafted this post").waitFor();
     assert.equal(await dialog.getByRole("button", { name: /Publish now|Schedule/ }).count(), 0);

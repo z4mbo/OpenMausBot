@@ -24,7 +24,7 @@ const rows: Record<string, unknown> = {
   "tasks:details": { task: fixtureTasks[0], columns, members: people, comments: [{ _id: "fixture-comment", authorName: "Fixture teammate", authorEmail: "other@example.test", body: "The synthetic issue is ready for review.", createdAt: now }], assets: [] },
   "taskPRs:list": [],
   "design:list": { assets: fixtureMode === "empty" ? [] : [{ _id: "fixture-asset", name: "Release workflow documentation with a long filename", type: "document", url: "https://example.test/release", notes: "Synthetic documentation for this project.", updatedAt: now }], tokens: fixtureMode === "empty" ? [] : [{ _id: "fixture-token", name: "Project accent", type: "color", value: "#77c59b", description: "Synthetic project colour" }] },
-  "credentials:list": [],
+  "credentials:list": [], "personalCredentials:list": [],
   "feedback:portals": fixtureMode === "empty" ? [] : [{ _id: "fixture-portal", projectId: fixtureProject._id, slug: "fixture-project", title: "Fixture feedback", description: "Synthetic feedback portal", enabled: true }],
   "feedback:list": [{ _id: "fixture-feedback", title: "Keyboard navigation needs attention", body: "A synthetic report with a long URL https://example.test/" + "a".repeat(80), kind: "bug", status: "new", createdAt: now }],
   "notifications:summary": { unread: 1, more: false },
@@ -57,7 +57,16 @@ export function useCloudPages<T>(name: string, args: Record<string, unknown> | "
 export async function cloudMutation<T = unknown>(name: string, args: Record<string, unknown>): Promise<T> {
   fixtureCalls.push({ name, args });
   if (fixtureMode === "error") throw new Error("Synthetic mutation failure. Try again.");
-  if (name === "credentials:create") { rows["credentials:list"] = [...rows["credentials:list"] as unknown[], { _id: "fixture-credential", ...args, updatedAt: Date.now() }]; rerender(); }
+  if (name === "credentials:create" || name === "personalCredentials:create") {
+    const list = name.replace(":create", ":list");
+    rows[list] = [...rows[list] as unknown[], { _id: `fixture-credential-${fixtureCalls.length}`, ...args, updatedAt: Date.now() }];
+    rerender();
+  }
+  if (name === "credentials:setAgentUse" || name === "personalCredentials:setAgentUse") {
+    const list = name.replace(":setAgentUse", ":list");
+    rows[list] = (rows[list] as { _id: string }[]).map((row) => (row._id === args.credentialId ? { ...row, agentUse: args.agentUse } : row));
+    rerender();
+  }
   if (name === "tasks:createTask" || name === "feedback:convert") return "fixture-created-task" as T;
   return null as T;
 }

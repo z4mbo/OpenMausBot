@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
-import { canSeeThread, requireAgent, requireSharedAgents, requireThread } from "./lib/agentAccess";
+import { canSeeThread, requireAgent, requireSharedAgents, requireThread, runnerOf } from "./lib/agentAccess";
 import { messageView, runSummary, runView, userNames } from "./lib/agentThreadRows";
 
 const TITLE_MAX = 80;
@@ -101,7 +101,7 @@ export const messagesSince = query({
       let run = row.runId ? runs.get(row.runId) : undefined;
       if (row.runId && !run) {
         const doc = await ctx.db.get(row.runId);
-        run = doc ? { by: await name(doc.requesterUserId), byUserId: doc.requesterUserId, engineLabel: doc.engineLabel } : {};
+        run = doc ? { by: await name(runnerOf(doc)), byUserId: runnerOf(doc), engineLabel: doc.engineLabel } : {};
         runs.set(row.runId, run);
       }
       messages.push({

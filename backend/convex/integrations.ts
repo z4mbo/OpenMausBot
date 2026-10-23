@@ -128,6 +128,21 @@ export const linkIssue = internalMutation({
   },
 });
 
+/** Forgets the GitHub issue removed for an issue that was completed or moved back to Draft; leaving Draft or reopening creates a new one. */
+export const unlinkIssue = internalMutation({
+  args: { projectId: v.id("projects"), taskId: v.id("tasks"), number: v.number() }, returns: v.null(),
+  handler: async (ctx, a) => {
+    const task = await ctx.db.get(a.taskId);
+    if (!task || task.projectId !== a.projectId || task.githubIssueNumber !== a.number) return null;
+    await ctx.db.patch(task._id, {
+      githubIssueNumber: undefined, githubIssueUrl: undefined, githubIssueState: undefined, githubIssueSyncedAt: undefined,
+      githubIssueUpdatedAt: undefined, githubIssueReopenRequested: undefined,
+    });
+    await touchProject(ctx, a.projectId);
+    return null;
+  },
+});
+
 /** Security: only the signed server bridge records head-pinned merge receipts; an issue closure cannot create one. */
 export const completeMergedIssue = internalMutation({
   args: {

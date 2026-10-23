@@ -48,11 +48,16 @@ async function seed(convex: FakeConvex, mediaBase: string) {
   await generation({ kind: "image", prompt: "Pricing card, three tiers", status: "cancelled" });
   await generation({ kind: "audio", mode: "audio", model: "fal-ai/elevenlabs/tts/eleven-v3", modelLabel: "ElevenLabs v3 voice", prompt: "Welcome to the Origin launch", status: "done", outputs: [{ url: "https://cdn.fixture.test/welcome.mp3", kind: "audio", contentType: "audio/mpeg" }] });
   await generation({ kind: "video", mode: "video", model: "fal-ai/kling-video/v3/pro/text-to-video", modelLabel: "Kling 3 Pro", prompt: "Five second teaser clip", status: "done", aspectRatio: "16:9", outputs: [{ url: `${mediaBase}/video/teaser.webm`, kind: "video", contentType: "video/webm" }] });
-  await generation({ kind: "image", model: "fal-ai/nano-banana-pro", modelLabel: "Nano Banana Pro", prompt: "Hero shot of the app on a dark desk", status: "done", aspectRatio: "16:9", agentName: "Atlas", outputs: [{ url: swatch("#3b5bdb", "hero"), kind: "image" }] });
+  const hero = await generation({ kind: "image", model: "fal-ai/nano-banana-pro", modelLabel: "Nano Banana Pro", prompt: "Hero shot of the app on a dark desk", status: "done", aspectRatio: "16:9", agentName: "Atlas", outputs: [{ url: swatch("#3b5bdb", "hero"), kind: "image" }] });
   const product = await t.run((ctx) => ctx.db.insert("designAssets", { projectId, type: "image", name: "Product photo.png", url: swatch("#2b8a3e", "product"), createdAt: Date.now(), updatedAt: Date.now() }));
   await t.run((ctx) => ctx.db.insert("studioCharacters", {
     projectId, name: "Aurora bottle", kind: "product", description: "Frosted glass bottle, copper cap, embossed logo", referenceAssetIds: [product],
     createdBy: userId, createdByName: "ada", createdAt: Date.now(), updatedAt: Date.now(),
+  }));
+  await t.run((ctx) => ctx.db.insert("studioTemplates", {
+    projectId, name: "Launch hero", description: "Our product on a desk, in the brand's light", mode: "image", model: "fal-ai/nano-banana-pro",
+    prompt: "Hero shot of [Product: the app] on [Place: a dark desk], soft rim light", params: { aspectRatio: "16:9" }, sourceAssetIds: [],
+    coverUrl: swatch("#3b5bdb", "hero"), coverKind: "image", generationId: hero, createdBy: userId, createdByName: "ada", agentName: "Atlas", createdAt: Date.now(), updatedAt: Date.now(),
   }));
   return { token, projectId };
 }

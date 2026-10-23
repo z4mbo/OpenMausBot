@@ -1,8 +1,9 @@
-import { v } from "convex/values";
+import { v, type Infer } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { runUsage, threadAttachment, threadMessageKind, threadMessageTool } from "./agentsTables";
 import { requireUser } from "./lib/auth";
-import { canResumeThreadRun, requireThread, requireWritableThread, runAcceptsBotWrites } from "./lib/agentAccess";
+import { canResumeThreadRun, requireThread, requireWritableThread, runAcceptsBotWrites, runnerOf } from "./lib/agentAccess";
+import { chosenRunner } from "./lib/agentRunner";
 import { cleanPayload, cleanText, cleanTool, LEASE_MS, messageByClientId, nextSeq, promoteQueuedRun, settleRun } from "./lib/agentThreadRows";
 import { requireTeamMember } from "./lib/permissions";
 import { budgetRefusal, recordSpend } from "./budgets";
@@ -15,21 +16,34 @@ const clientIdOf = (value: string) => {
   return id;
 };
 
+const beginResult = v.object({
+  runId: v.id("workspaceAgentRuns"), messageId: v.id("agentThreadMessages"), status: v.string(), seq: v.number(),
+  /** Set when another member's app or server runs it; the sender's app only shows it. */
+  runner: v.optional(v.object({ userId: v.id("users"), name: v.string(), host: v.string() })),
+  /** The agent's chosen computer was unavailable, so it runs on the sender's app. */
+  fallback: v.optional(v.string()),
+});
+
 /** Records a person's message and starts their run, or queues it behind the run that holds the thread. Idempotent per clientId. */
 export const begin = mutation({
   args: {
     sessionToken: v.string(), threadId: v.id("agentThreads"), clientId: v.string(), text: v.string(),
     engineLabel: v.optional(v.string()), attachments: v.optional(v.array(threadAttachment)),
   },
-  returns: v.object({ runId: v.id("workspaceAgentRuns"), messageId: v.id("agentThreadMessages"), status: v.string(), seq: v.number() }),
-  handler: async (ctx, args) => {
+  returns: beginResult,
+  handler: async (ctx, args): Promise<Infer<typeof beginResult>> => {
     const { thread, agent, access, user } = await requireWritableThread(ctx, args.threadId, args.sessionToken);
     const clientId = clientIdOf(args.clientId);
     const existing = await messageByClientId(ctx, thread._id, clientId);
     if (existing) {
       if (existing.authorUserId !== user._id || !existing.runId) throw new Error("clientId already belongs to another message");
       const run = await ctx.db.get(existing.runId);
-      return { runId: existing.runId, messageId: existing._id, status: run?.status ?? "failed", seq: existing.seq };
+      const runner = run && runnerOf(run) !== user._id ? await ctx.db.get(runnerOf(run)) : null;
+      const host = run?.hostId ? await ctx.db.get(run.hostId) : null;
+      return {
+        runId: existing.runId, messageId: existing._id, status: run?.status ?? "failed", seq: existing.seq,
+        ...(runner ? { runner: { userId: runner._id, name: runner.name || runner.email, host: host?.name ?? "" } } : {}),
+      };
     }
     const now = Date.now();
     const overBudget = await budgetRefusal(ctx, agent, thread.projectId ?? agent.projectId, now);
@@ -39,12 +53,15 @@ export const begin = mutation({
     const fresh = (await ctx.db.get(thread._id))!;
     const busy = fresh.activeRunId !== undefined;
     const status = busy ? "queued" as const : "running" as const;
-    const engineLabel = args.engineLabel?.trim().slice(0, ENGINE_LABEL_MAX);
+    const { runner: chosen, unavailable } = await chosenRunner(ctx, agent, now);
+    const runner = chosen && chosen.userId !== user._id ? chosen : null;
+    const engineLabel = runner ? undefined : args.engineLabel?.trim().slice(0, ENGINE_LABEL_MAX);
     const runId = await ctx.db.insert("workspaceAgentRuns", {
       teamId: thread.teamId, ...(thread.projectId ? { projectId: thread.projectId } : {}), threadId: thread._id, requestClientId: clientId,
       ...(engineLabel ? { engineLabel } : {}), requesterUserId: user._id, requesterMembershipId: access.membership._id, actorAgentId: agent._id,
       status, task: args.text.slice(0, 500), engine: agent.engine, model: agent.model, effort: agent.effort, depth: 0, eventSequence: 0,
       lastEventAt: now, ...(status === "running" ? { heartbeatAt: now } : {}), createdAt: now, updatedAt: now,
+      ...(chosen ? { hostId: chosen.hostId } : {}), ...(runner ? { runnerUserId: runner.userId, runnerMembershipId: runner.membershipId } : {}),
     });
     const seq = await nextSeq(ctx, fresh, now, true);
     const messageId = await ctx.db.insert("agentThreadMessages", {
@@ -53,7 +70,10 @@ export const begin = mutation({
       createdAt: now, updatedAt: now,
     });
     if (status === "running") await ctx.db.patch(thread._id, { activeRunId: runId, leaseUntil: now + LEASE_MS });
-    return { runId, messageId, status, seq };
+    return {
+      runId, messageId, status, seq,
+      ...(runner ? { runner: { userId: runner.userId, name: runner.ownerName, host: runner.hostName } } : {}), ...(unavailable ? { fallback: unavailable } : {}),
+    };
   },
 });
 
@@ -63,7 +83,7 @@ export const heartbeat = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
     const run = await ctx.db.get(args.runId);
-    if (!run || run.requesterUserId !== user._id) throw new Error("Run not found");
+    if (!run || runnerOf(run) !== user._id) throw new Error("Run not found");
     if (run.status !== "running" || !run.threadId) return { status: run.status };
     const now = Date.now();
     if (!await canResumeThreadRun(ctx, run, user)) {
@@ -96,7 +116,7 @@ export const appendMessage = mutation({
     }
     const now = Date.now();
     if (args.role === "bot" && (!args.runId || !runAcceptsBotWrites(await ctx.db.get(args.runId), user._id, thread._id, now))) {
-      throw new Error("Only the run's requester can write its replies");
+      throw new Error("Only the app running this reply can write it");
     }
     const seq = await nextSeq(ctx, thread, now, true);
     const messageId = await ctx.db.insert("agentThreadMessages", {
@@ -145,7 +165,7 @@ export const finish = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
     const run = await ctx.db.get(args.runId);
-    if (!run || run.requesterUserId !== user._id) throw new Error("Run not found");
+    if (!run || runnerOf(run) !== user._id) throw new Error("Run not found");
     if (run.status !== "running" && run.status !== "queued") return null;
     const engineLabel = args.engineLabel?.trim().slice(0, ENGINE_LABEL_MAX);
     await settleRun(ctx, run, args.status, Date.now(), { ...(args.usage ? { usage: args.usage } : {}), ...(engineLabel ? { engineLabel } : {}) });
@@ -162,31 +182,38 @@ export const cancel = mutation({
     const run = await ctx.db.get(args.runId);
     if (!run?.threadId) throw new Error("Run not found");
     const { access, user } = await requireThread(ctx, run.threadId, args.sessionToken);
-    if (run.requesterUserId !== user._id && !access.canEdit) throw new Error("Only the requester can stop this run");
+    if (run.requesterUserId !== user._id && runnerOf(run) !== user._id && !access.canEdit) throw new Error("Only the requester can stop this run");
     if (run.status === "running" || run.status === "queued") await settleRun(ctx, run, "cancelled", Date.now());
     return null;
   },
 });
 
-/** My live and queued runs in a workspace: a desktop starts each one that holds its thread. */
+/** The live and queued runs this member's app runs in a workspace: its own, and teammates' runs of agents set to run on it.
+ * A desktop starts each one that holds its thread. */
 export const pendingForMe = query({
   args: { sessionToken: v.string(), teamId: v.id("teams") },
   returns: v.array(v.object({
     runId: v.id("workspaceAgentRuns"), threadId: v.id("agentThreads"), agentId: v.id("workspaceAgents"), status: v.string(),
     requestClientId: v.optional(v.string()), text: v.string(), createdAt: v.number(),
+    /** A teammate's run of an agent set to run here: the cloud row of their message, and who sent it. */
+    hostedFor: v.optional(v.object({ userId: v.id("users"), name: v.string(), messageId: v.optional(v.id("agentThreadMessages")) })),
   })),
   handler: async (ctx, args) => {
     const { member, user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     const out = [];
     for (const status of ["running", "queued"] as const) {
-      const runs = await ctx.db.query("workspaceAgentRuns")
+      const own = await ctx.db.query("workspaceAgentRuns")
         .withIndex("by_requesterMembershipId_and_status", (q) => q.eq("requesterMembershipId", member._id).eq("status", status)).take(50);
-      for (const run of runs) {
+      const hosted = await ctx.db.query("workspaceAgentRuns")
+        .withIndex("by_runnerMembershipId_and_status", (q) => q.eq("runnerMembershipId", member._id).eq("status", status)).take(50);
+      for (const run of [...own, ...hosted.filter((run) => run.requesterUserId !== user._id)]) {
         if (!run.threadId || !await canResumeThreadRun(ctx, run, user)) continue;
         const request = run.requestClientId ? await messageByClientId(ctx, run.threadId, run.requestClientId) : null;
+        const requester = run.requesterUserId !== user._id ? await ctx.db.get(run.requesterUserId) : null;
         out.push({
           runId: run._id, threadId: run.threadId, agentId: run.actorAgentId, status: run.status,
           ...(run.requestClientId ? { requestClientId: run.requestClientId } : {}), text: request?.text ?? run.task, createdAt: run.createdAt,
+          ...(requester ? { hostedFor: { userId: requester._id, name: requester.name || requester.email, ...(request ? { messageId: request._id } : {}) } } : {}),
         });
       }
     }

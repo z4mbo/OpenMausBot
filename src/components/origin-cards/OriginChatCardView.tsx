@@ -4,7 +4,7 @@ import { MessageBoundary } from "../MessageBoundary";
 import { AssetsCard } from "./AssetsCard";
 import { BroadcastCard } from "./BroadcastCard";
 import { CallCard } from "./CallCard";
-import { CampaignCard } from "./CampaignCard";
+import { CampaignCard, CampaignsCard } from "./CampaignCard";
 import { FeedbackCard } from "./FeedbackCard";
 import { RepoCard } from "./RepoCard";
 import { VaultCard } from "./VaultCard";
@@ -13,6 +13,7 @@ function ChatCard({ card }: { card: OriginChatCard }) {
   switch (card.kind) {
     case "broadcast": return <BroadcastCard card={card} />;
     case "campaign": return <CampaignCard card={card} />;
+    case "campaigns": return <CampaignsCard card={card} />;
     case "assets": return <AssetsCard card={card} />;
     case "vault": return <VaultCard card={card} />;
     case "repo": return <RepoCard card={card} />;

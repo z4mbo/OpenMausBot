@@ -5,11 +5,13 @@ import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
 export const STUDIO_TOOL_DEFINITIONS = [
   {
     name: "origin_studio_generate",
-    description: "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. preset picks a ready-made effect from origin_studio_presets. Images and audio wait for the result (up to 40 s); video returns at once." + ORIGIN_SCOPE,
+    description: "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. preset picks a ready-made effect and template one of the project's own templates, both from origin_studio_presets; fill sets their blanks. Images and audio wait for the result (up to 40 s); video returns at once." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
         preset: { type: "string", enum: STUDIO_PRESETS.map((preset) => preset.id), description: "A ready-made effect from origin_studio_presets: its model, settings and prompt, unless you pass your own." },
+        template: { type: "string", maxLength: 80, description: "A project template id or name from origin_studio_presets: its model, settings, prompt and example inputs, unless you pass your own." },
+        fill: { type: "object", additionalProperties: { type: "string", maxLength: 400 }, description: "Values for the [placeholders] in the prompt, by label, by default words or by position (1, 2 …); blanks you leave out keep their default words." },
         mode: { type: "string", enum: ["image", "video", "audio", "edit"], description: "edit changes, upscales or cuts out an image. Default image." },
         prompt: { type: "string", maxLength: 8_000, description: "What to make; for an ElevenLabs voice, the words spoken." },
         model: { type: "string", enum: [...STUDIO_MODELS.map((model) => model.id), STUDIO_CUSTOM_MODEL], description: "Default: the mode's first model that takes as many sources as you pass." },
@@ -82,6 +84,7 @@ export const STUDIO_TOOL_DEFINITIONS = [
         inputs: { type: "object", additionalProperties: { type: "string", maxLength: 8_000 }, description: "Input node id to prompt text, or to an asset id for a file input." },
         character: { type: "string", maxLength: 64, description: "A library entry every image and video step follows." },
         caption: { type: "string", maxLength: 2_000, description: "Text of the Publish drafts its Output nodes fill, such as template:campaign-pack's feed post and reel." },
+        fill: { type: "object", additionalProperties: { type: "string", maxLength: 400 }, description: "Values for the [placeholders] in its Prompt nodes, by label or default words, as origin_studio_workflow_list shows them." },
         name: { type: "string", maxLength: 120 },
         wait: { type: "boolean", description: "Wait up to 40 s for the run. Default false." },
         project: ORIGIN_PROJECT,
@@ -90,8 +93,38 @@ export const STUDIO_TOOL_DEFINITIONS = [
     },
   },
   {
+    name: "origin_studio_workflow_save",
+    description: "Save a Studio workflow the team can open, edit and run: from a template id (such as template:talking-avatar), a copy of a saved workflow, or a finished generation, whose animate, remix and upscale steps become one model node each with its prompt as an input. Returns its id for origin_studio_workflow_run." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        from: { type: "string", minLength: 1, maxLength: 64, description: "A template id or workflow id from origin_studio_workflow_list, or a generation id from origin_studio_list." },
+        name: { type: "string", minLength: 1, maxLength: 120 },
+        description: { type: "string", maxLength: 400 },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["from", "name"],
+    },
+  },
+  {
+    name: "origin_studio_template_save",
+    description: "Save a finished Studio generation as one of the project's templates: its model, settings and starting files as examples, its result as the cover. Write prompt with the words people should change as [Label: default words]; each becomes a blank in Studio's prompt bar and in fill." + ORIGIN_SCOPE,
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        generation_id: { type: "string", minLength: 1, maxLength: 64, description: "From origin_studio_list or origin_studio_generate." },
+        name: { type: "string", minLength: 1, maxLength: 80 },
+        prompt: { type: "string", maxLength: 8_000, description: "The prompt with [Label: default] blanks. Default: the generation's own prompt." },
+        description: { type: "string", maxLength: 400 },
+        keep_inputs: { type: "boolean", description: "Keep its starting file as an example input people can swap. Default true." },
+        project: ORIGIN_PROJECT,
+      },
+      required: ["generation_id", "name"],
+    },
+  },
+  {
     name: "origin_studio_presets",
-    description: "List Studio's ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt template. Pass an id as preset to origin_studio_generate." + ORIGIN_SCOPE,
+    description: "List the templates Studio offers: the project's own (saved from generations, with [blanks] to fill) and the ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt. Pass a preset id as preset, or a project template as template, to origin_studio_generate." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {

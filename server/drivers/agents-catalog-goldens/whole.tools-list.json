@@ -2123,7 +2123,7 @@
     },
     {
       "name": "origin_vault_list",
-      "description": "List an Origin project's vault: titles, kinds, URLs, usernames, and the values members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's vault and the signed-in person's: titles, kinds, URLs, usernames, and the values (a service sign-in's as env vars) members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2254,7 +2254,7 @@
     },
     {
       "name": "origin_canvas",
-      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's canvases (design files, boards and presentations), or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2303,6 +2303,15 @@
             "type": "string",
             "maxLength": 80,
             "description": "Start a new canvas with this name and apply ops to it."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "design",
+              "board",
+              "deck"
+            ],
+            "description": "With new_canvas: a design file (default), a whiteboard or a presentation."
           },
           "ops": {
             "type": "array",
@@ -2461,6 +2470,105 @@
       }
     },
     {
+      "name": "origin_canvas_board",
+      "description": "Work on an Origin project's whiteboard (a board on its Design page) as people do: sticky notes, text, labelled shapes, freehand strokes and connector arrows, live for everyone on it. items run in order: {type: sticky|text|shape|stroke|connector, key, text, color, x, y}; stickies take color yellow|pink|green|blue|purple|orange|gray; shapes take shape box|pill|circle, w, h; strokes take points [[x,y],...] (world coordinates), width, highlight; connectors take from and to (keys from this call or node ids). Items without x and y are laid out in a grid beside what is there. delete removes nodes by id. Read the board first with origin_canvas, and look at it with origin_canvas_screenshot. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "canvas": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Board name or id; optional when the project has one canvas."
+          },
+          "new_board": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Start a new board with this name."
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 120,
+            "items": {
+              "type": "object"
+            }
+          },
+          "delete": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      }
+    },
+    {
+      "name": "origin_canvas_deck",
+      "description": "Build or edit an Origin presentation (a pitch deck on the project's Design page) as people do: its slides are 1920×1080 frames played top to bottom, styled with the brand kit. slides adds slides from an outline: {layout: title|section|bullets|two-column|stat|image|quote|closing, title, subtitle, body, bullets [..], columns [left, right], stat, image (an image asset's name), notes (speaker notes), key, replace (a slide id to replace)}; at inserts them at a position (default the end). order reorders by slide ids, notes [{slide, text}] writes speaker notes, delete removes slides. Refine any slide's layers with origin_canvas_edit and check it with origin_canvas_screenshot. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "canvas": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Presentation name or id; optional when the project has one canvas."
+          },
+          "new_deck": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Start a new presentation with this name."
+          },
+          "slides": {
+            "type": "array",
+            "maxItems": 40,
+            "items": {
+              "type": "object"
+            }
+          },
+          "at": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "order": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          "notes": {
+            "type": "array",
+            "maxItems": 80,
+            "items": {
+              "type": "object"
+            }
+          },
+          "delete": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        }
+      }
+    },
+    {
       "name": "origin_standup",
       "description": "What happened in an Origin project in the last 24 hours, as its Chief's standup: PRs waiting for a merge, blocked agents (approvals, failed runs), issues done and moved. Without project, every project you reach. With a project admin's sign-in it is also posted to the members' Inbox.",
       "inputSchema": {
@@ -2498,7 +2606,7 @@
     },
     {
       "name": "origin_studio_generate",
-      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. preset picks a ready-made effect from origin_studio_presets. Images and audio wait for the result (up to 40 s); video returns at once. Acts on your team's Origin project unless you pass project.",
+      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. preset picks a ready-made effect and template one of the project's own templates, both from origin_studio_presets; fill sets their blanks. Images and audio wait for the result (up to 40 s); video returns at once. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2540,6 +2648,19 @@
               "sound-effect"
             ],
             "description": "A ready-made effect from origin_studio_presets: its model, settings and prompt, unless you pass your own."
+          },
+          "template": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "A project template id or name from origin_studio_presets: its model, settings, prompt and example inputs, unless you pass your own."
+          },
+          "fill": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 400
+            },
+            "description": "Values for the [placeholders] in the prompt, by label, by default words or by position (1, 2 …); blanks you leave out keep their default words."
           },
           "mode": {
             "type": "string",
@@ -2860,6 +2981,14 @@
             "maxLength": 2000,
             "description": "Text of the Publish drafts its Output nodes fill, such as template:campaign-pack's feed post and reel."
           },
+          "fill": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 400
+            },
+            "description": "Values for the [placeholders] in its Prompt nodes, by label or default words, as origin_studio_workflow_list shows them."
+          },
           "name": {
             "type": "string",
             "maxLength": 120
@@ -2880,8 +3009,85 @@
       }
     },
     {
+      "name": "origin_studio_workflow_save",
+      "description": "Save a Studio workflow the team can open, edit and run: from a template id (such as template:talking-avatar), a copy of a saved workflow, or a finished generation, whose animate, remix and upscale steps become one model node each with its prompt as an input. Returns its id for origin_studio_workflow_run. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "from": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "A template id or workflow id from origin_studio_workflow_list, or a generation id from origin_studio_list."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "from",
+          "name"
+        ]
+      }
+    },
+    {
+      "name": "origin_studio_template_save",
+      "description": "Save a finished Studio generation as one of the project's templates: its model, settings and starting files as examples, its result as the cover. Write prompt with the words people should change as [Label: default words]; each becomes a blank in Studio's prompt bar and in fill. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "generation_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "From origin_studio_list or origin_studio_generate."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "prompt": {
+            "type": "string",
+            "maxLength": 8000,
+            "description": "The prompt with [Label: default] blanks. Default: the generation's own prompt."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "keep_inputs": {
+            "type": "boolean",
+            "description": "Keep its starting file as an example input people can swap. Default true."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "generation_id",
+          "name"
+        ]
+      }
+    },
+    {
       "name": "origin_studio_presets",
-      "description": "List Studio's ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt template. Pass an id as preset to origin_studio_generate. Acts on your team's Origin project unless you pass project.",
+      "description": "List the templates Studio offers: the project's own (saved from generations, with [blanks] to fill) and the ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt. Pass a preset id as preset, or a project template as template, to origin_studio_generate. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3017,6 +3223,11 @@
             },
             "description": "Asset names or ids from origin_list_assets; [] removes all."
           },
+          "campaign": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Id or name of a campaign from origin_campaign_get to attach the post to."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,
@@ -3027,7 +3238,7 @@
     },
     {
       "name": "origin_broadcast_list",
-      "description": "List an Origin project's Publish posts: id, status, approval, schedule, channels with their published links or errors, media and text. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Publish posts, or one campaign's: id, status, approval, schedule, channels with their published links or errors, media and text. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3036,13 +3247,19 @@
             "type": "string",
             "enum": [
               "all",
+              "approval",
               "draft",
               "scheduled",
               "publishing",
               "published",
               "failed"
             ],
-            "description": "Default all."
+            "description": "Default all; approval lists the posts an agent wrote that wait for a person."
+          },
+          "campaign": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Id or name of a campaign: only its posts."
           },
           "project": {
             "type": "string",
@@ -3074,6 +3291,29 @@
             "type": "string",
             "maxLength": 40,
             "description": "ISO 8601 time with offset; omit to publish now."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "post_id"
+        ]
+      }
+    },
+    {
+      "name": "origin_broadcast_unschedule",
+      "description": "Take a scheduled Publish post off the calendar so it does not go out; it becomes a draft again. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "post_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
           },
           "project": {
             "type": "string",

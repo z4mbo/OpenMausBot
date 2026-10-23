@@ -25,6 +25,9 @@ export const broadcastFormat = v.union(v.literal("post"), v.literal("reel"));
 
 export const broadcastReel = v.object({ coverMs: v.optional(v.number()), music: v.optional(v.string()) });
 
+/** An agent wrote the post and no person approved it yet, so it cannot be scheduled. */
+export const needsApproval = (post: { agentName?: string; approvedAt?: number }) => Boolean(post.agentName) && !post.approvedAt;
+
 export const broadcastTables = {
   broadcastPosts: defineTable({
     projectId: v.id("projects"),

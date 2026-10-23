@@ -176,21 +176,14 @@ export async function createGitHubTask(service: GitHubService, projectId: string
 
 export const DRAFT_STAYS_LOCAL = "This issue is in Draft, which stays in Origin. Move it to another column to create its GitHub issue.";
 
-/** `park` closes the GitHub issue of an Origin issue moved back to Draft as not planned, until it leaves Draft. */
-export type IssueStateMove = "pull" | "close" | "park" | "reopen";
-
-const STATE_PATCH: Record<Exclude<IssueStateMove, "pull">, object> = {
-  close: { state: "closed", state_reason: "completed" },
-  park: { state: "closed", state_reason: "not_planned" },
-  reopen: { state: "open" },
-};
+/** `remove` deletes the GitHub issue of an Origin issue that was completed or moved back to Draft; it gets a new one when it leaves Draft or reopens. */
+export type IssueStateMove = "pull" | "remove" | "reopen";
 
 export function issueStateMove(task: { done: boolean; draft?: boolean; githubIssueState?: "open" | "closed"; githubIssueReopenRequested?: boolean }, remote: "open" | "closed"): IssueStateMove {
-  const parked = !task.done && task.draft === true;
-  const local = task.done || parked ? "closed" : "open";
+  const local = task.done || task.draft === true ? "closed" : "open";
   if (!task.githubIssueState || remote !== task.githubIssueState || local === remote) return "pull";
   if (local === "open") return task.githubIssueReopenRequested ? "reopen" : "pull";
-  return parked ? "park" : "close";
+  return "remove";
 }
 
 async function syncTarget(service: GitHubService, target: Target, pushChanges = true) {
@@ -202,16 +195,16 @@ async function syncTarget(service: GitHubService, target: Target, pushChanges = 
   let issue = await githubRequest<GitHubIssue>(service, path, token);
   if (issue.pull_request) return;
   const move = pushChanges ? issueStateMove(task, issue.state) : "pull";
-  if (move !== "pull") issue = await githubRequest<GitHubIssue>(service, path, token, { method: "PATCH", body: JSON.stringify(STATE_PATCH[move]) });
-  if (move === "park") {
-    await githubRequest(service, `${path}/comments`, token, {
-      method: "POST", body: JSON.stringify({ body: `Moved back to Draft in Origin (${originIssueKey(target.taskId)}), so this issue is closed as not planned. It reopens when the issue leaves Draft.` }),
-    }).catch(() => undefined);
+  if (move === "remove") {
+    await removeGitHubIssue(service, target.projectId, target.taskId, `https://github.com/${repo.owner}/${repo.repo}/issues/${target.number}`, task.done ? "Completed in Origin" : "Moved back to Draft in Origin");
+    await service.bridge("unlinkIssue", { projectId: target.projectId, taskId: target.taskId, number: target.number });
+    return;
   }
+  if (move === "reopen") issue = await githubRequest<GitHubIssue>(service, path, token, { method: "PATCH", body: JSON.stringify({ state: "open" }) });
   await link(service, target.projectId, target.taskId, `https://github.com/${repo.owner}/${repo.repo}`, issue);
 }
 
-/** Pushes one linked issue's Origin state (done, or parked in Draft) to GitHub now instead of on the next sync. */
+/** Pushes one linked issue's Origin state to GitHub now instead of on the next sync: completed or back in Draft removes its GitHub issue. */
 export async function syncLinkedTask(service: GitHubService, projectId: string, taskId: string, number: number, repoUrl: string) {
   await syncTarget(service, { projectId, taskId, number, repoUrl });
 }
@@ -238,7 +231,7 @@ async function issueOrGone(service: GitHubService, repoPath: string, number: num
  * Deletes the GitHub issue Origin created for this task. GitHub lets only repository admins delete issues, so without
  * that right, or for an issue Origin did not create, it is closed as not planned with a note instead.
  */
-export async function removeGitHubIssue(service: GitHubService, projectId: string, taskId: string, issueUrl: string): Promise<GitHubIssueRemoval> {
+export async function removeGitHubIssue(service: GitHubService, projectId: string, taskId: string, issueUrl: string, cause = "Deleted in Origin"): Promise<GitHubIssueRemoval> {
   const { repo, token, tokenError } = await contextWithToken(service, projectId);
   if (!repo) throw new Error("This project has no GitHub repository");
   const repoUrl = `https://github.com/${repo.owner}/${repo.repo}`;
@@ -265,7 +258,7 @@ export async function removeGitHubIssue(service: GitHubService, projectId: strin
   }
   await githubRequest(service, `${repoPath}/issues/${number}`, token, { method: "PATCH", body: JSON.stringify({ state: "closed", state_reason: "not_planned" }) });
   await githubRequest(service, `${repoPath}/issues/${number}/comments`, token, {
-    method: "POST", body: JSON.stringify({ body: `Deleted in Origin (${originIssueKey(taskId)}), so this issue is closed as not planned.` }),
+    method: "POST", body: JSON.stringify({ body: `${cause} (${originIssueKey(taskId)}), so this issue is closed as not planned.` }),
   }).catch(() => undefined);
   return { outcome: "closed", number, reason };
 }

@@ -2123,7 +2123,7 @@
     },
     {
       "name": "origin_vault_list",
-      "description": "List an Origin project's vault: titles, kinds, URLs, usernames, and the values members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's vault and the signed-in person's: titles, kinds, URLs, usernames, and the values (a service sign-in's as env vars) members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2254,7 +2254,7 @@
     },
     {
       "name": "origin_canvas",
-      "description": "List an Origin project's design canvases, or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Before the first call, get its input schema from find_tool.",
+      "description": "List an Origin project's canvases (design files, boards and presentations), or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2354,6 +2354,24 @@
       }
     },
     {
+      "name": "origin_canvas_board",
+      "description": "Work on an Origin project's whiteboard (a board on its Design page) as people do: sticky notes, text, labelled shapes, freehand strokes and connector arrows, live for everyone on it. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_canvas_deck",
+      "description": "Build or edit an Origin presentation (a pitch deck on the project's Design page) as people do: its slides are 1920×1080 frames played top to bottom, styled with the brand kit. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
       "name": "origin_standup",
       "description": "What happened in an Origin project in the last 24 hours, as its Chief's standup: PRs waiting for a merge, blocked agents (approvals, failed runs), issues done and moved. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
@@ -2435,8 +2453,26 @@
       }
     },
     {
+      "name": "origin_studio_workflow_save",
+      "description": "Save a Studio workflow the team can open, edit and run: from a template id (such as template:talking-avatar), a copy of a saved workflow, or a finished generation, whose animate, remix and upscale steps become one model node each with its prompt as an input. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_studio_template_save",
+      "description": "Save a finished Studio generation as one of the project's templates: its model, settings and starting files as examples, its result as the cover. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
       "name": "origin_studio_presets",
-      "description": "List Studio's ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt template. Before the first call, get its input schema from find_tool.",
+      "description": "List the templates Studio offers: the project's own (saved from generations, with [blanks] to fill) and the ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2469,7 +2505,7 @@
     },
     {
       "name": "origin_broadcast_list",
-      "description": "List an Origin project's Publish posts: id, status, approval, schedule, channels with their published links or errors, media and text. Before the first call, get its input schema from find_tool.",
+      "description": "List an Origin project's Publish posts, or one campaign's: id, status, approval, schedule, channels with their published links or errors, media and text. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2485,6 +2521,15 @@
     {
       "name": "origin_broadcast_schedule",
       "description": "Schedule an approved Publish post to go out at a time, or now; the person's app publishes it with their channel keys. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_broadcast_unschedule",
+      "description": "Take a scheduled Publish post off the calendar so it does not go out; it becomes a draft again. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},

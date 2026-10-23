@@ -1,5 +1,6 @@
 import { BROADCAST_RULES } from "../../../shared/broadcast";
 import type { CampaignDetail, CampaignMetric, CampaignPost, CampaignSummary } from "../../../shared/origin-campaigns";
+import type { BroadcastPost } from "./broadcast-model";
 
 export type CampaignForm = {
   name: string;
@@ -88,4 +89,19 @@ export function metricTotals(metrics: readonly CampaignMetric[]): { likes: numbe
 
 export function compactNumber(value: number): string {
   return new Intl.NumberFormat([], { notation: "compact", maximumFractionDigits: 1 }).format(value);
+}
+
+const STATUS_RANK: Record<CampaignSummary["status"], number> = { running: 0, planning: 1, done: 2 };
+
+/** Running campaigns first, then the ones being planned, then the finished; each group as the backend sorted it. */
+export function campaignOrder<T extends Pick<CampaignSummary, "status">>(campaigns: readonly T[]): T[] {
+  return campaigns.map((campaign, index) => ({ campaign, index }))
+    .sort((a, b) => STATUS_RANK[a.campaign.status] - STATUS_RANK[b.campaign.status] || a.index - b.index).map(({ campaign }) => campaign);
+}
+
+/** When the campaign's next scheduled post goes out, from the posts it lists. */
+export function nextPostAt(campaign: Pick<CampaignSummary, "postIds">, posts: readonly Pick<BroadcastPost, "_id" | "status" | "scheduledAt">[]): number | undefined {
+  const linked = new Set(campaign.postIds ?? []);
+  const times = posts.filter((post) => linked.has(post._id) && post.status === "scheduled" && post.scheduledAt !== undefined).map((post) => post.scheduledAt!);
+  return times.length ? Math.min(...times) : undefined;
 }

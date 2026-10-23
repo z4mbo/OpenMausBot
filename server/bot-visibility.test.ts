@@ -128,6 +128,8 @@ describe("VisibleSet", () => {
     const bob = new VisibleSet(bots, groups, BOB);
     expect(bob.everything).toBe(false);
     expect([bob.bot("pub"), bob.bot("hr"), bob.bot("adm"), bob.bot("corp"), bob.bot("unknown")]).toEqual([true, false, false, true, false]);
+    expect(bob.threadIds()?.sort()).toEqual(["t-corp", "t-pub", "t-pub-2", "t-room-pub"]);
+    expect(new VisibleSet(bots, groups, SEES_EVERYTHING).threadIds()).toBeNull();
     expect([bob.group("room-pub"), bob.group("room-mixed"), bob.group("room-empty")]).toEqual([true, false, false]);
     expect([bob.thread("t-pub-2"), bob.thread("t-hr"), bob.thread("t-room-mixed-2"), bob.thread("t-unknown")]).toEqual([true, false, false, false]);
     expect(bob.sections(["Ops", "People", "Empty"])).toEqual(["Ops"]);

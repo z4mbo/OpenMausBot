@@ -34,7 +34,8 @@ export interface OriginCampaignCardItem {
   endDate?: string;
   channels: BroadcastChannel[];
   slug?: string;
-  counts: { posts: number; published: number; generations: number; openIssues: number };
+  /** `approval`: posts an agent wrote that wait for a person's approval. */
+  counts: { posts: number; published: number; generations: number; openIssues: number; approval?: number };
 }
 
 export interface OriginAssetCardItem {
@@ -91,10 +92,11 @@ interface CardBase {
   projectName?: string;
 }
 
-/** A Publish post, campaign, asset, vault entry, repository, feedback or call an Origin agent tool returned, drawn in chat as a card that opens it in its project. Clients that do not know a kind ignore it. */
+/** A Publish post, campaign or list of campaigns, asset, vault entry, repository, feedback or call an Origin agent tool returned, drawn in chat as a card that opens it in its project. Clients that do not know a kind ignore it. */
 export type OriginChatCard = CardBase & (
   | { kind: "broadcast"; heading: string; posts: OriginPostCardItem[]; more?: number }
   | { kind: "campaign"; campaign: OriginCampaignCardItem }
+  | { kind: "campaigns"; heading: string; campaigns: OriginCampaignCardItem[]; more?: number }
   | { kind: "assets"; heading: string; assets: OriginAssetCardItem[]; more?: number }
   | { kind: "vault"; items: OriginVaultCardItem[]; more?: number }
   | { kind: "repo"; repo: OriginRepoCardItem }

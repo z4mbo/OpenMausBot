@@ -6,7 +6,7 @@ export { archivedDeleteAllCopy, botConfirmCopy, type BotConfirmKind } from "./bo
 import { track } from "@/lib/analytics";
 import { activeWorkspace, addAccountWorkspace, inWorkspace, reportActiveWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
 import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
-import { NewAgentDialog, SidebarGroups, SidebarProjects, WorkspaceSwitcher } from "./SidebarProjects";
+import { NewAgentDialog, SidebarGroups, SidebarProjectIcons, SidebarProjects, WorkspaceSwitcher, splitPinnedProjects } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
 import { OriginNav } from "./OriginPages";
 import { sidebarRowLead } from "@/lib/sidebar-row-geometry";
@@ -1254,7 +1254,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
           className={cn("absolute -right-0.5 -bottom-0.5 rounded-full border-2 border-panel bg-accent", iconOnly ? "size-3" : "size-2.5")} />}
         {!teammateWait && !waiting && !working && queued && <span data-testid="queued-dot" role="status" aria-label={t("task.queued")} title={t("task.queued")}
           className={cn("absolute -right-0.5 -bottom-0.5 rounded-full border-2 border-panel bg-ink-secondary", iconOnly ? "size-3" : "size-2.5")} />}
-        {bot.chiefOfStaff && iconOnly && (
+        {bot.chiefOfStaff && iconOnly && SHOWS_CHIEF_LABEL && (
           <span className="absolute -left-1 -top-1 flex rounded-full bg-raised p-[3px]">
             <Crown size={11} strokeWidth={2.25} className="shrink-0 text-accent" role="img" aria-label={t("sidebar.bot.chiefOfStaff")} data-testid="chief-crown">
               <title>{t("sidebar.bot.chiefOfStaff")}</title>
@@ -1285,7 +1285,6 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
           className="absolute -inset-y-1 inset-x-0 z-10 rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-accent/60" />}
         <div className="flex items-baseline justify-between gap-2">
           <span className="flex min-w-0 grow items-center gap-1.5 truncate text-[15px] font-semibold leading-5 text-ink">
-            {bot.pinned && <Pin size={12} className="shrink-0 text-ink-secondary" />}
             <RenameTitle
               key={iconOnly ? "icons" : "expanded"}
               value={bot.name}
@@ -1676,15 +1675,14 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   } = partitionSidebarBots(matchingBots, { universalPins });
   const workspaces = useWorkspaces();
   const workspaceHeads = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : workspaceHeadsOf(sectionChiefs);
-  const standaloneTeams = new Set(state.bots.filter((bot) => bot.installedPackage).map((bot) => bot.section?.trim() ?? "").filter(Boolean));
-  standaloneTeams.add(STANDALONE_SECTION);
-  const standaloneAgents = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : state.bots
-    .filter((bot) => !bot.hidden && bot.section?.trim() === STANDALONE_SECTION);
+  const standaloneTeams = new Set([STANDALONE_SECTION, ...state.bots.filter((bot) => bot.installedPackage).map((bot) => bot.section?.trim() ?? "").filter(Boolean)]);
+  const standaloneAgents = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : state.bots.filter((bot) => !bot.hidden && bot.section?.trim() === STANDALONE_SECTION);
   const activeHeadId = activeWorkspace(workspaces, workspaceHeads);
   const bossBot = SIDEBAR_SHOWS_LOOSE_BOTS ? unsectionedChief : workspaceHeads.find((head) => head.id === activeHeadId) ?? unsectionedChief ?? unsectionedBots.at(-1);
   const workspaceTeams = [...standaloneTeams].filter((team) => team !== STANDALONE_SECTION
     && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, { section: team })).sort((a, b) => a.localeCompare(b));
-  const workspaceProjects = sectionChiefs.filter((chief) => !isWorkspaceSection(chief.section) && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, chief)
+  const { pinnedProjectChiefs, topPins } = splitPinnedProjects(pinnedBots, !SIDEBAR_SHOWS_LOOSE_BOTS);
+  const workspaceProjects = [...sectionChiefs, ...pinnedProjectChiefs].filter((chief) => !isWorkspaceSection(chief.section) && inWorkspace(bossBot?.chiefOfStaff ? bossBot : undefined, chief)
     && !standaloneTeams.has(chief.section?.trim() ?? ""));
   useEffect(() => { if (activeHeadId) reportActiveWorkspace(activeHeadId); }, [activeHeadId]);
   const cloudLinks = useCloudLinks();
@@ -2056,7 +2054,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         </div>
       </div>
 
-      {universalPins && pinnedBots.length > 0 && (
+      {universalPins && topPins.length > 0 && (
         <div
           data-sidebar-universal-pins=""
           // vh, not %: a percentage has no height to resolve against inside the glass head.
@@ -2068,7 +2066,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
             </div>
           )}
           <PinnedBotRoster
-            bots={pinnedBots}
+            bots={topPins}
             density={density}
             circles={pinnedCircles}
             row={botRow}
@@ -2110,7 +2108,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         aria-valuenow={Math.min(sidebarWidth ?? defaultWidth, maxSidebarWidth)}
         tabIndex={0}
         data-sidebar-resize
-        className="absolute inset-y-0 -right-1 z-20 hidden w-2 cursor-col-resize touch-none hover:bg-accent/20 focus-visible:bg-accent/30 md:block"
+        className="absolute inset-y-0 -right-1 z-20 hidden w-2 cursor-col-resize touch-none outline-none focus-visible:bg-accent/30 md:block"
         style={windowNoDragStyle}
         onPointerDown={(event) => {
           if (event.button !== 0) return;
@@ -2156,6 +2154,8 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
               archived={originRows.isArchived} selectedId={state.activeView === "chat" && !originPage ? state.selectedId : null}
               onNewProject={createsProjects ? () => dispatch({ type: "toggleNewBot", open: true }) : undefined} />
           )}
+          {!SIDEBAR_SHOWS_LOOSE_BOTS && density === "icons" && <SidebarProjectIcons projects={workspaceProjects} agents={standaloneAgents} archived={originRows.isArchived}
+            row={(bot) => <BotListItem {...botRow(bot)} {...originRows.rowProps(bot)} />} agentRow={(bot) => <BotListItem {...botRow(bot)} />} />}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && <SidebarGroups groups={[
             { id: "agents", name: "Agents", addLabel: "New agent", onAdd: () => setNewAgentOpen(true),
               rows: standaloneAgents.map((bot) => <BotListItem key={bot.id} {...botRow(bot)} />),
@@ -2209,7 +2209,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
                 )
               : undefined;
             const chiefLed = Boolean(sectionName) && sectionChiefItems.length > 0;
-            if ((chiefLed || sectionName === STANDALONE_SECTION) && !SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons") return null;
+            if (!SIDEBAR_SHOWS_LOOSE_BOTS && (density === "icons" || chiefLed || sectionName === STANDALONE_SECTION)) return null;
             const openTeamMenu = !remoteClient && layoutInteractive && sectionName ? (event: ReactMouseEvent<HTMLElement>) => {
               event.preventDefault();
               teamMenuReturn.current = event.currentTarget.querySelector<HTMLElement>("button") ?? event.currentTarget;

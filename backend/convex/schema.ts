@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { featureTables } from "./featureTables";
 import { agentAttribution, agentsTables } from "./agentsTables";
+import { realtimeTables } from "./realtimeTables";
 import { broadcastTables } from "./broadcastTables";
 import { campaignTables } from "./campaignTables";
 import { pipelineTables } from "./pipelineTables";
@@ -18,6 +19,8 @@ import { storageScope, uploadTarget } from "./lib/storageValidators";
 import {
   assetTypeValidator,
   callSignalKindValidator,
+  canvasKindValidator,
+  credentialKindValidator,
   memberStatusValidator,
   priorityValidator,
   storedProjectStatusValidator,
@@ -33,6 +36,7 @@ import {
 export default defineSchema({
   ...featureTables,
   ...agentsTables,
+  ...realtimeTables,
   ...broadcastTables,
   ...campaignTables,
   ...pipelineTables,
@@ -57,7 +61,7 @@ export default defineSchema({
     .index("by_team_updatedAt", ["teamId", "updatedAt"])
     .index("by_updatedAt", ["updatedAt"]),
   authAttempts: defineTable({ key: v.string(), count: v.number(), expiresAt: v.number() }).index("by_key", ["key"]),
-  canvases: defineTable({ teamId: v.id("teams"), projectId: v.id("projects"), name: v.string(), archived: v.boolean(), pages: v.optional(v.array(v.object({ id: v.string(), name: v.string(), guides: v.optional(v.array(v.object({ axis: v.union(v.literal("x"), v.literal("y")), at: v.number() }))) }))), drawingElementCount: v.optional(v.number()), drawingBytes: v.optional(v.number()), createdAt: v.number(), updatedAt: v.number() }).index("by_project", ["projectId", "archived"]),
+  canvases: defineTable({ teamId: v.id("teams"), projectId: v.id("projects"), name: v.string(), kind: v.optional(canvasKindValidator), archived: v.boolean(), pages: v.optional(v.array(v.object({ id: v.string(), name: v.string(), guides: v.optional(v.array(v.object({ axis: v.union(v.literal("x"), v.literal("y")), at: v.number() }))) }))), drawingElementCount: v.optional(v.number()), drawingBytes: v.optional(v.number()), createdAt: v.number(), updatedAt: v.number() }).index("by_project", ["projectId", "archived"]),
   drawingElements: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), elementId: v.string(), version: v.number(), nonce: v.number(), data: v.string(), updatedAt: v.number() }).index("by_teamId", ["teamId"]).index("by_teamId_and_elementId", ["teamId", "elementId"]).index("by_scene", ["teamId", "canvasId", "elementId"]),
   drawingFiles: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), fileId: v.string(), storageId: v.id("_storage"), mimeType: v.string() }).index("by_teamId", ["teamId"]).index("by_teamId_and_fileId", ["teamId", "fileId"]).index("by_scene", ["teamId", "canvasId", "fileId"]).index("by_storageId", ["storageId"]),
   drawingPresence: defineTable({ teamId: v.id("teams"), canvasId: v.optional(v.id("canvases")), userId: v.id("users"), agentId: v.optional(v.string()), name: v.string(), x: v.number(), y: v.number(), button: v.string(), selection: v.optional(v.array(v.string())), page: v.optional(v.string()), updatedAt: v.number() }).index("by_teamId", ["teamId"]).index("by_teamId_and_userId", ["teamId", "userId"]).index("by_scene", ["teamId", "canvasId", "userId"]),
@@ -351,14 +355,9 @@ export default defineSchema({
 
   credentials: defineTable({
     projectId: v.id("projects"),
-    kind: v.optional(v.union(
-      v.literal("password"),
-      v.literal("api_key"),
-      v.literal("secret"),
-      v.literal("note"),
-      v.literal("apk"),
-      v.literal("file"),
-    )),
+    kind: v.optional(credentialKindValidator),
+    /** For a service sign-in, which service in shared/vault-services.ts its variables are for. */
+    service: v.optional(v.string()),
     title: v.string(),
     username: v.optional(v.string()),
     url: v.optional(v.string()),
@@ -373,6 +372,24 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_project", ["projectId"]),
+
+  /** One person's own Vault: only they list it, and their agents use an item in every project while they have it unlocked. */
+  personalCredentials: defineTable({
+    userId: v.id("users"),
+    kind: credentialKindValidator,
+    service: v.optional(v.string()),
+    title: v.string(),
+    username: v.optional(v.string()),
+    url: v.optional(v.string()),
+    ciphertext: v.string(),
+    iv: v.string(),
+    salt: v.string(),
+    iterations: v.number(),
+    kdf: v.string(),
+    agentUse: v.optional(v.boolean()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_userId", ["userId"]),
 
   designTokens: defineTable({
     projectId: v.id("projects"),

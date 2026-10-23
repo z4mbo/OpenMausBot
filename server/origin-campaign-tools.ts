@@ -2,7 +2,7 @@ import { BROADCAST_CHANNELS, isBroadcastChannel } from "../shared/broadcast.ts";
 import { CAMPAIGN_LINK_KINDS, CAMPAIGN_STATUS_LABEL, isCampaignLinkKind, isCampaignStatus } from "../shared/origin-campaigns.ts";
 import { originIssueKey } from "../shared/origin-issues.ts";
 import { campaignCardItem } from "../shared/origin-chat-card-items.ts";
-import type { OriginChatCard } from "../shared/origin-chat-cards.ts";
+import { capped, type OriginChatCard } from "../shared/origin-chat-cards.ts";
 import type { OriginCloudClient, OriginToolResult } from "./origin-cloud.ts";
 
 type Args = Record<string, unknown>;
@@ -33,8 +33,8 @@ async function campaigns(scope: CampaignToolScope): Promise<Args[]> {
   return list(record(await scope.client.query("campaigns:list", { sessionToken: scope.sessionToken, projectId: scope.projectId })).campaigns);
 }
 
-/** A campaign by id, exact name or slug. */
-async function findCampaign(scope: CampaignToolScope, wanted: string): Promise<Args | string> {
+/** A campaign by id, exact name or slug, or what to tell the agent when there is none. */
+export async function findCampaign(scope: CampaignToolScope, wanted: string): Promise<Args | string> {
   const all = await campaigns(scope);
   const key = wanted.toLowerCase();
   const found = all.find((campaign) => campaign._id === wanted) ?? all.find((campaign) => text(campaign.name).toLowerCase() === key || text(campaign.slug) === key);
@@ -48,11 +48,22 @@ function campaignCard(scope: CampaignToolScope, campaign: Args | undefined): { c
   return campaign ? { card: { kind: "campaign", projectId: scope.projectId, projectName: scope.projectName, campaign: campaignCardItem(campaign) } } : {};
 }
 
+function campaignsCard(scope: CampaignToolScope, all: readonly Args[]): OriginChatCard {
+  const { items, more } = capped(all.map(campaignCardItem));
+  return { kind: "campaigns", projectId: scope.projectId, projectName: scope.projectName, heading: `${all.length} campaign${all.length === 1 ? "" : "s"}`, campaigns: items, ...(more ? { more } : {}) };
+}
+
+/** The ids of the posts a campaign links, read from its detail so older backends without `postIds` answer too. */
+export async function campaignPostIds(scope: CampaignToolScope, campaign: Args): Promise<Set<string>> {
+  const detail = record(await scope.client.query("campaigns:get", { sessionToken: scope.sessionToken, projectId: scope.projectId, campaignId: text(campaign._id) }));
+  return new Set(list(detail.posts).map((post) => text(post._id)));
+}
+
 function summaryLine(campaign: Args): string {
   const counts = record(campaign.counts);
   const dates = [text(campaign.startDate), text(campaign.endDate)].filter(Boolean).join(" to ");
   return `- ${text(campaign._id)} "${text(campaign.name)}" [${CAMPAIGN_STATUS_LABEL[text(campaign.status) as keyof typeof CAMPAIGN_STATUS_LABEL] ?? text(campaign.status)}]`
-    + `${dates ? ` ${dates}` : ""} · utm_campaign=${text(campaign.slug)} · ${Number(counts.posts) || 0} posts (${Number(counts.published) || 0} published), `
+    + `${dates ? ` ${dates}` : ""} · utm_campaign=${text(campaign.slug)} · ${Number(counts.posts) || 0} posts (${Number(counts.published) || 0} published${Number(counts.approval) ? `, ${Number(counts.approval)} awaiting approval` : ""}), `
     + `${Number(counts.generations) || 0} generations, ${Number(counts.openIssues) || 0} open issues`;
 }
 
@@ -121,7 +132,7 @@ export function campaignTools<C>(scope: (args: Args, ctx: C) => Promise<Campaign
       if (!wanted) {
         const all = await campaigns(target);
         if (!all.length) return { text: `${target.projectName} has no campaigns yet; create one with origin_campaign_create.` };
-        return { text: `${target.projectName}'s campaigns, recently changed first (${all.length}):\n${all.slice(0, SHOWN).map(summaryLine).join("\n")}` };
+        return { text: `${target.projectName}'s campaigns, recently changed first (${all.length}):\n${all.slice(0, SHOWN).map(summaryLine).join("\n")}`, card: campaignsCard(target, all) };
       }
       const found = await findCampaign(target, wanted);
       if (typeof found === "string") return { text: found, isError: true };
@@ -140,7 +151,8 @@ export function campaignTools<C>(scope: (args: Args, ctx: C) => Promise<Campaign
       if (typeof found === "string") return { text: found, isError: true };
       const remove = args.remove === true;
       await target.client.mutation("campaigns:link", { ...base(target), campaignId: text(found._id), kind: args.kind, itemId, ...(remove ? { remove } : {}) });
-      return { text: `${remove ? "Detached" : "Attached"} ${args.kind} ${itemId} ${remove ? "from" : "to"} campaign "${text(found.name)}".` };
+      const updated = (await campaigns(target).catch(() => [])).find((campaign) => campaign._id === found._id);
+      return { text: `${remove ? "Detached" : "Attached"} ${args.kind} ${itemId} ${remove ? "from" : "to"} campaign "${text(found.name)}".`, ...campaignCard(target, updated) };
     },
   };
 }

@@ -164,7 +164,7 @@ describe("bot draft dialog", () => {
 
   it("uses the same section editor for default templates", () => {
     const result = render(true);
-    expect(result.html).toContain("Defaults for new bots");
+    expect(result.html).toContain("Defaults for new agents");
     expect(result.html).toContain("Save defaults");
     expect(result.html).not.toContain(">Create bot<");
   });

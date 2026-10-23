@@ -17,13 +17,13 @@ const BOTS = [{ id: "chief", name: "Kai", section: "Kai", chiefOfStaff: true }, 
 function convex(role = "member") {
   const rows = new Map<string, string[]>([["canvas1", []], ["foreign", []]]);
   const calls: { name: string; args: Record<string, unknown> }[] = [];
-  const canvases = [{ _id: "canvas1", name: "Landing" }];
+  const canvases: { _id: string; name: string; kind?: string }[] = [{ _id: "canvas1", name: "Landing" }];
   const comments: Record<string, unknown>[] = [];
   const answer = async (name: string, args: Record<string, unknown>): Promise<unknown> => {
     calls.push({ name, args });
     if (name === "projects:get") return { _id: "kai", teamId: "team1", name: "Kai", memberRole: role };
     if (name === "draw:canvases") return canvases;
-    if (name === "draw:createCanvas") { canvases.push({ _id: "canvas2", name: String(args.name) }); rows.set("canvas2", []); return "canvas2"; }
+    if (name === "draw:createCanvas") { const id = `canvas${canvases.length + 1}`; canvases.push({ _id: id, name: String(args.name), kind: String(args.kind ?? "design") }); rows.set(id, []); return id; }
     if (name === "draw:scene") return rows.get(String(args.canvasId)) ?? [];
     if (name === "draw:updateElements") { rows.get(String(args.canvasId))!.push(...(args.elements as string[])); return null; }
     if (name === "canvasCollab:comments") return comments;
@@ -50,7 +50,7 @@ describe("origin_canvas and origin_canvas_edit", () => {
     expect(edit.text).toContain('Saved 3 node(s) on canvas "Landing" (canvas1) of Kai');
     expect(edit.text).toMatch(/Created: hero=\w+ frame "Hero"/);
     const hero = /hero=(\w+)/.exec(edit.text)![1]!;
-    expect(edit.design).toEqual({ heading: "Designed 1 frame on Landing", projectId: "kai", teamId: "team1", canvasId: "canvas1", canvasName: "Landing", frames: [{ id: hero, name: "Hero" }] });
+    expect(edit.design).toEqual({ heading: "Designed 1 frame on Landing", projectId: "kai", teamId: "team1", canvasId: "canvas1", canvasName: "Landing", kind: "design", frames: [{ id: hero, name: "Hero" }] });
     expect(calls.find((call) => call.name === "draw:saveFile")?.args).toMatchObject({ canvasId: "canvas1", fileId: "asset-logo1", storageId: "storage1", mimeType: "image/png" });
     const saved = decodeScene(rows.get("canvas1")!);
     expect(saved.find((node) => node.type === "image")?.fileId).toBe("asset-logo1");
@@ -125,9 +125,62 @@ describe("agent design tools", () => {
     const submitted = await run(client, "origin_design_submit", { issue_id: "task1", frames: ["Pricing"], rationale: "Three tiers, the middle one highlighted." });
     expect(submitted.text).toContain("is asked to review it");
     expect(submitted.reviewer).toMatchObject({ botId: "chief", botName: "Kai" });
-    expect(submitted.design).toEqual({ heading: "ORI-ASK1 design · in review", projectId: "kai", teamId: "team1", canvasId: "canvas1", canvasName: "Landing", frames: [{ id: frame, name: "Pricing" }], issueKey: "ORI-ASK1" });
+    expect(submitted.design).toEqual({ heading: "ORI-ASK1 design · in review", projectId: "kai", teamId: "team1", canvasId: "canvas1", canvasName: "Landing", kind: "design", frames: [{ id: frame, name: "Pricing" }], issueKey: "ORI-ASK1" });
     expect(calls.find((call) => call.name === "canvasCollab:linkDesign")?.args).toMatchObject({ taskId: "task1", frameId: frame, status: "review", agentName: "Developer" });
     expect(decodeScene(rows.get("canvas1")!).filter((node) => node.id === frame).at(-1)?.issue).toBe("task1");
     expect(calls.filter((call) => call.name === "canvasCollab:addComment").at(-1)?.args).toMatchObject({ nodeId: frame, agentName: "Developer" });
+  });
+});
+
+const latest = (rows: string[]) => new Map(decodeScene(rows).map((node) => [node.id, node]));
+
+describe("origin_canvas_board", () => {
+  it("starts a board and adds stickies in a grid, a labelled shape, a stroke and a connector", async () => {
+    const { client, rows } = convex();
+    const result = await run(client, "origin_canvas_board", { new_board: "Retro", items: [
+      { type: "sticky", key: "good", text: "Shipped Design", color: "green" },
+      { type: "sticky", key: "bad", text: "Flaky CI", color: "pink" },
+      { type: "shape", key: "next", text: "Fix CI first", shape: "pill", x: 0, y: 400 },
+      { type: "connector", from: "bad", to: "next" },
+      { type: "stroke", points: [[0, 700], [40, 720], [80, 700], [120, 730]], color: "#E03131" },
+      { type: "connector", from: "bad", to: "nowhere" },
+    ] });
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain('board "Retro" (canvas2)');
+    expect(result.text).toContain("Skipped: items[5]: connector ends bad and nowhere");
+    expect(result.design).toMatchObject({ kind: "board", canvasId: "canvas2", frames: [] });
+    const scene = latest(rows.get("canvas2")!);
+    const stickies = [...scene.values()].filter((node) => node.name === "Sticky");
+    expect(stickies.map((node) => [node.x, node.y, node.fill])).toEqual([[0, 0, "#BDEBC0"], [280, 0, "#FFC2D7"]]);
+    expect([...scene.values()].find((node) => node.type === "text" && node.text === "Flaky CI")?.parentId).toBe(stickies[1]!.id);
+    expect([...scene.values()].find((node) => node.type === "arrow")).toMatchObject({ name: "Connector" });
+    expect([...scene.values()].find((node) => node.type === "path")).toMatchObject({ name: "Drawing", stroke: "#E03131" });
+    expect((await run(client, "origin_canvas", {})).text).toContain('"Retro" (canvas2, board)');
+  });
+});
+
+describe("origin_canvas_deck", () => {
+  it("drafts a deck from an outline, then inserts, reorders, annotates and deletes slides", async () => {
+    const { client, rows } = convex();
+    const draft = await run(client, "origin_canvas_deck", { new_deck: "Seed pitch", slides: [
+      { layout: "title", title: "Origin", subtitle: "Projects, people and agents" },
+      { title: "Problem", bullets: ["Too many tools", "Agents work blind"], notes: "Tell the story of the launch week." },
+      { layout: "stat", stat: "3×", title: "Faster launches" },
+    ] });
+    expect(draft.isError).toBeUndefined();
+    expect(draft.text).toMatch(/3 slide\(s\) in order: 1 \w+ "Origin", 2 \w+ "Problem", 3 \w+ "Faster launches"/);
+    expect(draft.design).toMatchObject({ kind: "deck", canvasName: "Seed pitch" });
+    const ids = [...draft.text.split("\n")[0]!.matchAll(/\d (\w+) "/g)].map((match) => match[1]!);
+    let scene = latest(rows.get("canvas2")!);
+    expect(ids.map((id) => [scene.get(id)!.x, scene.get(id)!.y, scene.get(id)!.width])).toEqual([[0, 0, 1920], [0, 1240, 1920], [0, 2480, 1920]]);
+    expect(scene.get(ids[1]!)!.notes).toBe("Tell the story of the launch week.");
+    const edit = await run(client, "origin_canvas_deck", { canvas: "Seed pitch", slides: [{ layout: "section", title: "Market" }], at: 1, order: [ids[0], ids[2], ids[1]], notes: [{ slide: ids[2], text: "Pause here." }], delete: [] });
+    expect(edit.text).toMatch(/4 slide\(s\) in order: 1 \w+ "Origin", 2 \w+ "Market", 3 \w+ "Faster launches", 4 \w+ "Problem"/);
+    scene = latest(rows.get("canvas2")!);
+    expect(scene.get(ids[2]!)!.notes).toBe("Pause here.");
+    const removed = await run(client, "origin_canvas_deck", { canvas: "Seed pitch", delete: [ids[0]] });
+    expect(removed.text).toMatch(/3 slide\(s\) in order: 1 \w+ "Market"/);
+    expect((await run(client, "origin_canvas_deck", { canvas: "Seed pitch", order: ["missing"] })).text).toContain("No slide missing");
+    expect((await run(client, "origin_canvas", { canvas: "Seed pitch" })).text).toContain("Presentation slides in order");
   });
 });

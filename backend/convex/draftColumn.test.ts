@@ -62,6 +62,20 @@ describe("Draft column", () => {
     expect((await context(f, taskId)).task.done).toBe(true);
   });
 
+  test("an issue moved back to Draft forgets its removed GitHub issue and gets a new one when it leaves", async () => {
+    const f = await fixture();
+    const taskId = await f.create(f.columns[1]._id, "Planned");
+    await f.t.mutation(internal.integrations.linkIssue, { projectId: f.projectId, taskId, repoUrl, number: 7, issueUrl: `${repoUrl}/issues/7`, state: "open", updatedAt: 1000 });
+    await f.t.mutation(internal.integrations.unlinkIssue, { projectId: f.projectId, taskId, number: 8 });
+    expect(JSON.parse(await f.t.query(internal.integrations.context, { projectId: f.projectId, taskId })).task.githubIssueNumber).toBe(7);
+    await f.t.mutation(internal.integrations.unlinkIssue, { projectId: f.projectId, taskId, number: 7 });
+    const task = JSON.parse(await f.t.query(internal.integrations.context, { projectId: f.projectId, taskId })).task as Record<string, unknown>;
+    expect(task.githubIssueNumber).toBeUndefined();
+    expect(task.githubIssueUrl).toBeUndefined();
+    const { rows } = JSON.parse(await f.t.query(internal.integrations.unlinkedTasks, { cursor: null })) as { rows: { taskId: string }[] };
+    expect(rows.map(row => row.taskId)).toEqual([taskId]);
+  });
+
   test("the legacy GitHub issue action keeps Draft issues private", async () => {
     const f = await fixture();
     const taskId = await f.create(f.columns[0]._id, "Confidential draft");

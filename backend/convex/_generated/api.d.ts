@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as agentHosts from "../agentHosts.js";
 import type * as agentRuns from "../agentRuns.js";
 import type * as agentThreads from "../agentThreads.js";
 import type * as agents from "../agents.js";
@@ -46,6 +47,7 @@ import type * as integrations from "../integrations.js";
 import type * as issueRelations from "../issueRelations.js";
 import type * as legacyImport from "../legacyImport.js";
 import type * as lib_agentAccess from "../lib/agentAccess.js";
+import type * as lib_agentRunner from "../lib/agentRunner.js";
 import type * as lib_agentThreadRows from "../lib/agentThreadRows.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_columns from "../lib/columns.js";
@@ -61,6 +63,7 @@ import type * as lib_storage from "../lib/storage.js";
 import type * as lib_storageValidators from "../lib/storageValidators.js";
 import type * as lib_taskBranches from "../lib/taskBranches.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as lib_vaultService from "../lib/vaultService.js";
 import type * as memberProfiles from "../memberProfiles.js";
 import type * as members from "../members.js";
 import type * as meta from "../meta.js";
@@ -69,12 +72,15 @@ import type * as org from "../org.js";
 import type * as pages from "../pages.js";
 import type * as pagesHttp from "../pagesHttp.js";
 import type * as pagesTables from "../pagesTables.js";
+import type * as personalCredentials from "../personalCredentials.js";
 import type * as pipelineTables from "../pipelineTables.js";
 import type * as planning from "../planning.js";
 import type * as preferences from "../preferences.js";
 import type * as projectDocs from "../projectDocs.js";
 import type * as projectMilestones from "../projectMilestones.js";
 import type * as projectPresence from "../projectPresence.js";
+import type * as realtime from "../realtime.js";
+import type * as realtimeTables from "../realtimeTables.js";
 import type * as projects from "../projects.js";
 import type * as pulse from "../pulse.js";
 import type * as pulseTables from "../pulseTables.js";
@@ -87,6 +93,7 @@ import type * as storage from "../storage.js";
 import type * as studio from "../studio.js";
 import type * as studioLibrary from "../studioLibrary.js";
 import type * as studioTables from "../studioTables.js";
+import type * as studioTemplates from "../studioTemplates.js";
 import type * as studioUpload from "../studioUpload.js";
 import type * as studioWorkflows from "../studioWorkflows.js";
 import type * as taskPRs from "../taskPRs.js";
@@ -104,6 +111,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agentHosts: typeof agentHosts;
   agentRuns: typeof agentRuns;
   agentThreads: typeof agentThreads;
   agents: typeof agents;
@@ -142,6 +150,7 @@ declare const fullApi: ApiFromModules<{
   issueRelations: typeof issueRelations;
   legacyImport: typeof legacyImport;
   "lib/agentAccess": typeof lib_agentAccess;
+  "lib/agentRunner": typeof lib_agentRunner;
   "lib/agentThreadRows": typeof lib_agentThreadRows;
   "lib/auth": typeof lib_auth;
   "lib/columns": typeof lib_columns;
@@ -157,6 +166,7 @@ declare const fullApi: ApiFromModules<{
   "lib/storageValidators": typeof lib_storageValidators;
   "lib/taskBranches": typeof lib_taskBranches;
   "lib/validators": typeof lib_validators;
+  "lib/vaultService": typeof lib_vaultService;
   memberProfiles: typeof memberProfiles;
   members: typeof members;
   meta: typeof meta;
@@ -165,12 +175,15 @@ declare const fullApi: ApiFromModules<{
   pages: typeof pages;
   pagesHttp: typeof pagesHttp;
   pagesTables: typeof pagesTables;
+  personalCredentials: typeof personalCredentials;
   pipelineTables: typeof pipelineTables;
   planning: typeof planning;
   preferences: typeof preferences;
   projectDocs: typeof projectDocs;
   projectMilestones: typeof projectMilestones;
   projectPresence: typeof projectPresence;
+  realtime: typeof realtime;
+  realtimeTables: typeof realtimeTables;
   projects: typeof projects;
   pulse: typeof pulse;
   pulseTables: typeof pulseTables;
@@ -183,6 +196,7 @@ declare const fullApi: ApiFromModules<{
   studio: typeof studio;
   studioLibrary: typeof studioLibrary;
   studioTables: typeof studioTables;
+  studioTemplates: typeof studioTemplates;
   studioUpload: typeof studioUpload;
   studioWorkflows: typeof studioWorkflows;
   taskPRs: typeof taskPRs;

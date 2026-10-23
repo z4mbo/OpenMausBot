@@ -180,7 +180,17 @@ export class VisibleSet {
     return owner.bot !== undefined ? this.bot(owner.bot) : this.group(owner.group);
   }
 
+  /** Every thread the viewer may read, or null when that is all of them. */
+  threadIds(): string[] | null {
+    if (this.everything) return null;
+    return [...this.threadIndex().keys()].filter((threadId) => this.thread(threadId));
+  }
+
   private indexedOwner(threadId: string): ThreadOwner | undefined {
+    return this.threadIndex().get(threadId);
+  }
+
+  private threadIndex(): Map<string, ThreadOwner> {
     if (!this.threads) {
       const threads = new Map<string, ThreadOwner>();
       for (const bot of this.bots.values()) {
@@ -193,7 +203,7 @@ export class VisibleSet {
       }
       this.threads = threads;
     }
-    return this.threads.get(threadId);
+    return this.threads;
   }
 
   sections(all: readonly string[]): string[] {

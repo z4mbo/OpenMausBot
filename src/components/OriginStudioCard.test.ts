@@ -63,8 +63,8 @@ describe("Origin Studio chat cards", () => {
     }
     const { container, unmount } = render(createElement("div", null, createElement(OriginStudioCard, { message: message("kai") }), createElement(Probe)));
     try {
-      expect(container.querySelectorAll("[data-preset-card]")).toHaveLength(2);
-      flushSync(() => (container.querySelector('[data-preset-card="motion-transfer"]') as HTMLButtonElement).click());
+      expect(container.querySelectorAll("[data-template-card]")).toHaveLength(2);
+      flushSync(() => (container.querySelector('[data-template-card="motion-transfer"] button') as HTMLButtonElement).click());
       expect(focused).toEqual({ projectId: "kai", presetId: "motion-transfer" });
       expect(chiefSectionOf("kai-chief")).toBe("studio");
       expect(dispatch).toHaveBeenCalled();

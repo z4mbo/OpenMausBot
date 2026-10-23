@@ -27,10 +27,12 @@ export function dropTargetAt(root: HTMLElement, taskId: string, x: number, y: nu
  * Pointer-driven card dragging: a floating copy follows the pointer (written straight to the DOM, so moving re-renders nothing)
  * and the board re-renders only when the drop target changes. Touch starts after a short hold so a swipe still scrolls.
  */
-export function useCardDrag({ enabled, root, onDrop }: {
+export function useCardDrag({ enabled, root, onDrop, ignore = "button, a, input, textarea, select" }: {
   enabled: boolean;
   root: RefObject<HTMLElement | null>;
   onDrop(taskId: string, target: DropTarget, from: DOMRect): void;
+  /** Where a press does not start a drag. */
+  ignore?: string;
 }) {
   const [drag, setDrag] = useState<CardDrag | null>(null);
   const [target, setTarget] = useState<DropTarget | null>(null);
@@ -118,7 +120,7 @@ export function useCardDrag({ enabled, root, onDrop }: {
 
   /** Wire to a card's onPointerDown. */
   const press = (event: ReactPointerEvent<HTMLElement>, taskId: string) => {
-    if (!enabled || event.button !== 0 || drag || (event.target as HTMLElement).closest("button, a, input, textarea, select")) return;
+    if (!enabled || event.button !== 0 || drag || (event.target as HTMLElement).closest(ignore)) return;
     const card = event.currentTarget;
     const startX = event.clientX;
     const startY = event.clientY;

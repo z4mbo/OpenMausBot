@@ -593,7 +593,8 @@ import { createDefaultTeamRoutes, initializeWorkspaceTeams, openWorkspaceHead } 
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
 import { createOriginCloudRoutes, cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
 import { BroadcastScheduler, createBroadcastRoutes } from "./broadcast/scheduler.ts";
-import { awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, recordCallNotes, transcribeWith } from "./origin-call-agent.ts";
+import { CallAgentError, createCallAgentSettingsRoutes, readCallAgentSettings } from "./origin-call-agent.ts";
+import { createProjectBotAgents } from "./host/project-bot-agents.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
 import { createOriginImportRoutes } from "./routes/origin-import.ts";
 import { createOriginAgentSupport } from "./origin-agent-support.ts";
@@ -7846,6 +7847,10 @@ async function acceptDirectSend(
       const shared = await sharedAgents.beforeSend({ botId: currentAtStart.id, threadId, text, sendId });
       if (shared) sendId = shared.sendId;
       if (shared?.status === "queued") return queueSharedSend(currentAtStart.id, threadId, text, shared, replyTo, sender);
+      if (shared?.status === "hosted") return hostedSharedSend(threadId, text, shared, replyTo, sender);
+      if (shared?.status === "running" && shared.fallback) {
+        store.appendMessage(threadId, { role: "bot", kind: "activity", tool: { name: `${shared.fallback}, so this runs on this computer`, ok: true } });
+      }
       if (shared) {
         return startOrQueueDirectMessage(botId, threadId, text, replyTo, sendId, sender, trigger, via, callId, dataContext)
           .catch((error: unknown) => { sharedAgents.failed(threadId); throw error; });
@@ -7919,6 +7924,13 @@ async function acceptDirectSend(
       return startOrQueueDirectMessage(botId, threadId, text, replyTo, sendId, sender, trigger, via, callId, dataContext);
     },
   );
+}
+
+/** The agent runs on a teammate's computer or a server: this app records the message and shows the answer as it arrives. */
+function hostedSharedSend(threadId: string, text: string, decision: Extract<SendDecision, { status: "hosted" }>, replyTo?: Message, sender?: ResolvedSender): DirectSendReceipt {
+  const message = store.appendMessage(threadId, { role: "user", kind: "text", text, sendId: decision.sendId, replyToId: replyTo?.id, sender });
+  store.appendMessage(threadId, { role: "bot", kind: "activity", tool: { name: `Running on ${decision.runner.name}'s computer (${decision.runner.host})`, ok: true } });
+  return { ok: true, threadId, message };
 }
 
 function queueSharedSend(botId: string, threadId: string, text: string, decision: Extract<SendDecision, { status: "queued" }>, replyTo?: Message, sender?: ResolvedSender): DirectSendReceipt {
@@ -13603,7 +13615,7 @@ ROUTES.push(createOriginInviteRoutes({ publicUrl }));
 const originPublicPages = createOriginPublicRoutes({ publicUrl });
 ROUTES.push(createAvatarLookRoutes({ store }));
 const sharedAgents = createSharedAgents({
-  store,
+  store, hostKind: CLOUD_HOME || process.env.ORIGIN_HOST_KIND === "server" ? "server" : "local",
   instances: async () => selectableInstances(await registry.describe()),
   selectionContext,
   isBusy: threadBusy,
@@ -13611,7 +13623,7 @@ const sharedAgents = createSharedAgents({
     await startTurn(run.botId, run.text, { threadId: run.threadId, ...(message ? { userMessage: message } : {}), ...(run.sender ? { sender: run.sender } : {}) });
   },
   interrupt: (botId, threadId) => void interruptDirectThread(botId, threadId).catch(() => undefined),
-  redact: redactSecretsInText, quickText: async (botId, prompt) => { const bot = store.bot(botId); if (!bot) throw new Error("The Chief no longer exists"); const writer = callSummaryWriter(bot); assertWithinBudget(cfg, DATA_DIR); return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), timeoutMs: 120_000 }); },
+  redact: redactSecretsInText, quickText: (botId, prompt) => writeCallText(botId, prompt, 120_000),
 });
 ROUTES.push(sharedAgents.routes);
 sharedAgents.start();
@@ -13636,45 +13648,23 @@ function callSummaryWriter(bot: BotRecord): { instance: ProviderInstance; model?
   }
   return { instance, ...(chosen.model ? { model: chosen.model } : {}) };
 }
-const callAgents = createCallAgents({
-  bot: (botId) => {
-    const bot = store.bot(botId);
-    return bot && !bot.hidden ? { id: bot.id, name: bot.name } : null;
-  },
-  allowed: ({ auth, botId, room }) => {
-    const bot = store.bot(botId);
-    if (!bot?.chiefOfStaff || !visibleTo(viewerFor(auth)).bot(botId)) return false;
-    return !room || cloudProjectFor(store.bots, readOriginCloud(defaultOriginCloudFile()).projects, botId) === room;
-  },
-  ask: ({ auth, botId, prompt }) => {
-    const bot = store.bot(botId);
-    if (!bot || !visibleTo(viewerFor(auth)).bot(botId)) return Promise.reject(new CallAgentError("That agent is not available to you"));
-    return awaitBotReply(store, bot.threadId, async () => {
-      await acceptDirectSend({
-        botId, threadId: bot.threadId, text: prompt, sendId: randomUUID().replaceAll("-", ""),
-        sender: messageSender(auth), trigger: usageTriggerFor(auth), via: "call", personPresent: true,
-      });
-    }, 120_000);
-  },
-  summarize: async ({ botId, prompt }) => {
-    const bot = store.bot(botId);
-    if (!bot) throw new CallAgentError("The chief no longer exists");
-    const writer = callSummaryWriter(bot);
-    assertWithinBudget(cfg, DATA_DIR);
-    return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), timeoutMs: 180_000 });
-  },
-  post: ({ botId, widget, fallback, transcript }) => {
-    const bot = store.bot(botId);
-    if (!bot) return;
-    const card = createAgentCard({ store, bot, threadId: bot.threadId, input: { tool: "show_widget", widget, fallback_text: fallback } });
-    if (!card.ok) store.appendMessage(bot.threadId, { role: "bot", kind: "text", text: fallback });
-    if (transcript) store.appendMessage(bot.threadId, { role: "bot", kind: "text", text: `Call transcript\n\n${transcript}` });
-  },
-  transcribe: ({ audio, mime, settings }) => transcribeWith({ audio, mime, settings, keys: { groq: cfg.groq?.key, openai: cfg.openai?.key } }),
-  settings: () => callAgentSettings, record: (input) => recordCallNotes(input),
-  log: (line) => console.log(line),
+async function writeCallText(botId: string, prompt: string, timeoutMs: number): Promise<string> {
+  const bot = store.bot(botId);
+  if (!bot) throw new CallAgentError("The Chief no longer exists");
+  const writer = callSummaryWriter(bot);
+  assertWithinBudget(cfg, DATA_DIR);
+  return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), timeoutMs });
+}
+const { chatAgent, callAgents } = createProjectBotAgents({
+  store,
+  visible: (auth, botId) => visibleTo(viewerFor(auth)).bot(botId),
+  projectOf: (botId) => cloudProjectFor(store.bots, readOriginCloud(defaultOriginCloudFile()).projects, botId),
+  send: (auth, input) => acceptDirectSend({ ...input, sender: messageSender(auth), trigger: usageTriggerFor(auth), personPresent: true }),
+  write: writeCallText,
+  keys: () => ({ groq: cfg.groq?.key, openai: cfg.openai?.key }),
+  settings: () => callAgentSettings,
 });
-ROUTES.push(createOriginMemberRoutes({ callAgents }));
+ROUTES.push(createOriginMemberRoutes({ callAgents, chatAgent }));
 const githubService = createGitHubService({ serverPublicUrl: publicUrl });
 PUBLIC_ROUTES.push(createOriginMcpRoutes({
   publicUrl,

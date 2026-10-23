@@ -377,7 +377,7 @@ export function BotSettingsDialog({ bot, overlay = false }: {
               <div
                 key={id}
                 data-bot-settings-section={id}
-                className="border-b border-hairline/30"
+                className="px-2 py-0.5"
                 hidden={!matched}
               >
                 <button
@@ -391,8 +391,8 @@ export function BotSettingsDialog({ bot, overlay = false }: {
                   }}
                   aria-expanded={open}
                   className={cn(
-                    "flex w-full shrink-0 items-center gap-2.5 px-4 py-2.5 text-left text-[14px]",
-                    open ? "bg-control/60 text-ink" : "text-ink-secondary hover:bg-control/40 hover:text-ink",
+                    "flex w-full shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[14px] outline-none transition-colors duration-(--motion-fast) focus-visible:ring-1 focus-visible:ring-accent/60",
+                    open ? "font-semibold text-ink" : "text-ink-secondary hover:bg-control/40 hover:text-ink",
                   )}
                 >
                   <Icon size={15} className="shrink-0" />
@@ -407,11 +407,11 @@ export function BotSettingsDialog({ bot, overlay = false }: {
                 </button>
                 {/* Memory stays mounted (hidden when collapsed) so its unsaved draft survives. */}
                 {id === "memory" ? (
-                  <div hidden={!open} className="px-4 pb-4 pt-1">
+                  <div hidden={!open} className="px-2.5 pb-4 pt-1">
                     {renderSectionBody("memory")}
                   </div>
                 ) : (
-                  open && <div className="px-4 pb-4 pt-1">{renderSectionBody(id)}</div>
+                  open && <div className="px-2.5 pb-4 pt-1 motion-safe:animate-[section-in_var(--motion-base)_var(--ease-out)_backwards]">{renderSectionBody(id)}</div>
                 )}
               </div>
             );

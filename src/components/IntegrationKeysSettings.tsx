@@ -122,6 +122,7 @@ function IntegrationRow({ integration, open, teamId, project, targets, workspace
     return field?.secret ? value.trim() !== "" : value.trim() !== (field?.value ?? "");
   });
   const shares = visibleShares(integration, project);
+  const checkScope = { teamId, projectId: project?.id };
   const chosen = targets.find((candidate) => target !== null && (candidate.projectId ?? "") === target) ?? targets[0];
   const canStop = (share: SharedIntegration) => (share.projectId ? targets.some((candidate) => candidate.projectId === share.projectId) : workspaceAdmin);
   const work = async (request: () => Promise<unknown>) => {
@@ -139,7 +140,7 @@ function IntegrationRow({ integration, open, teamId, project, targets, workspace
     const next = (await request).integration;
     onSaved(next);
     setDraft({});
-    if (next.configured) void runIntegrationCheck(next.id);
+    if (next.configured) void runIntegrationCheck(next.id, checkScope);
     else integrationsChanged();
   });
   const shareRequest = (method: "POST" | "DELETE", projectId: string | null) => work(async () => {
@@ -227,13 +228,13 @@ function IntegrationRow({ integration, open, teamId, project, targets, workspace
                 </button>
               </span>
             )}
-            {integration.configured && <CheckButton id={integration.id} className="ml-auto" />}
+            {integration.configured && <CheckButton id={integration.id} scope={checkScope} className="ml-auto" />}
             <a href={integration.help} target="_blank" rel="noreferrer"
               className={cn("inline-flex items-center gap-1 text-[12px] text-ink-secondary hover:text-ink", !integration.configured && "ml-auto")}>
               Get keys<ExternalLink size={12} aria-hidden="true" />
             </a>
           </div>
-          <CheckResult id={integration.id} />
+          <CheckResult id={integration.id} scope={checkScope} />
         </form>
       )}
     </div>

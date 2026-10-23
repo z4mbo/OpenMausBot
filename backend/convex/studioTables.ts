@@ -112,4 +112,27 @@ export const studioTables = {
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_projectId_and_updatedAt", ["projectId", "updatedAt"]),
+
+  /** A generation saved to make again: its model, settings and a prompt whose `[placeholders]` people fill in. */
+  studioTemplates: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    description: v.string(),
+    mode: studioMode,
+    model: v.string(),
+    prompt: v.string(),
+    params: studioParams,
+    /** Example inputs for the model's starting files, in order. */
+    sourceAssetIds: v.array(v.id("designAssets")),
+    coverAssetId: v.optional(v.id("designAssets")),
+    /** fal's link when the cover was never copied into Assets. */
+    coverUrl: v.optional(v.string()),
+    coverKind: v.optional(studioKind),
+    generationId: v.optional(v.id("studioGenerations")),
+    createdBy: v.id("users"),
+    createdByName: v.string(),
+    agentName: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_projectId_and_updatedAt", ["projectId", "updatedAt"]),
 };

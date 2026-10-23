@@ -68,7 +68,10 @@ export type CampaignSummary = {
   budgetNote?: string;
   status: CampaignStatus;
   agentName?: string;
-  counts: { posts: number; published: number; generations: number; openIssues: number };
+  /** The linked Publish posts; absent from backends that predate it. */
+  postIds?: string[];
+  /** `approval`: linked posts an agent wrote that no person approved yet; absent from backends that predate it. */
+  counts: { posts: number; published: number; generations: number; openIssues: number; approval?: number };
   createdAt: number;
   updatedAt: number;
 };

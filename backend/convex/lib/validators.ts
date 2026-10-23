@@ -77,3 +77,15 @@ export const taskAssetTypeValidator = v.union(
   v.literal("file"),
   v.literal("other"),
 );
+
+export const credentialKindValidator = v.union(
+  v.literal("password"),
+  v.literal("api_key"),
+  v.literal("secret"),
+  v.literal("note"),
+  v.literal("apk"),
+  v.literal("file"),
+  v.literal("service"),
+);
+
+export const canvasKindValidator = v.union(v.literal("design"), v.literal("board"), v.literal("deck"));

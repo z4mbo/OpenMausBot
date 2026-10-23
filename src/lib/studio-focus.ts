@@ -7,11 +7,13 @@ import { projectBotFor } from "./origin-issue-focus";
 import { openOriginPage } from "./origin-pages";
 import { useShowThreads } from "./thread-preferences";
 
-/** What Studio should show once it opens its project: a preset set up in the prompt bar, or a result in the viewer. */
+/** What Studio should show once it opens its project: a preset or template set up in the prompt bar, a result in the viewer, or a workflow run. */
 export interface StudioFocus {
   projectId: string;
   presetId?: string;
+  templateId?: string;
   generationId?: string;
+  runId?: string;
 }
 
 let focus: StudioFocus | null = null;

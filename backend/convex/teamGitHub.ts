@@ -521,6 +521,18 @@ async function sessionOperation(ctx: ActionCtx, sessionToken: string, operation:
       });
       return null;
     }
+    case "unlinkIssue": {
+      const { project } = await requireProject(ctx, sessionToken, args.projectId, "editor");
+      if (typeof args.taskId !== "string") throw new Error("Issue required");
+      const number = numberOf(args.number, "Issue number");
+      const removed = await withReadToken(ctx, project, (token, repo) => github<{ state: "open" | "closed" }>(`/repos/${repo.owner}/${repo.repo}/issues/${number}`, token).then(
+        (issue) => issue.state === "closed",
+        (error: unknown) => { if (error instanceof GitHubError && [404, 410].includes(error.status)) return true; throw error; },
+      ));
+      if (!removed) throw new Error("That GitHub issue is still open");
+      await ctx.runMutation(internal.integrations.unlinkIssue, { projectId: project._id, taskId: args.taskId as Id<"tasks">, number });
+      return null;
+    }
     case "webhookTargets": {
       if (typeof args.repoUrl !== "string") throw new Error("Repository required");
       const rows = JSON.parse(await ctx.runQuery(internal.integrations.webhookTargets, { repoUrl: args.repoUrl, number: numberOf(args.number, "Issue number") })) as { projectId: string }[];

@@ -181,6 +181,8 @@ export interface CanvasNode {
   prototype?: PrototypeLink;
   /** On a frame: the Origin issue it designs. */
   issue?: string;
+  /** On a top-level frame of a presentation: the speaker notes shown while presenting it. */
+  notes?: string;
   /** Rectangles, frames and images: radii per corner, in place of `radius`. */
   radii?: CornerRadii;
   gradient?: Gradient;
@@ -189,7 +191,7 @@ export interface CanvasNode {
 }
 
 export const CANVAS_ROW_FORMAT = "canvas";
-export const CANVAS_LIMITS = { nodes: 5000, text: 20_000, name: 120, coordinate: 1_000_000, size: 100_000, points: 4000, rowBytes: 64_000 } as const;
+export const CANVAS_LIMITS = { nodes: 5000, text: 20_000, name: 120, coordinate: 1_000_000, size: 100_000, points: 4000, notes: 10_000, rowBytes: 64_000 } as const;
 
 export const FRAME_PRESETS = [
   { name: "Desktop", width: 1440, height: 1024 },
@@ -416,6 +418,7 @@ export function sanitizeNode(raw: unknown): CanvasNode | null {
     node.prototype = { to: link.to as string, transition: oneOf(link.transition, TRANSITIONS) ?? "dissolve" };
   }
   if (type === "frame" && ID(value.issue)) node.issue = value.issue as string;
+  if (type === "frame" && typeof value.notes === "string" && value.notes.trim()) node.notes = value.notes.slice(0, CANVAS_LIMITS.notes);
   if (type === "image") {
     if (typeof value.fileId === "string" && value.fileId.length <= 100) node.fileId = value.fileId;
     node.imageFit = oneOf(value.imageFit, IMAGE_FITS) ?? "cover";

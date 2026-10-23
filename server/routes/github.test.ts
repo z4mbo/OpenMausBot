@@ -442,10 +442,11 @@ describe("issue mirroring and two-way state", () => {
       bridge: {
         pending: () => [], prTargets: () => ({ rows: [], nextCursor: null }), unlinkedTasks: () => ({ rows: [], nextCursor: null }),
         targets: () => ({ rows: [{ projectId: "p1", taskId: "t1", repoUrl: "https://github.com/acme/widgets", number: 5 }], nextCursor: null }),
-        context: () => linked(task), linkIssue: () => null,
+        context: () => linked(task), linkIssue: () => null, unlinkIssue: () => null,
       },
       github: {
-        "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, html_url: "https://github.com/acme/widgets/issues/5", state: remote, updated_at: "2026-10-16T00:00:00Z" } }),
+        "GET https://api.github.com/repos/acme/widgets/issues/5": () => ({ body: { number: 5, node_id: "I_5", html_url: "https://github.com/acme/widgets/issues/5", state: remote, updated_at: "2026-10-16T00:00:00Z", body: "<!-- origin-task:t1 -->" } }),
+        "POST https://api.github.com/graphql": () => ({ body: { data: { deleteIssue: { clientMutationId: null } } } }),
         "PATCH https://api.github.com/repos/acme/widgets/issues/5": ({ body }) => ({ body: { number: 5, html_url: "https://github.com/acme/widgets/issues/5", state: JSON.parse(body).state, updated_at: "2026-10-17T00:00:00Z" } }),
         "POST https://api.github.com/repos/acme/widgets/issues/5/comments": () => ({ status: 201, body: {} }),
       },
@@ -456,11 +457,11 @@ describe("issue mirroring and two-way state", () => {
     return harness;
   };
 
-  it("closes the GitHub issue when Origin completed it since the last sync", async () => {
+  it("deletes the GitHub issue and forgets it when Origin completed the issue since the last sync", async () => {
     const { network } = await tickWith({ done: true, githubIssueState: "open" }, "open");
-    const patch = network.requests.find((r) => r.key.startsWith("PATCH"));
-    expect(JSON.parse(patch!.body)).toEqual({ state: "closed", state_reason: "completed" });
-    expect(network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ number: 5, state: "closed" });
+    expect(JSON.parse(network.requests.find((r) => r.key.endsWith("/graphql"))!.body).query).toContain("deleteIssue");
+    expect(network.bridgeCalls.find((c) => c.name === "unlinkIssue")?.args).toEqual({ projectId: "p1", taskId: "t1", number: 5 });
+    expect(network.bridgeCalls.some((c) => c.name === "linkIssue")).toBe(false);
   });
 
   it("reopens on GitHub after Origin reopened, and lets a change on GitHub win", async () => {
@@ -471,11 +472,10 @@ describe("issue mirroring and two-way state", () => {
     expect(closedOnGitHub.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ state: "closed" });
   });
 
-  it("closes the GitHub issue as not planned with a note while its Origin issue is in Draft, and reopens it when it leaves", async () => {
+  it("deletes the GitHub issue of an issue moved back to Draft, and leaves an already closed one alone", async () => {
     const parked = await tickWith({ done: false, draft: true, githubIssueState: "open" }, "open");
-    expect(JSON.parse(parked.network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "closed", state_reason: "not_planned" });
-    expect(JSON.parse(parked.network.requests.find((r) => r.key.endsWith("/issues/5/comments"))!.body).body).toContain("Moved back to Draft in Origin");
-    expect(parked.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ state: "closed" });
+    expect(parked.network.requests.some((r) => r.key.endsWith("/graphql"))).toBe(true);
+    expect(parked.network.bridgeCalls.find((c) => c.name === "unlinkIssue")?.args).toEqual({ projectId: "p1", taskId: "t1", number: 5 });
     const stillParked = await tickWith({ done: false, draft: true, githubIssueState: "closed" }, "closed");
     expect(stillParked.network.requests.some((r) => r.key.startsWith("PATCH") || r.key.endsWith("/comments"))).toBe(false);
     const left = await tickWith({ done: false, draft: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed");
@@ -542,7 +542,7 @@ describe("issue mirroring and two-way state", () => {
     const harness = await start({
       bridge: {
         context: (args) => context({ task: { _id: args.taskId, title: String(args.taskId), done: false, ...(args.taskId === "t3" ? parkedTask : {}) } }),
-        linkIssue: () => null,
+        linkIssue: () => null, unlinkIssue: () => null,
       },
       github: {
         "POST https://api.github.com/repos/acme/widgets/issues": ({ body }) => {
@@ -570,6 +570,8 @@ describe("issue mirroring and two-way state", () => {
       { taskId: "t3", issueNumber: 5 },
     ] });
     expect(JSON.parse(harness.network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "closed", state_reason: "not_planned" });
+    expect(JSON.parse(harness.network.requests.find((r) => r.key.endsWith("/issues/5/comments"))!.body).body).toContain("Moved back to Draft in Origin");
+    expect(harness.network.bridgeCalls.find((c) => c.name === "unlinkIssue")?.args).toEqual({ projectId: "p1", taskId: "t3", number: 5 });
   });
 
   it("mirrors open issues without a GitHub issue on the tick, and on request for a project", async () => {
