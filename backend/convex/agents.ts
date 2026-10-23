@@ -257,6 +257,8 @@ export const publishHost = mutation({
   args: {
     sessionToken: v.string(), teamId: v.id("teams"), name: v.string(),
     engines: v.array(v.string()), models: v.array(v.string()), computers: v.array(v.string()),
+    /** "server": an always-on Origin server (a cloud machine or SSH box) rather than someone's desktop. */
+    kind: v.optional(v.union(v.literal("local"), v.literal("server"))),
   },
   returns: v.id("agentHosts"),
   handler: async (ctx, args) => {
@@ -267,13 +269,14 @@ export const publishHost = mutation({
     const capabilities = { engines: list(args.engines), models: list(args.models), computers: list(args.computers), capacity: 1 };
     const now = Date.now();
     const hosts = await ctx.db.query("agentHosts").withIndex("by_teamId", (q) => q.eq("teamId", args.teamId)).take(500);
-    const mine = hosts.find((host) => host.ownerUserId === user._id && host.name === name && host.kind === "local");
+    const kind = args.kind ?? "local";
+    const mine = hosts.find((host) => host.ownerUserId === user._id && host.name === name && host.kind === kind);
     if (mine) {
       await ctx.db.patch(mine._id, { capabilities, online: true, heartbeatAt: now });
       return mine._id;
     }
     return ctx.db.insert("agentHosts", {
-      teamId: args.teamId, ownerUserId: user._id, ownerMembershipId: member._id, name, kind: "local", shared: false, online: true, revoked: false,
+      teamId: args.teamId, ownerUserId: user._id, ownerMembershipId: member._id, name, kind, shared: false, online: true, revoked: false,
       heartbeatAt: now, capabilities, activeRuns: 0, createdAt: now,
     });
   },

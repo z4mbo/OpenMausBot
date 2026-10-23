@@ -80,8 +80,12 @@ export async function requireWritableThread(ctx: Ctx, threadId: Id<"agentThreads
   return context;
 }
 
+/** Who executes a run: the member whose app (or server) runs the turn, its model accounts paying. */
+export const runnerOf = (run: Pick<Doc<"workspaceAgentRuns">, "requesterUserId" | "runnerUserId">): Id<"users"> => run.runnerUserId ?? run.requesterUserId;
+
+/** Whether `user`, as the run's runner, may still carry it on. */
 export async function canResumeThreadRun(ctx: Ctx, run: Doc<"workspaceAgentRuns">, user: Doc<"users">): Promise<boolean> {
-  if (!run.threadId || run.requesterUserId !== user._id) return false;
+  if (!run.threadId || runnerOf(run) !== user._id) return false;
   const thread = await ctx.db.get(run.threadId);
   if (!thread || thread.archivedAt !== undefined || !canSeeThread(thread, user)) return false;
   const agent = await ctx.db.get(thread.agentId);
@@ -89,11 +93,11 @@ export async function canResumeThreadRun(ctx: Ctx, run: Doc<"workspaceAgentRuns"
   return (await agentAccess(ctx, agent, user))?.canSend === true;
 }
 
-/** Security: a bot-role row is written only by the person whose run produced it, while that run is live or just ended. */
+/** Security: a bot-role row is written only by the member whose app runs the turn, while that run is live or just ended. */
 export const BOT_WRITE_GRACE_MS = 120_000;
 
 export function runAcceptsBotWrites(run: Doc<"workspaceAgentRuns"> | null, userId: Id<"users">, threadId: Id<"agentThreads">, now: number): boolean {
-  if (!run || run.requesterUserId !== userId || run.threadId !== threadId) return false;
+  if (!run || runnerOf(run) !== userId || run.threadId !== threadId) return false;
   if (run.status === "running") return true;
   return run.endedAt !== undefined && now - run.endedAt <= BOT_WRITE_GRACE_MS && run.status !== "queued";
 }
