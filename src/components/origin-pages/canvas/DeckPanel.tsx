@@ -110,7 +110,7 @@ export function DeckPanel({ canvas, selection, readOnly, images, brand }: {
                 </svg>
               </button>
               {!readOnly && (
-                <div className="absolute right-2.5 top-2.5 hidden items-center gap-0.5 rounded-md bg-menu/95 p-0.5 group-hover:flex group-focus-within:flex">
+                <div className="absolute right-2.5 top-2.5 hidden items-center gap-0.5 rounded-md bg-menu/95 p-0.5 group-hover:flex group-focus-within:flex touch:flex">
                   <button type="button" className={iconButton} aria-label="Move slide up" title="Move up" disabled={at === 0} onClick={() => move(slide, -1)}><ArrowUp size={12} /></button>
                   <button type="button" className={iconButton} aria-label="Move slide down" title="Move down" disabled={at === slides.length - 1} onClick={() => move(slide, 1)}><ArrowDown size={12} /></button>
                   <button type="button" className={iconButton} aria-label="Duplicate slide" title="Duplicate" onClick={() => duplicate(slide)}><Copy size={12} /></button>
