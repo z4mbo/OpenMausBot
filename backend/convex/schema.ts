@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { featureTables } from "./featureTables";
 import { agentAttribution, agentsTables } from "./agentsTables";
+import { realtimeTables } from "./realtimeTables";
 import { broadcastTables } from "./broadcastTables";
 import { campaignTables } from "./campaignTables";
 import { pipelineTables } from "./pipelineTables";
@@ -33,6 +34,7 @@ import {
 export default defineSchema({
   ...featureTables,
   ...agentsTables,
+  ...realtimeTables,
   ...broadcastTables,
   ...campaignTables,
   ...pipelineTables,

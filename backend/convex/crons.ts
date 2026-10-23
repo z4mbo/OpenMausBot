@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 crons.interval("expire project presence", { minutes: 5 }, internal.projectPresence.cleanup, {});
+crons.interval("expire team call presence and signals", { minutes: 5 }, internal.realtime.cleanup, {});
 crons.interval("expire storage upload intents", { minutes: 5 }, internal.storage.expireUploads, {});
 crons.interval("sync GitHub issues and task PRs", { minutes: 2 }, internal.integrations.kick, {});
 // The signed integration tick reconciles bounded pages of draft/open/closed PRs too.

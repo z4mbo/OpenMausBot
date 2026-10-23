@@ -7,6 +7,7 @@ import { runOriginTool, type OriginCloudClient, type OriginTeamChat, type Origin
 import { originTeamChat } from "./origin-members.ts";
 import { createOriginTurnContext } from "./origin-project-context.ts";
 import { projectFolderName, projectFolderState, readFolderState, reconcileProjectFolders } from "./origin-project-folders.ts";
+import { localRealtimeBackend } from "./origin-realtime-backend.ts";
 import { openRealtimeStore } from "./origin-realtime-store.ts";
 import type { BotRecord } from "./store.ts";
 
@@ -79,11 +80,11 @@ function fakeChat() {
   const posts: { teamId: string; projectId: string; agent: { id: string; name: string }; body: string }[] = [];
   const reads: string[] = [];
   const chat: OriginTeamChat = {
-    recent: (_teamId, projectId, limit) => {
+    recent: async (_teamId, projectId, limit) => {
       reads.push(projectId);
       return [{ id: "m1", authorName: "Ana", body: `Hello ${projectId} team`, createdAt: 0 }].slice(0, limit);
     },
-    post: (teamId, projectId, agent, body) => {
+    post: async (teamId, projectId, agent, body) => {
       posts.push({ teamId, projectId, agent, body });
       return { id: "m2", authorName: agent.name, body, createdAt: 1 };
     },
@@ -158,14 +159,15 @@ describe("Origin project tools stay in the caller's project", () => {
 });
 
 describe("project team chat", () => {
-  it("posts as the agent in the project's conversation and reads it back", () => {
+  it("posts as the agent in the project's conversation and reads it back", async () => {
     const store = openRealtimeStore(join(tempDir(), "rt.sqlite"));
     try {
-      const chat = originTeamChat(() => store);
-      chat.post("team1", "kaiproject01", { id: "kai-dev", name: "Developer" }, "Cloned and running on :5173");
-      expect(chat.recent("team1", "kaiproject01", 5)).toMatchObject([{ authorName: "Developer", body: "Cloned and running on :5173" }]);
-      expect(chat.recent("team1", "yukiproject1", 5)).toEqual([]);
-      expect(chat.recent("team2", "kaiproject01", 5)).toEqual([]);
+      const backend = localRealtimeBackend(() => store, { id: () => "f", write: () => undefined, read: () => new Uint8Array() });
+      const chat = originTeamChat(() => backend, () => "token");
+      await chat.post("team1", "kaiproject01", { id: "kai-dev", name: "Developer" }, "Cloned and running on :5173");
+      expect(await chat.recent("team1", "kaiproject01", 5)).toMatchObject([{ authorName: "Developer", body: "Cloned and running on :5173" }]);
+      expect(await chat.recent("team1", "yukiproject1", 5)).toEqual([]);
+      expect(await chat.recent("team2", "kaiproject01", 5)).toEqual([]);
       const scope = { user: { userId: "u1", name: "Ana", email: "a@x.dev", teamId: "team1", role: "member" }, conversation: "project:kaiproject01" as const };
       expect(store.messages(scope)[0]).toMatchObject({ authorUserId: "agent:kai-dev", authorName: "Developer" });
     } finally {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseWidgetInput, widgetActions } from "../shared/widget.ts";
 import {
-  awaitBotReply, createCallAgents, parseCallAgentSettings, parseSummary, spokenReply, summaryWidget, transcribeWith, wakeRequest,
+  awaitBotReply, createCallAgents, memoryCallRooms, parseCallAgentSettings, parseSummary, spokenReply, summaryWidget, transcribeWith, wakeRequest,
   DEFAULT_CALL_AGENT_SETTINGS, type CallAgentDeps, type CallAgentScope, type CallAgentSettings,
 } from "./origin-call-agent.ts";
 import type { RequestAuth } from "./request-auth.ts";
@@ -10,7 +10,7 @@ const AUTH: RequestAuth = { kind: "loopback", scopes: ["admin", "client"] };
 const ana = { userId: "user000000000a", name: "Ana" };
 const bo = { userId: "user000000000b", name: "Bo", username: "bo" };
 const scopeOf = (user: CallAgentScope["user"], room = "proj0000000001"): CallAgentScope => ({ teamId: "team0000000001", room, name: "Kai", user });
-const flush = () => new Promise((done) => setTimeout(done, 0));
+const flush = async () => { for (let pass = 0; pass < 5; pass++) await new Promise((done) => setTimeout(done, 0)); };
 
 function harness(overrides: Partial<CallAgentDeps> = {}) {
   const asked: string[] = [];
@@ -83,70 +83,100 @@ describe("settings", () => {
 });
 
 describe("a call's agent", () => {
-  it("only joins for someone in the call, and only the allowed chief", () => {
+  it("only joins for someone in the call, and only the allowed chief", async () => {
     const { agents } = harness();
-    expect(() => agents.join(scopeOf(ana), AUTH, "chief", [])).toThrow("Join the call first");
-    expect(() => agents.join(scopeOf(ana), AUTH, "other", [ana.userId])).toThrow("can't join");
-    expect(agents.join(scopeOf(ana), AUTH, "chief", [ana.userId])).toMatchObject({ botId: "chief", name: "GGs", state: "listening", addedBy: "Ana" });
-    expect(agents.state(scopeOf(bo), 0).agent?.name).toBe("GGs");
-    expect(agents.state(scopeOf(bo, ""), 0).agent).toBeNull();
+    await expect(agents.join(scopeOf(ana), AUTH, "chief", [])).rejects.toThrow("Join the call first");
+    await expect(agents.join(scopeOf(ana), AUTH, "other", [ana.userId])).rejects.toThrow("can't join");
+    expect(await agents.join(scopeOf(ana), AUTH, "chief", [ana.userId])).toMatchObject({ botId: "chief", name: "GGs", state: "listening", addedBy: "Ana" });
+    expect((await agents.state(scopeOf(bo), 0)).agent?.name).toBe("GGs");
+    expect((await agents.state(scopeOf(bo, ""), 0)).agent).toBeNull();
   });
 
   it("answers a wake word with recent context and shows the reply as a caption", async () => {
     const { agents, asked } = harness();
     const present = [ana.userId, bo.userId];
-    agents.join(scopeOf(ana), AUTH, "chief", present);
-    agents.line(scopeOf(bo), AUTH, "We could ship on Friday", present);
-    agents.line(scopeOf(ana), AUTH, "Hey GGs, what do you think?", present);
-    expect(agents.state(scopeOf(ana), 0).agent?.state).toBe("thinking");
+    await agents.join(scopeOf(ana), AUTH, "chief", present);
+    await agents.line(scopeOf(bo), AUTH, "We could ship on Friday", present);
+    await agents.line(scopeOf(ana), AUTH, "Hey GGs, what do you think?", present);
     await flush();
     expect(asked).toHaveLength(1);
     expect(asked[0]).toContain("bo: We could ship on Friday");
     expect(asked[0]).toContain("Ana asked: what do you think?");
-    const { lines, cursor } = agents.state(scopeOf(bo), 0);
+    const { lines, cursor } = await agents.state(scopeOf(bo), 0);
     expect(lines.at(-1)).toMatchObject({ speaker: "GGs", text: "Ship it on Friday.", agent: true });
-    expect(agents.state(scopeOf(bo), cursor).lines).toEqual([]);
+    expect((await agents.state(scopeOf(bo), cursor)).lines).toEqual([]);
+  });
+
+  it("wakes on its project's name, without a greeting when the name opens the sentence", async () => {
+    const { agents, asked } = harness();
+    const present = [ana.userId];
+    await agents.join(scopeOf(ana), AUTH, "chief", present, ["Operazioni Immobiliari"]);
+    await agents.line(scopeOf(ana), AUTH, "ehi operazioniimmobiliari cosa ne pensi di questa cosa?", present);
+    await flush();
+    expect(asked[0]).toContain("Ana asked: cosa ne pensi di questa cosa?");
+    await agents.line(scopeOf(ana), AUTH, "GGs, and the launch date?", present);
+    await flush();
+    expect(asked[1]).toContain("Ana asked: and the launch date?");
   });
 
   it("takes the next sentence as the question after only the name", async () => {
     const { agents, asked, tick } = harness();
     const present = [ana.userId, bo.userId];
-    agents.join(scopeOf(ana), AUTH, "chief", present);
-    agents.line(scopeOf(ana), AUTH, "hey GGs", present);
-    expect(agents.state(scopeOf(bo), 0).agent?.awaiting).toBe("Ana");
-    agents.line(scopeOf(bo), AUTH, "not you", present);
+    await agents.join(scopeOf(ana), AUTH, "chief", present);
+    await agents.line(scopeOf(ana), AUTH, "hey GGs", present);
+    await flush();
+    expect((await agents.state(scopeOf(bo), 0)).agent?.awaiting).toBe("Ana");
+    await agents.line(scopeOf(bo), AUTH, "not you", present);
     tick(1_000);
-    agents.line(scopeOf(ana), AUTH, "summarise the plan", present);
+    await agents.line(scopeOf(ana), AUTH, "summarise the plan", present);
     await flush();
     expect(asked[0]).toContain("Ana asked: summarise the plan");
+  });
+
+  it("is shared: captions from another member's app reach the app that answers", async () => {
+    const rooms = memoryCallRooms(() => 1_700_000_000_000);
+    const host = harness({ rooms });
+    const guest = harness({ rooms, ask: async () => { throw new Error("the guest's app must not answer"); } });
+    try {
+      const present = [ana.userId, bo.userId];
+      await host.agents.join(scopeOf(ana), AUTH, "chief", present);
+      expect((await guest.agents.state(scopeOf(bo), 0)).agent?.name).toBe("GGs");
+      await guest.agents.line(scopeOf(bo), AUTH, "hey GGs is the build green?", present);
+      await new Promise((done) => setTimeout(done, 1_700));
+      expect(host.asked[0]).toContain("bo asked: is the build green?");
+      expect((await guest.agents.state(scopeOf(bo), 0)).lines.at(-1)).toMatchObject({ speaker: "GGs", agent: true });
+    } finally {
+      host.agents.close();
+      guest.agents.close();
+    }
   });
 
   it("summarises when removed, posts the card, then forgets the transcript", async () => {
     const { agents, posted, summarized } = harness();
     const present = [ana.userId, bo.userId];
-    agents.join(scopeOf(ana), AUTH, "chief", present);
-    agents.line(scopeOf(bo), AUTH, "Let's move the launch to Friday", present);
-    agents.leave(scopeOf(bo), present);
-    expect(agents.state(scopeOf(ana), 0).agent).toBeNull();
+    await agents.join(scopeOf(ana), AUTH, "chief", present);
+    await agents.line(scopeOf(bo), AUTH, "Let's move the launch to Friday", present);
+    await agents.leave(scopeOf(bo), present);
     await flush();
+    expect((await agents.state(scopeOf(ana), 0)).agent).toBeNull();
     expect(summarized[0]).toContain("bo: Let's move the launch to Friday");
     expect(posted).toHaveLength(1);
     expect(posted[0]!.transcript).toBeUndefined();
     expect(parseWidgetInput(posted[0]!.widget).ok).toBe(true);
-    expect(agents.state(scopeOf(ana), 0).ended).toMatchObject({ name: "GGs", status: "posted" });
-    expect(agents.state(scopeOf({ userId: "user000000000c", name: "Cy" }), 0).ended).toBeNull();
-    agents.join(scopeOf(ana), AUTH, "chief", present);
-    expect(agents.state(scopeOf(ana), 0).lines).toEqual([]);
+    expect((await agents.state(scopeOf(ana), 0)).ended).toMatchObject({ name: "GGs", status: "posted" });
+    expect((await agents.state(scopeOf({ userId: "user000000000c", name: "Cy" }), 0)).ended).toBeNull();
+    await agents.join(scopeOf(ana), AUTH, "chief", present);
+    expect((await agents.state(scopeOf(ana), 0)).lines).toEqual([]);
   });
 
   it("keeps the transcript in the chief's chat when the call asks to", async () => {
     const { agents, posted } = harness();
-    agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
-    agents.keep(scopeOf(ana), true, [ana.userId]);
-    agents.line(scopeOf(ana), AUTH, "Decision: ship v2", [ana.userId]);
-    agents.sweep(() => [ana.userId]);
+    await agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
+    await agents.keep(scopeOf(ana), true, [ana.userId]);
+    await agents.line(scopeOf(ana), AUTH, "Decision: ship v2", [ana.userId]);
+    await agents.sweep(() => [ana.userId]);
     expect(agents.active()).toBe(1);
-    agents.sweep(() => []);
+    await agents.sweep(() => []);
     await flush();
     expect(posted[0]!.transcript).toBe("Ana: Decision: ship v2");
   });
@@ -154,14 +184,14 @@ describe("a call's agent", () => {
   it("keeps the summary and action items in Origin, with the transcript only when the call kept it", async () => {
     const recorded: unknown[] = [];
     const { agents } = harness({ record: async (input) => { recorded.push(input); } });
-    agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
-    agents.line(scopeOf(ana), AUTH, "Bo writes the release notes", [ana.userId]);
-    agents.leave(scopeOf(ana), [ana.userId]);
+    await agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
+    await agents.line(scopeOf(ana), AUTH, "Bo writes the release notes", [ana.userId]);
+    await agents.leave(scopeOf(ana), [ana.userId]);
     await flush();
-    agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
-    agents.keep(scopeOf(ana), true, [ana.userId]);
-    agents.line(scopeOf(ana), AUTH, "Ship v2", [ana.userId]);
-    agents.leave(scopeOf(ana), [ana.userId]);
+    await agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
+    await agents.keep(scopeOf(ana), true, [ana.userId]);
+    await agents.line(scopeOf(ana), AUTH, "Ship v2", [ana.userId]);
+    await agents.leave(scopeOf(ana), [ana.userId]);
     await flush();
     expect(recorded).toEqual([
       {
@@ -174,23 +204,23 @@ describe("a call's agent", () => {
 
   it("posts nothing for a call where nobody spoke, and reports a failed summary", async () => {
     const quiet = harness();
-    quiet.agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
-    quiet.agents.leave(scopeOf(ana), [ana.userId]);
+    await quiet.agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
+    await quiet.agents.leave(scopeOf(ana), [ana.userId]);
     await flush();
     expect(quiet.posted).toEqual([]);
-    expect(quiet.agents.state(scopeOf(ana), 0).ended).toBeNull();
+    expect((await quiet.agents.state(scopeOf(ana), 0)).ended).toBeNull();
     const failing = harness({ summarize: async () => { throw new Error("model offline"); } });
-    failing.agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
-    failing.agents.line(scopeOf(ana), AUTH, "something", [ana.userId]);
-    failing.agents.leave(scopeOf(ana), [ana.userId]);
+    await failing.agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
+    await failing.agents.line(scopeOf(ana), AUTH, "something", [ana.userId]);
+    await failing.agents.leave(scopeOf(ana), [ana.userId]);
     await flush();
-    expect(failing.agents.state(scopeOf(ana), 0).ended).toMatchObject({ status: "failed", error: "model offline" });
+    expect((await failing.agents.state(scopeOf(ana), 0)).ended).toMatchObject({ status: "failed", error: "model offline" });
   });
 
   it("transcribes audio through the engine and keeps only the text", async () => {
     const seen: number[] = [];
     const { agents, asked, setSettings } = harness({ transcribe: async ({ audio }) => { seen.push(audio.length); return "hey GGs status?"; } });
-    agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
+    await agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
     const result = await agents.audio(scopeOf(ana), AUTH, new Uint8Array(32), "audio/webm", [ana.userId]);
     expect(result.line).toMatchObject({ speaker: "Ana", text: "hey GGs status?" });
     expect(seen).toEqual([32]);
