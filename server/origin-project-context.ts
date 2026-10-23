@@ -93,13 +93,7 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
   const feedback = portal && teamId ? list(await optional(client.query("feedback:list", { sessionToken, teamId, portalId: portal._id }))) : null;
   const openFeedback = feedback?.filter((entry) => entry.status === "new" || entry.status === "planned") ?? [];
   const assets = list(record(design).assets);
-  const chat = teamId && deps.teamChat ? (() => {
-    try {
-      return deps.teamChat!.recent(teamId, projectId, CHAT_SHOWN);
-    } catch {
-      return [];
-    }
-  })() : [];
+  const chat = teamId && deps.teamChat ? await deps.teamChat.recent(teamId, projectId, CHAT_SHOWN).catch(() => []) : [];
   return {
     projectId,
     name: text(doc.name) || projectId,

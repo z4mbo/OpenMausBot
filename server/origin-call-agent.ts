@@ -1,5 +1,6 @@
 // Privacy invariants: call audio is only ever held in memory for one transcription request and never written anywhere;
 // the transcript lives in memory for the call and is dropped once it is summarised, unless the people in the call keep it.
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { writeFileAtomic } from "./atomic.ts";
 import type { CallNotesInput } from "./origin-call-notes.ts";
@@ -95,21 +96,31 @@ const compact = (value: string) => value.toLowerCase().replace(/[^\p{L}\p{N}]/gu
 const GREETINGS = new Set(["hey", "hi", "hello", "ok", "okay", "ehi", "ehy", "ciao"]);
 
 /** "hey GGs, what do you think?" for an agent named GGs: `request` is what follows the name, empty when only the name was said.
- * Speech-to-text splits and spells names freely ("G G's", "ggs"), so the name is matched with its letters run together. */
-export function wakeRequest(said: string, name: string): { request: string } | null {
-  const target = compact(name);
-  if (!target) return null;
+ * The name also wakes it without a greeting when it opens the sentence ("GGs, what do you think?"), and any of `names`
+ * (the agent's own and its project's) works. Speech-to-text splits and spells names freely ("G G's", "ggs"), so a name
+ * is matched with its letters run together. */
+export function wakeRequest(said: string, names: string | readonly string[]): { request: string } | null {
+  const targets = (typeof names === "string" ? [names] : names).map(compact).filter(Boolean);
+  if (!targets.length) return null;
   const tokens = words(said);
+  const nameEndingAt = (from: number): number | null => {
+    for (const target of targets) {
+      let joined = "";
+      for (let end = from; end < Math.min(tokens.length, from + 6); end++) {
+        joined += tokens[end]!.word;
+        if (joined === target || (target.endsWith("s") && joined === target.slice(0, -1))) return end;
+        if (joined.length >= target.length) break;
+      }
+    }
+    return null;
+  };
+  const request = (end: number) => ({ request: said.slice(tokens[end]!.end).replace(/^[\s,.:;!?-]+/, "").trim() });
+  const opening = nameEndingAt(0);
+  if (opening !== null) return request(opening);
   for (let index = 0; index < tokens.length; index++) {
     if (!GREETINGS.has(tokens[index]!.word)) continue;
-    let joined = "";
-    for (let end = index + 1; end < Math.min(tokens.length, index + 6); end++) {
-      joined += tokens[end]!.word;
-      if (joined === target || (target.endsWith("s") && joined === target.slice(0, -1))) {
-        return { request: said.slice(tokens[end]!.end).replace(/^[\s,.:;!?-]+/, "").trim() };
-      }
-      if (joined.length >= target.length) break;
-    }
+    const end = nameEndingAt(index + 1);
+    if (end !== null) return request(end);
   }
   return null;
 }
@@ -231,7 +242,71 @@ export function summaryWidget(input: { callName: string; summary: CallSummary; p
 
 export interface CallAgentBot { id: string; name: string }
 
-export type CallAgentScope = { teamId: string; room: string; name: string; user: { userId: string; name: string; username?: string } };
+export type CallAgentScope = { teamId: string; room: string; name: string; user: { userId: string; name: string; username?: string }; token?: string };
+
+/** The agent's place in one call, as every member's app reads it. */
+export type SharedCallAgent = {
+  botId: string;
+  name: string;
+  /** Other names that wake it, such as its project's. */
+  aliases: string[];
+  addedBy: string;
+  /** The app that answers for the agent: the one that brought it in, or took over when that app went quiet. */
+  hostId: string;
+  startedAt: number;
+  heartbeatAt: number;
+  keepTranscript: boolean;
+  thinking: boolean;
+  awaiting?: { userId: string; name: string; until: number };
+  /** Someone removed the agent; its host summarises the call. */
+  ending?: true;
+  ended?: { status: "summarizing" | "posted" | "failed"; error?: string; at: number; people: string[] };
+};
+
+/** Where a call's agent and captions live, so every member's app sees the same call. */
+export interface CallRoomPort {
+  read(scope: CallAgentScope, after: number): Promise<{ agent: { state: SharedCallAgent; updatedAt: number } | null; lines: CaptionLine[] }>;
+  /** Replaces the agent's state when it still is `expected` (its `updatedAt`, or null for none); null removes it and its captions. */
+  set(scope: CallAgentScope, state: SharedCallAgent | null, expected?: number | null): Promise<{ changed: boolean; updatedAt: number | null }>;
+  add(scope: CallAgentScope, line: Omit<CaptionLine, "id" | "at">): Promise<CaptionLine>;
+}
+
+/** One app's calls, for an app with no Origin deployment and for tests. */
+export function memoryCallRooms(now: () => number = Date.now): CallRoomPort {
+  const rooms = new Map<string, { agent: { state: SharedCallAgent; updatedAt: number } | null; lines: CaptionLine[]; nextId: number }>();
+  const room = (scope: CallAgentScope) => {
+    const key = `${scope.teamId}\n${scope.room}`;
+    let found = rooms.get(key);
+    if (!found) rooms.set(key, found = { agent: null, lines: [], nextId: 1 });
+    return found;
+  };
+  return {
+    read: async (scope, after) => {
+      const found = room(scope);
+      return { agent: found.agent ? { state: structuredClone(found.agent.state), updatedAt: found.agent.updatedAt } : null, lines: found.lines.filter((line) => line.id > after) };
+    },
+    set: async (scope, state, expected) => {
+      const found = room(scope);
+      if (expected !== undefined && (found.agent?.updatedAt ?? null) !== expected) return { changed: false, updatedAt: found.agent?.updatedAt ?? null };
+      if (!state) {
+        found.agent = null;
+        found.lines = [];
+        return { changed: true, updatedAt: null };
+      }
+      const updatedAt = Math.max(now(), (found.agent?.updatedAt ?? 0) + 1);
+      found.agent = { state: structuredClone(state), updatedAt };
+      return { changed: true, updatedAt };
+    },
+    add: async (scope, line) => {
+      const found = room(scope);
+      if (!found.agent) throw new CallAgentError("No agent is in this call");
+      const entry: CaptionLine = { ...line, id: found.nextId++, at: now() };
+      found.lines.push(entry);
+      if (found.lines.length > MAX_LINES) found.lines.splice(0, found.lines.length - MAX_LINES);
+      return entry;
+    },
+  };
+}
 
 export interface CallAgentDeps {
   bot(botId: string): CallAgentBot | null;
@@ -246,11 +321,11 @@ export interface CallAgentDeps {
   record?(input: CallNotesInput): Promise<unknown>;
   transcribe(input: { audio: Uint8Array; mime: string; settings: CallAgentSettings }): Promise<string>;
   settings(): CallAgentSettings;
+  /** Shared call state; defaults to this app alone. */
+  rooms?: CallRoomPort;
   log?(line: string): void;
   now?(): number;
 }
-
-type EndedView = { botId: string; name: string; status: "summarizing" | "posted" | "failed"; error?: string; at: number };
 
 export type CallAgentView = {
   botId: string;
@@ -264,29 +339,27 @@ export type CallAgentView = {
   awaiting?: string;
 };
 
-interface Session {
-  key: string;
+/** What this app holds for a call whose agent it answers for: whose turn asks, and how far it has read. */
+interface Hosted {
   scope: CallAgentScope;
-  bot: CallAgentBot;
-  addedBy: string;
-  startedAt: number;
-  lines: CaptionLine[];
-  nextId: number;
-  people: Map<string, string>;
-  keepTranscript: boolean;
-  thinking: boolean;
-  awaiting: { userId: string; until: number } | null;
+  auth: RequestAuth;
+  cursor: number;
+  busy: boolean;
 }
 
 export class CallAgentError extends Error {}
 
 const keyOf = (scope: Pick<CallAgentScope, "teamId" | "room">) => `${scope.teamId}\n${scope.room}`;
 const speakerName = (user: CallAgentScope["user"]) => user.username || user.name || "Someone";
+const HOST_QUIET_MS = 45_000;
+const HEARTBEAT_MS = 15_000;
+const POLL_MS = 1_500;
 
 export function createCallAgents(deps: CallAgentDeps) {
   const now = deps.now ?? Date.now;
-  const sessions = new Map<string, Session>();
-  const ended = new Map<string, EndedView & { people: Set<string> }>();
+  const rooms = deps.rooms ?? memoryCallRooms(now);
+  const hostId = randomUUID();
+  const hosted = new Map<string, Hosted>();
   const rates = new Map<string, { count: number; reset: number }>();
 
   const limit = (key: string, max: number) => {
@@ -300,156 +373,208 @@ export function createCallAgents(deps: CallAgentDeps) {
     if (++entry.count > max) throw new CallAgentError("Too many requests; slow down");
   };
 
-  const append = (session: Session, line: Omit<CaptionLine, "id" | "at">): CaptionLine => {
-    const entry: CaptionLine = { ...line, text: line.text.slice(0, MAX_LINE), id: session.nextId++, at: now() };
-    session.lines.push(entry);
-    if (session.lines.length > MAX_LINES) session.lines.splice(0, session.lines.length - MAX_LINES);
-    return entry;
-  };
+  const live = (agent: { state: SharedCallAgent } | null) => (agent && !agent.state.ended ? agent.state : null);
 
-  const view = (session: Session): CallAgentView => ({
-    botId: session.bot.id, name: session.bot.name, addedBy: session.addedBy, startedAt: session.startedAt,
-    state: session.thinking ? "thinking" : "listening", engine: deps.settings().transcription.engine, keepTranscript: session.keepTranscript,
-    ...(session.awaiting && session.awaiting.until > now() ? { awaiting: session.people.get(session.awaiting.userId) ?? "someone" } : {}),
+  const view = (agent: SharedCallAgent): CallAgentView => ({
+    botId: agent.botId, name: agent.name, addedBy: agent.addedBy, startedAt: agent.startedAt,
+    state: agent.thinking ? "thinking" : "listening", engine: deps.settings().transcription.engine, keepTranscript: agent.keepTranscript,
+    ...(agent.awaiting && agent.awaiting.until > now() ? { awaiting: agent.awaiting.name } : {}),
   });
 
-  const respond = async (session: Session, auth: RequestAuth, speaker: string, request: string) => {
-    session.thinking = true;
-    session.awaiting = null;
+  /** Read-modify-write of the shared state, retried when another app changed it in between. */
+  const update = async (scope: CallAgentScope, change: (agent: SharedCallAgent) => SharedCallAgent | null): Promise<SharedCallAgent | null> => {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const { agent } = await rooms.read(scope, Number.MAX_SAFE_INTEGER);
+      const current = live(agent);
+      if (!current || !agent) return null;
+      const next = change(structuredClone(current));
+      if (!next) return current;
+      if ((await rooms.set(scope, next, agent.updatedAt)).changed) return next;
+    }
+    throw new CallAgentError("The call changed; try again");
+  };
+
+  const respond = async (host: Hosted, agent: SharedCallAgent, speaker: string, request: string, context: CaptionLine[]) => {
+    const { scope } = host;
+    await update(scope, (state) => ({ ...state, thinking: true, awaiting: undefined } as SharedCallAgent));
     try {
-      const prompt = askPrompt({
-        callName: session.scope.name, agent: session.bot.name, speaker, request,
-        transcript: transcriptText(session.lines.slice(-CONTEXT_LINES - 1, -1), CONTEXT_CHARS),
-      });
-      const reply = spokenReply(await deps.ask({ auth, botId: session.bot.id, prompt }));
-      if (sessions.get(session.key) === session && reply) append(session, { speaker: session.bot.name, text: reply, agent: true });
+      const prompt = askPrompt({ callName: scope.name, agent: agent.name, speaker, request, transcript: transcriptText(context.slice(-CONTEXT_LINES - 1, -1), CONTEXT_CHARS) });
+      const reply = spokenReply(await deps.ask({ auth: host.auth, botId: agent.botId, prompt }));
+      if (reply && hosted.get(keyOf(scope)) === host) await rooms.add(scope, { speaker: agent.name, text: reply, agent: true });
     } catch (error) {
-      if (sessions.get(session.key) === session) {
-        append(session, { speaker: session.bot.name, text: `I couldn't answer that (${error instanceof Error ? error.message : "unknown error"}).`, agent: true });
+      if (hosted.get(keyOf(scope)) === host) {
+        await rooms.add(scope, { speaker: agent.name, text: `I couldn't answer that (${error instanceof Error ? error.message : "unknown error"}).`, agent: true }).catch(() => undefined);
       }
     } finally {
-      session.thinking = false;
+      await update(scope, (state) => ({ ...state, thinking: false })).catch(() => undefined);
     }
   };
 
-  const hear = (session: Session, auth: RequestAuth, user: CallAgentScope["user"], said: string): CaptionLine | null => {
-    const clean = said.replace(/\s+/g, " ").trim();
-    if (!clean) return null;
-    const speaker = speakerName(user);
-    session.people.set(user.userId, speaker);
-    const line = append(session, { speaker, userId: user.userId, text: clean });
-    if (session.thinking) return line;
-    const wake = wakeRequest(clean, session.bot.name);
-    if (wake && wake.request) void respond(session, auth, speaker, wake.request);
-    else if (wake) session.awaiting = { userId: user.userId, until: now() + WAKE_FOLLOW_UP_MS };
-    else if (session.awaiting?.userId === user.userId && session.awaiting.until > now()) void respond(session, auth, speaker, clean);
-    return line;
+  /** The host reads the captions it has not seen and answers when someone addressed the agent. */
+  const process = async (host: Hosted): Promise<void> => {
+    if (host.busy) return;
+    host.busy = true;
+    try {
+      const { agent, lines } = await rooms.read(host.scope, 0);
+      const state = live(agent);
+      if (!state || state.hostId !== hostId) {
+        if (agent?.state.ended || !state) hosted.delete(keyOf(host.scope));
+        return;
+      }
+      if (state.ending) {
+        await finish(host, state, lines);
+        return;
+      }
+      if (now() - state.heartbeatAt > HEARTBEAT_MS) await update(host.scope, (current) => ({ ...current, heartbeatAt: now() }));
+      let latest = state;
+      const refresh = async () => { latest = live((await rooms.read(host.scope, Number.MAX_SAFE_INTEGER)).agent) ?? latest; };
+      for (const line of lines.filter((entry) => entry.id > host.cursor)) {
+        host.cursor = line.id;
+        if (line.agent || !line.userId || latest.thinking) continue;
+        const wake = wakeRequest(line.text, [latest.name, ...latest.aliases]);
+        const context = lines.filter((entry) => entry.id <= line.id);
+        if (wake?.request) await respond(host, latest, line.speaker, wake.request, context);
+        else if (wake) await update(host.scope, (current) => ({ ...current, awaiting: { userId: line.userId!, name: line.speaker, until: now() + WAKE_FOLLOW_UP_MS } }));
+        else if (latest.awaiting?.userId === line.userId && latest.awaiting.until > now()) await respond(host, latest, line.speaker, line.text, context);
+        else continue;
+        await refresh();
+      }
+    } finally {
+      host.busy = false;
+    }
   };
 
-  const finish = async (session: Session) => {
-    sessions.delete(session.key);
-    const lines = session.lines;
-    const people = new Set(session.people.keys());
-    people.add(session.addedBy);
-    const record: EndedView & { people: Set<string> } = { botId: session.bot.id, name: session.bot.name, status: "summarizing", at: now(), people };
-    ended.set(session.key, record);
-    session.lines = [];
+  const finish = async (host: Hosted, agent: SharedCallAgent, lines: CaptionLine[]) => {
+    const { scope } = host;
+    hosted.delete(keyOf(scope));
+    const people = [...new Set([...lines.filter((line) => !line.agent && line.userId).map((line) => line.userId!), scope.user.userId])];
+    const ended = async (status: "summarizing" | "posted" | "failed", error?: string) => {
+      await rooms.set(scope, null);
+      await rooms.set(scope, { ...agent, ending: undefined, thinking: false, ended: { status, ...(error ? { error } : {}), at: now(), people } } as SharedCallAgent);
+    };
     if (!lines.some((line) => !line.agent)) {
-      ended.delete(session.key);
+      await rooms.set(scope, null);
       return;
     }
     const transcript = transcriptText(lines, SUMMARY_CHARS);
+    await ended("summarizing");
     try {
-      const raw = await deps.summarize({ botId: session.bot.id, prompt: summaryPrompt({ callName: session.scope.name, chief: session.bot.name, transcript }) });
+      const raw = await deps.summarize({ botId: agent.botId, prompt: summaryPrompt({ callName: scope.name, chief: agent.name, transcript }) });
       const summary = parseSummary(raw);
-      const minutes = Math.max(1, Math.round((now() - session.startedAt) / 60_000));
-      const { widget, fallback } = summaryWidget({
-        callName: session.scope.name, summary, people: [...session.people.values()],
-        minutes, when: new Date(session.startedAt).toISOString().slice(0, 16).replace("T", " "),
-      });
-      deps.post({ botId: session.bot.id, widget, fallback, ...(session.keepTranscript ? { transcript } : {}) });
+      const minutes = Math.max(1, Math.round((now() - agent.startedAt) / 60_000));
+      const speakers = [...new Set(lines.filter((line) => !line.agent).map((line) => line.speaker))];
+      const { widget, fallback } = summaryWidget({ callName: scope.name, summary, people: speakers, minutes, when: new Date(agent.startedAt).toISOString().slice(0, 16).replace("T", " ") });
+      deps.post({ botId: agent.botId, widget, fallback, ...(agent.keepTranscript ? { transcript } : {}) });
       void deps.record?.({
-        room: session.scope.room, callName: session.scope.name, startedAt: session.startedAt, minutes, summary, ...(session.keepTranscript ? { transcript } : {}),
-      })?.catch(() => deps.log?.(`call agent: Origin did not keep the notes of ${session.scope.name}`));
-      record.status = "posted";
+        room: scope.room, callName: scope.name, startedAt: agent.startedAt, minutes, summary, ...(agent.keepTranscript ? { transcript } : {}),
+      })?.catch(() => deps.log?.(`call agent: Origin did not keep the notes of ${scope.name}`));
+      await ended("posted");
     } catch (error) {
-      record.status = "failed";
-      record.error = error instanceof Error ? error.message : "The summary could not be written";
-      deps.log?.(`call agent: the summary for ${session.bot.name} failed`);
+      deps.log?.(`call agent: the summary for ${agent.name} failed`);
+      await ended("failed", error instanceof Error ? error.message : "The summary could not be written");
     }
-    record.at = now();
   };
 
-  const requireSession = (scope: CallAgentScope) => {
-    const session = sessions.get(keyOf(scope));
-    if (!session) throw new CallAgentError("No agent is in this call");
-    return session;
+  const host = (scope: CallAgentScope, auth: RequestAuth, cursor: number): Hosted => {
+    const existing = hosted.get(keyOf(scope));
+    if (existing) return existing;
+    const entry: Hosted = { scope, auth, cursor, busy: false };
+    hosted.set(keyOf(scope), entry);
+    return entry;
+  };
+
+  /** Runs the host's pass now when this app answers for the call, so its own captions are answered without waiting for the poll. */
+  const nudge = async (scope: CallAgentScope) => {
+    const entry = hosted.get(keyOf(scope));
+    if (entry) await process(entry);
+  };
+
+  const timer = deps.rooms ? setInterval(() => { for (const entry of hosted.values()) void process(entry).catch(() => undefined); }, POLL_MS) : null;
+  timer?.unref?.();
+
+  const requirePresent = (scope: CallAgentScope, present: readonly string[]) => {
+    if (!present.includes(scope.user.userId)) throw new CallAgentError("Join the call first");
+  };
+
+  const hear = async (scope: CallAgentScope, said: string): Promise<CaptionLine | null> => {
+    const clean = said.replace(/\s+/g, " ").trim();
+    if (!clean) return null;
+    const line = await rooms.add(scope, { speaker: speakerName(scope.user), userId: scope.user.userId, text: clean.slice(0, MAX_LINE) });
+    void nudge(scope).catch(() => undefined);
+    return line;
   };
 
   return {
     /** What everyone in the call sees: who is listening, and the captions after `after`. */
-    state(scope: CallAgentScope, after: number) {
-      const session = sessions.get(keyOf(scope));
-      const done = ended.get(keyOf(scope));
-      const recent = done && done.at + ENDED_VISIBLE_MS > now() && done.people.has(scope.user.userId)
-        ? { botId: done.botId, name: done.name, status: done.status, ...(done.error ? { error: done.error } : {}), at: done.at } : null;
-      if (!session) return { agent: null, lines: [] as CaptionLine[], cursor: 0, ended: recent };
-      session.people.set(scope.user.userId, session.people.get(scope.user.userId) ?? speakerName(scope.user));
-      return { agent: view(session), lines: session.lines.filter((line) => line.id > after).slice(-50), cursor: session.nextId - 1, ended: null };
+    async state(scope: CallAgentScope, after: number) {
+      const { agent, lines } = await rooms.read(scope, after);
+      const ended = agent?.state.ended;
+      if (ended) {
+        const recent = ended.at + ENDED_VISIBLE_MS > now() && ended.people.includes(scope.user.userId)
+          ? { botId: agent.state.botId, name: agent.state.name, status: ended.status, ...(ended.error ? { error: ended.error } : {}), at: ended.at } : null;
+        return { agent: null, lines: [] as CaptionLine[], cursor: 0, ended: recent };
+      }
+      if (!agent) return { agent: null, lines: [] as CaptionLine[], cursor: 0, ended: null };
+      return { agent: view(agent.state), lines: lines.slice(-50), cursor: lines.at(-1)?.id ?? after, ended: null };
     },
-    join(scope: CallAgentScope, auth: RequestAuth, botId: string, present: readonly string[]) {
-      if (!present.includes(scope.user.userId)) throw new CallAgentError("Join the call first");
+    async join(scope: CallAgentScope, auth: RequestAuth, botId: string, present: readonly string[], aliases: readonly string[] = []) {
+      requirePresent(scope, present);
       const bot = deps.bot(botId);
       if (!bot || !deps.allowed({ auth, botId, room: scope.room })) throw new CallAgentError("This agent can't join this call");
-      const existing = sessions.get(keyOf(scope));
-      if (existing) {
-        if (existing.bot.id !== botId) throw new CallAgentError(`${existing.bot.name} is already in this call`);
-        return view(existing);
+      const { agent } = await rooms.read(scope, Number.MAX_SAFE_INTEGER);
+      const current = live(agent);
+      if (current && now() - current.heartbeatAt <= HOST_QUIET_MS) {
+        if (current.botId !== botId) throw new CallAgentError(`${current.name} is already in this call`);
+        return view(current);
       }
-      const session: Session = {
-        key: keyOf(scope), scope, bot, addedBy: speakerName(scope.user), startedAt: now(), lines: [], nextId: 1,
-        people: new Map([[scope.user.userId, speakerName(scope.user)]]), keepTranscript: deps.settings().keepTranscript, thinking: false, awaiting: null,
+      const state: SharedCallAgent = {
+        botId, name: bot.name, aliases: aliases.filter((alias) => alias.trim() && alias !== bot.name).slice(0, 4), addedBy: speakerName(scope.user), hostId,
+        startedAt: current?.startedAt ?? now(), heartbeatAt: now(), keepTranscript: current?.keepTranscript ?? deps.settings().keepTranscript, thinking: false,
       };
-      sessions.set(session.key, session);
-      ended.delete(session.key);
-      return view(session);
+      if (!current) await rooms.set(scope, null);
+      const { changed } = await rooms.set(scope, state, current ? agent!.updatedAt : null);
+      if (!changed) throw new CallAgentError("The call changed; try again");
+      const { lines } = await rooms.read(scope, 0);
+      host(scope, auth, lines.at(-1)?.id ?? 0);
+      return view(state);
     },
-    leave(scope: CallAgentScope, present: readonly string[]) {
-      if (!present.includes(scope.user.userId)) throw new CallAgentError("Join the call first");
-      const session = requireSession(scope);
-      void finish(session);
+    async leave(scope: CallAgentScope, present: readonly string[]) {
+      requirePresent(scope, present);
+      const next = await update(scope, (state) => ({ ...state, ending: true }));
+      if (!next) throw new CallAgentError("No agent is in this call");
+      void nudge(scope).catch(() => undefined);
       return { ok: true };
     },
-    keep(scope: CallAgentScope, keep: boolean, present: readonly string[]) {
-      if (!present.includes(scope.user.userId)) throw new CallAgentError("Join the call first");
-      requireSession(scope).keepTranscript = keep;
+    async keep(scope: CallAgentScope, keep: boolean, present: readonly string[]) {
+      requirePresent(scope, present);
+      if (!await update(scope, (state) => ({ ...state, keepTranscript: keep }))) throw new CallAgentError("No agent is in this call");
       return { ok: true };
     },
-    line(scope: CallAgentScope, auth: RequestAuth, said: string, present: readonly string[]) {
-      if (!present.includes(scope.user.userId)) throw new CallAgentError("Join the call first");
-      const session = requireSession(scope);
+    async line(scope: CallAgentScope, _auth: RequestAuth, said: string, present: readonly string[]) {
+      requirePresent(scope, present);
       limit(`line:${scope.user.userId}`, LINES_PER_MINUTE);
-      return { line: hear(session, auth, scope.user, said) };
+      return { line: await hear(scope, said) };
     },
-    /** The audio goes to the transcription engine and is gone when this returns: only the text is kept. */
-    async audio(scope: CallAgentScope, auth: RequestAuth, audio: Uint8Array, mime: string, present: readonly string[]) {
-      if (!present.includes(scope.user.userId)) throw new CallAgentError("Join the call first");
-      const session = requireSession(scope);
+    /** The audio goes to the transcription engine and is gone when this returns: only the text is kept. Each person's app transcribes their own voice. */
+    async audio(scope: CallAgentScope, _auth: RequestAuth, audio: Uint8Array, mime: string, present: readonly string[]) {
+      requirePresent(scope, present);
       const settings = deps.settings();
       if (settings.transcription.engine === "browser") throw new CallAgentError("This workspace transcribes in the browser");
+      if (!live((await rooms.read(scope, Number.MAX_SAFE_INTEGER)).agent)) throw new CallAgentError("No agent is in this call");
       limit(`audio:${scope.user.userId}`, AUDIO_PER_MINUTE);
       const said = await deps.transcribe({ audio, mime, settings });
-      if (sessions.get(session.key) !== session) return { line: null };
-      return { line: hear(session, auth, scope.user, said) };
+      return { line: await hear(scope, said) };
     },
-    /** Ends the agent's part in calls nobody is in any more, which summarises them. */
-    sweep(present: (scope: CallAgentScope) => readonly string[]) {
-      for (const session of sessions.values()) {
-        if (!present(session.scope).length) void finish(session);
+    /** Ends the agent's part in calls this app answers for once nobody is in them, which summarises them. */
+    async sweep(present: (scope: CallAgentScope) => Promise<readonly string[]> | readonly string[]) {
+      for (const entry of [...hosted.values()]) {
+        if ((await present(entry.scope)).length) continue;
+        await update(entry.scope, (state) => ({ ...state, ending: true })).catch(() => undefined);
+        await process(entry).catch(() => undefined);
       }
-      for (const [key, done] of ended) if (done.at + ENDED_VISIBLE_MS <= now()) ended.delete(key);
     },
-    active: () => sessions.size,
+    active: () => hosted.size,
+    close: () => { if (timer) clearInterval(timer); },
   };
 }
 

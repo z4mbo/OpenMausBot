@@ -5,10 +5,12 @@ import { join } from "node:path";
 import { releases } from "../shared/origin-releases.ts";
 import { DATA_DIR } from "./config.ts";
 import { CallAgentError, MAX_AUDIO_BYTES, type CallAgents, type CallAgentScope } from "./origin-call-agent.ts";
+import { agentUserId, type ChatAgent } from "./origin-chat-agent.ts";
+import { convexRealtimeBackend, localRealtimeBackend, type RealtimeBackend, type TokenCall } from "./origin-realtime-backend.ts";
 import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, type OriginCloudClient, type OriginTeamChat } from "./origin-cloud.ts";
 import {
   openRealtimeStore, RealtimeError, CallSessionChangedError,
-  type CallScope, type CallSignalKind, type ChatMention, type Conversation, type ChatReference, type ChatScope, type MentionNotice, type RealtimeStore, type WorkspaceUser,
+  type CallSignalKind, type ChatMention, type Conversation, type ChatReference, type ChatScope, type MentionNotice, type RealtimeStore, type WorkspaceUser,
 } from "./origin-realtime-store.ts";
 import { convexSiteUrl } from "./origin-public-pages.ts";
 import { PASS, type RouteContext, type RouteHandler } from "./routes/table.ts";
@@ -35,6 +37,9 @@ export interface OriginMemberRouteDeps {
   turn?: () => TurnConfig;
   notifyMentions?: ((notice: MentionNotice) => Promise<void>) | null;
   callAgents?: CallAgents | null;
+  chatAgent?: ChatAgent | null;
+  /** Where chat and call signalling live; defaults to the connected Origin deployment, else this app's own store. */
+  backend?: () => RealtimeBackend;
   now?: () => number;
 }
 
@@ -118,17 +123,37 @@ export function appRealtimeStore(): RealtimeStore {
   return sharedStore ??= openRealtimeStore(join(DATA_DIR, "origin-realtime.sqlite"));
 }
 
-/** A project's team chat for the Origin agent tools; an agent posts under its own name, never the person's. */
-export function originTeamChat(store: () => RealtimeStore = appRealtimeStore): OriginTeamChat {
-  const scope = (teamId: string, projectId: string, author: { userId: string; name: string }): ChatScope => ({
-    user: { userId: author.userId, name: author.name, email: "", teamId, role: "member" },
-    conversation: `project:${projectId}`,
+const appFiles = (dir: string) => ({
+  id: () => randomUUID(),
+  write(id: string, data: Uint8Array) {
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, id), data, { flag: "wx", mode: 0o600 });
+  },
+  read: (id: string) => new Uint8Array(readFileSync(join(dir, id))),
+});
+
+/** Team chat and calls on the connected Origin deployment, shared by every member's app; this app's own store when none is connected. */
+export function appRealtimeBackend(store: () => RealtimeStore = appRealtimeStore, filesDir = join(DATA_DIR, "origin-chat-files")): () => RealtimeBackend {
+  const local = localRealtimeBackend(store, appFiles(filesDir));
+  let shared: { client: OriginCloudClient; backend: RealtimeBackend } | null = null;
+  return () => {
+    const client = connectedConvex();
+    if (!client) return local;
+    if (shared?.client !== client) shared = { client, backend: convexRealtimeBackend(() => client) };
+    return shared.backend;
+  };
+}
+
+/** A project's team chat for the Origin agent tools, read and written with the app's Origin sign-in; an agent posts under its own name, never the person's. */
+export function originTeamChat(backend: () => RealtimeBackend = appRealtimeBackend(), token: () => string = () => readOriginCloud(defaultOriginCloudFile()).sessionToken ?? ""): OriginTeamChat {
+  const scope = (teamId: string, projectId: string) => ({
+    user: { userId: "", name: "", email: "", teamId, role: "member" }, conversation: `project:${projectId}` as const, token: token(),
   });
   const line = (message: { id: string; authorName: string; body: string; createdAt: number }) =>
     ({ id: message.id, authorName: message.authorName, body: message.body, createdAt: message.createdAt });
   return {
-    recent: (teamId, projectId, limit) => store().messages(scope(teamId, projectId, { userId: "", name: "" })).slice(-limit).map(line),
-    post: (teamId, projectId, agent, body) => line(store().send(scope(teamId, projectId, { userId: `agent:${agent.id}`, name: agent.name }), body)),
+    recent: async (teamId, projectId, limit) => (await backend().messages(scope(teamId, projectId), {})).slice(-limit).map(line),
+    post: async (teamId, projectId, agent, body) => line(await backend().send(scope(teamId, projectId), body, { asAgent: agent })),
   };
 }
 
@@ -138,6 +163,7 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
   let opened: RealtimeStore | null = null;
   const store = deps.store ?? (deps.now ? () => (opened ??= openRealtimeStore(join(DATA_DIR, "origin-realtime.sqlite"), now)) : appRealtimeStore);
   const convexFor = deps.convex ?? connectedConvex;
+  const backend = deps.backend ?? (deps.store || deps.now ? (() => { const local = localRealtimeBackend(store, appFiles(filesDir)); return () => local; })() : appRealtimeBackend(store, filesDir));
   const turn = deps.turn ?? (() => ({ host: process.env.ORIGIN_TURN_HOST, secret: process.env.ORIGIN_TURN_SECRET }));
   const notifyMentions = deps.notifyMentions === undefined ? convexMentionNotifier() : deps.notifyMentions;
   const accessCache = new Map<string, { value: unknown; expires: number }>();
@@ -196,12 +222,12 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
     teamId: ctx.url.searchParams.get("teamId") ?? text(body?.teamId),
   });
 
-  const callScope = async (ctx: RouteContext, body?: Args): Promise<CallScope> => {
+  const callScope = async (ctx: RouteContext, body?: Args): Promise<TokenCall> => {
     const { token, teamId } = scopeInput(ctx, body);
     let user = await workspaceUser(token, teamId);
     const room = ctx.url.searchParams.get("room") ?? text(body?.room);
     if (room && (await project(token, teamId, room)).memberRole === "viewer") user = { ...user, role: "viewer" };
-    return { user, room };
+    return { user, room, token };
   };
 
   const chatScope = async (ctx: RouteContext, body?: Args): Promise<ChatScope & { token: string }> => {
@@ -212,7 +238,7 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
     if (conversation.startsWith("project:")) {
       if ((await project(token, teamId, conversation.slice("project:".length))).memberRole === "viewer") user = { ...user, role: "viewer" };
     }
-    else if (conversation && !store().directConversationMember(user, conversation)) throw new RealtimeError("Conversation not found");
+    else if (conversation && !(await backend().directConversationMember(token, user, conversation))) throw new RealtimeError("Conversation not found");
     return { user, conversation, token };
   };
 
@@ -243,10 +269,10 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
 
   const callAgents = deps.callAgents ?? null;
   if (callAgents) {
-    const present = (scope: CallAgentScope) => store().participants({
-      user: { userId: scope.user.userId, name: scope.user.name, email: "", teamId: scope.teamId, role: "member" }, room: scope.room,
-    }).map((participant) => participant.userId);
-    setInterval(() => callAgents.sweep(present), 10_000).unref();
+    const present = async (scope: CallAgentScope) => (await backend().participants({
+      user: { userId: scope.user.userId, name: scope.user.name, email: "", teamId: scope.teamId, role: "member" }, room: scope.room, token: scope.token ?? "",
+    })).map((participant) => participant.userId);
+    setInterval(() => void callAgents.sweep(present).catch(() => undefined), 10_000).unref();
   }
 
   const callAgent = async (agents: CallAgents, ctx: RouteContext, route: string) => {
@@ -255,19 +281,19 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
     const scope = await callScope(ctx, body);
     if (method === "POST" && scope.user.role === "viewer") throw new RealtimeError("View-only workspace access");
     const name = scope.room ? (await project(originSessionToken(req, body), scope.user.teamId, scope.room)).name : "Workspace";
-    const agentScope: CallAgentScope = { teamId: scope.user.teamId, room: scope.room, name, user: scope.user };
-    const present = () => store().participants(scope).map((participant) => participant.userId);
-    if (route === "agent" && method === "GET") return json(res, 200, agents.state(agentScope, Number(url.searchParams.get("after")) || 0));
+    const agentScope: CallAgentScope = { teamId: scope.user.teamId, room: scope.room, name, user: scope.user, token: scope.token };
+    const present = async () => (await backend().participants(scope)).map((participant) => participant.userId);
+    if (route === "agent" && method === "GET") return json(res, 200, await agents.state(agentScope, Number(url.searchParams.get("after")) || 0));
     if (route === "agent-audio" && method === "POST") {
       const audio = await readBounded(req, MAX_AUDIO_BYTES);
       if (!audio) throw Object.assign(new Error("too large"), { status: 413 });
-      return json(res, 200, await agents.audio(agentScope, auth, new Uint8Array(audio), url.searchParams.get("mime") ?? "", present()));
+      return json(res, 200, await agents.audio(agentScope, auth, new Uint8Array(audio), url.searchParams.get("mime") ?? "", await present()));
     }
     if (route !== "agent" || method !== "POST" || !body) return PASS;
-    if (body.action === "join") return json(res, 200, { agent: agents.join(agentScope, auth, text(body.botId), present()) });
-    if (body.action === "leave") return json(res, 200, agents.leave(agentScope, present()));
-    if (body.action === "keep") return json(res, 200, agents.keep(agentScope, body.keep === true, present()));
-    if (body.action === "line") return json(res, 200, agents.line(agentScope, auth, text(body.text).slice(0, 2_000), present()));
+    if (body.action === "join") return json(res, 200, { agent: await agents.join(agentScope, auth, text(body.botId), await present(), scope.room ? [name] : []) });
+    if (body.action === "leave") return json(res, 200, await agents.leave(agentScope, await present()));
+    if (body.action === "keep") return json(res, 200, await agents.keep(agentScope, body.keep === true, await present()));
+    if (body.action === "line") return json(res, 200, await agents.line(agentScope, auth, text(body.text).slice(0, 2_000), await present()));
     throw new RealtimeError("Unknown call agent action");
   };
 
@@ -279,25 +305,25 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
       const scope = await callScope(ctx);
       return json(res, 200, { iceServers: turnIceServers(turn(), scope.user.userId, now()) });
     }
-    if (route === "participants" && method === "GET") return json(res, 200, { participants: store().participants(await callScope(ctx)) });
+    if (route === "participants" && method === "GET") return json(res, 200, { participants: await backend().participants(await callScope(ctx)) });
     if (route === "participants" && method === "POST") {
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
       const scope = await callScope(ctx, body);
       if (body.action === "leave") {
-        store().leave(scope, text(body.sessionId));
+        await backend().leave(scope, text(body.sessionId));
         return json(res, 200, { ok: true });
       }
       const media = { audioEnabled: body.audioEnabled === true, videoEnabled: body.videoEnabled === true, screenSharing: body.screenSharing === true };
       if (body.action !== "join" && body.action !== "update") throw new RealtimeError("Unknown call action");
-      const participant = body.action === "update" ? store().heartbeat(scope, media, text(body.sessionId)) : store().join(scope, media);
+      const participant = body.action === "update" ? await backend().heartbeat(scope, media, text(body.sessionId)) : await backend().join(scope, media);
       return json(res, 200, { userId: participant.userId, joinedAt: participant.joinedAt, sessionId: participant.sessionId });
     }
-    if (route === "signals" && method === "GET") return json(res, 200, { signals: store().signals(await callScope(ctx), ctx.url.searchParams.get("sessionId") ?? undefined) });
+    if (route === "signals" && method === "GET") return json(res, 200, { signals: await backend().signals(await callScope(ctx), ctx.url.searchParams.get("sessionId") ?? undefined) });
     if (route === "signals" && method === "POST") {
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
       const scope = await callScope(ctx, body);
       if (!text(body.toUserId) || !text(body.kind)) throw new RealtimeError("Signal target and kind required");
-      const signal = store().sendSignal(scope, text(body.toUserId), text(body.kind) as CallSignalKind, text(body.payload), {
+      const signal = await backend().sendSignal(scope, text(body.toUserId), text(body.kind) as CallSignalKind, text(body.payload), {
         fromJoinedAt: typeof body.fromJoinedAt === "number" ? body.fromJoinedAt : undefined,
         toJoinedAt: typeof body.toJoinedAt === "number" ? body.toJoinedAt : undefined,
         sessionId: text(body.sessionId), toSessionId: text(body.toSessionId),
@@ -307,7 +333,7 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
     if (route === "signals" && method === "DELETE") {
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
       const scope = await callScope(ctx, body);
-      store().ackSignals(scope, Array.isArray(body.signalIds) ? body.signalIds.filter((id): id is string => typeof id === "string") : [], text(body.sessionId));
+      await backend().ackSignals(scope, Array.isArray(body.signalIds) ? body.signalIds.filter((id): id is string => typeof id === "string") : [], text(body.sessionId));
       return json(res, 200, { ok: true });
     }
     return PASS;
@@ -334,7 +360,7 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
     res.setHeader("cache-control", "no-store");
     if (route === "conversations" && method === "GET") {
       const { token, teamId } = scopeInput(ctx);
-      return json(res, 200, { conversations: store().directConversations(await workspaceUser(token, teamId)) });
+      return json(res, 200, { conversations: await backend().directConversations(token, await workspaceUser(token, teamId)) });
     }
     if (route === "conversations" && method === "POST") {
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
@@ -342,13 +368,13 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
       const user = await workspaceUser(token, teamId);
       const recipientId = text(body.recipientId);
       if (!recipientId || !(await members(token, teamId)).some((member) => member.userId === recipientId)) throw new RealtimeError("Choose a member of this workspace");
-      return json(res, 200, { conversationId: store().openDirectConversation(user, recipientId) });
+      return json(res, 200, { conversationId: await backend().openDirectConversation(token, user, recipientId) });
     }
     if (route === "conversations" && method === "PATCH") {
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
       const scope = await chatScope(ctx, body);
       if (!text(body.messageId)) throw new RealtimeError("Message required");
-      store().markRead(scope, text(body.messageId));
+      await backend().markRead(scope, text(body.messageId));
       return json(res, 200, { ok: true });
     }
     if (route === "messages" && method === "GET") {
@@ -356,8 +382,11 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
       const search = url.searchParams.get("search");
       const focus = url.searchParams.get("focus");
       const before = Number(url.searchParams.get("before")) || undefined;
-      const messages = search ? store().search(scope, search, before) : focus ? store().context(scope, focus) : store().messages(scope, before);
-      return json(res, 200, { messages, hasMore: messages.length === 100 });
+      const messages = await backend().messages(scope, { ...(before ? { before } : {}), ...(search ? { search } : {}), ...(focus ? { focus } : {}) });
+      const projectId = scope.conversation.startsWith("project:") ? scope.conversation.slice("project:".length) : "";
+      const agent = projectId && deps.chatAgent ? deps.chatAgent.agent(ctx.auth, projectId) : null;
+      const thinking = agent ? deps.chatAgent!.thinking(scope) : null;
+      return json(res, 200, { messages, hasMore: messages.length === 100, ...(agent ? { agent: { id: agent.id, name: agent.name, userId: agentUserId(agent.id) } } : {}), ...(thinking ? { thinking } : {}) });
     }
     if (route === "messages" && method === "POST") {
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
@@ -378,17 +407,22 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
       if (mentions.length) store().limit(`chat-mention:${scope.user.teamId}:${scope.user.userId}`, 20, 60_000);
       const notifyUserIds: string[] = [];
       const references = await resolveReferences(scope, body.references, team, notifyUserIds);
-      const message = store().send(scope, text(body.body), {
+      const message = await backend().send(scope, text(body.body), {
         attachmentIds: Array.isArray(body.attachmentIds) ? body.attachmentIds.filter((id): id is string => typeof id === "string") : [],
         references, mentions, notifyUserIds, ...(text(body.replyTo) ? { replyTo: text(body.replyTo) } : {}),
       });
       void flushMentions().catch(() => console.warn("Origin chat mention delivery deferred"));
+      if (deps.chatAgent && scope.conversation.startsWith("project:")) {
+        const projectId = scope.conversation.slice("project:".length);
+        const { name } = await project(scope.token, scope.user.teamId, projectId);
+        deps.chatAgent.heard({ backend: backend(), scope, auth: ctx.auth, projectId, projectName: name || "this project", message });
+      }
       return json(res, 200, { message });
     }
     if (route === "messages" && method === "PATCH") {
       const body = record(await ctx.readBody(req, MAX_JSON_BYTES));
       const scope = await chatScope(ctx, body);
-      return json(res, 200, { message: store().edit(scope, text(body.id), body) });
+      return json(res, 200, { message: await backend().edit(scope, text(body.id), body) });
     }
     if (route === "files" && method === "POST") {
       const scope = await chatScope(ctx);
@@ -402,24 +436,23 @@ export function createOriginMemberRoutes(deps: OriginMemberRouteDeps = {}): Rout
       const form = await new Response(new Uint8Array(bytes), { headers: { "content-type": String(req.headers["content-type"] ?? "") } }).formData().catch(() => null);
       const file = form?.get("file");
       if (!(file instanceof File) || file.size === 0 || file.size > MAX_CHAT_FILE_BYTES) throw new RealtimeError("Choose a file between 1 byte and 15 MB");
-      const metadata = { id: randomUUID(), name: file.name.slice(0, 200), contentType: file.type || "application/octet-stream", size: file.size, ...(projectId ? { projectId } : {}) };
-      mkdirSync(filesDir, { recursive: true });
-      writeFileSync(join(filesDir, metadata.id), Buffer.from(await file.arrayBuffer()), { flag: "wx", mode: 0o600 });
-      store().registerFile(scope, metadata);
+      const metadata = await backend().uploadFile(scope, {
+        name: file.name, contentType: file.type || "application/octet-stream", data: new Uint8Array(await file.arrayBuffer()), ...(projectId ? { projectId } : {}),
+      });
       return json(res, 200, { file: metadata });
     }
     if (route === "files" && method === "GET") {
-      let data: Buffer;
+      let data: Uint8Array;
       let file: { name: string; contentType: string };
       try {
         const scope = await chatScope(ctx);
         const id = url.searchParams.get("id") ?? "";
         if (!FILE_ID.test(id)) throw new RealtimeError("File not found");
-        const found = store().file(scope, id);
-        if (found.projectId) await project(scope.token, scope.user.teamId, found.projectId);
+        const found = await backend().file(scope, id);
+        if (found.file.projectId) await project(scope.token, scope.user.teamId, found.file.projectId);
         else await convex().query("tasks:authorizeLocalFile", { sessionToken: scope.token, teamId: scope.user.teamId, fileId: id });
-        data = readFileSync(join(filesDir, id));
-        file = found;
+        data = found.data;
+        file = found.file;
       } catch {
         return json(res, 404, { error: "File not found or access denied" });
       }

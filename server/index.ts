@@ -594,13 +594,15 @@ import { createProjectIconRoutes } from "./origin-project-icons.ts";
 import { createOriginCloudRoutes, cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
 import { BroadcastScheduler, createBroadcastRoutes } from "./broadcast/scheduler.ts";
 import { awaitBotReply, CallAgentError, createCallAgents, createCallAgentSettingsRoutes, readCallAgentSettings, recordCallNotes, transcribeWith } from "./origin-call-agent.ts";
+import { createChatAgent } from "./origin-chat-agent.ts";
+import { convexCallRooms } from "./origin-realtime-backend.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
 import { createOriginImportRoutes } from "./routes/origin-import.ts";
 import { createOriginAgentSupport } from "./origin-agent-support.ts";
 import { createOriginInviteRoutes, createOriginPublicRoutes } from "./origin-public-pages.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
 import { createSharedAgents, type SendDecision } from "./origin-shared-agents.ts";
-import { createOriginMemberRoutes } from "./origin-members.ts";
+import { connectedConvex, createOriginMemberRoutes } from "./origin-members.ts";
 import { createOriginMcpRoutes } from "./origin-mcp.ts";
 import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService, createProjectGit } from "./routes/github.ts";
 import { originGitHub } from "./github/review.ts";
@@ -13638,6 +13640,26 @@ function callSummaryWriter(bot: BotRecord): { instance: ProviderInstance; model?
   }
   return { instance, ...(chosen.model ? { model: chosen.model } : {}) };
 }
+/** A bot's answer to `prompt` from a turn in its own chat, so it remembers the exchange; the turn runs on this app's engines. */
+function askBotInItsChat({ auth, botId, prompt }: { auth: RequestAuth; botId: string; prompt: string }): Promise<string> {
+  const bot = store.bot(botId);
+  if (!bot || !visibleTo(viewerFor(auth)).bot(botId)) return Promise.reject(new CallAgentError("That agent is not available to you"));
+  return awaitBotReply(store, bot.threadId, async () => {
+    await acceptDirectSend({
+      botId, threadId: bot.threadId, text: prompt, sendId: randomUUID().replaceAll("-", ""),
+      sender: messageSender(auth), trigger: usageTriggerFor(auth), personPresent: true,
+    });
+  }, 180_000);
+}
+const chatAgent = createChatAgent({
+  find: ({ auth, projectId }) => {
+    const links = readOriginCloud(defaultOriginCloudFile()).projects;
+    const chief = store.bots.find((bot) => bot.chiefOfStaff && !bot.hidden && cloudProjectFor(store.bots, links, bot.id) === projectId && visibleTo(viewerFor(auth)).bot(bot.id));
+    return chief ? { id: chief.id, name: chief.name } : null;
+  },
+  ask: askBotInItsChat,
+  log: (line) => console.log(line),
+});
 const callAgents = createCallAgents({
   bot: (botId) => {
     const bot = store.bot(botId);
@@ -13658,6 +13680,7 @@ const callAgents = createCallAgents({
       });
     }, 120_000);
   },
+  rooms: convexCallRooms(connectedConvex),
   summarize: async ({ botId, prompt }) => {
     const bot = store.bot(botId);
     if (!bot) throw new CallAgentError("The chief no longer exists");
@@ -13676,7 +13699,7 @@ const callAgents = createCallAgents({
   settings: () => callAgentSettings, record: (input) => recordCallNotes(input),
   log: (line) => console.log(line),
 });
-ROUTES.push(createOriginMemberRoutes({ callAgents }));
+ROUTES.push(createOriginMemberRoutes({ callAgents, chatAgent }));
 const githubService = createGitHubService({ serverPublicUrl: publicUrl });
 PUBLIC_ROUTES.push(createOriginMcpRoutes({
   publicUrl,

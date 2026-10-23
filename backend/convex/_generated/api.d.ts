@@ -75,6 +75,8 @@ import type * as preferences from "../preferences.js";
 import type * as projectDocs from "../projectDocs.js";
 import type * as projectMilestones from "../projectMilestones.js";
 import type * as projectPresence from "../projectPresence.js";
+import type * as realtime from "../realtime.js";
+import type * as realtimeTables from "../realtimeTables.js";
 import type * as projects from "../projects.js";
 import type * as pulse from "../pulse.js";
 import type * as pulseTables from "../pulseTables.js";
@@ -171,6 +173,8 @@ declare const fullApi: ApiFromModules<{
   projectDocs: typeof projectDocs;
   projectMilestones: typeof projectMilestones;
   projectPresence: typeof projectPresence;
+  realtime: typeof realtime;
+  realtimeTables: typeof realtimeTables;
   projects: typeof projects;
   pulse: typeof pulse;
   pulseTables: typeof pulseTables;
