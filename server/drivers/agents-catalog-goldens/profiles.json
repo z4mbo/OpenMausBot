@@ -1,7 +1,7 @@
 {
   "default": {
-    "bytes": 79816,
-    "sha256": "91babd1da558a36e875ac4508f5edb7e09330f7e3d81dbaf4de7720cb48ded4d",
+    "bytes": 80688,
+    "sha256": "9dbf131dbc6916bc71c46fa460e12e7555b872a5788276985182eb2481c613b1",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -70,6 +70,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -87,8 +89,8 @@
     ]
   },
   "voice": {
-    "bytes": 80557,
-    "sha256": "2374713f4d860d2d034d958d4bff48cc400bd24160621b1bb182fd4559f868c4",
+    "bytes": 81429,
+    "sha256": "438df5cacd6a64b637050a4208b8afffee698342ab377ff6c1959a0e1a21bb48",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -158,6 +160,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -175,8 +179,8 @@
     ]
   },
   "shared": {
-    "bytes": 81561,
-    "sha256": "030c8c63a863699dd83ca1ce30e8a5af922b1d080ac3527a77c029c26c115bca",
+    "bytes": 82433,
+    "sha256": "7851abd1163f531c043a26fa819ffebe5811c25e53b7d56e9873657773d0c8f6",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -247,6 +251,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -264,8 +270,8 @@
     ]
   },
   "shared+voice": {
-    "bytes": 82302,
-    "sha256": "017176976577238a94d6563a1f294c445c07253313aa8de3f9acf51154cafe83",
+    "bytes": 83174,
+    "sha256": "8acbf929571aa7a0f27d0ebcccaea45f3131db98610e18e46286be6832d58943",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -337,6 +343,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -354,8 +362,8 @@
     ]
   },
   "skills": {
-    "bytes": 82715,
-    "sha256": "51e4993ffa8092e61a46b1a37986ff06703a4fcf6bb248923e71c770c565931a",
+    "bytes": 83587,
+    "sha256": "ff284fae04adf0b18b80bbaaf51bad8a918d7a218387bd1db90f035a0a94ff7e",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -426,6 +434,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -443,8 +453,8 @@
     ]
   },
   "skills+voice": {
-    "bytes": 83456,
-    "sha256": "fde825286e3ae03ba680c573d1d79569d8dcf41d6ee40162d3931afe734730be",
+    "bytes": 84328,
+    "sha256": "94473aeb30da5524bbe566e4a07441757de72ab62bf4815f1c29268875efe5fc",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -516,6 +526,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -533,8 +545,8 @@
     ]
   },
   "skills+shared": {
-    "bytes": 84460,
-    "sha256": "8b702dec3c738e3912307e4cdf323b1a0e3217d959c8955783dea6fae6def6c5",
+    "bytes": 85332,
+    "sha256": "420cc5f5e3f957f2e603b874b0da91634f64f5167640958acc94c79478dfae6e",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -607,6 +619,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -624,8 +638,8 @@
     ]
   },
   "skills+shared+voice": {
-    "bytes": 85201,
-    "sha256": "3ff97836cf11e77c0dcd912168042696ddacf186145e7d0b60f4bd41aa6630fd",
+    "bytes": 86073,
+    "sha256": "e8b758dfb96bdd1d18d5001154238a0c15662a5210b322dda89d3063ef71a911",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -699,6 +713,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -716,8 +732,8 @@
     ]
   },
   "non-chief": {
-    "bytes": 67091,
-    "sha256": "571b3d9a882c81fd6aa3d90258e2baf02b869a1a7a9dc83667fa86f489a36a2b",
+    "bytes": 67963,
+    "sha256": "88a9bce4ec8460975120636e2e6863241070434924f5b9694dbdd559e48cd8ce",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -775,6 +791,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -792,8 +810,8 @@
     ]
   },
   "voice+non-chief": {
-    "bytes": 67832,
-    "sha256": "38976b30222576aefd6e1c88bd7e99b4b6babf542df540a4b5f5a93d7e4a5140",
+    "bytes": 68704,
+    "sha256": "dea2f36627e4396d627e1817f2d0d2863197f1a55ffad9c9a1c1b2e0448fc4f1",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -852,6 +870,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -869,8 +889,8 @@
     ]
   },
   "shared+non-chief": {
-    "bytes": 68836,
-    "sha256": "aa3f34d5b779fb429bf3852fcc7b2fde0b9e724045cfe02664a58d8c71fef833",
+    "bytes": 69708,
+    "sha256": "1b04939208a16e40bbdf1e987b01fb07178cbedcb011194548f8ca77e7bd298b",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -930,6 +950,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -947,8 +969,8 @@
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 69577,
-    "sha256": "3471968cfec642e7af47c770a62b114f00b01748bf668c1a6799bfd5d4a4098c",
+    "bytes": 70449,
+    "sha256": "d4941ff37c242171d1067d872645e5dbc0efbaf5c6769cd8304b44663c1f065b",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1009,6 +1031,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -1026,8 +1050,8 @@
     ]
   },
   "skills+non-chief": {
-    "bytes": 69990,
-    "sha256": "2492d9630100cacd9c420334f1d68d67597b1b275bc7ba3db8aa84245fbfc0ff",
+    "bytes": 70862,
+    "sha256": "480a8751820248d26194d61d65131cdcd84205958bf9ea728e861d3c830bbc89",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1087,6 +1111,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -1104,8 +1130,8 @@
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 70731,
-    "sha256": "4cb3a296dc0582ac02da427c3b745c470c6ead995a89d222413022f29220e567",
+    "bytes": 71603,
+    "sha256": "1ca35ca30b694dd38d3d4411157280350e1d427246a83b09dc2fa073e3f95b9d",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1166,6 +1192,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -1183,8 +1211,8 @@
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 71735,
-    "sha256": "42057584f168bf29c6448372bac035ab1d66a51d716b05d90c28b903ae244b65",
+    "bytes": 72607,
+    "sha256": "d3f1259214cb18e8a0f45d10dd5d7a8832f2196ce0e26a35c472f4712c945530",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1246,6 +1274,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -1263,8 +1293,8 @@
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 72476,
-    "sha256": "3cefec49414e21c71cc3a5b46fb6150a8d1432c4c22a2a1675ae22aff1541205",
+    "bytes": 73348,
+    "sha256": "31740ec75130374e0de7564d4e78b55368e256cb61fa988394f0634e6fe6563a",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1327,6 +1357,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -1344,8 +1376,8 @@
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 84256,
-    "sha256": "14e9fa4b7e208f47a80ad3fe923de76ec8045765be658570a622cf60b5ac4f9b",
+    "bytes": 85128,
+    "sha256": "949f03fde00b7dffa941c5d2e5188ca7c28271730478cfacdd864a78741c02e1",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1418,6 +1450,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -1435,8 +1469,8 @@
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 71531,
-    "sha256": "d6557948f3ac07946642d0570ec1cb4253963717b106637cc941e096310fb305",
+    "bytes": 72403,
+    "sha256": "ac15db9c9b93ff82dc5a3a0617322ce1b12bd2c429bed99e95292be4de5f1dd7",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1498,6 +1532,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -1515,8 +1551,8 @@
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 86061,
-    "sha256": "cb630e6a515d70d70628c78f3153f9cc164549934b8d137a7536c7a67eb7dace",
+    "bytes": 86933,
+    "sha256": "34d439b4d4cbf944f6fedaeb6ec3a7ed86978b1baa05d022b50bf9495d9442f8",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1591,6 +1627,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -1608,8 +1646,8 @@
     ]
   },
   "default+legacy-switches": {
-    "bytes": 79816,
-    "sha256": "91babd1da558a36e875ac4508f5edb7e09330f7e3d81dbaf4de7720cb48ded4d",
+    "bytes": 80688,
+    "sha256": "9dbf131dbc6916bc71c46fa460e12e7555b872a5788276985182eb2481c613b1",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1678,6 +1716,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
@@ -1695,8 +1735,8 @@
     ]
   },
   "skills+shared+voice+escalations+whole-schemas": {
-    "bytes": 106711,
-    "sha256": "82d864259c27e90d00291dd336167a790131303adc05f749c7dde1f8e2382e89",
+    "bytes": 109571,
+    "sha256": "c23a0880a37a69b2e7f0713b9b17d71c8c0075e14270e08c4989c25692ebd79a",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1771,6 +1811,8 @@
       "origin_studio_save_asset",
       "origin_studio_workflow_list",
       "origin_studio_workflow_run",
+      "origin_studio_workflow_save",
+      "origin_studio_template_save",
       "origin_studio_presets",
       "origin_studio_library",
       "origin_broadcast_draft",
