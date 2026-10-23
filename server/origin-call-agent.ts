@@ -567,7 +567,7 @@ export function createCallAgents(deps: CallAgentDeps) {
     },
     /** Ends the agent's part in calls this app answers for once nobody is in them, which summarises them. */
     async sweep(present: (scope: CallAgentScope) => Promise<readonly string[]> | readonly string[]) {
-      for (const entry of [...hosted.values()]) {
+      for (const entry of hosted.values()) {
         if ((await present(entry.scope)).length) continue;
         await update(entry.scope, (state) => ({ ...state, ending: true })).catch(() => undefined);
         await process(entry).catch(() => undefined);

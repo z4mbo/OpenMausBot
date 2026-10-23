@@ -38,7 +38,7 @@ export function localRealtimeBackend(store: () => RealtimeStore, files: { write(
     messages: async (scope, query) => query.search ? store().search(scope, query.search, query.before) : query.focus ? store().context(scope, query.focus) : store().messages(scope, query.before),
     send: async (scope, body, extras = {}) => {
       if (!extras.asAgent) return store().send(scope, body, extras);
-      return store().send({ ...scope, user: { userId: `agent:${extras.asAgent.id.replace(/^agent:/, "")}`, name: extras.asAgent.name, email: "", teamId: scope.user.teamId, role: "member" } }, body, { ...(extras.replyTo ? { replyTo: extras.replyTo } : {}) });
+      return store().send({ ...scope, user: { userId: `agent:${extras.asAgent.id.replace(/^agent:/, "")}`, name: extras.asAgent.name, email: "", teamId: scope.user.teamId, role: "member" } }, body, extras.replyTo ? { replyTo: extras.replyTo } : {});
     },
     edit: async (scope, id, change) => store().edit(scope, id, change),
     markRead: async (scope, messageId) => store().markRead(scope, messageId),
