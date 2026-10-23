@@ -1,5 +1,11 @@
 # Origin release delivery
 
+## 0.7.6 delivery
+
+Origin **0.7.6** is [published](https://github.com/z4mbo/Origin/releases/tag/origin-v0.7.6) from immutable source `eb829c152ce3cd4359eeb58bca3dd2e55abff879` (`origin-v0.7.6`). GitHub release 420111325 became public and latest at `2026-10-23T07:52:35Z`. The website, backed-up backend, Windows x64 and Mac arm64/x64 packages, fifteen release assets and both update feeds match this source. All eighteen anonymous public file/alias streams passed size and SHA-256 checks. PR3 remains open and unmerged.
+
+The [delivery and audit report](evidence/origin-delivery-054/final-audit-report.md), [receipt](evidence/origin-delivery-054/delivery-receipt.json) and [evidence manifest](evidence/origin-delivery-054/manifest.json) distinguish actual exact-source CI, package/static/browser checks and public delivery from physical installation, real provider billing, updater and recipient-email acceptance. They retain the original failed methods and interrupted upload alongside the reconciled successful continuation. Earlier candidate and delivery records below retain their original dates and boundaries.
+
 ## 0.2.14 delivery
 
 Origin **0.2.14** is [published](https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.14) from frozen source `ab0cd72b4c2f004c1015adca034472241569c04b`, tagged `origin-v0.2.14`. GitHub release 416803740 became public at `2026-10-19T04:01:32Z`; the matching website promotion completed at `2026-10-19T04:01:51.863Z`. The running image is `sha256:b0a0a3315c8eeec4ea8e337b935142cf04142962e3cb92dcde87369f74684201`, with the frozen source/version labels and zero restarts at verification. Windows x64 and both Mac architectures, fifteen GitHub assets, thirteen public payloads, two metadata files and three download aliases match the pinned sizes and SHA-256 values. Both update feeds and the website contain the four current notes.

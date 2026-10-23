@@ -1,0 +1,19 @@
+{
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "version": "0.7.6",
+  "image": "sha256:ec65fe62092049fd9a3c3660a0d2f9a9d7dc43b84931a90709097edee6b7cd37",
+  "previousImage": "sha256:78a8daf8ce012d91fa9cb6d041c97ede04c5b2c3d42cec140945ab7a7ab9ab52",
+  "rollbackImage": "origin-rollback:before-20261023T074901Z-90b4d2c6-1d60-41a6-8c2d-90b4272a18d2",
+  "rollbackContext": "/root/origin.bak-20261023T074901Z-90b4d2c6-1d60-41a6-8c2d-90b4272a18d2-0.7.6",
+  "newContext": "/root/origin.new-20261023T074901Z-90b4d2c6-1d60-41a6-8c2d-90b4272a18d2-0.7.6",
+  "publicMutation": true,
+  "operatorConfigPreserved": true,
+  "validationSource": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "phase": "promote",
+  "completed": true,
+  "completedAt": "2026-10-23T07:49:03.487Z",
+  "buildReceiptSha256": "fc04923b14ab0437528cbc49864d89d7f8fa5b1be3d6395f05983a245921db5b",
+  "contextProofSha256": "20d3382e5dacb80f992c4a8d658411f6dd5dff8b5363fcedfe56d4a7c2842113",
+  "archiveSha256": "8edcdf88b0237a8fb212d134cff6fa0f03986ebb0767bbe30d0f8b8aed7dd889",
+  "remoteResultSha256": "7a25766ab6e9e0a5b25f0619062390dfa244ef7b84ca0b41d3d9c0700c7b4c58"
+}

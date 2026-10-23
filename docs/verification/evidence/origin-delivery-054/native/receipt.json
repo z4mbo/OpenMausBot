@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 1,
+  "cycle": "054",
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "version": "0.7.6",
+  "nativeRun": 39676135188,
+  "nativeAttempt": 1,
+  "status": "pass",
+  "startedAt": "2026-10-21T22:15:16.693Z",
+  "artifactManifestSha256": "a63e9b2ea739ac81a2e4cdfcd9f46c8b868c1c58df03f8df91ffe24d5d87ec1b",
+  "artifactDownloadReceiptSha256": "a4ffd2f1891f99913f3bbb8bbea080f7b4c63221a646a159983212f392050e9e",
+  "distributionReceiptSha256": "3736d6f1614e616f358553b68762f043e47335667a6d55991c2fbfd99b5b0fa7",
+  "inputSha256": "61da3ac1cc97c5f4176b9b920b45f1b7a6e778df2fe32b1e2db5b47e7a7573b6",
+  "helperPins": {
+    "audit-native-054.cjs": "0d55a493d9bbfa8a78b1894da29a968d334e19d363e4b07c626686fef99e00ac",
+    "contract.cjs": "9a7e29bc71c2d6b26f9779aa4469accea27a824d2e5d255c60fe45aed90465f5",
+    "features.cjs": "d89ac215ca100882293e455fbff671e7487204599b0578d094866a552d8ff59b",
+    "pending-thread.cjs": "4a87077ab0e2bdffb0006662409b209f1e233fddfc036da61be328cab74a7e54",
+    "recovery-wiring.cjs": "72ff65f902f993c4124fb79a9ed5540269681255985ef0e1e985d850cd0a60c9",
+    "extract-selected.ps1": "f303edec3ee64be02ae506620475fda151dd792a46d541b779b1cf12a883c3cd",
+    "checkout-source.cjs": "22b5b937c7f03c2e19b3d397b5559d8a93b9ae47e2fa9d2c4bbdab8b97877894",
+    "before-send.cjs": "ec94216136ad59080099f3667c26f5c90800570b843b1c6cb84a0b3be99519df"
+  },
+  "exactSourceAndValidation": true,
+  "limits": [
+    "Mac archives receive static resource inspection on Windows only.",
+    "Windows smoke executes copied Node server/browser resources; no installed Electron GUI, installer or updater journey.",
+    "Plain source accepts raw Git bytes or Windows-only complete exact LF-to-CRLF checkout serialization; Mac requires raw Git bytes.",
+    "No real provider, quota/invoice or production data acceptance. Renderer AST checks prove reachable interactive structures, not full GUI behavior."
+  ],
+  "retainedWindowsExtraction": {
+    "failedReceiptSha256": "6f7b4c102722bfd8c7893c7c70e9839b0f8f141e2ae67063b70b9cffdcf083ce",
+    "failedInputSha256": "6075db6df2e74c7b97acbe04e1bb1937b22a8ba2235e4d5ae55ff5a03c647869",
+    "failedIntentSha256": "e7428187d2c951cd57beae8bfe701a573a175c3924816ebd32e66057d8b314ec",
+    "failedManifestSha256": "ab0aa3f43150e6ac4df32ad127c12bb34550609e82760bda564a6370cb595de7",
+    "windowsManifestSha256": "59ef8d496a22e1499e66754bb6c7c5886c32b99adae1bcee860abbd496af7e12",
+    "extractionLogSha256": "7a949b35ecee41c6065fbfb577bbf92671da8c951e9bc517fe225cfd92113d71",
+    "preservedDirectory": "failed-attempt-1",
+    "retainedDirectory": "extracted-windows-x64",
+    "archiveRehashed": true,
+    "selectedFilesRehashed": 1372,
+    "selectedBytesRehashed": 591208623,
+    "unexpectedFilesRejected": true,
+    "completedTargetChecksReused": false
+  },
+  "audit": {
+    "targets": [
+      "windows-x64",
+      "mac-arm64",
+      "mac-x64"
+    ],
+    "staticPassed": true,
+    "sourceIdentityPassed": true,
+    "compiledAstPassed": true,
+    "sourceFiles": [
+      {
+        "path": "server/spend.ts",
+        "sha256": "592e9ff687a2db778ed362377310ea7d8eafa444bd1b84ab5d01693a6fc6f7dd"
+      },
+      {
+        "path": "server/origin-shared-agents.ts",
+        "sha256": "12c17d6f707ae24db111570619d5e33dc76bb06e4e4a43ec5526320e246cd658"
+      },
+      {
+        "path": "server/delegation-thread.ts",
+        "sha256": "e085d855138a4f2e1773aa500c9eeca7532429206349337b83357907cfffeaec"
+      },
+      {
+        "path": "server/delegation-notification.ts",
+        "sha256": "d003ac137f7372004736fa63d3ad2b189b05def4a989572aec88912c79fe495b"
+      },
+      {
+        "path": "shared/model-selection.ts",
+        "sha256": "04d54d8299ff34a071fbc031f144262fa4905147f21ec7c239050e7a82a14b31"
+      },
+      {
+        "path": "server/model-backup.ts",
+        "sha256": "d5a95b0d6cb8228e25dd5d4c6606f14dea4e6c904f4ea1d40f3a8feab651245a"
+      },
+      {
+        "path": "server/quota-start.ts",
+        "sha256": "dcadacc484cb585e35ce6dc709735a17567b58547b40a7ce2aec6bf2a2e2f720"
+      },
+      {
+        "path": "server/daily-api-budget.ts",
+        "sha256": "60cee3c1ca486f79b0eeb5cf8f3bdd0b31de64b8d8b24252b226f53d9a4a33a5"
+      },
+      {
+        "path": "server/config.ts",
+        "sha256": "e378f09d9ef69b72e1ed7d68b2ce58cfb367eafdf68df5bcd953887f1081f341"
+      },
+      {
+        "path": "server/drivers/claude-billing.ts",
+        "sha256": "fbe991c2d65d031d15fa16fa9065b02d43a377f9833a570141a04712a7f41a87"
+      },
+      {
+        "path": "server/host/project-tools.ts",
+        "sha256": "d43df7f9730f07a20e3712ea6bcda1ea0a456d9439e6533ef60ad43d5945f9d9"
+      },
+      {
+        "path": "server/origin-studio.ts",
+        "sha256": "49c9399d9937e7a80c1dff0d4d47087d84070e2b405cb6e853dc5e26492e653f"
+      },
+      {
+        "path": "server/api-budget-policy.ts",
+        "sha256": "6bcc332a6a5d06a127b92236dc28f2fce7ecd02b4d9584d5156713e89e3aa79e"
+      },
+      {
+        "path": "server/origin-hosted-requests.ts",
+        "sha256": "9d3e33c239b8aad2b0ac5a778a621d7912c424ec565c13ecf1d7834e00b89a77"
+      },
+      {
+        "path": "server/origin-model-host-sidecar.ts",
+        "sha256": "557f339af8fa8ce63c501d8839858896ea44afee35b6d23bfe3912c4ab4df745"
+      },
+      {
+        "path": "server/origin-model-host.ts",
+        "sha256": "eff1b61662592b100d632b5b243ddd33feb86a6e88c96947f64c8b1bd5466f1e"
+      },
+      {
+        "path": "server/host/shared-model-backups.ts",
+        "sha256": "f0aee3f12f8fe4b39d8bc30ffe656d4047e7b69e71c094a9f3befe3eaf4f8152"
+      },
+      {
+        "path": "server/testing/model-host-readiness.ts",
+        "sha256": "61409aec1d90653083ff23932abc415ef6d72633fe2a3967974ca44a52d403f7"
+      },
+      {
+        "path": "server/model-selection-config.ts",
+        "sha256": "c86ee8382ab7925a59aa7473528e84b2d9110e4bb5990572950351cf46ac9677"
+      }
+    ],
+    "payloads": [
+      {
+        "name": "Origin-0.7.6-arm64.dmg",
+        "size": 303445836,
+        "sha256": "86f44d7c05a8e6084827a3231cda375da994636938bd74aad869f6669e7e12a0"
+      },
+      {
+        "name": "Origin-0.7.6-arm64.dmg.blockmap",
+        "size": 317395,
+        "sha256": "1d703b9f0e470646ae6ebab757d32b6a3295d5dcffde51c0b302accf62c361f1"
+      },
+      {
+        "name": "Origin-0.7.6-arm64.zip",
+        "size": 303940522,
+        "sha256": "f53c664240e861cd497c8ca5cf6c181f114aca6df7f0bca4b908e24edb449b50"
+      },
+      {
+        "name": "Origin-0.7.6-arm64.zip.blockmap",
+        "size": 315763,
+        "sha256": "5f351287474d75ba8c67c5a23116366c865fb885b12740175e9a488aebd25d8b"
+      },
+      {
+        "name": "Origin-0.7.6-setup.exe",
+        "size": 255510711,
+        "sha256": "31a203f1113f61d781ba54d35d1788e9d47c13939cd64d153c526ef71c63318d"
+      },
+      {
+        "name": "Origin-0.7.6-setup.exe.blockmap",
+        "size": 264225,
+        "sha256": "fabde13cec05da00332eb66f7d7f91598875f79553357afdf7c76f8e6e331fc3"
+      },
+      {
+        "name": "Origin-0.7.6-windows-x64.zip",
+        "size": 355833937,
+        "sha256": "e80c4eb6034f3c212c16ca83f3983ad3b27daed75d6b625c7d39ae1f5d4cc0fa"
+      },
+      {
+        "name": "Origin-0.7.6-x64.dmg",
+        "size": 320583342,
+        "sha256": "06447712965e16279254f1961ddae75d5a180428f2258192140d79e8440d46eb"
+      },
+      {
+        "name": "Origin-0.7.6-x64.dmg.blockmap",
+        "size": 334281,
+        "sha256": "735a315b8de7c01df2a0106a2428ecded393cdde1acdee638952903f04cc5d32"
+      },
+      {
+        "name": "Origin-0.7.6-x64.zip",
+        "size": 321268514,
+        "sha256": "de6456926b09a787f73462c8c2e7d24886b2ba23aa7e3fee2ef16016a9c2e9a3"
+      },
+      {
+        "name": "Origin-0.7.6-x64.zip.blockmap",
+        "size": 332504,
+        "sha256": "5e14aa914d41188c58c1ec35e975abdeb35f8a41f7643e8cd8318c0938847a93"
+      },
+      {
+        "name": "latest-mac.yml",
+        "size": 3997,
+        "sha256": "2236b6d7431a89a32810279942dac60c8259ceb98bb5f19daeeb3b3214eaa277"
+      },
+      {
+        "name": "latest.yml",
+        "size": 3544,
+        "sha256": "35cb238c20a29c28caf5bf7d67d38a1ea878fda1040587189670d3752ec18188"
+      }
+    ],
+    "outerArchives": [
+      {
+        "id": 12382946545,
+        "name": "origin-windows",
+        "size": 610424844,
+        "sha256": "75b5b93f2426e5e84b1e7ddc777a45b3dbe84cc36fbfe981a5aefa8f9c8e0516"
+      },
+      {
+        "id": 12381543114,
+        "name": "origin-mac",
+        "size": 1247172327,
+        "sha256": "520f61f728cf5a336715c0562b110b5c1f05103008ed06802afaa9fafca4301f"
+      }
+    ],
+    "feeds": [
+      {
+        "name": "latest-mac.yml",
+        "sha256": "2236b6d7431a89a32810279942dac60c8259ceb98bb5f19daeeb3b3214eaa277",
+        "canonicalNotesMatch": true
+      },
+      {
+        "name": "latest.yml",
+        "sha256": "35cb238c20a29c28caf5bf7d67d38a1ea878fda1040587189670d3752ec18188",
+        "canonicalNotesMatch": true
+      }
+    ],
+    "canonicalReleaseNotes": 11
+  },
+  "smoke": {
+    "status": "pass",
+    "platform": "win32",
+    "arch": "x64",
+    "scriptSha256": "642865b7f53994ed66986d9075681ae1e860e92b319a054038dd22929144100d",
+    "nodeSha256": "ba4e6d110e8c1592a1ecd390f6b05f3da124b13871a5be62b341a07a853c6c32",
+    "exitCode": 0,
+    "signal": null,
+    "credentialFree": true,
+    "environmentNames": [
+      "APPDATA",
+      "HOME",
+      "LOCALAPPDATA",
+      "OMB_SMOKE_DIST",
+      "PATH",
+      "SystemRoot",
+      "TEMP",
+      "TMP",
+      "USERPROFILE",
+      "WINDIR",
+      "XDG_CACHE_HOME",
+      "XDG_CONFIG_HOME",
+      "XDG_DATA_HOME"
+    ],
+    "smokeTempOutsideCheckout": true,
+    "noNodeModulesAncestor": true,
+    "ownedProcessesClosed": true,
+    "ownedTempRemoved": true,
+    "serverResourceSha256": "4e416d9cd9ffea6d667c6a4d3aeae0b3301e6b9c20abfb7f35e0db127b542f5f",
+    "logSha256": "35e79d12624ea678f6e4dd1597767c6ed4eaec1b5b670d735dc7ac375f61ea3f",
+    "startedAt": "2026-10-21T22:16:25.499Z",
+    "endedAt": "2026-10-21T22:16:41.758Z",
+    "frozenSourceCopies": [
+      {
+        "file": "scripts/smoke-packaged-server.mjs",
+        "bytes": 21398,
+        "sha256": "642865b7f53994ed66986d9075681ae1e860e92b319a054038dd22929144100d"
+      },
+      {
+        "file": "server/browser-bundle-release.ts",
+        "bytes": 3424,
+        "sha256": "2aaa75acc04c57911fea6c7df20e78d72f24876d0ac9de35a5ccdc0a0c81e81c"
+      },
+      {
+        "file": "server/browser-engine-release.ts",
+        "bytes": 3192,
+        "sha256": "30cad1c6718046352883fdb2f606c4f2689fcb3826a59f2bb007b5bbf90919a4"
+      }
+    ]
+  },
+  "endedAt": "2026-10-21T22:16:42.011Z"
+}

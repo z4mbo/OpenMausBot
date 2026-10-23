@@ -1,0 +1,61 @@
+{
+  "startedAt": "2026-10-21T22:16:25.499Z",
+  "endedAt": "2026-10-21T22:16:41.757Z",
+  "observedProcesses": [
+    {
+      "pid": 33524,
+      "parentPid": 27992,
+      "name": "node.exe",
+      "createdAt": "2026-10-21T22:16:25.5008540Z"
+    },
+    {
+      "pid": 34136,
+      "parentPid": 33524,
+      "name": "conhost.exe",
+      "createdAt": "2026-10-21T22:16:25.5048820Z"
+    },
+    {
+      "pid": 3976,
+      "parentPid": 33524,
+      "name": "node.exe",
+      "createdAt": "2026-10-21T22:16:26.1079700Z"
+    },
+    {
+      "pid": 31608,
+      "parentPid": 33524,
+      "name": "node.exe",
+      "createdAt": "2026-10-21T22:16:27.5946070Z"
+    },
+    {
+      "pid": 32236,
+      "parentPid": 33524,
+      "name": "node.exe",
+      "createdAt": "2026-10-21T22:16:28.6738840Z"
+    }
+  ],
+  "observedListeners": [
+    {
+      "pid": 3976,
+      "address": "127.0.0.1",
+      "port": 62993
+    },
+    {
+      "pid": 3976,
+      "address": "127.0.0.1",
+      "port": 62992
+    },
+    {
+      "pid": 32236,
+      "address": "127.0.0.1",
+      "port": 63110
+    },
+    {
+      "pid": 32236,
+      "address": "127.0.0.1",
+      "port": 63109
+    }
+  ],
+  "remainingOwnedProcesses": [],
+  "remainingOwnedListeners": [],
+  "limits": "Scoped ancestry and listener sampling; fast children between samples may not be observed. No command lines or credential values retained."
+}

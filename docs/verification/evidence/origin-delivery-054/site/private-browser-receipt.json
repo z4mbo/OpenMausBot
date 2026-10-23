@@ -1,0 +1,187 @@
+{
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "version": "0.7.6",
+  "image": "sha256:ec65fe62092049fd9a3c3660a0d2f9a9d7dc43b84931a90709097edee6b7cd37",
+  "url": "http://127.0.0.1:53354",
+  "observedBy": "root-agent-browser",
+  "driver": "repository-agent-browser",
+  "driverVersion": "agent-browser 0.36.0-omb.1",
+  "engine": "chrome",
+  "nativeWindowControl": false,
+  "ownedPreview": {
+    "container": "origin-preview-054-7a437fe7565fd75c18b662040417e5e7",
+    "containerId": "0432e9b67aa965cef0b3db6834a968affef7400eb68878afc30845f317aa2046",
+    "externalEnvironment": false,
+    "forwardBinding": {
+      "address": "172.27.0.2",
+      "containerId": "0432e9b67aa965cef0b3db6834a968affef7400eb68878afc30845f317aa2046",
+      "endpointId": "c3337fa50e4cf78ca9c13babe231019fd770d6268d1b455a879f440495db0854",
+      "networkId": "448012fbf360c3f0bc6154f3f0f58c25cb861e224eac7fe49f38ab3ddc9bc11b",
+      "port": 3000,
+      "prefixLength": 16,
+      "subnet": "172.27.0.0/16"
+    },
+    "freeBytesBefore": 6309777408,
+    "hostMounts": false,
+    "hostPublishedPorts": false,
+    "image": "sha256:ec65fe62092049fd9a3c3660a0d2f9a9d7dc43b84931a90709097edee6b7cd37",
+    "internalNetwork": true,
+    "network": "origin-preview-net-054-7a437fe7565fd75c18b662040417e5e7",
+    "networkId": "448012fbf360c3f0bc6154f3f0f58c25cb861e224eac7fe49f38ab3ddc9bc11b",
+    "owner": "7a437fe7565fd75c18b662040417e5e7",
+    "previousImage": "sha256:78a8daf8ce012d91fa9cb6d041c97ede04c5b2c3d42cec140945ab7a7ab9ab52",
+    "publicMutation": false,
+    "readOnlyRoot": true,
+    "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+    "version": "0.7.6",
+    "controllerPid": 13688,
+    "tunnelPid": 26608,
+    "tunnelArguments": [
+      "-v",
+      "-N",
+      "-T",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ExitOnForwardFailure=yes",
+      "-o",
+      "ControlMaster=no",
+      "-o",
+      "ControlPath=none",
+      "-o",
+      "ForwardAgent=no",
+      "-o",
+      "ServerAliveInterval=15",
+      "-o",
+      "ServerAliveCountMax=2",
+      "-L",
+      "127.0.0.1:53349:172.27.0.2:3000",
+      "hetzner"
+    ],
+    "tunnelListeningEvidence": "Local forwarding listening on 127.0.0.1 port 53349.",
+    "localTunnelPort": 53349,
+    "proxyPort": 53354
+  },
+  "previewReadySha256": "7755672cedb9f3b7f495544c4eedb258a1245312740b72746bb3e2402ee3af2a",
+  "screenshots": [
+    {
+      "role": "landing-desktop-light",
+      "path": "landing-desktop-light.png",
+      "route": "/",
+      "url": "http://127.0.0.1:53354/",
+      "viewport": {
+        "width": 1400,
+        "height": 900
+      },
+      "mediaTheme": "light",
+      "fullPage": false,
+      "bytes": 105858,
+      "sha256": "38f62012d832fbd5dd8beadc19a7e4a66257b56941a7871dba403d17a6c9ed28",
+      "capturedAt": "2026-10-21T22:07:21.272Z",
+      "viewedByRoot": true
+    },
+    {
+      "role": "landing-desktop-dark",
+      "path": "landing-desktop-dark.png",
+      "route": "/",
+      "url": "http://127.0.0.1:53354/",
+      "viewport": {
+        "width": 1400,
+        "height": 900
+      },
+      "mediaTheme": "dark",
+      "fullPage": false,
+      "bytes": 106034,
+      "sha256": "7e90f5b871a5394f04817630b6a99f75f54cba58081612d7677d6de22c02b4ba",
+      "capturedAt": "2026-10-21T22:07:22.016Z",
+      "viewedByRoot": true
+    },
+    {
+      "role": "landing-mobile-light",
+      "path": "landing-mobile-light.png",
+      "route": "/",
+      "url": "http://127.0.0.1:53354/",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "mediaTheme": "light",
+      "fullPage": false,
+      "bytes": 57929,
+      "sha256": "2788feb0f7dcbfce015a97c5b402c3698352d4e2e605a494ac5bf0f05dd70871",
+      "capturedAt": "2026-10-21T22:07:22.807Z",
+      "viewedByRoot": true
+    },
+    {
+      "role": "whats-new-desktop-dark",
+      "path": "whats-new-desktop-dark.png",
+      "route": "/whats-new",
+      "url": "http://127.0.0.1:53354/whats-new",
+      "viewport": {
+        "width": 1400,
+        "height": 900
+      },
+      "mediaTheme": "dark",
+      "fullPage": false,
+      "bytes": 128662,
+      "sha256": "356f1379874f6d213023c1a8af51fee83ffcb1e617d064af065eea399518daed",
+      "capturedAt": "2026-10-21T22:07:23.478Z",
+      "viewedByRoot": true
+    },
+    {
+      "role": "whats-new-mobile-dark",
+      "path": "whats-new-mobile-dark.png",
+      "route": "/whats-new",
+      "url": "http://127.0.0.1:53354/whats-new",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "mediaTheme": "dark",
+      "fullPage": false,
+      "bytes": 66847,
+      "sha256": "729de70bb01623660283f852e170fd2c31e6a1983e66177fc183fb7a234e9ab3",
+      "capturedAt": "2026-10-21T22:07:24.074Z",
+      "viewedByRoot": true
+    }
+  ],
+  "observations": {
+    "canonicalHistory076": true,
+    "noOverflow375": true,
+    "footer": true,
+    "downloadHrefStrings": true,
+    "menuKeyboard": true
+  },
+  "rootViewedImagesPending": false,
+  "authenticationSubmitted": false,
+  "productionDataUsed": false,
+  "publicMutation": false,
+  "externalRequestsBlocked": true,
+  "networkGuardInstalled": true,
+  "engineVersion": "156.0.0.0",
+  "browserRecipePassed": true,
+  "browserClosed": true,
+  "browserHomeRemoved": true,
+  "completedAt": "2026-10-21T22:07:24.759Z",
+  "validationSource": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "observedAt": "2026-10-21T22:09:01.889Z",
+  "passed": true,
+  "rootViewReceipt": {
+    "path": "browser-evidence/root-viewed-images.json",
+    "sha256": "9c4d708f3ada214487d40ac3c885a39d2b514ebae9e97a1ff644db830464a147"
+  },
+  "console": {
+    "path": "browser-evidence/browser-console.json",
+    "sha256": "64a88181bf160ce96d064065a06280df720586ff06be3dea939f898267870199"
+  },
+  "browserNetwork": {
+    "path": "browser-evidence/browser-network.json",
+    "sha256": "f04a44f8100454e8a6cd249024bcd887a5055ea9134a96a8fe2ee8c57dcb9544"
+  },
+  "buildReceiptSha256": "fc04923b14ab0437528cbc49864d89d7f8fa5b1be3d6395f05983a245921db5b",
+  "contextProofSha256": "20d3382e5dacb80f992c4a8d658411f6dd5dff8b5363fcedfe56d4a7c2842113",
+  "cleanupReceiptSha256": "05e72ec0d49954991d753322d41ab5acba5147589da8d72fc66695d5b881c4e5",
+  "guardSha256": "0525521da5d4637174bbbdd57874c20e50946913c0af7ff989177527e26caa53",
+  "proxySha256": "3d6c6a086e2536da6064811a9748cac9e2e8b2b882f3f43c01af62178cf977e7",
+  "requestLogSha256": "467ce272a32c441e933fe195d405f5a4fba8e70bafba5fa5cc5fd32e34d0fa96"
+}

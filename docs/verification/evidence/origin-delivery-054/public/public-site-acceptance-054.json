@@ -1,0 +1,54 @@
+{
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "version": "0.7.6",
+  "observedAt": "2026-10-23T07:51:33.487Z",
+  "readOnly": true,
+  "authenticationSubmitted": false,
+  "productionApplicationRowsRead": false,
+  "javascriptExecuted": false,
+  "observations": [
+    {
+      "route": "/",
+      "status": 200,
+      "bytes": 43824,
+      "sha256": "d5dc79556bd129828149745be83e1b59c366cf00e18617a98a018cd18fdd047b",
+      "title": "Origin | Agent teams that ship your projects",
+      "scope": "server-rendered-public-content",
+      "downloadLinks": [
+        "/downloads/Origin-Setup.exe",
+        "/downloads/Origin-Mac-AppleSilicon.dmg",
+        "/downloads/Origin-Mac-Intel.dmg"
+      ]
+    },
+    {
+      "route": "/whats-new",
+      "status": 200,
+      "bytes": 86951,
+      "sha256": "b407f177c29b34a088d8839846c5de2fb6e19b69553eb8b20fd86f498f6d47a2",
+      "title": "What's new | Origin",
+      "scope": "server-rendered-public-content",
+      "currentVersion": "0.7.6",
+      "canonicalChanges": 11
+    },
+    {
+      "route": "/login",
+      "status": 200,
+      "bytes": 12633,
+      "sha256": "ef4186d1b2753265aac469cae693ca128c43f8791edb2b76c7e0aa35653ffa7f",
+      "title": "Sign in | Origin",
+      "scope": "anonymous-initial-shell"
+    },
+    {
+      "route": "/signup",
+      "status": 200,
+      "bytes": 12661,
+      "sha256": "9f7cdae1f976b4b89348d1c8b26d403fde44e6504cbd4e968c69e0172562d9d8",
+      "title": "Create your account | Origin",
+      "scope": "anonymous-initial-shell"
+    }
+  ],
+  "limits": [
+    "HTTP and inert DOM inspection; no new browser or native GUI run",
+    "Login and signup initial shells only; no authentication acceptance"
+  ]
+}

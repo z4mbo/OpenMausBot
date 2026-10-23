@@ -1,0 +1,12 @@
+{
+  "status": "pass",
+  "scope": "Only final lexical snapshot billing guard, not full audit",
+  "serverBytes": 11579969,
+  "serverSha256": "4e416d9cd9ffea6d667c6a4d3aeae0b3301e6b9c20abfb7f35e0db127b542f5f",
+  "report": {
+    "extractedStudioBudgetMounted": true,
+    "studioBotIdentityForwarded": true,
+    "claudeBillingSnapshotMounted": true,
+    "apiKeySnapshotMetered": true
+  }
+}

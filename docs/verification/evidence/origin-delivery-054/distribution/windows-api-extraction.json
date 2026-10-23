@@ -1,0 +1,33 @@
+{
+  "platform": "windows",
+  "version": "0.7.6",
+  "archive": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\artifact-preparation-054\\raw\\origin-windows.zip",
+  "actualArchiveHashVerified": true,
+  "destination": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\artifacts\\0.7.6\\windows",
+  "entries": [
+    {
+      "name": "latest.yml",
+      "bytes": 3544,
+      "compressedBytes": 1598,
+      "externalAttributes": -2118778848
+    },
+    {
+      "name": "Origin-0.7.6-setup.exe",
+      "bytes": 255510711,
+      "compressedBytes": 255147468,
+      "externalAttributes": -2118778848
+    },
+    {
+      "name": "Origin-0.7.6-setup.exe.blockmap",
+      "bytes": 264225,
+      "compressedBytes": 264310,
+      "externalAttributes": -2118778848
+    },
+    {
+      "name": "Origin-0.7.6-x64.zip",
+      "bytes": 355833937,
+      "compressedBytes": 355010912,
+      "externalAttributes": -2118778848
+    }
+  ]
+}

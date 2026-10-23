@@ -1,0 +1,20 @@
+{
+  "containerAbsent": true,
+  "containerRemoved": "0432e9b67aa965cef0b3db6834a968affef7400eb68878afc30845f317aa2046",
+  "networkAbsent": true,
+  "networkRemoved": "448012fbf360c3f0bc6154f3f0f58c25cb861e224eac7fe49f38ab3ddc9bc11b",
+  "publicMutation": false,
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "version": "0.7.6",
+  "image": "sha256:ec65fe62092049fd9a3c3660a0d2f9a9d7dc43b84931a90709097edee6b7cd37",
+  "owner": "7a437fe7565fd75c18b662040417e5e7",
+  "container": "origin-preview-054-7a437fe7565fd75c18b662040417e5e7",
+  "network": "origin-preview-net-054-7a437fe7565fd75c18b662040417e5e7",
+  "containerId": "0432e9b67aa965cef0b3db6834a968affef7400eb68878afc30845f317aa2046",
+  "networkId": "448012fbf360c3f0bc6154f3f0f58c25cb861e224eac7fe49f38ab3ddc9bc11b",
+  "stopReason": "exact-owner shutdown request",
+  "localProxyClosed": true,
+  "ownedTunnelExited": true,
+  "controllerPid": 13688,
+  "at": "2026-10-21T22:08:21.057Z"
+}

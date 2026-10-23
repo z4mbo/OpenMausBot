@@ -1,0 +1,51 @@
+{
+  "missing": [
+    "Origin-0.7.6-windows-x64.zip",
+    "Origin-0.7.6-x64.dmg",
+    "Origin-0.7.6-x64.dmg.blockmap",
+    "Origin-0.7.6-x64.zip",
+    "Origin-0.7.6-x64.zip.blockmap",
+    "SHA256SUMS-0.7.6.txt",
+    "latest-mac.yml",
+    "latest.yml",
+    "release-manifest-0.7.6.json"
+  ],
+  "preserved": [
+    {
+      "id": 663954708,
+      "name": "Origin-0.7.6-arm64.dmg",
+      "size": 303445836,
+      "digest": "sha256:86f44d7c05a8e6084827a3231cda375da994636938bd74aad869f6669e7e12a0"
+    },
+    {
+      "id": 663955611,
+      "name": "Origin-0.7.6-arm64.dmg.blockmap",
+      "size": 317395,
+      "digest": "sha256:1d703b9f0e470646ae6ebab757d32b6a3295d5dcffde51c0b302accf62c361f1"
+    },
+    {
+      "id": 663955675,
+      "name": "Origin-0.7.6-arm64.zip",
+      "size": 303940522,
+      "digest": "sha256:f53c664240e861cd497c8ca5cf6c181f114aca6df7f0bca4b908e24edb449b50"
+    },
+    {
+      "id": 663956653,
+      "name": "Origin-0.7.6-arm64.zip.blockmap",
+      "size": 315763,
+      "digest": "sha256:5f351287474d75ba8c67c5a23116366c865fb885b12740175e9a488aebd25d8b"
+    },
+    {
+      "id": 663956744,
+      "name": "Origin-0.7.6-setup.exe",
+      "size": 255510711,
+      "digest": "sha256:31a203f1113f61d781ba54d35d1788e9d47c13939cd64d153c526ef71c63318d"
+    },
+    {
+      "id": 663957320,
+      "name": "Origin-0.7.6-setup.exe.blockmap",
+      "size": 264225,
+      "digest": "sha256:fabde13cec05da00332eb66f7d7f91598875f79553357afdf7c76f8e6e331fc3"
+    }
+  ]
+}

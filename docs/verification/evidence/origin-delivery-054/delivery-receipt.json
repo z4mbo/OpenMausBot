@@ -1,0 +1,415 @@
+{
+  "schemaVersion": 1,
+  "status": "published-and-proof-checked",
+  "cycle": "054",
+  "version": "0.7.6",
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "tag": "origin-v0.7.6",
+  "recordedAt": "2026-10-23T08:04:17.4984601Z",
+  "sourceBoundary": "Frozen application/package/site source and immutable tag; post-publication documentation has a separate commit identity.",
+  "scope": "Actual exact-source workflows and native artifacts, three-target static and copied Windows-resource inspection, guarded backend deployment, private compiled-site Chrome acceptance, website/download/feed publication, 18 anonymous public byte/hash streams and GitHub latest publication. Archival performed no tests, network calls or delivery actions.",
+  "github": {
+    "releaseId": 420111325,
+    "url": "https://github.com/z4mbo/Origin/releases/tag/origin-v0.7.6",
+    "publishedAt": "2026-10-23T07:52:35Z",
+    "draft": false,
+    "latest": true,
+    "assets": 15,
+    "publicReceipt": {
+      "path": "github/github-public-confirmed.json",
+      "bytes": 182,
+      "sha256": "7ea6bcc9825c24428b0da1cf84303f57a3a5d460fab20f6a0176bfebb10183d7"
+    },
+    "metadata": {
+      "path": "github/github-publish-response.json",
+      "bytes": 32470,
+      "sha256": "0b48ce66aba5907d44847da6d76b5373109b79c4a0f8d9855e5b4e3ced102231"
+    },
+    "finalReadOnlyState": {
+      "path": "public/final-public-state-054.json",
+      "bytes": 4921,
+      "sha256": "403e95033f46ed9d1d042d92c84cdd39b15ffcbfa658217f34a52656d73bff8d"
+    },
+    "recheckedAt": "2026-10-23T07:58:19.851Z"
+  },
+  "pullRequest": {
+    "number": 3,
+    "url": "https://github.com/z4mbo/Origin/pull/3",
+    "state": "open",
+    "merged": false,
+    "base": "origin-integration",
+    "observedAt": "2026-10-23T07:58:19.851Z",
+    "mergeAuthority": "Person approval required; publication and archive do not authorize merging."
+  },
+  "workflows": {
+    "ci": {
+      "runId": 39676147231,
+      "attempt": 1,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "status": "completed",
+      "conclusion": "success",
+      "completedJobs": 20,
+      "successfulJobs": 19,
+      "skippedJobs": 1,
+      "runReceipt": {
+        "path": "workflows/ci-run.json",
+        "bytes": 12119,
+        "sha256": "3316456b62a746c17048d1dc71ca6910258c158a06b4553c3739019835629109"
+      },
+      "jobsReceipt": {
+        "path": "workflows/ci-jobs.json",
+        "bytes": 59879,
+        "sha256": "b081eb63c17f317fbdc9f82689571b2198e1fd5aa6ce10659377dead87dfc03a"
+      }
+    },
+    "cloud": {
+      "runId": 39676135059,
+      "attempt": 1,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "status": "completed",
+      "conclusion": "success",
+      "completedJobs": 1,
+      "successfulJobs": 1,
+      "skippedJobs": 0,
+      "runReceipt": {
+        "path": "workflows/cloud-run.json",
+        "bytes": 11677,
+        "sha256": "6ff6076b4e2351b6e8c23b207d869253115abe6a1ab13c857874099b3a9df8f4"
+      },
+      "jobsReceipt": {
+        "path": "workflows/cloud-jobs.json",
+        "bytes": 3347,
+        "sha256": "c021f4bb7f643b146fe288662d1bf5bf8757f707fefe3de64b65f708e6dc86fa"
+      }
+    },
+    "docs": {
+      "runId": 39676135100,
+      "attempt": 1,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "status": "completed",
+      "conclusion": "success",
+      "completedJobs": 1,
+      "successfulJobs": 1,
+      "skippedJobs": 0,
+      "runReceipt": {
+        "path": "workflows/docs-run.json",
+        "bytes": 11649,
+        "sha256": "eecaa684919b7593728d649a9c08f690aa08b66b714f40f7f90391519d6b95fe"
+      },
+      "jobsReceipt": {
+        "path": "workflows/docs-jobs.json",
+        "bytes": 3147,
+        "sha256": "f98af23b65e4c62227c41b78ac2dfb2ba085557113d52bbed323c58cf5d8ba58"
+      }
+    },
+    "native": {
+      "runId": 39676135188,
+      "attempt": 1,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "status": "completed",
+      "conclusion": "success",
+      "completedJobs": 3,
+      "successfulJobs": 3,
+      "skippedJobs": 0,
+      "runReceipt": {
+        "path": "workflows/native-run.json",
+        "bytes": 11669,
+        "sha256": "f6678b7ca02099a22b57cb60896351ee1ff6e0bcb81c69dc2b0f3d64c482ec93"
+      },
+      "jobsReceipt": {
+        "path": "workflows/native-jobs.json",
+        "bytes": 11321,
+        "sha256": "3e2a9d1abf9d77baf7288aeb26d48792c077b120039573f535f4ca5b1a525546"
+      }
+    }
+  },
+  "actualPRCheckout": {
+    "commit": "dc8013ecb63f33c623501de81cae00012bc93542",
+    "base": "fa83fb6b9e7e6e7e8195e93405a975007917872a",
+    "tree": "8d61a307a39e9c959b7bb52db3101eafeb3f75c6",
+    "identicalEntries": 9357,
+    "passed": true,
+    "receipt": {
+      "path": "workflows/merge-tree-proof-054.json",
+      "bytes": 1236,
+      "sha256": "d8a80d979dca33b11e1e9d3be5f89031cbedf75bb6dbd9e83f5b6daef0cd2f2a"
+    },
+    "boundary": "Successful PR merge-tree validation is not a merged PR."
+  },
+  "distribution": {
+    "files": 15,
+    "payloads": 13,
+    "metadata": 2,
+    "bytes": 1862157995,
+    "manifestSha256": "a63e9b2ea739ac81a2e4cdfcd9f46c8b868c1c58df03f8df91ffe24d5d87ec1b",
+    "checksumsSha256": "a3de17108af440b4fd7f5a5daf733e2ff8408f8e2f3923aa574e0a711381678a",
+    "acquired": {
+      "path": "distribution/download-ready.json",
+      "bytes": 634,
+      "sha256": "a4ffd2f1891f99913f3bbb8bbea080f7b4c63221a646a159983212f392050e9e"
+    },
+    "assembled": {
+      "path": "distribution/distribution-ready.json",
+      "bytes": 836,
+      "sha256": "3736d6f1614e616f358553b68762f043e47335667a6d55991c2fbfd99b5b0fa7"
+    },
+    "privateStage": {
+      "path": "distribution/private-stage-ready.json",
+      "bytes": 551,
+      "sha256": "0a5c0b08b1a279af93bd3bafe950e4d14726f4dc00db3a8b9fe79126ab3bcb3a"
+    },
+    "privateStageCompletedAt": "2026-10-23T07:45:41.526Z"
+  },
+  "uploadResume": {
+    "interruptedOriginal": true,
+    "readOnlyReconciliation": {
+      "path": "github/upload-reconciliation.json",
+      "bytes": 51359,
+      "sha256": "43c6c4d2d60637c3b269479f339cfd3fde8ab352ef65e8f01ff50d97a1d2fcae"
+    },
+    "preservedOriginalAssetIds": [
+      663954708,
+      663955611,
+      663955675,
+      663956653,
+      663956744,
+      663957320
+    ],
+    "uploadedMissingAssets": 9,
+    "finalAssets": 15,
+    "completed": {
+      "path": "github/resume-completed.json",
+      "bytes": 325,
+      "sha256": "4fb5a32ba5841a04f0eb78e05689e9b23834536a4b7661381882ef6729128c35"
+    },
+    "finalInventory": {
+      "path": "github/resume-final-inventory.json",
+      "bytes": 32585,
+      "sha256": "6508bad0c9a1db115f26e950da76412c91ff3c5f9ab1df34f56d3d6ad184734d"
+    },
+    "draftVerified": {
+      "path": "github/resume-draft-verified.json",
+      "bytes": 233,
+      "sha256": "2e3467a311d4e20ab2336766f87df82c0a02b024668a6a473587d5e487fe3ba1"
+    },
+    "overwriteOrDeleteImplemented": false
+  },
+  "native": {
+    "status": "pass",
+    "receipt": {
+      "path": "native/receipt.json",
+      "bytes": 10529,
+      "sha256": "db242cf8aa268fd36cfc5b9c85bc195c2a4bc8893646ed025d45344272be6f54"
+    },
+    "firstInspectorFailure": {
+      "path": "native/first-inspector-failed-receipt.json",
+      "bytes": 2524,
+      "sha256": "6f7b4c102722bfd8c7893c7c70e9839b0f8f141e2ae67063b70b9cffdcf083ce"
+    },
+    "staticTargets": [
+      "windows-x64",
+      "mac-arm64",
+      "mac-x64"
+    ],
+    "copiedWindowsResourceSmoke": "pass",
+    "smokeEndedAt": "2026-10-21T22:16:41.758Z",
+    "credentialFree": true,
+    "ownedProcessesClosed": true,
+    "ownedTempRemoved": true,
+    "boundary": "Mac static inspection on Windows and copied Windows Node server/browser resources; no installed Electron GUI, installer, updater or physical Mac acceptance."
+  },
+  "backend": {
+    "receipt": {
+      "path": "backend/execution-sanitized.json",
+      "bytes": 3076,
+      "sha256": "c705fe521234fa622664952ca73409716335b0a101d06781d02a75847e4def7d"
+    },
+    "status": "complete",
+    "completedAt": "2026-10-21T22:18:38.744Z",
+    "backupIncludesFileStorage": true,
+    "backupBytes": 21720707,
+    "backupSha256": "53d865c1cc8066bed35e4ce7c8f7e472c0727e35614648eb7709c2540f2f905f",
+    "deployed": true,
+    "exactTemporaryKeyRevoked": true,
+    "credentialFileAbsent": true,
+    "productionTestMutations": false,
+    "applicationRowReads": false,
+    "privateMaterial": "Private backup and raw credentials/logs remain external and are not archived."
+  },
+  "site": {
+    "url": "https://origin.imbored.fun",
+    "image": "sha256:ec65fe62092049fd9a3c3660a0d2f9a9d7dc43b84931a90709097edee6b7cd37",
+    "previousImage": "sha256:78a8daf8ce012d91fa9cb6d041c97ede04c5b2c3d42cec140945ab7a7ab9ab52",
+    "promotedAt": "2026-10-23T07:49:03.487Z",
+    "operatorConfigPreserved": true,
+    "build": {
+      "path": "site/build-receipt.json",
+      "bytes": 737,
+      "sha256": "fc04923b14ab0437528cbc49864d89d7f8fa5b1be3d6395f05983a245921db5b"
+    },
+    "promotion": {
+      "path": "site/promote-receipt.json",
+      "bytes": 1135,
+      "sha256": "14be16d448945e8471eaeaf9bb581333d146831ccd6cd52a21f500107a5554b2"
+    },
+    "remoteOutput": {
+      "path": "site/promote-remote.stdout.log",
+      "bytes": 1182,
+      "sha256": "7a25766ab6e9e0a5b25f0619062390dfa244ef7b84ca0b41d3d9c0700c7b4c58"
+    },
+    "privateBrowser": {
+      "path": "site/private-browser-receipt.json",
+      "bytes": 6402,
+      "sha256": "fe835116e882ed89797ce852b22bc447ee20f60d9d8e24841a475ff57a838fd4"
+    },
+    "rootViewedImages": {
+      "path": "site/root-viewed-images.json",
+      "bytes": 1252,
+      "sha256": "9c4d708f3ada214487d40ac3c885a39d2b514ebae9e97a1ff644db830464a147"
+    },
+    "privateScreenshotCount": 5,
+    "nativeWindowControl": false,
+    "ownedPreviewCleanup": {
+      "path": "site/preview-cleanup-receipt.json",
+      "bytes": 948,
+      "sha256": "05e72ec0d49954991d753322d41ab5acba5147589da8d72fc66695d5b881c4e5"
+    },
+    "publicAcceptance": {
+      "path": "public/public-site-acceptance-054.json",
+      "bytes": 1690,
+      "sha256": "e424054d30834505fca70bf966629cae048e042002120ff2bb15957f6a7d1a58"
+    },
+    "publicObservedAt": "2026-10-23T07:51:33.487Z",
+    "publicBoundary": "Public HTTP/inert DOM inspection: landing and canonical 11-note history, login/signup initial anonymous shells only; no new public browser, native GUI or authentication acceptance."
+  },
+  "publicDownloads": {
+    "status": "verified",
+    "publicHttpStreams": 18,
+    "verifiedAt": "2026-10-23T07:51:41.729Z",
+    "receipt": {
+      "path": "public/downloads-public-verified.json",
+      "bytes": 3256,
+      "sha256": "ddad8c7a4047d325293f380bd061d4796f9da4fd3e1f531df70e2da7bd891e1a"
+    },
+    "baseUrl": "https://origin.imbored.fun/downloads/",
+    "files": [
+      {
+        "name": "Origin-0.7.6-arm64.dmg",
+        "size": 303445836,
+        "sha256": "86f44d7c05a8e6084827a3231cda375da994636938bd74aad869f6669e7e12a0"
+      },
+      {
+        "name": "Origin-0.7.6-arm64.dmg.blockmap",
+        "size": 317395,
+        "sha256": "1d703b9f0e470646ae6ebab757d32b6a3295d5dcffde51c0b302accf62c361f1"
+      },
+      {
+        "name": "Origin-0.7.6-arm64.zip",
+        "size": 303940522,
+        "sha256": "f53c664240e861cd497c8ca5cf6c181f114aca6df7f0bca4b908e24edb449b50"
+      },
+      {
+        "name": "Origin-0.7.6-arm64.zip.blockmap",
+        "size": 315763,
+        "sha256": "5f351287474d75ba8c67c5a23116366c865fb885b12740175e9a488aebd25d8b"
+      },
+      {
+        "name": "Origin-0.7.6-setup.exe",
+        "size": 255510711,
+        "sha256": "31a203f1113f61d781ba54d35d1788e9d47c13939cd64d153c526ef71c63318d"
+      },
+      {
+        "name": "Origin-0.7.6-setup.exe.blockmap",
+        "size": 264225,
+        "sha256": "fabde13cec05da00332eb66f7d7f91598875f79553357afdf7c76f8e6e331fc3"
+      },
+      {
+        "name": "Origin-0.7.6-windows-x64.zip",
+        "size": 355833937,
+        "sha256": "e80c4eb6034f3c212c16ca83f3983ad3b27daed75d6b625c7d39ae1f5d4cc0fa"
+      },
+      {
+        "name": "Origin-0.7.6-x64.dmg",
+        "size": 320583342,
+        "sha256": "06447712965e16279254f1961ddae75d5a180428f2258192140d79e8440d46eb"
+      },
+      {
+        "name": "Origin-0.7.6-x64.dmg.blockmap",
+        "size": 334281,
+        "sha256": "735a315b8de7c01df2a0106a2428ecded393cdde1acdee638952903f04cc5d32"
+      },
+      {
+        "name": "Origin-0.7.6-x64.zip",
+        "size": 321268514,
+        "sha256": "de6456926b09a787f73462c8c2e7d24886b2ba23aa7e3fee2ef16016a9c2e9a3"
+      },
+      {
+        "name": "Origin-0.7.6-x64.zip.blockmap",
+        "size": 332504,
+        "sha256": "5e14aa914d41188c58c1ec35e975abdeb35f8a41f7643e8cd8318c0938847a93"
+      },
+      {
+        "name": "latest-mac.yml",
+        "size": 3997,
+        "sha256": "2236b6d7431a89a32810279942dac60c8259ceb98bb5f19daeeb3b3214eaa277"
+      },
+      {
+        "name": "latest.yml",
+        "size": 3544,
+        "sha256": "35cb238c20a29c28caf5bf7d67d38a1ea878fda1040587189670d3752ec18188"
+      },
+      {
+        "name": "release-manifest-0.7.6.json",
+        "size": 2244,
+        "sha256": "a63e9b2ea739ac81a2e4cdfcd9f46c8b868c1c58df03f8df91ffe24d5d87ec1b"
+      },
+      {
+        "name": "SHA256SUMS-0.7.6.txt",
+        "size": 1180,
+        "sha256": "a3de17108af440b4fd7f5a5daf733e2ff8408f8e2f3923aa574e0a711381678a"
+      },
+      {
+        "name": "Origin-Setup.exe",
+        "size": 255510711,
+        "sha256": "31a203f1113f61d781ba54d35d1788e9d47c13939cd64d153c526ef71c63318d"
+      },
+      {
+        "name": "Origin-Mac-AppleSilicon.dmg",
+        "size": 303445836,
+        "sha256": "86f44d7c05a8e6084827a3231cda375da994636938bd74aad869f6669e7e12a0"
+      },
+      {
+        "name": "Origin-Mac-Intel.dmg",
+        "size": 320583342,
+        "sha256": "06447712965e16279254f1961ddae75d5a180428f2258192140d79e8440d46eb"
+      }
+    ],
+    "boundary": "18 independent anonymous HTTPS streams: 13 payloads, manifest/checksums and three aliases."
+  },
+  "historicalEvidence": [
+    "../../origin-candidate-050.md#source-and-fixes",
+    "../../origin-candidate-050.md#actual-ui-observations",
+    "../../origin-candidate-052.md#upstream-disposition-and-next-opportunities",
+    "../../origin-candidate-053.md#actual-browser-observations",
+    "../../origin-candidate-054.md"
+  ],
+  "acceptanceLimits": [
+    "Historical selected UI fixtures are not new full-product acceptance against final release.",
+    "Mac archives receive static checks on Windows; physical Mac execution and installation remain separate.",
+    "Copied Windows resource smoke does not establish installed Electron GUI, installer or real updater/rollback journeys.",
+    "Windows unsigned and Mac ad-hoc/unnotarized/manual-update limits remain.",
+    "Real-provider quotas/resets, paid invoice accounting and owner-crash recovery remain separate.",
+    "Real channel publishing, recipient invitation/email delivery and signup/login journeys were not accepted.",
+    "Private compiled-site Chrome and public HTTP/hash observations have distinct scopes.",
+    "PR3 remains unmerged pending person approval."
+  ],
+  "archive": {
+    "manifest": "manifest.json",
+    "report": "final-audit-report.md",
+    "manifestScope": "Explicit payloads including this receipt; manifest itself and separately authored final-audit-report.md excluded from recursive hashes.",
+    "privateBackupCopied": false,
+    "rawBackendLogsCopied": false,
+    "credentialsCopied": false,
+    "releaseBinariesCopied": false
+  }
+}

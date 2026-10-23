@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "version": "0.7.6",
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "target": {
+    "name": "wry-fly-446",
+    "type": "dev",
+    "region": "aws-eu-west-1",
+    "cloud": "https://wry-fly-446.eu-west-1.convex.cloud",
+    "site": "https://wry-fly-446.eu-west-1.convex.site"
+  },
+  "startedAt": "2026-10-21T22:18:03.506Z",
+  "completedAt": "2026-10-21T22:18:38.744Z",
+  "status": "complete",
+  "pendingOperation": null,
+  "productionTestMutations": false,
+  "applicationRowReads": false,
+  "backup": {
+    "includesFileStorage": true,
+    "archiveComplete": true,
+    "bytes": 21720707,
+    "sha256": "53d865c1cc8066bed35e4ce7c8f7e472c0727e35614648eb7709c2540f2f905f",
+    "startedAt": "2026-10-21T22:18:05.514Z",
+    "completedAt": "2026-10-21T22:18:08.654Z"
+  },
+  "backend": {
+    "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+    "confirmed": true,
+    "typecheck": "enable",
+    "codegen": "disable",
+    "startedAt": "2026-10-21T22:18:28.209Z",
+    "completedAt": "2026-10-21T22:18:37.842Z"
+  },
+  "migrations": {
+    "required": [],
+    "executed": []
+  },
+  "cleanup": {
+    "keyCreatedOutcome": "confirmed",
+    "exactNameRevocationAttempted": true,
+    "revoked": true,
+    "credentialFileAbsent": true,
+    "revokedAt": "2026-10-21T22:18:38.743Z"
+  },
+  "inputs": {
+    "ci": {
+      "id": 39676147231,
+      "attempt": 1,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "cloud": {
+      "id": 39676135059,
+      "attempt": 1,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "native": {
+      "id": 39676135188,
+      "attempt": 1,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "validationSource": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+    "validationProofSha256": "d554cc289820f7207c40e0c8d907b6dcdc52eac1bf1c951dd3a5b09904bfb022",
+    "publicBaseline": {
+      "tag": "origin-v0.7.1",
+      "source": "fa83fb6b9e7e6e7e8195e93405a975007917872a"
+    },
+    "compatibilitySha256": "740b6e3519daca8bab158de102de8cd58375cecced6b4c9e1137cc40cf0b1295",
+    "localGates": [
+      {
+        "path": ".omb-scratch/backend-delivery-054/stage-check.json",
+        "sha256": "1d726e030fa3f9a08db57cb29ba322dcf4ee5d965164013ccef636b0aebda668",
+        "passed": true
+      },
+      {
+        "path": ".omb-scratch/backend-delivery-054/compatibility.json",
+        "sha256": "740b6e3519daca8bab158de102de8cd58375cecced6b4c9e1137cc40cf0b1295",
+        "passed": true
+      }
+    ]
+  },
+  "privateMaterialExternal": true,
+  "sanitization": {
+    "omitted": [
+      "temporary deployment key name",
+      "private credential/backup contents and locations",
+      "raw backend logs"
+    ],
+    "originalReceiptSha256": "42ddd06f0cd84bd1499361ba2899d828119e4a3e3e8d61dd80c66fd689cbf600"
+  }
+}

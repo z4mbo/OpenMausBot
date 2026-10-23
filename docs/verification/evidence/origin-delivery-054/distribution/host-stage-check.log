@@ -1,0 +1,20 @@
+release-manifest-0.7.6.json: OK
+SHA256SUMS-0.7.6.txt: OK
+{"validatedMetadata": "downloads", "version": "0.7.6", "files": 13}
+Origin-0.7.6-arm64.dmg: OK
+Origin-0.7.6-arm64.dmg.blockmap: OK
+Origin-0.7.6-arm64.zip: OK
+Origin-0.7.6-arm64.zip.blockmap: OK
+Origin-0.7.6-setup.exe: OK
+Origin-0.7.6-setup.exe.blockmap: OK
+Origin-0.7.6-windows-x64.zip: OK
+Origin-0.7.6-x64.dmg: OK
+Origin-0.7.6-x64.dmg.blockmap: OK
+Origin-0.7.6-x64.zip: OK
+Origin-0.7.6-x64.zip.blockmap: OK
+latest-mac.yml: OK
+latest.yml: OK
+validated=downloads
+version=0.7.6
+source=eb829c152ce3cd4359eeb58bca3dd2e55abff879
+desktopRun=39676135188

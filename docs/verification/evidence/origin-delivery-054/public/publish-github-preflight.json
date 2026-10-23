@@ -1,0 +1,105 @@
+{
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "version": "0.7.6",
+  "releaseId": 420111325,
+  "image": "sha256:ec65fe62092049fd9a3c3660a0d2f9a9d7dc43b84931a90709097edee6b7cd37",
+  "controls": {
+    "feeds": {
+      "latest.yml": {
+        "sha256": "35cb238c20a29c28caf5bf7d67d38a1ea878fda1040587189670d3752ec18188",
+        "version": "version: 0.7.6"
+      },
+      "latest-mac.yml": {
+        "sha256": "2236b6d7431a89a32810279942dac60c8259ceb98bb5f19daeeb3b3214eaa277",
+        "version": "version: 0.7.6"
+      }
+    },
+    "aliases": {
+      "Origin-Setup.exe": "Origin-0.7.6-setup.exe",
+      "Origin-Mac-AppleSilicon.dmg": "Origin-0.7.6-arm64.dmg",
+      "Origin-Mac-Intel.dmg": "Origin-0.7.6-x64.dmg"
+    },
+    "candidateFiles": [
+      {
+        "name": "Origin-0.7.6-arm64.dmg",
+        "regular": true,
+        "size": 303445836,
+        "sha256": "86f44d7c05a8e6084827a3231cda375da994636938bd74aad869f6669e7e12a0"
+      },
+      {
+        "name": "Origin-0.7.6-arm64.dmg.blockmap",
+        "regular": true,
+        "size": 317395,
+        "sha256": "1d703b9f0e470646ae6ebab757d32b6a3295d5dcffde51c0b302accf62c361f1"
+      },
+      {
+        "name": "Origin-0.7.6-arm64.zip",
+        "regular": true,
+        "size": 303940522,
+        "sha256": "f53c664240e861cd497c8ca5cf6c181f114aca6df7f0bca4b908e24edb449b50"
+      },
+      {
+        "name": "Origin-0.7.6-arm64.zip.blockmap",
+        "regular": true,
+        "size": 315763,
+        "sha256": "5f351287474d75ba8c67c5a23116366c865fb885b12740175e9a488aebd25d8b"
+      },
+      {
+        "name": "Origin-0.7.6-setup.exe",
+        "regular": true,
+        "size": 255510711,
+        "sha256": "31a203f1113f61d781ba54d35d1788e9d47c13939cd64d153c526ef71c63318d"
+      },
+      {
+        "name": "Origin-0.7.6-setup.exe.blockmap",
+        "regular": true,
+        "size": 264225,
+        "sha256": "fabde13cec05da00332eb66f7d7f91598875f79553357afdf7c76f8e6e331fc3"
+      },
+      {
+        "name": "Origin-0.7.6-windows-x64.zip",
+        "regular": true,
+        "size": 355833937,
+        "sha256": "e80c4eb6034f3c212c16ca83f3983ad3b27daed75d6b625c7d39ae1f5d4cc0fa"
+      },
+      {
+        "name": "Origin-0.7.6-x64.dmg",
+        "regular": true,
+        "size": 320583342,
+        "sha256": "06447712965e16279254f1961ddae75d5a180428f2258192140d79e8440d46eb"
+      },
+      {
+        "name": "Origin-0.7.6-x64.dmg.blockmap",
+        "regular": true,
+        "size": 334281,
+        "sha256": "735a315b8de7c01df2a0106a2428ecded393cdde1acdee638952903f04cc5d32"
+      },
+      {
+        "name": "Origin-0.7.6-x64.zip",
+        "regular": true,
+        "size": 321268514,
+        "sha256": "de6456926b09a787f73462c8c2e7d24886b2ba23aa7e3fee2ef16016a9c2e9a3"
+      },
+      {
+        "name": "Origin-0.7.6-x64.zip.blockmap",
+        "regular": true,
+        "size": 332504,
+        "sha256": "5e14aa914d41188c58c1ec35e975abdeb35f8a41f7643e8cd8318c0938847a93"
+      },
+      {
+        "name": "SHA256SUMS-0.7.6.txt",
+        "regular": true,
+        "size": 1180,
+        "sha256": "a3de17108af440b4fd7f5a5daf733e2ff8408f8e2f3923aa574e0a711381678a"
+      },
+      {
+        "name": "release-manifest-0.7.6.json",
+        "regular": true,
+        "size": 2244,
+        "sha256": "a63e9b2ea739ac81a2e4cdfcd9f46c8b868c1c58df03f8df91ffe24d5d87ec1b"
+      }
+    ]
+  },
+  "checkedAt": "2026-10-23T07:52:35.915Z",
+  "readOnly": true
+}

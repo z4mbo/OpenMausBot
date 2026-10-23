@@ -1,0 +1,35 @@
+{
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "observedAt": "2026-10-21T21:53:32.960Z",
+  "results": {
+    "ci": {
+      "id": 39676147231,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "cloud": {
+      "id": 39676135059,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "docs": {
+      "id": 39676135100,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "native": {
+      "id": 39676135188,
+      "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "success"
+    }
+  },
+  "allSuccessful": true
+}

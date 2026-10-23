@@ -1,0 +1,39 @@
+{
+  "viewedBy": "root",
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "version": "0.7.6",
+  "image": "sha256:ec65fe62092049fd9a3c3660a0d2f9a9d7dc43b84931a90709097edee6b7cd37",
+  "viewedAt": "2026-10-21T22:08:20.050Z",
+  "screenshots": [
+    {
+      "role": "landing-desktop-light",
+      "path": "landing-desktop-light.png",
+      "sha256": "38f62012d832fbd5dd8beadc19a7e4a66257b56941a7871dba403d17a6c9ed28",
+      "viewed": true
+    },
+    {
+      "role": "landing-desktop-dark",
+      "path": "landing-desktop-dark.png",
+      "sha256": "7e90f5b871a5394f04817630b6a99f75f54cba58081612d7677d6de22c02b4ba",
+      "viewed": true
+    },
+    {
+      "role": "landing-mobile-light",
+      "path": "landing-mobile-light.png",
+      "sha256": "2788feb0f7dcbfce015a97c5b402c3698352d4e2e605a494ac5bf0f05dd70871",
+      "viewed": true
+    },
+    {
+      "role": "whats-new-desktop-dark",
+      "path": "whats-new-desktop-dark.png",
+      "sha256": "356f1379874f6d213023c1a8af51fee83ffcb1e617d064af065eea399518daed",
+      "viewed": true
+    },
+    {
+      "role": "whats-new-mobile-dark",
+      "path": "whats-new-mobile-dark.png",
+      "sha256": "729de70bb01623660283f852e170fd2c31e6a1983e66177fc183fb7a234e9ab3",
+      "viewed": true
+    }
+  ]
+}

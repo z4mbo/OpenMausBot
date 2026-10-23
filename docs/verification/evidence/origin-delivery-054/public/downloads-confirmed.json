@@ -1,0 +1,8 @@
+{
+  "status": "promoted",
+  "backup": "/root/origin-release-backups/0.7.6-cycle054-59a4887a-60de-423b-9d0a-00607072f94b",
+  "files": 15,
+  "version": "0.7.6",
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "publicUrlVerificationPending": true
+}

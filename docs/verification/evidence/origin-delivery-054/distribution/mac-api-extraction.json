@@ -1,0 +1,63 @@
+{
+  "platform": "mac",
+  "version": "0.7.6",
+  "archive": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\artifact-preparation-054\\raw\\origin-mac.zip",
+  "actualArchiveHashVerified": true,
+  "destination": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\artifacts\\0.7.6\\mac",
+  "entries": [
+    {
+      "name": "Origin-0.7.6-arm64.dmg",
+      "bytes": 303445836,
+      "compressedBytes": 302752696,
+      "externalAttributes": -2119958496
+    },
+    {
+      "name": "Origin-0.7.6-arm64.dmg.blockmap",
+      "bytes": 317395,
+      "compressedBytes": 317495,
+      "externalAttributes": -2119958496
+    },
+    {
+      "name": "Origin-0.7.6-arm64.zip",
+      "bytes": 303940522,
+      "compressedBytes": 302892863,
+      "externalAttributes": -2119958496
+    },
+    {
+      "name": "Origin-0.7.6-arm64.zip.blockmap",
+      "bytes": 315763,
+      "compressedBytes": 315863,
+      "externalAttributes": -2119958496
+    },
+    {
+      "name": "Origin-0.7.6-x64.dmg",
+      "bytes": 320583342,
+      "compressedBytes": 319949771,
+      "externalAttributes": -2119958496
+    },
+    {
+      "name": "Origin-0.7.6-x64.zip",
+      "bytes": 321268514,
+      "compressedBytes": 320273470,
+      "externalAttributes": -2119958496
+    },
+    {
+      "name": "Origin-0.7.6-x64.dmg.blockmap",
+      "bytes": 334281,
+      "compressedBytes": 334386,
+      "externalAttributes": -2119958496
+    },
+    {
+      "name": "Origin-0.7.6-x64.zip.blockmap",
+      "bytes": 332504,
+      "compressedBytes": 332609,
+      "externalAttributes": -2119958496
+    },
+    {
+      "name": "latest-mac.yml",
+      "bytes": 3997,
+      "compressedBytes": 1888,
+      "externalAttributes": -2119958496
+    }
+  ]
+}

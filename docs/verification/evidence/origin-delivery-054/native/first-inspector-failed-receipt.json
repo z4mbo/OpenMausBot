@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "cycle": "054",
+  "source": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "version": "0.7.6",
+  "nativeRun": 39676135188,
+  "nativeAttempt": 1,
+  "status": "failed",
+  "startedAt": "2026-10-21T22:05:03.785Z",
+  "artifactManifestSha256": "a63e9b2ea739ac81a2e4cdfcd9f46c8b868c1c58df03f8df91ffe24d5d87ec1b",
+  "artifactDownloadReceiptSha256": "a4ffd2f1891f99913f3bbb8bbea080f7b4c63221a646a159983212f392050e9e",
+  "distributionReceiptSha256": "3736d6f1614e616f358553b68762f043e47335667a6d55991c2fbfd99b5b0fa7",
+  "inputSha256": "6075db6df2e74c7b97acbe04e1bb1937b22a8ba2235e4d5ae55ff5a03c647869",
+  "helperPins": {
+    "audit-native-054.cjs": "bc731f567a1a0dfef84265b1cb78cbce7ddada6c7396efbdd484ddf5fa0b310c",
+    "contract.cjs": "a0743b952036192bb1a23d736d7fc227f0fcbd7841a4bf40b16321e4df957b35",
+    "features.cjs": "bd0028fff60c3efcf5a018327cad219e6c097a032c38389dd3a90a7ea389e2e7",
+    "pending-thread.cjs": "4a87077ab0e2bdffb0006662409b209f1e233fddfc036da61be328cab74a7e54",
+    "recovery-wiring.cjs": "72ff65f902f993c4124fb79a9ed5540269681255985ef0e1e985d850cd0a60c9",
+    "extract-selected.ps1": "f303edec3ee64be02ae506620475fda151dd792a46d541b779b1cf12a883c3cd",
+    "checkout-source.cjs": "22b5b937c7f03c2e19b3d397b5559d8a93b9ae47e2fa9d2c4bbdab8b97877894",
+    "before-send.cjs": "ec94216136ad59080099f3667c26f5c90800570b843b1c6cb84a0b3be99519df"
+  },
+  "exactSourceAndValidation": true,
+  "limits": [
+    "Mac archives receive static resource inspection on Windows only.",
+    "Windows smoke executes copied Node server/browser resources; no installed Electron GUI, installer or updater journey.",
+    "Plain source accepts raw Git bytes or Windows-only complete exact LF-to-CRLF checkout serialization; Mac requires raw Git bytes.",
+    "No real provider, quota/invoice or production data acceptance. Renderer AST checks prove reachable interactive structures, not full GUI behavior."
+  ],
+  "error": "AssertionError [ERR_ASSERTION]: Claude billing must execute inside the provider snapshot\n    at verifyStudioBillingMounts (<checkout>\\.omb-scratch\\native-delivery-054\\features.cjs:151:3)\n    at Object.server (<checkout>\\.omb-scratch\\native-delivery-054\\features.cjs:82:33)\n    at audit (<checkout>\\.omb-scratch\\native-delivery-054\\audit-native-054.cjs:131:28)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async <checkout>\\.omb-scratch\\native-delivery-054\\audit-native-054.cjs:204:25",
+  "endedAt": "2026-10-21T22:05:45.098Z"
+}
