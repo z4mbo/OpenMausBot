@@ -1,0 +1,2386 @@
+{
+  "checkpoint": "2026-10-20T04:03:12Z",
+  "cutoff": "2026-10-21T04:01:05.255Z",
+  "refs": {
+    "audit": "bdea56e9ed6bc0882fa8173465bcb735d4fe3f66",
+    "main": "fa83fb6b9e7e6e7e8195e93405a975007917872a"
+  },
+  "evaluated": 45,
+  "adoptedDuringReview": 0,
+  "selectedForImplementation": [
+    3177
+  ],
+  "deferredOrNotApplicable": 44,
+  "coverage": {
+    "checkpoint": "2026-10-20T04:03:12Z",
+    "cutoff": "2026-10-21T04:01:05.255Z",
+    "searchIncomplete": false,
+    "searchCount": 45,
+    "restPages": 1,
+    "restOldestUpdatedAt": "2026-10-18T16:07:19Z",
+    "exactNumberSetsMatch": true,
+    "mergedPrNumbers": [
+      2957,
+      2960,
+      2999,
+      3010,
+      3019,
+      3031,
+      3035,
+      3087,
+      3109,
+      3111,
+      3112,
+      3139,
+      3141,
+      3145,
+      3150,
+      3151,
+      3154,
+      3155,
+      3156,
+      3157,
+      3158,
+      3159,
+      3160,
+      3161,
+      3163,
+      3164,
+      3165,
+      3166,
+      3167,
+      3169,
+      3170,
+      3171,
+      3173,
+      3174,
+      3175,
+      3176,
+      3177,
+      3180,
+      3181,
+      3182,
+      3186,
+      3192,
+      3193,
+      3199,
+      3202
+    ],
+    "externalMutations": 0
+  },
+  "method": "Primary GitHub PR metadata and patches; pinned Git object source snapshots. Exact-added-line screening is only triage; findings below use concrete runtime source paths. No live/provider/browser tests or deployment in this review.",
+  "sourceEvidence": [
+    {
+      "path": "server/config.ts",
+      "auditSha256": "68cc0eadab865de58d9fed673ec143c03611adbda3012e4314b82131617d66ea",
+      "mainSha256": "943e966da14f2c9975b5675888f8845d5111ac815d0418a0d01c1fa9c7b6a5f3",
+      "identical": false
+    },
+    {
+      "path": "server/drivers/claude.ts",
+      "auditSha256": "fa894bcb09794a370feeab47f1c9ca41bee61c7efdd6c14062523575197afdc1",
+      "mainSha256": "fd2f07ab530ace3e66611a159ab67d98efe962268c4ec7a595aae39b2194ca09",
+      "identical": false
+    },
+    {
+      "path": "server/mcp-schema-validator.ts",
+      "auditSha256": "f2c1d2a3087187a728447ea9b20cd81fd56992bcc602a85f71e149de4b79bfa2",
+      "mainSha256": "f2c1d2a3087187a728447ea9b20cd81fd56992bcc602a85f71e149de4b79bfa2",
+      "identical": true
+    },
+    {
+      "path": "server/drivers/chat-mcp-tools.ts",
+      "auditSha256": "dd3436b0d9aba56a4579d39d10295b83bdd16b6213502fbed490e2ff30f986ba",
+      "mainSha256": "dd3436b0d9aba56a4579d39d10295b83bdd16b6213502fbed490e2ff30f986ba",
+      "identical": true
+    },
+    {
+      "path": "server/drivers/openai-chat.ts",
+      "auditSha256": "0b2e8ea614fbf35142da1edadc45eb8b2095672dc8053184f1aafe405f774d82",
+      "mainSha256": "81349889e64a8137c78ef674ac9ee6547dad18d9907974b7841f877459949cbb",
+      "identical": false
+    },
+    {
+      "path": "server/store.ts",
+      "auditSha256": "6b459095f91c04654cfd9894b8444798d656c074d1405b6caa4fc0dc413d9b13",
+      "mainSha256": "89da091dc68a0112a3678afd38d727f4dc88566aa3ac72ed1ee9fe5c3617331b",
+      "identical": false
+    },
+    {
+      "path": "server/browser-engine.ts",
+      "auditSha256": "00a7342eccb741a6f7d642612b314507320e00e59d83c04c2f581bb4a6ccca5d",
+      "mainSha256": "833f4346dcddf1a9be9091d8cce1adef7a294920e04c9ed6e0916b7254ddb119",
+      "identical": false
+    },
+    {
+      "path": "server/browser-live.ts",
+      "auditSha256": "188623f5257901d56da712444829dc8b34df091d91f68bacc8bdb79084bf8da4",
+      "mainSha256": "f42813d2b810a836eae1d500f1553b1db63c6a7044eb84e2d7a810eaf0e5459e",
+      "identical": false
+    },
+    {
+      "path": "electron/preload.cjs",
+      "auditSha256": "89926422f6f7bc3f82c73fc66efbb26082942443677e3f618930fa9d86e8e1c5",
+      "mainSha256": "89926422f6f7bc3f82c73fc66efbb26082942443677e3f618930fa9d86e8e1c5",
+      "identical": true
+    },
+    {
+      "path": "src/components/ThreadModelsLine.tsx",
+      "auditSha256": "0815d4cf4f244807a8ef26cc94de98a79dbccf94911e52ef32f9eea58bf502ea",
+      "mainSha256": "0815d4cf4f244807a8ef26cc94de98a79dbccf94911e52ef32f9eea58bf502ea",
+      "identical": true
+    },
+    {
+      "path": "src/components/computer-panel-tabs.ts",
+      "auditSha256": "c5f97eeb1dfa47fd3dca6d2dfdf30a5739eb284a93e8f1b27ffdf9f37bf2864c",
+      "mainSha256": "c5f97eeb1dfa47fd3dca6d2dfdf30a5739eb284a93e8f1b27ffdf9f37bf2864c",
+      "identical": true
+    },
+    {
+      "path": "src/components/CursorAvatar.tsx",
+      "auditSha256": "30eafe9635bd98afee880cbb677c265c77e1a1a2e254b5d19c028e0d82fd7ca1",
+      "mainSha256": "30eafe9635bd98afee880cbb677c265c77e1a1a2e254b5d19c028e0d82fd7ca1",
+      "identical": true
+    },
+    {
+      "path": "server/drivers/codex-errors.ts",
+      "auditSha256": "1885d64d21d9817c787ef04266817a412ffa2c0647ffb373a543f6aa67232e29",
+      "mainSha256": "1885d64d21d9817c787ef04266817a412ffa2c0647ffb373a543f6aa67232e29",
+      "identical": true
+    }
+  ],
+  "rows": [
+    {
+      "number": 3156,
+      "title": "Add OSS Scanner build and threat model",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3156",
+      "mergedAt": "2026-10-20T04:54:30Z",
+      "mergeCommit": "e68ef0944c45fb11fc21ab6ed7ee7f19de6ef3e3",
+      "decision": "deferred-security-process",
+      "comparison": "Scanner Dockerfile/threat model only; no runtime fix. Optional Origin-specific threat model is useful, but upstream approval-free/cloud trust decisions conflict with Origin human merge consent/workspace ACLs. No scanner enrollment/contact was performed.",
+      "changedFiles": 2,
+      "runtimeFiles": []
+    },
+    {
+      "number": 3141,
+      "title": "Bots' browsers keep their own Chrome profile, so sign-ins survive closes",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3141",
+      "mergedAt": "2026-10-20T06:15:36Z",
+      "mergeCommit": "3b307a1a5f1e9cd11d6e2ea4e78f48d4af2cb4ac",
+      "decision": "deferred-fix",
+      "comparison": "Both legacy agentBrowserIntegration environments omit AGENT_BROWSER_PROFILE and keep only saved-state restore. Persistent localStorage/IndexedDB sign-ins can disappear after close/restart. Port isolated kept-profile lifecycle/deletion/backup exclusions; do not copy profile secrets between members.",
+      "changedFiles": 10,
+      "runtimeFiles": [
+        {
+          "path": "server/browser-engine.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/browser-lifecycle-cleanup.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/browser-processes.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/browser-runtime.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/browser-sites.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/workspace-backup.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3145,
+      "title": "Live browser panel: inputs travel in batches and frames stop waiting a round trip each",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3145",
+      "mergedAt": "2026-10-20T06:16:28Z",
+      "mergeCommit": "05b4ec779d65842869bf88e2e348ab80b7bddea2",
+      "decision": "deferred-browser",
+      "comparison": "Both legacy browser-live.ts retain ACK-paced maxFps15 streaming (567); upstream batches input and removes a frame RTT. Origin lacks upstream browser-stream-v1.ts, so adapt its current browser-input-queue/BrowserPanel rather than blind cherry-pick.",
+      "changedFiles": 4,
+      "runtimeFiles": [
+        {
+          "path": "server/browser-live.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/lib/browser-stream-v1.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3155,
+      "title": "Live browser panel: show a page's own question, and restart a page that stopped answering for the person",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3155",
+      "mergedAt": "2026-10-20T06:16:40Z",
+      "mergeCommit": "fc20ef019053935b75da13eba1ed727b8dc84fcb",
+      "decision": "deferred-browser",
+      "comparison": "browser-dialogs and host/browser modules plus stream-v1 are absent in both. Useful human page alert/confirm/prompt and stuck-page restart support; adapt as a browser subsystem slice while keeping person-control leases and egress.",
+      "changedFiles": 8,
+      "runtimeFiles": [
+        {
+          "path": "server/browser-dialogs.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/browser-live.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/host/browser.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/lib/browser-stream-v1.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3157,
+      "title": "Sign-in: a bot types a code from the person's own inbox into the site it was sent for",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3157",
+      "mergedAt": "2026-10-20T06:18:14Z",
+      "mergeCommit": "ebe8255b5ef783d40b0e674621676aed577a9a49",
+      "decision": "deferred-security-sensitive",
+      "comparison": "Both login-fill.ts retain person-entered OTP handoff and omit CODE_FROM_INBOX. Inbox-derived codes are useful only with explicit owner-mailbox/domain binding and redaction; do not broaden teammate secret access by importing prompt text alone.",
+      "changedFiles": 15,
+      "runtimeFiles": [
+        {
+          "path": "server/drivers/agents-catalog.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/phone-proxy.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/login-fill.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/system-prompt.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3158,
+      "title": "Webhook automations: the bot that owns one gets its address to set up the sending app",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3158",
+      "mergedAt": "2026-10-20T07:21:09Z",
+      "mergeCommit": "bda33a525ac925a7ab1a635253dcec618b07d73b",
+      "decision": "deferred-automation",
+      "comparison": "webhook-address and request/address helpers are absent in both. Owner agents knowing their webhook callback URL is useful, but expose it only through Origin project scope with secret-safe tool output and member revocation.",
+      "changedFiles": 33,
+      "runtimeFiles": [
+        {
+          "path": "server/app-trigger-host.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/digest.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/agents-call-triggers.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/drivers/agents-catalog.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/webhooks.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/trigger-tools.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/webhook-address.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/webhook-requests.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/webhooks.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/workspace-backup-policy.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/workspace-backup.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "shared/redact.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/automations/actions.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3151,
+      "title": "Show Windows caption buttons when the desktop app uses a remote server",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3151",
+      "mergedAt": "2026-10-20T07:22:43Z",
+      "mergeCommit": "4f1a54465b1b5e10a482301287e1419967d69bc8",
+      "decision": "deferred-fix",
+      "comparison": "Both electron/preload.cjs43 REMOTE_SAFE omit windowControls although bridge182 defines them. A Windows desktop showing a remote server loses its custom caption controls. Port only this capability plus remote-page IPC tests.",
+      "changedFiles": 2,
+      "runtimeFiles": [
+        {
+          "path": "electron/preload.cjs",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3150,
+      "title": "fix(server): a slow MCP shutdown no longer fails a turn with nothing in flight",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3150",
+      "mergedAt": "2026-10-20T07:22:57Z",
+      "mergeCommit": "c4c498e6a2e4dc618bf16ed41879f7947c9c1b78",
+      "decision": "deferred-fix",
+      "comparison": "Both chat-mcp-tools.ts100–108 throw on unconfirmed shutdown even with zero pending calls, and openai-chat.ts864–867 marks cleanup failure as failed turn. Slow Windows process cleanup can overwrite an otherwise completed turn; retain uncertainty errors for genuinely in-flight calls.",
+      "changedFiles": 2,
+      "runtimeFiles": [
+        {
+          "path": "server/drivers/chat-mcp-tools.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3111,
+      "title": "fix(local-vm): an OpenAI-compatible bot whose Local VM lists no tools gets a clear error, not a silent turn (MOCA-382)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3111",
+      "mergedAt": "2026-10-20T07:24:01Z",
+      "mergeCommit": "24c07a03c474c120a5075d56770849b7ea526599",
+      "decision": "deferred-fix",
+      "comparison": "Both chat-mcp-tools.ts285 accept an unrestricted Local VM tools/list with zero tools. The upstream guard turns a silent no-tool turn into an explicit failure; adapt with isolated empty-catalog fixture.",
+      "changedFiles": 3,
+      "runtimeFiles": [
+        {
+          "path": "server/drivers/chat-mcp-tools.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3161,
+      "title": "fix(cloud): say what Send to My Cloud could not send and why, and bring chats with Send everything",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3161",
+      "mergedAt": "2026-10-20T10:21:57Z",
+      "mergeCommit": "8baa08050884c2ab62cbce7dba50cafbb2489664",
+      "decision": "not-applicable-cloud",
+      "comparison": "Upstream Send to My Cloud transfer UX/modules are mostly absent. Origin uses Convex workspace/chat sync and explicit online model hosts, not upstream paid-cloud migration. Do not reintroduce its sales/UI flow.",
+      "changedFiles": 26,
+      "runtimeFiles": [
+        {
+          "path": "electron/cloud-send-main.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send-main.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send-parts.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send-parts.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/main.mjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/bot-logins.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/login-handoff.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/CloudSendCard.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/CloudSendStrip.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/lib/cloud-send.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3160,
+      "title": "Webhooks: post straight into a room (from #3139)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3160",
+      "mergedAt": "2026-10-20T10:22:09Z",
+      "mergeCommit": "9274236a6b0d8c0f68fb703174510b205238c50e",
+      "decision": "deferred-product",
+      "comparison": "Reconciled room webhook delivery is absent as a complete feature. Could post external build/lead/voice events without spending a model turn; require Origin member/project access, idempotency and no forged participant attribution.",
+      "changedFiles": 21,
+      "runtimeFiles": [
+        {
+          "path": "server/bot-visibility.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/host/room-access.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/host/room-transcript.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/host/webhook-room-deps.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/host/webhook-room-post.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/peer-provenance.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/webhooks.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/webhook-ingress.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/webhooks.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "shared/webhooks.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "shared/wire.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3139,
+      "title": "Webhooks: a \"post\" delivery can go straight into a room, with a voice note, without a run",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3139",
+      "mergedAt": "2026-10-20T10:22:11Z",
+      "mergeCommit": "06e5cd9ccde8b6542b24b8f47bc906386003e50a",
+      "decision": "deferred-duplicate",
+      "comparison": "Original room webhook post/voice-note delivery. Prefer reconciled #3160; not a separate independent feature.",
+      "changedFiles": 13,
+      "runtimeFiles": [
+        {
+          "path": "server/host/room-access.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/host/webhook-room-deps.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/host/webhook-room-post.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/webhook-ingress.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/webhooks.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "shared/webhooks.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "shared/wire.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3159,
+      "title": "chore(release): bump version to 0.1.119",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3159",
+      "mergedAt": "2026-10-20T10:22:18Z",
+      "mergeCommit": "353a77eb9c863750d31a03804eb4b8894fb43f0b",
+      "decision": "not-applicable-version",
+      "comparison": "Upstream package bump to0.1.119; Origin owns independent versions/changelogs.",
+      "changedFiles": 1,
+      "runtimeFiles": []
+    },
+    {
+      "number": 3164,
+      "title": "Bring in 10 PRs: account removal, Codex reset time, bounded nudges, model badge, Pop skin, panel focus, busy-thread note, Claude stable prompt, room saves, Today page",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3164",
+      "mergedAt": "2026-10-20T11:31:50Z",
+      "mergeCommit": "1db45cab1266a3cf34728dd69833675e67223a06",
+      "decision": "deferred-aggregate",
+      "comparison": "Aggregate of10 changes, not a45th independent feature. Track its constituents separately; additionally codexLimitResetsAt/reset parser is absent from both Origin codex-errors.ts (only display text remains), so the upstream minute/DST fix cannot be copied in isolation.",
+      "changedFiles": 105,
+      "runtimeFiles": [
+        {
+          "path": "electron/skin-overlay.cjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/activity.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/bots-save.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/antigravity-acp.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/claude.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/codex-errors.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/openai-chat.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/openai-compat.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/prompt-split.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/message-db.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/registry-save.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/request-auth.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/channels.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/instances.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/today.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/store.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/system-prompt.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/team-backup.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/today.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "shared/approval-mode.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "shared/bots-save-failure.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "shared/registry-save-failure.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "shared/today-outcomes.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "shared/today.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/App.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/BotModelBadge.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/ChatView.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/ComputerPanel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/EngineAccounts.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/EnginesSettings.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/Sidebar.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/SidebarFooterNav.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/SkinPicker.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/ThreadModelsLine.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/TodayPage.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/computer-panel-resize.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/lazy-screens.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/remote-desktop-panel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/lib/computer-panel-focus.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/lib/skins.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/lib/today.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/state/saved-state.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/state/store.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/state/thread-edits.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/styles.css",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 2957,
+      "title": "perf(claude): launch with the stable half of the system prompt; volatile half in the first message",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/2957",
+      "mergedAt": "2026-10-20T11:31:52Z",
+      "mergeCommit": "e71fe61e1372e0bbb50c12ced352bdf619a7a1a1",
+      "decision": "deferred-useful",
+      "comparison": "Both retain full turn.system on new Claude launches (claude.ts1110–1113), although live-session volatile updates already exist. Port stable-only launch later; preserve Origin origin-status/Chief/delegation/permission context and verify cache benefit.",
+      "changedFiles": 8,
+      "runtimeFiles": [
+        {
+          "path": "server/drivers/claude.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/prompt-split.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/system-prompt.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 2960,
+      "title": "feat(skins): add pop skin inspired by ClaudeBar",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/2960",
+      "mergedAt": "2026-10-20T11:31:52Z",
+      "mergeCommit": "46797ebb0465e58065620c485b4b978837e28859",
+      "decision": "deferred-style",
+      "comparison": "Pop skin is not present as the new upstream skin. Optional theme proliferation is outside the narrow release and the requested consistent core Origin appearance.",
+      "changedFiles": 8,
+      "runtimeFiles": [
+        {
+          "path": "electron/skin-overlay.cjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/SkinPicker.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/lib/skins.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/styles.css",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 2999,
+      "title": "feat(sidebar): show each bot's model as a small badge on its avatar",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/2999",
+      "mergedAt": "2026-10-20T11:31:52Z",
+      "mergeCommit": "338f1f609d1d1aaab1f7579fc1809bac0bee486d",
+      "decision": "deferred-ui",
+      "comparison": "BotModelBadge.tsx is absent in both. A useful optional actual-model/provider indicator, but static default badges must not mislabel Origin fallback/shared-host execution.",
+      "changedFiles": 4,
+      "runtimeFiles": [
+        {
+          "path": "src/components/BotModelBadge.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/Sidebar.tsx",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3010,
+      "title": "fix(rooms): save room threads and room settings before showing them",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3010",
+      "mergedAt": "2026-10-20T11:31:52Z",
+      "mergeCommit": "d547603505138a0a824254d0f80f2be9e66c752b",
+      "decision": "deferred-fix",
+      "comparison": "Both Store.createGroup mutate this.groups before saveGroups (1041–1042), and createGroupTask changes active/task state before save (1181–1187). Disk write failure leaves unpersisted in-memory room/thread state; upstream adds rollback/save-before-publish. Keep as separate data-loss repair with ENOSPC fixtures.",
+      "changedFiles": 20,
+      "runtimeFiles": [
+        {
+          "path": "server/bots-save.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/registry-save.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/routes/channels.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/store.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/team-backup.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "shared/approval-mode.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "shared/bots-save-failure.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "shared/registry-save-failure.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/state/saved-state.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/state/store.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/state/thread-edits.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3019,
+      "title": "feat(today): a Today page — what your bots finished, what needs you, time saved",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3019",
+      "mergedAt": "2026-10-20T11:31:52Z",
+      "mergeCommit": "3f1fc4b3e240387d3cbde0a827cd80e6d6e71e56",
+      "decision": "deferred-product",
+      "comparison": "TodayPage/server/today/shared today modules are absent in both. Consider a workspace daily brief built from authorized project outcomes and approvals; do not duplicate Origin Inbox or import unverified time-saved estimates.",
+      "changedFiles": 30,
+      "runtimeFiles": [
+        {
+          "path": "server/activity.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/message-db.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/request-auth.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/today.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/today.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "shared/today-outcomes.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "shared/today.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/App.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/Sidebar.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/SidebarFooterNav.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/TodayPage.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/lazy-screens.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/lib/today.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/state/store.tsx",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3035,
+      "title": "fix: bound repeated action recovery in OpenAI-compatible turns",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3035",
+      "mergedAt": "2026-10-20T11:31:52Z",
+      "mergeCommit": "c338f8d77771c4ae6358449e5e4cc574a927b546",
+      "decision": "deferred-fix",
+      "comparison": "Both openai-chat.ts retain one nudged boolean (638/742) and no protectedMutations fence. After one successful mutation, an automatic announcement nudge can offer the same mutation again. Port bounded progress/duplicate-mutation fencing independently; preserve Origin quota evidence, approvals and unknown-outcome rules.",
+      "changedFiles": 9,
+      "runtimeFiles": [
+        {
+          "path": "server/drivers/chat-mcp-tools.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/openai-chat.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/openai-compat.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3109,
+      "title": "Switch it too: say when a busy thread kept its own model",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3109",
+      "mergedAt": "2026-10-20T11:31:52Z",
+      "mergeCommit": "c513ea8da62e60ff7e8a545037bbd5a5ae9e6b27",
+      "decision": "deferred-ui",
+      "comparison": "Both ThreadModelsLine.tsx16 dispatch followBotModel without onSettled/busy feedback. Busy threads intentionally retain their own model but the switch UI does not explain this. Small useful status repair after the narrow release.",
+      "changedFiles": 6,
+      "runtimeFiles": [
+        {
+          "path": "src/components/ThreadModelsLine.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/state/store.tsx",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3112,
+      "title": "feat(computer-panel): hand keyboard focus to the panel and back",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3112",
+      "mergedAt": "2026-10-20T11:31:52Z",
+      "mergeCommit": "5725d2788ab3bb6af2187eca3bf22718c1dd28fa",
+      "decision": "deferred-accessibility",
+      "comparison": "computer-panel-focus helper is absent in both. Add predictable keyboard entry/return and Escape hand-back as a separate UI change, preserving Origin usage popup/model selector focus.",
+      "changedFiles": 14,
+      "runtimeFiles": [
+        {
+          "path": "src/components/ChatView.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/ComputerPanel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/remote-desktop-panel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/lib/computer-panel-focus.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3154,
+      "title": "feat(accounts): remove added provider accounts",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3154",
+      "mergedAt": "2026-10-20T11:31:52Z",
+      "mergeCommit": "1780462062a4a7a0dd86b8235346870e60422935",
+      "decision": "deferred-provider",
+      "comparison": "Both instance removal routes/UI predate added Antigravity removal. Useful if multiple Gemini/Antigravity accounts are offered; retain in-use checks across defaults, fallbacks and shared-host references.",
+      "changedFiles": 8,
+      "runtimeFiles": [
+        {
+          "path": "server/routes/instances.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/EngineAccounts.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/EnginesSettings.tsx",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3171,
+      "title": "Bring in #3031: your profile photo, and the mouse wheel scrolls the computer panel's tabs",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3171",
+      "mergedAt": "2026-10-20T11:48:15Z",
+      "mergeCommit": "86222462985bf0322b2932a22fb65cc252a50435",
+      "decision": "deferred-aggregate",
+      "comparison": "Reconciled profile-photo/tab-wheel import; #3170 is its small wheel slice. Local ProfileSettings/photo-config implementation is absent; integrate with Origin account profile rather than a second local identity.",
+      "changedFiles": 17,
+      "runtimeFiles": [
+        {
+          "path": "server/config.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/Avatar.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/ComputerPanel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/ProfileSettings.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/SettingsModal.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/SidebarProfileMenu.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/computer-panel-tabs.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/state/config-status.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3031,
+      "title": "Add profile photos and scrollable computer tabs",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3031",
+      "mergedAt": "2026-10-20T11:48:17Z",
+      "mergeCommit": "d7ac6fc0d959c7861ff24e6131427d6b862386c1",
+      "decision": "deferred-duplicate",
+      "comparison": "Original profile-photo/tab-wheel PR; use reconciled #3171/#3170 rather than importing this branch too. Upstream user-avatar config changes are absent in both snapshots.",
+      "changedFiles": 10,
+      "runtimeFiles": [
+        {
+          "path": "server/config.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/Avatar.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/ComputerPanel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/SettingsModal.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/SidebarProfileMenu.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/state/config-status.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3170,
+      "title": "Computer panel: the mouse wheel scrolls the tab row sideways (from #3031)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3170",
+      "mergedAt": "2026-10-20T11:48:48Z",
+      "mergeCommit": "001214fca18126b31ab138bb0f743da6d9fc6747",
+      "decision": "deferred-ui",
+      "comparison": "Both computer-panel-tabs.ts have keyboard navigation but no scrollTabsWithWheel. Plain vertical wheel cannot move an overflowing horizontal tab row; small independent accessibility/responsiveness improvement.",
+      "changedFiles": 3,
+      "runtimeFiles": [
+        {
+          "path": "src/components/ComputerPanel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/computer-panel-tabs.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3173,
+      "title": "Engines: list Antigravity as \"Google Gemini (Antigravity)\"",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3173",
+      "mergedAt": "2026-10-20T12:14:32Z",
+      "mergeCommit": "1ba5829b4793acd0c16ae121ae5c971e6e8d0325",
+      "decision": "deferred-copy",
+      "comparison": "Both Antigravity support labels still read Antigravity. Upstream renames it Google Gemini(Antigravity), useful provider discoverability copy; verify current vendor naming before release adoption.",
+      "changedFiles": 2,
+      "runtimeFiles": [
+        {
+          "path": "server/drivers/antigravity.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3174,
+      "title": "Mascots: one shared clock, draw only when something changes, pause off-screen",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3174",
+      "mergedAt": "2026-10-20T12:40:52Z",
+      "mergeCommit": "5321f2e2fc0ef2e8d64122e7bd09847c2c3c94c7",
+      "decision": "deferred-performance",
+      "comparison": "Shared mascot-clock/motion modules are absent; both CursorAvatar.tsx1127+ still schedule a per-avatar animation effect. Useful shared-clock/offscreen pause work; benchmark Origin long-sidebar CPU and preserve reduced motion.",
+      "changedFiles": 13,
+      "runtimeFiles": [
+        {
+          "path": "src/components/BotPickerList.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/CursorAvatar.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/MentionMenu.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/NotificationsPanel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/SidebarNewChatPanel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/ThreadChip.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/TodayPage.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/mascot-clock.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/mascot-motion.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3175,
+      "title": "test: fix two e2e tests main fails since #3164 (launch note in steer, cloud-personal tools race)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3175",
+      "mergedAt": "2026-10-20T13:22:37Z",
+      "mergeCommit": "ee48bf5487e41876a20a6d477bf866de6cac0e27",
+      "decision": "not-needed-test-only",
+      "comparison": "Fixes upstream launch-note and cloud-personal tests after #3164. Origin has not adopted those changed runtime seams; take fixtures only alongside the matching feature.",
+      "changedFiles": 2,
+      "runtimeFiles": []
+    },
+    {
+      "number": 3169,
+      "title": "fix(mcp): let GitHub MCP's tools through the schema check",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3169",
+      "mergedAt": "2026-10-20T13:23:22Z",
+      "mergeCommit": "ea86e68f4c61bb742504fe04d629eb9ab166b08f",
+      "decision": "deferred-fix",
+      "comparison": "Both strict AJV compiler files omit addKeyword x-mcp-header at22–25. Valid GitHub MCP schemas with string header annotations are rejected as unsupported schemas, removing tools. Port typed annotation support without disabling strict unknown-keyword/type/required validation.",
+      "changedFiles": 2,
+      "runtimeFiles": [
+        {
+          "path": "server/mcp-schema-validator.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3167,
+      "title": "Let a team server raise the 512 MB attachments limit",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3167",
+      "mergedAt": "2026-10-20T13:24:22Z",
+      "mergeCommit": "a99e787889eec3056b53953c9e77a53f085187bb",
+      "decision": "deferred-admin",
+      "comparison": "Both attachments.ts retain fixed512MiB total ceiling. A positive validated environment override is useful for self-hosted team servers; keep per-upload limits, explicit507/no eviction and storage budgeting.",
+      "changedFiles": 3,
+      "runtimeFiles": [
+        {
+          "path": "server/attachments.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3166,
+      "title": "fix(cloud): lend this computer from My Cloud's own page, and drop the buttons that now happen by themselves",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3166",
+      "mergedAt": "2026-10-20T13:25:02Z",
+      "mergeCommit": "0def8ed32a5fbe0df3ac07f0ba029c059ff6c1db",
+      "decision": "not-applicable-cloud",
+      "comparison": "My Cloud lending IPC/UI belongs to upstream cloud account pages absent from Origin. Its concepts may inform online Origin model hosts, without importing paid-cloud account logic.",
+      "changedFiles": 30,
+      "runtimeFiles": [
+        {
+          "path": "electron/cloud-lending-ipc.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-lending-ipc.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/main.mjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "electron/preload.cjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/CloudAccountSettings.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/CloudLending.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/CloudMove.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/LentComputers.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/LoginsSettings.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/types/ogb.d.ts",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3176,
+      "title": "Browser S4 and comms e2e: hold on GitHub's macOS and Windows runners",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3176",
+      "mergedAt": "2026-10-20T17:21:29Z",
+      "mergeCommit": "977225fe4bc8843ce394a5a6b95e014f3273cbaa",
+      "decision": "deferred-test-platform",
+      "comparison": "Upstream new-browser S4/stream-v2 real-Chrome test infrastructure is absent. Use its sealed cross-platform test principle when adopting that engine, not its CI/browser harness wholesale.",
+      "changedFiles": 8,
+      "runtimeFiles": []
+    },
+    {
+      "number": 3182,
+      "title": "Browser: open the identity check's page again when Chrome cancels it",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3182",
+      "mergedAt": "2026-10-20T17:21:45Z",
+      "mergeCommit": "989b60973e2774a7ffdbdff76cc2ba6ad57b32bb",
+      "decision": "not-applicable-engine",
+      "comparison": "CDP identity-calibration backends are absent in both; this Chrome-cancel recovery applies to the newer upstream browser engine, not Origin legacy agent-browser path yet.",
+      "changedFiles": 6,
+      "runtimeFiles": [
+        {
+          "path": "server/browser/backends.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/browser/chrome/calibrate.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3180,
+      "title": "Let My Cloud use this computer works on Linux without XDG folders, and says why when it can't",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3180",
+      "mergedAt": "2026-10-20T17:22:00Z",
+      "mergeCommit": "7333186db65bbe222db5a8a5577b53f79661949d",
+      "decision": "not-applicable-cloud",
+      "comparison": "Linux XDG fallback is in upstream My Cloud lending IPC absent from both. Keep for future machine-sharing work; no current Origin cloud-flow adoption.",
+      "changedFiles": 15,
+      "runtimeFiles": [
+        {
+          "path": "electron/cloud-lending-ipc.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-lending-ipc.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/computer-sharing.mjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "electron/main.mjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/CloudLending.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/LentComputers.tsx",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3165,
+      "title": "VPS computers: each bot can use its own SSH alias (from #3087)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3165",
+      "mergedAt": "2026-10-20T17:22:27Z",
+      "mergeCommit": "f2f4061bd4f8df7fb08f363d6e53353fab46a072",
+      "decision": "deferred-computers",
+      "comparison": "Reconciled per-bot VPS SSH aliases/vps-hosts module are absent. Useful future per-project remote compute, but require explicit machine ownership/project-folder ACLs and offline routing; avoid a broad provider migration during release.",
+      "changedFiles": 36,
+      "runtimeFiles": [
+        {
+          "path": "companion/src/wire.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/admin-activity.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/bot-visibility.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/cloud-backend.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/bot-patch.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/computers.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/vps-computer.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/vps-hosts.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "shared/wire.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/ChatErrorBanner.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/ComputerPanel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/LocalComputerSection.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/VpsComputersCard.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/bot-settings/AccessSection.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/bot-settings/useBotSettingsDerived.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/lib/bot-duplicate.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/state/store.tsx",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3087,
+      "title": "VPS computers: each bot can use its own SSH alias",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3087",
+      "mergedAt": "2026-10-20T17:22:29Z",
+      "mergeCommit": "d61b1b9cb77ec4e041115e05dfc75d48571927ce",
+      "decision": "deferred-duplicate",
+      "comparison": "Original per-bot VPS-alias feature; review the reconciled #3165 implementation once. Do not import both branches.",
+      "changedFiles": 25,
+      "runtimeFiles": [
+        {
+          "path": "companion/src/wire.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/cloud-backend.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/config.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/bot-patch.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/computers.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/store.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/vps-computer.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "shared/wire.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/LocalComputerSection.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/bot-settings/AccessSection.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/bot-settings/useBotSettingsDerived.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/state/store.tsx",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3186,
+      "title": "Moving to My Cloud carries this computer's MCP servers, sign-ins, keys, connected apps and HighLevel, once",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3186",
+      "mergedAt": "2026-10-20T18:31:10Z",
+      "mergeCommit": "3c4a00084f2f26af1fa36f338845afff6ff7ad44",
+      "decision": "not-applicable-cloud",
+      "comparison": "Transfers keys, OAuth/MCP/HighLevel and shared broker identities into upstream My Cloud. This conflicts with Origin explicit owner-host consent and keeping subscriptions/credentials on their owners machines; do not import.",
+      "changedFiles": 85,
+      "runtimeFiles": [
+        {
+          "path": "electron/cloud-connections.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-connections.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-logins.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-logins.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-move.mjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "electron/cloud-send-main.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send-main.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send-parts.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send-parts.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/main.mjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/bot-logins.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/cloud-chat-merge.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/cloud-connections-host.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/cloud-connections-prompt.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/cloud-connections.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/cloud-send-chats.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/cloud-send.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/composio-share.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/config.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/highlevel/service.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/highlevel/store.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/login-handoff.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/mcp-oauth-store.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/mcp-oauth.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/mcp-registry.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/message-db.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/cloud-connections.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/routes/cloud-send.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/routes/mcp-servers.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/store.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/App.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/CloudSendCard.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/CloudSendStrip.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/McpServersPanel.tsx",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/SidebarSimpleTop.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/cloud-welcome/CloudWelcome.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/cloud-welcome/WelcomeBring.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/lib/cloud-send.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/lib/connect-link.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3163,
+      "title": "feat(cloud): send everything to My Cloud by itself, chats included, a row at a time",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3163",
+      "mergedAt": "2026-10-20T18:31:13Z",
+      "mergeCommit": "a80e1f01702652603a44a5681d63faf7518ccd5b",
+      "decision": "not-applicable-cloud",
+      "comparison": "Automatic My Cloud migration of local bots/chats is not Origin account/workspace synchronization. Do not copy credential/chat migration into sender-runs/shared-host design.",
+      "changedFiles": 47,
+      "runtimeFiles": [
+        {
+          "path": "electron/cloud-move.mjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "electron/cloud-send-main.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send-main.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send-parts.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send-parts.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send.d.mts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/cloud-send.mjs",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "electron/main.mjs",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/cloud-chat-merge.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/cloud-send-chats.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/cloud-send.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/login-handoff.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/message-db.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/routes/cloud-send.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/store.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/CloudSendCard.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/CloudSendStrip.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/SidebarSimpleTop.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/cloud-welcome/CloudWelcome.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/components/cloud-welcome/WelcomeBring.tsx",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "src/lib/cloud-send.ts",
+          "auditExists": false,
+          "mainExists": false
+        }
+      ]
+    },
+    {
+      "number": 3177,
+      "title": "Use this key for every Claude bot no longer breaks Claude (API key) bots",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3177",
+      "mergedAt": "2026-10-20T18:47:18Z",
+      "mergeCommit": "352c431f6366d6fb040f9311973c139df18f23f8",
+      "decision": "adopted-uncommitted",
+      "comparison": "Subsequently ported narrowly into integration dc652c11a0ce37331aff8a35810a9c86c6162e35; dedicated API routing stays enabled for everyClaudeBot default/true/false, and selected API-key environments report metered billing. Four red failures proved before repair; fake-CLI/server/budget/typecheck evidence is bound in3177-adoption.json. Root owns the separate logical commit; no other upstream feature adopted.",
+      "changedFiles": 18,
+      "runtimeFiles": [
+        {
+          "path": "server/anthropic-key-env.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/config.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/drivers/claude-billing.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/drivers/claude.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/CloudEngineSignIn.tsx",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3181,
+      "title": "Local VM: Cua Driver 0.37.0 and text-only error results",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3181",
+      "mergedAt": "2026-10-20T18:53:05Z",
+      "mergeCommit": "1286a44ce84ac9545f3f989e25cc5555e47d1f27",
+      "decision": "deferred-runtime",
+      "comparison": "Cua Driver0.37.0 plus text-only error results/old-desktop gating spans a larger computer runtime. Its mcp-error-result/desktop-updates helpers are absent; validate against Origin current runner and host approval/fallback rules before adopting.",
+      "changedFiles": 32,
+      "runtimeFiles": [
+        {
+          "path": "server/container-computer.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/container-mcp.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/desktop-updates.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/index.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/lent-screen-guidance.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/local-vm-profiles.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/mcp-bridge.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/mcp-error-result.ts",
+          "auditExists": false,
+          "mainExists": false
+        },
+        {
+          "path": "server/routes/computers.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "server/system-prompt.ts",
+          "auditExists": true,
+          "mainExists": true
+        },
+        {
+          "path": "src/components/LocalComputerSection.tsx",
+          "auditExists": true,
+          "mainExists": true
+        }
+      ]
+    },
+    {
+      "number": 3193,
+      "title": "chore(release): bump version to 0.1.120",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3193",
+      "mergedAt": "2026-10-20T19:13:08Z",
+      "mergeCommit": "ca5da23c22e43bb02bd6a1e5048c79029502718c",
+      "decision": "not-applicable-version",
+      "comparison": "Upstream package bump to0.1.120; keep independent Origin version/changelog.",
+      "changedFiles": 1,
+      "runtimeFiles": []
+    },
+    {
+      "number": 3192,
+      "title": "Control plane: place new Secure HTTPS addresses where there is room",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3192",
+      "mergedAt": "2026-10-20T19:16:41Z",
+      "mergeCommit": "2bfb982f5a55ce297a6d301bc45ba0c9906a9dc6",
+      "decision": "not-applicable-infrastructure",
+      "comparison": "Upstream Cloudflare account/tunnel/DNS-capacity allocator is not Origin Hetzner/Convex/domain delivery. No deployment or config change adopted.",
+      "changedFiles": 8,
+      "runtimeFiles": []
+    },
+    {
+      "number": 3199,
+      "title": "Fix the updater test on main: its copy of the Cloud sign-in was missing cloudLogins",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3199",
+      "mergedAt": "2026-10-20T20:54:52Z",
+      "mergeCommit": "3cb872b8a0f03f65c41ade248e520aee49ea5a7c",
+      "decision": "not-needed-test-only",
+      "comparison": "Adds cloudLogins stub for upstream updater test after #3186. Origin cloudLogins/main changes are absent; no corresponding fixture repair required.",
+      "changedFiles": 1,
+      "runtimeFiles": []
+    },
+    {
+      "number": 3202,
+      "title": "Old-desktop e2e: the fake VPS answers on Linux too, and covers a bot's own VPS alias",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3202",
+      "mergedAt": "2026-10-20T20:55:14Z",
+      "mergeCommit": "c192de3c2d4183f721a1c544f7fcd16ae719b899",
+      "decision": "deferred-test-platform",
+      "comparison": "Test-only sealed fake PATH and own-VPS alias cases accompany #3165/#3181. Keep as prerequisites if those features are adopted; do not claim their upstream runtime changes from this test-only PR.",
+      "changedFiles": 1,
+      "runtimeFiles": []
+    }
+  ],
+  "adoptedAfterReview": [
+    {
+      "upstreamPr": 3177,
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3177",
+      "integrationBase": "dc652c11a0ce37331aff8a35810a9c86c6162e35",
+      "status": "verified-uncommitted",
+      "staged": false,
+      "committed": false,
+      "realProviderCalls": false,
+      "productionDataUsed": false,
+      "redBefore": {
+        "failed": 4,
+        "passed": 1,
+        "scenario": "Dedicated API instance default/all routes rejected missing key; workspace-key subscription probe was misclassified"
+      },
+      "verification": {
+        "claudeDriver": {
+          "passed": 216,
+          "skipped": 3,
+          "log": "3177-green-full.log",
+          "qualification": "The file passed in the first full run; a stale config reload expectation failed separately, then was corrected without any further runtime edit."
+        },
+        "configAndBudgets": {
+          "files": 4,
+          "passed": 249,
+          "skipped": 2,
+          "log": "3177-config-budget.log"
+        },
+        "distinctTotals": {
+          "files": 5,
+          "passed": 465,
+          "skipped": 5
+        },
+        "serverTypecheck": "pass",
+        "touchedLint": "pass",
+        "diffCheck": "pass",
+        "isolatedHttpFixture": {
+          "receipt": "3177-live-fixture-attempt3.json",
+          "checks": 3,
+          "state": "completed",
+          "exitCode": 0,
+          "cleanup": {
+            "ownedServerExited": true,
+            "ownedDataRemoved": true
+          },
+          "parentTemporaryHomeRemoved": true,
+          "earlierAttempts": "Two cleaned-up harness attempts used an unsupported config.instances patch; final fixture uses the actual instance CLI settings route."
+        }
+      },
+      "preserved": "Native API-key auth classification, instance-owned routing/secret isolation, ranked fallback, owner-host consent and daily API policy remain unchanged outside the narrow routing/billing integration.",
+      "limits": [
+        "Synthetic fake CLI only; no real Claude login, real API key, provider invoice, packaged app or production acceptance"
+      ],
+      "files": [
+        {
+          "path": "server/config.ts",
+          "sha256": "6dc4e4f17e94bb865818f479bdf1bef2c3085da0726239da17a70ffeb0aaea02"
+        },
+        {
+          "path": "server/config.test.ts",
+          "sha256": "62660827c94af03a5592d9be7af2ba61e6210d5a8cfd5f6c7b88dd5c1fac9d2c"
+        },
+        {
+          "path": "server/drivers/claude.ts",
+          "sha256": "6372b4c59a8f5395183b84d36739cfab6ae24034600eb1aa35b4a3b9a0ab3eec"
+        },
+        {
+          "path": "server/drivers/claude.test.ts",
+          "sha256": "0779c18a967c078210d3b0908481b942adacceee9386c6d31219dcf85e3726d7"
+        },
+        {
+          "path": "server/drivers/claude-billing.ts",
+          "sha256": "fbe991c2d65d031d15fa16fa9065b02d43a377f9833a570141a04712a7f41a87"
+        }
+      ],
+      "evidence": [
+        {
+          "name": "3177-red.log",
+          "sha256": "2087039fecee3272686139d32f2891e13896ac055b16cfdad0c4691e4f59970e"
+        },
+        {
+          "name": "3177-green-full.log",
+          "sha256": "c59cb2b1d9a4a130b187ee5f9942eb3b28f10a24ef1583004ad4fb5d1aaafa6d"
+        },
+        {
+          "name": "3177-config-budget.log",
+          "sha256": "b1432fb4570cbf3b23b65fc5dda913e1819519fa8fb6ffc0157853f11374d4a8"
+        },
+        {
+          "name": "3177-tsc-server.log",
+          "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+        },
+        {
+          "name": "3177-lint.log",
+          "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+        },
+        {
+          "name": "3177-live-fixture.json",
+          "sha256": "4bf75ae2a1dd83b00b1cc1a77f695ba51b6d568e6ff92b31ec5dd17c8a724279"
+        },
+        {
+          "name": "3177-live-fixture-attempt2.json",
+          "sha256": "350e21ab26c14e0088ec382cd1d97aa95fafba35eba954f7107bfb1ede3f2db2"
+        },
+        {
+          "name": "3177-live-fixture-attempt3.json",
+          "sha256": "c083a374143c69359037a0c28d798c72b817bd915aa9099f70c581322c32eb14"
+        },
+        {
+          "name": "3177-live-fixture.mjs",
+          "sha256": "354929bb71d849a748ecc1c2e8a495282397579eddbd344917ddf884f673dea9"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "source": "3dcdc677972264d49e1f94306a777236cc3c3784",
+  "version": "0.2.12",
+  "beforeAssetGitBlob": "77b9357a106d417bb12b9c79258a1740b12d0243",
+  "beforeAssetByteIdentical": true,
+  "files": [
+    {
+      "path": "issues-before.webp",
+      "bytes": 55344,
+      "sha256": "47434c41ba65694ea76dd8758913b76b8fe0c7b270b0b47fcf2b71991e338a2a"
+    },
+    {
+      "path": "issues-after.png",
+      "bytes": 228351,
+      "sha256": "bac5fde95d474626947b3eb8bab055f5d69c43b99ccad4bef0cc6f50e5a1b5fc"
+    },
+    {
+      "path": "issues.webp",
+      "bytes": 38244,
+      "sha256": "da0295b297143b79e52586cf82e474d1a8b5082591f30ea1f764ac4fe6e6ca11"
+    },
+    {
+      "path": "issues-960.webp",
+      "bytes": 19084,
+      "sha256": "0f4d85b8e1f52c0ffee0c0443692a1e1ea7b3899b0ecf456788776dfe90da2cb"
+    },
+    {
+      "path": "issues-crop.webp",
+      "bytes": 13200,
+      "sha256": "4aef9388c1f6515e28a4dd5fd5605450aba3dde8fd02b56e7c79d0247da7108e"
+    },
+    {
+      "path": "report.json",
+      "bytes": 5537,
+      "sha256": "f8fbe8dfa3d122ee9da0d13f42e660ff29b10ea26efd2ca88eea9801eae34f53"
+    }
+  ],
+  "sourceArchive": {
+    "sha256": "8db916fde75566b32f8f6926f0cccb14801ff944e64e51ebb81fa23fdae9c418",
+    "bytes": 48670720,
+    "excludedTopLevel": [
+      "docs",
+      "evals",
+      "site"
+    ],
+    "injectedRecipes": [
+      "scripts/verify-origin-landing.ts",
+      "scripts/testing/landing-cloud.ts",
+      "scripts/testing/landing-preview.tsx"
+    ]
+  },
+  "sourceBinding": "Product files match the committed Git blobs after CRLF-to-LF normalization; observed byte hashes are retained separately. Recipe hashes identify the executed recipe source bytes, also matching their normalized Git form.",
+  "productComponentsOrCssEdited": false,
+  "pixelsAddedOrComposited": false,
+  "footerVersionEdited": false,
+  "actualCloudBackendCalls": 0,
+  "actualProductionChanges": 0,
+  "screenshotCases": 1
+}

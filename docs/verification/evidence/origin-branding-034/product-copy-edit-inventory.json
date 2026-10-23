@@ -1,0 +1,1127 @@
+{
+  "changed": [
+    {
+      "file": "electron/computer-sharing.mjs",
+      "literalEdits": 1,
+      "lines": [
+        164
+      ]
+    },
+    {
+      "file": "electron/desktop-companion-client.mjs",
+      "literalEdits": 1,
+      "lines": [
+        126
+      ]
+    },
+    {
+      "file": "server/boat-create-idempotency.ts",
+      "literalEdits": 2,
+      "lines": [
+        82,
+        314
+      ]
+    },
+    {
+      "file": "server/boat-delete-journal.ts",
+      "literalEdits": 2,
+      "lines": [
+        109,
+        336
+      ]
+    },
+    {
+      "file": "server/boat-deletion.ts",
+      "literalEdits": 1,
+      "lines": [
+        54
+      ]
+    },
+    {
+      "file": "server/boat.ts",
+      "literalEdits": 10,
+      "lines": [
+        509,
+        518,
+        523,
+        541,
+        555,
+        617,
+        646,
+        649,
+        655,
+        743
+      ]
+    },
+    {
+      "file": "server/bot-package.ts",
+      "literalEdits": 1,
+      "lines": [
+        124
+      ]
+    },
+    {
+      "file": "server/browser-engine.ts",
+      "literalEdits": 1,
+      "lines": [
+        490
+      ]
+    },
+    {
+      "file": "server/browser-lifecycle-cleanup.ts",
+      "literalEdits": 1,
+      "lines": [
+        116
+      ]
+    },
+    {
+      "file": "server/browser-runtime.ts",
+      "literalEdits": 1,
+      "lines": [
+        868
+      ]
+    },
+    {
+      "file": "server/checkpoints.ts",
+      "literalEdits": 3,
+      "lines": [
+        25,
+        193,
+        195
+      ]
+    },
+    {
+      "file": "server/chief-of-staff.ts",
+      "literalEdits": 2,
+      "lines": [
+        49,
+        52
+      ]
+    },
+    {
+      "file": "server/claude-update.ts",
+      "literalEdits": 1,
+      "lines": [
+        119
+      ]
+    },
+    {
+      "file": "server/cli-phone-setup.ts",
+      "literalEdits": 4,
+      "lines": [
+        59,
+        90,
+        97,
+        122
+      ]
+    },
+    {
+      "file": "server/cli-setup.ts",
+      "literalEdits": 4,
+      "lines": [
+        134,
+        155,
+        178,
+        287
+      ]
+    },
+    {
+      "file": "server/cli.ts",
+      "literalEdits": 5,
+      "lines": [
+        338,
+        506,
+        893,
+        898,
+        979
+      ]
+    },
+    {
+      "file": "server/connector-proxy.ts",
+      "literalEdits": 2,
+      "lines": [
+        205,
+        210
+      ]
+    },
+    {
+      "file": "server/connector-scope-hint.ts",
+      "literalEdits": 2,
+      "lines": [
+        26,
+        29
+      ]
+    },
+    {
+      "file": "server/connector-signed-out-hint.ts",
+      "literalEdits": 1,
+      "lines": [
+        11
+      ]
+    },
+    {
+      "file": "server/connector-verdict.ts",
+      "literalEdits": 4,
+      "lines": [
+        135,
+        141,
+        152,
+        153
+      ]
+    },
+    {
+      "file": "server/container-computer.ts",
+      "literalEdits": 2,
+      "lines": [
+        390,
+        987
+      ]
+    },
+    {
+      "file": "server/control-client.ts",
+      "literalEdits": 1,
+      "lines": [
+        29
+      ]
+    },
+    {
+      "file": "server/custom-domain.ts",
+      "literalEdits": 5,
+      "lines": [
+        110,
+        120,
+        127,
+        171,
+        180
+      ]
+    },
+    {
+      "file": "server/data/engine.ts",
+      "literalEdits": 1,
+      "lines": [
+        719
+      ]
+    },
+    {
+      "file": "server/decider/openrouter.ts",
+      "literalEdits": 1,
+      "lines": [
+        128
+      ]
+    },
+    {
+      "file": "server/decider/relay.ts",
+      "literalEdits": 1,
+      "lines": [
+        6
+      ]
+    },
+    {
+      "file": "server/drivers/acp/background-text.ts",
+      "literalEdits": 1,
+      "lines": [
+        29
+      ]
+    },
+    {
+      "file": "server/drivers/acp/core.ts",
+      "literalEdits": 2,
+      "lines": [
+        490,
+        1883
+      ]
+    },
+    {
+      "file": "server/drivers/agents-bridge.ts",
+      "literalEdits": 2,
+      "lines": [
+        155,
+        168
+      ]
+    },
+    {
+      "file": "server/drivers/agents-call.ts",
+      "literalEdits": 2,
+      "lines": [
+        616,
+        628
+      ]
+    },
+    {
+      "file": "server/drivers/agents-catalog-goldens/bridged.tools-list.json",
+      "literalEdits": 8,
+      "lines": [
+        33,
+        42,
+        139,
+        207,
+        235,
+        259,
+        355,
+        378
+      ]
+    },
+    {
+      "file": "server/drivers/agents-catalog-goldens/full.tools-list.json",
+      "literalEdits": 8,
+      "lines": [
+        105,
+        114,
+        256,
+        747,
+        775,
+        799,
+        1140,
+        1318
+      ]
+    },
+    {
+      "file": "server/drivers/agents-catalog.ts",
+      "literalEdits": 7,
+      "lines": [
+        164,
+        428,
+        433,
+        476,
+        677,
+        697,
+        711
+      ]
+    },
+    {
+      "file": "server/drivers/antigravity-acp.ts",
+      "literalEdits": 2,
+      "lines": [
+        136,
+        312
+      ]
+    },
+    {
+      "file": "server/drivers/chatgpt-plan-auth.ts",
+      "literalEdits": 4,
+      "lines": [
+        228,
+        234,
+        237,
+        398
+      ]
+    },
+    {
+      "file": "server/drivers/claude-keepwarm.ts",
+      "literalEdits": 1,
+      "lines": [
+        75
+      ]
+    },
+    {
+      "file": "server/drivers/claude.ts",
+      "literalEdits": 7,
+      "lines": [
+        159,
+        276,
+        380,
+        381,
+        382,
+        386,
+        387
+      ]
+    },
+    {
+      "file": "server/drivers/codex-instructions.ts",
+      "literalEdits": 3,
+      "lines": [
+        48,
+        83,
+        84
+      ]
+    },
+    {
+      "file": "server/drivers/codex.ts",
+      "literalEdits": 3,
+      "lines": [
+        179,
+        959,
+        1482
+      ]
+    },
+    {
+      "file": "server/drivers/dweb-proxy.ts",
+      "literalEdits": 1,
+      "lines": [
+        28
+      ]
+    },
+    {
+      "file": "server/drivers/muse-code.ts",
+      "literalEdits": 2,
+      "lines": [
+        32,
+        527
+      ]
+    },
+    {
+      "file": "server/drivers/openai-chat.ts",
+      "literalEdits": 1,
+      "lines": [
+        189
+      ]
+    },
+    {
+      "file": "server/drivers/phone-proxy.ts",
+      "literalEdits": 3,
+      "lines": [
+        65,
+        273,
+        275
+      ]
+    },
+    {
+      "file": "server/drivers/pi-mcp-extension.ts",
+      "literalEdits": 2,
+      "lines": [
+        581,
+        583
+      ]
+    },
+    {
+      "file": "server/drivers/pi.ts",
+      "literalEdits": 1,
+      "lines": [
+        995
+      ]
+    },
+    {
+      "file": "server/drivers/prompt-split.ts",
+      "literalEdits": 2,
+      "lines": [
+        26,
+        29
+      ]
+    },
+    {
+      "file": "server/engine-install.ts",
+      "literalEdits": 3,
+      "lines": [
+        132,
+        156,
+        157
+      ]
+    },
+    {
+      "file": "server/escalations.ts",
+      "literalEdits": 1,
+      "lines": [
+        93
+      ]
+    },
+    {
+      "file": "server/fleet.ts",
+      "literalEdits": 3,
+      "lines": [
+        53,
+        151,
+        186
+      ]
+    },
+    {
+      "file": "server/harness-mcp-proxy.ts",
+      "literalEdits": 4,
+      "lines": [
+        32,
+        33,
+        35,
+        86
+      ]
+    },
+    {
+      "file": "server/harness/bus.ts",
+      "literalEdits": 1,
+      "lines": [
+        11
+      ]
+    },
+    {
+      "file": "server/headless/client.ts",
+      "literalEdits": 6,
+      "lines": [
+        85,
+        94,
+        149,
+        153,
+        167,
+        167
+      ]
+    },
+    {
+      "file": "server/headless/commands.ts",
+      "literalEdits": 4,
+      "lines": [
+        34,
+        36,
+        57,
+        57
+      ]
+    },
+    {
+      "file": "server/headless/connect.ts",
+      "literalEdits": 1,
+      "lines": [
+        49
+      ]
+    },
+    {
+      "file": "server/headless/engine.ts",
+      "literalEdits": 1,
+      "lines": [
+        59
+      ]
+    },
+    {
+      "file": "server/headless/main.ts",
+      "literalEdits": 1,
+      "lines": [
+        79
+      ]
+    },
+    {
+      "file": "server/highlevel/client.ts",
+      "literalEdits": 7,
+      "lines": [
+        152,
+        153,
+        154,
+        155,
+        156,
+        196,
+        205
+      ]
+    },
+    {
+      "file": "server/highlevel/instructions.ts",
+      "literalEdits": 4,
+      "lines": [
+        27,
+        28,
+        32,
+        33
+      ]
+    },
+    {
+      "file": "server/highlevel/relay.ts",
+      "literalEdits": 9,
+      "lines": [
+        63,
+        81,
+        88,
+        94,
+        95,
+        97,
+        101,
+        109,
+        115
+      ]
+    },
+    {
+      "file": "server/highlevel/service.ts",
+      "literalEdits": 1,
+      "lines": [
+        70
+      ]
+    },
+    {
+      "file": "server/highlevel/sign-in.ts",
+      "literalEdits": 1,
+      "lines": [
+        73
+      ]
+    },
+    {
+      "file": "server/host/loop-guard.ts",
+      "literalEdits": 1,
+      "lines": [
+        133
+      ]
+    },
+    {
+      "file": "server/incidents.ts",
+      "literalEdits": 1,
+      "lines": [
+        133
+      ]
+    },
+    {
+      "file": "server/index.ts",
+      "literalEdits": 29,
+      "lines": [
+        750,
+        1116,
+        1481,
+        1967,
+        1972,
+        1975,
+        1977,
+        1978,
+        4117,
+        4476,
+        6294,
+        6295,
+        9664,
+        9667,
+        9801,
+        9806,
+        10994,
+        11002,
+        12664,
+        12835,
+        14121,
+        14365,
+        14617,
+        16206,
+        16217,
+        16274,
+        16275,
+        17584,
+        17592
+      ]
+    },
+    {
+      "file": "server/local-computer.ts",
+      "literalEdits": 2,
+      "lines": [
+        378,
+        412
+      ]
+    },
+    {
+      "file": "server/mcp-oauth.ts",
+      "literalEdits": 8,
+      "lines": [
+        297,
+        373,
+        393,
+        404,
+        498,
+        503,
+        513,
+        515
+      ]
+    },
+    {
+      "file": "server/mcp-probe.ts",
+      "literalEdits": 2,
+      "lines": [
+        87,
+        214
+      ]
+    },
+    {
+      "file": "server/mcp-registry.ts",
+      "literalEdits": 3,
+      "lines": [
+        79,
+        80,
+        190
+      ]
+    },
+    {
+      "file": "server/mcp-remote-proxy.ts",
+      "literalEdits": 3,
+      "lines": [
+        48,
+        248,
+        293
+      ]
+    },
+    {
+      "file": "server/mcp-trim.ts",
+      "literalEdits": 2,
+      "lines": [
+        72,
+        87
+      ]
+    },
+    {
+      "file": "server/message-db.ts",
+      "literalEdits": 1,
+      "lines": [
+        121
+      ]
+    },
+    {
+      "file": "server/model-catalog/catalog.ts",
+      "literalEdits": 1,
+      "lines": [
+        267
+      ]
+    },
+    {
+      "file": "server/onepassword.ts",
+      "literalEdits": 1,
+      "lines": [
+        45
+      ]
+    },
+    {
+      "file": "server/org-library.ts",
+      "literalEdits": 2,
+      "lines": [
+        295,
+        581
+      ]
+    },
+    {
+      "file": "server/origin-cloud.ts",
+      "literalEdits": 2,
+      "lines": [
+        711,
+        997
+      ]
+    },
+    {
+      "file": "server/package-export.ts",
+      "literalEdits": 9,
+      "lines": [
+        228,
+        229,
+        231,
+        655,
+        657,
+        660,
+        774,
+        776,
+        779
+      ]
+    },
+    {
+      "file": "server/package-import.ts",
+      "literalEdits": 1,
+      "lines": [
+        19
+      ]
+    },
+    {
+      "file": "server/peer-provenance.ts",
+      "literalEdits": 4,
+      "lines": [
+        74,
+        86,
+        94,
+        159
+      ]
+    },
+    {
+      "file": "server/peer-roster.ts",
+      "literalEdits": 2,
+      "lines": [
+        215,
+        217
+      ]
+    },
+    {
+      "file": "server/permission-proxy.ts",
+      "literalEdits": 6,
+      "lines": [
+        27,
+        87,
+        98,
+        111,
+        163,
+        191
+      ]
+    },
+    {
+      "file": "server/phone-secret.ts",
+      "literalEdits": 2,
+      "lines": [
+        364,
+        370
+      ]
+    },
+    {
+      "file": "server/recall.ts",
+      "literalEdits": 1,
+      "lines": [
+        36
+      ]
+    },
+    {
+      "file": "server/routes/bot-memory.ts",
+      "literalEdits": 1,
+      "lines": [
+        190
+      ]
+    },
+    {
+      "file": "server/routes/desktop-viewer.ts",
+      "literalEdits": 1,
+      "lines": [
+        117
+      ]
+    },
+    {
+      "file": "server/routes/instances.ts",
+      "literalEdits": 2,
+      "lines": [
+        161,
+        169
+      ]
+    },
+    {
+      "file": "server/routes/pinned-client-thread.ts",
+      "literalEdits": 1,
+      "lines": [
+        13
+      ]
+    },
+    {
+      "file": "server/routine-execution.ts",
+      "literalEdits": 1,
+      "lines": [
+        42
+      ]
+    },
+    {
+      "file": "server/routine-requests.ts",
+      "literalEdits": 2,
+      "lines": [
+        903,
+        1057
+      ]
+    },
+    {
+      "file": "server/routines.ts",
+      "literalEdits": 1,
+      "lines": [
+        278
+      ]
+    },
+    {
+      "file": "server/runtime/envelope.ts",
+      "literalEdits": 2,
+      "lines": [
+        7,
+        137
+      ]
+    },
+    {
+      "file": "server/runtime/tree.ts",
+      "literalEdits": 4,
+      "lines": [
+        5,
+        7,
+        127,
+        128
+      ]
+    },
+    {
+      "file": "server/sentinel/cli.ts",
+      "literalEdits": 2,
+      "lines": [
+        19,
+        117
+      ]
+    },
+    {
+      "file": "server/server-launcher.ts",
+      "literalEdits": 1,
+      "lines": [
+        21
+      ]
+    },
+    {
+      "file": "server/service-unit.ts",
+      "literalEdits": 3,
+      "lines": [
+        38,
+        221,
+        238
+      ]
+    },
+    {
+      "file": "server/setup-mode.ts",
+      "literalEdits": 1,
+      "lines": [
+        68
+      ]
+    },
+    {
+      "file": "server/store.ts",
+      "literalEdits": 1,
+      "lines": [
+        1118
+      ]
+    },
+    {
+      "file": "server/surface.ts",
+      "literalEdits": 5,
+      "lines": [
+        126,
+        155,
+        158,
+        163,
+        166
+      ]
+    },
+    {
+      "file": "server/system-prompt.ts",
+      "literalEdits": 8,
+      "lines": [
+        29,
+        42,
+        88,
+        99,
+        114,
+        143,
+        146,
+        189
+      ]
+    },
+    {
+      "file": "server/vps-computer.ts",
+      "literalEdits": 6,
+      "lines": [
+        466,
+        467,
+        468,
+        469,
+        473,
+        1109
+      ]
+    },
+    {
+      "file": "server/vps-ssh.ts",
+      "literalEdits": 2,
+      "lines": [
+        50,
+        83
+      ]
+    },
+    {
+      "file": "server/waiting-on-person.ts",
+      "literalEdits": 1,
+      "lines": [
+        62
+      ]
+    },
+    {
+      "file": "server/webhooks.ts",
+      "literalEdits": 2,
+      "lines": [
+        247,
+        454
+      ]
+    },
+    {
+      "file": "server/workspace-backup-http.ts",
+      "literalEdits": 3,
+      "lines": [
+        115,
+        131,
+        141
+      ]
+    },
+    {
+      "file": "server/workspace-backup-maintenance.ts",
+      "literalEdits": 1,
+      "lines": [
+        9
+      ]
+    },
+    {
+      "file": "server/workspace-backup.ts",
+      "literalEdits": 1,
+      "lines": [
+        570
+      ]
+    },
+    {
+      "file": "shared/logins.ts",
+      "literalEdits": 1,
+      "lines": [
+        90
+      ]
+    },
+    {
+      "file": "shared/package-format.ts",
+      "literalEdits": 6,
+      "lines": [
+        32,
+        788,
+        792,
+        795,
+        797,
+        844
+      ]
+    },
+    {
+      "file": "shared/provider-safety.ts",
+      "literalEdits": 1,
+      "lines": [
+        6
+      ]
+    },
+    {
+      "file": "shared/sign-in-request.ts",
+      "literalEdits": 3,
+      "lines": [
+        69,
+        70,
+        76
+      ]
+    },
+    {
+      "file": "shared/widget-samples.ts",
+      "literalEdits": 1,
+      "lines": [
+        181
+      ]
+    },
+    {
+      "file": "src/lib/computer-control.ts",
+      "literalEdits": 2,
+      "lines": [
+        70,
+        74
+      ]
+    },
+    {
+      "file": "src/lib/local-computer.ts",
+      "literalEdits": 1,
+      "lines": [
+        52
+      ]
+    },
+    {
+      "file": "src/pair/PairPage.tsx",
+      "literalEdits": 3,
+      "lines": [
+        29,
+        118,
+        120
+      ]
+    }
+  ],
+  "preserved": [
+    {
+      "file": "electron/cloud-sync-mark.mjs",
+      "line": 11,
+      "text": ";OpenMausBot;",
+      "reason": "OS quarantine provenance marker"
+    },
+    {
+      "file": "electron/desktop-server-auth.cjs",
+      "line": 3,
+      "text": "X-OpenMausBot-Desktop-Owner",
+      "reason": "Wire authentication header"
+    },
+    {
+      "file": "server/cli-phone-setup.ts",
+      "line": 46,
+      "text": "Your saved OpenMausBot account can be reused. The connection will be checked when the server starts.",
+      "reason": "Actual upstream control-plane account, not an Origin account"
+    },
+    {
+      "file": "server/cli-phone-setup.ts",
+      "line": 49,
+      "text": "Sign in to an OpenMausBot account using an emailed code. This is separate from your AI provider account.",
+      "reason": "Actual upstream control-plane account, not an Origin account"
+    },
+    {
+      "file": "server/cli-phone-setup.ts",
+      "line": 126,
+      "text": "On iPhone or iPad, scan the QR with Camera to open Safari. If you already have the OpenMausBot iOS app, use its pairing scanner or paste the full pairing link there.",
+      "reason": "Actual external iOS companion app"
+    },
+    {
+      "file": "server/cli-phone-setup.ts",
+      "line": 127,
+      "text": "On Android, open the OpenMausBot app and scan the QR with its pairing scanner. The QR is an app link, so Camera will not open it in a browser.",
+      "reason": "Actual external Android companion app"
+    },
+    {
+      "file": "server/cli.ts",
+      "line": 372,
+      "text": "Scan that in the OpenMausBot app. For a browser instead, open the web",
+      "reason": "Actual external mobile companion app"
+    },
+    {
+      "file": "server/cli.ts",
+      "line": 380,
+      "text": "above into the OpenMausBot app.",
+      "reason": "Actual external mobile companion app"
+    },
+    {
+      "file": "server/cli.ts",
+      "line": 597,
+      "text": "Email for your OpenMausBot account: ",
+      "reason": "Actual upstream control-plane account, not an Origin account"
+    },
+    {
+      "file": "server/custom-domain.ts",
+      "line": 105,
+      "text": "OpenMausBot-domain-check",
+      "reason": "HTTP domain-check user agent"
+    },
+    {
+      "file": "server/live-call.ts",
+      "line": 72,
+      "text": "runs in OpenMausBot on the user's own computer",
+      "reason": "Owned by the live-call specialist"
+    },
+    {
+      "file": "server/phone-secret.ts",
+      "line": 11,
+      "text": "OpenMausBot phone credential v1",
+      "reason": "Cryptographic protocol context; changing it breaks existing phone credentials"
+    },
+    {
+      "file": "server/service-cli.ts",
+      "line": 106,
+      "text": "  schtasks /Create /SC MINUTE /MO 2 /TN \"OpenMausBot Sentinel\" /TR \"",
+      "reason": "Existing Windows scheduled-task identity"
+    },
+    {
+      "file": "server/service-unit.ts",
+      "line": 152,
+      "text": "OpenMausBot",
+      "reason": "Legacy installed executable name"
+    },
+    {
+      "file": "server/service-unit.ts",
+      "line": 154,
+      "text": "/opt/OpenMausBot/openmausbot",
+      "reason": "Legacy installed executable paths"
+    },
+    {
+      "file": "server/service-unit.ts",
+      "line": 154,
+      "text": "/opt/OpenMausBot/resources/server/openmausbot.js",
+      "reason": "Legacy installed executable paths"
+    },
+    {
+      "file": "server/skill-fetch.ts",
+      "line": 108,
+      "text": "OpenMausBot-skills",
+      "reason": "HTTP user-agent identifier"
+    },
+    {
+      "file": "server/skill-fetch.ts",
+      "line": 130,
+      "text": "OpenMausBot-skills",
+      "reason": "HTTP user-agent identifier"
+    },
+    {
+      "file": "src/components/onboarding/PhonePreview.tsx",
+      "line": 45,
+      "text": "OpenMausBot",
+      "reason": "Replace legacy presentation branch explicitly"
+    },
+    {
+      "file": "src/lib/call-capability.ts",
+      "line": 37,
+      "text": "The speech service is unavailable in this app build. Restart or update OpenMausBot.",
+      "reason": "Owned by the live-call specialist"
+    }
+  ],
+  "metadata": "Only reviewed AST literal spans are edited. Comments, legal notices, URLs, lower-case protocol/storage/service identifiers and selected crypto/path/account/app references are not renamed."
+}

@@ -1,0 +1,8 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin
+
+
+ Test Files  3 passed (3)
+      Tests  9 passed (9)
+   Start at  23:16:12
+   Duration  2.55s (transform 424ms, setup 646ms, import 917ms, tests 561ms, environment 0ms)

@@ -1,0 +1,719 @@
+{
+  "templateOnly": true,
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "version": "0.2.14",
+  "preparedAt": "2026-10-19T01:17:13.720Z",
+  "files": [
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/results.json",
+      "bytes": 92400,
+      "sha256": "466a1c3b1fc735864c7d0ea5b06d32390f6301c40a714a4a8c393459b5e4cea0",
+      "proposedPermanentPath": "site/results.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-timeout-results.json",
+      "bytes": 3576,
+      "sha256": "bb8b9717f69520da280c81c8aee62063e2e6b58bc3a3660dc6f4f19efaebba99",
+      "proposedPermanentPath": "site/signup-timeout-results.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-light-timeout-replacement.json",
+      "bytes": 976,
+      "sha256": "232563fb7131b3940d79b0e40b97905f32c990d1f6cc4caacd5cd72a67b2fdf3",
+      "proposedPermanentPath": "site/signup-375-light-timeout-replacement.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/capture-helper.txt",
+      "bytes": 2766,
+      "sha256": "defde612723e3b578ab33d1fd35d9f1ed47f177d6fdf1aae3445ff3f859251c6",
+      "proposedPermanentPath": "site/capture-helper.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/observation-helper.txt",
+      "bytes": 2089,
+      "sha256": "430a76cc68b179cd70ede8c7a992133a1932e922bcc2ecb074513977c6c2fc58",
+      "proposedPermanentPath": "site/observation-helper.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/site-release-identity-0.2.14.json",
+      "bytes": 25179,
+      "sha256": "23cd75880bc9ad2b5a95cc3f7554a2d860425fe8e57f0521105912c413ff22ed",
+      "proposedPermanentPath": "inputs/site-release-identity-0.2.14.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/site-stage-038-proof.json",
+      "bytes": 35104,
+      "sha256": "f77aef1984618433d2d7dca80e3a39d39fe6e8abf9bf92e17ec0210a27c5489b",
+      "proposedPermanentPath": "inputs/site-stage-038-proof.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/prepublication-037.mjs",
+      "bytes": 22563,
+      "sha256": "9f56d5efcab9f74ff8fd5d3c04bd30ee78b35ca73a22d749dbf87b2612b05d37",
+      "proposedPermanentPath": "inputs/prepublication-037.mjs",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/prepublication-037-test-report.json",
+      "bytes": 3726,
+      "sha256": "ea0f01b1dbdb33bfb5b5990eba02790f992eadfec27569f629455c7e3f9554d9",
+      "proposedPermanentPath": "inputs/prepublication-037-test-report.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/prepublication-037-pr-checkout-proof.json",
+      "bytes": 3291,
+      "sha256": "e13f09e9945b6499cb92512052c9cdc557bb1d29aa0d70c546d863de6561dfb4",
+      "proposedPermanentPath": "inputs/prepublication-037-pr-checkout-proof.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": "docs/verification/origin-ownership-037.md",
+      "bytes": 10885,
+      "sha256": "c5fbb4a801aaf0ea05cd85764a2adab9bd1342870e64c9a065c111b9ec1830c1",
+      "proposedPermanentPath": "inputs/docs__verification__origin-ownership-037.md",
+      "qualification": "Existing bug scenarios/regressions retain original proof labels; reference existing permanent037 packet rather than duplicate all150payloads."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": "docs/verification/evidence/origin-ownership-037/manifest.json",
+      "bytes": 65297,
+      "sha256": "2448d22d53bfd56d074a25380bf332a35c8d772ce7cfd4df183f57063a468008",
+      "proposedPermanentPath": "inputs/docs__verification__evidence__origin-ownership-037__manifest.json",
+      "qualification": "Existing bug scenarios/regressions retain original proof labels; reference existing permanent037 packet rather than duplicate all150payloads."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": "docs/verification/evidence/origin-ownership-037/source-binding.json",
+      "bytes": 12248,
+      "sha256": "5b6e6cb6e517b5812996e8aa6fbe87bbd3c42299d19c260482dffe1608c3a0a1",
+      "proposedPermanentPath": "inputs/docs__verification__evidence__origin-ownership-037__source-binding.json",
+      "qualification": "Existing bug scenarios/regressions retain original proof labels; reference existing permanent037 packet rather than duplicate all150payloads."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-375-light.png",
+      "bytes": 387102,
+      "sha256": "0e7eb7f4e76b9e31071dcf665a18ab108379a0d5cc232f64b435537e9d0d4495",
+      "proposedPermanentPath": "site/landing-375-light.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-375-light.json",
+      "bytes": 4506,
+      "sha256": "e3f65b239538e083156abd0e693569625423461ee175c829e5f9d9ac2b3692ba",
+      "proposedPermanentPath": "site/landing-375-light.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-375-light.ax.txt",
+      "bytes": 261,
+      "sha256": "591fcf33da3a8165759838b6f8845aefc68d5b064d9df88d27b7f7547ffc8a41",
+      "proposedPermanentPath": "site/landing-375-light.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-375-dark.png",
+      "bytes": 376180,
+      "sha256": "68caf4f56dcf6ad5e24720090f966ccdb8d31ea895f6cb9bbf9c99144863c1b6",
+      "proposedPermanentPath": "site/landing-375-dark.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-375-dark.json",
+      "bytes": 4506,
+      "sha256": "ede6964a37f93b1fc6f02cd35e4aabd7b1374f0be408da6102bc66e34e97127c",
+      "proposedPermanentPath": "site/landing-375-dark.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-375-dark.ax.txt",
+      "bytes": 261,
+      "sha256": "591fcf33da3a8165759838b6f8845aefc68d5b064d9df88d27b7f7547ffc8a41",
+      "proposedPermanentPath": "site/landing-375-dark.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-1440-light.png",
+      "bytes": 545639,
+      "sha256": "282c0d17c8c1868e257a129bc28762a7ea98048e7662437de51a1c6927ffbe4a",
+      "proposedPermanentPath": "site/landing-1440-light.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-1440-light.json",
+      "bytes": 4506,
+      "sha256": "51a28d74065d5e649dae2b630728c828b83ba21abac2cbe5feead8399dd5a92d",
+      "proposedPermanentPath": "site/landing-1440-light.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-1440-light.ax.txt",
+      "bytes": 261,
+      "sha256": "591fcf33da3a8165759838b6f8845aefc68d5b064d9df88d27b7f7547ffc8a41",
+      "proposedPermanentPath": "site/landing-1440-light.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-1440-dark.png",
+      "bytes": 532180,
+      "sha256": "811de5b095cae59520334fd7ff634a9cfecf408a8c46fef28d859f69e786390e",
+      "proposedPermanentPath": "site/landing-1440-dark.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-1440-dark.json",
+      "bytes": 4506,
+      "sha256": "41195f38184a03e950dd71153d7e3d4d52b5bb2159c6dc89022a83a886dea02e",
+      "proposedPermanentPath": "site/landing-1440-dark.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/landing-1440-dark.ax.txt",
+      "bytes": 261,
+      "sha256": "591fcf33da3a8165759838b6f8845aefc68d5b064d9df88d27b7f7547ffc8a41",
+      "proposedPermanentPath": "site/landing-1440-dark.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-375-light.png",
+      "bytes": 21253,
+      "sha256": "6de6227910331dd1015ab23ad0fbd445839c8ea26103baf28145f28a8a024513",
+      "proposedPermanentPath": "site/login-375-light.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-375-light.json",
+      "bytes": 717,
+      "sha256": "32c443cc6854421cd087149bd3464080c00b299303654f35eec025750ea7f7ec",
+      "proposedPermanentPath": "site/login-375-light.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-375-light.ax.txt",
+      "bytes": 1368,
+      "sha256": "2ed833185604714a1177abca734077f00f254dead9b41e5481fe13dfa539841c",
+      "proposedPermanentPath": "site/login-375-light.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-375-dark.png",
+      "bytes": 20202,
+      "sha256": "9f53afb4db1c9eea084265e10534dc843e0a734b821e7a80e00ed7a44e2fabf2",
+      "proposedPermanentPath": "site/login-375-dark.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-375-dark.json",
+      "bytes": 717,
+      "sha256": "7dbfb7c32eb4f08f4d060d8e6ce84aaffaaeecc9db8e969a113e108b394a02d4",
+      "proposedPermanentPath": "site/login-375-dark.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-375-dark.ax.txt",
+      "bytes": 215,
+      "sha256": "b5bf5c763d1c76988e9de20ab61fcddc18a8b699088da6b7a8121f271e097073",
+      "proposedPermanentPath": "site/login-375-dark.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-1440-light.png",
+      "bytes": 28627,
+      "sha256": "758f2844768fbe4392862f276438d79a1a1c11a5fbdb9c4f6aac4b3cb33257e3",
+      "proposedPermanentPath": "site/login-1440-light.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-1440-light.json",
+      "bytes": 722,
+      "sha256": "056b3e0ac787c9dd1734202fee7a75bb7d556d4b0c936e689be821695aa419a2",
+      "proposedPermanentPath": "site/login-1440-light.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-1440-light.ax.txt",
+      "bytes": 1429,
+      "sha256": "86be820f36c2724f27ba047a7276f7409fceacba482ef6bf706c9f1f1f18e099",
+      "proposedPermanentPath": "site/login-1440-light.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-1440-dark.png",
+      "bytes": 27602,
+      "sha256": "5f9084714aadcfb835f9c144626f04ca7950852e8dd397d9b2c732784d181e57",
+      "proposedPermanentPath": "site/login-1440-dark.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-1440-dark.json",
+      "bytes": 722,
+      "sha256": "d6e488afe1457c129913c9b2683ae44737786700b142a37aeda2b842cf73e2c7",
+      "proposedPermanentPath": "site/login-1440-dark.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/login-1440-dark.ax.txt",
+      "bytes": 1429,
+      "sha256": "86be820f36c2724f27ba047a7276f7409fceacba482ef6bf706c9f1f1f18e099",
+      "proposedPermanentPath": "site/login-1440-dark.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-light.png",
+      "bytes": 17475,
+      "sha256": "bc8bf419c943059c94a0f364e0549e06492e479b7e9f70455b56fa4ffbd5bff2",
+      "proposedPermanentPath": "site/signup-375-light.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-light.json",
+      "bytes": 812,
+      "sha256": "17835f6afad0cfd6672bfe2ff64d59834ad5f7c5758098b5787cb4a28e78361b",
+      "proposedPermanentPath": "site/signup-375-light.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-light.ax.txt",
+      "bytes": 241,
+      "sha256": "2df940dc6d7d408e8bba64b4eda9e21a4a3a8fe82b3f461b25668c3773379d37",
+      "proposedPermanentPath": "site/signup-375-light.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-dark.png",
+      "bytes": 16242,
+      "sha256": "efc3063477180c2408b5f76ad995a9dfdeee56815d12546ae70002faec5231e9",
+      "proposedPermanentPath": "site/signup-375-dark.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-dark.json",
+      "bytes": 812,
+      "sha256": "acae7f8987477169d96ae4e40ca9b63ab25e35e39173099b3e99191fc503cebd",
+      "proposedPermanentPath": "site/signup-375-dark.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-dark.ax.txt",
+      "bytes": 1290,
+      "sha256": "843b6eef7788efdcb43554694b80d5e637135af8059126cf2507b8f599c9f721",
+      "proposedPermanentPath": "site/signup-375-dark.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-light.png",
+      "bytes": 23373,
+      "sha256": "cb606fcc326c4d40317da4af60714b9fedb0b248c2ccdb93a9a12f5079c24ff5",
+      "proposedPermanentPath": "site/signup-1440-light.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-light.json",
+      "bytes": 817,
+      "sha256": "b0618ed78d075fe1b154703fffc3968494992275285a76efc96df275a8bf3ee4",
+      "proposedPermanentPath": "site/signup-1440-light.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-light.ax.txt",
+      "bytes": 241,
+      "sha256": "2df940dc6d7d408e8bba64b4eda9e21a4a3a8fe82b3f461b25668c3773379d37",
+      "proposedPermanentPath": "site/signup-1440-light.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark.png",
+      "bytes": 22220,
+      "sha256": "bb1e24217fe9dd0914160c718ac5e9d81944a51feb5658e4223e33f76a63b4f1",
+      "proposedPermanentPath": "site/signup-1440-dark.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark.json",
+      "bytes": 817,
+      "sha256": "40be3888b8db4c3d5c92c39f720d5ff7f3745161deb33176e074b3125592ee74",
+      "proposedPermanentPath": "site/signup-1440-dark.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark.ax.txt",
+      "bytes": 241,
+      "sha256": "2df940dc6d7d408e8bba64b4eda9e21a4a3a8fe82b3f461b25668c3773379d37",
+      "proposedPermanentPath": "site/signup-1440-dark.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-375-light.png",
+      "bytes": 586687,
+      "sha256": "f98ac722a2ddaa71a7b11e4559f228bef7600b8e72678227df8ef86dc1807d89",
+      "proposedPermanentPath": "site/whats-new-375-light.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-375-light.json",
+      "bytes": 15897,
+      "sha256": "57d0e5a7a8443c241be4dc682e4fde067fac62ef362e3763dcf3297a688d68bb",
+      "proposedPermanentPath": "site/whats-new-375-light.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-375-light.ax.txt",
+      "bytes": 229,
+      "sha256": "3cbd0f6396461678d1a988153da87bdeffca2a4c2e302e863a28f8d9fce4bc73",
+      "proposedPermanentPath": "site/whats-new-375-light.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-375-dark.png",
+      "bytes": 571914,
+      "sha256": "539d8935e37f092b144cd3cc660981ae69bc128672fe4f0faa95c13c08f3fd3a",
+      "proposedPermanentPath": "site/whats-new-375-dark.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-375-dark.json",
+      "bytes": 15897,
+      "sha256": "bdc92bd7d1dc34895d149933c518faeb58bc76a4161dc4949b20b19883e750a1",
+      "proposedPermanentPath": "site/whats-new-375-dark.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-375-dark.ax.txt",
+      "bytes": 229,
+      "sha256": "3cbd0f6396461678d1a988153da87bdeffca2a4c2e302e863a28f8d9fce4bc73",
+      "proposedPermanentPath": "site/whats-new-375-dark.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-light.png",
+      "bytes": 654366,
+      "sha256": "e5af3b55f0075bb2dda3cf82572cd6074d40db76a076a23d2685f443e9bc1cee",
+      "proposedPermanentPath": "site/whats-new-1440-light.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-light.json",
+      "bytes": 15902,
+      "sha256": "05c999b831ff327bffe5df0d6f8a20fb18d98aaf33c6e104824a3b9beb70624b",
+      "proposedPermanentPath": "site/whats-new-1440-light.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-light.ax.txt",
+      "bytes": 229,
+      "sha256": "3cbd0f6396461678d1a988153da87bdeffca2a4c2e302e863a28f8d9fce4bc73",
+      "proposedPermanentPath": "site/whats-new-1440-light.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-dark.png",
+      "bytes": 639074,
+      "sha256": "8238d5c00860af1b0d73e7755e03817ba3fd143849bad5e8cd5326166a802e52",
+      "proposedPermanentPath": "site/whats-new-1440-dark.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-dark.json",
+      "bytes": 15902,
+      "sha256": "372b555392b95e4259b05acd87e0c133ae0aba933c817bc1f3a7ac6409d80b21",
+      "proposedPermanentPath": "site/whats-new-1440-dark.json",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/whats-new-1440-dark.ax.txt",
+      "bytes": 229,
+      "sha256": "3cbd0f6396461678d1a988153da87bdeffca2a4c2e302e863a28f8d9fce4bc73",
+      "proposedPermanentPath": "site/whats-new-1440-dark.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-light-timeout.png",
+      "bytes": 22973,
+      "sha256": "fa631b8aaf220e9ce6743da514c6585b9cecf6438fd60f5faf8ffec6602c1b30",
+      "proposedPermanentPath": "site/signup-375-light-timeout.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-light-timeout.ax.txt",
+      "bytes": 241,
+      "sha256": "2df940dc6d7d408e8bba64b4eda9e21a4a3a8fe82b3f461b25668c3773379d37",
+      "proposedPermanentPath": "site/signup-375-light-timeout.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-dark-timeout.png",
+      "bytes": 21847,
+      "sha256": "774455e9f3bbc932272f05362a21846a7b2918b9b73f74f4036b4ac683d0a103",
+      "proposedPermanentPath": "site/signup-375-dark-timeout.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-375-dark-timeout.ax.txt",
+      "bytes": 241,
+      "sha256": "2df940dc6d7d408e8bba64b4eda9e21a4a3a8fe82b3f461b25668c3773379d37",
+      "proposedPermanentPath": "site/signup-375-dark-timeout.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-light-timeout.png",
+      "bytes": 30117,
+      "sha256": "88e7555e553bdcd53b3df1bb5371783dddbff4a5fde34db3583b730a176ded2d",
+      "proposedPermanentPath": "site/signup-1440-light-timeout.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-light-timeout.ax.txt",
+      "bytes": 241,
+      "sha256": "2df940dc6d7d408e8bba64b4eda9e21a4a3a8fe82b3f461b25668c3773379d37",
+      "proposedPermanentPath": "site/signup-1440-light-timeout.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark-timeout.png",
+      "bytes": 29140,
+      "sha256": "7db802f374db6453ec2e6139c763afafc8e2b5ede0a21cae4b1e0f357331a86b",
+      "proposedPermanentPath": "site/signup-1440-dark-timeout.png",
+      "qualification": "Actual JPEG/JFIF bytes under inherited.png name; capture scope retained."
+    },
+    {
+      "root": "readOnlyFinalCheckout",
+      "path": ".omb-scratch/delivery-evidence-038/site/signup-1440-dark-timeout.ax.txt",
+      "bytes": 241,
+      "sha256": "2df940dc6d7d408e8bba64b4eda9e21a4a3a8fe82b3f461b25668c3773379d37",
+      "proposedPermanentPath": "site/signup-1440-dark-timeout.ax.txt",
+      "qualification": "Current frozen-source or fresh038 evidence"
+    },
+    {
+      "root": "privatePreparationWorktree",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\site-visual-review-038.json",
+      "bytes": 25801,
+      "sha256": "b29e414563dc8bfb0a0cb716321d42533d55becf7097eda4e290d9898698a0a1",
+      "proposedPermanentPath": "review/site-visual-review-038.json",
+      "qualification": "Bounded20-final-image read-only visual/helper review"
+    },
+    {
+      "root": "privatePreparationWorktree",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\site-visual-review-038.md",
+      "bytes": 1878,
+      "sha256": "569a71cc586ae1f56815ee5fb5cb4f98ab4c813053c0ac3197b696c096618cfc",
+      "proposedPermanentPath": "review/site-visual-review-038.md",
+      "qualification": "Bounded20-final-image read-only visual/helper review"
+    },
+    {
+      "root": "privatePreparationWorktree",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\site-helper-prerequisites-038.json",
+      "bytes": 5877,
+      "sha256": "59fbcbebce92fdd10d7a435e0b8c92721083faf1e30188c40c7ceb57711e676f",
+      "proposedPermanentPath": "review/site-helper-prerequisites-038.json",
+      "qualification": "Bounded20-final-image read-only visual/helper review"
+    },
+    {
+      "root": "privatePreparationWorktree",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037b.mjs",
+      "bytes": 25941,
+      "sha256": "ba70dccb6dab5dee6b371e1edbb8035984ddd4e07564056b413d46d5bd38bcd6",
+      "proposedPermanentPath": "ci-retry/prepublication-037b.mjs",
+      "qualification": "Initial failure and versioned retry guard proof retained without relabeling original attempts"
+    },
+    {
+      "root": "privatePreparationWorktree",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\ci-attempt1-terminal-038.json",
+      "bytes": 59459,
+      "sha256": "d2e194bb1c65ff24284b822f38baf62a1ea8d0251913bdf30b613d427512e002",
+      "proposedPermanentPath": "ci-retry/ci-attempt1-terminal-038.json",
+      "qualification": "Initial failure and versioned retry guard proof retained without relabeling original attempts"
+    },
+    {
+      "root": "privatePreparationWorktree",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\ci-attempt1-terminal-receipt-038.json",
+      "bytes": 89888,
+      "sha256": "a384de9121678da1f8f78431428ea80a4aa1fb9d24d3b957bffe82f0199a3fcc",
+      "proposedPermanentPath": "ci-retry/ci-attempt1-terminal-receipt-038.json",
+      "qualification": "Initial failure and versioned retry guard proof retained without relabeling original attempts"
+    },
+    {
+      "root": "privatePreparationWorktree",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037b-ci-latest-jobs-raw.json",
+      "bytes": 57737,
+      "sha256": "7ef42f974499c7476a5105022cd199ceda730968d94659b12f8ee3cbe2264cc1",
+      "proposedPermanentPath": "ci-retry/prepublication-037b-ci-latest-jobs-raw.json",
+      "qualification": "Observed partial19-job metadata only; no terminal acceptance"
+    },
+    {
+      "root": "privatePreparationWorktree",
+      "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-branding-034\\Origin\\.omb-scratch\\prepublication-037b-provenance-test-report.json",
+      "bytes": 798,
+      "sha256": "66fb92c1a5385ec98faa204069e335640827ab464d2ab4c3c26e149367d9c3bc",
+      "proposedPermanentPath": "ci-retry/prepublication-037b-provenance-test-report.json",
+      "qualification": "Six pure synthetic provenance cases; not actual CI success"
+    }
+  ],
+  "actualProofSelectionPending": {
+    "prepublication": {
+      "path": ".omb-scratch/delivery-evidence-038/prepublication-038.json",
+      "sha256": null
+    },
+    "ci": {
+      "path": ".omb-scratch/delivery-evidence-038/origin-ci-038.json",
+      "sha256": null
+    },
+    "github": {
+      "path": ".omb-scratch/delivery-evidence-038/github-public-038.json",
+      "sha256": null
+    },
+    "githubMetadata": {
+      "path": ".omb-scratch/delivery-evidence-038/github-public-metadata-038.json",
+      "sha256": null
+    },
+    "downloadsLog": {
+      "path": ".omb-scratch/delivery-evidence-038/public-downloads-038.log",
+      "sha256": null
+    },
+    "downloadsResult": {
+      "path": ".omb-scratch/delivery-evidence-038/public-downloads-result.json",
+      "sha256": null
+    },
+    "http": {
+      "path": ".omb-scratch/delivery-evidence-038/public-http-038.json",
+      "sha256": null
+    },
+    "runtime": {
+      "path": ".omb-scratch/delivery-evidence-038/public-runtime-038.txt",
+      "sha256": null
+    },
+    "publishGithubResult": {
+      "path": ".omb-scratch/delivery-evidence-038/publish-github-result.json",
+      "sha256": null
+    },
+    "promoteDownloadsResult": {
+      "path": ".omb-scratch/delivery-evidence-038/promote-downloads-result.json",
+      "sha256": null
+    },
+    "promoteSiteResult": {
+      "path": ".omb-scratch/delivery-evidence-038/promote-site-result.json",
+      "sha256": null
+    },
+    "publicLanding": {
+      "path": ".omb-scratch/delivery-evidence-038/public-landing-038.jpg",
+      "sha256": null
+    },
+    "publicWhatsNew": {
+      "path": ".omb-scratch/delivery-evidence-038/public-whats-new-038.jpg",
+      "sha256": null
+    },
+    "publicWhatsNewAX": {
+      "path": ".omb-scratch/delivery-evidence-038/public-whats-new-038.ax.txt",
+      "sha256": null
+    }
+  },
+  "nativeAuditPending": false,
+  "excluded": [
+    "Actual native payload binaries/extracted trees",
+    "Credentials/provider data",
+    "035RootFS-equivalence as acceptance for038",
+    "Rejected black/resize captures from accepted20; root keeps diagnostics separately"
+  ],
+  "historicalReceipt035Sha256": "61df081fd59390f8a88cf63e5b7615ce321e7c07239c0323e367035dfa699da1",
+  "nativeAuditPrepared": {
+    "workerDirectory": "C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/native-audit-038-721db7e04c32",
+    "rootImportPathPending": true,
+    "files": [
+      {
+        "path": "C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/native-audit-038-721db7e04c32/receipt.json",
+        "bytes": 8016,
+        "sha256": "4c17e1451fbc8a66545516e94acef675cffbea74dcd7bf71545b2fde0a9d4e27"
+      },
+      {
+        "path": "C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/native-audit-038-721db7e04c32/manifest.json",
+        "bytes": 12948,
+        "sha256": "cceb7f99e51086de7badfb2a51f919e1476b5d9a43ea24e4de5aa13b93991b84"
+      },
+      {
+        "path": "C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/native-audit-038-721db7e04c32/REPORT.md",
+        "bytes": 4270,
+        "sha256": "2013147b230c6de43733ee8563743ee22937eac101eb5ef16a6da0d4648b581a"
+      }
+    ]
+  },
+  "phase": "038b-targeted-ci-retry-preparation",
+  "ciRetry": {
+    "initialAttempt": 1,
+    "plannedAttempt": 2,
+    "rootCause": "unproved",
+    "sourceFixClaimed": false,
+    "qualification": "Actual API assigns attempt2 IDs to retained records; original execution timestamps/steps, rather than run_attempt alone, classify retained success/skip versus targeted retry."
+  }
+}

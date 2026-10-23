@@ -1,0 +1,61 @@
+{
+  "createdAt": "2026-10-20T07:12:22.9477564Z",
+  "parentSource": "6d1c772d121d557e9742e71da8102f453d9e336f",
+  "status": "Local source fix and focused checks complete; fresh browser after-check pending root",
+  "bug": {
+    "severity": "P2",
+    "scenario": "At 375px, a monthly budget overage made the header status pill 262px wide and displaced Model, Computer, and More beyond the visible pane.",
+    "before": "Root observed on root1 synthetic current-source fixture; root supplied exact control bounds and screenshot. This agent did not operate CUA.",
+    "fix": "Below 48rem chat-container width the indicator becomes a 30px Wallet button; full monthly status and admin-only Raise budget remain available in a viewport-clamped keyboard-dismissible panel. Wide desktop preserves the full status and direct Raise button."
+  },
+  "changes": [
+    "src/components/AgentBudgetPill.tsx",
+    "src/components/AgentBudgetPill.test.ts"
+  ],
+  "checks": {
+    "red": "3 new interaction tests failed before fix: missing compact details control.",
+    "green": "53 tests in 3 files passed after final fix: AgentBudgetPill.test.ts, origin-pages/CallActionItems.test.ts, ChatView.controls.test.ts",
+    "types": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json exited 0",
+    "lint": "node node_modules/oxlint/bin/oxlint --deny-warnings on the two owned files exited 0",
+    "diff": "git diff --check exited 0",
+    "review": "React skill applied: hooks unconditional, event listeners and ResizeObserver cleaned up, permissions retained, portal dismissal handles trigger and panel, focus returns to opener, target changes remount editor."
+  },
+  "qualification": "Happy-dom interaction tests do not prove CSS geometry. Actual after dimensions/themes remain for root CUA. No model/provider/backend/mutation or production acceptance; no commit or stage by this agent.",
+  "files": [
+    {
+      "path": "src/components/AgentBudgetPill.tsx",
+      "bytes": 6808,
+      "sha256": "0ce554385105687b433864afade832f7a9fda20fe435fa51b14ccc94fb36b4d0"
+    },
+    {
+      "path": "src/components/AgentBudgetPill.test.ts",
+      "bytes": 3413,
+      "sha256": "2c775fffaeb8ab7b329737ac341f1c4c07441ca044d200efb093e21a2f2dcdf1"
+    },
+    {
+      "path": ".omb-scratch/integration-048/budget-pill-red.log",
+      "bytes": 2816,
+      "sha256": "eb94cabe1c73b45b32fc89793cf63d7c3dff604d84313ae3f0ae191f58979b8b"
+    },
+    {
+      "path": ".omb-scratch/integration-048/budget-pill-green-final.log",
+      "bytes": 261,
+      "sha256": "56c70bfa1babf7c84592675b6df83414073685c85d116673d8eecefa4641cd57"
+    },
+    {
+      "path": ".omb-scratch/integration-048/budget-pill-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".omb-scratch/integration-048/budget-pill-oxlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".omb-scratch/integration-048/ui-preview/runs/root1/chat-header-before-375.jpg",
+      "bytes": 35907,
+      "sha256": "b2cf89ea3822a5069760a7a95d85544b62f21d009120b7bc148df0ef8d1af4e9"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "startedAt": "2026-10-21T04:36:48.489Z",
+  "pid": 44164,
+  "sourceHeadAtLaunch": "a7636129e50107f235c889a28b13113b2b72ce93",
+  "baseline": "fa83fb6b9e7e6e7e8195e93405a975007917872a",
+  "component": "src/components/origin-broadcast/BroadcastComposer.tsx",
+  "baselineGitSha256": "18036c419acd9def200b26aa9d5bba61cf4e286e6b6a23392f325b6f6db1392d",
+  "baselineRewrittenSha256": "e5c562d802e9269f78d1a4dea7684e61027c4dacf831af746aeb6274edcd26cc",
+  "workingComponentSha256": "37e5438e33e0b34eb0331849e7745f155e5e69795f2cbadefa6dbb96397656bd",
+  "workingComponentPinnedAtLaunch": true,
+  "entrySha256": "fb9c17c0f53f284906092e0a2fc2b6b920cc81989f97904712a222722924647f",
+  "cloudAliasSha256": "79ecc43cdace67cd6be13875c561e252961df76e4198aa39b61ab1e7245c436e",
+  "stylesSha256": "da993cb83933c1221efbd85c0ef68ba47ab11ab3c154dff6c0ebbe4c4854c7dd",
+  "helpers": [
+    {
+      "name": "src/components/origin-broadcast/ComposerParts.tsx",
+      "sha256": "5dc9433019f1f33bf6a603894ba536799b94d258fb4343b7a86dfe96af235d4d"
+    },
+    {
+      "name": "src/components/origin-broadcast/ChannelPreview.tsx",
+      "sha256": "0184d2250fa2c0e16400ad5fbcd3ff155b6101a51726cef9bcd8e4ab1b8d734b"
+    },
+    {
+      "name": "src/components/origin-pages/ui.tsx",
+      "sha256": "1e88769e7cc4b65b7a4adc11ad372375a672b2040196938f3a91c50f585d3e69"
+    },
+    {
+      "name": "shared/broadcast.ts",
+      "sha256": "85d603ec8b5455971713ffa0e246030f37c902516a7a51aeb37c6e38252b484b"
+    }
+  ],
+  "previewUrl": "http://127.0.0.1:62144/__origin-publish-compare.html",
+  "beforeUrl": "http://127.0.0.1:62144/__origin-publish-compare.html?phase=before&theme=dark",
+  "afterUrl": "http://127.0.0.1:62144/__origin-publish-compare.html?phase=after&theme=dark",
+  "apiUrl": "http://127.0.0.1:62143",
+  "readOnlyMethods": [
+    "GET",
+    "HEAD"
+  ],
+  "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' data: blob:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; worker-src 'none'",
+  "hmr": false,
+  "cloudMutationsBlocked": true,
+  "rendererOnly": true,
+  "noBackendOrProvider": true,
+  "limits": "Actual baseline/current Composer and shared current CSS/helpers; synthetic account/design props. No actual publish, credentials, production data or backend acceptance. Browser screenshots owned by root."
+}

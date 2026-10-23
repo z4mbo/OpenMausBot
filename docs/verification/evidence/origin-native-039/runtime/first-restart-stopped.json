@@ -1,0 +1,9 @@
+{
+  "stoppedAt": "2026-10-19T06:33:08.4199023Z",
+  "pidAbsent": 36780,
+  "portsClosed": [
+    51527,
+    51528
+  ],
+  "dataRetained": true
+}

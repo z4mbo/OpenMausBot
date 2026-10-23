@@ -1,0 +1,12 @@
+{
+  "containerAbsent": true,
+  "containerRemoved": null,
+  "networkAbsent": true,
+  "networkRemoved": null,
+  "publicMutation": false,
+  "stopReason": "startup failure",
+  "localProxyClosed": true,
+  "ownedTunnelExited": true,
+  "controllerPid": 67728,
+  "at": "2026-10-20T09:28:59.737Z"
+}

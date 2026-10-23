@@ -1,0 +1,220 @@
+{
+  "recordedAt": "2026-10-20T06:23:37.095Z",
+  "reportedBy": "Parent /root using its enabled CUA browser; this subagent did not perform or witness CUA interaction",
+  "sourceBinding": {
+    "manifestHead": "8a25756147af124f1781cc0d056cd9ec62819293",
+    "manifestCapturedAt": "2026-10-20T06:15:40.520Z",
+    "workingTree": true,
+    "sources": [
+      {
+        "path": "src/components/origin-broadcast/BroadcastPage.tsx",
+        "sha256": "323b5d25b6e18f03e769808c3ea40140c09425805cda2cbaa20990783bd7233c",
+        "manifest6Match": true
+      },
+      {
+        "path": "src/components/origin-pipeline/PipelinePage.tsx",
+        "sha256": "82ed233129cf152a7f03cb3139afea4b0524eaf315226b3a2a38248e94711d65",
+        "manifest6Match": true
+      },
+      {
+        "path": "src/components/origin-pages/canvas/CanvasEditor.tsx",
+        "sha256": "ab619c28c89892dcee328b1ff972025dadc5365077589f95f886318c7fb94afa",
+        "manifest6Match": true
+      },
+      {
+        "path": "src/components/origin-broadcast/BroadcastComposer.tsx",
+        "sha256": "c7d8e316a5a50a4d5166901d2cc54e4f49dd10da0cb35db1286ca546aa90d27a",
+        "manifest6Match": true
+      },
+      {
+        "path": "src/components/origin-pipeline/LeadDrawer.tsx",
+        "sha256": "dbc78988a8b9d67bae7fcd6bbca0fcbb02bcfcadaed893a8467ca4a25c416660",
+        "manifest6Match": true
+      },
+      {
+        "path": "src/components/origin-broadcast/BroadcastComposer.readiness.test.ts",
+        "sha256": "f5a423e512ddff67b09b1219d4057d86da5459040728287e63a2e7a43eb285a1",
+        "manifest6Match": true
+      },
+      {
+        "path": "src/components/origin-pipeline/LeadDrawer.readiness.test.ts",
+        "sha256": "1945802e61467cbfab98b280c86994966a4f869d1eb9937deaa26f8258781caf",
+        "manifest6Match": true
+      }
+    ],
+    "fixtures": [
+      {
+        "path": ".omb-scratch/integration-046/ui/source-before-6.json",
+        "sha256": "f66fed255ff0f64aba3824883793541a56d0525333c8e34ec11cadd8a16fc209"
+      },
+      {
+        "path": ".omb-scratch/integration-046/ui/fixture-6.json",
+        "sha256": "80877dac42b3dd3355cddde8ae35c6378478bc412ba5963782baf559fe9864e3"
+      },
+      {
+        "path": ".omb-scratch/integration-046/ui/launch-root-6.mjs",
+        "sha256": "97e61cc05eaeb86dba4cc22f5247d57b36add8e351a19516479ca0c17fd00f8c"
+      },
+      {
+        "path": ".omb-scratch/integration-046/ui/feature-addon.mjs",
+        "sha256": "fc364a1a4ece820bded0537030411bd76824bb90ad66ac4f5a26670a60db1077"
+      },
+      {
+        "path": ".omb-scratch/integration-046/ui/feature-pipeline-api.mjs",
+        "sha256": "c24446053c3fcbf977bbffb80d9e336e4d2f8228e4e4d03b98d0de74c43f3799"
+      },
+      {
+        "path": ".omb-scratch/integration-046/ui/feature-preview.tsx",
+        "sha256": "6fa6e877a81c8487ab2d8a00afa5af7d38bd9a0340ccb159a8057852ff0751be"
+      },
+      {
+        "path": ".omb-scratch/integration-046/ui/feature-cloud.mjs",
+        "sha256": "c478af8b179f4e94a8b35715de143b4c23ee42029a3a6a1356532e350da4a0f3"
+      }
+    ]
+  },
+  "preview": {
+    "revision": 6,
+    "pid": 48432,
+    "port": 50063,
+    "rootSession": 37425,
+    "oldRevision5StoppedByRoot": true
+  },
+  "observations": [
+    {
+      "feature": "Broadcast mobile banner",
+      "viewport": 375,
+      "theme": "light",
+      "result": "pass as reported by root",
+      "textWidthPx": 309,
+      "textHeightPx": 39,
+      "documentWidthPx": 375,
+      "before": "broadcast-composer-light-375.jpg",
+      "after": "broadcast-composer-after-light-375.jpg",
+      "additionalCapture": "broadcast-after-light-375.jpg",
+      "comparison": "Matching empty New post modal before/after; disconnected banner now readable."
+    },
+    {
+      "feature": "Broadcast unavailable publishing",
+      "viewport": 375,
+      "theme": "light",
+      "result": "pass as reported by root",
+      "state": "X selected, connection false, same text Synthetic preview draft.",
+      "publishNowDisabled": true,
+      "saveDraftEnabled": true,
+      "before": "broadcast-disconnected-publish-light-375.jpg",
+      "after": "broadcast-disconnected-publish-after-light-375.jpg",
+      "mutationSubmitted": false
+    },
+    {
+      "feature": "Pipeline mobile toolbar",
+      "viewport": 375,
+      "theme": "light",
+      "result": "pass as reported by root",
+      "searchInputWidthPx": 295,
+      "searchTopPx": 105,
+      "actionsTopPx": 145,
+      "controlsOverlap": false,
+      "before": "pipeline-light-375.jpg",
+      "after": "pipeline-after-light-375.jpg"
+    },
+    {
+      "feature": "Pipeline disconnected email",
+      "viewport": 375,
+      "theme": "light",
+      "result": "pass as reported by root",
+      "afterConnectionState": "Known false returned through corrected synthetic GET adapter",
+      "after": "pipeline-disconnected-after-light-375.jpg",
+      "afterFields": "Subject and Message filled",
+      "afterCopy": "Connect Brevo",
+      "sendDisabled": true,
+      "originalObservationState": "UNKNOWN, not false: original fixture mocked hook session but not actual sessionStore; pipeline API rejected before GET and page caught as null.",
+      "comparison": "Not a matched known-false before/after proof. Unknown-state regression is proven separately by LeadDrawer DOM tests.",
+      "mutationSubmitted": false
+    },
+    {
+      "feature": "Canvas compact panels",
+      "viewport": 375,
+      "theme": "dark",
+      "access": "viewer",
+      "result": "pass as reported by root",
+      "before": "canvas-panels-dark-375.jpg",
+      "after": "canvas-panels-after-dark-375.jpg",
+      "beforeHitAtDesignToggle": "SVG export button in overlaid Design panel",
+      "afterHitAtBothToggleCenters": "Within their own toolbar buttons",
+      "actualCloseSequence": [
+        "Clicked Design panel toggle: Design closed",
+        "Clicked Layers toggle: Layers closed"
+      ],
+      "mutationSubmitted": false
+    }
+  ],
+  "captures": [
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/broadcast-after-light-375.jpg",
+      "bytes": 23635,
+      "sha256": "e016d608c0ed2af02252a3231d60d2ae14b6a9abc4adaa5306ef22f2b7aeac7a"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/broadcast-composer-after-light-375.jpg",
+      "bytes": 26270,
+      "sha256": "0f82ea7d322d5eb688efead5f81b061d72fe511570ebdbf6a850c615a6a66e4d"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/broadcast-composer-light-375.jpg",
+      "bytes": 21296,
+      "sha256": "6afe9c459db9be0d38c3de7e6d5b56f669a5be6ab58c3f9ca775c657725f91a1"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/broadcast-disconnected-publish-after-light-375.jpg",
+      "bytes": 25084,
+      "sha256": "e1871be9c5e819f8423d8fb490a3df010610d8f2bb961609ad704c8ecfae1865"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/broadcast-disconnected-publish-light-375.jpg",
+      "bytes": 25704,
+      "sha256": "1fcf406211356b415114cdd51e38a5be482543852d595b40918dd1ecdde2bdd9"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/canvas-panels-after-dark-375.jpg",
+      "bytes": 17794,
+      "sha256": "67483cd19726e81485525a9542b0e0315c1c755236d536abb036d9a0ab9c1753"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/canvas-panels-dark-375.jpg",
+      "bytes": 16335,
+      "sha256": "8ff8d97c47e95ff67d2776f73b2de29ab6fbc14d1f7e1a79928d55cff639feba"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/org-dark-375.jpg",
+      "bytes": 19636,
+      "sha256": "3767d86ef3c8da2de5f84ef7eec6a12098acfcb42b8b3fbf2b4043ecd149bce1"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/pipeline-after-light-375.jpg",
+      "bytes": 17319,
+      "sha256": "d761747dd660cfd94ae3816ad5531100e2d1a1e59160a523ca69166132e6b8f9"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/pipeline-disconnected-after-light-375.jpg",
+      "bytes": 35415,
+      "sha256": "0ab26a520087bb12d755c8964ace7be0c7bfbafd8814e7d904dfdc513f70455d"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/pipeline-light-375.jpg",
+      "bytes": 16158,
+      "sha256": "4279d8cc50b3f7fc62842f20dfe2b36841fdbd6d07f75739b4d7432048673400"
+    },
+    {
+      "path": ".omb-scratch/integration-046/ui/feature-captures/studio-light-375.jpg",
+      "bytes": 28901,
+      "sha256": "15e480d2b0fc48895e18e567656b14471911540a65ee6c5cc25b6c3a32076466"
+    }
+  ],
+  "limits": [
+    "Actual merged feature bodies used synthetic query, store and connection-status data.",
+    "Only selected Studio, Broadcast, Pipeline, Canvas and Org UI states/interactions were inspected; this is not all-feature acceptance.",
+    "No outbound publishing, outreach, provider/model execution, native app, production data, backend persistence or shared-canvas synchronization was tested.",
+    "Root supplied the CUA observations; this subagent only verified receipt identities and file hashes."
+  ]
+}

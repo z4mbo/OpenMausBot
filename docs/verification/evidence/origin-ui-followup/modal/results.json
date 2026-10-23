@@ -1,0 +1,1714 @@
+{
+  "beforeSource": "cfbb5c097a8e29c4adc6ba8ad6e2a19612885410",
+  "afterSource": "62fe9d9a3c5dd55c391a60853ce3692bd568d2f0",
+  "cases": [
+    {
+      "screen": "about",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen aboutBackground actionPrivate before fixture · production about · syntheti",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open about",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "phone",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen phoneBackground actionPrivate before fixture · production phone · syntheti",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open phone",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "archive",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen archiveBackground actionPrivate before fixture · production archive · synt",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true,
+        "nestedInitial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": false,
+          "dialogCount": 2,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedTabs": [
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          }
+        ],
+        "nestedAfterEscape": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedClosedOnlyInner": true
+      },
+      "after": {
+        "initial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open archive",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true,
+        "nestedInitial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 2,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedTabs": [
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          }
+        ],
+        "nestedAfterEscape": {
+          "tag": "BUTTON",
+          "label": "Delete Atlas",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedClosedOnlyInner": true
+      }
+    },
+    {
+      "screen": "files-refusal",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "OK",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen files-refusalBackground actionPrivate before fixture · production files-re",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "OK",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Add a folder",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "files-suggest",
+      "theme": "dark",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen files-suggestBackground actionPrivate before fixture · production files-su",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "SECTION",
+          "label": "Shared with My CloudBots on My Cloud can use these folders, even when this computer is off. They nev",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "about",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen aboutBackground actionPrivate before fixture · production about · syntheti",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open about",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "phone",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen phoneBackground actionPrivate before fixture · production phone · syntheti",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open phone",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "archive",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen archiveBackground actionPrivate before fixture · production archive · synt",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true,
+        "nestedInitial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": false,
+          "dialogCount": 2,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedTabs": [
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          }
+        ],
+        "nestedAfterEscape": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedClosedOnlyInner": true
+      },
+      "after": {
+        "initial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open archive",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true,
+        "nestedInitial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 2,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedTabs": [
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          }
+        ],
+        "nestedAfterEscape": {
+          "tag": "BUTTON",
+          "label": "Delete Atlas",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedClosedOnlyInner": true
+      }
+    },
+    {
+      "screen": "files-refusal",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "OK",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen files-refusalBackground actionPrivate before fixture · production files-re",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "OK",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Add a folder",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "files-suggest",
+      "theme": "dark",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen files-suggestBackground actionPrivate before fixture · production files-su",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "SECTION",
+          "label": "Shared with My CloudBots on My Cloud can use these folders, even when this computer is off. They nev",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "about",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen aboutBackground actionPrivate before fixture · production about · syntheti",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open about",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "phone",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen phoneBackground actionPrivate before fixture · production phone · syntheti",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open phone",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "archive",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen archiveBackground actionPrivate before fixture · production archive · synt",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true,
+        "nestedInitial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": false,
+          "dialogCount": 2,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedTabs": [
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          }
+        ],
+        "nestedAfterEscape": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedClosedOnlyInner": true
+      },
+      "after": {
+        "initial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open archive",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true,
+        "nestedInitial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 2,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedTabs": [
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          }
+        ],
+        "nestedAfterEscape": {
+          "tag": "BUTTON",
+          "label": "Delete Atlas",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedClosedOnlyInner": true
+      }
+    },
+    {
+      "screen": "files-refusal",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "OK",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen files-refusalBackground actionPrivate before fixture · production files-re",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "OK",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Add a folder",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "files-suggest",
+      "theme": "light",
+      "size": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen files-suggestBackground actionPrivate before fixture · production files-su",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "SECTION",
+          "label": "Shared with My CloudBots on My Cloud can use these folders, even when this computer is off. They nev",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "about",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen aboutBackground actionPrivate before fixture · production about · syntheti",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open about",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "phone",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen phoneBackground actionPrivate before fixture · production phone · syntheti",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Close",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open phone",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "archive",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen archiveBackground actionPrivate before fixture · production archive · synt",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true,
+        "nestedInitial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": false,
+          "dialogCount": 2,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedTabs": [
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          }
+        ],
+        "nestedAfterEscape": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedClosedOnlyInner": true
+      },
+      "after": {
+        "initial": {
+          "tag": "DIV",
+          "label": "Archived botsConversations are kept until you choose to delete a bot.Restore allDelete all2 archived",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Open archive",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": true
+        },
+        "escapeClosed": true,
+        "nestedInitial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 2,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedTabs": [
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Delete",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          },
+          {
+            "tag": "BUTTON",
+            "label": "Cancel",
+            "id": "",
+            "insideAnyDialog": true,
+            "insideTopDialog": true,
+            "dialogCount": 2,
+            "body": false,
+            "fixtureOpener": false
+          }
+        ],
+        "nestedAfterEscape": {
+          "tag": "BUTTON",
+          "label": "Delete Atlas",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "nestedClosedOnlyInner": true
+      }
+    },
+    {
+      "screen": "files-refusal",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "OK",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen files-refusalBackground actionPrivate before fixture · production files-re",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "OK",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "BUTTON",
+          "label": "Add a folder",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      }
+    },
+    {
+      "screen": "files-suggest",
+      "theme": "light",
+      "size": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "geometryUnchanged": true,
+      "before": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": true,
+        "reverseEscaped": true,
+        "afterEscape": {
+          "tag": "BODY",
+          "label": "Search synthetic botsOpen files-suggestBackground actionPrivate before fixture · production files-su",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": true,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      },
+      "after": {
+        "initial": {
+          "tag": "BUTTON",
+          "label": "Cancel",
+          "id": "",
+          "insideAnyDialog": true,
+          "insideTopDialog": true,
+          "dialogCount": 1,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "forwardEscaped": false,
+        "reverseEscaped": false,
+        "afterEscape": {
+          "tag": "SECTION",
+          "label": "Shared with My CloudBots on My Cloud can use these folders, even when this computer is off. They nev",
+          "id": "",
+          "insideAnyDialog": false,
+          "insideTopDialog": false,
+          "dialogCount": 0,
+          "body": false,
+          "fixtureOpener": false
+        },
+        "escapeClosed": true
+      }
+    }
+  ],
+  "beforePageErrors": [],
+  "afterPageErrors": [],
+  "beforeExternal": [],
+  "afterExternal": []
+}

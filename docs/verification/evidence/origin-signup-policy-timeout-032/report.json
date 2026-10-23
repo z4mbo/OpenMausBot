@@ -1,0 +1,99 @@
+{
+  "cycle": "032",
+  "status": "verified-isolated-candidate-not-published",
+  "baselineCommit": "2a9628f7c13cfb628d0401f0cd3f1a464a6f9511",
+  "fixCommit": "5b4aa15ea0968ba53128d40bef45466e099a96c5",
+  "priorPublishedRelease": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+  "severity": "P2 availability/UX",
+  "authenticationBypassProven": false,
+  "scenario": "The signup policy remains undefined indefinitely. The prior waiting state never terminates or offers recovery; site Providers has no query deadline or connection-error UI.",
+  "correction": "After 10 seconds, stop the public signup policy subscription, replace loading with a connection alert and Try again, and resume the subscription with a new bounded attempt on Retry. Clear timers on resolution/unmount and ignore stale callbacks. Sign-in and verified invitation signup do not subscribe or start this deadline.",
+  "before": {
+    "capturedAt": "2026-10-18T17:29:58.241Z",
+    "browserCases": 8,
+    "unresolvedPolicyMs": 60000,
+    "spinnerRemained": true,
+    "retryAvailable": false,
+    "timeMode": "Playwright virtual clock; not a 60-second wall-clock observation"
+  },
+  "after": {
+    "capturedAt": "2026-10-18T17:31:49.543Z",
+    "browserCases": 16,
+    "timeoutMs": 10000,
+    "retryPolicyResolvedAfterMs": 9000,
+    "noStaleTimeoutAfterAdditionalMs": 20000,
+    "states": [
+      "pending",
+      "timeout with Retry",
+      "Retry pending",
+      "invite-only resolved after Retry and old deadline"
+    ],
+    "timeMode": "Playwright virtual clock"
+  },
+  "browser": {
+    "screenshots": 24,
+    "widths": [
+      375,
+      1440
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "overflowCases": 0,
+    "runtimeExceptions": 0,
+    "externalRequests": 0,
+    "authenticationActionCalls": 0
+  },
+  "fixture": {
+    "realAuthComponentAndCss": true,
+    "syntheticSessionPolicyActionsNavigationAndSiteShell": true,
+    "font": "Local system sans fallback",
+    "reducedMotionConfigured": true,
+    "computedMotionNotAssertedHere": true
+  },
+  "tests": {
+    "baseline": {
+      "failed": 5,
+      "passed": 17,
+      "file": "components/auth-page.test.tsx"
+    },
+    "after": {
+      "passed": 25,
+      "files": 2
+    },
+    "cases": [
+      "timeout and Retry resubscription",
+      "invite-only response before deadline",
+      "open response before deadline",
+      "stale timer from replaced flow",
+      "timer cleanup on unmount",
+      "sign-in exemption",
+      "verified invitation exemption"
+    ],
+    "siteTypecheck": "No diagnostics; exit 0",
+    "diffCheck": "Passed before source commit"
+  },
+  "rawTestLogs": [
+    {
+      "path": "fail-before.log.gz",
+      "encoding": "gzip of unchanged raw Windows test output",
+      "uncompressedBytes": 4090,
+      "uncompressedSha256": "8f709c7479846a9a8eb9c542ed6384c037b0fd0c51f3cf320ad2d694e63dd046"
+    },
+    {
+      "path": "pass-after.log.gz",
+      "encoding": "gzip of unchanged raw Windows test output",
+      "uncompressedBytes": 263,
+      "uncompressedSha256": "224a837614616220cf9f35732dc49f39796a8345fc1c521839c25036628a5a52"
+    }
+  ],
+  "limitations": [
+    "No real backend, network outage, account, invitation acceptance or email provider was contacted",
+    "Policy subscription stop/resume uses the documented Convex query skip contract and was checked at the mocked hook boundary; no live WebSocket unsubscribe was measured",
+    "Invitation-preview/session waiting states outside the public signup policy are unchanged",
+    "A fixture locator initially matched the toolbar output status as well as the main loading status; the corrected main-scoped locator produced these final observations",
+    "No reduced-motion CSS, version, changelog, push or deployment was changed"
+  ],
+  "independentSourceReview": "CLEAR; read-only review of exact runtime and regression commit"
+}

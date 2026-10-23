@@ -1,0 +1,39 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/origin-pipeline.test.ts (15 tests | 2 failed | 13 skipped) 16ms
+     × refuses an unpriced AI call under an active $0 cap after its delayed claim 14ms
+     × refuses an unpriced AI call under an active $2 cap after its delayed claim 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/origin-pipeline.test.ts > pipeline sender > refuses an unpriced AI call under an active $0 cap after its delayed claim
+ FAIL  server/origin-pipeline.test.ts > pipeline sender > refuses an unpriced AI call under an active $2 cap after its delayed claim
+AssertionError: expected { ok: true, …(2) } to match object { ok: false, …(1) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "error": StringContaining "daily API budget",
+-   "ok": false,
++   "ok": true,
+  }
+
+ ❯ server/origin-pipeline.test.ts:49:67
+     47|     const providers = fakeProviders([{ body: { success: true, conversa…
+     48|     const sender = createPipelineSender({ keys: KEYS, fetch: providers…
+     49|     expect(await sender.send({ client: convex.client, ...base })).toMa…
+       |                                                                   ^
+     50|     expect(providers.requests).toHaveLength(0);
+     51|     expect(convex.finished()).toEqual([expect.objectContaining({ statu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 skipped (15)
+   Start at  07:20:33
+   Duration  1.67s (transform 592ms, setup 488ms, import 1000ms, tests 16ms, environment 0ms)
+

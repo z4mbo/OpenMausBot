@@ -1,0 +1,413 @@
+{
+  "status": "published-and-proof-checked",
+  "cycle": "040",
+  "version": "0.2.15",
+  "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "recordedAt": "2026-10-19T21:33:45.020Z",
+  "scope": "Provider Usage fixes and matching release notes only; newer feature work is not included.",
+  "pins": {
+    "ciRun": 39318748860,
+    "ciAttempt": 1,
+    "nativeRun": 39318738462,
+    "nativeAttempt": 2,
+    "sitePRRun": 39318748839,
+    "sitePRAttempt": 1,
+    "siteTagRun": 39318738427,
+    "siteTagAttempt": 1,
+    "githubReleaseId": 417743732,
+    "manifestSha256": "98bbf032d314c344c892cf69af3ce0ad61bd2bbd10c4aff75803c3ee863c57a7",
+    "checksumsSha256": "9a06a1566dd65e98ba9e255882b9348d1b2406a43fe6b6b1fa217be039a4947b",
+    "nativeAuditReceiptSha256": "caae1fb33f270461c78fcd3124451efdc8380d9d483706429a63fa21e0ba414e",
+    "siteImageId": "sha256:91b6d2d7ade9b89ac21a95e76b4870c5ee246ad204f8f1acf21112278d0e51ef",
+    "siteIdentitySha256": "92d4c37d53773520cc3958aae2122162048b526d37324725b294f95e1fe7caff"
+  },
+  "github": {
+    "url": "https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.15",
+    "publishedAt": "2026-10-19T21:21:36Z",
+    "draft": false,
+    "assets": 15,
+    "metadata": {
+      "path": "github/current-release.json",
+      "bytes": 6984,
+      "sha256": "ef7065b507b32b59c3af6357d2ab8c9c0c9c323d23ad04f5adba03b0a7949bef"
+    }
+  },
+  "pullRequest": {
+    "checkedAt": "2026-10-19T21:31:39.916Z",
+    "number": 1,
+    "url": "https://github.com/z4mbo/Origin/pull/1",
+    "state": "closed",
+    "merged": true,
+    "mergedAt": "2026-10-19T21:25:10Z",
+    "mergeCommit": "8dc1c710a1a98636a1dc159e59b6ce838fff45aa",
+    "head": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+    "headBranch": "bugfix/scan",
+    "baseBranch": "origin-integration",
+    "title": "Origin 0.2.15: safer accounts and accurate provider usage",
+    "evidence": {
+      "path": "github/current-pr.json",
+      "bytes": 445,
+      "sha256": "45eef28ff93a1953da2b83cdbb27b1055e234166d0a8d0b3f613c3bbe3ecad96"
+    },
+    "branchDeletionRequested": false
+  },
+  "workflows": [
+    {
+      "id": 39318748860,
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39318748860",
+      "attempt": 1,
+      "conclusion": "success",
+      "headSha": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+      "totalJobs": 20,
+      "skippedJobs": [
+        "deploy composio broker (Cloudflare Worker)"
+      ],
+      "evidence": {
+        "path": "github/current-ci.json",
+        "bytes": 42245,
+        "sha256": "519d829680ba8fe35b69ab8162a9dd1719ae280371fa1be8063305f2b55c0276"
+      }
+    },
+    {
+      "id": 39318738462,
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39318738462",
+      "attempt": 2,
+      "conclusion": "success",
+      "headSha": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+      "totalJobs": 3,
+      "skippedJobs": [],
+      "evidence": {
+        "path": "github/current-native.json",
+        "bytes": 8664,
+        "sha256": "62bc72fbd29e63391814f0f07bfe5e91635cc74c7ccd1e4542769b76f764e827"
+      }
+    },
+    {
+      "id": 39318748839,
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39318748839",
+      "attempt": 1,
+      "conclusion": "success",
+      "headSha": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+      "totalJobs": 1,
+      "skippedJobs": [],
+      "evidence": {
+        "path": "github/current-site-pr.json",
+        "bytes": 2814,
+        "sha256": "6a4159b452013c1ea6c4c85cff94861914790861651d16ffeb59c0b0bc8bce02"
+      }
+    },
+    {
+      "id": 39318738427,
+      "url": "https://github.com/z4mbo/Origin/actions/runs/39318738427",
+      "attempt": 1,
+      "conclusion": "success",
+      "headSha": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+      "totalJobs": 1,
+      "skippedJobs": [],
+      "evidence": {
+        "path": "github/current-site-tag.json",
+        "bytes": 2809,
+        "sha256": "58323d85d2747229e313d61e066d5a09dfd7f811781c8cb251789f103cfec5eb"
+      }
+    }
+  ],
+  "sourceAcceptance": {
+    "clientSharedTests": 6047,
+    "clientSharedTestFiles": 570,
+    "focusedTests": 293,
+    "focusedPlatformSkips": 2,
+    "releaseGuardsAfterVersionBump": 54,
+    "clientTypecheck": "passed",
+    "serverTypecheck": "passed",
+    "touchedFileLint": "passed",
+    "provenance": "../../origin-plan-usage.md and ../origin-plan-usage-040/manifest.json; these recorded source runs were not repeated during delivery archival."
+  },
+  "publicDownloads": {
+    "status": "passed",
+    "version": "0.2.15",
+    "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+    "desktopRun": 39318738462,
+    "payloads": 13,
+    "aliases": 3,
+    "metadata": 2,
+    "payloadBytes": 1947902547,
+    "evidence": {
+      "path": "public/public-downloads-040.log",
+      "bytes": 2756,
+      "sha256": "d7656ccc39b88c680cb7d3bb56c338329608005d9e15f14071076a54dae5b96c"
+    },
+    "canonicalManifest": {
+      "path": "distribution/release-manifest-0.2.15.json",
+      "bytes": 2256,
+      "sha256": "98bbf032d314c344c892cf69af3ce0ad61bd2bbd10c4aff75803c3ee863c57a7"
+    },
+    "checksums": {
+      "path": "distribution/SHA256SUMS-0.2.15.txt",
+      "bytes": 1191,
+      "sha256": "9a06a1566dd65e98ba9e255882b9348d1b2406a43fe6b6b1fa217be039a4947b"
+    },
+    "publicHashVerificationWasPreviouslyRun": true,
+    "largePayloadsDownloadedAgainDuringArchival": false
+  },
+  "publicSite": {
+    "http": {
+      "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+      "version": "0.2.15",
+      "origin": "https://origin.imbored.fun",
+      "anonymousHttp": true,
+      "credentialsOrCookiesSupplied": false,
+      "submissions": 0,
+      "expectations": {
+        "version": "0.2.15",
+        "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+        "currentNoteCount": 2,
+        "canonicalTitleTotal": 57,
+        "releaseArticles": 8,
+        "auditFindings": 73,
+        "retainedPriorBugRows": 52,
+        "retainedPublished030AuditRows": 59,
+        "retainedPublishedAuditRows": 69,
+        "siteFileCount": 152
+      },
+      "routes": [
+        {
+          "path": "/",
+          "status": 200,
+          "bytes": 43824,
+          "sha256": "2f1c52e1297a3d07f98e11d5a0447bb6520b3f9147fbaf5c371e79ff7f1dd0db",
+          "heading": "Every project gets a team of agents that ships.",
+          "authShellOnly": false,
+          "downloadLinks": 3
+        },
+        {
+          "path": "/login",
+          "status": 200,
+          "bytes": 12633,
+          "sha256": "f06ccf17770f3e9a0a8981cfa0aad74212111d26ee811dc8e249de5d0dc261a4",
+          "heading": null,
+          "authShellOnly": true
+        },
+        {
+          "path": "/signup",
+          "status": 200,
+          "bytes": 12661,
+          "sha256": "308a9ed545fdbfd5d03b6523388c536638f30e8192b2eedb4c30cbe3582d9112",
+          "heading": null,
+          "authShellOnly": true
+        },
+        {
+          "path": "/whats-new",
+          "status": 200,
+          "bytes": 49014,
+          "sha256": "94abe702eba463671c5244ae01078a240c5bf8d4597a57f63c4c5038947f8831",
+          "heading": "What's new",
+          "authShellOnly": false,
+          "currentNotes": 2,
+          "canonicalTitles": 57,
+          "canonicalBodies": 57,
+          "articles": 8
+        }
+      ],
+      "passed": true,
+      "checkedAt": "2026-10-19T21:23:38.003Z"
+    },
+    "evidence": {
+      "path": "public/public-http-040.json",
+      "bytes": 1687,
+      "sha256": "d838ab4f6600701ce375473c69f838c0671d6220050a8028b8226338c891cc87"
+    },
+    "browser": [
+      {
+        "url": "https://origin.imbored.fun/whats-new",
+        "metrics": {
+          "path": "site/public-whats-new.json",
+          "bytes": 2823,
+          "sha256": "eff9e1aae5f5e24f6b3e01d29a795f594a21e13aa555a65aaf4d108fde05c9b4"
+        },
+        "screenshot": {
+          "path": "site/public-whats-new.png",
+          "bytes": 53326,
+          "sha256": "4506f9b7ad87699d6b578e98a445a5dae2b3c2977620a725f3ad79c063cc263d"
+        }
+      },
+      {
+        "url": "https://origin.imbored.fun/",
+        "metrics": {
+          "path": "site/public-landing.json",
+          "bytes": 4142,
+          "sha256": "2ac7a38c8a90bc08e8e97ef194575ca24f8e2c002bd34a8e12504a847f232d93"
+        },
+        "screenshot": {
+          "path": "site/public-landing.png",
+          "bytes": 55329,
+          "sha256": "004cb8772a225787ce6aa86d8524551ae576ac2381159063f697ab42f7e00aa1"
+        }
+      }
+    ],
+    "anonymous": true,
+    "submissions": 0,
+    "authenticatedFlowAcceptance": false,
+    "landingImageQualification": "First observed images were loaded. Additional off-screen/lazy entries were recorded complete:false with nonzero naturalWidth; no full-page image-completion assertion."
+  },
+  "backend": {
+    "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+    "baselineSource": "ab0cd72b4c2f004c1015adca034472241569c04b",
+    "backendReused": true,
+    "newBackendDeployment": false,
+    "paths": [
+      "backend",
+      "shared/origin-columns.ts",
+      "shared/origin-site-address.ts",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "tsconfig.json",
+      ".npmrc",
+      ".pnpmfile.cjs",
+      ".pnpmfile.mjs",
+      "convex.json"
+    ],
+    "rootPackageDifference": "version only",
+    "verifiedAt": "2026-10-19T21:09:49.971Z"
+  },
+  "nativeAudit": {
+    "status": "bounded-package-audit-passed",
+    "evidence": {
+      "path": "native/receipt.json",
+      "bytes": 175175,
+      "sha256": "caae1fb33f270461c78fcd3124451efdc8380d9d483706429a63fa21e0ba414e"
+    },
+    "targets": [
+      "Windows x64",
+      "Mac arm64",
+      "Mac x64"
+    ],
+    "canonicalPayloads": 13,
+    "totalDistributionFiles": 15,
+    "windowsResourceSmokeExitCode": 0,
+    "observedProcesses": 6,
+    "observedListeners": 6,
+    "remainingOwnedProcesses": 0,
+    "remainingOwnedListeners": 0,
+    "qualification": [
+      "Actual downloaded archives, canonical feeds and thirteen payload hashes checked against successful exact-source GitHub run metadata.",
+      "Mac arm64/x64 verification is static ZIP/ASAR/plist/Mach-O/source AST/UI reachability only. No Mac execution, installed app GUI or installer/updater flow acceptance.",
+      "Windows smoke executes the extracted server/browser resources under pinned Node24 in an isolated whitelisted HOME/data/temp environment. It does not install or open the owner app.",
+      "Process/listener closure was independently sampled within the owned process tree and scoped audit path; fast children between samples may not be observed.",
+      "No Windows PE version-resource check, whole-bundle rebuild equality, real-provider quota/credential exercise or public production acceptance is claimed.",
+      "Original auditor ASAR renderer-location failure is retained; v2 inspects the documented Resources/ui assets and verifies entrypoint reachability with the same renderer structural checks."
+    ]
+  },
+  "recoveredFailures": [
+    {
+      "phase": "Windows native attempt 1",
+      "finding": "PowerShell Expand-Archive child was terminated during CUA archive extraction. The targeted Windows retry succeeded; successful Mac output was retained.",
+      "evidence": [
+        {
+          "path": "native/attempt1-run.json",
+          "bytes": 11522,
+          "sha256": "9fd3a10cca89b3089edec5dc62226fa9cbcad356091df829d08fe243885a4391"
+        },
+        {
+          "path": "native/attempt1-jobs.json",
+          "bytes": 11324,
+          "sha256": "b51c1618f638bf7aedb31434d51a506295fc2305d2d89b9ff74fd68c04599b32"
+        },
+        {
+          "path": "native/attempt1-windows-failure.log",
+          "bytes": 159815,
+          "sha256": "88f5055c84d761dc9ab8e9c0d98a523790d04e83211772a6f978121ce25e0f3c"
+        },
+        {
+          "path": "github/current-native.json",
+          "bytes": 8664,
+          "sha256": "62bc72fbd29e63391814f0f07bfe5e91635cc74c7ccd1e4542769b76f764e827"
+        }
+      ]
+    },
+    {
+      "phase": "Initial native auditor",
+      "finding": "The first auditor looked for the renderer inside ASAR. The documented package stores it in Resources/ui. The corrected auditor inspected actual UI entrypoint/assets with the same structural checks.",
+      "evidence": [
+        {
+          "path": "native/initial-auditor-layout-failure.json",
+          "bytes": 598,
+          "sha256": "6650b345391473758782ea96567a34ae39ac2298c8f369b05feaeff35437ac2b"
+        },
+        {
+          "path": "native/initial-auditor.cjs",
+          "bytes": 25858,
+          "sha256": "bec19f433ae802f96f1c477a251a956b42df7e1de52be5e97e08cc8f57f129ef"
+        },
+        {
+          "path": "native/corrected-auditor.cjs",
+          "bytes": 27591,
+          "sha256": "3f8edd2b33bad36d71c399542b69f289f1dbec06a99750114f8f5e27aad4f066"
+        },
+        {
+          "path": "native/corrected-metadata-results.json",
+          "bytes": 162846,
+          "sha256": "091629181295a15ce1fdbf2434aa67d20ba2ca2b07bd9e70ace9a0afcd371244"
+        }
+      ]
+    },
+    {
+      "phase": "Private artifact staging",
+      "finding": "An initial stalled SSH staging command was stopped and marked for reconciliation. The next attempt stopped at the free-space guard. Only 22 old private staging payload duplicates from 0.2.3/0.2.5 were removed after local size/hash verification; public files were retained. A fresh stage then completed all 15 files and passed metadata checks before publication.",
+      "evidence": [
+        {
+          "path": "staging/initial-stage-failure.json",
+          "bytes": 378,
+          "sha256": "8b9ba2a8dae275a0074438971086876a1864954c5bf1b32884c117946ae39aa4"
+        },
+        {
+          "path": "staging/resume-disk-guard-failure.json",
+          "bytes": 280,
+          "sha256": "a8f4e957c469c6683499f20f252ec66d06fb0b4698074cd1be3bc75fedeaa412"
+        },
+        {
+          "path": "staging/resume-disk-guard.py",
+          "bytes": 893,
+          "sha256": "4ad38b5f36fe596cdf51d448a06991899cf6f18746dd61d6651d949fde2e8320"
+        },
+        {
+          "path": "staging/local-backups-verified.json",
+          "bytes": 5886,
+          "sha256": "43754d0caab73e6f29a46acb8097feb10adb41c7a68d4c6e226ba83d82e357a9"
+        },
+        {
+          "path": "staging/backed-up-stage-cleanup.log",
+          "bytes": 7802,
+          "sha256": "0bd3441b57390938106ff73e5ffe19f74edcd5a912e572606a7056ce37fde3be"
+        },
+        {
+          "path": "staging/private-stage-ready.json",
+          "bytes": 346,
+          "sha256": "4f2f5deb2d22f0f0fc72b24e9ab5bd6e1da914be22a7018a5994b86ad4ac27ac"
+        },
+        {
+          "path": "staging/private-stage-check.log",
+          "bytes": 619,
+          "sha256": "26053e3e38ae7a901d4864187a875c27e641e320de59c51dd006901f04123eea"
+        }
+      ]
+    }
+  ],
+  "notShippedInThisVersion": [
+    "Ranked model/provider fallback",
+    "Daily computer-wide or per-agent API budgets",
+    "New cross-machine bot metadata sync repairs",
+    "New shared model-host execution",
+    "New Agents thread navigation and delegation continuity UI",
+    "New shared project order",
+    "Claude desktop-style minimal Usage panel",
+    "Proposed top-bar/tools navigation changes"
+  ],
+  "remainingAcceptance": [
+    "No physical Mac installation or native interactive Mac execution.",
+    "Windows checks cover CI packaged smoke and isolated extracted server/browser resources, not an owner-profile installer/updater journey.",
+    "Windows packages are unsigned; Mac packages are ad hoc signed, not notarized, and require manual downloads for updates.",
+    "No real-provider quota/credential tests or vendor invoice/budget acceptance.",
+    "No production-data test mutations or authenticated production user journeys.",
+    "No whole-bundle byte-for-byte rebuild equality or Windows PE version-resource inspection."
+  ]
+}

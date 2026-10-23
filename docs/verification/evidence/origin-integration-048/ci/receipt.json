@@ -1,0 +1,102 @@
+{
+  "status": "BOUNDED_LOCAL_CORRECTION_PASS_FULL_CI032_FAILED",
+  "run": "39381788335",
+  "source032": "5aafbf02ab2ded075d2c75955419f35a45cce99a",
+  "reviewed041": "86b9326afd81d277117ec953b7a9b70caed07d07",
+  "workflowMerge": "2043883b7fb739692c1b8fd7c7d0f7c6d5ac858d",
+  "workflowMergeTreeVerified": false,
+  "correctionCommit": "0baf67f27",
+  "runtimeAllocationChanged": false,
+  "local": {
+    "red": {
+      "failed": 1,
+      "deselected": 41
+    },
+    "green": {
+      "passed": 3,
+      "deselected": 39
+    },
+    "helper": {
+      "passed": 21
+    },
+    "oxlintExit": 0,
+    "diffCheckExit": 0
+  },
+  "ownedSource": [
+    {
+      "path": "server/direct-coordination.e2e.test.ts",
+      "sha256": "2e6b6e416e345b7c5dfebe8fabc8398aad3da8a5e4063323779f6c810896eabd"
+    },
+    {
+      "path": "server/delegation-thread.test.ts",
+      "sha256": "c032573342fc5c5c6b420af7b725bf2e8b0ed3d0f9e0e63b246ef5e5dbe04f2f"
+    }
+  ],
+  "rootReportedClientTsc": {
+    "command": "tsc -b",
+    "source": "86b9326afd81d277117ec953b7a9b70caed07d07",
+    "session": 36576,
+    "exitCode": 0,
+    "logBytes": 0,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reportAuthority": "parent root; not rerun by this lane"
+  },
+  "jobExcerpts": [
+    {
+      "output": "linux-shard2-failure.log",
+      "source": ".omb-scratch/ci-048/linux23/shard2-118493171061.clean.log",
+      "sourceSha256": "1503bd3a429db67c681eb76f4c645306fdee4b31abfb34ca51d3aa162486ed18",
+      "firstLine": 2742,
+      "lastLine": 2772
+    },
+    {
+      "output": "linux-shard3-failure.log",
+      "source": ".omb-scratch/ci-048/linux23/shard3-118493171187.clean.log",
+      "sourceSha256": "508692ccd093421f540839a3373ff50546a69ffebfb1f4f5cd7df49d655d6cdf",
+      "firstLine": 5083,
+      "lastLine": 5127
+    },
+    {
+      "output": "windows-shard2-failure.log",
+      "source": ".omb-scratch/ci-046/job-118493171051-032-windows.log",
+      "sourceSha256": "ca591182b4318de9eef9c8b3489b06d8feab2701d5187d6059fe888a38b9f6ea",
+      "firstLine": 2915,
+      "lastLine": 2945
+    },
+    {
+      "output": "windows-shard4-failure.log",
+      "source": ".omb-scratch/ci-046/job-118493171145-032-windows.log",
+      "sourceSha256": "7192270927b6b89e73789db0a82e75b1d356d5409e1acfa52ec44ae60e064a84",
+      "firstLine": 2926,
+      "lastLine": 2946
+    }
+  ],
+  "localLogs": [
+    {
+      "output": "continuity-red.log",
+      "source": ".omb-scratch/ci-048/linux23/current041-continuity-red.log",
+      "sourceSha256": "2e00237f3e886acada73485c630c248485db7defd6802483e8d8ba3a28d9f5f6"
+    },
+    {
+      "output": "continuity-green.log",
+      "source": ".omb-scratch/ci-048/linux23/current041-continuity-green.log",
+      "sourceSha256": "b871247afffe3555a3ed3e7fa6ec0db25a518f98fc607fba6428eadc95712d22"
+    },
+    {
+      "output": "delegation-helper-green.log",
+      "source": ".omb-scratch/ci-048/linux23/helper-green.log",
+      "sourceSha256": "6ed6ec5e2fc393e4133abf1aec514ed271744984e52b63cf40696510b3907f2b"
+    },
+    {
+      "output": "continuity-oxlint.log",
+      "source": ".omb-scratch/ci-048/linux23/continuity-oxlint.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limits": [
+    "Focused isolated fake-engine server fixtures only",
+    "Full CI032 remains failed",
+    "No fresh full CI041 acceptance claim",
+    "No native GUI, provider, production or publication operations"
+  ]
+}

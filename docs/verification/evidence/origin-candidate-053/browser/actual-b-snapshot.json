@@ -1,0 +1,96 @@
+{
+  "bots": [
+    {
+      "id": "73d43215-be1e-448b-afd4-d0fbad6b83cb",
+      "threadId": "f78ca17e-8eee-4ded-bb0f-20b11e71dc2d",
+      "name": "Thread recovery",
+      "title": "",
+      "description": "",
+      "soul": "",
+      "soulHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "notifications": true,
+      "color": "green",
+      "unread": true,
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "createdAt": 1792613015433,
+      "section": "Agents",
+      "activity": "idle",
+      "busy": false,
+      "approvalMode": "full",
+      "waitingForTeammates": false,
+      "mainThreadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+      "avatarUrl": null,
+      "tasks": [
+        {
+          "threadId": "f78ca17e-8eee-4ded-bb0f-20b11e71dc2d",
+          "title": "Current server thread B",
+          "createdAt": 1792613016169,
+          "updatedAt": 1792613016169,
+          "approvalMode": "full",
+          "autoApprove": false,
+          "alwaysAllow": [],
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        },
+        {
+          "threadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+          "title": "Pinned thread A",
+          "createdAt": 1792613015433,
+          "updatedAt": 1792613015894,
+          "unread": true,
+          "activity": "idle",
+          "busy": false,
+          "lastThreadOrderAt": 1792613015886,
+          "cwd": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-WqDvAb\\task-workspaces\\73d43215-be1e-448b-afd4-d0fbad6b83cb\\50226d54-ffc3-44c6-953e-11568bd239b9",
+          "usage": {
+            "input": 12,
+            "output": 5,
+            "cachedInput": 2,
+            "costUsd": 0.01,
+            "turns": 1,
+            "lastTurn": {
+              "input": 12,
+              "output": 5,
+              "cachedInput": 2,
+              "costUsd": 0.01
+            },
+            "context": {
+              "tokens": 12,
+              "window": 200000
+            }
+          },
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        }
+      ],
+      "messages": [],
+      "hasMore": false,
+      "activeLeafId": null
+    }
+  ],
+  "botQueuedMessages": {},
+  "sections": [
+    "Agents"
+  ],
+  "groups": [],
+  "computerControl": {
+    "73d43215-be1e-448b-afd4-d0fbad6b83cb": {
+      "held": false,
+      "helpReason": null
+    }
+  }
+}

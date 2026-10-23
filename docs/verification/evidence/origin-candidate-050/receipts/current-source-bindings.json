@@ -1,0 +1,86 @@
+{
+  "headAtArchive": "a7636129e50107f235c889a28b13113b2b72ce93",
+  "scope": "Selected source bytes only, not a complete fixture or final release tree; root-owned version/docs edits remain pending.",
+  "files": [
+    {
+      "path": "backend/convex/budgets.ts",
+      "sha256": "df66505194beb29a7896208e6383f1027f7a6b8effd828d23bf1baaeeb05652d",
+      "bytes": 10110
+    },
+    {
+      "path": "backend/convex/modelHosts.ts",
+      "sha256": "27cdcb0300626ed9b67dec11ef2667026c2f741266a42af82f19da56c7b13480",
+      "bytes": 38129
+    },
+    {
+      "path": "backend/convex/schema.ts",
+      "sha256": "270c71fdef57e3f2f742190818e203e39744f0e226844647270c2bdcfe66de3b",
+      "bytes": 21727
+    },
+    {
+      "path": "server/origin-studio.ts",
+      "sha256": "43e8ef7fbcd2a3def336e206add86ec5715c8b2a52dcf591dc873a0a212bd6cb",
+      "bytes": 39558
+    },
+    {
+      "path": "server/origin-studio-workflow.ts",
+      "sha256": "e122da763c3db403c5808f09ecfc35d5bd9a404455cc4aecb08283d222a79210",
+      "bytes": 14826
+    },
+    {
+      "path": "server/routes/studio.ts",
+      "sha256": "50b68d6ed47f6064f3e8c4af356cfb4bf837df8b0e9af8f043136a7916c07d35",
+      "bytes": 8947
+    },
+    {
+      "path": "server/config.ts",
+      "sha256": "6dc4e4f17e94bb865818f479bdf1bef2c3085da0726239da17a70ffeb0aaea02",
+      "bytes": 73565
+    },
+    {
+      "path": "server/drivers/claude.ts",
+      "sha256": "6372b4c59a8f5395183b84d36739cfab6ae24034600eb1aa35b4a3b9a0ab3eec",
+      "bytes": 99800
+    },
+    {
+      "path": "server/drivers/claude-billing.ts",
+      "sha256": "fbe991c2d65d031d15fa16fa9065b02d43a377f9833a570141a04712a7f41a87",
+      "bytes": 389
+    },
+    {
+      "path": "src/components/ChatUsagePopover.tsx",
+      "sha256": "bb38056fef514e1982710e8a73cca407a68aedfa143137b08d38a82e9a47df48",
+      "bytes": 6778
+    },
+    {
+      "path": "src/components/ChatUsagePopover.visibility.test.ts",
+      "sha256": "cefc0c05a8e906c0bb40062d61596b6df7c1f5baa7116a86f77765e173309029",
+      "bytes": 6207
+    },
+    {
+      "path": "src/components/project-sections.ts",
+      "sha256": "eb928ab68e0ea56af3da99d9c1a45b3646ae5fad2a5c4b6d8717de10040d8d18",
+      "bytes": 2354
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastComposer.tsx",
+      "sha256": "37e5438e33e0b34eb0331849e7745f155e5e69795f2cbadefa6dbb96397656bd",
+      "bytes": 22564
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastPage.tsx",
+      "sha256": "9cf7bc7ada3dc5962952364921f4059ef97cada7b4aebb9a56449b90f4653d58",
+      "bytes": 13858
+    },
+    {
+      "path": "src/components/origin-pages/canvas/CanvasEditor.tsx",
+      "sha256": "ba003f5162db315085e37a5c1b64ae74a046edd955cf629d85b452f0c7230ea6",
+      "bytes": 56836
+    },
+    {
+      "path": "src/components/origin-pages/canvas/Toolbar.tsx",
+      "sha256": "047ed74c60bbf74299b29d59fa00762a136759bf08e2bd2705c6ac854f12c581",
+      "bytes": 7850
+    }
+  ]
+}

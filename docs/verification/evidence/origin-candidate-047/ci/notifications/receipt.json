@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "cycle": "047",
+  "status": "targeted-verification-passed",
+  "commits": [
+    "c4e278347c31d02138f10a966a525139bcd3ba49",
+    "a148f39f44644f8566418bda9ebb54464123e7cb",
+    "82d7617a80b0d65a53546a1d010c21e0980240f5"
+  ],
+  "report": "REPORT.md",
+  "reportSha256": "a20623840e511b5dabda2793c4ec10432f68bd2c4fc44a0f4b76fa2cca1e73ef",
+  "evidenceManifestSha256": "3350062820d1464e7aec67fec4ad5947368dee090ede837becda8beb4b8ce52f",
+  "runtime": {
+    "version": "24.21.0",
+    "sha256": "ba4e6d110e8c1592a1ecd390f6b05f3da124b13871a5be62b341a07a853c6c32",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "results": {
+    "helperPassed": 31,
+    "selectedClientPassed": 231,
+    "serverFixtureUnionPassed": 56,
+    "serverFixtureUnionPlatformSkipped": 1,
+    "guardsPassed": 2,
+    "clientTypecheck": "passed",
+    "serverTypecheck": "passed",
+    "focusedLint": "passed-without-dedicated-log",
+    "diffCheck": "passed",
+    "combinedServerCountsAreUnionOfTargetedRuns": true
+  },
+  "mutations": {
+    "pushed": false,
+    "tagged": false,
+    "versionEdited": false,
+    "deployed": false,
+    "installed": false,
+    "protectedPortsTouched": false,
+    "productionDataUsed": false
+  },
+  "limits": [
+    "Root owns the full client/shared and final global verification runs.",
+    "No Linux rerun, installed Electron, macOS, real provider, or production acceptance claimed.",
+    "Long-running Chief stale expectation and interim cross-stream ordering failures are preserved with final green evidence.",
+    "No UI styling or screenshot claim.",
+    "Final source freeze and publication remain root-owned."
+  ]
+}

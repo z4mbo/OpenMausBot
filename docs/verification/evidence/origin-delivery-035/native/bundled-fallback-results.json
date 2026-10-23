@@ -1,0 +1,91 @@
+{
+  "frozenSource": "1483a7d76fb092b5ef6860afc5ffb520fc4e7707",
+  "nativeRun": 39175524797,
+  "scope": "Three known packaged server/index.js entries only; Mac index.js is the sole additional selected JS entry per ZIP.",
+  "targets": [
+    {
+      "label": "mac-arm64",
+      "file": "mac-arm64/Origin.app/Contents/Resources/server/index.js",
+      "available": true,
+      "bundleBytes": 10904652,
+      "bundleSha256": "6fae90e94bf57eb0a728e57fc184e89dc1a94ea119aa68d859f67a04a2ff0693",
+      "functionName": "cuaDescriptorPaths",
+      "functionLine": 192124,
+      "functionBytes": 355,
+      "functionSha256": "52a82b4b41fe2cc79865b4449f803a2920bff743ead9bb308dc0f6ac8f2c8631",
+      "expectedOrder": [
+        "Origin",
+        "OpenMausBot",
+        "openmausbot",
+        "OpenGrokBot",
+        "opengrokbot"
+      ],
+      "actualOrder": [
+        "Origin",
+        "OpenMausBot",
+        "openmausbot",
+        "OpenGrokBot",
+        "opengrokbot"
+      ],
+      "exactOrder": true,
+      "emittedFunction": "function cuaDescriptorPaths(platform, userData, home) {\n  if (userData) return [join101(userData, \"cua-connection.json\")];\n  if (platform !== \"darwin\") return [];\n  return [\"Origin\", \"OpenMausBot\", \"openmausbot\", \"OpenGrokBot\", \"opengrokbot\"].map(\n    (directory) => join101(home, \"Library\", \"Application Support\", directory, \"cua-connection.json\")\n  );\n}",
+      "qualification": "Static actual downloaded JS inspection only; no native platform execution or descriptor discovery acceptance inferred."
+    },
+    {
+      "label": "mac-x64",
+      "file": "mac-x64/Origin.app/Contents/Resources/server/index.js",
+      "available": true,
+      "bundleBytes": 10904652,
+      "bundleSha256": "6fae90e94bf57eb0a728e57fc184e89dc1a94ea119aa68d859f67a04a2ff0693",
+      "functionName": "cuaDescriptorPaths",
+      "functionLine": 192124,
+      "functionBytes": 355,
+      "functionSha256": "52a82b4b41fe2cc79865b4449f803a2920bff743ead9bb308dc0f6ac8f2c8631",
+      "expectedOrder": [
+        "Origin",
+        "OpenMausBot",
+        "openmausbot",
+        "OpenGrokBot",
+        "opengrokbot"
+      ],
+      "actualOrder": [
+        "Origin",
+        "OpenMausBot",
+        "openmausbot",
+        "OpenGrokBot",
+        "opengrokbot"
+      ],
+      "exactOrder": true,
+      "emittedFunction": "function cuaDescriptorPaths(platform, userData, home) {\n  if (userData) return [join101(userData, \"cua-connection.json\")];\n  if (platform !== \"darwin\") return [];\n  return [\"Origin\", \"OpenMausBot\", \"openmausbot\", \"OpenGrokBot\", \"opengrokbot\"].map(\n    (directory) => join101(home, \"Library\", \"Application Support\", directory, \"cua-connection.json\")\n  );\n}",
+      "qualification": "Static actual downloaded JS inspection only; no native platform execution or descriptor discovery acceptance inferred."
+    },
+    {
+      "label": "windows-x64",
+      "file": "windows/resources/server/index.js",
+      "available": true,
+      "bundleBytes": 10904652,
+      "bundleSha256": "6fae90e94bf57eb0a728e57fc184e89dc1a94ea119aa68d859f67a04a2ff0693",
+      "functionName": "cuaDescriptorPaths",
+      "functionLine": 192124,
+      "functionBytes": 355,
+      "functionSha256": "52a82b4b41fe2cc79865b4449f803a2920bff743ead9bb308dc0f6ac8f2c8631",
+      "expectedOrder": [
+        "Origin",
+        "OpenMausBot",
+        "openmausbot",
+        "OpenGrokBot",
+        "opengrokbot"
+      ],
+      "actualOrder": [
+        "Origin",
+        "OpenMausBot",
+        "openmausbot",
+        "OpenGrokBot",
+        "opengrokbot"
+      ],
+      "exactOrder": true,
+      "emittedFunction": "function cuaDescriptorPaths(platform, userData, home) {\n  if (userData) return [join101(userData, \"cua-connection.json\")];\n  if (platform !== \"darwin\") return [];\n  return [\"Origin\", \"OpenMausBot\", \"openmausbot\", \"OpenGrokBot\", \"opengrokbot\"].map(\n    (directory) => join101(home, \"Library\", \"Application Support\", directory, \"cua-connection.json\")\n  );\n}",
+      "qualification": "Static actual downloaded JS inspection only; no native platform execution or descriptor discovery acceptance inferred."
+    }
+  ]
+}

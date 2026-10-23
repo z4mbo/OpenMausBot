@@ -1,0 +1,477 @@
+Backend tests, site build	Set up job	﻿2026-10-21T05:00:19.4221590Z Current runner version: '2.338.0'
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4244921Z ##[group]Runner Image Provisioner
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4245789Z Hosted Compute Agent
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4246328Z Version: 20261012.601
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4246972Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4247719Z Build Date: 2026-10-12T17:48:21Z
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4248393Z Worker ID: {27badf9b-6777-46fe-9469-f84c184f3bd9}
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4249067Z Region: centralus
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4249580Z Cloud: Azure
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4250130Z ##[endgroup]
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4251734Z ##[group]Operating System
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4252521Z Ubuntu
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4253224Z 24.04.5
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4253749Z LTS
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4254293Z ##[endgroup]
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4254871Z ##[group]Runner Image
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4255440Z Image: ubuntu-24.04
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4255991Z Version: 20261012.334.1
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4256987Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4258695Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4259603Z ##[endgroup]
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4260642Z ##[group]GITHUB_TOKEN Permissions
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4262648Z Contents: read
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4263385Z Metadata: read
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4263949Z ##[endgroup]
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4265867Z Secret source: Actions
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4266756Z Cache mode: write
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4267662Z Prepare workflow directory
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4573441Z Prepare all required actions
+Backend tests, site build	Set up job	2026-10-21T05:00:19.4620326Z Getting action download info
+Backend tests, site build	Set up job	2026-10-21T05:00:19.7308204Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+Backend tests, site build	Set up job	2026-10-21T05:00:19.8086982Z Download action repository 'pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3' (SHA:ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3)
+Backend tests, site build	Set up job	2026-10-21T05:00:20.1450399Z Download action repository 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' (SHA:820762786026740c76f36085b0efc47a31fe5020)
+Backend tests, site build	Set up job	2026-10-21T05:00:20.4393322Z Complete job name: Backend tests, site build
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	﻿2026-10-21T05:00:20.5078587Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5079612Z with:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5080195Z   persist-credentials: false
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5080764Z   repository: z4mbo/Origin
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5084744Z   token: ***
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5085284Z   ssh-strict: true
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5085773Z   ssh-user: git
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5086317Z   clean: true
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5086812Z   sparse-checkout-cone-mode: true
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5087380Z   fetch-depth: 1
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5087893Z   fetch-tags: false
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5088386Z   show-progress: true
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5088889Z   lfs: false
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5089354Z   submodules: false
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5089841Z   set-safe-directory: true
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5090440Z   allow-unsafe-pr-checkout: false
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.5091234Z ##[endgroup]
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6055441Z Syncing repository: z4mbo/Origin
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6057601Z ##[group]Getting Git version info
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6058512Z Working directory is '/home/runner/work/Origin/Origin'
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6060048Z [command]/usr/bin/git version
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6127614Z git version 2.55.0
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6148384Z ##[endgroup]
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6157558Z Temporarily overriding HOME='/home/runner/work/_temp/0dd61e22-c536-4c39-902f-d3fee2924b4e' before making global git config changes
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6159018Z Adding repository directory to the temporary git global config as a safe directory
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6163294Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Origin/Origin
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6215065Z Deleting the contents of '/home/runner/work/Origin/Origin'
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6218665Z ##[group]Determining repository object format
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6220110Z ##[endgroup]
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6221663Z ##[group]Initializing the repository
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6223408Z [command]/usr/bin/git init /home/runner/work/Origin/Origin
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6431379Z hint: Using 'master' as the name for the initial branch. This default branch name
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6434330Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6436495Z hint: to use in all of your new repositories, which will suppress this warning,
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6438081Z hint: call:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6438956Z hint:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6440227Z hint: 	git config --global init.defaultBranch <name>
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6441541Z hint:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6442596Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6444571Z hint: 'development'. The just-created branch can be renamed via this command:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6446445Z hint:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6448393Z hint: 	git branch -m <name>
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6449542Z hint:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6451144Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6452477Z Initialized empty Git repository in /home/runner/work/Origin/Origin/.git/
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6454834Z [command]/usr/bin/git remote add origin https://github.com/z4mbo/Origin
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6497923Z ##[endgroup]
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6499258Z ##[group]Disabling automatic garbage collection
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6500609Z [command]/usr/bin/git config --local gc.auto 0
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6534100Z ##[endgroup]
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6535437Z ##[group]Setting up auth
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6536279Z Removing SSH command configuration
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6540576Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6569329Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6877923Z Removing HTTP extra header
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6882092Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.6911670Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7105326Z Removing includeIf entries pointing to credentials config files
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7111872Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7138121Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7315361Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7348225Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Origin/Origin/.git.path /home/runner/work/_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7377934Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7411666Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7439426Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7466686Z ##[endgroup]
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7467773Z ##[group]Fetching the repository
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:20.7472264Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a96dc8247ca30d5e87ca40753f7b41367e9d61dc:refs/remotes/pull/3/merge
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:26.4577123Z From https://github.com/z4mbo/Origin
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:26.4578796Z  * [new ref]         a96dc8247ca30d5e87ca40753f7b41367e9d61dc -> pull/3/merge
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:26.4586554Z ##[endgroup]
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:26.4587633Z ##[group]Determining the checkout info
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:26.4588614Z ##[endgroup]
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:26.4589316Z [command]/usr/bin/git sparse-checkout disable
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:26.4638777Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:26.4669886Z ##[group]Checking out the ref
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:26.4674014Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/3/merge
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.4828896Z Updating files:  56% (4879/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.4894286Z Updating files:  57% (4956/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.4947681Z Updating files:  58% (5043/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.4999058Z Updating files:  59% (5130/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5050140Z Updating files:  60% (5217/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5096058Z Updating files:  61% (5304/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5174983Z Updating files:  62% (5391/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5232114Z Updating files:  63% (5478/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5306375Z Updating files:  64% (5565/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5386647Z Updating files:  65% (5652/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5457635Z Updating files:  66% (5739/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5527200Z Updating files:  67% (5825/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5602246Z Updating files:  68% (5912/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5666895Z Updating files:  69% (5999/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5724626Z Updating files:  70% (6086/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5838383Z Updating files:  71% (6173/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5926414Z Updating files:  72% (6260/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.5992176Z Updating files:  73% (6347/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6048460Z Updating files:  74% (6434/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6107813Z Updating files:  75% (6521/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6181225Z Updating files:  76% (6608/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6266769Z Updating files:  77% (6695/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6337686Z Updating files:  78% (6782/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6402164Z Updating files:  79% (6869/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6459763Z Updating files:  80% (6956/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6510878Z Updating files:  81% (7043/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6555778Z Updating files:  82% (7130/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6594519Z Updating files:  83% (7217/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6652323Z Updating files:  84% (7303/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6707380Z Updating files:  85% (7390/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6768259Z Updating files:  86% (7477/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6822621Z Updating files:  87% (7564/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6876494Z Updating files:  88% (7651/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6925290Z Updating files:  89% (7738/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.6968049Z Updating files:  90% (7825/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7017882Z Updating files:  91% (7912/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7072031Z Updating files:  92% (7999/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7119322Z Updating files:  93% (8086/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7157911Z Updating files:  94% (8173/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7201110Z Updating files:  95% (8260/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7236072Z Updating files:  96% (8347/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7267891Z Updating files:  97% (8434/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7549714Z Updating files:  98% (8521/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7642306Z Updating files:  99% (8608/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7643558Z Updating files: 100% (8694/8694)
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7644632Z Updating files: 100% (8694/8694), done.
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7767322Z Note: switching to 'refs/remotes/pull/3/merge'.
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7767708Z 
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7767970Z You are in 'detached HEAD' state. You can look around, make experimental
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7769274Z changes and commit them, and you can discard any commits you make in this
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7770053Z state without impacting any branches by switching back to a branch.
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7770456Z 
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7770901Z If you want to create a new branch to retain commits you create, you may
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7771991Z do so (now or later) by using -c with the switch command. Example:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7772483Z 
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7772649Z   git switch -c <new-branch-name>
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7773511Z 
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7773692Z Or undo this operation with:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7773995Z 
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7774154Z   git switch -
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7774389Z 
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7774794Z Turn off this advice by setting config variable advice.detachedHead to false
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7775236Z 
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7775770Z HEAD is now at a96dc82 Merge bd111a97d1f161a51e32ad050b4363874d1cd517 into fa83fb6b9e7e6e7e8195e93405a975007917872a
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7800009Z ##[endgroup]
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7841613Z [command]/usr/bin/git log -1 --format=%H
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7865135Z a96dc8247ca30d5e87ca40753f7b41367e9d61dc
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7875079Z ##[group]Removing auth
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7875809Z Removing SSH command configuration
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7880170Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.7907361Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8103123Z Removing HTTP extra header
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8107122Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8136958Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8334490Z Removing includeIf entries pointing to credentials config files
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8337929Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8361070Z includeif.gitdir:/home/runner/work/Origin/Origin/.git.path
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8362133Z includeif.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8362944Z includeif.gitdir:/github/workspace/.git.path
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8363586Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8369211Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Origin/Origin/.git.path
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8389296Z /home/runner/work/_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8398900Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Origin/Origin/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-54d65d9b\-6aaa\-41e5\-8664\-e6297cb1b944\.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8777598Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8798526Z /home/runner/work/_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.8805013Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-54d65d9b\-6aaa\-41e5\-8664\-e6297cb1b944\.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.9175120Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.9199462Z /github/runner_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.9211446Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-54d65d9b\-6aaa\-41e5\-8664\-e6297cb1b944\.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.9877494Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.9901337Z /github/runner_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:27.9909615Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-54d65d9b\-6aaa\-41e5\-8664\-e6297cb1b944\.config
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:28.0381251Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:28.0575180Z Removing credentials config '/home/runner/work/_temp/git-credentials-54d65d9b-6aaa-41e5-8664-e6297cb1b944.config'
+Backend tests, site build	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:00:28.0672326Z ##[endgroup]
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	﻿2026-10-21T05:00:28.0888479Z ##[group]Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:28.0889327Z with:
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:28.0889667Z   dest: ~/setup-pnpm
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:28.0889982Z   run_install: null
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:28.0890294Z   cache: false
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:28.0890613Z   cache_dependency_path: pnpm-lock.yaml
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:28.0890993Z   package_json_file: package.json
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:28.0891359Z   standalone: false
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:28.0891640Z ##[endgroup]
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:28.2278359Z ##[group]Running self-installer...
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:30.4175411Z 
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:30.4176500Z added 1 package, and audited 2 packages in 2s
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:30.4176916Z 
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:30.4177276Z 1 package is looking for funding
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:30.4177702Z   run `npm fund` for details
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:30.4184281Z 
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:30.4184899Z found 0 vulnerabilities
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:30.9609622Z Checking for updates...
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:31.1946862Z Switching pnpm from v11.19.0 to v10.33.0...
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:32.1222367Z .../v11/975-1a15cd51950-0b46fa4239f34ef5 | Progress: resolved 1, reused 0, downloaded 0, added 0
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:32.1243869Z .../v11/975-1a15cd51950-0b46fa4239f34ef5 |   +1 +
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:32.3735088Z .../v11/975-1a15cd51950-0b46fa4239f34ef5 | Progress: resolved 1, reused 0, downloaded 1, added 1, done
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:32.7679385Z [WARN] Detected a pnpm v10 installation layout at PNPM_HOME. The pnpm shims at PNPM_HOME have been refreshed so the new version is active, but pnpm v11 expects bins in PNPM_HOME/bin. Run "pnpm setup" to migrate your PATH to the v11 layout.
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:32.7706350Z Successfully updated pnpm to v10.33.0
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:32.7904615Z ##[endgroup]
+Backend tests, site build	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:00:32.7905348Z Installation Completed!
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	﻿2026-10-21T05:00:32.8094241Z ##[group]Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.8094744Z with:
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.8095029Z   node-version: 24
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.8095359Z   cache: pnpm
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.8095658Z   check-latest: false
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.8098307Z   token: ***
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.8098634Z   package-manager-cache: true
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.8098957Z env:
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.8099315Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.8099705Z ##[endgroup]
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.9287483Z Found in cache @ /opt/hostedtoolcache/node/24.21.0/x64
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:32.9291302Z ##[group]Environment details
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:33.3238910Z node: v24.21.0
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:33.3239527Z npm: 11.19.0
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:33.3240125Z yarn: 1.22.22
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:33.3241128Z ##[endgroup]
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:33.3260155Z [command]/home/runner/setup-pnpm/node_modules/.bin/bin/pnpm store path --silent
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:33.6788781Z /home/runner/setup-pnpm/node_modules/.bin/store/v10
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:33.8356298Z Cache hit for: node-cache-Linux-x64-pnpm-6df072a65c593ae1a34c36f5412d880677ef3729879503a3d5a9e8118859bacf
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:35.0121256Z Received 88080384 of 707914161 (12.4%), 84.0 MBs/sec
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:36.0100696Z Received 322961408 of 707914161 (45.6%), 154.0 MBs/sec
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:37.0164656Z Received 545259520 of 707914161 (77.0%), 173.1 MBs/sec
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:37.6358545Z Received 707914161 of 707914161 (100.0%), 186.2 MBs/sec
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:37.6359558Z Cache Size: ~675 MB (707914161 B)
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:37.6475210Z [command]/usr/bin/tar -xf /home/runner/work/_temp/895cc7e8-67af-4906-a971-9705b6f2a6c3/cache.tzst -P -C /home/runner/work/Origin/Origin --use-compress-program unzstd
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:48.0803563Z Cache restored successfully
+Backend tests, site build	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:00:48.1061016Z Cache restored from key: node-cache-Linux-x64-pnpm-6df072a65c593ae1a34c36f5412d880677ef3729879503a3d5a9e8118859bacf
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	﻿2026-10-21T05:00:48.2860259Z ##[group]Run pnpm install --frozen-lockfile --filter "@origin/site..."
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:48.2861029Z ^[[36;1mpnpm install --frozen-lockfile --filter "@origin/site..."^[[0m
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:48.3596459Z shell: /usr/bin/bash -e {0}
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:48.3597009Z env:
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:48.3597417Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:48.3597817Z ##[endgroup]
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:48.6675929Z Scope: 2 of 5 workspace projects
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:48.7187895Z Lockfile is up to date, resolution step is skipped
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:48.7945499Z Progress: resolved 1, reused 0, downloaded 0, added 0
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:48.8624871Z .                                        | +855 ++++++++++++++++++++++++++++++++
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:49.7956700Z Progress: resolved 855, reused 854, downloaded 0, added 156
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:50.7960722Z Progress: resolved 855, reused 854, downloaded 0, added 265
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:51.7963088Z Progress: resolved 855, reused 854, downloaded 0, added 744
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:52.7965607Z Progress: resolved 855, reused 854, downloaded 0, added 854
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:55.1449118Z Progress: resolved 855, reused 854, downloaded 0, added 855
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:55.1450985Z Progress: resolved 855, reused 854, downloaded 0, added 855, done
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.2798757Z . prepare$ node scripts/install-git-hooks.mjs
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.3241403Z . prepare: Done
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.3332357Z ╭ Warning ─────────────────────────────────────────────────────────────────────╮
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.3334033Z │                                                                              │
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.3335475Z │   Ignored build scripts: core-js@3.50.0, workerd@1.20260811.1.               │
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.3336833Z │   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.3338079Z │   to run scripts.                                                            │
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.3339161Z │                                                                              │
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.3340499Z ╰──────────────────────────────────────────────────────────────────────────────╯
+Backend tests, site build	Run pnpm install --frozen-lockfile --filter "@origin/site..."	2026-10-21T05:00:56.3472229Z Done in 7.9s using pnpm v10.33.0
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	﻿2026-10-21T05:00:56.3822640Z ##[group]Run pnpm --filter @origin/backend typecheck
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	2026-10-21T05:00:56.3823435Z ^[[36;1mpnpm --filter @origin/backend typecheck^[[0m
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	2026-10-21T05:00:56.3866722Z shell: /usr/bin/bash -e {0}
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	2026-10-21T05:00:56.3867125Z env:
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	2026-10-21T05:00:56.3867494Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	2026-10-21T05:00:56.3867987Z ##[endgroup]
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	2026-10-21T05:00:56.6726919Z 
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	2026-10-21T05:00:56.6728731Z > @origin/backend@0.1.0 typecheck /home/runner/work/Origin/Origin/backend
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	2026-10-21T05:00:56.6729704Z > tsc -p convex/tsconfig.json
+Backend tests, site build	Run pnpm --filter @origin/backend typecheck	2026-10-21T05:00:56.6730746Z 
+Backend tests, site build	Run pnpm test:backend	﻿2026-10-21T05:01:06.5386884Z ##[group]Run pnpm test:backend
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:06.5387359Z ^[[36;1mpnpm test:backend^[[0m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:06.5428512Z shell: /usr/bin/bash -e {0}
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:06.5428915Z env:
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:06.5429339Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:06.5429772Z ##[endgroup]
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:06.7967001Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:06.7968181Z > openmausbot@0.7.3 test:backend /home/runner/work/Origin/Origin
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:06.7968945Z > pnpm --filter @origin/backend test
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:06.7969254Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:07.0686188Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:07.0687372Z > @origin/backend@0.1.0 test /home/runner/work/Origin/Origin/backend
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:07.0688351Z > vitest run
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:07.0688588Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:07.3243801Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:07.3246260Z ^[[1m^[[30m^[[46m RUN ^[[49m^[[39m^[[22m ^[[36mv5.0.2 ^[[39m^[[90m/home/runner/work/Origin/Origin/backend^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:07.3247186Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:08.5550560Z  ^[[32m✓^[[39m convex/modelHosts.test.ts ^[[2m(^[[22m^[[2m27 tests^[[22m^[[2m)^[[22m^[[33m 763^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:09.3318770Z  ^[[32m✓^[[39m convex/projectWorkflow.test.ts ^[[2m(^[[22m^[[2m17 tests^[[22m^[[2m)^[[22m^[[33m 544^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:10.0367614Z  ^[[32m✓^[[39m convex/storageAdmission.test.ts ^[[2m(^[[22m^[[2m15 tests^[[22m^[[2m)^[[22m^[[33m 473^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:13.0976529Z  ^[[32m✓^[[39m convex/pg1Parity.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[33m 2830^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:13.0977858Z    ^[[33m^[[2m✓^[[22m^[[39m PG1 O-001 O-002: open/invite-only signup, both account invite paths and wrong-email/expired rejection^[[33m 605^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:13.0979096Z    ^[[33m^[[2m✓^[[22m^[[39m PG1 O-003 O-005: persistent session, password change, explicit revocation, logout and 30-day expiry^[[33m 699^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:13.0980531Z    ^[[33m^[[2m✓^[[22m^[[39m PG1 O-049: six-month heatmap counts mine/all and emits truncation at 5001 completions^[[33m 338^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:13.6110822Z  ^[[32m✓^[[39m convex/chiefOps.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[32m 287^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:14.0275869Z  ^[[32m✓^[[39m convex/taskPRs.test.ts ^[[2m(^[[22m^[[2m14 tests^[[22m^[[2m)^[[22m^[[32m 195^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:14.6019835Z  ^[[32m✓^[[39m convex/sharedAgents.test.ts ^[[2m(^[[22m^[[2m17 tests^[[22m^[[2m)^[[22m^[[33m 339^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:15.0533830Z  ^[[32m✓^[[39m convex/draftDefaults.test.ts ^[[2m(^[[22m^[[2m20 tests^[[22m^[[2m)^[[22m^[[32m 229^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:19.4488262Z  ^[[32m✓^[[39m convex/invitationMail.test.ts ^[[2m(^[[22m^[[2m41 tests^[[22m^[[2m)^[[22m^[[33m 4180^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:19.9746634Z  ^[[32m✓^[[39m convex/studio.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[32m 289^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:20.6416702Z  ^[[32m✓^[[39m convex/accessMatrix.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[33m 435^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:21.6493025Z  ^[[32m✓^[[39m convex/teamGitHub.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[33m 760^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:22.0625553Z  ^[[32m✓^[[39m convex/pulse.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[32m 186^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:22.6188313Z  ^[[32m✓^[[39m convex/draftMigration.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[33m 347^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:23.4305726Z  ^[[32m✓^[[39m convex/githubMemberAccess.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[33m 592^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:23.8429408Z  ^[[32m✓^[[39m convex/mergeCompletion.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[32m 201^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:24.1989684Z  ^[[32m✓^[[39m convex/broadcast.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[32m 138^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:24.6293074Z  ^[[32m✓^[[39m convex/mentions.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[32m 219^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:24.9411526Z  ^[[32m✓^[[39m convex/standup.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[32m 94^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:25.2746771Z  ^[[32m✓^[[39m convex/draftColumn.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[32m 125^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:25.6309295Z  ^[[32m✓^[[39m convex/launchpad.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[32m 149^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:25.9368485Z  ^[[32m✓^[[39m convex/ship.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[32m 97^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:26.3276443Z  ^[[32m✓^[[39m convex/canvasCollab.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[32m 121^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:26.6897065Z  ^[[32m✓^[[39m convex/legacyIssueCreation.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[32m 139^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:27.1849127Z  ^[[32m✓^[[39m convex/sharedAgentQueue.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[32m 284^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:27.4949355Z  ^[[32m✓^[[39m convex/campaigns.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[32m 102^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:27.8510213Z  ^[[32m✓^[[39m convex/studioWorkflows.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[32m 146^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:28.1712541Z  ^[[32m✓^[[39m convex/pages.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 97^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:28.4470423Z  ^[[32m✓^[[39m convex/org.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 56^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:28.7318082Z  ^[[32m✓^[[39m convex/sharedKeys.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[32m 78^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:29.0189930Z  ^[[32m✓^[[39m convex/projectOrdering.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[32m 72^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:29.3288134Z  ^[[32m✓^[[39m convex/githubRaces.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[32m 101^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:29.6719237Z  ^[[32m✓^[[39m convex/brand.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 132^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:29.9484413Z  ^[[32m✓^[[39m convex/draftImport.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 76^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:30.2598026Z  ^[[32m✓^[[39m convex/issueCompletion.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[32m 109^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:30.5363159Z  ^[[32m✓^[[39m convex/projectInvites.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[32m 75^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:31.0041715Z  ^[[32m✓^[[39m convex/legacyInvitationMail.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 257^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:31.3293561Z  ^[[32m✓^[[39m convex/budgets.access.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 122^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:31.8124115Z  ^[[32m✓^[[39m convex/authSessions.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 280^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.0592244Z  ^[[32m✓^[[39m convex/storageReferences.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[32m 51^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.3003718Z  ^[[32m✓^[[39m convex/httpSecurity.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[32m 34^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5187067Z  ^[[32m✓^[[39m convex/meta.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[32m 17^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5221792Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5234422Z ^[[2m Test Files ^[[22m ^[[1m^[[32m42 passed^[[39m^[[22m^[[90m (42)^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5257489Z ^[[2m      Tests ^[[22m ^[[1m^[[32m333 passed^[[39m^[[22m^[[90m (333)^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5267324Z ^[[2m   Start at ^[[22m 05:01:07
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5276173Z ^[[2m   Duration ^[[22m 25.19s^[[2m (tests 74%, import 10%, environment 10%, transform 5%, worker 1%)^[[22m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5276980Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5284586Z ^[[2m    Isolate ^[[22m ^[[33m42 workers spawned^[[39m^[[2m · ~133ms startup each (spawn + environment, per file)^[[22m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5286720Z ^[[2m            ^[[22m ^[[2mat least ~5.47s faster with ^[[22m^[[33misolate: false^[[39m^[[2m — reuses workers across files instead of one per file^[[22m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T05:01:32.5287523Z 
+Backend tests, site build	Run pnpm test:site	﻿2026-10-21T05:01:32.6019168Z ##[group]Run pnpm test:site
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:32.6019558Z ^[[36;1mpnpm test:site^[[0m
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:32.6060996Z shell: /usr/bin/bash -e {0}
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:32.6061480Z env:
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:32.6061855Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:32.6062276Z ##[endgroup]
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:32.8573137Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:32.8573934Z > openmausbot@0.7.3 test:site /home/runner/work/Origin/Origin
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:32.8574529Z > pnpm --filter @origin/site test
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:32.8574851Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.1290313Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.1291285Z > @origin/site@0.1.0 test /home/runner/work/Origin/Origin/site
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.1292262Z > pnpm test:csp && pnpm test:components
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.1293251Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.3917157Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.3918730Z > @origin/site@0.1.0 test:csp /home/runner/work/Origin/Origin/site
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.3919817Z > node --test lib/*.test.ts
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.3920202Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5214343Z ✔ the policy permits only configured connections (1.009299ms)
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5254519Z ✔ malformed destinations and nonces are refused (0.479715ms)
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5285496Z ✔ only the development server may evaluate scripts (0.353575ms)
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5487835Z ✔ pages are served by the Convex HTTP origin paired with the deployment (1.369703ms)
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5493313Z ✔ the relay keeps the page's headers and its relative redirect, and refuses odd addresses (31.705062ms)
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5581697Z ℹ tests 5
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5582347Z ℹ suites 0
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5583568Z ℹ pass 5
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5584221Z ℹ fail 0
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5584762Z ℹ cancelled 0
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5585403Z ℹ skipped 0
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5586007Z ℹ todo 0
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.5586645Z ℹ duration_ms 135.733855
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.8294602Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.8295718Z > @origin/site@0.1.0 test:components /home/runner/work/Origin/Origin/site
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.8296351Z > vitest run
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:33.8296575Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.0863030Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.0865244Z ^[[1m^[[30m^[[46m RUN ^[[49m^[[39m^[[22m ^[[36mv4.1.11 ^[[39m^[[90m/home/runner/work/Origin/Origin/site^[[39m
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.0866534Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.6630307Z  ^[[32m✓^[[39m components/brand.test.tsx ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[32m 48^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.9204755Z  ^[[32m✓^[[39m components/auth-page.test.tsx ^[[2m(^[[22m^[[2m22 tests^[[22m^[[2m)^[[22m^[[32m 163^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.9224758Z 
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.9228581Z ^[[2m Test Files ^[[22m ^[[1m^[[32m2 passed^[[39m^[[22m^[[90m (2)^[[39m
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.9229973Z ^[[2m      Tests ^[[22m ^[[1m^[[32m31 passed^[[39m^[[22m^[[90m (31)^[[39m
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.9231138Z ^[[2m   Start at ^[[22m 05:01:34
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.9232519Z ^[[2m   Duration ^[[22m 830ms^[[2m (transform 261ms, setup 0ms, import 447ms, tests 211ms, environment 468ms)^[[22m
+Backend tests, site build	Run pnpm test:site	2026-10-21T05:01:34.9233217Z 
+Backend tests, site build	Run pnpm --filter @origin/site build	﻿2026-10-21T05:01:34.9685660Z ##[group]Run pnpm --filter @origin/site build
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:34.9686137Z ^[[36;1mpnpm --filter @origin/site build^[[0m
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:34.9725803Z shell: /usr/bin/bash -e {0}
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:34.9726186Z env:
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:34.9726569Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:34.9727022Z   NEXT_PUBLIC_CONVEX_URL: http://127.0.0.1:3210
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:34.9727513Z   NEXT_PUBLIC_CONVEX_SITE_URL: http://127.0.0.1:3211
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:34.9727910Z ##[endgroup]
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.2414642Z 
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.2415578Z > @origin/site@0.1.0 build /home/runner/work/Origin/Origin/site
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.2416316Z > next build --webpack
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.2416623Z 
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.5782028Z ▲ Next.js 16.4.1 (webpack)
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.6015435Z ✓ Running next.config.ts took 23ms
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.6017648Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.6168059Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.6169768Z This information is used to shape Next.js' roadmap and prioritize features.
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.6171579Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.6173330Z https://nextjs.org/telemetry
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.6173974Z 
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.6371116Z 
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:35.6644281Z   Creating an optimized production build ...
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:44.0944365Z ✓ Compiled successfully in 6.5s
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:44.0966658Z   Running TypeScript ...
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:53.0041253Z   Finished TypeScript in 8.9s ...
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:53.0063582Z   Collecting page data using 3 workers ...
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:53.9442198Z   Generating static pages using 3 workers (0/1) ...
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:54.3388896Z ✓ Generating static pages using 3 workers (1/1) in 395ms
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:54.5387753Z   Finalizing page optimization ...
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:01:54.5388890Z   Collecting build traces ...
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2036914Z 
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2055378Z Route (app)
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2056039Z ┌ ƒ /
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2056460Z ├ ƒ /_not-found
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2056900Z ├ ƒ /join/[token]
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2057321Z ├ ƒ /login
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2057752Z ├ ƒ /p/[site]/[page]
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2058133Z ├ ƒ /signup
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2058527Z └ ƒ /whats-new
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2058700Z 
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2058709Z 
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2058904Z ƒ Proxy (Middleware)
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2059196Z 
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2059480Z ƒ  (Dynamic)  server-rendered on demand
+Backend tests, site build	Run pnpm --filter @origin/site build	2026-10-21T05:02:03.2059931Z 
+Backend tests, site build	Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	﻿2026-10-21T05:02:03.2533650Z Post job cleanup.
+Backend tests, site build	Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:02:03.3569178Z Cache hit occurred on the primary key node-cache-Linux-x64-pnpm-6df072a65c593ae1a34c36f5412d880677ef3729879503a3d5a9e8118859bacf, not saving cache.
+Backend tests, site build	Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	﻿2026-10-21T05:02:03.3666381Z Post job cleanup.
+Backend tests, site build	Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:02:03.4979854Z Pruning is unnecessary.
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	﻿2026-10-21T05:02:03.5145332Z Post job cleanup.
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6059577Z [command]/usr/bin/git version
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6096668Z git version 2.55.0
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6128755Z Temporarily overriding HOME='/home/runner/work/_temp/44abc17c-69a0-470a-8082-98bda54f81b2' before making global git config changes
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6130449Z Adding repository directory to the temporary git global config as a safe directory
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6133471Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Origin/Origin
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6163863Z Removing SSH command configuration
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6169366Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6202279Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6410405Z Removing HTTP extra header
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6415408Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6444901Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6652693Z Removing includeIf entries pointing to credentials config files
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6659616Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Backend tests, site build	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:03.6688725Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Backend tests, site build	Complete job	﻿2026-10-21T05:02:03.7092337Z Cleaning up orphan processes

@@ -1,0 +1,65 @@
+{
+  "algorithm": "SHA-256",
+  "files": [
+    {
+      "path": "continuity-green.log",
+      "bytes": 5859,
+      "sha256": "b871247afffe3555a3ed3e7fa6ec0db25a518f98fc607fba6428eadc95712d22"
+    },
+    {
+      "path": "continuity-oxlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "continuity-red.log",
+      "bytes": 7054,
+      "sha256": "2e00237f3e886acada73485c630c248485db7defd6802483e8d8ba3a28d9f5f6"
+    },
+    {
+      "path": "delegation-helper-green.log",
+      "bytes": 4003,
+      "sha256": "6ed6ec5e2fc393e4133abf1aec514ed271744984e52b63cf40696510b3907f2b"
+    },
+    {
+      "path": "final-ui-tsc-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "linux-shard2-failure.log",
+      "bytes": 2265,
+      "sha256": "bb09cccafddb55d0c6c3bb4e1a026b1cd8e2f6fa536a16a0fdc74bbd45dd5732"
+    },
+    {
+      "path": "linux-shard3-failure.log",
+      "bytes": 2960,
+      "sha256": "f828e5c0a66fe7da08f80359c9a4706d26cdd8b17537c1bc89a9bdd15650db51"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3368,
+      "sha256": "614124f09ee05cdb6517c594a06f894642eb3807eab2ea28c7795475198b6f91"
+    },
+    {
+      "path": "receipt.json",
+      "bytes": 3467,
+      "sha256": "9867a9559cb5a676b37a3ced364af4df56855f3c64d2d93570b921ababb2a301"
+    },
+    {
+      "path": "windows-shard2-failure.log",
+      "bytes": 2267,
+      "sha256": "08d5f4afcd9b376b3d7538691c84fe4aab86ce541a3499a746be58b11dd9d4dc"
+    },
+    {
+      "path": "windows-shard4-failure.log",
+      "bytes": 1512,
+      "sha256": "34e8843c5a25970400eeb0a784982a6a1b44bd8a32240a59d85ddd63463e863c"
+    },
+    {
+      "path": "windows032-review.json",
+      "bytes": 3583,
+      "sha256": "d5d757200416a28e2e86a67ed5931bacd3ac8422f2050ec6ca55a97edc03a1be"
+    }
+  ]
+}

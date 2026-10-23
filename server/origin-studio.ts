@@ -3,6 +3,9 @@ import { join } from "node:path";
 import { writeFileAtomic } from "./atomic.ts";
 import { DATA_DIR } from "./config.ts";
 import { projectIntegrationKey } from "./integration-keys.ts";
+import { integrationErrorScrubber } from "./integration-errors.ts";
+import { assertUnpricedAiBudget } from "./api-budget-policy.ts";
+import { DailyApiBudgetError } from "./daily-api-budget.ts";
 import { ConvexHttpClient } from "convex/browser";
 import { makeFunctionReference } from "convex/server";
 import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, type OriginCloudClient } from "./origin-cloud.ts";
@@ -23,6 +26,11 @@ export interface StudioCloud {
   url: string;
 }
 
+export interface StudioBudgetInput {
+  projectId?: string;
+  botId?: string;
+}
+
 export interface StudioDeps {
   fetch: typeof fetch;
   /** The fal.ai key for one project's work, or for work outside any project. */
@@ -31,6 +39,7 @@ export interface StudioDeps {
   journalFile: string;
   now(): number;
   pollMs: number;
+  checkBudget(input: StudioBudgetInput): void | Promise<void>;
   /** Where generations are queued; https://queue.fal.run unless a loopback fake stands in. */
   queueOrigin?: string;
   /** Voice samples already made, so each costs one fal call per app. */
@@ -57,6 +66,9 @@ export class StudioRefusal extends Error {}
 export const refuse = (message: string): never => { throw new StudioRefusal(message); };
 
 export const STUDIO_FAL_MISSING = "Add your fal.ai key in Settings > Integrations to generate in Studio.";
+export function assertStudioDailyBudget(policy: { limitUsd?: number; agentLimitUsd?: number }): void {
+  assertUnpricedAiBudget(policy, "Studio media generation");
+}
 const QUEUE_ORIGIN = "https://queue.fal.run";
 const JOB_TIMEOUT_MS = 45 * 60_000;
 const STATUS_FAILURES_MAX = 10;
@@ -84,12 +96,12 @@ export function clip(value: string, max: number): string {
 }
 
 /** fal reports errors as `detail` (a string or a list of `{ msg }`), `error` or `message`. */
-function falError(body: unknown, status: number): string {
+function falError(body: unknown, status: number, scrub: (message: string) => string): string {
   const data = record(body);
   const detail = data.detail;
-  const message = typeof detail === "string" ? detail
+  const message = scrub(typeof detail === "string" ? detail
     : Array.isArray(detail) ? detail.map((item) => text(record(item).msg)).filter(Boolean).join("; ")
-      : text(data.error) || text(data.message);
+      : text(data.error) || text(data.message));
   if (status === 401 || status === 403) return message ? `fal.ai refused the key: ${clip(message, 300)}` : "fal.ai refused the key. Check it in Settings > Integrations.";
   return clip(message || `fal.ai answered HTTP ${status}`, 500);
 }
@@ -107,14 +119,17 @@ export function isFalMediaUrl(raw: string): boolean {
 }
 
 /** Security: a project asset is read only from the signed-in deployment's own storage. */
-function isDeploymentStorageUrl(raw: string, deployment: string): boolean {
+export function isDeploymentStorageUrl(raw: string, deployment: string): boolean {
   try {
     const url = new URL(raw);
     const base = new URL(deployment);
+    if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.hash || !url.pathname.startsWith("/api/storage/") || url.pathname.length === "/api/storage/".length) return false;
+    const origins = new Set([base.origin]);
     const site = new URL(base.origin);
     if (site.hostname.endsWith(".convex.cloud")) site.hostname = site.hostname.replace(/\.convex\.cloud$/, ".convex.site");
-    else if (site.port) site.port = String(Number(site.port) + 1);
-    return url.origin === base.origin || url.origin === site.origin;
+    else if (["localhost", "127.0.0.1", "[::1]"].includes(site.hostname) && site.port) site.port = String(Number(site.port) + 1);
+    origins.add(site.origin);
+    return origins.has(url.origin);
   } catch {
     return false;
   }
@@ -223,12 +238,14 @@ export interface StudioMedia {
 }
 
 export interface StudioGenerateExtra {
+  botId?: string;
   media?: StudioMedia;
   workflow?: { runId: string; nodeId: string };
   intermediate?: boolean;
 }
 
 export interface StudioRunner {
+  checkBudget(input: StudioBudgetInput): Promise<void>;
   generate(cloud: StudioCloud, request: StudioGenerateRequest, agentName?: string, extra?: StudioGenerateExtra): Promise<string[]>;
   /** A project asset as a link fal can fetch, inlined when it lives in the deployment's own storage. */
   assetMedia(cloud: StudioCloud, projectId: string, assetId: string, kind: StudioMediaKind): Promise<string>;
@@ -238,11 +255,11 @@ export interface StudioRunner {
   pickForBroadcast(cloud: StudioCloud, projectId: string, generationId: string, index: number, picked: boolean): Promise<{ assetId?: string }>;
   wait(cloud: StudioCloud, projectId: string, ids: readonly string[], timeoutMs: number): Promise<StudioGeneration[]>;
   /** Rewrites a rough idea into a full prompt with a cheap fast model. */
-  enhance(prompt: string, mode: StudioMode): Promise<string>;
+  enhance(prompt: string, mode: StudioMode, budget?: StudioBudgetInput): Promise<string>;
   /** A short sample of an ElevenLabs voice. */
-  voicePreview(voice: string): Promise<string>;
+  voicePreview(voice: string, budget?: StudioBudgetInput): Promise<string>;
   /** A spoken script and a post caption for a campaign brief, from the same cheap model. */
-  campaignCopy(brief: string): Promise<{ script: string; caption: string }>;
+  campaignCopy(brief: string, budget?: StudioBudgetInput): Promise<{ script: string; caption: string }>;
   /** Picks up the generations this app was polling before it last stopped. */
   resume(): void;
   /** Runs one polling pass now; tests drive the runner with it. */
@@ -281,12 +298,19 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     }, deps.pollMs);
     timer.unref?.();
   };
-  const falFetch = (projectId: string | undefined, url: string, init: RequestInit = {}) => {
+  const falFetch = async (projectId: string | undefined, url: string, init: RequestInit = {}) => {
     const key = deps.falKey(projectId) ?? refuse(STUDIO_FAL_MISSING);
-    return deps.fetch(url, { ...init, headers: { ...init.headers, Authorization: `Key ${key}`, "Content-Type": "application/json" } });
+    const scrub = integrationErrorScrubber([key]);
+    try {
+      return { response: await deps.fetch(url, { ...init, headers: { ...init.headers, Authorization: `Key ${key}`, "Content-Type": "application/json" } }), scrub };
+    } catch (error) {
+      throw new StudioRefusal(`Could not reach fal.ai: ${scrub(error instanceof Error ? error.message : String(error))}`);
+    }
   };
-  const update = (cloud: StudioCloud, job: Pick<Job, "projectId" | "generationId">, patch: Record<string, unknown>) =>
-    cloud.client.mutation("studio:update", { projectId: job.projectId, sessionToken: cloud.sessionToken, generationId: job.generationId, ...patch });
+  const update = (cloud: StudioCloud, job: Pick<Job, "projectId" | "generationId">, patch: Record<string, unknown>) => {
+    const scrub = integrationErrorScrubber([deps.falKey(job.projectId) ?? "", cloud.sessionToken]);
+    return cloud.client.mutation("studio:update", { projectId: job.projectId, sessionToken: cloud.sessionToken, generationId: job.generationId, ...patch, ...(typeof patch.error === "string" ? { error: scrub(patch.error) } : {}) });
+  };
 
   async function assetMedia(cloud: StudioCloud, projectId: string, assetId: string, kind: StudioMediaKind): Promise<string> {
     const design = record(await cloud.client.query("design:list", { projectId, sessionToken: cloud.sessionToken }));
@@ -299,7 +323,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     if (!/^https?:\/\//i.test(link)) refuse(`${text(asset.name)} has no file to start from.`);
     if (!isDeploymentStorageUrl(link, cloud.url)) return link;
     if (/^https:\/\//i.test(link) && kind !== "image") return link;
-    const response = await deps.fetch(link);
+    const response = await deps.fetch(link, { redirect: "error" });
     if (!response.ok) refuse(`Could not read ${text(asset.name)} (HTTP ${response.status}).`);
     const data = await readLimited(response, SOURCE_INLINE_MAX);
     if (!data) {
@@ -320,23 +344,24 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
   }
 
   /** Queues one generation on fal; a refusal is recorded on the generation itself, and false stops a batch. */
-  async function submit(cloud: StudioCloud, projectId: string, generationId: string, endpoint: string, kind: StudioMediaKind, input: Record<string, unknown>, intermediate: boolean): Promise<boolean> {
+  async function submit(cloud: StudioCloud, projectId: string, generationId: string, endpoint: string, kind: StudioMediaKind, input: Record<string, unknown>, extra: StudioGenerateExtra): Promise<boolean> {
     try {
-      const response = await falFetch(projectId, `${queueOrigin}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
+      await deps.checkBudget({ projectId, ...(extra.botId ? { botId: extra.botId } : {}) });
+      const { response, scrub } = await falFetch(projectId, `${queueOrigin}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
       const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new StudioRefusal(falError(body, response.status));
+      if (!response.ok) throw new StudioRefusal(falError(body, response.status, scrub));
       const data = record(body);
       const statusUrl = text(data.status_url);
       const responseUrl = text(data.response_url);
       const cancelUrl = text(data.cancel_url);
       if (!isQueueUrl(statusUrl) || !isQueueUrl(responseUrl)) throw new StudioRefusal("fal.ai did not queue the request");
       await update(cloud, { projectId, generationId }, { status: "queued", falRequestId: text(data.request_id) });
-      jobs.push({ generationId, projectId, kind, statusUrl, responseUrl, ...(isQueueUrl(cancelUrl) ? { cancelUrl } : {}), submittedAt: deps.now(), ...(intermediate ? { intermediate } : {}) });
+      jobs.push({ generationId, projectId, kind, statusUrl, responseUrl, ...(isQueueUrl(cancelUrl) ? { cancelUrl } : {}), submittedAt: deps.now(), ...(extra.intermediate ? { intermediate: true } : {}) });
       persist();
       schedule();
       return true;
     } catch (error) {
-      const message = error instanceof StudioRefusal ? error.message : `Could not reach fal.ai: ${error instanceof Error ? error.message : String(error)}`;
+      const message = error instanceof StudioRefusal || error instanceof DailyApiBudgetError ? error.message : `Could not reach fal.ai: ${error instanceof Error ? error.message : String(error)}`;
       await update(cloud, { projectId, generationId }, { status: "failed", error: message });
       return false;
     }
@@ -384,10 +409,10 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
   }
 
   async function finish(cloud: StudioCloud, job: Job): Promise<void> {
-    const response = await falFetch(job.projectId, job.responseUrl);
+    const { response, scrub } = await falFetch(job.projectId, job.responseUrl);
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
-      await update(cloud, job, { status: "failed", error: falError(body, response.status) });
+      await update(cloud, job, { status: "failed", error: falError(body, response.status, scrub) });
       return;
     }
     const outputs = studioOutputs(body, job.kind);
@@ -406,9 +431,10 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     }
     let status: Record<string, unknown>;
     try {
-      const response = await falFetch(job.projectId, job.statusUrl);
+      const { response, scrub } = await falFetch(job.projectId, job.statusUrl);
       status = record(await response.json().catch(() => ({})));
-      if (!response.ok) throw new Error(falError(status, response.status));
+      if (!response.ok) throw new Error(falError(status, response.status, scrub));
+      if (typeof status.error === "string") status.error = scrub(status.error);
       job.failures = 0;
     } catch (error) {
       job.failures = (job.failures ?? 0) + 1;
@@ -456,26 +482,27 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
   }
 
   /** Runs one quick fal request to completion: the prompt enhancer and voice samples. */
-  async function falRun(endpoint: string, input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    const response = await falFetch(undefined, `${queueOrigin}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
+  async function falRun(endpoint: string, input: Record<string, unknown>, budget: StudioBudgetInput = {}): Promise<Record<string, unknown>> {
+    await deps.checkBudget(budget);
+    const { response, scrub } = await falFetch(budget.projectId, `${queueOrigin}/${endpoint}`, { method: "POST", body: JSON.stringify(input) });
     const queued = record(await response.json().catch(() => ({})));
-    if (!response.ok) refuse(falError(queued, response.status));
+    if (!response.ok) refuse(falError(queued, response.status, scrub));
     const statusUrl = text(queued.status_url);
     const responseUrl = text(queued.response_url);
     if (!isQueueUrl(statusUrl) || !isQueueUrl(responseUrl)) refuse("fal.ai did not queue the request");
     const deadline = deps.now() + QUICK_TIMEOUT_MS;
     for (;;) {
-      const status = record(await (await falFetch(undefined, statusUrl)).json().catch(() => ({})));
+      const status = record(await (await falFetch(budget.projectId, statusUrl)).response.json().catch(() => ({})));
       if (text(status.status) === "COMPLETED") {
-        if (status.error) refuse(clip(text(status.error), 400));
+        if (status.error) refuse(clip(scrub(text(status.error)), 400));
         break;
       }
       if (deps.now() > deadline) refuse("fal.ai took too long; try again.");
       await new Promise((done) => setTimeout(done, Math.min(deps.pollMs, 600)));
     }
-    const result = await falFetch(undefined, responseUrl);
+    const { response: result } = await falFetch(budget.projectId, responseUrl);
     const body = record(await result.json().catch(() => ({})));
-    if (!result.ok) refuse(falError(body, result.status));
+    if (!result.ok) refuse(falError(body, result.status, scrub));
     return body;
   }
 
@@ -503,7 +530,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
     const job = jobs.find((candidate) => candidate.generationId === generationId && candidate.projectId === projectId);
     if (job) {
       const cancelUrl = job.cancelUrl ?? job.statusUrl.replace(/\/status$/, "/cancel");
-      const response = await falFetch(projectId, cancelUrl, { method: "PUT" });
+      const { response, scrub } = await falFetch(projectId, cancelUrl, { method: "PUT" });
       const body = record(await response.json().catch(() => ({})));
       if (text(body.status) === "ALREADY_COMPLETED") {
         if (await step(cloud, job).catch(() => false)) {
@@ -512,7 +539,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
         }
         return { cancelled: false };
       }
-      if (!response.ok) refuse(falError(body, response.status));
+      if (!response.ok) refuse(falError(body, response.status, scrub));
       jobs = jobs.filter((candidate) => candidate !== job);
       persist();
     }
@@ -521,7 +548,9 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
   }
 
   return {
+    async checkBudget(input) { await deps.checkBudget(input); },
     async generate(cloud, request, agentName, extra = {}) {
+      await deps.checkBudget({ projectId: request.projectId, ...(extra.botId ? { botId: extra.botId } : {}) });
       load();
       if (!deps.falKey(request.projectId)) refuse(STUDIO_FAL_MISSING);
       const { model, label } = resolveModel(request);
@@ -563,7 +592,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
           ...(sent !== described ? { branded: true } : {}),
         }));
         ids.push(generationId);
-        if (!await submit(cloud, request.projectId, generationId, endpoint, model.kind, input, extra.intermediate === true)) break;
+        if (!await submit(cloud, request.projectId, generationId, endpoint, model.kind, input, extra)) break;
       }
       return ids;
     },
@@ -589,7 +618,7 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
       }
     },
 
-    async enhance(prompt, mode) {
+    async enhance(prompt, mode, budget) {
       const idea = prompt.trim();
       if (!idea) refuse("Write an idea to enhance first.");
       const kind = mode === "audio" ? "an audio generation (speech, music or a sound effect)" : mode === "video" ? "a video generation model; describe subject, action, setting, light and camera" : mode === "edit" ? "an image edit instruction" : "an image generation model; describe subject, composition, light, lens and style";
@@ -597,28 +626,28 @@ export function createStudioRunner(deps: StudioDeps): StudioRunner {
         model: STUDIO_ENHANCER.model, max_tokens: 400, temperature: 0.7,
         system_prompt: `You write prompts for ${kind}. Rewrite the user's idea as one vivid, specific prompt of at most 80 words. Keep their subject, names and any quoted text exactly. Reply with the prompt only.`,
         prompt: clip(idea, 2_000),
-      });
+      }, budget);
       const output = text(body.output).trim().replace(/^["“]|["”]$/g, "");
       return output ? clip(output, PROMPT_MAX) : refuse("The enhancer returned nothing; try again.");
     },
 
-    async voicePreview(voice) {
+    async voicePreview(voice, budget) {
       const known = STUDIO_VOICES.find((entry) => entry.name === voice) ?? refuse(`ElevenLabs has no voice ${clip(voice, 40)} here.`);
       const cache = voiceCache();
       if (cache[known.name]) return cache[known.name]!;
-      const body = await falRun("fal-ai/elevenlabs/tts/eleven-v3", { text: `Hi, I'm ${known.name}. This is how your project sounds in my voice.`, voice: known.name });
+      const body = await falRun("fal-ai/elevenlabs/tts/eleven-v3", { text: `Hi, I'm ${known.name}. This is how your project sounds in my voice.`, voice: known.name }, budget);
       const url = studioOutputs(body, "audio")[0]?.url ?? refuse("fal.ai returned no audio.");
       if (deps.voiceCacheFile) writeFileAtomic(deps.voiceCacheFile, JSON.stringify({ ...cache, [known.name]: url }), { mode: 0o600 });
       return url;
     },
 
-    async campaignCopy(brief) {
+    async campaignCopy(brief, budget) {
       const idea = clip(brief.trim(), 2_000) || refuse("Write a brief first.");
       const body = await falRun(STUDIO_ENHANCER.endpoint, {
         model: STUDIO_ENHANCER.model, max_tokens: 500, temperature: 0.7,
         system_prompt: "You write launch campaign copy. From the brief, reply with JSON only: {\"script\": a spoken voice-over of at most 40 words, \"caption\": a social post caption of at most 220 characters with up to three hashtags}. Keep names and quoted text exactly.",
         prompt: idea,
-      });
+      }, budget);
       const raw = text(body.output).trim();
       const script = clip(text(copyField(raw, "script")).trim() || idea, PROMPT_MAX);
       return { script, caption: clip(text(copyField(raw, "caption")).trim() || idea, 2_000) };
@@ -664,6 +693,11 @@ export function connectedStudioCloud(file = defaultOriginCloudFile(), connect: (
 }
 
 let shared: StudioRunner | null = null;
+let sharedBudgetGuard: StudioDeps["checkBudget"] | undefined;
+
+export function setStudioBudgetGuard(guard: StudioDeps["checkBudget"]): void {
+  sharedBudgetGuard = guard;
+}
 
 /** The app server's one runner, so the page and every agent share one polling loop. */
 export function studioRunner(): StudioRunner {
@@ -675,6 +709,10 @@ export function studioRunner(): StudioRunner {
     voiceCacheFile: join(DATA_DIR, "studio-voices.json"),
     now: () => Date.now(),
     pollMs: 2_500,
+    checkBudget: input => {
+      const guard = sharedBudgetGuard ?? refuse("Studio is not ready to check your API budget. Try again.");
+      return guard(input);
+    },
     queueOrigin: falQueueOrigin(),
   });
   return shared;

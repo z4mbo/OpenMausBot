@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "status": "prepared-not-executed",
+  "deployment": "wry-fly-446",
+  "sourceBinding": {
+    "workerCommit": "3b85cb69c0c907a9aa08ba98b664cb5889cbe83a",
+    "releaseSource": null,
+    "comparison": "Resolve releaseSource from the final frozen candidate and require identical Git blobs for every implementation path before any repair invocation.",
+    "expectedGitBlobs": {
+      "shared/origin-columns.ts": "fe44fa23f9bf6e6cbd6da94e966b3a1a666a4375",
+      "backend/convex/lib/columns.ts": "fb0e9a0dd44f6f30deeda7345477eeca4b4a08a6",
+      "backend/convex/schema.ts": "f763482fc352c75549efef49644ff5baf233de7f",
+      "backend/convex/tasks.ts": "389701fbfdd0a0bb4e2412f5bf911767025dd2d4",
+      "backend/convex/projects.ts": "a5a6eed91d13978cb190700a4be8371429aca928",
+      "backend/convex/legacyImport.ts": "93c482aebd910d376e54a0e1c337d148d8e73f21",
+      "backend/convex/connectors.ts": "2fafbb61c4b637b9b08b895d6e34a6c08f1d5000",
+      "backend/convex/feedback.ts": "47eb3dd9623c8b28bc5c7350fef6ba174342d63d",
+      "backend/convex/integrations.ts": "9de569bbe86ed4a238e7c96c9b8cf269464a711f"
+    }
+  },
+  "storageMigration": false,
+  "sequence": "Finish every page in columns, then every page in legacyIdeas, then every page in projects. These are three separate phases after the five storage migrations.",
+  "args": {
+    "cursor": "null on the first invocation; the prior successful receipt cursor on every continuation"
+  },
+  "receiptKeys": [
+    "phase",
+    "scanned",
+    "changed",
+    "created",
+    "candidateUpdated",
+    "adopted",
+    "cursor",
+    "isDone"
+  ],
+  "phases": [
+    {
+      "phase": "columns",
+      "function": "tasks:flagDraftColumns",
+      "visibility": "internal",
+      "maxScannedPerPage": 100,
+      "changes": "Persist existing semantic Draft flags and clear contradictory Done flags. Explicit isDraft:false remains authoritative.",
+      "candidateUpdated": 0,
+      "adopted": 0,
+      "created": 0
+    },
+    {
+      "phase": "legacyIdeas",
+      "function": "tasks:selectLegacyDraftCandidates",
+      "visibility": "internal",
+      "maxScannedPerPage": 100,
+      "changes": "Record the lowest(order,_creationTime,_id) unflagged Idea candidate per project only when no semantic Draft exists. Candidate metadata is transient; no column is adopted in this phase.",
+      "candidateUpdated": "equals changed",
+      "adopted": 0,
+      "created": 0
+    },
+    {
+      "phase": "projects",
+      "function": "tasks:repairProjectDrafts",
+      "visibility": "internal",
+      "maxScannedPerPage": 25,
+      "changes": "Keep an existing semantic Draft, or adopt the validated Idea candidate, or create an empty Draft; place it first and clear candidate metadata.",
+      "candidateUpdated": 0,
+      "adopted": "actual adopted columns",
+      "created": "actual new empty Draft columns"
+    }
+  ],
+  "executorRequirements": [
+    "Strict source comparison against expectedGitBlobs and the final release source",
+    "A finite root-reviewed page budget",
+    "Validate each receipt, counter bounds, phase identity and cursor advancement before persisting it",
+    "Require isDone:true before beginning the next phase",
+    "Preserve unknown-outcome records and reconcile before another real invocation",
+    "Do not change any existing task, link, assignee, completion, or explicit lane as part of this repair"
+  ],
+  "completedProductionPhases": [],
+  "productionCalls": 0
+}

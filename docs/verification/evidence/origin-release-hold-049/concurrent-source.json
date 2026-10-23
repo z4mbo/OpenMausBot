@@ -1,0 +1,364 @@
+{
+  "observedImage": "sha256:a70d46e9fa00195b221e68a0a194cf4399ee92ae8cd4ead97891fc7713f6a767",
+  "currentImageAfter": "sha256:a70d46e9fa00195b221e68a0a194cf4399ee92ae8cd4ead97891fc7713f6a767",
+  "diagnosticContainer": {
+    "id": "d8c72b6ce6e28b8a08e6150763742cf52b21676fc2c285aba262e14abe0efe33",
+    "neverStarted": true,
+    "networkNone": true,
+    "readOnly": true,
+    "exactLabelImageStoppedGuardBeforeRemoval": true,
+    "removed": true
+  },
+  "mainCommit": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+  "mainCommitSubject": "Origin 0.5.0: Launchpad, Docs and milestones, Ship, Brand kit, Pulse",
+  "mainStatusObservedReadOnly": [
+    "M backend/convex/pulse.test.ts",
+    " M backend/convex/pulse.ts",
+    " M server/origin-project-context.ts",
+    " M server/origin-project-tools.test.ts"
+  ],
+  "filesInspected": 333,
+  "sources": {
+    "f76cbe9b8019b648bb08f9125daefe35e6625185": {
+      "exactMatches": 303,
+      "expectedMissing": [
+        "site/.env.example"
+      ]
+    },
+    "7e89e33def92a3cce1b574a12e478eb392133fa2": {
+      "exactMatches": 289,
+      "expectedMissing": [
+        "backend/convex/budgets.access.test.ts",
+        "backend/convex/lib/modelHostAccess.ts",
+        "backend/convex/lib/modelHostRecovery.ts",
+        "backend/convex/lib/projectOrder.ts",
+        "backend/convex/modelHosts.test.ts",
+        "backend/convex/modelHosts.ts",
+        "backend/convex/modelHostsTables.ts",
+        "backend/convex/projectOrdering.test.ts",
+        "shared/model-selection.test.ts",
+        "shared/model-selection.ts",
+        "site/.env.example",
+        "site/vitest.config.ts"
+      ]
+    },
+    "97383097d13e5c9bb969801623e6ccd9ed3b356f": {
+      "exactMatches": 321,
+      "expectedMissing": [
+        "site/.env.example"
+      ]
+    }
+  },
+  "differsFrom040": [
+    {
+      "name": "backend/convex/_generated/api.d.ts",
+      "exists": true,
+      "bytes": 7768,
+      "sha256": "b0e38b97bf974cbe455bc6516adb4614b69df5e58660a66deb6609d09cb7c0da",
+      "normalizedLfSha256": "b0e38b97bf974cbe455bc6516adb4614b69df5e58660a66deb6609d09cb7c0da",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 7768,
+        "sha256": "b0e38b97bf974cbe455bc6516adb4614b69df5e58660a66deb6609d09cb7c0da"
+      }
+    },
+    {
+      "name": "backend/convex/design.ts",
+      "exists": true,
+      "bytes": 7443,
+      "sha256": "e35ac3cdca6436505198d525436585318e3386963a007c46800a06b03d380e5d",
+      "normalizedLfSha256": "e35ac3cdca6436505198d525436585318e3386963a007c46800a06b03d380e5d",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 7443,
+        "sha256": "e35ac3cdca6436505198d525436585318e3386963a007c46800a06b03d380e5d"
+      }
+    },
+    {
+      "name": "backend/convex/featureTables.ts",
+      "exists": true,
+      "bytes": 2812,
+      "sha256": "ff5c5ed206739dc6be4fe1500271e3881488a90ffa0c8ff4cc4b17bba26176b6",
+      "normalizedLfSha256": "ff5c5ed206739dc6be4fe1500271e3881488a90ffa0c8ff4cc4b17bba26176b6",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 2812,
+        "sha256": "ff5c5ed206739dc6be4fe1500271e3881488a90ffa0c8ff4cc4b17bba26176b6"
+      }
+    },
+    {
+      "name": "backend/convex/lib/validators.ts",
+      "exists": true,
+      "bytes": 1869,
+      "sha256": "5a7676e868d408afce41d19f1f0182f171608caca79e1005a100b587bb78fecb",
+      "normalizedLfSha256": "5a7676e868d408afce41d19f1f0182f171608caca79e1005a100b587bb78fecb",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 1869,
+        "sha256": "5a7676e868d408afce41d19f1f0182f171608caca79e1005a100b587bb78fecb"
+      }
+    },
+    {
+      "name": "backend/convex/pages.ts",
+      "exists": true,
+      "bytes": 10500,
+      "sha256": "694962ec77b704c36a99c9810c88b0fb304f57b40c42b2657abd2c2becee225e",
+      "normalizedLfSha256": "694962ec77b704c36a99c9810c88b0fb304f57b40c42b2657abd2c2becee225e",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 10500,
+        "sha256": "694962ec77b704c36a99c9810c88b0fb304f57b40c42b2657abd2c2becee225e"
+      }
+    },
+    {
+      "name": "backend/convex/pagesHttp.ts",
+      "exists": true,
+      "bytes": 4357,
+      "sha256": "e6446cae186052d073d4e1a8b2df9f662929f5066f5bfad8afe1a84efe8ac449",
+      "normalizedLfSha256": "e6446cae186052d073d4e1a8b2df9f662929f5066f5bfad8afe1a84efe8ac449",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 4357,
+        "sha256": "e6446cae186052d073d4e1a8b2df9f662929f5066f5bfad8afe1a84efe8ac449"
+      }
+    },
+    {
+      "name": "backend/convex/pagesTables.ts",
+      "exists": true,
+      "bytes": 1034,
+      "sha256": "0ea09349ecad59e961830a6d9edb4b1123585a44dfc5c6bec0edf21dd8c3d929",
+      "normalizedLfSha256": "0ea09349ecad59e961830a6d9edb4b1123585a44dfc5c6bec0edf21dd8c3d929",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 1034,
+        "sha256": "0ea09349ecad59e961830a6d9edb4b1123585a44dfc5c6bec0edf21dd8c3d929"
+      }
+    },
+    {
+      "name": "backend/convex/schema.ts",
+      "exists": true,
+      "bytes": 20057,
+      "sha256": "ddc4ffc147e01dd664a148128a4db9466a111910f5466169a289e15341d0bcea",
+      "normalizedLfSha256": "ddc4ffc147e01dd664a148128a4db9466a111910f5466169a289e15341d0bcea",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 20057,
+        "sha256": "ddc4ffc147e01dd664a148128a4db9466a111910f5466169a289e15341d0bcea"
+      }
+    },
+    {
+      "name": "backend/convex/studio.test.ts",
+      "exists": true,
+      "bytes": 8095,
+      "sha256": "c294d6a204a763573859bf96c4838412e1e171764c9675150e41806cd4bece9b",
+      "normalizedLfSha256": "c294d6a204a763573859bf96c4838412e1e171764c9675150e41806cd4bece9b",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 8095,
+        "sha256": "c294d6a204a763573859bf96c4838412e1e171764c9675150e41806cd4bece9b"
+      }
+    },
+    {
+      "name": "backend/convex/studio.ts",
+      "exists": true,
+      "bytes": 10043,
+      "sha256": "8792794a9c568472eedb8aded04ddab3478bc6353360642d7c612b2899221234",
+      "normalizedLfSha256": "8792794a9c568472eedb8aded04ddab3478bc6353360642d7c612b2899221234",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 10043,
+        "sha256": "8792794a9c568472eedb8aded04ddab3478bc6353360642d7c612b2899221234"
+      }
+    },
+    {
+      "name": "backend/convex/studioTables.ts",
+      "exists": true,
+      "bytes": 1843,
+      "sha256": "14498ad0b5fee4750f61a46c43d254daf9d6d6e3644c82cbe58050f0ae0e2a38",
+      "normalizedLfSha256": "14498ad0b5fee4750f61a46c43d254daf9d6d6e3644c82cbe58050f0ae0e2a38",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 1843,
+        "sha256": "14498ad0b5fee4750f61a46c43d254daf9d6d6e3644c82cbe58050f0ae0e2a38"
+      }
+    },
+    {
+      "name": "shared/canvas-ops.ts",
+      "exists": true,
+      "bytes": 17026,
+      "sha256": "02e24b8706ed10c6ce97a1087642a2276fc5ecde5f60e08e3c760bdb5d4a6e2b",
+      "normalizedLfSha256": "02e24b8706ed10c6ce97a1087642a2276fc5ecde5f60e08e3c760bdb5d4a6e2b",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 17026,
+        "sha256": "02e24b8706ed10c6ce97a1087642a2276fc5ecde5f60e08e3c760bdb5d4a6e2b"
+      }
+    },
+    {
+      "name": "shared/canvas-page.ts",
+      "exists": true,
+      "bytes": 20208,
+      "sha256": "da91c764758a98b8de5a80e9bf8c664945781fbea46284756a0c739198644893",
+      "normalizedLfSha256": "da91c764758a98b8de5a80e9bf8c664945781fbea46284756a0c739198644893",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 20208,
+        "sha256": "da91c764758a98b8de5a80e9bf8c664945781fbea46284756a0c739198644893"
+      }
+    },
+    {
+      "name": "shared/canvas-scene.ts",
+      "exists": true,
+      "bytes": 25887,
+      "sha256": "b1594c694c72d9a2fbae9a66496d272860c30ab4bf56c41b0a68d93c7d1127b4",
+      "normalizedLfSha256": "b1594c694c72d9a2fbae9a66496d272860c30ab4bf56c41b0a68d93c7d1127b4",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 25887,
+        "sha256": "b1594c694c72d9a2fbae9a66496d272860c30ab4bf56c41b0a68d93c7d1127b4"
+      }
+    },
+    {
+      "name": "shared/origin-releases.ts",
+      "exists": true,
+      "bytes": 19874,
+      "sha256": "236b4fbe4dadba21224c9b49b9626706a88cd814f697ab79641d89ad9d38b1f3",
+      "normalizedLfSha256": "236b4fbe4dadba21224c9b49b9626706a88cd814f697ab79641d89ad9d38b1f3",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 19874,
+        "sha256": "236b4fbe4dadba21224c9b49b9626706a88cd814f697ab79641d89ad9d38b1f3"
+      }
+    },
+    {
+      "name": "shared/outbound.test.ts",
+      "exists": true,
+      "bytes": 6500,
+      "sha256": "04edd95d83a0f3687315e2cf2c38a2a074c3a8acd5ecf36ccf218db7c4be065c",
+      "normalizedLfSha256": "04edd95d83a0f3687315e2cf2c38a2a074c3a8acd5ecf36ccf218db7c4be065c",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 6500,
+        "sha256": "04edd95d83a0f3687315e2cf2c38a2a074c3a8acd5ecf36ccf218db7c4be065c"
+      }
+    },
+    {
+      "name": "shared/outbound.ts",
+      "exists": true,
+      "bytes": 7119,
+      "sha256": "aa23aac31921614c8b5ead496d561822647bef0d64ec03c35ee71ba1e5c9b0dc",
+      "normalizedLfSha256": "aa23aac31921614c8b5ead496d561822647bef0d64ec03c35ee71ba1e5c9b0dc",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 7119,
+        "sha256": "aa23aac31921614c8b5ead496d561822647bef0d64ec03c35ee71ba1e5c9b0dc"
+      }
+    },
+    {
+      "name": "shared/studio.ts",
+      "exists": true,
+      "bytes": 10409,
+      "sha256": "d223581b70b1b9f34ca7d369a3ea583bf7503b1879069888e54ce7c014121bbc",
+      "normalizedLfSha256": "d223581b70b1b9f34ca7d369a3ea583bf7503b1879069888e54ce7c014121bbc",
+      "exactMatches": [
+        "97383097d13e5c9bb969801623e6ccd9ed3b356f"
+      ],
+      "normalizedMatches": [],
+      "mainExpected": {
+        "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+        "bytes": 10409,
+        "sha256": "d223581b70b1b9f34ca7d369a3ea583bf7503b1879069888e54ce7c014121bbc"
+      }
+    }
+  ],
+  "unknownToAllThree": [],
+  "missing": [
+    "backend/convex/budgets.access.test.ts",
+    "backend/convex/lib/modelHostAccess.ts",
+    "backend/convex/lib/modelHostRecovery.ts",
+    "backend/convex/lib/projectOrder.ts",
+    "backend/convex/modelHosts.test.ts",
+    "backend/convex/modelHosts.ts",
+    "backend/convex/modelHostsTables.ts",
+    "backend/convex/projectOrdering.test.ts",
+    "shared/model-selection.test.ts",
+    "shared/model-selection.ts",
+    "site/.env.example",
+    "site/vitest.config.ts"
+  ],
+  "originalResponseSha256": "08fc11d4574b2b992639383ca3196d53140b604b2e2d9496502c0fe938fdb54b",
+  "remoteRequestSha256": "ee241ba5644dd7195389a3d04ccd2a5166c2f9be49d0b4a327b8603811726986",
+  "comparison": "Raw byte SHA256 only. Original normalizedLf summary misclassified eight binary assets due local UTF8 conversion; those assets are exact matches and are not changes.",
+  "conclusion": "The current image contains newer concurrent source files than040 and does not equal042. Exact matches to973 are limited to inspected whitelisted paths; extra new files and compiled output were not read, so this is source fingerprint evidence rather than complete image provenance.",
+  "productionDataRead": false,
+  "environmentValuesRead": false,
+  "furtherRemoteOperations": false
+}

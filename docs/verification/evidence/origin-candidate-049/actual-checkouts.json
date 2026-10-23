@@ -1,0 +1,43 @@
+{
+  "source": "daeb5096f6b880443e408c304cb9a7b76004d865",
+  "checkedOutJobs": [
+    {
+      "kind": "ci",
+      "jobId": 118512004732,
+      "actualCheckout": "6e0f11d89731ee46dd07284b60771ff6311a4907",
+      "rawLogSha256": "7e2fd302aa5d2dbb6a1e28f964cf3d76b10d6c41c7b40c66fe347ce1d423face",
+      "cleanLogSha256": "24640c4f482b57a444733c3e6ae30bb913264662236d83eed18664918d7dd0ea"
+    },
+    {
+      "kind": "cloud-pr",
+      "jobId": 118512003433,
+      "actualCheckout": "6e0f11d89731ee46dd07284b60771ff6311a4907",
+      "rawLogSha256": "26479f7a211b250665f034bdb445f305131bd174bfbc68ffab3f0525b29a9e55",
+      "cleanLogSha256": "c0496e4b412dfad1c74c228b389ba02e1295bfa2b80f727f1f09b269c64ef2f9"
+    },
+    {
+      "kind": "docs",
+      "jobId": 118512004255,
+      "actualCheckout": "6e0f11d89731ee46dd07284b60771ff6311a4907",
+      "rawLogSha256": "91ebab94bb29a8c011ceafcb4f5d5e5ce37afbbad2bd2389e024ef07be169b63",
+      "cleanLogSha256": "a9f7c37c61c089722d917a7affaa1cd14a96cf427747f14b7871f3c0ea715941"
+    },
+    {
+      "kind": "native",
+      "jobId": 118512274925,
+      "actualCheckout": "daeb5096f6b880443e408c304cb9a7b76004d865",
+      "rawLogSha256": "1b11580a452e7b914e475b39bb9d475b239d5118a30d710c6498aecff9dfbc04",
+      "cleanLogSha256": "f304df1c822449cb9f92056b9e3b55f06812d2ec8bf75397289030cbf1840e3c"
+    }
+  ],
+  "recursiveTreeProofSha256": "116875538c361bbdb6587aabb14872b3249eabb1ae5cb871f3c1e0ffa0a94fee",
+  "cloudCounts": {
+    "siteFiles": 2,
+    "siteTests": 31,
+    "backendFiles": 35,
+    "backendTests": 293,
+    "productionSiteBuild": "PASS",
+    "backendTypecheck": "PASS"
+  },
+  "productionOperations": false
+}

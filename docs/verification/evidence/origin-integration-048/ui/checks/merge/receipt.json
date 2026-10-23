@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-10-20T06:51:57.905Z",
+  "head": "5aafbf02ab2ded075d2c75955419f35a45cce99a",
+  "mergeHead": "1a5ce4e975af376e43c32a75110756bfb80105eb",
+  "workingTree": true,
+  "sourceFrozen": false,
+  "scope": "Finite UI conflict resolution and existing focused tests for merging concurrent 0.4.0 into held 0.3.2",
+  "ownedEdits": [
+    {
+      "path": "src/components/ChatView.tsx",
+      "change": "Retain ThreadContextWarning, monthly AgentBudgetPill, ChatUsagePopover directly before ModelPicker, chat-column/dock width classes; remove one unused import-group blank to keep1560line pin"
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastPage.tsx",
+      "change": "Keep posts-only disconnected banner from campaigns plus mobile stacked banner/text width"
+    },
+    {
+      "path": "src/components/origin-pipeline/LeadDrawer.readiness.test.ts",
+      "change": "Scope mocked lead response to pipeline:lead, null sequence query, required inboundEnabled:false; readiness assertions unchanged"
+    }
+  ],
+  "autoMergedReview": [
+    {
+      "path": "src/components/origin-pipeline/LeadDrawer.tsx",
+      "result": "Unknown/known-false connection guards retained before outreach ready calculation; local Notes preserved"
+    },
+    {
+      "path": "src/components/origin-pipeline/PipelinePage.tsx",
+      "result": "192px mobile search minimum retained alongside score/next-action features"
+    }
+  ],
+  "checks": {
+    "initial": {
+      "files": 13,
+      "passed": 109,
+      "failed": 8,
+      "failure": "Test fixture returned lead detail as new SequencePanel data; not a production readiness failure"
+    },
+    "final": {
+      "files": 13,
+      "passed": 117,
+      "failed": 0
+    },
+    "lintExit": 0,
+    "diffCheckExit": 0,
+    "reactChecklist": "Reread and applied: conditional display only, no conditional/new merged hooks, scoped budget query, no new effects or network path",
+    "globalTypecheck": "root-owned, not claimed by this lane"
+  },
+  "files": [
+    {
+      "path": "src/components/ChatView.tsx",
+      "bytes": 74904,
+      "lines": 1560,
+      "sha256": "16ab4e49e0d1d318d9f4329b93fb37820666542991dbbbae57fffb01c621eafe"
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastPage.tsx",
+      "bytes": 16113,
+      "lines": 235,
+      "sha256": "a78124c29ec2efd805856b011826d2b2f8bf75a1718fe6bc7f06fe4b0dda68f7"
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastComposer.tsx",
+      "bytes": 18275,
+      "lines": 253,
+      "sha256": "c7d8e316a5a50a4d5166901d2cc54e4f49dd10da0cb35db1286ca546aa90d27a"
+    },
+    {
+      "path": "src/components/origin-pipeline/LeadDrawer.tsx",
+      "bytes": 29950,
+      "lines": 376,
+      "sha256": "2f3434f150d7c6063410c5c5d57d9f15999354e92e77d57509f528e359484220"
+    },
+    {
+      "path": "src/components/origin-pipeline/PipelinePage.tsx",
+      "bytes": 30882,
+      "lines": 407,
+      "sha256": "a37d96eb31835f851caa03864ff10886bf17f22ab28d106e69d6891af2b0371b"
+    },
+    {
+      "path": "src/components/origin-pipeline/LeadDrawer.readiness.test.ts",
+      "bytes": 3508,
+      "lines": 71,
+      "sha256": "c129f126e4af4e4e51cb394066e10319a5b0c9abed673133308eb407619529ce"
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastComposer.readiness.test.ts",
+      "bytes": 3395,
+      "lines": 73,
+      "sha256": "f5a423e512ddff67b09b1219d4057d86da5459040728287e63a2e7a43eb285a1"
+    },
+    {
+      "path": "src/components/ChatUsagePopover.tsx",
+      "bytes": 6383,
+      "lines": 70,
+      "sha256": "3ae9b1436a38307389d6920b8a74aa0f6c98b8b65fd71a147544187d23eb5f69"
+    },
+    {
+      "path": "src/components/AgentBudgetPill.tsx",
+      "bytes": 2542,
+      "lines": 43,
+      "sha256": "67dc58efecb51226aaa36c87811e262982081f7cb1c9b6a1e47874d4c01ecec5"
+    },
+    {
+      "path": "src/components/ContextWarning.tsx",
+      "bytes": 4432,
+      "lines": 98,
+      "sha256": "178c44290ae783d96ed7dc2ee6a2a0687ede3863c93f44f431b91b66d840e720"
+    },
+    {
+      "path": "src/components/origin-broadcast/CampaignsView.tsx",
+      "bytes": 24459,
+      "lines": 355,
+      "sha256": "7919408ae7a9d23d72efbd18aecc4bb9603c141de0e0ea4dca9abeb89c9b2757"
+    }
+  ],
+  "logs": [
+    {
+      "name": "focused-initial.log",
+      "bytes": 22915,
+      "sha256": "54b46e60920e01c1f084591517f630471682295ca27a1551c60934bbf1abfcef"
+    },
+    {
+      "name": "focused-green.log",
+      "bytes": 265,
+      "sha256": "03ba18173b4595b348866700a28d7fa0aebafbdf6f580e4b205195a704a8dfad"
+    },
+    {
+      "name": "lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "actions": {
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "versionEdited": false,
+    "releaseEdited": false,
+    "docsEdited": false,
+    "provider": false,
+    "browser": false,
+    "serverLaunched": false,
+    "production": false
+  },
+  "limits": [
+    "Raw hashes bind the unfrozen working files at this moment, not a final release.",
+    "Focused local synthetic tests only; no full client/server/backend or browser/native/provider acceptance.",
+    "Old0.3.2 delivery preparation remains permanently held; no publication action."
+  ]
+}

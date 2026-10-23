@@ -1,0 +1,478 @@
+Build, typecheck, and lint	Set up job	﻿2026-10-21T05:01:16.2787113Z Current runner version: '2.338.0'
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2814671Z ##[group]Runner Image Provisioner
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2815605Z Hosted Compute Agent
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2816194Z Version: 20261015.610
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2816939Z Commit: 267fdb4e8bbec4ab5ea31367f3a00d5c480c7656
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2818100Z Build Date: 2026-10-14T17:06:54Z
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2818914Z Worker ID: {52ab01c8-1123-4a17-b379-67812ff8699a}
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2819723Z Region: eastus
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2820339Z Cloud: Azure
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2821245Z ##[endgroup]
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2822829Z ##[group]Operating System
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2823616Z Ubuntu
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2824161Z 24.04.5
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2824664Z LTS
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2825250Z ##[endgroup]
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2825849Z ##[group]Runner Image
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2826489Z Image: ubuntu-24.04
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2827085Z Version: 20261018.339.1
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2828454Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261018.339/images/ubuntu/Ubuntu2404-Readme.md
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2830434Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261018.339
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2831826Z ##[endgroup]
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2833024Z ##[group]GITHUB_TOKEN Permissions
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2835325Z Contents: read
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2836015Z Metadata: read
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2836573Z ##[endgroup]
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2839145Z Secret source: Actions
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2840086Z Cache mode: write
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.2841159Z Prepare workflow directory
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.3183541Z Prepare all required actions
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.3233227Z Getting action download info
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.5606378Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.6689601Z Download action repository 'pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3' (SHA:ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3)
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:16.8049600Z Download action repository 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' (SHA:820762786026740c76f36085b0efc47a31fe5020)
+Build, typecheck, and lint	Set up job	2026-10-21T05:01:17.0641462Z Complete job name: Build, typecheck, and lint
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	﻿2026-10-21T05:01:17.1496448Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1498012Z with:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1498548Z   persist-credentials: false
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1499116Z   repository: z4mbo/Origin
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1503263Z   token: ***
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1503730Z   ssh-strict: true
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1504251Z   ssh-user: git
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1504703Z   clean: true
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1505180Z   sparse-checkout-cone-mode: true
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1505730Z   fetch-depth: 1
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1506184Z   fetch-tags: false
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1506651Z   show-progress: true
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1507122Z   lfs: false
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1507698Z   submodules: false
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1508223Z   set-safe-directory: true
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1508759Z   allow-unsafe-pr-checkout: false
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.1509700Z ##[endgroup]
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2575721Z Syncing repository: z4mbo/Origin
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2579000Z ##[group]Getting Git version info
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2580348Z Working directory is '/home/runner/work/Origin/Origin'
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2582865Z [command]/usr/bin/git version
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2697362Z git version 2.55.0
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2752637Z ##[endgroup]
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2781159Z Temporarily overriding HOME='/home/runner/work/_temp/8460d777-6df4-4d67-902d-16e1e875e4ab' before making global git config changes
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2787977Z Adding repository directory to the temporary git global config as a safe directory
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2792271Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Origin/Origin
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2870304Z Deleting the contents of '/home/runner/work/Origin/Origin'
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2874025Z ##[group]Determining repository object format
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2876628Z ##[endgroup]
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2879396Z ##[group]Initializing the repository
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.2881622Z [command]/usr/bin/git init /home/runner/work/Origin/Origin
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3014147Z hint: Using 'master' as the name for the initial branch. This default branch name
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3034246Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3056406Z hint: to use in all of your new repositories, which will suppress this warning,
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3059027Z hint: call:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3059944Z hint:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3060968Z hint: 	git config --global init.defaultBranch <name>
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3062267Z hint:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3063150Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3064295Z hint: 'development'. The just-created branch can be renamed via this command:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3065215Z hint:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3065820Z hint: 	git branch -m <name>
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3066475Z hint:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3067365Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3069947Z Initialized empty Git repository in /home/runner/work/Origin/Origin/.git/
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3077752Z [command]/usr/bin/git remote add origin https://github.com/z4mbo/Origin
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3141656Z ##[endgroup]
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3143351Z ##[group]Disabling automatic garbage collection
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3144947Z [command]/usr/bin/git config --local gc.auto 0
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3196308Z ##[endgroup]
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3198586Z ##[group]Setting up auth
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3200090Z Removing SSH command configuration
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3205938Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3265965Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3701825Z Removing HTTP extra header
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3703664Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.3741879Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4041861Z Removing includeIf entries pointing to credentials config files
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4043021Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4093035Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4358958Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4412979Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Origin/Origin/.git.path /home/runner/work/_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4461099Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4512389Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4559985Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4604596Z ##[endgroup]
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4606136Z ##[group]Fetching the repository
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:17.4613555Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +refs/tags/origin-v0.7.3:refs/tags/origin-v0.7.3
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9730741Z From https://github.com/z4mbo/Origin
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9733110Z  * [new tag]         origin-v0.7.3 -> origin-v0.7.3
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9747784Z [command]/usr/bin/git tag --list origin-v0.7.3
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9788998Z origin-v0.7.3
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9796942Z [command]/usr/bin/git rev-parse refs/tags/origin-v0.7.3^{commit}
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9833227Z bd111a97d1f161a51e32ad050b4363874d1cd517
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9839067Z ##[endgroup]
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9840212Z ##[group]Determining the checkout info
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9841528Z ##[endgroup]
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9842836Z [command]/usr/bin/git sparse-checkout disable
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9905374Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9952959Z ##[group]Checking out the ref
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:21.9954399Z [command]/usr/bin/git checkout --progress --force refs/tags/origin-v0.7.3
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0076572Z Updating files:  69% (6065/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0141775Z Updating files:  70% (6086/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0262756Z Updating files:  71% (6173/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0358677Z Updating files:  72% (6260/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0434832Z Updating files:  73% (6347/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0502566Z Updating files:  74% (6434/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0576506Z Updating files:  75% (6521/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0696088Z Updating files:  76% (6608/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0768002Z Updating files:  77% (6695/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0830409Z Updating files:  78% (6782/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0891655Z Updating files:  79% (6869/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.0952360Z Updating files:  80% (6956/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1008358Z Updating files:  81% (7043/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1097222Z Updating files:  82% (7130/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1180455Z Updating files:  83% (7217/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1273604Z Updating files:  84% (7303/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1340516Z Updating files:  85% (7390/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1405311Z Updating files:  86% (7477/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1467215Z Updating files:  87% (7564/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1534897Z Updating files:  88% (7651/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1595475Z Updating files:  89% (7738/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1648952Z Updating files:  90% (7825/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1709688Z Updating files:  91% (7912/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1766836Z Updating files:  92% (7999/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1825719Z Updating files:  93% (8086/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1873856Z Updating files:  94% (8173/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1924116Z Updating files:  95% (8260/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.1971060Z Updating files:  96% (8347/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2018131Z Updating files:  97% (8434/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2271159Z Updating files:  98% (8521/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2372074Z Updating files:  99% (8608/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2372503Z Updating files: 100% (8694/8694)
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2372940Z Updating files: 100% (8694/8694), done.
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2455151Z Note: switching to 'refs/tags/origin-v0.7.3'.
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2455653Z 
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2455880Z You are in 'detached HEAD' state. You can look around, make experimental
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2456952Z changes and commit them, and you can discard any commits you make in this
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2458140Z state without impacting any branches by switching back to a branch.
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2458642Z 
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2458975Z If you want to create a new branch to retain commits you create, you may
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2459754Z do so (now or later) by using -c with the switch command. Example:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2460208Z 
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2460392Z   git switch -c <new-branch-name>
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2460666Z 
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2460837Z Or undo this operation with:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2461102Z 
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2461240Z   git switch -
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2461446Z 
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2461800Z Turn off this advice by setting config variable advice.detachedHead to false
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2462309Z 
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2462723Z HEAD is now at bd111a9 release: prepare Origin 0.7.3 after exact-source gate corrections
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2509368Z ##[endgroup]
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2572354Z [command]/usr/bin/git log -1 --format=%H
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2613594Z bd111a97d1f161a51e32ad050b4363874d1cd517
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2624037Z ##[group]Removing auth
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2624500Z Removing SSH command configuration
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2629343Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2683030Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2973745Z Removing HTTP extra header
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.2978477Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3024583Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3278315Z Removing includeIf entries pointing to credentials config files
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3281772Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3320897Z includeif.gitdir:/home/runner/work/Origin/Origin/.git.path
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3321684Z includeif.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3322220Z includeif.gitdir:/github/workspace/.git.path
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3322603Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3330755Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Origin/Origin/.git.path
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3366087Z /home/runner/work/_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3376270Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Origin/Origin/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-86fa88ab\-bcd5\-47d8\-add3\-690b94ea65a6\.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3422706Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3456570Z /home/runner/work/_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3479260Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Origin/Origin/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-86fa88ab\-bcd5\-47d8\-add3\-690b94ea65a6\.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3522036Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3559756Z /github/runner_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3568354Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-86fa88ab\-bcd5\-47d8\-add3\-690b94ea65a6\.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3614712Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3649068Z /github/runner_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3660082Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-86fa88ab\-bcd5\-47d8\-add3\-690b94ea65a6\.config
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3711929Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3964343Z Removing credentials config '/home/runner/work/_temp/git-credentials-86fa88ab-bcd5-47d8-add3-690b94ea65a6.config'
+Build, typecheck, and lint	Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:01:23.3974393Z ##[endgroup]
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	﻿2026-10-21T05:01:23.4278866Z ##[group]Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:23.4279285Z with:
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:23.4279489Z   dest: ~/setup-pnpm
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:23.4279900Z   run_install: null
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:23.4280106Z   cache: false
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:23.4280325Z   cache_dependency_path: pnpm-lock.yaml
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:23.4280620Z   package_json_file: package.json
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:23.4280919Z   standalone: false
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:23.4281126Z ##[endgroup]
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:23.5819110Z ##[group]Running self-installer...
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:25.3549997Z 
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:25.3550653Z added 1 package, and audited 2 packages in 1s
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:25.3551103Z 
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:25.3551411Z 1 package is looking for funding
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:25.3551887Z   run `npm fund` for details
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:25.3567286Z 
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:25.3567841Z found 0 vulnerabilities
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:26.0062420Z Checking for updates...
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:26.1519395Z Switching pnpm from v11.19.0 to v10.33.0...
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:26.6026673Z .../v11/971-1a15cd5ee2e-5ab65faed8c21751 | Progress: resolved 1, reused 0, downloaded 0, added 0
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:26.6050937Z .../v11/971-1a15cd5ee2e-5ab65faed8c21751 |   +1 +
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:26.8675690Z .../v11/971-1a15cd5ee2e-5ab65faed8c21751 | Progress: resolved 1, reused 0, downloaded 1, added 1, done
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:27.2930956Z [WARN] Detected a pnpm v10 installation layout at PNPM_HOME. The pnpm shims at PNPM_HOME have been refreshed so the new version is active, but pnpm v11 expects bins in PNPM_HOME/bin. Run "pnpm setup" to migrate your PATH to the v11 layout.
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:27.2969083Z Successfully updated pnpm to v10.33.0
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:27.3345906Z ##[endgroup]
+Build, typecheck, and lint	Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:01:27.3346230Z Installation Completed!
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	﻿2026-10-21T05:01:27.3537391Z ##[group]Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.3538128Z with:
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.3538338Z   node-version: 24
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.3538549Z   cache: pnpm
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.3538750Z   check-latest: false
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.3541281Z   token: ***
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.3541506Z   package-manager-cache: true
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.3541748Z env:
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.3542009Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.3542326Z ##[endgroup]
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.4832513Z Found in cache @ /opt/hostedtoolcache/node/24.22.0/x64
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.4836298Z ##[group]Environment details
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.9371491Z node: v24.22.0
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.9371809Z npm: 11.19.1
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.9372039Z yarn: 1.22.22
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.9372519Z ##[endgroup]
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:27.9393873Z [command]/home/runner/setup-pnpm/node_modules/.bin/bin/pnpm store path --silent
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:29.5132291Z /home/runner/setup-pnpm/node_modules/.bin/store/v10
+Build, typecheck, and lint	Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:01:29.6153981Z pnpm cache is not found
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	﻿2026-10-21T05:01:29.6564510Z ##[group]Run pnpm install --frozen-lockfile
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:29.6565232Z ^[[36;1mpnpm install --frozen-lockfile^[[0m
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:29.8715536Z shell: /usr/bin/bash -e {0}
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:29.8715833Z env:
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:29.8716104Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:29.8716426Z ##[endgroup]
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:30.2829905Z Scope: all 5 workspace projects
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:30.3639369Z Lockfile is up to date, resolution step is skipped
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:30.4584060Z Progress: resolved 1, reused 0, downloaded 0, added 0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:30.5681676Z Packages: +969
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:30.5682741Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:31.4609097Z Progress: resolved 969, reused 0, downloaded 52, added 22
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:32.4595190Z Progress: resolved 969, reused 0, downloaded 118, added 49
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:33.4607931Z Progress: resolved 969, reused 0, downloaded 218, added 95
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:34.4608834Z Progress: resolved 969, reused 0, downloaded 397, added 214
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:35.4633848Z Progress: resolved 969, reused 0, downloaded 593, added 316
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:36.4682677Z Progress: resolved 969, reused 0, downloaded 742, added 371
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:37.4768834Z Progress: resolved 969, reused 0, downloaded 811, added 403
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:38.4748944Z Progress: resolved 969, reused 0, downloaded 825, added 407
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:39.4702873Z Progress: resolved 969, reused 0, downloaded 865, added 423
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:40.4965073Z Progress: resolved 969, reused 0, downloaded 900, added 445
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:41.4965171Z Progress: resolved 969, reused 0, downloaded 916, added 450
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:42.4973563Z Progress: resolved 969, reused 0, downloaded 944, added 462
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:43.4978051Z Progress: resolved 969, reused 0, downloaded 963, added 627
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:44.4979034Z Progress: resolved 969, reused 0, downloaded 964, added 966
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:45.1888254Z Progress: resolved 969, reused 0, downloaded 965, added 969, done
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:45.6023545Z .../esbuild@0.28.1/node_modules/esbuild postinstall$ node install.js
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:45.6034224Z .../esbuild@0.28.2/node_modules/esbuild postinstall$ node install.js
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:45.6042689Z .../esbuild@0.27.0/node_modules/esbuild postinstall$ node install.js
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:45.7079098Z .../esbuild@0.28.1/node_modules/esbuild postinstall: Done
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:45.7252101Z .../esbuild@0.28.2/node_modules/esbuild postinstall: Done
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:45.7709707Z .../esbuild@0.27.0/node_modules/esbuild postinstall: Done
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0392274Z 
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0393143Z dependencies:
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0393643Z + @1password/sdk 0.5.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0394129Z + @clack/prompts 1.7.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0394590Z + @codemirror/lang-sql 6.10.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0395064Z + @codemirror/language 6.13.1
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0395524Z + @codemirror/state 6.7.6
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0396037Z + @duckdb/node-api 1.5.6-r.1
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0396359Z + @hpke/core 1.9.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0396649Z + @lezer/highlight 1.2.5
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0396936Z + @muse-code/sdk 1.4.6
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0397200Z + @novnc/novnc 1.7.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0397731Z + @resvg/resvg-js 2.6.2
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0398187Z + @tanstack/react-virtual 3.14.13
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0398513Z + @trycua/cua-driver 0.28.2
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0398819Z + ag-grid-community 36.2.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0399092Z + ag-grid-react 36.2.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0399329Z + ajv 8.20.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0399562Z + ajv-formats 3.0.1
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0399786Z + clsx 2.1.1
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0400011Z + codemirror 6.0.2
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0400244Z + convex 1.47.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0400461Z + croner 10.0.1
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0400670Z + jose 6.2.10
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0400879Z + katex 0.16.47
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0401204Z + lucide-react 0.539.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0401691Z + mdast-util-from-markdown 2.0.3
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0402152Z + mermaid 12.1.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0402547Z + papaparse 5.7.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0402859Z + posthog-js 1.415.6
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0403446Z + qrcode-terminal 0.12.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0403729Z + qrcode.react 4.2.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0403965Z + react 19.2.8
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0404199Z + react-dom 19.2.8
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0404486Z + react-markdown 10.1.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0404749Z + rehype-katex 7.0.1
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0405009Z + remark-gfm 4.0.1
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0405256Z + remark-math 6.0.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0405483Z + shiki 4.4.3
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0405721Z + tailwind-merge 3.6.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0405965Z + tar 7.5.22
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0406156Z + vega 6.4.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0406355Z + vega-embed 7.3.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0406565Z + vega-lite 6.5.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0406774Z + vega-themes 3.0.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0406972Z + yaml 2.9.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0407162Z + zod 4.4.3
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0407266Z 
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0407383Z devDependencies:
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0408034Z + @tailwindcss/vite 4.3.3
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0408489Z + @types/node 26.2.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0408938Z + @types/novnc__novnc 1.6.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0409459Z + @types/papaparse 5.5.2
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0409801Z + @types/qrcode-terminal 0.12.2
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0410087Z + @types/react 19.2.18
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0410567Z + @types/react-dom 19.2.4
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0411032Z + @types/ws 8.18.2
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0411809Z + @vitejs/plugin-react 4.7.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0412328Z + electron 43.7.9
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0412754Z + electron-builder 26.15.3
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0413244Z + electron-updater 6.8.9
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0413702Z + esbuild 0.28.2
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0414045Z + happy-dom 20.14.5
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0414259Z + oxlint 1.80.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0414643Z + tailwindcss 4.3.3
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0414895Z + typebox 1.3.7
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0415117Z + typescript 5.9.3
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0415376Z + vite 7.3.6
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0415676Z + vitest 4.1.11
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0415888Z + wrangler 4.123.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0416085Z + ws 8.22.0
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.0416198Z 
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.1603783Z . prepare$ node scripts/install-git-hooks.mjs
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2211804Z . prepare: Done
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2313918Z ╭ Warning ─────────────────────────────────────────────────────────────────────╮
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2314570Z │                                                                              │
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2315239Z │   Ignored build scripts: core-js@3.50.0, workerd@1.20260811.1,               │
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2315857Z │   workerd@1.20260820.1.                                                      │
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2316494Z │   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2317123Z │   to run scripts.                                                            │
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2318052Z │                                                                              │
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2318650Z ╰──────────────────────────────────────────────────────────────────────────────╯
+Build, typecheck, and lint	Run pnpm install --frozen-lockfile	2026-10-21T05:01:46.2531652Z Done in 16.3s using pnpm v10.33.0
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	﻿2026-10-21T05:01:46.3648374Z ##[group]Run pnpm --filter @openmausbot/docs types:check
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:46.3648865Z ^[[36;1mpnpm --filter @openmausbot/docs types:check^[[0m
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:46.3702083Z shell: /usr/bin/bash -e {0}
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:46.3702347Z env:
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:46.3702604Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:46.3702952Z ##[endgroup]
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:46.7100738Z 
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:46.7101848Z > @openmausbot/docs@0.1.0 types:check /home/runner/work/Origin/Origin/apps/docs
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:46.7102960Z > next typegen && tsc --noEmit
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:46.7103617Z 
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:47.0536546Z Generating route types...
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs types:check	2026-10-21T05:01:47.0700553Z ✓ Types generated successfully
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	﻿2026-10-21T05:01:50.0262542Z ##[group]Run pnpm --filter @openmausbot/docs lint
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.0263195Z ^[[36;1mpnpm --filter @openmausbot/docs lint^[[0m
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.0331620Z shell: /usr/bin/bash -e {0}
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.0331894Z env:
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.0332154Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.0332491Z ##[endgroup]
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.4548358Z 
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.4549355Z > @openmausbot/docs@0.1.0 lint /home/runner/work/Origin/Origin/apps/docs
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.4550107Z > oxlint .
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.4550296Z 
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.5087360Z Found 0 warnings and 0 errors.
+Build, typecheck, and lint	Run pnpm --filter @openmausbot/docs lint	2026-10-21T05:01:50.5088600Z Finished in 12ms on 21 files with 96 rules using 4 threads.
+Build, typecheck, and lint	Run pnpm docs:build	﻿2026-10-21T05:01:50.5409642Z ##[group]Run pnpm docs:build
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.5409965Z ^[[36;1mpnpm docs:build^[[0m
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.5466393Z shell: /usr/bin/bash -e {0}
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.5466656Z env:
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.5466915Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.5470038Z   GITHUB_TOKEN: ***
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.5470280Z ##[endgroup]
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.8555726Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.8556533Z > openmausbot@0.7.3 docs:build /home/runner/work/Origin/Origin
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.8557100Z > pnpm --filter @openmausbot/docs build
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:50.8557344Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.1896006Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.1897262Z > @openmausbot/docs@0.1.0 prebuild /home/runner/work/Origin/Origin/apps/docs
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.1898357Z > pnpm assets:sync
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.1898621Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.5052848Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.5053887Z > @openmausbot/docs@0.1.0 assets:sync /home/runner/work/Origin/Origin/apps/docs
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.5055245Z > node scripts/sync-assets.mjs
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.5055576Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.5612232Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.5612924Z > @openmausbot/docs@0.1.0 build /home/runner/work/Origin/Origin/apps/docs
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.5613426Z > next build
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.5613620Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.9268976Z ▲ Next.js 16.3.8 (Turbopack)
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.9761231Z ✓ Running next.config.mjs took 48ms
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.9764345Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.9900840Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.9902138Z This information is used to shape Next.js' roadmap and prioritize features.
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.9903304Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.9904149Z https://nextjs.org/telemetry
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:51.9904372Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:52.0133719Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:01:52.0517062Z   Creating an optimized production build ...
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:07.5568899Z ✓ Compiled successfully in 14.7s
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:07.5678453Z   Running TypeScript ...
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:11.1046615Z   Finished TypeScript in 3.5s ...
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:11.1070283Z   Collecting page data using 3 workers ...
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:11.9787401Z   Generating static pages using 3 workers (0/123) ...
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:12.0488884Z [lucide-icons-plugin] Unknown icon detected: Boat.
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:12.0717703Z [lucide-icons-plugin] Unknown icon detected: Boat.
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:12.1674441Z [lucide-icons-plugin] Unknown icon detected: Boat.
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:12.3020688Z [lucide-icons-plugin] Unknown icon detected: Boat.
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:12.4442603Z   Generating static pages using 3 workers (30/123) 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:12.8921339Z   Generating static pages using 3 workers (61/123) 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:13.8927357Z Failed to set Next.js data cache for https://api.github.com/repos/milind-soni/openmausbot-releases/releases?per_page=100&page=1, items over 2MB can not be cached (4805056 bytes)
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:14.2552974Z Failed to set Next.js data cache for https://api.github.com/repos/milind-soni/OpenMausBot/releases?per_page=100&page=1, items over 2MB can not be cached (4122292 bytes)
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:14.9403752Z   Generating static pages using 3 workers (92/123) 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5179698Z ✓ Generating static pages using 3 workers (123/123) in 3.5s
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5363660Z   Finalizing page optimization ...
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5538350Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5568540Z Route (app)
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5585558Z ┌ ○ /
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5588432Z ├ ○ /_not-found
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5598760Z ├ ○ /api/search
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5599262Z ├   /docs/[[...slug]]
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5599664Z │ ├ ● /docs
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5600059Z │ ├ ● /docs/changelog
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5600510Z │ ├ ● /docs/connected-apps
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5601030Z │ └ ● [+36 more paths]
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5601449Z ├ ○ /llms-full.txt
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5601928Z ├   /llms.mdx/docs/[[...slug]]
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5602838Z │ ├ ● /llms.mdx/docs/content.md
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5603410Z │ ├ ● /llms.mdx/docs/changelog/content.md
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5604117Z │ ├ ● /llms.mdx/docs/computers/cloud-and-vps/content.md
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5604691Z │ └ ● [+36 more paths]
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5605077Z ├ ○ /llms.txt
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5605460Z └   /og/docs/[...slug]
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5605871Z   ├ ● /og/docs/image.png
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5606345Z   ├ ● /og/docs/changelog/image.png
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5606937Z   ├ ● /og/docs/computers/cloud-and-vps/image.png
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5607683Z   └ ● [+36 more paths]
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5607919Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5607931Z 
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5608272Z ○  (Static)  prerendered as static content
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5609100Z ●  (SSG)     prerendered as static HTML (uses generateStaticParams)
+Build, typecheck, and lint	Run pnpm docs:build	2026-10-21T05:02:15.5609541Z 
+Build, typecheck, and lint	Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	﻿2026-10-21T05:02:16.1785543Z Post job cleanup.
+Build, typecheck, and lint	Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:02:16.3262739Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/Origin/Origin --files-from manifest.txt --use-compress-program zstdmt
+Build, typecheck, and lint	Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020	2026-10-21T05:02:23.9713792Z Failed to save: Unable to reserve cache with key node-cache-Linux-x64-pnpm-6df072a65c593ae1a34c36f5412d880677ef3729879503a3d5a9e8118859bacf, another job may be creating this cache.
+Build, typecheck, and lint	Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	﻿2026-10-21T05:02:24.0426964Z Post job cleanup.
+Build, typecheck, and lint	Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3	2026-10-21T05:02:24.1910376Z Pruning is unnecessary.
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	﻿2026-10-21T05:02:24.2083016Z Post job cleanup.
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.2968462Z [command]/usr/bin/git version
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3024413Z git version 2.55.0
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3064113Z Temporarily overriding HOME='/home/runner/work/_temp/733a3957-a7b1-4a86-9ec2-f5c413ae3303' before making global git config changes
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3065574Z Adding repository directory to the temporary git global config as a safe directory
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3069447Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Origin/Origin
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3106004Z Removing SSH command configuration
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3112912Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3155379Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3432905Z Removing HTTP extra header
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3438480Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3492351Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3824118Z Removing includeIf entries pointing to credentials config files
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3838996Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build, typecheck, and lint	Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1	2026-10-21T05:02:24.3939048Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build, typecheck, and lint	Complete job	﻿2026-10-21T05:02:24.4379191Z Cleaning up orphan processes

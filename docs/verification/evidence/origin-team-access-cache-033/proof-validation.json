@@ -1,0 +1,28 @@
+{
+  "command": "node node_modules/vitest/vitest.mjs run scripts/testing/verification-docs.test.ts scripts/testing/comment-history.test.ts scripts/testing/file-size-ratchet.test.ts",
+  "before": {
+    "passed": 8,
+    "failed": 1,
+    "skipped": 0,
+    "sha256": "9fa72a51bb7bfe2d242547a9e37a424b80618622976610c2c358456ad847f410",
+    "files": 3
+  },
+  "after": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "sha256": "4aeec90f14d45446d850977ef470c22a41b8a781e59f78123d7bed72ac460a7d",
+    "files": 3
+  },
+  "change": "Add already-registered server/origin-teams.ts to the documentation guard factory-module inventory. No runtime route or guard assertion changed.",
+  "sourceReferences": [
+    "server/origin-teams.ts:70-72",
+    "server/index.ts:590"
+  ],
+  "browserFailedAttemptsPreserved": [
+    "settings-attempt-hidden-panel.json",
+    "sidebar-attempt-workspace-status.json",
+    "sidebar-attempt-default-team-status.json",
+    "full-app-attempt-no-membership.json"
+  ]
+}

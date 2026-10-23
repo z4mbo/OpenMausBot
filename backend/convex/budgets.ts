@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { projectMember, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
+import { projectMember, requireMember, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
 
 export const WARN_RATIO = 0.8;
 const MONTHLY_MAX = 100_000;
@@ -158,6 +158,10 @@ export const forAgent = query({
     const agent = await ctx.db.get(a.agentId);
     if (!agent) return null;
     const { member } = await requireTeamMember(ctx, agent.teamId, a.sessionToken);
+    if (agent.projectId) {
+      const { project } = await requireMember(ctx, agent.projectId, a.sessionToken);
+      if (project.teamId !== agent.teamId) throw new Error("No active project access");
+    }
     const checks = await budgetChecks(ctx, agent, agent.projectId, Date.now());
     const tightest = checks.sort((x, y) => y.spentUsd / y.monthlyUsd - x.spentUsd / x.monthlyUsd)[0];
     if (!tightest) return null;

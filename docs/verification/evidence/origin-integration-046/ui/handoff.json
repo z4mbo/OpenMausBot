@@ -1,0 +1,89 @@
+{
+  "preparedAt": "2026-10-20T05:15:21.180Z",
+  "status": "Browser inspection delegated to root CUA; no visual acceptance claimed by this agent",
+  "fixture": {
+    "pid": 73112,
+    "port": 50063,
+    "url": "http://127.0.0.1:50063/__integration046.html",
+    "sourceManifest": "source-before-2.json",
+    "protectedPortsUntouched": true,
+    "scope": "Actual merged UI components with controlled StoreContext/reducer, HTTP catalog/quota/settings responses and cloud-query adapter. No native backend, provider, real host, credential, production data or full App acceptance."
+  },
+  "sourceBinding": {
+    "manifest": "source-before-2.json",
+    "sha256": "58361df4db82034c6fab3325d6ed220aa35e3a659b3623ed5d2e0d7345f27472",
+    "files": 1438,
+    "head": "fb7b838aab70c1308023e5df27209641fff5e9c1",
+    "workingTree": true,
+    "fixtureFiles": [
+      {
+        "name": "launch.mjs",
+        "sha256": "a6c780c7830d1cc8eb42451ebf8d2bff7d4d17bac5dc9be4b5566d7b94b1fcb3"
+      },
+      {
+        "name": "preview.tsx",
+        "sha256": "7702bd4da8d7d1065e3c48ced1d7800e4e22c54e8f1106ff77fbfa41f8ea6ecf"
+      }
+    ]
+  },
+  "routes": {
+    "agent": "?screen=agent&theme=dark",
+    "hosting": "?screen=hosting&theme=light",
+    "chat": "?screen=chat&theme=dark&width=standard",
+    "settings": "?screen=settings&theme=light",
+    "tabs": "?screen=tabs&theme=dark"
+  },
+  "options": {
+    "theme": [
+      "light",
+      "dark"
+    ],
+    "width": [
+      "standard",
+      "wide",
+      "full"
+    ]
+  },
+  "capabilities": [
+    "Actual ModelSection/ModelFallbackSettings/ModelPicker presentation with two synthetic local backup routes",
+    "Actual ModelHostingSettings and controlled owner/workspace/project/catalog responses; no real source is enabled",
+    "Actual ChatView, minimal quota/context popover and merged PR card using synthetic transcript and quota reports",
+    "Actual SettingsModal opened on Integrations with three disconnected synthetic service descriptors",
+    "Actual ChiefSectionBar overflow navigation for new project tabs; selected body is a fixture status only"
+  ],
+  "limitations": [
+    "No native backend, real model, provider credentials, production data, GitHub mutation or service grant is accessed",
+    "Unhandled operations fail405; model execution, saves, budget accounting and host execution are not acceptance-tested here",
+    "The PR card points to a synthetic URL; do not open or submit its merge action",
+    "Project tab bodies are not mounted, so new Studio/Broadcast/Pipeline/Canvas/Org functionality is not established by this navigation check",
+    "Model fallback catalog is controlled; native source opt-in/permissions/offline behavior remains covered by separate native evidence",
+    "Manifest covers the unfrozen working tree; root should compare current inputs before attributing screenshots"
+  ],
+  "priorFocusedChecks": {
+    "testFiles": 13,
+    "passed": 143,
+    "groups": [
+      {
+        "files": 9,
+        "passed": 118,
+        "durationSeconds": 22.61
+      },
+      {
+        "files": 4,
+        "passed": 25,
+        "durationSeconds": 3.79
+      }
+    ],
+    "oxlint": "passed for touched UI/test/helper files",
+    "stagedDiffCheck": "passed",
+    "logs": "Tool outputs; no separate raw logs were captured"
+  },
+  "failedAttempt": {
+    "fixture": "fixture.json",
+    "sourceManifest": "source-before.json",
+    "observedBy": "root CUA",
+    "error": "Blank page: transitive style-to-js CJS default export was not optimized",
+    "correction": "Only fixture Vite dependency discovery changed to scan actual source components and explicitly bundle react-markdown; exact owned PID52380 was stopped and replaced by PID73112 on the same strict50063 port",
+    "productCodeChanged": false
+  }
+}

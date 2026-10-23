@@ -1,0 +1,40 @@
+{
+  "kind": "origin-ci-lifecycle-evidence",
+  "files": [
+    {
+      "path": "focused-green.log",
+      "bytes": 241,
+      "sha256": "c2733e895a1dcd74906902907d30f01b30fac0cd8864ca51e0958e6f185070bf"
+    },
+    {
+      "path": "owned-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1831,
+      "sha256": "518f429978caae920ed6125f52c5877edcbc59e5459197a2de4ed7e35eaaf72a"
+    },
+    {
+      "path": "report.json",
+      "bytes": 2818,
+      "sha256": "bf7cb7bf82012e88c189ee32ab59b161029097d2ac00b69b63baa6cdab769fb2"
+    },
+    {
+      "path": "room-rename-red.log",
+      "bytes": 1073,
+      "sha256": "2a1f4d6a1126fcebb10126ffc1ded52fe33cd4cedf90d47b4df284d08a8c8463"
+    },
+    {
+      "path": "server-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source-files.json",
+      "bytes": 824,
+      "sha256": "31fca76af2c0c9375f8454bcdea6b3bb5aee55a4078a4bb3e8949c5a347d247a"
+    }
+  ]
+}

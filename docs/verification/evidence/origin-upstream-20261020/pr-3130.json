@@ -1,0 +1,33 @@
+{
+  "number": 3130,
+  "url": "https://github.com/milind-soni/OpenMausBot/pull/3130",
+  "mergeCommit": "40a9787f2215a9b6208158be55641fbeb16b88e2",
+  "baseCommit": "615fe65e17f88d99f12d34682750d9ae2fa402bc",
+  "headCommit": "cffa85d0b24835c3250f0e8b0cd254fb0695ec41",
+  "originalCaptureSha256": "51f95177fc75874b3d395fead587e5121f38f8e2c27af06d5e6072c595d2e35f",
+  "patchRepresentation": "Per-file GitHub patch SHA-256; raw patch text stays in ignored local capture.",
+  "files": [
+    {
+      "sha": "a0519b409a4709632c1c47d04146fadb92eb49ab",
+      "filename": "server/harness/bus.test.ts",
+      "status": "modified",
+      "additions": 20,
+      "deletions": 0,
+      "changes": 20,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/cffa85d0b24835c3250f0e8b0cd254fb0695ec41/server%2Fharness%2Fbus.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "1a5d378c915d60738bd337d3b746badbbd29d2e6f905300c64e4fb3efce7edd2"
+    },
+    {
+      "sha": "be033b6822e1cc6ddf300903c8c858cf99e95ca2",
+      "filename": "server/harness/bus.ts",
+      "status": "modified",
+      "additions": 16,
+      "deletions": 15,
+      "changes": 31,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/cffa85d0b24835c3250f0e8b0cd254fb0695ec41/server%2Fharness%2Fbus.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "b80c1fb73d54d6c2c4ad029e8be6db7b5f2cc6d73fb1ff70b167b1d94e11389e"
+    }
+  ]
+}

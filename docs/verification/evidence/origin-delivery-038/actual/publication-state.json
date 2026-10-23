@@ -1,0 +1,18 @@
+{
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "version": "0.2.14",
+  "pinsSha256": "5658fa4ec16086a422a3ac3401f767155e86535274e5d75287ac0eba40b5be80",
+  "startedAt": "2026-10-19T04:01:32.017Z",
+  "prepublicationSha256": "77680572fcf3ced3ed3cd318e56ec09654939442bc95e51b8e4a78d8d93cad09",
+  "github": "confirmed",
+  "downloads": "confirmed",
+  "site": "confirmed",
+  "backendReused": true,
+  "newBackendDeployment": false,
+  "publishedAt": "2026-10-19T04:01:32Z",
+  "downloadsPromotedAt": "2026-10-19T04:01:50.167Z",
+  "sitePromotedAt": "2026-10-19T04:01:51.863Z",
+  "publicArtifactHashesVerified": true,
+  "runtimeVerified": true,
+  "completedAt": "2026-10-19T04:02:02.560Z"
+}

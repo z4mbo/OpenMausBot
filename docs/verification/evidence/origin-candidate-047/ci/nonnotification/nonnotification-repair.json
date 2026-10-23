@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-20T06:24:02.322Z",
+  "sourceScope": "non-notification CI repairs; final release freeze owned by root",
+  "commits": {
+    "modelValidation": "c045a7bdd",
+    "extractedFixtureSeams": "657e6b84e",
+    "legacyGuestFixtures": "ca04aa512"
+  },
+  "cases": [
+    {
+      "severity": "P2",
+      "scenario": "Scoped model validation intercepts malformed local selections before the existing checker, dropping field names and established effort/unknown-control messages.",
+      "fix": "Keep the strict schema and format the same actionable rejection contract; no provider/controller dispatch on invalid requests.",
+      "proof": "6 new failures before, 21 checker tests and 3 real HTTP regressions pass after."
+    },
+    {
+      "severity": "verification blocker",
+      "scenario": "Approval timing hook still targets claude.ts after broker extraction, so approval-clock fixtures exit before health readiness.",
+      "fix": "Target exact claude-permission-broker.ts timer seam; no production permission behavior changed."
+    },
+    {
+      "severity": "verification blocker",
+      "scenario": "Late-completion fixture silently replaces an event fan-out loop no longer in claude.ts, so completionheld is never written.",
+      "fix": "Hook claude-turn-events.ts exact fan-out and fail explicitly if that seam changes.",
+      "proof": "All 4 replacement-generation scenarios and full 44-case VM suite pass."
+    },
+    {
+      "severity": "verification blocker",
+      "scenario": "Cleanup VM fixture omits sharedAgents.cancelHosted now used by interruptDirectThread, so deferred adapter-start promises never resolve.",
+      "fix": "Supply inert hosted-cancellation dependency in the fixture; 15 cleanup tests pass."
+    },
+    {
+      "severity": "verification blocker",
+      "scenario": "Synthetic Codex config/read invents an unrelated native MCP server unless instructed to honor its -c overrides; guest configuration gate correctly refuses before turn/start.",
+      "fix": "Enable existing fake override behavior in the Cloud fixture; shell-disable and empty-environment assertions remain."
+    },
+    {
+      "severity": "verification blocker",
+      "scenario": "Legacy guest test expects a Bash approval card, while hardened confinement correctly denies Bash at the broker before any card.",
+      "fix": "Require explicit system denial and no card, both before and after an owner saves a matching command; no production guard relaxed."
+    }
+  ],
+  "verification": {
+    "fullGroupVm": {
+      "passed": 44
+    },
+    "fullCloudIsolation": {
+      "passed": 39,
+      "environmentBlocked": 1,
+      "blocker": "Local Windows file-symlink creation lacks privilege; EPERM at cloud-lending-memory.e2e.test.ts:415. Original CI031 passed this exact case; assertions retained."
+    },
+    "checkerAndCleanup": {
+      "passed": 36
+    },
+    "realHttpModelContract": {
+      "passed": 3
+    },
+    "originalFailingCloudCases": {
+      "passed": 2
+    },
+    "serverTypecheck": "passed",
+    "targetedLint": "passed"
+  },
+  "ciWindowsLogsCaptured": [
+    118474514646,
+    118474514702,
+    118474514737,
+    118474514749
+  ],
+  "windowsAdditionalNotificationFailure": "notification-open.test.ts handled by notification owner",
+  "files": {
+    "startup-local-red.log": "2dfdd56ca045b1d3fd6157060f4a99b681747efcd814e28333aae1000c42b4db",
+    "startup-child-red.log": "83aae0246da5c3920d026563008c57daaba79a66e6010c683d4280c48ec8bebb",
+    "model-selection-contract-red.log": "dbee8f3a7be4dc7a20cf4d6f0510ead4e834231dc91cbbe63cdf797e11e19add",
+    "model-selection-cleanup-green.log": "b793400868015b453c82caee2d6d34ae00f4c2ff70be55e4e078cfbc4c40b8bd",
+    "model-http-contract-green.log": "526ac745ce62cb3e5faf01d29feb5ed42b414652710a39a1068a611ec17fab1a",
+    "group-vm-seam-green.log": "51a0091f66bff2a16e244163d1d8c3c854a77b4afaa1c20746492b0cc747b4be",
+    "cloud-guest-local-red.log": "c2522acbadd6f1937a8ba0b6778b7d27326ce0ad54382b32f5df44f6307ee0c0",
+    "cloud-guest-fixture-green.log": "864cf14cb510c5ee5e67ba012d76690c4c08db01edd7ea82f62003eb054987da",
+    "cloud-lending-local-red.log": "c8eba6be2a44b597319f3e081abe0c92ce6a56c49d1bf33c2e236f0bd04762e0",
+    "cloud-lending-policy-green.log": "114174cd71165925cb586ba07dfd3a9924bda847a89f47a3cc3b46bcdf692430",
+    "nonnotification-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "nonnotification-server-tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "group-vm-full-green.log": "eaf254efffe863958af88cd0f89647953b4569e7e28480c26afd04a82b27855c",
+    "cloud-isolation-full-local.log": "4289f19648187392ee449ba50e43d7558aa6d21307f1be3d512eb1723d0f4a70"
+  },
+  "productionOperations": false,
+  "productionDataUsed": false,
+  "protectedServicesTouched": false,
+  "mainCheckoutTouched": false,
+  "limits": [
+    "Local Windows isolated fixtures; Linux CI awaits final exact-source workflow.",
+    "Notification, delegation and thread-selection semantics are owned by the other agent.",
+    "No release, tag, push, deployment, credentials or production operations in this repair."
+  ]
+}

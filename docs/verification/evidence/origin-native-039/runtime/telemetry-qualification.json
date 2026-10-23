@@ -1,0 +1,15 @@
+{
+  "phase": "Initial CLI code push",
+  "source": "0745d6ef0317d42b498fecbbfdf5e5e3be6d41ce",
+  "originalRecipe": "launch-original.mjs.txt",
+  "nativeBeaconDisabled": true,
+  "nativeSentryEnabled": false,
+  "cliVersion": "1.45.0",
+  "initialCliCiFlagAbsent": true,
+  "initialCliSentryEligible": true,
+  "actualOutboundTelemetryEstablished": false,
+  "credentialProfileIsolated": true,
+  "ownerCredentialsInherited": false,
+  "correction": "Future CLI child invocations include CI=1, which the installed CLI uses to skip Sentry initialization. The already completed successful push is not relabelled as telemetry-disabled.",
+  "productDefectClaimed": false
+}

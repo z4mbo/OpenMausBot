@@ -1,0 +1,23 @@
+{
+  "searchedAt": "2026-10-19T04:03:03.694Z",
+  "repository": "milind-soni/OpenMausBot",
+  "since": "2026-10-19T01:30:31Z",
+  "until": "2026-10-19T04:02:34Z",
+  "query": "repo:milind-soni/OpenMausBot is:pr is:merged merged:2026-10-19T01:30:31Z..2026-10-19T04:02:34Z",
+  "officialEndpoint": "https://api.github.com/search/issues",
+  "incompleteResults": false,
+  "paginationComplete": true,
+  "totalCount": 0,
+  "pages": [
+    {
+      "path": "search-page-1.json",
+      "bytes": 79,
+      "sha256": "c9938edecb99d754b2d039ac9eec320a94c769b6a6417921e2dcbef9e2fe01a0",
+      "items": 0
+    }
+  ],
+  "pullRequests": [],
+  "sourceChanged": false,
+  "productionActionPerformed": false,
+  "adoptionClaimed": false
+}

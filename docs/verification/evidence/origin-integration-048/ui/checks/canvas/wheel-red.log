@@ -1,0 +1,35 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+-x------
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/origin-pages/DrawingCanvas.test.ts > keeps toolbar scrolling from panning the canvas or cancelling native scrolling
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/components/origin-pages/DrawingCanvas.test.ts:56:34
+     54|   const wheel = new WheelEvent("wheel", { bubbles: true, cancelable: t…
+     55|   flushSync(() => button("Rectangle").dispatchEvent(wheel));
+     56|   expect(wheel.defaultPrevented).toBe(false);
+       |                                  ^
+     57|   expect(drawing.getAttribute("transform")).toBe(before);
+     58| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  09:13:18
+   Duration  1.88s (transform 479ms, setup 647ms, import 667ms, tests 40ms, environment 343ms)
+

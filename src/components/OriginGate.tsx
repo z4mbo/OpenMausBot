@@ -204,15 +204,19 @@ export function OriginSync() {
           if (!workspaces.length) return;
           const projects = (await guarded(() => Promise.all(workspaces.map((workspace) => cloud.projects.listForUser(workspace._id))))).flat();
           const links = await guarded(() => api<CloudLinks>("/api/origin/cloud-links"));
+          const roundBots = new Map(bots.current.map(bot => [bot.id, bot]));
           const call = async <T,>(path: string, init?: { method?: string; body?: string }): Promise<T> => {
             const answer = await guarded(() => api<T & { bot?: Bot; chief?: Bot; members?: Bot[] }>(path, init));
-            for (const bot of [answer.bot, answer.chief, ...(answer.members ?? [])]) if (bot) dispatch({ type: "botAdded", bot, preserveSelection: true });
+            for (const bot of [answer.bot, answer.chief, ...(answer.members ?? [])]) if (bot) {
+              roundBots.set(bot.id, { ...roundBots.get(bot.id), ...bot });
+              dispatch({ type: "botAdded", bot, preserveSelection: true });
+            }
             return answer;
           };
           const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: bots.current, links, call, lead: PROJECT_LEAD_ROLE });
           assertCurrent();
           await sharedAgentsRound({
-            call, bots: bots.current, instances: instances.current, projects,
+            call, bots: [...roundBots.values()], instances: instances.current, projects,
             cloud: {
               query: (name, args) => guarded(() => cloudQueryOnce(name, args)),
               mutation: (name, args) => guarded(() => cloudMutation(name, args)),

@@ -1,0 +1,354 @@
+[
+  {
+    "stage": "created-second-thread",
+    "at": "2026-10-21T05:13:40.603Z",
+    "bot": {
+      "id": "693c6f35-e196-43c7-8614-d36bf864e560",
+      "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "tasks": [
+        {
+          "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+          "title": "New thread",
+          "createdAt": 1792559620155,
+          "updatedAt": 1792559620155,
+          "approvalMode": "full",
+          "autoApprove": false,
+          "alwaysAllow": [],
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        },
+        {
+          "threadId": "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6",
+          "title": "New thread",
+          "createdAt": 1792559598837,
+          "updatedAt": 1792559598841,
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "lastThreadOrderAt": 1792559598841,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        }
+      ]
+    },
+    "dom": {
+      "alerts": [],
+      "current": [
+        "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6"
+      ],
+      "focus": {
+        "label": "Message Pepper",
+        "tag": "TEXTAREA"
+      },
+      "requests": [],
+      "textarea": [
+        {
+          "connected": true,
+          "disabled": false,
+          "label": "Message Pepper",
+          "value": ""
+        }
+      ]
+    }
+  },
+  {
+    "stage": "selected-original",
+    "at": "2026-10-21T05:13:40.744Z",
+    "bot": {
+      "id": "693c6f35-e196-43c7-8614-d36bf864e560",
+      "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "tasks": [
+        {
+          "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+          "title": "New thread",
+          "createdAt": 1792559620155,
+          "updatedAt": 1792559620155,
+          "approvalMode": "full",
+          "autoApprove": false,
+          "alwaysAllow": [],
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        },
+        {
+          "threadId": "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6",
+          "title": "New thread",
+          "createdAt": 1792559598837,
+          "updatedAt": 1792559598841,
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "lastThreadOrderAt": 1792559598841,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        }
+      ]
+    },
+    "dom": {
+      "alerts": [],
+      "current": [
+        "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6"
+      ],
+      "focus": {
+        "label": "Message Pepper",
+        "tag": "TEXTAREA"
+      },
+      "requests": [],
+      "textarea": [
+        {
+          "connected": true,
+          "disabled": false,
+          "label": "Message Pepper",
+          "value": ""
+        }
+      ]
+    }
+  },
+  {
+    "stage": "typed-before-enter",
+    "at": "2026-10-21T05:13:40.882Z",
+    "bot": {
+      "id": "693c6f35-e196-43c7-8614-d36bf864e560",
+      "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "tasks": [
+        {
+          "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+          "title": "New thread",
+          "createdAt": 1792559620155,
+          "updatedAt": 1792559620155,
+          "approvalMode": "full",
+          "autoApprove": false,
+          "alwaysAllow": [],
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        },
+        {
+          "threadId": "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6",
+          "title": "New thread",
+          "createdAt": 1792559598837,
+          "updatedAt": 1792559598841,
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "lastThreadOrderAt": 1792559598841,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        }
+      ]
+    },
+    "dom": {
+      "alerts": [],
+      "current": [
+        "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6"
+      ],
+      "focus": {
+        "label": "Message Pepper",
+        "tag": "TEXTAREA"
+      },
+      "requests": [],
+      "textarea": [
+        {
+          "connected": true,
+          "disabled": false,
+          "label": "Message Pepper",
+          "value": "hello"
+        }
+      ]
+    }
+  },
+  {
+    "stage": "pressed-enter",
+    "at": "2026-10-21T05:13:40.992Z",
+    "bot": {
+      "id": "693c6f35-e196-43c7-8614-d36bf864e560",
+      "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "tasks": [
+        {
+          "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+          "title": "New thread",
+          "createdAt": 1792559620155,
+          "updatedAt": 1792559620155,
+          "approvalMode": "full",
+          "autoApprove": false,
+          "alwaysAllow": [],
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        },
+        {
+          "threadId": "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6",
+          "title": "New thread",
+          "createdAt": 1792559598837,
+          "updatedAt": 1792559598841,
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "lastThreadOrderAt": 1792559598841,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        }
+      ]
+    },
+    "dom": {
+      "alerts": [],
+      "current": [
+        "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6"
+      ],
+      "focus": {
+        "label": "Message Pepper",
+        "tag": "TEXTAREA"
+      },
+      "requests": [
+        {
+          "body": "{\"text\":\"hello\",\"threadId\":\"65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6\",\"sendId\":\"d5a2711f-99ef-4f15-87fc-e488ef851b99\"}",
+          "method": "POST",
+          "url": "/api/bots/693c6f35-e196-43c7-8614-d36bf864e560/messages"
+        }
+      ],
+      "textarea": [
+        {
+          "connected": true,
+          "disabled": false,
+          "label": "Message Pepper",
+          "value": ""
+        }
+      ]
+    }
+  },
+  {
+    "stage": "original-busy",
+    "at": "2026-10-21T05:13:41.894Z",
+    "bot": {
+      "id": "693c6f35-e196-43c7-8614-d36bf864e560",
+      "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+      "busy": true,
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "tasks": [
+        {
+          "threadId": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+          "title": "New thread",
+          "createdAt": 1792559620155,
+          "updatedAt": 1792559620155,
+          "approvalMode": "full",
+          "autoApprove": false,
+          "alwaysAllow": [],
+          "unread": false,
+          "activity": "idle",
+          "busy": false,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        },
+        {
+          "threadId": "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6",
+          "title": "hello",
+          "createdAt": 1792559598837,
+          "updatedAt": 1792559621662,
+          "unread": false,
+          "activity": "working",
+          "busy": true,
+          "lastThreadOrderAt": 1792559621662,
+          "titleFromFirstMessage": true,
+          "turnStartedAt": 1792559621670,
+          "cwd": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-6SsmFg\\task-workspaces\\693c6f35-e196-43c7-8614-d36bf864e560\\65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6",
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "followsBotModel": true,
+          "waitingForTeammates": false
+        }
+      ]
+    },
+    "dom": {
+      "alerts": [],
+      "current": [
+        "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6"
+      ],
+      "focus": {
+        "label": "Message Pepper",
+        "tag": "TEXTAREA"
+      },
+      "requests": [
+        {
+          "body": "{\"text\":\"hello\",\"threadId\":\"65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6\",\"sendId\":\"d5a2711f-99ef-4f15-87fc-e488ef851b99\"}",
+          "method": "POST",
+          "status": 202,
+          "url": "/api/bots/693c6f35-e196-43c7-8614-d36bf864e560/messages"
+        }
+      ],
+      "textarea": [
+        {
+          "connected": true,
+          "disabled": false,
+          "label": "Message Pepper",
+          "value": ""
+        }
+      ]
+    }
+  }
+]

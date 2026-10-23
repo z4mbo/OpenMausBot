@@ -122,3 +122,24 @@ docs/verification/evidence/origin-delivery-038/** -text -whitespace
 docs/verification/evidence/origin-native-039/** -text -whitespace
 docs/verification/evidence/origin-plan-usage-040/**/*.json text eol=lf
 docs/verification/evidence/origin-delivery-040/** -text -whitespace
+
+docs/verification/evidence/origin-upstream-20261020/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-model-fallback-041/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-project-order-042/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-chat-usage-042/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-agent-threads-043/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-model-host-ui-044/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-model-host-native-044/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-candidate-045/** -text -whitespace
+docs/verification/evidence/origin-model-host-native-045/** -text whitespace=cr-at-eol
+docs/verification/evidence/origin-integration-046/** -text -whitespace
+
+docs/verification/evidence/origin-candidate-047/** -text -whitespace
+docs/verification/evidence/origin-integration-048/** -text -whitespace
+docs/verification/evidence/origin-candidate-049/** -text -whitespace
+docs/verification/evidence/origin-release-hold-049/** -text -whitespace
+docs/verification/evidence/origin-candidate-050/** -text -whitespace
+docs/verification/evidence/origin-candidate-051/** -text -whitespace
+docs/verification/evidence/origin-candidate-052/** -text -whitespace
+docs/verification/evidence/origin-candidate-053/** -text -whitespace
+docs/verification/evidence/origin-candidate-054/** -text -whitespace

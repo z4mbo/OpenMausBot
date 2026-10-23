@@ -1,0 +1,74 @@
+{
+  "preparedAt": "2026-10-20T06:15:10.1194045Z",
+  "commits": [
+    "73bd07518cadbb1108360cf4122590f7c0d3b45e",
+    "8a25756147af124f1781cc0d056cd9ec62819293"
+  ],
+  "scope": "five confirmed project-tools UI fixes; no provider or production mutation",
+  "checks": {
+    "focusedFiles": 7,
+    "focusedTests": 44,
+    "focusedExit": 0,
+    "frontendTypecheckExit": 0,
+    "touchedOxlintExit": 0,
+    "diffCheckExit": 0,
+    "broadcastRed": {
+      "passed": 3,
+      "failed": 4
+    },
+    "pipelineRed": {
+      "passed": 3,
+      "failed": 5
+    }
+  },
+  "browserAfterAcceptance": "pending root browser inspection; no visual acceptance claimed",
+  "logs": [
+    "broadcast-readiness-red.log",
+    "broadcast-readiness-green.log",
+    "pipeline-readiness-red.log",
+    "pipeline-readiness-first.log",
+    "focused-green.log",
+    "typecheck.log",
+    "lint.log"
+  ],
+  "sources": [
+    {
+      "path": "src/components/origin-broadcast/BroadcastPage.tsx",
+      "sha256": "323b5d25b6e18f03e769808c3ea40140c09425805cda2cbaa20990783bd7233c"
+    },
+    {
+      "path": "src/components/origin-pipeline/PipelinePage.tsx",
+      "sha256": "82ed233129cf152a7f03cb3139afea4b0524eaf315226b3a2a38248e94711d65"
+    },
+    {
+      "path": "src/components/origin-pages/canvas/CanvasEditor.tsx",
+      "sha256": "ab619c28c89892dcee328b1ff972025dadc5365077589f95f886318c7fb94afa"
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastComposer.tsx",
+      "sha256": "c7d8e316a5a50a4d5166901d2cc54e4f49dd10da0cb35db1286ca546aa90d27a"
+    },
+    {
+      "path": "src/components/origin-pipeline/LeadDrawer.tsx",
+      "sha256": "dbc78988a8b9d67bae7fcd6bbca0fcbb02bcfcadaed893a8467ca4a25c416660"
+    },
+    {
+      "path": "src/components/origin-broadcast/BroadcastComposer.readiness.test.ts",
+      "sha256": "f5a423e512ddff67b09b1219d4057d86da5459040728287e63a2e7a43eb285a1"
+    },
+    {
+      "path": "src/components/origin-pipeline/LeadDrawer.readiness.test.ts",
+      "sha256": "1945802e61467cbfab98b280c86994966a4f869d1eb9937deaa26f8258781caf"
+    }
+  ],
+  "fixture": {
+    "adapter": "feature-pipeline-api.mjs",
+    "adapterSha256": "c24446053c3fcbf977bbffb80d9e336e4d2f8228e4e4d03b98d0de74c43f3799",
+    "addonSha256": "fc364a1a4ece820bded0537030411bd76824bb90ad66ac4f5a26670a60db1077",
+    "pipelineDefault": "synthetic disconnected GET status",
+    "pipelineUnknown": "channels=unknown",
+    "writes": "blocked before network",
+    "sessionStorage": "not read or written by adapter",
+    "activation": "root controlled restart required"
+  }
+}

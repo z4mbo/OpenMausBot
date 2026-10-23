@@ -1,0 +1,68 @@
+✔ accepts only a candidate image with its completed confirmed promotion proof (1.2804ms)
+✖ rejects the preserved071 image even with otherwise valid candidate evidence (0.4346ms)
+✖ rejects missing promotion proof and a build receipt in its place (0.1309ms)
+✖ rejects mismatched or incomplete promotion identity and confirmation evidence (0.1586ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 1
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 54.1026
+
+✖ failing tests:
+
+test at .omb-scratch\public-delivery-052\promotion-proof.test.mjs:20:1
+✖ rejects the preserved071 image even with otherwise valid candidate evidence (0.4346ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/.omb-scratch/public-delivery-052/promotion-proof.test.mjs:21:62)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at .omb-scratch\public-delivery-052\promotion-proof.test.mjs:23:1
+✖ rejects missing promotion proof and a build receipt in its place (0.1309ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/.omb-scratch/public-delivery-052/promotion-proof.test.mjs:24:69)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at .omb-scratch\public-delivery-052\promotion-proof.test.mjs:27:1
+✖ rejects mismatched or incomplete promotion identity and confirmation evidence (0.1586ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/.omb-scratch/public-delivery-052/promotion-proof.test.mjs:40:68)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }

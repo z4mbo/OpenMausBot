@@ -1,0 +1,64 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix
+
+ ❯ src/lib/origin-cloud/session-races.test.ts (8 tests | 1 failed | 7 skipped) 16ms
+   × rejects a delayed login after a backend switch without sending its token to the new backend 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/origin-cloud/session-races.test.ts > rejects a delayed login after a backend switch without sending its token to the new backend
+AssertionError: expected 'fixture-private-token-from-first-back…' to be null
+
+- Expected:
+null
+
++ Received:
+"fixture-private-token-from-first-backend"
+
+ ❯ src/lib/origin-cloud/session-races.test.ts:83:35
+     81|   await act(async () => setCloudUrl("http://127.0.0.1:43002"));
+     82|   await act(async () => { request.resolve({ sessionToken: "fixture-pri…
+     83|   expect.soft(sessionStore.get()).toBeNull();
+       |                                   ^
+     84|   expect(fixture.queries).not.toContainEqual({ url: "http://127.0.0.1:…
+     85| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/lib/origin-cloud/session-races.test.ts > rejects a delayed login after a backend switch without sending its token to the new backend
+AssertionError: expected [ { …(2) }, { …(2) } ] to not deep equally contain { url: 'http://127.0.0.1:43002', …(1) }
+
+- Expected:
+{
+  "token": "fixture-private-token-from-first-backend",
+  "url": "http://127.0.0.1:43002",
+}
+
++ Received:
+[
+  {
+    "token": "fixture-private-token-from-first-backend",
+    "url": "http://127.0.0.1:43002",
+  },
+  {
+    "token": "fixture-private-token-from-first-backend",
+    "url": "http://127.0.0.1:43002",
+  },
+]
+
+ ❯ src/lib/origin-cloud/session-races.test.ts:84:31
+     82|   await act(async () => { request.resolve({ sessionToken: "fixture-pri…
+     83|   expect.soft(sessionStore.get()).toBeNull();
+     84|   expect(fixture.queries).not.toContainEqual({ url: "http://127.0.0.1:…
+       |                               ^
+     85| });
+     86|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  02:05:53
+   Duration  1.10s (transform 238ms, setup 480ms, import 96ms, tests 16ms, environment 331ms)
+

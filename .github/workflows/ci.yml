@@ -3,7 +3,7 @@ name: CI
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, origin-integration]
   pull_request:
   # The merge queue runs CI on the PR merged onto the current main BEFORE it
   # lands, so a PR that is green alone but red together with what just
@@ -449,6 +449,7 @@ jobs:
           path: |
             .omb-scratch/verify-evidence/chat-ui.png
             .omb-scratch/verify-evidence/thinking-timer-anchored.png
+            .omb-scratch/verify-evidence/*.thinking-timer.json
             .omb-scratch/verify-evidence/share-team-dialog.png
           if-no-files-found: warn
           retention-days: 7

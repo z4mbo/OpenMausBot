@@ -1,0 +1,17 @@
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-arm64.dmg", "size": 317887454, "sha256": "4cf723f32e69da638b2876056bcecc33df501706c6bfc73f1070c1557f7f29c6"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-arm64.dmg.blockmap", "size": 332431, "sha256": "36f32addebf6c693aee7ce42c3f0e3bfe9c737761e9d9e5c0e2d88ad0374f8d5"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-arm64.zip", "size": 318273079, "sha256": "cec2c553a2d0927f708d7e1197cc2120c3354b2b2755da220b044c592539e632"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-arm64.zip.blockmap", "size": 330840, "sha256": "a110201e965c450c3e4d666ae3f34b692dc8f2cd0d8c3c5d5a2c131d43e84e0d"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-setup.exe", "size": 269478428, "sha256": "30233e5036ae81304cc84564faeab79734be17c09ac93a50e1086f2b1a41cca8"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-setup.exe.blockmap", "size": 278198, "sha256": "ada2d5058176753a416f57f6cd9e5e1480bc23c37a4c2383fd2679e0d78f6fde"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-windows-x64.zip", "size": 370056422, "sha256": "03892721401920a8bb0abdfb3c405f45aad634ff5bad2781c1691ba65a3863d8"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-x64.dmg", "size": 334965101, "sha256": "2c942f6a8daacba76a2ebeedb8bc292a763c3dccffbc38f71a7e876eff173de0"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-x64.dmg.blockmap", "size": 350492, "sha256": "a1e2373aaefeb5abb804241ef48fa4c260cd28d668d47f5ae474658f39744544"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-x64.zip", "size": 335600685, "sha256": "17f161eee7719269370f45021c55f9c1e9bc0dbe7427d0e7b1201d85ba3598c2"}}
+{"verifiedPublicPayload": {"name": "Origin-0.2.15-x64.zip.blockmap", "size": 347241, "sha256": "5df6410ee56bfe4b0bccff759310fbbcd9dac1634480aee0f9c421c1e0fbdacd"}}
+{"verifiedPublicPayload": {"name": "latest-mac.yml", "size": 1316, "sha256": "c7af2c62c581f7d9baaaf484035734ecf8e2f1f72d3c2976ee51b9f783d22a4b"}}
+{"verifiedPublicPayload": {"name": "latest.yml", "size": 860, "sha256": "951f76c6214e8a355808d9617ef483565678a818a1a8b15b475cc2fcb87b54ea"}}
+{"verifiedPublicAlias": {"name": "Origin-Setup.exe", "size": 269478428, "sha256": "30233e5036ae81304cc84564faeab79734be17c09ac93a50e1086f2b1a41cca8"}}
+{"verifiedPublicAlias": {"name": "Origin-Mac-AppleSilicon.dmg", "size": 317887454, "sha256": "4cf723f32e69da638b2876056bcecc33df501706c6bfc73f1070c1557f7f29c6"}}
+{"verifiedPublicAlias": {"name": "Origin-Mac-Intel.dmg", "size": 334965101, "sha256": "2c942f6a8daacba76a2ebeedb8bc292a763c3dccffbc38f71a7e876eff173de0"}}
+{"status": "passed", "version": "0.2.15", "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97", "desktopRun": 39318738462, "payloads": 13, "aliases": 3, "metadata": 2, "payloadBytes": 1947902547}

@@ -1,0 +1,68 @@
+{
+  "source": "ec3683b171438905c6171d838ab11c559e1bfa49",
+  "ciRun": 39551218972,
+  "attempt": 1,
+  "jobId": 119061530695,
+  "artifactId": 12323637332,
+  "artifactDigest": "sha256:4af2ce8bcfbed4554a066c28523cfee9acd44f26a36f90e467fb43e1568584b3",
+  "diagnosticSha256": "3fd6aa6e3d8bff115f0bcbf51ff8225094da583be40db4d97d6956de71d25184",
+  "diagnosticBytes": 14056,
+  "fixtureBot": "785b658f-07ea-4696-a41e-4ad0f5359bb6",
+  "serverSelectedThread": "3d2d0b79-aa8f-42fb-8688-ca6a714bbdaf",
+  "renderedCurrentThreads": [
+    "c0828513-e930-43f1-93b2-813846bf5dfe"
+  ],
+  "selectionMismatch": true,
+  "tasks": [
+    {
+      "threadId": "3d2d0b79-aa8f-42fb-8688-ca6a714bbdaf",
+      "busy": false,
+      "activity": "idle",
+      "turnStartedAt": null
+    },
+    {
+      "threadId": "c0828513-e930-43f1-93b2-813846bf5dfe",
+      "busy": false,
+      "activity": "idle",
+      "turnStartedAt": null
+    }
+  ],
+  "serverMessages": 0,
+  "composerBusy": [
+    {
+      "label": "Message Pepper",
+      "tag": "TEXTAREA",
+      "value": "true"
+    }
+  ],
+  "composerTextareas": [
+    {
+      "disabled": true,
+      "focused": false,
+      "label": "Message Pepper",
+      "value": "",
+      "visible": true
+    }
+  ],
+  "focus": {
+    "label": null,
+    "tag": "BODY"
+  },
+  "selectedTaskHasTurnStamp": false,
+  "serverLog": "openmausbot webhook receiver on http://127.0.0.1:21825\nopenmausbot open-source edition (enterprise layer present but OMB_LICENSE_KEY is not set)\nlocal requests: owner trust (self-hosted default)\nlocal requests: OMB_DEV_TRUST_LOCAL_BROWSER=1: browsers on this machine act as the owner (development only)\nbrand: default\nopenmausbot server on http://127.0.0.1:21824\nbot 785b658f-07ea-4696-a41e-4ad0f5359bb6: section loosened by 127.0.0.1 through the local API with no paired session\n",
+  "error": "The task did not become busy with a turnStartedAt stamp within60000ms; last=null.",
+  "testFiles": {
+    "failed": 1,
+    "passed": 6
+  },
+  "tests": {
+    "failed": 1,
+    "passed": 14
+  },
+  "classification": "Observed selected-thread/rendered-thread mismatch and disabled empty composer; no accepted turn/provider error is evidenced. This does not by itself establish the underlying cause.",
+  "rootCauseClaimed": false,
+  "readOnly": true,
+  "reruns": 0,
+  "sourceEdits": 0,
+  "checkedAt": "2026-10-21T05:56:41.350Z"
+}

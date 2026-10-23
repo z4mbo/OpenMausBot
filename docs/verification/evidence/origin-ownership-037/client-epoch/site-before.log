@@ -1,0 +1,54 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin/site
+
+ ❯ components/brand.test.tsx (7 tests | 1 failed | 6 skipped) 14ms
+   × rejects an older form after an ABA cross-tab sign-in and sign-out 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  components/brand.test.tsx > rejects an older form after an ABA cross-tab sign-in and sign-out
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ components/brand.test.tsx:85:63
+     83|   expect(host.textContent).toBe("signed out");
+     84|   await act(async () => {
+     85|     expect.soft(() => saveFromOldForm("fixture-stale-login")).toThrow(…
+       |                                                               ^
+     86|   });
+     87|   expect.soft(localStorage.getItem("origin.sessionToken")).toBeNull();
+ ❯ Proxy.process.env.NODE_ENV.exports.act ../node_modules/.pnpm/react@19.2.6/node_modules/react/cjs/react.development.js:814:22
+ ❯ components/brand.test.tsx:84:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  components/brand.test.tsx > rejects an older form after an ABA cross-tab sign-in and sign-out
+AssertionError: expected 'fixture-stale-login' to be null
+
+- Expected:
+null
+
++ Received:
+"fixture-stale-login"
+
+ ❯ components/brand.test.tsx:87:60
+     85|     expect.soft(() => saveFromOldForm("fixture-stale-login")).toThrow(…
+     86|   });
+     87|   expect.soft(localStorage.getItem("origin.sessionToken")).toBeNull();
+       |                                                            ^
+     88|   await act(async () => session.save("fixture-current-login"));
+     89|   expect(localStorage.getItem("origin.sessionToken")).toBe("fixture-cu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 skipped (7)
+   Start at  02:22:23
+   Duration  620ms (transform 45ms, setup 0ms, import 98ms, tests 14ms, environment 372ms)
+

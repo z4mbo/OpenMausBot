@@ -1,0 +1,127 @@
+✔ shared: this computer's files go to My Cloud, a second pass sends nothing, and a bot's change there is replaced (30.855ms)
+✔ shared: a file removed here is removed from My Cloud; many at once wait for the person, and Keep keeps them (97.4161ms)
+✔ shared: Remove from My Cloud carries the deletes out (21.2336ms)
+✖ shared: a missing folder, a link and a hard-linked file never read as deleted (27.9723ms)
+✔ shared: a full My Cloud leaves the rest waiting, smallest first (20.1039ms)
+✔ bots' work: new files come down marked as downloaded; nothing here is deleted, and agent configs never come (19.2984ms)
+✔ bots' work: a newer version replaces an untouched file (the old one to the Recycle Bin), and lands beside the person's edit (35.1025ms)
+✔ bots' work: a damaged download is thrown away, and a path from My Cloud never leaves the folder (29.1486ms)
+✖ lists files as wire paths with hashes, keeping links and hard links as present, skipping litter and sync's own downloads (3.9755ms)
+✔ reuses the base's hash when size and modified time match, and hashes again when they do not (5.3836ms)
+✔ a file saved in the last two seconds, or open in Office, waits (2.6752ms)
+✔ Windows folders are always case-insensitive (0.1088ms)
+✔ a burst of changes is reported once, after it goes quiet (75.4114ms)
+✔ a folder it cannot read stops the scan instead of reading as empty (2.3561ms)
+✔ the vendored bundle still contains the AppImage installer we patch (0.7987ms)
+✔ the install stages the replacement instead of deleting first (0.3196ms)
+✔ an AppImage update can never be written to a different filename (0.3415ms)
+✔ the patch keeps the running path and never deletes ahead of the rename (0.2538ms)
+✔ the patch tolerates esbuild renaming the path import (0.0944ms)
+✔ the patch fails closed when upstream's shape moves (0.3415ms)
+✖ the shipped installer replaces the AppImage and queues its original path for relaunch (26.1099ms)
+✖ a rejected AppImage relaunch is reported without quitting the desktop (5.4582ms)
+✔ the running AppImage is never removed before its replacement is in place (4.7882ms)
+﹣ Electron relaunch waits for deferred cleanup and the replacement acquires the same data directory (0.1447ms) # SKIP
+ℹ tests 24
+ℹ suites 0
+ℹ pass 19
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 339.6693
+
+✖ failing tests:
+
+test at electron\cloud-sync-engine.node-test.mjs:80:1
+✖ shared: a missing folder, a link and a hard-linked file never read as deleted (27.9723ms)
+  Error: EPERM: operation not permitted, symlink 'C:\Users\aless\AppData\Local\Temp\omb-files-engine-U1nCyU\moved-sub' -> 'C:\Users\aless\AppData\Local\Temp\omb-files-engine-U1nCyU\Clients\sub'
+      at symlinkSync (node:fs:1937:11)
+      at TestContext.<anonymous> (file:///C:/Users/aless/AppData/Local/Temp/origin-cloud-baseline-034-xEYJpq/electron/cloud-sync-engine.node-test.mjs:92:3)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'symlink',
+    path: 'C:\\Users\\aless\\AppData\\Local\\Temp\\omb-files-engine-U1nCyU\\moved-sub',
+    dest: 'C:\\Users\\aless\\AppData\\Local\\Temp\\omb-files-engine-U1nCyU\\Clients\\sub'
+  }
+
+test at electron\cloud-sync-scan.node-test.mjs:16:1
+✖ lists files as wire paths with hashes, keeping links and hard links as present, skipping litter and sync's own downloads (3.9755ms)
+  Error: EPERM: operation not permitted, symlink 'C:\Users\aless\AppData\Local\Temp\omb-sync-scan-AP3iHT\sub\a.txt' -> 'C:\Users\aless\AppData\Local\Temp\omb-sync-scan-AP3iHT\link.txt'
+      at symlinkSync (node:fs:1937:11)
+      at TestContext.<anonymous> (file:///C:/Users/aless/AppData/Local/Temp/origin-cloud-baseline-034-xEYJpq/electron/cloud-sync-scan.node-test.mjs:22:3)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'symlink',
+    path: 'C:\\Users\\aless\\AppData\\Local\\Temp\\omb-sync-scan-AP3iHT\\sub\\a.txt',
+    dest: 'C:\\Users\\aless\\AppData\\Local\\Temp\\omb-sync-scan-AP3iHT\\link.txt'
+  }
+
+test at electron\vendor-updater.node-test.mjs:91:1
+✖ the shipped installer replaces the AppImage and queues its original path for relaunch (26.1099ms)
+  Error: spawnSync mv ENOENT
+      at Object.spawnSync (node:internal/child_process:1160:20)
+      at spawnSync (node:child_process:928:24)
+      at execFileSync (node:child_process:971:15)
+      at Object.doInstall (C:\Users\aless\AppData\Local\Temp\origin-cloud-baseline-034-xEYJpq\electron\vendor\electron-updater.cjs:14955:42)
+      at TestContext.<anonymous> (file:///C:/Users/aless/AppData/Local/Temp/origin-cloud-baseline-034-xEYJpq/electron/vendor-updater.node-test.mjs:126:39)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'spawnSync mv',
+    path: 'mv',
+    spawnargs: [ '-f', 'C:\\Users\\aless\\AppData\\Local\\Temp\\omb-appimage-install-wuIeA6\\pending\\OpenMausBot-0.1.44-x86_64.AppImage', 'C:\\Users\\aless\\AppData\\Local\\Temp\\omb-appimage-install-wuIeA6\\OpenMausBot-0.1.43-x86_64.AppImage.new' ],
+    error: Error: spawnSync mv ENOENT
+        at Object.spawnSync (node:internal/child_process:1160:20)
+        at spawnSync (node:child_process:928:24)
+        at execFileSync (node:child_process:971:15)
+        at Object.doInstall (C:\Users\aless\AppData\Local\Temp\origin-cloud-baseline-034-xEYJpq\electron\vendor\electron-updater.cjs:14955:42)
+        at TestContext.<anonymous> (file:///C:/Users/aless/AppData/Local/Temp/origin-cloud-baseline-034-xEYJpq/electron/vendor-updater.node-test.mjs:126:39)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1402:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+        at Test.postRun (node:internal/test_runner/test:1542:19)
+        at Test.run (node:internal/test_runner/test:1467:12),
+    status: null,
+    signal: null,
+    output: null,
+    pid: 0,
+    stdout: undefined,
+    stderr: undefined
+  }
+
+test at electron\vendor-updater.node-test.mjs:147:1
+✖ a rejected AppImage relaunch is reported without quitting the desktop (5.4582ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'spawnSync mv ENOENT'
+  -   'Could not schedule the updated AppImage to restart'
+    ]
+  
+      at TestContext.<anonymous> (file:///C:/Users/aless/AppData/Local/Temp/origin-cloud-baseline-034-xEYJpq/electron/vendor-updater.node-test.mjs:181:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'spawnSync mv ENOENT' ],
+    expected: [ 'Could not schedule the updated AppImage to restart' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,142 @@
+{
+  "recordedAt": "2026-10-20T04:52:40.287Z",
+  "source": "working-tree at the times identified below; not a frozen release build",
+  "node": "v24.21.0",
+  "platform": "Windows x64",
+  "headAtRecording": "8bf4a0b6f2f3609932d58e4d418e89378ba53c79",
+  "evidenceOrigin": "Observed local command/tool completion results. Console transcripts are in this task; no raw transcript files are asserted here.",
+  "gates": [
+    {
+      "command": "vitest run src shared",
+      "startedAtLocal": "2026-10-20 06:17:42 Europe/Rome",
+      "status": "pass",
+      "files": 581,
+      "passed": 6124,
+      "failed": 0,
+      "durationSeconds": 378.6,
+      "scope": "Before promotion of the release-history data; later release/history/docs focused checks are separate."
+    },
+    {
+      "command": "backend vitest run",
+      "startedAtLocal": "2026-10-20 06:17:42 Europe/Rome",
+      "status": "pass",
+      "files": 25,
+      "passed": 243,
+      "failed": 0,
+      "scope": "Unchanged backend source subsequently committed as e3c8e2e01."
+    },
+    {
+      "command": "site vitest run",
+      "startedAtLocal": "2026-10-20 06:27:00 Europe/Rome",
+      "status": "pass",
+      "files": 3,
+      "passed": 34,
+      "failed": 0
+    },
+    {
+      "command": "vitest run changed server test files",
+      "startedAtLocal": "2026-10-20 06:28:30 Europe/Rome",
+      "status": "pass",
+      "files": 37,
+      "passed": 847,
+      "skipped": 4,
+      "failed": 0,
+      "durationSeconds": 475.3,
+      "scope": "Initial touched-server inventory, before the later sender/catalog/readiness regressions. Focused checks below cover those additions; counts overlap and must not be summed."
+    },
+    {
+      "command": "vitest run requester/backup regressions",
+      "startedAtLocal": "2026-10-20 06:34:08 Europe/Rome",
+      "status": "pass",
+      "files": 6,
+      "passed": 32,
+      "failed": 0,
+      "scope": "Inherited-folder correction plus requester/chooser paths."
+    },
+    {
+      "command": "vitest run readiness/controller/catalog/requester regressions",
+      "startedAtLocal": "2026-10-20 06:45:51 Europe/Rome",
+      "status": "pass",
+      "files": 8,
+      "passed": 54,
+      "failed": 0,
+      "scope": "Includes production opt-in readiness and non-loopback fixture refusal. One nonexistent selector matched no file and is not counted."
+    },
+    {
+      "command": "vitest run origin-hosted-sender-activity-review native-model-host-profile file-size-ratchet index-route-ratchet",
+      "startedAtLocal": "2026-10-20 06:46:13 Europe/Rome",
+      "status": "pass",
+      "files": 4,
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "command": "five shared source/UI guards",
+      "startedAtLocal": "2026-10-20 06:26:26 Europe/Rome",
+      "status": "pass",
+      "files": 5,
+      "passed": 11,
+      "failed": 0
+    },
+    {
+      "command": "tsc -b",
+      "status": "pass",
+      "completedBeforeLocal": "2026-10-20 06:34:00 Europe/Rome"
+    },
+    {
+      "command": "tsc -p tsconfig.server.json",
+      "status": "pass",
+      "scope": "Rerun after final readiness/catalog/sender code; session88831 exited0."
+    },
+    {
+      "command": "backend tsc -p convex/tsconfig.json",
+      "status": "pass",
+      "scope": "Correct backend target; supersedes an earlier mis-scoped tsc --noEmit that walked to the parent configuration."
+    },
+    {
+      "command": "oxlint --deny-warnings .",
+      "startedAtLocal": "2026-10-20 06:45:51 Europe/Rome",
+      "status": "pass"
+    },
+    {
+      "command": "check-electron.mjs",
+      "status": "pass",
+      "modulesSyntaxChecked": 183
+    },
+    {
+      "command": "generate-locale.mjs --check",
+      "status": "pass",
+      "languages": 12,
+      "keys": 4715,
+      "scope": "Recorded earlier in this same heartbeat before version-data promotion."
+    }
+  ],
+  "retainedFailures": [
+    {
+      "gate": "Initial full client/shared",
+      "passed": 6117,
+      "failed": 7,
+      "files": 581,
+      "reason": "Six stale settings/layout test expectations in three files and one terminology guard rejection of seven legitimate Origin workspace keys.",
+      "correction": "Updated the mocks/assertions and seven exact domain-key exceptions; 73 focused tests and the full 6124-case rerun pass. Generic terminology guard remains enabled."
+    },
+    {
+      "gate": "Initial site tests",
+      "reason": "next/link could not resolve because the active worktree had only its Vite cache in site/node_modules.",
+      "correction": "Created missing dependency junctions to the frozen checkout's installed packages; all34site tests pass. No source or lock changes."
+    },
+    {
+      "gate": "Initial documentation checks",
+      "passed": 81,
+      "failed": 2,
+      "reason": "Candidate used a site API route as though registered by the app server and lacked a direct recipe-index link.",
+      "correction": "Corrected wording and direct link; all7 documentation tests pass."
+    }
+  ],
+  "noise": "Full client/shared runs printed refused connections to loopback port3000 from test paths. The complete rerun still passed; no protected process was started or stopped to hide this noise.",
+  "limits": [
+    "These local counts are overlapping suites, not one combined unique total.",
+    "Native fake-provider evidence and packaged-resource evidence have their own source manifests.",
+    "This receipt does not establish final CI, a final-version build, production deployment, artifacts, real vendor accounts or physical Mac acceptance."
+  ]
+}

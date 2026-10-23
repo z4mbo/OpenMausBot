@@ -1,0 +1,113 @@
+{
+  "upstreamPr": 3177,
+  "url": "https://github.com/milind-soni/OpenMausBot/pull/3177",
+  "integrationBase": "dc652c11a0ce37331aff8a35810a9c86c6162e35",
+  "status": "verified-uncommitted",
+  "staged": false,
+  "committed": false,
+  "realProviderCalls": false,
+  "productionDataUsed": false,
+  "redBefore": {
+    "failed": 4,
+    "passed": 1,
+    "scenario": "Dedicated API instance default/all routes rejected missing key; workspace-key subscription probe was misclassified"
+  },
+  "verification": {
+    "claudeDriver": {
+      "passed": 216,
+      "skipped": 3,
+      "log": "3177-green-full.log",
+      "qualification": "The file passed in the first full run; a stale config reload expectation failed separately, then was corrected without any further runtime edit."
+    },
+    "configAndBudgets": {
+      "files": 4,
+      "passed": 249,
+      "skipped": 2,
+      "log": "3177-config-budget.log"
+    },
+    "distinctTotals": {
+      "files": 5,
+      "passed": 465,
+      "skipped": 5
+    },
+    "serverTypecheck": "pass",
+    "touchedLint": "pass",
+    "diffCheck": "pass",
+    "isolatedHttpFixture": {
+      "receipt": "3177-live-fixture-attempt3.json",
+      "checks": 3,
+      "state": "completed",
+      "exitCode": 0,
+      "cleanup": {
+        "ownedServerExited": true,
+        "ownedDataRemoved": true
+      },
+      "parentTemporaryHomeRemoved": true,
+      "earlierAttempts": "Two cleaned-up harness attempts used an unsupported config.instances patch; final fixture uses the actual instance CLI settings route."
+    }
+  },
+  "preserved": "Native API-key auth classification, instance-owned routing/secret isolation, ranked fallback, owner-host consent and daily API policy remain unchanged outside the narrow routing/billing integration.",
+  "limits": [
+    "Synthetic fake CLI only; no real Claude login, real API key, provider invoice, packaged app or production acceptance"
+  ],
+  "files": [
+    {
+      "path": "server/config.ts",
+      "sha256": "6dc4e4f17e94bb865818f479bdf1bef2c3085da0726239da17a70ffeb0aaea02"
+    },
+    {
+      "path": "server/config.test.ts",
+      "sha256": "62660827c94af03a5592d9be7af2ba61e6210d5a8cfd5f6c7b88dd5c1fac9d2c"
+    },
+    {
+      "path": "server/drivers/claude.ts",
+      "sha256": "6372b4c59a8f5395183b84d36739cfab6ae24034600eb1aa35b4a3b9a0ab3eec"
+    },
+    {
+      "path": "server/drivers/claude.test.ts",
+      "sha256": "0779c18a967c078210d3b0908481b942adacceee9386c6d31219dcf85e3726d7"
+    },
+    {
+      "path": "server/drivers/claude-billing.ts",
+      "sha256": "fbe991c2d65d031d15fa16fa9065b02d43a377f9833a570141a04712a7f41a87"
+    }
+  ],
+  "evidence": [
+    {
+      "name": "3177-red.log",
+      "sha256": "2087039fecee3272686139d32f2891e13896ac055b16cfdad0c4691e4f59970e"
+    },
+    {
+      "name": "3177-green-full.log",
+      "sha256": "c59cb2b1d9a4a130b187ee5f9942eb3b28f10a24ef1583004ad4fb5d1aaafa6d"
+    },
+    {
+      "name": "3177-config-budget.log",
+      "sha256": "b1432fb4570cbf3b23b65fc5dda913e1819519fa8fb6ffc0157853f11374d4a8"
+    },
+    {
+      "name": "3177-tsc-server.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "name": "3177-lint.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "name": "3177-live-fixture.json",
+      "sha256": "4bf75ae2a1dd83b00b1cc1a77f695ba51b6d568e6ff92b31ec5dd17c8a724279"
+    },
+    {
+      "name": "3177-live-fixture-attempt2.json",
+      "sha256": "350e21ab26c14e0088ec382cd1d97aa95fafba35eba954f7107bfb1ede3f2db2"
+    },
+    {
+      "name": "3177-live-fixture-attempt3.json",
+      "sha256": "c083a374143c69359037a0c28d798c72b817bd915aa9099f70c581322c32eb14"
+    },
+    {
+      "name": "3177-live-fixture.mjs",
+      "sha256": "354929bb71d849a748ecc1c2e8a495282397579eddbd344917ddf884f673dea9"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/broadcast/scheduler.test.ts (6 tests | 1 failed) 21ms
+     × refuses media on this computer's network instead of fetching it 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/broadcast/scheduler.test.ts > BroadcastScheduler > refuses media on this computer's network instead of fetching it
+AssertionError: expected [ { channel: 'bluesky', …(2) } ] to deeply equal [ { channel: 'bluesky', …(2) } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "channel": "bluesky",
+-     "error": "A media file's address is not a public https address",
++     "error": "A media file's address is not a [redacted]ublic htt[redacted]s address",
+      "ok": false,
+    },
+  ]
+
+ ❯ server/broadcast/scheduler.test.ts:91:82
+     89|     await scheduler.tick();
+     90|     expect(fetched.some((url) => url.includes("192.168"))).toBe(false);
+     91|     expect(calls.find((call) => call.name === "broadcast:finish")?.arg…
+       |                                                                                  ^
+     92|   });
+     93|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 50 passed (51)
+   Start at  07:15:46
+   Duration  3.61s (transform 679ms, setup 1.04s, import 1.61s, tests 211ms, environment 0ms)
+

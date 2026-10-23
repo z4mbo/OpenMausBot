@@ -1,0 +1,10 @@
+
+ RUN  v5.0.2 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/backend
+
+ ✓ convex/storageReferences.test.ts > replacing an agent avatar preserves files referenced by a project and another agent 177ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  06:56:35
+   Duration  622ms (tests 35%, import 32%, transform 26%, environment 6%, worker 1%)
+

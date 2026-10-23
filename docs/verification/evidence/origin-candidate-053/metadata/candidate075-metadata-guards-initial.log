@@ -1,0 +1,35 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ scripts/testing/verification-docs.test.ts (7 tests | 1 failed) 266ms
+     × are all reachable from README.md 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/testing/verification-docs.test.ts > docs/verification recipes cite things that exist > are all reachable from README.md
+AssertionError: expected [ 'origin-0.7.5-release-notes.md' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "origin-0.7.5-release-notes.md",
++ ]
+
+ ❯ scripts/testing/verification-docs.test.ts:105:87
+    103|   it("are all reachable from README.md", () => {
+    104|     const linked = new Set([...text("README.md").matchAll(/\]\(([^)#\s…
+    105|     expect(recipes.filter((recipe) => recipe !== "README.md" && !linke…
+       |                                                                                       ^
+    106|   });
+    107|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 14 passed (15)
+   Start at  22:14:32
+   Duration  2.91s (transform 479ms, setup 899ms, import 1.02s, tests 414ms, environment 0ms)
+

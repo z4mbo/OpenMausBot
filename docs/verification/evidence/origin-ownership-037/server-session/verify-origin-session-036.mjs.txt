@@ -1,0 +1,118 @@
+import assert from 'node:assert/strict';
+import { createServer } from 'node:http';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { createHash } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { launchVerificationServer } from '../scripts/control-omb.ts';
+const execFileAsync = promisify(execFile);
+const root = process.cwd();
+const output = join(root, '.omb-scratch/origin-session-fixture-036.json');
+const deferred = () => { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; };
+const statuses = new Map([['expired-a', { email: 'ana@fixture.invalid' }], ['replacement-b', { email: 'bo@fixture.invalid' }], ['older-c', { email: 'cy@fixture.invalid' }], ['refreshed-b', { email: 'BO@fixture.invalid' }], ['candidate-b', { email: 'bo@fixture.invalid' }]]);
+let gate;
+let started;
+let heldToken;
+let failedToken;
+let queryCount = 0;
+const backend = createServer(async (req, res) => {
+  try {
+    let bytes = '';
+    for await (const part of req) bytes += part;
+    const body = JSON.parse(bytes);
+    assert.equal(req.url, '/api/query');
+    assert.equal(body.path, 'auth:me');
+    const args = Array.isArray(body.args) ? body.args[0] : body.args;
+    const token = args.sessionToken;
+    queryCount++;
+    if (token === failedToken) {
+      res.writeHead(503, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ status: 'error', errorMessage: 'synthetic owner lookup unavailable', logLines: [] }));
+      return;
+    }
+    let value = statuses.get(token) ?? null;
+    if (token === heldToken && gate) {
+      heldToken = undefined;
+      started.resolve();
+      value = await gate.promise;
+    }
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ status: 'success', value, logLines: [] }));
+  } catch {
+    res.writeHead(500, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ status: 'error', errorMessage: 'synthetic query failed', logLines: [] }));
+  }
+});
+await new Promise(resolve => backend.listen(0, '127.0.0.1', resolve));
+const backendUrl = `http://127.0.0.1:${backend.address().port}`;
+let fixture;
+const checks = [];
+let result;
+try {
+  fixture = await launchVerificationServer();
+  assert(![5199, 8799, 3210].includes(new URL(fixture.info.url).port * 1));
+  const stateFile = join(fixture.info.dataDir, 'origin-cloud.json');
+  const state = () => JSON.parse(readFileSync(stateFile, 'utf8'));
+  const call = async (method, token) => {
+    const response = await fetch(`${fixture.info.url}/api/origin/cloud-session`, {
+      method,
+      headers: { 'content-type': 'application/json', origin: fixture.info.url },
+      ...(token ? { body: JSON.stringify({ url: backendUrl, sessionToken: token }) } : {}),
+      signal: AbortSignal.timeout(8000),
+    });
+    return { status: response.status, body: await response.json() };
+  };
+  const doctor = await execFileAsync(process.execPath, ['--experimental-strip-types', 'scripts/control-omb.ts', 'doctor', '--url', fixture.info.url], { cwd: root, timeout: 15000 });
+  assert.doesNotThrow(() => JSON.parse(doctor.stdout));
+  checks.push({ name: 'standard control-omb doctor', passed: true });
+  assert.equal((await call('PUT', 'expired-a')).status, 200);
+  statuses.set('expired-a', null);
+  gate = deferred(); started = deferred(); heldToken = 'expired-a';
+  const disconnect = call('DELETE');
+  await Promise.race([started.promise, new Promise((_, reject) => setTimeout(() => reject(new Error('disconnect owner lookup did not start')), 5000))]);
+  try { assert.equal((await call('PUT', 'replacement-b')).status, 200); }
+  finally { gate.resolve(null); }
+  assert.equal((await disconnect).status, 409);
+  assert.equal(state().sessionToken, 'replacement-b');
+  checks.push({ name: 'older disconnect retains replacement account', passed: true });
+  statuses.set('replacement-b', null); statuses.set('expired-a', { email: 'ana@fixture.invalid' });
+  assert.equal((await call('PUT', 'expired-a')).status, 200);
+  statuses.set('expired-a', null); statuses.set('replacement-b', { email: 'bo@fixture.invalid' });
+  gate = deferred(); started = deferred(); heldToken = 'expired-a';
+  const olderConnect = call('PUT', 'older-c');
+  await Promise.race([started.promise, new Promise((_, reject) => setTimeout(() => reject(new Error('older connection owner lookup did not start')), 5000))]);
+  try { assert.equal((await call('PUT', 'replacement-b')).status, 200); }
+  finally { gate.resolve(null); }
+  assert.equal((await olderConnect).status, 409);
+  assert.equal(state().sessionToken, 'replacement-b');
+  checks.push({ name: 'older connection retains newer account', passed: true });
+  assert.equal((await call('PUT', 'refreshed-b')).status, 200);
+  assert.equal(state().sessionToken, 'refreshed-b');
+  checks.push({ name: 'same-email token refresh succeeds', passed: true });
+  failedToken = 'refreshed-b';
+  for (const method of ['PUT', 'DELETE']) {
+    const response = await call(method, method === 'PUT' ? 'candidate-b' : undefined);
+    assert.equal(response.status, 502);
+    assert.equal(state().sessionToken, 'refreshed-b');
+    assert(!JSON.stringify(response).includes('refreshed-b'));
+    checks.push({ name: `${method} preserves ownership when verification is unavailable`, passed: true });
+  }
+  const publicState = await call('GET');
+  assert.equal(publicState.status, 200);
+  assert.deepEqual(publicState.body, { url: backendUrl, connected: true });
+  checks.push({ name: 'session status excludes bearer token', passed: true });
+  result = { passed: true, sourceFileSha256: createHash('sha256').update(readFileSync(join(root, 'server/origin-cloud.ts'))).digest('hex'), baselineSourceGitBlob: '7e28eb9f8d79374f2d41967ebb8ba3b63269a6f1', fixture: fixture.info, syntheticBackend: backendUrl, queryCount, checks };
+} catch (error) {
+  result = { passed: false, error: error instanceof Error ? error.message : String(error), fixture: fixture?.info, syntheticBackend: backendUrl, queryCount, checks };
+  process.exitCode = 1;
+} finally {
+  gate?.resolve(null);
+  await fixture?.close();
+  await new Promise(resolve => backend.close(resolve));
+  if (result) {
+    result.cleanup = { fixtureExited: !fixture || fixture.child.exitCode !== null || fixture.child.signalCode !== null, fixtureDataRemoved: !fixture || !existsSync(fixture.info.dataDir), syntheticBackendClosed: !backend.listening };
+    writeFileSync(output, JSON.stringify(result, null, 2) + '\n');
+    console.log(JSON.stringify({ passed: result.passed, checks: checks.length, cleanup: result.cleanup, output, error: result.error }));
+  }
+}

@@ -1,0 +1,83 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/drivers/claude.test.ts (219 tests | 3 failed | 215 skipped) 608ms
+     × runs the dedicated API instance with the workspace Claude scope default 14ms
+     × runs the dedicated API instance with the workspace Claude scope all 3ms
+     × reports a selected workspace API key as metered even when the auth probe reports a subscription 249ms
+ ❯ server/config.test.ts (212 tests | 1 failed | 211 skipped) 8ms
+     × keeps Claude (API key) on the saved key when all Claude bots also use it 7ms
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 1 passed | 426 skipped (431)
+   Start at  06:14:06
+   Duration  2.59s (transform 589ms, setup 641ms, import 1.02s, tests 616ms, environment 0ms)
+
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/config.test.ts > credential env narrowing > keeps Claude (API key) on the saved key when all Claude bots also use it
+AssertionError: expected {} to deeply equal { ANTHROPIC_API_KEY: 'SECRET-ANT' }
+
+- Expected
++ Received
+
+- {
+-   "ANTHROPIC_API_KEY": "SECRET-ANT",
+- }
++ {}
+
+ ❯ server/config.test.ts:1291:43
+    1289|       const every = instanceConfigs({ anthropic });
+    1290|       expect(every.claude.environment).toEqual({ ANTHROPIC_API_KEY: "S…
+    1291|       expect(every.claudeApi.environment).toEqual({ ANTHROPIC_API_KEY:…
+       |                                           ^
+    1292|     }
+    1293|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  server/drivers/claude.test.ts > ClaudeDriver turns (fake CLI) > runs the dedicated API instance with the workspace Claude scope default
+ FAIL  server/drivers/claude.test.ts > ClaudeDriver turns (fake CLI) > runs the dedicated API instance with the workspace Claude scope all
+Error: No Anthropic API key — open Settings → API keys.
+ ❯ sendTurn server/drivers/claude.ts:838:79
+    836|       turn = { ...turn, toolScope: assertToolScopeSupported(DRIVER_KIN…
+    837|       if (config.managedModels && (!turn.model || !config.managedModel…
+    838|       if (config.requireApiKey && !input.environment.ANTHROPIC_API_KEY…
+       |                                                                               ^
+    839|       if (config.managed && (!turn.model || turn.model.includes("::") …
+    840|           !input.environment.ANTHROPIC_API_KEY || !input.environment.A…
+ ❯ Object.send server/drivers/claude-auth-recovery.ts:70:94
+ ❯ Object.sendTurn server/drivers/claude.ts:1923:42
+ ❯ server/drivers/claude.test.ts:556:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  server/drivers/claude.test.ts > ClaudeDriver snapshot auth (fake CLI) > reports a selected workspace API key as metered even when the auth probe reports a subscription
+AssertionError: expected { state: 'available', …(4) } to match object { state: 'available', …(3) }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "account": {
+-     "method": "api-key",
+-   },
+    "authenticated": true,
+-   "billing": "metered",
++   "billing": "subscription",
+    "state": "available",
+  }
+
+ ❯ server/drivers/claude.test.ts:3942:39
+    3940|     process.env.FAKE_CLAUDE_AUTH = "in";
+    3941|     await create({ ANTHROPIC_API_KEY: "synthetic-workspace-api-key" });
+    3942|     expect(await instance.snapshot()).toMatchObject({ state: "availabl…
+       |                                       ^
+    3943|   });
+    3944|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+

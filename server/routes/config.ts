@@ -1,3 +1,4 @@
+import type { ModelSelectionChecker } from "../model-selection-check.ts";
 import * as boat from "../boat.ts";
 import { boatCreateRecoverySnapshot, retireDeletedBoatCreate } from "../boat-create-idempotency.ts";
 import { boatDeletionSnapshot } from "../boat-delete-journal.ts";
@@ -5,6 +6,7 @@ import { browserEngineStatus, browserSessionId, closeBrowserSession } from "../b
 import type { BrowserCleanupCoordinator, BrowserCleanupRequest } from "../browser-lifecycle-cleanup.ts";
 import { finalizeBrowserCleanupMutation, requireBrowserCleanupAcknowledged } from "../browser-lifecycle-cleanup.ts";
 import type { BrowserLive } from "../browser-live.ts";
+import { dailyBudgetSettingsConflict } from "../budget-settings-guard.ts";
 import { browserRuntimeEnv, type BrowserRuntime } from "../browser-runtime.ts";
 import { boatAccountResourceChangeError, vpsAliasResourceChangeError } from "../cloud-backend.ts";
 import { CLOUD_PERSONAL_REFUSAL } from "../cloud-owner.ts";
@@ -78,7 +80,7 @@ export interface ConfigRouteDeps {
   managedBoatOwners(): boat.ManagedBoatOwner[];
   providerOperationConflict(provider: RemoteComputerProvider): string | null;
   perBotLocalVmCountForModeChange(): Promise<number | null>;
-  checkedModelSelection(raw: unknown, current?: { selection: ModelSelection; busy: boolean }, requireAvailableModel?: boolean): ModelSelectionCheck;
+  checkedModelSelection: ModelSelectionChecker;
   policyModelRefusal(instance: { instanceId: string; driverKind: string }): string | undefined;
   browserSessionSpec(binaryPath: string, session: string, profile: string | undefined): { command: string; env: Record<string, string> };
   configStatus(): ConfigStatus;
@@ -108,12 +110,21 @@ export function createConfigRoutes(deps: ConfigRouteDeps): RouteHandler {
       const body = await readBody(req);
       if (hostedModels && ["instances", "anthropic", "openai", "openrouter", "openaiCompat", "xai", "mistral", "cerebras", "groq", "meta", "opencodeGo"].some(key => Object.hasOwn(body, key))) return json(res, 403, { error: HOSTED_PROVIDER_SETTINGS_ERROR });
       const patch = parseConfigPatch(body);
+      const budgetConflict = () => dailyBudgetSettingsConflict(patch.dailyApiBudget, cfg.dailyApiBudget, store.bots.some(bot => bot.busy));
+      const initialBudgetConflict = budgetConflict();
+      if (initialBudgetConflict) return json(res, 409, { error: initialBudgetConflict });
       if (CLOUD_HOME && (patch.signIn?.admins?.length || patch.signIn?.members?.length)) {
         return json(res, 403, { error: CLOUD_PERSONAL_REFUSAL, code: "cloud_personal" });
       }
+      if (cfg.dailyApiBudget && patch.dailyApiBudget !== undefined &&
+          (patch.dailyApiBudget === null || patch.dailyApiBudget.limitUsd > cfg.dailyApiBudget.limitUsd ||
+            patch.dailyApiBudget.timeZone !== cfg.dailyApiBudget.timeZone) &&
+          auth.kind === "loopback" && !req.headers.origin && store.bots.some(bot => bot.busy)) {
+        return json(res, 409, { error: "Raise or remove the daily API budget from the app or a paired admin device while agents are working." });
+      }
       if (patch.newBotDefaults) {
         if (patch.newBotDefaults.profile.modelSelection) {
-          const checked = checkedModelSelection(patch.newBotDefaults.profile.modelSelection);
+          const checked = await checkedModelSelection(patch.newBotDefaults.profile.modelSelection);
           if (!checked.ok) return json(res, checked.status, { error: checked.error });
           patch.newBotDefaults.profile.modelSelection = checked.selection;
         }
@@ -122,12 +133,12 @@ export function createConfigRoutes(deps: ConfigRouteDeps): RouteHandler {
           if ("error" in parsed || parsed.name !== skill.name) return json(res, 400, { error: "Skill name does not match its contents" });
         }
       }
-      if (hostedModels && patch.defaultModelSelection) {
-        const checked = checkedModelSelection(patch.defaultModelSelection);
+      if (patch.defaultModelSelection) {
+        const checked = await checkedModelSelection(patch.defaultModelSelection);
         if (!checked.ok) return json(res, checked.status, { error: checked.error });
       }
       if (patch.automaticRecovery?.enabled) {
-        const checked = checkedModelSelection(patch.automaticRecovery.backup, undefined, true);
+        const checked = await checkedModelSelection(patch.automaticRecovery.backup, undefined, true);
         if (!checked.ok) return json(res, checked.status, { error: checked.error });
         const target = registry.get(checked.selection.instanceId)!;
         if (!target.enabled) return json(res, 400, { error: "Enable the backup engine before selecting it for recovery." });
@@ -459,6 +470,8 @@ export function createConfigRoutes(deps: ConfigRouteDeps): RouteHandler {
         patch.opencodeGo = { ...patch.opencodeGo, providerKeys: merged.keys };
       }
       const browserCleanupRequests: BrowserCleanupRequest[] = [];
+      const finalBudgetConflict = budgetConflict();
+      if (finalBudgetConflict) return json(res, 409, { error: finalBudgetConflict });
       if (profileControlConflict()) return json(res, 409, { error: "Release browser control before deleting its profile." });
       try {
         for (const profileId of removedBrowserProfileIds) {
@@ -507,12 +520,14 @@ export function createConfigRoutes(deps: ConfigRouteDeps): RouteHandler {
           configWriteCommitted = true;
           syncCredentialEnv(patch);
           Object.assign(cfg, loadConfig());
+          if (patch.dailyApiBudget === null) delete cfg.dailyApiBudget;
         } else {
           saveConfig(patch);
           configWriteCommitted = true;
           // loadConfig prefers env over the file for credentials, so the env must follow the save.
           syncCredentialEnv(patch);
           Object.assign(cfg, loadConfig());
+          if (patch.dailyApiBudget === null) delete cfg.dailyApiBudget;
         }
       } catch (error) {
         if (configWriteCommitted) {

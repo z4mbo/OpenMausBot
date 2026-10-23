@@ -1,0 +1,856 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90mC:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin[39m
+
+[90mstderr[2m | unknown test
+[22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+[90mstdout[2m | server/drivers/agents-bridge-wire.test.ts[2m > [22m[2magents proxy tools/list wire size with the tool bridge on[2m > [22m[2mprints each bridged profile beside its unbridged twin, and what the two bridge tools cost
+[22m[39magents proxy tools/list with the tool bridge on, UTF-8 bytes of the serialized result
+
+  bridged  tools  unbridged  tools  saved  profile
+    15603     15      68469     54    77%  default
+    16344     16      69210     55    76%  voice
+    15643     15      70214     56    78%  shared
+    16384     16      70955     57    77%  shared+voice
+    15630     15      71368     56    78%  skills
+    16371     16      72109     57    77%  skills+voice
+    15670     15      73113     58    79%  skills+shared
+    16411     16      73854     59    78%  skills+shared+voice
+    15436     15      56230     44    73%  non-chief
+    16177     16      56971     45    72%  voice+non-chief
+    15476     15      57975     46    73%  shared+non-chief
+    16217     16      58716     47    72%  shared+voice+non-chief
+    15463     15      59129     46    74%  skills+non-chief
+    16204     16      59870     47    73%  skills+voice+non-chief
+    15503     15      60874     48    75%  skills+shared+non-chief
+    16244     16      61615     49    74%  skills+shared+voice+non-chief
+    16409     16      72909     58    77%  skills+shared+voice+cloud-home
+    16242     16      60670     48    73%  skills+shared+voice+non-chief+cloud-home
+    16429     16      74714     60    78%  skills+shared+voice+escalations
+    15603     15      68469     54    77%  default+legacy-switches
+
+the two bridge tools (whole definition | input schema alone); find_tool's description grows with the names it lists:
+    1420    185  find_tool  (skills+shared+voice+escalations)
+     712    350  use_tool  (skills+shared+voice+escalations)
+    1168    185  find_tool  (non-chief)
+     712    350  use_tool  (non-chief)
+
+ [31m❯[39m server/drivers/agents-bridge-wire.test.ts [2m([22m[2m32 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 1285[2mms[22m[39m
+[31m     [31m×[31m has a bridged twin for every profile the unbridged goldens pin, of exactly that catalog[39m[32m 6[2mms[22m[39m
+     [32m✓[39m round-trips through JSON.parse unchanged, so a parsed golden can stand for the bytes[32m 2[2mms[22m[39m
+     [32m✓[39m the fullest bridged profile is byte-identical to its golden[32m 6[2mms[22m[39m
+[31m     [31m×[31m every bridged profile matches its pinned tool names, byte count and sha256[39m[32m 6[2mms[22m[39m
+     [32m✓[39m lists a subset of its twin's tools with their bytes unchanged, then find_tool and use_tool[32m 15[2mms[22m[39m
+     [32m✓[39m names every other tool of its twin, and no tool of any other profile, in find_tool's description[32m 9[2mms[22m[39m
+     [32m✓[39m keeps the same hot tools whatever the role and features, except the ones a profile does not have[32m 1[2mms[22m[39m
+     [32m✓[39m is what the catalog and the bridge compute in-process, so another front end lists the same tools[32m 6[2mms[22m[39m
+     [32m✓[39m uses no JSON-Schema keyword a provider conversion is known to drop or mangle[32m 1[2mms[22m[39m
+     [33m[2m✓[22m[39m serves the unbridged goldens unless the switch is exactly 1 [33m 319[2mms[22m[39m
+     [33m[2m✓[22m[39m serves the same bridged bytes and answers the bridge's own calls, with no source tree beside it [33m 505[2mms[22m[39m
+     [32m✓[39m prints each bridged profile beside its unbridged twin, and what the two bridge tools cost[32m 9[2mms[22m[39m
+     [32m✓[39m default stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m voice stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m shared stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m shared+voice stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+voice stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m voice+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m shared+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m shared+voice+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+voice+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice+cloud-home stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice+non-chief+cloud-home stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice+escalations stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m default+legacy-switches stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+[90mstderr[2m | unknown test
+[22m[39mImporting from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+[90mstdout[2m | server/drivers/agents-catalog-wire.test.ts[2m > [22m[2magents proxy tools/list wire size[2m > [22m[2mprints per-tool and total UTF-8 bytes
+[22m[39magents proxy tools/list, UTF-8 bytes of the serialized result
+
+total per profile:
+   68469  54 tools  default
+   69210  55 tools  voice
+   70214  56 tools  shared
+   70955  57 tools  shared+voice
+   71368  56 tools  skills
+   72109  57 tools  skills+voice
+   73113  58 tools  skills+shared
+   73854  59 tools  skills+shared+voice
+   56230  44 tools  non-chief
+   56971  45 tools  voice+non-chief
+   57975  46 tools  shared+non-chief
+   58716  47 tools  shared+voice+non-chief
+   59129  46 tools  skills+non-chief
+   59870  47 tools  skills+voice+non-chief
+   60874  48 tools  skills+shared+non-chief
+   61615  49 tools  skills+shared+voice+non-chief
+   72909  58 tools  skills+shared+voice+cloud-home
+   60670  48 tools  skills+shared+voice+non-chief+cloud-home
+   74714  60 tools  skills+shared+voice+escalations
+   68469  54 tools  default+legacy-switches
+
+per tool (skills+shared+voice+escalations | skills+shared+voice+non-chief); every other profile is a by-name subset with identical tool bytes:
+    6760   6760  propose_routine
+    6661   6661  propose_routine_action
+    3374   3374  coordinate_bots
+    3005      -  propose_team_setup
+    2686   2686  add_mcp_server
+    2467   2467  skill_manage
+    2252   2252  show_widget
+    2246   1979  propose_profile
+    1808   1643  propose_model
+    1689   1689  session_search
+    1660   1660  start_thread
+    1524   1524  memory_update
+    1320      -  create_bot
+    1250      -  manage_room
+    1249   1249  shared_computer
+    1201   1201  select_computer
+    1201   1201  origin_update_issue
+    1147      -  propose_bot_deletion
+    1128   1128  attach_file
+    1099   1099  assignment_status
+    1083   1083  origin_create_issue
+    1080   1080  post_to_room
+    1079   1079  origin_complete_issue
+    1061      -  retry_thread
+    1024      -  origin_assign_issue
+    1023   1023  origin_list_issues
+     983      -  create_room
+     951    951  vm_exec
+     935    935  propose_team_memory
+     928    928  request_credential
+     859      -  raise_escalation
+     852    852  request_sign_in
+     836    836  tool_result_read
+     810    810  origin_add_asset
+     785      -  origin_review_pr
+     777      -  origin_merge_pr
+     757    757  origin_feedback
+     741    741  session_read
+     740    740  send_voice_note
+     729    729  list_threads
+     718    718  close_thread
+     706    706  origin_get_issue
+     690    690  memory_log
+     659    659  fill_login
+     624    624  origin_comment_issue
+     596    596  origin_repo_status
+     591    591  origin_draw
+     561    561  origin_vault_list
+     555    555  origin_team_chat
+     541    541  list_rooms
+     501    501  list_routines
+     494    494  list_shared_computers
+     488    488  origin_team_chat_post
+     487    487  origin_list_assets
+     472    472  list_bots
+     453    453  update_widget
+     447    447  list_room_targets
+     445      -  list_team_setup
+     430    430  skills_list
+     425    425  origin_list_projects
+
+ [31m❯[39m server/drivers/agents-catalog-wire.test.ts [2m([22m[2m34 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 762[2mms[22m[39m
+     [32m✓[39m round-trips through JSON.parse unchanged, so a parsed golden can stand for the bytes[32m 6[2mms[22m[39m
+     [32m✓[39m the fullest profile is byte-identical to its golden[32m 2[2mms[22m[39m
+[31m     [31m×[31m every profile matches its pinned tool names, byte count and sha256[39m[32m 16[2mms[22m[39m
+     [32m✓[39m every profile is a by-name subset of the full golden, tool bytes included[32m 10[2mms[22m[39m
+     [32m✓[39m gives every turn the one teamwork surface, with start_thread on the bot itself[32m 10[2mms[22m[39m
+     [32m✓[39m mounts raise_escalation only where chief escalations are on[32m 3[2mms[22m[39m
+     [32m✓[39m ignores the switches that once picked a catalog profile[32m 1[2mms[22m[39m
+     [32m✓[39m shows a Cloud home's bots no Local VM and no this computer, and every other server both[32m 2[2mms[22m[39m
+     [32m✓[39m shows only a Chief of Staff the Chief-only tools, and for_bot_id on another bot's profile or model[32m 7[2mms[22m[39m
+     [32m✓[39m is what the catalog module computes in-process, so another front end mounts the same tools[32m 3[2mms[22m[39m
+     [32m✓[39m writes the routine fields out identically in both routine tools[32m 0[2mms[22m[39m
+     [32m✓[39m uses no JSON-Schema keyword a provider conversion is known to drop or mangle[32m 1[2mms[22m[39m
+     [33m[2m✓[22m[39m serves the same bytes with no source tree beside it [33m 326[2mms[22m[39m
+     [32m✓[39m prints per-tool and total UTF-8 bytes[32m 4[2mms[22m[39m
+     [32m✓[39m default stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m voice stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m shared stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m shared+voice stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+voice stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m voice+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m shared+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m shared+voice+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+voice+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice+non-chief stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice+cloud-home stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice+non-chief+cloud-home stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m skills+shared+voice+escalations stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+     [32m✓[39m default+legacy-switches stays within 2% of its budget baseline[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m server/drivers/agents-bridge-wire.test.ts[2m > [22magents proxy tools/list golden with the tool bridge on[2m > [22mhas a bridged twin for every profile the unbridged goldens pin, of exactly that catalog
+[31m[1mAssertionError[22m: default: expected { bytes: 68469, …(1) } to deeply equal { bytes: 68524, …(1) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "bytes": 68524,[39m
+[32m-   "sha256": "5a1181da1dbd2ddb2182ac2ad4295dc59378fb52b6cb95393c2c95527ed565c2",[39m
+[31m+   "bytes": 68469,[39m
+[31m+   "sha256": "760961c9f01cef156bb97f09e86e9674a57c834bf0f7ec18aaacb53fba9c32f7",[39m
+[2m  }[22m
+
+[36m [2m❯[22m server/drivers/agents-bridge-wire.test.ts:[2m211:96[22m[39m
+    [90m209|[39m     [34mexpect[39m([33mObject[39m[33m.[39m[34mkeys[39m(wires))[33m.[39m[34mtoEqual[39m([33mObject[39m[33m.[39m[34mkeys[39m(unbridged))[33m;[39m
+    [90m210|[39m     [35mfor[39m ([35mconst[39m [name[33m,[39m pinned] [35mof[39m [33mObject[39m[33m.[39m[34mentries[39m(unbridged)) {
+    [90m211|[39m       expect({ bytes: bytes(unbridgedWire(name)), sha256: sha256(unbri…
+    [90m   |[39m                                                                                                [31m^[39m
+    [90m212|[39m     }
+    [90m213|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m server/drivers/agents-bridge-wire.test.ts[2m > [22magents proxy tools/list golden with the tool bridge on[2m > [22mevery bridged profile matches its pinned tool names, byte count and sha256
+[31m[1mAssertionError[22m: expected { …(20) } to deeply equal { …(20) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,9 +1,9 @@[39m
+[2m  {[22m
+[2m    "default": {[22m
+[32m-     "bytes": 15658,[39m
+[32m-     "sha256": "15813e96252013d93b2a606b533e904cf3fc811c41b21596443fae682360ff22",[39m
+[31m+     "bytes": 15603,[39m
+[31m+     "sha256": "44ea1f9521afc5eebf26d9a08d082ab9c1aaee0fc2a2b2fe3680429496aba5c1",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -19,12 +19,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "default+legacy-switches": {[22m
+[32m-     "bytes": 15658,[39m
+[32m-     "sha256": "15813e96252013d93b2a606b533e904cf3fc811c41b21596443fae682360ff22",[39m
+[31m+     "bytes": 15603,[39m
+[31m+     "sha256": "44ea1f9521afc5eebf26d9a08d082ab9c1aaee0fc2a2b2fe3680429496aba5c1",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -40,12 +40,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "non-chief": {[22m
+[32m-     "bytes": 15491,[39m
+[32m-     "sha256": "341b308fd86b3d2f965172ad4bda6cc84d8d65f81e88d219bb2757edbb6a548b",[39m
+[31m+     "bytes": 15436,[39m
+[31m+     "sha256": "12df262174ec8ff303d863e0fbe6a650a070c7853a9a1c21db447c5d94eaccc2",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -61,12 +61,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "shared": {[22m
+[32m-     "bytes": 15698,[39m
+[32m-     "sha256": "cfb3b847a760c957ebe111fcabfa862a28d01ed8869407e9d368709da63dce85",[39m
+[31m+     "bytes": 15643,[39m
+[31m+     "sha256": "8c4eed55658d04c4fdca57476b047b27adac5b2236f0cb61475935c2f82896c0",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -82,12 +82,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "shared+non-chief": {[22m
+[32m-     "bytes": 15531,[39m
+[32m-     "sha256": "5b2eed90f450a456957c2dfbf4b18e8a5927f89994dbff6747600d3c1c0c1a4e",[39m
+[31m+     "bytes": 15476,[39m
+[31m+     "sha256": "71fb6770fca63d309a685ce4da5f3683e326069567048f931cabfbc5df2e982f",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -103,12 +103,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "shared+voice": {[22m
+[32m-     "bytes": 16439,[39m
+[32m-     "sha256": "7e909318d103f44cf88ffaf5451e733f4ea18ae29aa90bd5fa725de0395080ca",[39m
+[31m+     "bytes": 16384,[39m
+[31m+     "sha256": "27dd68c11353242e2c68786e3c151209187bf9fed8510b9108c934c9538fef52",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -125,12 +125,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "shared+voice+non-chief": {[22m
+[32m-     "bytes": 16272,[39m
+[32m-     "sha256": "f22a1bab502a8966c13751e4f87bed54bae3468b0df749f8a4b14c4e079929b5",[39m
+[31m+     "bytes": 16217,[39m
+[31m+     "sha256": "535689eea6c1a4a8ea6ab139a8e510eb10eca47c85779a04f9b5978f5ebd0912",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -147,12 +147,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills": {[22m
+[32m-     "bytes": 15685,[39m
+[32m-     "sha256": "1b3c91e070867a215434e15311932f77c531cd3cb96bb474480ebd0360cc541c",[39m
+[31m+     "bytes": 15630,[39m
+[31m+     "sha256": "54e4fbb447a9ff155e3a85fe7778cb8cc72dad83b36b955c0d39073606fdbe78",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -168,12 +168,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+non-chief": {[22m
+[32m-     "bytes": 15518,[39m
+[32m-     "sha256": "d441a6ccae64e35870e9c012db5740374957ed8641543c3bb5a1c04dabe08894",[39m
+[31m+     "bytes": 15463,[39m
+[31m+     "sha256": "a09f39bcabd01ff2d4408fd177660722937d58322d3a6c3cba668ad7fd5f222d",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -189,12 +189,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared": {[22m
+[32m-     "bytes": 15725,[39m
+[32m-     "sha256": "341c93a45c7a7663cc20e3a3ee71f9e443eefacd5e6651f95427927a9d5d75d6",[39m
+[31m+     "bytes": 15670,[39m
+[31m+     "sha256": "73da22690ffc1a40d0a1f048fceaad74e72d5f46feb3dd2991402c5a0c1e4cdb",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -210,12 +210,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+non-chief": {[22m
+[32m-     "bytes": 15558,[39m
+[32m-     "sha256": "440c588dfce432e31621cdabb6fdb89c730477e7b07f0ee72dc817b9419ba0a6",[39m
+[31m+     "bytes": 15503,[39m
+[31m+     "sha256": "c274e0d17fdb2fd2b347fc67f341538f2d4b250ded4db718fed06ad4c35efeac",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -231,12 +231,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice": {[22m
+[32m-     "bytes": 16466,[39m
+[32m-     "sha256": "f1bbb4489c978f681f7b1c86eadfdf9f2836957c9dd0044d3c5b90f0f25ca38c",[39m
+[31m+     "bytes": 16411,[39m
+[31m+     "sha256": "e2814eb0abe2b1dd79cb661baab2161da9f0b05d46c510a5b65c3d0da0d4ec3a",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -253,12 +253,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice+cloud-home": {[22m
+[32m-     "bytes": 16464,[39m
+[32m-     "sha256": "4bd68cf9852f20eec6867ab5b348ca3f8dca351b55c8ad734c8c2be3bca682fe",[39m
+[31m+     "bytes": 16409,[39m
+[31m+     "sha256": "5e1c313593ea1625ebbce6d500bf368dc12adec480577c71028c557433721166",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -275,12 +275,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice+escalations": {[22m
+[32m-     "bytes": 16484,[39m
+[32m-     "sha256": "b2649c8dbec8ade927f06f8e1af064beec68b5c11443f0c58c22e3fd6ee7aa5a",[39m
+[31m+     "bytes": 16429,[39m
+[31m+     "sha256": "d0c08e18082489959dc6de081f33b0604b53fe4109703b5d1c7e60ec439831ab",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -297,12 +297,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice+non-chief": {[22m
+[32m-     "bytes": 16299,[39m
+[32m-     "sha256": "43574e45b28ad050cb393d25b8fdaff8bbd7f7b58458fc4884dbb12226b57354",[39m
+[31m+     "bytes": 16244,[39m
+[31m+     "sha256": "2028ba722c506303aa781f3b9c125f4ae1d5ac58f5d2131cfd79d4f85dee5c90",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -319,12 +319,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice+non-chief+cloud-home": {[22m
+[32m-     "bytes": 16297,[39m
+[32m-     "sha256": "d5ab45caa311b12df5d2ab4ce77183275955497a971dfc77f2c07d994e981320",[39m
+[31m+     "bytes": 16242,[39m
+[31m+     "sha256": "c8d8bfa9100aa30bad9ef68c81fbee2be68427c56987eda1693195dd606a8d21",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -341,12 +341,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+voice": {[22m
+[32m-     "bytes": 16426,[39m
+[32m-     "sha256": "f59605bc9de5a8a61d23041532b60fd055f31066a208c171850f4892b0de06d3",[39m
+[31m+     "bytes": 16371,[39m
+[31m+     "sha256": "9aaab849dcd49bcd8be1965e1a33ed5e9bd7aa1583d2de8730df80f7dfd24a16",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -363,12 +363,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+voice+non-chief": {[22m
+[32m-     "bytes": 16259,[39m
+[32m-     "sha256": "b4bb8f4367fdd50f9026d34a6f404e62e0709c455da8116fa3b81bf2b93aaef9",[39m
+[31m+     "bytes": 16204,[39m
+[31m+     "sha256": "8e0050cc90cab55542c6e484ef3f0e4adc4b8d93613a770840c7b1ac2925a1ed",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -385,12 +385,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "voice": {[22m
+[32m-     "bytes": 16399,[39m
+[32m-     "sha256": "eb2f8532cc6497f1efd4d052688aa9cdfc0df2f357cfb6ef103441a30c207c53",[39m
+[31m+     "bytes": 16344,[39m
+[31m+     "sha256": "c0c0871635e9791730cfaba767c8666a4ca19c4cffd8511dd725127f1fa6c6d7",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+[33m@@ -407,12 +407,12 @@[39m
+[2m        "find_tool",[22m
+[2m        "use_tool",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "voice+non-chief": {[22m
+[32m-     "bytes": 16232,[39m
+[32m-     "sha256": "7ba1fb615b08802255e20d25edd928b04adcea1f5c472be837486128266e25d9",[39m
+[31m+     "bytes": 16177,[39m
+[31m+     "sha256": "e6056ef8b4f49f6345b0a3cb84d89b081fe9c23e83df28dfa25f661e0e6ea0a2",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "list_bots",[22m
+
+[36m [2m❯[22m server/drivers/agents-bridge-wire.test.ts:[2m229:31[22m[39m
+    [90m227|[39m
+    [90m228|[39m   it("every bridged profile matches its pinned tool names, byte count …
+    [90m229|[39m     [34mexpect[39m([34mmanifestOf[39m(wires))[33m.[39m[34mtoEqual[39m([34mreadJson[39m(manifestPath))[33m;[39m
+    [90m   |[39m                               [31m^[39m
+    [90m230|[39m   })[33m;[39m
+    [90m231|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m server/drivers/agents-catalog-wire.test.ts[2m > [22magents proxy tools/list golden[2m > [22mevery profile matches its pinned tool names, byte count and sha256
+[31m[1mAssertionError[22m: expected { …(20) } to deeply equal { …(20) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,9 +1,9 @@[39m
+[2m  {[22m
+[2m    "default": {[22m
+[32m-     "bytes": 68524,[39m
+[32m-     "sha256": "5a1181da1dbd2ddb2182ac2ad4295dc59378fb52b6cb95393c2c95527ed565c2",[39m
+[31m+     "bytes": 68469,[39m
+[31m+     "sha256": "760961c9f01cef156bb97f09e86e9674a57c834bf0f7ec18aaacb53fba9c32f7",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "assignment_status",[22m
+[33m@@ -58,12 +58,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "default+legacy-switches": {[22m
+[32m-     "bytes": 68524,[39m
+[32m-     "sha256": "5a1181da1dbd2ddb2182ac2ad4295dc59378fb52b6cb95393c2c95527ed565c2",[39m
+[31m+     "bytes": 68469,[39m
+[31m+     "sha256": "760961c9f01cef156bb97f09e86e9674a57c834bf0f7ec18aaacb53fba9c32f7",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "assignment_status",[22m
+[33m@@ -118,12 +118,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "non-chief": {[22m
+[32m-     "bytes": 56285,[39m
+[32m-     "sha256": "3563dac35f0bb138b4268aea47ddc6c33738ecfe8c6a6d1fa2ef49de7a6cfbe5",[39m
+[31m+     "bytes": 56230,[39m
+[31m+     "sha256": "e17ad8b4258636c2c1a67d511eef5c9235dfa5f3e4b94c230da93716de569781",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "assignment_status",[22m
+[33m@@ -168,12 +168,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "shared": {[22m
+[32m-     "bytes": 70269,[39m
+[32m-     "sha256": "0d85cd2a3ea32ad1d87693bde9e24d33487d7d68102bea8e696060ff1ae488ca",[39m
+[31m+     "bytes": 70214,[39m
+[31m+     "sha256": "2b1ac44b8487d6244a0323107f2c4c8173292f8be17d0be3b76061f7c7e4c205",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -230,12 +230,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "shared+non-chief": {[22m
+[32m-     "bytes": 58030,[39m
+[32m-     "sha256": "b9ed5c8c8aa57f2acb0a8cd7af1115fe6df1a501a4131ce6276081bdd667d0d8",[39m
+[31m+     "bytes": 57975,[39m
+[31m+     "sha256": "d8e66d2cef19c050dac349eda38bfa98f1dd802a38a16c85c3b4a72df1f996c9",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -282,12 +282,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "shared+voice": {[22m
+[32m-     "bytes": 71010,[39m
+[32m-     "sha256": "c1f7aaef9fef2a82fbd4c85d136e4cd06349ecd0741cc8397069341b023e4d52",[39m
+[31m+     "bytes": 70955,[39m
+[31m+     "sha256": "1ad18fae06be98348aa001ae21c53a92937ce18a590fa06584e31cca0eea5222",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -345,12 +345,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "shared+voice+non-chief": {[22m
+[32m-     "bytes": 58771,[39m
+[32m-     "sha256": "bedf8ca0c2a45314e72e7c1a03d34930dc4bb0189381ee274ad5028bedf58cec",[39m
+[31m+     "bytes": 58716,[39m
+[31m+     "sha256": "b0efa59db2163b6a225e53148c73dfacbae74e44be9795b703bd5061a63e7e7d",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -398,12 +398,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills": {[22m
+[32m-     "bytes": 71423,[39m
+[32m-     "sha256": "90ff9339c3d0a5140f98cf69353f28664ce8382446ea27645184fd884b6034ed",[39m
+[31m+     "bytes": 71368,[39m
+[31m+     "sha256": "ca472550a9522309eabffebcb29d7b0a4a8763b71bc92c5d079e6b8201816444",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "assignment_status",[22m
+[33m@@ -460,12 +460,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+non-chief": {[22m
+[32m-     "bytes": 59184,[39m
+[32m-     "sha256": "6f15973350c839f183313fc95d0d34b2237f309046243969ff39e3e26f3e8d5a",[39m
+[31m+     "bytes": 59129,[39m
+[31m+     "sha256": "ba23330f83b7a12b618a791f52ce80e80d38927353ea1d2f0aeecda880a26274",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "assignment_status",[22m
+[33m@@ -512,12 +512,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared": {[22m
+[32m-     "bytes": 73168,[39m
+[32m-     "sha256": "12c453f8b35f2796c853ef6e8c7aa78af59a79f46c91615c1ecfcab567acfb45",[39m
+[31m+     "bytes": 73113,[39m
+[31m+     "sha256": "c18ca7edf17042b2734587e94ffa07cd5622f3854521d8f3a4753ea498c4b813",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -576,12 +576,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+non-chief": {[22m
+[32m-     "bytes": 60929,[39m
+[32m-     "sha256": "e1f0cdb838467d495c5d4ddc573a1bd83ff6995f0988ec0cfd307da3ac5d38cc",[39m
+[31m+     "bytes": 60874,[39m
+[31m+     "sha256": "2de0f3c5dbef041f5e9c3a04f954c78fcabdab5f9ca52756d620779d0e308800",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -630,12 +630,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice": {[22m
+[32m-     "bytes": 73909,[39m
+[32m-     "sha256": "c9de6886d957efa81187858436247ce132619519196dbdb76d3056e67b11efec",[39m
+[31m+     "bytes": 73854,[39m
+[31m+     "sha256": "c8f4ef9996326144179bd811aa6479f2ef4dd812f8836551031adebe40d8c230",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -695,12 +695,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice+cloud-home": {[22m
+[32m-     "bytes": 72964,[39m
+[32m-     "sha256": "f2bb7e4a5245d4119cdb92cdd485730ce275a530818527e3caa36bf4a12aec09",[39m
+[31m+     "bytes": 72909,[39m
+[31m+     "sha256": "9a1c128f2a89a55f03993bf31a214a2b18680db24b2a2beed7818a7fd50a8a95",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -759,12 +759,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice+escalations": {[22m
+[32m-     "bytes": 74769,[39m
+[32m-     "sha256": "e6abc1fa0b98994035a6c88708feac1bb9cb0ac8e182550b6dbaef60ba56762d",[39m
+[31m+     "bytes": 74714,[39m
+[31m+     "sha256": "ebf6145f2dcac9d586d83e9e4cda185d506f1255314f8fc1f779039f0bd15ea6",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -825,12 +825,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice+non-chief": {[22m
+[32m-     "bytes": 61670,[39m
+[32m-     "sha256": "53425170f47cf875b706cb167fc7b8c0439c2c5c94618021560152b0fd172b93",[39m
+[31m+     "bytes": 61615,[39m
+[31m+     "sha256": "9b29dc9d80b55dd6374ae3ce1d016a094a3c3e3b0ce069b6c6f76da74f9b4eb1",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -880,12 +880,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+shared+voice+non-chief+cloud-home": {[22m
+[32m-     "bytes": 60725,[39m
+[32m-     "sha256": "4220409514a94f505012290938878ef03efffdc2c98e5359550627b097d52de8",[39m
+[31m+     "bytes": 60670,[39m
+[31m+     "sha256": "2c09c170e8a9349127846578f9c206fdb394851b905bcf0dfeccd23ac7770d0b",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_shared_computers",[22m
+[2m        "shared_computer",[22m
+[2m        "list_room_targets",[22m
+[33m@@ -934,12 +934,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+voice": {[22m
+[32m-     "bytes": 72164,[39m
+[32m-     "sha256": "1dbae5faee44a7151b45e642c68f335f605016577cb897aa7c813a4e369c201e",[39m
+[31m+     "bytes": 72109,[39m
+[31m+     "sha256": "a524ed27d17cd4fae00f00849c265359e4b0b712dcf7fe663d80c977797545bb",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "assignment_status",[22m
+[33m@@ -997,12 +997,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "skills+voice+non-chief": {[22m
+[32m-     "bytes": 59925,[39m
+[32m-     "sha256": "41952ce70eb7a3383f5a9073566d6f5710c932d18c0a4a286291769551b67965",[39m
+[31m+     "bytes": 59870,[39m
+[31m+     "sha256": "b0939d61e7f70d19cd0866b492bb48e33e4bdac6342ea5db73740e01767b2a18",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "assignment_status",[22m
+[33m@@ -1050,12 +1050,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "voice": {[22m
+[32m-     "bytes": 69265,[39m
+[32m-     "sha256": "d4c2bb4441a15cd44cef20304e60aaeb520fea8b91931cdd89b0ffb4ddadbab6",[39m
+[31m+     "bytes": 69210,[39m
+[31m+     "sha256": "8864eb31b5ac6cb63ca7aa6662602a742f83053de20aba3aee2b17b4873220c5",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "assignment_status",[22m
+[33m@@ -1111,12 +1111,12 @@[39m
+[2m        "origin_feedback",[22m
+[2m        "origin_draw",[22m
+[2m      ],[22m
+[2m    },[22m
+[2m    "voice+non-chief": {[22m
+[32m-     "bytes": 57026,[39m
+[32m-     "sha256": "e728521903d555fe6e71d12d59488465d466a564462cdf559e3984d7184ec1eb",[39m
+[31m+     "bytes": 56971,[39m
+[31m+     "sha256": "a45bec24e2cf517e8f0d787f3181b816847822284e436441f9af70da46ec3d20",[39m
+[2m      "tools": [[22m
+[2m        "tool_result_read",[22m
+[2m        "list_room_targets",[22m
+[2m        "coordinate_bots",[22m
+[2m        "assignment_status",[22m
+
+[36m [2m❯[22m server/drivers/agents-catalog-wire.test.ts:[2m169:31[22m[39m
+    [90m167|[39m
+    [90m168|[39m   it("every profile matches its pinned tool names, byte count and sha2…
+    [90m169|[39m     [34mexpect[39m([34mmanifestOf[39m(wires))[33m.[39m[34mtoEqual[39m([34mreadJson[39m(manifestPath))[33m;[39m
+    [90m   |[39m                               [31m^[39m
+    [90m170|[39m   })[33m;[39m
+    [90m171|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m63 passed[39m[22m[90m (66)[39m
+[2m   Start at [22m 00:54:45
+[2m   Duration [22m 3.56s[2m (transform 554ms, setup 1.00s, import 197ms, tests 2.05s, environment 0ms)[22m
+
+JSON report written to C:/Users/aless/.codex/worktrees/origin-footer-single-row-034/Origin/.omb-scratch/ci034-agent-wire-goldens/red.json

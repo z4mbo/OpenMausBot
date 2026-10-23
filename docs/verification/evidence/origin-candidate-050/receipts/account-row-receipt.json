@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-10-21T04:43:11.1076727Z",
+  "sourceHeadAtVerification": "a78e0438afe1a0165c352163122ce144a8f0ce88",
+  "scope": "Publish AccountRow identity display only",
+  "scenario": "Saved explicit X account removed while one or more other accounts remain; row implied a different posting identity",
+  "ownedPaths": {
+    "src/components/origin-broadcast/ComposerParts.tsx": "64fb303ace06a88870f35edf702f2852d9a1bb66776ed9b2db7d51db598fd32a",
+    "src/components/origin-broadcast/AccountRow.test.ts": "e5db88dae9af08e0012625aa14abbf90b9ddc257763c82370bc21e711ac222d9"
+  },
+  "behavior": [
+    "Undefined chosen account still defaults to first available",
+    "Missing explicit identity renders empty-value disabled placeholder Choose an account",
+    "One or multiple available accounts permit explicit valid choice",
+    "Valid selected extra identity and locked editing state retained"
+  ],
+  "verification": {
+    "red": {
+      "failed": 5,
+      "passed": 3,
+      "log": "account-row-red.log",
+      "sha256": "b05e56fdd0c5dc6df235ecea86258b70b6d5e46d08d6c407a61fcf506eccb837"
+    },
+    "green": {
+      "passed": 20,
+      "failed": 0,
+      "files": 2,
+      "accountRowTests": 8,
+      "composerReadinessTests": 12,
+      "log": "account-row-green.log",
+      "sha256": "352330f3b35609508db7296f71e19c909063a0e9aeca93fb98da8b9cb00e8390"
+    },
+    "lint": {
+      "exitCode": 0,
+      "log": "account-row-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ownedDiffWhitespaceCheckExitCode": 0,
+    "actualReactDomAndSSR": true,
+    "fullTypecheck": "Root owned; not rerun in this lane",
+    "browser": "Root captured initial before/after and found this issue; final new-helper after capture pending root",
+    "previewBeforeHelpersSha256": "5dc9433019f1f33bf6a603894ba536799b94d258fb4343b7a86dfe96af235d4d"
+  },
+  "limits": [
+    "Synthetic account props only; no actual publish/provider/backend mutation",
+    "Initial before/after preview receipt remains immutable with old helper bytes; final after requires new helper hash binding"
+  ],
+  "staged": false,
+  "committed": false,
+  "productionMutation": false
+}

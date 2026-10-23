@@ -1,0 +1,62 @@
+{
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "version": "0.2.14",
+  "cycle": "038",
+  "authorizedAfterRootVisualCompletion": true,
+  "local": {
+    "checkedAt": "2026-10-19T01:18:46.0447693Z",
+    "execSession": 87168,
+    "execClosedAfterCtrlC": true,
+    "exactPids": [
+      {
+        "pid": 11604,
+        "present": false
+      },
+      {
+        "pid": 41600,
+        "present": false
+      }
+    ],
+    "listeners": [],
+    "containerStopExitCode": 0,
+    "noOtherProcessStopAttempted": true
+  },
+  "container": {
+    "id": "1108374a532f323ca533870759b244dbb396326887c02f4a646c4abae5e4bf44",
+    "image": "sha256:b0a0a3315c8eeec4ea8e337b935142cf04142962e3cb92dcde87369f74684201",
+    "status": "exited",
+    "labels": {
+      "org.opencontainers.image.revision": "ab0cd72b4c2f004c1015adca034472241569c04b",
+      "org.opencontainers.image.version": "0.2.14",
+      "origin.preview.source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+      "origin.preview.version": "0.2.14"
+    }
+  },
+  "image": {
+    "id": "sha256:b0a0a3315c8eeec4ea8e337b935142cf04142962e3cb92dcde87369f74684201",
+    "labels": {
+      "org.opencontainers.image.revision": "ab0cd72b4c2f004c1015adca034472241569c04b",
+      "org.opencontainers.image.version": "0.2.14"
+    }
+  },
+  "network": {
+    "id": "01ae6d3dcfa91a6f109798c2e0bb5b2475ab068338988b4d3f5d1b0ae9966c30",
+    "name": "origin-site-038-preview",
+    "internal": true,
+    "labels": {
+      "origin.preview.source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+      "origin.preview.version": "0.2.14"
+    }
+  },
+  "remoteContextArchiveSha256": "f5a6b070ae7e462bcb3d89c32417273d4bf50ca1b070cb6dcf2f5dd1f53b3204",
+  "remoteStage": "/root/origin-release-staging/0.2.14-cycle038",
+  "preservedForPromotionRollback": [
+    "private image",
+    "context stage",
+    "context archive",
+    "private network",
+    "stopped private container"
+  ],
+  "productionActions": 0,
+  "checkedAt": "2026-10-19T01:19:23.523Z"
+}

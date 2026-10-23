@@ -1,0 +1,8 @@
+{
+  "initialExecSession": 84475,
+  "stdinProbe": "One empty line; no backend mutation",
+  "result": "The exec session was launched without a PTY and its stdin is closed",
+  "productDefect": false,
+  "ownedBackendContinues": true,
+  "recoveryPlan": "After the API/UI checkpoint, stop only the verified original child PID, wait for both owned ports and the original parent session to close, then resume the exact SQLite/storage with a PTY-owned controller. No second concurrent backend or code push."
+}

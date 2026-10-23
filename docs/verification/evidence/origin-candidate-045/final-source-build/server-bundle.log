@@ -1,0 +1,25 @@
+
+  dist-server\index.js                     10.6mb
+  dist-server\pair-cli.js                   3.0mb
+  dist-server\openmausbot.js                3.0mb
+  dist-server\drivers\agents-proxy.js     771.4kb
+  dist-server\workspace-backup.worker.js  763.1kb
+  ...and 16 more output files...
+
+Done in 530ms
+
+  dist-server\mcp-server.js  58.7kb
+
+Done in 7ms
+
+  dist-server\tunnel-guardian.js  11.9kb
+
+Done in 9ms
+
+  dist-server\prepare-cloudflared.js  10.9kb
+
+Done in 5ms
+
+  dist-server\enterprise\server\index.js  552.7kb
+
+Done in 25ms

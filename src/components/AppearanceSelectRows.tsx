@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { t } from "@/lib/i18n";
-import { CHAT_WIDTH_IDS, applyChatWidth, readChatWidth, type ChatWidthId } from "@/lib/chat-width";
+import { CHAT_WIDTH_IDS, applyChatWidth, useChatWidth } from "@/lib/chat-width";
 import { FONT_IDS, applyFont, readFont, type FontId } from "@/lib/fonts";
 import { parseSidebarToolsLayout, setSidebarToolsLayout, SIDEBAR_TOOLS_LAYOUTS, useSidebarToolsLayout } from "@/lib/sidebar-preferences";
 import { SettingRow } from "./SettingsPrimitives";
@@ -29,9 +29,9 @@ export function FontRow() {
 }
 
 export function ChatWidthRow() {
-  const [current, setCurrent] = useState<ChatWidthId>(readChatWidth);
+  const current = useChatWidth();
   return (
-    <SettingRow title={t("settings.chatWidth.title")} subtitle={t("settings.chatWidth.subtitle")}>
+    <SettingRow title={t("settings.chatWidth.title")} subtitle={t("chatLayout.help")}>
       <Select size="sm" className="w-full max-w-[240px]"
         value={current}
         aria-label={t("settings.chatWidth.aria")}
@@ -39,11 +39,10 @@ export function ChatWidthRow() {
           const id = CHAT_WIDTH_IDS.find((width) => width === event.target.value);
           if (!id) return;
           applyChatWidth(id);
-          setCurrent(id);
         }}
       >
         {CHAT_WIDTH_IDS.map((id) => (
-          <option key={id} value={id}>{t(`settings.chatWidth.${id}`)}</option>
+          <option key={id} value={id}>{t(`chatLayout.${id}`)}</option>
         ))}
       </Select>
     </SettingRow>

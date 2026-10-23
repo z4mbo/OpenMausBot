@@ -5,6 +5,12 @@ import { buildNotification, buildSpendNotification, summarize } from "./notify.t
 const bot = { id: "bot-1", name: "Scout", threadId: "thread-1" };
 
 describe("buildNotification", () => {
+  it("routes delegated work to the specialist's exact child conversation", () => {
+    expect(buildNotification("delegation-started", bot, "child-a", "Research the project")).toMatchObject({
+      kind: "delegation-started", threadId: "child-a", botId: bot.id, title: "Scout started delegated work", body: "Research the project",
+    });
+    expect(buildNotification("delegation-started", { ...bot, notifications: false }, "child-a", "Research the project")).toBeNull();
+  });
   it("names the bot and carries the detail, per kind", () => {
     expect(buildNotification("approval", bot, "thread-1", "rm -rf ./build")).toMatchObject({
       kind: "approval",

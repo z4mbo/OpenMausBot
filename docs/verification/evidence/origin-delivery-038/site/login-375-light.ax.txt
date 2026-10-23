@@ -1,0 +1,31 @@
+Browser tab: 14, Title: "Sign in | Origin", URL: "http://127.0.0.1:64038/login".
+1 AXWebArea Sign in | Origin, URL: 127.0.0.1:64038/login
+	2 link Description: Skip to content, Value: 127.0.0.1:64038/login#main
+	3 container Main
+		4 link Description: Origin home, Value: 127.0.0.1:64038/
+		5 link Description: Download, Value: origin.imbored.fun/downloads/Origin-Setup.exe
+	16 container Sign in to Origin
+		17 heading Sign in to Origin, Value: 1, ID: auth-title
+			18 text Sign in to Origin
+		19 text Pick up your workspaces where you left them.
+		20 container
+			21 text Email
+			22 text field (settable) Email
+			23 text Password
+			24 text field (settable) Password
+			25 button Show password
+			26 button Sign in
+		27 container
+			28 text New to Origin?
+			29 link Description: Create an account, Value: 127.0.0.1:64038/signup
+	7 container
+		8 link Description: Origin home, Value: 127.0.0.1:64038/
+		9 container Footer
+			10 link Description: Download, Value: 127.0.0.1:64038/#download
+			11 link Description: Sign in, Value: 127.0.0.1:64038/login
+			12 link Description: Create account, Value: 127.0.0.1:64038/signup
+			13 link Description: What's new, Value: 127.0.0.1:64038/whats-new
+			14 link Description: GitHub, Value: github.com/z4mbo/Origin
+		15 text No trackers, no ads.
+
+The focused UI element is 1 AXWebArea Sign in | Origin, URL: 127.0.0.1:64038/login

@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "folder": "origin-model-fallback-041",
+  "reviewedAt": "2026-10-20T04:33:42.843Z",
+  "reviewerScope": "Retained bytes, declared bindings and relative references only; no browser recapture or runtime re-execution.",
+  "browserProof": {
+    "file": "browser-proof.json",
+    "sha256": "4922078f169e1fb4d86b1c35ea8c48e9769aa9c7a8ec4d1d24e51268146ee358",
+    "recordedTime": "2026-10-19T20:53:47.993Z",
+    "timeProvenance": "observedAt field in retained proof",
+    "scope": "Isolated actual React components with synthetic provider catalogs; real local HTTP persistence; no live provider, invoice or native acceptance"
+  },
+  "recordedSourceBindings": {
+    "provenance": "No source digest bindings retained in this evidence folder. Current verifier support is not capture-time evidence.",
+    "entries": []
+  },
+  "baseline": null,
+  "previousManifest": null,
+  "currentSourceInventory": {
+    "observedAt": "2026-10-20T04:33:42.843Z",
+    "gitHeadAtReview": "2a29a82702fef4f9b3b4c2c91e52fb3af72deab4",
+    "tree": "working-tree",
+    "captureTimeBinding": false,
+    "purpose": "Supplementary current-source inventory only. These hashes must not be presented as the source loaded when the screenshots were captured.",
+    "files": [
+      {
+        "name": "scripts/verify-model-fallback.ts",
+        "bytes": 10198,
+        "sha256": "b276342c749e758361a78a639146bda86688895c6c7acd32a2f527f90fc8e839",
+        "present": true
+      },
+      {
+        "name": "scripts/testing/model-fallback-preview.tsx",
+        "bytes": 3267,
+        "sha256": "837b72d3a6fed076adbc4327eb931c4d446dcadf0bd33fad950d07717398f39d",
+        "present": true
+      },
+      {
+        "name": "src/components/ModelPicker.tsx",
+        "bytes": 60429,
+        "sha256": "4bdfeab7eb8d3cc3df7621cd67a0cc55be67decd7ef837140bf8071065b5fe58",
+        "present": true
+      },
+      {
+        "name": "src/components/ModelFallbackSettings.tsx",
+        "bytes": 14727,
+        "sha256": "54562b09138063a495c7a0a104507b72c2616cb2083e271467a1449ac6c8d974",
+        "present": true
+      },
+      {
+        "name": "src/lib/use-pointer-reorder.ts",
+        "bytes": 3557,
+        "sha256": "5f0939acbda3107100f218ad7dea9783e71b330434aa4f7e2f0b9940e3dd336e",
+        "present": true
+      },
+      {
+        "name": "src/components/DailyApiBudgetCard.tsx",
+        "bytes": 9936,
+        "sha256": "9318e2776a6de65dd1d046b165fa3c80ab76737608b573017bb9aff7abf97ffa",
+        "present": true
+      },
+      {
+        "name": "src/components/bot-settings/ModelSection.tsx",
+        "bytes": 3680,
+        "sha256": "1ae7f42129255cb4d71d2dd2c7454cadd1e56a986337c3d95b225ae668b78643",
+        "present": true
+      },
+      {
+        "name": "src/components/UsageSection.tsx",
+        "bytes": 4070,
+        "sha256": "64f7ece27ae63d8ec2e1e6026bfe846f73bc9e737bbfb4bd18bfca8d43d86713",
+        "present": true
+      },
+      {
+        "name": "src/locales/en.json",
+        "bytes": 328253,
+        "sha256": "87232cf80b5e1abfbdf35b360077bcc2d9314d24413d89f7455be40c0b691800",
+        "present": true
+      },
+      {
+        "name": "server/daily-api-budget.ts",
+        "bytes": 20030,
+        "sha256": "60cee3c1ca486f79b0eeb5cf8f3bdd0b31de64b8d8b24252b226f53d9a4a33a5",
+        "present": true
+      },
+      {
+        "name": "server/routes/bot-patch.ts",
+        "bytes": 43429,
+        "sha256": "6156d28c34736db178236dac15c3b3f7c9db36b8ad619026e8fee52680f24639",
+        "present": true
+      },
+      {
+        "name": "server/routes/config.ts",
+        "bytes": 35104,
+        "sha256": "ea59df7edef259ad9c6e1fb8fc9d49e60f92cb2232461b70a007f302fd0efe76",
+        "present": true
+      },
+      {
+        "name": "server/routes/status.ts",
+        "bytes": 14155,
+        "sha256": "a13321911328ca90d563a846262162e003c5e1ddfc1027cc06916a33e249c9b8",
+        "present": true
+      }
+    ]
+  },
+  "originalFiles": [
+    {
+      "name": "after-agent-dark.png",
+      "bytes": 91729,
+      "sha256": "9bcf9e281d03cfd64af6261bd329b35c4a744866bac319bec301f38cd1aabfe0"
+    },
+    {
+      "name": "after-agent-light-375.png",
+      "bytes": 75571,
+      "sha256": "42e5836681356402932465d820d7f9fac25ee7a367ac63900777e3d3653c0ac5"
+    },
+    {
+      "name": "after-chat-dark-375.png",
+      "bytes": 40375,
+      "sha256": "f5cfe478094e22599ccd94041d039a466c011b6c139f32091c74175ffc80f807"
+    },
+    {
+      "name": "after-chat-dark.png",
+      "bytes": 53913,
+      "sha256": "30ddfcd3b8d6fbd096185f12d2525d345af7a84873967dd947e1b4069d996d7c"
+    },
+    {
+      "name": "after-chat-light-375.png",
+      "bytes": 43714,
+      "sha256": "67d49773be27ca6fd205ee453e3f39690ac0a4966623c99d3b8fa838349aece3"
+    },
+    {
+      "name": "after-usage-dark.png",
+      "bytes": 100474,
+      "sha256": "48b9a432056444e55379125593ad574119f79976b0d8a5fa10348a03c3a7ca4a"
+    },
+    {
+      "name": "after-usage-light-375.png",
+      "bytes": 82340,
+      "sha256": "1235831921198f4a35026cdf915096616ee64eda9f8b81b1d0d58c2da066b911"
+    },
+    {
+      "name": "after-usage-light.png",
+      "bytes": 102973,
+      "sha256": "e68ed1250e048fa232a7b7ec45d403e552114fbae2eab2051b5c304de611ebbb"
+    },
+    {
+      "name": "agent-failed-save-light-375.png",
+      "bytes": 86186,
+      "sha256": "4e84e71a41bd497887f646d4939aff6f5e1d3adbeb487b49b3fca0018d4d5d60"
+    },
+    {
+      "name": "before-agent-dark.png",
+      "bytes": 60614,
+      "sha256": "4ffe84ef9ae8707b8d4a19305fae5cfcb91516759b73f76543f79ac2d5f3b432"
+    },
+    {
+      "name": "before-agent-light-375.png",
+      "bytes": 49868,
+      "sha256": "ef9981b83f7623b9cca924c04b7adf7aa471175aabd9fe117e23aec50c88457c"
+    },
+    {
+      "name": "before-chat-dark.png",
+      "bytes": 38222,
+      "sha256": "d7c1f3dc4d0a8975e68ae64d514a0856a1d78dd639016598e721bb782a6c1379"
+    },
+    {
+      "name": "before-chat-light-375.png",
+      "bytes": 30136,
+      "sha256": "852b8ae94bdf90ec2f2b962fa4624fc622f45c1ed3fb4094b4855594b4b9e2e4"
+    },
+    {
+      "name": "before-usage-dark.png",
+      "bytes": 64690,
+      "sha256": "195afed86283822191788a2bf3c5c8ecfa75922db0accc74000f13108b4f70ab"
+    },
+    {
+      "name": "before-usage-light-375.png",
+      "bytes": 49427,
+      "sha256": "bb85cd7cf28b77e6178820d63cb14ebd2e704d49966506066237fe137beb060e"
+    },
+    {
+      "name": "browser-proof.json",
+      "bytes": 5295,
+      "sha256": "4922078f169e1fb4d86b1c35ea8c48e9769aa9c7a8ec4d1d24e51268146ee358"
+    },
+    {
+      "name": "global-zero-light-375.png",
+      "bytes": 84726,
+      "sha256": "b2d6ae94fe0c1b27f0d90f5810b34a9494a09cf6a9e0d5fbb2bdcda34d49ccfb"
+    }
+  ],
+  "images": [
+    {
+      "name": "after-agent-dark.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 1150,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "after-agent-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 1396,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "after-chat-dark-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "after-chat-dark.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "after-chat-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "after-usage-dark.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 1380,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "after-usage-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 1797,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "after-usage-light.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 1380,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "agent-failed-save-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 1554,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "before-agent-dark.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "before-agent-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "before-chat-dark.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "before-chat-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "before-usage-dark.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 991,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "before-usage-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 1216,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "global-zero-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 1840,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    }
+  ],
+  "referenceChecks": {
+    "originalManifestRelativeFiles": "No original manifest retained.",
+    "recordedSourcePaths": "checked entry by entry",
+    "imageHeaders": "encoding and dimensions checked without re-rendering",
+    "markdown": "relative links generated from files confirmed present",
+    "gitTextAttribute": "\"docs\\\\verification\\\\evidence\\\\origin-model-fallback-041\\\\browser-proof.json\": text: unset",
+    "gitIndexOrCommitBytesVerified": false
+  },
+  "limitations": [
+    "No missing capture-time source bindings or timestamps were reconstructed.",
+    "A matching recorded binding proves raw file equality at review; it does not independently prove browser startup or complete runtime identity.",
+    "Current source drift is reported without changing original proof or historical manifest.",
+    "Retained screenshot filenames use .png, but their encoding is recorded from the bytes; no original was renamed or re-encoded.",
+    "Screenshots were not recaptured; pixel correctness, runtime behavior, native packages, real vendors and production are outside this integrity review."
+  ]
+}

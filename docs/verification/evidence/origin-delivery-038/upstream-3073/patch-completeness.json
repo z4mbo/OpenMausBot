@@ -1,0 +1,230 @@
+{
+  "files": 37,
+  "complete": 37,
+  "additions": 3194,
+  "deletions": 169,
+  "checks": [
+    {
+      "path": "docs/team-sharing.md",
+      "addedLines": 59,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "electron/package-link.mjs",
+      "addedLines": 5,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "electron/package-link.node-test.mjs",
+      "addedLines": 9,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "scripts/testing/file-size-ratchet.test.ts",
+      "addedLines": 0,
+      "deletedLines": 1,
+      "metadataMatched": true
+    },
+    {
+      "path": "server/cursor-session.test.ts",
+      "addedLines": 279,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "server/cursor-session.ts",
+      "addedLines": 324,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "server/fixtures/grok-share-page-anonymous.html",
+      "addedLines": 1,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "server/fixtures/grok-share-page.html",
+      "addedLines": 1,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "server/request-auth.test.ts",
+      "addedLines": 2,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "server/routes/team-library-grok.test.ts",
+      "addedLines": 137,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "server/routes/teams.ts",
+      "addedLines": 41,
+      "deletedLines": 1,
+      "metadataMatched": true
+    },
+    {
+      "path": "server/team-library.test.ts",
+      "addedLines": 108,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "server/team-library.ts",
+      "addedLines": 172,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "shared/grok-import.test.ts",
+      "addedLines": 302,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "shared/grok-import.ts",
+      "addedLines": 542,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/GrokBotMark.test.ts",
+      "addedLines": 26,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/GrokBotMark.tsx",
+      "addedLines": 16,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/GrokFinishSetup.test.ts",
+      "addedLines": 77,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/GrokFinishSetup.tsx",
+      "addedLines": 81,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/GrokImportBox.test.ts",
+      "addedLines": 88,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/GrokImportBox.tsx",
+      "addedLines": 252,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/GrokImportFlow.tsx",
+      "addedLines": 95,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/ImportSettings.test.ts",
+      "addedLines": 62,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/ImportSettings.tsx",
+      "addedLines": 132,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/ProviderIcons.tsx",
+      "addedLines": 2,
+      "deletedLines": 1,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/SettingsModal.groups.test.ts",
+      "addedLines": 2,
+      "deletedLines": 2,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/SettingsModal.simple.test.ts",
+      "addedLines": 5,
+      "deletedLines": 2,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/SettingsModal.tsx",
+      "addedLines": 9,
+      "deletedLines": 9,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/TeamImportDetails.tsx",
+      "addedLines": 114,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/TeamLibraryPanel.tsx",
+      "addedLines": 22,
+      "deletedLines": 148,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/onboarding/beats/ImportBeat.test.ts",
+      "addedLines": 30,
+      "deletedLines": 1,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/components/onboarding/beats/ImportBeat.tsx",
+      "addedLines": 37,
+      "deletedLines": 2,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/lib/team-import.test.ts",
+      "addedLines": 48,
+      "deletedLines": 1,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/lib/team-import.ts",
+      "addedLines": 41,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/lib/template-add.ts",
+      "addedLines": 25,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/locales/en.json",
+      "addedLines": 47,
+      "deletedLines": 0,
+      "metadataMatched": true
+    },
+    {
+      "path": "src/state/store.tsx",
+      "addedLines": 1,
+      "deletedLines": 1,
+      "metadataMatched": true
+    }
+  ]
+}

@@ -30,7 +30,7 @@ export const toolSections = (): ProjectSectionEntry[] => CHIEF_SECTIONS.filter((
 
 export function teamAgents(bots: readonly Bot[], chief: Bot): Bot[] {
   const team = chief.section?.trim();
-  return team ? bots.filter((bot) => !bot.hidden && bot.id !== chief.id && bot.section?.trim() === team) : [];
+  return team ? bots.filter((bot) => !bot.hidden && !bot.chiefOfStaff && bot.id !== chief.id && bot.section?.trim() === team) : [];
 }
 
 /** Unread replies across a project's agents, which the sidebar does not list one by one. */

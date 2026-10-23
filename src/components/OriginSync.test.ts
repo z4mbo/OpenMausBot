@@ -65,6 +65,24 @@ afterEach(() => {
 const render = () => flushSync(() => root.render(createElement(OriginSync)));
 
 describe("Origin sync account isolation", () => {
+  it("reconciles imported workspace and project bots in the same round before React renders their additions", async () => {
+    fixture.workspaces.mockResolvedValue([{ _id: "team", name: "GGs" }]);
+    fixture.projects.mockResolvedValue([{ _id: "project", teamId: "team", name: "Origin" }]);
+    const head = { id: "mac-head", name: "GGs", chiefOfStaff: true, section: "Workspace: GGs" };
+    const chief = { id: "mac-chief", name: "Origin", chiefOfStaff: true, section: "Origin" };
+    const researcher = { id: "mac-researcher", name: "Researcher", title: "Researcher", section: "Origin" };
+    fixture.api.mockImplementation(async (path: string) => {
+      if (path === "/api/origin/cloud-links") return { workspaces: {}, projects: {} };
+      if (path === "/api/origin/import/workspaces") return { bot: head };
+      if (path === "/api/origin/import/projects") return { bot: chief, members: [researcher] };
+      throw new Error(`Unexpected fixture path: ${path}`);
+    });
+    render();
+    await vi.waitFor(() => expect(fixture.sharedRound).toHaveBeenCalledOnce());
+    expect(fixture.sharedRound.mock.calls[0][0].bots).toEqual(expect.arrayContaining([head, chief, researcher]));
+    expect(fixture.state.bots).toEqual([]);
+  });
+
   it("chooses a workspace from the current account when older accounts retain local links", async () => {
     fixture.workspaces.mockResolvedValue([{ _id: "current-team", name: "Current" }]);
     fixture.api.mockResolvedValue({ workspaces: { "old-head": "old-team", "current-head": "current-team" }, projects: {} });

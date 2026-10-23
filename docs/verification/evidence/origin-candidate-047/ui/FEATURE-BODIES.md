@@ -1,0 +1,19 @@
+# Feature body browser fixture
+
+Prepared only under this ignored UI scratch folder. The current 50063 process has not been stopped, restarted or edited by this agent. Root owns activation and CUA. The existing navigation fixture and its original proof remain separate.
+
+To activate in one fresh root-owned launcher copy, preserve the existing launcher and choose new write-once source/fixture receipt names. Add `import {featureBodiesPlugin} from './feature-addon.mjs';`, then put `featureBodiesPlugin(own)` first in the existing `plugins` array, immediately before the `integration046-ui` plugin. Keep all existing route/template and dependency-optimization configuration. Root may then stop only its verified PID74440/session57373 and start that new launcher on the same strict50063 port. No other listener or process is part of this operation.
+
+The addon adds `/__features046.html` and a virtual TSX entry. It supplies the existing cloud virtual module from `feature-cloud.mjs`; the legacy route keeps its original query responses and actual session/url hooks. The new route overrides cloud query/session/url hooks with explicit synthetic data. Its CSP limits connections/media to the fixture origin or local data/blob media, and blocks form submissions. Every cloud mutation/action rejects before network activity. The entry rejects all non-local HTTP and every method except GET/HEAD; the three status endpoints return disconnected synthetic results. No provider credentials, external media, email recipient or real host is involved.
+
+Base: `http://127.0.0.1:50063/__features046.html`. Parameters: `screen=studio|broadcast|pipeline|canvas|org`, `state=data|empty|loading`, `theme=dark|light`, `access=editor|viewer`. `key=ready` is a synthetic Studio readiness flag only; no credential exists and Generate stays intercepted. Leave it absent for the actual missing-key state.
+
+Finite browser actions:
+
+- Studio data: switch Images/Video/Audio filters; use Reuse on the finished local SVG card; switch Image/Video/Audio/Edit composer modes. Missing-key Add key opens the actual Integrations settings; close it without credentials. Empty and Loading use actual body states. A running and failed card are synthetic.
+- Broadcast data: switch Week/List; open the approval-waiting draft and cancel; open New post and cancel. Every channel is disconnected. Do not approve/schedule/publish; such actions are rejected rather than sent.
+- Pipeline data: switch Board/Table; search `Aria`; open that lead and inspect its local note; open New lead, Import CSV or Lead capture and cancel. Contact/plan/send actions are not execution acceptance. The board has an intentional internal horizontal lane scroller; measure document overflow separately.
+- Canvas data: prefer `access=viewer` for read-only inspection. The actual project canvas and editor show a local frame, heading and button; use Layers, Design panel, Zoom and Fit. Empty/Loading exercise the actual canvas-list states. Editor changes would remain in the fixture's own local outbox and cannot sync; uploads/provider/Chief-send/export journeys are not claimed.
+- Org data: inspect the workspace Chief, project Chief and Researcher, including working/approval states and weekly token/cost text. Empty/Loading use the actual Org bodies. It has no mutation control.
+
+Capture the five bodies at375px in both themes, with representative desktop/dialog states if useful. Inspect actual overflow, text, focus, dialogs and controls before claiming any visual result. This setup has only passed syntax/fixture preparation checks; root's browser screenshots and observations establish the visual evidence. It does not prove backend persistence, billing, provider authentication/generation, publishing, outreach, collaborative canvas synchronization or live Org run events.

@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-live-gate-034/Origin
+
+
+ Test Files  14 passed | 1 skipped (15)
+      Tests  283 passed | 17 skipped (300)
+   Start at  23:20:47
+   Duration  12.70s (transform 1.61s, setup 2.17s, import 4.61s, tests 3.65s, environment 1ms)
+

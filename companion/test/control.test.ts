@@ -83,6 +83,9 @@ describe("the per-launch control token", () => {
   it("serves the page itself, which holds no state, without one", async () => {
     const page = await ask("GET", "/", {}, undefined, {});
     expect(page.status).toBe(200);
+    expect(page.body).toContain("<title>Origin Companion</title>");
+    expect(page.body).toContain("<h1>Origin Companion</h1>");
+    expect(page.body).not.toContain("OpenMausBot Companion");
     expect(page.body).toContain("x-openmausbot-control-token");
     expect(page.body).not.toContain(CONTROL_TOKEN);
   });

@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-20T04:55:25.738Z",
+  "headAtStart": "3914e395109a4172e9ca4385bd1c797e2038a36d",
+  "packageVersion": "0.2.16",
+  "platform": "win32",
+  "architecture": "x64",
+  "node": {
+    "version": "v24.21.0",
+    "sha256": "ba4e6d110e8c1592a1ecd390f6b05f3da124b13871a5be62b341a07a853c6c32"
+  },
+  "source": {
+    "count": 3781,
+    "sha256": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+    "manifest": "input-source.json",
+    "excludes": [
+      "docs/**",
+      "**/*.md",
+      ".gitattributes",
+      ".gitignore"
+    ],
+    "trackedOnly": true
+  },
+  "isolation": {
+    "ownedHome": true,
+    "inheritedEnvironment": [
+      "APPDATA",
+      "ComSpec",
+      "HOME",
+      "LOCALAPPDATA",
+      "NODE_OPTIONS",
+      "NO_COLOR",
+      "PATH",
+      "SystemRoot",
+      "TEMP",
+      "TMP",
+      "USERPROFILE",
+      "WINDIR",
+      "XDG_CACHE_HOME",
+      "XDG_CONFIG_HOME",
+      "XDG_DATA_HOME"
+    ],
+    "pathEntries": [
+      "portable-node-directory",
+      "System32"
+    ],
+    "noEnvironmentFilesExceptExample": true,
+    "smokeTempOutsideCheckout": true,
+    "noNodeModulesAncestor": true,
+    "productionDataUsed": false,
+    "protectedPortsTouched": false,
+    "ownedTemporaryRootRemoved": true
+  },
+  "steps": [
+    {
+      "name": "client-typecheck",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "-b"
+      ],
+      "startedAt": "2026-10-20T04:55:26.026Z",
+      "sourceBefore": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "log": "client-typecheck.log",
+      "endedAt": "2026-10-20T04:55:48.243Z",
+      "code": 0,
+      "signal": null,
+      "sourceAfter": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "sourceUnchanged": true,
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "client-vite-build",
+      "args": [
+        "node_modules/vite/bin/vite.js",
+        "build"
+      ],
+      "startedAt": "2026-10-20T04:55:48.493Z",
+      "sourceBefore": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "log": "client-vite-build.log",
+      "endedAt": "2026-10-20T04:56:20.004Z",
+      "code": 0,
+      "signal": null,
+      "sourceAfter": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "sourceUnchanged": true,
+      "logBytes": 72614,
+      "logSha256": "8297a8b6d1b3bd693df039c7474271bb7fb93899a320c0109e71055e7cdac5e9"
+    },
+    {
+      "name": "server-typescript-emit",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.server.build.json"
+      ],
+      "startedAt": "2026-10-20T04:56:20.527Z",
+      "sourceBefore": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "log": "server-typescript-emit.log",
+      "endedAt": "2026-10-20T04:56:31.179Z",
+      "code": 0,
+      "signal": null,
+      "sourceAfter": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "sourceUnchanged": true,
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "server-bundle",
+      "args": [
+        "scripts/bundle-server.mjs"
+      ],
+      "startedAt": "2026-10-20T04:56:31.473Z",
+      "sourceBefore": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "log": "server-bundle.log",
+      "endedAt": "2026-10-20T04:56:32.439Z",
+      "code": 0,
+      "signal": null,
+      "sourceAfter": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "sourceUnchanged": true,
+      "logBytes": 528,
+      "logSha256": "51c8bcb67ee7e2a6793c7e1c135c147d039c5b4d5cae85f9f62c3cd5caf07f73"
+    },
+    {
+      "name": "packaged-server-smoke",
+      "args": [
+        "scripts/smoke-packaged-server.mjs"
+      ],
+      "startedAt": "2026-10-20T04:56:32.927Z",
+      "sourceBefore": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "log": "packaged-server-smoke.log",
+      "endedAt": "2026-10-20T04:56:47.148Z",
+      "code": 0,
+      "signal": null,
+      "sourceAfter": "f797e1a98def2d2a9a14ee367e1164d549aa43b6dd914891095daea5a2669deb",
+      "sourceUnchanged": true,
+      "logBytes": 493,
+      "logSha256": "5543be919b608cbc4a6e45486162744138f1dd639507827533d785224081299a"
+    }
+  ],
+  "limits": [
+    "Build and copied packaged-server Node smoke only; not an installed Electron GUI, real provider, physical macOS, updater or production acceptance."
+  ],
+  "outputs": {
+    "client": {
+      "count": 580,
+      "sha256": "2870e69c430b5580b31417add12a0ecc951de9c5262a4377c64747d9f09f9d96",
+      "manifest": "client-output.json"
+    },
+    "server": {
+      "count": 746,
+      "sha256": "a2025f7ec8f012c6c6a4a540e8e59d998e4c3543505d8f5ec66ec52685277ca9",
+      "manifest": "server-output.json"
+    }
+  },
+  "serverOutputUnchangedAfterSmoke": true,
+  "success": true,
+  "endedAt": "2026-10-20T04:56:47.210Z",
+  "headAtEnd": "3914e395109a4172e9ca4385bd1c797e2038a36d",
+  "sourceUnchanged": true,
+  "retention": {
+    "sanitizedCheckoutAndTemporaryPaths": true,
+    "warningSummary": [
+      "Two generated CSS optimizer warnings for ::highlight pseudo-elements",
+      "origin-cloud/client.ts has both static and dynamic imports; dynamic import does not split it",
+      "Some minified renderer chunks exceed 500 kB"
+    ],
+    "noSourceFixesRequired": true
+  }
+}

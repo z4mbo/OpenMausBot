@@ -1,0 +1,1069 @@
+{
+  "info": {
+    "url": "http://127.0.0.1:21006",
+    "pid": 21640,
+    "dataDir": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\shared-run-lease-035\\fixture-final-temp\\openmausbot-verify-data-x8e2Ey",
+    "logPath": "C:\\Users\\aless\\.codex\\worktrees\\origin-footer-single-row-034\\Origin\\.omb-scratch\\shared-run-lease-035\\fixture-final-temp\\openmausbot-verification-evidence\\server-1792369247324-3144.log"
+  },
+  "success": true,
+  "steps": [
+    {
+      "args": [
+        "doctor"
+      ],
+      "result": {
+        "ok": true,
+        "health": {
+          "status": "connected",
+          "endpoint": "http://127.0.0.1:21006",
+          "app": "openmausbot",
+          "packaged": false
+        },
+        "availableEngines": [
+          "claude"
+        ],
+        "instances": [
+          {
+            "instanceId": "claude",
+            "driverKind": "claudeAgent",
+            "displayName": "Verification fixture",
+            "snapshot": {
+              "state": "available"
+            },
+            "models": {
+              "default": "claude-sonnet-5",
+              "options": [
+                {
+                  "id": "claude-fable-5-1",
+                  "label": "Claude Fable 5.1"
+                },
+                {
+                  "id": "claude-fable-5",
+                  "label": "Claude Fable 5"
+                },
+                {
+                  "id": "claude-opus-5-5",
+                  "label": "Claude Opus 5.5",
+                  "contextWindow": 1000000
+                },
+                {
+                  "id": "claude-opus-5",
+                  "label": "Claude Opus 5"
+                },
+                {
+                  "id": "claude-sonnet-5-5",
+                  "label": "Claude Sonnet 5.5",
+                  "contextWindow": 1000000
+                },
+                {
+                  "id": "claude-sonnet-5",
+                  "label": "Claude Sonnet 5"
+                },
+                {
+                  "id": "claude-haiku-5-5",
+                  "label": "Claude Haiku 5.5",
+                  "contextWindow": 1000000
+                },
+                {
+                  "id": "claude-haiku-4-5",
+                  "label": "Claude Haiku 4.5"
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": true,
+              "browserMcp": true,
+              "images": true,
+              "effortLevels": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": true,
+              "backgroundText": true
+            },
+            "access": "subscription"
+          },
+          {
+            "instanceId": "chatgpt",
+            "driverKind": "codex",
+            "displayName": "ChatGPT plan",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "",
+              "options": []
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": true,
+              "browserMcp": true,
+              "images": true,
+              "effortLevels": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "subscription"
+          },
+          {
+            "instanceId": "cursor",
+            "driverKind": "cursorAgent",
+            "displayName": "Cursor",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "auto",
+              "options": [
+                {
+                  "id": "auto",
+                  "label": "Auto"
+                },
+                {
+                  "id": "composer-2.5",
+                  "label": "Composer 2.5"
+                },
+                {
+                  "id": "composer-2.5-fast",
+                  "label": "Composer 2.5 Fast"
+                },
+                {
+                  "id": "gpt-5.3-codex",
+                  "label": "Codex 5.3"
+                },
+                {
+                  "id": "claude-sonnet-5-thinking-high",
+                  "label": "Claude Sonnet 5 1M Thinking"
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": false,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "subscription"
+          },
+          {
+            "instanceId": "openaiCompat",
+            "driverKind": "openai-compat",
+            "displayName": "Other (OpenAI-compatible)",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "meta-llama/llama-3.3-70b-instruct",
+              "options": [
+                {
+                  "id": "meta-llama/llama-3.3-70b-instruct",
+                  "label": "Llama 3.3 70B (OpenRouter)",
+                  "custom": true
+                },
+                {
+                  "id": "llama-3.3-70b-versatile",
+                  "label": "Llama 3.3 70B (Groq)",
+                  "custom": true
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "api"
+          },
+          {
+            "instanceId": "mistral",
+            "driverKind": "mistral",
+            "displayName": "Mistral (API)",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "mistral-large-latest",
+              "options": [
+                {
+                  "id": "mistral-large-latest",
+                  "label": "Mistral Large (latest)"
+                },
+                {
+                  "id": "mistral-small-latest",
+                  "label": "Mistral Small (latest)"
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": false,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": false,
+              "images": false,
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": false,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "api"
+          },
+          {
+            "instanceId": "cerebras",
+            "driverKind": "cerebras",
+            "displayName": "Cerebras (API)",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "gpt-oss-120b",
+              "options": [
+                {
+                  "id": "gpt-oss-120b",
+                  "label": "GPT OSS 120B",
+                  "contextWindow": 65536
+                },
+                {
+                  "id": "qwen-3.8-27b",
+                  "label": "Qwen3.8 27B",
+                  "contextWindow": 65536
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "api"
+          },
+          {
+            "instanceId": "groq",
+            "driverKind": "groq",
+            "displayName": "Groq (API)",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "openai/gpt-oss-120b",
+              "options": [
+                {
+                  "id": "openai/gpt-oss-120b",
+                  "label": "GPT OSS 120B",
+                  "contextWindow": 131072
+                },
+                {
+                  "id": "openai/gpt-oss-20b",
+                  "label": "GPT OSS 20B",
+                  "contextWindow": 131072
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "api"
+          },
+          {
+            "instanceId": "meta",
+            "driverKind": "meta",
+            "displayName": "Meta Muse (API)",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "muse-wonder-1.0",
+              "options": [
+                {
+                  "id": "muse-wonder-1.0",
+                  "label": "Muse Wonder 1.0",
+                  "contextWindow": 1048576
+                },
+                {
+                  "id": "muse-spark-1.3",
+                  "label": "Muse Spark 1.3",
+                  "contextWindow": 1048576
+                },
+                {
+                  "id": "muse-spark-1.3-contributor",
+                  "label": "Muse Spark 1.3 Contributor",
+                  "contextWindow": 1048576
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "api"
+          },
+          {
+            "instanceId": "museCode",
+            "driverKind": "museCode",
+            "displayName": "Muse Code",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "muse-wonder-1.0",
+              "options": [
+                {
+                  "id": "muse-wonder-1.0",
+                  "label": "Muse Wonder 1.0",
+                  "contextWindow": 1048576
+                },
+                {
+                  "id": "muse-spark-1.3",
+                  "label": "Muse Spark 1.3",
+                  "contextWindow": 1048576
+                },
+                {
+                  "id": "muse-spark-1.2",
+                  "label": "Muse Spark 1.2",
+                  "contextWindow": 1048576
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "effortLevels": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": false
+            },
+            "access": "subscription"
+          },
+          {
+            "instanceId": "openai",
+            "driverKind": "openai-compat",
+            "displayName": "OpenAI",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "gpt-5",
+              "options": [
+                {
+                  "id": "gpt-5",
+                  "label": "gpt-5"
+                },
+                {
+                  "id": "gpt-5-mini",
+                  "label": "gpt-5-mini"
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "api"
+          },
+          {
+            "instanceId": "claudeApi",
+            "driverKind": "claudeAgent",
+            "displayName": "Claude (API key)",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "claude-sonnet-5",
+              "options": [
+                {
+                  "id": "claude-fable-5-1",
+                  "label": "Claude Fable 5.1"
+                },
+                {
+                  "id": "claude-fable-5",
+                  "label": "Claude Fable 5"
+                },
+                {
+                  "id": "claude-opus-5-5",
+                  "label": "Claude Opus 5.5",
+                  "contextWindow": 1000000
+                },
+                {
+                  "id": "claude-opus-5",
+                  "label": "Claude Opus 5"
+                },
+                {
+                  "id": "claude-sonnet-5-5",
+                  "label": "Claude Sonnet 5.5",
+                  "contextWindow": 1000000
+                },
+                {
+                  "id": "claude-sonnet-5",
+                  "label": "Claude Sonnet 5"
+                },
+                {
+                  "id": "claude-haiku-5-5",
+                  "label": "Claude Haiku 5.5",
+                  "contextWindow": 1000000
+                },
+                {
+                  "id": "claude-haiku-4-5",
+                  "label": "Claude Haiku 4.5"
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": true,
+              "browserMcp": true,
+              "images": true,
+              "effortLevels": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": true,
+              "backgroundText": true
+            },
+            "access": "api"
+          },
+          {
+            "instanceId": "xaiApi",
+            "driverKind": "grok",
+            "displayName": "xAI",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "grok-4.7",
+              "options": [
+                {
+                  "id": "grok-4.7",
+                  "label": "Grok 4.7",
+                  "contextWindow": 500000
+                },
+                {
+                  "id": "grok-4",
+                  "label": "Grok 4"
+                },
+                {
+                  "id": "grok-4-fast",
+                  "label": "Grok 4 Fast"
+                },
+                {
+                  "id": "grok-3-mini",
+                  "label": "Grok 3 Mini"
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": false,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": false,
+              "images": false,
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": false,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "api"
+          },
+          {
+            "instanceId": "openrouter",
+            "driverKind": "openai-compat",
+            "displayName": "OpenRouter",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "meta-llama/llama-3.3-70b-instruct",
+              "options": [
+                {
+                  "id": "meta-llama/llama-3.3-70b-instruct",
+                  "label": "Llama 3.3 70B (OpenRouter)",
+                  "custom": true
+                },
+                {
+                  "id": "llama-3.3-70b-versatile",
+                  "label": "Llama 3.3 70B (Groq)",
+                  "custom": true
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "api"
+          },
+          {
+            "instanceId": "qwen",
+            "driverKind": "qwenAgent",
+            "displayName": "Qwen",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "",
+              "options": []
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": false,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "custom"
+          },
+          {
+            "instanceId": "hermes",
+            "driverKind": "hermesAgent",
+            "displayName": "Hermes",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "",
+              "options": []
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": false,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "custom"
+          },
+          {
+            "instanceId": "cline",
+            "driverKind": "clineAgent",
+            "displayName": "Cline",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "cline-default",
+              "options": [
+                {
+                  "id": "cline-default",
+                  "label": "Cline default (configured)"
+                }
+              ]
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": false,
+              "browserMcp": true,
+              "images": true,
+              "modelVariants": false,
+              "queueing": false,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": true
+            },
+            "access": "subscription"
+          },
+          {
+            "instanceId": "pi",
+            "driverKind": "piAgent",
+            "displayName": "pi",
+            "snapshot": {
+              "state": "unavailable"
+            },
+            "models": {
+              "default": "",
+              "options": []
+            },
+            "capabilities": {
+              "computerMcp": true,
+              "agentsMcp": true,
+              "composioMcp": true,
+              "phoneMcp": true,
+              "browserMcp": true,
+              "images": true,
+              "effortLevels": [
+                "none",
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "modelVariants": false,
+              "queueing": true,
+              "localComputerMcp": true,
+              "approvalReview": false,
+              "backgroundText": false
+            },
+            "access": "custom"
+          }
+        ],
+        "server": {
+          "version": "0.2.13",
+          "label": "z4mbo-w11",
+          "environmentId": "78b10b7d-ad3f-4574-8cea-2b3f6f4c76f0",
+          "capabilities": {
+            "remoteSessions": true,
+            "selfUpdate": "operator",
+            "emailSignIn": false,
+            "jobs": true
+          }
+        },
+        "session": {
+          "kind": "loopback",
+          "scopes": [
+            "admin",
+            "client"
+          ]
+        },
+        "browser": {
+          "kind": "unavailable",
+          "reason": "agent-browser is not installed on this machine yet",
+          "installable": true,
+          "myChrome": false
+        },
+        "problems": [],
+        "warnings": [
+          "bots have no built-in browser here: agent-browser is not installed on this machine yet (install it with `pnpm omb browser install`)"
+        ]
+      }
+    },
+    {
+      "args": [
+        "new-bot",
+        "--name",
+        "Lease fixture"
+      ],
+      "result": {
+        "success": true,
+        "bot": {
+          "id": "6294911f-2753-4802-b62b-b362cea5921f",
+          "name": "Lease fixture",
+          "title": "",
+          "description": "",
+          "section": null,
+          "chiefOfStaff": false,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "busy": false,
+          "waitingForTeammates": false,
+          "unread": false,
+          "activeTaskId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+          "tasks": [
+            {
+              "taskId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+              "title": "New thread",
+              "createdAt": 1792369249404,
+              "busy": false,
+              "waitingForTeammates": false,
+              "activity": "idle",
+              "modelSelection": {
+                "instanceId": "claude",
+                "model": "claude-sonnet-5"
+              },
+              "active": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "args": [
+        "send",
+        "--bot",
+        "6294911f-2753-4802-b62b-b362cea5921f",
+        "--task",
+        "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+        "--text",
+        "Verify the isolated lease change fixture"
+      ],
+      "result": {
+        "success": true,
+        "botId": "6294911f-2753-4802-b62b-b362cea5921f",
+        "taskId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+        "messageId": "929a4fc0-97aa-4250-bd33-d0cc94bbeaea",
+        "at": 1792369249418
+      }
+    },
+    {
+      "args": [
+        "wait",
+        "--bot",
+        "6294911f-2753-4802-b62b-b362cea5921f",
+        "--task",
+        "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+        "--timeout",
+        "25"
+      ],
+      "result": {
+        "status": "settled",
+        "state": "completed",
+        "targetType": "bot",
+        "targetId": "6294911f-2753-4802-b62b-b362cea5921f",
+        "taskId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+        "target": {
+          "id": "6294911f-2753-4802-b62b-b362cea5921f",
+          "name": "Lease fixture",
+          "title": "",
+          "description": "",
+          "section": null,
+          "chiefOfStaff": false,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "busy": false,
+          "waitingForTeammates": false,
+          "activity": "idle",
+          "unread": true,
+          "activeTaskId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+          "tasks": [
+            {
+              "taskId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+              "title": "Verify the isolated lease change fixture",
+              "createdAt": 1792369249404,
+              "busy": false,
+              "waitingForTeammates": false,
+              "activity": "idle",
+              "modelSelection": {
+                "instanceId": "claude",
+                "model": "claude-sonnet-5"
+              },
+              "active": true,
+              "usage": {
+                "input": 12,
+                "output": 5,
+                "cachedInput": 2,
+                "costUsd": 0.01,
+                "turns": 1,
+                "lastTurn": {
+                  "input": 12,
+                  "output": 5,
+                  "cachedInput": 2,
+                  "costUsd": 0.01
+                },
+                "context": {
+                  "tokens": 12,
+                  "window": 200000
+                }
+              }
+            }
+          ]
+        },
+        "messages": [
+          {
+            "id": "871ae5e8-f4ce-4aba-945d-81263d8e85ca",
+            "at": 1792369249407,
+            "role": "bot",
+            "kind": "text",
+            "text": "Hi, I'm Lease fixture. What would you like me to do?"
+          },
+          {
+            "id": "929a4fc0-97aa-4250-bd33-d0cc94bbeaea",
+            "at": 1792369249418,
+            "role": "user",
+            "kind": "text",
+            "text": "Verify the isolated lease change fixture"
+          },
+          {
+            "id": "e92487af-1221-4a3c-bda1-9fb7f3f04982",
+            "at": 1792369249596,
+            "role": "bot",
+            "kind": "text",
+            "text": "hello from fake claude"
+          },
+          {
+            "id": "8cf1fa75-f13e-4ade-baee-32d1528b3086",
+            "at": 1792369249597,
+            "role": "bot",
+            "kind": "activity",
+            "tool": {
+              "name": "Bash",
+              "ok": true,
+              "spoken": "running a command"
+            }
+          },
+          {
+            "id": "ca6c5fcc-7de5-4f91-b8a2-6ce2d9b91741",
+            "at": 1792369249620,
+            "role": "bot",
+            "kind": "digest",
+            "text": "[digest] · tools: Bash ×1 (from tool previews) · reply: hello from fake claude"
+          }
+        ],
+        "hasMore": false,
+        "job": {
+          "threadId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+          "scope": "job",
+          "since": 1792369249535,
+          "now": 1792369249780,
+          "state": "completed",
+          "reason": "Lease fixture finished",
+          "version": "YtFXpqhD4iHegLyC",
+          "conversation": {
+            "kind": "bot",
+            "busy": false,
+            "activity": "idle",
+            "queued": 0
+          },
+          "roots": [
+            "4f1ca861-56be-4459-8f8a-e740dcd46210"
+          ],
+          "nodes": [
+            {
+              "id": "4f1ca861-56be-4459-8f8a-e740dcd46210",
+              "rootId": "4f1ca861-56be-4459-8f8a-e740dcd46210",
+              "depth": 0,
+              "botId": "6294911f-2753-4802-b62b-b362cea5921f",
+              "botName": "Lease fixture",
+              "threadId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+              "threadTitle": "Verify the isolated lease change fixture",
+              "status": "completed",
+              "outcome": "done",
+              "mode": "work",
+              "reply": "resume",
+              "awaited": true,
+              "createdAt": 1792369249423,
+              "startedAt": 1792369249423,
+              "finishedAt": 1792369249602,
+              "executions": 1,
+              "result": "hello from fake claude"
+            }
+          ],
+          "hidden": 0,
+          "counts": {
+            "queued": 0,
+            "running": 0,
+            "waiting": 0,
+            "needsInput": 0,
+            "completed": 1,
+            "failed": 0,
+            "cancelled": 0
+          },
+          "needsInput": []
+        }
+      }
+    },
+    {
+      "args": [
+        "messages",
+        "--bot",
+        "6294911f-2753-4802-b62b-b362cea5921f",
+        "--task",
+        "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+        "--limit",
+        "50"
+      ],
+      "result": {
+        "bot": {
+          "id": "6294911f-2753-4802-b62b-b362cea5921f",
+          "name": "Lease fixture",
+          "title": "",
+          "description": "",
+          "section": null,
+          "chiefOfStaff": false,
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "busy": false,
+          "waitingForTeammates": false,
+          "activity": "idle",
+          "unread": true,
+          "activeTaskId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+          "tasks": [
+            {
+              "taskId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+              "title": "Verify the isolated lease change fixture",
+              "createdAt": 1792369249404,
+              "busy": false,
+              "waitingForTeammates": false,
+              "activity": "idle",
+              "modelSelection": {
+                "instanceId": "claude",
+                "model": "claude-sonnet-5"
+              },
+              "active": true,
+              "usage": {
+                "input": 12,
+                "output": 5,
+                "cachedInput": 2,
+                "costUsd": 0.01,
+                "turns": 1,
+                "lastTurn": {
+                  "input": 12,
+                  "output": 5,
+                  "cachedInput": 2,
+                  "costUsd": 0.01
+                },
+                "context": {
+                  "tokens": 12,
+                  "window": 200000
+                }
+              }
+            }
+          ]
+        },
+        "taskId": "ddf74fec-52c6-4edb-8f2e-1432bd265229",
+        "messages": [
+          {
+            "id": "871ae5e8-f4ce-4aba-945d-81263d8e85ca",
+            "at": 1792369249407,
+            "role": "bot",
+            "kind": "text",
+            "text": "Hi, I'm Lease fixture. What would you like me to do?"
+          },
+          {
+            "id": "929a4fc0-97aa-4250-bd33-d0cc94bbeaea",
+            "at": 1792369249418,
+            "role": "user",
+            "kind": "text",
+            "text": "Verify the isolated lease change fixture"
+          },
+          {
+            "id": "e92487af-1221-4a3c-bda1-9fb7f3f04982",
+            "at": 1792369249596,
+            "role": "bot",
+            "kind": "text",
+            "text": "hello from fake claude"
+          },
+          {
+            "id": "8cf1fa75-f13e-4ade-baee-32d1528b3086",
+            "at": 1792369249597,
+            "role": "bot",
+            "kind": "activity",
+            "tool": {
+              "name": "Bash",
+              "ok": true,
+              "spoken": "running a command"
+            }
+          },
+          {
+            "id": "ca6c5fcc-7de5-4f91-b8a2-6ce2d9b91741",
+            "at": 1792369249620,
+            "role": "bot",
+            "kind": "digest",
+            "text": "[digest] · tools: Bash ×1 (from tool previews) · reply: hello from fake claude"
+          }
+        ],
+        "hasMore": false
+      }
+    }
+  ]
+}

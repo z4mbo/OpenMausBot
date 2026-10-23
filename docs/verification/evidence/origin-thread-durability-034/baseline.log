@@ -1,0 +1,636 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin
+
+ ❯ server/store-durability.test.ts (17 tests | 14 failed) 4337ms
+     × restores edited fields, active mirrors and unread state in place 235ms
+     × does not apply an unsaved new thread 249ms
+     × does not apply an unsaved thread switch 236ms
+     × does not apply an unsaved folder pin 236ms
+     × does not apply an unsaved opener 237ms
+     × does not apply an unsaved closer 235ms
+     × does not apply an unsaved first title 236ms
+     × never activates a failed permission widening {"approvalMode":"full"} 246ms
+     × never activates a failed permission widening {"alwaysAllow":["Read","Bash"]} 233ms
+     × retains an approval revocation while rolling back an unrelated failed edit 251ms
+     × retains the narrower part of a mixed approval change without its new allow-list grant 250ms
+     × does not treat a custom provider policy as broader than Full access 234ms
+     × does not widen an inherited allow-list while retaining its requested removals 262ms
+     × keeps deleted conversations, queued work and event files when bots.json cannot be saved 239ms
+ ❯ server/store-durability-http.e2e.test.ts (4 tests | 4 failed) 3919ms
+     × rejects a rename without publishing it 358ms
+     × rejects new conversations without exposing an unsaved task 373ms
+     × cannot activate Full access after reporting that its save failed 386ms
+     × retains a real fake-engine conversation after a failed delete, then permits a successful retry 838ms
+
+ Test Files  2 failed (2)
+      Tests  18 failed | 3 passed (21)
+   Start at  23:38:44
+   Duration  10.64s (transform 656ms, setup 650ms, import 1.40s, tests 8.26s, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 18 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/store-durability-http.e2e.test.ts > registered task routes with an unwritable bots.json > rejects a rename without publishing it
+AssertionError: expected 'Unsaved HTTP rename' to be 'New thread' // Object.is equality
+
+Expected: "New thread"
+Received: "Unsaved HTTP rename"
+
+ ❯ server/store-durability-http.e2e.test.ts:40:81
+     38|     const result = await blockedSave(() => api("PATCH", path, { title:…
+     39|     expect(result.status).toBe(500);
+     40|     expect((await bots()).find(entry => entry.id === bot.id)!.tasks![0…
+       |                                                                                 ^
+     41|     expect(result.body.error).toContain("Couldn't save the conversatio…
+     42|     expect(result.body.error).not.toContain(fixture.info.dataDir);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/18]⎯
+
+ FAIL  server/store-durability-http.e2e.test.ts > registered task routes with an unwritable bots.json > rejects new conversations without exposing an unsaved task
+AssertionError: expected '8ece350c-7d43-41fa-9983-bbc3a8d7e52b' to be '6af4d52e-da57-4e19-9f3c-d48006ea7f59' // Object.is equality
+
+Expected: "6af4d52e-da57-4e19-9f3c-d48006ea7f59"
+Received: "8ece350c-7d43-41fa-9983-bbc3a8d7e52b"
+
+ ❯ server/store-durability-http.e2e.test.ts:50:30
+     48|     expect((await blockedSave(() => api("POST", path, { title: "Unsave…
+     49|     const current = (await bots()).find(entry => entry.id === bot.id)!;
+     50|     expect(current.threadId).toBe(original.threadId);
+       |                              ^
+     51|     expect(current.tasks).toEqual(original.tasks);
+     52|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/18]⎯
+
+ FAIL  server/store-durability-http.e2e.test.ts > registered task routes with an unwritable bots.json > cannot activate Full access after reporting that its save failed
+AssertionError: expected 'full' to be 'ask' // Object.is equality
+
+Expected: "ask"
+Received: "full"
+
+ ❯ server/store-durability-http.e2e.test.ts:58:88
+     56|     expect((await api("PATCH", path, { approvalMode: "ask" })).status)…
+     57|     expect((await blockedSave(() => api("PATCH", path, { approvalMode:…
+     58|     expect((await bots()).find(entry => entry.id === bot.id)!.tasks![0…
+       |                                                                                        ^
+     59|   });
+     60|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/18]⎯
+
+ FAIL  server/store-durability-http.e2e.test.ts > registered task routes with an unwritable bots.json > retains a real fake-engine conversation after a failed delete, then permits a successful retry
+AssertionError: expected undefined to deeply equal [ { …(6) }, { …(8) }, { …(11) }, …(2) ]
+
+- Expected:
+[
+  {
+    "at": 1792359534544,
+    "id": "23f4a244-051d-4283-aa17-c50c2eff46c2",
+    "kind": "text",
+    "parentId": null,
+    "role": "bot",
+    "text": "Hi, I'm Ivy. What would you like me to do?",
+  },
+  {
+    "at": 1792359534604,
+    "id": "f28d8ab7-0606-4c63-903d-34d1929ac03c",
+    "kind": "text",
+    "parentId": "23f4a244-051d-4283-aa17-c50c2eff46c2",
+    "requestPending": false,
+    "role": "user",
+    "sendId": "cli-mX3cpywmxWWLBBKb",
+    "text": "Retain this isolated conversation",
+  },
+  {
+    "at": 1792359534814,
+    "id": "d40c9af8-b5d1-4229-983f-5a15867129f4",
+    "kind": "text",
+    "parentId": "f28d8ab7-0606-4c63-903d-34d1929ac03c",
+    "requestMessageId": "f28d8ab7-0606-4c63-903d-34d1929ac03c",
+    "role": "bot",
+    "text": "hello from fake claude",
+    "turnCompletedAt": 1792359534828,
+    "turnId": "b358e402-d02a-4744-bec1-ced3f68957b3",
+    "turnSucceeded": true,
+    "turnTerminal": true,
+  },
+  {
+    "at": 1792359534815,
+    "id": "576a3be3-bb66-446d-ae34-337854ee2594",
+    "kind": "activity",
+    "parentId": "d40c9af8-b5d1-4229-983f-5a15867129f4",
+    "requestMessageId": "f28d8ab7-0606-4c63-903d-34d1929ac03c",
+    "role": "bot",
+    "tool": {
+      "input": "{
+  \"command\": \"echo hi\"
+}",
+      "itemId": "tu-2136-1",
+      "name": "Bash",
+      "ok": true,
+      "output": "[
+  {
+    \"type\": \"text\",
+    \"text\": \"hi\"
+  }
+]",
+      "spoken": "running a command",
+      "summary": "echo hi",
+    },
+    "turnId": "b358e402-d02a-4744-bec1-ced3f68957b3",
+  },
+  {
+    "at": 1792359534837,
+    "digest": {
+      "at": 1792359534837,
+      "botId": "e685ca04-5c1c-4c36-a0ad-753117d82d01",
+      "durationMs": 91,
+      "hookCoverage": "preview",
+      "memory": [],
+      "reply": "hello from fake claude",
+      "threadId": "7bb8f034-b03e-4b1f-b97e-d7a7dfffdaf1",
+      "toolCalls": 1,
+      "tools": [
+        {
+          "count": 1,
+          "failed": 0,
+          "name": "Bash",
+          "sample": "echo hi",
+        },
+      ],
+      "turnId": "b358e402-d02a-4744-bec1-ced3f68957b3",
+      "usage": {
+        "cachedInput": 2,
+        "costUsd": 0.01,
+        "input": 12,
+        "output": 5,
+      },
+    },
+    "id": "7b62087c-f04f-490b-9dbb-3f301581d159",
+    "kind": "digest",
+    "parentId": "576a3be3-bb66-446d-ae34-337854ee2594",
+    "requestMessageId": "f28d8ab7-0606-4c63-903d-34d1929ac03c",
+    "role": "bot",
+    "text": "[digest] · tools: Bash ×1 (from tool previews) · reply: hello from fake claude",
+    "turnId": "b358e402-d02a-4744-bec1-ced3f68957b3",
+    "turnSucceeded": true,
+  },
+]
+
++ Received:
+undefined
+
+ ❯ server/store-durability-http.e2e.test.ts:70:42
+     68|     expect(original.some(message => message.role === "bot" && message.…
+     69|     expect((await blockedSave(() => api("DELETE", path))).status).toBe…
+     70|     expect(await messages(bot.threadId)).toEqual(original);
+       |                                          ^
+     71|     expect((await bots()).find(entry => entry.id === bot.id)!.tasks!.s…
+     72|     expect((await api("DELETE", path)).status).toBe(200);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > restores edited fields, active mirrors and unread state in place
+AssertionError: expected { …(16) } to deeply equal { …(16) }
+
+- Expected
++ Received
+
+@@ -7,13 +7,13 @@
+      "instanceId": "claude",
+      "model": "fixture",
+    },
+    "name": "Plum",
+    "notifications": true,
+-   "pinnedMessageId": undefined,
++   "pinnedMessageId": "unsaved-pin",
+    "resumeCursors": {
+-     "claude": "second-session",
++     "claude": "unsaved-session",
+    },
+    "rewound": undefined,
+    "soul": "",
+    "soulHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks": [
+@@ -22,16 +22,17 @@
+        "alwaysAllow": [],
+        "approvalMode": "full",
+        "autoApprove": false,
+        "busy": false,
+        "createdAt": 1792359525796,
++       "pinnedMessageId": "unsaved-pin",
+        "resumeCursors": {
+-         "claude": "second-session",
++         "claude": "unsaved-session",
+        },
+        "threadId": "21e5c84b-da7e-4536-9b74-6fed1e5c9b91",
+-       "title": "New thread",
+-       "unread": false,
++       "title": "Unsaved rename",
++       "unread": true,
+        "updatedAt": 1792359525796,
+      },
+      {
+        "activity": "idle",
+        "busy": false,
+@@ -45,7 +46,7 @@
+        "updatedAt": 1792359525788,
+      },
+    ],
+    "threadId": "21e5c84b-da7e-4536-9b74-6fed1e5c9b91",
+    "title": "",
+-   "unread": false,
++   "unread": true,
+  }
+
+ ❯ server/store-durability.test.ts:43:17
+     41|     const original = structuredClone(bot), tasks = bot.tasks;
+     42|     blockedSave(() => store.patchTask(bot.id, second.threadId, { title…
+     43|     expect(bot).toEqual(original);
+       |                 ^
+     44|     expect(bot.tasks).toBe(tasks);
+     45|     expect(store.taskByThread(bot.id, second.threadId)).toBe(second);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > does not apply an unsaved new thread
+AssertionError: expected { …(16) } to deeply equal { …(16) }
+
+- Expected
++ Received
+
+@@ -8,23 +8,34 @@
+      "model": "fixture",
+    },
+    "name": "Finch",
+    "notifications": true,
+    "pinnedMessageId": undefined,
+-   "resumeCursors": {
+-     "claude": "second-session",
+-   },
++   "resumeCursors": {},
+    "rewound": undefined,
+    "soul": "",
+    "soulHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks": [
+      {
+        "activity": "idle",
+        "alwaysAllow": [],
+        "approvalMode": "full",
+        "autoApprove": false,
+        "busy": false,
++       "createdAt": 1792359526051,
++       "resumeCursors": {},
++       "threadId": "6b2e6d2d-7042-4dde-8472-3fbeb49d917e",
++       "title": "Unsaved thread",
++       "unread": false,
++       "updatedAt": 1792359526051,
++     },
++     {
++       "activity": "idle",
++       "alwaysAllow": [],
++       "approvalMode": "full",
++       "autoApprove": false,
++       "busy": false,
+        "createdAt": 1792359526030,
+        "resumeCursors": {
+          "claude": "second-session",
+        },
+        "threadId": "0b45cb36-37ca-4a3c-b290-5b9eb61e70dd",
+@@ -43,9 +54,9 @@
+        "title": "New thread",
+        "unread": false,
+        "updatedAt": 1792359526022,
+      },
+    ],
+-   "threadId": "0b45cb36-37ca-4a3c-b290-5b9eb61e70dd",
++   "threadId": "6b2e6d2d-7042-4dde-8472-3fbeb49d917e",
+    "title": "",
+    "unread": false,
+  }
+
+ ❯ server/store-durability.test.ts:59:25
+     57|     const fixture = twoThreads(), original = structuredClone(fixture.b…
+     58|     blockedSave(() => change(fixture));
+     59|     expect(fixture.bot).toEqual(original);
+       |                         ^
+     60|     expect(fixture.bot.tasks).toBe(tasks);
+     61|     expect(fixture.changed).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > does not apply an unsaved thread switch
+AssertionError: expected { …(16) } to deeply equal { …(16) }
+
+- Expected
++ Received
+
+@@ -9,11 +9,11 @@
+    },
+    "name": "Tango",
+    "notifications": true,
+    "pinnedMessageId": undefined,
+    "resumeCursors": {
+-     "claude": "second-session",
++     "claude": "first-session",
+    },
+    "rewound": undefined,
+    "soul": "",
+    "soulHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks": [
+@@ -43,9 +43,9 @@
+        "title": "New thread",
+        "unread": false,
+        "updatedAt": 1792359526270,
+      },
+    ],
+-   "threadId": "9b3f3189-74e3-4fa3-a5cd-8b0d2a0ba51f",
++   "threadId": "52d1a249-4697-410e-b3e7-b0cd5fe9eed9",
+    "title": "",
+    "unread": false,
+  }
+
+ ❯ server/store-durability.test.ts:59:25
+     57|     const fixture = twoThreads(), original = structuredClone(fixture.b…
+     58|     blockedSave(() => change(fixture));
+     59|     expect(fixture.bot).toEqual(original);
+       |                         ^
+     60|     expect(fixture.bot.tasks).toBe(tasks);
+     61|     expect(fixture.changed).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > does not apply an unsaved folder pin
+AssertionError: expected { …(16) } to deeply equal { …(16) }
+
+- Expected
++ Received
+
+@@ -22,10 +22,11 @@
+        "alwaysAllow": [],
+        "approvalMode": "full",
+        "autoApprove": false,
+        "busy": false,
+        "createdAt": 1792359526514,
++       "cwd": null,
+        "resumeCursors": {
+          "claude": "second-session",
+        },
+        "threadId": "88814d46-7c81-4f0a-95c0-06be1db45754",
+        "title": "New thread",
+
+ ❯ server/store-durability.test.ts:59:25
+     57|     const fixture = twoThreads(), original = structuredClone(fixture.b…
+     58|     blockedSave(() => change(fixture));
+     59|     expect(fixture.bot).toEqual(original);
+       |                         ^
+     60|     expect(fixture.bot.tasks).toBe(tasks);
+     61|     expect(fixture.changed).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > does not apply an unsaved opener
+AssertionError: expected { …(16) } to deeply equal { …(16) }
+
+- Expected
++ Received
+
+@@ -22,10 +22,16 @@
+        "alwaysAllow": [],
+        "approvalMode": "full",
+        "autoApprove": false,
+        "busy": false,
+        "createdAt": 1792359526750,
++       "openedBy": {
++         "at": 1,
++         "botId": "chief",
++         "kind": "work",
++         "name": "Fixture Chief",
++       },
+        "resumeCursors": {
+          "claude": "second-session",
+        },
+        "threadId": "ef9950e3-65b1-4c28-8222-5481f07ee425",
+        "title": "New thread",
+
+ ❯ server/store-durability.test.ts:59:25
+     57|     const fixture = twoThreads(), original = structuredClone(fixture.b…
+     58|     blockedSave(() => change(fixture));
+     59|     expect(fixture.bot).toEqual(original);
+       |                         ^
+     60|     expect(fixture.bot.tasks).toBe(tasks);
+     61|     expect(fixture.changed).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > does not apply an unsaved closer
+AssertionError: expected { …(16) } to deeply equal { …(16) }
+
+- Expected
++ Received
+
+@@ -21,10 +21,15 @@
+        "activity": "idle",
+        "alwaysAllow": [],
+        "approvalMode": "full",
+        "autoApprove": false,
+        "busy": false,
++       "closedBy": {
++         "at": 1,
++         "botId": "chief",
++         "name": "Fixture Chief",
++       },
+        "createdAt": 1792359526986,
+        "resumeCursors": {
+          "claude": "second-session",
+        },
+        "threadId": "df0707e7-59bc-4a0a-8f85-36fcda69b53c",
+
+ ❯ server/store-durability.test.ts:59:25
+     57|     const fixture = twoThreads(), original = structuredClone(fixture.b…
+     58|     blockedSave(() => change(fixture));
+     59|     expect(fixture.bot).toEqual(original);
+       |                         ^
+     60|     expect(fixture.bot.tasks).toBe(tasks);
+     61|     expect(fixture.changed).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > does not apply an unsaved first title
+AssertionError: expected { …(16) } to deeply equal { …(16) }
+
+- Expected
++ Received
+
+@@ -26,11 +26,12 @@
+        "createdAt": 1792359527223,
+        "resumeCursors": {
+          "claude": "second-session",
+        },
+        "threadId": "349343e6-5d85-4f0e-9b02-933cbff6a43a",
+-       "title": "New thread",
++       "title": "Unsaved first title",
++       "titleFromFirstMessage": true,
+        "unread": false,
+        "updatedAt": 1792359527223,
+      },
+      {
+        "activity": "idle",
+
+ ❯ server/store-durability.test.ts:59:25
+     57|     const fixture = twoThreads(), original = structuredClone(fixture.b…
+     58|     blockedSave(() => change(fixture));
+     59|     expect(fixture.bot).toEqual(original);
+       |                         ^
+     60|     expect(fixture.bot.tasks).toBe(tasks);
+     61|     expect(fixture.changed).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > never activates a failed permission widening {"approvalMode":"full"}
+AssertionError: expected 'full' to be 'ask' // Object.is equality
+
+Expected: "ask"
+Received: "full"
+
+ ❯ server/store-durability.test.ts:71:80
+     69|     store.patchTask(bot.id, second.threadId, { approvalMode: "ask", au…
+     70|     blockedSave(() => store.patchTask(bot.id, second.threadId, patch));
+     71|     expect(approvalModeFor(store.projectBotForTask(bot.id, second.thre…
+       |                                                                                ^
+     72|     expect(second.alwaysAllow).toEqual(["Read"]);
+     73|     expect(new Store(selection).taskByThread(bot.id, second.threadId)?…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > never activates a failed permission widening {"alwaysAllow":["Read","Bash"]}
+AssertionError: expected [ 'Read', 'Bash' ] to deeply equal [ 'Read' ]
+
+- Expected
++ Received
+
+  [
+    "Read",
++   "Bash",
+  ]
+
+ ❯ server/store-durability.test.ts:72:32
+     70|     blockedSave(() => store.patchTask(bot.id, second.threadId, patch));
+     71|     expect(approvalModeFor(store.projectBotForTask(bot.id, second.thre…
+     72|     expect(second.alwaysAllow).toEqual(["Read"]);
+       |                                ^
+     73|     expect(new Store(selection).taskByThread(bot.id, second.threadId)?…
+     74|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > retains an approval revocation while rolling back an unrelated failed edit
+AssertionError: expected { …(11) } to match object { approvalMode: 'ask', …(3) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+@@ -2,7 +2,7 @@
+    "alwaysAllow": [
+      "Read",
+    ],
+    "approvalMode": "ask",
+    "autoApprove": false,
+-   "title": "New thread",
++   "title": "Unsaved rename",
+  }
+
+ ❯ server/store-durability.test.ts:81:20
+     79|     const title = second.title;
+     80|     blockedSave(() => store.patchTask(bot.id, second.threadId, { appro…
+     81|     expect(second).toMatchObject({ approvalMode: "ask", autoApprove: f…
+       |                    ^
+     82|     expect(new Store(selection).taskByThread(bot.id, second.threadId)?…
+     83|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > retains the narrower part of a mixed approval change without its new allow-list grant
+AssertionError: expected { …(11) } to match object { approvalMode: 'ask', …(2) }
+(9 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "alwaysAllow": [
+      "Read",
++     "Bash",
+    ],
+    "approvalMode": "ask",
+    "autoApprove": false,
+  }
+
+ ❯ server/store-durability.test.ts:89:20
+     87|     store.patchTask(bot.id, second.threadId, { approvalMode: "full", a…
+     88|     blockedSave(() => store.patchTask(bot.id, second.threadId, { appro…
+     89|     expect(second).toMatchObject({ approvalMode: "ask", autoApprove: f…
+       |                    ^
+     90|   });
+     91|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > does not treat a custom provider policy as broader than Full access
+AssertionError: expected 'full' to be 'custom' // Object.is equality
+
+Expected: "custom"
+Received: "full"
+
+ ❯ server/store-durability.test.ts:96:33
+     94|     store.patchTask(bot.id, second.threadId, { approvalMode: "custom",…
+     95|     blockedSave(() => store.patchTask(bot.id, second.threadId, { appro…
+     96|     expect(second.approvalMode).toBe("custom");
+       |                                 ^
+     97|   });
+     98|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > does not widen an inherited allow-list while retaining its requested removals
+AssertionError: expected [ 'Read', 'Write' ] to deeply equal [ 'Read' ]
+
+- Expected
++ Received
+
+  [
+    "Read",
++   "Write",
+  ]
+
+ ❯ server/store-durability.test.ts:104:75
+    102|     store.patchTask(bot.id, second.threadId, { alwaysAllow: undefined …
+    103|     blockedSave(() => store.patchTask(bot.id, second.threadId, { alway…
+    104|     expect(store.projectBotForTask(bot.id, second.threadId)?.alwaysAll…
+       |                                                                           ^
+    105|   });
+    106|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/18]⎯
+
+ FAIL  server/store-durability.test.ts > thread changes when the real bots.json replacement fails > keeps deleted conversations, queued work and event files when bots.json cannot be saved
+AssertionError: expected [] to deeply equal [ 'Keep the synthetic conversation' ]
+
+- Expected
++ Received
+
+- [
+-   "Keep the synthetic conversation",
+- ]
++ []
+
+ ❯ server/store-durability.test.ts:123:83
+    121|     changed.mockClear();
+    122|     blockedSave(() => store.deleteTasks(bot.id, [second.threadId]));
+    123|     expect(readThread(second.threadId, "").messages.map(message => mes…
+       |                                                                                   ^
+    124|     expect(chatFollowups().map(message => message.id)).toContain("fixt…
+    125|     expect(readFileSync(eventFile, "utf8")).toBe("{}\n");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/18]⎯

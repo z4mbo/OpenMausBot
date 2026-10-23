@@ -1,0 +1,22 @@
+{
+  "version": "0.4.2",
+  "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+  "recordedAt": "2026-10-20T09:48:10.025Z",
+  "status": "HELD_CONCURRENT_0_5_SOURCE",
+  "reason": "Production website changed to a different image while 0.4.2 was verified; 321 inspected existing source files match concurrent 0.5.0 commit. Release owner/source freeze is required before integration or publication.",
+  "currentImageObserved": "sha256:a70d46e9fa00195b221e68a0a194cf4399ee92ae8cd4ead97891fc7713f6a767",
+  "concurrentSource": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+  "sourceComparisonSha256": "f515e9484c2574f3944d827bdb132b903a0eb66a7a1e2ea8f35977bbe74383a6",
+  "applicationProductionMutationsByThisCandidate": false,
+  "backendKeyCreated": false,
+  "backendExported": false,
+  "backendDeployed": false,
+  "githubDraftOrAssetsCreated": false,
+  "downloadsOrFeedsPromoted": false,
+  "sitePromoted": false,
+  "privateSiteBuildCompleted": true,
+  "privateSiteBrowserAccepted": false,
+  "packageAuditPassed": true,
+  "nativeReceiptSha256": "1bc70ee4d5387e8a3e5c9fc896f9291a4e430bf230f59794fcb0420f91aab938",
+  "ownerQuestionPending": true
+}

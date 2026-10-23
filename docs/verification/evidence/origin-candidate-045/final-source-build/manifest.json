@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-20T04:57:26.740Z",
+  "entries": [
+    {
+      "path": "client-output.json",
+      "bytes": 112027,
+      "sha256": "b642b107f7860b7c482b36a01f64b63c1c03f7463c2870188bf881c8d7abc292"
+    },
+    {
+      "path": "client-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "client-vite-build.log",
+      "bytes": 72614,
+      "sha256": "8297a8b6d1b3bd693df039c7474271bb7fb93899a320c0109e71055e7cdac5e9"
+    },
+    {
+      "path": "input-source.json",
+      "bytes": 632140,
+      "sha256": "601ef6729f3aeb6ba42cc3c4acc6072330de68121898803a9a31806a1ef8591a"
+    },
+    {
+      "path": "packaged-server-smoke.log",
+      "bytes": 493,
+      "sha256": "5543be919b608cbc4a6e45486162744138f1dd639507827533d785224081299a"
+    },
+    {
+      "path": "receipt.json",
+      "bytes": 5472,
+      "sha256": "3acec579ea70ae5c34390e414fbb7c729de75de603e6e8ad154828cce5c6d47c"
+    },
+    {
+      "path": "run-final-build.cjs",
+      "bytes": 8348,
+      "sha256": "e1bebf5d10be9ff04b6f2664d28c91531c4c8ac66674cf43ed5e81003c86f285"
+    },
+    {
+      "path": "server-bundle.log",
+      "bytes": 528,
+      "sha256": "51c8bcb67ee7e2a6793c7e1c135c147d039c5b4d5cae85f9f62c3cd5caf07f73"
+    },
+    {
+      "path": "server-output.json",
+      "bytes": 128648,
+      "sha256": "f10a28c9067af8ed1d3e44e24b9fac403807262c9f864f4cb1f408eee444d595"
+    },
+    {
+      "path": "server-typescript-emit.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

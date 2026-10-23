@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { featureTables } from "./featureTables";
 import { agentAttribution, agentsTables } from "./agentsTables";
 import { realtimeTables } from "./realtimeTables";
+import { modelHostsTables } from "./modelHostsTables";
 import { broadcastTables } from "./broadcastTables";
 import { campaignTables } from "./campaignTables";
 import { pipelineTables } from "./pipelineTables";
@@ -37,6 +38,7 @@ export default defineSchema({
   ...featureTables,
   ...agentsTables,
   ...realtimeTables,
+  ...modelHostsTables,
   ...broadcastTables,
   ...campaignTables,
   ...pipelineTables,

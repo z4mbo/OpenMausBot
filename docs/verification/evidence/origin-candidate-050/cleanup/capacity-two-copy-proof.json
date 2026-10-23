@@ -1,0 +1,2987 @@
+{
+  "capturedAt": "2026-10-21T04:18:04.020860+00:00",
+  "mode": "read-only three-private-cache two-independent-copy proof",
+  "diskAvailableBytes": 702484480,
+  "hypotheticalAvailableAfterAllThree": 6546276352,
+  "candidates": [
+    {
+      "version": "0.2.8",
+      "folder": "0.2.8",
+      "privateDirectory": "/root/origin-release-staging/0.2.8/downloads",
+      "directoryIdentity": [
+        2049,
+        267072,
+        16877,
+        4096,
+        2,
+        "1792323293449730910",
+        "1792323293449730910"
+      ],
+      "directoryEntries": {
+        "Origin-0.2.8-arm64.dmg": [
+          2049,
+          267073,
+          33188,
+          317885691,
+          1,
+          "1792323160778859313",
+          "1792323160778859313"
+        ],
+        "Origin-0.2.8-arm64.dmg.blockmap": [
+          2049,
+          267078,
+          33188,
+          332101,
+          1,
+          "1792323160966864809",
+          "1792323160966864809"
+        ],
+        "Origin-0.2.8-arm64.zip": [
+          2049,
+          267079,
+          33188,
+          318259957,
+          1,
+          "1792323193139804801",
+          "1792323193139804801"
+        ],
+        "Origin-0.2.8-arm64.zip.blockmap": [
+          2049,
+          267080,
+          33188,
+          331204,
+          1,
+          "1792323193378811781",
+          "1792323193378811781"
+        ],
+        "Origin-0.2.8-setup.exe": [
+          2049,
+          267081,
+          33188,
+          269467399,
+          1,
+          "1792323215079445373",
+          "1792323215079445373"
+        ],
+        "Origin-0.2.8-setup.exe.blockmap": [
+          2049,
+          267082,
+          33188,
+          278311,
+          1,
+          "1792323215243450160",
+          "1792323215243450160"
+        ],
+        "Origin-0.2.8-windows-x64.zip": [
+          2049,
+          267083,
+          33188,
+          370043909,
+          1,
+          "1792323240844197200",
+          "1792323240844197200"
+        ],
+        "Origin-0.2.8-x64.dmg": [
+          2049,
+          267085,
+          33188,
+          335000079,
+          1,
+          "1792323267591977247",
+          "1792323267591977247"
+        ],
+        "Origin-0.2.8-x64.dmg.blockmap": [
+          2049,
+          267087,
+          33188,
+          350230,
+          1,
+          "1792323267755982028",
+          "1792323267755982028"
+        ],
+        "Origin-0.2.8-x64.zip": [
+          2049,
+          267089,
+          33188,
+          335587576,
+          1,
+          "1792323292772711182",
+          "1792323292772711182"
+        ],
+        "Origin-0.2.8-x64.zip.blockmap": [
+          2049,
+          267090,
+          33188,
+          347530,
+          1,
+          "1792323292961716690",
+          "1792323292961716690"
+        ],
+        "SHA256SUMS-0.2.8.txt": [
+          2049,
+          267092,
+          33188,
+          1180,
+          1,
+          "1792323293096720624",
+          "1792323293096720624"
+        ],
+        "latest-mac.yml": [
+          2049,
+          267095,
+          33188,
+          1540,
+          1,
+          "1792323293231724558",
+          "1792323293231724558"
+        ],
+        "latest.yml": [
+          2049,
+          267096,
+          33188,
+          1087,
+          1,
+          "1792323293367728521",
+          "1792323293367728521"
+        ],
+        "release-manifest-0.2.8.json": [
+          2049,
+          267099,
+          33188,
+          2244,
+          1,
+          "1792323293502732454",
+          "1792323293502732454"
+        ]
+      },
+      "files": [
+        {
+          "name": "Origin-0.2.8-arm64.dmg",
+          "bytes": 317885691,
+          "sha256": "a465ee462fd47e127e8ae1621d84660f54e117ebe906378a3104c29332bf2fb1",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-arm64.dmg",
+          "private": {
+            "device": 2049,
+            "inode": 267073,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 317885691,
+            "allocatedBytes": 317890560,
+            "mtimeNs": "1792323160778859313",
+            "ctimeNs": "1792323160778859313"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-arm64.dmg",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-arm64.dmg.blockmap",
+          "bytes": 332101,
+          "sha256": "0e6b7d7e96922f8871a1d30f7abf8b6260f2473ab4d6fb58d241da36256e8feb",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-arm64.dmg.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267078,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 332101,
+            "allocatedBytes": 335872,
+            "mtimeNs": "1792323160966864809",
+            "ctimeNs": "1792323160966864809"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-arm64.dmg.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-arm64.zip",
+          "bytes": 318259957,
+          "sha256": "a6dfd2f988d401400675f9ece9c6a5100621d51e90f183c41ddbb2e18b469eed",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-arm64.zip",
+          "private": {
+            "device": 2049,
+            "inode": 267079,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 318259957,
+            "allocatedBytes": 318267392,
+            "mtimeNs": "1792323193139804801",
+            "ctimeNs": "1792323193139804801"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-arm64.zip",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-arm64.zip.blockmap",
+          "bytes": 331204,
+          "sha256": "ec07adfe3873c466aa79bbbaf5a3471e037caf60b778c90fa1167b6115ce39b0",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-arm64.zip.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267080,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 331204,
+            "allocatedBytes": 331776,
+            "mtimeNs": "1792323193378811781",
+            "ctimeNs": "1792323193378811781"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-arm64.zip.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-setup.exe",
+          "bytes": 269467399,
+          "sha256": "c5db4062ddd17b190c1ce60621a096add4b18c87ad5970e255f12b79a136c9c1",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-setup.exe",
+          "private": {
+            "device": 2049,
+            "inode": 267081,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 269467399,
+            "allocatedBytes": 269471744,
+            "mtimeNs": "1792323215079445373",
+            "ctimeNs": "1792323215079445373"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-setup.exe",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-setup.exe.blockmap",
+          "bytes": 278311,
+          "sha256": "2fae69ae9e70d73d4ed48763c55460d64af483a21661a7da7241f777aa4f69d6",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-setup.exe.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267082,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 278311,
+            "allocatedBytes": 278528,
+            "mtimeNs": "1792323215243450160",
+            "ctimeNs": "1792323215243450160"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-setup.exe.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-windows-x64.zip",
+          "bytes": 370043909,
+          "sha256": "a538da1233275ed74fd9d223ffa697aea3d3cd2812118b0b4cef723f92e0760c",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-windows-x64.zip",
+          "private": {
+            "device": 2049,
+            "inode": 267083,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 370043909,
+            "allocatedBytes": 370049024,
+            "mtimeNs": "1792323240844197200",
+            "ctimeNs": "1792323240844197200"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-windows-x64.zip",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-x64.dmg",
+          "bytes": 335000079,
+          "sha256": "3759404f60ffda3cbb62fc03c8325526a419c59dadbe3f1df8b37c8aa48bd0e2",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-x64.dmg",
+          "private": {
+            "device": 2049,
+            "inode": 267085,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 335000079,
+            "allocatedBytes": 335007744,
+            "mtimeNs": "1792323267591977247",
+            "ctimeNs": "1792323267591977247"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-x64.dmg",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-x64.dmg.blockmap",
+          "bytes": 350230,
+          "sha256": "d0e0adb6502d1476566f06eec11c27446a26fe6956209d4185dd2184e94e2f9f",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-x64.dmg.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267087,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 350230,
+            "allocatedBytes": 352256,
+            "mtimeNs": "1792323267755982028",
+            "ctimeNs": "1792323267755982028"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-x64.dmg.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-x64.zip",
+          "bytes": 335587576,
+          "sha256": "3e38e6712e88fb2e91f08acd6df95fd5f0bb8f216b8523d4794c8de923f9e0cc",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-x64.zip",
+          "private": {
+            "device": 2049,
+            "inode": 267089,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 335587576,
+            "allocatedBytes": 335593472,
+            "mtimeNs": "1792323292772711182",
+            "ctimeNs": "1792323292772711182"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-x64.zip",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.8-x64.zip.blockmap",
+          "bytes": 347530,
+          "sha256": "df0253808339d701136914e5dc8d1e5f3014f6ea4e6cb94a932380295d07e8e1",
+          "privatePath": "/root/origin-release-staging/0.2.8/downloads/Origin-0.2.8-x64.zip.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267090,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 347530,
+            "allocatedBytes": 348160,
+            "mtimeNs": "1792323292961716690",
+            "ctimeNs": "1792323292961716690"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.8/Origin-0.2.8-x64.zip.blockmap",
+          "publicCopyPresent": false
+        }
+      ],
+      "twoIndependentCopiesSha256Equal": true,
+      "allRegularNonsymlinkNlink1": true,
+      "payloadBytes": 1947883987,
+      "reclaimableAllocatedBytes": 1947926528
+    },
+    {
+      "version": "0.2.9",
+      "folder": "0.2.9",
+      "privateDirectory": "/root/origin-release-staging/0.2.9/downloads",
+      "directoryIdentity": [
+        2049,
+        267531,
+        16832,
+        4096,
+        2,
+        "1792326094602256555",
+        "1792326094720259987"
+      ],
+      "directoryEntries": {
+        "Origin-0.2.9-arm64.dmg": [
+          2049,
+          267536,
+          33188,
+          317873092,
+          1,
+          "1792325928188414051",
+          "1792325928188414051"
+        ],
+        "Origin-0.2.9-arm64.dmg.blockmap": [
+          2049,
+          267538,
+          33188,
+          332041,
+          1,
+          "1792325928338418419",
+          "1792325928338418419"
+        ],
+        "Origin-0.2.9-arm64.zip": [
+          2049,
+          267539,
+          33188,
+          318260268,
+          1,
+          "1792325958001282149",
+          "1792325958001282149"
+        ],
+        "Origin-0.2.9-arm64.zip.blockmap": [
+          2049,
+          267542,
+          33188,
+          330989,
+          1,
+          "1792325958178287302",
+          "1792325958178287302"
+        ],
+        "Origin-0.2.9-setup.exe": [
+          2049,
+          267544,
+          33188,
+          269467589,
+          1,
+          "1792325984874064407",
+          "1792325984874064407"
+        ],
+        "Origin-0.2.9-setup.exe.blockmap": [
+          2049,
+          267546,
+          33188,
+          278283,
+          1,
+          "1792325985023068745",
+          "1792325985023068745"
+        ],
+        "Origin-0.2.9-windows-x64.zip": [
+          2049,
+          267548,
+          33188,
+          370044223,
+          1,
+          "1792326031220413065",
+          "1792326031220413065"
+        ],
+        "Origin-0.2.9-x64.dmg": [
+          2049,
+          267550,
+          33188,
+          335009118,
+          1,
+          "1792326068927509910",
+          "1792326068927509910"
+        ],
+        "Origin-0.2.9-x64.dmg.blockmap": [
+          2049,
+          267551,
+          33188,
+          348978,
+          1,
+          "1792326069077514273",
+          "1792326069077514273"
+        ],
+        "Origin-0.2.9-x64.zip": [
+          2049,
+          267553,
+          33188,
+          335587889,
+          1,
+          "1792326094274247018",
+          "1792326094274247018"
+        ],
+        "Origin-0.2.9-x64.zip.blockmap": [
+          2049,
+          267555,
+          33188,
+          347198,
+          1,
+          "1792326094424251380",
+          "1792326094424251380"
+        ],
+        "SHA256SUMS-0.2.9.txt": [
+          2049,
+          267557,
+          33188,
+          1180,
+          1,
+          "1792326094661258271",
+          "1792326094661258271"
+        ],
+        "latest-mac.yml": [
+          2049,
+          267532,
+          33188,
+          1771,
+          1,
+          "1792325893411401052",
+          "1792325893411401052"
+        ],
+        "latest.yml": [
+          2049,
+          267535,
+          33188,
+          1318,
+          1,
+          "1792325893529404490",
+          "1792325893529404490"
+        ],
+        "release-manifest-0.2.9.json": [
+          2049,
+          267556,
+          33188,
+          2244,
+          1,
+          "1792326094543254840",
+          "1792326094543254840"
+        ]
+      },
+      "files": [
+        {
+          "name": "Origin-0.2.9-arm64.dmg",
+          "bytes": 317873092,
+          "sha256": "d3afc680a1f6a73b9963d7379f30952dd410e0539869caac663244dd551af35d",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-arm64.dmg",
+          "private": {
+            "device": 2049,
+            "inode": 267536,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 317873092,
+            "allocatedBytes": 317878272,
+            "mtimeNs": "1792325928188414051",
+            "ctimeNs": "1792325928188414051"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-arm64.dmg",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-arm64.dmg.blockmap",
+          "bytes": 332041,
+          "sha256": "2b83e7a81e11c21537e1896ebe35b8680fc9c5ea06153d32e67c9ad3c15f34b5",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-arm64.dmg.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267538,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 332041,
+            "allocatedBytes": 335872,
+            "mtimeNs": "1792325928338418419",
+            "ctimeNs": "1792325928338418419"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-arm64.dmg.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-arm64.zip",
+          "bytes": 318260268,
+          "sha256": "8b08ae4a98273c7b15fb1019d841e90cfdc368e1ff50ca0cc82d19aef60b178d",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-arm64.zip",
+          "private": {
+            "device": 2049,
+            "inode": 267539,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 318260268,
+            "allocatedBytes": 318267392,
+            "mtimeNs": "1792325958001282149",
+            "ctimeNs": "1792325958001282149"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-arm64.zip",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-arm64.zip.blockmap",
+          "bytes": 330989,
+          "sha256": "861021cfe6729090797e7baa42290b8753ac86b88eff0ab00d73d3f254c5c91b",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-arm64.zip.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267542,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 330989,
+            "allocatedBytes": 331776,
+            "mtimeNs": "1792325958178287302",
+            "ctimeNs": "1792325958178287302"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-arm64.zip.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-setup.exe",
+          "bytes": 269467589,
+          "sha256": "5097297f64292781c67cf508796d6e0ab1357ec92b444f64e31c8978523694d4",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-setup.exe",
+          "private": {
+            "device": 2049,
+            "inode": 267544,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 269467589,
+            "allocatedBytes": 269471744,
+            "mtimeNs": "1792325984874064407",
+            "ctimeNs": "1792325984874064407"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-setup.exe",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-setup.exe.blockmap",
+          "bytes": 278283,
+          "sha256": "f9a46cc34b3e753362b7601414dc6224a365ac71fa924a5234c1fdc5f4b379af",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-setup.exe.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267546,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 278283,
+            "allocatedBytes": 278528,
+            "mtimeNs": "1792325985023068745",
+            "ctimeNs": "1792325985023068745"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-setup.exe.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-windows-x64.zip",
+          "bytes": 370044223,
+          "sha256": "43ffe4b396aee458e2cfb27d7a6639304643e399a9032b502671b1e65a841bec",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-windows-x64.zip",
+          "private": {
+            "device": 2049,
+            "inode": 267548,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 370044223,
+            "allocatedBytes": 370049024,
+            "mtimeNs": "1792326031220413065",
+            "ctimeNs": "1792326031220413065"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-windows-x64.zip",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-x64.dmg",
+          "bytes": 335009118,
+          "sha256": "6ac5ca47c9687956f563896c1fd4a61f282c24012647a6031459c2ca0d204508",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-x64.dmg",
+          "private": {
+            "device": 2049,
+            "inode": 267550,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 335009118,
+            "allocatedBytes": 335015936,
+            "mtimeNs": "1792326068927509910",
+            "ctimeNs": "1792326068927509910"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-x64.dmg",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-x64.dmg.blockmap",
+          "bytes": 348978,
+          "sha256": "87765524ba6f3cc8dfee5f78affc3d20b6d91ee383bf462063238303f421a35a",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-x64.dmg.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267551,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 348978,
+            "allocatedBytes": 352256,
+            "mtimeNs": "1792326069077514273",
+            "ctimeNs": "1792326069077514273"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-x64.dmg.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-x64.zip",
+          "bytes": 335587889,
+          "sha256": "db11308ff6c488aa74934e3e1413d6fd3c72c5c0784e25b073dddfdc776f7d6e",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-x64.zip",
+          "private": {
+            "device": 2049,
+            "inode": 267553,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 335587889,
+            "allocatedBytes": 335593472,
+            "mtimeNs": "1792326094274247018",
+            "ctimeNs": "1792326094274247018"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-x64.zip",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.9-x64.zip.blockmap",
+          "bytes": 347198,
+          "sha256": "715979da8bb9361499dd2d9a4142b157f183c73845bc8e530d532931c924ee8f",
+          "privatePath": "/root/origin-release-staging/0.2.9/downloads/Origin-0.2.9-x64.zip.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 267555,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 347198,
+            "allocatedBytes": 348160,
+            "mtimeNs": "1792326094424251380",
+            "ctimeNs": "1792326094424251380"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.9/Origin-0.2.9-x64.zip.blockmap",
+          "publicCopyPresent": false
+        }
+      ],
+      "twoIndependentCopiesSha256Equal": true,
+      "allRegularNonsymlinkNlink1": true,
+      "payloadBytes": 1947879668,
+      "reclaimableAllocatedBytes": 1947922432
+    },
+    {
+      "version": "0.2.12",
+      "folder": "0.2.12-candidate-032-d09a92021",
+      "privateDirectory": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads",
+      "directoryIdentity": [
+        2049,
+        255657,
+        16832,
+        4096,
+        2,
+        "1792348291493078320",
+        "1792348291493078320"
+      ],
+      "directoryEntries": {
+        "Origin-0.2.12-arm64.dmg": [
+          2049,
+          270177,
+          33188,
+          317895793,
+          1,
+          "1792348183758980236",
+          "1792348183758980236"
+        ],
+        "Origin-0.2.12-arm64.dmg.blockmap": [
+          2049,
+          270179,
+          33188,
+          331525,
+          1,
+          "1792348183950985757",
+          "1792348183950985757"
+        ],
+        "Origin-0.2.12-arm64.zip": [
+          2049,
+          270180,
+          33188,
+          318266678,
+          1,
+          "1792348201151480364",
+          "1792348201151480364"
+        ],
+        "Origin-0.2.12-arm64.zip.blockmap": [
+          2049,
+          270183,
+          33188,
+          331524,
+          1,
+          "1792348201317485137",
+          "1792348201317485137"
+        ],
+        "Origin-0.2.12-setup.exe": [
+          2049,
+          270184,
+          33188,
+          269472863,
+          1,
+          "1792348226051196381",
+          "1792348226051196381"
+        ],
+        "Origin-0.2.12-setup.exe.blockmap": [
+          2049,
+          270186,
+          33188,
+          278670,
+          1,
+          "1792348226216201126",
+          "1792348226216201126"
+        ],
+        "Origin-0.2.12-windows-x64.zip": [
+          2049,
+          270188,
+          33188,
+          370050411,
+          1,
+          "1792348254679019626",
+          "1792348254679019626"
+        ],
+        "Origin-0.2.12-x64.dmg": [
+          2049,
+          270190,
+          33188,
+          334975687,
+          1,
+          "1792348270961487870",
+          "1792348270961487870"
+        ],
+        "Origin-0.2.12-x64.dmg.blockmap": [
+          2049,
+          270192,
+          33188,
+          350358,
+          1,
+          "1792348271127492644",
+          "1792348271127492644"
+        ],
+        "Origin-0.2.12-x64.zip": [
+          2049,
+          270193,
+          33188,
+          335594295,
+          1,
+          "1792348290833059339",
+          "1792348290833059339"
+        ],
+        "Origin-0.2.12-x64.zip.blockmap": [
+          2049,
+          270195,
+          33188,
+          347869,
+          1,
+          "1792348290999064113",
+          "1792348290999064113"
+        ],
+        "SHA256SUMS-0.2.12.txt": [
+          2049,
+          270197,
+          33188,
+          1191,
+          1,
+          "1792348291136068053",
+          "1792348291136068053"
+        ],
+        "latest-mac.yml": [
+          2049,
+          270199,
+          33188,
+          1458,
+          1,
+          "1792348291274072021",
+          "1792348291274072021"
+        ],
+        "latest.yml": [
+          2049,
+          270201,
+          33188,
+          1002,
+          1,
+          "1792348291410075932",
+          "1792348291410075932"
+        ],
+        "release-manifest-0.2.12.json": [
+          2049,
+          270202,
+          33188,
+          2257,
+          1,
+          "1792348291547079872",
+          "1792348291547079872"
+        ]
+      },
+      "files": [
+        {
+          "name": "Origin-0.2.12-arm64.dmg",
+          "bytes": 317895793,
+          "sha256": "faad8de2eed1d65a41fa7ae05793eb97d4eefaa731a2ee6197fbf2979ecaa271",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-arm64.dmg",
+          "private": {
+            "device": 2049,
+            "inode": 270177,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 317895793,
+            "allocatedBytes": 317902848,
+            "mtimeNs": "1792348183758980236",
+            "ctimeNs": "1792348183758980236"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-arm64.dmg",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-arm64.dmg.blockmap",
+          "bytes": 331525,
+          "sha256": "dd43412a10528d36cfa0b760ab80b841a95a53b4c21eb099575071972837d467",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-arm64.dmg.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 270179,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 331525,
+            "allocatedBytes": 331776,
+            "mtimeNs": "1792348183950985757",
+            "ctimeNs": "1792348183950985757"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-arm64.dmg.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-arm64.zip",
+          "bytes": 318266678,
+          "sha256": "582a4d98273b6279050f552fd9637bbe50178215564c756d82a21d23c938685e",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-arm64.zip",
+          "private": {
+            "device": 2049,
+            "inode": 270180,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 318266678,
+            "allocatedBytes": 318271488,
+            "mtimeNs": "1792348201151480364",
+            "ctimeNs": "1792348201151480364"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-arm64.zip",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-arm64.zip.blockmap",
+          "bytes": 331524,
+          "sha256": "38261ab32125a6b0dd1571d09dce5d7660295d88f2084454c0b07a2b8dac2b93",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-arm64.zip.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 270183,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 331524,
+            "allocatedBytes": 331776,
+            "mtimeNs": "1792348201317485137",
+            "ctimeNs": "1792348201317485137"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-arm64.zip.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-setup.exe",
+          "bytes": 269472863,
+          "sha256": "c197d16fecc557cf2bbfd57b53e8f23f893f9f31265a890398b0123c3cd2a98b",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-setup.exe",
+          "private": {
+            "device": 2049,
+            "inode": 270184,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 269472863,
+            "allocatedBytes": 269479936,
+            "mtimeNs": "1792348226051196381",
+            "ctimeNs": "1792348226051196381"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-setup.exe",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-setup.exe.blockmap",
+          "bytes": 278670,
+          "sha256": "f6ac332d1c8e77d527d527d33c4591ba81c96fb1b685f90caf38062c9be9c63a",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-setup.exe.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 270186,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 278670,
+            "allocatedBytes": 282624,
+            "mtimeNs": "1792348226216201126",
+            "ctimeNs": "1792348226216201126"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-setup.exe.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-windows-x64.zip",
+          "bytes": 370050411,
+          "sha256": "7e87f5e41b986d11e09307d5aeb827965243bc942e0ff713e8941e094cf24b40",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-windows-x64.zip",
+          "private": {
+            "device": 2049,
+            "inode": 270188,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 370050411,
+            "allocatedBytes": 370057216,
+            "mtimeNs": "1792348254679019626",
+            "ctimeNs": "1792348254679019626"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-windows-x64.zip",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-x64.dmg",
+          "bytes": 334975687,
+          "sha256": "0701c0a6164c17c9df5a1ce9749d8748c25facdfc763d8eaaa616a5173b8ec0c",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-x64.dmg",
+          "private": {
+            "device": 2049,
+            "inode": 270190,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 334975687,
+            "allocatedBytes": 334983168,
+            "mtimeNs": "1792348270961487870",
+            "ctimeNs": "1792348270961487870"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-x64.dmg",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-x64.dmg.blockmap",
+          "bytes": 350358,
+          "sha256": "e185af6975340c438a76245e7539d31730280d64ebe910b742ff3041303dad30",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-x64.dmg.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 270192,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 350358,
+            "allocatedBytes": 352256,
+            "mtimeNs": "1792348271127492644",
+            "ctimeNs": "1792348271127492644"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-x64.dmg.blockmap",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-x64.zip",
+          "bytes": 335594295,
+          "sha256": "6954dbacbd10941a380067d9de8108ebbf3a59f2f3eec8654e8d5c0622f90d81",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-x64.zip",
+          "private": {
+            "device": 2049,
+            "inode": 270193,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 335594295,
+            "allocatedBytes": 335601664,
+            "mtimeNs": "1792348290833059339",
+            "ctimeNs": "1792348290833059339"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-x64.zip",
+          "publicCopyPresent": false
+        },
+        {
+          "name": "Origin-0.2.12-x64.zip.blockmap",
+          "bytes": 347869,
+          "sha256": "3d37e2d82d364a4f761a42eaa507de4354ca1b1b173736e3288ed92220ee07f3",
+          "privatePath": "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads/Origin-0.2.12-x64.zip.blockmap",
+          "private": {
+            "device": 2049,
+            "inode": 270195,
+            "mode": 33188,
+            "nlink": 1,
+            "bytes": 347869,
+            "allocatedBytes": 348160,
+            "mtimeNs": "1792348290999064113",
+            "ctimeNs": "1792348290999064113"
+          },
+          "localBackup": ".omb-scratch/distribution/0.2.12-candidate-032-d09a92021/Origin-0.2.12-x64.zip.blockmap",
+          "publicCopyPresent": false
+        }
+      ],
+      "twoIndependentCopiesSha256Equal": true,
+      "allRegularNonsymlinkNlink1": true,
+      "payloadBytes": 1947895673,
+      "reclaimableAllocatedBytes": 1947942912
+    }
+  ],
+  "protectedEntrySnapshots": {
+    "/root/multi-ghost/origin-downloads": {
+      "Origin-0.2.0-setup.exe": [
+        2049,
+        255511,
+        33261,
+        269429966,
+        1,
+        "1792257015541289666",
+        "1792257015541289666"
+      ],
+      "Origin-0.2.0-setup.exe.blockmap": [
+        2049,
+        257195,
+        33188,
+        278659,
+        1,
+        "1792257015704294415",
+        "1792257015704294415"
+      ],
+      "Origin-0.2.1-arm64.dmg": [
+        2049,
+        256566,
+        33188,
+        317825742,
+        1,
+        "1792265285358877227",
+        "1792265285358877227"
+      ],
+      "Origin-0.2.1-arm64.dmg.blockmap": [
+        2049,
+        256567,
+        33188,
+        332611,
+        1,
+        "1792265285542882554",
+        "1792265285542882554"
+      ],
+      "Origin-0.2.1-arm64.zip": [
+        2049,
+        257720,
+        33188,
+        318226929,
+        1,
+        "1792265303509402736",
+        "1792265303509402736"
+      ],
+      "Origin-0.2.1-arm64.zip.blockmap": [
+        2049,
+        257722,
+        33188,
+        331051,
+        1,
+        "1792265303693408064",
+        "1792265303693408064"
+      ],
+      "Origin-0.2.1-setup.exe": [
+        2049,
+        256568,
+        33261,
+        269440785,
+        1,
+        "1792261585337725416",
+        "1792261585337725416"
+      ],
+      "Origin-0.2.1-setup.exe.blockmap": [
+        2049,
+        256569,
+        33188,
+        278281,
+        1,
+        "1792261585511730946",
+        "1792261585511730946"
+      ],
+      "Origin-0.2.1-x64.dmg": [
+        2049,
+        257723,
+        33188,
+        335025060,
+        1,
+        "1792265321055910794",
+        "1792265321055910794"
+      ],
+      "Origin-0.2.1-x64.dmg.blockmap": [
+        2049,
+        257739,
+        33188,
+        349542,
+        1,
+        "1792265321237916065",
+        "1792265321237916065"
+      ],
+      "Origin-0.2.1-x64.zip": [
+        2049,
+        257752,
+        33188,
+        335554552,
+        1,
+        "1792265346958660868",
+        "1792265346958660868"
+      ],
+      "Origin-0.2.1-x64.zip.blockmap": [
+        2049,
+        257765,
+        33188,
+        347155,
+        1,
+        "1792265347141666168",
+        "1792265347141666168"
+      ],
+      "Origin-0.2.10-arm64.dmg": [
+        2049,
+        267982,
+        33188,
+        317862841,
+        1,
+        "1792331390742868716",
+        "1792332931730329475"
+      ],
+      "Origin-0.2.10-arm64.dmg.blockmap": [
+        2049,
+        267983,
+        33188,
+        332054,
+        1,
+        "1792331390906873423",
+        "1792332931737329677"
+      ],
+      "Origin-0.2.10-arm64.zip": [
+        2049,
+        267987,
+        33188,
+        318260685,
+        1,
+        "1792331411912476429",
+        "1792332933122369719"
+      ],
+      "Origin-0.2.10-arm64.zip.blockmap": [
+        2049,
+        267989,
+        33188,
+        331135,
+        1,
+        "1792331412075481109",
+        "1792332933126369835"
+      ],
+      "Origin-0.2.10-setup.exe": [
+        2049,
+        267990,
+        33188,
+        269468008,
+        1,
+        "1792331430988024188",
+        "1792332933871391374"
+      ],
+      "Origin-0.2.10-setup.exe.blockmap": [
+        2049,
+        267993,
+        33188,
+        278784,
+        1,
+        "1792331431151028870",
+        "1792332933876391518"
+      ],
+      "Origin-0.2.10-windows-x64.zip": [
+        2049,
+        267994,
+        33188,
+        370044757,
+        1,
+        "1792331456385753711",
+        "1792332935409435840"
+      ],
+      "Origin-0.2.10-x64.dmg": [
+        2049,
+        267997,
+        33188,
+        335000456,
+        1,
+        "1792331480908458331",
+        "1792332936594470099"
+      ],
+      "Origin-0.2.10-x64.dmg.blockmap": [
+        2049,
+        267999,
+        33188,
+        348893,
+        1,
+        "1792331481072463044",
+        "1792332936600470273"
+      ],
+      "Origin-0.2.10-x64.zip": [
+        2049,
+        268001,
+        33188,
+        335588286,
+        1,
+        "1792331501936062699",
+        "1792332937446494732"
+      ],
+      "Origin-0.2.10-x64.zip.blockmap": [
+        2049,
+        268003,
+        33188,
+        347554,
+        1,
+        "1792331502100067413",
+        "1792332937452494905"
+      ],
+      "Origin-0.2.11-arm64.dmg": [
+        2049,
+        269345,
+        33188,
+        317897835,
+        2,
+        "1792341569998497110",
+        "1792372617518422140"
+      ],
+      "Origin-0.2.11-arm64.dmg.blockmap": [
+        2049,
+        269346,
+        33188,
+        331228,
+        2,
+        "1792341570177502079",
+        "1792372617537422690"
+      ],
+      "Origin-0.2.11-arm64.zip": [
+        2049,
+        269348,
+        33188,
+        318265741,
+        2,
+        "1792341592611125286",
+        "1792372617537422690"
+      ],
+      "Origin-0.2.11-arm64.zip.blockmap": [
+        2049,
+        269349,
+        33188,
+        331277,
+        2,
+        "1792341592790130263",
+        "1792372617550423066"
+      ],
+      "Origin-0.2.11-setup.exe": [
+        2049,
+        269351,
+        33188,
+        269471941,
+        2,
+        "1792341618032832694",
+        "1792372617550423066"
+      ],
+      "Origin-0.2.11-setup.exe.blockmap": [
+        2049,
+        269353,
+        33188,
+        278666,
+        2,
+        "1792341618224838042",
+        "1792372617566423528"
+      ],
+      "Origin-0.2.11-windows-x64.zip": [
+        2049,
+        269354,
+        33188,
+        370049288,
+        2,
+        "1792341647812662907",
+        "1792372617567423557"
+      ],
+      "Origin-0.2.11-x64.dmg": [
+        2049,
+        269356,
+        33188,
+        334980437,
+        2,
+        "1792341675565438029",
+        "1792372617578423875"
+      ],
+      "Origin-0.2.11-x64.dmg.blockmap": [
+        2049,
+        269358,
+        33188,
+        350021,
+        2,
+        "1792341675744443033",
+        "1792372617589424194"
+      ],
+      "Origin-0.2.11-x64.zip": [
+        2049,
+        269360,
+        33188,
+        335593360,
+        2,
+        "1792341704943259936",
+        "1792372617589424194"
+      ],
+      "Origin-0.2.11-x64.zip.blockmap": [
+        2049,
+        269361,
+        33188,
+        347613,
+        2,
+        "1792341705151265761",
+        "1792372617599424483"
+      ],
+      "Origin-0.2.13-arm64.dmg": [
+        2049,
+        270974,
+        33188,
+        317886990,
+        2,
+        "1792366238601836592",
+        "1792372617600424512"
+      ],
+      "Origin-0.2.13-arm64.dmg.blockmap": [
+        2049,
+        270975,
+        33188,
+        331375,
+        2,
+        "1792366238787841892",
+        "1792372617609424772"
+      ],
+      "Origin-0.2.13-arm64.zip": [
+        2049,
+        270977,
+        33188,
+        318267373,
+        2,
+        "1792366271308769148",
+        "1792372617609424772"
+      ],
+      "Origin-0.2.13-arm64.zip.blockmap": [
+        2049,
+        270979,
+        33188,
+        331292,
+        2,
+        "1792366271470773770",
+        "1792372617621425119"
+      ],
+      "Origin-0.2.13-setup.exe": [
+        2049,
+        270980,
+        33188,
+        269473596,
+        2,
+        "1792366290882327668",
+        "1792372617622425148"
+      ],
+      "Origin-0.2.13-setup.exe.blockmap": [
+        2049,
+        270982,
+        33188,
+        278778,
+        2,
+        "1792366291042332235",
+        "1792372617630425379"
+      ],
+      "Origin-0.2.13-windows-x64.zip": [
+        2049,
+        270984,
+        33188,
+        370051115,
+        2,
+        "1792366316401056282",
+        "1792372617630425379"
+      ],
+      "Origin-0.2.13-x64.dmg": [
+        2049,
+        270985,
+        33188,
+        334981020,
+        2,
+        "1792366339428714199",
+        "1792372617642425726"
+      ],
+      "Origin-0.2.13-x64.dmg.blockmap": [
+        2049,
+        270986,
+        33188,
+        350845,
+        2,
+        "1792366339590718828",
+        "1792372617651425987"
+      ],
+      "Origin-0.2.13-x64.zip": [
+        2049,
+        270989,
+        33188,
+        335594983,
+        2,
+        "1792366363354398179",
+        "1792372617651425987"
+      ],
+      "Origin-0.2.13-x64.zip.blockmap": [
+        2049,
+        270990,
+        33188,
+        347419,
+        2,
+        "1792366363516402811",
+        "1792372617664426363"
+      ],
+      "Origin-0.2.14-arm64.dmg": [
+        2049,
+        270956,
+        33188,
+        317886358,
+        1,
+        "1792372667250860389",
+        "1792382498657474038"
+      ],
+      "Origin-0.2.14-arm64.dmg.blockmap": [
+        2049,
+        270958,
+        33188,
+        332622,
+        1,
+        "1792372667425865450",
+        "1792382498662474186"
+      ],
+      "Origin-0.2.14-arm64.zip": [
+        2049,
+        270960,
+        33188,
+        318271725,
+        1,
+        "1792372692022576810",
+        "1792382499472498084"
+      ],
+      "Origin-0.2.14-arm64.zip.blockmap": [
+        2049,
+        270961,
+        33188,
+        331225,
+        1,
+        "1792372692194581785",
+        "1792382499476498202"
+      ],
+      "Origin-0.2.14-setup.exe": [
+        2049,
+        270964,
+        33188,
+        269477444,
+        1,
+        "1792372715377252265",
+        "1792382500069515697"
+      ],
+      "Origin-0.2.14-setup.exe.blockmap": [
+        2049,
+        270965,
+        33188,
+        278442,
+        1,
+        "1792372715550257269",
+        "1792382500074515845"
+      ],
+      "Origin-0.2.14-windows-x64.zip": [
+        2049,
+        271672,
+        33188,
+        370055045,
+        1,
+        "1792372747148171161",
+        "1792382500955541836"
+      ],
+      "Origin-0.2.14-x64.dmg": [
+        2049,
+        271989,
+        33188,
+        334966861,
+        1,
+        "1792372773465932354",
+        "1792382501742565052"
+      ],
+      "Origin-0.2.14-x64.dmg.blockmap": [
+        2049,
+        271990,
+        33188,
+        349847,
+        1,
+        "1792372773665938139",
+        "1792382501748565229"
+      ],
+      "Origin-0.2.14-x64.zip": [
+        2049,
+        271992,
+        33188,
+        335599336,
+        1,
+        "1792372800037700911",
+        "1792382502551588917"
+      ],
+      "Origin-0.2.14-x64.zip.blockmap": [
+        2049,
+        271993,
+        33188,
+        347448,
+        1,
+        "1792372800238706724",
+        "1792382502557589094"
+      ],
+      "Origin-0.2.15-arm64.dmg": [
+        2049,
+        264793,
+        33188,
+        317887454,
+        1,
+        "1792444696033974093",
+        "1792444905099838617"
+      ],
+      "Origin-0.2.15-arm64.dmg.blockmap": [
+        2049,
+        264795,
+        33188,
+        332431,
+        1,
+        "1792444696206978945",
+        "1792444905104838757"
+      ],
+      "Origin-0.2.15-arm64.zip": [
+        2049,
+        272732,
+        33188,
+        318273079,
+        1,
+        "1792444714236484651",
+        "1792444906410875397"
+      ],
+      "Origin-0.2.15-arm64.zip.blockmap": [
+        2049,
+        273204,
+        33188,
+        330840,
+        1,
+        "1792444714409489504",
+        "1792444906415875537"
+      ],
+      "Origin-0.2.15-setup.exe": [
+        2049,
+        273206,
+        33188,
+        269478428,
+        1,
+        "1792444736160099594",
+        "1792444907040893071"
+      ],
+      "Origin-0.2.15-setup.exe.blockmap": [
+        2049,
+        273208,
+        33188,
+        278198,
+        1,
+        "1792444736334104474",
+        "1792444907046893240"
+      ],
+      "Origin-0.2.15-windows-x64.zip": [
+        2049,
+        273209,
+        33188,
+        370056422,
+        1,
+        "1792444766906962038",
+        "1792444908023920649"
+      ],
+      "Origin-0.2.15-x64.dmg": [
+        2049,
+        273212,
+        33188,
+        334965101,
+        1,
+        "1792444789348591539",
+        "1792444908920945814"
+      ],
+      "Origin-0.2.15-x64.dmg.blockmap": [
+        2049,
+        273215,
+        33188,
+        350492,
+        1,
+        "1792444789521596392",
+        "1792444908925945954"
+      ],
+      "Origin-0.2.15-x64.zip": [
+        2049,
+        273217,
+        33188,
+        335600685,
+        1,
+        "1792444810849194656",
+        "1792444909971975299"
+      ],
+      "Origin-0.2.15-x64.zip.blockmap": [
+        2049,
+        273220,
+        33188,
+        347241,
+        1,
+        "1792444811022199509",
+        "1792444909978975495"
+      ],
+      "Origin-0.2.7-arm64.dmg": [
+        2049,
+        266318,
+        33206,
+        317877092,
+        1,
+        "1792314213000000000",
+        "1792317465841781722"
+      ],
+      "Origin-0.2.7-arm64.dmg.blockmap": [
+        2049,
+        266321,
+        33206,
+        330192,
+        1,
+        "1792314213000000000",
+        "1792317465846781871"
+      ],
+      "Origin-0.2.7-arm64.zip": [
+        2049,
+        266324,
+        33206,
+        318256388,
+        1,
+        "1792314214000000000",
+        "1792317466585803827"
+      ],
+      "Origin-0.2.7-arm64.zip.blockmap": [
+        2049,
+        266326,
+        33206,
+        331392,
+        1,
+        "1792314214000000000",
+        "1792317466591804005"
+      ],
+      "Origin-0.2.7-setup.exe": [
+        2049,
+        266335,
+        33206,
+        269464776,
+        1,
+        "1792314118000000000",
+        "1792317467286824652"
+      ],
+      "Origin-0.2.7-setup.exe.blockmap": [
+        2049,
+        266337,
+        33206,
+        278420,
+        1,
+        "1792314118000000000",
+        "1792317467292824830"
+      ],
+      "Origin-0.2.7-windows-x64.zip": [
+        2049,
+        266338,
+        33206,
+        370040769,
+        1,
+        "1792314118000000000",
+        "1792317469051877082"
+      ],
+      "Origin-0.2.7-x64.dmg": [
+        2049,
+        266340,
+        33206,
+        335012954,
+        1,
+        "1792314215000000000",
+        "1792317470855930665"
+      ],
+      "Origin-0.2.7-x64.dmg.blockmap": [
+        2049,
+        266341,
+        33206,
+        348588,
+        1,
+        "1792314214000000000",
+        "1792317470861930844"
+      ],
+      "Origin-0.2.7-x64.zip": [
+        2049,
+        266343,
+        33206,
+        335584000,
+        1,
+        "1792314214000000000",
+        "1792317471703955850"
+      ],
+      "Origin-0.2.7-x64.zip.blockmap": [
+        2049,
+        266345,
+        33206,
+        347638,
+        1,
+        "1792314215000000000",
+        "1792317471709956029"
+      ],
+      "Origin-0.4.0-arm64.dmg": [
+        2049,
+        275725,
+        33188,
+        302626286,
+        1,
+        "1792478294070904456",
+        "1792478294070904456"
+      ],
+      "Origin-0.4.0-arm64.dmg.blockmap": [
+        2049,
+        275728,
+        33188,
+        316835,
+        1,
+        "1792478295001930924",
+        "1792478295001930924"
+      ],
+      "Origin-0.4.0-arm64.zip": [
+        2049,
+        275733,
+        33188,
+        303130440,
+        1,
+        "1792478336059098129",
+        "1792478336059098129"
+      ],
+      "Origin-0.4.0-arm64.zip.blockmap": [
+        2049,
+        275735,
+        33188,
+        315218,
+        1,
+        "1792478337036125905",
+        "1792478337036125905"
+      ],
+      "Origin-0.4.0-setup.exe": [
+        2049,
+        272728,
+        33261,
+        254767668,
+        1,
+        "1792478273827328937",
+        "1792478273827328937"
+      ],
+      "Origin-0.4.0-setup.exe.blockmap": [
+        2049,
+        273676,
+        33188,
+        262848,
+        1,
+        "1792478274771355776",
+        "1792478274771355776"
+      ],
+      "Origin-0.4.0-x64.dmg": [
+        2049,
+        275730,
+        33188,
+        319769778,
+        1,
+        "1792478312063415967",
+        "1792478312063415967"
+      ],
+      "Origin-0.4.0-x64.dmg.blockmap": [
+        2049,
+        275731,
+        33188,
+        334644,
+        1,
+        "1792478312983442123",
+        "1792478312983442123"
+      ],
+      "Origin-0.4.0-x64.zip": [
+        2049,
+        275737,
+        33188,
+        320458052,
+        1,
+        "1792478360717799132",
+        "1792478360717799132"
+      ],
+      "Origin-0.4.0-x64.zip.blockmap": [
+        2049,
+        275739,
+        33188,
+        331456,
+        1,
+        "1792478361667826138",
+        "1792478361667826138"
+      ],
+      "Origin-0.5.0-arm64.dmg": [
+        2049,
+        277256,
+        33188,
+        302744002,
+        1,
+        "1792490102969509759",
+        "1792490102969509759"
+      ],
+      "Origin-0.5.0-arm64.dmg.blockmap": [
+        2049,
+        277258,
+        33188,
+        315435,
+        1,
+        "1792490103906536650",
+        "1792490103906536650"
+      ],
+      "Origin-0.5.0-arm64.zip": [
+        2049,
+        277264,
+        33188,
+        303233446,
+        1,
+        "1792490148186807306",
+        "1792490148186807306"
+      ],
+      "Origin-0.5.0-arm64.zip.blockmap": [
+        2049,
+        277265,
+        33188,
+        315123,
+        1,
+        "1792490149137834594",
+        "1792490149137834594"
+      ],
+      "Origin-0.5.0-setup.exe": [
+        2049,
+        275722,
+        33261,
+        254846932,
+        1,
+        "1792490083880961926",
+        "1792490083880961926"
+      ],
+      "Origin-0.5.0-setup.exe.blockmap": [
+        2049,
+        275724,
+        33188,
+        262929,
+        1,
+        "1792490084803988417",
+        "1792490084803988417"
+      ],
+      "Origin-0.5.0-x64.dmg": [
+        2049,
+        277260,
+        33188,
+        319933004,
+        1,
+        "1792490126369181260",
+        "1792490126369181260"
+      ],
+      "Origin-0.5.0-x64.dmg.blockmap": [
+        2049,
+        277262,
+        33188,
+        336114,
+        1,
+        "1792490127282207460",
+        "1792490127282207460"
+      ],
+      "Origin-0.5.0-x64.zip": [
+        2049,
+        277267,
+        33188,
+        320561062,
+        1,
+        "1792490171431474237",
+        "1792490171431474237"
+      ],
+      "Origin-0.5.0-x64.zip.blockmap": [
+        2049,
+        277269,
+        33188,
+        331517,
+        1,
+        "1792490172414502440",
+        "1792490172414502440"
+      ],
+      "Origin-0.6.0-arm64.dmg": [
+        2049,
+        278071,
+        33188,
+        302839797,
+        1,
+        "1792515601375497674",
+        "1792515601375497674"
+      ],
+      "Origin-0.6.0-arm64.dmg.blockmap": [
+        2049,
+        278073,
+        33188,
+        316243,
+        1,
+        "1792515602382526997",
+        "1792515602382526997"
+      ],
+      "Origin-0.6.0-arm64.zip": [
+        2049,
+        278077,
+        33188,
+        303366121,
+        1,
+        "1792515642963708069",
+        "1792515642963708069"
+      ],
+      "Origin-0.6.0-arm64.zip.blockmap": [
+        2049,
+        278078,
+        33188,
+        315516,
+        1,
+        "1792515643874734571",
+        "1792515643874734571"
+      ],
+      "Origin-0.6.0-setup.exe": [
+        2049,
+        277252,
+        33261,
+        254964477,
+        1,
+        "1792515580004875227",
+        "1792515580004875227"
+      ],
+      "Origin-0.6.0-setup.exe.blockmap": [
+        2049,
+        277254,
+        33188,
+        263608,
+        1,
+        "1792515580923902002",
+        "1792515580923902002"
+      ],
+      "Origin-0.6.0-x64.dmg": [
+        2049,
+        278074,
+        33188,
+        320048280,
+        1,
+        "1792515625381196486",
+        "1792515625381196486"
+      ],
+      "Origin-0.6.0-x64.dmg.blockmap": [
+        2049,
+        278075,
+        33188,
+        331121,
+        1,
+        "1792515626283222737",
+        "1792515626283222737"
+      ],
+      "Origin-0.6.0-x64.zip": [
+        2049,
+        278080,
+        33188,
+        320693747,
+        1,
+        "1792515666493392375",
+        "1792515666493392375"
+      ],
+      "Origin-0.6.0-x64.zip.blockmap": [
+        2049,
+        278081,
+        33188,
+        331773,
+        1,
+        "1792515667463420579",
+        "1792515667463420579"
+      ],
+      "Origin-0.7.0-arm64.dmg": [
+        2049,
+        278083,
+        33188,
+        303307529,
+        1,
+        "1792534933994995148",
+        "1792534933994995148"
+      ],
+      "Origin-0.7.0-arm64.dmg.blockmap": [
+        2049,
+        278861,
+        33188,
+        316847,
+        1,
+        "1792534934174000233",
+        "1792534934174000233"
+      ],
+      "Origin-0.7.0-arm64.zip": [
+        2049,
+        278865,
+        33188,
+        303812720,
+        1,
+        "1792534982716379741",
+        "1792534982716379741"
+      ],
+      "Origin-0.7.0-arm64.zip.blockmap": [
+        2049,
+        278867,
+        33188,
+        316121,
+        1,
+        "1792534982895384829",
+        "1792534982895384829"
+      ],
+      "Origin-0.7.0-setup.exe": [
+        2049,
+        278068,
+        33261,
+        255415960,
+        1,
+        "1792534268432184017",
+        "1792534268432184017"
+      ],
+      "Origin-0.7.0-setup.exe.blockmap": [
+        2049,
+        278070,
+        33188,
+        264299,
+        1,
+        "1792534268603188811",
+        "1792534268603188811"
+      ],
+      "Origin-0.7.0-x64.dmg": [
+        2049,
+        278862,
+        33188,
+        320482553,
+        1,
+        "1792534961348772428",
+        "1792534961348772428"
+      ],
+      "Origin-0.7.0-x64.dmg.blockmap": [
+        2049,
+        278864,
+        33188,
+        333890,
+        1,
+        "1792534961526777487",
+        "1792534961526777487"
+      ],
+      "Origin-0.7.0-x64.zip": [
+        2049,
+        278868,
+        33188,
+        321140329,
+        1,
+        "1792535005194018729",
+        "1792535005194018729"
+      ],
+      "Origin-0.7.0-x64.zip.blockmap": [
+        2049,
+        278870,
+        33188,
+        332481,
+        1,
+        "1792535005373023818",
+        "1792535005373023818"
+      ],
+      "Origin-0.7.1-arm64.dmg": [
+        2049,
+        278859,
+        33188,
+        303319348,
+        1,
+        "1792540986591694976",
+        "1792540986591694976"
+      ],
+      "Origin-0.7.1-arm64.dmg.blockmap": [
+        2049,
+        279677,
+        33188,
+        314718,
+        1,
+        "1792540986758699840",
+        "1792540986758699840"
+      ],
+      "Origin-0.7.1-arm64.zip": [
+        2049,
+        279682,
+        33188,
+        303815500,
+        1,
+        "1792541027404883086",
+        "1792541027404883086"
+      ],
+      "Origin-0.7.1-arm64.zip.blockmap": [
+        2049,
+        279683,
+        33188,
+        316224,
+        1,
+        "1792541027570887916",
+        "1792541027570887916"
+      ],
+      "Origin-0.7.1-setup.exe": [
+        2049,
+        278856,
+        33261,
+        255418448,
+        1,
+        "1792540293294276311",
+        "1792540293294276311"
+      ],
+      "Origin-0.7.1-setup.exe.blockmap": [
+        2049,
+        278857,
+        33188,
+        263809,
+        1,
+        "1792540293488282125",
+        "1792540293488282125"
+      ],
+      "Origin-0.7.1-x64.dmg": [
+        2049,
+        279679,
+        33188,
+        320476150,
+        1,
+        "1792541005477244870",
+        "1792541005477244870"
+      ],
+      "Origin-0.7.1-x64.dmg.blockmap": [
+        2049,
+        279680,
+        33188,
+        333933,
+        1,
+        "1792541005649249877",
+        "1792541005649249877"
+      ],
+      "Origin-0.7.1-x64.zip": [
+        2049,
+        279685,
+        33188,
+        321143112,
+        1,
+        "1792541051451582690",
+        "1792541051451582690"
+      ],
+      "Origin-0.7.1-x64.zip.blockmap": [
+        2049,
+        255514,
+        33188,
+        332515,
+        1,
+        "1792541051618587548",
+        "1792541051618587548"
+      ],
+      "Origin-Mac-AppleSilicon.dmg": [
+        2049,
+        255515,
+        41471,
+        22,
+        1,
+        "1792541053043628998",
+        "1792541053043628998"
+      ],
+      "Origin-Mac-Intel.dmg": [
+        2049,
+        278872,
+        41471,
+        20,
+        1,
+        "1792541053044629027",
+        "1792541053044629027"
+      ],
+      "Origin-Setup.exe": [
+        2049,
+        279676,
+        41471,
+        22,
+        1,
+        "1792540294225304209",
+        "1792540294225304209"
+      ],
+      "SHA256SUMS-0.2.10.txt": [
+        2049,
+        268005,
+        33188,
+        1191,
+        1,
+        "1792331502236071323",
+        "1792332937456495021"
+      ],
+      "SHA256SUMS-0.2.11.txt": [
+        2049,
+        269364,
+        33188,
+        1191,
+        2,
+        "1792341705446274022",
+        "1792372617599424483"
+      ],
+      "SHA256SUMS-0.2.13.txt": [
+        2049,
+        270994,
+        33188,
+        1191,
+        2,
+        "1792366363782410418",
+        "1792372617664426363"
+      ],
+      "SHA256SUMS-0.2.14.txt": [
+        2049,
+        271995,
+        33188,
+        1191,
+        1,
+        "1792372800381710861",
+        "1792382502560589182"
+      ],
+      "SHA256SUMS-0.2.15.txt": [
+        2049,
+        273222,
+        33188,
+        1191,
+        1,
+        "1792444811594215555",
+        "1792444909982975607"
+      ],
+      "SHA256SUMS-0.2.7.txt": [
+        2049,
+        266347,
+        33206,
+        1180,
+        1,
+        "1792314225000000000",
+        "1792317471716956236"
+      ],
+      "latest-mac.yml": [
+        2049,
+        273228,
+        33188,
+        1859,
+        1,
+        "1792541052423610964",
+        "1792541052423610964"
+      ],
+      "latest.yml": [
+        2049,
+        273227,
+        33188,
+        1406,
+        1,
+        "1792540293629286350",
+        "1792540293629286350"
+      ],
+      "release-manifest-0.2.10.json": [
+        2049,
+        268007,
+        33188,
+        2257,
+        1,
+        "1792331502641082965",
+        "1792332937462495194"
+      ],
+      "release-manifest-0.2.11.json": [
+        2049,
+        269365,
+        33188,
+        2257,
+        2,
+        "1792341705299269905",
+        "1792372617599424483"
+      ],
+      "release-manifest-0.2.13.json": [
+        2049,
+        270996,
+        33188,
+        2257,
+        2,
+        "1792366363649406615",
+        "1792372617664426363"
+      ],
+      "release-manifest-0.2.14.json": [
+        2049,
+        271997,
+        33188,
+        2257,
+        1,
+        "1792372800809723240",
+        "1792382502564589300"
+      ],
+      "release-manifest-0.2.15.json": [
+        2049,
+        273225,
+        33188,
+        2256,
+        1,
+        "1792444811451211544",
+        "1792444909985975692"
+      ],
+      "release-manifest-0.2.7.json": [
+        2049,
+        266349,
+        33206,
+        2244,
+        1,
+        "1792314225000000000",
+        "1792317471721956385"
+      ]
+    },
+    "/root/origin-release-staging/0.2.14/downloads": {
+      "Origin-0.2.14-arm64.dmg": [
+        2049,
+        269316,
+        33188,
+        317886358,
+        1,
+        "1792372667250860389",
+        "1792372667250860389"
+      ],
+      "Origin-0.2.14-arm64.dmg.blockmap": [
+        2049,
+        269318,
+        33188,
+        332622,
+        1,
+        "1792372667425865450",
+        "1792372667425865450"
+      ],
+      "Origin-0.2.14-arm64.zip": [
+        2049,
+        269320,
+        33188,
+        318271725,
+        1,
+        "1792372692022576810",
+        "1792372692022576810"
+      ],
+      "Origin-0.2.14-arm64.zip.blockmap": [
+        2049,
+        269321,
+        33188,
+        331225,
+        1,
+        "1792372692194581785",
+        "1792372692194581785"
+      ],
+      "Origin-0.2.14-setup.exe": [
+        2049,
+        269323,
+        33188,
+        269477444,
+        1,
+        "1792372715377252265",
+        "1792372715377252265"
+      ],
+      "Origin-0.2.14-setup.exe.blockmap": [
+        2049,
+        269325,
+        33188,
+        278442,
+        1,
+        "1792372715550257269",
+        "1792372715550257269"
+      ],
+      "Origin-0.2.14-windows-x64.zip": [
+        2049,
+        269327,
+        33188,
+        370055045,
+        1,
+        "1792372747148171161",
+        "1792372747148171161"
+      ],
+      "Origin-0.2.14-x64.dmg": [
+        2049,
+        269328,
+        33188,
+        334966861,
+        1,
+        "1792372773465932354",
+        "1792372773465932354"
+      ],
+      "Origin-0.2.14-x64.dmg.blockmap": [
+        2049,
+        269329,
+        33188,
+        349847,
+        1,
+        "1792372773665938139",
+        "1792372773665938139"
+      ],
+      "Origin-0.2.14-x64.zip": [
+        2049,
+        269330,
+        33188,
+        335599336,
+        1,
+        "1792372800037700911",
+        "1792372800037700911"
+      ],
+      "Origin-0.2.14-x64.zip.blockmap": [
+        2049,
+        269332,
+        33188,
+        347448,
+        1,
+        "1792372800238706724",
+        "1792372800238706724"
+      ],
+      "SHA256SUMS-0.2.14.txt": [
+        2049,
+        269333,
+        33188,
+        1191,
+        1,
+        "1792372800381710861",
+        "1792372800381710861"
+      ],
+      "latest-mac.yml": [
+        2049,
+        270944,
+        33188,
+        1648,
+        1,
+        "1792372800524714997",
+        "1792372800524714997"
+      ],
+      "latest.yml": [
+        2049,
+        270945,
+        33188,
+        1192,
+        1,
+        "1792372800666719104",
+        "1792372800666719104"
+      ],
+      "release-manifest-0.2.14.json": [
+        2049,
+        270948,
+        33188,
+        2257,
+        1,
+        "1792372800809723240",
+        "1792372800809723240"
+      ]
+    },
+    "/root/origin-release-staging": {
+      "0.2.10": [
+        2049,
+        267563,
+        16877,
+        4096,
+        4,
+        "1792332875955717044",
+        "1792332875955717044"
+      ],
+      "0.2.11": [
+        2049,
+        268659,
+        16832,
+        4096,
+        4,
+        "1792341993102383524",
+        "1792341993102383524"
+      ],
+      "0.2.11-d84eaf3c4-held": [
+        2049,
+        255637,
+        16832,
+        4096,
+        3,
+        "1792339786229450198",
+        "1792340041731700707"
+      ],
+      "0.2.12": [
+        2049,
+        255639,
+        16877,
+        4096,
+        2,
+        "1792357681233750029",
+        "1792357681233750029"
+      ],
+      "0.2.12-candidate-032-d09a92021": [
+        2049,
+        255644,
+        16832,
+        4096,
+        4,
+        "1792346791487018085",
+        "1792357625872139237"
+      ],
+      "0.2.13": [
+        2049,
+        255551,
+        16877,
+        4096,
+        4,
+        "1792366203174827552",
+        "1792366203174827552"
+      ],
+      "0.2.13-held-f44ebe30": [
+        2049,
+        270212,
+        16877,
+        4096,
+        4,
+        "1792363821117115486",
+        "1792364695502075255"
+      ],
+      "0.2.14": [
+        2049,
+        271678,
+        16832,
+        4096,
+        4,
+        "1792372640675091816",
+        "1792372640675091816"
+      ],
+      "0.2.14-cycle038": [
+        2049,
+        269297,
+        16877,
+        4096,
+        3,
+        "1792370856397539052",
+        "1792370856397539052"
+      ],
+      "0.2.15": [
+        2049,
+        272734,
+        16832,
+        4096,
+        4,
+        "1792444672740320749",
+        "1792444672740320749"
+      ],
+      "0.2.15-cycle040": [
+        2049,
+        255532,
+        16832,
+        4096,
+        3,
+        "1792441679990769306",
+        "1792441679990769306"
+      ],
+      "0.2.2": [
+        2049,
+        255847,
+        16832,
+        4096,
+        3,
+        "1792275379824868558",
+        "1792275379824868558"
+      ],
+      "0.2.3": [
+        2049,
+        255508,
+        16832,
+        4096,
+        6,
+        "1792277086534173793",
+        "1792277086534173793"
+      ],
+      "0.2.4": [
+        2049,
+        257474,
+        16877,
+        4096,
+        3,
+        "1792279357064261940",
+        "1792279357064261940"
+      ],
+      "0.2.5": [
+        2049,
+        264423,
+        16877,
+        4096,
+        4,
+        "1792282162974920741",
+        "1792282162974920741"
+      ],
+      "0.2.6": [
+        2049,
+        264806,
+        16877,
+        4096,
+        4,
+        "1792285440440499170",
+        "1792285440440499170"
+      ],
+      "0.2.7": [
+        2049,
+        255613,
+        16877,
+        4096,
+        4,
+        "1792314351814982516",
+        "1792314351814982516"
+      ],
+      "0.2.8": [
+        2049,
+        256175,
+        16832,
+        4096,
+        4,
+        "1792323141920307954",
+        "1792323141920307954"
+      ],
+      "0.2.9": [
+        2049,
+        255636,
+        16877,
+        4096,
+        4,
+        "1792326108417658259",
+        "1792326108417658259"
+      ],
+      "0.4.2-cycle049": [
+        2049,
+        255569,
+        16832,
+        4096,
+        3,
+        "1792488366131467707",
+        "1792488366131467707"
+      ]
+    },
+    "/root/origin-release-staging/0.2.8": {
+      "build-site.sh": [
+        2049,
+        266681,
+        33188,
+        832,
+        1,
+        "1792321867504583860",
+        "1792321867504583860"
+      ],
+      "check-public-downloads.py": [
+        2049,
+        267076,
+        33188,
+        5118,
+        1,
+        "1792323141973309504",
+        "1792323141973309504"
+      ],
+      "downloads": [
+        2049,
+        267072,
+        16877,
+        4096,
+        2,
+        "1792323293449730910",
+        "1792323293449730910"
+      ],
+      "promote-downloads.sh": [
+        2049,
+        267075,
+        33188,
+        4787,
+        1,
+        "1792323141707301724",
+        "1792323141707301724"
+      ],
+      "promote-site.sh": [
+        2049,
+        267066,
+        33188,
+        3393,
+        1,
+        "1792322043406633855",
+        "1792322043406633855"
+      ],
+      "site-context-final": [
+        2049,
+        266682,
+        16895,
+        4096,
+        5,
+        "1792321831000000000",
+        "1792321868093600769"
+      ],
+      "site-context.tgz": [
+        2049,
+        256176,
+        33188,
+        499516,
+        1,
+        "1792321866799563620",
+        "1792321866799563620"
+      ],
+      "site-release-identity-0.2.8.json": [
+        2049,
+        267065,
+        33188,
+        24166,
+        1,
+        "1792322043258629606",
+        "1792322043258629606"
+      ],
+      "validate-release.py": [
+        2049,
+        267067,
+        33188,
+        8538,
+        1,
+        "1792323141840305614",
+        "1792323141840305614"
+      ]
+    },
+    "/root/origin-release-staging/0.2.9": {
+      "build-site-029.sh": [
+        2049,
+        267106,
+        33188,
+        1260,
+        1,
+        "1792324807655538948",
+        "1792324807655538948"
+      ],
+      "check-public-downloads.py": [
+        2049,
+        267561,
+        33188,
+        5118,
+        1,
+        "1792326108471659830",
+        "1792326108471659830"
+      ],
+      "downloads": [
+        2049,
+        267531,
+        16832,
+        4096,
+        2,
+        "1792326094602256555",
+        "1792326094720259987"
+      ],
+      "preview-site-029.sh": [
+        2049,
+        267108,
+        33188,
+        2182,
+        1,
+        "1792324807792542900",
+        "1792324807792542900"
+      ],
+      "promote-downloads.sh": [
+        2049,
+        267559,
+        33188,
+        4787,
+        1,
+        "1792326108202652008",
+        "1792326108202652008"
+      ],
+      "promote-site.sh": [
+        2049,
+        267528,
+        33188,
+        3393,
+        1,
+        "1792325394848816342",
+        "1792325394848816342"
+      ],
+      "site-context-final": [
+        2049,
+        267111,
+        16895,
+        4096,
+        5,
+        "1792324779000000000",
+        "1792324808743570337"
+      ],
+      "site-context.tgz": [
+        2049,
+        255642,
+        33188,
+        501050,
+        1,
+        "1792324806944518435",
+        "1792324806944518435"
+      ],
+      "site-release-identity-0.2.9.json": [
+        2049,
+        267519,
+        33188,
+        24166,
+        1,
+        "1792324880387637146",
+        "1792324880387637146"
+      ],
+      "validate-release.py": [
+        2049,
+        267530,
+        33188,
+        8538,
+        1,
+        "1792326108336655904",
+        "1792326108336655904"
+      ]
+    },
+    "/root/origin-release-staging/0.2.12-candidate-032-d09a92021": {
+      "build-site-032.sh": [
+        2049,
+        269812,
+        33188,
+        1263,
+        1,
+        "1792346706716597406",
+        "1792346706716597406"
+      ],
+      "check-public-downloads.py": [
+        2049,
+        269820,
+        33188,
+        5118,
+        1,
+        "1792346707440618067",
+        "1792346707440618067"
+      ],
+      "downloads": [
+        2049,
+        255657,
+        16832,
+        4096,
+        2,
+        "1792348291493078320",
+        "1792348291493078320"
+      ],
+      "preview-site-032.sh": [
+        2049,
+        269813,
+        33188,
+        2186,
+        1,
+        "1792346706861601544",
+        "1792346706861601544"
+      ],
+      "promote-downloads.sh": [
+        2049,
+        269817,
+        33188,
+        4787,
+        1,
+        "1792346707151609820",
+        "1792346707151609820"
+      ],
+      "promote-site.sh": [
+        2049,
+        269815,
+        33188,
+        3393,
+        1,
+        "1792346707007605711",
+        "1792346707007605711"
+      ],
+      "site-context-final": [
+        2049,
+        269823,
+        16895,
+        4096,
+        5,
+        "1792346515000000000",
+        "1792346729245240411"
+      ],
+      "site-context.tgz": [
+        2049,
+        269810,
+        33188,
+        485228,
+        1,
+        "1792346705977576318",
+        "1792346705977576318"
+      ],
+      "site-release-identity-0.2.12.json": [
+        2049,
+        270172,
+        33188,
+        25015,
+        1,
+        "1792346791575020599",
+        "1792346791575020599"
+      ],
+      "validate-release.py": [
+        2049,
+        269818,
+        33188,
+        8538,
+        1,
+        "1792346707296613958",
+        "1792346707296613958"
+      ]
+    }
+  },
+  "protectedEntriesUnchangedDuringProof": true,
+  "currentImage": "sha256:78a8daf8ce012d91fa9cb6d041c97ede04c5b2c3d42cec140945ab7a7ab9ab52",
+  "feeds": {
+    "latest.yml": {
+      "sha256": "a32ff212a1994d88b1cba7faca9e23ee6d9423559cceb4c5860ed0370435f84c",
+      "bytes": 1406,
+      "version": "0.7.1",
+      "referencesCandidates": false
+    },
+    "latest-mac.yml": {
+      "sha256": "a5a192aae16846d06c09e49e28ff41a0d3de50948528a7359697088b0cdff7c7",
+      "bytes": 1859,
+      "version": "0.7.1",
+      "referencesCandidates": false
+    }
+  },
+  "mutation": false,
+  "localBackupPreserved": true,
+  "publicDownloadsRollback049ImagesAndContextUntouched": true
+}

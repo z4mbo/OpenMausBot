@@ -1,0 +1,26 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/cloud-lending-memory.e2e.test.ts (29 tests | 1 failed) 104953ms
+   × a link planted in a bot's memory is a change, and what it points at never reaches a turn 2956ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/cloud-lending-memory.e2e.test.ts > a link planted in a bot's memory is a change, and what it points at never reaches a turn
+Error: EPERM: operation not permitted, symlink 'C:\Users\aless\AppData\Local\Temp\omb-cloud-lending-memory-OdzBb9\guest-controlled.md' -> 'C:\Users\aless\AppData\Local\Temp\omb-cloud-lending-memory-OdzBb9\.openmausbot\workspaces\91a5e583-7e52-4654-b87a-966aaca99679\memory\mac.md'
+ ❯ server/cloud-lending-memory.e2e.test.ts:415:3
+    413|   const guests = await guestThread(bot);
+    414|   await toolsFor(() => say(owner, bot, "Organize your notes.", guests)…
+    415|   symlinkSync(target, ws(bot, "memory", "mac.md"));
+       |   ^
+    416|   rmSync(ws(bot, "MEMORY.md"));
+    417|   symlinkSync(notes, ws(bot, "MEMORY.md"));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 39 passed (40)
+   Start at  08:20:40
+   Duration  134.87s (transform 388ms, setup 648ms, import 483ms, tests 133.43s, environment 0ms)
+

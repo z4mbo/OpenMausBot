@@ -785,7 +785,7 @@ it("the owner's devices are not told which conversations they may write in, even
   expect(ownerSession).not.toHaveProperty("openedThreads");
 }, 30_000);
 
-it("no command the owner saved answers for a conversation a guest left behind: it still asks the owner", async () => {
+it("denies shell requests in a guest's old conversation even after the owner saves a matching command", async () => {
   const bot = await newBot("Saved commands", "held");
   const socketPath = () => JSON.parse(readFileSync(dumpOf("held"), "utf8")).mcpConfig.mcpServers.ogb.args.at(-1) as string;
   const ask = async (command: string) => {
@@ -802,15 +802,14 @@ it("no command the owner saved answers for a conversation a guest left behind: i
   const guests = await guestThread(bot);
   await toolsFor(() => say(owner, bot, "Run the fixture.", guests));
   const first = await ask("printf 'guest fixture'");
-  await expect.poll(async () => Boolean(await cardOf(guests, first.id))).toBe(true);
-  expect((await cardOf(guests, first.id)).commandAllowlist).toBeUndefined();
+  await expect.poll(first.answer).toMatchObject({ id: first.id, behavior: "deny", source: "system", message: expect.stringMatching(/confined.*cannot be widened/) });
+  expect(await cardOf(guests, first.id)).toBeUndefined();
   const folder = realpathSync(((await api("GET", "/api/bots", { token: owner })).body.bots as any[]).find((candidate) => candidate.id === bot.id).tasks.find((task: any) => task.threadId === guests).cwd);
   const saved = await api("POST", `/api/bots/${bot.id}/command-allowlist`, { token: owner, body: { command: "printf 'guest fixture'", cwd: folder, providerInstanceId: "held" } });
   expect(saved.status, JSON.stringify(saved.body)).toBe(200);
-  expect((await api("POST", `/api/threads/${guests}/respond`, { token: owner, body: { requestId: first.id, behavior: "deny" } })).status).toBe(200);
   const again = await ask("printf 'guest fixture'");
-  await expect.poll(async () => Boolean(await cardOf(guests, again.id))).toBe(true);
-  expect(again.answer()).toBeUndefined();
+  await expect.poll(again.answer).toMatchObject({ id: again.id, behavior: "deny", source: "system", message: expect.stringMatching(/confined.*cannot be widened/) });
+  expect(await cardOf(guests, again.id)).toBeUndefined();
   first.close();
   again.close();
   await stop(bot, guests);

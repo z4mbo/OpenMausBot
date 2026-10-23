@@ -1,0 +1,218 @@
+{
+  "firstSession": {
+    "after": {
+      "version": "after",
+      "baseline": "683f3e5e9",
+      "sourceHashes": {
+        "src/lib/origin-members.ts": "565a99cc97906a9809aa1691221c6eba5270c680601bf2c385b44cd9c1852708",
+        "src/components/origin-members/WorkspaceMembers.tsx": "20edabbc637c8cdafabc50178479bb0d369d922f50fc8277da1746d9ef37b435",
+        "server/origin-invites.ts": "7a079b8cd4caca7860a3a6dab4360fca8f313fae73a627a56f0ab5bb354e6f4a",
+        "site/components/auth-page.tsx": "de81b74e3a893805b9b172f9b7a3367b51434ef9a23cb18840ba4914316a7d5f"
+      },
+      "calls": [
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "action",
+          "name": "workspaces:sendEmailInvite",
+          "mail": "accepted"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "action",
+          "name": "workspaces:sendEmailInvite",
+          "mail": "failed"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        },
+        {
+          "kind": "action",
+          "name": "workspaces:sendEmailInvite",
+          "mail": "not_configured"
+        },
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        }
+      ]
+    },
+    "before": {
+      "version": "before",
+      "baseline": "683f3e5e9",
+      "sourceHashes": {
+        "src/lib/origin-members.ts": "b9b9d06b57c507b186897ce8b6f55210609f22986f264de6d7dddd286da454c0",
+        "src/components/origin-members/WorkspaceMembers.tsx": "51272c5992741ee84ec7024c4739ade5b7488c007e0bdf20abc4084b9944eb27",
+        "site/components/auth-page.tsx": "366b74e4f9c7406d73d8d4a6a0c30e41ba7b54c8b756e40934449e6185f232c3",
+        "server/origin-invites.ts": "6e196a47f3b11d344d20c40b390114f19a19945674886279502c09beffef64f2"
+      },
+      "calls": [
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        },
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        },
+        {
+          "kind": "query",
+          "name": "auth:me"
+        },
+        {
+          "kind": "synthetic-mail",
+          "name": "sendMail",
+          "mail": "failed"
+        },
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        },
+        {
+          "kind": "query",
+          "name": "auth:me"
+        },
+        {
+          "kind": "synthetic-mail",
+          "name": "sendMail",
+          "mail": "failed"
+        },
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        },
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        },
+        {
+          "kind": "mutation",
+          "name": "workspaces:createInvite"
+        }
+      ]
+    }
+  },
+  "secondSession": {
+    "after": {
+      "version": "after",
+      "baseline": "683f3e5e9ef0a53d86723fc0aa2403ab831993b7",
+      "sourceHashes": {
+        "src/lib/origin-members.ts": "565a99cc97906a9809aa1691221c6eba5270c680601bf2c385b44cd9c1852708",
+        "src/components/origin-members/WorkspaceMembers.tsx": "20edabbc637c8cdafabc50178479bb0d369d922f50fc8277da1746d9ef37b435",
+        "server/origin-invites.ts": "7a079b8cd4caca7860a3a6dab4360fca8f313fae73a627a56f0ab5bb354e6f4a",
+        "site/components/auth-page.tsx": "de81b74e3a893805b9b172f9b7a3367b51434ef9a23cb18840ba4914316a7d5f"
+      },
+      "calls": [
+        {
+          "kind": "query",
+          "name": "workspaces:inviteAddress"
+        }
+      ],
+      "acceptance": {
+        "version": "after",
+        "baseline": "683f3e5e9ef0a53d86723fc0aa2403ab831993b7",
+        "sourceHashes": {
+          "src/lib/origin-members.ts": "565a99cc97906a9809aa1691221c6eba5270c680601bf2c385b44cd9c1852708",
+          "src/components/origin-members/WorkspaceMembers.tsx": "20edabbc637c8cdafabc50178479bb0d369d922f50fc8277da1746d9ef37b435",
+          "server/origin-invites.ts": "7a079b8cd4caca7860a3a6dab4360fca8f313fae73a627a56f0ab5bb354e6f4a",
+          "site/components/auth-page.tsx": "de81b74e3a893805b9b172f9b7a3367b51434ef9a23cb18840ba4914316a7d5f"
+        },
+        "font": {
+          "available": true,
+          "asset": "site/.next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "sha256": "c940764593d0fe5d596be327ca7558855e018039fb78509aa21921fd3644c3e4"
+        }
+      }
+    },
+    "before": {
+      "version": "before",
+      "baseline": "683f3e5e9ef0a53d86723fc0aa2403ab831993b7",
+      "sourceHashes": {
+        "src/lib/origin-members.ts": "b9b9d06b57c507b186897ce8b6f55210609f22986f264de6d7dddd286da454c0",
+        "src/components/origin-members/WorkspaceMembers.tsx": "51272c5992741ee84ec7024c4739ade5b7488c007e0bdf20abc4084b9944eb27",
+        "site/components/auth-page.tsx": "366b74e4f9c7406d73d8d4a6a0c30e41ba7b54c8b756e40934449e6185f232c3",
+        "server/origin-invites.ts": "6e196a47f3b11d344d20c40b390114f19a19945674886279502c09beffef64f2"
+      },
+      "calls": [],
+      "acceptance": {
+        "version": "before",
+        "baseline": "683f3e5e9ef0a53d86723fc0aa2403ab831993b7",
+        "sourceHashes": {
+          "src/lib/origin-members.ts": "b9b9d06b57c507b186897ce8b6f55210609f22986f264de6d7dddd286da454c0",
+          "src/components/origin-members/WorkspaceMembers.tsx": "51272c5992741ee84ec7024c4739ade5b7488c007e0bdf20abc4084b9944eb27",
+          "site/components/auth-page.tsx": "366b74e4f9c7406d73d8d4a6a0c30e41ba7b54c8b756e40934449e6185f232c3",
+          "server/origin-invites.ts": "6e196a47f3b11d344d20c40b390114f19a19945674886279502c09beffef64f2"
+        },
+        "font": {
+          "available": true,
+          "asset": "site/.next/static/media/e4af272ccee01ff0-s.p.woff2",
+          "sha256": "c940764593d0fe5d596be327ca7558855e018039fb78509aa21921fd3644c3e4"
+        }
+      }
+    }
+  },
+  "qualification": "First session preserves the exercised member route calls. It was stopped before the font setup changed. The second session retains the same four implementation source hashes and supplies the local Next Inter face for the retained acceptance captures.",
+  "firstOwnedListenersClosed": true
+}

@@ -1,0 +1,112 @@
+{
+  "Origin-0.2.3-arm64.dmg": {
+    "size": 317843706,
+    "sha256": "6741a0f60784cb7eb9c711a9e4c5cef9d14e77728730069f95cddd8493424c8d",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-arm64.dmg"
+  },
+  "Origin-0.2.3-arm64.dmg.blockmap": {
+    "size": 333697,
+    "sha256": "258f579efa911b70b7c323dbb4669d6e16839dcbbebb2000b05d89a2a38b57c0",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-arm64.dmg.blockmap"
+  },
+  "Origin-0.2.3-arm64.zip": {
+    "size": 318246448,
+    "sha256": "e7ea66a1295bb2c8d63105594bea997a63f42075cf99679bc15e6a7a338162ce",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-arm64.zip"
+  },
+  "Origin-0.2.3-arm64.zip.blockmap": {
+    "size": 330933,
+    "sha256": "2ad9b7b25833ba67eb52274a38bc70b06e7a1802a5fc9214f0b1b844dbe75a3b",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-arm64.zip.blockmap"
+  },
+  "Origin-0.2.3-setup.exe": {
+    "size": 269457668,
+    "sha256": "1932f099a6affdd448dfc25b859834865d46b6efd75868a3fc2b3af3f5027973",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-setup.exe"
+  },
+  "Origin-0.2.3-setup.exe.blockmap": {
+    "size": 278274,
+    "sha256": "a96e8cbab84683e2faccae072287feea86cbc319ac1c802d9b131a6e3522c620",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-setup.exe.blockmap"
+  },
+  "Origin-0.2.3-windows-x64.zip": {
+    "size": 370031408,
+    "sha256": "2ef08f1a8db736a26032d07f5fa8454eeef4a3e2a3c7a0e4f83d103243ae75cd",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-windows-x64.zip"
+  },
+  "Origin-0.2.3-x64.dmg": {
+    "size": 335010643,
+    "sha256": "ce6b73abaa4ae882990aecce431c66033238d9462eb867370a4b09bb6647e8c2",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-x64.dmg"
+  },
+  "Origin-0.2.3-x64.dmg.blockmap": {
+    "size": 349837,
+    "sha256": "f482b769a7983a4bfb4072415d48fc8a82d0dc9341f7136d6d1a8075ef10d324",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-x64.dmg.blockmap"
+  },
+  "Origin-0.2.3-x64.zip": {
+    "size": 335574065,
+    "sha256": "1e7237f7c1c351c2f5a68cc33df0f2e9293e7ae69c80559f79104ed39c72e32f",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-x64.zip"
+  },
+  "Origin-0.2.3-x64.zip.blockmap": {
+    "size": 347338,
+    "sha256": "ee1b2251f64fbd842e9cff1a404d76f12f43e87e7ab7e5c87e0225cd5d591231",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.3\\Origin-0.2.3-x64.zip.blockmap"
+  },
+  "Origin-0.2.5-arm64.dmg": {
+    "size": 317853132,
+    "sha256": "5e654029125cfee4342cd3caac0bc4bf209697a732f57b7fb9cd01d1b10991a9",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-arm64.dmg"
+  },
+  "Origin-0.2.5-arm64.dmg.blockmap": {
+    "size": 331217,
+    "sha256": "a747db5fcc5132931afdc45f848136ddc1a6f2a86c934d18b52e1a183a06ec31",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-arm64.dmg.blockmap"
+  },
+  "Origin-0.2.5-arm64.zip": {
+    "size": 318253933,
+    "sha256": "bcfa8940e73aaa13baee4d0ce2b17dd64ffd4932209b6328580ad01533e1e847",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-arm64.zip"
+  },
+  "Origin-0.2.5-arm64.zip.blockmap": {
+    "size": 331323,
+    "sha256": "1d37621b6b6c46824965b1280acb697b4e40f47e2fc8474f4614043935ee0be5",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-arm64.zip.blockmap"
+  },
+  "Origin-0.2.5-setup.exe": {
+    "size": 269462917,
+    "sha256": "5b6cbc421984cf4ac906dc3401a486a40b24acad36bcc776b0a6034e90e180e5",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-setup.exe"
+  },
+  "Origin-0.2.5-setup.exe.blockmap": {
+    "size": 278530,
+    "sha256": "eb937b322feec0e7782bafa8299edcd1cbd9b07c95297529c09c3a47a9c1f91f",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-setup.exe.blockmap"
+  },
+  "Origin-0.2.5-windows-x64.zip": {
+    "size": 370037991,
+    "sha256": "73e6813e85a3f6bffb2decf933f6910b87228683021c585bf1244ccdfae55e5e",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-windows-x64.zip"
+  },
+  "Origin-0.2.5-x64.dmg": {
+    "size": 335039120,
+    "sha256": "bcd0f05e6b08299dfb42d02b0064909becdcab39d3fcc893c4151da1339aaa82",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-x64.dmg"
+  },
+  "Origin-0.2.5-x64.dmg.blockmap": {
+    "size": 351932,
+    "sha256": "d849b87327e52d8239ee8925c7dd01307544dd547fb74a75c18debcb3c3923ef",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-x64.dmg.blockmap"
+  },
+  "Origin-0.2.5-x64.zip": {
+    "size": 335581550,
+    "sha256": "c45a6c279787a9957b09d4a6c8277cf9d7c5e091da07a7ba044e9437f2e4270b",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-x64.zip"
+  },
+  "Origin-0.2.5-x64.zip.blockmap": {
+    "size": 347651,
+    "sha256": "16261e9d932c9858382205fc193af9256710b9ee1eedb85ee5e29c90e3cdc8ec",
+    "localPath": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\distribution\\0.2.5\\Origin-0.2.5-x64.zip.blockmap"
+  }
+}

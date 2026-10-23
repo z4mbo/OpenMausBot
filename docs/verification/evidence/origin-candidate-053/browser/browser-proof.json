@@ -1,0 +1,33 @@
+{
+  "source": "ec3683b171438905c6171d838ab11c559e1bfa49",
+  "owner": "5273847f-b0b4-4d97-a245-1bdb3c104a70",
+  "observedBy": "repository-agent-browser",
+  "qualification": "Forced startup network/event ordering using actual synthetic-server bodies and announcements. No reducer dispatch injection, transcript fabrication, approval bypass or provider/account access.",
+  "nativeWindowControl": false,
+  "productionData": false,
+  "before": {
+    "image": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\reconciliation-052\\thread-recovery-live\\before-chat.png",
+    "sha256": "bbd46ecabe4f12185592e9b39857ac468129cf3dc403695e84b81a4d0e4b8e10",
+    "serverSelection": "f78ca17e-8eee-4ded-bb0f-20b11e71dc2d",
+    "passed": true
+  },
+  "after": {
+    "image": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\reconciliation-052\\thread-recovery-live\\after-chat.png",
+    "sha256": "bf2a9417ef6e65d648a837be6ce7d70e3e8b03473968325a7c264ba3f57c1ecd",
+    "serverSelection": "f78ca17e-8eee-4ded-bb0f-20b11e71dc2d",
+    "passed": true
+  },
+  "passed": false,
+  "error": "Error: actual pinned A response did not settle: {\"messages\":[{\"id\":\"f3b2e011-0516-449b-a0eb-4939d1d9dacb\",\"at\":1792613015444,\"parentId\":null,\"role\":\"bot\",\"kind\":\"text\",\"text\":\"Hi, I'm Waffle. What would you like me to do?\"},{\"id\":\"75066dd5-b488-442b-a4e8-ef8b170f5a24\",\"at\":1792613015673,\"parentId\":\"f3b2e011-0516-449b-a0eb-4939d1d9dacb\",\"role\":\"user\",\"kind\":\"text\",\"text\":\"Synthetic saved transcript on A.\",\"sendId\":\"cli-4-tfYE-kCvYTF9uB\",\"requestPending\":false},{\"id\":\"920775ac-16a5-48ac-88d5-66ad6bc13418\",\"at\":1792613015871,\"parentId\":\"75066dd5-b488-442b-a4e8-ef8b170f5a24\",\"role\":\"bot\",\"kind\":\"text\",\"text\":\"Synthetic pinned thread A response.\",\"turnId\":\"aae088ef-7ebc-4081-9f2e-31d5fb376388\",\"requestMessageId\":\"75066dd5-b488-442b-a4e8-ef8b170f5a24\",\"turnTerminal\":true,\"turnCompletedAt\":1792613015886,\"turnSucceeded\":true},{\"id\":\"40bc792c-211b-4fae-897d-0ac05fd9bd8c\",\"at\":1792613015894,\"parentId\":\"920775ac-16a5-48ac-88d5-66ad6bc13418\",\"role\":\"bot\",\"kind\":\"digest\",\"text\":\"[digest] · no tool activity observed in this turn · reply: Synthetic pinned thread A response.\",\"digest\":{\"turnId\":\"aae088ef-7ebc-4081-9f2e-31d5fb376388\",\"botId\":\"73d43215-be1e-448b-afd4-d0fbad6b83cb\",\"threadId\":\"50226d54-ffc3-44c6-953e-11568bd239b9\",\"at\":1792613015894,\"durationMs\":98,\"tools\":[],\"toolCalls\":0,\"memory\":[],\"reply\":\"Synthetic pinned thread A response.\",\"usage\":{\"input\":12,\"output\":5,\"cachedInput\":2,\"costUsd\":0.01},\"hookCoverage\":\"none\"},\"turnId\":\"aae088ef-7ebc-4081-9f2e-31d5fb376388\",\"requestMessageId\":\"75066dd5-b488-442b-a4e8-ef8b170f5a24\",\"turnSucceeded\":true},{\"id\":\"425235a5-eab8-439f-a706-c4f394675555\",\"at\":1792613203557,\"parentId\":\"40bc792c-211b-4fae-897d-0ac05fd9bd8c\",\"role\":\"user\",\"kind\":\"text\",\"text\":\"Recovery verified on pinned thread A.\",\"sendId\":\"adab1a71-2a89-4879-bc97-c67e5869e5b3\",\"requestPending\":false},{\"id\":\"ea968152-8839-4b3e-93f4-6e70049400e7\",\"at\":1792613203617,\"parentId\":\"425235a5-eab8-439f-a706-c4f394675555\",\"role\":\"bot\",\"kind\":\"text\",\"text\":\"hello from fake claude\",\"turnId\":\"ee471147-7aba-4371-af8c-2e9b8f93f31c\",\"requestMessageId\":\"425235a5-eab8-439f-a706-c4f394675555\",\"turnTerminal\":true,\"turnCompletedAt\":1792613203643,\"turnSucceeded\":true},{\"id\":\"8cb7f9fe-b300-47af-b6a1-53c264b47d33\",\"at\":1792613203651,\"parentId\":\"ea968152-8839-4b3e-93f4-6e70049400e7\",\"role\":\"bot\",\"kind\":\"digest\",\"text\":\"[digest] · no tool activity observed in this turn · reply: hello from fake claude\",\"digest\":{\"turnId\":\"ee471147-7aba-4371-af8c-2e9b8f93f31c\",\"botId\":\"73d43215-be1e-448b-afd4-d0fbad6b83cb\",\"threadId\":\"50226d54-ffc3-44c6-953e-11568bd239b9\",\"at\":1792613203650,\"durationMs\":63,\"tools\":[],\"toolCalls\":0,\"memory\":[],\"reply\":\"hello from fake claude\",\"usage\":{\"input\":12,\"output\":5,\"cachedInput\":2,\"costUsd\":0.01},\"hookCoverage\":\"none\"},\"turnId\":\"ee471147-7aba-4371-af8c-2e9b8f93f31c\",\"requestMessageId\":\"425235a5-eab8-439f-a706-c4f394675555\",\"turnSucceeded\":true}],\"hasMore\":false,\"activeLeafId\":\"8cb7f9fe-b300-47af-b6a1-53c264b47d33\"}",
+  "browserCleanup": [
+    {
+      "mode": "after",
+      "closed": true
+    },
+    {
+      "mode": "before",
+      "closed": true
+    }
+  ],
+  "completedAt": "2026-10-21T20:07:09.688Z"
+}

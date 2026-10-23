@@ -51,9 +51,10 @@ export function CanvasToolbar({ mode = "design", options, tool, readOnly, narrow
   return (
     <div className="pointer-events-none absolute bottom-3 z-30 flex flex-col items-center gap-1.5 transition-[left,right] duration-(--motion-fast)" style={{ left: 8 + insets.left, right: 8 + insets.right }}>
       {options && <div role="toolbar" aria-label="Tool options" data-tool-options className={cn(surface, "pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto p-1 [scrollbar-width:none] animate-pop-in")}>{options}</div>}
-      <div role="toolbar" aria-label="Canvas tools" className={cn(surface, "pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto p-1 [scrollbar-width:none]")}>
+      <div role="toolbar" aria-label="Canvas tools" className={cn(surface, "pointer-events-auto flex min-w-0 max-w-full items-center gap-0.5 p-1")}>
         <button type="button" className={cn(tight, panels.layers && "bg-raised text-ink")} aria-label="Layers" aria-pressed={panels.layers} title="Layers" onClick={() => onPanels({ ...panels, layers: !panels.layers })}><Layers size={16} /></button>
         <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-hairline/60" />
+        <div className="-my-0.5 flex min-w-0 touch-pan-x items-center gap-0.5 overflow-x-auto p-0.5 [scrollbar-width:none]" onWheelCapture={(event) => event.stopPropagation()}>
         {(mode === "board" ? BOARD_TOOLS : TOOLS).filter((item) => (!readOnly || !item.edits) && !(narrow && item.wideOnly && tool !== item.tool)).map((item) => (
           <button key={item.tool} type="button" aria-label={item.label} aria-pressed={tool === item.tool} title={`${item.label} (${item.key})`} onClick={() => onTool(item.tool)}
             className={cn(tight, tool === item.tool && "bg-accent text-accent-ink hover:bg-accent hover:text-accent-ink")}>
@@ -83,6 +84,7 @@ export function CanvasToolbar({ mode = "design", options, tool, readOnly, narrow
             <button type="button" className={tight} aria-label="Redo" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={onRedo}><Redo2 size={16} /></button>
           </>
         )}
+        </div>
         <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-hairline/60" />
         <button type="button" className={cn(tight, panels.inspector && "bg-raised text-ink")} aria-label="Design panel" aria-pressed={panels.inspector} title="Design panel" onClick={() => onPanels({ ...panels, inspector: !panels.inspector })}><SlidersHorizontal size={16} /></button>
       </div>

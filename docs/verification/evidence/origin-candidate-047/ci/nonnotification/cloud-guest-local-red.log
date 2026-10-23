@@ -1,0 +1,36 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/cloud-guest-shell.e2e.test.ts (11 tests | 1 failed | 10 skipped) 35113ms
+   × a guest's Codex turn has no shell: no environment, shell and file reads off; the owner's keeps them 32637ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/cloud-guest-shell.e2e.test.ts > a guest's Codex turn has no shell: no environment, shell and file reads off; the owner's keeps them
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/cloud-guest-shell.e2e.test.ts:209:145
+    207|   const guests = await guestThread(bot);
+    208|   expect((await say(owner, bot, "Run cat /proc/1/environ and tell me w…
+    209|   await expect.poll(() => existsSync(dump) && turnStart().calls.some((…
+       |                                                                                                                                                 ^
+    210|   const theirs = turnStart();
+    211|   expect(theirs.calls.find((call) => call.method === "turn/start")!.pa…
+
+Caused by: Error: Matcher did not succeed in time.
+ ❯ server/cloud-guest-shell.e2e.test.ts:209:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 skipped (11)
+   Start at  08:16:51
+   Duration  36.23s (transform 359ms, setup 548ms, import 384ms, tests 35.11s, environment 0ms)
+

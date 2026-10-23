@@ -1,0 +1,205 @@
+{
+  "version": "0.2.13",
+  "source": "f44ebe30a9568ed634b9eb8a45476f42e4c059b1",
+  "image": "sha256:a893f04ee5c627e06c240e179bcf52c1bf2ce0a532c65d5348059a5b36f602d1",
+  "recordedAt": "2026-10-18T22:40:50.109Z",
+  "compiled": true,
+  "siteContextFiles": 151,
+  "identitySha256": "c467a15f14b4b8b87f96eb0420fae258f1255fab0fd2b253bd5ee9c482dcbf08",
+  "archiveSha256": "894517cfdd476f4c5c07ce5866a7fdbf57008d147da842e39b4f0828bd9a7192",
+  "cases": 16,
+  "fullPageVisualCaseScopes": 9,
+  "authViewportVisualCaseScopes": 7,
+  "supplementalLandingViewport": 1,
+  "originalCapturesRejected": 8,
+  "originalCapturesPreserved": true,
+  "readinessCorrections": {
+    "path": "/login",
+    "stage": "before client auth panel mounted",
+    "h1Present": false,
+    "correction": "Wait for the visible h1 and document fonts before observing/capturing; no application change."
+  },
+  "visualDecision": {
+    "replacementImagesViewed": 9,
+    "replacementImagesUsable": 9,
+    "replacementCasesCovered": 8,
+    "combinedRouteThemeWidthCases": 16,
+    "combinedFullPageCaseScopes": 9,
+    "combinedViewportOnlyCaseScopes": 7,
+    "additionalLandingViewportImages": 1,
+    "productVisualDefectEstablished": false
+  },
+  "accountSubmissions": 0,
+  "runtimeExceptions": 0,
+  "allProxyGetHeadRequests": 411,
+  "allProxyResponses200": true,
+  "backendConnectionsAndFormsBlocked": true,
+  "preview": {
+    "containerId": "9cc8f0b0a0550d090c505282411ca76fb4e757187f4594d7e0ee9e3ef88caccf",
+    "internalNetwork": true,
+    "capabilitiesDropped": [
+      "ALL"
+    ],
+    "mounts": 0,
+    "readOnlyRootFilesystem": false,
+    "cleanupRecordedSeparately": true
+  },
+  "qualification": "Layout/heading/theme/reduced-motion and named visible scope only. Signup captures show deliberately blocked-policy loading, not account flow acceptance. Full-page capture/readiness gaps are preserved and superseded only by the listed visual replacements. No production, account, mail, backend-policy or native acceptance inferred.",
+  "files": [
+    {
+      "path": "site-replacement/landing-375-light-fresh-full.png",
+      "bytes": 387102,
+      "sha256": "0e7eb7f4e76b9e31071dcf665a18ab108379a0d5cc232f64b435537e9d0d4495"
+    },
+    {
+      "path": "site-replacement/landing-375-light-viewport.png",
+      "bytes": 42706,
+      "sha256": "0ef4873205daa0a04489f9abbea05b9408e1aa90fba971a12da1c01eac9a0a51"
+    },
+    {
+      "path": "site-replacement/login-1440-dark-viewport.png",
+      "bytes": 27602,
+      "sha256": "5f9084714aadcfb835f9c144626f04ca7950852e8dd397d9b2c732784d181e57"
+    },
+    {
+      "path": "site-replacement/login-1440-light-viewport.png",
+      "bytes": 28627,
+      "sha256": "758f2844768fbe4392862f276438d79a1a1c11a5fbdb9c4f6aac4b3cb33257e3"
+    },
+    {
+      "path": "site-replacement/login-375-dark-viewport.png",
+      "bytes": 20202,
+      "sha256": "9f53afb4db1c9eea084265e10534dc843e0a734b821e7a80e00ed7a44e2fabf2"
+    },
+    {
+      "path": "site-replacement/login-375-light-viewport.png",
+      "bytes": 21253,
+      "sha256": "6de6227910331dd1015ab23ad0fbd445839c8ea26103baf28145f28a8a024513"
+    },
+    {
+      "path": "site-replacement/proof.json",
+      "bytes": 3790,
+      "sha256": "dca7ce0f80a465c7d10c7dd0e613c49a136440ed9fe526adc46a33ff1f5dd9d6"
+    },
+    {
+      "path": "site-replacement/signup-1440-dark-viewport.png",
+      "bytes": 22220,
+      "sha256": "bb1e24217fe9dd0914160c718ac5e9d81944a51feb5658e4223e33f76a63b4f1"
+    },
+    {
+      "path": "site-replacement/signup-1440-light-viewport.png",
+      "bytes": 23373,
+      "sha256": "cb606fcc326c4d40317da4af60714b9fedb0b248c2ccdb93a9a12f5079c24ff5"
+    },
+    {
+      "path": "site-replacement/signup-375-dark-viewport.png",
+      "bytes": 16242,
+      "sha256": "efc3063477180c2408b5f76ad995a9dfdeee56815d12546ae70002faec5231e9"
+    },
+    {
+      "path": "site-visual-qa-final.json",
+      "bytes": 15462,
+      "sha256": "f315c4885aa9ad0d2af2fc20991e742b787d51d285f8d4df3f5f674fcf3cf8bb"
+    },
+    {
+      "path": "site-visual-qa-initial.json",
+      "bytes": 10671,
+      "sha256": "f2706274d306860129b35b30a6c4af8238eb455f707cdbdd84cf323a7f476362"
+    },
+    {
+      "path": "site/landing-1440-dark.png",
+      "bytes": 532180,
+      "sha256": "811de5b095cae59520334fd7ff634a9cfecf408a8c46fef28d859f69e786390e"
+    },
+    {
+      "path": "site/landing-1440-light.png",
+      "bytes": 545639,
+      "sha256": "282c0d17c8c1868e257a129bc28762a7ea98048e7662437de51a1c6927ffbe4a"
+    },
+    {
+      "path": "site/landing-375-dark.png",
+      "bytes": 376180,
+      "sha256": "68caf4f56dcf6ad5e24720090f966ccdb8d31ea895f6cb9bbf9c99144863c1b6"
+    },
+    {
+      "path": "site/landing-375-light.png",
+      "bytes": 76705,
+      "sha256": "0681236bb10e45853090ff5abe190bef027f184c4d7e84db344d14edf3c1f1a4"
+    },
+    {
+      "path": "site/login-1440-dark.png",
+      "bytes": 10383,
+      "sha256": "2810046fd91e4da44c093daeaed4e06d4e5c7e13755939b4aba697caab1b40fd"
+    },
+    {
+      "path": "site/login-1440-light.png",
+      "bytes": 10956,
+      "sha256": "e6d0553b9ee17d1877c1b371fc1023f695c3c7f053bc3db854b33bc71466b9c2"
+    },
+    {
+      "path": "site/login-375-dark.png",
+      "bytes": 4173,
+      "sha256": "b817caf2f4107e0092ff3e733be870a8b6e5e5c019acf36ba4922e6f8df34386"
+    },
+    {
+      "path": "site/login-375-light.png",
+      "bytes": 4790,
+      "sha256": "6093fb9abf95332735b93ec8ec96af1d9b9d15601e31b066a8a22248e5f2857c"
+    },
+    {
+      "path": "site/proof.json",
+      "bytes": 7244,
+      "sha256": "d21186a886e3f6e5039c2ab71cc0b0a2a6b08c7a9d114872e7e8ad74c9482a24"
+    },
+    {
+      "path": "site/proxy-proof-final.json",
+      "bytes": 50021,
+      "sha256": "dba5013530f6ffe98e68f5c3e0099593a3009016eee8bd93959224215ae6ee69"
+    },
+    {
+      "path": "site/proxy-proof.json",
+      "bytes": 32452,
+      "sha256": "a8cdfd891c0575cc8eaa213281405475bd1ad9130151865074662b76dd4ddc46"
+    },
+    {
+      "path": "site/signup-1440-dark.png",
+      "bytes": 10455,
+      "sha256": "8bd3ccbe35a3dfbd5ffe2323e8a6136228b79fdb735191e6350657be6458b36f"
+    },
+    {
+      "path": "site/signup-1440-light.png",
+      "bytes": 11025,
+      "sha256": "88447ca38d38a9a6d331180009a241f004bb49a7e9a2081591685f5b262ae96e"
+    },
+    {
+      "path": "site/signup-375-dark.png",
+      "bytes": 4249,
+      "sha256": "2c03d90b475d9586de303ef78f6091fc7fe461bb91ff74768767f63c9236ffbc"
+    },
+    {
+      "path": "site/signup-375-light.png",
+      "bytes": 21563,
+      "sha256": "180526c941055719eea298c0faec9413515f5a57d3ce0ed6f11029841769dae5"
+    },
+    {
+      "path": "site/whats-new-1440-dark.png",
+      "bytes": 593913,
+      "sha256": "919671500ec303c36916b7d8f8c8eca6b6d7c6fd6287ef16828f98db16439ce1"
+    },
+    {
+      "path": "site/whats-new-1440-light.png",
+      "bytes": 607017,
+      "sha256": "5a1a3c45fb66bb9ac7d7a1c031172051b925d50d530a25f156e26ea3b30df4f1"
+    },
+    {
+      "path": "site/whats-new-375-dark.png",
+      "bytes": 527174,
+      "sha256": "2806e9312bc2e2a07c57e813401cec285f8ef2e0ca2d284793ee4367bcb5123d"
+    },
+    {
+      "path": "site/whats-new-375-light.png",
+      "bytes": 540848,
+      "sha256": "6fd14b357047671a54db36c183edb1e89f6b9c9935bf36df286362c60f378cd7"
+    }
+  ]
+}

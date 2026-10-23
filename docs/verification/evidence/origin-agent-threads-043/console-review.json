@@ -1,0 +1,20 @@
+{
+  "fixtureSetupFailure": {
+    "message": "An initial preview-only effect depended on an unstable setter and repeatedly selected the Chief. The fixture was corrected to use the stable setChiefSectionOf function, then its owned server/preview were replaced before final checks.",
+    "firstObserved": {
+      "level": "error",
+      "message": "Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.",
+      "timestamp": "2026-10-19T21:32:01.793Z",
+      "url": "http://127.0.0.1:5179/@fs/C:/Users/aless/AppData/Local/Temp/openmausbot-verify-data-6VbiBE/node_modules/.vite/deps/react-dom_client.js?v=73ea4ede"
+    },
+    "lastObserved": {
+      "level": "error",
+      "message": "Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.",
+      "timestamp": "2026-10-19T21:32:35.739Z",
+      "url": "http://127.0.0.1:5179/@fs/C:/Users/aless/AppData/Local/Temp/openmausbot-verify-data-6VbiBE/node_modules/.vite/deps/react-dom_client.js?v=73ea4ede"
+    },
+    "observedErrors": 484
+  },
+  "finalChecksAfter": "2026-10-19T21:40:00.000Z",
+  "errorsDuringFinalChecks": []
+}

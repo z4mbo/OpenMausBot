@@ -1,0 +1,42 @@
+
+ RUN  v5.0.2 [isolated Origin checkout]/backend
+
+ ❯ convex/budgets.access.test.ts (2 tests | 1 failed) 251ms
+   × a known private-project agent ID does not grant another workspace member its budget details 242ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  convex/budgets.access.test.ts > a known private-project agent ID does not grant another workspace member its budget details
+AssertionError: promise resolved "{ canRaise: false, level: 'ok', …(5) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "canRaise": false,
++   "level": "ok",
++   "monthlyUsd": 5,
++   "name": "Private Chief",
++   "scope": "agent",
++   "spentUsd": 0,
++   "teamId": "[synthetic row identifier]",
+  }
+
+ ❯ convex/budgets.access.test.ts:37:103
+     35| test("a known private-project agent ID does not grant another workspac…
+     36|   const f = await fixture();
+     37|   await expect(f.t.query(api.budgets.forAgent, { sessionToken: f.outsi…
+       |                                                                                                       ^
+     38|   expect((await f.t.query(api.budgets.overview, { sessionToken: f.outs…
+     39| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  08:49:10
+   Duration  664ms (tests 44%, import 27%, transform 23%, environment 6%, worker 1%)
+

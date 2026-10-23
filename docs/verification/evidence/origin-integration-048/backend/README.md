@@ -1,0 +1,17 @@
+# Backend integration evidence
+
+This is the local working-merge evidence for combining prepared Origin 0.3.2 source `5aafbf02ab2ded075d2c75955419f35a45cce99a` with published Origin 0.4.0 source `f76cbe9b8019b648bb08f9125daefe35e6625185`. It does not name a final release commit or authorize delivery. Root binds the final immutable source after committing the integration.
+
+The compiled schemas contain 68 tables in 0.3.2, 73 in 0.4.0 and 75 in the combined tree. [Schema comparison](schema-comparison.json) preserves every table validator and index from both parents. The [repair record](backend-repair.json) also preserves all 61 generated API modules from 0.3.2 and 71 from 0.4.0. It does not claim complete old-client/provider execution or knowledge of deployed production rows.
+
+The approved fixes close two concrete paths. A workspace member outside a private project could query its agent budget by known ID; project membership now gates that read while owners/admins and project viewers retain their permissions. The restored hosted-model path bypassed the new monthly caps/accounting; admission, transfer, claim and start now check those caps, and authenticated terminal receipts record spend once. Replayed receipts cannot charge again. Daily computer/agent API caps and explicit paid-source consent remain separate enforced gates.
+
+[Access red](access-red.log) records one genuine failed privacy assertion. [Hosted monthly red](monthly-hosted-red.log) records four genuine failed admission/accounting cases. [Final focused checks](backend-focused.log) pass 37 tests, including a cap changed between claim and start. [Full backend](backend-full.log) passes 293 tests across 35 files; that full run preceded the last additional start-race assertion, then the final 37 focused checks passed without further runtime changes. [Call/Pipeline/host checks](call-pipeline-host.log) pass 45 tests. [Backend TypeScript](backend-typecheck.log) and [owned-file lint](owned-lint.log) exit successfully with empty logs.
+
+The three conflict leaves preserve 0.4.0 Pipeline replies/status callbacks, stages/read state and call-note recording together with 0.3.2 paid-AI budget checks, exact transcription-agent attribution and provider credential scrubbing. [Source hashes](source-files.json) retain the exact working bytes. No source was staged or committed by this lane.
+
+The bounded HTTP review covered signed Twilio and secret-authenticated Brevo callbacks, bounded bodies, published-only page serving and existing capture token/rate controls. No additional proven P1 was found. This is source/synthetic qualification, not real provider, recipient, public-site or persisted account acceptance.
+
+[Delivery hold](delivery-hold.json) retains the superseded 047 preparation hashes. See the [held 0.3.2 candidate](../../../origin-candidate-047.md) and [earlier combined candidate](../../../origin-candidate-046.md). Existing invitation-mail activation remains recorded in the [031 activation evidence](../../origin-mail-activation-031.json); no mail reactivation or recipient test occurred here.
+
+Logs contain synthetic records only. Credential and row identifiers are sanitized for this archive; manifest source hashes distinguish the retained ignored raw logs from their public sanitized copies. No real application rows, credential values, private account identifiers, production test requests, protected-service changes or production deployment operations are included.

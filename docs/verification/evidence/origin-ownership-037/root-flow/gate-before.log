@@ -1,0 +1,150 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix
+
+ ❯ src/components/OriginGate.session.test.ts (4 tests | 3 failed) 55ms
+   × the actual false signup form discards authentication after a backend switch 29ms
+   × the actual true signup form discards authentication after a backend switch 11ms
+   × a pending invitation acceptance cannot re-share the old account after a switch 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/OriginGate.session.test.ts > the actual false signup form discards authentication after a backend switch
+ FAIL  src/components/OriginGate.session.test.ts > the actual true signup form discards authentication after a backend switch
+AssertionError: expected 'fixture-private-token-from-first-back…' to be null
+
+- Expected:
+null
+
++ Received:
+"fixture-private-token-from-first-backend"
+
+ ❯ src/components/OriginGate.session.test.ts:74:35
+     72|   await act(async () => setCloudUrl("http://127.0.0.1:43002"));
+     73|   await act(async () => request.resolve({ sessionToken: "fixture-priva…
+     74|   expect.soft(sessionStore.get()).toBeNull();
+       |                                   ^
+     75|   expect.soft(fixture.queries).not.toContainEqual({ url: "http://127.0…
+     76|   expect.soft(fixture.mutation).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  src/components/OriginGate.session.test.ts > the actual false signup form discards authentication after a backend switch
+ FAIL  src/components/OriginGate.session.test.ts > the actual true signup form discards authentication after a backend switch
+AssertionError: expected [ { …(2) }, { …(2) } ] to not deep equally contain { url: 'http://127.0.0.1:43002', …(1) }
+
+- Expected:
+{
+  "token": "fixture-private-token-from-first-backend",
+  "url": "http://127.0.0.1:43002",
+}
+
++ Received:
+[
+  {
+    "token": "fixture-private-token-from-first-backend",
+    "url": "http://127.0.0.1:43002",
+  },
+  {
+    "token": "fixture-private-token-from-first-backend",
+    "url": "http://127.0.0.1:43002",
+  },
+]
+
+ ❯ src/components/OriginGate.session.test.ts:75:36
+     73|   await act(async () => request.resolve({ sessionToken: "fixture-priva…
+     74|   expect.soft(sessionStore.get()).toBeNull();
+     75|   expect.soft(fixture.queries).not.toContainEqual({ url: "http://127.0…
+       |                                    ^
+     76|   expect.soft(fixture.mutation).not.toHaveBeenCalled();
+     77|   expect(fixture.share).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  src/components/OriginGate.session.test.ts > the actual false signup form discards authentication after a backend switch
+ FAIL  src/components/OriginGate.session.test.ts > the actual true signup form discards authentication after a backend switch
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      Object {
+        Symbol(functionName): "workspaces:acceptInvite",
+      },
+      Object {
+        "sessionToken": "fixture-private-token-from-first-backend",
+        "token": "fixture-invite",
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/components/OriginGate.session.test.ts:76:37
+     74|   expect.soft(sessionStore.get()).toBeNull();
+     75|   expect.soft(fixture.queries).not.toContainEqual({ url: "http://127.0…
+     76|   expect.soft(fixture.mutation).not.toHaveBeenCalled();
+       |                                     ^
+     77|   expect(fixture.share).not.toHaveBeenCalled();
+     78| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  src/components/OriginGate.session.test.ts > the actual false signup form discards authentication after a backend switch
+ FAIL  src/components/OriginGate.session.test.ts > the actual true signup form discards authentication after a backend switch
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "http://127.0.0.1:43001",
+      "fixture-private-token-from-first-backend",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/components/OriginGate.session.test.ts:77:29
+     75|   expect.soft(fixture.queries).not.toContainEqual({ url: "http://127.0…
+     76|   expect.soft(fixture.mutation).not.toHaveBeenCalled();
+     77|   expect(fixture.share).not.toHaveBeenCalled();
+       |                             ^
+     78| });
+     79|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  src/components/OriginGate.session.test.ts > a pending invitation acceptance cannot re-share the old account after a switch
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "http://127.0.0.1:43001",
+      "fixture-session-one",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/components/OriginGate.session.test.ts:88:29
+     86|   await act(async () => invite.resolve(null));
+     87|   expect(sessionStore.get()).toBe("fixture-session-two");
+     88|   expect(fixture.share).not.toHaveBeenCalled();
+       |                             ^
+     89| });
+     90|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  02:21:56
+   Duration  1.28s (transform 260ms, setup 529ms, import 201ms, tests 55ms, environment 316ms)
+

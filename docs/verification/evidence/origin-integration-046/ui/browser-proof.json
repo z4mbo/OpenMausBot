@@ -1,0 +1,104 @@
+{
+  "recordedAt": "2026-10-20T05:28:00.375Z",
+  "browser": "Root CUA, browser2; tabs11 then12",
+  "fixture": "http://127.0.0.1:50063/__integration046.html",
+  "ownedRootLauncher": {
+    "pid": 74440,
+    "source": "launch-root.mjs",
+    "manifest": "source-before-4.json",
+    "fixture": "fixture-4.json"
+  },
+  "scope": "Actual merged ModelSection, ModelHostingSettings, SettingsModal, ChiefSectionBar, ChatView, usage/context and PR card components with controlled StoreContext/cloud adapters/HTTP replies; no real provider, backend, grant, credential, execution or GitHub action.",
+  "cases": [
+    {
+      "name": "Ranked models, dark desktop and light375",
+      "result": "pass",
+      "width375": 375,
+      "scrollWidth375": 375,
+      "interaction": "Moved ChatGPT from1to2 using the actual move control; live status announced move, Save enabled; Cancel restored order. No save submitted."
+    },
+    {
+      "name": "Account sharing, light375",
+      "result": "pass",
+      "width": 375,
+      "scrollWidth": 375,
+      "interaction": "Selected synthetic workspace and observed disabled source, Edit/Add/Stop controls; no source enabled or saved."
+    },
+    {
+      "name": "Integrations, light375",
+      "result": "pass",
+      "width": 375,
+      "scrollWidth": 375,
+      "dialog": {
+        "x": 24,
+        "y": 26,
+        "width": 327,
+        "height": 760
+      },
+      "interaction": "Actual Settings dialog and service expander inspected; no credential entered."
+    },
+    {
+      "name": "Project More menu, dark375",
+      "result": "pass",
+      "width": 375,
+      "scrollWidth": 375,
+      "interaction": "Menu contained Call,Canvas,Studio,Broadcast,Pipeline,Assets. Studio selection updated the selected section. Feature bodies are not mounted."
+    },
+    {
+      "name": "Compact Usage and context with PR card, dark375",
+      "result": "pass",
+      "width": 375,
+      "scrollWidth": 375,
+      "popup": {
+        "x": 47,
+        "y": 166,
+        "width": 320,
+        "height": 276.5
+      },
+      "interaction": "Session32%/weekly61% and reset times shown, context collapsed initially, expansion revealed20k/100k and input/output details. Close restored chat. No merge or provider action."
+    },
+    {
+      "name": "Desktop width presets",
+      "result": "pass",
+      "viewport": 1280,
+      "standard": {
+        "transcript": 680,
+        "dock": 720
+      },
+      "wide": {
+        "transcript": 840,
+        "dock": 880
+      },
+      "full": {
+        "transcript": 1240,
+        "dock": 1280
+      },
+      "scrollWidth": 1280,
+      "dockPaddingPx": 40
+    }
+  ],
+  "console": {
+    "tab": 12,
+    "errors": 0,
+    "warnings": 0,
+    "checkedThrough": "2026-10-20T05:28:00.375Z"
+  },
+  "failuresRetained": [
+    "Initial fixture omitted Markdown dependency optimization: blank page/CJS default-export error; fixture only corrected.",
+    "Second fixture mounted ThreadRefsProvider outside StoreContext: blank page; fixture only corrected.",
+    "Agent-owned70208 was no longer listening after handoff. Root launched fresh74440 with source-before-4; failed navigation in stale tab11 was retained as a browser error, then a fresh tab12 worked. No security interstitial was bypassed.",
+    "Exact Playwright context-button accessible-name selector matched no element; fresh AX state and its current button successfully expanded the same context panel."
+  ],
+  "sourceLimits": [
+    "source-before-3 and4 bind the unfrozen working tree, not a release SHA; captures occurred while unrelated backend/server integration changes were being finished.",
+    "The tracked source inventory omitted the newly extracted untracked src/state/time-format.ts; its current hash is supplemental, not reconstructed capture-time evidence.",
+    "The canonical release-data file gained an integration-safety note after launcher startup; these screens do not render release history.",
+    "A screenshot captured immediately during a menu/settings transition can show its previous frame. project-more-open-dark-375.jpg was captured in a subsequent tool call after the open menu was visible.",
+    "The app fixture has a synthetic PR card and synthetic provider labels; outbound key/merge forms were never submitted."
+  ],
+  "supplementalTimeFormat": {
+    "path": "src/state/time-format.ts",
+    "sha256": "d702583cc892f0a12715260aa2d2cedfc077a2d68aad7bd0bebb81f4b3ee5098"
+  },
+  "viewportRestored": true
+}

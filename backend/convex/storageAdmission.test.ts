@@ -8,7 +8,7 @@ import type { Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
-afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks(); });
+afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
 async function legacyImageMetadata(ctx: MutationCtx, id: Id<"_storage">) {
   // convex-test 0.0.60 omits Blob.type when emulating storage.store.
@@ -173,6 +173,7 @@ test("upload URLs are one-use, expire, enforce MIME and bound incoming bytes", a
 });
 
 test("an upload rechecks project access after receiving the body and deletes only its rejected new blob", async () => {
+  vi.useFakeTimers();
   const f = await fixture();
   const original = await f.upload(await f.t.mutation(api.design.generateUploadUrl, f.source));
   const url = await f.t.mutation(api.design.generateUploadUrl, { ...f.source, sessionToken: f.own.sessionToken });
@@ -184,6 +185,7 @@ test("an upload rechecks project access after receiving the body and deletes onl
   const response = f.t.fetch(new URL(url).pathname + new URL(url).search, { method: "POST", body, headers: { "Content-Type": "image/png" }, duplex: "half" } as RequestInit);
   await started;
   await f.removeMember();
+  await f.t.finishAllScheduledFunctions(vi.runAllTimers);
   release();
   expect((await response).status).toBe(400);
   expect(await f.t.run(ctx => ctx.db.system.get(original))).not.toBeNull();

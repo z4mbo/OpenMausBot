@@ -102,7 +102,8 @@ export function SharedThreadBar({ bot, empty }: { bot: Bot; empty: boolean }) {
             {task.sharedPrivate ? t("shared.share") : t("shared.keepPrivate")}
           </button>
         )}
-        {run && !run.mine && <span data-shared-busy className="ml-auto text-ink-secondary">{t("shared.workingFor", { name: run.by })}</span>}
+        {run?.hostId ? <span data-shared-busy className="ml-auto text-ink-secondary">{run.executedByName ? t("shared.runningOnComputer", { name: run.executedByName }) : t("shared.waitingForComputer")}</span>
+          : run && !run.mine && <span data-shared-busy className="ml-auto text-ink-secondary">{t("shared.workingFor", { name: run.by })}</span>}
         {!run?.mine && Boolean(task.shared?.queued) && !run && <span className="ml-auto">{t("shared.waiting", { count: task.shared!.queued! })}</span>}
       </div>
     </div>

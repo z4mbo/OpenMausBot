@@ -1281,14 +1281,14 @@ describe("credential env narrowing", () => {
     expect(instances.openai.access).toBe("api");
   });
 
-  it("runs only Claude (API key) on a key saved from Settings, and every Claude bot when asked", () => {
+  it("keeps Claude (API key) on the saved key when all Claude bots also use it", () => {
     const own = instanceConfigs({ anthropic: { key: "SECRET-ANT", everyClaudeBot: false } });
     expect(own.claudeApi.environment).toEqual({ ANTHROPIC_API_KEY: "SECRET-ANT" });
     expect(own.claude.environment).toEqual({});
     for (const anthropic of [{ key: "SECRET-ANT" }, { key: "SECRET-ANT", everyClaudeBot: true }]) {
       const every = instanceConfigs({ anthropic });
       expect(every.claude.environment).toEqual({ ANTHROPIC_API_KEY: "SECRET-ANT" });
-      expect(every.claudeApi.environment).toEqual({});
+      expect(every.claudeApi.environment).toEqual({ ANTHROPIC_API_KEY: "SECRET-ANT" });
     }
   });
 
@@ -1980,7 +1980,7 @@ describe("changedInstanceIds", () => {
     expect(reloaded({ mistral: { key: "m2" } }, saved)).toEqual(["mistral"]);
     expect(reloaded({ openaiCompat: { key: "c2", url: "https://compat.example/v1" } }, saved)).toEqual(["openaiCompat"]);
     expect(reloaded({ openaiCompat: { key: "c1", url: "https://other.example/v1" } }, saved)).toEqual(["openaiCompat"]);
-    expect(reloaded({ anthropic: { key: "a" } }, saved)).toEqual(["claude"]);
+    expect(reloaded({ anthropic: { key: "a" } }, saved)).toEqual(["claude", "claudeApi"]);
   });
   it("replaces nothing for sections no driver reads", () => {
     expect(reloaded({ onboarding: { hintsSeen: ["tour.composer"] } })).toEqual([]);

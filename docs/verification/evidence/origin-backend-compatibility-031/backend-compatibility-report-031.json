@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "status": "isolated-request-contract-verified-unpublished",
+  "passed": true,
+  "verifiedAt": "2026-10-18T15:57:36.103Z",
+  "releaseSource": null,
+  "baseline": {
+    "version": "0.2.10",
+    "source": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+    "originalCaller": {
+      "role": "baseline-client",
+      "path": "server/origin-cloud.ts",
+      "originalModuleId": "C:/Users/aless/.codex/worktrees/origin-compat-client-030/Origin/server/origin-cloud.ts",
+      "source": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+      "gitBlob": "d335c7c354ce6f601f487289f10531a722fa1383",
+      "sha256Lf": "7316bc9fd23ec8b72a9d44fd653463d5e22dcc6ebe7b967777e0be84d57cfe1a"
+    },
+    "transportSdk": "convex1.47.0, matching the baseline lockfile"
+  },
+  "candidate": {
+    "observedIntegrationSource": "dd5b63ef914c5a546ea99cbef65b29b33078c7e9",
+    "workerBackendSource": "3b85cb69c0c907a9aa08ba98b664cb5889cbe83a",
+    "originalCaller": {
+      "role": "candidate-client",
+      "path": "server/origin-cloud.ts",
+      "originalModuleId": "C:/Users/aless/Documents/Origin-bugfix/server/origin-cloud.ts",
+      "source": "dd5b63ef914c5a546ea99cbef65b29b33078c7e9",
+      "gitBlob": "5a82c554d37e68f5e70a000b0515356b9135017d",
+      "sha256Lf": "299d50439d587586bfb47e1eabd457144156f38d740631e19cadd8bc47d8b6b0"
+    },
+    "registeredBackendModules": [
+      {
+        "path": "backend/convex/schema.ts",
+        "gitBlob": "f763482fc352c75549efef49644ff5baf233de7f",
+        "sha256Lf": "d32b3843d31b0bbc7ae6b2fc2993943a7155135ea775c7d26a38f4e16056ecbf"
+      },
+      {
+        "path": "backend/convex/featureTables.ts",
+        "gitBlob": "6df35255bb6fef46145c92bc7aae294537e0deb4",
+        "sha256Lf": "63cad7f3183693ce1e6b2e04d67b0ed7c84b86429b9fef4a39e7676627ac7f58"
+      },
+      {
+        "path": "backend/convex/agentsTables.ts",
+        "gitBlob": "19b85f7c87d5a81e6de2ec5c7b1d17011a34c7b7",
+        "sha256Lf": "983b5a482fc01e4c8c78499cf33b722bb2eba88ae1f734617525bc394e2462a2"
+      },
+      {
+        "path": "backend/convex/lib/storageValidators.ts",
+        "gitBlob": "4429ca291482946c789e3da7f25507bdefb2030a",
+        "sha256Lf": "9e7a718fbe0b99c53754ff3d3fc6ff8060a11b08124e407d897293eb247af065"
+      },
+      {
+        "path": "backend/convex/lib/validators.ts",
+        "gitBlob": "dda1df55abfbe935a57be7fb89c3a01f18484caa",
+        "sha256Lf": "51801aec43a1ec4858072a57a755674ba60327458a821099648c957e5e4b21d5"
+      },
+      {
+        "path": "backend/convex/_generated/api.js",
+        "gitBlob": "44bf98583204c1f9474b38f84b48659b192eea8b",
+        "sha256Lf": "f513058549831e85376f8d19cafaf2a4a770b6eb1b859fb371141f2c9dec0d70"
+      },
+      {
+        "path": "backend/convex/lib/auth.ts",
+        "gitBlob": "212c936bafc9e94d4eff3a49bc7751a220353e6f",
+        "sha256Lf": "3fc94b50e6fc5898aa5d7a39a8bdaaab2bc27de171fcb8d0509ab2f49849e2a2"
+      },
+      {
+        "path": "backend/convex/workspaces.ts",
+        "gitBlob": "75ce114781eec38acae35a9493abab12c6842673",
+        "sha256Lf": "6d0271275e4032895d6f50c761964b9d02e4a16f1684593955f9447c87bddb27"
+      },
+      {
+        "path": "backend/convex/_generated/server.js",
+        "gitBlob": "2dbe0dbd475de29f550f222942597ef9f5dc8654",
+        "sha256Lf": "0cdd1d842b9458d8a6f2444c35eb9929312316a384ca76a4b1d964bedde8a6f2"
+      },
+      {
+        "path": "backend/convex/lib/invitationMail.ts",
+        "gitBlob": "d3112223648e36bc4babe19c512e8fc92c028677",
+        "sha256Lf": "cc828b89b665e7a4d274d7dc993f32e984beb01d3d54b70d5d48c3aef18e80dc"
+      },
+      {
+        "path": "shared/origin-site-address.ts",
+        "gitBlob": "b07c786115cd0d8ac93a00b403895b7af103face",
+        "sha256Lf": "1df1a4a5cb49117a4430d6d21db8a61ae03388eeb4221fd20fdb31c24e3a0161"
+      },
+      {
+        "path": "backend/convex/lib/permissions.ts",
+        "gitBlob": "cacbc469e0abc32f8e54e7c612139e660073eb5e",
+        "sha256Lf": "579f2518d6a82ebd9ced89fb5e323d934c59d2af32df588dd29ed8ba06584546"
+      },
+      {
+        "path": "backend/convex/projects.ts",
+        "gitBlob": "a5a6eed91d13978cb190700a4be8371429aca928",
+        "sha256Lf": "c18ad82a41062188540e28825e45c3fad9b9fb728a6aa40224eaf70346ff5911"
+      },
+      {
+        "path": "backend/convex/lib/repository.ts",
+        "gitBlob": "ea0f59b0cc2ae90fb526271141d695b5a1c015fd",
+        "sha256Lf": "e09a4a91f36e96184969c63017852ac42f8eeb51d83cd1a9f66bfefca3b17fbb"
+      },
+      {
+        "path": "backend/convex/lib/storage.ts",
+        "gitBlob": "b018ad94ec260c4f6554b75b4f27828d6dfc48f5",
+        "sha256Lf": "dd6a1ca00b1e3dbbc83f3131416f10b703d5d86b2bfb6ed6473a64ae78f0c165"
+      },
+      {
+        "path": "backend/convex/lib/agentAccess.ts",
+        "gitBlob": "c9adc6a945b8cb0adbb00517a2821bb3ebe026c3",
+        "sha256Lf": "0c5e1ca7b70cb6939a34a6f44b7fed0ecae3e2ddd86cc98e9d17fde43ac28454"
+      },
+      {
+        "path": "backend/convex/lib/columns.ts",
+        "gitBlob": "fb0e9a0dd44f6f30deeda7345477eeca4b4a08a6",
+        "sha256Lf": "64cdbe511258f5c299e814ec00d1dc8d9a03905afb6da297d068b88ed591db99"
+      },
+      {
+        "path": "shared/origin-columns.ts",
+        "gitBlob": "fe44fa23f9bf6e6cbd6da94e966b3a1a666a4375",
+        "sha256Lf": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b"
+      },
+      {
+        "path": "backend/convex/tasks.ts",
+        "gitBlob": "389701fbfdd0a0bb4e2412f5bf911767025dd2d4",
+        "sha256Lf": "58bca92460f52c7c3544705a58f0f89cc9749c2590d1983581fc20dc7955048a"
+      },
+      {
+        "path": "backend/convex/integrations.ts",
+        "gitBlob": "9de569bbe86ed4a238e7c96c9b8cf269464a711f",
+        "sha256Lf": "96ea47b84d2c637d6ec64ec50a294da415879b2ddd2746ee5b1f9319944eb412"
+      },
+      {
+        "path": "backend/convex/lib/completions.ts",
+        "gitBlob": "90a7c5ad77ebefdd3c15619310cc16ffc8d8cc8a",
+        "sha256Lf": "195a3ed46bae219ae8723972fa969cb22a016b4790d204cbe36947fad56a9da6"
+      },
+      {
+        "path": "backend/convex/notifications.ts",
+        "gitBlob": "40bca2dedd80b45360b2564f3a54dead133f85e9",
+        "sha256Lf": "f10bc2083f3ce9bee4763dfd0529d4967228bfbd6fe72644cc290c264cf477ff"
+      },
+      {
+        "path": "backend/convex/lib/agentThreadRows.ts",
+        "gitBlob": "0fcdfca21e33135380125605198d2e55784df5e6",
+        "sha256Lf": "d615ca21de02f6885666dd7836f3dec152789c29d731e4131060c0a7d0602957"
+      },
+      {
+        "path": "backend/lib/issue-mentions.ts",
+        "gitBlob": "48b7864fb18e186643f2552226bb368b950dc139",
+        "sha256Lf": "b7812722491fdd60ce122e3ea71a01a9d0bed92840764f966c012735dad3fed7"
+      },
+      {
+        "path": "backend/lib/comment-checklist.ts",
+        "gitBlob": "a21a423b4a1312be689f3a8e48c61a8bc89ea233",
+        "sha256Lf": "e5e3f26a3d945773569bb18776c2f02819de5fb56557273c5ef188fd3a18d565"
+      },
+      {
+        "path": "backend/convex/auth.ts",
+        "gitBlob": "c25c26a3f8bbd5c97371d9122334a707734f61b3",
+        "sha256Lf": "bd19c396ed409164c018f3540827b9adf867f7a05eeb0e09b65a9a6d13e75b67"
+      }
+    ],
+    "draftImplementationFiles": [
+      {
+        "path": "backend/convex/connectors.ts",
+        "mode": "100644",
+        "gitBlob": "2fafbb61c4b637b9b08b895d6e34a6c08f1d5000",
+        "sha256": "2c740582d73cae692049ad6994143faca3513e627df73075df3cd15ffdcc2e08"
+      },
+      {
+        "path": "backend/convex/feedback.ts",
+        "mode": "100644",
+        "gitBlob": "47eb3dd9623c8b28bc5c7350fef6ba174342d63d",
+        "sha256": "ef31e7670675d405e0d3c84e929a78d4280f896e7406da24a9d00123d58386f1"
+      },
+      {
+        "path": "backend/convex/integrations.ts",
+        "mode": "100644",
+        "gitBlob": "9de569bbe86ed4a238e7c96c9b8cf269464a711f",
+        "sha256": "96ea47b84d2c637d6ec64ec50a294da415879b2ddd2746ee5b1f9319944eb412"
+      },
+      {
+        "path": "backend/convex/legacyImport.ts",
+        "mode": "100644",
+        "gitBlob": "93c482aebd910d376e54a0e1c337d148d8e73f21",
+        "sha256": "fac602ef80f5db08324fdb8318f33a70789d51d7b154877b61a75d274b327f45"
+      },
+      {
+        "path": "backend/convex/lib/columns.ts",
+        "mode": "100644",
+        "gitBlob": "fb0e9a0dd44f6f30deeda7345477eeca4b4a08a6",
+        "sha256": "64cdbe511258f5c299e814ec00d1dc8d9a03905afb6da297d068b88ed591db99"
+      },
+      {
+        "path": "backend/convex/projects.ts",
+        "mode": "100644",
+        "gitBlob": "a5a6eed91d13978cb190700a4be8371429aca928",
+        "sha256": "c18ad82a41062188540e28825e45c3fad9b9fb728a6aa40224eaf70346ff5911"
+      },
+      {
+        "path": "backend/convex/schema.ts",
+        "mode": "100644",
+        "gitBlob": "f763482fc352c75549efef49644ff5baf233de7f",
+        "sha256": "d32b3843d31b0bbc7ae6b2fc2993943a7155135ea775c7d26a38f4e16056ecbf"
+      },
+      {
+        "path": "backend/convex/tasks.ts",
+        "mode": "100644",
+        "gitBlob": "389701fbfdd0a0bb4e2412f5bf911767025dd2d4",
+        "sha256": "58bca92460f52c7c3544705a58f0f89cc9749c2590d1983581fc20dc7955048a"
+      },
+      {
+        "path": "shared/origin-columns.ts",
+        "mode": "100644",
+        "gitBlob": "fe44fa23f9bf6e6cbd6da94e966b3a1a666a4375",
+        "sha256": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b"
+      }
+    ]
+  },
+  "coverage": [
+    "baseline-client-existing-explicit-lanes",
+    "baseline-client-new-task-explicit-draft",
+    "optional-column-omission",
+    "legacy-idea-private-until-repair",
+    "existing-task-and-link-byte-equivalence",
+    "viewer-and-foreign-workspace-denial"
+  ],
+  "checks": {
+    "files": 1,
+    "passed": 7,
+    "failed": 0,
+    "caseObservations": 10,
+    "protocolRequests": 34,
+    "successfulRequests": 30,
+    "intentionalRegisteredRejections": 4,
+    "sourceModulesBound": 209,
+    "sourceRoles": {
+      "baselineClient": 90,
+      "candidateClient": 93,
+      "registeredBackend": 26
+    },
+    "sourceBlobsIndependentlyRechecked": 209,
+    "sourceDigestsIndependentlyRechecked": 209,
+    "migrationPages": {
+      "columns": 3,
+      "legacyIdeas": 3,
+      "projects": 2
+    },
+    "legacyPrivacyObservations": 12,
+    "existingTasksPreserved": 6,
+    "embeddedGitHubIssueLinksPreserved": 3,
+    "pullRequestLinkRowsPreserved": 3
+  },
+  "boundary": {
+    "protocol": "Actual untouched original server caller and ConvexHttpClient serialize real HTTP requests to a disposable port0 loopback protocol adapter; the adapter dispatches candidate registered Convex queries/mutations and validators with convex-test.",
+    "queryResultAndWriteLogic": "The actual registered candidate functions read/write synthetic fixture documents; no cloud response data or task-creation result is emulated.",
+    "operatorPhases": "Actual internal registered functions run directly through convex-test; raw cursors remain in memory and only hashes are published.",
+    "productionDataUsed": false,
+    "actualConvexDeployment": false,
+    "fullBaselineReactApp": false,
+    "packagedClient": false,
+    "actualBrowser": false,
+    "localMainPortsTouched": false,
+    "providerCalls": 0,
+    "externalNetworkRequests": 0,
+    "listenerClosed": true,
+    "temporaryData": "Worker-owned ignored synthetic data directory; no user home/profile changed."
+  },
+  "freezeGate": {
+    "authorizedReleaseSource": null,
+    "required": "Before authorizing the root compatibility summary, compare every candidate-client and registered-backend loaded source blob/digest, plus all nine reviewed Draft implementation files, with the actual final frozen release. Require source-specific successful CI/native/private-draft/site preflight separately. This detail report cannot create release authority."
+  },
+  "filenames": {
+    "detailReport": ".omb-scratch/backend-compatibility-report-031.json",
+    "rootAuthoritySummary": ".omb-scratch/backend-compatibility-031.json",
+    "summaryReportSha256Meaning": "The root summary hashes the separate detail-report bytes; it never self-hashes."
+  },
+  "evidence": {
+    "observationsSha256Lf": "308e7fa7d47c1dac3bd02cff201039d8287842e0f008e9a3fc6894530836a523",
+    "moduleBindingsSha256Lf": "1d33163b4e5f52aafa644be5c5ce022aa251e8cc6a7e5a73619a710ddcfbc801",
+    "rawPrivateLogSha256": "fb0c359774326f0351faeee0a738f042657c83e8d9469508d77892a5bb041baf",
+    "normalizedPublishedLogSha256": "3b6a234366cba556b2f18c872309d5fb27b27a3c3bccea3aba357320c493fbf6",
+    "logSanitization": "ANSI SGR removed, CRLF normalized to LF and trailing blank lines reduced to one newline; the raw ignored log is retained."
+  },
+  "limitations": [
+    "This proves specified backward-compatible request contracts through registered handler logic. It does not claim a hosted Convex backend, a full baseline React app, a real browser, a packaged desktop app, GitHub mirroring, mail delivery or production acceptance.",
+    "An old caller without an explicit destination is checked after all three repair phases complete. This evidence does not authorize publishing clients before the complete ordered repair, cleanup and mail gates.",
+    "The initial viewer fixture had only workspace membership and was denied at the earlier project-access guard. The final fixture also grants explicit viewer project membership, proves board-read access, then proves the editor guard rejects its write; this was a fixture correction, not an application code change."
+  ]
+}

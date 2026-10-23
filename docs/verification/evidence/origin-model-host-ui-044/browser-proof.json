@@ -1,0 +1,649 @@
+{
+  "checkedAt": "2026-10-20T04:27:33.319Z",
+  "scope": "Actual ModelPicker, ranked fallback and owner sharing components with controlled HTTP catalog and source/grant persistence in this disposable preview process. Native042 synthetic workspace/project queries are real. Store context is a controlled adapter using the actual reducer. No provider, host registration, remote execution, invoice, full App or native desktop acceptance is established.",
+  "source": "working-tree",
+  "launcherBindings": [
+    {
+      "name": "src/components/ModelPicker.tsx",
+      "sha256": "b5b3108224cc34439ebc5e4add2017c0ad6e7c11f7592768d577a3b5d220467e"
+    },
+    {
+      "name": "src/components/ModelFallbackSettings.tsx",
+      "sha256": "54562b09138063a495c7a0a104507b72c2616cb2083e271467a1449ac6c8d974"
+    },
+    {
+      "name": "src/components/RemoteModelPicker.tsx",
+      "sha256": "b0698a56aaf1a374fdcbe6a709cfa92037f9d93023c81f046a3dbf27677998e0"
+    },
+    {
+      "name": "src/components/SharedModelChoices.tsx",
+      "sha256": "1b786545d6e78cfd76afc503ee26a17bef50ca7410e7d3de181062f2ad57c200"
+    },
+    {
+      "name": "src/components/ModelHostingSettings.tsx",
+      "sha256": "cb246bd0dde5f52bd25896e5755d6761948ad5e4370d0f1d51c7b3240066c058"
+    },
+    {
+      "name": "src/components/ProviderConnectionsSettings.tsx",
+      "sha256": "98f957004819f2a5a93f25cc6e895dad3b5662a75bd6c85f5bafde5337d8d27d"
+    },
+    {
+      "name": "src/lib/origin-model-hosts.ts",
+      "sha256": "7fba6fb10ec32d8163064f4eb3ddd22942b795492fa4660cc5df4dda1703b0f5"
+    },
+    {
+      "name": "src/lib/model-picker-selection.ts",
+      "sha256": "c266ceb642a787e56bf85627076a6595ad4e3887ca45585d43e80f814db27db7"
+    },
+    {
+      "name": "shared/model-selection.ts",
+      "sha256": "04d54d8299ff34a071fbc031f144262fa4905147f21ec7c239050e7a82a14b31"
+    },
+    {
+      "name": "shared/wire.ts",
+      "sha256": "97395362c195ddb0462e87afa612853f90d5ef3097f6337c7796e8fed5b3c469"
+    },
+    {
+      "name": "src/styles.css",
+      "sha256": "c64a90590dcc814e7c84c4016386aa12c2a4c306ecae18d2a076ab5cbb5423d3"
+    },
+    {
+      "name": "src/locales/en.json",
+      "sha256": "59eebb6612d6c60d40e8d905860fd4e49bf23f4318e7c5d5156f1786d5fdd772"
+    },
+    {
+      "name": "scripts/testing/model-host-preview.tsx",
+      "sha256": "de3c7af4e5edd92dc85390d70b678f6a2448a5808eb86e269cead7fe81fa0c19"
+    },
+    {
+      "name": "scripts/verify-model-host-ui.ts",
+      "sha256": "7f88a961f4214bb3cde10f91bb8cc7e06be0e360eae3f7760b5e54c829ca5f5a"
+    }
+  ],
+  "currentBindings": [
+    {
+      "name": "src/components/ModelPicker.tsx",
+      "sha256": "4bdfeab7eb8d3cc3df7621cd67a0cc55be67decd7ef837140bf8071065b5fe58"
+    },
+    {
+      "name": "src/components/ModelFallbackSettings.tsx",
+      "sha256": "54562b09138063a495c7a0a104507b72c2616cb2083e271467a1449ac6c8d974"
+    },
+    {
+      "name": "src/components/RemoteModelPicker.tsx",
+      "sha256": "b0698a56aaf1a374fdcbe6a709cfa92037f9d93023c81f046a3dbf27677998e0"
+    },
+    {
+      "name": "src/components/SharedModelChoices.tsx",
+      "sha256": "1b786545d6e78cfd76afc503ee26a17bef50ca7410e7d3de181062f2ad57c200"
+    },
+    {
+      "name": "src/components/ModelHostingSettings.tsx",
+      "sha256": "cb246bd0dde5f52bd25896e5755d6761948ad5e4370d0f1d51c7b3240066c058"
+    },
+    {
+      "name": "src/components/ProviderConnectionsSettings.tsx",
+      "sha256": "98f957004819f2a5a93f25cc6e895dad3b5662a75bd6c85f5bafde5337d8d27d"
+    },
+    {
+      "name": "src/lib/origin-model-hosts.ts",
+      "sha256": "7fba6fb10ec32d8163064f4eb3ddd22942b795492fa4660cc5df4dda1703b0f5"
+    },
+    {
+      "name": "src/lib/model-picker-selection.ts",
+      "sha256": "c266ceb642a787e56bf85627076a6595ad4e3887ca45585d43e80f814db27db7"
+    },
+    {
+      "name": "shared/model-selection.ts",
+      "sha256": "04d54d8299ff34a071fbc031f144262fa4905147f21ec7c239050e7a82a14b31"
+    },
+    {
+      "name": "shared/wire.ts",
+      "sha256": "902b640633a9062184485e563b17791660d9d7d9f68b1936d71698eb0068f47f"
+    },
+    {
+      "name": "src/styles.css",
+      "sha256": "c64a90590dcc814e7c84c4016386aa12c2a4c306ecae18d2a076ab5cbb5423d3"
+    },
+    {
+      "name": "src/locales/en.json",
+      "sha256": "87232cf80b5e1abfbdf35b360077bcc2d9314d24413d89f7455be40c0b691800"
+    },
+    {
+      "name": "scripts/testing/model-host-preview.tsx",
+      "sha256": "de3c7af4e5edd92dc85390d70b678f6a2448a5808eb86e269cead7fe81fa0c19"
+    },
+    {
+      "name": "scripts/verify-model-host-ui.ts",
+      "sha256": "7f88a961f4214bb3cde10f91bb8cc7e06be0e360eae3f7760b5e54c829ca5f5a"
+    },
+    {
+      "name": "src/components/bot-settings/ModelSection.tsx",
+      "sha256": "1ae7f42129255cb4d71d2dd2c7454cadd1e56a986337c3d95b225ae668b78643"
+    },
+    {
+      "name": "src/lib/use-pointer-reorder.ts",
+      "sha256": "5f0939acbda3107100f218ad7dea9783e71b330434aa4f7e2f0b9940e3dd336e"
+    },
+    {
+      "name": "src/components/Select.tsx",
+      "sha256": "fdc11505b83579822e92f716bfb0c409b0acf65fe9027b8a90bd92e22058c92d"
+    }
+  ],
+  "startupBindingsChangedBeforeLaterReloadedCaptures": [
+    "src/components/ModelPicker.tsx",
+    "shared/wire.ts",
+    "src/locales/en.json"
+  ],
+  "modelState": {
+    "default": {
+      "instanceId": "claude",
+      "model": "opus"
+    },
+    "threads": [
+      {
+        "threadId": "fixture-thread",
+        "title": "Main",
+        "createdAt": 1792446291934,
+        "modelSelection": {
+          "instanceId": "origin-remote",
+          "model": "sonnet",
+          "source": {
+            "hostId": "fixture-alice-windows",
+            "sourceId": "fixture-alice-windows-claude"
+          }
+        },
+        "followsBotModel": false
+      }
+    ],
+    "fallback": [
+      {
+        "instanceId": "origin-remote",
+        "model": "sonnet",
+        "source": {
+          "hostId": "fixture-alice-windows",
+          "sourceId": "fixture-alice-windows-claude"
+        }
+      },
+      {
+        "instanceId": "origin-remote",
+        "model": "sonnet",
+        "source": {
+          "hostId": "fixture-alice-mac",
+          "sourceId": "fixture-alice-claude"
+        }
+      }
+    ],
+    "quotaFallback": true
+  },
+  "observations": [
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/bots/fixture-atlas",
+      "body": {
+        "fallback": [
+          {
+            "instanceId": "origin-remote",
+            "model": "sonnet",
+            "source": {
+              "hostId": "fixture-alice-windows",
+              "sourceId": "fixture-alice-windows-claude"
+            }
+          },
+          {
+            "instanceId": "origin-remote",
+            "model": "sonnet",
+            "source": {
+              "hostId": "fixture-alice-mac",
+              "sourceId": "fixture-alice-claude"
+            }
+          }
+        ],
+        "quotaFallback": true
+      },
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/bots/fixture-atlas/tasks/fixture-thread",
+      "body": {
+        "modelSelection": {
+          "instanceId": "origin-remote",
+          "model": "openai/gpt-5.6",
+          "source": {
+            "hostId": "fixture-bob-linux",
+            "sourceId": "fixture-bob-api"
+          }
+        },
+        "updateBotDefault": false
+      },
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/origin/model-host/sources",
+      "body": {
+        "teamId": "rn7cjstxz1k2rywhxyc6hb257n8gkbe4",
+        "sourceKey": "6a6fd5ab-770e-4e33-ab0a-418eee532f6a",
+        "instanceId": "claude",
+        "label": "My Claude account",
+        "models": [
+          "sonnet"
+        ],
+        "enabled": true,
+        "projectIds": [
+          "px727z4cg50r5s8s9ggf3n5bxd8gj4yc"
+        ],
+        "workspaceHead": false,
+        "capacity": 1
+      },
+      "status": 503
+    },
+    {
+      "method": "PUT",
+      "path": "/api/origin/model-host/sources",
+      "body": {
+        "teamId": "rn7cjstxz1k2rywhxyc6hb257n8gkbe4",
+        "sourceKey": "6a6fd5ab-770e-4e33-ab0a-418eee532f6a",
+        "instanceId": "claude",
+        "label": "My Claude account",
+        "models": [
+          "sonnet"
+        ],
+        "enabled": true,
+        "projectIds": [
+          "px727z4cg50r5s8s9ggf3n5bxd8gj4yc"
+        ],
+        "workspaceHead": false,
+        "capacity": 1
+      },
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/origin/model-host/revoke",
+      "body": {
+        "teamId": "rn7cjstxz1k2rywhxyc6hb257n8gkbe4"
+      },
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/bots/fixture-atlas/tasks/fixture-thread",
+      "body": {
+        "modelSelection": {
+          "instanceId": "origin-remote",
+          "model": "sonnet",
+          "source": {
+            "hostId": "fixture-alice-windows",
+            "sourceId": "fixture-alice-windows-claude"
+          }
+        },
+        "updateBotDefault": false
+      },
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/origin/model-host/catalog",
+      "status": 200
+    }
+  ],
+  "cases": [
+    {
+      "name": "Owner and computer distinguish two Claude subscriptions; rank reorder saves and reloads",
+      "pass": true,
+      "boundary": "Controlled source catalog and HTTP persistence, actual components and reducer"
+    },
+    {
+      "name": "Paid API backup requires explicit consent; primary selection confirms owner, computer, billing and local approval owner",
+      "pass": true
+    },
+    {
+      "name": "Owner sharing starts disabled; exact models/projects, failed-save editor preservation, retry and revoke",
+      "pass": true
+    },
+    {
+      "name": "ready:false hides sharing controls",
+      "pass": true,
+      "boundary": "Synthetic readiness response; production readiness is independently gated"
+    },
+    {
+      "name": "Agent settings overflow reproduced and fixed",
+      "pass": true,
+      "before": {
+        "width": 375,
+        "scrollWidth": 410
+      },
+      "after": {
+        "width": 375,
+        "scrollWidth": 375
+      },
+      "changed": [
+        "src/components/bot-settings/ModelSection.tsx",
+        "src/components/ModelPicker.tsx"
+      ]
+    },
+    {
+      "name": "Owner grant form at 375 px, subscription source, exact Sonnet and Alpha selections; sharing checkbox left off",
+      "pass": true,
+      "width": 375,
+      "scrollWidth": 375
+    },
+    {
+      "name": "Expanded shared picker at 375 px",
+      "pass": true,
+      "width": 375,
+      "scrollWidth": 375,
+      "dialog": {
+        "left": 16,
+        "right": 359,
+        "width": 343,
+        "top": 187,
+        "bottom": 787,
+        "height": 600
+      }
+    },
+    {
+      "name": "Subscription confirmation is visible, selecting Alice Windows Sonnet changes this thread only",
+      "pass": true,
+      "selectedThread": "sonnet",
+      "defaultRetained": "opus",
+      "consoleErrorsOrWarnings": 0
+    }
+  ],
+  "limits": [
+    "No real provider run, subscription use, invoice, remote execution or packaged desktop acceptance is established by this UI fixture.",
+    "Earlier dark/ranked captures preceded the min-width-only fix. Later mobile captures were reloaded from current component source. Native execution evidence has its own source manifest."
+  ]
+}

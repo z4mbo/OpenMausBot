@@ -8,6 +8,7 @@ import { homedir, tmpdir } from "node:os";
 import { lstat, mkdir, readFile, realpath, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { createHash } from "node:crypto";
+import { createQuotaEventProofs, providerQuotaRefusal, type QuotaEvidence } from "../../quota-refusal.ts";
 
 import { PROVIDER_CREDENTIAL_ENV, stripControlPlaneEnv, WORKSPACE_CREDENTIAL_ENV } from "../../config.ts";
 import { openStartupModelCatalog, writeStartupModelCache } from "../../startup-model-catalog.ts";
@@ -43,7 +44,6 @@ import type {
   ProviderSnapshot,
   ModelCatalog,
   ModelVariantOption,
-  RuntimeEvent,
   RuntimeEventListener,
   SendTurnInput,
   ProviderErrorCode,
@@ -64,19 +64,11 @@ import { extractMcpImages } from "../../mcp-tool-images.ts";
 import { acpRpcError } from "./rpc-error.ts";
 import { recoveryPromptFor } from "../../resume-recovery.ts";
 import { sessionIdlePolicy } from "../session-idle.ts";
-import { classifyError } from "../retry.ts";
-import { engineFailureKind, engineFailureMessage } from "../engine-errors.ts";
+import { engineFailureMessage } from "../engine-errors.ts";
+import { acpPromptFailure, type AccountErrorCode } from "./error-policy.ts";
+export type { AccountErrorCode } from "./error-policy.ts";
 import { narrowsNativeTools, parseToolScope } from "../../../shared/tool-scope.ts";
 import { turnStdioMcpServers } from "../turn-mcp.ts";
-
-/** Failures fixed on the provider account, not by retrying; the reporting process stays pooled. */
-export type AccountErrorCode = Extract<ProviderErrorCode,
-  "invalid_credentials" | "inactive_subscription" | "insufficient_funds" | "quota_or_region_restriction">;
-const ACCOUNT_ERROR_CODES: ReadonlySet<ProviderErrorCode> = new Set<AccountErrorCode>([
-  "invalid_credentials", "inactive_subscription", "insufficient_funds", "quota_or_region_restriction",
-]);
-const isAccountError = (code: ProviderErrorCode | undefined): code is AccountErrorCode =>
-  code !== undefined && ACCOUNT_ERROR_CODES.has(code);
 
 export interface AcpConfig {
   cli: string;
@@ -101,6 +93,7 @@ interface AcpTurn {
     usagePeak: number | null;
     usageLast: number | null;
     usageCompacted: boolean;
+    quotaEvidence?: QuotaEvidence;
   };
   acknowledge: () => void;
   asks: Map<string, AcpAskFinish>;
@@ -155,6 +148,7 @@ interface AcpSession {
 
 /** Per-CLI specifics plugged into the shared ACP runtime. */
 export interface AcpSupport {
+  billing?: "subscription" | "metered";
   questionRequests?: Readonly<Record<string, AcpQuestionRequest>>;
   /** Verified native catalog parameters, applied before both new and restored sessions. */
   toolScopeSessionParams?(turn: SendTurnInput, initializeResult: unknown, hasMcp: boolean,
@@ -585,9 +579,8 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
     // thread, for the native session's life. A generic title with no input is never remembered.
       const sessionAllows = new Map<string, Set<string>>();
 
-      const emit = (event: RuntimeEvent) => {
-        for (const listener of listeners) listener(event);
-      };
+      const quotaProofs = createQuotaEventProofs(event => { for (const listener of Array.from(listeners)) listener(event); });
+      const emit = quotaProofs.emit;
 
     // Inline images stay on the wire but never go into the native log as base64.
       const nativeLogMessage = (msg: any): unknown => {
@@ -741,7 +734,17 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
             message: `${DRIVER_KIND} ended the turn with no reply, image, or tool result`,
           });
         }
-        emit({ ...base(threadId, current.turnId), type: "turn.completed", ok: finalOk, stopReason: finalStopReason, cost: null });
+        const complete = (quiesced = false) => {
+          const refusal = !finalOk && current.state.quotaEvidence && quotaProofs.refusal(threadId, current.state.quotaEvidence,
+            quiesced && !current.state.stopped && current.asks.size === 0 && current.runningTools.size === 0);
+          emit({ ...base(threadId, current.turnId), type: "turn.completed", ok: finalOk, stopReason: finalStopReason, cost: null, ...(refusal ? { refusal } : {}) });
+        };
+        if (!finalOk && current.state.quotaEvidence) {
+          closeSession(threadId, "subscription quota refused");
+          void retireChild(threadId, session.child).then(stopped => complete(stopped), () => complete(false));
+          return;
+        }
+        complete();
         if (session.child.exitCode === null && !session.closing && !session.dead) {
           armIdle(threadId);
         } else if (session.dead && sessions.get(threadId) === session) {
@@ -1787,6 +1790,7 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
               });
             }
             const reason = result?.stopReason;
+            if (DRIVER_KIND === "grokAgent") state.quotaEvidence = providerQuotaRefusal(result?.error) ?? providerQuotaRefusal({ code: reason }) ?? undefined;
             if (reason === "end_turn") settle(threadId, session, true, null);
             else if (reason === "cancelled") settle(threadId, session, true, "cancelled");
             else {
@@ -1807,16 +1811,8 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
               deletePromptSplitReceipt(DRIVER_KIND, pendingSplitReceipt.key);
             }
             if (!state.settled) {
-              const message = e instanceof Error ? e.message : String(e);
-              const code = support.classifyError?.(e) ?? (engineFailureKind(message) === "credits" ? "insufficient_funds" : undefined);
-              const needsAuth = code === "invalid_credentials" || code === "inactive_subscription"
-                || code === "insufficient_funds" || message === support.loginNote;
-              const accountError = isAccountError(code);
-              const failure = classifyError({ text: message });
-              const transientStartup = failure.transient || (failure.reason === "unknown" && code === "upstream_outage");
-              const denied = /\b(?:(?:permission|access) denied|(?:approval|permission) (?:required|denied|rejected)|requires? (?:approval|permission)|policy (?:restriction|violation)|(?:blocked|denied|restricted) by (?:the )?policy)\b/i.test(message);
-              const retryableStartup = approvalUnconfirmed || (transientStartup && (!code || code === "upstream_outage")
-                && ![-32700, -32600, -32601, -32602].includes((e as any)?.code));
+              if (DRIVER_KIND === "grokAgent") state.quotaEvidence = providerQuotaRefusal(e) ?? undefined;
+              const { message, code, needsAuth, accountError, denied, retryableStartup } = acpPromptFailure(e, support, approvalUnconfirmed);
               if (turn.startupRecovery && retryableStartup && !needsAuth && !accountError && !denied
                   && !state.promptSent && !state.startupActivity && !state.producedItem && !state.text
                   && !state.stopped && !session.closing && !asks.size && !current.runningTools.size) {
@@ -1840,7 +1836,7 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
               }
               emit({
                 ...base(threadId, turnId), type: "runtime.error",
-                message: (accountError ? support.describeAccountError?.(code, cliTurn.model) : undefined) ?? engineFailureMessage(support.displayName, message) ?? message,
+                message: (accountError ? support.describeAccountError?.(accountError, cliTurn.model) : undefined) ?? engineFailureMessage(support.displayName, message) ?? message,
                 ...(needsAuth ? { setup: true } : {}),
               });
               // Never replay an accepted prompt (it may have run tools); evict before listeners start the next turn.
@@ -1883,7 +1879,7 @@ export function createAcpDriver(support: AcpSupport): ProviderDriver<AcpConfig> 
           });
         });
         if (!probe.version) return { state: "unavailable", reason: probe.reason };
-        return { state: "available", version: probe.version, authenticated: await support.isAuthenticated(env, config, instanceId) };
+        return { state: "available", version: probe.version, authenticated: await support.isAuthenticated(env, config, instanceId), ...(support.billing ? { billing: support.billing } : {}) };
       };
 
     /** Memory upkeep's one-shot: a fresh process and session, no MCP servers, an empty folder, and

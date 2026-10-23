@@ -1,0 +1,227 @@
+{
+  "repository": "milind-soni/OpenMausBot",
+  "query": "repo:milind-soni/OpenMausBot is:pr is:merged merged:2026-10-19T04:02:34Z..2026-10-20T04:03:12Z",
+  "searchedAt": "2026-10-20T04:05:59.096Z",
+  "total_count": 36,
+  "incomplete_results": false,
+  "paginationComplete": true,
+  "originalCaptureSha256": "6a2f5cfc97a0c2eb3be194b2f16e297026df8dd408d8fd9b98b0dfc2dfc12e3b",
+  "items": [
+    {
+      "number": 3135,
+      "title": "chore(release): bump version to 0.1.118",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3135",
+      "mergedAt": "2026-10-19T20:08:51Z"
+    },
+    {
+      "number": 3133,
+      "title": "Performance: Cloud memory, browsers and server (combined)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3133",
+      "mergedAt": "2026-10-19T20:07:03Z"
+    },
+    {
+      "number": 3132,
+      "title": "Server: let idle conversations leave the message cache",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3132",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3131,
+      "title": "Server: diff a memory file's shared prefix without the line table",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3131",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3130,
+      "title": "Server: redact and serialize each runtime event once for its log line",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3130",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3129,
+      "title": "Server: keep inline base64 payloads out of the native protocol log",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3129",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3128,
+      "title": "Server: read the Team map's last-message times without loading each room",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3128",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3127,
+      "title": "Server: cap the stream replay buffer by size as well as count",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3127",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3126,
+      "title": "Server: read coordination state once per bot, not once per task",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3126",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3125,
+      "title": "Headless Chrome runs no omnibox popup or reload button WebUI",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3125",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3124,
+      "title": "OpenCode reaches OpenMausBot's own MCP servers over HTTP, without a proxy process each",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3124",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3123,
+      "title": "Cloud homes keep idle engines only for the conversation a person has open",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3123",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3122,
+      "title": "OpenCode threads share one process on the same spawn contract",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3122",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3120,
+      "title": "test(limit-reset): the after-reset route uses the injected clock (fixes main)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3120",
+      "mergedAt": "2026-10-19T18:27:32Z"
+    },
+    {
+      "number": 3118,
+      "title": "Close a deleted bot's browser on Cloud homes, and sweep strays",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3118",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3117,
+      "title": "Cloud homes close idle browsers after 3 minutes",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3117",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3116,
+      "title": "Idle browsers close even while a view is open",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3116",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3115,
+      "title": "Server: find stale peer cards without loading every conversation at boot",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3115",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3113,
+      "title": "Release: give the macOS packaging step a 4 GB Node heap",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3113",
+      "mergedAt": "2026-10-19T14:14:58Z"
+    },
+    {
+      "number": 3110,
+      "title": "Lending: a restarting My Cloud answers the desktop as restarting, and the lending e2e waits for its own turn",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3110",
+      "mergedAt": "2026-10-19T20:07:06Z"
+    },
+    {
+      "number": 3106,
+      "title": "Cloud homes wait for memory before starting another engine, and say when memory ran out",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3106",
+      "mergedAt": "2026-10-19T11:31:56Z"
+    },
+    {
+      "number": 3105,
+      "title": "Browser: tell sites the person's languages as Chrome does, and the owner's time zone",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3105",
+      "mergedAt": "2026-10-19T11:41:59Z"
+    },
+    {
+      "number": 3104,
+      "title": "feat(cloud): one place for This computer and My Cloud, and Send everything to My Cloud",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3104",
+      "mergedAt": "2026-10-19T11:42:07Z"
+    },
+    {
+      "number": 3103,
+      "title": "Browser: a passkey request without an authenticator fails like real Chrome, so sign-in can pick another way",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3103",
+      "mergedAt": "2026-10-19T11:41:49Z"
+    },
+    {
+      "number": 3101,
+      "title": "Servers built into an image report their version",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3101",
+      "mergedAt": "2026-10-19T11:32:04Z"
+    },
+    {
+      "number": 3100,
+      "title": "Cloud home image ships python3, pdftotext and unzip",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3100",
+      "mergedAt": "2026-10-19T11:32:11Z"
+    },
+    {
+      "number": 3098,
+      "title": "Routines: Mark all as seen covers only the runs the person can see",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3098",
+      "mergedAt": "2026-10-19T08:55:16Z"
+    },
+    {
+      "number": 3097,
+      "title": "Make an OpenRouter key work out of the box on OpenRouter's free tier",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3097",
+      "mergedAt": "2026-10-19T08:55:31Z"
+    },
+    {
+      "number": 3096,
+      "title": "chore(release): bump version to 0.1.117",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3096",
+      "mergedAt": "2026-10-19T14:08:26Z"
+    },
+    {
+      "number": 3095,
+      "title": "feat(templates): a gallery of ready-made bots",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3095",
+      "mergedAt": "2026-10-19T08:55:55Z"
+    },
+    {
+      "number": 3090,
+      "title": "feat(chat): preview HTML file attachments in a sandboxed frame",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3090",
+      "mergedAt": "2026-10-19T08:56:10Z"
+    },
+    {
+      "number": 3083,
+      "title": "fix(server): a data lane's early abort no longer strands the statement",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3083",
+      "mergedAt": "2026-10-19T09:02:27Z"
+    },
+    {
+      "number": 3079,
+      "title": "test: fix main (Live call journeys and Grok import route tests)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3079",
+      "mergedAt": "2026-10-19T06:11:27Z"
+    },
+    {
+      "number": 3077,
+      "title": "Team map: show each bot's computer with a live screen",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3077",
+      "mergedAt": "2026-10-19T06:24:59Z"
+    },
+    {
+      "number": 3076,
+      "title": "Desktop and broker: leave a sleeping Cloud home asleep, and wake it when needed",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3076",
+      "mergedAt": "2026-10-19T06:51:26Z"
+    },
+    {
+      "number": 3075,
+      "title": "Cloud homes can report when they are idle and get ready to sleep",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3075",
+      "mergedAt": "2026-10-19T06:25:16Z"
+    }
+  ]
+}

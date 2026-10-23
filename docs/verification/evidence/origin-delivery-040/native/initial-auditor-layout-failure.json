@@ -1,0 +1,10 @@
+{
+  "status": "auditor-layout-assumption-failed",
+  "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "nativeRun": 39318738462,
+  "helperSha256": "bec19f433ae802f96f1c477a251a956b42df7e1de52be5e97e08cc8f57f129ef",
+  "inputSha256": "4d64f3f36346fae5f28f8655440adeae6aeeb737dc4011373b3b4dbbdd06debd",
+  "error": "mac-arm64: expected one actual PlanUsage renderer (0 found in ASAR)",
+  "reason": "Frozen electron-builder.yml lines88-89 ship renderer in Resources/ui, separately from Electron ASAR; original renderer location assumption incorrect.",
+  "preservedAt": "2026-10-19T20:57:50.382Z"
+}

@@ -1,0 +1,90 @@
+{
+  "kind": "readonly-windows-ci032-review",
+  "runId": "39381788335",
+  "source032": "5aafbf02ab2ded075d2c75955419f35a45cce99a",
+  "comparedSource041": "86b9326afd81d277117ec953b7a9b70caed07d07",
+  "logs": [
+    {
+      "path": ".omb-scratch/ci-046/job-118493171051-032-windows.raw.log",
+      "bytes": 309078,
+      "sha256": "c788bf08a3ca74f1de966e4842b821c9ca64c45664520ceb338f0eb07bf8aae7"
+    },
+    {
+      "path": ".omb-scratch/ci-046/job-118493171051-032-windows.log",
+      "bytes": 256208,
+      "sha256": "ca591182b4318de9eef9c8b3489b06d8feab2701d5187d6059fe888a38b9f6ea"
+    },
+    {
+      "path": ".omb-scratch/ci-046/job-118493171145-032-windows.raw.log",
+      "bytes": 318766,
+      "sha256": "0379a2cb72aea2bb7dd21a224e58359cc9d6055533bcccd1350f55635c6e133e"
+    },
+    {
+      "path": ".omb-scratch/ci-046/job-118493171145-032-windows.log",
+      "bytes": 269280,
+      "sha256": "7192270927b6b89e73789db0a82e75b1d356d5409e1acfa52ec44ae60e064a84"
+    }
+  ],
+  "fileProofs": [
+    {
+      "path": "server/delegation-thread.ts",
+      "source032Blob": "112587b0206d8e04c2550e23f071fc7e165469e6",
+      "current041Blob": "112587b0206d8e04c2550e23f071fc7e165469e6",
+      "equal": true
+    },
+    {
+      "path": "server/delegation-thread.test.ts",
+      "source032Blob": "b53dd9543991659c97aea088986e6720ca63ce39",
+      "current041Blob": "b53dd9543991659c97aea088986e6720ca63ce39",
+      "equal": true
+    },
+    {
+      "path": "server/store.ts",
+      "source032Blob": "f61e027ca32a595c091a7ca9c04d08e78931c546",
+      "current041Blob": "f61e027ca32a595c091a7ca9c04d08e78931c546",
+      "equal": true
+    },
+    {
+      "path": "server/direct-coordination.e2e.test.ts",
+      "source032Blob": "8b8874dc7508f14311b946e24139a3a9093fc4ff",
+      "current041Blob": "8b8874dc7508f14311b946e24139a3a9093fc4ff",
+      "equal": true
+    },
+    {
+      "path": "server/room-coordination.e2e.test.ts",
+      "source032Blob": "aed2a34c667c2b38d6bc3ebf308154eaac6dfe7c",
+      "current041Blob": "aed2a34c667c2b38d6bc3ebf308154eaac6dfe7c",
+      "equal": true
+    }
+  ],
+  "failures": [
+    {
+      "jobId": "118493171051",
+      "shard": 2,
+      "failed": 1,
+      "passed": 4862,
+      "skipped": 123,
+      "test": "server/direct-coordination.e2e.test.ts:633",
+      "scenario": "Explicit thread:new delegation followed by an independent direct specialist chat, then omitted-thread delegation followup",
+      "observed": "Second child has a new threadId instead of the first child threadId",
+      "cause": "Fixture expects reuse of an explicitly fresh continuity:false task, contrary to allocator and its dedicated unit contract",
+      "fixedBy040": false
+    },
+    {
+      "jobId": "118493171145",
+      "shard": 4,
+      "failed": 1,
+      "passed": 4933,
+      "skipped": 145,
+      "test": "server/room-coordination.e2e.test.ts:231",
+      "scenario": "Wait for sender bot.busy false, move running recipient out of supervised team, immediately rename now-empty team",
+      "observed": "409 Stop this team active work before renaming the team",
+      "cause": "Rename guard sees an affected managing Chief bot or task busy; fixture prior poll excludes task.busy and precedes a revocation that can resume the source",
+      "causeQualification": "Exact internal busy row unavailable in job log; source path supports race, not a proven production corruption",
+      "fixedBy040": false
+    }
+  ],
+  "sourceEdits": false,
+  "testReruns": false,
+  "productionOperations": false
+}

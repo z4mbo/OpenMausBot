@@ -95,13 +95,16 @@ export const messagesSince = query({
     const limit = Math.max(1, Math.min(PAGE_MAX, Math.floor(args.limit ?? PAGE_MAX)));
     const rows = await ctx.db.query("agentThreadMessages")
       .withIndex("by_threadId_and_updSeq", (q) => q.eq("threadId", thread._id).gt("updSeq", args.afterSeq)).take(limit + 1);
-    const runs = new Map<string, { by?: string; byUserId?: Id<"users">; engineLabel?: string }>();
+    const runs = new Map<string, { by?: string; byUserId?: Id<"users">; engineLabel?: string; executedByUserId?: Id<"users">; executedByName?: string; hostId?: Id<"agentHosts">; sourceId?: Id<"modelHostSources"> }>();
     const messages = [];
     for (const row of rows.slice(0, limit)) {
       let run = row.runId ? runs.get(row.runId) : undefined;
       if (row.runId && !run) {
         const doc = await ctx.db.get(row.runId);
-        run = doc ? { by: await name(runnerOf(doc)), byUserId: runnerOf(doc), engineLabel: doc.engineLabel } : {};
+        const execution = doc?.modelExecutionId ? await ctx.db.get(doc.modelExecutionId) : null;
+        run = doc ? { by: await name(runnerOf(doc)), byUserId: runnerOf(doc), engineLabel: doc.engineLabel,
+          ...(doc.executedByUserId ? { executedByUserId: doc.executedByUserId, executedByName: await name(doc.executedByUserId) } : {}),
+          ...(execution ? { hostId: execution.hostId, sourceId: execution.sourceId } : {}) } : {};
         runs.set(row.runId, run);
       }
       messages.push({
@@ -110,6 +113,8 @@ export const messagesSince = query({
         ...(row.authorUserId ? { authorUserId: row.authorUserId, authorName: await name(row.authorUserId) } : {}),
         ...(row.runId ? { runId: row.runId } : {}), ...(run?.by ? { runBy: run.by } : {}),
         ...(run?.byUserId ? { runByUserId: run.byUserId } : {}), ...(run?.engineLabel ? { engineLabel: run.engineLabel } : {}),
+        ...(run?.executedByUserId ? { executedByUserId: run.executedByUserId, executedByName: run.executedByName } : {}),
+        ...(run?.hostId ? { hostId: run.hostId, sourceId: run.sourceId } : {}),
         status: row.status, ...(row.attachments ? { attachments: row.attachments } : {}), ...(row.payload !== undefined ? { payload: row.payload } : {}),
         createdAt: row.createdAt, updatedAt: row.updatedAt,
       });

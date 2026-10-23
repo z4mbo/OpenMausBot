@@ -1,0 +1,19 @@
+{
+  "cycle": "049",
+  "version": "0.4.2",
+  "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+  "nativeRun": 39393415574,
+  "nativeAttempt": 1,
+  "directory": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\distribution\\0.4.2",
+  "body": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\github-release-0.4.2.md",
+  "sourceCommit": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+  "desktopRun": 39393415574,
+  "notes": 12,
+  "files": 13,
+  "copied": 13,
+  "bytes": 1858099209,
+  "manifestSha256": "1958d0d15e37f6c48eb8c848fb8aa1d2792d5ca23d42f87a80e45073f71bbf7d",
+  "checksumsSha256": "ba73ac7b41ef250177fcca1940c8ed5013e3fab4207b9feacc3ea4ccc8668813",
+  "bodySha256": "e8170f63d7eecd7e148332acbbfce7b976409319658a40a40e30dea0d8daf974",
+  "publicMutation": false
+}

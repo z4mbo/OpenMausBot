@@ -1,0 +1,63 @@
+{
+  "state": {
+    "hydrated": true,
+    "selectedId": "73d43215-be1e-448b-afd4-d0fbad6b83cb",
+    "activeView": "chat",
+    "bots": [
+      {
+        "id": "73d43215-be1e-448b-afd4-d0fbad6b83cb",
+        "name": "Thread recovery",
+        "threadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+        "awaitingThreadSnapshot": false,
+        "switchingTo": null,
+        "approvalMode": "full",
+        "tasks": [
+          {
+            "threadId": "f78ca17e-8eee-4ded-bb0f-20b11e71dc2d",
+            "title": "Current server thread B",
+            "approvalMode": "full",
+            "autoApprove": false
+          },
+          {
+            "threadId": "50226d54-ffc3-44c6-953e-11568bd239b9",
+            "title": "Pinned thread A"
+          }
+        ],
+        "messages": [
+          {
+            "id": "f3b2e011-0516-449b-a0eb-4939d1d9dacb",
+            "role": "bot",
+            "kind": "text",
+            "text": "Hi, I'm Waffle. What would you like me to do?"
+          },
+          {
+            "id": "75066dd5-b488-442b-a4e8-ef8b170f5a24",
+            "role": "user",
+            "kind": "text",
+            "text": "Synthetic saved transcript on A."
+          },
+          {
+            "id": "920775ac-16a5-48ac-88d5-66ad6bc13418",
+            "role": "bot",
+            "kind": "text",
+            "text": "Synthetic pinned thread A response."
+          },
+          {
+            "id": "40bc792c-211b-4fae-897d-0ac05fd9bd8c",
+            "role": "bot",
+            "kind": "digest"
+          }
+        ]
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "label": "Message Thread recovery",
+      "disabled": false,
+      "value": "",
+      "visible": true
+    }
+  ],
+  "busy": []
+}

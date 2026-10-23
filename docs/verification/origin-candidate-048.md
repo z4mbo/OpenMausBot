@@ -1,0 +1,47 @@
+# Origin 0.4.1 integration candidate
+
+Held after final-source CI found a stale hostile-page expectation for the old product name. The correct product response was Origin. Native, backend/site and Docs jobs passed at immutable source `daeb5096f6b880443e408c304cb9a7b76004d865`; their receipts remain source-qualified. No 0.4.1 acquisition, draft, upload, backend credential/export/deployment, private website build or public promotion occurred. Its tag remains immutable, its operators remain unadmitted, and it is omitted from published What's new history. See the [0.4.2 correction candidate](origin-candidate-049.md).
+
+Prepared on 2026-10-20. This finite integration combines correction source `5aafbf02ab2ded075d2c75955419f35a45cce99a` with published 0.4.0 source `f76cbe9b8019b648bb08f9125daefe35e6625185`. Neither source or immutable tag is replaced. PR 3 still targets `origin-integration`; no app task PR is merged by this workflow.
+
+## Concurrent publication and delivery boundary
+
+A fresh read-only pre-delivery check found [0.4.0](https://github.com/z4mbo/Origin/releases/tag/origin-v0.4.0) published at `2026-10-20T06:37:29Z`, with both public update feeds and all three download aliases already naming 0.4.0. The running website image was `sha256:b3be41ef45f30a7cd6fa35babcbc1e17d29b937b5c7652705ced0bb8b2f54679`. The previous 0.3.2 publication guard refused the changed baseline before any production mutation.
+
+The immutable 0.3.2 tag remains at `5aafbf02ab2ded075d2c75955419f35a45cce99a`. Its required local client/shared suite passed 604 files and 6,254 tests, with both TypeScript checks, lint, locale/release checks, Electron syntax and source/documentation guards passing. Those results remain qualified to that source. Native run 39382063332 and duplicate cloud tag run 39382063028 were cancelled as obsolete. No 0.3.2 assets, credentials, backend export/deployment, private website build or public promotion occurred. All 047 operators remain held.
+
+## Integration scope
+
+The newer source adds Pages, Campaigns, pipeline replies and sequences, monthly budgets, Chief heartbeats, call action items, lazy tool domains and local-browser/companion/egress security. The integration preserves these features and the [0.3.2 corrections](origin-candidate-047.md). Daily computer API limits and project monthly limits serve different scopes; both apply to eligible teammate-hosted work. Canonical What's new lists 0.4.1, followed by the published 0.4.0 and 0.3.0 history, omitting unpublished intermediate candidates.
+
+The conflict resolution retains exact-thread cancellation and lease behavior, budgeted helper-model requests, call-note recording, channel readiness, responsive toolbars, monthly-budget indicators and the minimal Usage panel. Existing size limits use the smaller parent values; no limit is raised. A stale lead-detail UI mock is updated for the new sequence query and required settings field without relaxing readiness assertions.
+
+Two additional concrete access/accounting scenarios receive regression coverage: a workspace member outside a private project could read its agent budget by known ID, and a teammate-hosted run ignored the same monthly budget checked by ordinary shared runs. The corrected backend requires project access, checks monthly admission throughout hosted ownership transitions, and records completed hosted usage once under its existing receipt fence. New public-facing upstream product names are changed to Origin while legal attribution and internal compatibility identifiers remain intact.
+
+## Verification and remaining gates
+
+Fresh combined-source checks cover changed backend paths, actual UI bodies, auth/egress interoperability, client/shared behavior, TypeScript, lint and required guards. The [retained correction evidence](evidence/origin-candidate-047/README.md) remains historical before/after proof; it is never relabelled as 0.4.1 acceptance. Production application data is not used for tests.
+
+The [combined local check receipt](evidence/origin-integration-048/global/README.md) passes 609 client/shared files and 6,275 tests at `6d1c772d121d557e9742e71da8102f453d9e336f`, both TypeScript checks, lint and all eight check groups. Later UI changes have focused checks and a fresh exact TypeScript project build. The [backend archive](evidence/origin-integration-048/backend/README.md) records 293 full-suite passes, then 37 final focused passes and 45 call/Pipeline/host passes. The [auth/branding review](evidence/origin-integration-048/auth-branding/README.md) records 112 passes and four pre-existing platform skips. These results retain their source boundaries; final immutable-source CI remains required.
+
+## Concrete integration fixes
+
+| Severity | Scenario and source | Fix commit |
+| --- | --- | --- |
+| P2 | `backend/convex/budgets.ts:162`: a workspace member outside a private project could read its agent budget by known ID. Project access now gates the query. | `1697edd4a79a65c7aed0e88199f63e659ebb31e4` |
+| P1 | `backend/convex/modelHosts.ts:26`: hosted runs could bypass a newly introduced monthly cap and omit its spend ledger. Admission/claim/start now enforce it, and fenced completion accounts once. | `a4af30264f6bf30e7fb48495589506db48c53ad1` |
+| P2 | `src/components/AgentBudgetPill.tsx:30`: at 375px, the monthly budget message pushed Model, Computer and More outside the viewport. A compact Wallet opens details and the admin editor; desktop keeps the full message. | `d03d8ddf8c78443f74d5c6ef07936b27d0651a26` |
+| P2 | `src/components/origin-pages/canvas/Toolbar.tsx:38`: focusing Design in the editable Canvas scrolled Layers to x-99. Both panel toggles now stay visible while the central tools scroll; wheel events within that strip leave the canvas camera unchanged. | `ccb65fbab1dbfc5261b9bc6ae9b234448157a3d9`, `86b9326afd81d277117ec953b7a9b70caed07d07` |
+| P3 | `server/cli-pairing.ts:32`, `companion/src/control.ts:294`, `server/browser/egress/policy.ts:21`: new pairing, companion and egress messages displayed the upstream product name. Visible names now say Origin; protocol identifiers and legal notices retain compatibility. | `6d1c772d121d557e9742e71da8102f453d9e336f` |
+
+The [UI archive](evidence/origin-integration-048/ui/README.md) contains 20 captures, actual component/fixture bindings, measured geometry and focused before/after failures. It also records the bounds of each interaction: synthetic data, blocked writes, local drafts cancelled, no real outbound sends or publication.
+
+The superseded 0.3.2 CI run [39381788335](https://github.com/z4mbo/Origin/actions/runs/39381788335) finished with four passing and four failing Vitest shards. Two failures share a contradictory fixture: it explicitly requested a fresh job and then expected canonical continuation. The corrected fixture starts canonical work by default and separately proves explicit fresh jobs remain separate on a later default call; all context-isolation assertions remain (`0baf67f27`). The other failures concern fixture lifecycle/port isolation. Team recreation now explicitly verifies the active-work 409, releases the resumed Chief and waits for authoritative task/bot idle (`77c8b4c77`). The card fixture uses a probed port pair, at most three retries limited to its own child's EADDRINUSE, close-before-relaunch and its own listening marker before health checks (`2ab64717d`). The [CI diagnosis](evidence/origin-integration-048/ci/README.md) and [lifecycle repair proof](evidence/origin-integration-048/ci-lifecycle/README.md) retain the exact red/green checks and platform skips. They do not claim the old run passed or relax live protections.
+
+## Upstream review and future work
+
+The [upstream reconciliation](evidence/origin-candidate-047/upstream-reconciliation.md) evaluates 36 merged PRs through the current review checkpoint. Five useful changes are already present: OpenRouter free-model discovery (#3097), bounded SSE replay (#3127), native base64 marker redaction (#3129), one-time bus serialization/redaction (#3130), and idle-thread cache reload (#3132). They must not be presented as missing features. HTML attachment sandboxing (#3090), Chief specialist templates (#3095), and the HTTP MCP security migration (#3124) remain separate, testable follow-ups. Each adoption should be isolated in one logical change with Origin access, lease, approval and context tests, rather than a wholesale upstream merge.
+
+Useful next product improvements are a visible host availability/ownership indicator for teammate subscriptions, a thread map showing project-to-specialist links, and a unified spend view distinguishing monthly project caps from computer-wide daily API limits. These are proposals, not delivered claims. Physical Mac installation, real provider fallback/reset accuracy, recipient email deliverability and actual account persistence still require their separate acceptance checks.
+
+Publication remains pending an immutable combined source, exact successful replacement workflows, actual Windows/Mac package audit and isolated copied-resource smoke, backward-compatible backend deployment with fresh full-storage backup and verified temporary-key cleanup, private compiled-site browser acceptance, and independently hashed public downloads/feeds. Physical Mac installation, signed updater behavior, real subscription-provider billing and real recipient email delivery remain separate acceptance limits.

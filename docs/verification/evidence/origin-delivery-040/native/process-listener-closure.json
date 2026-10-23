@@ -1,0 +1,80 @@
+{
+  "startedAt": "2026-10-19T21:00:01.1635821Z",
+  "finishedAt": "2026-10-19T21:00:18.1016305Z",
+  "helperPid": 25932,
+  "helperExitCode": 0,
+  "observedProcesses": [
+    {
+      "pid": 28188,
+      "parentPid": 35324,
+      "name": "node.exe",
+      "createdAt": "2026-10-19T21:00:15.7403740Z"
+    },
+    {
+      "pid": 22372,
+      "parentPid": 35324,
+      "name": "node.exe",
+      "createdAt": "2026-10-19T21:00:03.8928120Z"
+    },
+    {
+      "pid": 6940,
+      "parentPid": 25932,
+      "name": "conhost.exe",
+      "createdAt": "2026-10-19T21:00:01.9376320Z"
+    },
+    {
+      "pid": 2196,
+      "parentPid": 35324,
+      "name": "node.exe",
+      "createdAt": "2026-10-19T21:00:05.1986680Z"
+    },
+    {
+      "pid": 35324,
+      "parentPid": 25932,
+      "name": "node.exe",
+      "createdAt": "2026-10-19T21:00:02.3094130Z"
+    },
+    {
+      "pid": 11036,
+      "parentPid": 35324,
+      "name": "node.exe",
+      "createdAt": "2026-10-19T21:00:02.8669530Z"
+    }
+  ],
+  "observedListeners": [
+    {
+      "pid": 2196,
+      "address": "127.0.0.1",
+      "port": 54543
+    },
+    {
+      "pid": 28188,
+      "address": "127.0.0.1",
+      "port": 55556
+    },
+    {
+      "pid": 2196,
+      "address": "127.0.0.1",
+      "port": 54544
+    },
+    {
+      "pid": 28188,
+      "address": "127.0.0.1",
+      "port": 55557
+    },
+    {
+      "pid": 11036,
+      "address": "127.0.0.1",
+      "port": 54385
+    },
+    {
+      "pid": 11036,
+      "address": "127.0.0.1",
+      "port": 54386
+    }
+  ],
+  "remainingOwnedProcesses": [],
+  "remainingOwnedListeners": [],
+  "scopedProcessesAfter": [],
+  "qualification": "Scoped process ancestry and listener observations; command lines and environment values are not recorded. Fast children between samples may not be observed. No process termination or owner-app interaction performed."
+}

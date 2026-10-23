@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-10-20T04:45:00.166Z",
+  "backend": "http://127.0.0.1:54851",
+  "backendPid": 33952,
+  "baseCommit": "a89f4bb4add33209ab25f1e0d36c9d33aa290db0",
+  "runtimeSourceArtifact": "handover-final-runtime-source.json",
+  "earlierEvidence": "docs/verification/evidence/origin-model-host-native-044/receipt.json",
+  "privateTranscriptsUnchanged": true,
+  "cases": {
+    "remote-local": {
+      "stage": "passed",
+      "startedAt": "2026-10-20T04:43:51.238Z",
+      "finishedAt": "2026-10-20T04:44:07.609Z",
+      "sendId": "5002f069-c8ca-4076-a2d9-bf1b9dc4d92e",
+      "cloudThreadId": "k57et1rwr06h76p0ddc7atfnc58gn0yg",
+      "counts": {
+        "ownerQuota": 1,
+        "ownerGood": 0,
+        "ownerPartial": 0,
+        "ownerMetered": 0,
+        "localQuota": 0,
+        "localGood": 1
+      },
+      "runStatus": "succeeded",
+      "canonicalUserRows": 1,
+      "canonicalReplyRows": 1,
+      "finalModel": "claude-sonnet-5",
+      "finalProvider": "claudeAgent",
+      "startedWithInheritedProjectFolder": true,
+      "sharedReplyVisibleOnBothNativeClients": true
+    }
+  },
+  "finding": {
+    "scenario": "Remote quota safely transfers once to a local backup on a thread with inherited project folder",
+    "sendId": "5002f069-c8ca-4076-a2d9-bf1b9dc4d92e",
+    "cloudThreadId": "k57et1rwr06h76p0ddc7atfnc58gn0yg",
+    "runStatus": "succeeded",
+    "taskHasCwdOverride": false,
+    "botHasSyncedProjectFolder": true,
+    "counts": {
+      "ownerQuota": 1,
+      "ownerGood": 0,
+      "ownerPartial": 0,
+      "ownerMetered": 0,
+      "localQuota": 0,
+      "localGood": 1
+    },
+    "route": "none",
+    "currentExecutionId": null,
+    "taskBusy": false,
+    "selectedInstance": "localGood",
+    "failedRequestReplayed": false,
+    "followUpEvidenceRequired": null
+  },
+  "limitations": [
+    "Two isolated native servers and repository fake providers only",
+    "Aliases model distinct synthetic accounts on one owner computer",
+    "No production, real provider, email or GitHub calls",
+    "No packaged UI, real CLI sandbox or positive metered API acceptance"
+  ]
+}

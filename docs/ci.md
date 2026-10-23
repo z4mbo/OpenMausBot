@@ -4,6 +4,10 @@ Every PR still runs the workflow and its static checks: locale validation,
 typecheck, lint, Electron checks, the UI build, CI-selection tests and the
 verification-documentation checks. Selection never skips the entire workflow.
 
+Direct pushes to `main` and `origin-integration` also run CI. Origin releases
+are prepared on the integration branch, so a desktop build or backend/site
+build alone cannot stand in for its full CI result.
+
 - Root Markdown files, Markdown under `docs/`, and `.github/FUNDING.yml` alone
   do not run the runtime jobs.
 - Any other change runs the runtime suite.
@@ -134,6 +138,11 @@ instead of picking them at random: a random pick inside a range Windows
 reserves failed with `listen EACCES 127.0.0.1:497xx`.
 
 ## Required check
+
+Docs also builds on every `origin-v*` tag, using that tag's checkout, and supports
+manual runs. Release tags do not depend on GitHub's pull-request path filtering,
+which examines only the first 300 changed files. A large integration still needs
+its exact tagged documentation build before publication.
 
 The `main-ci-gate` ruleset requires the single `CI` check (it replaced the
 three legacy `typecheck + test (<os>)` names in September 2026). Renaming the

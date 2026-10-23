@@ -1,0 +1,170 @@
+{
+  "candidate": "0.2.11-preparing",
+  "published": false,
+  "workerBase": "0757f71888d2c5aaf41bd877724949a63d815aa2",
+  "normalization": "SHA-256 of UTF-8 sources with CRLF normalized to LF",
+  "sources": [
+    {
+      "path": "server/index.ts",
+      "sha256Lf": "7c8c020d1cedb9c2e257f555327b4f61ba31136fd13855e0c2bcf71417ddd312"
+    },
+    {
+      "path": "server/store.ts",
+      "sha256Lf": "3cc863ea2fd0caedb73dc7683fd7bf250fa1c00325525a23309caf488ad0db47"
+    },
+    {
+      "path": "server/store-bot-deletion.ts",
+      "sha256Lf": "143c90fd3a7f8c0bde88e7a9c4a30ad02e6901096f9aeaac93c45e6c9c6ce8d3"
+    },
+    {
+      "path": "server/origin-teams.ts",
+      "sha256Lf": "62c6cbc622027cf55d1c74a97b07fb9a0e7400c6bb408a975b47982abf2929f7"
+    }
+  ],
+  "originalSources": [
+    {
+      "path": "server/store.ts",
+      "sha256Lf": "52b3251d0744dd793a86fc82ec3befef12df0418d450f30704038e70ddce3a67"
+    },
+    {
+      "path": "server/origin-teams.ts",
+      "sha256Lf": "2e72fc7dc94cbf3b119fc493d2ecaa06592dd22db6aee34c2b0144da3bb8ce4a"
+    }
+  ],
+  "tests": [
+    {
+      "path": "server/workspace-head-deletion.test.ts",
+      "sha256Lf": "d9392a0eff3e1396a396dfe236daac570e482cdec754458654511a077863faa1"
+    },
+    {
+      "path": "server/origin-import.test.ts",
+      "sha256Lf": "2c8f1e7d39bdcbb8e7cb094f44529ad9ac6a04eb70cd058e984d7a6fda68e828"
+    }
+  ],
+  "baseline": {
+    "moduleIds": [
+      "server/store.ts",
+      "server/origin-teams.ts"
+    ],
+    "source": "0757f71888d2c5aaf41bd877724949a63d815aa2",
+    "sameFinalTests": true,
+    "total": 33,
+    "passed": 25,
+    "failed": 8,
+    "rawLogSha256": "fee50e49e84afa875e0c294f4f6bec49a246a7b47590b8e91253fe4a4e766a1d",
+    "retainedLog": "baseline-tests.log"
+  },
+  "changed": {
+    "sameFinalTests": true,
+    "total": 33,
+    "passed": 33,
+    "failed": 0,
+    "skipped": 0
+  },
+  "focused": {
+    "total": 195,
+    "passed": 193,
+    "failed": 1,
+    "skipped": 1,
+    "suites": 6,
+    "retainedLog": "focused-tests.log",
+    "unchangedEnvironmentFailure": {
+      "file": "server/team-computers.test.ts",
+      "line": 127,
+      "code": "EPERM",
+      "operation": "symlinkSync",
+      "beforeProductAssertion": true,
+      "assertionsUnchanged": true
+    }
+  },
+  "checks": {
+    "serverTypes": "passed",
+    "appTypes": "passed",
+    "touchedOxlint": "passed",
+    "whitespace": "passed",
+    "storeLineLimit": 2442,
+    "serverIndexLineLimit": 17673,
+    "independentReadOnlyReview": "clear"
+  },
+  "browser": {
+    "synthetic": true,
+    "realAppAndSidebar": true,
+    "realLocalHttpDeletion": true,
+    "cloudSyncDisabled": true,
+    "startupSettledBeforeMutations": true,
+    "observer": "coordinating agent using Cua",
+    "acceptance": "Primary and Fixture Starter visible before capturing; residual Secondary sidebar section only in baseline",
+    "baselineModules": [
+      "server/store.ts",
+      "server/origin-teams.ts"
+    ],
+    "baselineInitializerCompatibilityShim": true,
+    "before": {
+      "sections": [
+        "Workspace: Primary",
+        "Agents",
+        "Workspace: Secondary"
+      ],
+      "botNames": [
+        "Primary",
+        "Fixture Starter"
+      ],
+      "deletedHeadAbsent": true
+    },
+    "after": {
+      "sections": [
+        "Workspace: Primary",
+        "Agents"
+      ],
+      "botNames": [
+        "Primary",
+        "Fixture Starter"
+      ],
+      "deletedHeadAbsent": true
+    },
+    "screenshots": [
+      {
+        "path": "before.jpg",
+        "bytes": 46075,
+        "sha256": "8ea9dc783c930a1169f25aa1f8fe09c7501a0ed494a6488066b89b977522efdf",
+        "format": "jpeg",
+        "width": 1890,
+        "height": 1290
+      },
+      {
+        "path": "after.jpg",
+        "bytes": 44291,
+        "sha256": "83ccda13f99e2aeac636513d2224033b81cb83e6c9aa25b052223ed353fd7582",
+        "format": "jpeg",
+        "width": 1890,
+        "height": 1290
+      },
+      {
+        "path": "before-sidebar.jpg",
+        "bytes": 13234,
+        "sha256": "72ac9990cb9c5c376d22d01f7aa2ecb409061a68e5015b09e9c3449003c83903",
+        "format": "jpeg",
+        "width": 340,
+        "height": 620
+      },
+      {
+        "path": "after-sidebar.jpg",
+        "bytes": 11635,
+        "sha256": "8d5f6d0d8f0a1d49961eb5a25969a1a0767b70d77f1f8d7f8d61b1efed7b62aa",
+        "format": "jpeg",
+        "width": 340,
+        "height": 620
+      }
+    ],
+    "excludedEarlierCaptures": "Earlier initial, transient No Bots and pre-final-source images are excluded"
+  },
+  "limits": {
+    "noRealAccountOrCloudMutation": true,
+    "noPackagedNativeAcceptance": true,
+    "cloudWorkspaceMayReimportLocalHead": true,
+    "alreadyRecreatedHeadPreserved": true,
+    "nonemptySectionsAndSharedComputersPreserved": true,
+    "separateBotAndSectionFiles": true,
+    "unexpectedFixtureFetchResetRetainedPrivately": true
+  }
+}

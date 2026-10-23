@@ -1,0 +1,32 @@
+{
+  "frozenSource": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "nativeRun": 39318738462,
+  "node": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\runtimes\\node-v24.21.0-win-x64\\node.exe",
+  "version": "v24.21.0",
+  "args": [
+    "C:\\Users\\aless\\Documents\\Origin-bugfix\\scripts\\smoke-packaged-server.mjs",
+    "--browser-bundle",
+    "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\windows-v2\\resources\\browser-engine"
+  ],
+  "cwd": "C:\\Users\\aless\\Documents\\Origin-bugfix",
+  "env": {
+    "PATH": "C:\\Windows\\System32",
+    "SystemRoot": "C:\\Windows",
+    "WINDIR": "C:\\Windows",
+    "TEMP": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-temp",
+    "TMP": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-temp",
+    "HOME": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-home",
+    "USERPROFILE": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-home",
+    "APPDATA": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-home\\AppData\\Roaming",
+    "LOCALAPPDATA": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-home\\AppData\\Local",
+    "XDG_CONFIG_HOME": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-home\\.config",
+    "XDG_CACHE_HOME": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-home\\.cache",
+    "XDG_DATA_HOME": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-home\\.local\\share",
+    "OMB_DATA_DIR": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\results-v2\\smoke-own-home\\.openmausbot",
+    "OMB_SMOKE_DIST": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\native-audit-040\\windows-v2\\resources\\server"
+  },
+  "scriptSha256": "dec83b64bb367233668299210151f429c668f4952e1db0a42f2155acc6b0854b",
+  "helperSha256": "3f8edd2b33bad36d71c399542b69f289f1dbec06a99750114f8f5e27aad4f066",
+  "startedAt": "2026-10-19T21:00:02.306Z",
+  "pid": 35324
+}

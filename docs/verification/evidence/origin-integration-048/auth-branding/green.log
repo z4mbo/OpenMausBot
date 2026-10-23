@@ -1,0 +1,22 @@
+
+ RUN  v4.1.11 <checkout>
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+·····················································---·-··························································
+
+ Test Files  4 passed (4)
+      Tests  112 passed | 4 skipped (116)
+   Start at  08:53:59
+   Duration  6.53s (transform 655ms, setup 874ms, import 1.18s, tests 3.88s, environment 0ms)
+

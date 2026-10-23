@@ -1,3 +1,4 @@
+import type { ModelSelectionChecker } from "../model-selection-check.ts";
 import { approvalModeFor, type ApprovalMode } from "../../shared/approval-mode.ts";
 import { botAvatarUrlFromStoredPath } from "../../shared/bot-avatar.ts";
 import type { CommandAllowlistResponse } from "../../shared/command-allowlist.ts";
@@ -15,9 +16,9 @@ import { profileSnapshot } from "../profile-revision.ts";
 import { recordProfileChange } from "../profile-versions.ts";
 import type { RequestAuth } from "../request-auth.ts";
 import type { BotRecord, GroupRecord, Store } from "../store.ts";
-import type { ModelSelectionCheck } from "./bots-create.ts";
 import { PASS, type RouteHandler } from "./table.ts";
 import { pinnedClientThreadGuard } from "./pinned-client-thread.ts";
+import { sameModelSelection } from "../../shared/thread-model.ts";
 
 export interface BotSettingsRouteDeps {
   store: Store;
@@ -37,7 +38,7 @@ export interface BotSettingsRouteDeps {
   requestedTaskBot(botId: string, rawThreadId: unknown): BotRecord;
   threadBusy(botId: string, threadId: string): boolean;
   activeGroupTurnForBot(botId: string): { group: GroupRecord; threadId: string } | null;
-  checkedModelSelection(raw: unknown, current?: { selection: ModelSelection; busy: boolean }, requireAvailableModel?: boolean): ModelSelectionCheck;
+  checkedModelSelection: ModelSelectionChecker;
   engineSwitchNeedsAsk(mode: ApprovalMode, from: ModelSelection, to: ModelSelection): boolean;
   readCursor(threadId: string): { lastReadMessageId?: string };
   canManageCommandAllowlist(auth: RequestAuth): boolean;
@@ -116,7 +117,7 @@ export function createBotSettingsRoutes(deps: BotSettingsRouteDeps): RouteHandle
       const body = await readBody(req);
       if (body && typeof body === "object" && !Array.isArray(body)) {
         const unsupported = Object.keys(body).find(
-          (key) => key !== "instanceId" && key !== "model" && key !== "effort" && key !== "variant",
+          (key) => key !== "instanceId" && key !== "model" && key !== "effort" && key !== "variant" && key !== "source",
         );
         if (unsupported) return json(res, 400, { error: `unsupported model field: ${unsupported}` });
       }
@@ -127,14 +128,15 @@ export function createBotSettingsRoutes(deps: BotSettingsRouteDeps): RouteHandle
       if (existing.approvalGrant) {
         return json(res, 409, { error: "wait for the approval-level change to finish before changing models" });
       }
-      const checked = checkedModelSelection(
+      const checked = await checkedModelSelection(
         body,
         { selection: selected.modelSelection, busy: threadBusy(selected.id, selected.threadId) },
         true,
+        { botId: existing.id, threadId: selected.threadId },
       );
       if (!checked.ok) return json(res, checked.status, { error: checked.error });
       if (activeGroupTurnForBot(existing.id)) {
-        const groupChecked = checkedModelSelection(checked.selection, { selection: existing.modelSelection, busy: true });
+        const groupChecked = await checkedModelSelection(checked.selection, { selection: existing.modelSelection, busy: true }, false, { botId: existing.id });
         if (!groupChecked.ok) return json(res, groupChecked.status, { error: groupChecked.error });
       }
       if ([existing, selected].some((owner) => {
@@ -145,6 +147,11 @@ export function createBotSettingsRoutes(deps: BotSettingsRouteDeps): RouteHandle
         return json(res, 400, {
           error: "Changing providers with elevated permissions requires choosing Ask first",
         });
+      }
+      const fresh = store.projectBotForTask(existing.id, selected.threadId);
+      if (store.bot(existing.id) !== existing || !fresh || fresh.approvalGrant ||
+          !sameModelSelection(fresh.modelSelection, selected.modelSelection) || threadBusy(existing.id, selected.threadId)) {
+        return json(res, 409, { error: "The agent changed or started working while its model was checked. Try again when it is idle." });
       }
       const bot = store.patchBot(existing.id, { modelSelection: checked.selection });
       if (!bot) return json(res, 404, { error: "no such bot" });

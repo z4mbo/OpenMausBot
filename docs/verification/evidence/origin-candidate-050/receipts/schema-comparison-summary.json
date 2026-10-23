@@ -1,0 +1,26 @@
+{
+  "qualification": "Working integration compiled locally in memory; copied from host-review.md, not a deployed or final frozen schema proof.",
+  "mainSource": "fa83fb6b9e7e6e7e8195e93405a975007917872a",
+  "mainTables": 94,
+  "mergedTables": 96,
+  "mainCompiledSchemaSha256": "67ba494c0488b0159d320ae68b9484ac8f7a584462827ea879e9002200c0a705",
+  "mergedCompiledSchemaSha256": "88f2a5316f23e674c9daa4442e914aeacba5719107d977503ee7f063ea44a9f8",
+  "removedTables": [],
+  "narrowedValidators": [],
+  "removedIndexes": [],
+  "addedTables": [
+    "modelHostSources",
+    "modelHostExecutions"
+  ],
+  "addedOptionalFields": [
+    "agentHosts.deviceId",
+    "agentHosts.credentialHash",
+    "workspaceAgentRuns.executedByUserId",
+    "workspaceAgentRuns.modelExecutionId"
+  ],
+  "addedIndexes": [
+    "agentHosts.by_ownerUserId_and_teamId_and_deviceId"
+  ],
+  "productionRowsRead": false,
+  "deploymentPerformed": false
+}

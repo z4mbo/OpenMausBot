@@ -230,6 +230,7 @@ describe("phone pairing instructions", () => {
     const text = phonePairingInstructions("ios", { origin: "https://maus.example", ready: true }).join("\n");
     expect(text).toContain("Safari");
     expect(text).toContain("already have");
+    expect(text).toContain("compatible companion app");
     expect(text).toContain("https://maus.example/pair");
     expect(text).toContain("does not mean the phone is paired");
     expect(text).toContain("not settings or pairing administration");
@@ -238,7 +239,7 @@ describe("phone pairing instructions", () => {
 
   it("sends an Android phone to the app first, and still offers the browser", () => {
     const text = phonePairingInstructions("android", { origin: "https://maus.example", ready: true }).join("\n");
-    expect(text).toContain("open the OpenMausBot app and scan the QR with its pairing scanner");
+    expect(text).toContain("open a compatible companion app and scan the QR with its pairing scanner");
     expect(text).toContain("Camera will not open it in a browser");
     expect(text).toContain("https://maus.example/pair");
     expect(text).not.toContain("not the Android native pairing scanner");

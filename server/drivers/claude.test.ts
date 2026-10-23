@@ -543,6 +543,23 @@ describe("ClaudeDriver turns (fake CLI)", () => {
     }
   });
 
+  it.each([
+    ["default", undefined],
+    ["all", true],
+    ["API only", false],
+  ] as const)("runs the dedicated API instance with the workspace Claude scope %s", async (label, everyClaudeBot) => {
+    const map = instanceConfigs({ anthropic: { key: "synthetic-selected-api-key", ...(everyClaudeBot === undefined ? {} : { everyClaudeBot }) } });
+    const selected = map.claudeApi!;
+    const dump = join(scratch, "dedicated-api.json");
+    process.env.FAKE_CLAUDE_DUMP = dump;
+    await create("echo", selected.environment as Record<string, string>, { ...ClaudeDriver.decodeConfig(selected.config), cli: FAKE_CLI });
+    await instance.adapter.sendTurn({ threadId: `dedicated-api-${label}`, text: "Synthetic API route" });
+    await recorder.until((event) => event.type === "turn.completed");
+    expect(recorder.events.at(-1)).toMatchObject({ type: "turn.completed", ok: true });
+    expect(JSON.parse(readFileSync(dump, "utf8")).env.ANTHROPIC_API_KEY).toBe("synthetic-selected-api-key");
+    expect(await instance.snapshot()).toMatchObject({ state: "available", authenticated: true, account: { method: "api-key" }, billing: "metered" });
+  });
+
   it("normalizes a full turn into the canonical event sequence", async () => {
     await create();
     const { turnId } = await instance.adapter.sendTurn({ threadId: "t-happy", text: "hi", model: "claude-sonnet-5" });
@@ -661,7 +678,8 @@ describe("ClaudeDriver turns (fake CLI)", () => {
     expect(errors[0]).not.toHaveProperty("claudeUpdate");
     expect(recorder.events.some((event) => event.type === "item.completed" && event.itemType === "assistant_text")).toBe(false);
     expect(recorder.events.some((event) => event.type === "content.delta")).toBe(false);
-    expect(recorder.events.at(-1)).toMatchObject({ type: "turn.completed", ok: false, stopReason: "quota" });
+    expect(recorder.events.at(-1)).toMatchObject({ type: "turn.completed", ok: false, stopReason: "quota",
+      refusal: { kind: "quota_exhausted", scope: "account", retry: "safe_initial_refusal", resetsAt: new Date(resetsAt * 1000).toISOString() } });
   });
 
   it("names the weekly limit behind an older CLI's update request, and offers no update", async () => {
@@ -785,6 +803,24 @@ describe("ClaudeDriver turns (fake CLI)", () => {
     const refused = await instance.adapter.sendTurn({ threadId: "t-old", text: "hello", approvalMode: "ask", guestConfined: true })
       .then(() => recorder.until((e) => e.type === "turn.completed").then((event) => JSON.stringify(event) + JSON.stringify(recorder.events)), (error: unknown) => String(error));
     expect(refused).toContain("too old to run this turn without a shell");
+  });
+
+  it("cannot approve a confined guest read outside the granted folder", async () => {
+    const release = join(scratch, "release-confined");
+    await create("hang", { FAKE_CLAUDE_VERSION: "2.1.284", FAKE_CLAUDE_RELEASE: release });
+    const folder = mkdtempSync(join(scratch, "granted-"));
+    await instance.adapter.sendTurn({ threadId: "guest-outside", text: "Canonical work", cwd: folder, approvalMode: "ask", guestConfined: true });
+    const autoAllow = instance.adapter.onEvent(event => {
+      if (event.type === "request.opened" && event.requestId) void instance.adapter.respondToRequest("guest-outside", event.requestId, { behavior: "allow" });
+    });
+    const conn = await connectSocket(permissionSocketPath("guest-outside"));
+    try {
+      const response = answerQueue(conn)();
+      conn.write(JSON.stringify({ t: "ask", id: "outside-read", tool: "Read", input: { file_path: join(scratch, "private-owner.md") } }) + "\n");
+      await expect(response).resolves.toMatchObject({ behavior: "deny", source: "system" });
+      expect(recorder.events.some(event => event.type === "request.opened" && event.requestId === "outside-read")).toBe(false);
+    } finally { autoAllow(); conn.destroy(); writeFileSync(release, "finish"); }
+    await recorder.until(event => event.type === "turn.completed");
   });
 
   it("keeps a workspace Anthropic key set on purpose while still dropping one from the parent env", async () => {
@@ -1459,6 +1495,17 @@ describe("ClaudeDriver turns (fake CLI)", () => {
     expect(seen.argv).not.toContain("--strict-mcp-config");
     expect(seen.argv).not.toContain("--setting-sources");
     expect(seen.settings?.claudeMdExcludes).toBeUndefined();
+  });
+
+  it("keeps a confined guest isolated when the account inherits personal Claude configuration", async () => {
+    const dump = join(scratch, "guest-inherit.json");
+    await create(undefined, { FAKE_CLAUDE_VERSION: "2.1.284", FAKE_CLAUDE_DUMP: dump, OMB_CLAUDE_INHERIT_USER_CONFIG: "1" });
+    await instance.adapter.sendTurn({ threadId: "guest-inherit", text: "Canonical shared work", approvalMode: "ask", guestConfined: true });
+    await recorder.until(event => event.type === "turn.completed");
+    const seen = JSON.parse(readFileSync(dump, "utf8"));
+    expect(seen.argv).toContain("--strict-mcp-config");
+    expect(seen.argv[seen.argv.indexOf("--setting-sources") + 1]).toBe("project");
+    expect(seen.settings.claudeMdExcludes).toEqual([join(homedir(), ".claude", "CLAUDE.md")]);
   });
 
   it("loads the machine's own MCP servers when the turn asks, keeping the rest isolated", async () => {
@@ -3856,11 +3903,11 @@ describe("ClaudeDriver resume recovery (fake CLI)", () => {
 describe("ClaudeDriver snapshot auth (fake CLI)", () => {
   let instance: ProviderInstance;
 
-  const create = async () => {
+  const create = async (environment: Record<string, string> = {}) => {
     instance = await ClaudeDriver.create({
       instanceId: "claude-auth-test",
       displayName: "Claude Auth Test",
-      environment: {},
+      environment,
       enabled: true,
       config: { cli: FAKE_CLI, permissionMode: "acceptEdits" },
     });
@@ -3881,6 +3928,18 @@ describe("ClaudeDriver snapshot auth (fake CLI)", () => {
     process.env.FAKE_CLAUDE_AUTH = "in";
     await create();
     expect(await instance.snapshot()).toMatchObject({ state: "available", authenticated: true });
+  });
+
+  it("reports native API-key authentication as metered without a requireApiKey override", async () => {
+    process.env.FAKE_CLAUDE_AUTH = "api-key";
+    await create();
+    expect(await instance.snapshot()).toMatchObject({ state: "available", authenticated: true, account: { method: "api-key" }, billing: "metered" });
+  });
+
+  it("reports a selected workspace API key as metered even when the auth probe reports a subscription", async () => {
+    process.env.FAKE_CLAUDE_AUTH = "in";
+    await create({ ANTHROPIC_API_KEY: "synthetic-workspace-api-key" });
+    expect(await instance.snapshot()).toMatchObject({ state: "available", authenticated: true, account: { method: "api-key" }, billing: "metered" });
   });
 
   it("reports signed out when `auth status` says loggedIn:false", async () => {

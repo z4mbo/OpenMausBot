@@ -1,0 +1,37 @@
+{
+  "source": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+  "busyThread": "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6",
+  "otherThread": "b95178e6-218c-4f40-bdc9-943f05dd696a",
+  "actualOriginalBusy": true,
+  "result": {
+    "threadId": "65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6",
+    "title": "hello",
+    "createdAt": 1792559598837,
+    "updatedAt": 1792559621662,
+    "unread": false,
+    "activity": "working",
+    "busy": true,
+    "lastThreadOrderAt": 1792559621662,
+    "titleFromFirstMessage": true,
+    "turnStartedAt": 1792559621670,
+    "cwd": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-6SsmFg\\task-workspaces\\693c6f35-e196-43c7-8614-d36bf864e560\\65e47a7c-a1f9-43f3-860b-1c0abdbbd9e6",
+    "modelSelection": {
+      "instanceId": "claude",
+      "model": "claude-sonnet-5"
+    },
+    "followsBotModel": true,
+    "waitingForTeammates": false
+  },
+  "fixture": {
+    "ok": true,
+    "ui": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-6SsmFg\\ui.json",
+    "url": "http://127.0.0.1:22322",
+    "previewUrl": "http://127.0.0.1:5173/__threads.html",
+    "botId": "693c6f35-e196-43c7-8614-d36bf864e560",
+    "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-6SsmFg",
+    "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792559596526-22988.log"
+  },
+  "root": "isolated synthetic hang-mode only",
+  "browserSha256": "33bee834f6a6072ec8688b0914726e0262874d758f69f27e8baf7eaac6b5ed15",
+  "chromeSha256": "01176f6928faeb37ff018bc8884bbca8a0197f51b659d467f2501ab2c64f9fcf"
+}

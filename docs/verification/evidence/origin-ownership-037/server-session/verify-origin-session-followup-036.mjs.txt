@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+import { createServer } from 'node:http';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { createHash } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { launchVerificationServer } from '../scripts/control-omb.ts';
+const root = process.cwd();
+const deferred = () => { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; };
+const waitStarted = promise => Promise.race([promise,new Promise((_,reject)=>{setTimeout(()=>reject(new Error('synthetic query did not start')),5000).unref();})]);
+const accounts = new Map([['older-a',{email:'ana@fixture.invalid'}],['newer-b',{email:'bo@fixture.invalid'}],...['a','b','c'].map(token=>[token,{email:'ana@fixture.invalid'}])]);
+let query = async token => accounts.get(token) ?? null;
+let queryCount = 0;
+let release;
+const backend = createServer(async(req,res)=>{
+ try {
+  let bytes=''; for await(const part of req) bytes+=part;
+  const body=JSON.parse(bytes); assert.equal(req.url,'/api/query'); assert.equal(body.path,'auth:me');
+  const args=Array.isArray(body.args)?body.args[0]:body.args; queryCount++;
+  const value=await query(args.sessionToken);
+  res.writeHead(200,{'content-type':'application/json'}); res.end(JSON.stringify({status:'success',value,logLines:[]}));
+ } catch {
+  res.writeHead(500,{'content-type':'application/json'});res.end(JSON.stringify({status:'error',errorMessage:'synthetic query failed',logLines:[]}));
+ }
+});
+await new Promise(resolve=>backend.listen(0,'127.0.0.1',resolve));
+const backendUrl=`http://127.0.0.1:${backend.address().port}`;
+let fixture;
+let result;
+const checks=[];
+try {
+ fixture=await launchVerificationServer();
+ assert(![3210,5199,8799].includes(Number(new URL(fixture.info.url).port)));
+ const stateFile=join(fixture.info.dataDir,'origin-cloud.json');
+ const state=()=>JSON.parse(readFileSync(stateFile,'utf8'));
+ const call=async(method,token)=>{
+  const response=await fetch(`${fixture.info.url}/api/origin/cloud-session`,{method,headers:{'content-type':'application/json',origin:fixture.info.url},...(token?{body:JSON.stringify({url:backendUrl,sessionToken:token})}:{}),signal:AbortSignal.timeout(8000)});
+  return{status:response.status,body:await response.json()};
+ };
+ const doctor=await promisify(execFile)(process.execPath,['--experimental-strip-types','scripts/control-omb.ts','doctor','--url',fixture.info.url],{cwd:root,timeout:15000});
+ assert.doesNotThrow(()=>JSON.parse(doctor.stdout));checks.push({name:'standard control-omb doctor',passed:true});
+ const incoming=deferred(); const incomingStarted=deferred(); release=()=>incoming.resolve({email:'ana@fixture.invalid'});
+ query=async token=>{if(token==='older-a'){incomingStarted.resolve();return incoming.promise;}return accounts.get(token)??null;};
+ const olderIncoming=call('PUT','older-a');await waitStarted(incomingStarted.promise);
+ try{assert.equal((await call('PUT','newer-b')).status,200);accounts.set('newer-b',null);assert.equal((await call('DELETE')).status,200);}finally{release();}
+ assert.equal((await olderIncoming).status,409);assert.deepEqual(state(),{projects:{}});
+ checks.push({name:'held incoming validation cannot restore an account after newer sign-out',passed:true});
+ query=async token=>accounts.get(token)??null;assert.equal((await call('PUT','a')).status,200);
+ const owner=deferred();const ownerStarted=deferred();let aChecks=0;release=()=>owner.resolve({email:'ana@fixture.invalid'});
+ query=async token=>{if(token==='a'&&++aChecks===1){ownerStarted.resolve();return owner.promise;}return accounts.get(token)??null;};
+ const staleRefresh=call('PUT','c');await waitStarted(ownerStarted.promise);
+ try{assert.equal((await call('PUT','b')).status,200);assert.equal((await call('PUT','a')).status,200);}finally{release();}
+ assert.equal((await staleRefresh).status,409);assert.equal(state().sessionToken,'a');
+ checks.push({name:'same-account a-to-b-to-a changes reject the stale c refresh',passed:true});
+ result={passed:true,baselineCommit:'e7c289d3d6ed15763f87f4d26967b8ae1d4eb5ec',sourceFileSha256:createHash('sha256').update(readFileSync(join(root,'server/origin-cloud.ts'))).digest('hex'),fixture:fixture.info,syntheticBackend:backendUrl,queryCount,checks};
+}catch(error){result={passed:false,error:error instanceof Error?error.message:String(error),fixture:fixture?.info,syntheticBackend:backendUrl,queryCount,checks};process.exitCode=1;}
+finally{
+ release?.();await fixture?.close();await new Promise(resolve=>backend.close(resolve));
+ result.cleanup={fixtureExited:!fixture||fixture.child.exitCode!==null||fixture.child.signalCode!==null,fixtureDataRemoved:!fixture||!existsSync(fixture.info.dataDir),syntheticBackendClosed:!backend.listening};
+ const output=join(root,'.omb-scratch/origin-session-followup-fixture-036.json');writeFileSync(output,JSON.stringify(result,null,2)+'\n');
+ console.log(JSON.stringify({passed:result.passed,checks:checks.length,cleanup:result.cleanup,output,error:result.error}));
+}

@@ -1,0 +1,136 @@
+{
+  "baseline": "d06fe4cb6bdb33b81800424cacd619bd60665c4a",
+  "source": "f44ebe30a9568ed634b9eb8a45476f42e4c059b1",
+  "profilesCompared": 40,
+  "unbridgedDefault": {
+    "profile": "default",
+    "bridged": false,
+    "tools": 54,
+    "old": {
+      "bytes": 68524,
+      "sha256": "5a1181da1dbd2ddb2182ac2ad4295dc59378fb52b6cb95393c2c95527ed565c2"
+    },
+    "current": {
+      "bytes": 68469,
+      "sha256": "760961c9f01cef156bb97f09e86e9674a57c834bf0f7ec18aaacb53fba9c32f7"
+    },
+    "replacements": 11,
+    "fields": [
+      {
+        "path": "catalog.tools.1.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "list_room_targets"
+      },
+      {
+        "path": "catalog.tools.2.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "coordinate_bots"
+      },
+      {
+        "path": "catalog.tools.6.description",
+        "replacements": 2,
+        "byteDelta": -10,
+        "tool": "select_computer"
+      },
+      {
+        "path": "catalog.tools.21.description",
+        "replacements": 2,
+        "byteDelta": -10,
+        "tool": "request_credential"
+      },
+      {
+        "path": "catalog.tools.22.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "request_sign_in"
+      },
+      {
+        "path": "catalog.tools.23.description",
+        "replacements": 2,
+        "byteDelta": -10,
+        "tool": "fill_login"
+      },
+      {
+        "path": "catalog.tools.30.inputSchema.properties.run_on_startup.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "propose_routine"
+      },
+      {
+        "path": "catalog.tools.31.inputSchema.properties.changes.properties.run_on_startup.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "propose_routine_action"
+      }
+    ]
+  },
+  "bridgedDefault": {
+    "profile": "default",
+    "bridged": true,
+    "tools": 15,
+    "old": {
+      "bytes": 15658,
+      "sha256": "15813e96252013d93b2a606b533e904cf3fc811c41b21596443fae682360ff22"
+    },
+    "current": {
+      "bytes": 15603,
+      "sha256": "44ea1f9521afc5eebf26d9a08d082ab9c1aaee0fc2a2b2fe3680429496aba5c1"
+    },
+    "replacements": 11,
+    "fields": [
+      {
+        "path": "catalog.tools.1.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "list_room_targets"
+      },
+      {
+        "path": "catalog.tools.2.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "coordinate_bots"
+      },
+      {
+        "path": "catalog.tools.5.description",
+        "replacements": 2,
+        "byteDelta": -10,
+        "tool": "select_computer"
+      },
+      {
+        "path": "catalog.tools.8.description",
+        "replacements": 2,
+        "byteDelta": -10,
+        "tool": "request_credential"
+      },
+      {
+        "path": "catalog.tools.9.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "request_sign_in"
+      },
+      {
+        "path": "catalog.tools.10.description",
+        "replacements": 2,
+        "byteDelta": -10,
+        "tool": "fill_login"
+      },
+      {
+        "path": "catalog.tools.13.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "find_tool"
+      },
+      {
+        "path": "catalog.tools.14.description",
+        "replacements": 1,
+        "byteDelta": -5,
+        "tool": "use_tool"
+      }
+    ]
+  },
+  "allByteDeltas": [
+    -55
+  ]
+}

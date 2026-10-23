@@ -109,11 +109,15 @@ export function orderedGroups<T extends { id: string }>(groups: readonly T[], vi
 export const setProjectOrder = (order: string[]) => write({ order, sort: "custom" });
 
 /** Projects of one workspace, in the chosen order. `updatedAt` is the project's latest thread activity. */
-export function sortProjects<T extends { id: string; name: string; updatedAt: number }>(projects: readonly T[], view: WorkspaceView): T[] {
+export function sortProjects<T extends { id: string; name: string; updatedAt: number }>(projects: readonly T[], view: WorkspaceView, sharedOrder?: readonly string[]): T[] {
   const list = [...projects];
   if (view.sort === "name") return list.sort((a, b) => a.name.localeCompare(b.name));
   if (view.sort === "recent") return list.sort((a, b) => b.updatedAt - a.updatedAt);
   const rank = (id: string) => { const index = view.order.indexOf(id); return index < 0 ? Number.MAX_SAFE_INTEGER : index; };
+  if (sharedOrder) {
+    const shared = new Map(sharedOrder.map((id, index) => [id, index]));
+    return [...list.filter(project => shared.has(project.id)).sort((a, b) => shared.get(a.id)! - shared.get(b.id)!), ...list.filter(project => !shared.has(project.id)).sort((a, b) => rank(a.id) - rank(b.id))];
+  }
   return list.sort((a, b) => rank(a.id) - rank(b.id));
 }
 

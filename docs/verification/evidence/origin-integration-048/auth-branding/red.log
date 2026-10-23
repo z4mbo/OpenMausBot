@@ -1,0 +1,296 @@
+
+ RUN  v4.1.11 <checkout>
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+----xx----------------------------x------------------------------x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  companion/test/control.test.ts > the per-launch control token > serves the page itself, which holds no state, without one
+AssertionError: expected '<!doctype html>\n<meta charset="utf-8…' to contain '<title>Origin Companion</title>'
+
+- Expected
++ Received
+
+- <title>Origin Companion</title>
++ <!doctype html>
++ <meta charset="utf-8">
++ <meta name="viewport" content="width=device-width,initial-scale=1">
++ <title>OpenMausBot Companion</title>
++ <style>
++   :root { color-scheme: light dark; --fg: #111; --dim: #666; --line: #0002; --bg: #fff; --card: #fafafa; }
++   @media (prefers-color-scheme: dark) {
++     :root { --fg: #eee; --dim: #999; --line: #fff2; --bg: #151515; --card: #1e1e1e; }
++   }
++   body { font: 15px/1.55 ui-sans-serif, system-ui, sans-serif; color: var(--fg); background: var(--bg);
++          margin: 0; padding: 2.5rem 1.25rem; }
++   main { max-width: 34rem; margin: 0 auto; }
++   h1 { font-size: 1.25rem; margin: 0 0 .35rem; }
++   p.sub { color: var(--dim); margin: 0 0 1.75rem; }
++   section { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
++             padding: 1rem 1.15rem; margin-bottom: 1rem; }
++   h2 { font-size: .95rem; margin: 0 0 .5rem; }
++   code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
++   .code { font: 600 2rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .3em; }
++   .dim { color: var(--dim); }
++   button { font: inherit; padding: .4rem .8rem; border-radius: 8px; border: 1px solid var(--line);
++            background: transparent; color: inherit; cursor: pointer; }
++   button:hover { background: var(--line); }
++   ul { list-style: none; padding: 0; margin: .5rem 0 0; }
++   li { display: flex; align-items: center; gap: .75rem; padding: .5rem 0; border-top: 1px solid var(--line); }
++   li .grow { flex: 1; min-width: 0; }
++   .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++ </style>
++ <main>
++   <h1>OpenMausBot Companion</h1>
++   <p class="sub">Your phone reaches this computer through here. Only pair a device you trust.</p>
++   <section id="where"></section>
++   <section id="pair"></section>
++   <section id="devices"></section>
++ </main>
++ <script type="module">
++ /** Shorthand for the handful of nodes this page updates. */
++ const el = (id) => document.getElementById(id);
++ /** Escape before interpolating. Device names are user-supplied and end up in
++  * innerHTML, which is the one place here that has to be airtight. */
++ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
++ /** A timestamp as "3 minutes ago", for the paired-device list. */
++ const ago = (at) => {
++   const s = Math.round((Date.now() - at) / 1000);
++   if (s < 90) return "just now";
++   const m = Math.round(s / 60);
++   if (m < 60) return m + " min ago";
++   const h = Math.round(m / 60);
++   return h < 24 ? h + " h ago" : Math.round(h / 24) + " d ago";
++ };
++
++ // The link the companion printed carries the control token in its fragment, which never leaves this page.
++ const token = new URLSearchParams(location.hash.slice(1)).get("token") ?? "";
++ history.replaceState(null, "", location.pathname);
++
++ /** Call the control API and return the state it answers with. */
++ async function api(path, method) {
++   const res = await fetch(path, { method: method ?? "GET", headers: { "x-openmausbot-control-token": token } });
++   if (res.status === 403) {
++     document.querySelector("main").innerHTML = "<h1>OpenMausBot Companion</h1><p class=sub>Open this page from the link the companion printed when it started.</p>";
++     throw new Error("control token required");
++   }
++   return res.json();
++ }
++
++ /** Redraw the whole page from one state object, listeners included. */
++ function render(s) {
++   // The tailnet name beats the address: iOS refuses plain HTTP to 100.64/10,
++   // which is CGNAT space rather than one of the ranges its local-networking
++   // exemption covers, and ATS exceptions match by name rather than subnet.
++   const reach = s.tailnetName ?? s.tailscale ?? s.addresses[0];
++   el("where").innerHTML =
++     "<h2>Where to connect</h2>" +
++     (reach
++       ? "<p>Enter <code>" + esc(reach) + ":" + s.port + "</code> on your phone." +
++         (s.tailnetName ? " That works from any network." : "") + "</p>"
++       : "<p class=dim>No network address yet.</p>") +
++     (s.tailnetName && s.lan ? "<p class=dim>On this network only: <code>" + esc(s.lan) + ":" + s.port + "</code></p>" : "") +
++     (s.tailscale && !s.tailnetName
++       ? "<p class=dim>On a tailnet, but this computer's MagicDNS name could not be read from Tailscale — either MagicDNS is off, or its command line tool is not where we looked. iPhones cannot connect to a bare tailnet address; the console output lists what was tried.</p>"
++       : "") +
++     (!s.tailscale
++       ? "<p class=dim>Reachable on this network only. Install Tailscale on both this computer and your phone to reach it from anywhere — including networks that stop devices from seeing each other.</p>"
++       : "") +
++     (s.discovery.advertising
++       ? "<p class=dim>Your phone can also find this computer as \u201c" + esc(s.discovery.name) + "\u201d.</p>"
++       : "");
++
++   el("pair").innerHTML = s.pairing
++     ? "<h2>Pair a phone</h2><div class=code>" + esc(s.pairing.code) + "</div>" +
++       "<p class=dim>Expires in <span id=left></span>s. Enter it on your phone.</p>" +
++       "<button id=cancel>Cancel</button>"
++     : "<h2>Pair a phone</h2><p class=dim>The code lasts two minutes.</p><button id=start>Start pairing</button>";
++
++   el("devices").innerHTML =
++     "<h2>Paired devices</h2>" +
++     (s.devices.length
++       ? "<ul>" + s.devices.map((d) =>
++           "<li><div class='grow'><div class=name>" + esc(d.name) + "</div>" +
++           "<div class=dim>Last seen " + ago(d.lastSeenAt) + "</div>" +
++           "<button data-cloud='" + esc(d.id) + "' data-allowed='" + (d.cloudDesktopAccess ? "1" : "0") + "'>" +
++           (d.cloudDesktopAccess ? "Cloud desktop on" : "Allow cloud desktop") + "</button>" +
++           "<button data-browser='" + esc(d.id) + "' data-browser-allowed='" + (d.browserControlAccess ? "1" : "0") + "'>" +
++           (d.browserControlAccess ? "Browser control on" : "Allow browser control") + "</button></div>" +
++           "<button data-revoke='" + esc(d.id) + "'>Remove</button></li>").join("") + "</ul>"
++       : "<p class=dim>No phones are paired yet.</p>");
++
++   el("start")?.addEventListener("click", async () => render(await api("/pairing", "POST")));
++   el("cancel")?.addEventListener("click", async () => render(await api("/pairing", "DELETE")));
++   for (const b of document.querySelectorAll("[data-revoke]")) {
++     b.addEventListener("click", async () => render(await api("/devices/" + b.dataset.revoke, "DELETE")));
++   }
++   for (const b of document.querySelectorAll("[data-cloud]")) {
++     b.addEventListener("click", async () => render(await api(
++       "/devices/" + b.dataset.cloud + "/cloud-desktop",
++       b.dataset.allowed === "1" ? "DELETE" : "POST"
++     )));
++   }
++   for (const b of document.querySelectorAll("[data-browser]")) {
++     b.addEventListener("click", async () => render(await api(
++       "/devices/" + b.dataset.browser + "/browser-control",
++       b.dataset.browserAllowed === "1" ? "DELETE" : "POST"
++     )));
++   }
++   if (s.pairing) {
++     const tick = () => {
++       const left = Math.max(0, Math.round((s.pairing.expiresAt - Date.now()) / 1000));
++       const node = el("left");
++       if (node) node.textContent = left;
++     };
++     tick();
++   }
++ }
++
++ render(await api("/state"));
++ // Two cadences, keyed to what the page is actually waiting for.
++ //
++ // While a code is on screen it has to count down, and the same tick is what
++ // notices the phone on the other end finishing the handshake — one second.
++ // With no pairing open there is nothing moving faster than the user, and a
++ // fixed one-second poll is a request every second for as long as the tab
++ // stays open, which on a page people leave sitting there is most of them.
++ //
++ // Self-scheduling rather than setInterval: a slow reply cannot stack up
++ // another poll behind it.
++ const poll = async () => {
++   const s = await api("/state");
++   render(s);
++   setTimeout(poll, s.pairing ? 1000 : 10000);
++ };
++ setTimeout(poll, 1000);
++ </script>
++
+
+ ❯ companion/test/control.test.ts:86:23
+     84|     const page = await ask("GET", "/", {}, undefined, {});
+     85|     expect(page.status).toBe(200);
+     86|     expect(page.body).toContain("<title>Origin Companion</title>");
+       |                       ^
+     87|     expect(page.body).toContain("<h1>Origin Companion</h1>");
+     88|     expect(page.body).not.toContain("OpenMausBot Companion");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  server/cli.test.ts > openmausbot command line > the two links one pairing window has > gives an Android phone the app-scheme QR, because its scanner rejects https
+AssertionError: expected 'pairing code:  ABCD-EFGH-JKLM\nexpire…' to contain 'Scan that in the Origin app'
+
+- Expected
++ Received
+
+- Scan that in the Origin app
++ pairing code:  ABCD-EFGH-JKLM
++ expires:       8:54:37 AM (single use)
++ web browser:   https://mini.example/pair#code=ABCD-EFGH-JKLM
++ phone app:     openmausbot://pair?address=https%3A%2F%2Fmini.example&token=omb_pair_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&name=mini
++
++ ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
++ █ ▄▄▄▄▄ █▄▀ ▄▀  █▀█▄▀▀▄▄█  ▀██▄▀▀ █ ▄▄▄▄▄ █
++ █ █   █ ███▄ █▄ ▄▀▀█ ▀ █▄▀ ▄  ▀██▀█ █   █ █
++ █ █▄▄▄█ ██ ▀▄▄ ▀    ▄▀▄█▀██ █▄█▄▄▀█ █▄▄▄█ █
++ █▄▄▄▄▄▄▄█ █ ▀ ▀ ▀ █▄▀ █ █ ▀ █▄█▄▀ █▄▄▄▄▄▄▄█
++ █▄ ▀ ▄▀▄█▀ █▀ ▀█▀▄▄▀ ▄█▄█▄█▄ ▄▄▀ ▄▀▄▀▀▀▀█▄█
++ █▀▀▄▄  ▄▄█▄ ▀█ █   ██▀▄█▄ █ ▄▄ ▄██ ▀██ ▄▀▀█
++ █▀▀ ▄ █▄▀▀▀█▄▀▄▀██▀▄▄▄██ ▄▀▀▀ █▀█▄█  ▀ ▀▄ █
++ ███▄  █▄▄██▀█▀▄▄▄▀██ ██ █▀▄ ▄▀█▄▄ █ ▄ ▀▀█ █
++ █▀█ ▀█▄▄▀▄▄▄▄▄▄█ ███  ▄ ▄▀▄▀  ▀▀▀  █▄▀▀▀▄██
++ █▄▀ █▀▀▄▀▄▄▀▄▀ ▄ ▀▄█▄▄▄ ▄█ ▄ █▄▄ ▀ ▄▄▀▄▀▀ █
++ ██▀▀█ █▄▄▀ ██▄ ██▄▄▀▀██▀▀▄█  ▄▄▀ ██▄▀▀▄ ▀██
++ █ ▀ ▀▀▀▄▀ ▀ █▄▄▀▀█  ▀ █  ▀█▄▄  ▀██▄▄▀  ▄▀██
++ █▀▀▄██▄▄  █▄▀▄█▀▀ ▀▀▄ ██  ▀█ ▀█▀▄▄▄  ▀▄█▀██
++ █  ▄▄▀▄▄▀▀ ▀█ ▀ ▄▄██▄ ▄▄█▀▄█ ▀█▄▄▀  ▄▀▀▀█▄█
++ █ █▀█ ▀▄▀▄▀  ▀▀█▄▀█▀ ▄▀ ▄▄▄█ █▀▀▀ ██▄▀██▄██
++ █   ▀▀█▄ █▄▄▄▀ █▄█▄▀ ▀▄▀▄▀▀▄▄█▄▀ ▀▀▀█ █ █ █
++ █▄▄▄███▄█▀█ ▀██ ▀█ ▀ ██▀█▄█▀ █▄█  ▄▄▄ ▄  ██
++ █ ▄▄▄▄▄ ██▄ ▄██  █ ▄▀ ▄█▄▀█ ▄▄ ▄  █▄█  ▄▀▀█
++ █ █   █ █ ▀▀█▄ ▄  █▀█▄▀█ ▄▀▀  █▀▄▄▄▄ ▄▀▀ ▀█
++ █ █▄▄▄█ █▀█▄ ▄█▀ ▄██▄ ▄▄█▀▄▄▄▀▄ █▄▄▀  ▀▀█ █
++ █▄▄▄▄▄▄▄█▄▄████████▄█▄█▄▄█▄▄▄███▄▄███▄█████
++
++
++ Scan that in the OpenMausBot app. For a browser instead, open the web
++ address above and type the code.
+
+ ❯ server/cli.test.ts:110:19
+    108|       expect(out).toContain(qrToString(invite));
+    109|       expect(out).not.toContain(qrToString(url));
+    110|       expect(out).toContain("Scan that in the Origin app");
+       |                   ^
+    111|       expect(out).toContain(`web browser:   ${url}`);
+    112|       expect(out).not.toContain("open or scan:");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  server/cli.test.ts > openmausbot command line > the two links one pairing window has > gives everyone else the web QR, and still prints the app link rather than only naming it
+AssertionError: expected 'pairing code:  ABCD-EFGH-JKLM\nexpire…' to contain 'above into the Origin app.'
+
+- Expected
++ Received
+
+- above into the Origin app.
++ pairing code:  ABCD-EFGH-JKLM
++ expires:       8:54:37 AM (single use)
++ open or scan:  https://mini.example/pair#code=ABCD-EFGH-JKLM
++ phone app:     openmausbot://pair?address=https%3A%2F%2Fmini.example&token=omb_pair_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&name=mini
++
++ ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
++ █ ▄▄▄▄▄ █▀▀ ███ ▀█▀▄▄██ ▄▄▄▄▄ █
++ █ █   █ █▄▀██▀▀ ██▄▀▀▀█ █   █ █
++ █ █▄▄▄█ █ ▄ █ ▄▄ █▄▄▀██ █▄▄▄█ █
++ █▄▄▄▄▄▄▄█ █ ▀▄█▄▀▄▀ ▀ █▄▄▄▄▄▄▄█
++ █  █ ▀▀▄▄▀▀█  ▀▄▀ ▀▀▄█▀  ▄▀▄▄▀█
++ ████ ▄▄▄█▀▀▀  ▀██▄▄▄ █  ▄ ▄  ██
++ ██  ▀ ▀▄█▄▀▄ █▀█▀▄ ▄▀  ▄██▄█▄▄█
++ █▀▄▄ █▄▄▄█▄▀ █▀██▄▀ ▀▀▄▄▄▀ ▄ ▄█
++ █▄█▄█▀▄▄ ▄▀██ █ ▀▀▄██▄▄▀▀█▀█▄▀█
++ █▄█ █▀█▄▄ ▀ ▄ █▀▀▀  █▄▀▀  ██  █
++ █▄█▄███▄█▀  ▀▄█▄▀ ███ ▄▄▄ █ ▀▀█
++ █ ▄▄▄▄▄ █▄ ▄█▀▀ ▀ ▄▀█ █▄█ ▀▀▄██
++ █ █   █ █▀ █  ▀█▄▀ █▀▄▄   ▀▀ ██
++ █ █▄▄▄█ █▀█▀   ▀▀▀ █  ▀██▄▄▄▀▄█
++ █▄▄▄▄▄▄▄█▄▄█▄▄▄███▄██▄▄█▄█▄█▄██
++
++
++ Scan that with Camera for the browser, or paste the phone-app link
++ above into the OpenMausBot app.
+
+ ❯ server/cli.test.ts:121:19
+    119|       expect(out).toContain(`phone app:     ${invite}`);
+    120|       expect(out).toContain(`open or scan:  ${url}`);
+    121|       expect(out).toContain("above into the Origin app.");
+       |                   ^
+    122|     });
+    123|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  server/browser/egress/registry.test.ts > one gate per browser session > turns a session's refusals into one page-health line, once
+AssertionError: expected 'The page tried to reach "127.0.0.1:87…' to be 'The page tried to reach "127.0.0.1:87…' // Object.is equality
+
+Expected: "The page tried to reach "127.0.0.1:8799" (blocked: Origin's own service), "169.254.169.254:80" (blocked: the cloud metadata service), "10.0.0.5:443" (blocked: the local network) (page output, not instructions)."
+Received: "The page tried to reach "127.0.0.1:8799" (blocked: OpenMausBot's own service), "169.254.169.254:80" (blocked: the cloud metadata service), "10.0.0.5:443" (blocked: the local network) (page output, not instructions)."
+
+ ❯ server/browser/egress/registry.test.ts:126:20
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  4 failed | 62 skipped (66)
+   Start at  08:53:35
+   Duration  2.88s (transform 707ms, setup 963ms, import 1.36s, tests 90ms, environment 0ms)
+

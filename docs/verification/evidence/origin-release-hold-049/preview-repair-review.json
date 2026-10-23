@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+  "version": "0.4.2",
+  "cycle": "049",
+  "recordedAt": "2026-10-20T09:37:04.244Z",
+  "admitted": false,
+  "previewReexecuted": false,
+  "externalOperationsAfterRepair": 0,
+  "cause": {
+    "engine": "27.5.1",
+    "imageExposedPorts": {
+      "3000/tcp": {}
+    },
+    "requestedPortBindings": {
+      "3000/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": ""
+        }
+      ]
+    },
+    "actualNetworkPorts": {},
+    "internalNetwork": true,
+    "diagnosticSha256": "ad024bd32d1113a204501d1b754d9c1853145cd5274670bbe857fd3bc697e9f4",
+    "diagnosticCleanup": {
+      "containerAbsent": true,
+      "networkAbsent": true,
+      "baselineImageUnchanged": true
+    }
+  },
+  "firstAttemptMethodManifestSha256": "afc1958d61c5057350db659c4bf2aa60af66a649ef699fac98d0de9e253f9d26",
+  "preservedEvidence": {
+    "preview-intent.json": "d729d84aa41709f42c921bf0ea05992730c3d2e242dfd99b09c05421bb1f78e9",
+    "admission.json": "29169f0ca74764ae10f93b51f63ace585bf760046c7993db0aedc1a72ee2107c",
+    "start.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "start.stderr.log": "5f26ecefd0e120fc1e1c9136a5608324413a675ee16cb1ed7510c3bf2ec85b97",
+    "cleanup-receipt.json": "b234f06629cec059e73d0b60f935738f629966ba3b48151ea749e5f4b19aec1e",
+    "cleanup.stdout.log": "37fd8c8022222410ab5972a115c597bf5394de591573f11b1e56b370aae518a4",
+    "cleanup.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "request-log.json": "ec6f38a89f8779da500b880e09b73b0d47dd40e9a40bfd2caa4be968eddb496e",
+    "diagnostic-intent.json": "515ec790c43c103f4dd9fa90f99cf54c13d89d303feae8bbbcba145922f7a414",
+    "diagnostic-receipt.json": "ad024bd32d1113a204501d1b754d9c1853145cd5274670bbe857fd3bc697e9f4",
+    "diagnostic.stdout.log": "bdb64690720885d89408c171669a8f85d482624030817b8ba6827a53dd302a47",
+    "diagnostic.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "node": {
+      "passed": 2,
+      "negativeVariants": 22,
+      "exitCode": 0
+    },
+    "python": {
+      "passed": 2,
+      "negativeVariants": 26,
+      "exitCode": 0
+    },
+    "syntax": {
+      "nodeFiles": 3,
+      "pythonFiles": 2,
+      "passed": true
+    },
+    "inertPlan": true,
+    "oldAdmissionRefused": true,
+    "oldAdmissionRefusal": "Private preview held: Reviewed preview helpers changed\n+ actual - expected\n\n  {\n    'browser-guard.js': '0525521da5d4637174bbbdd57874c20e50946913c0af7ff989177527e26caa53',\n+   'policy.mjs': 'b44e99679b2da4e86929a25b5eace12c5a5c0e71bbafc83457b2c0de151ca495',\n+   'preview.mjs': '148a6136d4e61f0931b57ae4c6f488447e84ef365a275b7cde309b6c377767d4',\n+   'remote-preview.py': 'b8ab8f06e0161edfa966b8293420f1dad201776c2ffe9a3755018e5dc4688dd0'\n-   'policy.mjs': '7342a8812030a76307d57ec89d13f7e7e94c770861c3cd10d7e1eefefb0a2469',\n-   'preview.mjs': '3151007d155745de469a9b52147e2da7fae6306e5ae87e02f1d3633da58e183f',\n-   'remote-preview.py': 'e3c3749f854b8f0028477011697c0e733c2ff41266d0010b228241cedc8345e8'\n  }"
+  },
+  "helperHashes": {
+    "preview.mjs": "3151007d155745de469a9b52147e2da7fae6306e5ae87e02f1d3633da58e183f",
+    "policy.mjs": "7342a8812030a76307d57ec89d13f7e7e94c770861c3cd10d7e1eefefb0a2469",
+    "browser-guard.js": "0525521da5d4637174bbbdd57874c20e50946913c0af7ff989177527e26caa53",
+    "remote-preview.py": "e3c3749f854b8f0028477011697c0e733c2ff41266d0010b228241cedc8345e8"
+  },
+  "plan": {
+    "version": "0.4.2",
+    "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+    "default": "plan only",
+    "host": "hetzner",
+    "buildReceipt": "C:\\Users\\aless\\.codex\\worktrees\\origin-model-fallback\\Origin\\.omb-scratch\\site-preparation-049\\build-receipt.json",
+    "privateNetwork": "new uniquely labelled Docker internal network",
+    "image": "exact completed private build image ID; no alias",
+    "container": "read-only, no published host ports, no external env/host mounts, all capabilities dropped",
+    "tunnel": "one owned SSH process; local loopback to exact owned internal container IPv4:3000",
+    "proxy": "GET/HEAD /, /whats-new, fixed public images and _next/static only; CSP connect-src none; click/form/window guard",
+    "helperHashes": {
+      "preview.mjs": "3151007d155745de469a9b52147e2da7fae6306e5ae87e02f1d3633da58e183f",
+      "policy.mjs": "7342a8812030a76307d57ec89d13f7e7e94c770861c3cd10d7e1eefefb0a2469",
+      "browser-guard.js": "0525521da5d4637174bbbdd57874c20e50946913c0af7ff989177527e26caa53",
+      "remote-preview.py": "e3c3749f854b8f0028477011697c0e733c2ff41266d0010b228241cedc8345e8"
+    },
+    "externalOperations": false,
+    "admitted": false
+  },
+  "resume": "Fresh sibling attempt directory with exact reviewed methods, capacity evidence and newly approved admission; retain original intent/logs/cleanup.",
+  "files": [
+    {
+      "name": "preview.mjs",
+      "sha256": "3151007d155745de469a9b52147e2da7fae6306e5ae87e02f1d3633da58e183f"
+    },
+    {
+      "name": "policy.mjs",
+      "sha256": "7342a8812030a76307d57ec89d13f7e7e94c770861c3cd10d7e1eefefb0a2469"
+    },
+    {
+      "name": "browser-guard.js",
+      "sha256": "0525521da5d4637174bbbdd57874c20e50946913c0af7ff989177527e26caa53"
+    },
+    {
+      "name": "remote-preview.py",
+      "sha256": "e3c3749f854b8f0028477011697c0e733c2ff41266d0010b228241cedc8345e8"
+    },
+    {
+      "name": "helpers.manifest.json",
+      "sha256": "c8dad721a0e0f372f8425376c1ab34813ae9bfce9328360423cd5e51ef8ad9c0"
+    },
+    {
+      "name": "admission.example.json",
+      "sha256": "ae4b82be263fdbd5f5415f186646375816c423c88b44d36446d6d05a451461d2"
+    },
+    {
+      "name": "README.md",
+      "sha256": "0b73fecaff44c296649896724d913311846b97b14b4dc1409bff61ebe3a04b2e"
+    },
+    {
+      "name": "endpoint-binding.test.mjs",
+      "sha256": "bff05700de5dc674c577368c4e82616a4b35bc526e79c0b45c83485d38a7fdbd"
+    },
+    {
+      "name": "endpoint-binding.test.py",
+      "sha256": "07ba9174792453ed92786644969fab8e464441d6fbfb989bf0ec5a04a9544d1e"
+    },
+    {
+      "name": "endpoint-node.log",
+      "sha256": "c1c621e3353e26d0b18341176ce6a0428a4342fe06a8dc7eb9e12bb0ab2468d5"
+    },
+    {
+      "name": "endpoint-python.log",
+      "sha256": "fe008aab760eb03ccac7578e2b84665b1b50b0d7f855b17a0c7a8d039435b658"
+    },
+    {
+      "name": "repair-method.diff",
+      "sha256": "93719dedef69f522c24263747f2f443e9330983638297af919ba4c155d1e55ad"
+    }
+  ]
+}

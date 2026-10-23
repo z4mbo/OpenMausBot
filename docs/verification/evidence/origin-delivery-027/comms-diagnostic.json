@@ -1,0 +1,31 @@
+{
+  "source": "dbdac25fcd014d231e694aa8665d326b235af616",
+  "ciRun": 39112787205,
+  "firstAttempt": {
+    "job": 117632700003,
+    "test": "server/comms.test.ts:1015",
+    "error": "fetch failed / read ECONNRESET",
+    "testsPassed": 4711,
+    "testsFailed": 1,
+    "existingSkips": 93
+  },
+  "localRuns": [
+    {
+      "node": "v24.19.0",
+      "testsPassed": 32,
+      "durationSeconds": 53.87,
+      "resetErrors": 0,
+      "startupOnlyHealthErrors": true
+    },
+    {
+      "node": "v24.21.0",
+      "undici": "7.29.1",
+      "testsPassed": 32,
+      "durationSeconds": 45.73,
+      "resetErrors": 0,
+      "startupOnlyHealthErrors": true
+    }
+  ],
+  "rootCauseProven": false,
+  "qualification": "Unchanged local passes do not identify the original reset or establish a flaky-test classification. No test, predicate, timeout or skip changes were made. One bounded diagnostic CI rerun is recorded separately in the delivery receipt."
+}

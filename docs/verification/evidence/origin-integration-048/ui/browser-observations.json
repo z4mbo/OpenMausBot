@@ -1,0 +1,47 @@
+{
+  "observer": "root agent operating CUA",
+  "archiverOperatedBrowser": false,
+  "beforeSource": "6d1c772d121d557e9742e71da8102f453d9e336f",
+  "afterSource": "86b9326afd81d277117ec953b7a9b70caed07d07",
+  "budget375": {
+    "beforePillWidth": 262,
+    "beforeControlLeft": { "model": 355, "computer": 393, "more": 431 },
+    "afterWalletContentWidth": 28,
+    "afterWalletWithBorderWidth": 30,
+    "afterMaximumControlRight": 355,
+    "documentWidth": 375,
+    "monthlyStatus": "$20 of $20 this month",
+    "adminEditorVisible": true,
+    "cancelRestoredFocus": true,
+    "dialog": { "left": 8, "right": 328, "width": 320, "bottom": 312.5 }
+  },
+  "usage": { "source": "synthetic GET response", "sessionUsedPercent": 32, "weeklyUsedPercent": 61, "resetsVisible": true, "contextTokens": 20000, "contextWindow": 100000 },
+  "canvas375": {
+    "beforeLayersLeftAfterDesignFocus": -99,
+    "afterLayers": { "left": 13, "right": 45, "centreHitOwnButton": true },
+    "afterDesign": { "left": 330, "right": 362, "centreHitOwnButton": true },
+    "bothPanelsActuallyClosed": true,
+    "toolbarScrollLeft": [0, 116, 0],
+    "unchangedCamera": "translate(24 206.25) scale(0.340625)",
+    "viewerLightCapture": "Move/Hand and panel toggles only",
+    "beforeMeasurementQualification": "Root-reported CUA measurement; no separately matched before capture asserted."
+  },
+  "otherRoot1Checks": [
+    "Campaign detail and filled New campaign form, cancelled",
+    "Pipeline Table, Aria existing sequence and reply scrolling",
+    "Canvas Pages and Publish form inspected without publishing",
+    "Org monthly budget 175 draft, cancelled",
+    "Heartbeat Off inspected",
+    "Call action selection changed locally from three to two; Create not clicked",
+    "Backup ordering and disabled shared-source edit, cancelled",
+    "Desktop Campaign inspected"
+  ],
+  "limits": [
+    "Synthetic query/status state; no successful business mutations.",
+    "Automatic Pipeline lead markRead attempted and blocked.",
+    "Root2 HTTP log is a bounded local listener snapshot; not all browser/cloud actions.",
+    "Root1 final HTTP log is not asserted.",
+    "No Save/send/publish/merge/metrics/provider/native/production acceptance.",
+    "No screenshots or checks repeated by archiving agent."
+  ]
+}

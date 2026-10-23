@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "folder": "origin-chat-usage-042",
+  "reviewedAt": "2026-10-20T04:33:42.843Z",
+  "reviewerScope": "Retained bytes, declared bindings and relative references only; no browser recapture or runtime re-execution.",
+  "browserProof": {
+    "file": "browser-proof.json",
+    "sha256": "f75dc462716d569d18b23edbdab415d830999849b74b4eaeb5baf2e76f28f69d",
+    "recordedTime": null,
+    "timeProvenance": "No capture timestamp retained; this review does not invent one.",
+    "scope": "Actual ChatView/PlanUsage/Composer, disposable fake CLI accounting; synthetic provider quotas, not a physical vendor account or packaged acceptance"
+  },
+  "recordedSourceBindings": {
+    "provenance": "No source digest bindings retained in this evidence folder. Current verifier support is not capture-time evidence.",
+    "entries": []
+  },
+  "baseline": null,
+  "previousManifest": null,
+  "currentSourceInventory": {
+    "observedAt": "2026-10-20T04:33:42.843Z",
+    "gitHeadAtReview": "2a29a82702fef4f9b3b4c2c91e52fb3af72deab4",
+    "tree": "working-tree",
+    "captureTimeBinding": false,
+    "purpose": "Supplementary current-source inventory only. These hashes must not be presented as the source loaded when the screenshots were captured.",
+    "files": [
+      {
+        "name": "scripts/verify-chat-usage.ts",
+        "bytes": 4617,
+        "sha256": "74c1de3902cf6732861ce90b91fe0ccc5e0a73c515cd581ed7e48b14f66685c5",
+        "present": true
+      },
+      {
+        "name": "scripts/testing/chat-usage-preview.tsx",
+        "bytes": 2071,
+        "sha256": "e687ffa206d5733bb20ffdc7c3249b4b1d27ca9cc7ea67bf74fa3f7311b2de30",
+        "present": true
+      },
+      {
+        "name": "src/components/ChatView.tsx",
+        "bytes": 75251,
+        "sha256": "fb41b7b0428fafa064fd03d9a5ced8a1ad01666dc256101362832a812329cdc9",
+        "present": true
+      },
+      {
+        "name": "src/components/ChatUsagePopover.tsx",
+        "bytes": 6383,
+        "sha256": "3ae9b1436a38307389d6920b8a74aa0f6c98b8b65fd71a147544187d23eb5f69",
+        "present": true
+      },
+      {
+        "name": "src/components/PlanUsage.tsx",
+        "bytes": 8523,
+        "sha256": "a2ec029f0daa21410147fefb397a2ab198d9f6e49e885e29e9255f7178f2b5f8",
+        "present": true
+      },
+      {
+        "name": "src/components/Composer.tsx",
+        "bytes": 49419,
+        "sha256": "8fd831f68334aae97edf7677bedbda1c21e3f8678d995b0cfc2367b9922847a4",
+        "present": true
+      },
+      {
+        "name": "src/components/AppearanceSelectRows.tsx",
+        "bytes": 2514,
+        "sha256": "f8aaf795adbfbdd4076ff1e627995468937d77f92f136becd7d62fdd36951da3",
+        "present": true
+      },
+      {
+        "name": "src/lib/chat-width.ts",
+        "bytes": 2262,
+        "sha256": "5d91f9d15f1676a697b1340e9772204cf5810acda97f683cf232b95db55afa2a",
+        "present": true
+      },
+      {
+        "name": "src/lib/chat-usage-preferences.ts",
+        "bytes": 1404,
+        "sha256": "6e1871f3781d22cc972cf017bda49007f958d0bb62f540c9028013dace24d4f6",
+        "present": true
+      },
+      {
+        "name": "src/styles.css",
+        "bytes": 91069,
+        "sha256": "c64a90590dcc814e7c84c4016386aa12c2a4c306ecae18d2a076ab5cbb5423d3",
+        "present": true
+      }
+    ]
+  },
+  "originalFiles": [
+    {
+      "name": "browser-proof.json",
+      "bytes": 560,
+      "sha256": "f75dc462716d569d18b23edbdab415d830999849b74b4eaeb5baf2e76f28f69d"
+    },
+    {
+      "name": "minimal-usage-dark.png",
+      "bytes": 66135,
+      "sha256": "54b15fd44a7bfa86860f4e69af5a2e1160dc03822d135d457a9ac906129494fe"
+    },
+    {
+      "name": "minimal-usage-light-375.png",
+      "bytes": 41169,
+      "sha256": "5196459503dcc682ab20d5089576f626cd8027557214698722caa93964b62f84"
+    },
+    {
+      "name": "minimal-usage-light.png",
+      "bytes": 67383,
+      "sha256": "0a7e38c20237d892cc254287e52808a00f16c78fbd1b04d800d5fa9523c2bbd7"
+    },
+    {
+      "name": "usage-context-dark.png",
+      "bytes": 79970,
+      "sha256": "9ae2d5b599c81db7162ddf75944f1db37d599d3ae6fc51a00a19c4b4337cee91"
+    }
+  ],
+  "images": [
+    {
+      "name": "minimal-usage-dark.png",
+      "encoding": "jpeg",
+      "width": 1371,
+      "height": 930,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "minimal-usage-light-375.png",
+      "encoding": "jpeg",
+      "width": 375,
+      "height": 900,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "minimal-usage-light.png",
+      "encoding": "jpeg",
+      "width": 1371,
+      "height": 930,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "usage-context-dark.png",
+      "encoding": "jpeg",
+      "width": 1371,
+      "height": 930,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    }
+  ],
+  "referenceChecks": {
+    "originalManifestRelativeFiles": "No original manifest retained.",
+    "recordedSourcePaths": "checked entry by entry",
+    "imageHeaders": "encoding and dimensions checked without re-rendering",
+    "markdown": "relative links generated from files confirmed present",
+    "gitTextAttribute": "\"docs\\\\verification\\\\evidence\\\\origin-chat-usage-042\\\\browser-proof.json\": text: unset",
+    "gitIndexOrCommitBytesVerified": false
+  },
+  "limitations": [
+    "No missing capture-time source bindings or timestamps were reconstructed.",
+    "A matching recorded binding proves raw file equality at review; it does not independently prove browser startup or complete runtime identity.",
+    "Current source drift is reported without changing original proof or historical manifest.",
+    "Retained screenshot filenames use .png, but their encoding is recorded from the bytes; no original was renamed or re-encoded.",
+    "Screenshots were not recaptured; pixel correctness, runtime behavior, native packages, real vendors and production are outside this integrity review."
+  ]
+}

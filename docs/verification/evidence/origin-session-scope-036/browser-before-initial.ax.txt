@@ -1,0 +1,28 @@
+Browser tab: 5, Title: "Origin session scope — before", URL: "http://127.0.0.1:5174/__origin-session-scope.html".
+0 AXWebArea Origin session scope — before, URL: 127.0.0.1:5174/__origin-session-scope.html
+	1 container root
+		2 container
+			3 heading Origin session race · before, Value: 1
+				4 text Origin session race ·  before
+			5 text Real AuthPage and session hook; synthetic accounts and Convex transport. Two tabs share only this fixture origin's browser storage.
+			6 button Reset to first fixture member
+			7 button Sign in as second fixture member
+			8 button (disabled) Resolve old sign-out
+			9 button (disabled) Reject old sign-out
+			10 text Logout calls:  1  · Request:  settled  · Session:  signed out
+		11 container Sign in to Origin
+			12 heading Sign in to Origin, Value: 1, ID: auth-title
+				13 text Sign in to Origin
+			14 text Pick up your workspaces where you left them.
+			15 container
+				16 text Email
+				17 text field (settable) Email
+				18 text Password
+				19 text field (settable) Password
+				20 button Show password
+				21 button Sign in
+			22 container
+				23 text New to Origin?
+				24 link Description: Create an account, Value: 127.0.0.1:5174/__origin-session-scope.html#fixture
+
+The focused UI element is 0 AXWebArea Origin session scope — before, URL: 127.0.0.1:5174/__origin-session-scope.html

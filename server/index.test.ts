@@ -3673,6 +3673,9 @@ describe("harness HTTP API", () => {
       expect(siblingMessages.some((message) => (message.tool?.name ?? "").startsWith("Waiting for its turn on this computer"))).toBe(true);
       const parkedChip = siblingMessages.find((message) => (message.tool?.name ?? "").startsWith("Computer still busy after "));
       expect(parkedChip?.tool?.ok).toBe(true);
+      await expect.poll(async () => (await isolatedApi("GET", `/api/threads/${sibling.threadId}/events`)).body.entries
+        .some((entry: { kind: string; data: { type?: string } }) => entry.kind === "runtime" && entry.data.type === "turn.wait_ended"),
+      { timeout: 5_000 }).toBe(true);
       const waitEvents = ((await isolatedApi("GET", `/api/threads/${sibling.threadId}/events`)).body.entries as Array<{ kind: string; data: any }>)
         .filter((entry) => entry.kind === "runtime").map((entry) => entry.data);
       expect(waitEvents.find((event) => event.type === "turn.wait_started")).toMatchObject({

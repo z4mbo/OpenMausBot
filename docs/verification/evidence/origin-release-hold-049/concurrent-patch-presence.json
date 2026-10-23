@@ -1,0 +1,36 @@
+{
+  "source": "97383097d13e5c9bb969801623e6ccd9ed3b356f",
+  "reviewedAt": "2026-10-20T09:45:34.862Z",
+  "method": "Offline exact frozen-source function and file inspection, not ancestry inference; no tests or target queries executed.",
+  "privateBudgetAccess1697": {
+    "patch": "1697edd4a79a65c7aed0e88199f63e659ebb31e4",
+    "present": false,
+    "sourcePath": "backend/convex/budgets.ts",
+    "sourceSha256": "ff3fd5ecb7bb8b2c804875b18894aac126245abf08d89276fdaa6e59d890269d",
+    "exportLine": 151,
+    "scenario": "A valid non-admin workspace member without membership in a private project supplies a known project-agent ID to budgets.forAgent. requireTeamMember succeeds, then budgetChecks returns the private agent/project name, monthly cap and spend. requireMember would reject this member, but that check is absent.",
+    "sourceBody": "151: export const forAgent = query({\n152:   args: { sessionToken: v.string(), agentId: v.id(\"workspaceAgents\") },\n153:   returns: v.union(v.null(), v.object({\n154:     scope: v.union(v.literal(\"agent\"), v.literal(\"project\")), name: v.string(), spentUsd: v.number(), monthlyUsd: v.number(),\n155:     level: v.union(v.literal(\"ok\"), v.literal(\"warn\"), v.literal(\"over\")), canRaise: v.boolean(), teamId: v.id(\"teams\"), projectId: v.optional(v.id(\"projects\")),\n156:   })),\n157:   handler: async (ctx, a) => {\n158:     const agent = await ctx.db.get(a.agentId);\n159:     if (!agent) return null;\n160:     const { member } = await requireTeamMember(ctx, agent.teamId, a.sessionToken);\n161:     const checks = await budgetChecks(ctx, agent, agent.projectId, Date.now());\n162:     const tightest = checks.sort((x, y) => y.spentUsd / y.monthlyUsd - x.spentUsd / x.monthlyUsd)[0];\n163:     if (!tightest) return null;\n164:     return { ...tightest, canRaise: member.role === \"owner\" || member.role === \"admin\", teamId: agent.teamId, ...(tightest.scope === \"project\" && agent.projectId ? { projectId: agent.projectId } : {}) };\n165:   },\n166: });\n167: ",
+    "authorityBody": "28: export async function requireTeamMember(ctx: Ctx, teamId: Id<\"teams\">, sessionToken: string) {\n29:   const user = await requireUser(ctx, sessionToken);\n30:   const member = await getActiveTeamMember(ctx, teamId, user.email);\n31:   if (!member || (member.userId && member.userId !== user._id)) throw new Error(\"No active team access\");\n32:   return { member, user };\n33: }\n34: \n35: export async function requireTeamAdmin(ctx: Ctx, teamId: Id<\"teams\">, sessionToken: string) {\n36:   const { member, user } = await requireTeamMember(ctx, teamId, sessionToken);\n37:   if (member.role !== \"owner\" && member.role !== \"admin\") throw new Error(\"Admin role required\");\n38:   return { member, user };\n39: }\n40: \n41: export async function requireMember(ctx: Ctx, projectId: Id<\"projects\">, sessionToken: string) {\n42:   const user = await requireUser(ctx, sessionToken);\n43:   const project = await ctx.db.get(projectId);\n44:   if (!project) throw new Error(\"Project not found\");\n45:   const member = await projectMember(ctx, project, user);\n46:   if (member) return { member, user, project };\n47:   throw new Error(\"No active project access\");\n48: }\n49: \n50: // Workspace admins see every project; everyone else needs explicit membership.\n51: // A project role can never bypass a read-only workspace role.\n52: export async function projectMember(ctx: Ctx, project: Doc<\"projects\">, user: Pick<Doc<\"users\">, \"_id\" | \"email\">) {\n53:   const team = project.teamId ? await getActiveTeamMember(ctx, project.teamId, user.email) : null;\n54:   if (project.teamId && (!team || (team.userId && team.userId !== user._id))) return null;\n55:   if (team && [\"owner\", \"admin\"].includes(team.role)) return team;\n56:   const member = await getActiveMember(ctx, project._id, user.email);\n57:   if (!member || (member.userId && member.userId !== user._id)) return null;\n58:   return team?.role === \"viewer\" ? { ...member, role: \"viewer\" as const } : member;",
+    "qualification": "Source defect present in973 and its image source copy; production Convex deployment identity was not inspected, so this is not a claim that a live production query was executed."
+  },
+  "hostedMonthlyBudgetA4af": {
+    "patch": "a4af30264f6bf30e7fb48495589506db48c53ad1",
+    "present": false,
+    "modulePresent": false,
+    "generatedApiModulePresent": false,
+    "sourcePaths": [
+      "backend/convex/modelHosts.ts",
+      "backend/convex/modelHosts.test.ts"
+    ],
+    "missingBehavior": [
+      "requireMonthlyBudget helper and checks in hosted offer/begin/claim/started",
+      "recordSpend call from hosted finish after settlement"
+    ],
+    "qualification": "973 does not include this model-host feature/module at all. Absence is a feature/fix preservation requirement, not proof of a reachable hosted budget bypass in973.",
+    "ordinaryRunGuardLine": 35,
+    "ordinaryRunAccountingLine": 152,
+    "ordinaryRunChecks": "28:     const existing = await messageByClientId(ctx, thread._id, clientId);\n29:     if (existing) {\n30:       if (existing.authorUserId !== user._id || !existing.runId) throw new Error(\"clientId already belongs to another message\");\n31:       const run = await ctx.db.get(existing.runId);\n32:       return { runId: existing.runId, messageId: existing._id, status: run?.status ?? \"failed\", seq: existing.seq };\n33:     }\n34:     const now = Date.now();\n35:     const overBudget = await budgetRefusal(ctx, agent, thread.projectId ?? agent.projectId, now);\n36:     if (overBudget) throw new Error(overBudget);\n37:     const holder = thread.activeRunId ? await ctx.db.get(thread.activeRunId) : null;",
+    "ordinaryRunAccounting": "145:   handler: async (ctx, args) => {\n146:     const user = await requireUser(ctx, args.sessionToken);\n147:     const run = await ctx.db.get(args.runId);\n148:     if (!run || run.requesterUserId !== user._id) throw new Error(\"Run not found\");\n149:     if (run.status !== \"running\" && run.status !== \"queued\") return null;\n150:     const engineLabel = args.engineLabel?.trim().slice(0, ENGINE_LABEL_MAX);\n151:     await settleRun(ctx, run, args.status, Date.now(), { ...(args.usage ? { usage: args.usage } : {}), ...(engineLabel ? { engineLabel } : {}) });\n152:     await recordSpend(ctx, run, args.usage?.costUsd, Date.now());\n153:     return null;"
+  },
+  "furtherRemoteOperations": false
+}

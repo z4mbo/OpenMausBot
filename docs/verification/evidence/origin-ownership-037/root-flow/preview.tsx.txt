@@ -1,0 +1,28 @@
+import { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { OriginGate } from "../../src/components/OriginGate";
+import { setCloudUrl } from "../../src/lib/origin-cloud/client";
+import { useCloudToken, useCloudUrl } from "../../src/lib/origin-cloud/hooks";
+import { useControls } from "./transport";
+import "../../src/styles.css";
+setCloudUrl("http://127.0.0.1:43001");
+function Preview() {
+  const controls = useControls();
+  const token = useCloudToken(); const url = useCloudUrl();
+  const [version, setVersion] = useState("loading");
+  useEffect(() => { void fetch("/__session-flow-proof.json").then(response => response.json()).then(value => setVersion(value.version)); }, []);
+  const button = "rounded-lg border border-hairline px-3 py-2 text-[13px] hover:bg-raised disabled:opacity-40";
+  return <div className="min-h-dvh bg-app text-ink">
+    <header className="border-b border-hairline p-4 text-[13px]">
+      <h1 className="text-[18px] font-semibold">Origin sign-in ownership · {version}</h1>
+      <p className="mt-1 text-ink-secondary">Actual desktop sign-in form and session hooks. Synthetic accounts and Convex; no real backend, password or workspace.</p>
+      <div className="mt-3 flex gap-2">
+        <button className={button} onClick={() => setCloudUrl("http://127.0.0.1:43002")}>Switch to fixture server B</button>
+        <button className={button} disabled={!controls.pending} onClick={controls.resolve}>Resolve server A sign-in</button>
+      </div>
+      <output className="mt-3 block">Server: {url?.endsWith("43002") ? "B" : "A"} · Request: {controls.pending ? "pending" : "settled"} · Account: {token ? "old server A session" : "signed out"} · Wrong-server queries: {controls.wrongBackendQueries} · Session handoffs: {controls.shares}</output>
+    </header>
+    <OriginGate><main className="p-8"><h2 className="text-[24px] font-semibold">Synthetic workspace content</h2><p>The old server A session reached the current server B context.</p></main></OriginGate>
+  </div>;
+}
+createRoot(document.getElementById("root")!).render(<Preview />);

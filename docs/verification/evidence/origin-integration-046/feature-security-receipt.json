@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "targetVersion": "0.3.1",
+  "baselineFeatureSource": "84b0ccedb30615f2fa0a1c9c0d3fd18da0f730d3",
+  "finalCommitBindingPending": true,
+  "syntheticOnly": true,
+  "productionRequests": 0,
+  "protectedListenerRequests": 0,
+  "proofScopes": [
+    "Provider credential echoes: 5 genuine failing regressions, now scrubbed before clipping, returned errors and shared Convex persistence",
+    "Studio paid generations: 2 genuine ignored-policy failures, now computer/per-agent zero or positive caps refuse unpriced requests before cloud/provider work and recheck after delayed creation",
+    "Pipeline ElevenLabs AI calls: 2 genuine ignored-policy failures, now policy checked after awaited claim before provider POST; missing gate refuses",
+    "Studio local asset inlining: 2 genuine unintended owner-local synthetic fetches; exact origins/resource path and redirect refusal now prevent unrelated port/admin-path reads"
+  ],
+  "tests": {
+    "files": 8,
+    "passed": 86,
+    "failed": 0
+  },
+  "serverTscExit": 0,
+  "targetedOxlintExit": 0,
+  "ownDiffCheckExit": 0,
+  "attribution": {
+    "studioUi": "Ignores body.botId; computer policy",
+    "missingAgent": "Shared host guard handles stale explicit agent",
+    "pipelineUi": "Ignores body.botId; trusted botForProject callback",
+    "toolAgent": "Exact ctx.caller.id"
+  },
+  "policyScope": "AI model API spending; SMS/email/social provider charges excluded",
+  "hostedGuestScope": "Read-only review confirms global internal denial precedes origin tool dispatch; pure policy/admin route regressions passed, no new native guest acceptance claimed",
+  "humanApprovalScope": "Existing backend 265-test run and focused agent-tool tests preserve default pending Pipeline contacts and agent Broadcast approval; project-admin auto-send remains explicit",
+  "changesStaged": true,
+  "commitCreated": false,
+  "files": [
+    {
+      "path": "server/integration-errors.ts",
+      "sha256": "e75e23874ecc8a9c91dbf68c1da630d450add6e9776cb070a0375afc5f1449ce"
+    },
+    {
+      "path": "server/integration-errors.test.ts",
+      "sha256": "67cc48bd60632b3b2a1a0882e741e43e000d80c5d0049b692214c2a2ebf76378"
+    },
+    {
+      "path": "server/origin-pipeline.ts",
+      "sha256": "b854594b9c3b53f0c741ccd1c1dcf70dd81d040f8cf65af3d8ef4143d6f6167a"
+    },
+    {
+      "path": "server/origin-pipeline.test.ts",
+      "sha256": "e48b91aeafcb4b9c9b9c56c2109c75e45aaef20832e85e593b36428c41ea1811"
+    },
+    {
+      "path": "server/origin-studio.ts",
+      "sha256": "91b771f55a9cd72a184adca688fa6b17f7b19291372685d9a3f290fb471fa3e9"
+    },
+    {
+      "path": "server/origin-studio.test.ts",
+      "sha256": "231ac14364500002d06f65bba008ac1c48081866b1e8f6efcc28df012914903f"
+    },
+    {
+      "path": "server/broadcast/channels.ts",
+      "sha256": "0b28bf5a572b944d76d99cea203eb9b30a5688dd4b4ddff6401f4842ebc3ac1c"
+    },
+    {
+      "path": "server/broadcast/scheduler.test.ts",
+      "sha256": "7ef7fbbf5b1d93fadee65148fc97094ea1470482f6899fae0977dca5ce49db02"
+    },
+    {
+      "path": "server/origin-cloud.ts",
+      "sha256": "15331a01fb274d6fc6032f8916ea37c4c99c9895481b065dff422959580d0aac"
+    },
+    {
+      "path": "server/hosted-turn-policy.test.ts",
+      "sha256": "21da960550738a604de8d854c166a57b6419d2e32d69b0279dac61273114c075"
+    },
+    {
+      "path": "server/origin-feature-access.test.ts",
+      "sha256": "f7fe444fa70abd7e0866e3e654c7f69dd693ab5a042b0892fcddcf209c7ea2b2"
+    },
+    {
+      "path": "server/api-budget-policy.ts",
+      "sha256": "6bcc332a6a5d06a127b92236dc28f2fce7ecd02b4d9584d5156713e89e3aa79e"
+    },
+    {
+      "path": "server/host/project-tools.ts",
+      "sha256": "13aa3e5f1af98295f0fe16c7685b93f5a864fa73b3e468dace0b8390e7aae518"
+    },
+    {
+      "path": ".omb-scratch/integration-046/provider-echo-red.log",
+      "sha256": "1a0576efbe0595eb09438c7f2cd86965d9dfd381b7e253d195c4cad640e2f265"
+    },
+    {
+      "path": ".omb-scratch/integration-046/studio-budget-red.log",
+      "sha256": "c0d834ca6c1cf670570381fb737d52b4632d1b120521589d30d9016e37316410"
+    },
+    {
+      "path": ".omb-scratch/integration-046/pipeline-budget-red.log",
+      "sha256": "27c70188b8490dbab1f884cf1fb06fb8a8abb164cc3e3ffb492ca8932969f0d5"
+    },
+    {
+      "path": ".omb-scratch/integration-046/studio-storage-red.log",
+      "sha256": "7dc048ebc142237650b1986045980968a898adccb096d710b05e0082126d1a1d"
+    },
+    {
+      "path": ".omb-scratch/integration-046/provider-budget-final-tests.log",
+      "sha256": "396be5a36331c4a94f062dfbbb8b6a637669bbaa18865e54b7338f84b00be96e"
+    },
+    {
+      "path": ".omb-scratch/integration-046/provider-budget-final-tsc.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".omb-scratch/integration-046/provider-budget-final-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

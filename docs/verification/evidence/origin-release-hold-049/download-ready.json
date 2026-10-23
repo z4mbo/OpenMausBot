@@ -1,0 +1,24 @@
+{
+  "cycle": "049",
+  "version": "0.4.2",
+  "source": "7e89e33def92a3cce1b574a12e478eb392133fa2",
+  "nativeRun": 39393415574,
+  "nativeAttempt": 1,
+  "attempt": 1,
+  "archiveDownloads": [
+    {
+      "id": 12251171829,
+      "name": "origin-windows",
+      "size": 609115374,
+      "sha256": "46e3563477468ffe6a1ecddab1d3070d712a168b4b6fcb29c4591997f83ee61f"
+    },
+    {
+      "id": 12250309345,
+      "name": "origin-mac",
+      "size": 1244424947,
+      "sha256": "494ffa6fa36215fc743ce4dcfde8c32878b8ed4d83354c38e1c692817715b208"
+    }
+  ],
+  "completedAt": "2026-10-20T09:12:55.343Z",
+  "allActualArchiveDigestsVerified": true
+}

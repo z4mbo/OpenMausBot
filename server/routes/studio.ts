@@ -1,4 +1,5 @@
 import { projectIntegrationKey } from "../integration-keys.ts";
+import { DailyApiBudgetError } from "../daily-api-budget.ts";
 import { clip, connectedStudioCloud, record, refuse, StudioRefusal, studioRunner, text, type StudioCloud, type StudioRunner } from "../origin-studio.ts";
 import { studioWorkflows, type WorkflowExecutor } from "../origin-studio-workflow.ts";
 import { PASS, type RouteHandler } from "./table.ts";
@@ -54,7 +55,10 @@ async function startCampaign(runner: StudioRunner, workflows: WorkflowExecutor, 
   let script = text(body.script).trim();
   let caption = text(body.caption).trim();
   if (!script || !caption) {
-    const copy = await runner.campaignCopy(brief).catch(() => ({ script: brief, caption: brief }));
+    const copy = await runner.campaignCopy(brief, { projectId }).catch(error => {
+      if (error instanceof DailyApiBudgetError) throw error;
+      return { script: brief, caption: brief };
+    });
     script ||= copy.script;
     caption ||= copy.caption;
   }
@@ -84,12 +88,13 @@ export function createStudioRoutes(options: { runner?: () => StudioRunner; workf
     if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Studio runs on this app's own keys and needs the admin scope" });
     const body = record(await readBody(req));
     try {
-      if (path === "/api/studio/enhance") return json(res, 200, { prompt: await runner.enhance(text(body.prompt), (MODES.includes(text(body.mode)) ? text(body.mode) : "image") as StudioMode) });
-      if (path === "/api/studio/voice-preview") return json(res, 200, { url: await runner.voicePreview(text(body.voice)) });
+      if (path === "/api/studio/enhance") return json(res, 200, { prompt: await runner.enhance(text(body.prompt), (MODES.includes(text(body.mode)) ? text(body.mode) : "image") as StudioMode, { projectId: text(body.projectId) || undefined }) });
+      if (path === "/api/studio/voice-preview") return json(res, 200, { url: await runner.voicePreview(text(body.voice), { projectId: text(body.projectId) || undefined }) });
       if (!cloud) return json(res, 409, { error: "Sign in to Origin first." });
       if (path === "/api/studio/generate") return json(res, 200, { ids: await runner.generate(cloud, generateRequest(body)) });
       const projectId = text(body.projectId);
       if (!projectId) return json(res, 400, { error: "projectId is required" });
+      if (path === "/api/studio/workflow/run" || path === "/api/studio/campaign") await runner.checkBudget({ projectId });
       if (path === "/api/studio/workflow/run") {
         const template = text(body.templateId) ? studioWorkflowTemplate(text(body.templateId)) : undefined;
         const graph = (body.graph && typeof body.graph === "object" ? body.graph : template?.graph) as StudioWorkflowGraph | undefined;
@@ -112,6 +117,7 @@ export function createStudioRoutes(options: { runner?: () => StudioRunner; workf
       if (path === "/api/studio/save-asset") return json(res, 200, await runner.saveAsset(cloud, projectId, generationId, index));
       return json(res, 200, await runner.pickForBroadcast(cloud, projectId, generationId, index, body.picked !== false));
     } catch (error) {
+      if (error instanceof DailyApiBudgetError) return json(res, 409, { error: error.message, code: "daily_api_budget" });
       if (error instanceof StudioRefusal) return json(res, 400, { error: error.message });
       const raw = error instanceof Error ? error.message : String(error);
       const message = (/Uncaught Error: ([^\n]+)/.exec(raw)?.[1] ?? raw).replaceAll(cloud?.sessionToken ?? "\u0000", "[redacted]");

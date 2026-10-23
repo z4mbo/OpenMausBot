@@ -1,0 +1,45 @@
+{
+  "total_count": 2,
+  "artifacts": [
+    {
+      "id": 12322711884,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyMjcxMTg4NA==",
+      "name": "origin-windows",
+      "size_in_bytes": 610423091,
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/artifacts/12322711884",
+      "archive_download_url": "https://api.github.com/repos/z4mbo/Origin/actions/artifacts/12322711884/zip",
+      "expired": false,
+      "digest": "sha256:f7f54f3a69c304c1314a90708b203ec6847b737bd26f6a447f0972e75448c464",
+      "created_at": "2026-10-21T05:11:22Z",
+      "updated_at": "2026-10-21T05:11:22Z",
+      "expires_at": "2026-11-04T05:11:02Z",
+      "workflow_run": {
+        "id": 39547204164,
+        "repository_id": 1420970877,
+        "head_repository_id": 1420970877,
+        "head_branch": "origin-v0.7.3",
+        "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517"
+      }
+    },
+    {
+      "id": 12321943561,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyMTk0MzU2MQ==",
+      "name": "origin-mac",
+      "size_in_bytes": 1247193047,
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/artifacts/12321943561",
+      "archive_download_url": "https://api.github.com/repos/z4mbo/Origin/actions/artifacts/12321943561/zip",
+      "expired": false,
+      "digest": "sha256:5799cf720d01f4b602a68edc39d47f708cbe9c8bfcaafd9550b85b2098a87b3b",
+      "created_at": "2026-10-21T05:11:06Z",
+      "updated_at": "2026-10-21T05:11:06Z",
+      "expires_at": "2026-11-04T05:10:31Z",
+      "workflow_run": {
+        "id": 39547204164,
+        "repository_id": 1420970877,
+        "head_repository_id": 1420970877,
+        "head_branch": "origin-v0.7.3",
+        "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517"
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "version": "0.2.11",
+  "observedAt": "2026-10-18T16:02:13.287Z",
+  "apiKeyAuthorized": true,
+  "transactionalRelayEnabled": true,
+  "providerAccountRequests": 1,
+  "recipientRequests": 0,
+  "backendConfigured": false,
+  "releaseAuthority": false
+}

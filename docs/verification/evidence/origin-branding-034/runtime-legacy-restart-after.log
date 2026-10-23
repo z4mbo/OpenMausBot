@@ -1,0 +1,64 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-branding-034/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | server/runtime-coordinator.test.ts > RuntimeCoordinator: the requesting turn and its tree > active() never reads an ended row: one that no longer parses stops all(), not active() (#2765)
+test cleanup could not remove C:\Users\aless\AppData\Local\Temp\runtime-coordinator-active-QZLCIs: EPERM, Permission denied: \\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-active-QZLCIs '\\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-active-QZLCIs'
+
+stderr | server/runtime-coordinator.test.ts > RuntimeCoordinator: restarts > continuesAfterRestart names the turns the next start goes on with, and the next start reruns a cut turn with its note
+test cleanup could not remove C:\Users\aless\AppData\Local\Temp\runtime-coordinator-i098RD: EPERM, Permission denied: \\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-i098RD '\\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-i098RD'
+
+stderr | server/runtime-coordinator.test.ts > RuntimeCoordinator: every turn a root (beginTurn, endTurn, answerRoot, parkedDirect) > a root cut by a restart reruns once as the rerun turn, the restart note first; cut again it ends interrupted, reported into its own conversation
+test cleanup could not remove C:\Users\aless\AppData\Local\Temp\runtime-coordinator-root-OxinxB: EPERM, Permission denied: \\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-root-OxinxB '\\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-root-OxinxB'
+
+stderr | server/runtime-coordinator.test.ts > RuntimeCoordinator: every turn a root (beginTurn, endTurn, answerRoot, parkedDirect) > a parked root survives a restart parked: park() again with its cards, no new item, no run, and the answer still resumes it
+test cleanup could not remove C:\Users\aless\AppData\Local\Temp\runtime-coordinator-parked-JqoKM6: EPERM, Permission denied: \\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-parked-JqoKM6 '\\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-parked-JqoKM6'
+
+stderr | server/runtime-coordinator.test.ts > RuntimeCoordinator: outward restart policy, answerNode, continuation on the view > a cut turn that already acted outward is not rerun: host.outward decides, it ends interrupted with what it did, a root is reported into its own conversation, a child to its requester with the note; a port that says nothing reruns
+test cleanup could not remove C:\Users\aless\AppData\Local\Temp\runtime-coordinator-outward-Qele9y: EPERM, Permission denied: \\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-outward-Qele9y '\\?\C:\Users\aless\AppData\Local\Temp\runtime-coordinator-outward-Qele9y'
+
+ ✓ server/runtime-coordinator.test.ts (65 tests) 22313ms
+     ✓ active() never reads an ended row: one that no longer parses stops all(), not active() (#2765)  4396ms
+     ✓ continuesAfterRestart names the turns the next start goes on with, and the next start reruns a cut turn with its note  4421ms
+     ✓ a root cut by a restart reruns once as the rerun turn, the restart note first; cut again it ends interrupted, reported into its own conversation  4431ms
+     ✓ a parked root survives a restart parked: park() again with its cards, no new item, no run, and the answer still resumes it  4396ms
+     ✓ a cut turn that already acted outward is not rerun: host.outward decides, it ends interrupted with what it did, a root is reported into its own conversation, a child to its requester with the note; a port that says nothing reruns  4409ms
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ ✓ server/runtime-roots.e2e.test.ts (13 tests) 61973ms
+   ✓ T1 records a person's turn as a root that runs and completes  2657ms
+   ✓ T2 parks the root on a credential card and runs it again with the provided line  4044ms
+   ✓ T3 parks the root on connector cards and runs it again once when both connect  5785ms
+   ✓ T4 parks the root on a team-setup card, runs it again with the decision, and a Stop cancels the park  5077ms
+   ✓ T5 reruns a person's cut turn once after a restart, with the restart note first and the resuming chip  5525ms
+   ✓ T6 continues a person's step-capped turn in place on the same root  3636ms
+   ✓ T7 queues a root on the computer seat at the wait ceiling and continues it when the seat frees  8108ms
+   ✓ T8 Stop while parked on a credential card cancels the root and stops the card; a key provided afterwards is saved but starts nothing  4030ms
+   ✓ T8 Stop while parked on connector cards cancels the root and stops the cards; connecting afterwards is kept but starts nothing  5705ms
+   ✓ T8 Stop while parked on a sign-in card cancels the root and stops the card; Cancel afterwards is saved but starts nothing  4035ms
+   ✓ T9 parks the root on a sign-in card and runs it again with the signed-in line on Done  3568ms
+   ✓ T10 parks a teammate's turn on its credential card, tells the Chief at once, and the key answers the teammate  3821ms
+   ✓ T11 does not rerun a cut turn that already pushed: the root ends with what it did, said once  5983ms
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+ ✓ server/room-roots.e2e.test.ts (9 tests) 45106ms
+   ✓ R1 runs each responder of a person's room message as a root in the room thread  2958ms
+   ✓ R2 a member's coordinate_bots reuses its turn's root, and a Chief's Full reaches the teammate's row and turn  5094ms
+   ✓ R3 parks a member's root on its credential card, keeps the room taking messages, and resumes the member with the provided line  4078ms
+   ✓ R4 Stop in the room cancels the parked root and stops the card; providing afterwards saves but starts nothing  4390ms
+   ✓ R5 queues a member's root on the computer seat at the wait ceiling, FIFO with a direct root, and continues it when the seat frees  7917ms
+   ✓ R6 reruns a member's cut turn once after a restart, in place, with the restart note and the member's resuming chip  5480ms
+   ✓ R6 does not rerun a member's cut turn that already pushed: the root ends with what it did, said once in the room  5938ms
+   ✓ R7 does not rerun a cut goal step after a restart: its run ended with the restart, the step ends with that reason, silently  6271ms
+   ✓ R8 runs a chained @mention as a root of its own, with the hop recorded  2979ms
+
+ Test Files  3 passed (3)
+      Tests  87 passed (87)
+   Start at  23:57:27
+   Duration  132.14s (transform 607ms, setup 768ms, import 1.55s, tests 129.39s, environment 0ms)
+
+JSON report written to C:/Users/aless/.codex/worktrees/origin-branding-034/Origin/.omb-scratch/runtime-legacy-restart-after.json

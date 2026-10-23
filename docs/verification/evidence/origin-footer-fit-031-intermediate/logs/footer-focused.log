@@ -1,0 +1,8 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-header-fit/Origin
+
+
+ Test Files  5 passed (5)
+      Tests  55 passed (55)
+   Start at  16:52:16
+   Duration  23.33s (transform 8.93s, setup 1.73s, import 19.24s, tests 553ms, environment 887ms)

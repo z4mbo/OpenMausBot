@@ -1,0 +1,32 @@
+{
+  "source": "ec3683b171438905c6171d838ab11c559e1bfa49",
+  "artifactId": 12323637332,
+  "archiveSha256": "4af2ce8bcfbed4554a066c28523cfee9acd44f26a36f90e467fb43e1568584b3",
+  "entries": [
+    {
+      "FullName": "chat-ui.png",
+      "Length": 66567,
+      "CompressedLength": 64110
+    },
+    {
+      "FullName": "openmausbot-verify-data-YlMeVx.thinking-timer.json",
+      "Length": 14056,
+      "CompressedLength": 2802
+    },
+    {
+      "FullName": "share-team-dialog.png",
+      "Length": 70228,
+      "CompressedLength": 67975
+    }
+  ],
+  "relativePathsValidated": true,
+  "memberSizeBoundBytes": 10485760,
+  "jsonSizeBoundBytes": 1048576,
+  "retainedJsonMember": "openmausbot-verify-data-YlMeVx.thinking-timer.json",
+  "retainedJsonBytes": 14056,
+  "retainedJsonSha256": "3fd6aa6e3d8bff115f0bcbf51ff8225094da583be40db4d97d6956de71d25184",
+  "retainedRawBytesEqual": true,
+  "arbitraryPathsExtracted": false,
+  "pngFilesExtracted": false,
+  "executedContent": false
+}

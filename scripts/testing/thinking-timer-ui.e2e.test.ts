@@ -4,9 +4,9 @@
 // directory, OMB_AGENT_BROWSER_PATH or PATH) or OMB_UI_E2E=1 asks for the
 // verified download; otherwise skipped.
 import type { ChildProcess } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { closeSync, existsSync, fstatSync, mkdirSync, mkdtempSync, openSync, readSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 
@@ -130,7 +130,30 @@ describe("the thinking timer stays anchored across a thread switch", () => {
         const api = fixtureApi(current.info.url);
         const state = await api("GET", "/api/bots").catch(error => ({ error: String(error) }));
         const snapshot = await ui("snapshot", current.info.ui).catch(error => ({ error: String(error) }));
-        writeFileSync(`${current.info.logPath}.thinking-timer.json`, JSON.stringify({ info: current.info, state, snapshot }, null, 2), { mode: 0o600 });
+        const composer = await ui("eval", current.info.ui, "--js", `(() => ({
+          textareas: [...document.querySelectorAll('textarea')].slice(0, 20).map(input => ({
+            label: input.getAttribute('aria-label'), value: input.value.slice(0, 4096), disabled: input.disabled,
+            visible: input.getClientRects().length > 0, focused: input === document.activeElement,
+          })),
+          focus: { tag: document.activeElement?.tagName, label: document.activeElement?.getAttribute('aria-label') },
+          busy: [...document.querySelectorAll('[aria-busy]')].slice(0, 20).map(element => ({
+            tag: element.tagName, label: element.getAttribute('aria-label'), value: element.getAttribute('aria-busy'),
+          })),
+          currentThreads: [...document.querySelectorAll('[data-sidebar-thread-row][aria-current="page"]')].map(element => element.dataset.sidebarThreadRow),
+        }))()`).catch(error => ({ error: String(error) }));
+        let serverLog: string;
+        try {
+          const descriptor = openSync(current.info.logPath, "r");
+          try {
+            const size = fstatSync(descriptor).size;
+            const buffer = Buffer.alloc(Math.min(size, 65_536));
+            const bytes = readSync(descriptor, buffer, 0, buffer.length, size - buffer.length);
+            serverLog = buffer.subarray(0, bytes).toString("utf8");
+          } finally { closeSync(descriptor); }
+        } catch (error) { serverLog = String(error); }
+        mkdirSync(evidenceDir, { recursive: true, mode: 0o700 });
+        writeFileSync(join(evidenceDir, `${basename(current.info.dataDir)}.thinking-timer.json`),
+          JSON.stringify({ info: current.info, state, snapshot, composer, serverLog }, null, 2), { flag: "wx", mode: 0o600 });
         console.log("Thinking timer fixture evidence saved.");
       }
     } finally {
@@ -164,6 +187,10 @@ describe("the thinking timer stays anchored across a thread switch", () => {
     // the renderer before sending the turn whose stamp this case observes.
     await selectThread(busyThread);
     await waitUntil(() => isCurrent(busyThread), 10_000, "the original thread to become current");
+    await waitUntil(() => evaluate(`(() => {
+      const input = document.querySelector('textarea[aria-label="Message Pepper"]');
+      return input && !input.disabled && input.getClientRects().length > 0;
+    })()`), 10_000, "the original thread's composer to finish loading");
 
     await ui("type", info.ui, "--name", "Message Pepper", "--text", "hello");
     await ui("press", info.ui, "--keys", "Enter");

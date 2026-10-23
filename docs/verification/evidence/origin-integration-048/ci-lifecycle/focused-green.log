@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 <isolated-checkout>
+
+
+ Test Files  2 passed | 1 skipped (3)
+      Tests  5 passed | 47 skipped (52)
+   Start at  09:33:13
+   Duration  9.19s (transform 571ms, setup 796ms, import 1.16s, tests 6.78s, environment 0ms)
+

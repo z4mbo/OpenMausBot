@@ -1,0 +1,11 @@
+
+{"fixtureEntry":true,"output":"C:\\Users\\aless\\AppData\\Local\\Temp\\origin-cloud-entry-033-WcRMBN"}
+AssertionError [ERR_ASSERTION]: Saved server name was squeezed to 5.984375px
+    at file:///C:/Users/aless/.codex/worktrees/origin-cloud-entry-033/Origin/scripts/verify-origin-cloud-entry.mjs:93:36 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

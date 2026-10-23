@@ -1,0 +1,28 @@
+{
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "node": "v24.21.0",
+  "command": ".omb-scratch/runtimes/node-v24.21.0-win-x64/node.exe node_modules/vitest/vitest.mjs run server/provider-key-flow.test.ts --reporter=verbose --no-file-parallelism",
+  "isolatedFixture": true,
+  "protectedProcessesTouched": false,
+  "scope": "One local Windows run of the same unchanged two-test file; it does not explain or erase the failed hosted shard.",
+  "initialOutput": "RUN v4.1.11 C:/Users/aless/Documents/Origin-bugfix; vitest/runners deprecation warning",
+  "subsequentToolOutputs": [
+    {
+      "chunk_id": "8f5e33",
+      "wall_time_seconds": 5.0015614,
+      "session_id": 22676,
+      "original_token_count": 37,
+      "output": " ✓ server/provider-key-flow.test.ts > saving and replacing a workspace key reaches an existing bot's next request without leaking keys 19287ms\n"
+    },
+    {
+      "chunk_id": "fb08d5",
+      "wall_time_seconds": 0.0000056,
+      "exit_code": 0,
+      "original_token_count": 82,
+      "output": " ✓ server/provider-key-flow.test.ts > switching the workspace endpoint moves discovery and existing chats without changing a private connection 3244ms\n\n Test Files  1 passed (1)\n      Tests  2 passed (2)\n   Start at  03:24:59\n   Duration  27.11s (transform 1.35s, setup 1.69s, import 2.32s, tests 22.53s, environment 0ms)\n\n"
+    }
+  ],
+  "passed": 2,
+  "failed": 0,
+  "completeStdoutCaptured": false
+}

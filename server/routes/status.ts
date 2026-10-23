@@ -5,6 +5,7 @@ import { loadBrand } from "../brand.ts";
 import { browserEngineStatus, ensureChrome, installAgentBrowserBinary, resolveAgentBrowserBinary } from "../browser-engine.ts";
 import { DATA_DIR, EVENTS_DIR, NATIVE_DIR, instanceConfigs, type AppConfig } from "../config.ts";
 import { boundRetentionDays, decisionsCsv, readDecisionRange, readDecisions } from "../decision-log.ts";
+import { dailyApiBudgetForDataDir } from "../daily-api-budget.ts";
 import { editionForMembers, editionStatus, entitled } from "../enterprise.ts";
 import { fleetAvailable, fleetRequest, fleetSocketPath } from "../fleet-client.ts";
 import { noteKeyAccepted, noteKeyRejected } from "../key-rejections.ts";
@@ -124,6 +125,15 @@ export function createStatusRoutes(deps: StatusRouteDeps): RouteHandler {
         refresh: url.searchParams.get("refresh") === "1",
       });
       return json(res, 200, report);
+    }
+    if (method === "GET" && path === "/api/daily-api-budget") {
+      res.setHeader("cache-control", "no-store");
+      const policy = {
+        limitUsd: cfg.dailyApiBudget?.limitUsd,
+        timeZone: cfg.dailyApiBudget?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+      return json(res, 200, dailyApiBudgetForDataDir(DATA_DIR).status(policy,
+        store.bots.map(bot => ({ botId: bot.id, limitUsd: bot.dailyApiBudgetUsd }))));
     }
 
     // One read-only request from this server; the verdict never carries the key.

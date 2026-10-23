@@ -88,7 +88,7 @@ describe("Studio with the brand kit", () => {
       return Response.json({ request_id: "r1", status_url: "https://queue.fal.run/x/requests/r1/status", response_url: "https://queue.fal.run/x/requests/r1" });
     }) as typeof fetch;
     const cloud: StudioCloud = { client: convex.client, sessionToken: "session", url: DEPLOYMENT };
-    return { cloud, sent, studio: createStudioRunner({ fetch: fetchFn, falKey: () => "key", cloud: () => cloud, journalFile: join(folder, "jobs.json"), now: () => 1, pollMs: 60_000 }) };
+    return { cloud, sent, studio: createStudioRunner({ fetch: fetchFn, falKey: () => "key", cloud: () => cloud, journalFile: join(folder, "jobs.json"), now: () => 1, pollMs: 60_000, checkBudget: () => undefined }) };
   }
 
   it("puts the imagery and colours ahead of image and video prompts unless brand is false, and never ahead of audio", async () => {

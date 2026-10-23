@@ -1,0 +1,43 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+·····················x··
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/testing/verification-docs.test.ts > docs/verification recipes cite things that exist > are all reachable from README.md
+AssertionError: expected [ 'origin-0.7.4-release-notes.md' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "origin-0.7.4-release-notes.md",
++ ]
+
+ ❯ scripts/testing/verification-docs.test.ts:105:87
+    103|   it("are all reachable from README.md", () => {
+    104|     const linked = new Set([...text("README.md").matchAll(/\]\(([^)#\s…
+    105|     expect(recipes.filter((recipe) => recipe !== "README.md" && !linke…
+       |                                                                                       ^
+    106|   });
+    107|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 23 passed (24)
+   Start at  07:40:25
+   Duration  3.13s (transform 453ms, setup 686ms, import 981ms, tests 1.05s, environment 0ms)
+

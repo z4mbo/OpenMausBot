@@ -1,0 +1,26 @@
+{
+  "head": "2ab64717decc575aded74a5c5853bcc94db8b2dd",
+  "binding": "Exact source hashes verified against root logical fixture commits",
+  "files": [
+    {
+      "path": "server/room-coordination.e2e.test.ts",
+      "sha256": "65f106835136140dade9b4e00d9c276c9fc8fe18682bafe937ef4d2d9aac56f9"
+    },
+    {
+      "path": "server/card-answerers.e2e.test.ts",
+      "sha256": "fd2994d6f66f1b1222599d7c0bc4a9a406b515e7e2a20fdc862419a1544a544c"
+    },
+    {
+      "path": "server/testing/bind-fixture.ts",
+      "sha256": "20075ed915f6c91e03755b9f56c1636339cd7b79e6f946d2aef9f06c2bb07ccd"
+    },
+    {
+      "path": "server/testing/bind-fixture.test.ts",
+      "sha256": "21375915991915fe17e95f47ab729bc726c66ce7a3340e0dbe48a6827dbbb319"
+    }
+  ],
+  "commits": [
+    "77c8b4c77",
+    "2ab64717d"
+  ]
+}

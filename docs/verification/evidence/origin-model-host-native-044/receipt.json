@@ -1,0 +1,120 @@
+{
+  "cycle": "044",
+  "verifiedAt": "2026-10-20T04:14:51.974Z",
+  "baseCommit": "a89f4bb4add33209ab25f1e0d36c9d33aa290db0",
+  "source": "working-tree",
+  "scope": "Two native Node app servers with isolated temporary homes, actual Convex backend, actual local HTTP routes, actual injected MCP proxy and repository fake Claude CLI. No real model service.",
+  "backend": {
+    "url": "http://127.0.0.1:54851",
+    "siteUrl": "http://127.0.0.1:54852",
+    "nativePid": 33952,
+    "same042Instance": true,
+    "reconciledPushExit": 0,
+    "snapshotFiles": 228,
+    "snapshotReceiptSha256": "9f7500036e523c21e1a8c3240ed55c8fbb34b32e3cd83f5439ce61ece52ce2f4"
+  },
+  "clients": {
+    "owner": {
+      "url": "http://127.0.0.1:26771",
+      "pid": 37732,
+      "localBotId": "daac9e6e-2c68-4f96-9bd1-afc3aff1ceda",
+      "privateThreadId": "4edd69c6-84ae-4d2e-a477-3e6bc333709c",
+      "sharedThreadId": "2ed13681-7c3d-4640-a81e-4e0103d6acf2"
+    },
+    "requester": {
+      "url": "http://127.0.0.1:26819",
+      "pid": 42800,
+      "localBotId": "f342308c-bdd8-48e8-bdbb-ad244badbeca",
+      "privateThreadId": "0e5693f5-0c2c-42e8-b9b7-c03f27b52679",
+      "sharedThreadId": "119248f6-4792-4a36-a852-edd468235fd6"
+    }
+  },
+  "requesterBackendProxy": "http://127.0.0.1:52147",
+  "runtimeSource": {
+    "files": 765,
+    "manifest": "runtime-source.json",
+    "sha256": "3bccb231ee043813ca0e2c14879d1fbf4eafd983a4925ccfad8f12a412da1149"
+  },
+  "ownerPrivateMemoryControl": {
+    "memoryEnabled": true,
+    "memoryCanaryReachedOwnLocalPrompt": true,
+    "dumpSha256": "c35409bc3e91fd31858a6e2388e7924faae1bc6c2d25b8585ba7bb77cc7aefe6"
+  },
+  "cases": {
+    "remotePrimary": {
+      "startedAt": "2026-10-20T04:12:29.232Z",
+      "sendId": "2a0fd20f-55f3-470c-a144-7671223c2f27",
+      "stage": "passed",
+      "localMessageId": "e8781a4a-c398-4027-9aa5-3a63b7e4d13f",
+      "initialHttpStatus": 202,
+      "finishedAt": "2026-10-20T04:12:35.272Z",
+      "canonicalThreadId": "k5771a99yzkwrwngg0k1e8ap9h8gnm7x",
+      "ownerCliInvocations": 1,
+      "requesterCliInvocations": 0,
+      "duplicateSendReused": true,
+      "ownerSelectedPrivateBRetained": true,
+      "privateTranscriptsUnchanged": true,
+      "privateMemoryAndThreadExcludedFromPrompt": true,
+      "privateMemorySearchReadAndThreadListDeniedViaActualMcp": 3,
+      "outsideProjectReadDeniedThroughFakeCliPermissionPath": true,
+      "nativeGuestConfinementArgumentsVerified": true,
+      "ownerMemoryAndLogUnchanged": true,
+      "ownerProjectFolderUsed": true,
+      "dumpSha256": "2d650a88da0829bbafd2a4269951a0732df71e2793ed6a713ccb3502cdbdab5f"
+    },
+    "unknownBegin": {
+      "startedAt": "2026-10-20T04:12:53.127Z",
+      "sendId": "5164f5d6-36a5-48f7-93a1-13cd29f9a5a7",
+      "stage": "passed",
+      "initialHttpStatus": 503,
+      "finishedAt": "2026-10-20T04:13:05.351Z",
+      "canonicalThreadId": "k573j23kx95g1sfeqtt604a4jh8gnef1",
+      "ownerCliInvocations": 1,
+      "requesterCliInvocations": 0,
+      "duplicateSendReused": true,
+      "ownerSelectedPrivateBRetained": true,
+      "privateTranscriptsUnchanged": true,
+      "privateMemoryAndThreadExcludedFromPrompt": true,
+      "privateMemorySearchReadAndThreadListDeniedViaActualMcp": 3,
+      "outsideProjectReadDeniedThroughFakeCliPermissionPath": true,
+      "nativeGuestConfinementArgumentsVerified": true,
+      "ownerMemoryAndLogUnchanged": true,
+      "ownerProjectFolderUsed": true,
+      "dumpSha256": "4ebde380adf125e8d67f3f703bbe9b606615c0cdf11ae1e83dcb7603dce36c25"
+    },
+    "stopSetup": {
+      "startedAt": "2026-10-20T04:13:19.998Z",
+      "sendId": "fff9a2dd-61e4-4327-9373-99e577c05bbc",
+      "threadId": "d2b3c309-c128-462f-853b-0dbf2103c2bb",
+      "stage": "passed",
+      "finishedAt": "2026-10-20T04:13:20.750Z",
+      "acceptedHostedMutations": 0,
+      "nativeSendStatus": 409,
+      "privateTranscriptsUnchanged": true
+    }
+  },
+  "responseFaults": [
+    {
+      "path": "modelHosts:begin",
+      "status": 200,
+      "outcome": "dropped"
+    },
+    {
+      "path": "agentThreads:create",
+      "status": 200,
+      "outcome": "held"
+    },
+    {
+      "path": "agentThreads:create",
+      "status": 200,
+      "outcome": "released"
+    }
+  ],
+  "limitations": [
+    "No production data, email, GitHub, provider account or invoice calls.",
+    "No packaged Windows/macOS UI, real provider CLI or operating-system filesystem sandbox acceptance.",
+    "Outside-folder read proof is the fake CLI permission request plus emitted native confinement arguments.",
+    "Quota chains, offline skipping, owner revoke, accepted unknown-work restart behavior and API-dollar attribution are not covered by this receipt."
+  ],
+  "privateEvidence": "Raw CLI captures and turn logs remain only under ignored .omb-scratch/model-host-native-044/private; their environment/capability tokens are not published."
+}

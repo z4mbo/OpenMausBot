@@ -319,7 +319,7 @@ export interface CallAgentDeps {
   post(input: { botId: string; widget: Record<string, unknown>; fallback: string; transcript?: string }): void;
   /** Keeps the summary and action items in Origin; the transcript only when the call kept it. */
   record?(input: CallNotesInput): Promise<unknown>;
-  transcribe(input: { audio: Uint8Array; mime: string; settings: CallAgentSettings }): Promise<string>;
+  transcribe(input: { botId: string; audio: Uint8Array; mime: string; settings: CallAgentSettings }): Promise<string>;
   settings(): CallAgentSettings;
   /** Shared call state; defaults to this app alone. */
   rooms?: CallRoomPort;
@@ -560,9 +560,12 @@ export function createCallAgents(deps: CallAgentDeps) {
       requirePresent(scope, present);
       const settings = deps.settings();
       if (settings.transcription.engine === "browser") throw new CallAgentError("This workspace transcribes in the browser");
-      if (!live((await rooms.read(scope, Number.MAX_SAFE_INTEGER)).agent)) throw new CallAgentError("No agent is in this call");
+      const agent = live((await rooms.read(scope, Number.MAX_SAFE_INTEGER)).agent);
+      if (!agent) throw new CallAgentError("No agent is in this call");
       limit(`audio:${scope.user.userId}`, AUDIO_PER_MINUTE);
-      const said = await deps.transcribe({ audio, mime, settings });
+      const said = await deps.transcribe({ botId: agent.botId, audio, mime, settings });
+      const current = live((await rooms.read(scope, Number.MAX_SAFE_INTEGER)).agent);
+      if (!current || current.botId !== agent.botId || current.startedAt !== agent.startedAt) return { line: null };
       return { line: await hear(scope, said) };
     },
     /** Ends the agent's part in calls this app answers for once nobody is in them, which summarises them. */

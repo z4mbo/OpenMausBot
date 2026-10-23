@@ -1,0 +1,184 @@
+commit 00dccbc156b553bcd5df9abe4fb8077c4e30b52e
+Author:     Alessandro Zambon <alessandrozambon1997@gmail.com>
+AuthorDate: Wed Oct 21 07:26:50 2026 +0200
+Commit:     Alessandro Zambon <alessandrozambon1997@gmail.com>
+CommitDate: Wed Oct 21 07:26:50 2026 +0200
+
+    test: scope owned UI browser startup to Windows
+    
+    Co-authored-by: Codex <noreply@openai.com>
+---
+ scripts/testing/control-omb-ui.ts         |  7 ++++++-
+ scripts/testing/ui-session-daemon.test.ts | 34 +++++++++++++++++++++++++++++++
+ 2 files changed, 40 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/testing/control-omb-ui.ts b/scripts/testing/control-omb-ui.ts
+index d2172a6b8..18fd3ad34 100644
+--- a/scripts/testing/control-omb-ui.ts
++++ b/scripts/testing/control-omb-ui.ts
+@@ -144,6 +144,11 @@ export async function startSessionDaemon(binary: string, env: NodeJS.ProcessEnv)
+   catch (error) { throw new ControlOmbError(error instanceof Error ? error.message : String(error)); }
+ }
+ 
++export async function ownUiSessionDaemon(binary: string, env: NodeJS.ProcessEnv, platform: NodeJS.Platform = process.platform): Promise<void> {
++  if (platform !== "win32") return;
++  await startSessionDaemon(binary, env);
++}
++
+ /** Chrome for Testing that `agent-browser install` unpacked under the tools
+  * directory, newest version first; null when it found a system browser instead. */
+ export function installedChrome(toolsDir = UI_TOOLS_DIR, platform: NodeJS.Platform = process.platform): string | null {
+@@ -480,7 +485,7 @@ export async function launchUi(
+     const session: SessionEnv = { home: fixture.info.dataDir, session: `omb-ui-${new URL(fixture.info.url).port}`, chrome };
+     const env = sessionEnv(session, parentEnv);
+     opened = { binary, env };
+-    await startSessionDaemon(binary, env);
++    await ownUiSessionDaemon(binary, env);
+     await agentBrowser(binary, env, ["open", preview.previewUrl], 120_000);
+     checkpoint();
+     const handle: UiHandle = {
+diff --git a/scripts/testing/ui-session-daemon.test.ts b/scripts/testing/ui-session-daemon.test.ts
+new file mode 100644
+index 000000000..5ac80a69c
+--- /dev/null
++++ b/scripts/testing/ui-session-daemon.test.ts
+@@ -0,0 +1,34 @@
++import { beforeEach, describe, expect, it, vi } from "vitest";
++
++const daemon = vi.hoisted(() => ({ start: vi.fn() }));
++vi.mock("../../server/browser-daemon.ts", () => ({ startBrowserDaemon: daemon.start }));
++
++const { ownUiSessionDaemon } = await import("./control-omb-ui.ts");
++
++describe("UI session daemon ownership", () => {
++  beforeEach(() => { daemon.start.mockReset().mockResolvedValue({ pid: 12345 }); });
++
++  it.each(["linux", "darwin"] as const)("keeps the normal CLI launch path on %s without starting a daemon subprocess", async (platform) => {
++    daemon.start.mockRejectedValue(new Error("Unexpected subprocess"));
++    await expect(ownUiSessionDaemon("unused-browser", { HOME: "synthetic-home" }, platform)).resolves.toBeUndefined();
++    expect(daemon.start).not.toHaveBeenCalled();
++  });
++
++  it("starts the owned Windows daemon with the exact session environment", async () => {
++    const env = { HOME: "synthetic-home", AGENT_BROWSER_SESSION: "synthetic-session" };
++    await ownUiSessionDaemon("synthetic-browser", env, "win32");
++    expect(daemon.start).toHaveBeenCalledExactlyOnceWith("synthetic-browser", env);
++    expect(daemon.start.mock.calls[0][1]).toBe(env);
++  });
++
++  it("surfaces Windows daemon failure instead of continuing with an unowned daemon", async () => {
++    daemon.start.mockRejectedValue(new Error("Synthetic daemon refusal"));
++    await expect(ownUiSessionDaemon("synthetic-browser", {}, "win32")).rejects.toThrow("Synthetic daemon refusal");
++    expect(daemon.start).toHaveBeenCalledTimes(1);
++  });
++
++  it("uses the actual host platform when no platform override is supplied", async () => {
++    await ownUiSessionDaemon("synthetic-browser", {});
++    expect(daemon.start).toHaveBeenCalledTimes(process.platform === "win32" ? 1 : 0);
++  });
++});
+
+commit e12c6c132c07375c30251a204a67d2cd5d74c2fa
+Author:     Alessandro Zambon <alessandrozambon1997@gmail.com>
+AuthorDate: Wed Oct 21 07:26:50 2026 +0200
+Commit:     Alessandro Zambon <alessandrozambon1997@gmail.com>
+CommitDate: Wed Oct 21 07:26:50 2026 +0200
+
+    ci: retain isolated thread timer failure diagnostics
+    
+    Co-authored-by: Codex <noreply@openai.com>
+---
+ .github/workflows/ci.yml                      |  1 +
+ scripts/ci-workflow.test.ts                   | 13 ++++++++++++
+ scripts/testing/thinking-timer-ui.e2e.test.ts | 29 ++++++++++++++++++++++++---
+ 3 files changed, 40 insertions(+), 3 deletions(-)
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 9bad4aa6b..2bd771d0a 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -449,6 +449,7 @@ jobs:
+           path: |
+             .omb-scratch/verify-evidence/chat-ui.png
+             .omb-scratch/verify-evidence/thinking-timer-anchored.png
++            .omb-scratch/verify-evidence/*.thinking-timer.json
+             .omb-scratch/verify-evidence/share-team-dialog.png
+           if-no-files-found: warn
+           retention-days: 7
+diff --git a/scripts/ci-workflow.test.ts b/scripts/ci-workflow.test.ts
+index 47f8c799d..9ad34f9bb 100644
+--- a/scripts/ci-workflow.test.ts
++++ b/scripts/ci-workflow.test.ts
+@@ -1,11 +1,24 @@
+ import { spawnSync } from "node:child_process";
+ import { readFileSync } from "node:fs";
++import { matchesGlob } from "node:path";
+ import { describe, expect, it } from "vitest";
+ import { parse } from "yaml";
+ 
+ const workflow = parse(readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8"));
+ const requiredRuntimeJobs = ["vitest", "behavior-evals", "packaged-server", "windows-cua", "electron-smokes"];
+ 
++describe("Renderer failure evidence", () => {
++  it("uploads unique timer fixture diagnostics even when the renderer command fails", () => {
++    const upload = workflow.jobs["ui-smoke"].steps.find((step: { uses?: string }) => step.uses?.startsWith("actions/upload-artifact@"));
++    expect(upload.if).toBe("always()");
++    const patterns = (upload.with.path as string).trim().split(/\r?\n/);
++    for (const fixture of ["first-failed", "second-passed"]) {
++      const file = `.omb-scratch/verify-evidence/openmausbot-verify-data-${fixture}.thinking-timer.json`;
++      expect(patterns.some((pattern) => matchesGlob(file, pattern))).toBe(true);
++    }
++  });
++});
++
+ describe("Docs release coverage", () => {
+   it("runs for Origin release tags independently of pull-request path selection", () => {
+     const docs = parse(readFileSync(new URL("../.github/workflows/docs.yml", import.meta.url), "utf8"));
+diff --git a/scripts/testing/thinking-timer-ui.e2e.test.ts b/scripts/testing/thinking-timer-ui.e2e.test.ts
+index 40f79dfbf..3492e738f 100644
+--- a/scripts/testing/thinking-timer-ui.e2e.test.ts
++++ b/scripts/testing/thinking-timer-ui.e2e.test.ts
+@@ -4,9 +4,9 @@
+ // directory, OMB_AGENT_BROWSER_PATH or PATH) or OMB_UI_E2E=1 asks for the
+ // verified download; otherwise skipped.
+ import type { ChildProcess } from "node:child_process";
+-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
++import { closeSync, existsSync, fstatSync, mkdirSync, mkdtempSync, openSync, readSync, writeFileSync } from "node:fs";
+ import { tmpdir } from "node:os";
+-import { join, resolve } from "node:path";
++import { basename, join, resolve } from "node:path";
+ import { fileURLToPath } from "node:url";
+ import { afterAll, afterEach, describe, expect, it } from "vitest";
+ 
+@@ -130,7 +130,30 @@ describe("the thinking timer stays anchored across a thread switch", () => {
+         const api = fixtureApi(current.info.url);
+         const state = await api("GET", "/api/bots").catch(error => ({ error: String(error) }));
+         const snapshot = await ui("snapshot", current.info.ui).catch(error => ({ error: String(error) }));
+-        writeFileSync(`${current.info.logPath}.thinking-timer.json`, JSON.stringify({ info: current.info, state, snapshot }, null, 2), { mode: 0o600 });
++        const composer = await ui("eval", current.info.ui, "--js", `(() => ({
++          textareas: [...document.querySelectorAll('textarea')].slice(0, 20).map(input => ({
++            label: input.getAttribute('aria-label'), value: input.value.slice(0, 4096), disabled: input.disabled,
++            visible: input.getClientRects().length > 0, focused: input === document.activeElement,
++          })),
++          focus: { tag: document.activeElement?.tagName, label: document.activeElement?.getAttribute('aria-label') },
++          busy: [...document.querySelectorAll('[aria-busy]')].slice(0, 20).map(element => ({
++            tag: element.tagName, label: element.getAttribute('aria-label'), value: element.getAttribute('aria-busy'),
++          })),
++          currentThreads: [...document.querySelectorAll('[data-sidebar-thread-row][aria-current="page"]')].map(element => element.dataset.sidebarThreadRow),
++        }))()`).catch(error => ({ error: String(error) }));
++        let serverLog: string;
++        try {
++          const descriptor = openSync(current.info.logPath, "r");
++          try {
++            const size = fstatSync(descriptor).size;
++            const buffer = Buffer.alloc(Math.min(size, 65_536));
++            const bytes = readSync(descriptor, buffer, 0, buffer.length, size - buffer.length);
++            serverLog = buffer.subarray(0, bytes).toString("utf8");
++          } finally { closeSync(descriptor); }
++        } catch (error) { serverLog = String(error); }
++        mkdirSync(evidenceDir, { recursive: true, mode: 0o700 });
++        writeFileSync(join(evidenceDir, `${basename(current.info.dataDir)}.thinking-timer.json`),
++          JSON.stringify({ info: current.info, state, snapshot, composer, serverLog }, null, 2), { flag: "wx", mode: 0o600 });
+         console.log("Thinking timer fixture evidence saved.");
+       }
+     } finally {

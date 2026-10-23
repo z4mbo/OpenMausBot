@@ -1,0 +1,684 @@
+{
+  "observedAt": "2026-10-21T05:12:18.925Z",
+  "run": {
+    "id": 39547204164,
+    "name": "Origin desktop",
+    "node_id": "WFR_kwLOVLJLfc8AAAAJNTJyRA",
+    "head_branch": "origin-v0.7.3",
+    "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+    "path": ".github/workflows/origin-desktop.yml",
+    "display_title": "release: prepare Origin 0.7.3 after exact-source gate corrections",
+    "run_number": 30,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 388014214,
+    "check_suite_id": 107170220441,
+    "check_suite_node_id": "CS_kwDOVLJLfc8AAAAY89fJmQ",
+    "url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547204164",
+    "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547204164",
+    "pull_requests": [],
+    "created_at": "2026-10-21T05:01:13Z",
+    "updated_at": "2026-10-21T05:11:50Z",
+    "actor": {
+      "login": "z4mbo",
+      "id": 9134380,
+      "node_id": "MDQ6VXNlcjkxMzQzODA=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9134380?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/z4mbo",
+      "html_url": "https://github.com/z4mbo",
+      "followers_url": "https://api.github.com/users/z4mbo/followers",
+      "following_url": "https://api.github.com/users/z4mbo/following{/other_user}",
+      "gists_url": "https://api.github.com/users/z4mbo/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/z4mbo/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/z4mbo/subscriptions",
+      "organizations_url": "https://api.github.com/users/z4mbo/orgs",
+      "repos_url": "https://api.github.com/users/z4mbo/repos",
+      "events_url": "https://api.github.com/users/z4mbo/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/z4mbo/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-21T05:01:13Z",
+    "triggering_actor": {
+      "login": "z4mbo",
+      "id": 9134380,
+      "node_id": "MDQ6VXNlcjkxMzQzODA=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9134380?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/z4mbo",
+      "html_url": "https://github.com/z4mbo",
+      "followers_url": "https://api.github.com/users/z4mbo/followers",
+      "following_url": "https://api.github.com/users/z4mbo/following{/other_user}",
+      "gists_url": "https://api.github.com/users/z4mbo/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/z4mbo/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/z4mbo/subscriptions",
+      "organizations_url": "https://api.github.com/users/z4mbo/orgs",
+      "repos_url": "https://api.github.com/users/z4mbo/repos",
+      "events_url": "https://api.github.com/users/z4mbo/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/z4mbo/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547204164/jobs",
+    "logs_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547204164/logs",
+    "check_suite_url": "https://api.github.com/repos/z4mbo/Origin/check-suites/107170220441",
+    "artifacts_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547204164/artifacts",
+    "cancel_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547204164/cancel",
+    "rerun_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547204164/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/z4mbo/Origin/actions/workflows/388014214",
+    "head_commit": {
+      "id": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "tree_id": "2ca473036f2f426edd682f7093705573d1f97d01",
+      "message": "release: prepare Origin 0.7.3 after exact-source gate corrections\n\nCo-authored-by: Codex <noreply@openai.com>",
+      "timestamp": "2026-10-21T04:59:16Z",
+      "author": {
+        "name": "Alessandro Zambon",
+        "email": "alessandrozambon1997@gmail.com"
+      },
+      "committer": {
+        "name": "Alessandro Zambon",
+        "email": "alessandrozambon1997@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1420970877,
+      "node_id": "R_kgDOVLJLfQ",
+      "name": "Origin",
+      "full_name": "z4mbo/Origin",
+      "private": false,
+      "owner": {
+        "login": "z4mbo",
+        "id": 9134380,
+        "node_id": "MDQ6VXNlcjkxMzQzODA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/9134380?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/z4mbo",
+        "html_url": "https://github.com/z4mbo",
+        "followers_url": "https://api.github.com/users/z4mbo/followers",
+        "following_url": "https://api.github.com/users/z4mbo/following{/other_user}",
+        "gists_url": "https://api.github.com/users/z4mbo/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/z4mbo/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/z4mbo/subscriptions",
+        "organizations_url": "https://api.github.com/users/z4mbo/orgs",
+        "repos_url": "https://api.github.com/users/z4mbo/repos",
+        "events_url": "https://api.github.com/users/z4mbo/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/z4mbo/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/z4mbo/Origin",
+      "description": "Origin: projects, people and local AI agents in one desktop workspace. Built on OpenMausBot.",
+      "fork": true,
+      "url": "https://api.github.com/repos/z4mbo/Origin",
+      "forks_url": "https://api.github.com/repos/z4mbo/Origin/forks",
+      "keys_url": "https://api.github.com/repos/z4mbo/Origin/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/z4mbo/Origin/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/z4mbo/Origin/teams",
+      "hooks_url": "https://api.github.com/repos/z4mbo/Origin/hooks",
+      "issue_events_url": "https://api.github.com/repos/z4mbo/Origin/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/z4mbo/Origin/events",
+      "assignees_url": "https://api.github.com/repos/z4mbo/Origin/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/z4mbo/Origin/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/z4mbo/Origin/tags",
+      "blobs_url": "https://api.github.com/repos/z4mbo/Origin/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/z4mbo/Origin/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/z4mbo/Origin/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/z4mbo/Origin/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/z4mbo/Origin/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/z4mbo/Origin/languages",
+      "stargazers_url": "https://api.github.com/repos/z4mbo/Origin/stargazers",
+      "contributors_url": "https://api.github.com/repos/z4mbo/Origin/contributors",
+      "subscribers_url": "https://api.github.com/repos/z4mbo/Origin/subscribers",
+      "subscription_url": "https://api.github.com/repos/z4mbo/Origin/subscription",
+      "commits_url": "https://api.github.com/repos/z4mbo/Origin/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/z4mbo/Origin/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/z4mbo/Origin/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/z4mbo/Origin/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/z4mbo/Origin/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/z4mbo/Origin/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/z4mbo/Origin/merges",
+      "archive_url": "https://api.github.com/repos/z4mbo/Origin/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/z4mbo/Origin/downloads",
+      "issues_url": "https://api.github.com/repos/z4mbo/Origin/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/z4mbo/Origin/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/z4mbo/Origin/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/z4mbo/Origin/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/z4mbo/Origin/labels{/name}",
+      "releases_url": "https://api.github.com/repos/z4mbo/Origin/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/z4mbo/Origin/deployments"
+    },
+    "head_repository": {
+      "id": 1420970877,
+      "node_id": "R_kgDOVLJLfQ",
+      "name": "Origin",
+      "full_name": "z4mbo/Origin",
+      "private": false,
+      "owner": {
+        "login": "z4mbo",
+        "id": 9134380,
+        "node_id": "MDQ6VXNlcjkxMzQzODA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/9134380?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/z4mbo",
+        "html_url": "https://github.com/z4mbo",
+        "followers_url": "https://api.github.com/users/z4mbo/followers",
+        "following_url": "https://api.github.com/users/z4mbo/following{/other_user}",
+        "gists_url": "https://api.github.com/users/z4mbo/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/z4mbo/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/z4mbo/subscriptions",
+        "organizations_url": "https://api.github.com/users/z4mbo/orgs",
+        "repos_url": "https://api.github.com/users/z4mbo/repos",
+        "events_url": "https://api.github.com/users/z4mbo/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/z4mbo/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/z4mbo/Origin",
+      "description": "Origin: projects, people and local AI agents in one desktop workspace. Built on OpenMausBot.",
+      "fork": true,
+      "url": "https://api.github.com/repos/z4mbo/Origin",
+      "forks_url": "https://api.github.com/repos/z4mbo/Origin/forks",
+      "keys_url": "https://api.github.com/repos/z4mbo/Origin/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/z4mbo/Origin/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/z4mbo/Origin/teams",
+      "hooks_url": "https://api.github.com/repos/z4mbo/Origin/hooks",
+      "issue_events_url": "https://api.github.com/repos/z4mbo/Origin/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/z4mbo/Origin/events",
+      "assignees_url": "https://api.github.com/repos/z4mbo/Origin/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/z4mbo/Origin/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/z4mbo/Origin/tags",
+      "blobs_url": "https://api.github.com/repos/z4mbo/Origin/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/z4mbo/Origin/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/z4mbo/Origin/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/z4mbo/Origin/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/z4mbo/Origin/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/z4mbo/Origin/languages",
+      "stargazers_url": "https://api.github.com/repos/z4mbo/Origin/stargazers",
+      "contributors_url": "https://api.github.com/repos/z4mbo/Origin/contributors",
+      "subscribers_url": "https://api.github.com/repos/z4mbo/Origin/subscribers",
+      "subscription_url": "https://api.github.com/repos/z4mbo/Origin/subscription",
+      "commits_url": "https://api.github.com/repos/z4mbo/Origin/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/z4mbo/Origin/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/z4mbo/Origin/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/z4mbo/Origin/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/z4mbo/Origin/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/z4mbo/Origin/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/z4mbo/Origin/merges",
+      "archive_url": "https://api.github.com/repos/z4mbo/Origin/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/z4mbo/Origin/downloads",
+      "issues_url": "https://api.github.com/repos/z4mbo/Origin/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/z4mbo/Origin/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/z4mbo/Origin/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/z4mbo/Origin/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/z4mbo/Origin/labels{/name}",
+      "releases_url": "https://api.github.com/repos/z4mbo/Origin/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/z4mbo/Origin/deployments"
+    }
+  },
+  "jobs": {
+    "total_count": 3,
+    "jobs": [
+      {
+        "id": 119047953422,
+        "run_id": 39547204164,
+        "workflow_name": "Origin desktop",
+        "head_branch": "origin-v0.7.3",
+        "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547204164",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVLJLfc8AAAAbt8-cDg",
+        "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+        "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119047953422",
+        "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547204164/job/119047953422",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-21T05:01:14Z",
+        "started_at": "2026-10-21T05:01:15Z",
+        "completed_at": "2026-10-21T05:02:04Z",
+        "name": "Version and changelog",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-21T05:01:16Z",
+            "completed_at": "2026-10-21T05:01:17Z"
+          },
+          {
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-21T05:01:17Z",
+            "completed_at": "2026-10-21T05:01:25Z"
+          },
+          {
+            "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-21T05:01:25Z",
+            "completed_at": "2026-10-21T05:01:29Z"
+          },
+          {
+            "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-21T05:01:29Z",
+            "completed_at": "2026-10-21T05:01:30Z"
+          },
+          {
+            "name": "Run pnpm install --frozen-lockfile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-21T05:01:30Z",
+            "completed_at": "2026-10-21T05:01:48Z"
+          },
+          {
+            "name": "Run pnpm check:releases",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-21T05:01:48Z",
+            "completed_at": "2026-10-21T05:01:48Z"
+          },
+          {
+            "name": "Run pnpm exec vitest run scripts/origin-release-notes.test.mjs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-21T05:01:48Z",
+            "completed_at": "2026-10-21T05:01:51Z"
+          },
+          {
+            "name": "The updater compares package.json's version, so the tag must name it",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-21T05:01:51Z",
+            "completed_at": "2026-10-21T05:01:51Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-21T05:01:51Z",
+            "completed_at": "2026-10-21T05:02:02Z"
+          },
+          {
+            "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-10-21T05:02:02Z",
+            "completed_at": "2026-10-21T05:02:03Z"
+          },
+          {
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-10-21T05:02:03Z",
+            "completed_at": "2026-10-21T05:02:03Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-10-21T05:02:03Z",
+            "completed_at": "2026-10-21T05:02:03Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119047953422",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "runner_id": 1000001345,
+        "runner_name": "GitHub Actions 1000001345",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 119048202660,
+        "run_id": 39547204164,
+        "workflow_name": "Origin desktop",
+        "head_branch": "origin-v0.7.3",
+        "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547204164",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVLJLfc8AAAAbt9NppA",
+        "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+        "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048202660",
+        "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547204164/job/119048202660",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-21T05:02:05Z",
+        "started_at": "2026-10-21T05:02:07Z",
+        "completed_at": "2026-10-21T05:11:46Z",
+        "name": "macOS (arm64 + x64)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-21T05:02:08Z",
+            "completed_at": "2026-10-21T05:02:10Z"
+          },
+          {
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-21T05:02:10Z",
+            "completed_at": "2026-10-21T05:02:22Z"
+          },
+          {
+            "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-21T05:02:22Z",
+            "completed_at": "2026-10-21T05:02:27Z"
+          },
+          {
+            "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-21T05:02:27Z",
+            "completed_at": "2026-10-21T05:02:29Z"
+          },
+          {
+            "name": "Run pnpm install --frozen-lockfile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-21T05:02:29Z",
+            "completed_at": "2026-10-21T05:03:21Z"
+          },
+          {
+            "name": "Clean generated output",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-21T05:03:21Z",
+            "completed_at": "2026-10-21T05:03:22Z"
+          },
+          {
+            "name": "Import the Developer ID certificate, when provided",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-21T05:03:22Z",
+            "completed_at": "2026-10-21T05:03:22Z"
+          },
+          {
+            "name": "Prepare the app, speech helper and CUA driver",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-21T05:03:22Z",
+            "completed_at": "2026-10-21T05:06:59Z"
+          },
+          {
+            "name": "Package both architectures",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-21T05:06:59Z",
+            "completed_at": "2026-10-21T05:09:49Z"
+          },
+          {
+            "name": "Gate: both apps read Origin's update feed",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-21T05:09:49Z",
+            "completed_at": "2026-10-21T05:09:54Z"
+          },
+          {
+            "name": "Gate: both packaged servers start",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-21T05:09:54Z",
+            "completed_at": "2026-10-21T05:10:28Z"
+          },
+          {
+            "name": "Notarize, staple and refresh the feed, when signed",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12,
+            "started_at": "2026-10-21T05:10:28Z",
+            "completed_at": "2026-10-21T05:10:28Z"
+          },
+          {
+            "name": "Gate: macOS release notes and artifact hashes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-21T05:10:28Z",
+            "completed_at": "2026-10-21T05:10:30Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-21T05:10:30Z",
+            "completed_at": "2026-10-21T05:11:06Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26,
+            "started_at": "2026-10-21T05:11:06Z",
+            "completed_at": "2026-10-21T05:11:42Z"
+          },
+          {
+            "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27,
+            "started_at": "2026-10-21T05:11:42Z",
+            "completed_at": "2026-10-21T05:11:42Z"
+          },
+          {
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28,
+            "started_at": "2026-10-21T05:11:42Z",
+            "completed_at": "2026-10-21T05:11:42Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29,
+            "started_at": "2026-10-21T05:11:42Z",
+            "completed_at": "2026-10-21T05:11:43Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048202660",
+        "labels": [
+          "macos-14"
+        ],
+        "runner_id": 1000001347,
+        "runner_name": "GitHub Actions 1000001347",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 119048202688,
+        "run_id": 39547204164,
+        "workflow_name": "Origin desktop",
+        "head_branch": "origin-v0.7.3",
+        "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547204164",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVLJLfc8AAAAbt9NpwA",
+        "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+        "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048202688",
+        "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547204164/job/119048202688",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-21T05:02:05Z",
+        "started_at": "2026-10-21T05:02:06Z",
+        "completed_at": "2026-10-21T05:11:50Z",
+        "name": "Windows x64",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-21T05:02:07Z",
+            "completed_at": "2026-10-21T05:02:08Z"
+          },
+          {
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-21T05:02:08Z",
+            "completed_at": "2026-10-21T05:02:23Z"
+          },
+          {
+            "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-21T05:02:23Z",
+            "completed_at": "2026-10-21T05:02:45Z"
+          },
+          {
+            "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-21T05:02:45Z",
+            "completed_at": "2026-10-21T05:02:52Z"
+          },
+          {
+            "name": "Run pnpm install --frozen-lockfile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-21T05:02:52Z",
+            "completed_at": "2026-10-21T05:03:27Z"
+          },
+          {
+            "name": "Clean generated output",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-21T05:03:27Z",
+            "completed_at": "2026-10-21T05:03:27Z"
+          },
+          {
+            "name": "Run pnpm package:win",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-21T05:03:27Z",
+            "completed_at": "2026-10-21T05:10:36Z"
+          },
+          {
+            "name": "Verify the bundled browser with an empty home",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-21T05:10:36Z",
+            "completed_at": "2026-10-21T05:10:43Z"
+          },
+          {
+            "name": "Verify the packaged server discovers its browser",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-21T05:10:43Z",
+            "completed_at": "2026-10-21T05:11:01Z"
+          },
+          {
+            "name": "Gate: the packaged tree and Origin's update feed",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-21T05:11:01Z",
+            "completed_at": "2026-10-21T05:11:01Z"
+          },
+          {
+            "name": "Gate: Windows release notes and artifact hashes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-21T05:11:01Z",
+            "completed_at": "2026-10-21T05:11:02Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-21T05:11:02Z",
+            "completed_at": "2026-10-21T05:11:22Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-10-21T05:11:22Z",
+            "completed_at": "2026-10-21T05:11:46Z"
+          },
+          {
+            "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-10-21T05:11:46Z",
+            "completed_at": "2026-10-21T05:11:46Z"
+          },
+          {
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24,
+            "started_at": "2026-10-21T05:11:46Z",
+            "completed_at": "2026-10-21T05:11:48Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25,
+            "started_at": "2026-10-21T05:11:48Z",
+            "completed_at": "2026-10-21T05:11:48Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048202688",
+        "labels": [
+          "windows-latest"
+        ],
+        "runner_id": 1000001346,
+        "runner_name": "GitHub Actions 1000001346",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  }
+}

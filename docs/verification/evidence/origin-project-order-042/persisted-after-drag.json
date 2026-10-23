@@ -1,0 +1,50 @@
+{
+  "client": "owner",
+  "teamId": "rn7cjstxz1k2rywhxyc6hb257n8gkbe4",
+  "backend": "http://127.0.0.1:54851",
+  "bindings": [
+    {
+      "name": "src/components/SidebarProjects.tsx",
+      "sha256": "7b435d0fb5140747311d34a1a5fa24b9fe5f2f2a8f49bdb009a4b03fcdf60687"
+    },
+    {
+      "name": "src/lib/origin-project-order.ts",
+      "sha256": "2e561cdad079ea2d3e24cc66601b3e53252b06e25d06b42ccbca72d1b6953acf"
+    },
+    {
+      "name": "src/lib/origin-workspaces.ts",
+      "sha256": "80e4455d5510d3aedfb364af195746d08b47d03f3546fe478fa9af3f0120a719"
+    },
+    {
+      "name": "src/lib/use-pointer-reorder.ts",
+      "sha256": "5f0939acbda3107100f218ad7dea9783e71b330434aa4f7e2f0b9940e3dd336e"
+    },
+    {
+      "name": "backend/convex/projects.ts",
+      "sha256": "2f7e2de699e4e13cc47e4978aafc0daa2b5c4985d51b39cbbeb853e85e702bb7"
+    }
+  ],
+  "projects": [
+    {
+      "id": "px7aw7rr0gmjkk3b2r98p1nh718gjwtg",
+      "name": "Private planning",
+      "order": 0
+    },
+    {
+      "id": "px7b48x56wxzfgmbxhc9f0ww9s8gkny8",
+      "name": "Charlie",
+      "order": 1
+    },
+    {
+      "id": "px727z4cg50r5s8s9ggf3n5bxd8gj4yc",
+      "name": "Alpha",
+      "order": 2
+    },
+    {
+      "id": "px7115yn7qkzcty2tv3ebbcztn8gkh49",
+      "name": "Bravo",
+      "order": 3
+    }
+  ],
+  "scope": "Actual SidebarProjects and Convex session/query/mutation hooks. Separate browser origins, synthetic people and independent local Chief IDs. Rows use a controlled surrounding shell; not full App or native desktop acceptance."
+}

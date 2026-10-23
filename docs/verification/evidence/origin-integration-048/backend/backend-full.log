@@ -1,0 +1,12 @@
+
+ RUN  v5.0.2 [isolated Origin checkout]/backend
+
+
+ Test Files  35 passed (35)
+      Tests  293 passed (293)
+   Start at  08:51:43
+   Duration  15.96s (tests 67%, import 15%, environment 9%, transform 8%, worker 1%)
+
+    Isolate  35 workers spawned · ~119ms startup each (spawn + environment, per file)
+             at least ~4.05s faster with isolate: false — reuses workers across files instead of one per file
+

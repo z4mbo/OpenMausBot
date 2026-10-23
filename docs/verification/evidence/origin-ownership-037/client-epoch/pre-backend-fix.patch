@@ -1,0 +1,117 @@
+diff --git a/src/lib/origin-cloud/client.ts b/src/lib/origin-cloud/client.ts
+index 87949e059..f82a5cf39 100644
+--- a/src/lib/origin-cloud/client.ts
++++ b/src/lib/origin-cloud/client.ts
+@@ -31,14 +31,7 @@ function createStore(read: () => string | null) {
+     notify: () => listeners.forEach((listener) => listener()),
+     subscribe(listener: Listener) {
+       listeners.add(listener);
+-      const onStorage = (event: StorageEvent) => {
+-        if (event.key === null || event.key === URL_KEY || event.key === SESSION_KEY) listener();
+-      };
+-      globalThis.addEventListener?.("storage", onStorage);
+-      return () => {
+-        listeners.delete(listener);
+-        globalThis.removeEventListener?.("storage", onStorage);
+-      };
++      return () => { listeners.delete(listener); };
+     },
+   };
+ }
+@@ -54,20 +47,52 @@ export const urlStore = createStore(cloudUrl);
+ 
+ export function setCloudUrl(url: string | null): void {
+   writeStorage(URL_KEY, url?.trim() || null);
+-  urlStore.notify();
++  notifyCloudSession();
+ }
+ 
+ export const sessionStore = createStore(() => readStorage(SESSION_KEY));
+ 
+ export function setSessionToken(token: string | null): void {
+   writeStorage(SESSION_KEY, token);
++  notifyCloudSession();
++}
++
++let sessionEpoch = 0;
++
++function notifyCloudSession(): void {
++  sessionEpoch++;
++  urlStore.notify();
+   sessionStore.notify();
+ }
+ 
++globalThis.addEventListener?.("storage", (event: StorageEvent) => {
++  if (event.key === null || event.key === URL_KEY || event.key === SESSION_KEY) notifyCloudSession();
++});
++
+ export function isCurrentCloudSession(url: string | null, token: string | null): boolean {
+   return cloudUrl() === url && sessionStore.get() === token;
+ }
+ 
++export function captureCloudSession(): {
++  url: string | null;
++  token: string | null;
++  isCurrent(): boolean;
++  assertCurrent(): void;
++} {
++  const url = cloudUrl();
++  const token = sessionStore.get();
++  const epoch = sessionEpoch;
++  const isCurrent = () => sessionEpoch === epoch && isCurrentCloudSession(url, token);
++  return {
++    url,
++    token,
++    isCurrent,
++    assertCurrent() {
++      if (!isCurrent()) throw new Error("Your Origin account or connection changed. Try again.");
++    },
++  };
++}
++
+ let current: { url: string; client: ConvexReactClient | null } | null = null;
+ 
+ export function cloudClient(): ConvexReactClient | null {
+@@ -90,13 +115,12 @@ export function functionRef<T extends FunctionType>(name: string) {
+ }
+ 
+ export async function logoutCloud(): Promise<void> {
+-  const url = cloudUrl();
++  const session = captureCloudSession();
+   const client = cloudClient();
+-  const current = sessionStore.get();
+   try {
+-    if (client && current) await client.mutation(functionRef<"mutation">("auth:logout"), { sessionToken: current });
++    if (client && session.token) await client.mutation(functionRef<"mutation">("auth:logout"), { sessionToken: session.token });
+   } finally {
+-    if (isCurrentCloudSession(url, current)) setSessionToken(null);
++    if (session.isCurrent()) setSessionToken(null);
+   }
+ }
+ 
+diff --git a/src/lib/origin-cloud/hooks.ts b/src/lib/origin-cloud/hooks.ts
+index 8e54dd5a5..2f4f4f376 100644
+--- a/src/lib/origin-cloud/hooks.ts
++++ b/src/lib/origin-cloud/hooks.ts
+@@ -1,5 +1,5 @@
+ import { useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+-import { cloudClient, cloudUrl, functionRef, isCurrentCloudSession, logoutCloud, sessionStore, setSessionToken, urlStore, withSession } from "./client";
++import { captureCloudSession, cloudClient, functionRef, logoutCloud, sessionStore, setSessionToken, urlStore, withSession } from "./client";
+ import type { CloudUser } from "./types";
+ import { isAuthorityQuery, OriginQueryFailures, OriginQueryRecovery, OriginQueryUnavailable } from "./query-failure";
+ 
+@@ -157,12 +157,11 @@ export function useCloudSession(): {
+   }, [url, token]);
+ 
+   const login = useCallback(async (email: string, password: string) => {
+-    const url = cloudUrl();
+-    const token = sessionStore.get();
++    const session = captureCloudSession();
+     const client = cloudClient();
+     if (!client) throw new Error("Origin Cloud is not configured");
+     const result = (await client.action(functionRef<"action">("auth:login"), { email, password })) as { sessionToken: string };
+-    if (!isCurrentCloudSession(url, token)) throw new Error("Your Origin account or connection changed. Try again.");
++    session.assertCurrent();
+     setSessionToken(result.sessionToken);
+   }, []);
+ 

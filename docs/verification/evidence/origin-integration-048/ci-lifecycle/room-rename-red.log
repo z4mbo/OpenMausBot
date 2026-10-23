@@ -1,0 +1,28 @@
+
+ RUN  v4.1.11 <isolated-checkout>
+
+ ❯ server/room-coordination.e2e.test.ts (42 tests | 1 failed | 41 skipped) 3006ms
+   × withholds an in-flight result after team rename and recreation 3004ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/room-coordination.e2e.test.ts > withholds an in-flight result after team rename and recreation
+Error: Origin API error (409): {"error":"Stop this team's active work before renaming the team"}
+ ❯ fetchJson scripts/mcp-server.ts:58:11
+     56|       );
+     57|     }
+     58|     throw new OpenMausBotApiError(response.status, `Origin API error (…
+       |           ^
+     59|   }
+     60|   try {
+ ❯ server/room-coordination.e2e.test.ts:234:3
+ ❯ withRooms server/room-coordination.e2e.test.ts:46:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 41 skipped (42)
+   Start at  09:31:32
+   Duration  5.08s (transform 592ms, setup 647ms, import 1.24s, tests 3.01s, environment 0ms)
+

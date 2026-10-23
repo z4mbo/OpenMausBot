@@ -1,0 +1,33 @@
+
+ RUN  v5.0.2 <worker>/backend
+
+ ❯ convex/draftDefaults.test.ts (18 tests | 1 failed | 15 skipped) 237ms
+   ❯ Draft defaults at the task and workflow boundary (18)
+     × pending legacy Idea tasks stay out of mirror discovery and publish context before repair 228ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  convex/draftDefaults.test.ts > Draft defaults at the task and workflow boundary > pending legacy Idea tasks stay out of mirror discovery and publish context before repair
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ convex/draftDefaults.test.ts:196:32
+    194|     });
+    195|     const context = JSON.parse(await f.t.query(internal.integrations.c…
+    196|     expect(context.task.draft).toBe(true);
+       |                                ^
+    197|     const targets = JSON.parse(await f.t.query(internal.integrations.u…
+    198|     expect(targets.rows.map((row: { taskId: string }) => row.taskId)).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed | 15 skipped (18)
+   Start at  17:24:18
+   Duration  583ms (tests 48%, import 26%, transform 18%, environment 7%, worker 1%)

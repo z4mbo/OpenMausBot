@@ -1,0 +1,20 @@
+{
+  "base": "ec28ec06e935b10a176f26586348e81831475e80",
+  "files": [
+    {
+      "file": "server/origin-run-lease.ts",
+      "baselineSha256": "9ebad28a156e959220c255c10da6a75fc797c4f067217a5e4e7d29b5f238cd57",
+      "fixedSha256": "938d69537159e8a1013d8cc12340ae0df0b125708e12ded70de9a6a2f7b8dc9f"
+    },
+    {
+      "file": "server/origin-shared-agents.ts",
+      "baselineSha256": "b793cf50717ddfc078a362649d4be1562d95a63c962ec0bb4ff6acebc3b1b8e1",
+      "fixedSha256": "1e3b6928f82dff5374abf7a187eccbb6f47748be8e2c787d3c8fb78587b4a1a8"
+    }
+  ],
+  "testsSha256": "384bc2a3087a8d07892b9ddc5407b09951c653b992435a90c8a43373cd3623d6",
+  "restoredExact": true,
+  "testBytesUnchanged": true,
+  "redExit": 1,
+  "date": "2026-10-19T00:20:46.626Z"
+}

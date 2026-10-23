@@ -1,0 +1,25 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin
+
+ ❯ src/components/origin-pages/issue-order.flip.test.ts (5 tests | 1 failed) 19ms
+     × keeps at most one movement animation on each card while reordering rapidly 12ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  23:20:43
+   Duration  1.15s (transform 219ms, setup 546ms, import 46ms, tests 19ms, environment 350ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/origin-pages/issue-order.flip.test.ts > issue movement during an unfinished animation > keeps at most one movement animation on each card while reordering rapidly
+AssertionError: expected 240 to be less than or equal to 200
+ ❯ src/components/origin-pages/issue-order.flip.test.ts:64:35
+     62|         for (const motion of active(card)) {
+     63|           expect(motion.duration).toBeGreaterThanOrEqual(120);
+     64|           expect(motion.duration).toBeLessThanOrEqual(200);
+       |                                   ^
+     65|         }
+     66|       }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

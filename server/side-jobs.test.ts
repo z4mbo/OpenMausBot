@@ -55,7 +55,7 @@ function backgroundEngine(instanceId: string, driverKind: string) {
 
 const bot = (id: string, instanceId: string): SideJobBot => ({ id, name: `Bot ${id}`, threadId: `main-${id}`, modelSelection: { instanceId } });
 
-function setup(options: { helper?: { instanceId: string; model?: string } | null; modelAllowed?: SideJobsDeps["modelAllowed"] } = {}) {
+function setup(options: { helper?: { instanceId: string; model?: string } | null; modelAllowed?: SideJobsDeps["modelAllowed"]; apiBudget?: SideJobsDeps["apiBudget"] } = {}) {
   const claude = textEngine("claude", "claudeAgent");
   const openrouter = textEngine("openrouter", "openai-compat");
   const acp = backgroundEngine("grok", "grokAgent");
@@ -82,6 +82,7 @@ function setup(options: { helper?: { instanceId: string; model?: string } | null
     refusal: (instance) => (state.refused.has(instance.instanceId) ? "the organisation does not allow this engine" : undefined),
     helper: () => state.helper,
     ...(options.modelAllowed ? { modelAllowed: options.modelAllowed } : {}),
+    ...(options.apiBudget ? { apiBudget: options.apiBudget } : {}),
     assertWithinBudget: () => {
       if (state.overBudget) throw new Error("this workspace has reached its monthly spend limit");
     },
@@ -90,6 +91,48 @@ function setup(options: { helper?: { instanceId: string; model?: string } | null
   });
   return { jobs, state, claude, openrouter, acp, codex };
 }
+
+describe("helper API budget attribution", () => {
+  it("waits for an asynchronous billing refusal before compaction or helper generation", async () => {
+    const { jobs, claude, openrouter } = setup({ helper: { instanceId: "openrouter" }, apiBudget: async () => {
+      await Promise.resolve(); throw new Error("Synthetic fresh billing probe refused API-key CLI");
+    } });
+    await expect(jobs.text("compaction", "claude")!.generateText("Do not dispatch")).rejects.toThrow(/fresh billing probe/);
+    await expect(jobs.text("memory", "pi")!.generateText("Do not dispatch")).rejects.toThrow(/fresh billing probe/);
+    expect(claude.calls).toHaveLength(0);
+    expect(openrouter.calls).toHaveLength(0);
+  });
+
+  it("passes a fresh originating-agent budget to own compaction, own upkeep and a fallback helper", async () => {
+    const apiBudget = { begin: vi.fn() };
+    const admission = vi.fn<NonNullable<SideJobsDeps["apiBudget"]>>(() => apiBudget);
+    const { jobs, claude, openrouter } = setup({ helper: { instanceId: "openrouter" }, apiBudget: admission });
+    await jobs.text("compaction", "claude")!.generateText("Synthetic compaction");
+    await jobs.text("memory", "claude")!.generateText("Synthetic upkeep");
+    await jobs.text("memory", "pi")!.generateText("Synthetic helper");
+    expect(admission.mock.calls.map(([instance, botId]) => [instance.instanceId, botId])).toEqual([["claude", "claude"], ["claude", "claude"], ["openrouter", "pi"]]);
+    expect([...claude.calls, ...openrouter.calls].every(call => call.options?.apiBudget === apiBudget)).toBe(true);
+  });
+
+  it("refuses unsupported paid helpers and compaction before their generation call", async () => {
+    const { jobs, claude, openrouter } = setup({ helper: { instanceId: "openrouter" }, apiBudget: () => { throw new Error("Synthetic unsupported metered route"); } });
+    await expect(jobs.text("compaction", "claude")!.generateText("Synthetic compaction")).rejects.toThrow(/unsupported metered/);
+    await expect(jobs.text("memory", "pi")!.generateText("Synthetic helper")).rejects.toThrow(/unsupported metered/);
+    expect(claude.calls).toHaveLength(0);
+    expect(openrouter.calls).toHaveLength(0);
+  });
+
+  it("checks the helper's explicit custom route before a subscription instance can launch it", async () => {
+    const admission = vi.fn<NonNullable<SideJobsDeps["apiBudget"]>>((_instance, _botId, model) => {
+      if (model?.includes("::")) throw new Error("Synthetic unbounded custom API route");
+      return undefined;
+    });
+    const { jobs, claude } = setup({ helper: { instanceId: "claude", model: "custom::api-model" }, apiBudget: admission });
+    await expect(jobs.text("memory", "pi")!.generateText("Synthetic helper")).rejects.toThrow(/custom API route/);
+    expect(admission).toHaveBeenCalledWith(expect.objectContaining({ instanceId: "claude" }), "pi", "custom::api-model");
+    expect(claude.calls).toHaveLength(0);
+  });
+});
 
 describe("the helper setting", () => {
   const file = join(DATA_DIR, "config.json");

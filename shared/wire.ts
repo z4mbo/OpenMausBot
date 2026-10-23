@@ -39,10 +39,11 @@ export function isEffortLevel(value: unknown): value is EffortLevel {
   return typeof value === "string" && (EFFORT_LEVELS as readonly string[]).includes(value);
 }
 
-/** instanceId is the routing key. */
+/** Local accounts use instanceId. A shared account uses origin-remote and its exact opted-in source. */
 export interface ModelSelection {
   instanceId: string;
   model: string;
+  source?: { hostId: string; sourceId: string };
   /** Optional: no effort means no flag, and the CLI keeps its own default. */
   effort?: EffortLevel;
   /** Explicit model-specific variant. Omitted leaves the native session alone. */
@@ -88,6 +89,8 @@ export interface TaskOpenedBy {
   threadId?: string;
   /** A parallel room job's thread: `threadId` is the room thread it came from, and the member must stay in that room. */
   roomLane?: true;
+  /** True marks the canonical specialist conversation for this parent and recipient; false keeps an explicitly new conversation independent. */
+  continuity?: boolean;
   at: number;
 }
 
@@ -133,6 +136,8 @@ export interface WireTask {
   projectId?: string;
   /** Detached routine execution, reachable through its visible results card. */
   routineRunId?: string;
+  /** Server-owned hosted execution identity; permanently separates its context and memory from the source owner's private conversations. */
+  hostedRequest?: { runId: string; executionId: string; requesterUserId: string };
   /** Set when a bot, not a person, opened this thread. */
   openedBy?: TaskOpenedBy;
   /** Set by close_thread; absent while the thread is open. */
@@ -187,11 +192,19 @@ export interface WireTask {
   sharedPrivate?: true;
 }
 
-/** A thread mirrored to a shared Origin agent: every member sees it, and each message runs on its sender's machine. */
+/** A thread mirrored to a shared Origin agent. Messages run on the sender's machine or an explicitly granted shared model host. */
 export interface SharedThreadLink {
   cloudThreadId: string;
   /** The run holding the thread, when one is live. */
-  run?: { by: string; mine: boolean; model?: string };
+  run?: {
+    by: string;
+    /** Whether this person requested the turn; the executor may be another member's computer. */
+    mine: boolean;
+    model?: string;
+    executedByName?: string;
+    hostId?: string;
+    sourceId?: string;
+  };
   /** Runs waiting behind it; mineQueued counts this person's own. */
   queued?: number;
   mineQueued?: number;
@@ -356,7 +369,13 @@ export interface WireBot {
   connectorScopes?: { apps: Record<string, "read" | "write"> };
   outbound?: { policy: "ask" | "allow"; dailyCap: number };
   /** Ordered backups used only by opt-in, pre-prompt startup recovery. */
-  fallback?: Array<{ instanceId: string; model: string }>;
+  fallback?: ModelSelection[];
+  /** Automatically try ordered backups after a provider proves an initial quota refusal. */
+  quotaFallback?: boolean;
+  /** Explicit permission to include metered API models in automatic quota fallback. */
+  fallbackApiAllowed?: boolean;
+  /** Daily model API allowance on this computer; absent inherits, zero blocks paid requests. */
+  dailyApiBudgetUsd?: number;
   /** Whether this bot gets the app's built-in browser. */
   browser?: boolean;
   /** Record a screenshot and a short note of each browser action, kept with

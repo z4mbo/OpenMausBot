@@ -8,6 +8,8 @@ import type {
   DriverKind, InstanceId, ModelVariantOption, RuntimeEventListener, ThreadId, TurnId,
 } from "../shared/runtime-events.ts";
 import type { ProviderIcon } from "../shared/provider-icon.ts";
+import type { ApiRequestBudget } from "./daily-api-budget.ts";
+export type { ApiRequestBudget } from "./daily-api-budget.ts";
 
 export type { CloudBackend, EffortLevel, ModelSelection } from "../shared/wire.ts";
 export type {
@@ -86,6 +88,8 @@ export type RequestOutcome = "allowed-once" | "rejected" | "answered" | "unavail
 
 // Sessions start implicitly on the first turn; resumeCursor carries the provider-native continuation (e.g. a Claude session id).
 export interface SendTurnInput {
+  /** Per-request admission and durable API cost reservations; only bounded drivers may consume it. */
+  apiBudget?: ApiRequestBudget;
   threadId: ThreadId;
   /** Drivers namespace process-level resources (broker socket, CLI session) by botId too: threadIds may coincide across bots. */
   botId?: string;
@@ -191,6 +195,8 @@ export interface ProviderAdapter {
   readonly provider: DriverKind;
   readonly capabilities: {
     sessionModelSwitch: "in-session" | "unsupported";
+    /** Each metered request enforces an output bound and settles its daily API budget reservation. */
+    apiRequestBudget?: true;
     /** The driver mounts integrations.agents. Every *Mcp flag guards one rule: never tell a bot about tools its driver cannot mount. */
     agentsMcp?: boolean;
     /** The driver mounts isolated computer MCP descriptors. */
@@ -390,6 +396,8 @@ export interface TextGenerationUsage {
 }
 
 export interface TextGenerationOptions {
+  /** The caller's agent/global API budget, including helper and summary requests. */
+  apiBudget?: ApiRequestBudget;
   signal?: AbortSignal;
   onUsage?: (usage: TextGenerationUsage) => void;
   /** Only the helper model setting passes it: one of this instance's models instead of the driver's quick-call choice. */

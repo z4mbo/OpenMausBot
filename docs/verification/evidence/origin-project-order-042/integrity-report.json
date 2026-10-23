@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "folder": "origin-project-order-042",
+  "reviewedAt": "2026-10-20T04:33:42.843Z",
+  "reviewerScope": "Retained bytes, declared bindings and relative references only; no browser recapture or runtime re-execution.",
+  "browserProof": {
+    "file": "browser-proof.json",
+    "sha256": "abb0aded608818ee0949654e34b10ddf290c18497d05641bc06ba27eec38382a",
+    "recordedTime": "2026-10-19T21:25:38.161Z",
+    "timeProvenance": "checkedAt field in retained proof",
+    "scope": "Two browser origins and independent local Chief IDs, fresh synthetic Convex backend; actual SidebarProjects/query/mutation hooks; controlled outer shell, not full App or packaged acceptance"
+  },
+  "recordedSourceBindings": {
+    "provenance": "No source digest bindings retained in this evidence folder. Current verifier support is not capture-time evidence.",
+    "entries": []
+  },
+  "baseline": null,
+  "previousManifest": null,
+  "currentSourceInventory": {
+    "observedAt": "2026-10-20T04:33:42.843Z",
+    "gitHeadAtReview": "2a29a82702fef4f9b3b4c2c91e52fb3af72deab4",
+    "tree": "working-tree",
+    "captureTimeBinding": false,
+    "purpose": "Supplementary current-source inventory only. These hashes must not be presented as the source loaded when the screenshots were captured.",
+    "files": [
+      {
+        "name": "scripts/verify-origin-project-order.ts",
+        "bytes": 6953,
+        "sha256": "4568de367004af19fa93ba36ddd3cf8bb9f1c47461b8636e01bf7aeaf00597f4",
+        "present": true
+      },
+      {
+        "name": "scripts/testing/origin-project-order-preview.tsx",
+        "bytes": 4181,
+        "sha256": "cf34ddb4174aaf9e12695499f72770e8da7d2413b81fa9302838e135e8106cf0",
+        "present": true
+      },
+      {
+        "name": "src/components/SidebarProjects.tsx",
+        "bytes": 15283,
+        "sha256": "7b435d0fb5140747311d34a1a5fa24b9fe5f2f2a8f49bdb009a4b03fcdf60687",
+        "present": true
+      },
+      {
+        "name": "src/lib/origin-project-order.ts",
+        "bytes": 4690,
+        "sha256": "2e561cdad079ea2d3e24cc66601b3e53252b06e25d06b42ccbca72d1b6953acf",
+        "present": true
+      },
+      {
+        "name": "src/lib/origin-workspaces.ts",
+        "bytes": 6192,
+        "sha256": "80e4455d5510d3aedfb364af195746d08b47d03f3546fe478fa9af3f0120a719",
+        "present": true
+      },
+      {
+        "name": "src/lib/use-pointer-reorder.ts",
+        "bytes": 3557,
+        "sha256": "5f0939acbda3107100f218ad7dea9783e71b330434aa4f7e2f0b9940e3dd336e",
+        "present": true
+      },
+      {
+        "name": "backend/convex/projects.ts",
+        "bytes": 21568,
+        "sha256": "2f7e2de699e4e13cc47e4978aafc0daa2b5c4985d51b39cbbeb853e85e702bb7",
+        "present": true
+      },
+      {
+        "name": "backend/convex/lib/projectOrder.ts",
+        "bytes": 2421,
+        "sha256": "62fb86f16f90998827d937f4de21fab4bd6f24dbff5921dca641145f8d99d01b",
+        "present": true
+      },
+      {
+        "name": "backend/convex/schema.ts",
+        "bytes": 19626,
+        "sha256": "d7437b3034185693ebd11aa600133e3934ca8d82432028f8d2423258e840be8c",
+        "present": true
+      }
+    ]
+  },
+  "originalFiles": [
+    {
+      "name": "browser-proof.json",
+      "bytes": 1275,
+      "sha256": "abb0aded608818ee0949654e34b10ddf290c18497d05641bc06ba27eec38382a"
+    },
+    {
+      "name": "member-after-reload.png",
+      "bytes": 21357,
+      "sha256": "d462a2e5adf722427e41c7b3ccdeaf1f2db009e50c9bfde571812b8e35153e65"
+    },
+    {
+      "name": "member-before.png",
+      "bytes": 21400,
+      "sha256": "985ad2f6ce1def7880a189a0291307b240562a2d08d5067bdfcf33dfc70145e6"
+    },
+    {
+      "name": "member-change-owner-live.png",
+      "bytes": 25185,
+      "sha256": "e9d9bbc7d07b9e7e0b9990af700353f0a250f19a175048979006aa8293ea0909"
+    },
+    {
+      "name": "member-read-only.png",
+      "bytes": 21223,
+      "sha256": "adb868c9037bb9c08f19a75bcc7b9831d459808c1c1451220614049921c4e065"
+    },
+    {
+      "name": "owner-after.png",
+      "bytes": 67736,
+      "sha256": "b7a4b8529c3117b16100bedbc70bac6a8eccab87d0a87dcdd7daf03a4452ea89"
+    },
+    {
+      "name": "owner-before.png",
+      "bytes": 25170,
+      "sha256": "1b7518971daa9624681a4f41ffb084198262ecd6c35aed2be151acb89465bd59"
+    },
+    {
+      "name": "persisted-after-drag.json",
+      "bytes": 1524,
+      "sha256": "7f1e5246a797a5f3c196cc9fd2478c7120b228389820e61978bbcea4c008dcd4"
+    }
+  ],
+  "images": [
+    {
+      "name": "member-after-reload.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 720,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "member-before.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 720,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "member-change-owner-live.png",
+      "encoding": "jpeg",
+      "width": 1371,
+      "height": 930,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "member-read-only.png",
+      "encoding": "jpeg",
+      "width": 1280,
+      "height": 720,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "owner-after.png",
+      "encoding": "jpeg",
+      "width": 1371,
+      "height": 930,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    },
+    {
+      "name": "owner-before.png",
+      "encoding": "jpeg",
+      "width": 1371,
+      "height": 930,
+      "suffixMatchesEncoding": false,
+      "result": "image_header_and_dimensions_read"
+    }
+  ],
+  "referenceChecks": {
+    "originalManifestRelativeFiles": "No original manifest retained.",
+    "recordedSourcePaths": "checked entry by entry",
+    "imageHeaders": "encoding and dimensions checked without re-rendering",
+    "markdown": "relative links generated from files confirmed present",
+    "gitTextAttribute": "\"docs\\\\verification\\\\evidence\\\\origin-project-order-042\\\\browser-proof.json\": text: unset",
+    "gitIndexOrCommitBytesVerified": false
+  },
+  "limitations": [
+    "No missing capture-time source bindings or timestamps were reconstructed.",
+    "A matching recorded binding proves raw file equality at review; it does not independently prove browser startup or complete runtime identity.",
+    "Current source drift is reported without changing original proof or historical manifest.",
+    "Retained screenshot filenames use .png, but their encoding is recorded from the bytes; no original was renamed or re-encoded.",
+    "Screenshots were not recaptured; pixel correctness, runtime behavior, native packages, real vendors and production are outside this integrity review."
+  ]
+}

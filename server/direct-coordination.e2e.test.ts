@@ -336,9 +336,13 @@ it.each(["resume", "stop", "failed resume", "failed root"] as const)("keeps a gu
 
 it("opens a fresh thread on a teammate with coordinate_bots thread \"new\" and gets the result back", () => fixture(async f => {
   const originalLead = await f.messages(f.lead.activeTaskId);
-  f.plan[f.chief.id] = { steps: [{ arguments: { bot_ids: [f.lead.id], message: "NEW_THREAD_BRIEF verify the CSV export yourself", thread: "new" } }],
-    reply: "Opened a fresh thread", resumeReply: "The fresh thread reported back" };
-  f.plan[f.lead.id] = { reply: "NEW_THREAD_RESULT verified" };
+  f.plan[f.chief.id] = { turns: [
+    { steps: [{ arguments: { bot_ids: [f.lead.id], message: "NEW_THREAD_BRIEF verify the CSV export yourself", thread: "new" } }], reply: "Opened a fresh thread" },
+    { reply: "The fresh thread reported back" },
+    { steps: [{ arguments: { bot_ids: [f.lead.id], message: "Start the standing export review" } }], reply: "Assigned the standing review" },
+    { reply: "The standing review reported back" },
+  ] };
+  f.plan[f.lead.id] = { turns: [{ reply: "NEW_THREAD_RESULT verified" }, { reply: "Standing export review complete" }] };
   await f.start();
   expect((await f.wait()).status).toBe("settled");
   const answered = f.evidence()[0].evidence.find((entry: any) => entry.step?.arguments?.thread === "new").response.result;
@@ -347,11 +351,27 @@ it("opens a fresh thread on a teammate with coordinate_bots thread \"new\" and g
   const child = f.nodes().find((node: any) => node.botId === f.lead.id);
   expect(child).toMatchObject({ mode: "work", reply: "resume", status: "completed", text: expect.stringContaining("NEW_THREAD_BRIEF") });
   const lead = (await f.api("/api/bots")).bots.find((bot: any) => bot.id === f.lead.id);
-  expect(lead.tasks.find((task: any) => task.threadId === child.threadId)).toMatchObject({ title: "NEW_THREAD_BRIEF verify the CSV export yourself", openedBy: { botId: f.chief.id, name: "Clive" } });
+  expect(lead.tasks.find((task: any) => task.threadId === child.threadId)).toMatchObject({ title: "NEW_THREAD_BRIEF verify the CSV export yourself", openedBy: { botId: f.chief.id, name: "Clive", threadId: f.chief.activeTaskId, continuity: false } });
   expect(child.threadId).not.toBe(f.lead.activeTaskId);
   expect(await f.messages(f.lead.activeTaskId)).toEqual(originalLead);
   expect(f.evidence().map((turn: any) => turn.botId)).toEqual([f.chief.id, f.lead.id, f.chief.id]);
   expect((await f.messages(f.chief.activeTaskId)).some((message: any) => message.tool?.name === "Engineering lead replied" && message.tool.output === "NEW_THREAD_RESULT verified")).toBe(true);
+  const freshMessages = await f.messages(child.threadId);
+  await f.cli("send", "--bot", f.chief.id, "--task", f.chief.activeTaskId, "--text", "Ask Engineering to start the standing export review.");
+  expect((await f.wait()).status).toBe("settled");
+  const children = f.nodes().filter((node: any) => node.parentId && node.botId === f.lead.id);
+  expect(children).toHaveLength(2);
+  expect(children[1].threadId).not.toBe(child.threadId);
+  const after = (await f.api("/api/bots")).bots.find((bot: any) => bot.id === f.lead.id);
+  expect(after.tasks).toHaveLength(3);
+  expect(after.threadId).toBe(f.lead.activeTaskId);
+  expect(after.tasks.find((task: any) => task.threadId === child.threadId).openedBy).toEqual(lead.tasks.find((task: any) => task.threadId === child.threadId).openedBy);
+  expect(after.tasks.find((task: any) => task.threadId === children[1].threadId).openedBy)
+    .toMatchObject({ botId: f.chief.id, threadId: f.chief.activeTaskId, kind: "work", continuity: true });
+  expect(await f.messages(child.threadId)).toEqual(freshMessages);
+  expect(await f.messages(f.lead.activeTaskId)).toEqual(originalLead);
+  expect((await f.messages(children[1].threadId)).some((message: any) => message.text === "Standing export review complete")).toBe(true);
+  expect((await f.messages(f.chief.activeTaskId)).filter((message: any) => message.text === "The standing review reported back")).toHaveLength(1);
 }), 45_000);
 
 it("lets the opener find and close the completed task", () => fixture(async f => {
@@ -604,6 +624,52 @@ it("gives another conversation of the same Chief its own thread with the teammat
   expect(work.map((task: any) => task.openedBy.threadId).sort()).toEqual([f.chief.activeTaskId, other].sort());
   expect(new Set(f.nodes().filter((node: any) => node.botId === f.lead.id).map((node: any) => node.threadId))).toEqual(new Set(work.map((task: any) => task.threadId)));
 }), 60_000);
+
+it("continues its original delegated child after the person selects an independent specialist conversation", () => fixture(async f => {
+  const projectMarker = "PROJECT_A_RESEARCH_CONTEXT_7J";
+  const privateMarker = "DIRECT_B_PRIVATE_CONTEXT_8K";
+  f.plan[f.chief.id] = { turns: [
+    { steps: [{ arguments: { bot_ids: [f.lead.id], message: projectMarker } }], reply: "Research assigned" },
+    { reply: "Research received" },
+    { steps: [{ arguments: { bot_ids: [f.lead.id], message: "Continue that project research" } }], reply: "Follow-up assigned" },
+    { reply: "Follow-up received" },
+  ] };
+  f.plan[f.lead.id] = { turns: [
+    { reply: "Project research result" },
+    { reply: "Private direct answer" },
+    { expectContextIncludes: ["Continue that project research"], reply: "Project follow-up result" },
+  ] };
+  await f.start();
+  expect((await f.wait()).status).toBe("settled");
+  const originalChild = f.nodes().find((node: any) => node.botId === f.lead.id);
+  const initialSpecialist = (await f.api("/api/bots")).bots.find((bot: any) => bot.id === f.lead.id);
+  expect(initialSpecialist.tasks.find((task: any) => task.threadId === originalChild.threadId).openedBy)
+    .toMatchObject({ botId: f.chief.id, threadId: f.chief.activeTaskId, kind: "work", continuity: true });
+  const direct = (await f.api(`/api/bots/${f.lead.id}/tasks`, { title: "Independent conversation B", approvalMode: "ask" })).task;
+  await f.cli("send", "--bot", f.lead.id, "--task", direct.threadId, "--text", privateMarker);
+  expect((await f.cli("wait", "--bot", f.lead.id, "--task", direct.threadId, "--timeout", "30")).status).toBe("settled");
+  const directBefore = await f.messages(direct.threadId);
+  f.save();
+  await f.cli("send", "--bot", f.chief.id, "--task", f.chief.activeTaskId, "--text", "Ask Engineering to continue the project research");
+  expect((await f.wait()).status).toBe("settled");
+  const children = f.nodes().filter((node: any) => node.parentId && node.botId === f.lead.id);
+  expect(children.map((node: any) => node.threadId)).toEqual([originalChild.threadId, originalChild.threadId]);
+  const specialist = (await f.api("/api/bots")).bots.find((bot: any) => bot.id === f.lead.id);
+  expect(specialist.threadId).toBe(direct.threadId);
+  expect(specialist.tasks).toHaveLength(3);
+  expect(specialist.tasks.find((task: any) => task.threadId === direct.threadId)).toMatchObject({ approvalMode: "ask", busy: false });
+  expect(await f.messages(direct.threadId)).toEqual(directBefore);
+  const childMessages = await f.messages(originalChild.threadId);
+  expect(JSON.stringify(childMessages)).toContain(projectMarker);
+  expect(childMessages.some((message: any) => message.text === "Project research result")).toBe(true);
+  expect(childMessages.some((message: any) => message.text === "Project follow-up result")).toBe(true);
+  expect(JSON.stringify(childMessages)).not.toContain(privateMarker);
+  expect(specialist.tasks.find((task: any) => task.threadId === originalChild.threadId).openedBy)
+    .toMatchObject({ botId: f.chief.id, threadId: f.chief.activeTaskId, kind: "work", continuity: true });
+  const secondTurn = f.evidence().filter((turn: any) => turn.botId === f.lead.id).at(-1);
+  expect(told(secondTurn)).not.toContain(privateMarker);
+  expect((await f.messages(f.chief.activeTaskId)).filter((message: any) => message.text === "Follow-up received")).toHaveLength(1);
+}), 90_000);
 
 it("runs an identical call made twice in one turn once, without an extra recipient thread", () => fixture(async f => {
   f.plan[f.chief.id].steps.push(structuredClone(f.plan[f.chief.id].steps[0]));

@@ -1,0 +1,21 @@
+{
+  "source": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "siteImageId": "sha256:91b6d2d7ade9b89ac21a95e76b4870c5ee246ad204f8f1acf21112278d0e51ef",
+  "identitySha256": "92d4c37d53773520cc3958aae2122162048b526d37324725b294f95e1fe7caff",
+  "acceptedVisualStates": 1,
+  "productLayoutBlockers": [],
+  "pendingEvidence": [],
+  "files": [
+    {
+      "path": ".omb-scratch/delivery-evidence-040/site/private-whats-new.json",
+      "bytes": 25304,
+      "sha256": "6916b7296b4f6b66d5ad0e7aefee9ed31e12c35310d3f6b0b8c91fbc9b009cbc"
+    },
+    {
+      "path": ".omb-scratch/delivery-evidence-040/site/private-whats-new.png",
+      "bytes": 52996,
+      "sha256": "b34f2c40e7225a9dd13b739fce07e62d5b302b4283690b81858abae2d6ab6d39"
+    }
+  ],
+  "scope": "Actual private compiled 0.2.15 changelog in Chromium at 1280px. Unchanged landing/account/download surfaces retain their separately recorded 0.2.14 acceptance; this adds no broad UI or native Mac acceptance claim."
+}

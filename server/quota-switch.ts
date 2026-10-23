@@ -3,7 +3,9 @@
 // A request the job runtime still holds is never sent again: the runtime reruns its root itself.
 import { approvalModeFor, modelSwitchNeedsAsk } from "../shared/approval-mode.ts";
 import type { QuotaSwitchCardData } from "../shared/wire.ts";
+import type { QuotaRefusal } from "../shared/runtime-events.ts";
 import { recoveryCapabilityError } from "./automatic-recovery.ts";
+import { sameModelSelection } from "../shared/thread-model.ts";
 import { newId } from "./contracts.ts";
 import type { EngineAccess, ModelCatalog, ModelSelection, ProviderAdapter, ProviderSnapshot } from "./contracts.ts";
 import type { Coordinator } from "./coordinator.ts";
@@ -33,7 +35,7 @@ export interface QuotaRequest {
   origin?: WorkOrigin;
 }
 
-export type SettledTurn = Parameters<TurnStops["failureCause"]>[0];
+export type SettledTurn = Parameters<TurnStops["failureCause"]>[0] & { refusal?: QuotaRefusal };
 
 export interface QuotaSwitchDeps {
   store: Store;
@@ -43,7 +45,8 @@ export interface QuotaSwitchDeps {
   /** A custom endpoint brings its own credential, so its sign-in state does not count. */
   access?: (instanceId: string) => EngineAccess | undefined;
   refusal?: (engine: QuotaSwitchEngine) => string | undefined;
-  gate: (thread: BotRecord, selection: ModelSelection) => { ok: true; selection: ModelSelection } | { ok: false; error: string };
+  gate: (thread: BotRecord, selection: ModelSelection) => { ok: true; selection: ModelSelection } | { ok: false; error: string }
+    | Promise<{ ok: true; selection: ModelSelection } | { ok: false; error: string }>;
   reset?: (from: ModelSelection, to: ModelSelection) => Partial<TaskRecord> | undefined;
   busy: (botId: string, threadId: string) => boolean;
   request: (threadId: string) => QuotaRequest | undefined;
@@ -150,7 +153,7 @@ export function createQuotaSwitch(deps: QuotaSwitchDeps): QuotaSwitch {
     try {
       // Read before any await: the record is this turn's only now.
       const request = deps.request(threadId);
-      if (classifyError({ text: deps.turnStops.failureCause(event) ?? "" }).reason !== "quota") return null;
+      if (event.refusal?.kind !== "quota_exhausted" && classifyError({ text: deps.turnStops.failureCause(event) ?? "" }).reason !== "quota") return null;
       const currentId = bot.modelSelection.instanceId;
       limited.add(currentId);
       // Only the person's own request: never a routine's, a webhook's, a relayed or a guest's.
@@ -175,14 +178,15 @@ export function createQuotaSwitch(deps: QuotaSwitchDeps): QuotaSwitch {
       }
       // No await between this check and the write, so a thread never holds two open offers.
       if (!offered.length || build.stale || !store.taskByThread(bot.id, threadId) || openCard(threadId)) return null;
-      const original = resendable(store, threadId, messageId);
+      const original = event.refusal?.retry === "manual" ? undefined : resendable(store, threadId, messageId);
       const rootId = rootOf(threadId, request);
       return store.appendMessage(threadId, {
         role: "bot",
         kind: "options",
         card: {
           title: `${nameOf(current)} is out of quota`,
-          subtitle: original ? "Continue this conversation on another engine?"
+          subtitle: event.refusal?.retry === "manual" ? "Some work may have completed. Switch for your next message; nothing will be sent again."
+            : original ? "Continue this conversation on another engine?"
             : "Switch this conversation to another engine? Send your message again afterwards.",
           options: [...offered.map((engine) => engine.name), NOT_NOW],
           requestId: newId(),
@@ -247,7 +251,6 @@ export function createQuotaSwitch(deps: QuotaSwitchDeps): QuotaSwitch {
     const current = engines.find((candidate) => candidate.instanceId === before.modelSelection.instanceId);
     if (!current) return refuse("this conversation's own engine is no longer configured here, so no other engine can be checked against it — nothing switched. Choose a model for this conversation instead.", closed);
     const selection = await takeover(engine, before, current);
-    // No await from here to the resend: the gate, the switch and the resend must see one state.
     const card = offer();
     const bot = store.projectBotForTask(botId, threadId);
     if (!card || !bot) return false;
@@ -255,8 +258,13 @@ export function createQuotaSwitch(deps: QuotaSwitchDeps): QuotaSwitch {
     if (!selection) return refuse(`${chosen.name} is no longer available — nothing switched.`);
     const already = bot.modelSelection.instanceId === selection.instanceId;
     if (!already) {
-      const checked = deps.gate(bot, selection);
+      const checked = await deps.gate(bot, selection);
       if (!checked.ok) return refuse(`could not switch to ${chosen.name} — ${checked.error}`);
+      const fresh = store.projectBotForTask(botId, threadId);
+      if (!offer() || !fresh) return false;
+      if (!sameModelSelection(fresh.modelSelection, bot.modelSelection) || deps.busy(botId, threadId)) {
+        return refuse("This conversation changed while its model was being checked. Try again once it is idle.");
+      }
       try {
         store.switchTaskModel(botId, threadId, checked.selection, false, false, deps.reset?.(bot.modelSelection, checked.selection));
       } catch {

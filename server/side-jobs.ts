@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 
 import { helperModelAllowed } from "../shared/wire.ts";
-import type { ProviderAdapter, ProviderInstance, TextGenerationOptions } from "./contracts.ts";
+import type { ApiRequestBudget, ProviderAdapter, ProviderInstance, TextGenerationOptions } from "./contracts.ts";
 import type { UsageRow, UsageTrigger } from "./usage-ledger.ts";
 
 /** config.json `helper`: a connected instance and optionally one of its models. Stored config only, so a settings
@@ -60,6 +60,7 @@ export interface SideJobsDeps {
   /** Hosted workspaces only. */
   modelAllowed?: (selection: { instanceId: string; model: string }) => boolean;
   assertWithinBudget: () => void;
+  apiBudget?: (instance: SideJobInstance, botId: string, model?: string) => ApiRequestBudget | undefined | Promise<ApiRequestBudget | undefined>;
   book: (row: Omit<UsageRow, "at" | "costSource">, tokensReported: boolean, notificationThreadId: string) => void;
   log?: (line: string) => void;
 }
@@ -89,10 +90,12 @@ export function createSideJobs(deps: SideJobsDeps): SideJobs {
   const booked = (job: SideJob, bot: SideJobBot, instance: SideJobInstance, call: TextCall, trigger: UsageTrigger, model?: string): SideJobText["generateText"] =>
     async (prompt, options) => {
       deps.assertWithinBudget();
+      const apiBudget = await deps.apiBudget?.(instance, bot.id, model);
       const threadId = `${job}-${randomUUID()}`;
       return call(prompt, {
         ...options,
         ...(model ? { model } : {}),
+        ...(apiBudget ? { apiBudget } : {}),
         onUsage: (usage) => deps.book({
           botId: bot.id,
           botName: bot.name,
@@ -155,7 +158,10 @@ export function createSideJobs(deps: SideJobsDeps): SideJobs {
       const call = ownCall(job, own);
       if (call) {
         // The summary belongs to a turn that already passed the spend limit and is not booked on its own.
-        if (job === "compaction") return { via: "engine", generateText: call };
+        if (job === "compaction") return { via: "engine", generateText: async (prompt, options) => {
+          const apiBudget = await deps.apiBudget?.(own, bot.id);
+          return call(prompt, { ...options, ...(apiBudget ? { apiBudget } : {}) });
+        } };
         return { via: "engine", generateText: booked(job, bot, own, call, { kind: "bot", botId: bot.id }) };
       }
       if (!helperModelAllowed(bot)) return null;

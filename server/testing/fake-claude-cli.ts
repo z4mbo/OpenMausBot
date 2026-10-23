@@ -60,7 +60,9 @@ import { appendFileSync, closeSync, existsSync, mkdirSync, readFileSync, renameS
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { runRoomHandoffAgent } from "./room-handoff-agent.ts";
+import { applyNativeModelHostProfile } from "./native-model-host-profile.ts";
 
+applyNativeModelHostProfile(process.env);
 const mode = process.env.FAKE_CLAUDE_MODE ?? "happy";
 
 // Concurrent turns share a capture path: publish whole JSON in one rename.
@@ -270,9 +272,9 @@ if (argv[0] === "auth" && argv[1] === "status") {
     process.stdout.write("not json\n");
     process.exit(0);
   }
-  const loggedIn = auth === "in" || (auth === "inherited-api-key" && Boolean(process.env.ANTHROPIC_API_KEY));
+  const loggedIn = auth === "in" || auth === "api-key" || (auth === "inherited-api-key" && Boolean(process.env.ANTHROPIC_API_KEY));
   process.stdout.write(
-    JSON.stringify({ loggedIn, authMethod: loggedIn ? "claude.ai" : "none", apiProvider: "firstParty" }) + "\n",
+    JSON.stringify({ loggedIn, authMethod: auth === "api-key" ? "api_key" : loggedIn ? "claude.ai" : "none", apiProvider: "firstParty" }) + "\n",
     () => process.exit(auth === "out" ? 1 : 0),
   );
 }
@@ -646,7 +648,12 @@ const playTurn = (prompt: JsonValue, late = false) => {
 
   const resumedError = process.env.FAKE_CLAUDE_RESUMED_API_ERROR === "1" && argv.includes("--resume") && !resumedErrorPlayed;
   if (resumedError) resumedErrorPlayed = true;
-  if (mode === "usage-limit") {
+  if (["usage-limit", "usage-limit-after-text", "usage-limit-after-tool"].includes(mode)) {
+    if (mode === "usage-limit-after-text") out({ type: "assistant", message: { model, content: [{ type: "text", text: "A partial response already exists." }] } });
+    if (mode === "usage-limit-after-tool") {
+      out({ type: "assistant", message: { model, content: [{ type: "tool_use", id: "quota-tool", name: "Write", input: { file_path: "/synthetic/already-written.txt" } }] } });
+      out({ type: "user", message: { content: [{ type: "tool_result", tool_use_id: "quota-tool", content: "Synthetic tool succeeded." }] } });
+    }
     // captured from 2.1.295 for an account past its weekly limit
     const text = process.env.FAKE_CLAUDE_API_ERROR ?? "You've hit your weekly limit \u00b7 resets Oct 12 at 2:30pm (Asia/Calcutta)";
     out({

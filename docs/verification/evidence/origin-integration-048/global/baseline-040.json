@@ -1,0 +1,40 @@
+{
+  "observedAt": "2026-10-20T06:45:41.610Z",
+  "readOnly": true,
+  "applicationRowsRead": false,
+  "latest": {
+    "id": 418078993,
+    "tag": "origin-v0.4.0",
+    "target": "main",
+    "publishedAt": "2026-10-20T06:37:29Z",
+    "resolvedSource": "f76cbe9b8019b648bb08f9125daefe35e6625185"
+  },
+  "feeds": {
+    "latest.yml": {
+      "version": "version: 0.4.0",
+      "sha256": "6aef840ed21003a9e66bf91b2290feaeb0c14311c5498cdc1e86fcc27c948435"
+    },
+    "latest-mac.yml": {
+      "version": "version: 0.4.0",
+      "sha256": "c96ded49684651635b5cfae361e1556f71c74997516195aa154d21e72e8bfea3"
+    }
+  },
+  "aliases": {
+    "Origin-Setup.exe": "Origin-0.4.0-setup.exe",
+    "Origin-Mac-AppleSilicon.dmg": "Origin-0.4.0-arm64.dmg",
+    "Origin-Mac-Intel.dmg": "Origin-0.4.0-x64.dmg"
+  },
+  "paths": {
+    "/root/origin-release-staging/0.3.2-cycle047": {
+      "exists": false,
+      "entries": []
+    },
+    "/root/origin-release-staging/0.3.2": {
+      "exists": false,
+      "entries": []
+    }
+  },
+  "image": "sha256:b3be41ef45f30a7cd6fa35babcbc1e17d29b937b5c7652705ced0bb8b2f54679",
+  "freeBytes": 4956651520,
+  "candidatePublicNames": []
+}

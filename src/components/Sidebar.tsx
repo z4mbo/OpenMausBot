@@ -1,3 +1,5 @@
+import { roomDeleteCopy } from "./room-delete-copy";
+export { roomDeleteCopy } from "./room-delete-copy";
 import { ArchivedBotsPanel } from "./ArchivedBotsPanel";
 import { SidebarFeedback } from "./SidebarFeedback";
 import { botConfirmCopy, type BotConfirmKind } from "./bot-confirm-copy";
@@ -314,17 +316,6 @@ export function GroupThreadList({ group, selected, density = "comfortable", quer
   </div>;
 }
 
-export function roomDeleteCopy(group: Pick<Group, "name" | "dm">) {
-  const isBotChat = Boolean(group.dm);
-  return {
-    title: t("sidebar.room.deleteConfirmTitle", { name: group.name }),
-    body: isBotChat
-      ? t("sidebar.room.deleteChatBody", { name: group.name })
-      : t("sidebar.room.deleteChannelBody", { name: group.name }),
-    confirmLabel: isBotChat ? t("sidebar.room.deleteChat") : t("sidebar.room.deleteChannel"),
-    tone: "danger" as const,
-  };
-}
 
 function RoomContextMenu({
   menu,
@@ -2150,7 +2141,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           )}
           {WORKSPACE_NAV && <OriginNav density={density} />}
           {!SIDEBAR_SHOWS_LOOSE_BOTS && density !== "icons" && (
-            <SidebarProjects projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} {...originRows.rowProps(bot)} />}
+            <SidebarProjects cloudTeamId={cloudTeamId} projects={workspaceProjects} row={(bot) => <BotListItem {...botRow(bot)} {...originRows.rowProps(bot)} />}
               archived={originRows.isArchived} selectedId={state.activeView === "chat" && !originPage ? state.selectedId : null}
               onNewProject={createsProjects ? () => dispatch({ type: "toggleNewBot", open: true }) : undefined} />
           )}

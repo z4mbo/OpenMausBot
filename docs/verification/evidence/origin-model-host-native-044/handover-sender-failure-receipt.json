@@ -1,0 +1,38 @@
+{
+  "capturedAt": "2026-10-20T04:41:07.332Z",
+  "backend": "http://127.0.0.1:54851",
+  "backendPid": 33952,
+  "baseCommit": "a89f4bb4add33209ab25f1e0d36c9d33aa290db0",
+  "runtimeSourceArtifact": "handover-sender-failure-runtime-source.json",
+  "earlierEvidence": "docs/verification/evidence/origin-model-host-native-044/receipt.json",
+  "privateTranscriptsUnchanged": true,
+  "cases": {},
+  "finding": {
+    "scenario": "Backend transfers to sender, but the remote busy presentation blocks startTurn before local provider dispatch",
+    "sendId": "5385d6f4-3636-4e20-949b-fc257add9966",
+    "cloudThreadId": "k571gnv1zg2t0bzx7b1rjsshh18gn1f0",
+    "runStatus": "running",
+    "taskHasCwdOverride": false,
+    "botHasSyncedProjectFolder": true,
+    "counts": {
+      "ownerQuota": 1,
+      "ownerGood": 0,
+      "ownerPartial": 0,
+      "ownerMetered": 0,
+      "localQuota": 0,
+      "localGood": 0
+    },
+    "route": "sender",
+    "currentExecutionId": null,
+    "taskBusy": true,
+    "selectedInstance": "localGood",
+    "failedRequestReplayed": false,
+    "followUpEvidenceRequired": "Fresh post-fix remote-to-local request; failed send remains untouched"
+  },
+  "limitations": [
+    "Two isolated native servers and repository fake providers only",
+    "Aliases model distinct synthetic accounts on one owner computer",
+    "No production, real provider, email or GitHub calls",
+    "No packaged UI, real CLI sandbox or positive metered API acceptance"
+  ]
+}

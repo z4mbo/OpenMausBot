@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "version": "0.2.12",
+  "cycle": "033",
+  "referenceSource": "f2ad2a15cb4d61cb49b678a74b53c7b9b063e253",
+  "status": "local-integration-checkpoint-only",
+  "finalFrozenSource": null,
+  "clientShared": {
+    "command": "node node_modules/vitest/vitest.mjs run src shared",
+    "files": 564,
+    "passed": 5983,
+    "skipped": 0,
+    "seconds": 361.58,
+    "startedAt": "2026-10-18T18:58:40.453Z",
+    "finishedAt": "2026-10-18T19:04:42.778Z",
+    "exitCode": 0,
+    "sourceAtStart": "f2ad2a15cb4d61cb49b678a74b53c7b9b063e253",
+    "sourceAtFinish": "f2ad2a15cb4d61cb49b678a74b53c7b9b063e253",
+    "bindingEntries": 1344,
+    "bindingScope": [
+      "src",
+      "shared",
+      "package.json",
+      "vite.config.ts",
+      "tsconfig.json"
+    ],
+    "inputBindingsSha256": "89d095cdd7c42330ab3983a66661d0e17140ee951d89e288be7dde015c381d65",
+    "inputsUnchangedAtBoundaries": true,
+    "continuousMonitoring": false,
+    "rawLogContainsConnectionRefusalDiagnostics": true,
+    "diagnosticBoundary": "The retained successful-run log includes refused connections to loopback port 3000; the terminal suite footer and process exit remain successful. No cause or silent-log claim is inferred."
+  },
+  "integratedChecksReportedByRoot": {
+    "source": "f2ad2a15cb4d61cb49b678a74b53c7b9b063e253",
+    "focused": {
+      "files": 7,
+      "passed": 317
+    },
+    "types": {
+      "application": true,
+      "server": true
+    },
+    "evidenceBoundary": "Root reported actual successful terminal results for these checks. This record independently reads and hashes only the full client/shared log and boundary envelope, not separate focused/type raw logs."
+  },
+  "canonicalReleaseHistory": {
+    "currentNotes": 4,
+    "totalNoteTitles": 44,
+    "articles": 6
+  },
+  "audit": {
+    "rowsAtReferenceSource": 72,
+    "rowsAfterCompanionDocumentationProposal": 73,
+    "previousRowsPreserved": true,
+    "newSeverity": "P2",
+    "newFinding": "Stale workspace project links in the renderer after grant removal and Chief re-election",
+    "authorizationBypassEstablished": false,
+    "fixtureTransportCorrectionIsSeparateVerificationFinding": true
+  },
+  "historicalInputs": {
+    "rejectedCandidateSource": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+    "rejectedCiRun": "39152274046",
+    "rejectedCiAttempt": 1,
+    "rejectedCiConclusion": "failure",
+    "rejectedPrivateDraft": "416624096",
+    "publicRelease": "0.2.11",
+    "publicationReceipts030And031Unchanged": true,
+    "candidate032CheckpointUnchanged": true
+  },
+  "logs": [
+    {
+      "name": "client-shared-stable-033.log",
+      "bytes": 6563,
+      "sha256": "62ce8e1aad95a80b1855d9e3b176e4f4d2f214a561bb3d60d4986209e874268d",
+      "retainedPrivately": true
+    },
+    {
+      "name": "client-shared-stable-033.json",
+      "bytes": 128282,
+      "sha256": "dffd87e1d2ba32a8c7f0971783c3a5e074f27d432d176200cf25af32e09c283d",
+      "retainedPrivately": true
+    }
+  ],
+  "pending": [
+    "Final frozen release source and tag identity",
+    "Fresh complete exact-source CI and native packaging",
+    "New private GitHub draft, artifacts, manifest and checksum identities",
+    "Fresh compiled website image, identity and browser acceptance",
+    "Public GitHub, platform apps, update feeds and website acceptance",
+    "Final backend deployment-closure equivalence before reusing the deployed backend"
+  ],
+  "limits": [
+    "This local root check is distinct from the cache worker run and from final-source CI or packaging acceptance.",
+    "Inputs were compared at start and finish; no continuous filesystem monitoring was performed.",
+    "The source audit has 72 rows; the companion documentation proposal appends one P2 row without changing the previous 72.",
+    "No production mutation, public release, provider-readiness renewal or recipient email is established by this record.",
+    "Physical Mac, signing/notarization, provider/hardware, cross-machine/TURN, recipient delivery and broader UI inventory limits remain open."
+  ]
+}

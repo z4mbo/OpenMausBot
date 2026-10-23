@@ -1,0 +1,125 @@
+Backend tests, site build	Run pnpm test:backend	﻿2026-10-21T04:50:27.9512644Z ##[group]Run pnpm test:backend
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:27.9512914Z ^[[36;1mpnpm test:backend^[[0m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:27.9560447Z shell: /usr/bin/bash -e {0}
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:27.9560665Z env:
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:27.9560880Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:27.9561150Z ##[endgroup]
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.1871993Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.1872670Z > openmausbot@0.7.2 test:backend /home/runner/work/Origin/Origin
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.1873241Z > pnpm --filter @origin/backend test
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.1873409Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.4336251Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.4337101Z > @origin/backend@0.1.0 test /home/runner/work/Origin/Origin/backend
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.4337581Z > vitest run
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.4337691Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.6540052Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.6541697Z ^[[1m^[[30m^[[46m RUN ^[[49m^[[39m^[[22m ^[[36mv5.0.2 ^[[39m^[[90m/home/runner/work/Origin/Origin/backend^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:28.6542377Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:29.7194689Z  ^[[32m✓^[[39m convex/modelHosts.test.ts ^[[2m(^[[22m^[[2m27 tests^[[22m^[[2m)^[[22m^[[33m 662^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:30.3913748Z  ^[[32m✓^[[39m convex/projectWorkflow.test.ts ^[[2m(^[[22m^[[2m17 tests^[[22m^[[2m)^[[22m^[[33m 459^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0097311Z  ^[[31m❯^[[39m convex/storageAdmission.test.ts ^[[2m(^[[22m^[[2m15 tests^[[22m^[[2m | ^[[22m^[[31m1 failed^[[39m^[[2m)^[[22m^[[33m 421^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0098225Z    ^[[32m✓^[[39m a removed project member cannot rebind its remembered storage ID in their own workspace^[[32m 95^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0098932Z    ^[[32m✓^[[39m unreferenced IDs cannot be claimed by any of the five storage reference writers^[[32m 35^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0099693Z    ^[[32m✓^[[39m all five upload issuers register scoped server-stored bytes and preserve the transport contract^[[32m 127^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0100839Z    ^[[32m✓^[[39m a valid unrelated upload intent cannot authorize an arbitrary ID or someone else's private profile upload^[[32m 11^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0102086Z    ^[[32m✓^[[39m current source readers may reuse legacy files, and an authorized copy survives source removal^[[32m 12^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0103446Z    ^[[32m✓^[[39m a revoked source cannot be rebound through profiles, icons, agents, assets or drawing files^[[32m 16^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0115411Z    ^[[32m✓^[[39m upload URLs are one-use, expire, enforce MIME and bound incoming bytes^[[32m 15^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0116735Z ^[[31m   ^[[31m×^[[31m an upload rechecks project access after receiving the body and deletes only its rejected new blob^[[39m^[[32m 16^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0117860Z    ^[[32m✓^[[39m signing out invalidates an already issued upload capability^[[32m 7^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0118911Z    ^[[32m✓^[[39m legacy migration is paginated and idempotent and does not claim unreferenced blobs^[[32m 44^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0119883Z    ^[[32m✓^[[39m concurrent POSTs can consume an upload intent only once^[[32m 9^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0120742Z    ^[[32m✓^[[39m a chunked upload is bounded without trusting Content-Length^[[32m 8^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0121361Z    ^[[32m✓^[[39m session generation revocation during an upload prevents admission^[[32m 7^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0122045Z    ^[[32m✓^[[39m migration covers every live reference scope without exposing unrelated unreferenced blobs^[[32m 9^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:31.0123376Z    ^[[32m✓^[[39m upload preflight permits binary transport without ambient credentials^[[32m 7^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:33.6181781Z  ^[[32m✓^[[39m convex/pg1Parity.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[33m 2397^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:33.6183776Z    ^[[33m^[[2m✓^[[22m^[[39m PG1 O-001 O-002: open/invite-only signup, both account invite paths and wrong-email/expired rejection^[[33m 502^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:33.6184794Z    ^[[33m^[[2m✓^[[22m^[[39m PG1 O-003 O-005: persistent session, password change, explicit revocation, logout and 30-day expiry^[[33m 563^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:33.6185853Z    ^[[33m^[[2m✓^[[22m^[[39m PG1 O-049: six-month heatmap counts mine/all and emits truncation at 5001 completions^[[33m 344^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:34.0640669Z  ^[[32m✓^[[39m convex/chiefOps.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[32m 240^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:34.4234481Z  ^[[32m✓^[[39m convex/taskPRs.test.ts ^[[2m(^[[22m^[[2m14 tests^[[22m^[[2m)^[[22m^[[32m 164^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:34.9157857Z  ^[[32m✓^[[39m convex/sharedAgents.test.ts ^[[2m(^[[22m^[[2m17 tests^[[22m^[[2m)^[[22m^[[32m 296^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:35.2935913Z  ^[[32m✓^[[39m convex/draftDefaults.test.ts ^[[2m(^[[22m^[[2m20 tests^[[22m^[[2m)^[[22m^[[32m 187^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:38.8753276Z  ^[[32m✓^[[39m convex/invitationMail.test.ts ^[[2m(^[[22m^[[2m41 tests^[[22m^[[2m)^[[22m^[[33m 3389^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:39.3296048Z  ^[[32m✓^[[39m convex/studio.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[32m 241^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:39.8944186Z  ^[[32m✓^[[39m convex/accessMatrix.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[33m 363^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:40.8306995Z  ^[[32m✓^[[39m convex/teamGitHub.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[33m 727^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:41.1794504Z  ^[[32m✓^[[39m convex/pulse.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[32m 152^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:41.6622348Z  ^[[32m✓^[[39m convex/draftMigration.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[32m 291^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:42.3191236Z  ^[[32m✓^[[39m convex/githubMemberAccess.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[33m 475^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:42.6798966Z  ^[[32m✓^[[39m convex/mergeCompletion.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[32m 172^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:42.9976479Z  ^[[32m✓^[[39m convex/broadcast.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[32m 124^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:43.3854730Z  ^[[32m✓^[[39m convex/mentions.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[32m 194^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:43.6644986Z  ^[[32m✓^[[39m convex/standup.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[32m 81^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:43.9588855Z  ^[[32m✓^[[39m convex/draftColumn.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[32m 108^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:44.2740717Z  ^[[32m✓^[[39m convex/launchpad.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[32m 128^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:44.5592893Z  ^[[32m✓^[[39m convex/ship.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[32m 89^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:44.9098966Z  ^[[32m✓^[[39m convex/canvasCollab.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[32m 106^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:45.2276779Z  ^[[32m✓^[[39m convex/legacyIssueCreation.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[32m 126^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:45.6559690Z  ^[[32m✓^[[39m convex/sharedAgentQueue.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[32m 241^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:45.9233369Z  ^[[32m✓^[[39m convex/campaigns.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[32m 83^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:46.2418963Z  ^[[32m✓^[[39m convex/studioWorkflows.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[32m 132^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:46.5150021Z  ^[[32m✓^[[39m convex/pages.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 79^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:46.7521501Z  ^[[32m✓^[[39m convex/org.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 50^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:47.0047302Z  ^[[32m✓^[[39m convex/sharedKeys.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[32m 67^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:47.2495378Z  ^[[32m✓^[[39m convex/projectOrdering.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[32m 64^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:47.5258729Z  ^[[32m✓^[[39m convex/githubRaces.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[32m 91^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:47.8241955Z  ^[[32m✓^[[39m convex/brand.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 119^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:48.0793059Z  ^[[32m✓^[[39m convex/draftImport.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 69^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:48.3469591Z  ^[[32m✓^[[39m convex/issueCompletion.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[32m 89^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:48.5970300Z  ^[[32m✓^[[39m convex/projectInvites.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[32m 65^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:48.9995055Z  ^[[32m✓^[[39m convex/legacyInvitationMail.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 215^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:49.2998183Z  ^[[32m✓^[[39m convex/budgets.access.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 110^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:49.7210870Z  ^[[32m✓^[[39m convex/authSessions.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[32m 243^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:49.9514895Z  ^[[32m✓^[[39m convex/storageReferences.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[32m 47^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.1644084Z  ^[[32m✓^[[39m convex/httpSecurity.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[32m 33^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3567048Z  ^[[32m✓^[[39m convex/meta.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[32m 12^[[2mms^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3612815Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3633474Z ^[[31m⎯⎯⎯⎯⎯⎯⎯^[[39m^[[1m^[[41m Failed Tests 1 ^[[49m^[[22m^[[31m⎯⎯⎯⎯⎯⎯⎯^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3662589Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3664322Z ^[[41m^[[1m FAIL ^[[22m^[[49m convex/storageAdmission.test.ts^[[2m > ^[[22man upload rechecks project access after receiving the body and deletes only its rejected new blob
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3668145Z ^[[31m^[[1mAssertionError^[[22m: expected [ { …(4) }, { …(4) } ] to have a length of 1 but got 2^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3668823Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3669136Z ^[[32m- Expected^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3669613Z ^[[31m+ Received^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3669969Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3670255Z ^[[32m- 1^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3670668Z ^[[31m+ 2^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3670957Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3671535Z ^[[36m ^[[2m❯^[[22m convex/storageAdmission.test.ts:^[[2m190:75^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3705713Z     ^[[90m188|^[[39m   expect((await response).status).toBe(400);
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3715120Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3718827Z ^[[2m Test Files ^[[22m ^[[1m^[[31m1 failed^[[39m^[[22m^[[2m | ^[[22m^[[1m^[[32m41 passed^[[39m^[[22m^[[90m (42)^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3719864Z     ^[[90m189|^[[39m   expect(await f.t.run(ctx => ctx.db.system.get(original))).not.toBeNu…
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3724218Z ^[[2m      Tests ^[[22m ^[[1m^[[31m1 failed^[[39m^[[22m^[[2m | ^[[22m^[[1m^[[32m332 passed^[[39m^[[22m^[[90m (333)^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3724687Z ^[[2m   Start at ^[[22m 04:50:28
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3725116Z     ^[[90m190|^[[39m   expect(await f.t.run(ctx => ctx.db.system.query("_storage").collect(…
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3725736Z     ^[[90m   |^[[39m                                                                           ^[[31m^^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3726062Z     ^[[90m191|^[[39m });
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3726263Z     ^[[90m192|^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3726370Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3726570Z ^[[31m^[[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯^[[22m^[[39m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3726747Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3736759Z ^[[2m   Duration ^[[22m 21.70s^[[2m (tests 73%, import 11%, environment 10%, transform 5%, worker 1%)^[[22m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3750512Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3751406Z ^[[2m    Isolate ^[[22m ^[[33m42 workers spawned^[[39m^[[2m · ~120ms startup each (spawn + environment, per file)^[[22m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3752882Z ^[[2m            ^[[22m ^[[2mat least ~4.91s faster with ^[[22m^[[33misolate: false^[[39m^[[2m — reuses workers across files instead of one per file^[[22m
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3753526Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3771418Z 
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.3790587Z ##[error]AssertionError: expected [ { …(4) }, { …(4) } ] to have a length of 1 but got 2
+Backend tests, site build	Run pnpm test:backend	
+Backend tests, site build	Run pnpm test:backend	- Expected
+Backend tests, site build	Run pnpm test:backend	+ Received
+Backend tests, site build	Run pnpm test:backend	
+Backend tests, site build	Run pnpm test:backend	- 1
+Backend tests, site build	Run pnpm test:backend	+ 2
+Backend tests, site build	Run pnpm test:backend	
+Backend tests, site build	Run pnpm test:backend	 ❯ convex/storageAdmission.test.ts:190:75
+Backend tests, site build	Run pnpm test:backend	
+Backend tests, site build	Run pnpm test:backend	
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.4391418Z /home/runner/work/Origin/Origin/backend:
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.4392794Z  ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @origin/backend@0.1.0 test: `vitest run`
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.4393321Z Exit status 1
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.4723236Z  ELIFECYCLE  Command failed with exit code 1.
+Backend tests, site build	Run pnpm test:backend	2026-10-21T04:50:50.4926327Z ##[error]Process completed with exit code 1.

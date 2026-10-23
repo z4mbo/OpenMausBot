@@ -197,14 +197,13 @@
   --chat-bubble-max: 35rem;
   --chat-bubble-pct: 80%;
   --chat-card-pct: 88%;
-  /* .chat-column: fills a narrow pane, then stops at this width and centers, so wider windows only grow the gutters. */
-  --chat-column-max: 60rem;
+  --chat-column-max: 42.5rem;
 }
 :root[data-chat-width="wide"] {
   --chat-bubble-max: 64rem;
   --chat-bubble-pct: 92%;
   --chat-card-pct: 94%;
-  --chat-column-max: 80rem;
+  --chat-column-max: 52.5rem;
 }
 :root[data-chat-width="full"] {
   --chat-bubble-max: 100%;

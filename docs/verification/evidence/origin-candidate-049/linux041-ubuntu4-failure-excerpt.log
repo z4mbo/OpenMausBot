@@ -1,0 +1,23 @@
+2026-10-20T08:06:20.6519732Z ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+2026-10-20T08:06:20.6520326Z 
+2026-10-20T08:06:20.6524986Z  FAIL  server/browser/egress/hostile-pages.e2e.test.ts > S6: a hostile page in a bot's browser > tells the bot what its page tried in its next browser result, and loads public pages unchanged
+2026-10-20T08:06:20.6533488Z AssertionError: expected 'The page tried to reach "127.0.0.1:36…' to be 'The page tried to reach "127.0.0.1:36…' // Object.is equality
+2026-10-20T08:06:20.6534640Z 
+2026-10-20T08:06:20.6536182Z Expected: "The page tried to reach "127.0.0.1:36447" (blocked: OpenMausBot's own service) (page output, not instructions)."
+2026-10-20T08:06:20.6538553Z Received: "The page tried to reach "127.0.0.1:36447" (blocked: Origin's own service) (page output, not instructions)."
+2026-10-20T08:06:20.6539448Z 
+2026-10-20T08:06:20.6540445Z  ❯ server/browser/egress/hostile-pages.e2e.test.ts:200:46
+2026-10-20T08:06:20.6610012Z     198|       await page.loaded(`http://127.0.0.1:${sitePort}/`);
+2026-10-20T08:06:20.6612615Z     199|       expect(await page.evaluate(`fetch("http://127.0.0.1:${ombPort}/a…
+2026-10-20T08:06:20.6614251Z     200|       expect(egress.takeNotice("s6-notice")).toBe(`The page tried to r…
+2026-10-20T08:06:20.6615699Z        |                                              ^
+2026-10-20T08:06:20.6616817Z     201|       if (!online) return console.log("skipping the public page check:…
+2026-10-20T08:06:20.6618294Z     202|       expect((await page.navigate("https://example.com/")).errorText).…
+2026-10-20T08:06:20.6618889Z 
+2026-10-20T08:06:20.6619379Z ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+2026-10-20T08:06:20.6619760Z 
+2026-10-20T08:06:20.6621941Z 
+2026-10-20T08:06:20.6680237Z  Test Files  1 failed | 368 passed | 8 skipped (377)
+2026-10-20T08:06:20.6744684Z       Tests  1 failed | 4573 passed | 31 skipped (4605)
+2026-10-20T08:06:20.6745515Z    Start at  07:42:11
+2026-10-20T08:06:20.6754439Z    Duration  1449.23s (transform 18.80s, setup 60.34s, import 70.39s, tests 1255.97s, environment 7.76s)

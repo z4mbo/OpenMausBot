@@ -1,0 +1,80 @@
+
+ RUN  v4.1.11 <worktree>
+
+stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+warning: in the working copy of 'docs/guide.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/guide.md', LF will be replaced by CRLF the next time Git touches it
+·····················warning: in the working copy of 'server/original.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/original.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/guide.md', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/original.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/original.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/first second.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/first second.md', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/page.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/page.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/page.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/page.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/page.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/page.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+···········warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/guide.md', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'server/index.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/page.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/page.ts', LF will be replaced by CRLF the next time Git touches it
+·warning: in the working copy of 'src/page.ts', LF will be replaced by CRLF the next time Git touches it
+··stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+·····················stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+·······stderr | unknown test
+Importing from "vitest/runners" is deprecated since Vitest 4.1. Please use "vitest" instead.
+
+·
+
+ Test Files  4 passed (4)
+      Tests  84 passed (84)
+   Start at  08:57:08
+   Duration  15.04s (transform 662ms, setup 990ms, import 1.30s, tests 12.09s, environment 0ms)
+

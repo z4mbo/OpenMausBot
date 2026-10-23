@@ -1,0 +1,67 @@
+{
+  "sourceBefore": "375da4cf23cf803da0b045ffec42f7f651082ab5",
+  "reportedCI": "39546164763",
+  "diagnosis": "convex-test0.0.60 transaction timing collides with scheduled internal.githubLinks.reviewAccess after members.remove; awaited exact rejected-ID deletion is observed in syscall trace. No production cleanup leak established.",
+  "trackedPath": "backend/convex/storageAdmission.test.ts",
+  "sourceSha256": "a28ef189c59471da0ee14c3de59f1a184335c2292c80dd4d882605e79fedd4fe",
+  "diffSha256": "ad3a52ae9a5fa8f1813be731d7fb728dcb70515bf855205faba38f33b3be14d7",
+  "change": "Fake timers before fixture; finishAllScheduledFunctions(vi.runAllTimers) after member removal before body release; real timers restored in afterEach. HTTP400/original-retained/one-remaining assertions unchanged.",
+  "runtimeOrSchemaEdited": false,
+  "originalFocused": "RED1failed, same2-vs1 count",
+  "controlledTimers": "GREEN1focused with original assertions",
+  "deletionNoopControl": "RED1focused despite identical barrier, proving cleanup assertion remains effective",
+  "correctedAdmission": {
+    "files": 1,
+    "passed": 15
+  },
+  "storageReferences": {
+    "files": 1,
+    "passed": 1
+  },
+  "backendTypecheck": {
+    "command": "node backend/node_modules/typescript/bin/tsc -p convex/tsconfig.json (cwd backend)",
+    "exitCode": 0,
+    "compilerOutput": "none",
+    "outputLog": null,
+    "evidence": "Actual tool completion, no empty log file fabricated"
+  },
+  "logs": [
+    {
+      "path": "storage-admission-focused-original.log",
+      "bytes": 2941,
+      "sha256": "d28e416091dffb0e4d0111a996ea34aebfc1507b45f8708ce9c354dbca79c204"
+    },
+    {
+      "path": "storage-ci-diagnostic/syscall-trace.log",
+      "bytes": 5856,
+      "sha256": "f6ccf71d39af7bb8060c65bde2ca98ce038e117a12417316cb9509dd3edd4e9b"
+    },
+    {
+      "path": "storage-ci-diagnostic/syscall-trace-after-delete.log",
+      "bytes": 4906,
+      "sha256": "ff4bb76257c68dc5944934b6b960939bfd57f7486142cb25a38eb85bb1c8b0d0"
+    },
+    {
+      "path": "storage-ci-diagnostic/scheduled-barrier-green.log",
+      "bytes": 2800,
+      "sha256": "cbc204e4e768dc2b8d0c006b9002db6a467260bdf4d435d5ac584df21bdec4b0"
+    },
+    {
+      "path": "storage-ci-diagnostic/deletion-noop-negative.log",
+      "bytes": 3766,
+      "sha256": "8630c531ee903ba28c8afe3ecc2e184badaf004c2b0b68ef04306ddb3d31eba7"
+    },
+    {
+      "path": "storage-admission-corrected-green.log",
+      "bytes": 2123,
+      "sha256": "417f5da4e7fa3c0dfd3f05f46d68b9da13376e6b657dd042bc1633b9457728ed"
+    },
+    {
+      "path": "storage-reference-green.log",
+      "bytes": 385,
+      "sha256": "9563d9d0a189282aebbad507779dcc90ad9506f68cb879b620fdd79385b03410"
+    }
+  ],
+  "productionActions": false,
+  "commit": null
+}

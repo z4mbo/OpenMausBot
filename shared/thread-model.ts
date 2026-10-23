@@ -3,11 +3,12 @@
 // the wire carries the model the thread runs on plus followsBotModel, so the
 // app and the phones read one effective model either way.
 import type { ModelSelection } from "./wire.ts";
+import { sameModelSource } from "./model-selection.ts";
 
 /** The same engine, model, effort and variant. */
 export function sameModelSelection(a: ModelSelection | undefined, b: ModelSelection | undefined): boolean {
   if (!a || !b) return a === b;
-  return a.instanceId === b.instanceId && a.model === b.model && a.effort === b.effort && a.variant === b.variant;
+  return a.instanceId === b.instanceId && a.model === b.model && sameModelSource(a.source, b.source) && a.effort === b.effort && a.variant === b.variant;
 }
 
 /** A bot's threads that run on a model of their own, different from the

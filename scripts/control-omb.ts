@@ -2,6 +2,7 @@
 // The openmausbot headless verbs for verifying an isolated fixture. A verb that
 // changes something never runs on a server it merely found.
 import { spawn, type ChildProcess } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { closeSync, mkdirSync, mkdtempSync, openSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join } from "node:path";
@@ -223,7 +224,7 @@ export async function launchVerificationServer(
   /** A stand-in enterprise layer (the folder shape core loads) and the key
    * it should accept, so a recipe can prove entitled behaviour offline. */
   enterprise?: { dir: string; licenseKey: string },
-  room?: { scripted: boolean },
+  room?: { scripted: boolean; modelHosting?: boolean; modelHostProfiles?: Array<{ id: string; mode: "happy" | "usage-limit" | "usage-limit-after-text"; metered?: boolean }> },
   /** Optional repository-owned fake providers for multi-engine setup checks. */
   extraProviders: Array<"codex" | "cline"> = [],
   /** Programmatic tests only: an owned loopback Boat provider, never a live account. */
@@ -258,6 +259,18 @@ export async function launchVerificationServer(
   const evidenceDir = join(tmpdir(), "openmausbot-verification-evidence");
   mkdirSync(evidenceDir, { recursive: true });
   const logPath = join(evidenceDir, `server-${Date.now()}-${process.pid}.log`);
+  const modelHostProfiles = Object.fromEntries((room?.modelHostProfiles ?? []).map(profile => {
+    if (!room?.modelHosting || !room.scripted || !/^[A-Za-z][\w-]{0,63}$/.test(profile.id) || !["happy", "usage-limit", "usage-limit-after-text"].includes(profile.mode)) {
+      throw new ControlOmbError("Model host profiles require the sealed scripted fake-only fixture");
+    }
+    const account = join(dataDir, "handover", `${profile.id}-account`);
+    mkdirSync(account, { recursive: true });
+    writeFileSync(join(account, "fake-auth.json"), JSON.stringify({ email: `${profile.id.toLowerCase()}@example.test` }), { flag: "wx" });
+    writeFileSync(join(account, "origin-model-host-fixture.json"), JSON.stringify({ version: 1, mode: profile.mode,
+      auth: profile.metered ? "api-key" : "file", roomPlan: join(dataDir, "room-plan.json"),
+      prompts: join(dataDir, "handover", `${profile.id}-prompts.jsonl`), dump: join(dataDir, "handover", `${profile.id}-dump.json`) }), { flag: "wx" });
+    return [profile.id, { driver: "claudeAgent", displayName: `Synthetic ${profile.id}`, config: { cli: FAKE_CLI, configDir: account } }];
+  }));
   writeFileSync(join(dataDir, "config.json"), JSON.stringify({
     ...(boatFixtureApi ? { box: { token: "box_verification_fixture" } } : {}),
     instances: {
@@ -276,11 +289,17 @@ export async function launchVerificationServer(
         config: { cli: FAKE_CLI },
         ...(room?.scripted ? { environment: { FAKE_CLAUDE_ROOM_PLAN: join(dataDir, "room-plan.json") } } : {}),
       },
+      ...modelHostProfiles,
     },
   }, null, 2));
 
   const log = openSync(logPath, "a", 0o600);
   const childEnv = verificationServerEnvironment(parentEnv, dataDir, port);
+  if (room?.modelHosting) {
+    const token = randomBytes(32).toString("hex");
+    writeFileSync(join(dataDir, ".origin-model-host-fixture"), token, { flag: "wx", mode: 0o600 });
+    childEnv.OMB_TEST_MODEL_HOST_TOKEN = token;
+  }
   // Opt-in live Local VM fixture: keep the temporary home and fake engine,
   // granting only the explicitly selected machine connection and static UI.
   if (localVm) Object.assign(childEnv, {

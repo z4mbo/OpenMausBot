@@ -1,0 +1,20 @@
+{
+  "source": "ec3683b171438905c6171d838ab11c559e1bfa49",
+  "ciRun": 39551218972,
+  "attempt": 1,
+  "jobId": 119061530695,
+  "artifactId": 12323637332,
+  "name": "control-omb-ui-chat-screenshot",
+  "size": 135349,
+  "digest": "sha256:4af2ce8bcfbed4554a066c28523cfee9acd44f26a36f90e467fb43e1568584b3",
+  "metadataSha256": "0bbf5adbdf132cbb19724203a4f6c550d49318590d76538d9c9653d8c1a54f4b",
+  "jobUploadConfirmed": true,
+  "jobUploadDigestConfirmed": true,
+  "acquiredAt": "2026-10-21T05:56:41.349Z",
+  "officialApi": true,
+  "smallDiagnosticOnly": true,
+  "downloadedOnce": true,
+  "readOnly": true,
+  "rerun": false,
+  "sourceEdits": false
+}

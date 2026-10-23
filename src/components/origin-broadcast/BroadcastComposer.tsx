@@ -96,10 +96,13 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
   const textOf = (channel: BroadcastChannel) => published.get(channel)?.text ?? draft.custom[channel] ?? draft.base;
   const open = draft.channels.filter((channel) => !published.has(channel));
   const problems = [...new Set([...(reel ? reelProblems(open, kinds) : []), ...open.flatMap((channel) => channelProblems(channel, textOf(channel), kinds))])];
+  const unconnected = accounts ? open.filter((channel) => !accounts[channel].length) : [];
+  const connectionsUnknown = open.length > 0 && accounts === null;
+  const unavailableAccounts = accounts ? open.filter((channel) => accounts[channel].length > 0 && draft.accounts[channel] !== undefined && !accounts[channel].some((account) => account.id === draft.accounts[channel])) : [];
   const at = fromLocalInput(draft.at);
   const now = at === undefined || at <= Date.now() + NOW_SLACK_MS;
   const needsApproval = Boolean(post?.needsApproval);
-  const ready = draft.channels.length > 0 && !problems.length && !needsApproval;
+  const ready = draft.channels.length > 0 && !problems.length && !needsApproval && !connectionsUnknown && !unconnected.length && !unavailableAccounts.length;
   const set = (patch: Partial<Draft>) => setDraft((current) => ({ ...current, ...patch }));
   const shownPreview = previewChannel && draft.channels.includes(previewChannel) ? previewChannel : tab !== "all" ? tab : draft.channels[0];
 
@@ -127,7 +130,7 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
   };
   const accountFor = (channel: BroadcastChannel) => {
     const options = accounts?.[channel] ?? [];
-    return options.find((account) => account.id === draft.accounts[channel]) ?? options[0];
+    return draft.accounts[channel] === undefined ? options[0] : options.find((account) => account.id === draft.accounts[channel]);
   };
 
   const linkCampaign = async (postId: string) => {
@@ -146,7 +149,9 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
     ...(reel ? { reel: { coverMs: draft.coverMs, ...(draft.music.trim() ? { music: draft.music.trim() } : {}) } } : {}),
     variants: draft.channels.map((channel) => {
       const account = accountFor(channel);
-      return { channel, text: textOf(channel), ...(account && !account.isDefault ? { accountId: account.id, accountLabel: account.label } : {}) };
+      const accountId = account?.isDefault ? undefined : account?.id ?? draft.accounts[channel];
+      const accountLabel = account?.label ?? post?.variants.find((variant) => variant.channel === channel)?.accountLabel;
+      return { channel, text: textOf(channel), ...(accountId ? { accountId, ...(accountLabel ? { accountLabel } : {}) } : {}) };
     }),
   });
   const run = (work: () => Promise<unknown>, fallback: string, close = true) => void action.run(work, fallback).then((ok) => { if (ok && close) onClose(); });
@@ -214,6 +219,23 @@ export function BroadcastComposer({ projectId, projectName, post, slot, format =
 
           <AccountRow channels={open} accounts={accounts} chosen={draft.accounts} locked={locked} onConnect={onConnect}
             onChoose={(channel, accountId) => set({ accounts: { ...draft.accounts, [channel]: accountId } })} />
+
+          {unconnected.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg bg-raised/60 px-3 py-2 text-[12.5px] text-ink-secondary">
+              <span className="min-w-0 flex-1">{unconnected.map((channel) => BROADCAST_RULES[channel].label).join(", ")} {unconnected.length === 1 ? "is" : "are"} not connected on this computer.</span>
+              <button type="button" className={cn(ghostButton, "min-h-7 px-2.5 py-1 text-[12px]")} onClick={onConnect}>Connect</button>
+            </div>
+          )}
+          {connectionsUnknown && <Notice>Connections are not confirmed on this computer. Check Settings &gt; Integrations before publishing.</Notice>}
+          {unavailableAccounts.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg bg-raised/60 px-3 py-2 text-[12.5px] text-ink-secondary">
+              <span className="min-w-0 flex-1">The selected account is no longer available for {unavailableAccounts.map((channel) => BROADCAST_RULES[channel].label).join(", ")}. Choose an account before publishing.</span>
+              <button type="button" className={cn(ghostButton, "min-h-7 px-2.5 py-1 text-[12px]")}
+                onClick={() => set({ accounts: { ...draft.accounts, ...Object.fromEntries(unavailableAccounts.map((channel) => [channel, accounts![channel][0].id])) } })}>
+                Use available {unavailableAccounts.length === 1 ? "account" : "accounts"}
+              </button>
+            </div>
+          )}
 
           {(draft.channels.length > 0 || !locked) && (
             <div className="flex flex-col overflow-hidden rounded-xl border border-hairline/50 bg-inset transition-colors duration-(--motion-fast) focus-within:border-accent/60">

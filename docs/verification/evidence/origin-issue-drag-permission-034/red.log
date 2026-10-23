@@ -1,0 +1,57 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin
+
+ ❯ src/components/origin-pages/use-card-drag.test.ts (5 tests | 2 failed) 1029ms
+     × cancels a lifted card when editing permission is removed 1020ms
+     × does not lift a previously pressed card after editing permission is removed 2ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  23:26:41
+   Duration  2.12s (transform 219ms, setup 519ms, import 49ms, tests 1.03s, environment 347ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/origin-pages/use-card-drag.test.ts > issue drag permission changes > cancels a lifted card when editing permission is removed
+AssertionError: expected <div data-active-drag="first" …(1)></div> to be null
+
+- Expected:
+null
+
++ Received:
+<div
+  data-active-drag="first"
+  style="transform: translate3d(60px, 60px, 0);"
+/>
+
+ ❯ src/components/origin-pages/use-card-drag.test.ts:62:77
+     60|     expect(host.querySelector("[data-active-drag]")).not.toBeNull();
+     61|     render(false);
+     62|     await vi.waitFor(() => expect(host.querySelector("[data-active-dra…
+       |                                                                             ^
+     63|     pointer(window, "pointerup", 80, 80);
+     64|     expect(dropped).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/origin-pages/use-card-drag.test.ts > issue drag permission changes > does not lift a previously pressed card after editing permission is removed
+AssertionError: expected <div data-active-drag="first"></div> to be null
+
+- Expected:
+null
+
++ Received:
+<div
+  data-active-drag="first"
+/>
+
+ ❯ src/components/origin-pages/use-card-drag.test.ts:73:54
+     71|     render(false);
+     72|     move();
+     73|     expect(host.querySelector("[data-active-drag]")).toBeNull();
+       |                                                      ^
+     74|     pointer(window, "pointerup", 80, 80);
+     75|     expect(dropped).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯

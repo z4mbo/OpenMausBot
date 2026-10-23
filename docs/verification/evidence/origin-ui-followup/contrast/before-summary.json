@@ -1,0 +1,426 @@
+{
+  "source": "cfbb5c097a8e29c4adc6ba8ad6e2a19612885410",
+  "caseCount": 27,
+  "controlSamples": 1026,
+  "customCases": 12,
+  "customSamples": 72,
+  "pageErrors": [],
+  "externalRequests": [],
+  "geometryFailures": [],
+  "rootSrgb": [
+    {
+      "skin": "midnight",
+      "primaryBase": 3.6498323765118044,
+      "primaryBrightnessHover": 3.2218503023820384,
+      "dangerBase": 3.097815775678492,
+      "dangerBrightnessHover": 2.9612781840534286,
+      "pageOpacityHoverMin": 3.476929383120932,
+      "accentAlphaHover": 4.330312832398771,
+      "dangerAlphaIcon": 3.698610352387311,
+      "dangerBody": 4.885225754128422,
+      "uiPrimaryHover": 9.893667567580328
+    },
+    {
+      "skin": "atelier",
+      "primaryBase": 5.050123050644257,
+      "primaryBrightnessHover": 4.323845900249261,
+      "dangerBase": 6.544938445750331,
+      "dangerBrightnessHover": 5.702011291627783,
+      "pageOpacityHoverMin": 4.2127580510021305,
+      "accentAlphaHover": 4.183383125245802,
+      "dangerAlphaIcon": 5.382384727650405,
+      "dangerBody": 6.544938445750331,
+      "uiPrimaryHover": 16.93618179357223
+    },
+    {
+      "skin": "foundry",
+      "primaryBase": 7.437618739363902,
+      "primaryBrightnessHover": 8.781948835158515,
+      "dangerBase": 5.676690305578059,
+      "dangerBrightnessHover": 6.695592593591852,
+      "pageOpacityHoverMin": 6.253717809514676,
+      "accentAlphaHover": 6.256881601384385,
+      "dangerAlphaIcon": 3.9069771666620237,
+      "dangerBody": 5.202709893082774,
+      "uiPrimaryHover": 13.130187281411125
+    },
+    {
+      "skin": "lagoon",
+      "primaryBase": 5.680353533472966,
+      "primaryBrightnessHover": 4.910622782885021,
+      "dangerBase": 6.418715309456843,
+      "dangerBrightnessHover": 5.594971841423675,
+      "pageOpacityHoverMin": 4.692911131739667,
+      "accentAlphaHover": 4.71792372112188,
+      "dangerAlphaIcon": 5.373740697643356,
+      "dangerBody": 6.418715309456843,
+      "uiPrimaryHover": 14.860600892259136
+    },
+    {
+      "skin": "graphite",
+      "primaryBase": 4.774142361342289,
+      "primaryBrightnessHover": 4.0965811305278494,
+      "dangerBase": 5.79140853232486,
+      "dangerBrightnessHover": 6.811103909056634,
+      "pageOpacityHoverMin": 4.416503806808483,
+      "accentAlphaHover": 5.446140026885322,
+      "dangerAlphaIcon": 3.8346645848266614,
+      "dangerBody": 4.703300098337542,
+      "uiPrimaryHover": 10.714589892788352
+    },
+    {
+      "skin": "linen",
+      "primaryBase": 6.655561382278694,
+      "primaryBrightnessHover": 5.822162763768352,
+      "dangerBase": 6.129526550079094,
+      "dangerBrightnessHover": 5.31130040375034,
+      "pageOpacityHoverMin": 5.327060762369258,
+      "accentAlphaHover": 5.3300833483575145,
+      "dangerAlphaIcon": 5.1069402963603405,
+      "dangerBody": 6.129526550079094,
+      "uiPrimaryHover": 15.027360975362024
+    },
+    {
+      "skin": "dusk",
+      "primaryBase": 6.123940699312246,
+      "primaryBrightnessHover": 5.3336988485138965,
+      "dangerBase": 5.956916718090884,
+      "dangerBrightnessHover": 6.998250193316706,
+      "pageOpacityHoverMin": 5.613501723057862,
+      "accentAlphaHover": 6.871038551024057,
+      "dangerAlphaIcon": 3.677453967496278,
+      "dangerBody": 5.1667130977590725,
+      "uiPrimaryHover": 11.902212258794739
+    },
+    {
+      "skin": "daylight",
+      "primaryBase": 5.901517280722496,
+      "primaryBrightnessHover": 5.121988878281264,
+      "dangerBase": 5.756670527063286,
+      "dangerBrightnessHover": 4.943317659139486,
+      "pageOpacityHoverMin": 4.872389611295216,
+      "accentAlphaHover": 4.899251011163277,
+      "dangerAlphaIcon": 4.950873137041689,
+      "dangerBody": 4.961661213713249,
+      "uiPrimaryHover": 16.340787786604853
+    },
+    {
+      "skin": "meadow",
+      "primaryBase": 5.355350766520945,
+      "primaryBrightnessHover": 4.592857608367814,
+      "dangerBase": 5.756670527063286,
+      "dangerBrightnessHover": 4.943317659139486,
+      "pageOpacityHoverMin": 4.450626542485863,
+      "accentAlphaHover": 4.439079537974458,
+      "dangerAlphaIcon": 4.9860127838141715,
+      "dangerBody": 5.231245098470186,
+      "uiPrimaryHover": 16.820533871459148
+    }
+  ],
+  "p3Opaque": [
+    {
+      "skin": "midnight",
+      "computedAccent": "color(display-p3 0.2062 0.5041 0.9917)",
+      "computedDanger": "color(display-p3 0.9587 0.3424 0.3958)",
+      "primaryOpaqueNative": 3.66457251180745,
+      "dangerOpaqueNative": 3.1364946457890452,
+      "midnightCandidateDarkPrimaryMathOnly": 5.496959074876536,
+      "midnightCandidateDarkDangerMathOnly": 6.422457998252203
+    },
+    {
+      "skin": "atelier",
+      "computedAccent": "color(display-p3 0.6084 0.3747 0.15)",
+      "computedDanger": "color(display-p3 0.613 0.2306 0.192)",
+      "primaryOpaqueNative": 5.075471498575043,
+      "dangerOpaqueNative": 6.605808311366054,
+      "midnightCandidateDarkPrimaryMathOnly": null,
+      "midnightCandidateDarkDangerMathOnly": null
+    },
+    {
+      "skin": "foundry",
+      "computedAccent": "color(display-p3 0.8317 0.6065 0.2525)",
+      "computedDanger": "color(display-p3 0.8455 0.4114 0.3635)",
+      "primaryOpaqueNative": 7.412262599703056,
+      "dangerOpaqueNative": 5.625864983853848,
+      "midnightCandidateDarkPrimaryMathOnly": null,
+      "midnightCandidateDarkDangerMathOnly": null
+    },
+    {
+      "skin": "lagoon",
+      "computedAccent": "color(display-p3 0.1708 0.4496 0.43)",
+      "computedDanger": "color(display-p3 0.6315 0.2229 0.1802)",
+      "primaryOpaqueNative": 5.652512606880942,
+      "dangerOpaqueNative": 6.483312377665492,
+      "midnightCandidateDarkPrimaryMathOnly": null,
+      "midnightCandidateDarkDangerMathOnly": null
+    },
+    {
+      "skin": "graphite",
+      "computedAccent": "color(display-p3 0.328 0.4543 0.6408)",
+      "computedDanger": "color(display-p3 0.8343 0.4228 0.4455)",
+      "primaryOpaqueNative": 4.777329110352274,
+      "dangerOpaqueNative": 5.742582115569959,
+      "midnightCandidateDarkPrimaryMathOnly": null,
+      "midnightCandidateDarkDangerMathOnly": null
+    },
+    {
+      "skin": "linen",
+      "computedAccent": "color(display-p3 0.2306 0.3679 0.5469)",
+      "computedDanger": "color(display-p3 0.6315 0.2423 0.2772)",
+      "primaryOpaqueNative": 6.6591785780725745,
+      "dangerOpaqueNative": 6.187651890716681,
+      "midnightCandidateDarkPrimaryMathOnly": null,
+      "midnightCandidateDarkDangerMathOnly": null
+    },
+    {
+      "skin": "dusk",
+      "computedAccent": "color(display-p3 0.4495 0.335 0.5154)",
+      "computedDanger": "color(display-p3 0.8279 0.4499 0.4734)",
+      "primaryOpaqueNative": 6.155060494593976,
+      "dangerOpaqueNative": 5.910832948725229,
+      "midnightCandidateDarkPrimaryMathOnly": null,
+      "midnightCandidateDarkDangerMathOnly": null
+    },
+    {
+      "skin": "daylight",
+      "computedAccent": "color(display-p3 0.1269 0.3689 0.7837)",
+      "computedDanger": "color(display-p3 0.7202 0.1738 0.2207)",
+      "primaryOpaqueNative": 5.944581610164296,
+      "dangerOpaqueNative": 5.829852433559263,
+      "midnightCandidateDarkPrimaryMathOnly": null,
+      "midnightCandidateDarkDangerMathOnly": null
+    },
+    {
+      "skin": "meadow",
+      "computedAccent": "color(display-p3 0.1985 0.4783 0.2864)",
+      "computedDanger": "color(display-p3 0.7202 0.1738 0.2207)",
+      "primaryOpaqueNative": 5.321685879963158,
+      "dangerOpaqueNative": 5.829852433559263,
+      "midnightCandidateDarkPrimaryMathOnly": null,
+      "midnightCandidateDarkDangerMathOnly": null
+    }
+  ],
+  "screenshotValidation": [
+    {
+      "skin": "midnight",
+      "actualScreenshotBackground": [
+        18,
+        145,
+        255
+      ],
+      "actualScreenshotForeground": [
+        255,
+        255,
+        255
+      ],
+      "actualPixelRatio": 3.2209185611846887,
+      "modelRatio": 3.2218503023820384,
+      "maxBackgroundChannelDifference": 1,
+      "solidForegroundPixels": 81
+    },
+    {
+      "skin": "atelier",
+      "actualScreenshotBackground": [
+        176,
+        104,
+        41
+      ],
+      "actualScreenshotForeground": [
+        255,
+        255,
+        255
+      ],
+      "actualPixelRatio": 4.322618711703139,
+      "modelRatio": 4.323845900249261,
+      "maxBackgroundChannelDifference": 1,
+      "solidForegroundPixels": 92
+    }
+  ],
+  "custom": [
+    {
+      "skin": "midnight",
+      "width": 1280,
+      "probes": [
+        {
+          "id": "confirm-primary",
+          "ink": "#ffffff",
+          "base": 3.6498323765118044,
+          "hover": 3.2218503023820384,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": null
+        },
+        {
+          "id": "composer",
+          "ink": "#ffffff",
+          "base": 3.6498323765118044,
+          "hover": 3.2218503023820384,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": "rgb(255, 255, 255)"
+        },
+        {
+          "id": "shared-primary-app",
+          "ink": "#ffffff",
+          "base": 3.6498323765118044,
+          "hover": 3.512381260239064,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": null
+        }
+      ]
+    },
+    {
+      "skin": "atelier",
+      "width": 1280,
+      "probes": [
+        {
+          "id": "confirm-primary",
+          "ink": "#ffffff",
+          "base": 5.050123050644257,
+          "hover": 4.323845900249261,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": null
+        },
+        {
+          "id": "composer",
+          "ink": "#ffffff",
+          "base": 5.050123050644257,
+          "hover": 4.323845900249261,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": "rgb(255, 255, 255)"
+        },
+        {
+          "id": "shared-primary-app",
+          "ink": "#ffffff",
+          "base": 5.050123050644257,
+          "hover": 4.2127580510021305,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": null
+        }
+      ]
+    },
+    {
+      "skin": "midnight",
+      "project": "#C8FF00",
+      "width": 1280,
+      "probes": [
+        {
+          "id": "confirm-primary",
+          "ink": "#101410",
+          "base": 15.722596658693005,
+          "hover": 16.000048621321152,
+          "color": "rgb(16, 20, 16)",
+          "svgStroke": null
+        },
+        {
+          "id": "composer",
+          "ink": "#101410",
+          "base": 15.722596658693005,
+          "hover": 16.000048621321152,
+          "color": "rgb(16, 20, 16)",
+          "svgStroke": "rgb(16, 20, 16)"
+        },
+        {
+          "id": "shared-primary-app",
+          "ink": "#101410",
+          "base": 15.722596658693005,
+          "hover": 12.824877706216897,
+          "color": "rgb(16, 20, 16)",
+          "svgStroke": null
+        }
+      ]
+    },
+    {
+      "skin": "midnight",
+      "project": "#123456",
+      "width": 1280,
+      "probes": [
+        {
+          "id": "confirm-primary",
+          "ink": "#ffffff",
+          "base": 12.717304079982272,
+          "hover": 11.83384729041743,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": null
+        },
+        {
+          "id": "composer",
+          "ink": "#ffffff",
+          "base": 12.717304079982272,
+          "hover": 11.83384729041743,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": "rgb(255, 255, 255)"
+        },
+        {
+          "id": "shared-primary-app",
+          "ink": "#ffffff",
+          "base": 12.717304079982272,
+          "hover": 10.935536685036332,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": null
+        }
+      ]
+    },
+    {
+      "skin": "midnight",
+      "project": "#777777",
+      "width": 1280,
+      "probes": [
+        {
+          "id": "confirm-primary",
+          "ink": "#ffffff",
+          "base": 4.478089453577214,
+          "hover": 3.8429449545037673,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": null
+        },
+        {
+          "id": "composer",
+          "ink": "#ffffff",
+          "base": 4.478089453577214,
+          "hover": 3.8429449545037673,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": "rgb(255, 255, 255)"
+        },
+        {
+          "id": "shared-primary-app",
+          "ink": "#ffffff",
+          "base": 4.478089453577214,
+          "hover": 4.207335590467781,
+          "color": "rgb(255, 255, 255)",
+          "svgStroke": null
+        }
+      ]
+    },
+    {
+      "skin": "midnight",
+      "brand": "#777777",
+      "width": 1280,
+      "probes": [
+        {
+          "id": "confirm-primary",
+          "ink": "#111111",
+          "base": 4.216767253166575,
+          "hover": 4.87481973452301,
+          "color": "rgb(17, 17, 17)",
+          "svgStroke": null
+        },
+        {
+          "id": "composer",
+          "ink": "#111111",
+          "base": 4.216767253166575,
+          "hover": 4.87481973452301,
+          "color": "rgb(17, 17, 17)",
+          "svgStroke": "rgb(17, 17, 17)"
+        },
+        {
+          "id": "shared-primary-app",
+          "ink": "#111111",
+          "base": 4.216767253166575,
+          "hover": 3.623673319623254,
+          "color": "rgb(17, 17, 17)",
+          "svgStroke": null
+        }
+      ]
+    }
+  ],
+  "staticPureBlackOn777": 4.68949989000882
+}

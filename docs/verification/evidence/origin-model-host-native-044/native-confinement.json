@@ -1,0 +1,40 @@
+{
+  "remotePrimary": {
+    "capturedDumpSha256": "2d650a88da0829bbafd2a4269951a0732df71e2793ed6a713ccb3502cdbdab5f",
+    "model": "claude-sonnet-5",
+    "nativeTools": "Read,Grep,Glob,Edit,Write,WebSearch",
+    "restricted": true,
+    "strictMcpConfig": true,
+    "settingSources": "project",
+    "permissions": {
+      "blockReadsOutsideWorkingDirectories": true,
+      "deny": [
+        "Bash",
+        "PowerShell",
+        "WebFetch",
+        "Read(//proc/**)"
+      ]
+    },
+    "brokerOutsideProjectRead": "denied",
+    "memoryAndPrivateThreadCanariesInHostedPrompt": false
+  },
+  "unknownBegin": {
+    "capturedDumpSha256": "4ebde380adf125e8d67f3f703bbe9b606615c0cdf11ae1e83dcb7603dce36c25",
+    "model": "claude-sonnet-5",
+    "nativeTools": "Read,Grep,Glob,Edit,Write,WebSearch",
+    "restricted": true,
+    "strictMcpConfig": true,
+    "settingSources": "project",
+    "permissions": {
+      "blockReadsOutsideWorkingDirectories": true,
+      "deny": [
+        "Bash",
+        "PowerShell",
+        "WebFetch",
+        "Read(//proc/**)"
+      ]
+    },
+    "brokerOutsideProjectRead": "denied",
+    "memoryAndPrivateThreadCanariesInHostedPrompt": false
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "version": "0.2.10",
+  "source": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+  "ciRun": 39131925881,
+  "ciRunAttempt": 1,
+  "ciConclusion": "success",
+  "ciUrl": "https://github.com/z4mbo/Origin/actions/runs/39131925881",
+  "nativeRun": 39131922063,
+  "nativeConclusion": "success",
+  "nativeUrl": "https://github.com/z4mbo/Origin/actions/runs/39131922063",
+  "published": true,
+  "publicVersion": "0.2.10",
+  "artifactFeedsVerified": true,
+  "backendDeployed": true,
+  "migrationComplete": true,
+  "siteDeployed": true,
+  "siteSourceCommit": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+  "siteImageSourceCommit": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+  "siteImageId": "sha256:4dfdb35d3736cae71bd5a1498b8901e3328480966a72f5cbb0d465cb5272fe7b",
+  "previousSiteImageId": "sha256:5d59beb1676c192b4368d731be1b1be1e53407ff0168ae16385cb4568f79ccca",
+  "manifestSha256": "cbf75496f263d9b4608c4ea8b70963c3e5ae175600c805831423aca17e9ce1f9",
+  "checksumsSha256": "c3384c776cba5781d9c7ec76076e8435bc2eaa3ce6b1d5b80719441b9ea4293e",
+  "siteIdentitySha256": "a6618c614b3a802368f7a97b2df9b35768a6ffb27a933979ed40a685186154e4",
+  "backupSha256": "e7da76d6ba2eb0261f0b0ff7d7fc5d0ad3e6ed6b203be00b799afcff0e2ae176",
+  "backup": {
+    "sha256": "e7da76d6ba2eb0261f0b0ff7d7fc5d0ad3e6ed6b203be00b799afcff0e2ae176",
+    "bytes": 10917109,
+    "completedAt": "2026-10-18T14:16:21.958Z"
+  },
+  "migrations": [
+    {
+      "table": "users",
+      "done": true,
+      "pages": 1,
+      "admitted": 3
+    },
+    {
+      "table": "projects",
+      "done": true,
+      "pages": 1,
+      "admitted": 0
+    },
+    {
+      "table": "workspaceAgents",
+      "done": true,
+      "pages": 1,
+      "admitted": 0
+    },
+    {
+      "table": "designAssets",
+      "done": true,
+      "pages": 1,
+      "admitted": 5
+    },
+    {
+      "table": "drawingFiles",
+      "done": true,
+      "pages": 1,
+      "admitted": 1
+    }
+  ],
+  "deployment": {
+    "name": "wry-fly-446",
+    "type": "dev",
+    "url": "https://wry-fly-446.eu-west-1.convex.cloud",
+    "verifiedAt": "2026-10-18T14:16:32.337Z"
+  },
+  "temporaryDeployKeyRevoked": true,
+  "temporaryDeployKeyRevokedAt": "2026-10-18T14:16:39.3562237Z",
+  "credentialFileAbsent": true,
+  "github": {
+    "receiptProvided": true,
+    "verified": true,
+    "id": 416478932,
+    "assets": 15,
+    "payloads": 13,
+    "assetBytes": 1947870381,
+    "url": "https://github.com/z4mbo/Origin/releases/tag/origin-v0.2.10"
+  },
+  "publicDownloads": {
+    "verified": true,
+    "status": "passed",
+    "version": "0.2.10",
+    "source": "0eb372a94715527931043a1b6d8c02a50194dbb0",
+    "nativeRun": 39131922063,
+    "payloads": 13,
+    "aliases": 3,
+    "metadata": 2,
+    "payloadBytes": 1947866933
+  },
+  "publicSite": {
+    "verified": true,
+    "origin": "https://origin.imbored.fun",
+    "notes": 5,
+    "accountSubmissions": 0,
+    "routes": [
+      {
+        "path": "/",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/",
+        "h1": "Every project gets a team of agents that ships."
+      },
+      {
+        "path": "/login",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/login",
+        "h1": "Sign in to Origin"
+      },
+      {
+        "path": "/signup",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/signup",
+        "h1": "Create your Origin account"
+      },
+      {
+        "path": "/whats-new",
+        "status": "passed",
+        "url": "https://origin.imbored.fun/whats-new",
+        "h1": "What's new"
+      }
+    ],
+    "downloads": [
+      {
+        "platform": "Windows",
+        "href": "https://origin.imbored.fun/downloads/Origin-Setup.exe"
+      },
+      {
+        "platform": "MacAppleSilicon",
+        "href": "https://origin.imbored.fun/downloads/Origin-Mac-AppleSilicon.dmg"
+      },
+      {
+        "platform": "MacIntel",
+        "href": "https://origin.imbored.fun/downloads/Origin-Mac-Intel.dmg"
+      }
+    ],
+    "verifiedAt": "2026-10-18T14:19:51.023Z",
+    "proof": "public/browser-proof.json"
+  },
+  "publicScreenshot": {
+    "path": "public/landing.jpg",
+    "bytes": 55320,
+    "sha256": "e5920818bef09f2ad52bba767ae47b6b9278013374077553f76c7c630fba99fb"
+  },
+  "mailConfigured": false,
+  "realEmailSent": false,
+  "mailConfiguration": {
+    "namesOnly": true,
+    "providerKeyPresent": false,
+    "senderPresent": false,
+    "verifiedAt": "2026-10-18T14:16:49.205Z"
+  },
+  "mailLimitations": {
+    "providerAcceptanceDoesNotProveInbox": true,
+    "providerAccepted": false,
+    "mailboxDeliveryVerified": false
+  },
+  "authenticationLimitations": {
+    "liveAccountFormsSubmitted": false,
+    "liveSignupConfigurationExercised": false
+  },
+  "signingLimitations": {
+    "windows": "unsigned",
+    "mac": "ad-hoc, unnotarized",
+    "macInteractiveAcceptance": false
+  },
+  "preparedManifestSha256": "8e81a27f0ed633c3d15175a3c948fde90fd14b166986fdef81d4eea080b5e5ee",
+  "generatedAt": "2026-10-18T14:19:51.023Z"
+}

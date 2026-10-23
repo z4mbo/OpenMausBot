@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "source": "e6227c5f32a5b688af44594f6f436fc73ced2b3c",
+  "payloads": [
+    {
+      "path": "issues-before.webp",
+      "bytes": 38244,
+      "sha256": "da0295b297143b79e52586cf82e474d1a8b5082591f30ea1f764ac4fe6e6ca11"
+    },
+    {
+      "path": "issues-after.png",
+      "bytes": 228679,
+      "sha256": "a85013955967a789f193e673f9fc2fe7242f6cd07c2a2feff33713399e9c1488"
+    },
+    {
+      "path": "issues.webp",
+      "bytes": 38080,
+      "sha256": "411c35b65fc0fe6e3307a971d2ca7a5fb5cd5d55ca06f1a7a2e793f950819987"
+    },
+    {
+      "path": "issues-960.webp",
+      "bytes": 19094,
+      "sha256": "03923da599cfaa3eb8c41ae189e66fc92b2fd5c2102b007fc7ebf3845e4af910"
+    },
+    {
+      "path": "issues-crop.webp",
+      "bytes": 13214,
+      "sha256": "35d0b4e1bb7f1bdc4fabffce89d4ab5ad51ce469c544960723299342016fcb3c"
+    },
+    {
+      "path": "report.json",
+      "bytes": 5537,
+      "sha256": "678037841ba3a6045be8d4df79d71cd35e37dd34b7de80559d185d3aa3f4e63c"
+    },
+    {
+      "path": "qualification.json",
+      "bytes": 4259,
+      "sha256": "211c718db43df03a7b1903647ca211c6263803ef02f757606b867482a3edd662"
+    },
+    {
+      "path": "capture.log",
+      "bytes": 723,
+      "sha256": "570cca380d2f6396e7153cb646f16631760e8908ad3db3cf8acc9622a3c71935"
+    }
+  ]
+}

@@ -513,7 +513,7 @@ process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:m.id,result})+'\\n');});`)
   });
 
   it("runs a guest's turn with no environment and the shell off, proven before the turn starts", async () => {
-    await create();
+    await create({ environment: { FAKE_CODEX_MCP_OVERRIDES: "1" } });
     expect(instance.adapter.capabilities.guestTurns).toBe("confined");
     const dump = join(scratch, "dump.json");
     process.env.FAKE_CODEX_DUMP = dump;
@@ -533,7 +533,7 @@ process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:m.id,result})+'\\n');});`)
   });
 
   it("refuses a guest's turn when Codex did not take the shell-off overrides", async () => {
-    await create({ environment: { FAKE_CODEX_IGNORE_FEATURES: "1" } });
+    await create({ environment: { FAKE_CODEX_MCP_OVERRIDES: "1", FAKE_CODEX_IGNORE_FEATURES: "1" } });
     const dump = join(scratch, "dump.json");
     process.env.FAKE_CODEX_DUMP = dump;
     await instance.adapter.sendTurn({ threadId: "t-guest", text: "cat /proc/1/environ", system: "You are Testy.", model: "gpt-5.6-sol", approvalMode: "ask", guestConfined: true })
@@ -3013,6 +3013,7 @@ process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:m.id,result})+'\\n');});`)
       expect(message).toContain("workspace routing discovery unauthorized (401)");
       expect(message).not.toContain("Reconnecting");
       expect(done).toMatchObject({ ok: false, stopReason: message });
+      expect(done).not.toHaveProperty("refusal");
       expect(recorder.events.some((e) => e.type === "turn.retrying")).toBe(false);
       const refused = await instance.snapshot();
       expect(refused).toMatchObject({ state: "available", authenticated: false, reason: CODEX_SIGN_IN_EXPIRED });
@@ -3165,7 +3166,9 @@ process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:m.id,result})+'\\n');});`)
       expect(message).toContain("resets at 5:23 PM");
       expect(errors[0]).not.toHaveProperty("setup");
       expect(done).toMatchObject({ ok: false, stopReason: message });
+      expect(done).toMatchObject({ refusal: { kind: "quota_exhausted", scope: "account", retry: "safe_initial_refusal" } });
       const custom = await runTurn("t-limit-custom", "badprov::badmodel");
+      expect(custom.done).not.toHaveProperty("refusal");
       expect((custom.errors[0] as { message: string }).message).toMatch(/^You've hit your usage limit\. Upgrade to Pro/);
     });
   });

@@ -1,0 +1,35 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ src/state/notification-open.test.ts (8 tests | 1 failed) 4251ms
+     × keeps a switch announcement ahead of React's navigation commit from reading the old reply 471ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/notification-open.test.ts > opening a bot with threads hidden > keeps a switch announcement ahead of React's navigation commit from reading the old reply
+AssertionError: expected [ 'left-behind' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "left-behind",
++ ]
+
+ ❯ src/state/notification-open.test.ts:188:21
+    186|     startTransition(() => openBot(dispatch, scoutNow(), false));
+    187|     await settle();
+    188|     expect(reads()).toEqual([]);
+       |                     ^
+    189|     expect(scoutNow().threadId).toBe("main-chat");
+    190|     expect(unread("left-behind")).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  08:20:20
+   Duration  6.32s (transform 577ms, setup 550ms, import 1.01s, tests 4.25s, environment 338ms)
+

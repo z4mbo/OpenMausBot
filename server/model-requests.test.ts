@@ -69,6 +69,18 @@ const CAPS: Record<string, { driverKind: string; agentsMcp: boolean }> = {
 const caps = (instanceId: string) => CAPS[instanceId];
 
 describe("ModelRequestService", () => {
+  it("cannot silently propose or auto-apply a teammate account", () => {
+    const store = new MemoryStore(), bot = addBot(store, "Scout");
+    const service = new ModelRequestService({ store });
+    for (const selection of [
+      { instanceId: "origin-remote", model: "synthetic", source: { hostId: "host1", sourceId: "source1" } },
+      { instanceId: "claude", model: "synthetic", source: { hostId: "host1", sourceId: "source1" } },
+      { instanceId: "origin-remote", model: "synthetic" },
+    ]) expect(() => service.propose({ botId: bot.id, threadId: bot.threadId, selection, reason: "automatically selected" }))
+      .toThrow("Choose shared accounts yourself");
+    expect(store.applied).toHaveLength(0); expect(store.messagesFor(bot.threadId)).toHaveLength(0);
+  });
+
   it("renders engine-switch capability warnings and applies the reviewed change", () => {
     const store = new MemoryStore();
     const bot = addBot(store, "Scout");

@@ -109,7 +109,7 @@ export function createWorkflowExecutor(deps: WorkflowDeps): WorkflowExecutor {
         ...(param("motion") ? { motion: String(param("motion")) } : {}), ...(param("angle") ? { angle: String(param("angle")) } : {}), ...(param("negativePrompt") ? { negativePrompt: String(param("negativePrompt")) } : {}),
         ...(Number.isInteger(param("seed")) ? { seed: Number(param("seed")) } : {}), ...(node.params.sound === false ? { sound: false } : {}),
         ...(node.params.brand === false ? { brand: false } : {}), ...(param("character") ? { characterId: String(param("character")) } : {}),
-      }, agentName, { media: { sources, references }, workflow: { runId, nodeId: node.id }, intermediate: true });
+      }, agentName, { botId: run.agent?.id, media: { sources, references }, workflow: { runId, nodeId: node.id }, intermediate: true });
       if (!generationId) refuse("fal.ai did not start this step.");
       generations.add(generationId!);
       await report({ nodeId: node.id, status: "running", generationId });
@@ -187,6 +187,7 @@ export function createWorkflowExecutor(deps: WorkflowDeps): WorkflowExecutor {
     async start(cloud, projectId, run) {
       const problems = validateWorkflow(run.graph);
       if (problems.length) refuse(problems.map((problem) => problem.message).join(" "));
+      await deps.runner().checkBudget({ projectId, botId: run.agent?.id });
       const runId = text(await cloud.client.mutation("studioWorkflows:startRun", {
         projectId, sessionToken: cloud.sessionToken, name: run.name, graph: run.graph,
         ...(run.workflowId ? { workflowId: run.workflowId } : {}), ...(run.agent ? { agentName: run.agent.name } : {}),

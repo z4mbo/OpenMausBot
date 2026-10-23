@@ -17,6 +17,7 @@ export const messageView = v.object({
   kind: threadMessageKind, text: v.optional(v.string()), tool: v.optional(threadMessageTool), authorUserId: v.optional(v.id("users")),
   authorName: v.optional(v.string()), runId: v.optional(v.id("workspaceAgentRuns")), runBy: v.optional(v.string()), runByUserId: v.optional(v.id("users")),
   engineLabel: v.optional(v.string()), status: v.union(v.literal("streaming"), v.literal("final"), v.literal("interrupted")),
+  executedByUserId: v.optional(v.id("users")), executedByName: v.optional(v.string()), hostId: v.optional(v.id("agentHosts")), sourceId: v.optional(v.id("modelHostSources")),
   attachments: v.optional(v.array(threadAttachment)), payload: v.optional(v.string()), createdAt: v.number(), updatedAt: v.number(),
 });
 
@@ -25,6 +26,7 @@ export const runView = v.object({
   /** Set when another member's app or server runs it. */
   runnerUserId: v.optional(v.id("users")), runnerName: v.optional(v.string()),
   status: v.string(), engineLabel: v.optional(v.string()), createdAt: v.number(),
+  executedByUserId: v.optional(v.id("users")), executedByName: v.optional(v.string()), hostId: v.optional(v.id("agentHosts")), sourceId: v.optional(v.id("modelHostSources")),
 });
 
 const clip = (value: string, max: number) => (value.length > max ? `${value.slice(0, max - 1)}…` : value);
@@ -70,10 +72,13 @@ export function userNames(ctx: QueryCtx) {
 }
 
 export async function runSummary(ctx: QueryCtx, run: Doc<"workspaceAgentRuns">, name: (id: Id<"users">) => Promise<string | undefined>) {
+  const execution = run.modelExecutionId ? await ctx.db.get(run.modelExecutionId) : null;
   return {
     runId: run._id, requesterUserId: run.requesterUserId, requesterName: (await name(run.requesterUserId)) ?? "Someone",
     ...(run.runnerUserId && run.runnerUserId !== run.requesterUserId ? { runnerUserId: run.runnerUserId, runnerName: (await name(run.runnerUserId)) ?? "a teammate" } : {}),
     status: run.status, ...(run.engineLabel ? { engineLabel: run.engineLabel } : {}), createdAt: run.createdAt,
+    ...(run.executedByUserId ? { executedByUserId: run.executedByUserId, executedByName: await name(run.executedByUserId) } : {}),
+    ...(execution ? { hostId: execution.hostId, sourceId: execution.sourceId } : {}),
   };
 }
 

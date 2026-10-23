@@ -342,4 +342,3 @@ function AssetPicker({ projectId, onPick }: { projectId: string; onPick(asset: C
     </div>
   );
 }
-

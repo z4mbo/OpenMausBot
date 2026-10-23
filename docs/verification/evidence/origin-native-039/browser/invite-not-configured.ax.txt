@@ -1,0 +1,63 @@
+Browser tab: 17, Title: "Origin local client A", URL: "http://127.0.0.1:5174/__origin-local-two-client.html".
+1 AXWebArea Origin local client A, URL: 127.0.0.1:5174/__origin-local-two-client.html
+	2 container root
+		3 container
+			4 heading Client A · actual local Origin account flow, Value: 1
+				5 text Client  A  · actual local Origin account flow
+			6 text Real local Convex, OriginGate, account dialog and member panel. Component harness; no full desktop synchronization claim. Backend:  http://127.0.0.1:51527  · browser origin:  http://127.0.0.1:5174  · independent profile:  e2b905b3  · session fingerprint:  1390f68a95ac
+			7 button Open actual account dialog
+		32 container
+			33 heading Signed in as Fixture Owner · owner.local-two-client@example.test, Value: 2
+				34 text Signed in as  Fixture Owner  ·  owner.local-two-client@example.test
+			35 text Remembered local test workspace
+			36 pop up button (collapsed, settable) Description: Local test workspace, Value: Fixture Owner's workspace · owner, Secondary Actions: Expand
+				37 menu
+					38 (selected) Fixture Owner's workspace · owner
+			39 text Local test target ID:  rd74b7gdb0pv6y81j9vvb3xa5x8gjcze
+			40 button Check selected workspace access
+			41 container Workspace members
+				42 heading Members, Value: 2
+					43 text Members
+				44 text 1 1 admin  ·  0 members You are  owner
+				45 heading Invite people, Value: 3
+					46 text Invite people
+				47 container
+					48 text Email address (optional)
+					49 text field (settable) Email address (optional)
+					50 text Role
+					51 pop up button (collapsed, settable) Role, Value: Member, Secondary Actions: Expand
+						52 menu
+							53 Admin
+							54 (selected) Member
+							55 Viewer
+					56 button Create link
+				57 container
+					58 text Works in the projects they can access . Leave email blank to create a shareable link. Invitations expire in 7 days; email invites only work for that address.
+				72 text Email invitations are not available for this Origin connection. Share the link below.
+				73 text field Description: Invitation link, Value: https://origin-local-fixture.invalid/join/96a2cf4aac914ef3aae88b47ddea1f8a62643c6fc06143f6b723d4d95c64f0f0
+				74 button Copy invite link
+				59 content list Members
+					60 container
+						61 text Fixture Owner (you) @owner.local-two-client ·  owner.local-two-client@example.test Owner
+				62 heading Pending invitations 1, Value: 3
+					63 text Pending invitations 1
+				75 content list Pending invitations
+					76 container
+						77 text member.local-two-client@example.test Invited Member  ·  Expires in 7 days
+						78 button Copy invite link
+						79 button Revoke invitation
+				65 text As the owner you stay in this workspace; it cannot be left without an owner.
+		26 container
+			27 button (expanded) Persisted real subscription observations, Secondary Actions: Collapse
+				28 text Persisted real subscription observations
+			29 content list Local subscription observations
+				30 container
+					31 text 2026-10-19T06:26:56.741Z  ·  session :  signed out
+				66 container
+					67 text 2026-10-19T06:27:20.527Z  ·  session :  1390f68a95ac
+				68 container
+					69 text 2026-10-19T06:27:20.535Z  ·  workspace-list :  Fixture Owner's workspace:owner
+				70 container
+					71 text 2026-10-19T06:27:20.542Z  ·  access-subscription :  owner
+
+The focused UI element is 1 AXWebArea Origin local client A, URL: 127.0.0.1:5174/__origin-local-two-client.html

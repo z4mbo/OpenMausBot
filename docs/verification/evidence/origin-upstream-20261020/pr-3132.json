@@ -1,0 +1,55 @@
+{
+  "number": 3132,
+  "url": "https://github.com/milind-soni/OpenMausBot/pull/3132",
+  "mergeCommit": "c7ec5d63b7c4e82bd1767ab5f761eadcef667ac7",
+  "baseCommit": "615fe65e17f88d99f12d34682750d9ae2fa402bc",
+  "headCommit": "5f525d5050742791ee7f24d2b61b49ac6c80f8e4",
+  "originalCaptureSha256": "b3642b2e269849641ff77df845d26d178070f2790958a3b1776dcb789c4e69bf",
+  "patchRepresentation": "Per-file GitHub patch SHA-256; raw patch text stays in ignored local capture.",
+  "files": [
+    {
+      "sha": "1178d82abbd2ed2a9b22d4be91b54e92b5eb5804",
+      "filename": "scripts/testing/file-size-ratchet.test.ts",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/5f525d5050742791ee7f24d2b61b49ac6c80f8e4/scripts%2Ftesting%2Ffile-size-ratchet.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "b2a1d9921ad16d3f47b5ba36ddcb72d4eb43fa19f2ffbc78a59788d21830a33e"
+    },
+    {
+      "sha": "4fc7c86078e40cf4732a36b7c1e8c55c64c7a803",
+      "filename": "server/store.ts",
+      "status": "modified",
+      "additions": 13,
+      "deletions": 21,
+      "changes": 34,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/5f525d5050742791ee7f24d2b61b49ac6c80f8e4/server%2Fstore.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "2a83b9c716b6f7153178ba988e5e3f9cc0cd32fc164bfb906ce10b10e97e777e"
+    },
+    {
+      "sha": "a9d632ec1a521d5978d19a1f2364b5584a0ef692",
+      "filename": "server/thread-cache.test.ts",
+      "status": "added",
+      "additions": 102,
+      "deletions": 0,
+      "changes": 102,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/5f525d5050742791ee7f24d2b61b49ac6c80f8e4/server%2Fthread-cache.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "948ac2414c521235d9d1bfa48ffb500ea62f1cf04979567c2cf35fe2477d2cdd"
+    },
+    {
+      "sha": "110748cfee8715d61f4386a62391973061b333f7",
+      "filename": "server/thread-cache.ts",
+      "status": "added",
+      "additions": 61,
+      "deletions": 0,
+      "changes": 61,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/5f525d5050742791ee7f24d2b61b49ac6c80f8e4/server%2Fthread-cache.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "a741d1973da0d7d6642e43ed70cbb5973412d58ae3e1dd31f395b477c6ee7ae0"
+    }
+  ]
+}

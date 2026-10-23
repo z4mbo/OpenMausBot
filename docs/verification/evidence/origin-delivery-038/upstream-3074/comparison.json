@@ -1,0 +1,633 @@
+{
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "number": 3074,
+  "title": "Run when my AI limit resets, and continue on the backup engine",
+  "body": "## What the person gets\n\n- **A new automation \"when\": the AI limit resets.** \"When your Claude limit resets, Scout finishes the report.\" Once (default) or every reset. From chat (\"run this when my limit resets\" → `create_trigger when=limit_reset`), from the editor's When (\"When my AI limit resets\" + engine picker + once / every time), and from the calendar.\n- **The stopped turn's button.** A turn stopped by a usage limit with a known reset shows **\"Continue at 3:40 PM when your limit resets\"**. One click creates a one-time limit-reset automation in that conversation (the usual card with Pause, Edit, Undo). It runs in that same conversation and is told the previous turn hit the limit.\n- **The bot does it itself.** TRIGGER_PROMPT and the tool description cover it; a turn on an engine at ≥ 90 % has that on its clock line (\"Claude's usage limit is 92% used; it resets …\"), so the bot can set up its continuation and say so (no approval card, like every trigger).\n- **Near-limit warning.** \"Claude: 92% used · resets 3:40 PM\" on the Automations page with **Move to after reset** for schedules due before the reset whose bot uses that engine (only their next run moves), plus a compact notice in that bot's chat header.\n- **Calendar.** Each engine's next known reset is a labelled marker (\"Claude resets 3:40 PM\"). Dropping a bot from the sidebar on it opens the quick composer for a limit-reset automation; dropping an automation on it switches it to run at that reset.\n- **Backup engine.** With Automatic recovery on and a backup configured (bot fallback list or workspace backup), a usage-limit refusal continues on the backup with one line: \"Claude hit its limit (resets 3:40 PM), so Codex took over.\" After the reset, the next turn in that conversation goes back, with one line. No allowed backup → the Continue button. **Never** moves to another sign-in of the same subscription engine (that circumvents provider usage limits); another engine or a pay-per-use key is fine.\n\n## How the reset time is derived\n\nSchedule: `{ type: \"limit_reset\", engine, repeat: \"once\" | \"every_reset\", at }`. `at` is derived on the server (reset + 60 s), never taken from input; `null` while unknown.\n\n`server/limit-resets.ts` keeps one limit per engine instance:\n- **Plan usage** (`plan-usage.ts`): Claude `five_hour` / `seven_day` (`utilization`, `resets_at`); Codex `primary_window` / `secondary_window` (`used_percent`, `reset_at`, assigned by window length).\n- **Refusals:** Claude's `rate_limit_info.resetsAt` (`runtime.error.limitResetsAt`); Codex now also sets `limitResetsAt` from its words \"try again at 5:23 PM\" / \"…at Oct 17th, 2026 5:23 PM\" (host local time).\n- Rule: windows at ≥ 100 % decide and the latest of their resets counts; otherwise the fullest window. A live refusal wins unless usage shows a later window still full; it is kept 10 min past its time. Unknown → \"runs when the limit resets (time not known yet)\" and usage is polled every 5 min while an automation waits. Every usage refresh or refusal retimes the waiting automations. `every_reset` never runs twice for one reset.\n- Usage is read at most every 5 minutes for the warnings. Sealed test fixtures no longer read this machine's keychain for plan usage.\n\n## Failover\n\n- Claude's startup hold, which already proves a signed-out refusal, also proves a usage-limit refusal (synthetic `usage_limit_reached` + error result with no new cost, process stopped) → `TurnUsageLimitRefusedError` → `startTurn`'s existing backup path.\n- An engine the clock knows is refusing raises the same error before dispatch, so Codex/Grok turns and automation runs also go to the backup without spending a refused turn. A Codex automation run refused with a known reset is restarted at once for the backup instead of waiting for the reset.\n- `limit-failovers.json` remembers `{thread → from, to, resetsAt}` for the switch back.\n\n## Moved out (pinned files shrink)\n\n`routine-schedules.ts` (from routines.ts), `routine-request-schemas.ts` (from routine-requests.ts), `routine-run-card.ts` (from index.ts), `projectCalls` → `lib/routine-calendar.ts`, ChatView's lucide import on one line. Pins lowered: index.ts 17285→17259, routines.ts 1804→1651, routine-requests.ts 1677→1484, ChatView.tsx 1492→1482, RoutineCalendarPage.tsx 1763→1750. store.tsx, App.tsx, electron/main.mjs unchanged. Catalog goldens re-pinned (create_trigger `when` + `engine` + `repeat`; budgets within 2 %).\n\n## Tests\n\n- `server/limit-resets.test.ts`: derivation from Claude and Codex fixtures, blocked vs fullest, refusal precedence, expiry, unknown time, Codex words, near-limit line.\n- `server/routines-limit-reset.test.ts`: derived time, recompute when the reset moves, once vs every reset, unknown time, late wake still runs, restart, Move to after reset, backup restart of a refused run.\n- `server/limit-reset-requests.test.ts`: create_trigger `when=limit_reset`, the card and Undo, default engine, duplicates, resume, and the routes (Continue creates the automation in the same thread, idempotent; after-reset; limits list).\n- `server/drivers/claude-auth-recovery.test.ts`: the usage-limit refusal hold.\n- `server/limit-failover.test.ts`: same-engine sign-ins refused, API key allowed, switch back after reset, unknown reset waits an hour.\n- `server/limit-reset.e2e.test.ts` (real server, fake Claude/Codex, a test clock hook that shortens the post-reset minute): button → automation → reset → run continues the same conversation; failover to Codex with the line, pre-dispatch skip, switch back after reset; a same-engine backup is never used and the button is offered.\n- `src/components/limit-resets.test.ts`: warning + Move to after reset, chat notice, Continue button, calendar marker and drops onto it, sentences.\n- Mutation-checked: 36 unit-level and 7 end-to-end mutations, each caught.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\n\n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n## Summary by CodeRabbit\n\n* **New Features**\n  * Added visibility into AI engine usage limits, including near-limit warnings and expected reset times.\n  * Added automations that run once or repeatedly after an engine’s usage limit resets. Create and manage them from the calendar, or move routines to run after a reset.\n  * Added an option to continue a chat after its limit resets, plus automatic recovery using an eligible backup engine.\n* **Bug Fixes**\n  * Improved handling of usage-limit refusals so unfinished turns can be resumed and recovery respects reset timing.\n<!-- end of auto-generated comment: release notes by coderabbit.ai -->",
+  "url": "https://github.com/milind-soni/OpenMausBot/pull/3074",
+  "mergedAt": "2026-10-18T23:22:28Z",
+  "mergeCommit": "53d9803aea32c11104a5301805089a5d6b40cf8c",
+  "files": [
+    {
+      "path": "scripts/testing/file-size-ratchet.test.ts",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 5,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "f1b330c43b0833815b1aee54ef4ba894097800ee",
+      "originBlob": "f2212e799756377d3ae44753e93b7446a8e81563",
+      "exactBlob": false
+    },
+    {
+      "path": "server/bot-overview.ts",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "12cab6572bb3619075508bc8a2de7bb207d6e00e",
+      "originBlob": "199566918df6d623a33a878ca98a2d76f2b288f9",
+      "exactBlob": false
+    },
+    {
+      "path": "server/contracts.ts",
+      "status": "modified",
+      "additions": 12,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "758683065780ce122ca40415e62c37994294a578",
+      "originBlob": "940163608667361c184e6ca78d526a71cee64dc5",
+      "exactBlob": false
+    },
+    {
+      "path": "server/drivers/agents-call-triggers.ts",
+      "status": "modified",
+      "additions": 25,
+      "deletions": 2,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "a5c96426a348ec44a83f937e59e719dc73cbc037",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/drivers/agents-catalog-goldens/full.tools-list.json",
+      "status": "modified",
+      "additions": 16,
+      "deletions": 3,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "1723d2edf09448a73051c9f4adf11a76c7b020d7",
+      "originBlob": "7d7f648b0b5aacdff42d88ebe8c0cbc5ceb01837",
+      "exactBlob": false
+    },
+    {
+      "path": "server/drivers/agents-catalog-goldens/profiles.json",
+      "status": "modified",
+      "additions": 42,
+      "deletions": 42,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "906b1f00441919c3af44a353817a8aaa471456b4",
+      "originBlob": "6dc6f4f3ddc33cec33685ff151428bbd81219a61",
+      "exactBlob": false
+    },
+    {
+      "path": "server/drivers/agents-catalog.ts",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 3,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "5bbfc1bbcbfaae6bef73fd8907cb8f38ec27ff5b",
+      "originBlob": "35e03464d5edefab649451aecd5abd6e36f33dd0",
+      "exactBlob": false
+    },
+    {
+      "path": "server/drivers/agents-proxy.test.ts",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "2a0bac569ca7e013d252f547bb832172ce806ee1",
+      "originBlob": "c88a3370599a0a28a4afd65dc8eab9a22451d2be",
+      "exactBlob": false
+    },
+    {
+      "path": "server/drivers/claude-auth-recovery.test.ts",
+      "status": "modified",
+      "additions": 46,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "a6951121e355f83fbc45cd7df7a12a16819f9ffd",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/drivers/claude-auth-recovery.ts",
+      "status": "modified",
+      "additions": 29,
+      "deletions": 13,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "85de1d2cb7d097a5fb4469a4c18d5698cae9eb0a",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/drivers/codex-errors.ts",
+      "status": "modified",
+      "additions": 31,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "d9978179a20c5d84e669009dd8f2779c9b248581",
+      "originBlob": "e69d255f45e154218207b68c8388e2682dfa37e1",
+      "exactBlob": false
+    },
+    {
+      "path": "server/drivers/codex.ts",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 3,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "bed15625c16280b7c04884c8373e6b725700e968",
+      "originBlob": "35aca3630f3debc8ac73182b324e9418f7de790e",
+      "exactBlob": false
+    },
+    {
+      "path": "server/env-path.ts",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "fa1ec1c3677de4ee376d00e320e2036b5b5fc39a",
+      "originBlob": "fa05dbbf24553b69235c9563fe741c63e5927a5b",
+      "exactBlob": false
+    },
+    {
+      "path": "server/index.ts",
+      "status": "modified",
+      "additions": 35,
+      "deletions": 61,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "4a445ee8579169594f84f04f2f79db96af8e8453",
+      "originBlob": "b3ee7b73580341787adf3673e81647ad96b59ed5",
+      "exactBlob": false
+    },
+    {
+      "path": "server/limit-failover.test.ts",
+      "status": "added",
+      "additions": 104,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "01eaa49fed19a7bb7d03e543b3c6937c1930e38b",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/limit-failover.ts",
+      "status": "added",
+      "additions": 137,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "d99c8dce6eb086561cda2ac021dfec1795c3c2d9",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/limit-reset-requests.test.ts",
+      "status": "added",
+      "additions": 191,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "fc8557ae809f1264567f35da5289b64b7499f50a",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/limit-reset.e2e.test.ts",
+      "status": "added",
+      "additions": 192,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "efc59a036069f25adddd582855a488a4d72cab87",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/limit-resets.test.ts",
+      "status": "added",
+      "additions": 163,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "ea1dea0cf5b16965e9fa3624c9f861bd380029f2",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/limit-resets.ts",
+      "status": "added",
+      "additions": 201,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "0afce5614d0b060b956e2c8ccc37cb93f7127bd8",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/package-export.ts",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 2,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "379c7427de48ef48b5bd8b74b799bae1a438cea8",
+      "originBlob": "be2dbe10c8f8c2f3140c79fc68661506389f1b9e",
+      "exactBlob": false
+    },
+    {
+      "path": "server/plan-usage.ts",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "44715e111c5d63eb9b34f74e90e051a6f8df8395",
+      "originBlob": "80fa625a6f7b6b46234c1ec16fc09a9118e5e2f8",
+      "exactBlob": false
+    },
+    {
+      "path": "server/routes/limit-resets.ts",
+      "status": "added",
+      "additions": 86,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "5585c47c276626ae345bba4d381af3dda12a39c6",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/routine-intervals.ts",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "5cb1699633683cf49c6d71094656617e70cb3bb3",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/routine-recovery.ts",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "28b90c895af87b3ae2ab19c77f78ada867ce7caf",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/routine-request-schemas.ts",
+      "status": "added",
+      "additions": 237,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "d7349e0e2dc8960d73115978b19a3e2dd4a91863",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/routine-requests.test.ts",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "648fa494521cf20055e4f85e72de8b6f495d1801",
+      "originBlob": "1f303bd411b533f2927e4329c2e21afa939eaab7",
+      "exactBlob": false
+    },
+    {
+      "path": "server/routine-requests.ts",
+      "status": "modified",
+      "additions": 78,
+      "deletions": 271,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "208655545db9ab54d515d64cf4f54e77d5e0dfbb",
+      "originBlob": "343af988d14611972edb9893d8503af94c0a460b",
+      "exactBlob": false
+    },
+    {
+      "path": "server/routine-run-card.ts",
+      "status": "added",
+      "additions": 54,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "ac3888fa155d057c0dd852864583a868eb445d3a",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/routine-schedules.ts",
+      "status": "added",
+      "additions": 225,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "5951640da1936df3a97e478c303883a3ba5349e9",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/routines-limit-reset.test.ts",
+      "status": "added",
+      "additions": 188,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "4effeab816696b99d292637b54f62b619f5b3662",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/routines.ts",
+      "status": "modified",
+      "additions": 56,
+      "deletions": 209,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "6750a7e81e824e88b40857c48c0873f228f0f953",
+      "originBlob": "f87f277843a38de17a8da817c9ea075e4b7eeead",
+      "exactBlob": false
+    },
+    {
+      "path": "server/system-prompt.ts",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "32ee446d968da02f9502d61cb6625ffcc69dad46",
+      "originBlob": "3437c04b2a6264babd3d412ef1e7b2bb51923e58",
+      "exactBlob": false
+    },
+    {
+      "path": "server/testing/fake-claude-cli.ts",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 2,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "5033f15331ac2b90b3c642f6491d3b38ef5283b4",
+      "originBlob": "eaaa7814feee7174961974707ffed253fb403fc2",
+      "exactBlob": false
+    },
+    {
+      "path": "server/testing/limit-clock-hooks.mjs",
+      "status": "added",
+      "additions": 23,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "d9b04a7c5a7a36d084907b0d0d35d7abeedd70ad",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "server/trigger-tools.ts",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "e2a6ca70c4939efaae90ecdafed9ef35d5eed8bb",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "shared/failed-turn.ts",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "eee106d0f2bc82a9ecdf669181e4ffa767625fb8",
+      "originBlob": "550c0b556a4b3eb6c4e14ffafd4ad708d40bac0f",
+      "exactBlob": false
+    },
+    {
+      "path": "shared/limit-reset.ts",
+      "status": "added",
+      "additions": 60,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "92412cdd24fac5667ed4d78d323533c11fb59849",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "shared/routine-request.ts",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "2edcfd2899c8e1e0bfe54f50c4b7af0880611a08",
+      "originBlob": "fb2aa82301ff7866a71e45fa4fbc9cce4a3efc7c",
+      "exactBlob": false
+    },
+    {
+      "path": "shared/routines.ts",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "80281fc8314c5f8222ea58d002bc65e6a5145341",
+      "originBlob": "a41844b865f375eb2eee78188afcd04c399c1b3a",
+      "exactBlob": false
+    },
+    {
+      "path": "shared/wire.ts",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "4658b9a15e12584ec28692bdac24adf8f4018147",
+      "originBlob": "caa329747d76ad7100eadd7be3ba3943811c9b6e",
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/ApprovalCard.tsx",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "6556f59d223bf5ef5b6039ff2dc4c5e68b3700b7",
+      "originBlob": "2b75e17894eae0ef9563db996e112e3a574559c2",
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/ChatView.tsx",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 16,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "bbba9cb8b0cf9b1999f08c147bb150e64e33b56e",
+      "originBlob": "048cce11663b9638857875b3bc19365453d1b0f5",
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/LimitResetContinue.tsx",
+      "status": "added",
+      "additions": 44,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "12d7235b15956150aa97666a0d02a461f3151dcd",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/RoutineCalendarPage.tsx",
+      "status": "modified",
+      "additions": 27,
+      "deletions": 40,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "d4a9ecfc4966f5b281f4634798a1bfd0011f858f",
+      "originBlob": "7de946e890de2d9b4689609fcadeb622d53854c7",
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/TriggersPage.tsx",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "f737e8573cbd96f10c92ec55dafe0242916028ad",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/automations/AutomationsCalendar.tsx",
+      "status": "modified",
+      "additions": 23,
+      "deletions": 3,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "66871c8ba7a05506a398284caa48a25b95aa7b43",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/automations/LimitWarnings.tsx",
+      "status": "added",
+      "additions": 59,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "e799de8b7bfb4a9acf160c614d14b28d37b20d8a",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/limit-resets.test.ts",
+      "status": "added",
+      "additions": 197,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "b1e696cacccf05e85426628f98c9ab2549e0621a",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/remote-desktop-panel.tsx",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "2ad2a46f352641f784973872703725592f20e343",
+      "originBlob": "4ec7e057d8bb4fb65e9f11683b2123e0524c38a7",
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/routines/LimitResetFields.tsx",
+      "status": "added",
+      "additions": 31,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "b95e0bd1849d423e98bceef6fbb8ee6476009ea4",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "src/components/routines/LimitResetMarkers.tsx",
+      "status": "added",
+      "additions": 62,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "d23fedaeeff3fe864c87f8cd003e353f9945a578",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "src/lib/automations.ts",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "940c28ddc8ad10536fa4cd05237d37c6d0aaf071",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "src/lib/bot-creation-draft.ts",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "65c0da4c53f2f1927497563a308cd412520090b1",
+      "originBlob": "cdece568271c486382bd7db6ba29b243f7dfd62d",
+      "exactBlob": false
+    },
+    {
+      "path": "src/lib/limit-resets.ts",
+      "status": "added",
+      "additions": 88,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "48dc3b1ad08a2733add843be42d4b5b559f25c85",
+      "originBlob": null,
+      "exactBlob": false
+    },
+    {
+      "path": "src/lib/routine-calendar.ts",
+      "status": "modified",
+      "additions": 30,
+      "deletions": 2,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "e71beaac79cf2fa07c5cecb0b600dc08d6726704",
+      "originBlob": "dd86c2a6ad04b51f745fc0d58d1f4f671ea26fca",
+      "exactBlob": false
+    },
+    {
+      "path": "src/lib/schedule-label.ts",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "944018ed34d89a60143063341015602e6ae33c53",
+      "originBlob": "1bf397f59c797f192801b2ad9b850d8fa88a2b4e",
+      "exactBlob": false
+    },
+    {
+      "path": "src/locales/en.json",
+      "status": "modified",
+      "additions": 23,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "e2e0b1609a7493dd37dc973e619d0e07f735f9ff",
+      "originBlob": "88046bea5f142c03e0bf3185cf4cc2478630b6c6",
+      "exactBlob": false
+    },
+    {
+      "path": "src/locales/es.json",
+      "status": "modified",
+      "additions": 23,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "d696f9e86a9374d64d8f58b59afcd0d938842e2b",
+      "originBlob": "3e495d877c7c817ae861434ba69be6c8bb4833dd",
+      "exactBlob": false
+    },
+    {
+      "path": "src/locales/pt-br.json",
+      "status": "modified",
+      "additions": 23,
+      "deletions": 0,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "20699e1cfa9800518af8687284342784a5afdc61",
+      "originBlob": "d6620d0dfcad192c5a766e6a6d0901ed2ce516c5",
+      "exactBlob": false
+    },
+    {
+      "path": "src/locales/source-hashes.json",
+      "status": "modified",
+      "additions": 144,
+      "deletions": 98,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "d920e50c8348e8476dcc18e438fbe559192eb325",
+      "originBlob": "fac2351bae53124d2830a40d3348c35e517e6c67",
+      "exactBlob": false
+    },
+    {
+      "path": "src/state/store.tsx",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "patchAvailable": true,
+      "upstreamPrHeadBlob": "5cad597e6946eca331476ef72a45bb1b30d4b487",
+      "originBlob": "aa7e482925168c781e0b2e4a20e6470562d194b1",
+      "exactBlob": false
+    }
+  ],
+  "adopted": false,
+  "scope": "Complete official PR changed-file metadata and patches; divergent blobs alone do not prove missing functionality."
+}

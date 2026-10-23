@@ -1,0 +1,172 @@
+{
+  "source": "e6227c5f32a5b688af44594f6f436fc73ced2b3c",
+  "version": "0.2.13",
+  "observedAt": "2026-10-18T22:06:26.122Z",
+  "actualAppComponent": true,
+  "syntheticCloudAndDesktopBridge": true,
+  "liveBackend": false,
+  "packagedApp": false,
+  "viewport": {
+    "width": 1600,
+    "height": 1000,
+    "deviceScaleFactor": 2
+  },
+  "observations": {
+    "viewport": {
+      "width": 1600,
+      "height": 1000
+    },
+    "scrollWidth": 1600,
+    "accountBeforeSearch": true,
+    "computerBelowAccount": true,
+    "computerFullWidth": true,
+    "computerName": "This computer",
+    "visibleFooterVersion": true,
+    "columns": [
+      {
+        "title": "Draft",
+        "draft": true,
+        "left": 297,
+        "top": 135,
+        "right": 601,
+        "bottom": 975,
+        "width": 304,
+        "height": 840
+      },
+      {
+        "title": "Todo",
+        "draft": false,
+        "left": 613,
+        "top": 135,
+        "right": 917,
+        "bottom": 975,
+        "width": 304,
+        "height": 840
+      },
+      {
+        "title": "In Progress",
+        "draft": false,
+        "left": 929,
+        "top": 135,
+        "right": 1233,
+        "bottom": 975,
+        "width": 304,
+        "height": 840
+      }
+    ],
+    "activeTaskCards": 6,
+    "reducedMotion": true
+  },
+  "pageErrors": [],
+  "externalRequests": [],
+  "webSockets": [
+    {
+      "origin": "ws://127.0.0.1:5174",
+      "blocked": true,
+      "previewOnly": true
+    },
+    {
+      "origin": "ws://127.0.0.1:0",
+      "blocked": true,
+      "previewOnly": true
+    }
+  ],
+  "modules": [
+    {
+      "path": "src/App.tsx",
+      "sha256": "e4630341c61a0b27f9ffa27da7701e99d8c7b256f7e81b7d5fe7bb3c2c45a31e",
+      "lfSha256": "c6fca3e61488269c9a3064a17fe22afa36ce817dabee9494630717b0b5f93f52",
+      "gitBlob": "42bb971bd917bd90d6b1a1bec596d78ee9ef3ad6"
+    },
+    {
+      "path": "src/components/Sidebar.tsx",
+      "sha256": "c9a9a32946681753d661da0751e117f6eb7115d6084d465c2b8ad91d86f0cf39",
+      "lfSha256": "0f7716def8e0bbaf1a4c3ad27071c487cd4475a8823120c11b5015afebecb6d6",
+      "gitBlob": "bba0a857164cd5264542f22bbe883027db9141ee"
+    },
+    {
+      "path": "src/components/SidebarFooterNav.tsx",
+      "sha256": "55f6b7fd5b9241621390c612bbd74f3085d613128dbfad5e85be4852184462d8",
+      "lfSha256": "3d760eb822528611ba24026a4d894a75be28c19bffc146df1859df8123581e35",
+      "gitBlob": "3d2efff2b9ee17fa3469d761d5581161c74e7583"
+    },
+    {
+      "path": "src/components/OriginAccountMenu.tsx",
+      "sha256": "1a6f6f31ac592a60780f5b84df22696e0c44afaeae3bbe28180b9018dda53b87",
+      "lfSha256": "5cb227d491bfebab340064dee6c820fc1735960ee32cb0b073be01aee59a3d80",
+      "gitBlob": "c8f0ccdf601276227569deb8704ec6068cc1ad13"
+    },
+    {
+      "path": "src/components/ChiefSections.tsx",
+      "sha256": "47abcc6d7729ab6ccdcb9f42dbe93ef418089cfe2f1f045ea8381d47dc9f0d6c",
+      "lfSha256": "75b7bb9768ea902e9909023922c725aa38f87d8fc8771e66fc10f4677e7a6528",
+      "gitBlob": "1edfbfe2f44b5c3fc4eb82a131fd2daa13c60ffc"
+    },
+    {
+      "path": "src/components/origin-pages/IssuesPage.tsx",
+      "sha256": "7112d4b0872648313a6ed52bcb8b9332d1339f872858ca1a0eaba19911c910be",
+      "lfSha256": "c1c5f20de1ee398d510d6f75fbc0a4207899ebe1cc655160b971206af32a445e",
+      "gitBlob": "11aa90a43ab86f7f6bb5ada924d058a498c29963"
+    },
+    {
+      "path": "src/styles.css",
+      "sha256": "3ac6751aa06a95dfeee9642ddbda1591ee213329ec3ddfed70e5f8eff0c0a113",
+      "lfSha256": "c52698835b305fa0f4c743d73d94016f740952caafdfc0cf8e3b6d48d5036654",
+      "gitBlob": "948798d6e00094c440bbaeeef9e4ba8eb4394285"
+    }
+  ],
+  "recipes": [
+    {
+      "path": "scripts/verify-origin-landing.ts",
+      "sha256": "604779b0eeb582684290a32e92aa395cbf2ebad4314e1415a1dddd818b7c1cd0"
+    },
+    {
+      "path": "scripts/testing/landing-cloud.ts",
+      "sha256": "b24acf0d7c5933c7ac452a8bd932a3033df7677b57e81cb34c1566683bb28102"
+    },
+    {
+      "path": "scripts/testing/landing-preview.tsx",
+      "sha256": "f3ed1bca2c7e5ab24bb194ab83e06d43e9782306ada154c9f9576152fca777a8"
+    },
+    {
+      "path": "scripts/testing/capture-origin-landing.mjs",
+      "sha256": "fc58a6be9b27abd2ff6d7b6dc77d3bc49624ed9f57f79edf87e364274d108906"
+    }
+  ],
+  "files": [
+    {
+      "path": "issues-after.png",
+      "bytes": 228679,
+      "sha256": "a85013955967a789f193e673f9fc2fe7242f6cd07c2a2feff33713399e9c1488",
+      "width": 3200,
+      "height": 2000
+    },
+    {
+      "path": "issues.webp",
+      "bytes": 38080,
+      "sha256": "411c35b65fc0fe6e3307a971d2ca7a5fb5cd5d55ca06f1a7a2e793f950819987",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "path": "issues-960.webp",
+      "bytes": 19094,
+      "sha256": "03923da599cfaa3eb8c41ae189e66fc92b2fd5c2102b007fc7ebf3845e4af910",
+      "width": 960,
+      "height": 600
+    },
+    {
+      "path": "issues-crop.webp",
+      "bytes": 13214,
+      "sha256": "35d0b4e1bb7f1bdc4fabffce89d4ab5ad51ce469c544960723299342016fcb3c",
+      "width": 760,
+      "height": 475
+    }
+  ],
+  "transformation": "The raw browser PNG is only resized and encoded as WebP. All three derivatives retain the complete frame; the legacy crop filename is retained without cropping.",
+  "limits": [
+    "This is the actual App renderer with synthetic cloud queries, a simulated Windows bridge, and an isolated fake-engine HTTP server.",
+    "No real account, cloud backend, native Electron window, installer or production data was used.",
+    "Cloud mutations throw; no backend authorization or actual task execution is claimed."
+  ]
+}

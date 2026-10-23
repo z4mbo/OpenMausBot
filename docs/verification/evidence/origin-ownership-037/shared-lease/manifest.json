@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "commit": "99f2c5672fb358f749bb02a9e899bdfe5dbf7b35",
+  "files": [
+    {
+      "file": "REPORT.md",
+      "size": 7261,
+      "sha256": "63bd8208481328cd0f51406bfa854f3d0ecc1e40fc7e66f2529b44fbf250248b"
+    },
+    {
+      "file": "backend-command.json",
+      "size": 1876,
+      "sha256": "c0a33a653099a0ad5df7238bab580340a14a84701c85c59147097dd969b3d0df"
+    },
+    {
+      "file": "backend-exit.json",
+      "size": 78,
+      "sha256": "a7fd84005809c6b4a3735a51e6563386f593251590c5a66815ad8bd50135ce1b"
+    },
+    {
+      "file": "backend.json",
+      "size": 5826,
+      "sha256": "e2b2afab32dda0f58c42c13308879f9c52a8647cafee9dcd641b968c24a841d2"
+    },
+    {
+      "file": "backend.log",
+      "size": 723,
+      "sha256": "02a1fd9041ec420b57a4746c07ee7d0091f8cb5ddecc4956ef1e7ab1e1849526"
+    },
+    {
+      "file": "change.patch",
+      "size": 36098,
+      "sha256": "d205f15fa392628deff5289c1ef2e49c1a295c853ff8927aff41a4842fb2ec70"
+    },
+    {
+      "file": "diff-check.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "final-source-proof.json",
+      "size": 746,
+      "sha256": "8393249df747b75d393c8e6296f5d58b8b65947365dd932bc1963f66e56f1021"
+    },
+    {
+      "file": "fixture-final-cleanup.json",
+      "size": 110,
+      "sha256": "0ca117e64578a179ab03e4a48ea903eea93cf1ebbbdc43b8842a20c99e851dc0"
+    },
+    {
+      "file": "fixture-final-command.json",
+      "size": 1605,
+      "sha256": "b55be5ab464fc841454faa235bd2adc7c905e885aef71b8e6e1c4f2c2367155c"
+    },
+    {
+      "file": "fixture-final-exit.json",
+      "size": 78,
+      "sha256": "343f691f14f1e2240e698487e4cf9ff84af71e072b267dabb9f531d10b574461"
+    },
+    {
+      "file": "fixture-final-server.log",
+      "size": 513,
+      "sha256": "a967377720b8e25cee71fa0971b80ed8af8bc86e02368ac3ef30fc83d0a7af6e"
+    },
+    {
+      "file": "fixture-final-steps.json",
+      "size": 32424,
+      "sha256": "8d95afa09a3446d1c8c84cc16b130c743b39d455029ec9aa221a96bb2e9f2513"
+    },
+    {
+      "file": "fixture-final.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "fixture-smoke.mts",
+      "size": 2721,
+      "sha256": "52c06c9de4fcd8074136fcfbd6163f9b489146a89013034243e278d8e78f03c3"
+    },
+    {
+      "file": "green-accepted-final-command.json",
+      "size": 1710,
+      "sha256": "bb4192b53b4dc3867e4aa78246392fe5a93d38e18ba718946179ce764f6cb9bb"
+    },
+    {
+      "file": "green-accepted-final-exit.json",
+      "size": 78,
+      "sha256": "8453275cf308faa094cd74578036bcc93544f11242336db6195fd8480d21a715"
+    },
+    {
+      "file": "green-accepted-final.json",
+      "size": 10883,
+      "sha256": "4c039ff7d7a05e2ae43bb9d76400c3591fa95ef358436481c4a8348d7b4f6bce"
+    },
+    {
+      "file": "green-accepted-final.log",
+      "size": 801,
+      "sha256": "cf6acbad7cef023f32efdf4d03e5b2f784d367f928400e2a3d1cee4a08fbb4d0"
+    },
+    {
+      "file": "green-lifecycle-exit.json",
+      "size": 78,
+      "sha256": "f075f4d3f75d02fe4bb12f5dcd333df997c598d46d41649b5e3984451e87ad24"
+    },
+    {
+      "file": "green-lifecycle.json",
+      "size": 12528,
+      "sha256": "0fc717e2953d54304b3bbcc67f84ec63279244b55225df68195229b54c4abdfe"
+    },
+    {
+      "file": "green-lifecycle.log",
+      "size": 5986,
+      "sha256": "a88013bdb798b237a395c073da0f94737ff958710223ef3dfe8d11d2611e005e"
+    },
+    {
+      "file": "guards-final-command.json",
+      "size": 1828,
+      "sha256": "efce0cd91b0afcaf5b64fe788d1e77efe0dfb3b361aa4f6be6888c7b7eafef33"
+    },
+    {
+      "file": "guards-final-exit.json",
+      "size": 78,
+      "sha256": "241a5c75ef5c76d31367ca616c3e2c3b2b177be4e7f0420a127499a74b6951d6"
+    },
+    {
+      "file": "guards-final.json",
+      "size": 1496,
+      "sha256": "8eb09abb46297c4e39b7b45932e49893c3cc0a666355242ee7c640d46bfbe306"
+    },
+    {
+      "file": "guards-final.log",
+      "size": 1052,
+      "sha256": "671d99c7a45c3b957c478e422bf985e1cb1db8d06e40d52135bcaea12ac5d446"
+    },
+    {
+      "file": "lint-final.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "make-manifest.cjs",
+      "size": 3471,
+      "sha256": "6d237f98f2facbcc9cdbb460299d85368719e23466fe16760fe6601196817555"
+    },
+    {
+      "file": "red-begin-confirmation-command.json",
+      "size": 1758,
+      "sha256": "537cb982d4bd7655a6c19f54981fd606837c722b1c05e3fa012ea40a9d741047"
+    },
+    {
+      "file": "red-begin-confirmation-exit.json",
+      "size": 78,
+      "sha256": "1058490d752f11fa9e224716a4a995d5d8417420ca6aa5a964b3d67f60cbb20a"
+    },
+    {
+      "file": "red-begin-confirmation.json",
+      "size": 9431,
+      "sha256": "717708c938dd738b9a27f606c93ef9bc05cb04230e083afe8eacd7c9f7c612fc"
+    },
+    {
+      "file": "red-begin-confirmation.log",
+      "size": 5083,
+      "sha256": "27b56f7b01cbf16156959d8e16721f063063b1e7c9139acb97daa4f71f08f619"
+    },
+    {
+      "file": "red-exit.json",
+      "size": 78,
+      "sha256": "f90dd7d6fd8ed7e1d05946fd7109dbf26ac0eb12160a5e1a23cff80f939cb950"
+    },
+    {
+      "file": "red-final-account-command.json",
+      "size": 1728,
+      "sha256": "30b1a7e31b69da6b4e9fc49d964aa77a110eee9513d5a0c22e33e9254720dbe1"
+    },
+    {
+      "file": "red-final-account-exit.json",
+      "size": 78,
+      "sha256": "c6c133ae2676bec8493569beb71fac5efa25e5474b1b947aa7e423d57a22fd15"
+    },
+    {
+      "file": "red-final-account-source-proof.json",
+      "size": 746,
+      "sha256": "45cc2630f851b4d9f5aab5dc9de3234e95db507ee1d2af2a76a16979cc9d0b29"
+    },
+    {
+      "file": "red-final-account.json",
+      "size": 10835,
+      "sha256": "b9a2e577fdeafc8da2a6bfdc29d8607ffa82b3965e1ebfe50c707e4f0933f98d"
+    },
+    {
+      "file": "red-final-account.log",
+      "size": 5418,
+      "sha256": "ffcb501727dca04c79f6b4a97df528967a657d806841f0bcfc1dedcd93ef1dfe"
+    },
+    {
+      "file": "red-final-bound-command.json",
+      "size": 1960,
+      "sha256": "81e089b02298e15d2dbe0339dd121e52ed402e1eb0d5cea56249982c6aeacbb6"
+    },
+    {
+      "file": "red-final-bound-exit.json",
+      "size": 78,
+      "sha256": "781daeb040a8b3009674d6d44ee7e24666f1aca5ea6fcda058b910894cbe53c0"
+    },
+    {
+      "file": "red-final-bound.json",
+      "size": 17174,
+      "sha256": "3a5c29258bdb20a447e1e4d549704895d7f088c6c02716b793ba4a1c9b3ef573"
+    },
+    {
+      "file": "red-final-bound.log",
+      "size": 16867,
+      "sha256": "527efb03b232801cdf3edd2b7c611fa0a1ad4e3594d28ca09798768f13246c7f"
+    },
+    {
+      "file": "red-lifecycle-command.json",
+      "size": 1712,
+      "sha256": "d8134d6c27e30758bd1a76a27db5018cf344ff6b1733e4146c41ecbc79c4fec9"
+    },
+    {
+      "file": "red-lifecycle-exit.json",
+      "size": 78,
+      "sha256": "541a10e89cb64334e7d356926cf1e66ac2ffaab795dfcbcb9285cf7297742981"
+    },
+    {
+      "file": "red-lifecycle.json",
+      "size": 12251,
+      "sha256": "d591358e834fd7c9fa94e7ac28d87cffac60931f14b8e6c3feb3b47bc955eeaf"
+    },
+    {
+      "file": "red-lifecycle.log",
+      "size": 9458,
+      "sha256": "77b5151fd06bf169a7243475dce47e51b180ed44deb8ededfcb7cd3b8bd0491c"
+    },
+    {
+      "file": "red.json",
+      "size": 12520,
+      "sha256": "0249fd95745b834e792a1628c9542c783fdfe7085392524f1d76f8c89ff36ba1"
+    },
+    {
+      "file": "red.log",
+      "size": 12248,
+      "sha256": "1362100467b5bc35a60ebbed6854918857e2d119e64a8551c09ca14fc979c7ff"
+    },
+    {
+      "file": "replay-baseline-final.cjs",
+      "size": 2273,
+      "sha256": "d24579b4940358b635ab49dcd2b646a73a995c2df5c1b90a3b3a2c90bb2b70a6"
+    },
+    {
+      "file": "run-check.cjs",
+      "size": 2303,
+      "sha256": "664348b18c02bacb16c335a8ff1ba14dc4ba5b31b2137f4f8d4f45b07b7cf5ef"
+    },
+    {
+      "file": "run-tests.cjs",
+      "size": 1552,
+      "sha256": "d28f5b97e0bf0b8b7d35d1ec6c742e16b8c70ec7ce8b5d31fba47106718571c9"
+    },
+    {
+      "file": "tsc-server-final.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "verification.json",
+      "size": 1981,
+      "sha256": "15e73aae53dc26a3822f3bc8e6fb16ee4062e7b2810912c4b7cfb6a01fd29edb"
+    }
+  ],
+  "count": 53,
+  "totalBytes": 257736
+}

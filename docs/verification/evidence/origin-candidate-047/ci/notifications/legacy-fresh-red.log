@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/delegation-thread.test.ts (20 tests | 1 failed) 10ms
+     × preserves a legacy fresh job with an exact opener but no work kind 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/delegation-thread.test.ts > parent delegation conversations > preserves a legacy fresh job with an exact opener but no work kind
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/delegation-thread.test.ts:71:34
+     69|     const fresh = task("legacy-named-job", { openedBy: opened() });
+     70|     const f = fixture([fresh], previous(fresh.threadId));
+     71|     expect(f.allocate().created).toBe(true);
+       |                                  ^
+     72|     expect(fresh.openedBy).not.toHaveProperty("continuity");
+     73|     expect(f.store.setTaskOpenedBy).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 19 passed (20)
+   Start at  08:24:44
+   Duration  763ms (transform 216ms, setup 550ms, import 29ms, tests 10ms, environment 0ms)
+

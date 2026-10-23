@@ -1,0 +1,2766 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-18T22:17:53.834Z",
+  "source": "ec60e5a8aa578c021132c5053d6bd5f0448bbbab",
+  "publishedBackendSource": "697e9f0adacd7d90af9b3f190ab5c4df978b48f1",
+  "version": "0.2.13",
+  "status": "read-only-backend-reuse-and-committed-evidence-verified",
+  "backend": {
+    "backendFiles": 94,
+    "roots": 85,
+    "closureFiles": 87,
+    "externalRelative": [
+      "shared/origin-columns.ts",
+      "shared/origin-site-address.ts"
+    ],
+    "relativeEdges": [
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../agentRuns.js",
+        "dependency": "backend/convex/agentRuns.ts"
+      },
+      {
+        "from": "backend/convex/agentRuns.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/_generated/server.d.ts",
+        "specifier": "./dataModel.js",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/_generated/dataModel.d.ts",
+        "specifier": "../schema.js",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/schema.ts",
+        "specifier": "./featureTables",
+        "dependency": "backend/convex/featureTables.ts"
+      },
+      {
+        "from": "backend/convex/schema.ts",
+        "specifier": "./agentsTables",
+        "dependency": "backend/convex/agentsTables.ts"
+      },
+      {
+        "from": "backend/convex/schema.ts",
+        "specifier": "./lib/storageValidators",
+        "dependency": "backend/convex/lib/storageValidators.ts"
+      },
+      {
+        "from": "backend/convex/schema.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/agentRuns.ts",
+        "specifier": "./agentsTables",
+        "dependency": "backend/convex/agentsTables.ts"
+      },
+      {
+        "from": "backend/convex/agentRuns.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/lib/auth.ts",
+        "specifier": "../_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/auth.ts",
+        "specifier": "../_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/agentRuns.ts",
+        "specifier": "./lib/agentAccess",
+        "dependency": "backend/convex/lib/agentAccess.ts"
+      },
+      {
+        "from": "backend/convex/lib/agentAccess.ts",
+        "specifier": "../_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/agentAccess.ts",
+        "specifier": "../_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/agentAccess.ts",
+        "specifier": "./auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/lib/agentAccess.ts",
+        "specifier": "./permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/lib/permissions.ts",
+        "specifier": "../_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/permissions.ts",
+        "specifier": "../_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/permissions.ts",
+        "specifier": "./auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/agentRuns.ts",
+        "specifier": "./lib/agentThreadRows",
+        "dependency": "backend/convex/lib/agentThreadRows.ts"
+      },
+      {
+        "from": "backend/convex/lib/agentThreadRows.ts",
+        "specifier": "../_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/agentThreadRows.ts",
+        "specifier": "../_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/agentThreadRows.ts",
+        "specifier": "../_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/agentThreadRows.ts",
+        "specifier": "../agentsTables",
+        "dependency": "backend/convex/agentsTables.ts"
+      },
+      {
+        "from": "backend/convex/lib/agentThreadRows.ts",
+        "specifier": "./agentAccess",
+        "dependency": "backend/convex/lib/agentAccess.ts"
+      },
+      {
+        "from": "backend/convex/agentRuns.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../agentThreads.js",
+        "dependency": "backend/convex/agentThreads.ts"
+      },
+      {
+        "from": "backend/convex/agentThreads.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/agentThreads.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/agentThreads.ts",
+        "specifier": "./lib/agentAccess",
+        "dependency": "backend/convex/lib/agentAccess.ts"
+      },
+      {
+        "from": "backend/convex/agentThreads.ts",
+        "specifier": "./lib/agentThreadRows",
+        "dependency": "backend/convex/lib/agentThreadRows.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../agents.js",
+        "dependency": "backend/convex/agents.ts"
+      },
+      {
+        "from": "backend/convex/agents.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/agents.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/agents.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/agents.ts",
+        "specifier": "./agentsTables",
+        "dependency": "backend/convex/agentsTables.ts"
+      },
+      {
+        "from": "backend/convex/agents.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/agents.ts",
+        "specifier": "./lib/agentAccess",
+        "dependency": "backend/convex/lib/agentAccess.ts"
+      },
+      {
+        "from": "backend/convex/agents.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/agents.ts",
+        "specifier": "./lib/storage",
+        "dependency": "backend/convex/lib/storage.ts"
+      },
+      {
+        "from": "backend/convex/lib/storage.ts",
+        "specifier": "../_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/storage.ts",
+        "specifier": "../_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/storage.ts",
+        "specifier": "./agentAccess",
+        "dependency": "backend/convex/lib/agentAccess.ts"
+      },
+      {
+        "from": "backend/convex/lib/storage.ts",
+        "specifier": "./auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/lib/storage.ts",
+        "specifier": "./permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../agentsTables.js",
+        "dependency": "backend/convex/agentsTables.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../auth.js",
+        "dependency": "backend/convex/auth.ts"
+      },
+      {
+        "from": "backend/convex/auth.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/auth.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/auth.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/auth.ts",
+        "specifier": "./workspaces",
+        "dependency": "backend/convex/workspaces.ts"
+      },
+      {
+        "from": "backend/convex/workspaces.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/workspaces.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/workspaces.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/workspaces.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/workspaces.ts",
+        "specifier": "./lib/invitationMail",
+        "dependency": "backend/convex/lib/invitationMail.ts"
+      },
+      {
+        "from": "backend/convex/lib/invitationMail.ts",
+        "specifier": "../../../shared/origin-site-address",
+        "dependency": "shared/origin-site-address.ts"
+      },
+      {
+        "from": "backend/convex/lib/invitationMail.ts",
+        "specifier": "../../../shared/origin-site-address",
+        "dependency": "shared/origin-site-address.ts"
+      },
+      {
+        "from": "backend/convex/workspaces.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/workspaces.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/auth.ts",
+        "specifier": "./lib/storage",
+        "dependency": "backend/convex/lib/storage.ts"
+      },
+      {
+        "from": "backend/convex/auth.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../chat.js",
+        "dependency": "backend/convex/chat.ts"
+      },
+      {
+        "from": "backend/convex/chat.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/chat.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/chat.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/chat.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../commits.js",
+        "dependency": "backend/convex/commits.ts"
+      },
+      {
+        "from": "backend/convex/commits.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/commits.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/commits.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/commits.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/commits.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/commits.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../connectors.js",
+        "dependency": "backend/convex/connectors.ts"
+      },
+      {
+        "from": "backend/convex/connectors.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/connectors.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/connectors.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/connectors.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/connectors.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/connectors.ts",
+        "specifier": "./projects",
+        "dependency": "backend/convex/projects.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./lib/repository",
+        "dependency": "backend/convex/lib/repository.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./lib/storage",
+        "dependency": "backend/convex/lib/storage.ts"
+      },
+      {
+        "from": "backend/convex/projects.ts",
+        "specifier": "./lib/columns",
+        "dependency": "backend/convex/lib/columns.ts"
+      },
+      {
+        "from": "backend/convex/lib/columns.ts",
+        "specifier": "../../../shared/origin-columns",
+        "dependency": "shared/origin-columns.ts"
+      },
+      {
+        "from": "backend/convex/lib/columns.ts",
+        "specifier": "../_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/columns.ts",
+        "specifier": "../_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/columns.ts",
+        "specifier": "../../../shared/origin-columns",
+        "dependency": "shared/origin-columns.ts"
+      },
+      {
+        "from": "backend/convex/connectors.ts",
+        "specifier": "./tasks",
+        "dependency": "backend/convex/tasks.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./lib/completions",
+        "dependency": "backend/convex/lib/completions.ts"
+      },
+      {
+        "from": "backend/convex/lib/completions.ts",
+        "specifier": "../_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/completions.ts",
+        "specifier": "../_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/completions.ts",
+        "specifier": "./repository",
+        "dependency": "backend/convex/lib/repository.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./notifications",
+        "dependency": "backend/convex/notifications.ts"
+      },
+      {
+        "from": "backend/convex/notifications.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/notifications.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/notifications.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/notifications.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/notifications.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/notifications.ts",
+        "specifier": "./lib/agentAccess",
+        "dependency": "backend/convex/lib/agentAccess.ts"
+      },
+      {
+        "from": "backend/convex/notifications.ts",
+        "specifier": "./lib/agentThreadRows",
+        "dependency": "backend/convex/lib/agentThreadRows.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "../lib/issue-mentions",
+        "dependency": "backend/lib/issue-mentions.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "../lib/comment-checklist",
+        "dependency": "backend/lib/comment-checklist.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./lib/columns",
+        "dependency": "backend/convex/lib/columns.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "../../shared/origin-columns",
+        "dependency": "shared/origin-columns.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./lib/repository",
+        "dependency": "backend/convex/lib/repository.ts"
+      },
+      {
+        "from": "backend/convex/tasks.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/connectors.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../credentials.js",
+        "dependency": "backend/convex/credentials.ts"
+      },
+      {
+        "from": "backend/convex/credentials.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/credentials.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/credentials.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/credentials.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../crons.js",
+        "dependency": "backend/convex/crons.ts"
+      },
+      {
+        "from": "backend/convex/crons.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../design.js",
+        "dependency": "backend/convex/design.ts"
+      },
+      {
+        "from": "backend/convex/design.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/design.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/design.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/design.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/design.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/design.ts",
+        "specifier": "./lib/storage",
+        "dependency": "backend/convex/lib/storage.ts"
+      },
+      {
+        "from": "backend/convex/design.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../documents.js",
+        "dependency": "backend/convex/documents.ts"
+      },
+      {
+        "from": "backend/convex/documents.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/documents.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/documents.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/documents.ts",
+        "specifier": "./lib/features",
+        "dependency": "backend/convex/lib/features.ts"
+      },
+      {
+        "from": "backend/convex/lib/features.ts",
+        "specifier": "../_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/features.ts",
+        "specifier": "../_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/features.ts",
+        "specifier": "./permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/documents.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../draw.js",
+        "dependency": "backend/convex/draw.ts"
+      },
+      {
+        "from": "backend/convex/draw.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/draw.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/draw.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/draw.ts",
+        "specifier": "./lib/storage",
+        "dependency": "backend/convex/lib/storage.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../featureTables.js",
+        "dependency": "backend/convex/featureTables.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../feedback.js",
+        "dependency": "backend/convex/feedback.ts"
+      },
+      {
+        "from": "backend/convex/feedback.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/feedback.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/feedback.ts",
+        "specifier": "./lib/features",
+        "dependency": "backend/convex/lib/features.ts"
+      },
+      {
+        "from": "backend/convex/feedback.ts",
+        "specifier": "./tasks",
+        "dependency": "backend/convex/tasks.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../github.js",
+        "dependency": "backend/convex/github.ts"
+      },
+      {
+        "from": "backend/convex/github.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/github.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/github.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/github.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/github.ts",
+        "specifier": "./lib/completions",
+        "dependency": "backend/convex/lib/completions.ts"
+      },
+      {
+        "from": "backend/convex/github.ts",
+        "specifier": "./lib/columns",
+        "dependency": "backend/convex/lib/columns.ts"
+      },
+      {
+        "from": "backend/convex/github.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/github.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../http.js",
+        "dependency": "backend/convex/http.ts"
+      },
+      {
+        "from": "backend/convex/http.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/http.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/http.ts",
+        "specifier": "../lib/http-body",
+        "dependency": "backend/lib/http-body.ts"
+      },
+      {
+        "from": "backend/convex/http.ts",
+        "specifier": "./storage",
+        "dependency": "backend/convex/storage.ts"
+      },
+      {
+        "from": "backend/convex/storage.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/storage.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/storage.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/storage.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/storage.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/storage.ts",
+        "specifier": "./lib/storage",
+        "dependency": "backend/convex/lib/storage.ts"
+      },
+      {
+        "from": "backend/convex/storage.ts",
+        "specifier": "../lib/http-body",
+        "dependency": "backend/lib/http-body.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../inbox.js",
+        "dependency": "backend/convex/inbox.ts"
+      },
+      {
+        "from": "backend/convex/inbox.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/inbox.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/inbox.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/inbox.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/inbox.ts",
+        "specifier": "./lib/features",
+        "dependency": "backend/convex/lib/features.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../integrations.js",
+        "dependency": "backend/convex/integrations.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "./lib/completions",
+        "dependency": "backend/convex/lib/completions.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "./lib/columns",
+        "dependency": "backend/convex/lib/columns.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "../../shared/origin-columns",
+        "dependency": "shared/origin-columns.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/integrations.ts",
+        "specifier": "./lib/repository",
+        "dependency": "backend/convex/lib/repository.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../issueRelations.js",
+        "dependency": "backend/convex/issueRelations.ts"
+      },
+      {
+        "from": "backend/convex/issueRelations.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/issueRelations.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/issueRelations.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../legacyImport.js",
+        "dependency": "backend/convex/legacyImport.ts"
+      },
+      {
+        "from": "backend/convex/legacyImport.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/legacyImport.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/legacyImport.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/legacyImport.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/legacyImport.ts",
+        "specifier": "./workspaces",
+        "dependency": "backend/convex/workspaces.ts"
+      },
+      {
+        "from": "backend/convex/legacyImport.ts",
+        "specifier": "./lib/columns",
+        "dependency": "backend/convex/lib/columns.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/agentAccess.js",
+        "dependency": "backend/convex/lib/agentAccess.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/agentThreadRows.js",
+        "dependency": "backend/convex/lib/agentThreadRows.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/auth.js",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/columns.js",
+        "dependency": "backend/convex/lib/columns.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/completions.js",
+        "dependency": "backend/convex/lib/completions.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/features.js",
+        "dependency": "backend/convex/lib/features.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/invitationMail.js",
+        "dependency": "backend/convex/lib/invitationMail.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/permissions.js",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/repository.js",
+        "dependency": "backend/convex/lib/repository.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/storage.js",
+        "dependency": "backend/convex/lib/storage.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/storageValidators.js",
+        "dependency": "backend/convex/lib/storageValidators.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/taskBranches.js",
+        "dependency": "backend/convex/lib/taskBranches.ts"
+      },
+      {
+        "from": "backend/convex/lib/taskBranches.ts",
+        "specifier": "../_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/taskBranches.ts",
+        "specifier": "../_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/lib/taskBranches.ts",
+        "specifier": "../../lib/task-branch",
+        "dependency": "backend/lib/task-branch.ts"
+      },
+      {
+        "from": "backend/convex/lib/taskBranches.ts",
+        "specifier": "./auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../lib/validators.js",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../memberProfiles.js",
+        "dependency": "backend/convex/memberProfiles.ts"
+      },
+      {
+        "from": "backend/convex/memberProfiles.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/memberProfiles.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/memberProfiles.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/memberProfiles.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../members.js",
+        "dependency": "backend/convex/members.ts"
+      },
+      {
+        "from": "backend/convex/members.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/members.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/members.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../meta.js",
+        "dependency": "backend/convex/meta.ts"
+      },
+      {
+        "from": "backend/convex/meta.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../notifications.js",
+        "dependency": "backend/convex/notifications.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../planning.js",
+        "dependency": "backend/convex/planning.ts"
+      },
+      {
+        "from": "backend/convex/planning.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/planning.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/planning.ts",
+        "specifier": "./lib/features",
+        "dependency": "backend/convex/lib/features.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../preferences.js",
+        "dependency": "backend/convex/preferences.ts"
+      },
+      {
+        "from": "backend/convex/preferences.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/preferences.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/preferences.ts",
+        "specifier": "./lib/features",
+        "dependency": "backend/convex/lib/features.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../projectPresence.js",
+        "dependency": "backend/convex/projectPresence.ts"
+      },
+      {
+        "from": "backend/convex/projectPresence.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/projectPresence.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../projects.js",
+        "dependency": "backend/convex/projects.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../storage.js",
+        "dependency": "backend/convex/storage.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../taskPRs.js",
+        "dependency": "backend/convex/taskPRs.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.ts",
+        "specifier": "./lib/completions",
+        "dependency": "backend/convex/lib/completions.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.ts",
+        "specifier": "./agentsTables",
+        "dependency": "backend/convex/agentsTables.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.ts",
+        "specifier": "./lib/taskBranches",
+        "dependency": "backend/convex/lib/taskBranches.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../tasks.js",
+        "dependency": "backend/convex/tasks.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../teams.js",
+        "dependency": "backend/convex/teams.ts"
+      },
+      {
+        "from": "backend/convex/teams.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/teams.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/teams.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/teams.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/teams.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/teams.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/teams.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../wiki.js",
+        "dependency": "backend/convex/wiki.ts"
+      },
+      {
+        "from": "backend/convex/wiki.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/wiki.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/wiki.ts",
+        "specifier": "./lib/validators",
+        "dependency": "backend/convex/lib/validators.ts"
+      },
+      {
+        "from": "backend/convex/wiki.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/wiki.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/wiki.ts",
+        "specifier": "./lib/features",
+        "dependency": "backend/convex/lib/features.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../workspaceSearch.js",
+        "dependency": "backend/convex/workspaceSearch.ts"
+      },
+      {
+        "from": "backend/convex/workspaceSearch.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/workspaceSearch.ts",
+        "specifier": "./lib/permissions",
+        "dependency": "backend/convex/lib/permissions.ts"
+      },
+      {
+        "from": "backend/convex/workspaceSearch.ts",
+        "specifier": "./lib/features",
+        "dependency": "backend/convex/lib/features.ts"
+      },
+      {
+        "from": "backend/convex/_generated/api.d.ts",
+        "specifier": "../workspaces.js",
+        "dependency": "backend/convex/workspaces.ts"
+      },
+      {
+        "from": "backend/convex/accessMatrix.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/accessMatrix.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/accessMatrix.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/authSessions.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/authSessions.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/authSessions.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/draftColumn.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/draftColumn.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/draftColumn.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/draftDefaults.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/draftDefaults.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/draftDefaults.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/draftDefaults.test.ts",
+        "specifier": "./lib/columns",
+        "dependency": "backend/convex/lib/columns.ts"
+      },
+      {
+        "from": "backend/convex/draftDefaults.test.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/draftImport.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/draftImport.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/draftImport.test.ts",
+        "specifier": "./lib/columns",
+        "dependency": "backend/convex/lib/columns.ts"
+      },
+      {
+        "from": "backend/convex/draftImport.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/draftMigration.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/draftMigration.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/draftMigration.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/draftMigration.test.ts",
+        "specifier": "./lib/columns",
+        "dependency": "backend/convex/lib/columns.ts"
+      },
+      {
+        "from": "backend/convex/draftMigration.test.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/githubRaces.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/githubRaces.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/githubRaces.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/httpSecurity.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/invitationMail.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/invitationMail.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/invitationMail.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/issueCompletion.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/issueCompletion.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/issueCompletion.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/legacyInvitationMail.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/legacyInvitationMail.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/legacyInvitationMail.test.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/legacyInvitationMail.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/legacyIssueCreation.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/legacyIssueCreation.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/legacyIssueCreation.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/mentions.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/mentions.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/mentions.test.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/mentions.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/mentions.test.ts",
+        "specifier": "./notifications",
+        "dependency": "backend/convex/notifications.ts"
+      },
+      {
+        "from": "backend/convex/mergeCompletion.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/mergeCompletion.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/mergeCompletion.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/meta.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/pg1Parity.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/pg1Parity.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/pg1Parity.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/pg1Parity.test.ts",
+        "specifier": "../lib/notification-quiet",
+        "dependency": "backend/lib/notification-quiet.ts"
+      },
+      {
+        "from": "backend/convex/projectInvites.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/projectInvites.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/projectInvites.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/projectWorkflow.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/projectWorkflow.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/projectWorkflow.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/projectWorkflow.test.ts",
+        "specifier": "../lib/issue-mentions",
+        "dependency": "backend/lib/issue-mentions.ts"
+      },
+      {
+        "from": "backend/convex/projectWorkflow.test.ts",
+        "specifier": "./lib/repository",
+        "dependency": "backend/convex/lib/repository.ts"
+      },
+      {
+        "from": "backend/convex/sharedAgentQueue.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/sharedAgentQueue.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/sharedAgentQueue.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/sharedAgents.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/sharedAgents.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/sharedAgents.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/storageAdmission.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/storageAdmission.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/storageAdmission.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/storageAdmission.test.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/storageAdmission.test.ts",
+        "specifier": "./_generated/server",
+        "dependency": "backend/convex/_generated/server.d.ts"
+      },
+      {
+        "from": "backend/convex/storageAdmission.test.ts",
+        "specifier": "./_generated/dataModel",
+        "dependency": "backend/convex/_generated/dataModel.d.ts"
+      },
+      {
+        "from": "backend/convex/storageReferences.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/storageReferences.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/storageReferences.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.test.ts",
+        "specifier": "./_generated/api",
+        "dependency": "backend/convex/_generated/api.d.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.test.ts",
+        "specifier": "./schema",
+        "dependency": "backend/convex/schema.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.test.ts",
+        "specifier": "./lib/auth",
+        "dependency": "backend/convex/lib/auth.ts"
+      },
+      {
+        "from": "backend/convex/taskPRs.test.ts",
+        "specifier": "../lib/github-pr-snapshot",
+        "dependency": "backend/lib/github-pr-snapshot.ts"
+      }
+    ],
+    "externalImports": [
+      "convex-test",
+      "convex/server",
+      "convex/values",
+      "vitest",
+      "vitest/config",
+      "yjs",
+      "zod"
+    ],
+    "nonLiteral": [],
+    "unresolved": [],
+    "bindings": [
+      {
+        "path": "backend/.env.example",
+        "candidateSha256": "2cb6716970ebf45ad731058532679b520c61d948202d89c45192efac1dce857e",
+        "baselineSha256": "2cb6716970ebf45ad731058532679b520c61d948202d89c45192efac1dce857e",
+        "normalization": "none",
+        "bytes": 1088,
+        "gitBlob": "6119f9b63e85a0b4ccad7efc6966f6ab3dd2464a"
+      },
+      {
+        "path": "backend/.gitignore",
+        "candidateSha256": "14a891a6e8028f08fdc109d545a767692ebd193700d6eeedd64c7105281709f0",
+        "baselineSha256": "14a891a6e8028f08fdc109d545a767692ebd193700d6eeedd64c7105281709f0",
+        "normalization": "none",
+        "bytes": 62,
+        "gitBlob": "b3da67e600378f3a3931bd3bab7af1f8bc538e80"
+      },
+      {
+        "path": "backend/AGENTS.md",
+        "candidateSha256": "004f5403d9d12126070e167e5a6e8a3bf5b0727b099a3ab089633285dc76af68",
+        "baselineSha256": "004f5403d9d12126070e167e5a6e8a3bf5b0727b099a3ab089633285dc76af68",
+        "normalization": "none",
+        "bytes": 564,
+        "gitBlob": "c2f2c92695c603536a8a3d80bef3415c57290911"
+      },
+      {
+        "path": "backend/LICENSE",
+        "candidateSha256": "7652adfcd2301e1f2f91f498f963c9d1e04ce16f78ff9432fca5c46bd44add8d",
+        "baselineSha256": "7652adfcd2301e1f2f91f498f963c9d1e04ce16f78ff9432fca5c46bd44add8d",
+        "normalization": "none",
+        "bytes": 1076,
+        "gitBlob": "f7f857c518cae8b4b388059c0a827746cde7fcf4"
+      },
+      {
+        "path": "backend/README.md",
+        "candidateSha256": "f23ba6854f1fb493bdbf3bb5ca01a22c7fd77003f77a46e3705b0a302aa9f730",
+        "baselineSha256": "f23ba6854f1fb493bdbf3bb5ca01a22c7fd77003f77a46e3705b0a302aa9f730",
+        "normalization": "none",
+        "bytes": 1272,
+        "gitBlob": "b335631871eb63846a57eea2719e69889ffbbce8"
+      },
+      {
+        "path": "backend/convex/_generated/ai/ai-files.state.json",
+        "candidateSha256": "ace53748e8e37b3b0ad0e9f2e0e9666818036f5b7f6b609ad6c3b826a11a01ab",
+        "baselineSha256": "ace53748e8e37b3b0ad0e9f2e0e9666818036f5b7f6b609ad6c3b826a11a01ab",
+        "normalization": "none",
+        "bytes": 334,
+        "gitBlob": "d4f9a0a5625aa75d0d37b44ca57cdc72de5fe459"
+      },
+      {
+        "path": "backend/convex/_generated/ai/guidelines.md",
+        "candidateSha256": "62d72acb9afcc18f658d88dd772f34b5b1da5fa60ef0402e57a784d97c458e57",
+        "baselineSha256": "62d72acb9afcc18f658d88dd772f34b5b1da5fa60ef0402e57a784d97c458e57",
+        "normalization": "none",
+        "bytes": 19556,
+        "gitBlob": "e41beddc6642ee00ad17bc2b1be3df71a9512f44"
+      },
+      {
+        "path": "backend/convex/_generated/api.d.ts",
+        "candidateSha256": "23239e6e8676e453c724b7b4a0d2383f9f317c465fb87cb47c2139b94a67ff90",
+        "baselineSha256": "23239e6e8676e453c724b7b4a0d2383f9f317c465fb87cb47c2139b94a67ff90",
+        "normalization": "none",
+        "bytes": 5122,
+        "gitBlob": "b56745cdd9940e7d411fcbf7107a612f341011e0"
+      },
+      {
+        "path": "backend/convex/_generated/api.js",
+        "candidateSha256": "f513058549831e85376f8d19cafaf2a4a770b6eb1b859fb371141f2c9dec0d70",
+        "baselineSha256": "f513058549831e85376f8d19cafaf2a4a770b6eb1b859fb371141f2c9dec0d70",
+        "normalization": "none",
+        "bytes": 480,
+        "gitBlob": "44bf98583204c1f9474b38f84b48659b192eea8b"
+      },
+      {
+        "path": "backend/convex/_generated/dataModel.d.ts",
+        "candidateSha256": "db177073d16a4393c7a96bcdc3a2a904e88c2432d54d138ca7715cc431982c17",
+        "baselineSha256": "db177073d16a4393c7a96bcdc3a2a904e88c2432d54d138ca7715cc431982c17",
+        "normalization": "none",
+        "bytes": 1736,
+        "gitBlob": "f97fd1942151eef5b818c0679f7a12f2c22557b5"
+      },
+      {
+        "path": "backend/convex/_generated/server.d.ts",
+        "candidateSha256": "2b536ee08d434dd044efe0302aeaf4ccb00cd08af10c9f8c7bc7a6734e4aa49b",
+        "baselineSha256": "2b536ee08d434dd044efe0302aeaf4ccb00cd08af10c9f8c7bc7a6734e4aa49b",
+        "normalization": "none",
+        "bytes": 6008,
+        "gitBlob": "f235db4a112ece75f7698b191532048a98270c21"
+      },
+      {
+        "path": "backend/convex/_generated/server.js",
+        "candidateSha256": "0cdd1d842b9458d8a6f2444c35eb9929312316a384ca76a4b1d964bedde8a6f2",
+        "baselineSha256": "0cdd1d842b9458d8a6f2444c35eb9929312316a384ca76a4b1d964bedde8a6f2",
+        "normalization": "none",
+        "bytes": 3872,
+        "gitBlob": "2dbe0dbd475de29f550f222942597ef9f5dc8654"
+      },
+      {
+        "path": "backend/convex/accessMatrix.test.ts",
+        "candidateSha256": "fa78fbcd1467c4809463ffb8863ad567babd79518d81f327e8fcb8fb8219a555",
+        "baselineSha256": "fa78fbcd1467c4809463ffb8863ad567babd79518d81f327e8fcb8fb8219a555",
+        "normalization": "none",
+        "bytes": 14587,
+        "gitBlob": "129ca077fd5239fdf32012323999001af5fcfea9"
+      },
+      {
+        "path": "backend/convex/agentRuns.ts",
+        "candidateSha256": "62e089f79547165c96c317864940b85d2eacac3503d042d4147b99095c4805af",
+        "baselineSha256": "62e089f79547165c96c317864940b85d2eacac3503d042d4147b99095c4805af",
+        "normalization": "none",
+        "bytes": 12038,
+        "gitBlob": "976e40da35cfea1e5550587aed789d4da29cdaa8"
+      },
+      {
+        "path": "backend/convex/agentThreads.ts",
+        "candidateSha256": "df1d61109859dcd9509d3448b278aa6334a4a3bc84b86bb53a7d5b7f121d5a33",
+        "baselineSha256": "df1d61109859dcd9509d3448b278aa6334a4a3bc84b86bb53a7d5b7f121d5a33",
+        "normalization": "none",
+        "bytes": 8206,
+        "gitBlob": "36de20fe65ae4dcd05b5decdb779d0cc88ca4d89"
+      },
+      {
+        "path": "backend/convex/agents.ts",
+        "candidateSha256": "5eba763c29e8f458a5da7b8c55a615503fc7b00c7af60dafb607cbe8acd265f0",
+        "baselineSha256": "5eba763c29e8f458a5da7b8c55a615503fc7b00c7af60dafb607cbe8acd265f0",
+        "normalization": "none",
+        "bytes": 16045,
+        "gitBlob": "ddf03ac582fb5b057ba2aca34c8fa443e3c38b07"
+      },
+      {
+        "path": "backend/convex/agentsTables.ts",
+        "candidateSha256": "983b5a482fc01e4c8c78499cf33b722bb2eba88ae1f734617525bc394e2462a2",
+        "baselineSha256": "983b5a482fc01e4c8c78499cf33b722bb2eba88ae1f734617525bc394e2462a2",
+        "normalization": "none",
+        "bytes": 12664,
+        "gitBlob": "19b85f7c87d5a81e6de2ec5c7b1d17011a34c7b7"
+      },
+      {
+        "path": "backend/convex/auth.ts",
+        "candidateSha256": "bd19c396ed409164c018f3540827b9adf867f7a05eeb0e09b65a9a6d13e75b67",
+        "baselineSha256": "bd19c396ed409164c018f3540827b9adf867f7a05eeb0e09b65a9a6d13e75b67",
+        "normalization": "none",
+        "bytes": 13160,
+        "gitBlob": "c25c26a3f8bbd5c97371d9122334a707734f61b3"
+      },
+      {
+        "path": "backend/convex/authSessions.test.ts",
+        "candidateSha256": "848ec82a31ef080f90f958eea31bc26d513f9502d37dca7bcd897ce91b857c0f",
+        "baselineSha256": "848ec82a31ef080f90f958eea31bc26d513f9502d37dca7bcd897ce91b857c0f",
+        "normalization": "none",
+        "bytes": 2276,
+        "gitBlob": "10ffb6b7918129be3490924e928d176b5acb88d6"
+      },
+      {
+        "path": "backend/convex/chat.ts",
+        "candidateSha256": "ae275f4c38254fcbc5cc13cfccc1b512a58796fc3720bfd17ef86db06a805166",
+        "baselineSha256": "ae275f4c38254fcbc5cc13cfccc1b512a58796fc3720bfd17ef86db06a805166",
+        "normalization": "none",
+        "bytes": 6467,
+        "gitBlob": "ef4f07f175be99735df35352ab75dbcd7c39a0f0"
+      },
+      {
+        "path": "backend/convex/commits.ts",
+        "candidateSha256": "be9d1afa2d48d0f4e800e80331fde4c32e961d960d39d3b9649212d59942360e",
+        "baselineSha256": "be9d1afa2d48d0f4e800e80331fde4c32e961d960d39d3b9649212d59942360e",
+        "normalization": "none",
+        "bytes": 6675,
+        "gitBlob": "4a0600dde2e4d3bc1bf887e3f3a6e39acb742cd4"
+      },
+      {
+        "path": "backend/convex/connectors.ts",
+        "candidateSha256": "2c740582d73cae692049ad6994143faca3513e627df73075df3cd15ffdcc2e08",
+        "baselineSha256": "2c740582d73cae692049ad6994143faca3513e627df73075df3cd15ffdcc2e08",
+        "normalization": "none",
+        "bytes": 13197,
+        "gitBlob": "2fafbb61c4b637b9b08b895d6e34a6c08f1d5000"
+      },
+      {
+        "path": "backend/convex/credentials.ts",
+        "candidateSha256": "273ffcf59a6d290a98be2dfdb8cf56431b858e90116830db5d9a99530871cbc6",
+        "baselineSha256": "273ffcf59a6d290a98be2dfdb8cf56431b858e90116830db5d9a99530871cbc6",
+        "normalization": "none",
+        "bytes": 4618,
+        "gitBlob": "3e0cbad94a048f37ead5198d8596bf16a5c379a4"
+      },
+      {
+        "path": "backend/convex/crons.ts",
+        "candidateSha256": "7141e7c054c1e961ac9f68ec2c8fccd012f6454112d1970c6a68250c0fe66407",
+        "baselineSha256": "7141e7c054c1e961ac9f68ec2c8fccd012f6454112d1970c6a68250c0fe66407",
+        "normalization": "none",
+        "bytes": 831,
+        "gitBlob": "af2d8cf56154a2383227e2562eab86fb397eb950"
+      },
+      {
+        "path": "backend/convex/design.ts",
+        "candidateSha256": "c11320b85d5b3d93070f641c2257f343b0fc99cd781d5ddaad3e125536c343ac",
+        "baselineSha256": "c11320b85d5b3d93070f641c2257f343b0fc99cd781d5ddaad3e125536c343ac",
+        "normalization": "none",
+        "bytes": 7477,
+        "gitBlob": "ddaa36026f1bd7bcd9fdcd612fd7901b7efeb6b0"
+      },
+      {
+        "path": "backend/convex/documents.ts",
+        "candidateSha256": "f03b216865900b761aa93990eb2c3b9c897a76a086e4c518cb3254aff8c5abf4",
+        "baselineSha256": "f03b216865900b761aa93990eb2c3b9c897a76a086e4c518cb3254aff8c5abf4",
+        "normalization": "none",
+        "bytes": 6159,
+        "gitBlob": "ebc48e9cbebc0b88f97e731df4383de7a407e07d"
+      },
+      {
+        "path": "backend/convex/draftColumn.test.ts",
+        "candidateSha256": "69637b6f6e6c4755f9e4b419f7ae2a7c82f944bdb816273478277e4a85e9f0ab",
+        "baselineSha256": "69637b6f6e6c4755f9e4b419f7ae2a7c82f944bdb816273478277e4a85e9f0ab",
+        "normalization": "none",
+        "bytes": 7607,
+        "gitBlob": "c517100d88d05c51b43047c99eaa0012c21bb91a"
+      },
+      {
+        "path": "backend/convex/draftDefaults.test.ts",
+        "candidateSha256": "bccd4035ff51195e4a080de84290b916e45f7fc77b645fac30936c48f60542fd",
+        "baselineSha256": "bccd4035ff51195e4a080de84290b916e45f7fc77b645fac30936c48f60542fd",
+        "normalization": "none",
+        "bytes": 16354,
+        "gitBlob": "441b23a97d03519a78e8b90dd0c8e0f2a73acc9d"
+      },
+      {
+        "path": "backend/convex/draftImport.test.ts",
+        "candidateSha256": "56419e601b09946c7d23de62d5eeec92e6e189bb999f1cd14d8970d6fd1b83e0",
+        "baselineSha256": "56419e601b09946c7d23de62d5eeec92e6e189bb999f1cd14d8970d6fd1b83e0",
+        "normalization": "none",
+        "bytes": 4353,
+        "gitBlob": "5d635dc66a5acefdd47729b95061c30e4cec008b"
+      },
+      {
+        "path": "backend/convex/draftMigration.test.ts",
+        "candidateSha256": "c75f0cd6fb021a312f3f81c63f01351202b313deae6a3c108fc4edaf548dd76a",
+        "baselineSha256": "c75f0cd6fb021a312f3f81c63f01351202b313deae6a3c108fc4edaf548dd76a",
+        "normalization": "none",
+        "bytes": 12521,
+        "gitBlob": "5f9261f1ba67f76a1b72c10b90c3a631489f6d95"
+      },
+      {
+        "path": "backend/convex/draw.ts",
+        "candidateSha256": "7a2642498007d9a220e5e8e95fc57a42c8012394250c73b2ee8be0530ce92747",
+        "baselineSha256": "7a2642498007d9a220e5e8e95fc57a42c8012394250c73b2ee8be0530ce92747",
+        "normalization": "none",
+        "bytes": 9403,
+        "gitBlob": "9bf2d6ef44bf4920fd172c247f1c076854fd9fdf"
+      },
+      {
+        "path": "backend/convex/featureTables.ts",
+        "candidateSha256": "63cad7f3183693ce1e6b2e04d67b0ed7c84b86429b9fef4a39e7676627ac7f58",
+        "baselineSha256": "63cad7f3183693ce1e6b2e04d67b0ed7c84b86429b9fef4a39e7676627ac7f58",
+        "normalization": "none",
+        "bytes": 2734,
+        "gitBlob": "6df35255bb6fef46145c92bc7aae294537e0deb4"
+      },
+      {
+        "path": "backend/convex/feedback.ts",
+        "candidateSha256": "ef31e7670675d405e0d3c84e929a78d4280f896e7406da24a9d00123d58386f1",
+        "baselineSha256": "ef31e7670675d405e0d3c84e929a78d4280f896e7406da24a9d00123d58386f1",
+        "normalization": "none",
+        "bytes": 6483,
+        "gitBlob": "47eb3dd9623c8b28bc5c7350fef6ba174342d63d"
+      },
+      {
+        "path": "backend/convex/github.ts",
+        "candidateSha256": "af2565df2f5cfadf1143227a1fc46788e47e5c6e067912f9f4ab21cba4f70e43",
+        "baselineSha256": "af2565df2f5cfadf1143227a1fc46788e47e5c6e067912f9f4ab21cba4f70e43",
+        "normalization": "none",
+        "bytes": 15013,
+        "gitBlob": "5a739e645d68c9b998460f1e59f4e972e6438310"
+      },
+      {
+        "path": "backend/convex/githubRaces.test.ts",
+        "candidateSha256": "99f88a8ad8a6d95b6317e95986767a0b54d97ef4452951c62875cf2ab6036996",
+        "baselineSha256": "99f88a8ad8a6d95b6317e95986767a0b54d97ef4452951c62875cf2ab6036996",
+        "normalization": "none",
+        "bytes": 4559,
+        "gitBlob": "ebdf9fd557df238cc94cd05504b27ede18985fc7"
+      },
+      {
+        "path": "backend/convex/http.ts",
+        "candidateSha256": "9fde9c78f6d78f09c43925df56cd95d183bf00be1d79ed555a630c95857ed208",
+        "baselineSha256": "9fde9c78f6d78f09c43925df56cd95d183bf00be1d79ed555a630c95857ed208",
+        "normalization": "none",
+        "bytes": 3685,
+        "gitBlob": "a9ab74f77cfb3fd2cd4afa378c4e2beefbaa55e0"
+      },
+      {
+        "path": "backend/convex/httpSecurity.test.ts",
+        "candidateSha256": "2791b5215f266923253e57225a2caa6bc3f2b34d87c19136539b74236b2a3397",
+        "baselineSha256": "2791b5215f266923253e57225a2caa6bc3f2b34d87c19136539b74236b2a3397",
+        "normalization": "none",
+        "bytes": 903,
+        "gitBlob": "fb2a066437855b20aef52afaa668ccf52454fd15"
+      },
+      {
+        "path": "backend/convex/inbox.ts",
+        "candidateSha256": "6b4857232c1bb0d7c767bff554261dc1fe45651ab9792ab6daec2e122e41b959",
+        "baselineSha256": "6b4857232c1bb0d7c767bff554261dc1fe45651ab9792ab6daec2e122e41b959",
+        "normalization": "none",
+        "bytes": 7694,
+        "gitBlob": "e633c05dfbdadc342956686cbec8de67d181e544"
+      },
+      {
+        "path": "backend/convex/integrations.ts",
+        "candidateSha256": "96ea47b84d2c637d6ec64ec50a294da415879b2ddd2746ee5b1f9319944eb412",
+        "baselineSha256": "96ea47b84d2c637d6ec64ec50a294da415879b2ddd2746ee5b1f9319944eb412",
+        "normalization": "none",
+        "bytes": 17531,
+        "gitBlob": "9de569bbe86ed4a238e7c96c9b8cf269464a711f"
+      },
+      {
+        "path": "backend/convex/invitationMail.test.ts",
+        "candidateSha256": "4349eac0b8335a3004e50625d61fde218182e928faf1d2fb1aaa01cfe4331349",
+        "baselineSha256": "4349eac0b8335a3004e50625d61fde218182e928faf1d2fb1aaa01cfe4331349",
+        "normalization": "none",
+        "bytes": 15923,
+        "gitBlob": "b173ed71400a3b3d092c357ab49a1f250188468e"
+      },
+      {
+        "path": "backend/convex/issueCompletion.test.ts",
+        "candidateSha256": "8e5acc446b697e40e15f11c6670db192392bd7372d5163a49f3f1ec68b8af085",
+        "baselineSha256": "8e5acc446b697e40e15f11c6670db192392bd7372d5163a49f3f1ec68b8af085",
+        "normalization": "none",
+        "bytes": 4116,
+        "gitBlob": "1000e3452f99063bb508609d31a3d2651cc14de9"
+      },
+      {
+        "path": "backend/convex/issueRelations.ts",
+        "candidateSha256": "1c0ae1b7f7dbe271b482bcab2a0bc16861eda0e4239c56ece89a9777261e9d40",
+        "baselineSha256": "1c0ae1b7f7dbe271b482bcab2a0bc16861eda0e4239c56ece89a9777261e9d40",
+        "normalization": "none",
+        "bytes": 5014,
+        "gitBlob": "5a4193a38df00f3de7ac78e1fe027e2a498d6c58"
+      },
+      {
+        "path": "backend/convex/legacyImport.ts",
+        "candidateSha256": "fac602ef80f5db08324fdb8318f33a70789d51d7b154877b61a75d274b327f45",
+        "baselineSha256": "fac602ef80f5db08324fdb8318f33a70789d51d7b154877b61a75d274b327f45",
+        "normalization": "none",
+        "bytes": 7827,
+        "gitBlob": "93c482aebd910d376e54a0e1c337d148d8e73f21"
+      },
+      {
+        "path": "backend/convex/legacyInvitationMail.test.ts",
+        "candidateSha256": "56b0aa5a31b4f6d459738bb95bd5f4d0f93bc8d8dfeb18e759b92380d058cb8f",
+        "baselineSha256": "56b0aa5a31b4f6d459738bb95bd5f4d0f93bc8d8dfeb18e759b92380d058cb8f",
+        "normalization": "none",
+        "bytes": 3554,
+        "gitBlob": "eb1d828786863bccf80cd0c4a6a1f8eb4c6f7a2b"
+      },
+      {
+        "path": "backend/convex/legacyIssueCreation.test.ts",
+        "candidateSha256": "024edaa23dfc6893baf98db9c8359e32d91a4911be8404901d7b929b82202b89",
+        "baselineSha256": "024edaa23dfc6893baf98db9c8359e32d91a4911be8404901d7b929b82202b89",
+        "normalization": "none",
+        "bytes": 6427,
+        "gitBlob": "08dcc6f8a1954e4bb95a93ef2df759e08d8b04fe"
+      },
+      {
+        "path": "backend/convex/lib/agentAccess.ts",
+        "candidateSha256": "0c5e1ca7b70cb6939a34a6f44b7fed0ecae3e2ddd86cc98e9d17fde43ac28454",
+        "baselineSha256": "0c5e1ca7b70cb6939a34a6f44b7fed0ecae3e2ddd86cc98e9d17fde43ac28454",
+        "normalization": "none",
+        "bytes": 4873,
+        "gitBlob": "c9adc6a945b8cb0adbb00517a2821bb3ebe026c3"
+      },
+      {
+        "path": "backend/convex/lib/agentThreadRows.ts",
+        "candidateSha256": "d615ca21de02f6885666dd7836f3dec152789c29d731e4131060c0a7d0602957",
+        "baselineSha256": "d615ca21de02f6885666dd7836f3dec152789c29d731e4131060c0a7d0602957",
+        "normalization": "none",
+        "bytes": 6030,
+        "gitBlob": "0fcdfca21e33135380125605198d2e55784df5e6"
+      },
+      {
+        "path": "backend/convex/lib/auth.ts",
+        "candidateSha256": "3fc94b50e6fc5898aa5d7a39a8bdaaab2bc27de171fcb8d0509ab2f49849e2a2",
+        "baselineSha256": "3fc94b50e6fc5898aa5d7a39a8bdaaab2bc27de171fcb8d0509ab2f49849e2a2",
+        "normalization": "none",
+        "bytes": 5268,
+        "gitBlob": "212c936bafc9e94d4eff3a49bc7751a220353e6f"
+      },
+      {
+        "path": "backend/convex/lib/columns.ts",
+        "candidateSha256": "64cdbe511258f5c299e814ec00d1dc8d9a03905afb6da297d068b88ed591db99",
+        "baselineSha256": "64cdbe511258f5c299e814ec00d1dc8d9a03905afb6da297d068b88ed591db99",
+        "normalization": "none",
+        "bytes": 3708,
+        "gitBlob": "fb0e9a0dd44f6f30deeda7345477eeca4b4a08a6"
+      },
+      {
+        "path": "backend/convex/lib/completions.ts",
+        "candidateSha256": "195a3ed46bae219ae8723972fa969cb22a016b4790d204cbe36947fad56a9da6",
+        "baselineSha256": "195a3ed46bae219ae8723972fa969cb22a016b4790d204cbe36947fad56a9da6",
+        "normalization": "none",
+        "bytes": 1199,
+        "gitBlob": "90a7c5ad77ebefdd3c15619310cc16ffc8d8cc8a"
+      },
+      {
+        "path": "backend/convex/lib/features.ts",
+        "candidateSha256": "f0fe7073e4bf70be40d1b696bfd906ed738c5236aa7901c2fd99ca9d8833cb9a",
+        "baselineSha256": "f0fe7073e4bf70be40d1b696bfd906ed738c5236aa7901c2fd99ca9d8833cb9a",
+        "normalization": "none",
+        "bytes": 1279,
+        "gitBlob": "e9734b200f0e0dcdd336a0e124de3c597eddffc4"
+      },
+      {
+        "path": "backend/convex/lib/invitationMail.ts",
+        "candidateSha256": "cc828b89b665e7a4d274d7dc993f32e984beb01d3d54b70d5d48c3aef18e80dc",
+        "baselineSha256": "cc828b89b665e7a4d274d7dc993f32e984beb01d3d54b70d5d48c3aef18e80dc",
+        "normalization": "none",
+        "bytes": 2847,
+        "gitBlob": "d3112223648e36bc4babe19c512e8fc92c028677"
+      },
+      {
+        "path": "backend/convex/lib/permissions.ts",
+        "candidateSha256": "579f2518d6a82ebd9ced89fb5e323d934c59d2af32df588dd29ed8ba06584546",
+        "baselineSha256": "579f2518d6a82ebd9ced89fb5e323d934c59d2af32df588dd29ed8ba06584546",
+        "normalization": "none",
+        "bytes": 5331,
+        "gitBlob": "cacbc469e0abc32f8e54e7c612139e660073eb5e"
+      },
+      {
+        "path": "backend/convex/lib/repository.ts",
+        "candidateSha256": "e09a4a91f36e96184969c63017852ac42f8eeb51d83cd1a9f66bfefca3b17fbb",
+        "baselineSha256": "e09a4a91f36e96184969c63017852ac42f8eeb51d83cd1a9f66bfefca3b17fbb",
+        "normalization": "none",
+        "bytes": 422,
+        "gitBlob": "ea0f59b0cc2ae90fb526271141d695b5a1c015fd"
+      },
+      {
+        "path": "backend/convex/lib/storage.ts",
+        "candidateSha256": "dd6a1ca00b1e3dbbc83f3131416f10b703d5d86b2bfb6ed6473a64ae78f0c165",
+        "baselineSha256": "dd6a1ca00b1e3dbbc83f3131416f10b703d5d86b2bfb6ed6473a64ae78f0c165",
+        "normalization": "none",
+        "bytes": 8063,
+        "gitBlob": "b018ad94ec260c4f6554b75b4f27828d6dfc48f5"
+      },
+      {
+        "path": "backend/convex/lib/storageValidators.ts",
+        "candidateSha256": "9e7a718fbe0b99c53754ff3d3fc6ff8060a11b08124e407d897293eb247af065",
+        "baselineSha256": "9e7a718fbe0b99c53754ff3d3fc6ff8060a11b08124e407d897293eb247af065",
+        "normalization": "none",
+        "bytes": 713,
+        "gitBlob": "4429ca291482946c789e3da7f25507bdefb2030a"
+      },
+      {
+        "path": "backend/convex/lib/taskBranches.ts",
+        "candidateSha256": "112936e35a0a9b4dc3e8b3b405c1b51fae2ed493b6e65c66bf6f1516b588593e",
+        "baselineSha256": "112936e35a0a9b4dc3e8b3b405c1b51fae2ed493b6e65c66bf6f1516b588593e",
+        "normalization": "none",
+        "bytes": 1410,
+        "gitBlob": "9d7a50fd51f735f45158471d1828cf3c805c9b92"
+      },
+      {
+        "path": "backend/convex/lib/validators.ts",
+        "candidateSha256": "51801aec43a1ec4858072a57a755674ba60327458a821099648c957e5e4b21d5",
+        "baselineSha256": "51801aec43a1ec4858072a57a755674ba60327458a821099648c957e5e4b21d5",
+        "normalization": "none",
+        "bytes": 1825,
+        "gitBlob": "dda1df55abfbe935a57be7fb89c3a01f18484caa"
+      },
+      {
+        "path": "backend/convex/memberProfiles.ts",
+        "candidateSha256": "b36074920f31fc808ce53463201384b6fe8c66372c47ac2f790d8519e2642d72",
+        "baselineSha256": "b36074920f31fc808ce53463201384b6fe8c66372c47ac2f790d8519e2642d72",
+        "normalization": "none",
+        "bytes": 3118,
+        "gitBlob": "2a47203a3bf081ac6a602a309fa4a8827494747b"
+      },
+      {
+        "path": "backend/convex/members.ts",
+        "candidateSha256": "e56221c44aaf77be0557c080d3580a453d2091056e43a41938d19b8d333af2dd",
+        "baselineSha256": "e56221c44aaf77be0557c080d3580a453d2091056e43a41938d19b8d333af2dd",
+        "normalization": "none",
+        "bytes": 7086,
+        "gitBlob": "ccbe7085bdd187d06d7f0e06445e2d33995a7b5e"
+      },
+      {
+        "path": "backend/convex/mentions.test.ts",
+        "candidateSha256": "5ada29e2e7c06837b3ad0cb102c79dc30502d2c5f25b46dcebd561cd037ca26d",
+        "baselineSha256": "5ada29e2e7c06837b3ad0cb102c79dc30502d2c5f25b46dcebd561cd037ca26d",
+        "normalization": "none",
+        "bytes": 8658,
+        "gitBlob": "647ecf4c2cd580c64ece29db87d601dbd5f43cc5"
+      },
+      {
+        "path": "backend/convex/mergeCompletion.test.ts",
+        "candidateSha256": "8d1ac4fc8d54c236c8550682f6da122fbba0b520e3db5b88eda80caf49fa20d1",
+        "baselineSha256": "8d1ac4fc8d54c236c8550682f6da122fbba0b520e3db5b88eda80caf49fa20d1",
+        "normalization": "none",
+        "bytes": 10533,
+        "gitBlob": "3040ca82c3675febbe3acca7c3479392fcab344e"
+      },
+      {
+        "path": "backend/convex/meta.test.ts",
+        "candidateSha256": "891cddd959b26f762506b76615408305cd25c105362d1dceb3ab86a079dfe905",
+        "baselineSha256": "891cddd959b26f762506b76615408305cd25c105362d1dceb3ab86a079dfe905",
+        "normalization": "none",
+        "bytes": 632,
+        "gitBlob": "03239b00e4874ad03f5be6738f2116f9d306da4b"
+      },
+      {
+        "path": "backend/convex/meta.ts",
+        "candidateSha256": "0ba0da9383af577f513a30b34bdfdf8e397fcc41fbd343691051cbdd296de914",
+        "baselineSha256": "0ba0da9383af577f513a30b34bdfdf8e397fcc41fbd343691051cbdd296de914",
+        "normalization": "none",
+        "bytes": 339,
+        "gitBlob": "7b2e130532857d6ceaae9a2bf1d0b656e32aab7f"
+      },
+      {
+        "path": "backend/convex/notifications.ts",
+        "candidateSha256": "f10bc2083f3ce9bee4763dfd0529d4967228bfbd6fe72644cc290c264cf477ff",
+        "baselineSha256": "f10bc2083f3ce9bee4763dfd0529d4967228bfbd6fe72644cc290c264cf477ff",
+        "normalization": "none",
+        "bytes": 14097,
+        "gitBlob": "40bca2dedd80b45360b2564f3a54dead133f85e9"
+      },
+      {
+        "path": "backend/convex/pg1Parity.test.ts",
+        "candidateSha256": "ed622e74c78291456bd310a4be3bce3344de6071104813edb31aad70c49e9609",
+        "baselineSha256": "ed622e74c78291456bd310a4be3bce3344de6071104813edb31aad70c49e9609",
+        "normalization": "none",
+        "bytes": 20360,
+        "gitBlob": "8c53c9f8c996aab1b8e9646911ff4e56710afa74"
+      },
+      {
+        "path": "backend/convex/planning.ts",
+        "candidateSha256": "3e91f81eda062c97c3e71fbd6a58a1483ee2c4aa57df275c2d62a16005401ec6",
+        "baselineSha256": "3e91f81eda062c97c3e71fbd6a58a1483ee2c4aa57df275c2d62a16005401ec6",
+        "normalization": "none",
+        "bytes": 9118,
+        "gitBlob": "9494a43f620cced5eb6180b3dc6bf131e2f93c3f"
+      },
+      {
+        "path": "backend/convex/preferences.ts",
+        "candidateSha256": "f6c20599fd6893e03f9d7f32417d8204b3eb4f334ea316f71049a0cfd00800b9",
+        "baselineSha256": "f6c20599fd6893e03f9d7f32417d8204b3eb4f334ea316f71049a0cfd00800b9",
+        "normalization": "none",
+        "bytes": 2310,
+        "gitBlob": "ec238032d548222e4e4f797a560cdeba6fe5ee0c"
+      },
+      {
+        "path": "backend/convex/projectInvites.test.ts",
+        "candidateSha256": "4f1d2fb8f6d5ef65e3f1a19cc1a2bf61ddf15ece9f3edc4d831e0fa23f22e28f",
+        "baselineSha256": "4f1d2fb8f6d5ef65e3f1a19cc1a2bf61ddf15ece9f3edc4d831e0fa23f22e28f",
+        "normalization": "none",
+        "bytes": 3666,
+        "gitBlob": "3db4a024cd3c33d79b22d1c168c1980f0fd17bed"
+      },
+      {
+        "path": "backend/convex/projectPresence.ts",
+        "candidateSha256": "903de0e979c40cd80de0e5cd077e4202552f2edd158f358fdd67d240e301da07",
+        "baselineSha256": "903de0e979c40cd80de0e5cd077e4202552f2edd158f358fdd67d240e301da07",
+        "normalization": "none",
+        "bytes": 3387,
+        "gitBlob": "6815bd1fd172c690019dafd61d75f7e12b7b4b12"
+      },
+      {
+        "path": "backend/convex/projectWorkflow.test.ts",
+        "candidateSha256": "d04f2c5715909d8daaa954904e1e3683b7766d6c222bb65c5048d1d55bd099d0",
+        "baselineSha256": "d04f2c5715909d8daaa954904e1e3683b7766d6c222bb65c5048d1d55bd099d0",
+        "normalization": "none",
+        "bytes": 22578,
+        "gitBlob": "d0245c2e31c0e7af7517573d320f749b16b8a44b"
+      },
+      {
+        "path": "backend/convex/projects.ts",
+        "candidateSha256": "c18ad82a41062188540e28825e45c3fad9b9fb728a6aa40224eaf70346ff5911",
+        "baselineSha256": "c18ad82a41062188540e28825e45c3fad9b9fb728a6aa40224eaf70346ff5911",
+        "normalization": "none",
+        "bytes": 21567,
+        "gitBlob": "a5a6eed91d13978cb190700a4be8371429aca928"
+      },
+      {
+        "path": "backend/convex/schema.ts",
+        "candidateSha256": "d32b3843d31b0bbc7ae6b2fc2993943a7155135ea775c7d26a38f4e16056ecbf",
+        "baselineSha256": "d32b3843d31b0bbc7ae6b2fc2993943a7155135ea775c7d26a38f4e16056ecbf",
+        "normalization": "none",
+        "bytes": 19102,
+        "gitBlob": "f763482fc352c75549efef49644ff5baf233de7f"
+      },
+      {
+        "path": "backend/convex/sharedAgentQueue.test.ts",
+        "candidateSha256": "3b3ef32cfc957f7ed89fcf047b9b81dca30497cfa4a4f8b3a05d3a9fe53c928c",
+        "baselineSha256": "3b3ef32cfc957f7ed89fcf047b9b81dca30497cfa4a4f8b3a05d3a9fe53c928c",
+        "normalization": "none",
+        "bytes": 6226,
+        "gitBlob": "6e31a8da04cf92eb3ec8837bd232448773a41233"
+      },
+      {
+        "path": "backend/convex/sharedAgents.test.ts",
+        "candidateSha256": "3fe0d8674ba4c581d794ae317f48b86702cfa436dd272d0edda0ac0b00c42405",
+        "baselineSha256": "3fe0d8674ba4c581d794ae317f48b86702cfa436dd272d0edda0ac0b00c42405",
+        "normalization": "none",
+        "bytes": 16590,
+        "gitBlob": "87e728852fe52c81b6e91d230cc776e15d104f4f"
+      },
+      {
+        "path": "backend/convex/storage.ts",
+        "candidateSha256": "35e78aa3507ebe6ea510beddb56cbf2196535045011b2b560f41c56335e1d50c",
+        "baselineSha256": "35e78aa3507ebe6ea510beddb56cbf2196535045011b2b560f41c56335e1d50c",
+        "normalization": "none",
+        "bytes": 6631,
+        "gitBlob": "6f7e0a9e25c43eb1737e2e4fdde5158366170a9e"
+      },
+      {
+        "path": "backend/convex/storageAdmission.test.ts",
+        "candidateSha256": "e01719e9c0bb421b3dc0f7ad7bdb7cc1499e337e3b234eec17ffce14fc3efb5f",
+        "baselineSha256": "e01719e9c0bb421b3dc0f7ad7bdb7cc1499e337e3b234eec17ffce14fc3efb5f",
+        "normalization": "none",
+        "bytes": 21132,
+        "gitBlob": "ca447765c7ee211e9f745858d82011074ac5eac5"
+      },
+      {
+        "path": "backend/convex/storageReferences.test.ts",
+        "candidateSha256": "de8873874efa2a5e594cee896f97f6e796f49e30e38f72f88d8da9f88c4b72a3",
+        "baselineSha256": "de8873874efa2a5e594cee896f97f6e796f49e30e38f72f88d8da9f88c4b72a3",
+        "normalization": "none",
+        "bytes": 1922,
+        "gitBlob": "8caebf44829a64185f261e024b84ff5a966dbd50"
+      },
+      {
+        "path": "backend/convex/taskPRs.test.ts",
+        "candidateSha256": "794e3ad50515925b6dcbddf9b107229a3df51d615c7e93962e5f0046e9258c7d",
+        "baselineSha256": "794e3ad50515925b6dcbddf9b107229a3df51d615c7e93962e5f0046e9258c7d",
+        "normalization": "none",
+        "bytes": 16689,
+        "gitBlob": "058a0e3810889c5d513273a992005616d16fd456"
+      },
+      {
+        "path": "backend/convex/taskPRs.ts",
+        "candidateSha256": "420b898d8dd333918fe549835b8a60c6e9de2ab9743ca09d950cdd749f3207bd",
+        "baselineSha256": "420b898d8dd333918fe549835b8a60c6e9de2ab9743ca09d950cdd749f3207bd",
+        "normalization": "none",
+        "bytes": 14312,
+        "gitBlob": "78c15405d26a49252f1a61b56f8800366152bc31"
+      },
+      {
+        "path": "backend/convex/tasks.ts",
+        "candidateSha256": "58bca92460f52c7c3544705a58f0f89cc9749c2590d1983581fc20dc7955048a",
+        "baselineSha256": "58bca92460f52c7c3544705a58f0f89cc9749c2590d1983581fc20dc7955048a",
+        "normalization": "none",
+        "bytes": 34572,
+        "gitBlob": "389701fbfdd0a0bb4e2412f5bf911767025dd2d4"
+      },
+      {
+        "path": "backend/convex/teams.ts",
+        "candidateSha256": "2e79ba5d3672e7ccf1bc6be76d457582eb36c163eaca55c5a4db29978a22d1bc",
+        "baselineSha256": "2e79ba5d3672e7ccf1bc6be76d457582eb36c163eaca55c5a4db29978a22d1bc",
+        "normalization": "none",
+        "bytes": 8889,
+        "gitBlob": "fe27b1d0301291e9e22278e0dae2ee90d1e3f54c"
+      },
+      {
+        "path": "backend/convex/tsconfig.json",
+        "candidateSha256": "e7438058520ddab6ebdf29d5d82ff77585ea3aa05ae0351edd3690ab92adde27",
+        "baselineSha256": "e7438058520ddab6ebdf29d5d82ff77585ea3aa05ae0351edd3690ab92adde27",
+        "normalization": "none",
+        "bytes": 375,
+        "gitBlob": "588217dcb89cb91f9803b9f507650e22b40228dd"
+      },
+      {
+        "path": "backend/convex/wiki.ts",
+        "candidateSha256": "5adc93a7a3ad39cdfd693f685b28ca63898bd20a59c740d6ee44911c5220ee3b",
+        "baselineSha256": "5adc93a7a3ad39cdfd693f685b28ca63898bd20a59c740d6ee44911c5220ee3b",
+        "normalization": "none",
+        "bytes": 4340,
+        "gitBlob": "ef7d88b005ee50a592527b858513ffddc29b66da"
+      },
+      {
+        "path": "backend/convex/workspaceSearch.ts",
+        "candidateSha256": "02640e1f7a4b2995552e295cc79662dcd966c7b9e967f89c57d8310239e2a472",
+        "baselineSha256": "02640e1f7a4b2995552e295cc79662dcd966c7b9e967f89c57d8310239e2a472",
+        "normalization": "none",
+        "bytes": 3035,
+        "gitBlob": "88abca4e834cd47edc33c90562ab644846280d4b"
+      },
+      {
+        "path": "backend/convex/workspaces.ts",
+        "candidateSha256": "6d0271275e4032895d6f50c761964b9d02e4a16f1684593955f9447c87bddb27",
+        "baselineSha256": "6d0271275e4032895d6f50c761964b9d02e4a16f1684593955f9447c87bddb27",
+        "normalization": "none",
+        "bytes": 12729,
+        "gitBlob": "75ce114781eec38acae35a9493abab12c6842673"
+      },
+      {
+        "path": "backend/lib/comment-checklist.ts",
+        "candidateSha256": "e5e3f26a3d945773569bb18776c2f02819de5fb56557273c5ef188fd3a18d565",
+        "baselineSha256": "e5e3f26a3d945773569bb18776c2f02819de5fb56557273c5ef188fd3a18d565",
+        "normalization": "none",
+        "bytes": 651,
+        "gitBlob": "a21a423b4a1312be689f3a8e48c61a8bc89ea233"
+      },
+      {
+        "path": "backend/lib/github-pr-snapshot.ts",
+        "candidateSha256": "a6603f1672babf663b897c8871bd8eca6ca1bae4847faa3478af2e90053e7ad9",
+        "baselineSha256": "a6603f1672babf663b897c8871bd8eca6ca1bae4847faa3478af2e90053e7ad9",
+        "normalization": "none",
+        "bytes": 2159,
+        "gitBlob": "07b99d802c576bb453b12659cda642f804e02d90"
+      },
+      {
+        "path": "backend/lib/http-body.ts",
+        "candidateSha256": "b985b8d11182bad36e170c082a67106aa71e2472c8de4e24f11830e52fe2c423",
+        "baselineSha256": "b985b8d11182bad36e170c082a67106aa71e2472c8de4e24f11830e52fe2c423",
+        "normalization": "none",
+        "bytes": 1328,
+        "gitBlob": "c29e483165b5fb1a53d1ae122cf55767658091c5"
+      },
+      {
+        "path": "backend/lib/issue-mentions.ts",
+        "candidateSha256": "b7812722491fdd60ce122e3ea71a01a9d0bed92840764f966c012735dad3fed7",
+        "baselineSha256": "b7812722491fdd60ce122e3ea71a01a9d0bed92840764f966c012735dad3fed7",
+        "normalization": "none",
+        "bytes": 372,
+        "gitBlob": "48b7864fb18e186643f2552226bb368b950dc139"
+      },
+      {
+        "path": "backend/lib/notification-quiet.ts",
+        "candidateSha256": "e1d9be5c24ea7757e6d40d9f86138940920e38e9f03eeb64456d8f939363ef45",
+        "baselineSha256": "e1d9be5c24ea7757e6d40d9f86138940920e38e9f03eeb64456d8f939363ef45",
+        "normalization": "none",
+        "bytes": 619,
+        "gitBlob": "9ee4611738aa5d88b0174f54c20d88cd983e2fa9"
+      },
+      {
+        "path": "backend/lib/task-branch.ts",
+        "candidateSha256": "8323713fe6b3cfaa6c1b3d9de531d6cd5ae75be7d2f5ae7bdc1a510adf3d0cd6",
+        "baselineSha256": "8323713fe6b3cfaa6c1b3d9de531d6cd5ae75be7d2f5ae7bdc1a510adf3d0cd6",
+        "normalization": "none",
+        "bytes": 283,
+        "gitBlob": "29e90ae6bacee4f040f8f22b9e4d358b1da3e9e9"
+      },
+      {
+        "path": "backend/package.json",
+        "candidateSha256": "3a8a039a8f172588c41d91bdfdf8188704e0455c770757106bfb65ae04692d0d",
+        "baselineSha256": "3a8a039a8f172588c41d91bdfdf8188704e0455c770757106bfb65ae04692d0d",
+        "normalization": "none",
+        "bytes": 661,
+        "gitBlob": "7f4be03fb5a28dfc304f0ca7aa2b15fe1aa26122"
+      },
+      {
+        "path": "backend/vitest.config.ts",
+        "candidateSha256": "07f62967c3d3a04e674d8e191c12f8c14a3e973611350fafdd9eebbfecca2e40",
+        "baselineSha256": "07f62967c3d3a04e674d8e191c12f8c14a3e973611350fafdd9eebbfecca2e40",
+        "normalization": "none",
+        "bytes": 168,
+        "gitBlob": "139783bdadf4a0f3bb21712c08eeacb71e06a2ea"
+      },
+      {
+        "path": "package.json",
+        "candidateSha256": "b4495f66c5c1728972bd2524d014a0eab324812917e1317d634592e29e960e72",
+        "baselineSha256": "a81ab8d9f56e8b88cc7f2ba29cf888931569a2aab2e8caf21f4a79194e53f3a9",
+        "normalization": "version-only",
+        "bytes": 7906,
+        "gitBlob": "1f0f879733b6248dc909f1edfdb0535ef0fb8ee2"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "candidateSha256": "759cc1e85571ddf84a2146a96a09d78e169ef224453997c5a60cfdd91e26edf4",
+        "baselineSha256": "759cc1e85571ddf84a2146a96a09d78e169ef224453997c5a60cfdd91e26edf4",
+        "normalization": "none",
+        "bytes": 423628,
+        "gitBlob": "9c816eeb3de44293e95305836711d6354c8a70d6"
+      },
+      {
+        "path": "pnpm-workspace.yaml",
+        "candidateSha256": "5212658de24e6faadc5142e67711431fadcb9cf0e936c3cb46295830a31fa672",
+        "baselineSha256": "5212658de24e6faadc5142e67711431fadcb9cf0e936c3cb46295830a31fa672",
+        "normalization": "none",
+        "bytes": 954,
+        "gitBlob": "e9d76582b7260b0577f3a5b91f5ac3c400038544"
+      },
+      {
+        "path": "shared/origin-columns.ts",
+        "candidateSha256": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b",
+        "baselineSha256": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b",
+        "normalization": "none",
+        "bytes": 1232,
+        "gitBlob": "fe44fa23f9bf6e6cbd6da94e966b3a1a666a4375"
+      },
+      {
+        "path": "shared/origin-site-address.ts",
+        "candidateSha256": "1df1a4a5cb49117a4430d6d21db8a61ae03388eeb4221fd20fdb31c24e3a0161",
+        "baselineSha256": "1df1a4a5cb49117a4430d6d21db8a61ae03388eeb4221fd20fdb31c24e3a0161",
+        "normalization": "none",
+        "bytes": 1899,
+        "gitBlob": "b07c786115cd0d8ac93a00b403895b7af103face"
+      },
+      {
+        "path": "tsconfig.json",
+        "candidateSha256": "b83de20e81ea4fb86d3f7a3ee1fc84b1d175691fb580e8364dc9692af2224af6",
+        "baselineSha256": "b83de20e81ea4fb86d3f7a3ee1fc84b1d175691fb580e8364dc9692af2224af6",
+        "normalization": "none",
+        "bytes": 592,
+        "gitBlob": "fe66f710c3d93fe53b2284bf476fdc103b28ae1d"
+      }
+    ],
+    "backendTree": "785ac8c20beb028922f4d95068be2bd4f8bbcc96",
+    "baselineBackendTree": "785ac8c20beb028922f4d95068be2bd4f8bbcc96",
+    "comparisonBindings": 100,
+    "optionalMetadata": [
+      {
+        "path": ".npmrc",
+        "present": false
+      },
+      {
+        "path": ".pnpmfile.cjs",
+        "present": false
+      },
+      {
+        "path": ".pnpmfile.mjs",
+        "present": false
+      },
+      {
+        "path": "convex.json",
+        "present": false
+      }
+    ],
+    "reusedVerifier": {
+      "sha256": "07bc8aaf330d3b8e3aaf37c802922d054292b9c807c9601bc178569983512d34",
+      "backendPrefixSha256": "fefa548ed03a69030b9291ca19f7984c3ed4a18be4ab587d9e5b0343aa4f49a4",
+      "expectedVersionAdaptedTo": "0.2.13",
+      "newFramework": false
+    }
+  },
+  "manifests": [
+    {
+      "path": "docs/verification/evidence/origin-branding-034/artifact-manifest.json",
+      "sha256": "2a3b6a67f4c6918f79385a9dd63638356110f6832470c50671556d4fafaf69fa",
+      "bytes": 13420,
+      "payloads": 63,
+      "payloadBytes": 2968179,
+      "verifiedFromCommittedGitBlobs": true,
+      "allDirectoryPayloadsListed": true
+    },
+    {
+      "path": "docs/verification/evidence/origin-landing-capture-034/manifest.json",
+      "sha256": "d33019c643c6482b666269fdc2438d1a213c47429c93e045063c03fb2f440c83",
+      "bytes": 1302,
+      "payloads": 8,
+      "payloadBytes": 347830,
+      "verifiedFromCommittedGitBlobs": true,
+      "allDirectoryPayloadsListed": true
+    }
+  ],
+  "brandingSnapshot": {
+    "path": "docs/verification/evidence/origin-branding-034/source-snapshot.json",
+    "sha256": "609c50f5c602a29186895efca62cdb162171efa32611bf77b6fc789f655c2347",
+    "historical": true,
+    "currentSelfHashClaim": false,
+    "artifactManifestReference": {
+      "recordedSha256": "06466dd660c0883919075f9fcf82b0ec6d30ad8e488028ec4575691f4f237d1a",
+      "currentSha256": "2a3b6a67f4c6918f79385a9dd63638356110f6832470c50671556d4fafaf69fa",
+      "matchesCurrent": false,
+      "meaning": "Original checkpoint value; not the current refreshed manifest hash."
+    },
+    "selfReference": {
+      "recordedSha256": "98f26a299205bfedabc74190f4c4cca213f73c66cc862e9ce54da7ff0d05f2dc",
+      "currentSha256": "609c50f5c602a29186895efca62cdb162171efa32611bf77b6fc789f655c2347",
+      "matchesCurrent": false,
+      "meaning": "Historical captured value; not a current self-hash assertion."
+    },
+    "documentationClarificationRequired": true,
+    "capturedEvidenceRewritten": false,
+    "rawHashMismatchCount": 254,
+    "rawComparisonQualification": "Historical recorded raw source hashes compared with current committed Git blobs can differ because of capture timing, later edits or text normalization. This count is not a semantic source-change count or a failed current-manifest check."
+  },
+  "landing": {
+    "capturedSource": "e6227c5f32a5b688af44594f6f436fc73ced2b3c",
+    "sevenFrontendBindings": [
+      {
+        "path": "src/App.tsx",
+        "gitBlob": "42bb971bd917bd90d6b1a1bec596d78ee9ef3ad6",
+        "lfSha256": "c6fca3e61488269c9a3064a17fe22afa36ce817dabee9494630717b0b5f93f52",
+        "unchangedFromCapture": true
+      },
+      {
+        "path": "src/components/Sidebar.tsx",
+        "gitBlob": "bba0a857164cd5264542f22bbe883027db9141ee",
+        "lfSha256": "0f7716def8e0bbaf1a4c3ad27071c487cd4475a8823120c11b5015afebecb6d6",
+        "unchangedFromCapture": true
+      },
+      {
+        "path": "src/components/SidebarFooterNav.tsx",
+        "gitBlob": "3d2efff2b9ee17fa3469d761d5581161c74e7583",
+        "lfSha256": "3d760eb822528611ba24026a4d894a75be28c19bffc146df1859df8123581e35",
+        "unchangedFromCapture": true
+      },
+      {
+        "path": "src/components/OriginAccountMenu.tsx",
+        "gitBlob": "c8f0ccdf601276227569deb8704ec6068cc1ad13",
+        "lfSha256": "5cb227d491bfebab340064dee6c820fc1735960ee32cb0b073be01aee59a3d80",
+        "unchangedFromCapture": true
+      },
+      {
+        "path": "src/components/ChiefSections.tsx",
+        "gitBlob": "1edfbfe2f44b5c3fc4eb82a131fd2daa13c60ffc",
+        "lfSha256": "75b7bb9768ea902e9909023922c725aa38f87d8fc8771e66fc10f4677e7a6528",
+        "unchangedFromCapture": true
+      },
+      {
+        "path": "src/components/origin-pages/IssuesPage.tsx",
+        "gitBlob": "11aa90a43ab86f7f6bb5ada924d058a498c29963",
+        "lfSha256": "c1c5f20de1ee398d510d6f75fbc0a4207899ebe1cc655160b971206af32a445e",
+        "unchangedFromCapture": true
+      },
+      {
+        "path": "src/styles.css",
+        "gitBlob": "948798d6e00094c440bbaeeef9e4ba8eb4394285",
+        "lfSha256": "c52698835b305fa0f4c743d73d94016f740952caafdfc0cf8e3b6d48d5036654",
+        "unchangedFromCapture": true
+      }
+    ],
+    "siteDerivativesEqualCapturedPayloads": true,
+    "packagedApp": false,
+    "production": false
+  },
+  "immutableReceipts": [
+    {
+      "path": "docs/verification/evidence/origin-delivery-030/delivery-receipt.json",
+      "sha256": "247e4a0dfc19c473b7eea3093bf759ee9777f327850dd5fe44ca6753d110c297",
+      "unchanged": true,
+      "originalTimesPreservedByByteEquality": true
+    },
+    {
+      "path": "docs/verification/evidence/origin-delivery-031/delivery-receipt.json",
+      "sha256": "37cac08e14eec8e409de6d2b81ca0bb83ebccdbc6b1e0223733e60d510cf8c03",
+      "unchanged": true,
+      "originalTimesPreservedByByteEquality": true
+    }
+  ],
+  "conclusion": {
+    "convexDeployRequiredByTheseChanges": false,
+    "reusePublishedBackend": true,
+    "reason": "All backend source, parsed import closure, shared dependencies and build/deployment metadata match the published source; root package version is the sole normalized field.",
+    "bundledNodeServerAndSiteNeedTheirOwnDelivery": true,
+    "productionQueried": false,
+    "credentialsRead": false,
+    "convexProcessTouched": false,
+    "broadTestsRun": false,
+    "continuousMonitoring": false
+  },
+  "finalFreezeReuse": {
+    "rule": "Compare the backend tree, all100 source/metadata byte bindings with package-version-only normalization, and optional metadata presence against the final immutable source. If identical, reuse this AST/import closure without rerunning deployment or backend tests.",
+    "currentManifestHashesAreOnlyTheManifestsAbove": true,
+    "historicalSnapshotHashesMustNotBeUsedAsCurrent": true
+  }
+}

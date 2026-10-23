@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "hashFormat": "UTF-8 text, CRLF normalized to LF",
+  "files": [
+    {
+      "file": "ambiguous-default-red.log",
+      "bytesLf": 1364,
+      "sha256Lf": "dd1761fe1eb0fca984dacff270d854d0edb0ef72ca6386baa3569ea2995a5356"
+    },
+    {
+      "file": "backend-green.log",
+      "bytesLf": 398,
+      "sha256Lf": "0a7089b45c26c12570eaa9e3b1dea58afc1063e7a2a01037fdead7b433bacf63"
+    },
+    {
+      "file": "baseline-red.log",
+      "bytesLf": 7170,
+      "sha256Lf": "7b4ab3c62f6b095ca4bc355d70638acbb6c893f2925e1a353c50e8826ab9c172"
+    },
+    {
+      "file": "contradictory-draft-red.log",
+      "bytesLf": 1925,
+      "sha256Lf": "4bb2a95762a497204bd2c1675b8af135cae0e5cf0a985320107b1c5e31c6a1fa"
+    },
+    {
+      "file": "migration-descriptors.json",
+      "bytesLf": 3441,
+      "sha256Lf": "50fcf76d0e0a753e96415fc4612ce36b0e6233e2ad3d1c420952ec626e297bc5"
+    },
+    {
+      "file": "pending-idea-red.log",
+      "bytesLf": 1283,
+      "sha256Lf": "bebb13b857bcb7a42a230ca6044bbf377c5ad0b65890aa456fef2919ecccee81"
+    },
+    {
+      "file": "report.json",
+      "bytesLf": 7042,
+      "sha256Lf": "82dda4523cabd5f7ae1f38a8dcafbfd18141d8f480c9317c3b3eb1c6d6fdb1ad"
+    },
+    {
+      "file": "shared-guards-green.log",
+      "bytesLf": 193,
+      "sha256Lf": "9dade50cd598b9b085b5edfd1df1bb66e4e712d3f5fb496176ef2d851b79788f"
+    }
+  ]
+}

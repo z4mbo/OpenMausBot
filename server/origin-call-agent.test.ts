@@ -219,9 +219,11 @@ describe("a call's agent", () => {
 
   it("transcribes audio through the engine and keeps only the text", async () => {
     const seen: number[] = [];
-    const { agents, asked, setSettings } = harness({ transcribe: async ({ audio }) => { seen.push(audio.length); return "hey GGs status?"; } });
+    const botIds: string[] = [];
+    const { agents, asked, setSettings } = harness({ transcribe: async ({ audio, botId }) => { seen.push(audio.length); botIds.push(botId); return "hey GGs status?"; } });
     await agents.join(scopeOf(ana), AUTH, "chief", [ana.userId]);
     const result = await agents.audio(scopeOf(ana), AUTH, new Uint8Array(32), "audio/webm", [ana.userId]);
+    expect(botIds).toEqual(["chief"]);
     expect(result.line).toMatchObject({ speaker: "Ana", text: "hey GGs status?" });
     expect(seen).toEqual([32]);
     await flush();

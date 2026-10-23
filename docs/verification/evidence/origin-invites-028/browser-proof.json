@@ -1,0 +1,163 @@
+{
+  "synthetic": true,
+  "baseline": "683f3e5e9ef0a53d86723fc0aa2403ab831993b7",
+  "currentSource": "c24064a1c",
+  "cases": [
+    {
+      "name": "email-failed-375-light",
+      "link": "https://origin.imbored.fun/join/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "notice": "The invitation was created, but the email could not be sent. Share the link below.",
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "name": "email-failed-before-375-light",
+      "link": "http://127.0.0.1:5178/join/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "scrollWidth": 1675,
+      "text": true,
+      "width": 1675
+    },
+    {
+      "name": "members-before-375-dark",
+      "link": "http://127.0.0.1:5178/join/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "name": "members-after-375-dark",
+      "link": "https://origin.imbored.fun/join/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "name": "members-before-1440-light",
+      "link": "http://127.0.0.1:5178/join/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "name": "members-after-1440-light",
+      "link": "https://origin.imbored.fun/join/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "name": "members-before-1440-dark",
+      "link": "http://127.0.0.1:5178/join/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "name": "members-after-1440-dark",
+      "link": "https://origin.imbored.fun/join/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "name": "email-not-configured-375-dark",
+      "link": "https://origin.imbored.fun/join/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "notice": true,
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "name": "custom-unconfigured-375-light",
+      "width": 375,
+      "scrollWidth": 375,
+      "copyDisabled": true,
+      "unavailableNotice": true
+    },
+    {
+      "name": "acceptance-before-375-light",
+      "counter": "Mutation calls: 1 · Preview: invalidated · Mutation: settled",
+      "fontFamily": "\"Origin Fixture Inter\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "fontLoaded": true,
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "title": "Invitation unavailable",
+      "width": 375
+    },
+    {
+      "name": "acceptance-after-375-light",
+      "counter": "Mutation calls: 1 · Preview: invalidated · Mutation: settled",
+      "fontFamily": "\"Origin Fixture Inter\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "fontLoaded": true,
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "title": "You're in Synthetic workspace",
+      "width": 375
+    },
+    {
+      "name": "acceptance-before-375-dark",
+      "counter": "Mutation calls: 1 · Preview: invalidated · Mutation: settled",
+      "fontFamily": "\"Origin Fixture Inter\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "fontLoaded": true,
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "title": "Invitation unavailable",
+      "width": 375
+    },
+    {
+      "name": "acceptance-after-375-dark",
+      "counter": "Mutation calls: 1 · Preview: invalidated · Mutation: settled",
+      "fontFamily": "\"Origin Fixture Inter\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "fontLoaded": true,
+      "reducedMotion": true,
+      "scrollWidth": 365,
+      "title": "You're in Synthetic workspace",
+      "width": 375
+    },
+    {
+      "name": "acceptance-before-1440-light",
+      "counter": "Mutation calls: 1 · Preview: invalidated · Mutation: settled",
+      "fontFamily": "\"Origin Fixture Inter\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "fontLoaded": true,
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "title": "Invitation unavailable",
+      "width": 1440
+    },
+    {
+      "name": "acceptance-after-1440-light",
+      "counter": "Mutation calls: 1 · Preview: invalidated · Mutation: settled",
+      "fontFamily": "\"Origin Fixture Inter\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "fontLoaded": true,
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "title": "You're in Synthetic workspace",
+      "width": 1440
+    },
+    {
+      "name": "acceptance-before-1440-dark",
+      "counter": "Mutation calls: 1 · Preview: invalidated · Mutation: settled",
+      "fontFamily": "\"Origin Fixture Inter\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "fontLoaded": true,
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "title": "Invitation unavailable",
+      "width": 1440
+    },
+    {
+      "name": "acceptance-after-1440-dark",
+      "counter": "Mutation calls: 1 · Preview: invalidated · Mutation: settled",
+      "fontFamily": "\"Origin Fixture Inter\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "fontLoaded": true,
+      "reducedMotion": true,
+      "scrollWidth": 1430,
+      "title": "You're in Synthetic workspace",
+      "width": 1440
+    },
+    {
+      "name": "acceptance-rejected-after-invalidation",
+      "counter": "Mutation calls: 1 · Preview: invalidated · Mutation: settled",
+      "title": "Invitation unavailable"
+    },
+    {
+      "name": "acceptance-account-switch",
+      "counter": "Mutation calls: 1 · Preview: available · Mutation: settled",
+      "otherAccount": true,
+      "title": "Join Synthetic workspace"
+    }
+  ],
+  "captureQualification": "Full-page and raw CDP capture attempts painted incorrectly and were excluded. Retained mobile images use the supported browser viewport and normal viewport screenshots; content below the viewport remains outside the capture."
+}

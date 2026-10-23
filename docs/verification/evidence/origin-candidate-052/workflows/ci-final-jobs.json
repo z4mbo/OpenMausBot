@@ -1,0 +1,2372 @@
+{
+  "total_count": 20,
+  "jobs": [
+    {
+      "id": 119047769283,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt8zMww",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119047769283",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119047769283",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:00:38Z",
+      "started_at": "2026-10-21T05:00:40Z",
+      "completed_at": "2026-10-21T05:02:48Z",
+      "name": "typecheck + lint",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:00:41Z",
+          "completed_at": "2026-10-21T05:00:41Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:00:41Z",
+          "completed_at": "2026-10-21T05:00:52Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:00:52Z",
+          "completed_at": "2026-10-21T05:00:54Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:00:54Z",
+          "completed_at": "2026-10-21T05:01:08Z"
+        },
+        {
+          "name": "Select checks for this change",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:01:08Z",
+          "completed_at": "2026-10-21T05:01:08Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:01:08Z",
+          "completed_at": "2026-10-21T05:01:16Z"
+        },
+        {
+          "name": "Verify CI selection and documentation references",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:01:16Z",
+          "completed_at": "2026-10-21T05:01:21Z"
+        },
+        {
+          "name": "Validate locale catalogs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:01:21Z",
+          "completed_at": "2026-10-21T05:01:21Z"
+        },
+        {
+          "name": "Run pnpm typecheck",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-21T05:01:21Z",
+          "completed_at": "2026-10-21T05:02:07Z"
+        },
+        {
+          "name": "Run pnpm lint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-21T05:02:07Z",
+          "completed_at": "2026-10-21T05:02:08Z"
+        },
+        {
+          "name": "Run pnpm check:electron",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-21T05:02:08Z",
+          "completed_at": "2026-10-21T05:02:17Z"
+        },
+        {
+          "name": "production UI build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-21T05:02:17Z",
+          "completed_at": "2026-10-21T05:02:45Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-21T05:02:45Z",
+          "completed_at": "2026-10-21T05:02:46Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-21T05:02:46Z",
+          "completed_at": "2026-10-21T05:02:46Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-10-21T05:02:46Z",
+          "completed_at": "2026-10-21T05:02:46Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-10-21T05:02:46Z",
+          "completed_at": "2026-10-21T05:02:46Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119047769283",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001342,
+      "runner_name": "GitHub Actions 1000001342",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414502,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9alJg",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414502",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414502",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:06:23Z",
+      "name": "behavior evals (offline tiers 1-3)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:50Z",
+          "completed_at": "2026-10-21T05:02:51Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:57Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:57Z",
+          "completed_at": "2026-10-21T05:03:00Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:00Z",
+          "completed_at": "2026-10-21T05:03:16Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:16Z",
+          "completed_at": "2026-10-21T05:03:25Z"
+        },
+        {
+          "name": "Eval suite typecheck (standalone tsconfig)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:03:25Z",
+          "completed_at": "2026-10-21T05:03:29Z"
+        },
+        {
+          "name": "Eval vitest gate (redaction, trace, golden replay)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:03:29Z",
+          "completed_at": "2026-10-21T05:05:05Z"
+        },
+        {
+          "name": "Tier 1 scenarios (scripted harness, no models)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:05:05Z",
+          "completed_at": "2026-10-21T05:06:16Z"
+        },
+        {
+          "name": "Tier 2 golden replay against committed baselines",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-21T05:06:16Z",
+          "completed_at": "2026-10-21T05:06:20Z"
+        },
+        {
+          "name": "Tier 3 stays offline in CI (the skip is the pass condition)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-21T05:06:20Z",
+          "completed_at": "2026-10-21T05:06:21Z"
+        },
+        {
+          "name": "Upload eval run reports on failure",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-21T05:06:21Z",
+          "completed_at": "2026-10-21T05:06:21Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-21T05:06:21Z",
+          "completed_at": "2026-10-21T05:06:21Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-21T05:06:21Z",
+          "completed_at": "2026-10-21T05:06:21Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-21T05:06:21Z",
+          "completed_at": "2026-10-21T05:06:21Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-21T05:06:21Z",
+          "completed_at": "2026-10-21T05:06:21Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414502",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001348,
+      "runner_name": "GitHub Actions 1000001348",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414553,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9alWQ",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414553",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414553",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:05:37Z",
+      "name": "macOS smokes (packaged server + Electron)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:50Z",
+          "completed_at": "2026-10-21T05:02:51Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:03:11Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:03:11Z",
+          "completed_at": "2026-10-21T05:03:17Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:17Z",
+          "completed_at": "2026-10-21T05:03:45Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:45Z",
+          "completed_at": "2026-10-21T05:04:15Z"
+        },
+        {
+          "name": "Prepare Electron test runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:04:15Z",
+          "completed_at": "2026-10-21T05:04:18Z"
+        },
+        {
+          "name": "Packaged server smoke (macOS)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:04:18Z",
+          "completed_at": "2026-10-21T05:05:03Z"
+        },
+        {
+          "name": "Verify native approval mode transitions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:05:03Z",
+          "completed_at": "2026-10-21T05:05:22Z"
+        },
+        {
+          "name": "Verify app permissions and guarded display capture",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-21T05:05:22Z",
+          "completed_at": "2026-10-21T05:05:26Z"
+        },
+        {
+          "name": "Verify paired phone authorization against packaged harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-21T05:05:26Z",
+          "completed_at": "2026-10-21T05:05:31Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:05:31Z",
+          "completed_at": "2026-10-21T05:05:32Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:05:32Z",
+          "completed_at": "2026-10-21T05:05:32Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-21T05:05:32Z",
+          "completed_at": "2026-10-21T05:05:32Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-21T05:05:32Z",
+          "completed_at": "2026-10-21T05:05:35Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414553",
+      "labels": [
+        "macos-latest"
+      ],
+      "runner_id": 1000001349,
+      "runner_name": "GitHub Actions 1000001349",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414581,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9aldQ",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414581",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414581",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:05:14Z",
+      "name": "Windows CUA host smoke",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:03:05Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:03:05Z",
+          "completed_at": "2026-10-21T05:04:06Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:04:06Z",
+          "completed_at": "2026-10-21T05:04:43Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:04:43Z",
+          "completed_at": "2026-10-21T05:04:59Z"
+        },
+        {
+          "name": "Smoke the staged Windows CUA host (no computer actions)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:04:59Z",
+          "completed_at": "2026-10-21T05:05:10Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-21T05:05:10Z",
+          "completed_at": "2026-10-21T05:05:10Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-21T05:05:10Z",
+          "completed_at": "2026-10-21T05:05:10Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-21T05:05:10Z",
+          "completed_at": "2026-10-21T05:05:12Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-21T05:05:12Z",
+          "completed_at": "2026-10-21T05:05:12Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414581",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000001357,
+      "runner_name": "GitHub Actions 1000001357",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414620,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9alnA",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414620",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414620",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:03:59Z",
+      "name": "packaged server smoke (ubuntu-latest)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:02:58Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:58Z",
+          "completed_at": "2026-10-21T05:03:02Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:02Z",
+          "completed_at": "2026-10-21T05:03:15Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:15Z",
+          "completed_at": "2026-10-21T05:03:20Z"
+        },
+        {
+          "name": "Run pnpm test:packaged-server",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:03:20Z",
+          "completed_at": "2026-10-21T05:03:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-21T05:03:56Z",
+          "completed_at": "2026-10-21T05:03:56Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-21T05:03:56Z",
+          "completed_at": "2026-10-21T05:03:57Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-21T05:03:57Z",
+          "completed_at": "2026-10-21T05:03:57Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-21T05:03:57Z",
+          "completed_at": "2026-10-21T05:03:57Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414620",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001351,
+      "runner_name": "GitHub Actions 1000001351",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414649,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9aluQ",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414649",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414649",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:51Z",
+      "completed_at": "2026-10-21T05:05:24Z",
+      "name": "packaged server smoke (windows-latest)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:03:05Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:03:05Z",
+          "completed_at": "2026-10-21T05:03:38Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:38Z",
+          "completed_at": "2026-10-21T05:04:22Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:04:22Z",
+          "completed_at": "2026-10-21T05:04:39Z"
+        },
+        {
+          "name": "Run pnpm test:packaged-server",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:04:39Z",
+          "completed_at": "2026-10-21T05:05:20Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-21T05:05:20Z",
+          "completed_at": "2026-10-21T05:05:20Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-21T05:05:20Z",
+          "completed_at": "2026-10-21T05:05:20Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-21T05:05:20Z",
+          "completed_at": "2026-10-21T05:05:23Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-21T05:05:23Z",
+          "completed_at": "2026-10-21T05:05:23Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414649",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000001350,
+      "runner_name": "GitHub Actions 1000001350",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414707,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9al8w",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414707",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414707",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:04:39Z",
+      "name": "open-source edition builds without enterprise/",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:02:58Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:58Z",
+          "completed_at": "2026-10-21T05:03:02Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:02Z",
+          "completed_at": "2026-10-21T05:03:16Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:16Z",
+          "completed_at": "2026-10-21T05:03:26Z"
+        },
+        {
+          "name": "Delete the enterprise folder",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:03:26Z",
+          "completed_at": "2026-10-21T05:03:26Z"
+        },
+        {
+          "name": "Run pnpm typecheck",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:03:26Z",
+          "completed_at": "2026-10-21T05:04:32Z"
+        },
+        {
+          "name": "Run pnpm exec vitest run server/enterprise.test.ts server/brand.test.ts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:04:32Z",
+          "completed_at": "2026-10-21T05:04:34Z"
+        },
+        {
+          "name": "The server boots and reports the open-source edition",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-21T05:04:34Z",
+          "completed_at": "2026-10-21T05:04:36Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:04:36Z",
+          "completed_at": "2026-10-21T05:04:36Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:04:36Z",
+          "completed_at": "2026-10-21T05:04:36Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:04:36Z",
+          "completed_at": "2026-10-21T05:04:37Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:04:37Z",
+          "completed_at": "2026-10-21T05:04:37Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414707",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001355,
+      "runner_name": "GitHub Actions 1000001355",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414712,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9al-A",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414712",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414712",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:52Z",
+      "completed_at": "2026-10-21T05:03:04Z",
+      "name": "cloudflared installer (Linux ARM64)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:53Z",
+          "completed_at": "2026-10-21T05:02:54Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:54Z",
+          "completed_at": "2026-10-21T05:02:58Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:58Z",
+          "completed_at": "2026-10-21T05:03:01Z"
+        },
+        {
+          "name": "Install and reuse the pinned connector in an isolated fixture",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:01Z",
+          "completed_at": "2026-10-21T05:03:02Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:03:02Z",
+          "completed_at": "2026-10-21T05:03:02Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:03:02Z",
+          "completed_at": "2026-10-21T05:03:03Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-21T05:03:03Z",
+          "completed_at": "2026-10-21T05:03:03Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414712",
+      "labels": [
+        "ubuntu-24.04-arm"
+      ],
+      "runner_id": 1000001352,
+      "runner_name": "GitHub Actions 1000001352",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414713,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9al-Q",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414713",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414713",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:08:53Z",
+      "name": "renderer smoke (control-omb ui, Ubuntu 24.04)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:51Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:57Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:57Z",
+          "completed_at": "2026-10-21T05:03:01Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:01Z",
+          "completed_at": "2026-10-21T05:03:13Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:13Z",
+          "completed_at": "2026-10-21T05:03:18Z"
+        },
+        {
+          "name": "Let Chrome build its sandbox on this runner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:03:18Z",
+          "completed_at": "2026-10-21T05:03:18Z"
+        },
+        {
+          "name": "Drive the real renderer through control-omb ui",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 7,
+          "started_at": "2026-10-21T05:03:18Z",
+          "completed_at": "2026-10-21T05:08:51Z"
+        },
+        {
+          "name": "Upload the renderer screenshot",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:08:51Z",
+          "completed_at": "2026-10-21T05:08:51Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-21T05:08:51Z",
+          "completed_at": "2026-10-21T05:08:51Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-21T05:08:51Z",
+          "completed_at": "2026-10-21T05:08:52Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:08:52Z",
+          "completed_at": "2026-10-21T05:08:52Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:08:52Z",
+          "completed_at": "2026-10-21T05:08:52Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414713",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": 1000001358,
+      "runner_name": "GitHub Actions 1000001358",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414765,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9amLQ",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414765",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414765",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:35:18Z",
+      "name": "vitest (windows-latest, shard 1/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:03:05Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:03:05Z",
+          "completed_at": "2026-10-21T05:03:27Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:27Z",
+          "completed_at": "2026-10-21T05:03:59Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:59Z",
+          "completed_at": "2026-10-21T05:04:22Z"
+        },
+        {
+          "name": "Prepare Electron test runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:04:22Z",
+          "completed_at": "2026-10-21T05:04:26Z"
+        },
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:04:26Z",
+          "completed_at": "2026-10-21T05:34:52Z"
+        },
+        {
+          "name": "Report flaky tests that needed a retry",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:34:52Z",
+          "completed_at": "2026-10-21T05:34:52Z"
+        },
+        {
+          "name": "Broker and Electron unit tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-21T05:34:52Z",
+          "completed_at": "2026-10-21T05:35:13Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:35:13Z",
+          "completed_at": "2026-10-21T05:35:14Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:35:14Z",
+          "completed_at": "2026-10-21T05:35:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:35:14Z",
+          "completed_at": "2026-10-21T05:35:17Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:35:17Z",
+          "completed_at": "2026-10-21T05:35:17Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414765",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000001356,
+      "runner_name": "GitHub Actions 1000001356",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414784,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9amQA",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414784",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414784",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:03:49Z",
+      "name": "control-plane check + workerd tests + dry run",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:51Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:57Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:57Z",
+          "completed_at": "2026-10-21T05:03:01Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:01Z",
+          "completed_at": "2026-10-21T05:03:12Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:12Z",
+          "completed_at": "2026-10-21T05:03:17Z"
+        },
+        {
+          "name": "Run pnpm control-plane:check",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:03:17Z",
+          "completed_at": "2026-10-21T05:03:24Z"
+        },
+        {
+          "name": "Run pnpm control-plane:test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:03:24Z",
+          "completed_at": "2026-10-21T05:03:44Z"
+        },
+        {
+          "name": "Run pnpm control-plane:dry-run",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:03:44Z",
+          "completed_at": "2026-10-21T05:03:47Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-21T05:03:47Z",
+          "completed_at": "2026-10-21T05:03:47Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-21T05:03:47Z",
+          "completed_at": "2026-10-21T05:03:47Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:03:47Z",
+          "completed_at": "2026-10-21T05:03:47Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:03:47Z",
+          "completed_at": "2026-10-21T05:03:47Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414784",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001363,
+      "runner_name": "GitHub Actions 1000001363",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414817,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9amYQ",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414817",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414817",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:19:55Z",
+      "name": "vitest (ubuntu-latest, shard 4/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:50Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:02:57Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:57Z",
+          "completed_at": "2026-10-21T05:03:00Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:00Z",
+          "completed_at": "2026-10-21T05:03:14Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:14Z",
+          "completed_at": "2026-10-21T05:03:21Z"
+        },
+        {
+          "name": "Prepare Electron test runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:03:21Z",
+          "completed_at": "2026-10-21T05:03:23Z"
+        },
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:03:23Z",
+          "completed_at": "2026-10-21T05:19:52Z"
+        },
+        {
+          "name": "Report flaky tests that needed a retry",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:19:52Z",
+          "completed_at": "2026-10-21T05:19:52Z"
+        },
+        {
+          "name": "Broker and Electron unit tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-21T05:19:52Z",
+          "completed_at": "2026-10-21T05:19:52Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:19:52Z",
+          "completed_at": "2026-10-21T05:19:52Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:19:52Z",
+          "completed_at": "2026-10-21T05:19:52Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:19:52Z",
+          "completed_at": "2026-10-21T05:19:52Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:19:52Z",
+          "completed_at": "2026-10-21T05:19:52Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414817",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001353,
+      "runner_name": "GitHub Actions 1000001353",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414824,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9amaA",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414824",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414824",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:22:18Z",
+      "name": "vitest (ubuntu-latest, shard 1/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:51Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:57Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:57Z",
+          "completed_at": "2026-10-21T05:03:03Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:03Z",
+          "completed_at": "2026-10-21T05:03:23Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:23Z",
+          "completed_at": "2026-10-21T05:03:31Z"
+        },
+        {
+          "name": "Prepare Electron test runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:03:31Z",
+          "completed_at": "2026-10-21T05:03:33Z"
+        },
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:03:33Z",
+          "completed_at": "2026-10-21T05:22:06Z"
+        },
+        {
+          "name": "Report flaky tests that needed a retry",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:22:06Z",
+          "completed_at": "2026-10-21T05:22:06Z"
+        },
+        {
+          "name": "Broker and Electron unit tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-21T05:22:06Z",
+          "completed_at": "2026-10-21T05:22:15Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:22:15Z",
+          "completed_at": "2026-10-21T05:22:15Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:22:15Z",
+          "completed_at": "2026-10-21T05:22:15Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:22:15Z",
+          "completed_at": "2026-10-21T05:22:15Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:22:15Z",
+          "completed_at": "2026-10-21T05:22:15Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414824",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001361,
+      "runner_name": "GitHub Actions 1000001361",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414825,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9amaQ",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414825",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414825",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:40:34Z",
+      "name": "vitest (windows-latest, shard 3/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:03:06Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:03:06Z",
+          "completed_at": "2026-10-21T05:03:27Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:27Z",
+          "completed_at": "2026-10-21T05:04:01Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:04:01Z",
+          "completed_at": "2026-10-21T05:04:24Z"
+        },
+        {
+          "name": "Prepare Electron test runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:04:24Z",
+          "completed_at": "2026-10-21T05:04:29Z"
+        },
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:04:29Z",
+          "completed_at": "2026-10-21T05:40:28Z"
+        },
+        {
+          "name": "Report flaky tests that needed a retry",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:40:28Z",
+          "completed_at": "2026-10-21T05:40:29Z"
+        },
+        {
+          "name": "Broker and Electron unit tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-21T05:40:29Z",
+          "completed_at": "2026-10-21T05:40:29Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:40:29Z",
+          "completed_at": "2026-10-21T05:40:29Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:40:29Z",
+          "completed_at": "2026-10-21T05:40:29Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:40:29Z",
+          "completed_at": "2026-10-21T05:40:32Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:40:32Z",
+          "completed_at": "2026-10-21T05:40:32Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414825",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000001359,
+      "runner_name": "GitHub Actions 1000001359",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414839,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9amdw",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414839",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414839",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:32:57Z",
+      "name": "vitest (windows-latest, shard 4/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:03:05Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:03:05Z",
+          "completed_at": "2026-10-21T05:03:39Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:39Z",
+          "completed_at": "2026-10-21T05:04:13Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:04:13Z",
+          "completed_at": "2026-10-21T05:04:28Z"
+        },
+        {
+          "name": "Prepare Electron test runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:04:28Z",
+          "completed_at": "2026-10-21T05:04:31Z"
+        },
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:04:31Z",
+          "completed_at": "2026-10-21T05:32:53Z"
+        },
+        {
+          "name": "Report flaky tests that needed a retry",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:32:53Z",
+          "completed_at": "2026-10-21T05:32:53Z"
+        },
+        {
+          "name": "Broker and Electron unit tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-21T05:32:53Z",
+          "completed_at": "2026-10-21T05:32:53Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:32:53Z",
+          "completed_at": "2026-10-21T05:32:53Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:32:53Z",
+          "completed_at": "2026-10-21T05:32:53Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:32:53Z",
+          "completed_at": "2026-10-21T05:32:55Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:32:55Z",
+          "completed_at": "2026-10-21T05:32:55Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414839",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000001360,
+      "runner_name": "GitHub Actions 1000001360",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414850,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9amgg",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414850",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414850",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:29:01Z",
+      "name": "vitest (ubuntu-latest, shard 3/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:51Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:57Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:57Z",
+          "completed_at": "2026-10-21T05:03:06Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:06Z",
+          "completed_at": "2026-10-21T05:03:20Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:20Z",
+          "completed_at": "2026-10-21T05:03:25Z"
+        },
+        {
+          "name": "Prepare Electron test runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:03:25Z",
+          "completed_at": "2026-10-21T05:03:27Z"
+        },
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:03:27Z",
+          "completed_at": "2026-10-21T05:28:59Z"
+        },
+        {
+          "name": "Report flaky tests that needed a retry",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:28:59Z",
+          "completed_at": "2026-10-21T05:28:59Z"
+        },
+        {
+          "name": "Broker and Electron unit tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-21T05:28:59Z",
+          "completed_at": "2026-10-21T05:28:59Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:28:59Z",
+          "completed_at": "2026-10-21T05:28:59Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:28:59Z",
+          "completed_at": "2026-10-21T05:28:59Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:28:59Z",
+          "completed_at": "2026-10-21T05:28:59Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:28:59Z",
+          "completed_at": "2026-10-21T05:28:59Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414850",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001362,
+      "runner_name": "GitHub Actions 1000001362",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048414853,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9amhQ",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048414853",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048414853",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:27:21Z",
+      "name": "vitest (ubuntu-latest, shard 2/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:02:59Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:02:59Z",
+          "completed_at": "2026-10-21T05:03:08Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:08Z",
+          "completed_at": "2026-10-21T05:03:22Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:03:22Z",
+          "completed_at": "2026-10-21T05:03:27Z"
+        },
+        {
+          "name": "Prepare Electron test runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:03:27Z",
+          "completed_at": "2026-10-21T05:03:29Z"
+        },
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:03:29Z",
+          "completed_at": "2026-10-21T05:27:16Z"
+        },
+        {
+          "name": "Report flaky tests that needed a retry",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:27:16Z",
+          "completed_at": "2026-10-21T05:27:16Z"
+        },
+        {
+          "name": "Broker and Electron unit tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-21T05:27:16Z",
+          "completed_at": "2026-10-21T05:27:16Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:27:16Z",
+          "completed_at": "2026-10-21T05:27:16Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:27:16Z",
+          "completed_at": "2026-10-21T05:27:17Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:27:17Z",
+          "completed_at": "2026-10-21T05:27:17Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:27:17Z",
+          "completed_at": "2026-10-21T05:27:17Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048414853",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001354,
+      "runner_name": "GitHub Actions 1000001354",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048415042,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9anQg",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048415042",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048415042",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:02:48Z",
+      "started_at": "2026-10-21T05:02:50Z",
+      "completed_at": "2026-10-21T05:37:38Z",
+      "name": "vitest (windows-latest, shard 2/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:02:51Z",
+          "completed_at": "2026-10-21T05:02:52Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:02:52Z",
+          "completed_at": "2026-10-21T05:03:05Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:03:05Z",
+          "completed_at": "2026-10-21T05:03:35Z"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-21T05:03:35Z",
+          "completed_at": "2026-10-21T05:04:17Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-21T05:04:17Z",
+          "completed_at": "2026-10-21T05:04:40Z"
+        },
+        {
+          "name": "Prepare Electron test runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-21T05:04:40Z",
+          "completed_at": "2026-10-21T05:04:44Z"
+        },
+        {
+          "name": "Run tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-21T05:04:44Z",
+          "completed_at": "2026-10-21T05:37:32Z"
+        },
+        {
+          "name": "Report flaky tests that needed a retry",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-21T05:37:32Z",
+          "completed_at": "2026-10-21T05:37:33Z"
+        },
+        {
+          "name": "Broker and Electron unit tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-21T05:37:33Z",
+          "completed_at": "2026-10-21T05:37:33Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-21T05:37:33Z",
+          "completed_at": "2026-10-21T05:37:33Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-21T05:37:33Z",
+          "completed_at": "2026-10-21T05:37:33Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-21T05:37:33Z",
+          "completed_at": "2026-10-21T05:37:36Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-21T05:37:36Z",
+          "completed_at": "2026-10-21T05:37:36Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048415042",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000001364,
+      "runner_name": "GitHub Actions 1000001364",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 119048710692,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbt9sqJA",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119048710692",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119048710692",
+      "status": "completed",
+      "conclusion": "skipped",
+      "created_at": "2026-10-21T05:03:50Z",
+      "started_at": "2026-10-21T05:03:50Z",
+      "completed_at": "2026-10-21T05:03:49Z",
+      "name": "deploy composio broker (Cloudflare Worker)",
+      "steps": [],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119048710692",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": null,
+      "runner_name": null,
+      "runner_group_id": null,
+      "runner_group_name": null
+    },
+    {
+      "id": 119059586933,
+      "run_id": 39547106200,
+      "workflow_name": "CI",
+      "head_branch": "codex/shared-agent-conversations",
+      "run_url": "https://api.github.com/repos/z4mbo/Origin/actions/runs/39547106200",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVLJLfc8AAAAbuIEfdQ",
+      "head_sha": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+      "url": "https://api.github.com/repos/z4mbo/Origin/actions/jobs/119059586933",
+      "html_url": "https://github.com/z4mbo/Origin/actions/runs/39547106200/job/119059586933",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-21T05:40:34Z",
+      "started_at": "2026-10-21T05:40:36Z",
+      "completed_at": "2026-10-21T05:40:40Z",
+      "name": "CI",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-21T05:40:37Z",
+          "completed_at": "2026-10-21T05:40:37Z"
+        },
+        {
+          "name": "Every required job passed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-21T05:40:37Z",
+          "completed_at": "2026-10-21T05:40:39Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-21T05:40:39Z",
+          "completed_at": "2026-10-21T05:40:39Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/z4mbo/Origin/check-runs/119059586933",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001365,
+      "runner_name": "GitHub Actions 1000001365",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

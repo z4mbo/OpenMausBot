@@ -1,12 +1,12 @@
 // Import first: it reads a Cloud home's secrets off the launcher's pipe before any module can start a process.
 import { BOOT_CLOUD_SECRETS } from "./cloud-secrets-boot.ts";
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
-import { existsSync, readFileSync, realpathSync, rmSync } from "node:fs";
+import { existsSync, realpathSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
 import { rm as removeDirectory } from "node:fs/promises";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { ToolResults, TOOL_RESULT_MAX_CHARS } from "./tool-results.ts";
-import { extname, join } from "node:path";
+import { join } from "node:path";
 import { authorizeExternalRuntime, externalRuntimeIsActive, type ExternalRuntimeGrant } from "./external-runtime.ts";
 
 import { z } from "zod";
@@ -22,6 +22,12 @@ import { cloudHomeLendingRefusal, createCloudRoutineAuthors, ownerOnlyConversati
 import { botMemoryFiles, createLendingMemory } from "./lending-memory.ts";
 import { SharedComputerControl } from "./shared-computer-control.ts";
 import { createCoordinator, type ComposedTurn, type Coordinator, type HandoffOpener, type HandoffOptions, type HandoffView, type HostTurnResult } from "./coordinator.ts";
+import { allocateDelegationThread } from "./delegation-thread.ts";
+import { appendDelegationRequest } from "./delegation-notification.ts";
+import { createOriginModelHost } from "./origin-model-host.ts";
+import { createHostedSidecar } from "./origin-model-host-sidecar.ts";
+import { modelHostReady } from "./testing/model-host-readiness.ts";
+import { HOSTED_CONFINEMENT, hostedInternalAllowed, hostedPromptParts, restrictHostedIntegrations } from "./hosted-turn-policy.ts";
 import { queuedBehindPersonText, settledWaitingChip, UnansweredApprovals } from "./waiting-on-person.ts";
 import { assertRequestTarget, guardedRequestPath, requestConflict, requestNeedsInput } from "./guarded-requests.ts";
 import { botAvatarUrlFromStoredPath } from "../shared/bot-avatar.ts";
@@ -120,7 +126,10 @@ import * as composio from "./composio.ts";
 import { connectorCallFromFrame, connectorRefusalText, connectorScopeRefusalText, connectorUnrecognizedText, evaluateConnectorTools } from "./connector-verdict.ts";
 import { connectorCardText } from "./connector-card-text.ts";
 import { chiefOfStaffSystemPrompt } from "./chief-of-staff.ts";
-import { buildRecall, recallRooms, recallThreadIds, withRecalled } from "./recall.ts";
+import { withRecalled } from "./recall.ts";
+import { createConversationRecall } from "./host/conversation-recall.ts";
+import { createSharedModelBackups } from "./host/shared-model-backups.ts";
+import { createCallAgentHost } from "./host/call-agents.ts";
 import { hostTimeZone, takesTurnClock, turnClockLine, withTurnClock } from "./turn-clock.ts";
 import { createMemoryUpkeep, upkeepEnabled } from "./memory-upkeep.ts";
 import { createCacheKeepWarm, type KeepWarmStatus, type KeepWarmTarget } from "./cache-keepwarm.ts";
@@ -218,6 +227,13 @@ import {
 } from "./contracts.ts";
 import { RETRY_MAX_ATTEMPTS } from "./drivers/retry.ts";
 import { recoveryCapabilityError } from "./automatic-recovery.ts";
+import { createQuotaStartGate, InitialQuotaRefusalError } from "./quota-start.ts";
+import { modelPairKey, quotaFallbackPolicyRefusal } from "./quota-fallback.ts";
+import { chooseModelBackup, modelAccountKey } from "./model-backup.ts";
+import { createScopedModelSelectionChecker } from "./model-selection-check.ts";
+import { REMOTE_MODEL_INSTANCE } from "../shared/model-selection.ts";
+import { sameModelSelection } from "../shared/thread-model.ts";
+import { createApiBudgetHost } from "./api-budget-policy.ts";
 import { createQuotaSwitchHost } from "./host/quota-switch.ts";
 import { decodeGeneratedImage } from "./generated-image.ts";
 import {
@@ -313,7 +329,6 @@ import {
   sectionKey,
   Store,
   threadTitleFrom,
-  titleFromLlm,
   type BotRecord,
   type GroupDefaultResponder,
   type GroupRecord,
@@ -333,7 +348,9 @@ import { TurnStops, outwardActions, stoppedTurnOutcome, turnEvidence } from "./t
 import { buildRecoveryText, buildTurnContext, engineIsFresh, replaysNatively } from "./turn-context.ts";
 import { Handoffs, handedStateUsable, isContextMessage, recordHanded, renderUnseen, sessionStart, unseenMessages, withUnseenMessages, type ContextMessage } from "./delta-context.ts";
 import { extractReplayImages, extractTurnImages } from "./turn-images.ts";
-import { callTitleExcerpt, threadTitlePrompt, type ThreadTitleSource } from "./thread-title.ts";
+import { callTitleExcerpt } from "./thread-title.ts";
+import { routineRunFallbackText } from "./host/routine-fallback.ts";
+import { createThreadTitleHost } from "./host/thread-titles.ts";
 import { TurnWatchdog } from "./turn-watchdog.ts";
 import { TurnResources, type TurnOwner } from "./turn-resources.ts";
 import {
@@ -591,17 +608,17 @@ import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, initializeWorkspaceTeams, openWorkspaceHead } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
-import { createOriginCloudRoutes, cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
-import { BroadcastScheduler, createBroadcastRoutes } from "./broadcast/scheduler.ts";
-import { CallAgentError, createCallAgentSettingsRoutes, readCallAgentSettings } from "./origin-call-agent.ts";
-import { createProjectBotAgents } from "./host/project-bot-agents.ts";
+import { cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
+import { createProjectToolsHost } from "./host/project-tools.ts";
+import { createStaticResponder } from "./host/static-files.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
 import { createOriginImportRoutes } from "./routes/origin-import.ts";
 import { createOriginAgentSupport } from "./origin-agent-support.ts";
 import { createOriginInviteRoutes, createOriginPublicRoutes } from "./origin-public-pages.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
-import { createSharedAgents, type SendDecision } from "./origin-shared-agents.ts";
-import { createOriginMemberRoutes } from "./origin-members.ts";
+import { createSharedAgents } from "./origin-shared-agents.ts";
+import { connectedConvex, createOriginMemberRoutes } from "./origin-members.ts";
+import { convexCallRooms } from "./origin-realtime-backend.ts";
 import { createOriginMcpRoutes } from "./origin-mcp.ts";
 import { createGitHubPublicRoutes, createGitHubRoutes, createGitHubService, createProjectGit } from "./routes/github.ts";
 import { originGitHub } from "./github/review.ts";
@@ -1271,51 +1288,9 @@ function settleRoomFloor(group: GroupRecord): void {
   store.patchGroup(group.id, { audienceFloor: next === "everyone" ? undefined : next });
 }
 
-function recentWorkFilter(): { include?: (threadId: string) => boolean } {
-  return CLOUD_HOME ? { include: cloudOwnerOnlyThread } : {};
-}
-
-function recentWorkSources(bot: BotRecord) {
-  return {
-    groups: store.groups.filter((group) => !group.memberIds.includes(bot.id) || roomFeedsBot(group, bot)),
-    taskByThread: (botId: string, threadId: string) => store.taskByThread(botId, threadId),
-  };
-}
-
-function recallThreads(from: BotRecord, capability: Parameters<typeof cloudLendingView>[0]): { roomByThread: Map<string, GroupRecord>; ownThreads: string[] } {
-  const roomByThread = recallRooms(store.groups, from, roomFeedsBot);
-  return { roomByThread, ownThreads: recallThreadIds(from, roomByThread).filter(cloudLendingView(capability) ? cloudOwnerOnlyThread : () => true) };
-}
-
-/** Other conversations only for a 1:1 turn the person started: another bot, a webhook or a room must not pull a private chat into its reply. */
-function autoRecallPrompt(bot: BotRecord, threadId: string, message: string, opts: { conversations: boolean; userName: string }): string {
-  if (bot.memoryEnabled === false || !autoRecallEnabled(cfg)) return "";
-  const roomByThread = opts.conversations ? recallRooms(store.groups, bot, roomFeedsBot) : new Map<string, GroupRecord>();
-  const threadIds = opts.conversations
-    ? recallThreadIds(bot, roomByThread).filter((id) => id !== threadId && (!CLOUD_HOME || cloudOwnerOnlyThread(id)))
-    : [];
-  try {
-    const recalled = buildRecall({
-      botId: bot.id,
-      message,
-      threadIds,
-      label: (id) => {
-        const room = roomByThread.get(id);
-        if (room) return `room ${JSON.stringify(room.name)}`;
-        const task = store.taskByThread(bot.id, id);
-        if (task) return `chat ${JSON.stringify(task.title)}`;
-        return id === bot.threadId ? "your main chat" : "an earlier chat";
-      },
-      author: (hit) => (hit.role === "user" ? hit.peer ?? opts.userName : hit.from ?? bot.name),
-    });
-    if (recalled) console.log(`auto-recall: ${bot.name} (${bot.id}) got ${recalled.notes} note and ${recalled.conversations} conversation passage(s) in ${threadId}`);
-    return recalled?.text ?? "";
-  } catch (err) {
-    console.warn(`auto-recall failed for ${bot.id}: ${(err as Error).message}`);
-    return "";
-  }
-}
-
+const { hostedRequestThread, recentWorkFilter, recentWorkSources, recallThreads, autoRecallPrompt } = createConversationRecall({
+  store: () => store, cfg, cloudHome: Boolean(CLOUD_HOME), cloudOwnerOnlyThread, roomFeedsBot, cloudLendingView,
+});
 /** A room is one transcript: a restricted bot's words would otherwise feed a teammate everyone can see. */
 function roomAudienceConflict(memberIds: readonly string[], existing: readonly string[] = []): string | null {
   const members = memberIds.flatMap((id) => {
@@ -1374,6 +1349,9 @@ function bookTurnUsage(row: Omit<UsageRow, "at" | "costSource">, tokensReported 
     broadcast({ kind: "notify", notification: logNotification(buildSpendNotification({ id: row.botId, name: row.botName }, notificationThreadId, spendAlertText(alert, state))) }, { adminOnly: true });
   }
 }
+
+const apiBudgetFor = createApiBudgetHost({ dataDir: DATA_DIR, config: () => cfg, bot: id => store.bot(id),
+  provider: id => providerConfigs()[id], snapshot: id => registry.lastSnapshot(id), current: instance => registry.get(instance.instanceId) === instance });
 
 const providerAuthSessions = new ProviderAuthSessions();
 const mcpOAuth = new McpOAuthManager({
@@ -2321,7 +2299,9 @@ function requestedTaskBot(botId: string, rawThreadId: unknown): BotRecord {
   return task;
 }
 
-async function interruptDirectThread(botId: string, threadId: string, cause?: string): Promise<void> {
+async function interruptDirectThread(botId: string, threadId: string, cause?: string, localOnly = false): Promise<void> {
+  const remoteStop = localOnly ? Promise.resolve(false) : sharedAgents.cancelHosted(botId, threadId);
+  void remoteStop.catch(() => undefined);
   if (store.taskByThread(botId, threadId)?.activity === "parked.computer") store.setTaskActivity(botId, threadId, "idle");
   const requestOwner = directRequestOwners.get(threadId);
   if (requestOwner) {
@@ -2337,6 +2317,7 @@ async function interruptDirectThread(botId: string, threadId: string, cause?: st
   // Keep the generation fence so a replacement turn's approvals are never closed here.
   await (owner ? runningTurnInstance(owner, threadId) : null)?.adapter.interruptTurn(threadId);
   if (directTurnGenerationByThread.get(threadId) === generation) closeOpenApprovals(threadId);
+  await remoteStop;
 }
 
 /** Stop left teammates mid-turn: one pill each links to the conversation where Stop reaches that turn. */
@@ -2373,6 +2354,7 @@ async function interruptAllDirectThreads(botId: string): Promise<void> {
   await Promise.all(threads.map((task) => interruptDirectThread(botId, task.threadId)));
 }
 const retiredProviderTurns = new RetiredTurnRegistry();
+const quotaStarts = createQuotaStartGate({ settled: (threadId, refused) => { if (!refused) sharedAgents.releaseHandoff(threadId); } });
 const pendingCancelledProviderHandshakes = new PendingTurnCancellations();
 type ParkedTurnAttachment = NonNullable<Message["attachments"]>[number] & { text?: string };
 
@@ -2414,6 +2396,7 @@ function retireProviderTurn(turnId: string): void {
 function shouldIgnoreProviderEvent(event: RuntimeEvent): boolean {
   // Some adapters emit completion synchronously before sendTurn resolves: quarantine the pre-id window, time-bounded.
   if (isTurnEventQuarantined(pendingCancelledProviderHandshakes, retiredProviderTurns, event)) return true;
+  if (quotaStarts.event(event)) return true;
   if (event.type !== "session.exited" || event.turnId !== undefined) return false;
   const bot = store.botByThread(event.threadId);
   return Boolean(bot && threadBusy(bot.id, event.threadId)) || groupSpeakers.has(event.threadId);
@@ -2450,6 +2433,7 @@ function cancelDirectTurnDispatch(botId: string, expectedThreadId?: string): Dir
   if (!threadId) return null;
   const claim = directTurnDispatchClaims.get(threadId);
   if (!claim || claim.botId !== botId) return null;
+  quotaStarts.cancel(threadId, claim.id);
   const compacting = compactionControllers.get(threadId);
   if (compacting?.generation === claim.id) compacting.controller.abort(new DirectTurnSetupCancelled("context summarization stopped"));
   directTurnDispatchClaims.delete(threadId);
@@ -2823,7 +2807,7 @@ function retryComputerEngineMove(): Promise<void> {
   return computerEngineMoveRunning;
 }
 
-function checkedModelSelection(
+function checkedLocalModelSelection(
   raw: unknown,
   current?: { selection: ModelSelection; busy: boolean },
   requireAvailableModel = false,
@@ -2897,23 +2881,46 @@ function checkedModelSelection(
   return { ok: true, selection };
 }
 
+const checkedModelSelection = createScopedModelSelectionChecker({
+  local: checkedLocalModelSelection,
+  remote: async (scope, selection) => {
+    const bot = store.bot(scope.botId);
+    if (!bot?.shared) throw Object.assign(new Error("Only a shared workspace or project agent can use a teammate's account"), { status: 403 });
+    if (scope.threadId && store.taskByThread(bot.id, scope.threadId)?.sharedPrivate) {
+      throw Object.assign(new Error("A private conversation cannot use another person's account"), { status: 403 });
+    }
+    await originModelHost.validateSelection(bot.id, selection, true);
+    if (store.bot(bot.id) !== bot || (scope.threadId && threadBusy(bot.id, scope.threadId))) {
+      throw Object.assign(new Error("The agent changed or started working while its shared account was being checked. Try again."), { status: 409 });
+    }
+  },
+});
+
 function engineSwitchNeedsAsk(mode: ApprovalMode, from: ModelSelection, to: ModelSelection): boolean {
   return modelSwitchNeedsAsk(mode, registry.cliTarget(from.instanceId)?.driverKind, registry.cliTarget(to.instanceId)?.driverKind);
 }
 
-function checkedTaskModelSwitch(current: BotRecord, raw: unknown, updateBotDefault: boolean,
+async function checkedTaskModelSwitch(current: BotRecord, raw: unknown, updateBotDefault: boolean,
   resetApprovalToAsk: boolean, requireAvailableModel = false, trusted = false) {
+  const originalProfile = store.bot(current.id);
+  const originalThread = store.projectBotForTask(current.id, current.threadId);
   if (current.approvalGrant) return { ok: false as const, status: 409, error: "Wait for the approval change to finish before switching models" };
-  const checked = checkedModelSelection(raw, {
+  const checked = await checkedModelSelection(raw, {
     selection: current.modelSelection, busy: threadBusy(current.id, current.threadId),
-  }, requireAvailableModel);
+  }, requireAvailableModel, { botId: current.id, threadId: current.threadId });
   if (!checked.ok) return checked;
   const profile = store.bot(current.id)!;
   if (updateBotDefault) {
-    const defaults = checkedModelSelection(checked.selection, {
+    const defaults = await checkedModelSelection(checked.selection, {
       selection: profile.modelSelection, busy: Boolean(activeGroupTurnForBot(current.id)),
-    });
+    }, false, { botId: current.id });
     if (!defaults.ok) return defaults;
+  }
+  const fresh = store.projectBotForTask(current.id, current.threadId);
+  if (!fresh || store.bot(current.id) !== originalProfile || !sameModelSelection(fresh.modelSelection, current.modelSelection) ||
+      fresh.approvalGrant || approvalModeFor(fresh) !== approvalModeFor(originalThread ?? current) ||
+      (threadBusy(current.id, current.threadId) && !sameModelSelection(checked.selection, fresh.modelSelection))) {
+    return { ok: false as const, status: 409, error: "The conversation changed or started working while its model was checked. Try again when it is idle." };
   }
   for (const target of updateBotDefault ? [current, profile] : [current]) {
     const mode = approvalModeFor(target);
@@ -3728,17 +3735,16 @@ function handleDesktopTrustedApprovalMessage(raw: unknown): boolean {
       respond({ ok: false, error: "A confirmed model switch must select a thread and Ask permissions" });
       return true;
     }
-    const checked = checkedTaskModelSwitch(target, message.modelSelection, message.updateBotDefault, true, false, true);
-    if (!checked.ok) { respond({ ok: false, error: checked.error }); return true; }
-    try {
-      store.switchTaskModel(botId, threadId as string, checked.selection, message.updateBotDefault, true,
+    const updateBotDefault = message.updateBotDefault;
+    void (async () => {
+      const checked = await checkedTaskModelSwitch(target, message.modelSelection, updateBotDefault, true, false, true);
+      if (!checked.ok) { respond({ ok: false, error: checked.error }); return; }
+      store.switchTaskModel(botId, threadId as string, checked.selection, updateBotDefault, true,
         hostedModels?.resetTask(target.modelSelection, checked.selection));
       const fresh = { ...wireBot(store.bot(botId)!), approvalMode: approvalModeFor(store.bot(botId)!) };
       broadcast({ kind: "bot", bot: fresh });
       respond({ ok: true, bot: fresh });
-    } catch {
-      respond({ ok: false, error: "The model switch could not be saved. No settings were changed." });
-    }
+    })().catch(() => respond({ ok: false, error: "The model switch could not be saved. No settings were changed." }));
     return true;
   }
   if (threadId !== undefined) {
@@ -4355,14 +4361,8 @@ const coordinator: Coordinator = createCoordinator({
       const liveRoster = resumed ? undefined : coordinationLiveRosterBlock(bot);
       const turnText = liveRoster ? `${brief}\n\n${liveRoster}` : brief;
       const systemInstructions = node.parentId ? coordinationSystemInstructions() : "";
-      const request = coordinator.sharedRequest(node);
-      if (!resumed && !store.messagesFor(node.threadId).some(m => m.roomRequest?.id === request.id && m.roomRequest.phase === "request")) {
-        store.appendMessage(node.threadId, { role: "bot", kind: "text",
-          roomRequest: { id: request.id, phase: "request" },
-          from: sender ? { botId: sender.id, name: sender.name, color: sender.color } : undefined,
-          text: `${request.botIds.map(id => `@${store.bot(id)?.name ?? "Teammate"}`).join(" ")} ${node.text}`,
-        });
-      }
+      appendDelegationRequest({ store, node, resumed, request: coordinator.sharedRequest(node), sender, bot, notify,
+        routine: activeRoutineRunForThread(coordinator.node(node.rootId)?.threadId ?? node.threadId) !== null, quiet: turnAnswers(coordinator.node(node.rootId)?.threadId ?? node.threadId, { cardContinuation: true, coordination: { id: node.rootId } }).quiet });
       markInternalTurn(node.threadId);
       if (resumed && !group) {
         const settledFrom = [...new Set(coordinator.children(node.id)
@@ -5581,6 +5581,7 @@ const sideJobs = createSideJobs({
   helper: cacheUntilConfigChanges((config) => helperSelection(config)),
   ...(hostedModels ? { modelAllowed: (selection: ModelSelection) => hostedModels.allows(selection) } : {}),
   assertWithinBudget: () => assertWithinBudget(cfg, DATA_DIR),
+  apiBudget: (instance, botId, model) => apiBudgetFor.prepare(registry.get(instance.instanceId), botId, model),
   book: bookTurnUsage,
   log: (line) => console.log(line),
 });
@@ -5603,11 +5604,12 @@ const memoryUpkeep = createMemoryUpkeep({
   },
   sourceLabel: (botId, threadId) => memorySourceLabel({ room: store.groupByThread(threadId), task: store.taskByThread(botId, threadId), threadId }),
   mayCapture: (botId, threadId) => {
+    if (hostedRequestThread(threadId)) return false;
     const room = store.groupByThread(threadId);
     return !room || roomCaptureAllowed(room, store.bot(botId));
   },
   restoreTurn: (botId, threadId, turnId) => {
-    if (routines?.runForThread(threadId)) return null;
+    if (hostedRequestThread(threadId) || routines?.runForThread(threadId)) return null;
     const room = store.groupByThread(threadId);
     if (room) return roomCaptureAllowed(room, store.bot(botId)) ? captureRoomTurnFor(threadId, botId, turnId) : null;
     if (store.botByThread(threadId)?.id !== botId) return null;
@@ -5778,7 +5780,7 @@ function captureRoomTurnFor(threadId: string, botId: string, turnId: string): Ca
 
 bus.subscribe((event: RuntimeEvent) => {
   if (shouldIgnoreProviderEvent(event)) return;
-  if (event.type !== "turn.completed" || !event.turnId || !event.ok) return;
+  if (event.type !== "turn.completed" || !event.turnId || !event.ok || hostedRequestThread(event.threadId)) return;
   try {
     const room = store.groupByThread(event.threadId);
     if (room) {
@@ -5810,7 +5812,7 @@ const skillReview = createSkillReview({
   busy: (botId) => workspaceMaintenance.active || botHasActiveTurn(botId),
   transcript: (botId, threadId) => {
     const owned = connectorThread(botId, threadId);
-    if (!owned || selfApplyBlocked(threadId)) return null;
+    if (!owned || hostedRequestThread(threadId) || selfApplyBlocked(threadId)) return null;
     return { messages: store.activePath(threadId), room: Boolean(owned.group) };
   },
   skills: (botId) => skillsHost.reviewSkills(botId, listSkills(botId).map((skill) => ({
@@ -5845,7 +5847,7 @@ const skillReview = createSkillReview({
 
 bus.subscribe((event: RuntimeEvent) => {
   if (shouldIgnoreProviderEvent(event)) return;
-  if (event.type !== "turn.completed" || !event.turnId) return;
+  if (event.type !== "turn.completed" || !event.turnId || hostedRequestThread(event.threadId)) return;
   try {
     const messages = store.activePath(event.threadId);
     const reply = messages.findLast((message) => message.role === "bot" && message.kind === "text" && message.turnId === event.turnId);
@@ -5864,7 +5866,7 @@ bus.subscribe((event: RuntimeEvent) => {
 
 bus.subscribe((event: RuntimeEvent) => {
   if (shouldIgnoreProviderEvent(event)) return;
-  if (event.type !== "turn.completed" || !event.turnId) return;
+  if (event.type !== "turn.completed" || !event.turnId || hostedRequestThread(event.threadId)) return;
   try {
     const messages = store.messagesFor(event.threadId);
     const reply = messages.findLast((message) => message.role === "bot" && message.kind === "text" && message.turnId === event.turnId);
@@ -7841,13 +7843,14 @@ async function acceptDirectSend(
       if (!store.taskByThread(currentAtStart.id, threadId)) {
         throw Object.assign(new Error("the target task no longer exists"), { status: 409 });
       }
+      if (hostedRequestThread(threadId)) throw Object.assign(new Error("This conversation records a teammate's hosted request. Open a different conversation for your own work."), { status: 409 });
 
       if (guardedStart) return guardedStart(currentAtStart);
 
       const shared = await sharedAgents.beforeSend({ botId: currentAtStart.id, threadId, text, sendId });
       if (shared) sendId = shared.sendId;
-      if (shared?.status === "queued") return queueSharedSend(currentAtStart.id, threadId, text, shared, replyTo, sender);
-      if (shared?.status === "hosted") return hostedSharedSend(threadId, text, shared, replyTo, sender);
+      if (shared?.status === "hosted") return { ok: true as const, threadId, message: shared.message };
+      if (shared?.status === "queued" || shared?.status === "remote") return sharedAgents.record(currentAtStart.id, threadId, text, shared, replyTo?.id, sender);
       if (shared?.status === "running" && shared.fallback) {
         store.appendMessage(threadId, { role: "bot", kind: "activity", tool: { name: `${shared.fallback}, so this runs on this computer`, ok: true } });
       }
@@ -7927,23 +7930,6 @@ async function acceptDirectSend(
 }
 
 /** The agent runs on a teammate's computer or a server: this app records the message and shows the answer as it arrives. */
-function hostedSharedSend(threadId: string, text: string, decision: Extract<SendDecision, { status: "hosted" }>, replyTo?: Message, sender?: ResolvedSender): DirectSendReceipt {
-  const message = store.appendMessage(threadId, { role: "user", kind: "text", text, sendId: decision.sendId, replyToId: replyTo?.id, sender });
-  store.appendMessage(threadId, { role: "bot", kind: "activity", tool: { name: `Running on ${decision.runner.name}'s computer (${decision.runner.host})`, ok: true } });
-  return { ok: true, threadId, message };
-}
-
-function queueSharedSend(botId: string, threadId: string, text: string, decision: Extract<SendDecision, { status: "queued" }>, replyTo?: Message, sender?: ResolvedSender): DirectSendReceipt {
-  const message = store.appendMessage(threadId, {
-    role: "user", kind: "text", text, sendId: decision.sendId, replyToId: replyTo?.id, sender, queued: true, queueId: decision.runId,
-  });
-  sharedAgents.queued({
-    runId: decision.runId, botId, threadId, cloudThreadId: decision.cloudThreadId, teamId: decision.teamId, messageId: message.id, text,
-    ...(sender ? { sender } : {}),
-  });
-  return { ok: true, queued: true, queueId: decision.runId, threadId };
-}
-
 async function deliverLateQuestionAnswer(
   auth: RequestAuth,
   threadId: string,
@@ -8166,46 +8152,9 @@ async function finalScreenFrame(_botId: string, threadId: string): Promise<Frame
   return frame;
 }
 
-async function generateThreadTitle(
-  provider: { generateText?: (prompt: string, options?: { signal?: AbortSignal }) => Promise<string> },
-  text: string,
-  source: ThreadTitleSource = "first-message",
-): Promise<string | null> {
-  const prompt = threadTitlePrompt(text, source);
-  const expiry = new AbortController();
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    const reply = await Promise.race([
-      provider.generateText!(prompt, { signal: expiry.signal }),
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(() => {
-          expiry.abort();
-          reject(new Error("thread title timed out"));
-        }, 10_000);
-      }),
-    ]);
-    return titleFromLlm(reply);
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-function threadTitleGate(bot: Pick<BotRecord, "modelSelection">): { ok: true; instance: ProviderInstance } | { ok: false; refusal: string } {
-  if (!llmThreadTitlesEnabled(cfg)) return { ok: false, refusal: "generated thread titles are turned off on this server" };
-  if (hostedModels && !hostedModels.allows(bot.modelSelection)) return { ok: false, refusal: hostedModels.error() };
-  const instance = registry.get(bot.modelSelection.instanceId);
-  if (!instance?.generateText) return { ok: false, refusal: "this bot's model can't generate a title — rename the thread instead" };
-  const refusal = policyModelRefusal(instance);
-  if (refusal) return { ok: false, refusal };
-  try {
-    assertWithinBudget(cfg, DATA_DIR);
-  } catch (error) {
-    return { ok: false, refusal: error instanceof Error ? error.message : String(error) };
-  }
-  return { ok: true, instance };
-}
+const { generateThreadTitle, threadTitleGate } = createThreadTitleHost({ enabled: () => llmThreadTitlesEnabled(cfg),
+  instance: id => registry.get(id), modelRefusal: bot => hostedModels && !hostedModels.allows(bot.modelSelection) ? hostedModels.error() : undefined,
+  providerRefusal: policyModelRefusal, assertBudget: () => assertWithinBudget(cfg, DATA_DIR), apiBudget: apiBudgetFor.prepare });
 
 const titleRegenerations = new Set<string>();
 
@@ -8241,6 +8190,10 @@ async function startTurn(
     compactOnly?: boolean;
     automaticRecoveryAttempted?: boolean;
     automaticRecoveryIndex?: number;
+    quotaFallbackVisited?: string[];
+    quotaFallbackBlocked?: string[];
+    quotaFallbackBlockedAccounts?: string[];
+    hostedExecution?: { beforeDispatch(): Promise<void> };
     onTurnSettled?: () => void;
     coordination?: { id: string; resumed: boolean; settle: (outcome: HostTurnResult) => void };
   },
@@ -8265,6 +8218,7 @@ async function startTurn(
   healThreadModel(botId, threadId);
   const bot = store.projectBotForTask(botId, threadId);
   if (!bot) throw Object.assign(new Error("no such task"), { status: 404 });
+  if (bot.modelSelection.source || bot.modelSelection.instanceId === "origin-remote") throw Object.assign(new Error("Teammate-hosted execution must start from a shared person conversation; this delegated or automated route cannot run it locally"), { status: 409 });
   if (bot.approvalGrant) {
     throw Object.assign(new Error("this bot's approval level is still being confirmed — try again"), { status: 409 });
   }
@@ -8295,8 +8249,9 @@ async function startTurn(
   else if (opts?.automationSource === undefined && !opts?.commsDepth && !opts?.cardContinuation) clearUnattended(threadId);
   const task = store.taskByThread(bot.id, threadId);
   if (!task) throw Object.assign(new Error("no such task"), { status: 404 });
+  if (task.hostedRequest && !opts?.hostedExecution) throw Object.assign(new Error("A hosted request cannot be resumed as private or automated work"), { status: 409 });
   if (hostedModels && !hostedModels.allows(bot.modelSelection)) throw Object.assign(new Error(hostedModels.error()), { status: 409 });
-  const plan = turnSurfacePlan(bot, opts?.runOn, threadId);
+  const plan = opts?.hostedExecution ? resolveSurface({ destination: "off", browserOn: false }) : turnSurfacePlan(bot, opts?.runOn, threadId);
   const instance = registry.get(bot.modelSelection.instanceId);
   if (!instance) {
     if (removedComputerInstanceIds(cfg.instances).has(bot.modelSelection.instanceId)) void retryComputerEngineMove();
@@ -8309,7 +8264,7 @@ async function startTurn(
   if (policyRefusal) throw Object.assign(new Error(policyRefusal), { status: 409, code: "managed_policy" });
   const toolScope = toolScopeForTurn(bot.id);
   guestDrivenTurns.delete(threadId);
-  const guestConfined = cloudGuestDriven(threadId) || cloudGuestDrivenHandoff(opts?.coordination?.id);
+  const guestConfined = Boolean(opts?.hostedExecution) || cloudGuestDriven(threadId) || cloudGuestDrivenHandoff(opts?.coordination?.id);
   if (guestConfined && instance.adapter.capabilities.guestTurns !== "confined") {
     throw Object.assign(new Error(guestEngineRefusal(threadId)), { status: 409, code: "guest_engine" });
   }
@@ -8326,7 +8281,7 @@ async function startTurn(
     const titled = store.titleTaskFromFirstMessage(bot.id, resolvedImages.text, threadId);
     const snippet = titled?.title;
     if (titled && snippet && !titled.openedBy?.botId && llmThreadTitlesEnabled(cfg) && instance.generateText) {
-      void generateThreadTitle(instance, resolvedImages.text)
+      void generateThreadTitle(instance, resolvedImages.text, "first-message", bot.id)
         .then((title) => {
           if (title) store.retitleTask(bot.id, threadId, snippet, title);
         })
@@ -8343,7 +8298,7 @@ async function startTurn(
   }));
   const instanceId = instance.instanceId;
   const automated = commsDepth > 0 || opts?.automationSource !== undefined
-    || Boolean(opts?.unattended || opts?.cardContinuation || opts?.peerAsk || opts?.coordination || opts?.compactOnly || opts?.computerSelectionContinuation);
+    || Boolean(opts?.hostedExecution || opts?.unattended || opts?.cardContinuation || opts?.peerAsk || opts?.coordination || opts?.compactOnly || opts?.computerSelectionContinuation);
   const route = routeDirectTurn(bot, task, store.activePath(threadId), resolvedImages, instance, automated);
   const { model, effort, variant } = route;
   assertModelVariantSupported({ variant, effort }, instance.adapter.capabilities);
@@ -8522,11 +8477,11 @@ async function startTurn(
       const sessionConfig = (soul: string | undefined) =>
         createHash("sha256").update(JSON.stringify([...persistentConfig, soul])).digest("hex").slice(0, 16);
       const plannedConfig = sessionConfig(bot.soul);
-      const skillAuthoring = skillAuthoringEnabled(cfg) && agentsMounted;
-      const skillCommandText = supportsWorkspaceFiles(instance.driverKind)
+      const skillAuthoring = !opts?.hostedExecution && skillAuthoringEnabled(cfg) && agentsMounted;
+      const skillCommandText = !opts?.hostedExecution && supportsWorkspaceFiles(instance.driverKind)
         ? expandSkillCommandTurnText(bot.id, providerText, skillsLibraryEnabled(cfg) ? (store.bot(bot.id)?.assignedSkills ?? bot.assignedSkills) : undefined)
         : providerText;
-      const setupText = agentsMounted ? expandSetupTurnText(skillCommandText) : skillCommandText;
+      const setupText = !opts?.hostedExecution && agentsMounted ? expandSetupTurnText(skillCommandText) : skillCommandText;
       const userTurnText = promptWithReply(
         skillAuthoring ? expandLearnTurnText(setupText) : setupText,
         opts?.replyTo,
@@ -8591,37 +8546,37 @@ async function startTurn(
         ],
         availableSkills(),
       );
-      if (selectedSkills.some((skill) => skill.manifest.requiredCapabilities.includes("phoneMcp"))) {
+      if (!opts?.hostedExecution && selectedSkills.some((skill) => skill.manifest.requiredCapabilities.includes("phoneMcp"))) {
         integrations.phone = phoneIntegration(bot.id, threadId, dispatchClaimId);
       }
-      if (bot.composio !== false && composio.configured(cfg) && instance.adapter.capabilities.composioMcp === true) {
+      if (!opts?.hostedExecution && bot.composio !== false && composio.configured(cfg) && instance.adapter.capabilities.composioMcp === true) {
         const connection = await connectedAppsIntegration(bot, threadId, dispatchClaimId);
         if (connection) integrations.composio = connection;
       }
       // User MCP servers' tools are never pre-allowed: every call rides the normal permission flow.
-      if (instance.adapter.capabilities.customMcp === true) {
+      if (!opts?.hostedExecution && instance.adapter.capabilities.customMcp === true) {
         attachCustomMcp(integrations, await withMcpSignIn(engineMcpServers(bot), mcpOAuth), cfg);
       }
       const worksInWorkspace = supportsWorkspaceFiles(instance.driverKind);
       if (worksInWorkspace) {
         ensureWorkspace(bot.id);
-        if (bot.memoryEnabled !== false) beginMemoryTurn(bot.id, threadId);
+        if (!opts?.hostedExecution && bot.memoryEnabled !== false) beginMemoryTurn(bot.id, threadId);
       }
-      const privateWorkspace = worksInWorkspace ? ensureTaskWorkspaceWithSkills(bot.id, threadId) : undefined;
+      const privateWorkspace = worksInWorkspace && !opts?.hostedExecution ? ensureTaskWorkspaceWithSkills(bot.id, threadId) : undefined;
       const skillInstructions = renderSkillInstructions(selectedSkills, {
         includeRoot: worksInWorkspace,
       });
       const packagePlaybooks = installedPlaybookInstructions(providerText, bot.playbooks);
       // A legacy task with a live provider session pins to null, since moving it breaks resume; a Cloud guest's conversation pins its own private folder.
       const pinnedCwd =
-        privateWorkspace
+        opts?.hostedExecution ? task.cwd : privateWorkspace
           ? store.pinTaskCwd(bot.id, threadId, privateWorkspace, { privateOnly: cloudGuestOpened(threadId) })
           : null;
       const cwd = pinnedCwd ?? undefined;
       const checkpointCwd = cwd && cwd !== privateWorkspace ? cwd : undefined;
       const dwebUrl = process.env.DWEB_URL?.trim();
       if (dwebUrl) integrations.dweb = { url: dwebUrl };
-      let teamComputer = computerSkipped ? undefined : inheritedTeamComputer(bot);
+      let teamComputer = computerSkipped || opts?.hostedExecution ? undefined : inheritedTeamComputer(bot);
       const cloudBackend = teamComputer || opts?.runOn === "cloud" || bot.cloudBackend !== "vps" ? "box" : "vps";
       const mountsComputerMcp = instance.adapter.capabilities.computerMcp === true;
       const mountsLocalComputer = instance.adapter.capabilities.localComputerMcp === true;
@@ -8934,7 +8889,7 @@ async function startTurn(
       if (agentsMounted) {
         integrations.agents = agentsIntegration(bot.id, threadId, commsDepth, skillAuthoring, dispatchClaimId, opts?.coordination?.id, worksInWorkspace);
       }
-      if (instance.adapter.capabilities.hooks === true && hooksEnabled()) {
+      if (!opts?.hostedExecution && instance.adapter.capabilities.hooks === true && hooksEnabled()) {
         integrations.hooks = hooksIntegration(bot.id, threadId, dispatchClaimId);
       }
       const tagged = integrations.agents
@@ -8953,7 +8908,7 @@ async function startTurn(
       const profilePrompt = integrations.agents ? PROFILE_PROMPT : "";
       const recallPrompt = integrations.agents && bot.memoryEnabled !== false ? SESSION_SEARCH_SYSTEM_PROMPT : "";
       const learnPrompt = skillAuthoring ? LEARN_PROMPT : "";
-      const originParts = integrations.agents ? await originAgents.context.parts(bot.id) : [];
+      const originParts = !opts?.hostedExecution && integrations.agents ? await originAgents.context.parts(bot.id) : [];
 
       // Wait for the snapshot right before dispatch: the engine must not edit the project until it settles.
       if (checkpointCwd) {
@@ -8977,11 +8932,11 @@ async function startTurn(
           description: liveBot?.description ?? bot.description,
           text: providerText,
         });
-      if (liveBot && instance.adapter.capabilities.dataMcp === true) {
+      if (!opts?.hostedExecution && liveBot && instance.adapter.capabilities.dataMcp === true) {
         const data = dataIntegration(bot.id, { threadId, generation: dispatchClaimId });
         if (data) integrations.data = data;
       }
-      if (liveBot && instance.adapter.capabilities.highlevelMcp === true) { const crm = highlevelIntegration(liveBot, { threadId, generation: dispatchClaimId }); if (crm) integrations.highlevel = crm; }
+      if (!opts?.hostedExecution && liveBot && instance.adapter.capabilities.highlevelMcp === true) { const crm = highlevelIntegration(liveBot, { threadId, generation: dispatchClaimId }); if (crm) integrations.highlevel = crm; }
       const mountedComputer = surfaceOfComputerKind(computerKind);
       if (
         liveBot &&
@@ -9015,6 +8970,7 @@ async function startTurn(
       if (computerSelection) computerSelection.mounted = mountedComputer ?? (integrations.browser ? "browser" : undefined);
       recordTurnPlace(bot.id, threadId, mountedComputer ?? (integrations.browser ? "browser" : null));
       // Never overlap a replacement with a cancelled adapter's pre-id window: wait for it, then revalidate this exact claim.
+      const apiBudget = await apiBudgetFor.prepare(instance, bot.id, model);
       await pendingCancelledProviderHandshakes.waitForClear(threadId);
       if (!markDirectTurnDispatching(bot.id, dispatchClaimId, threadId)) {
         throw new DirectTurnSetupCancelled("turn stopped before dispatch");
@@ -9030,7 +8986,8 @@ async function startTurn(
       }
       // The tool bridge is decided here: the folder the turn is launched in is known, and the prompt is not built yet.
       applyAgentsBridge(threadId, integrations, cfg, bot, turnEngine(instance, providerConfigs(), registry.lastSnapshot(instance.instanceId), cwd));
-      const prompt = buildSystemPrompt(persona, liveBot?.soul ?? bot.soul ?? "", [
+      if (opts?.hostedExecution) restrictHostedIntegrations(integrations);
+      const prompt = buildSystemPrompt(persona, liveBot?.soul ?? bot.soul ?? "", hostedPromptParts(() => [
         { id: "user-profile", label: "About the user", text: userProfileSystemPrompt(cfg.profile) },
         { id: "setup", label: "Setup", text: setupSystemPrompt(setupMode, {
           skills: skillAuthoring,
@@ -9070,10 +9027,10 @@ async function startTurn(
         { id: "playbooks", label: "Playbooks", text: packagePlaybooks },
         { id: "webhook", label: "Webhook provenance", text: opts?.automationSource === "webhook" ? WEBHOOK_PROMPT : "" },
         { id: "mentions", label: "Mentions", text: tagged.length ? `The user named these existing teammates: ${tagged.map(b => `${peerName(b.name)} (${b.id})`).join(", ")}. Use coordinate_bots when their contribution is needed; do not substitute native helper agents for these bots.` : "" },
-      ], integrations.agents, { replyStyle: liveBot?.replyStyle ?? bot.replyStyle });
+      ], Boolean(opts?.hostedExecution), cwd), integrations.agents, { replyStyle: liveBot?.replyStyle ?? bot.replyStyle });
       turnPromptBytes.set(threadId, { stable: Buffer.byteLength(prompt.stable), volatile: Buffer.byteLength(prompt.volatile) });
       // Recall rides in front of this turn's message, never the system prompt, whose volatile half is re-sent whole on any change.
-      const recalled = autoRecallPrompt(bot, threadId, resolvedImages.text, {
+      const recalled = opts?.hostedExecution ? "" : autoRecallPrompt(bot, threadId, resolvedImages.text, {
         // A routine run starts fresh, and a webhook is untrusted: neither pulls earlier conversations in.
         conversations: commsDepth === 0 && !coordinationNode && !opts?.automationSource && !opts?.unattended,
         userName: cfg.profile?.name?.trim() || "User",
@@ -9085,18 +9042,25 @@ async function startTurn(
       // Before sendTurn: an adapter may emit the whole turn before it resolves.
       handoffs.dispatching(threadId, dispatchClaimId, dispatchContext.handoff);
       const clock = takesTurnClock(userTurnText) ? turnClockLine(Date.now(), hostTimeZone()) : "";
-      const shareNote = skillsHost.shareNote(bot, threadId, Boolean(privateWorkspace));
-      const dispatch = await guardTurnDispatch(shareNote.after(instance.adapter.sendTurn({
+      const shareNote = skillsHost.shareNote(bot, threadId, Boolean(privateWorkspace) && !opts?.hostedExecution);
+      if (opts?.hostedExecution) {
+        await opts.hostedExecution.beforeDispatch();
+        if (!directTurnClaimIsCurrent(bot.id, dispatchClaimId, threadId)) throw new DirectTurnSetupCancelled("The hosted request was stopped before dispatch");
+      }
+      const waitQuota = opts?.hostedExecution || bot.quotaFallback === true && bot.fallback?.length
+        ? quotaStarts.open(threadId, dispatchClaimId, instanceId) : (sending: Promise<{ turnId: string }>) => sending;
+      const dispatch = await guardTurnDispatch(waitQuota(shareNote.after(instance.adapter.sendTurn({
         threadId,
         botId: bot.id,
-        startupRecovery: cfg.automaticRecovery?.enabled === true &&
+        ...(apiBudget ? { apiBudget } : {}),
+        startupRecovery: !opts?.hostedExecution && cfg.automaticRecovery?.enabled === true &&
           (opts?.automaticRecoveryIndex ?? 0) < ((liveBot ?? bot).fallback?.length || (cfg.automaticRecovery.backup ? 1 : 0)),
         text: withTurnClock(clock, withRecalled(recalled, dispatchContext.turnText + shareNote.text)),
         ...(recalled ? { recalled } : {}),
         images: dispatchContext.images,
         approvalMode: approvalModeForTurn(bot, commsDepth > 0, threadId),
         toolScope,
-        ...(guestConfined ? { guestConfined: true, confinedWhy: confinedWhy(threadId) } : {}),
+        ...(guestConfined ? { guestConfined: true, confinedWhy: opts?.hostedExecution ? HOSTED_CONFINEMENT : confinedWhy(threadId) } : {}),
         model,
         effort,
         variant,
@@ -9110,9 +9074,9 @@ async function startTurn(
         mentionTurn: tagged.length > 0,
         integrations,
         ...(integrations.browser && browserIsThePlace(plan) ? { preloadBrowserTools: true } : {}),
-        ...settingsTurnFields(cfg, DATA_DIR, managedPolicy.restrictsMcp()),
+        ...(opts?.hostedExecution ? { mcpFromUserConfig: false, userSkillsDir: undefined } : settingsTurnFields(cfg, DATA_DIR, managedPolicy.restrictsMcp())),
         cwd,
-      })), () => !directTurnClaimExists(bot.id, dispatchClaimId, threadId), async () => {
+      }))), () => !directTurnClaimExists(bot.id, dispatchClaimId, threadId), async () => {
         await instance.adapter.interruptTurn(threadId).catch(() => {});
       });
       if (dispatch.cancelled) {
@@ -9157,12 +9121,13 @@ async function startTurn(
         drainQueuedSends();
       }
     } catch (cause) {
+      quotaStarts.cancel(threadId, dispatchClaimId);
       let e = cause;
       // Only the driver can prove a task was never submitted; an error string is not that proof.
-      const mayRecover = e instanceof TurnNotStartedError &&
+      const mayRecover = !opts?.hostedExecution && (e instanceof TurnNotStartedError || e instanceof InitialQuotaRefusalError) &&
         directTurnClaimIsCurrent(bot.id, dispatchClaimId, threadId);
-      if (e instanceof TurnNotStartedError) {
-        retireProviderTurn(e.turnId);
+      if (e instanceof TurnNotStartedError || e instanceof InitialQuotaRefusalError) {
+        retireProviderTurn(e instanceof InitialQuotaRefusalError ? e.event.turnId! : e.turnId);
         if (!mayRecover) e = new DirectTurnSetupCancelled("turn stopped during provider setup");
       }
       handoffs.abandon(threadId, dispatchClaimId);
@@ -9209,25 +9174,63 @@ async function startTurn(
       }
       if (e instanceof PlaceUnavailableError) clearFailedAutoPin(bot.id, threadId, e.place);
       let message = e instanceof Error ? e.message : String(e);
+      const quotaRefused = e instanceof InitialQuotaRefusalError;
+      const visited = new Set([...(opts?.quotaFallbackVisited ?? []), modelPairKey({ instanceId, model })]);
+      const blocked = new Set(opts?.quotaFallbackBlocked ?? []);
+      if (e instanceof InitialQuotaRefusalError && e.event.refusal?.scope === "account") blocked.add(instanceId);
+      const quotaCurrent = () => directTurnGenerationByThread.get(threadId) === dispatchClaimId &&
+        !directRequestOwners.get(threadId)?.stopped && store.projectBotForTask(bot.id, threadId)?.quotaFallback === true &&
+        JSON.stringify(store.projectBotForTask(bot.id, threadId)?.modelSelection) === JSON.stringify(bot.modelSelection);
+      const blockedAccounts = new Set([...(opts?.quotaFallbackBlockedAccounts ?? []), ...[...blocked].map(instanceId => modelAccountKey({ instanceId, model: "" }))]);
+      const quotaBackup = quotaRefused && mayRecover && quotaCurrent() ? await chooseModelBackup({
+        chain: store.bot(bot.id)?.fallback ?? [], visited, blockedAccounts, current: quotaCurrent,
+        prepare: async selection => {
+          if (selection.source) {
+            if (opts?.coordination || opts?.automationSource || opts?.commsDepth || opts?.cardContinuation || /<attached-(?:image|file|audio)\b/i.test(text)) return null;
+            const source = await originModelHost.validateSelection(bot.id, selection, store.bot(bot.id)?.fallbackApiAllowed === true);
+            return { provider: source.provider };
+          }
+          const target = registry.get(selection.instanceId);
+          if (!target?.enabled) return null;
+          const snapshot = await target.snapshot();
+          if (snapshot.state !== "available" || snapshot.authenticated === false || !(target.models.default === selection.model || target.models.options.some(model => model.id === selection.model))) return null;
+          const refusal = apiBudgetFor.fallbackRefusal(target, bot.id, selection.model, snapshot, store.bot(bot.id)?.fallbackApiAllowed === true) ??
+            quotaFallbackPolicyRefusal({ approvalMode: approvalModeFor(bot), selection, source: instance, target, hosted: hostedModels ?? undefined, providerRefusal: policyModelRefusal });
+          return refusal ? null : { provider: target.driverKind };
+        },
+      }) : null;
       const current = store.projectBotForTask(bot.id, threadId);
-      const backups = cfg.automaticRecovery?.enabled
+      if (quotaBackup?.selection.source && current && quotaCurrent() && recoveryUserMessageId && !hasQueuedSteeredMessages(bot.id, threadId) &&
+          store.activePath(threadId).findLast(m => m.role === "user" && m.kind === "text")?.id === recoveryUserMessageId) {
+        const transferred = await sharedAgents.transferToHost({ botId: bot.id, threadId, messageId: recoveryUserMessageId, selection: quotaBackup.selection,
+          visited: [...visited, modelPairKey(quotaBackup.selection)], blockedAccounts: [...blockedAccounts], current: quotaCurrent });
+        if (transferred) {
+          directTurnBots.delete(threadId);
+          settleDirectFollowup(dispatchClaimId, { ok: false, text: "The request is continuing through its ranked shared account." });
+          return;
+        }
+      }
+      sharedAgents.releaseHandoff(threadId);
+      const backups = quotaRefused ? quotaBackup ? [quotaBackup.selection] : [] : cfg.automaticRecovery?.enabled
         ? current?.fallback?.length ? current.fallback : cfg.automaticRecovery.backup ? [cfg.automaticRecovery.backup] : []
         : [];
-      const nextIndex = backups.findIndex((candidate, index) => index >= (opts?.automaticRecoveryIndex ?? 0) &&
+      const nextIndex = backups.findIndex((candidate, index) => index >= (quotaRefused ? 0 : opts?.automaticRecoveryIndex ?? 0) &&
         registry.get(candidate.instanceId)?.enabled && (!(e instanceof TurnAuthenticationRefusedError) || candidate.instanceId !== instanceId) &&
         (candidate.instanceId !== instanceId || candidate.model !== model));
       const backup = backups[nextIndex];
-      if (mayRecover && backup && current && (!opts?.cardContinuation || opts.coordination) &&
+      if (mayRecover && backup && current && (!quotaRefused || quotaCurrent()) && (!opts?.cardContinuation || opts.coordination) &&
           !directRequestOwners.get(threadId)?.stopped && !hasQueuedSteeredMessages(bot.id, threadId) &&
           JSON.stringify(current.modelSelection) === JSON.stringify(bot.modelSelection) &&
           (backup.instanceId !== instanceId || backup.model !== model) &&
           store.activePath(threadId).findLast(m => m.role === "user" && m.kind === "text")?.id === recoveryUserMessageId) {
-        // No await between releasing the failed attempt and admitting its replacement: a newer send or Stop must never lose to a stale retry.
-        store.setTaskActivity(bot.id, threadId, "idle");
-        directTurnBots.delete(threadId);
-        const checked = checkedTaskModelSwitch(current, backup, false, false, true);
+        const checked = checkedLocalModelSelection(backup, undefined, true);
+        if (directTurnGenerationByThread.get(threadId) !== dispatchClaimId || directRequestOwners.get(threadId)?.stopped ||
+            JSON.stringify(store.projectBotForTask(bot.id, threadId)?.modelSelection) !== JSON.stringify(bot.modelSelection)) {
+          settleDirectFollowup(dispatchClaimId, { ok: false, text: "The original request changed while validating its backup" }); return;
+        }
         const target = checked.ok ? registry.get(checked.selection.instanceId) : null;
-        const refusal = !checked.ok ? checked.error : !target || !target.enabled ? "The backup engine is unavailable."
+        const refusal = !checked.ok ? checked.error : current.approvalGrant || engineSwitchNeedsAsk(approvalModeFor(current), current.modelSelection, checked.selection) ? "The backup requires a confirmed permission change."
+          : !target || !target.enabled ? "The backup engine is unavailable."
           : !store.taskByThread(bot.id, threadId)?.cwd ? "This older thread has no pinned working folder. Choose its backup manually."
           : policyModelRefusal(target) ?? recoveryCapabilityError(
             { driverKind: instance.driverKind, capabilities: instance.adapter.capabilities },
@@ -9235,16 +9238,18 @@ async function startTurn(
         if (!refusal && checked.ok && target) {
           try {
             assertWithinBudget(cfg, DATA_DIR);
+            store.setTaskActivity(bot.id, threadId, "idle"); directTurnBots.delete(threadId);
             store.switchTaskModel(bot.id, threadId, checked.selection, false, false, {
               ...hostedModels?.resetTask(current.modelSelection, checked.selection), rewound: true,
             });
             store.appendMessage(threadId, { role: "bot", kind: "activity", tool: {
-              name: `recovery: Automatic recovery: ${instance.displayName || instance.driverKind} ${e instanceof TurnAuthenticationRefusedError ? "is signed out" : "could not start"}. Trying ${target.displayName || target.driverKind} · ${checked.selection.model} once in this thread.`, ok: true,
+              name: `recovery: ${quotaRefused ? "Quota fallback" : "Automatic recovery"}: ${instance.displayName || instance.driverKind} ${quotaRefused ? "reached its allowance before doing work" : e instanceof TurnAuthenticationRefusedError ? "is signed out" : "could not start"}. Trying ${target.displayName || target.driverKind} · ${checked.selection.model} once in this thread.`, ok: true,
             } });
             if (opts?.coordination) directCoordinationSettlers.delete(dispatchClaimId);
             else settleDirectCoordination(dispatchClaimId, { ok: false, text: message });
             await startTurn(bot.id, text, { ...opts, threadId, userMessage, editedMessageId: undefined,
-              automaticRecoveryAttempted: true, automaticRecoveryIndex: nextIndex + 1 });
+              automaticRecoveryAttempted: true, automaticRecoveryIndex: nextIndex + 1,
+              ...(quotaRefused ? { quotaFallbackVisited: [...visited], quotaFallbackBlocked: [...blocked], quotaFallbackBlockedAccounts: [...blockedAccounts] } : {}) });
             // The backup now owns these callbacks: publish no failed result and release no queued receipt in between.
             directFollowupSettlers.delete(dispatchClaimId);
             return;
@@ -9266,6 +9271,7 @@ async function startTurn(
         );
         reportIncident({ kind: "could-not-start", bot, threadId, detail: message });
       }
+      if (!opts?.hostedExecution && e instanceof InitialQuotaRefusalError) void quotaSwitch.turnFailed(bot, e.event, opts?.automationSource !== undefined || !!opts?.commsDepth || opts?.cardContinuation === true);
       store.setTaskActivity(bot.id, threadId, "idle");
       directTurnBots.delete(threadId);
       opts?.onDispatchError?.(message);
@@ -9329,37 +9335,6 @@ function routineRunCard(run: RoutineRun): NonNullable<Message["routineRun"]> {
   if (summary) card.summary = summary;
   if (error) card.error = error;
   return card;
-}
-
-function routineRunFallbackText(card: NonNullable<Message["routineRun"]>): string {
-  const goalState = card.goalStatus === "needs-input"
-    ? "needs your input"
-    : card.goalStatus === "blocked"
-      ? "was blocked"
-      : card.goalStatus === "limit-reached"
-        ? "reached its limit"
-        : card.goalStatus === "stopped"
-          ? "was stopped"
-          : card.goalStatus === "failed"
-            ? "failed"
-            : undefined;
-  const state = goalState ?? (
-    card.status === "waiting"
-      ? "needs your attention"
-      : card.status === "completed"
-        ? "completed"
-        : card.status === "failed"
-          ? "failed"
-          : card.status === "cancelled"
-            ? "was cancelled"
-            : card.status === "missed"
-              ? "was missed"
-              : card.status === "queued" && card.deferredAt != null
-                ? "deferred: target busy"
-              : card.status
-  );
-  const detail = card.summary ?? card.error;
-  return `Routine “${card.routineName}” ${state}${detail ? `\n\n${detail}` : ""}`;
 }
 
 function syncRoutineRunToSource(run: RoutineRun): string | null {
@@ -9927,7 +9902,8 @@ const chiefPeerTargetRule = (noun: string) => (proposerBotId: string, targetBotI
   return null;
 };
 const validateModelProposal = (selection: ModelSelection, current?: BotRecord): string | null => {
-  const checked = checkedModelSelection(selection, undefined, true);
+  if (selection.source || selection.instanceId === REMOTE_MODEL_INSTANCE) return "Choose shared accounts yourself in the agent model settings";
+  const checked = checkedLocalModelSelection(selection, undefined, true);
   if (!checked.ok) return checked.error;
   if (current?.approvalGrant) return "Wait for the approval-level confirmation before changing this bot's model";
   if (current) {
@@ -11094,6 +11070,7 @@ async function runClaimedGroupMemberTurn(
 
   // The startup engine read is part of setup: wait for it before the claim below.
   if (enginesRead) await enginesRead;
+  const apiBudget = await apiBudgetFor.prepare(instance, readyBot.id, readyBot.modelSelection.model);
   // Claim /learn only after setup succeeded, so a failed first responder does not consume it.
   if (skillAuthoring) skillAuthoringClaim.claimed = true;
   // Never launch a replacement into a stopped handshake's pre-id window.
@@ -11227,6 +11204,7 @@ async function runClaimedGroupMemberTurn(
         ...roomSession.send,
         threadId,
         botId: readyBot.id,
+        apiBudget,
         text: roomSession.text,
         ...(roomRecalled ? { recalled: roomRecalled } : {}),
         images: turnImages,
@@ -11972,7 +11950,7 @@ function startGroupTurn(
     const titleInstance = registry.get(titleBot.modelSelection.instanceId);
     // An engine the organisation disallows never receives the text, even for a title.
     if (titled && snippet && titleText.trim() && llmThreadTitlesEnabled(cfg) && titleInstance?.generateText && !policyModelRefusal(titleInstance)) {
-      void generateThreadTitle(titleInstance, titleText)
+      void generateThreadTitle(titleInstance, titleText, "first-message", titleBot.id)
         .then((title) => {
           if (title) store.retitleGroupTask(group.id, threadId, snippet, title);
         })
@@ -13128,6 +13106,7 @@ function configStatus() {
       ...(cfg.budgets?.warnAtPercent !== undefined ? { warnAtPercent: cfg.budgets.warnAtPercent } : {}),
     },
     billing: { currency: cfg.billing?.currency ?? "USD", prices: cfg.billing?.prices ?? {} },
+    dailyApiBudget: cfg.dailyApiBudget,
     decisions: { retentionDays: decisionRetentionDays(cfg.decisions?.retentionDays) },
     safetyFloor: { enabled: safetyFloorOn() },
     openaiCompat: { configured: Boolean(cfg.openaiCompat?.key), url: cfg.openaiCompat?.url ?? "" },
@@ -13200,6 +13179,7 @@ function configForAccess(status: ReturnType<typeof configStatus>, admin: boolean
   return {
     ...status,
     edition: { edition: status.edition.edition, features: status.edition.features },
+    dailyApiBudget: undefined,
     signIn: { admins: [], members: [] },
     vps: { configured: status.vps.configured, sshAlias: "" },
     opencodeGo: { configured: status.opencodeGo.configured, providerKeys: [] },
@@ -13444,34 +13424,7 @@ let providerConfigBusy = false;
 const providerInstancesChanging = new Set<string>();
 let mcpConfigBusy = false;
 
-/** Never framed (a hidden frame could act on a pair or sign-in page unseen), and no Referer. */
-const PAGE_HEADERS = { "content-security-policy": "frame-ancestors 'none'", "x-frame-options": "DENY", "referrer-policy": "no-referrer" } as const;
-
-/** Public by design: the same bundle anyone can download, with no secrets, and /pair must load before a session exists. */
-function serveStatic(res: ServerResponse, path: string): boolean {
-  if (!STATIC_DIR) return false;
-  const safe = path === "/" ? "/index.html" : path.replace(/\.\./g, "");
-  const file = join(STATIC_DIR, safe);
-  try {
-    const data = readFileSync(file);
-    const type = MIME[extname(file)] ?? "application/octet-stream";
-    // Vite content-hashes every file under /assets/, so those URLs are immutable while public/ has no assets/ dir.
-    const cache = type === "text/html" ? "no-cache" : safe.startsWith("/assets/") ? "public, max-age=31536000, immutable" : null;
-    res.writeHead(200, { "content-type": type, ...(type === "text/html" ? PAGE_HEADERS : {}), ...(cache ? { "cache-control": cache } : {}) });
-    res.end(data);
-    return true;
-  } catch {
-      // SPA fallback, never immutable: a missing chunk answered with the page must not stay cached under the chunk's URL.
-    try {
-      const data = readFileSync(join(STATIC_DIR, "index.html"));
-      res.writeHead(200, { "content-type": "text/html", "cache-control": "no-cache", ...PAGE_HEADERS });
-      res.end(data);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-}
+const serveStatic = createStaticResponder(STATIC_DIR, MIME);
 
 const workspaceBackupAccess = {
   authorized: (req: IncomingMessage, original: RequestAuth) => {
@@ -13580,7 +13533,7 @@ const originAgents = createOriginAgentSupport({
   localFolders: !CLOUD_HOME, git: CLOUD_HOME ? undefined : createProjectGit({ service: () => githubService(), cloud: () => readOriginCloud(defaultOriginCloudFile()), connect: convexOriginClient, port: PORT, dataDir: DATA_DIR }),
 });
 ROUTES.push(originAgents.routes); PUBLIC_ROUTES.push(originAgents.publicRoutes);
-ROUTES.push(createOriginCloudRoutes({
+const projectTools = createProjectToolsHost({
   store,
   github: () => originGitHub(githubService()),
   teamChat: originAgents.teamChat,
@@ -13599,14 +13552,9 @@ ROUTES.push(createOriginCloudRoutes({
       await opened.handle.close().catch(() => undefined);
     }
   },
-}));
+}, { studioBudget: ({ botId }) => apiBudgetFor.assertUnpriced(botId, "Studio generation") });
+ROUTES.push(...projectTools.routes);
 ROUTES.push(createCloudLinkRoutes({ store, changed: originAgents.changed }));
-const broadcastScheduler = new BroadcastScheduler({
-  session: () => readOriginCloud(defaultOriginCloudFile()),
-  connect: convexOriginClient,
-  log: (message) => console.warn(message),
-});
-ROUTES.push(createBroadcastRoutes({ scheduler: broadcastScheduler }));
 ROUTES.push(createOriginImportRoutes({
   store, maxWorkspaceBots: MAX_WORKSPACE_BOTS, defaultSelection, wireBot, changed: originAgents.changed, authorized: workspaceBackupAccess.authorized,
   selectionError: (selection) => hostedModels && !hostedModels.allows(selection) ? hostedModels.error() : null,
@@ -13614,56 +13562,38 @@ ROUTES.push(createOriginImportRoutes({
 ROUTES.push(createOriginInviteRoutes({ publicUrl }));
 const originPublicPages = createOriginPublicRoutes({ publicUrl });
 ROUTES.push(createAvatarLookRoutes({ store }));
+const modelHostSidecar = createHostedSidecar({ store, start: startTurn, interrupt: interruptDirectThread, observe: listener => bus.subscribe(listener), redact: redactSecretsInText });
+const originModelHost = createOriginModelHost({ ready: () => modelHostReady(DATA_DIR, cfg.instances ?? {}), loopbackOnly: process.env.OMB_TEST_MODEL_HOST_TOKEN !== undefined,
+  store, visible: (auth, botId) => visibleTo(viewerFor(auth)).bot(botId), instances: async () => selectableInstances(await registry.describe()), instance: id => registry.get(id), folder: originAgents.folder,
+  preflight: async (botId, instance, model) => { assertWithinBudget(cfg, DATA_DIR); await apiBudgetFor.prepare(instance, botId, model); }, run: input => modelHostSidecar.run(input) });
+ROUTES.push(originModelHost.routes); originModelHost.start();
 const sharedAgents = createSharedAgents({
   store, hostKind: CLOUD_HOME || process.env.ORIGIN_HOST_KIND === "server" ? "server" : "local",
+  locallyRunning: threadId => directTurnDispatchClaims.has(threadId) || directTurnBots.has(threadId) || runningTurnEngines.has(threadId),
+  validateHostedSelection: (botId, selection, paid) => originModelHost.validateSelection(botId, selection, paid),
+  ...createSharedModelBackups({ store, instance: id => registry.get(id), checkedLocal: checkedLocalModelSelection, providerRefusal: policyModelRefusal,
+    validateHosted: (botId, selection, paid) => originModelHost.validateSelection(botId, selection, paid),
+    fallbackRefusal: apiBudgetFor.fallbackRefusal, start: startTurn }),
   instances: async () => selectableInstances(await registry.describe()),
   selectionContext,
   isBusy: threadBusy,
   startQueued: async (run, message) => {
     await startTurn(run.botId, run.text, { threadId: run.threadId, ...(message ? { userMessage: message } : {}), ...(run.sender ? { sender: run.sender } : {}) });
   },
-  interrupt: (botId, threadId) => void interruptDirectThread(botId, threadId).catch(() => undefined),
-  redact: redactSecretsInText, quickText: (botId, prompt) => writeCallText(botId, prompt, 120_000),
+  interrupt: (botId, threadId) => void interruptDirectThread(botId, threadId, "Origin's local run lease ended", true).catch(() => undefined),
+  redact: redactSecretsInText, quickText: (botId, prompt) => summarizeCall({ botId, prompt }),
 });
 ROUTES.push(sharedAgents.routes);
 sharedAgents.start();
-const callAgentSettingsFile = join(DATA_DIR, "origin-call-agent.json");
-let callAgentSettings = readCallAgentSettings(callAgentSettingsFile);
-ROUTES.push(createCallAgentSettingsRoutes({
-  file: callAgentSettingsFile,
-  keys: () => ({ groq: Boolean(cfg.groq?.key), openai: Boolean(cfg.openai?.key) }),
-  changed: (settings) => { callAgentSettings = settings; },
-}));
-/** No model named: the engine's own quick-call choice, its cheapest, rather than the chief's chat model. */
-function callSummaryWriter(bot: BotRecord): { instance: ProviderInstance; model?: string } {
-  const chosen = callAgentSettings.summarizer.instanceId
-    ? { instanceId: callAgentSettings.summarizer.instanceId, ...(callAgentSettings.summarizer.model ? { model: callAgentSettings.summarizer.model } : {}) }
-    : helperSelection(cfg) ?? { instanceId: bot.modelSelection.instanceId };
-  const instance = registry.get(chosen.instanceId);
-  if (!instance?.enabled || !instance.generateText) throw new CallAgentError("The call summary model can't write text; pick another in Settings");
-  const refusal = policyModelRefusal(instance);
-  if (refusal) throw new CallAgentError(refusal);
-  if (hostedModels && chosen.instanceId !== bot.modelSelection.instanceId && !(chosen.model && hostedModels.allows({ instanceId: chosen.instanceId, model: chosen.model }))) {
-    throw new CallAgentError(hostedModels.error());
-  }
-  return { instance, ...(chosen.model ? { model: chosen.model } : {}) };
-}
-async function writeCallText(botId: string, prompt: string, timeoutMs: number): Promise<string> {
-  const bot = store.bot(botId);
-  if (!bot) throw new CallAgentError("The Chief no longer exists");
-  const writer = callSummaryWriter(bot);
-  assertWithinBudget(cfg, DATA_DIR);
-  return writer.instance.generateText!(prompt, { ...(writer.model ? { model: writer.model } : {}), timeoutMs });
-}
-const { chatAgent, callAgents } = createProjectBotAgents({
-  store,
-  visible: (auth, botId) => visibleTo(viewerFor(auth)).bot(botId),
-  projectOf: (botId) => cloudProjectFor(store.bots, readOriginCloud(defaultOriginCloudFile()).projects, botId),
-  send: (auth, input) => acceptDirectSend({ ...input, sender: messageSender(auth), trigger: usageTriggerFor(auth), personPresent: true }),
-  write: writeCallText,
-  keys: () => ({ groq: cfg.groq?.key, openai: cfg.openai?.key }),
-  settings: () => callAgentSettings,
+const { settingsRoute: callAgentSettingsRoute, callAgents, chatAgent, summarize: summarizeCall } = createCallAgentHost({ file: join(DATA_DIR, "origin-call-agent.json"), store, cfg,
+  instance: id => registry.get(id), providerRefusal: policyModelRefusal, hostedModels: () => hostedModels, visible: (auth, botId) => visibleTo(viewerFor(auth)).bot(botId),
+  project: botId => cloudProjectFor(store.bots, readOriginCloud(defaultOriginCloudFile()).projects, botId),
+  send: async (bot, auth, prompt, sendId, via) => { await acceptDirectSend({ botId: bot.id, threadId: bot.threadId, text: prompt, sendId,
+    sender: messageSender(auth), trigger: usageTriggerFor(auth), ...(via ? { via } : {}), personPresent: true }); },
+  assertBudget: () => assertWithinBudget(cfg, DATA_DIR), apiBudget: (instance, botId, model) => apiBudgetFor.prepare(instance, botId, model),
+  unpricedApiBudget: (botId, service) => apiBudgetFor.assertUnpriced(botId, service), rooms: convexCallRooms(connectedConvex),
 });
+ROUTES.push(callAgentSettingsRoute);
 ROUTES.push(createOriginMemberRoutes({ callAgents, chatAgent }));
 const githubService = createGitHubService({ serverPublicUrl: publicUrl });
 PUBLIC_ROUTES.push(createOriginMcpRoutes({
@@ -13980,7 +13910,7 @@ function liveCallTitle(botId: string, threadId: string, excerpt: string): Promis
   const bot = store.projectBotForTask(botId, threadId);
   if (!bot) return null;
   const gate = threadTitleGate(bot);
-  return gate.ok ? generateThreadTitle(gate.instance, excerpt, "call") : null;
+  return gate.ok ? generateThreadTitle(gate.instance, excerpt, "call", botId) : null;
 }
 const liveCalls = new LiveCallController({
   store,
@@ -14503,6 +14433,7 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
       if (!internalSender) {
         return json(res, 401, { error: "unauthorized" });
       }
+      if (hostedRequestThread(internalCapability.threadId) && !hostedInternalAllowed(method, path)) return json(res, 403, { error: "Shared model execution cannot access the account owner's private memory, conversations, integrations or administrative tools" });
       if (internalCapability.generation === EXTERNAL_RUNTIME_GENERATION && !externalRuntimeMayCall(method, path)) {
         return json(res, 403, { error: "an external runtime can only list its peers, hand them work with coordinate_bots and read assignment_status" });
       }
@@ -15415,18 +15346,16 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
             requireActiveInternalCapability();
             const recipient = store.bot(target.botId);
             if (!recipient) throw new Error("The recipient no longer exists");
-            const continued = destination || fresh ? undefined : store.workThread(target.botId, internalSender.id, address.threadId);
             const lane = destination && lanes ? roomJobs.openLane(destination, target.threadId, target.botId, internalSender, call.message) : undefined;
             if (lane?.created) createdThread = lane.threadId;
             if (lane) applyDelegatedLevel(internalSender, internalCapability.threadId, recipient, lane.threadId);
             if (!destination) {
-              const opened = { botId: internalSender.id, name: internalSender.name, threadId: address.threadId, at: Date.now() };
-              const task = continued ?? (fresh
-                ? store.createTask(target.botId, call.title ?? (call.message.replace(/\s+/g, " ").trim().slice(0, 60) || `From ${internalSender.name}`), false, call.projectId, opened, undefined, undefined, projectCwd)
-                : store.createTask(target.botId, `@${internalSender.name} · work`, false, undefined, { ...opened, kind: "work" }));
-              if (!task) throw new Error("The recipient no longer exists");
+              const { task, created } = allocateDelegationThread(store, () => coordinator.all(), {
+                parent: { botId: internalSender.id, name: internalSender.name, threadId: address.threadId },
+                recipientId: target.botId, fresh, message: call.message, title: call.title, projectId: call.projectId, cwd: projectCwd,
+              });
               target.threadId = task.threadId;
-              if (!continued) createdThread = task.threadId;
+              if (created) createdThread = task.threadId;
               applyDelegatedLevel(internalSender, internalCapability.threadId, recipient, target.threadId);
             }
             const routed = lane ? { botId: target.botId, threadId: lane.threadId } : target;
@@ -15846,7 +15775,7 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
         if (body.modelSelection === undefined) {
           selection = await defaultSelection();
         } else {
-          const checked = checkedModelSelection(body.modelSelection, undefined, true);
+          const checked = await checkedModelSelection(body.modelSelection, undefined, true);
           if (!checked.ok) return json(res, checked.status, { error: checked.error });
           selection = checked.selection;
         }
@@ -17444,7 +17373,7 @@ const server = createServer(handleRequest);
 desktopViewer.attach(server, handleRequest);
 
 calendarCalls.start();
-broadcastScheduler.start();
+projectTools.start();
 
 // Resolve the edition before accepting requests so /api/edition is never a guess.
 console.log(describeEdition(await loadEnterpriseLayer()));
@@ -17602,6 +17531,7 @@ const gracefulShutdown = createGracefulShutdown({
       companyShutdown = true;
       // Before any provider is torn down, so what the teardown fails stays cut for the next start.
       coordinator.close();
+      originModelHost.stop();
       noteTurnsCutByShutdown();
       if (workspaceAccessTimer) clearInterval(workspaceAccessTimer);
       // Invalidate turn bearers before any cleanup reaches an await: child MCP processes and the listener may outlive it.

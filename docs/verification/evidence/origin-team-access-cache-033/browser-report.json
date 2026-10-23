@@ -1,0 +1,135 @@
+{
+  "base": "d09a9202130ef58976aea8ee6c221dc433f97e25",
+  "fix": "01ddbb18b123954c5381bb77a372de32e63d2961",
+  "startedAt": "2026-10-18T18:50:06.163Z",
+  "baselineStoreSha256": "f47528a40487a1c7ffc5fe6bf936d8eb89def37574d86838a651ed19bdbe0660",
+  "fixedStoreSha256": "91d8c168b735ed9598be60df2f3fb16a99a4a27956eae28c757768e519bb3729",
+  "cases": [
+    {
+      "phase": "before",
+      "theme": "light",
+      "visibleProjectRows": 1,
+      "authoritative": {
+        "chiefOfStaff": true,
+        "hasManagedSections": false
+      },
+      "layout": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "skin": "daylight",
+        "reducedMotion": true
+      },
+      "errors": [],
+      "screenshot": {
+        "filename": "before-1440-light.png",
+        "bytes": 31618,
+        "sha256": "8e5548818cfb27162520d76030d06a77aafa1b9edf84a7c6b9e7a15e77587622"
+      }
+    },
+    {
+      "phase": "before",
+      "theme": "dark",
+      "visibleProjectRows": 1,
+      "authoritative": {
+        "chiefOfStaff": true,
+        "hasManagedSections": false
+      },
+      "layout": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "skin": "midnight",
+        "reducedMotion": true
+      },
+      "errors": [],
+      "screenshot": {
+        "filename": "before-1440-dark.png",
+        "bytes": 32386,
+        "sha256": "f3d76fb0c07dba2f4cd6576ec3e3eb8b441c04af974b603d53dc61f6c2e1b5e6"
+      }
+    },
+    {
+      "phase": "after",
+      "theme": "light",
+      "visibleProjectRows": 0,
+      "authoritative": {
+        "chiefOfStaff": true,
+        "hasManagedSections": false
+      },
+      "layout": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "skin": "daylight",
+        "reducedMotion": true
+      },
+      "errors": [],
+      "screenshot": {
+        "filename": "after-1440-light.png",
+        "bytes": 26720,
+        "sha256": "5307cbccec117a33821dea2da4dc4e453d75cb5a29256e2cac5da8425c41b2f2"
+      }
+    },
+    {
+      "phase": "after",
+      "theme": "dark",
+      "visibleProjectRows": 0,
+      "authoritative": {
+        "chiefOfStaff": true,
+        "hasManagedSections": false
+      },
+      "layout": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "skin": "midnight",
+        "reducedMotion": true
+      },
+      "errors": [],
+      "screenshot": {
+        "filename": "after-1440-dark.png",
+        "bytes": 27392,
+        "sha256": "f965fea2d8fe5a36ac23df5e74322daddcd55bcb3117784e9db4b94100c7b754"
+      }
+    }
+  ],
+  "fixtures": [
+    {
+      "phase": "before",
+      "info": {
+        "url": "http://127.0.0.1:23307",
+        "pid": 41432,
+        "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\sidebar-proof-4\\openmausbot-verify-data-Q1ml2A",
+        "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\sidebar-proof-4\\openmausbot-verification-evidence\\server-1792349406345-13720.log"
+      },
+      "workspaceId": "f16aff9f-5fa3-4075-9e35-c709cf14acd3",
+      "projectId": "ba72b2be-a1dc-4379-a79f-66bae68f2544",
+      "fixtureEntrySha256": "187591fa69029d37f0ea18e1244afaecf1d1544629549b14633ec02578b1778a",
+      "previewUrl": "http://127.0.0.1:5173/__team-cache-sidebar.html",
+      "fakeEngineStarted": false,
+      "stopped": true,
+      "fixtureDataRemoved": true
+    },
+    {
+      "phase": "after",
+      "info": {
+        "url": "http://127.0.0.1:23338",
+        "pid": 4224,
+        "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\sidebar-proof-4\\openmausbot-verify-data-signCP",
+        "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\origin-team-cache-033-a2196e580a4a4ebd88a69694587afc71\\implementation\\sidebar-proof-4\\openmausbot-verification-evidence\\server-1792349418886-13720.log"
+      },
+      "workspaceId": "227aa916-98e0-4297-b894-ecfab1e46303",
+      "projectId": "9f1707e3-b609-4aa1-a93b-bcece1ad7cef",
+      "fixtureEntrySha256": "021b744e25f8ff19ad612fde2e9774c2082c2540dea558945a5173f74898ffce",
+      "previewUrl": "http://127.0.0.1:5173/__team-cache-sidebar.html",
+      "fakeEngineStarted": false,
+      "stopped": true,
+      "fixtureDataRemoved": true
+    }
+  ],
+  "errors": [],
+  "blockedRequests": [],
+  "corrections": [
+    "The Additional teams panel is hidden by SHOWS_CHIEF_LABEL=false in shipped Origin. Its prior direct component render was conditional, not a visible Origin screen. This capture targets the actual App/Sidebar workspace-project consumer instead."
+  ],
+  "boundary": "Actual Sidebar component and StoreProvider against isolated local fake-engine server, known account-workspace membership supplied through the same setAccountWorkspaces API used after Origin sync; OriginSync and full App excluded; no cloud backend or Origin session, native bridge simulated; role transitions use registered owner PATCH route, not a shipped role-toggle control",
+  "browserClosed": true,
+  "endedAt": "2026-10-18T18:50:31.490Z"
+}

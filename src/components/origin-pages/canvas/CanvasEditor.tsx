@@ -936,7 +936,7 @@ export function CanvasEditor({ mode = "design", canvas, readOnly, images, cursor
     <div ref={root} className="relative flex min-h-0 min-w-0 flex-1">
       {shown.layers && (
         <aside aria-label="Layers" style={compact ? undefined : { width: LAYERS_WIDTH, inset: `${PANEL_GAP}px auto ${PANEL_GAP}px ${PANEL_GAP}px` }}
-          className={cn("absolute z-20 flex flex-col overflow-hidden bg-panel", compact ? "inset-y-0 left-0 w-[min(260px,80vw)] border-r border-hairline/40 pb-16 origin-overlay-in" : floatingPanel)}>
+          className={cn("absolute z-20 flex flex-col overflow-hidden bg-panel", compact ? "bottom-16 left-0 top-0 w-[min(260px,80vw)] border-r border-hairline/40 origin-overlay-in" : floatingPanel)}>
           {layers(selectionApi)}
         </aside>
       )}
@@ -979,7 +979,7 @@ export function CanvasEditor({ mode = "design", canvas, readOnly, images, cursor
       </div>
       {shown.inspector && (
         <aside aria-label="Design" style={compact ? undefined : { width: INSPECTOR_WIDTH, inset: `${PANEL_GAP}px ${PANEL_GAP}px ${PANEL_GAP}px auto` }}
-          className={cn("absolute z-20 flex flex-col overflow-hidden bg-panel", compact ? "inset-x-0 bottom-0 max-h-[55%] border-t border-hairline/40 pb-16 origin-overlay-in" : floatingPanel)}>
+          className={cn("absolute z-20 flex flex-col overflow-hidden bg-panel", compact ? "inset-x-0 bottom-16 max-h-[55%] border-t border-hairline/40 origin-overlay-in" : floatingPanel)}>
           {inspector(selectionApi)}
         </aside>
       )}

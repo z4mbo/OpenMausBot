@@ -1,4 +1,7 @@
+import { NewConversationInstead } from "./NewConversationInstead";
+export { NewConversationInstead } from "./NewConversationInstead";
 import { ChatHeaderMenu } from "./ChatHeaderMenu";
+import { ChatUsagePopover } from "./ChatUsagePopover";
 import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useAdvancedMode } from "@/lib/interface-mode";
@@ -114,7 +117,6 @@ import { RenameTitle } from "./RenameTitle";
 import { BotActivityPicker } from "./TaskPicker";
 import { ModelPicker } from "./ModelPicker";
 import { CitationSelectionToolbar, SentCitations } from "./CitationUI";
-
 import { SpeakButton } from "./SpeakButton";
 import { CallOverlay } from "./CallView";
 import { LiveCallBar } from "./LiveCallBar";
@@ -1079,10 +1081,10 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
   const projectPage = Boolean(bot.chiefOfStaff) && !isWorkspaceSection(bot.section) && !profile.installedPackage;
   const unreadHere = Boolean(profile.tasks?.find((task) => task.threadId === bot.threadId)?.unread ?? profile.unread);
   useEffect(() => {
-    if (projectPage && chiefSection === "chat" && unreadHere) {
+    if ((embedded || (projectPage && chiefSection === "chat")) && unreadHere) {
       void api(`/api/bots/${profile.id}/read`, { method: "POST", body: JSON.stringify({ threadId: bot.threadId }) }).catch(() => {});
     }
-  }, [projectPage, chiefSection, unreadHere, profile.id, bot.threadId]);
+  }, [embedded, projectPage, chiefSection, unreadHere, profile.id, bot.threadId]);
 
   const computerStarting = computerStartLine(state.computerStarts[bot.id], bot.name);
   const mascotMotion = state.mascotMotion?.botId === bot.id ? state.mascotMotion : null;
@@ -1368,7 +1370,9 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
               <span className="@max-4xl/chathead:hidden">{t("chat.stop")}</span>
             </button>
           )}
-          <ThreadContextWarning bot={bot} messages={messages} /><AgentBudgetPill shared={bot.shared} />
+          <ThreadContextWarning bot={bot} messages={messages} />
+          <AgentBudgetPill shared={bot.shared} />
+          <ChatUsagePopover bot={bot} messages={messages} />
           {!remoteClient && <ModelPicker key={bot.threadId} bot={bot} threadId={bot.threadId} />}
           <LiveCallChip currentBotId={bot.id} onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)} />
           <button
@@ -1410,8 +1414,6 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
           dispatch({ type: "updateTask", botId: bot.id, threadId: bot.threadId, patch: { pinnedMessageId: "" } })
         }
       />
-
-
       </GlassBar>
 
       <div
@@ -1552,16 +1554,5 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
 
     </main>
     </ThreadLinkContext>
-  );
-}
-
-export function NewConversationInstead({ onNew }: { onNew: () => void }) {
-  return (
-    <div className="pointer-events-auto mx-5 mb-4 flex items-center justify-between gap-3 rounded-2xl border border-hairline/60 bg-raised px-4 py-3" data-testid="cloud-guest-composer">
-      <p className="text-[13px] text-ink-secondary">{t("chat.cloudGuest.notYours")}</p>
-      <button type="button" onClick={onNew} className="shrink-0 rounded-full bg-accent px-3 py-1 text-[13px] font-medium text-white">
-        {t("chat.cloudGuest.newConversation")}
-      </button>
-    </div>
   );
 }

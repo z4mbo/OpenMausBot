@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import { parseBudgetInput } from "@/lib/agent-budget";
 import { ghostButton, inputClass, primaryButton, useAction } from "./origin-pages/ui";
 
-type BudgetTarget = { agentId: string } | { projectId: string };
+export type BudgetTarget = { agentId: string } | { projectId: string };
 
 /** Sets, changes or clears one agent's or one project's monthly budget. Workspace admins only. */
 export function BudgetEditor({ teamId, target, label, monthlyUsd, onDone }: { teamId: string; target: BudgetTarget; label: string; monthlyUsd?: number; onDone(): void }) {

@@ -1,0 +1,146 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/long-running-chief.e2e.test.ts (9 tests | 3 failed) 53674ms
+   × carries a consult-and-implement job over several teammate turns, through a step cap, to one final answer 5755ms
+   × tells the Chief what happened to each approval: allowed, denied, or never answered and not run 5380ms
+   × tells the Chief a teammate's turn stalled, in the watchdog's words 4680ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/long-running-chief.e2e.test.ts > carries a consult-and-implement job over several teammate turns, through a step cap, to one final answer
+AssertionError: expected [ [ 'done', …(1) ], …(5) ] to deeply equal [ [ 'done', …(1) ], …(2) ]
+
+- Expected
++ Received
+
+@@ -2,12 +2,24 @@
+    [
+      "done",
+      "A0: Mira is consulting and Eli is implementing.",
+    ],
+    [
++     "delegation-started",
++     "CONSULT-ONE: Which CSV approach and which edge cases should we handle?",
++   ],
++   [
++     "delegation-started",
++     "IMPLEMENT-CAP: Build the invoice CSV export end to end, run the tests, and report.",
++   ],
++   [
+      "delegation-settled",
+      "Results in from Mira, Eli",
++   ],
++   [
++     "delegation-started",
++     "REVIEW: review Eli's finished export.",
+    ],
+    [
+      "delegation-settled",
+      "Results in from Mira, Eli",
+    ],
+
+ ❯ server/long-running-chief.e2e.test.ts:234:94
+    232|   for (const node of f.tree(job).filter((candidate: any) => candidate.…
+    233|   expect(f.notifications.filter((notification: any) => notification.ki…
+    234|   expect(f.notifications.map((notification: any) => [notification.kind…
+       |                                                                                              ^
+    235|     ["done", "A0: Mira is consulting and Eli is implementing."],
+    236|     ["delegation-settled", "Results in from Mira, Eli"],
+ ❯ chiefJob server/long-running-chief.e2e.test.ts:165:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  server/long-running-chief.e2e.test.ts > tells the Chief what happened to each approval: allowed, denied, or never answered and not run
+AssertionError: expected [ [ 'done', …(1) ], …(9) ] to deeply equal [ [ 'done', …(1) ], …(6) ]
+
+- Expected
++ Received
+
+@@ -2,24 +2,36 @@
+    [
+      "done",
+      "B0: Mira is checking.",
+    ],
+    [
++     "delegation-started",
++     "CHECK-HISTORY: check the export module's recent history.",
++   ],
++   [
+      "approval",
+      "git log --oneline -5 -- src/export",
+    ],
+    [
+      "delegation-settled",
+      "Results in from Mira",
++   ],
++   [
++     "delegation-started",
++     "PUSH-BRANCH: push the export branch.",
+    ],
+    [
+      "approval",
+      "git push origin export",
+    ],
+    [
+      "delegation-settled",
+      "Results in from Mira",
++   ],
++   [
++     "delegation-started",
++     "RUN-TESTS: run the test suite.",
+    ],
+    [
+      "approval",
+      "pnpm test",
+    ],
+
+ ❯ server/long-running-chief.e2e.test.ts:303:94
+    301|   expect((await f.cards(work)).map((message: any) => [message.card.sub…
+    302|     .toEqual([["git log --oneline -5 -- src/export", "allow", false, "…
+    303|   expect(f.notifications.map((notification: any) => [notification.kind…
+       |                                                                                              ^
+    304|     ["done", "B0: Mira is checking."],
+    305|     ["approval", "git log --oneline -5 -- src/export"], ["delegation-s…
+ ❯ chiefJob server/long-running-chief.e2e.test.ts:165:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  server/long-running-chief.e2e.test.ts > tells the Chief a teammate's turn stalled, in the watchdog's words
+AssertionError: expected [ [ 'done', …(1) ], …(2) ] to deeply equal [ [ 'done', …(1) ], …(1) ]
+
+- Expected
++ Received
+
+@@ -2,9 +2,13 @@
+    [
+      "done",
+      "D0: Mira is running the suite.",
+    ],
+    [
++     "delegation-started",
++     "LONG-SUITE: run the full integration suite; it prints nothing until it finishes.",
++   ],
++   [
+      "delegation-settled",
+      "Results in from Mira",
+    ],
+  ]
+
+ ❯ server/long-running-chief.e2e.test.ts:418:94
+    416|   expect(f.turns(f.clive.id).map((record: any) => record.planKey)).toE…
+    417|   expect((await f.tasks(f.clive.id)).map((task: any) => task.title)).n…
+    418|   expect(f.notifications.map((notification: any) => [notification.kind…
+       |                                                                                              ^
+    419|     ["done", "D0: Mira is running the suite."], ["delegation-settled",…
+    420| }), hostTimeout(90_000));
+ ❯ chiefJob server/long-running-chief.e2e.test.ts:165:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  3 failed | 52 passed | 1 skipped (56)
+   Start at  08:17:22
+   Duration  163.72s (transform 666ms, setup 977ms, import 2.14s, tests 159.87s, environment 0ms)
+

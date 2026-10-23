@@ -1,0 +1,28 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const cp = require('node:child_process');
+const crypto = require('node:crypto');
+const root = path.resolve(__dirname, '../..');
+const parent = 'C:\\Users\\aless\\Documents\\Origin-bugfix';
+const base = 'ec28ec06e935b10a176f26586348e81831475e80';
+const digest = data => crypto.createHash('sha256').update(data).digest('hex');
+const leases = ['server/origin-run-lease.ts', 'server/origin-shared-agents.ts', 'server/origin-shared.test.ts'].map(file => ({ file, sha256: digest(fs.readFileSync(path.join(root, file))) }));
+const sources = ['src/components/OriginGate.tsx', 'src/components/OriginConnect.tsx', 'src/lib/origin-cloud/client.ts', 'src/lib/origin-cloud/hooks.ts'].map(file => {
+  const current = fs.readFileSync(path.join(root, file));
+  const baseline = cp.execFileSync('git', ['show', `${base}:${file}`], { cwd: root, maxBuffer: 5_000_000 });
+  const identicalLf = current.toString().replace(/\r\n/g, '\n') === baseline.toString().replace(/\r\n/g, '\n');
+  if (!identicalLf) throw new Error(`production is not baseline: ${file}`);
+  return { file, checkoutSha256: digest(current), baselineGitSha256: digest(baseline), identicalLf, gitBlob: cp.execFileSync('git', ['rev-parse', `${base}:${file}`], { cwd: root }).toString().trim() };
+});
+const tests = ['src/components/OriginGate.session.test.ts', 'src/components/OriginConnect.session.test.ts'].map(file => {
+  if (fs.existsSync(path.join(root, file))) throw new Error(`refusing to overwrite test: ${file}`);
+  const bytes = fs.readFileSync(path.join(parent, file));
+  fs.copyFileSync(path.join(parent, file), path.join(root, file));
+  const copied = fs.readFileSync(path.join(root, file));
+  const parentAfter = fs.readFileSync(path.join(parent, file));
+  if (!bytes.equals(copied) || !bytes.equals(parentAfter)) throw new Error(`test changed during copy: ${file}`);
+  return { file, size: bytes.length, sha256: digest(bytes), byteExactFromParent: true };
+});
+fs.copyFileSync(path.join(root, '.omb-scratch/shared-run-lease-035/run-tests.cjs'), path.join(__dirname, 'run-tests.cjs'));
+fs.writeFileSync(path.join(__dirname, 'bindings-before.json'), JSON.stringify({ base, ownHead: cp.execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root }).toString().trim(), parentHead: cp.execFileSync('git', ['rev-parse', 'HEAD'], { cwd: parent }).toString().trim(), sources, tests, leases, createdAt: new Date().toISOString() }, null, 2) + '\n');
+console.log(JSON.stringify({ testCount: tests.length, baselineSources: sources.length, leasesPreserved: leases.every(item => digest(fs.readFileSync(path.join(root, item.file))) === item.sha256), tests }, null, 2));

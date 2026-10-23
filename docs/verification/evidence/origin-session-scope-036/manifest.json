@@ -1,0 +1,230 @@
+{
+  "source": "bfa4597452a871af28caa614b0594c34fd980119",
+  "baseline": "ec28ec06e935b10a176f26586348e81831475e80",
+  "generatedAt": "2026-10-19T00:16:41.112Z",
+  "files": [
+    {
+      "path": "browser-after-fixture.json",
+      "bytes": 637,
+      "sha256": "7383e6036f50e881bdd740658ab75108986635e55a8f07976228d171bc0a06e8",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-after-fixture.json"
+    },
+    {
+      "path": "browser-after-reload.ax.txt",
+      "bytes": 1464,
+      "sha256": "a595656f22468ebd43d62eb2086a86db6a902877e29a047f802bfe202994b158",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-after-reload.ax.txt"
+    },
+    {
+      "path": "browser-after.ax.txt",
+      "bytes": 1463,
+      "sha256": "1889b11d52d0339b610e938ea2b90222e8396c01b2334241d32cd5d0c1eeeb89",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-after.ax.txt"
+    },
+    {
+      "path": "browser-after.png",
+      "bytes": 51559,
+      "sha256": "233bce0a57a6757ebc493083d61f67884b5b9d3e87a4dc51f70b3d12510c044d",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-after.png"
+    },
+    {
+      "path": "browser-before-fixture-initial.json",
+      "bytes": 638,
+      "sha256": "91a36f1dc083cdb1e2a625ef85025d85400ba129698d405744c616361ef9844e",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-before-fixture-initial.json"
+    },
+    {
+      "path": "browser-before-fixture.json",
+      "bytes": 638,
+      "sha256": "ec6a833de47fd4d542052aca74749aa2cd353276a48a1e2a2b6ff242b11ece83",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-before-fixture.json"
+    },
+    {
+      "path": "browser-before-initial-system-font-missing.png",
+      "bytes": 38007,
+      "sha256": "26aeb652e42a9c27c58b413af757fe744fa41b1dab3731677705bba54deeabe6",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-before-initial-system-font-missing.png"
+    },
+    {
+      "path": "browser-before-initial.ax.txt",
+      "bytes": 1346,
+      "sha256": "3cc1919635f4d12f5e2068e092d33f1262c16740dc37b7d3d1f39974c6baaf6b",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-before-initial.ax.txt"
+    },
+    {
+      "path": "browser-before.ax.txt",
+      "bytes": 1397,
+      "sha256": "e48ab73881ee5a27b55d8e6d04a0173379a822fbb5e3e4ffd7f3017076dd21f4",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-before.ax.txt"
+    },
+    {
+      "path": "browser-before.png",
+      "bytes": 42115,
+      "sha256": "3dae94b916e1743fd5075df51ae7050956c8030dbeb5012b917d341bef90eae3",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/browser-before.png"
+    },
+    {
+      "path": "client-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/client-types.log"
+    },
+    {
+      "path": "commit.log",
+      "bytes": 253,
+      "sha256": "e250df3eb51dd2da06fc4336350d913383db1b2fd19fb950c85f7ac0555a7a01",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/commit.log"
+    },
+    {
+      "path": "desktop-after.json",
+      "bytes": 72,
+      "sha256": "3b1aaad5d9519467f9eba0401f894476c9a16348da81a9e89afedf04341ba804",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/desktop-after.json"
+    },
+    {
+      "path": "desktop-after.log",
+      "bytes": 234,
+      "sha256": "6ecb706f2a8944945bfcb664f294e7a4d7249b154f75526e5650539edafc0f0f",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/desktop-after.log"
+    },
+    {
+      "path": "desktop-before.json",
+      "bytes": 129,
+      "sha256": "d28063d1533ac77a9e9566451d29052dfd4cd2ca458352252bc2e135be17fd16",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/desktop-before.json"
+    },
+    {
+      "path": "desktop-before.log",
+      "bytes": 3733,
+      "sha256": "90ca37209255c4c36a7551f7bd09bd9f86cd1da93534114da1cae37985cc85c0",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/desktop-before.log"
+    },
+    {
+      "path": "desktop-initial-unmatched-filter.json",
+      "bytes": 129,
+      "sha256": "6fd87dc2159b472a21e0c0cf62e6486b13cdb25f235a6acfd7997a3439393ac9",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/desktop-initial-unmatched-filter.json"
+    },
+    {
+      "path": "desktop-initial-unmatched-filter.log",
+      "bytes": 406,
+      "sha256": "6d421ba97b3397972b1caa16eee57ef91d7f5d5a93a58bd1db6dbcdf1581e2e0",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/desktop-initial-unmatched-filter.log"
+    },
+    {
+      "path": "desktop-integrated.log",
+      "bytes": 238,
+      "sha256": "0ce831340865157c56e624547f3aa788e1c66440adf0c65b143ed0f24f7b5197",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/desktop-integrated.log"
+    },
+    {
+      "path": "desktop-leak-before.json",
+      "bytes": 129,
+      "sha256": "9ce2878136dc8d11638ce554751ea3dc848cb34cced6a0fd5faee335acb07eae",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/desktop-leak-before.json"
+    },
+    {
+      "path": "desktop-leak-before.log",
+      "bytes": 2356,
+      "sha256": "5dabf96c44a89e0f2a15c4f597c6f7892c635f1b808ff19dcbf30930d0ae5e1b",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/desktop-leak-before.log"
+    },
+    {
+      "path": "fixture-cleanup.json",
+      "bytes": 398,
+      "sha256": "4a88c008ebd7a0c6b53b01899721edb7d7834fc878683c9739cfe57fe2949d1a",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/fixture-cleanup.json"
+    },
+    {
+      "path": "full-lint.log",
+      "bytes": 98,
+      "sha256": "6de67888f6e3f7fb15a6cdc681d20d4f02c22ab07fb592db3b4360fa249c9760",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/full-lint.log"
+    },
+    {
+      "path": "lint-initial-unavailable-eslint.log",
+      "bytes": 213,
+      "sha256": "011503f26434170f37232dfc9be7cbb065b0e2b85f991a48ba86ab53802060b3",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/lint-initial-unavailable-eslint.log"
+    },
+    {
+      "path": "preview.tsx.txt",
+      "bytes": 2240,
+      "sha256": "a8f5c24feb38f66b33c96a289c4a62d577a35f6fc6db41f0423f13b4efe82bea",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/preview.tsx"
+    },
+    {
+      "path": "site-after.json",
+      "bytes": 72,
+      "sha256": "6517bca12f84238f210a845eeb6d1e57c9126dc3e02a3a5ac3f8e9e840ccfef3",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/site-after.json"
+    },
+    {
+      "path": "site-after.log",
+      "bytes": 236,
+      "sha256": "fb340d986b023d13adb094561f51704cd817bba50b08a0e98ceb51336e6169f6",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/site-after.log"
+    },
+    {
+      "path": "site-before.json",
+      "bytes": 129,
+      "sha256": "b159764aab32e177ba019f028194dbaa7e80accc2d90a4fe0a2cdd3bbb6ea3fb",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/site-before.json"
+    },
+    {
+      "path": "site-before.log",
+      "bytes": 1524,
+      "sha256": "b57eb8fbc6ad2085860094049b59c3f8c0c346e7561594bdcf1c8a16fea17644",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/site-before.log"
+    },
+    {
+      "path": "site-expanded-before.json",
+      "bytes": 129,
+      "sha256": "b4f5b3d0cc48914e7bc2d1c45c370a081018f883848062b09e563d0146cc2596",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/site-expanded-before.json"
+    },
+    {
+      "path": "site-expanded-before.log",
+      "bytes": 3112,
+      "sha256": "2590156d12c253572abba04f72514c12372904f6850eac11e2494c38b34af7c8",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/site-expanded-before.log"
+    },
+    {
+      "path": "site-integrated.log",
+      "bytes": 440,
+      "sha256": "5059c223ae166b26e4088c5efdc7becf43d14d5104c370022affa7a8ad481e4d",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/site-integrated.log"
+    },
+    {
+      "path": "site-types.log",
+      "bytes": 96,
+      "sha256": "291125fecee0828d7f4ef51d098001ac725fd102c4208f5bd446de81fd03ed41",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/site-types.log"
+    },
+    {
+      "path": "source-proof.json",
+      "bytes": 2970,
+      "sha256": "0650dd270998cd9198b221ebb75fb08782a9efc0621dda4550db4d74f2e5ba1d",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/source-proof.json"
+    },
+    {
+      "path": "transport.tsx.txt",
+      "bytes": 2490,
+      "sha256": "48407172b6db04d6dd6efd85b2f9911e5b8f01fe9274aad9df056fa3010f8fe7",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/transport.tsx"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 2429,
+      "sha256": "3c310ede7547b5109800226618dca31fedfa0bcd41ac0ca7b3572a923437c083",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/validation.json"
+    },
+    {
+      "path": "verify.mjs.txt",
+      "bytes": 2719,
+      "sha256": "5be7814d682561f07d28f7674d852d76eaee0b30ec35b736707e7e0581df9303",
+      "archivedOriginalPath": ".omb-scratch/session-scope-036/verify.mjs"
+    }
+  ],
+  "qualification": "Evidence bytes and failures are retained. Helper snapshots use .txt data extensions, not lint suppressions. No native backend or complete Batch A acceptance is claimed."
+}

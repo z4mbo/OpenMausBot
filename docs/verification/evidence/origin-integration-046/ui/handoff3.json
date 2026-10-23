@@ -1,0 +1,100 @@
+{
+  "preparedAt": "2026-10-20T05:16:09.844Z",
+  "status": "Browser inspection delegated to root CUA; no visual acceptance claimed by this agent",
+  "fixture": {
+    "pid": 70208,
+    "port": 50063,
+    "url": "http://127.0.0.1:50063/__integration046.html",
+    "sourceManifest": "source-before-3.json",
+    "protectedPortsUntouched": true,
+    "scope": "Actual merged UI components with controlled StoreContext/reducer, HTTP catalog/quota/settings responses and cloud-query adapter. No native backend, provider, real host, credential, production data or full App acceptance."
+  },
+  "sourceBinding": {
+    "manifest": "source-before-3.json",
+    "sha256": "2707e91886329a94f5e93bee2d20de9741c657fe67a5670415239b820153f8ea",
+    "files": 1438,
+    "head": "fb7b838aab70c1308023e5df27209641fff5e9c1",
+    "workingTree": true,
+    "fixtureFiles": [
+      {
+        "name": "launch.mjs",
+        "sha256": "de68c50dc2128f29db65899316e773c6e062e320795e84d8b8c2d5a8012b39a2"
+      },
+      {
+        "name": "preview.tsx",
+        "sha256": "28f10f1cf60130c61521951809a033710999ceaafbb0225d125857349fb52de9"
+      }
+    ]
+  },
+  "routes": {
+    "agent": "?screen=agent&theme=dark",
+    "hosting": "?screen=hosting&theme=light",
+    "chat": "?screen=chat&theme=dark&width=standard",
+    "settings": "?screen=settings&theme=light",
+    "tabs": "?screen=tabs&theme=dark"
+  },
+  "options": {
+    "theme": [
+      "light",
+      "dark"
+    ],
+    "width": [
+      "standard",
+      "wide",
+      "full"
+    ]
+  },
+  "capabilities": [
+    "Actual ModelSection/ModelFallbackSettings/ModelPicker presentation with two synthetic local backup routes",
+    "Actual ModelHostingSettings and controlled owner/workspace/project/catalog responses; no real source is enabled",
+    "Actual ChatView, minimal quota/context popover and merged PR card using synthetic transcript and quota reports",
+    "Actual SettingsModal opened on Integrations with three disconnected synthetic service descriptors",
+    "Actual ChiefSectionBar overflow navigation for new project tabs; selected body is a fixture status only"
+  ],
+  "limitations": [
+    "No native backend, real model, provider credentials, production data, GitHub mutation or service grant is accessed",
+    "Unhandled operations fail405; model execution, saves, budget accounting and host execution are not acceptance-tested here",
+    "The PR card points to a synthetic URL; do not open or submit its merge action",
+    "Project tab bodies are not mounted, so new Studio/Broadcast/Pipeline/Canvas/Org functionality is not established by this navigation check",
+    "Model fallback catalog is controlled; native source opt-in/permissions/offline behavior remains covered by separate native evidence",
+    "Manifest covers the unfrozen working tree; root should compare current inputs before attributing screenshots"
+  ],
+  "priorFocusedChecks": {
+    "testFiles": 13,
+    "passed": 143,
+    "groups": [
+      {
+        "files": 9,
+        "passed": 118,
+        "durationSeconds": 22.61
+      },
+      {
+        "files": 4,
+        "passed": 25,
+        "durationSeconds": 3.79
+      }
+    ],
+    "oxlint": "passed for touched UI/test/helper files",
+    "stagedDiffCheck": "passed",
+    "logs": "Tool outputs; no separate raw logs were captured"
+  },
+  "failedAttempts": [
+    {
+      "fixture": "fixture.json",
+      "sourceManifest": "source-before.json",
+      "observedBy": "root CUA",
+      "error": "Blank page: transitive style-to-js CJS default export was not optimized",
+      "correction": "Only fixture Vite dependency discovery changed to scan actual source components and explicitly bundle react-markdown; exact owned PID52380 was stopped and replaced by PID73112 on the same strict50063 port",
+      "productCodeChanged": false
+    },
+    {
+      "observedBy": "root CUA",
+      "error": "useStore outside provider in ThreadRefsProvider",
+      "classification": "Fixture provider order: ThreadRefsProvider wrapped Fixture before its StoreContext",
+      "productCodeChanged": false,
+      "sourceManifest": "source-before-2.json",
+      "fixture": "fixture-2.json",
+      "recordedAt": "2026-10-20T05:15:39.666Z"
+    }
+  ]
+}

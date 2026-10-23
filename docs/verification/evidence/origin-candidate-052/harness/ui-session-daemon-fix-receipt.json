@@ -1,0 +1,99 @@
+{
+  "sourceBaseline": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+  "recordedAt": "2026-10-21T05:26:16.566Z",
+  "scope": "Harness only: Windows ownership scope and retained afterEach timer diagnostics",
+  "sourceHeadAtRecord": "bd111a97d1f161a51e32ad050b4363874d1cd517",
+  "paths": [
+    {
+      "file": "scripts/testing/control-omb-ui.ts",
+      "bytes": 27970,
+      "sha256": "0e8a048085d6701e369dddbdb37d9812b9a6446045623fda52b0c85ef07d0a90"
+    },
+    {
+      "file": "scripts/testing/ui-session-daemon.test.ts",
+      "bytes": 1775,
+      "sha256": "81adc483c71b02d2ef6a972cd939cce685d1cc9953b444c4def1275228f0c147"
+    },
+    {
+      "file": "scripts/testing/thinking-timer-ui.e2e.test.ts",
+      "bytes": 16661,
+      "sha256": "45e190b6a8c46ba99e2b20e4c797844f3bcea331847096f6556d132bff89ad03"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "bytes": 22745,
+      "sha256": "4373efc3057306a5bca10a479a0a8f4c5cf64e4017d23e98671fef6cb135e110"
+    },
+    {
+      "file": "scripts/ci-workflow.test.ts",
+      "bytes": 14359,
+      "sha256": "61d64227d8d89bc50afcce8340f265e4e000a8414b649497fa3e05b9d38763fd"
+    }
+  ],
+  "diffSha256": "4d6829f9a93189ea0aeaf28ca339cfa3d7c247b982cb429d0dbac7c11fea0eae",
+  "behavior": [
+    "UI launcher uses the normal CLI daemon path on Linux/macOS",
+    "Windows still starts the owned daemon with identical environment and surfaced failures",
+    "Existing explicit startSessionDaemon ChildProcess API retained for direct callers",
+    "Failure-only afterEach captures synthetic bots/AX and bounded readonly textarea/focus/disabled/aria-busy/current-thread state",
+    "Per-fixture data basename produces unique .thinking-timer.json under evidenceDir with exclusive creation",
+    "Existing fixture server log is capped at65536bytes using a descriptor-based tail read",
+    "CI always-upload glob includes distinct timer diagnostic JSON files"
+  ],
+  "verification": {
+    "red": {
+      "log": "ui-session-daemon-red.log",
+      "bytes": 1893,
+      "sha256": "f157520177fa9870bab16f36b403c563587ce3cf53dfef14c3f7248f47894e46",
+      "failed": 2,
+      "passed": 3,
+      "scope": "Same focused platform tests against unconditional delegation before guard"
+    },
+    "green": {
+      "log": "ui-session-daemon-final-green.log",
+      "bytes": 258,
+      "sha256": "558926d34ee652dad8ce4c21ce28f7f2c536e0022d19f1c03e28b843b83e86e0",
+      "failed": 0,
+      "passed": 32,
+      "files": 3,
+      "scope": "5daemon-scope cases plus existing CLI and CI policy guards, including new unique artifact retention guard"
+    },
+    "lint": {
+      "log": "ui-session-daemon-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0
+    },
+    "diffWhitespaceExitCode": 0,
+    "realUiBeforeHarnessPatch": {
+      "log": "thinking-timer-exact.log",
+      "passed": 1,
+      "filtered": 1,
+      "platform": "win32",
+      "significance": "Windows behavior is preserved; this earlier pass does not establish Linux causality"
+    },
+    "timerAssertionsChanged": false,
+    "timerTimeoutsChanged": false,
+    "preSendSequenceChanged": false,
+    "newPreSendAwait": false,
+    "wholeUiRerunAfterHarnessPatch": false,
+    "extraIgnoredNegativeControl": {
+      "log": "ui-session-daemon-negative-control-red.log",
+      "bytes": 1351,
+      "sha256": "1e5a3d23bfb8ab716aeeae5872bc40b6fcd24564005c964f465eec45bc071830",
+      "adapterPreconditionFailure": true,
+      "testsExecuted": 0,
+      "qualifiesAsRedProof": false,
+      "replayed": false
+    }
+  },
+  "limits": [
+    "Windows-only workaround scope is proven by focused tests; its causality for the repeated Linux timer failure remains unproven until fresh Linux CI",
+    "No app/server runtime change, source version change, provider/billing acceptance or publication",
+    "All diagnostics derive only from owned synthetic fixtures; no production data or real credentials"
+  ],
+  "committedByThisLane": false,
+  "stagedByThisLane": false,
+  "nativeAdaptersChanged": false,
+  "publication": false
+}

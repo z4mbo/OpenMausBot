@@ -1,0 +1,16 @@
+{
+  "operation": "private-cache-cleanup-050",
+  "nonce": "d885bc56-28d2-4c82-b92c-11cae1341f7a",
+  "startedAt": "2026-10-21T04:31:20.735Z",
+  "admissionSha256": "5a924035311e8e80d016b6331f9a460124c35ba8e30bd3388aef6f0023339461",
+  "manifestSha256": "30d8f56ef58c392993d31f4639cc9121bd785ec8c8fc95a7348e1c41b197ed44",
+  "operatorSha256": "6507975a61ea6bf96f35d9ec6a0ecfaa3c3b96a26c76346edad3e44e258cfe8b",
+  "remoteMethodSha256": "6f6b00ca8250586ca30d6a567b3c1df251859153bbc72cbe458482e7d7d2d748",
+  "count": 33,
+  "directories": [
+    "/root/origin-release-staging/0.2.8/downloads",
+    "/root/origin-release-staging/0.2.9/downloads",
+    "/root/origin-release-staging/0.2.12-candidate-032-d09a92021/downloads"
+  ],
+  "unknownOutcomeRequiresReconciliation": true
+}

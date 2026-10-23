@@ -203,6 +203,17 @@ describe("threadModelFallback", () => {
     expect(threadModelFallback(spare, sonnet, engines({}))).toBeNull();
   });
 
+  it("keeps an explicit teammate account when it is absent from the local provider registry", () => {
+    const remote: ModelSelection = { instanceId: "origin-remote", model: "synthetic", source: { hostId: "host1", sourceId: "source1" } };
+    expect(threadModelFallback(remote, sonnet, () => undefined)).toBeNull();
+    const store = open(), bot = store.createBot();
+    store.switchTaskModel(bot.id, bot.threadId, remote, false, false);
+    expect(runsOn(open(), bot.id, bot.threadId)).toEqual(remote);
+    const other = { ...remote, source: { hostId: "host2", sourceId: "source2" } };
+    store.applyModelDefault(bot.id, other);
+    expect(ownModel(open(), bot.id, bot.threadId)).toEqual(remote);
+  });
+
   it("gives way when the engine is gone, disabled, unavailable, or not allowed", () => {
     expect(threadModelFallback(spare, sonnet, engines({ spare: undefined }))).toBe("unavailable");
     expect(threadModelFallback(spare, sonnet, engines({ spare: engine("spare", { enabled: false }) }))).toBe("unavailable");

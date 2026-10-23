@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { BROADCAST_RULES, type BroadcastChannel, type BroadcastFormat } from "../../shared/broadcast.ts";
 import type { IntegrationValues } from "../integration-keys.ts";
 import { oauth1Header } from "./oauth1.ts";
+import { integrationCredentialSecrets, integrationErrorScrubber } from "../integration-errors.ts";
 
 export interface PublishMedia {
   name: string;
@@ -45,7 +46,7 @@ async function readJson(response: Response): Promise<Json> {
   try {
     return record(JSON.parse(body));
   } catch {
-    return { message: body.slice(0, 300) };
+    return { message: body };
   }
 }
 
@@ -53,7 +54,7 @@ function vendorMessage(body: Json): string {
   const error = record(body.error);
   const first = Array.isArray(body.errors) ? record(body.errors[0]) : {};
   return [text(body.detail), text(error.message), text(body.message), text(first.message), text(body.error_description), text(body.title), typeof body.error === "string" ? body.error : ""]
-    .find(Boolean)?.slice(0, 300) ?? "";
+    .find(Boolean) ?? "";
 }
 
 async function expectOk(label: string, response: Response): Promise<Json> {
@@ -358,12 +359,17 @@ export type ChannelKeys = { [I in "x" | "bluesky" | "linkedin" | "meta" | "tikto
 
 export async function publishChannel(channel: BroadcastChannel, body: string, media: readonly PublishMedia[], keys: ChannelKeys, env = defaultPublishEnv, options: PublishOptions = {}): Promise<Published> {
   const missing = (): never => refuse(`${BROADCAST_RULES[channel].label} is not connected; add its keys in Settings, Integrations`);
+  const publish = async <T extends object>(credentials: T, action: (value: T) => Promise<Published>) => {
+    const scrub = integrationErrorScrubber(integrationCredentialSecrets(credentials));
+    try { return await action(credentials); }
+    catch (error) { throw new PublishError(scrub(error instanceof Error ? error.message : String(error))); }
+  };
   switch (channel) {
-    case "x": return publishX(keys.x() ?? missing(), body, media, env);
-    case "bluesky": return publishBluesky(keys.bluesky() ?? missing(), body, media, env);
-    case "linkedin": return publishLinkedIn(keys.linkedin() ?? missing(), body, media, env);
-    case "facebook": return publishFacebook(keys.meta() ?? missing(), body, media, env);
-    case "instagram": return publishInstagram(keys.meta() ?? missing(), body, media, env, options);
-    case "tiktok": return publishTikTok(keys.tiktok() ?? missing(), body, media, env, options);
+    case "x": return publish(keys.x() ?? missing(), credentials => publishX(credentials, body, media, env));
+    case "bluesky": return publish(keys.bluesky() ?? missing(), credentials => publishBluesky(credentials, body, media, env));
+    case "linkedin": return publish(keys.linkedin() ?? missing(), credentials => publishLinkedIn(credentials, body, media, env));
+    case "facebook": return publish(keys.meta() ?? missing(), credentials => publishFacebook(credentials, body, media, env));
+    case "instagram": return publish(keys.meta() ?? missing(), credentials => publishInstagram(credentials, body, media, env, options));
+    case "tiktok": return publish(keys.tiktok() ?? missing(), credentials => publishTikTok(credentials, body, media, env, options));
   }
 }

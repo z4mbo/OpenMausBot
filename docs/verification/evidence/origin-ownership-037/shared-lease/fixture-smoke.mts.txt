@@ -1,0 +1,49 @@
+import assert from 'node:assert/strict';
+import { copyFileSync, existsSync, writeFileSync } from 'node:fs';
+import { createConnection } from 'node:net';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { launchVerificationServer, runControlOmb } from '../../scripts/control-omb.ts';
+
+const evidence = dirname(fileURLToPath(import.meta.url));
+const label = process.argv[2] ?? 'fixture';
+const fixture = await launchVerificationServer({});
+const steps: unknown[] = [];
+let success = false;
+const cli = async (...args: string[]) => {
+  const result = await runControlOmb([...args, '--url', fixture.info.url], { env: {} });
+  steps.push({ args, result });
+  return result as Record<string, any>;
+};
+try {
+  await cli('doctor');
+  const created = await cli('new-bot', '--name', 'Lease fixture');
+  assert.ok(created.bot?.id);
+  const task = created.bot.activeTaskId ?? created.bot.threadId;
+  assert.equal(typeof task, 'string');
+  const text = 'Verify the isolated lease change fixture';
+  await cli('send', '--bot', created.bot.id, '--task', task, '--text', text);
+  const settled = await cli('wait', '--bot', created.bot.id, '--task', task, '--timeout', '25');
+  assert.equal(settled.status, 'settled');
+  const transcript = await cli('messages', '--bot', created.bot.id, '--task', task, '--limit', '50');
+  assert.ok(transcript.messages.some((row: any) => row.role === 'user' && row.text === text));
+  assert.ok(transcript.messages.some((row: any) => row.role === 'bot' && row.kind === 'text' && row.text));
+  success = true;
+} finally {
+  writeFileSync(join(evidence, `${label}-steps.json`), JSON.stringify({ info: fixture.info, success, steps }, null, 2) + '\n');
+  await fixture.close();
+  copyFileSync(fixture.info.logPath, join(evidence, `${label}-server.log`));
+  const endpoint = new URL(fixture.info.url);
+  const portClosed = await new Promise<boolean>(resolve => {
+    const socket = createConnection({ host: endpoint.hostname, port: Number(endpoint.port) });
+    socket.setTimeout(1000);
+    socket.once('connect', () => { socket.destroy(); resolve(false); });
+    socket.once('error', () => { socket.destroy(); resolve(true); });
+    socket.once('timeout', () => { socket.destroy(); resolve(false); });
+  });
+  let processAbsent = false;
+  try { process.kill(fixture.info.pid, 0); } catch (error) { processAbsent = (error as NodeJS.ErrnoException).code === 'ESRCH'; }
+  const cleanup = { pid: fixture.info.pid, processAbsent, portClosed, dataDirAbsent: !existsSync(fixture.info.dataDir), success };
+  writeFileSync(join(evidence, `${label}-cleanup.json`), JSON.stringify(cleanup, null, 2) + '\n');
+  assert.ok(processAbsent && portClosed && cleanup.dataDirAbsent);
+}

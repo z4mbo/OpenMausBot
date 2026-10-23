@@ -1,0 +1,95 @@
+import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
+import { readFile, stat } from "node:fs/promises";
+import { resolve } from "node:path";
+import { assertReleaseVersion } from "./release-contract.mjs";
+
+const [version, source, nativeRun, mode, manifestPin, checksumsPin] = process.argv.slice(2);
+assertReleaseVersion(version);
+assert.match(source ?? "", /^[0-9a-f]{40}$/);
+assert.match(nativeRun ?? "", /^[1-9][0-9]*$/);
+assert.ok(Number.isSafeInteger(Number(nativeRun)));
+assert.ok(["--draft", "--public"].includes(mode));
+for (const pin of [manifestPin, checksumsPin]) assert.match(pin ?? "", /^[0-9a-f]{64}$/);
+const tag = `origin-v${version}`;
+const directory = resolve(".omb-scratch/distribution", version);
+const manifestName = `release-manifest-${version}.json`;
+const checksumsName = `SHA256SUMS-${version}.txt`;
+const manifestBytes = await readFile(resolve(directory, manifestName));
+const checksumsBytes = await readFile(resolve(directory, checksumsName));
+assert.equal(createHash("sha256").update(manifestBytes).digest("hex"), manifestPin, "Local manifest differs from its reviewed pin");
+assert.equal(createHash("sha256").update(checksumsBytes).digest("hex"), checksumsPin, "Local checksums differ from their reviewed pin");
+const manifest = JSON.parse(manifestBytes.toString("utf8"));
+assert.equal(manifest.version, version);
+assert.equal(manifest.tag, tag);
+assert.equal(manifest.commit, source);
+assert.equal(manifest.desktopRun, Number(nativeRun));
+assert.equal(manifest.files.length, 13);
+const suffixes = ["arm64.dmg", "arm64.dmg.blockmap", "arm64.zip", "arm64.zip.blockmap", "setup.exe", "setup.exe.blockmap", "windows-x64.zip", "x64.dmg", "x64.dmg.blockmap", "x64.zip", "x64.zip.blockmap"];
+const canonicalNames = [...suffixes.map(suffix => `Origin-${version}-${suffix}`), "latest.yml", "latest-mac.yml"];
+assert.deepEqual(manifest.files.map(item => item.name).sort(), canonicalNames.sort(), "Missing or unexpected canonical release payload");
+const expected = new Map();
+async function localFile(name) {
+  assert.match(name, /^[A-Za-z0-9_.+-]+$/);
+  const path = resolve(directory, name);
+  const info = await stat(path);
+  assert.ok(info.isFile() && info.size > 0);
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(path)) hash.update(chunk);
+  return { name, size: info.size, sha256: hash.digest("hex") };
+}
+for (const item of manifest.files) {
+  const actual = await localFile(item.name);
+  assert.deepEqual(actual, item, "Local artifact differs from its frozen manifest");
+  assert.ok(!expected.has(item.name));
+  expected.set(item.name, actual);
+}
+const checksumLines = checksumsBytes.toString("utf8").split(/\r?\n/);
+if (checksumLines.at(-1) === "") checksumLines.pop();
+assert.equal(checksumLines.length, 13, "Checksum list must contain exactly thirteen entries");
+const checksums = new Map();
+for (const line of checksumLines) {
+  const match = /^([0-9a-f]{64})  ([A-Za-z0-9_.+-]+)$/.exec(line);
+  assert.ok(match, "Malformed checksum entry");
+  const [, digest, name] = match;
+  assert.ok(expected.has(name) && !checksums.has(name), "Unexpected or duplicate checksum path");
+  assert.equal(digest, expected.get(name).sha256, "Checksum differs from the frozen manifest");
+  checksums.set(name, digest);
+}
+assert.deepEqual([...checksums.keys()].sort(), canonicalNames, "Missing checksum payload");
+for (const name of [manifestName, checksumsName]) {
+  assert.ok(!expected.has(name));
+  const actual = await localFile(name);
+  assert.equal(actual.sha256, name === manifestName ? manifestPin : checksumsPin, "Reviewed metadata changed during validation");
+  expected.set(name, actual);
+}
+function github(args) {
+  return JSON.parse(execFileSync("gh", ["api", ...args], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024, stdio: ["ignore", "pipe", "pipe"] }));
+}
+const pages = github(["--paginate", "--slurp", "repos/z4mbo/Origin/releases?per_page=100"]);
+assert.ok(Array.isArray(pages) && pages.every(Array.isArray));
+const matches = pages.flat().filter(release => release.tag_name === tag);
+assert.equal(matches.length, 1, "Expected exactly one authenticated release for the requested tag");
+const releaseId = matches[0].id;
+assert.ok(Number.isSafeInteger(releaseId) && releaseId > 0);
+const release = github([`repos/z4mbo/Origin/releases/${releaseId}`]);
+assert.equal(release.id, releaseId);
+assert.equal(release.tag_name, tag);
+assert.equal(release.target_commitish, source);
+assert.equal(release.draft, mode === "--draft");
+assert.equal(release.prerelease, false);
+const notes = await readFile(resolve(`.omb-scratch/github-release-${version}.md`), "utf8");
+assert.equal(release.body.replaceAll("\r\n", "\n").trimEnd(), notes.replaceAll("\r\n", "\n").trimEnd(), "GitHub release notes differ from the reviewed local notes");
+assert.equal(release.assets.length, 15);
+assert.equal(new Set(release.assets.map(asset => asset.name)).size, 15);
+for (const asset of release.assets) {
+  const local = expected.get(asset.name);
+  assert.ok(local, "Unexpected GitHub release asset");
+  assert.equal(asset.state, "uploaded");
+  assert.equal(asset.size, local.size);
+  assert.equal(asset.digest, `sha256:${local.sha256}`);
+}
+assert.equal(Boolean(release.published_at), mode === "--public");
+console.log(JSON.stringify({ id: release.id, version, source, nativeRun: Number(nativeRun), draft: release.draft, assets: release.assets.length, payloads: manifest.files.length, assetBytes: [...expected.values()].reduce((sum, item) => sum + item.size, 0), sha256Verified: true }));

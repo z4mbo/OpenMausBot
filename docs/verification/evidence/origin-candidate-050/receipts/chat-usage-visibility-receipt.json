@@ -1,0 +1,33 @@
+{
+  "finding": "A hidden retained Chief ChatView and a visible specialist ChatView both portal usage because they share the persistent open preference",
+  "rootReportedBrowserReproduction": {
+    "fixture": "http://127.0.0.1:5174/__origin-core-sections.html",
+    "route": "Chief to Agents to new Echo thread to Usage",
+    "beforeScreenshot": "screenshots/agents-usage-before.png",
+    "panels": 2,
+    "stalePanel": "Hidden Chief context 12k / 200k at top 8, alongside active Echo at top 133"
+  },
+  "ownedSource": {
+    "src/components/ChatUsagePopover.tsx": "bb38056fef514e1982710e8a73cca407a68aedfa143137b08d38a82e9a47df48",
+    "src/components/ChatUsagePopover.visibility.test.ts": "cefc0c05a8e906c0bb40062d61596b6df7c1f5baa7116a86f77765e173309029"
+  },
+  "change": "A popover position exists only while its actual trigger is connected, has nonzero client geometry and is visible; observe both trigger and header to clear/rebuild placement on retained-chat hide/show. The global open preference is unchanged.",
+  "verification": {
+    "red": { "file": "chat-usage-visibility-red.log", "sha256": "19cff586aac91ec4b170eca882ba57f3e557e52d2ab4068e91eda66d5845b354", "failed": 4 },
+    "green": { "file": "chat-usage-visibility-final-green.log", "sha256": "7ec5c24df955097ef866c0ccb2ff8239dcd2a4c0d2358b862ccec1d12a418a1e", "files": 4, "passed": 28, "failed": 0 },
+    "coverage": [
+      "Two mounted retained chats, one display-none: one current specialist portal and no stale Chief context",
+      "Open preference persists while both chats hide and the visible chat changes using controlled ResizeObserver deliveries",
+      "A visibility-hidden trigger is refused when a resize rechecks its noncollapsed geometry",
+      "Escape from the panel and trigger closes globally and restores focus to the visible trigger",
+      "Existing context readings, compaction, quota identity and 375px positioning assertions retain their scope"
+    ],
+    "ownedLint": { "file": "chat-usage-visibility-final-lint.log", "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "exitCode": 0 },
+    "ownedDiffWhitespaceCheckExitCode": 0,
+    "browserAfter": "Root-owned actual CUA verification pending at handoff; no browser interaction by this lane",
+    "globalTypecheck": "Root-owned; not run in this lane"
+  },
+  "staged": false,
+  "committed": false,
+  "productionMutation": false
+}

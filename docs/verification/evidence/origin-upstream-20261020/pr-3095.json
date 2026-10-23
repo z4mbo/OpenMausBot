@@ -1,0 +1,99 @@
+{
+  "number": 3095,
+  "url": "https://github.com/milind-soni/OpenMausBot/pull/3095",
+  "mergeCommit": "4e9097beb8d72a63c91d4cace51a9c59c9e9331b",
+  "baseCommit": "0adb029686e24938dda432ef81d069ee20ce35e2",
+  "headCommit": "bc4e6675bfe0d9ea09b53f260928c3779345fa0b",
+  "originalCaptureSha256": "e45d07279eb98a6848fb49c09a67d6806accd8939a57993eb934c4316f4eabe2",
+  "patchRepresentation": "Per-file GitHub patch SHA-256; raw patch text stays in ignored local capture.",
+  "files": [
+    {
+      "sha": "8d4b0dc8bc33dbdc1f3574c9170d9a162f98f151",
+      "filename": "src/components/NewBotDialog.tsx",
+      "status": "modified",
+      "additions": 11,
+      "deletions": 4,
+      "changes": 15,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/bc4e6675bfe0d9ea09b53f260928c3779345fa0b/src%2Fcomponents%2FNewBotDialog.tsx",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "54ee36400571126949a2cf72d6de6b199ab7d1d411a294dfdfb0d160e49af950"
+    },
+    {
+      "sha": "dec6fdd4b3989c961478f0d2d4e65e14385fdab3",
+      "filename": "src/components/ReadyBotGallery.test.ts",
+      "status": "added",
+      "additions": 80,
+      "deletions": 0,
+      "changes": 80,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/bc4e6675bfe0d9ea09b53f260928c3779345fa0b/src%2Fcomponents%2FReadyBotGallery.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "8d418c73bd6c6af46ec5937637c5f91d4ddd85ae7dc72534d6c09fbd24304c71"
+    },
+    {
+      "sha": "cf9ed36b8b4d29eaaf5f15931ceb068e1ca61f5b",
+      "filename": "src/components/ReadyBotGallery.tsx",
+      "status": "added",
+      "additions": 69,
+      "deletions": 0,
+      "changes": 69,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/bc4e6675bfe0d9ea09b53f260928c3779345fa0b/src%2Fcomponents%2FReadyBotGallery.tsx",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "aad0c627601fa4ace9f97e511992cb64296b920f59dc1a980116ab5174db10c0"
+    },
+    {
+      "sha": "3ba2ffdb6cbe90c0296c77bd6c6ec51569d9c50f",
+      "filename": "src/components/TeamLibraryPanel.tsx",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 2,
+      "changes": 7,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/bc4e6675bfe0d9ea09b53f260928c3779345fa0b/src%2Fcomponents%2FTeamLibraryPanel.tsx",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "a35d38314ce49c41ca5795979f1814ed0d933cb41a4b2e8b27c2ce2f17f93df3"
+    },
+    {
+      "sha": "c1cfb40a0b5e86cf610778bcbb0b65b384c6025f",
+      "filename": "src/lib/bot-roles.ts",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 50,
+      "changes": 56,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/bc4e6675bfe0d9ea09b53f260928c3779345fa0b/src%2Flib%2Fbot-roles.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "8a7cde41ce71bd19d6aaadf7bf7b09983945b09744b4b26722a1c01f666025f9"
+    },
+    {
+      "sha": "3cd04029dc7bd6c590c4aa6768f8bf43f063288b",
+      "filename": "src/lib/ready-bots.test.ts",
+      "status": "added",
+      "additions": 86,
+      "deletions": 0,
+      "changes": 86,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/bc4e6675bfe0d9ea09b53f260928c3779345fa0b/src%2Flib%2Fready-bots.test.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "89a09a730c07d80444e6bf77b222cca99c0d8412e6193d049126a296846ca533"
+    },
+    {
+      "sha": "8f8fe0531755df6d663ffd84509a15289939cf4e",
+      "filename": "src/lib/ready-bots.ts",
+      "status": "added",
+      "additions": 329,
+      "deletions": 0,
+      "changes": 329,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/bc4e6675bfe0d9ea09b53f260928c3779345fa0b/src%2Flib%2Fready-bots.ts",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "99ce7dd624531c7d31449f80dbc5b01aad3f6edbb0297411a950dfc5079bf8b5"
+    },
+    {
+      "sha": "8c7b71f7de098f3f4bfafa8ad35ecfa19a67f65d",
+      "filename": "src/locales/en.json",
+      "status": "modified",
+      "additions": 15,
+      "deletions": 0,
+      "changes": 15,
+      "blob_url": "https://github.com/milind-soni/OpenMausBot/blob/bc4e6675bfe0d9ea09b53f260928c3779345fa0b/src%2Flocales%2Fen.json",
+      "patchPresentInOriginalCapture": true,
+      "patchSha256": "7b5267a95480bad80906dd66ee46d8f2c793b3b73af1072b958dbb033ee2236a"
+    }
+  ]
+}

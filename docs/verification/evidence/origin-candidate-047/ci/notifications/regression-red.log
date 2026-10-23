@@ -1,0 +1,74 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin
+
+ ❯ server/delegation-thread.test.ts (20 tests | 1 failed) 10ms
+     × keeps a fresh named job separate when no canonical child exists yet 3ms
+ ❯ server/delegation-notification.test.ts (10 tests | 5 failed) 9ms
+     × keeps ordinary coordination in the transcript without a new start notification 2ms
+     × keeps consult coordination in the transcript without a new start notification 0ms
+     × keeps notice coordination in the transcript without a new start notification 0ms
+     × keeps quiet coordination in the transcript without a new start notification 0ms
+     × keeps outside coordination in the transcript without a new start notification 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/delegation-notification.test.ts > delegation start notifications > keeps ordinary coordination in the transcript without a new start notification
+ FAIL  server/delegation-notification.test.ts > delegation start notifications > keeps consult coordination in the transcript without a new start notification
+ FAIL  server/delegation-notification.test.ts > delegation start notifications > keeps notice coordination in the transcript without a new start notification
+ FAIL  server/delegation-notification.test.ts > delegation start notifications > keeps quiet coordination in the transcript without a new start notification
+ FAIL  server/delegation-notification.test.ts > delegation start notifications > keeps outside coordination in the transcript without a new start notification
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      Object {
+        "body": "Research project A",
+        "botId": "researcher",
+        "botName": "Researcher",
+        "kind": "delegation-started",
+        "threadId": "child-A",
+        "title": "Researcher started delegated work",
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ server/delegation-notification.test.ts:43:26
+     41|     f.send({ quiet: reason === "quiet" });
+     42|     expect(f.store.appendMessage).toHaveBeenCalledTimes(1);
+     43|     expect(f.notify).not.toHaveBeenCalled();
+       |                          ^
+     44|   });
+     45|   it("does not announce work whose request could not be saved", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  server/delegation-thread.test.ts > parent delegation conversations > keeps a fresh named job separate when no canonical child exists yet
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/delegation-thread.test.ts:126:31
+    124|     const saved = structuredClone(fresh.task);
+    125|     const canonical = f.allocate();
+    126|     expect(canonical.created).toBe(true);
+       |                               ^
+    127|     expect(canonical.task.threadId).not.toBe(fresh.task.threadId);
+    128|     expect(fresh.task).toEqual(saved);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 24 passed (30)
+   Start at  08:15:56
+   Duration  1.05s (transform 228ms, setup 637ms, import 80ms, tests 19ms, environment 0ms)
+

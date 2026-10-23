@@ -1,0 +1,17 @@
+file:///C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/server/testing/approval-clock-hooks.mjs:17
+    if (source.split(anchor).length !== 2) throw new Error('Claude permission broker timer seam changed');
+                                                 ^
+
+Error: Claude permission broker timer seam changed
+    at load (file:///C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/server/testing/approval-clock-hooks.mjs:17:50)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at load (file:///C:/Users/aless/.codex/worktrees/origin-model-fallback/Origin/server/testing/stall-clock-hooks.mjs:14:20)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at loadWithHooks (node:internal/modules/customization_hooks:374:18)
+    at #loadSync (node:internal/modules/esm/loader:829:16)
+    at ModuleLoader.load (node:internal/modules/esm/loader:787:26)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:498:31)
+    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:564:36)
+    at afterResolve (node:internal/modules/esm/loader:611:52)
+
+Node.js v24.21.0

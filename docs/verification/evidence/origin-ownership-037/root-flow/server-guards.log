@@ -1,0 +1,35 @@
+
+ RUN  v4.1.11 C:/Users/aless/Documents/Origin-bugfix
+
+ ❯ scripts/testing/file-size-ratchet.test.ts (1 test | 1 failed) 117ms
+     × no listed file grows, and no file over 1,000 lines goes unlisted 116ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/testing/file-size-ratchet.test.ts > source files stay a readable size > no listed file grows, and no file over 1,000 lines goes unlisted
+AssertionError: See server/host/README.md: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "server/origin-cloud.ts grew to 1154 lines (listed at 1137): move code out, do not add here",
++ ]
+
+ ❯ scripts/testing/file-size-ratchet.test.ts:86:51
+     84|     }
+     85|     for (const file of Object.keys(LINES)) if (!seen.has(file)) proble…
+     86|     expect(problems, "See server/host/README.md").toEqual([]);
+       |                                                   ^
+     87|   });
+     88| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 92 passed (93)
+   Start at  02:32:09
+   Duration  4.40s (transform 776ms, setup 893ms, import 1.97s, tests 842ms, environment 0ms)
+

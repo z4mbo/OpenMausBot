@@ -4,7 +4,9 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { runOriginTool } from "./origin-cloud.ts";
-import { createStudioRunner, falQueueOrigin, isFalMediaUrl, pieces, type StudioCloud, type StudioDeps } from "./origin-studio.ts";
+import { assertStudioDailyBudget, createStudioRunner, falQueueOrigin, isDeploymentStorageUrl, isFalMediaUrl, pieces, studioRunner, type StudioCloud, type StudioDeps } from "./origin-studio.ts";
+import { createStudioRoutes } from "./routes/studio.ts";
+import type { RouteContext } from "./routes/table.ts";
 import { createWorkflowExecutor } from "./origin-studio-workflow.ts";
 import type { BotRecord } from "./store.ts";
 import type { StudioGeneration } from "../shared/studio.ts";
@@ -183,12 +185,13 @@ function fakeFal(options: { submitStatus?: number; submitBody?: unknown; result?
   return { fetch: fetchFn, requests, submits };
 }
 
-function setup(options: { key?: string | null; fal?: ReturnType<typeof fakeFal>; file?: string; queueOrigin?: string } = {}) {
+function setup(options: { key?: string | null; fal?: ReturnType<typeof fakeFal>; file?: string; queueOrigin?: string; checkBudget?: StudioDeps["checkBudget"] } = {}) {
   const convex = fakeConvex();
   const fal = options.fal ?? fakeFal();
   const cloud: StudioCloud = { client: convex.client, sessionToken: "session", url: DEPLOYMENT };
   const deps: StudioDeps = {
     fetch: fal.fetch, falKey: () => (options.key === undefined ? "fal-test-key" : options.key), cloud: () => cloud,
+    checkBudget: options.checkBudget ?? (() => undefined),
     journalFile: options.file ?? journal(), voiceCacheFile: scratch("voices.json"), now: () => Date.now(), pollMs: 60_000,
     ...(options.queueOrigin ? { queueOrigin: options.queueOrigin } : {}),
   };
@@ -196,6 +199,94 @@ function setup(options: { key?: string | null; fal?: ReturnType<typeof fakeFal>;
 }
 
 describe("Studio runner", () => {
+  it.each(["http://127.0.0.1:8799/api/config", "http://127.0.0.1:3210/api/config"])("never inlines a teammate's non-storage local asset URL %s", async sourceUrl => {
+    const fal = fakeFal();
+    const privateReads: string[] = [];
+    const privateText = "OWNER_PRIVATE_CONFIG_CANARY";
+    const safeFetch = fal.fetch;
+    fal.fetch = (async (url, init) => {
+      if (String(url) === sourceUrl) { privateReads.push(sourceUrl); return new Response(privateText, { headers: { "content-type": "image/png" } }); }
+      return safeFetch(url, init);
+    }) as typeof fetch;
+    const { runner, cloud } = setup({ fal });
+    cloud.client.query = async name => name === "design:list" ? { assets: [{ _id: "untrusted-image", name: "Image", type: "image", contentType: "image/png", fileUrl: sourceUrl }] } : null;
+    await runner.generate(cloud, { projectId: "kai", mode: "edit", model: "fal-ai/seedvr/upscale/image", prompt: "", sourceAssetId: "untrusted-image" });
+    expect(privateReads).toEqual([]);
+    expect(JSON.stringify(fal.requests)).not.toContain(Buffer.from(privateText).toString("base64"));
+    runner.stop();
+  });
+
+  it("refuses shared generations until the server installs its budget guard", async () => {
+    const convex = fakeConvex();
+    const shared = studioRunner();
+    await expect(shared.generate({ client: convex.client, sessionToken: "synthetic-session", url: DEPLOYMENT }, { projectId: "kai", mode: "image", model: "fal-ai/flux/schnell", prompt: "x" })).rejects.toThrow(/not ready to check your API budget/);
+    expect(convex.calls).toHaveLength(0);
+    shared.stop();
+  });
+
+  it("returns a budget refusal for the UI without trusting its forged botId", async () => {
+    const seen: (string | undefined)[] = [];
+    const { runner, cloud, convex, fal } = setup({ checkBudget: input => { seen.push(input.botId); assertStudioDailyBudget({ limitUsd: 0 }); } });
+    const route = createStudioRoutes({ runner: () => runner, cloud: () => cloud });
+    let reply: { status: number; body: unknown } | undefined;
+    await route({ req: { headers: {} }, res: {}, path: "/api/studio/generate", method: "POST", auth: { kind: "loopback", scopes: ["admin"] },
+      readBody: async () => ({ projectId: "kai", mode: "image", model: "fal-ai/flux/schnell", prompt: "x", botId: "uncapped-agent" }),
+      json: (_res: unknown, status: number, body: unknown) => { reply = { status, body }; },
+    } as unknown as RouteContext);
+    expect(reply).toMatchObject({ status: 409, body: { code: "daily_api_budget", error: expect.stringContaining("daily API budget") } });
+    expect(seen).toEqual([undefined]);
+    expect(convex.calls).toHaveLength(0);
+    expect(fal.requests).toHaveLength(0);
+    runner.stop();
+  });
+
+  it("scrubs a long rejected key before truncating the provider's reason", async () => {
+    const key = "q".repeat(512);
+    const { runner, cloud, convex } = setup({ key, fal: fakeFal({ submitStatus: 401, submitBody: { message: `Rejected ${key}` } }) });
+    await runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/flux/schnell", prompt: "x" });
+    expect(convex.rows.get("gen1")).toMatchObject({ status: "failed", error: expect.stringContaining("fal.ai refused the key") });
+    expect(JSON.stringify(convex.calls)).not.toContain("q".repeat(32));
+  });
+
+  it.each([0, 2])("refuses an unpriced generation under an active $%s budget before any cloud or provider call", async limit => {
+    const { runner, cloud, convex, fal } = setup({ checkBudget: () => assertStudioDailyBudget({ limitUsd: limit }) });
+    await expect(runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/flux/schnell", prompt: "x" })).rejects.toThrow(/daily API budget/);
+    expect(convex.calls).toHaveLength(0);
+    expect(fal.requests).toHaveLength(0);
+  });
+
+  it("checks the calling agent's own zero limit and rechecks before a delayed submission", async () => {
+    const seen: (string | undefined)[] = [];
+    let limit: number | undefined;
+    const { runner, cloud, convex, fal } = setup({ checkBudget: input => { seen.push(input.botId); assertStudioDailyBudget({ agentLimitUsd: limit }); } });
+    const mutation = cloud.client.mutation;
+    cloud.client.mutation = async (name, args) => { const result = await mutation(name, args); if (name === "studio:create") limit = 0; return result; };
+    expect(await runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/flux/schnell", prompt: "x" }, "Researcher", { botId: "researcher" })).toEqual(["gen1"]);
+    expect(seen).toEqual(["researcher", "researcher"]);
+    expect(convex.rows.get("gen1")).toMatchObject({ status: "failed", error: expect.stringContaining("daily API budget") });
+    expect(fal.requests).toHaveLength(0);
+  });
+
+  it.each([0, 3])("refuses an active per-agent $%s limit before a generation is created", async limit => {
+    const { runner, cloud, convex, fal } = setup({ checkBudget: input => { expect(input.botId).toBe("researcher"); assertStudioDailyBudget({ agentLimitUsd: limit }); } });
+    await expect(runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/flux/schnell", prompt: "x" }, "Researcher", { botId: "researcher" })).rejects.toThrow(/daily API budget/);
+    expect(convex.calls).toHaveLength(0);
+    expect(fal.requests).toHaveLength(0);
+  });
+
+  it("keeps rejected and completion-echoed fal credentials out of shared generations", async () => {
+    for (const fal of [fakeFal({ submitStatus: 401, submitBody: { message: "Rejected fal-test-key" } }), fakeFal({ failWith: "Generation refused fal-test-key" })]) {
+      const { runner, cloud, convex } = setup({ fal });
+      await runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/flux/schnell", prompt: "x" });
+      await runner.tick();
+      await runner.tick();
+      expect(convex.rows.get("gen1")?.status).toBe("failed");
+      expect(JSON.stringify([...convex.rows.values()])).not.toContain("fal-test-key");
+      expect(JSON.stringify(convex.calls)).not.toContain("fal-test-key");
+      runner.stop();
+    }
+  });
+
   it("queues one fal request per variation, records progress and files the result in Assets", async () => {
     const { runner, cloud, convex, fal } = setup();
     const ids = await runner.generate(cloud, { projectId: "kai", mode: "image", model: "fal-ai/nano-banana-pro", prompt: "  launch poster ", aspectRatio: "16:9", resolution: "2K", seed: 7, count: 2 });
@@ -370,6 +461,13 @@ describe("Studio runner", () => {
     expect(isFalMediaUrl("http://v3.fal.media/a.png")).toBe(false);
     expect(isFalMediaUrl("https://127.0.0.1/a.png")).toBe(false);
   });
+
+  it("matches complete deployment storage origins and paths while keeping signed queries", () => {
+    const remote = "https://sample.convex.cloud";
+    for (const url of [`${remote}/api/storage/file?token=signed`, "https://sample.convex.site/api/storage/file"]) expect(isDeploymentStorageUrl(url, remote), url).toBe(true);
+    for (const url of ["http://127.0.0.1:3210/api/storage/file", "http://127.0.0.1:3211/api/storage/file?token=signed"]) expect(isDeploymentStorageUrl(url, DEPLOYMENT), url).toBe(true);
+    for (const url of ["http://127.0.0.1:8799/api/storage/file", "https://127.0.0.1:3210/api/storage/file", "http://127.0.0.1:3210/api/config", "http://user:secret@127.0.0.1:3210/api/storage/file", "http://127.0.0.1:3210/api/storage/file#fragment", "file:///api/storage/file", "http://127.0.0.1:3210/api/storage/"]) expect(isDeploymentStorageUrl(url, DEPLOYMENT), url).toBe(false);
+  });
 });
 
 describe("Studio workflows", () => {
@@ -377,6 +475,75 @@ describe("Studio workflows", () => {
     const runner = createStudioRunner({ ...base.deps, pollMs: 1 });
     return { runner, workflows: createWorkflowExecutor({ runner: () => runner, cloud: () => base.cloud, journalFile: scratch("runs.json"), pollMs: 1, now: () => Date.now() }) };
   }
+
+  it.each([undefined, "kai-dev"])("refuses a workflow under a daily cap before recording or dispatching work (agent: %s)", async botId => {
+    const seen: Array<{ projectId?: string; botId?: string }> = [];
+    const base = setup({ checkBudget: input => {
+      seen.push(input);
+      assertStudioDailyBudget(botId ? { agentLimitUsd: 0 } : { limitUsd: 0 });
+    } });
+    const { runner, workflows } = executor(base);
+    const graph = withWorkflowInputs(studioWorkflowTemplate("template:product-reel")!.graph, { a1: "asset-link" });
+    await expect(workflows.start(base.cloud, "kai", { name: "Reel", graph, ...(botId ? { agent: { id: botId, name: "Designer" } } : {}) })).rejects.toThrow(/daily API budget/);
+    expect(seen).toEqual([{ projectId: "kai", botId }]);
+    expect(base.convex.calls).toHaveLength(0);
+    expect(base.fal.requests).toHaveLength(0);
+    runner.stop();
+  });
+
+  it.each(["No active project access", "Session expired"])("does not dispatch a workflow when its account/project admission refuses: %s", async refusal => {
+    const base = setup();
+    const { runner, workflows } = executor(base);
+    const mutate = base.cloud.client.mutation;
+    base.cloud.client.mutation = async (name, args) => {
+      if (name === "studioWorkflows:startRun") throw new Error(refusal);
+      return mutate(name, args);
+    };
+    const graph = withWorkflowInputs(studioWorkflowTemplate("template:product-reel")!.graph, { a1: "asset-link" });
+    await expect(workflows.start(base.cloud, "private-project", { name: "Reel", graph })).rejects.toThrow(refusal);
+    expect(base.fal.requests).toHaveLength(0);
+    expect(base.convex.runs.size).toBe(0);
+    runner.stop();
+  });
+
+  it("rechecks the trusted workflow agent's cap after the run is admitted", async () => {
+    let capped = false;
+    const seen: (string | undefined)[] = [];
+    const base = setup({ checkBudget: input => { seen.push(input.botId); assertStudioDailyBudget({ agentLimitUsd: capped ? 0 : undefined }); } });
+    const { runner, workflows } = executor(base);
+    const mutate = base.cloud.client.mutation;
+    base.cloud.client.mutation = async (name, args) => {
+      const result = await mutate(name, args);
+      if (name === "studioWorkflows:startRun") capped = true;
+      return result;
+    };
+    const graph = studioWorkflowTemplate("template:podcast-kit")!.graph;
+    const runId = await workflows.start(base.cloud, "kai", { name: "Podcast", graph, agent: { id: "kai-dev", name: "Designer" } });
+    await workflows.settled(runId);
+    expect(seen.length).toBeGreaterThan(1);
+    expect(seen.every(id => id === "kai-dev")).toBe(true);
+    expect(base.convex.runs.get(runId)?.status).toBe("failed");
+    expect(base.convex.calls.some(call => call.name === "studio:create")).toBe(false);
+    expect(base.fal.requests).toHaveLength(0);
+    runner.stop();
+  });
+
+  it.each(["/api/studio/workflow/run", "/api/studio/campaign", "/api/studio/enhance", "/api/studio/voice-preview"])("returns a daily cap refusal from %s without trusting a supplied agent", async path => {
+    const seen: (string | undefined)[] = [];
+    const base = setup({ checkBudget: input => { seen.push(input.botId); assertStudioDailyBudget({ limitUsd: 0 }); } });
+    const { runner, workflows } = executor(base);
+    const route = createStudioRoutes({ runner: () => runner, workflows: () => workflows, cloud: () => base.cloud });
+    let reply: { status: number; body: unknown } | undefined;
+    await route({ req: { headers: {} }, res: {}, path, method: "POST", auth: { kind: "loopback", scopes: ["admin"] },
+      readBody: async () => ({ projectId: "kai", templateId: "template:podcast-kit", brief: "Launch", prompt: "Poster", voice: "Brian", botId: "uncapped-agent", agent: { id: "uncapped-agent" } }),
+      json: (_res: unknown, status: number, body: unknown) => { reply = { status, body }; },
+    } as unknown as RouteContext);
+    expect(reply).toMatchObject({ status: 409, body: { code: "daily_api_budget" } });
+    expect(seen).toEqual([undefined]);
+    expect(base.convex.calls).toHaveLength(0);
+    expect(base.fal.requests).toHaveLength(0);
+    runner.stop();
+  });
 
   it("runs the product reel template step by step and files only the Output in Assets", async () => {
     const base = setup();
@@ -478,6 +645,32 @@ describe("Studio agent tools", () => {
     { id: "kai-chief", name: "Kai", section: "Kai", chiefOfStaff: true },
     { id: "kai-dev", name: "Designer", section: "Kai" },
   ] as unknown as BotRecord[];
+
+  it("applies the calling agent's cap to workflows despite a forged bot_id", async () => {
+    const seen: (string | undefined)[] = [];
+    const base = setup({ checkBudget: input => { seen.push(input.botId); assertStudioDailyBudget({ agentLimitUsd: input.botId === "kai-dev" ? 0 : undefined }); } });
+    const workflows = createWorkflowExecutor({ runner: () => base.runner, cloud: () => base.cloud, journalFile: scratch("runs.json"), pollMs: 1, now: () => Date.now() });
+    const result = await runOriginTool("origin_studio_workflow_run", { workflow_id: "template:podcast-kit", bot_id: "uncapped-agent" }, "kai-dev", {
+      bots: BOTS, state: { url: DEPLOYMENT, sessionToken: "session", projects: { "kai-chief": "kai" } }, connect: () => base.convex.client, studio: base.runner, studioWorkflows: workflows,
+    });
+    expect(result).toMatchObject({ isError: true, text: expect.stringContaining("daily API budget") });
+    expect(seen).toEqual(["kai-dev"]);
+    expect(base.convex.calls.some(call => call.name === "studioWorkflows:startRun")).toBe(false);
+    expect(base.fal.requests).toHaveLength(0);
+    base.runner.stop();
+  });
+
+  it("applies the real calling agent's cap despite a different bot_id in tool arguments", async () => {
+    const seen: (string | undefined)[] = [];
+    const { convex, fal, runner: studio } = setup({ checkBudget: input => { seen.push(input.botId); assertStudioDailyBudget({ agentLimitUsd: input.botId === "kai-dev" ? 0 : undefined }); } });
+    const result = await runOriginTool("origin_studio_generate", { prompt: "poster", bot_id: "uncapped-agent", wait: false }, "kai-dev", {
+      bots: BOTS, state: { url: DEPLOYMENT, sessionToken: "session", projects: { "kai-chief": "kai" } }, connect: () => convex.client, studio,
+    });
+    expect(result).toMatchObject({ isError: true, text: expect.stringContaining("daily API budget") });
+    expect(seen).toEqual(["kai-dev"]);
+    expect(convex.calls.some(call => call.name === "studio:create")).toBe(false);
+    expect(fal.requests).toHaveLength(0);
+  });
 
   it("generate, list and save through the Origin tools as the calling agent", async () => {
     const base = setup();

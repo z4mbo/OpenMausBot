@@ -1,0 +1,114 @@
+{
+  "startedAt": "2026-10-20T04:58:57.638709+00:00",
+  "operation": "unlink exact proven private distribution duplicates",
+  "privateDirectory": "/root/origin-release-staging/0.2.15/downloads",
+  "publicDirectory": "/root/multi-ghost/origin-downloads",
+  "diskAvailableBeforeBytes": 3597877248,
+  "removed": [
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-arm64.dmg",
+      "bytes": 317887454,
+      "sha256": "4cf723f32e69da638b2876056bcecc33df501706c6bfc73f1070c1557f7f29c6",
+      "allocatedBytes": 317894656,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-arm64.dmg",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-arm64.dmg"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-arm64.dmg.blockmap",
+      "bytes": 332431,
+      "sha256": "36f32addebf6c693aee7ce42c3f0e3bfe9c737761e9d9e5c0e2d88ad0374f8d5",
+      "allocatedBytes": 335872,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-arm64.dmg.blockmap",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-arm64.dmg.blockmap"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-arm64.zip",
+      "bytes": 318273079,
+      "sha256": "cec2c553a2d0927f708d7e1197cc2120c3354b2b2755da220b044c592539e632",
+      "allocatedBytes": 318279680,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-arm64.zip",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-arm64.zip"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-arm64.zip.blockmap",
+      "bytes": 330840,
+      "sha256": "a110201e965c450c3e4d666ae3f34b692dc8f2cd0d8c3c5d5a2c131d43e84e0d",
+      "allocatedBytes": 331776,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-arm64.zip.blockmap",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-arm64.zip.blockmap"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-setup.exe",
+      "bytes": 269478428,
+      "sha256": "30233e5036ae81304cc84564faeab79734be17c09ac93a50e1086f2b1a41cca8",
+      "allocatedBytes": 269484032,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-setup.exe",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/windows/Origin-0.2.15-setup.exe"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-setup.exe.blockmap",
+      "bytes": 278198,
+      "sha256": "ada2d5058176753a416f57f6cd9e5e1480bc23c37a4c2383fd2679e0d78f6fde",
+      "allocatedBytes": 278528,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-setup.exe.blockmap",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/windows/Origin-0.2.15-setup.exe.blockmap"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-windows-x64.zip",
+      "bytes": 370056422,
+      "sha256": "03892721401920a8bb0abdfb3c405f45aad634ff5bad2781c1691ba65a3863d8",
+      "allocatedBytes": 370061312,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-windows-x64.zip",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/windows/Origin-0.2.15-x64.zip"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-x64.dmg",
+      "bytes": 334965101,
+      "sha256": "2c942f6a8daacba76a2ebeedb8bc292a763c3dccffbc38f71a7e876eff173de0",
+      "allocatedBytes": 334970880,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-x64.dmg",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-x64.dmg"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-x64.dmg.blockmap",
+      "bytes": 350492,
+      "sha256": "a1e2373aaefeb5abb804241ef48fa4c260cd28d668d47f5ae474658f39744544",
+      "allocatedBytes": 352256,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-x64.dmg.blockmap",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-x64.dmg.blockmap"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-x64.zip",
+      "bytes": 335600685,
+      "sha256": "17f161eee7719269370f45021c55f9c1e9bc0dbe7427d0e7b1201d85ba3598c2",
+      "allocatedBytes": 335605760,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-x64.zip",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-x64.zip"
+    },
+    {
+      "path": "/root/origin-release-staging/0.2.15/downloads/Origin-0.2.15-x64.zip.blockmap",
+      "bytes": 347241,
+      "sha256": "5df6410ee56bfe4b0bccff759310fbbcd9dac1634480aee0f9c421c1e0fbdacd",
+      "allocatedBytes": 348160,
+      "retainedPublicPath": "/root/multi-ghost/origin-downloads/Origin-0.2.15-x64.zip.blockmap",
+      "retainedLocalBackup": ".omb-scratch/artifacts/0.2.15/mac/Origin-0.2.15-x64.zip.blockmap"
+    }
+  ],
+  "preservedRollbackVersion": "0.2.14",
+  "success": true,
+  "remainingPrivateFilesUnchanged": true,
+  "publicDirectoryEntriesUnchanged": true,
+  "rollbackVersionEntriesUnchanged": true,
+  "privateParentEntriesUnchanged": true,
+  "finishedAt": "2026-10-20T04:59:04.825105+00:00",
+  "diskAvailableAfterBytes": 5545979904,
+  "observedAvailableIncreaseBytes": 1948102656,
+  "unlinkedPayloadBytes": 1947900371,
+  "unlinkedAllocatedBytes": 1947942912,
+  "manifest": "release-staging-current15-cleanup-manifest.json",
+  "manifestSha256": "41739136697d45ea57859ca878de9c7075652b87709ede2e30522da78260bd59",
+  "authorization": "User authorized production delivery; coordinator expressly extended exact backed-up private duplicate cleanup to the 11 independent 0.2.15 native payloads. This replaces the earlier private-current preservation only for those redundant copies; public-current files remain protected.",
+  "method": "No directory removal, recursion, wildcard deletion or pruning. Held nonsymlink directory/file descriptors, verified exact parent paths, file identities, nlink=1 and independent public inodes, then unlinked only the exact 11 whitelisted 0.2.15 payload names.",
+  "reversal": "Copy the named retained public payload or verified local artifact back to its original private staging path. Public serving files were never removed or replaced.",
+  "spaceNote": "Observed free-space delta can differ from released file allocation because the server remains active."
+}

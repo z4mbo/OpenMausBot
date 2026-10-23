@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "productionDataUsed": false,
+  "generatedAt": "2026-10-20T05:08:58.822Z",
+  "parents": {
+    "fallback": {
+      "source": "fb7b838aab70c1308023e5df27209641fff5e9c1",
+      "tables": 62,
+      "tableValidatorsPreservedOrWidened": true,
+      "existingIndexesPreserved": true,
+      "apiModules": 51,
+      "apiModulesPreserved": true
+    },
+    "features": {
+      "source": "84b0ccedb30615f2fa0a1c9c0d3fd18da0f730d3",
+      "tables": 66,
+      "tableValidatorsPreservedOrWidened": true,
+      "existingIndexesPreserved": true,
+      "apiModules": 59,
+      "apiModulesPreserved": true
+    }
+  },
+  "mergedSchemaSha256": "031136a0b9fc10f71dc21df6ab0ac0cdfb4e48ab7dc87f09559174e65dc12c10",
+  "mergedSchemaSourceSha256": "3a4b8257d270ef6abc3e81628794a7807ce2a2682d5cc3773b9fd4c78f02fde8",
+  "mergedGeneratedApiSha256": "2bad9ca2a4cf838c3b5d6668d8bf0faa66d7095c33e63bddb85e404660b43f30",
+  "mergedTables": 68,
+  "modelHostFields": [
+    "agentHosts.deviceId",
+    "agentHosts.credentialHash",
+    "workspaceAgentRuns.executedByUserId",
+    "workspaceAgentRuns.modelExecutionId"
+  ],
+  "requiredMigrationsIntroducedByResolution": [],
+  "limits": [
+    "A source-level schema/API union proof; not a Convex push or production acceptance."
+  ]
+}

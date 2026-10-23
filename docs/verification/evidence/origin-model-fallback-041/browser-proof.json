@@ -1,0 +1,219 @@
+{
+  "scope": "Isolated actual React components with synthetic provider catalogs; real local HTTP persistence; no live provider, invoice or native acceptance",
+  "observedAt": "2026-10-19T20:53:47.993Z",
+  "cases": [
+    {
+      "case": "native-drag-and-save",
+      "result": "pass",
+      "detail": "Dragged ChatGPT from rank 1 to 2 with normal pointer input; enabled per-agent fallback/API consent, added API backup and saved through isolated HTTP. Main selected model unchanged."
+    },
+    {
+      "case": "before-chat-dark",
+      "width": 1280,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": false,
+        "height": 900,
+        "ranks": [],
+        "scrollWidth": 1280,
+        "width": 1280
+      }
+    },
+    {
+      "case": "before-usage-dark",
+      "width": 1280,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": false,
+        "height": 991,
+        "ranks": [],
+        "scrollWidth": 1280,
+        "width": 1280
+      }
+    },
+    {
+      "case": "before-agent-dark",
+      "width": 1280,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": false,
+        "height": 900,
+        "ranks": [],
+        "scrollWidth": 1280,
+        "width": 1280
+      }
+    },
+    {
+      "case": "after-agent-dark",
+      "width": 1280,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": true,
+        "height": 1150,
+        "ranks": [
+          "1.Grok · Grok 4.7",
+          "2.ChatGPT · GPT-5.6",
+          "3.OpenRouter API · GPT-5.6"
+        ],
+        "scrollWidth": 1280,
+        "width": 1280
+      }
+    },
+    {
+      "case": "after-chat-dark",
+      "width": 1280,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": true,
+        "height": 900,
+        "ranks": [
+          "1.Grok · Grok 4.7",
+          "2.ChatGPT · GPT-5.6",
+          "3.OpenRouter API · GPT-5.6"
+        ],
+        "scrollWidth": 1280,
+        "width": 1280
+      }
+    },
+    {
+      "case": "after-usage-dark",
+      "width": 1280,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": true,
+        "height": 1380,
+        "ranks": [],
+        "scrollWidth": 1280,
+        "width": 1280
+      }
+    },
+    {
+      "case": "before-agent-light",
+      "width": 375,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": false,
+        "height": 900,
+        "ranks": [],
+        "scrollWidth": 375,
+        "width": 375
+      }
+    },
+    {
+      "case": "after-agent-light",
+      "width": 375,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": true,
+        "height": 1396,
+        "ranks": [
+          "1.Grok · Grok 4.7",
+          "2.ChatGPT · GPT-5.6",
+          "3.OpenRouter API · GPT-5.6"
+        ],
+        "scrollWidth": 375,
+        "width": 375
+      }
+    },
+    {
+      "case": "before-chat-light",
+      "width": 375,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": false,
+        "height": 900,
+        "ranks": [],
+        "scrollWidth": 375,
+        "width": 375
+      }
+    },
+    {
+      "case": "after-chat-light",
+      "width": 375,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": true,
+        "height": 900,
+        "ranks": [
+          "1.Grok · Grok 4.7",
+          "2.ChatGPT · GPT-5.6",
+          "3.OpenRouter API · GPT-5.6"
+        ],
+        "scrollWidth": 375,
+        "width": 375
+      }
+    },
+    {
+      "case": "before-usage-light",
+      "width": 375,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": false,
+        "height": 1216,
+        "ranks": [],
+        "scrollWidth": 375,
+        "width": 375
+      }
+    },
+    {
+      "case": "after-usage-light",
+      "width": 375,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": true,
+        "height": 1797,
+        "ranks": [],
+        "scrollWidth": 375,
+        "width": 375
+      }
+    },
+    {
+      "case": "global-zero-clear-reload",
+      "result": "pass",
+      "detail": "Zero saved and reloaded as 0; reached state shown. Blank saved and reloaded as no computer cap; per-agent policy stays intact."
+    },
+    {
+      "case": "agent-failed-save-and-zero",
+      "result": "pass",
+      "detail": "503 injected once; draft 0 preserved with visible alert. Retry saved 0; reload retained it and showed paid work blocked."
+    },
+    {
+      "case": "agent-clear-inherits",
+      "result": "pass",
+      "detail": "Blank clears the agent-only cap and retains the computer limit."
+    },
+    {
+      "case": "keyboard-and-hover-cancel",
+      "result": "pass",
+      "detail": "Enter on Move-up changes draft only; Cancel restores saved ranks. Pointer hover leaves order unchanged; Escape cancels and release leaves Save disabled."
+    },
+    {
+      "case": "after-chat-dark",
+      "width": 375,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": true,
+        "height": 900,
+        "ranks": [
+          "1.Grok · Grok 4.7",
+          "2.ChatGPT · GPT-5.6",
+          "3.OpenRouter API · GPT-5.6"
+        ],
+        "scrollWidth": 375,
+        "width": 375
+      }
+    },
+    {
+      "case": "after-usage-light",
+      "width": 1280,
+      "result": "pass",
+      "metrics": {
+        "hasBudget": true,
+        "height": 1380,
+        "ranks": [],
+        "scrollWidth": 1280,
+        "width": 1280
+      }
+    }
+  ]
+}

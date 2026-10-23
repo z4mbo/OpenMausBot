@@ -1,0 +1,353 @@
+{
+  "synthetic": true,
+  "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+  "browser": "156.0.8078.4",
+  "externalRequests": [],
+  "rows": [
+    {
+      "version": "before",
+      "width": 375,
+      "theme": "light",
+      "state": {
+        "githubCalls": [
+          {
+            "projectId": "fixture-project",
+            "taskIds": [
+              "task-fixture-idea",
+              "task-fixture-todo"
+            ]
+          }
+        ],
+        "calls": [
+          {
+            "name": "tasks:ensureDefaultColumns",
+            "args": {
+              "projectId": "fixture-project"
+            }
+          }
+        ],
+        "lanes": [
+          "fixture-idea",
+          "fixture-todo"
+        ],
+        "overflow": false
+      },
+      "identity": {
+        "version": "before",
+        "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+        "sourceHashes": {
+          "src/components/origin-pages/NewIssueComposer.tsx": "a4c04a63f5029434723d50a82c5b363c071c45219382d6684c87ded53e3b8074",
+          "src/components/origin-pages/FeedbackPage.tsx": "8417fc9dfa8b06960d71e30b4f63752f55006e9854153bce9487a739d440642d",
+          "src/components/origin-pages/IssuesPage.tsx": "32bf71a7164ac9450eee08d9f973f2a0ef14af59adaef16cd10951b26a69687c",
+          "shared/origin-columns.ts": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b"
+        },
+        "synthetic": true
+      },
+      "errors": [],
+      "screenshot": "legacy-mirror-375-light-before.png",
+      "sha256": "561c621a590331f4cd35ecc7c0c501a0de87544ce091434c0a74d512379d1843"
+    },
+    {
+      "version": "before",
+      "width": 375,
+      "theme": "dark",
+      "state": {
+        "githubCalls": [
+          {
+            "projectId": "fixture-project",
+            "taskIds": [
+              "task-fixture-idea",
+              "task-fixture-todo"
+            ]
+          }
+        ],
+        "calls": [
+          {
+            "name": "tasks:ensureDefaultColumns",
+            "args": {
+              "projectId": "fixture-project"
+            }
+          }
+        ],
+        "lanes": [
+          "fixture-idea",
+          "fixture-todo"
+        ],
+        "overflow": false
+      },
+      "identity": {
+        "version": "before",
+        "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+        "sourceHashes": {
+          "src/components/origin-pages/NewIssueComposer.tsx": "a4c04a63f5029434723d50a82c5b363c071c45219382d6684c87ded53e3b8074",
+          "src/components/origin-pages/FeedbackPage.tsx": "8417fc9dfa8b06960d71e30b4f63752f55006e9854153bce9487a739d440642d",
+          "src/components/origin-pages/IssuesPage.tsx": "32bf71a7164ac9450eee08d9f973f2a0ef14af59adaef16cd10951b26a69687c",
+          "shared/origin-columns.ts": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b"
+        },
+        "synthetic": true
+      },
+      "errors": [],
+      "screenshot": "legacy-mirror-375-dark-before.png",
+      "sha256": "f6971c584e22b68d7dfd3a41b1ffc3b6c7730d685f59604e5a4df662e26cd4d4"
+    },
+    {
+      "version": "before",
+      "width": 1280,
+      "theme": "light",
+      "state": {
+        "githubCalls": [
+          {
+            "projectId": "fixture-project",
+            "taskIds": [
+              "task-fixture-idea",
+              "task-fixture-todo"
+            ]
+          }
+        ],
+        "calls": [
+          {
+            "name": "tasks:ensureDefaultColumns",
+            "args": {
+              "projectId": "fixture-project"
+            }
+          }
+        ],
+        "lanes": [
+          "fixture-idea",
+          "fixture-todo"
+        ],
+        "overflow": false
+      },
+      "identity": {
+        "version": "before",
+        "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+        "sourceHashes": {
+          "src/components/origin-pages/NewIssueComposer.tsx": "a4c04a63f5029434723d50a82c5b363c071c45219382d6684c87ded53e3b8074",
+          "src/components/origin-pages/FeedbackPage.tsx": "8417fc9dfa8b06960d71e30b4f63752f55006e9854153bce9487a739d440642d",
+          "src/components/origin-pages/IssuesPage.tsx": "32bf71a7164ac9450eee08d9f973f2a0ef14af59adaef16cd10951b26a69687c",
+          "shared/origin-columns.ts": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b"
+        },
+        "synthetic": true
+      },
+      "errors": [],
+      "screenshot": "legacy-mirror-1280-light-before.png",
+      "sha256": "2c70a5433c06f3cf11ab411058c2f4abb70de6c37c72c407aa050bbf0c44623d"
+    },
+    {
+      "version": "before",
+      "width": 1280,
+      "theme": "dark",
+      "state": {
+        "githubCalls": [
+          {
+            "projectId": "fixture-project",
+            "taskIds": [
+              "task-fixture-idea",
+              "task-fixture-todo"
+            ]
+          }
+        ],
+        "calls": [
+          {
+            "name": "tasks:ensureDefaultColumns",
+            "args": {
+              "projectId": "fixture-project"
+            }
+          }
+        ],
+        "lanes": [
+          "fixture-idea",
+          "fixture-todo"
+        ],
+        "overflow": false
+      },
+      "identity": {
+        "version": "before",
+        "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+        "sourceHashes": {
+          "src/components/origin-pages/NewIssueComposer.tsx": "a4c04a63f5029434723d50a82c5b363c071c45219382d6684c87ded53e3b8074",
+          "src/components/origin-pages/FeedbackPage.tsx": "8417fc9dfa8b06960d71e30b4f63752f55006e9854153bce9487a739d440642d",
+          "src/components/origin-pages/IssuesPage.tsx": "32bf71a7164ac9450eee08d9f973f2a0ef14af59adaef16cd10951b26a69687c",
+          "shared/origin-columns.ts": "1479d7ce9b9724f80fe02db44e26f42238ca7f89afe852ee408d0e0064be010b"
+        },
+        "synthetic": true
+      },
+      "errors": [],
+      "screenshot": "legacy-mirror-1280-dark-before.png",
+      "sha256": "d40d049edc92ffb84cae294f283aad2f36e75845967f9b9dfedaf4df8ded9a5c"
+    },
+    {
+      "version": "after",
+      "width": 375,
+      "theme": "light",
+      "state": {
+        "githubCalls": [
+          {
+            "projectId": "fixture-project",
+            "taskIds": [
+              "task-fixture-todo"
+            ]
+          }
+        ],
+        "calls": [
+          {
+            "name": "tasks:ensureDefaultColumns",
+            "args": {
+              "projectId": "fixture-project"
+            }
+          }
+        ],
+        "lanes": [
+          "fixture-idea",
+          "fixture-todo"
+        ],
+        "overflow": false
+      },
+      "identity": {
+        "version": "after",
+        "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+        "sourceHashes": {
+          "src/components/origin-pages/NewIssueComposer.tsx": "68ef763d185123b066f008b9deb8d794e469041342f45ad6ad10d6571e4ea214",
+          "src/components/origin-pages/FeedbackPage.tsx": "37aa6e52cd754dd709d83265d15f604f2d2904b56d3e736dac851a6ae1a5d889",
+          "src/components/origin-pages/IssuesPage.tsx": "7112d4b0872648313a6ed52bcb8b9332d1339f872858ca1a0eaba19911c910be",
+          "shared/origin-columns.ts": "ed0bb5a4b1a3368709407f5f713b349c0f88f7046ba8f17a50182c83129cbcbc",
+          "src/components/origin-pages/issue-columns.ts": "3fc46389ea7e6b7b7e52a877fd2570ef7d6f9d524f9260d5ebe072f6365b9682"
+        },
+        "synthetic": true
+      },
+      "errors": [],
+      "screenshot": "legacy-mirror-375-light-after.png",
+      "sha256": "561c621a590331f4cd35ecc7c0c501a0de87544ce091434c0a74d512379d1843"
+    },
+    {
+      "version": "after",
+      "width": 375,
+      "theme": "dark",
+      "state": {
+        "githubCalls": [
+          {
+            "projectId": "fixture-project",
+            "taskIds": [
+              "task-fixture-todo"
+            ]
+          }
+        ],
+        "calls": [
+          {
+            "name": "tasks:ensureDefaultColumns",
+            "args": {
+              "projectId": "fixture-project"
+            }
+          }
+        ],
+        "lanes": [
+          "fixture-idea",
+          "fixture-todo"
+        ],
+        "overflow": false
+      },
+      "identity": {
+        "version": "after",
+        "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+        "sourceHashes": {
+          "src/components/origin-pages/NewIssueComposer.tsx": "68ef763d185123b066f008b9deb8d794e469041342f45ad6ad10d6571e4ea214",
+          "src/components/origin-pages/FeedbackPage.tsx": "37aa6e52cd754dd709d83265d15f604f2d2904b56d3e736dac851a6ae1a5d889",
+          "src/components/origin-pages/IssuesPage.tsx": "7112d4b0872648313a6ed52bcb8b9332d1339f872858ca1a0eaba19911c910be",
+          "shared/origin-columns.ts": "ed0bb5a4b1a3368709407f5f713b349c0f88f7046ba8f17a50182c83129cbcbc",
+          "src/components/origin-pages/issue-columns.ts": "3fc46389ea7e6b7b7e52a877fd2570ef7d6f9d524f9260d5ebe072f6365b9682"
+        },
+        "synthetic": true
+      },
+      "errors": [],
+      "screenshot": "legacy-mirror-375-dark-after.png",
+      "sha256": "f6971c584e22b68d7dfd3a41b1ffc3b6c7730d685f59604e5a4df662e26cd4d4"
+    },
+    {
+      "version": "after",
+      "width": 1280,
+      "theme": "light",
+      "state": {
+        "githubCalls": [
+          {
+            "projectId": "fixture-project",
+            "taskIds": [
+              "task-fixture-todo"
+            ]
+          }
+        ],
+        "calls": [
+          {
+            "name": "tasks:ensureDefaultColumns",
+            "args": {
+              "projectId": "fixture-project"
+            }
+          }
+        ],
+        "lanes": [
+          "fixture-idea",
+          "fixture-todo"
+        ],
+        "overflow": false
+      },
+      "identity": {
+        "version": "after",
+        "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+        "sourceHashes": {
+          "src/components/origin-pages/NewIssueComposer.tsx": "68ef763d185123b066f008b9deb8d794e469041342f45ad6ad10d6571e4ea214",
+          "src/components/origin-pages/FeedbackPage.tsx": "37aa6e52cd754dd709d83265d15f604f2d2904b56d3e736dac851a6ae1a5d889",
+          "src/components/origin-pages/IssuesPage.tsx": "7112d4b0872648313a6ed52bcb8b9332d1339f872858ca1a0eaba19911c910be",
+          "shared/origin-columns.ts": "ed0bb5a4b1a3368709407f5f713b349c0f88f7046ba8f17a50182c83129cbcbc",
+          "src/components/origin-pages/issue-columns.ts": "3fc46389ea7e6b7b7e52a877fd2570ef7d6f9d524f9260d5ebe072f6365b9682"
+        },
+        "synthetic": true
+      },
+      "errors": [],
+      "screenshot": "legacy-mirror-1280-light-after.png",
+      "sha256": "2c70a5433c06f3cf11ab411058c2f4abb70de6c37c72c407aa050bbf0c44623d"
+    },
+    {
+      "version": "after",
+      "width": 1280,
+      "theme": "dark",
+      "state": {
+        "githubCalls": [
+          {
+            "projectId": "fixture-project",
+            "taskIds": [
+              "task-fixture-todo"
+            ]
+          }
+        ],
+        "calls": [
+          {
+            "name": "tasks:ensureDefaultColumns",
+            "args": {
+              "projectId": "fixture-project"
+            }
+          }
+        ],
+        "lanes": [
+          "fixture-idea",
+          "fixture-todo"
+        ],
+        "overflow": false
+      },
+      "identity": {
+        "version": "after",
+        "baseline": "6d31c2e5278042d0bf3ef25fe3f1fb501ba9822d",
+        "sourceHashes": {
+          "src/components/origin-pages/NewIssueComposer.tsx": "68ef763d185123b066f008b9deb8d794e469041342f45ad6ad10d6571e4ea214",
+          "src/components/origin-pages/FeedbackPage.tsx": "37aa6e52cd754dd709d83265d15f604f2d2904b56d3e736dac851a6ae1a5d889",
+          "src/components/origin-pages/IssuesPage.tsx": "7112d4b0872648313a6ed52bcb8b9332d1339f872858ca1a0eaba19911c910be",
+          "shared/origin-columns.ts": "ed0bb5a4b1a3368709407f5f713b349c0f88f7046ba8f17a50182c83129cbcbc",
+          "src/components/origin-pages/issue-columns.ts": "3fc46389ea7e6b7b7e52a877fd2570ef7d6f9d524f9260d5ebe072f6365b9682"
+        },
+        "synthetic": true
+      },
+      "errors": [],
+      "screenshot": "legacy-mirror-1280-dark-after.png",
+      "sha256": "d40d049edc92ffb84cae294f283aad2f36e75845967f9b9dfedaf4df8ded9a5c"
+    }
+  ],
+  "qualification": "Cloud repair and GitHub mirror are in-memory fixture facades. Requests are recorded, never sent to GitHub. Source-only effect guard; screenshots intentionally retain the same repaired board appearance."
+}

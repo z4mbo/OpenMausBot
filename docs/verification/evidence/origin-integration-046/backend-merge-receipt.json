@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "fallbackParent": "fb7b838aab70c1308023e5df27209641fff5e9c1",
+  "featuresParent": "84b0ccedb30615f2fa0a1c9c0d3fd18da0f730d3",
+  "workingMerge": true,
+  "finalCommitBindingPending": true,
+  "changedByThisLane": [
+    "backend/convex/schema.ts",
+    "backend/convex/pipeline.ts (EOF whitespace only)"
+  ],
+  "typecheckExit": 0,
+  "testFiles": 30,
+  "testsPassed": 265,
+  "schemaTables": 68,
+  "bothParentsValidatorsPreservedOrWidened": true,
+  "bothParentsIndexesPreserved": true,
+  "bothParentsApiModulesPreserved": true,
+  "productionCalls": 0,
+  "isolatedBackendPushPerformed": false,
+  "stagedOwnChanges": true,
+  "commitCreated": false,
+  "files": [
+    {
+      "path": "backend/convex/schema.ts",
+      "sha256": "3a4b8257d270ef6abc3e81628794a7807ce2a2682d5cc3773b9fd4c78f02fde8"
+    },
+    {
+      "path": "backend/convex/_generated/api.d.ts",
+      "sha256": "2bad9ca2a4cf838c3b5d6668d8bf0faa66d7095c33e63bddb85e404660b43f30"
+    },
+    {
+      "path": "backend/convex/agentsTables.ts",
+      "sha256": "e42f4149c0aedaff1050bbc232a687a5dea637b5833f59926f10ae2adc58c25a"
+    },
+    {
+      "path": "backend/convex/modelHostsTables.ts",
+      "sha256": "e0eeddb6f777064fdfb3e11b3284ca7bb6d6a31d79fbc1c89e4fad1a989e3ec6"
+    },
+    {
+      "path": "backend/convex/modelHosts.ts",
+      "sha256": "15d00215bba4704ab14d3fa22c7f13013905ad19f99314a2091a8678e60e5507"
+    },
+    {
+      "path": "backend/convex/pipeline.ts",
+      "sha256": "4c9e5f091658d7c259576facd9916dda642f5c5014c8b90a68f3cd2d2a44f6fa"
+    },
+    {
+      "path": ".omb-scratch/integration-046/backend-tsc.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".omb-scratch/integration-046/backend-tests.log",
+      "sha256": "b0d7b5db1510fbde2e8087c5bb8f8ce9440b27842655b35ba62afa3ddbaed409"
+    },
+    {
+      "path": ".omb-scratch/integration-046/merge-schema-proof.json",
+      "sha256": "91c6ac8bc682a6b2cc9d9550520ac7f47b66a07c6dcf76e89882e3780d66af82"
+    }
+  ]
+}

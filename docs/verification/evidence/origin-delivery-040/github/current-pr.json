@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-19T21:31:39.916Z",
+  "number": 1,
+  "url": "https://github.com/z4mbo/Origin/pull/1",
+  "state": "closed",
+  "merged": true,
+  "mergedAt": "2026-10-19T21:25:10Z",
+  "mergeCommit": "8dc1c710a1a98636a1dc159e59b6ce838fff45aa",
+  "head": "cf9e6fdec944700aa1ee395d05512afbaf95da97",
+  "headBranch": "bugfix/scan",
+  "baseBranch": "origin-integration",
+  "title": "Origin 0.2.15: safer accounts and accurate provider usage"
+}

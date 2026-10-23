@@ -10,11 +10,12 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { DecisionRow } from "./decision-log.ts";
 import { SessionRegistry } from "./sessions.ts";
 import { removeTempDir, waitForExit } from "./testing/cleanup.ts";
+import { retryFixtureBind } from "./testing/bind-fixture.ts";
+import { freePortBlock } from "./testing/ports.ts";
 
 const SERVER_DIR = dirname(fileURLToPath(import.meta.url));
 const FAKE_CLI = join(SERVER_DIR, "testing", "fake-acp-cli.ts");
-const PORT = 28800 + Math.floor(Math.random() * 10_000);
-const BASE = `http://127.0.0.1:${PORT}`;
+let BASE: string;
 const posixOnly = describe.skipIf(process.platform === "win32");
 const BOSS = "boss@example.test";
 const ADA = "ada@example.test";
@@ -40,27 +41,43 @@ const api = async (method: string, path: string, body?: unknown, as?: string): P
 };
 
 async function start(env: NodeJS.ProcessEnv = {}) {
-  child = spawn(process.execPath, [join(SERVER_DIR, "index.ts")], {
-    cwd: join(SERVER_DIR, ".."),
-    env: {
-      ...(process.env.PATH ? { PATH: process.env.PATH } : {}),
-      ...(process.env.SystemRoot ? { SystemRoot: process.env.SystemRoot } : {}),
-      HOME: home, USERPROFILE: home, OMB_PORT: String(PORT), OMB_WEBHOOK_PORT: String(PORT + 1),
-      OMB_TEST_INTERNAL_CAPABILITY_KEY: CAPABILITY_KEY, ...env,
-    },
-    stdio: ["ignore", "pipe", "pipe"],
+  await retryFixtureBind(async () => {
+    const port = await freePortBlock([0, 1]);
+    BASE = `http://127.0.0.1:${port}`;
+    const launched = spawn(process.execPath, [join(SERVER_DIR, "index.ts")], {
+      cwd: join(SERVER_DIR, ".."),
+      env: {
+        ...(process.env.PATH ? { PATH: process.env.PATH } : {}),
+        ...(process.env.SystemRoot ? { SystemRoot: process.env.SystemRoot } : {}),
+        HOME: home, USERPROFILE: home, OMB_PORT: String(port), OMB_WEBHOOK_PORT: String(port + 1),
+        OMB_TEST_INTERNAL_CAPABILITY_KEY: CAPABILITY_KEY, ...env,
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const closed = new Promise<void>(resolve => launched.once("close", () => resolve()));
+    child = launched;
+    let output = "";
+    const append = (chunk: Buffer) => { output += chunk; log += chunk; };
+    launched.stdout!.on("data", append);
+    launched.stderr!.on("data", append);
+    return {
+      output: () => output,
+      close: async () => { await waitForExit(launched, { signal: "SIGTERM" }); await closed; },
+      ready: async () => {
+        const deadline = Date.now() + 20_000;
+        for (;;) {
+          if (launched.exitCode !== null || launched.signalCode !== null) throw new Error(`server exited during boot:\n${output}`);
+          if (/\bEADDRINUSE\b/.test(output)) throw new Error(`fixture port collision:\n${output}`);
+          try {
+            if (output.includes(`server on ${BASE}`) && (await fetch(`${BASE}/api/health`)).ok) return;
+          } catch {
+          }
+          if (Date.now() > deadline) throw new Error(`server never came up:\n${output}`);
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        }
+      },
+    };
   });
-  child.stdout!.on("data", (c) => (log += c));
-  child.stderr!.on("data", (c) => (log += c));
-  const deadline = Date.now() + 20_000;
-  for (;;) {
-    try {
-      if ((await fetch(`${BASE}/api/health`)).ok) return;
-    } catch {
-    }
-    if (Date.now() > deadline) throw new Error(`server never came up:\n${log}`);
-    await new Promise((r) => setTimeout(r, 150));
-  }
 }
 
 async function waitFor<T>(read: () => Promise<T | null | undefined>, ms = 30_000): Promise<T | null> {

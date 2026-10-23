@@ -19,12 +19,19 @@ const readable = (stored: string | null): boolean => {
 };
 
 /** codex-cli 0.160.1 says "Logged in using …", "Not logged in", or "Error checking login status: …" for an auth.json it cannot read. */
-export function codexLoginStatus(cli: string, env: Env): Promise<"signed-in" | "signed-out" | "unknown"> {
-  return new Promise((resolve) => execCli(cli, ["login", "status"], { timeout: 8000, env }, (err, stdout, stderr) => {
+export function codexLoginDetails(cli: string, env: Env, run: typeof execCli = execCli): Promise<{ status: "signed-in" | "signed-out" | "unknown"; billing?: "subscription" | "metered" }> {
+  return new Promise((resolve) => run(cli, ["login", "status"], { timeout: 8000, env }, (err, stdout, stderr) => {
     const said = `${stdout}\n${stderr ?? ""}`;
-    resolve(!err && /^logged in\b/im.test(said) ? "signed-in"
-      : err && /^(?:not logged in|error checking login status)\b/im.test(said) ? "signed-out" : "unknown");
+    const status = !err && /^logged in\b/im.test(said) ? "signed-in"
+      : err && /^(?:not logged in|error checking login status)\b/im.test(said) ? "signed-out" : "unknown";
+    const billing = status !== "signed-in" ? undefined : /^logged in using ChatGPT\b/im.test(said) ? "subscription"
+      : /^logged in using (?:an? )?API key\b/im.test(said) ? "metered" : undefined;
+    resolve({ status, ...(billing ? { billing } : {}) });
   }));
+}
+
+export async function codexLoginStatus(cli: string, env: Env): Promise<"signed-in" | "signed-out" | "unknown"> {
+  return (await codexLoginDetails(cli, env)).status;
 }
 
 /** Without a login Codex still runs a turn and fails only after a minute of reconnects. Only Codex's own "not

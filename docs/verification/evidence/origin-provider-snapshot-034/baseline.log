@@ -1,0 +1,94 @@
+
+ RUN  v4.1.11 C:/Users/aless/.codex/worktrees/origin-workspace-delete/Origin
+
+ ❯ server/harness/snapshot-deadline.test.ts (9 tests | 5 failed) 10ms
+     × finishes describe after one minute when a sibling status probe never settles 6ms
+     × bounds direct get().snapshot calls used outside describe 1ms
+     × ignores a late resolve after timing out and permits the next healthy probe 1ms
+     × ignores a late reject after timing out and permits the next healthy probe 0ms
+     × bounds snapshots captured by a decorator before publishing the instance 1ms
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 4 passed (9)
+   Start at  23:44:01
+   Duration  843ms (transform 233ms, setup 547ms, import 102ms, tests 10ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/harness/snapshot-deadline.test.ts > provider status probe deadline > finishes describe after one minute when a sibling status probe never settles
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/harness/snapshot-deadline.test.ts:33:26
+     31|     expect(read.settled).toBe(false);
+     32|     await vi.advanceTimersByTimeAsync(1);
+     33|     expect(read.settled).toBe(true);
+       |                          ^
+     34|     expect(read.value?.map(entry => [entry.instanceId, entry.snapshot.…
+     35|     expect(read.value?.[0]?.snapshot.reason).toContain("within a minut…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  server/harness/snapshot-deadline.test.ts > provider status probe deadline > bounds direct get().snapshot calls used outside describe
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/harness/snapshot-deadline.test.ts:47:26
+     45|     const read = observe(registry.get("a")!.snapshot());
+     46|     await vi.advanceTimersByTimeAsync(60_000);
+     47|     expect(read.settled).toBe(true);
+       |                          ^
+     48|     expect(read.error).toBeInstanceOf(Error);
+     49|     expect((read.error as Error).message).toContain("within a minute");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  server/harness/snapshot-deadline.test.ts > provider status probe deadline > ignores a late resolve after timing out and permits the next healthy probe
+ FAIL  server/harness/snapshot-deadline.test.ts > provider status probe deadline > ignores a late reject after timing out and permits the next healthy probe
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/harness/snapshot-deadline.test.ts:62:26
+     60|     const read = observe(registry.describe());
+     61|     await vi.advanceTimersByTimeAsync(60_000);
+     62|     expect(read.settled).toBe(true);
+       |                          ^
+     63|     if (completion === "resolve") resolve(available); else reject(new …
+     64|     await vi.advanceTimersByTimeAsync(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  server/harness/snapshot-deadline.test.ts > provider status probe deadline > bounds snapshots captured by a decorator before publishing the instance
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/harness/snapshot-deadline.test.ts:123:26
+    121|     const read = observe(registry.get("a")!.snapshot());
+    122|     await vi.advanceTimersByTimeAsync(60_000);
+    123|     expect(read.settled).toBe(true);
+       |                          ^
+    124|     expect(read.error).toBeInstanceOf(Error);
+    125|     expect(vi.getTimerCount()).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯

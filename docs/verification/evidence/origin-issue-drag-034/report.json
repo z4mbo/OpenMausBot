@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "status": "isolated-browser-and-regression-passed",
+  "baseline": "87ff77be5ea79272175219d479b9a8017b4e8fcc",
+  "severity": "P2",
+  "scenario": "Drag one issue rapidly up/down and across three populated lanes while previous reorder animations are still running.",
+  "wrongResult": "Other cards remain in the DOM but their compounded transforms move them out of every visible lane until pointer release.",
+  "cause": "FLIP sampled transformed card positions into the next layout baseline and retained earlier animations. The pointer drop-target scan followed those animated rectangles, repeatedly retargeting the board.",
+  "fix": "Own and cancel the previous card animation before measuring untransformed layout. Keep displayed offsets separate from the saved layout position and continue from the visible position. Cancel on board unmount and before reduced-motion movement.",
+  "before": {
+    "phase": "before-native",
+    "checkedAt": "2026-10-18T21:11:34.006Z",
+    "theme": "dark",
+    "reducedMotion": "no-preference",
+    "finish": "drop",
+    "pointerSamples": 64,
+    "initialCards": 36,
+    "cardsAfterRelease": 36,
+    "maxAnimationsIncludingCss": 17,
+    "maxWebAnimations": null,
+    "maxAbsoluteCardY": 33554432,
+    "pageErrors": [],
+    "externalRequests": [],
+    "mutationCount": 0,
+    "mutationsDuringDrag": null,
+    "minVisibleCardsPerLane": null
+  },
+  "originalFirstBad": {
+    "index": 2,
+    "pointerLane": 1,
+    "pointerY": 760,
+    "id": "drag-0-4",
+    "lane": "fixture-draft",
+    "y": 6430.6875,
+    "x": 35,
+    "height": 105.8125,
+    "transform": "matrix(1, 0, 0, 1, 0, 5918.25)",
+    "animations": 8
+  },
+  "after": [
+    {
+      "phase": "after-asserted",
+      "checkedAt": "2026-10-18T21:14:52.382Z",
+      "theme": "dark",
+      "reducedMotion": "no-preference",
+      "finish": "drop",
+      "pointerSamples": 64,
+      "initialCards": 36,
+      "cardsAfterRelease": 36,
+      "maxAnimationsIncludingCss": 6,
+      "maxWebAnimations": 1,
+      "maxAbsoluteCardY": 1510.3428955078125,
+      "pageErrors": [],
+      "externalRequests": [],
+      "mutationCount": 1,
+      "mutationsDuringDrag": [],
+      "minVisibleCardsPerLane": 6
+    },
+    {
+      "phase": "after-light",
+      "checkedAt": "2026-10-18T21:15:39.189Z",
+      "theme": "light",
+      "reducedMotion": "no-preference",
+      "finish": "escape",
+      "pointerSamples": 64,
+      "initialCards": 36,
+      "cardsAfterRelease": 36,
+      "maxAnimationsIncludingCss": 6,
+      "maxWebAnimations": 1,
+      "maxAbsoluteCardY": 1509.8670654296875,
+      "pageErrors": [],
+      "externalRequests": [],
+      "mutationCount": 0,
+      "mutationsDuringDrag": [],
+      "minVisibleCardsPerLane": 6
+    },
+    {
+      "phase": "after-reduced",
+      "checkedAt": "2026-10-18T21:15:38.894Z",
+      "theme": "dark",
+      "reducedMotion": "reduce",
+      "finish": "drop",
+      "pointerSamples": 64,
+      "initialCards": 36,
+      "cardsAfterRelease": 36,
+      "maxAnimationsIncludingCss": 0,
+      "maxWebAnimations": 0,
+      "maxAbsoluteCardY": 1535.75,
+      "pageErrors": [],
+      "externalRequests": [],
+      "mutationCount": 1,
+      "mutationsDuringDrag": [],
+      "minVisibleCardsPerLane": 6
+    }
+  ],
+  "regressions": {
+    "before": {
+      "failed": 4,
+      "passed": 1,
+      "exitCode": 1
+    },
+    "after": {
+      "files": 2,
+      "passed": 8
+    },
+    "canonicalRed": {
+      "baseline": "87ff77be5ea79272175219d479b9a8017b4e8fcc",
+      "baselineSourceSha256": "c655b05abf5a3abf2142b22e7a9fff2ab48afe2a4c077164454ca0ea19d2fe44",
+      "regressionSha256": "73604d34ca7039821c68b079cc05bf922ca8fcb33db323a5ec16caa0f2e68cc6",
+      "exitCode": 1,
+      "failed": 4,
+      "passed": 1,
+      "sourceRestored": true,
+      "fixedSha256": "d2a90b230acadbcbae84beeae4eb3fe1b682c201b2c517b2bab6637c3e34b243",
+      "logSha256": "f0ee74f5bcf90c14c1ec9f2156fd2ceade746c460f1d959579de77ecffd1f1f3"
+    },
+    "focused": {
+      "files": 5,
+      "passed": 39
+    },
+    "guards": {
+      "files": 3,
+      "passed": 9
+    },
+    "applicationTypes": true,
+    "serverTypes": true,
+    "touchedLint": true,
+    "diffCheck": true
+  },
+  "sourceBindings": [
+    {
+      "path": "src/components/origin-pages/issue-order.ts",
+      "workingSha256": "d2a90b230acadbcbae84beeae4eb3fe1b682c201b2c517b2bab6637c3e34b243",
+      "baselineBlob": "100644 blob cfa3c6460ef86a8ab532d29659b2ee0cafa790c4\tsrc/components/origin-pages/issue-order.ts",
+      "indexBlob": "100644 777d736965ccfbe5b1233cdaecba5cd81a4cff82 0\tsrc/components/origin-pages/issue-order.ts"
+    },
+    {
+      "path": "src/components/origin-pages/issue-order.flip.test.ts",
+      "workingSha256": "73604d34ca7039821c68b079cc05bf922ca8fcb33db323a5ec16caa0f2e68cc6",
+      "baselineBlob": null,
+      "indexBlob": "100644 4937143e65056b2b56c11c86c44dbe59d9aeb01e 0\tsrc/components/origin-pages/issue-order.flip.test.ts"
+    },
+    {
+      "path": "src/components/origin-pages/IssuesPage.tsx",
+      "workingSha256": "7112d4b0872648313a6ed52bcb8b9332d1339f872858ca1a0eaba19911c910be",
+      "baselineBlob": "100644 blob 11aa90a43ab86f7f6bb5ada924d058a498c29963\tsrc/components/origin-pages/IssuesPage.tsx",
+      "indexBlob": "100644 11aa90a43ab86f7f6bb5ada924d058a498c29963 0\tsrc/components/origin-pages/IssuesPage.tsx"
+    },
+    {
+      "path": "src/components/origin-pages/use-card-drag.ts",
+      "workingSha256": "1a5e083cfe2eff27551503a7b509e52016fedf16808f99735ea5a2db3499f775",
+      "baselineBlob": "100644 blob e4c2c63a31d9a3201ad28122573236c2ae1c133c\tsrc/components/origin-pages/use-card-drag.ts",
+      "indexBlob": "100644 e4c2c63a31d9a3201ad28122573236c2ae1c133c 0\tsrc/components/origin-pages/use-card-drag.ts"
+    }
+  ],
+  "rawReports": [
+    {
+      "name": "before-native/report.json",
+      "bytes": 560919,
+      "sha256": "0070ac8ad6c5045f79505ec61f2114316698594706837bce4360bf98938a42b9",
+      "retainedPrivately": true
+    },
+    {
+      "name": "after-asserted/report.json",
+      "bytes": 656902,
+      "sha256": "5788c7a4cccf85311462f8631c40f51bbd86c2ee6b00bbd0f7ec537498711adb",
+      "retainedPrivately": true
+    },
+    {
+      "name": "after-light/report.json",
+      "bytes": 655202,
+      "sha256": "6015f58a99348e0c68b0f897a6cf834c01b1a82c3511ea510828d742d7167a5e",
+      "retainedPrivately": true
+    },
+    {
+      "name": "after-reduced/report.json",
+      "bytes": 584465,
+      "sha256": "4bc9b0a99fb195ecbe6d700d683470e9db4d10b879f4bf6f8c542ab267e1bc7a",
+      "retainedPrivately": true
+    }
+  ],
+  "inspection": [
+    "IssuesBoard lane rendering has no virtualization; only the lifted task is temporarily absent.",
+    "useCardDrag press/hold, RAF ghost positioning, target updates, scroll edges, pointerup/Escape/cancel dispatch inspected.",
+    "dropTargetAt uses rendered card rectangles; the divergent animated geometry is the feedback input.",
+    "useFlip is only consumed by IssuesBoard; keyboard order, pending move layering, ghost seed and DropGap/TaskCard paths inspected."
+  ],
+  "limits": [
+    "Actual headless Chromium and native mouse events; actual production IssuesPage/order/drag/styles.",
+    "Cloud board and mutation results are synthetic. Successful drop proves one mutation request, not persisted Convex ordering or a real account.",
+    "Desktop 1440x1000. Dark before/after are matched; light Escape and reduced-motion captures are additional after-only cases.",
+    "No production/local Convex, main checkout ports, provider or packaged application was used.",
+    "Initial missing-browser launch and the earlier mistaken unit sign expectation remain private rejected setup/reporting attempts; the final identical five-case regression above is canonical."
+  ],
+  "cleanup": {
+    "fixtureServerPid": 7004,
+    "launcherPid": 17040,
+    "processesAbsent": true,
+    "ports": [
+      22398,
+      5174
+    ],
+    "listenersAbsent": true,
+    "directory": "C:/Users/aless/AppData/Local/Temp/openmausbot-verify-data-VzdoDm",
+    "directoryRetained": true,
+    "automaticCleanupInterruptedByCtrlC": true,
+    "guardedManualCleanup": "automatic-approval-review-rejected",
+    "reason": "blocked by policy",
+    "alternateDeletionAttempted": false
+  },
+  "retainedRawLogs": [
+    {
+      "name": "issue-drag-034-red-final.log",
+      "bytes": 3606,
+      "sha256": "f0ee74f5bcf90c14c1ec9f2156fd2ceade746c460f1d959579de77ecffd1f1f3",
+      "retainedPrivately": true,
+      "publicCopyTrimsOnlyTrailingBlankLines": true
+    },
+    {
+      "name": "issue-drag-034-focused.log",
+      "bytes": 262,
+      "sha256": "9491eeec8f5d7898b1d0b01f15c51e8e36e933388a8f2d5907238a41d8db408a",
+      "retainedPrivately": true,
+      "publicCopyTrimsOnlyTrailingBlankLines": true
+    },
+    {
+      "name": "issue-drag-034-guards.log",
+      "bytes": 258,
+      "sha256": "e4ff8c1ed1639238a33e9ddf5c641dacb33beef38ab6bcf1a04ee314f153a0bd",
+      "retainedPrivately": true,
+      "publicCopyTrimsOnlyTrailingBlankLines": true
+    }
+  ]
+}

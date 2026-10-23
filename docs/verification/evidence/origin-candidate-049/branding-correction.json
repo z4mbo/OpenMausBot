@@ -1,0 +1,103 @@
+{
+  "kind": "finite-041-ci-branding-correction-for-next-candidate",
+  "baselineSource": "daeb5096f6b880443e408c304cb9a7b76004d865",
+  "sourceCommitBindingPending": false,
+  "ownedFiles": [
+    {
+      "path": "server/browser/egress/hostile-pages.e2e.test.ts",
+      "sha256": "24c2ea5978514880fe9a2358177cc5d1c1a67c12f83f26a7e865d5dbbb2a822a",
+      "gitBlob": "970885389c6db9efc38a06b19b09ff976f3ab56d"
+    },
+    {
+      "path": "server/cli-phone-setup.ts",
+      "sha256": "211271363d467458843f4114c90fda9bc8a7b7f839be717ef86cf07ff019d947",
+      "gitBlob": "34b0f1a6b857bc292b79522c9eef731f174f7ad8"
+    },
+    {
+      "path": "server/cli-phone-setup.test.ts",
+      "sha256": "3fd9aa2c6bbb4978e3b3cb713446323e6725433ceaa1f2f58ceccecbdaeb0c52",
+      "gitBlob": "56e2ecbce3286b6b2052689386f10543aec6c62a"
+    },
+    {
+      "path": "server/cli-lifecycle.test.ts",
+      "sha256": "8fccd0a686bc042ea68dd31656a07a7d5ee7cd916ce7236a43a4714848da26b9",
+      "gitBlob": "58762c1af5ff184e513772160e43a37f3ecf6be6"
+    }
+  ],
+  "bugs": [
+    {
+      "kind": "stale-test-expectation",
+      "file": "server/browser/egress/hostile-pages.e2e.test.ts",
+      "line": 200,
+      "ciJob": 118513066904,
+      "ciFailed": 1,
+      "ciPassed": 4573,
+      "ciSkipped": 31,
+      "fix": "Expect Origin own-service notice while preserving blocked-request and zero-service-hits assertions",
+      "realChromeAfterFix": "PASS: one actual corrected hostile-notice test on Windows with existing cached Chromium156.0.8078.4 and disposable profile. Three other cases filtered/platform-skipped. No public-page-check skip logged.",
+      "existingFocusedUnits": "Prior112PASS/4platform-skips receipt remains historical. Egress runtime did not change; no fresh112 rerun or full-E2E claim. Phone66 checks are fresh after copy correction.",
+      "secondCiJob": {
+        "platform": "Windows",
+        "sameStaleAssertion": true,
+        "passed": 4507,
+        "failed": 1,
+        "skipped": 97,
+        "jobId": 118513067305
+      },
+      "browser": {
+        "externalProviderAccountsUsed": false,
+        "kind": "existing Playwright Chromium cache",
+        "productionDataUsed": false,
+        "version": "156.0.8078.4",
+        "binarySha256": "7f08161bbeb2853ffe1780a9ded4985087f52efb9725d7d8207aabdd42f7cfb9"
+      }
+    },
+    {
+      "kind": "visible-cli-copy",
+      "file": "server/cli-phone-setup.ts",
+      "line": 126,
+      "scenario": "Android and conditional iOS pairing instructions display upstream product name",
+      "fix": "Use compatible companion app, retaining conditional availability and exact QR/browser/scope rules",
+      "red": 3,
+      "redFiltered": 63,
+      "green": 66,
+      "greenFiles": 2
+    }
+  ],
+  "decision": "Do not imply a publicly available Origin Android/iOS app. Compatible companion wording removes upstream branding without inventing availability.",
+  "logs": [
+    {
+      "sha256": "5ff9d55620246817f944e922a1e1d73f53cb3c2e5b1d094844a64843cf5659d8",
+      "name": "phone-companion-red.log"
+    },
+    {
+      "sha256": "ebef42be46290b278291db162593fc73af0cae4cb7a361c769366006024268f1",
+      "name": "phone-companion-green.log"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "brand-corrections-lint.log"
+    },
+    {
+      "name": "hostile-notice-green.log",
+      "qualification": "4skipped, not a passing browser run",
+      "sha256": "ede9ba44b3188273c0446860696370eaba7edc465e0be3131eeffcf02bc2d044"
+    },
+    {
+      "qualification": "Actual1passed/3filtered-platformskipped",
+      "name": "hostile-notice-actual-green.log",
+      "sha256": "a14d4d6673da4f8430b29824e247fe34f4f4a33c8bb110b03f68d48ccae7206a"
+    }
+  ],
+  "lintExit": 0,
+  "diffCheckExit": 0,
+  "protocolChanges": false,
+  "timeoutsChanged": false,
+  "sourceStaged": false,
+  "sourceCommittedByLane": false,
+  "productionOperations": false,
+  "commits": [
+    "bfccd2a3f6f266860f01338221fdeb192e91602f",
+    "40bb8be3a0442a434665bd4aa1d1101268813bf2"
+  ]
+}

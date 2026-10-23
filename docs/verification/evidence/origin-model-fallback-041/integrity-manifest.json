@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-20T04:33:42.843Z",
+  "scope": "Current raw evidence bytes; includes the integrity reports and excludes this manifest itself.",
+  "files": [
+    {
+      "name": "after-agent-dark.png",
+      "bytes": 91729,
+      "sha256": "9bcf9e281d03cfd64af6261bd329b35c4a744866bac319bec301f38cd1aabfe0"
+    },
+    {
+      "name": "after-agent-light-375.png",
+      "bytes": 75571,
+      "sha256": "42e5836681356402932465d820d7f9fac25ee7a367ac63900777e3d3653c0ac5"
+    },
+    {
+      "name": "after-chat-dark-375.png",
+      "bytes": 40375,
+      "sha256": "f5cfe478094e22599ccd94041d039a466c011b6c139f32091c74175ffc80f807"
+    },
+    {
+      "name": "after-chat-dark.png",
+      "bytes": 53913,
+      "sha256": "30ddfcd3b8d6fbd096185f12d2525d345af7a84873967dd947e1b4069d996d7c"
+    },
+    {
+      "name": "after-chat-light-375.png",
+      "bytes": 43714,
+      "sha256": "67d49773be27ca6fd205ee453e3f39690ac0a4966623c99d3b8fa838349aece3"
+    },
+    {
+      "name": "after-usage-dark.png",
+      "bytes": 100474,
+      "sha256": "48b9a432056444e55379125593ad574119f79976b0d8a5fa10348a03c3a7ca4a"
+    },
+    {
+      "name": "after-usage-light-375.png",
+      "bytes": 82340,
+      "sha256": "1235831921198f4a35026cdf915096616ee64eda9f8b81b1d0d58c2da066b911"
+    },
+    {
+      "name": "after-usage-light.png",
+      "bytes": 102973,
+      "sha256": "e68ed1250e048fa232a7b7ec45d403e552114fbae2eab2051b5c304de611ebbb"
+    },
+    {
+      "name": "agent-failed-save-light-375.png",
+      "bytes": 86186,
+      "sha256": "4e84e71a41bd497887f646d4939aff6f5e1d3adbeb487b49b3fca0018d4d5d60"
+    },
+    {
+      "name": "before-agent-dark.png",
+      "bytes": 60614,
+      "sha256": "4ffe84ef9ae8707b8d4a19305fae5cfcb91516759b73f76543f79ac2d5f3b432"
+    },
+    {
+      "name": "before-agent-light-375.png",
+      "bytes": 49868,
+      "sha256": "ef9981b83f7623b9cca924c04b7adf7aa471175aabd9fe117e23aec50c88457c"
+    },
+    {
+      "name": "before-chat-dark.png",
+      "bytes": 38222,
+      "sha256": "d7c1f3dc4d0a8975e68ae64d514a0856a1d78dd639016598e721bb782a6c1379"
+    },
+    {
+      "name": "before-chat-light-375.png",
+      "bytes": 30136,
+      "sha256": "852b8ae94bdf90ec2f2b962fa4624fc622f45c1ed3fb4094b4855594b4b9e2e4"
+    },
+    {
+      "name": "before-usage-dark.png",
+      "bytes": 64690,
+      "sha256": "195afed86283822191788a2bf3c5c8ecfa75922db0accc74000f13108b4f70ab"
+    },
+    {
+      "name": "before-usage-light-375.png",
+      "bytes": 49427,
+      "sha256": "bb85cd7cf28b77e6178820d63cb14ebd2e704d49966506066237fe137beb060e"
+    },
+    {
+      "name": "browser-proof.json",
+      "bytes": 5295,
+      "sha256": "4922078f169e1fb4d86b1c35ea8c48e9769aa9c7a8ec4d1d24e51268146ee358"
+    },
+    {
+      "name": "global-zero-light-375.png",
+      "bytes": 84726,
+      "sha256": "b2d6ae94fe0c1b27f0d90f5810b34a9494a09cf6a9e0d5fbb2bdcda34d49ccfb"
+    },
+    {
+      "name": "integrity-report.json",
+      "bytes": 11128,
+      "sha256": "1aa8284f7400b645ccc9db6dbcc5cf8bc4b2fa0430c26d8fa3638c67e2351c7e"
+    },
+    {
+      "name": "integrity-report.md",
+      "bytes": 2751,
+      "sha256": "15cbb1430827cb779c5165c2eeec5a9909346a450cd84ec02b13bba9cb291fbf"
+    }
+  ]
+}

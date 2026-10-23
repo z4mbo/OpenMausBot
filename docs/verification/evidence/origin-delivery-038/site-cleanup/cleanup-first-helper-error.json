@@ -1,0 +1,5 @@
+{
+  "scope": "Read-only cleanup preservation receipt",
+  "firstError": "sha256sum: /root/origin-release-staging/0.2.14-cycle038/site-context-038-final.tgz: No such file or directory",
+  "resolution": "Used exact uploaded remote site-context.tgz name from unchanged build-site-038.sh; no file or container recreated/deleted."
+}

@@ -1,0 +1,131 @@
+{
+  "cycle": "045",
+  "startedAt": "2026-10-20T04:52:02.185Z",
+  "completedAt": "2026-10-20T04:53:04.851Z",
+  "native": {
+    "holder": 43140,
+    "pids": [
+      4296,
+      25084
+    ],
+    "stop": "Exact holder stop command",
+    "stoppedAt": "2026-10-20T04:52:06.287Z",
+    "temporaryHomesRemovedByLauncher": true
+  },
+  "backend": {
+    "holder": 85137,
+    "pid": 33952,
+    "primaryStop": "Exact holder stop command could not be written: stdin closed",
+    "fallbackStop": "Verified executable, original042 instance and data path; exact process SIGTERM, matching holder child.kill operation",
+    "stoppedAt": "2026-10-20T04:53:03.294Z",
+    "originalDataPreserved": true,
+    "originalProfilePreserved": true
+  },
+  "ownedBefore": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 26773,
+      "OwningProcess": 4296
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 26774,
+      "OwningProcess": 4296
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 26812,
+      "OwningProcess": 25084
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 26813,
+      "OwningProcess": 25084
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 54851,
+      "OwningProcess": 33952
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 54852,
+      "OwningProcess": 33952
+    }
+  ],
+  "ownedAfter": [],
+  "protectedPorts": [
+    3210,
+    3211,
+    5199,
+    8799
+  ],
+  "protectedListenersUnchanged": true,
+  "protectedBefore": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 8799,
+      "OwningProcess": 18092
+    }
+  ],
+  "protectedAfter": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 8799,
+      "OwningProcess": 18092
+    }
+  ],
+  "privateRawCaptureFiles": [
+    {
+      "owner": "owner",
+      "path": ".omb-scratch\\model-host-native-044\\private\\handover-owner-4296/ownerQuota-dump.json",
+      "bytes": 6423,
+      "sha256": "331d27817cf0ae4581c9fb71be9037c78ccedc077728e26429c5f3c61c43573e"
+    },
+    {
+      "owner": "owner",
+      "path": ".omb-scratch\\model-host-native-044\\private\\handover-owner-4296/ownerQuota-prompts.jsonl",
+      "bytes": 212,
+      "sha256": "c284c960efce8e67fec1bab9534cafc2540a3c92c501e8142139c03d4893a756"
+    },
+    {
+      "owner": "owner",
+      "path": ".omb-scratch\\model-host-native-044\\private\\handover-owner-4296/turn-evidence.jsonl",
+      "bytes": 75012,
+      "sha256": "47802f452d22f40dd7925659404cbd4e027f80d578ef56776d7f00033020385c"
+    },
+    {
+      "owner": "owner",
+      "path": ".omb-scratch\\model-host-native-044\\private\\handover-owner-4296/server.log",
+      "bytes": 658,
+      "sha256": "3d09c1240dac0d9ae107a3c9f2a996b6a07f1b8f0ca30a4533730f91b8b78917"
+    },
+    {
+      "owner": "requester",
+      "path": ".omb-scratch\\model-host-native-044\\private\\handover-requester-25084/localGood-dump.json",
+      "bytes": 26007,
+      "sha256": "4fd99577929ba591bcc82a8f93564dc276bc6000a8d833109b51fda0a81070be"
+    },
+    {
+      "owner": "requester",
+      "path": ".omb-scratch\\model-host-native-044\\private\\handover-requester-25084/localGood-prompts.jsonl",
+      "bytes": 212,
+      "sha256": "c284c960efce8e67fec1bab9534cafc2540a3c92c501e8142139c03d4893a756"
+    },
+    {
+      "owner": "requester",
+      "path": ".omb-scratch\\model-host-native-044\\private\\handover-requester-25084/turn-evidence.jsonl",
+      "bytes": 153183,
+      "sha256": "3887efc7898e1180c9833d2a81db81ea4c4f9a7c23567b8ee48c70d278015050"
+    },
+    {
+      "owner": "requester",
+      "path": ".omb-scratch\\model-host-native-044\\private\\handover-requester-25084/server.log",
+      "bytes": 662,
+      "sha256": "b22a8e8f27639a0057c6095eaa9fd58c2a5794a85def20ec6aed1c8e73d43ca6"
+    }
+  ],
+  "privateRawHashesVerifiedAfterCleanup": true,
+  "publicEvidenceUnchanged": true,
+  "productionMutation": false
+}

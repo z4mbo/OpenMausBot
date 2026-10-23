@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-10-19T06:33:50.099Z",
+  "authority": "Root agent confirmation; lifecycle actions not performed by API worker",
+  "source": "0745d6ef0317d42b498fecbbfdf5e5e3be6d41ce",
+  "apiPort": 51527,
+  "httpPort": 51528,
+  "oldPid": 36780,
+  "newPid": 28028,
+  "oldOwnedPidStopped": true,
+  "bothPortsObservedClosedByRoot": true,
+  "sameSQLiteAndStorage": true,
+  "codePushPerformed": false,
+  "newEnvironmentApplied": false,
+  "rootTtySession": 57999,
+  "childResumeAuthorized": true
+}

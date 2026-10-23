@@ -1,0 +1,14 @@
+{
+  "owner": "5273847f-b0b4-4d97-a245-1bdb3c104a70",
+  "observedAt": "2026-10-21T20:15:46.215Z",
+  "foregroundSessionAvailable": false,
+  "ownedProcessesAlreadyAbsent": true,
+  "ownedListenersAlreadyAbsent": true,
+  "shutdownRequestWritten": true,
+  "normalFinallyReceiptPresent": false,
+  "retainedDataRemoved": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-WqDvAb",
+  "temporaryDataAbsent": true,
+  "protectedProcessesTouched": false,
+  "browserSessionsPreviouslyClosed": true,
+  "qualification": "Foreground process handle unavailable and exact owned processes/listeners absent on fresh inspection; removed only its identity-checked retained temporary data. No claim of graceful launcher shutdown."
+}

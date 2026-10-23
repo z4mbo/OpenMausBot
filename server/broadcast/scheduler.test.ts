@@ -44,6 +44,23 @@ describe("connectedChannels", () => {
 });
 
 describe("BroadcastScheduler", () => {
+  it.each([false, true])("keeps a rejected channel key out of a shared publication result (plain response: %s)", async plain => {
+    const secret = plain ? "q".repeat(512) : "linkedin-private-token";
+    const calls: { name: string; args: Record<string, unknown> }[] = [];
+    const client: OriginCloudClient = { query: async () => null, mutation: async (name, args) => {
+      calls.push({ name, args });
+      return name === "broadcast:claimDue" ? [{ postId: "p1", variants: [{ channel: "linkedin", text: "Hi" }], media: [] }] : null;
+    } };
+    const env: PublishEnv = { sleep: async () => undefined, nonce: () => "n", now: () => 0,
+      fetch: async () => plain ? new Response(`Rejected ${secret}`, { status: 401 }) : Response.json({ message: `Rejected ${secret}` }, { status: 401 }) };
+    const scheduler = new BroadcastScheduler({ session: () => ({ url: DEPLOYMENT, sessionToken: "token" }), connect: () => client, env,
+      keys: { linkedin: () => ({ accessToken: secret, authorUrn: "urn:li:person:a" }), x: () => null, bluesky: () => null, meta: () => null, tiktok: () => null } });
+    expect(await scheduler.tick()).toBe(1);
+    const finish = calls.find(call => call.name === "broadcast:finish");
+    expect(finish?.args.results).toEqual([{ channel: "linkedin", ok: false, error: expect.stringContaining("LinkedIn answered 401") }]);
+    expect(JSON.stringify(finish)).not.toContain(secret.slice(0, 32));
+  });
+
   function setup(claimed: unknown[], deps: Partial<BroadcastSchedulerDeps> = {}) {
     const calls: { name: string; args: Record<string, unknown> }[] = [];
     const client: OriginCloudClient = {
@@ -70,7 +87,7 @@ describe("BroadcastScheduler", () => {
     };
     const scheduler = new BroadcastScheduler({
       session: () => ({ url: DEPLOYMENT, sessionToken: "token" }), connect: () => client, env,
-      keys: { x: () => null, bluesky: () => ({ handle: "me.test", appPassword: "p" }), linkedin: () => null, meta: () => null, tiktok: () => null },
+      keys: { x: () => null, bluesky: () => ({ handle: "me.test", appPassword: "broadcast-test-app-password" }), linkedin: () => null, meta: () => null, tiktok: () => null },
       ...deps,
     });
     return { scheduler, calls, fetched, bodies };
@@ -114,7 +131,7 @@ describe("BroadcastScheduler", () => {
       { postId: "default", projectId: "proj", variants: [{ channel: "bluesky", text: "Personal", accountId: "default" }] },
     ], { accounts });
     expect(await scheduler.tick()).toBe(2);
-    expect(bodies).toEqual([{ identifier: "brand.test", password: "brand-password" }, { identifier: "me.test", password: "p" }]);
+    expect(bodies).toEqual([{ identifier: "brand.test", password: "brand-password" }, { identifier: "me.test", password: "broadcast-test-app-password" }]);
     expect(calls.filter((call) => call.name === "broadcast:finish").every((call) => (call.args.results as { ok: boolean }[])[0].ok)).toBe(true);
   });
 

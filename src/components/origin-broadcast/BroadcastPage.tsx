@@ -23,7 +23,7 @@ import { duplicatePost, publishNow } from "./post-actions";
 import { useBroadcastAccounts, type ChannelAccounts } from "./use-broadcast-accounts";
 
 export function BroadcastPage({ agent, ...props }: OriginPageProps & { agent: Bot }) {
-  return <CloudGate {...props} label="Publish">{({ project, projectId, canEdit }) => <Broadcast projectId={projectId} projectName={project.name} canEdit={canEdit} agent={agent} />}</CloudGate>;
+  return <CloudGate {...props} label="Publish">{({ project, projectId, canEdit }) => <Broadcast key={projectId} projectId={projectId} projectName={project.name} canEdit={canEdit} agent={agent} />}</CloudGate>;
 }
 
 type View = "month" | "week" | "list";
@@ -103,7 +103,7 @@ function Broadcast({ projectId, projectName, canEdit: projectEdit, agent }: { pr
 
 /** Which accounts post from this computer, and the channels still to connect. */
 function AccountsStrip({ accounts, onConnect }: { accounts: ChannelAccounts | null; onConnect(): void }) {
-  if (!accounts) return <div className="mb-4 h-7" />;
+  if (!accounts) return <p role="status" className="mb-4 text-[12px] text-ink-secondary">Connections are not confirmed on this computer. Drafts and approvals remain available.</p>;
   const connected = [...new Map(BROADCAST_CHANNELS.flatMap((channel) => accounts[channel]).map((account) => [`${account.integration}:${account.id}`, account])).values()];
   const missing = BROADCAST_CHANNELS.filter((channel) => !accounts[channel].length);
   return (
@@ -115,17 +115,18 @@ function AccountsStrip({ accounts, onConnect }: { accounts: ChannelAccounts | nu
         </span>
       ))}
       {missing.length > 0 && (
-        <span className="inline-flex items-center gap-1 pl-1">
+        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-1 pl-1">
+          {!connected.length && <p className="basis-full text-[12px] text-ink-secondary">Connect a channel to publish from this computer. Drafts and approvals work without one.</p>}
           {missing.map((channel) => (
             <button key={channel} type="button" onClick={onConnect} title={`Connect ${BROADCAST_RULES[channel].label}`} aria-label={`Connect ${BROADCAST_RULES[channel].label}`}
               className="flex size-7 items-center justify-center rounded-md border border-dashed border-hairline/70 text-ink-tertiary transition-colors duration-(--motion-fast) hover:border-accent/60 hover:text-ink">
               <ChannelMark channel={channel} size={12} />
             </button>
           ))}
-          <button type="button" onClick={onConnect} className="ml-1 text-[12px] text-ink-tertiary transition-colors duration-(--motion-fast) hover:text-ink">
-            {connected.length ? "Connect more" : "Connect a channel to publish from this computer"}
+          <button type="button" onClick={onConnect} className="ml-1 min-w-0 text-left text-[12px] text-ink-tertiary transition-colors duration-(--motion-fast) hover:text-ink">
+            {connected.length ? "Connect more" : "Connect channels"}
           </button>
-        </span>
+        </div>
       )}
     </div>
   );

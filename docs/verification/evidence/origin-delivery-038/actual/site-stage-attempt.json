@@ -1,0 +1,23 @@
+{
+  "version": "0.2.14",
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "image": "sha256:b0a0a3315c8eeec4ea8e337b935142cf04142962e3cb92dcde87369f74684201",
+  "previous": "sha256:02e51fcd5b86b85392ada154c402f86229369c8894bb377d8ab5487ecc2296b0",
+  "identitySha": "23cd75880bc9ad2b5a95cc3f7554a2d860425fe8e57f0521105912c413ff22ed",
+  "helpers": [
+    {
+      "name": "promote-downloads.sh",
+      "sha256": "b9550237b61204053d1446c0772e02ba45cf151a410d6e60d2d49825c25bc6ab"
+    },
+    {
+      "name": "promote-site.sh",
+      "sha256": "a6c3151d21752351c5ce63ec1fefa58902a4cb499589e1f4a7c0ecd1137f99c5"
+    },
+    {
+      "name": "validate-release.py",
+      "sha256": "d555e5b03ecb6e8f8650278935b6b194af1d63e2816e7c07d8bf9f21df790567"
+    }
+  ],
+  "attemptedAt": "2026-10-19T01:09:21.386Z",
+  "publicMutation": false
+}

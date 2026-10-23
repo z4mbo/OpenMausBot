@@ -1,0 +1,31 @@
+2026-10-20T07:07:31.3094264Z ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+2026-10-20T07:07:31.3094579Z 
+2026-10-20T07:07:31.3097941Z  FAIL  server/direct-coordination.e2e.test.ts > continues its original delegated child after the person selects an independent specialist conversation
+2026-10-20T07:07:31.3107692Z AssertionError: expected [ …(2) ] to deeply equal [ …(2) ]
+2026-10-20T07:07:31.3108277Z 
+2026-10-20T07:07:31.3108535Z - Expected
+2026-10-20T07:07:31.3108988Z + Received
+2026-10-20T07:07:31.3109445Z 
+2026-10-20T07:07:31.3109642Z   [
+2026-10-20T07:07:31.3110214Z     "0a3a82e6-8b5c-4587-91f5-c2fcf2525a56",
+2026-10-20T07:07:31.3110686Z -   "0a3a82e6-8b5c-4587-91f5-c2fcf2525a56",
+2026-10-20T07:07:31.3111140Z +   "ed21f793-4cde-4368-b1e9-92276978fff0",
+2026-10-20T07:07:31.3111791Z   ]
+2026-10-20T07:07:31.3111920Z 
+2026-10-20T07:07:31.3112304Z  ❯ server/direct-coordination.e2e.test.ts:633:54
+2026-10-20T07:07:31.3393200Z     631|   expect((await f.wait()).status).toBe("settled");
+2026-10-20T07:07:31.3394173Z     632|   const children = f.nodes().filter((node: any) => node.parentId && no…
+2026-10-20T07:07:31.3394967Z     633|   expect(children.map((node: any) => node.threadId)).toEqual([original…
+2026-10-20T07:07:31.3396389Z        |                                                      ^
+2026-10-20T07:07:31.3397471Z     634|   const specialist = (await f.api("/api/bots")).bots.find((bot: any) =…
+2026-10-20T07:07:31.3398620Z     635|   expect(specialist.threadId).toBe(direct.threadId);
+2026-10-20T07:07:31.3399668Z  ❯ fixtureSession server/direct-coordination.e2e.test.ts:57:5
+2026-10-20T07:07:31.3400441Z  ❯ fixture server/direct-coordination.e2e.test.ts:27:9
+2026-10-20T07:07:31.3400775Z 
+2026-10-20T07:07:31.3401028Z ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+2026-10-20T07:07:31.3401235Z 
+2026-10-20T07:07:31.3402571Z 
+2026-10-20T07:07:31.3433334Z  Test Files  1 failed | 363 passed | 9 skipped (373)
+2026-10-20T07:07:31.3469916Z       Tests  1 failed | 4970 passed | 15 skipped (4986)
+2026-10-20T07:07:31.3471096Z    Start at  06:44:16
+2026-10-20T07:07:31.3476152Z    Duration  1394.92s (transform 17.47s, setup 55.43s, import 64.52s, tests 1215.16s, environment 7.04s)

@@ -109,6 +109,26 @@ describe("new thread folder navigation", () => {
     expect(seen.selectedId).toBe("B");
   });
 
+  it("keeps a project selected while creating an embedded specialist conversation", async () => {
+    mount(false);
+    const onCreated = vi.fn();
+    flushSync(() => dispatch({ type: "newTask", botId: "B", preserveSelection: true, onCreated }));
+    expect(seen.selectedId).toBe("A");
+    created.resolve(response({ bot: newBot() }, 201));
+    await vi.waitFor(() => expect(onCreated).toHaveBeenCalledWith("B-new"));
+    expect(seen.selectedId).toBe("A");
+    expect(seen.bots.find(bot => bot.id === "B")?.threadId).toBe("B-new");
+  });
+
+  it("loads an embedded specialist thread without changing the selected project", async () => {
+    mount(false);
+    flushSync(() => dispatch({ type: "switchTask", botId: "B", threadId: "B-other", preserveSelection: true }));
+    expect(seen.selectedId).toBe("A");
+    switched.resolve(response({ bot: { ...profile("B"), threadId: "B-other" } }));
+    await vi.waitFor(() => expect(seen.bots.find(bot => bot.id === "B")?.threadId).toBe("B-other"));
+    expect(seen.selectedId).toBe("A");
+  });
+
   it("does not overwrite a newer same-bot task switch with a late creation response", async () => {
     mount();
     submit();

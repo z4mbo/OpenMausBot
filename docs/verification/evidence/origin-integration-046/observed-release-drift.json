@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-10-20T05:25:42.322Z",
+  "release": {
+    "isDraft": false,
+    "name": "Origin 0.3.0",
+    "publishedAt": "2026-10-20T04:28:39Z",
+    "tagName": "origin-v0.3.0",
+    "targetCommitish": "main",
+    "url": "https://github.com/z4mbo/Origin/releases/tag/origin-v0.3.0"
+  },
+  "gitHubTagSource": "924d587c03767fb0b6d5d899872f69b00a6f03e7",
+  "feedVersion": "0.2.15",
+  "runningSiteImage": "sha256:91b6d2d7ade9b89ac21a95e76b4870c5ee246ad204f8f1acf21112278d0e51ef",
+  "cancelledOlderNative": {
+    "attempt": 1,
+    "conclusion": "cancelled",
+    "headBranch": "origin-v0.2.16",
+    "headSha": "fb7b838aab70c1308023e5df27209641fff5e9c1",
+    "status": "completed",
+    "url": "https://github.com/z4mbo/Origin/actions/runs/39372926025"
+  },
+  "hold": "Do not publish0.2.16 or invoke its delivery adapters. Reconcile both source parents and qualify a newer release.",
+  "productionDataRead": false,
+  "productionMutation": false
+}

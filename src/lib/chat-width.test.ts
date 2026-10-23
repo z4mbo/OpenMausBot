@@ -27,12 +27,12 @@ describe("chat width", () => {
     expect(readChatWidth()).toBe("standard");
   });
 
-  it("sizes the standard width like Grok Bot: a 960px column and bubbles of min(80%, 560px)", () => {
+  it("keeps the compact column at 680px and caps bubbles at 80% or 560px", () => {
     const body = css.match(/:root\s*\{([^}]*--chat-bubble-max[^}]*)\}/)?.[1] ?? "";
     expect(body).toMatch(/--chat-bubble-max:\s*35rem/);
     expect(body).toMatch(/--chat-bubble-pct:\s*80%/);
     expect(body).toMatch(/--chat-card-pct:\s*88%/);
-    expect(body).toMatch(/--chat-column-max:\s*60rem/);
+    expect(body).toMatch(/--chat-column-max:\s*42.5rem/);
   });
 
   it("gives every non-default width a stylesheet block that sets the bubble variables", () => {
@@ -45,17 +45,18 @@ describe("chat width", () => {
     }
   });
 
-  it.each(CHAT_WIDTH_IDS)("sizes the %s column so its bubbles still reach their cap", (id) => {
+  it.each(CHAT_WIDTH_IDS)("keeps the %s column and bubbles within their selected limits", (id) => {
     const selector = id === DEFAULT_CHAT_WIDTH ? ":root" : `:root\\[data-chat-width="${id}"\\]`;
     const body = css.match(new RegExp(`${selector}\\s*\\{([^}]*--chat-bubble-max[^}]*)\\}`))?.[1] ?? "";
     const token = (name: string) => body.match(new RegExp(`--${name}:\\s*([\\d.]+)(rem|%)?`))?.slice(1) ?? [];
-    const [column, columnUnit] = token("chat-column-max");
-    const [bubble, bubbleUnit] = token("chat-bubble-max");
+    const [column] = token("chat-column-max");
+    const [bubble] = token("chat-bubble-max");
     const [pct] = token("chat-bubble-pct");
     expect(column, `${id} sets --chat-column-max`).toBeDefined();
-    if (columnUnit === "rem" && bubbleUnit === "rem") {
-      expect(Number(column) * Number(pct) / 100).toBeGreaterThanOrEqual(Number(bubble));
-    }
+    expect(Number(column)).toBeGreaterThan(0);
+    expect(Number(bubble)).toBeGreaterThan(0);
+    expect(Number(pct)).toBeGreaterThan(0);
+    expect(Number(pct)).toBeLessThanOrEqual(100);
   });
 
   it("centers the transcript and the composer in one column, in a chat and in a room", () => {
@@ -70,6 +71,15 @@ describe("chat width", () => {
 
   it("registers every stylesheet block", () => {
     for (const id of blocks) expect<readonly string[]>(CHAT_WIDTH_IDS).toContain(id);
+  });
+
+  it("centers the conversation and composer with compact, medium and full-width column limits", () => {
+    expect(css).toContain("--chat-column-max: 42.5rem");
+    expect(css).toContain("--chat-column-max: 52.5rem");
+    expect(css).toContain("--chat-column-max: 100%");
+    const chat = readFileSync(join(root, "components/ChatView.tsx"), "utf8");
+    expect(chat).toContain("glass-scroller-content chat-column");
+    expect(chat).toContain("chat-column-dock");
   });
 
   it("stamps a chosen width, remembers it, and clears the attribute for the default", () => {

@@ -1,0 +1,28 @@
+Browser tab: 7, Title: "Origin session scope — after", URL: "http://127.0.0.1:5175/__origin-session-scope.html".
+0 AXWebArea Origin session scope — after, URL: 127.0.0.1:5175/__origin-session-scope.html
+	1 container root
+		2 container
+			3 heading Origin session race · after, Value: 1
+				4 text Origin session race ·  after
+			5 text Real AuthPage and session hook; synthetic accounts and Convex transport. Two tabs share only this fixture origin's browser storage. System UI font; typography is outside this check.
+			6 button Reset to first fixture member
+			7 button Sign in as second fixture member
+			8 button (disabled) Resolve old sign-out
+			9 button (disabled) Reject old sign-out
+			10 text Logout calls:  1  · Request:  settled  · Session:  Second fixture member
+		11 container
+			12 text Synthetic download shell · no download action
+			13 container Second fixture member
+				14 heading Second fixture member, Value: 2, ID: account-title
+					15 text Second fixture member
+				16 text second@example.test
+				17 button Sign out
+				18 heading YOUR WORKSPACES, Value: 3
+					19 text YOUR WORKSPACES
+				20 content list
+					21 container
+						22 text Fixture workspace Member
+				23 container
+					24 text Open Origin on your computer and sign in with  second@example.test . Your workspaces and projects are already there.
+
+The focused UI element is 0 AXWebArea Origin session scope — after, URL: 127.0.0.1:5175/__origin-session-scope.html

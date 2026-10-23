@@ -1,4 +1,5 @@
 import { clip, record, refuse, StudioRefusal, studioRunner, STUDIO_TERMINAL, text, type StudioCloud, type StudioRunner } from "./origin-studio.ts";
+import { DailyApiBudgetError } from "./daily-api-budget.ts";
 import { runSummary, studioWorkflows, type WorkflowExecutor } from "./origin-studio-workflow.ts";
 import { presetList, withPreset } from "./origin-studio-presets.ts";
 
@@ -221,7 +222,7 @@ async function generate(scope: Resolved, given: Record<string, unknown>): Promis
   const sources = await sourcesOf(scope, [...(Array.isArray(args.sources) ? args.sources : []), ...(text(args.source_asset_id) ? [args.source_asset_id] : [])]);
   const model = text(args.model) || (text(args.endpoint) ? STUDIO_CUSTOM_MODEL : defaultModel(mode, sources.length));
   let prompt = text(args.prompt);
-  if (args.enhance === true && prompt.trim()) prompt = await runner.enhance(prompt, mode);
+  if (args.enhance === true && prompt.trim()) prompt = await runner.enhance(prompt, mode, { projectId, botId: scope.agentId });
   const parent = sources.find((source): source is Extract<StudioSource, { generationId: string }> => "generationId" in source);
   const ids = await runner.generate(cloud, {
     projectId, mode, model, prompt,
@@ -242,7 +243,7 @@ async function generate(scope: Resolved, given: Record<string, unknown>): Promis
     ...(args.input && typeof args.input === "object" && !Array.isArray(args.input) ? { input: args.input as Record<string, unknown> } : {}),
     ...(args.count !== undefined ? { count: Number(args.count) } : {}), ...(typeof args.brand === "boolean" ? { brand: args.brand } : {}),
     ...(character ? { characterId: character } : {}),
-  }, scope.agentName);
+  }, scope.agentName, { botId: scope.agentId });
   const wait = args.wait === undefined ? mode !== "video" : args.wait === true;
   const enhanced = prompt !== text(args.prompt) ? `Enhanced prompt: "${clip(prompt, 400)}"\n` : "";
   if (!wait) {
@@ -417,7 +418,7 @@ export async function runStudioTool(name: string, args: Record<string, unknown>,
     if (name === "origin_studio_generate") return await generate(scope, args);
     return { text: `Unknown Studio tool: ${name}`, isError: true };
   } catch (error) {
-    if (error instanceof StudioRefusal) return { text: error.message, isError: true };
+    if (error instanceof StudioRefusal || error instanceof DailyApiBudgetError) return { text: error.message, isError: true };
     throw error;
   }
 }

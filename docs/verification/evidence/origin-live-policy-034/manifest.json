@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "name": "before.log",
+      "bytes": 2251,
+      "sha256": "803c6fd59a2cc4b40dfed11892ad89387c5aff6cba47473a3e031ecea5ef7c73"
+    },
+    {
+      "name": "after.log",
+      "bytes": 287,
+      "sha256": "1879120958776bfc1b4d9c10ff49f0f9002ebc9efe352db48344752aa178ce12"
+    },
+    {
+      "name": "report.json",
+      "bytes": 3159,
+      "sha256": "8f1578321f59e9aa155baffed5cb20bee2d75f883a5f763b3966e9fdae468d1c"
+    }
+  ]
+}

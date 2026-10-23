@@ -1,0 +1,45 @@
+2026-10-20T07:06:27.5286620Z ⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+2026-10-20T07:06:27.5286873Z 
+2026-10-20T07:06:27.5288843Z  FAIL  server/card-answerers.e2e.test.ts > who may answer a card on a shared workspace
+2026-10-20T07:06:27.5294182Z Error: server never came up:
+2026-10-20T07:06:27.5294677Z openmausbot webhook receiver on http://127.0.0.1:34931
+2026-10-20T07:06:27.5295248Z openmausbot open-source edition (enterprise layer present but OMB_LICENSE_KEY is not set)
+2026-10-20T07:06:27.5295683Z local requests: owner trust (self-hosted default)
+2026-10-20T07:06:27.5295930Z brand: default
+2026-10-20T07:06:27.5296121Z node:events:505
+2026-10-20T07:06:27.5296338Z     throw er; // Unhandled 'error' event
+2026-10-20T07:06:27.5296566Z     ^
+2026-10-20T07:06:27.5296658Z 
+2026-10-20T07:06:27.5296860Z Error: listen EADDRINUSE: address already in use 127.0.0.1:34930
+2026-10-20T07:06:27.5297221Z     at Server.setupListenHandle [as _listen2] (node:net:2328:16)
+2026-10-20T07:06:27.5297661Z     at listenInCluster (node:net:2437:12)
+2026-10-20T07:06:27.5297979Z     at node:net:2666:7
+2026-10-20T07:06:27.5298351Z     at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+2026-10-20T07:06:27.5298743Z Emitted 'error' event on Server instance at:
+2026-10-20T07:06:27.5298999Z     at emitErrorNT (node:net:2416:8)
+2026-10-20T07:06:27.5299359Z     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+2026-10-20T07:06:27.5299698Z   code: 'EADDRINUSE',
+2026-10-20T07:06:27.5299880Z   errno: -98,
+2026-10-20T07:06:27.5300045Z   syscall: 'listen',
+2026-10-20T07:06:27.5300231Z   address: '127.0.0.1',
+2026-10-20T07:06:27.5300421Z   port: 34930
+2026-10-20T07:06:27.5300587Z }
+2026-10-20T07:06:27.5300671Z 
+2026-10-20T07:06:27.5300742Z Node.js v24.21.0
+2026-10-20T07:06:27.5300945Z 
+2026-10-20T07:06:27.5301324Z  ❯ start server/card-answerers.e2e.test.ts:61:38
+2026-10-20T07:06:27.5359916Z      59|     } catch {
+2026-10-20T07:06:27.5360502Z      60|     }
+2026-10-20T07:06:27.5361184Z      61|     if (Date.now() > deadline) throw new Error(`server never came up:\…
+2026-10-20T07:06:27.5361888Z        |                                      ^
+2026-10-20T07:06:27.5362839Z      62|     await new Promise((r) => setTimeout(r, 150));
+2026-10-20T07:06:27.5363559Z      63|   }
+2026-10-20T07:06:27.5364174Z  ❯ server/card-answerers.e2e.test.ts:126:5
+2026-10-20T07:06:27.5364510Z 
+2026-10-20T07:06:27.5364847Z ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+2026-10-20T07:06:27.5365122Z 
+2026-10-20T07:06:27.5367899Z 
+2026-10-20T07:06:27.5384981Z  Test Files  1 failed | 363 passed | 9 skipped (373)
+2026-10-20T07:06:27.5420703Z       Tests  5074 passed | 29 skipped (5103)
+2026-10-20T07:06:27.5421442Z    Start at  06:46:20
+2026-10-20T07:06:27.5424833Z    Duration  1206.86s (transform 14.11s, setup 41.60s, import 52.32s, tests 1066.74s, environment 5.58s)

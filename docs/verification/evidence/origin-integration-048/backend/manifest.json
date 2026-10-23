@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-20T06:56:44.186Z",
+  "parents": {
+    "previous032": "5aafbf02ab2ded075d2c75955419f35a45cce99a",
+    "incomingPublished040": "f76cbe9b8019b648bb08f9125daefe35e6625185"
+  },
+  "candidateWorkingMerge": true,
+  "finalCommitBindingPending": true,
+  "sourceFilesSha256": "406a518478420cd779fdcab15235e1e32e93e670301097301a1b353c8e0cc156",
+  "files": [
+    {
+      "path": "access-red.log",
+      "bytes": 1512,
+      "sha256": "7b15ec852b115d900302692e7d3c1222cffab427f649dd4833c2731ce74ff589",
+      "source": {
+        "ignoredInput": ".omb-scratch/ci-046/budgets-access-red.log",
+        "rawSha256": "704f3fa032df8790243d770df9002e230ba21c95686838896352fa40e793587f"
+      },
+      "qualification": "Synthetic tests only. ANSI and synthetic credential/row identifiers sanitized; source bytes remain retained in ignored evidence."
+    },
+    {
+      "path": "monthly-hosted-red.log",
+      "bytes": 3803,
+      "sha256": "e466268bdddeb4319bdd1d45c1cc0e25a37db84d4245f6afc087c4d13a9622f6",
+      "source": {
+        "ignoredInput": ".omb-scratch/ci-046/hosted-monthly-red.log",
+        "rawSha256": "03d061e368877278a99044214ad424789dff0663ac380b9f038b0f976ed2893b"
+      },
+      "qualification": "Synthetic tests only. ANSI and synthetic credential/row identifiers sanitized; source bytes remain retained in ignored evidence."
+    },
+    {
+      "path": "backend-full.log",
+      "bytes": 429,
+      "sha256": "fa304a96c85b191f850d3e1a6ebf8b8c3b9f4741085800550f28269f6bd5d162",
+      "source": {
+        "ignoredInput": ".omb-scratch/ci-046/backend-040-full.log",
+        "rawSha256": "42ec7a97c6309976f1d8af891450bcefa3f36324f3ae06cdf77bbe85dd0c7f7f"
+      },
+      "qualification": "Synthetic tests only. ANSI and synthetic credential/row identifiers sanitized; source bytes remain retained in ignored evidence."
+    },
+    {
+      "path": "backend-focused.log",
+      "bytes": 424,
+      "sha256": "39cb207747d338529fdca8c367ae53073bedfa039c5ce5c1999ca6ec4d933bc2",
+      "source": {
+        "ignoredInput": ".omb-scratch/ci-046/backend-040-monthly-access-green.log",
+        "rawSha256": "fa8dc5049818d688a68d90edecbe7aa215b053fb41607e97d99b26de9f0ef23f"
+      },
+      "qualification": "Synthetic tests only. ANSI and synthetic credential/row identifiers sanitized; source bytes remain retained in ignored evidence."
+    },
+    {
+      "path": "call-pipeline-host.log",
+      "bytes": 224,
+      "sha256": "ddca69601098106fe903bfd7d3635a543cfb7e54facd75fad4aa110e9505886e",
+      "source": {
+        "ignoredInput": ".omb-scratch/ci-046/040-leaf-merge-tests.log",
+        "rawSha256": "709b20ae52007d021f8ab9961b859e7ce9b956d254292a1c577073434bd41678"
+      },
+      "qualification": "Synthetic tests only. ANSI and synthetic credential/row identifiers sanitized; source bytes remain retained in ignored evidence."
+    },
+    {
+      "path": "backend-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": {
+        "ignoredInput": ".omb-scratch/ci-046/backend-040-tsc.log",
+        "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "qualification": "Synthetic tests only. ANSI and synthetic credential/row identifiers sanitized; source bytes remain retained in ignored evidence."
+    },
+    {
+      "path": "owned-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": {
+        "ignoredInput": ".omb-scratch/ci-046/040-owned-lint.log",
+        "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "qualification": "Synthetic tests only. ANSI and synthetic credential/row identifiers sanitized; source bytes remain retained in ignored evidence."
+    },
+    {
+      "path": "schema-comparison.json",
+      "bytes": 1481,
+      "sha256": "6b927248becd6d96eb634adad5994bd7a1cdaa1d56bd8742353a21bd1b8bc0cc",
+      "source": ".omb-scratch/ci-046/040-schema-comparison.json",
+      "qualification": "Actual compiled parent/candidate schema exports; local working merge, no production rows."
+    },
+    {
+      "path": "backend-repair.json",
+      "bytes": 5881,
+      "sha256": "23377fe8fdd96d3bbd9516386254565574c0c0d116f7c6e4c7c878c633c88eb1",
+      "source": ".omb-scratch/ci-046/040-backend-repair.json",
+      "qualification": "Verified working-tree hashes and exact parent identities; no final source commit is claimed."
+    },
+    {
+      "path": "source-files.json",
+      "bytes": 977,
+      "sha256": "406a518478420cd779fdcab15235e1e32e93e670301097301a1b353c8e0cc156",
+      "source": null,
+      "qualification": "Raw working-tree source hashes after the final focused assertion."
+    },
+    {
+      "path": "delivery-hold.json",
+      "bytes": 1334,
+      "sha256": "a18959e873b8f4ee3e8999b1f9b9fc4cdc64792e1dfe99ae49242bf6bfa22ddb",
+      "source": ".omb-scratch/backend-delivery-047/preparation.json",
+      "qualification": "Historical unadmitted readiness only, superseded by the incoming0.4.0 source."
+    },
+    {
+      "path": "README.md",
+      "bytes": 3466,
+      "sha256": "6c742efbdb68e6bb806838fcacb30006d8e8e3a37b87b5e19bcc46f5ca9718fa",
+      "source": null,
+      "qualification": "Scope and provenance; historical preparation is separate from completed delivery."
+    }
+  ],
+  "productionDataUsed": false,
+  "productionOperations": false
+}

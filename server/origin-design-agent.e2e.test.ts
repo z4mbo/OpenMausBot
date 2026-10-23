@@ -164,4 +164,3 @@ it("a design issue assigned to an agent ends as frames in review with a Design c
     await convex.close();
   }
 }, 180_000);
-

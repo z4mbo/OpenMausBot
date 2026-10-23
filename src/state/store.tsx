@@ -60,6 +60,7 @@ import { useChatErrorClear } from "./chat-error";
 import { openLiveEvents, publishLiveFrame, publishMissedFrames } from "@/lib/live-events";
 import { chatHiddenFor } from "@/lib/origin-chief-section";
 import { trimRoutineRuns } from "./routine-run-retention";
+import { bumpTranscriptGeneration, hydratedTranscriptState, reducePendingThreadSnapshot, usePendingThreadSnapshotRecovery, type PendingThreadSnapshotPage, type PendingThreadSnapshotTarget } from "./pending-thread-snapshots";
 
 export type { MausColor } from "@/lib/mascot";
 export type { RoutineRunCardData } from "../../shared/routine-run";
@@ -215,12 +216,7 @@ export interface GroupTask {
   busyBotId?: string | null;
 }
 
-export interface ModelSelection {
-  instanceId: string;
-  model: string;
-  effort?: EffortLevel;
-  variant?: string;
-}
+export type ModelSelection = import("../../shared/wire").ModelSelection;
 
 export interface Task extends Pick<import("../../shared/wire").WireTask, "shared" | "sharedPrivate"> {
   waitingForTeammates?: boolean;
@@ -255,12 +251,7 @@ export interface Task extends Pick<import("../../shared/wire").WireTask, "shared
   snoozedUntil?: number;
 }
 
-export interface ThreadOpener {
-  botId: string;
-  name: string;
-  delegationId?: string;
-  at: number;
-}
+export type ThreadOpener = import("../../shared/wire").TaskOpenedBy;
 
 export interface ThreadCloser {
   botId: string;
@@ -329,7 +320,10 @@ export interface Bot {
   connectorTools?: Record<string, ConnectorToolGrant>;
   connectorScopes?: { apps: Record<string, "read" | "write"> };
   outbound?: { policy: "ask" | "allow"; dailyCap: number };
-  fallback?: Array<{ instanceId: string; model: string }>;
+  fallback?: ModelSelection[];
+  quotaFallback?: boolean;
+  fallbackApiAllowed?: boolean;
+  dailyApiBudgetUsd?: number;
   browser?: boolean;
   recordBrowserSteps?: boolean;
   memoryUpkeep?: boolean;
@@ -428,51 +422,9 @@ export function visibleMessages(bot: Pick<Bot, "messages" | "activeLeafId">): Me
 import type { BrowserEngineSummary, BrowserProfile, ConfigStatus, ManagedPolicySummary } from "./config-status";
 export type { BrowserEngineSummary, BrowserProfile, ConfigStatus, ManagedPolicySummary };
 
-// A section left out here is wiped from state.config whenever a config frame lands.
-export type ConfigStatusFrame = Pick<
-  ConfigStatus,
-  "xai" | "mistral" | "cerebras" | "groq" | "meta" | "anthropic" | "openai" | "openrouter" | "openaiCompat" | "fleet" | "composio" | "box" | "vps" | "rooms" | "mcp" | "threads" | "automaticRecovery" | "cacheKeepWarm" | "localVm" | "opencodeGo" | "tts" | "decider" | "imageGen" | "live" | "profile" | "language" | "features" | "onboarding" | "browserEngine" | "browserProfiles" | "edition" | "budgets" | "billing" | "managedPolicy" | "cloudHome"
->;
-
-export function configStatusFromFrame(frame: ConfigStatusFrame): ConfigStatus {
-  return {
-    xai: frame.xai,
-    mistral: frame.mistral,
-    cerebras: frame.cerebras,
-    groq: frame.groq,
-    meta: frame.meta,
-    anthropic: frame.anthropic,
-    openai: frame.openai,
-    openrouter: frame.openrouter,
-    openaiCompat: frame.openaiCompat,
-    fleet: frame.fleet,
-    composio: frame.composio,
-    box: frame.box,
-    vps: frame.vps,
-    rooms: frame.rooms,
-    mcp: frame.mcp,
-    threads: frame.threads,
-    automaticRecovery: frame.automaticRecovery,
-    cacheKeepWarm: frame.cacheKeepWarm,
-    localVm: frame.localVm,
-    opencodeGo: frame.opencodeGo,
-    tts: frame.tts,
-    decider: frame.decider,
-    imageGen: frame.imageGen,
-    live: frame.live,
-    profile: frame.profile,
-    language: frame.language,
-    features: frame.features,
-    onboarding: frame.onboarding,
-    browserEngine: frame.browserEngine,
-    browserProfiles: frame.browserProfiles,
-    edition: frame.edition,
-    budgets: frame.budgets,
-    billing: frame.billing,
-    managedPolicy: frame.managedPolicy,
-    ...(frame.cloudHome ? { cloudHome: true } : {}),
-  };
-}
+import { configStatusFromFrame, type ConfigStatusFrame } from "./config-status";
+export { configStatusFromFrame };
+export type { ConfigStatusFrame };
 
 export interface EngineInstall {
   platform?: "darwin" | "win32" | "linux";
@@ -514,7 +466,7 @@ export interface InstanceInfo {
       message: string;
     };
   };
-  models: { default: string; options: Array<{ id: string; label: string; custom?: boolean; loaded?: boolean; provider?: string; variants?: ModelVariantOption[] }> };
+  models: { default: string; options: Array<{ id: string; label: string; custom?: boolean; loaded?: boolean; provider?: string; contextWindow?: number; variants?: ModelVariantOption[] }> };
   capabilities?: {
     computerMcp?: boolean;
     agentsMcp?: boolean;
@@ -835,10 +787,13 @@ export type Action =
       rememberCommand?: boolean;
       onError?: (message: string) => void;
     }
-  | { type: "newTask"; botId: string; projectId?: string; cwd?: string; onCreated?: () => void; onError?: (message: string) => void }
-  | { type: "switchTask"; botId: string; threadId: string; whole?: true }
+  | { type: "newTask"; botId: string; projectId?: string; cwd?: string; preserveSelection?: true; onCreated?: (threadId: string) => void; onError?: (message: string) => void }
+  | { type: "switchTask"; botId: string; threadId: string; whole?: true; preserveSelection?: true; onError?: (message: string) => void }
   | { type: "switchTaskFailed"; botId: string; threadId: string }
   | { type: "taskSwitched"; bot: Bot }
+  | { type: "retryPendingThreadSnapshot"; botId: string; threadId: string }
+  | ({ type: "pendingThreadSnapshotLoaded"; page: PendingThreadSnapshotPage } & PendingThreadSnapshotTarget)
+  | ({ type: "pendingThreadSnapshotFailed"; message: string } & PendingThreadSnapshotTarget)
   | { type: "renameTask"; botId: string; threadId: string; title: string }
   | { type: "regenerateTaskTitle"; botId: string; threadId: string; onSettled?: (ok: boolean) => void }
   | { type: "deleteTask"; botId: string; threadId: string }
@@ -916,17 +871,6 @@ export function pinBotThreadAction(action: Action, bots: Bot[]): Action {
   const botId = action.botId;
   const threadId = bots.find((bot) => bot.id === botId)?.threadId;
   return { ...action, threadId } as Action;
-}
-
-function bumpTranscriptGeneration(state: AppState, threadId: string | undefined | null): AppState {
-  if (!threadId) return state;
-  return {
-    ...state,
-    transcriptGeneration: {
-      ...state.transcriptGeneration,
-      [threadId]: (state.transcriptGeneration[threadId] ?? 0) + 1,
-    },
-  };
 }
 
 function updateBot(state: AppState, botId: string, fn: (b: Bot) => Bot): AppState {
@@ -1033,9 +977,7 @@ export function reducer(state: AppState, action: Action): AppState {
         computerControl: action.computerControl,
         selectedId,
         hydrated: true as const,
-        backgroundThreadEvents: {},
-        loadingOlder: {},
-        transcriptGeneration: {},
+        ...hydratedTranscriptState(state, action),
         modelVariantSessions: {},
       };
       return reconcileSnapshotQueues(
@@ -1188,24 +1130,26 @@ export function reducer(state: AppState, action: Action): AppState {
         config: { ...state.config, profile: { name: "", email: "", ...state.config.profile, ...action.profile } },
       } : state;
     case "select": {
-      const room = state.groups.find((g) => g.id === action.id);
+      const pending = state.bots.find((bot) => bot.id === action.id && bot.awaitingThreadSnapshot);
+      const selectedState = pending ? bumpTranscriptGeneration(state, pending.threadId) : state;
+      const room = selectedState.groups.find((g) => g.id === action.id);
       if (room) {
         return {
-          ...state,
-          unreadDivider: openedUnreadDivider(state, room.threadId, room.unread, room.messages, room.lastReadMessageId),
+          ...selectedState,
+          unreadDivider: openedUnreadDivider(selectedState, room.threadId, room.unread, room.messages, room.lastReadMessageId),
           activeView: "chat",
           selectedId: action.id,
-          groups: state.groups.map((g) => (g.id === action.id ? { ...g, unread: false } : g)),
+          groups: selectedState.groups.map((g) => (g.id === action.id ? { ...g, unread: false } : g)),
         };
       }
-      const opened = state.bots.find((b) => b.id === action.id);
+      const opened = selectedState.bots.find((b) => b.id === action.id);
       return updateBot(
         withMascotMotion(
           {
-            ...state,
+            ...selectedState,
             unreadDivider: opened
-              ? openedUnreadDivider(state, opened.threadId, threadOpensUnread(opened), visibleMessages(opened), threadReadCursor(opened))
-              : state.unreadDivider,
+              ? openedUnreadDivider(selectedState, opened.threadId, threadOpensUnread(opened), visibleMessages(opened), threadReadCursor(opened))
+              : selectedState.unreadDivider,
             activeView: "chat",
             selectedId: action.id,
           },
@@ -1292,10 +1236,10 @@ export function reducer(state: AppState, action: Action): AppState {
       const switchedThread =
         typeof action.bot.threadId === "string" && action.bot.threadId !== before.threadId &&
         !action.bot.tasks?.some((task) => task.threadId === before.threadId);
-      let switching = next;
+      let switching = switchedThread ? bumpTranscriptGeneration(next, action.bot.threadId) : next;
       if (switchedThread) {
-        const { [action.bot.threadId]: _stale, ...otherThreadEvents } = next.backgroundThreadEvents;
-        switching = { ...next, backgroundThreadEvents: otherThreadEvents };
+        const { [action.bot.threadId]: _stale, ...otherThreadEvents } = switching.backgroundThreadEvents;
+        switching = { ...switching, backgroundThreadEvents: otherThreadEvents };
       }
       if ((switchedThread || (before.awaitingThreadSnapshot && action.bot.threadId === before.threadId)) &&
           Array.isArray(action.bot.messages)) {
@@ -1865,10 +1809,10 @@ export function reducer(state: AppState, action: Action): AppState {
     case "regenerateTaskTitle":
       return state;
     case "newTask":
-      return action.cwd !== undefined ? state : { ...state, selectedId: action.botId, activeView: "chat" };
+      return action.cwd !== undefined || action.preserveSelection ? state : { ...state, selectedId: action.botId, activeView: "chat" };
     case "switchTask": {
       const { [action.threadId]: _old, ...backgroundThreadEvents } = state.backgroundThreadEvents;
-      return updateBot({ ...state, backgroundThreadEvents, selectedId: action.botId, activeView: "chat" }, action.botId,
+      return updateBot({ ...state, backgroundThreadEvents, ...(action.preserveSelection ? {} : { selectedId: action.botId, activeView: "chat" as const }) }, action.botId,
         (bot) => ({ ...bot, switchingTo: action.threadId }));
     }
     case "switchTaskFailed":
@@ -1924,6 +1868,10 @@ export function reducer(state: AppState, action: Action): AppState {
           };
         }),
       };
+    case "retryPendingThreadSnapshot":
+    case "pendingThreadSnapshotFailed":
+    case "pendingThreadSnapshotLoaded":
+      return reducePendingThreadSnapshot(state, action, reducer);
     case "taskSwitched": {
       let switched = updateBot(bumpTranscriptGeneration(state, action.bot.threadId), action.bot.id, (bot) => ({
         ...bot,
@@ -2342,6 +2290,7 @@ function restoreBotSettingsSection(state: AppState): AppState {
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const navigation = useRef(new Map<string, { revision: number; threadId?: string }>()).current;
   const taskWrites = useRef(new Map<string, { botId: string; updatesDefault: boolean; promise: Promise<BotAnnouncement>; execution: Promise<unknown>; patch: TaskUpdatePatch }>()).current;
   const withTaskWrites = (bot: BotAnnouncement): BotAnnouncement => ({
     ...bot,
@@ -2350,6 +2299,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, rawDispatch] = useReducer(reducer, initialState, restoreBotSettingsSection);
   const stateRef = useRef(state);
   stateRef.current = state;
+  usePendingThreadSnapshotRecovery(state, stateRef, api<PendingThreadSnapshotPage>, rawDispatch);
   const showThreads = useShowThreads();
   const showThreadsRef = useRef(showThreads);
   showThreadsRef.current = showThreads;
@@ -2389,7 +2339,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [botPatchQueue]);
 
   const dispatch = useMemo(() => {
-    const navigation = new Map<string, number>();
     let selectionRevision = 0;
     const olderPagesInFlight = new Set<string>();
     let creatingBot = false;
@@ -3084,8 +3033,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           break;
         case "newTask":
         case "switchTask": {
-          const revision = (navigation.get(action.botId) ?? 0) + 1;
-          navigation.set(action.botId, revision);
+          const revision = (navigation.get(action.botId)?.revision ?? 0) + 1;
+          navigation.set(action.botId, { revision, ...(action.type === "switchTask" ? { threadId: action.threadId } : {}) });
           const selectedAtStart = selectionRevision;
           const ready = action.type === "newTask"
             ? botPatchQueue.flush(action.botId)
@@ -3094,18 +3043,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             ? `/api/bots/${action.botId}/tasks`
             : `/api/bots/${action.botId}/tasks/${action.threadId}${action.whole ? "" : `?messages=${MESSAGE_PAGE_SIZE}`}`, { method: "POST", body: JSON.stringify(action.type === "newTask" ? { projectId: action.projectId, cwd: action.cwd } : {}) }))
             .then((r) => {
-              if (action.type === "newTask") action.onCreated?.();
-              if (!r?.bot || navigation.get(action.botId) !== revision) return;
-              const selectsAfterCreation = action.type === "newTask" && action.cwd !== undefined;
+              if (action.type === "newTask" && r?.bot) action.onCreated?.(r.bot.threadId);
+              if (!r?.bot || navigation.get(action.botId)?.revision !== revision) return;
+              const selectsAfterCreation = action.type === "newTask" && action.cwd !== undefined && !action.preserveSelection;
               if (selectsAfterCreation && selectionRevision !== selectedAtStart) return;
               dispatch({ type: "taskSwitched", bot: r.bot });
               if (selectsAfterCreation) rawDispatch({ type: "select", id: action.botId });
             })
             .catch((error) => {
-              if (action.type === "switchTask" && navigation.get(action.botId) === revision) {
+              if (action.type === "switchTask" && navigation.get(action.botId)?.revision === revision) {
+                delete navigation.get(action.botId)!.threadId;
                 rawDispatch({ type: "switchTaskFailed", botId: action.botId, threadId: action.threadId });
               }
-              if (action.type === "newTask" && action.onError) action.onError(error instanceof Error ? error.message : String(error));
+              if (action.onError) action.onError(error instanceof Error ? error.message : String(error));
               else showError(error);
             });
           break;
@@ -3187,16 +3137,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     };
     return wrapped;
-  }, [botPatchQueue]);
-
+  }, [botPatchQueue, navigation]);
   const launched = useRef(false);
   useEffect(() => {
+    for (const bot of state.bots) if (!bot.switchingTo && navigation.get(bot.id)?.threadId === bot.threadId) delete navigation.get(bot.id)!.threadId;
     if (!state.hydrated || launched.current) return;
     launched.current = true;
     const bot = state.bots.find((candidate) => candidate.id === state.selectedId);
     if (bot && state.activeView === "chat" && botOpensTo(bot, showThreads) !== bot.threadId) openBot(dispatch, bot, showThreads);
-  }, [state.hydrated, state.bots, state.selectedId, state.activeView, showThreads, dispatch]);
-
+  }, [state.hydrated, state.bots, state.selectedId, state.activeView, showThreads, dispatch, navigation]);
   useEffect(() => {
     let alive = true;
     type PeripheralKey = "instances" | "config" | "routines" | "webhooks" | "notifications";
@@ -3412,7 +3361,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         case "bot": {
           const bot = frame.bot as BotAnnouncement;
           const selected = stateRef.current.bots.find((candidate) => candidate.id === bot.id);
-          const shown = selected?.switchingTo ?? selected?.threadId;
+          const shown = navigation.get(bot.id)?.threadId ?? selected?.switchingTo ?? selected?.threadId;
           const selectedTask = bot.tasks?.find((task) => task.threadId === shown);
           if (bot.id === stateRef.current.selectedId && stateRef.current.activeView === "chat" && !chatHiddenFor(bot.id) &&
               (selectedTask?.unread || (!bot.tasks && bot.unread))) {
@@ -3604,10 +3553,4 @@ export function BotEditorStore({ value, children }: { value: ReturnType<typeof u
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 
-const TIME_FORMAT = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
-
-export function formatTime(at: number) {
-  const date = new Date(at);
-  // toLocaleTimeString's output, where Intl.DateTimeFormat.format would throw
-  return Number.isNaN(date.getTime()) ? "Invalid Date" : TIME_FORMAT.format(date);
-}
+export { formatTime } from "./time-format";

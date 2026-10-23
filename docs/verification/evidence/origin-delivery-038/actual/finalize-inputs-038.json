@@ -1,0 +1,75 @@
+{
+  "templateOnly": false,
+  "source": "ab0cd72b4c2f004c1015adca034472241569c04b",
+  "proofs": {
+    "prepublication": {
+      "path": ".omb-scratch/delivery-evidence-038/prepublication-038.json",
+      "sha256": "77680572fcf3ced3ed3cd318e56ec09654939442bc95e51b8e4a78d8d93cad09"
+    },
+    "ci": {
+      "path": ".omb-scratch/delivery-evidence-038/origin-ci-038.json",
+      "sha256": "270f56f923af965072874cc520d3404a88862fcadc0d5dc3e56747bd7f596862"
+    },
+    "github": {
+      "path": ".omb-scratch/delivery-evidence-038/github-public-038.json",
+      "sha256": "1c78c959ca493a3948519e4720b196a402990ed9e955ca5ec4811e0adea40121"
+    },
+    "githubMetadata": {
+      "path": ".omb-scratch/delivery-evidence-038/github-public-metadata-038.json",
+      "sha256": "a9445b7973e1fb41dfc758d8e173abde90e90fdc6c77c5506189cbc002a630cf"
+    },
+    "downloadsLog": {
+      "path": ".omb-scratch/delivery-evidence-038/public-downloads-038.log",
+      "sha256": "74f9380d6e66e35922f59e2cdc9f9fa0ed96ab3666b8d3b101c3c1a9c94ad5ea"
+    },
+    "downloadsResult": {
+      "path": ".omb-scratch/delivery-evidence-038/public-downloads-result.json",
+      "sha256": "cd344c00b4c7d1aa0f4b3607a40645e9dbfbfd4d783b3ca1e22d8ccbb4952b23"
+    },
+    "http": {
+      "path": ".omb-scratch/delivery-evidence-038/public-http-038.json",
+      "sha256": "98b50b1dd86bfc55b643ef13e94c5ea846044e84ca6ecd403f139ed9c9d1f405"
+    },
+    "runtime": {
+      "path": ".omb-scratch/delivery-evidence-038/public-runtime-038.txt",
+      "sha256": "646af3c0c767d54e5ddcfe4b94d451ec938bbe3deb3ae8a108c57f9bcb8d4789"
+    },
+    "publishGithubResult": {
+      "path": ".omb-scratch/delivery-evidence-038/publish-github-result.json",
+      "sha256": "83808843a54aafaf6558f47c489df0cd83380f7f30953ce7a6eb55b9b7f3d855"
+    },
+    "promoteDownloadsResult": {
+      "path": ".omb-scratch/delivery-evidence-038/promote-downloads-result.json",
+      "sha256": "11d30be4012b1e0d48caf7661dbdf49bf578eb835f6d218876290d2f48cb7c7d"
+    },
+    "promoteSiteResult": {
+      "path": ".omb-scratch/delivery-evidence-038/promote-site-result.json",
+      "sha256": "39d29c66770687622417600e5c2c9b13be843373f7a27a7061a2279bc444db16"
+    },
+    "publicLanding": {
+      "path": ".omb-scratch/delivery-evidence-038/public-landing-038.jpg",
+      "sha256": "aafb01f42434a5dd5ee349f68c70a4079d9d350469c9b0b92647fdee40c27c75"
+    },
+    "publicWhatsNew": {
+      "path": ".omb-scratch/delivery-evidence-038/public-whats-new-038.jpg",
+      "sha256": "23754245e580d70a2d09bb291a34af7ee2d5fb26e808db4d547f176ab2b64dcc"
+    },
+    "publicWhatsNewAX": {
+      "path": ".omb-scratch/delivery-evidence-038/public-whats-new-038.ax.txt",
+      "sha256": "1ce540533d9ea878555b3991a9411a35152597c50a46bcfe510b97b6e466c9ee"
+    }
+  },
+  "nativeAudit": {
+    "path": ".omb-scratch/delivery-evidence-038/native/receipt.json",
+    "sha256": "4c17e1451fbc8a66545516e94acef675cffbea74dcd7bf71545b2fde0a9d4e27"
+  },
+  "qualification": "Anticipated CI attempt2 after one targeted retry; all actual public and terminal proof hashes remain required. Preserve attempt1 failure and copied-versus-rerun execution provenance; no source fix is established.",
+  "initialCiFailure": {
+    "path": ".omb-scratch/ci-attempt1-terminal-038.json",
+    "sha256": "d2e194bb1c65ff24284b822f38baf62a1ea8d0251913bdf30b613d427512e002"
+  },
+  "initialFailureDiagnostics": {
+    "path": ".omb-scratch/ci-attempt1-terminal-receipt-038.json",
+    "sha256": "a384de9121678da1f8f78431428ea80a4aa1fb9d24d3b957bffe82f0199a3fcc"
+  }
+}

@@ -1,0 +1,369 @@
+{
+  "schema": 1,
+  "reviewedAt": "2026-10-18T22:36:39.774Z",
+  "source": "f44ebe30a9568ed634b9eb8a45476f42e4c059b1",
+  "image": "sha256:a893f04ee5c627e06c240e179bcf52c1bf2ce0a532c65d5348059a5b36f602d1",
+  "initialQa": {
+    "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-workspace-delete\\Origin\\.omb-scratch\\site-visual-qa-034-initial.json",
+    "sha256": "f2706274d306860129b35b30a6c4af8238eb455f707cdbdd84cf323a7f476362",
+    "bytes": 10671,
+    "usable": 8,
+    "notAccepted": 8,
+    "initialEvidencePreserved": true
+  },
+  "replacementProof": {
+    "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\proof.json",
+    "sha256": "dca7ce0f80a465c7d10c7dd0e613c49a136440ed9fe526adc46a33ff1f5dd9d6",
+    "bytes": 3790
+  },
+  "replacementInputManifest": {
+    "path": "C:\\Users\\aless\\.codex\\worktrees\\origin-workspace-delete\\Origin\\.omb-scratch\\site-visual-qa-034-replacement-inputs.json",
+    "sha256": "812279211c53dd5caa3704a4b753d7d081ec4df54785ffcf5fa41ec04e9e6215",
+    "bytes": 3580
+  },
+  "decision": {
+    "replacementImagesViewed": 9,
+    "replacementImagesUsable": 9,
+    "replacementCasesCovered": 8,
+    "combinedRouteThemeWidthCases": 16,
+    "combinedFullPageCaseScopes": 9,
+    "combinedViewportOnlyCaseScopes": 7,
+    "additionalLandingViewportImages": 1,
+    "productVisualDefectEstablished": false
+  },
+  "acceptanceQualification": "Sixteen route/theme/width cases have visual evidence within the stated full-page or visible-viewport scopes, after retaining and rejecting eight original failed captures. This does not certify every product feature or account flow.",
+  "reviewedChecks": [
+    "Visual heading and control legibility",
+    "Light/dark appearance",
+    "Wrapping and visible overlap",
+    "Landing and release-history full-page layout including footer",
+    "Auth form visibility within replacement viewport",
+    "Original/replacement byte lengths, SHA256 and decoded image dimensions"
+  ],
+  "capturedMetrics": {
+    "accountSubmissions": 0,
+    "reducedMotion": true,
+    "revealEnabled": false,
+    "requestedCssWidths": [
+      375,
+      1440
+    ],
+    "decodedWidths": [
+      365,
+      1430
+    ],
+    "scrollbarQualification": "Captured content widths exclude the 10px browser scrollbar. Proof scroll widths fit the requested CSS width; no horizontal overflow inferred from the 10px difference.",
+    "currentVersion": "v0.2.13",
+    "currentNotes": 11,
+    "releaseArticles": 6,
+    "runtimeExceptions": 0
+  },
+  "remainingAcceptance": [
+    "Signup policy response and form/error/retry states require a controlled reachable backend; deliberate CSP block cannot exercise them.",
+    "Sign-in, signup and invite submissions were not performed.",
+    "Auth footer below replacement visible viewport is not reviewed by those images.",
+    "Production website routing/cache, authenticated backend, mail delivery, packaged native apps, Mac hardware and multi-client/provider workflows require their separate evidence."
+  ],
+  "readOnlyReview": {
+    "browserRerun": false,
+    "productSourceEdits": false,
+    "trackedWrites": false,
+    "commits": false,
+    "deployments": false,
+    "originalImagesEdited": false,
+    "privateInspectionCropsOnly": true
+  },
+  "acceptedInitialCases": [
+    {
+      "name": "landing-1440-dark.png",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-034/site/landing-1440-dark.png",
+      "sha256": "811de5b095cae59520334fd7ff634a9cfecf408a8c46fef28d859f69e786390e",
+      "scope": "Full-page visual inspection"
+    },
+    {
+      "name": "landing-1440-light.png",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-034/site/landing-1440-light.png",
+      "sha256": "282c0d17c8c1868e257a129bc28762a7ea98048e7662437de51a1c6927ffbe4a",
+      "scope": "Full-page visual inspection"
+    },
+    {
+      "name": "landing-375-dark.png",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-034/site/landing-375-dark.png",
+      "sha256": "68caf4f56dcf6ad5e24720090f966ccdb8d31ea895f6cb9bbf9c99144863c1b6",
+      "scope": "Full-page visual inspection"
+    },
+    {
+      "name": "signup-375-light.png",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-034/site/signup-375-light.png",
+      "sha256": "180526c941055719eea298c0faec9413515f5a57d3ce0ed6f11029841769dae5",
+      "scope": "Header, heading, blocked-policy loading and available footer only; no signup form or flow"
+    },
+    {
+      "name": "whats-new-1440-dark.png",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-034/site/whats-new-1440-dark.png",
+      "sha256": "919671500ec303c36916b7d8f8c8eca6b6d7c6fd6287ef16828f98db16439ce1",
+      "scope": "Full-page visual inspection"
+    },
+    {
+      "name": "whats-new-1440-light.png",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-034/site/whats-new-1440-light.png",
+      "sha256": "5a1a3c45fb66bb9ac7d7a1c031172051b925d50d530a25f156e26ea3b30df4f1",
+      "scope": "Full-page visual inspection"
+    },
+    {
+      "name": "whats-new-375-dark.png",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-034/site/whats-new-375-dark.png",
+      "sha256": "2806e9312bc2e2a07c57e813401cec285f8ef2e0ca2d284793ee4367bcb5123d",
+      "scope": "Full-page visual inspection"
+    },
+    {
+      "name": "whats-new-375-light.png",
+      "path": "C:/Users/aless/Documents/Origin-bugfix/.omb-scratch/delivery-evidence-034/site/whats-new-375-light.png",
+      "sha256": "6fd14b357047671a54db36c183edb1e89f6b9c9935bf36df286362c60f378cd7",
+      "scope": "Full-page visual inspection"
+    }
+  ],
+  "replacementCases": [
+    {
+      "name": "landing-375-light",
+      "path": "/",
+      "theme": "light",
+      "h1": "Every project gets a team of agents that ships.",
+      "fields": [],
+      "reducedMotion": true,
+      "revealEnabled": false,
+      "scrollWidth": 365,
+      "width": 375
+    },
+    {
+      "name": "login-375-light",
+      "path": "/login",
+      "theme": "light",
+      "h1": "Sign in to Origin",
+      "fields": [
+        {
+          "height": 44,
+          "opacity": "1",
+          "type": "email",
+          "y": 324.5
+        },
+        {
+          "height": 44,
+          "opacity": "1",
+          "type": "password",
+          "y": 408.640625
+        }
+      ],
+      "reducedMotion": true,
+      "revealEnabled": false,
+      "scrollWidth": 365,
+      "width": 375
+    },
+    {
+      "name": "login-1440-light",
+      "path": "/login",
+      "theme": "light",
+      "h1": "Sign in to Origin",
+      "fields": [
+        {
+          "height": 44,
+          "opacity": "1",
+          "type": "email",
+          "y": 326.96875
+        },
+        {
+          "height": 44,
+          "opacity": "1",
+          "type": "password",
+          "y": 411.109375
+        }
+      ],
+      "reducedMotion": true,
+      "revealEnabled": false,
+      "scrollWidth": 1430,
+      "width": 1440
+    },
+    {
+      "name": "login-375-dark",
+      "path": "/login",
+      "theme": "dark",
+      "h1": "Sign in to Origin",
+      "fields": [
+        {
+          "height": 44,
+          "opacity": "1",
+          "type": "email",
+          "y": 324.5
+        },
+        {
+          "height": 44,
+          "opacity": "1",
+          "type": "password",
+          "y": 408.640625
+        }
+      ],
+      "reducedMotion": true,
+      "revealEnabled": false,
+      "scrollWidth": 365,
+      "width": 375
+    },
+    {
+      "name": "login-1440-dark",
+      "path": "/login",
+      "theme": "dark",
+      "h1": "Sign in to Origin",
+      "fields": [
+        {
+          "height": 44,
+          "opacity": "1",
+          "type": "email",
+          "y": 326.96875
+        },
+        {
+          "height": 44,
+          "opacity": "1",
+          "type": "password",
+          "y": 411.109375
+        }
+      ],
+      "reducedMotion": true,
+      "revealEnabled": false,
+      "scrollWidth": 1430,
+      "width": 1440
+    },
+    {
+      "name": "signup-1440-light",
+      "path": "/signup",
+      "theme": "light",
+      "h1": "Create your Origin account",
+      "fields": [],
+      "reducedMotion": true,
+      "revealEnabled": false,
+      "scrollWidth": 1430,
+      "width": 1440
+    },
+    {
+      "name": "signup-375-dark",
+      "path": "/signup",
+      "theme": "dark",
+      "h1": "Create your Origin account",
+      "fields": [],
+      "reducedMotion": true,
+      "revealEnabled": false,
+      "scrollWidth": 365,
+      "width": 375
+    },
+    {
+      "name": "signup-1440-dark",
+      "path": "/signup",
+      "theme": "dark",
+      "h1": "Create your Origin account",
+      "fields": [],
+      "reducedMotion": true,
+      "revealEnabled": false,
+      "scrollWidth": 1430,
+      "width": 1440
+    }
+  ],
+  "replacementImages": [
+    {
+      "name": "landing-375-light-fresh-full.png",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\landing-375-light-fresh-full.png",
+      "bytes": 387102,
+      "width": 365,
+      "height": 8760,
+      "sha256": "0e7eb7f4e76b9e31071dcf665a18ab108379a0d5cc232f64b435537e9d0d4495",
+      "acceptedVisualEvidence": true,
+      "scope": "Fresh full-page landing visual: hero, product image, workspace/project explanations, workflow, agent cards, feature cards, download, FAQ and footer.",
+      "observation": "Previously blank sections are populated; heading, cards and footer wrap within the page. No visible overflow or contrast defect identified."
+    },
+    {
+      "name": "landing-375-light-viewport.png",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\landing-375-light-viewport.png",
+      "bytes": 42706,
+      "width": 365,
+      "height": 876,
+      "sha256": "0ef4873205daa0a04489f9abbea05b9408e1aa90fba971a12da1c01eac9a0a51",
+      "acceptedVisualEvidence": true,
+      "scope": "Supplemental native viewport of fresh mobile light landing hero.",
+      "observation": "Hero, navigation, CTA and product image are visible with readable light-theme contrast."
+    },
+    {
+      "name": "login-1440-dark-viewport.png",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\login-1440-dark-viewport.png",
+      "bytes": 27602,
+      "width": 1430,
+      "height": 894,
+      "sha256": "5f9084714aadcfb835f9c144626f04ca7950852e8dd397d9b2c732784d181e57",
+      "acceptedVisualEvidence": true,
+      "scope": "Visible viewport: header, sign-in title, email/password inputs, visibility icon, submit button and create-account link; footer below viewport is not accepted from this image.",
+      "observation": "Both inputs and button are visible, aligned and readable; no overlap or horizontal clipping in the captured viewport."
+    },
+    {
+      "name": "login-1440-light-viewport.png",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\login-1440-light-viewport.png",
+      "bytes": 28627,
+      "width": 1430,
+      "height": 894,
+      "sha256": "758f2844768fbe4392862f276438d79a1a1c11a5fbdb9c4f6aac4b3cb33257e3",
+      "acceptedVisualEvidence": true,
+      "scope": "Visible viewport: header, sign-in title, email/password inputs, visibility icon, submit button and create-account link; footer below viewport is not accepted from this image.",
+      "observation": "Both inputs and button are visible, aligned and readable; no overlap or horizontal clipping in the captured viewport."
+    },
+    {
+      "name": "login-375-dark-viewport.png",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\login-375-dark-viewport.png",
+      "bytes": 20202,
+      "width": 365,
+      "height": 876,
+      "sha256": "9f53afb4db1c9eea084265e10534dc843e0a734b821e7a80e00ed7a44e2fabf2",
+      "acceptedVisualEvidence": true,
+      "scope": "Visible viewport: header, sign-in title, email/password inputs, visibility icon, submit button and create-account link; footer below viewport is not accepted from this image.",
+      "observation": "Both inputs and button are visible, aligned and readable; no overlap or horizontal clipping in the captured viewport."
+    },
+    {
+      "name": "login-375-light-viewport.png",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\login-375-light-viewport.png",
+      "bytes": 21253,
+      "width": 365,
+      "height": 876,
+      "sha256": "6de6227910331dd1015ab23ad0fbd445839c8ea26103baf28145f28a8a024513",
+      "acceptedVisualEvidence": true,
+      "scope": "Visible viewport: header, sign-in title, email/password inputs, visibility icon, submit button and create-account link; footer below viewport is not accepted from this image.",
+      "observation": "Both inputs and button are visible, aligned and readable; no overlap or horizontal clipping in the captured viewport."
+    },
+    {
+      "name": "signup-1440-dark-viewport.png",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\signup-1440-dark-viewport.png",
+      "bytes": 22220,
+      "width": 1430,
+      "height": 894,
+      "sha256": "bb1e24217fe9dd0914160c718ac5e9d81944a51feb5658e4223e33f76a63b4f1",
+      "acceptedVisualEvidence": true,
+      "scope": "Visible viewport: header, create-account title, blocked-policy loading indicator and sign-in link. No fields, policy decision, error recovery or account creation acceptance.",
+      "observation": "Title, loading indicator and escape link are readable. Spinner appearance is expected in this deliberately disconnected capture; it is not proof of a healthy signup flow."
+    },
+    {
+      "name": "signup-1440-light-viewport.png",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\signup-1440-light-viewport.png",
+      "bytes": 23373,
+      "width": 1430,
+      "height": 894,
+      "sha256": "cb606fcc326c4d40317da4af60714b9fedb0b248c2ccdb93a9a12f5079c24ff5",
+      "acceptedVisualEvidence": true,
+      "scope": "Visible viewport: header, create-account title, blocked-policy loading indicator and sign-in link. No fields, policy decision, error recovery or account creation acceptance.",
+      "observation": "Title, loading indicator and escape link are readable. Spinner appearance is expected in this deliberately disconnected capture; it is not proof of a healthy signup flow."
+    },
+    {
+      "name": "signup-375-dark-viewport.png",
+      "path": "C:\\Users\\aless\\Documents\\Origin-bugfix\\.omb-scratch\\delivery-evidence-034\\site-replacement\\signup-375-dark-viewport.png",
+      "bytes": 16242,
+      "width": 365,
+      "height": 876,
+      "sha256": "efc3063477180c2408b5f76ad995a9dfdeee56815d12546ae70002faec5231e9",
+      "acceptedVisualEvidence": true,
+      "scope": "Visible viewport: header, create-account title, blocked-policy loading indicator and sign-in link. No fields, policy decision, error recovery or account creation acceptance.",
+      "observation": "Title, loading indicator and escape link are readable. Spinner appearance is expected in this deliberately disconnected capture; it is not proof of a healthy signup flow."
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "candidate": "0.2.11-preparing",
+  "screenshots": 4,
+  "files": [
+    {
+      "path": "before.jpg",
+      "bytes": 46075,
+      "sha256": "8ea9dc783c930a1169f25aa1f8fe09c7501a0ed494a6488066b89b977522efdf"
+    },
+    {
+      "path": "after.jpg",
+      "bytes": 44291,
+      "sha256": "83ccda13f99e2aeac636513d2224033b81cb83e6c9aa25b052223ed353fd7582"
+    },
+    {
+      "path": "before-sidebar.jpg",
+      "bytes": 13234,
+      "sha256": "72ac9990cb9c5c376d22d01f7aa2ecb409061a68e5015b09e9c3449003c83903"
+    },
+    {
+      "path": "after-sidebar.jpg",
+      "bytes": 11635,
+      "sha256": "8d5f6d0d8f0a1d49961eb5a25969a1a0767b70d77f1f8d7f8d61b1efed7b62aa"
+    },
+    {
+      "path": "baseline-tests.log",
+      "bytes": 9577,
+      "sha256": "ba1a73f16c9216888066984d2cb07f17a6da68329036a9346da9a307458a147b"
+    },
+    {
+      "path": "focused-tests.log",
+      "bytes": 8710,
+      "sha256": "479636137b3fcefd901a011a0de9b05ade313aa7df27bf2a05707031f65ed75e"
+    },
+    {
+      "path": "proof.json",
+      "bytes": 4823,
+      "sha256": "b905b29e7d821e6fe15e085c2e293ccdef048471c83847cc0b859abce81ac75f"
+    }
+  ]
+}

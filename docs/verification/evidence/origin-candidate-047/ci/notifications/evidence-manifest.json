@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "cycle": "047",
+  "scope": "notification-coordination-ci-repair",
+  "createdAtUtc": "2026-10-20T06:30:55.9942885Z",
+  "sourceFiles": [
+    {
+      "path": "server/delegation-thread.ts",
+      "bytes": 3246,
+      "sha256": "e085d855138a4f2e1773aa500c9eeca7532429206349337b83357907cfffeaec"
+    },
+    {
+      "path": "server/delegation-thread.test.ts",
+      "bytes": 8251,
+      "sha256": "28c4be458fbc9932b50d0b31297bf125f0e441773455a25d0d73ecf5db15ef4b"
+    },
+    {
+      "path": "shared/wire.ts",
+      "bytes": 43279,
+      "sha256": "885ffcfc4a6562ee98cdea5012c8cfb822075a4ec37c5855cbd994b8a621a737"
+    },
+    {
+      "path": "src/state/store.tsx",
+      "bytes": 161877,
+      "sha256": "514ff94e38f859de5fd6045d164c11adbf278bb1510ce4d2a86847ac777a9166"
+    },
+    {
+      "path": "src/state/notification-open.test.ts",
+      "bytes": 12403,
+      "sha256": "a5f06c0662443a1587739a6a989028e9f446ef1f06dd260c47b6c22acea39292"
+    },
+    {
+      "path": "server/delegation-notification.ts",
+      "bytes": 1328,
+      "sha256": "d003ac137f7372004736fa63d3ad2b189b05def4a989572aec88912c79fe495b"
+    },
+    {
+      "path": "server/delegation-notification.test.ts",
+      "bytes": 3157,
+      "sha256": "4a8fa72b4f4682f34f6973725e1651683ff94dec86458dfe405aedec41844976"
+    },
+    {
+      "path": "server/index.ts",
+      "bytes": 953322,
+      "sha256": "f994dd3907d9d01f28272b8777d0492e52c9b4d825eb6f0c228104ad2eae9a71"
+    },
+    {
+      "path": "server/long-running-chief.e2e.test.ts",
+      "bytes": 44788,
+      "sha256": "7041e4e9b5719875c8e0a9c43b63bbcde57e11b6fda64a9676f31e11b1edf901"
+    },
+    {
+      "path": "server/thread-aware-bots.e2e.test.ts",
+      "bytes": 44363,
+      "sha256": "86ae8d36474541ac1cfe9013148d8dadbf39a1f0dece12735df135cf02527fe1"
+    }
+  ],
+  "evidenceFiles": [
+    {
+      "name": "client-race-green.log",
+      "bytes": 263,
+      "sha256": "c3c3980bc6c2c7c2a13a303f0579d9f81d8ed579895d0669837580370464674c"
+    },
+    {
+      "name": "client-race-red.log",
+      "bytes": 1241,
+      "sha256": "e28caced7dc29cb5ee741fd6e957bade5a35c36e3274a3183233a373501df31e"
+    },
+    {
+      "name": "client-routing-before.log",
+      "bytes": 258,
+      "sha256": "858587b7f1fa400e04aac17ac4fe5eea9af95a79bf25bdd5f13516342c334343"
+    },
+    {
+      "name": "client-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "guards.log",
+      "bytes": 255,
+      "sha256": "102fbecc20dac629a02e58ed0ffe0a3e4be43b35ecb7622c17f4f74ab9c1c371"
+    },
+    {
+      "name": "legacy-fresh-green.log",
+      "bytes": 256,
+      "sha256": "93a9f592c63151e4b313cec0cfd7de2a594653b54a2bd8b5fdd51480021428ea"
+    },
+    {
+      "name": "legacy-fresh-red.log",
+      "bytes": 1251,
+      "sha256": "0a7b75acb4ae42598388a67596bc7cee0ec2cc56b33b9ececedbd1a3c8647e2f"
+    },
+    {
+      "name": "real-chief-final.log",
+      "bytes": 258,
+      "sha256": "c4d1105cc78022d7d322b306ef299820f04a58a976da48ecc9332ed2a23fc3ca"
+    },
+    {
+      "name": "real-chief-green.log",
+      "bytes": 2061,
+      "sha256": "41c7623896021fc371ce6e845de4e3d6e15925856365fedb092abeb662b84f2f"
+    },
+    {
+      "name": "real-fixtures-green.log",
+      "bytes": 5252,
+      "sha256": "620987f8d6542e95289ea5d2cb5287e99ecc9b9eb94c4e3fe25c31f500dc4f86"
+    },
+    {
+      "name": "regression-green.log",
+      "bytes": 256,
+      "sha256": "fca66e059701806192672d6a8e13d4fdaa0c94497e2dbd06eaa9bd239898a4ed"
+    },
+    {
+      "name": "regression-red.log",
+      "bytes": 3397,
+      "sha256": "40e563717a9865f53b39a7aede5d7d50c8ed33570004e0e731b2c88f6cf2298b"
+    },
+    {
+      "name": "REPORT.md",
+      "bytes": 6203,
+      "sha256": "a20623840e511b5dabda2793c4ec10432f68bd2c4fc44a0f4b76fa2cca1e73ef"
+    },
+    {
+      "name": "server-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

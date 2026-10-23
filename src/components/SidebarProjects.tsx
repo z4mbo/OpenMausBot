@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Archive, ArrowUpDown, Check, ChevronRight, ChevronsUpDown, GripVertical, Pin, Plus, UserPlus, X } from "lucide-react";
-import { useCardDrag } from "./origin-pages/use-card-drag";
-import { useFlip } from "./origin-pages/issue-order";
 import { RuntimeHelp, WorkspaceMembersPanel } from "./origin-members";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
 import type { Bot } from "@/state/store";
 import { UnreadBadge } from "./UnreadBadge";
 import { cn } from "@/lib/cn";
+import { useOriginProjectOrder } from "@/lib/origin-project-order";
+import { usePointerReorder } from "@/lib/use-pointer-reorder";
 import {
-  movedOrder, orderedGroups, setGroupOrder, setProjectOrder, setProjectSort, setProjectsCollapsed, sortProjects, switchWorkspace, toggleGroup, useWorkspaces, type ProjectSort,
+  movedOrder, orderedGroups, setGroupOrder, setProjectSort, setProjectsCollapsed, sortProjects, switchWorkspace, toggleGroup, useWorkspaces, type ProjectSort,
 } from "@/lib/origin-workspaces";
 import { createPortal } from "react-dom";
 import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
@@ -86,14 +86,7 @@ export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = f
   );
 }
 
-/** The whole order with `group`'s members put in `groupOrder`'s sequence, every other project keeping its place. */
-export function withGroupOrder(order: readonly string[], groupOrder: readonly string[]): string[] {
-  const members = new Set(groupOrder);
-  const next = [...groupOrder];
-  return order.map((id) => (members.has(id) ? next.shift()! : id));
-}
-
-export function SidebarProjects({ projects, row, onNewProject, archived, selectedId }: {
+export function SidebarProjects({ projects, row, onNewProject, archived, selectedId, cloudTeamId = null }: {
   projects: readonly Bot[];
   row(bot: Bot): ReactNode;
   /** Absent when the signed-in person may not create projects here. */
@@ -101,9 +94,13 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
   /** Projects that are inactive in Origin: listed under a folded "Archived" group. */
   archived?: (bot: Bot) => boolean;
   selectedId?: string | null;
+  cloudTeamId?: string | null;
 }) {
   const workspaces = useWorkspaces();
-  const ordered = sortProjects(projects.map((bot) => ({ id: bot.id, name: bot.name, updatedAt: lastUpdate(bot), bot })), workspaces);
+  const links = useCloudLinks();
+  const order = useOriginProjectOrder(projects.map(bot => ({ id: bot.id, name: bot.name, updatedAt: lastUpdate(bot), bot })), links.projects, workspaces, cloudTeamId);
+  const { ordered } = order;
+  const reorder = usePointerReorder<HTMLDivElement>(ordered.map(project => project.id), order.saving || workspaces.sort !== "custom", (from, to) => void order.move(from, to));
   const open = !workspaces.collapsed;
   const shelved = archived ? ordered.filter(({ bot }) => archived(bot)) : [];
   const pinned = ordered.filter((item) => item.bot.pinned && !shelved.includes(item));
@@ -111,15 +108,14 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
   const holdsSelection = shelved.some(({ id }) => id === selectedId);
   const [shelfOpen, setShelfOpen] = useState(holdsSelection);
   useEffect(() => { if (holdsSelection) setShelfOpen(true); }, [holdsSelection]);
-  const reorder = (groupOrder: string[]) => setProjectOrder(withGroupOrder(ordered.map((item) => item.id), groupOrder));
   return (
-    <div data-sidebar-projects className="flex flex-col gap-0.5 pt-2">
+    <div ref={reorder.listRef} data-reorder-list data-sidebar-projects onKeyDown={reorder.onKeyDown} className="flex flex-col gap-0.5 pt-2">
       {pinned.length > 0 && (
         <div data-sidebar-pinned-projects className="mb-2 flex flex-col gap-0.5">
           <div className="flex h-6 items-center gap-1.5 px-2 pb-1 text-[12px] font-medium text-ink-secondary">
             <Pin size={11} className="shrink-0" aria-hidden="true" />Pinned
           </div>
-          <ProjectList label="Pinned projects" items={pinned} row={row} onReorder={reorder} />
+          {pinned.map(({ id, bot }) => projectRow(id, bot))}
         </div>
       )}
       <div className="flex items-center gap-1 px-2 pb-1">
@@ -137,7 +133,7 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
         {onNewProject && <button type="button" aria-label="New project" title="New project" onClick={onNewProject}
           className="flex size-6 items-center justify-center rounded text-ink-secondary hover:bg-raised hover:text-ink"><Plus size={14} /></button>}
       </div>
-      {open && <ProjectList label="Projects" items={live} row={row} onReorder={reorder} />}
+      {open && live.map(({ id, bot }) => projectRow(id, bot))}
       {open && shelved.length > 0 && (
         <div data-sidebar-archived-projects className="mt-1 flex flex-col gap-0.5">
           <button type="button" aria-expanded={shelfOpen} onClick={() => setShelfOpen((value) => !value)}
@@ -148,20 +144,35 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
             <span className="rounded-full bg-raised/70 px-1.5 text-[10.5px] tabular-nums leading-4 text-ink-tertiary">{shelved.length}</span>
           </button>
           {shelfOpen && <div className="flex origin-top animate-pop-in flex-col gap-0.5 opacity-75 transition-opacity hover:opacity-100 focus-within:opacity-100">
-            <ProjectList label="Archived projects" items={shelved} row={row} onReorder={reorder} />
+            {shelved.map(({ id, bot }) => projectRow(id, bot))}
           </div>}
         </div>
       )}
+      {order.error && <p role="alert" className="break-words px-2 py-1 text-[12px] text-danger">{order.error}</p>}
+      {order.saving && <span role="status" className="sr-only">Saving workspace project order…</span>}
     </div>
   );
+
+  function projectRow(id: string, bot: Bot) {
+    const handle = reorder.handleProps(id);
+    return (
+        <div key={id} data-sidebar-project-row={id} data-reorder-key={id} className={cn("flex min-w-0 items-center rounded-lg", reorder.targetKey === id && "ring-1 ring-inset ring-accent")}>
+          <button type="button" {...handle} disabled={order.disabledFor(id)} aria-label={`Reorder ${bot.name}`} title="Drag to reorder, or use the Up and Down arrow keys"
+            onPointerDown={event => { if (!order.disabledFor(id)) handle.onPointerDown(event); }}
+            onKeyDown={event => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); event.stopPropagation(); reorder.cancel(); order.moveBy(id, event.key === "ArrowUp" ? -1 : 1); } }}
+            className="shrink-0 touch-none select-none cursor-grab rounded p-1 text-ink-tertiary hover:text-ink-secondary active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-default disabled:opacity-30"><GripVertical size={12} /></button>
+          <div className="min-w-0 flex-1">{row(bot)}</div>
+        </div>
+    );
+  }
 }
 
-/** The collapsed sidebar's projects: pinned first, then the rest in the chosen order, without archived ones. */
 export function splitPinnedProjects(pinned: readonly Bot[], projectsListed: boolean): { pinnedProjectChiefs: Bot[]; topPins: Bot[] } {
   const pinnedProjectChiefs = projectsListed ? pinned.filter((bot) => bot.chiefOfStaff && bot.section && !isWorkspaceSection(bot.section)) : [];
   return { pinnedProjectChiefs, topPins: pinned.filter((bot) => !pinnedProjectChiefs.includes(bot)) };
 }
 
+/** The collapsed sidebar's projects: pinned first, then the rest in the chosen order, without archived ones. */
 export function SidebarProjectIcons({ projects, agents = [], row, agentRow = row, archived }: {
   projects: readonly Bot[]; agents?: readonly Bot[]; row(bot: Bot): ReactNode; agentRow?(bot: Bot): ReactNode; archived?: (bot: Bot) => boolean;
 }) {
@@ -182,61 +193,6 @@ export function SidebarProjectIcons({ projects, agents = [], row, agentRow = row
         {agents.map((bot) => <div key={bot.id} role="listitem" className="w-full">{agentRow(bot)}</div>)}
       </div>}
     </>
-  );
-}
-
-const LANE = "projects";
-
-/** One reorderable run of project rows, dragged the way issue cards are: a lifted copy follows the pointer over a dashed gap. */
-function ProjectList({ label, items, row, onReorder }: {
-  label: string;
-  items: readonly { id: string; bot: Bot }[];
-  row(bot: Bot): ReactNode;
-  onReorder(order: string[]): void;
-}) {
-  const root = useRef<HTMLDivElement>(null);
-  const [moves, setMoves] = useState(0);
-  const seed = useRef<(id: string, from: DOMRect) => void>(() => {});
-  const drag = useCardDrag({
-    enabled: items.length > 1, root, ignore: "input, textarea, select, [aria-haspopup]",
-    onDrop(id, target, from) {
-      seed.current(id, from);
-      const ids = items.map((item) => item.id);
-      const next = target.beforeTaskId ? movedOrder(ids, id, target.beforeTaskId, "before") : [...ids.filter((other) => other !== id), id];
-      setMoves((count) => count + 1);
-      if (next.some((other, index) => other !== ids[index])) onReorder(next);
-    },
-  });
-  seed.current = useFlip(root, `${moves}:${drag.target?.beforeTaskId ?? ""}`);
-  const lifted = drag.drag;
-  const gap = lifted && <span aria-hidden="true" data-drop-gap className="block rounded-xl border-2 border-dashed border-accent/45 bg-accent/[0.06] motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)]" style={{ height: lifted.height }} />;
-  const ghostBot = lifted && items.find((item) => item.id === lifted.taskId)?.bot;
-  return (
-    <div ref={root} onClickCapture={(event) => { if (drag.justDropped()) { event.preventDefault(); event.stopPropagation(); } }}>
-    <div role="list" aria-label={label} data-column-id={LANE} className="flex flex-col gap-0.5">
-      {items.map(({ id, bot }) => lifted?.taskId === id ? null : (
-        <div key={id} role="listitem" className="flex flex-col gap-0.5">
-          {drag.target?.beforeTaskId === id && gap}
-          <div data-sidebar-project-row={id} data-task-id={id} data-flip-id={id} onPointerDown={(event) => drag.press(event, id)}
-            className={cn("group/project relative", items.length > 1 && "active:cursor-grabbing")}>
-            {row(bot)}
-            {items.length > 1 && <GripVertical size={12} aria-hidden="true" data-project-grip
-              className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-ink-tertiary opacity-0 transition-opacity duration-(--motion-fast) group-hover/project:opacity-100" />}
-          </div>
-        </div>
-      ))}
-      {drag.target && !drag.target.beforeTaskId && gap}
-    </div>
-      {lifted && ghostBot && createPortal(
-        <div ref={drag.ghost} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[60]"
-          style={{ width: lifted.width, transform: `translate3d(${lifted.x}px, ${lifted.y}px, 0)` }}>
-          <div className="rotate-[1.5deg] scale-[1.03] cursor-grabbing rounded-xl border border-hairline bg-panel shadow-2xl shadow-black/40 motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)] [&_[data-sidebar-bot-row]]:bg-raised/60">
-            {row(ghostBot)}
-          </div>
-        </div>,
-        document.body,
-      )}
-    </div>
   );
 }
 

@@ -1,0 +1,67 @@
+{
+  "workerCommit": "da53ac6ab",
+  "integrationCommit": "67d5d8a26",
+  "baseline": "c6141cbbd",
+  "scope": "Self-hosted Origin update lookup, version parsing and install guidance; native updater is separate.",
+  "regression": {
+    "before": {
+      "files": 1,
+      "failed": 4
+    },
+    "after": {
+      "files": 4,
+      "passed": 19
+    }
+  },
+  "isolatedServer": {
+    "fixture": "fixture.json",
+    "productionData": false,
+    "closed": true,
+    "pidAbsent": true,
+    "portAbsent": true,
+    "dataDirAbsent": true
+  },
+  "additionalChecks": {
+    "serverTypecheck": "passed",
+    "touchedLint": "passed",
+    "diffCheck": "passed"
+  },
+  "boundaries": [
+    "No Docker image was built or deployed by this check.",
+    "The actual isolated server looked up current public Origin release metadata read-only.",
+    "An available newer version was exercised through the registered HTTP route with synthetic GitHub metadata.",
+    "No npm package name or Origin registry publication was invented."
+  ],
+  "sourceFiles": [
+    {
+      "path": "server/update-check.ts",
+      "bytes": 4590,
+      "sha256": "0e4cfa4ceec0c0c83d78b12045eb36977e90d282c2c99d59a7f63eb58b357d34"
+    },
+    {
+      "path": "server/update-check.test.ts",
+      "bytes": 4610,
+      "sha256": "d614e30d218d58145966be809265cf908f5b5998049d4b7fdf05349b77d1dfc8"
+    },
+    {
+      "path": "server/origin-update-channel.test.ts",
+      "bytes": 2581,
+      "sha256": "ede8723183db4eb1edb9ebeec669e26d6b7bfd9e4831017fbe0a8a49e36763a0"
+    },
+    {
+      "path": "server/routes/update-check.test.ts",
+      "bytes": 3174,
+      "sha256": "53c666c52f3c5178d2900602bd6689785d96817b77a86bb86dbe7515c6232c45"
+    },
+    {
+      "path": "deploy/docker-compose.yml",
+      "bytes": 1975,
+      "sha256": "10d1af28571061b6a85971555f29ead0219ec6b7e2b293f22eb9c76dcbf39dfc"
+    },
+    {
+      "path": "docs/self-hosting.md",
+      "bytes": 63281,
+      "sha256": "9d12af76d429aeed3557b3f09b73d6c1fde6017f43def513f91803687602a476"
+    }
+  ]
+}

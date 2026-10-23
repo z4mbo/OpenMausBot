@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-19T01:18:46.0447693Z",
+  "execSession": 87168,
+  "execClosedAfterCtrlC": true,
+  "exactPids": [
+    {
+      "pid": 11604,
+      "present": false
+    },
+    {
+      "pid": 41600,
+      "present": false
+    }
+  ],
+  "listeners": [],
+  "containerStopExitCode": 0,
+  "noOtherProcessStopAttempted": true
+}
