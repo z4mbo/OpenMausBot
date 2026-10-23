@@ -3,7 +3,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { threadAttachment, threadMessageKind, threadMessageTool } from "../agentsTables";
-import { canResumeThreadRun } from "./agentAccess";
+import { canResumeThreadRun, runnerOf } from "./agentAccess";
 
 /** A thread holds one live run; it lapses this long after the runner's last heartbeat. */
 export const LEASE_MS = 60_000;
@@ -22,6 +22,8 @@ export const messageView = v.object({
 
 export const runView = v.object({
   runId: v.id("workspaceAgentRuns"), requesterUserId: v.id("users"), requesterName: v.string(),
+  /** Set when another member's app or server runs it. */
+  runnerUserId: v.optional(v.id("users")), runnerName: v.optional(v.string()),
   status: v.string(), engineLabel: v.optional(v.string()), createdAt: v.number(),
 });
 
@@ -70,6 +72,7 @@ export function userNames(ctx: QueryCtx) {
 export async function runSummary(ctx: QueryCtx, run: Doc<"workspaceAgentRuns">, name: (id: Id<"users">) => Promise<string | undefined>) {
   return {
     runId: run._id, requesterUserId: run.requesterUserId, requesterName: (await name(run.requesterUserId)) ?? "Someone",
+    ...(run.runnerUserId && run.runnerUserId !== run.requesterUserId ? { runnerUserId: run.runnerUserId, runnerName: (await name(run.runnerUserId)) ?? "a teammate" } : {}),
     status: run.status, ...(run.engineLabel ? { engineLabel: run.engineLabel } : {}), createdAt: run.createdAt,
   };
 }
@@ -80,8 +83,8 @@ export async function promoteQueuedRun(ctx: MutationCtx, threadId: Id<"agentThre
   const queued = await ctx.db.query("workspaceAgentRuns")
     .withIndex("by_threadId_and_status", (q) => q.eq("threadId", thread._id).eq("status", "queued")).take(50);
   for (const next of queued) {
-    const requester = await ctx.db.get(next.requesterUserId);
-    if (!requester || requester.status !== "active" || !await canResumeThreadRun(ctx, next, requester)) {
+    const runner = await ctx.db.get(runnerOf(next));
+    if (!runner || runner.status !== "active" || !await canResumeThreadRun(ctx, next, runner)) {
       await ctx.db.patch(next._id, { status: "interrupted", endedAt: now, updatedAt: now });
       continue;
     }

@@ -7848,6 +7848,10 @@ async function acceptDirectSend(
       const shared = await sharedAgents.beforeSend({ botId: currentAtStart.id, threadId, text, sendId });
       if (shared) sendId = shared.sendId;
       if (shared?.status === "queued") return queueSharedSend(currentAtStart.id, threadId, text, shared, replyTo, sender);
+      if (shared?.status === "hosted") return hostedSharedSend(threadId, text, shared, replyTo, sender);
+      if (shared?.status === "running" && shared.fallback) {
+        store.appendMessage(threadId, { role: "bot", kind: "activity", tool: { name: `${shared.fallback}, so this runs on this computer`, ok: true } });
+      }
       if (shared) {
         return startOrQueueDirectMessage(botId, threadId, text, replyTo, sendId, sender, trigger, via, callId, dataContext)
           .catch((error: unknown) => { sharedAgents.failed(threadId); throw error; });
@@ -7921,6 +7925,13 @@ async function acceptDirectSend(
       return startOrQueueDirectMessage(botId, threadId, text, replyTo, sendId, sender, trigger, via, callId, dataContext);
     },
   );
+}
+
+/** The agent runs on a teammate's computer or a server: this app records the message and shows the answer as it arrives. */
+function hostedSharedSend(threadId: string, text: string, decision: Extract<SendDecision, { status: "hosted" }>, replyTo?: Message, sender?: ResolvedSender): DirectSendReceipt {
+  const message = store.appendMessage(threadId, { role: "user", kind: "text", text, sendId: decision.sendId, replyToId: replyTo?.id, sender });
+  store.appendMessage(threadId, { role: "bot", kind: "activity", tool: { name: `Running on ${decision.runner.name}'s computer (${decision.runner.host})`, ok: true } });
+  return { ok: true, threadId, message };
 }
 
 function queueSharedSend(botId: string, threadId: string, text: string, decision: Extract<SendDecision, { status: "queued" }>, replyTo?: Message, sender?: ResolvedSender): DirectSendReceipt {
@@ -13607,7 +13618,7 @@ ROUTES.push(createOriginInviteRoutes({ publicUrl }));
 const originPublicPages = createOriginPublicRoutes({ publicUrl });
 ROUTES.push(createAvatarLookRoutes({ store }));
 const sharedAgents = createSharedAgents({
-  store,
+  store, hostKind: CLOUD_HOME || process.env.ORIGIN_HOST_KIND === "server" ? "server" : "local",
   instances: async () => selectableInstances(await registry.describe()),
   selectionContext,
   isBusy: threadBusy,

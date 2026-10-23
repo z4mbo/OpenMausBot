@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as agentHosts from "../agentHosts.js";
 import type * as agentRuns from "../agentRuns.js";
 import type * as agentThreads from "../agentThreads.js";
 import type * as agents from "../agents.js";
@@ -46,6 +47,7 @@ import type * as integrations from "../integrations.js";
 import type * as issueRelations from "../issueRelations.js";
 import type * as legacyImport from "../legacyImport.js";
 import type * as lib_agentAccess from "../lib/agentAccess.js";
+import type * as lib_agentRunner from "../lib/agentRunner.js";
 import type * as lib_agentThreadRows from "../lib/agentThreadRows.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_columns from "../lib/columns.js";
@@ -108,6 +110,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agentHosts: typeof agentHosts;
   agentRuns: typeof agentRuns;
   agentThreads: typeof agentThreads;
   agents: typeof agents;
@@ -146,6 +149,7 @@ declare const fullApi: ApiFromModules<{
   issueRelations: typeof issueRelations;
   legacyImport: typeof legacyImport;
   "lib/agentAccess": typeof lib_agentAccess;
+  "lib/agentRunner": typeof lib_agentRunner;
   "lib/agentThreadRows": typeof lib_agentThreadRows;
   "lib/auth": typeof lib_auth;
   "lib/columns": typeof lib_columns;

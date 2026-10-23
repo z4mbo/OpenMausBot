@@ -30,6 +30,13 @@ export interface BeginInput {
 
 export interface RunUsage { input: number; output: number; costUsd: number | null }
 
+/** "hosted": another member's app or server runs it, so this app only shows the thread. `fallback`: why the agent's
+ * chosen computer did not take it. */
+export type BeginResult =
+  | { runId: string; status: "running"; messageId: string; fallback?: string }
+  | { runId: string; status: "queued"; messageId: string }
+  | { runId: string; status: "hosted"; messageId: string; runner: { name: string; host: string } };
+
 interface ActiveRun {
   runId: string;
   botId: string;
@@ -167,13 +174,17 @@ export function createRunLease(deps: LeaseDeps) {
   };
 
   return {
-    async begin(input: BeginInput): Promise<{ runId: string; status: "running" | "queued"; messageId: string }> {
+    async begin(input: BeginInput): Promise<BeginResult> {
       if (stopped) throw leaseError();
       const requestedAt = monotonicNow();
       const result = await deps.mutation("agentRuns:begin", {
         threadId: input.cloudThreadId, clientId: input.clientId, text: input.text, ...(input.engineLabel ? { engineLabel: input.engineLabel } : {}),
-      }) as { runId: string; status: string; messageId: string };
+      }) as { runId: string; status: string; messageId: string; runner?: { name: string; host: string }; fallback?: string };
       if (stopped) throw leaseError();
+      if (result.runner) {
+        if (result.status !== "running" && result.status !== "queued") throw Object.assign(new Error(`this message's run already ended (${result.status})`), { status: 409 });
+        return { runId: result.runId, status: "hosted", messageId: result.messageId, runner: result.runner };
+      }
       if (result.status === "running") {
         let previous = active.get(input.threadId);
         if (monotonicNow() >= requestedAt + LEASE_MS || (previous?.runId === result.runId && expire(input.threadId, previous))) {
@@ -192,7 +203,7 @@ export function createRunLease(deps: LeaseDeps) {
             armExpiry(input.threadId, run);
           }
         } else if (!previous.confirmed) throw leaseError();
-        return { runId: result.runId, status: "running", messageId: result.messageId };
+        return { runId: result.runId, status: "running", messageId: result.messageId, ...(result.fallback ? { fallback: result.fallback } : {}) };
       }
       if (result.status !== "queued") throw Object.assign(new Error(`this message's run already ended (${result.status})`), { status: 409 });
       return { runId: result.runId, status: "queued", messageId: result.messageId };
